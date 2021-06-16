@@ -1,0 +1,24 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "com.jozufozu.flywheel.mixin",
+    "compatibilityLevel": "JAVA_8",
+    "refmap": "flywheel.refmap.json",
+    "mixins": [
+    ],
+    "client": [
+        "CancelEntityRenderMixin",
+        "CancelTileEntityRenderMixin",
+        "FogColorTrackerMixin",
+        "RenderHooksMixin",
+        "ShaderCloseMixin",
+        "StoreProjectionMatrixMixin",
+        "TileRemoveMixin",
+        "TileWorldHookMixin",
+        "light.LightUpdateMixin",
+        "light.NetworkLightUpdateMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

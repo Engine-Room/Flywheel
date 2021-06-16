@@ -1,0 +1,26 @@
+modLoader = "javafml"
+loaderVersion = "[36,)"
+license = "LGPL3"
+
+[[mods]]
+modId = "flywheel"
+version = "${file.jarVersion}"
+displayName = "Flywheel"
+authors="Jozufozu"
+description = '''
+A modern engine for modded minecraft.
+'''
+
+[[dependencies.flywheel]]
+modId = "forge"
+mandatory = true
+versionRange = "[36,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.flywheel]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.16.5,1.17)"
+ordering = "NONE"
+side = "BOTH"
