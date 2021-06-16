@@ -1,11 +1,13 @@
 modLoader = "javafml"
 loaderVersion = "[36,)"
+issueTrackerURL = "https://github.com/Jozufozu/Flywheel/issues"
 license = "LGPLv3"
 
 [[mods]]
 modId = "flywheel"
 version = "${file.jarVersion}"
 displayName = "Flywheel"
+displayURL = "https://www.curseforge.com/minecraft/mc-mods/flywheel"
 authors="Jozufozu"
 description = '''
 A modern engine for modded minecraft.
