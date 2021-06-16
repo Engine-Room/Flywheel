@@ -1,6 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "[36,)"
-license = "LGPL3"
+license = "LGPLv3"
 
 [[mods]]
 modId = "flywheel"
