@@ -7,6 +7,7 @@ license = "LGPLv3"
 modId = "flywheel"
 version = "${file.jarVersion}"
 displayName = "Flywheel"
+logoFile="logo.png"
 displayURL = "https://www.curseforge.com/minecraft/mc-mods/flywheel"
 authors="Jozufozu"
 description = '''
@@ -23,6 +24,6 @@ side = "BOTH"
 [[dependencies.flywheel]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.16.5,1.17)"
+versionRange = "[1.16.3,1.17)"
 ordering = "NONE"
 side = "BOTH"
