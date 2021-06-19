@@ -1,0 +1,9 @@
+0.0.2:
+New
+ - Added /flywheel backend command to replace /create experimentalRendering
+ - Added /flywheel normalOverlay command
+ - Added basic config
+ - New logo (thanks, bumble_dani!)
+
+0.0.1:
+ - Initial release

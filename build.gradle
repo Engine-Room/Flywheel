@@ -18,8 +18,10 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 
+boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equals('false');
+
 group = 'jozufozu'
-version = "${mod_version}"
+version = "${mc_update_version}-${mod_version}"
 archivesBaseName = 'flywheel'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
@@ -115,28 +117,7 @@ repositories {
 }
 
 dependencies {
-    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
-    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
-    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-
-    // You may put jars on which you depend on in ./libs or you may define them like so..
-    // compile "some.group:artifact:version:classifier"
-    // compile "some.group:artifact:version"
-
-    // Real examples
-    // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
-    // compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
-
-    // The 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
-    // provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // These dependencies get remapped to your current MCP mappings
-    // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // For more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
     annotationProcessor 'org.spongepowered:mixin:0.8:processor'
 }
@@ -158,3 +139,20 @@ jar {
 }
 
 jar.finalizedBy('reobfJar')
+
+tasks.curseforge.enabled = !dev && project.hasProperty('jozu_curseforge_key')
+
+curseforge {
+    if (project.hasProperty('jozu_curseforge_key')) {
+        apiKey = project.jozu_curseforge_key
+    }
+
+    project {
+        id = project.projectId
+        changelog = file('changelog.txt')
+        releaseType = project.curse_type
+        mainArtifact(jar) {
+            displayName = "${archivesBaseName}-${version}"
+        }
+    }
+}
