@@ -20,6 +20,7 @@ import com.jozufozu.flywheel.core.CrumblingInstanceManager;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
+import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.WorldAttached;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -39,7 +40,9 @@ import net.minecraft.util.LazyValue;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -67,9 +70,15 @@ public class InstancedRenderDispatcher {
 		return entityInstanceManager.get(world);
 	}
 
-	public static void tick() {
+	@SubscribeEvent
+	public static void tick(TickEvent.ClientTickEvent event) {
+
+		if (!Backend.isGameActive() || event.phase == TickEvent.Phase.START) {
+			return;
+		}
 		Minecraft mc = Minecraft.getInstance();
 		ClientWorld world = mc.world;
+		AnimationTickHolder.tick();
 
 		Entity renderViewEntity = mc.renderViewEntity != null ? mc.renderViewEntity : mc.player;
 
