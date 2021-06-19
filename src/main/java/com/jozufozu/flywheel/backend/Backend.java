@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.jozufozu.flywheel.config.FlwConfig;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL;
@@ -143,8 +145,7 @@ public class Backend {
 				compat.drawInstancedSupported() &&
 				compat.instancedArraysSupported();
 
-		// TODO: Config
-		enabled = !OptifineHandler.usingShaders();
+		enabled = FlwConfig.get().enabled() && !OptifineHandler.usingShaders();
 	}
 
 	public boolean canUseInstancing(World world) {
@@ -178,7 +179,13 @@ public class Backend {
 		return (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel()) || world == Minecraft.getInstance().world;
 	}
 
+	public static boolean isGameActive() {
+		return !(Minecraft.getInstance().world == null || Minecraft.getInstance().player == null);
+	}
+
 	public static void reloadWorldRenderers() {
 		RenderWork.enqueue(Minecraft.getInstance().worldRenderer::loadRenderers);
 	}
+
+	public static void init() { }
 }

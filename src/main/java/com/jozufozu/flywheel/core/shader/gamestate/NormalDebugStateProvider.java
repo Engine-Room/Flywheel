@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.core.shader.gamestate;
 
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.shader.spec.IBooleanStateProvider;
 
 import net.minecraft.util.ResourceLocation;
@@ -16,7 +17,7 @@ public class NormalDebugStateProvider implements IBooleanStateProvider {
 
 	@Override
 	public boolean isTrue() {
-		return false;
+		return FlwConfig.get().normalOverlayEnabled();
 	}
 
 	@Override
