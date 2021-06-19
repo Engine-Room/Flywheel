@@ -72,7 +72,7 @@ public class WeakHashSet<T> extends AbstractSet<T> {
 
 	@Override
 	public boolean remove(Object o) {
-		return map.remove((T) o) != null;
+		return map.remove(o) != null;
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class WeakHashSet<T> extends AbstractSet<T> {
 
 	@Override
 	public boolean contains(Object o) {
-		return map.containsKey((T) o);
+		return map.containsKey(o);
 	}
 
 	@Override
@@ -93,7 +93,7 @@ public class WeakHashSet<T> extends AbstractSet<T> {
 
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		return c.stream()
+		return stream()
 			.allMatch(map::containsKey);
 	}
 
