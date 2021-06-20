@@ -18,10 +18,13 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 
-boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equals('false');
+boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
 
+ext.buildnumber = 0
+project.buildnumber = System.getenv('BUILD_NUMBER') != null ? System.getenv('BUILD_NUMBER') : "custom"
+
+version = "${mc_update_version}-${mod_version}" + (dev ? ".${buildnumber}" : '')
 group = 'jozufozu'
-version = "${mc_update_version}-${mod_version}"
 archivesBaseName = 'flywheel'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
@@ -125,6 +128,10 @@ task sourcesJar(type: Jar) {
     archiveBaseName.set(project.archivesBaseName)
     archiveVersion.set("${project.version}")
     archiveClassifier.set('sources')
+}
+
+artifacts {
+    archives jar, sourcesJar
 }
 
 tasks.curseforge.enabled = !dev && project.hasProperty('jozu_curseforge_key')
