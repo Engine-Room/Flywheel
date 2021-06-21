@@ -16,6 +16,7 @@ plugins {
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
 boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
@@ -24,7 +25,7 @@ ext.buildnumber = 0
 project.buildnumber = System.getenv('BUILD_NUMBER') != null ? System.getenv('BUILD_NUMBER') : "custom"
 
 version = "${mc_update_version}-${mod_version}" + (dev ? ".${buildnumber}" : '')
-group = 'jozufozu'
+group = 'com.jozufozu.flywheel'
 archivesBaseName = 'flywheel'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
@@ -132,6 +133,22 @@ task sourcesJar(type: Jar) {
 
 artifacts {
     archives jar, sourcesJar
+}
+
+publishing {
+    tasks.publish.dependsOn 'build'
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+            artifact sourcesJar
+        }
+    }
+
+    repositories {
+        if (project.hasProperty('mavendir')) {
+            maven { url mavendir }
+        }
+    }
 }
 
 tasks.curseforge.enabled = !dev && project.hasProperty('jozu_curseforge_key')
