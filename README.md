@@ -7,8 +7,8 @@
 <a href="https://www.curseforge.com/minecraft/mc-mods/flywheel"><img src="http://cf.way2muchnoise.eu/486392.svg" alt="Curseforge Downloads"></a>
 <br>
 </div>
-d
-## About
+
+### About
 The goal of this project is to provide tools for mod developers so they no longer have to worry about performance, or limitations of Minecraft's archaic rendering engine.
 That said, this is primarily an outlet for me to have fun with graphics programming.
 
