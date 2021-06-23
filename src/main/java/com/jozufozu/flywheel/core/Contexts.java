@@ -12,16 +12,16 @@ import com.jozufozu.flywheel.event.GatherContextEvent;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+@OnlyIn(Dist.CLIENT)
 public class Contexts {
 
 	public static WorldContext<WorldProgram> WORLD;
 	public static WorldContext<CrumblingProgram> CRUMBLING;
 
-	@SubscribeEvent
 	public static void flwInit(GatherContextEvent event) {
 		Backend backend = event.getBackend();
 

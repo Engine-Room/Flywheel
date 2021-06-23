@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.core;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.instancing.MaterialSpec;
 import com.jozufozu.flywheel.core.materials.ModelData;
 import com.jozufozu.flywheel.core.materials.OrientedData;
@@ -9,22 +8,16 @@ import com.jozufozu.flywheel.event.GatherContextEvent;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+@OnlyIn(Dist.CLIENT)
 public class Materials {
-	public static final MaterialSpec<OrientedData> ORIENTED = register(new MaterialSpec<>(Locations.ORIENTED, Programs.ORIENTED, Formats.UNLIT_MODEL, Formats.ORIENTED, OrientedData::new));
-	public static final MaterialSpec<ModelData> TRANSFORMED = register(new MaterialSpec<>(Locations.MODEL, Programs.TRANSFORMED, Formats.UNLIT_MODEL, Formats.TRANSFORMED, ModelData::new));
+	public static final MaterialSpec<OrientedData> ORIENTED = new MaterialSpec<>(Locations.ORIENTED, Programs.ORIENTED, Formats.UNLIT_MODEL, Formats.ORIENTED, OrientedData::new);
+	public static final MaterialSpec<ModelData> TRANSFORMED = new MaterialSpec<>(Locations.MODEL, Programs.TRANSFORMED, Formats.UNLIT_MODEL, Formats.TRANSFORMED, ModelData::new);
 
-	public static <D extends InstanceData> MaterialSpec<D> register(MaterialSpec<D> spec) {
-		return Backend.getInstance().register(spec);
-	}
-
-	@SubscribeEvent
 	public static void flwInit(GatherContextEvent event) {
-		register(ORIENTED);
-		register(TRANSFORMED);
+		event.getBackend().register(ORIENTED);
+		event.getBackend().register(TRANSFORMED);
 	}
 
 	public static class Locations {

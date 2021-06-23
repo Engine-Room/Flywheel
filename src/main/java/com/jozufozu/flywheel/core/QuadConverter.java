@@ -25,7 +25,7 @@ import net.minecraftforge.fml.common.Mod;
 /**
  * A class to manage EBOs that index quads as triangles.
  */
-@Mod.EventBusSubscriber(value = Dist.CLIENT)
+@Mod.EventBusSubscriber(Dist.CLIENT)
 public class QuadConverter {
 
 	public static final int STARTING_CAPACITY = 42;
