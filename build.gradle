@@ -94,7 +94,6 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
     maven {
-        //location of the maven for mixed mappings and registrate
         name "tterrag maven"
         url "https://maven.tterrag.com/"
     }

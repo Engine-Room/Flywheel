@@ -15,25 +15,22 @@ public class GlShader extends GlObject {
 	public final ShaderType type;
 
 	public GlShader(Shader shader) {
-		this(shader.type, shader.name, shader.getSource());
-	}
+		this.type = shader.type;
+		this.name = shader.name;
+		int handle = GL20.glCreateShader(shader.type.glEnum);
 
-	public GlShader(ShaderType type, ResourceLocation name, String source) {
-		this.type = type;
-		this.name = name;
-		int handle = GL20.glCreateShader(type.glEnum);
-
-		GlCompat.safeShaderSource(handle, source);
+		GlCompat.safeShaderSource(handle, shader.getSource());
 		GL20.glCompileShader(handle);
 
 		String log = GL20.glGetShaderInfoLog(handle);
 
 		if (!log.isEmpty()) {
-			Backend.log.error("Shader compilation log for " + name + ": " + log);
+			Backend.log.error("Shader compilation log for " + shader.name + ": " + log);
+			Backend.log.error(shader.printSource());
 		}
 
 		if (GL20.glGetShaderi(handle, GL20.GL_COMPILE_STATUS) != GL20.GL_TRUE) {
-			throw new RuntimeException("Could not compile " + name + ". See log for details.");
+			throw new RuntimeException("Could not compile " + shader.name + ". See log for details.");
 		}
 
 		setHandle(handle);

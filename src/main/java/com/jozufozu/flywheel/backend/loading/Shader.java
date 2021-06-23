@@ -135,12 +135,18 @@ public class Shader {
 		});
 	}
 
-	public void printSource() {
-		Backend.log.debug("Source for shader '" + name + "':");
+	public String printSource() {
+		StringBuilder builder = new StringBuilder();
+
+		builder.append("Source for shader '").append(name).append("':\n");
 		int i = 1;
 		for (String s : source.split("\n")) {
-			Backend.log.debug(String.format("%1$4s: ", i++) + s);
+			builder.append(String.format("%1$4s: ", i++))
+				   .append(s)
+				   .append('\n');
 		}
+
+		return builder.toString();
 	}
 
 	public static Stream<String> lines(String s) {
