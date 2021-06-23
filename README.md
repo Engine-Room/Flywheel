@@ -43,6 +43,6 @@ repositories {
 Then add Flywheel as a dependency:
 ```groovy
 dependencies {
-    compile fg.deobf("com.jozufozu.flywheel:Flywheel:1.16-0.0.2.6")
+    implementation fg.deobf("com.jozufozu.flywheel:Flywheel:1.16-0.0.2.9")
 }
 ```
