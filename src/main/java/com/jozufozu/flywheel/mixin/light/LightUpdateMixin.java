@@ -29,26 +29,26 @@ public abstract class LightUpdateMixin extends AbstractChunkProvider {
 	 * the rendering system that it needs to redraw a chunk. It does all that work asynchronously,
 	 * and we should too.
 	 */
-	@Inject(at = @At("HEAD"), method = "markLightChanged")
+	@Inject(at = @At("HEAD"), method = "onLightUpdate")
 	private void onLightUpdate(LightType type, SectionPos pos, CallbackInfo ci) {
 		ClientChunkProvider thi = ((ClientChunkProvider) (Object) this);
-		ClientWorld world = (ClientWorld) thi.getWorld();
+		ClientWorld world = (ClientWorld) thi.getLevel();
 
-		Chunk chunk = thi.getChunk(pos.getSectionX(), pos.getSectionZ(), false);
+		Chunk chunk = thi.getChunk(pos.x(), pos.z(), false);
 
-		int sectionY = pos.getSectionY();
+		int sectionY = pos.y();
 
 		if (chunk != null) {
-			chunk.getTileEntityMap()
+			chunk.getBlockEntities()
 					.entrySet()
 					.stream()
-					.filter(entry -> SectionPos.toChunk(entry.getKey()
+					.filter(entry -> SectionPos.blockToSectionCoord(entry.getKey()
 							.getY()) == sectionY)
 					.map(Map.Entry::getValue)
 					.forEach(InstancedRenderDispatcher.getTiles(world)::onLightUpdate);
 
 			if (sectionY >= 0) // TODO: 1.17
-				chunk.getEntityLists()[sectionY]
+				chunk.getEntitySections()[sectionY]
 						.forEach(InstancedRenderDispatcher.getEntities(world)::onLightUpdate);
 		}
 

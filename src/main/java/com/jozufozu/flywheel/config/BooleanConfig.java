@@ -1,5 +1,8 @@
 package com.jozufozu.flywheel.config;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.OptifineHandler;
 
@@ -11,9 +14,6 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public enum BooleanConfig {
 	ENGINE(() -> BooleanConfig::enabled),
@@ -37,7 +37,7 @@ public enum BooleanConfig {
 
 		if (state == BooleanDirective.DISPLAY) {
 			ITextComponent text = new StringTextComponent("Flywheel Renderer is currently: ").append(boolToText(FlwConfig.get().client.enabled.get()));
-			player.sendStatusMessage(text, false);
+			player.displayClientMessage(text, false);
 			return;
 		}
 
@@ -46,10 +46,10 @@ public enum BooleanConfig {
 
 		FlwConfig.get().client.enabled.set(enabled);
 
-		ITextComponent text = boolToText(FlwConfig.get().client.enabled.get()).append(new StringTextComponent(" Flywheel Renderer").formatted(TextFormatting.WHITE));
-		ITextComponent error = new StringTextComponent("Flywheel Renderer does not support Optifine Shaders").formatted(TextFormatting.RED);
+		ITextComponent text = boolToText(FlwConfig.get().client.enabled.get()).append(new StringTextComponent(" Flywheel Renderer").withStyle(TextFormatting.WHITE));
+		ITextComponent error = new StringTextComponent("Flywheel Renderer does not support Optifine Shaders").withStyle(TextFormatting.RED);
 
-		player.sendStatusMessage(cannotUseER ? error : text, false);
+		player.displayClientMessage(cannotUseER ? error : text, false);
 		Backend.reloadWorldRenderers();
 	}
 
@@ -60,18 +60,18 @@ public enum BooleanConfig {
 
 		if (state == BooleanDirective.DISPLAY) {
 			ITextComponent text = new StringTextComponent("Normal overlay is currently: ").append(boolToText(FlwConfig.get().client.normalDebug.get()));
-			player.sendStatusMessage(text, false);
+			player.displayClientMessage(text, false);
 			return;
 		}
 
 		FlwConfig.get().client.normalDebug.set(state.get());
 
-		ITextComponent text = boolToText(FlwConfig.get().client.normalDebug.get()).append(new StringTextComponent(" Normal Overlay").formatted(TextFormatting.WHITE));
+		ITextComponent text = boolToText(FlwConfig.get().client.normalDebug.get()).append(new StringTextComponent(" Normal Overlay").withStyle(TextFormatting.WHITE));
 
-		player.sendStatusMessage(text, false);
+		player.displayClientMessage(text, false);
 	}
 
 	private static IFormattableTextComponent boolToText(boolean b) {
-		return b ? new StringTextComponent("enabled").formatted(TextFormatting.DARK_GREEN) : new StringTextComponent("disabled").formatted(TextFormatting.RED);
+		return b ? new StringTextComponent("enabled").withStyle(TextFormatting.DARK_GREEN) : new StringTextComponent("disabled").withStyle(TextFormatting.RED);
 	}
 }

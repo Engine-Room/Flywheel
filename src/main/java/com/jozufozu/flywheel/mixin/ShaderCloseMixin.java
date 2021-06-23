@@ -19,15 +19,15 @@ public class ShaderCloseMixin {
 
 	@Shadow
 	@Nullable
-	public Screen currentScreen;
+	public Screen screen;
 
-	@Inject(at = @At("HEAD"), method = "displayGuiScreen")
+	@Inject(at = @At("HEAD"), method = "setScreen")
 	private void whenScreenChanges(Screen screen, CallbackInfo info) {
 		if (OptifineHandler.optifineInstalled() && screen instanceof VideoSettingsScreen) {
-			Screen old = this.currentScreen;
+			Screen old = this.screen;
 			if (old != null && old.getClass()
-				.getName()
-				.startsWith(OptifineHandler.SHADER_PACKAGE)) {
+					.getName()
+					.startsWith(OptifineHandler.SHADER_PACKAGE)) {
 				OptifineHandler.refresh();
 			}
 		}

@@ -30,7 +30,7 @@ public class OrientedData extends BasicData {
 	}
 
 	public OrientedData setPosition(Vector3f pos) {
-		return setPosition(pos.getX(), pos.getY(), pos.getZ());
+		return setPosition(pos.x(), pos.y(), pos.z());
 	}
 
 	public OrientedData setPosition(float x, float y, float z) {
@@ -50,11 +50,11 @@ public class OrientedData extends BasicData {
 	}
 
 	public OrientedData setPivot(Vector3f pos) {
-		return setPosition(pos.getX(), pos.getY(), pos.getZ());
+		return setPosition(pos.x(), pos.y(), pos.z());
 	}
 
 	public OrientedData setPivot(Vector3d pos) {
-		return setPosition((float) pos.getX(), (float) pos.getY(), (float) pos.getZ());
+		return setPosition((float) pos.x(), (float) pos.y(), (float) pos.z());
 	}
 
 	public OrientedData setPivot(float x, float y, float z) {
@@ -66,7 +66,7 @@ public class OrientedData extends BasicData {
 	}
 
 	public OrientedData setRotation(Quaternion q) {
-		return setRotation(q.getX(), q.getY(), q.getZ(), q.getW());
+		return setRotation(q.i(), q.j(), q.k(), q.r());
 	}
 
 	public OrientedData setRotation(float x, float y, float z, float w) {

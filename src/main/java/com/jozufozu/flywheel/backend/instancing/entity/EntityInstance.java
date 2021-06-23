@@ -46,7 +46,7 @@ public abstract class EntityInstance<E extends Entity> implements IInstance {
 	public EntityInstance(MaterialManager<?> materialManager, E entity) {
 		this.materialManager = materialManager;
 		this.entity = entity;
-		this.world = entity.world;
+		this.world = entity.level;
 	}
 
 	/**
@@ -92,7 +92,7 @@ public abstract class EntityInstance<E extends Entity> implements IInstance {
 	 * represents should be rendered at to appear in the correct location.
 	 */
 	public Vector3f getInstancePosition() {
-		Vector3d pos = entity.getPositionVec();
+		Vector3d pos = entity.position();
 		Vector3i origin = materialManager.getOriginCoordinate();
 		return new Vector3f(
 				(float) (pos.x - origin.getX()),
@@ -103,15 +103,15 @@ public abstract class EntityInstance<E extends Entity> implements IInstance {
 
 	@Override
 	public BlockPos getWorldPosition() {
-		return entity.getBlockPos();
+		return entity.blockPosition();
 	}
 
 	protected void relight(BlockPos pos, IFlatLight<?>... models) {
-		relight(world.getLightLevel(LightType.BLOCK, pos), world.getLightLevel(LightType.SKY, pos), models);
+		relight(world.getBrightness(LightType.BLOCK, pos), world.getBrightness(LightType.SKY, pos), models);
 	}
 
 	protected <L extends IFlatLight<?>> void relight(BlockPos pos, Stream<L> models) {
-		relight(world.getLightLevel(LightType.BLOCK, pos), world.getLightLevel(LightType.SKY, pos), models);
+		relight(world.getBrightness(LightType.BLOCK, pos), world.getBrightness(LightType.SKY, pos), models);
 	}
 
 	protected void relight(int block, int sky, IFlatLight<?>... models) {

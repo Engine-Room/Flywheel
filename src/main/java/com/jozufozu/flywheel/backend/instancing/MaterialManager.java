@@ -72,7 +72,7 @@ public class MaterialManager<P extends WorldProgram> {
 		camY -= originCoordinate.getY();
 		camZ -= originCoordinate.getZ();
 
-		Matrix4f translate = Matrix4f.translate((float) -camX, (float) -camY, (float) -camZ);
+		Matrix4f translate = Matrix4f.createTranslateMatrix((float) -camX, (float) -camY, (float) -camZ);
 
 		translate.multiplyBackward(viewProjection);
 
@@ -81,7 +81,7 @@ public class MaterialManager<P extends WorldProgram> {
 		}
 
 		for (Map.Entry<ResourceLocation, ArrayList<MaterialRenderer<P>>> entry : renderers.entrySet()) {
-			Minecraft.getInstance().textureManager.bindTexture(entry.getKey());
+			Minecraft.getInstance().textureManager.bind(entry.getKey());
 
 			for (MaterialRenderer<P> materialRenderer : entry.getValue()) {
 				materialRenderer.render(layer, translate, camX, camY, camZ, callback);
@@ -136,9 +136,9 @@ public class MaterialManager<P extends WorldProgram> {
 	}
 
 	public void checkAndShiftOrigin(ActiveRenderInfo info) {
-		int cX = MathHelper.floor(info.getProjectedView().x);
-		int cY = MathHelper.floor(info.getProjectedView().y);
-		int cZ = MathHelper.floor(info.getProjectedView().z);
+		int cX = MathHelper.floor(info.getPosition().x);
+		int cY = MathHelper.floor(info.getPosition().y);
+		int cZ = MathHelper.floor(info.getPosition().z);
 
 		int dX = cX - originCoordinate.getX();
 		int dY = cY - originCoordinate.getY();

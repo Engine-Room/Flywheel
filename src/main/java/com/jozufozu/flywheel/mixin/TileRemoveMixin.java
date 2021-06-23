@@ -19,12 +19,12 @@ public class TileRemoveMixin {
 
 	@Shadow
 	@Nullable
-	protected World world;
+	protected World level;
 
-	@Inject(at = @At("TAIL"), method = "remove")
+	@Inject(at = @At("TAIL"), method = "setRemoved")
 	private void onRemove(CallbackInfo ci) {
-		if (world instanceof ClientWorld)
-			InstancedRenderDispatcher.getTiles(this.world)
+		if (level instanceof ClientWorld)
+			InstancedRenderDispatcher.getTiles(this.level)
 					.remove((TileEntity) (Object) this);
 	}
 }

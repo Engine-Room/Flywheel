@@ -40,7 +40,6 @@ import net.minecraft.util.LazyValue;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -70,6 +69,8 @@ public class InstancedRenderDispatcher {
 		return entityInstanceManager.get(world);
 	}
 
+	private static final RenderType crumblingLayer = ModelBakery.DESTROY_TYPES.get(0);
+
 	@SubscribeEvent
 	public static void tick(TickEvent.ClientTickEvent event) {
 
@@ -77,10 +78,10 @@ public class InstancedRenderDispatcher {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		ClientWorld world = mc.world;
+		ClientWorld world = mc.level;
 		AnimationTickHolder.tick();
 
-		Entity renderViewEntity = mc.renderViewEntity != null ? mc.renderViewEntity : mc.player;
+		Entity renderViewEntity = mc.cameraEntity != null ? mc.cameraEntity : mc.player;
 
 		if (renderViewEntity == null) return;
 
@@ -89,11 +90,7 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static void enqueueUpdate(TileEntity te) {
-		getTiles(te.getWorld()).queueUpdate(te);
-	}
-
-	public static void enqueueUpdate(Entity entity) {
-		getEntities(entity.world).queueUpdate(entity);
+		getTiles(te.getLevel()).queueUpdate(te);
 	}
 
 	@SubscribeEvent
@@ -105,17 +102,21 @@ public class InstancedRenderDispatcher {
 		getEntities(event.getWorld()).beginFrame(event.getInfo());
 	}
 
+	public static void enqueueUpdate(Entity entity) {
+		getEntities(entity.level).queueUpdate(entity);
+	}
+
 	@SubscribeEvent
 	public static void renderLayer(RenderLayerEvent event) {
 		ClientWorld world = event.getWorld();
 		if (!Backend.getInstance().canUseInstancing(world)) return;
 
-		event.type.startDrawing();
+		event.type.setupRenderState();
 
 		Contexts.WORLD.getMaterialManager(world)
 				.render(event.type, event.viewProjection, event.camX, event.camY, event.camZ);
 
-		event.type.endDrawing();
+		event.type.clearRenderState();
 	}
 
 	@SubscribeEvent
@@ -126,64 +127,62 @@ public class InstancedRenderDispatcher {
 
 			TileInstanceManager tiles = getTiles(world);
 			tiles.invalidate();
-			world.loadedTileEntityList.forEach(tiles::add);
+			world.blockEntityList.forEach(tiles::add);
 
 			EntityInstanceManager entities = getEntities(world);
 			entities.invalidate();
-			world.getAllEntities().forEach(entities::add);
+			world.entitiesForRendering().forEach(entities::add);
 		}
 	}
-
-	private static final RenderType crumblingLayer = ModelBakery.BLOCK_DESTRUCTION_RENDER_LAYERS.get(0);
 
 	public static void renderBreaking(ClientWorld world, Matrix4f viewProjection, double cameraX, double cameraY, double cameraZ) {
 		if (!Backend.getInstance().canUseInstancing(world)) return;
 
-		WorldRenderer worldRenderer = Minecraft.getInstance().worldRenderer;
-		Long2ObjectMap<SortedSet<DestroyBlockProgress>> breakingProgressions = worldRenderer.blockBreakingProgressions;
+		WorldRenderer worldRenderer = Minecraft.getInstance().levelRenderer;
+		Long2ObjectMap<SortedSet<DestroyBlockProgress>> breakingProgressions = worldRenderer.destructionProgress;
 
 		if (breakingProgressions.isEmpty()) return;
-		Vector<CrumblingInstanceManager> renderers = blockBreaking.getValue();
+		Vector<CrumblingInstanceManager> renderers = blockBreaking.get();
 
 		BitSet bitSet = new BitSet(10);
 
 		for (Long2ObjectMap.Entry<SortedSet<DestroyBlockProgress>> entry : breakingProgressions.long2ObjectEntrySet()) {
-			BlockPos breakingPos = BlockPos.fromLong(entry.getLongKey());
+			BlockPos breakingPos = BlockPos.of(entry.getLongKey());
 
 			SortedSet<DestroyBlockProgress> progresses = entry.getValue();
 			if (progresses != null && !progresses.isEmpty()) {
-				int blockDamage = progresses.last().getPartialBlockDamage();
+				int blockDamage = progresses.last().getProgress();
 				bitSet.set(blockDamage);
-				renderers.get(blockDamage).add(world.getTileEntity(breakingPos));
+				renderers.get(blockDamage).add(world.getBlockEntity(breakingPos));
 			}
 		}
 
 		TextureManager textureManager = Minecraft.getInstance().textureManager;
-		ActiveRenderInfo info = Minecraft.getInstance().gameRenderer.getActiveRenderInfo();
+		ActiveRenderInfo info = Minecraft.getInstance().gameRenderer.getMainCamera();
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureManager.getTexture(PlayerContainer.BLOCK_ATLAS_TEXTURE).getGlTextureId());
+		glBindTexture(GL_TEXTURE_2D, textureManager.getTexture(PlayerContainer.BLOCK_ATLAS).getId());
 
 		glActiveTexture(GL_TEXTURE4);
 
-		crumblingLayer.startDrawing();
+		crumblingLayer.setupRenderState();
 		bitSet.stream().forEach(i -> {
-			Texture breaking = textureManager.getTexture(ModelBakery.BLOCK_DESTRUCTION_STAGE_TEXTURES.get(i));
+			Texture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(i));
 			CrumblingInstanceManager renderer = renderers.get(i);
 			renderer.beginFrame(info);
 
 			if (breaking != null) {
-				glBindTexture(GL_TEXTURE_2D, breaking.getGlTextureId());
-				renderer.materialManager.render(RenderType.getCutoutMipped(), viewProjection, cameraX, cameraY, cameraZ);
+				glBindTexture(GL_TEXTURE_2D, breaking.getId());
+				renderer.materialManager.render(RenderType.cutoutMipped(), viewProjection, cameraX, cameraY, cameraZ);
 			}
 
 			renderer.invalidate();
 		});
-		crumblingLayer.endDrawing();
+		crumblingLayer.clearRenderState();
 
 		glActiveTexture(GL_TEXTURE0);
-		Texture breaking = textureManager.getTexture(ModelBakery.BLOCK_DESTRUCTION_STAGE_TEXTURES.get(0));
+		Texture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(0));
 		if (breaking != null)
-			glBindTexture(GL_TEXTURE_2D, breaking.getGlTextureId());
+			glBindTexture(GL_TEXTURE_2D, breaking.getId());
 	}
 }

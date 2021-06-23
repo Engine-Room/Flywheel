@@ -101,9 +101,24 @@ public class InstanceMaterial<D extends InstanceData> {
 		}
 	}
 
-	private BufferedModel buildModel(BlockState renderedState) {
-		BlockRendererDispatcher dispatcher = Minecraft.getInstance().getBlockRendererDispatcher();
-		return buildModel(dispatcher.getModelForState(renderedState), renderedState);
+	public static BufferBuilder getBufferBuilder(IBakedModel model, BlockState referenceState, MatrixStack ms) {
+		Minecraft mc = Minecraft.getInstance();
+		BlockRendererDispatcher dispatcher = mc.getBlockRenderer();
+		BlockModelRenderer blockRenderer = dispatcher.getModelRenderer();
+		BufferBuilder builder = new BufferBuilder(512);
+
+//		BakedQuadWrapper quadReader = new BakedQuadWrapper();
+//
+//		IModelData modelData = model.getModelData(mc.world, BlockPos.ZERO.up(255), referenceState, VirtualEmptyModelData.INSTANCE);
+//		List<BakedQuad> quads = Arrays.stream(dirs)
+//				.flatMap(dir -> model.getQuads(referenceState, dir, mc.world.rand, modelData).stream())
+//				.collect(Collectors.toList());
+
+		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+		blockRenderer.renderModel(mc.level, model, referenceState, BlockPos.ZERO.above(255), ms, builder, true,
+				mc.level.random, 42, OverlayTexture.NO_OVERLAY, VirtualEmptyModelData.INSTANCE);
+		builder.end();
+		return builder;
 	}
 
 	private BufferedModel buildModel(IBakedModel model, BlockState renderedState) {
@@ -147,24 +162,9 @@ public class InstanceMaterial<D extends InstanceData> {
 		dirs = Arrays.copyOf(directions, directions.length + 1);
 	}
 
-	public static BufferBuilder getBufferBuilder(IBakedModel model, BlockState referenceState, MatrixStack ms) {
-		Minecraft mc = Minecraft.getInstance();
-		BlockRendererDispatcher dispatcher = mc.getBlockRendererDispatcher();
-		BlockModelRenderer blockRenderer = dispatcher.getBlockModelRenderer();
-		BufferBuilder builder = new BufferBuilder(512);
-
-//		BakedQuadWrapper quadReader = new BakedQuadWrapper();
-//
-//		IModelData modelData = model.getModelData(mc.world, BlockPos.ZERO.up(255), referenceState, VirtualEmptyModelData.INSTANCE);
-//		List<BakedQuad> quads = Arrays.stream(dirs)
-//				.flatMap(dir -> model.getQuads(referenceState, dir, mc.world.rand, modelData).stream())
-//				.collect(Collectors.toList());
-
-		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-		blockRenderer.renderModel(mc.world, model, referenceState, BlockPos.ZERO.up(255), ms, builder, true,
-				mc.world.rand, 42, OverlayTexture.DEFAULT_UV, VirtualEmptyModelData.INSTANCE);
-		builder.finishDrawing();
-		return builder;
+	private BufferedModel buildModel(BlockState renderedState) {
+		BlockRendererDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
+		return buildModel(dispatcher.getBlockModel(renderedState), renderedState);
 	}
 
 }

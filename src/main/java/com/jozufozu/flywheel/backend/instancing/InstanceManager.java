@@ -77,15 +77,15 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		frame++;
 		processQueuedAdditions();
 
-		Vector3f look = info.getHorizontalPlane();
-		float lookX = look.getX();
-		float lookY = look.getY();
-		float lookZ = look.getZ();
+		Vector3f look = info.getLookVector();
+		float lookX = look.x();
+		float lookY = look.y();
+		float lookZ = look.z();
 
 		// integer camera pos
-		int cX = (int) info.getProjectedView().x;
-		int cY = (int) info.getProjectedView().y;
-		int cZ = (int) info.getProjectedView().z;
+		int cX = (int) info.getPosition().x;
+		int cY = (int) info.getPosition().y;
+		int cZ = (int) info.getPosition().z;
 
 		if (dynamicInstances.size() > 0) {
 			dynamicInstances.object2ObjectEntrySet().fastForEach(e -> {

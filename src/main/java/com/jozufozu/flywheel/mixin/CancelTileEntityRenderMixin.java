@@ -25,7 +25,7 @@ public class CancelTileEntityRenderMixin {
 	 * list of tile entities to render. By filtering the output here, we prevent the game from
 	 * doing unnecessary light lookups and frustum checks.
 	 */
-	@Inject(at = @At("RETURN"), method = "getTileEntities", cancellable = true)
+	@Inject(at = @At("RETURN"), method = "getRenderableBlockEntities", cancellable = true)
 	private void noRenderInstancedTiles(CallbackInfoReturnable<List<TileEntity>> cir) {
 		if (Backend.getInstance().canUseInstancing()) {
 			List<TileEntity> tiles = cir.getReturnValue();

@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.jozufozu.flywheel.config.FlwConfig;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL;
@@ -16,6 +14,7 @@ import org.lwjgl.opengl.GLCapabilities;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.instancing.MaterialSpec;
+import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
 import net.minecraft.client.Minecraft;
@@ -176,15 +175,15 @@ public class Backend {
 	 * Used to avoid calling Flywheel functions on (fake) worlds that don't specifically support it.
 	 */
 	public static boolean isFlywheelWorld(IWorld world) {
-		return (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel()) || world == Minecraft.getInstance().world;
+		return (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel()) || world == Minecraft.getInstance().level;
 	}
 
 	public static boolean isGameActive() {
-		return !(Minecraft.getInstance().world == null || Minecraft.getInstance().player == null);
+		return !(Minecraft.getInstance().level == null || Minecraft.getInstance().player == null);
 	}
 
 	public static void reloadWorldRenderers() {
-		RenderWork.enqueue(Minecraft.getInstance().worldRenderer::loadRenderers);
+		RenderWork.enqueue(Minecraft.getInstance().levelRenderer::allChanged);
 	}
 
 	public static void init() { }

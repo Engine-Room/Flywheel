@@ -22,7 +22,7 @@ public class ForgeEvents {
 	@SubscribeEvent
 	public static void addToDebugScreen(RenderGameOverlayEvent.Text event) {
 
-		if (Minecraft.getInstance().gameSettings.showDebugInfo) {
+		if (Minecraft.getInstance().options.renderDebug) {
 
 			ArrayList<String> right = event.getRight();
 
@@ -46,11 +46,11 @@ public class ForgeEvents {
 
 			TileInstanceManager tiles = InstancedRenderDispatcher.getTiles(world);
 			tiles.invalidate();
-			clientWorld.loadedTileEntityList.forEach(tiles::add);
+			clientWorld.blockEntityList.forEach(tiles::add);
 
 			EntityInstanceManager entities = InstancedRenderDispatcher.getEntities(world);
 			entities.invalidate();
-			clientWorld.getAllEntities().forEach(entities::add);
+			clientWorld.entitiesForRendering().forEach(entities::add);
 		}
 	}
 }

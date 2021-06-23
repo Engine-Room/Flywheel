@@ -60,7 +60,7 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 		this.backend = backend;
 		IResourceManager manager = backend.minecraft.getResourceManager();
 		if (manager instanceof IReloadableResourceManager) {
-			((IReloadableResourceManager) manager).addReloadListener(this);
+			((IReloadableResourceManager) manager).registerReloadListener(this);
 		}
 	}
 
@@ -97,7 +97,7 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 	}
 
 	private void loadProgramSpecs(IResourceManager manager) {
-		Collection<ResourceLocation> programSpecs = manager.getAllResourceLocations(PROGRAM_DIR, s -> s.endsWith(".json"));
+		Collection<ResourceLocation> programSpecs = manager.listResources(PROGRAM_DIR, s -> s.endsWith(".json"));
 
 		for (ResourceLocation location : programSpecs) {
 			try {
@@ -136,7 +136,7 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 	}
 
 	private void loadShaderSources(IResourceManager manager) {
-		Collection<ResourceLocation> allShaders = manager.getAllResourceLocations(SHADER_DIR, s -> {
+		Collection<ResourceLocation> allShaders = manager.listResources(SHADER_DIR, s -> {
 			for (String ext : EXTENSIONS) {
 				if (s.endsWith(ext)) return true;
 			}

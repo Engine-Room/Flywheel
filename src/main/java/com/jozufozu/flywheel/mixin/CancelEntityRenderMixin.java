@@ -17,9 +17,9 @@ import net.minecraft.entity.Entity;
 @Mixin(WorldRenderer.class)
 public class CancelEntityRenderMixin {
 
-	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getAllEntities()Ljava/lang/Iterable;"))
+	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;entitiesForRendering()Ljava/lang/Iterable;"))
 	private Iterable<Entity> filterEntities(ClientWorld world) {
-		Iterable<Entity> entities = world.getAllEntities();
+		Iterable<Entity> entities = world.entitiesForRendering();
 		if (Backend.getInstance().canUseInstancing()) {
 
 			ArrayList<Entity> filtered = Lists.newArrayList(entities);

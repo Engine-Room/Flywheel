@@ -22,7 +22,7 @@ public class BooleanConfigCommand {
 	public ArgumentBuilder<CommandSource, ?> register() {
 		return Commands.literal(name)
 				.executes(context -> {
-					ServerPlayerEntity player = context.getSource().asPlayer();
+					ServerPlayerEntity player = context.getSource().getPlayerOrException();
 					FlwPackets.channel.send(
 							PacketDistributor.PLAYER.with(() -> player),
 							new SConfigureBooleanPacket(value, BooleanDirective.DISPLAY)
@@ -30,7 +30,7 @@ public class BooleanConfigCommand {
 					return Command.SINGLE_SUCCESS;
 				})
 				.then(Commands.literal("on").executes(context -> {
-					ServerPlayerEntity player = context.getSource().asPlayer();
+					ServerPlayerEntity player = context.getSource().getPlayerOrException();
 					FlwPackets.channel.send(
 							PacketDistributor.PLAYER.with(() -> player),
 							new SConfigureBooleanPacket(value, BooleanDirective.TRUE)
@@ -38,7 +38,7 @@ public class BooleanConfigCommand {
 					return Command.SINGLE_SUCCESS;
 				}))
 				.then(Commands.literal("off").executes(context -> {
-					ServerPlayerEntity player = context.getSource().asPlayer();
+					ServerPlayerEntity player = context.getSource().getPlayerOrException();
 					FlwPackets.channel.send(
 							PacketDistributor.PLAYER.with(() -> player),
 							new SConfigureBooleanPacket(value, BooleanDirective.FALSE)
