@@ -91,8 +91,11 @@ public class MaterialManager<P extends WorldProgram> {
 
 	public void delete() {
 		atlasMaterials.values().forEach(InstanceMaterial::delete);
-
 		materials.values().stream().flatMap(m -> m.values().stream()).forEach(InstanceMaterial::delete);
+
+		atlasMaterials.clear();
+		atlasRenderers.clear();
+		materials.clear();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -131,7 +134,7 @@ public class MaterialManager<P extends WorldProgram> {
 		return originCoordinate;
 	}
 
-	public void onOriginShift(OriginShiftListener listener) {
+	public void addListener(OriginShiftListener listener) {
 		listeners.add(listener);
 	}
 

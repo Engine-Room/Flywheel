@@ -49,10 +49,19 @@ public class ExtensibleGlProgram extends GlProgram {
 
 	@Override
 	public String toString() {
-		return "ExtensibleGlProgram{" +
-				"name=" + name +
-				", extensions=" + extensions +
-				'}';
+		StringBuilder builder = new StringBuilder();
+		builder.append("program ")
+			   .append(name)
+			   .append('[');
+
+		for (IExtensionInstance extension : extensions) {
+			builder.append(extension)
+				   .append('+');
+		}
+
+		builder.append(']');
+
+		return builder.toString();
 	}
 
 	/**

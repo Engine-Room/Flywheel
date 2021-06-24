@@ -74,4 +74,8 @@ public abstract class GlProgram extends GlObject {
 		glDeleteProgram(handle);
 	}
 
+	@Override
+	public String toString() {
+		return "program " + name;
+	}
 }
