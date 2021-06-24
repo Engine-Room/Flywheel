@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.ShaderSources;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 
@@ -53,19 +52,18 @@ public class Shader {
 	}
 
 	public TaggedStruct getTag(String tag) {
-		checkAndParse();
+		checkIfParsed();
 		return tag2Struct.get(tag);
 	}
 
 	public TaggedStruct getStruct(String name) {
-		checkAndParse();
+		checkIfParsed();
 		return name2Struct.get(name);
 	}
 
-	private void checkAndParse() {
+	private void checkIfParsed() {
 		if (!parsed) {
-			parsed = true;
-			parseStructs();
+			throw new IllegalStateException("tagged structs must be explicitly parsed before use");
 		}
 	}
 
@@ -94,7 +92,8 @@ public class Shader {
 
 			structs.add(struct);
 
-			structMatcher.appendReplacement(strippedSrc, decorator.matcher(struct.source).replaceFirst(""));
+			String replacement = decorator.matcher(struct.source).replaceFirst("");
+			structMatcher.appendReplacement(strippedSrc, replacement);
 
 			tag2Struct.put(struct.tag, struct);
 			name2Struct.put(struct.name, struct);
@@ -102,6 +101,7 @@ public class Shader {
 		structMatcher.appendTail(strippedSrc);
 
 		this.source = strippedSrc.toString();
+		parsed = true;
 	}
 
 	public void processIncludes() {
