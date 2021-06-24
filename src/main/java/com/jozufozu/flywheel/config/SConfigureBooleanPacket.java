@@ -30,6 +30,7 @@ public class SConfigureBooleanPacket {
 
 	public void execute(Supplier<NetworkEvent.Context> ctx) {
 		target.receiver.get().accept(directive);
+		ctx.get().setPacketHandled(true);
 	}
 
 }
