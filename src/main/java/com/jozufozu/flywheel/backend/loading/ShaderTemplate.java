@@ -32,10 +32,9 @@ public class ShaderTemplate {
 	}
 
 	public String apply(Shader shader) {
+		shader.parseStructs();
 
-		return header +
-				shader.getSource() +
-				processBody(shader);
+		return header + shader.getSource() + processBody(shader);
 	}
 
 	public String processBody(Shader shader) {

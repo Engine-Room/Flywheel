@@ -110,6 +110,9 @@ public class Backend {
 			throw new IllegalStateException("Material spec '" + name + "' already registered.");
 		}
 		materialRegistry.put(name, spec);
+
+		log.debug("registered material '" + name + "' with vertex size " + spec.getModelFormat().getStride() + " and instance size " + spec.getInstanceFormat().getStride());
+
 		return spec;
 	}
 

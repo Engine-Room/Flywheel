@@ -28,6 +28,7 @@ public class GlShader extends GlObject {
 			Backend.log.error("Shader compilation log for " + shader.name + ": " + log);
 			Backend.log.error(shader.printSource());
 		}
+		Backend.log.debug(shader.printSource());
 
 		if (GL20.glGetShaderi(handle, GL20.GL_COMPILE_STATUS) != GL20.GL_TRUE) {
 			throw new RuntimeException("Could not compile " + shader.name + ". See log for details.");
