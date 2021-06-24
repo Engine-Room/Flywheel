@@ -40,7 +40,6 @@ import net.minecraft.util.LazyValue;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent;
@@ -124,15 +123,7 @@ public class InstancedRenderDispatcher {
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		ClientWorld world = event.getWorld();
 		if (Backend.getInstance().canUseInstancing() && world != null) {
-			Contexts.WORLD.getMaterialManager(world).delete();
-
-			TileInstanceManager tiles = getTiles(world);
-			tiles.invalidate();
-			world.loadedTileEntityList.forEach(tiles::add);
-
-			EntityInstanceManager entities = getEntities(world);
-			entities.invalidate();
-			world.getAllEntities().forEach(entities::add);
+			loadAllInWorld(world);
 		}
 	}
 
@@ -187,5 +178,15 @@ public class InstancedRenderDispatcher {
 		Texture breaking = textureManager.getTexture(ModelBakery.BLOCK_DESTRUCTION_STAGE_TEXTURES.get(0));
 		if (breaking != null)
 			glBindTexture(GL_TEXTURE_2D, breaking.getGlTextureId());
+	}
+
+	public static void loadAllInWorld(ClientWorld world) {
+		Contexts.WORLD.getMaterialManager(world).delete();
+
+		TileInstanceManager tiles = tileInstanceManager.replace(world);
+		world.loadedTileEntityList.forEach(tiles::add);
+
+		EntityInstanceManager entities = entityInstanceManager.replace(world);
+		world.getAllEntities().forEach(entities::add);
 	}
 }

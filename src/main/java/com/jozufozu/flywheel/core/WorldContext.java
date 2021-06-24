@@ -21,7 +21,6 @@ import com.jozufozu.flywheel.backend.loading.Shader;
 import com.jozufozu.flywheel.backend.loading.ShaderLoadingException;
 import com.jozufozu.flywheel.backend.loading.ShaderTransformer;
 import com.jozufozu.flywheel.core.shader.ExtensibleGlProgram;
-import com.jozufozu.flywheel.core.shader.IMultiProgram;
 import com.jozufozu.flywheel.core.shader.StateSensitiveMultiProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.util.WorldAttached;
@@ -38,7 +37,7 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 	protected Supplier<Stream<ResourceLocation>> specStream;
 	protected TemplateFactory templateFactory;
 
-	private final WorldAttached<MaterialManager<P>> materialManager = new WorldAttached<>($ -> new MaterialManager<>(this));
+	private final WorldAttached<MaterialManager<P>> worldAttachedMMs = new WorldAttached<>($ -> new MaterialManager<>(this));
 
 	private final Map<ShaderType, ResourceLocation> builtins = new EnumMap<>(ShaderType.class);
 	private final Map<ShaderType, String> builtinSources = new EnumMap<>(ShaderType.class);
@@ -71,7 +70,7 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 	}
 
 	public MaterialManager<P> getMaterialManager(IWorld world) {
-		return materialManager.get(world);
+		return worldAttachedMMs.get(world);
 	}
 
 	public WorldContext<P> withSpecStream(Supplier<Stream<ResourceLocation>> specStream) {
@@ -89,8 +88,6 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 
 	@Override
 	public void load() {
-		programs.values().forEach(IMultiProgram::delete);
-		programs.clear();
 
 		Backend.log.info("Loading context '{}'", name);
 
@@ -130,7 +127,7 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 	public void delete() {
 		super.delete();
 
-		materialManager.forEach(MaterialManager::delete);
+		worldAttachedMMs.empty(MaterialManager::delete);
 	}
 
 	@Override

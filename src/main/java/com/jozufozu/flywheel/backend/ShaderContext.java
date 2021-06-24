@@ -58,6 +58,7 @@ public abstract class ShaderContext<P extends GlProgram> implements IShaderConte
 	@Override
 	public void delete() {
 		programs.values().forEach(IMultiProgram::delete);
+		programs.clear();
 	}
 
 	/**

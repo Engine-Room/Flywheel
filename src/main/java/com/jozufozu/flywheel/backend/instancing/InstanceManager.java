@@ -37,7 +37,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		this.dynamicInstances = new Object2ObjectOpenHashMap<>();
 		this.tickableInstances = new Object2ObjectOpenHashMap<>();
 
-		materialManager.onOriginShift(this);
+		materialManager.addListener(this);
 	}
 
 	public void tick(double cameraX, double cameraY, double cameraZ) {

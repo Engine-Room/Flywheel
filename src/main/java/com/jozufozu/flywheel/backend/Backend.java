@@ -24,6 +24,8 @@ import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
+
 public class Backend {
 	public static final Logger log = LogManager.getLogger(Backend.class);
 
@@ -175,8 +177,14 @@ public class Backend {
 	/**
 	 * Used to avoid calling Flywheel functions on (fake) worlds that don't specifically support it.
 	 */
-	public static boolean isFlywheelWorld(IWorld world) {
-		return (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel()) || world == Minecraft.getInstance().world;
+	public static boolean isFlywheelWorld(@Nullable IWorld world) {
+		if (world == null)
+			return false;
+
+		if (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel())
+			return true;
+
+		return world == Minecraft.getInstance().world;
 	}
 
 	public static boolean isGameActive() {

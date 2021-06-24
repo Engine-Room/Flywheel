@@ -19,6 +19,15 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.event.ForgeEvents;
+
+import net.minecraft.client.Minecraft;
+
+import net.minecraft.client.world.ClientWorld;
+
+import net.minecraftforge.event.world.WorldEvent;
+
 import org.lwjgl.system.MemoryUtil;
 
 import com.google.common.collect.Lists;
@@ -89,9 +98,14 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 				}
 
 				Backend.log.info("Loaded all shader programs.");
- 
+
 				// no need to hog all that memory
 				shaderSource.clear();
+
+				ClientWorld world = Minecraft.getInstance().world;
+				if (Backend.isFlywheelWorld(world)) {
+					InstancedRenderDispatcher.loadAllInWorld(world);
+				}
 			}
 		}
 	}

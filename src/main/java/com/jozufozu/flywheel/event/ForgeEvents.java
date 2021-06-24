@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
-import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
-import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.world.ClientWorld;
@@ -42,15 +40,8 @@ public class ForgeEvents {
 		IWorld world = event.getWorld();
 
 		if (Backend.isFlywheelWorld(world)) {
-			ClientWorld clientWorld = (ClientWorld) world;
-
-			TileInstanceManager tiles = InstancedRenderDispatcher.getTiles(world);
-			tiles.invalidate();
-			clientWorld.loadedTileEntityList.forEach(tiles::add);
-
-			EntityInstanceManager entities = InstancedRenderDispatcher.getEntities(world);
-			entities.invalidate();
-			clientWorld.getAllEntities().forEach(entities::add);
+			InstancedRenderDispatcher.loadAllInWorld((ClientWorld) world);
 		}
 	}
+
 }
