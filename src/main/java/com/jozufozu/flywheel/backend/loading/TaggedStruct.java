@@ -10,13 +10,13 @@ import java.util.regex.Pattern;
 public class TaggedStruct {
 
 	// https://regexr.com/5t207
-	static final Pattern taggedStruct = Pattern.compile("#\\[(\\w*)]\\s*struct\\s+([\\w\\d]*)\\s*\\{([\\w\\d \\t#\\[\\](),;\\n]*)}\\s*;");
+	public static final Pattern taggedStruct = Pattern.compile("#\\[(\\w*)]\\s*struct\\s+([\\w\\d]*)\\s*\\{([\\w\\d \\t#\\[\\](),;\\n]*)}\\s*;");
 
-	int srcStart, srcEnd;
-	String source;
-	String tag;
-	String name;
-	String body;
+	public int srcStart, srcEnd;
+	public String source;
+	public String tag;
+	public String name;
+	public String body;
 
 	List<TaggedField> fields = new ArrayList<>(4);
 	Map<String, String> fields2Types = new HashMap<>();
