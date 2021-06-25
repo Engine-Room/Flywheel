@@ -1,3 +1,15 @@
+0.0.3:
+New
+ - Include the logo in the mod
+ - Prevent Minecraft from nuking the depth buffer on fabulous graphics
+ - Add some more debug information when shader compilation fails
+Fixes
+ - Fix startup crash with intel drivers
+ - Fix startup crash with optifine
+ - Fix crash on server start
+ - Fix "unknown custom packet identifier" errors
+ - Fix crash on resource reload
+
 0.0.2:
 New
  - Added /flywheel backend command to replace /create experimentalRendering
