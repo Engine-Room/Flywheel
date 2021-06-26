@@ -50,9 +50,6 @@ public class RenderHooksMixin {
 	@Inject(at = @At("TAIL"), method = "renderLayer")
 	private void renderLayer(RenderType type, MatrixStack stack, double camX, double camY, double camZ,
 							 CallbackInfo ci) {
-		if (!Backend.getInstance().available())
-			return;
-
 		Matrix4f view = stack.peek()
 				.getModel();
 		Matrix4f viewProjection = view.copy();
