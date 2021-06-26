@@ -11,7 +11,7 @@ public class StitchedSprite {
 
 	TextureAtlasSprite sprite;
 
-	public StitchedSprite(ResourceLocation loc) {
+	StitchedSprite(ResourceLocation loc) {
 		this.loc = loc;
 	}
 
@@ -27,5 +27,9 @@ public class StitchedSprite {
 		}
 
 		return sprite;
+	}
+
+	void reset() {
+		sprite = null;
 	}
 }
