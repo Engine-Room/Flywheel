@@ -33,6 +33,7 @@ public class AtlasStitcher {
 				.equals(PlayerContainer.BLOCK_ATLAS_TEXTURE))
 			return;
 
+		sprites.forEach(StitchedSprite::reset);
 		sprites.stream()
 				.map(StitchedSprite::getLoc)
 				.forEach(event::addSprite);
