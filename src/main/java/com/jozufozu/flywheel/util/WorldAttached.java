@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import net.minecraft.world.IWorld;
 
@@ -24,8 +23,7 @@ public class WorldAttached<T> {
 	@Nonnull
 	public T get(IWorld world) {
 		T t = attached.get(world);
-		if (t != null)
-			return t;
+		if (t != null) return t;
 		T entry = factory.apply(world);
 		put(world, entry);
 		return entry;

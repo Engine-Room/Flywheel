@@ -17,7 +17,8 @@ public class RenderWork {
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void onRenderWorldLast(RenderWorldLastEvent event) {
 		while (!runs.isEmpty()) {
-			runs.remove().run();
+			runs.remove()
+					.run();
 		}
 	}
 

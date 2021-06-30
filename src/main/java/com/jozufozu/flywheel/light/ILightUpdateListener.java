@@ -24,8 +24,7 @@ public interface ILightUpdateListener {
 	default boolean onLightPacket(IBlockDisplayReader world, int chunkX, int chunkZ) {
 		GridAlignedBB changedVolume = GridAlignedBB.from(chunkX, chunkZ);
 
-		if (onLightUpdate(world, LightType.BLOCK, changedVolume))
-			return true;
+		if (onLightUpdate(world, LightType.BLOCK, changedVolume)) return true;
 
 		return onLightUpdate(world, LightType.SKY, changedVolume);
 	}

@@ -35,13 +35,13 @@ public class GlFog {
 		int mode = getFogModeGlEnum();
 
 		switch (mode) {
-			case GL11.GL_EXP2:
-			case GL11.GL_EXP:
-				return WorldFog.EXP2;
-			case GL11.GL_LINEAR:
-				return WorldFog.LINEAR;
-			default:
-				throw new UnsupportedOperationException("Unknown fog mode: " + mode);
+		case GL11.GL_EXP2:
+		case GL11.GL_EXP:
+			return WorldFog.EXP2;
+		case GL11.GL_LINEAR:
+			return WorldFog.LINEAR;
+		default:
+			throw new UnsupportedOperationException("Unknown fog mode: " + mode);
 		}
 	}
 }

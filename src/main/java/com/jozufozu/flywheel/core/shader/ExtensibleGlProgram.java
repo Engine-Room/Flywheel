@@ -35,7 +35,8 @@ public class ExtensibleGlProgram extends GlProgram {
 				list.add(extension);
 			}
 			this.extensions = list;
-		} else {
+		}
+		else {
 			this.extensions = Collections.emptyList();
 		}
 	}
@@ -51,12 +52,12 @@ public class ExtensibleGlProgram extends GlProgram {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("program ")
-			   .append(name)
-			   .append('[');
+				.append(name)
+				.append('[');
 
 		for (IExtensionInstance extension : extensions) {
 			builder.append(extension)
-				   .append('+');
+					.append('+');
 		}
 
 		builder.append(']');

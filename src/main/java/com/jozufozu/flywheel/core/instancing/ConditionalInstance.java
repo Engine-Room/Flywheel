@@ -38,7 +38,8 @@ public class ConditionalInstance<D extends InstanceData> {
 		if (shouldShow && instance == null) {
 			instance = model.createInstance();
 			if (setupFunc != null) setupFunc.accept(instance);
-		} else if (!shouldShow && instance != null) {
+		}
+		else if (!shouldShow && instance != null) {
 			instance.delete();
 			instance = null;
 		}

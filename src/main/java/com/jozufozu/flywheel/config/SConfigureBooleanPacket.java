@@ -1,9 +1,9 @@
 package com.jozufozu.flywheel.config;
 
+import java.util.function.Supplier;
+
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
-
-import java.util.function.Supplier;
 
 /**
  * Thanks, @zelophed
@@ -29,8 +29,10 @@ public class SConfigureBooleanPacket {
 	}
 
 	public void execute(Supplier<NetworkEvent.Context> ctx) {
-		target.receiver.get().accept(directive);
-		ctx.get().setPacketHandled(true);
+		target.receiver.get()
+				.accept(directive);
+		ctx.get()
+				.setPacketHandled(true);
 	}
 
 }

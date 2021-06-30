@@ -33,7 +33,9 @@ public class InstancedArraysTemplate extends ProgramTemplate {
 	public void attachAttributes(Program builder) {
 		Shader shader = builder.attached.get(ShaderType.VERTEX);
 
-		shader.getTag(vertexData).addPrefixedAttributes(builder, vertexPrefix);
-		shader.getTag(instanceData).addPrefixedAttributes(builder, instancePrefix);
+		shader.getTag(vertexData)
+				.addPrefixedAttributes(builder, vertexPrefix);
+		shader.getTag(instanceData)
+				.addPrefixedAttributes(builder, instancePrefix);
 	}
 }

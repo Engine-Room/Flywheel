@@ -17,7 +17,8 @@ public class NormalDebugStateProvider implements IBooleanStateProvider {
 
 	@Override
 	public boolean isTrue() {
-		return FlwConfig.get().normalOverlayEnabled();
+		return FlwConfig.get()
+				.normalOverlayEnabled();
 	}
 
 	@Override

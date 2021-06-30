@@ -26,8 +26,8 @@ public class ShaderCloseMixin {
 		if (OptifineHandler.optifineInstalled() && screen instanceof VideoSettingsScreen) {
 			Screen old = this.currentScreen;
 			if (old != null && old.getClass()
-				.getName()
-				.startsWith(OptifineHandler.SHADER_PACKAGE)) {
+					.getName()
+					.startsWith(OptifineHandler.SHADER_PACKAGE)) {
 				OptifineHandler.refresh();
 			}
 		}

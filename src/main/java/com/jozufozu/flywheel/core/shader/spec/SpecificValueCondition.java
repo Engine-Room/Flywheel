@@ -8,10 +8,10 @@ import net.minecraft.util.ResourceLocation;
 
 public class SpecificValueCondition implements IContextCondition {
 
-	public static final Codec<SpecificValueCondition> CODEC = RecordCodecBuilder.create(condition -> condition.group(
-			IGameStateProvider.CODEC.fieldOf("provider").forGetter(SpecificValueCondition::contextProvider),
-			Codec.STRING.fieldOf("value").forGetter(SpecificValueCondition::getValue)
-	).apply(condition, SpecificValueCondition::new));
+	public static final Codec<SpecificValueCondition> CODEC = RecordCodecBuilder.create(condition -> condition.group(IGameStateProvider.CODEC.fieldOf("provider")
+																															 .forGetter(SpecificValueCondition::contextProvider), Codec.STRING.fieldOf("value")
+																															 .forGetter(SpecificValueCondition::getValue))
+			.apply(condition, SpecificValueCondition::new));
 
 	private final String required;
 	private final IGameStateProvider context;
@@ -37,6 +37,7 @@ public class SpecificValueCondition implements IContextCondition {
 
 	@Override
 	public boolean get() {
-		return required.equals(context.getValue().toString());
+		return required.equals(context.getValue()
+									   .toString());
 	}
 }

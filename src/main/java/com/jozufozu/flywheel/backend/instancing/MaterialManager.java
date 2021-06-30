@@ -42,7 +42,9 @@ public class MaterialManager<P extends WorldProgram> {
 		this.context = context;
 
 		this.atlasMaterials = new HashMap<>();
-		this.atlasRenderers = new ArrayList<>(Backend.getInstance().allMaterials().size());
+		this.atlasRenderers = new ArrayList<>(Backend.getInstance()
+													  .allMaterials()
+													  .size());
 
 		this.materials = new HashMap<>();
 		this.renderers = new HashMap<>();
@@ -90,8 +92,13 @@ public class MaterialManager<P extends WorldProgram> {
 	}
 
 	public void delete() {
-		atlasMaterials.values().forEach(InstanceMaterial::delete);
-		materials.values().stream().flatMap(m -> m.values().stream()).forEach(InstanceMaterial::delete);
+		atlasMaterials.values()
+				.forEach(InstanceMaterial::delete);
+		materials.values()
+				.stream()
+				.flatMap(m -> m.values()
+						.stream())
+				.forEach(InstanceMaterial::delete);
 
 		atlasMaterials.clear();
 		atlasRenderers.clear();
@@ -151,8 +158,13 @@ public class MaterialManager<P extends WorldProgram> {
 
 			originCoordinate = new BlockPos(cX, cY, cZ);
 
-			materials.values().stream().flatMap(m -> m.values().stream()).forEach(InstanceMaterial::clear);
-			atlasMaterials.values().forEach(InstanceMaterial::clear);
+			materials.values()
+					.stream()
+					.flatMap(m -> m.values()
+							.stream())
+					.forEach(InstanceMaterial::clear);
+			atlasMaterials.values()
+					.forEach(InstanceMaterial::clear);
 			listeners.forEach(OriginShiftListener::onOriginShift);
 		}
 	}

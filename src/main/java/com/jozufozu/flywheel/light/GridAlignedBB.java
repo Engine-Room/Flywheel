@@ -46,32 +46,17 @@ public class GridAlignedBB {
 	}
 
 	public static GridAlignedBB from(SectionPos pos) {
-		return new GridAlignedBB(pos.getWorldStartX(),
-				pos.getWorldStartY(),
-				pos.getWorldStartZ(),
-				pos.getWorldEndX() + 1,
-				pos.getWorldEndY() + 1,
-				pos.getWorldEndZ() + 1);
+		return new GridAlignedBB(pos.getWorldStartX(), pos.getWorldStartY(), pos.getWorldStartZ(), pos.getWorldEndX() + 1, pos.getWorldEndY() + 1, pos.getWorldEndZ() + 1);
 	}
 
 	public static GridAlignedBB from(BlockPos start, BlockPos end) {
-		return new GridAlignedBB(start.getX(),
-				start.getY(),
-				start.getZ(),
-				end.getX() + 1,
-				end.getY() + 1,
-				end.getZ() + 1);
+		return new GridAlignedBB(start.getX(), start.getY(), start.getZ(), end.getX() + 1, end.getY() + 1, end.getZ() + 1);
 	}
 
 	public static GridAlignedBB from(int sectionX, int sectionZ) {
 		int startX = sectionX << 4;
 		int startZ = sectionZ << 4;
-		return new GridAlignedBB(startX,
-				0,
-				startZ,
-				startX + 16,
-				256,
-				startZ + 16);
+		return new GridAlignedBB(startX, 0, startZ, startX + 16, 256, startZ + 16);
 	}
 
 	public static AxisAlignedBB toAABB(GridAlignedBB bb) {
@@ -83,12 +68,7 @@ public class GridAlignedBB {
 	}
 
 	public boolean sameAs(GridAlignedBB other) {
-		return minX == other.minX &&
-				minY == other.minY &&
-				minZ == other.minZ &&
-				maxX == other.maxX &&
-				maxY == other.maxY &&
-				maxZ == other.maxZ;
+		return minX == other.minX && minY == other.minY && minZ == other.minZ && maxX == other.maxX && maxY == other.maxY && maxZ == other.maxZ;
 	}
 
 	public void fixMinMax() {
@@ -125,9 +105,7 @@ public class GridAlignedBB {
 
 	public boolean empty() {
 		// if any dimension has side length 0 this box contains no volume
-		return minX == maxX ||
-				minY == maxY ||
-				minZ == maxZ;
+		return minX == maxX || minY == maxY || minZ == maxZ;
 	}
 
 	public void translate(Vector3i by) {
@@ -144,7 +122,8 @@ public class GridAlignedBB {
 	}
 
 	public void mirrorAbout(Direction.Axis axis) {
-		Vector3i axisVec = Direction.getFacingFromAxis(Direction.AxisDirection.POSITIVE, axis).getDirectionVec();
+		Vector3i axisVec = Direction.getFacingFromAxis(Direction.AxisDirection.POSITIVE, axis)
+				.getDirectionVec();
 		int flipX = axisVec.getX() - 1;
 		int flipY = axisVec.getY() - 1;
 		int flipZ = axisVec.getZ() - 1;
@@ -267,12 +246,7 @@ public class GridAlignedBB {
 	}
 
 	public boolean contains(GridAlignedBB other) {
-		return other.minX >= this.minX &&
-				other.maxX <= this.maxX &&
-				other.minY >= this.minY &&
-				other.maxY <= this.maxY &&
-				other.minZ >= this.minZ &&
-				other.maxZ <= this.maxZ;
+		return other.minX >= this.minX && other.maxX <= this.maxX && other.minY >= this.minY && other.maxY <= this.maxY && other.minZ >= this.minZ && other.maxZ <= this.maxZ;
 	}
 
 	public boolean isContainedBy(GridAlignedBB other) {

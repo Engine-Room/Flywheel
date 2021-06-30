@@ -82,18 +82,7 @@ public class OrientedData extends BasicData {
 	public void write(MappedBuffer buf) {
 		super.write(buf);
 
-		buf.putFloatArray(new float[]{
-				posX,
-				posY,
-				posZ,
-				pivotX,
-				pivotY,
-				pivotZ,
-				qX,
-				qY,
-				qZ,
-				qW
-		});
+		buf.putFloatArray(new float[]{posX, posY, posZ, pivotX, pivotY, pivotZ, qX, qY, qZ, qW});
 	}
 }
 

@@ -9,12 +9,9 @@ public class Formats {
 			.addAttributes(CommonAttributes.VEC3, CommonAttributes.NORMAL, CommonAttributes.UV)
 			.build();
 
-	public static final VertexFormat TRANSFORMED = litInstance()
-			.addAttributes(MatrixAttributes.MAT4,
-					MatrixAttributes.MAT3)
+	public static final VertexFormat TRANSFORMED = litInstance().addAttributes(MatrixAttributes.MAT4, MatrixAttributes.MAT3)
 			.build();
-	public static final VertexFormat ORIENTED = litInstance()
-			.addAttributes(CommonAttributes.VEC3, CommonAttributes.VEC3, CommonAttributes.QUATERNION)
+	public static final VertexFormat ORIENTED = litInstance().addAttributes(CommonAttributes.VEC3, CommonAttributes.VEC3, CommonAttributes.QUATERNION)
 			.build();
 
 	public static VertexFormat.Builder litInstance() {
