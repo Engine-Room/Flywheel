@@ -125,8 +125,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 					removeInternal(obj, instance);
 
 					createInternal(obj);
-				}
-				else {
+				} else {
 					instance.update();
 				}
 			}
@@ -177,11 +176,9 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 
 		if (instance != null) {
 			return instance;
-		}
-		else if (create && canCreateInstance(obj)) {
+		} else if (create && canCreateInstance(obj)) {
 			return createInternal(obj);
-		}
-		else {
+		} else {
 			return null;
 		}
 	}

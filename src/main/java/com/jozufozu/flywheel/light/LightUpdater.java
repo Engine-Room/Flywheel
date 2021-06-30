@@ -150,8 +150,7 @@ public class LightUpdater {
 		if (set == null) {
 			set = new LongRBTreeSet();
 			listeners.put(listener, set);
-		}
-		else {
+		} else {
 			set.forEach((LongConsumer) l -> {
 				WeakHashSet<ILightUpdateListener> listeningSections = lookup.get(l);
 

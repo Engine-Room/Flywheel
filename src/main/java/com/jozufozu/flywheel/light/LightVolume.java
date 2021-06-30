@@ -126,13 +126,11 @@ public class LightVolume {
 				sampleVolume = newSampleVolume;
 
 				copyLight(world, newArea);
-			}
-			else {
+			} else {
 				sampleVolume = newSampleVolume;
 				initialize(world);
 			}
-		}
-		else {
+		} else {
 			setSampleVolume(newSampleVolume);
 			int volume = textureVolume.volume();
 			if (volume * 2 > lightData.capacity()) {

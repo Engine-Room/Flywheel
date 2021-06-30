@@ -59,8 +59,7 @@ public class SourceFile {
 			if (blockEnd > blockStart) {
 				self = new StringSpan(this, matcher.start(), blockEnd + 1);
 				body = new StringSpan(this, blockStart, blockEnd);
-			}
-			else {
+			} else {
 				self = new ErrorSpan(this, matcher.start(), matcher.end());
 				body = new ErrorSpan(this, blockStart);
 			}
