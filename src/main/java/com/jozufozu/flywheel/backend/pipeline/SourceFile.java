@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.backend.ShaderSources;
 
+import com.jozufozu.flywheel.backend.pipeline.parse.ShaderFunction;
 import com.jozufozu.flywheel.backend.pipeline.span.ErrorSpan;
 import com.jozufozu.flywheel.backend.pipeline.span.Span;
 
@@ -48,8 +49,9 @@ public class SourceFile {
 		Matcher matcher = functionDeclaration.matcher(source);
 
 		while (matcher.find()) {
-			Span type = Span.fromMatcherGroup(this, matcher, 1);
-			Span name = Span.fromMatcherGroup(this, matcher, 2);
+			Span type = Span.fromMatcher(this, matcher, 1);
+			Span name = Span.fromMatcher(this, matcher, 2);
+			Span args = Span.fromMatcher(this, matcher, 3);
 
 			int blockStart = matcher.end();
 			int blockEnd = findEndOfBlock(blockStart);
@@ -57,16 +59,16 @@ public class SourceFile {
 			Span self;
 			Span body;
 			if (blockEnd > blockStart) {
-				self = new StringSpan(this, matcher.start(), blockEnd);
+				self = new StringSpan(this, matcher.start(), blockEnd + 1);
 				body = new StringSpan(this, blockStart, blockEnd);
 			} else {
 				self = new ErrorSpan(this, matcher.start(), matcher.end());
 				body = new ErrorSpan(this, blockStart);
 			}
 
-			ShaderFunction function = new ShaderFunction(self, type, name, body);
+			ShaderFunction function = new ShaderFunction(self, type, name, args, body);
 
-			functions.put(name.getValue(), function);
+			functions.put(name.get(), function);
 		}
 	}
 

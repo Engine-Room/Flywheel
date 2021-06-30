@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.backend.pipeline.SourceFile;
 import com.jozufozu.flywheel.event.ForgeEvents;
 
 import net.minecraft.client.Minecraft;
@@ -61,6 +62,7 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 	private static final Gson GSON = new GsonBuilder().create();
 
 	private final Map<ResourceLocation, String> shaderSource = new HashMap<>();
+	private final Map<ResourceLocation, SourceFile> shaderSources = new HashMap<>();
 
 	private boolean shouldCrash;
 	private final Backend backend;
@@ -161,11 +163,12 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 			try {
 				IResource resource = manager.getResource(location);
 
-				String file = readToString(resource.getInputStream());
+				String source = readToString(resource.getInputStream());
 
 				ResourceLocation name = ResourceUtil.removePrefixUnchecked(location, SHADER_DIR);
 
-				shaderSource.put(name, file);
+				shaderSource.put(name, source);
+				shaderSources.put(name, new SourceFile(this, name, source));
 			} catch (IOException e) {
 
 			}
