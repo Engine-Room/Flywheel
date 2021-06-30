@@ -16,8 +16,7 @@ public class CodecUtil {
 				.xmap(either -> either.map(l -> l, Collections::singletonList), list -> {
 					if (list.size() == 1) {
 						return Either.right(list.get(0));
-					}
-					else {
+					} else {
 						return Either.left(list);
 					}
 				});

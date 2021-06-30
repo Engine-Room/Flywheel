@@ -37,8 +37,7 @@ public class SelectInstance<D extends InstanceData> {
 				current.delete();
 				current = null;
 			}
-		}
-		else if (i != last) {
+		} else if (i != last) {
 			if (current != null) current.delete();
 
 			current = models.get(i)

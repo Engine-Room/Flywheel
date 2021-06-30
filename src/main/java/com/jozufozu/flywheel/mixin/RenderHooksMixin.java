@@ -55,7 +55,8 @@ public class RenderHooksMixin {
 												.getProjectionMatrix());
 
 		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(world, type, viewProjection, camX, camY, camZ));
-		GL20.glUseProgram(0);
+
+		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
 	}
 
 	@Inject(at = @At("TAIL"), method = "loadRenderers")
