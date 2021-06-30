@@ -45,8 +45,7 @@ public class OptifineHandler {
 
 		if (optifine == null) {
 			Backend.log.info("Optifine not detected.");
-		}
-		else {
+		} else {
 			Backend.log.info("Optifine detected.");
 
 			refresh();

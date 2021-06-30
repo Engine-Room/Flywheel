@@ -207,8 +207,7 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 
 			while (filechannel.read(bytebuffer) != -1) {
 			}
-		}
-		else {
+		} else {
 			bytebuffer = MemoryUtil.memAlloc(8192);
 			ReadableByteChannel readablebytechannel = Channels.newChannel(is);
 

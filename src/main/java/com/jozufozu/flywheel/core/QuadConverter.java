@@ -101,8 +101,7 @@ public class QuadConverter {
 		ByteBuffer indices;
 		if (bytes > stack.getSize()) {
 			indices = MemoryUtil.memAlloc(bytes); // not enough space on the preallocated stack
-		}
-		else {
+		} else {
 			stack.push();
 			indices = stack.malloc(bytes);
 		}
@@ -119,8 +118,7 @@ public class QuadConverter {
 
 		if (bytes > stack.getSize()) {
 			MemoryUtil.memFree(indices);
-		}
-		else {
+		} else {
 			stack.pop();
 		}
 

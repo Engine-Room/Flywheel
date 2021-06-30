@@ -201,19 +201,15 @@ public class BakedQuadWrapper {
 				int intOffset = FORMAT.getOffset(elementId) / Integer.BYTES;
 				if (element.getUsage() == VertexFormatElement.Usage.POSITION) {
 					position = intOffset;
-				}
-				else if (element.getUsage() == VertexFormatElement.Usage.COLOR) {
+				} else if (element.getUsage() == VertexFormatElement.Usage.COLOR) {
 					color = intOffset;
-				}
-				else if (element.getUsage() == VertexFormatElement.Usage.UV) {
+				} else if (element.getUsage() == VertexFormatElement.Usage.UV) {
 					if (element.getIndex() == 0) {
 						texture = intOffset;
-					}
-					else if (element.getIndex() == 2) {
+					} else if (element.getIndex() == 2) {
 						light = intOffset;
 					}
-				}
-				else if (element.getUsage() == VertexFormatElement.Usage.NORMAL) {
+				} else if (element.getUsage() == VertexFormatElement.Usage.NORMAL) {
 					normal = intOffset;
 				}
 			}
