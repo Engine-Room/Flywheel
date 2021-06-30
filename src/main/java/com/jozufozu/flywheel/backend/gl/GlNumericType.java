@@ -53,9 +53,11 @@ public enum GlNumericType {
 	public void castAndBuffer(ByteBuffer buf, int val) {
 		if (this == UBYTE || this == BYTE) {
 			buf.put((byte) val);
-		} else if (this == USHORT || this == SHORT) {
+		}
+		else if (this == USHORT || this == SHORT) {
 			buf.putShort((short) val);
-		} else if (this == UINT || this == INT) {
+		}
+		else if (this == UINT || this == INT) {
 			buf.putInt(val);
 		}
 	}

@@ -79,7 +79,10 @@ public class GlCompat {
 			throw new IllegalStateException("");
 		}
 
-		return Arrays.stream(constants).filter(it -> it.supported(caps)).findFirst().get();
+		return Arrays.stream(constants)
+				.filter(it -> it.supported(caps))
+				.findFirst()
+				.get();
 	}
 
 	/**

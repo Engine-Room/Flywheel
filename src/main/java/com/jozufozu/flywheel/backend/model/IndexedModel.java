@@ -25,7 +25,8 @@ public class IndexedModel extends BufferedModel {
 	}
 
 	public static IndexedModel fromSequentialQuads(VertexFormat modelFormat, ByteBuffer quads, int vertices) {
-		return new IndexedModel(modelFormat, quads, vertices, QuadConverter.getInstance().quads2Tris(vertices / 4));
+		return new IndexedModel(modelFormat, quads, vertices, QuadConverter.getInstance()
+				.quads2Tris(vertices / 4));
 	}
 
 	@Override

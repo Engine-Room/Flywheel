@@ -13,35 +13,26 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 public class ProgramState {
 
 	// TODO: Use Codec.dispatch
-	private static final Codec<IContextCondition> WHEN = Codec.either(
-			BooleanContextCondition.BOOLEAN_SUGAR,
-			SpecificValueCondition.CODEC
-			).flatXmap(
-					either -> either.map(DataResult::success, DataResult::success),
-					any -> {
-						if (any instanceof BooleanContextCondition) {
-							return DataResult.success(Either.left((BooleanContextCondition) any));
-						}
+	private static final Codec<IContextCondition> WHEN = Codec.either(BooleanContextCondition.BOOLEAN_SUGAR, SpecificValueCondition.CODEC)
+			.flatXmap(either -> either.map(DataResult::success, DataResult::success), any -> {
+				if (any instanceof BooleanContextCondition) {
+					return DataResult.success(Either.left((BooleanContextCondition) any));
+				}
 
-						if (any instanceof SpecificValueCondition) {
-							return DataResult.success(Either.right((SpecificValueCondition) any));
-						}
+				if (any instanceof SpecificValueCondition) {
+					return DataResult.success(Either.right((SpecificValueCondition) any));
+				}
 
-						return DataResult.error("unknown context condition");
-					}
-			);
+				return DataResult.error("unknown context condition");
+			});
 
-	public static final Codec<ProgramState> CODEC = RecordCodecBuilder.create(state ->
-			state.group(
-					WHEN.fieldOf("when")
-							.forGetter(ProgramState::getContext),
-					CodecUtil.oneOrMore(Codec.STRING)
-							.optionalFieldOf("define", Collections.emptyList())
-							.forGetter(ProgramState::getDefines),
-					CodecUtil.oneOrMore(IProgramExtension.CODEC)
-							.optionalFieldOf("extend", Collections.emptyList())
-							.forGetter(ProgramState::getExtensions)
-			).apply(state, ProgramState::new));
+	public static final Codec<ProgramState> CODEC = RecordCodecBuilder.create(state -> state.group(WHEN.fieldOf("when")
+																										   .forGetter(ProgramState::getContext), CodecUtil.oneOrMore(Codec.STRING)
+																										   .optionalFieldOf("define", Collections.emptyList())
+																										   .forGetter(ProgramState::getDefines), CodecUtil.oneOrMore(IProgramExtension.CODEC)
+																										   .optionalFieldOf("extend", Collections.emptyList())
+																										   .forGetter(ProgramState::getExtensions))
+			.apply(state, ProgramState::new));
 
 	private final IContextCondition context;
 	private final List<String> defines;

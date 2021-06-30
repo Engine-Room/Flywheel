@@ -102,8 +102,7 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 		}
 
 		template = templateFactory.create(backend.sources);
-		transformer = new ShaderTransformer()
-				.pushStage(this::injectBuiltins)
+		transformer = new ShaderTransformer().pushStage(this::injectBuiltins)
 				.pushStage(Shader::processIncludes)
 				.pushStage(template)
 				.pushStage(Shader::processIncludes);
@@ -150,8 +149,7 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 	public void injectBuiltins(Shader shader) {
 		Matcher matcher = builtinPattern.matcher(shader.getSource());
 
-		if (matcher.find())
-			shader.setSource(matcher.replaceFirst(builtinSources.get(shader.type)));
+		if (matcher.find()) shader.setSource(matcher.replaceFirst(builtinSources.get(shader.type)));
 		else
 			throw new ShaderLoadingException(String.format("%s is missing %s, cannot use in World Context", shader.type.name, declaration));
 	}

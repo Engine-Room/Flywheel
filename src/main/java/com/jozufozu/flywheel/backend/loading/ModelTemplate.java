@@ -30,6 +30,7 @@ public class ModelTemplate extends ProgramTemplate {
 	public void attachAttributes(Program builder) {
 		Shader shader = builder.attached.get(ShaderType.VERTEX);
 
-		shader.getTag(vertexData).addPrefixedAttributes(builder, vertexPrefix);
+		shader.getTag(vertexData)
+				.addPrefixedAttributes(builder, vertexPrefix);
 	}
 }

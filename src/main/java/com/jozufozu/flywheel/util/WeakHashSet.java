@@ -57,7 +57,7 @@ public class WeakHashSet<T> extends AbstractSet<T> {
 	@Override
 	public Iterator<T> iterator() {
 		return map.keySet()
-			.iterator();
+				.iterator();
 	}
 
 	@Override
@@ -88,13 +88,12 @@ public class WeakHashSet<T> extends AbstractSet<T> {
 	@Override
 	public Object[] toArray() {
 		return map.keySet()
-			.toArray();
+				.toArray();
 	}
 
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		return stream()
-			.allMatch(map::containsKey);
+		return stream().allMatch(map::containsKey);
 	}
 
 	@Override

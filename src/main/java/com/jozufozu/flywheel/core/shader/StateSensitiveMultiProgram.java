@@ -34,8 +34,8 @@ public class StateSensitiveMultiProgram<P extends GlProgram> implements IMultiPr
 	@Override
 	public P get() {
 		for (Pair<IContextCondition, P> variant : variants) {
-			if (variant.getFirst().get())
-				return variant.getSecond();
+			if (variant.getFirst()
+					.get()) return variant.getSecond();
 		}
 
 		return fallback;
@@ -44,7 +44,8 @@ public class StateSensitiveMultiProgram<P extends GlProgram> implements IMultiPr
 	@Override
 	public void delete() {
 		for (Pair<IContextCondition, P> variant : variants) {
-			variant.getSecond().delete();
+			variant.getSecond()
+					.delete();
 		}
 
 		fallback.delete();

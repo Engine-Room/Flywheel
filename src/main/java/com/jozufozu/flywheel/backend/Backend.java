@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.jozufozu.flywheel.config.FlwConfig;
+import javax.annotation.Nullable;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,6 +16,7 @@ import org.lwjgl.opengl.GLCapabilities;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.instancing.MaterialSpec;
+import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
 import net.minecraft.client.Minecraft;
@@ -23,8 +24,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-
-import javax.annotation.Nullable;
 
 public class Backend {
 	public static final Logger log = LogManager.getLogger(Backend.class);
@@ -111,7 +110,9 @@ public class Backend {
 		}
 		materialRegistry.put(name, spec);
 
-		log.debug("registered material '" + name + "' with vertex size " + spec.getModelFormat().getStride() + " and instance size " + spec.getInstanceFormat().getStride());
+		log.debug("registered material '" + name + "' with vertex size " + spec.getModelFormat()
+				.getStride() + " and instance size " + spec.getInstanceFormat()
+				.getStride());
 
 		return spec;
 	}
@@ -146,11 +147,10 @@ public class Backend {
 
 		compat = new GlCompat(capabilities);
 
-		instancedArrays = compat.vertexArrayObjectsSupported() &&
-				compat.drawInstancedSupported() &&
-				compat.instancedArraysSupported();
+		instancedArrays = compat.vertexArrayObjectsSupported() && compat.drawInstancedSupported() && compat.instancedArraysSupported();
 
-		enabled = FlwConfig.get().enabled() && !OptifineHandler.usingShaders();
+		enabled = FlwConfig.get()
+				.enabled() && !OptifineHandler.usingShaders();
 	}
 
 	public boolean canUseInstancing(World world) {
@@ -181,11 +181,9 @@ public class Backend {
 	 * Used to avoid calling Flywheel functions on (fake) worlds that don't specifically support it.
 	 */
 	public static boolean isFlywheelWorld(@Nullable IWorld world) {
-		if (world == null)
-			return false;
+		if (world == null) return false;
 
-		if (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel())
-			return true;
+		if (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel()) return true;
 
 		return world == Minecraft.getInstance().world;
 	}
@@ -198,5 +196,6 @@ public class Backend {
 		RenderWork.enqueue(Minecraft.getInstance().worldRenderer::loadRenderers);
 	}
 
-	public static void init() { }
+	public static void init() {
+	}
 }

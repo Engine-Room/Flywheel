@@ -55,7 +55,10 @@ public class InstanceMaterial<D extends InstanceData> {
 	}
 
 	public boolean nothingToRender() {
-		return models.size() > 0 && models.asMap().values().stream().allMatch(Instancer::empty);
+		return models.size() > 0 && models.asMap()
+				.values()
+				.stream()
+				.allMatch(Instancer::empty);
 	}
 
 	public void delete() {
@@ -66,11 +69,14 @@ public class InstanceMaterial<D extends InstanceData> {
 	 * Clear all instance data without freeing resources.
 	 */
 	public void clear() {
-		models.asMap().values().forEach(Instancer::clear);
+		models.asMap()
+				.values()
+				.forEach(Instancer::clear);
 	}
 
 	public void forEachInstancer(Consumer<Instancer<D>> f) {
-		for (Instancer<D> model : models.asMap().values()) {
+		for (Instancer<D> model : models.asMap()
+				.values()) {
 			f.accept(model);
 		}
 	}
@@ -84,8 +90,7 @@ public class InstanceMaterial<D extends InstanceData> {
 	}
 
 	public Instancer<D> getModel(PartialModel partial, BlockState referenceState, Direction dir, Supplier<MatrixStack> modelTransform) {
-		return get(Pair.of(dir, partial),
-				() -> buildModel(partial.get(), referenceState, modelTransform.get()));
+		return get(Pair.of(dir, partial), () -> buildModel(partial.get(), referenceState, modelTransform.get()));
 	}
 
 	public Instancer<D> getModel(BlockState toRender) {
@@ -102,7 +107,8 @@ public class InstanceMaterial<D extends InstanceData> {
 	}
 
 	private BufferedModel buildModel(BlockState renderedState) {
-		BlockRendererDispatcher dispatcher = Minecraft.getInstance().getBlockRendererDispatcher();
+		BlockRendererDispatcher dispatcher = Minecraft.getInstance()
+				.getBlockRendererDispatcher();
 		return buildModel(dispatcher.getModelForState(renderedState), renderedState);
 	}
 
@@ -153,16 +159,15 @@ public class InstanceMaterial<D extends InstanceData> {
 		BlockModelRenderer blockRenderer = dispatcher.getBlockModelRenderer();
 		BufferBuilder builder = new BufferBuilder(512);
 
-//		BakedQuadWrapper quadReader = new BakedQuadWrapper();
-//
-//		IModelData modelData = model.getModelData(mc.world, BlockPos.ZERO.up(255), referenceState, VirtualEmptyModelData.INSTANCE);
-//		List<BakedQuad> quads = Arrays.stream(dirs)
-//				.flatMap(dir -> model.getQuads(referenceState, dir, mc.world.rand, modelData).stream())
-//				.collect(Collectors.toList());
+		//		BakedQuadWrapper quadReader = new BakedQuadWrapper();
+		//
+		//		IModelData modelData = model.getModelData(mc.world, BlockPos.ZERO.up(255), referenceState, VirtualEmptyModelData.INSTANCE);
+		//		List<BakedQuad> quads = Arrays.stream(dirs)
+		//				.flatMap(dir -> model.getQuads(referenceState, dir, mc.world.rand, modelData).stream())
+		//				.collect(Collectors.toList());
 
 		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-		blockRenderer.renderModel(mc.world, model, referenceState, BlockPos.ZERO.up(255), ms, builder, true,
-				mc.world.rand, 42, OverlayTexture.DEFAULT_UV, VirtualEmptyModelData.INSTANCE);
+		blockRenderer.renderModel(mc.world, model, referenceState, BlockPos.ZERO.up(255), ms, builder, true, mc.world.rand, 42, OverlayTexture.DEFAULT_UV, VirtualEmptyModelData.INSTANCE);
 		builder.finishDrawing();
 		return builder;
 	}

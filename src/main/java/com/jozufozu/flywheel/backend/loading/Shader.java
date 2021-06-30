@@ -72,7 +72,9 @@ public class Shader {
 
 		if (matcher.find()) {
 			StringBuffer sourceWithDefines = new StringBuffer();
-			String lines = defines.stream().map(it -> "#define " + it).collect(Collectors.joining("\n"));
+			String lines = defines.stream()
+					.map(it -> "#define " + it)
+					.collect(Collectors.joining("\n"));
 
 			matcher.appendReplacement(sourceWithDefines, matcher.group() + '\n' + lines);
 
@@ -92,7 +94,8 @@ public class Shader {
 
 			structs.add(struct);
 
-			String replacement = decorator.matcher(struct.source).replaceFirst("");
+			String replacement = decorator.matcher(struct.source)
+					.replaceFirst("");
 			structMatcher.appendReplacement(strippedSrc, replacement);
 
 			tag2Struct.put(struct.tag, struct);
@@ -138,12 +141,14 @@ public class Shader {
 	public String printSource() {
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("Source for shader '").append(name).append("':\n");
+		builder.append("Source for shader '")
+				.append(name)
+				.append("':\n");
 		int i = 1;
 		for (String s : source.split("\n")) {
 			builder.append(String.format("%1$4s: ", i++))
-				   .append(s)
-				   .append('\n');
+					.append(s)
+					.append('\n');
 		}
 
 		return builder.toString();

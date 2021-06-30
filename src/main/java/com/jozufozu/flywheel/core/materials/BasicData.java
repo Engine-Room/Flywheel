@@ -44,7 +44,8 @@ public abstract class BasicData extends InstanceData implements IFlatLight<Basic
 		if (alpha) {
 			byte a = (byte) ((color >> 24) & 0xFF);
 			return setColor(r, g, b, a);
-		} else {
+		}
+		else {
 			return setColor(r, g, b);
 		}
 	}
