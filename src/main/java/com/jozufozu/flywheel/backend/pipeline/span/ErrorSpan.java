@@ -12,7 +12,17 @@ public class ErrorSpan extends Span {
 	}
 
 	@Override
-	public String getValue() {
+	public Span subSpan(int from, int to) {
+		return new ErrorSpan(in, start, end); // the sub-span of an error is an error in the same location
+	}
+
+	@Override
+	public String get() {
 		return "";
+	}
+
+	@Override
+	public boolean isErr() {
+		return true;
 	}
 }

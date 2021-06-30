@@ -9,7 +9,17 @@ public class StringSpan extends Span {
 	}
 
 	@Override
-	public String getValue() {
+	public Span subSpan(int from, int to) {
+		return new StringSpan(in, start + from, start + to);
+	}
+
+	@Override
+	public String get() {
 		return in.getSource().substring(start, end);
+	}
+
+	@Override
+	public boolean isErr() {
+		return false;
 	}
 }
