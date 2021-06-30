@@ -24,7 +24,7 @@ import net.minecraft.world.World;
 
 /**
  * The layer between a {@link TileEntity} and the Flywheel backend.
- **
+ * *
  * <br><br> There are a few additional features that overriding classes can opt in to:
  * <ul>
  *     <li>{@link IDynamicInstance}</li>
@@ -94,11 +94,7 @@ public abstract class EntityInstance<E extends Entity> implements IInstance {
 	public Vector3f getInstancePosition() {
 		Vector3d pos = entity.getPositionVec();
 		Vector3i origin = materialManager.getOriginCoordinate();
-		return new Vector3f(
-				(float) (pos.x - origin.getX()),
-				(float) (pos.y - origin.getY()),
-				(float) (pos.z - origin.getZ())
-		);
+		return new Vector3f((float) (pos.x - origin.getX()), (float) (pos.y - origin.getY()), (float) (pos.z - origin.getZ()));
 	}
 
 	@Override
@@ -119,7 +115,8 @@ public abstract class EntityInstance<E extends Entity> implements IInstance {
 	}
 
 	protected <L extends IFlatLight<?>> void relight(int block, int sky, Stream<L> models) {
-		models.forEach(model -> model.setBlockLight(block).setSkyLight(sky));
+		models.forEach(model -> model.setBlockLight(block)
+				.setSkyLight(sky));
 	}
 
 	protected InstanceMaterial<ModelData> getTransformMaterial() {

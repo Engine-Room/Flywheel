@@ -61,8 +61,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 				int dY = pos.getY() - cY;
 				int dZ = pos.getZ() - cZ;
 
-				if ((tick % getUpdateDivisor(dX, dY, dZ)) == 0)
-					instance.tick();
+				if ((tick % getUpdateDivisor(dX, dY, dZ)) == 0) instance.tick();
 			}
 		}
 
@@ -88,16 +87,18 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		int cZ = (int) info.getProjectedView().z;
 
 		if (dynamicInstances.size() > 0) {
-			dynamicInstances.object2ObjectEntrySet().fastForEach(e -> {
-				IDynamicInstance dyn = e.getValue();
-				if (!dyn.decreaseFramerateWithDistance() || shouldFrameUpdate(dyn.getWorldPosition(), lookX, lookY, lookZ, cX, cY, cZ))
-					dyn.beginFrame();
-			});
+			dynamicInstances.object2ObjectEntrySet()
+					.fastForEach(e -> {
+						IDynamicInstance dyn = e.getValue();
+						if (!dyn.decreaseFramerateWithDistance() || shouldFrameUpdate(dyn.getWorldPosition(), lookX, lookY, lookZ, cX, cY, cZ))
+							dyn.beginFrame();
+					});
 		}
 	}
 
 	public void add(T obj) {
-		if (!Backend.getInstance().canUseInstancing()) return;
+		if (!Backend.getInstance()
+				.canUseInstancing()) return;
 
 		if (obj instanceof IInstanceRendered) {
 			addInternal(obj);
@@ -105,13 +106,15 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 	}
 
 	public synchronized void queueAdd(T obj) {
-		if (!Backend.getInstance().canUseInstancing()) return;
+		if (!Backend.getInstance()
+				.canUseInstancing()) return;
 
 		queuedAdditions.add(obj);
 	}
 
 	public void update(T obj) {
-		if (!Backend.getInstance().canUseInstancing()) return;
+		if (!Backend.getInstance()
+				.canUseInstancing()) return;
 
 		if (obj instanceof IInstanceRendered) {
 			IInstance instance = getInstance(obj, false);
@@ -122,7 +125,8 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 					removeInternal(obj, instance);
 
 					createInternal(obj);
-				} else {
+				}
+				else {
 					instance.update();
 				}
 			}
@@ -130,29 +134,30 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 	}
 
 	public synchronized void queueUpdate(T obj) {
-		if (!Backend.getInstance().canUseInstancing()) return;
+		if (!Backend.getInstance()
+				.canUseInstancing()) return;
 
 		queuedUpdates.add(obj);
 	}
 
 	public void onLightUpdate(T obj) {
-		if (!Backend.getInstance().canUseInstancing()) return;
+		if (!Backend.getInstance()
+				.canUseInstancing()) return;
 
 		if (obj instanceof IInstanceRendered) {
 			IInstance instance = getInstance(obj, false);
 
-			if (instance != null)
-				instance.updateLight();
+			if (instance != null) instance.updateLight();
 		}
 	}
 
 	public void remove(T obj) {
-		if (!Backend.getInstance().canUseInstancing()) return;
+		if (!Backend.getInstance()
+				.canUseInstancing()) return;
 
 		if (obj instanceof IInstanceRendered) {
 			IInstance instance = getInstance(obj, false);
-			if (instance != null)
-				removeInternal(obj, instance);
+			if (instance != null) removeInternal(obj, instance);
 		}
 	}
 
@@ -165,15 +170,18 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 	@SuppressWarnings("unchecked")
 	@Nullable
 	protected <I extends T> IInstance getInstance(I obj, boolean create) {
-		if (!Backend.getInstance().canUseInstancing()) return null;
+		if (!Backend.getInstance()
+				.canUseInstancing()) return null;
 
 		IInstance instance = instances.get(obj);
 
 		if (instance != null) {
 			return instance;
-		} else if (create && canCreateInstance(obj)) {
+		}
+		else if (create && canCreateInstance(obj)) {
 			return createInternal(obj);
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
@@ -222,11 +230,9 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 			renderer.updateLight();
 			instances.put(obj, renderer);
 
-			if (renderer instanceof IDynamicInstance)
-				dynamicInstances.put(obj, (IDynamicInstance) renderer);
+			if (renderer instanceof IDynamicInstance) dynamicInstances.put(obj, (IDynamicInstance) renderer);
 
-			if (renderer instanceof ITickableInstance)
-				tickableInstances.put(obj, ((ITickableInstance) renderer));
+			if (renderer instanceof ITickableInstance) tickableInstances.put(obj, ((ITickableInstance) renderer));
 		}
 
 		return renderer;

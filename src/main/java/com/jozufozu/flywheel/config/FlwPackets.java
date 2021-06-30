@@ -14,15 +14,15 @@ public class FlwPackets {
 
 	public static void registerPackets() {
 		channel = NetworkRegistry.ChannelBuilder.named(CHANNEL_NAME)
-												.serverAcceptedVersions(NETWORK_VERSION::equals)
-												.clientAcceptedVersions(NETWORK_VERSION::equals)
-												.networkProtocolVersion(() -> NETWORK_VERSION)
-												.simpleChannel();
+				.serverAcceptedVersions(NETWORK_VERSION::equals)
+				.clientAcceptedVersions(NETWORK_VERSION::equals)
+				.networkProtocolVersion(() -> NETWORK_VERSION)
+				.simpleChannel();
 
 		channel.messageBuilder(SConfigureBooleanPacket.class, 0, NetworkDirection.PLAY_TO_CLIENT)
-			   .decoder(SConfigureBooleanPacket::new)
-			   .encoder(SConfigureBooleanPacket::encode)
-			   .consumer(SConfigureBooleanPacket::execute)
-			   .add();
+				.decoder(SConfigureBooleanPacket::new)
+				.encoder(SConfigureBooleanPacket::encode)
+				.consumer(SConfigureBooleanPacket::execute)
+				.add();
 	}
 }

@@ -12,16 +12,12 @@ import net.minecraft.util.ResourceLocation;
 public class ProgramSpec {
 
 	// TODO: Block model style inheritance?
-	public static final Codec<ProgramSpec> CODEC = RecordCodecBuilder.create(instance ->
-			instance.group(
-					ResourceLocation.CODEC.fieldOf("vert")
-							.forGetter(ProgramSpec::getVert),
-					ResourceLocation.CODEC.fieldOf("frag")
-							.forGetter(ProgramSpec::getFrag),
-					ProgramState.CODEC.listOf()
-							.optionalFieldOf("states", Collections.emptyList())
-							.forGetter(ProgramSpec::getStates)
-			).apply(instance, ProgramSpec::new));
+	public static final Codec<ProgramSpec> CODEC = RecordCodecBuilder.create(instance -> instance.group(ResourceLocation.CODEC.fieldOf("vert")
+																												.forGetter(ProgramSpec::getVert), ResourceLocation.CODEC.fieldOf("frag")
+																												.forGetter(ProgramSpec::getFrag), ProgramState.CODEC.listOf()
+																												.optionalFieldOf("states", Collections.emptyList())
+																												.forGetter(ProgramSpec::getStates))
+			.apply(instance, ProgramSpec::new));
 
 	public ResourceLocation name;
 	public final ResourceLocation vert;

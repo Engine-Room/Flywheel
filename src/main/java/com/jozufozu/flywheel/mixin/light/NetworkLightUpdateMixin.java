@@ -26,14 +26,13 @@ public class NetworkLightUpdateMixin {
 		RenderWork.enqueue(() -> {
 			ClientWorld world = Minecraft.getInstance().world;
 
-			if (world == null)
-				return;
+			if (world == null) return;
 
 			int chunkX = packet.getChunkX();
 			int chunkZ = packet.getChunkZ();
 
 			Chunk chunk = world.getChunkProvider()
-				.getChunk(chunkX, chunkZ, false);
+					.getChunk(chunkX, chunkZ, false);
 
 			if (chunk != null) {
 				chunk.getTileEntityMap()
@@ -46,7 +45,7 @@ public class NetworkLightUpdateMixin {
 			}
 
 			LightUpdater.getInstance()
-				.onLightPacket(world, chunkX, chunkZ);
+					.onLightPacket(world, chunkX, chunkZ);
 		});
 	}
 }

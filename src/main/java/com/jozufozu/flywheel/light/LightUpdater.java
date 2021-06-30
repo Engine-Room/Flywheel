@@ -27,8 +27,7 @@ public class LightUpdater {
 	private static LightUpdater instance;
 
 	public static LightUpdater getInstance() {
-		if (instance == null)
-			instance = new LightUpdater();
+		if (instance == null) instance = new LightUpdater();
 
 		return instance;
 	}
@@ -151,7 +150,8 @@ public class LightUpdater {
 		if (set == null) {
 			set = new LongRBTreeSet();
 			listeners.put(listener, set);
-		} else {
+		}
+		else {
 			set.forEach((LongConsumer) l -> {
 				WeakHashSet<ILightUpdateListener> listeningSections = lookup.get(l);
 

@@ -9,11 +9,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.backend.ShaderSources;
-
 import com.jozufozu.flywheel.backend.pipeline.parse.ShaderFunction;
 import com.jozufozu.flywheel.backend.pipeline.span.ErrorSpan;
 import com.jozufozu.flywheel.backend.pipeline.span.Span;
-
 import com.jozufozu.flywheel.backend.pipeline.span.StringSpan;
 
 import net.minecraft.util.ResourceLocation;
@@ -61,7 +59,8 @@ public class SourceFile {
 			if (blockEnd > blockStart) {
 				self = new StringSpan(this, matcher.start(), blockEnd + 1);
 				body = new StringSpan(this, blockStart, blockEnd);
-			} else {
+			}
+			else {
 				self = new ErrorSpan(this, matcher.start(), matcher.end());
 				body = new ErrorSpan(this, blockStart);
 			}
@@ -73,7 +72,8 @@ public class SourceFile {
 	}
 
 	private int findEndOfBlock(int end) {
-		char[] rest = source.substring(end).toCharArray();
+		char[] rest = source.substring(end)
+				.toCharArray();
 
 		int blockDepth = 0;
 		for (int i = 0; i < rest.length; i++) {
@@ -93,12 +93,14 @@ public class SourceFile {
 	public String printSource() {
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("Source for shader '").append(name).append("':\n");
+		builder.append("Source for shader '")
+				.append(name)
+				.append("':\n");
 		int i = 1;
 		for (String s : source.split("\n")) {
 			builder.append(String.format("%1$4s: ", i++))
-				   .append(s)
-				   .append('\n');
+					.append(s)
+					.append('\n');
 		}
 
 		return builder.toString();

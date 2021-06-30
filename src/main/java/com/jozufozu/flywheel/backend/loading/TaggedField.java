@@ -40,9 +40,6 @@ public class TaggedField {
 
 	@Override
 	public String toString() {
-		return "TaggedField{" +
-				"name='" + name + '\'' +
-				", type='" + type + '\'' +
-				'}';
+		return "TaggedField{" + "name='" + name + '\'' + ", type='" + type + '\'' + '}';
 	}
 }

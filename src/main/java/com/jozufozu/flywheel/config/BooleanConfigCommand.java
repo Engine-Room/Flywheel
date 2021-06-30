@@ -22,28 +22,24 @@ public class BooleanConfigCommand {
 	public ArgumentBuilder<CommandSource, ?> register() {
 		return Commands.literal(name)
 				.executes(context -> {
-					ServerPlayerEntity player = context.getSource().asPlayer();
-					FlwPackets.channel.send(
-							PacketDistributor.PLAYER.with(() -> player),
-							new SConfigureBooleanPacket(value, BooleanDirective.DISPLAY)
-					);
+					ServerPlayerEntity player = context.getSource()
+							.asPlayer();
+					FlwPackets.channel.send(PacketDistributor.PLAYER.with(() -> player), new SConfigureBooleanPacket(value, BooleanDirective.DISPLAY));
 					return Command.SINGLE_SUCCESS;
 				})
-				.then(Commands.literal("on").executes(context -> {
-					ServerPlayerEntity player = context.getSource().asPlayer();
-					FlwPackets.channel.send(
-							PacketDistributor.PLAYER.with(() -> player),
-							new SConfigureBooleanPacket(value, BooleanDirective.TRUE)
-					);
-					return Command.SINGLE_SUCCESS;
-				}))
-				.then(Commands.literal("off").executes(context -> {
-					ServerPlayerEntity player = context.getSource().asPlayer();
-					FlwPackets.channel.send(
-							PacketDistributor.PLAYER.with(() -> player),
-							new SConfigureBooleanPacket(value, BooleanDirective.FALSE)
-					);
-					return Command.SINGLE_SUCCESS;
-				}));
+				.then(Commands.literal("on")
+							  .executes(context -> {
+								  ServerPlayerEntity player = context.getSource()
+										  .asPlayer();
+								  FlwPackets.channel.send(PacketDistributor.PLAYER.with(() -> player), new SConfigureBooleanPacket(value, BooleanDirective.TRUE));
+								  return Command.SINGLE_SUCCESS;
+							  }))
+				.then(Commands.literal("off")
+							  .executes(context -> {
+								  ServerPlayerEntity player = context.getSource()
+										  .asPlayer();
+								  FlwPackets.channel.send(PacketDistributor.PLAYER.with(() -> player), new SConfigureBooleanPacket(value, BooleanDirective.FALSE));
+								  return Command.SINGLE_SUCCESS;
+							  }));
 	}
 }

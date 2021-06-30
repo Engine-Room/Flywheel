@@ -1,9 +1,9 @@
 package com.jozufozu.flywheel.backend.pipeline.parse;
 
-import com.jozufozu.flywheel.backend.loading.LayoutTag;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.jozufozu.flywheel.backend.loading.LayoutTag;
 
 public class StructField {
 	public static final Pattern fieldPattern = Pattern.compile("(\\S+)\\s*(\\S+);");
@@ -27,9 +27,6 @@ public class StructField {
 
 	@Override
 	public String toString() {
-		return "TaggedField{" +
-				"name='" + name + '\'' +
-				", type='" + type + '\'' +
-				'}';
+		return "TaggedField{" + "name='" + name + '\'' + ", type='" + type + '\'' + '}';
 	}
 }
