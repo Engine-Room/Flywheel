@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.backend.pipeline.span;
 
-import com.jozufozu.flywheel.backend.pipeline.SourceFile;
-
 import java.util.regex.Matcher;
+
+import com.jozufozu.flywheel.backend.pipeline.SourceFile;
 
 /**
  * A span of code in a {@link SourceFile}.

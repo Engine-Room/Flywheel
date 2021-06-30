@@ -9,7 +9,8 @@ public class ResourceUtil {
 	}
 
 	public static ResourceLocation removePrefixUnchecked(ResourceLocation full, String root) {
-		return new ResourceLocation(full.getNamespace(), full.getPath().substring(root.length()));
+		return new ResourceLocation(full.getNamespace(), full.getPath()
+				.substring(root.length()));
 	}
 
 	public static ResourceLocation trim(ResourceLocation loc, String prefix, String suffix) {

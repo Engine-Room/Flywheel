@@ -27,13 +27,13 @@ public class BufferBuilderReader {
 		size = vertexCount * formatSize;
 
 		// TODO: adjust the getters based on the input format
-//		ImmutableList<VertexFormatElement> elements = vertexFormat.getElements();
-//		for (int i = 0, size = elements.size(); i < size; i++) {
-//			VertexFormatElement element = elements.get(i);
-//			int offset = vertexFormat.getOffset(i);
-//
-//			element.getUsage()
-//		}
+		//		ImmutableList<VertexFormatElement> elements = vertexFormat.getElements();
+		//		for (int i = 0, size = elements.size(); i < size; i++) {
+		//			VertexFormatElement element = elements.get(i);
+		//			int offset = vertexFormat.getOffset(i);
+		//
+		//			element.getUsage()
+		//		}
 	}
 
 	public boolean isEmpty() {

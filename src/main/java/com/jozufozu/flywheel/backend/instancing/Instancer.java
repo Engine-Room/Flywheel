@@ -65,8 +65,7 @@ public class Instancer<D extends InstanceData> {
 		vao.bind();
 		renderSetup();
 
-		if (glInstanceCount > 0)
-			model.drawInstances(glInstanceCount);
+		if (glInstanceCount > 0) model.drawInstances(glInstanceCount);
 
 		vao.unbind();
 	}
@@ -160,12 +159,13 @@ public class Instancer<D extends InstanceData> {
 		if (length > 0) {
 			MappedBuffer mapped = instanceVBO.getBuffer(offset, length);
 
-			dirtySet.stream().forEach(i -> {
-				final D d = data.get(i);
+			dirtySet.stream()
+					.forEach(i -> {
+						final D d = data.get(i);
 
-				mapped.position(i * stride);
-				d.write(mapped);
-			});
+						mapped.position(i * stride);
+						d.write(mapped);
+					});
 			mapped.flush();
 		}
 	}
@@ -236,7 +236,8 @@ public class Instancer<D extends InstanceData> {
 
 		anyToUpdate = true;
 
-		data.subList(newSize, oldSize).clear();
+		data.subList(newSize, oldSize)
+				.clear();
 
 	}
 

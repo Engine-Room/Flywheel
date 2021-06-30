@@ -10,8 +10,7 @@ public class AngleHelper {
 	 */
 	public static float horizontalAngle(Direction facing) {
 		float angle = facing.getHorizontalAngle();
-		if (facing.getAxis() == Axis.X)
-			angle = -angle;
+		if (facing.getAxis() == Axis.X) angle = -angle;
 		return angle;
 	}
 
@@ -19,12 +18,12 @@ public class AngleHelper {
 	 * Same as {@link #horizontalAngle(Direction)}, but returns 0 instead of -90 for vertical directions.
 	 */
 	public static float horizontalAngleNew(Direction facing) {
-		if (facing.getAxis().isVertical()) {
+		if (facing.getAxis()
+				.isVertical()) {
 			return 0;
 		}
 		float angle = facing.getHorizontalAngle();
-		if (facing.getAxis() == Axis.X)
-			angle = -angle;
+		if (facing.getAxis() == Axis.X) angle = -angle;
 		return angle;
 	}
 
@@ -33,14 +32,12 @@ public class AngleHelper {
 	}
 
 	public static float rad(double angle) {
-		if (angle == 0)
-			return 0;
+		if (angle == 0) return 0;
 		return (float) (angle / 180 * Math.PI);
 	}
 
 	public static float deg(double angle) {
-		if (angle == 0)
-			return 0;
+		if (angle == 0) return 0;
 		return (float) (angle * 180 / Math.PI);
 	}
 

@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.core;
 
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.MaterialSpec;
 import com.jozufozu.flywheel.core.materials.ModelData;
 import com.jozufozu.flywheel.core.materials.OrientedData;
@@ -16,8 +15,10 @@ public class Materials {
 	public static final MaterialSpec<ModelData> TRANSFORMED = new MaterialSpec<>(Locations.MODEL, Programs.TRANSFORMED, Formats.UNLIT_MODEL, Formats.TRANSFORMED, ModelData::new);
 
 	public static void flwInit(GatherContextEvent event) {
-		event.getBackend().register(ORIENTED);
-		event.getBackend().register(TRANSFORMED);
+		event.getBackend()
+				.register(ORIENTED);
+		event.getBackend()
+				.register(TRANSFORMED);
 	}
 
 	public static class Locations {

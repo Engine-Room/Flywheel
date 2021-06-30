@@ -1,12 +1,12 @@
 package com.jozufozu.flywheel.backend.pipeline.parse;
 
-import com.jozufozu.flywheel.backend.pipeline.span.Span;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import com.jozufozu.flywheel.backend.pipeline.span.Span;
 
 public class ShaderFunction {
 
@@ -55,9 +55,9 @@ public class ShaderFunction {
 	public String toString() {
 
 		String p = parameters.stream()
-							 .map(Variable::getType)
-							 .map(Span::get)
-							 .collect(Collectors.joining(","));
+				.map(Variable::getType)
+				.map(Span::get)
+				.collect(Collectors.joining(","));
 
 		return name + "(" + p + ")";
 	}

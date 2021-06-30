@@ -19,7 +19,8 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 
 	@Override
 	protected IInstance createRaw(Entity obj) {
-		return InstancedRenderRegistry.getInstance().create(materialManager, obj);
+		return InstancedRenderRegistry.getInstance()
+				.create(materialManager, obj);
 	}
 
 	@Override

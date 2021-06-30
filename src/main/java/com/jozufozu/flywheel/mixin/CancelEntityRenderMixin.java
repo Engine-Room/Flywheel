@@ -24,7 +24,8 @@ public class CancelEntityRenderMixin {
 	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getAllEntities()Ljava/lang/Iterable;"))
 	private Iterable<Entity> filterEntities(ClientWorld world) {
 		Iterable<Entity> entities = world.getAllEntities();
-		if (Backend.getInstance().canUseInstancing()) {
+		if (Backend.getInstance()
+				.canUseInstancing()) {
 
 			ArrayList<Entity> filtered = Lists.newArrayList(entities);
 			filtered.removeIf(entity -> entity instanceof IInstanceRendered && !((IInstanceRendered) entity).shouldRenderNormally());
@@ -37,7 +38,8 @@ public class CancelEntityRenderMixin {
 	@Group(name = "entityFilter")
 	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ClassInheritanceMultiMap;iterator()Ljava/util/Iterator;"))
 	private Iterator<Entity> filterEntitiesOF(ClassInheritanceMultiMap<Entity> classInheritanceMultiMap) {
-		if (Backend.getInstance().canUseInstancing()) {
+		if (Backend.getInstance()
+				.canUseInstancing()) {
 
 			ArrayList<Entity> filtered = Lists.newArrayList(classInheritanceMultiMap);
 			filtered.removeIf(entity -> entity instanceof IInstanceRendered && !((IInstanceRendered) entity).shouldRenderNormally());

@@ -13,8 +13,6 @@ import com.jozufozu.flywheel.event.GatherContextEvent;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
 @OnlyIn(Dist.CLIENT)
 public class Contexts {
@@ -31,15 +29,13 @@ public class Contexts {
 		SpecMetaRegistry.register(WorldFog.LINEAR);
 		SpecMetaRegistry.register(WorldFog.EXP2);
 
-		CRUMBLING = backend.register(new WorldContext<>(backend, CrumblingProgram::new)
-				.withName(Names.CRUMBLING)
-				.withBuiltin(ShaderType.FRAGMENT, Names.CRUMBLING, "/builtin.frag")
-				.withBuiltin(ShaderType.VERTEX, Names.CRUMBLING, "/builtin.vert"));
+		CRUMBLING = backend.register(new WorldContext<>(backend, CrumblingProgram::new).withName(Names.CRUMBLING)
+											 .withBuiltin(ShaderType.FRAGMENT, Names.CRUMBLING, "/builtin.frag")
+											 .withBuiltin(ShaderType.VERTEX, Names.CRUMBLING, "/builtin.vert"));
 
-		WORLD = backend.register(new WorldContext<>(backend, WorldProgram::new)
-				.withName(Names.WORLD)
-				.withBuiltin(ShaderType.FRAGMENT, Names.WORLD, "/builtin.frag")
-				.withBuiltin(ShaderType.VERTEX, Names.WORLD, "/builtin.vert"));
+		WORLD = backend.register(new WorldContext<>(backend, WorldProgram::new).withName(Names.WORLD)
+										 .withBuiltin(ShaderType.FRAGMENT, Names.WORLD, "/builtin.frag")
+										 .withBuiltin(ShaderType.VERTEX, Names.WORLD, "/builtin.vert"));
 	}
 
 	public static class Names {

@@ -117,7 +117,8 @@ public abstract class TileEntityInstance<T extends TileEntity> implements IInsta
 	}
 
 	protected <L extends IFlatLight<?>> void relight(int block, int sky, Stream<L> models) {
-		models.forEach(model -> model.setBlockLight(block).setSkyLight(sky));
+		models.forEach(model -> model.setBlockLight(block)
+				.setSkyLight(sky));
 	}
 
 	protected InstanceMaterial<ModelData> getTransformMaterial() {

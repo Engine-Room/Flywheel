@@ -9,7 +9,8 @@ public class UnitExtensionInstance implements IExtensionInstance {
 
 	public static final ResourceLocation NAME = new ResourceLocation(Flywheel.ID, "unit");
 
-	public UnitExtensionInstance(GlProgram program) { }
+	public UnitExtensionInstance(GlProgram program) {
+	}
 
 	@Override
 	public void bind() {

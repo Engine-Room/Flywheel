@@ -46,7 +46,8 @@ public class GroupInstance<D extends InstanceData> extends AbstractCollection<D>
 			for (int i = size; i < count; i++) {
 				addInstance();
 			}
-		} else {
+		}
+		else {
 			List<D> unnecessary = backing.subList(count, size);
 			unnecessary.forEach(InstanceData::delete);
 			unnecessary.clear();

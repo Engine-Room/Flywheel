@@ -1,5 +1,8 @@
 package com.jozufozu.flywheel.config;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.OptifineHandler;
 
@@ -11,9 +14,6 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public enum BooleanConfig {
 	ENGINE(() -> BooleanConfig::enabled),
