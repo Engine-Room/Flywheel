@@ -35,8 +35,7 @@ public class ExtensibleGlProgram extends GlProgram {
 				list.add(extension);
 			}
 			this.extensions = list;
-		}
-		else {
+		} else {
 			this.extensions = Collections.emptyList();
 		}
 	}

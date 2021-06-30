@@ -29,8 +29,7 @@ public class ForgeEvents {
 			if (right.size() < 10) {
 				right.add("");
 				right.add(text);
-			}
-			else {
+			} else {
 				right.add(9, "");
 				right.add(10, text);
 			}

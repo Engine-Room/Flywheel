@@ -16,8 +16,7 @@ public class AnimationTickHolder {
 		if (!Minecraft.getInstance()
 				.isGamePaused()) {
 			ticks = (ticks + 1) % 1_728_000; // wrap around every 24 hours so we maintain enough floating point precision
-		}
-		else {
+		} else {
 			paused_ticks = (paused_ticks + 1) % 1_728_000;
 		}
 	}

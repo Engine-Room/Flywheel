@@ -47,8 +47,7 @@ public class ShaderTemplate {
 
 			if (struct != null) {
 				s = s.replace(name, struct.name);
-			}
-			else {
+			} else {
 				missing.add(name);
 			}
 		}
