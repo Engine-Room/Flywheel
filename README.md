@@ -35,7 +35,7 @@ breaking changes, and I make no guarantees of backwards compatibility.
 
 ### Getting Started (For Developers)
 
-Add the following repo to your `build.gradle`:
+Add the following repo and dependency to your `build.gradle`:
 
 ```groovy
 repositories {
@@ -44,12 +44,18 @@ repositories {
         url "https://maven.tterrag.com/"
     }
 }
-```
 
-Then add Flywheel as a dependency:
-
-```groovy
 dependencies {
-    implementation fg.deobf("com.jozufozu.flywheel:Flywheel:1.16-0.0.2.9")
+    implementation fg.deobf("com.jozufozu.flywheel:Flywheel:${flywheel_version}")
 }
 ```
+`${flywheel_version}` gets replaced by the version of Flywheel you want to use, eg. `0.0.3.18`
+
+For a list of available Flywheel versions, you can check [the maven](https://maven.tterrag.com/com/jozufozu/flywheel/Flywheel/).
+
+If you aren't using mixed mappings (or just want to be safe), add the following properties to your run configurations:
+```groovy
+property 'mixin.env.remapRefMap', 'true'
+property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+```
+This ensures that Flywheel's mixins get properly loaded in your dev env.

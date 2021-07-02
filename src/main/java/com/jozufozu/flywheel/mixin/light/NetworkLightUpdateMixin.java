@@ -8,13 +8,16 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.backend.RenderWork;
+import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.light.LightUpdater;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 import net.minecraft.network.play.server.SUpdateLightPacket;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.world.chunk.Chunk;
 
@@ -35,13 +38,16 @@ public class NetworkLightUpdateMixin {
 					.getChunk(chunkX, chunkZ, false);
 
 			if (chunk != null) {
+				InstanceManager<TileEntity> tiles = InstancedRenderDispatcher.getTiles(world);
+				InstanceManager<Entity> entities = InstancedRenderDispatcher.getEntities(world);
+
 				chunk.getTileEntityMap()
 						.values()
-						.forEach(InstancedRenderDispatcher.getTiles(world)::onLightUpdate);
+						.forEach(tiles::onLightUpdate);
 
 				Arrays.stream(chunk.getEntityLists())
 						.flatMap(ClassInheritanceMultiMap::stream)
-						.forEach(InstancedRenderDispatcher.getEntities(world)::onLightUpdate);
+						.forEach(entities::onLightUpdate);
 			}
 
 			LightUpdater.getInstance()

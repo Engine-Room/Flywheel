@@ -41,6 +41,7 @@ minecraft {
 
             property 'forge.logging.markers', ''
             property 'forge.logging.console.level', 'debug'
+            property 'fml.earlyprogresswindow', 'false'
 
             arg "-mixin.config=flywheel.mixins.json"
 
