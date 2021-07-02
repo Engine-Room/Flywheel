@@ -133,10 +133,12 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 		}
 	}
 
+	@Deprecated
 	public void notifyError() {
 		shouldCrash = true;
 	}
 
+	@Deprecated
 	@Nonnull
 	public String getShaderSource(ResourceLocation loc) {
 		String source = shaderSource.get(loc);
@@ -172,12 +174,19 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 		}
 	}
 
+	@Deprecated
 	public Shader source(ResourceLocation name, ShaderType type) {
 		return new Shader(this, type, name, getShaderSource(name));
 	}
 
-	public static Stream<String> lines(String s) {
-		return new BufferedReader(new StringReader(s)).lines();
+	public SourceFile source(ResourceLocation name) {
+		SourceFile source = shaderSources.get(name);
+
+		if (source == null) {
+			throw new ShaderLoadingException(String.format("shader '%s' does not exist", name));
+		}
+
+		return source;
 	}
 
 	public String readToString(InputStream is) {

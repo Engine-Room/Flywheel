@@ -2,12 +2,17 @@ package com.jozufozu.flywheel.backend.pipeline;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.backend.ShaderSources;
 import com.jozufozu.flywheel.backend.pipeline.parse.ShaderFunction;
 import com.jozufozu.flywheel.backend.pipeline.span.ErrorSpan;
@@ -27,24 +32,62 @@ public class SourceFile {
 
 	public final ResourceLocation name;
 	private final String source;
-	private final ShaderSources loader;
+	private final ShaderSources parent;
 
-	private final Map<String, ShaderFunction> functions = new HashMap<>();
+	// function name -> function object
+	private final ImmutableMap<String, ShaderFunction> functions;
+	private final ImmutableList<ResourceLocation> includes;
 
-	public SourceFile(ShaderSources loader, ResourceLocation name, String source) {
-		this.loader = loader;
+	// Sections of the source that must be trimmed for compilation.
+	private final List<Span> elisions = new ArrayList<>();
+
+	public SourceFile(ShaderSources parent, ResourceLocation name, String source) {
+		this.parent = parent;
 		this.name = name;
 		this.source = source;
 
-		parseFunctions();
+		functions = parseFunctions();
+		includes = parseIncludes();
 	}
 
 	public String getSource() {
 		return source;
 	}
 
-	protected void parseFunctions() {
+	public ShaderSources getParent() {
+		return parent;
+	}
+
+	public ImmutableMap<String, ShaderFunction> getFunctions() {
+		return functions;
+	}
+
+	public ImmutableList<ResourceLocation> getIncludes() {
+		return includes;
+	}
+
+	private ImmutableList<ResourceLocation> parseIncludes() {
+		Matcher uses = includePattern.matcher(source);
+
+		List<ResourceLocation> includes = new ArrayList<>();
+
+		while (uses.find()) {
+			Span use = Span.fromMatcher(this, uses);
+
+			elisions.add(use); // we have to trim that later
+
+			ResourceLocation loc = new ResourceLocation(uses.group(1)); // TODO: error gracefully
+
+			includes.add(loc);
+		}
+
+		return ImmutableList.copyOf(includes);
+	}
+
+	private ImmutableMap<String, ShaderFunction> parseFunctions() {
 		Matcher matcher = functionDeclaration.matcher(source);
+
+		Map<String, ShaderFunction> functions = new HashMap<>();
 
 		while (matcher.find()) {
 			Span type = Span.fromMatcher(this, matcher, 1);
@@ -68,6 +111,8 @@ public class SourceFile {
 
 			functions.put(name.get(), function);
 		}
+
+		return ImmutableMap.copyOf(functions);
 	}
 
 	private int findEndOfBlock(int end) {

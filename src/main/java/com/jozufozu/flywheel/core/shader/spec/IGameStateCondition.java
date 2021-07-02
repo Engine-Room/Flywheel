@@ -4,11 +4,11 @@ import com.jozufozu.flywheel.core.shader.gamestate.IGameStateProvider;
 
 import net.minecraft.util.ResourceLocation;
 
-public interface IContextCondition {
+public interface IGameStateCondition {
 
 	ResourceLocation getID();
 
-	IGameStateProvider contextProvider();
+	IGameStateProvider getStateProvider();
 
-	boolean get();
+	boolean isMet();
 }
