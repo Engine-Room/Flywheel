@@ -50,8 +50,8 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class InstancedRenderDispatcher {
 
-	private static final WorldAttached<EntityInstanceManager> entityInstanceManager = new WorldAttached<>(world -> new EntityInstanceManager(Contexts.WORLD.getMaterialManager(world)));
-	private static final WorldAttached<TileInstanceManager> tileInstanceManager = new WorldAttached<>(world -> new TileInstanceManager(Contexts.WORLD.getMaterialManager(world)));
+	private static final WorldAttached<InstanceManager<Entity>> entityInstanceManager = new WorldAttached<>(world -> new EntityInstanceManager(Contexts.WORLD.getMaterialManager(world)));
+	private static final WorldAttached<InstanceManager<TileEntity>> tileInstanceManager = new WorldAttached<>(world -> new TileInstanceManager(Contexts.WORLD.getMaterialManager(world)));
 
 	private static final LazyValue<Vector<CrumblingInstanceManager>> blockBreaking = new LazyValue<>(() -> {
 		Vector<CrumblingInstanceManager> renderers = new Vector<>(10);
@@ -62,12 +62,12 @@ public class InstancedRenderDispatcher {
 	});
 
 	@Nonnull
-	public static TileInstanceManager getTiles(IWorld world) {
+	public static InstanceManager<TileEntity> getTiles(IWorld world) {
 		return tileInstanceManager.get(world);
 	}
 
 	@Nonnull
-	public static EntityInstanceManager getEntities(IWorld world) {
+	public static InstanceManager<Entity> getEntities(IWorld world) {
 		return entityInstanceManager.get(world);
 	}
 
@@ -190,10 +190,10 @@ public class InstancedRenderDispatcher {
 		Contexts.WORLD.getMaterialManager(world)
 				.delete();
 
-		TileInstanceManager tiles = tileInstanceManager.replace(world);
+		InstanceManager<TileEntity> tiles = tileInstanceManager.replace(world);
 		world.loadedTileEntityList.forEach(tiles::add);
 
-		EntityInstanceManager entities = entityInstanceManager.replace(world);
+		InstanceManager<Entity> entities = entityInstanceManager.replace(world);
 		world.getAllEntities()
 				.forEach(entities::add);
 	}
