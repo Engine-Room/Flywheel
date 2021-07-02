@@ -5,18 +5,18 @@ import com.mojang.serialization.Codec;
 
 import net.minecraft.util.ResourceLocation;
 
-public class BooleanContextCondition implements IContextCondition {
+public class BooleanGameStateCondition implements IGameStateCondition {
 
-	public static final Codec<BooleanContextCondition> BOOLEAN_SUGAR = IGameStateProvider.CODEC.xmap(gameContext -> {
+	public static final Codec<BooleanGameStateCondition> BOOLEAN_SUGAR = IGameStateProvider.CODEC.xmap(gameContext -> {
 		if (gameContext instanceof IBooleanStateProvider) {
-			return new BooleanContextCondition(((IBooleanStateProvider) gameContext));
+			return new BooleanGameStateCondition(((IBooleanStateProvider) gameContext));
 		}
 
 		return null;
-	}, IContextCondition::contextProvider);
+	}, IGameStateCondition::getStateProvider);
 	protected final IBooleanStateProvider context;
 
-	public BooleanContextCondition(IBooleanStateProvider context) {
+	public BooleanGameStateCondition(IBooleanStateProvider context) {
 		this.context = context;
 	}
 
@@ -26,12 +26,12 @@ public class BooleanContextCondition implements IContextCondition {
 	}
 
 	@Override
-	public IGameStateProvider contextProvider() {
+	public IGameStateProvider getStateProvider() {
 		return context;
 	}
 
 	@Override
-	public boolean get() {
+	public boolean isMet() {
 		return context.isTrue();
 	}
 }

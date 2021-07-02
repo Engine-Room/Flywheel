@@ -6,10 +6,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.util.ResourceLocation;
 
-public class SpecificValueCondition implements IContextCondition {
+public class SpecificValueCondition implements IGameStateCondition {
 
 	public static final Codec<SpecificValueCondition> CODEC = RecordCodecBuilder.create(condition -> condition.group(IGameStateProvider.CODEC.fieldOf("provider")
-																															 .forGetter(SpecificValueCondition::contextProvider), Codec.STRING.fieldOf("value")
+																															 .forGetter(SpecificValueCondition::getStateProvider), Codec.STRING.fieldOf("value")
 																															 .forGetter(SpecificValueCondition::getValue))
 			.apply(condition, SpecificValueCondition::new));
 
@@ -31,12 +31,12 @@ public class SpecificValueCondition implements IContextCondition {
 	}
 
 	@Override
-	public IGameStateProvider contextProvider() {
+	public IGameStateProvider getStateProvider() {
 		return context;
 	}
 
 	@Override
-	public boolean get() {
+	public boolean isMet() {
 		return required.equals(context.getValue()
 									   .toString());
 	}

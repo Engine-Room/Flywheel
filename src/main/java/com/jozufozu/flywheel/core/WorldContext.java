@@ -23,6 +23,8 @@ import com.jozufozu.flywheel.backend.loading.ShaderTransformer;
 import com.jozufozu.flywheel.core.shader.ExtensibleGlProgram;
 import com.jozufozu.flywheel.core.shader.StateSensitiveMultiProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
+import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
+import com.jozufozu.flywheel.core.shader.spec.ProgramState;
 import com.jozufozu.flywheel.util.WorldAttached;
 
 import net.minecraft.util.ResourceLocation;
@@ -109,17 +111,7 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 
 		specStream.get()
 				.map(backend::getSpec)
-				.forEach(spec -> {
-
-					try {
-						programs.put(spec.name, new StateSensitiveMultiProgram<>(factory, this, spec));
-
-						Backend.log.debug("Loaded program {}", spec.name);
-					} catch (Exception e) {
-						Backend.log.error("Program '{}': {}", spec.name, e);
-						backend.sources.notifyError();
-					}
-				});
+				.forEach(this::loadSpec);
 	}
 
 	@Override
@@ -152,6 +144,26 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 		if (matcher.find()) shader.setSource(matcher.replaceFirst(builtinSources.get(shader.type)));
 		else
 			throw new ShaderLoadingException(String.format("%s is missing %s, cannot use in World Context", shader.type.name, declaration));
+	}
+
+	private void loadSpec(ProgramSpec spec) {
+
+		try {
+			StateSensitiveMultiProgram.Builder<P> builder = new StateSensitiveMultiProgram.Builder<>(factory.create(loadAndLink(spec, null)));
+
+			for (ProgramState state : spec.states) {
+				Program variant = loadAndLink(spec, state);
+
+				builder.withVariant(state.getContext(), factory.create(variant, state.getExtensions()));
+			}
+
+			programs.put(spec.name, builder.build());
+
+			Backend.log.debug("Loaded program {}", spec.name);
+		} catch (Exception e) {
+			Backend.log.error("Program '{}': {}", spec.name, e);
+			backend.sources.notifyError();
+		}
 	}
 
 	public interface TemplateFactory {

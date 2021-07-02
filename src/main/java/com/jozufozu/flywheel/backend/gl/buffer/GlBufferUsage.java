@@ -2,6 +2,10 @@ package com.jozufozu.flywheel.backend.gl.buffer;
 
 import org.lwjgl.opengl.GL15;
 
+/**
+ * Gives a hint to the driver about how you intend to use a buffer. For a detailed explanation, see
+ * <a href="https://www.khronos.org/opengl/wiki/Buffer_Object#Buffer_Object_Usage">this article</a>.
+ */
 public enum GlBufferUsage {
 	STREAM_DRAW(GL15.GL_STREAM_DRAW),
 	STREAM_READ(GL15.GL_STREAM_READ),

@@ -13,10 +13,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 public class ProgramState {
 
 	// TODO: Use Codec.dispatch
-	private static final Codec<IContextCondition> WHEN = Codec.either(BooleanContextCondition.BOOLEAN_SUGAR, SpecificValueCondition.CODEC)
+	private static final Codec<IGameStateCondition> WHEN = Codec.either(BooleanGameStateCondition.BOOLEAN_SUGAR, SpecificValueCondition.CODEC)
 			.flatXmap(either -> either.map(DataResult::success, DataResult::success), any -> {
-				if (any instanceof BooleanContextCondition) {
-					return DataResult.success(Either.left((BooleanContextCondition) any));
+				if (any instanceof BooleanGameStateCondition) {
+					return DataResult.success(Either.left((BooleanGameStateCondition) any));
 				}
 
 				if (any instanceof SpecificValueCondition) {
@@ -27,24 +27,24 @@ public class ProgramState {
 			});
 
 	public static final Codec<ProgramState> CODEC = RecordCodecBuilder.create(state -> state.group(WHEN.fieldOf("when")
-																										   .forGetter(ProgramState::getContext), CodecUtil.oneOrMore(Codec.STRING)
-																										   .optionalFieldOf("define", Collections.emptyList())
-																										   .forGetter(ProgramState::getDefines), CodecUtil.oneOrMore(IProgramExtension.CODEC)
-																										   .optionalFieldOf("extend", Collections.emptyList())
-																										   .forGetter(ProgramState::getExtensions))
+			.forGetter(ProgramState::getContext), CodecUtil.oneOrMore(Codec.STRING)
+			.optionalFieldOf("define", Collections.emptyList())
+			.forGetter(ProgramState::getDefines), CodecUtil.oneOrMore(IProgramExtension.CODEC)
+			.optionalFieldOf("extend", Collections.emptyList())
+			.forGetter(ProgramState::getExtensions))
 			.apply(state, ProgramState::new));
 
-	private final IContextCondition context;
+	private final IGameStateCondition context;
 	private final List<String> defines;
 	private final List<IProgramExtension> extensions;
 
-	public ProgramState(IContextCondition context, List<String> defines, List<IProgramExtension> extensions) {
+	public ProgramState(IGameStateCondition context, List<String> defines, List<IProgramExtension> extensions) {
 		this.context = context;
 		this.defines = defines;
 		this.extensions = extensions;
 	}
 
-	public IContextCondition getContext() {
+	public IGameStateCondition getContext() {
 		return context;
 	}
 
