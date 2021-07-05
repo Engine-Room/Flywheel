@@ -7,6 +7,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.ResourceUtil;
 import com.jozufozu.flywheel.backend.ShaderContext;
@@ -21,7 +23,7 @@ import com.jozufozu.flywheel.backend.loading.Shader;
 import com.jozufozu.flywheel.backend.loading.ShaderLoadingException;
 import com.jozufozu.flywheel.backend.loading.ShaderTransformer;
 import com.jozufozu.flywheel.core.shader.ExtensibleGlProgram;
-import com.jozufozu.flywheel.core.shader.StateSensitiveMultiProgram;
+import com.jozufozu.flywheel.core.shader.GameStateProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 import com.jozufozu.flywheel.core.shader.spec.ProgramState;
@@ -149,12 +151,11 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 	private void loadSpec(ProgramSpec spec) {
 
 		try {
-			StateSensitiveMultiProgram.Builder<P> builder = new StateSensitiveMultiProgram.Builder<>(factory.create(loadAndLink(spec, null)));
+			GameStateProgram.Builder<P> builder = GameStateProgram.builder(compile(spec, null));
 
 			for (ProgramState state : spec.states) {
-				Program variant = loadAndLink(spec, state);
 
-				builder.withVariant(state.getContext(), factory.create(variant, state.getExtensions()));
+				builder.withVariant(state.getContext(), compile(spec, state));
 			}
 
 			programs.put(spec.name, builder.build());
@@ -164,6 +165,13 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 			Backend.log.error("Program '{}': {}", spec.name, e);
 			backend.sources.notifyError();
 		}
+	}
+
+	private P compile(ProgramSpec spec, @Nullable ProgramState state) {
+		if (state != null)
+			return factory.create(loadAndLink(spec, state), state.getExtensions());
+		else
+			return factory.create(loadAndLink(spec, null));
 	}
 
 	public interface TemplateFactory {

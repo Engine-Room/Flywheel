@@ -28,8 +28,6 @@ public class SourceFile {
 	// https://regexr.com/60n3d
 	public static final Pattern functionDeclaration = Pattern.compile("(\\w+)\\s+(\\w+)\\s*\\(([\\w,\\s]*)\\)\\s*\\{");
 
-	public static final Pattern versionDetector = Pattern.compile("#version[^\\n]*");
-
 	public final ResourceLocation name;
 	private final String source;
 	private final ShaderSources parent;
@@ -150,7 +148,24 @@ public class SourceFile {
 		return builder.toString();
 	}
 
-	public static Stream<String> lines(String s) {
-		return new BufferedReader(new StringReader(s)).lines();
+	private CharSequence elided = null;
+	public CharSequence getElidedSource() {
+		if (elided == null) {
+			StringBuilder out = new StringBuilder();
+
+			int lastEnd = 0;
+
+			for (Span elision : elisions) {
+				out.append(source, lastEnd, elision.getStart());
+
+				lastEnd = elision.getEnd();
+			}
+
+			out.append(source, lastEnd, source.length());
+
+			elided = out.toString();
+		}
+
+		return elided;
 	}
 }
