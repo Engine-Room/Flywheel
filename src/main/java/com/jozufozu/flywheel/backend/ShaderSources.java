@@ -11,6 +11,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -25,11 +26,14 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.loading.Shader;
 import com.jozufozu.flywheel.backend.loading.ShaderLoadingException;
 import com.jozufozu.flywheel.backend.pipeline.SourceFile;
+import com.jozufozu.flywheel.backend.pipeline.WorldShaderPipeline;
+import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 import com.jozufozu.flywheel.event.GatherContextEvent;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -85,6 +89,11 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 
 				loadProgramSpecs(manager);
 				loadShaderSources(manager);
+
+				WorldShaderPipeline<WorldProgram> pl = new WorldShaderPipeline<>(this);
+
+				SourceFile source = source(new ResourceLocation(Flywheel.ID, "model.glsl"));
+				pl.compile(source, Collections.emptyList());
 
 				for (IShaderContext<?> context : backend.allContexts()) {
 					context.load();

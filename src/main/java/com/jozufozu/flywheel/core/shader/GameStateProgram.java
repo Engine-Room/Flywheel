@@ -8,12 +8,12 @@ import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.shader.spec.IGameStateCondition;
 import com.jozufozu.flywheel.util.Pair;
 
-public class StateSensitiveMultiProgram<P extends GlProgram> implements IMultiProgram<P> {
+public class GameStateProgram<P extends GlProgram> implements IMultiProgram<P> {
 
 	private final List<Pair<IGameStateCondition, P>> variants;
 	private final P fallback;
 
-	protected StateSensitiveMultiProgram(List<Pair<IGameStateCondition, P>> variants, P fallback) {
+	protected GameStateProgram(List<Pair<IGameStateCondition, P>> variants, P fallback) {
 		this.variants = variants;
 		this.fallback = fallback;
 	}
@@ -38,6 +38,10 @@ public class StateSensitiveMultiProgram<P extends GlProgram> implements IMultiPr
 		fallback.delete();
 	}
 
+	public static <P extends GlProgram> Builder<P> builder(P fallback) {
+		return new Builder<>(fallback);
+	}
+
 	public static class Builder<P extends GlProgram> {
 		private final P fallback;
 		private final List<Pair<IGameStateCondition, P>> variants = new ArrayList<>();
@@ -52,7 +56,7 @@ public class StateSensitiveMultiProgram<P extends GlProgram> implements IMultiPr
 		}
 
 		public IMultiProgram<P> build() {
-			return new StateSensitiveMultiProgram<>(ImmutableList.copyOf(variants), fallback);
+			return new GameStateProgram<>(ImmutableList.copyOf(variants), fallback);
 		}
 	}
 }

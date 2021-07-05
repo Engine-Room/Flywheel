@@ -21,4 +21,14 @@ public class PipelineProgramBuilder {
 		sources.addAll(files);
 		return this;
 	}
+
+	public CharSequence build() {
+		StringBuilder builder = new StringBuilder();
+
+		for (SourceFile source : sources) {
+			builder.append(source.getElidedSource());
+		}
+
+		return builder;
+	}
 }
