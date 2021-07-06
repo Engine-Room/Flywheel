@@ -26,7 +26,7 @@ public class TypeHelper {
 		return 1;
 	}
 
-	public static int getAttributeCount(String type) {
+	public static int getAttributeCount(CharSequence type) {
 		Matcher mat = matType.matcher(type);
 		if (mat.find()) {
 			return Integer.parseInt(mat.group(1));

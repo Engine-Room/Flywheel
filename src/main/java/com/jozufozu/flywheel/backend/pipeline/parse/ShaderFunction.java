@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import com.jozufozu.flywheel.backend.pipeline.span.Span;
 
-public class ShaderFunction {
+public class ShaderFunction extends AbstractShaderElement {
 
 	public static final Pattern argument = Pattern.compile("(\\w+)\\s+(\\w+)");
 	public static final Pattern assignment = Pattern.compile("(\\w+)\\s*=");
@@ -17,16 +17,15 @@ public class ShaderFunction {
 	private final Span name;
 	private final Span args;
 	private final Span body;
-	private final Span self;
 
 	private final List<Variable> parameters;
 
 	public ShaderFunction(Span self, Span type, Span name, Span args, Span body) {
+		super(self);
 		this.type = type;
 		this.name = name;
 		this.args = args;
 		this.body = body;
-		this.self = self;
 
 		this.parameters = new ArrayList<>();
 
@@ -59,6 +58,11 @@ public class ShaderFunction {
 				.map(Span::get)
 				.collect(Collectors.joining(","));
 
-		return name + "(" + p + ")";
+		return type + " " + name + "(" + p + ")";
+	}
+
+	@Override
+	public void checkErrors(ErrorReporter e) {
+
 	}
 }

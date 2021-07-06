@@ -7,13 +7,17 @@ import com.jozufozu.flywheel.backend.pipeline.SourceFile;
 /**
  * A span of code in a {@link SourceFile}.
  */
-public abstract class Span {
+public abstract class Span implements CharSequence {
 
 	protected final SourceFile in;
-	protected final int start;
-	protected final int end;
+	protected final CharPos start;
+	protected final CharPos end;
 
 	public Span(SourceFile in, int start, int end) {
+		this(in, in.getCharPos(start), in.getCharPos(end));
+	}
+
+	public Span(SourceFile in, CharPos start, CharPos end) {
 		this.in = in;
 		this.start = start;
 		this.end = end;
@@ -24,11 +28,11 @@ public abstract class Span {
 	}
 
 	public int getStart() {
-		return start;
+		return start.getPos();
 	}
 
 	public int getEnd() {
-		return end;
+		return end.getPos();
 	}
 
 	public boolean isEmpty() {
@@ -40,6 +44,21 @@ public abstract class Span {
 	public abstract String get();
 
 	public abstract boolean isErr();
+
+	@Override
+	public int length() {
+		return end.getPos() - start.getPos();
+	}
+
+	@Override
+	public char charAt(int index) {
+		return in.getSource().charAt(start.getPos() + index);
+	}
+
+	@Override
+	public CharSequence subSequence(int start, int end) {
+		return subSpan(start, end);
+	}
 
 	@Override
 	public String toString() {

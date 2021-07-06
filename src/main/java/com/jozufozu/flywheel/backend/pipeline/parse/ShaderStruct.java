@@ -7,36 +7,56 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.backend.loading.Program;
 import com.jozufozu.flywheel.backend.loading.TypeHelper;
 import com.jozufozu.flywheel.backend.pipeline.span.Span;
 
-public class ShaderStruct {
+public class ShaderStruct extends AbstractShaderElement {
 
 	// https://regexr.com/5t207
 	public static final Pattern struct = Pattern.compile("struct\\s+([\\w\\d]*)\\s*\\{([\\w\\d \\t#\\[\\](),;\\n]*)}\\s*;");
 
-	public final Span self;
 	public final Span name;
 	public final Span body;
 
-	List<StructField> fields = new ArrayList<>(4);
-	Map<String, String> fields2Types = new HashMap<>();
+	private final ImmutableList<StructField> fields;
+	private final ImmutableMap<String, Span> fields2Types;
 
 	public ShaderStruct(Span self, Span name, Span body) {
-		this.self = self;
+		super(self);
 		this.name = name;
 		this.body = body;
-		parseFields();
+		this.fields = parseFields();
+
+		ImmutableMap.Builder<String, Span> lookup = ImmutableMap.builder();
+		for (StructField field : fields) {
+			lookup.put(field.name.get(), field.type);
+		}
+
+		this.fields2Types = lookup.build();
 	}
 
-	private void parseFields() {
-		Matcher fielder = StructField.fieldPattern.matcher(body.get());
+	@Override
+	public void checkErrors(ErrorReporter e) {
 
-		while (fielder.find()) {
-			fields.add(new StructField(fielder));
-			fields2Types.put(fielder.group(2), fielder.group(1));
+	}
+
+	private ImmutableList<StructField> parseFields() {
+		Matcher matcher = StructField.fieldPattern.matcher(body);
+
+		ImmutableList.Builder<StructField> fields = ImmutableList.builder();
+
+		while (matcher.find()) {
+			Span field = Span.fromMatcher(body, matcher);
+			Span type = Span.fromMatcher(body, matcher, 1);
+			Span name = Span.fromMatcher(body, matcher, 2);
+
+			fields.add(new StructField(field, type, name));
 		}
+
+		return fields.build();
 	}
 
 	public void addPrefixedAttributes(Program builder, String prefix) {

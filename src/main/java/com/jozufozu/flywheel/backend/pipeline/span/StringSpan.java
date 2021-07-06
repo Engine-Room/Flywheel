@@ -8,15 +8,19 @@ public class StringSpan extends Span {
 		super(in, start, end);
 	}
 
+	public StringSpan(SourceFile in, CharPos start, CharPos end) {
+		super(in, start, end);
+	}
+
 	@Override
 	public Span subSpan(int from, int to) {
-		return new StringSpan(in, start + from, start + to);
+		return new StringSpan(in, start.getPos() + from, start.getPos() + to);
 	}
 
 	@Override
 	public String get() {
 		return in.getSource()
-				.substring(start, end);
+				.substring(start.getPos(), end.getPos());
 	}
 
 	@Override

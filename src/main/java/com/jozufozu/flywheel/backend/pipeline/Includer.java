@@ -8,6 +8,7 @@ import java.util.Stack;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.ShaderSources;
+import com.jozufozu.flywheel.backend.pipeline.parse.Include;
 
 import net.minecraft.util.ResourceLocation;
 
@@ -28,12 +29,12 @@ public class Includer {
 	}
 
 	private static void process(ShaderSources sources, Set<ResourceLocation> seen, List<SourceFile> out, SourceFile source) {
-		ImmutableList<ResourceLocation> includes = source.getIncludes();
+		ImmutableList<Include> includes = source.getIncludes();
 
-		for (ResourceLocation include : includes) {
+		for (Include include : includes) {
 
-			if (seen.add(include)) {
-				SourceFile file = sources.source(include);
+			if (seen.add(include.getFile())) {
+				SourceFile file = sources.source(include.getFile());
 
 				process(sources, seen, out, file);
 
