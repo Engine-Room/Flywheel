@@ -11,6 +11,10 @@ public class ErrorSpan extends Span {
 		super(in, start, end);
 	}
 
+	public ErrorSpan(SourceFile in, CharPos start, CharPos end) {
+		super(in, start, end);
+	}
+
 	@Override
 	public Span subSpan(int from, int to) {
 		return new ErrorSpan(in, start, end); // the sub-span of an error is an error in the same location

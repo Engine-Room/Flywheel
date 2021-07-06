@@ -4,29 +4,35 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.jozufozu.flywheel.backend.loading.LayoutTag;
+import com.jozufozu.flywheel.backend.pipeline.span.Span;
 
-public class StructField {
+public class StructField extends AbstractShaderElement {
 	public static final Pattern fieldPattern = Pattern.compile("(\\S+)\\s*(\\S+);");
 
-	public String name;
-	public String type;
-	public LayoutTag layout;
+	public Span name;
+	public Span type;
 
-	public StructField(Matcher fieldMatcher) {
-		type = fieldMatcher.group(2);
-		name = fieldMatcher.group(3);
+	public StructField(Span self, Span name, Span type) {
+		super(self);
+		this.name = name;
+		this.type = type;
 	}
 
-	public String getName() {
+	public Span getName() {
 		return name;
 	}
 
-	public String getType() {
+	public Span getType() {
 		return type;
 	}
 
 	@Override
 	public String toString() {
 		return "TaggedField{" + "name='" + name + '\'' + ", type='" + type + '\'' + '}';
+	}
+
+	@Override
+	public void checkErrors(ErrorReporter e) {
+
 	}
 }
