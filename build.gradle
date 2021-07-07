@@ -78,7 +78,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
-//loom.accessWidener("src/main/resources/flywheel.accesswidener")
+loom.accessWidener("src/main/resources/flywheel.accesswidener")
 
 processResources {
     inputs.property "version", project.version
