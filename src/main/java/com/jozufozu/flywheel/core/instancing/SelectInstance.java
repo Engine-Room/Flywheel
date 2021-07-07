@@ -40,7 +40,8 @@ public class SelectInstance<D extends InstanceData> {
 		} else if (i != last) {
 			if (current != null) current.delete();
 
-			current = models.get(i).createInstance();
+			current = models.get(i)
+					.createInstance();
 		}
 
 		last = i;

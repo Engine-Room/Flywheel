@@ -82,7 +82,8 @@ public class QuadConverter {
 	}
 
 	public void free() {
-		ebos.values().forEach(GlBuffer::delete);
+		ebos.values()
+				.forEach(GlBuffer::delete);
 		ebos.clear();
 		initCapacities();
 	}

@@ -7,11 +7,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
+import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.light.LightUpdater;
+import com.jozufozu.flywheel.util.ChunkUtil;
 
 import net.minecraft.client.multiplayer.ClientChunkProvider;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.SectionPos;
 import net.minecraft.world.LightType;
 import net.minecraft.world.chunk.AbstractChunkProvider;
@@ -38,21 +44,22 @@ public abstract class LightUpdateMixin extends AbstractChunkProvider {
 
 		int sectionY = pos.getSectionY();
 
-		if (chunk != null) {
+		if (ChunkUtil.isValidSection(chunk, sectionY)) {
+			InstanceManager<TileEntity> tiles = InstancedRenderDispatcher.getTiles(world);
+			InstanceManager<Entity> entities = InstancedRenderDispatcher.getEntities(world);
+
 			chunk.getTileEntityMap()
 					.entrySet()
 					.stream()
 					.filter(entry -> SectionPos.toChunk(entry.getKey()
-							.getY()) == sectionY)
+																.getY()) == sectionY)
 					.map(Map.Entry::getValue)
-					.forEach(InstancedRenderDispatcher.getTiles(world)::onLightUpdate);
+					.forEach(tiles::onLightUpdate);
 
-			if (sectionY >= 0) // TODO: 1.17
-				chunk.getEntityLists()[sectionY]
-						.forEach(InstancedRenderDispatcher.getEntities(world)::onLightUpdate);
+			chunk.getEntityLists()[sectionY].forEach(entities::onLightUpdate);
 		}
 
 		LightUpdater.getInstance()
-			.onLightUpdate(world, type, pos.asLong());
+				.onLightUpdate(world, type, pos.asLong());
 	}
 }

@@ -194,8 +194,10 @@ public class BakedQuadWrapper {
 
 		public void refresh() {
 			vertexSize = FORMAT.getIntegerSize();
-			for (int elementId = 0; elementId < FORMAT.getElements().size(); elementId++) {
-				VertexFormatElement element = FORMAT.getElements().get(elementId);
+			for (int elementId = 0; elementId < FORMAT.getElements()
+					.size(); elementId++) {
+				VertexFormatElement element = FORMAT.getElements()
+						.get(elementId);
 				int intOffset = FORMAT.getOffset(elementId) / Integer.BYTES;
 				if (element.getUsage() == VertexFormatElement.Usage.POSITION) {
 					position = intOffset;

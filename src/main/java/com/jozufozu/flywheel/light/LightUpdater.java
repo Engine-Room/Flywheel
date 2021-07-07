@@ -27,8 +27,7 @@ public class LightUpdater {
 	private static LightUpdater instance;
 
 	public static LightUpdater getInstance() {
-		if (instance == null)
-			instance = new LightUpdater();
+		if (instance == null) instance = new LightUpdater();
 
 		return instance;
 	}

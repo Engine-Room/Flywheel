@@ -51,12 +51,12 @@ public class ExtensibleGlProgram extends GlProgram {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("program ")
-			   .append(name)
-			   .append('[');
+				.append(name)
+				.append('[');
 
 		for (IExtensionInstance extension : extensions) {
 			builder.append(extension)
-				   .append('+');
+					.append('+');
 		}
 
 		builder.append(']');

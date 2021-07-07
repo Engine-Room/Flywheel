@@ -50,8 +50,8 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class InstancedRenderDispatcher {
 
-	private static final WorldAttached<EntityInstanceManager> entityInstanceManager = new WorldAttached<>(world -> new EntityInstanceManager(Contexts.WORLD.getMaterialManager(world)));
-	private static final WorldAttached<TileInstanceManager> tileInstanceManager = new WorldAttached<>(world -> new TileInstanceManager(Contexts.WORLD.getMaterialManager(world)));
+	private static final WorldAttached<InstanceManager<Entity>> entityInstanceManager = new WorldAttached<>(world -> new EntityInstanceManager(Contexts.WORLD.getMaterialManager(world)));
+	private static final WorldAttached<InstanceManager<TileEntity>> tileInstanceManager = new WorldAttached<>(world -> new TileInstanceManager(Contexts.WORLD.getMaterialManager(world)));
 
 	private static final LazyValue<Vector<CrumblingInstanceManager>> blockBreaking = new LazyValue<>(() -> {
 		Vector<CrumblingInstanceManager> renderers = new Vector<>(10);
@@ -62,12 +62,12 @@ public class InstancedRenderDispatcher {
 	});
 
 	@Nonnull
-	public static TileInstanceManager getTiles(IWorld world) {
+	public static InstanceManager<TileEntity> getTiles(IWorld world) {
 		return tileInstanceManager.get(world);
 	}
 
 	@Nonnull
-	public static EntityInstanceManager getEntities(IWorld world) {
+	public static InstanceManager<Entity> getEntities(IWorld world) {
 		return entityInstanceManager.get(world);
 	}
 
@@ -109,7 +109,8 @@ public class InstancedRenderDispatcher {
 	@SubscribeEvent
 	public static void renderLayer(RenderLayerEvent event) {
 		ClientWorld world = event.getWorld();
-		if (!Backend.getInstance().canUseInstancing(world)) return;
+		if (!Backend.getInstance()
+				.canUseInstancing(world)) return;
 
 		event.type.startDrawing();
 
@@ -122,7 +123,8 @@ public class InstancedRenderDispatcher {
 	@SubscribeEvent
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		ClientWorld world = event.getWorld();
-		if (Backend.getInstance().canUseInstancing() && world != null) {
+		if (Backend.getInstance()
+				.canUseInstancing() && world != null) {
 			loadAllInWorld(world);
 		}
 	}
@@ -130,7 +132,8 @@ public class InstancedRenderDispatcher {
 	private static final RenderType crumblingLayer = ModelBakery.BLOCK_DESTRUCTION_RENDER_LAYERS.get(0);
 
 	public static void renderBreaking(ClientWorld world, Matrix4f viewProjection, double cameraX, double cameraY, double cameraZ) {
-		if (!Backend.getInstance().canUseInstancing(world)) return;
+		if (!Backend.getInstance()
+				.canUseInstancing(world)) return;
 
 		WorldRenderer worldRenderer = Minecraft.getInstance().worldRenderer;
 		Long2ObjectMap<SortedSet<DestroyBlockProgress>> breakingProgressions = worldRenderer.blockBreakingProgressions;
@@ -145,9 +148,11 @@ public class InstancedRenderDispatcher {
 
 			SortedSet<DestroyBlockProgress> progresses = entry.getValue();
 			if (progresses != null && !progresses.isEmpty()) {
-				int blockDamage = progresses.last().getPartialBlockDamage();
+				int blockDamage = progresses.last()
+						.getPartialBlockDamage();
 				bitSet.set(blockDamage);
-				renderers.get(blockDamage).add(world.getTileEntity(breakingPos));
+				renderers.get(blockDamage)
+						.add(world.getTileEntity(breakingPos));
 			}
 		}
 
@@ -155,38 +160,41 @@ public class InstancedRenderDispatcher {
 		ActiveRenderInfo info = Minecraft.getInstance().gameRenderer.getActiveRenderInfo();
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureManager.getTexture(PlayerContainer.BLOCK_ATLAS_TEXTURE).getGlTextureId());
+		glBindTexture(GL_TEXTURE_2D, textureManager.getTexture(PlayerContainer.BLOCK_ATLAS_TEXTURE)
+				.getGlTextureId());
 
 		glActiveTexture(GL_TEXTURE4);
 
 		crumblingLayer.startDrawing();
-		bitSet.stream().forEach(i -> {
-			Texture breaking = textureManager.getTexture(ModelBakery.BLOCK_DESTRUCTION_STAGE_TEXTURES.get(i));
-			CrumblingInstanceManager renderer = renderers.get(i);
-			renderer.beginFrame(info);
+		bitSet.stream()
+				.forEach(i -> {
+					Texture breaking = textureManager.getTexture(ModelBakery.BLOCK_DESTRUCTION_STAGE_TEXTURES.get(i));
+					CrumblingInstanceManager renderer = renderers.get(i);
+					renderer.beginFrame(info);
 
-			if (breaking != null) {
-				glBindTexture(GL_TEXTURE_2D, breaking.getGlTextureId());
-				renderer.materialManager.render(RenderType.getCutoutMipped(), viewProjection, cameraX, cameraY, cameraZ);
-			}
+					if (breaking != null) {
+						glBindTexture(GL_TEXTURE_2D, breaking.getGlTextureId());
+						renderer.materialManager.render(RenderType.getCutoutMipped(), viewProjection, cameraX, cameraY, cameraZ);
+					}
 
-			renderer.invalidate();
-		});
+					renderer.invalidate();
+				});
 		crumblingLayer.endDrawing();
 
 		glActiveTexture(GL_TEXTURE0);
 		Texture breaking = textureManager.getTexture(ModelBakery.BLOCK_DESTRUCTION_STAGE_TEXTURES.get(0));
-		if (breaking != null)
-			glBindTexture(GL_TEXTURE_2D, breaking.getGlTextureId());
+		if (breaking != null) glBindTexture(GL_TEXTURE_2D, breaking.getGlTextureId());
 	}
 
 	public static void loadAllInWorld(ClientWorld world) {
-		Contexts.WORLD.getMaterialManager(world).delete();
+		Contexts.WORLD.getMaterialManager(world)
+				.delete();
 
-		TileInstanceManager tiles = tileInstanceManager.replace(world);
+		InstanceManager<TileEntity> tiles = tileInstanceManager.replace(world);
 		world.loadedTileEntityList.forEach(tiles::add);
 
-		EntityInstanceManager entities = entityInstanceManager.replace(world);
-		world.getAllEntities().forEach(entities::add);
+		InstanceManager<Entity> entities = entityInstanceManager.replace(world);
+		world.getAllEntities()
+				.forEach(entities::add);
 	}
 }

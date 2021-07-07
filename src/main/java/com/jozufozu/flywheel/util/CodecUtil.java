@@ -13,14 +13,12 @@ public class CodecUtil {
 	 */
 	public static <T> Codec<List<T>> oneOrMore(Codec<T> codec) {
 		return Codec.either(codec.listOf(), codec)
-				.xmap(
-						either -> either.map(l -> l, Collections::singletonList),
-						list -> {
-							if (list.size() == 1) {
-								return Either.right(list.get(0));
-							} else {
-								return Either.left(list);
-							}
-						});
+				.xmap(either -> either.map(l -> l, Collections::singletonList), list -> {
+					if (list.size() == 1) {
+						return Either.right(list.get(0));
+					} else {
+						return Either.left(list);
+					}
+				});
 	}
 }

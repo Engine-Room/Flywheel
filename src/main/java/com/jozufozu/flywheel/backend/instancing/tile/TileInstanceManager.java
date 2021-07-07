@@ -19,7 +19,8 @@ public class TileInstanceManager extends InstanceManager<TileEntity> {
 
 	@Override
 	protected IInstance createRaw(TileEntity obj) {
-		return InstancedRenderRegistry.getInstance().create(materialManager, obj);
+		return InstancedRenderRegistry.getInstance()
+				.create(materialManager, obj);
 	}
 
 	@Override

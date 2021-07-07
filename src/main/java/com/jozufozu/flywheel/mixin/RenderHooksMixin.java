@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.OptifineHandler;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -36,9 +37,7 @@ public class RenderHooksMixin {
 	private ClientWorld world;
 
 	@Inject(at = @At(value = "INVOKE", target = "net.minecraft.client.renderer.WorldRenderer.updateChunks(J)V"), method = "render")
-	private void setupFrame(MatrixStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_,
-							ActiveRenderInfo info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f p_228426_9_,
-							CallbackInfo ci) {
+	private void setupFrame(MatrixStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, ActiveRenderInfo info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f p_228426_9_, CallbackInfo ci) {
 		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(world, stack, info, gameRenderer, lightTexture));
 	}
 
@@ -48,46 +47,43 @@ public class RenderHooksMixin {
 	 * This should probably be a forge event.
 	 */
 	@Inject(at = @At("TAIL"), method = "renderLayer")
-	private void renderLayer(RenderType type, MatrixStack stack, double camX, double camY, double camZ,
-							 CallbackInfo ci) {
+	private void renderLayer(RenderType type, MatrixStack stack, double camX, double camY, double camZ, CallbackInfo ci) {
 		Matrix4f view = stack.peek()
 				.getModel();
 		Matrix4f viewProjection = view.copy();
-		viewProjection.multiplyBackward(Backend.getInstance().getProjectionMatrix());
+		viewProjection.multiplyBackward(Backend.getInstance()
+												.getProjectionMatrix());
 
 		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(world, type, viewProjection, camX, camY, camZ));
-		GL20.glUseProgram(0);
+
+		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
 	}
 
 	@Inject(at = @At("TAIL"), method = "loadRenderers")
 	private void refresh(CallbackInfo ci) {
-		Backend.getInstance().refresh();
+		Backend.getInstance()
+				.refresh();
 
 		MinecraftForge.EVENT_BUS.post(new ReloadRenderersEvent(world));
 	}
 
 
-	@Inject(at =
-	@At(
-			value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/WorldRenderer;checkEmpty(Lcom/mojang/blaze3d/matrix/MatrixStack;)V",
-			ordinal = 2 // after the game renders the breaking overlay normally
-	),
-			method = "render")
-	private void renderBlockBreaking(MatrixStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_,
-									 ActiveRenderInfo info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f p_228426_9_,
-									 CallbackInfo ci) {
-		if (!Backend.getInstance().available())
-			return;
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WorldRenderer;checkEmpty(Lcom/mojang/blaze3d/matrix/MatrixStack;)V", ordinal = 2 // after the game renders the breaking overlay normally
+	), method = "render")
+	private void renderBlockBreaking(MatrixStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, ActiveRenderInfo info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f p_228426_9_, CallbackInfo ci) {
+		if (!Backend.getInstance()
+				.available()) return;
 
 		Matrix4f view = stack.peek()
 				.getModel();
 		Matrix4f viewProjection = view.copy();
-		viewProjection.multiplyBackward(Backend.getInstance().getProjectionMatrix());
+		viewProjection.multiplyBackward(Backend.getInstance()
+												.getProjectionMatrix());
 
 		Vector3d cameraPos = info.getProjectedView();
 		InstancedRenderDispatcher.renderBreaking(world, viewProjection, cameraPos.x, cameraPos.y, cameraPos.z);
-		GL20.glUseProgram(0);
+
+		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
 	}
 
 	// Instancing

@@ -141,11 +141,9 @@ public class LightVolume {
 	}
 
 	public void notifyLightUpdate(IBlockDisplayReader world, LightType type, GridAlignedBB changedVolume) {
-		if (removed)
-			return;
+		if (removed) return;
 
-		if (!changedVolume.intersects(sampleVolume))
-			return;
+		if (!changedVolume.intersects(sampleVolume)) return;
 		changedVolume = changedVolume.intersect(sampleVolume); // compute the region contained by us that has dirty lighting data.
 
 		if (type == LightType.BLOCK) copyBlock(world, changedVolume);
@@ -156,8 +154,7 @@ public class LightVolume {
 		if (removed) return;
 
 		GridAlignedBB changedVolume = GridAlignedBB.from(chunkX, chunkZ);
-		if (!changedVolume.intersects(sampleVolume))
-			return;
+		if (!changedVolume.intersects(sampleVolume)) return;
 		changedVolume.intersectAssign(sampleVolume); // compute the region contained by us that has dirty lighting data.
 
 		copyLight(world, changedVolume);

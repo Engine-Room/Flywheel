@@ -19,15 +19,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
-import com.jozufozu.flywheel.event.ForgeEvents;
-
-import net.minecraft.client.Minecraft;
-
-import net.minecraft.client.world.ClientWorld;
-
-import net.minecraftforge.event.world.WorldEvent;
-
 import org.lwjgl.system.MemoryUtil;
 
 import com.google.common.collect.Lists;
@@ -35,6 +26,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.loading.Shader;
 import com.jozufozu.flywheel.backend.loading.ShaderLoadingException;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
@@ -44,6 +36,8 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
@@ -84,7 +78,8 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 				shouldCrash = false;
 
 				backend.clearContexts();
-				ModLoader.get().postEvent(new GatherContextEvent(backend));
+				ModLoader.get()
+						.postEvent(new GatherContextEvent(backend));
 
 				loadProgramSpecs(manager);
 				loadShaderSources(manager);
@@ -123,7 +118,9 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 
 				DataResult<Pair<ProgramSpec, JsonElement>> result = ProgramSpec.CODEC.decode(JsonOps.INSTANCE, GSON.fromJson(s, JsonElement.class));
 
-				ProgramSpec spec = result.get().orThrow().getFirst();
+				ProgramSpec spec = result.get()
+						.orThrow()
+						.getFirst();
 
 				spec.setName(specName);
 

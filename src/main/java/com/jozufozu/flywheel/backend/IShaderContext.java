@@ -9,7 +9,8 @@ import net.minecraft.util.ResourceLocation;
 public interface IShaderContext<P extends GlProgram> {
 
 	default P getProgram(ResourceLocation loc) {
-		return this.getProgramSupplier(loc).get();
+		return this.getProgramSupplier(loc)
+				.get();
 	}
 
 	Supplier<P> getProgramSupplier(ResourceLocation loc);
