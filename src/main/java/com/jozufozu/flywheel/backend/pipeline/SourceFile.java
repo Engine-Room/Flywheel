@@ -113,9 +113,9 @@ public class SourceFile {
 			int lastEnd = 0;
 
 			for (Span elision : elisions) {
-				out.append(source, lastEnd, elision.getStart());
+				out.append(source, lastEnd, elision.getStartPos());
 
-				lastEnd = elision.getEnd();
+				lastEnd = elision.getEndPos();
 			}
 
 			out.append(source, lastEnd, source.length());

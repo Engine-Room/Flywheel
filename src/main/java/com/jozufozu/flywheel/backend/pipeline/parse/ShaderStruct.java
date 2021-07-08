@@ -1,9 +1,5 @@
 package com.jozufozu.flywheel.backend.pipeline.parse;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.backend.loading.Program;
 import com.jozufozu.flywheel.backend.loading.TypeHelper;
+import com.jozufozu.flywheel.backend.pipeline.error.ErrorReporter;
 import com.jozufozu.flywheel.backend.pipeline.span.Span;
 
 public class ShaderStruct extends AbstractShaderElement {
