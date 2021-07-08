@@ -2,6 +2,9 @@ package com.jozufozu.flywheel.backend.pipeline.span;
 
 import com.jozufozu.flywheel.backend.pipeline.SourceFile;
 
+/**
+ * Represents a (syntactically) malformed segment of code.
+ */
 public class ErrorSpan extends Span {
 	public ErrorSpan(SourceFile in, int loc) {
 		super(in, loc, loc);

@@ -1,9 +1,8 @@
 package com.jozufozu.flywheel.backend.pipeline.parse;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.jozufozu.flywheel.backend.loading.LayoutTag;
+import com.jozufozu.flywheel.backend.pipeline.error.ErrorReporter;
 import com.jozufozu.flywheel.backend.pipeline.span.Span;
 
 public class StructField extends AbstractShaderElement {

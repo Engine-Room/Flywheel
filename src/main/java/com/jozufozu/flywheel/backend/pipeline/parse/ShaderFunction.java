@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.jozufozu.flywheel.backend.pipeline.error.ErrorReporter;
 import com.jozufozu.flywheel.backend.pipeline.span.Span;
 
 public class ShaderFunction extends AbstractShaderElement {

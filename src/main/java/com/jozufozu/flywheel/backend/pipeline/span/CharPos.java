@@ -1,7 +1,8 @@
 package com.jozufozu.flywheel.backend.pipeline.span;
 
-import com.jozufozu.flywheel.backend.pipeline.SourceFile;
-
+/**
+ * A position in a file.
+ */
 public class CharPos {
 
 	private final int idx;

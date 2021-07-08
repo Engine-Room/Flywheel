@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.backend.pipeline.parse;
 import java.util.Optional;
 
 import com.jozufozu.flywheel.backend.ShaderSources;
+import com.jozufozu.flywheel.backend.pipeline.error.ErrorReporter;
 import com.jozufozu.flywheel.backend.pipeline.SourceFile;
 import com.jozufozu.flywheel.backend.pipeline.span.Span;
 

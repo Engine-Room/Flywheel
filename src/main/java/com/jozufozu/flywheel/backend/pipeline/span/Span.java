@@ -23,31 +23,49 @@ public abstract class Span implements CharSequence {
 		this.end = end;
 	}
 
+	/**
+	 * @return The file that contains this code segment.
+	 */
 	public SourceFile getSourceFile() {
 		return in;
 	}
 
-	public int getStart() {
+	/**
+	 * @return the string index at the (inclusive) beginning of this code segment.
+	 */
+	public int getStartPos() {
 		return start.getPos();
 	}
 
-	public int getEnd() {
+	/**
+	 * @return the string index at the (exclusive) end of this code segment.
+	 */
+	public int getEndPos() {
 		return end.getPos();
 	}
 
+	/**
+	 * @return true if this span has no width.
+	 */
 	public boolean isEmpty() {
 		return start == end;
 	}
 
+	/**
+	 * Get a span referring to a code segment inside this code segment.
+	 */
 	public abstract Span subSpan(int from, int to);
 
+	/**
+	 * @return the portion of code represented by this span.
+	 */
 	public abstract String get();
 
 	public abstract boolean isErr();
 
 	@Override
 	public int length() {
-		return end.getPos() - start.getPos();
+		return getEndPos() - getStartPos();
 	}
 
 	@Override
