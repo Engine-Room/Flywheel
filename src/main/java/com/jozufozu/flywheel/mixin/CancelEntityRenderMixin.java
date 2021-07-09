@@ -3,6 +3,8 @@ package com.jozufozu.flywheel.mixin;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
@@ -10,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import com.google.common.collect.Lists;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.instancing.IInstanceRendered;
 
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.world.ClientWorld;
@@ -28,7 +29,9 @@ public class CancelEntityRenderMixin {
 				.canUseInstancing()) {
 
 			ArrayList<Entity> filtered = Lists.newArrayList(entities);
-			filtered.removeIf(entity -> entity instanceof IInstanceRendered && !((IInstanceRendered) entity).shouldRenderNormally());
+
+			InstancedRenderRegistry r = InstancedRenderRegistry.getInstance();
+			filtered.removeIf(r::shouldSkipRender);
 
 			return filtered;
 		}
@@ -42,7 +45,9 @@ public class CancelEntityRenderMixin {
 				.canUseInstancing()) {
 
 			ArrayList<Entity> filtered = Lists.newArrayList(classInheritanceMultiMap);
-			filtered.removeIf(entity -> entity instanceof IInstanceRendered && !((IInstanceRendered) entity).shouldRenderNormally());
+
+			InstancedRenderRegistry r = InstancedRenderRegistry.getInstance();
+			filtered.removeIf(r::shouldSkipRender);
 
 			return filtered.iterator();
 		}

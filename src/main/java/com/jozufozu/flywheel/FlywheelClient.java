@@ -5,6 +5,8 @@ import com.jozufozu.flywheel.core.AtlasStitcher;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.Materials;
 
+import com.jozufozu.flywheel.vanilla.VanillaInstances;
+
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -20,5 +22,7 @@ public class FlywheelClient {
 
 		modEventBus.addListener(Contexts::flwInit);
 		modEventBus.addListener(Materials::flwInit);
+
+		VanillaInstances.init();
 	}
 }

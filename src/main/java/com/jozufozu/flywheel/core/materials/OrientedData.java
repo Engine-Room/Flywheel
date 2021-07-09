@@ -19,7 +19,7 @@ public class OrientedData extends BasicData {
 	private float qX;
 	private float qY;
 	private float qZ;
-	private float qW;
+	private float qW = 1;
 
 	public OrientedData(Instancer<?> owner) {
 		super(owner);

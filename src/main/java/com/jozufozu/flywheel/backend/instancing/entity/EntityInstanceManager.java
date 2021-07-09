@@ -7,6 +7,7 @@ import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 import com.jozufozu.flywheel.backend.instancing.MaterialManager;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
@@ -15,6 +16,11 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 
 	public EntityInstanceManager(MaterialManager<?> materialManager) {
 		super(materialManager);
+	}
+
+	@Override
+	protected boolean canInstance(Entity obj) {
+		return obj != null && InstancedRenderRegistry.getInstance().canInstance(obj.getType());
 	}
 
 	@Override
