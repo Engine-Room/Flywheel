@@ -40,6 +40,12 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		materialManager.addListener(this);
 	}
 
+	protected abstract boolean canInstance(T obj);
+
+	protected abstract IInstance createRaw(T obj);
+
+	protected abstract boolean canCreateInstance(T entity);
+
 	public void tick(double cameraX, double cameraY, double cameraZ) {
 		tick++;
 
@@ -100,7 +106,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		if (!Backend.getInstance()
 				.canUseInstancing()) return;
 
-		if (obj instanceof IInstanceRendered) {
+		if (canInstance(obj)) {
 			addInternal(obj);
 		}
 	}
@@ -116,7 +122,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		if (!Backend.getInstance()
 				.canUseInstancing()) return;
 
-		if (obj instanceof IInstanceRendered) {
+		if (canInstance(obj)) {
 			IInstance instance = getInstance(obj, false);
 
 			if (instance != null) {
@@ -143,7 +149,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		if (!Backend.getInstance()
 				.canUseInstancing()) return;
 
-		if (obj instanceof IInstanceRendered) {
+		if (canInstance(obj)) {
 			IInstance instance = getInstance(obj, false);
 
 			if (instance != null) instance.updateLight();
@@ -154,7 +160,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		if (!Backend.getInstance()
 				.canUseInstancing()) return;
 
-		if (obj instanceof IInstanceRendered) {
+		if (canInstance(obj)) {
 			IInstance instance = getInstance(obj, false);
 			if (instance != null) removeInternal(obj, instance);
 		}
@@ -241,8 +247,4 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		invalidate();
 		instancedTiles.forEach(this::add);
 	}
-
-	protected abstract IInstance createRaw(T obj);
-
-	protected abstract boolean canCreateInstance(T entity);
 }
