@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.config.FlwPackets;
 
-import net.minecraftforge.api.distmarker.Dist;
+import net.fabricmc.api.EnvType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
@@ -29,7 +29,7 @@ public class Flywheel {
 
 		FlwConfig.init();
 
-		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> FlywheelClient::clientInit);
+		DistExecutor.unsafeRunWhenOn(EnvType.CLIENT, () -> FlywheelClient::clientInit);
 	}
 
 	private void setup(final FMLCommonSetupEvent event) {

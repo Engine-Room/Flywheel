@@ -10,7 +10,7 @@ import java.util.BitSet;
 import java.util.SortedSet;
 import java.util.Vector;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
@@ -40,14 +40,14 @@ import net.minecraft.util.LazyValue;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.world.IWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-@OnlyIn(Dist.CLIENT)
-@Mod.EventBusSubscriber(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
+@Mod.EventBusSubscriber(EnvType.CLIENT)
 public class InstancedRenderDispatcher {
 
 	private static final WorldAttached<InstanceManager<Entity>> entityInstanceManager = new WorldAttached<>(world -> new EntityInstanceManager(Contexts.WORLD.getMaterialManager(world)));
@@ -61,12 +61,12 @@ public class InstancedRenderDispatcher {
 		return renderers;
 	});
 
-	@Nonnull
+	@NotNull
 	public static InstanceManager<TileEntity> getTiles(IWorld world) {
 		return tileInstanceManager.get(world);
 	}
 
-	@Nonnull
+	@NotNull
 	public static InstanceManager<Entity> getEntities(IWorld world) {
 		return entityInstanceManager.get(world);
 	}

@@ -5,8 +5,8 @@ import java.nio.ByteOrder;
 import java.util.EnumMap;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -17,7 +17,7 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 
-import net.minecraftforge.api.distmarker.Dist;
+import net.fabricmc.api.EnvType;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -25,14 +25,14 @@ import net.minecraftforge.fml.common.Mod;
 /**
  * A class to manage EBOs that index quads as triangles.
  */
-@Mod.EventBusSubscriber(Dist.CLIENT)
+@Mod.EventBusSubscriber(EnvType.CLIENT)
 public class QuadConverter {
 
 	public static final int STARTING_CAPACITY = 42;
 
 	private static QuadConverter INSTANCE;
 
-	@Nonnull
+	@NotNull
 	public static QuadConverter getInstance() {
 		if (INSTANCE == null) {
 			INSTANCE = new QuadConverter(STARTING_CAPACITY); // 255 / 6 = 42

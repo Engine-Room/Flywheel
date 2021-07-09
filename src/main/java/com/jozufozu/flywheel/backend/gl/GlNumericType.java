@@ -6,14 +6,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import org.lwjgl.opengl.GL11;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public enum GlNumericType {
 	FLOAT(4, "float", GL11.GL_FLOAT),
 	UBYTE(1, "ubyte", GL11.GL_UNSIGNED_BYTE),

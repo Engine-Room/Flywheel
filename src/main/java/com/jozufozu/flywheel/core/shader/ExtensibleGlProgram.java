@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.loading.Program;
@@ -70,7 +70,7 @@ public class ExtensibleGlProgram extends GlProgram {
 	 */
 	public interface Factory<P extends GlProgram> {
 
-		@Nonnull
+		@NotNull
 		P create(Program program, @Nullable List<IProgramExtension> extensions);
 
 		default P create(Program program) {

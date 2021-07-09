@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import org.lwjgl.system.MemoryUtil;
@@ -135,7 +135,7 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 		shouldCrash = true;
 	}
 
-	@Nonnull
+	@NotNull
 	public String getShaderSource(ResourceLocation loc) {
 		String source = shaderSource.get(loc);
 

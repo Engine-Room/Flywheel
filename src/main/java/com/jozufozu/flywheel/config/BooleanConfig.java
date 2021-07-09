@@ -12,8 +12,8 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 public enum BooleanConfig {
 	ENGINE(() -> BooleanConfig::enabled),
@@ -30,7 +30,7 @@ public enum BooleanConfig {
 		return new SConfigureBooleanPacket(this, directive);
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	private static void enabled(BooleanDirective state) {
 		ClientPlayerEntity player = Minecraft.getInstance().player;
 		if (player == null || state == null) return;
@@ -53,7 +53,7 @@ public enum BooleanConfig {
 		Backend.reloadWorldRenderers();
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	private static void normalOverlay(BooleanDirective state) {
 		ClientPlayerEntity player = Minecraft.getInstance().player;
 		if (player == null || state == null) return;

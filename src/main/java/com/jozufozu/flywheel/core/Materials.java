@@ -6,10 +6,10 @@ import com.jozufozu.flywheel.core.materials.OrientedData;
 import com.jozufozu.flywheel.event.GatherContextEvent;
 
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class Materials {
 	public static final MaterialSpec<OrientedData> ORIENTED = new MaterialSpec<>(Locations.ORIENTED, Programs.ORIENTED, Formats.UNLIT_MODEL, Formats.ORIENTED, OrientedData::new);
 	public static final MaterialSpec<ModelData> TRANSFORMED = new MaterialSpec<>(Locations.MODEL, Programs.TRANSFORMED, Formats.UNLIT_MODEL, Formats.TRANSFORMED, ModelData::new);
