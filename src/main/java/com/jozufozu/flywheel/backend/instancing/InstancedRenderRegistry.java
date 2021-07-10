@@ -48,12 +48,12 @@ public class InstancedRenderRegistry {
 		return entities.containsKey(type);
 	}
 
-	public <T extends TileEntity> TileRegistrater<? extends T> tile(TileEntityType<? extends T> type) {
-		return new TileRegistrater<>(type);
+	public <T extends TileEntity> TileConfig<? extends T> tile(TileEntityType<? extends T> type) {
+		return new TileConfig<>(type);
 	}
 
-	public <T extends Entity> EntityRegistrater<? extends T> entity(EntityType<? extends T> type) {
-		return new EntityRegistrater<>(type);
+	public <T extends Entity> EntityConfig<? extends T> entity(EntityType<? extends T> type) {
+		return new EntityConfig<>(type);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -81,22 +81,22 @@ public class InstancedRenderRegistry {
 		return skipRender.getBoolean(o);
 	}
 
-	public class TileRegistrater<T extends TileEntity> {
+	public class TileConfig<T extends TileEntity> {
 
 		private final TileEntityType<T> type;
 		private ITileInstanceFactory<? super T> factory;
 		private boolean skipRender = false;
 
-		public TileRegistrater(TileEntityType<T> type) {
+		public TileConfig(TileEntityType<T> type) {
 			this.type = type;
 		}
 
-		public TileRegistrater<T> factory(ITileInstanceFactory<? super T> rendererFactory) {
+		public TileConfig<T> factory(ITileInstanceFactory<? super T> rendererFactory) {
 			factory = rendererFactory;
 			return this;
 		}
 
-		public TileRegistrater<T> setSkipRender(boolean skipRender) {
+		public TileConfig<T> setSkipRender(boolean skipRender) {
 			this.skipRender = skipRender;
 			return this;
 		}
@@ -109,27 +109,27 @@ public class InstancedRenderRegistry {
 		}
 	}
 
-	public class EntityRegistrater<T extends Entity> {
+	public class EntityConfig<T extends Entity> {
 
 		private final EntityType<T> type;
 		private IEntityInstanceFactory<? super T> factory;
 		private boolean skipRender = false;
 
-		public EntityRegistrater(EntityType<T> type) {
+		public EntityConfig(EntityType<T> type) {
 			this.type = type;
 		}
 
-		public EntityRegistrater<T> factory(IEntityInstanceFactory<? super T> rendererFactory) {
+		public EntityConfig<T> factory(IEntityInstanceFactory<? super T> rendererFactory) {
 			factory = rendererFactory;
 			return this;
 		}
 
-		public EntityRegistrater<T> setSkipRender(boolean skipRender) {
+		public EntityConfig<T> setSkipRender(boolean skipRender) {
 			this.skipRender = skipRender;
 			return this;
 		}
 
-		public InstancedRenderRegistry build() {
+		public InstancedRenderRegistry register() {
 			entities.put(type, factory);
 			InstancedRenderRegistry.this.skipRender.put(type, skipRender);
 
