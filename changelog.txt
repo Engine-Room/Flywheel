@@ -1,3 +1,10 @@
+0.1.0:
+Fixes
+ - Render layer events are always dispatched, even when the backend is disabled
+ - Fix a crash when light updates occur close to the world height
+ - Fix issue with optifine shaders
+ - Fix PartialModels not being initialized
+
 0.0.3:
 New
  - Include the logo in the mod
