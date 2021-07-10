@@ -12,6 +12,14 @@ public class VanillaInstances {
 		r.tile(TileEntityType.CHEST)
 				.setSkipRender(true)
 				.factory(ChestInstance::new)
-				.build();
+				.register();
+		r.tile(TileEntityType.ENDER_CHEST)
+				.setSkipRender(true)
+				.factory(ChestInstance::new)
+				.register();
+		r.tile(TileEntityType.TRAPPED_CHEST)
+				.setSkipRender(true)
+				.factory(ChestInstance::new)
+				.register();
 	}
 }
