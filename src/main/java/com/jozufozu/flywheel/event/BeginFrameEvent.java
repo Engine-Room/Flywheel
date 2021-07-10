@@ -1,14 +1,14 @@
 package com.jozufozu.flywheel.event;
 
+import com.jozufozu.flywheel.fabric.event.EventContext;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraftforge.eventbus.api.Event;
 
-public class BeginFrameEvent extends Event {
+public class BeginFrameEvent extends EventContext {
 	private final ClientWorld world;
 	private final MatrixStack stack;
 	private final ActiveRenderInfo info;

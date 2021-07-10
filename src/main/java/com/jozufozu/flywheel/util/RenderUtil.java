@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.util;
 
 import java.util.function.Supplier;
 
+import com.jozufozu.flywheel.fabric.util.MatrixUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.util.Direction;
@@ -51,9 +52,11 @@ public class RenderUtil {
 			//					.rotateY(AngleHelper.horizontalAngle(facing))
 			//					.rotateX(AngleHelper.verticalAngle(facing))
 			//					.unCentre();
+
+			MatrixUtil.setTranslation(
 			stack.peek()
 					.getModel()
-					.setTranslation(0.5f, 0.5f, 0.5f);
+					, 0.5f, 0.5f, 0.5f);
 			stack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(AngleHelper.horizontalAngle(facing)));
 			stack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(AngleHelper.verticalAngle(facing)));
 			stack.translate(-0.5f, -0.5f, -0.5f);

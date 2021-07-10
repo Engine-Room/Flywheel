@@ -2,24 +2,16 @@ package com.jozufozu.flywheel.event;
 
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 
-import net.fabricmc.api.EnvType;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 
-@Mod.EventBusSubscriber(EnvType.CLIENT)
 public class EntityWorldHandler {
 
-	@SubscribeEvent
-	public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
-		if (event.getWorld().isRemote) InstancedRenderDispatcher.getEntities(event.getWorld())
-				.queueAdd(event.getEntity());
+	public static void onEntityJoinWorld(Entity entity, ClientWorld world) {
+		InstancedRenderDispatcher.getEntities(world).queueAdd(entity);
 	}
 
-	@SubscribeEvent
-	public static void onEntityLeaveWorld(EntityLeaveWorldEvent event) {
-		if (event.getWorld().isRemote) InstancedRenderDispatcher.getEntities(event.getWorld())
-				.remove(event.getEntity());
+	public static void onEntityLeaveWorld(Entity entity, ClientWorld world) {
+		InstancedRenderDispatcher.getEntities(world).remove(entity);
 	}
 }

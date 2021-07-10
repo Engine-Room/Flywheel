@@ -1,14 +1,24 @@
 package com.jozufozu.flywheel.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Consumer;
 
+import com.jozufozu.flywheel.Flywheel;
+
+import net.fabricmc.fabric.api.client.model.BakedModelManagerHelper;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.ModelManager;
+import net.minecraft.client.resources.ReloadListener;
+import net.minecraft.profiler.IProfiler;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.ModelBakeEvent;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoader;
+import net.minecraft.util.Unit;
 
 /**
  * A helper class for loading and accessing json models.
@@ -22,7 +32,6 @@ import net.minecraftforge.client.model.ModelLoader;
  */
 public class PartialModel {
 
-	private static boolean tooLate = false;
 	private static final List<PartialModel> all = new ArrayList<>();
 
 	protected final ResourceLocation modelLocation;
@@ -30,27 +39,49 @@ public class PartialModel {
 
 	public PartialModel(ResourceLocation modelLocation) {
 
-		if (tooLate) throw new RuntimeException("PartialModel '" + modelLocation + "' loaded after ModelRegistryEvent");
-
 		this.modelLocation = modelLocation;
 		all.add(this);
 	}
 
-	public static void onModelRegistry(ModelRegistryEvent event) {
+	public static void onModelRegistry(IResourceManager manager, Consumer<ResourceLocation> out) {
 		for (PartialModel partial : all)
-			ModelLoader.addSpecialModel(partial.modelLocation);
-
-		tooLate = true;
+			out.accept(partial.modelLocation);
 	}
 
-	public static void onModelBake(ModelBakeEvent event) {
-		Map<ResourceLocation, IBakedModel> modelRegistry = event.getModelRegistry();
+	public static void onModelBake(ModelManager manager) {
 		for (PartialModel partial : all)
-			partial.bakedModel = modelRegistry.get(partial.modelLocation);
+			partial.bakedModel = BakedModelManagerHelper.getModel(manager, partial.modelLocation);
 	}
 
 	public IBakedModel get() {
 		return bakedModel;
+	}
+
+	public static class ResourceReloadListener extends ReloadListener<Unit> implements IdentifiableResourceReloadListener {
+		public static final ResourceReloadListener INSTANCE = new ResourceReloadListener();
+
+		public static final ResourceLocation ID = new ResourceLocation(Flywheel.ID, "partial_models");
+		public static final Collection<ResourceLocation> DEPENDENCIES = Arrays.asList(ResourceReloadListenerKeys.MODELS);
+
+		@Override
+		protected Unit prepare(IResourceManager manager, IProfiler profiler) {
+			return Unit.INSTANCE;
+		}
+
+		@Override
+		protected void apply(Unit unit, IResourceManager manager, IProfiler profiler) {
+			onModelBake(Minecraft.getInstance().getModelManager());
+		}
+
+		@Override
+		public ResourceLocation getFabricId() {
+			return ID;
+		}
+
+		@Override
+		public Collection<ResourceLocation> getFabricDependencies() {
+			return DEPENDENCIES;
+		}
 	}
 
 }

@@ -13,8 +13,12 @@ import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
+import com.jozufozu.flywheel.fabric.event.FlywheelEvents;
+import com.jozufozu.flywheel.fabric.util.MatrixUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.GameRenderer;
@@ -25,9 +29,6 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraftforge.common.MinecraftForge;
 
 @Environment(EnvType.CLIENT)
 @Mixin(WorldRenderer.class)
@@ -38,7 +39,7 @@ public class RenderHooksMixin {
 
 	@Inject(at = @At(value = "INVOKE", target = "net.minecraft.client.renderer.WorldRenderer.updateChunks(J)V"), method = "render")
 	private void setupFrame(MatrixStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, ActiveRenderInfo info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f p_228426_9_, CallbackInfo ci) {
-		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(world, stack, info, gameRenderer, lightTexture));
+		FlywheelEvents.BEGIN_FRAME.invoker().handleEvent(new BeginFrameEvent(world, stack, info, gameRenderer, lightTexture));
 	}
 
 	/**
@@ -51,10 +52,10 @@ public class RenderHooksMixin {
 		Matrix4f view = stack.peek()
 				.getModel();
 		Matrix4f viewProjection = view.copy();
-		viewProjection.multiplyBackward(Backend.getInstance()
+		MatrixUtil.multiplyBackward(viewProjection, Backend.getInstance()
 												.getProjectionMatrix());
 
-		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(world, type, viewProjection, camX, camY, camZ));
+		FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(world, type, viewProjection, camX, camY, camZ));
 
 		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
 	}
@@ -64,7 +65,7 @@ public class RenderHooksMixin {
 		Backend.getInstance()
 				.refresh();
 
-		MinecraftForge.EVENT_BUS.post(new ReloadRenderersEvent(world));
+		FlywheelEvents.RELOAD_RENDERERS.invoker().handleEvent(new ReloadRenderersEvent(world));
 	}
 
 
@@ -77,7 +78,7 @@ public class RenderHooksMixin {
 		Matrix4f view = stack.peek()
 				.getModel();
 		Matrix4f viewProjection = view.copy();
-		viewProjection.multiplyBackward(Backend.getInstance()
+		MatrixUtil.multiplyBackward(viewProjection, Backend.getInstance()
 												.getProjectionMatrix());
 
 		Vector3d cameraPos = info.getProjectedView();

@@ -1,47 +1,30 @@
 package com.jozufozu.flywheel.event;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.world.IWorld;
-import net.fabricmc.api.EnvType;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber(EnvType.CLIENT)
 public class ForgeEvents {
 
-	@SubscribeEvent
-	public static void addToDebugScreen(RenderGameOverlayEvent.Text event) {
+	public static void addToDebugScreen(List<String> right) {
 
-		if (Minecraft.getInstance().gameSettings.showDebugInfo) {
-
-			ArrayList<String> right = event.getRight();
-
-			String text = "Flywheel: " + Backend.getInstance()
-					.getBackendDescriptor();
-			if (right.size() < 10) {
-				right.add("");
-				right.add(text);
-			} else {
-				right.add(9, "");
-				right.add(10, text);
-			}
+		String text = "Flywheel: " + Backend.getInstance()
+				.getBackendDescriptor();
+		if (right.size() < 10) {
+			right.add("");
+			right.add(text);
+		} else {
+			right.add(9, "");
+			right.add(10, text);
 		}
 	}
 
-	@SubscribeEvent
-	public static void onLoadWorld(WorldEvent.Load event) {
-		IWorld world = event.getWorld();
-
+	public static void onLoadWorld(ClientWorld world) {
 		if (Backend.isFlywheelWorld(world)) {
-			InstancedRenderDispatcher.loadAllInWorld((ClientWorld) world);
+			InstancedRenderDispatcher.loadAllInWorld(world);
 		}
 	}
 

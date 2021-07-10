@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.util;
 
+import com.jozufozu.flywheel.mixin.fabric.VertexFormatAccessor;
+
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -198,7 +200,7 @@ public class BakedQuadWrapper {
 					.size(); elementId++) {
 				VertexFormatElement element = FORMAT.getElements()
 						.get(elementId);
-				int intOffset = FORMAT.getOffset(elementId) / Integer.BYTES;
+				int intOffset = ((VertexFormatAccessor) FORMAT).getOffsets().getInt(elementId) / Integer.BYTES;
 				if (element.getUsage() == VertexFormatElement.Usage.POSITION) {
 					position = intOffset;
 				} else if (element.getUsage() == VertexFormatElement.Usage.COLOR) {

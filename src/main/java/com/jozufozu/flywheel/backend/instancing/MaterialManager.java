@@ -11,6 +11,7 @@ import com.jozufozu.flywheel.core.materials.ModelData;
 import com.jozufozu.flywheel.core.materials.OrientedData;
 import com.jozufozu.flywheel.core.shader.IProgramCallback;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
+import com.jozufozu.flywheel.fabric.util.MatrixUtil;
 import com.jozufozu.flywheel.util.WeakHashSet;
 
 import net.minecraft.client.Minecraft;
@@ -76,14 +77,14 @@ public class MaterialManager<P extends WorldProgram> {
 
 		Matrix4f translate = Matrix4f.translate((float) -camX, (float) -camY, (float) -camZ);
 
-		translate.multiplyBackward(viewProjection);
+		MatrixUtil.multiplyBackward(translate, viewProjection);
 
 		for (MaterialRenderer<P> material : atlasRenderers) {
 			material.render(layer, translate, camX, camY, camZ, callback);
 		}
 
 		for (Map.Entry<ResourceLocation, ArrayList<MaterialRenderer<P>>> entry : renderers.entrySet()) {
-			Minecraft.getInstance().textureManager.bindTexture(entry.getKey());
+			Minecraft.getInstance().getTextureManager().bindTexture(entry.getKey());
 
 			for (MaterialRenderer<P> materialRenderer : entry.getValue()) {
 				materialRenderer.render(layer, translate, camX, camY, camZ, callback);

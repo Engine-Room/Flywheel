@@ -17,6 +17,11 @@
     "TileWorldHookMixin",
     "light.LightUpdateMixin",
     "light.NetworkLightUpdateMixin"
+
+    , "fabric.BufferBuilderAccessor"
+    , "fabric.ClientWorldMixin"
+    , "fabric.DebugOverlayGuiMixin"
+    , "fabric.VertexFormatAccessor"
   ],
   "injectors": {
     "defaultRequire": 0

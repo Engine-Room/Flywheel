@@ -1,9 +1,10 @@
 package com.jozufozu.flywheel.event;
 
-import net.minecraft.client.world.ClientWorld;
-import net.minecraftforge.eventbus.api.Event;
+import com.jozufozu.flywheel.fabric.event.EventContext;
 
-public class ReloadRenderersEvent extends Event {
+import net.minecraft.client.world.ClientWorld;
+
+public class ReloadRenderersEvent extends EventContext {
 	private final ClientWorld world;
 
 	public ReloadRenderersEvent(ClientWorld world) {

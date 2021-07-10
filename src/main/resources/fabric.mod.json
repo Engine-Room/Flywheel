@@ -18,11 +18,8 @@
   "license": "LGPLv3",
   "icon": "icon.png",
 
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
-    "main": [
-      "com.jozufozu.flywheel.Flywheel"
-    ],
     "client": [
       "com.jozufozu.flywheel.FlywheelClient"
     ]

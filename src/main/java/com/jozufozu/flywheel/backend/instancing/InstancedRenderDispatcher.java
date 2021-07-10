@@ -24,6 +24,8 @@ import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.WorldAttached;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.DestroyBlockProgress;
@@ -40,14 +42,8 @@ import net.minecraft.util.LazyValue;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.world.IWorld;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
 @Environment(EnvType.CLIENT)
-@Mod.EventBusSubscriber(EnvType.CLIENT)
 public class InstancedRenderDispatcher {
 
 	private static final WorldAttached<InstanceManager<Entity>> entityInstanceManager = new WorldAttached<>(world -> new EntityInstanceManager(Contexts.WORLD.getMaterialManager(world)));
@@ -71,13 +67,11 @@ public class InstancedRenderDispatcher {
 		return entityInstanceManager.get(world);
 	}
 
-	@SubscribeEvent
-	public static void tick(TickEvent.ClientTickEvent event) {
+	public static void tick(Minecraft mc) {
 
-		if (!Backend.isGameActive() || event.phase == TickEvent.Phase.START) {
+		if (!Backend.isGameActive()) {
 			return;
 		}
-		Minecraft mc = Minecraft.getInstance();
 		ClientWorld world = mc.world;
 		AnimationTickHolder.tick();
 
@@ -97,7 +91,6 @@ public class InstancedRenderDispatcher {
 		getEntities(entity.world).queueUpdate(entity);
 	}
 
-	@SubscribeEvent
 	public static void onBeginFrame(BeginFrameEvent event) {
 		Contexts.WORLD.getMaterialManager(event.getWorld())
 				.checkAndShiftOrigin(event.getInfo());
@@ -106,7 +99,6 @@ public class InstancedRenderDispatcher {
 		getEntities(event.getWorld()).beginFrame(event.getInfo());
 	}
 
-	@SubscribeEvent
 	public static void renderLayer(RenderLayerEvent event) {
 		ClientWorld world = event.getWorld();
 		if (!Backend.getInstance()
@@ -120,7 +112,6 @@ public class InstancedRenderDispatcher {
 		event.type.endDrawing();
 	}
 
-	@SubscribeEvent
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		ClientWorld world = event.getWorld();
 		if (Backend.getInstance()
@@ -156,7 +147,7 @@ public class InstancedRenderDispatcher {
 			}
 		}
 
-		TextureManager textureManager = Minecraft.getInstance().textureManager;
+		TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 		ActiveRenderInfo info = Minecraft.getInstance().gameRenderer.getActiveRenderInfo();
 
 		glActiveTexture(GL_TEXTURE0);

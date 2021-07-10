@@ -7,11 +7,11 @@ import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 
-import net.minecraftforge.common.util.Lazy;
+import net.minecraft.util.LazyValue;
 
 public class FullscreenQuad {
 
-	public static final Lazy<FullscreenQuad> INSTANCE = Lazy.of(FullscreenQuad::new);
+	public static final LazyValue<FullscreenQuad> INSTANCE = new LazyValue<>(FullscreenQuad::new);
 
 	private static final float[] vertices = {
 			// pos          // tex

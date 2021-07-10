@@ -10,45 +10,46 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
-import javax.annotation.ParametersAreNonnullByDefault;
-
 import org.lwjgl.system.MemoryUtil;
 
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.loading.Shader;
 import com.jozufozu.flywheel.backend.loading.ShaderLoadingException;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 import com.jozufozu.flywheel.event.GatherContextEvent;
+import com.jozufozu.flywheel.fabric.event.FlywheelEvents;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.resource.IResourceType;
-import net.minecraftforge.resource.ISelectiveResourceReloadListener;
-import net.minecraftforge.resource.VanillaResourceType;
+import net.minecraft.util.Unit;
 
-@ParametersAreNonnullByDefault
-public class ShaderSources implements ISelectiveResourceReloadListener {
+public class ShaderSources {
 	public static final String SHADER_DIR = "flywheel/shaders/";
 	public static final String PROGRAM_DIR = "flywheel/programs/";
 	public static final ArrayList<String> EXTENSIONS = Lists.newArrayList(".vert", ".vsh", ".frag", ".fsh", ".glsl");
@@ -61,46 +62,40 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 
 	public ShaderSources(Backend backend) {
 		this.backend = backend;
-		IResourceManager manager = backend.minecraft.getResourceManager();
-		if (manager instanceof IReloadableResourceManager) {
-			((IReloadableResourceManager) manager).addReloadListener(this);
-		}
+		ResourceReloadListener.INSTANCE.addCallback(this::onResourceManagerReload);
 	}
 
-	@Override
-	public void onResourceManagerReload(IResourceManager manager, Predicate<IResourceType> predicate) {
-		if (predicate.test(VanillaResourceType.SHADERS)) {
-			backend.refresh();
+	public void onResourceManagerReload(IResourceManager manager) {
+		backend.refresh();
 
-			if (backend.gl20()) {
-				shaderSource.clear();
+		if (backend.gl20()) {
+			shaderSource.clear();
 
-				shouldCrash = false;
+			shouldCrash = false;
 
-				backend.clearContexts();
-				ModLoader.get()
-						.postEvent(new GatherContextEvent(backend));
+			backend.clearContexts();
+			FlywheelEvents.GATHER_CONTEXT.invoker()
+					.handleEvent(new GatherContextEvent(backend));
 
-				loadProgramSpecs(manager);
-				loadShaderSources(manager);
+			loadProgramSpecs(manager);
+			loadShaderSources(manager);
 
-				for (IShaderContext<?> context : backend.allContexts()) {
-					context.load();
-				}
+			for (IShaderContext<?> context : backend.allContexts()) {
+				context.load();
+			}
 
-				if (shouldCrash) {
-					throw new ShaderLoadingException("Could not load all shaders, see log for details");
-				}
+			if (shouldCrash) {
+				throw new ShaderLoadingException("Could not load all shaders, see log for details");
+			}
 
-				Backend.log.info("Loaded all shader programs.");
+			Backend.log.info("Loaded all shader programs.");
 
-				// no need to hog all that memory
-				shaderSource.clear();
+			// no need to hog all that memory
+			shaderSource.clear();
 
-				ClientWorld world = Minecraft.getInstance().world;
-				if (Backend.isFlywheelWorld(world)) {
-					InstancedRenderDispatcher.loadAllInWorld(world);
-				}
+			ClientWorld world = Minecraft.getInstance().world;
+			if (Backend.isFlywheelWorld(world)) {
+				InstancedRenderDispatcher.loadAllInWorld(world);
 			}
 		}
 	}
@@ -219,5 +214,38 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 		}
 
 		return bytebuffer;
+	}
+
+	public static class ResourceReloadListener extends ReloadListener<Unit> implements IdentifiableResourceReloadListener {
+		public static final ResourceReloadListener INSTANCE = new ResourceReloadListener();
+
+		public static final ResourceLocation ID = new ResourceLocation(Flywheel.ID, "shader_sources");
+		public static final Collection<ResourceLocation> DEPENDENCIES = Arrays.asList(ResourceReloadListenerKeys.TEXTURES, ResourceReloadListenerKeys.MODELS);
+
+		private final List<Consumer<IResourceManager>> callbacks = new ArrayList<>();
+
+		@Override
+		protected Unit prepare(IResourceManager resourceManager, IProfiler profiler) {
+			return Unit.INSTANCE;
+		}
+
+		@Override
+		protected void apply(Unit object, IResourceManager resourceManager, IProfiler profiler) {
+			callbacks.forEach(callback -> callback.accept(resourceManager));
+		}
+
+		@Override
+		public ResourceLocation getFabricId() {
+			return ID;
+		}
+
+		@Override
+		public Collection<ResourceLocation> getFabricDependencies() {
+			return DEPENDENCIES;
+		}
+
+		protected void addCallback(Consumer<IResourceManager> callback) {
+			callbacks.add(callback);
+		}
 	}
 }

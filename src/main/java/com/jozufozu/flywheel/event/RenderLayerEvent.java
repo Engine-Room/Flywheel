@@ -1,11 +1,12 @@
 package com.jozufozu.flywheel.event;
 
+import com.jozufozu.flywheel.fabric.event.EventContext;
+
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraftforge.eventbus.api.Event;
 
-public class RenderLayerEvent extends Event {
+public class RenderLayerEvent extends EventContext {
 	private final ClientWorld world;
 	public final RenderType type;
 	public final Matrix4f viewProjection;

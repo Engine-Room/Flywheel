@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.util;
 
 import java.nio.ByteBuffer;
 
+import com.jozufozu.flywheel.mixin.fabric.BufferBuilderAccessor;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.renderer.BufferBuilder;
@@ -15,7 +16,7 @@ public class BufferBuilderReader {
 	private final int size;
 
 	public BufferBuilderReader(BufferBuilder builder) {
-		VertexFormat vertexFormat = builder.getVertexFormat();
+		VertexFormat vertexFormat = ((BufferBuilderAccessor) builder).getVertexFormat();
 		Pair<BufferBuilder.DrawState, ByteBuffer> data = builder.popData();
 		buffer = data.getSecond();
 
