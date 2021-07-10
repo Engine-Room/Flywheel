@@ -11,6 +11,10 @@ import com.jozufozu.flywheel.core.materials.OrientedData;
 import com.jozufozu.flywheel.core.model.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 
+import com.jozufozu.flywheel.util.vec.Vec3;
+import com.jozufozu.flywheel.util.vec.Vec4;
+import com.mojang.blaze3d.matrix.MatrixStack;
+
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.minecraft.block.Block;
 import net.minecraft.block.ChestBlock;
@@ -18,26 +22,34 @@ import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.state.properties.ChestType;
 import net.minecraft.tileentity.ChestTileEntity;
+import net.minecraft.tileentity.IChestLid;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMerger;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.math.vector.Vector4f;
+
+import javax.annotation.Nonnull;
 
 import java.util.Calendar;
 
-public class ChestInstance extends TileEntityInstance<ChestTileEntity> implements IDynamicInstance {
+public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityInstance<T> implements IDynamicInstance {
 
 	private final OrientedData body;
 	private final OrientedData lid;
 
 	private final Float2FloatFunction lidProgress;
 	private final RenderMaterial renderMaterial;
+	@Nonnull
+	private final ChestType chestType;
+	private final Quaternion baseRotation;
 
-	public ChestInstance(MaterialManager<?> materialManager, ChestTileEntity tile) {
+	public ChestInstance(MaterialManager<?> materialManager, T tile) {
 		super(materialManager, tile);
 
 		Block block = blockState.getBlock();
 
-		ChestType chestType = blockState.contains(ChestBlock.TYPE) ? blockState.get(ChestBlock.TYPE) : ChestType.SINGLE;
+		chestType = blockState.contains(ChestBlock.TYPE) ? blockState.get(ChestBlock.TYPE) : ChestType.SINGLE;
 		renderMaterial = Atlases.getChestTexture(tile, chestType, isChristmas());
 
 		body = baseInstance()
@@ -48,6 +60,15 @@ public class ChestInstance extends TileEntityInstance<ChestTileEntity> implement
 
 		if (block instanceof ChestBlock) {
 
+//			MatrixStack stack = new MatrixStack();
+//
+//			stack.push();
+			float horizontalAngle = blockState.get(ChestBlock.FACING).getHorizontalAngle();
+
+			baseRotation = Vector3f.POSITIVE_Y.getDegreesQuaternion(-horizontalAngle);
+
+			body.setRotation(baseRotation);
+
 			ChestBlock chestBlock = (ChestBlock) block;
 
 			TileEntityMerger.ICallbackWrapper<? extends ChestTileEntity> wrapper = chestBlock.getBlockEntitySource(blockState, world, getWorldPosition(), true);
@@ -56,6 +77,7 @@ public class ChestInstance extends TileEntityInstance<ChestTileEntity> implement
 
 
 		} else {
+			baseRotation = Quaternion.IDENTITY;
 			lidProgress = $ -> 0f;
 		}
 	}
@@ -69,10 +91,22 @@ public class ChestInstance extends TileEntityInstance<ChestTileEntity> implement
 
 		float angleX = -(progress * ((float) Math.PI / 2F));
 
-		Quaternion quaternion = new Quaternion(Vector3f.POSITIVE_X, angleX, false);
+
+		Vec3 axis = Vec3.POSITIVE_X.copy();
+		Vec3 pivot = new Vec3(0, 0, 1f / 16f);
+		pivot.add(0.5f, 0.5f, 0.5f)
+				.multiply(baseRotation)
+				.sub(0.5f, 0.5f, 0.5f);
+		axis.multiply(baseRotation);
+
+		Quaternion quaternion = new Quaternion(axis.convert(), angleX, false);
+
+		quaternion.multiply(baseRotation);
 
 		lid.setRotation(quaternion)
-				.setPivot(0, 0, 1f / 16f);
+				.setPosition(getInstancePosition())
+				.nudge(0, 9f/16f, 0)
+				.setPivot(pivot);
 
 	}
 
@@ -103,6 +137,27 @@ public class ChestInstance extends TileEntityInstance<ChestTileEntity> implement
 
 	private BufferedModel getBaseModel() {
 
+		switch (chestType) {
+		case LEFT:
+			return ModelPart.builder(64, 64)
+				.sprite(renderMaterial.getSprite())
+				.cuboid()
+				.textureOffset(0, 19)
+				.start(0, 0, 1)
+				.size(15, 10, 14)
+				.endCuboid()
+				.build();
+		case RIGHT:
+			return ModelPart.builder(64, 64)
+				.sprite(renderMaterial.getSprite())
+				.cuboid()
+				.textureOffset(0, 19)
+				.start(1, 0, 1)
+				.size(15, 10, 14)
+				.endCuboid()
+				.build();
+		}
+
 		return ModelPart.builder(64, 64)
 				.sprite(renderMaterial.getSprite())
 				.cuboid()
@@ -115,12 +170,41 @@ public class ChestInstance extends TileEntityInstance<ChestTileEntity> implement
 
 	private BufferedModel getLidModel() {
 
+		switch (chestType) {
+		case LEFT:
+		return ModelPart.builder(64, 64)
+				.sprite(renderMaterial.getSprite())
+				.cuboid()
+				.textureOffset(0, 0)
+				.start(0, 0, 1)
+				.size(15, 5, 14)
+				.endCuboid()
+				.cuboid()
+				.start(0, -2, 15)
+				.size(1, 4, 1)
+				.endCuboid()
+				.build();
+		case RIGHT:
 		return ModelPart.builder(64, 64)
 				.sprite(renderMaterial.getSprite())
 				.cuboid()
 				.textureOffset(0, 0)
 				.start(1, 0, 1)
-				.end(15, 5, 15)
+				.size(15, 5, 14)
+				.endCuboid()
+				.cuboid()
+				.start(15, -2, 15)
+				.size(1, 4, 1)
+				.endCuboid()
+				.build();
+		}
+
+		return ModelPart.builder(64, 64)
+				.sprite(renderMaterial.getSprite())
+				.cuboid()
+				.textureOffset(0, 0)
+				.start(1, 0, 1)
+				.size(14, 5, 14)
 				.endCuboid()
 				.cuboid()
 				.start(7, -2, 15)

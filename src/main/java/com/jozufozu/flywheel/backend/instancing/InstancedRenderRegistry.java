@@ -101,7 +101,7 @@ public class InstancedRenderRegistry {
 			return this;
 		}
 
-		public InstancedRenderRegistry build() {
+		public InstancedRenderRegistry register() {
 			tiles.put(type, factory);
 			InstancedRenderRegistry.this.skipRender.put(type, skipRender);
 
