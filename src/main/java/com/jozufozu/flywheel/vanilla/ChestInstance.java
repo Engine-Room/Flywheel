@@ -6,16 +6,19 @@ import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
 
 import com.jozufozu.flywheel.backend.model.BufferedModel;
 import com.jozufozu.flywheel.core.Materials;
+import com.jozufozu.flywheel.core.materials.ModelData;
 import com.jozufozu.flywheel.core.materials.OrientedData;
 
 import com.jozufozu.flywheel.core.model.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 
+import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
 import com.jozufozu.flywheel.util.vec.Vec3;
 import com.jozufozu.flywheel.util.vec.Vec4;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
+import net.minecraft.block.AbstractChestBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.client.renderer.Atlases;
@@ -26,6 +29,7 @@ import net.minecraft.tileentity.IChestLid;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMerger;
 import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
 
@@ -36,13 +40,15 @@ import java.util.Calendar;
 public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityInstance<T> implements IDynamicInstance {
 
 	private final OrientedData body;
-	private final OrientedData lid;
+	private final ModelData lid;
 
 	private final Float2FloatFunction lidProgress;
 	private final RenderMaterial renderMaterial;
 	@Nonnull
 	private final ChestType chestType;
 	private final Quaternion baseRotation;
+
+	private float lastProgress = Float.NaN;
 
 	public ChestInstance(MaterialManager<?> materialManager, T tile) {
 		super(materialManager, tile);
@@ -54,11 +60,9 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 
 		body = baseInstance()
 				.setPosition(getInstancePosition());
-		lid = lidInstance()
-				.setPosition(getInstancePosition())
-				.nudge(0, 9f/16f, 0);
+		lid = lidInstance();
 
-		if (block instanceof ChestBlock) {
+		if (block instanceof AbstractChestBlock) {
 
 //			MatrixStack stack = new MatrixStack();
 //
@@ -69,7 +73,7 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 
 			body.setRotation(baseRotation);
 
-			ChestBlock chestBlock = (ChestBlock) block;
+			AbstractChestBlock<?> chestBlock = (AbstractChestBlock<?>) block;
 
 			TileEntityMerger.ICallbackWrapper<? extends ChestTileEntity> wrapper = chestBlock.getBlockEntitySource(blockState, world, getWorldPosition(), true);
 
@@ -86,27 +90,27 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 	public void beginFrame() {
 		float progress = lidProgress.get(AnimationTickHolder.getPartialTicks());
 
+		if (lastProgress == progress) return;
+
+		lastProgress = progress;
+
 		progress = 1.0F - progress;
 		progress = 1.0F - progress * progress * progress;
 
 		float angleX = -(progress * ((float) Math.PI / 2F));
 
+		MatrixTransformStack stack = new MatrixTransformStack();
 
-		Vec3 axis = Vec3.POSITIVE_X.copy();
-		Vec3 pivot = new Vec3(0, 0, 1f / 16f);
-		pivot.add(0.5f, 0.5f, 0.5f)
+		stack.translate(getInstancePosition())
+				.translate(0, 9f/16f, 0)
+				.centre()
 				.multiply(baseRotation)
-				.sub(0.5f, 0.5f, 0.5f);
-		axis.multiply(baseRotation);
+				.unCentre()
+				.translate(0, 0, 1f / 16f)
+				.multiply(Vector3f.POSITIVE_X.getRadialQuaternion(angleX))
+				.translate(0, 0, -1f / 16f);
 
-		Quaternion quaternion = new Quaternion(axis.convert(), angleX, false);
-
-		quaternion.multiply(baseRotation);
-
-		lid.setRotation(quaternion)
-				.setPosition(getInstancePosition())
-				.nudge(0, 9f/16f, 0)
-				.setPivot(pivot);
+		lid.setTransform(stack.unwrap());
 
 	}
 
@@ -128,9 +132,9 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 				.createInstance();
 	}
 
-	private OrientedData lidInstance() {
+	private ModelData lidInstance() {
 
-		return materialManager.getMaterial(Materials.ORIENTED, renderMaterial.getAtlasId())
+		return materialManager.getMaterial(Materials.TRANSFORMED, renderMaterial.getAtlasId())
 				.get("lid_" + renderMaterial.getTextureId(), this::getLidModel)
 				.createInstance();
 	}

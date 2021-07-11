@@ -28,13 +28,13 @@ public class Vec4 {
 		this.w = w;
 	}
 
-	public void multiply(Quaternion quat) {
+	public Vec4 multiply(Quaternion quat) {
 		Quaternion quaternion = new Quaternion(quat);
 		quaternion.multiply(new Quaternion(this.getX(), this.getY(), this.getZ(), 0.0F));
 		Quaternion quaternion1 = new Quaternion(quat);
 		quaternion1.conjugate();
 		quaternion.multiply(quaternion1);
-		this.set(quaternion.getX(), quaternion.getY(), quaternion.getZ(), this.getW());
+		return set(quaternion.getX(), quaternion.getY(), quaternion.getZ(), this.getW());
 	}
 
 	public Vec3 xyz() {
@@ -57,10 +57,11 @@ public class Vec4 {
 		return w;
 	}
 
-	public void set(float x, float y, float z, float w) {
+	public Vec4 set(float x, float y, float z, float w) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.w = w;
+		return this;
 	}
 }
