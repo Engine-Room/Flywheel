@@ -56,6 +56,26 @@ public class InstancedRenderRegistry {
 		return new EntityConfig<>(type);
 	}
 
+	/**
+	 * @deprecated will be removed in 0.2.0, use {@link #tile}
+	 */
+	@Deprecated
+	public <T extends TileEntity> void register(TileEntityType<? extends T> type, ITileInstanceFactory<? super T> rendererFactory) {
+		this.tile(type)
+				.factory(rendererFactory)
+				.register();
+	}
+
+	/**
+	 * @deprecated will be removed in 0.2.0, use {@link #entity}
+	 */
+	@Deprecated
+	public <T extends Entity> void register(EntityType<? extends T> type, IEntityInstanceFactory<? super T> rendererFactory) {
+		this.entity(type)
+				.factory(rendererFactory)
+				.register();
+	}
+
 	@SuppressWarnings("unchecked")
 	@Nullable
 	public <T extends TileEntity> TileEntityInstance<? super T> create(MaterialManager<?> manager, T tile) {
