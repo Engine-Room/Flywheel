@@ -38,8 +38,7 @@ public class Vec3 {
 
 		vec4.multiply(quat);
 
-		set(vec4.getX(), vec4.getY(), vec4.getZ());
-		return this;
+		return set(vec4.getX(), vec4.getY(), vec4.getZ());
 	}
 
 	public Vec3 copy() {
@@ -50,15 +49,15 @@ public class Vec3 {
 		return new Vector3f(x, y, z);
 	}
 
-	public void set(float x, float y, float z) {
+	public Vec3 set(float x, float y, float z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
+		return this;
 	}
 
 	public Vec3 add(Vec3 v) {
-		add(v.x, v.y, v.z);
-		return this;
+		return add(v.x, v.y, v.z);
 	}
 
 	public Vec3 add(float x, float y, float z) {
@@ -66,6 +65,10 @@ public class Vec3 {
 		this.y += y;
 		this.z += z;
 		return this;
+	}
+
+	public Vec3 sub(Vec3 v) {
+		return sub(v.x, v.y, v.z);
 	}
 
 	public Vec3 sub(float x, float y, float z) {
