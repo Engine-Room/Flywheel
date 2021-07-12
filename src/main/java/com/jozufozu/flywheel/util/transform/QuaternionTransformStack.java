@@ -1,16 +1,9 @@
 package com.jozufozu.flywheel.util.transform;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.Stack;
-import java.util.Vector;
 
 public class QuaternionTransformStack implements TransformStack {
 

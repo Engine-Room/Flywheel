@@ -1,24 +1,20 @@
 package com.jozufozu.flywheel.core.model;
 
-import static com.jozufozu.flywheel.util.RenderMath.*;
-
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.backend.model.BufferedModel;
-
-import com.jozufozu.flywheel.backend.model.IndexedModel;
-
-import com.jozufozu.flywheel.core.Formats;
-
-import com.jozufozu.flywheel.core.atlas.AtlasInfo;
-
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Vector3f;
+import static com.jozufozu.flywheel.util.RenderMath.nb;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+
+import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
+import com.jozufozu.flywheel.backend.model.BufferedModel;
+import com.jozufozu.flywheel.backend.model.IndexedModel;
+import com.jozufozu.flywheel.core.Formats;
+
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.vector.Vector3f;
 
 public class PartBuilder {
 

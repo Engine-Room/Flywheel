@@ -3,8 +3,6 @@ package com.jozufozu.flywheel.mixin;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
@@ -12,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import com.google.common.collect.Lists;
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.world.ClientWorld;
