@@ -62,8 +62,7 @@ public class InstancedRenderRegistry {
 	@Deprecated
 	public <T extends TileEntity> void register(TileEntityType<? extends T> type, ITileInstanceFactory<? super T> rendererFactory) {
 		this.tile(type)
-				.factory(rendererFactory)
-				.register();
+				.factory(rendererFactory);
 	}
 
 	/**
@@ -72,8 +71,7 @@ public class InstancedRenderRegistry {
 	@Deprecated
 	public <T extends Entity> void register(EntityType<? extends T> type, IEntityInstanceFactory<? super T> rendererFactory) {
 		this.entity(type)
-				.factory(rendererFactory)
-				.register();
+				.factory(rendererFactory);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -104,56 +102,39 @@ public class InstancedRenderRegistry {
 	public class TileConfig<T extends TileEntity> {
 
 		private final TileEntityType<T> type;
-		private ITileInstanceFactory<? super T> factory;
-		private boolean skipRender = false;
 
 		public TileConfig(TileEntityType<T> type) {
 			this.type = type;
 		}
 
 		public TileConfig<T> factory(ITileInstanceFactory<? super T> rendererFactory) {
-			factory = rendererFactory;
+			tiles.put(type, rendererFactory);
 			return this;
 		}
 
 		public TileConfig<T> setSkipRender(boolean skipRender) {
-			this.skipRender = skipRender;
-			return this;
-		}
-
-		public InstancedRenderRegistry register() {
-			tiles.put(type, factory);
 			InstancedRenderRegistry.this.skipRender.put(type, skipRender);
-
-			return InstancedRenderRegistry.this;
+			return this;
 		}
 	}
 
 	public class EntityConfig<T extends Entity> {
 
 		private final EntityType<T> type;
-		private IEntityInstanceFactory<? super T> factory;
-		private boolean skipRender = false;
 
 		public EntityConfig(EntityType<T> type) {
 			this.type = type;
 		}
 
 		public EntityConfig<T> factory(IEntityInstanceFactory<? super T> rendererFactory) {
-			factory = rendererFactory;
+			entities.put(type, rendererFactory);
 			return this;
 		}
 
 		public EntityConfig<T> setSkipRender(boolean skipRender) {
-			this.skipRender = skipRender;
-			return this;
-		}
-
-		public InstancedRenderRegistry register() {
-			entities.put(type, factory);
 			InstancedRenderRegistry.this.skipRender.put(type, skipRender);
 
-			return InstancedRenderRegistry.this;
+			return this;
 		}
 	}
 

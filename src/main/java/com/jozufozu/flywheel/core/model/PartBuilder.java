@@ -9,6 +9,8 @@ import com.jozufozu.flywheel.backend.model.IndexedModel;
 
 import com.jozufozu.flywheel.core.Formats;
 
+import com.jozufozu.flywheel.core.atlas.AtlasInfo;
+
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.vector.Vector3f;
@@ -157,19 +159,16 @@ public class PartBuilder {
 			float f11 = getV((float)textureOffsetV + sizeZ);
 			float f12 = getV((float)textureOffsetV + sizeZ + sizeY);
 
-
-			float textureWidth = partBuilder.sizeU;
-			float textureHeight = partBuilder.sizeV;
-			quad(buffer, new Vector3f[]{hlh, llh, lll, hll}, f5, f10, f6, f11, textureWidth, textureHeight, Direction.DOWN);
-			quad(buffer, new Vector3f[]{hhl, lhl, lhh, hhh}, f6, f11, f7, f10, textureWidth, textureHeight, Direction.UP);
-			quad(buffer, new Vector3f[]{lll, llh, lhh, lhl}, f4, f11, f5, f12, textureWidth, textureHeight, Direction.WEST);
-			quad(buffer, new Vector3f[]{hll, lll, lhl, hhl}, f5, f11, f6, f12, textureWidth, textureHeight, Direction.NORTH);
-			quad(buffer, new Vector3f[]{hlh, hll, hhl, hhh}, f6, f11, f8, f12, textureWidth, textureHeight, Direction.EAST);
-			quad(buffer, new Vector3f[]{llh, hlh, hhh, lhh}, f8, f11, f9, f12, textureWidth, textureHeight, Direction.SOUTH);
+			quad(buffer, new Vector3f[]{hlh, llh, lll, hll}, f5, f10, f6, f11, Direction.DOWN);
+			quad(buffer, new Vector3f[]{hhl, lhl, lhh, hhh}, f6, f11, f7, f10, Direction.UP);
+			quad(buffer, new Vector3f[]{lll, llh, lhh, lhl}, f4, f11, f5, f12, Direction.WEST);
+			quad(buffer, new Vector3f[]{hll, lll, lhl, hhl}, f5, f11, f6, f12, Direction.NORTH);
+			quad(buffer, new Vector3f[]{hlh, hll, hhl, hhh}, f6, f11, f8, f12, Direction.EAST);
+			quad(buffer, new Vector3f[]{llh, hlh, hhh, lhh}, f8, f11, f9, f12, Direction.SOUTH);
 		}
 
 
-		public void quad(VecBuffer buffer, Vector3f[] vertices, float minU, float minV, float maxU, float maxV, float texWidth, float texHeight, Direction dir) {
+		public void quad(VecBuffer buffer, Vector3f[] vertices, float minU, float minV, float maxU, float maxV, Direction dir) {
 
 			Vector3f normal = dir.getUnitVector();
 
@@ -182,14 +181,14 @@ public class PartBuilder {
 
 		public float getU(float u) {
 			if (sprite != null)
-				return sprite.getInterpolatedU(u / 4.);
+				return sprite.getInterpolatedU(u * 16 / partBuilder.sizeU);
 			else
 				return u;
 		}
 
 		public float getV(float v) {
 			if (sprite != null)
-				return sprite.getInterpolatedV(v / 4.);
+				return sprite.getInterpolatedV(v * 16 / partBuilder.sizeV);
 			else
 				return v;
 		}
