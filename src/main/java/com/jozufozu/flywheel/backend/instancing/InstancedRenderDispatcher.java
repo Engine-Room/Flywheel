@@ -16,7 +16,8 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.core.Contexts;
-import com.jozufozu.flywheel.core.CrumblingInstanceManager;
+import com.jozufozu.flywheel.core.crumbling.CrumblingInstanceManager;
+import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
@@ -163,8 +164,6 @@ public class InstancedRenderDispatcher {
 		glBindTexture(GL_TEXTURE_2D, textureManager.getTexture(PlayerContainer.BLOCK_ATLAS_TEXTURE)
 				.getGlTextureId());
 
-		glActiveTexture(GL_TEXTURE4);
-
 		crumblingLayer.startDrawing();
 		bitSet.stream()
 				.forEach(i -> {
@@ -173,6 +172,7 @@ public class InstancedRenderDispatcher {
 					renderer.beginFrame(info);
 
 					if (breaking != null) {
+						glActiveTexture(GL_TEXTURE4);
 						glBindTexture(GL_TEXTURE_2D, breaking.getGlTextureId());
 						renderer.materialManager.render(RenderType.getCutoutMipped(), viewProjection, cameraX, cameraY, cameraZ);
 					}

@@ -167,6 +167,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 	}
 
 	public void invalidate() {
+		instances.values().forEach(IInstance::remove);
 		instances.clear();
 		dynamicInstances.clear();
 		tickableInstances.clear();
