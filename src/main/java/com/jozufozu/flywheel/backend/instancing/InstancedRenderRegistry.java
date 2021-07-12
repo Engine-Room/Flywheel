@@ -57,7 +57,7 @@ public class InstancedRenderRegistry {
 	}
 
 	/**
-	 * @deprecated will be removed in 0.2.0, use {@link #tile}
+	 * @deprecated will be removed in 0.3.0, use {@link #tile}
 	 */
 	@Deprecated
 	public <T extends TileEntity> void register(TileEntityType<? extends T> type, ITileInstanceFactory<? super T> rendererFactory) {
@@ -66,7 +66,7 @@ public class InstancedRenderRegistry {
 	}
 
 	/**
-	 * @deprecated will be removed in 0.2.0, use {@link #entity}
+	 * @deprecated will be removed in 0.3.0, use {@link #entity}
 	 */
 	@Deprecated
 	public <T extends Entity> void register(EntityType<? extends T> type, IEntityInstanceFactory<? super T> rendererFactory) {

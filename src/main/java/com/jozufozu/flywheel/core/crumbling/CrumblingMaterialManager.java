@@ -10,7 +10,7 @@ import java.util.Map;
 
 import com.jozufozu.flywheel.backend.instancing.MaterialManager;
 import com.jozufozu.flywheel.backend.instancing.MaterialRenderer;
-import com.jozufozu.flywheel.core.Contexts;
+import com.jozufozu.flywheel.core.WorldContext;
 import com.jozufozu.flywheel.core.atlas.AtlasInfo;
 import com.jozufozu.flywheel.core.atlas.SheetData;
 import com.jozufozu.flywheel.core.shader.IProgramCallback;
@@ -24,8 +24,8 @@ import net.minecraft.util.math.vector.Matrix4f;
 
 public class CrumblingMaterialManager extends MaterialManager<CrumblingProgram> {
 
-	public CrumblingMaterialManager() {
-		super(Contexts.CRUMBLING);
+	public CrumblingMaterialManager(WorldContext<CrumblingProgram> context) {
+		super(context);
 	}
 
 	/**

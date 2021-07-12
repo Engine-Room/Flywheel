@@ -17,7 +17,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
 
 import org.lwjgl.system.MemoryUtil;
 
@@ -47,7 +46,6 @@ import net.minecraftforge.resource.IResourceType;
 import net.minecraftforge.resource.ISelectiveResourceReloadListener;
 import net.minecraftforge.resource.VanillaResourceType;
 
-@ParametersAreNonnullByDefault
 public class ShaderSources implements ISelectiveResourceReloadListener {
 	public static final String SHADER_DIR = "flywheel/shaders/";
 	public static final String PROGRAM_DIR = "flywheel/programs/";
