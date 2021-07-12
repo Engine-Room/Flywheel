@@ -1,5 +1,8 @@
 package com.jozufozu.flywheel.core.atlas;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.jozufozu.flywheel.mixin.atlas.SheetDataAccessor;
 
 import net.minecraft.client.Minecraft;
@@ -7,9 +10,6 @@ import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.Texture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class AtlasInfo {
 

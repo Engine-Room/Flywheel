@@ -2,23 +2,16 @@ package com.jozufozu.flywheel.vanilla;
 
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.MaterialManager;
-import com.jozufozu.flywheel.backend.instancing.MaterialSpec;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
-
 import com.jozufozu.flywheel.backend.model.BufferedModel;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.OrientedData;
-
 import com.jozufozu.flywheel.core.model.ModelPart;
-import com.jozufozu.flywheel.core.model.PartBuilder;
-
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 
 import net.minecraft.client.renderer.tileentity.BellTileEntityRenderer;
 import net.minecraft.tileentity.BellTileEntity;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 
 public class BellInstance extends TileEntityInstance<BellTileEntity> implements IDynamicInstance {

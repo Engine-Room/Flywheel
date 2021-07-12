@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.util.vec;
 
 import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3f;
 
 public class Vec4 {
 

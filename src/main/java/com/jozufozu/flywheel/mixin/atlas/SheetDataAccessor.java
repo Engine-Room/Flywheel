@@ -1,9 +1,9 @@
 package com.jozufozu.flywheel.mixin.atlas;
 
-import net.minecraft.client.renderer.texture.AtlasTexture;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.client.renderer.texture.AtlasTexture;
 
 @Mixin(AtlasTexture.SheetData.class)
 public interface SheetDataAccessor {

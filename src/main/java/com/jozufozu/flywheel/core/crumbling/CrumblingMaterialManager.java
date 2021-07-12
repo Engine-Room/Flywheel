@@ -1,13 +1,19 @@
 package com.jozufozu.flywheel.core.crumbling;
 
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
+
+import java.util.ArrayList;
+import java.util.Map;
+
 import com.jozufozu.flywheel.backend.instancing.MaterialManager;
 import com.jozufozu.flywheel.backend.instancing.MaterialRenderer;
 import com.jozufozu.flywheel.core.Contexts;
-import com.jozufozu.flywheel.core.WorldContext;
 import com.jozufozu.flywheel.core.atlas.AtlasInfo;
 import com.jozufozu.flywheel.core.atlas.SheetData;
 import com.jozufozu.flywheel.core.shader.IProgramCallback;
-import com.jozufozu.flywheel.core.shader.WorldProgram;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -15,14 +21,6 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
-
-import java.util.ArrayList;
-import java.util.Map;
-
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 public class CrumblingMaterialManager extends MaterialManager<CrumblingProgram> {
 

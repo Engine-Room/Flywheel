@@ -1,21 +1,19 @@
 package com.jozufozu.flywheel.vanilla;
 
+import java.util.Calendar;
+
+import javax.annotation.Nonnull;
+
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.MaterialManager;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
-
 import com.jozufozu.flywheel.backend.model.BufferedModel;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.ModelData;
 import com.jozufozu.flywheel.core.materials.OrientedData;
-
 import com.jozufozu.flywheel.core.model.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
-
 import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
-import com.jozufozu.flywheel.util.vec.Vec3;
-import com.jozufozu.flywheel.util.vec.Vec4;
-import com.mojang.blaze3d.matrix.MatrixStack;
 
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.minecraft.block.AbstractChestBlock;
@@ -29,13 +27,7 @@ import net.minecraft.tileentity.IChestLid;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMerger;
 import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector4f;
-
-import javax.annotation.Nonnull;
-
-import java.util.Calendar;
 
 public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityInstance<T> implements IDynamicInstance {
 
