@@ -12,11 +12,14 @@ import com.jozufozu.flywheel.util.AnimationTickHolder;
 import net.minecraft.client.renderer.tileentity.BellTileEntityRenderer;
 import net.minecraft.tileentity.BellTileEntity;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 
 public class BellInstance extends TileEntityInstance<BellTileEntity> implements IDynamicInstance {
 
 	private final OrientedData bell;
+
+	private float lastRingTime = Float.NaN;
 
 	public BellInstance(MaterialManager<?> materialManager, BellTileEntity tile) {
 		super(materialManager, tile);
@@ -28,13 +31,19 @@ public class BellInstance extends TileEntityInstance<BellTileEntity> implements 
 
 	@Override
 	public void beginFrame() {
+		float ringTime = (float)tile.ringingTicks + AnimationTickHolder.getPartialTicks();
+
+		if (ringTime == lastRingTime) return;
+		lastRingTime = ringTime;
+
 		if (tile.isRinging) {
-			float ringness = (float)tile.ringingTicks + AnimationTickHolder.getPartialTicks();
-			float angle = MathHelper.sin(ringness / (float)Math.PI) / (4.0F + ringness / 3.0F);
+			float angle = MathHelper.sin(ringTime / (float) Math.PI) / (4.0F + ringTime / 3.0F);
 
 			Vector3f ringAxis = tile.ringDirection.rotateYCCW().getUnitVector();
 
 			bell.setRotation(ringAxis.getRadialQuaternion(angle));
+		} else {
+			bell.setRotation(Quaternion.IDENTITY);
 		}
 	}
 
