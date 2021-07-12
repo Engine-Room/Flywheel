@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.mixin;
 
-import java.util.Set;
+import java.util.List;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,7 +31,7 @@ public class TileWorldHookMixin {
 
 	@Shadow
 	@Final
-	protected Set<TileEntity> tileEntitiesToBeRemoved;
+	protected List<TileEntity> tileEntitiesToBeRemoved;
 
 	@Inject(at = @At("TAIL"), method = "addTileEntity")
 	private void onAddTile(TileEntity te, CallbackInfoReturnable<Boolean> cir) {

@@ -15,7 +15,7 @@ import net.minecraft.client.gui.overlay.DebugOverlayGui;
 @Mixin(DebugOverlayGui.class)
 public abstract class DebugOverlayGuiMixin extends AbstractGui {
 	@Inject(method = "getDebugInfoRight", at = @At("RETURN"))
-    private void modifyRightText(CallbackInfoReturnable<List<String>> cir) {
+	private void modifyRightText(CallbackInfoReturnable<List<String>> cir) {
 		ForgeEvents.addToDebugScreen(cir.getReturnValue());
 	}
 }

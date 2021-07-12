@@ -4,6 +4,7 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.ShaderSources;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.AtlasStitcher;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.Materials;
@@ -24,7 +25,8 @@ import net.minecraft.resources.ResourcePackType;
 
 public class FlywheelClient implements ClientModInitializer {
 
-	public static void clientInit() {
+	@Override
+	public void onInitializeClient() {
 
 		Backend.init();
 
@@ -45,10 +47,7 @@ public class FlywheelClient implements ClientModInitializer {
 		FlywheelEvents.RELOAD_RENDERERS.register(QuadConverter::onRendererReload);
 		ClientEntityEvents.ENTITY_LOAD.register(EntityWorldHandler::onEntityJoinWorld);
 		ClientEntityEvents.ENTITY_UNLOAD.register(EntityWorldHandler::onEntityLeaveWorld);
-	}
 
-	@Override
-	public void onInitializeClient() {
-		clientInit();
+		FlwConfig.init();
 	}
 }

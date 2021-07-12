@@ -19,7 +19,7 @@ import com.jozufozu.flywheel.backend.model.IndexedModel;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.util.BufferBuilderReader;
 import com.jozufozu.flywheel.util.RenderUtil;
-import com.jozufozu.flywheel.util.VirtualEmptyModelData;
+import com.jozufozu.flywheel.util.VirtualRenderingStateManager;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.block.BlockState;
@@ -167,7 +167,9 @@ public class InstanceMaterial<D extends InstanceData> {
 		//				.collect(Collectors.toList());
 
 		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-		blockRenderer.renderModel(mc.world, model, referenceState, BlockPos.ZERO.up(255), ms, builder, true, mc.world.rand, 42, OverlayTexture.DEFAULT_UV, VirtualEmptyModelData.INSTANCE);
+		VirtualRenderingStateManager.runVirtually(() -> {
+			blockRenderer.render(mc.world, model, referenceState, BlockPos.ZERO.up(255), ms, builder, true, mc.world.rand, 42, OverlayTexture.DEFAULT_UV);
+		});
 		builder.finishDrawing();
 		return builder;
 	}
