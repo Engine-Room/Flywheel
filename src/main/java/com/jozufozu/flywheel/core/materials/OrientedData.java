@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.core.materials;
 
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.instancing.Instancer;
+import com.jozufozu.flywheel.util.vec.Vec3;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Quaternion;
@@ -19,7 +20,7 @@ public class OrientedData extends BasicData {
 	private float qX;
 	private float qY;
 	private float qZ;
-	private float qW;
+	private float qW = 1;
 
 	public OrientedData(Instancer<?> owner) {
 		super(owner);
@@ -41,6 +42,11 @@ public class OrientedData extends BasicData {
 		return this;
 	}
 
+
+	public OrientedData nudge(Vec3 pos) {
+		return nudge(pos.getX(), pos.getY(), pos.getZ());
+	}
+
 	public OrientedData nudge(float x, float y, float z) {
 		this.posX += x;
 		this.posY += y;
@@ -55,6 +61,10 @@ public class OrientedData extends BasicData {
 
 	public OrientedData setPivot(Vector3d pos) {
 		return setPosition((float) pos.getX(), (float) pos.getY(), (float) pos.getZ());
+	}
+
+	public OrientedData setPivot(Vec3 pos) {
+		return setPivot(pos.getX(), pos.getY(), pos.getZ());
 	}
 
 	public OrientedData setPivot(float x, float y, float z) {

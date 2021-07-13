@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.core;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.EnumMap;
@@ -136,7 +137,7 @@ public class QuadConverter {
 			type.castAndBuffer(indices, i + 2);
 			type.castAndBuffer(indices, i + 3);
 		}
-		indices.flip();
+		((Buffer) indices).flip();
 	}
 
 	private GlBuffer getBuffer(GlNumericType type) {

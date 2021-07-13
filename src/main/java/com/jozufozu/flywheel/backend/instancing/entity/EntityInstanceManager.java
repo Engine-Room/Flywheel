@@ -18,6 +18,11 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 	}
 
 	@Override
+	protected boolean canInstance(Entity obj) {
+		return obj != null && InstancedRenderRegistry.getInstance().canInstance(obj.getType());
+	}
+
+	@Override
 	protected IInstance createRaw(Entity obj) {
 		return InstancedRenderRegistry.getInstance()
 				.create(materialManager, obj);

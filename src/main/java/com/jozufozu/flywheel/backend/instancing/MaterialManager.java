@@ -34,7 +34,7 @@ public class MaterialManager<P extends WorldProgram> {
 	protected final Map<ResourceLocation, ArrayList<MaterialRenderer<P>>> renderers;
 	protected final Map<ResourceLocation, Map<MaterialSpec<?>, InstanceMaterial<?>>> materials;
 
-	private BlockPos originCoordinate = BlockPos.ZERO;
+	protected BlockPos originCoordinate = BlockPos.ZERO;
 
 	private final WeakHashSet<OriginShiftListener> listeners;
 

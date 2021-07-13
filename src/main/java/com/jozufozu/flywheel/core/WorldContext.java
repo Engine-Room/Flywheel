@@ -14,7 +14,6 @@ import com.jozufozu.flywheel.backend.ResourceUtil;
 import com.jozufozu.flywheel.backend.ShaderContext;
 import com.jozufozu.flywheel.backend.ShaderSources;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
-import com.jozufozu.flywheel.backend.instancing.MaterialManager;
 import com.jozufozu.flywheel.backend.instancing.MaterialSpec;
 import com.jozufozu.flywheel.backend.loading.InstancedArraysTemplate;
 import com.jozufozu.flywheel.backend.loading.Program;
@@ -30,7 +29,6 @@ import com.jozufozu.flywheel.core.shader.spec.ProgramState;
 import com.jozufozu.flywheel.util.WorldAttached;
 
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.IWorld;
 
 public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 
@@ -40,8 +38,6 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 	protected ResourceLocation name;
 	protected Supplier<Stream<ResourceLocation>> specStream;
 	protected TemplateFactory templateFactory;
-
-	private final WorldAttached<MaterialManager<P>> worldAttachedMMs = new WorldAttached<>($ -> new MaterialManager<>(this));
 
 	private final Map<ShaderType, ResourceLocation> builtins = new EnumMap<>(ShaderType.class);
 	private final Map<ShaderType, String> builtinSources = new EnumMap<>(ShaderType.class);
@@ -71,10 +67,6 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 	public WorldContext<P> withBuiltin(ShaderType shaderType, ResourceLocation file) {
 		builtins.put(shaderType, file);
 		return this;
-	}
-
-	public MaterialManager<P> getMaterialManager(IWorld world) {
-		return worldAttachedMMs.get(world);
 	}
 
 	public WorldContext<P> withSpecStream(Supplier<Stream<ResourceLocation>> specStream) {
@@ -114,13 +106,6 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 		specStream.get()
 				.map(backend::getSpec)
 				.forEach(this::loadSpec);
-	}
-
-	@Override
-	public void delete() {
-		super.delete();
-
-		worldAttachedMMs.empty(MaterialManager::delete);
 	}
 
 	@Override
