@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
@@ -18,7 +19,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
 
 import org.lwjgl.system.MemoryUtil;
 
@@ -52,7 +52,6 @@ import net.minecraftforge.resource.IResourceType;
 import net.minecraftforge.resource.ISelectiveResourceReloadListener;
 import net.minecraftforge.resource.VanillaResourceType;
 
-@ParametersAreNonnullByDefault
 public class ShaderSources implements ISelectiveResourceReloadListener {
 	public static final String SHADER_DIR = "flywheel/shaders/";
 	public static final String PROGRAM_DIR = "flywheel/programs/";
@@ -205,7 +204,7 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 		try {
 			bytebuffer = readToBuffer(is);
 			int i = bytebuffer.position();
-			bytebuffer.rewind();
+			((Buffer) bytebuffer).rewind();
 			return MemoryUtil.memASCII(bytebuffer, i);
 		} catch (IOException e) {
 

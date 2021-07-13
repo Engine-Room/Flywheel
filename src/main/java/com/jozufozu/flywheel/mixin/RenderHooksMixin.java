@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.OptifineHandler;
+import com.jozufozu.flywheel.backend.instancing.CrumblingRenderer;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -81,7 +82,7 @@ public class RenderHooksMixin {
 												.getProjectionMatrix());
 
 		Vector3d cameraPos = info.getProjectedView();
-		InstancedRenderDispatcher.renderBreaking(world, viewProjection, cameraPos.x, cameraPos.y, cameraPos.z);
+		CrumblingRenderer.renderBreaking(world, viewProjection, cameraPos.x, cameraPos.y, cameraPos.z);
 
 		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
 	}
