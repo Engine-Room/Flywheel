@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.core.shader.spec;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
 import com.jozufozu.flywheel.util.CodecUtil;
@@ -54,5 +55,10 @@ public class ProgramState {
 
 	public List<IProgramExtension> getExtensions() {
 		return extensions;
+	}
+
+	@Override
+	public String toString() {
+		return "ProgramState{" + "gameState=" + context.getID() + ", defines=" + defines + ", extensions=" + extensions.stream().map(IProgramExtension::getID).collect(Collectors.toList()) + '}';
 	}
 }
