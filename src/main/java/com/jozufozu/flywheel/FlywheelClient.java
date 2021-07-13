@@ -3,6 +3,7 @@ package com.jozufozu.flywheel;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.ShaderSources;
+import com.jozufozu.flywheel.backend.instancing.CrumblingRenderer;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.AtlasStitcher;
@@ -12,6 +13,7 @@ import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.QuadConverter;
 import com.jozufozu.flywheel.event.EntityWorldHandler;
 import com.jozufozu.flywheel.fabric.event.FlywheelEvents;
+import com.jozufozu.flywheel.vanilla.VanillaInstances;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
@@ -37,9 +39,12 @@ public class FlywheelClient implements ClientModInitializer {
 		ModelLoadingRegistry.INSTANCE.registerModelProvider(PartialModel::onModelRegistry);
 		ResourceManagerHelper.get(ResourcePackType.CLIENT_RESOURCES).registerReloadListener(PartialModel.ResourceReloadListener.INSTANCE);
 
+		VanillaInstances.init();
+
 		ResourceManagerHelper.get(ResourcePackType.CLIENT_RESOURCES).registerReloadListener(ShaderSources.ResourceReloadListener.INSTANCE);
 
 		WorldRenderEvents.END.register(RenderWork::onRenderWorldLast);
+		FlywheelEvents.RELOAD_RENDERERS.register(CrumblingRenderer::onReloadRenderers);
 		ClientTickEvents.END_CLIENT_TICK.register(InstancedRenderDispatcher::tick);
 		FlywheelEvents.BEGIN_FRAME.register(InstancedRenderDispatcher::onBeginFrame);
 		FlywheelEvents.RENDER_LAYER.register(InstancedRenderDispatcher::renderLayer);

@@ -12,7 +12,7 @@ import net.minecraft.world.IWorld;
 
 public class WorldAttached<T> {
 
-	Map<IWorld, T> attached;
+	private final Map<IWorld, T> attached;
 	private final Function<IWorld, T> factory;
 
 	public WorldAttached(Function<IWorld, T> factory) {

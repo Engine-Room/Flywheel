@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -137,7 +138,7 @@ public class InstanceMaterial<D extends InstanceData> {
 			vertices.putFloat(reader.getV(i));
 		}
 
-		vertices.rewind();
+		((Buffer) vertices).rewind();
 
 		// return new BufferedModel(GlPrimitive.QUADS, format, vertices, vertexCount);
 

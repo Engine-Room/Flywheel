@@ -18,6 +18,11 @@ public class TileInstanceManager extends InstanceManager<TileEntity> {
 	}
 
 	@Override
+	protected boolean canInstance(TileEntity obj) {
+		return obj != null && InstancedRenderRegistry.getInstance().canInstance(obj.getType());
+	}
+
+	@Override
 	protected IInstance createRaw(TileEntity obj) {
 		return InstancedRenderRegistry.getInstance()
 				.create(materialManager, obj);

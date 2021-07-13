@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
@@ -19,6 +20,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
+
 import org.lwjgl.system.MemoryUtil;
 
 import com.google.common.collect.Lists;
@@ -179,7 +181,7 @@ public class ShaderSources {
 		try {
 			bytebuffer = readToBuffer(is);
 			int i = bytebuffer.position();
-			bytebuffer.rewind();
+			((Buffer) bytebuffer).rewind();
 			return MemoryUtil.memASCII(bytebuffer, i);
 		} catch (IOException e) {
 
