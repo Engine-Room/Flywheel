@@ -44,7 +44,16 @@ public abstract class ShaderContext<P extends GlProgram> implements IShaderConte
 			fragmentFile.defineAll(state.getDefines());
 		}
 
-		return link(buildProgram(spec.name, vertexFile, fragmentFile));
+		Program linked = link(buildProgram(spec.name, vertexFile, fragmentFile));
+
+		String descriptor = linked.program + ": " + spec.name;
+
+		if (state != null)
+			descriptor += "#" + state;
+
+		Backend.log.debug(descriptor);
+
+		return linked;
 	}
 
 	protected Shader getSource(ShaderType type, ResourceLocation name) {
@@ -52,7 +61,7 @@ public abstract class ShaderContext<P extends GlProgram> implements IShaderConte
 	}
 
 	protected Program link(Program program) {
-		return program.link();
+		return program.link().deleteLinkedShaders();
 	}
 
 	@Override
