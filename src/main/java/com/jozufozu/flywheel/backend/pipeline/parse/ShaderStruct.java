@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.pipeline.parse;
 
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,8 +13,8 @@ import com.jozufozu.flywheel.backend.pipeline.span.Span;
 
 public class ShaderStruct extends AbstractShaderElement {
 
-	// https://regexr.com/5t207
-	public static final Pattern struct = Pattern.compile("struct\\s+([\\w\\d]*)\\s*\\{([\\w\\d \\t#\\[\\](),;\\n]*)}\\s*;");
+	// https://regexr.com/61rpe
+	public static final Pattern struct = Pattern.compile("struct\\s+([\\w\\d]*)\\s*\\{([\\w\\d\\s,;]*)}\\s*;\\s");
 
 	public final Span name;
 	public final Span body;
@@ -26,18 +27,16 @@ public class ShaderStruct extends AbstractShaderElement {
 		this.name = name;
 		this.body = body;
 		this.fields = parseFields();
+		this.fields2Types = createTypeLookup();
+	}
 
+	private ImmutableMap<String, Span> createTypeLookup() {
 		ImmutableMap.Builder<String, Span> lookup = ImmutableMap.builder();
 		for (StructField field : fields) {
 			lookup.put(field.name.get(), field.type);
 		}
 
-		this.fields2Types = lookup.build();
-	}
-
-	@Override
-	public void checkErrors(ErrorReporter e) {
-
+		return lookup.build();
 	}
 
 	private ImmutableList<StructField> parseFields() {

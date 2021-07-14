@@ -89,6 +89,8 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 				loadProgramSpecs(manager);
 				loadShaderSources(manager);
 
+				shaderSources.values().forEach(SourceFile::resolveIncludes);
+
 				WorldShaderPipeline<WorldProgram> pl = new WorldShaderPipeline<>(this);
 
 				SourceFile source = source(new ResourceLocation(Flywheel.ID, "model.glsl"));

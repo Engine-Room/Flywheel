@@ -10,20 +10,23 @@ import java.util.regex.Pattern;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.backend.ShaderSources;
+import com.jozufozu.flywheel.backend.pipeline.error.ErrorReporter;
+import com.jozufozu.flywheel.backend.pipeline.parse.AbstractShaderElement;
 import com.jozufozu.flywheel.backend.pipeline.parse.Include;
 import com.jozufozu.flywheel.backend.pipeline.parse.ShaderFunction;
+import com.jozufozu.flywheel.backend.pipeline.parse.ShaderStruct;
 import com.jozufozu.flywheel.backend.pipeline.span.CharPos;
 import com.jozufozu.flywheel.backend.pipeline.span.ErrorSpan;
 import com.jozufozu.flywheel.backend.pipeline.span.Span;
 import com.jozufozu.flywheel.backend.pipeline.span.StringSpan;
+import com.jozufozu.flywheel.util.StringUtil;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.util.ResourceLocation;
 
 public class SourceFile {
-	// #use "valid_namespace:valid/path_to_file.glsl"
-	private static final Pattern includePattern = Pattern.compile("#use \"(\\w+:[\\w./]+)\"");
+	private static final Pattern includePattern = Pattern.compile("#use \"(.*)\"");
 
 	private static final Pattern newLine = Pattern.compile("(\\r\\n|\\r|\\n)");
 
@@ -34,11 +37,13 @@ public class SourceFile {
 
 	private final ShaderSources parent;
 	private final String source;
+	private final ImmutableList<String> lines;
 
 	private final IntList lineStarts;
 
 	// Function name -> Function object
 	private final ImmutableMap<String, ShaderFunction> functions;
+	private final ImmutableMap<String, ShaderStruct> structs;
 
 	// Includes ordered as defined in the source
 	private final ImmutableList<Include> includes;
@@ -51,10 +56,12 @@ public class SourceFile {
 		this.name = name;
 		this.source = source;
 
-		this.lineStarts = getLinePositions();
+		this.lineStarts = createLineStarts();
+		this.lines = createLineList(lineStarts);
 
-		this.functions = parseFunctions();
 		this.includes = parseIncludes();
+		this.functions = parseFunctions();
+		this.structs = parseStructs();
 	}
 
 	public String getSource() {
@@ -73,6 +80,12 @@ public class SourceFile {
 		return includes;
 	}
 
+	public void resolveIncludes() {
+		for (Include include : includes) {
+			include.resolve();
+		}
+	}
+
 	public CharPos getCharPos(int charPos) {
 		int lineNo = 0;
 		for (; lineNo < lineStarts.size(); lineNo++) {
@@ -83,7 +96,9 @@ public class SourceFile {
 			}
 		}
 
-		int lineStart = lineStarts.getInt(lineNo - 1);
+		lineNo -= 1;
+
+		int lineStart = lineStarts.getInt(lineNo);
 
 		return new CharPos(charPos, lineNo, charPos - lineStart);
 	}
@@ -95,7 +110,7 @@ public class SourceFile {
 				.append(name)
 				.append("':\n");
 		int i = 1;
-		for (String s : source.split("\n")) {
+		for (String s : lines) {
 			builder.append(String.format("%1$4s: ", i++))
 					.append(s)
 					.append('\n');
@@ -129,7 +144,7 @@ public class SourceFile {
 	/**
 	 * Scan the source for line breaks, recording the position of the first character of each line.
 	 */
-	private IntList getLinePositions() {
+	private IntList createLineStarts() {
 		IntList l = new IntArrayList();
 		l.add(0); // first line is always at position 0
 
@@ -139,6 +154,19 @@ public class SourceFile {
 			l.add(matcher.end());
 		}
 		return l;
+	}
+
+	private ImmutableList<String> createLineList(IntList lines) {
+		ImmutableList.Builder<String> builder = ImmutableList.builder();
+
+		for (int i = 1; i < lines.size(); i++) {
+			int start = lines.getInt(i - 1);
+			int end = lines.getInt(i);
+
+			builder.add(StringUtil.trimEnd(source.substring(start, end)));
+		}
+
+		return builder.build();
 	}
 
 	/**
@@ -173,6 +201,26 @@ public class SourceFile {
 		}
 
 		return ImmutableMap.copyOf(functions);
+	}
+
+	/**
+	 * Scan the source for function definitions and "parse" them into objects that contain properties of the function.
+	 */
+	private ImmutableMap<String, ShaderStruct> parseStructs() {
+		Matcher matcher = ShaderStruct.struct.matcher(source);
+
+		ImmutableMap.Builder<String, ShaderStruct> functions = ImmutableMap.builder();
+		while (matcher.find()) {
+			Span self = Span.fromMatcher(this, matcher);
+			Span name = Span.fromMatcher(this, matcher, 1);
+			Span body = Span.fromMatcher(this, matcher, 2);
+
+			ShaderStruct shaderStruct = new ShaderStruct(self, name, body);
+
+			functions.put(body.get(), shaderStruct);
+		}
+
+		return functions.build();
 	}
 
 	/**
@@ -213,5 +261,13 @@ public class SourceFile {
 		}
 
 		return -1;
+	}
+
+	public int getLineCount() {
+		return lines.size();
+	}
+
+	public CharSequence getLine(int lineNo) {
+		return lines.get(lineNo);
 	}
 }
