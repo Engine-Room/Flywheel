@@ -50,7 +50,8 @@ public class WorldAttached<T> {
 	public T replace(IWorld world, Consumer<T> finalizer) {
 		T remove = attached.remove(world);
 
-		finalizer.accept(remove);
+		if (remove != null)
+			finalizer.accept(remove);
 
 		return get(world);
 	}
