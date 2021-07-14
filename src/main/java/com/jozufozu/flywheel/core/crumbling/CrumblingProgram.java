@@ -26,12 +26,6 @@ public class CrumblingProgram extends WorldProgram {
 	}
 
 	@Override
-	public void bind() {
-		super.bind();
-		setDefaultAtlasSize();
-	}
-
-	@Override
 	protected void registerSamplers() {
 		super.registerSamplers();
 		uCrumbling = setSamplerBinding("uCrumbling", 4);
