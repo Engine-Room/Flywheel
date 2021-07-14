@@ -11,11 +11,16 @@ import static org.lwjgl.opengl.GL20.glLinkProgram;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.function.IntConsumer;
+
+import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.util.ResourceLocation;
 
 public class Program {
@@ -26,10 +31,13 @@ public class Program {
 
 	public final Map<ShaderType, Shader> attached;
 
+	private final IntList shaders;
+
 	public Program(ResourceLocation name) {
 		this.name = name;
 		this.program = glCreateProgram();
 		attached = new EnumMap<>(ShaderType.class);
+		shaders = new IntArrayList(2);
 	}
 
 	public Program attachShader(Shader shader, GlShader glShader) {
@@ -64,6 +72,11 @@ public class Program {
 			throw new RuntimeException("Shader program linking failed, see log for details");
 		}
 
+		return this;
+	}
+
+	public Program deleteLinkedShaders() {
+		shaders.forEach((IntConsumer) GL20::glDeleteShader);
 		return this;
 	}
 }
