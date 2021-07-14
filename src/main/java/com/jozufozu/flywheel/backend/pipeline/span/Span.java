@@ -30,6 +30,14 @@ public abstract class Span implements CharSequence {
 		return in;
 	}
 
+	public CharPos getStart() {
+		return start;
+	}
+
+	public CharPos getEnd() {
+		return end;
+	}
+
 	/**
 	 * @return the string index at the (inclusive) beginning of this code segment.
 	 */
@@ -49,6 +57,17 @@ public abstract class Span implements CharSequence {
 	 */
 	public boolean isEmpty() {
 		return start == end;
+	}
+
+	/**
+	 * @return how many lines this span spans.
+	 */
+	public int lines() {
+		return end.getLine() - start.getLine() + 1;
+	}
+
+	public int firstLine() {
+		return start.getLine();
 	}
 
 	/**

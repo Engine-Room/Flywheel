@@ -8,30 +8,25 @@ import com.jozufozu.flywheel.backend.pipeline.span.Span;
 public class StructField extends AbstractShaderElement {
 	public static final Pattern fieldPattern = Pattern.compile("(\\S+)\\s*(\\S+);");
 
-	public Span name;
 	public Span type;
+	public Span name;
 
-	public StructField(Span self, Span name, Span type) {
+	public StructField(Span self, Span type, Span name) {
 		super(self);
-		this.name = name;
 		this.type = type;
-	}
-
-	public Span getName() {
-		return name;
+		this.name = name;
 	}
 
 	public Span getType() {
 		return type;
 	}
 
-	@Override
-	public String toString() {
-		return "TaggedField{" + "name='" + name + '\'' + ", type='" + type + '\'' + '}';
+	public Span getName() {
+		return name;
 	}
 
 	@Override
-	public void checkErrors(ErrorReporter e) {
-
+	public String toString() {
+		return "TaggedField{" + "name='" + name + '\'' + ", type='" + type + '\'' + '}';
 	}
 }

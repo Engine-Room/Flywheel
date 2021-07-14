@@ -21,9 +21,4 @@ public class Variable extends AbstractShaderElement {
 	public Span getName() {
 		return name;
 	}
-
-	@Override
-	public void checkErrors(ErrorReporter e) {
-
-	}
 }

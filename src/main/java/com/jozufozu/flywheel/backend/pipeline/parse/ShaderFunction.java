@@ -61,9 +61,4 @@ public class ShaderFunction extends AbstractShaderElement {
 
 		return type + " " + name + "(" + p + ")";
 	}
-
-	@Override
-	public void checkErrors(ErrorReporter e) {
-
-	}
 }
