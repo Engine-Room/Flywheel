@@ -7,6 +7,9 @@ Technical/API
  - Deprecate instance registration functions in favor of builders
  - Refactor breaking overlay renderer to be cleaner and more contained
  - Move per-world material managers out of WorldContext into InstancedRenderDispatcher
+ - Add helper for getting information about texture atlases
+ - Add more debug information for shader loading
+ - Delete shaders after they're linked to programs
 
 0.1.0:
 Fixes
