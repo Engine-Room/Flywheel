@@ -17,12 +17,12 @@ public class BakedQuadWrapper {
 
 	public BakedQuadWrapper(BakedQuad quad) {
 		this.quad = quad;
-		this.vertexData = quad.getVertexData();
+		this.vertexData = quad.getVertices();
 	}
 
 	public void setQuad(BakedQuad quad) {
 		this.quad = quad;
-		this.vertexData = this.quad.getVertexData();
+		this.vertexData = this.quad.getVertices();
 	}
 
 	public static BakedQuadWrapper of(BakedQuad quad) {
@@ -125,7 +125,7 @@ public class BakedQuadWrapper {
 	}
 
 	public void setPos(int vertexIndex, Vector3f pos) {
-		setPos(vertexIndex, pos.getX(), pos.getY(), pos.getZ());
+		setPos(vertexIndex, pos.x(), pos.y(), pos.z());
 	}
 
 	public void setColor(int vertexIndex, int color) {
@@ -172,7 +172,7 @@ public class BakedQuadWrapper {
 	}
 
 	public void setNormal(int vertexIndex, Vector3f normal) {
-		setNormal(vertexIndex, normal.getX(), normal.getY(), normal.getZ());
+		setNormal(vertexIndex, normal.x(), normal.y(), normal.z());
 	}
 
 	private static class FormatCache {

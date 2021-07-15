@@ -16,13 +16,13 @@ public class BufferBuilderReader {
 
 	public BufferBuilderReader(BufferBuilder builder) {
 		VertexFormat vertexFormat = builder.getVertexFormat();
-		Pair<BufferBuilder.DrawState, ByteBuffer> data = builder.popData();
+		Pair<BufferBuilder.DrawState, ByteBuffer> data = builder.popNextBuffer();
 		buffer = data.getSecond();
 
-		formatSize = vertexFormat.getSize();
+		formatSize = vertexFormat.getVertexSize();
 
 		vertexCount = data.getFirst()
-				.getCount();
+				.vertexCount();
 
 		size = vertexCount * formatSize;
 

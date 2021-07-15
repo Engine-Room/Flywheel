@@ -29,8 +29,8 @@ public class AtlasStitcher {
 
 	public void onTextureStitch(TextureStitchEvent.Pre event) {
 		if (!event.getMap()
-				.getId()
-				.equals(PlayerContainer.BLOCK_ATLAS_TEXTURE)) return;
+				.location()
+				.equals(PlayerContainer.BLOCK_ATLAS)) return;
 
 		sprites.forEach(StitchedSprite::reset);
 		sprites.stream()

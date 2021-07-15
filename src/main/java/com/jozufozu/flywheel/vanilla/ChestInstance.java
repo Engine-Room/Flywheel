@@ -47,8 +47,8 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 
 		Block block = blockState.getBlock();
 
-		chestType = blockState.contains(ChestBlock.TYPE) ? blockState.get(ChestBlock.TYPE) : ChestType.SINGLE;
-		renderMaterial = Atlases.getChestTexture(tile, chestType, isChristmas());
+		chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
+		renderMaterial = Atlases.chooseMaterial(tile, chestType, isChristmas());
 
 		body = baseInstance()
 				.setPosition(getInstancePosition());
@@ -59,21 +59,21 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 //			MatrixStack stack = new MatrixStack();
 //
 //			stack.push();
-			float horizontalAngle = blockState.get(ChestBlock.FACING).getHorizontalAngle();
+			float horizontalAngle = blockState.getValue(ChestBlock.FACING).toYRot();
 
-			baseRotation = Vector3f.POSITIVE_Y.getDegreesQuaternion(-horizontalAngle);
+			baseRotation = Vector3f.YP.rotationDegrees(-horizontalAngle);
 
 			body.setRotation(baseRotation);
 
 			AbstractChestBlock<?> chestBlock = (AbstractChestBlock<?>) block;
 
-			TileEntityMerger.ICallbackWrapper<? extends ChestTileEntity> wrapper = chestBlock.getBlockEntitySource(blockState, world, getWorldPosition(), true);
+			TileEntityMerger.ICallbackWrapper<? extends ChestTileEntity> wrapper = chestBlock.combine(blockState, world, getWorldPosition(), true);
 
-			this.lidProgress = wrapper.apply(ChestBlock.getAnimationProgressRetriever(tile));
+			this.lidProgress = wrapper.apply(ChestBlock.opennessCombiner(tile));
 
 
 		} else {
-			baseRotation = Quaternion.IDENTITY;
+			baseRotation = Quaternion.ONE;
 			lidProgress = $ -> 0f;
 		}
 	}
@@ -99,7 +99,7 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 				.multiply(baseRotation)
 				.unCentre()
 				.translate(0, 0, 1f / 16f)
-				.multiply(Vector3f.POSITIVE_X.getRadialQuaternion(angleX))
+				.multiply(Vector3f.XP.rotation(angleX))
 				.translate(0, 0, -1f / 16f);
 
 		lid.setTransform(stack.unwrap());
@@ -119,15 +119,15 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 
 	private OrientedData baseInstance() {
 
-		return materialManager.getMaterial(Materials.ORIENTED, renderMaterial.getAtlasId())
-				.get("base_" + renderMaterial.getTextureId(), this::getBaseModel)
+		return materialManager.getMaterial(Materials.ORIENTED, renderMaterial.atlasLocation())
+				.get("base_" + renderMaterial.texture(), this::getBaseModel)
 				.createInstance();
 	}
 
 	private ModelData lidInstance() {
 
-		return materialManager.getMaterial(Materials.TRANSFORMED, renderMaterial.getAtlasId())
-				.get("lid_" + renderMaterial.getTextureId(), this::getLidModel)
+		return materialManager.getMaterial(Materials.TRANSFORMED, renderMaterial.atlasLocation())
+				.get("lid_" + renderMaterial.texture(), this::getLidModel)
 				.createInstance();
 	}
 
@@ -136,7 +136,7 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 		switch (chestType) {
 		case LEFT:
 			return ModelPart.builder(64, 64)
-				.sprite(renderMaterial.getSprite())
+				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 19)
 				.start(0, 0, 1)
@@ -145,7 +145,7 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 				.build();
 		case RIGHT:
 			return ModelPart.builder(64, 64)
-				.sprite(renderMaterial.getSprite())
+				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 19)
 				.start(1, 0, 1)
@@ -155,7 +155,7 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 		}
 
 		return ModelPart.builder(64, 64)
-				.sprite(renderMaterial.getSprite())
+				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 19)
 				.start(1, 0, 1)
@@ -169,7 +169,7 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 		switch (chestType) {
 		case LEFT:
 		return ModelPart.builder(64, 64)
-				.sprite(renderMaterial.getSprite())
+				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 0)
 				.start(0, 0, 1)
@@ -182,7 +182,7 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 				.build();
 		case RIGHT:
 		return ModelPart.builder(64, 64)
-				.sprite(renderMaterial.getSprite())
+				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 0)
 				.start(1, 0, 1)
@@ -196,7 +196,7 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 		}
 
 		return ModelPart.builder(64, 64)
-				.sprite(renderMaterial.getSprite())
+				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 0)
 				.start(1, 0, 1)

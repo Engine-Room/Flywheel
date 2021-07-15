@@ -54,7 +54,7 @@ public class CrumblingRenderer {
 		INVALIDATOR = state.getSecond();
 	}
 
-	private static final RenderType crumblingLayer = ModelBakery.BLOCK_DESTRUCTION_RENDER_LAYERS.get(0);
+	private static final RenderType crumblingLayer = ModelBakery.DESTROY_TYPES.get(0);
 
 	public static void renderBreaking(ClientWorld world, Matrix4f viewProjection, double cameraX, double cameraY, double cameraZ) {
 		if (!Backend.getInstance()
@@ -69,14 +69,14 @@ public class CrumblingRenderer {
 		InstanceManager<TileEntity> renderer = state.instanceManager;
 
 		TextureManager textureManager = Minecraft.getInstance().textureManager;
-		ActiveRenderInfo info = Minecraft.getInstance().gameRenderer.getActiveRenderInfo();
+		ActiveRenderInfo info = Minecraft.getInstance().gameRenderer.getMainCamera();
 
 		MaterialManager<CrumblingProgram> materials = state.materialManager;
-		crumblingLayer.startDrawing();
+		crumblingLayer.setupRenderState();
 
 		for (Int2ObjectMap.Entry<List<TileEntity>> stage : activeStages.int2ObjectEntrySet()) {
 			int i = stage.getIntKey();
-			Texture breaking = textureManager.getTexture(ModelBakery.BLOCK_DESTRUCTION_STAGE_TEXTURES.get(i));
+			Texture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(i));
 
 			// something about when we call this means that the textures are not ready for use on the first frame they should appear
 			if (breaking != null) {
@@ -85,38 +85,38 @@ public class CrumblingRenderer {
 				renderer.beginFrame(info);
 
 				glActiveTexture(GL_TEXTURE4);
-				glBindTexture(GL_TEXTURE_2D, breaking.getGlTextureId());
-				materials.render(RenderType.getCutoutMipped(), viewProjection, cameraX, cameraY, cameraZ);
+				glBindTexture(GL_TEXTURE_2D, breaking.getId());
+				materials.render(RenderType.cutoutMipped(), viewProjection, cameraX, cameraY, cameraZ);
 
 				renderer.invalidate();
 			}
 
 		}
 
-		crumblingLayer.endDrawing();
+		crumblingLayer.clearRenderState();
 
 		glActiveTexture(GL_TEXTURE0);
-		Texture breaking = textureManager.getTexture(ModelBakery.BLOCK_DESTRUCTION_STAGE_TEXTURES.get(0));
-		if (breaking != null) glBindTexture(GL_TEXTURE_2D, breaking.getGlTextureId());
+		Texture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(0));
+		if (breaking != null) glBindTexture(GL_TEXTURE_2D, breaking.getId());
 	}
 
 	/**
 	 * Associate each breaking stage with a list of all tile entities at that stage.
 	 */
 	private static Int2ObjectMap<List<TileEntity>> getActiveStageTiles(ClientWorld world) {
-		Long2ObjectMap<SortedSet<DestroyBlockProgress>> breakingProgressions = Minecraft.getInstance().worldRenderer.blockBreakingProgressions;
+		Long2ObjectMap<SortedSet<DestroyBlockProgress>> breakingProgressions = Minecraft.getInstance().levelRenderer.destructionProgress;
 
 		Int2ObjectMap<List<TileEntity>> breakingEntities = new Int2ObjectArrayMap<>();
 
 		for (Long2ObjectMap.Entry<SortedSet<DestroyBlockProgress>> entry : breakingProgressions.long2ObjectEntrySet()) {
-			BlockPos breakingPos = BlockPos.fromLong(entry.getLongKey());
+			BlockPos breakingPos = BlockPos.of(entry.getLongKey());
 
 			SortedSet<DestroyBlockProgress> progresses = entry.getValue();
 			if (progresses != null && !progresses.isEmpty()) {
 				int blockDamage = progresses.last()
-						.getPartialBlockDamage();
+						.getProgress();
 
-				TileEntity tileEntity = world.getTileEntity(breakingPos);
+				TileEntity tileEntity = world.getBlockEntity(breakingPos);
 
 				if (tileEntity != null) {
 					List<TileEntity> tileEntities = breakingEntities.computeIfAbsent(blockDamage, $ -> new ArrayList<>());

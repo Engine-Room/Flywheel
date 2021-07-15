@@ -49,8 +49,8 @@ public class RenderHooksMixin {
 	 */
 	@Inject(at = @At("TAIL"), method = "renderLayer")
 	private void renderLayer(RenderType type, MatrixStack stack, double camX, double camY, double camZ, CallbackInfo ci) {
-		Matrix4f view = stack.peek()
-				.getModel();
+		Matrix4f view = stack.last()
+				.pose();
 		Matrix4f viewProjection = view.copy();
 		viewProjection.multiplyBackward(Backend.getInstance()
 												.getProjectionMatrix());
@@ -75,13 +75,13 @@ public class RenderHooksMixin {
 		if (!Backend.getInstance()
 				.available()) return;
 
-		Matrix4f view = stack.peek()
-				.getModel();
+		Matrix4f view = stack.last()
+				.pose();
 		Matrix4f viewProjection = view.copy();
 		viewProjection.multiplyBackward(Backend.getInstance()
 												.getProjectionMatrix());
 
-		Vector3d cameraPos = info.getProjectedView();
+		Vector3d cameraPos = info.getPosition();
 		CrumblingRenderer.renderBreaking(world, viewProjection, cameraPos.x, cameraPos.y, cameraPos.z);
 
 		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
@@ -92,6 +92,6 @@ public class RenderHooksMixin {
 	@Inject(at = @At("TAIL"), method = "scheduleBlockRerenderIfNeeded")
 	private void checkUpdate(BlockPos pos, BlockState lastState, BlockState newState, CallbackInfo ci) {
 		InstancedRenderDispatcher.getTiles(world)
-				.update(world.getTileEntity(pos));
+				.update(world.getBlockEntity(pos));
 	}
 }

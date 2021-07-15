@@ -16,7 +16,7 @@ public class MaterialSpec<D extends InstanceData> {
 	private final ResourceLocation texture;
 
 	public MaterialSpec(ResourceLocation name, ResourceLocation programSpec, VertexFormat modelFormat, VertexFormat instanceFormat, IInstanceFactory<D> instanceFactory) {
-		this(name, programSpec, modelFormat, instanceFormat, PlayerContainer.BLOCK_ATLAS_TEXTURE, instanceFactory);
+		this(name, programSpec, modelFormat, instanceFormat, PlayerContainer.BLOCK_ATLAS, instanceFactory);
 	}
 
 	public MaterialSpec(ResourceLocation name, ResourceLocation programSpec, VertexFormat modelFormat, VertexFormat instanceFormat, ResourceLocation texture, IInstanceFactory<D> instanceFactory) {

@@ -20,26 +20,26 @@ public interface TransformStack {
 	default TransformStack rotate(Direction axis, float radians) {
 		if (radians == 0)
 			return this;
-		return multiply(axis.getUnitVector()
-				.getRadialQuaternion(radians));
+		return multiply(axis.step()
+				.rotation(radians));
 	}
 
 	default TransformStack rotate(double angle, Direction.Axis axis) {
 		Vector3f vec =
-				axis == Direction.Axis.X ? Vector3f.POSITIVE_X : axis == Direction.Axis.Y ? Vector3f.POSITIVE_Y : Vector3f.POSITIVE_Z;
+				axis == Direction.Axis.X ? Vector3f.XP : axis == Direction.Axis.Y ? Vector3f.YP : Vector3f.ZP;
 		return multiply(vec, angle);
 	}
 
 	default TransformStack rotateX(double angle) {
-		return multiply(Vector3f.POSITIVE_X, angle);
+		return multiply(Vector3f.XP, angle);
 	}
 
 	default TransformStack rotateY(double angle) {
-		return multiply(Vector3f.POSITIVE_Y, angle);
+		return multiply(Vector3f.YP, angle);
 	}
 
 	default TransformStack rotateZ(double angle) {
-		return multiply(Vector3f.POSITIVE_Z, angle);
+		return multiply(Vector3f.ZP, angle);
 	}
 
 	default TransformStack centre() {
@@ -74,6 +74,6 @@ public interface TransformStack {
 	default TransformStack multiply(Vector3f axis, double angle) {
 		if (angle == 0)
 			return this;
-		return multiply(axis.getDegreesQuaternion((float) angle));
+		return multiply(axis.rotationDegrees((float) angle));
 	}
 }

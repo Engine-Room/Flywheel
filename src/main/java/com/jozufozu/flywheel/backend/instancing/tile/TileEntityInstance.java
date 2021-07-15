@@ -47,8 +47,8 @@ public abstract class TileEntityInstance<T extends TileEntity> implements IInsta
 	public TileEntityInstance(MaterialManager<?> materialManager, T tile) {
 		this.materialManager = materialManager;
 		this.tile = tile;
-		this.world = tile.getWorld();
-		this.pos = tile.getPos();
+		this.world = tile.getLevel();
+		this.pos = tile.getBlockPos();
 		this.blockState = tile.getBlockState();
 		this.instancePos = pos.subtract(materialManager.getOriginCoordinate());
 	}
@@ -105,11 +105,11 @@ public abstract class TileEntityInstance<T extends TileEntity> implements IInsta
 	}
 
 	protected void relight(BlockPos pos, IFlatLight<?>... models) {
-		relight(world.getLightLevel(LightType.BLOCK, pos), world.getLightLevel(LightType.SKY, pos), models);
+		relight(world.getBrightness(LightType.BLOCK, pos), world.getBrightness(LightType.SKY, pos), models);
 	}
 
 	protected <L extends IFlatLight<?>> void relight(BlockPos pos, Stream<L> models) {
-		relight(world.getLightLevel(LightType.BLOCK, pos), world.getLightLevel(LightType.SKY, pos), models);
+		relight(world.getBrightness(LightType.BLOCK, pos), world.getBrightness(LightType.SKY, pos), models);
 	}
 
 	protected void relight(int block, int sky, IFlatLight<?>... models) {

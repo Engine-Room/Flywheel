@@ -14,7 +14,7 @@ public class AnimationTickHolder {
 
 	public static void tick() {
 		if (!Minecraft.getInstance()
-				.isGamePaused()) {
+				.isPaused()) {
 			ticks = (ticks + 1) % 1_728_000; // wrap around every 24 hours so we maintain enough floating point precision
 		} else {
 			paused_ticks = (paused_ticks + 1) % 1_728_000;
@@ -35,6 +35,6 @@ public class AnimationTickHolder {
 
 	public static float getPartialTicks() {
 		Minecraft mc = Minecraft.getInstance();
-		return (mc.isGamePaused() ? mc.renderPartialTicksPaused : mc.getRenderPartialTicks());
+		return (mc.isPaused() ? mc.pausePartialTick : mc.getFrameTime());
 	}
 }
