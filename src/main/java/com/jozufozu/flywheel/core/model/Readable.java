@@ -108,9 +108,9 @@ public class Readable {
 				}
 			}
 
-			this.normal = p_i225951_9_.getUnitVector();
+			this.normal = p_i225951_9_.step();
 			if (p_i225951_8_) {
-				this.normal.multiplyComponentwise(-1.0F, 1.0F, 1.0F);
+				this.normal.mul(-1.0F, 1.0F, 1.0F);
 			}
 
 		}

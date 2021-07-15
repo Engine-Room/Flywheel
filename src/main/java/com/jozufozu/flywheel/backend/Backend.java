@@ -187,15 +187,15 @@ public class Backend {
 
 		if (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel()) return true;
 
-		return world == Minecraft.getInstance().world;
+		return world == Minecraft.getInstance().level;
 	}
 
 	public static boolean isGameActive() {
-		return !(Minecraft.getInstance().world == null || Minecraft.getInstance().player == null);
+		return !(Minecraft.getInstance().level == null || Minecraft.getInstance().player == null);
 	}
 
 	public static void reloadWorldRenderers() {
-		RenderWork.enqueue(Minecraft.getInstance().worldRenderer::loadRenderers);
+		RenderWork.enqueue(Minecraft.getInstance().levelRenderer::allChanged);
 	}
 
 	public static void init() {

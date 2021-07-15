@@ -20,7 +20,7 @@ public class MatrixTransformStack implements TransformStack {
 
 	@Override
 	public TransformStack multiply(Quaternion quaternion) {
-		internal.multiply(quaternion);
+		internal.mulPose(quaternion);
 		return this;
 	}
 

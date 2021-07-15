@@ -12,7 +12,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 @Mixin(GlStateManager.class)
 public class FogColorTrackerMixin {
 
-	@Inject(at = @At("TAIL"), method = "fog")
+	@Inject(at = @At("TAIL"), method = "_fog")
 	private static void copyFogColor(int pname, float[] params, CallbackInfo ci) {
 		if (pname == GL11.GL_FOG_COLOR) {
 			GlFog.FOG_COLOR = params;

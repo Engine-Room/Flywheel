@@ -11,7 +11,7 @@ public class FlwCommands {
 	@SubscribeEvent
 	public static void onServerStarting(FMLServerStartingEvent event) {
 		CommandDispatcher<CommandSource> dispatcher = event.getServer()
-				.getCommandManager()
+				.getCommands()
 				.getDispatcher();
 
 		dispatcher.register(Commands.literal("flywheel")
