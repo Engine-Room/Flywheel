@@ -172,10 +172,10 @@ public class LightVolume {
 		int shiftZ = textureVolume.minZ;
 
 		sampleVolume.forEachContained((x, y, z) -> {
-			pos.setPos(x, y, z);
+			pos.set(x, y, z);
 
-			int blockLight = world.getLightLevel(LightType.BLOCK, pos);
-			int skyLight = world.getLightLevel(LightType.SKY, pos);
+			int blockLight = world.getBrightness(LightType.BLOCK, pos);
+			int skyLight = world.getBrightness(LightType.SKY, pos);
 
 			writeLight(x - shiftX, y - shiftY, z - shiftZ, blockLight, skyLight);
 		});
@@ -196,9 +196,9 @@ public class LightVolume {
 		int zShift = textureVolume.minZ;
 
 		worldVolume.forEachContained((x, y, z) -> {
-			pos.setPos(x, y, z);
+			pos.set(x, y, z);
 
-			int light = world.getLightLevel(LightType.BLOCK, pos);
+			int light = world.getBrightness(LightType.BLOCK, pos);
 
 			writeBlock(x - xShift, y - yShift, z - zShift, light);
 		});
@@ -219,9 +219,9 @@ public class LightVolume {
 		int zShift = textureVolume.minZ;
 
 		worldVolume.forEachContained((x, y, z) -> {
-			pos.setPos(x, y, z);
+			pos.set(x, y, z);
 
-			int light = world.getLightLevel(LightType.SKY, pos);
+			int light = world.getBrightness(LightType.SKY, pos);
 
 			writeSky(x - xShift, y - yShift, z - zShift, light);
 		});
@@ -242,10 +242,10 @@ public class LightVolume {
 		int zShift = textureVolume.minZ;
 
 		worldVolume.forEachContained((x, y, z) -> {
-			pos.setPos(x, y, z);
+			pos.set(x, y, z);
 
-			int block = world.getLightLevel(LightType.BLOCK, pos);
-			int sky = world.getLightLevel(LightType.SKY, pos);
+			int block = world.getBrightness(LightType.BLOCK, pos);
+			int sky = world.getBrightness(LightType.SKY, pos);
 
 			writeLight(x - xShift, y - yShift, z - zShift, block, sky);
 		});

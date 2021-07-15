@@ -21,9 +21,9 @@ import net.minecraft.util.ClassInheritanceMultiMap;
 public class CancelEntityRenderMixin {
 
 	@Group(name = "entityFilter", min = 1, max = 1)
-	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getAllEntities()Ljava/lang/Iterable;"))
+	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;entitiesForRendering()Ljava/lang/Iterable;"))
 	private Iterable<Entity> filterEntities(ClientWorld world) {
-		Iterable<Entity> entities = world.getAllEntities();
+		Iterable<Entity> entities = world.entitiesForRendering();
 		if (Backend.getInstance()
 				.canUseInstancing()) {
 
@@ -38,7 +38,7 @@ public class CancelEntityRenderMixin {
 	}
 
 	@Group(name = "entityFilter")
-	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ClassInheritanceMultiMap;iterator()Ljava/util/Iterator;"))
+	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ClassInheritanceMultiMap;iterator()Ljava/util/Iterator;"))
 	private Iterator<Entity> filterEntitiesOF(ClassInheritanceMultiMap<Entity> classInheritanceMultiMap) {
 		if (Backend.getInstance()
 				.canUseInstancing()) {

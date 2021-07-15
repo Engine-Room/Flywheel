@@ -46,7 +46,7 @@ public class GridAlignedBB {
 	}
 
 	public static GridAlignedBB from(SectionPos pos) {
-		return new GridAlignedBB(pos.getWorldStartX(), pos.getWorldStartY(), pos.getWorldStartZ(), pos.getWorldEndX() + 1, pos.getWorldEndY() + 1, pos.getWorldEndZ() + 1);
+		return new GridAlignedBB(pos.minBlockX(), pos.minBlockY(), pos.minBlockZ(), pos.maxBlockX() + 1, pos.maxBlockY() + 1, pos.maxBlockZ() + 1);
 	}
 
 	public static GridAlignedBB from(BlockPos start, BlockPos end) {
@@ -122,8 +122,8 @@ public class GridAlignedBB {
 	}
 
 	public void mirrorAbout(Direction.Axis axis) {
-		Vector3i axisVec = Direction.getFacingFromAxis(Direction.AxisDirection.POSITIVE, axis)
-				.getDirectionVec();
+		Vector3i axisVec = Direction.get(Direction.AxisDirection.POSITIVE, axis)
+				.getNormal();
 		int flipX = axisVec.getX() - 1;
 		int flipY = axisVec.getY() - 1;
 		int flipZ = axisVec.getZ() - 1;

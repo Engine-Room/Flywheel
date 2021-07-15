@@ -13,13 +13,13 @@ public class EntityWorldHandler {
 
 	@SubscribeEvent
 	public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
-		if (event.getWorld().isRemote) InstancedRenderDispatcher.getEntities(event.getWorld())
+		if (event.getWorld().isClientSide) InstancedRenderDispatcher.getEntities(event.getWorld())
 				.queueAdd(event.getEntity());
 	}
 
 	@SubscribeEvent
 	public static void onEntityLeaveWorld(EntityLeaveWorldEvent event) {
-		if (event.getWorld().isRemote) InstancedRenderDispatcher.getEntities(event.getWorld())
+		if (event.getWorld().isClientSide) InstancedRenderDispatcher.getEntities(event.getWorld())
 				.remove(event.getEntity());
 	}
 }

@@ -50,10 +50,10 @@ public class InstancedRenderDispatcher {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		ClientWorld world = mc.world;
+		ClientWorld world = mc.level;
 		AnimationTickHolder.tick();
 
-		Entity renderViewEntity = mc.renderViewEntity != null ? mc.renderViewEntity : mc.player;
+		Entity renderViewEntity = mc.cameraEntity != null ? mc.cameraEntity : mc.player;
 
 		if (renderViewEntity == null) return;
 
@@ -62,11 +62,11 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static void enqueueUpdate(TileEntity te) {
-		getTiles(te.getWorld()).queueUpdate(te);
+		getTiles(te.getLevel()).queueUpdate(te);
 	}
 
 	public static void enqueueUpdate(Entity entity) {
-		getEntities(entity.world).queueUpdate(entity);
+		getEntities(entity.level).queueUpdate(entity);
 	}
 
 	@SubscribeEvent
@@ -84,12 +84,12 @@ public class InstancedRenderDispatcher {
 		if (!Backend.getInstance()
 				.canUseInstancing(world)) return;
 
-		event.type.startDrawing();
+		event.type.setupRenderState();
 
 		materialManagers.get(world)
 				.render(event.type, event.viewProjection, event.camX, event.camY, event.camZ);
 
-		event.type.endDrawing();
+		event.type.clearRenderState();
 	}
 
 	@SubscribeEvent
@@ -105,10 +105,10 @@ public class InstancedRenderDispatcher {
 		materialManagers.replace(world, MaterialManager::delete);
 
 		InstanceManager<TileEntity> tiles = tileInstanceManager.replace(world);
-		world.loadedTileEntityList.forEach(tiles::add);
+		world.blockEntityList.forEach(tiles::add);
 
 		InstanceManager<Entity> entities = entityInstanceManager.replace(world);
-		world.getAllEntities()
+		world.entitiesForRendering()
 				.forEach(entities::add);
 	}
 }

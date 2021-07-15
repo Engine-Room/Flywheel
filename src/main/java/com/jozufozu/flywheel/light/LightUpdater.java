@@ -81,12 +81,12 @@ public class LightUpdater {
 		LongRBTreeSet sections = clearSections(listener);
 		LongRBTreeSet chunks = clearSections(listener);
 
-		int minX = SectionPos.toChunk(volume.minX);
-		int minY = SectionPos.toChunk(volume.minY);
-		int minZ = SectionPos.toChunk(volume.minZ);
-		int maxX = SectionPos.toChunk(volume.maxX);
-		int maxY = SectionPos.toChunk(volume.maxY);
-		int maxZ = SectionPos.toChunk(volume.maxZ);
+		int minX = SectionPos.blockToSectionCoord(volume.minX);
+		int minY = SectionPos.blockToSectionCoord(volume.minY);
+		int minZ = SectionPos.blockToSectionCoord(volume.minZ);
+		int maxX = SectionPos.blockToSectionCoord(volume.maxX);
+		int maxY = SectionPos.blockToSectionCoord(volume.maxY);
+		int maxZ = SectionPos.blockToSectionCoord(volume.maxZ);
 
 		for (int x = minX; x <= maxX; x++) {
 			for (int z = minZ; z <= maxZ; z++) {
@@ -114,7 +114,7 @@ public class LightUpdater {
 
 		if (set == null || set.isEmpty()) return;
 
-		GridAlignedBB chunkBox = GridAlignedBB.from(SectionPos.from(sectionPos));
+		GridAlignedBB chunkBox = GridAlignedBB.from(SectionPos.of(sectionPos));
 
 		set.removeIf(listener -> listener.onLightUpdate(world, type, chunkBox.copy()));
 	}

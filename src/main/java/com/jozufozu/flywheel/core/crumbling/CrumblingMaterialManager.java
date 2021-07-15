@@ -40,15 +40,15 @@ public class CrumblingMaterialManager extends MaterialManager<CrumblingProgram> 
 		camY -= originCoordinate.getY();
 		camZ -= originCoordinate.getZ();
 
-		Matrix4f translate = Matrix4f.translate((float) -camX, (float) -camY, (float) -camZ);
+		Matrix4f translate = Matrix4f.createTranslateMatrix((float) -camX, (float) -camY, (float) -camZ);
 
 		translate.multiplyBackward(viewProjection);
 
 		TextureManager textureManager = Minecraft.getInstance().textureManager;
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureManager.getTexture(PlayerContainer.BLOCK_ATLAS_TEXTURE)
-				.getGlTextureId());
+		glBindTexture(GL_TEXTURE_2D, textureManager.getTexture(PlayerContainer.BLOCK_ATLAS)
+				.getId());
 
 		for (MaterialRenderer<CrumblingProgram> material : atlasRenderers) {
 			material.render(layer, translate, camX, camY, camZ, CrumblingProgram::setDefaultAtlasSize);
@@ -56,7 +56,7 @@ public class CrumblingMaterialManager extends MaterialManager<CrumblingProgram> 
 
 		for (Map.Entry<ResourceLocation, ArrayList<MaterialRenderer<CrumblingProgram>>> entry : renderers.entrySet()) {
 			glBindTexture(GL_TEXTURE_2D, textureManager.getTexture(entry.getKey())
-					.getGlTextureId());
+					.getId());
 			SheetData atlasData = AtlasInfo.getAtlasData(entry.getKey());
 			for (MaterialRenderer<CrumblingProgram> materialRenderer : entry.getValue()) {
 				materialRenderer.render(layer, translate, camX, camY, camZ, p -> p.setAtlasSize(atlasData.width, atlasData.height));

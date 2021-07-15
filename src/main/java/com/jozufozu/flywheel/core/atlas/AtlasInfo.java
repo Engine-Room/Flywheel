@@ -25,11 +25,11 @@ public class AtlasInfo {
 	}
 
 	public static SheetData getAtlasData(TextureAtlasSprite texture) {
-		return getAtlasData(texture.getAtlas());
+		return getAtlasData(texture.atlas());
 	}
 
 	public static SheetData getAtlasData(AtlasTexture atlas) {
-		return getAtlasData(atlas.getId());
+		return getAtlasData(atlas.location());
 	}
 
 	public static SheetData getAtlasData(ResourceLocation loc) {

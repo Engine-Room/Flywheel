@@ -166,25 +166,25 @@ public class PartBuilder {
 
 		public void quad(VecBuffer buffer, Vector3f[] vertices, float minU, float minV, float maxU, float maxV, Direction dir) {
 
-			Vector3f normal = dir.getUnitVector();
+			Vector3f normal = dir.step();
 
-			buffer.putVec3(vertices[0].getX(), vertices[0].getY(), vertices[0].getZ()).putVec3(nb(normal.getX()), nb(normal.getY()), nb(normal.getZ())).putVec2(maxU, minV);
-			buffer.putVec3(vertices[1].getX(), vertices[1].getY(), vertices[1].getZ()).putVec3(nb(normal.getX()), nb(normal.getY()), nb(normal.getZ())).putVec2(minU, minV);
-			buffer.putVec3(vertices[2].getX(), vertices[2].getY(), vertices[2].getZ()).putVec3(nb(normal.getX()), nb(normal.getY()), nb(normal.getZ())).putVec2(minU, maxV);
-			buffer.putVec3(vertices[3].getX(), vertices[3].getY(), vertices[3].getZ()).putVec3(nb(normal.getX()), nb(normal.getY()), nb(normal.getZ())).putVec2(maxU, maxV);
+			buffer.putVec3(vertices[0].x(), vertices[0].y(), vertices[0].z()).putVec3(nb(normal.x()), nb(normal.y()), nb(normal.z())).putVec2(maxU, minV);
+			buffer.putVec3(vertices[1].x(), vertices[1].y(), vertices[1].z()).putVec3(nb(normal.x()), nb(normal.y()), nb(normal.z())).putVec2(minU, minV);
+			buffer.putVec3(vertices[2].x(), vertices[2].y(), vertices[2].z()).putVec3(nb(normal.x()), nb(normal.y()), nb(normal.z())).putVec2(minU, maxV);
+			buffer.putVec3(vertices[3].x(), vertices[3].y(), vertices[3].z()).putVec3(nb(normal.x()), nb(normal.y()), nb(normal.z())).putVec2(maxU, maxV);
 
 		}
 
 		public float getU(float u) {
 			if (sprite != null)
-				return sprite.getInterpolatedU(u * 16 / partBuilder.sizeU);
+				return sprite.getU(u * 16 / partBuilder.sizeU);
 			else
 				return u;
 		}
 
 		public float getV(float v) {
 			if (sprite != null)
-				return sprite.getInterpolatedV(v * 16 / partBuilder.sizeV);
+				return sprite.getV(v * 16 / partBuilder.sizeV);
 			else
 				return v;
 		}
