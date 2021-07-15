@@ -55,7 +55,7 @@ public class OptifineHandler {
 	public static void refresh() {
 		if (optifine == null) return;
 
-		File dir = Minecraft.getInstance().gameDir;
+		File dir = Minecraft.getInstance().gameDirectory;
 
 		File shaderOptions = new File(dir, "optionsshaders.txt");
 

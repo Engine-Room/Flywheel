@@ -36,7 +36,7 @@ public class CrumblingProgram extends WorldProgram {
 	}
 
 	public void setDefaultAtlasSize() {
-		SheetData atlasData = AtlasInfo.getAtlasData(PlayerContainer.BLOCK_ATLAS_TEXTURE);
+		SheetData atlasData = AtlasInfo.getAtlasData(PlayerContainer.BLOCK_ATLAS);
 		if (atlasData == null) return;
 
 		int width = atlasData.width;
@@ -46,10 +46,10 @@ public class CrumblingProgram extends WorldProgram {
 	}
 
 	public void setAtlasSize(int width, int height) {
-		AtlasTexture blockAtlas = AtlasInfo.getAtlas(PlayerContainer.BLOCK_ATLAS_TEXTURE);
+		AtlasTexture blockAtlas = AtlasInfo.getAtlas(PlayerContainer.BLOCK_ATLAS);
 		if (blockAtlas == null) return;
 
-		TextureAtlasSprite sprite = blockAtlas.getSprite(ModelBakery.BLOCK_DESTRUCTION_STAGE_TEXTURES.get(0));
+		TextureAtlasSprite sprite = blockAtlas.getSprite(ModelBakery.BREAKING_LOCATIONS.get(0));
 
 		setTextureScale(width / (float) sprite.getWidth(), height / (float) sprite.getHeight());
 	}

@@ -31,19 +31,19 @@ public class BellInstance extends TileEntityInstance<BellTileEntity> implements 
 
 	@Override
 	public void beginFrame() {
-		float ringTime = (float)tile.ringingTicks + AnimationTickHolder.getPartialTicks();
+		float ringTime = (float)tile.ticks + AnimationTickHolder.getPartialTicks();
 
 		if (ringTime == lastRingTime) return;
 		lastRingTime = ringTime;
 
-		if (tile.isRinging) {
+		if (tile.shaking) {
 			float angle = MathHelper.sin(ringTime / (float) Math.PI) / (4.0F + ringTime / 3.0F);
 
-			Vector3f ringAxis = tile.ringDirection.rotateYCCW().getUnitVector();
+			Vector3f ringAxis = tile.clickDirection.getCounterClockWise().step();
 
-			bell.setRotation(ringAxis.getRadialQuaternion(angle));
+			bell.setRotation(ringAxis.rotation(angle));
 		} else {
-			bell.setRotation(Quaternion.IDENTITY);
+			bell.setRotation(Quaternion.ONE);
 		}
 	}
 
@@ -65,7 +65,7 @@ public class BellInstance extends TileEntityInstance<BellTileEntity> implements 
 
 	private static BufferedModel createBellModel() {
 		return ModelPart.builder(32, 32)
-				.sprite(BellTileEntityRenderer.field_217653_c.getSprite())
+				.sprite(BellTileEntityRenderer.BELL_RESOURCE_LOCATION.sprite())
 				.cuboid()
 				.start(5.0F, 6.0F, 5.0F)
 				.size(6.0F, 7.0F, 6.0F)

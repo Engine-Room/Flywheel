@@ -109,8 +109,8 @@ public class InstanceMaterial<D extends InstanceData> {
 
 	private BufferedModel buildModel(BlockState renderedState) {
 		BlockRendererDispatcher dispatcher = Minecraft.getInstance()
-				.getBlockRendererDispatcher();
-		return buildModel(dispatcher.getModelForState(renderedState), renderedState);
+				.getBlockRenderer();
+		return buildModel(dispatcher.getBlockModel(renderedState), renderedState);
 	}
 
 	private BufferedModel buildModel(IBakedModel model, BlockState renderedState) {
@@ -156,8 +156,8 @@ public class InstanceMaterial<D extends InstanceData> {
 
 	public static BufferBuilder getBufferBuilder(IBakedModel model, BlockState referenceState, MatrixStack ms) {
 		Minecraft mc = Minecraft.getInstance();
-		BlockRendererDispatcher dispatcher = mc.getBlockRendererDispatcher();
-		BlockModelRenderer blockRenderer = dispatcher.getBlockModelRenderer();
+		BlockRendererDispatcher dispatcher = mc.getBlockRenderer();
+		BlockModelRenderer blockRenderer = dispatcher.getModelRenderer();
 		BufferBuilder builder = new BufferBuilder(512);
 
 		//		BakedQuadWrapper quadReader = new BakedQuadWrapper();
@@ -168,8 +168,8 @@ public class InstanceMaterial<D extends InstanceData> {
 		//				.collect(Collectors.toList());
 
 		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-		blockRenderer.renderModel(mc.world, model, referenceState, BlockPos.ZERO.up(255), ms, builder, true, mc.world.rand, 42, OverlayTexture.DEFAULT_UV, VirtualEmptyModelData.INSTANCE);
-		builder.finishDrawing();
+		blockRenderer.renderModel(mc.level, model, referenceState, BlockPos.ZERO.above(255), ms, builder, true, mc.level.random, 42, OverlayTexture.NO_OVERLAY, VirtualEmptyModelData.INSTANCE);
+		builder.end();
 		return builder;
 	}
 

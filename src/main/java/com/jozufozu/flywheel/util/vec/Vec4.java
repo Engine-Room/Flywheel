@@ -29,11 +29,11 @@ public class Vec4 {
 
 	public Vec4 multiply(Quaternion quat) {
 		Quaternion quaternion = new Quaternion(quat);
-		quaternion.multiply(new Quaternion(this.getX(), this.getY(), this.getZ(), 0.0F));
+		quaternion.mul(new Quaternion(this.getX(), this.getY(), this.getZ(), 0.0F));
 		Quaternion quaternion1 = new Quaternion(quat);
-		quaternion1.conjugate();
-		quaternion.multiply(quaternion1);
-		return set(quaternion.getX(), quaternion.getY(), quaternion.getZ(), this.getW());
+		quaternion1.conj();
+		quaternion.mul(quaternion1);
+		return set(quaternion.i(), quaternion.j(), quaternion.k(), this.getW());
 	}
 
 	public Vec3 xyz() {

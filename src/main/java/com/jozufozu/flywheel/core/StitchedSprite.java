@@ -22,7 +22,7 @@ public class StitchedSprite {
 	public TextureAtlasSprite getSprite() {
 		if (sprite == null) {
 			sprite = Minecraft.getInstance()
-					.getSpriteAtlas(PlayerContainer.BLOCK_ATLAS_TEXTURE)
+					.getTextureAtlas(PlayerContainer.BLOCK_ATLAS)
 					.apply(loc);
 		}
 

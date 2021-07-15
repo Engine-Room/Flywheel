@@ -32,16 +32,16 @@ public class TileInstanceManager extends InstanceManager<TileEntity> {
 	protected boolean canCreateInstance(TileEntity tile) {
 		if (tile.isRemoved()) return false;
 
-		World world = tile.getWorld();
+		World world = tile.getLevel();
 
 		if (world == null) return false;
 
-		if (world.isAirBlock(tile.getPos())) return false;
+		if (world.isEmptyBlock(tile.getBlockPos())) return false;
 
 		if (Backend.isFlywheelWorld(world)) {
-			BlockPos pos = tile.getPos();
+			BlockPos pos = tile.getBlockPos();
 
-			IBlockReader existingChunk = world.getExistingChunk(pos.getX() >> 4, pos.getZ() >> 4);
+			IBlockReader existingChunk = world.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
 
 			return existingChunk != null;
 		}

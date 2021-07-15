@@ -20,7 +20,7 @@ public class ForgeEvents {
 	@SubscribeEvent
 	public static void addToDebugScreen(RenderGameOverlayEvent.Text event) {
 
-		if (Minecraft.getInstance().gameSettings.showDebugInfo) {
+		if (Minecraft.getInstance().options.renderDebug) {
 
 			ArrayList<String> right = event.getRight();
 

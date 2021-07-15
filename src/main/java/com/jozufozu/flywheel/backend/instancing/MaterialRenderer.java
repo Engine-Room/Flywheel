@@ -19,7 +19,7 @@ public class MaterialRenderer<P extends WorldProgram> {
 	}
 
 	public void render(RenderType layer, Matrix4f viewProjection, double camX, double camY, double camZ, IProgramCallback<P> setup) {
-		if (!(layer == RenderType.getCutoutMipped())) return;
+		if (!(layer == RenderType.cutoutMipped())) return;
 
 		if (material.nothingToRender()) return;
 
