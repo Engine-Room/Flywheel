@@ -102,8 +102,7 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static void loadAllInWorld(ClientWorld world) {
-		materialManagers.get(world)
-				.delete();
+		materialManagers.replace(world, MaterialManager::delete);
 
 		InstanceManager<TileEntity> tiles = tileInstanceManager.replace(world);
 		world.loadedTileEntityList.forEach(tiles::add);

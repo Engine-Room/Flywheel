@@ -16,12 +16,14 @@ import com.jozufozu.flywheel.util.WeakHashSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3i;
 
+// TODO: 0.2 block atlas should not be a special case
 public class MaterialManager<P extends WorldProgram> {
 
 	public static int MAX_ORIGIN_DISTANCE = 100;
@@ -103,6 +105,7 @@ public class MaterialManager<P extends WorldProgram> {
 		atlasMaterials.clear();
 		atlasRenderers.clear();
 		materials.clear();
+		renderers.clear();
 	}
 
 	@SuppressWarnings("unchecked")

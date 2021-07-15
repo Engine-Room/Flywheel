@@ -28,6 +28,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.loading.Shader;
 import com.jozufozu.flywheel.backend.loading.ShaderLoadingException;
@@ -111,7 +112,9 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 
 				ClientWorld world = Minecraft.getInstance().world;
 				if (Backend.isFlywheelWorld(world)) {
+					// TODO: looks like it might be good to have another event here
 					InstancedRenderDispatcher.loadAllInWorld(world);
+					CrumblingRenderer.reset();
 				}
 			}
 		}

@@ -60,7 +60,9 @@ public class Backend {
 
 	void clearContexts() {
 		SpecMetaRegistry.clear();
+		programSpecRegistry.clear();
 		contexts.forEach(IShaderContext::delete);
+		contexts.clear();
 		materialRegistry.clear();
 	}
 
