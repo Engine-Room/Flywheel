@@ -24,7 +24,7 @@ import net.minecraft.world.chunk.Chunk;
 @Mixin(ClientPlayNetHandler.class)
 public class NetworkLightUpdateMixin {
 
-	@Inject(at = @At("TAIL"), method = "handleUpdateLight")
+	@Inject(at = @At("TAIL"), method = "handleLightUpdatePacked")
 	private void onLightPacket(SUpdateLightPacket packet, CallbackInfo ci) {
 		RenderWork.enqueue(() -> {
 			ClientWorld world = Minecraft.getInstance().level;
