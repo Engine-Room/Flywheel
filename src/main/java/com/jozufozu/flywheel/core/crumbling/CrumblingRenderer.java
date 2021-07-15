@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.instancing;
+package com.jozufozu.flywheel.core.crumbling;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
@@ -11,11 +11,12 @@ import java.util.List;
 import java.util.SortedSet;
 
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.instancing.InstanceManager;
+import com.jozufozu.flywheel.backend.instancing.MaterialManager;
 import com.jozufozu.flywheel.core.Contexts;
-import com.jozufozu.flywheel.core.crumbling.CrumblingInstanceManager;
-import com.jozufozu.flywheel.core.crumbling.CrumblingMaterialManager;
-import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.util.Lazy;
+import com.jozufozu.flywheel.util.Pair;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -29,7 +30,6 @@ import net.minecraft.client.renderer.texture.Texture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.LazyValue;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraftforge.api.distmarker.Dist;
@@ -44,8 +44,15 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class CrumblingRenderer {
 
-	private static final LazyValue<MaterialManager<CrumblingProgram>> materialManager = new LazyValue<>(() -> new CrumblingMaterialManager(Contexts.CRUMBLING));
-	private static final LazyValue<InstanceManager<TileEntity>> manager = new LazyValue<>(() -> new CrumblingInstanceManager(materialManager.getValue()));
+	private static final Lazy<State> STATE;
+	private static final Lazy.KillSwitch<State> INVALIDATOR;
+
+	static {
+		Pair<Lazy<State>, Lazy.KillSwitch<State>> state = Lazy.ofKillable(State::new, State::kill);
+
+		STATE = state.getFirst();
+		INVALIDATOR = state.getSecond();
+	}
 
 	private static final RenderType crumblingLayer = ModelBakery.BLOCK_DESTRUCTION_RENDER_LAYERS.get(0);
 
@@ -57,12 +64,14 @@ public class CrumblingRenderer {
 
 		if (activeStages.isEmpty()) return;
 
-		InstanceManager<TileEntity> renderer = manager.getValue();
+		State state = STATE.get();
+
+		InstanceManager<TileEntity> renderer = state.instanceManager;
 
 		TextureManager textureManager = Minecraft.getInstance().textureManager;
 		ActiveRenderInfo info = Minecraft.getInstance().gameRenderer.getActiveRenderInfo();
 
-		MaterialManager<CrumblingProgram> materials = materialManager.getValue();
+		MaterialManager<CrumblingProgram> materials = state.materialManager;
 		crumblingLayer.startDrawing();
 
 		for (Int2ObjectMap.Entry<List<TileEntity>> stage : activeStages.int2ObjectEntrySet()) {
@@ -124,7 +133,26 @@ public class CrumblingRenderer {
 		ClientWorld world = event.getWorld();
 		if (Backend.getInstance()
 				.canUseInstancing() && world != null) {
-			materialManager.getValue().delete();
+			reset();
+		}
+	}
+
+	public static void reset() {
+		INVALIDATOR.killValue();
+	}
+
+	private static class State {
+		private final MaterialManager<CrumblingProgram> materialManager;
+		private final InstanceManager<TileEntity> instanceManager;
+
+		private State() {
+			materialManager = new CrumblingMaterialManager(Contexts.CRUMBLING);
+			instanceManager = new CrumblingInstanceManager(materialManager);
+		}
+
+		private void kill() {
+			materialManager.delete();
+			instanceManager.invalidate();
 		}
 	}
 }

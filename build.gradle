@@ -161,6 +161,5 @@ curseforge {
         changelog = file('changelog.txt')
         releaseType = project.curse_type
         mainArtifact jar
-        addArtifact sourcesJar
     }
 }
