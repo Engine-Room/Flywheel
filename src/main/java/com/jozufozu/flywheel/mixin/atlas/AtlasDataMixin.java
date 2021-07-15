@@ -19,14 +19,14 @@ import net.minecraft.util.ResourceLocation;
 public abstract class AtlasDataMixin {
 
 	@Shadow
-	public abstract ResourceLocation getId();
+	public abstract ResourceLocation location();
 
-	@Inject(method = "stitch", at = @At("RETURN"))
+	@Inject(method = "prepareToStitch", at = @At("RETURN"))
 	public void stealAtlasData(IResourceManager resourceManager, Stream<ResourceLocation> locationStream, IProfiler profiler, int mipMapLevels, CallbackInfoReturnable<AtlasTexture.SheetData> cir) {
 		AtlasTexture.SheetData value = cir.getReturnValue();
 
 		SheetDataAccessor dataAccessor = (SheetDataAccessor) value;
 
-		AtlasInfo.setAtlasData(getId(), dataAccessor);
+		AtlasInfo.setAtlasData(location(), dataAccessor);
 	}
 }

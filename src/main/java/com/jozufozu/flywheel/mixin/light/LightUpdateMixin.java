@@ -33,7 +33,7 @@ public abstract class LightUpdateMixin extends AbstractChunkProvider {
 	 * the rendering system that it needs to redraw a chunk. It does all that work asynchronously,
 	 * and we should too.
 	 */
-	@Inject(at = @At("HEAD"), method = "markLightChanged")
+	@Inject(at = @At("HEAD"), method = "onLightUpdate")
 	private void onLightUpdate(LightType type, SectionPos pos, CallbackInfo ci) {
 		ClientChunkProvider thi = ((ClientChunkProvider) (Object) this);
 		ClientWorld world = (ClientWorld) thi.getLevel();

@@ -20,7 +20,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @Mixin(WorldRenderer.class)
 public class FixFabulousDepthMixin {
 
-	@Inject(method = "render", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/client/shader/ShaderGroup;render(F)V"))
+	@Inject(method = "renderLevel", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/client/shader/ShaderGroup;process(F)V"))
 	private void disableTransparencyShaderDepth(MatrixStack p_228426_1_, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, ActiveRenderInfo p_228426_6_, GameRenderer p_228426_7_, LightTexture p_228426_8_, Matrix4f p_228426_9_, CallbackInfo ci) {
 		GlStateManager._depthMask(false);
 	}

@@ -35,11 +35,11 @@ import net.minecraftforge.common.MinecraftForge;
 public class RenderHooksMixin {
 
 	@Shadow
-	private ClientWorld world;
+	private ClientWorld level;
 
-	@Inject(at = @At(value = "INVOKE", target = "net.minecraft.client.renderer.WorldRenderer.updateChunks(J)V"), method = "render")
+	@Inject(at = @At(value = "INVOKE", target = "net.minecraft.client.renderer.WorldRenderer.compileChunksUntil(J)V"), method = "renderLevel")
 	private void setupFrame(MatrixStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, ActiveRenderInfo info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f p_228426_9_, CallbackInfo ci) {
-		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(world, stack, info, gameRenderer, lightTexture));
+		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, stack, info, gameRenderer, lightTexture));
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class RenderHooksMixin {
 	 * layer-correct custom rendering. RenderWorldLast is not refined enough for rendering world objects.
 	 * This should probably be a forge event.
 	 */
-	@Inject(at = @At("TAIL"), method = "renderLayer")
+	@Inject(at = @At("TAIL"), method = "renderChunkLayer")
 	private void renderLayer(RenderType type, MatrixStack stack, double camX, double camY, double camZ, CallbackInfo ci) {
 		Matrix4f view = stack.last()
 				.pose();
@@ -55,22 +55,22 @@ public class RenderHooksMixin {
 		viewProjection.multiplyBackward(Backend.getInstance()
 												.getProjectionMatrix());
 
-		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(world, type, viewProjection, camX, camY, camZ));
+		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(level, type, viewProjection, camX, camY, camZ));
 
 		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
 	}
 
-	@Inject(at = @At("TAIL"), method = "loadRenderers")
+	@Inject(at = @At("TAIL"), method = "allChanged")
 	private void refresh(CallbackInfo ci) {
 		Backend.getInstance()
 				.refresh();
 
-		MinecraftForge.EVENT_BUS.post(new ReloadRenderersEvent(world));
+		MinecraftForge.EVENT_BUS.post(new ReloadRenderersEvent(level));
 	}
 
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WorldRenderer;checkEmpty(Lcom/mojang/blaze3d/matrix/MatrixStack;)V", ordinal = 2 // after the game renders the breaking overlay normally
-	), method = "render")
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WorldRenderer;checkPoseStack(Lcom/mojang/blaze3d/matrix/MatrixStack;)V", ordinal = 2 // after the game renders the breaking overlay normally
+	), method = "renderLevel")
 	private void renderBlockBreaking(MatrixStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, ActiveRenderInfo info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f p_228426_9_, CallbackInfo ci) {
 		if (!Backend.getInstance()
 				.available()) return;
@@ -82,16 +82,16 @@ public class RenderHooksMixin {
 												.getProjectionMatrix());
 
 		Vector3d cameraPos = info.getPosition();
-		CrumblingRenderer.renderBreaking(world, viewProjection, cameraPos.x, cameraPos.y, cameraPos.z);
+		CrumblingRenderer.renderBreaking(level, viewProjection, cameraPos.x, cameraPos.y, cameraPos.z);
 
 		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
 	}
 
 	// Instancing
 
-	@Inject(at = @At("TAIL"), method = "scheduleBlockRerenderIfNeeded")
+	@Inject(at = @At("TAIL"), method = "setBlockDirty(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;)V")
 	private void checkUpdate(BlockPos pos, BlockState lastState, BlockState newState, CallbackInfo ci) {
-		InstancedRenderDispatcher.getTiles(world)
-				.update(world.getBlockEntity(pos));
+		InstancedRenderDispatcher.getTiles(level)
+				.update(level.getBlockEntity(pos));
 	}
 }
