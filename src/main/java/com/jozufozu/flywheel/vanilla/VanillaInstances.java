@@ -7,7 +7,6 @@ import net.minecraft.tileentity.TileEntityType;
 /**
  * TODO:
  * <table>
- * 		<tr><td>{@link TileEntityType#SHULKER_BOX}</td><td> {@link net.minecraft.client.renderer.tileentity.ShulkerBoxTileEntityRenderer ShulkerBoxTileEntityRenderer}</td></tr>
  * 		<tr><td>{@link TileEntityType#SIGN}</td><td> {@link net.minecraft.client.renderer.tileentity.SignTileEntityRenderer SignTileEntityRenderer}</td></tr>
  * 		<tr><td>{@link TileEntityType#PISTON}</td><td> {@link net.minecraft.client.renderer.tileentity.PistonTileEntityRenderer PistonTileEntityRenderer}</td></tr>
  * 		<tr><td>{@link TileEntityType#CONDUIT}</td><td> {@link net.minecraft.client.renderer.tileentity.ConduitTileEntityRenderer ConduitTileEntityRenderer}</td></tr>
@@ -43,5 +42,9 @@ public class VanillaInstances {
 		r.tile(TileEntityType.BELL)
 				.setSkipRender(true)
 				.factory(BellInstance::new);
+
+		r.tile(TileEntityType.SHULKER_BOX)
+				.setSkipRender(true)
+				.factory(ShulkerBoxInstance::new);
 	}
 }

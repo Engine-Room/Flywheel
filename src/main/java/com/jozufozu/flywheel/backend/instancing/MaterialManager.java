@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.state.IRenderState;
+import com.jozufozu.flywheel.backend.state.TextureRenderState;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.WorldContext;
 import com.jozufozu.flywheel.core.materials.ModelData;
@@ -13,7 +14,6 @@ import com.jozufozu.flywheel.core.shader.IProgramCallback;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.util.WeakHashSet;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.inventory.container.PlayerContainer;
@@ -30,11 +30,8 @@ public class MaterialManager<P extends WorldProgram> {
 
 	protected final WorldContext<P> context;
 
-	protected final Map<MaterialSpec<?>, InstanceMaterial<?>> atlasMaterials;
-	protected final ArrayList<MaterialRenderer<P>> atlasRenderers;
-
-	protected final Map<ResourceLocation, ArrayList<MaterialRenderer<P>>> renderers;
-	protected final Map<ResourceLocation, Map<MaterialSpec<?>, InstanceMaterial<?>>> materials;
+	protected final Map<IRenderState, ArrayList<MaterialRenderer<P>>> renderers;
+	protected final Map<IRenderState, Map<MaterialSpec<?>, InstanceMaterial<?>>> materials;
 
 	protected BlockPos originCoordinate = BlockPos.ZERO;
 
@@ -42,11 +39,6 @@ public class MaterialManager<P extends WorldProgram> {
 
 	public MaterialManager(WorldContext<P> context) {
 		this.context = context;
-
-		this.atlasMaterials = new HashMap<>();
-		this.atlasRenderers = new ArrayList<>(Backend.getInstance()
-													  .allMaterials()
-													  .size());
 
 		this.materials = new HashMap<>();
 		this.renderers = new HashMap<>();
@@ -80,52 +72,43 @@ public class MaterialManager<P extends WorldProgram> {
 
 		translate.multiplyBackward(viewProjection);
 
-		for (MaterialRenderer<P> material : atlasRenderers) {
-			material.render(layer, translate, camX, camY, camZ, callback);
-		}
-
-		for (Map.Entry<ResourceLocation, ArrayList<MaterialRenderer<P>>> entry : renderers.entrySet()) {
-			Minecraft.getInstance().textureManager.bind(entry.getKey());
+		for (Map.Entry<IRenderState, ArrayList<MaterialRenderer<P>>> entry : renderers.entrySet()) {
+			entry.getKey().bind();
 
 			for (MaterialRenderer<P> materialRenderer : entry.getValue()) {
 				materialRenderer.render(layer, translate, camX, camY, camZ, callback);
 			}
+
+			entry.getKey().unbind();
 		}
 	}
 
 	public void delete() {
-		atlasMaterials.values()
-				.forEach(InstanceMaterial::delete);
 		materials.values()
 				.stream()
 				.flatMap(m -> m.values()
 						.stream())
 				.forEach(InstanceMaterial::delete);
 
-		atlasMaterials.clear();
-		atlasRenderers.clear();
 		materials.clear();
 		renderers.clear();
 	}
 
-	@SuppressWarnings("unchecked")
 	public <D extends InstanceData> InstanceMaterial<D> getMaterial(MaterialSpec<D> materialType) {
-		return (InstanceMaterial<D>) this.atlasMaterials.computeIfAbsent(materialType, type -> {
-			InstanceMaterial<?> material = new InstanceMaterial<>(this::getOriginCoordinate, type);
+		return getMaterial(materialType, PlayerContainer.BLOCK_ATLAS);
+	}
 
-			this.atlasRenderers.add(new MaterialRenderer<>(context.getProgramSupplier(type.getProgramName()), material));
-
-			return material;
-		});
+	public <D extends InstanceData> InstanceMaterial<D> getMaterial(MaterialSpec<D> materialType, ResourceLocation texture) {
+		return getMaterial(materialType, TextureRenderState.get(texture));
 	}
 
 	@SuppressWarnings("unchecked")
-	public <D extends InstanceData> InstanceMaterial<D> getMaterial(MaterialSpec<D> materialType, ResourceLocation texture) {
-		return (InstanceMaterial<D>) materials.computeIfAbsent(texture, $ -> new HashMap<>())
+	public <D extends InstanceData> InstanceMaterial<D> getMaterial(MaterialSpec<D> materialType, IRenderState state) {
+		return (InstanceMaterial<D>) materials.computeIfAbsent(state, $ -> new HashMap<>())
 				.computeIfAbsent(materialType, type -> {
 					InstanceMaterial<?> material = new InstanceMaterial<>(this::getOriginCoordinate, type);
 
-					this.renderers.computeIfAbsent(texture, $ -> new ArrayList<>())
+					this.renderers.computeIfAbsent(state, $ -> new ArrayList<>())
 							.add(new MaterialRenderer<>(context.getProgramSupplier(type.getProgramName()), material));
 
 					return material;
@@ -166,8 +149,7 @@ public class MaterialManager<P extends WorldProgram> {
 					.flatMap(m -> m.values()
 							.stream())
 					.forEach(InstanceMaterial::clear);
-			atlasMaterials.values()
-					.forEach(InstanceMaterial::clear);
+
 			listeners.forEach(OriginShiftListener::onOriginShift);
 		}
 	}
