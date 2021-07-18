@@ -35,16 +35,6 @@ public class CrumblingProgram extends WorldProgram {
 		glUniform2f(uTextureScale, x, y);
 	}
 
-	public void setDefaultAtlasSize() {
-		SheetData atlasData = AtlasInfo.getAtlasData(PlayerContainer.BLOCK_ATLAS);
-		if (atlasData == null) return;
-
-		int width = atlasData.width;
-		int height = atlasData.height;
-
-		setAtlasSize(width, height);
-	}
-
 	public void setAtlasSize(int width, int height) {
 		AtlasTexture blockAtlas = AtlasInfo.getAtlas(PlayerContainer.BLOCK_ATLAS);
 		if (blockAtlas == null) return;

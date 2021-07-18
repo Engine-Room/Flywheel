@@ -1,24 +1,18 @@
 package com.jozufozu.flywheel.core.crumbling;
 
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
-
 import java.util.ArrayList;
 import java.util.Map;
 
+import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.MaterialManager;
 import com.jozufozu.flywheel.backend.instancing.MaterialRenderer;
+import com.jozufozu.flywheel.backend.state.IRenderState;
 import com.jozufozu.flywheel.core.WorldContext;
 import com.jozufozu.flywheel.core.atlas.AtlasInfo;
 import com.jozufozu.flywheel.core.atlas.SheetData;
 import com.jozufozu.flywheel.core.shader.IProgramCallback;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
 
@@ -44,23 +38,29 @@ public class CrumblingMaterialManager extends MaterialManager<CrumblingProgram> 
 
 		translate.multiplyBackward(viewProjection);
 
-		TextureManager textureManager = Minecraft.getInstance().textureManager;
+		for (Map.Entry<IRenderState, ArrayList<MaterialRenderer<CrumblingProgram>>> entry : renderers.entrySet()) {
+			IRenderState key = entry.getKey();
+			key.bind();
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureManager.getTexture(PlayerContainer.BLOCK_ATLAS)
-				.getId());
+			int width;
+			int height;
 
-		for (MaterialRenderer<CrumblingProgram> material : atlasRenderers) {
-			material.render(layer, translate, camX, camY, camZ, CrumblingProgram::setDefaultAtlasSize);
-		}
+			ResourceLocation texture = key.getTexture(GlTextureUnit.T0);
 
-		for (Map.Entry<ResourceLocation, ArrayList<MaterialRenderer<CrumblingProgram>>> entry : renderers.entrySet()) {
-			glBindTexture(GL_TEXTURE_2D, textureManager.getTexture(entry.getKey())
-					.getId());
-			SheetData atlasData = AtlasInfo.getAtlasData(entry.getKey());
-			for (MaterialRenderer<CrumblingProgram> materialRenderer : entry.getValue()) {
-				materialRenderer.render(layer, translate, camX, camY, camZ, p -> p.setAtlasSize(atlasData.width, atlasData.height));
+			if (texture != null) {
+				SheetData atlasData = AtlasInfo.getAtlasData(texture);
+
+				width = atlasData.width;
+				height = atlasData.height;
+			} else {
+				width = height = 256;
 			}
+
+			for (MaterialRenderer<CrumblingProgram> materialRenderer : entry.getValue()) {
+				materialRenderer.render(layer, translate, camX, camY, camZ, p -> p.setAtlasSize(width, height));
+			}
+
+			key.unbind();
 		}
 	}
 }

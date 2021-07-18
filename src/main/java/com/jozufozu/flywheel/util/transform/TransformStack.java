@@ -45,11 +45,27 @@ public interface TransformStack {
 	}
 
 	default TransformStack centre() {
-		return translate(CENTER);
+		return translateAll(0.5);
 	}
 
 	default TransformStack unCentre() {
-		return translateBack(CENTER);
+		return translateAll(-0.5);
+	}
+
+	default TransformStack translateAll(double v) {
+		return translate(v, v, v);
+	}
+
+	default TransformStack translateX(double x) {
+		return translate(x, 0, 0);
+	}
+
+	default TransformStack translateY(double y) {
+		return translate(0, y, 0);
+	}
+
+	default TransformStack translateZ(double z) {
+		return translate(0, 0, z);
 	}
 
 	default TransformStack translate(Vector3i vec) {

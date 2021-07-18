@@ -127,8 +127,6 @@ public class PartBuilder {
 
 		/**
 		 * Pulls the cuboid "inside out" through the Y and Z axes.
-		 *
-		 * See the {@link com.jozufozu.flywheel.vanilla.SignInstance sign} renderer for the use case.
 		 */
 		public CuboidBuilder invertYZ() {
 			this.invertYZ = true;
