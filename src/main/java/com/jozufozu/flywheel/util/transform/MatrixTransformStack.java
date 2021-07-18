@@ -25,12 +25,20 @@ public class MatrixTransformStack implements TransformStack {
 	}
 
 	@Override
+	public TransformStack scale(float factor) {
+		internal.scale(factor, factor, factor);
+		return this;
+	}
+
+	@Override
 	public TransformStack push() {
+		internal.pushPose();
 		return this;
 	}
 
 	@Override
 	public TransformStack pop() {
+		internal.popPose();
 		return this;
 	}
 }
