@@ -13,6 +13,8 @@ public interface TransformStack {
 
 	TransformStack multiply(Quaternion quaternion);
 
+	TransformStack scale(float factor);
+
 	TransformStack push();
 
 	TransformStack pop();

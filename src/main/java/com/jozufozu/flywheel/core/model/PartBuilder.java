@@ -84,6 +84,8 @@ public class PartBuilder {
 		float posY2;
 		float posZ2;
 
+		boolean invertYZ;
+
 		final PartBuilder partBuilder;
 
 		CuboidBuilder(PartBuilder partBuilder) {
@@ -123,6 +125,16 @@ public class PartBuilder {
 			return this;
 		}
 
+		/**
+		 * Pulls the cuboid "inside out" through the Y and Z axes.
+		 *
+		 * See the {@link com.jozufozu.flywheel.vanilla.SignInstance sign} renderer for the use case.
+		 */
+		public CuboidBuilder invertYZ() {
+			this.invertYZ = true;
+			return this;
+		}
+
 		public PartBuilder endCuboid() {
 			return partBuilder.addCuboid(this);
 		}
@@ -137,14 +149,21 @@ public class PartBuilder {
 			float sizeY = posY2 - posY1;
 			float sizeZ = posZ2 - posZ1;
 
-			Vector3f lll = new Vector3f(posX1 / 16f, posY1 / 16f, posZ1 / 16f);
-			Vector3f hll = new Vector3f(posX2 / 16f, posY1 / 16f, posZ1 / 16f);
-			Vector3f hhl = new Vector3f(posX2 / 16f, posY2 / 16f, posZ1 / 16f);
-			Vector3f lhl = new Vector3f(posX1 / 16f, posY2 / 16f, posZ1 / 16f);
-			Vector3f llh = new Vector3f(posX1 / 16f, posY1 / 16f, posZ2 / 16f);
-			Vector3f hlh = new Vector3f(posX2 / 16f, posY1 / 16f, posZ2 / 16f);
-			Vector3f hhh = new Vector3f(posX2 / 16f, posY2 / 16f, posZ2 / 16f);
-			Vector3f lhh = new Vector3f(posX1 / 16f, posY2 / 16f, posZ2 / 16f);
+			float posX1 = this.posX1 / 16f;
+			float posY1 = this.posY1 / 16f;
+			float posZ1 = this.posZ1 / 16f;
+			float posX2 = this.posX2 / 16f;
+			float posY2 = this.posY2 / 16f;
+			float posZ2 = this.posZ2 / 16f;
+
+			Vector3f lll = new Vector3f(posX1, posY1, posZ1);
+			Vector3f hll = new Vector3f(posX2, posY1, posZ1);
+			Vector3f hhl = new Vector3f(posX2, posY2, posZ1);
+			Vector3f lhl = new Vector3f(posX1, posY2, posZ1);
+			Vector3f llh = new Vector3f(posX1, posY1, posZ2);
+			Vector3f hlh = new Vector3f(posX2, posY1, posZ2);
+			Vector3f hhh = new Vector3f(posX2, posY2, posZ2);
+			Vector3f lhh = new Vector3f(posX1, posY2, posZ2);
 			float f4 = getU((float)textureOffsetU);
 			float f5 = getU((float)textureOffsetU + sizeZ);
 			float f6 = getU((float)textureOffsetU + sizeZ + sizeX);
@@ -155,12 +174,21 @@ public class PartBuilder {
 			float f11 = getV((float)textureOffsetV + sizeZ);
 			float f12 = getV((float)textureOffsetV + sizeZ + sizeY);
 
-			quad(buffer, new Vector3f[]{hlh, llh, lll, hll}, f5, f10, f6, f11, Direction.DOWN);
-			quad(buffer, new Vector3f[]{hhl, lhl, lhh, hhh}, f6, f11, f7, f10, Direction.UP);
-			quad(buffer, new Vector3f[]{lll, llh, lhh, lhl}, f4, f11, f5, f12, Direction.WEST);
-			quad(buffer, new Vector3f[]{hll, lll, lhl, hhl}, f5, f11, f6, f12, Direction.NORTH);
-			quad(buffer, new Vector3f[]{hlh, hll, hhl, hhh}, f6, f11, f8, f12, Direction.EAST);
-			quad(buffer, new Vector3f[]{llh, hlh, hhh, lhh}, f8, f11, f9, f12, Direction.SOUTH);
+			if (invertYZ) {
+				quad(buffer, new Vector3f[]{hlh, llh, lll, hll}, f6, f11, f7, f10, Direction.DOWN);
+				quad(buffer, new Vector3f[]{hhl, lhl, lhh, hhh}, f5, f10, f6, f11, Direction.UP);
+				quad(buffer, new Vector3f[]{lll, llh, lhh, lhl}, f5, f12, f4, f11, Direction.WEST);
+				quad(buffer, new Vector3f[]{hll, lll, lhl, hhl}, f9, f12, f8, f11, Direction.NORTH);
+				quad(buffer, new Vector3f[]{hlh, hll, hhl, hhh}, f8, f12, f6, f11, Direction.EAST);
+				quad(buffer, new Vector3f[]{llh, hlh, hhh, lhh}, f6, f12, f5, f11, Direction.SOUTH);
+			} else {
+				quad(buffer, new Vector3f[]{hlh, llh, lll, hll}, f5, f10, f6, f11, Direction.DOWN);
+				quad(buffer, new Vector3f[]{hhl, lhl, lhh, hhh}, f6, f11, f7, f10, Direction.UP);
+				quad(buffer, new Vector3f[]{lll, llh, lhh, lhl}, f4, f11, f5, f12, Direction.WEST);
+				quad(buffer, new Vector3f[]{hll, lll, lhl, hhl}, f5, f11, f6, f12, Direction.NORTH);
+				quad(buffer, new Vector3f[]{hlh, hll, hhl, hhh}, f6, f11, f8, f12, Direction.EAST);
+				quad(buffer, new Vector3f[]{llh, hlh, hhh, lhh}, f8, f11, f9, f12, Direction.SOUTH);
+			}
 		}
 
 
