@@ -4,7 +4,6 @@
   "package": "com.jozufozu.flywheel.mixin",
   "compatibilityLevel": "JAVA_8",
   "refmap": "flywheel.refmap.json",
-  "mixins": [],
   "client": [
     "CancelEntityRenderMixin",
     "CancelTileEntityRenderMixin",
@@ -18,7 +17,8 @@
     "atlas.AtlasDataMixin",
     "atlas.SheetDataAccessor",
     "light.LightUpdateMixin",
-    "light.NetworkLightUpdateMixin"
+    "light.NetworkLightUpdateMixin",
+    "FastChunkProviderMixin"
   ],
   "injectors": {
     "defaultRequire": 0

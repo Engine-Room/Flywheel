@@ -74,7 +74,10 @@ public class Instancer<D extends InstanceData> {
 		D instanceData = factory.create(this);
 		instanceData.dirty = true;
 		anyToUpdate = true;
-		data.add(instanceData);
+
+		synchronized (data) {
+			data.add(instanceData);
+		}
 
 		return instanceData;
 	}

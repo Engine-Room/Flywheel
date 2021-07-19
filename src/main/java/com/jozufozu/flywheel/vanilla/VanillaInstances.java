@@ -13,6 +13,7 @@ import net.minecraft.tileentity.TileEntityType;
  * 		<tr><td>{@link TileEntityType#ENCHANTING_TABLE}</td><td> {@link net.minecraft.client.renderer.tileentity.EnchantmentTableTileEntityRenderer EnchantmentTableTileEntityRenderer}</td></tr>
  * 		<tr><td>{@link TileEntityType#LECTERN}</td><td> {@link net.minecraft.client.renderer.tileentity.LecternTileEntityRenderer LecternTileEntityRenderer}</td></tr>
  * 		<tr><td>{@link TileEntityType#MOB_SPAWNER}</td><td> {@link net.minecraft.client.renderer.tileentity.MobSpawnerTileEntityRenderer MobSpawnerTileEntityRenderer}</td></tr>
+ * 		<tr><td>{@link TileEntityType#BED}</td><td> {@link net.minecraft.client.renderer.tileentity.BedTileEntityRenderer BedTileEntityRenderer}</td></tr>
  * 		<tr><td>^^ Interesting - Major vv</td></tr>
  * 		<tr><td>{@link TileEntityType#END_PORTAL}</td><td> {@link net.minecraft.client.renderer.tileentity.EndPortalTileEntityRenderer EndPortalTileEntityRenderer}</td></tr>
  * 		<tr><td>{@link TileEntityType#END_GATEWAY}</td><td> {@link net.minecraft.client.renderer.tileentity.EndGatewayTileEntityRenderer EndGatewayTileEntityRenderer}</td></tr>
@@ -20,7 +21,6 @@ import net.minecraft.tileentity.TileEntityType;
  * 		<tr><td>{@link TileEntityType#SKULL}</td><td> {@link net.minecraft.client.renderer.tileentity.SkullTileEntityRenderer SkullTileEntityRenderer}</td></tr>
  * 		<tr><td>{@link TileEntityType#BANNER}</td><td> {@link net.minecraft.client.renderer.tileentity.BannerTileEntityRenderer BannerTileEntityRenderer}</td></tr>
  * 		<tr><td>{@link TileEntityType#STRUCTURE_BLOCK}</td><td> {@link net.minecraft.client.renderer.tileentity.StructureTileEntityRenderer StructureTileEntityRenderer}</td></tr>
- * 		<tr><td>{@link TileEntityType#BED}</td><td> {@link net.minecraft.client.renderer.tileentity.BedTileEntityRenderer BedTileEntityRenderer}</td></tr>
  * 		<tr><td>{@link TileEntityType#CAMPFIRE}</td><td> {@link net.minecraft.client.renderer.tileentity.CampfireTileEntityRenderer CampfireTileEntityRenderer}</td></tr>
  * </table>
  */

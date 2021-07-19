@@ -55,10 +55,11 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		int cZ = (int) cameraZ;
 
 		if (tickableInstances.size() > 0) {
-			for (ITickableInstance instance : tickableInstances.values()) {
+			tickableInstances.object2ObjectEntrySet().parallelStream().forEach(e -> {
+				ITickableInstance instance = e.getValue();
 				if (!instance.decreaseTickRateWithDistance()) {
 					instance.tick();
-					continue;
+					return;
 				}
 
 				BlockPos pos = instance.getWorldPosition();
@@ -68,7 +69,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 				int dZ = pos.getZ() - cZ;
 
 				if ((tick % getUpdateDivisor(dX, dY, dZ)) == 0) instance.tick();
-			}
+			});
 		}
 
 		queuedUpdates.forEach(te -> {
@@ -94,7 +95,8 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 
 		if (dynamicInstances.size() > 0) {
 			dynamicInstances.object2ObjectEntrySet()
-					.fastForEach(e -> {
+					.parallelStream()
+					.forEach(e -> {
 						IDynamicInstance dyn = e.getValue();
 						if (!dyn.decreaseFramerateWithDistance() || shouldFrameUpdate(dyn.getWorldPosition(), lookX, lookY, lookZ, cX, cY, cZ))
 							dyn.beginFrame();
