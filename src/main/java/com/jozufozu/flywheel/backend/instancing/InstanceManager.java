@@ -212,10 +212,14 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		return (frame % getUpdateDivisor(dX, dY, dZ)) == 0;
 	}
 
+	// 1 followed by the prime numbers
+	private static final int[] divisorSequence = new int[] { 1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31 };
 	protected int getUpdateDivisor(int dX, int dY, int dZ) {
 		int dSq = dX * dX + dY * dY + dZ * dZ;
 
-		return (dSq / 1024) + 1;
+		int i = (dSq / 2048);
+
+		return divisorSequence[Math.min(i, divisorSequence.length - 1)];
 	}
 
 	protected void addInternal(T tile) {
