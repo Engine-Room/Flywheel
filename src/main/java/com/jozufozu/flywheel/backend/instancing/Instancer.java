@@ -20,7 +20,8 @@ public class Instancer<D extends InstanceData> {
 
 	public final Supplier<Vector3i> originCoordinate;
 
-	protected final BufferedModel model;
+	protected Supplier<BufferedModel> gen;
+	protected BufferedModel model;
 
 	protected final VertexFormat instanceFormat;
 	protected final IInstanceFactory<D> factory;
@@ -35,31 +36,15 @@ public class Instancer<D extends InstanceData> {
 	boolean anyToRemove;
 	boolean anyToUpdate;
 
-	public Instancer(BufferedModel model, Supplier<Vector3i> originCoordinate, MaterialSpec<D> spec) {
-		this.model = model;
+	public Instancer(Supplier<BufferedModel> model, Supplier<Vector3i> originCoordinate, MaterialSpec<D> spec) {
+		this.gen = model;
 		this.factory = spec.getInstanceFactory();
 		this.instanceFormat = spec.getInstanceFormat();
 		this.originCoordinate = originCoordinate;
-
-		if (model.getVertexCount() <= 0)
-			throw new IllegalArgumentException("Refusing to instance a model with no vertices.");
-
-		vao = new GlVertexArray();
-		instanceVBO = new GlBuffer(GlBufferType.ARRAY_BUFFER);
-
-		vao.bind();
-
-		// bind the model's vbo to our vao
-		model.setupState();
-
-		AttribUtil.enableArrays(model.getAttributeCount() + instanceFormat.getAttributeCount());
-
-		vao.unbind();
-
-		model.clearState();
 	}
 
 	public void render() {
+		if (!isInitialized()) init();
 		if (deleted) return;
 
 		vao.bind();
@@ -82,7 +67,33 @@ public class Instancer<D extends InstanceData> {
 		return instanceData;
 	}
 
-	public boolean empty() {
+	private void init() {
+		model = gen.get();
+		gen = null;
+
+		if (model.getVertexCount() <= 0)
+			throw new IllegalArgumentException("Refusing to instance a model with no vertices.");
+
+		vao = new GlVertexArray();
+		instanceVBO = new GlBuffer(GlBufferType.ARRAY_BUFFER);
+
+		vao.bind();
+
+		// bind the model's vbo to our vao
+		model.setupState();
+
+		AttribUtil.enableArrays(model.getAttributeCount() + instanceFormat.getAttributeCount());
+
+		vao.unbind();
+
+		model.clearState();
+	}
+
+	public boolean isInitialized() {
+		return gen != null;
+	}
+
+	public boolean isEmpty() {
 		return !anyToUpdate && !anyToRemove && glInstanceCount == 0;
 	}
 
@@ -95,17 +106,19 @@ public class Instancer<D extends InstanceData> {
 	}
 
 	/**
-	 * Free acquired resources. Attempting to use this after calling delete is undefined behavior.
+	 * Free acquired resources. All other Instancer methods are undefined behavior after calling delete.
 	 */
 	public void delete() {
 		if (deleted) return;
 
 		deleted = true;
 
-		model.delete();
+		if (isInitialized()) {
+			model.delete();
 
-		instanceVBO.delete();
-		vao.delete();
+			instanceVBO.delete();
+			vao.delete();
+		}
 	}
 
 	protected void renderSetup() {
