@@ -59,7 +59,7 @@ public class InstanceMaterial<D extends InstanceData> {
 		return models.size() > 0 && models.asMap()
 				.values()
 				.stream()
-				.allMatch(Instancer::empty);
+				.allMatch(Instancer::isEmpty);
 	}
 
 	public void delete() {
@@ -100,7 +100,7 @@ public class InstanceMaterial<D extends InstanceData> {
 
 	public Instancer<D> get(Object key, Supplier<BufferedModel> supplier) {
 		try {
-			return models.get(key, () -> new Instancer<>(supplier.get(), originCoordinate, spec));
+			return models.get(key, () -> new Instancer<>(supplier, originCoordinate, spec));
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 			return null;
