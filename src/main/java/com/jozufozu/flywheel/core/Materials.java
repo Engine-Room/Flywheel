@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.core;
 
-import com.jozufozu.flywheel.backend.instancing.MaterialSpec;
+import com.jozufozu.flywheel.backend.material.MaterialSpec;
 import com.jozufozu.flywheel.core.materials.ModelData;
 import com.jozufozu.flywheel.core.materials.OrientedData;
 import com.jozufozu.flywheel.event.GatherContextEvent;

@@ -5,12 +5,15 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.function.Supplier;
 
+import javax.annotation.Nonnull;
+
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
+import com.jozufozu.flywheel.backend.material.MaterialSpec;
 import com.jozufozu.flywheel.backend.model.BufferedModel;
 import com.jozufozu.flywheel.util.AttribUtil;
 
@@ -20,7 +23,7 @@ public class Instancer<D extends InstanceData> {
 
 	public final Supplier<Vector3i> originCoordinate;
 
-	protected Supplier<BufferedModel> gen;
+	protected final Supplier<BufferedModel> gen;
 	protected BufferedModel model;
 
 	protected final VertexFormat instanceFormat;
@@ -30,6 +33,7 @@ public class Instancer<D extends InstanceData> {
 	protected int glBufferSize = -1;
 	protected int glInstanceCount = 0;
 	private boolean deleted;
+	private boolean initialized;
 
 	protected final ArrayList<D> data = new ArrayList<>();
 
@@ -69,7 +73,7 @@ public class Instancer<D extends InstanceData> {
 
 	private void init() {
 		model = gen.get();
-		gen = null;
+		initialized = true;
 
 		if (model.getVertexCount() <= 0)
 			throw new IllegalArgumentException("Refusing to instance a model with no vertices.");
@@ -90,7 +94,7 @@ public class Instancer<D extends InstanceData> {
 	}
 
 	public boolean isInitialized() {
-		return gen != null;
+		return initialized;
 	}
 
 	public boolean isEmpty() {

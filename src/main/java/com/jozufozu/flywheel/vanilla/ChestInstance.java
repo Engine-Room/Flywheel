@@ -5,9 +5,10 @@ import java.util.Calendar;
 import javax.annotation.Nonnull;
 
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
-import com.jozufozu.flywheel.backend.instancing.MaterialManager;
+import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
 import com.jozufozu.flywheel.backend.model.BufferedModel;
+import com.jozufozu.flywheel.backend.state.TextureRenderState;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.ModelData;
 import com.jozufozu.flywheel.core.materials.OrientedData;
@@ -119,15 +120,17 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 
 	private OrientedData baseInstance() {
 
-		return materialManager.getMaterial(Materials.ORIENTED, renderMaterial.atlasLocation())
-				.get("base_" + renderMaterial.texture(), this::getBaseModel)
+		return materialManager.solid(TextureRenderState.get(renderMaterial.atlasLocation()))
+                .material(Materials.ORIENTED)
+				.model("base_" + renderMaterial.texture(), this::getBaseModel)
 				.createInstance();
 	}
 
 	private ModelData lidInstance() {
 
-		return materialManager.getMaterial(Materials.TRANSFORMED, renderMaterial.atlasLocation())
-				.get("lid_" + renderMaterial.texture(), this::getLidModel)
+		return materialManager.solid(TextureRenderState.get(renderMaterial.atlasLocation()))
+                .material(Materials.TRANSFORMED)
+				.model("lid_" + renderMaterial.texture(), this::getLidModel)
 				.createInstance();
 	}
 

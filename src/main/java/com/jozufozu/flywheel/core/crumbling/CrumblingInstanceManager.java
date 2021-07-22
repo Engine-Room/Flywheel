@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.core.crumbling;
 
-import com.jozufozu.flywheel.backend.instancing.MaterialManager;
+import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 
 import net.minecraft.util.math.BlockPos;

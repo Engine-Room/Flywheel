@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.jozufozu.flywheel.backend.state.IRenderState;
 import com.jozufozu.flywheel.backend.state.NoCullRenderState;
 import com.jozufozu.flywheel.backend.state.RenderState;
+import com.jozufozu.flywheel.backend.state.TextureRenderState;
 
 import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.model.RenderMaterial;
