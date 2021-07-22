@@ -5,6 +5,8 @@ import javax.annotation.Nonnull;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
+import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.backend.state.RenderLayer;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
@@ -84,10 +86,14 @@ public class InstancedRenderDispatcher {
 		if (!Backend.getInstance()
 				.canUseInstancing(world)) return;
 
+		RenderLayer renderLayer = RenderLayer.fromRenderType(event.type);
+
+		if (renderLayer == null) return;
+
 		event.type.setupRenderState();
 
 		materialManagers.get(world)
-				.render(event.type, event.viewProjection, event.camX, event.camY, event.camZ);
+				.render(renderLayer, event.viewProjection, event.camX, event.camY, event.camZ);
 
 		event.type.clearRenderState();
 	}

@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.SortedSet;
 
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
-import com.jozufozu.flywheel.backend.instancing.MaterialManager;
+import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.backend.state.RenderLayer;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.util.Lazy;
@@ -84,9 +86,9 @@ public class CrumblingRenderer {
 
 				renderer.beginFrame(info);
 
-				glActiveTexture(GL_TEXTURE4);
+				GlTextureUnit.T4.makeActive();
 				glBindTexture(GL_TEXTURE_2D, breaking.getId());
-				materials.render(RenderType.cutoutMipped(), viewProjection, cameraX, cameraY, cameraZ);
+				materials.render(RenderLayer.SOLID, viewProjection, cameraX, cameraY, cameraZ);
 
 				renderer.invalidate();
 			}
@@ -95,7 +97,7 @@ public class CrumblingRenderer {
 
 		crumblingLayer.clearRenderState();
 
-		glActiveTexture(GL_TEXTURE0);
+		GlTextureUnit.T0.makeActive();
 		Texture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(0));
 		if (breaking != null) glBindTexture(GL_TEXTURE_2D, breaking.getId());
 	}
@@ -146,7 +148,7 @@ public class CrumblingRenderer {
 		private final InstanceManager<TileEntity> instanceManager;
 
 		private State() {
-			materialManager = new CrumblingMaterialManager(Contexts.CRUMBLING);
+			materialManager = new MaterialManager<>(Contexts.CRUMBLING).setGroupFactory(CrumblingGroup::new);
 			instanceManager = new CrumblingInstanceManager(materialManager);
 		}
 

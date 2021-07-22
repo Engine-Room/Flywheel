@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.instancing;
+package com.jozufozu.flywheel.backend.material;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -15,6 +15,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
+import com.jozufozu.flywheel.backend.instancing.InstanceData;
+import com.jozufozu.flywheel.backend.instancing.Instancer;
 import com.jozufozu.flywheel.backend.model.BufferedModel;
 import com.jozufozu.flywheel.backend.model.IndexedModel;
 import com.jozufozu.flywheel.core.PartialModel;
@@ -83,7 +85,7 @@ public class InstanceMaterial<D extends InstanceData> {
 	}
 
 	public Instancer<D> getModel(PartialModel partial, BlockState referenceState) {
-		return get(partial, () -> buildModel(partial.get(), referenceState));
+		return model(partial, () -> buildModel(partial.get(), referenceState));
 	}
 
 	public Instancer<D> getModel(PartialModel partial, BlockState referenceState, Direction dir) {
@@ -91,14 +93,14 @@ public class InstanceMaterial<D extends InstanceData> {
 	}
 
 	public Instancer<D> getModel(PartialModel partial, BlockState referenceState, Direction dir, Supplier<MatrixStack> modelTransform) {
-		return get(Pair.of(dir, partial), () -> buildModel(partial.get(), referenceState, modelTransform.get()));
+		return model(Pair.of(dir, partial), () -> buildModel(partial.get(), referenceState, modelTransform.get()));
 	}
 
 	public Instancer<D> getModel(BlockState toRender) {
-		return get(toRender, () -> buildModel(toRender));
+		return model(toRender, () -> buildModel(toRender));
 	}
 
-	public Instancer<D> get(Object key, Supplier<BufferedModel> supplier) {
+	public Instancer<D> model(Object key, Supplier<BufferedModel> supplier) {
 		try {
 			return models.get(key, () -> new Instancer<>(supplier, originCoordinate, spec));
 		} catch (ExecutionException e) {

@@ -6,8 +6,9 @@ import java.util.stream.Stream;
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.IInstance;
 import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
-import com.jozufozu.flywheel.backend.instancing.InstanceMaterial;
-import com.jozufozu.flywheel.backend.instancing.MaterialManager;
+import com.jozufozu.flywheel.backend.material.InstanceMaterial;
+import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.IFlatLight;
 import com.jozufozu.flywheel.core.materials.ModelData;
 import com.jozufozu.flywheel.core.materials.OrientedData;
@@ -122,10 +123,10 @@ public abstract class TileEntityInstance<T extends TileEntity> implements IInsta
 	}
 
 	protected InstanceMaterial<ModelData> getTransformMaterial() {
-		return materialManager.getTransformMaterial();
-	}
+        return materialManager.defaultCutout().material(Materials.TRANSFORMED);
+    }
 
 	protected InstanceMaterial<OrientedData> getOrientedMaterial() {
-		return materialManager.getOrientedMaterial();
+		return materialManager.defaultCutout().material(Materials.ORIENTED);
 	}
 }
