@@ -60,15 +60,14 @@ public class Instancer<D extends InstanceData> {
 	}
 
 	public D createInstance() {
-		D instanceData = factory.create(this);
-		instanceData.dirty = true;
-		anyToUpdate = true;
+		return _add(factory.create(this));
+	}
 
-		synchronized (data) {
-			data.add(instanceData);
-		}
+	public void stealInstance(D inOther) {
+		if (inOther.owner == this) return;
 
-		return instanceData;
+		inOther.owner.anyToRemove = true;
+		_add(inOther);
 	}
 
 	private void init() {
@@ -123,6 +122,18 @@ public class Instancer<D extends InstanceData> {
 			instanceVBO.delete();
 			vao.delete();
 		}
+	}
+
+	private D _add(D instanceData) {
+		instanceData.owner = this;
+
+		instanceData.dirty = true;
+		anyToUpdate = true;
+		synchronized (data) {
+			data.add(instanceData);
+		}
+
+		return instanceData;
 	}
 
 	protected void renderSetup() {
@@ -235,7 +246,7 @@ public class Instancer<D extends InstanceData> {
 		final BitSet removeSet = new BitSet(oldSize);
 		for (int i = 0; i < oldSize; i++) {
 			final D element = this.data.get(i);
-			if (element.removed) {
+			if (element.removed || element.owner != this) {
 				removeSet.set(i);
 				removeCount++;
 			}
