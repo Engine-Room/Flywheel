@@ -3,38 +3,32 @@ package com.jozufozu.flywheel.backend.material;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.lwjgl.opengl.GL11;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
+import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.instancing.Instancer;
 import com.jozufozu.flywheel.backend.model.BufferedModel;
 import com.jozufozu.flywheel.backend.model.IndexedModel;
 import com.jozufozu.flywheel.core.PartialModel;
-import com.jozufozu.flywheel.util.BufferBuilderReader;
+import com.jozufozu.flywheel.core.model.BlockModel;
+import com.jozufozu.flywheel.core.model.IModel;
 import com.jozufozu.flywheel.util.RenderUtil;
-import com.jozufozu.flywheel.util.VirtualEmptyModelData;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockModelRenderer;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3i;
 
 public class InstanceMaterial<D extends InstanceData> {
@@ -100,7 +94,7 @@ public class InstanceMaterial<D extends InstanceData> {
 		return model(toRender, () -> buildModel(toRender));
 	}
 
-	public Instancer<D> model(Object key, Supplier<BufferedModel> supplier) {
+	public Instancer<D> model(Object key, Supplier<IModel> supplier) {
 		try {
 			return models.get(key, () -> new Instancer<>(supplier, originCoordinate, spec));
 		} catch (ExecutionException e) {
@@ -109,70 +103,18 @@ public class InstanceMaterial<D extends InstanceData> {
 		}
 	}
 
-	private BufferedModel buildModel(BlockState renderedState) {
+	private IModel buildModel(BlockState renderedState) {
 		BlockRendererDispatcher dispatcher = Minecraft.getInstance()
 				.getBlockRenderer();
 		return buildModel(dispatcher.getBlockModel(renderedState), renderedState);
 	}
 
-	private BufferedModel buildModel(IBakedModel model, BlockState renderedState) {
+	private IModel buildModel(IBakedModel model, BlockState renderedState) {
 		return buildModel(model, renderedState, new MatrixStack());
 	}
 
-	private BufferedModel buildModel(IBakedModel model, BlockState referenceState, MatrixStack ms) {
-		BufferBuilderReader reader = new BufferBuilderReader(getBufferBuilder(model, referenceState, ms));
+	private IModel buildModel(IBakedModel model, BlockState referenceState, MatrixStack ms) {
 
-		int vertexCount = reader.getVertexCount();
-
-		ByteBuffer vertices = ByteBuffer.allocate(vertexCount * modelFormat.getStride());
-		vertices.order(ByteOrder.nativeOrder());
-
-		for (int i = 0; i < vertexCount; i++) {
-			vertices.putFloat(reader.getX(i));
-			vertices.putFloat(reader.getY(i));
-			vertices.putFloat(reader.getZ(i));
-
-			vertices.put(reader.getNX(i));
-			vertices.put(reader.getNY(i));
-			vertices.put(reader.getNZ(i));
-
-			vertices.putFloat(reader.getU(i));
-			vertices.putFloat(reader.getV(i));
-		}
-
-		((Buffer) vertices).rewind();
-
-		// return new BufferedModel(GlPrimitive.QUADS, format, vertices, vertexCount);
-
-		return IndexedModel.fromSequentialQuads(modelFormat, vertices, vertexCount);
+		return new BlockModel(modelFormat, model, referenceState, ms);
 	}
-
-	// DOWN, UP, NORTH, SOUTH, WEST, EAST, null
-	private static final Direction[] dirs;
-
-	static {
-		Direction[] directions = Direction.values();
-
-		dirs = Arrays.copyOf(directions, directions.length + 1);
-	}
-
-	public static BufferBuilder getBufferBuilder(IBakedModel model, BlockState referenceState, MatrixStack ms) {
-		Minecraft mc = Minecraft.getInstance();
-		BlockRendererDispatcher dispatcher = mc.getBlockRenderer();
-		BlockModelRenderer blockRenderer = dispatcher.getModelRenderer();
-		BufferBuilder builder = new BufferBuilder(512);
-
-		//		BakedQuadWrapper quadReader = new BakedQuadWrapper();
-		//
-		//		IModelData modelData = model.getModelData(mc.world, BlockPos.ZERO.up(255), referenceState, VirtualEmptyModelData.INSTANCE);
-		//		List<BakedQuad> quads = Arrays.stream(dirs)
-		//				.flatMap(dir -> model.getQuads(referenceState, dir, mc.world.rand, modelData).stream())
-		//				.collect(Collectors.toList());
-
-		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-		blockRenderer.renderModel(mc.level, model, referenceState, BlockPos.ZERO.above(255), ms, builder, true, mc.level.random, 42, OverlayTexture.NO_OVERLAY, VirtualEmptyModelData.INSTANCE);
-		builder.end();
-		return builder;
-	}
-
 }

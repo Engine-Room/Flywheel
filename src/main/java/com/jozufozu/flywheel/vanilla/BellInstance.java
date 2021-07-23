@@ -64,7 +64,7 @@ public class BellInstance extends TileEntityInstance<BellTileEntity> implements 
 				.createInstance();
 	}
 
-	private static BufferedModel createBellModel() {
+	private static ModelPart createBellModel() {
 		return ModelPart.builder(32, 32)
 				.sprite(BellTileEntityRenderer.BELL_RESOURCE_LOCATION.sprite())
 				.cuboid()
