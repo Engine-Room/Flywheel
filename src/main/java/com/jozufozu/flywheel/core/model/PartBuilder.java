@@ -6,11 +6,9 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.backend.model.BufferedModel;
-import com.jozufozu.flywheel.backend.model.IndexedModel;
-import com.jozufozu.flywheel.core.Formats;
 
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Direction;
@@ -18,23 +16,16 @@ import net.minecraft.util.math.vector.Vector3f;
 
 public class PartBuilder {
 
-	private float sizeU = 64.0F;
-	private float sizeV = 32.0F;
+	private final float sizeU;
+	private final float sizeV;
 
 	private TextureAtlasSprite sprite;
 
 	private final List<CuboidBuilder> cuboids = new ArrayList<>();
 
-	public PartBuilder() { }
-
 	public PartBuilder(int sizeU, int sizeV) {
-		this.setTextureSize(sizeU, sizeV);
-	}
-
-	public PartBuilder setTextureSize(int textureWidth, int textureHeight) {
-		this.sizeU = (float)textureWidth;
-		this.sizeV = (float)textureHeight;
-		return this;
+		this.sizeU = (float) sizeU;
+		this.sizeV = (float) sizeV;
 	}
 
 	public PartBuilder sprite(TextureAtlasSprite sprite) {
@@ -46,22 +37,8 @@ public class PartBuilder {
 		return new CuboidBuilder(this);
 	}
 
-	public BufferedModel build() {
-		int vertices = 0;
-
-		for (CuboidBuilder cuboid : cuboids) {
-			vertices += cuboid.vertices();
-		}
-
-		VecBuffer buffer = VecBuffer.allocate(vertices * Formats.UNLIT_MODEL.getStride());
-
-		for (CuboidBuilder cuboid : cuboids) {
-			cuboid.buffer(buffer);
-		}
-
-		buffer.rewind();
-
-		return IndexedModel.fromSequentialQuads(Formats.UNLIT_MODEL, buffer.unwrap(), vertices);
+	public ModelPart build() {
+		return new ModelPart(cuboids);
 	}
 
 	private PartBuilder addCuboid(CuboidBuilder builder) {

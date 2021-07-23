@@ -101,7 +101,7 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxTileEntity>
 				.createInstance();
 	}
 
-	private BufferedModel makeBaseModel() {
+	private ModelPart makeBaseModel() {
 		return ModelPart.builder(64, 64)
 				.sprite(texture)
 				.cuboid()
@@ -112,7 +112,7 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxTileEntity>
 				.build();
 	}
 
-	private BufferedModel makeLidModel() {
+	private ModelPart makeLidModel() {
 		return ModelPart.builder(64, 64)
 				.sprite(texture)
 				.cuboid()

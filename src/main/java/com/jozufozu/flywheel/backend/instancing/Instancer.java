@@ -15,6 +15,8 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.material.MaterialSpec;
 import com.jozufozu.flywheel.backend.model.BufferedModel;
+import com.jozufozu.flywheel.core.model.IModel;
+import com.jozufozu.flywheel.core.model.ModelUtil;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 import net.minecraft.util.math.vector.Vector3i;
@@ -23,7 +25,7 @@ public class Instancer<D extends InstanceData> {
 
 	public final Supplier<Vector3i> originCoordinate;
 
-	protected final Supplier<BufferedModel> gen;
+	protected final Supplier<IModel> gen;
 	protected BufferedModel model;
 
 	protected final VertexFormat instanceFormat;
@@ -40,7 +42,7 @@ public class Instancer<D extends InstanceData> {
 	boolean anyToRemove;
 	boolean anyToUpdate;
 
-	public Instancer(Supplier<BufferedModel> model, Supplier<Vector3i> originCoordinate, MaterialSpec<D> spec) {
+	public Instancer(Supplier<IModel> model, Supplier<Vector3i> originCoordinate, MaterialSpec<D> spec) {
 		this.gen = model;
 		this.factory = spec.getInstanceFactory();
 		this.instanceFormat = spec.getInstanceFormat();
@@ -71,7 +73,7 @@ public class Instancer<D extends InstanceData> {
 	}
 
 	private void init() {
-		model = gen.get();
+		model = ModelUtil.getIndexedModel(gen.get());
 		initialized = true;
 
 		if (model.getVertexCount() <= 0)

@@ -134,7 +134,7 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 				.createInstance();
 	}
 
-	private BufferedModel getBaseModel() {
+	private ModelPart getBaseModel() {
 
 		switch (chestType) {
 		case LEFT:
@@ -167,7 +167,7 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 				.build();
 	}
 
-	private BufferedModel getLidModel() {
+	private ModelPart getLidModel() {
 
 		switch (chestType) {
 		case LEFT:
