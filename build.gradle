@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url = 'https://maven.minecraftforge.net' }
         jcenter()
         mavenCentral()
         maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
@@ -15,6 +15,7 @@ plugins {
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 

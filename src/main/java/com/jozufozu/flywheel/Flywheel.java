@@ -18,7 +18,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class Flywheel {
 
 	public static final String ID = "flywheel";
-	private static final Logger LOGGER = LogManager.getLogger();
 
 	public Flywheel() {
 		FMLJavaModLoadingContext.get()
