@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 

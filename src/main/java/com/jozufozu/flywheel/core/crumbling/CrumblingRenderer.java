@@ -2,9 +2,6 @@ package com.jozufozu.flywheel.core.crumbling;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE4;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 import java.util.ArrayList;
 import java.util.List;

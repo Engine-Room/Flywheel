@@ -5,7 +5,6 @@ import static org.lwjgl.opengl.GL20.glUniform3f;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.loading.Program;
 import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
