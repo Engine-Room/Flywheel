@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.material;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -12,7 +13,6 @@ import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.WorldContext;
 import com.jozufozu.flywheel.core.materials.ModelData;
 import com.jozufozu.flywheel.core.materials.OrientedData;
-import com.jozufozu.flywheel.core.shader.IProgramCallback;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.util.WeakHashSet;
 
@@ -29,23 +29,32 @@ public class MaterialManager<P extends WorldProgram> {
 
 	public static int MAX_ORIGIN_DISTANCE = 100;
 
+	protected BlockPos originCoordinate = BlockPos.ZERO;
+
 	protected final WorldContext<P> context;
-	protected GroupFactory<P> groupFactory;
-	protected boolean ignoreOriginCoordinate;
+	protected final GroupFactory<P> groupFactory;
+	protected final boolean ignoreOriginCoordinate;
 
 	protected final Map<RenderLayer, Map<IRenderState, MaterialGroup<P>>> layers;
-
-	protected BlockPos originCoordinate = BlockPos.ZERO;
 
 	private final WeakHashSet<OriginShiftListener> listeners;
 
 	public MaterialManager(WorldContext<P> context) {
+		this(context, MaterialGroup::new, false);
+	}
+
+	public static <P extends WorldProgram> Builder<P> builder(WorldContext<P> context) {
+		return new Builder<>(context);
+	}
+
+	public MaterialManager(WorldContext<P> context, GroupFactory<P> groupFactory, boolean ignoreOriginCoordinate) {
 		this.context = context;
+		this.ignoreOriginCoordinate = ignoreOriginCoordinate;
 
-		this.layers = new HashMap<>();
 		this.listeners = new WeakHashSet<>();
-		this.groupFactory = MaterialGroup::new;
+		this.groupFactory = groupFactory;
 
+		this.layers = new EnumMap<>(RenderLayer.class);
 		for (RenderLayer value : RenderLayer.values()) {
 			layers.put(value, new HashMap<>());
 		}
@@ -53,20 +62,10 @@ public class MaterialManager<P extends WorldProgram> {
 
 	/**
 	 * Render every model for every material.
-	 *  @param layer          Which vanilla {@link RenderType} is being drawn?
+	 * @param layer          Which vanilla {@link RenderType} is being drawn?
 	 * @param viewProjection How do we get from camera space to clip space?
 	 */
 	public void render(RenderLayer layer, Matrix4f viewProjection, double camX, double camY, double camZ) {
-		render(layer, viewProjection, camX, camY, camZ, null);
-	}
-
-	/**
-	 * Render every model for every material.
-	 *  @param layer          Which vanilla {@link RenderType} is being drawn?
-	 * @param viewProjection How do we get from camera space to clip space?
-	 * @param callback       Provide additional uniforms or state here.
-	 */
-	public void render(RenderLayer layer, Matrix4f viewProjection, double camX, double camY, double camZ, IProgramCallback<P> callback) {
 		if (!ignoreOriginCoordinate) {
 			camX -= originCoordinate.getX();
 			camY -= originCoordinate.getY();
@@ -84,7 +83,7 @@ public class MaterialManager<P extends WorldProgram> {
 			MaterialGroup<P> group = entry.getValue();
 
 			state.bind();
-			group.render(viewProjection, camX, camY, camZ, callback);
+			group.render(viewProjection, camX, camY, camZ);
 			state.unbind();
 		}
 	}
@@ -148,16 +147,6 @@ public class MaterialManager<P extends WorldProgram> {
 		return context.getProgramSupplier(name);
 	}
 
-	public MaterialManager<P> setIgnoreOriginCoordinate(boolean ignoreOriginCoordinate) {
-		this.ignoreOriginCoordinate = ignoreOriginCoordinate;
-		return this;
-	}
-
-	public MaterialManager<P> setGroupFactory(GroupFactory<P> factory) {
-		this.groupFactory = factory;
-		return this;
-	}
-
 	public Vector3i getOriginCoordinate() {
 		return originCoordinate;
 	}
@@ -199,5 +188,29 @@ public class MaterialManager<P extends WorldProgram> {
 	@FunctionalInterface
 	public interface GroupFactory<P extends WorldProgram> {
 		MaterialGroup<P> create(MaterialManager<P> materialManager, IRenderState state);
+	}
+
+	public static class Builder<P extends WorldProgram> {
+		protected final WorldContext<P> context;
+		protected GroupFactory<P> groupFactory = MaterialGroup::new;
+		protected boolean ignoreOriginCoordinate;
+
+		public Builder(WorldContext<P> context) {
+			this.context = context;
+		}
+
+		public Builder<P> setGroupFactory(GroupFactory<P> groupFactory) {
+			this.groupFactory = groupFactory;
+			return this;
+		}
+
+		public Builder<P> setIgnoreOriginCoordinate(boolean ignoreOriginCoordinate) {
+			this.ignoreOriginCoordinate = ignoreOriginCoordinate;
+			return this;
+		}
+
+		public MaterialManager<P> build() {
+			return new MaterialManager<>(context, groupFactory, ignoreOriginCoordinate);
+		}
 	}
 }
