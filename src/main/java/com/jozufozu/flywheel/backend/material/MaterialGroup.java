@@ -6,10 +6,8 @@ import java.util.Map;
 
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.state.IRenderState;
-import com.jozufozu.flywheel.core.shader.IProgramCallback;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.math.vector.Matrix4f;
 
 public class MaterialGroup<P extends WorldProgram> {
@@ -26,10 +24,14 @@ public class MaterialGroup<P extends WorldProgram> {
 		this.state = state;
 	}
 
-	public void render(Matrix4f viewProjection, double camX, double camY, double camZ, IProgramCallback<P> callback) {
+	public void render(Matrix4f viewProjection, double camX, double camY, double camZ) {
 		for (MaterialRenderer<P> renderer : renderers) {
-			renderer.render(viewProjection, camX, camY, camZ, callback);
+			renderer.render(viewProjection, camX, camY, camZ);
 		}
+	}
+
+	public void setup(P program) {
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -40,7 +42,7 @@ public class MaterialGroup<P extends WorldProgram> {
 	private InstanceMaterial<?> createInstanceMaterial(MaterialSpec<?> type) {
 		InstanceMaterial<?> material = new InstanceMaterial<>(owner::getOriginCoordinate, type);
 
-		this.renderers.add(new MaterialRenderer<>(owner.getProgram(type.getProgramName()), material));
+		this.renderers.add(new MaterialRenderer<>(owner.getProgram(type.getProgramName()), material, this::setup));
 
 		return material;
 	}

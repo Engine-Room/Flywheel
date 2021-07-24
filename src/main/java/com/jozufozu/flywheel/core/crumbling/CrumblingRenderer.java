@@ -148,7 +148,9 @@ public class CrumblingRenderer {
 		private final InstanceManager<TileEntity> instanceManager;
 
 		private State() {
-			materialManager = new MaterialManager<>(Contexts.CRUMBLING).setGroupFactory(CrumblingGroup::new);
+			materialManager = MaterialManager.builder(Contexts.CRUMBLING)
+					.setGroupFactory(CrumblingGroup::new)
+					.build();
 			instanceManager = new CrumblingInstanceManager(materialManager);
 		}
 
