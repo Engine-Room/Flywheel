@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.core.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;

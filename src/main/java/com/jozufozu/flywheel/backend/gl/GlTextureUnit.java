@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.backend.gl;
 
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 

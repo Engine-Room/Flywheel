@@ -2,8 +2,6 @@ package com.jozufozu.flywheel.core.model;
 
 import java.util.Arrays;
 
-import javax.annotation.Nullable;
-
 import org.lwjgl.opengl.GL11;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;

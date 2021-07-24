@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.jozufozu.flywheel.backend.loading.Program;
 import com.jozufozu.flywheel.core.atlas.AtlasInfo;
-import com.jozufozu.flywheel.core.atlas.SheetData;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
 

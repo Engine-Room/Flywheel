@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.function.Supplier;
 
-import javax.annotation.Nonnull;
-
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
