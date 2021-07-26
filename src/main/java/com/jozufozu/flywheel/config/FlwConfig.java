@@ -30,8 +30,8 @@ public class FlwConfig {
 		return client.enabled.get();
 	}
 
-	public boolean normalOverlayEnabled() {
-		return client.normalDebug.get();
+	public boolean debugNormals() {
+		return client.debugNormals.get();
 	}
 
 	public static void init() {
@@ -39,15 +39,15 @@ public class FlwConfig {
 
 	public static class ClientConfig {
 		public final BooleanValue enabled;
-		public final BooleanValue normalDebug;
+		public final BooleanValue debugNormals;
 
 		public ClientConfig(ForgeConfigSpec.Builder builder) {
 
 			enabled = builder.comment("Enable or disable the entire engine")
 					.define("enabled", true);
 
-			normalDebug = builder.comment("Enable or disable a debug overlay that colors pixels by their normal")
-					.define("normalDebug", false);
+			debugNormals = builder.comment("Enable or disable a debug overlay that colors pixels by their normal")
+					.define("debugNormals", false);
 		}
 	}
 }

@@ -36,20 +36,20 @@ public enum BooleanConfig {
 		if (player == null || state == null) return;
 
 		if (state == BooleanDirective.DISPLAY) {
-			ITextComponent text = new StringTextComponent("Flywheel Renderer is currently: ").append(boolToText(FlwConfig.get().client.enabled.get()));
+			ITextComponent text = new StringTextComponent("Flywheel renderer is currently: ").append(boolToText(FlwConfig.get().client.enabled.get()));
 			player.displayClientMessage(text, false);
 			return;
 		}
 
 		boolean enabled = state.get();
-		boolean cannotUseER = OptifineHandler.usingShaders() && enabled;
+		boolean cannotUse = OptifineHandler.usingShaders() && enabled;
 
 		FlwConfig.get().client.enabled.set(enabled);
 
-		ITextComponent text = boolToText(FlwConfig.get().client.enabled.get()).append(new StringTextComponent(" Flywheel Renderer").withStyle(TextFormatting.WHITE));
-		ITextComponent error = new StringTextComponent("Flywheel Renderer does not support Optifine Shaders").withStyle(TextFormatting.RED);
+		ITextComponent text = boolToText(FlwConfig.get().client.enabled.get()).append(new StringTextComponent(" Flywheel renderer").withStyle(TextFormatting.WHITE));
+		ITextComponent error = new StringTextComponent("Flywheel renderer does not support Optifine Shaders").withStyle(TextFormatting.RED);
 
-		player.displayClientMessage(cannotUseER ? error : text, false);
+		player.displayClientMessage(cannotUse ? error : text, false);
 		Backend.reloadWorldRenderers();
 	}
 
@@ -59,14 +59,14 @@ public enum BooleanConfig {
 		if (player == null || state == null) return;
 
 		if (state == BooleanDirective.DISPLAY) {
-			ITextComponent text = new StringTextComponent("Normal overlay is currently: ").append(boolToText(FlwConfig.get().client.normalDebug.get()));
+			ITextComponent text = new StringTextComponent("Normal debug mode is currently: ").append(boolToText(FlwConfig.get().client.debugNormals.get()));
 			player.displayClientMessage(text, false);
 			return;
 		}
 
-		FlwConfig.get().client.normalDebug.set(state.get());
+		FlwConfig.get().client.debugNormals.set(state.get());
 
-		ITextComponent text = boolToText(FlwConfig.get().client.normalDebug.get()).append(new StringTextComponent(" Normal Overlay").withStyle(TextFormatting.WHITE));
+		ITextComponent text = boolToText(FlwConfig.get().client.debugNormals.get()).append(new StringTextComponent(" normal debug mode").withStyle(TextFormatting.WHITE));
 
 		player.displayClientMessage(text, false);
 	}
