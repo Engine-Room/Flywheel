@@ -29,6 +29,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlTexture;
+import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.gl.versioned.RGPixelFormat;
 
 import net.minecraft.util.math.BlockPos;
@@ -257,7 +258,7 @@ public class LightVolume {
 		// just in case something goes wrong or we accidentally call this before this volume is properly disposed of.
 		if (lightData == null || removed) return;
 
-		glActiveTexture(GL_TEXTURE4);
+		GlTextureUnit.T4.makeActive();
 		glTexture.bind();
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
