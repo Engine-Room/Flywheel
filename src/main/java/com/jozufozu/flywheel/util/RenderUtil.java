@@ -10,6 +10,20 @@ import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3f;
 
 public class RenderUtil {
+
+	private static final Matrix4f IDENTITY = new Matrix4f();
+	static {
+		IDENTITY.setIdentity();
+	}
+
+	public static Matrix4f getIdentity() {
+		return IDENTITY;
+	}
+
+	public static Matrix4f copyIdentity() {
+		return IDENTITY.copy();
+	}
+
 	public static int nextPowerOf2(int a) {
 		int h = Integer.highestOneBit(a);
 		return (h == a) ? h : (h << 1);

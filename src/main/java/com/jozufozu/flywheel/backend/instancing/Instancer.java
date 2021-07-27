@@ -11,7 +11,10 @@ import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
+import com.jozufozu.flywheel.backend.material.MaterialSpec;
 import com.jozufozu.flywheel.backend.model.BufferedModel;
+import com.jozufozu.flywheel.core.model.IModel;
+import com.jozufozu.flywheel.core.model.ModelUtil;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 import net.minecraft.util.math.vector.Vector3i;
@@ -20,7 +23,8 @@ public class Instancer<D extends InstanceData> {
 
 	public final Supplier<Vector3i> originCoordinate;
 
-	protected final BufferedModel model;
+	protected final Supplier<IModel> gen;
+	protected BufferedModel model;
 
 	protected final VertexFormat instanceFormat;
 	protected final IInstanceFactory<D> factory;
@@ -29,17 +33,46 @@ public class Instancer<D extends InstanceData> {
 	protected int glBufferSize = -1;
 	protected int glInstanceCount = 0;
 	private boolean deleted;
+	private boolean initialized;
 
 	protected final ArrayList<D> data = new ArrayList<>();
 
 	boolean anyToRemove;
 	boolean anyToUpdate;
 
-	public Instancer(BufferedModel model, Supplier<Vector3i> originCoordinate, MaterialSpec<D> spec) {
-		this.model = model;
+	public Instancer(Supplier<IModel> model, Supplier<Vector3i> originCoordinate, MaterialSpec<D> spec) {
+		this.gen = model;
 		this.factory = spec.getInstanceFactory();
 		this.instanceFormat = spec.getInstanceFormat();
 		this.originCoordinate = originCoordinate;
+	}
+
+	public void render() {
+		if (!isInitialized()) init();
+		if (deleted) return;
+
+		vao.bind();
+		renderSetup();
+
+		if (glInstanceCount > 0) model.drawInstances(glInstanceCount);
+
+		vao.unbind();
+	}
+
+	public D createInstance() {
+		return _add(factory.create(this));
+	}
+
+	public void stealInstance(D inOther) {
+		if (inOther.owner == this) return;
+
+		inOther.owner.anyToRemove = true;
+		_add(inOther);
+	}
+
+	private void init() {
+		model = ModelUtil.getIndexedModel(gen.get());
+		initialized = true;
 
 		if (model.getVertexCount() <= 0)
 			throw new IllegalArgumentException("Refusing to instance a model with no vertices.");
@@ -59,27 +92,11 @@ public class Instancer<D extends InstanceData> {
 		model.clearState();
 	}
 
-	public void render() {
-		if (deleted) return;
-
-		vao.bind();
-		renderSetup();
-
-		if (glInstanceCount > 0) model.drawInstances(glInstanceCount);
-
-		vao.unbind();
+	public boolean isInitialized() {
+		return initialized;
 	}
 
-	public D createInstance() {
-		D instanceData = factory.create(this);
-		instanceData.dirty = true;
-		anyToUpdate = true;
-		data.add(instanceData);
-
-		return instanceData;
-	}
-
-	public boolean empty() {
+	public boolean isEmpty() {
 		return !anyToUpdate && !anyToRemove && glInstanceCount == 0;
 	}
 
@@ -92,17 +109,31 @@ public class Instancer<D extends InstanceData> {
 	}
 
 	/**
-	 * Free acquired resources. Attempting to use this after calling delete is undefined behavior.
+	 * Free acquired resources. All other Instancer methods are undefined behavior after calling delete.
 	 */
 	public void delete() {
 		if (deleted) return;
 
 		deleted = true;
 
-		model.delete();
+		if (isInitialized()) {
+			model.delete();
 
-		instanceVBO.delete();
-		vao.delete();
+			instanceVBO.delete();
+			vao.delete();
+		}
+	}
+
+	private D _add(D instanceData) {
+		instanceData.owner = this;
+
+		instanceData.dirty = true;
+		anyToUpdate = true;
+		synchronized (data) {
+			data.add(instanceData);
+		}
+
+		return instanceData;
 	}
 
 	protected void renderSetup() {
@@ -215,7 +246,7 @@ public class Instancer<D extends InstanceData> {
 		final BitSet removeSet = new BitSet(oldSize);
 		for (int i = 0; i < oldSize; i++) {
 			final D element = this.data.get(i);
-			if (element.removed) {
+			if (element.removed || element.owner != this) {
 				removeSet.set(i);
 				removeCount++;
 			}

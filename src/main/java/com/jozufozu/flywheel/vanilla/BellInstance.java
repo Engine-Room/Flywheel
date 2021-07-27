@@ -1,9 +1,8 @@
 package com.jozufozu.flywheel.vanilla;
 
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
-import com.jozufozu.flywheel.backend.instancing.MaterialManager;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
-import com.jozufozu.flywheel.backend.model.BufferedModel;
+import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.OrientedData;
 import com.jozufozu.flywheel.core.model.ModelPart;
@@ -58,12 +57,13 @@ public class BellInstance extends TileEntityInstance<BellTileEntity> implements 
 	}
 
 	private OrientedData createBellInstance() {
-		return materialManager.getMaterial(Materials.ORIENTED)
-				.get(tile.getType(), BellInstance::createBellModel)
+        return materialManager.defaultCutout()
+                .material(Materials.ORIENTED)
+				.model(tile.getType(), BellInstance::createBellModel)
 				.createInstance();
 	}
 
-	private static BufferedModel createBellModel() {
+	private static ModelPart createBellModel() {
 		return ModelPart.builder(32, 32)
 				.sprite(BellTileEntityRenderer.BELL_RESOURCE_LOCATION.sprite())
 				.cuboid()

@@ -1,6 +1,8 @@
-package com.jozufozu.flywheel.backend.instancing;
+package com.jozufozu.flywheel.backend.material;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
+import com.jozufozu.flywheel.backend.instancing.IInstanceFactory;
+import com.jozufozu.flywheel.backend.instancing.InstanceData;
 
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;

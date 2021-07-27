@@ -6,7 +6,19 @@ import net.minecraft.util.math.vector.Quaternion;
 
 public class MatrixTransformStack implements TransformStack {
 
-	private final MatrixStack internal = new MatrixStack();
+	private final MatrixStack internal;
+
+	public MatrixTransformStack() {
+		this(new MatrixStack());
+	}
+
+	public MatrixTransformStack(MatrixStack internal) {
+		this.internal = internal;
+	}
+
+	public static MatrixTransformStack of(MatrixStack ms) {
+		return new MatrixTransformStack(ms);
+	}
 
 	public MatrixStack unwrap() {
 		return internal;
@@ -25,12 +37,20 @@ public class MatrixTransformStack implements TransformStack {
 	}
 
 	@Override
+	public TransformStack scale(float factor) {
+		internal.scale(factor, factor, factor);
+		return this;
+	}
+
+	@Override
 	public TransformStack push() {
+		internal.pushPose();
 		return this;
 	}
 
 	@Override
 	public TransformStack pop() {
+		internal.popPose();
 		return this;
 	}
 }
