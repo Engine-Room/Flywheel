@@ -89,6 +89,14 @@ public class VecBuffer {
 		return this;
 	}
 
+	public VecBuffer putColor(int r, int g, int b, int a) {
+		internal.put((byte) r);
+		internal.put((byte) g);
+		internal.put((byte) b);
+		internal.put((byte) a);
+		return this;
+	}
+
 	public VecBuffer putVec3(float x, float y, float z) {
 		internal.putFloat(x);
 		internal.putFloat(y);

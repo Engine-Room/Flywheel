@@ -42,6 +42,11 @@ public class QuaternionTransformStack implements TransformStack {
 	}
 
 	@Override
+	public TransformStack scale(float factor) {
+		return this;
+	}
+
+	@Override
 	public TransformStack pop() {
 
 		if (stack.size() == 1) {

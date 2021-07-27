@@ -4,7 +4,7 @@ import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 
 public abstract class InstanceData {
 
-	protected final Instancer<?> owner;
+	Instancer<?> owner;
 
 	boolean dirty;
 	boolean removed;
