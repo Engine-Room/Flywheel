@@ -121,6 +121,12 @@ jar {
 
 jar.finalizedBy('reobfJar')
 
+javadoc {
+    source = [sourceSets.main.allJava]
+    // prevent java 8's strict doclint for javadocs from failing builds
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
 task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
     archiveBaseName.set(project.archivesBaseName)
@@ -128,8 +134,13 @@ task sourcesJar(type: Jar) {
     archiveClassifier.set('sources')
 }
 
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from javadoc.destinationDir
+    archiveClassifier.set('javadoc')
+}
+
 artifacts {
-    archives jar, sourcesJar
+    archives jar, sourcesJar, javadocJar
 }
 
 publishing {
@@ -138,6 +149,7 @@ publishing {
         mavenJava(MavenPublication) {
             artifact jar
             artifact sourcesJar
+            artifact javadocJar
         }
     }
 

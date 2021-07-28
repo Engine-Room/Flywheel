@@ -14,6 +14,10 @@ import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
 public interface IDynamicInstance extends IInstance {
 	/**
 	 * Called every frame.
+	 * <br>
+	 * <em>DISPATCHED IN PARALLEL</em>, don't attempt to mutate anything outside of this instance.
+	 * <br>
+	 * {@link Instancer}/{@link InstanceData} creation/acquisition is safe here.
 	 */
 	void beginFrame();
 

@@ -155,7 +155,7 @@ public class Backend {
 				.enabled() && !OptifineHandler.usingShaders();
 	}
 
-	public boolean canUseInstancing(World world) {
+	public boolean canUseInstancing(@Nullable World world) {
 		return canUseInstancing() && isFlywheelWorld(world);
 	}
 
