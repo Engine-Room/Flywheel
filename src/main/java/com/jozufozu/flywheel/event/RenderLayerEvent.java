@@ -1,5 +1,9 @@
 package com.jozufozu.flywheel.event;
 
+import javax.annotation.Nullable;
+
+import com.jozufozu.flywheel.backend.state.RenderLayer;
+
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.vector.Matrix4f;
@@ -12,6 +16,7 @@ public class RenderLayerEvent extends Event {
 	public final double camX;
 	public final double camY;
 	public final double camZ;
+	public final RenderLayer layer;
 
 	public RenderLayerEvent(ClientWorld world, RenderType type, Matrix4f viewProjection, double camX, double camY, double camZ) {
 		this.world = world;
@@ -20,6 +25,13 @@ public class RenderLayerEvent extends Event {
 		this.camX = camX;
 		this.camY = camY;
 		this.camZ = camZ;
+
+		this.layer = RenderLayer.fromRenderType(type);
+	}
+
+	@Nullable
+	public RenderLayer getLayer() {
+		return layer;
 	}
 
 	public ClientWorld getWorld() {

@@ -30,6 +30,12 @@ public class BlockModel implements IModel {
 
 	private final VertexFormat modelFormat;
 
+	public BlockModel(VertexFormat modelFormat, BlockState state) {
+		this(modelFormat, Minecraft.getInstance()
+				.getBlockRenderer()
+				.getBlockModel(state), state);
+	}
+
 	public BlockModel(VertexFormat modelFormat, IBakedModel model, BlockState referenceState) {
 		this(modelFormat, model, referenceState, IDENTITY);
 	}
