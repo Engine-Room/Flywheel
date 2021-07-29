@@ -11,9 +11,9 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.material.MaterialSpec;
-import com.jozufozu.flywheel.backend.model.BufferedModel;
+import com.jozufozu.flywheel.backend.model.IBufferedModel;
+import com.jozufozu.flywheel.backend.model.IndexedModel;
 import com.jozufozu.flywheel.core.model.IModel;
-import com.jozufozu.flywheel.core.model.ModelUtil;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 /**
@@ -37,7 +37,7 @@ import com.jozufozu.flywheel.util.AttribUtil;
 public class Instancer<D extends InstanceData> {
 
 	protected final Supplier<IModel> gen;
-	protected BufferedModel model;
+	protected IBufferedModel model;
 
 	protected final VertexFormat instanceFormat;
 	protected final IInstanceFactory<D> factory;
@@ -92,7 +92,7 @@ public class Instancer<D extends InstanceData> {
 	}
 
 	private void init() {
-		model = ModelUtil.getIndexedModel(gen.get());
+		model = new IndexedModel(gen.get());
 		initialized = true;
 
 		if (model.getVertexCount() <= 0)
