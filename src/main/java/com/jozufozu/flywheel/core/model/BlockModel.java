@@ -23,6 +23,9 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
+/**
+ * A model of a single block.
+ */
 public class BlockModel implements IModel {
 	private static final MatrixStack IDENTITY = new MatrixStack();
 
@@ -67,12 +70,6 @@ public class BlockModel implements IModel {
 
 			buffer.putVec2(reader.getU(i), reader.getV(i));
 		}
-	}
-
-	@Override
-	public ElementBuffer createEBO() {
-		return QuadConverter.getInstance()
-				.quads2Tris(vertexCount() / 4);
 	}
 
 	public static BufferBuilder getBufferBuilder(IBakedModel model, BlockState referenceState, MatrixStack ms) {
