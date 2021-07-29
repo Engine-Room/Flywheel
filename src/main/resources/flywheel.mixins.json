@@ -18,7 +18,8 @@
     "atlas.SheetDataAccessor",
     "light.LightUpdateMixin",
     "light.NetworkLightUpdateMixin",
-    "FastChunkProviderMixin"
+    "FastChunkProviderMixin",
+    "GlobalClippingHelperMixin"
   ],
   "injectors": {
     "defaultRequire": 0
