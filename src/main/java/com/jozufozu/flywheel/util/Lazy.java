@@ -36,6 +36,10 @@ public class Lazy<T> {
 		return Pair.of(lazy, killSwitch);
 	}
 
+	public static <T> Lazy<T> of(NonNullSupplier<T> factory) {
+		return new Lazy<>(factory);
+	}
+
 	public static class KillSwitch<T> {
 
 		private final Lazy<T> lazy;
