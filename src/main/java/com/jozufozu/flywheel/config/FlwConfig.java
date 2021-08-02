@@ -34,12 +34,17 @@ public class FlwConfig {
 		return client.debugNormals.get();
 	}
 
+	public boolean chunkCaching() {
+		return client.chunkCaching.get();
+	}
+
 	public static void init() {
 	}
 
 	public static class ClientConfig {
 		public final BooleanValue enabled;
 		public final BooleanValue debugNormals;
+		public final BooleanValue chunkCaching;
 
 		public ClientConfig(ForgeConfigSpec.Builder builder) {
 
@@ -48,6 +53,9 @@ public class FlwConfig {
 
 			debugNormals = builder.comment("Enable or disable a debug overlay that colors pixels by their normal")
 					.define("debugNormals", false);
+
+			chunkCaching = builder.comment("Cache chunk lookups to improve performance.")
+					.define("chunkCaching", true);
 		}
 	}
 }
