@@ -16,6 +16,8 @@ public class FlwCommands {
 
 		dispatcher.register(Commands.literal("flywheel")
 									.then(new BooleanConfigCommand("backend", BooleanConfig.ENGINE).register())
-									.then(new BooleanConfigCommand("debugNormals", BooleanConfig.NORMAL_OVERLAY).register()));
+									.then(new BooleanConfigCommand("debugNormals", BooleanConfig.NORMAL_OVERLAY).register())
+									.then(new BooleanConfigCommand("chunkCaching", BooleanConfig.CHUNK_CACHING).register())
+		);
 	}
 }
