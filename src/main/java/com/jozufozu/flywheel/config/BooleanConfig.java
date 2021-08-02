@@ -78,7 +78,7 @@ public enum BooleanConfig {
 		if (player == null || state == null) return;
 
 		if (state == BooleanDirective.DISPLAY) {
-			ITextComponent text = new StringTextComponent("Chunk caching is currently: ").append(boolToText(FlwConfig.get().client.debugNormals.get()));
+			ITextComponent text = new StringTextComponent("Chunk caching is currently: ").append(boolToText(FlwConfig.get().client.chunkCaching.get()));
 			player.displayClientMessage(text, false);
 			return;
 		}
