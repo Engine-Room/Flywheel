@@ -1,12 +1,16 @@
 package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -14,6 +18,7 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3f;
@@ -22,12 +27,8 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 
 	public final MaterialManager<?> materialManager;
 
-	//Thread locks to ensure concurrent access exceptions don't occur
-	private final ReadWriteLock queuedUpdatesLock = new ReentrantReadWriteLock();
-	private final ReadWriteLock queuedAdditionsLock = new ReentrantReadWriteLock();
-
-	private final ArrayList<T> queuedAdditions;
-	private final ConcurrentHashMap.KeySetView<T, Boolean> queuedUpdates;
+	private final Set<T> queuedAdditions;
+	private final Set<T> queuedUpdates;
 
 	protected final Map<T, IInstance> instances;
 	protected final Object2ObjectOpenHashMap<T, ITickableInstance> tickableInstances;
@@ -38,8 +39,8 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 
 	public InstanceManager(MaterialManager<?> materialManager) {
 		this.materialManager = materialManager;
-		this.queuedUpdates = ConcurrentHashMap.newKeySet(64);
-		this.queuedAdditions = new ArrayList<>(64);
+		this.queuedUpdates = new HashSet<>(64);
+		this.queuedAdditions = new HashSet<>(64);
 		this.instances = new HashMap<>();
 
 		this.dynamicInstances = new Object2ObjectOpenHashMap<>();
@@ -56,6 +57,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 
 	public void tick(double cameraX, double cameraY, double cameraZ) {
 		tick++;
+		processQueuedUpdates();
 
 		// integer camera pos
 		int cX = (int) cameraX;
@@ -79,21 +81,6 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 				if ((tick % getUpdateDivisor(dX, dY, dZ)) == 0) instance.tick();
 			});
 		}
-
-
-
-
-		//suggested replacement ?
-		//Unable to confirm if the call to update(te) causes updates to the que.
-		//queuedUpdatesLock.writeLock().lock();
-		//*
-		queuedUpdates.forEach(te -> {
-			queuedUpdates.remove(te);
-			update(te);
-		});//*/
-		//queuedUpdates.forEach(this::update);
-		//queuedUpdates.clear();
-		//queuedUpdatesLock.writeLock().unlock();
 	}
 
 	public void beginFrame(ActiveRenderInfo info) {
@@ -134,9 +121,9 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		if (!Backend.getInstance()
 				.canUseInstancing()) return;
 
-		queuedAdditionsLock.writeLock().lock();
-		queuedAdditions.add(obj);
-		queuedAdditionsLock.writeLock().unlock();
+		synchronized (queuedAdditions) {
+			queuedAdditions.add(obj);
+		}
 	}
 
 	public void update(T obj) {
@@ -162,9 +149,9 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 	public synchronized void queueUpdate(T obj) {
 		if (!Backend.getInstance()
 				.canUseInstancing()) return;
-		queuedUpdatesLock.writeLock().lock();
-		queuedUpdates.add(obj);
-		queuedUpdatesLock.writeLock().unlock();
+		synchronized (queuedUpdates) {
+			queuedUpdates.add(obj);
+		}
 	}
 
 	public void onLightUpdate(T obj) {
@@ -195,7 +182,6 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		tickableInstances.clear();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Nullable
 	protected <I extends T> IInstance getInstance(I obj, boolean create) {
 		if (!Backend.getInstance()
@@ -212,13 +198,29 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		}
 	}
 
-	protected synchronized void processQueuedAdditions() {
-		queuedAdditionsLock.writeLock().lock();
-		ArrayList<T> queued = new ArrayList<>(queuedAdditions);
-		queuedAdditions.clear();
-		queuedAdditionsLock.writeLock().unlock();
+	protected void processQueuedAdditions() {
+		ArrayList<T> queued;
+
+		synchronized (queuedAdditions) {
+			queued = new ArrayList<>(queuedAdditions);
+			queuedAdditions.clear();
+		}
+
 		if (queued.size() > 0) {
 			queued.forEach(this::addInternal);
+		}
+	}
+
+	protected void processQueuedUpdates() {
+		ArrayList<T> queued;
+
+		synchronized (queuedUpdates) {
+			queued = new ArrayList<>(queuedUpdates);
+			queuedUpdates.clear();
+		}
+
+		if (queued.size() > 0) {
+			queued.forEach(this::update);
 		}
 	}
 
