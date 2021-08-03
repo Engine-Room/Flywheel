@@ -45,7 +45,7 @@ public class RenderHooksMixin {
 	private RenderTypeBuffers renderBuffers;
 
 	@Inject(at = @At(value = "INVOKE", target = "net.minecraft.client.renderer.WorldRenderer.compileChunksUntil(J)V"), method = "renderLevel")
-	private void setupFrame(MatrixStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, ActiveRenderInfo info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f p_228426_9_, CallbackInfo ci) {
+	private void setupFrame(MatrixStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, ActiveRenderInfo info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projection, CallbackInfo ci) {
 		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, stack, info, gameRenderer, lightTexture, Clipping.HELPER));
 	}
 

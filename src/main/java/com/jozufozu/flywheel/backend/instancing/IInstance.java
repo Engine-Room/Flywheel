@@ -16,6 +16,15 @@ public interface IInstance {
 
 	void remove();
 
+	/**
+	 * When an instance is reset, the instance is deleted and re-created.
+	 *
+	 * <p>
+	 *     This is used to handle things like block state changes.
+	 * </p>
+	 *
+	 * @return true if this instance should be reset
+	 */
 	boolean shouldReset();
 
 	void update();
