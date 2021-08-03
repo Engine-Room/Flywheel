@@ -49,17 +49,41 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		materialManager.addListener(this);
 	}
 
+	/**
+	 * Is the given object capable of being instanced at all?
+	 *
+	 * @return false if on object cannot be instanced.
+	 */
 	protected abstract boolean canInstance(T obj);
 
+	/**
+	 * Is the given object currently capable of being instanced?
+	 *
+	 * <p>
+	 *     This won't be the case for TEs or entities that are outside of loaded chunks.
+	 * </p>
+	 *
+	 * @return true if the object is currently capable of being instanced.
+	 */
+	protected abstract boolean canCreateInstance(T obj);
+
+	@Nullable
 	protected abstract IInstance createRaw(T obj);
 
-	protected abstract boolean canCreateInstance(T entity);
-
+	/**
+	 * Ticks the InstanceManager.
+	 *
+	 * <p>
+	 *     {@link ITickableInstance}s get ticked.
+	 *     <br>
+	 *     Queued updates are processed.
+	 * </p>
+	 */
 	public void tick(double cameraX, double cameraY, double cameraZ) {
 		tick++;
 		processQueuedUpdates();
 
-		// integer camera pos
+		// integer camera pos as a micro-optimization
 		int cX = (int) cameraX;
 		int cY = (int) cameraY;
 		int cZ = (int) cameraZ;
@@ -117,7 +141,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		}
 	}
 
-	public synchronized void queueAdd(T obj) {
+	public void queueAdd(T obj) {
 		if (!Backend.getInstance()
 				.canUseInstancing()) return;
 
@@ -126,6 +150,17 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		}
 	}
 
+	/**
+	 * Update the instance associated with an object.
+	 *
+	 * <p>
+	 *     By default this is the only hook an IInstance has to change its internal state. This is the lowest frequency
+	 *     update hook IInstance gets. For more frequent updates, see {@link ITickableInstance} and
+	 *     {@link IDynamicInstance}.
+	 * </p>
+	 *
+	 * @param obj the object to update.
+	 */
 	public void update(T obj) {
 		if (!Backend.getInstance()
 				.canUseInstancing()) return;
@@ -135,9 +170,11 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 
 			if (instance != null) {
 
+				// resetting instances is by default used to handle block state changes.
 				if (instance.shouldReset()) {
+					// delete and re-create the instance.
+					// resetting an instance supersedes updating it.
 					removeInternal(obj, instance);
-
 					createInternal(obj);
 				} else {
 					instance.update();
@@ -146,7 +183,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		}
 	}
 
-	public synchronized void queueUpdate(T obj) {
+	public void queueUpdate(T obj) {
 		if (!Backend.getInstance()
 				.canUseInstancing()) return;
 		synchronized (queuedUpdates) {
