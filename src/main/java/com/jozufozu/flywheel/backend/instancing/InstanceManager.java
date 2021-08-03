@@ -3,7 +3,10 @@ package com.jozufozu.flywheel.backend.instancing;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.annotation.Nullable;
 
@@ -19,8 +22,12 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 
 	public final MaterialManager<?> materialManager;
 
-	protected final ArrayList<T> queuedAdditions;
-	protected final ConcurrentHashMap.KeySetView<T, Boolean> queuedUpdates;
+	//Thread locks to ensure concurrent access exceptions don't occur
+	private final ReadWriteLock queuedUpdatesLock = new ReentrantReadWriteLock();
+	private final ReadWriteLock queuedAdditionsLock = new ReentrantReadWriteLock();
+
+	private final ArrayList<T> queuedAdditions;
+	private final ConcurrentHashMap.KeySetView<T, Boolean> queuedUpdates;
 
 	protected final Map<T, IInstance> instances;
 	protected final Object2ObjectOpenHashMap<T, ITickableInstance> tickableInstances;
@@ -73,11 +80,20 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 			});
 		}
 
+
+
+
+		//suggested replacement ?
+		//Unable to confirm if the call to update(te) causes updates to the que.
+		//queuedUpdatesLock.writeLock().lock();
+		//*
 		queuedUpdates.forEach(te -> {
 			queuedUpdates.remove(te);
-
 			update(te);
-		});
+		});//*/
+		//queuedUpdates.forEach(this::update);
+		//queuedUpdates.clear();
+		//queuedUpdatesLock.writeLock().unlock();
 	}
 
 	public void beginFrame(ActiveRenderInfo info) {
@@ -118,7 +134,9 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		if (!Backend.getInstance()
 				.canUseInstancing()) return;
 
+		queuedAdditionsLock.writeLock().lock();
 		queuedAdditions.add(obj);
+		queuedAdditionsLock.writeLock().unlock();
 	}
 
 	public void update(T obj) {
@@ -144,8 +162,9 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 	public synchronized void queueUpdate(T obj) {
 		if (!Backend.getInstance()
 				.canUseInstancing()) return;
-
+		queuedUpdatesLock.writeLock().lock();
 		queuedUpdates.add(obj);
+		queuedUpdatesLock.writeLock().unlock();
 	}
 
 	public void onLightUpdate(T obj) {
@@ -194,9 +213,12 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 	}
 
 	protected synchronized void processQueuedAdditions() {
-		if (queuedAdditions.size() > 0) {
-			queuedAdditions.forEach(this::addInternal);
-			queuedAdditions.clear();
+		queuedAdditionsLock.writeLock().lock();
+		ArrayList<T> queued = new ArrayList<>(queuedAdditions);
+		queuedAdditions.clear();
+		queuedAdditionsLock.writeLock().unlock();
+		if (queued.size() > 0) {
+			queued.forEach(this::addInternal);
 		}
 	}
 
