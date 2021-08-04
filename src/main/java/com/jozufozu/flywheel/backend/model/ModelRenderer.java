@@ -19,30 +19,29 @@ public class ModelRenderer {
 	 * Renders this model, checking first if there is anything to render.
 	 */
 	public void draw() {
-
-		if (!isInitialized()) init();
-		if (!model.valid()) return;
+		if (!initialized) init();
+		if (!isValid()) return;
 
 		model.setupState();
 		model.drawCall();
 		model.clearState();
 	}
 
+	public void delete() {
+		if (model != null)
+			model.delete();
+	}
+
 	protected void init() {
 		initialized = true;
 		IModel model = modelSupplier.get();
 
-		if (model.vertexCount() <= 0) return;
+		if (model.empty()) return;
 
 		this.model = new IndexedModel(model);
 	}
 
-	public boolean isInitialized() {
-		return initialized;
-	}
-
-	public void delete() {
-		if (model != null)
-			model.delete();
+	protected boolean isValid() {
+		return model != null && model.valid();
 	}
 }
