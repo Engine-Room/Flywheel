@@ -63,4 +63,12 @@ public interface IModel {
 	default int size() {
 		return vertexCount() * format().getStride();
 	}
+
+	/**
+	 * Is there nothing to render?
+	 * @return true if there are no vertices.
+	 */
+	default boolean empty() {
+		return vertexCount() == 0;
+	}
 }

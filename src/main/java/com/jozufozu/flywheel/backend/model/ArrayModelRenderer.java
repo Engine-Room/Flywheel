@@ -16,7 +16,7 @@ public class ArrayModelRenderer extends ModelRenderer {
 
 	@Override
 	public void draw() {
-		if (!isInitialized()) init();
+		if (!initialized) init();
 		if (!isValid()) return;
 
 		vao.bind();
@@ -26,16 +26,12 @@ public class ArrayModelRenderer extends ModelRenderer {
 		vao.unbind();
 	}
 
-	private boolean isValid() {
-		return model != null && model.valid();
-	}
-
 	@Override
 	protected void init() {
 		initialized = true;
 		IModel model = modelSupplier.get();
 
-		if (model.vertexCount() <= 0) return;
+		if (model.empty()) return;
 
 		this.model = new IndexedModel(model);
 
