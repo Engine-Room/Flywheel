@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.util;
 
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.Axis;
+import net.minecraft.core.Direction;
 
 public class AngleHelper {
 
@@ -10,7 +9,7 @@ public class AngleHelper {
 	 */
 	public static float horizontalAngle(Direction facing) {
 		float angle = facing.toYRot();
-		if (facing.getAxis() == Axis.X) angle = -angle;
+		if (facing.getAxis() == Direction.Axis.X) angle = -angle;
 		return angle;
 	}
 
@@ -23,7 +22,7 @@ public class AngleHelper {
 			return 0;
 		}
 		float angle = facing.toYRot();
-		if (facing.getAxis() == Axis.X) angle = -angle;
+		if (facing.getAxis() == Direction.Axis.X) angle = -angle;
 		return angle;
 	}
 

@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
-
 import org.lwjgl.opengl.GL11;
 
 import net.fabricmc.api.EnvType;

@@ -13,6 +13,8 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.IntConsumer;
 
+import net.minecraft.resources.ResourceLocation;
+
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.backend.Backend;
@@ -21,7 +23,6 @@ import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.util.ResourceLocation;
 
 public class Program {
 	public final ResourceLocation name;

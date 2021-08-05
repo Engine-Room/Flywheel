@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.core.materials;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.instancing.Instancer;
 import com.jozufozu.flywheel.util.RenderUtil;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 public class ModelData extends BasicData {
 	private static final float[] empty = new float[25];
@@ -14,7 +14,7 @@ public class ModelData extends BasicData {
 		super(owner);
 	}
 
-	public ModelData setTransform(MatrixStack stack) {
+	public ModelData setTransform(PoseStack stack) {
 		matrices = RenderUtil.writeMatrixStack(stack);
 		markDirty();
 		return this;

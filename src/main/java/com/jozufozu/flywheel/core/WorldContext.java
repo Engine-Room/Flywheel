@@ -23,7 +23,7 @@ import com.jozufozu.flywheel.core.shader.ExtensibleGlProgram;
 import com.jozufozu.flywheel.core.shader.StateSensitiveMultiProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 

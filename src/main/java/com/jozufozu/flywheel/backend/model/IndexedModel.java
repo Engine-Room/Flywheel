@@ -1,13 +1,9 @@
 package com.jozufozu.flywheel.backend.model;
 
-import java.nio.ByteBuffer;
-
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
-import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
-import com.jozufozu.flywheel.core.QuadConverter;
 import com.jozufozu.flywheel.core.model.IModel;
 
 /**

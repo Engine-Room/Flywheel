@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 /**
  * A general interface providing information about any type of thing that could use Flywheel's instanced rendering.

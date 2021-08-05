@@ -11,6 +11,7 @@ import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.QuadConverter;
+import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.event.EntityWorldHandler;
 import com.jozufozu.flywheel.fabric.event.FlywheelEvents;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
@@ -22,8 +23,8 @@ import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.resources.ResourcePackType;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.world.inventory.InventoryMenu;
 
 public class FlywheelClient implements ClientModInitializer {
 
@@ -32,16 +33,16 @@ public class FlywheelClient implements ClientModInitializer {
 
 		Backend.init();
 
-		ClientSpriteRegistryCallback.event(PlayerContainer.BLOCK_ATLAS_TEXTURE).register(AtlasStitcher.getInstance()::onTextureStitch);
+		ClientSpriteRegistryCallback.event(InventoryMenu.BLOCK_ATLAS).register(AtlasStitcher.getInstance()::onTextureStitch);
 
 		FlywheelEvents.GATHER_CONTEXT.register(Contexts::flwInit);
 		FlywheelEvents.GATHER_CONTEXT.register(Materials::flwInit);
 		ModelLoadingRegistry.INSTANCE.registerModelProvider(PartialModel::onModelRegistry);
-		ResourceManagerHelper.get(ResourcePackType.CLIENT_RESOURCES).registerReloadListener(PartialModel.ResourceReloadListener.INSTANCE);
+		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(PartialModel.ResourceReloadListener.INSTANCE);
 
 		VanillaInstances.init();
 
-		ResourceManagerHelper.get(ResourcePackType.CLIENT_RESOURCES).registerReloadListener(ShaderSources.ResourceReloadListener.INSTANCE);
+		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(ShaderSources.ResourceReloadListener.INSTANCE);
 
 		WorldRenderEvents.END.register(RenderWork::onRenderWorldLast);
 		FlywheelEvents.RELOAD_RENDERERS.register(CrumblingRenderer::onReloadRenderers);

@@ -1,29 +1,24 @@
 package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Consumer;
+
+import com.mojang.math.Vector3f;
+
+import net.minecraft.client.Camera;
+import net.minecraft.core.BlockPos;
+
+import net.minecraft.util.Mth;
 
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
-import com.jozufozu.flywheel.util.RenderMath;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArraySet;
-import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3f;
 
 public abstract class InstanceManager<T> implements MaterialManager.OriginShiftListener {
 
@@ -109,7 +104,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		}
 	}
 
-	public void beginFrame(ActiveRenderInfo info) {
+	public void beginFrame(Camera info) {
 		frame++;
 		processQueuedAdditions();
 
@@ -283,7 +278,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 
 		int i = (dSq / 2048);
 
-		return divisorSequence[MathHelper.clamp(i, 0, divisorSequence.length - 1)];
+		return divisorSequence[Mth.clamp(i, 0, divisorSequence.length - 1)];
 	}
 
 	protected void addInternal(T tile) {

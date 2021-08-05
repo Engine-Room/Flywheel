@@ -1,40 +1,53 @@
 package com.jozufozu.flywheel.event;
 
 import com.jozufozu.flywheel.fabric.event.EventContext;
-import com.mojang.blaze3d.matrix.MatrixStack;
 
-import net.minecraft.client.renderer.ActiveRenderInfo;
+import com.mojang.blaze3d.vertex.PoseStack;
+
+import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.culling.ClippingHelper;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraftforge.eventbus.api.Event;
+import net.minecraft.client.renderer.culling.Frustum;
 
 public class BeginFrameEvent extends EventContext {
-	private final ClientWorld world;
-	private final ActiveRenderInfo info;
-	private final ClippingHelper clippingHelper;
+	private final ClientLevel world;
+	private final PoseStack stack;
+	private final Camera info;
+	private final GameRenderer gameRenderer;
+	private final LightTexture lightTexture;
+	private final Frustum clippingHelper;
 
-	public BeginFrameEvent(ClientWorld world, ActiveRenderInfo info, ClippingHelper clippingHelper) {
+	public BeginFrameEvent(ClientLevel world, PoseStack stack, Camera info, GameRenderer gameRenderer, LightTexture lightTexture, Frustum clippingHelper) {
 		this.world = world;
+		this.stack = stack;
 		this.info = info;
+		this.gameRenderer = gameRenderer;
+		this.lightTexture = lightTexture;
 		this.clippingHelper = clippingHelper;
 	}
 
-	public ClientWorld getWorld() {
+	public ClientLevel getWorld() {
 		return world;
 	}
 
-	public ActiveRenderInfo getInfo() {
+	public PoseStack getStack() {
+		return stack;
+	}
+
+	public Camera getInfo() {
 		return info;
 	}
 
-	public ClippingHelper getClippingHelper() {
-		return clippingHelper;
+	public GameRenderer getGameRenderer() {
+		return gameRenderer;
 	}
 
-	public Vector3d getCameraPos() {
-		return info.getPosition();
+	public LightTexture getLightTexture() {
+		return lightTexture;
+	}
+
+	public Frustum getClippingHelper() {
+		return clippingHelper;
 	}
 }

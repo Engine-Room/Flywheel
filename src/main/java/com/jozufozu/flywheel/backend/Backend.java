@@ -6,10 +6,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jetbrains.annotations.Nullable;
+import com.mojang.math.Matrix4f;
+
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 
@@ -20,10 +25,6 @@ import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
 
 public class Backend {
 	public static final Logger log = LogManager.getLogger(Backend.class);
@@ -158,7 +159,7 @@ public class Backend {
 				.chunkCaching();
 	}
 
-	public boolean canUseInstancing(@Nullable World world) {
+	public boolean canUseInstancing(@Nullable Level world) {
 		return canUseInstancing() && isFlywheelWorld(world);
 	}
 
@@ -185,7 +186,7 @@ public class Backend {
 	/**
 	 * Used to avoid calling Flywheel functions on (fake) worlds that don't specifically support it.
 	 */
-	public static boolean isFlywheelWorld(@Nullable IWorld world) {
+	public static boolean isFlywheelWorld(@Nullable LevelAccessor world) {
 		if (world == null) return false;
 
 		if (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel()) return true;

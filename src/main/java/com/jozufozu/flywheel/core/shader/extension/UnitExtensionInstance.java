@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.core.shader.extension;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class UnitExtensionInstance implements IExtensionInstance {
 

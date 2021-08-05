@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import com.jozufozu.flywheel.backend.instancing.Instancer;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 
-import net.minecraft.util.math.vector.Matrix4f;
+import com.mojang.math.Matrix4f;
 
 public class MaterialRenderer<P extends WorldProgram> {
 

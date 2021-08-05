@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.state.IRenderState;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 
-import net.minecraft.util.math.vector.Matrix4f;
+import com.mojang.math.Matrix4f;
 
 /**
  * A group of materials all rendered with the same GL state.

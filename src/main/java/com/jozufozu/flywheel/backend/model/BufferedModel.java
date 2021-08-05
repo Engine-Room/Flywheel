@@ -2,8 +2,6 @@ package com.jozufozu.flywheel.backend.model;
 
 import static org.lwjgl.opengl.GL20.glDrawArrays;
 
-import java.nio.ByteBuffer;
-
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;

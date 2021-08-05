@@ -6,6 +6,8 @@ import javax.annotation.Nonnull;
 
 import net.minecraftforge.common.util.NonNullSupplier;
 
+import org.jetbrains.annotations.NotNull;
+
 public class Lazy<T> {
 
 	private final NonNullSupplier<T> supplier;
@@ -16,7 +18,7 @@ public class Lazy<T> {
 		this.supplier = supplier;
 	}
 
-	@Nonnull
+	@NotNull
 	public T get() {
 		if (value == null) {
 			value = supplier.get();

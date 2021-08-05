@@ -8,10 +8,10 @@ import com.jozufozu.flywheel.util.WeakHashSet;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongRBTreeSet;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.SectionPos;
-import net.minecraft.world.IBlockDisplayReader;
-import net.minecraft.world.LightType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.LightLayer;
 
 /**
  * By using WeakReferences we can automatically remove listeners when they are garbage collected.
@@ -109,7 +109,7 @@ public class LightUpdater {
 	 * @param type       The type of light that changed.
 	 * @param sectionPos A long representing the section position where light changed.
 	 */
-	public void onLightUpdate(IBlockDisplayReader world, LightType type, long sectionPos) {
+	public void onLightUpdate(BlockAndTintGetter world, LightLayer type, long sectionPos) {
 		WeakHashSet<ILightUpdateListener> set = sections.get(sectionPos);
 
 		if (set == null || set.isEmpty()) return;
@@ -125,7 +125,7 @@ public class LightUpdater {
 	 *
 	 * @param world The world in which light was updated.
 	 */
-	public void onLightPacket(IBlockDisplayReader world, int chunkX, int chunkZ) {
+	public void onLightPacket(BlockAndTintGetter world, int chunkX, int chunkZ) {
 
 		long chunkPos = SectionPos.asLong(chunkX, 0, chunkZ);
 

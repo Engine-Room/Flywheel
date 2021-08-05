@@ -16,14 +16,14 @@ import com.jozufozu.flywheel.core.materials.OrientedData;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.util.WeakHashSet;
 
-import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3i;
+import com.mojang.math.Matrix4f;
+
+import net.minecraft.client.Camera;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.inventory.InventoryMenu;
 
 public class MaterialManager<P extends WorldProgram> {
 
@@ -84,15 +84,15 @@ public class MaterialManager<P extends WorldProgram> {
 	}
 
 	public MaterialGroup<P> defaultSolid() {
-		return solid(TextureRenderState.get(PlayerContainer.BLOCK_ATLAS));
+		return solid(TextureRenderState.get(InventoryMenu.BLOCK_ATLAS));
 	}
 
 	public MaterialGroup<P> defaultCutout() {
-		return cutout(TextureRenderState.get(PlayerContainer.BLOCK_ATLAS));
+		return cutout(TextureRenderState.get(InventoryMenu.BLOCK_ATLAS));
 	}
 
 	public MaterialGroup<P> defaultTransparent() {
-		return transparent(TextureRenderState.get(PlayerContainer.BLOCK_ATLAS));
+		return transparent(TextureRenderState.get(InventoryMenu.BLOCK_ATLAS));
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class MaterialManager<P extends WorldProgram> {
 
 			Matrix4f translate = Matrix4f.createTranslateMatrix((float) -camX, (float) -camY, (float) -camZ);
 
-			translate.multiplyBackward(viewProjection);
+			translate.multiply(viewProjection);
 
 			viewProjection = translate;
 		}
@@ -154,7 +154,7 @@ public class MaterialManager<P extends WorldProgram> {
 		return context.getProgramSupplier(name);
 	}
 
-	public Vector3i getOriginCoordinate() {
+	public Vec3i getOriginCoordinate() {
 		return originCoordinate;
 	}
 
@@ -167,10 +167,10 @@ public class MaterialManager<P extends WorldProgram> {
 	 *
 	 * This prevents floating point precision issues at high coordinates.
 	 */
-	public void checkAndShiftOrigin(ActiveRenderInfo info) {
-		int cX = MathHelper.floor(info.getPosition().x);
-		int cY = MathHelper.floor(info.getPosition().y);
-		int cZ = MathHelper.floor(info.getPosition().z);
+	public void checkAndShiftOrigin(Camera info) {
+		int cX = Mth.floor(info.getPosition().x);
+		int cY = Mth.floor(info.getPosition().y);
+		int cZ = Mth.floor(info.getPosition().z);
 
 		int dX = cX - originCoordinate.getX();
 		int dY = cY - originCoordinate.getY();

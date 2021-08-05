@@ -1,9 +1,9 @@
 package com.jozufozu.flywheel.backend.instancing;
 
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 
 /**
- * Something (a TileEntity or Entity) that can be rendered using the instancing API.
+ * Something (a BlockEntity or Entity) that can be rendered using the instancing API.
  */
 public interface IInstanceRendered {
 
@@ -14,5 +14,5 @@ public interface IInstanceRendered {
 		return false;
 	}
 
-	World getWorld();
+	Level getWorld();
 }

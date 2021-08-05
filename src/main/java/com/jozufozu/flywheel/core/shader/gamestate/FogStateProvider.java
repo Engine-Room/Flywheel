@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.core.shader.gamestate;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.core.shader.GlFog;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class FogStateProvider implements IGameStateProvider {
 

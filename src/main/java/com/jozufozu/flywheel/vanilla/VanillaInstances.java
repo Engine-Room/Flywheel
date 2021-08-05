@@ -2,26 +2,26 @@ package com.jozufozu.flywheel.vanilla;
 
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
-import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 /**
  * TODO:
  * <table>
- * 		<tr><td>{@link TileEntityType#SIGN}</td><td> {@link net.minecraft.client.renderer.tileentity.SignTileEntityRenderer SignTileEntityRenderer}</td></tr>
- * 		<tr><td>{@link TileEntityType#PISTON}</td><td> {@link net.minecraft.client.renderer.tileentity.PistonTileEntityRenderer PistonTileEntityRenderer}</td></tr>
- * 		<tr><td>{@link TileEntityType#CONDUIT}</td><td> {@link net.minecraft.client.renderer.tileentity.ConduitTileEntityRenderer ConduitTileEntityRenderer}</td></tr>
- * 		<tr><td>{@link TileEntityType#ENCHANTING_TABLE}</td><td> {@link net.minecraft.client.renderer.tileentity.EnchantmentTableTileEntityRenderer EnchantmentTableTileEntityRenderer}</td></tr>
- * 		<tr><td>{@link TileEntityType#LECTERN}</td><td> {@link net.minecraft.client.renderer.tileentity.LecternTileEntityRenderer LecternTileEntityRenderer}</td></tr>
- * 		<tr><td>{@link TileEntityType#MOB_SPAWNER}</td><td> {@link net.minecraft.client.renderer.tileentity.MobSpawnerTileEntityRenderer MobSpawnerTileEntityRenderer}</td></tr>
- * 		<tr><td>{@link TileEntityType#BED}</td><td> {@link net.minecraft.client.renderer.tileentity.BedTileEntityRenderer BedTileEntityRenderer}</td></tr>
+ * 		<tr><td>{@link BlockEntityType#SIGN}</td><td> {@link net.minecraft.client.renderer.blockentity.SignRenderer SignBlockEntityRenderer}</td></tr>
+ * 		<tr><td>{@link BlockEntityType#PISTON}</td><td> {@link net.minecraft.client.renderer.blockentity.PistonHeadRenderer PistonBlockEntityRenderer}</td></tr>
+ * 		<tr><td>{@link BlockEntityType#CONDUIT}</td><td> {@link net.minecraft.client.renderer.blockentity.ConduitRenderer ConduitBlockEntityRenderer}</td></tr>
+ * 		<tr><td>{@link BlockEntityType#ENCHANTING_TABLE}</td><td> {@link net.minecraft.client.renderer.blockentity.EnchantTableRenderer EnchantmentTableBlockEntityRenderer}</td></tr>
+ * 		<tr><td>{@link BlockEntityType#LECTERN}</td><td> {@link net.minecraft.client.renderer.blockentity.LecternRenderer LecternBlockEntityRenderer}</td></tr>
+ * 		<tr><td>{@link BlockEntityType#MOB_SPAWNER}</td><td> {@link net.minecraft.client.renderer.blockentity.SpawnerRenderer MobSpawnerBlockEntityRenderer}</td></tr>
+ * 		<tr><td>{@link BlockEntityType#BED}</td><td> {@link net.minecraft.client.renderer.blockentity.BedRenderer BedBlockEntityRenderer}</td></tr>
  * 		<tr><td>^^ Interesting - Major vv</td></tr>
- * 		<tr><td>{@link TileEntityType#END_PORTAL}</td><td> {@link net.minecraft.client.renderer.tileentity.EndPortalTileEntityRenderer EndPortalTileEntityRenderer}</td></tr>
- * 		<tr><td>{@link TileEntityType#END_GATEWAY}</td><td> {@link net.minecraft.client.renderer.tileentity.EndGatewayTileEntityRenderer EndGatewayTileEntityRenderer}</td></tr>
- * 		<tr><td>{@link TileEntityType#BEACON}</td><td> {@link net.minecraft.client.renderer.tileentity.BeaconTileEntityRenderer BeaconTileEntityRenderer}</td></tr>
- * 		<tr><td>{@link TileEntityType#SKULL}</td><td> {@link net.minecraft.client.renderer.tileentity.SkullTileEntityRenderer SkullTileEntityRenderer}</td></tr>
- * 		<tr><td>{@link TileEntityType#BANNER}</td><td> {@link net.minecraft.client.renderer.tileentity.BannerTileEntityRenderer BannerTileEntityRenderer}</td></tr>
- * 		<tr><td>{@link TileEntityType#STRUCTURE_BLOCK}</td><td> {@link net.minecraft.client.renderer.tileentity.StructureTileEntityRenderer StructureTileEntityRenderer}</td></tr>
- * 		<tr><td>{@link TileEntityType#CAMPFIRE}</td><td> {@link net.minecraft.client.renderer.tileentity.CampfireTileEntityRenderer CampfireTileEntityRenderer}</td></tr>
+ * 		<tr><td>{@link BlockEntityType#END_PORTAL}</td><td> {@link net.minecraft.client.renderer.blockentity.TheEndPortalRenderer EndPortalBlockEntityRenderer}</td></tr>
+ * 		<tr><td>{@link BlockEntityType#END_GATEWAY}</td><td> {@link net.minecraft.client.renderer.blockentity.TheEndGatewayRenderer EndGatewayBlockEntityRenderer}</td></tr>
+ * 		<tr><td>{@link BlockEntityType#BEACON}</td><td> {@link net.minecraft.client.renderer.blockentity.BeaconRenderer BeaconBlockEntityRenderer}</td></tr>
+ * 		<tr><td>{@link BlockEntityType#SKULL}</td><td> {@link net.minecraft.client.renderer.blockentity.SkullBlockRenderer SkullBlockEntityRenderer}</td></tr>
+ * 		<tr><td>{@link BlockEntityType#BANNER}</td><td> {@link net.minecraft.client.renderer.blockentity.BannerRenderer BannerBlockEntityRenderer}</td></tr>
+ * 		<tr><td>{@link BlockEntityType#STRUCTURE_BLOCK}</td><td> {@link net.minecraft.client.renderer.blockentity.StructureBlockRenderer StructureBlockEntityRenderer}</td></tr>
+ * 		<tr><td>{@link BlockEntityType#CAMPFIRE}</td><td> {@link net.minecraft.client.renderer.blockentity.CampfireRenderer CampfireBlockEntityRenderer}</td></tr>
  * </table>
  */
 public class VanillaInstances {
@@ -29,21 +29,21 @@ public class VanillaInstances {
 	public static void init() {
 		InstancedRenderRegistry r = InstancedRenderRegistry.getInstance();
 
-		r.tile(TileEntityType.CHEST)
+		r.tile(BlockEntityType.CHEST)
 				.setSkipRender(true)
 				.factory(ChestInstance::new);
-		r.tile(TileEntityType.ENDER_CHEST)
+		r.tile(BlockEntityType.ENDER_CHEST)
 				.setSkipRender(true)
 				.factory(ChestInstance::new);
-		r.tile(TileEntityType.TRAPPED_CHEST)
+		r.tile(BlockEntityType.TRAPPED_CHEST)
 				.setSkipRender(true)
 				.factory(ChestInstance::new);
 
-		r.tile(TileEntityType.BELL)
+		r.tile(BlockEntityType.BELL)
 				.setSkipRender(true)
 				.factory(BellInstance::new);
 
-		r.tile(TileEntityType.SHULKER_BOX)
+		r.tile(BlockEntityType.SHULKER_BOX)
 				.setSkipRender(true)
 				.factory(ShulkerBoxInstance::new);
 	}

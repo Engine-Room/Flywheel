@@ -1,10 +1,12 @@
 package com.jozufozu.flywheel.util.transform;
 
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector3i;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3d;
+
+import com.mojang.math.Vector3f;
+
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 
 public interface TransformStack {
 	Vector3d CENTER = new Vector3d(0.5, 0.5, 0.5);
@@ -68,7 +70,7 @@ public interface TransformStack {
 		return translate(0, 0, z);
 	}
 
-	default TransformStack translate(Vector3i vec) {
+	default TransformStack translate(Vec3i vec) {
 		return translate(vec.getX(), vec.getY(), vec.getZ());
 	}
 

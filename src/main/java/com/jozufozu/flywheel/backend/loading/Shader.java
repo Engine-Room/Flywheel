@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 import com.jozufozu.flywheel.backend.ShaderSources;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class Shader {
 	// #flwinclude <"valid_namespace:valid/path_to_file.glsl">

@@ -4,7 +4,7 @@ import com.jozufozu.flywheel.backend.SpecMetaRegistry;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.mojang.serialization.Codec;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * A factory interface for creating {@link IExtensionInstance}s. These are what end up being passed in

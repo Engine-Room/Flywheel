@@ -2,32 +2,30 @@ package com.jozufozu.flywheel.core.model;
 
 import java.util.Arrays;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
+
 import org.lwjgl.opengl.GL11;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.backend.model.ElementBuffer;
-import com.jozufozu.flywheel.core.QuadConverter;
 import com.jozufozu.flywheel.util.BufferBuilderReader;
-import com.jozufozu.flywheel.util.VirtualEmptyModelData;
-import com.mojang.blaze3d.matrix.MatrixStack;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockModelRenderer;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
 
 /**
  * A model of a single block.
  */
 public class BlockModel implements IModel {
-	private static final MatrixStack IDENTITY = new MatrixStack();
+	private static final PoseStack IDENTITY = new PoseStack();
 
 	private final BufferBuilderReader reader;
 
@@ -39,11 +37,11 @@ public class BlockModel implements IModel {
 				.getBlockModel(state), state);
 	}
 
-	public BlockModel(VertexFormat modelFormat, IBakedModel model, BlockState referenceState) {
+	public BlockModel(VertexFormat modelFormat, BakedModel model, BlockState referenceState) {
 		this(modelFormat, model, referenceState, IDENTITY);
 	}
 
-	public BlockModel(VertexFormat modelFormat, IBakedModel model, BlockState referenceState, MatrixStack ms) {
+	public BlockModel(VertexFormat modelFormat, BakedModel model, BlockState referenceState, PoseStack ms) {
 		this.modelFormat = modelFormat;
 		reader = new BufferBuilderReader(getBufferBuilder(model, referenceState, ms));
 	}
@@ -72,10 +70,10 @@ public class BlockModel implements IModel {
 		}
 	}
 
-	public static BufferBuilder getBufferBuilder(IBakedModel model, BlockState referenceState, MatrixStack ms) {
+	public static BufferBuilder getBufferBuilder(BakedModel model, BlockState referenceState, PoseStack ms) {
 		Minecraft mc = Minecraft.getInstance();
-		BlockRendererDispatcher dispatcher = mc.getBlockRenderer();
-		BlockModelRenderer blockRenderer = dispatcher.getModelRenderer();
+		BlockRenderDispatcher dispatcher = mc.getBlockRenderer();
+		ModelBlockRenderer blockRenderer = dispatcher.getModelRenderer();
 		BufferBuilder builder = new BufferBuilder(512);
 
 		//		BakedQuadWrapper quadReader = new BakedQuadWrapper();
@@ -85,7 +83,7 @@ public class BlockModel implements IModel {
 		//				.flatMap(dir -> model.getQuads(referenceState, dir, mc.world.rand, modelData).stream())
 		//				.collect(Collectors.toList());
 
-		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+		builder.begin(GL11.GL_QUADS, DefaultVertexFormat.BLOCK);
 		blockRenderer.renderModel(mc.level, model, referenceState, BlockPos.ZERO.above(255), ms, builder, true, mc.level.random, 42, OverlayTexture.NO_OVERLAY, VirtualEmptyModelData.INSTANCE);
 		builder.end();
 		return builder;

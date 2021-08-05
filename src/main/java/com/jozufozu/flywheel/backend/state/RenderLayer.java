@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.backend.state;
 
-import javax.annotation.Nullable;
-
 import net.minecraft.client.renderer.RenderType;
+
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The 3 discrete stages the world is rendered in.

@@ -11,9 +11,9 @@ import com.jozufozu.flywheel.core.shader.gamestate.FogStateProvider;
 import com.jozufozu.flywheel.core.shader.gamestate.NormalDebugStateProvider;
 import com.jozufozu.flywheel.event.GatherContextEvent;
 
-import net.minecraft.util.ResourceLocation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class Contexts {

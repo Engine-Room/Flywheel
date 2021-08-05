@@ -12,13 +12,14 @@ import net.fabricmc.fabric.api.client.model.BakedModelManagerHelper;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ModelManager;
-import net.minecraft.client.resources.ReloadListener;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.Unit;
+
+import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
  * A helper class for loading and accessing json models.
@@ -36,7 +37,7 @@ public class PartialModel {
 	private static final List<PartialModel> all = new ArrayList<>();
 
 	protected final ResourceLocation modelLocation;
-	protected IBakedModel bakedModel;
+	protected BakedModel bakedModel;
 
 	public PartialModel(ResourceLocation modelLocation) {
 
@@ -44,7 +45,7 @@ public class PartialModel {
 		all.add(this);
 	}
 
-	public static void onModelRegistry(IResourceManager manager, Consumer<ResourceLocation> out) {
+	public static void onModelRegistry(ResourceManager manager, Consumer<ResourceLocation> out) {
 		for (PartialModel partial : all)
 			out.accept(partial.modelLocation);
 	}
@@ -54,23 +55,23 @@ public class PartialModel {
 			partial.bakedModel = BakedModelManagerHelper.getModel(manager, partial.modelLocation);
 	}
 
-	public IBakedModel get() {
+	public BakedModel get() {
 		return bakedModel;
 	}
 
-	public static class ResourceReloadListener extends ReloadListener<Unit> implements IdentifiableResourceReloadListener {
+	public static class ResourceReloadListener extends SimplePreparableReloadListener<Unit> implements IdentifiableResourceReloadListener {
 		public static final ResourceReloadListener INSTANCE = new ResourceReloadListener();
 
 		public static final ResourceLocation ID = new ResourceLocation(Flywheel.ID, "partial_models");
 		public static final Collection<ResourceLocation> DEPENDENCIES = Arrays.asList(ResourceReloadListenerKeys.MODELS);
 
 		@Override
-		protected Unit prepare(IResourceManager manager, IProfiler profiler) {
+		protected Unit prepare(ResourceManager manager, ProfilerFiller profiler) {
 			return Unit.INSTANCE;
 		}
 
 		@Override
-		protected void apply(Unit unit, IResourceManager manager, IProfiler profiler) {
+		protected void apply(Unit unit, ResourceManager manager, ProfilerFiller profiler) {
 			onModelBake(Minecraft.getInstance().getModelManager());
 		}
 

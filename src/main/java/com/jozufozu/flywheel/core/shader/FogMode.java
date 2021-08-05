@@ -1,12 +1,12 @@
 package com.jozufozu.flywheel.core.shader;
 
+import net.minecraft.resources.ResourceLocation;
+
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.shader.extension.IExtensionInstance;
-
-import net.minecraft.util.ResourceLocation;
 
 public abstract class FogMode {
 

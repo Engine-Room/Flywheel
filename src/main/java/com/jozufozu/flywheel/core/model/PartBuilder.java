@@ -9,9 +9,10 @@ import java.util.Set;
 
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 
+import com.mojang.math.Vector3f;
+
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.core.Direction;
 
 public class PartBuilder {
 

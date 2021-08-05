@@ -6,22 +6,22 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.level.LevelAccessor;
 
-import net.minecraft.world.IWorld;
+import org.jetbrains.annotations.NotNull;
 
 public class WorldAttached<T> {
 
-	private final Map<IWorld, T> attached;
-	private final Function<IWorld, T> factory;
+	private final Map<LevelAccessor, T> attached;
+	private final Function<LevelAccessor, T> factory;
 
-	public WorldAttached(Function<IWorld, T> factory) {
+	public WorldAttached(Function<LevelAccessor, T> factory) {
 		this.factory = factory;
 		attached = new HashMap<>();
 	}
 
 	@NotNull
-	public T get(IWorld world) {
+	public T get(LevelAccessor world) {
 		T t = attached.get(world);
 		if (t != null) return t;
 		T entry = factory.apply(world);
@@ -29,7 +29,7 @@ public class WorldAttached<T> {
 		return entry;
 	}
 
-	public void put(IWorld world, T entry) {
+	public void put(LevelAccessor world, T entry) {
 		attached.put(world, entry);
 	}
 
@@ -37,7 +37,7 @@ public class WorldAttached<T> {
 	 * Replaces the entry with a new one from the factory and returns the new entry.
 	 */
 	@NotNull
-	public T replace(IWorld world) {
+	public T replace(LevelAccessor world) {
 		attached.remove(world);
 
 		return get(world);
@@ -47,7 +47,7 @@ public class WorldAttached<T> {
 	 * Replaces the entry with a new one from the factory and returns the new entry.
 	 */
 	@NotNull
-	public T replace(IWorld world, Consumer<T> finalizer) {
+	public T replace(LevelAccessor world, Consumer<T> finalizer) {
 		T remove = attached.remove(world);
 
 		if (remove != null)
@@ -61,7 +61,7 @@ public class WorldAttached<T> {
 	 *
 	 * @param finalizer Do something with all of the world-value pairs
 	 */
-	public void empty(BiConsumer<IWorld, T> finalizer) {
+	public void empty(BiConsumer<LevelAccessor, T> finalizer) {
 		attached.forEach(finalizer);
 		attached.clear();
 	}

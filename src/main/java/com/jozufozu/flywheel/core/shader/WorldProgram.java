@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.backend.loading.Program;
 import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 
-import net.minecraft.util.math.vector.Matrix4f;
+import com.mojang.math.Matrix4f;
 
 public class WorldProgram extends ExtensibleGlProgram {
 	protected final int uTime;

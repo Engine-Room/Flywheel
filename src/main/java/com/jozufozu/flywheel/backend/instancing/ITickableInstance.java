@@ -1,10 +1,10 @@
 package com.jozufozu.flywheel.backend.instancing;
 
-import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
+import com.jozufozu.flywheel.backend.instancing.tile.BlockEntityInstance;
 
 /**
- * An interface giving {@link TileEntityInstance}s a hook to have a function called at
- * the end of every tick. By implementing {@link ITickableInstance}, a {@link TileEntityInstance}
+ * An interface giving {@link BlockEntityInstance}s a hook to have a function called at
+ * the end of every tick. By implementing {@link ITickableInstance}, a {@link BlockEntityInstance}
  * can update frequently, but not every frame.
  * <br> There are a few cases in which this should be considered over {@link IDynamicInstance}:
  * <ul>
@@ -13,7 +13,7 @@ import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
  *         eg. adding or removing parts, snapping to a different rotation, etc.
  *     </li>
  *     <li>
- *         Your TileEntity does animate, but the animation doesn't have
+ *         Your BlockEntity does animate, but the animation doesn't have
  *         to be smooth, in which case this could be an optimization.
  *     </li>
  * </ul>

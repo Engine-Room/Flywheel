@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.core;
 
+import net.minecraft.util.LazyLoadedValue;
+
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
@@ -7,11 +9,9 @@ import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 
-import net.minecraft.util.LazyValue;
-
 public class FullscreenQuad {
 
-	public static final LazyValue<FullscreenQuad> INSTANCE = new LazyValue<>(FullscreenQuad::new);
+	public static final LazyLoadedValue<FullscreenQuad> INSTANCE = new LazyLoadedValue<>(FullscreenQuad::new);
 
 	private static final float[] vertices = {
 			// pos          // tex

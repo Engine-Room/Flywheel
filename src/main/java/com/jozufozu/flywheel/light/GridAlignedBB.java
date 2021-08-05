@@ -4,11 +4,11 @@ import static com.jozufozu.flywheel.util.RenderUtil.isPowerOf2;
 
 import com.jozufozu.flywheel.util.RenderUtil;
 
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.SectionPos;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.phys.AABB;
 
 public class GridAlignedBB {
 	public int minX;
@@ -35,7 +35,7 @@ public class GridAlignedBB {
 		return new GridAlignedBB(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ);
 	}
 
-	public static GridAlignedBB from(AxisAlignedBB aabb) {
+	public static GridAlignedBB from(AABB aabb) {
 		int minX = (int) Math.floor(aabb.minX);
 		int minY = (int) Math.floor(aabb.minY);
 		int minZ = (int) Math.floor(aabb.minZ);
@@ -59,8 +59,8 @@ public class GridAlignedBB {
 		return new GridAlignedBB(startX, 0, startZ, startX + 16, 256, startZ + 16);
 	}
 
-	public static AxisAlignedBB toAABB(GridAlignedBB bb) {
-		return new AxisAlignedBB(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ);
+	public static AABB toAABB(GridAlignedBB bb) {
+		return new AABB(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ);
 	}
 
 	public GridAlignedBB copy() {
@@ -108,7 +108,7 @@ public class GridAlignedBB {
 		return minX == maxX || minY == maxY || minZ == maxZ;
 	}
 
-	public void translate(Vector3i by) {
+	public void translate(Vec3i by) {
 		translate(by.getX(), by.getY(), by.getZ());
 	}
 
@@ -122,7 +122,7 @@ public class GridAlignedBB {
 	}
 
 	public void mirrorAbout(Direction.Axis axis) {
-		Vector3i axisVec = Direction.get(Direction.AxisDirection.POSITIVE, axis)
+		Vec3i axisVec = Direction.get(Direction.AxisDirection.POSITIVE, axis)
 				.getNormal();
 		int flipX = axisVec.getX() - 1;
 		int flipY = axisVec.getY() - 1;
@@ -232,7 +232,7 @@ public class GridAlignedBB {
 		this.maxZ = Math.max(this.maxZ, other.maxZ);
 	}
 
-	public void unionAssign(AxisAlignedBB other) {
+	public void unionAssign(AABB other) {
 		this.minX = Math.min(this.minX, (int) Math.floor(other.minX));
 		this.minY = Math.min(this.minY, (int) Math.floor(other.minY));
 		this.minZ = Math.min(this.minZ, (int) Math.floor(other.minZ));
@@ -269,7 +269,7 @@ public class GridAlignedBB {
 		}
 	}
 
-	public AxisAlignedBB toAABB() {
+	public AABB toAABB() {
 		return toAABB(this);
 	}
 

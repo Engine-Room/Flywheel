@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public interface IShaderContext<P extends GlProgram> {
 

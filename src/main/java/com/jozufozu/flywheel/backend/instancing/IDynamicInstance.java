@@ -1,10 +1,10 @@
 package com.jozufozu.flywheel.backend.instancing;
 
-import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
+import com.jozufozu.flywheel.backend.instancing.tile.BlockEntityInstance;
 
 /**
- * An interface giving {@link TileEntityInstance}s a hook to have a function called at
- * the start of a frame. By implementing {@link IDynamicInstance}, a {@link TileEntityInstance}
+ * An interface giving {@link BlockEntityInstance}s a hook to have a function called at
+ * the start of a frame. By implementing {@link IDynamicInstance}, a {@link BlockEntityInstance}
  * can animate its models in ways that could not be easily achieved by shader attribute
  * parameterization.
  *

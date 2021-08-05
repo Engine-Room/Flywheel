@@ -9,14 +9,14 @@ import com.jozufozu.flywheel.util.BufferBuilderReader;
 
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.IBlockDisplayReader;
-import net.minecraft.world.gen.feature.template.Template;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class WorldModel implements IModel {
 
 	private final BufferBuilderReader reader;
 
-	public WorldModel(IBlockDisplayReader renderWorld, RenderType layer, Collection<Template.BlockInfo> blocks) {
+	public WorldModel(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks) {
 		reader = new BufferBuilderReader(ModelUtil.getBufferBuilderFromTemplate(renderWorld, layer, blocks));
 	}
 

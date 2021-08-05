@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.annotation.Nullable;
-
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.util.Pair;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+
+import org.jetbrains.annotations.Nullable;
 
 public class TextureRenderState implements IRenderState {
 	private static final Map<Pair<GlTextureUnit, ResourceLocation>, TextureRenderState> states = new HashMap<>();
@@ -34,7 +34,7 @@ public class TextureRenderState implements IRenderState {
 	@Override
 	public void bind() {
 		unit.makeActive();
-		Minecraft.getInstance().textureManager.bind(location);
+		Minecraft.getInstance().getTextureManager().bindForSetup(location);
 	}
 
 	@Override

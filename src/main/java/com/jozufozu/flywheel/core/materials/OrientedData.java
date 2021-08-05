@@ -4,10 +4,12 @@ import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.instancing.Instancer;
 import com.jozufozu.flywheel.util.vec.Vec3;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
+import com.mojang.math.Quaternion;
+
+import com.mojang.math.Vector3d;
+import com.mojang.math.Vector3f;
+
+import net.minecraft.core.BlockPos;
 
 public class OrientedData extends BasicData {
 
@@ -60,7 +62,7 @@ public class OrientedData extends BasicData {
 	}
 
 	public OrientedData setPivot(Vector3d pos) {
-		return setPosition((float) pos.x(), (float) pos.y(), (float) pos.z());
+		return setPosition((float) pos.x, (float) pos.y, (float) pos.z);
 	}
 
 	public OrientedData setPivot(Vec3 pos) {

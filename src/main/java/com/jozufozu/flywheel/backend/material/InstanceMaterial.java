@@ -14,10 +14,10 @@ import com.jozufozu.flywheel.core.model.BlockModel;
 import com.jozufozu.flywheel.core.model.IModel;
 import com.jozufozu.flywheel.util.Pair;
 import com.jozufozu.flywheel.util.RenderUtil;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * A collection of Instancers that all have the same format.
@@ -62,7 +62,7 @@ public class InstanceMaterial<D extends InstanceData> {
 		return getModel(partial, referenceState, dir, RenderUtil.rotateToFace(dir));
 	}
 
-	public Instancer<D> getModel(PartialModel partial, BlockState referenceState, Direction dir, Supplier<MatrixStack> modelTransform) {
+	public Instancer<D> getModel(PartialModel partial, BlockState referenceState, Direction dir, Supplier<PoseStack> modelTransform) {
 		return model(Pair.of(dir, partial), () -> new BlockModel(spec.getModelFormat(), partial.get(), referenceState, modelTransform.get()));
 	}
 

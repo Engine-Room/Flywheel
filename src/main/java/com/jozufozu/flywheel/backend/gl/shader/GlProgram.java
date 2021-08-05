@@ -11,8 +11,9 @@ import com.jozufozu.flywheel.backend.gl.GlObject;
 import com.jozufozu.flywheel.backend.loading.Program;
 import com.jozufozu.flywheel.util.RenderUtil;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
+import com.mojang.math.Matrix4f;
+
+import net.minecraft.resources.ResourceLocation;
 
 public abstract class GlProgram extends GlObject {
 

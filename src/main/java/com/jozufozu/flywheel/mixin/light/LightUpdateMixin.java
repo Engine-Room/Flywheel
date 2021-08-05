@@ -2,6 +2,17 @@ package com.jozufozu.flywheel.mixin.light;
 
 import java.util.Map;
 
+import net.minecraft.client.multiplayer.ClientChunkCache;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.LightLayer;
+
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.chunk.ChunkSource;
+
+import net.minecraft.world.level.chunk.LevelChunk;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -12,20 +23,12 @@ import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.light.LightUpdater;
 import com.jozufozu.flywheel.util.ChunkUtil;
 
-import net.minecraft.client.multiplayer.ClientChunkProvider;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.SectionPos;
-import net.minecraft.world.LightType;
-import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.chunk.Chunk;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
-@Mixin(ClientChunkProvider.class)
-public abstract class LightUpdateMixin extends AbstractChunkProvider {
+@Mixin(ClientChunkCache.class)
+public abstract class LightUpdateMixin extends ChunkSource {
 
 	/**
 	 * JUSTIFICATION: This method is called after a lighting tick once per subchunk where a
@@ -34,16 +37,16 @@ public abstract class LightUpdateMixin extends AbstractChunkProvider {
 	 * and we should too.
 	 */
 	@Inject(at = @At("HEAD"), method = "onLightUpdate")
-	private void onLightUpdate(LightType type, SectionPos pos, CallbackInfo ci) {
-		ClientChunkProvider thi = ((ClientChunkProvider) (Object) this);
-		ClientWorld world = (ClientWorld) thi.getLevel();
+	private void onLightUpdate(LightLayer type, SectionPos pos, CallbackInfo ci) {
+		ClientChunkCache thi = ((ClientChunkCache) (Object) this);
+		ClientLevel world = (ClientLevel) thi.getLevel();
 
-		Chunk chunk = thi.getChunk(pos.x(), pos.z(), false);
+		LevelChunk chunk = thi.getChunk(pos.x(), pos.z(), false);
 
 		int sectionY = pos.y();
 
 		if (ChunkUtil.isValidSection(chunk, sectionY)) {
-			InstanceManager<TileEntity> tiles = InstancedRenderDispatcher.getTiles(world);
+			InstanceManager<BlockEntity> tiles = InstancedRenderDispatcher.getTiles(world);
 			InstanceManager<Entity> entities = InstancedRenderDispatcher.getEntities(world);
 
 			chunk.getBlockEntities()

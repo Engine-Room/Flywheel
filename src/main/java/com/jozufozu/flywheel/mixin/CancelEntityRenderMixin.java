@@ -3,6 +3,12 @@ package com.jozufozu.flywheel.mixin;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
+
+import net.minecraft.util.ClassInstanceMultiMap;
+import net.minecraft.world.entity.Entity;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
@@ -12,17 +18,12 @@ import com.google.common.collect.Lists;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.ClassInheritanceMultiMap;
-
-@Mixin(WorldRenderer.class)
+@Mixin(LevelRenderer.class)
 public class CancelEntityRenderMixin {
 
 	@Group(name = "entityFilter", min = 1, max = 1)
-	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;entitiesForRendering()Ljava/lang/Iterable;"))
-	private Iterable<Entity> filterEntities(ClientWorld world) {
+	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;entitiesForRendering()Ljava/lang/Iterable;"))
+	private Iterable<Entity> filterEntities(ClientLevel world) {
 		Iterable<Entity> entities = world.entitiesForRendering();
 		if (Backend.getInstance()
 				.canUseInstancing()) {
@@ -39,7 +40,7 @@ public class CancelEntityRenderMixin {
 
 	@Group(name = "entityFilter")
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ClassInheritanceMultiMap;iterator()Ljava/util/Iterator;"))
-	private Iterator<Entity> filterEntitiesOF(ClassInheritanceMultiMap<Entity> classInheritanceMultiMap) {
+	private Iterator<Entity> filterEntitiesOF(ClassInstanceMultiMap<Entity> classInheritanceMultiMap) {
 		if (Backend.getInstance()
 				.canUseInstancing()) {
 

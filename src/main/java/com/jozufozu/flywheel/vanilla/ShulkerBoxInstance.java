@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.vanilla;
 
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
-import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
+import com.jozufozu.flywheel.backend.instancing.tile.BlockEntityInstance;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.ModelData;
@@ -9,16 +9,18 @@ import com.jozufozu.flywheel.core.model.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
 
-import net.minecraft.block.ShulkerBoxBlock;
-import net.minecraft.client.renderer.Atlases;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.item.DyeColor;
-import net.minecraft.tileentity.ShulkerBoxTileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3f;
+import com.mojang.math.Quaternion;
 
-public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxTileEntity> implements IDynamicInstance {
+import com.mojang.math.Vector3f;
+
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
+
+public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntity> implements IDynamicInstance {
 
 	private final TextureAtlasSprite texture;
 
@@ -28,14 +30,14 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxTileEntity>
 
 	private float lastProgress = Float.NaN;
 
-	public ShulkerBoxInstance(MaterialManager<?> materialManager, ShulkerBoxTileEntity tile) {
+	public ShulkerBoxInstance(MaterialManager<?> materialManager, ShulkerBoxBlockEntity tile) {
 		super(materialManager, tile);
 
 		DyeColor color = tile.getColor();
 		if (color == null) {
-			texture = Atlases.DEFAULT_SHULKER_TEXTURE_LOCATION.sprite();
+			texture = Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION.sprite();
 		} else {
-			texture = Atlases.SHULKER_TEXTURE_LOCATION.get(color.getId()).sprite();
+			texture = Sheets.SHULKER_TEXTURE_LOCATION.get(color.getId()).sprite();
 		}
 		Quaternion rotation = getDirection().getRotation();
 

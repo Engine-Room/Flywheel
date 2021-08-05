@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.instancing.entity;
+package com.jozufozu.flywheel.backend.instancing.tile;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.IInstance;
 import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
-import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.backend.material.InstanceMaterial;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.core.Materials;
@@ -14,18 +13,17 @@ import com.jozufozu.flywheel.core.materials.IFlatLight;
 import com.jozufozu.flywheel.core.materials.ModelData;
 import com.jozufozu.flywheel.core.materials.OrientedData;
 
-import com.mojang.math.Vector3f;
-
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * The layer between a {@link net.minecraft.world.level.block.entity.BlockEntity} and the Flywheel backend.
- * *
+ * The layer between a {@link BlockEntity} and the Flywheel backend.
+ *
+ * <br><br> {@link #updateLight()} is called after construction.
+ *
  * <br><br> There are a few additional features that overriding classes can opt in to:
  * <ul>
  *     <li>{@link IDynamicInstance}</li>
@@ -33,27 +31,28 @@ import net.minecraft.world.phys.Vec3;
  * </ul>
  * See the interfaces' documentation for more information about each one.
  *
- * <br> Implementing one or more of these will give a {@link EntityInstance} access
+ * <br> Implementing one or more of these will give a {@link BlockEntityInstance} access
  * to more interesting and regular points within a tick or a frame.
  *
- * @param <E> The type of {@link Entity} your class is an instance of.
+ * @param <T> The type of {@link BlockEntity} your class is an instance of.
  */
-public abstract class EntityInstance<E extends Entity> implements IInstance {
+public abstract class BlockEntityInstance<T extends BlockEntity> implements IInstance {
 
 	protected final MaterialManager<?> materialManager;
-	protected final E entity;
+	protected final T tile;
 	protected final Level world;
+	protected final BlockPos pos;
+	protected final BlockPos instancePos;
+	protected final BlockState blockState;
 
-	public EntityInstance(MaterialManager<?> materialManager, E entity) {
+	public BlockEntityInstance(MaterialManager<?> materialManager, T tile) {
 		this.materialManager = materialManager;
-		this.entity = entity;
-		this.world = entity.level;
+		this.tile = tile;
+		this.world = tile.getLevel();
+		this.pos = tile.getBlockPos();
+		this.blockState = tile.getBlockState();
+		this.instancePos = pos.subtract(materialManager.getOriginCoordinate());
 	}
-
-	/**
-	 * Free any acquired resources.
-	 */
-	public abstract void remove();
 
 	/**
 	 * Update instance data here. Good for when data doesn't change very often and when animations are GPU based.
@@ -73,6 +72,11 @@ public abstract class EntityInstance<E extends Entity> implements IInstance {
 	}
 
 	/**
+	 * Free any acquired resources.
+	 */
+	public abstract void remove();
+
+	/**
 	 * Just before {@link #update()} would be called, <code>shouldReset()</code> is checked.
 	 * If this function returns <code>true</code>, then this instance will be {@link #remove removed},
 	 * and another instance will be constructed to replace it. This allows for more sane resource
@@ -81,7 +85,7 @@ public abstract class EntityInstance<E extends Entity> implements IInstance {
 	 * @return <code>true</code> if this instance should be discarded and refreshed.
 	 */
 	public boolean shouldReset() {
-		return false;
+		return tile.getBlockState() != blockState;
 	}
 
 	/**
@@ -89,18 +93,16 @@ public abstract class EntityInstance<E extends Entity> implements IInstance {
 	 * {@link TileInstanceManager}s are allowed to arbitrarily adjust the origin, and
 	 * shift the world matrix provided as a shader uniform accordingly.
 	 *
-	 * @return The {@link BlockPos position} of the {@link Entity} this instance
+	 * @return The {@link BlockPos position} of the {@link BlockEntity} this instance
 	 * represents should be rendered at to appear in the correct location.
 	 */
-	public Vector3f getInstancePosition() {
-		Vec3 pos = entity.position();
-		Vec3i origin = materialManager.getOriginCoordinate();
-		return new Vector3f((float) (pos.x - origin.getX()), (float) (pos.y - origin.getY()), (float) (pos.z - origin.getZ()));
+	public BlockPos getInstancePosition() {
+		return pos.subtract(materialManager.getOriginCoordinate());
 	}
 
 	@Override
 	public BlockPos getWorldPosition() {
-		return entity.blockPosition();
+		return pos;
 	}
 
 	protected void relight(BlockPos pos, IFlatLight<?>... models) {
@@ -121,11 +123,10 @@ public abstract class EntityInstance<E extends Entity> implements IInstance {
 	}
 
 	protected InstanceMaterial<ModelData> getTransformMaterial() {
-        return materialManager.defaultSolid().material(Materials.TRANSFORMED);
+        return materialManager.defaultCutout().material(Materials.TRANSFORMED);
     }
 
 	protected InstanceMaterial<OrientedData> getOrientedMaterial() {
-		return materialManager.defaultSolid().material(Materials.ORIENTED);
+		return materialManager.defaultCutout().material(Materials.ORIENTED);
 	}
-
 }

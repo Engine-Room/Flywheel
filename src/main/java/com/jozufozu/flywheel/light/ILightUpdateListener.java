@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.light;
 
-import net.minecraft.world.IBlockDisplayReader;
-import net.minecraft.world.LightType;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.LightLayer;
 
 /**
  * Anything can implement this, implementors should call {@link LightUpdater#startListening}
@@ -14,18 +14,18 @@ public interface ILightUpdateListener {
 	 *
 	 * @return true if this object is no longer valid and should not receive any more updates.
 	 */
-	boolean onLightUpdate(IBlockDisplayReader world, LightType type, GridAlignedBB changed);
+	boolean onLightUpdate(BlockAndTintGetter world, LightLayer type, GridAlignedBB changed);
 
 	/**
 	 * Called when the server sends light data to the client.
 	 *
 	 * @return true if this object is no longer valid and should not receive any more updates.
 	 */
-	default boolean onLightPacket(IBlockDisplayReader world, int chunkX, int chunkZ) {
+	default boolean onLightPacket(BlockAndTintGetter world, int chunkX, int chunkZ) {
 		GridAlignedBB changedVolume = GridAlignedBB.from(chunkX, chunkZ);
 
-		if (onLightUpdate(world, LightType.BLOCK, changedVolume)) return true;
+		if (onLightUpdate(world, LightLayer.BLOCK, changedVolume)) return true;
 
-		return onLightUpdate(world, LightType.SKY, changedVolume);
+		return onLightUpdate(world, LightLayer.SKY, changedVolume);
 	}
 }
