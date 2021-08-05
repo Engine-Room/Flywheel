@@ -1,5 +1,23 @@
 package com.jozufozu.flywheel.mixin;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+
+import com.mojang.math.Matrix4f;
+
+import com.mojang.math.Vector3d;
+
+import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
+
+import net.minecraft.client.renderer.LevelRenderer;
+
+import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+
+import net.minecraft.world.phys.Vec3;
+
 import org.lwjgl.opengl.GL20;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,37 +35,27 @@ import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.fabric.event.FlywheelEvents;
 import com.jozufozu.flywheel.fabric.util.MatrixUtil;
-import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeBuffers;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.culling.ClippingHelper;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
 
 @Environment(EnvType.CLIENT)
-@Mixin(WorldRenderer.class)
+@Mixin(LevelRenderer.class)
 public class RenderHooksMixin {
 
 	@Shadow
-	private ClientWorld level;
+	private ClientLevel level;
 
 	@Shadow
 	@Final
-	private RenderTypeBuffers renderBuffers;
+	private RenderBuffers renderBuffers;
 
 	@Inject(at = @At("HEAD"), method = "setupRender")
-	private void setupRender(ActiveRenderInfo info, ClippingHelper clippingHelper, boolean p_228437_3_, int frameCount, boolean isSpectator, CallbackInfo ci) {
-		FlywheelEvents.BEGIN_FRAME.invoker().handleEvent(new BeginFrameEvent(world, stack, info, gameRenderer, lightTexture));
+	private void setupRender(Camera info, Frustum Frustum, boolean p_228437_3_, int frameCount, boolean isSpectator, CallbackInfo ci) {
+		FlywheelEvents.BEGIN_FRAME.invoker().handleEvent(new BeginFrameEvent(level, stack, info, gameRenderer, lightTexture));
 	}
 
 	/**
@@ -56,11 +64,11 @@ public class RenderHooksMixin {
 	 * This should probably be a forge event.
 	 */
 	@Inject(at = @At("TAIL"), method = "renderChunkLayer")
-	private void renderLayer(RenderType type, MatrixStack stack, double camX, double camY, double camZ, CallbackInfo ci) {
+	private void renderLayer(RenderType type, PoseStack stack, double camX, double camY, double camZ, Matrix4f matrix4f, CallbackInfo ci) {
 
-		RenderTypeBuffers renderBuffers = this.renderBuffers;
+		RenderBuffers renderBuffers = this.renderBuffers;
 
-		FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(world, type, viewProjection, camX, camY, camZ));
+		FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(level, type, stack, renderBuffers, camX, camY, camZ));
 
 		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
 
@@ -72,13 +80,13 @@ public class RenderHooksMixin {
 		Backend.getInstance()
 				.refresh();
 
-		FlywheelEvents.RELOAD_RENDERERS.invoker().handleEvent(new ReloadRenderersEvent(world));
+		FlywheelEvents.RELOAD_RENDERERS.invoker().handleEvent(new ReloadRenderersEvent(level));
 	}
 
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WorldRenderer;checkPoseStack(Lcom/mojang/blaze3d/matrix/MatrixStack;)V", ordinal = 2 // after the game renders the breaking overlay normally
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;checkPoseStack(Lcom/mojang/blaze3d/vertex/PoseStack;)V", ordinal = 2 // after the game renders the breaking overlay normally
 	), method = "renderLevel")
-	private void renderBlockBreaking(MatrixStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, ActiveRenderInfo info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f p_228426_9_, CallbackInfo ci) {
+	private void renderBlockBreaking(PoseStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, Camera info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f p_228426_9_, CallbackInfo ci) {
 		if (!Backend.getInstance()
 				.available()) return;
 
@@ -88,7 +96,7 @@ public class RenderHooksMixin {
 		MatrixUtil.multiplyBackward(viewProjection, Backend.getInstance()
 												.getProjectionMatrix());
 
-		Vector3d cameraPos = info.getPosition();
+		Vec3 cameraPos = info.getPosition();
 		CrumblingRenderer.renderBreaking(level, viewProjection, cameraPos.x, cameraPos.y, cameraPos.z);
 
 		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
@@ -96,7 +104,7 @@ public class RenderHooksMixin {
 
 	// Instancing
 
-	@Inject(at = @At("TAIL"), method = "setBlockDirty(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;)V")
+	@Inject(at = @At("TAIL"), method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;)V")
 	private void checkUpdate(BlockPos pos, BlockState lastState, BlockState newState, CallbackInfo ci) {
 		InstancedRenderDispatcher.getTiles(level)
 				.update(level.getBlockEntity(pos));

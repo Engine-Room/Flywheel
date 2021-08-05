@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.jozufozu.flywheel.core.Clipping;
 
 @Mixin(Frustum.class)
-public class GlobalClippingHelperMixin {
+public class GlobalFrustumMixin {
 
 	@Inject(at = @At("TAIL"), method = "<init>")
 	private void init(Matrix4f p_i226026_1_, Matrix4f p_i226026_2_, CallbackInfo ci) {

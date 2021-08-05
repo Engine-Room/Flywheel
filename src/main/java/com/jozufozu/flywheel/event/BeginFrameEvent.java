@@ -16,15 +16,15 @@ public class BeginFrameEvent extends EventContext {
 	private final Camera info;
 	private final GameRenderer gameRenderer;
 	private final LightTexture lightTexture;
-	private final Frustum clippingHelper;
+	private final Frustum Frustum;
 
-	public BeginFrameEvent(ClientLevel world, PoseStack stack, Camera info, GameRenderer gameRenderer, LightTexture lightTexture, Frustum clippingHelper) {
+	public BeginFrameEvent(ClientLevel world, PoseStack stack, Camera info, GameRenderer gameRenderer, LightTexture lightTexture, Frustum Frustum) {
 		this.world = world;
 		this.stack = stack;
 		this.info = info;
 		this.gameRenderer = gameRenderer;
 		this.lightTexture = lightTexture;
-		this.clippingHelper = clippingHelper;
+		this.Frustum = Frustum;
 	}
 
 	public ClientLevel getWorld() {
@@ -47,7 +47,7 @@ public class BeginFrameEvent extends EventContext {
 		return lightTexture;
 	}
 
-	public Frustum getClippingHelper() {
-		return clippingHelper;
+	public Frustum getFrustum() {
+		return Frustum;
 	}
 }

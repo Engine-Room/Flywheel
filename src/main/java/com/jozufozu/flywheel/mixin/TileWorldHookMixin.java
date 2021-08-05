@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.BlockEntity.BlockEntity;
 import net.minecraft.world.World;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -30,10 +30,10 @@ public class TileWorldHookMixin {
 
 	@Shadow
 	@Final
-	protected Set<TileEntity> blockEntitiesToUnload;
+	protected Set<BlockEntity> blockEntitiesToUnload;
 
 	@Inject(at = @At("TAIL"), method = "addBlockEntity")
-	private void onAddTile(TileEntity te, CallbackInfoReturnable<Boolean> cir) {
+	private void onAddTile(BlockEntity te, CallbackInfoReturnable<Boolean> cir) {
 		if (isClientSide) {
 			InstancedRenderDispatcher.getTiles(self)
 					.queueAdd(te);
@@ -46,8 +46,8 @@ public class TileWorldHookMixin {
 	@Inject(at = @At(value = "INVOKE", target = "Ljava/util/Set;clear()V", ordinal = 0), method = "tickBlockEntities")
 	private void onChunkUnload(CallbackInfo ci) {
 		if (isClientSide) {
-			InstanceManager<TileEntity> kineticRenderer = InstancedRenderDispatcher.getTiles(self);
-			for (TileEntity tile : blockEntitiesToUnload) {
+			InstanceManager<BlockEntity> kineticRenderer = InstancedRenderDispatcher.getTiles(self);
+			for (BlockEntity tile : blockEntitiesToUnload) {
 				kineticRenderer.remove(tile);
 			}
 		}

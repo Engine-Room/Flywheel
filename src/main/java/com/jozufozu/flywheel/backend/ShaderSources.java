@@ -19,6 +19,15 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.resources.ResourceLocation;
+
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
+
 import org.jetbrains.annotations.NotNull;
 
 import org.lwjgl.system.MemoryUtil;
@@ -44,12 +53,6 @@ import com.mojang.serialization.JsonOps;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.ReloadListener;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResource;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Unit;
 
 public class ShaderSources {
@@ -68,7 +71,7 @@ public class ShaderSources {
 		ResourceReloadListener.INSTANCE.addCallback(this::onResourceManagerReload);
 	}
 
-	public void onResourceManagerReload(IResourceManager manager) {
+	public void onResourceManagerReload(ResourceManager manager) {
 		backend.refresh();
 
 		if (backend.gl20()) {
@@ -96,22 +99,21 @@ public class ShaderSources {
 			// no need to hog all that memory
 			shaderSource.clear();
 
-				ClientWorld world = Minecraft.getInstance().level;
-				if (Backend.isFlywheelWorld(world)) {
-					// TODO: looks like it might be good to have another event here
-					InstancedRenderDispatcher.loadAllInWorld(world);
-					CrumblingRenderer.reset();
-				}
+			ClientLevel world = Minecraft.getInstance().level;
+			if (Backend.isFlywheelWorld(world)) {
+				// TODO: looks like it might be good to have another event here
+				InstancedRenderDispatcher.loadAllInWorld(world);
+				CrumblingRenderer.reset();
 			}
 		}
 	}
 
-	private void loadProgramSpecs(IResourceManager manager) {
+	private void loadProgramSpecs(ResourceManager manager) {
 		Collection<ResourceLocation> programSpecs = manager.listResources(PROGRAM_DIR, s -> s.endsWith(".json"));
 
 		for (ResourceLocation location : programSpecs) {
 			try {
-				IResource file = manager.getResource(location);
+				Resource file = manager.getResource(location);
 
 				String s = readToString(file.getInputStream());
 
@@ -147,7 +149,7 @@ public class ShaderSources {
 		return source;
 	}
 
-	private void loadShaderSources(IResourceManager manager) {
+	private void loadShaderSources(ResourceManager manager) {
 		Collection<ResourceLocation> allShaders = manager.listResources(SHADER_DIR, s -> {
 			for (String ext : EXTENSIONS) {
 				if (s.endsWith(ext)) return true;
@@ -157,7 +159,7 @@ public class ShaderSources {
 
 		for (ResourceLocation location : allShaders) {
 			try {
-				IResource resource = manager.getResource(location);
+				Resource resource = manager.getResource(location);
 
 				String file = readToString(resource.getInputStream());
 
@@ -222,21 +224,21 @@ public class ShaderSources {
 		return bytebuffer;
 	}
 
-	public static class ResourceReloadListener extends ReloadListener<Unit> implements IdentifiableResourceReloadListener {
+	public static class ResourceReloadListener extends SimplePreparableReloadListener<Unit> implements IdentifiableResourceReloadListener {
 		public static final ResourceReloadListener INSTANCE = new ResourceReloadListener();
 
 		public static final ResourceLocation ID = new ResourceLocation(Flywheel.ID, "shader_sources");
 		public static final Collection<ResourceLocation> DEPENDENCIES = Arrays.asList(ResourceReloadListenerKeys.TEXTURES, ResourceReloadListenerKeys.MODELS);
 
-		private final List<Consumer<IResourceManager>> callbacks = new ArrayList<>();
+		private final List<Consumer<ResourceManager>> callbacks = new ArrayList<>();
 
 		@Override
-		protected Unit prepare(IResourceManager resourceManager, IProfiler profiler) {
+		protected Unit prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
 			return Unit.INSTANCE;
 		}
 
 		@Override
-		protected void apply(Unit object, IResourceManager resourceManager, IProfiler profiler) {
+		protected void apply(Unit object, ResourceManager resourceManager, ProfilerFiller profiler) {
 			callbacks.forEach(callback -> callback.accept(resourceManager));
 		}
 
@@ -250,7 +252,7 @@ public class ShaderSources {
 			return DEPENDENCIES;
 		}
 
-		protected void addCallback(Consumer<IResourceManager> callback) {
+		protected void addCallback(Consumer<ResourceManager> callback) {
 			callbacks.add(callback);
 		}
 	}

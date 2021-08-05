@@ -15,7 +15,7 @@ public class ModelData extends BasicData {
 	}
 
 	public ModelData setTransform(PoseStack stack) {
-		matrices = RenderUtil.writeMatrixStack(stack);
+		matrices = RenderUtil.writePoseStack(stack);
 		markDirty();
 		return this;
 	}

@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.culling.Frustum;
 public class Clipping {
 
 	/**
-	 * Assigned in {@link com.jozufozu.flywheel.mixin.GlobalClippingHelperMixin this} mixin.
+	 * Assigned in {@link com.jozufozu.flywheel.mixin.GlobalFrustumMixin this} mixin.
 	 */
 	public static Frustum HELPER;
 }

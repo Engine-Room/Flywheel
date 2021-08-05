@@ -11,13 +11,13 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.BlockEntity.BlockEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 @Mixin(ChunkRenderDispatcher.CompiledChunk.class)
-public class CancelTileEntityRenderMixin {
+public class CancelBlockEntityRenderMixin {
 
 	/**
 	 * JUSTIFICATION: when instanced rendering is enabled, many tile entities no longer need
@@ -26,10 +26,10 @@ public class CancelTileEntityRenderMixin {
 	 * doing unnecessary light lookups and frustum checks.
 	 */
 	@Inject(at = @At("RETURN"), method = "getRenderableBlockEntities", cancellable = true)
-	private void noRenderInstancedTiles(CallbackInfoReturnable<List<TileEntity>> cir) {
+	private void noRenderInstancedTiles(CallbackInfoReturnable<List<BlockEntity>> cir) {
 		if (Backend.getInstance()
 				.canUseInstancing()) {
-			List<TileEntity> tiles = cir.getReturnValue();
+			List<BlockEntity> tiles = cir.getReturnValue();
 
 			InstancedRenderRegistry r = InstancedRenderRegistry.getInstance();
 			tiles.removeIf(r::shouldSkipRender);

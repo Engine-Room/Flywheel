@@ -3,7 +3,6 @@ package com.jozufozu.flywheel;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.ShaderSources;
-import com.jozufozu.flywheel.backend.instancing.CrumblingRenderer;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.AtlasStitcher;

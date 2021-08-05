@@ -1,5 +1,12 @@
 package com.jozufozu.flywheel.backend.instancing;
 
+import net.minecraft.client.multiplayer.ClientLevel;
+
+import net.minecraft.world.entity.Entity;
+
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.entity.BlockEntity;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.backend.Backend;
@@ -11,10 +18,6 @@ import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.WorldAttached;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.IWorld;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -24,13 +27,13 @@ public class InstancedRenderDispatcher {
 	private static final WorldAttached<InstanceWorld> instanceWorlds = new WorldAttached<>($ -> new InstanceWorld());
 
 	@NotNull
-	public static InstanceManager<TileEntity> getTiles(IWorld world) {
+	public static InstanceManager<BlockEntity> getTiles(LevelAccessor world) {
 		return instanceWorlds.get(world)
-				.getTileEntityInstanceManager();
+				.getBlockEntityInstanceManager();
 	}
 
 	@NotNull
-	public static InstanceManager<Entity> getEntities(IWorld world) {
+	public static InstanceManager<Entity> getEntities(LevelAccessor world) {
 		return instanceWorlds.get(world)
 				.getEntityInstanceManager();
 	}
@@ -40,13 +43,13 @@ public class InstancedRenderDispatcher {
 		if (!Backend.isGameActive()) {
 			return;
 		}
-		ClientWorld world = mc.world;
+		ClientLevel world = mc.level;
 		AnimationTickHolder.tick();
 
 		instanceWorlds.get(world).tick();
 	}
 
-	public static void enqueueUpdate(TileEntity te) {
+	public static void enqueueUpdate(BlockEntity te) {
 		getTiles(te.getLevel()).queueUpdate(te);
 	}
 
@@ -61,7 +64,7 @@ public class InstancedRenderDispatcher {
 	public static void renderLayer(RenderLayerEvent event) {
 		if (event.layer == null) return;
 
-		ClientWorld world = event.getWorld();
+		ClientLevel world = event.getWorld();
 		if (!Backend.getInstance()
 				.canUseInstancing(world)) return;
 
@@ -69,14 +72,14 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
-		ClientWorld world = event.getWorld();
+		ClientLevel world = event.getWorld();
 		if (Backend.getInstance()
 				.canUseInstancing() && world != null) {
 			loadAllInWorld(world);
 		}
 	}
 
-	public static void loadAllInWorld(ClientWorld world) {
+	public static void loadAllInWorld(ClientLevel world) {
 		instanceWorlds.replace(world, InstanceWorld::delete)
 				.loadAll(world);
 	}

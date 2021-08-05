@@ -2,19 +2,19 @@ package com.jozufozu.flywheel.event;
 
 import com.jozufozu.flywheel.fabric.event.EventContext;
 
-import javax.annotation.Nullable;
+import net.minecraft.client.multiplayer.ClientLevel;
 
-import net.minecraft.client.world.ClientWorld;
+import org.jetbrains.annotations.Nullable;
 
 public class ReloadRenderersEvent extends EventContext {
-	private final ClientWorld world;
+	private final ClientLevel world;
 
-	public ReloadRenderersEvent(ClientWorld world) {
+	public ReloadRenderersEvent(ClientLevel world) {
 		this.world = world;
 	}
 
 	@Nullable
-	public ClientWorld getWorld() {
+	public ClientLevel getWorld() {
 		return world;
 	}
 }

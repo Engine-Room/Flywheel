@@ -6,7 +6,7 @@
   "refmap": "flywheel.refmap.json",
   "client": [
     "CancelEntityRenderMixin",
-    "CancelTileEntityRenderMixin",
+    "CancelBlockEntityRenderMixin",
     "FixFabulousDepthMixin",
     "FogColorTrackerMixin",
     "RenderHooksMixin",
@@ -20,7 +20,7 @@
     "light.NetworkLightUpdateMixin",
     "FastChunkProviderMixin",
     "fabric.BufferBuilderAccessor",
-    "fabric.ClientWorldMixin",
+    "fabric.ClientLevelMixin",
     "fabric.DebugOverlayGuiMixin",
     "fabric.VertexFormatAccessor"
   ],

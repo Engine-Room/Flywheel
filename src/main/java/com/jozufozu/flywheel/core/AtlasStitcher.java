@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback.Registry;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This is primarily for hacking entity textures into the block atlas.
@@ -27,7 +27,7 @@ public class AtlasStitcher {
 		return sprite;
 	}
 
-	public void onTextureStitch(AtlasTexture atlasTexture, Registry registry) {
+	public void onTextureStitch(TextureAtlas atlasTexture, Registry registry) {
 		sprites.forEach(StitchedSprite::reset);
 		sprites.stream()
 				.map(StitchedSprite::getLoc)
