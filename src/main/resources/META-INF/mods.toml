@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[36,)"
 issueTrackerURL = "https://github.com/Jozufozu/Flywheel/issues"
-license = "LGPLv3"
+license = "MIT"
 
 [[mods]]
 modId = "flywheel"

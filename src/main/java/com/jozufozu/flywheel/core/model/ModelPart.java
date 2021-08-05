@@ -43,10 +43,4 @@ public class ModelPart implements IModel {
 	public VertexFormat format() {
 		return Formats.UNLIT_MODEL;
 	}
-
-	@Override
-	public ElementBuffer createEBO() {
-		return QuadConverter.getInstance()
-				.quads2Tris(vertices / 4);
-	}
 }

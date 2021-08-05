@@ -53,8 +53,6 @@ public class CrumblingRenderer {
 		INVALIDATOR = state.getSecond();
 	}
 
-	private static final RenderType crumblingLayer = ModelBakery.DESTROY_TYPES.get(0);
-
 	public static void renderBreaking(ClientWorld world, Matrix4f viewProjection, double cameraX, double cameraY, double cameraZ) {
 		if (!Backend.getInstance()
 				.canUseInstancing(world)) return;
@@ -64,6 +62,7 @@ public class CrumblingRenderer {
 		if (activeStages.isEmpty()) return;
 
 		State state = STATE.get();
+		RenderType layer = ModelBakery.DESTROY_TYPES.get(0);
 
 		InstanceManager<TileEntity> renderer = state.instanceManager;
 
@@ -71,7 +70,7 @@ public class CrumblingRenderer {
 		ActiveRenderInfo info = Minecraft.getInstance().gameRenderer.getMainCamera();
 
 		MaterialManager<CrumblingProgram> materials = state.materialManager;
-		crumblingLayer.setupRenderState();
+		layer.setupRenderState();
 
 		for (Int2ObjectMap.Entry<List<TileEntity>> stage : activeStages.int2ObjectEntrySet()) {
 			int i = stage.getIntKey();
@@ -92,7 +91,7 @@ public class CrumblingRenderer {
 
 		}
 
-		crumblingLayer.clearRenderState();
+		layer.clearRenderState();
 
 		GlTextureUnit.T0.makeActive();
 		Texture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(0));

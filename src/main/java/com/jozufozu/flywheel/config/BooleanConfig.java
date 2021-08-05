@@ -18,6 +18,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public enum BooleanConfig {
 	ENGINE(() -> BooleanConfig::enabled),
 	NORMAL_OVERLAY(() -> BooleanConfig::normalOverlay),
+	CHUNK_CACHING(() -> BooleanConfig::chunkCaching),
 	;
 
 	final Supplier<Consumer<BooleanDirective>> receiver;
@@ -69,6 +70,25 @@ public enum BooleanConfig {
 		ITextComponent text = boolToText(FlwConfig.get().client.debugNormals.get()).append(new StringTextComponent(" normal debug mode").withStyle(TextFormatting.WHITE));
 
 		player.displayClientMessage(text, false);
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	private static void chunkCaching(BooleanDirective state) {
+		ClientPlayerEntity player = Minecraft.getInstance().player;
+		if (player == null || state == null) return;
+
+		if (state == BooleanDirective.DISPLAY) {
+			ITextComponent text = new StringTextComponent("Chunk caching is currently: ").append(boolToText(FlwConfig.get().client.chunkCaching.get()));
+			player.displayClientMessage(text, false);
+			return;
+		}
+
+		FlwConfig.get().client.chunkCaching.set(state.get());
+
+		ITextComponent text = boolToText(FlwConfig.get().client.chunkCaching.get()).append(new StringTextComponent(" chunk caching").withStyle(TextFormatting.WHITE));
+
+		player.displayClientMessage(text, false);
+		Backend.reloadWorldRenderers();
 	}
 
 	private static IFormattableTextComponent boolToText(boolean b) {

@@ -4,7 +4,6 @@ import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.instancing.IInstanceFactory;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 
-import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
 
 public class MaterialSpec<D extends InstanceData> {
@@ -15,19 +14,13 @@ public class MaterialSpec<D extends InstanceData> {
 	private final VertexFormat modelFormat;
 	private final VertexFormat instanceFormat;
 	private final IInstanceFactory<D> instanceFactory;
-	private final ResourceLocation texture;
 
 	public MaterialSpec(ResourceLocation name, ResourceLocation programSpec, VertexFormat modelFormat, VertexFormat instanceFormat, IInstanceFactory<D> instanceFactory) {
-		this(name, programSpec, modelFormat, instanceFormat, PlayerContainer.BLOCK_ATLAS, instanceFactory);
-	}
-
-	public MaterialSpec(ResourceLocation name, ResourceLocation programSpec, VertexFormat modelFormat, VertexFormat instanceFormat, ResourceLocation texture, IInstanceFactory<D> instanceFactory) {
 		this.name = name;
 		this.programSpec = programSpec;
 		this.modelFormat = modelFormat;
 		this.instanceFormat = instanceFormat;
 		this.instanceFactory = instanceFactory;
-		this.texture = texture;
 	}
 
 	public ResourceLocation getProgramName() {

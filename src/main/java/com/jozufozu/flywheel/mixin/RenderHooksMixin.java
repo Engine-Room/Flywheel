@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.mixin;
 
 import org.lwjgl.opengl.GL20;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -10,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.OptifineHandler;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.core.Clipping;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -21,6 +23,7 @@ import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeBuffers;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
@@ -37,9 +40,13 @@ public class RenderHooksMixin {
 	@Shadow
 	private ClientWorld level;
 
+	@Shadow
+	@Final
+	private RenderTypeBuffers renderBuffers;
+
 	@Inject(at = @At(value = "INVOKE", target = "net.minecraft.client.renderer.WorldRenderer.compileChunksUntil(J)V"), method = "renderLevel")
-	private void setupFrame(MatrixStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, ActiveRenderInfo info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f p_228426_9_, CallbackInfo ci) {
-		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, stack, info, gameRenderer, lightTexture));
+	private void setupFrame(MatrixStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, ActiveRenderInfo info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projection, CallbackInfo ci) {
+		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, stack, info, gameRenderer, lightTexture, Clipping.HELPER));
 	}
 
 	/**
@@ -49,15 +56,14 @@ public class RenderHooksMixin {
 	 */
 	@Inject(at = @At("TAIL"), method = "renderChunkLayer")
 	private void renderLayer(RenderType type, MatrixStack stack, double camX, double camY, double camZ, CallbackInfo ci) {
-		Matrix4f view = stack.last()
-				.pose();
-		Matrix4f viewProjection = view.copy();
-		viewProjection.multiplyBackward(Backend.getInstance()
-												.getProjectionMatrix());
 
-		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(level, type, viewProjection, camX, camY, camZ));
+		RenderTypeBuffers renderBuffers = this.renderBuffers;
+
+		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(level, type, stack, renderBuffers, camX, camY, camZ));
 
 		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
+
+		renderBuffers.bufferSource().endBatch(type);
 	}
 
 	@Inject(at = @At("TAIL"), method = "allChanged")

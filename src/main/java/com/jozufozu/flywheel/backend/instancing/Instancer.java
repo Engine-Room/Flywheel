@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.backend.instancing;
 
-
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.function.Supplier;
@@ -12,19 +11,33 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.material.MaterialSpec;
-import com.jozufozu.flywheel.backend.model.BufferedModel;
+import com.jozufozu.flywheel.backend.model.IBufferedModel;
+import com.jozufozu.flywheel.backend.model.IndexedModel;
 import com.jozufozu.flywheel.core.model.IModel;
-import com.jozufozu.flywheel.core.model.ModelUtil;
 import com.jozufozu.flywheel.util.AttribUtil;
 
-import net.minecraft.util.math.vector.Vector3i;
-
+/**
+ * An instancer is how you interact with an instanced model.
+ * <p>
+ *     Instanced models can have many copies, and on most systems it's very fast to draw all of the copies at once.
+ *     There is no limit to how many copies an instanced model can have.
+ *     Each copy is represented by an InstanceData object.
+ * </p>
+ * <p>
+ *     When you call {@link #createInstance()} you are given an InstanceData object that you can manipulate however
+ *     you want. The changes you make to the InstanceData object are automatically made visible, and persistent.
+ *     Changing the position of your InstanceData object every frame means that that copy of the model will be in a
+ *     different position in the world each frame. Setting the position of your InstanceData once and not touching it
+ *     again means that your model will be in the same position in the world every frame. This persistence is useful
+ *     because it means the properties of your model don't have to be re-evaluated every frame.
+ * </p>
+ *
+ * @param <D> the data that represents a copy of the instanced model.
+ */
 public class Instancer<D extends InstanceData> {
 
-	public final Supplier<Vector3i> originCoordinate;
-
 	protected final Supplier<IModel> gen;
-	protected BufferedModel model;
+	protected IBufferedModel model;
 
 	protected final VertexFormat instanceFormat;
 	protected final IInstanceFactory<D> factory;
@@ -40,11 +53,30 @@ public class Instancer<D extends InstanceData> {
 	boolean anyToRemove;
 	boolean anyToUpdate;
 
-	public Instancer(Supplier<IModel> model, Supplier<Vector3i> originCoordinate, MaterialSpec<D> spec) {
+	public Instancer(Supplier<IModel> model, MaterialSpec<D> spec) {
 		this.gen = model;
 		this.factory = spec.getInstanceFactory();
 		this.instanceFormat = spec.getInstanceFormat();
-		this.originCoordinate = originCoordinate;
+	}
+
+	/**
+	 * @return a handle to a new copy of this model.
+	 */
+	public D createInstance() {
+		return _add(factory.create(this));
+	}
+
+	/**
+	 * Copy a data from another Instancer to this.
+	 *
+	 * This has the effect of swapping out one model for another.
+	 * @param inOther the data associated with a different model.
+	 */
+	public void stealInstance(D inOther) {
+		if (inOther.owner == this) return;
+
+		inOther.owner.anyToRemove = true;
+		_add(inOther);
 	}
 
 	public void render() {
@@ -59,19 +91,8 @@ public class Instancer<D extends InstanceData> {
 		vao.unbind();
 	}
 
-	public D createInstance() {
-		return _add(factory.create(this));
-	}
-
-	public void stealInstance(D inOther) {
-		if (inOther.owner == this) return;
-
-		inOther.owner.anyToRemove = true;
-		_add(inOther);
-	}
-
 	private void init() {
-		model = ModelUtil.getIndexedModel(gen.get());
+		model = new IndexedModel(gen.get());
 		initialized = true;
 
 		if (model.getVertexCount() <= 0)

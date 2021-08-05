@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.event;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.client.world.ClientWorld;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -10,6 +12,7 @@ public class ReloadRenderersEvent extends Event {
 		this.world = world;
 	}
 
+	@Nullable
 	public ClientWorld getWorld() {
 		return world;
 	}
