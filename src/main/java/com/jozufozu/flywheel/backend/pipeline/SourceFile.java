@@ -37,6 +37,7 @@ public class SourceFile {
 
 	private final ShaderSources parent;
 	private final String source;
+	private final CharSequence elided;
 	private final ImmutableList<String> lines;
 
 	private final IntList lineStarts;
@@ -62,10 +63,16 @@ public class SourceFile {
 		this.includes = parseIncludes();
 		this.functions = parseFunctions();
 		this.structs = parseStructs();
+
+		this.elided = createElidedSource();
 	}
 
 	public String getSource() {
 		return source;
+	}
+
+	public CharSequence getElidedSource() {
+		return elided;
 	}
 
 	public ShaderSources getParent() {
@@ -119,26 +126,20 @@ public class SourceFile {
 		return builder.toString();
 	}
 
-	private CharSequence elided = null;
+	private CharSequence createElidedSource() {
+		StringBuilder out = new StringBuilder();
 
-	public CharSequence getElidedSource() {
-		if (elided == null) {
-			StringBuilder out = new StringBuilder();
+		int lastEnd = 0;
 
-			int lastEnd = 0;
+		for (Span elision : elisions) {
+			out.append(source, lastEnd, elision.getStartPos());
 
-			for (Span elision : elisions) {
-				out.append(source, lastEnd, elision.getStartPos());
-
-				lastEnd = elision.getEndPos();
-			}
-
-			out.append(source, lastEnd, source.length());
-
-			elided = out.toString();
+			lastEnd = elision.getEndPos();
 		}
 
-		return elided;
+		out.append(source, lastEnd, source.length());
+
+		return out;
 	}
 
 	/**

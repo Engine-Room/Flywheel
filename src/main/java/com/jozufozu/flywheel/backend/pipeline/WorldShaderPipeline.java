@@ -5,6 +5,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.backend.ShaderSources;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
+import com.jozufozu.flywheel.backend.loading.Program;
 import com.jozufozu.flywheel.core.shader.IMultiProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
@@ -34,7 +36,9 @@ public class WorldShaderPipeline<P extends WorldProgram> {
 
 		builder.include(file);
 
-		builder.build();
+		CharSequence output = builder.build();
+
+		//Program program = new Program()
 
 		return null;
 	}
