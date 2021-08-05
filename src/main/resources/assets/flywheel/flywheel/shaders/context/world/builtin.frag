@@ -3,6 +3,7 @@
 
 uniform sampler2D uBlockAtlas;
 uniform sampler2D uLightMap;
+uniform vec2 uWindowSize;
 
 vec4 FLWBlockTexture(vec2 texCoords) {
     return texture2D(uBlockAtlas, texCoords);
