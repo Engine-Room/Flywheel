@@ -29,6 +29,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlTexture;
+import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.gl.versioned.RGPixelFormat;
 
 import net.minecraft.util.math.BlockPos;
@@ -172,10 +173,10 @@ public class LightVolume {
 		int shiftZ = textureVolume.minZ;
 
 		sampleVolume.forEachContained((x, y, z) -> {
-			pos.setPos(x, y, z);
+			pos.set(x, y, z);
 
-			int blockLight = world.getLightLevel(LightType.BLOCK, pos);
-			int skyLight = world.getLightLevel(LightType.SKY, pos);
+			int blockLight = world.getBrightness(LightType.BLOCK, pos);
+			int skyLight = world.getBrightness(LightType.SKY, pos);
 
 			writeLight(x - shiftX, y - shiftY, z - shiftZ, blockLight, skyLight);
 		});
@@ -196,9 +197,9 @@ public class LightVolume {
 		int zShift = textureVolume.minZ;
 
 		worldVolume.forEachContained((x, y, z) -> {
-			pos.setPos(x, y, z);
+			pos.set(x, y, z);
 
-			int light = world.getLightLevel(LightType.BLOCK, pos);
+			int light = world.getBrightness(LightType.BLOCK, pos);
 
 			writeBlock(x - xShift, y - yShift, z - zShift, light);
 		});
@@ -219,9 +220,9 @@ public class LightVolume {
 		int zShift = textureVolume.minZ;
 
 		worldVolume.forEachContained((x, y, z) -> {
-			pos.setPos(x, y, z);
+			pos.set(x, y, z);
 
-			int light = world.getLightLevel(LightType.SKY, pos);
+			int light = world.getBrightness(LightType.SKY, pos);
 
 			writeSky(x - xShift, y - yShift, z - zShift, light);
 		});
@@ -242,10 +243,10 @@ public class LightVolume {
 		int zShift = textureVolume.minZ;
 
 		worldVolume.forEachContained((x, y, z) -> {
-			pos.setPos(x, y, z);
+			pos.set(x, y, z);
 
-			int block = world.getLightLevel(LightType.BLOCK, pos);
-			int sky = world.getLightLevel(LightType.SKY, pos);
+			int block = world.getBrightness(LightType.BLOCK, pos);
+			int sky = world.getBrightness(LightType.SKY, pos);
 
 			writeLight(x - xShift, y - yShift, z - zShift, block, sky);
 		});
@@ -257,7 +258,7 @@ public class LightVolume {
 		// just in case something goes wrong or we accidentally call this before this volume is properly disposed of.
 		if (lightData == null || removed) return;
 
-		glActiveTexture(GL_TEXTURE4);
+		GlTextureUnit.T4.makeActive();
 		glTexture.bind();
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

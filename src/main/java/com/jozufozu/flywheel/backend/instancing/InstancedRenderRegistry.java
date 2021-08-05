@@ -9,6 +9,7 @@ import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
 import com.jozufozu.flywheel.backend.instancing.entity.IEntityInstanceFactory;
 import com.jozufozu.flywheel.backend.instancing.tile.ITileInstanceFactory;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
+import com.jozufozu.flywheel.backend.material.MaterialManager;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;

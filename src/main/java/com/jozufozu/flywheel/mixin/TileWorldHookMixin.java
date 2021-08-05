@@ -26,15 +26,15 @@ public class TileWorldHookMixin {
 
 	@Shadow
 	@Final
-	public boolean isRemote;
+	public boolean isClientSide;
 
 	@Shadow
 	@Final
-	protected List<TileEntity> tileEntitiesToBeRemoved;
+	protected Set<TileEntity> blockEntitiesToUnload;
 
-	@Inject(at = @At("TAIL"), method = "addTileEntity")
+	@Inject(at = @At("TAIL"), method = "addBlockEntity")
 	private void onAddTile(TileEntity te, CallbackInfoReturnable<Boolean> cir) {
-		if (isRemote) {
+		if (isClientSide) {
 			InstancedRenderDispatcher.getTiles(self)
 					.queueAdd(te);
 		}
@@ -45,9 +45,9 @@ public class TileWorldHookMixin {
 	 */
 	@Inject(at = @At(value = "INVOKE", target = "Ljava/util/Set;clear()V", ordinal = 0), method = "tickBlockEntities")
 	private void onChunkUnload(CallbackInfo ci) {
-		if (isRemote) {
+		if (isClientSide) {
 			InstanceManager<TileEntity> kineticRenderer = InstancedRenderDispatcher.getTiles(self);
-			for (TileEntity tile : tileEntitiesToBeRemoved) {
+			for (TileEntity tile : blockEntitiesToUnload) {
 				kineticRenderer.remove(tile);
 			}
 		}

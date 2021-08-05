@@ -22,6 +22,10 @@ public interface ITickableInstance extends IInstance {
 
 	/**
 	 * Called every tick.
+	 * <br>
+	 * <em>DISPATCHED IN PARALLEL</em>, don't attempt to mutate anything outside of this instance.
+	 * <br>
+	 * {@link Instancer}/{@link InstanceData} creation/acquisition is safe here.
 	 */
 	void tick();
 

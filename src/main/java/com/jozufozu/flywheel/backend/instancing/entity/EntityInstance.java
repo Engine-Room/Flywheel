@@ -6,9 +6,10 @@ import java.util.stream.Stream;
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.IInstance;
 import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
-import com.jozufozu.flywheel.backend.instancing.InstanceMaterial;
-import com.jozufozu.flywheel.backend.instancing.MaterialManager;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
+import com.jozufozu.flywheel.backend.material.InstanceMaterial;
+import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.IFlatLight;
 import com.jozufozu.flywheel.core.materials.ModelData;
 import com.jozufozu.flywheel.core.materials.OrientedData;
@@ -46,7 +47,7 @@ public abstract class EntityInstance<E extends Entity> implements IInstance {
 	public EntityInstance(MaterialManager<?> materialManager, E entity) {
 		this.materialManager = materialManager;
 		this.entity = entity;
-		this.world = entity.world;
+		this.world = entity.level;
 	}
 
 	/**
@@ -92,22 +93,22 @@ public abstract class EntityInstance<E extends Entity> implements IInstance {
 	 * represents should be rendered at to appear in the correct location.
 	 */
 	public Vector3f getInstancePosition() {
-		Vector3d pos = entity.getPositionVec();
+		Vector3d pos = entity.position();
 		Vector3i origin = materialManager.getOriginCoordinate();
 		return new Vector3f((float) (pos.x - origin.getX()), (float) (pos.y - origin.getY()), (float) (pos.z - origin.getZ()));
 	}
 
 	@Override
 	public BlockPos getWorldPosition() {
-		return entity.getBlockPos();
+		return entity.blockPosition();
 	}
 
 	protected void relight(BlockPos pos, IFlatLight<?>... models) {
-		relight(world.getLightLevel(LightType.BLOCK, pos), world.getLightLevel(LightType.SKY, pos), models);
+		relight(world.getBrightness(LightType.BLOCK, pos), world.getBrightness(LightType.SKY, pos), models);
 	}
 
 	protected <L extends IFlatLight<?>> void relight(BlockPos pos, Stream<L> models) {
-		relight(world.getLightLevel(LightType.BLOCK, pos), world.getLightLevel(LightType.SKY, pos), models);
+		relight(world.getBrightness(LightType.BLOCK, pos), world.getBrightness(LightType.SKY, pos), models);
 	}
 
 	protected void relight(int block, int sky, IFlatLight<?>... models) {
@@ -120,11 +121,11 @@ public abstract class EntityInstance<E extends Entity> implements IInstance {
 	}
 
 	protected InstanceMaterial<ModelData> getTransformMaterial() {
-		return materialManager.getTransformMaterial();
-	}
+        return materialManager.defaultSolid().material(Materials.TRANSFORMED);
+    }
 
 	protected InstanceMaterial<OrientedData> getOrientedMaterial() {
-		return materialManager.getOrientedMaterial();
+		return materialManager.defaultSolid().material(Materials.ORIENTED);
 	}
 
 }

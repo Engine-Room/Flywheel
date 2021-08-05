@@ -11,6 +11,20 @@ import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3f;
 
 public class RenderUtil {
+
+	private static final Matrix4f IDENTITY = new Matrix4f();
+	static {
+		IDENTITY.setIdentity();
+	}
+
+	public static Matrix4f getIdentity() {
+		return IDENTITY;
+	}
+
+	public static Matrix4f copyIdentity() {
+		return IDENTITY.copy();
+	}
+
 	public static int nextPowerOf2(int a) {
 		int h = Integer.highestOneBit(a);
 		return (h == a) ? h : (h << 1);
@@ -30,18 +44,18 @@ public class RenderUtil {
 	}
 
 	public static float[] writeMatrixStack(MatrixStack stack) {
-		return writeMatrixStack(stack.peek()
-										.getModel(), stack.peek()
-										.getNormal());
+		return writeMatrixStack(stack.last()
+										.pose(), stack.last()
+										.normal());
 	}
 
 	// GPUs want matrices in column major order.
 	public static float[] writeMatrixStack(Matrix4f model, Matrix3f normal) {
-		return new float[]{model.a00, model.a10, model.a20, model.a30, model.a01, model.a11, model.a21, model.a31, model.a02, model.a12, model.a22, model.a32, model.a03, model.a13, model.a23, model.a33, normal.a00, normal.a10, normal.a20, normal.a01, normal.a11, normal.a21, normal.a02, normal.a12, normal.a22,};
+		return new float[]{model.m00, model.m10, model.m20, model.m30, model.m01, model.m11, model.m21, model.m31, model.m02, model.m12, model.m22, model.m32, model.m03, model.m13, model.m23, model.m33, normal.m00, normal.m10, normal.m20, normal.m01, normal.m11, normal.m21, normal.m02, normal.m12, normal.m22,};
 	}
 
 	public static float[] writeMatrix(Matrix4f model) {
-		return new float[]{model.a00, model.a10, model.a20, model.a30, model.a01, model.a11, model.a21, model.a31, model.a02, model.a12, model.a22, model.a32, model.a03, model.a13, model.a23, model.a33,};
+		return new float[]{model.m00, model.m10, model.m20, model.m30, model.m01, model.m11, model.m21, model.m31, model.m02, model.m12, model.m22, model.m32, model.m03, model.m13, model.m23, model.m33,};
 	}
 
 	public static Supplier<MatrixStack> rotateToFace(Direction facing) {
@@ -52,13 +66,11 @@ public class RenderUtil {
 			//					.rotateY(AngleHelper.horizontalAngle(facing))
 			//					.rotateX(AngleHelper.verticalAngle(facing))
 			//					.unCentre();
-
-			MatrixUtil.setTranslation(
-			stack.peek()
-					.getModel()
-					, 0.5f, 0.5f, 0.5f);
-			stack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(AngleHelper.horizontalAngle(facing)));
-			stack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(AngleHelper.verticalAngle(facing)));
+			stack.last()
+					.pose()
+					.setTranslation(0.5f, 0.5f, 0.5f);
+			stack.mulPose(Vector3f.YP.rotationDegrees(AngleHelper.horizontalAngle(facing)));
+			stack.mulPose(Vector3f.XP.rotationDegrees(AngleHelper.verticalAngle(facing)));
 			stack.translate(-0.5f, -0.5f, -0.5f);
 			return stack;
 		};

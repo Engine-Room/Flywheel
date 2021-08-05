@@ -11,14 +11,15 @@ public class ForgeEvents {
 
 	public static void addToDebugScreen(List<String> right) {
 
-		String text = "Flywheel: " + Backend.getInstance()
-				.getBackendDescriptor();
-		if (right.size() < 10) {
-			right.add("");
-			right.add(text);
-		} else {
-			right.add(9, "");
-			right.add(10, text);
+			String text = "Flywheel: " + Backend.getInstance()
+					.getBackendDescriptor();
+			if (right.size() < 10) {
+				right.add("");
+				right.add(text);
+			} else {
+				right.add(9, "");
+				right.add(10, text);
+			}
 		}
 	}
 

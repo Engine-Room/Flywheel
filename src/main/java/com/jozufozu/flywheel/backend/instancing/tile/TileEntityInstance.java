@@ -6,8 +6,9 @@ import java.util.stream.Stream;
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.IInstance;
 import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
-import com.jozufozu.flywheel.backend.instancing.InstanceMaterial;
-import com.jozufozu.flywheel.backend.instancing.MaterialManager;
+import com.jozufozu.flywheel.backend.material.InstanceMaterial;
+import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.IFlatLight;
 import com.jozufozu.flywheel.core.materials.ModelData;
 import com.jozufozu.flywheel.core.materials.OrientedData;
@@ -47,8 +48,8 @@ public abstract class TileEntityInstance<T extends TileEntity> implements IInsta
 	public TileEntityInstance(MaterialManager<?> materialManager, T tile) {
 		this.materialManager = materialManager;
 		this.tile = tile;
-		this.world = tile.getWorld();
-		this.pos = tile.getPos();
+		this.world = tile.getLevel();
+		this.pos = tile.getBlockPos();
 		this.blockState = tile.getBlockState();
 		this.instancePos = pos.subtract(materialManager.getOriginCoordinate());
 	}
@@ -105,11 +106,11 @@ public abstract class TileEntityInstance<T extends TileEntity> implements IInsta
 	}
 
 	protected void relight(BlockPos pos, IFlatLight<?>... models) {
-		relight(world.getLightLevel(LightType.BLOCK, pos), world.getLightLevel(LightType.SKY, pos), models);
+		relight(world.getBrightness(LightType.BLOCK, pos), world.getBrightness(LightType.SKY, pos), models);
 	}
 
 	protected <L extends IFlatLight<?>> void relight(BlockPos pos, Stream<L> models) {
-		relight(world.getLightLevel(LightType.BLOCK, pos), world.getLightLevel(LightType.SKY, pos), models);
+		relight(world.getBrightness(LightType.BLOCK, pos), world.getBrightness(LightType.SKY, pos), models);
 	}
 
 	protected void relight(int block, int sky, IFlatLight<?>... models) {
@@ -122,10 +123,10 @@ public abstract class TileEntityInstance<T extends TileEntity> implements IInsta
 	}
 
 	protected InstanceMaterial<ModelData> getTransformMaterial() {
-		return materialManager.getTransformMaterial();
-	}
+        return materialManager.defaultCutout().material(Materials.TRANSFORMED);
+    }
 
 	protected InstanceMaterial<OrientedData> getOrientedMaterial() {
-		return materialManager.getOrientedMaterial();
+		return materialManager.defaultCutout().material(Materials.ORIENTED);
 	}
 }

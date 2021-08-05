@@ -1,8 +1,51 @@
+0.2.3:
+Technical/API:
+ - Alter BeginFrameEvent to enable compatibility with optifine shadows
+
+0.2.2:
+Fixes
+ - Fix ConcurrentModificationException crash
+ - Fix NullPointer rendering create contraptions on older graphics cards
+ - Fix crash triggered when moving large distances in a single frame
+
+0.2.1:
+Fixes
+ - Potential fix for many issues caused by optimized chunk accesses
+New
+ - Added config+command to disable chunk access optimization
+
+0.2.0:
+New
+ - Flywheel driven shulker box rendering
+ - Optimize chunk accesses by caching previous result
+ - Further optimize flywheel rendered objects through parallel updates
+Changes
+ - Distant objects are update throttled according to the sequence of prime numbers, smoothing out updates
+ - Rename normalOverlay to debugNormals, make naming consistent across command and config
+Fixes
+ - Fix issue causing modded banner patterns to all have missing textures
+Technical/API
+ - Reorganize, simplify, and document everything in the MaterialManager tree
+ - MaterialManagers associate RenderStates with MaterialGroups
+ - Proper support for rendering in different layers (SOLID, CUTOUT, and TRANSPARENT)
+ - New methods in MaterialManager to accommodate these changes
+ - Deprecate old functions in MaterialManager in favor of new ones using MaterialGroups
+ - InstanceDatas can be transferred to other Instancers via "instance stealing"
+ - Abstraction for models, IModel
+    - Easier to use, and gives Flywheel more freedom to optimize
+    - Buffered models directly consume IModels
+    - Added BlockModel, renders a single block
+    - Added WorldModel, renders many blocks given a world instance
+ - Cuboids can be inverted across Y and Z, used by many vanilla models for some reason
+ - TransformStack scaling
+ - VecBuffer coloring
+ - Add more information to RenderLayerEvent and BeginFrameEvent
+
 0.1.1:
 New
  - Flywheel driven chest and bell rendering, ~20x performance improvement in contrived cases
 Fixes
- - Fix potential crash related to rendering breaking overlay
+ - Fix crash rendering breaking overlay after reloading resource packs
 Technical/API
  - Deprecate instance registration functions in favor of builders
  - Refactor breaking overlay renderer to be cleaner and more contained

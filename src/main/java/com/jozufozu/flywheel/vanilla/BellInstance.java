@@ -1,9 +1,8 @@
 package com.jozufozu.flywheel.vanilla;
 
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
-import com.jozufozu.flywheel.backend.instancing.MaterialManager;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
-import com.jozufozu.flywheel.backend.model.BufferedModel;
+import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.OrientedData;
 import com.jozufozu.flywheel.core.model.ModelPart;
@@ -31,19 +30,19 @@ public class BellInstance extends TileEntityInstance<BellTileEntity> implements 
 
 	@Override
 	public void beginFrame() {
-		float ringTime = (float)tile.ringingTicks + AnimationTickHolder.getPartialTicks();
+		float ringTime = (float)tile.ticks + AnimationTickHolder.getPartialTicks();
 
 		if (ringTime == lastRingTime) return;
 		lastRingTime = ringTime;
 
-		if (tile.isRinging) {
+		if (tile.shaking) {
 			float angle = MathHelper.sin(ringTime / (float) Math.PI) / (4.0F + ringTime / 3.0F);
 
-			Vector3f ringAxis = tile.ringDirection.rotateYCCW().getUnitVector();
+			Vector3f ringAxis = tile.clickDirection.getCounterClockWise().step();
 
-			bell.setRotation(ringAxis.getRadialQuaternion(angle));
+			bell.setRotation(ringAxis.rotation(angle));
 		} else {
-			bell.setRotation(Quaternion.IDENTITY);
+			bell.setRotation(Quaternion.ONE);
 		}
 	}
 
@@ -58,14 +57,15 @@ public class BellInstance extends TileEntityInstance<BellTileEntity> implements 
 	}
 
 	private OrientedData createBellInstance() {
-		return materialManager.getMaterial(Materials.ORIENTED)
-				.get(tile.getType(), BellInstance::createBellModel)
+        return materialManager.defaultCutout()
+                .material(Materials.ORIENTED)
+				.model(tile.getType(), BellInstance::createBellModel)
 				.createInstance();
 	}
 
-	private static BufferedModel createBellModel() {
+	private static ModelPart createBellModel() {
 		return ModelPart.builder(32, 32)
-				.sprite(BellTileEntityRenderer.field_217653_c.getSprite())
+				.sprite(BellTileEntityRenderer.BELL_RESOURCE_LOCATION.sprite())
 				.cuboid()
 				.start(5.0F, 6.0F, 5.0F)
 				.size(6.0F, 7.0F, 6.0F)

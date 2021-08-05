@@ -3,10 +3,7 @@ package com.jozufozu.flywheel.backend.instancing;
 import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
-import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
-import com.jozufozu.flywheel.core.Contexts;
-import com.jozufozu.flywheel.core.shader.WorldProgram;
+import com.jozufozu.flywheel.backend.state.RenderLayer;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
@@ -24,19 +21,18 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class InstancedRenderDispatcher {
 
-	private static final WorldAttached<MaterialManager<WorldProgram>> materialManagers = new WorldAttached<>($ -> new MaterialManager<>(Contexts.WORLD));
-
-	private static final WorldAttached<InstanceManager<Entity>> entityInstanceManager = new WorldAttached<>(world -> new EntityInstanceManager(materialManagers.get(world)));
-	private static final WorldAttached<InstanceManager<TileEntity>> tileInstanceManager = new WorldAttached<>(world -> new TileInstanceManager(materialManagers.get(world)));
+	private static final WorldAttached<InstanceWorld> instanceWorlds = new WorldAttached<>($ -> new InstanceWorld());
 
 	@NotNull
 	public static InstanceManager<TileEntity> getTiles(IWorld world) {
-		return tileInstanceManager.get(world);
+		return instanceWorlds.get(world)
+				.getTileEntityInstanceManager();
 	}
 
 	@NotNull
 	public static InstanceManager<Entity> getEntities(IWorld world) {
-		return entityInstanceManager.get(world);
+		return instanceWorlds.get(world)
+				.getEntityInstanceManager();
 	}
 
 	public static void tick(Minecraft mc) {
@@ -47,41 +43,29 @@ public class InstancedRenderDispatcher {
 		ClientWorld world = mc.world;
 		AnimationTickHolder.tick();
 
-		Entity renderViewEntity = mc.renderViewEntity != null ? mc.renderViewEntity : mc.player;
-
-		if (renderViewEntity == null) return;
-
-		getTiles(world).tick(renderViewEntity.getX(), renderViewEntity.getY(), renderViewEntity.getZ());
-		getEntities(world).tick(renderViewEntity.getX(), renderViewEntity.getY(), renderViewEntity.getZ());
+		instanceWorlds.get(world).tick();
 	}
 
 	public static void enqueueUpdate(TileEntity te) {
-		getTiles(te.getWorld()).queueUpdate(te);
+		getTiles(te.getLevel()).queueUpdate(te);
 	}
 
 	public static void enqueueUpdate(Entity entity) {
-		getEntities(entity.world).queueUpdate(entity);
+		getEntities(entity.level).queueUpdate(entity);
 	}
 
 	public static void onBeginFrame(BeginFrameEvent event) {
-		materialManagers.get(event.getWorld())
-				.checkAndShiftOrigin(event.getInfo());
-
-		getTiles(event.getWorld()).beginFrame(event.getInfo());
-		getEntities(event.getWorld()).beginFrame(event.getInfo());
+		instanceWorlds.get(event.getWorld()).beginFrame(event);
 	}
 
 	public static void renderLayer(RenderLayerEvent event) {
+		if (event.layer == null) return;
+
 		ClientWorld world = event.getWorld();
 		if (!Backend.getInstance()
 				.canUseInstancing(world)) return;
 
-		event.type.startDrawing();
-
-		materialManagers.get(world)
-				.render(event.type, event.viewProjection, event.camX, event.camY, event.camZ);
-
-		event.type.endDrawing();
+		instanceWorlds.get(world).renderLayer(event);
 	}
 
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
@@ -93,13 +77,8 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static void loadAllInWorld(ClientWorld world) {
-		materialManagers.replace(world, MaterialManager::delete);
-
-		InstanceManager<TileEntity> tiles = tileInstanceManager.replace(world);
-		world.loadedTileEntityList.forEach(tiles::add);
-
-		InstanceManager<Entity> entities = entityInstanceManager.replace(world);
-		world.getAllEntities()
-				.forEach(entities::add);
+		instanceWorlds.replace(world, InstanceWorld::delete)
+				.loadAll(world);
 	}
+
 }

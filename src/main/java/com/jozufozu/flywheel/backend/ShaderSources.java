@@ -32,6 +32,7 @@ import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.loading.Shader;
 import com.jozufozu.flywheel.backend.loading.ShaderLoadingException;
+import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 import com.jozufozu.flywheel.event.GatherContextEvent;
 import com.jozufozu.flywheel.fabric.event.FlywheelEvents;
@@ -95,15 +96,18 @@ public class ShaderSources {
 			// no need to hog all that memory
 			shaderSource.clear();
 
-			ClientWorld world = Minecraft.getInstance().world;
-			if (Backend.isFlywheelWorld(world)) {
-				InstancedRenderDispatcher.loadAllInWorld(world);
+				ClientWorld world = Minecraft.getInstance().level;
+				if (Backend.isFlywheelWorld(world)) {
+					// TODO: looks like it might be good to have another event here
+					InstancedRenderDispatcher.loadAllInWorld(world);
+					CrumblingRenderer.reset();
+				}
 			}
 		}
 	}
 
 	private void loadProgramSpecs(IResourceManager manager) {
-		Collection<ResourceLocation> programSpecs = manager.getAllResourceLocations(PROGRAM_DIR, s -> s.endsWith(".json"));
+		Collection<ResourceLocation> programSpecs = manager.listResources(PROGRAM_DIR, s -> s.endsWith(".json"));
 
 		for (ResourceLocation location : programSpecs) {
 			try {
@@ -144,7 +148,7 @@ public class ShaderSources {
 	}
 
 	private void loadShaderSources(IResourceManager manager) {
-		Collection<ResourceLocation> allShaders = manager.getAllResourceLocations(SHADER_DIR, s -> {
+		Collection<ResourceLocation> allShaders = manager.listResources(SHADER_DIR, s -> {
 			for (String ext : EXTENSIONS) {
 				if (s.endsWith(ext)) return true;
 			}

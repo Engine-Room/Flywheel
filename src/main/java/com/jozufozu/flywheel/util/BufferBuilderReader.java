@@ -20,10 +20,10 @@ public class BufferBuilderReader {
 		Pair<BufferBuilder.DrawState, ByteBuffer> data = builder.popData();
 		buffer = data.getSecond();
 
-		formatSize = vertexFormat.getSize();
+		formatSize = vertexFormat.getVertexSize();
 
 		vertexCount = data.getFirst()
-				.getCount();
+				.vertexCount();
 
 		size = vertexCount * formatSize;
 

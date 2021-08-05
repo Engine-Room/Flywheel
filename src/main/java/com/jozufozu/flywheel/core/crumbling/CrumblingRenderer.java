@@ -1,21 +1,21 @@
-package com.jozufozu.flywheel.backend.instancing;
+package com.jozufozu.flywheel.core.crumbling;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE4;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
+import com.jozufozu.flywheel.backend.instancing.InstanceManager;
+import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.backend.state.RenderLayer;
 import com.jozufozu.flywheel.core.Contexts;
-import com.jozufozu.flywheel.core.crumbling.CrumblingInstanceManager;
-import com.jozufozu.flywheel.core.crumbling.CrumblingMaterialManager;
-import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.util.Lazy;
+import com.jozufozu.flywheel.util.Pair;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -29,7 +29,6 @@ import net.minecraft.client.renderer.texture.Texture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.LazyValue;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.fabricmc.api.EnvType;
@@ -41,10 +40,15 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class CrumblingRenderer {
 
-	private static final LazyValue<MaterialManager<CrumblingProgram>> materialManager = new LazyValue<>(() -> new CrumblingMaterialManager(Contexts.CRUMBLING));
-	private static final LazyValue<InstanceManager<TileEntity>> manager = new LazyValue<>(() -> new CrumblingInstanceManager(materialManager.getValue()));
+	private static final Lazy<State> STATE;
+	private static final Lazy.KillSwitch<State> INVALIDATOR;
 
-	private static final RenderType crumblingLayer = ModelBakery.BLOCK_DESTRUCTION_RENDER_LAYERS.get(0);
+	static {
+		Pair<Lazy<State>, Lazy.KillSwitch<State>> state = Lazy.ofKillable(State::new, State::kill);
+
+		STATE = state.getFirst();
+		INVALIDATOR = state.getSecond();
+	}
 
 	public static void renderBreaking(ClientWorld world, Matrix4f viewProjection, double cameraX, double cameraY, double cameraZ) {
 		if (!Backend.getInstance()
@@ -54,17 +58,20 @@ public class CrumblingRenderer {
 
 		if (activeStages.isEmpty()) return;
 
-		InstanceManager<TileEntity> renderer = manager.getValue();
+		State state = STATE.get();
+		RenderType layer = ModelBakery.DESTROY_TYPES.get(0);
+
+		InstanceManager<TileEntity> renderer = state.instanceManager;
 
 		TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 		ActiveRenderInfo info = Minecraft.getInstance().gameRenderer.getActiveRenderInfo();
 
-		MaterialManager<CrumblingProgram> materials = materialManager.getValue();
-		crumblingLayer.startDrawing();
+		MaterialManager<CrumblingProgram> materials = state.materialManager;
+		layer.setupRenderState();
 
 		for (Int2ObjectMap.Entry<List<TileEntity>> stage : activeStages.int2ObjectEntrySet()) {
 			int i = stage.getIntKey();
-			Texture breaking = textureManager.getTexture(ModelBakery.BLOCK_DESTRUCTION_STAGE_TEXTURES.get(i));
+			Texture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(i));
 
 			// something about when we call this means that the textures are not ready for use on the first frame they should appear
 			if (breaking != null) {
@@ -72,39 +79,39 @@ public class CrumblingRenderer {
 
 				renderer.beginFrame(info);
 
-				glActiveTexture(GL_TEXTURE4);
-				glBindTexture(GL_TEXTURE_2D, breaking.getGlTextureId());
-				materials.render(RenderType.getCutoutMipped(), viewProjection, cameraX, cameraY, cameraZ);
+				GlTextureUnit.T4.makeActive();
+				glBindTexture(GL_TEXTURE_2D, breaking.getId());
+				materials.render(RenderLayer.SOLID, viewProjection, cameraX, cameraY, cameraZ);
 
 				renderer.invalidate();
 			}
 
 		}
 
-		crumblingLayer.endDrawing();
+		layer.clearRenderState();
 
-		glActiveTexture(GL_TEXTURE0);
-		Texture breaking = textureManager.getTexture(ModelBakery.BLOCK_DESTRUCTION_STAGE_TEXTURES.get(0));
-		if (breaking != null) glBindTexture(GL_TEXTURE_2D, breaking.getGlTextureId());
+		GlTextureUnit.T0.makeActive();
+		Texture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(0));
+		if (breaking != null) glBindTexture(GL_TEXTURE_2D, breaking.getId());
 	}
 
 	/**
 	 * Associate each breaking stage with a list of all tile entities at that stage.
 	 */
 	private static Int2ObjectMap<List<TileEntity>> getActiveStageTiles(ClientWorld world) {
-		Long2ObjectMap<SortedSet<DestroyBlockProgress>> breakingProgressions = Minecraft.getInstance().worldRenderer.blockBreakingProgressions;
+		Long2ObjectMap<SortedSet<DestroyBlockProgress>> breakingProgressions = Minecraft.getInstance().levelRenderer.destructionProgress;
 
 		Int2ObjectMap<List<TileEntity>> breakingEntities = new Int2ObjectArrayMap<>();
 
 		for (Long2ObjectMap.Entry<SortedSet<DestroyBlockProgress>> entry : breakingProgressions.long2ObjectEntrySet()) {
-			BlockPos breakingPos = BlockPos.fromLong(entry.getLongKey());
+			BlockPos breakingPos = BlockPos.of(entry.getLongKey());
 
 			SortedSet<DestroyBlockProgress> progresses = entry.getValue();
 			if (progresses != null && !progresses.isEmpty()) {
 				int blockDamage = progresses.last()
-						.getPartialBlockDamage();
+						.getProgress();
 
-				TileEntity tileEntity = world.getTileEntity(breakingPos);
+				TileEntity tileEntity = world.getBlockEntity(breakingPos);
 
 				if (tileEntity != null) {
 					List<TileEntity> tileEntities = breakingEntities.computeIfAbsent(blockDamage, $ -> new ArrayList<>());
@@ -120,7 +127,28 @@ public class CrumblingRenderer {
 		ClientWorld world = event.getWorld();
 		if (Backend.getInstance()
 				.canUseInstancing() && world != null) {
-			materialManager.getValue().delete();
+			reset();
+		}
+	}
+
+	public static void reset() {
+		INVALIDATOR.killValue();
+	}
+
+	private static class State {
+		private final MaterialManager<CrumblingProgram> materialManager;
+		private final InstanceManager<TileEntity> instanceManager;
+
+		private State() {
+			materialManager = MaterialManager.builder(Contexts.CRUMBLING)
+					.setGroupFactory(CrumblingGroup::new)
+					.build();
+			instanceManager = new CrumblingInstanceManager(materialManager);
+		}
+
+		private void kill() {
+			materialManager.delete();
+			instanceManager.invalidate();
 		}
 	}
 }

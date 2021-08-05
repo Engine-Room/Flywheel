@@ -15,7 +15,7 @@ import org.lwjgl.opengl.GLCapabilities;
 
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
-import com.jozufozu.flywheel.backend.instancing.MaterialSpec;
+import com.jozufozu.flywheel.backend.material.MaterialSpec;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
@@ -43,6 +43,7 @@ public class Backend {
 	private Matrix4f projectionMatrix = new Matrix4f();
 	private boolean instancedArrays;
 	private boolean enabled;
+	public boolean chunkCachingEnabled;
 
 	private final List<IShaderContext<?>> contexts = new ArrayList<>();
 	private final Map<ResourceLocation, MaterialSpec<?>> materialRegistry = new HashMap<>();
@@ -153,9 +154,11 @@ public class Backend {
 
 		enabled = FlwConfig.get()
 				.enabled() && !OptifineHandler.usingShaders();
+		chunkCachingEnabled = FlwConfig.get()
+				.chunkCaching();
 	}
 
-	public boolean canUseInstancing(World world) {
+	public boolean canUseInstancing(@Nullable World world) {
 		return canUseInstancing() && isFlywheelWorld(world);
 	}
 
@@ -187,15 +190,15 @@ public class Backend {
 
 		if (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel()) return true;
 
-		return world == Minecraft.getInstance().world;
+		return world == Minecraft.getInstance().level;
 	}
 
 	public static boolean isGameActive() {
-		return !(Minecraft.getInstance().world == null || Minecraft.getInstance().player == null);
+		return !(Minecraft.getInstance().level == null || Minecraft.getInstance().player == null);
 	}
 
 	public static void reloadWorldRenderers() {
-		RenderWork.enqueue(Minecraft.getInstance().worldRenderer::loadRenderers);
+		RenderWork.enqueue(Minecraft.getInstance().levelRenderer::allChanged);
 	}
 
 	public static void init() {
