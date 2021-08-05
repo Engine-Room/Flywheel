@@ -1,3 +1,7 @@
+0.2.3:
+Technical/API:
+ - Alter BeginFrameEvent to enable compatibility with optifine shadows
+
 0.2.2:
 Fixes
  - Fix ConcurrentModificationException crash
