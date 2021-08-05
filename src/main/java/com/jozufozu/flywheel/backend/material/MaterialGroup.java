@@ -10,6 +10,12 @@ import com.jozufozu.flywheel.core.shader.WorldProgram;
 
 import net.minecraft.util.math.vector.Matrix4f;
 
+/**
+ * A group of materials all rendered with the same GL state.
+ *
+ * The children of a material group will all be rendered at the same time.
+ * No guarantees are made about the order of draw calls.
+ */
 public class MaterialGroup<P extends WorldProgram> {
 
 	protected final MaterialManager<P> owner;
@@ -24,6 +30,17 @@ public class MaterialGroup<P extends WorldProgram> {
 		this.state = state;
 	}
 
+	/**
+	 * Get the material as defined by the given {@link MaterialSpec spec}.
+	 * @param spec The material you want to create instances with.
+	 * @param <D> The type representing the per instance data.
+	 * @return A
+	 */
+	@SuppressWarnings("unchecked")
+	public <D extends InstanceData> InstanceMaterial<D> material(MaterialSpec<D> spec) {
+		return (InstanceMaterial<D>) materials.computeIfAbsent(spec, this::createInstanceMaterial);
+	}
+
 	public void render(Matrix4f viewProjection, double camX, double camY, double camZ) {
 		for (MaterialRenderer<P> renderer : renderers) {
 			renderer.render(viewProjection, camX, camY, camZ);
@@ -32,19 +49,6 @@ public class MaterialGroup<P extends WorldProgram> {
 
 	public void setup(P program) {
 
-	}
-
-	@SuppressWarnings("unchecked")
-	public <D extends InstanceData> InstanceMaterial<D> material(MaterialSpec<D> spec) {
-		return (InstanceMaterial<D>) materials.computeIfAbsent(spec, this::createInstanceMaterial);
-	}
-
-	private InstanceMaterial<?> createInstanceMaterial(MaterialSpec<?> type) {
-		InstanceMaterial<?> material = new InstanceMaterial<>(owner::getOriginCoordinate, type);
-
-		this.renderers.add(new MaterialRenderer<>(owner.getProgram(type.getProgramName()), material, this::setup));
-
-		return material;
 	}
 
 	public void clear() {
@@ -57,5 +61,13 @@ public class MaterialGroup<P extends WorldProgram> {
 
 		materials.clear();
 		renderers.clear();
+	}
+
+	private InstanceMaterial<?> createInstanceMaterial(MaterialSpec<?> type) {
+		InstanceMaterial<?> material = new InstanceMaterial<>(type);
+
+		this.renderers.add(new MaterialRenderer<>(owner.getProgram(type.getProgramName()), material, this::setup));
+
+		return material;
 	}
 }

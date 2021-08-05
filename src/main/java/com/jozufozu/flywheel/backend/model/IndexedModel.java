@@ -8,6 +8,7 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.core.QuadConverter;
+import com.jozufozu.flywheel.core.model.IModel;
 
 /**
  * An indexed triangle model. Just what the driver ordered.
@@ -18,15 +19,10 @@ public class IndexedModel extends BufferedModel {
 
 	protected ElementBuffer ebo;
 
-	public IndexedModel(VertexFormat modelFormat, ByteBuffer buf, int vertices, ElementBuffer ebo) {
-		super(GlPrimitive.TRIANGLES, modelFormat, buf, vertices);
+	public IndexedModel(IModel model) {
+		super(GlPrimitive.TRIANGLES, model);
 
-		this.ebo = ebo;
-	}
-
-	public static IndexedModel fromSequentialQuads(VertexFormat modelFormat, ByteBuffer quads, int vertices) {
-		return new IndexedModel(modelFormat, quads, vertices, QuadConverter.getInstance()
-				.quads2Tris(vertices / 4));
+		this.ebo = model.createEBO();
 	}
 
 	@Override
@@ -48,13 +44,8 @@ public class IndexedModel extends BufferedModel {
 
 	@Override
 	public void drawInstances(int instanceCount) {
-		if (vertexCount <= 0 || deleted) return;
+		if (!valid()) return;
 
 		Backend.getInstance().compat.drawInstanced.drawElementsInstanced(primitiveMode, ebo.elementCount, ebo.eboIndexType, 0, instanceCount);
-	}
-
-	@Override
-	public void delete() {
-		super.delete();
 	}
 }

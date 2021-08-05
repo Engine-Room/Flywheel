@@ -61,8 +61,43 @@ public class MaterialManager<P extends WorldProgram> {
 	}
 
 	/**
+	 * Get a material group that will render in the given layer with the given state.
+	 *
+	 * @param layer The {@link RenderLayer} you want to draw in.
+	 * @param state The {@link IRenderState} you need to draw with.
+	 * @return A material group whose children will
+	 */
+	public MaterialGroup<P> state(RenderLayer layer, IRenderState state) {
+		return layers.get(layer).computeIfAbsent(state, this::createGroup);
+	}
+
+	public MaterialGroup<P> solid(IRenderState state) {
+		return layers.get(RenderLayer.SOLID).computeIfAbsent(state, this::createGroup);
+	}
+
+	public MaterialGroup<P> cutout(IRenderState state) {
+		return layers.get(RenderLayer.CUTOUT).computeIfAbsent(state, this::createGroup);
+	}
+
+	public MaterialGroup<P> transparent(IRenderState state) {
+		return layers.get(RenderLayer.TRANSPARENT).computeIfAbsent(state, this::createGroup);
+	}
+
+	public MaterialGroup<P> defaultSolid() {
+		return solid(TextureRenderState.get(PlayerContainer.BLOCK_ATLAS));
+	}
+
+	public MaterialGroup<P> defaultCutout() {
+		return cutout(TextureRenderState.get(PlayerContainer.BLOCK_ATLAS));
+	}
+
+	public MaterialGroup<P> defaultTransparent() {
+		return transparent(TextureRenderState.get(PlayerContainer.BLOCK_ATLAS));
+	}
+
+	/**
 	 * Render every model for every material.
-	 * @param layer          Which vanilla {@link RenderType} is being drawn?
+	 * @param layer          Which of the 3 {@link RenderLayer render layers} is being drawn?
 	 * @param viewProjection How do we get from camera space to clip space?
 	 */
 	public void render(RenderLayer layer, Matrix4f viewProjection, double camX, double camY, double camZ) {
@@ -93,34 +128,6 @@ public class MaterialManager<P extends WorldProgram> {
 
 			groups.values().forEach(MaterialGroup::delete);
 		}
-	}
-
-	public MaterialGroup<P> state(RenderLayer layer, IRenderState state) {
-		return layers.get(layer).computeIfAbsent(state, this::createGroup);
-	}
-
-	public MaterialGroup<P> solid(IRenderState state) {
-		return layers.get(RenderLayer.SOLID).computeIfAbsent(state, this::createGroup);
-	}
-
-	public MaterialGroup<P> cutout(IRenderState state) {
-		return layers.get(RenderLayer.CUTOUT).computeIfAbsent(state, this::createGroup);
-	}
-
-	public MaterialGroup<P> transparent(IRenderState state) {
-		return layers.get(RenderLayer.TRANSPARENT).computeIfAbsent(state, this::createGroup);
-	}
-
-	public MaterialGroup<P> defaultSolid() {
-		return solid(TextureRenderState.get(PlayerContainer.BLOCK_ATLAS));
-	}
-
-	public MaterialGroup<P> defaultCutout() {
-		return cutout(TextureRenderState.get(PlayerContainer.BLOCK_ATLAS));
-	}
-
-	public MaterialGroup<P> defaultTransparent() {
-		return transparent(TextureRenderState.get(PlayerContainer.BLOCK_ATLAS));
 	}
 
 	@Deprecated
@@ -155,6 +162,11 @@ public class MaterialManager<P extends WorldProgram> {
 		listeners.add(listener);
 	}
 
+	/**
+	 * Maintain the integer origin coordinate to be within a certain distance from the camera in all directions.
+	 *
+	 * This prevents floating point precision issues at high coordinates.
+	 */
 	public void checkAndShiftOrigin(ActiveRenderInfo info) {
 		int cX = MathHelper.floor(info.getPosition().x);
 		int cY = MathHelper.floor(info.getPosition().y);

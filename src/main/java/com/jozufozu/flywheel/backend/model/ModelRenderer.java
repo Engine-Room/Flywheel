@@ -1,18 +1,26 @@
 package com.jozufozu.flywheel.backend.model;
 
+import java.util.function.Supplier;
+
+import com.jozufozu.flywheel.core.model.IModel;
+
 public class ModelRenderer {
 
-	protected BufferedModel model;
+	protected Supplier<IModel> modelSupplier;
+	protected IBufferedModel model;
 
-	public ModelRenderer(BufferedModel model) {
-		this.model = model;
+	protected boolean initialized;
+
+	public ModelRenderer(Supplier<IModel> modelSupplier) {
+		this.modelSupplier = modelSupplier;
 	}
 
 	/**
 	 * Renders this model, checking first if there is anything to render.
 	 */
 	public void draw() {
-		if (!model.valid()) return;
+		if (!initialized) init();
+		if (!isValid()) return;
 
 		model.setupState();
 		model.drawCall();
@@ -20,6 +28,20 @@ public class ModelRenderer {
 	}
 
 	public void delete() {
-		model.delete();
+		if (model != null)
+			model.delete();
+	}
+
+	protected void init() {
+		initialized = true;
+		IModel model = modelSupplier.get();
+
+		if (model.empty()) return;
+
+		this.model = new IndexedModel(model);
+	}
+
+	protected boolean isValid() {
+		return model != null && model.valid();
 	}
 }

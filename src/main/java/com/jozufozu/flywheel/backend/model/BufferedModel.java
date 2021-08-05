@@ -9,46 +9,45 @@ import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
+import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
+import com.jozufozu.flywheel.core.model.IModel;
 import com.jozufozu.flywheel.util.AttribUtil;
 
-public class BufferedModel {
+public class BufferedModel implements IBufferedModel {
 
+	protected final IModel model;
 	protected final GlPrimitive primitiveMode;
-	protected final ByteBuffer data;
-	protected final VertexFormat format;
-	protected final int vertexCount;
 	protected GlBuffer vbo;
 	protected boolean deleted;
 
-	public BufferedModel(GlPrimitive primitiveMode, VertexFormat format, ByteBuffer data, int vertices) {
+	public BufferedModel(GlPrimitive primitiveMode, IModel model) {
+		this.model = model;
 		this.primitiveMode = primitiveMode;
-		this.data = data;
-		this.format = format;
-		this.vertexCount = vertices;
 
 		vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER);
 
 		vbo.bind();
 		// allocate the buffer on the gpu
-		vbo.alloc(this.data.capacity());
+		vbo.alloc(model.size());
 
 		// mirror it in system memory so we can write to it, and upload our model.
-		vbo.getBuffer(0, this.data.capacity())
-				.put(this.data)
-				.flush();
+		MappedBuffer buffer = vbo.getBuffer(0, model.size());
+		model.buffer(buffer);
+		buffer.flush();
+
 		vbo.unbind();
 	}
 
 	public VertexFormat getFormat() {
-		return format;
+		return model.format();
 	}
 
 	public int getVertexCount() {
-		return vertexCount;
+		return model.vertexCount();
 	}
 
 	public boolean valid() {
-		return vertexCount > 0 && !deleted;
+		return getVertexCount() > 0 && !deleted;
 	}
 
 	/**
@@ -57,7 +56,7 @@ public class BufferedModel {
 	public void setupState() {
 		vbo.bind();
 		AttribUtil.enableArrays(getAttributeCount());
-		format.vertexAttribPointers(0);
+		getFormat().vertexAttribPointers(0);
 	}
 
 	public void clearState() {
@@ -66,7 +65,7 @@ public class BufferedModel {
 	}
 
 	public void drawCall() {
-		glDrawArrays(primitiveMode.glEnum, 0, vertexCount);
+		glDrawArrays(primitiveMode.glEnum, 0, getVertexCount());
 	}
 
 	/**
@@ -75,7 +74,7 @@ public class BufferedModel {
 	public void drawInstances(int instanceCount) {
 		if (!valid()) return;
 
-		Backend.getInstance().compat.drawInstanced.drawArraysInstanced(primitiveMode, 0, vertexCount, instanceCount);
+		Backend.getInstance().compat.drawInstanced.drawArraysInstanced(primitiveMode, 0, getVertexCount(), instanceCount);
 	}
 
 	public void delete() {
@@ -84,10 +83,5 @@ public class BufferedModel {
 		deleted = true;
 		vbo.delete();
 	}
-
-	public int getAttributeCount() {
-		return format.getAttributeCount();
-	}
-
 }
 
