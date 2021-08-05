@@ -1,3 +1,9 @@
+0.2.2:
+Fixes
+ - Fix ConcurrentModificationException crash
+ - Fix NullPointer rendering create contraptions on older graphics cards
+ - Fix crash triggered when moving large distances in a single frame
+
 0.2.1:
 Fixes
  - Potential fix for many issues caused by optimized chunk accesses
