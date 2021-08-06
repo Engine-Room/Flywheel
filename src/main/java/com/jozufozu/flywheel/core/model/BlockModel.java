@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.core.model;
 
 import java.util.Arrays;
 
+import com.jozufozu.flywheel.util.VirtualRenderingStateManager;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -83,8 +84,9 @@ public class BlockModel implements IModel {
 		//				.flatMap(dir -> model.getQuads(referenceState, dir, mc.world.rand, modelData).stream())
 		//				.collect(Collectors.toList());
 
-		builder.begin(GL11.GL_QUADS, DefaultVertexFormat.BLOCK);
-		blockRenderer.renderModel(mc.level, model, referenceState, BlockPos.ZERO.above(255), ms, builder, true, mc.level.random, 42, OverlayTexture.NO_OVERLAY, VirtualEmptyModelData.INSTANCE);
+		builder.begin(com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+		VirtualRenderingStateManager.runVirtually(() -> blockRenderer.tesselateBlock(
+				mc.level, model, referenceState, BlockPos.ZERO.above(255), ms, builder, true, mc.level.random, 42, OverlayTexture.NO_OVERLAY));
 		builder.end();
 		return builder;
 	}

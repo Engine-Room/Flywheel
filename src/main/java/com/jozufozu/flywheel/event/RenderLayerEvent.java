@@ -18,7 +18,7 @@ public class RenderLayerEvent extends EventContext {
 	private final ClientLevel world;
 	public final RenderType type;
 	public final PoseStack stack;
-	public final Matrix4f viewProjection;
+	public Matrix4f viewProjection;
 	public final RenderBuffers buffers;
 	public final double camX;
 	public final double camY;
@@ -33,8 +33,11 @@ public class RenderLayerEvent extends EventContext {
 		viewProjection = stack.last()
 				.pose()
 				.copy();
-		viewProjection.multiplyBackward(Backend.getInstance()
-				.getProjectionMatrix());
+
+		// replacement for multiplyBackward
+		Matrix4f copy = Backend.getInstance().getProjectionMatrix().copy();
+		copy.multiply(viewProjection);
+		viewProjection = copy;
 
 		this.buffers = buffers;
 		this.camX = camX;

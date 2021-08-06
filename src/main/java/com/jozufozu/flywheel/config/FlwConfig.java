@@ -35,6 +35,7 @@ public class FlwConfig {
 
 	public final BooleanOption enabled = add(OptionCreation.enabled());
 	public final BooleanOption normalOverlay = add(OptionCreation.normalOverlay());
+	public final BooleanOption chunkCaching = add(OptionCreation.chunkCaching());
 
 	public static FlwConfig get() {
 		return INSTANCE;
@@ -109,31 +110,10 @@ public class FlwConfig {
 	}
 
 	public boolean debugNormals() {
-		return client.debugNormals.get();
+		return normalOverlay.get();
 	}
 
 	public boolean chunkCaching() {
-		return client.chunkCaching.get();
-	}
-
-	public static void init() {
-	}
-
-	public static class ClientConfig {
-		public final BooleanValue enabled;
-		public final BooleanValue debugNormals;
-		public final BooleanValue chunkCaching;
-
-		public ClientConfig(ForgeConfigSpec.Builder builder) {
-
-			enabled = builder.comment("Enable or disable the entire engine")
-					.define("enabled", true);
-
-			debugNormals = builder.comment("Enable or disable a debug overlay that colors pixels by their normal")
-					.define("debugNormals", false);
-
-			chunkCaching = builder.comment("Cache chunk lookups to improve performance.")
-					.define("chunkCaching", true);
-		}
+		return chunkCaching.get();
 	}
 }

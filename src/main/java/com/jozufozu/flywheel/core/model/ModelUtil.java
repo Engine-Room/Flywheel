@@ -6,10 +6,14 @@ import java.util.Collection;
 import java.util.Random;
 
 import com.jozufozu.flywheel.util.Lazy;
+import com.jozufozu.flywheel.util.VirtualRenderingStateManager;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
+import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
 import net.fabricmc.fabric.mixin.blockrenderlayer.MixinBlockRenderLayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -33,28 +37,28 @@ public class ModelUtil {
 		PoseStack ms = new PoseStack();
 		Random random = new Random();
 		BufferBuilder builder = new BufferBuilder(DefaultVertexFormat.BLOCK.getIntegerSize());
-		builder.begin(GL_QUADS, DefaultVertexFormat.BLOCK);
+		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
-		ForgeHooksClient.setRenderLayer(layer);
+//		ForgeHooksClient.setRenderLayer(layer);
+
 		ModelBlockRenderer.enableCaching();
 		for (StructureTemplate.StructureBlockInfo info : blocks) {
 			BlockState state = info.state;
 
 			if (state.getRenderShape() != RenderShape.MODEL)
 				continue;
-			if (!ItemBlockRenderTypes.canRenderInLayer(state, layer))
+			if (!ItemBlockRenderTypes.getChunkRenderType(state).equals(layer))
 				continue;
 
 			BlockPos pos = info.pos;
 
 			ms.pushPose();
 			ms.translate(pos.getX(), pos.getY(), pos.getZ());
-			MODEL_RENDERER.get().renderModel(renderWorld, BLOCK_MODELS.get().getBlockModel(state), state, pos, ms, builder, true,
-					random, 42, OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
+			MODEL_RENDERER.get().tesselateBlock(renderWorld, BLOCK_MODELS.get().getBlockModel(state), state, pos, ms, builder, true, random, 42, OverlayTexture.NO_OVERLAY);
 			ms.popPose();
 		}
 		ModelBlockRenderer.clearCache();
-		ForgeHooksClient.setRenderLayer(null);
+//		ForgeHooksClient.setRenderLayer(null);
 
 		builder.end();
 		return builder;

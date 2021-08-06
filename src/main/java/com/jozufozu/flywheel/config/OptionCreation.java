@@ -44,6 +44,20 @@ public final class OptionCreation {
 		);
 	}
 
+	public static BooleanOption chunkCaching() {
+		return new BooleanOption("chunkCaching", false,
+				source -> {
+					Component text = new TextComponent("Chunk Caching is currently: ").append(boolToText(FlwConfig.get().chunkCaching.get()));
+					source.sendFeedback(text);
+				},
+				(source, value) -> {
+					Component text = boolToText(value).append(new TextComponent(" Chunk Caching").withStyle(ChatFormatting.WHITE));
+					source.sendFeedback(text);
+					FlwConfig.save();
+				}
+		);
+	}
+
 	private static MutableComponent boolToText(boolean b) {
 		return b ? new TextComponent("enabled").withStyle(ChatFormatting.DARK_GREEN) : new TextComponent("disabled").withStyle(ChatFormatting.RED);
 	}
