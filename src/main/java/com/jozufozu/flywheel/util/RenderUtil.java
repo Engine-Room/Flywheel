@@ -65,13 +65,22 @@ public class RenderUtil {
 			//					.rotateY(AngleHelper.horizontalAngle(facing))
 			//					.rotateX(AngleHelper.verticalAngle(facing))
 			//					.unCentre();
-			stack.last()
-					.pose()
-					.setTranslation(0.5f, 0.5f, 0.5f);
+			setTranslation(stack.last().pose(), 0.5f, 0.5f, 0.5f);
 			stack.mulPose(Vector3f.YP.rotationDegrees(AngleHelper.horizontalAngle(facing)));
 			stack.mulPose(Vector3f.XP.rotationDegrees(AngleHelper.verticalAngle(facing)));
 			stack.translate(-0.5f, -0.5f, -0.5f);
 			return stack;
 		};
+	}
+
+	public static Matrix4f setTranslation(Matrix4f matrix, float x, float y, float z) {
+		matrix.m00 = 1;
+		matrix.m11 = 1;
+		matrix.m22 = 1;
+		matrix.m33 = 1;
+		matrix.m03 = x;
+		matrix.m13 = y;
+		matrix.m23 = z;
+		return matrix;
 	}
 }

@@ -22,7 +22,9 @@
     "fabric.BufferBuilderAccessor",
     "fabric.ClientLevelMixin",
     "fabric.DebugOverlayGuiMixin",
-    "fabric.VertexFormatAccessor"
+    "fabric.VertexFormatAccessor",
+    "fabric.LevelRendererAccessor",
+    "fabric.MinecraftAccessor"
   ],
   "injectors": {
     "defaultRequire": 0

@@ -3,10 +3,9 @@ package com.jozufozu.flywheel.util;
 import java.nio.ByteBuffer;
 
 import com.jozufozu.flywheel.mixin.fabric.BufferBuilderAccessor;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
-
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.vertex.VertexFormat;
 
 public class BufferBuilderReader {
 
@@ -17,7 +16,7 @@ public class BufferBuilderReader {
 
 	public BufferBuilderReader(BufferBuilder builder) {
 		VertexFormat vertexFormat = ((BufferBuilderAccessor) builder).getVertexFormat();
-		Pair<BufferBuilder.DrawState, ByteBuffer> data = builder.popData();
+		Pair<BufferBuilder.DrawState, ByteBuffer> data = builder.popNextBuffer();
 		buffer = data.getSecond();
 
 		formatSize = vertexFormat.getVertexSize();

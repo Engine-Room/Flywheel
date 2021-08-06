@@ -7,6 +7,7 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3d;
 
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 
 import net.minecraft.client.renderer.LevelRenderer;
@@ -53,9 +54,14 @@ public class RenderHooksMixin {
 	@Final
 	private RenderBuffers renderBuffers;
 
+	@Shadow
+	@Final
+	private Minecraft minecraft;
+
 	@Inject(at = @At("HEAD"), method = "setupRender")
-	private void setupRender(Camera info, Frustum Frustum, boolean p_228437_3_, int frameCount, boolean isSpectator, CallbackInfo ci) {
-		FlywheelEvents.BEGIN_FRAME.invoker().handleEvent(new BeginFrameEvent(level, stack, info, gameRenderer, lightTexture));
+	private void setupRender(Camera info, Frustum frustum, boolean p_228437_3_, int frameCount, boolean isSpectator, CallbackInfo ci) {
+		FlywheelEvents.BEGIN_FRAME.invoker().handleEvent(
+				new BeginFrameEvent(level, info, minecraft.gameRenderer, minecraft.gameRenderer.lightTexture(), frustum));
 	}
 
 	/**

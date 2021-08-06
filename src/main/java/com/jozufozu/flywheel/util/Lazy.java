@@ -2,10 +2,6 @@ package com.jozufozu.flywheel.util;
 
 import java.util.function.Consumer;
 
-import javax.annotation.Nonnull;
-
-import net.minecraftforge.common.util.NonNullSupplier;
-
 import org.jetbrains.annotations.NotNull;
 
 public class Lazy<T> {

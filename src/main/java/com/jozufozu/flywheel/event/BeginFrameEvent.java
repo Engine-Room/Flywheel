@@ -12,15 +12,15 @@ import net.minecraft.client.renderer.culling.Frustum;
 
 public class BeginFrameEvent extends EventContext {
 	private final ClientLevel world;
-	private final PoseStack stack;
+//	private final PoseStack stack;
 	private final Camera info;
 	private final GameRenderer gameRenderer;
 	private final LightTexture lightTexture;
 	private final Frustum Frustum;
 
-	public BeginFrameEvent(ClientLevel world, PoseStack stack, Camera info, GameRenderer gameRenderer, LightTexture lightTexture, Frustum Frustum) {
+	public BeginFrameEvent(ClientLevel world, /*PoseStack stack,*/ Camera info, GameRenderer gameRenderer, LightTexture lightTexture, Frustum Frustum) {
 		this.world = world;
-		this.stack = stack;
+//		this.stack = stack;
 		this.info = info;
 		this.gameRenderer = gameRenderer;
 		this.lightTexture = lightTexture;
@@ -31,9 +31,9 @@ public class BeginFrameEvent extends EventContext {
 		return world;
 	}
 
-	public PoseStack getStack() {
-		return stack;
-	}
+//	public PoseStack getStack() {
+//		return stack;
+//	}
 
 	public Camera getInfo() {
 		return info;

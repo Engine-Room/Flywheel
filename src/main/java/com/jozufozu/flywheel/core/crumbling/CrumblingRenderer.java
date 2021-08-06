@@ -14,6 +14,7 @@ import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.backend.state.RenderLayer;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.mixin.fabric.LevelRendererAccessor;
 import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.Pair;
 
@@ -100,7 +101,7 @@ public class CrumblingRenderer {
 	 * Associate each breaking stage with a list of all tile entities at that stage.
 	 */
 	private static Int2ObjectMap<List<BlockEntity>> getActiveStageTiles(ClientLevel world) {
-		Long2ObjectMap<SortedSet<BlockDestructionProgress>> breakingProgressions = Minecraft.getInstance().levelRenderer.destructionProgress;
+		Long2ObjectMap<SortedSet<BlockDestructionProgress>> breakingProgressions = ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).getDestructionProgress();
 
 		Int2ObjectMap<List<BlockEntity>> breakingEntities = new Int2ObjectArrayMap<>();
 
