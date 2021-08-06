@@ -1,5 +1,9 @@
 package com.jozufozu.flywheel.core.shader;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+
+import net.minecraft.client.renderer.FogRenderer;
+
 import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -8,7 +12,7 @@ public class GlFog {
 	public static float[] FOG_COLOR = new float[]{0, 0, 0, 0};
 
 	public static boolean fogEnabled() {
-		return GlStateManager.FOG.enable.enabled;
+		return RenderSystem.getShaderFogStart() != Float.MAX_VALUE;
 	}
 
 	public static int getFogModeGlEnum() {
@@ -16,15 +20,15 @@ public class GlFog {
 	}
 
 	public static float getFogDensity() {
-		return GlStateManager.FOG.density;
+		return RenderSystem.getShaderFogColor()[4];
 	}
 
 	public static float getFogEnd() {
-		return GlStateManager.FOG.end;
+		return RenderSystem.getShaderFogEnd();
 	}
 
 	public static float getFogStart() {
-		return GlStateManager.FOG.start;
+		return RenderSystem.getShaderFogStart();
 	}
 
 	public static WorldFog getFogMode() {
