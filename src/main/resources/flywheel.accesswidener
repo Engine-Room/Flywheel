@@ -9,6 +9,9 @@ accessible field com/mojang/blaze3d/platform/GlStateManager FOG Lcom/mojang/blaz
 accessible class com/mojang/blaze3d/platform/GlStateManager$BooleanState
 accessible field com/mojang/blaze3d/platform/GlStateManager$BooleanState field_179201_b Z
 
+# To access all chunks of a world
+accessible class net/minecraft/client/multiplayer/ClientChunkCache$Storage
+
 # For uploading matrices as vertex attributes
 accessible field com/mojang/math/Matrix3f m00 F
 accessible field com/mojang/math/Matrix3f m01 F

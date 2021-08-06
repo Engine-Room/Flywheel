@@ -13,6 +13,7 @@
     "ShaderCloseMixin",
     "StoreProjectionMatrixMixin",
     "TileRemoveMixin",
+    "LevelChunkMixin",
     "TileWorldHookMixin",
     "atlas.AtlasDataMixin",
     "atlas.SheetDataAccessor",
@@ -24,7 +25,9 @@
     "fabric.DebugOverlayGuiMixin",
     "fabric.VertexFormatAccessor",
     "fabric.LevelRendererAccessor",
-    "fabric.MinecraftAccessor"
+    "fabric.MinecraftAccessor",
+    "fabric.ClientChunkCacheAccessor",
+    "fabric.ClientChunkCache$StorageAccessor"
   ],
   "injectors": {
     "defaultRequire": 0

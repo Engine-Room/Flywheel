@@ -8,10 +8,18 @@ import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 
+import com.jozufozu.flywheel.mixin.fabric.ClientChunkCache$StorageAccessor;
+import com.jozufozu.flywheel.mixin.fabric.ClientChunkCacheAccessor;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.chunk.LevelChunk;
+
+import java.util.concurrent.atomic.AtomicReferenceArray;
+import java.util.function.BiConsumer;
 
 /**
  * A manager class for a single world where instancing is supported.
@@ -54,7 +62,11 @@ public class InstanceWorld {
 	 * Instantiate all the necessary instances to render the given world.
 	 */
 	public void loadAll(ClientLevel world) {
-		world.blockEntityList.forEach(BlockEntityInstanceManager::add);
+		AtomicReferenceArray<LevelChunk> allChunks = ((ClientChunkCache$StorageAccessor) (Object) ((ClientChunkCacheAccessor) world.getChunkSource()).getStorage()).getChunks();
+		for (int i = 0; i < allChunks.length(); i++) {
+			LevelChunk chunk = allChunks.get(i);
+			chunk.getBlockEntities().forEach((blockPos, blockEntity) -> BlockEntityInstanceManager.add(blockEntity));
+		}
 		world.entitiesForRendering()
 				.forEach(entityInstanceManager::add);
 	}

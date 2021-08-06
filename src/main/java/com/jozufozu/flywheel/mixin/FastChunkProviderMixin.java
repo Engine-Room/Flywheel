@@ -84,15 +84,4 @@ public abstract class FastChunkProviderMixin extends ChunkSource {
 			}
 		}
 	}
-
-	@Redirect(method = "isTickingChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientChunkProvider;hasChunk(II)Z"))
-	public boolean redirectTicking(ClientChunkCache clientChunkProvider, int x, int z) {
-		if (Backend.getInstance().chunkCachingEnabled) {
-			synchronized (level) {
-				if (lastChunk != null && x == lastX && z == lastZ) return true;
-			}
-		}
-
-		return clientChunkProvider.hasChunk(x, z);
-	}
 }
