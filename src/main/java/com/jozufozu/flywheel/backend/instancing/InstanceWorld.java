@@ -65,6 +65,7 @@ public class InstanceWorld {
 		AtomicReferenceArray<LevelChunk> allChunks = ((ClientChunkCache$StorageAccessor) (Object) ((ClientChunkCacheAccessor) world.getChunkSource()).getStorage()).getChunks();
 		for (int i = 0; i < allChunks.length(); i++) {
 			LevelChunk chunk = allChunks.get(i);
+			if (chunk == null) continue;
 			chunk.getBlockEntities().forEach((blockPos, blockEntity) -> BlockEntityInstanceManager.add(blockEntity));
 		}
 		world.entitiesForRendering()

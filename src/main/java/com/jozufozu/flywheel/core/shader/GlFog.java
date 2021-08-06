@@ -15,9 +15,9 @@ public class GlFog {
 		return RenderSystem.getShaderFogStart() != Float.MAX_VALUE;
 	}
 
-	public static int getFogModeGlEnum() {
-		return GlStateManager.FOG.mode;
-	}
+//	public static int getFogModeGlEnum() {
+//		return GlStateManager.FOG.mode;
+//	}
 
 	public static float getFogDensity() {
 		return RenderSystem.getShaderFogColor()[4];
@@ -32,20 +32,21 @@ public class GlFog {
 	}
 
 	public static WorldFog getFogMode() {
-		if (!fogEnabled()) {
-			return WorldFog.NONE;
-		}
-
-		int mode = getFogModeGlEnum();
-
-		switch (mode) {
-		case GL11.GL_EXP2:
-		case GL11.GL_EXP:
-			return WorldFog.EXP2;
-		case GL11.GL_LINEAR:
-			return WorldFog.LINEAR;
-		default:
-			throw new UnsupportedOperationException("Unknown fog mode: " + mode);
-		}
+		return WorldFog.LINEAR;
+//		if (!fogEnabled()) {
+//			return WorldFog.NONE;
+//		}
+//
+//		int mode = getFogModeGlEnum();
+//
+//		switch (mode) {
+//		case GL11.GL_EXP2:
+//		case GL11.GL_EXP:
+//			return WorldFog.EXP2;
+//		case GL11.GL_LINEAR:
+//			return WorldFog.LINEAR;
+//		default:
+//			throw new UnsupportedOperationException("Unknown fog mode: " + mode);
+//		}
 	}
 }

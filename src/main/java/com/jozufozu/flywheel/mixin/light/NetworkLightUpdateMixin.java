@@ -1,24 +1,15 @@
 package com.jozufozu.flywheel.mixin.light;
 
-import java.util.Arrays;
-
-import com.jozufozu.flywheel.mixin.ClientLevelAccessor;
-
-import com.jozufozu.flywheel.mixin.EntitySectionStorageAccessor;
-
-import com.jozufozu.flywheel.mixin.TransientEntitySectionManagerAccessor;
+import com.jozufozu.flywheel.mixin.LevelAccessor;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
-import net.minecraft.util.ClassInstanceMultiMap;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import net.minecraft.world.level.chunk.LevelChunk;
-
-import net.minecraft.world.level.entity.EntityAccess;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -56,13 +47,7 @@ public class NetworkLightUpdateMixin {
 						.values()
 						.forEach(tiles::onLightUpdate);
 
-				long chunkPos = chunk.getPos().toLong();
-				if (chunk.getLevel() instanceof ClientLevel clientLevel) {
-					((EntitySectionStorageAccessor<? extends EntityAccess>) ((TransientEntitySectionManagerAccessor<? extends EntityAccess>) ((ClientLevelAccessor) clientLevel)
-							.getEntityStorage()).getSectionStorage()).getSections().get(chunkPos).getEntities().forEach(entityAccess -> entities.onLightUpdate(((Entity) entityAccess)));
-				} else {
-					System.out.println("level is not a client level somehow"); // this is just here to test
-				}
+				((LevelAccessor) world).invokeGetEntities().getAll().forEach(entities::onLightUpdate);
 			}
 
 			LightUpdater.getInstance()
