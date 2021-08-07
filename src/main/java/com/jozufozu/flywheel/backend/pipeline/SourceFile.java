@@ -10,9 +10,7 @@ import java.util.regex.Pattern;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.backend.ShaderSources;
-import com.jozufozu.flywheel.backend.pipeline.error.ErrorReporter;
-import com.jozufozu.flywheel.backend.pipeline.parse.AbstractShaderElement;
-import com.jozufozu.flywheel.backend.pipeline.parse.Include;
+import com.jozufozu.flywheel.backend.pipeline.parse.Import;
 import com.jozufozu.flywheel.backend.pipeline.parse.ShaderFunction;
 import com.jozufozu.flywheel.backend.pipeline.parse.ShaderStruct;
 import com.jozufozu.flywheel.backend.pipeline.span.CharPos;
@@ -47,7 +45,7 @@ public class SourceFile {
 	private final ImmutableMap<String, ShaderStruct> structs;
 
 	// Includes ordered as defined in the source
-	private final ImmutableList<Include> includes;
+	private final ImmutableList<Import> imports;
 
 	// Sections of the source that must be trimmed for compilation.
 	private final List<Span> elisions = new ArrayList<>();
@@ -60,7 +58,7 @@ public class SourceFile {
 		this.lineStarts = createLineStarts();
 		this.lines = createLineList(lineStarts);
 
-		this.includes = parseIncludes();
+		this.imports = parseImports();
 		this.functions = parseFunctions();
 		this.structs = parseStructs();
 
@@ -83,14 +81,12 @@ public class SourceFile {
 		return functions;
 	}
 
-	public ImmutableList<Include> getIncludes() {
-		return includes;
+	public ImmutableMap<String, ShaderStruct> getStructs() {
+		return structs;
 	}
 
-	public void resolveIncludes() {
-		for (Include include : includes) {
-			include.resolve();
-		}
+	public ImmutableList<Import> getIncludes() {
+		return imports;
 	}
 
 	public CharPos getCharPos(int charPos) {
@@ -210,7 +206,7 @@ public class SourceFile {
 	private ImmutableMap<String, ShaderStruct> parseStructs() {
 		Matcher matcher = ShaderStruct.struct.matcher(source);
 
-		ImmutableMap.Builder<String, ShaderStruct> functions = ImmutableMap.builder();
+		ImmutableMap.Builder<String, ShaderStruct> structs = ImmutableMap.builder();
 		while (matcher.find()) {
 			Span self = Span.fromMatcher(this, matcher);
 			Span name = Span.fromMatcher(this, matcher, 1);
@@ -218,31 +214,31 @@ public class SourceFile {
 
 			ShaderStruct shaderStruct = new ShaderStruct(self, name, body);
 
-			functions.put(body.get(), shaderStruct);
+			structs.put(name.get(), shaderStruct);
 		}
 
-		return functions.build();
+		return structs.build();
 	}
 
 	/**
 	 * Scan the source for <code>#use "..."</code> directives.
-	 * Records the contents of the directive into an {@link Include} object, and marks the directive for elision.
+	 * Records the contents of the directive into an {@link Import} object, and marks the directive for elision.
 	 */
-	private ImmutableList<Include> parseIncludes() {
+	private ImmutableList<Import> parseImports() {
 		Matcher uses = includePattern.matcher(source);
 
-		List<Include> includes = new ArrayList<>();
+		List<Import> imports = new ArrayList<>();
 
 		while (uses.find()) {
 			Span use = Span.fromMatcher(this, uses);
 			Span file = Span.fromMatcher(this, uses, 1);
 
-			includes.add(new Include(parent, use, file));
+			imports.add(new Import(parent, use, file));
 
 			elisions.add(use); // we have to trim that later
 		}
 
-		return ImmutableList.copyOf(includes);
+		return ImmutableList.copyOf(imports);
 	}
 
 	/**

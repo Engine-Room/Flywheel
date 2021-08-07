@@ -18,9 +18,9 @@ public abstract class GlProgram extends GlObject {
 
 	public final ResourceLocation name;
 
-	protected GlProgram(Program program) {
-		setHandle(program.program);
-		this.name = program.name;
+	protected GlProgram(ResourceLocation name, int handle) {
+		this.name = name;
+		setHandle(handle);
 	}
 
 	public void bind() {

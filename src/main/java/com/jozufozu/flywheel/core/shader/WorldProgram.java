@@ -6,12 +6,12 @@ import static org.lwjgl.opengl.GL20.glUniform3f;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.backend.loading.Program;
 import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
 
 public class WorldProgram extends ExtensibleGlProgram {
@@ -23,8 +23,8 @@ public class WorldProgram extends ExtensibleGlProgram {
 	protected int uBlockAtlas;
 	protected int uLightMap;
 
-	public WorldProgram(Program program, List<IProgramExtension> extensions) {
-		super(program, extensions);
+	public WorldProgram(ResourceLocation name, int handle, List<IProgramExtension> extensions) {
+		super(name, handle, extensions);
 
 		super.bind();
 		registerSamplers();

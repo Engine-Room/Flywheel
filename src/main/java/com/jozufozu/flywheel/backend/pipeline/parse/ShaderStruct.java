@@ -30,6 +30,10 @@ public class ShaderStruct extends AbstractShaderElement {
 		this.fields2Types = createTypeLookup();
 	}
 
+	public ImmutableList<StructField> getFields() {
+		return fields;
+	}
+
 	private ImmutableMap<String, Span> createTypeLookup() {
 		ImmutableMap.Builder<String, Span> lookup = ImmutableMap.builder();
 		for (StructField field : fields) {
@@ -61,5 +65,10 @@ public class ShaderStruct extends AbstractShaderElement {
 
 			builder.addAttribute(prefix + field.name, attributeCount);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "struct " + name;
 	}
 }

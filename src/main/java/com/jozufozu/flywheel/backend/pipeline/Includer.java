@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Stack;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.backend.ShaderSources;
-import com.jozufozu.flywheel.backend.pipeline.parse.Include;
+import com.jozufozu.flywheel.backend.pipeline.parse.Import;
 
 import net.minecraft.util.ResourceLocation;
 
@@ -27,11 +25,11 @@ public class Includer {
 	}
 
 	private static void process(Set<ResourceLocation> seen, List<SourceFile> out, SourceFile source) {
-		ImmutableList<Include> includes = source.getIncludes();
+		ImmutableList<Import> imports = source.getIncludes();
 
-		for (Include include : includes) {
+		for (Import use : imports) {
 
-			SourceFile file = include.getTarget();
+			SourceFile file = use.getFile();
 			if (file != null && seen.add(file.name)) {
 				process(seen, out, file);
 

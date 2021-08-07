@@ -27,6 +27,6 @@ public class StructField extends AbstractShaderElement {
 
 	@Override
 	public String toString() {
-		return "TaggedField{" + "name='" + name + '\'' + ", type='" + type + '\'' + '}';
+		return type + " " + name;
 	}
 }

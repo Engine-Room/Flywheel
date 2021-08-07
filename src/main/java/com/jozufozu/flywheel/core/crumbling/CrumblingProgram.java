@@ -4,7 +4,6 @@ import static org.lwjgl.opengl.GL20.glUniform2f;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.backend.loading.Program;
 import com.jozufozu.flywheel.core.atlas.AtlasInfo;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
@@ -13,13 +12,14 @@ import net.minecraft.client.renderer.model.ModelBakery;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.util.ResourceLocation;
 
 public class CrumblingProgram extends WorldProgram {
 	protected final int uTextureScale;
 	protected int uCrumbling;
 
-	public CrumblingProgram(Program program, List<IProgramExtension> extensions) {
-		super(program, extensions);
+	public CrumblingProgram(ResourceLocation name, int handle, List<IProgramExtension> extensions) {
+		super(name, handle, extensions);
 
 		uTextureScale = getUniformLocation("uTextureScale");
 	}

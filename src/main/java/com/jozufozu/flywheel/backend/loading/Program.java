@@ -24,17 +24,16 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.util.ResourceLocation;
 
 public class Program {
-	public final ResourceLocation name;
 	public final int program;
 
+	public ResourceLocation name;
 	private int attributeIndex;
 
 	public final Map<ShaderType, Shader> attached;
 
 	private final IntList shaders;
 
-	public Program(ResourceLocation name) {
-		this.name = name;
+	public Program() {
 		this.program = glCreateProgram();
 		attached = new EnumMap<>(ShaderType.class);
 		shaders = new IntArrayList(2);
@@ -57,13 +56,14 @@ public class Program {
 	/**
 	 * Links the attached shaders to this program.
 	 */
-	public Program link() {
+	public Program link(ResourceLocation name) {
+		this.name = name;
 		glLinkProgram(this.program);
 
 		String log = glGetProgramInfoLog(this.program);
 
 		if (!log.isEmpty()) {
-			Backend.log.debug("Program link log for " + this.name + ": " + log);
+			Backend.log.debug("Program link log for " + name + ": " + log);
 		}
 
 		int result = glGetProgrami(this.program, GL_LINK_STATUS);
