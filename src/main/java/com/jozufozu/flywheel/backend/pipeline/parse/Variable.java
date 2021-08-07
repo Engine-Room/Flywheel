@@ -14,11 +14,16 @@ public class Variable extends AbstractShaderElement {
 		this.name = name;
 	}
 
-	public Span getType() {
+	public Span typeName() {
 		return type;
 	}
 
 	public Span getName() {
 		return name;
+	}
+
+	@Override
+	public String toString() {
+		return type + " " + name;
 	}
 }

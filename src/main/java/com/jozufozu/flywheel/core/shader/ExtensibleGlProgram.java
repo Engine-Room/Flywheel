@@ -8,9 +8,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.backend.loading.Program;
 import com.jozufozu.flywheel.core.shader.extension.IExtensionInstance;
 import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
+
+import net.minecraft.util.ResourceLocation;
 
 /**
  * A shader program that be arbitrarily "extended". This class can take in any number of program extensions, and
@@ -25,8 +26,8 @@ public class ExtensibleGlProgram extends GlProgram {
 
 	protected final List<IExtensionInstance> extensions;
 
-	public ExtensibleGlProgram(Program program, @Nullable List<IProgramExtension> extensions) {
-		super(program);
+	public ExtensibleGlProgram(ResourceLocation name, int handle, @Nullable List<IProgramExtension> extensions) {
+		super(name, handle);
 
 		if (extensions != null) {
 			List<IExtensionInstance> list = new ArrayList<>();
@@ -71,10 +72,6 @@ public class ExtensibleGlProgram extends GlProgram {
 	public interface Factory<P extends GlProgram> {
 
 		@Nonnull
-		P create(Program program, @Nullable List<IProgramExtension> extensions);
-
-		default P create(Program program) {
-			return create(program, null);
-		}
+		P create(ResourceLocation name, int handle, @Nullable List<IProgramExtension> extensions);
 	}
 }

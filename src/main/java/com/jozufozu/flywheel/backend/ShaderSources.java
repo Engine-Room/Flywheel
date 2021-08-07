@@ -1,26 +1,15 @@
 package com.jozufozu.flywheel.backend;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
-
-import org.lwjgl.system.MemoryUtil;
 
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
@@ -35,9 +24,10 @@ import com.jozufozu.flywheel.backend.pipeline.SourceFile;
 import com.jozufozu.flywheel.backend.pipeline.WorldShaderPipeline;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
+import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 import com.jozufozu.flywheel.event.GatherContextEvent;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.jozufozu.flywheel.util.StreamUtil;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
@@ -62,6 +52,8 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 	private final Map<ResourceLocation, String> shaderSource = new HashMap<>();
 	private final Map<ResourceLocation, SourceFile> shaderSources = new HashMap<>();
 
+	private final Map<ResourceLocation, FileResolution> resolutions = new HashMap<>();
+
 	private boolean shouldCrash;
 	private final Backend backend;
 
@@ -71,6 +63,42 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 		if (manager instanceof IReloadableResourceManager) {
 			((IReloadableResourceManager) manager).registerReloadListener(this);
 		}
+	}
+
+	public SourceFile source(ResourceLocation name) {
+		SourceFile source = shaderSources.get(name);
+
+		if (source == null) {
+			throw new ShaderLoadingException(String.format("shader '%s' does not exist", name));
+		}
+
+		return source;
+	}
+
+	public FileResolution resolveFile(ResourceLocation fileLoc) {
+		return resolutions.computeIfAbsent(fileLoc, FileResolution::new);
+	}
+
+	@Deprecated
+	public Shader source(ResourceLocation name, ShaderType type) {
+		return new Shader(this, type, name, getShaderSource(name));
+	}
+
+	@Deprecated
+	public void notifyError() {
+		shouldCrash = true;
+	}
+
+	@Deprecated
+	@Nonnull
+	public String getShaderSource(ResourceLocation loc) {
+		String source = shaderSource.get(loc);
+
+		if (source == null) {
+			throw new ShaderLoadingException(String.format("shader '%s' does not exist", loc));
+		}
+
+		return source;
 	}
 
 	@Override
@@ -87,15 +115,20 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 				ModLoader.get()
 						.postEvent(new GatherContextEvent(backend));
 
+				resolutions.clear();
+
 				loadProgramSpecs(manager);
 				loadShaderSources(manager);
 
-				shaderSources.values().forEach(SourceFile::resolveIncludes);
+				for (FileResolution resolution : resolutions.values()) {
+					resolution.resolve(this);
+				}
 
-				WorldShaderPipeline<WorldProgram> pl = new WorldShaderPipeline<>(this);
+				WorldShaderPipeline<WorldProgram> pl = new WorldShaderPipeline<>(this, WorldProgram::new);
 
-				SourceFile source = source(new ResourceLocation(Flywheel.ID, "model.glsl"));
-				pl.compile(source, Collections.emptyList());
+//				ResourceLocation name = new ResourceLocation(Flywheel.ID, "model.glsl");
+//				SourceFile source = source(name);
+//				pl.compile(name, source, Collections.emptyList());
 
 				for (IShaderContext<?> context : backend.allContexts()) {
 					context.load();
@@ -120,6 +153,31 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 		}
 	}
 
+	private void loadShaderSources(IResourceManager manager) {
+		Collection<ResourceLocation> allShaders = manager.listResources(SHADER_DIR, s -> {
+			for (String ext : EXTENSIONS) {
+				if (s.endsWith(ext)) return true;
+			}
+			return false;
+		});
+
+		for (ResourceLocation location : allShaders) {
+			try {
+				IResource resource = manager.getResource(location);
+
+				String source = StreamUtil.readToString(resource.getInputStream());
+
+				ResourceLocation name = ResourceUtil.removePrefixUnchecked(location, SHADER_DIR);
+
+				shaderSource.put(name, source);
+				shaderSources.put(name, new SourceFile(this, name, source));
+			} catch (IOException e) {
+
+			}
+		}
+	}
+
+
 	private void loadProgramSpecs(IResourceManager manager) {
 		Collection<ResourceLocation> programSpecs = manager.listResources(PROGRAM_DIR, s -> s.endsWith(".json"));
 
@@ -127,7 +185,7 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 			try {
 				IResource file = manager.getResource(location);
 
-				String s = readToString(file.getInputStream());
+				String s = StreamUtil.readToString(file.getInputStream());
 
 				ResourceLocation specName = ResourceUtil.trim(location, PROGRAM_DIR, ".json");
 
@@ -144,105 +202,5 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 				Backend.log.error(e);
 			}
 		}
-	}
-
-	@Deprecated
-	public void notifyError() {
-		shouldCrash = true;
-	}
-
-	@Deprecated
-	@Nonnull
-	public String getShaderSource(ResourceLocation loc) {
-		String source = shaderSource.get(loc);
-
-		if (source == null) {
-			throw new ShaderLoadingException(String.format("shader '%s' does not exist", loc));
-		}
-
-		return source;
-	}
-
-	private void loadShaderSources(IResourceManager manager) {
-		Collection<ResourceLocation> allShaders = manager.listResources(SHADER_DIR, s -> {
-			for (String ext : EXTENSIONS) {
-				if (s.endsWith(ext)) return true;
-			}
-			return false;
-		});
-
-		for (ResourceLocation location : allShaders) {
-			try {
-				IResource resource = manager.getResource(location);
-
-				String source = readToString(resource.getInputStream());
-
-				ResourceLocation name = ResourceUtil.removePrefixUnchecked(location, SHADER_DIR);
-
-				shaderSource.put(name, source);
-				shaderSources.put(name, new SourceFile(this, name, source));
-			} catch (IOException e) {
-
-			}
-		}
-	}
-
-	@Deprecated
-	public Shader source(ResourceLocation name, ShaderType type) {
-		return new Shader(this, type, name, getShaderSource(name));
-	}
-
-	public SourceFile source(ResourceLocation name) {
-		SourceFile source = shaderSources.get(name);
-
-		if (source == null) {
-			throw new ShaderLoadingException(String.format("shader '%s' does not exist", name));
-		}
-
-		return source;
-	}
-
-	public String readToString(InputStream is) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-		ByteBuffer bytebuffer = null;
-
-		try {
-			bytebuffer = readToBuffer(is);
-			int i = bytebuffer.position();
-			((Buffer) bytebuffer).rewind();
-			return MemoryUtil.memASCII(bytebuffer, i);
-		} catch (IOException e) {
-
-		} finally {
-			if (bytebuffer != null) {
-				MemoryUtil.memFree(bytebuffer);
-			}
-
-		}
-
-		return null;
-	}
-
-	public ByteBuffer readToBuffer(InputStream is) throws IOException {
-		ByteBuffer bytebuffer;
-		if (is instanceof FileInputStream) {
-			FileInputStream fileinputstream = (FileInputStream) is;
-			FileChannel filechannel = fileinputstream.getChannel();
-			bytebuffer = MemoryUtil.memAlloc((int) filechannel.size() + 1);
-
-			while (filechannel.read(bytebuffer) != -1) {
-			}
-		} else {
-			bytebuffer = MemoryUtil.memAlloc(8192);
-			ReadableByteChannel readablebytechannel = Channels.newChannel(is);
-
-			while (readablebytechannel.read(bytebuffer) != -1) {
-				if (bytebuffer.remaining() == 0) {
-					bytebuffer = MemoryUtil.memRealloc(bytebuffer, bytebuffer.capacity() * 2);
-				}
-			}
-		}
-
-		return bytebuffer;
 	}
 }

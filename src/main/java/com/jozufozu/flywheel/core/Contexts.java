@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.core;
 
+import java.util.List;
+
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.SpecMetaRegistry;
@@ -7,6 +9,7 @@ import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
 import com.jozufozu.flywheel.core.shader.WorldFog;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
+import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
 import com.jozufozu.flywheel.core.shader.gamestate.FogStateProvider;
 import com.jozufozu.flywheel.core.shader.gamestate.NormalDebugStateProvider;
 import com.jozufozu.flywheel.event.GatherContextEvent;

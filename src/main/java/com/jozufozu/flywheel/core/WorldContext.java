@@ -3,11 +3,7 @@ package com.jozufozu.flywheel.core;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.ResourceUtil;
@@ -15,26 +11,18 @@ import com.jozufozu.flywheel.backend.ShaderContext;
 import com.jozufozu.flywheel.backend.ShaderSources;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.loading.InstancedArraysTemplate;
-import com.jozufozu.flywheel.backend.loading.Program;
 import com.jozufozu.flywheel.backend.loading.ProgramTemplate;
-import com.jozufozu.flywheel.backend.loading.Shader;
 import com.jozufozu.flywheel.backend.loading.ShaderLoadingException;
-import com.jozufozu.flywheel.backend.loading.ShaderTransformer;
 import com.jozufozu.flywheel.backend.material.MaterialSpec;
+import com.jozufozu.flywheel.backend.pipeline.IShaderPipeline;
+import com.jozufozu.flywheel.backend.pipeline.LegacyPipeline;
 import com.jozufozu.flywheel.core.shader.ExtensibleGlProgram;
-import com.jozufozu.flywheel.core.shader.GameStateProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
-import com.jozufozu.flywheel.core.shader.spec.ProgramState;
-import com.jozufozu.flywheel.util.WorldAttached;
 
 import net.minecraft.util.ResourceLocation;
 
 public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
-
-	private static final String declaration = "#flwbuiltins";
-	private static final Pattern builtinPattern = Pattern.compile(declaration);
-
 	protected ResourceLocation name;
 	protected Supplier<Stream<ResourceLocation>> specStream;
 	protected TemplateFactory templateFactory;
@@ -43,6 +31,8 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 	private final Map<ShaderType, String> builtinSources = new EnumMap<>(ShaderType.class);
 
 	private final ExtensibleGlProgram.Factory<P> factory;
+
+	public IShaderPipeline<P> pipeline;
 
 	public WorldContext(Backend backend, ExtensibleGlProgram.Factory<P> factory) {
 		super(backend);
@@ -79,9 +69,6 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 		return this;
 	}
 
-	protected ShaderTransformer transformer;
-	protected ProgramTemplate template;
-
 	@Override
 	public void load() {
 
@@ -97,66 +84,23 @@ public class WorldContext<P extends WorldProgram> extends ShaderContext<P> {
 			return;
 		}
 
-		template = templateFactory.create(backend.sources);
-		transformer = new ShaderTransformer().pushStage(this::injectBuiltins)
-				.pushStage(Shader::processIncludes)
-				.pushStage(template)
-				.pushStage(Shader::processIncludes);
+		pipeline = new LegacyPipeline<>(backend.sources, templateFactory.create(backend.sources), factory, builtinSources);
 
 		specStream.get()
 				.map(backend::getSpec)
 				.forEach(this::loadSpec);
 	}
 
-	@Override
-	protected Shader getSource(ShaderType type, ResourceLocation name) {
-		Shader source = super.getSource(type, name);
-		transformer.transformSource(source);
-		return source;
-	}
-
-	@Override
-	protected Program link(Program program) {
-		template.attachAttributes(program);
-
-		return super.link(program);
-	}
-
-	/**
-	 * Replace #flwbuiltins with whatever expansion this context provides for the given shader.
-	 */
-	public void injectBuiltins(Shader shader) {
-		Matcher matcher = builtinPattern.matcher(shader.getSource());
-
-		if (matcher.find()) shader.setSource(matcher.replaceFirst(builtinSources.get(shader.type)));
-		else
-			throw new ShaderLoadingException(String.format("%s is missing %s, cannot use in World Context", shader.type.name, declaration));
-	}
-
 	private void loadSpec(ProgramSpec spec) {
 
 		try {
-			GameStateProgram.Builder<P> builder = GameStateProgram.builder(compile(spec, null));
-
-			for (ProgramState state : spec.states) {
-
-				builder.withVariant(state.getContext(), compile(spec, state));
-			}
-
-			programs.put(spec.name, builder.build());
+			programs.put(spec.name, pipeline.compile(spec));
 
 			Backend.log.debug("Loaded program {}", spec.name);
 		} catch (Exception e) {
 			Backend.log.error("Program '{}': {}", spec.name, e);
 			backend.sources.notifyError();
 		}
-	}
-
-	private P compile(ProgramSpec spec, @Nullable ProgramState state) {
-		if (state != null)
-			return factory.create(loadAndLink(spec, state), state.getExtensions());
-		else
-			return factory.create(loadAndLink(spec, null));
 	}
 
 	public interface TemplateFactory {
