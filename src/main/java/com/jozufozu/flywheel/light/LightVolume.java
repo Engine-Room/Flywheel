@@ -121,6 +121,8 @@ public class LightVolume {
 	}
 
 	public void move(IBlockDisplayReader world, GridAlignedBB newSampleVolume) {
+		if (removed) return;
+
 		if (textureVolume.contains(newSampleVolume)) {
 			if (newSampleVolume.intersects(sampleVolume)) {
 				GridAlignedBB newArea = newSampleVolume.intersect(sampleVolume);
@@ -166,6 +168,8 @@ public class LightVolume {
 	 * This is expensive and should be avoided.
 	 */
 	public void initialize(IBlockDisplayReader world) {
+		if (removed) return;
+
 		BlockPos.Mutable pos = new BlockPos.Mutable();
 
 		int shiftX = textureVolume.minX;
