@@ -29,6 +29,22 @@ public class ShaderFunction extends AbstractShaderElement {
 		this.parameters = parseArguments();
 	}
 
+	public Span getType() {
+		return type;
+	}
+
+	public Span getName() {
+		return name;
+	}
+
+	public Span getArgs() {
+		return args;
+	}
+
+	public Span getBody() {
+		return body;
+	}
+
 	public String call(String... args) {
 		return name + "(" + String.join(", ", args) + ")";
 	}
@@ -37,7 +53,7 @@ public class ShaderFunction extends AbstractShaderElement {
 		return parameters;
 	}
 
-	public String returnType() {
+	public String returnTypeName() {
 		return type.get();
 	}
 

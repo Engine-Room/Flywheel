@@ -1,10 +1,9 @@
-#flwbuiltins
-#flwinclude <"flywheel:core/diffuse.glsl">
+#use "flywheel:core/diffuse.glsl"
 
-#flwinclude <"flywheel:data/modelvertex.glsl">
-#flwinclude <"flywheel:data/blockfragment.glsl">
+#use "flywheel:data/modelvertex.glsl"
 
-#[InstanceData]
+#use "flywheel:block.frag"
+
 struct Instance {
     vec2 light;
     vec4 color;
@@ -12,7 +11,8 @@ struct Instance {
     mat3 normalMat;
 };
 
-BlockFrag FLWMain(Vertex v, Instance i) {
+#if defined(VERTEX_SHADER)
+BlockFrag vertex(Vertex v, Instance i) {
     vec4 worldPos = i.transform * vec4(v.pos, 1.);
 
     vec3 norm = i.normalMat * v.normal;
@@ -33,3 +33,4 @@ BlockFrag FLWMain(Vertex v, Instance i) {
     #endif
     return b;
 }
+#endif

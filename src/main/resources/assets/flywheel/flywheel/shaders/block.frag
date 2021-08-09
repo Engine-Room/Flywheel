@@ -1,8 +1,13 @@
-#flwbuiltins
 
-#flwinclude <"flywheel:data/blockfragment.glsl">
+struct BlockFrag {
+    vec2 texCoords;
+    vec4 color;
+    float diffuse;
+    vec2 light;
+};
 
-void FLWMain(BlockFrag r) {
+#if defined(FRAGMENT_SHADER)
+void fragment(BlockFrag r) {
     vec4 tex = FLWBlockTexture(r.texCoords);
 
     vec4 color = vec4(tex.rgb * FLWLight(r.light).rgb * r.diffuse, tex.a) * r.color;
@@ -15,3 +20,4 @@ void FLWMain(BlockFrag r) {
 //    flw_Tint = r.color;
     FLWFinalizeColor(color);
 }
+#endif

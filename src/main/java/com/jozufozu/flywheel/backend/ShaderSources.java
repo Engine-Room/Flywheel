@@ -3,9 +3,7 @@ package com.jozufozu.flywheel.backend;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -15,16 +13,11 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
-import com.jozufozu.flywheel.backend.loading.Shader;
 import com.jozufozu.flywheel.backend.loading.ShaderLoadingException;
 import com.jozufozu.flywheel.backend.pipeline.SourceFile;
-import com.jozufozu.flywheel.backend.pipeline.WorldShaderPipeline;
-import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
-import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 import com.jozufozu.flywheel.event.GatherContextEvent;
 import com.jozufozu.flywheel.util.StreamUtil;
@@ -49,13 +42,14 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 	public static final ArrayList<String> EXTENSIONS = Lists.newArrayList(".vert", ".vsh", ".frag", ".fsh", ".glsl");
 	private static final Gson GSON = new GsonBuilder().create();
 
-	private final Map<ResourceLocation, String> shaderSource = new HashMap<>();
 	private final Map<ResourceLocation, SourceFile> shaderSources = new HashMap<>();
 
 	private final Map<ResourceLocation, FileResolution> resolutions = new HashMap<>();
 
 	private boolean shouldCrash;
 	private final Backend backend;
+
+	public Index index;
 
 	public ShaderSources(Backend backend) {
 		this.backend = backend;
@@ -80,25 +74,8 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 	}
 
 	@Deprecated
-	public Shader source(ResourceLocation name, ShaderType type) {
-		return new Shader(this, type, name, getShaderSource(name));
-	}
-
-	@Deprecated
 	public void notifyError() {
 		shouldCrash = true;
-	}
-
-	@Deprecated
-	@Nonnull
-	public String getShaderSource(ResourceLocation loc) {
-		String source = shaderSource.get(loc);
-
-		if (source == null) {
-			throw new ShaderLoadingException(String.format("shader '%s' does not exist", loc));
-		}
-
-		return source;
 	}
 
 	@Override
@@ -107,15 +84,13 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 			backend.refresh();
 
 			if (backend.gl20()) {
-				shaderSource.clear();
-
 				shouldCrash = false;
 
 				backend.clearContexts();
 				ModLoader.get()
 						.postEvent(new GatherContextEvent(backend));
 
-				resolutions.clear();
+				resolutions.values().forEach(FileResolution::invalidate);
 
 				loadProgramSpecs(manager);
 				loadShaderSources(manager);
@@ -123,12 +98,6 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 				for (FileResolution resolution : resolutions.values()) {
 					resolution.resolve(this);
 				}
-
-				WorldShaderPipeline<WorldProgram> pl = new WorldShaderPipeline<>(this, WorldProgram::new);
-
-//				ResourceLocation name = new ResourceLocation(Flywheel.ID, "model.glsl");
-//				SourceFile source = source(name);
-//				pl.compile(name, source, Collections.emptyList());
 
 				for (IShaderContext<?> context : backend.allContexts()) {
 					context.load();
@@ -139,9 +108,6 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 				}
 
 				Backend.log.info("Loaded all shader programs.");
-
-				// no need to hog all that memory
-				shaderSource.clear();
 
 				ClientWorld world = Minecraft.getInstance().level;
 				if (Backend.isFlywheelWorld(world)) {
@@ -169,12 +135,13 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 
 				ResourceLocation name = ResourceUtil.removePrefixUnchecked(location, SHADER_DIR);
 
-				shaderSource.put(name, source);
 				shaderSources.put(name, new SourceFile(this, name, source));
 			} catch (IOException e) {
 
 			}
 		}
+
+		index = new Index(shaderSources);
 	}
 
 

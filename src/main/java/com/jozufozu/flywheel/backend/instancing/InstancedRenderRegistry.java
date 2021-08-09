@@ -100,7 +100,15 @@ public class InstancedRenderRegistry {
 		return skipRender.getBoolean(o);
 	}
 
-	public class TileConfig<T extends TileEntity> {
+	public interface Config<CONFIG extends Config<CONFIG, FACTORY>, FACTORY> {
+
+		CONFIG factory(FACTORY rendererFactory);
+
+		CONFIG setSkipRender(boolean skipRender);
+	}
+
+	public class TileConfig<T extends TileEntity> implements Config<TileConfig<T>, ITileInstanceFactory<? super T>> {
+
 
 		private final TileEntityType<T> type;
 
@@ -112,14 +120,14 @@ public class InstancedRenderRegistry {
 			tiles.put(type, rendererFactory);
 			return this;
 		}
-
 		public TileConfig<T> setSkipRender(boolean skipRender) {
 			InstancedRenderRegistry.this.skipRender.put(type, skipRender);
 			return this;
 		}
-	}
 
-	public class EntityConfig<T extends Entity> {
+	}
+	public class EntityConfig<T extends Entity> implements Config<EntityConfig<T>, IEntityInstanceFactory<? super T>> {
+
 
 		private final EntityType<T> type;
 
@@ -131,12 +139,12 @@ public class InstancedRenderRegistry {
 			entities.put(type, rendererFactory);
 			return this;
 		}
-
 		public EntityConfig<T> setSkipRender(boolean skipRender) {
 			InstancedRenderRegistry.this.skipRender.put(type, skipRender);
 
 			return this;
 		}
+
 	}
 
 }
