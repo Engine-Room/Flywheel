@@ -23,40 +23,32 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.util.ResourceLocation;
 
-public class Program {
+public class ProtoProgram {
 	public final int program;
 
 	public ResourceLocation name;
 	private int attributeIndex;
 
-	public final Map<ShaderType, Shader> attached;
-
 	private final IntList shaders;
 
-	public Program() {
+	public ProtoProgram() {
 		this.program = glCreateProgram();
-		attached = new EnumMap<>(ShaderType.class);
 		shaders = new IntArrayList(2);
 	}
 
-	public Program attachShader(Shader shader, GlShader glShader) {
+	public void attachShader(GlShader glShader) {
 		glAttachShader(this.program, glShader.handle());
-
-		attached.put(shader.type, shader);
-
-		return this;
 	}
 
-	public Program addAttribute(String name, int attributeCount) {
+	public void addAttribute(String name, int attributeCount) {
 		glBindAttribLocation(this.program, attributeIndex, name);
 		attributeIndex += attributeCount;
-		return this;
 	}
 
 	/**
 	 * Links the attached shaders to this program.
 	 */
-	public Program link(ResourceLocation name) {
+	public ProtoProgram link(ResourceLocation name) {
 		this.name = name;
 		glLinkProgram(this.program);
 
@@ -75,7 +67,7 @@ public class Program {
 		return this;
 	}
 
-	public Program deleteLinkedShaders() {
+	public ProtoProgram deleteLinkedShaders() {
 		shaders.forEach((IntConsumer) GL20::glDeleteShader);
 		return this;
 	}

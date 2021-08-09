@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.backend.pipeline;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import com.jozufozu.flywheel.backend.FileResolution;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 
@@ -11,18 +11,19 @@ import net.minecraft.util.ResourceLocation;
 public class ShaderBuilder {
 
 	public final ResourceLocation name;
-	public final Template template;
+	public final ITemplate template;
+	public final FileResolution header;
 
-	private SourceFile mainFile;
+	public SourceFile mainFile;
 	private GLSLVersion version;
 
 	private StringBuilder source;
 	private StringBuilder defines;
-	private CharSequence footer;
 
-	public ShaderBuilder(ResourceLocation name, Template template) {
+	public ShaderBuilder(ResourceLocation name, ITemplate template, FileResolution header) {
 		this.name = name;
 		this.template = template;
+		this.header = header;
 	}
 
 	public ShaderBuilder setVersion(GLSLVersion version) {
@@ -41,21 +42,13 @@ public class ShaderBuilder {
 		return this;
 	}
 
-	public ShaderBuilder setFooter(CharSequence footer) {
-		this.footer = footer;
-		return this;
-	}
-
 	public ShaderBuilder setMainSource(SourceFile file) {
 		if (mainFile == file) return this;
 
 		mainFile = file;
 		source = new StringBuilder();
 
-		for (SourceFile includeFile : Includer.recurseIncludes(file)) {
-			source.append(includeFile.getElidedSource());
-		}
-		source.append(file.getElidedSource());
+		file.generateFinalSource(source);
 
 		return this;
 	}
@@ -70,9 +63,13 @@ public class ShaderBuilder {
 				.append("#define ")
 				.append(type.define)
 				.append('\n')
-				.append(defines != null ? defines : "")
-				.append(source)
-				.append(template.footer(type, mainFile));
+				.append(defines != null ? defines : "");
+		SourceFile file = header.getFile();
+		if (file != null) {
+			file.generateFinalSource(finalSource);
+		}
+		mainFile.generateFinalSource(finalSource);
+		template.generateTemplateSource(finalSource, type, mainFile);
 
 		return new GlShader(name, type, finalSource);
 	}

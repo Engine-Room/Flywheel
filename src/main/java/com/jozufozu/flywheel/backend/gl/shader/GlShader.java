@@ -5,7 +5,6 @@ import org.lwjgl.opengl.GL20;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
-import com.jozufozu.flywheel.backend.loading.Shader;
 
 import net.minecraft.util.ResourceLocation;
 

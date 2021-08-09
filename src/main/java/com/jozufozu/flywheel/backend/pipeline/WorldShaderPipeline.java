@@ -12,9 +12,11 @@ import javax.annotation.Nullable;
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.FileResolution;
 import com.jozufozu.flywheel.backend.ShaderSources;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.backend.loading.ProtoProgram;
 import com.jozufozu.flywheel.core.shader.ExtensibleGlProgram;
 import com.jozufozu.flywheel.core.shader.GameStateProgram;
 import com.jozufozu.flywheel.core.shader.IMultiProgram;
@@ -24,15 +26,20 @@ import com.jozufozu.flywheel.core.shader.spec.ProgramState;
 
 import net.minecraft.util.ResourceLocation;
 
-public class WorldShaderPipeline<P extends WorldProgram> {
+public class WorldShaderPipeline<P extends WorldProgram> implements IShaderPipeline<P> {
 
 	private final ShaderSources sources;
 
 	private final ExtensibleGlProgram.Factory<P> factory;
 
-	public WorldShaderPipeline(ShaderSources sources, ExtensibleGlProgram.Factory<P> factory) {
+	private final ITemplate template;
+	private final FileResolution header;
+
+	public WorldShaderPipeline(ShaderSources sources, ExtensibleGlProgram.Factory<P> factory, ITemplate template, FileResolution header) {
 		this.sources = sources;
 		this.factory = factory;
+		this.template = template;
+		this.header = header;
 	}
 
 	public IMultiProgram<P> compile(ProgramSpec spec) {
@@ -43,9 +50,9 @@ public class WorldShaderPipeline<P extends WorldProgram> {
 	}
 
 	public IMultiProgram<P> compile(ResourceLocation name, SourceFile file, List<ProgramState> variants) {
-		ShaderBuilder shader = new ShaderBuilder(name, new Template())
+		ShaderBuilder shader = new ShaderBuilder(name, template, header)
 				.setMainSource(file)
-				.setVersion(GLSLVersion.V120);
+				.setVersion(GLSLVersion.V110);
 
 		GameStateProgram.Builder<P> builder = GameStateProgram.builder(compile(shader, name, null));
 
@@ -65,27 +72,20 @@ public class WorldShaderPipeline<P extends WorldProgram> {
 		GlShader vertex = shader.compile(name, ShaderType.VERTEX);
 		GlShader fragment = shader.compile(name, ShaderType.FRAGMENT);
 
-		int program = GL20.glCreateProgram();
+		ProtoProgram program = new ProtoProgram();
 
-		GL20.glAttachShader(program, vertex.handle());
-		GL20.glAttachShader(program, fragment.handle());
+		program.attachShader(vertex);
+		program.attachShader(fragment);
 
-		String log = glGetProgramInfoLog(program);
+		template.attachAttributes(program, shader.mainFile);
 
-		if (!log.isEmpty()) {
-			Backend.log.debug("Program link log for " + name + ": " + log);
-		}
-
-		int result = glGetProgrami(program, GL_LINK_STATUS);
-
-		if (result != GL_TRUE) {
-			throw new RuntimeException("Shader program linking failed, see log for details");
-		}
+		program.link(name);
+		program.deleteLinkedShaders();
 
 		if (variant != null) {
-			return factory.create(name, program, variant.getExtensions());
+			return factory.create(name, program.program, variant.getExtensions());
 		} else {
-			return factory.create(name, program, null);
+			return factory.create(name, program.program, null);
 		}
 	}
 }

@@ -1,14 +1,21 @@
 package com.jozufozu.flywheel.backend.pipeline;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.jozufozu.flywheel.backend.FileResolution;
 import com.jozufozu.flywheel.backend.ShaderSources;
 import com.jozufozu.flywheel.backend.pipeline.parse.Import;
 import com.jozufozu.flywheel.backend.pipeline.parse.ShaderFunction;
@@ -33,7 +40,7 @@ public class SourceFile {
 
 	public final ResourceLocation name;
 
-	private final ShaderSources parent;
+	public final ShaderSources parent;
 	private final String source;
 	private final CharSequence elided;
 	private final ImmutableList<String> lines;
@@ -87,6 +94,61 @@ public class SourceFile {
 
 	public ImmutableList<Import> getIncludes() {
 		return imports;
+	}
+
+	/**
+	 * Search this file and recursively search all imports to find a struct definition matching the given name.
+	 *
+	 * @param name The name of the struct to find.
+	 * @return null if no definition matches the name.
+	 */
+	public Optional<ShaderStruct> findStruct(CharSequence name) {
+		ShaderStruct struct = getStructs().get(name.toString());
+
+		if (struct != null) return Optional.of(struct);
+
+		for (Import include : getIncludes()) {
+			Optional<ShaderStruct> externalStruct = include.getOptional()
+					.flatMap(file -> file.findStruct(name));
+
+			if (externalStruct.isPresent()) return externalStruct;
+		}
+
+		return Optional.empty();
+	}
+
+	/**
+	 * Search this file and recursively search all imports to find a function definition matching the given name.
+	 *
+	 * @param name The name of the function to find.
+	 * @return Optional#empty() if no definition matches the name.
+	 */
+	public Optional<ShaderFunction> findFunction(CharSequence name) {
+		ShaderFunction local = getFunctions().get(name.toString());
+
+		if (local != null) return Optional.of(local);
+
+		for (Import include : getIncludes()) {
+			Optional<ShaderFunction> external = include.getOptional()
+					.flatMap(file -> file.findFunction(name));
+
+			if (external.isPresent()) return external;
+		}
+
+		return Optional.empty();
+	}
+
+	public CharSequence importStatement() {
+		return "#use " + '"' + name + '"';
+	}
+
+	public void generateFinalSource(StringBuilder source) {
+		for (Import include : getIncludes()) {
+			SourceFile file = include.getFile();
+
+			if (file != null) file.generateFinalSource(source);
+		}
+		source.append(getElidedSource());
 	}
 
 	public CharPos getCharPos(int charPos) {

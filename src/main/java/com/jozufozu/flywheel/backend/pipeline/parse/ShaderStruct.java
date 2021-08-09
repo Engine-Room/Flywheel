@@ -1,14 +1,12 @@
 package com.jozufozu.flywheel.backend.pipeline.parse;
 
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.jozufozu.flywheel.backend.loading.Program;
+import com.jozufozu.flywheel.backend.loading.ProtoProgram;
 import com.jozufozu.flywheel.backend.loading.TypeHelper;
-import com.jozufozu.flywheel.backend.pipeline.error.ErrorReporter;
 import com.jozufozu.flywheel.backend.pipeline.span.Span;
 
 public class ShaderStruct extends AbstractShaderElement {
@@ -28,6 +26,14 @@ public class ShaderStruct extends AbstractShaderElement {
 		this.body = body;
 		this.fields = parseFields();
 		this.fields2Types = createTypeLookup();
+	}
+
+	public Span getName() {
+		return name;
+	}
+
+	public Span getBody() {
+		return body;
 	}
 
 	public ImmutableList<StructField> getFields() {
@@ -59,7 +65,7 @@ public class ShaderStruct extends AbstractShaderElement {
 		return fields.build();
 	}
 
-	public void addPrefixedAttributes(Program builder, String prefix) {
+	public void addPrefixedAttributes(ProtoProgram builder, String prefix) {
 		for (StructField field : fields) {
 			int attributeCount = TypeHelper.getAttributeCount(field.type);
 

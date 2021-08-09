@@ -1,9 +1,7 @@
-#flwbuiltins
-#flwinclude <"flywheel:core/matutils.glsl">
-#flwinclude <"flywheel:core/quaternion.glsl">
-#flwinclude <"flywheel:core/diffuse.glsl">
+#use "flywheel:core/matutils.glsl"
+#use "flywheel:core/quaternion.glsl"
+#use "flywheel:core/diffuse.glsl"
 
-#[InstanceData]
 struct Oriented {
 // each vec 4 is 2 light coords packed <lo y, hi y>
 //               x   z
@@ -21,10 +19,10 @@ struct Oriented {
     vec4 rotation;
 };
 
-#flwinclude <"flywheel:data/modelvertex.glsl">
-#flwinclude <"flywheel:data/blockfragment.glsl">
+#use "flywheel:data/modelvertex.glsl"
+#use "flywheel:block.frag"
 
-BlockFrag FLWMain(Vertex v, Oriented o) {
+BlockFrag vertex(Vertex v, Oriented o) {
     vec4 worldPos = vec4(rotateVertexByQuat(v.pos - o.pivot, o.rotation) + o.pivot + o.pos, 1.);
 
     vec3 norm = rotateVertexByQuat(v.normal, o.rotation);

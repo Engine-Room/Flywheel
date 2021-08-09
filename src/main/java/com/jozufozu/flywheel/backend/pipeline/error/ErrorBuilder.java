@@ -1,19 +1,36 @@
 package com.jozufozu.flywheel.backend.pipeline.error;
 
+import java.util.Optional;
+
+import javax.annotation.Nullable;
+
 import com.jozufozu.flywheel.backend.pipeline.SourceFile;
 import com.jozufozu.flywheel.backend.pipeline.span.Span;
+import com.jozufozu.flywheel.util.FlwUtil;
 
 public class ErrorBuilder {
 
 	private final StringBuilder internal = new StringBuilder();
 
-	public ErrorBuilder header(CharSequence msg) {
+	public ErrorBuilder error(CharSequence msg) {
 		internal.append("error: ")
 				.append(msg);
 		return endLine();
 	}
 
-	public ErrorBuilder errorIn(SourceFile file) {
+	public ErrorBuilder note(CharSequence msg) {
+		internal.append("note: ")
+				.append(msg);
+		return endLine();
+	}
+
+	public ErrorBuilder hint(CharSequence msg) {
+		internal.append("hint: ")
+				.append(msg);
+		return endLine();
+	}
+
+	public ErrorBuilder in(SourceFile file) {
 		internal.append("--> ")
 				.append(file.name);
 		return endLine();
@@ -37,7 +54,18 @@ public class ErrorBuilder {
 		return this;
 	}
 
+	public ErrorBuilder hintIncludeFor(Span span) {
+		if (span == null) return this;
+
+		hint("add " + span.getSourceFile().importStatement())
+				.in(span.getSourceFile())
+				.pointAt(span, 1);
+
+		return this;
+	}
+
 	public ErrorBuilder pointAt(Span span, int ctxLines) {
+
 		SourceFile file = span.getSourceFile();
 
 		if (span.lines() == 1) {
@@ -46,6 +74,8 @@ public class ErrorBuilder {
 
 			int firstLine = Math.max(0, spanLine - ctxLines);
 			int lastLine = Math.min(file.getLineCount(), spanLine + ctxLines);
+
+			int digits = FlwUtil.numDigits(lastLine);
 
 
 			int firstCol = span.getStart().getCol();
@@ -57,7 +87,7 @@ public class ErrorBuilder {
 				numberedLine(i + 1, line);
 
 				if (i == spanLine) {
-					line(" ", generateUnderline(firstCol, lastCol));
+					line(FlwUtil.repeatChar(' ', digits), generateUnderline(firstCol, lastCol));
 				}
 			}
 		}

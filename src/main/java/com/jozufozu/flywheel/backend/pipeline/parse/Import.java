@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.pipeline.parse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -41,6 +42,14 @@ public class Import extends AbstractShaderElement {
 		}
 
 		return new ResourceLocation("");
+	}
+
+	public FileResolution getResolution() {
+		return resolution;
+	}
+
+	public Optional<SourceFile> getOptional() {
+		return Optional.ofNullable(resolution.getFile());
 	}
 
 	@Nullable
