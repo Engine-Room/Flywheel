@@ -1,18 +1,17 @@
 package com.jozufozu.flywheel.backend.pipeline;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Collection;
 
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
-import com.jozufozu.flywheel.backend.loading.ProtoProgram;
+import com.jozufozu.flywheel.backend.source.SourceFile;
 
-public class OneShotTemplate implements ITemplate {
+public class OneShotTemplate extends Template<OneShotProgramMetaData> {
 
 	public static final OneShotTemplate INSTANCE = new OneShotTemplate();
 
-
-	private final Map<SourceFile, OneShotData> datas = new HashMap<>();
+	public OneShotTemplate() {
+		super(OneShotProgramMetaData::new);
+	}
 
 	@Override
 	public void generateTemplateSource(StringBuilder builder, ShaderType type, SourceFile file) {
@@ -24,45 +23,42 @@ public class OneShotTemplate implements ITemplate {
 	}
 
 	@Override
-	public void attachAttributes(ProtoProgram program, SourceFile file) {
-		OneShotData data = getData(file);
-		data.vertex.addPrefixedAttributes(program, "a_v_");
-	}
+	public Collection<ShaderInput> getShaderInputs(SourceFile file) {
+		OneShotProgramMetaData data = getMetadata(file);
 
-	public OneShotData getData(SourceFile file) {
-		return datas.computeIfAbsent(file, OneShotData::new);
+		return ShaderInput.fromStruct(data.vertex, "a_v_");
 	}
 
 	public void vertexFooter(StringBuilder template, SourceFile file) {
-		OneShotData data = getData(file);
+		OneShotProgramMetaData data = getMetadata(file);
 
-		ITemplate.prefixFields(template, data.vertex, "attribute", "a_v_");
-		ITemplate.prefixFields(template, data.interpolant, "varying", "v2f_");
+		Template.prefixFields(template, data.vertex, "attribute", "a_v_");
+		Template.prefixFields(template, data.interpolant, "varying", "v2f_");
 
 		template.append("void main() {\n");
 		template.append(data.vertexName)
 				.append(" v;\n");
-		ITemplate.assignFields(template, data.vertex, "v.", "a_v_");
+		Template.assignFields(template, data.vertex, "v.", "a_v_");
 
 		template.append(data.interpolantName)
 				.append(" o = ")
 				.append(data.vertexMain.call("v"))
 				.append(";\n");
 
-		ITemplate.assignFields(template, data.interpolant, "v2f_", "o.");
+		Template.assignFields(template, data.interpolant, "v2f_", "o.");
 
 		template.append('}');
 	}
 
 	public void fragmentFooter(StringBuilder template, SourceFile file) {
-		OneShotData data = getData(file);
+		OneShotProgramMetaData data = getMetadata(file);
 
-		ITemplate.prefixFields(template, data.interpolant, "varying", "v2f_");
+		Template.prefixFields(template, data.interpolant, "varying", "v2f_");
 
 		template.append("void main() {\n");
 		template.append(data.interpolant.name)
 				.append(" o;\n");
-		ITemplate.assignFields(template, data.interpolant, "o.", "v2f_");
+		Template.assignFields(template, data.interpolant, "o.", "v2f_");
 
 		template.append(data.fragmentMain.call("o"))
 				.append(";\n");

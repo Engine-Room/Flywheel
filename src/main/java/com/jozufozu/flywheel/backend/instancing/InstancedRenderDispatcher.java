@@ -27,6 +27,18 @@ public class InstancedRenderDispatcher {
 
 	private static final WorldAttached<InstanceWorld> instanceWorlds = new WorldAttached<>($ -> new InstanceWorld());
 
+	/**
+	 * Call this when you want to invoke
+	 * @param te
+	 */
+	public static void enqueueUpdate(TileEntity te) {
+		getTiles(te.getLevel()).queueUpdate(te);
+	}
+
+	public static void enqueueUpdate(Entity entity) {
+		getEntities(entity.level).queueUpdate(entity);
+	}
+
 	@Nonnull
 	public static InstanceManager<TileEntity> getTiles(IWorld world) {
 		return instanceWorlds.get(world)
@@ -50,14 +62,6 @@ public class InstancedRenderDispatcher {
 		AnimationTickHolder.tick();
 
 		instanceWorlds.get(world).tick();
-	}
-
-	public static void enqueueUpdate(TileEntity te) {
-		getTiles(te.getLevel()).queueUpdate(te);
-	}
-
-	public static void enqueueUpdate(Entity entity) {
-		getEntities(entity.level).queueUpdate(entity);
 	}
 
 	@SubscribeEvent

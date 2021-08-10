@@ -16,6 +16,7 @@ import org.lwjgl.opengl.GLCapabilities;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.material.MaterialSpec;
+import com.jozufozu.flywheel.backend.source.ShaderSources;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
@@ -59,14 +60,6 @@ public class Backend {
 		OptifineHandler.init();
 	}
 
-	void clearContexts() {
-		SpecMetaRegistry.clear();
-		programSpecRegistry.clear();
-		contexts.forEach(IShaderContext::delete);
-		contexts.clear();
-		materialRegistry.clear();
-	}
-
 	/**
 	 * Get a string describing the Flywheel backend. When there are eventually multiple backends
 	 * (Meshlet, MDI, GL31 Draw Instanced are planned), this will name which one is in use.
@@ -98,7 +91,7 @@ public class Backend {
 	/**
 	 * Register a shader context.
 	 */
-	public <C extends ShaderContext<?>> C register(C spec) {
+	public <C extends IShaderContext<?>> C register(C spec) {
 		contexts.add(spec);
 		return spec;
 	}
@@ -199,6 +192,17 @@ public class Backend {
 
 	public static void reloadWorldRenderers() {
 		RenderWork.enqueue(Minecraft.getInstance().levelRenderer::allChanged);
+	}
+
+	/**
+	 * INTERNAL USE ONLY
+	 */
+	public void _clearContexts() {
+		SpecMetaRegistry.clear();
+		programSpecRegistry.clear();
+		contexts.forEach(IShaderContext::delete);
+		contexts.clear();
+		materialRegistry.clear();
 	}
 
 	public static void init() {

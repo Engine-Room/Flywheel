@@ -152,6 +152,14 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 		}
 	}
 
+	public void queueUpdate(T obj) {
+		if (!Backend.getInstance()
+				.canUseInstancing()) return;
+		synchronized (queuedUpdates) {
+			queuedUpdates.add(obj);
+		}
+	}
+
 	/**
 	 * Update the instance associated with an object.
 	 *
@@ -182,14 +190,6 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 					instance.update();
 				}
 			}
-		}
-	}
-
-	public void queueUpdate(T obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return;
-		synchronized (queuedUpdates) {
-			queuedUpdates.add(obj);
 		}
 	}
 

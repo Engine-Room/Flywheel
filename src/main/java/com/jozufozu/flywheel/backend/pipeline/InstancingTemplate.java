@@ -1,16 +1,19 @@
 package com.jozufozu.flywheel.backend.pipeline;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
-import com.jozufozu.flywheel.backend.loading.ProtoProgram;
+import com.jozufozu.flywheel.backend.source.SourceFile;
 
-public class InstancingTemplate implements ITemplate {
+public class InstancingTemplate extends Template<InstancingProgramMetaData> {
 
 	public static final InstancingTemplate INSTANCE = new InstancingTemplate();
 
-	private final Map<SourceFile, InstanceTemplateData> datas = new HashMap<>();
+	public InstancingTemplate() {
+		super(InstancingProgramMetaData::new);
+	}
 
 	@Override
 	public void generateTemplateSource(StringBuilder builder, ShaderType type, SourceFile file) {
@@ -22,51 +25,50 @@ public class InstancingTemplate implements ITemplate {
 	}
 
 	@Override
-	public void attachAttributes(ProtoProgram program, SourceFile file) {
-		InstanceTemplateData data = getData(file);
-		data.vertex.addPrefixedAttributes(program, "a_v_");
-		data.instance.addPrefixedAttributes(program, "a_i_");
-	}
+	public Collection<ShaderInput> getShaderInputs(SourceFile file) {
+		InstancingProgramMetaData data = getMetadata(file);
 
-	public InstanceTemplateData getData(SourceFile file) {
-		return datas.computeIfAbsent(file, InstanceTemplateData::new);
+		List<ShaderInput> inputs = new ArrayList<>(ShaderInput.fromStruct(data.vertex, "a_v_"));
+		inputs.addAll(ShaderInput.fromStruct(data.instance, "a_i_"));
+
+		return inputs;
 	}
 
 	public void vertexFooter(StringBuilder template, SourceFile file) {
-		InstanceTemplateData data = getData(file);
+		InstancingProgramMetaData data = getMetadata(file);
 
-		ITemplate.prefixFields(template, data.vertex, "attribute", "a_v_");
-		ITemplate.prefixFields(template, data.instance, "attribute", "a_i_");
-		ITemplate.prefixFields(template, data.interpolant, "varying", "v2f_");
+		Template.prefixFields(template, data.vertex, "attribute", "a_v_");
+		Template.prefixFields(template, data.instance, "attribute", "a_i_");
+		Template.prefixFields(template, data.interpolant, "varying", "v2f_");
 
 		template.append("void main() {\n");
 		template.append(data.vertexName)
 				.append(" v;\n");
-		ITemplate.assignFields(template, data.vertex, "v.", "a_v_");
+		Template.assignFields(template, data.vertex, "v.", "a_v_");
 
 		template.append(data.instanceName)
 				.append(" i;\n");
-		ITemplate.assignFields(template, data.instance, "i.", "a_i_");
+		Template.assignFields(template, data.instance, "i.", "a_i_");
 
 		template.append(data.interpolantName)
 				.append(" o = ")
 				.append(data.vertexMain.call("v", "i"))
 				.append(";\n");
 
-		ITemplate.assignFields(template, data.interpolant, "v2f_", "o.");
+		Template.assignFields(template, data.interpolant, "v2f_", "o.");
 
 		template.append('}');
 	}
 
 	public void fragmentFooter(StringBuilder template, SourceFile file) {
-		InstanceTemplateData data = getData(file);
+		InstancingProgramMetaData data = getMetadata(file);
 
-		ITemplate.prefixFields(template, data.interpolant, "varying", "v2f_");
+		Template.prefixFields(template, data.interpolant, "varying", "v2f_");
 
 		template.append("void main() {\n");
 		template.append(data.interpolantName)
 				.append(" o;\n");
-		ITemplate.assignFields(template, data.interpolant, "o.", "v2f_");
+		Template.assignFields(template, data.interpolant, "o.", "v2f_");
 
 		template.append(data.fragmentMain.call("o"))
 				.append(";\n");
