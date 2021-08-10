@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend;
+package com.jozufozu.flywheel.util;
 
 import net.minecraft.util.ResourceLocation;
 

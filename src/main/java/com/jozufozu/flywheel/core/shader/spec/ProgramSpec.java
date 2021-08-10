@@ -3,6 +3,8 @@ package com.jozufozu.flywheel.core.shader.spec;
 import java.util.Collections;
 import java.util.List;
 
+import com.jozufozu.flywheel.backend.source.FileResolution;
+import com.jozufozu.flywheel.backend.source.Resolver;
 import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -27,19 +29,19 @@ public class ProgramSpec {
 	// TODO: Block model style inheritance?
 	public static final Codec<ProgramSpec> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			ResourceLocation.CODEC.fieldOf("source")
-					.forGetter(ProgramSpec::getSource),
+					.forGetter(ProgramSpec::getSourceLoc),
 			ProgramState.CODEC.listOf()
 					.optionalFieldOf("states", Collections.emptyList())
 					.forGetter(ProgramSpec::getStates))
 			.apply(instance, ProgramSpec::new));
 
 	public ResourceLocation name;
-	public final ResourceLocation source;
+	public final FileResolution source;
 
 	public final List<ProgramState> states;
 
 	public ProgramSpec(ResourceLocation source, List<ProgramState> states) {
-		this.source = source;
+		this.source = Resolver.INSTANCE.findShader(source);
 		this.states = states;
 	}
 
@@ -47,7 +49,11 @@ public class ProgramSpec {
 		this.name = name;
 	}
 
-	public ResourceLocation getSource() {
+	public ResourceLocation getSourceLoc() {
+		return source.getFileLoc();
+	}
+
+	public FileResolution getSource() {
 		return source;
 	}
 

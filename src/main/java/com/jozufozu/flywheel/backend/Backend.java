@@ -37,6 +37,7 @@ public class Backend {
 
 	public final Minecraft minecraft;
 	public ShaderSources sources;
+	public Loader loader;
 
 	public GLCapabilities capabilities;
 	public GlCompat compat;
@@ -55,7 +56,7 @@ public class Backend {
 		minecraft = Minecraft.getInstance();
 		if (minecraft == null) return;
 
-		sources = new ShaderSources(this);
+		loader = new Loader(this);
 
 		OptifineHandler.init();
 	}

@@ -1,7 +1,5 @@
 #use "flywheel:core/diffuse.glsl"
-
 #use "flywheel:data/modelvertex.glsl"
-
 #use "flywheel:block.frag"
 
 struct Instance {

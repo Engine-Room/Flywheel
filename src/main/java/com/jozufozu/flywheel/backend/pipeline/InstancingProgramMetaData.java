@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.backend.pipeline;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
+import com.jozufozu.flywheel.backend.source.ShaderLoadingException;
 import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.backend.source.error.ErrorReporter;
 import com.jozufozu.flywheel.backend.source.parse.ShaderFunction;
@@ -36,7 +37,7 @@ public class InstancingProgramMetaData {
 		}
 
 		if (!fragmentFunc.isPresent() || !vertexFunc.isPresent()) {
-			throw new RuntimeException();
+			throw new ShaderLoadingException();
 		}
 
 		fragmentMain = fragmentFunc.get();
@@ -50,7 +51,7 @@ public class InstancingProgramMetaData {
 
 		if (vertexParams.size() != 2) {
 			ErrorReporter.generateSpanError(vertexMain.getArgs(), "instancing requires vertex function to have 2 arguments");
-			throw new RuntimeException();
+			throw new ShaderLoadingException();
 		}
 
 		interpolantName = vertexMain.getType();
@@ -76,7 +77,7 @@ public class InstancingProgramMetaData {
 		}
 
 		if (!maybeVertex.isPresent() || !maybeInterpolant.isPresent() || !maybeInstance.isPresent()) {
-			throw new RuntimeException();
+			throw new ShaderLoadingException();
 		}
 
 		interpolant = maybeInterpolant.get();

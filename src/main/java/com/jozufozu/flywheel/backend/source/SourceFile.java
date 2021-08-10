@@ -294,7 +294,7 @@ public class SourceFile {
 			Span use = Span.fromMatcher(this, uses);
 			Span file = Span.fromMatcher(this, uses, 1);
 
-			imports.add(new Import(parent, use, file));
+			imports.add(new Import(Resolver.INSTANCE, use, file));
 
 			elisions.add(use); // we have to trim that later
 		}

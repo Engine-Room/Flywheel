@@ -5,126 +5,27 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Predicate;
 
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.IShaderContext;
-import com.jozufozu.flywheel.backend.ResourceUtil;
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
-import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
-import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
-import com.jozufozu.flywheel.event.GatherContextEvent;
+import com.jozufozu.flywheel.util.ResourceUtil;
 import com.jozufozu.flywheel.util.StreamUtil;
-import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.JsonOps;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.resource.IResourceType;
-import net.minecraftforge.resource.ISelectiveResourceReloadListener;
-import net.minecraftforge.resource.VanillaResourceType;
 
 /**
- * The main entity for loading shaders.
- *
- * <p>
- *     This class is responsible for invoking the loading, parsing, and compilation stages.
- * </p>
+ * The main object for loading and parsing source files.
  */
-public class ShaderSources implements ISelectiveResourceReloadListener {
+public class ShaderSources implements ISourceHolder {
 	public static final String SHADER_DIR = "flywheel/shaders/";
-	public static final String PROGRAM_DIR = "flywheel/programs/";
 	public static final ArrayList<String> EXTENSIONS = Lists.newArrayList(".vert", ".vsh", ".frag", ".fsh", ".glsl");
-	private static final Gson GSON = new GsonBuilder().create();
 
 	private final Map<ResourceLocation, SourceFile> shaderSources = new HashMap<>();
 
-	private final Map<ResourceLocation, FileResolution> resolutions = new HashMap<>();
+	public final Index index;
 
-	private boolean shouldCrash;
-	private final Backend backend;
-
-	public Index index;
-
-	public ShaderSources(Backend backend) {
-		this.backend = backend;
-		IResourceManager manager = backend.minecraft.getResourceManager();
-		if (manager instanceof IReloadableResourceManager) {
-			((IReloadableResourceManager) manager).registerReloadListener(this);
-		}
-	}
-
-	public SourceFile source(ResourceLocation name) {
-		SourceFile source = shaderSources.get(name);
-
-		if (source == null) {
-			throw new ShaderLoadingException(String.format("shader '%s' does not exist", name));
-		}
-
-		return source;
-	}
-
-	public FileResolution resolveFile(ResourceLocation fileLoc) {
-		return resolutions.computeIfAbsent(fileLoc, l -> new FileResolution(this, l));
-	}
-
-	@Deprecated
-	public void notifyError() {
-		shouldCrash = true;
-	}
-
-	@Override
-	public void onResourceManagerReload(IResourceManager manager, Predicate<IResourceType> predicate) {
-		if (predicate.test(VanillaResourceType.SHADERS)) {
-			backend.refresh();
-
-			if (backend.gl20()) {
-				shouldCrash = false;
-
-				backend._clearContexts();
-				resolutions.values().forEach(FileResolution::invalidate);
-				shaderSources.clear();
-				ModLoader.get()
-						.postEvent(new GatherContextEvent(backend));
-
-				loadProgramSpecs(manager);
-				loadShaderSources(manager);
-
-				for (FileResolution resolution : resolutions.values()) {
-					resolution.resolve();
-				}
-
-				for (IShaderContext<?> context : backend.allContexts()) {
-					context.load();
-				}
-
-				if (shouldCrash) {
-					throw new ShaderLoadingException("Could not load all shaders, see log for details");
-				}
-
-				Backend.log.info("Loaded all shader programs.");
-
-				ClientWorld world = Minecraft.getInstance().level;
-				if (Backend.isFlywheelWorld(world)) {
-					// TODO: looks like it might be good to have another event here
-					InstancedRenderDispatcher.loadAllInWorld(world);
-					CrumblingRenderer.reset();
-				}
-			}
-		}
-	}
-
-	private void loadShaderSources(IResourceManager manager) {
+	public ShaderSources(IResourceManager manager) {
 		Collection<ResourceLocation> allShaders = manager.listResources(SHADER_DIR, s -> {
 			for (String ext : EXTENSIONS) {
 				if (s.endsWith(ext)) return true;
@@ -149,30 +50,14 @@ public class ShaderSources implements ISelectiveResourceReloadListener {
 		index = new Index(shaderSources);
 	}
 
+	@Override
+	public SourceFile findSource(ResourceLocation name) {
+		SourceFile source = shaderSources.get(name);
 
-	private void loadProgramSpecs(IResourceManager manager) {
-		Collection<ResourceLocation> programSpecs = manager.listResources(PROGRAM_DIR, s -> s.endsWith(".json"));
-
-		for (ResourceLocation location : programSpecs) {
-			try {
-				IResource file = manager.getResource(location);
-
-				String s = StreamUtil.readToString(file.getInputStream());
-
-				ResourceLocation specName = ResourceUtil.trim(location, PROGRAM_DIR, ".json");
-
-				DataResult<Pair<ProgramSpec, JsonElement>> result = ProgramSpec.CODEC.decode(JsonOps.INSTANCE, GSON.fromJson(s, JsonElement.class));
-
-				ProgramSpec spec = result.get()
-						.orThrow()
-						.getFirst();
-
-				spec.setName(specName);
-
-				backend.register(spec);
-			} catch (Exception e) {
-				Backend.log.error(e);
-			}
+		if (source == null) {
+			throw new ShaderLoadingException(String.format("shader '%s' does not exist", name));
 		}
+
+		return source;
 	}
 }

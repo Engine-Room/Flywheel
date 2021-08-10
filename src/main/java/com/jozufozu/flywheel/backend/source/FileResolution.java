@@ -26,12 +26,10 @@ public class FileResolution {
 	 * Spans that have references that resolved to this.
 	 */
 	private final List<Span> foundSpans = new ArrayList<>();
-	private final ShaderSources parent;
 	private final ResourceLocation fileLoc;
 	private SourceFile file;
 
-	public FileResolution(ShaderSources parent, ResourceLocation fileLoc) {
-		this.parent = parent;
+	public FileResolution(ResourceLocation fileLoc) {
 		this.fileLoc = fileLoc;
 	}
 
@@ -52,8 +50,9 @@ public class FileResolution {
 	 * </p>
 	 * @param span A span where this file is referenced.
 	 */
-	public void addSpan(Span span) {
+	public FileResolution addSpan(Span span) {
 		foundSpans.add(span);
+		return this;
 	}
 
 	/**
@@ -63,10 +62,10 @@ public class FileResolution {
 	 *     Called after all files are loaded. If we can't find the file here, it doesn't exist.
 	 * </p>
 	 */
-	void resolve() {
+	void resolve(ISourceHolder sources) {
 
 		try {
-			file = this.parent.source(fileLoc);
+			file = sources.findSource(fileLoc);
 		} catch (RuntimeException error) {
 			ErrorBuilder builder = new ErrorBuilder();
 			builder.error(String.format("could not find source for file %s", fileLoc));

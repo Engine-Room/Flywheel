@@ -7,7 +7,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.backend.source.FileResolution;
-import com.jozufozu.flywheel.backend.source.ShaderSources;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.core.shader.ExtensibleGlProgram;
@@ -21,15 +20,12 @@ import net.minecraft.util.ResourceLocation;
 
 public class WorldShaderPipeline<P extends WorldProgram> implements IShaderPipeline<P> {
 
-	private final ShaderSources sources;
-
 	private final ExtensibleGlProgram.Factory<P> factory;
 
 	private final Template<?> template;
 	private final FileResolution header;
 
-	public WorldShaderPipeline(ShaderSources sources, ExtensibleGlProgram.Factory<P> factory, Template<?> template, FileResolution header) {
-		this.sources = sources;
+	public WorldShaderPipeline(ExtensibleGlProgram.Factory<P> factory, Template<?> template, FileResolution header) {
 		this.factory = factory;
 		this.template = template;
 		this.header = header;
@@ -37,7 +33,7 @@ public class WorldShaderPipeline<P extends WorldProgram> implements IShaderPipel
 
 	public IMultiProgram<P> compile(ProgramSpec spec) {
 
-		SourceFile file = sources.source(spec.source);
+		SourceFile file = spec.getSource().getFile();
 
 		return compile(spec.name, file, spec.getStates());
 	}

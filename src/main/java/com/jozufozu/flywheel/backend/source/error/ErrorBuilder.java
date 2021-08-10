@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.backend.source.error;
 
+import javax.annotation.Nullable;
+
 import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.backend.source.span.Span;
 import com.jozufozu.flywheel.util.FlwUtil;
@@ -55,7 +57,7 @@ public class ErrorBuilder {
 		return this;
 	}
 
-	public ErrorBuilder hintIncludeFor(Span span, CharSequence msg) {
+	public ErrorBuilder hintIncludeFor(@Nullable Span span, CharSequence msg) {
 		if (span == null) return this;
 
 		hint("add " + span.getSourceFile().importStatement() + " " + msg)
