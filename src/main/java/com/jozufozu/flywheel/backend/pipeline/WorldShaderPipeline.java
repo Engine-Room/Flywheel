@@ -1,22 +1,15 @@
 package com.jozufozu.flywheel.backend.pipeline;
 
-import static org.lwjgl.opengl.GL11.GL_TRUE;
-import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
 import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
-import static org.lwjgl.opengl.GL20.glGetProgrami;
 
 import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.lwjgl.opengl.GL20;
-
-import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.FileResolution;
-import com.jozufozu.flywheel.backend.ShaderSources;
-import com.jozufozu.flywheel.backend.gl.shader.GlShader;
+import com.jozufozu.flywheel.backend.source.FileResolution;
+import com.jozufozu.flywheel.backend.source.ShaderSources;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
-import com.jozufozu.flywheel.backend.loading.ProtoProgram;
+import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.core.shader.ExtensibleGlProgram;
 import com.jozufozu.flywheel.core.shader.GameStateProgram;
 import com.jozufozu.flywheel.core.shader.IMultiProgram;
@@ -32,10 +25,10 @@ public class WorldShaderPipeline<P extends WorldProgram> implements IShaderPipel
 
 	private final ExtensibleGlProgram.Factory<P> factory;
 
-	private final ITemplate template;
+	private final Template<?> template;
 	private final FileResolution header;
 
-	public WorldShaderPipeline(ShaderSources sources, ExtensibleGlProgram.Factory<P> factory, ITemplate template, FileResolution header) {
+	public WorldShaderPipeline(ShaderSources sources, ExtensibleGlProgram.Factory<P> factory, Template<?> template, FileResolution header) {
 		this.sources = sources;
 		this.factory = factory;
 		this.template = template;
@@ -44,48 +37,40 @@ public class WorldShaderPipeline<P extends WorldProgram> implements IShaderPipel
 
 	public IMultiProgram<P> compile(ProgramSpec spec) {
 
-		SourceFile file = sources.source(spec.vert);
+		SourceFile file = sources.source(spec.source);
 
 		return compile(spec.name, file, spec.getStates());
 	}
 
 	public IMultiProgram<P> compile(ResourceLocation name, SourceFile file, List<ProgramState> variants) {
-		ShaderBuilder shader = new ShaderBuilder(name, template, header)
-				.setMainSource(file)
-				.setVersion(GLSLVersion.V110);
+		WorldShader shader = new WorldShader(name, template, header)
+				.setMainSource(file);
 
-		GameStateProgram.Builder<P> builder = GameStateProgram.builder(compile(shader, name, null));
+		GameStateProgram.Builder<P> builder = GameStateProgram.builder(compile(shader, null));
 
 		for (ProgramState variant : variants) {
-			builder.withVariant(variant.getContext(), compile(shader, name, variant));
+			builder.withVariant(variant.getContext(), compile(shader, variant));
 		}
 
 		return builder.build();
 	}
 
-	private P compile(ShaderBuilder shader, ResourceLocation name, @Nullable ProgramState variant) {
+	private P compile(WorldShader shader, @Nullable ProgramState variant) {
 
 		if (variant != null) {
 			shader.setDefines(variant.getDefines());
 		}
 
-		GlShader vertex = shader.compile(name, ShaderType.VERTEX);
-		GlShader fragment = shader.compile(name, ShaderType.FRAGMENT);
-
-		ProtoProgram program = new ProtoProgram();
-
-		program.attachShader(vertex);
-		program.attachShader(fragment);
-
-		template.attachAttributes(program, shader.mainFile);
-
-		program.link(name);
-		program.deleteLinkedShaders();
+		ProtoProgram program = shader.createProgram()
+				.compilePart(ShaderType.VERTEX)
+				.compilePart(ShaderType.FRAGMENT)
+				.link()
+				.deleteLinkedShaders();
 
 		if (variant != null) {
-			return factory.create(name, program.program, variant.getExtensions());
+			return factory.create(shader.name, program.program, variant.getExtensions());
 		} else {
-			return factory.create(name, program.program, null);
+			return factory.create(shader.name, program.program, null);
 		}
 	}
 }

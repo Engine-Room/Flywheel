@@ -1,6 +1,5 @@
 {
-  "vert": "flywheel:model.vert",
-  "frag": "flywheel:block.frag",
+  "source": "flywheel:model.vert",
   "states": [
     {
       "when": {

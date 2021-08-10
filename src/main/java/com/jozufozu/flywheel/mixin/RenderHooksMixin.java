@@ -95,6 +95,9 @@ public class RenderHooksMixin {
 
 	// Instancing
 
+	/**
+	 * This gets called when a block is marked for rerender by vanilla.
+	 */
 	@Inject(at = @At("TAIL"), method = "setBlockDirty(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;)V")
 	private void checkUpdate(BlockPos pos, BlockState lastState, BlockState newState, CallbackInfo ci) {
 		InstancedRenderDispatcher.getTiles(level)

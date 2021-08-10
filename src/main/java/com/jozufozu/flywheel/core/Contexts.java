@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.core;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.FileResolution;
+import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.ResourceUtil;
 import com.jozufozu.flywheel.backend.SpecMetaRegistry;
 import com.jozufozu.flywheel.backend.pipeline.IShaderPipeline;
@@ -40,8 +40,8 @@ public class Contexts {
 		IShaderPipeline<CrumblingProgram> crumblingPipeline = new WorldShaderPipeline<>(backend.sources, CrumblingProgram::new, InstancingTemplate.INSTANCE, crumblingBuiltins);
 		IShaderPipeline<WorldProgram> worldPipeline = new WorldShaderPipeline<>(backend.sources, WorldProgram::new, InstancingTemplate.INSTANCE, worldBuiltins);
 
-		CRUMBLING = backend.register(new WorldContext<>(backend, crumblingPipeline).withName(Names.CRUMBLING));
-		WORLD = backend.register(new WorldContext<>(backend, worldPipeline).withName(Names.WORLD));
+		CRUMBLING = backend.register(WorldContext.builder(backend, Names.CRUMBLING).build(crumblingPipeline));
+		WORLD = backend.register(WorldContext.builder(backend, Names.WORLD).build(worldPipeline));
 	}
 
 	public static class Names {
