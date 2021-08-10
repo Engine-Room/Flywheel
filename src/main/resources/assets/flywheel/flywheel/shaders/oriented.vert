@@ -1,4 +1,3 @@
-#use "flywheel:core/matutils.glsl"
 #use "flywheel:core/quaternion.glsl"
 #use "flywheel:core/diffuse.glsl"
 

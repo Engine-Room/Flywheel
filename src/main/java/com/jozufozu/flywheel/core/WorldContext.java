@@ -49,7 +49,7 @@ public class WorldContext<P extends WorldProgram> implements IShaderContext<P> {
 		} catch (Exception e) {
 			Backend.log.error("Error loading program {}", spec.name);
 			Backend.log.error("", e);
-			backend.sources.notifyError();
+			backend.loader.notifyError();
 		}
 	}
 

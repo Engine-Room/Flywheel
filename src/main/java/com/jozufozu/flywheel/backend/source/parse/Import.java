@@ -7,7 +7,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.backend.source.FileResolution;
-import com.jozufozu.flywheel.backend.source.ShaderSources;
+import com.jozufozu.flywheel.backend.source.Resolver;
 import com.jozufozu.flywheel.backend.source.error.ErrorReporter;
 import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.backend.source.span.Span;
@@ -21,15 +21,13 @@ public class Import extends AbstractShaderElement {
 	private final Span file;
 
 	private final FileResolution resolution;
-	private final ResourceLocation fileLoc;
 
-	public Import(ShaderSources parent, Span self, Span file) {
+	public Import(Resolver resolver, Span self, Span file) {
 		super(self);
 		this.file = file;
 
-		fileLoc = toRL(file);
-		resolution = parent.resolveFile(fileLoc);
-		resolution.addSpan(file);
+		resolution = resolver.findShader(toRL(file))
+				.addSpan(file);
 
 		IMPORTS.add(this);
 	}
