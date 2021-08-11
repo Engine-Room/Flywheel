@@ -35,9 +35,7 @@ public class Backend {
 		return INSTANCE;
 	}
 
-	public final Minecraft minecraft;
-	public ShaderSources sources;
-	public Loader loader;
+	public final Loader loader;
 
 	public GLCapabilities capabilities;
 	public GlCompat compat;
@@ -52,10 +50,6 @@ public class Backend {
 	private final Map<ResourceLocation, ProgramSpec> programSpecRegistry = new HashMap<>();
 
 	protected Backend() {
-		// Can be null when running datagenerators due to the unfortunate time we call this
-		minecraft = Minecraft.getInstance();
-		if (minecraft == null) return;
-
 		loader = new Loader(this);
 
 		OptifineHandler.init();
