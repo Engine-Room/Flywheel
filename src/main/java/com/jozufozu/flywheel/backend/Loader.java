@@ -42,15 +42,18 @@ public class Loader implements ISelectiveResourceReloadListener {
 	private static final Gson GSON = new GsonBuilder().create();
 
 	private final Backend backend;
-	public boolean shouldCrash;
-
+	private boolean shouldCrash;
 
 	public Loader(Backend backend) {
 		this.backend = backend;
 
-		IResourceManager manager = backend.minecraft.getResourceManager();
-		if (manager instanceof IReloadableResourceManager) {
-			((IReloadableResourceManager) manager).registerReloadListener(this);
+		// Can be null when running datagenerators due to the unfortunate time we call this
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft != null) {
+			IResourceManager manager = minecraft.getResourceManager();
+			if (manager instanceof IReloadableResourceManager) {
+				((IReloadableResourceManager) manager).registerReloadListener(this);
+			}
 		}
 	}
 
@@ -71,11 +74,11 @@ public class Loader implements ISelectiveResourceReloadListener {
 				ModLoader.get()
 						.postEvent(new GatherContextEvent(backend));
 
-				backend.sources = new ShaderSources(manager);
+				ShaderSources sources = new ShaderSources(manager);
 
 				loadProgramSpecs(manager);
 
-				Resolver.INSTANCE.resolve(backend.sources);
+				Resolver.INSTANCE.resolve(sources);
 
 				for (IShaderContext<?> context : backend.allContexts()) {
 					context.load();
