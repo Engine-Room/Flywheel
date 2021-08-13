@@ -1,4 +1,6 @@
 0.2.3:
+Fixes
+ - Fix crash moving a deleted LightVolume
 Technical/API:
  - Alter BeginFrameEvent to enable compatibility with optifine shadows
 
