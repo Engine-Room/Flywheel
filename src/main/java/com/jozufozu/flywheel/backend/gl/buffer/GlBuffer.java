@@ -2,27 +2,17 @@ package com.jozufozu.flywheel.backend.gl.buffer;
 
 import java.nio.ByteBuffer;
 
-import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
 
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
-import com.jozufozu.flywheel.backend.gl.versioned.MapBufferRange;
 
-public class GlBuffer extends GlObject {
+public abstract class GlBuffer extends GlObject {
 
 	protected final GlBufferType type;
-	protected final GlBufferUsage usage;
 
 	public GlBuffer(GlBufferType type) {
-		this(type, GlBufferUsage.STATIC_DRAW);
-	}
-
-	public GlBuffer(GlBufferType type, GlBufferUsage usage) {
-		setHandle(GL20.glGenBuffers());
+		_create();
 		this.type = type;
-		this.usage = usage;
 	}
 
 	public GlBufferType getBufferTarget() {
@@ -30,37 +20,21 @@ public class GlBuffer extends GlObject {
 	}
 
 	public void bind() {
-		bind(type);
-	}
-
-	public void bind(GlBufferType type) {
 		GL20.glBindBuffer(type.glEnum, handle());
 	}
 
 	public void unbind() {
-		unbind(type);
+		GL20.glBindBuffer(type.glEnum, 0);
 	}
 
-	public void unbind(GlBufferType bufferType) {
-		GL20.glBindBuffer(bufferType.glEnum, 0);
-	}
+	public abstract void alloc(long size);
 
-	public void alloc(int size) {
-		GL15.glBufferData(type.glEnum, size, usage.glEnum);
-	}
+	public abstract void upload(ByteBuffer directBuffer);
 
-	public void upload(ByteBuffer directBuffer) {
-		GL15.glBufferData(type.glEnum, directBuffer, usage.glEnum);
-	}
+	public abstract MappedBuffer getBuffer(int offset, int length);
 
-	public MappedBuffer getBuffer(int offset, int length) {
-		if (Backend.getInstance().compat.mapBufferRange != MapBufferRange.UNSUPPORTED) {
-			return new MappedBufferRange(this, offset, length, GL30.GL_MAP_WRITE_BIT);
-		} else {
-			MappedFullBuffer fullBuffer = new MappedFullBuffer(this, MappedBufferUsage.WRITE_ONLY);
-			fullBuffer.position(offset);
-			return fullBuffer;
-		}
+	protected void _create() {
+		setHandle(GL20.glGenBuffers());
 	}
 
 	protected void deleteInternal(int handle) {

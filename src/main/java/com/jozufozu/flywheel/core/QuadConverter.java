@@ -14,6 +14,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferImpl;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -141,7 +142,7 @@ public class QuadConverter {
 	}
 
 	private GlBuffer getBuffer(GlNumericType type) {
-		return ebos.computeIfAbsent(type, $ -> new GlBuffer(GlBufferType.ELEMENT_ARRAY_BUFFER));
+		return ebos.computeIfAbsent(type, $ -> new GlBufferImpl(GlBufferType.ELEMENT_ARRAY_BUFFER));
 	}
 
 	/**

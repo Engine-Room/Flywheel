@@ -8,8 +8,10 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferImpl;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.PersistentGlBuffer;
 import com.jozufozu.flywheel.backend.material.MaterialSpec;
 import com.jozufozu.flywheel.backend.model.IBufferedModel;
 import com.jozufozu.flywheel.backend.model.IndexedModel;
@@ -105,7 +107,7 @@ public class Instancer<D extends InstanceData> {
 
 		model = new IndexedModel(iModel);
 		vao = new GlVertexArray();
-		instanceVBO = new GlBuffer(GlBufferType.ARRAY_BUFFER);
+		instanceVBO = new PersistentGlBuffer(GlBufferType.ARRAY_BUFFER);
 
 		vao.bind();
 
