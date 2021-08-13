@@ -37,11 +37,8 @@ public class VecBuffer {
 
 	public VecBuffer putFloatArray(float[] floats) {
 
-		for (float f : floats) {
-			internal.putFloat(f);
-		}
-		//		internal.asFloatBuffer().put(floats);
-		//		internal.position(internal.position() + floats.length * 4);
+		internal.asFloatBuffer().put(floats);
+		internal.position(internal.position() + floats.length * 4);
 
 		return this;
 	}
