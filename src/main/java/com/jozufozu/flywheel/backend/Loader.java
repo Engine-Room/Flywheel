@@ -44,6 +44,8 @@ public class Loader implements ISelectiveResourceReloadListener {
 	private final Backend backend;
 	private boolean shouldCrash;
 
+	private boolean firstLoad = true;
+
 	public Loader(Backend backend) {
 		this.backend = backend;
 
@@ -72,7 +74,7 @@ public class Loader implements ISelectiveResourceReloadListener {
 
 				Resolver.INSTANCE.invalidate();
 				ModLoader.get()
-						.postEvent(new GatherContextEvent(backend));
+						.postEvent(new GatherContextEvent(backend, firstLoad));
 
 				ShaderSources sources = new ShaderSources(manager);
 
@@ -97,6 +99,8 @@ public class Loader implements ISelectiveResourceReloadListener {
 					CrumblingRenderer.reset();
 				}
 			}
+
+			firstLoad = false;
 		}
 	}
 

@@ -18,8 +18,9 @@ import net.minecraftforge.event.TickEvent;
 
 /**
  * A manager class for a single world where instancing is supported.
- * <br>
- * The material manager is shared between the different instance managers.
+ * <p>
+ *     The material manager is shared between the different instance managers.
+ * </p>
  */
 public class InstanceWorld {
 	protected final MaterialManager<WorldProgram> materialManager;
@@ -63,11 +64,12 @@ public class InstanceWorld {
 	}
 
 	/**
-	 * Get ready to render a frame:
-	 * <br>
-	 * Check and shift the origin coordinate.
-	 * <br>
-	 * Call {@link IDynamicInstance#beginFrame()} on all instances in this world.
+	 * Get ready to render a frame.
+	 * <p>
+	 *     Check and shift the origin coordinate.
+	 *     <br>
+	 *     Call {@link IDynamicInstance#beginFrame()} on all instances in this world.
+	 * </p>
 	 */
 	public void beginFrame(BeginFrameEvent event) {
 		materialManager.checkAndShiftOrigin(event.getInfo());
@@ -78,8 +80,9 @@ public class InstanceWorld {
 
 	/**
 	 * Tick the renderers after the game has ticked:
-	 * <br>
-	 * Call {@link ITickableInstance#tick()} on all instances in this world.
+	 * <p>
+	 *     Call {@link ITickableInstance#tick()} on all instances in this world.
+	 * </p>
 	 */
 	public void tick() {
 		Minecraft mc = Minecraft.getInstance();

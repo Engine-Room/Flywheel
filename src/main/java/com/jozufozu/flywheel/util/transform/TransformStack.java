@@ -44,6 +44,18 @@ public interface TransformStack {
 		return multiply(Vector3f.ZP, angle);
 	}
 
+	default TransformStack rotateXRadians(double angle) {
+		return multiplyRadians(Vector3f.XP, angle);
+	}
+
+	default TransformStack rotateYRadians(double angle) {
+		return multiplyRadians(Vector3f.YP, angle);
+	}
+
+	default TransformStack rotateZRadians(double angle) {
+		return multiplyRadians(Vector3f.ZP, angle);
+	}
+
 	default TransformStack centre() {
 		return translateAll(0.5);
 	}
@@ -76,6 +88,10 @@ public interface TransformStack {
 		return translate(vec.x, vec.y, vec.z);
 	}
 
+	default TransformStack translate(Vector3f vec) {
+		return translate(vec.x(), vec.y(), vec.z());
+	}
+
 	default TransformStack translateBack(Vector3d vec) {
 		return translate(-vec.x, -vec.y, -vec.z);
 	}
@@ -93,5 +109,35 @@ public interface TransformStack {
 		if (angle == 0)
 			return this;
 		return multiply(axis.rotationDegrees((float) angle));
+	}
+
+	default TransformStack multiplyRadians(Vector3f axis, double angle) {
+		if (angle == 0)
+			return this;
+		return multiply(axis.rotation((float) angle));
+	}
+
+    default TransformStack rotateToFace(Direction facing) {
+		switch (facing) {
+		case SOUTH:
+			multiply(Vector3f.YP.rotationDegrees(180));
+			break;
+		case WEST:
+			multiply(Vector3f.YP.rotationDegrees(90));
+			break;
+		case NORTH:
+			multiply(Vector3f.YP.rotationDegrees(0));
+			break;
+		case EAST:
+			multiply(Vector3f.YP.rotationDegrees(270));
+			break;
+		case UP:
+			multiply(Vector3f.XP.rotationDegrees(90));
+			break;
+		case DOWN:
+			multiply(Vector3f.XN.rotationDegrees(90));
+			break;
+		}
+		return this;
 	}
 }

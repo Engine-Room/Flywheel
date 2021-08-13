@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Optional;
 
 import net.minecraft.client.Minecraft;
@@ -55,13 +56,18 @@ public class OptifineHandler {
 	public static void refresh() {
 		if (optifine == null) return;
 
+		boolean shadersOff = areShadersDisabledInOptifineConfigFile();
+
+		handler = new OptifineHandler(!shadersOff);
+	}
+
+	private static boolean areShadersDisabledInOptifineConfigFile() {
 		File dir = Minecraft.getInstance().gameDirectory;
 
 		File shaderOptions = new File(dir, "optionsshaders.txt");
 
 		boolean shadersOff = true;
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(shaderOptions));
+		try (BufferedReader reader = new BufferedReader(new FileReader(shaderOptions))) {
 
 			shadersOff = reader.lines()
 					.anyMatch(it -> {
@@ -73,11 +79,10 @@ public class OptifineHandler {
 						}
 						return false;
 					});
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			Backend.log.info("No shader config found.");
 		}
-
-		handler = new OptifineHandler(!shadersOff);
+		return shadersOff;
 	}
 
 	public boolean isUsingShaders() {

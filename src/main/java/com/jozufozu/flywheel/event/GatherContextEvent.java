@@ -8,12 +8,21 @@ import net.minecraftforge.fml.event.lifecycle.IModBusEvent;
 public class GatherContextEvent extends Event implements IModBusEvent {
 
 	private final Backend backend;
+	private final boolean firstLoad;
 
-	public GatherContextEvent(Backend backend) {
+	public GatherContextEvent(Backend backend, boolean firstLoad) {
 		this.backend = backend;
+		this.firstLoad = firstLoad;
 	}
 
 	public Backend getBackend() {
 		return backend;
+	}
+
+	/**
+	 * @return true iff it is the first time the event is fired.
+	 */
+	public boolean isFirstLoad() {
+		return firstLoad;
 	}
 }

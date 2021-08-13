@@ -17,6 +17,7 @@ import com.jozufozu.flywheel.core.materials.OrientedData;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
@@ -89,13 +90,29 @@ public abstract class EntityInstance<E extends Entity> implements IInstance {
 	 * {@link TileInstanceManager}s are allowed to arbitrarily adjust the origin, and
 	 * shift the world matrix provided as a shader uniform accordingly.
 	 *
-	 * @return The {@link BlockPos position} of the {@link Entity} this instance
-	 * represents should be rendered at to appear in the correct location.
+	 * @return The position this instance should be rendered at to appear in the correct location.
 	 */
 	public Vector3f getInstancePosition() {
 		Vector3d pos = entity.position();
 		Vector3i origin = materialManager.getOriginCoordinate();
 		return new Vector3f((float) (pos.x - origin.getX()), (float) (pos.y - origin.getY()), (float) (pos.z - origin.getZ()));
+	}
+
+	/**
+	 * In order to accommodate for floating point precision errors at high coordinates,
+	 * {@link TileInstanceManager}s are allowed to arbitrarily adjust the origin, and
+	 * shift the world matrix provided as a shader uniform accordingly.
+	 *
+	 * @return The position this instance should be rendered at to appear in the correct location.
+	 */
+	public Vector3f getInstancePosition(float partialTicks) {
+		Vector3d pos = entity.position();
+		Vector3i origin = materialManager.getOriginCoordinate();
+		return new Vector3f(
+				(float) (MathHelper.lerp(partialTicks, entity.xOld, pos.x) - origin.getX()),
+				(float) (MathHelper.lerp(partialTicks, entity.yOld, pos.y) - origin.getY()),
+				(float) (MathHelper.lerp(partialTicks, entity.zOld, pos.z) - origin.getZ())
+		);
 	}
 
 	@Override
