@@ -37,10 +37,10 @@ import com.jozufozu.flywheel.util.AttribUtil;
 public class Instancer<D extends InstanceData> {
 
 	protected final Supplier<IModel> gen;
-	protected IBufferedModel model;
-
 	protected final VertexFormat instanceFormat;
 	protected final IInstanceFactory<D> factory;
+
+	protected IBufferedModel model;
 	protected GlVertexArray vao;
 	protected GlBuffer instanceVBO;
 	protected int glBufferSize = -1;
@@ -81,7 +81,7 @@ public class Instancer<D extends InstanceData> {
 
 	public void render() {
 		if (!isInitialized()) init();
-		if (deleted) return;
+		if (invalid()) return;
 
 		vao.bind();
 		renderSetup();
@@ -91,13 +91,19 @@ public class Instancer<D extends InstanceData> {
 		vao.unbind();
 	}
 
+	private boolean invalid() {
+		return deleted || model == null;
+	}
+
 	private void init() {
-		model = new IndexedModel(gen.get());
 		initialized = true;
+		IModel iModel = gen.get();
 
-		if (model.getVertexCount() <= 0)
-			throw new IllegalArgumentException("Refusing to instance a model with no vertices.");
+		if (iModel.empty()) {
+			return;
+		}
 
+		model = new IndexedModel(iModel);
 		vao = new GlVertexArray();
 		instanceVBO = new GlBuffer(GlBufferType.ARRAY_BUFFER);
 
@@ -133,16 +139,14 @@ public class Instancer<D extends InstanceData> {
 	 * Free acquired resources. All other Instancer methods are undefined behavior after calling delete.
 	 */
 	public void delete() {
-		if (deleted) return;
+		if (invalid()) return;
 
 		deleted = true;
 
-		if (isInitialized()) {
-			model.delete();
+		model.delete();
 
-			instanceVBO.delete();
-			vao.delete();
-		}
+		instanceVBO.delete();
+		vao.delete();
 	}
 
 	private D _add(D instanceData) {

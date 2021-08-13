@@ -28,13 +28,17 @@ public class InstancedRenderDispatcher {
 	private static final WorldAttached<InstanceWorld> instanceWorlds = new WorldAttached<>($ -> new InstanceWorld());
 
 	/**
-	 * Call this when you want to invoke
-	 * @param te
+	 * Call this when you want to manually run {@link IInstance#update()}.
+	 * @param te The tile whose instance you want to update.
 	 */
 	public static void enqueueUpdate(TileEntity te) {
 		getTiles(te.getLevel()).queueUpdate(te);
 	}
 
+	/**
+	 * Call this when you want to manually run {@link IInstance#update()}.
+	 * @param entity The entity whose instance you want to update.
+	 */
 	public static void enqueueUpdate(Entity entity) {
 		getEntities(entity.level).queueUpdate(entity);
 	}
@@ -66,7 +70,10 @@ public class InstancedRenderDispatcher {
 
 	@SubscribeEvent
 	public static void onBeginFrame(BeginFrameEvent event) {
-		instanceWorlds.get(event.getWorld()).beginFrame(event);
+		if (Backend.isGameActive()) {
+			instanceWorlds.get(event.getWorld())
+					.beginFrame(event);
+		}
 	}
 
 	@SubscribeEvent

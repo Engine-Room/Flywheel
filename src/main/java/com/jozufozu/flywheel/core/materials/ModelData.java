@@ -20,6 +20,19 @@ public class ModelData extends BasicData {
 		return this;
 	}
 
+	/**
+	 * Sets the transform matrices to be all zeros.
+	 *
+	 * <p>
+	 *     This will allow the gpu to quickly discard all geometry for this instance, effectively "turning it off".
+	 * </p>
+	 */
+	public ModelData setEmptyTransform() {
+		matrices = empty;
+		markDirty();
+		return this;
+	}
+
 	@Override
 	public void write(MappedBuffer buf) {
 		super.write(buf);

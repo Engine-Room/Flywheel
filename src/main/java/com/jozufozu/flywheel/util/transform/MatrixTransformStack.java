@@ -24,6 +24,22 @@ public class MatrixTransformStack implements TransformStack {
 		return internal;
 	}
 
+	public MatrixTransformStack setIdentity() {
+		if (internal.clear()) {
+			MatrixStack.Entry last = internal.last();
+
+			last.normal()
+					.setIdentity();
+			last.pose()
+					.setIdentity();
+		} else {
+			internal.popPose();
+			internal.pushPose();
+		}
+
+		return this;
+	}
+
 	@Override
 	public TransformStack translate(double x, double y, double z) {
 		internal.translate(x, y, z);
