@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL20;
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferImpl;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 
 import net.minecraftforge.common.util.Lazy;
@@ -25,7 +26,7 @@ public class FullscreenQuad {
 	private final GlBuffer vbo;
 
 	private FullscreenQuad() {
-		vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER);
+		vbo = new GlBufferImpl(GlBufferType.ARRAY_BUFFER);
 		vbo.bind();
 		vbo.alloc(bufferSize);
 		vbo.getBuffer(0, bufferSize)

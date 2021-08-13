@@ -8,6 +8,7 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferImpl;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.core.model.IModel;
@@ -24,7 +25,7 @@ public class BufferedModel implements IBufferedModel {
 		this.model = model;
 		this.primitiveMode = primitiveMode;
 
-		vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER);
+		vbo = new GlBufferImpl(GlBufferType.ARRAY_BUFFER);
 
 		vbo.bind();
 		// allocate the buffer on the gpu
