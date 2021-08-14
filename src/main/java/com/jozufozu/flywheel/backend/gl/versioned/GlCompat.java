@@ -29,6 +29,7 @@ public class GlCompat {
 	public final DrawInstanced drawInstanced;
 	public final Blit blit;
 	public final Framebuffer fbo;
+	public final BufferStorage bufferStorage;
 
 	public final RGPixelFormat pixelFormat;
 
@@ -40,6 +41,7 @@ public class GlCompat {
 		drawInstanced = getLatest(DrawInstanced.class, caps);
 		blit = getLatest(Blit.class, caps);
 		fbo = getLatest(Framebuffer.class, caps);
+		bufferStorage = getLatest(BufferStorage.class, caps);
 
 		pixelFormat = getLatest(RGPixelFormat.class, caps);
 	}
@@ -62,6 +64,10 @@ public class GlCompat {
 
 	public boolean blitSupported() {
 		return blit != Blit.UNSUPPORTED;
+	}
+
+	public boolean bufferStorageSupported() {
+		return bufferStorage != BufferStorage.UNSUPPORTED;
 	}
 
 	/**
