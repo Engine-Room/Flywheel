@@ -90,6 +90,9 @@ public class Instancer<D extends InstanceData> {
 
 		if (glInstanceCount > 0) model.drawInstances(glInstanceCount);
 
+		// persistent mapping sync point
+		instanceVBO.doneForThisFrame();
+
 		vao.unbind();
 	}
 
