@@ -6,6 +6,8 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL44;
 import org.lwjgl.opengl.GL46;
 
+import com.jozufozu.flywheel.backend.Backend;
+
 public class PersistentMappedBuffer extends MappedBuffer {
 
 	PersistentGlBuffer owner;
@@ -14,7 +16,7 @@ public class PersistentMappedBuffer extends MappedBuffer {
 		super(buffer);
 		owner = buffer;
 
-		ByteBuffer byteBuffer = GL44.glMapBufferRange(owner.type.glEnum, 0, owner.size, owner.flags);
+		ByteBuffer byteBuffer = Backend.getInstance().compat.mapBufferRange.mapBuffer(owner.type, 0, owner.size, owner.flags);
 
 		setInternal(byteBuffer);
 	}

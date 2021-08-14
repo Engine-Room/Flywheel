@@ -8,15 +8,15 @@ import org.lwjgl.opengl.GL30;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.versioned.MapBufferRange;
 
-public class GlBufferImpl extends GlBuffer {
+public class MappedGlBuffer extends GlBuffer {
 
 	protected final GlBufferUsage usage;
 
-	public GlBufferImpl(GlBufferType type) {
+	public MappedGlBuffer(GlBufferType type) {
 		this(type, GlBufferUsage.STATIC_DRAW);
 	}
 
-	public GlBufferImpl(GlBufferType type, GlBufferUsage usage) {
+	public MappedGlBuffer(GlBufferType type, GlBufferUsage usage) {
 		super(type);
 		this.usage = usage;
 	}
