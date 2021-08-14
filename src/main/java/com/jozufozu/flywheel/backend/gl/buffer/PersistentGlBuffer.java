@@ -20,9 +20,7 @@ public class PersistentGlBuffer extends GlBuffer {
 	}
 
 	@Override
-	public void unbind() {
-		super.unbind();
-
+	public void doneForThisFrame() {
 		fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 	}
 

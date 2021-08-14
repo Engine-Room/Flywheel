@@ -27,6 +27,10 @@ public abstract class GlBuffer extends GlObject {
 		GL20.glBindBuffer(type.glEnum, 0);
 	}
 
+	public void doneForThisFrame() {
+
+	}
+
 	public abstract void alloc(long size);
 
 	public abstract void upload(ByteBuffer directBuffer);
