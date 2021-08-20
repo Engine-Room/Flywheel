@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.backend.gl.versioned.instancing;
 import org.lwjgl.opengl.ARBDrawInstanced;
 import org.lwjgl.opengl.EXTDrawInstanced;
 import org.lwjgl.opengl.GL31;
+import org.lwjgl.opengl.GL46;
 import org.lwjgl.opengl.GLCapabilities;
 
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
@@ -10,7 +11,7 @@ import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.versioned.GlVersioned;
 
 public enum DrawInstanced implements GlVersioned {
-	GL31_DRAW_INSTANCED {
+	GL31_CORE {
 		@Override
 		public boolean supported(GLCapabilities caps) {
 			return caps.OpenGL31;
@@ -26,7 +27,7 @@ public enum DrawInstanced implements GlVersioned {
 			GL31.glDrawElementsInstanced(mode.glEnum, elementCount, type.getGlEnum(), indices, primcount);
 		}
 	},
-	ARB_DRAW_INSTANCED {
+	ARB {
 		@Override
 		public boolean supported(GLCapabilities caps) {
 			return caps.GL_ARB_draw_instanced;
@@ -42,7 +43,7 @@ public enum DrawInstanced implements GlVersioned {
 			ARBDrawInstanced.glDrawElementsInstancedARB(mode.glEnum, elementCount, type.getGlEnum(), indices, primcount);
 		}
 	},
-	EXT_DRAW_INSTANCED {
+	EXT {
 		@Override
 		public boolean supported(GLCapabilities caps) {
 			return caps.GL_EXT_draw_instanced;

@@ -1,6 +1,9 @@
 package com.jozufozu.flywheel.backend.gl.buffer;
 
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.gl.error.GlError;
+import com.jozufozu.flywheel.backend.gl.error.GlException;
+import com.jozufozu.flywheel.util.StringUtil;
 
 public class MappedBufferRange extends MappedBuffer {
 
@@ -27,6 +30,12 @@ public class MappedBufferRange extends MappedBuffer {
 	protected void checkAndMap() {
 		if (!mapped) {
 			setInternal(Backend.getInstance().compat.mapBufferRange.mapBuffer(owner.type, offset, length, access));
+
+			GlError error = GlError.poll();
+
+			if (error != null) {
+				throw new GlException(error, StringUtil.args("mapBufferRange", owner.type, offset, length, access));
+			}
 			mapped = true;
 		}
 	}

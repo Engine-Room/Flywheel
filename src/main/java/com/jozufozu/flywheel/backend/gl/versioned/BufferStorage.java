@@ -4,6 +4,8 @@ import org.lwjgl.opengl.ARBBufferStorage;
 import org.lwjgl.opengl.GL44;
 import org.lwjgl.opengl.GLCapabilities;
 
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
+
 public enum BufferStorage implements GlVersioned {
 
 	GL44CORE {
@@ -13,8 +15,8 @@ public enum BufferStorage implements GlVersioned {
 		}
 
 		@Override
-		public void bufferStorage(int target, long size, int flags) {
-			GL44.glBufferStorage(target, size, flags);
+		public void bufferStorage(GlBufferType target, long size, int flags) {
+			GL44.glBufferStorage(target.glEnum, size, flags);
 		}
 	},
 	ARB {
@@ -24,8 +26,8 @@ public enum BufferStorage implements GlVersioned {
 		}
 
 		@Override
-		public void bufferStorage(int target, long size, int flags) {
-			ARBBufferStorage.glBufferStorage(target, size, flags);
+		public void bufferStorage(GlBufferType target, long size, int flags) {
+			ARBBufferStorage.glBufferStorage(target.glEnum, size, flags);
 		}
 	},
 	UNSUPPORTED {
@@ -35,10 +37,10 @@ public enum BufferStorage implements GlVersioned {
 		}
 
 		@Override
-		public void bufferStorage(int target, long size, int flags) {
+		public void bufferStorage(GlBufferType target, long size, int flags) {
 			throw new UnsupportedOperationException();
 		}
 	};
 
-	public abstract void bufferStorage(int target, long size, int flags);
+	public abstract void bufferStorage(GlBufferType target, long size, int flags);
 }

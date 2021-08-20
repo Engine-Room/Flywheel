@@ -8,8 +8,6 @@ public interface IBufferedModel {
 
 	int getVertexCount();
 
-	boolean valid();
-
 	/**
 	 * The VBO/VAO should be bound externally.
 	 */
@@ -24,7 +22,13 @@ public interface IBufferedModel {
 	 */
 	void drawInstances(int instanceCount);
 
+	boolean isDeleted();
+
 	void delete();
+
+	default boolean valid() {
+		return getVertexCount() > 0 && !isDeleted();
+	}
 
 	default int getAttributeCount() {
 		return getFormat().getAttributeCount();

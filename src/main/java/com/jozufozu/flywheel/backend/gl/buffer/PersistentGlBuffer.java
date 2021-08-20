@@ -6,6 +6,9 @@ import java.nio.ByteBuffer;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlFence;
+import com.jozufozu.flywheel.backend.gl.error.GlError;
+import com.jozufozu.flywheel.backend.gl.error.GlException;
+import com.jozufozu.flywheel.util.StringUtil;
 
 
 public class PersistentGlBuffer extends GlBuffer {
@@ -35,11 +38,19 @@ public class PersistentGlBuffer extends GlBuffer {
 		if (buffer != null) {
 			deleteInternal(handle());
 			_create();
+
+			bind();
 		}
 
 		fence.clear();
 
-		Backend.getInstance().compat.bufferStorage.bufferStorage(type.glEnum, size, flags);
+		Backend.getInstance().compat.bufferStorage.bufferStorage(type, size, flags);
+
+		GlError error = GlError.poll();
+
+		if (error != null) {
+			throw new GlException(error, StringUtil.args("bufferStorage", type, size, flags));
+		}
 
 		buffer = new PersistentMappedBuffer(this);
 	}

@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.material;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -24,6 +25,14 @@ public class MaterialRenderer<P extends WorldProgram> {
 	public void render(Matrix4f viewProjection, double camX, double camY, double camZ) {
 		if (material.nothingToRender()) return;
 
+		Collection<? extends Instancer<?>> instancers = material.models.asMap()
+				.values();
+
+		// initialize all uninitialized instancers...
+		instancers.forEach(Instancer::init);
+		// ...and then flush the model arena in case anything was marked for upload
+		material.modelPool.flush();
+
 		P program = this.program.get();
 
 		program.bind();
@@ -32,7 +41,7 @@ public class MaterialRenderer<P extends WorldProgram> {
 
 		setupFunc.accept(program);
 
-		material.forEachInstancer(Instancer::render);
+		instancers.forEach(Instancer::render);
 	}
 
 }

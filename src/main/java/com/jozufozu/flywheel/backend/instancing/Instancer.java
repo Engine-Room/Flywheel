@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
@@ -11,8 +10,8 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.material.MaterialSpec;
+import com.jozufozu.flywheel.backend.model.ModelPool;
 import com.jozufozu.flywheel.backend.model.IBufferedModel;
-import com.jozufozu.flywheel.backend.model.IndexedModel;
 import com.jozufozu.flywheel.core.model.IModel;
 import com.jozufozu.flywheel.util.AttribUtil;
 
@@ -36,25 +35,27 @@ import com.jozufozu.flywheel.util.AttribUtil;
  */
 public class Instancer<D extends InstanceData> {
 
-	protected final Supplier<IModel> gen;
-	protected final VertexFormat instanceFormat;
-	protected final IInstanceFactory<D> factory;
+	private final ModelPool modelAllocator;
+	private final IModel modelData;
+	private final VertexFormat instanceFormat;
+	private final IInstanceFactory<D> factory;
 
-	protected IBufferedModel model;
-	protected GlVertexArray vao;
-	protected GlBuffer instanceVBO;
-	protected int glBufferSize = -1;
-	protected int glInstanceCount = 0;
+	private IBufferedModel model;
+	private GlVertexArray vao;
+	private GlBuffer instanceVBO;
+	private int glBufferSize = -1;
+	private int glInstanceCount = 0;
 	private boolean deleted;
 	private boolean initialized;
 
-	protected final ArrayList<D> data = new ArrayList<>();
+	private final ArrayList<D> data = new ArrayList<>();
 
 	boolean anyToRemove;
 	boolean anyToUpdate;
 
-	public Instancer(Supplier<IModel> model, MaterialSpec<D> spec) {
-		this.gen = model;
+	public Instancer(ModelPool modelAllocator, IModel model, MaterialSpec<D> spec) {
+		this.modelAllocator = modelAllocator;
+		this.modelData = model;
 		this.factory = spec.getInstanceFactory();
 		this.instanceFormat = spec.getInstanceFormat();
 	}
@@ -80,7 +81,6 @@ public class Instancer<D extends InstanceData> {
 	}
 
 	public void render() {
-		if (!isInitialized()) init();
 		if (invalid()) return;
 
 		vao.bind();
@@ -98,28 +98,28 @@ public class Instancer<D extends InstanceData> {
 		return deleted || model == null;
 	}
 
-	private void init() {
+	public void init() {
+		if (isInitialized()) return;
+
 		initialized = true;
-		IModel iModel = gen.get();
 
-		if (iModel.empty()) {
-			return;
-		}
-
-		model = new IndexedModel(iModel);
 		vao = new GlVertexArray();
-		instanceVBO = GlBuffer.requestPersistent(GlBufferType.ARRAY_BUFFER);
+
+		model = modelAllocator.alloc(modelData)
+				.setReallocCallback(arenaModel -> {
+					vao.bind();
+
+					model.setupState();
+
+					vao.unbind();
+				});
 
 		vao.bind();
 
-		// bind the model's vbo to our vao
-		model.setupState();
-
+		instanceVBO = GlBuffer.requestPersistent(GlBufferType.ARRAY_BUFFER);
 		AttribUtil.enableArrays(model.getAttributeCount() + instanceFormat.getAttributeCount());
 
 		vao.unbind();
-
-		model.clearState();
 	}
 
 	public boolean isInitialized() {
