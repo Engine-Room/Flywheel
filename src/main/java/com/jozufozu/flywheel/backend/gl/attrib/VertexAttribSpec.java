@@ -1,6 +1,8 @@
 package com.jozufozu.flywheel.backend.gl.attrib;
 
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL44;
+import org.lwjgl.opengl.GL46;
 
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
 

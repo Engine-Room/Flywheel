@@ -2,6 +2,8 @@ package com.jozufozu.flywheel.backend.model;
 
 import static org.lwjgl.opengl.GL20.glDrawArrays;
 
+import org.lwjgl.opengl.GL44;
+
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
@@ -37,16 +39,16 @@ public class BufferedModel implements IBufferedModel {
 		vbo.unbind();
 	}
 
+	public boolean isDeleted() {
+		return deleted;
+	}
+
 	public VertexFormat getFormat() {
 		return model.format();
 	}
 
 	public int getVertexCount() {
 		return model.vertexCount();
-	}
-
-	public boolean valid() {
-		return getVertexCount() > 0 && !deleted;
 	}
 
 	/**

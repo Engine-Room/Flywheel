@@ -30,14 +30,14 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class QuadConverter {
 
-	public static final int STARTING_CAPACITY = 42;
+	public static final int STARTING_CAPACITY = 42; // 255 / 6 = 42
 
 	private static QuadConverter INSTANCE;
 
 	@Nonnull
 	public static QuadConverter getInstance() {
 		if (INSTANCE == null) {
-			INSTANCE = new QuadConverter(STARTING_CAPACITY); // 255 / 6 = 42
+			INSTANCE = new QuadConverter(STARTING_CAPACITY);
 		}
 
 		return INSTANCE;
@@ -157,14 +157,14 @@ public class QuadConverter {
 	 * </pre>
 	 */
 	private static GlNumericType getSmallestIndexType(int indexCount) {
-		indexCount = indexCount >>> 8;
-		if (indexCount == 0) {
-			return GlNumericType.UBYTE;
-		}
-		indexCount = indexCount >>> 8;
-		if (indexCount == 0) {
-			return GlNumericType.USHORT;
-		}
+//		indexCount = indexCount >>> 8;
+//		if (indexCount == 0) {
+//			return GlNumericType.UBYTE;
+//		}
+//		indexCount = indexCount >>> 8;
+//		if (indexCount == 0) {
+//			return GlNumericType.USHORT;
+//		}
 
 		return GlNumericType.UINT;
 	}

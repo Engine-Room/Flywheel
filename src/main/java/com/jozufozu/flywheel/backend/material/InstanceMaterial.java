@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.backend.material;
 
 import java.util.concurrent.ExecutionException;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.google.common.cache.Cache;
@@ -9,6 +8,7 @@ import com.google.common.cache.CacheBuilder;
 import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.instancing.Instancer;
+import com.jozufozu.flywheel.backend.model.ModelPool;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.model.BlockModel;
 import com.jozufozu.flywheel.core.model.IModel;
@@ -25,12 +25,14 @@ import net.minecraft.util.Direction;
  */
 public class InstanceMaterial<D extends InstanceData> {
 
+	final ModelPool modelPool;
 	protected final Cache<Object, Instancer<D>> models;
 	protected final MaterialSpec<D> spec;
 
 	public InstanceMaterial(MaterialSpec<D> spec) {
 		this.spec = spec;
 
+		modelPool = new ModelPool(spec.getModelFormat(), spec.getModelFormat().getStride() * 64);
 		this.models = CacheBuilder.newBuilder()
 				.removalListener(notification -> {
 					Instancer<?> instancer = (Instancer<?>) notification.getValue();
@@ -48,7 +50,7 @@ public class InstanceMaterial<D extends InstanceData> {
 	 */
 	public Instancer<D> model(Object key, Supplier<IModel> modelSupplier) {
 		try {
-			return models.get(key, () -> new Instancer<>(modelSupplier, spec));
+			return models.get(key, () -> new Instancer<>(modelPool, modelSupplier.get(), spec));
 		} catch (ExecutionException e) {
 			throw new RuntimeException("error creating instancer", e);
 		}
@@ -79,6 +81,7 @@ public class InstanceMaterial<D extends InstanceData> {
 
 	public void delete() {
 		models.invalidateAll();
+		modelPool.delete();
 	}
 
 	/**
@@ -88,13 +91,6 @@ public class InstanceMaterial<D extends InstanceData> {
 		models.asMap()
 				.values()
 				.forEach(Instancer::clear);
-	}
-
-	public void forEachInstancer(Consumer<Instancer<D>> f) {
-		for (Instancer<D> model : models.asMap()
-				.values()) {
-			f.accept(model);
-		}
 	}
 
 }

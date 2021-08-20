@@ -17,7 +17,6 @@ import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.util.WeakHashSet;
 
 import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
