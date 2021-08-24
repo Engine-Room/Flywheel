@@ -77,7 +77,7 @@ public class InstancedRenderRegistry {
 
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public <T extends TileEntity> TileEntityInstance<? super T> create(MaterialManager<?> manager, T tile) {
+	public <T extends TileEntity> TileEntityInstance<? super T> create(MaterialManager manager, T tile) {
 		TileEntityType<?> type = tile.getType();
 		ITileInstanceFactory<? super T> factory = (ITileInstanceFactory<? super T>) this.tiles.get(type);
 
@@ -88,7 +88,7 @@ public class InstancedRenderRegistry {
 
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public <T extends Entity> EntityInstance<? super T> create(MaterialManager<?> manager, T tile) {
+	public <T extends Entity> EntityInstance<? super T> create(MaterialManager manager, T tile) {
 		EntityType<?> type = tile.getType();
 		IEntityInstanceFactory<? super T> factory = (IEntityInstanceFactory<? super T>) this.entities.get(type);
 

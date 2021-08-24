@@ -1,13 +1,13 @@
 package com.jozufozu.flywheel.core.crumbling;
 
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
-import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
 
 import net.minecraft.util.math.BlockPos;
 
 public class CrumblingInstanceManager extends TileInstanceManager {
 
-	public CrumblingInstanceManager(MaterialManager<?> materialManager) {
+	public CrumblingInstanceManager(MaterialManagerImpl<?> materialManager) {
 		super(materialManager);
 	}
 

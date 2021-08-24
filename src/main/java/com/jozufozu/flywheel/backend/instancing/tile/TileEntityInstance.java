@@ -8,6 +8,7 @@ import com.jozufozu.flywheel.backend.instancing.IInstance;
 import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
 import com.jozufozu.flywheel.backend.material.InstanceMaterial;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.IFlatLight;
 import com.jozufozu.flywheel.core.materials.ModelData;
@@ -38,14 +39,14 @@ import net.minecraft.world.World;
  */
 public abstract class TileEntityInstance<T extends TileEntity> implements IInstance {
 
-	protected final MaterialManager<?> materialManager;
+	protected final MaterialManager materialManager;
 	protected final T tile;
 	protected final World world;
 	protected final BlockPos pos;
 	protected final BlockPos instancePos;
 	protected final BlockState blockState;
 
-	public TileEntityInstance(MaterialManager<?> materialManager, T tile) {
+	public TileEntityInstance(MaterialManager materialManager, T tile) {
 		this.materialManager = materialManager;
 		this.tile = tile;
 		this.world = tile.getLevel();

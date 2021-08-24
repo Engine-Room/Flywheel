@@ -1,33 +1,26 @@
 package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
-import com.jozufozu.flywheel.util.RenderMath;
+import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
 
-public abstract class InstanceManager<T> implements MaterialManager.OriginShiftListener {
+public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginShiftListener {
 
-	public final MaterialManager<?> materialManager;
+	public final MaterialManager materialManager;
 
 	private final Set<T> queuedAdditions;
 	private final Set<T> queuedUpdates;
@@ -39,7 +32,7 @@ public abstract class InstanceManager<T> implements MaterialManager.OriginShiftL
 	protected int frame;
 	protected int tick;
 
-	public InstanceManager(MaterialManager<?> materialManager) {
+	public InstanceManager(MaterialManagerImpl<?> materialManager) {
 		this.materialManager = materialManager;
 		this.queuedUpdates = new HashSet<>(64);
 		this.queuedAdditions = new HashSet<>(64);

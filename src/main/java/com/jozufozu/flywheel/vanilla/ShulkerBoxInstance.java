@@ -28,7 +28,7 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxTileEntity>
 
 	private float lastProgress = Float.NaN;
 
-	public ShulkerBoxInstance(MaterialManager<?> materialManager, ShulkerBoxTileEntity tile) {
+	public ShulkerBoxInstance(MaterialManager materialManager, ShulkerBoxTileEntity tile) {
 		super(materialManager, tile);
 
 		DyeColor color = tile.getColor();

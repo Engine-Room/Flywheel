@@ -17,15 +17,15 @@ public abstract class GlObject {
 	}
 
 	protected final void checkHandle() {
-		if (!this.isHandleValid()) {
+		if (this.isInvalid()) {
 			String descriptor = getDescriptor();
 			String message = (descriptor == null ? "" : (descriptor + " ")) + "handle is not valid.";
 			throw new IllegalStateException(message);
 		}
 	}
 
-	protected final boolean isHandleValid() {
-		return this.handle != INVALID_HANDLE;
+	protected final boolean isInvalid() {
+		return this.handle == INVALID_HANDLE;
 	}
 
 	protected final void invalidateHandle() {
@@ -33,7 +33,7 @@ public abstract class GlObject {
 	}
 
 	public void delete() {
-		if (!isHandleValid()) {
+		if (isInvalid()) {
 			String descriptor = getDescriptor();
 			String message = (descriptor == null ? "" : (descriptor + " ")) + "handle already deleted.";
 			throw new IllegalStateException(message);

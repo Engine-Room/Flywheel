@@ -20,7 +20,7 @@ public class BellInstance extends TileEntityInstance<BellTileEntity> implements 
 
 	private float lastRingTime = Float.NaN;
 
-	public BellInstance(MaterialManager<?> materialManager, BellTileEntity tile) {
+	public BellInstance(MaterialManager materialManager, BellTileEntity tile) {
 		super(materialManager, tile);
 
 		bell = createBellInstance()

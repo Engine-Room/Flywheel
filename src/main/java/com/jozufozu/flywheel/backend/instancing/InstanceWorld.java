@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.backend.instancing;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
-import com.jozufozu.flywheel.backend.state.RenderLayer;
+import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
@@ -13,8 +13,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.IWorld;
-import net.minecraftforge.event.TickEvent;
 
 /**
  * A manager class for a single world where instancing is supported.
@@ -23,19 +21,19 @@ import net.minecraftforge.event.TickEvent;
  * </p>
  */
 public class InstanceWorld {
-	protected final MaterialManager<WorldProgram> materialManager;
+	protected final MaterialManagerImpl<WorldProgram> materialManager;
 	protected final InstanceManager<Entity> entityInstanceManager;
 	protected final InstanceManager<TileEntity> tileEntityInstanceManager;
 
 	public InstanceWorld() {
 
-		materialManager = MaterialManager.builder(Contexts.WORLD)
+		materialManager = MaterialManagerImpl.builder(Contexts.WORLD)
 				.build();
 		entityInstanceManager = new EntityInstanceManager(materialManager);
 		tileEntityInstanceManager = new TileInstanceManager(materialManager);
 	}
 
-	public MaterialManager<WorldProgram> getMaterialManager() {
+	public MaterialManager getMaterialManager() {
 		return materialManager;
 	}
 
@@ -72,7 +70,7 @@ public class InstanceWorld {
 	 * </p>
 	 */
 	public void beginFrame(BeginFrameEvent event) {
-		materialManager.checkAndShiftOrigin(event.getInfo());
+		materialManager.beginFrame(event.getInfo());
 
 		tileEntityInstanceManager.beginFrame(event.getInfo());
 		entityInstanceManager.beginFrame(event.getInfo());

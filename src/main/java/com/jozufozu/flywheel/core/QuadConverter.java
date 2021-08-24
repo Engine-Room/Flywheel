@@ -83,7 +83,7 @@ public class QuadConverter {
 		}
 	}
 
-	public void free() {
+	public void delete() {
 		ebos.values()
 				.forEach(GlBuffer::delete);
 		ebos.clear();
@@ -172,6 +172,6 @@ public class QuadConverter {
 	// make sure this gets reset first so it has a chance to repopulate
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public static void onRendererReload(ReloadRenderersEvent event) {
-		if (INSTANCE != null) INSTANCE.free();
+		if (INSTANCE != null) INSTANCE.delete();
 	}
 }

@@ -12,11 +12,11 @@ import net.minecraft.util.math.vector.Matrix4f;
 public class MaterialRenderer<P extends WorldProgram> {
 
 	protected final Supplier<P> program;
-	protected final InstanceMaterial<?> material;
+	protected final InstanceMaterialImpl<?> material;
 
 	protected final Consumer<P> setupFunc;
 
-	public MaterialRenderer(Supplier<P> programSupplier, InstanceMaterial<?> material, Consumer<P> setupFunc) {
+	public MaterialRenderer(Supplier<P> programSupplier, InstanceMaterialImpl<?> material, Consumer<P> setupFunc) {
 		this.program = programSupplier;
 		this.material = material;
 		this.setupFunc = setupFunc;

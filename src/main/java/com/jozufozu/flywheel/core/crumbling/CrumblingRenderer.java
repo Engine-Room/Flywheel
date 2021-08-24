@@ -11,6 +11,7 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
 import com.jozufozu.flywheel.backend.state.RenderLayer;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -69,7 +70,7 @@ public class CrumblingRenderer {
 		TextureManager textureManager = Minecraft.getInstance().textureManager;
 		ActiveRenderInfo info = Minecraft.getInstance().gameRenderer.getMainCamera();
 
-		MaterialManager<CrumblingProgram> materials = state.materialManager;
+		MaterialManagerImpl<CrumblingProgram> materials = state.materialManager;
 		layer.setupRenderState();
 
 		for (Int2ObjectMap.Entry<List<TileEntity>> stage : activeStages.int2ObjectEntrySet()) {
@@ -140,11 +141,11 @@ public class CrumblingRenderer {
 	}
 
 	private static class State {
-		private final MaterialManager<CrumblingProgram> materialManager;
+		private final MaterialManagerImpl<CrumblingProgram> materialManager;
 		private final InstanceManager<TileEntity> instanceManager;
 
 		private State() {
-			materialManager = MaterialManager.builder(Contexts.CRUMBLING)
+			materialManager = MaterialManagerImpl.builder(Contexts.CRUMBLING)
 					.setGroupFactory(CrumblingGroup::new)
 					.build();
 			instanceManager = new CrumblingInstanceManager(materialManager);
