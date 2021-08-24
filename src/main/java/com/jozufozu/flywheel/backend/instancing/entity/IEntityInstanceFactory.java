@@ -6,5 +6,5 @@ import net.minecraft.entity.Entity;
 
 @FunctionalInterface
 public interface IEntityInstanceFactory<E extends Entity> {
-	EntityInstance<? super E> create(MaterialManager<?> manager, E te);
+	EntityInstance<? super E> create(MaterialManager manager, E te);
 }

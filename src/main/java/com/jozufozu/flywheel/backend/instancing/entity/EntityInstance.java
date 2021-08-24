@@ -41,11 +41,11 @@ import net.minecraft.world.World;
  */
 public abstract class EntityInstance<E extends Entity> implements IInstance {
 
-	protected final MaterialManager<?> materialManager;
+	protected final MaterialManager materialManager;
 	protected final E entity;
 	protected final World world;
 
-	public EntityInstance(MaterialManager<?> materialManager, E entity) {
+	public EntityInstance(MaterialManager materialManager, E entity) {
 		this.materialManager = materialManager;
 		this.entity = entity;
 		this.world = entity.level;

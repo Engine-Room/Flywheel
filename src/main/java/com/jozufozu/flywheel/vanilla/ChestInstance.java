@@ -42,7 +42,7 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 
 	private float lastProgress = Float.NaN;
 
-	public ChestInstance(MaterialManager<?> materialManager, T tile) {
+	public ChestInstance(MaterialManager materialManager, T tile) {
 		super(materialManager, tile);
 
 		Block block = blockState.getBlock();

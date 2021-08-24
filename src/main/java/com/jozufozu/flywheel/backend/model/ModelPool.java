@@ -12,9 +12,8 @@ import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.core.model.IModel;
 import com.jozufozu.flywheel.util.AttribUtil;
-import com.jozufozu.flywheel.util.StringUtil;
 
-public class ModelPool {
+public class ModelPool implements ModelAllocator {
 
 	protected final VertexFormat format;
 
@@ -47,8 +46,10 @@ public class ModelPool {
 	 * @param model The model to allocate.
 	 * @return A handle to the allocated model.
 	 */
-	public PooledModel alloc(IModel model) {
+	@Override
+	public PooledModel alloc(IModel model, Callback callback) {
 		PooledModel bufferedModel = new PooledModel(model, vertices);
+		bufferedModel.callback = callback;
 		vertices += model.vertexCount();
 		models.add(bufferedModel);
 		pendingUpload.add(bufferedModel);
@@ -117,7 +118,7 @@ public class ModelPool {
 		for (PooledModel model : models) {
 			model.model.buffer(buffer);
 			if (model.callback != null)
-				model.callback.invoke(model);
+				model.callback.onAlloc(model);
 		}
 
 		buffer.flush();
@@ -132,7 +133,7 @@ public class ModelPool {
 			buffer.position(pos);
 			model.model.buffer(buffer);
 			if (model.callback != null)
-				model.callback.invoke(model);
+				model.callback.onAlloc(model);
 		}
 		pendingUpload.clear();
 
@@ -199,7 +200,7 @@ public class ModelPool {
 
 			ebo.bind();
 
-			Backend.log.info(StringUtil.args("drawElementsInstancedBaseVertex", GlPrimitive.TRIANGLES, ebo.elementCount, ebo.eboIndexType, 0, instanceCount, first));
+			//Backend.log.info(StringUtil.args("drawElementsInstancedBaseVertex", GlPrimitive.TRIANGLES, ebo.elementCount, ebo.eboIndexType, 0, instanceCount, first));
 
 			Backend.getInstance().compat.baseVertex.drawElementsInstancedBaseVertex(GlPrimitive.TRIANGLES, ebo.elementCount, ebo.eboIndexType, 0, instanceCount, first);
 		}
@@ -215,15 +216,6 @@ public class ModelPool {
 			anyToRemove = true;
 			remove = true;
 		}
-
-		public PooledModel setReallocCallback(Callback callback) {
-			this.callback = callback;
-			return this;
-		}
 	}
 
-	@FunctionalInterface
-	public interface Callback {
-		void invoke(PooledModel arenaModel);
-	}
 }

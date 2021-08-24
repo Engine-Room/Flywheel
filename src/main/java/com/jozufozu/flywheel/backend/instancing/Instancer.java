@@ -10,7 +10,7 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.material.MaterialSpec;
-import com.jozufozu.flywheel.backend.model.ModelPool;
+import com.jozufozu.flywheel.backend.model.ModelAllocator;
 import com.jozufozu.flywheel.backend.model.IBufferedModel;
 import com.jozufozu.flywheel.core.model.IModel;
 import com.jozufozu.flywheel.util.AttribUtil;
@@ -35,7 +35,7 @@ import com.jozufozu.flywheel.util.AttribUtil;
  */
 public class Instancer<D extends InstanceData> {
 
-	private final ModelPool modelAllocator;
+	private final ModelAllocator modelAllocator;
 	private final IModel modelData;
 	private final VertexFormat instanceFormat;
 	private final IInstanceFactory<D> factory;
@@ -53,11 +53,11 @@ public class Instancer<D extends InstanceData> {
 	boolean anyToRemove;
 	boolean anyToUpdate;
 
-	public Instancer(ModelPool modelAllocator, IModel model, MaterialSpec<D> spec) {
+	public Instancer(ModelAllocator modelAllocator, IModel model, IInstanceFactory<D> factory, VertexFormat instanceFormat) {
 		this.modelAllocator = modelAllocator;
 		this.modelData = model;
-		this.factory = spec.getInstanceFactory();
-		this.instanceFormat = spec.getInstanceFormat();
+		this.factory = factory;
+		this.instanceFormat = instanceFormat;
 	}
 
 	/**
@@ -105,14 +105,13 @@ public class Instancer<D extends InstanceData> {
 
 		vao = new GlVertexArray();
 
-		model = modelAllocator.alloc(modelData)
-				.setReallocCallback(arenaModel -> {
-					vao.bind();
+		model = modelAllocator.alloc(modelData, arenaModel -> {
+			vao.bind();
 
-					model.setupState();
+			model.setupState();
 
-					vao.unbind();
-				});
+			vao.unbind();
+		});
 
 		vao.bind();
 
