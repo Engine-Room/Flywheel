@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.vanilla;
 
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
+import net.minecraft.entity.EntityType;
 import net.minecraft.tileentity.TileEntityType;
 
 /**
@@ -46,5 +47,15 @@ public class VanillaInstances {
 		r.tile(TileEntityType.SHULKER_BOX)
 				.setSkipRender(true)
 				.factory(ShulkerBoxInstance::new);
+
+		r.entity(EntityType.MINECART)
+				.setSkipRender(true)
+				.factory(MinecartInstance::new);
+		r.entity(EntityType.HOPPER_MINECART)
+				.setSkipRender(true)
+				.factory(MinecartInstance::new);
+		r.entity(EntityType.FURNACE_MINECART)
+				.setSkipRender(true)
+				.factory(MinecartInstance::new);
 	}
 }
