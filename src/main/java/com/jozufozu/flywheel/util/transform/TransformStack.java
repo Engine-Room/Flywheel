@@ -19,6 +19,10 @@ public interface TransformStack {
 
 	TransformStack pop();
 
+	default TransformStack scale(float factor) {
+		return scale(factor, factor, factor);
+	}
+
 	default TransformStack rotate(Direction axis, float radians) {
 		if (radians == 0)
 			return this;
