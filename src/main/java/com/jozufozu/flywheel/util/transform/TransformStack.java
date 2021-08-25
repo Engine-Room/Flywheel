@@ -13,11 +13,15 @@ public interface TransformStack {
 
 	TransformStack multiply(Quaternion quaternion);
 
-	TransformStack scale(float factor);
+	TransformStack scale(float factorX, float factorY, float factorZ);
 
 	TransformStack push();
 
 	TransformStack pop();
+
+	default TransformStack scale(float factor) {
+		return scale(factor, factor, factor);
+	}
 
 	default TransformStack rotate(Direction axis, float radians) {
 		if (radians == 0)
