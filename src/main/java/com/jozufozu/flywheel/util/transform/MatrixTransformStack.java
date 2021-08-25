@@ -41,6 +41,12 @@ public class MatrixTransformStack implements TransformStack {
 		internal.scale(factor, factor, factor);
 		return this;
 	}
+	
+	@Override
+	public TransformStack scale(float factorX, float factorY, float factorZ) {
+		internal.scale(factorX, factorY, factorZ);
+		return this;
+	}
 
 	@Override
 	public TransformStack push() {
