@@ -4,7 +4,6 @@ import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.instancing.Instancer;
-import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.model.BlockModel;
 import com.jozufozu.flywheel.core.model.IModel;
@@ -26,7 +25,7 @@ public interface InstanceMaterial<D extends InstanceData> {
 	Instancer<D> model(Object key, Supplier<IModel> modelSupplier);
 
 	default Instancer<D> getModel(PartialModel partial, BlockState referenceState) {
-		return model(partial, () -> new BlockModel(Formats.UNLIT_MODEL, partial.get(), referenceState));
+		return model(partial, () -> new BlockModel(partial.get(), referenceState));
 	}
 
 	default Instancer<D> getModel(PartialModel partial, BlockState referenceState, Direction dir) {
@@ -34,10 +33,10 @@ public interface InstanceMaterial<D extends InstanceData> {
 	}
 
 	default Instancer<D> getModel(PartialModel partial, BlockState referenceState, Direction dir, Supplier<MatrixStack> modelTransform) {
-		return model(Pair.of(dir, partial), () -> new BlockModel(Formats.UNLIT_MODEL, partial.get(), referenceState, modelTransform.get()));
+		return model(Pair.of(dir, partial), () -> new BlockModel(partial.get(), referenceState, modelTransform.get()));
 	}
 
 	default Instancer<D> getModel(BlockState toRender) {
-		return model(toRender, () -> new BlockModel(Formats.UNLIT_MODEL, toRender));
+		return model(toRender, () -> new BlockModel(toRender));
 	}
 }

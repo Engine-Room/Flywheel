@@ -6,8 +6,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.backend.model.ElementBuffer;
-import com.jozufozu.flywheel.core.QuadConverter;
+import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.util.BufferBuilderReader;
 import com.jozufozu.flywheel.util.VirtualEmptyModelData;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -31,26 +30,23 @@ public class BlockModel implements IModel {
 
 	private final BufferBuilderReader reader;
 
-	private final VertexFormat modelFormat;
-
-	public BlockModel(VertexFormat modelFormat, BlockState state) {
-		this(modelFormat, Minecraft.getInstance()
+	public BlockModel(BlockState state) {
+		this(Minecraft.getInstance()
 				.getBlockRenderer()
 				.getBlockModel(state), state);
 	}
 
-	public BlockModel(VertexFormat modelFormat, IBakedModel model, BlockState referenceState) {
-		this(modelFormat, model, referenceState, IDENTITY);
+	public BlockModel(IBakedModel model, BlockState referenceState) {
+		this(model, referenceState, IDENTITY);
 	}
 
-	public BlockModel(VertexFormat modelFormat, IBakedModel model, BlockState referenceState, MatrixStack ms) {
-		this.modelFormat = modelFormat;
+	public BlockModel(IBakedModel model, BlockState referenceState, MatrixStack ms) {
 		reader = new BufferBuilderReader(getBufferBuilder(model, referenceState, ms));
 	}
 
 	@Override
 	public VertexFormat format() {
-		return modelFormat;
+		return Formats.UNLIT_MODEL;
 	}
 
 	@Override
