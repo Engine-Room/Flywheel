@@ -13,7 +13,7 @@ public interface TransformStack {
 
 	TransformStack multiply(Quaternion quaternion);
 
-	TransformStack scale(float factor);
+	TransformStack scale(float factorX, float factorY, float factorZ);
 
 	TransformStack push();
 
