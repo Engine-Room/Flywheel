@@ -1,27 +1,16 @@
 package com.jozufozu.flywheel.light;
 
-import java.util.WeakHashMap;
-import java.util.function.LongConsumer;
+import java.util.Set;
 
 import com.jozufozu.flywheel.util.WeakHashSet;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.longs.LongRBTreeSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.SectionPos;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.LightType;
 
-/**
- * By using WeakReferences we can automatically remove listeners when they are garbage collected.
- * This allows us to easily be more clever about how we store the listeners. Each listener is associated
- * with 2 sets of longs indicating what chunks and sections each listener is in. Additionally, a reverse
- * mapping is created to allow for fast lookups when light updates. The reverse mapping is more interesting,
- * but {@link #listenersToSections}, and {@link #listenersToChunks} are used to know what sections and
- * chunks we need to remove the listeners from if they re-subscribe. Otherwise, listeners could get updates
- * they no longer care about. This is done in {@link #clearSections} and {@link #clearChunks}
- */
 public class LightUpdater {
 
 	private static LightUpdater instance;
@@ -32,72 +21,69 @@ public class LightUpdater {
 		return instance;
 	}
 
-	private final Long2ObjectMap<WeakHashSet<ILightUpdateListener>> sections;
-	private final WeakHashMap<ILightUpdateListener, LongRBTreeSet> listenersToSections;
-
-	private final Long2ObjectMap<WeakHashSet<ILightUpdateListener>> chunks;
-	private final WeakHashMap<ILightUpdateListener, LongRBTreeSet> listenersToChunks;
+	private final WeakHashSet<ILightUpdateListener> allListeners;
+	private final WeakContainmentMultiMap<ILightUpdateListener> sections;
+	private final WeakContainmentMultiMap<ILightUpdateListener> chunks;
 
 	public LightUpdater() {
-		sections = new Long2ObjectOpenHashMap<>();
-		listenersToSections = new WeakHashMap<>();
+		allListeners = new WeakHashSet<>();
+		sections = new WeakContainmentMultiMap<>();
+		chunks = new WeakContainmentMultiMap<>();
+	}
 
-		chunks = new Long2ObjectOpenHashMap<>();
-		listenersToChunks = new WeakHashMap<>();
+	public void tick() {
+		for (ILightUpdateListener listener : allListeners) {
+			if (listener.status() == ListenerStatus.UPDATE) {
+				addListener(listener);
+
+				listener.onLightUpdate(Minecraft.getInstance().level, LightType.BLOCK, null);
+			}
+		}
 	}
 
 	/**
-	 * Add a listener associated with the given {@link BlockPos}.
-	 * <p>
-	 * When a light update occurs in the chunk the position is contained in,
-	 * {@link ILightUpdateListener#onLightUpdate} will be called.
-	 *
-	 * @param pos      The position in the world that the listener cares about.
+	 * Add a listener.
+
 	 * @param listener The object that wants to receive light update notifications.
 	 */
-	public void startListening(BlockPos pos, ILightUpdateListener listener) {
-		LongRBTreeSet sections = clearSections(listener);
-		LongRBTreeSet chunks = clearChunks(listener);
+	public void addListener(ILightUpdateListener listener) {
+		allListeners.add(listener);
 
-		long sectionPos = worldToSection(pos);
-		addToSection(sectionPos, listener);
-		sections.add(sectionPos);
+		Volume volume = listener.getVolume();
 
-		long chunkPos = sectionToChunk(sectionPos);
-		addToChunk(chunkPos, listener);
-		chunks.add(chunkPos);
-	}
+		LongSet sections = this.sections.getAndResetContainment(listener);
+		LongSet chunks = this.chunks.getAndResetContainment(listener);
 
-	/**
-	 * Add a listener associated with the given {@link GridAlignedBB}.
-	 * <p>
-	 * When a light update occurs in any chunk spanning the given volume,
-	 * {@link ILightUpdateListener#onLightUpdate} will be called.
-	 *
-	 * @param volume   The volume in the world that the listener cares about.
-	 * @param listener The object that wants to receive light update notifications.
-	 */
-	public void startListening(GridAlignedBB volume, ILightUpdateListener listener) {
-		LongRBTreeSet sections = clearSections(listener);
-		LongRBTreeSet chunks = clearSections(listener);
+		if (volume instanceof Volume.Block) {
+			BlockPos pos = ((Volume.Block) volume).pos;
+			long sectionPos = blockToSection(pos);
+			this.sections.put(sectionPos, listener);
+			sections.add(sectionPos);
 
-		int minX = SectionPos.blockToSectionCoord(volume.minX);
-		int minY = SectionPos.blockToSectionCoord(volume.minY);
-		int minZ = SectionPos.blockToSectionCoord(volume.minZ);
-		int maxX = SectionPos.blockToSectionCoord(volume.maxX);
-		int maxY = SectionPos.blockToSectionCoord(volume.maxY);
-		int maxZ = SectionPos.blockToSectionCoord(volume.maxZ);
+			long chunkPos = sectionToChunk(sectionPos);
+			this.chunks.put(chunkPos, listener);
+			chunks.add(chunkPos);
+		} else if (volume instanceof Volume.Box) {
+			GridAlignedBB box = ((Volume.Box) volume).box;
 
-		for (int x = minX; x <= maxX; x++) {
-			for (int z = minZ; z <= maxZ; z++) {
-				for (int y = minY; y <= maxY; y++) {
-					long sectionPos = SectionPos.asLong(x, y, z);
-					addToSection(sectionPos, listener);
-					sections.add(sectionPos);
+			int minX = SectionPos.blockToSectionCoord(box.minX);
+			int minY = SectionPos.blockToSectionCoord(box.minY);
+			int minZ = SectionPos.blockToSectionCoord(box.minZ);
+			int maxX = SectionPos.blockToSectionCoord(box.maxX);
+			int maxY = SectionPos.blockToSectionCoord(box.maxY);
+			int maxZ = SectionPos.blockToSectionCoord(box.maxZ);
+
+			for (int x = minX; x <= maxX; x++) {
+				for (int z = minZ; z <= maxZ; z++) {
+					for (int y = minY; y <= maxY; y++) {
+						long sectionPos = SectionPos.asLong(x, y, z);
+						this.sections.put(sectionPos, listener);
+						sections.add(sectionPos);
+					}
+					long chunkPos = SectionPos.asLong(x, 0, z);
+					this.chunks.put(chunkPos, listener);
+					chunks.add(chunkPos);
 				}
-				long chunkPos = SectionPos.asLong(x, 0, z);
-				addToChunk(chunkPos, listener);
-				chunks.add(chunkPos);
 			}
 		}
 	}
@@ -110,13 +96,17 @@ public class LightUpdater {
 	 * @param sectionPos A long representing the section position where light changed.
 	 */
 	public void onLightUpdate(IBlockDisplayReader world, LightType type, long sectionPos) {
-		WeakHashSet<ILightUpdateListener> set = sections.get(sectionPos);
+		Set<ILightUpdateListener> set = sections.get(sectionPos);
 
 		if (set == null || set.isEmpty()) return;
 
+		set.removeIf(l -> l.status().shouldRemove());
+
 		GridAlignedBB chunkBox = GridAlignedBB.from(SectionPos.of(sectionPos));
 
-		set.removeIf(listener -> listener.onLightUpdate(world, type, chunkBox.copy()));
+		for (ILightUpdateListener listener : set) {
+			listener.onLightUpdate(world, type, chunkBox.copy());
+		}
 	}
 
 	/**
@@ -126,63 +116,20 @@ public class LightUpdater {
 	 * @param world The world in which light was updated.
 	 */
 	public void onLightPacket(IBlockDisplayReader world, int chunkX, int chunkZ) {
-
 		long chunkPos = SectionPos.asLong(chunkX, 0, chunkZ);
 
-		WeakHashSet<ILightUpdateListener> set = chunks.get(chunkPos);
+		Set<ILightUpdateListener> set = chunks.get(chunkPos);
 
 		if (set == null || set.isEmpty()) return;
 
-		set.removeIf(listener -> listener.onLightPacket(world, chunkX, chunkZ));
-	}
+		set.removeIf(l -> l.status().shouldRemove());
 
-	private LongRBTreeSet clearChunks(ILightUpdateListener listener) {
-		return clear(listener, listenersToChunks, chunks);
-	}
-
-	private LongRBTreeSet clearSections(ILightUpdateListener listener) {
-		return clear(listener, listenersToSections, sections);
-	}
-
-	private LongRBTreeSet clear(ILightUpdateListener listener, WeakHashMap<ILightUpdateListener, LongRBTreeSet> listeners, Long2ObjectMap<WeakHashSet<ILightUpdateListener>> lookup) {
-		LongRBTreeSet set = listeners.get(listener);
-
-		if (set == null) {
-			set = new LongRBTreeSet();
-			listeners.put(listener, set);
-		} else {
-			set.forEach((LongConsumer) l -> {
-				WeakHashSet<ILightUpdateListener> listeningSections = lookup.get(l);
-
-				if (listeningSections != null) listeningSections.remove(listener);
-			});
-
-			set.clear();
+		for (ILightUpdateListener listener : set) {
+			listener.onLightPacket(world, chunkX, chunkZ);
 		}
-
-		return set;
 	}
 
-	private void addToSection(long sectionPos, ILightUpdateListener listener) {
-		getOrCreate(sections, sectionPos).add(listener);
-	}
-
-	private void addToChunk(long chunkPos, ILightUpdateListener listener) {
-		getOrCreate(chunks, chunkPos).add(listener);
-	}
-
-	private WeakHashSet<ILightUpdateListener> getOrCreate(Long2ObjectMap<WeakHashSet<ILightUpdateListener>> sections, long chunkPos) {
-		WeakHashSet<ILightUpdateListener> set = sections.get(chunkPos);
-
-		if (set == null) {
-			set = new WeakHashSet<>();
-			sections.put(chunkPos, set);
-		}
-
-		return set;
-	}
-
-	public static long worldToSection(BlockPos pos) {
+	public static long blockToSection(BlockPos pos) {
 		return SectionPos.asLong(pos.getX(), pos.getY(), pos.getZ());
 	}
 

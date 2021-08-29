@@ -98,7 +98,11 @@ public class WeakHashSet<T> extends AbstractSet<T> {
 
 	@Override
 	public boolean addAll(Collection<? extends T> c) {
-		return false;
+		boolean out = false;
+		for (T t : c) {
+			out |= add(t);
+		}
+		return out;
 	}
 
 	@Override

@@ -34,22 +34,6 @@ public class NetworkLightUpdateMixin {
 			int chunkX = packet.getX();
 			int chunkZ = packet.getZ();
 
-			Chunk chunk = world.getChunkSource()
-					.getChunk(chunkX, chunkZ, false);
-
-			if (chunk != null) {
-				InstanceManager<TileEntity> tiles = InstancedRenderDispatcher.getTiles(world);
-				InstanceManager<Entity> entities = InstancedRenderDispatcher.getEntities(world);
-
-				chunk.getBlockEntities()
-						.values()
-						.forEach(tiles::onLightUpdate);
-
-				Arrays.stream(chunk.getEntitySections())
-						.flatMap(ClassInheritanceMultiMap::stream)
-						.forEach(entities::onLightUpdate);
-			}
-
 			LightUpdater.getInstance()
 					.onLightPacket(world, chunkX, chunkZ);
 		});
