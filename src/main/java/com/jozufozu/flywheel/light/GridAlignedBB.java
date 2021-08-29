@@ -53,6 +53,10 @@ public class GridAlignedBB {
 		return new GridAlignedBB(start.getX(), start.getY(), start.getZ(), end.getX() + 1, end.getY() + 1, end.getZ() + 1);
 	}
 
+	public static GridAlignedBB from(BlockPos pos) {
+		return new GridAlignedBB(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
+	}
+
 	public static GridAlignedBB from(int sectionX, int sectionZ) {
 		int startX = sectionX << 4;
 		int startZ = sectionZ << 4;

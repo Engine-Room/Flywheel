@@ -1,13 +1,12 @@
 package com.jozufozu.flywheel.vanilla;
 
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
+import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
-import com.jozufozu.flywheel.backend.model.ModelPool;
 import com.jozufozu.flywheel.backend.state.TextureRenderState;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.ModelData;
-import com.jozufozu.flywheel.core.model.BlockModel;
 import com.jozufozu.flywheel.core.model.IModel;
 import com.jozufozu.flywheel.core.model.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
@@ -21,20 +20,34 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class MinecartInstance<T extends AbstractMinecartEntity> extends EntityInstance<T> implements IDynamicInstance {
+public class MinecartInstance<T extends AbstractMinecartEntity> extends EntityInstance<T> implements IDynamicInstance, ITickableInstance {
 
 	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
 
 	MatrixTransformStack stack = new MatrixTransformStack();
 
 	private final ModelData body;
-	private final ModelData contents;
+	private ModelData contents;
+	private BlockState blockstate;
 
 	public MinecartInstance(MaterialManager materialManager, T entity) {
 		super(materialManager, entity);
 
+		blockstate = entity.getDisplayBlockState();
 		contents = getContents();
 		body = getBody();
+	}
+
+	@Override
+	public void tick() {
+		BlockState displayBlockState = entity.getDisplayBlockState();
+
+		if (displayBlockState != blockstate) {
+			blockstate = displayBlockState;
+			contents.delete();
+			contents = getContents();
+			updateLight();
+		}
 	}
 
 	@Override
@@ -124,8 +137,6 @@ public class MinecartInstance<T extends AbstractMinecartEntity> extends EntityIn
 	}
 
 	private ModelData getContents() {
-		BlockState blockstate = entity.getDisplayBlockState();
-
 		if (blockstate.getRenderShape() == BlockRenderType.INVISIBLE)
 			return null;
 

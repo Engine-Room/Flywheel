@@ -4,15 +4,13 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
-import com.jozufozu.flywheel.backend.instancing.IInstance;
+import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
-import com.jozufozu.flywheel.backend.material.InstanceMaterial;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
-import com.jozufozu.flywheel.core.Materials;
-import com.jozufozu.flywheel.core.materials.IFlatLight;
-import com.jozufozu.flywheel.core.materials.ModelData;
-import com.jozufozu.flywheel.core.materials.OrientedData;
+import com.jozufozu.flywheel.light.ILightUpdateListener;
+import com.jozufozu.flywheel.light.ListenerStatus;
+import com.jozufozu.flywheel.light.Volume;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
@@ -21,8 +19,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.LightType;
-import net.minecraft.world.World;
 
 /**
  * The layer between a {@link TileEntity} and the Flywheel backend.
@@ -39,50 +35,25 @@ import net.minecraft.world.World;
  *
  * @param <E> The type of {@link Entity} your class is an instance of.
  */
-public abstract class EntityInstance<E extends Entity> implements IInstance {
+public abstract class EntityInstance<E extends Entity> extends AbstractInstance implements ILightUpdateListener {
 
-	protected final MaterialManager materialManager;
 	protected final E entity;
-	protected final World world;
 
 	public EntityInstance(MaterialManager materialManager, E entity) {
-		this.materialManager = materialManager;
+		super(materialManager, entity.level);
 		this.entity = entity;
-		this.world = entity.level;
+
+		startListening();
 	}
 
-	/**
-	 * Free any acquired resources.
-	 */
-	public abstract void remove();
-
-	/**
-	 * Update instance data here. Good for when data doesn't change very often and when animations are GPU based.
-	 * Don't query lighting data here, that's handled separately in {@link #updateLight()}.
-	 *
-	 * <br><br> If your animations are complex or more CPU driven, see {@link IDynamicInstance} or {@link ITickableInstance}.
-	 */
-	public void update() {
+	@Override
+	public Volume.Box getVolume() {
+		return Volume.box(entity.getBoundingBox());
 	}
 
-	/**
-	 * Called after construction and when a light update occurs in the world.
-	 *
-	 * <br> If your model needs it, update light here.
-	 */
-	public void updateLight() {
-	}
-
-	/**
-	 * Just before {@link #update()} would be called, <code>shouldReset()</code> is checked.
-	 * If this function returns <code>true</code>, then this instance will be {@link #remove removed},
-	 * and another instance will be constructed to replace it. This allows for more sane resource
-	 * acquisition compared to trying to update everything within the lifetime of an instance.
-	 *
-	 * @return <code>true</code> if this instance should be discarded and refreshed.
-	 */
-	public boolean shouldReset() {
-		return false;
+	@Override
+	public ListenerStatus status() {
+		return ListenerStatus.UPDATE;
 	}
 
 	/**
@@ -119,30 +90,4 @@ public abstract class EntityInstance<E extends Entity> implements IInstance {
 	public BlockPos getWorldPosition() {
 		return entity.blockPosition();
 	}
-
-	protected void relight(BlockPos pos, IFlatLight<?>... models) {
-		relight(world.getBrightness(LightType.BLOCK, pos), world.getBrightness(LightType.SKY, pos), models);
-	}
-
-	protected <L extends IFlatLight<?>> void relight(BlockPos pos, Stream<L> models) {
-		relight(world.getBrightness(LightType.BLOCK, pos), world.getBrightness(LightType.SKY, pos), models);
-	}
-
-	protected void relight(int block, int sky, IFlatLight<?>... models) {
-		relight(block, sky, Arrays.stream(models));
-	}
-
-	protected <L extends IFlatLight<?>> void relight(int block, int sky, Stream<L> models) {
-		models.forEach(model -> model.setBlockLight(block)
-				.setSkyLight(sky));
-	}
-
-	protected InstanceMaterial<ModelData> getTransformMaterial() {
-        return materialManager.defaultSolid().material(Materials.TRANSFORMED);
-    }
-
-	protected InstanceMaterial<OrientedData> getOrientedMaterial() {
-		return materialManager.defaultSolid().material(Materials.ORIENTED);
-	}
-
 }

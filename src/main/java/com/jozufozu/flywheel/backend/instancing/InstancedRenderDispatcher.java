@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.instancing;
 import javax.annotation.Nonnull;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.state.RenderLayer;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
@@ -28,7 +27,7 @@ public class InstancedRenderDispatcher {
 	private static final WorldAttached<InstanceWorld> instanceWorlds = new WorldAttached<>($ -> new InstanceWorld());
 
 	/**
-	 * Call this when you want to manually run {@link IInstance#update()}.
+	 * Call this when you want to manually run {@link AbstractInstance#update()}.
 	 * @param te The tile whose instance you want to update.
 	 */
 	public static void enqueueUpdate(TileEntity te) {
@@ -36,7 +35,7 @@ public class InstancedRenderDispatcher {
 	}
 
 	/**
-	 * Call this when you want to manually run {@link IInstance#update()}.
+	 * Call this when you want to manually run {@link AbstractInstance#update()}.
 	 * @param entity The entity whose instance you want to update.
 	 */
 	public static void enqueueUpdate(Entity entity) {

@@ -4,12 +4,15 @@ import java.util.ArrayList;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.light.LightUpdater;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.world.IWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -43,6 +46,12 @@ public class ForgeEvents {
 		if (Backend.isFlywheelWorld(world)) {
 			InstancedRenderDispatcher.loadAllInWorld((ClientWorld) world);
 		}
+	}
+
+	@SubscribeEvent
+	public static void rwle(TickEvent.ClientTickEvent e) {
+		if (e.phase == TickEvent.Phase.END && Backend.isGameActive())
+			LightUpdater.getInstance().tick();
 	}
 
 }

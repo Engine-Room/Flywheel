@@ -25,7 +25,7 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 	private final Set<T> queuedAdditions;
 	private final Set<T> queuedUpdates;
 
-	protected final Map<T, IInstance> instances;
+	protected final Map<T, AbstractInstance> instances;
 	protected final Object2ObjectOpenHashMap<T, ITickableInstance> tickableInstances;
 	protected final Object2ObjectOpenHashMap<T, IDynamicInstance> dynamicInstances;
 
@@ -63,7 +63,7 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 	protected abstract boolean canCreateInstance(T obj);
 
 	@Nullable
-	protected abstract IInstance createRaw(T obj);
+	protected abstract AbstractInstance createRaw(T obj);
 
 	/**
 	 * Ticks the InstanceManager.
@@ -169,7 +169,7 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 				.canUseInstancing()) return;
 
 		if (canInstance(obj)) {
-			IInstance instance = getInstance(obj, false);
+			AbstractInstance instance = getInstance(obj, false);
 
 			if (instance != null) {
 
@@ -186,40 +186,29 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 		}
 	}
 
-	public void onLightUpdate(T obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return;
-
-		if (canInstance(obj)) {
-			IInstance instance = getInstance(obj, false);
-
-			if (instance != null) instance.updateLight();
-		}
-	}
-
 	public void remove(T obj) {
 		if (!Backend.getInstance()
 				.canUseInstancing()) return;
 
 		if (canInstance(obj)) {
-			IInstance instance = getInstance(obj, false);
+			AbstractInstance instance = getInstance(obj, false);
 			if (instance != null) removeInternal(obj, instance);
 		}
 	}
 
 	public void invalidate() {
-		instances.values().forEach(IInstance::remove);
+		instances.values().forEach(AbstractInstance::remove);
 		instances.clear();
 		dynamicInstances.clear();
 		tickableInstances.clear();
 	}
 
 	@Nullable
-	protected <I extends T> IInstance getInstance(I obj, boolean create) {
+	protected <I extends T> AbstractInstance getInstance(I obj, boolean create) {
 		if (!Backend.getInstance()
 				.canUseInstancing()) return null;
 
-		IInstance instance = instances.get(obj);
+		AbstractInstance instance = instances.get(obj);
 
 		if (instance != null) {
 			return instance;
@@ -283,18 +272,20 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 		getInstance(tile, true);
 	}
 
-	protected void removeInternal(T obj, IInstance instance) {
+	protected void removeInternal(T obj, AbstractInstance instance) {
 		instance.remove();
 		instances.remove(obj);
 		dynamicInstances.remove(obj);
 		tickableInstances.remove(obj);
 	}
 
-	protected IInstance createInternal(T obj) {
-		IInstance renderer = createRaw(obj);
+	@Nullable
+	protected AbstractInstance createInternal(T obj) {
+		AbstractInstance renderer = createRaw(obj);
 
 		if (renderer != null) {
 			renderer.updateLight();
+			renderer.startListening();
 			instances.put(obj, renderer);
 
 			if (renderer instanceof IDynamicInstance) dynamicInstances.put(obj, (IDynamicInstance) renderer);

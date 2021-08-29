@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.backend.instancing.tile;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.instancing.IInstance;
+import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
@@ -23,7 +23,7 @@ public class TileInstanceManager extends InstanceManager<TileEntity> {
 	}
 
 	@Override
-	protected IInstance createRaw(TileEntity obj) {
+	protected AbstractInstance createRaw(TileEntity obj) {
 		return InstancedRenderRegistry.getInstance()
 				.create(materialManager, obj);
 	}
