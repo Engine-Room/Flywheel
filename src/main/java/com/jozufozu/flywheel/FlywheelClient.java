@@ -5,6 +5,7 @@ import com.jozufozu.flywheel.core.AtlasStitcher;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.PartialModel;
+import com.jozufozu.flywheel.light.debug.DebugView;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
 
 import net.minecraftforge.eventbus.api.IEventBus;

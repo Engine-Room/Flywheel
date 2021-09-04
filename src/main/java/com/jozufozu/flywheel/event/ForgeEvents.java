@@ -11,7 +11,6 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.world.IWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -51,7 +50,7 @@ public class ForgeEvents {
 	@SubscribeEvent
 	public static void rwle(TickEvent.ClientTickEvent e) {
 		if (e.phase == TickEvent.Phase.END && Backend.isGameActive())
-			LightUpdater.getInstance().tick();
+			LightUpdater.get(Minecraft.getInstance().level).tick();
 	}
 
 }

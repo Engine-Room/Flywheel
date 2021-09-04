@@ -31,6 +31,7 @@ import net.minecraft.util.math.vector.Vector3f;
 
 public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityInstance<T> implements IDynamicInstance {
 
+	private final MatrixTransformStack stack = new MatrixTransformStack();
 	private final OrientedData body;
 	private final ModelData lid;
 
@@ -91,9 +92,8 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 
 		float angleX = -(progress * ((float) Math.PI / 2F));
 
-		MatrixTransformStack stack = new MatrixTransformStack();
-
-		stack.translate(getInstancePosition())
+		stack.setIdentity()
+				.translate(getInstancePosition())
 				.translate(0, 9f/16f, 0)
 				.centre()
 				.multiply(baseRotation)

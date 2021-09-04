@@ -1,19 +1,18 @@
 package com.jozufozu.flywheel.backend.instancing.entity;
 
-import java.util.Arrays;
-import java.util.stream.Stream;
-
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.light.GridAlignedBB;
 import com.jozufozu.flywheel.light.ILightUpdateListener;
-import com.jozufozu.flywheel.light.ListenerStatus;
-import com.jozufozu.flywheel.light.Volume;
+import com.jozufozu.flywheel.light.IMovingListener;
+import com.jozufozu.flywheel.light.LightProvider;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
@@ -35,25 +34,33 @@ import net.minecraft.util.math.vector.Vector3i;
  *
  * @param <E> The type of {@link Entity} your class is an instance of.
  */
-public abstract class EntityInstance<E extends Entity> extends AbstractInstance implements ILightUpdateListener {
+public abstract class EntityInstance<E extends Entity> extends AbstractInstance implements ILightUpdateListener, IMovingListener {
 
 	protected final E entity;
+	protected final GridAlignedBB bounds;
 
 	public EntityInstance(MaterialManager materialManager, E entity) {
 		super(materialManager, entity.level);
 		this.entity = entity;
-
-		startListening();
+		bounds = GridAlignedBB.from(entity.getBoundingBox());
 	}
 
 	@Override
-	public Volume.Box getVolume() {
-		return Volume.box(entity.getBoundingBox());
+	public GridAlignedBB getVolume() {
+		return bounds;
 	}
 
 	@Override
-	public ListenerStatus status() {
-		return ListenerStatus.UPDATE;
+	public boolean update(LightProvider provider) {
+		AxisAlignedBB boundsNow = entity.getBoundingBox();
+
+		if (bounds.sameAs(boundsNow)) return false;
+
+		bounds.assign(boundsNow);
+
+		updateLight();
+
+		return true;
 	}
 
 	/**

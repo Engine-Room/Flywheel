@@ -75,6 +75,15 @@ public class GridAlignedBB {
 		return minX == other.minX && minY == other.minY && minZ == other.minZ && maxX == other.maxX && maxY == other.maxY && maxZ == other.maxZ;
 	}
 
+	public boolean sameAs(AxisAlignedBB other) {
+		return minX == Math.floor(other.minX)
+				&& minY == Math.floor(other.minY)
+				&& minZ == Math.floor(other.minZ)
+				&& maxX == Math.ceil(other.maxX)
+				&& maxY == Math.ceil(other.maxY)
+				&& maxZ == Math.ceil(other.maxZ);
+	}
+
 	public void fixMinMax() {
 		int minX = Math.min(this.minX, this.maxX);
 		int minY = Math.min(this.minY, this.maxY);
@@ -245,6 +254,24 @@ public class GridAlignedBB {
 		this.maxZ = Math.max(this.maxZ, (int) Math.ceil(other.maxZ));
 	}
 
+	public void assign(AxisAlignedBB other) {
+		this.minX = (int) Math.floor(other.minX);
+		this.minY = (int) Math.floor(other.minY);
+		this.minZ = (int) Math.floor(other.minZ);
+		this.maxX = (int) Math.ceil(other.maxX);
+		this.maxY = (int) Math.ceil(other.maxY);
+		this.maxZ = (int) Math.ceil(other.maxZ);
+	}
+
+	public void assign(GridAlignedBB other) {
+		this.minX = other.minX;
+		this.minY = other.minY;
+		this.minZ = other.minZ;
+		this.maxX = other.maxX;
+		this.maxY = other.maxY;
+		this.maxZ = other.maxZ;
+	}
+
 	public boolean intersects(GridAlignedBB other) {
 		return this.intersects(other.minX, other.minY, other.minZ, other.maxX, other.maxY, other.maxZ);
 	}
@@ -297,5 +324,4 @@ public class GridAlignedBB {
 		result = 31 * result + maxZ;
 		return result;
 	}
-
 }

@@ -1,42 +1,42 @@
 package com.jozufozu.flywheel.light;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.util.WeakHashSet;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.SectionPos;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.LightType;
 
+/**
+ * Keeps track of what chunks/sections each listener is in so we can update exactly what needs to be updated.
+ */
 public class LightUpdater {
 
-	private static LightUpdater instance;
-
-	public static LightUpdater getInstance() {
-		if (instance == null) instance = new LightUpdater();
-
-		return instance;
+	private static final Map<IBlockDisplayReader, LightUpdater> light = new HashMap<>();
+	public static LightUpdater get(IBlockDisplayReader world) {
+		return light.computeIfAbsent(world, LightUpdater::new);
 	}
 
-	private final WeakHashSet<ILightUpdateListener> allListeners;
-	private final WeakContainmentMultiMap<ILightUpdateListener> sections;
-	private final WeakContainmentMultiMap<ILightUpdateListener> chunks;
+	private final LightProvider provider;
 
-	public LightUpdater() {
-		allListeners = new WeakHashSet<>();
-		sections = new WeakContainmentMultiMap<>();
-		chunks = new WeakContainmentMultiMap<>();
+	private final WeakHashSet<IMovingListener> movingListeners = new WeakHashSet<>();
+	private final WeakContainmentMultiMap<ILightUpdateListener> sections = new WeakContainmentMultiMap<>();
+	private final WeakContainmentMultiMap<ILightUpdateListener> chunks = new WeakContainmentMultiMap<>();
+
+	public LightUpdater(IBlockDisplayReader world) {
+		provider = BasicProvider.get(world);
 	}
 
 	public void tick() {
-		for (ILightUpdateListener listener : allListeners) {
-			if (listener.status() == ListenerStatus.UPDATE) {
+		for (IMovingListener listener : movingListeners) {
+			if (listener.update(provider)) {
 				addListener(listener);
-
-				listener.onLightUpdate(Minecraft.getInstance().level, LightType.BLOCK, null);
 			}
 		}
 	}
@@ -47,55 +47,41 @@ public class LightUpdater {
 	 * @param listener The object that wants to receive light update notifications.
 	 */
 	public void addListener(ILightUpdateListener listener) {
-		allListeners.add(listener);
+		if (listener instanceof IMovingListener)
+			movingListeners.add(((IMovingListener) listener));
 
-		Volume volume = listener.getVolume();
+		GridAlignedBB box = listener.getVolume();
 
 		LongSet sections = this.sections.getAndResetContainment(listener);
 		LongSet chunks = this.chunks.getAndResetContainment(listener);
 
-		if (volume instanceof Volume.Block) {
-			BlockPos pos = ((Volume.Block) volume).pos;
-			long sectionPos = blockToSection(pos);
-			this.sections.put(sectionPos, listener);
-			sections.add(sectionPos);
+		int minX = SectionPos.blockToSectionCoord(box.minX);
+		int minY = SectionPos.blockToSectionCoord(box.minY);
+		int minZ = SectionPos.blockToSectionCoord(box.minZ);
+		int maxX = SectionPos.blockToSectionCoord(box.maxX);
+		int maxY = SectionPos.blockToSectionCoord(box.maxY);
+		int maxZ = SectionPos.blockToSectionCoord(box.maxZ);
 
-			long chunkPos = sectionToChunk(sectionPos);
-			this.chunks.put(chunkPos, listener);
-			chunks.add(chunkPos);
-		} else if (volume instanceof Volume.Box) {
-			GridAlignedBB box = ((Volume.Box) volume).box;
-
-			int minX = SectionPos.blockToSectionCoord(box.minX);
-			int minY = SectionPos.blockToSectionCoord(box.minY);
-			int minZ = SectionPos.blockToSectionCoord(box.minZ);
-			int maxX = SectionPos.blockToSectionCoord(box.maxX);
-			int maxY = SectionPos.blockToSectionCoord(box.maxY);
-			int maxZ = SectionPos.blockToSectionCoord(box.maxZ);
-
-			for (int x = minX; x <= maxX; x++) {
-				for (int z = minZ; z <= maxZ; z++) {
-					for (int y = minY; y <= maxY; y++) {
-						long sectionPos = SectionPos.asLong(x, y, z);
-						this.sections.put(sectionPos, listener);
-						sections.add(sectionPos);
-					}
-					long chunkPos = SectionPos.asLong(x, 0, z);
-					this.chunks.put(chunkPos, listener);
-					chunks.add(chunkPos);
+		for (int x = minX; x <= maxX; x++) {
+			for (int z = minZ; z <= maxZ; z++) {
+				for (int y = minY; y <= maxY; y++) {
+					long sectionPos = SectionPos.asLong(x, y, z);
+					this.sections.put(sectionPos, listener);
+					sections.add(sectionPos);
 				}
+				long chunkPos = SectionPos.asLong(x, 0, z);
+				this.chunks.put(chunkPos, listener);
+				chunks.add(chunkPos);
 			}
 		}
 	}
 
 	/**
 	 * Dispatch light updates to all registered {@link ILightUpdateListener}s.
-	 *
-	 * @param world      The world in which light was updated.
 	 * @param type       The type of light that changed.
 	 * @param sectionPos A long representing the section position where light changed.
 	 */
-	public void onLightUpdate(IBlockDisplayReader world, LightType type, long sectionPos) {
+	public void onLightUpdate(LightType type, long sectionPos) {
 		Set<ILightUpdateListener> set = sections.get(sectionPos);
 
 		if (set == null || set.isEmpty()) return;
@@ -105,7 +91,7 @@ public class LightUpdater {
 		GridAlignedBB chunkBox = GridAlignedBB.from(SectionPos.of(sectionPos));
 
 		for (ILightUpdateListener listener : set) {
-			listener.onLightUpdate(world, type, chunkBox.copy());
+			listener.onLightUpdate(provider, type, chunkBox.copy());
 		}
 	}
 
@@ -113,9 +99,8 @@ public class LightUpdater {
 	 * Dispatch light updates to all registered {@link ILightUpdateListener}s
 	 * when the server sends lighting data for an entire chunk.
 	 *
-	 * @param world The world in which light was updated.
 	 */
-	public void onLightPacket(IBlockDisplayReader world, int chunkX, int chunkZ) {
+	public void onLightPacket(int chunkX, int chunkZ) {
 		long chunkPos = SectionPos.asLong(chunkX, 0, chunkZ);
 
 		Set<ILightUpdateListener> set = chunks.get(chunkPos);
@@ -125,7 +110,7 @@ public class LightUpdater {
 		set.removeIf(l -> l.status().shouldRemove());
 
 		for (ILightUpdateListener listener : set) {
-			listener.onLightPacket(world, chunkX, chunkZ);
+			listener.onLightPacket(provider, chunkX, chunkZ);
 		}
 	}
 
@@ -135,5 +120,13 @@ public class LightUpdater {
 
 	public static long sectionToChunk(long sectionPos) {
 		return sectionPos & 0xFFFFFFFFFFF_00000L;
+	}
+
+	public Stream<GridAlignedBB> getAllBoxes() {
+		return chunks.stream().map(ILightUpdateListener::getVolume);
+	}
+
+	public boolean isEmpty() {
+		return chunks.isEmpty();
 	}
 }
