@@ -4,6 +4,7 @@ import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.config.FlwPackets;
 
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.DistExecutor;
@@ -28,7 +29,11 @@ public class Flywheel {
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> FlywheelClient::clientInit);
 	}
 
-	private void setup(final FMLCommonSetupEvent event) {
+	public static ResourceLocation rl(String path) {
+		return new ResourceLocation(ID, path);
+	}
+
+    private void setup(final FMLCommonSetupEvent event) {
 		FlwPackets.registerPackets();
 	}
 }

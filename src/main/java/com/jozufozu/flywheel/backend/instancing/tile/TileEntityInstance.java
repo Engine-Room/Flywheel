@@ -9,7 +9,6 @@ import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.ModelData;
 import com.jozufozu.flywheel.core.materials.OrientedData;
 import com.jozufozu.flywheel.light.GridAlignedBB;
-import com.jozufozu.flywheel.light.Volume;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
@@ -85,7 +84,7 @@ public abstract class TileEntityInstance<T extends TileEntity> extends AbstractI
 	}
 
 	@Override
-	public Volume.Block getVolume() {
-		return Volume.block(pos);
+	public GridAlignedBB getVolume() {
+		return GridAlignedBB.from(pos);
 	}
 }

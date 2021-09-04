@@ -1,5 +1,8 @@
 package com.jozufozu.flywheel.light;
 
+import java.util.AbstractCollection;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.function.LongConsumer;
@@ -11,7 +14,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongRBTreeSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 
-public class WeakContainmentMultiMap<T> {
+public class WeakContainmentMultiMap<T> extends AbstractCollection<T> {
 
 	private final Long2ObjectMap<WeakHashSet<T>> forward;
 	private final WeakHashMap<T, LongSet> reverse;
@@ -52,5 +55,15 @@ public class WeakContainmentMultiMap<T> {
 
 	public void put(long sectionPos, T listener) {
 		forward.computeIfAbsent(sectionPos, $ -> new WeakHashSet<>()).add(listener);
+	}
+
+	@Override
+	public Iterator<T> iterator() {
+		return reverse.keySet().iterator();
+	}
+
+	@Override
+	public int size() {
+		return reverse.size();
 	}
 }

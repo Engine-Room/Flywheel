@@ -1,25 +1,17 @@
 package com.jozufozu.flywheel.mixin.light;
 
-import java.util.Map;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.backend.instancing.InstanceManager;
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.light.LightUpdater;
-import com.jozufozu.flywheel.util.ChunkUtil;
 
 import net.minecraft.client.multiplayer.ClientChunkProvider;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.SectionPos;
 import net.minecraft.world.LightType;
 import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -38,7 +30,7 @@ public abstract class LightUpdateMixin extends AbstractChunkProvider {
 		ClientChunkProvider thi = ((ClientChunkProvider) (Object) this);
 		ClientWorld world = (ClientWorld) thi.getLevel();
 
-		LightUpdater.getInstance()
-				.onLightUpdate(world, type, pos.asLong());
+		LightUpdater.get(world)
+				.onLightUpdate(type, pos.asLong());
 	}
 }

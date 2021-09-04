@@ -8,11 +8,10 @@ import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.core.materials.IFlatLight;
 import com.jozufozu.flywheel.light.GridAlignedBB;
 import com.jozufozu.flywheel.light.ILightUpdateListener;
-import com.jozufozu.flywheel.light.LightUpdater;
+import com.jozufozu.flywheel.light.LightProvider;
 import com.jozufozu.flywheel.light.ListenerStatus;
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
@@ -23,7 +22,7 @@ import net.minecraft.world.World;
 public abstract class AbstractInstance implements IInstance, ILightUpdateListener {
 
 	protected final MaterialManager materialManager;
-	protected final World world;
+	public final World world;
 
 	public AbstractInstance(MaterialManager materialManager, World world) {
 		this.materialManager = materialManager;
@@ -74,7 +73,7 @@ public abstract class AbstractInstance implements IInstance, ILightUpdateListene
 	}
 
 	@Override
-	public void onLightUpdate(IBlockDisplayReader world, LightType type, GridAlignedBB changed) {
+	public void onLightUpdate(LightProvider world, LightType type, GridAlignedBB changed) {
 		updateLight();
 	}
 

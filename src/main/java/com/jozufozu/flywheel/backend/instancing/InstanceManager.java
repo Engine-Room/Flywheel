@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
+import com.jozufozu.flywheel.light.LightUpdater;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.renderer.ActiveRenderInfo;
@@ -285,7 +286,7 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 
 		if (renderer != null) {
 			renderer.updateLight();
-			renderer.startListening();
+			LightUpdater.get(renderer.world).addListener(renderer);
 			instances.put(obj, renderer);
 
 			if (renderer instanceof IDynamicInstance) dynamicInstances.put(obj, (IDynamicInstance) renderer);
