@@ -50,17 +50,17 @@ public class LightUpdater {
 		if (listener instanceof IMovingListener)
 			movingListeners.add(((IMovingListener) listener));
 
-		GridAlignedBB box = listener.getVolume();
+		ReadOnlyBox box = listener.getVolume();
 
 		LongSet sections = this.sections.getAndResetContainment(listener);
 		LongSet chunks = this.chunks.getAndResetContainment(listener);
 
-		int minX = SectionPos.blockToSectionCoord(box.minX);
-		int minY = SectionPos.blockToSectionCoord(box.minY);
-		int minZ = SectionPos.blockToSectionCoord(box.minZ);
-		int maxX = SectionPos.blockToSectionCoord(box.maxX);
-		int maxY = SectionPos.blockToSectionCoord(box.maxY);
-		int maxZ = SectionPos.blockToSectionCoord(box.maxZ);
+		int minX = SectionPos.blockToSectionCoord(box.getMinX());
+		int minY = SectionPos.blockToSectionCoord(box.getMinY());
+		int minZ = SectionPos.blockToSectionCoord(box.getMinZ());
+		int maxX = SectionPos.blockToSectionCoord(box.getMaxX());
+		int maxY = SectionPos.blockToSectionCoord(box.getMaxY());
+		int maxZ = SectionPos.blockToSectionCoord(box.getMaxZ());
 
 		for (int x = minX; x <= maxX; x++) {
 			for (int z = minZ; z <= maxZ; z++) {
@@ -88,10 +88,10 @@ public class LightUpdater {
 
 		set.removeIf(l -> l.status().shouldRemove());
 
-		GridAlignedBB chunkBox = GridAlignedBB.from(SectionPos.of(sectionPos));
+		ReadOnlyBox chunkBox = GridAlignedBB.from(SectionPos.of(sectionPos));
 
 		for (ILightUpdateListener listener : set) {
-			listener.onLightUpdate(provider, type, chunkBox.copy());
+			listener.onLightUpdate(provider, type, chunkBox);
 		}
 	}
 
@@ -122,7 +122,7 @@ public class LightUpdater {
 		return sectionPos & 0xFFFFFFFFFFF_00000L;
 	}
 
-	public Stream<GridAlignedBB> getAllBoxes() {
+	public Stream<ReadOnlyBox> getAllBoxes() {
 		return chunks.stream().map(ILightUpdateListener::getVolume);
 	}
 
