@@ -76,36 +76,36 @@ public class LightVolume {
 		this.textureVolume.nextPowerOf2Centered();
 	}
 
-	public GridAlignedBB getTextureVolume() {
-		return GridAlignedBB.copy(textureVolume);
+	public ReadOnlyBox getTextureVolume() {
+		return textureVolume;
 	}
 
-	public GridAlignedBB getSampleVolume() {
-		return GridAlignedBB.copy(sampleVolume);
+	public ReadOnlyBox getSampleVolume() {
+		return sampleVolume;
 	}
 
 	public int getMinX() {
-		return textureVolume.minX;
+		return textureVolume.getMinX();
 	}
 
 	public int getMinY() {
-		return textureVolume.minY;
+		return textureVolume.getMinY();
 	}
 
 	public int getMinZ() {
-		return textureVolume.minZ;
+		return textureVolume.getMinZ();
 	}
 
 	public int getMaxX() {
-		return textureVolume.maxX;
+		return textureVolume.getMaxX();
 	}
 
 	public int getMaxY() {
-		return textureVolume.maxY;
+		return textureVolume.getMaxY();
 	}
 
 	public int getMaxZ() {
-		return textureVolume.maxZ;
+		return textureVolume.getMaxZ();
 	}
 
 	public int getSizeX() {
@@ -144,7 +144,7 @@ public class LightVolume {
 		}
 	}
 
-	public void notifyLightUpdate(LightProvider world, LightType type, GridAlignedBB changedVolume) {
+	public void notifyLightUpdate(LightProvider world, LightType type, ReadOnlyBox changedVolume) {
 		if (removed) return;
 
 		if (!changedVolume.intersects(sampleVolume)) return;
@@ -173,9 +173,9 @@ public class LightVolume {
 
 		BlockPos.Mutable pos = new BlockPos.Mutable();
 
-		int shiftX = textureVolume.minX;
-		int shiftY = textureVolume.minY;
-		int shiftZ = textureVolume.minZ;
+		int shiftX = textureVolume.getMinX();
+		int shiftY = textureVolume.getMinY();
+		int shiftZ = textureVolume.getMinZ();
 
 		sampleVolume.forEachContained((x, y, z) -> {
 			pos.set(x, y, z);
@@ -194,10 +194,10 @@ public class LightVolume {
 	 *
 	 * @param worldVolume the region in the world to copy data from.
 	 */
-	public void copyBlock(LightProvider world, GridAlignedBB worldVolume) {
-		int xShift = textureVolume.minX;
-		int yShift = textureVolume.minY;
-		int zShift = textureVolume.minZ;
+	public void copyBlock(LightProvider world, ReadOnlyBox worldVolume) {
+		int xShift = textureVolume.getMinX();
+		int yShift = textureVolume.getMinY();
+		int zShift = textureVolume.getMinZ();
 
 		worldVolume.forEachContained((x, y, z) -> {
 			int light = world.getLight(LightType.BLOCK, x, y, z);
@@ -213,10 +213,10 @@ public class LightVolume {
 	 *
 	 * @param worldVolume the region in the world to copy data from.
 	 */
-	public void copySky(LightProvider world, GridAlignedBB worldVolume) {
-		int xShift = textureVolume.minX;
-		int yShift = textureVolume.minY;
-		int zShift = textureVolume.minZ;
+	public void copySky(LightProvider world, ReadOnlyBox worldVolume) {
+		int xShift = textureVolume.getMinX();
+		int yShift = textureVolume.getMinY();
+		int zShift = textureVolume.getMinZ();
 
 		worldVolume.forEachContained((x, y, z) -> {
 			int light = world.getLight(LightType.SKY, x, y, z);
@@ -232,12 +232,12 @@ public class LightVolume {
 	 *
 	 * @param worldVolume the region in the world to copy data from.
 	 */
-	public void copyLight(LightProvider world, GridAlignedBB worldVolume) {
+	public void copyLight(LightProvider world, ReadOnlyBox worldVolume) {
 		BlockPos.Mutable pos = new BlockPos.Mutable();
 
-		int xShift = textureVolume.minX;
-		int yShift = textureVolume.minY;
-		int zShift = textureVolume.minZ;
+		int xShift = textureVolume.getMinX();
+		int yShift = textureVolume.getMinY();
+		int zShift = textureVolume.getMinZ();
 
 		worldVolume.forEachContained((x, y, z) -> {
 			pos.set(x, y, z);
