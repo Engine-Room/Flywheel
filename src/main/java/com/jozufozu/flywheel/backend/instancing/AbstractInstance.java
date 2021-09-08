@@ -6,11 +6,10 @@ import java.util.stream.Stream;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.core.materials.IFlatLight;
-import com.jozufozu.flywheel.light.GridAlignedBB;
 import com.jozufozu.flywheel.light.ILightUpdateListener;
 import com.jozufozu.flywheel.light.LightProvider;
 import com.jozufozu.flywheel.light.ListenerStatus;
-import com.jozufozu.flywheel.light.ReadOnlyBox;
+import com.jozufozu.flywheel.light.ImmutableBox;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.LightType;
@@ -74,7 +73,7 @@ public abstract class AbstractInstance implements IInstance, ILightUpdateListene
 	}
 
 	@Override
-	public void onLightUpdate(LightProvider world, LightType type, ReadOnlyBox changed) {
+	public void onLightUpdate(LightProvider world, LightType type, ImmutableBox changed) {
 		updateLight();
 	}
 

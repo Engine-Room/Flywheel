@@ -278,6 +278,8 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 		instances.remove(obj);
 		dynamicInstances.remove(obj);
 		tickableInstances.remove(obj);
+		LightUpdater.get(instance.world)
+				.removeListener(instance);
 	}
 
 	@Nullable
@@ -286,7 +288,8 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 
 		if (renderer != null) {
 			renderer.updateLight();
-			LightUpdater.get(renderer.world).addListener(renderer);
+			LightUpdater.get(renderer.world)
+					.addListener(renderer);
 			instances.put(obj, renderer);
 
 			if (renderer instanceof IDynamicInstance) dynamicInstances.put(obj, (IDynamicInstance) renderer);

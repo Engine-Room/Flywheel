@@ -48,7 +48,7 @@ public class ForgeEvents {
 	}
 
 	@SubscribeEvent
-	public static void rwle(TickEvent.ClientTickEvent e) {
+	public static void tickLight(TickEvent.ClientTickEvent e) {
 		if (e.phase == TickEvent.Phase.END && Backend.isGameActive())
 			LightUpdater.get(Minecraft.getInstance().level).tick();
 	}

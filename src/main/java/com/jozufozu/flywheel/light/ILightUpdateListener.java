@@ -4,14 +4,14 @@ import net.minecraft.world.LightType;
 
 public interface ILightUpdateListener {
 
-	ReadOnlyBox getVolume();
+	ImmutableBox getVolume();
 
 	ListenerStatus status();
 
 	/**
 	 * Called when a light updates in a chunk the implementor cares about.
 	 */
-	void onLightUpdate(LightProvider world, LightType type, ReadOnlyBox changed);
+	void onLightUpdate(LightProvider world, LightType type, ImmutableBox changed);
 
 	/**
 	 * Called when the server sends light data to the client.

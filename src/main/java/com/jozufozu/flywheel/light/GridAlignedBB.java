@@ -8,13 +8,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.SectionPos;
 import net.minecraft.util.math.vector.Vector3i;
 
-public class GridAlignedBB implements ReadOnlyBox {
+public class GridAlignedBB implements ImmutableBox {
 	private int minX;
 	private int minY;
 	private int minZ;
 	private int maxX;
 	private int maxY;
 	private int maxZ;
+
+	public GridAlignedBB() {
+
+	}
 
 	public GridAlignedBB(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
 		this.minX = minX;
@@ -58,19 +62,19 @@ public class GridAlignedBB implements ReadOnlyBox {
 	}
 
 	public void fixMinMax() {
-		int minX = Math.min(this.getMinX(), this.getMaxX());
-		int minY = Math.min(this.getMinY(), this.getMaxY());
-		int minZ = Math.min(this.getMinZ(), this.getMaxZ());
-		int maxX = Math.max(this.getMinX(), this.getMaxX());
-		int maxY = Math.max(this.getMinY(), this.getMaxY());
-		int maxZ = Math.max(this.getMinZ(), this.getMaxZ());
+		int minX = Math.min(this.minX, this.maxX);
+		int minY = Math.min(this.minY, this.maxY);
+		int minZ = Math.min(this.minZ, this.maxZ);
+		int maxX = Math.max(this.minX, this.maxX);
+		int maxY = Math.max(this.minY, this.maxY);
+		int maxZ = Math.max(this.minZ, this.maxZ);
 
-		this.setMinX(minX);
-		this.setMinY(minY);
-		this.setMinZ(minZ);
-		this.setMaxX(maxX);
-		this.setMaxY(maxY);
-		this.setMaxZ(maxZ);
+		this.minX = minX;
+		this.minY = minY;
+		this.minZ = minZ;
+		this.maxX = maxX;
+		this.maxY = maxY;
+		this.maxZ = maxZ;
 	}
 
 	public void translate(Vector3i by) {
@@ -78,12 +82,12 @@ public class GridAlignedBB implements ReadOnlyBox {
 	}
 
 	public void translate(int x, int y, int z) {
-		setMinX(getMinX() + x);
-		setMaxX(getMaxX() + x);
-		setMinY(getMinY() + y);
-		setMaxY(getMaxY() + y);
-		setMinZ(getMinZ() + z);
-		setMaxZ(getMaxZ() + z);
+		minX = minX + x;
+		maxX = maxX + x;
+		minY = minY + y;
+		maxY = maxY + y;
+		minZ = minZ + z;
+		maxZ = maxZ + z;
 	}
 
 	public void mirrorAbout(Direction.Axis axis) {
@@ -93,15 +97,15 @@ public class GridAlignedBB implements ReadOnlyBox {
 		int flipY = axisVec.getY() - 1;
 		int flipZ = axisVec.getZ() - 1;
 
-		int maxX = this.getMaxX() * flipX;
-		int maxY = this.getMaxY() * flipY;
-		int maxZ = this.getMaxZ() * flipZ;
-		this.setMaxX(this.getMinX() * flipX);
-		this.setMaxY(this.getMinY() * flipY);
-		this.setMaxZ(this.getMinZ() * flipZ);
-		this.setMinX(maxX);
-		this.setMinY(maxY);
-		this.setMinZ(maxZ);
+		int maxX = this.maxX * flipX;
+		int maxY = this.maxY * flipY;
+		int maxZ = this.maxZ * flipZ;
+		this.maxX = this.minX * flipX;
+		this.maxY = this.minY * flipY;
+		this.maxZ = this.minZ * flipZ;
+		this.minX = maxX;
+		this.minY = maxY;
+		this.minZ = maxZ;
 	}
 
 	/**
@@ -120,12 +124,12 @@ public class GridAlignedBB implements ReadOnlyBox {
 		int diffY = newSizeY - sizeY;
 		int diffZ = newSizeZ - sizeZ;
 
-		setMinX(getMinX() - diffX / 2); // floor division for the minimums
-		setMinY(getMinY() - diffY / 2);
-		setMinZ(getMinZ() - diffZ / 2);
-		setMaxX(getMaxX() + (diffX + 1) / 2); // ceiling divison for the maximums
-		setMaxY(getMaxY() + (diffY + 1) / 2);
-		setMaxZ(getMaxZ() + (diffZ + 1) / 2);
+		minX = minX - diffX / 2; // floor division for the minimums
+		minY = minY - diffY / 2;
+		minZ = minZ - diffZ / 2;
+		maxX = maxX + (diffX + 1) / 2; // ceiling divison for the maximums
+		maxY = maxY + (diffY + 1) / 2;
+		maxZ = maxZ + (diffZ + 1) / 2;
 	}
 
 	/**
@@ -136,9 +140,9 @@ public class GridAlignedBB implements ReadOnlyBox {
 		int sizeY = RenderUtil.nextPowerOf2(sizeY());
 		int sizeZ = RenderUtil.nextPowerOf2(sizeZ());
 
-		this.setMaxX(this.getMinX() + sizeX);
-		this.setMaxY(this.getMinY() + sizeY);
-		this.setMaxZ(this.getMinZ() + sizeZ);
+		maxX = minX + sizeX;
+		maxY = minY + sizeY;
+		maxZ = minZ + sizeZ;
 	}
 
 	public void grow(int s) {
@@ -146,57 +150,57 @@ public class GridAlignedBB implements ReadOnlyBox {
 	}
 
 	public void grow(int x, int y, int z) {
-		setMinX(getMinX() - x);
-		setMinY(getMinY() - y);
-		setMinZ(getMinZ() - z);
-		setMaxX(getMaxX() + x);
-		setMaxY(getMaxY() + y);
-		setMaxZ(getMaxZ() + z);
+		minX = minX - x;
+		minY = minY - y;
+		minZ = minZ - z;
+		maxX = maxX + x;
+		maxY = maxY + y;
+		maxZ = maxZ + z;
 	}
 
-	public void intersectAssign(ReadOnlyBox other) {
-		this.setMinX(Math.max(this.getMinX(), other.getMinX()));
-		this.setMinY(Math.max(this.getMinY(), other.getMinY()));
-		this.setMinZ(Math.max(this.getMinZ(), other.getMinZ()));
-		this.setMaxX(Math.min(this.getMaxX(), other.getMaxX()));
-		this.setMaxY(Math.min(this.getMaxY(), other.getMaxY()));
-		this.setMaxZ(Math.min(this.getMaxZ(), other.getMaxZ()));
+	public void intersectAssign(ImmutableBox other) {
+		minX = Math.max(this.minX, other.getMinX());
+		minY = Math.max(this.minY, other.getMinY());
+		minZ = Math.max(this.minZ, other.getMinZ());
+		maxX = Math.min(this.maxX, other.getMaxX());
+		maxY = Math.min(this.maxY, other.getMaxY());
+		maxZ = Math.min(this.maxZ, other.getMaxZ());
 	}
 
-	public void unionAssign(ReadOnlyBox other) {
-		this.setMinX(Math.min(this.getMinX(), other.getMinX()));
-		this.setMinY(Math.min(this.getMinY(), other.getMinY()));
-		this.setMinZ(Math.min(this.getMinZ(), other.getMinZ()));
-		this.setMaxX(Math.max(this.getMaxX(), other.getMaxX()));
-		this.setMaxY(Math.max(this.getMaxY(), other.getMaxY()));
-		this.setMaxZ(Math.max(this.getMaxZ(), other.getMaxZ()));
+	public void unionAssign(ImmutableBox other) {
+		minX = Math.min(this.minX, other.getMinX());
+		minY = Math.min(this.minY, other.getMinY());
+		minZ = Math.min(this.minZ, other.getMinZ());
+		maxX = Math.max(this.maxX, other.getMaxX());
+		maxY = Math.max(this.maxY, other.getMaxY());
+		maxZ = Math.max(this.maxZ, other.getMaxZ());
 	}
 
 	public void unionAssign(AxisAlignedBB other) {
-		this.setMinX(Math.min(this.getMinX(), (int) Math.floor(other.minX)));
-		this.setMinY(Math.min(this.getMinY(), (int) Math.floor(other.minY)));
-		this.setMinZ(Math.min(this.getMinZ(), (int) Math.floor(other.minZ)));
-		this.setMaxX(Math.max(this.getMaxX(), (int) Math.ceil(other.maxX)));
-		this.setMaxY(Math.max(this.getMaxY(), (int) Math.ceil(other.maxY)));
-		this.setMaxZ(Math.max(this.getMaxZ(), (int) Math.ceil(other.maxZ)));
+		minX = Math.min(this.minX, (int) Math.floor(other.minX));
+		minY = Math.min(this.minY, (int) Math.floor(other.minY));
+		minZ = Math.min(this.minZ, (int) Math.floor(other.minZ));
+		maxX = Math.max(this.maxX, (int) Math.ceil(other.maxX));
+		maxY = Math.max(this.maxY, (int) Math.ceil(other.maxY));
+		maxZ = Math.max(this.maxZ, (int) Math.ceil(other.maxZ));
 	}
 
 	public void assign(AxisAlignedBB other) {
-		this.setMinX((int) Math.floor(other.minX));
-		this.setMinY((int) Math.floor(other.minY));
-		this.setMinZ((int) Math.floor(other.minZ));
-		this.setMaxX((int) Math.ceil(other.maxX));
-		this.setMaxY((int) Math.ceil(other.maxY));
-		this.setMaxZ((int) Math.ceil(other.maxZ));
+		minX = (int) Math.floor(other.minX);
+		minY = (int) Math.floor(other.minY);
+		minZ = (int) Math.floor(other.minZ);
+		maxX = (int) Math.ceil(other.maxX);
+		maxY = (int) Math.ceil(other.maxY);
+		maxZ = (int) Math.ceil(other.maxZ);
 	}
 
-	public void assign(ReadOnlyBox other) {
-		this.setMinX(other.getMinX());
-		this.setMinY(other.getMinY());
-		this.setMinZ(other.getMinZ());
-		this.setMaxX(other.getMaxX());
-		this.setMaxY(other.getMaxY());
-		this.setMaxZ(other.getMaxZ());
+	public void assign(ImmutableBox other) {
+		minX = other.getMinX();
+		minY = other.getMinY();
+		minZ = other.getMinZ();
+		maxX = other.getMaxX();
+		maxY = other.getMaxY();
+		maxZ = other.getMaxZ();
 	}
 
 	@Override
@@ -204,7 +208,7 @@ public class GridAlignedBB implements ReadOnlyBox {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 
-		ReadOnlyBox that = (ReadOnlyBox) o;
+		ImmutableBox that = (ImmutableBox) o;
 
 		return this.sameAs(that);
 	}
@@ -278,5 +282,133 @@ public class GridAlignedBB implements ReadOnlyBox {
 	public GridAlignedBB setMaxZ(int maxZ) {
 		this.maxZ = maxZ;
 		return this;
+	}
+
+	public GridAlignedBB assign(BlockPos start, BlockPos end) {
+		minX = start.getX();
+		minY = start.getY();
+		minZ = start.getZ();
+		maxX = end.getX() + 1;
+		maxY = end.getY() + 1;
+		maxZ = end.getZ() + 1;
+		return this;
+	}
+
+	public GridAlignedBB setMax(Vector3i v) {
+		return setMax(v.getX(), v.getY(), v.getZ());
+	}
+
+	public GridAlignedBB setMin(Vector3i v) {
+		return setMin(v.getX(), v.getY(), v.getZ());
+	}
+
+	public GridAlignedBB setMax(int x, int y, int z) {
+		maxX = x;
+		maxY = y;
+		maxZ = z;
+		return this;
+	}
+
+	public GridAlignedBB setMin(int x, int y, int z) {
+		minX = x;
+		minY = y;
+		minZ = z;
+		return this;
+	}
+
+	@Override
+	public int sizeX() {
+		return maxX - minX;
+	}
+
+	@Override
+	public int sizeY() {
+		return maxY - minY;
+	}
+
+	@Override
+	public int sizeZ() {
+		return maxZ - minZ;
+	}
+
+	@Override
+	public boolean empty() {
+		// if any dimension has side length 0 this box contains no volume
+		return minX == maxX || minY == maxY || minZ == maxZ;
+	}
+
+	@Override
+	public boolean sameAs(ImmutableBox other) {
+		return minX == other.getMinX() && minY == other.getMinY() && minZ == other.getMinZ() && maxX == other.getMaxX() && maxY == other.getMaxY() && maxZ == other.getMaxZ();
+	}
+
+	@Override
+	public boolean sameAs(AxisAlignedBB other) {
+		return minX == Math.floor(other.minX)
+				&& minY == Math.floor(other.minY)
+				&& minZ == Math.floor(other.minZ)
+				&& maxX == Math.ceil(other.maxX)
+				&& maxY == Math.ceil(other.maxY)
+				&& maxZ == Math.ceil(other.maxZ);
+	}
+
+	@Override
+	public GridAlignedBB intersect(ImmutableBox other) {
+		int minX = Math.max(this.minX, other.getMinX());
+		int minY = Math.max(this.minY, other.getMinY());
+		int minZ = Math.max(this.minZ, other.getMinZ());
+		int maxX = Math.min(this.maxX, other.getMaxX());
+		int maxY = Math.min(this.maxY, other.getMaxY());
+		int maxZ = Math.min(this.maxZ, other.getMaxZ());
+		return new GridAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+	}
+
+	@Override
+	public ImmutableBox union(ImmutableBox other) {
+		int minX = Math.min(this.minX, other.getMinX());
+		int minY = Math.min(this.minY, other.getMinY());
+		int minZ = Math.min(this.minZ, other.getMinZ());
+		int maxX = Math.max(this.maxX, other.getMaxX());
+		int maxY = Math.max(this.maxY, other.getMaxY());
+		int maxZ = Math.max(this.maxZ, other.getMaxZ());
+		return new GridAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+	}
+
+	@Override
+	public boolean contains(ImmutableBox other) {
+		return other.getMinX() >= this.minX && other.getMaxX() <= this.maxX && other.getMinY() >= this.minY && other.getMaxY() <= this.maxY && other.getMinZ() >= this.minZ && other.getMaxZ() <= this.maxZ;
+	}
+
+	@Override
+	public boolean intersects(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+		return this.minX < maxX && this.maxX > minX && this.minY < maxY && this.maxY > minY && this.minZ < maxZ && this.maxZ > minZ;
+	}
+
+	@Override
+	public void forEachContained(ICoordinateConsumer func) {
+		if (empty()) return;
+
+		for (int x = minX; x < maxX; x++) {
+			for (int y = Math.max(minY, 0); y < Math.min(maxY, 255); y++) { // clamp to world height limits
+				for (int z = minZ; z < maxZ; z++) {
+					func.consume(x, y, z);
+				}
+			}
+		}
+	}
+
+	@Override
+	public AxisAlignedBB toAABB() {
+		return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+	}
+
+	@Override
+	public GridAlignedBB copy() {
+		return new GridAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+	}
+
+	@Override
+	public String toString() {
+		return "(" + minX + ", " + minY + ", " + minZ + ")->(" + maxX + ", " + maxY + ", " + maxZ + ')';
 	}
 }
