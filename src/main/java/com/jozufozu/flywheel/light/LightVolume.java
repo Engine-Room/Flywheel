@@ -1,165 +1,89 @@
 package com.jozufozu.flywheel.light;
 
-import static org.lwjgl.opengl.GL20.GL_LINEAR;
-import static org.lwjgl.opengl.GL20.GL_MIRRORED_REPEAT;
-import static org.lwjgl.opengl.GL20.GL_TEXTURE0;
-import static org.lwjgl.opengl.GL20.GL_TEXTURE4;
-import static org.lwjgl.opengl.GL20.GL_TEXTURE_3D;
-import static org.lwjgl.opengl.GL20.GL_TEXTURE_MAG_FILTER;
-import static org.lwjgl.opengl.GL20.GL_TEXTURE_MIN_FILTER;
-import static org.lwjgl.opengl.GL20.GL_TEXTURE_WRAP_R;
-import static org.lwjgl.opengl.GL20.GL_TEXTURE_WRAP_S;
-import static org.lwjgl.opengl.GL20.GL_TEXTURE_WRAP_T;
-import static org.lwjgl.opengl.GL20.GL_UNPACK_ALIGNMENT;
-import static org.lwjgl.opengl.GL20.GL_UNPACK_IMAGE_HEIGHT;
-import static org.lwjgl.opengl.GL20.GL_UNPACK_ROW_LENGTH;
-import static org.lwjgl.opengl.GL20.GL_UNPACK_SKIP_IMAGES;
-import static org.lwjgl.opengl.GL20.GL_UNPACK_SKIP_PIXELS;
-import static org.lwjgl.opengl.GL20.GL_UNPACK_SKIP_ROWS;
-import static org.lwjgl.opengl.GL20.GL_UNSIGNED_BYTE;
-import static org.lwjgl.opengl.GL20.glActiveTexture;
-import static org.lwjgl.opengl.GL20.glPixelStorei;
-import static org.lwjgl.opengl.GL20.glTexImage3D;
-import static org.lwjgl.opengl.GL20.glTexParameteri;
-import static org.lwjgl.opengl.GL20.glTexSubImage3D;
-
 import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.gl.GlTexture;
-import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
-import com.jozufozu.flywheel.backend.gl.versioned.RGPixelFormat;
-
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.LightType;
 
-public class LightVolume {
+public class LightVolume implements ImmutableBox, ILightUpdateListener {
 
-	private GridAlignedBB sampleVolume;
-	private GridAlignedBB textureVolume;
-	private ByteBuffer lightData;
+	protected final GridAlignedBB box = new GridAlignedBB();
+	protected ByteBuffer lightData;
 
-	private boolean bufferDirty;
-	private boolean removed;
+	public LightVolume(ImmutableBox sampleVolume) {
+		this.setBox(sampleVolume);
 
-	private final GlTexture glTexture;
-
-	private final RGPixelFormat pixelFormat;
-
-	public LightVolume(GridAlignedBB sampleVolume) {
-		setSampleVolume(sampleVolume);
-
-		pixelFormat = Backend.getInstance().compat.pixelFormat;
-
-		this.glTexture = new GlTexture(GL_TEXTURE_3D);
-		this.lightData = MemoryUtil.memAlloc(this.textureVolume.volume() * pixelFormat.byteCount());
-
-		// allocate space for the texture
-		glActiveTexture(GL_TEXTURE4);
-		glTexture.bind();
-
-		int sizeX = textureVolume.sizeX();
-		int sizeY = textureVolume.sizeY();
-		int sizeZ = textureVolume.sizeZ();
-		glTexImage3D(GL_TEXTURE_3D, 0, pixelFormat.internalFormat(), sizeX, sizeY, sizeZ, 0, pixelFormat.format(), GL_UNSIGNED_BYTE, 0);
-
-		glTexture.unbind();
-		glActiveTexture(GL_TEXTURE0);
+		this.lightData = MemoryUtil.memAlloc(this.box.volume() * getStride());
 	}
 
-	private void setSampleVolume(GridAlignedBB sampleVolume) {
-		this.sampleVolume = sampleVolume;
-		this.textureVolume = sampleVolume.copy();
-		this.textureVolume.nextPowerOf2Centered();
+	protected void setBox(ImmutableBox box) {
+		this.box.assign(box);
 	}
 
-	public ReadOnlyBox getTextureVolume() {
-		return textureVolume;
-	}
-
-	public ReadOnlyBox getSampleVolume() {
-		return sampleVolume;
-	}
-
-	public int getMinX() {
-		return textureVolume.getMinX();
-	}
-
-	public int getMinY() {
-		return textureVolume.getMinY();
-	}
-
-	public int getMinZ() {
-		return textureVolume.getMinZ();
-	}
-
-	public int getMaxX() {
-		return textureVolume.getMaxX();
-	}
-
-	public int getMaxY() {
-		return textureVolume.getMaxY();
-	}
-
-	public int getMaxZ() {
-		return textureVolume.getMaxZ();
-	}
-
-	public int getSizeX() {
-		return textureVolume.sizeX();
-	}
-
-	public int getSizeY() {
-		return textureVolume.sizeY();
-	}
-
-	public int getSizeZ() {
-		return textureVolume.sizeZ();
-	}
-
-	public void move(IBlockDisplayReader world, GridAlignedBB newSampleVolume) {
-		if (removed) return;
-
-		if (textureVolume.contains(newSampleVolume)) {
-			BasicProvider basicProvider = BasicProvider.get(world);
-			if (newSampleVolume.intersects(sampleVolume)) {
-				GridAlignedBB newArea = newSampleVolume.intersect(sampleVolume);
-				sampleVolume = newSampleVolume;
-
-				copyLight(basicProvider, newArea);
-			} else {
-				sampleVolume = newSampleVolume;
-				initialize(world);
-			}
+	public short getPackedLight(int x, int y, int z) {
+		if (box.contains(x, y, z)) {
+			return lightData.getShort(worldPosToBufferIndex(x, y, z));
 		} else {
-			setSampleVolume(newSampleVolume);
-			int volume = textureVolume.volume();
-			if (volume * 2 > lightData.capacity()) {
-				lightData = MemoryUtil.memRealloc(lightData, volume * 2);
-			}
-			initialize(world);
+			return 0;
 		}
 	}
 
-	public void notifyLightUpdate(LightProvider world, LightType type, ReadOnlyBox changedVolume) {
-		if (removed) return;
-
-		if (!changedVolume.intersects(sampleVolume)) return;
-		changedVolume = changedVolume.intersect(sampleVolume); // compute the region contained by us that has dirty lighting data.
-
-		if (type == LightType.BLOCK) copyBlock(world, changedVolume);
-		else if (type == LightType.SKY) copySky(world, changedVolume);
+	public int getMinX() {
+		return box.getMinX();
 	}
 
-	public void notifyLightPacket(LightProvider world, int chunkX, int chunkZ) {
-		if (removed) return;
+	public int getMinY() {
+		return box.getMinY();
+	}
+
+	public int getMinZ() {
+		return box.getMinZ();
+	}
+
+	public int getMaxX() {
+		return box.getMaxX();
+	}
+
+	public int getMaxY() {
+		return box.getMaxY();
+	}
+
+	public int getMaxZ() {
+		return box.getMaxZ();
+	}
+
+	public void move(LightProvider world, ImmutableBox newSampleVolume) {
+		if (lightData == null) return;
+
+		setBox(newSampleVolume);
+		int volume = box.volume();
+		if (volume * 2 > lightData.capacity()) {
+			lightData = MemoryUtil.memRealloc(lightData, volume * 2);
+		}
+		initialize(world);
+	}
+
+	@Override
+	public void onLightUpdate(LightProvider world, LightType type, ImmutableBox changedVolume) {
+		if (lightData == null) return;
+
+		GridAlignedBB vol = changedVolume.copy();
+		if (!vol.intersects(getVolume())) return;
+		vol.intersectAssign(getVolume()); // compute the region contained by us that has dirty lighting data.
+
+		if (type == LightType.BLOCK) copyBlock(world, vol);
+		else if (type == LightType.SKY) copySky(world, vol);
+	}
+
+	@Override
+	public void onLightPacket(LightProvider world, int chunkX, int chunkZ) {
+		if (lightData == null) return;
 
 		GridAlignedBB changedVolume = GridAlignedBB.from(chunkX, chunkZ);
-		if (!changedVolume.intersects(sampleVolume)) return;
-		changedVolume.intersectAssign(sampleVolume); // compute the region contained by us that has dirty lighting data.
+		if (!changedVolume.intersects(getVolume())) return;
+		changedVolume.intersectAssign(getVolume()); // compute the region contained by us that has dirty lighting data.
 
 		copyLight(world, changedVolume);
 	}
@@ -168,25 +92,20 @@ public class LightVolume {
 	 * Completely (re)populate this volume with block and sky lighting data.
 	 * This is expensive and should be avoided.
 	 */
-	public void initialize(IBlockDisplayReader world) {
-		if (removed) return;
+	public void initialize(LightProvider world) {
+		if (lightData == null) return;
 
-		BlockPos.Mutable pos = new BlockPos.Mutable();
+		ImmutableBox box = getVolume();
+		int shiftX = box.getMinX();
+		int shiftY = box.getMinY();
+		int shiftZ = box.getMinZ();
 
-		int shiftX = textureVolume.getMinX();
-		int shiftY = textureVolume.getMinY();
-		int shiftZ = textureVolume.getMinZ();
-
-		sampleVolume.forEachContained((x, y, z) -> {
-			pos.set(x, y, z);
-
-			int blockLight = world.getBrightness(LightType.BLOCK, pos);
-			int skyLight = world.getBrightness(LightType.SKY, pos);
+		box.forEachContained((x, y, z) -> {
+			int blockLight = world.getLight(LightType.BLOCK, x, y, z);
+			int skyLight = world.getLight(LightType.SKY, x, y, z);
 
 			writeLight(x - shiftX, y - shiftY, z - shiftZ, blockLight, skyLight);
 		});
-
-		bufferDirty = true;
 	}
 
 	/**
@@ -194,18 +113,16 @@ public class LightVolume {
 	 *
 	 * @param worldVolume the region in the world to copy data from.
 	 */
-	public void copyBlock(LightProvider world, ReadOnlyBox worldVolume) {
-		int xShift = textureVolume.getMinX();
-		int yShift = textureVolume.getMinY();
-		int zShift = textureVolume.getMinZ();
+	public void copyBlock(LightProvider world, ImmutableBox worldVolume) {
+		int xShift = box.getMinX();
+		int yShift = box.getMinY();
+		int zShift = box.getMinZ();
 
 		worldVolume.forEachContained((x, y, z) -> {
 			int light = world.getLight(LightType.BLOCK, x, y, z);
 
 			writeBlock(x - xShift, y - yShift, z - zShift, light);
 		});
-
-		bufferDirty = true;
 	}
 
 	/**
@@ -213,18 +130,16 @@ public class LightVolume {
 	 *
 	 * @param worldVolume the region in the world to copy data from.
 	 */
-	public void copySky(LightProvider world, ReadOnlyBox worldVolume) {
-		int xShift = textureVolume.getMinX();
-		int yShift = textureVolume.getMinY();
-		int zShift = textureVolume.getMinZ();
+	public void copySky(LightProvider world, ImmutableBox worldVolume) {
+		int xShift = box.getMinX();
+		int yShift = box.getMinY();
+		int zShift = box.getMinZ();
 
 		worldVolume.forEachContained((x, y, z) -> {
 			int light = world.getLight(LightType.SKY, x, y, z);
 
 			writeSky(x - xShift, y - yShift, z - zShift, light);
 		});
-
-		bufferDirty = true;
 	}
 
 	/**
@@ -232,12 +147,12 @@ public class LightVolume {
 	 *
 	 * @param worldVolume the region in the world to copy data from.
 	 */
-	public void copyLight(LightProvider world, ReadOnlyBox worldVolume) {
+	public void copyLight(LightProvider world, ImmutableBox worldVolume) {
 		BlockPos.Mutable pos = new BlockPos.Mutable();
 
-		int xShift = textureVolume.getMinX();
-		int yShift = textureVolume.getMinY();
-		int zShift = textureVolume.getMinZ();
+		int xShift = box.getMinX();
+		int yShift = box.getMinY();
+		int zShift = box.getMinZ();
 
 		worldVolume.forEachContained((x, y, z) -> {
 			pos.set(x, y, z);
@@ -247,77 +162,80 @@ public class LightVolume {
 
 			writeLight(x - xShift, y - yShift, z - zShift, block, sky);
 		});
-
-		bufferDirty = true;
-	}
-
-	public void bind() {
-		// just in case something goes wrong or we accidentally call this before this volume is properly disposed of.
-		if (lightData == null || removed) return;
-
-		GlTextureUnit.T4.makeActive();
-		glTexture.bind();
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
-		uploadTexture();
-	}
-
-	private void uploadTexture() {
-		if (bufferDirty) {
-			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-			glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-			glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-			glPixelStorei(GL_UNPACK_SKIP_IMAGES, 0);
-			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
-			int sizeX = textureVolume.sizeX();
-			int sizeY = textureVolume.sizeY();
-			int sizeZ = textureVolume.sizeZ();
-
-			glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, sizeX, sizeY, sizeZ, pixelFormat.format(), GL_UNSIGNED_BYTE, lightData);
-
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // 4 is the default
-			bufferDirty = false;
-		}
-	}
-
-	public void unbind() {
-		glTexture.unbind();
 	}
 
 	public void delete() {
-		removed = true;
-		glTexture.delete();
 		MemoryUtil.memFree(lightData);
 		lightData = null;
 	}
 
-	private void writeLight(int x, int y, int z, int block, int sky) {
+	protected void writeLight(int x, int y, int z, int block, int sky) {
 		byte b = (byte) ((block & 0xF) << 4);
 		byte s = (byte) ((sky & 0xF) << 4);
 
-		int i = posToIndex(x, y, z);
+		int i = boxPosToBufferIndex(x, y, z);
 		lightData.put(i, b);
 		lightData.put(i + 1, s);
 	}
 
-	private void writeBlock(int x, int y, int z, int block) {
+	protected void writeBlock(int x, int y, int z, int block) {
 		byte b = (byte) ((block & 0xF) << 4);
 
-		lightData.put(posToIndex(x, y, z), b);
+		lightData.put(boxPosToBufferIndex(x, y, z), b);
 	}
 
-	private void writeSky(int x, int y, int z, int sky) {
+	protected void writeSky(int x, int y, int z, int sky) {
 		byte b = (byte) ((sky & 0xF) << 4);
 
-		lightData.put(posToIndex(x, y, z) + 1, b);
+		lightData.put(boxPosToBufferIndex(x, y, z) + 1, b);
 	}
 
-	private int posToIndex(int x, int y, int z) {
-		return (x + textureVolume.sizeX() * (y + z * textureVolume.sizeY())) * pixelFormat.byteCount();
+	protected int worldPosToBufferIndex(int x, int y, int z) {
+		x -= box.getMinX();
+		y -= box.getMinY();
+		z -= box.getMinZ();
+		return boxPosToBufferIndex(x, y, z);
 	}
+
+	protected int boxPosToBufferIndex(int x, int y, int z) {
+		return (x + box.sizeX() * (y + z * box.sizeY())) * getStride();
+	}
+
+	/**
+	 * @return The stride of the texels, in bytes.
+	 */
+	protected int getStride() {
+		return 2;
+	}
+
+	@Override
+	public ImmutableBox getVolume() {
+		return box;
+	}
+
+	@Override
+	public ListenerStatus status() {
+		return ListenerStatus.OKAY;
+	}
+
+	public static int unpackBlock(short packed) {
+		return (packed >> 4) & 0xF;
+	}
+
+	public static int unpackSky(short packed) {
+		return (packed >> 12) & 0xF;
+	}
+
+	public static byte packLight(byte block, byte sky) {
+		return (byte) (block | (sky << 4));
+	}
+
+	public static int unpackBlock(byte packed) {
+		return packed & 0xF;
+	}
+
+	public static int unpackSky(byte packed) {
+		return (packed >> 4) & 0xF;
+	}
+
 }

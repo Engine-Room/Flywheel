@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.light;
 
 import java.util.AbstractCollection;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -55,6 +54,24 @@ public class WeakContainmentMultiMap<T> extends AbstractCollection<T> {
 
 	public void put(long sectionPos, T listener) {
 		forward.computeIfAbsent(sectionPos, $ -> new WeakHashSet<>()).add(listener);
+	}
+
+	@Override
+	public boolean remove(Object o) {
+		LongSet containmentSet = reverse.remove(o);
+
+		if (containmentSet != null) {
+			containmentSet.forEach((LongConsumer) l -> {
+				WeakHashSet<T> listeners = forward.get(l);
+
+				if (listeners != null) listeners.remove(o);
+			});
+
+			containmentSet.clear();
+
+			return true;
+		}
+		return false;
 	}
 
 	@Override

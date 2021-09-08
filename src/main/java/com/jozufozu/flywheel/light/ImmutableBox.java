@@ -4,7 +4,7 @@ import static com.jozufozu.flywheel.util.RenderUtil.isPowerOf2;
 
 import net.minecraft.util.math.AxisAlignedBB;
 
-public interface ReadOnlyBox {
+public interface ImmutableBox {
 	int getMinX();
 
 	int getMinY();
@@ -38,7 +38,7 @@ public interface ReadOnlyBox {
 		return getMinX() == getMaxX() || getMinY() == getMaxY() || getMinZ() == getMaxZ();
 	}
 
-	default boolean sameAs(ReadOnlyBox other) {
+	default boolean sameAs(ImmutableBox other) {
 		return getMinX() == other.getMinX() && getMinY() == other.getMinY() && getMinZ() == other.getMinZ() && getMaxX() == other.getMaxX() && getMaxY() == other.getMaxY() && getMaxZ() == other.getMaxZ();
 	}
 
@@ -56,7 +56,7 @@ public interface ReadOnlyBox {
 		return isPowerOf2(volume());
 	}
 
-	default GridAlignedBB intersect(ReadOnlyBox other) {
+	default GridAlignedBB intersect(ImmutableBox other) {
 		int minX = Math.max(this.getMinX(), other.getMinX());
 		int minY = Math.max(this.getMinY(), other.getMinY());
 		int minZ = Math.max(this.getMinZ(), other.getMinZ());
@@ -66,7 +66,7 @@ public interface ReadOnlyBox {
 		return new GridAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
 	}
 
-	default ReadOnlyBox union(ReadOnlyBox other) {
+	default ImmutableBox union(ImmutableBox other) {
 		int minX = Math.min(this.getMinX(), other.getMinX());
 		int minY = Math.min(this.getMinY(), other.getMinY());
 		int minZ = Math.min(this.getMinZ(), other.getMinZ());
@@ -77,12 +77,26 @@ public interface ReadOnlyBox {
 	}
 
 
-	default boolean intersects(ReadOnlyBox other) {
+	default boolean intersects(ImmutableBox other) {
 		return this.intersects(other.getMinX(), other.getMinY(), other.getMinZ(), other.getMaxX(), other.getMaxY(), other.getMaxZ());
 	}
 
-	default boolean contains(ReadOnlyBox other) {
-		return other.getMinX() >= this.getMinX() && other.getMaxX() <= this.getMaxX() && other.getMinY() >= this.getMinY() && other.getMaxY() <= this.getMaxY() && other.getMinZ() >= this.getMinZ() && other.getMaxZ() <= this.getMaxZ();
+	default boolean contains(int x, int y, int z) {
+		return x >= getMinX()
+				&& x <= getMaxX()
+				&& y >= getMinY()
+				&& y <= getMaxY()
+				&& z >= getMinZ()
+				&& z <= getMaxZ();
+	}
+
+	default boolean contains(ImmutableBox other) {
+		return other.getMinX() >= this.getMinX()
+				&& other.getMaxX() <= this.getMaxX()
+				&& other.getMinY() >= this.getMinY()
+				&& other.getMaxY() <= this.getMaxY()
+				&& other.getMinZ() >= this.getMinZ()
+				&& other.getMaxZ() <= this.getMaxZ();
 	}
 
 	default boolean isContainedBy(GridAlignedBB other) {

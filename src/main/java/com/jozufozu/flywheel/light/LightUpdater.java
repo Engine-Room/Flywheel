@@ -14,7 +14,7 @@ import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.LightType;
 
 /**
- * Keeps track of what chunks/sections each listener is in so we can update exactly what needs to be updated.
+ * Keeps track of what chunks/sections each listener is in, so we can update exactly what needs to be updated.
  */
 public class LightUpdater {
 
@@ -31,6 +31,10 @@ public class LightUpdater {
 
 	public LightUpdater(IBlockDisplayReader world) {
 		provider = BasicProvider.get(world);
+	}
+
+	public LightProvider getProvider() {
+		return provider;
 	}
 
 	public void tick() {
@@ -50,7 +54,7 @@ public class LightUpdater {
 		if (listener instanceof IMovingListener)
 			movingListeners.add(((IMovingListener) listener));
 
-		ReadOnlyBox box = listener.getVolume();
+		ImmutableBox box = listener.getVolume();
 
 		LongSet sections = this.sections.getAndResetContainment(listener);
 		LongSet chunks = this.chunks.getAndResetContainment(listener);
@@ -76,6 +80,11 @@ public class LightUpdater {
 		}
 	}
 
+	public void removeListener(ILightUpdateListener listener) {
+		this.sections.remove(listener);
+		this.chunks.remove(listener);
+	}
+
 	/**
 	 * Dispatch light updates to all registered {@link ILightUpdateListener}s.
 	 * @param type       The type of light that changed.
@@ -88,7 +97,7 @@ public class LightUpdater {
 
 		set.removeIf(l -> l.status().shouldRemove());
 
-		ReadOnlyBox chunkBox = GridAlignedBB.from(SectionPos.of(sectionPos));
+		ImmutableBox chunkBox = GridAlignedBB.from(SectionPos.of(sectionPos));
 
 		for (ILightUpdateListener listener : set) {
 			listener.onLightUpdate(provider, type, chunkBox);
@@ -122,7 +131,7 @@ public class LightUpdater {
 		return sectionPos & 0xFFFFFFFFFFF_00000L;
 	}
 
-	public Stream<ReadOnlyBox> getAllBoxes() {
+	public Stream<ImmutableBox> getAllBoxes() {
 		return chunks.stream().map(ILightUpdateListener::getVolume);
 	}
 
