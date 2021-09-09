@@ -4,9 +4,12 @@ import org.lwjgl.opengl.GL20;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.OptifineHandler;
@@ -26,6 +29,7 @@ import net.minecraft.client.renderer.RenderTypeBuffers;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.culling.ClippingHelper;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
@@ -43,11 +47,6 @@ public class RenderHooksMixin {
 	@Shadow
 	@Final
 	private RenderTypeBuffers renderBuffers;
-
-	@Inject(at = @At("HEAD"), method = "setupRender")
-	private void setupRender(ActiveRenderInfo info, ClippingHelper clippingHelper, boolean p_228437_3_, int frameCount, boolean isSpectator, CallbackInfo ci) {
-		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, info, clippingHelper));
-	}
 
 	/**
 	 * JUSTIFICATION: This method is called once per layer per frame. It allows us to perform
