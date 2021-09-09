@@ -4,22 +4,7 @@
   "package": "com.jozufozu.flywheel.mixin",
   "compatibilityLevel": "JAVA_8",
   "refmap": "flywheel.refmap.json",
-  "client": [
-    "CancelEntityRenderMixin",
-    "CancelTileEntityRenderMixin",
-    "FixFabulousDepthMixin",
-    "FogColorTrackerMixin",
-    "RenderHooksMixin",
-    "ShaderCloseMixin",
-    "StoreProjectionMatrixMixin",
-    "TileRemoveMixin",
-    "TileWorldHookMixin",
-    "atlas.AtlasDataMixin",
-    "atlas.SheetDataAccessor",
-    "light.LightUpdateMixin",
-    "light.NetworkLightUpdateMixin",
-    "FastChunkProviderMixin"
-  ],
+  "client": ["BeginFrameMixin", "CancelEntityRenderMixin", "CancelTileEntityRenderMixin", "FastChunkProviderMixin", "FixFabulousDepthMixin", "FogColorTrackerMixin", "RenderHooksMixin", "ShaderCloseMixin", "StoreProjectionMatrixMixin", "TileRemoveMixin", "TileWorldHookMixin", "atlas.AtlasDataMixin", "atlas.SheetDataAccessor", "light.LightUpdateMixin", "light.NetworkLightUpdateMixin"],
   "injectors": {
     "defaultRequire": 0
   }
