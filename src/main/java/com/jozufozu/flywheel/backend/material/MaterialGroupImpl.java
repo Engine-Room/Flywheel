@@ -23,7 +23,7 @@ public class MaterialGroupImpl<P extends WorldProgram> implements MaterialGroup 
 
 	private final ArrayList<MaterialRenderer<P>> renderers = new ArrayList<>();
 
-	private final Map<MaterialSpec<?>, InstanceMaterialImpl<?>> materials = new HashMap<>();
+	private final Map<MaterialSpec<?>, MaterialImpl<?>> materials = new HashMap<>();
 
 	public MaterialGroupImpl(MaterialManagerImpl<P> owner, IRenderState state) {
 		this.owner = owner;
@@ -38,8 +38,8 @@ public class MaterialGroupImpl<P extends WorldProgram> implements MaterialGroup 
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public <D extends InstanceData> InstanceMaterialImpl<D> material(MaterialSpec<D> spec) {
-		return (InstanceMaterialImpl<D>) materials.computeIfAbsent(spec, this::createInstanceMaterial);
+	public <D extends InstanceData> MaterialImpl<D> material(MaterialSpec<D> spec) {
+		return (MaterialImpl<D>) materials.computeIfAbsent(spec, this::createInstanceMaterial);
 	}
 
 	public void render(Matrix4f viewProjection, double camX, double camY, double camZ) {
@@ -53,19 +53,19 @@ public class MaterialGroupImpl<P extends WorldProgram> implements MaterialGroup 
 	}
 
 	public void clear() {
-		materials.values().forEach(InstanceMaterialImpl::clear);
+		materials.values().forEach(MaterialImpl::clear);
 	}
 
 	public void delete() {
 		materials.values()
-				.forEach(InstanceMaterialImpl::delete);
+				.forEach(MaterialImpl::delete);
 
 		materials.clear();
 		renderers.clear();
 	}
 
-	private InstanceMaterialImpl<?> createInstanceMaterial(MaterialSpec<?> type) {
-		InstanceMaterialImpl<?> material = new InstanceMaterialImpl<>(type);
+	private MaterialImpl<?> createInstanceMaterial(MaterialSpec<?> type) {
+		MaterialImpl<?> material = new MaterialImpl<>(type);
 
 		this.renderers.add(new MaterialRenderer<>(owner.getProgram(type.getProgramName()), material, this::setup));
 

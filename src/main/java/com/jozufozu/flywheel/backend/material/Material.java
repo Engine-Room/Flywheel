@@ -14,7 +14,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.Direction;
 
-public interface InstanceMaterial<D extends InstanceData> {
+public interface Material<D extends InstanceData> {
 	/**
 	 * Get an instancer for the given model. Calling this method twice with the same key will return the same instancer.
 	 *
