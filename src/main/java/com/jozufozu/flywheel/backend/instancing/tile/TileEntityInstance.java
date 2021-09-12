@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.backend.instancing.tile;
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
-import com.jozufozu.flywheel.backend.material.InstanceMaterial;
+import com.jozufozu.flywheel.backend.material.Material;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.ModelData;
@@ -76,11 +76,11 @@ public abstract class TileEntityInstance<T extends TileEntity> extends AbstractI
 		return pos;
 	}
 
-	protected InstanceMaterial<ModelData> getTransformMaterial() {
+	protected Material<ModelData> getTransformMaterial() {
         return materialManager.defaultCutout().material(Materials.TRANSFORMED);
     }
 
-	protected InstanceMaterial<OrientedData> getOrientedMaterial() {
+	protected Material<OrientedData> getOrientedMaterial() {
 		return materialManager.defaultCutout().material(Materials.ORIENTED);
 	}
 

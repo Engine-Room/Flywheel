@@ -10,5 +10,5 @@ public interface MaterialGroup {
 	 * @param <D>  The type representing the per instance data.
 	 * @return A material you can use to render models.
 	 */
-	<D extends InstanceData> InstanceMaterial<D> material(MaterialSpec<D> spec);
+	<D extends InstanceData> Material<D> material(MaterialSpec<D> spec);
 }

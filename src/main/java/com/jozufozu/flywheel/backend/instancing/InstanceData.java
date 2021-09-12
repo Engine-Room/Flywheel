@@ -16,13 +16,11 @@ public abstract class InstanceData {
 	public abstract void write(MappedBuffer buf);
 
 	public void markDirty() {
-		owner.anyToUpdate = true;
-		dirty = true;
+		owner.markDirty(this);
 	}
 
 	public void delete() {
-		owner.anyToRemove = true;
-		removed = true;
+		owner.markRemoval(this);
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.jozufozu.flywheel.backend.RenderWork;
+import com.jozufozu.flywheel.backend.instancing.GPUInstancer;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.instancing.Instancer;
 import com.jozufozu.flywheel.backend.model.ModelPool;
@@ -15,19 +16,19 @@ import com.jozufozu.flywheel.core.model.IModel;
  * A collection of Instancers that all have the same format.
  * @param <D>
  */
-public class InstanceMaterialImpl<D extends InstanceData> implements InstanceMaterial<D> {
+public class MaterialImpl<D extends InstanceData> implements Material<D> {
 
 	final ModelPool modelPool;
-	protected final Cache<Object, Instancer<D>> models;
+	protected final Cache<Object, GPUInstancer<D>> models;
 	protected final MaterialSpec<D> spec;
 
-	public InstanceMaterialImpl(MaterialSpec<D> spec) {
+	public MaterialImpl(MaterialSpec<D> spec) {
 		this.spec = spec;
 
 		modelPool = new ModelPool(spec.getModelFormat(), spec.getModelFormat().getStride() * 64);
 		this.models = CacheBuilder.newBuilder()
 				.removalListener(notification -> {
-					Instancer<?> instancer = (Instancer<?>) notification.getValue();
+					GPUInstancer<?> instancer = (GPUInstancer<?>) notification.getValue();
 					RenderWork.enqueue(instancer::delete);
 				})
 				.build();
@@ -43,7 +44,7 @@ public class InstanceMaterialImpl<D extends InstanceData> implements InstanceMat
 	@Override
 	public Instancer<D> model(Object key, Supplier<IModel> modelSupplier) {
 		try {
-			return models.get(key, () -> new Instancer<>(modelPool, modelSupplier.get(), spec.getInstanceFactory(), spec.getInstanceFormat()));
+			return models.get(key, () -> new GPUInstancer<>(modelPool, modelSupplier.get(), spec.getInstanceFactory(), spec.getInstanceFormat()));
 		} catch (ExecutionException e) {
 			throw new RuntimeException("error creating instancer", e);
 		}
@@ -53,7 +54,7 @@ public class InstanceMaterialImpl<D extends InstanceData> implements InstanceMat
 		return models.size() > 0 && models.asMap()
 				.values()
 				.stream()
-				.allMatch(Instancer::isEmpty);
+				.allMatch(GPUInstancer::isEmpty);
 	}
 
 	public void delete() {
@@ -67,7 +68,7 @@ public class InstanceMaterialImpl<D extends InstanceData> implements InstanceMat
 	public void clear() {
 		models.asMap()
 				.values()
-				.forEach(Instancer::clear);
+				.forEach(GPUInstancer::clear);
 	}
 
 }
