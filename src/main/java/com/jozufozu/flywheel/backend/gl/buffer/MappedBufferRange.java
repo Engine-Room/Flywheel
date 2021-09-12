@@ -17,7 +17,6 @@ public class MappedBufferRange extends MappedBuffer {
 		this.access = access;
 	}
 
-
 	@Override
 	public MappedBuffer position(int p) {
 		if (p < offset || p >= offset + length) {

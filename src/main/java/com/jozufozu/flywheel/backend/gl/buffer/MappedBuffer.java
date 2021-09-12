@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.backend.gl.buffer;
 import java.nio.ByteBuffer;
 
 import org.lwjgl.opengl.GL15;
+import org.lwjgl.system.MemoryUtil;
 
 public abstract class MappedBuffer extends VecBuffer implements AutoCloseable {
 
@@ -11,6 +12,10 @@ public abstract class MappedBuffer extends VecBuffer implements AutoCloseable {
 
 	public MappedBuffer(GlBuffer owner) {
 		this.owner = owner;
+	}
+
+	public long addr() {
+		return MemoryUtil.memAddress(this.internal, internal.position());
 	}
 
 	protected abstract void checkAndMap();
@@ -41,6 +46,11 @@ public abstract class MappedBuffer extends VecBuffer implements AutoCloseable {
 		checkAndMap();
 		super.putByteArray(bytes);
 		return this;
+	}
+
+	public int position() {
+		checkAndMap();
+		return super.position();
 	}
 
 	/**

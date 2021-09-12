@@ -1,22 +1,19 @@
 package com.jozufozu.flywheel.core.materials;
 
-import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
+import org.lwjgl.system.MemoryUtil;
+
+import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
-import com.jozufozu.flywheel.backend.instancing.Instancer;
 
 public abstract class BasicData extends InstanceData implements IFlatLight<BasicData> {
 
-	protected byte blockLight;
-	protected byte skyLight;
+	public byte blockLight;
+	public byte skyLight;
 
-	protected byte r = (byte) 0xFF;
-	protected byte g = (byte) 0xFF;
-	protected byte b = (byte) 0xFF;
-	protected byte a = (byte) 0xFF;
-
-	public BasicData(Instancer<?> owner) {
-		super(owner);
-	}
+	public byte r = (byte) 0xFF;
+	public byte g = (byte) 0xFF;
+	public byte b = (byte) 0xFF;
+	public byte a = (byte) 0xFF;
 
 	@Override
 	public BasicData setBlockLight(int blockLight) {
@@ -71,7 +68,7 @@ public abstract class BasicData extends InstanceData implements IFlatLight<Basic
 	}
 
 	@Override
-	public void write(MappedBuffer buf) {
+	public void write(VecBuffer buf) {
 		buf.putByteArray(new byte[]{blockLight, skyLight, r, g, b, a});
 	}
 }

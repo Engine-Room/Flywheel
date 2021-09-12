@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing;
 
-import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 
 public abstract class InstanceData {
 
@@ -9,11 +9,7 @@ public abstract class InstanceData {
 	boolean dirty;
 	boolean removed;
 
-	protected InstanceData(Instancer<?> owner) {
-		this.owner = owner;
-	}
-
-	public abstract void write(MappedBuffer buf);
+	public abstract void write(VecBuffer buf);
 
 	public void markDirty() {
 		owner.markDirty(this);

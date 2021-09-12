@@ -101,8 +101,7 @@ public class Backend {
 		materialRegistry.put(name, spec);
 
 		log.debug("registered material '" + name + "' with vertex size " + spec.getModelFormat()
-				.getStride() + " and instance size " + spec.getInstanceFormat()
-				.getStride());
+				.getStride() + " and instance size " + spec.getInstanceType().format().getStride());
 
 		return spec;
 	}
