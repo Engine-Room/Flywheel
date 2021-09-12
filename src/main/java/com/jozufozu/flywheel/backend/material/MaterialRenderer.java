@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.backend.instancing.GPUInstancer;
-import com.jozufozu.flywheel.backend.instancing.Instancer;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 
 import net.minecraft.util.math.vector.Matrix4f;

@@ -7,9 +7,9 @@ import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.core.materials.IFlatLight;
 import com.jozufozu.flywheel.light.ILightUpdateListener;
+import com.jozufozu.flywheel.light.ImmutableBox;
 import com.jozufozu.flywheel.light.LightProvider;
 import com.jozufozu.flywheel.light.ListenerStatus;
-import com.jozufozu.flywheel.light.ImmutableBox;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.LightType;

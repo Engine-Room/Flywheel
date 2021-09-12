@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.core.model;
 
 import static org.lwjgl.opengl.GL11.GL_QUADS;
 
-
 import java.util.Collection;
 import java.util.Random;
 

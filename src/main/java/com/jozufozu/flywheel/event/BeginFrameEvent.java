@@ -1,10 +1,6 @@
 package com.jozufozu.flywheel.event;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.culling.ClippingHelper;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.vector.Vector3d;

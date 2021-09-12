@@ -16,7 +16,6 @@ import org.lwjgl.opengl.GLCapabilities;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.material.MaterialSpec;
-import com.jozufozu.flywheel.backend.source.ShaderSources;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 

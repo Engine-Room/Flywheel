@@ -2,15 +2,13 @@ package com.jozufozu.flywheel.backend.model;
 
 import static org.lwjgl.opengl.GL20.glDrawArrays;
 
-import org.lwjgl.opengl.GL44;
-
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
-import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.core.model.IModel;
 import com.jozufozu.flywheel.util.AttribUtil;
 

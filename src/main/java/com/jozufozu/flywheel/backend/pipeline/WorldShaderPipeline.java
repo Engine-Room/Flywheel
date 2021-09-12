@@ -1,13 +1,11 @@
 package com.jozufozu.flywheel.backend.pipeline;
 
-import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
-
 import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.core.shader.ExtensibleGlProgram;
 import com.jozufozu.flywheel.core.shader.GameStateProgram;

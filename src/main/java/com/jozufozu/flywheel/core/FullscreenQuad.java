@@ -5,8 +5,8 @@ import org.lwjgl.opengl.GL20;
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
-import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
+import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 
 import net.minecraftforge.common.util.Lazy;
 

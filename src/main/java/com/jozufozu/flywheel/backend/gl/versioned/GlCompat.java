@@ -11,8 +11,8 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.backend.gl.versioned.framebuffer.Blit;
 import com.jozufozu.flywheel.backend.gl.versioned.framebuffer.Framebuffer;
-import com.jozufozu.flywheel.backend.gl.versioned.instancing.DrawInstanced;
 import com.jozufozu.flywheel.backend.gl.versioned.instancing.BaseVertex;
+import com.jozufozu.flywheel.backend.gl.versioned.instancing.DrawInstanced;
 import com.jozufozu.flywheel.backend.gl.versioned.instancing.InstancedArrays;
 import com.jozufozu.flywheel.backend.gl.versioned.instancing.VertexArrayObject;
 
