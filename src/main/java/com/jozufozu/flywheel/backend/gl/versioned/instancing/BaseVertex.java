@@ -1,8 +1,6 @@
 package com.jozufozu.flywheel.backend.gl.versioned.instancing;
 
 import org.lwjgl.opengl.ARBDrawElementsBaseVertex;
-import org.lwjgl.opengl.ARBDrawInstanced;
-import org.lwjgl.opengl.EXTDrawInstanced;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GLCapabilities;
 

@@ -3,9 +3,9 @@ package com.jozufozu.flywheel.backend.pipeline;
 import java.util.List;
 import java.util.Optional;
 
-import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.source.SourceFile;
 
 import net.minecraft.util.ResourceLocation;

@@ -4,9 +4,7 @@ import java.util.List;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.core.Formats;
-import com.jozufozu.flywheel.core.QuadConverter;
 
 public class ModelPart implements IModel {
 

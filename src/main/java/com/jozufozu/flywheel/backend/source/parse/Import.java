@@ -8,8 +8,8 @@ import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.source.Resolver;
-import com.jozufozu.flywheel.backend.source.error.ErrorReporter;
 import com.jozufozu.flywheel.backend.source.SourceFile;
+import com.jozufozu.flywheel.backend.source.error.ErrorReporter;
 import com.jozufozu.flywheel.backend.source.span.Span;
 
 import net.minecraft.util.ResourceLocation;

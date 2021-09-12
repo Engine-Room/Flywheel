@@ -23,7 +23,6 @@ import static org.lwjgl.opengl.GL20.glTexImage3D;
 import static org.lwjgl.opengl.GL20.glTexParameteri;
 import static org.lwjgl.opengl.GL20.glTexSubImage3D;
 
-
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlTexture;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
