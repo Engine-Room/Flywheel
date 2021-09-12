@@ -99,9 +99,7 @@ public class LightUpdater {
 
 		ImmutableBox chunkBox = GridAlignedBB.from(SectionPos.of(sectionPos));
 
-		for (ILightUpdateListener listener : set) {
-			listener.onLightUpdate(provider, type, chunkBox);
-		}
+		set.parallelStream().forEach(listener -> listener.onLightUpdate(provider, type, chunkBox));
 	}
 
 	/**
@@ -118,9 +116,7 @@ public class LightUpdater {
 
 		set.removeIf(l -> l.status().shouldRemove());
 
-		for (ILightUpdateListener listener : set) {
-			listener.onLightPacket(provider, chunkX, chunkZ);
-		}
+		set.parallelStream().forEach(listener -> listener.onLightPacket(provider, chunkX, chunkZ));
 	}
 
 	public static long blockToSection(BlockPos pos) {
