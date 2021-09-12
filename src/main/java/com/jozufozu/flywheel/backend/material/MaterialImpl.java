@@ -44,7 +44,7 @@ public class MaterialImpl<D extends InstanceData> implements Material<D> {
 	@Override
 	public Instancer<D> model(Object key, Supplier<IModel> modelSupplier) {
 		try {
-			return models.get(key, () -> new GPUInstancer<>(modelPool, modelSupplier.get(), spec.getInstanceFactory(), spec.getInstanceFormat()));
+			return models.get(key, () -> new GPUInstancer<>(modelPool, modelSupplier.get(), spec.getInstanceType()));
 		} catch (ExecutionException e) {
 			throw new RuntimeException("error creating instancer", e);
 		}

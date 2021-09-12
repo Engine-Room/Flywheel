@@ -1,7 +1,7 @@
-package com.jozufozu.flywheel.core.materials;
+package com.jozufozu.flywheel.core.materials.oriented;
 
-import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
-import com.jozufozu.flywheel.backend.instancing.Instancer;
+import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
+import com.jozufozu.flywheel.core.materials.BasicData;
 import com.jozufozu.flywheel.util.vec.Vec3;
 
 import net.minecraft.util.math.BlockPos;
@@ -11,20 +11,16 @@ import net.minecraft.util.math.vector.Vector3f;
 
 public class OrientedData extends BasicData {
 
-	private float posX;
-	private float posY;
-	private float posZ;
-	private float pivotX = 0.5f;
-	private float pivotY = 0.5f;
-	private float pivotZ = 0.5f;
-	private float qX;
-	private float qY;
-	private float qZ;
-	private float qW = 1;
-
-	public OrientedData(Instancer<?> owner) {
-		super(owner);
-	}
+	public float posX;
+	public float posY;
+	public float posZ;
+	public float pivotX = 0.5f;
+	public float pivotY = 0.5f;
+	public float pivotZ = 0.5f;
+	public float qX;
+	public float qY;
+	public float qZ;
+	public float qW = 1;
 
 	public OrientedData setPosition(BlockPos pos) {
 		return setPosition(pos.getX(), pos.getY(), pos.getZ());
@@ -89,10 +85,19 @@ public class OrientedData extends BasicData {
 	}
 
 	@Override
-	public void write(MappedBuffer buf) {
+	public void write(VecBuffer buf) {
 		super.write(buf);
 
-		buf.putFloatArray(new float[]{posX, posY, posZ, pivotX, pivotY, pivotZ, qX, qY, qZ, qW});
+		buf.putFloat(posX);
+		buf.putFloat(posY);
+		buf.putFloat(posZ);
+		buf.putFloat(pivotX);
+		buf.putFloat(pivotY);
+		buf.putFloat(pivotZ);
+		buf.putFloat(qX);
+		buf.putFloat(qY);
+		buf.putFloat(qZ);
+		buf.putFloat(qW);
 	}
 }
 

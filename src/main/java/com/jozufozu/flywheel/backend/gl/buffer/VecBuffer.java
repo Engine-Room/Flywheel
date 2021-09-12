@@ -48,6 +48,10 @@ public class VecBuffer {
 		return this;
 	}
 
+	public int position() {
+		return internal.position();
+	}
+
 	/**
 	 * Position this buffer relative to the 0-index in GPU memory.
 	 *

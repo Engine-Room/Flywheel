@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.backend.material;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
-import com.jozufozu.flywheel.backend.instancing.IInstanceFactory;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
+import com.jozufozu.flywheel.backend.struct.StructType;
 
 import net.minecraft.util.ResourceLocation;
 
@@ -12,15 +12,13 @@ public class MaterialSpec<D extends InstanceData> {
 
 	private final ResourceLocation programSpec;
 	private final VertexFormat modelFormat;
-	private final VertexFormat instanceFormat;
-	private final IInstanceFactory<D> instanceFactory;
+	private final StructType<D> instanceType;
 
-	public MaterialSpec(ResourceLocation name, ResourceLocation programSpec, VertexFormat modelFormat, VertexFormat instanceFormat, IInstanceFactory<D> instanceFactory) {
+	public MaterialSpec(ResourceLocation name, ResourceLocation programSpec, VertexFormat modelFormat, StructType<D> type) {
 		this.name = name;
 		this.programSpec = programSpec;
 		this.modelFormat = modelFormat;
-		this.instanceFormat = instanceFormat;
-		this.instanceFactory = instanceFactory;
+		this.instanceType = type;
 	}
 
 	public ResourceLocation getProgramName() {
@@ -31,12 +29,8 @@ public class MaterialSpec<D extends InstanceData> {
 		return modelFormat;
 	}
 
-	public VertexFormat getInstanceFormat() {
-		return instanceFormat;
-	}
-
-	public IInstanceFactory<D> getInstanceFactory() {
-		return instanceFactory;
+	public StructType<D> getInstanceType() {
+		return instanceType;
 	}
 
 }

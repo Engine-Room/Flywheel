@@ -1,8 +1,11 @@
 package com.jozufozu.flywheel.core;
 
 import com.jozufozu.flywheel.backend.material.MaterialSpec;
-import com.jozufozu.flywheel.core.materials.ModelData;
-import com.jozufozu.flywheel.core.materials.OrientedData;
+import com.jozufozu.flywheel.backend.struct.StructType;
+import com.jozufozu.flywheel.core.materials.model.ModelData;
+import com.jozufozu.flywheel.core.materials.model.ModelType;
+import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
+import com.jozufozu.flywheel.core.materials.oriented.OrientedType;
 import com.jozufozu.flywheel.event.GatherContextEvent;
 
 import net.minecraft.util.ResourceLocation;
@@ -11,8 +14,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class Materials {
-	public static final MaterialSpec<OrientedData> ORIENTED = new MaterialSpec<>(Locations.ORIENTED, Programs.ORIENTED, Formats.UNLIT_MODEL, Formats.ORIENTED, OrientedData::new);
-	public static final MaterialSpec<ModelData> TRANSFORMED = new MaterialSpec<>(Locations.MODEL, Programs.TRANSFORMED, Formats.UNLIT_MODEL, Formats.TRANSFORMED, ModelData::new);
+	public static final StructType<OrientedData> ORIENTED_TYPE = new OrientedType();
+	public static final StructType<ModelData> TRANSFORMED_TYPE = new ModelType();
+
+	public static final MaterialSpec<OrientedData> ORIENTED = new MaterialSpec<>(Names.ORIENTED, Programs.ORIENTED, Formats.UNLIT_MODEL, ORIENTED_TYPE);
+	public static final MaterialSpec<ModelData> TRANSFORMED = new MaterialSpec<>(Names.MODEL, Programs.TRANSFORMED, Formats.UNLIT_MODEL, TRANSFORMED_TYPE);
 
 	public static void flwInit(GatherContextEvent event) {
 		event.getBackend()
@@ -21,7 +27,7 @@ public class Materials {
 				.register(TRANSFORMED);
 	}
 
-	public static class Locations {
+	public static class Names {
 		public static final ResourceLocation MODEL = new ResourceLocation("create", "model");
 		public static final ResourceLocation ORIENTED = new ResourceLocation("create", "oriented");
 	}

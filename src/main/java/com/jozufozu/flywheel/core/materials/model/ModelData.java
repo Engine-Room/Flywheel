@@ -1,18 +1,14 @@
-package com.jozufozu.flywheel.core.materials;
+package com.jozufozu.flywheel.core.materials.model;
 
-import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
-import com.jozufozu.flywheel.backend.instancing.Instancer;
+import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
+import com.jozufozu.flywheel.core.materials.BasicData;
 import com.jozufozu.flywheel.util.RenderUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 public class ModelData extends BasicData {
 	private static final float[] empty = new float[25];
 
-	private float[] matrices = empty;
-
-	public ModelData(Instancer<?> owner) {
-		super(owner);
-	}
+	public float[] matrices = empty;
 
 	public ModelData setTransform(MatrixStack stack) {
 		matrices = RenderUtil.writeMatrixStack(stack);
@@ -34,7 +30,7 @@ public class ModelData extends BasicData {
 	}
 
 	@Override
-	public void write(MappedBuffer buf) {
+	public void write(VecBuffer buf) {
 		super.write(buf);
 		buf.putFloatArray(matrices);
 	}
