@@ -1,7 +1,15 @@
+0.2.4:
+
+Fixes
+ - Partially fix compatibility issues with sodium-forge
+   note: full compatibility is waiting on https://github.com/spoorn/sodium-forge/pull/175
+Technical/API
+ - Add separate xyz scaling function to TransformStack interface.
+
 0.2.3:
 Fixes
  - Fix crash moving a deleted LightVolume
-Technical/API:
+Technical/API
  - Alter BeginFrameEvent to enable compatibility with optifine shadows
 
 0.2.2:
