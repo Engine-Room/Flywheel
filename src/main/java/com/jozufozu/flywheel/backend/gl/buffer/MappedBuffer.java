@@ -76,6 +76,12 @@ public abstract class MappedBuffer extends VecBuffer implements AutoCloseable {
 		return this;
 	}
 
+	public MappedBuffer putShort(short s) {
+		checkAndMap();
+		super.putShort(s);
+		return this;
+	}
+
 	public MappedBuffer put(byte b) {
 		checkAndMap();
 		super.put(b);
