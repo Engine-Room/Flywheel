@@ -72,6 +72,11 @@ public class VecBuffer {
 		return this;
 	}
 
+	public VecBuffer putShort(short s) {
+		internal.putShort(s);
+		return this;
+	}
+
 	public VecBuffer put(byte b) {
 		internal.put(b);
 		return this;

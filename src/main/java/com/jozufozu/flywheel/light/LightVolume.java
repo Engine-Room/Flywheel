@@ -218,24 +218,4 @@ public class LightVolume implements ImmutableBox, ILightUpdateListener {
 		return ListenerStatus.OKAY;
 	}
 
-	public static int unpackBlock(short packed) {
-		return (packed >> 4) & 0xF;
-	}
-
-	public static int unpackSky(short packed) {
-		return (packed >> 12) & 0xF;
-	}
-
-	public static byte packLight(byte block, byte sky) {
-		return (byte) (block | (sky << 4));
-	}
-
-	public static int unpackBlock(byte packed) {
-		return packed & 0xF;
-	}
-
-	public static int unpackSky(byte packed) {
-		return (packed >> 4) & 0xF;
-	}
-
 }
