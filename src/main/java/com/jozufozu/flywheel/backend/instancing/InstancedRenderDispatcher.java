@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.backend.instancing;
 
-import javax.annotation.Nonnull;
-
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -42,13 +40,11 @@ public class InstancedRenderDispatcher {
 		getEntities(entity.level).queueUpdate(entity);
 	}
 
-	@Nonnull
 	public static InstanceManager<BlockEntity> getTiles(LevelAccessor world) {
 		return instanceWorlds.get(world)
 				.getTileEntityInstanceManager();
 	}
 
-	@Nonnull
 	public static InstanceManager<Entity> getEntities(LevelAccessor world) {
 		return instanceWorlds.get(world)
 				.getEntityInstanceManager();
