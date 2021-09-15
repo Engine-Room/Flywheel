@@ -100,7 +100,7 @@ dependencies {
 
     //implementation "org.joml:joml:1.10.1"
 
-    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
+    //annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -143,7 +143,6 @@ artifacts {
     archives jar, sourcesJar, javadocJar
 }
 
-/*
 publishing {
     tasks.publish.dependsOn 'build'
     publications {
@@ -173,6 +172,6 @@ curseforge {
         changelog = file('changelog.txt')
         releaseType = project.curse_type
         mainArtifact jar
+        addGameVersion '1.17.1'
     }
 }
- */

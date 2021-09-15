@@ -56,7 +56,8 @@ public class InstanceWorld {
 	 * Instantiate all the necessary instances to render the given world.
 	 */
 	public void loadAll(ClientLevel world) {
-		world.blockEntityList.forEach(tileEntityInstanceManager::add);
+		// FIXME: no more global blockEntity list
+		// world.blockEntityList.forEach(tileEntityInstanceManager::add);
 		world.entitiesForRendering()
 				.forEach(entityInstanceManager::add);
 	}

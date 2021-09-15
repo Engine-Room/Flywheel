@@ -9,9 +9,7 @@ import com.jozufozu.flywheel.backend.pipeline.WorldShaderPipeline;
 import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.source.Resolver;
 import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
-import com.jozufozu.flywheel.core.shader.WorldFog;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
-import com.jozufozu.flywheel.core.shader.gamestate.FogStateProvider;
 import com.jozufozu.flywheel.core.shader.gamestate.NormalDebugStateProvider;
 import com.jozufozu.flywheel.event.GatherContextEvent;
 import com.jozufozu.flywheel.util.ResourceUtil;
@@ -29,11 +27,7 @@ public class Contexts {
 	public static void flwInit(GatherContextEvent event) {
 		Backend backend = event.getBackend();
 
-		SpecMetaRegistry.register(FogStateProvider.INSTANCE);
 		SpecMetaRegistry.register(NormalDebugStateProvider.INSTANCE);
-
-		SpecMetaRegistry.register(WorldFog.LINEAR);
-		SpecMetaRegistry.register(WorldFog.EXP2);
 
         FileResolution crumblingBuiltins = Resolver.INSTANCE.findShader(ResourceUtil.subPath(Names.CRUMBLING, ".glsl"));
         FileResolution worldBuiltins = Resolver.INSTANCE.findShader(ResourceUtil.subPath(Names.WORLD, ".glsl"));
