@@ -15,6 +15,7 @@ import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.world.level.block.state.BlockState;
@@ -84,8 +85,7 @@ public class RenderHooksMixin {
 		Matrix4f view = stack.last()
 				.pose();
 		Matrix4f viewProjection = view.copy();
-		viewProjection.multiplyBackward(Backend.getInstance()
-												.getProjectionMatrix());
+		viewProjection.multiplyBackward(RenderSystem.getProjectionMatrix());
 
 		Vec3 cameraPos = info.getPosition();
 		CrumblingRenderer.renderBreaking(level, viewProjection, cameraPos.x, cameraPos.y, cameraPos.z);
