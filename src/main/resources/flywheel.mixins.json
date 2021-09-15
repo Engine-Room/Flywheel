@@ -10,7 +10,6 @@
     "FixFabulousDepthMixin",
     "RenderHooksMixin",
     "ShaderCloseMixin",
-    "StoreProjectionMatrixMixin",
     "TileRemoveMixin",
     "TileWorldHookMixin",
     "atlas.AtlasDataMixin",

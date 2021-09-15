@@ -21,7 +21,6 @@ import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import com.mojang.math.Matrix4f;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.Level;
 
@@ -39,7 +38,6 @@ public class Backend {
 	public GLCapabilities capabilities;
 	public GlCompat compat;
 
-	private Matrix4f projectionMatrix = new Matrix4f();
 	private boolean instancedArrays;
 	private boolean enabled;
 	public boolean chunkCachingEnabled;
@@ -158,14 +156,6 @@ public class Backend {
 
 	public Collection<IShaderContext<?>> allContexts() {
 		return contexts;
-	}
-
-	public Matrix4f getProjectionMatrix() {
-		return projectionMatrix;
-	}
-
-	public void setProjectionMatrix(Matrix4f projectionMatrix) {
-		this.projectionMatrix = projectionMatrix;
 	}
 
 	/**

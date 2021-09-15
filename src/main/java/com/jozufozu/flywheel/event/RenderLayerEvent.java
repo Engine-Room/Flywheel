@@ -2,8 +2,8 @@ package com.jozufozu.flywheel.event;
 
 import javax.annotation.Nullable;
 
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.state.RenderLayer;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.RenderType;
@@ -31,8 +31,7 @@ public class RenderLayerEvent extends Event {
 		viewProjection = stack.last()
 				.pose()
 				.copy();
-		viewProjection.multiplyBackward(Backend.getInstance()
-				.getProjectionMatrix());
+        viewProjection.multiplyBackward(RenderSystem.getProjectionMatrix());
 
 		this.buffers = buffers;
 		this.camX = camX;
