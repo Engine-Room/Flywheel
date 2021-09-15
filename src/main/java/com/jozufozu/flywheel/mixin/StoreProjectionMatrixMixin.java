@@ -22,7 +22,7 @@ public abstract class StoreProjectionMatrixMixin {
 	 * We only want to copy the projection matrix if it is going to be used to render the world.
 	 * We don't care about the mat for your hand.
 	 */
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resetProjectionMatrix(Lnet/minecraft/util/math/vector/Matrix4f;)V"))
+	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resetProjectionMatrix(Lcom/mojang/math/Matrix4f;)V"))
 	private void projectionMatrixReady(float p_228378_1_, long p_228378_2_, PoseStack p_228378_4_, CallbackInfo ci) {
 		shouldCopy = true;
 	}

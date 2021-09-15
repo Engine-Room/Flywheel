@@ -1,8 +1,5 @@
 package com.jozufozu.flywheel.backend;
 
-import java.util.Collection;
-import java.util.function.Predicate;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -21,23 +18,27 @@ import com.mojang.serialization.JsonOps;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.resource.IResourceType;
-import net.minecraftforge.resource.ISelectiveResourceReloadListener;
 import net.minecraftforge.resource.VanillaResourceType;
+
+import javax.annotation.Nullable;
+
+import java.util.Collection;
 
 /**
  * The main entity for loading shaders.
  *
  * <p>
- *     This class is responsible for invoking the loading, parsing, and compilation stages.
+ * This class is responsible for invoking the loading, parsing, and compilation stages.
  * </p>
  */
-public class Loader implements ISelectiveResourceReloadListener {
+public class Loader implements ResourceManagerReloadListener {
 	public static final String PROGRAM_DIR = "flywheel/programs/";
 	private static final Gson GSON = new GsonBuilder().create();
 
@@ -64,44 +65,42 @@ public class Loader implements ISelectiveResourceReloadListener {
 	}
 
 	@Override
-	public void onResourceManagerReload(ResourceManager manager, Predicate<IResourceType> predicate) {
-		if (predicate.test(VanillaResourceType.SHADERS)) {
-			backend.refresh();
+	public void onResourceManagerReload(ResourceManager manager) {
+		backend.refresh();
 
-			if (backend.gl20()) {
-				shouldCrash = false;
-				backend._clearContexts();
+		if (backend.gl20()) {
+			shouldCrash = false;
+			backend._clearContexts();
 
-				Resolver.INSTANCE.invalidate();
-				ModLoader.get()
-						.postEvent(new GatherContextEvent(backend, firstLoad));
+			Resolver.INSTANCE.invalidate();
+			ModLoader.get()
+					.postEvent(new GatherContextEvent(backend, firstLoad));
 
-				ShaderSources sources = new ShaderSources(manager);
+			ShaderSources sources = new ShaderSources(manager);
 
-				loadProgramSpecs(manager);
+			loadProgramSpecs(manager);
 
-				Resolver.INSTANCE.resolve(sources);
+			Resolver.INSTANCE.resolve(sources);
 
-				for (IShaderContext<?> context : backend.allContexts()) {
-					context.load();
-				}
-
-				if (shouldCrash) {
-					throw new ShaderLoadingException("Could not load all shaders, see log for details");
-				}
-
-				Backend.log.info("Loaded all shader programs.");
-
-				ClientLevel world = Minecraft.getInstance().level;
-				if (Backend.isFlywheelWorld(world)) {
-					// TODO: looks like it might be good to have another event here
-					InstancedRenderDispatcher.loadAllInWorld(world);
-					CrumblingRenderer.reset();
-				}
+			for (IShaderContext<?> context : backend.allContexts()) {
+				context.load();
 			}
 
-			firstLoad = false;
+			if (shouldCrash) {
+				throw new ShaderLoadingException("Could not load all shaders, see log for details");
+			}
+
+			Backend.log.info("Loaded all shader programs.");
+
+			ClientLevel world = Minecraft.getInstance().level;
+			if (Backend.isFlywheelWorld(world)) {
+				// TODO: looks like it might be good to have another event here
+				InstancedRenderDispatcher.loadAllInWorld(world);
+				CrumblingRenderer.reset();
+			}
 		}
+
+		firstLoad = false;
 	}
 
 	private void loadProgramSpecs(ResourceManager manager) {
@@ -128,5 +127,11 @@ public class Loader implements ISelectiveResourceReloadListener {
 				Backend.log.error(e);
 			}
 		}
+	}
+
+	@Nullable
+	@Override
+	public IResourceType getResourceType() {
+		return VanillaResourceType.SHADERS;
 	}
 }

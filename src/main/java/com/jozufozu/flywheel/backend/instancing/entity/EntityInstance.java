@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.light.IMovingListener;
 import com.jozufozu.flywheel.light.LightProvider;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -20,7 +20,7 @@ import com.mojang.math.Vector3f;
 import net.minecraft.core.Vec3i;
 
 /**
- * The layer between a {@link TileEntity} and the Flywheel backend.
+ * The layer between a {@link BlockEntity} and the Flywheel backend.
  * *
  * <br><br> There are a few additional features that overriding classes can opt in to:
  * <ul>

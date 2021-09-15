@@ -62,7 +62,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		);
 
 
-		float yaw = Mth.lerp(pt, entity.yRotO, entity.yRot);
+		float yaw = Mth.lerp(pt, entity.yRotO, entity.getYRot());
 
 		long i = (long)entity.getId() * 493286711L;
 		i = i * i * 4392167121L + i * 98761L;
@@ -75,7 +75,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		double d1 = Mth.lerp(pt, entity.yOld, entity.getY());
 		double d2 = Mth.lerp(pt, entity.zOld, entity.getZ());
 		Vec3 vector3d = entity.getPos(d0, d1, d2);
-		float f3 = Mth.lerp(pt, entity.xRotO, entity.xRot);
+		float f3 = Mth.lerp(pt, entity.xRotO, entity.getXRot());
 		if (vector3d != null) {
 			Vec3 vector3d1 = entity.getPosOffs(d0, d1, d2, 0.3F);
 			Vec3 vector3d2 = entity.getPosOffs(d0, d1, d2, -0.3F);

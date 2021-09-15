@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.core.model;
 
+import static com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS;
 import static org.lwjgl.opengl.GL11.GL_QUADS;
 
 import java.util.Collection;
@@ -32,7 +33,7 @@ public class ModelUtil {
 		PoseStack ms = new PoseStack();
 		Random random = new Random();
 		BufferBuilder builder = new BufferBuilder(DefaultVertexFormat.BLOCK.getIntegerSize());
-		builder.begin(GL_QUADS, DefaultVertexFormat.BLOCK);
+		builder.begin(QUADS, DefaultVertexFormat.BLOCK);
 
 		ForgeHooksClient.setRenderLayer(layer);
 		ModelBlockRenderer.enableCaching();
@@ -48,7 +49,7 @@ public class ModelUtil {
 
 			ms.pushPose();
 			ms.translate(pos.getX(), pos.getY(), pos.getZ());
-			MODEL_RENDERER.get().renderModel(renderWorld, BLOCK_MODELS.get().getBlockModel(state), state, pos, ms, builder, true,
+			MODEL_RENDERER.get().tesselateBlock(renderWorld, BLOCK_MODELS.get().getBlockModel(state), state, pos, ms, builder, true,
 					random, 42, OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
 			ms.popPose();
 		}

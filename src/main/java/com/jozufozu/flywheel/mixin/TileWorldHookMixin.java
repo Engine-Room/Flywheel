@@ -2,13 +2,14 @@ package com.jozufozu.flywheel.mixin;
 
 import java.util.Set;
 
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
@@ -30,13 +31,13 @@ public class TileWorldHookMixin {
 
 	@Shadow
 	@Final
-	protected Set<BlockEntity> blockEntitiesToUnload;
+	protected Set<BlockEntity> f_46434_; // FIXME: is this correct?
 
-	@Inject(at = @At("TAIL"), method = "addBlockEntity")
-	private void onAddTile(BlockEntity te, CallbackInfoReturnable<Boolean> cir) {
+	@Inject(at = @At("TAIL"), method = "addBlockEntityTicker(Lnet/minecraft/world/level/block/entity/TickingBlockEntity;)V")
+	private void onAddTile(TickingBlockEntity te, CallbackInfo ci) {
 		if (isClientSide) {
 			InstancedRenderDispatcher.getTiles(self)
-					.queueAdd(te);
+					.queueAdd((BlockEntity) te);
 		}
 	}
 
@@ -47,7 +48,7 @@ public class TileWorldHookMixin {
 	private void onChunkUnload(CallbackInfo ci) {
 		if (isClientSide) {
 			InstanceManager<BlockEntity> kineticRenderer = InstancedRenderDispatcher.getTiles(self);
-			for (BlockEntity tile : blockEntitiesToUnload) {
+			for (BlockEntity tile : f_46434_) {
 				kineticRenderer.remove(tile);
 			}
 		}

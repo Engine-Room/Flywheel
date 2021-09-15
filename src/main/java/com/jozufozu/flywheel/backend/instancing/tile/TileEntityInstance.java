@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.BlockPos;
 
 /**
- * The layer between a {@link TileEntity} and the Flywheel backend.
+ * The layer between a {@link BlockEntity} and the Flywheel backend.
  *
  * <br><br> {@link #updateLight()} is called after construction.
  *
@@ -30,7 +30,7 @@ import net.minecraft.core.BlockPos;
  * <br> Implementing one or more of these will give a {@link TileEntityInstance} access
  * to more interesting and regular points within a tick or a frame.
  *
- * @param <T> The type of {@link TileEntity} your class is an instance of.
+ * @param <T> The type of {@link BlockEntity} your class is an instance of.
  */
 public abstract class TileEntityInstance<T extends BlockEntity> extends AbstractInstance {
 
@@ -64,7 +64,7 @@ public abstract class TileEntityInstance<T extends BlockEntity> extends Abstract
 	 * {@link TileInstanceManager}s are allowed to arbitrarily adjust the origin, and
 	 * shift the world matrix provided as a shader uniform accordingly.
 	 *
-	 * @return The {@link BlockPos position} of the {@link TileEntity} this instance
+	 * @return The {@link BlockPos position} of the {@link BlockEntity} this instance
 	 * represents should be rendered at to appear in the correct location.
 	 */
 	public BlockPos getInstancePosition() {

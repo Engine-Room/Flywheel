@@ -22,6 +22,8 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
+import java.util.BitSet;
+
 @Mixin(ClientChunkCache.class)
 public abstract class FastChunkProviderMixin extends ChunkSource {
 
@@ -71,7 +73,7 @@ public abstract class FastChunkProviderMixin extends ChunkSource {
 	}
 
 	@Inject(method = "replaceWithPacketData", at = @At("HEAD"))
-	public void invalidateOnPacket(int x, int z, ChunkBiomeContainer p_228313_3_, FriendlyByteBuf p_228313_4_, CompoundTag p_228313_5_, int p_228313_6_, boolean p_228313_7_, CallbackInfoReturnable<LevelChunk> cir) {
+	public void invalidateOnPacket(int x, int z, ChunkBiomeContainer p_171618_, FriendlyByteBuf p_171619_, CompoundTag p_171620_, BitSet p_171621_, CallbackInfoReturnable<LevelChunk> cir) {
 		if (Backend.getInstance().chunkCachingEnabled) {
 			synchronized (level) {
 				if (x == lastX && z == lastZ) lastChunk = null;
