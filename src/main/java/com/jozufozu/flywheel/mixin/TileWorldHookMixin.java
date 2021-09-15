@@ -1,9 +1,5 @@
 package com.jozufozu.flywheel.mixin;
 
-import java.util.Set;
-
-import net.minecraft.world.level.block.entity.TickingBlockEntity;
-
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -11,46 +7,28 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-@Mixin(value = Level.class, priority = 1100) // this and create.mixins.json have high priority to load after Performant
+@Mixin(value = LevelChunk.class, priority = 1100) // this and create.mixins.json have high priority to load after Performant
 public class TileWorldHookMixin {
 
-	final Level self = (Level) (Object) this;
-
 	@Shadow
 	@Final
-	public boolean isClientSide;
+	Level level;
 
-	@Shadow
-	@Final
-	protected Set<BlockEntity> f_46434_; // FIXME: is this correct?
-
-	@Inject(at = @At("TAIL"), method = "addBlockEntityTicker(Lnet/minecraft/world/level/block/entity/TickingBlockEntity;)V")
-	private void onAddTile(TickingBlockEntity te, CallbackInfo ci) {
-		if (isClientSide) {
-			InstancedRenderDispatcher.getTiles(self)
-					.queueAdd((BlockEntity) te);
-		}
-	}
-
-	/**
-	 * Without this we don't unload instances when a chunk unloads.
-	 */
-	@Inject(at = @At(value = "INVOKE", target = "Ljava/util/Set;clear()V", ordinal = 0), method = "tickBlockEntities")
-	private void onChunkUnload(CallbackInfo ci) {
-		if (isClientSide) {
-			InstanceManager<BlockEntity> kineticRenderer = InstancedRenderDispatcher.getTiles(self);
-			for (BlockEntity tile : f_46434_) {
-				kineticRenderer.remove(tile);
-			}
+	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/level/block/entity/BlockEntity;clearRemoved()V"),
+			method = "setBlockEntity")
+	private void onAddTile(BlockEntity te, CallbackInfo ci) {
+		if (level.isClientSide) {
+			InstancedRenderDispatcher.getTiles(level)
+					.queueAdd(te);
 		}
 	}
 }
