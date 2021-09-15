@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.TextureStitchEvent;
 
 /**
@@ -30,7 +30,7 @@ public class AtlasStitcher {
 	public void onTextureStitch(TextureStitchEvent.Pre event) {
 		if (!event.getMap()
 				.location()
-				.equals(PlayerContainer.BLOCK_ATLAS)) return;
+				.equals(InventoryMenu.BLOCK_ATLAS)) return;
 
 		sprites.forEach(StitchedSprite::reset);
 		sprites.stream()

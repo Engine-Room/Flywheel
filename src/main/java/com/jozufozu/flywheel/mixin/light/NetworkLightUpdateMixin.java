@@ -9,17 +9,17 @@ import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.light.LightUpdater;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.network.play.ClientPlayNetHandler;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.network.play.server.SUpdateLightPacket;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
 
-@Mixin(ClientPlayNetHandler.class)
+@Mixin(ClientPacketListener.class)
 public class NetworkLightUpdateMixin {
 
 	@Inject(at = @At("TAIL"), method = "handleLightUpdatePacked")
-	private void onLightPacket(SUpdateLightPacket packet, CallbackInfo ci) {
+	private void onLightPacket(ClientboundLightUpdatePacket packet, CallbackInfo ci) {
 		RenderWork.enqueue(() -> {
-			ClientWorld world = Minecraft.getInstance().level;
+			ClientLevel world = Minecraft.getInstance().level;
 
 			if (world == null) return;
 

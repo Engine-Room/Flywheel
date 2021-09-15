@@ -6,10 +6,10 @@ import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 
 public class EntityInstanceManager extends InstanceManager<Entity> {
 
@@ -32,14 +32,14 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 	protected boolean canCreateInstance(Entity entity) {
 		if (!entity.isAlive()) return false;
 
-		World world = entity.level;
+		Level world = entity.level;
 
 		if (world == null) return false;
 
 		if (Backend.isFlywheelWorld(world)) {
 			BlockPos pos = entity.blockPosition();
 
-			IBlockReader existingChunk = world.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
+			BlockGetter existingChunk = world.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
 
 			return existingChunk != null;
 		}

@@ -2,11 +2,11 @@ package com.jozufozu.flywheel.light;
 
 import com.jozufozu.flywheel.util.RenderUtil;
 
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.SectionPos;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.core.Vec3i;
 
 public class GridAlignedBB implements ImmutableBox {
 	private int minX;
@@ -33,7 +33,7 @@ public class GridAlignedBB implements ImmutableBox {
 		return new GridAlignedBB(-radius, -radius, -radius, radius + 1, radius + 1, radius + 1);
 	}
 
-	public static GridAlignedBB from(AxisAlignedBB aabb) {
+	public static GridAlignedBB from(AABB aabb) {
 		int minX = (int) Math.floor(aabb.minX);
 		int minY = (int) Math.floor(aabb.minY);
 		int minZ = (int) Math.floor(aabb.minZ);
@@ -77,7 +77,7 @@ public class GridAlignedBB implements ImmutableBox {
 		this.maxZ = maxZ;
 	}
 
-	public void translate(Vector3i by) {
+	public void translate(Vec3i by) {
 		translate(by.getX(), by.getY(), by.getZ());
 	}
 
@@ -91,7 +91,7 @@ public class GridAlignedBB implements ImmutableBox {
 	}
 
 	public void mirrorAbout(Direction.Axis axis) {
-		Vector3i axisVec = Direction.get(Direction.AxisDirection.POSITIVE, axis)
+		Vec3i axisVec = Direction.get(Direction.AxisDirection.POSITIVE, axis)
 				.getNormal();
 		int flipX = axisVec.getX() - 1;
 		int flipY = axisVec.getY() - 1;
@@ -176,7 +176,7 @@ public class GridAlignedBB implements ImmutableBox {
 		maxZ = Math.max(this.maxZ, other.getMaxZ());
 	}
 
-	public void unionAssign(AxisAlignedBB other) {
+	public void unionAssign(AABB other) {
 		minX = Math.min(this.minX, (int) Math.floor(other.minX));
 		minY = Math.min(this.minY, (int) Math.floor(other.minY));
 		minZ = Math.min(this.minZ, (int) Math.floor(other.minZ));
@@ -185,7 +185,7 @@ public class GridAlignedBB implements ImmutableBox {
 		maxZ = Math.max(this.maxZ, (int) Math.ceil(other.maxZ));
 	}
 
-	public void assign(AxisAlignedBB other) {
+	public void assign(AABB other) {
 		minX = (int) Math.floor(other.minX);
 		minY = (int) Math.floor(other.minY);
 		minZ = (int) Math.floor(other.minZ);
@@ -294,11 +294,11 @@ public class GridAlignedBB implements ImmutableBox {
 		return this;
 	}
 
-	public GridAlignedBB setMax(Vector3i v) {
+	public GridAlignedBB setMax(Vec3i v) {
 		return setMax(v.getX(), v.getY(), v.getZ());
 	}
 
-	public GridAlignedBB setMin(Vector3i v) {
+	public GridAlignedBB setMin(Vec3i v) {
 		return setMin(v.getX(), v.getY(), v.getZ());
 	}
 
@@ -343,7 +343,7 @@ public class GridAlignedBB implements ImmutableBox {
 	}
 
 	@Override
-	public boolean sameAs(AxisAlignedBB other) {
+	public boolean sameAs(AABB other) {
 		return minX == Math.floor(other.minX)
 				&& minY == Math.floor(other.minY)
 				&& minZ == Math.floor(other.minZ)
@@ -398,8 +398,8 @@ public class GridAlignedBB implements ImmutableBox {
 	}
 
 	@Override
-	public AxisAlignedBB toAABB() {
-		return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+	public AABB toAABB() {
+		return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
 	}
 
 	@Override

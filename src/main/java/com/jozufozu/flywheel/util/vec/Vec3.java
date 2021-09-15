@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.util.vec;
 
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3f;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 
 public class Vec3 {
 	public static final Vec3 NEGATIVE_X = new Vec3(-1.0F, 0.0F, 0.0F);

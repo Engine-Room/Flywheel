@@ -1,35 +1,35 @@
 package com.jozufozu.flywheel.event;
 
-import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.culling.ClippingHelper;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.Event;
 
 public class BeginFrameEvent extends Event {
-	private final ClientWorld world;
-	private final ActiveRenderInfo info;
-	private final ClippingHelper clippingHelper;
+	private final ClientLevel world;
+	private final Camera info;
+	private final Frustum clippingHelper;
 
-	public BeginFrameEvent(ClientWorld world, ActiveRenderInfo info, ClippingHelper clippingHelper) {
+	public BeginFrameEvent(ClientLevel world, Camera info, Frustum clippingHelper) {
 		this.world = world;
 		this.info = info;
 		this.clippingHelper = clippingHelper;
 	}
 
-	public ClientWorld getWorld() {
+	public ClientLevel getWorld() {
 		return world;
 	}
 
-	public ActiveRenderInfo getInfo() {
+	public Camera getInfo() {
 		return info;
 	}
 
-	public ClippingHelper getClippingHelper() {
+	public Frustum getClippingHelper() {
 		return clippingHelper;
 	}
 
-	public Vector3d getCameraPos() {
+	public Vec3 getCameraPos() {
 		return info.getPosition();
 	}
 }

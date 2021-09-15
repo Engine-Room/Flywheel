@@ -16,27 +16,27 @@ import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
 
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
-import net.minecraft.block.AbstractChestBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.client.renderer.Atlases;
-import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.state.properties.ChestType;
-import net.minecraft.tileentity.ChestTileEntity;
-import net.minecraft.tileentity.IChestLid;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityMerger;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.world.level.block.AbstractChestBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.LidBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.DoubleBlockCombiner;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 
-public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityInstance<T> implements IDynamicInstance {
+public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileEntityInstance<T> implements IDynamicInstance {
 
 	private final MatrixTransformStack stack = new MatrixTransformStack();
 	private final OrientedData body;
 	private final ModelData lid;
 
 	private final Float2FloatFunction lidProgress;
-	private final RenderMaterial renderMaterial;
+	private final Material renderMaterial;
 	@Nonnull
 	private final ChestType chestType;
 	private final Quaternion baseRotation;
@@ -49,7 +49,7 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 		Block block = blockState.getBlock();
 
 		chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
-		renderMaterial = Atlases.chooseMaterial(tile, chestType, isChristmas());
+		renderMaterial = Sheets.chooseMaterial(tile, chestType, isChristmas());
 
 		body = baseInstance()
 				.setPosition(getInstancePosition());
@@ -68,7 +68,7 @@ public class ChestInstance<T extends TileEntity & IChestLid> extends TileEntityI
 
 			AbstractChestBlock<?> chestBlock = (AbstractChestBlock<?>) block;
 
-			TileEntityMerger.ICallbackWrapper<? extends ChestTileEntity> wrapper = chestBlock.combine(blockState, world, getWorldPosition(), true);
+			DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> wrapper = chestBlock.combine(blockState, world, getWorldPosition(), true);
 
 			this.lidProgress = wrapper.apply(ChestBlock.opennessCombiner(tile));
 

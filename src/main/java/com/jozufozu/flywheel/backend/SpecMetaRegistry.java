@@ -6,7 +6,7 @@ import java.util.Map;
 import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
 import com.jozufozu.flywheel.core.shader.gamestate.IGameStateProvider;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class SpecMetaRegistry {
 

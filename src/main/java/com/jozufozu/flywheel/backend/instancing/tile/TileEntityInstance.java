@@ -11,9 +11,9 @@ import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
 import com.jozufozu.flywheel.light.GridAlignedBB;
 import com.jozufozu.flywheel.light.ImmutableBox;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
 
 /**
  * The layer between a {@link TileEntity} and the Flywheel backend.
@@ -32,7 +32,7 @@ import net.minecraft.util.math.BlockPos;
  *
  * @param <T> The type of {@link TileEntity} your class is an instance of.
  */
-public abstract class TileEntityInstance<T extends TileEntity> extends AbstractInstance {
+public abstract class TileEntityInstance<T extends BlockEntity> extends AbstractInstance {
 
 	protected final T tile;
 	protected final BlockPos pos;

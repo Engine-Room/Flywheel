@@ -2,16 +2,16 @@ package com.jozufozu.flywheel.util;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 
 public class ChunkUtil {
 
-	public static boolean isValidSection(@Nullable Chunk chunk, int sectionY) {
+	public static boolean isValidSection(@Nullable LevelChunk chunk, int sectionY) {
 		if (chunk == null) return false;
 
 		// TODO: 1.17
-		ChunkSection[] sections = chunk.getSections();
+		LevelChunkSection[] sections = chunk.getSections();
 
 		return sectionY >= 0 && sectionY < sections.length;
 	}

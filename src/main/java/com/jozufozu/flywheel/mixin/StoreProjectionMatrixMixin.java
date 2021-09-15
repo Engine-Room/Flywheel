@@ -7,10 +7,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.util.math.vector.Matrix4f;
+import com.mojang.math.Matrix4f;
 
 @Mixin(GameRenderer.class)
 public abstract class StoreProjectionMatrixMixin {
@@ -23,7 +23,7 @@ public abstract class StoreProjectionMatrixMixin {
 	 * We don't care about the mat for your hand.
 	 */
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resetProjectionMatrix(Lnet/minecraft/util/math/vector/Matrix4f;)V"))
-	private void projectionMatrixReady(float p_228378_1_, long p_228378_2_, MatrixStack p_228378_4_, CallbackInfo ci) {
+	private void projectionMatrixReady(float p_228378_1_, long p_228378_2_, PoseStack p_228378_4_, CallbackInfo ci) {
 		shouldCopy = true;
 	}
 

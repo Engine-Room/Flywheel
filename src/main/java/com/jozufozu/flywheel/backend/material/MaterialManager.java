@@ -4,8 +4,8 @@ import com.jozufozu.flywheel.backend.state.IRenderState;
 import com.jozufozu.flywheel.backend.state.RenderLayer;
 import com.jozufozu.flywheel.backend.state.TextureRenderState;
 
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.core.Vec3i;
 
 public interface MaterialManager {
 
@@ -18,7 +18,7 @@ public interface MaterialManager {
 	 */
 	MaterialGroup state(RenderLayer layer, IRenderState state);
 
-	Vector3i getOriginCoordinate();
+	Vec3i getOriginCoordinate();
 
 	default MaterialGroup solid(IRenderState state) {
 		return state(RenderLayer.SOLID, state);
@@ -33,14 +33,14 @@ public interface MaterialManager {
 	}
 
 	default MaterialGroup defaultSolid() {
-		return solid(TextureRenderState.get(PlayerContainer.BLOCK_ATLAS));
+		return solid(TextureRenderState.get(InventoryMenu.BLOCK_ATLAS));
 	}
 
 	default MaterialGroup defaultCutout() {
-		return cutout(TextureRenderState.get(PlayerContainer.BLOCK_ATLAS));
+		return cutout(TextureRenderState.get(InventoryMenu.BLOCK_ATLAS));
 	}
 
 	default MaterialGroup defaultTransparent() {
-		return transparent(TextureRenderState.get(PlayerContainer.BLOCK_ATLAS));
+		return transparent(TextureRenderState.get(InventoryMenu.BLOCK_ATLAS));
 	}
 }

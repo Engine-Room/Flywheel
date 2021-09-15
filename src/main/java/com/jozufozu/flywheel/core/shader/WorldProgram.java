@@ -9,10 +9,10 @@ import java.util.List;
 import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 
-import net.minecraft.client.MainWindow;
+import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.resources.ResourceLocation;
+import com.mojang.math.Matrix4f;
 
 public class WorldProgram extends ExtensibleGlProgram {
 	protected final int uTime = getUniformLocation("uTime");
@@ -45,7 +45,7 @@ public class WorldProgram extends ExtensibleGlProgram {
 	public void uploadWindowSize() {
 		if (uWindowSize < 0) return;
 
-		MainWindow window = Minecraft.getInstance().getWindow();
+		Window window = Minecraft.getInstance().getWindow();
 
 		int height = window.getScreenHeight();
 		int width = window.getScreenWidth();

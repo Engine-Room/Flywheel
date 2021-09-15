@@ -2,8 +2,8 @@ package com.jozufozu.flywheel.core;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.resources.ResourceLocation;
 
 public class StitchedSprite {
 
@@ -22,7 +22,7 @@ public class StitchedSprite {
 	public TextureAtlasSprite getSprite() {
 		if (sprite == null) {
 			sprite = Minecraft.getInstance()
-					.getTextureAtlas(PlayerContainer.BLOCK_ATLAS)
+					.getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
 					.apply(loc);
 		}
 

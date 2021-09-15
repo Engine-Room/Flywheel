@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.shader.extension.IExtensionInstance;
 import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * A shader program that be arbitrarily "extended". This class can take in any number of program extensions, and

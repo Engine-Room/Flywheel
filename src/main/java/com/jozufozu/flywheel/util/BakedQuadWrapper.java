@@ -1,11 +1,11 @@
 package com.jozufozu.flywheel.util;
 
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.renderer.vertex.VertexFormatElement;
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
+import net.minecraft.world.phys.Vec2;
+import com.mojang.math.Vector3f;
 
 public class BakedQuadWrapper {
 	private final FormatCache formatCache = new FormatCache();
@@ -76,8 +76,8 @@ public class BakedQuadWrapper {
 		return Float.intBitsToFloat(vertexData[vertexIndex * formatCache.vertexSize + formatCache.texture + 1]);
 	}
 
-	public Vector2f getTex(int vertexIndex) {
-		return new Vector2f(getTexU(vertexIndex), getTexV(vertexIndex));
+	public Vec2 getTex(int vertexIndex) {
+		return new Vec2(getTexU(vertexIndex), getTexV(vertexIndex));
 	}
 
 	public int getLight(int vertexIndex) {
@@ -145,7 +145,7 @@ public class BakedQuadWrapper {
 		setTexV(vertexIndex, v);
 	}
 
-	public void setTex(int vertexIndex, Vector2f tex) {
+	public void setTex(int vertexIndex, Vec2 tex) {
 		setTex(vertexIndex, tex.x, tex.y);
 	}
 
@@ -176,7 +176,7 @@ public class BakedQuadWrapper {
 	}
 
 	private static class FormatCache {
-		private static final VertexFormat FORMAT = DefaultVertexFormats.BLOCK;
+		private static final VertexFormat FORMAT = DefaultVertexFormat.BLOCK;
 
 		public FormatCache() {
 			refresh();

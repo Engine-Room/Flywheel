@@ -10,14 +10,14 @@ import com.jozufozu.flywheel.light.ILightUpdateListener;
 import com.jozufozu.flywheel.light.IMovingListener;
 import com.jozufozu.flywheel.light.LightProvider;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import com.mojang.math.Vector3f;
+import net.minecraft.core.Vec3i;
 
 /**
  * The layer between a {@link TileEntity} and the Flywheel backend.
@@ -52,7 +52,7 @@ public abstract class EntityInstance<E extends Entity> extends AbstractInstance 
 
 	@Override
 	public boolean update(LightProvider provider) {
-		AxisAlignedBB boundsNow = entity.getBoundingBox();
+		AABB boundsNow = entity.getBoundingBox();
 
 		if (bounds.sameAs(boundsNow)) return false;
 
@@ -71,8 +71,8 @@ public abstract class EntityInstance<E extends Entity> extends AbstractInstance 
 	 * @return The position this instance should be rendered at to appear in the correct location.
 	 */
 	public Vector3f getInstancePosition() {
-		Vector3d pos = entity.position();
-		Vector3i origin = materialManager.getOriginCoordinate();
+		Vec3 pos = entity.position();
+		Vec3i origin = materialManager.getOriginCoordinate();
 		return new Vector3f((float) (pos.x - origin.getX()), (float) (pos.y - origin.getY()), (float) (pos.z - origin.getZ()));
 	}
 
@@ -84,12 +84,12 @@ public abstract class EntityInstance<E extends Entity> extends AbstractInstance 
 	 * @return The position this instance should be rendered at to appear in the correct location.
 	 */
 	public Vector3f getInstancePosition(float partialTicks) {
-		Vector3d pos = entity.position();
-		Vector3i origin = materialManager.getOriginCoordinate();
+		Vec3 pos = entity.position();
+		Vec3i origin = materialManager.getOriginCoordinate();
 		return new Vector3f(
-				(float) (MathHelper.lerp(partialTicks, entity.xOld, pos.x) - origin.getX()),
-				(float) (MathHelper.lerp(partialTicks, entity.yOld, pos.y) - origin.getY()),
-				(float) (MathHelper.lerp(partialTicks, entity.zOld, pos.z) - origin.getZ())
+				(float) (Mth.lerp(partialTicks, entity.xOld, pos.x) - origin.getX()),
+				(float) (Mth.lerp(partialTicks, entity.yOld, pos.y) - origin.getY()),
+				(float) (Mth.lerp(partialTicks, entity.zOld, pos.z) - origin.getZ())
 		);
 	}
 

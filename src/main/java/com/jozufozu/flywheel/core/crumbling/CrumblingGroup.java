@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.backend.state.IRenderState;
 import com.jozufozu.flywheel.core.atlas.AtlasInfo;
 import com.jozufozu.flywheel.core.atlas.SheetData;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class CrumblingGroup<P extends CrumblingProgram> extends MaterialGroupImpl<P> {
 

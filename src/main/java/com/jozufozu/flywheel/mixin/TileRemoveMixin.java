@@ -10,20 +10,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.Level;
 
-@Mixin(TileEntity.class)
+@Mixin(BlockEntity.class)
 public class TileRemoveMixin {
 
 	@Shadow
 	@Nullable
-	protected World level;
+	protected Level level;
 
 	@Inject(at = @At("TAIL"), method = "setRemoved")
 	private void onRemove(CallbackInfo ci) {
-		if (level instanceof ClientWorld) InstancedRenderDispatcher.getTiles(this.level)
-				.remove((TileEntity) (Object) this);
+		if (level instanceof ClientLevel) InstancedRenderDispatcher.getTiles(this.level)
+				.remove((BlockEntity) (Object) this);
 	}
 }

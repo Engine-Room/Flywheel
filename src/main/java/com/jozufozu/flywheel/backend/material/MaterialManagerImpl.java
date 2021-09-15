@@ -11,12 +11,12 @@ import com.jozufozu.flywheel.core.WorldContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.util.WeakHashSet;
 
-import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.client.Camera;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import com.mojang.math.Matrix4f;
+import net.minecraft.core.Vec3i;
 
 public class MaterialManagerImpl<P extends WorldProgram> implements MaterialManager {
 
@@ -105,7 +105,7 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 	}
 
 	@Override
-	public Vector3i getOriginCoordinate() {
+	public Vec3i getOriginCoordinate() {
 		return originCoordinate;
 	}
 
@@ -118,10 +118,10 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 	 *
 	 * This prevents floating point precision issues at high coordinates.
 	 */
-	public void beginFrame(ActiveRenderInfo info) {
-		int cX = MathHelper.floor(info.getPosition().x);
-		int cY = MathHelper.floor(info.getPosition().y);
-		int cZ = MathHelper.floor(info.getPosition().z);
+	public void beginFrame(Camera info) {
+		int cX = Mth.floor(info.getPosition().x);
+		int cY = Mth.floor(info.getPosition().y);
+		int cZ = Mth.floor(info.getPosition().z);
 
 		int dX = cX - originCoordinate.getX();
 		int dY = cY - originCoordinate.getY();

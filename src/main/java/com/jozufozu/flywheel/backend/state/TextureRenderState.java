@@ -10,7 +10,7 @@ import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.util.Pair;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class TextureRenderState implements IRenderState {
 	private static final Map<Pair<GlTextureUnit, ResourceLocation>, TextureRenderState> states = new HashMap<>();

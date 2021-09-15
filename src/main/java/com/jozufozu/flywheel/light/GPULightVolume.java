@@ -28,7 +28,7 @@ import com.jozufozu.flywheel.backend.gl.GlTexture;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.gl.versioned.RGPixelFormat;
 
-import net.minecraft.world.LightType;
+import net.minecraft.world.level.LightLayer;
 
 public class GPULightVolume extends LightVolume {
 
@@ -128,7 +128,7 @@ public class GPULightVolume extends LightVolume {
 		}
 	}
 
-	public void onLightUpdate(LightProvider world, LightType type, ImmutableBox changedVolume) {
+	public void onLightUpdate(LightProvider world, LightLayer type, ImmutableBox changedVolume) {
 		super.onLightUpdate(world, type, changedVolume);
 		bufferDirty = true;
 	}

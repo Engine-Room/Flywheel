@@ -12,7 +12,7 @@ import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.backend.source.error.ErrorReporter;
 import com.jozufozu.flywheel.backend.source.span.Span;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class Import extends AbstractShaderElement {
 

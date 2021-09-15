@@ -12,34 +12,34 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.jozufozu.flywheel.backend.Backend;
 
-import net.minecraft.client.multiplayer.ClientChunkProvider;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.world.biome.BiomeContainer;
-import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.IChunk;
+import net.minecraft.client.multiplayer.ClientChunkCache;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
+import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.ChunkAccess;
 
-@Mixin(ClientChunkProvider.class)
-public abstract class FastChunkProviderMixin extends AbstractChunkProvider {
+@Mixin(ClientChunkCache.class)
+public abstract class FastChunkProviderMixin extends ChunkSource {
 
 	@Shadow
 	@Final
-	private ClientWorld level;
+	private ClientLevel level;
 	@Unique
 	private int lastX;
 	@Unique
 	private int lastZ;
 
 	@Unique
-	private IChunk lastChunk;
+	private ChunkAccess lastChunk;
 
 	@Inject(method = "getChunk",
 			at = @At("HEAD"),
 			cancellable = true)
-	public void returnCachedChunk(int x, int z, ChunkStatus status, boolean create, CallbackInfoReturnable<IChunk> cir) {
+	public void returnCachedChunk(int x, int z, ChunkStatus status, boolean create, CallbackInfoReturnable<ChunkAccess> cir) {
 		if (Backend.getInstance().chunkCachingEnabled && status.isOrAfter(ChunkStatus.FULL)) {
 			synchronized (level) {
 				if (lastChunk != null && x == lastX && z == lastZ) {
@@ -51,7 +51,7 @@ public abstract class FastChunkProviderMixin extends AbstractChunkProvider {
 
 	@Inject(method = "getChunk",
 			at = @At("RETURN"))
-	public void cacheChunk(int x, int z, ChunkStatus status, boolean create, CallbackInfoReturnable<IChunk> cir) {
+	public void cacheChunk(int x, int z, ChunkStatus status, boolean create, CallbackInfoReturnable<ChunkAccess> cir) {
 		if (Backend.getInstance().chunkCachingEnabled && status.isOrAfter(ChunkStatus.FULL)) {
 			synchronized (level) {
 				lastChunk = cir.getReturnValue();
@@ -71,7 +71,7 @@ public abstract class FastChunkProviderMixin extends AbstractChunkProvider {
 	}
 
 	@Inject(method = "replaceWithPacketData", at = @At("HEAD"))
-	public void invalidateOnPacket(int x, int z, BiomeContainer p_228313_3_, PacketBuffer p_228313_4_, CompoundNBT p_228313_5_, int p_228313_6_, boolean p_228313_7_, CallbackInfoReturnable<Chunk> cir) {
+	public void invalidateOnPacket(int x, int z, ChunkBiomeContainer p_228313_3_, FriendlyByteBuf p_228313_4_, CompoundTag p_228313_5_, int p_228313_6_, boolean p_228313_7_, CallbackInfoReturnable<LevelChunk> cir) {
 		if (Backend.getInstance().chunkCachingEnabled) {
 			synchronized (level) {
 				if (x == lastX && z == lastZ) lastChunk = null;
@@ -80,7 +80,7 @@ public abstract class FastChunkProviderMixin extends AbstractChunkProvider {
 	}
 
 	@Redirect(method = "isTickingChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientChunkProvider;hasChunk(II)Z"))
-	public boolean redirectTicking(ClientChunkProvider clientChunkProvider, int x, int z) {
+	public boolean redirectTicking(ClientChunkCache clientChunkProvider, int x, int z) {
 		if (Backend.getInstance().chunkCachingEnabled) {
 			synchronized (level) {
 				if (lastChunk != null && x == lastX && z == lastZ) return true;

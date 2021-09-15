@@ -20,11 +20,11 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.resources.IReloadableResourceManager;
-import net.minecraft.resources.IResource;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.resource.IResourceType;
 import net.minecraftforge.resource.ISelectiveResourceReloadListener;
@@ -52,9 +52,9 @@ public class Loader implements ISelectiveResourceReloadListener {
 		// Can be null when running datagenerators due to the unfortunate time we call this
 		Minecraft minecraft = Minecraft.getInstance();
 		if (minecraft != null) {
-			IResourceManager manager = minecraft.getResourceManager();
-			if (manager instanceof IReloadableResourceManager) {
-				((IReloadableResourceManager) manager).registerReloadListener(this);
+			ResourceManager manager = minecraft.getResourceManager();
+			if (manager instanceof ReloadableResourceManager) {
+				((ReloadableResourceManager) manager).registerReloadListener(this);
 			}
 		}
 	}
@@ -64,7 +64,7 @@ public class Loader implements ISelectiveResourceReloadListener {
 	}
 
 	@Override
-	public void onResourceManagerReload(IResourceManager manager, Predicate<IResourceType> predicate) {
+	public void onResourceManagerReload(ResourceManager manager, Predicate<IResourceType> predicate) {
 		if (predicate.test(VanillaResourceType.SHADERS)) {
 			backend.refresh();
 
@@ -92,7 +92,7 @@ public class Loader implements ISelectiveResourceReloadListener {
 
 				Backend.log.info("Loaded all shader programs.");
 
-				ClientWorld world = Minecraft.getInstance().level;
+				ClientLevel world = Minecraft.getInstance().level;
 				if (Backend.isFlywheelWorld(world)) {
 					// TODO: looks like it might be good to have another event here
 					InstancedRenderDispatcher.loadAllInWorld(world);
@@ -104,12 +104,12 @@ public class Loader implements ISelectiveResourceReloadListener {
 		}
 	}
 
-	private void loadProgramSpecs(IResourceManager manager) {
+	private void loadProgramSpecs(ResourceManager manager) {
 		Collection<ResourceLocation> programSpecs = manager.listResources(PROGRAM_DIR, s -> s.endsWith(".json"));
 
 		for (ResourceLocation location : programSpecs) {
 			try {
-				IResource file = manager.getResource(location);
+				Resource file = manager.getResource(location);
 
 				String s = StreamUtil.readToString(file.getInputStream());
 

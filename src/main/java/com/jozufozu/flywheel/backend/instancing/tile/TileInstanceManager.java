@@ -6,33 +6,33 @@ import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 
-public class TileInstanceManager extends InstanceManager<TileEntity> {
+public class TileInstanceManager extends InstanceManager<BlockEntity> {
 
 	public TileInstanceManager(MaterialManagerImpl<?> materialManager) {
 		super(materialManager);
 	}
 
 	@Override
-	protected boolean canInstance(TileEntity obj) {
+	protected boolean canInstance(BlockEntity obj) {
 		return obj != null && InstancedRenderRegistry.getInstance().canInstance(obj.getType());
 	}
 
 	@Override
-	protected AbstractInstance createRaw(TileEntity obj) {
+	protected AbstractInstance createRaw(BlockEntity obj) {
 		return InstancedRenderRegistry.getInstance()
 				.create(materialManager, obj);
 	}
 
 	@Override
-	protected boolean canCreateInstance(TileEntity tile) {
+	protected boolean canCreateInstance(BlockEntity tile) {
 		if (tile.isRemoved()) return false;
 
-		World world = tile.getLevel();
+		Level world = tile.getLevel();
 
 		if (world == null) return false;
 
@@ -41,7 +41,7 @@ public class TileInstanceManager extends InstanceManager<TileEntity> {
 		if (Backend.isFlywheelWorld(world)) {
 			BlockPos pos = tile.getBlockPos();
 
-			IBlockReader existingChunk = world.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
+			BlockGetter existingChunk = world.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
 
 			return existingChunk != null;
 		}

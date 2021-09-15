@@ -6,20 +6,20 @@ import java.util.Map;
 import com.jozufozu.flywheel.mixin.atlas.SheetDataAccessor;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.client.renderer.texture.Texture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class AtlasInfo {
 
 	private static final Map<ResourceLocation, SheetData> sheetData = new HashMap<>();
 
-	public static AtlasTexture getAtlas(ResourceLocation name) {
-		Texture texture = Minecraft.getInstance().textureManager.getTexture(name);
+	public static TextureAtlas getAtlas(ResourceLocation name) {
+		AbstractTexture texture = Minecraft.getInstance().textureManager.getTexture(name);
 
-		if (texture instanceof AtlasTexture)
-			return (AtlasTexture) texture;
+		if (texture instanceof TextureAtlas)
+			return (TextureAtlas) texture;
 		else
 			return null;
 	}
@@ -28,7 +28,7 @@ public class AtlasInfo {
 		return getAtlasData(texture.atlas());
 	}
 
-	public static SheetData getAtlasData(AtlasTexture atlas) {
+	public static SheetData getAtlasData(TextureAtlas atlas) {
 		return getAtlasData(atlas.location());
 	}
 

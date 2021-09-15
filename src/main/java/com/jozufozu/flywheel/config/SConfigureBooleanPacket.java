@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.config;
 
 import java.util.function.Supplier;
 
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
@@ -18,12 +18,12 @@ public class SConfigureBooleanPacket {
 		this.directive = directive;
 	}
 
-	public SConfigureBooleanPacket(PacketBuffer buffer) {
+	public SConfigureBooleanPacket(FriendlyByteBuf buffer) {
 		target = BooleanConfig.values()[buffer.readByte()];
 		directive = BooleanDirective.values()[buffer.readByte()];
 	}
 
-	public void encode(PacketBuffer buffer) {
+	public void encode(FriendlyByteBuf buffer) {
 		buffer.writeByte(target.ordinal());
 		buffer.writeByte(directive.ordinal());
 	}

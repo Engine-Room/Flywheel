@@ -4,11 +4,11 @@ import com.jozufozu.flywheel.backend.state.IRenderState;
 import com.jozufozu.flywheel.backend.state.NoCullRenderState;
 import com.jozufozu.flywheel.backend.state.RenderState;
 
-import net.minecraft.client.renderer.Atlases;
+import net.minecraft.client.renderer.Sheets;
 
 public class RenderStates {
 	public static final IRenderState SHULKER = RenderState.builder()
-			.texture(Atlases.SHULKER_SHEET)
+			.texture(Sheets.SHULKER_SHEET)
 			.addState(NoCullRenderState.INSTANCE)
 			.build();
 }

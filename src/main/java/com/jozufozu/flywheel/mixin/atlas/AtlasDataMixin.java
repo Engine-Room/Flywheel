@@ -10,20 +10,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.jozufozu.flywheel.core.atlas.AtlasInfo;
 
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.resources.ResourceLocation;
 
-@Mixin(AtlasTexture.class)
+@Mixin(TextureAtlas.class)
 public abstract class AtlasDataMixin {
 
 	@Shadow
 	public abstract ResourceLocation location();
 
 	@Inject(method = "prepareToStitch", at = @At("RETURN"))
-	public void stealAtlasData(IResourceManager resourceManager, Stream<ResourceLocation> locationStream, IProfiler profiler, int mipMapLevels, CallbackInfoReturnable<AtlasTexture.SheetData> cir) {
-		AtlasTexture.SheetData value = cir.getReturnValue();
+	public void stealAtlasData(ResourceManager resourceManager, Stream<ResourceLocation> locationStream, ProfilerFiller profiler, int mipMapLevels, CallbackInfoReturnable<TextureAtlas.Preparations> cir) {
+		TextureAtlas.Preparations value = cir.getReturnValue();
 
 		SheetDataAccessor dataAccessor = (SheetDataAccessor) value;
 

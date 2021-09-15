@@ -5,43 +5,43 @@ import static org.lwjgl.opengl.GL11.GL_QUADS;
 import java.util.Collection;
 import java.util.Random;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockModelRenderer;
-import net.minecraft.client.renderer.BlockModelShapes;
-import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.block.BlockModelShaper;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockDisplayReader;
-import net.minecraft.world.gen.feature.template.Template;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.common.util.Lazy;
 
 public class ModelUtil {
-	private static final Lazy<BlockModelRenderer> MODEL_RENDERER = Lazy.of(() -> new BlockModelRenderer(Minecraft.getInstance().getBlockColors()));
-	private static final Lazy<BlockModelShapes> BLOCK_MODELS = Lazy.of(() -> Minecraft.getInstance().getModelManager().getBlockModelShaper());
+	private static final Lazy<ModelBlockRenderer> MODEL_RENDERER = Lazy.of(() -> new ModelBlockRenderer(Minecraft.getInstance().getBlockColors()));
+	private static final Lazy<BlockModelShaper> BLOCK_MODELS = Lazy.of(() -> Minecraft.getInstance().getModelManager().getBlockModelShaper());
 
-	public static BufferBuilder getBufferBuilderFromTemplate(IBlockDisplayReader renderWorld, RenderType layer, Collection<Template.BlockInfo> blocks) {
-		MatrixStack ms = new MatrixStack();
+	public static BufferBuilder getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks) {
+		PoseStack ms = new PoseStack();
 		Random random = new Random();
-		BufferBuilder builder = new BufferBuilder(DefaultVertexFormats.BLOCK.getIntegerSize());
-		builder.begin(GL_QUADS, DefaultVertexFormats.BLOCK);
+		BufferBuilder builder = new BufferBuilder(DefaultVertexFormat.BLOCK.getIntegerSize());
+		builder.begin(GL_QUADS, DefaultVertexFormat.BLOCK);
 
 		ForgeHooksClient.setRenderLayer(layer);
-		BlockModelRenderer.enableCaching();
-		for (Template.BlockInfo info : blocks) {
+		ModelBlockRenderer.enableCaching();
+		for (StructureTemplate.StructureBlockInfo info : blocks) {
 			BlockState state = info.state;
 
-			if (state.getRenderShape() != BlockRenderType.MODEL)
+			if (state.getRenderShape() != RenderShape.MODEL)
 				continue;
-			if (!RenderTypeLookup.canRenderInLayer(state, layer))
+			if (!ItemBlockRenderTypes.canRenderInLayer(state, layer))
 				continue;
 
 			BlockPos pos = info.pos;
@@ -52,7 +52,7 @@ public class ModelUtil {
 					random, 42, OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
 			ms.popPose();
 		}
-		BlockModelRenderer.clearCache();
+		ModelBlockRenderer.clearCache();
 		ForgeHooksClient.setRenderLayer(null);
 
 		builder.end();

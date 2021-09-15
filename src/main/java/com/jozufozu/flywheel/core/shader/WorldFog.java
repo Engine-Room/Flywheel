@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.core.shader.extension.IExtensionInstance;
 import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
 import com.jozufozu.flywheel.core.shader.extension.UnitExtensionInstance;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public enum WorldFog implements IProgramExtension {
 	NONE("none", UnitExtensionInstance::new),
