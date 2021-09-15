@@ -55,7 +55,7 @@ public class RenderHooksMixin {
 	 * This should probably be a forge event.
 	 */
 	@Inject(at = @At("TAIL"), method = "renderChunkLayer")
-	private void renderLayer(RenderType type, PoseStack stack, double camX, double camY, double camZ, CallbackInfo ci) {
+	private void renderLayer(RenderType type, PoseStack stack, double camX, double camY, double camZ, Matrix4f p_172999_, CallbackInfo ci) {
 
 		RenderBuffers renderBuffers = this.renderBuffers;
 
@@ -75,7 +75,7 @@ public class RenderHooksMixin {
 	}
 
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WorldRenderer;checkPoseStack(Lcom/mojang/blaze3d/matrix/MatrixStack;)V", ordinal = 2 // after the game renders the breaking overlay normally
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;checkPoseStack(Lcom/mojang/blaze3d/vertex/PoseStack;)V", ordinal = 2 // after the game renders the breaking overlay normally
 	), method = "renderLevel")
 	private void renderBlockBreaking(PoseStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, Camera info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f p_228426_9_, CallbackInfo ci) {
 		if (!Backend.getInstance()
@@ -98,7 +98,7 @@ public class RenderHooksMixin {
 	/**
 	 * This gets called when a block is marked for rerender by vanilla.
 	 */
-	@Inject(at = @At("TAIL"), method = "setBlockDirty(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;)V")
+	@Inject(at = @At("TAIL"), method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;)V")
 	private void checkUpdate(BlockPos pos, BlockState lastState, BlockState newState, CallbackInfo ci) {
 		InstancedRenderDispatcher.getTiles(level)
 				.update(level.getBlockEntity(pos));

@@ -6,7 +6,6 @@ import com.jozufozu.flywheel.util.vec.Vec3;
 
 import net.minecraft.core.BlockPos;
 import com.mojang.math.Quaternion;
-import net.minecraft.world.phys.Vec3;
 import com.mojang.math.Vector3f;
 
 public class OrientedData extends BasicData {
@@ -55,7 +54,7 @@ public class OrientedData extends BasicData {
 		return setPosition(pos.x(), pos.y(), pos.z());
 	}
 
-	public OrientedData setPivot(Vec3 pos) {
+	public OrientedData setPivot(net.minecraft.world.phys.Vec3 pos) {
 		return setPosition((float) pos.x(), (float) pos.y(), (float) pos.z());
 	}
 
