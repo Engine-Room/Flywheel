@@ -31,6 +31,7 @@ public class ExtensibleGlProgram extends GlProgram {
 
 		if (extensions != null) {
 			List<IExtensionInstance> list = new ArrayList<>();
+			list.add(new FogMode(this)); // TODO: temporary fog fix
 			for (IProgramExtension e : extensions) {
 				IExtensionInstance extension = e.create(this);
 				list.add(extension);
