@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 
 import com.mojang.datafixers.util.Pair;
 
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexFormat;
 
 public class BufferBuilderReader {
 

@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.light;
 
-import net.minecraft.world.LightType;
+import net.minecraft.world.level.LightLayer;
 
 public interface ILightUpdateListener {
 
@@ -11,7 +11,7 @@ public interface ILightUpdateListener {
 	/**
 	 * Called when a light updates in a chunk the implementor cares about.
 	 */
-	void onLightUpdate(LightProvider world, LightType type, ImmutableBox changed);
+	void onLightUpdate(LightProvider world, LightLayer type, ImmutableBox changed);
 
 	/**
 	 * Called when the server sends light data to the client.
@@ -20,8 +20,8 @@ public interface ILightUpdateListener {
 	default void onLightPacket(LightProvider world, int chunkX, int chunkZ) {
 		GridAlignedBB changedVolume = GridAlignedBB.from(chunkX, chunkZ);
 
-		onLightUpdate(world, LightType.BLOCK, changedVolume);
+		onLightUpdate(world, LightLayer.BLOCK, changedVolume);
 
-		onLightUpdate(world, LightType.SKY, changedVolume);
+		onLightUpdate(world, LightLayer.SKY, changedVolume);
 	}
 }

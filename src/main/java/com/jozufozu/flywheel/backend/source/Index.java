@@ -8,7 +8,7 @@ import com.google.common.collect.MultimapBuilder;
 import com.jozufozu.flywheel.backend.source.parse.ShaderFunction;
 import com.jozufozu.flywheel.backend.source.parse.ShaderStruct;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Indexes many shader source definitions to allow for error fix suggestions.

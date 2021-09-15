@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.light;
 
 import static com.jozufozu.flywheel.util.RenderUtil.isPowerOf2;
 
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.phys.AABB;
 
 public interface ImmutableBox {
 	int getMinX();
@@ -42,7 +42,7 @@ public interface ImmutableBox {
 		return getMinX() == other.getMinX() && getMinY() == other.getMinY() && getMinZ() == other.getMinZ() && getMaxX() == other.getMaxX() && getMaxY() == other.getMaxY() && getMaxZ() == other.getMaxZ();
 	}
 
-	default boolean sameAs(AxisAlignedBB other) {
+	default boolean sameAs(AABB other) {
 		return getMinX() == Math.floor(other.minX)
 				&& getMinY() == Math.floor(other.minY)
 				&& getMinZ() == Math.floor(other.minZ)
@@ -119,8 +119,8 @@ public interface ImmutableBox {
 		}
 	}
 
-	default  AxisAlignedBB toAABB() {
-		return new AxisAlignedBB(getMinX(), getMinY(), getMinZ(), getMaxX(), getMaxY(), getMaxZ());
+	default  AABB toAABB() {
+		return new AABB(getMinX(), getMinY(), getMinZ(), getMaxX(), getMaxY(), getMaxZ());
 	}
 
 	default GridAlignedBB copy() {

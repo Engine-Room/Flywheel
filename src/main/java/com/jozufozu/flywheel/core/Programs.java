@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.core;
 
 import com.jozufozu.flywheel.Flywheel;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class Programs {
 	public static final ResourceLocation TRANSFORMED = new ResourceLocation(Flywheel.ID, "model");

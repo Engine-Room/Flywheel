@@ -17,13 +17,13 @@ import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.util.VirtualEmptyModelData;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.color.ItemColors;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.client.color.item.ItemColors;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.BakedModel;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.core.Direction;
+import com.mojang.math.Vector3f;
+import net.minecraft.core.Vec3i;
 
 public class BakedModelModel implements IModel {
 	// DOWN, UP, NORTH, SOUTH, WEST, EAST, null
@@ -36,10 +36,10 @@ public class BakedModelModel implements IModel {
 	}
 
 
-	public final IBakedModel model;
+	public final BakedModel model;
 	private final int numQuads;
 
-	public BakedModelModel(IBakedModel model) {
+	public BakedModelModel(BakedModel model) {
 		this.model = model;
 
 		Random random = new Random();
@@ -80,13 +80,13 @@ public class BakedModelModel implements IModel {
 //				byte blue = (byte)(i & 255);
 
 				int[] aint = bakedQuad.getVertices();
-				Vector3i faceNormal = bakedQuad.getDirection().getNormal();
+				Vec3i faceNormal = bakedQuad.getDirection().getNormal();
 				Vector3f normal = new Vector3f((float)faceNormal.getX(), (float)faceNormal.getY(), (float)faceNormal.getZ());
-				int intSize = DefaultVertexFormats.BLOCK.getIntegerSize();
+				int intSize = DefaultVertexFormat.BLOCK.getIntegerSize();
 				int vertexCount = aint.length / intSize;
 
 				try (MemoryStack memorystack = MemoryStack.stackPush()) {
-					ByteBuffer bytebuffer = memorystack.malloc(DefaultVertexFormats.BLOCK.getVertexSize());
+					ByteBuffer bytebuffer = memorystack.malloc(DefaultVertexFormat.BLOCK.getVertexSize());
 					IntBuffer intbuffer = bytebuffer.asIntBuffer();
 
 					for(int j = 0; j < vertexCount; ++j) {

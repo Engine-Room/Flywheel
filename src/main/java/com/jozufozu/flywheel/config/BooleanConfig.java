@@ -7,11 +7,11 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.OptifineHandler;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.ChatFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -33,11 +33,11 @@ public enum BooleanConfig {
 
 	@OnlyIn(Dist.CLIENT)
 	private static void enabled(BooleanDirective state) {
-		ClientPlayerEntity player = Minecraft.getInstance().player;
+		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null || state == null) return;
 
 		if (state == BooleanDirective.DISPLAY) {
-			ITextComponent text = new StringTextComponent("Flywheel renderer is currently: ").append(boolToText(FlwConfig.get().client.enabled.get()));
+			Component text = new TextComponent("Flywheel renderer is currently: ").append(boolToText(FlwConfig.get().client.enabled.get()));
 			player.displayClientMessage(text, false);
 			return;
 		}
@@ -47,8 +47,8 @@ public enum BooleanConfig {
 
 		FlwConfig.get().client.enabled.set(enabled);
 
-		ITextComponent text = boolToText(FlwConfig.get().client.enabled.get()).append(new StringTextComponent(" Flywheel renderer").withStyle(TextFormatting.WHITE));
-		ITextComponent error = new StringTextComponent("Flywheel renderer does not support Optifine Shaders").withStyle(TextFormatting.RED);
+		Component text = boolToText(FlwConfig.get().client.enabled.get()).append(new TextComponent(" Flywheel renderer").withStyle(ChatFormatting.WHITE));
+		Component error = new TextComponent("Flywheel renderer does not support Optifine Shaders").withStyle(ChatFormatting.RED);
 
 		player.displayClientMessage(cannotUse ? error : text, false);
 		Backend.reloadWorldRenderers();
@@ -56,42 +56,42 @@ public enum BooleanConfig {
 
 	@OnlyIn(Dist.CLIENT)
 	private static void normalOverlay(BooleanDirective state) {
-		ClientPlayerEntity player = Minecraft.getInstance().player;
+		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null || state == null) return;
 
 		if (state == BooleanDirective.DISPLAY) {
-			ITextComponent text = new StringTextComponent("Normal debug mode is currently: ").append(boolToText(FlwConfig.get().client.debugNormals.get()));
+			Component text = new TextComponent("Normal debug mode is currently: ").append(boolToText(FlwConfig.get().client.debugNormals.get()));
 			player.displayClientMessage(text, false);
 			return;
 		}
 
 		FlwConfig.get().client.debugNormals.set(state.get());
 
-		ITextComponent text = boolToText(FlwConfig.get().client.debugNormals.get()).append(new StringTextComponent(" normal debug mode").withStyle(TextFormatting.WHITE));
+		Component text = boolToText(FlwConfig.get().client.debugNormals.get()).append(new TextComponent(" normal debug mode").withStyle(ChatFormatting.WHITE));
 
 		player.displayClientMessage(text, false);
 	}
 
 	@OnlyIn(Dist.CLIENT)
 	private static void chunkCaching(BooleanDirective state) {
-		ClientPlayerEntity player = Minecraft.getInstance().player;
+		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null || state == null) return;
 
 		if (state == BooleanDirective.DISPLAY) {
-			ITextComponent text = new StringTextComponent("Chunk caching is currently: ").append(boolToText(FlwConfig.get().client.chunkCaching.get()));
+			Component text = new TextComponent("Chunk caching is currently: ").append(boolToText(FlwConfig.get().client.chunkCaching.get()));
 			player.displayClientMessage(text, false);
 			return;
 		}
 
 		FlwConfig.get().client.chunkCaching.set(state.get());
 
-		ITextComponent text = boolToText(FlwConfig.get().client.chunkCaching.get()).append(new StringTextComponent(" chunk caching").withStyle(TextFormatting.WHITE));
+		Component text = boolToText(FlwConfig.get().client.chunkCaching.get()).append(new TextComponent(" chunk caching").withStyle(ChatFormatting.WHITE));
 
 		player.displayClientMessage(text, false);
 		Backend.reloadWorldRenderers();
 	}
 
-	private static IFormattableTextComponent boolToText(boolean b) {
-		return b ? new StringTextComponent("enabled").withStyle(TextFormatting.DARK_GREEN) : new StringTextComponent("disabled").withStyle(TextFormatting.RED);
+	private static MutableComponent boolToText(boolean b) {
+		return b ? new TextComponent("enabled").withStyle(ChatFormatting.DARK_GREEN) : new TextComponent("disabled").withStyle(ChatFormatting.RED);
 	}
 }

@@ -11,8 +11,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.jozufozu.flywheel.backend.OptifineHandler;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.VideoSettingsScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.VideoSettingsScreen;
 
 @Mixin(Minecraft.class)
 public class ShaderCloseMixin {

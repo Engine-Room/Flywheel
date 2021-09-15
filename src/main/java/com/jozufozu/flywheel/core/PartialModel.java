@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
@@ -27,7 +27,7 @@ public class PartialModel {
 	private static final List<PartialModel> all = new ArrayList<>();
 
 	protected final ResourceLocation modelLocation;
-	protected IBakedModel bakedModel;
+	protected BakedModel bakedModel;
 
 	public PartialModel(ResourceLocation modelLocation) {
 
@@ -45,12 +45,12 @@ public class PartialModel {
 	}
 
 	public static void onModelBake(ModelBakeEvent event) {
-		Map<ResourceLocation, IBakedModel> modelRegistry = event.getModelRegistry();
+		Map<ResourceLocation, BakedModel> modelRegistry = event.getModelRegistry();
 		for (PartialModel partial : all)
 			partial.bakedModel = modelRegistry.get(partial.modelLocation);
 	}
 
-	public IBakedModel get() {
+	public BakedModel get() {
 		return bakedModel;
 	}
 

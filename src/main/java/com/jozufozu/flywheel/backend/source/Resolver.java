@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.backend.source;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Manages deferred file resolution.

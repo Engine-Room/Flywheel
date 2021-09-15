@@ -28,7 +28,7 @@ version = "${mc_update_version}-${mod_version}" + (dev ? ".${buildnumber}" : '')
 group = 'com.jozufozu.flywheel'
 archivesBaseName = 'flywheel'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 minecraft {
     mappings channel: 'official', version: "${minecraft_version}"
@@ -143,6 +143,7 @@ artifacts {
     archives jar, sourcesJar, javadocJar
 }
 
+/*
 publishing {
     tasks.publish.dependsOn 'build'
     publications {
@@ -174,3 +175,4 @@ curseforge {
         mainArtifact jar
     }
 }
+ */

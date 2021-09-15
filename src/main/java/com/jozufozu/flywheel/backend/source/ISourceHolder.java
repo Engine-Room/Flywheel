@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.source;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * A minimal source file lookup function.

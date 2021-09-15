@@ -12,17 +12,17 @@ import com.google.common.collect.Lists;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.ClassInheritanceMultiMap;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.util.ClassInstanceMultiMap;
 
-@Mixin(WorldRenderer.class)
+@Mixin(LevelRenderer.class)
 public class CancelEntityRenderMixin {
 
 	@Group(name = "entityFilter", min = 1, max = 1)
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;entitiesForRendering()Ljava/lang/Iterable;"))
-	private Iterable<Entity> filterEntities(ClientWorld world) {
+	private Iterable<Entity> filterEntities(ClientLevel world) {
 		Iterable<Entity> entities = world.entitiesForRendering();
 		if (Backend.getInstance()
 				.canUseInstancing()) {
@@ -39,7 +39,7 @@ public class CancelEntityRenderMixin {
 
 	@Group(name = "entityFilter")
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ClassInheritanceMultiMap;iterator()Ljava/util/Iterator;"))
-	private Iterator<Entity> filterEntitiesOF(ClassInheritanceMultiMap<Entity> classInheritanceMultiMap) {
+	private Iterator<Entity> filterEntitiesOF(ClassInstanceMultiMap<Entity> classInheritanceMultiMap) {
 		if (Backend.getInstance()
 				.canUseInstancing()) {
 

@@ -1,32 +1,32 @@
 package com.jozufozu.flywheel.util.transform;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.util.math.vector.Quaternion;
+import com.mojang.math.Quaternion;
 
 public class MatrixTransformStack implements TransformStack {
 
-	private final MatrixStack internal;
+	private final PoseStack internal;
 
 	public MatrixTransformStack() {
-		this(new MatrixStack());
+		this(new PoseStack());
 	}
 
-	public MatrixTransformStack(MatrixStack internal) {
+	public MatrixTransformStack(PoseStack internal) {
 		this.internal = internal;
 	}
 
-	public static MatrixTransformStack of(MatrixStack ms) {
+	public static MatrixTransformStack of(PoseStack ms) {
 		return new MatrixTransformStack(ms);
 	}
 
-	public MatrixStack unwrap() {
+	public PoseStack unwrap() {
 		return internal;
 	}
 
 	public MatrixTransformStack setIdentity() {
 		if (internal.clear()) {
-			MatrixStack.Entry last = internal.last();
+			PoseStack.Pose last = internal.last();
 
 			last.normal()
 					.setIdentity();

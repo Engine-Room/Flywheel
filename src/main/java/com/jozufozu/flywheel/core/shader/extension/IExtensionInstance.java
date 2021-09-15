@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.core.shader.extension;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public interface IExtensionInstance {
 

@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -26,10 +26,10 @@ public class CancelTileEntityRenderMixin {
 	 * doing unnecessary light lookups and frustum checks.
 	 */
 	@Inject(at = @At("RETURN"), method = "getRenderableBlockEntities", cancellable = true)
-	private void noRenderInstancedTiles(CallbackInfoReturnable<List<TileEntity>> cir) {
+	private void noRenderInstancedTiles(CallbackInfoReturnable<List<BlockEntity>> cir) {
 		if (Backend.getInstance()
 				.canUseInstancing()) {
-			List<TileEntity> tiles = cir.getReturnValue();
+			List<BlockEntity> tiles = cir.getReturnValue();
 
 			InstancedRenderRegistry r = InstancedRenderRegistry.getInstance();
 			tiles.removeIf(r::shouldSkipRender);

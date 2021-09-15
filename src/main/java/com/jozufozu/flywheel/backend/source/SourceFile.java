@@ -21,7 +21,7 @@ import com.jozufozu.flywheel.util.StringUtil;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class SourceFile {
 	private static final Pattern includePattern = Pattern.compile("#use \"(.*)\"");

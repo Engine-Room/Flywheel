@@ -14,7 +14,7 @@ import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 import com.jozufozu.flywheel.core.shader.spec.ProgramState;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class WorldShaderPipeline<P extends WorldProgram> implements IShaderPipeline<P> {
 

@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.source.error.ErrorBuilder;
 import com.jozufozu.flywheel.backend.source.span.Span;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * A reference to a source file that might not be loaded when the owning object is created.

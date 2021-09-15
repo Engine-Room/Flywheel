@@ -21,16 +21,16 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.DestroyBlockProgress;
+import net.minecraft.client.Camera;
+import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.ModelBakery;
-import net.minecraft.client.renderer.texture.Texture;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import com.mojang.math.Matrix4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -53,28 +53,28 @@ public class CrumblingRenderer {
 		INVALIDATOR = state.getSecond();
 	}
 
-	public static void renderBreaking(ClientWorld world, Matrix4f viewProjection, double cameraX, double cameraY, double cameraZ) {
+	public static void renderBreaking(ClientLevel world, Matrix4f viewProjection, double cameraX, double cameraY, double cameraZ) {
 		if (!Backend.getInstance()
 				.canUseInstancing(world)) return;
 
-		Int2ObjectMap<List<TileEntity>> activeStages = getActiveStageTiles(world);
+		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageTiles(world);
 
 		if (activeStages.isEmpty()) return;
 
 		State state = STATE.get();
 		RenderType layer = ModelBakery.DESTROY_TYPES.get(0);
 
-		InstanceManager<TileEntity> renderer = state.instanceManager;
+		InstanceManager<BlockEntity> renderer = state.instanceManager;
 
 		TextureManager textureManager = Minecraft.getInstance().textureManager;
-		ActiveRenderInfo info = Minecraft.getInstance().gameRenderer.getMainCamera();
+		Camera info = Minecraft.getInstance().gameRenderer.getMainCamera();
 
 		MaterialManagerImpl<CrumblingProgram> materials = state.materialManager;
 		layer.setupRenderState();
 
-		for (Int2ObjectMap.Entry<List<TileEntity>> stage : activeStages.int2ObjectEntrySet()) {
+		for (Int2ObjectMap.Entry<List<BlockEntity>> stage : activeStages.int2ObjectEntrySet()) {
 			int i = stage.getIntKey();
-			Texture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(i));
+			AbstractTexture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(i));
 
 			// something about when we call this means that the textures are not ready for use on the first frame they should appear
 			if (breaking != null) {
@@ -94,30 +94,30 @@ public class CrumblingRenderer {
 		layer.clearRenderState();
 
 		GlTextureUnit.T0.makeActive();
-		Texture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(0));
+		AbstractTexture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(0));
 		if (breaking != null) glBindTexture(GL_TEXTURE_2D, breaking.getId());
 	}
 
 	/**
 	 * Associate each breaking stage with a list of all tile entities at that stage.
 	 */
-	private static Int2ObjectMap<List<TileEntity>> getActiveStageTiles(ClientWorld world) {
-		Long2ObjectMap<SortedSet<DestroyBlockProgress>> breakingProgressions = Minecraft.getInstance().levelRenderer.destructionProgress;
+	private static Int2ObjectMap<List<BlockEntity>> getActiveStageTiles(ClientLevel world) {
+		Long2ObjectMap<SortedSet<BlockDestructionProgress>> breakingProgressions = Minecraft.getInstance().levelRenderer.destructionProgress;
 
-		Int2ObjectMap<List<TileEntity>> breakingEntities = new Int2ObjectArrayMap<>();
+		Int2ObjectMap<List<BlockEntity>> breakingEntities = new Int2ObjectArrayMap<>();
 
-		for (Long2ObjectMap.Entry<SortedSet<DestroyBlockProgress>> entry : breakingProgressions.long2ObjectEntrySet()) {
+		for (Long2ObjectMap.Entry<SortedSet<BlockDestructionProgress>> entry : breakingProgressions.long2ObjectEntrySet()) {
 			BlockPos breakingPos = BlockPos.of(entry.getLongKey());
 
-			SortedSet<DestroyBlockProgress> progresses = entry.getValue();
+			SortedSet<BlockDestructionProgress> progresses = entry.getValue();
 			if (progresses != null && !progresses.isEmpty()) {
 				int blockDamage = progresses.last()
 						.getProgress();
 
-				TileEntity tileEntity = world.getBlockEntity(breakingPos);
+				BlockEntity tileEntity = world.getBlockEntity(breakingPos);
 
 				if (tileEntity != null) {
-					List<TileEntity> tileEntities = breakingEntities.computeIfAbsent(blockDamage, $ -> new ArrayList<>());
+					List<BlockEntity> tileEntities = breakingEntities.computeIfAbsent(blockDamage, $ -> new ArrayList<>());
 					tileEntities.add(tileEntity);
 				}
 			}
@@ -128,7 +128,7 @@ public class CrumblingRenderer {
 
 	@SubscribeEvent
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
-		ClientWorld world = event.getWorld();
+		ClientLevel world = event.getWorld();
 		if (Backend.getInstance()
 				.canUseInstancing() && world != null) {
 			reset();
@@ -141,7 +141,7 @@ public class CrumblingRenderer {
 
 	private static class State {
 		private final MaterialManagerImpl<CrumblingProgram> materialManager;
-		private final InstanceManager<TileEntity> instanceManager;
+		private final InstanceManager<BlockEntity> instanceManager;
 
 		private State() {
 			materialManager = MaterialManagerImpl.builder(Contexts.CRUMBLING)

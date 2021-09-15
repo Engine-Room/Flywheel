@@ -11,9 +11,9 @@ import com.jozufozu.flywheel.light.ImmutableBox;
 import com.jozufozu.flywheel.light.LightProvider;
 import com.jozufozu.flywheel.light.ListenerStatus;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.LightType;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.Level;
 
 /**
  * A general interface providing information about any type of thing that could use Flywheel's instanced rendering.
@@ -22,9 +22,9 @@ import net.minecraft.world.World;
 public abstract class AbstractInstance implements IInstance, ILightUpdateListener {
 
 	protected final MaterialManager materialManager;
-	public final World world;
+	public final Level world;
 
-	public AbstractInstance(MaterialManager materialManager, World world) {
+	public AbstractInstance(MaterialManager materialManager, Level world) {
 		this.materialManager = materialManager;
 		this.world = world;
 	}
@@ -73,16 +73,16 @@ public abstract class AbstractInstance implements IInstance, ILightUpdateListene
 	}
 
 	@Override
-	public void onLightUpdate(LightProvider world, LightType type, ImmutableBox changed) {
+	public void onLightUpdate(LightProvider world, LightLayer type, ImmutableBox changed) {
 		updateLight();
 	}
 
 	protected void relight(BlockPos pos, IFlatLight<?>... models) {
-		relight(world.getBrightness(LightType.BLOCK, pos), world.getBrightness(LightType.SKY, pos), models);
+		relight(world.getBrightness(LightLayer.BLOCK, pos), world.getBrightness(LightLayer.SKY, pos), models);
 	}
 
 	protected <L extends IFlatLight<?>> void relight(BlockPos pos, Stream<L> models) {
-		relight(world.getBrightness(LightType.BLOCK, pos), world.getBrightness(LightType.SKY, pos), models);
+		relight(world.getBrightness(LightLayer.BLOCK, pos), world.getBrightness(LightLayer.SKY, pos), models);
 	}
 
 	protected void relight(int block, int sky, IFlatLight<?>... models) {

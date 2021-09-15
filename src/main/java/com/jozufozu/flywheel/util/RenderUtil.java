@@ -2,12 +2,12 @@ package com.jozufozu.flywheel.util;
 
 import java.util.function.Supplier;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Matrix3f;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.core.Direction;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 
 public class RenderUtil {
 
@@ -42,7 +42,7 @@ public class RenderUtil {
 		return Math.sqrt(lengthSqr(x, y, z));
 	}
 
-	public static float[] writeMatrixStack(MatrixStack stack) {
+	public static float[] writeMatrixStack(PoseStack stack) {
 		return writeMatrixStack(stack.last()
 										.pose(), stack.last()
 										.normal());
@@ -57,9 +57,9 @@ public class RenderUtil {
 		return new float[]{model.m00, model.m10, model.m20, model.m30, model.m01, model.m11, model.m21, model.m31, model.m02, model.m12, model.m22, model.m32, model.m03, model.m13, model.m23, model.m33,};
 	}
 
-	public static Supplier<MatrixStack> rotateToFace(Direction facing) {
+	public static Supplier<PoseStack> rotateToFace(Direction facing) {
 		return () -> {
-			MatrixStack stack = new MatrixStack();
+			PoseStack stack = new PoseStack();
 			//			MatrixStacker.of(stack)
 			//					.centre()
 			//					.rotateY(AngleHelper.horizontalAngle(facing))

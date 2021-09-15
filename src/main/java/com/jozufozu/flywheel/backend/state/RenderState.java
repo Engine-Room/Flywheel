@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class RenderState implements IRenderState {
 

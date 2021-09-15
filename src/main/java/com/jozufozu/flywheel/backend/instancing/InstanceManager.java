@@ -14,10 +14,10 @@ import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
 import com.jozufozu.flywheel.light.LightUpdater;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.client.Camera;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import com.mojang.math.Vector3f;
 
 public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginShiftListener {
 
@@ -103,7 +103,7 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 		}
 	}
 
-	public void beginFrame(ActiveRenderInfo info) {
+	public void beginFrame(Camera info) {
 		frame++;
 		processQueuedAdditions();
 
@@ -266,7 +266,7 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 
 		int i = (dSq / 2048);
 
-		return divisorSequence[MathHelper.clamp(i, 0, divisorSequence.length - 1)];
+		return divisorSequence[Mth.clamp(i, 0, divisorSequence.length - 1)];
 	}
 
 	protected void addInternal(T tile) {

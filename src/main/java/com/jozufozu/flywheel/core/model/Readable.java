@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.core.model;
 
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.core.Direction;
+import com.mojang.math.Vector3f;
 
 public class Readable {
 	public static class ModelBox {

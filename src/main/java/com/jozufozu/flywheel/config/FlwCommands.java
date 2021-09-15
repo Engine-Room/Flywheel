@@ -2,15 +2,15 @@ package com.jozufozu.flywheel.config;
 
 import com.mojang.brigadier.CommandDispatcher;
 
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 
 public class FlwCommands {
 	@SubscribeEvent
 	public static void onServerStarting(FMLServerStartingEvent event) {
-		CommandDispatcher<CommandSource> dispatcher = event.getServer()
+		CommandDispatcher<CommandSourceStack> dispatcher = event.getServer()
 				.getCommands()
 				.getDispatcher();
 

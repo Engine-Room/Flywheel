@@ -1,12 +1,12 @@
 package com.jozufozu.flywheel.light;
 
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.world.LightType;
+import net.minecraft.world.level.LightLayer;
 
 public interface LightProvider {
-	int getLight(LightType type, int x, int y, int z);
+	int getLight(LightLayer type, int x, int y, int z);
 
 	default int getPackedLight(int x, int y, int z) {
-		return LightTexture.pack(getLight(LightType.BLOCK, x, y, z), getLight(LightType.SKY, x, y, z));
+		return LightTexture.pack(getLight(LightLayer.BLOCK, x, y, z), getLight(LightLayer.SKY, x, y, z));
 	}
 }

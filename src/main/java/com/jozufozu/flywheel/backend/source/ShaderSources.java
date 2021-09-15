@@ -10,9 +10,9 @@ import com.google.common.collect.Lists;
 import com.jozufozu.flywheel.util.ResourceUtil;
 import com.jozufozu.flywheel.util.StreamUtil;
 
-import net.minecraft.resources.IResource;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * The main object for loading and parsing source files.
@@ -25,7 +25,7 @@ public class ShaderSources implements ISourceHolder {
 
 	public final Index index;
 
-	public ShaderSources(IResourceManager manager) {
+	public ShaderSources(ResourceManager manager) {
 		Collection<ResourceLocation> allShaders = manager.listResources(SHADER_DIR, s -> {
 			for (String ext : EXTENSIONS) {
 				if (s.endsWith(ext)) return true;
@@ -35,7 +35,7 @@ public class ShaderSources implements ISourceHolder {
 
 		for (ResourceLocation location : allShaders) {
 			try {
-				IResource resource = manager.getResource(location);
+				Resource resource = manager.getResource(location);
 
 				String source = StreamUtil.readToString(resource.getInputStream());
 

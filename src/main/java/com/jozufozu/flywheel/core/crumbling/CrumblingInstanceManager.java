@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.core.crumbling;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 public class CrumblingInstanceManager extends TileInstanceManager {
 

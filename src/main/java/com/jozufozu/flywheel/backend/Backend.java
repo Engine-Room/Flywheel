@@ -20,10 +20,10 @@ import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import com.mojang.math.Matrix4f;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.Level;
 
 public class Backend {
 	public static final Logger log = LogManager.getLogger(Backend.class);
@@ -144,7 +144,7 @@ public class Backend {
 				.chunkCaching();
 	}
 
-	public boolean canUseInstancing(@Nullable World world) {
+	public boolean canUseInstancing(@Nullable Level world) {
 		return canUseInstancing() && isFlywheelWorld(world);
 	}
 
@@ -171,7 +171,7 @@ public class Backend {
 	/**
 	 * Used to avoid calling Flywheel functions on (fake) worlds that don't specifically support it.
 	 */
-	public static boolean isFlywheelWorld(@Nullable IWorld world) {
+	public static boolean isFlywheelWorld(@Nullable LevelAccessor world) {
 		if (world == null) return false;
 
 		if (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel()) return true;

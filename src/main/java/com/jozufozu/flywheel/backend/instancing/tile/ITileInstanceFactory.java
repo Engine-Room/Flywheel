@@ -2,9 +2,9 @@ package com.jozufozu.flywheel.backend.instancing.tile;
 
 import com.jozufozu.flywheel.backend.material.MaterialManager;
 
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 @FunctionalInterface
-public interface ITileInstanceFactory<T extends TileEntity> {
+public interface ITileInstanceFactory<T extends BlockEntity> {
 	TileEntityInstance<? super T> create(MaterialManager manager, T te);
 }

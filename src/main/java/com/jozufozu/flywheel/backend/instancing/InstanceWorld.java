@@ -10,9 +10,9 @@ import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * A manager class for a single world where instancing is supported.
@@ -23,7 +23,7 @@ import net.minecraft.tileentity.TileEntity;
 public class InstanceWorld {
 	protected final MaterialManagerImpl<WorldProgram> materialManager;
 	protected final InstanceManager<Entity> entityInstanceManager;
-	protected final InstanceManager<TileEntity> tileEntityInstanceManager;
+	protected final InstanceManager<BlockEntity> tileEntityInstanceManager;
 
 	public InstanceWorld() {
 
@@ -41,7 +41,7 @@ public class InstanceWorld {
 		return entityInstanceManager;
 	}
 
-	public InstanceManager<TileEntity> getTileEntityInstanceManager() {
+	public InstanceManager<BlockEntity> getTileEntityInstanceManager() {
 		return tileEntityInstanceManager;
 	}
 
@@ -55,7 +55,7 @@ public class InstanceWorld {
 	/**
 	 * Instantiate all the necessary instances to render the given world.
 	 */
-	public void loadAll(ClientWorld world) {
+	public void loadAll(ClientLevel world) {
 		world.blockEntityList.forEach(tileEntityInstanceManager::add);
 		world.entitiesForRendering()
 				.forEach(entityInstanceManager::add);

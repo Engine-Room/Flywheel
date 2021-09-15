@@ -8,18 +8,18 @@ import java.util.stream.Stream;
 import com.jozufozu.flywheel.util.WeakHashSet;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.SectionPos;
-import net.minecraft.world.IBlockDisplayReader;
-import net.minecraft.world.LightType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.LightLayer;
 
 /**
  * Keeps track of what chunks/sections each listener is in, so we can update exactly what needs to be updated.
  */
 public class LightUpdater {
 
-	private static final Map<IBlockDisplayReader, LightUpdater> light = new HashMap<>();
-	public static LightUpdater get(IBlockDisplayReader world) {
+	private static final Map<BlockAndTintGetter, LightUpdater> light = new HashMap<>();
+	public static LightUpdater get(BlockAndTintGetter world) {
 		return light.computeIfAbsent(world, LightUpdater::new);
 	}
 
@@ -29,7 +29,7 @@ public class LightUpdater {
 	private final WeakContainmentMultiMap<ILightUpdateListener> sections = new WeakContainmentMultiMap<>();
 	private final WeakContainmentMultiMap<ILightUpdateListener> chunks = new WeakContainmentMultiMap<>();
 
-	public LightUpdater(IBlockDisplayReader world) {
+	public LightUpdater(BlockAndTintGetter world) {
 		provider = BasicProvider.get(world);
 	}
 
@@ -90,7 +90,7 @@ public class LightUpdater {
 	 * @param type       The type of light that changed.
 	 * @param sectionPos A long representing the section position where light changed.
 	 */
-	public void onLightUpdate(LightType type, long sectionPos) {
+	public void onLightUpdate(LightLayer type, long sectionPos) {
 		Set<ILightUpdateListener> set = sections.get(sectionPos);
 
 		if (set == null || set.isEmpty()) return;
