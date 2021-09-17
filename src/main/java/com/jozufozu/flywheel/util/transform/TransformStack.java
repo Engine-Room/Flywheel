@@ -100,6 +100,10 @@ public interface TransformStack {
 		return translate(-vec.x, -vec.y, -vec.z);
 	}
 
+	default TransformStack translateBack(Vec3i vec) {
+		return translate(-vec.getX(), -vec.getY(), -vec.getZ());
+	}
+
 	default TransformStack nudge(int id) {
 		long randomBits = (long) id * 31L * 493286711L;
 		randomBits = randomBits * randomBits * 4392167121L + randomBits * 98761L;

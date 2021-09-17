@@ -170,7 +170,7 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 				.canUseInstancing()) return;
 
 		if (canInstance(obj)) {
-			AbstractInstance instance = getInstance(obj, false);
+			AbstractInstance instance = getInstance(obj);
 
 			if (instance != null) {
 
@@ -192,7 +192,7 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 				.canUseInstancing()) return;
 
 		if (canInstance(obj)) {
-			AbstractInstance instance = getInstance(obj, false);
+			AbstractInstance instance = getInstance(obj);
 			if (instance != null) removeInternal(obj, instance);
 		}
 	}
@@ -205,19 +205,11 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 	}
 
 	@Nullable
-	protected <I extends T> AbstractInstance getInstance(I obj, boolean create) {
+	protected <I extends T> AbstractInstance getInstance(I obj) {
 		if (!Backend.getInstance()
 				.canUseInstancing()) return null;
 
-		AbstractInstance instance = instances.get(obj);
-
-		if (instance != null) {
-			return instance;
-		} else if (create && canCreateInstance(obj)) {
-			return createInternal(obj);
-		} else {
-			return null;
-		}
+		return instances.get(obj);
 	}
 
 	protected void processQueuedAdditions() {
@@ -269,8 +261,15 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 		return divisorSequence[Mth.clamp(i, 0, divisorSequence.length - 1)];
 	}
 
-	protected void addInternal(T tile) {
-		getInstance(tile, true);
+	protected void addInternal(T obj) {
+		if (!Backend.getInstance()
+				.canUseInstancing()) return;
+
+		AbstractInstance instance = instances.get(obj);
+
+		if (instance == null && canCreateInstance(obj)) {
+			createInternal(obj);
+		}
 	}
 
 	protected void removeInternal(T obj, AbstractInstance instance) {

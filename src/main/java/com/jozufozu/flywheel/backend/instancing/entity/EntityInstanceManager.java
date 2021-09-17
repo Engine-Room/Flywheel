@@ -34,8 +34,6 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 
 		Level world = entity.level;
 
-		if (world == null) return false;
-
 		if (Backend.isFlywheelWorld(world)) {
 			BlockPos pos = entity.blockPosition();
 
