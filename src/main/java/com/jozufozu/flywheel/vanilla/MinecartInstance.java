@@ -12,6 +12,7 @@ import com.jozufozu.flywheel.core.model.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
 
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -55,12 +56,11 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		stack.setIdentity();
 		float pt = AnimationTickHolder.getPartialTicks();
 
+		Vec3i originCoordinate = materialManager.getOriginCoordinate();
 		stack.translate(
-				Mth.lerp(pt, entity.xOld, entity.getX()),
-				Mth.lerp(pt, entity.yOld, entity.getY()),
-				Mth.lerp(pt, entity.zOld, entity.getZ())
-		);
-
+				Mth.lerp(pt, entity.xOld, entity.getX()) - originCoordinate.getX(),
+				Mth.lerp(pt, entity.yOld, entity.getY()) - originCoordinate.getY(),
+				Mth.lerp(pt, entity.zOld, entity.getZ()) - originCoordinate.getZ());
 
 		float yaw = Mth.lerp(pt, entity.yRotO, entity.getYRot());
 
