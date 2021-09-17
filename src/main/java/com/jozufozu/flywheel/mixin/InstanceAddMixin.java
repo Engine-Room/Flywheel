@@ -9,26 +9,24 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-@Mixin(value = LevelChunk.class, priority = 1100) // this and create.mixins.json have high priority to load after Performant
-public class TileWorldHookMixin {
+@Mixin(LevelChunk.class)
+public class InstanceAddMixin {
 
 	@Shadow
 	@Final
 	Level level;
 
-	@Inject(at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/level/block/entity/BlockEntity;clearRemoved()V"),
-			method = "setBlockEntity")
-	private void onAddTile(BlockEntity te, CallbackInfo ci) {
-		if (level.isClientSide) {
-			InstancedRenderDispatcher.getTiles(level)
-					.queueAdd(te);
-		}
+	@Inject(method = "setBlockEntity",
+			at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))
+	private void tileAdded(BlockEntity be, CallbackInfo ci) {
+		if (level.isClientSide) InstancedRenderDispatcher.getTiles(this.level)
+				.add(be);
 	}
 }

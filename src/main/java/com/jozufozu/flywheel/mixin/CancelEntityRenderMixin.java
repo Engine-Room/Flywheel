@@ -20,6 +20,7 @@ import net.minecraft.util.ClassInstanceMultiMap;
 @Mixin(LevelRenderer.class)
 public class CancelEntityRenderMixin {
 
+	// TODO: Don't use redirect
 	@Group(name = "entityFilter", min = 1, max = 1)
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;entitiesForRendering()Ljava/lang/Iterable;"))
 	private Iterable<Entity> filterEntities(ClientLevel world) {
@@ -37,19 +38,19 @@ public class CancelEntityRenderMixin {
 		return entities;
 	}
 
-	@Group(name = "entityFilter")
-	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ClassInstanceMultiMap;iterator()Ljava/util/Iterator;"))
-	private Iterator<Entity> filterEntitiesOF(ClassInstanceMultiMap<Entity> classInheritanceMultiMap) {
-		if (Backend.getInstance()
-				.canUseInstancing()) {
-
-			ArrayList<Entity> filtered = Lists.newArrayList(classInheritanceMultiMap);
-
-			InstancedRenderRegistry r = InstancedRenderRegistry.getInstance();
-			filtered.removeIf(r::shouldSkipRender);
-
-			return filtered.iterator();
-		}
-		return classInheritanceMultiMap.iterator();
-	}
+//	@Group(name = "entityFilter")
+//	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ClassInstanceMultiMap;iterator()Ljava/util/Iterator;"))
+//	private Iterator<Entity> filterEntitiesOF(ClassInstanceMultiMap<Entity> classInheritanceMultiMap) {
+//		if (Backend.getInstance()
+//				.canUseInstancing()) {
+//
+//			ArrayList<Entity> filtered = Lists.newArrayList(classInheritanceMultiMap);
+//
+//			InstancedRenderRegistry r = InstancedRenderRegistry.getInstance();
+//			filtered.removeIf(r::shouldSkipRender);
+//
+//			return filtered.iterator();
+//		}
+//		return classInheritanceMultiMap.iterator();
+//	}
 }

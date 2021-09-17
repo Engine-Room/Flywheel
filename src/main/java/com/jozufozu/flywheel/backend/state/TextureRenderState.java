@@ -34,7 +34,7 @@ public class TextureRenderState implements IRenderState {
 	@Override
 	public void bind() {
 		unit.makeActive();
-		Minecraft.getInstance().textureManager.bindForSetup(location);
+		Minecraft.getInstance().getTextureManager().bindForSetup(location);
 	}
 
 	@Override

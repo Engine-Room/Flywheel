@@ -16,7 +16,7 @@ public class AtlasInfo {
 	private static final Map<ResourceLocation, SheetData> sheetData = new HashMap<>();
 
 	public static TextureAtlas getAtlas(ResourceLocation name) {
-		AbstractTexture texture = Minecraft.getInstance().textureManager.getTexture(name);
+		AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(name);
 
 		if (texture instanceof TextureAtlas)
 			return (TextureAtlas) texture;

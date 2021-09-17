@@ -41,6 +41,7 @@ minecraft {
             property 'forge.logging.markers', ''
             property 'forge.logging.console.level', 'debug'
             property 'fml.earlyprogresswindow', 'false'
+            property 'mixin.debug.export', 'true'
 
             arg "-mixin.config=flywheel.mixins.json"
 
@@ -100,7 +101,7 @@ dependencies {
 
     //implementation "org.joml:joml:1.10.1"
 
-    //annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
+    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

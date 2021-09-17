@@ -15,15 +15,25 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.Level;
 
 @Mixin(BlockEntity.class)
-public class TileRemoveMixin {
+public class InstanceRemoveMixin {
 
 	@Shadow
 	@Nullable
 	protected Level level;
 
 	@Inject(at = @At("TAIL"), method = "setRemoved")
-	private void onRemove(CallbackInfo ci) {
+	private void removeInstance(CallbackInfo ci) {
 		if (level instanceof ClientLevel) InstancedRenderDispatcher.getTiles(this.level)
 				.remove((BlockEntity) (Object) this);
 	}
+
+//	/**
+//	 * Don't do this.
+//	 * It can cause infinite loops if an instance class tries to access another tile entity in its constructor.
+//	 */
+//	@Inject(at = @At("TAIL"), method = "clearRemoved")
+//	private void addInstance(CallbackInfo ci) {
+//		if (level.isClientSide) InstancedRenderDispatcher.getTiles(this.level)
+//				.add((BlockEntity) (Object) this);
+//	}
 }
