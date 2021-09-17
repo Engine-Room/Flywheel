@@ -16,7 +16,8 @@
     "light.NetworkLightUpdateMixin",
     "LevelRendererAccessor",
     "InstanceAddMixin",
-    "InstanceRemoveMixin"
+    "InstanceRemoveMixin",
+    "LeakChunkStorageArrayMixin"
   ],
   "injectors": {
     "defaultRequire": 1
