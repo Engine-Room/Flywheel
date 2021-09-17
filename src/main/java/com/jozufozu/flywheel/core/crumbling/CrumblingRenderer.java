@@ -14,6 +14,7 @@ import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
 import com.jozufozu.flywheel.backend.state.RenderLayer;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
 import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.Pair;
 
@@ -66,7 +67,7 @@ public class CrumblingRenderer {
 
 		InstanceManager<BlockEntity> renderer = state.instanceManager;
 
-		TextureManager textureManager = Minecraft.getInstance().textureManager;
+		TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 		Camera info = Minecraft.getInstance().gameRenderer.getMainCamera();
 
 		MaterialManagerImpl<CrumblingProgram> materials = state.materialManager;
@@ -102,11 +103,11 @@ public class CrumblingRenderer {
 	 * Associate each breaking stage with a list of all tile entities at that stage.
 	 */
 	private static Int2ObjectMap<List<BlockEntity>> getActiveStageTiles(ClientLevel world) {
-		Long2ObjectMap<SortedSet<BlockDestructionProgress>> breakingProgressions = Minecraft.getInstance().levelRenderer.destructionProgress;
 
 		Int2ObjectMap<List<BlockEntity>> breakingEntities = new Int2ObjectArrayMap<>();
 
-		for (Long2ObjectMap.Entry<SortedSet<BlockDestructionProgress>> entry : breakingProgressions.long2ObjectEntrySet()) {
+		for (Long2ObjectMap.Entry<SortedSet<BlockDestructionProgress>> entry : ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).getDestructionProgress()
+				.long2ObjectEntrySet()) {
 			BlockPos breakingPos = BlockPos.of(entry.getLongKey());
 
 			SortedSet<BlockDestructionProgress> progresses = entry.getValue();

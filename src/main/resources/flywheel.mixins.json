@@ -10,15 +10,15 @@
     "FixFabulousDepthMixin",
     "RenderHooksMixin",
     "ShaderCloseMixin",
-    "TileRemoveMixin",
-    "TileWorldHookMixin",
     "atlas.AtlasDataMixin",
     "atlas.SheetDataAccessor",
     "light.LightUpdateMixin",
     "light.NetworkLightUpdateMixin",
-    "FastChunkProviderMixin"
+    "LevelRendererAccessor",
+    "InstanceAddMixin",
+    "InstanceRemoveMixin"
   ],
   "injectors": {
-    "defaultRequire": 0
+    "defaultRequire": 1
   }
 }
