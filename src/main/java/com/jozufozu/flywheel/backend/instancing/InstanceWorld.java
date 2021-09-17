@@ -8,6 +8,7 @@ import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
+import com.jozufozu.flywheel.util.ChunkIter;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
@@ -58,8 +59,9 @@ public class InstanceWorld {
 	 * Instantiate all the necessary instances to render the given world.
 	 */
 	public void loadAll(ClientLevel world) {
-		// FIXME: no more global blockEntity list
-		// world.blockEntityList.forEach(tileEntityInstanceManager::add);
+		ChunkIter.forEachChunk(world, chunk -> {
+			chunk.getBlockEntities().values().forEach(tileEntityInstanceManager::add);
+		});
 		world.entitiesForRendering()
 				.forEach(entityInstanceManager::add);
 	}

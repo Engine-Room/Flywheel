@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.light.LightUpdater;
+import com.jozufozu.flywheel.util.ChunkIter;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -45,6 +46,12 @@ public class ForgeEvents {
 		if (Backend.isFlywheelWorld(world)) {
 			InstancedRenderDispatcher.loadAllInWorld((ClientLevel) world);
 		}
+	}
+
+	@SubscribeEvent
+	public static void unloadWorld(WorldEvent.Unload event) {
+		LevelAccessor world = event.getWorld();
+		ChunkIter._unload(world);
 	}
 
 	@SubscribeEvent
