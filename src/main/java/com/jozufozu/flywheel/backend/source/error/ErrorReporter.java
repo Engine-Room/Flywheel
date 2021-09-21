@@ -13,10 +13,8 @@ public class ErrorReporter {
 	public static void generateSpanError(Span span, String message) {
 		SourceFile file = span.getSourceFile();
 
-		ErrorBuilder builder = new ErrorBuilder();
-
-		CharSequence error = builder.error(message)
-				.in(file)
+		CharSequence error = ErrorBuilder.error(message)
+				.pointAtFile(file)
 				.pointAt(span, 2)
 				.build();
 
@@ -25,10 +23,8 @@ public class ErrorReporter {
 
 	public static void generateFileError(SourceFile file, String message) {
 
-		ErrorBuilder builder = new ErrorBuilder();
-
-		CharSequence error = builder.error(message)
-				.in(file)
+		CharSequence error = ErrorBuilder.error(message)
+				.pointAtFile(file)
 				.build();
 
 		Backend.log.error(error);
@@ -43,10 +39,9 @@ public class ErrorReporter {
 				.stream()
 				.findFirst()
 				.map(ShaderStruct::getName);
-		ErrorBuilder builder = new ErrorBuilder();
 
-		ErrorBuilder error = builder.error(msg)
-				.in(file)
+		ErrorBuilder error = ErrorBuilder.error(msg)
+				.pointAtFile(file)
 				.pointAt(vertexName, 2)
 				.hintIncludeFor(span.orElse(null), hint);
 
@@ -62,10 +57,9 @@ public class ErrorReporter {
 				.stream()
 				.findFirst()
 				.map(ShaderFunction::getName);
-		ErrorBuilder builder = new ErrorBuilder();
 
-		ErrorBuilder error = builder.error(msg)
-				.in(file)
+		ErrorBuilder error = ErrorBuilder.error(msg)
+				.pointAtFile(file)
 				.hintIncludeFor(span.orElse(null), hint);
 
 		Backend.log.error(error.build());

@@ -57,7 +57,7 @@ public class WorldShader {
 				.append(template.getVersion())
 				.append('\n')
 				.append("#define ")
-				.append(type.define)
+				.append(type.define) // special case shader type declaration
 				.append('\n')
 				.append(defines != null ? defines : "")
 				.append(header)

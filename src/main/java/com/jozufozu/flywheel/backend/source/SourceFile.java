@@ -13,20 +13,21 @@ import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.backend.source.parse.Import;
 import com.jozufozu.flywheel.backend.source.parse.ShaderFunction;
 import com.jozufozu.flywheel.backend.source.parse.ShaderStruct;
-import com.jozufozu.flywheel.backend.source.span.CharPos;
 import com.jozufozu.flywheel.backend.source.span.ErrorSpan;
 import com.jozufozu.flywheel.backend.source.span.Span;
 import com.jozufozu.flywheel.backend.source.span.StringSpan;
-import com.jozufozu.flywheel.util.StringUtil;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.resources.ResourceLocation;
 
+/**
+ * Immutable class representing a shader file.
+ *
+ * <p>
+ *     This class parses shader files and generates what is effectively a high level AST of the source.
+ * </p>
+ */
 public class SourceFile {
 	private static final Pattern includePattern = Pattern.compile("#use \"(.*)\"");
-
-	private static final Pattern newLine = Pattern.compile("(\\r\\n|\\r|\\n)");
 
 	// https://regexr.com/60n3d
 	public static final Pattern functionDeclaration = Pattern.compile("(\\w+)\\s+(\\w+)\\s*\\(([\\w,\\s]*)\\)\\s*\\{");
@@ -34,59 +35,43 @@ public class SourceFile {
 	public final ResourceLocation name;
 
 	public final ShaderSources parent;
-	private final String source;
-	private final CharSequence elided;
-	private final ImmutableList<String> lines;
+	public final String source;
+	/**
+	 * Sections of the source that must be trimmed for compilation. Currently, it only contains the spans of imports.
+	 */
+	public final String elided;
 
-	private final IntList lineStarts;
+	public final SourceLines lines;
 
-	// Function name -> Function object
-	private final ImmutableMap<String, ShaderFunction> functions;
-	private final ImmutableMap<String, ShaderStruct> structs;
+	/**
+	 * Function lookup by name.
+	 */
+	public final ImmutableMap<String, ShaderFunction> functions;
 
-	// Includes ordered as defined in the source
-	private final ImmutableList<Import> imports;
+	/**
+	 * Struct lookup by name.
+	 */
+	public final ImmutableMap<String, ShaderStruct> structs;
 
-	// Sections of the source that must be trimmed for compilation.
-	private final List<Span> elisions = new ArrayList<>();
+	/**
+	 * Includes ordered as defined in the source.
+	 */
+	public final ImmutableList<Import> imports;
 
 	public SourceFile(ShaderSources parent, ResourceLocation name, String source) {
 		this.parent = parent;
 		this.name = name;
 		this.source = source;
 
-		this.lineStarts = createLineStarts();
-		this.lines = createLineList(lineStarts);
+		this.lines = new SourceLines(source);
 
-		this.imports = parseImports();
+		List<Span> elisions = new ArrayList<>();
+
+		this.imports = parseImports(elisions);
 		this.functions = parseFunctions();
 		this.structs = parseStructs();
 
-		this.elided = createElidedSource();
-	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public CharSequence getElidedSource() {
-		return elided;
-	}
-
-	public ShaderSources getParent() {
-		return parent;
-	}
-
-	public ImmutableMap<String, ShaderFunction> getFunctions() {
-		return functions;
-	}
-
-	public ImmutableMap<String, ShaderStruct> getStructs() {
-		return structs;
-	}
-
-	public ImmutableList<Import> getIncludes() {
-		return imports;
+		this.elided = elideSource(source, elisions).toString();
 	}
 
 	/**
@@ -96,11 +81,11 @@ public class SourceFile {
 	 * @return null if no definition matches the name.
 	 */
 	public Optional<ShaderStruct> findStruct(CharSequence name) {
-		ShaderStruct struct = getStructs().get(name.toString());
+		ShaderStruct struct = structs.get(name.toString());
 
 		if (struct != null) return Optional.of(struct);
 
-		for (Import include : getIncludes()) {
+		for (Import include : imports) {
 			Optional<ShaderStruct> externalStruct = include.getOptional()
 					.flatMap(file -> file.findStruct(name));
 
@@ -117,11 +102,11 @@ public class SourceFile {
 	 * @return Optional#empty() if no definition matches the name.
 	 */
 	public Optional<ShaderFunction> findFunction(CharSequence name) {
-		ShaderFunction local = getFunctions().get(name.toString());
+		ShaderFunction local = functions.get(name.toString());
 
 		if (local != null) return Optional.of(local);
 
-		for (Import include : getIncludes()) {
+		for (Import include : imports) {
 			Optional<ShaderFunction> external = include.getOptional()
 					.flatMap(file -> file.findFunction(name));
 
@@ -142,29 +127,12 @@ public class SourceFile {
 	}
 
 	public void generateFinalSource(StringBuilder source) {
-		for (Import include : getIncludes()) {
+		for (Import include : imports) {
 			SourceFile file = include.getFile();
 
 			if (file != null) file.generateFinalSource(source);
 		}
-		source.append(getElidedSource());
-	}
-
-	public CharPos getCharPos(int charPos) {
-		int lineNo = 0;
-		for (; lineNo < lineStarts.size(); lineNo++) {
-			int ls = lineStarts.getInt(lineNo);
-
-			if (charPos < ls) {
-				break;
-			}
-		}
-
-		lineNo -= 1;
-
-		int lineStart = lineStarts.getInt(lineNo);
-
-		return new CharPos(charPos, lineNo, charPos - lineStart);
+		source.append(elided);
 	}
 
 	public String printSource() {
@@ -172,18 +140,13 @@ public class SourceFile {
 
 		builder.append("Source for shader '")
 				.append(name)
-				.append("':\n");
-		int i = 1;
-		for (String s : lines) {
-			builder.append(String.format("%1$4s: ", i++))
-					.append(s)
-					.append('\n');
-		}
+				.append("':\n")
+				.append(lines.printLinesWithNumbers());
 
 		return builder.toString();
 	}
 
-	private CharSequence createElidedSource() {
+	private static CharSequence elideSource(String source, List<Span> elisions) {
 		StringBuilder out = new StringBuilder();
 
 		int lastEnd = 0;
@@ -197,34 +160,6 @@ public class SourceFile {
 		out.append(source, lastEnd, source.length());
 
 		return out;
-	}
-
-	/**
-	 * Scan the source for line breaks, recording the position of the first character of each line.
-	 */
-	private IntList createLineStarts() {
-		IntList l = new IntArrayList();
-		l.add(0); // first line is always at position 0
-
-		Matcher matcher = newLine.matcher(source);
-
-		while (matcher.find()) {
-			l.add(matcher.end());
-		}
-		return l;
-	}
-
-	private ImmutableList<String> createLineList(IntList lines) {
-		ImmutableList.Builder<String> builder = ImmutableList.builder();
-
-		for (int i = 1; i < lines.size(); i++) {
-			int start = lines.getInt(i - 1);
-			int end = lines.getInt(i);
-
-			builder.add(StringUtil.trimEnd(source.substring(start, end)));
-		}
-
-		return builder.build();
 	}
 
 	/**
@@ -284,8 +219,9 @@ public class SourceFile {
 	/**
 	 * Scan the source for <code>#use "..."</code> directives.
 	 * Records the contents of the directive into an {@link Import} object, and marks the directive for elision.
+	 * @param elisions
 	 */
-	private ImmutableList<Import> parseImports() {
+	private ImmutableList<Import> parseImports(List<Span> elisions) {
 		Matcher uses = includePattern.matcher(source);
 
 		List<Import> imports = new ArrayList<>();
@@ -321,11 +257,4 @@ public class SourceFile {
 		return -1;
 	}
 
-	public int getLineCount() {
-		return lines.size();
-	}
-
-	public CharSequence getLine(int lineNo) {
-		return lines.get(lineNo);
-	}
 }

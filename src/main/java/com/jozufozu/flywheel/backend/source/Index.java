@@ -27,8 +27,8 @@ public class Index {
 		Collection<SourceFile> files = sources.values();
 
 		for (SourceFile file : files) {
-			file.getStructs().forEach(knownStructs::put);
-			file.getFunctions().forEach(knownFunctions::put);
+            file.structs.forEach(knownStructs::put);
+			file.functions.forEach(knownFunctions::put);
 		}
 	}
 

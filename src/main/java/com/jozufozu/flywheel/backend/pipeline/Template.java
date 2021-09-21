@@ -25,10 +25,10 @@ public abstract class Template<D> {
 
 	private final Map<SourceFile, D> metadata = new HashMap<>();
 
-	private final Function<SourceFile, D> parser;
+	private final Function<SourceFile, D> reader;
 
-	protected Template(Function<SourceFile, D> parser) {
-		this.parser = parser;
+	protected Template(Function<SourceFile, D> reader) {
+		this.reader = reader;
 	}
 
 	/**
@@ -46,11 +46,12 @@ public abstract class Template<D> {
 	public abstract Collection<ShaderInput> getShaderInputs(SourceFile file);
 
 	public D getMetadata(SourceFile file) {
-		return metadata.computeIfAbsent(file, parser);
+		// lazily read files, cache results
+		return metadata.computeIfAbsent(file, reader);
 	}
 
 	public GLSLVersion getVersion() {
-		return GLSLVersion.V120;
+		return GLSLVersion.V150;
 	}
 
 	public static void prefixFields(StringBuilder builder, ShaderStruct struct, String qualifier, String prefix) {

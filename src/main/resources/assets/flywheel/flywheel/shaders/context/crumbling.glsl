@@ -26,6 +26,8 @@ void FLWFinalizeWorldPos(inout vec4 worldPos) {
 
 #elif defined(FRAGMENT_SHADER)
 
+out vec4 fragColor;
+
 vec4 FLWBlockTexture(vec2 texCoords) {
     vec4 cr = texture2D(uCrumbling, texCoords * uTextureScale);
     float diffuseAlpha = texture2D(uBlockAtlas, texCoords).a;
@@ -42,7 +44,11 @@ void FLWFinalizeColor(vec4 color) {
     color.a = a;
     #endif
 
-    gl_FragColor = color;
+    if (color.a < 0.1) {
+        discard;
+    }
+
+    fragColor = color;
 }
 
 vec4 FLWLight(vec2 lightCoords) {

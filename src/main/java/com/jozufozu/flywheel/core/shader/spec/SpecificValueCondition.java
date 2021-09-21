@@ -9,8 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 public class SpecificValueCondition implements IGameStateCondition {
 
 	public static final Codec<SpecificValueCondition> CODEC = RecordCodecBuilder.create(condition -> condition.group(IGameStateProvider.CODEC.fieldOf("provider")
-																															 .forGetter(SpecificValueCondition::getStateProvider), Codec.STRING.fieldOf("value")
-																															 .forGetter(SpecificValueCondition::getValue))
+					.forGetter(SpecificValueCondition::getStateProvider), Codec.STRING.fieldOf("value")
+					.forGetter(SpecificValueCondition::getValue))
 			.apply(condition, SpecificValueCondition::new));
 
 	private final String required;

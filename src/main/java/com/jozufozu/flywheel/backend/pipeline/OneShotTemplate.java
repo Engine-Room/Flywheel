@@ -32,8 +32,8 @@ public class OneShotTemplate extends Template<OneShotProgramMetaData> {
 	public void vertexFooter(StringBuilder template, SourceFile file) {
 		OneShotProgramMetaData data = getMetadata(file);
 
-		Template.prefixFields(template, data.vertex, "attribute", "a_v_");
-		Template.prefixFields(template, data.interpolant, "varying", "v2f_");
+		Template.prefixFields(template, data.vertex, "in", "a_v_");
+		Template.prefixFields(template, data.interpolant, "out", "v2f_");
 
 		template.append("void main() {\n");
 		template.append(data.vertexName)
@@ -53,7 +53,7 @@ public class OneShotTemplate extends Template<OneShotProgramMetaData> {
 	public void fragmentFooter(StringBuilder template, SourceFile file) {
 		OneShotProgramMetaData data = getMetadata(file);
 
-		Template.prefixFields(template, data.interpolant, "varying", "v2f_");
+		Template.prefixFields(template, data.interpolant, "in", "v2f_");
 
 		template.append("void main() {\n");
 		template.append(data.interpolant.name)

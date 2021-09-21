@@ -26,15 +26,15 @@ public class OneShotProgramMetaData {
 		Optional<ShaderFunction> maybeVertexMain = file.findFunction("vertex");
 		Optional<ShaderFunction> maybeFragmentMain = file.findFunction("fragment");
 
-		if (!maybeVertexMain.isPresent()) {
+		if (maybeVertexMain.isEmpty()) {
 			ErrorReporter.generateFileError(file, "could not find \"vertex\" function");
 		}
 
-		if (!maybeFragmentMain.isPresent()) {
+		if (maybeFragmentMain.isEmpty()) {
 			ErrorReporter.generateMissingFunction(file, "fragment", "\"fragment\" function not defined");
 		}
 
-		if (!maybeVertexMain.isPresent() || !maybeFragmentMain.isPresent()) {
+		if (maybeVertexMain.isEmpty() || maybeFragmentMain.isEmpty()) {
 			throw new RuntimeException();
 		}
 
@@ -62,13 +62,13 @@ public class OneShotProgramMetaData {
 		Optional<ShaderStruct> maybeInterpolant = file.findStruct(interpolantName);
 		Optional<ShaderStruct> maybeVertex = file.findStruct(vertexName);
 
-		if (!maybeVertex.isPresent())
+		if (maybeVertex.isEmpty())
 			ErrorReporter.generateMissingStruct(file, vertexName, "struct not defined");
 
-		if (!maybeInterpolant.isPresent())
+		if (maybeInterpolant.isEmpty())
 			ErrorReporter.generateMissingStruct(file, interpolantName, "struct not defined");
 
-		if (!maybeVertex.isPresent() || !maybeInterpolant.isPresent()) {
+		if (maybeVertex.isEmpty() || maybeInterpolant.isEmpty()) {
 			throw new RuntimeException();
 		}
 

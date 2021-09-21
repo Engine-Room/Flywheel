@@ -29,14 +29,14 @@ public class InstancingProgramMetaData {
 		Optional<ShaderFunction> vertexFunc = file.findFunction("vertex");
 		Optional<ShaderFunction> fragmentFunc = file.findFunction("fragment");
 
-		if (!fragmentFunc.isPresent()) {
+		if (fragmentFunc.isEmpty()) {
 			ErrorReporter.generateMissingFunction(file, "fragment", "\"fragment\" function not defined");
 		}
-		if (!vertexFunc.isPresent()) {
+		if (vertexFunc.isEmpty()) {
 			ErrorReporter.generateFileError(file, "could not find \"vertex\" function");
 		}
 
-		if (!fragmentFunc.isPresent() || !vertexFunc.isPresent()) {
+		if (fragmentFunc.isEmpty() || vertexFunc.isEmpty()) {
 			throw new ShaderLoadingException();
 		}
 
@@ -64,19 +64,19 @@ public class InstancingProgramMetaData {
 		Optional<ShaderStruct> maybeVertex = file.findStruct(vertexName);
 		Optional<ShaderStruct> maybeInstance = file.findStruct(instanceName);
 
-		if (!maybeVertex.isPresent()) {
+		if (maybeVertex.isEmpty()) {
 			ErrorReporter.generateMissingStruct(file, vertexName, "struct not defined");
 		}
 
-		if (!maybeInterpolant.isPresent()) {
+		if (maybeInterpolant.isEmpty()) {
 			ErrorReporter.generateMissingStruct(file, interpolantName, "struct not defined");
 		}
 
-		if (!maybeInstance.isPresent()) {
+		if (maybeInstance.isEmpty()) {
 			ErrorReporter.generateMissingStruct(file, instanceName, "struct not defined");
 		}
 
-		if (!maybeVertex.isPresent() || !maybeInterpolant.isPresent() || !maybeInstance.isPresent()) {
+		if (maybeVertex.isEmpty() || maybeInterpolant.isEmpty() || maybeInstance.isEmpty()) {
 			throw new ShaderLoadingException();
 		}
 

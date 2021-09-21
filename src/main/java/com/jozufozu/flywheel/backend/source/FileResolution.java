@@ -67,11 +67,10 @@ public class FileResolution {
 		try {
 			file = sources.findSource(fileLoc);
 		} catch (RuntimeException error) {
-			ErrorBuilder builder = new ErrorBuilder();
-			builder.error(String.format("could not find source for file %s", fileLoc));
+			ErrorBuilder builder = ErrorBuilder.error(String.format("could not find source for file %s", fileLoc));
 			// print the location of all places where this file was referenced
 			for (Span span : foundSpans) {
-				builder.in(span.getSourceFile())
+				builder.pointAtFile(span.getSourceFile())
 						.pointAt(span, 2);
 			}
 			Backend.log.error(builder.build());

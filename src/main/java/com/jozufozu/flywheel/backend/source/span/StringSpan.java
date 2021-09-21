@@ -14,13 +14,13 @@ public class StringSpan extends Span {
 
 	@Override
 	public Span subSpan(int from, int to) {
-		return new StringSpan(in, start.getPos() + from, start.getPos() + to);
+        return new StringSpan(in, start.pos() + from, start.pos() + to);
 	}
 
 	@Override
 	public String get() {
-		return in.getSource()
-				.substring(start.getPos(), end.getPos());
+		return in.source
+				.substring(start.pos(), end.pos());
 	}
 
 	@Override
