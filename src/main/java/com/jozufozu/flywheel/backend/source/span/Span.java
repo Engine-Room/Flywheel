@@ -5,7 +5,11 @@ import java.util.regex.Matcher;
 import com.jozufozu.flywheel.backend.source.SourceFile;
 
 /**
- * A span of code in a {@link SourceFile}.
+ * A segment of code in a {@link SourceFile}.
+ *
+ * <p>
+ *     Spans are used for pretty-printing errors.
+ * </p>
  */
 public abstract class Span implements CharSequence {
 
@@ -14,7 +18,7 @@ public abstract class Span implements CharSequence {
 	protected final CharPos end;
 
 	public Span(SourceFile in, int start, int end) {
-		this(in, in.getCharPos(start), in.getCharPos(end));
+		this(in, in.lines.getCharPos(start), in.lines.getCharPos(end));
 	}
 
 	public Span(SourceFile in, CharPos start, CharPos end) {
@@ -42,14 +46,14 @@ public abstract class Span implements CharSequence {
 	 * @return the string index at the (inclusive) beginning of this code segment.
 	 */
 	public int getStartPos() {
-		return start.getPos();
+		return start.pos();
 	}
 
 	/**
 	 * @return the string index at the (exclusive) end of this code segment.
 	 */
 	public int getEndPos() {
-		return end.getPos();
+		return end.pos();
 	}
 
 	/**
@@ -63,11 +67,11 @@ public abstract class Span implements CharSequence {
 	 * @return how many lines this span spans.
 	 */
 	public int lines() {
-		return end.getLine() - start.getLine() + 1;
+		return end.line() - start.line() + 1;
 	}
 
 	public int firstLine() {
-		return start.getLine();
+		return start.line();
 	}
 
 	/**
@@ -89,7 +93,7 @@ public abstract class Span implements CharSequence {
 
 	@Override
 	public char charAt(int index) {
-		return in.getSource().charAt(start.getPos() + index);
+		return in.source.charAt(start.pos() + index);
 	}
 
 	@Override

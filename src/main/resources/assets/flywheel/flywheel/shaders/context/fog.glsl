@@ -1,4 +1,8 @@
-varying float FragDistance;
+#if defined(VERTEX_SHADER)
+out float FragDistance;
+#elif defined(FRAGMENT_SHADER)
+in float FragDistance;
+#endif
 uniform vec4 uFogColor;
 uniform vec2 uFogRange;
 
