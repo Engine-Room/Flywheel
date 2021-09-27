@@ -6,6 +6,11 @@ import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 
+import java.nio.FloatBuffer;
+
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
+
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
 import com.jozufozu.flywheel.util.RenderUtil;
@@ -65,7 +70,10 @@ public abstract class GlProgram extends GlObject {
 	}
 
 	protected static void uploadMatrixUniform(int uniform, Matrix4f mat) {
-		glUniformMatrix4fv(uniform, false, RenderUtil.writeMatrix(mat));
+		FloatBuffer floatBuffer = MemoryStack.stackGet()
+				.mallocFloat(16);
+		mat.store(floatBuffer);
+		glUniformMatrix4fv(uniform, false, floatBuffer);
 	}
 
 	@Override

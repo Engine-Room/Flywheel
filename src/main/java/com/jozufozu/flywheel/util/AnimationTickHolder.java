@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.util;
 
+import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
+
 import net.minecraft.client.Minecraft;
 
 public class AnimationTickHolder {
@@ -35,6 +37,6 @@ public class AnimationTickHolder {
 
 	public static float getPartialTicks() {
 		Minecraft mc = Minecraft.getInstance();
-		return (mc.isPaused() ? mc.pausePartialTick : mc.getFrameTime());
+		return (mc.isPaused() ? ((PausedPartialTickAccessor) mc).getPausePartialTick() : mc.getFrameTime());
 	}
 }
