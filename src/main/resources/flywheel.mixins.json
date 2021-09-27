@@ -6,7 +6,7 @@
   "refmap": "flywheel.refmap.json",
   "client": [
     "CancelEntityRenderMixin",
-    "CancelTileEntityRenderMixin",
+    "ChunkRebuildHooksMixin",
     "FixFabulousDepthMixin",
     "RenderHooksMixin",
     "ShaderCloseMixin",
