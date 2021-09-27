@@ -18,9 +18,9 @@ public enum MatrixAttributes implements IAttribSpec {
 	}
 
 	@Override
-	public void vertexAttribPointer(int stride, int index, int pointer) {
+	public void vertexAttribPointer(int stride, int index, int offset) {
 		for (int i = 0; i < rows; i++) {
-			long attribPointer = pointer + (long) i * cols * GlNumericType.FLOAT.getByteWidth();
+			long attribPointer = offset + (long) i * cols * GlNumericType.FLOAT.getByteWidth();
 			GL20.glVertexAttribPointer(index + i, cols, GlNumericType.FLOAT.getGlEnum(), false, stride, attribPointer);
 		}
 	}

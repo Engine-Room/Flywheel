@@ -25,8 +25,8 @@ public class VertexAttribSpec implements IAttribSpec {
 	}
 
 	@Override
-	public void vertexAttribPointer(int stride, int index, int pointer) {
-		GL20.glVertexAttribPointer(index, count, type.getGlEnum(), normalized, stride, pointer);
+	public void vertexAttribPointer(int stride, int index, int offset) {
+		GL20.glVertexAttribPointer(index, count, type.getGlEnum(), normalized, stride, offset);
 	}
 
 	@Override

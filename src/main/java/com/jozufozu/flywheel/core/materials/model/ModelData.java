@@ -4,20 +4,20 @@ import java.nio.FloatBuffer;
 
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.materials.BasicData;
-import com.jozufozu.flywheel.util.RenderUtil;
+import com.jozufozu.flywheel.util.Attribute;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public class ModelData extends BasicData {
 	private static final float[] empty = new float[25];
 
 	public final float[] matrices = empty.clone();
-	private final FloatBuffer buf = FloatBuffer.wrap(matrices);
+	private final FloatBuffer wrap = FloatBuffer.wrap(matrices);
 
 	public ModelData setTransform(PoseStack stack) {
-		this.buf.reset();
+		this.wrap.position(0);
 
-		stack.last().pose().store(this.buf);
-		stack.last().normal().store(this.buf);
+		((Attribute)(Object) stack.last().pose()).append(this.wrap);
+		((Attribute)(Object) stack.last().normal()).append(this.wrap);
 		markDirty();
 		return this;
 	}
@@ -30,8 +30,8 @@ public class ModelData extends BasicData {
 	 * </p>
 	 */
 	public ModelData setEmptyTransform() {
-		this.buf.reset();
-		this.buf.put(empty);
+		this.wrap.position(0)
+				.put(empty);
 		markDirty();
 		return this;
 	}
@@ -39,6 +39,6 @@ public class ModelData extends BasicData {
 	@Override
 	public void write(VecBuffer buf) {
 		super.write(buf);
-		buf.put(this.buf);
+		buf.putFloatArray(matrices);
 	}
 }

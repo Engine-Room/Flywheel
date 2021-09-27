@@ -20,6 +20,10 @@
     "LeakChunkStorageArrayMixin",
     "PausedPartialTickAccessor"
   ],
+  "mixins": [
+    "matrix.Matrix3fMixin",
+    "matrix.Matrix4fMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

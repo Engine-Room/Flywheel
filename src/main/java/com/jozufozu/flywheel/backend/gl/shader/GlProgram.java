@@ -19,6 +19,8 @@ import net.minecraft.resources.ResourceLocation;
 import com.mojang.math.Matrix4f;
 
 public abstract class GlProgram extends GlObject {
+	private static final FloatBuffer floatBuffer = MemoryStack.stackGet()
+			.mallocFloat(16);
 
 	public final ResourceLocation name;
 
@@ -70,8 +72,6 @@ public abstract class GlProgram extends GlObject {
 	}
 
 	protected static void uploadMatrixUniform(int uniform, Matrix4f mat) {
-		FloatBuffer floatBuffer = MemoryStack.stackGet()
-				.mallocFloat(16);
 		mat.store(floatBuffer);
 		glUniformMatrix4fv(uniform, false, floatBuffer);
 	}
