@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.backend.gl.buffer;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 
 public class VecBuffer {
 
@@ -45,6 +46,15 @@ public class VecBuffer {
 
 	public VecBuffer putByteArray(byte[] bytes) {
 		internal.put(bytes);
+		return this;
+	}
+
+	public VecBuffer put(FloatBuffer floats) {
+
+		int remainingBytes = floats.remaining() * 4;
+		internal.asFloatBuffer().put(floats);
+		internal.position(internal.position() + remainingBytes);
+
 		return this;
 	}
 

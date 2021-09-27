@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.backend.gl.buffer;
 
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.system.MemoryUtil;
@@ -45,6 +46,12 @@ public abstract class MappedBuffer extends VecBuffer implements AutoCloseable {
 	public MappedBuffer putByteArray(byte[] bytes) {
 		checkAndMap();
 		super.putByteArray(bytes);
+		return this;
+	}
+
+	public MappedBuffer put(FloatBuffer floats) {
+		checkAndMap();
+		super.put(floats);
 		return this;
 	}
 

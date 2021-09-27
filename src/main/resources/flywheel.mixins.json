@@ -17,7 +17,8 @@
     "LevelRendererAccessor",
     "InstanceAddMixin",
     "InstanceRemoveMixin",
-    "LeakChunkStorageArrayMixin"
+    "LeakChunkStorageArrayMixin",
+    "PausedPartialTickAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -42,21 +42,6 @@ public class RenderUtil {
 		return Math.sqrt(lengthSqr(x, y, z));
 	}
 
-	public static float[] writeMatrixStack(PoseStack stack) {
-		return writeMatrixStack(stack.last()
-										.pose(), stack.last()
-										.normal());
-	}
-
-	// GPUs want matrices in column major order.
-	public static float[] writeMatrixStack(Matrix4f model, Matrix3f normal) {
-		return new float[]{model.m00, model.m10, model.m20, model.m30, model.m01, model.m11, model.m21, model.m31, model.m02, model.m12, model.m22, model.m32, model.m03, model.m13, model.m23, model.m33, normal.m00, normal.m10, normal.m20, normal.m01, normal.m11, normal.m21, normal.m02, normal.m12, normal.m22,};
-	}
-
-	public static float[] writeMatrix(Matrix4f model) {
-		return new float[]{model.m00, model.m10, model.m20, model.m30, model.m01, model.m11, model.m21, model.m31, model.m02, model.m12, model.m22, model.m32, model.m03, model.m13, model.m23, model.m33,};
-	}
-
 	public static Supplier<PoseStack> rotateToFace(Direction facing) {
 		return () -> {
 			PoseStack stack = new PoseStack();

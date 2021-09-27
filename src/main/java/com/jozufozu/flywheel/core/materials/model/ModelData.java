@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.core.materials.model;
 
+import java.nio.FloatBuffer;
+
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.materials.BasicData;
 import com.jozufozu.flywheel.util.RenderUtil;
@@ -8,10 +10,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 public class ModelData extends BasicData {
 	private static final float[] empty = new float[25];
 
-	public float[] matrices = empty;
+	public final float[] matrices = empty.clone();
+	private final FloatBuffer buf = FloatBuffer.wrap(matrices);
 
 	public ModelData setTransform(PoseStack stack) {
-		matrices = RenderUtil.writeMatrixStack(stack);
+		this.buf.reset();
+
+		stack.last().pose().store(this.buf);
+		stack.last().normal().store(this.buf);
 		markDirty();
 		return this;
 	}
@@ -24,7 +30,8 @@ public class ModelData extends BasicData {
 	 * </p>
 	 */
 	public ModelData setEmptyTransform() {
-		matrices = empty;
+		this.buf.reset();
+		this.buf.put(empty);
 		markDirty();
 		return this;
 	}
@@ -32,6 +39,6 @@ public class ModelData extends BasicData {
 	@Override
 	public void write(VecBuffer buf) {
 		super.write(buf);
-		buf.putFloatArray(matrices);
+		buf.put(this.buf);
 	}
 }
