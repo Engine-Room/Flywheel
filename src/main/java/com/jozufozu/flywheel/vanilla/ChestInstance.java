@@ -4,7 +4,7 @@ import java.util.Calendar;
 
 import javax.annotation.Nonnull;
 
-import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
+import com.jozufozu.flywheel.backend.instancing.DynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.backend.state.TextureRenderState;
@@ -29,7 +29,7 @@ import net.minecraft.world.level.block.DoubleBlockCombiner;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
-public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileEntityInstance<T> implements IDynamicInstance {
+public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileEntityInstance<T> implements DynamicInstance {
 
 	private final MatrixTransformStack stack = new MatrixTransformStack();
 	private final OrientedData body;

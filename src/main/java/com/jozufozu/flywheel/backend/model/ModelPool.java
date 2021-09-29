@@ -10,7 +10,7 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
-import com.jozufozu.flywheel.core.model.IModel;
+import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 public class ModelPool implements ModelAllocator {
@@ -47,7 +47,7 @@ public class ModelPool implements ModelAllocator {
 	 * @return A handle to the allocated model.
 	 */
 	@Override
-	public PooledModel alloc(IModel model, Callback callback) {
+	public PooledModel alloc(Model model, Callback callback) {
 		PooledModel bufferedModel = new PooledModel(model, vertices);
 		bufferedModel.callback = callback;
 		vertices += model.vertexCount();
@@ -153,12 +153,12 @@ public class ModelPool implements ModelAllocator {
 		private final ElementBuffer ebo;
 		private Callback callback;
 
-		private final IModel model;
+		private final Model model;
 		private int first;
 
 		private boolean remove;
 
-		public PooledModel(IModel model, int first) {
+		public PooledModel(Model model, int first) {
 			this.model = model;
 			this.first = first;
 			ebo = model.createEBO();

@@ -27,8 +27,8 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 	private final Set<T> queuedUpdates;
 
 	protected final Map<T, AbstractInstance> instances;
-	protected final Object2ObjectOpenHashMap<T, ITickableInstance> tickableInstances;
-	protected final Object2ObjectOpenHashMap<T, IDynamicInstance> dynamicInstances;
+	protected final Object2ObjectOpenHashMap<T, TickableInstance> tickableInstances;
+	protected final Object2ObjectOpenHashMap<T, DynamicInstance> dynamicInstances;
 
 	protected int frame;
 	protected int tick;
@@ -70,7 +70,7 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 	 * Ticks the InstanceManager.
 	 *
 	 * <p>
-	 *     {@link ITickableInstance}s get ticked.
+	 *     {@link TickableInstance}s get ticked.
 	 *     <br>
 	 *     Queued updates are processed.
 	 * </p>
@@ -86,7 +86,7 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 
 		if (tickableInstances.size() > 0) {
 			tickableInstances.object2ObjectEntrySet().parallelStream().forEach(e -> {
-				ITickableInstance instance = e.getValue();
+				TickableInstance instance = e.getValue();
 				if (!instance.decreaseTickRateWithDistance()) {
 					instance.tick();
 					return;
@@ -121,7 +121,7 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 			dynamicInstances.object2ObjectEntrySet()
 					.parallelStream()
 					.forEach(e -> {
-						IDynamicInstance dyn = e.getValue();
+						DynamicInstance dyn = e.getValue();
 						if (!dyn.decreaseFramerateWithDistance() || shouldFrameUpdate(dyn.getWorldPosition(), lookX, lookY, lookZ, cX, cY, cZ))
 							dyn.beginFrame();
 					});
@@ -159,8 +159,8 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 	 *
 	 * <p>
 	 *     By default this is the only hook an IInstance has to change its internal state. This is the lowest frequency
-	 *     update hook IInstance gets. For more frequent updates, see {@link ITickableInstance} and
-	 *     {@link IDynamicInstance}.
+	 *     update hook IInstance gets. For more frequent updates, see {@link TickableInstance} and
+	 *     {@link DynamicInstance}.
 	 * </p>
 	 *
 	 * @param obj the object to update.
@@ -291,9 +291,9 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 					.addListener(renderer);
 			instances.put(obj, renderer);
 
-			if (renderer instanceof IDynamicInstance) dynamicInstances.put(obj, (IDynamicInstance) renderer);
+			if (renderer instanceof DynamicInstance) dynamicInstances.put(obj, (DynamicInstance) renderer);
 
-			if (renderer instanceof ITickableInstance) tickableInstances.put(obj, ((ITickableInstance) renderer));
+			if (renderer instanceof TickableInstance) tickableInstances.put(obj, ((TickableInstance) renderer));
 		}
 
 		return renderer;

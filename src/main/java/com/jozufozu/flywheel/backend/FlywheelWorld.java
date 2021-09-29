@@ -6,7 +6,7 @@ package com.jozufozu.flywheel.backend;
  *
  * <code>Minecraft.getInstance().world</code> is special cased and will support Flywheel by default.
  */
-public interface IFlywheelWorld {
+public interface FlywheelWorld {
 	default boolean supportsFlywheel() {
 		return true;
 	}

@@ -2,8 +2,6 @@ package com.jozufozu.flywheel.core.model;
 
 import java.util.Arrays;
 
-import org.lwjgl.opengl.GL11;
-
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.Formats;
@@ -25,7 +23,7 @@ import net.minecraft.core.BlockPos;
 /**
  * A model of a single block.
  */
-public class BlockModel implements IModel {
+public class BlockModel implements Model {
 	private static final PoseStack IDENTITY = new PoseStack();
 
 	private final BufferBuilderReader reader;

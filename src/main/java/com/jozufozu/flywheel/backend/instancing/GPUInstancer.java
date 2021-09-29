@@ -13,13 +13,13 @@ import com.jozufozu.flywheel.backend.model.IBufferedModel;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
 import com.jozufozu.flywheel.backend.struct.StructType;
 import com.jozufozu.flywheel.backend.struct.StructWriter;
-import com.jozufozu.flywheel.core.model.IModel;
+import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 public class GPUInstancer<D extends InstanceData> implements Instancer<D> {
 
 	private final ModelAllocator modelAllocator;
-	private final IModel modelData;
+	private final Model modelData;
 	private final VertexFormat instanceFormat;
 	private final StructType<D> type;
 
@@ -36,7 +36,7 @@ public class GPUInstancer<D extends InstanceData> implements Instancer<D> {
 	boolean anyToRemove;
 	boolean anyToUpdate;
 
-	public GPUInstancer(ModelAllocator modelAllocator, IModel model, StructType<D> type) {
+	public GPUInstancer(ModelAllocator modelAllocator, Model model, StructType<D> type) {
 		this.modelAllocator = modelAllocator;
 		this.modelData = model;
 		this.type = type;

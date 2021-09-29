@@ -42,7 +42,7 @@ public class Backend {
 	private boolean enabled;
 	public boolean chunkCachingEnabled;
 
-	private final List<IShaderContext<?>> contexts = new ArrayList<>();
+	private final List<ShaderContext<?>> contexts = new ArrayList<>();
 	private final Map<ResourceLocation, MaterialSpec<?>> materialRegistry = new HashMap<>();
 	private final Map<ResourceLocation, ProgramSpec> programSpecRegistry = new HashMap<>();
 
@@ -83,7 +83,7 @@ public class Backend {
 	/**
 	 * Register a shader context.
 	 */
-	public <C extends IShaderContext<?>> C register(C spec) {
+	public <C extends ShaderContext<?>> C register(C spec) {
 		contexts.add(spec);
 		return spec;
 	}
@@ -154,7 +154,7 @@ public class Backend {
 		return programSpecRegistry.values();
 	}
 
-	public Collection<IShaderContext<?>> allContexts() {
+	public Collection<ShaderContext<?>> allContexts() {
 		return contexts;
 	}
 
@@ -164,7 +164,7 @@ public class Backend {
 	public static boolean isFlywheelWorld(@Nullable LevelAccessor world) {
 		if (world == null) return false;
 
-		if (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel()) return true;
+		if (world instanceof FlywheelWorld && ((FlywheelWorld) world).supportsFlywheel()) return true;
 
 		return world == Minecraft.getInstance().level;
 	}
@@ -183,7 +183,7 @@ public class Backend {
 	public void _clearContexts() {
 		SpecMetaRegistry.clear();
 		programSpecRegistry.clear();
-		contexts.forEach(IShaderContext::delete);
+		contexts.forEach(ShaderContext::delete);
 		contexts.clear();
 		materialRegistry.clear();
 	}

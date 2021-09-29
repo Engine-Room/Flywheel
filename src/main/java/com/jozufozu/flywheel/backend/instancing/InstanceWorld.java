@@ -71,7 +71,7 @@ public class InstanceWorld {
 	 * <p>
 	 *     Check and shift the origin coordinate.
 	 *     <br>
-	 *     Call {@link IDynamicInstance#beginFrame()} on all instances in this world.
+	 *     Call {@link DynamicInstance#beginFrame()} on all instances in this world.
 	 * </p>
 	 */
 	public void beginFrame(BeginFrameEvent event) {
@@ -84,7 +84,7 @@ public class InstanceWorld {
 	/**
 	 * Tick the renderers after the game has ticked:
 	 * <p>
-	 *     Call {@link ITickableInstance#tick()} on all instances in this world.
+	 *     Call {@link TickableInstance#tick()} on all instances in this world.
 	 * </p>
 	 */
 	public void tick() {

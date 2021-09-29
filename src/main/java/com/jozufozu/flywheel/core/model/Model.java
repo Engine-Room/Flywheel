@@ -25,7 +25,7 @@ import com.jozufozu.flywheel.core.QuadConverter;
  * assert model.size() == final - initial;
  * }</pre>
  */
-public interface IModel {
+public interface Model {
 
 	/**
 	 * Copy this model into the given buffer.

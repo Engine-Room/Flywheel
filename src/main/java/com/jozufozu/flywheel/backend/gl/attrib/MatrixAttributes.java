@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
 
-public enum MatrixAttributes implements IAttribSpec {
+public enum MatrixAttributes implements AttribSpec {
 	MAT3(3, 3),
 	MAT4(4, 4),
 	;

@@ -6,6 +6,10 @@ import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 
 import net.minecraft.resources.ResourceLocation;
 
+/**
+ * @deprecated TODO: Rework this to be more in-line/convertable with vanilla
+ */
+@Deprecated
 public interface IRenderState {
 
 	void bind();
