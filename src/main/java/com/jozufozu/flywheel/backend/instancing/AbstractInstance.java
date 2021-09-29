@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
-import com.jozufozu.flywheel.core.materials.IFlatLight;
+import com.jozufozu.flywheel.core.materials.FlatLight;
 import com.jozufozu.flywheel.light.ILightUpdateListener;
 import com.jozufozu.flywheel.light.ImmutableBox;
 import com.jozufozu.flywheel.light.LightProvider;
@@ -19,7 +19,7 @@ import net.minecraft.world.level.Level;
  * A general interface providing information about any type of thing that could use Flywheel's instanced rendering.
  * Right now, that's only {@link TileInstanceManager}, but there could be an entity equivalent in the future.
  */
-public abstract class AbstractInstance implements IInstance, ILightUpdateListener {
+public abstract class AbstractInstance implements Instance, ILightUpdateListener {
 
 	protected final MaterialManager materialManager;
 	public final Level world;
@@ -38,7 +38,7 @@ public abstract class AbstractInstance implements IInstance, ILightUpdateListene
 	 * Update instance data here. Good for when data doesn't change very often and when animations are GPU based.
 	 * Don't query lighting data here, that's handled separately in {@link #updateLight()}.
 	 *
-	 * <br><br> If your animations are complex or more CPU driven, see {@link IDynamicInstance} or {@link ITickableInstance}.
+	 * <br><br> If your animations are complex or more CPU driven, see {@link DynamicInstance} or {@link TickableInstance}.
 	 */
 	public void update() {
 	}
@@ -77,19 +77,19 @@ public abstract class AbstractInstance implements IInstance, ILightUpdateListene
 		updateLight();
 	}
 
-	protected void relight(BlockPos pos, IFlatLight<?>... models) {
+	protected void relight(BlockPos pos, FlatLight... models) {
 		relight(world.getBrightness(LightLayer.BLOCK, pos), world.getBrightness(LightLayer.SKY, pos), models);
 	}
 
-	protected <L extends IFlatLight<?>> void relight(BlockPos pos, Stream<L> models) {
+	protected <L extends FlatLight> void relight(BlockPos pos, Stream<L> models) {
 		relight(world.getBrightness(LightLayer.BLOCK, pos), world.getBrightness(LightLayer.SKY, pos), models);
 	}
 
-	protected void relight(int block, int sky, IFlatLight<?>... models) {
+	protected void relight(int block, int sky, FlatLight... models) {
 		relight(block, sky, Arrays.stream(models));
 	}
 
-	protected <L extends IFlatLight<?>> void relight(int block, int sky, Stream<L> models) {
+	protected <L extends FlatLight> void relight(int block, int sky, Stream<L> models) {
 		models.forEach(model -> model.setBlockLight(block)
 				.setSkyLight(sky));
 	}

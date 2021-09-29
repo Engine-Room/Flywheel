@@ -6,8 +6,8 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Maps;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
-import com.jozufozu.flywheel.backend.instancing.entity.IEntityInstanceFactory;
-import com.jozufozu.flywheel.backend.instancing.tile.ITileInstanceFactory;
+import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceFactory;
+import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceFactory;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
 
@@ -26,19 +26,21 @@ public class InstancedRenderRegistry {
 	}
 
 	private final Object2BooleanMap<Object> skipRender = new Object2BooleanLinkedOpenHashMap<>();
-	private final Map<BlockEntityType<?>, ITileInstanceFactory<?>> tiles = Maps.newHashMap();
-	private final Map<EntityType<?>, IEntityInstanceFactory<?>> entities = Maps.newHashMap();
+	private final Map<BlockEntityType<?>, TileInstanceFactory<?>> tiles = Maps.newHashMap();
+	private final Map<EntityType<?>, EntityInstanceFactory<?>> entities = Maps.newHashMap();
 
 	protected InstancedRenderRegistry() {
 		skipRender.defaultReturnValue(false);
 	}
 
 	public <T extends BlockEntity> boolean shouldSkipRender(T type) {
-		return _skipRender(type.getType()) || ((type instanceof IInstanceRendered) && !((IInstanceRendered) type).shouldRenderNormally());
+		// _skipRender is faster than instanceof and cast, take advantage of short-circuiting
+		return _skipRender(type.getType()) || ((type instanceof InstanceRendered) && !((InstanceRendered) type).shouldRenderNormally());
 	}
 
 	public <T extends Entity> boolean shouldSkipRender(T type) {
-		return _skipRender(type.getType()) || ((type instanceof IInstanceRendered) && !((IInstanceRendered) type).shouldRenderNormally());
+		// _skipRender is faster than instanceof and cast, take advantage of short-circuiting
+		return _skipRender(type.getType()) || ((type instanceof InstanceRendered) && !((InstanceRendered) type).shouldRenderNormally());
 	}
 
 	public <T extends BlockEntity> boolean canInstance(BlockEntityType<? extends T> type) {
@@ -61,7 +63,7 @@ public class InstancedRenderRegistry {
 	 * @deprecated will be removed in 0.3.0, use {@link #tile}
 	 */
 	@Deprecated
-	public <T extends BlockEntity> void register(BlockEntityType<? extends T> type, ITileInstanceFactory<? super T> rendererFactory) {
+	public <T extends BlockEntity> void register(BlockEntityType<? extends T> type, TileInstanceFactory<? super T> rendererFactory) {
 		this.tile(type)
 				.factory(rendererFactory);
 	}
@@ -70,7 +72,7 @@ public class InstancedRenderRegistry {
 	 * @deprecated will be removed in 0.3.0, use {@link #entity}
 	 */
 	@Deprecated
-	public <T extends Entity> void register(EntityType<? extends T> type, IEntityInstanceFactory<? super T> rendererFactory) {
+	public <T extends Entity> void register(EntityType<? extends T> type, EntityInstanceFactory<? super T> rendererFactory) {
 		this.entity(type)
 				.factory(rendererFactory);
 	}
@@ -79,7 +81,7 @@ public class InstancedRenderRegistry {
 	@Nullable
 	public <T extends BlockEntity> TileEntityInstance<? super T> create(MaterialManager manager, T tile) {
 		BlockEntityType<?> type = tile.getType();
-		ITileInstanceFactory<? super T> factory = (ITileInstanceFactory<? super T>) this.tiles.get(type);
+		TileInstanceFactory<? super T> factory = (TileInstanceFactory<? super T>) this.tiles.get(type);
 
 		if (factory == null) return null;
 		else return factory.create(manager, tile);
@@ -90,7 +92,7 @@ public class InstancedRenderRegistry {
 	@Nullable
 	public <T extends Entity> EntityInstance<? super T> create(MaterialManager manager, T tile) {
 		EntityType<?> type = tile.getType();
-		IEntityInstanceFactory<? super T> factory = (IEntityInstanceFactory<? super T>) this.entities.get(type);
+		EntityInstanceFactory<? super T> factory = (EntityInstanceFactory<? super T>) this.entities.get(type);
 
 		if (factory == null) return null;
 		else return factory.create(manager, tile);
@@ -107,7 +109,7 @@ public class InstancedRenderRegistry {
 		CONFIG setSkipRender(boolean skipRender);
 	}
 
-	public class TileConfig<T extends BlockEntity> implements Config<TileConfig<T>, ITileInstanceFactory<? super T>> {
+	public class TileConfig<T extends BlockEntity> implements Config<TileConfig<T>, TileInstanceFactory<? super T>> {
 
 
 		private final BlockEntityType<T> type;
@@ -116,7 +118,7 @@ public class InstancedRenderRegistry {
 			this.type = type;
 		}
 
-		public TileConfig<T> factory(ITileInstanceFactory<? super T> rendererFactory) {
+		public TileConfig<T> factory(TileInstanceFactory<? super T> rendererFactory) {
 			tiles.put(type, rendererFactory);
 			return this;
 		}
@@ -126,7 +128,7 @@ public class InstancedRenderRegistry {
 		}
 
 	}
-	public class EntityConfig<T extends Entity> implements Config<EntityConfig<T>, IEntityInstanceFactory<? super T>> {
+	public class EntityConfig<T extends Entity> implements Config<EntityConfig<T>, EntityInstanceFactory<? super T>> {
 
 
 		private final EntityType<T> type;
@@ -135,7 +137,7 @@ public class InstancedRenderRegistry {
 			this.type = type;
 		}
 
-		public EntityConfig<T> factory(IEntityInstanceFactory<? super T> rendererFactory) {
+		public EntityConfig<T> factory(EntityInstanceFactory<? super T> rendererFactory) {
 			entities.put(type, rendererFactory);
 			return this;
 		}

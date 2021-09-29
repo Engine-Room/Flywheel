@@ -9,17 +9,17 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
-import com.jozufozu.flywheel.core.model.IModel;
+import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 public class BufferedModel implements IBufferedModel {
 
-	protected final IModel model;
+	protected final Model model;
 	protected final GlPrimitive primitiveMode;
 	protected GlBuffer vbo;
 	protected boolean deleted;
 
-	public BufferedModel(GlPrimitive primitiveMode, IModel model) {
+	public BufferedModel(GlPrimitive primitiveMode, Model model) {
 		this.model = model;
 		this.primitiveMode = primitiveMode;
 

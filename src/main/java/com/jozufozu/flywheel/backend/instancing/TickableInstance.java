@@ -4,9 +4,9 @@ import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
 
 /**
  * An interface giving {@link TileEntityInstance}s a hook to have a function called at
- * the end of every tick. By implementing {@link ITickableInstance}, a {@link TileEntityInstance}
+ * the end of every tick. By implementing {@link TickableInstance}, a {@link TileEntityInstance}
  * can update frequently, but not every frame.
- * <br> There are a few cases in which this should be considered over {@link IDynamicInstance}:
+ * <br> There are a few cases in which this should be considered over {@link DynamicInstance}:
  * <ul>
  *     <li>
  *         You'd like to change something about the instance every now and then.
@@ -18,7 +18,7 @@ import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
  *     </li>
  * </ul>
  */
-public interface ITickableInstance extends IInstance {
+public interface TickableInstance extends Instance {
 
 	/**
 	 * Called every tick.

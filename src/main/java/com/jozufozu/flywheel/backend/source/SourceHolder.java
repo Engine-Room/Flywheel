@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
  * A minimal source file lookup function.
  */
 @FunctionalInterface
-public interface ISourceHolder {
+public interface SourceHolder {
 
 	SourceFile findSource(ResourceLocation name);
 }

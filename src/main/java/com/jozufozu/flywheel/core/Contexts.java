@@ -3,9 +3,9 @@ package com.jozufozu.flywheel.core;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.SpecMetaRegistry;
-import com.jozufozu.flywheel.backend.pipeline.IShaderPipeline;
+import com.jozufozu.flywheel.backend.pipeline.ShaderCompiler;
 import com.jozufozu.flywheel.backend.pipeline.InstancingTemplate;
-import com.jozufozu.flywheel.backend.pipeline.WorldShaderPipeline;
+import com.jozufozu.flywheel.backend.pipeline.WorldShaderCompiler;
 import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.source.Resolver;
 import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
@@ -32,8 +32,8 @@ public class Contexts {
         FileResolution crumblingBuiltins = Resolver.INSTANCE.findShader(ResourceUtil.subPath(Names.CRUMBLING, ".glsl"));
         FileResolution worldBuiltins = Resolver.INSTANCE.findShader(ResourceUtil.subPath(Names.WORLD, ".glsl"));
 
-		IShaderPipeline<CrumblingProgram> crumblingPipeline = new WorldShaderPipeline<>(CrumblingProgram::new, InstancingTemplate.INSTANCE, crumblingBuiltins);
-		IShaderPipeline<WorldProgram> worldPipeline = new WorldShaderPipeline<>(WorldProgram::new, InstancingTemplate.INSTANCE, worldBuiltins);
+		ShaderCompiler<CrumblingProgram> crumblingPipeline = new WorldShaderCompiler<>(CrumblingProgram::new, InstancingTemplate.INSTANCE, crumblingBuiltins);
+		ShaderCompiler<WorldProgram> worldPipeline = new WorldShaderCompiler<>(WorldProgram::new, InstancingTemplate.INSTANCE, worldBuiltins);
 
 		CRUMBLING = backend.register(WorldContext.builder(backend, Names.CRUMBLING).build(crumblingPipeline));
 		WORLD = backend.register(WorldContext.builder(backend, Names.WORLD).build(worldPipeline));
