@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.model;
 
-import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.IModel;
 
 public interface ModelAllocator {
 	/**
@@ -9,7 +9,7 @@ public interface ModelAllocator {
 	 * @param model The model to allocate.
 	 * @return A handle to the allocated model.
 	 */
-	IBufferedModel alloc(Model model, Callback allocationCallback);
+	IBufferedModel alloc(IModel model, Callback allocationCallback);
 
 	@FunctionalInterface
 	interface Callback {

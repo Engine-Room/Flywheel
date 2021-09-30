@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.vanilla;
 
-import com.jozufozu.flywheel.backend.instancing.DynamicInstance;
+import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.core.Materials;
@@ -18,7 +18,7 @@ import net.minecraft.core.Direction;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
-public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxBlockEntity> implements DynamicInstance {
+public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxBlockEntity> implements IDynamicInstance {
 
 	private final TextureAtlasSprite texture;
 

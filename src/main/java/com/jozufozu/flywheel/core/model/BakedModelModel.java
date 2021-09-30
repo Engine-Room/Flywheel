@@ -25,7 +25,7 @@ import net.minecraft.core.Direction;
 import com.mojang.math.Vector3f;
 import net.minecraft.core.Vec3i;
 
-public class BakedModelModel implements Model {
+public class BakedModelModel implements IModel {
 	// DOWN, UP, NORTH, SOUTH, WEST, EAST, null
 	private static final Direction[] dirs;
 

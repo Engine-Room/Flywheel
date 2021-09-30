@@ -6,7 +6,7 @@ import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.Formats;
 
-public class ModelPart implements Model {
+public class ModelPart implements IModel {
 
 	private final List<PartBuilder.CuboidBuilder> cuboids;
 	private int vertices;

@@ -82,7 +82,7 @@ public class Loader implements ResourceManagerReloadListener {
 
 			Resolver.INSTANCE.resolve(sources);
 
-			for (ShaderContext<?> context : backend.allContexts()) {
+			for (IShaderContext<?> context : backend.allContexts()) {
 				context.load();
 			}
 

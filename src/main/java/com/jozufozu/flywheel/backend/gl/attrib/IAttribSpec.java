@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.gl.attrib;
 
-public interface AttribSpec {
+public interface IAttribSpec {
 
 	void vertexAttribPointer(int stride, int index, int offset);
 

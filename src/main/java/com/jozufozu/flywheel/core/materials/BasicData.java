@@ -1,9 +1,11 @@
 package com.jozufozu.flywheel.core.materials;
 
+import org.lwjgl.system.MemoryUtil;
+
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 
-public abstract class BasicData extends InstanceData implements FlatLight {
+public abstract class BasicData extends InstanceData implements IFlatLight<BasicData> {
 
 	public byte blockLight;
 	public byte skyLight;

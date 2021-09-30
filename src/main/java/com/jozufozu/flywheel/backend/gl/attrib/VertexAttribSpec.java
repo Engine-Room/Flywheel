@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
 
-public class VertexAttribSpec implements AttribSpec {
+public class VertexAttribSpec implements IAttribSpec {
 
 	private final GlNumericType type;
 	private final int count;
