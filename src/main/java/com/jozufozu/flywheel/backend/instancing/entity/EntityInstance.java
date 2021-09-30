@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.backend.instancing.entity;
 
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
-import com.jozufozu.flywheel.backend.instancing.DynamicInstance;
-import com.jozufozu.flywheel.backend.instancing.TickableInstance;
+import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
+import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.light.GridAlignedBB;
@@ -24,8 +24,8 @@ import net.minecraft.core.Vec3i;
  * *
  * <br><br> There are a few additional features that overriding classes can opt in to:
  * <ul>
- *     <li>{@link DynamicInstance}</li>
- *     <li>{@link TickableInstance}</li>
+ *     <li>{@link IDynamicInstance}</li>
+ *     <li>{@link ITickableInstance}</li>
  * </ul>
  * See the interfaces' documentation for more information about each one.
  *

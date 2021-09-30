@@ -6,7 +6,7 @@ import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 
 import net.minecraft.resources.ResourceLocation;
 
-public interface ShaderContext<P extends GlProgram> {
+public interface IShaderContext<P extends GlProgram> {
 
 	default P getProgram(ResourceLocation loc) {
 		return this.getProgramSupplier(loc)

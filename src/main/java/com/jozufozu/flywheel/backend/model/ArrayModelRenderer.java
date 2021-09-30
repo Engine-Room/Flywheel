@@ -3,14 +3,14 @@ package com.jozufozu.flywheel.backend.model;
 import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
-import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.IModel;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 public class ArrayModelRenderer extends ModelRenderer {
 
 	protected GlVertexArray vao;
 
-	public ArrayModelRenderer(Supplier<Model> model) {
+	public ArrayModelRenderer(Supplier<IModel> model) {
 		super(model);
 	}
 
@@ -29,7 +29,7 @@ public class ArrayModelRenderer extends ModelRenderer {
 	@Override
 	protected void init() {
 		initialized = true;
-		Model model = modelSupplier.get();
+		IModel model = modelSupplier.get();
 
 		if (model.empty()) return;
 

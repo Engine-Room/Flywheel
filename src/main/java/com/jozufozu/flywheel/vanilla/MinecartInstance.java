@@ -1,13 +1,13 @@
 package com.jozufozu.flywheel.vanilla;
 
-import com.jozufozu.flywheel.backend.instancing.DynamicInstance;
-import com.jozufozu.flywheel.backend.instancing.TickableInstance;
+import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
+import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.backend.state.TextureRenderState;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
-import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.IModel;
 import com.jozufozu.flywheel.core.model.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
@@ -21,7 +21,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import com.mojang.math.Vector3f;
 
-public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance<T> implements DynamicInstance, TickableInstance {
+public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance<T> implements IDynamicInstance, ITickableInstance {
 
 	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
 
@@ -153,7 +153,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 				.createInstance();
 	}
 
-	private Model getBodyModel() {
+	private IModel getBodyModel() {
 		int y = -3;
 		return ModelPart.builder(64, 32)
 				.cuboid().invertYZ().start(-10, -8, -y).size(20, 16, 2).textureOffset(0, 10).rotateX(((float)Math.PI / 2F)).endCuboid()

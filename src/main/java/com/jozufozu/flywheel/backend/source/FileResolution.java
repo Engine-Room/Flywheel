@@ -62,7 +62,7 @@ public class FileResolution {
 	 *     Called after all files are loaded. If we can't find the file here, it doesn't exist.
 	 * </p>
 	 */
-	void resolve(SourceHolder sources) {
+	void resolve(ISourceHolder sources) {
 
 		try {
 			file = sources.findSource(fileLoc);

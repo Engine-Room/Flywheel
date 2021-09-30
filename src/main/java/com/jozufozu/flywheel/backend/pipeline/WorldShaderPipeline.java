@@ -9,33 +9,34 @@ import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.core.shader.ExtensibleGlProgram;
 import com.jozufozu.flywheel.core.shader.GameStateProgram;
+import com.jozufozu.flywheel.core.shader.IMultiProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 import com.jozufozu.flywheel.core.shader.spec.ProgramState;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class WorldShaderCompiler<P extends WorldProgram> implements ShaderCompiler<P> {
+public class WorldShaderPipeline<P extends WorldProgram> implements IShaderPipeline<P> {
 
 	private final ExtensibleGlProgram.Factory<P> factory;
 
 	private final Template<?> template;
 	private final FileResolution header;
 
-	public WorldShaderCompiler(ExtensibleGlProgram.Factory<P> factory, Template<?> template, FileResolution header) {
+	public WorldShaderPipeline(ExtensibleGlProgram.Factory<P> factory, Template<?> template, FileResolution header) {
 		this.factory = factory;
 		this.template = template;
 		this.header = header;
 	}
 
-	public GameStateProgram<P> compile(ProgramSpec spec) {
+	public IMultiProgram<P> compile(ProgramSpec spec) {
 
 		SourceFile file = spec.getSource().getFile();
 
 		return compile(spec.name, file, spec.getStates());
 	}
 
-	public GameStateProgram<P> compile(ResourceLocation name, SourceFile file, List<ProgramState> variants) {
+	public IMultiProgram<P> compile(ResourceLocation name, SourceFile file, List<ProgramState> variants) {
 		WorldShader shader = new WorldShader(name, template, header)
 				.setMainSource(file);
 

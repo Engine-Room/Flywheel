@@ -2,14 +2,13 @@ package com.jozufozu.flywheel.core.shader;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.shader.spec.IGameStateCondition;
 import com.jozufozu.flywheel.util.Pair;
 
-public class GameStateProgram<P extends GlProgram> implements Supplier<P> {
+public class GameStateProgram<P extends GlProgram> implements IMultiProgram<P> {
 
 	private final List<Pair<IGameStateCondition, P>> variants;
 	private final P fallback;
@@ -19,9 +18,6 @@ public class GameStateProgram<P extends GlProgram> implements Supplier<P> {
 		this.fallback = fallback;
 	}
 
-	/**
-	 * Get the shader program most suited for the current game state.
-	 */
 	@Override
 	public P get() {
 		for (Pair<IGameStateCondition, P> variant : variants) {
@@ -32,9 +28,7 @@ public class GameStateProgram<P extends GlProgram> implements Supplier<P> {
 		return fallback;
 	}
 
-	/**
-	 * Delete all associated programs.
-	 */
+	@Override
 	public void delete() {
 		for (Pair<IGameStateCondition, P> variant : variants) {
 			variant.getSecond()
@@ -61,7 +55,7 @@ public class GameStateProgram<P extends GlProgram> implements Supplier<P> {
 			return this;
 		}
 
-		public GameStateProgram<P> build() {
+		public IMultiProgram<P> build() {
 			return new GameStateProgram<>(ImmutableList.copyOf(variants), fallback);
 		}
 	}

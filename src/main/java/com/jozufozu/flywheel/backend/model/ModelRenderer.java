@@ -2,16 +2,16 @@ package com.jozufozu.flywheel.backend.model;
 
 import java.util.function.Supplier;
 
-import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.IModel;
 
 public class ModelRenderer {
 
-	protected Supplier<Model> modelSupplier;
+	protected Supplier<IModel> modelSupplier;
 	protected IBufferedModel model;
 
 	protected boolean initialized;
 
-	public ModelRenderer(Supplier<Model> modelSupplier) {
+	public ModelRenderer(Supplier<IModel> modelSupplier) {
 		this.modelSupplier = modelSupplier;
 	}
 
@@ -34,7 +34,7 @@ public class ModelRenderer {
 
 	protected void init() {
 		initialized = true;
-		Model model = modelSupplier.get();
+		IModel model = modelSupplier.get();
 
 		if (model.empty()) return;
 

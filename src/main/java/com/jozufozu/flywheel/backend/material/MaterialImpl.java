@@ -10,7 +10,7 @@ import com.jozufozu.flywheel.backend.instancing.GPUInstancer;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.instancing.Instancer;
 import com.jozufozu.flywheel.backend.model.ModelPool;
-import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.IModel;
 
 /**
  * A collection of Instancers that all have the same format.
@@ -42,7 +42,7 @@ public class MaterialImpl<D extends InstanceData> implements Material<D> {
 	 * @return An instancer for the given model, capable of rendering many copies for little cost.
 	 */
 	@Override
-	public Instancer<D> model(Object key, Supplier<Model> modelSupplier) {
+	public Instancer<D> model(Object key, Supplier<IModel> modelSupplier) {
 		try {
 			return models.get(key, () -> new GPUInstancer<>(modelPool, modelSupplier.get(), spec.getInstanceType()));
 		} catch (ExecutionException e) {

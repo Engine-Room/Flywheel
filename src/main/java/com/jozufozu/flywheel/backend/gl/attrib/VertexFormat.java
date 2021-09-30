@@ -5,16 +5,16 @@ import java.util.Collections;
 
 public class VertexFormat {
 
-	private final ArrayList<AttribSpec> allAttributes;
+	private final ArrayList<IAttribSpec> allAttributes;
 
 	private final int numAttributes;
 	private final int stride;
 
-	public VertexFormat(ArrayList<AttribSpec> allAttributes) {
+	public VertexFormat(ArrayList<IAttribSpec> allAttributes) {
 		this.allAttributes = allAttributes;
 
 		int numAttributes = 0, stride = 0;
-		for (AttribSpec spec : allAttributes) {
+		for (IAttribSpec spec : allAttributes) {
 			numAttributes += spec.getAttributeCount();
 			stride += spec.getSize();
 		}
@@ -32,7 +32,7 @@ public class VertexFormat {
 
 	public void vertexAttribPointers(int index) {
 		int offset = 0;
-		for (AttribSpec spec : this.allAttributes) {
+		for (IAttribSpec spec : this.allAttributes) {
 			spec.vertexAttribPointer(stride, index, offset);
 			index += spec.getAttributeCount();
 			offset += spec.getSize();
@@ -44,12 +44,12 @@ public class VertexFormat {
 	}
 
 	public static class Builder {
-		private final ArrayList<AttribSpec> allAttributes = new ArrayList<>();
+		private final ArrayList<IAttribSpec> allAttributes = new ArrayList<>();
 
 		public Builder() {
 		}
 
-		public Builder addAttributes(AttribSpec... attributes) {
+		public Builder addAttributes(IAttribSpec... attributes) {
 			Collections.addAll(allAttributes, attributes);
 			return this;
 		}

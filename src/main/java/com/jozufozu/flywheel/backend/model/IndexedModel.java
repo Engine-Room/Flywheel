@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
-import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.IModel;
 
 /**
  * An indexed triangle model. Just what the driver ordered.
@@ -15,7 +15,7 @@ public class IndexedModel extends BufferedModel {
 
 	protected ElementBuffer ebo;
 
-	public IndexedModel(Model model) {
+	public IndexedModel(IModel model) {
 		super(GlPrimitive.TRIANGLES, model);
 
 		this.ebo = model.createEBO();

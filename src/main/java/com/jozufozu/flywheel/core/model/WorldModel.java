@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
-public class WorldModel implements Model {
+public class WorldModel implements IModel {
 
 	private final BufferBuilderReader reader;
 
