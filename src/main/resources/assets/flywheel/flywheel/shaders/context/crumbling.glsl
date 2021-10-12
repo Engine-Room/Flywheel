@@ -29,8 +29,8 @@ void FLWFinalizeWorldPos(inout vec4 worldPos) {
 out vec4 fragColor;
 
 vec4 FLWBlockTexture(vec2 texCoords) {
-    vec4 cr = texture2D(uCrumbling, texCoords * uTextureScale);
-    float diffuseAlpha = texture2D(uBlockAtlas, texCoords).a;
+    vec4 cr = texture(uCrumbling, texCoords * uTextureScale);
+    float diffuseAlpha = texture(uBlockAtlas, texCoords).a;
     cr.a = cr.a * diffuseAlpha;
     return cr;
 }

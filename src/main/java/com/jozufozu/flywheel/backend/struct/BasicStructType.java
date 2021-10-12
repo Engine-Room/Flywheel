@@ -3,8 +3,7 @@ package com.jozufozu.flywheel.backend.struct;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
-
-import net.minecraftforge.common.util.NonNullSupplier;
+import com.jozufozu.flywheel.util.NonNullSupplier;
 
 public class BasicStructType<S extends InstanceData> implements StructType<S> {
 

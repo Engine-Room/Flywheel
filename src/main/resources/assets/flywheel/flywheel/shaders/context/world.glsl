@@ -37,7 +37,7 @@ void FLWFinalizeWorldPos(inout vec4 worldPos) {
 out vec4 fragColor;
 
 vec4 FLWBlockTexture(vec2 texCoords) {
-    return texture2D(uBlockAtlas, texCoords);
+    return texture(uBlockAtlas, texCoords);
 }
 
 void FLWFinalizeColor(vec4 color) {
@@ -59,6 +59,6 @@ void FLWFinalizeColor(vec4 color) {
 }
 
 vec4 FLWLight(vec2 lightCoords) {
-    return texture2D(uLightMap, shiftLight(lightCoords));
+    return texture(uLightMap, shiftLight(lightCoords));
 }
 #endif

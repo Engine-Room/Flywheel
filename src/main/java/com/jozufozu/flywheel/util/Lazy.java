@@ -4,8 +4,6 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 
-import net.minecraftforge.common.util.NonNullSupplier;
-
 public class Lazy<T> {
 
 	private final NonNullSupplier<T> supplier;
