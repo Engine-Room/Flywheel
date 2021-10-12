@@ -7,8 +7,7 @@ import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
-
-import net.minecraftforge.common.util.Lazy;
+import com.jozufozu.flywheel.util.Lazy;
 
 public class FullscreenQuad {
 

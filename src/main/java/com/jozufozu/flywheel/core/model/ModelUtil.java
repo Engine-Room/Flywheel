@@ -6,6 +6,7 @@ import static org.lwjgl.opengl.GL11.GL_QUADS;
 import java.util.Collection;
 import java.util.Random;
 
+import com.jozufozu.flywheel.util.Lazy;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.world.level.block.RenderShape;
@@ -23,7 +24,6 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.common.util.Lazy;
 
 public class ModelUtil {
 	private static final Lazy<ModelBlockRenderer> MODEL_RENDERER = Lazy.of(() -> new ModelBlockRenderer(Minecraft.getInstance().getBlockColors()));
