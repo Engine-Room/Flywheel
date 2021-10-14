@@ -8,10 +8,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import com.jozufozu.flywheel.util.Attribute;
 import com.mojang.math.Matrix3f;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-
-@OnlyIn(Dist.CLIENT)
 @Mixin(Matrix3f.class)
 public abstract class Matrix3fMixin implements Attribute {
 

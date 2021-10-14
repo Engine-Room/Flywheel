@@ -1,8 +1,14 @@
 package com.jozufozu.flywheel.backend;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Consumer;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.source.Resolver;
 import com.jozufozu.flywheel.backend.source.ShaderLoadingException;
@@ -10,26 +16,21 @@ import com.jozufozu.flywheel.backend.source.ShaderSources;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 import com.jozufozu.flywheel.event.GatherContextEvent;
+import com.jozufozu.flywheel.fabric.event.FlywheelEvents;
 import com.jozufozu.flywheel.util.ResourceUtil;
 import com.jozufozu.flywheel.util.StreamUtil;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.resource.IResourceType;
-import net.minecraftforge.resource.VanillaResourceType;
-
-import javax.annotation.Nullable;
-
-import java.util.Collection;
 
 /**
  * The main entity for loading shaders.
@@ -38,7 +39,7 @@ import java.util.Collection;
  * This class is responsible for invoking the loading, parsing, and compilation stages.
  * </p>
  */
-public class Loader implements ResourceManagerReloadListener {
+public class Loader {
 	public static final String PROGRAM_DIR = "flywheel/programs/";
 	private static final Gson GSON = new GsonBuilder().create();
 
@@ -50,21 +51,13 @@ public class Loader implements ResourceManagerReloadListener {
 	public Loader(Backend backend) {
 		this.backend = backend;
 
-		// Can be null when running datagenerators due to the unfortunate time we call this
-		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft != null) {
-			ResourceManager manager = minecraft.getResourceManager();
-			if (manager instanceof ReloadableResourceManager) {
-				((ReloadableResourceManager) manager).registerReloadListener(this);
-			}
-		}
+		ResourceReloadListener.INSTANCE.addCallback(this::onResourceManagerReload);
 	}
 
 	public void notifyError() {
 		shouldCrash = true;
 	}
 
-	@Override
 	public void onResourceManagerReload(ResourceManager manager) {
 		backend.refresh();
 
@@ -73,8 +66,8 @@ public class Loader implements ResourceManagerReloadListener {
 			backend._clearContexts();
 
 			Resolver.INSTANCE.invalidate();
-			ModLoader.get()
-					.postEvent(new GatherContextEvent(backend, firstLoad));
+			FlywheelEvents.GATHER_CONTEXT.invoker()
+					.handleEvent(new GatherContextEvent(backend, firstLoad));
 
 			ShaderSources sources = new ShaderSources(manager);
 
@@ -129,9 +122,31 @@ public class Loader implements ResourceManagerReloadListener {
 		}
 	}
 
-	@Nullable
-	@Override
-	public IResourceType getResourceType() {
-		return VanillaResourceType.SHADERS;
+	public static class ResourceReloadListener implements ResourceManagerReloadListener, IdentifiableResourceReloadListener {
+		public static final ResourceReloadListener INSTANCE = new ResourceReloadListener();
+
+		public static final ResourceLocation ID = Flywheel.rl("loaders");
+		public static final List<ResourceLocation> DEPENDENCIES = List.of(ResourceReloadListenerKeys.TEXTURES, ResourceReloadListenerKeys.MODELS);
+
+		private final List<Consumer<ResourceManager>> callbacks = new ArrayList<>();
+
+		@Override
+		public void onResourceManagerReload(ResourceManager resourceManager) {
+			callbacks.forEach(callback -> callback.accept(resourceManager));
+		}
+
+		@Override
+		public ResourceLocation getFabricId() {
+			return ID;
+		}
+
+		@Override
+		public List<ResourceLocation> getFabricDependencies() {
+			return DEPENDENCIES;
+		}
+
+		protected void addCallback(Consumer<ResourceManager> callback) {
+			callbacks.add(callback);
+		}
 	}
 }

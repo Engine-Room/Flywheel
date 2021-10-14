@@ -14,15 +14,13 @@ import org.lwjgl.system.MemoryStack;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.Formats;
-import com.jozufozu.flywheel.util.VirtualEmptyModelData;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.core.Direction;
-import com.mojang.math.Vector3f;
 import net.minecraft.core.Vec3i;
 
 public class BakedModelModel implements IModel {
@@ -48,7 +46,8 @@ public class BakedModelModel implements IModel {
 
 		for (Direction dir : dirs) {
 			random.setSeed(42);
-			List<BakedQuad> quads = model.getQuads(null, dir, random, VirtualEmptyModelData.INSTANCE);
+			// TODO
+			List<BakedQuad> quads = model.getQuads(null, dir, random/*, VirtualEmptyModelData.INSTANCE*/);
 
 			numQuads += quads.size();
 		}
@@ -61,13 +60,14 @@ public class BakedModelModel implements IModel {
 
 		Minecraft mc = Minecraft.getInstance();
 
-		ItemColors itemColors = mc.getItemColors();
+//		ItemColors itemColors = mc.getItemColors();
 
 		Random random = new Random();
 
 		for (Direction dir : dirs) {
 			random.setSeed(42);
-			List<BakedQuad> quads = model.getQuads(null, dir, random, VirtualEmptyModelData.INSTANCE);
+			// TODO
+			List<BakedQuad> quads = model.getQuads(null, dir, random/*, VirtualEmptyModelData.INSTANCE*/);
 
 			for (BakedQuad bakedQuad : quads) {
 //				int i = -1;

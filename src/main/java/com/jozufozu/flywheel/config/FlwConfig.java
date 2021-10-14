@@ -1,61 +1,130 @@
 package com.jozufozu.flywheel.config;
 
-import org.apache.commons.lang3.tuple.Pair;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.Collections;
+import java.util.Map;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.jozufozu.flywheel.config.Option.BooleanOption;
+
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.ObjectBidirectionalIterator;
+import net.fabricmc.loader.api.FabricLoader;
 
 public class FlwConfig {
+	protected static final Logger LOGGER = LogManager.getLogger("Flywheel Config");
+	protected static final JsonParser PARSER = new JsonParser();
+	protected static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-	private static final FlwConfig INSTANCE = new FlwConfig();
+	private static final FlwConfig INSTANCE = new FlwConfig(FabricLoader.getInstance().getConfigDir().resolve("flywheel.json").toFile());
 
-	public final ClientConfig client;
+	protected final File file;
+	protected final Object2ObjectLinkedOpenHashMap<String, Option<?>> optionMap = new Object2ObjectLinkedOpenHashMap<>();
+	protected final Map<String, Option<?>> optionMapView = Collections.unmodifiableMap(optionMap);
 
-	public FlwConfig() {
-		Pair<ClientConfig, ForgeConfigSpec> client = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
+	/** Enable or disable the entire engine */
+	public final BooleanOption enabled = addOption(new BooleanOption("enabled", true));
+	/** Enable or disable a debug overlay that colors pixels by their normal */
+	public final BooleanOption debugNormals = addOption(new BooleanOption("debugNormals", false));
+	/** Cache chunk lookups to improve performance. */
+	public final BooleanOption chunkCaching = addOption(new BooleanOption("chunkCaching", true));
 
-		this.client = client.getLeft();
-
-		ModLoadingContext.get()
-				.registerConfig(ModConfig.Type.CLIENT, client.getRight());
+	public FlwConfig(File file) {
+		this.file = file;
 	}
 
 	public static FlwConfig get() {
 		return INSTANCE;
 	}
 
+	public static void init() {
+		INSTANCE.load();
+		ConfigCommands.init(INSTANCE);
+	}
+
 	public boolean enabled() {
-		return client.enabled.get();
+		return enabled.get();
 	}
 
 	public boolean debugNormals() {
-		return client.debugNormals.get();
+		return debugNormals.get();
 	}
 
 	public boolean chunkCaching() {
-		return client.chunkCaching.get();
+		return chunkCaching.get();
 	}
 
-	public static void init() {
-	}
-
-	public static class ClientConfig {
-		public final BooleanValue enabled;
-		public final BooleanValue debugNormals;
-		public final BooleanValue chunkCaching;
-
-		public ClientConfig(ForgeConfigSpec.Builder builder) {
-
-			enabled = builder.comment("Enable or disable the entire engine")
-					.define("enabled", true);
-
-			debugNormals = builder.comment("Enable or disable a debug overlay that colors pixels by their normal")
-					.define("debugNormals", false);
-
-			chunkCaching = builder.comment("Cache chunk lookups to improve performance.")
-					.define("chunkCaching", true);
+	public void load() {
+		if (file.exists()) {
+			try (FileReader reader = new FileReader(file)) {
+				fromJson(PARSER.parse(reader));
+			} catch (Exception e) {
+				LOGGER.error("Could not load config from file '" + file.getAbsolutePath() + "'", e);
+			}
 		}
+		save();
+	}
+
+	public void save() {
+		try (FileWriter writer = new FileWriter(file)) {
+			GSON.toJson(toJson(), writer);
+		} catch (Exception e) {
+			LOGGER.error("Could not save config to file '" + file.getAbsolutePath() + "'", e);
+		}
+	}
+
+	protected void fromJson(JsonElement json) throws JsonParseException {
+		if (json.isJsonObject()) {
+			JsonObject object = json.getAsJsonObject();
+			ObjectBidirectionalIterator<Object2ObjectMap.Entry<String, Option<?>>> iterator = optionMap.object2ObjectEntrySet().fastIterator();
+			while (iterator.hasNext()) {
+				Object2ObjectMap.Entry<String, Option<?>> entry = iterator.next();
+				JsonElement element = object.get(entry.getKey());
+				if (element != null) {
+					entry.getValue().fromJson(element);
+				}
+			}
+		} else {
+			throw new JsonParseException("Json must be an object");
+		}
+	}
+
+	protected JsonElement toJson() {
+		JsonObject object = new JsonObject();
+		ObjectBidirectionalIterator<Object2ObjectMap.Entry<String, Option<?>>> iterator = optionMap.object2ObjectEntrySet().fastIterator();
+		while (iterator.hasNext()) {
+			Object2ObjectMap.Entry<String, Option<?>> entry = iterator.next();
+			object.add(entry.getKey(), entry.getValue().toJson());
+		}
+		return object;
+	}
+
+	protected <T extends Option<?>> T addOption(T option) {
+		Option<?> old = optionMap.put(option.getKey(), option);
+		if (old != null) {
+			LOGGER.warn("Option with key '" + old.getKey() + "' was overridden");
+		}
+		return option;
+	}
+
+	@Nullable
+	public Option<?> getOption(String key) {
+		return optionMap.get(key);
+	}
+
+	public Map<String, Option<?>> getOptionMapView() {
+		return optionMapView;
 	}
 }

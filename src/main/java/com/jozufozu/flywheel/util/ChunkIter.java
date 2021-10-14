@@ -6,13 +6,10 @@ import java.util.function.Consumer;
 
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * Helper class for iterating over all loaded chunks.
  */
-@OnlyIn(Dist.CLIENT)
 public class ChunkIter {
 
 	private static final WeakHashMap<BlockGetter, AtomicReferenceArray<LevelChunk>> storages = new WeakHashMap<>();

@@ -2,25 +2,22 @@ package com.jozufozu.flywheel.core.model;
 
 import java.util.Arrays;
 
-import org.lwjgl.opengl.GL11;
-
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.util.BufferBuilderReader;
-import com.jozufozu.flywheel.util.VirtualEmptyModelData;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import net.minecraft.core.Direction;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * A model of a single block.
@@ -82,7 +79,8 @@ public class BlockModel implements IModel {
 		//				.collect(Collectors.toList());
 
 		builder.begin(com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-		blockRenderer.tesselateBlock(mc.level, model, referenceState, BlockPos.ZERO.above(255), ms, builder, true, mc.level.random, 42, OverlayTexture.NO_OVERLAY, VirtualEmptyModelData.INSTANCE);
+		// TODO
+		blockRenderer.tesselateBlock(mc.level, model, referenceState, BlockPos.ZERO.above(255), ms, builder, true, mc.level.random, 42, OverlayTexture.NO_OVERLAY/*, VirtualEmptyModelData.INSTANCE*/);
 		builder.end();
 		return builder;
 	}

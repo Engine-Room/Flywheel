@@ -17,31 +17,25 @@ import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
 import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.Pair;
+import com.mojang.math.Matrix4f;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.Camera;
-import net.minecraft.server.level.BlockDestructionProgress;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
-import com.mojang.math.Matrix4f;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.server.level.BlockDestructionProgress;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * Responsible for rendering the block breaking overlay for instanced tiles.
  */
-@OnlyIn(Dist.CLIENT)
-@Mod.EventBusSubscriber(Dist.CLIENT)
 public class CrumblingRenderer {
 
 	private static final Lazy<State> STATE;
@@ -127,7 +121,6 @@ public class CrumblingRenderer {
 		return breakingEntities;
 	}
 
-	@SubscribeEvent
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		ClientLevel world = event.getWorld();
 		if (Backend.getInstance()

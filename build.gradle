@@ -1,23 +1,8 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        jcenter()
-        mavenCentral()
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
-    }
-}
 plugins {
+    id 'fabric-loom' version '0.10-SNAPSHOT'
+    id 'maven-publish'
     id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
-
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply plugin: 'org.spongepowered.mixin'
 
 boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
 
@@ -28,67 +13,12 @@ version = "${mc_update_version}-${mod_version}" + (dev ? ".${buildnumber}" : '')
 group = 'com.jozufozu.flywheel'
 archivesBaseName = 'flywheel'
 
+sourceCompatibility = JavaVersion.VERSION_16
+targetCompatibility = JavaVersion.VERSION_16
+
 java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
-minecraft {
-    mappings channel: 'official', version: "${minecraft_version}"
-    //accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
-    runs {
-        client {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', ''
-            property 'forge.logging.console.level', 'debug'
-            property 'fml.earlyprogresswindow', 'false'
-            property 'mixin.debug.export', 'true'
-
-            arg "-mixin.config=flywheel.mixins.json"
-
-            mods {
-                flywheel {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
-            arg "-mixin.config=flywheel.mixins.json"
-
-            mods {
-                flywheel {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
-            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'flywheel', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                flywheel {
-                    source sourceSets.main
-                }
-            }
-        }
-    }
-}
-
-mixin {
-    add sourceSets.main, "flywheel.refmap.json"
-}
 
 repositories {
     maven {
@@ -98,11 +28,47 @@ repositories {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    // To change the versions see the gradle.properties file
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    //implementation "org.joml:joml:1.10.1"
+    // Fabric API
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+}
+
+processResources {
+    inputs.property 'version', project.version
+
+    filesMatching('fabric.mod.json') {
+        expand 'version': project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    // ensure that the encoding is set to UTF-8, no matter what the system default is
+    // this fixes some edge cases with special characters not displaying correctly
+    // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+    // If Javadoc is generated, this must be specified in that task too.
+    it.options.encoding = 'UTF-8'
+
+    // Minecraft 1.17 (21w19a) upwards uses Java 16.
+    it.options.release = 16
+}
+
+java {
+    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+    // if it is present.
+    // If you remove this line, sources will not be generated.
+    withSourcesJar()
+}
+
+jar {
+    from('LICENSE') {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -121,19 +87,10 @@ jar {
     }
 }
 
-jar.finalizedBy('reobfJar')
-
 javadoc {
     source = [sourceSets.main.allJava]
     // prevent java 8's strict doclint for javadocs from failing builds
     options.addStringOption('Xdoclint:none', '-quiet')
-}
-
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allSource
-    archiveBaseName.set(project.archivesBaseName)
-    archiveVersion.set("${project.version}")
-    archiveClassifier.set('sources')
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
@@ -142,15 +99,17 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 artifacts {
-    archives jar, sourcesJar, javadocJar
+    archives remapJar, sourcesJar, javadocJar
 }
 
 publishing {
     tasks.publish.dependsOn 'build'
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
-            artifact sourcesJar
+            artifact remapJar
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
+            }
             artifact javadocJar
         }
     }

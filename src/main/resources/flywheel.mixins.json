@@ -3,7 +3,6 @@
   "minVersion": "0.8",
   "package": "com.jozufozu.flywheel.mixin",
   "compatibilityLevel": "JAVA_16",
-  "refmap": "flywheel.refmap.json",
   "client": [
     "CancelEntityRenderMixin",
     "ChunkRebuildHooksMixin",
@@ -19,6 +18,13 @@
     "InstanceRemoveMixin",
     "LeakChunkStorageArrayMixin",
     "PausedPartialTickAccessor"
+    ,
+    "fabric.BufferBuilderAccessor",
+    "fabric.ClientLevelMixin",
+    "fabric.DebugScreenOverlayMixin",
+    "fabric.Matrix4fMixin",
+    "fabric.MinecraftMixin",
+    "fabric.VertexFormatAccessor"
   ],
   "mixins": [
     "matrix.Matrix3fMixin",

@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.event;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
@@ -9,55 +9,35 @@ import com.jozufozu.flywheel.util.ChunkIter;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
 public class ForgeEvents {
 
-	@SubscribeEvent
-	public static void addToDebugScreen(RenderGameOverlayEvent.Text event) {
+	public static void addToDebugScreen(List<String> right) {
 
-		if (Minecraft.getInstance().options.renderDebug) {
-
-			ArrayList<String> right = event.getRight();
-
-			String text = "Flywheel: " + Backend.getInstance()
-					.getBackendDescriptor();
-			if (right.size() < 10) {
-				right.add("");
-				right.add(text);
-			} else {
-				right.add(9, "");
-				right.add(10, text);
-			}
+		String text = "Flywheel: " + Backend.getInstance()
+				.getBackendDescriptor();
+		if (right.size() < 10) {
+			right.add("");
+			right.add(text);
+		} else {
+			right.add(9, "");
+			right.add(10, text);
 		}
 	}
 
-	@SubscribeEvent
-	public static void onLoadWorld(WorldEvent.Load event) {
-		LevelAccessor world = event.getWorld();
-
+	public static void onLoadWorld(ClientLevel world) {
 		if (Backend.isFlywheelWorld(world)) {
 			InstancedRenderDispatcher.loadAllInWorld((ClientLevel) world);
 		}
 	}
 
-	@SubscribeEvent
-	public static void unloadWorld(WorldEvent.Unload event) {
-		LevelAccessor world = event.getWorld();
+	public static void unloadWorld(ClientLevel world) {
 		ChunkIter._unload(world);
 	}
 
-	@SubscribeEvent
-	public static void tickLight(TickEvent.ClientTickEvent e) {
-		if (e.phase == TickEvent.Phase.END && Backend.isGameActive())
-			LightUpdater.get(Minecraft.getInstance().level).tick();
+	public static void tickLight(Minecraft mc) {
+		if (Backend.isGameActive())
+			LightUpdater.get(mc.level).tick();
 	}
 
 }

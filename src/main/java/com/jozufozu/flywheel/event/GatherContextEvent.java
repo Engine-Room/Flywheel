@@ -1,11 +1,9 @@
 package com.jozufozu.flywheel.event;
 
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.fabric.event.EventContext;
 
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.fml.event.IModBusEvent;
-
-public class GatherContextEvent extends Event implements IModBusEvent {
+public class GatherContextEvent extends EventContext {
 
 	private final Backend backend;
 	private final boolean firstLoad;

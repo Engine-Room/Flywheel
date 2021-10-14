@@ -1,12 +1,13 @@
 package com.jozufozu.flywheel.event;
 
-import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.eventbus.api.Event;
+import com.jozufozu.flywheel.fabric.event.EventContext;
 
-public class BeginFrameEvent extends Event {
+import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.world.phys.Vec3;
+
+public class BeginFrameEvent extends EventContext {
 	private final ClientLevel world;
 	private final Camera info;
 	private final Frustum clippingHelper;

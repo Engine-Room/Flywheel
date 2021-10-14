@@ -13,8 +13,6 @@ import com.jozufozu.flywheel.util.ChunkIter;
 
 import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * In order to iterate over all loaded chunks, we do something absolutely foul.
@@ -24,7 +22,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
  *     access to the full array of loaded chunks.
  * </p>
  */
-@OnlyIn(Dist.CLIENT)
 @Mixin(targets = "net.minecraft.client.multiplayer.ClientChunkCache$Storage")
 public class LeakChunkStorageArrayMixin {
 

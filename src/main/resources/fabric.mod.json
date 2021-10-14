@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "flywheel",
+  "version": "${version}",
+
+  "name": "Flywheel",
+  "description": "A modern engine for modded minecraft.",
+  "authors": [
+    "Jozufozu",
+    "Pepper_Bell"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/flywheel",
+    "issues": "https://github.com/Jozufozu/Flywheel/issues",
+    "sources": "https://github.com/Jozufozu/Flywheel"
+  },
+
+  "license": "MIT",
+  "icon": "logo.png",
+
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.jozufozu.flywheel.FlywheelClient"
+    ]
+  },
+  "mixins": [
+    "flywheel.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "fabric": "*",
+    "minecraft": "1.17.x",
+    "java": ">=16"
+  }
+}

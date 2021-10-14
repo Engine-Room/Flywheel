@@ -15,26 +15,24 @@ import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
+import com.jozufozu.flywheel.fabric.event.FlywheelEvents;
+import com.jozufozu.flywheel.fabric.helper.Matrix4fHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderBuffers;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
 import com.mojang.math.Matrix4f;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
 
-@OnlyIn(Dist.CLIENT)
+import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+
 @Mixin(LevelRenderer.class)
 public class RenderHooksMixin {
 
@@ -47,7 +45,7 @@ public class RenderHooksMixin {
 
 	@Inject(at = @At("HEAD"), method = "setupRender")
 	private void setupRender(Camera info, Frustum clippingHelper, boolean p_228437_3_, int frameCount, boolean isSpectator, CallbackInfo ci) {
-		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, info, clippingHelper));
+		FlywheelEvents.BEGIN_FRAME.invoker().handleEvent(new BeginFrameEvent(level, info, clippingHelper));
 	}
 
 	/**
@@ -60,7 +58,7 @@ public class RenderHooksMixin {
 
 		RenderBuffers renderBuffers = this.renderBuffers;
 
-		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(level, type, stack, renderBuffers, camX, camY, camZ));
+		FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(level, type, stack, renderBuffers, camX, camY, camZ));
 
 		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
 
@@ -72,7 +70,7 @@ public class RenderHooksMixin {
 		Backend.getInstance()
 				.refresh();
 
-		MinecraftForge.EVENT_BUS.post(new ReloadRenderersEvent(level));
+		FlywheelEvents.RELOAD_RENDERERS.invoker().handleEvent(new ReloadRenderersEvent(level));
 	}
 
 
@@ -85,7 +83,7 @@ public class RenderHooksMixin {
 		Matrix4f view = stack.last()
 				.pose();
 		Matrix4f viewProjection = view.copy();
-		viewProjection.multiplyBackward(RenderSystem.getProjectionMatrix());
+		Matrix4fHelper.multiplyBackward(viewProjection, RenderSystem.getProjectionMatrix());
 
 		Vec3 cameraPos = info.getPosition();
 		CrumblingRenderer.renderBreaking(level, viewProjection, cameraPos.x, cameraPos.y, cameraPos.z);

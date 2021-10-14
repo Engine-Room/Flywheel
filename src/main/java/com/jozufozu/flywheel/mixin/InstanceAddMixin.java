@@ -12,10 +12,7 @@ import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 @Mixin(LevelChunk.class)
 public class InstanceAddMixin {
 

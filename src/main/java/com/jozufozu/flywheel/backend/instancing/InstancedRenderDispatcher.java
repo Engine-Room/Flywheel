@@ -10,16 +10,9 @@ import com.jozufozu.flywheel.util.WorldAttached;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
-@OnlyIn(Dist.CLIENT)
-@Mod.EventBusSubscriber(Dist.CLIENT)
 public class InstancedRenderDispatcher {
 
 	private static final WorldAttached<InstanceWorld> instanceWorlds = new WorldAttached<>($ -> new InstanceWorld());
@@ -50,20 +43,17 @@ public class InstancedRenderDispatcher {
 				.getEntityInstanceManager();
 	}
 
-	@SubscribeEvent
-	public static void tick(TickEvent.ClientTickEvent event) {
+	public static void tick(Minecraft mc) {
 
-		if (!Backend.isGameActive() || event.phase == TickEvent.Phase.START) {
+		if (!Backend.isGameActive()) {
 			return;
 		}
-		Minecraft mc = Minecraft.getInstance();
 		ClientLevel world = mc.level;
 		AnimationTickHolder.tick();
 
 		instanceWorlds.get(world).tick();
 	}
 
-	@SubscribeEvent
 	public static void onBeginFrame(BeginFrameEvent event) {
 		if (Backend.isGameActive()) {
 			instanceWorlds.get(event.getWorld())
@@ -71,7 +61,6 @@ public class InstancedRenderDispatcher {
 		}
 	}
 
-	@SubscribeEvent
 	public static void renderLayer(RenderLayerEvent event) {
 		if (event.layer == null) return;
 
@@ -82,7 +71,6 @@ public class InstancedRenderDispatcher {
 		instanceWorlds.get(world).renderLayer(event);
 	}
 
-	@SubscribeEvent
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		ClientLevel world = event.getWorld();
 		if (Backend.getInstance()
