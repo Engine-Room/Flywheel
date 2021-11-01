@@ -1,11 +1,7 @@
 package com.jozufozu.flywheel.util;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -16,30 +12,12 @@ import net.minecraft.world.IWorld;
 
 public class WorldAttached<T> {
 
-	// weak references to prevent leaking hashmaps when a WorldAttached is GC'd during runtime
-	static List<WeakReference<Map<IWorld, ?>>> allMaps = new ArrayList<>();
 	private final Map<IWorld, T> attached;
 	private final Function<IWorld, T> factory;
 
 	public WorldAttached(Function<IWorld, T> factory) {
 		this.factory = factory;
-		attached = new HashMap<>();
-		allMaps.add(new WeakReference<>(attached));
-	}
-
-	public static void invalidateWorld(IWorld world) {
-		Iterator<WeakReference<Map<IWorld, ?>>> i = allMaps.iterator();
-		while (i.hasNext()) {
-			Map<IWorld, ?> map = i.next()
-					.get();
-			if (map == null) {
-				// If the map has been GC'd, remove the weak reference
-				i.remove();
-			} else {
-				// Prevent leaks
-				map.remove(world);
-			}
-		}
+		attached = new WeakHashMap<>();
 	}
 
 	@Nonnull
