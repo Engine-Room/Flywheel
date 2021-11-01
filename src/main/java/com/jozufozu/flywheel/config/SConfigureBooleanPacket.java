@@ -19,18 +19,20 @@ public class SConfigureBooleanPacket {
 	}
 
 	public SConfigureBooleanPacket(PacketBuffer buffer) {
-		target = BooleanConfig.values()[buffer.readByte()];
-		directive = BooleanDirective.values()[buffer.readByte()];
+		target = BooleanConfig.decode(buffer);
+		directive = BooleanDirective.decode(buffer);
 	}
 
 	public void encode(PacketBuffer buffer) {
-		buffer.writeByte(target.ordinal());
-		buffer.writeByte(directive.ordinal());
+		target.encode(buffer);
+		directive.encode(buffer);
 	}
 
 	public void execute(Supplier<NetworkEvent.Context> ctx) {
-		target.receiver.get()
-				.accept(directive);
+		if (directive != null) {
+			target.receiver.get()
+					.accept(directive);
+		}
 		ctx.get()
 				.setPacketHandled(true);
 	}

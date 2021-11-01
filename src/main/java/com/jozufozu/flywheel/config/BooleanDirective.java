@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.config;
 
+import net.minecraft.network.PacketBuffer;
+
 public enum BooleanDirective {
 	TRUE(true),
 	FALSE(false),
@@ -16,7 +18,21 @@ public enum BooleanDirective {
 	}
 
 	public boolean get() {
-		if (this == DISPLAY) throw new IllegalStateException("Cannot get value from DISPLAY directive");
+		if (this == DISPLAY) throw new IllegalStateException("DISPLAY directive has no value");
 		return b;
+	}
+
+	/**
+	 * Encode a variant of BooleanDirective. Symmetrical function to {@link #decode}
+	 */
+	public void encode(PacketBuffer buffer) {
+		buffer.writeByte(this.ordinal());
+	}
+
+	/**
+	 * Safely decode a variant of BooleanDirective. Symmetrical function to {@link #encode}
+	 */
+	public static BooleanDirective decode(PacketBuffer buffer) {
+		return values()[buffer.readByte()];
 	}
 }
