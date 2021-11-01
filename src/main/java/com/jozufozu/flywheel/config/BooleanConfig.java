@@ -8,6 +8,7 @@ import com.jozufozu.flywheel.backend.OptifineHandler;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -18,7 +19,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public enum BooleanConfig {
 	ENGINE(() -> BooleanConfig::enabled),
 	NORMAL_OVERLAY(() -> BooleanConfig::normalOverlay),
-	CHUNK_CACHING(() -> BooleanConfig::chunkCaching),
 	;
 
 	final Supplier<Consumer<BooleanDirective>> receiver;
@@ -29,6 +29,27 @@ public enum BooleanConfig {
 
 	public SConfigureBooleanPacket packet(BooleanDirective directive) {
 		return new SConfigureBooleanPacket(this, directive);
+	}
+
+	/**
+	 * Encode a variant of BooleanConfig. Symmetrical function to {@link #decode}
+	 */
+	public void encode(PacketBuffer buffer) {
+		buffer.writeByte(this.ordinal());
+	}
+
+	/**
+	 * Safely decode a variant of BooleanConfig. Symmetrical function to {@link #encode}
+	 */
+	public static BooleanConfig decode(PacketBuffer buffer) {
+		byte t = buffer.readByte();
+		BooleanConfig[] values = values();
+		// Protects against version differences.
+		// Shouldn't ever happen but do a sanity check for safety.
+		if (t >= 0 && t < values.length)
+			return values[t];
+		else
+			return null;
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -70,25 +91,6 @@ public enum BooleanConfig {
 		ITextComponent text = boolToText(FlwConfig.get().client.debugNormals.get()).append(new StringTextComponent(" normal debug mode").withStyle(TextFormatting.WHITE));
 
 		player.displayClientMessage(text, false);
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	private static void chunkCaching(BooleanDirective state) {
-		ClientPlayerEntity player = Minecraft.getInstance().player;
-		if (player == null || state == null) return;
-
-		if (state == BooleanDirective.DISPLAY) {
-			ITextComponent text = new StringTextComponent("Chunk caching is currently: ").append(boolToText(FlwConfig.get().client.chunkCaching.get()));
-			player.displayClientMessage(text, false);
-			return;
-		}
-
-		FlwConfig.get().client.chunkCaching.set(state.get());
-
-		ITextComponent text = boolToText(FlwConfig.get().client.chunkCaching.get()).append(new StringTextComponent(" chunk caching").withStyle(TextFormatting.WHITE));
-
-		player.displayClientMessage(text, false);
-		Backend.reloadWorldRenderers();
 	}
 
 	private static IFormattableTextComponent boolToText(boolean b) {
