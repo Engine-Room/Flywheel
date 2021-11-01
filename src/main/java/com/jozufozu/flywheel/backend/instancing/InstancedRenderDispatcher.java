@@ -53,7 +53,8 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static void enqueueUpdate(TileEntity te) {
-		getTiles(te.getLevel()).queueUpdate(te);
+		if (te.hasLevel() && te.getLevel() instanceof ClientWorld)
+			getTiles(te.getLevel()).queueUpdate(te);
 	}
 
 	public static void enqueueUpdate(Entity entity) {

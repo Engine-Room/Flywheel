@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.util.WorldAttached;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.world.ClientWorld;
@@ -42,6 +43,15 @@ public class ForgeEvents {
 
 		if (Backend.isFlywheelWorld(world)) {
 			InstancedRenderDispatcher.loadAllInWorld((ClientWorld) world);
+		}
+	}
+
+	@SubscribeEvent
+	public static void onUnloadWorld(WorldEvent.Unload event) {
+		IWorld world = event.getWorld();
+
+		if (Backend.isFlywheelWorld(world)) {
+			WorldAttached.invalidateWorld(world);
 		}
 	}
 
