@@ -46,4 +46,13 @@ public class ForgeEvents {
 		}
 	}
 
+	@SubscribeEvent
+	public static void onUnloadWorld(WorldEvent.Unload event) {
+		IWorld world = event.getWorld();
+
+		if (Backend.isFlywheelWorld(world)) {
+			WorldAttached.invalidateWorld(world);
+		}
+	}
+
 }
