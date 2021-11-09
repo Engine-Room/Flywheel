@@ -30,6 +30,13 @@ public abstract class AbstractInstance implements IInstance, ILightUpdateListene
 	}
 
 	/**
+	 * Initialize models here.
+	 */
+	public void init() {
+
+	}
+
+	/**
 	 * Free any acquired resources.
 	 */
 	public abstract void remove();

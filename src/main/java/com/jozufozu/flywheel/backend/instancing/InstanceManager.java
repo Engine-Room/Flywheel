@@ -286,6 +286,7 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 		AbstractInstance renderer = createRaw(obj);
 
 		if (renderer != null) {
+			renderer.init();
 			renderer.updateLight();
 			LightUpdater.get(renderer.world)
 					.addListener(renderer);
