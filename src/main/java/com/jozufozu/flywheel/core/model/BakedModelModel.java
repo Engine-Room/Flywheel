@@ -57,6 +57,11 @@ public class BakedModelModel implements IModel {
 	}
 
 	@Override
+	public String name() {
+		return model.toString();
+	}
+
+	@Override
 	public void buffer(VecBuffer buffer) {
 
 		Minecraft mc = Minecraft.getInstance();

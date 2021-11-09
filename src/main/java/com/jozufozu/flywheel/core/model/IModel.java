@@ -28,6 +28,11 @@ import com.jozufozu.flywheel.core.QuadConverter;
 public interface IModel {
 
 	/**
+	 * A name uniquely identifying this model.
+	 */
+	String name();
+
+	/**
 	 * Copy this model into the given buffer.
 	 */
 	void buffer(VecBuffer buffer);

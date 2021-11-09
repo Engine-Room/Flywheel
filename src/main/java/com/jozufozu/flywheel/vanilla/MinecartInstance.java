@@ -155,7 +155,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 
 	private IModel getBodyModel() {
 		int y = -3;
-		return ModelPart.builder(64, 32)
+		return ModelPart.builder("minecart", 64, 32)
 				.cuboid().invertYZ().start(-10, -8, -y).size(20, 16, 2).textureOffset(0, 10).rotateX(((float)Math.PI / 2F)).endCuboid()
 				.cuboid().invertYZ().start(-8, y, -10).size(16, 8, 2).rotateY(((float)Math.PI * 1.5F)).endCuboid()
 				.cuboid().invertYZ().start(-8, y, -10).size(16, 8, 2).rotateY(((float)Math.PI / 2F)).endCuboid()

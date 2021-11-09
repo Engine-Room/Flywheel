@@ -137,7 +137,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 
 		switch (chestType) {
 		case LEFT:
-			return ModelPart.builder(64, 64)
+			return ModelPart.builder("chest_base_left", 64, 64)
 				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 19)
@@ -146,7 +146,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 				.endCuboid()
 				.build();
 		case RIGHT:
-			return ModelPart.builder(64, 64)
+			return ModelPart.builder("chest_base_right", 64, 64)
 				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 19)
@@ -156,7 +156,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 				.build();
 		}
 
-		return ModelPart.builder(64, 64)
+		return ModelPart.builder("chest_base", 64, 64)
 				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 19)
@@ -170,7 +170,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 
 		switch (chestType) {
 		case LEFT:
-		return ModelPart.builder(64, 64)
+		return ModelPart.builder("chest_lid_left", 64, 64)
 				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 0)
@@ -183,7 +183,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 				.endCuboid()
 				.build();
 		case RIGHT:
-		return ModelPart.builder(64, 64)
+		return ModelPart.builder("chest_lid_right", 64, 64)
 				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 0)
@@ -197,7 +197,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 				.build();
 		}
 
-		return ModelPart.builder(64, 64)
+		return ModelPart.builder("chest_lid", 64, 64)
 				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 0)
