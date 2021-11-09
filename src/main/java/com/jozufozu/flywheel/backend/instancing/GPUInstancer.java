@@ -9,6 +9,7 @@ import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
+import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.model.IBufferedModel;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
 import com.jozufozu.flywheel.backend.struct.StructType;
@@ -73,14 +74,22 @@ public class GPUInstancer<D extends InstanceData> implements Instancer<D> {
 		if (invalid()) return;
 
 		vao.bind();
-		renderSetup();
+		GlError.pollAndThrow(() -> modelData.name() + "_bind");
 
-		if (glInstanceCount > 0) model.drawInstances(glInstanceCount);
+		renderSetup();
+		GlError.pollAndThrow(() -> modelData.name() + "_setup");
+
+		if (glInstanceCount > 0) {
+			model.drawInstances(glInstanceCount);
+			GlError.pollAndThrow(() -> modelData.name() + "_draw");
+		}
 
 		// persistent mapping sync point
 		instanceVBO.doneForThisFrame();
 
 		vao.unbind();
+
+		GlError.pollAndThrow(() -> modelData.name() + "_unbind");
 	}
 
 	private boolean invalid() {

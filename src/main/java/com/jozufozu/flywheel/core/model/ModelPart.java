@@ -10,9 +10,11 @@ public class ModelPart implements IModel {
 
 	private final List<PartBuilder.CuboidBuilder> cuboids;
 	private int vertices;
+	private final String name;
 
-	public ModelPart(List<PartBuilder.CuboidBuilder> cuboids) {
+	public ModelPart(List<PartBuilder.CuboidBuilder> cuboids, String name) {
 		this.cuboids = cuboids;
+		this.name = name;
 
 		vertices = 0;
 
@@ -21,8 +23,13 @@ public class ModelPart implements IModel {
 		}
 	}
 
-	public static PartBuilder builder(int sizeU, int sizeV) {
-		return new PartBuilder(sizeU, sizeV);
+	public static PartBuilder builder(String name, int sizeU, int sizeV) {
+		return new PartBuilder(name, sizeU, sizeV);
+	}
+
+	@Override
+	public String name() {
+		return name;
 	}
 
 	@Override

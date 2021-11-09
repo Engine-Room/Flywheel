@@ -37,7 +37,7 @@ public enum BooleanConfig {
 		if (player == null || state == null) return;
 
 		if (state == BooleanDirective.DISPLAY) {
-			Component text = new TextComponent("Flywheel renderer is currently: ").append(boolToText(FlwConfig.get().client.enabled.get()));
+			Component text = new TextComponent("Flywheel renderer is currently: ").append(boolToText(FlwConfig.get().enabled()));
 			player.displayClientMessage(text, false);
 			return;
 		}
@@ -47,7 +47,7 @@ public enum BooleanConfig {
 
 		FlwConfig.get().client.enabled.set(enabled);
 
-		Component text = boolToText(FlwConfig.get().client.enabled.get()).append(new TextComponent(" Flywheel renderer").withStyle(ChatFormatting.WHITE));
+		Component text = boolToText(FlwConfig.get().enabled()).append(new TextComponent(" Flywheel renderer").withStyle(ChatFormatting.WHITE));
 		Component error = new TextComponent("Flywheel renderer does not support Optifine Shaders").withStyle(ChatFormatting.RED);
 
 		player.displayClientMessage(cannotUse ? error : text, false);
@@ -60,14 +60,14 @@ public enum BooleanConfig {
 		if (player == null || state == null) return;
 
 		if (state == BooleanDirective.DISPLAY) {
-			Component text = new TextComponent("Normal debug mode is currently: ").append(boolToText(FlwConfig.get().client.debugNormals.get()));
+			Component text = new TextComponent("Normal debug mode is currently: ").append(boolToText(FlwConfig.get().debugNormals()));
 			player.displayClientMessage(text, false);
 			return;
 		}
 
 		FlwConfig.get().client.debugNormals.set(state.get());
 
-		Component text = boolToText(FlwConfig.get().client.debugNormals.get()).append(new TextComponent(" normal debug mode").withStyle(ChatFormatting.WHITE));
+		Component text = boolToText(FlwConfig.get().debugNormals()).append(new TextComponent(" normal debug mode").withStyle(ChatFormatting.WHITE));
 
 		player.displayClientMessage(text, false);
 	}
@@ -78,14 +78,14 @@ public enum BooleanConfig {
 		if (player == null || state == null) return;
 
 		if (state == BooleanDirective.DISPLAY) {
-			Component text = new TextComponent("Chunk caching is currently: ").append(boolToText(FlwConfig.get().client.chunkCaching.get()));
+			Component text = new TextComponent("Chunk caching is currently: ").append(boolToText(FlwConfig.get().chunkCaching()));
 			player.displayClientMessage(text, false);
 			return;
 		}
 
 		FlwConfig.get().client.chunkCaching.set(state.get());
 
-		Component text = boolToText(FlwConfig.get().client.chunkCaching.get()).append(new TextComponent(" chunk caching").withStyle(ChatFormatting.WHITE));
+		Component text = boolToText(FlwConfig.get().chunkCaching()).append(new TextComponent(" chunk caching").withStyle(ChatFormatting.WHITE));
 
 		player.displayClientMessage(text, false);
 		Backend.reloadWorldRenderers();

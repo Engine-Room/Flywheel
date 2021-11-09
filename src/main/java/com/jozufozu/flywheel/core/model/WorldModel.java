@@ -15,9 +15,16 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 public class WorldModel implements IModel {
 
 	private final BufferBuilderReader reader;
+	private final String name;
 
-	public WorldModel(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks) {
+	public WorldModel(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks, String name) {
 		reader = new BufferBuilderReader(ModelUtil.getBufferBuilderFromTemplate(renderWorld, layer, blocks));
+		this.name = name;
+	}
+
+	@Override
+	public String name() {
+		return name;
 	}
 
 	@Override

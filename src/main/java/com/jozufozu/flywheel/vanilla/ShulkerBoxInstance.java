@@ -101,7 +101,7 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxBlockEntity
 	}
 
 	private ModelPart makeBaseModel() {
-		return ModelPart.builder(64, 64)
+		return ModelPart.builder("shulker_base", 64, 64)
 				.sprite(texture)
 				.cuboid()
 				.textureOffset(0, 28)
@@ -112,7 +112,7 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxBlockEntity
 	}
 
 	private ModelPart makeLidModel() {
-		return ModelPart.builder(64, 64)
+		return ModelPart.builder("shulker_lid", 64, 64)
 				.sprite(texture)
 				.cuboid()
 				.size(16, 12, 16)

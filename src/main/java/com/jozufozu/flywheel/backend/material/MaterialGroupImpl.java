@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.state.IRenderState;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
@@ -45,6 +46,8 @@ public class MaterialGroupImpl<P extends WorldProgram> implements MaterialGroup 
 	public void render(Matrix4f viewProjection, double camX, double camY, double camZ) {
 		for (MaterialRenderer<P> renderer : renderers) {
 			renderer.render(viewProjection, camX, camY, camZ);
+
+			GlError.pollAndThrow(renderer.material.spec.name::toString);
 		}
 	}
 
