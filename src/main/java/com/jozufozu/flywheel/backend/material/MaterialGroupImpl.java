@@ -46,8 +46,6 @@ public class MaterialGroupImpl<P extends WorldProgram> implements MaterialGroup 
 	public void render(Matrix4f viewProjection, double camX, double camY, double camZ) {
 		for (MaterialRenderer<P> renderer : renderers) {
 			renderer.render(viewProjection, camX, camY, camZ);
-
-			GlError.pollAndThrow(renderer.material.spec.name::toString);
 		}
 	}
 
