@@ -36,6 +36,7 @@ public class GPULightVolume extends LightVolume {
 	private final GlTexture glTexture;
 
 	private final RGPixelFormat pixelFormat;
+	private final GlTextureUnit textureUnit = GlTextureUnit.T4;
 	protected boolean bufferDirty;
 
 	public GPULightVolume(ImmutableBox sampleVolume) {
@@ -70,7 +71,7 @@ public class GPULightVolume extends LightVolume {
 		// just in case something goes wrong, or we accidentally call this before this volume is properly disposed of.
 		if (lightData == null) return;
 
-		GlTextureUnit.T4.makeActive();
+		textureUnit.makeActive();
 		glTexture.bind();
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
