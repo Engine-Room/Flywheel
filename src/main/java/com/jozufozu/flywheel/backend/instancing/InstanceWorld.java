@@ -9,11 +9,10 @@ import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.util.ChunkIter;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.jozufozu.flywheel.util.TextureBinder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -103,9 +102,7 @@ public class InstanceWorld {
 	public void renderLayer(RenderLayerEvent event) {
 		event.type.setupRenderState();
 
-		ShaderInstance shader = RenderSystem.getShader();
-		if (shader != null)
-			shader.apply();
+		TextureBinder.bindActiveTextures();
 
 		materialManager.render(event.layer, event.viewProjection, event.camX, event.camY, event.camZ);
 

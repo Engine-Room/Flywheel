@@ -18,7 +18,8 @@
     "InstanceAddMixin",
     "InstanceRemoveMixin",
     "LeakChunkStorageArrayMixin",
-    "PausedPartialTickAccessor"
+    "PausedPartialTickAccessor",
+    "ShaderInstanceMixin"
   ],
   "mixins": [
     "matrix.Matrix3fMixin",
