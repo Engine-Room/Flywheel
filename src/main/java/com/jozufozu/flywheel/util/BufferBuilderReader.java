@@ -2,10 +2,9 @@ package com.jozufozu.flywheel.util;
 
 import java.nio.ByteBuffer;
 
-import com.mojang.datafixers.util.Pair;
-
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.datafixers.util.Pair;
 
 public class BufferBuilderReader {
 

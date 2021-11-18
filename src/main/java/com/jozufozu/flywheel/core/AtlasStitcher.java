@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.client.event.TextureStitchEvent;
 
 /**

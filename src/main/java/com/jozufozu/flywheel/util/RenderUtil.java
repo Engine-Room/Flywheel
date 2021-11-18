@@ -3,11 +3,10 @@ package com.jozufozu.flywheel.util;
 import java.util.function.Supplier;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-
-import net.minecraft.core.Direction;
-import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+
+import net.minecraft.core.Direction;
 
 public class RenderUtil {
 

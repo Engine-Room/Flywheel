@@ -9,8 +9,8 @@ import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.light.LightUpdater;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
 
 @Mixin(ClientPacketListener.class)

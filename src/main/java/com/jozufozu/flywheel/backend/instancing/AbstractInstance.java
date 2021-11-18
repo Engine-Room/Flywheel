@@ -12,8 +12,8 @@ import com.jozufozu.flywheel.light.LightProvider;
 import com.jozufozu.flywheel.light.ListenerStatus;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
 
 /**
  * A general interface providing information about any type of thing that could use Flywheel's instanced rendering.

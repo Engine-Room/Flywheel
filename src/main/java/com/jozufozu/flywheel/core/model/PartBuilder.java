@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Set;
 
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.core.Direction;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
 
 public class PartBuilder {
 

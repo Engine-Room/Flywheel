@@ -1,11 +1,12 @@
 package com.jozufozu.flywheel.util;
 
-import net.minecraft.client.renderer.block.model.BakedQuad;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
-import net.minecraft.world.phys.Vec2;
 import com.mojang.math.Vector3f;
+
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.world.phys.Vec2;
 
 public class BakedQuadWrapper {
 	private final FormatCache formatCache = new FormatCache();

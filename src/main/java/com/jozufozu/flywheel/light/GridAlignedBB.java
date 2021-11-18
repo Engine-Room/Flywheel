@@ -2,11 +2,11 @@ package com.jozufozu.flywheel.light;
 
 import com.jozufozu.flywheel.util.RenderUtil;
 
-import net.minecraft.core.Direction;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.phys.AABB;
 
 public class GridAlignedBB implements ImmutableBox {
 	private int minX;

@@ -11,9 +11,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.jozufozu.flywheel.core.atlas.AtlasInfo;
 
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.ProfilerFiller;
 
 @Mixin(TextureAtlas.class)
 public abstract class AtlasDataMixin {
