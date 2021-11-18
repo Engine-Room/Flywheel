@@ -5,25 +5,23 @@
   "compatibilityLevel": "JAVA_16",
   "refmap": "flywheel.refmap.json",
   "client": [
-    "CancelEntityRenderMixin",
-    "ChunkRebuildHooksMixin",
-    "FixFabulousDepthMixin",
-    "RenderHooksMixin",
-    "ShaderCloseMixin",
     "atlas.AtlasDataMixin",
     "atlas.SheetDataAccessor",
     "light.LightUpdateMixin",
     "light.NetworkLightUpdateMixin",
-    "LevelRendererAccessor",
+    "matrix.Matrix3fMixin",
+    "matrix.Matrix4fMixin",
+    "CancelEntityRenderMixin",
+    "ChunkRebuildHooksMixin",
+    "FixFabulousDepthMixin",
     "InstanceAddMixin",
     "InstanceRemoveMixin",
     "LeakChunkStorageArrayMixin",
+    "LevelRendererAccessor",
     "PausedPartialTickAccessor",
+    "RenderHooksMixin",
+    "ShaderCloseMixin",
     "ShaderInstanceMixin"
-  ],
-  "mixins": [
-    "matrix.Matrix3fMixin",
-    "matrix.Matrix4fMixin"
   ],
   "injectors": {
     "defaultRequire": 1

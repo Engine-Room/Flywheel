@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.model;
 
-import static org.lwjgl.opengl.GL20.glDrawArrays;
+import static org.lwjgl.opengl.GL11.glDrawArrays;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;

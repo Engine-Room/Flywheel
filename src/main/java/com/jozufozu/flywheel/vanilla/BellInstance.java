@@ -7,12 +7,12 @@ import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
 import com.jozufozu.flywheel.core.model.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
-
-import net.minecraft.client.renderer.blockentity.BellRenderer;
-import net.minecraft.world.level.block.entity.BellBlockEntity;
-import net.minecraft.util.Mth;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+
+import net.minecraft.client.renderer.blockentity.BellRenderer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.entity.BellBlockEntity;
 
 public class BellInstance extends TileEntityInstance<BellBlockEntity> implements IDynamicInstance {
 

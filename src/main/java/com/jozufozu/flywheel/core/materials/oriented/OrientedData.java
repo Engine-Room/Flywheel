@@ -3,10 +3,10 @@ package com.jozufozu.flywheel.core.materials.oriented;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.materials.BasicData;
 import com.jozufozu.flywheel.util.vec.Vec3;
-
-import net.minecraft.core.BlockPos;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+
+import net.minecraft.core.BlockPos;
 
 public class OrientedData extends BasicData {
 

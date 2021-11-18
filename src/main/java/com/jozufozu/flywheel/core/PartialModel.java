@@ -23,31 +23,38 @@ import net.minecraftforge.client.model.ModelLoader;
  */
 public class PartialModel {
 
+	private static final List<PartialModel> ALL = new ArrayList<>();
 	private static boolean tooLate = false;
-	private static final List<PartialModel> all = new ArrayList<>();
 
 	protected final ResourceLocation modelLocation;
 	protected BakedModel bakedModel;
 
 	public PartialModel(ResourceLocation modelLocation) {
-
 		if (tooLate) throw new RuntimeException("PartialModel '" + modelLocation + "' loaded after ModelRegistryEvent");
 
 		this.modelLocation = modelLocation;
-		all.add(this);
+		ALL.add(this);
 	}
 
 	public static void onModelRegistry(ModelRegistryEvent event) {
-		for (PartialModel partial : all)
-			ModelLoader.addSpecialModel(partial.modelLocation);
+		for (PartialModel partial : ALL)
+			ModelLoader.addSpecialModel(partial.getLocation());
 
 		tooLate = true;
 	}
 
 	public static void onModelBake(ModelBakeEvent event) {
 		Map<ResourceLocation, BakedModel> modelRegistry = event.getModelRegistry();
-		for (PartialModel partial : all)
-			partial.bakedModel = modelRegistry.get(partial.modelLocation);
+		for (PartialModel partial : ALL)
+			partial.set(modelRegistry.get(partial.getLocation()));
+	}
+
+	protected void set(BakedModel bakedModel) {
+		this.bakedModel = bakedModel;
+	}
+
+	public ResourceLocation getLocation() {
+		return modelLocation;
 	}
 
 	public BakedModel get() {

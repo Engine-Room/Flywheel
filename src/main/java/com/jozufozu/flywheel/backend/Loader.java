@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.backend;
 
+import java.util.Collection;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -24,12 +26,6 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.resource.IResourceType;
-import net.minecraftforge.resource.VanillaResourceType;
-
-import javax.annotation.Nullable;
-
-import java.util.Collection;
 
 /**
  * The main entity for loading shaders.
@@ -127,11 +123,5 @@ public class Loader implements ResourceManagerReloadListener {
 				Backend.log.error(e);
 			}
 		}
-	}
-
-	@Nullable
-	@Override
-	public IResourceType getResourceType() {
-		return VanillaResourceType.SHADERS;
 	}
 }

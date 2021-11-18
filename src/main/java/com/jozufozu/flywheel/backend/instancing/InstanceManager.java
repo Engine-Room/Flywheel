@@ -12,12 +12,12 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
 import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
 import com.jozufozu.flywheel.light.LightUpdater;
+import com.mojang.math.Vector3f;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import com.mojang.math.Vector3f;
 
 public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginShiftListener {
 

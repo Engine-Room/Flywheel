@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.backend.gl.buffer;
 
+import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
 import static org.lwjgl.opengl.GL44.GL_MAP_COHERENT_BIT;
 import static org.lwjgl.opengl.GL44.GL_MAP_PERSISTENT_BIT;
-import static org.lwjgl.opengl.GL44.GL_MAP_WRITE_BIT;
 
 import java.nio.ByteBuffer;
 

@@ -8,11 +8,11 @@ import java.util.List;
 
 import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
-
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.math.Matrix4f;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import com.mojang.math.Matrix4f;
 
 public class WorldProgram extends ExtensibleGlProgram {
 	protected final int uTime = getUniformLocation("uTime");

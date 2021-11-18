@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.core.materials.oriented.writer;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.backend.struct.UnsafeBufferWriter;
 import com.jozufozu.flywheel.backend.struct.StructType;
+import com.jozufozu.flywheel.backend.struct.UnsafeBufferWriter;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
 
 public class UnsafeOrientedWriter extends UnsafeBufferWriter<OrientedData> {

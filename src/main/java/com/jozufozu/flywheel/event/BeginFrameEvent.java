@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.event;
 
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.Event;
 

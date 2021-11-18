@@ -9,14 +9,12 @@ import static org.lwjgl.opengl.GL20.glUseProgram;
 import java.nio.FloatBuffer;
 
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
-import com.jozufozu.flywheel.util.RenderUtil;
+import com.mojang.math.Matrix4f;
 
 import net.minecraft.resources.ResourceLocation;
-import com.mojang.math.Matrix4f;
 
 public abstract class GlProgram extends GlObject {
 	private static final FloatBuffer floatBuffer = MemoryStack.stackGet()

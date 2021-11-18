@@ -10,13 +10,13 @@ import com.jozufozu.flywheel.backend.state.RenderLayer;
 import com.jozufozu.flywheel.core.WorldContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.util.WeakHashSet;
+import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
-import com.mojang.math.Matrix4f;
 import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 
 public class MaterialManagerImpl<P extends WorldProgram> implements MaterialManager {
 

@@ -10,9 +10,9 @@ import com.google.common.collect.Lists;
 import com.jozufozu.flywheel.util.ResourceUtil;
 import com.jozufozu.flywheel.util.StreamUtil;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.resources.ResourceLocation;
 
 /**
  * The main object for loading and parsing source files.

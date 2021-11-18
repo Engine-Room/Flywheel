@@ -1,10 +1,10 @@
 package com.jozufozu.flywheel.config;
 
 
+import java.util.function.Supplier;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
-
-import java.util.function.Supplier;
 
 /**
  * Thanks, @zelophed

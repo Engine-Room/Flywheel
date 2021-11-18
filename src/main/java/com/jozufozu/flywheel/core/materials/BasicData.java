@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.core.materials;
 
-import org.lwjgl.system.MemoryUtil;
-
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 
