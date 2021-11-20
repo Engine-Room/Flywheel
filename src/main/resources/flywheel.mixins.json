@@ -4,20 +4,23 @@
   "package": "com.jozufozu.flywheel.mixin",
   "compatibilityLevel": "JAVA_16",
   "client": [
-    "CancelEntityRenderMixin",
-    "ChunkRebuildHooksMixin",
-    "FixFabulousDepthMixin",
-    "RenderHooksMixin",
-    "ShaderCloseMixin",
     "atlas.AtlasDataMixin",
     "atlas.SheetDataAccessor",
     "light.LightUpdateMixin",
     "light.NetworkLightUpdateMixin",
-    "LevelRendererAccessor",
+    "matrix.Matrix3fMixin",
+    "matrix.Matrix4fMixin",
+    "CancelEntityRenderMixin",
+    "ChunkRebuildHooksMixin",
+    "FixFabulousDepthMixin",
     "InstanceAddMixin",
     "InstanceRemoveMixin",
     "LeakChunkStorageArrayMixin",
-    "PausedPartialTickAccessor"
+    "LevelRendererAccessor",
+    "PausedPartialTickAccessor",
+    "RenderHooksMixin",
+    "ShaderCloseMixin",
+    "ShaderInstanceMixin"
     ,
     "fabric.BufferBuilderAccessor",
     "fabric.ClientLevelMixin",
@@ -25,10 +28,6 @@
     "fabric.Matrix4fMixin",
     "fabric.MinecraftMixin",
     "fabric.VertexFormatAccessor"
-  ],
-  "mixins": [
-    "matrix.Matrix3fMixin",
-    "matrix.Matrix4fMixin"
   ],
   "injectors": {
     "defaultRequire": 1

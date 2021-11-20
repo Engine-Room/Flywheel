@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.mixin;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,10 +11,9 @@ import com.google.common.collect.Lists;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.util.ClassInstanceMultiMap;
 
 @Mixin(LevelRenderer.class)
 public class CancelEntityRenderMixin {

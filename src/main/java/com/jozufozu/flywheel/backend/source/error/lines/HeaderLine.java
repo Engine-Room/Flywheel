@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.backend.source.error.lines;
 
-import com.jozufozu.flywheel.backend.source.error.Level;
-
 public record HeaderLine(String level, CharSequence message) implements ErrorLine {
 
 	@Override

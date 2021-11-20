@@ -11,15 +11,15 @@ import com.jozufozu.flywheel.core.model.IModel;
 import com.jozufozu.flywheel.core.model.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
+import com.mojang.math.Vector3f;
 
 import net.minecraft.core.Vec3i;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import com.mojang.math.Vector3f;
 
 public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance<T> implements IDynamicInstance, ITickableInstance {
 
@@ -155,7 +155,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 
 	private IModel getBodyModel() {
 		int y = -3;
-		return ModelPart.builder(64, 32)
+		return ModelPart.builder("minecart", 64, 32)
 				.cuboid().invertYZ().start(-10, -8, -y).size(20, 16, 2).textureOffset(0, 10).rotateX(((float)Math.PI / 2F)).endCuboid()
 				.cuboid().invertYZ().start(-8, y, -10).size(16, 8, 2).rotateY(((float)Math.PI * 1.5F)).endCuboid()
 				.cuboid().invertYZ().start(-8, y, -10).size(16, 8, 2).rotateY(((float)Math.PI / 2F)).endCuboid()

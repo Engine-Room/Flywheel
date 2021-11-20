@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.backend.gl.error;
 
+import java.util.function.Supplier;
+
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
@@ -34,5 +36,13 @@ public enum GlError {
 
 	public static GlError poll() {
 		return errorLookup.get(GL20.glGetError());
+	}
+
+	public static void pollAndThrow(Supplier<String> context) {
+		// TODO: build flag? to enable or disable this function
+		GlError poll = GlError.poll();
+		if (poll != null) {
+			//throw new GlException(poll, context.get());
+		}
 	}
 }

@@ -7,7 +7,6 @@ import java.util.Map;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.state.IRenderState;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
-
 import com.mojang.math.Matrix4f;
 
 /**

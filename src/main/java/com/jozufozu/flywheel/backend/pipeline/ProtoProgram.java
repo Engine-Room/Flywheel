@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.backend.pipeline;
 
+import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
-import static org.lwjgl.opengl.GL20.GL_TRUE;
 import static org.lwjgl.opengl.GL20.glAttachShader;
 import static org.lwjgl.opengl.GL20.glBindAttribLocation;
 import static org.lwjgl.opengl.GL20.glCreateProgram;

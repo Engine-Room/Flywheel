@@ -27,6 +27,8 @@ public class BlockModel implements IModel {
 
 	private final BufferBuilderReader reader;
 
+	private final String name;
+
 	public BlockModel(BlockState state) {
 		this(Minecraft.getInstance()
 				.getBlockRenderer()
@@ -39,6 +41,12 @@ public class BlockModel implements IModel {
 
 	public BlockModel(BakedModel model, BlockState referenceState, PoseStack ms) {
 		reader = new BufferBuilderReader(getBufferBuilder(model, referenceState, ms));
+		name = referenceState.toString();
+	}
+
+	@Override
+	public String name() {
+		return name;
 	}
 
 	@Override

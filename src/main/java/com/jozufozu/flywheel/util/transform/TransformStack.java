@@ -1,10 +1,11 @@
 package com.jozufozu.flywheel.util.transform;
 
-import net.minecraft.core.Direction;
 import com.mojang.math.Quaternion;
-import net.minecraft.world.phys.Vec3;
 import com.mojang.math.Vector3f;
+
+import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.phys.Vec3;
 
 public interface TransformStack {
 	Vec3 CENTER = new Vec3(0.5, 0.5, 0.5);

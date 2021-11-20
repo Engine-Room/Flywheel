@@ -29,25 +29,37 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
  */
 public class PartialModel {
 
-	private static final List<PartialModel> all = new ArrayList<>();
+	private static final List<PartialModel> ALL = new ArrayList<>();
+	private static boolean tooLate = false;
 
 	protected final ResourceLocation modelLocation;
 	protected BakedModel bakedModel;
 
 	public PartialModel(ResourceLocation modelLocation) {
+		if (tooLate) throw new RuntimeException("PartialModel '" + modelLocation + "' loaded after ModelRegistryEvent");
 
 		this.modelLocation = modelLocation;
-		all.add(this);
+		ALL.add(this);
 	}
 
 	public static void onModelRegistry(ResourceManager manager, Consumer<ResourceLocation> out) {
-		for (PartialModel partial : all)
+		for (PartialModel partial : ALL)
 			out.accept(partial.modelLocation);
+
+		tooLate = true;
 	}
 
 	public static void onModelBake(ModelManager manager) {
-		for (PartialModel partial : all)
-			partial.bakedModel = BakedModelManagerHelper.getModel(manager, partial.modelLocation);
+		for (PartialModel partial : ALL)
+			partial.set(BakedModelManagerHelper.getModel(manager, partial.getLocation()));
+	}
+
+	protected void set(BakedModel bakedModel) {
+		this.bakedModel = bakedModel;
+	}
+
+	public ResourceLocation getLocation() {
+		return modelLocation;
 	}
 
 	public BakedModel get() {

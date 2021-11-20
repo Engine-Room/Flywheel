@@ -14,20 +14,20 @@ import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
 import com.jozufozu.flywheel.core.model.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.world.level.block.AbstractChestBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ChestBlock;
-import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.block.DoubleBlockCombiner;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.LidBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.DoubleBlockCombiner;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
+import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileEntityInstance<T> implements IDynamicInstance {
 
@@ -137,7 +137,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 
 		switch (chestType) {
 		case LEFT:
-			return ModelPart.builder(64, 64)
+			return ModelPart.builder("chest_base_left", 64, 64)
 				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 19)
@@ -146,7 +146,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 				.endCuboid()
 				.build();
 		case RIGHT:
-			return ModelPart.builder(64, 64)
+			return ModelPart.builder("chest_base_right", 64, 64)
 				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 19)
@@ -156,7 +156,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 				.build();
 		}
 
-		return ModelPart.builder(64, 64)
+		return ModelPart.builder("chest_base", 64, 64)
 				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 19)
@@ -170,7 +170,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 
 		switch (chestType) {
 		case LEFT:
-		return ModelPart.builder(64, 64)
+		return ModelPart.builder("chest_lid_left", 64, 64)
 				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 0)
@@ -183,7 +183,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 				.endCuboid()
 				.build();
 		case RIGHT:
-		return ModelPart.builder(64, 64)
+		return ModelPart.builder("chest_lid_right", 64, 64)
 				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 0)
@@ -197,7 +197,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 				.build();
 		}
 
-		return ModelPart.builder(64, 64)
+		return ModelPart.builder("chest_lid", 64, 64)
 				.sprite(renderMaterial.sprite())
 				.cuboid()
 				.textureOffset(0, 0)

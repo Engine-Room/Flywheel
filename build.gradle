@@ -1,13 +1,13 @@
 plugins {
-    id 'fabric-loom' version '0.10-SNAPSHOT'
+    id 'fabric-loom' version "${loom_version}"
     id 'maven-publish'
-    id 'com.matthewprenger.cursegradle' version '1.4.0'
+    id 'com.matthewprenger.cursegradle' version "${cursegradle_version}"
 }
 
 boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
 
 ext.buildnumber = 0
-project.buildnumber = System.getenv('BUILD_NUMBER') != null ? System.getenv('BUILD_NUMBER') : "custom"
+project.buildnumber = System.getenv('BUILD_NUMBER') != null ? System.getenv('BUILD_NUMBER') : 'custom'
 
 version = "${mc_update_version}-${mod_version}" + (dev ? ".${buildnumber}" : '')
 group = 'com.jozufozu.flywheel'
@@ -22,21 +22,29 @@ println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getPro
 
 repositories {
     maven {
-        name "tterrag maven"
-        url "https://maven.tterrag.com/"
+        name 'tterrag maven'
+        url 'https://maven.tterrag.com/'
+    }
+    maven {
+        url 'https://maven.parchmentmc.org/'
     }
 }
 
 dependencies {
     // To change the versions see the gradle.properties file
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings loom.officialMojangMappings()
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.layered() {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
+    }
+    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
 
     // Fabric API
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
+
+    //implementation 'org.joml:joml:1.10.1'
 }
 
 processResources {
@@ -67,7 +75,7 @@ java {
 
 jar {
     from('LICENSE') {
-        rename { "${it}_${project.archivesBaseName}" }
+        rename { "${it}_${archivesBaseName}" }
     }
 }
 
@@ -75,14 +83,14 @@ jar {
 jar {
     manifest {
         attributes([
-                "Specification-Title"     : "flywheel",
-                //"Specification-Vendor": "flywheel authors",
-                "Specification-Version"   : "1", // We are version 1 of ourselves
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.version,
-                //"Implementation-Vendor": "flywheel authors",
-                "MixinConfigs"            : "flywheel.mixins.json",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                'Specification-Title'     : 'flywheel',
+                //'Specification-Vendor': 'flywheel authors',
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.version,
+                //'Implementation-Vendor': 'flywheel authors',
+                'MixinConfigs'            : 'flywheel.mixins.json',
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
 }

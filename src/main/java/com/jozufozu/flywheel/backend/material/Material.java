@@ -11,8 +11,8 @@ import com.jozufozu.flywheel.util.Pair;
 import com.jozufozu.flywheel.util.RenderUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 
 public interface Material<D extends InstanceData> {
 	/**

@@ -4,8 +4,8 @@ import com.jozufozu.flywheel.backend.state.IRenderState;
 import com.jozufozu.flywheel.backend.state.RenderLayer;
 import com.jozufozu.flywheel.backend.state.TextureRenderState;
 
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.inventory.InventoryMenu;
 
 public interface MaterialManager {
 
