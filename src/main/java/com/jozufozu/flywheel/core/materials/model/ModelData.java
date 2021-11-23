@@ -1,24 +1,27 @@
 package com.jozufozu.flywheel.core.materials.model;
 
-import java.nio.FloatBuffer;
-
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.materials.BasicData;
-import com.jozufozu.flywheel.util.Attribute;
+import com.jozufozu.flywheel.util.WriteSafe;
+import com.jozufozu.flywheel.util.transform.Rotate;
+import com.jozufozu.flywheel.util.transform.Scale;
+import com.jozufozu.flywheel.util.transform.Translate;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
 
-public class ModelData extends BasicData {
-	private static final float[] empty = new float[25];
+import net.minecraft.util.Mth;
 
-	public final float[] matrices = empty.clone();
-	private final FloatBuffer wrap = FloatBuffer.wrap(matrices);
+public class ModelData extends BasicData implements Translate<ModelData>, Rotate<ModelData>, Scale<ModelData> {
+	public final Matrix4f model = new Matrix4f();
+	public final Matrix3f normal = new Matrix3f();
 
 	public ModelData setTransform(PoseStack stack) {
-		this.wrap.position(0);
-
-		((Attribute)(Object) stack.last().pose()).append(this.wrap);
-		((Attribute)(Object) stack.last().normal()).append(this.wrap);
 		markDirty();
+
+		this.model.load(stack.last().pose());
+		this.normal.load(stack.last().normal());
 		return this;
 	}
 
@@ -30,15 +33,63 @@ public class ModelData extends BasicData {
 	 * </p>
 	 */
 	public ModelData setEmptyTransform() {
-		this.wrap.position(0)
-				.put(empty);
 		markDirty();
+
+		this.model.load(new Matrix4f());
+		this.normal.load(new Matrix3f());
+		return this;
+	}
+
+	public ModelData loadIdentity() {
+		markDirty();
+
+		this.model.setIdentity();
+		this.normal.setIdentity();
 		return this;
 	}
 
 	@Override
 	public void write(VecBuffer buf) {
 		super.write(buf);
-		buf.putFloatArray(matrices);
+		((WriteSafe) (Object) model).write(buf);
+		((WriteSafe) (Object) normal).write(buf);
+	}
+
+	@Override
+	public ModelData multiply(Quaternion quaternion) {
+		markDirty();
+
+		model.multiply(quaternion);
+		normal.mul(quaternion);
+		return this;
+	}
+
+	@Override
+	public ModelData scale(float pX, float pY, float pZ) {
+		markDirty();
+
+		model.multiply(Matrix4f.createScaleMatrix(pX, pY, pZ));
+		if (pX == pY && pY == pZ) {
+			if (pX > 0.0F) {
+				return this;
+			}
+
+			normal.mul(-1.0F);
+		}
+
+		float f = 1.0F / pX;
+		float f1 = 1.0F / pY;
+		float f2 = 1.0F / pZ;
+		float f3 = Mth.fastInvCubeRoot(f * f1 * f2);
+		normal.mul(Matrix3f.createScaleMatrix(f3 * f, f3 * f1, f3 * f2));
+		return this;
+	}
+
+	@Override
+	public ModelData translate(double x, double y, double z) {
+		markDirty();
+
+		model.multiplyWithTranslation((float) x, (float) y, (float) z);
+		return this;
 	}
 }

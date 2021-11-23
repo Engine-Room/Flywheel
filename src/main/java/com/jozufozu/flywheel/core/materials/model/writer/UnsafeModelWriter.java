@@ -6,6 +6,7 @@ import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.backend.struct.StructType;
 import com.jozufozu.flywheel.backend.struct.UnsafeBufferWriter;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
+import com.jozufozu.flywheel.util.WriteUnsafe;
 
 public class UnsafeModelWriter extends UnsafeBufferWriter<ModelData> {
 
@@ -25,10 +26,9 @@ public class UnsafeModelWriter extends UnsafeBufferWriter<ModelData> {
 
 		addr += 6;
 
-		float[] matrices = d.matrices;
-		for (int i = 0; i < matrices.length; i++) {
-			MemoryUtil.memPutFloat(addr + i * 4L, matrices[i]);
-		}
+		((WriteUnsafe) (Object) d.model).writeUnsafe(addr);
+		addr += 4 * 16;
+		((WriteUnsafe) (Object) d.normal).writeUnsafe(addr);
 
 		advance();
 	}
