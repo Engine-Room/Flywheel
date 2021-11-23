@@ -2,6 +2,8 @@ package com.jozufozu.flywheel.core.materials.oriented;
 
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.materials.BasicData;
+import com.jozufozu.flywheel.util.transform.Rotate;
+import com.jozufozu.flywheel.util.transform.Translate;
 import com.jozufozu.flywheel.util.vec.Vec3;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -79,6 +81,15 @@ public class OrientedData extends BasicData {
 		this.qY = y;
 		this.qZ = z;
 		this.qW = w;
+		markDirty();
+		return this;
+	}
+
+	public OrientedData resetRotation() {
+		this.qX = 0;
+		this.qY = 0;
+		this.qZ = 0;
+		this.qW = 1;
 		markDirty();
 		return this;
 	}
