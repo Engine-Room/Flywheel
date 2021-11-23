@@ -5,12 +5,6 @@
   "compatibilityLevel": "JAVA_16",
   "refmap": "flywheel.refmap.json",
   "client": [
-    "atlas.AtlasDataMixin",
-    "atlas.SheetDataAccessor",
-    "light.LightUpdateMixin",
-    "light.NetworkLightUpdateMixin",
-    "matrix.Matrix3fMixin",
-    "matrix.Matrix4fMixin",
     "CancelEntityRenderMixin",
     "ChunkRebuildHooksMixin",
     "FixFabulousDepthMixin",
@@ -21,7 +15,14 @@
     "PausedPartialTickAccessor",
     "RenderHooksMixin",
     "ShaderCloseMixin",
-    "ShaderInstanceMixin"
+    "ShaderInstanceMixin",
+    "atlas.AtlasDataMixin",
+    "atlas.SheetDataAccessor",
+    "light.LightUpdateMixin",
+    "light.NetworkLightUpdateMixin",
+    "matrix.Matrix3fMixin",
+    "matrix.Matrix4fMixin",
+    "matrix.PoseStackMixin"
   ],
   "injectors": {
     "defaultRequire": 1

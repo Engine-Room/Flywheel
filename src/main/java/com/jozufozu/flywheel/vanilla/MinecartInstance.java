@@ -111,12 +111,12 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 
 		int j = entity.getDisplayOffset();
 		if (contents != null) {
-			stack.push();
+			stack.pushPose();
 			stack.scale(0.75F);
 			stack.translate(-0.5D, (float)(j - 8) / 16, 0.5D);
 			stack.multiply(Vector3f.YP.rotationDegrees(90));
 			contents.setTransform(stack.unwrap());
-			stack.pop();
+			stack.popPose();
 		}
 
 		body.setTransform(stack.unwrap());
