@@ -1,7 +1,9 @@
 package com.jozufozu.flywheel.util.transform;
 
-public interface TransformStack extends Scale<TransformStack>, Translate<TransformStack>, Rotate<TransformStack> {
-	TransformStack push();
+import com.mojang.blaze3d.vertex.PoseStack;
 
-	TransformStack pop();
+public interface TransformStack extends Scale<TransformStack>, Translate<TransformStack>, Rotate<TransformStack>, TStack<TransformStack> {
+	static TransformStack cast(PoseStack stack) {
+		return (TransformStack) stack;
+	}
 }
