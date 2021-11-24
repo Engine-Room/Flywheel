@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.util.WorldAttached;
 import com.jozufozu.flywheel.light.LightUpdater;
 import com.jozufozu.flywheel.util.ChunkIter;
 
@@ -52,6 +53,7 @@ public class ForgeEvents {
 	public static void unloadWorld(WorldEvent.Unload event) {
 		LevelAccessor world = event.getWorld();
 		ChunkIter._unload(world);
+		WorldAttached.invalidateWorld(world);
 	}
 
 	@SubscribeEvent
