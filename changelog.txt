@@ -1,5 +1,9 @@
-0.2.4:
+0.2.5:
+Fixes
+ - Fix memory leak when many worlds are loaded
+ - Remove micro optimization causing more trouble than its worth
 
+0.2.4:
 Fixes
  - Partially fix compatibility issues with sodium-forge
    note: full compatibility is waiting on https://github.com/spoorn/sodium-forge/pull/175
