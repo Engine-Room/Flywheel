@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
-import com.jozufozu.flywheel.util.WorldAttached;
 import com.jozufozu.flywheel.light.LightUpdater;
 import com.jozufozu.flywheel.util.ChunkIter;
+import com.jozufozu.flywheel.util.WorldAttached;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;

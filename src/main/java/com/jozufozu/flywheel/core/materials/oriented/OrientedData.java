@@ -2,8 +2,6 @@ package com.jozufozu.flywheel.core.materials.oriented;
 
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.materials.BasicData;
-import com.jozufozu.flywheel.util.transform.Rotate;
-import com.jozufozu.flywheel.util.transform.Translate;
 import com.jozufozu.flywheel.util.vec.Vec3;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;

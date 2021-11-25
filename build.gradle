@@ -29,7 +29,7 @@ project.buildnumber = System.getenv('BUILD_NUMBER') != null ? System.getenv('BUI
 
 version = "${mc_update_version}-${mod_version}" + (dev ? ".${buildnumber}" : '')
 group = 'com.jozufozu.flywheel'
-archivesBaseName = 'flywheel'
+archivesBaseName = 'flywheel-forge'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
