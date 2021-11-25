@@ -13,7 +13,6 @@ import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
 import com.jozufozu.flywheel.core.model.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
-import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
