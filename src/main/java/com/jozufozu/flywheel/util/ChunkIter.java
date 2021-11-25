@@ -31,7 +31,7 @@ public class ChunkIter {
 		}
 	}
 
-	// INTERNAL MAINTENENCE METHODS BELOW
+	// INTERNAL MAINTENANCE METHODS BELOW
 
 	public static void _putStorageReference(BlockGetter level, AtomicReferenceArray<LevelChunk> storage) {
 		storages.put(level, storage);

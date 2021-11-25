@@ -4,12 +4,6 @@
   "package": "com.jozufozu.flywheel.mixin",
   "compatibilityLevel": "JAVA_16",
   "client": [
-    "atlas.AtlasDataMixin",
-    "atlas.SheetDataAccessor",
-    "light.LightUpdateMixin",
-    "light.NetworkLightUpdateMixin",
-    "matrix.Matrix3fMixin",
-    "matrix.Matrix4fMixin",
     "CancelEntityRenderMixin",
     "ChunkRebuildHooksMixin",
     "FixFabulousDepthMixin",
@@ -20,13 +14,21 @@
     "PausedPartialTickAccessor",
     "RenderHooksMixin",
     "ShaderCloseMixin",
-    "ShaderInstanceMixin"
+    "ShaderInstanceMixin",
+    "atlas.AtlasDataMixin",
+    "atlas.SheetDataAccessor",
+    "light.LightUpdateMixin",
+    "light.NetworkLightUpdateMixin",
+    "matrix.Matrix3fMixin",
+    "matrix.Matrix4fMixin",
+    "matrix.PoseStackMixin"
     ,
     "fabric.BufferBuilderAccessor",
     "fabric.ClientLevelMixin",
     "fabric.DebugScreenOverlayMixin",
     "fabric.Matrix4fMixin",
     "fabric.MinecraftMixin",
+    "fabric.TextureAtlasMixin",
     "fabric.VertexFormatAccessor"
   ],
   "injectors": {

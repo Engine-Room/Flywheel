@@ -38,8 +38,6 @@ public class FlwConfig {
 	public final BooleanOption enabled = addOption(new BooleanOption("enabled", true));
 	/** Enable or disable a debug overlay that colors pixels by their normal */
 	public final BooleanOption debugNormals = addOption(new BooleanOption("debugNormals", false));
-	/** Cache chunk lookups to improve performance. */
-	public final BooleanOption chunkCaching = addOption(new BooleanOption("chunkCaching", true));
 
 	public FlwConfig(File file) {
 		this.file = file;
@@ -60,10 +58,6 @@ public class FlwConfig {
 
 	public boolean debugNormals() {
 		return debugNormals.get();
-	}
-
-	public boolean chunkCaching() {
-		return chunkCaching.get();
 	}
 
 	public void load() {

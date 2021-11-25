@@ -24,7 +24,7 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxBlockEntity
 
 	private final ModelData base;
 	private final ModelData lid;
-	private final MatrixTransformStack stack;
+	private final MatrixTransformStack stack = new MatrixTransformStack();
 
 	private float lastProgress = Float.NaN;
 
@@ -38,8 +38,6 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxBlockEntity
 			texture = Sheets.SHULKER_TEXTURE_LOCATION.get(color.getId()).sprite();
 		}
 		Quaternion rotation = getDirection().getRotation();
-
-		stack = new MatrixTransformStack();
 
 		stack.translate(getInstancePosition())
 				.scale(0.9995f)
@@ -64,7 +62,7 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxBlockEntity
 
 		Quaternion spin = Vector3f.YP.rotationDegrees(270.0F * progress);
 
-		stack.push()
+		stack.pushPose()
 				.centre()
 				.multiply(spin)
 				.unCentre()
@@ -72,7 +70,7 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxBlockEntity
 
 		lid.setTransform(stack.unwrap());
 
-		stack.pop();
+		stack.popPose();
 	}
 
 	@Override

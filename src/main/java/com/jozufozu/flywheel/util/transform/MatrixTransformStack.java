@@ -15,10 +15,6 @@ public class MatrixTransformStack implements TransformStack {
 		this.internal = internal;
 	}
 
-	public static MatrixTransformStack of(PoseStack ms) {
-		return new MatrixTransformStack(ms);
-	}
-
 	public PoseStack unwrap() {
 		return internal;
 	}
@@ -58,13 +54,13 @@ public class MatrixTransformStack implements TransformStack {
 	}
 
 	@Override
-	public TransformStack push() {
+	public TransformStack pushPose() {
 		internal.pushPose();
 		return this;
 	}
 
 	@Override
-	public TransformStack pop() {
+	public TransformStack popPose() {
 		internal.popPose();
 		return this;
 	}

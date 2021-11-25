@@ -83,6 +83,15 @@ public class OrientedData extends BasicData {
 		return this;
 	}
 
+	public OrientedData resetRotation() {
+		this.qX = 0;
+		this.qY = 0;
+		this.qZ = 0;
+		this.qW = 1;
+		markDirty();
+		return this;
+	}
+
 	@Override
 	public void write(VecBuffer buf) {
 		super.write(buf);

@@ -5,7 +5,6 @@ import com.jozufozu.flywheel.backend.Loader;
 import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.core.AtlasStitcher;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.PartialModel;
@@ -21,10 +20,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.world.inventory.InventoryMenu;
 
 public class FlywheelClient implements ClientModInitializer {
 
@@ -32,8 +29,6 @@ public class FlywheelClient implements ClientModInitializer {
 	public void onInitializeClient() {
 
 		Backend.init();
-
-		ClientSpriteRegistryCallback.event(InventoryMenu.BLOCK_ATLAS).register(AtlasStitcher.getInstance()::onTextureStitch);
 
 		FlywheelEvents.GATHER_CONTEXT.register(Contexts::flwInit);
 		FlywheelEvents.GATHER_CONTEXT.register(Materials::flwInit);

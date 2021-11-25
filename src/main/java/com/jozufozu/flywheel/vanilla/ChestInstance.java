@@ -13,7 +13,6 @@ import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
 import com.jozufozu.flywheel.core.model.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
-import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
@@ -31,7 +30,6 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileEntityInstance<T> implements IDynamicInstance {
 
-	private final MatrixTransformStack stack = new MatrixTransformStack();
 	private final OrientedData body;
 	private final ModelData lid;
 
@@ -57,9 +55,6 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 
 		if (block instanceof AbstractChestBlock) {
 
-//			MatrixStack stack = new MatrixStack();
-//
-//			stack.push();
 			float horizontalAngle = blockState.getValue(ChestBlock.FACING).toYRot();
 
 			baseRotation = Vector3f.YP.rotationDegrees(-horizontalAngle);
@@ -92,7 +87,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 
 		float angleX = -(progress * ((float) Math.PI / 2F));
 
-		stack.setIdentity()
+		lid.loadIdentity()
 				.translate(getInstancePosition())
 				.translate(0, 9f/16f, 0)
 				.centre()
@@ -101,9 +96,6 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 				.translate(0, 0, 1f / 16f)
 				.multiply(Vector3f.XP.rotation(angleX))
 				.translate(0, 0, -1f / 16f);
-
-		lid.setTransform(stack.unwrap());
-
 	}
 
 	@Override

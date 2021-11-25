@@ -22,7 +22,8 @@ public class InstancedRenderDispatcher {
 	 * @param te The tile whose instance you want to update.
 	 */
 	public static void enqueueUpdate(BlockEntity te) {
-		getTiles(te.getLevel()).queueUpdate(te);
+		if (te.hasLevel() && te.getLevel() instanceof ClientLevel)
+			getTiles(te.getLevel()).queueUpdate(te);
 	}
 
 	/**

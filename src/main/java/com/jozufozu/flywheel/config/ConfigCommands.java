@@ -46,18 +46,6 @@ public final class ConfigCommands {
 				}
 			));
 
-		commandBuilder.addOption(config.chunkCaching, (builder, option) -> booleanOptionCommand(builder, config, option,
-				(source, value) -> {
-					Component text = new TextComponent("Chunk caching is currently: ").append(boolToText(value));
-					source.sendFeedback(text);
-				},
-				(source, value) -> {
-					Component text = boolToText(value).append(new TextComponent(" chunk caching").withStyle(ChatFormatting.WHITE));
-					source.sendFeedback(text);
-					Backend.reloadWorldRenderers();
-				}
-			));
-
 		commandBuilder.build();
 	}
 
