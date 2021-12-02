@@ -103,7 +103,12 @@ dependencies {
 
     //implementation 'org.joml:joml:1.10.1'
 
-    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
+    // https://discord.com/channels/313125603924639766/725850371834118214/910619168821354497
+    // Prevent Mixin annotation processor from getting into IntelliJ's annotation processor settings
+    // This allows 'Settings > Build, Execution, and Deployment > Build Tools > Gradle > Build and run using' set to IntelliJ to work correctly
+    if (System.getProperty('idea.sync.active') != 'true') {
+        annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
+    }
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
