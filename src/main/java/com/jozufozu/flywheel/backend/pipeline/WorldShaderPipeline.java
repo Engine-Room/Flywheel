@@ -43,7 +43,7 @@ public class WorldShaderPipeline<P extends WorldProgram> implements IShaderPipel
 		GameStateProgram.Builder<P> builder = GameStateProgram.builder(compile(shader, null));
 
 		for (ProgramState variant : variants) {
-			builder.withVariant(variant.getContext(), compile(shader, variant));
+			builder.withVariant(variant.context(), compile(shader, variant));
 		}
 
 		return builder.build();
@@ -52,7 +52,7 @@ public class WorldShaderPipeline<P extends WorldProgram> implements IShaderPipel
 	private P compile(WorldShader shader, @Nullable ProgramState variant) {
 
 		if (variant != null) {
-			shader.setDefines(variant.getDefines());
+			shader.setDefines(variant.defines());
 		}
 
 		ProtoProgram program = shader.createProgram()
@@ -61,10 +61,6 @@ public class WorldShaderPipeline<P extends WorldProgram> implements IShaderPipel
 				.link()
 				.deleteLinkedShaders();
 
-		if (variant != null) {
-			return factory.create(shader.name, program.program, variant.getExtensions());
-		} else {
-			return factory.create(shader.name, program.program, null);
-		}
+		return factory.create(shader.name, program.program);
 	}
 }

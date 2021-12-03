@@ -1,15 +1,12 @@
 package com.jozufozu.flywheel.core.shader;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.shader.extension.IExtensionInstance;
-import com.jozufozu.flywheel.core.shader.extension.IProgramExtension;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -24,22 +21,10 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class ExtensibleGlProgram extends GlProgram {
 
-	protected final List<IExtensionInstance> extensions;
+	protected final List<IExtensionInstance> extensions = new ArrayList<>();
 
-	public ExtensibleGlProgram(ResourceLocation name, int handle, @Nullable List<IProgramExtension> extensions) {
+	public ExtensibleGlProgram(ResourceLocation name, int handle) {
 		super(name, handle);
-
-		if (extensions != null) {
-			List<IExtensionInstance> list = new ArrayList<>();
-			list.add(new FogMode(this)); // TODO: temporary fog fix
-			for (IProgramExtension e : extensions) {
-				IExtensionInstance extension = e.create(this);
-				list.add(extension);
-			}
-			this.extensions = list;
-		} else {
-			this.extensions = Collections.emptyList();
-		}
 	}
 
 	@Override
@@ -73,6 +58,6 @@ public class ExtensibleGlProgram extends GlProgram {
 	public interface Factory<P extends GlProgram> {
 
 		@Nonnull
-		P create(ResourceLocation name, int handle, @Nullable List<IProgramExtension> extensions);
+		P create(ResourceLocation name, int handle);
 	}
 }

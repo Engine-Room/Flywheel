@@ -1,22 +1,21 @@
-package com.jozufozu.flywheel.core.shader;
+package com.jozufozu.flywheel.core.shader.extension;
 
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.core.shader.extension.IExtensionInstance;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class FogMode implements IExtensionInstance {
+public class WorldFog implements IExtensionInstance {
 
-	public static final ResourceLocation NAME = new ResourceLocation(Flywheel.ID, "fog_linear");
+	public static final ResourceLocation NAME = new ResourceLocation(Flywheel.ID, "fog");
 
 	private final int uFogColor;
 	private final int uFogRange;
 
-	public FogMode(GlProgram program) {
+	public WorldFog(GlProgram program) {
 		this.uFogColor = program.getUniformLocation("uFogColor");
 		this.uFogRange = program.getUniformLocation("uFogRange");
 	}
