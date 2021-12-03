@@ -1,3 +1,5 @@
+#define USE_FOG
+
 #if defined(VERTEX_SHADER)
 out float FragDistance;
 #elif defined(FRAGMENT_SHADER)
