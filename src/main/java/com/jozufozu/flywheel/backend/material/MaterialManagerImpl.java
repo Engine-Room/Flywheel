@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import com.jozufozu.flywheel.backend.state.IRenderState;
 import com.jozufozu.flywheel.backend.state.RenderLayer;
 import com.jozufozu.flywheel.core.WorldContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
@@ -13,6 +12,7 @@ import com.jozufozu.flywheel.util.WeakHashSet;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
@@ -28,7 +28,7 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 	protected final GroupFactory<P> groupFactory;
 	protected final boolean ignoreOriginCoordinate;
 
-	protected final Map<RenderLayer, Map<IRenderState, MaterialGroupImpl<P>>> layers;
+	protected final Map<RenderLayer, Map<RenderType, MaterialGroupImpl<P>>> layers;
 
 	private final WeakHashSet<OriginShiftListener> listeners;
 
@@ -57,12 +57,12 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 	 * Get a material group that will render in the given layer with the given state.
 	 *
 	 * @param layer The {@link RenderLayer} you want to draw in.
-	 * @param state The {@link IRenderState} you need to draw with.
+	 * @param state The {@link RenderType} you need to draw with.
 	 * @return A material group whose children will
 	 */
 	@Override
-	public MaterialGroup state(RenderLayer layer, IRenderState state) {
-		return layers.get(layer).computeIfAbsent(state, this::createGroup);
+	public MaterialGroup state(RenderLayer layer, RenderType state) {
+		return layers.get(layer).computeIfAbsent(state, $ -> groupFactory.create(this));
 	}
 
 	/**
@@ -83,18 +83,16 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 			viewProjection = translate;
 		}
 
-		for (Map.Entry<IRenderState, MaterialGroupImpl<P>> entry : layers.get(layer).entrySet()) {
-			IRenderState state = entry.getKey();
+		for (Map.Entry<RenderType, MaterialGroupImpl<P>> entry : layers.get(layer).entrySet()) {
+			RenderType state = entry.getKey();
 			MaterialGroupImpl<P> group = entry.getValue();
 
-			state.bind();
-			group.render(viewProjection, camX, camY, camZ);
-			state.unbind();
+			group.render(state, viewProjection, camX, camY, camZ);
 		}
 	}
 
 	public void delete() {
-		for (Map<IRenderState, MaterialGroupImpl<P>> groups : layers.values()) {
+		for (Map<RenderType, MaterialGroupImpl<P>> groups : layers.values()) {
 
 			groups.values().forEach(MaterialGroupImpl::delete);
 		}
@@ -131,16 +129,12 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 
 			originCoordinate = new BlockPos(cX, cY, cZ);
 
-			for (Map<IRenderState, MaterialGroupImpl<P>> groups : layers.values()) {
+			for (Map<RenderType, MaterialGroupImpl<P>> groups : layers.values()) {
 				groups.values().forEach(MaterialGroupImpl::clear);
 			}
 
 			listeners.forEach(OriginShiftListener::onOriginShift);
 		}
-	}
-
-	private MaterialGroupImpl<P> createGroup(IRenderState state) {
-		return groupFactory.create(this, state);
 	}
 
 	@FunctionalInterface
@@ -150,7 +144,7 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 
 	@FunctionalInterface
 	public interface GroupFactory<P extends WorldProgram> {
-		MaterialGroupImpl<P> create(MaterialManagerImpl<P> materialManager, IRenderState state);
+		MaterialGroupImpl<P> create(MaterialManagerImpl<P> materialManager);
 	}
 
 	public static class Builder<P extends WorldProgram> {

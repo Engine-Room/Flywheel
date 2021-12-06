@@ -10,6 +10,7 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.core.model.IModel;
+import com.jozufozu.flywheel.core.model.VecBufferConsumer;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 public class BufferedModel implements IBufferedModel {
@@ -31,7 +32,7 @@ public class BufferedModel implements IBufferedModel {
 
 		// mirror it in system memory so we can write to it, and upload our model.
 		MappedBuffer buffer = vbo.getBuffer(0, model.size());
-		model.buffer(buffer);
+		model.buffer(new VecBufferConsumer(buffer, model.format()));
 		buffer.flush();
 
 		vbo.unbind();

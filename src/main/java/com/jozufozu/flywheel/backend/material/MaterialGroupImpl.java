@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
-import com.jozufozu.flywheel.backend.state.IRenderState;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
+import com.jozufozu.flywheel.util.TextureBinder;
 import com.mojang.math.Matrix4f;
+
+import net.minecraft.client.renderer.RenderType;
 
 /**
  * A group of materials all rendered with the same GL state.
@@ -18,15 +20,13 @@ import com.mojang.math.Matrix4f;
 public class MaterialGroupImpl<P extends WorldProgram> implements MaterialGroup {
 
 	protected final MaterialManagerImpl<P> owner;
-	protected final IRenderState state;
 
-	private final ArrayList<MaterialRenderer<P>> renderers = new ArrayList<>();
+	protected final ArrayList<MaterialRenderer<P>> renderers = new ArrayList<>();
 
 	private final Map<MaterialSpec<?>, MaterialImpl<?>> materials = new HashMap<>();
 
-	public MaterialGroupImpl(MaterialManagerImpl<P> owner, IRenderState state) {
+	public MaterialGroupImpl(MaterialManagerImpl<P> owner) {
 		this.owner = owner;
-		this.state = state;
 	}
 
 	/**
@@ -41,10 +41,13 @@ public class MaterialGroupImpl<P extends WorldProgram> implements MaterialGroup 
 		return (MaterialImpl<D>) materials.computeIfAbsent(spec, this::createInstanceMaterial);
 	}
 
-	public void render(Matrix4f viewProjection, double camX, double camY, double camZ) {
+	public void render(RenderType type, Matrix4f viewProjection, double camX, double camY, double camZ) {
+		type.setupRenderState();
+		TextureBinder.bindActiveTextures();
 		for (MaterialRenderer<P> renderer : renderers) {
 			renderer.render(viewProjection, camX, camY, camZ);
 		}
+		type.clearRenderState();
 	}
 
 	public void setup(P program) {

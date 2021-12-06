@@ -2,12 +2,12 @@ package com.jozufozu.flywheel.core.materials.model;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.backend.struct.StructType;
 import com.jozufozu.flywheel.backend.struct.StructWriter;
+import com.jozufozu.flywheel.backend.struct.Writeable;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.materials.model.writer.UnsafeModelWriter;
 
-public class ModelType implements StructType<ModelData> {
+public class ModelType implements Writeable<ModelData> {
 
 	@Override
 	public ModelData create() {

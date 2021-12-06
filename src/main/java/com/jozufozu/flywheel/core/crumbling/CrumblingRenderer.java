@@ -1,14 +1,12 @@
 package com.jozufozu.flywheel.core.crumbling;
 
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
+import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
 import com.jozufozu.flywheel.backend.state.RenderLayer;
@@ -17,6 +15,7 @@ import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
 import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.Pair;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
@@ -44,6 +43,8 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class CrumblingRenderer {
 
+	static RenderType _currentLayer;
+
 	private static final Lazy<State> STATE;
 	private static final Lazy.KillSwitch<State> INVALIDATOR;
 
@@ -63,40 +64,31 @@ public class CrumblingRenderer {
 		if (activeStages.isEmpty()) return;
 
 		State state = STATE.get();
-		RenderType layer = ModelBakery.DESTROY_TYPES.get(0);
-
-		InstanceManager<BlockEntity> renderer = state.instanceManager;
+		InstanceManager<BlockEntity> instanceManager = state.instanceManager;
+		MaterialManagerImpl<CrumblingProgram> materials = state.materialManager;
 
 		TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 		Camera info = Minecraft.getInstance().gameRenderer.getMainCamera();
 
-		MaterialManagerImpl<CrumblingProgram> materials = state.materialManager;
-		layer.setupRenderState();
-
 		for (Int2ObjectMap.Entry<List<BlockEntity>> stage : activeStages.int2ObjectEntrySet()) {
-			int i = stage.getIntKey();
-			AbstractTexture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(i));
+			_currentLayer = ModelBakery.DESTROY_TYPES.get(stage.getIntKey());
 
 			// something about when we call this means that the textures are not ready for use on the first frame they should appear
-			if (breaking != null) {
-				stage.getValue().forEach(renderer::add);
+			if (_currentLayer != null) {
+				stage.getValue().forEach(instanceManager::add);
 
-				renderer.beginFrame(info);
+				instanceManager.beginFrame(info);
 
-				GlTextureUnit.T4.makeActive();
-				glBindTexture(GL_TEXTURE_2D, breaking.getId());
 				materials.render(RenderLayer.SOLID, viewProjection, cameraX, cameraY, cameraZ);
 
-				renderer.invalidate();
+				instanceManager.invalidate();
 			}
 
 		}
 
-		layer.clearRenderState();
-
 		GlTextureUnit.T0.makeActive();
 		AbstractTexture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(0));
-		if (breaking != null) glBindTexture(GL_TEXTURE_2D, breaking.getId());
+		if (breaking != null) RenderSystem.bindTexture(breaking.getId());
 	}
 
 	/**

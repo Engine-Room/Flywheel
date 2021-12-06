@@ -33,7 +33,7 @@ public class WorldProgram extends ExtensibleGlProgram {
 
 	protected void registerSamplers() {
 		uBlockAtlas = setSamplerBinding("uBlockAtlas", 0);
-		uLightMap = setSamplerBinding("uLightMap", 1);
+		uLightMap = setSamplerBinding("uLightMap", 2);
 	}
 
 	public void uploadViewProjection(Matrix4f viewProjection) {

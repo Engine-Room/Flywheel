@@ -11,6 +11,7 @@ import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
@@ -85,14 +86,14 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxBlockEntity
 	}
 
 	private ModelData makeBaseInstance() {
-        return materialManager.cutout(RenderStates.SHULKER)
+        return materialManager.cutout(RenderType.entityCutout(Sheets.SHULKER_SHEET))
                 .material(Materials.TRANSFORMED)
 				.model("base_" + texture.getName(), this::makeBaseModel)
 				.createInstance();
 	}
 
 	private ModelData makeLidInstance() {
-        return materialManager.cutout(RenderStates.SHULKER)
+        return materialManager.cutout(RenderType.entityCutout(Sheets.SHULKER_SHEET))
                 .material(Materials.TRANSFORMED)
 				.model("lid_" + texture.getName(), this::makeLidModel)
 				.createInstance();
