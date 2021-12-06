@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.core.materials.oriented;
 
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.materials.BasicData;
 import com.jozufozu.flywheel.util.vec.Vec3;
 import com.mojang.math.Quaternion;
@@ -92,20 +91,5 @@ public class OrientedData extends BasicData {
 		return this;
 	}
 
-	@Override
-	public void write(VecBuffer buf) {
-		super.write(buf);
-
-		buf.putFloat(posX);
-		buf.putFloat(posY);
-		buf.putFloat(posZ);
-		buf.putFloat(pivotX);
-		buf.putFloat(pivotY);
-		buf.putFloat(pivotZ);
-		buf.putFloat(qX);
-		buf.putFloat(qY);
-		buf.putFloat(qZ);
-		buf.putFloat(qW);
-	}
 }
 

@@ -178,7 +178,7 @@ public class Backend {
 	 * INTERNAL USE ONLY
 	 */
 	public void _clearContexts() {
-		SpecMetaRegistry.clear();
+		GameStateRegistry.clear();
 		programSpecRegistry.clear();
 		contexts.forEach(IShaderContext::delete);
 		contexts.clear();

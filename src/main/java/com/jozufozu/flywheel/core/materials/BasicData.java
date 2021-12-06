@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.core.materials;
 
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 
 public abstract class BasicData extends InstanceData implements IFlatLight<BasicData> {
@@ -65,8 +64,4 @@ public abstract class BasicData extends InstanceData implements IFlatLight<Basic
 		return this;
 	}
 
-	@Override
-	public void write(VecBuffer buf) {
-		buf.putByteArray(new byte[]{blockLight, skyLight, r, g, b, a});
-	}
 }

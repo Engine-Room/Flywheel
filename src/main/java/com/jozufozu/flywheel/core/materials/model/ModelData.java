@@ -1,8 +1,6 @@
 package com.jozufozu.flywheel.core.materials.model;
 
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.materials.BasicData;
-import com.jozufozu.flywheel.util.WriteSafe;
 import com.jozufozu.flywheel.util.transform.Rotate;
 import com.jozufozu.flywheel.util.transform.Scale;
 import com.jozufozu.flywheel.util.transform.Translate;
@@ -46,13 +44,6 @@ public class ModelData extends BasicData implements Translate<ModelData>, Rotate
 		this.model.setIdentity();
 		this.normal.setIdentity();
 		return this;
-	}
-
-	@Override
-	public void write(VecBuffer buf) {
-		super.write(buf);
-		((WriteSafe) (Object) model).write(buf);
-		((WriteSafe) (Object) normal).write(buf);
 	}
 
 	@Override

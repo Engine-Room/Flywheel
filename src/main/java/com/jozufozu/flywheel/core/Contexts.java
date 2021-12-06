@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.core;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.SpecMetaRegistry;
+import com.jozufozu.flywheel.backend.GameStateRegistry;
 import com.jozufozu.flywheel.backend.pipeline.IShaderPipeline;
 import com.jozufozu.flywheel.backend.pipeline.InstancingTemplate;
 import com.jozufozu.flywheel.backend.pipeline.WorldShaderPipeline;
@@ -24,7 +24,7 @@ public class Contexts {
 	public static void flwInit(GatherContextEvent event) {
 		Backend backend = event.getBackend();
 
-		SpecMetaRegistry.register(NormalDebugStateProvider.INSTANCE);
+		GameStateRegistry.register(NormalDebugStateProvider.INSTANCE);
 
         FileResolution crumblingBuiltins = Resolver.INSTANCE.findShader(ResourceUtil.subPath(Names.CRUMBLING, ".glsl"));
         FileResolution worldBuiltins = Resolver.INSTANCE.findShader(ResourceUtil.subPath(Names.WORLD, ".glsl"));
