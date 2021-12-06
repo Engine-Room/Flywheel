@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.core.model;
 import java.util.List;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.Formats;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 public class ModelPart implements IModel {
 
@@ -33,7 +33,7 @@ public class ModelPart implements IModel {
 	}
 
 	@Override
-	public void buffer(VecBuffer buffer) {
+	public void buffer(VertexConsumer buffer) {
 		for (PartBuilder.CuboidBuilder cuboid : cuboids) {
 			cuboid.buffer(buffer);
 		}

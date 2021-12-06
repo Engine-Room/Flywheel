@@ -69,4 +69,9 @@ public class RenderLayerEvent extends Event {
 	public double getCamZ() {
 		return camZ;
 	}
+
+	@Override
+	public String toString() {
+		return "RenderLayerEvent{" + "world=" + world + ", type=" + type + ", stack=" + stack + ", viewProjection=" + viewProjection + ", buffers=" + buffers + ", camX=" + camX + ", camY=" + camY + ", camZ=" + camZ + ", layer=" + layer + '}';
+	}
 }

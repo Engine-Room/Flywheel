@@ -3,13 +3,14 @@ package com.jozufozu.flywheel.core.model;
 import java.util.Arrays;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.util.BufferBuilderReader;
+import com.jozufozu.flywheel.util.RenderMath;
 import com.jozufozu.flywheel.util.VirtualEmptyModelData;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -61,16 +62,18 @@ public class BlockModel implements IModel {
 	}
 
 	@Override
-	public void buffer(VecBuffer buffer) {
+	public void buffer(VertexConsumer buffer) {
 
 		int vertexCount = vertexCount();
 
 		for (int i = 0; i < vertexCount; i++) {
-			buffer.putVec3(reader.getX(i), reader.getY(i), reader.getZ(i));
+			buffer.vertex(reader.getX(i), reader.getY(i), reader.getZ(i));
 
-			buffer.putVec3(reader.getNX(i), reader.getNY(i), reader.getNZ(i));
+			buffer.normal(RenderMath.f(reader.getNX(i)), RenderMath.f(reader.getNY(i)), RenderMath.f(reader.getNZ(i)));
 
-			buffer.putVec2(reader.getU(i), reader.getV(i));
+			buffer.uv(reader.getU(i), reader.getV(i));
+
+			buffer.endVertex();
 		}
 	}
 

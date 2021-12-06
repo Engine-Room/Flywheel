@@ -7,7 +7,6 @@ import javax.annotation.Nonnull;
 import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
-import com.jozufozu.flywheel.backend.state.TextureRenderState;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
@@ -17,6 +16,7 @@ import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.world.level.block.AbstractChestBlock;
@@ -111,7 +111,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 
 	private OrientedData baseInstance() {
 
-		return materialManager.solid(TextureRenderState.get(renderMaterial.atlasLocation()))
+		return materialManager.solid(RenderType.entitySolid(renderMaterial.atlasLocation()))
                 .material(Materials.ORIENTED)
 				.model("base_" + renderMaterial.texture(), this::getBaseModel)
 				.createInstance();
@@ -119,7 +119,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 
 	private ModelData lidInstance() {
 
-		return materialManager.solid(TextureRenderState.get(renderMaterial.atlasLocation()))
+		return materialManager.solid(RenderType.entitySolid(renderMaterial.atlasLocation()))
                 .material(Materials.TRANSFORMED)
 				.model("lid_" + renderMaterial.texture(), this::getLidModel)
 				.createInstance();

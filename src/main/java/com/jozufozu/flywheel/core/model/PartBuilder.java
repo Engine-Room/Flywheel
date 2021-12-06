@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -156,7 +157,7 @@ public class PartBuilder {
 			return visibleFaces.size() * 4;
 		}
 
-		public void buffer(VecBuffer buffer) {
+		public void buffer(VertexConsumer buffer) {
 
 			float sizeX = posX2 - posX1;
 			float sizeY = posY2 - posY1;
@@ -231,12 +232,11 @@ public class PartBuilder {
 			}
 		}
 
-
-		public void quad(VecBuffer buffer, Vector3f[] vertices, float minU, float minV, float maxU, float maxV, Vector3f normal) {
-			buffer.putVec3(vertices[0].x(), vertices[0].y(), vertices[0].z()).putVec3(nb(normal.x()), nb(normal.y()), nb(normal.z())).putVec2(maxU, minV);
-			buffer.putVec3(vertices[1].x(), vertices[1].y(), vertices[1].z()).putVec3(nb(normal.x()), nb(normal.y()), nb(normal.z())).putVec2(minU, minV);
-			buffer.putVec3(vertices[2].x(), vertices[2].y(), vertices[2].z()).putVec3(nb(normal.x()), nb(normal.y()), nb(normal.z())).putVec2(minU, maxV);
-			buffer.putVec3(vertices[3].x(), vertices[3].y(), vertices[3].z()).putVec3(nb(normal.x()), nb(normal.y()), nb(normal.z())).putVec2(maxU, maxV);
+		public void quad(VertexConsumer buffer, Vector3f[] vertices, float minU, float minV, float maxU, float maxV, Vector3f normal) {
+			buffer.vertex(vertices[0].x(), vertices[0].y(), vertices[0].z()).normal(normal.x(), normal.y(), normal.z()).uv(maxU, minV).endVertex();
+			buffer.vertex(vertices[1].x(), vertices[1].y(), vertices[1].z()).normal(normal.x(), normal.y(), normal.z()).uv(minU, minV).endVertex();
+			buffer.vertex(vertices[2].x(), vertices[2].y(), vertices[2].z()).normal(normal.x(), normal.y(), normal.z()).uv(minU, maxV).endVertex();
+			buffer.vertex(vertices[3].x(), vertices[3].y(), vertices[3].z()).normal(normal.x(), normal.y(), normal.z()).uv(maxU, maxV).endVertex();
 
 		}
 

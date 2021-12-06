@@ -10,6 +10,7 @@ import com.jozufozu.flywheel.backend.instancing.GPUInstancer;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.instancing.Instancer;
 import com.jozufozu.flywheel.backend.model.ModelPool;
+import com.jozufozu.flywheel.backend.struct.StructType;
 import com.jozufozu.flywheel.core.model.IModel;
 
 /**
@@ -20,12 +21,12 @@ public class MaterialImpl<D extends InstanceData> implements Material<D> {
 
 	final ModelPool modelPool;
 	protected final Cache<Object, GPUInstancer<D>> models;
-	protected final MaterialSpec<D> spec;
+	protected final StructType<D> type;
 
 	public MaterialImpl(MaterialSpec<D> spec) {
-		this.spec = spec;
+		this.type = spec.getInstanceType();
 
-		modelPool = new ModelPool(spec.getModelFormat(), spec.getModelFormat().getStride() * 64);
+		modelPool = new ModelPool(spec.getModelFormat(), 64);
 		this.models = CacheBuilder.newBuilder()
 				.removalListener(notification -> {
 					GPUInstancer<?> instancer = (GPUInstancer<?>) notification.getValue();
@@ -44,7 +45,7 @@ public class MaterialImpl<D extends InstanceData> implements Material<D> {
 	@Override
 	public Instancer<D> model(Object key, Supplier<IModel> modelSupplier) {
 		try {
-			return models.get(key, () -> new GPUInstancer<>(modelPool, modelSupplier.get(), spec.getInstanceType()));
+			return models.get(key, () -> new GPUInstancer<>(type, modelSupplier.get(), modelPool));
 		} catch (ExecutionException e) {
 			throw new RuntimeException("error creating instancer", e);
 		}
