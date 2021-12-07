@@ -8,7 +8,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.client.model.ForgeModelBakery;
 
 /**
  * A helper class for loading and accessing json models.
@@ -38,7 +38,7 @@ public class PartialModel {
 
 	public static void onModelRegistry(ModelRegistryEvent event) {
 		for (PartialModel partial : ALL)
-			ModelLoader.addSpecialModel(partial.getLocation());
+			ForgeModelBakery.addSpecialModel(partial.getLocation());
 
 		tooLate = true;
 	}

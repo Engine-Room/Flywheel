@@ -46,8 +46,8 @@ public class RenderHooksMixin {
 	private RenderBuffers renderBuffers;
 
 	@Inject(at = @At("HEAD"), method = "setupRender")
-	private void setupRender(Camera info, Frustum clippingHelper, boolean p_228437_3_, int frameCount, boolean isSpectator, CallbackInfo ci) {
-		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, info, clippingHelper));
+	private void setupRender(Camera camera, Frustum frustum, boolean queue, boolean isSpectator, CallbackInfo ci) {
+		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, camera, frustum));
 	}
 
 	/**

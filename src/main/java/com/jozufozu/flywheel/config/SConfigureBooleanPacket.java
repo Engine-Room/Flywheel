@@ -4,7 +4,7 @@ package com.jozufozu.flywheel.config;
 import java.util.function.Supplier;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 
 /**
  * Thanks, @zelophed
