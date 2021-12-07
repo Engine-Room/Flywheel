@@ -9,7 +9,6 @@ import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.util.ChunkIter;
-import com.jozufozu.flywheel.util.TextureBinder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -100,12 +99,6 @@ public class InstanceWorld {
 	 * Draw the given layer.
 	 */
 	public void renderLayer(RenderLayerEvent event) {
-		event.type.setupRenderState();
-
-		TextureBinder.bindActiveTextures();
-
 		materialManager.render(event.layer, event.viewProjection, event.camX, event.camY, event.camZ);
-
-		event.type.clearRenderState();
 	}
 }

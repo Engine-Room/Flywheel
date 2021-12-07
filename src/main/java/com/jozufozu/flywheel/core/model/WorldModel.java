@@ -3,9 +3,10 @@ package com.jozufozu.flywheel.core.model;
 import java.util.Collection;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.util.BufferBuilderReader;
+import com.jozufozu.flywheel.util.RenderMath;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
@@ -28,22 +29,24 @@ public class WorldModel implements IModel {
 	}
 
 	@Override
-	public void buffer(VecBuffer vertices) {
+	public void buffer(VertexConsumer vertices) {
 		for (int i = 0; i < vertexCount(); i++) {
-			vertices.putVec3(reader.getX(i), reader.getY(i), reader.getZ(i));
+			vertices.vertex(reader.getX(i), reader.getY(i), reader.getZ(i));
 
-			vertices.putVec3(reader.getNX(i), reader.getNY(i), reader.getNZ(i));
+			vertices.normal(RenderMath.f(reader.getNX(i)), RenderMath.f(reader.getNY(i)), RenderMath.f(reader.getNZ(i)));
 
-			vertices.putVec2(reader.getU(i), reader.getV(i));
+			vertices.uv(reader.getU(i), reader.getV(i));
 
-			vertices.putColor(reader.getR(i), reader.getG(i), reader.getB(i), reader.getA(i));
+			vertices.color(reader.getR(i), reader.getG(i), reader.getB(i), reader.getA(i));
 
 			int light = reader.getLight(i);
 
 			byte block = (byte) (LightTexture.block(light) << 4);
 			byte sky = (byte) (LightTexture.sky(light) << 4);
 
-			vertices.putVec2(block, sky);
+			vertices.uv2(block, sky);
+
+			vertices.endVertex();
 		}
 	}
 

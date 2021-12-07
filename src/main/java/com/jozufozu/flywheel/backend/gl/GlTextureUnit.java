@@ -51,4 +51,12 @@ public enum GlTextureUnit {
 	public void makeActive() {
 		GlStateManager._activeTexture(glEnum);
 	}
+
+	public static GlTextureUnit getActive() {
+		return fromGlEnum(GlStateManager._getActiveTexture());
+	}
+
+	public static GlTextureUnit fromGlEnum(int glEnum) {
+		return GlTextureUnit.values()[glEnum - GL_TEXTURE0];
+	}
 }

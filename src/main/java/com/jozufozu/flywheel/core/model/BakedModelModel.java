@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.core.model;
 
-import static com.jozufozu.flywheel.util.RenderMath.nb;
-
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -12,9 +10,9 @@ import java.util.Random;
 import org.lwjgl.system.MemoryStack;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.Formats;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Minecraft;
@@ -61,7 +59,7 @@ public class BakedModelModel implements IModel {
 	}
 
 	@Override
-	public void buffer(VecBuffer buffer) {
+	public void buffer(VertexConsumer buffer) {
 
 		Minecraft mc = Minecraft.getInstance();
 
@@ -118,9 +116,10 @@ public class BakedModelModel implements IModel {
 						float u = bytebuffer.getFloat(16);
 						float v = bytebuffer.getFloat(20);
 
-						buffer.putVec3(f, f1, f2);
-						buffer.putVec3(nb(normal.x()), nb(normal.y()), nb(normal.z()));
-						buffer.putVec2(u, v);
+						buffer.vertex(f, f1, f2);
+						buffer.normal(normal.x(), normal.y(), normal.z());
+						buffer.uv(u, v);
+						buffer.endVertex();
 					}
 				}
 			}

@@ -5,6 +5,8 @@ import java.util.function.Supplier;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
+import com.jozufozu.flywheel.Flywheel;
+
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 
@@ -42,7 +44,7 @@ public enum GlError {
 		// TODO: build flag? to enable or disable this function
 		GlError poll = GlError.poll();
 		if (poll != null) {
-			//throw new GlException(poll, context.get());
+			Flywheel.log.error("{}: {}", poll.name(), context.get());
 		}
 	}
 }

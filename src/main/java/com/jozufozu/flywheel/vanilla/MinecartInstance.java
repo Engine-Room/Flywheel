@@ -4,7 +4,6 @@ import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
 import com.jozufozu.flywheel.backend.material.MaterialManager;
-import com.jozufozu.flywheel.backend.state.TextureRenderState;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.model.IModel;
@@ -13,6 +12,7 @@ import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
 import com.mojang.math.Vector3f;
 
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -147,7 +147,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 	}
 
 	private ModelData getBody() {
-		return materialManager.solid(TextureRenderState.get(MINECART_LOCATION))
+		return materialManager.solid(RenderType.entitySolid(MINECART_LOCATION))
 				.material(Materials.TRANSFORMED)
 				.model(entity.getType(), this::getBodyModel)
 				.createInstance();
@@ -156,7 +156,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 	private IModel getBodyModel() {
 		int y = -3;
 		return ModelPart.builder("minecart", 64, 32)
-				.cuboid().invertYZ().start(-10, -8, -y).size(20, 16, 2).textureOffset(0, 10).rotateX(((float)Math.PI / 2F)).endCuboid()
+				.cuboid().invertYZ().start(-10, -8, -y).size(20, 16, 2).textureOffset(0, 10).rotateZ((float) Math.PI).rotateX(((float)Math.PI / 2F)).endCuboid()
 				.cuboid().invertYZ().start(-8, y, -10).size(16, 8, 2).rotateY(((float)Math.PI * 1.5F)).endCuboid()
 				.cuboid().invertYZ().start(-8, y, -10).size(16, 8, 2).rotateY(((float)Math.PI / 2F)).endCuboid()
 				.cuboid().invertYZ().start(-8, y, -8).size(16, 8, 2).rotateY((float)Math.PI).endCuboid()

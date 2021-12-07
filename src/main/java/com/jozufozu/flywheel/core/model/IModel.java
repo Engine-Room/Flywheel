@@ -1,9 +1,9 @@
 package com.jozufozu.flywheel.core.model;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.core.QuadConverter;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 /**
  * A model that can be rendered by flywheel.
@@ -35,7 +35,7 @@ public interface IModel {
 	/**
 	 * Copy this model into the given buffer.
 	 */
-	void buffer(VecBuffer buffer);
+	void buffer(VertexConsumer buffer);
 
 	/**
 	 * @return The number of vertices the model has.

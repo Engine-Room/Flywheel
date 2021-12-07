@@ -1,37 +1,37 @@
 {
-  "required": true,
-  "minVersion": "0.8",
-  "package": "com.jozufozu.flywheel.mixin",
-  "compatibilityLevel": "JAVA_16",
-  "client": [
-    "CancelEntityRenderMixin",
-    "ChunkRebuildHooksMixin",
-    "FixFabulousDepthMixin",
-    "InstanceAddMixin",
-    "InstanceRemoveMixin",
-    "LeakChunkStorageArrayMixin",
-    "LevelRendererAccessor",
-    "PausedPartialTickAccessor",
-    "RenderHooksMixin",
-    "ShaderCloseMixin",
-    "ShaderInstanceMixin",
-    "atlas.AtlasDataMixin",
-    "atlas.SheetDataAccessor",
-    "light.LightUpdateMixin",
-    "light.NetworkLightUpdateMixin",
-    "matrix.Matrix3fMixin",
-    "matrix.Matrix4fMixin",
-    "matrix.PoseStackMixin"
-    ,
-    "fabric.BufferBuilderAccessor",
-    "fabric.ClientLevelMixin",
-    "fabric.DebugScreenOverlayMixin",
-    "fabric.Matrix4fMixin",
-    "fabric.MinecraftMixin",
-    "fabric.TextureAtlasMixin",
-    "fabric.VertexFormatAccessor"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+    "required": true,
+    "minVersion": "0.8",
+    "package": "com.jozufozu.flywheel.mixin",
+    "compatibilityLevel": "JAVA_16",
+    "client": [
+        "CancelEntityRenderMixin",
+        "ChunkRebuildHooksMixin",
+        "FixFabulousDepthMixin",
+        "InstanceAddMixin",
+        "InstanceRemoveMixin",
+        "LeakChunkStorageArrayMixin",
+        "LevelRendererAccessor",
+        "PausedPartialTickAccessor",
+        "RenderHooksMixin",
+        "RenderTexturesMixin",
+        "ShaderCloseMixin",
+        "atlas.AtlasDataMixin",
+        "atlas.SheetDataAccessor",
+        "light.LightUpdateMixin",
+        "light.NetworkLightUpdateMixin",
+        "matrix.Matrix3fMixin",
+        "matrix.Matrix4fMixin",
+        "matrix.PoseStackMixin"
+        ,
+        "fabric.BufferBuilderAccessor",
+        "fabric.ClientLevelMixin",
+        "fabric.DebugScreenOverlayMixin",
+        "fabric.Matrix4fMixin",
+        "fabric.MinecraftMixin",
+        "fabric.TextureAtlasMixin",
+        "fabric.VertexFormatAccessor"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
 }

@@ -1,30 +1,29 @@
 package com.jozufozu.flywheel.util;
 
+import org.lwjgl.opengl.GL32;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.ShaderInstance;
 
 /**
  * This is a silly hack that's needed because flywheel does things too different from vanilla.
  *
  * <p>
- *     When a {@link RenderType} is setup, the associated textures are passed to the active ShaderInstance, and properly
- *     bound later on when {@link ShaderInstance#apply()} is called.
- *     This interface (and {@link com.jozufozu.flywheel.mixin.ShaderInstanceMixin mixin} binds textures to opengl
- *     without binding the shader.
+ *     When a {@link RenderType} is setup, the associated textures are "bound" within RenderSystem, but not actually
+ *     bound via opengl. This class provides a helper function to forward the bindings to opengl.
  * </p>
  */
-public interface TextureBinder {
+public class TextureBinder {
 
 	/**
 	 * Call this after calling {@link RenderType#setupRenderState()}.
 	 */
-	static void bindActiveTextures() {
-		TextureBinder shader = (TextureBinder) RenderSystem.getShader();
-		if (shader != null)
-			shader.bind();
+	public static void bindActiveTextures() {
+		for (int i = 0; i < 12; i++) {
+			int shaderTexture = RenderSystem.getShaderTexture(i);
+			RenderSystem.activeTexture(GL32.GL_TEXTURE0 + i);
+			RenderSystem.bindTexture(shaderTexture);
+		}
 	}
-
-	void bind();
 }
