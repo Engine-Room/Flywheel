@@ -39,14 +39,14 @@ public class FullscreenQuad {
 
 		GL20.glVertexAttribPointer(0, 4, GlNumericType.FLOAT.getGlEnum(), false, 4 * 4, 0);
 
-		vao.unbind();
+		GlVertexArray.unbind();
 		vbo.unbind();
 	}
 
 	public void draw() {
 		vao.bind();
 		GL20.glDrawArrays(GL20.GL_TRIANGLES, 0, 6);
-		vao.unbind();
+		GlVertexArray.unbind();
 	}
 
 	public void delete() {

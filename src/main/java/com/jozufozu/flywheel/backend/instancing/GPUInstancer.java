@@ -52,7 +52,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		// persistent mapping sync point
 		instanceVBO.doneForThisFrame();
 
-		vao.unbind();
+		GlVertexArray.unbind();
 
 		GlError.pollAndThrow(() -> modelData.name() + "_unbind");
 	}
@@ -72,16 +72,12 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 			vao.bind();
 
 			model.setupState();
-
-			vao.unbind();
 		});
 
 		vao.bind();
 
 		instanceVBO = GlBuffer.requestPersistent(GlBufferType.ARRAY_BUFFER);
 		AttribUtil.enableArrays(model.getAttributeCount() + instanceFormat.getAttributeCount());
-
-		vao.unbind();
 	}
 
 	public boolean isInitialized() {

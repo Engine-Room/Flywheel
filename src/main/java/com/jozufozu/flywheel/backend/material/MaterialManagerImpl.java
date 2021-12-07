@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import com.jozufozu.flywheel.backend.gl.GlVertexArray;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.state.RenderLayer;
 import com.jozufozu.flywheel.core.WorldContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
@@ -89,6 +91,10 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 
 			group.render(state, viewProjection, camX, camY, camZ);
 		}
+
+		GlBufferType.ELEMENT_ARRAY_BUFFER.unbind();
+		GlBufferType.ARRAY_BUFFER.unbind();
+		GlVertexArray.unbind();
 	}
 
 	public void delete() {

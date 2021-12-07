@@ -40,11 +40,11 @@ public abstract class GlBuffer extends GlObject {
 	}
 
 	public void bind() {
-		GL20.glBindBuffer(type.glEnum, handle());
+		type.bind(handle());
 	}
 
 	public void unbind() {
-		GL20.glBindBuffer(type.glEnum, 0);
+		type.unbind();
 	}
 
 	public void doneForThisFrame() {

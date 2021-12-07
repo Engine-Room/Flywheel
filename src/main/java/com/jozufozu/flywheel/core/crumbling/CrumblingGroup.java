@@ -28,16 +28,7 @@ public class CrumblingGroup<P extends CrumblingProgram> extends MaterialGroupImp
 
 		int renderTex = RenderSystem.getShaderTexture(0);
 
-		ResourceLocation texture = RenderTextures.getShaderTexture(0);
-
-		if (texture != null) {
-			SheetData atlasData = AtlasInfo.getAtlasData(texture);
-
-			width = atlasData.width;
-			height = atlasData.height;
-		} else {
-			width = height = 256;
-		}
+		updateAtlasSize();
 
 		type.clearRenderState();
 
@@ -54,6 +45,19 @@ public class CrumblingGroup<P extends CrumblingProgram> extends MaterialGroupImp
 		}
 
 		CrumblingRenderer._currentLayer.clearRenderState();
+	}
+
+	private void updateAtlasSize() {
+		ResourceLocation texture = RenderTextures.getShaderTexture(0);
+
+		if (texture != null) {
+			SheetData atlasData = AtlasInfo.getAtlasData(texture);
+
+			width = atlasData.width;
+			height = atlasData.height;
+		} else {
+			width = height = 256;
+		}
 	}
 
 	@Override

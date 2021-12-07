@@ -22,8 +22,6 @@ public class ArrayModelRenderer extends ModelRenderer {
 		vao.bind();
 
 		model.drawCall();
-
-		vao.unbind();
 	}
 
 	@Override
@@ -44,7 +42,7 @@ public class ArrayModelRenderer extends ModelRenderer {
 
 		AttribUtil.enableArrays(this.model.getAttributeCount());
 
-		vao.unbind();
+		GlVertexArray.unbind();
 
 		this.model.clearState();
 	}
