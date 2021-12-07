@@ -11,7 +11,7 @@ public class GlVertexArray extends GlObject {
 		Backend.getInstance().compat.vao.bindVertexArray(handle());
 	}
 
-	public void unbind() {
+	public static void unbind() {
 		Backend.getInstance().compat.vao.bindVertexArray(0);
 	}
 
