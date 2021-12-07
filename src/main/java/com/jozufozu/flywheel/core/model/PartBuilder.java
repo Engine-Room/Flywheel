@@ -136,6 +136,12 @@ public class PartBuilder {
 			return this;
 		}
 
+		public CuboidBuilder rotateZ(float z) {
+			useRotation = true;
+			this.rotationZ = z;
+			return this;
+		}
+
 		public CuboidBuilder sprite(TextureAtlasSprite sprite) {
 			this.sprite = sprite;
 			return this;
