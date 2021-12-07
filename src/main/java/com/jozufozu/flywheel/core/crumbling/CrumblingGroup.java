@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.core.crumbling;
 
-import com.jozufozu.flywheel.backend.material.MaterialGroupImpl;
-import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
-import com.jozufozu.flywheel.backend.material.MaterialRenderer;
+import com.jozufozu.flywheel.backend.material.instancing.InstancedMaterialGroup;
+import com.jozufozu.flywheel.backend.material.instancing.InstancingEngine;
+import com.jozufozu.flywheel.backend.material.instancing.InstancedMaterialRenderer;
 import com.jozufozu.flywheel.core.atlas.AtlasInfo;
 import com.jozufozu.flywheel.core.atlas.SheetData;
 import com.jozufozu.flywheel.util.RenderTextures;
@@ -13,12 +13,12 @@ import com.mojang.math.Matrix4f;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 
-public class CrumblingGroup<P extends CrumblingProgram> extends MaterialGroupImpl<P> {
+public class CrumblingGroup<P extends CrumblingProgram> extends InstancedMaterialGroup<P> {
 
 	private int width;
 	private int height;
 
-	public CrumblingGroup(MaterialManagerImpl<P> owner) {
+	public CrumblingGroup(InstancingEngine<P> owner) {
 		super(owner);
 	}
 
@@ -40,7 +40,7 @@ public class CrumblingGroup<P extends CrumblingProgram> extends MaterialGroupImp
 		RenderSystem.setShaderTexture(4, breakingTex);
 
 		TextureBinder.bindActiveTextures();
-		for (MaterialRenderer<P> renderer : renderers) {
+		for (InstancedMaterialRenderer<P> renderer : renderers) {
 			renderer.render(viewProjection, camX, camY, camZ);
 		}
 

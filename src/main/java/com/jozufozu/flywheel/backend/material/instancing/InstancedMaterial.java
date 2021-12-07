@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.material;
+package com.jozufozu.flywheel.backend.material.instancing;
 
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
@@ -9,6 +9,8 @@ import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.instancing.GPUInstancer;
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
 import com.jozufozu.flywheel.backend.instancing.Instancer;
+import com.jozufozu.flywheel.backend.material.Material;
+import com.jozufozu.flywheel.backend.material.MaterialSpec;
 import com.jozufozu.flywheel.backend.model.ModelPool;
 import com.jozufozu.flywheel.backend.struct.StructType;
 import com.jozufozu.flywheel.core.model.IModel;
@@ -17,13 +19,13 @@ import com.jozufozu.flywheel.core.model.IModel;
  * A collection of Instancers that all have the same format.
  * @param <D>
  */
-public class MaterialImpl<D extends InstanceData> implements Material<D> {
+public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 
 	final ModelPool modelPool;
 	protected final Cache<Object, GPUInstancer<D>> models;
 	protected final StructType<D> type;
 
-	public MaterialImpl(MaterialSpec<D> spec) {
+	public InstancedMaterial(MaterialSpec<D> spec) {
 		this.type = spec.getInstanceType();
 
 		modelPool = new ModelPool(spec.getModelFormat(), 64);

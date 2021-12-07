@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.material;
+package com.jozufozu.flywheel.backend.material.instancing;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -7,20 +7,24 @@ import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
+import com.jozufozu.flywheel.backend.material.Engine;
+import com.jozufozu.flywheel.backend.material.MaterialGroup;
 import com.jozufozu.flywheel.backend.state.RenderLayer;
 import com.jozufozu.flywheel.core.WorldContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
+import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.util.WeakHashSet;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
-public class MaterialManagerImpl<P extends WorldProgram> implements MaterialManager {
+public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 	public static int MAX_ORIGIN_DISTANCE = 100;
 
@@ -30,19 +34,19 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 	protected final GroupFactory<P> groupFactory;
 	protected final boolean ignoreOriginCoordinate;
 
-	protected final Map<RenderLayer, Map<RenderType, MaterialGroupImpl<P>>> layers;
+	protected final Map<RenderLayer, Map<RenderType, InstancedMaterialGroup<P>>> layers;
 
 	private final WeakHashSet<OriginShiftListener> listeners;
 
-	public MaterialManagerImpl(WorldContext<P> context) {
-		this(context, MaterialGroupImpl::new, false);
+	public InstancingEngine(WorldContext<P> context) {
+		this(context, InstancedMaterialGroup::new, false);
 	}
 
 	public static <P extends WorldProgram> Builder<P> builder(WorldContext<P> context) {
 		return new Builder<>(context);
 	}
 
-	public MaterialManagerImpl(WorldContext<P> context, GroupFactory<P> groupFactory, boolean ignoreOriginCoordinate) {
+	public InstancingEngine(WorldContext<P> context, GroupFactory<P> groupFactory, boolean ignoreOriginCoordinate) {
 		this.context = context;
 		this.ignoreOriginCoordinate = ignoreOriginCoordinate;
 
@@ -69,10 +73,13 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 
 	/**
 	 * Render every model for every material.
-	 * @param layer          Which of the 3 {@link RenderLayer render layers} is being drawn?
-	 * @param viewProjection How do we get from camera space to clip space?
 	 */
-	public void render(RenderLayer layer, Matrix4f viewProjection, double camX, double camY, double camZ) {
+	@Override
+	public void render(RenderLayerEvent event, MultiBufferSource buffers) {
+		double camX = event.camX;
+		double camY = event.camY;
+		double camZ = event.camZ;
+		Matrix4f viewProjection = event.viewProjection;
 		if (!ignoreOriginCoordinate) {
 			camX -= originCoordinate.getX();
 			camY -= originCoordinate.getY();
@@ -85,9 +92,9 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 			viewProjection = translate;
 		}
 
-		for (Map.Entry<RenderType, MaterialGroupImpl<P>> entry : layers.get(layer).entrySet()) {
+		for (Map.Entry<RenderType, InstancedMaterialGroup<P>> entry : layers.get(event.getLayer()).entrySet()) {
 			RenderType state = entry.getKey();
-			MaterialGroupImpl<P> group = entry.getValue();
+			InstancedMaterialGroup<P> group = entry.getValue();
 
 			group.render(state, viewProjection, camX, camY, camZ);
 		}
@@ -97,10 +104,11 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 		GlVertexArray.unbind();
 	}
 
+	@Override
 	public void delete() {
-		for (Map<RenderType, MaterialGroupImpl<P>> groups : layers.values()) {
+		for (Map<RenderType, InstancedMaterialGroup<P>> groups : layers.values()) {
 
-			groups.values().forEach(MaterialGroupImpl::delete);
+			groups.values().forEach(InstancedMaterialGroup::delete);
 		}
 	}
 
@@ -122,6 +130,7 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 	 *
 	 * This prevents floating point precision issues at high coordinates.
 	 */
+	@Override
 	public void beginFrame(Camera info) {
 		int cX = Mth.floor(info.getPosition().x);
 		int cY = Mth.floor(info.getPosition().y);
@@ -135,8 +144,8 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 
 			originCoordinate = new BlockPos(cX, cY, cZ);
 
-			for (Map<RenderType, MaterialGroupImpl<P>> groups : layers.values()) {
-				groups.values().forEach(MaterialGroupImpl::clear);
+			for (Map<RenderType, InstancedMaterialGroup<P>> groups : layers.values()) {
+				groups.values().forEach(InstancedMaterialGroup::clear);
 			}
 
 			listeners.forEach(OriginShiftListener::onOriginShift);
@@ -150,12 +159,12 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 
 	@FunctionalInterface
 	public interface GroupFactory<P extends WorldProgram> {
-		MaterialGroupImpl<P> create(MaterialManagerImpl<P> materialManager);
+		InstancedMaterialGroup<P> create(InstancingEngine<P> materialManager);
 	}
 
 	public static class Builder<P extends WorldProgram> {
 		protected final WorldContext<P> context;
-		protected GroupFactory<P> groupFactory = MaterialGroupImpl::new;
+		protected GroupFactory<P> groupFactory = InstancedMaterialGroup::new;
 		protected boolean ignoreOriginCoordinate;
 
 		public Builder(WorldContext<P> context) {
@@ -172,8 +181,8 @@ public class MaterialManagerImpl<P extends WorldProgram> implements MaterialMana
 			return this;
 		}
 
-		public MaterialManagerImpl<P> build() {
-			return new MaterialManagerImpl<>(context, groupFactory, ignoreOriginCoordinate);
+		public InstancingEngine<P> build() {
+			return new InstancingEngine<>(context, groupFactory, ignoreOriginCoordinate);
 		}
 	}
 }

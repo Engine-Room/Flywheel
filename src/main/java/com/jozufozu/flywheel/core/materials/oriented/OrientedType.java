@@ -2,12 +2,15 @@ package com.jozufozu.flywheel.core.materials.oriented;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
+import com.jozufozu.flywheel.backend.struct.Batched;
+import com.jozufozu.flywheel.backend.struct.BatchingTransformer;
 import com.jozufozu.flywheel.backend.struct.StructWriter;
 import com.jozufozu.flywheel.backend.struct.Writeable;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.materials.oriented.writer.UnsafeOrientedWriter;
+import com.jozufozu.flywheel.core.model.IModel;
 
-public class OrientedType implements Writeable<OrientedData> {
+public class OrientedType implements Writeable<OrientedData>, Batched<OrientedData> {
 
 	@Override
 	public OrientedData create() {
@@ -22,5 +25,10 @@ public class OrientedType implements Writeable<OrientedData> {
 	@Override
 	public StructWriter<OrientedData> getWriter(VecBuffer backing) {
 		return new UnsafeOrientedWriter(backing, this);
+	}
+
+	@Override
+	public BatchingTransformer<OrientedData> getTransformer(IModel model) {
+		return null;
 	}
 }
