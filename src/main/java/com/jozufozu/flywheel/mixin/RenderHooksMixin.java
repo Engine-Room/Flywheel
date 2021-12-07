@@ -82,13 +82,9 @@ public class RenderHooksMixin {
 		if (!Backend.getInstance()
 				.available()) return;
 
-		Matrix4f view = stack.last()
-				.pose();
-		Matrix4f viewProjection = view.copy();
-		viewProjection.multiplyBackward(RenderSystem.getProjectionMatrix());
-
 		Vec3 cameraPos = info.getPosition();
-		CrumblingRenderer.renderBreaking(level, viewProjection, cameraPos.x, cameraPos.y, cameraPos.z);
+
+		CrumblingRenderer.renderBreaking(new RenderLayerEvent(level, null, stack, null, cameraPos.x, cameraPos.y, cameraPos.z));
 
 		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
 	}
