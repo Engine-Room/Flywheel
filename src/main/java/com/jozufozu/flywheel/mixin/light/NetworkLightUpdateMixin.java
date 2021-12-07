@@ -16,7 +16,7 @@ import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
 @Mixin(ClientPacketListener.class)
 public class NetworkLightUpdateMixin {
 
-	@Inject(at = @At("TAIL"), method = "handleLightUpdatePacked")
+	@Inject(at = @At("TAIL"), method = "handleLightUpdatePacket")
 	private void onLightPacket(ClientboundLightUpdatePacket packet, CallbackInfo ci) {
 		RenderWork.enqueue(() -> {
 			ClientLevel world = Minecraft.getInstance().level;

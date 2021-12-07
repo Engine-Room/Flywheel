@@ -34,7 +34,7 @@ public class ModelUtil {
 		BufferBuilder builder = new BufferBuilder(DefaultVertexFormat.BLOCK.getIntegerSize());
 		builder.begin(QUADS, DefaultVertexFormat.BLOCK);
 
-		ForgeHooksClient.setRenderLayer(layer);
+		ForgeHooksClient.setRenderType(layer);
 		ModelBlockRenderer.enableCaching();
 		for (StructureTemplate.StructureBlockInfo info : blocks) {
 			BlockState state = info.state;
@@ -53,7 +53,7 @@ public class ModelUtil {
 			ms.popPose();
 		}
 		ModelBlockRenderer.clearCache();
-		ForgeHooksClient.setRenderLayer(null);
+		ForgeHooksClient.setRenderType(null);
 
 		builder.end();
 		return builder;

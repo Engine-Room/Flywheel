@@ -29,7 +29,7 @@ public class StitchedSprite {
 	}
 
 	public static void onTextureStitchPre(TextureStitchEvent.Pre event) {
-		ResourceLocation atlasLocation = event.getMap().location();
+		ResourceLocation atlasLocation = event.getAtlas().location();
 		List<StitchedSprite> sprites = ALL.get(atlasLocation);
 		if (sprites != null) {
 			for (StitchedSprite sprite : sprites) {
@@ -39,7 +39,7 @@ public class StitchedSprite {
 	}
 
 	public static void onTextureStitchPost(TextureStitchEvent.Post event) {
-		TextureAtlas atlas = event.getMap();
+		TextureAtlas atlas = event.getAtlas();
 		ResourceLocation atlasLocation = atlas.location();
 		List<StitchedSprite> sprites = ALL.get(atlasLocation);
 		if (sprites != null) {

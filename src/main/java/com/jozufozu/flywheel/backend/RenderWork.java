@@ -4,7 +4,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -15,7 +15,7 @@ public class RenderWork {
 
 
 	@SubscribeEvent(priority = EventPriority.LOWEST)
-	public static void onRenderWorldLast(RenderWorldLastEvent event) {
+	public static void onRenderWorldLast(RenderLevelLastEvent event) {
 		while (!runs.isEmpty()) {
 			runs.remove()
 					.run();
