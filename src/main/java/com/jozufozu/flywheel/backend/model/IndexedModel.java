@@ -35,6 +35,7 @@ public class IndexedModel extends BufferedModel {
 
 	@Override
 	public void drawCall() {
+		ebo.bind();
 		GL20.glDrawElements(primitiveMode.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0);
 	}
 
