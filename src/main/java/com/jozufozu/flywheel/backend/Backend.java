@@ -161,6 +161,8 @@ public class Backend {
 	public static boolean isFlywheelWorld(@Nullable LevelAccessor world) {
 		if (world == null) return false;
 
+		if (!world.isClientSide()) return false;
+
 		if (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel()) return true;
 
 		return world == Minecraft.getInstance().level;

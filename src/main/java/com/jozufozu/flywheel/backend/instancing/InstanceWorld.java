@@ -9,10 +9,8 @@ import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
-import com.jozufozu.flywheel.util.ChunkIter;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -60,17 +58,8 @@ public class InstanceWorld {
 	 */
 	public void delete() {
 		engine.delete();
-	}
-
-	/**
-	 * Instantiate all the necessary instances to render the given world.
-	 */
-	public void loadAll(ClientLevel world) {
-		ChunkIter.forEachChunk(world, chunk -> {
-			chunk.getBlockEntities().values().forEach(tileEntityInstanceManager::add);
-		});
-		world.entitiesForRendering()
-				.forEach(entityInstanceManager::add);
+		entityInstanceManager.detachLightListeners();
+		tileEntityInstanceManager.detachLightListeners();
 	}
 
 	/**

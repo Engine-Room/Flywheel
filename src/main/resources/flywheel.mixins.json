@@ -2,7 +2,7 @@
     "required": true,
     "minVersion": "0.8",
     "package": "com.jozufozu.flywheel.mixin",
-    "compatibilityLevel": "JAVA_16",
+    "compatibilityLevel": "JAVA_17",
     "refmap": "flywheel.refmap.json",
     "client": [
         "CancelEntityRenderMixin",
@@ -10,7 +10,6 @@
         "FixFabulousDepthMixin",
         "InstanceAddMixin",
         "InstanceRemoveMixin",
-        "LeakChunkStorageArrayMixin",
         "LevelRendererAccessor",
         "PausedPartialTickAccessor",
         "RenderHooksMixin",
