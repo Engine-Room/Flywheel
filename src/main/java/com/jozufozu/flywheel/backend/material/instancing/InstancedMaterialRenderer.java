@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.material;
+package com.jozufozu.flywheel.backend.material.instancing;
 
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -8,14 +8,14 @@ import com.jozufozu.flywheel.backend.instancing.GPUInstancer;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.mojang.math.Matrix4f;
 
-public class MaterialRenderer<P extends WorldProgram> {
+public class InstancedMaterialRenderer<P extends WorldProgram> {
 
 	protected final Supplier<P> program;
-	protected final MaterialImpl<?> material;
+	protected final InstancedMaterial<?> material;
 
 	protected final Consumer<P> setupFunc;
 
-	public MaterialRenderer(Supplier<P> programSupplier, MaterialImpl<?> material, Consumer<P> setupFunc) {
+	public InstancedMaterialRenderer(Supplier<P> programSupplier, InstancedMaterial<?> material, Consumer<P> setupFunc) {
 		this.program = programSupplier;
 		this.material = material;
 		this.setupFunc = setupFunc;

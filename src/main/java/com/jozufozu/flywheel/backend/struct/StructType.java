@@ -19,4 +19,6 @@ public interface StructType<S> {
 	VertexFormat format();
 
 	Writeable<S> asWriteable();
+
+	Batched<S> asBatched();
 }

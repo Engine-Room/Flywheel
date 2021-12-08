@@ -2,8 +2,9 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
-import com.jozufozu.flywheel.backend.material.MaterialManager;
-import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
+import com.jozufozu.flywheel.backend.material.Engine;
+import com.jozufozu.flywheel.backend.material.instancing.InstancingEngine;
+import com.jozufozu.flywheel.backend.material.batching.BatchingEngine;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
@@ -22,20 +23,28 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  * </p>
  */
 public class InstanceWorld {
-	protected final MaterialManagerImpl<WorldProgram> materialManager;
+	protected final Engine engine;
 	protected final InstanceManager<Entity> entityInstanceManager;
 	protected final InstanceManager<BlockEntity> tileEntityInstanceManager;
 
 	public InstanceWorld() {
+		
+		// TODO: finish impl
+		if (false) {
+			engine = new BatchingEngine();
+			entityInstanceManager = new EntityInstanceManager(engine);
+			tileEntityInstanceManager = new TileInstanceManager(engine);
+		} else {
+			InstancingEngine<WorldProgram> manager = InstancingEngine.builder(Contexts.WORLD)
+					.build();
 
-		materialManager = MaterialManagerImpl.builder(Contexts.WORLD)
-				.build();
-		entityInstanceManager = new EntityInstanceManager(materialManager);
-		tileEntityInstanceManager = new TileInstanceManager(materialManager);
-	}
+			entityInstanceManager = new EntityInstanceManager(manager);
+			tileEntityInstanceManager = new TileInstanceManager(manager);
 
-	public MaterialManager getMaterialManager() {
-		return materialManager;
+			manager.addListener(entityInstanceManager);
+			manager.addListener(tileEntityInstanceManager);
+			engine = manager;
+		}
 	}
 
 	public InstanceManager<Entity> getEntityInstanceManager() {
@@ -50,7 +59,7 @@ public class InstanceWorld {
 	 * Free all acquired resources and invalidate this instance world.
 	 */
 	public void delete() {
-		materialManager.delete();
+		engine.delete();
 	}
 
 	/**
@@ -73,7 +82,7 @@ public class InstanceWorld {
 	 * </p>
 	 */
 	public void beginFrame(BeginFrameEvent event) {
-		materialManager.beginFrame(event.getInfo());
+		engine.beginFrame(event.getInfo());
 
 		tileEntityInstanceManager.beginFrame(event.getInfo());
 		entityInstanceManager.beginFrame(event.getInfo());
@@ -99,6 +108,6 @@ public class InstanceWorld {
 	 * Draw the given layer.
 	 */
 	public void renderLayer(RenderLayerEvent event) {
-		materialManager.render(event.layer, event.viewProjection, event.camX, event.camY, event.camZ);
+		engine.render(event, event.buffers.bufferSource());
 	}
 }

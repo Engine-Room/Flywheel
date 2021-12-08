@@ -6,17 +6,15 @@ import java.util.SortedSet;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
-import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
-import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
-import com.jozufozu.flywheel.backend.state.RenderLayer;
+import com.jozufozu.flywheel.backend.material.instancing.InstancingEngine;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
 import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.Pair;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.math.Matrix4f;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -55,17 +53,17 @@ public class CrumblingRenderer {
 		INVALIDATOR = state.getSecond();
 	}
 
-	public static void renderBreaking(ClientLevel world, Matrix4f viewProjection, double cameraX, double cameraY, double cameraZ) {
+	public static void renderBreaking(RenderLayerEvent event) {
 		if (!Backend.getInstance()
-				.canUseInstancing(world)) return;
+				.canUseInstancing(event.getWorld())) return;
 
-		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageTiles(world);
+		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageTiles(event.getWorld());
 
 		if (activeStages.isEmpty()) return;
 
 		State state = STATE.get();
 		InstanceManager<BlockEntity> instanceManager = state.instanceManager;
-		MaterialManagerImpl<CrumblingProgram> materials = state.materialManager;
+		InstancingEngine<CrumblingProgram> materials = state.materialManager;
 
 		TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 		Camera info = Minecraft.getInstance().gameRenderer.getMainCamera();
@@ -79,7 +77,7 @@ public class CrumblingRenderer {
 
 				instanceManager.beginFrame(info);
 
-				materials.render(RenderLayer.SOLID, viewProjection, cameraX, cameraY, cameraZ);
+				materials.render(event, null);
 
 				instanceManager.invalidate();
 			}
@@ -133,14 +131,15 @@ public class CrumblingRenderer {
 	}
 
 	private static class State {
-		private final MaterialManagerImpl<CrumblingProgram> materialManager;
+		private final InstancingEngine<CrumblingProgram> materialManager;
 		private final InstanceManager<BlockEntity> instanceManager;
 
 		private State() {
-			materialManager = MaterialManagerImpl.builder(Contexts.CRUMBLING)
+			materialManager = InstancingEngine.builder(Contexts.CRUMBLING)
 					.setGroupFactory(CrumblingGroup::new)
 					.build();
 			instanceManager = new CrumblingInstanceManager(materialManager);
+			materialManager.addListener(instanceManager);
 		}
 
 		private void kill() {

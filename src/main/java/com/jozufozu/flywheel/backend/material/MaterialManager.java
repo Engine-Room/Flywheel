@@ -11,7 +11,7 @@ public interface MaterialManager {
 	 * Get a material group that will render in the given layer with the given state.
 	 *
 	 * @param layer The {@link RenderLayer} you want to draw in.
-	 * @param state The {@link net.minecraft.client.renderer.RenderType} you need to draw with.
+	 * @param state The {@link RenderType} you need to draw with.
 	 * @return A material group whose children will
 	 */
 	MaterialGroup state(RenderLayer layer, RenderType state);
