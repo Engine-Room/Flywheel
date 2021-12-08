@@ -1,10 +1,8 @@
-package com.jozufozu.flywheel.backend.gl.versioned.instancing;
+package com.jozufozu.flywheel.backend.gl.versioned;
 
 import org.lwjgl.opengl.ARBInstancedArrays;
 import org.lwjgl.opengl.GL33;
 import org.lwjgl.opengl.GLCapabilities;
-
-import com.jozufozu.flywheel.backend.gl.versioned.GlVersioned;
 
 public enum InstancedArrays implements GlVersioned {
 	GL33_INSTANCED_ARRAYS {

@@ -133,7 +133,7 @@ public class Backend {
 
 		compat = new GlCompat(capabilities);
 
-		instancedArrays = compat.vertexArrayObjectsSupported() && compat.drawInstancedSupported() && compat.instancedArraysSupported();
+		instancedArrays = compat.instancedArraysSupported();
 
 		enabled = FlwConfig.get()
 				.enabled() && !OptifineHandler.usingShaders();

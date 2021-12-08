@@ -9,13 +9,6 @@ import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.backend.gl.versioned.framebuffer.Blit;
-import com.jozufozu.flywheel.backend.gl.versioned.framebuffer.Framebuffer;
-import com.jozufozu.flywheel.backend.gl.versioned.instancing.BaseVertex;
-import com.jozufozu.flywheel.backend.gl.versioned.instancing.DrawInstanced;
-import com.jozufozu.flywheel.backend.gl.versioned.instancing.InstancedArrays;
-import com.jozufozu.flywheel.backend.gl.versioned.instancing.VertexArrayObject;
-
 /**
  * An instance of this class stores information about what OpenGL features are available.
  * <br>
@@ -25,48 +18,18 @@ import com.jozufozu.flywheel.backend.gl.versioned.instancing.VertexArrayObject;
 public class GlCompat {
 	public final MapBufferRange mapBufferRange;
 
-	public final VertexArrayObject vao;
 	public final InstancedArrays instancedArrays;
-	public final DrawInstanced drawInstanced;
-	public final Blit blit;
-	public final Framebuffer fbo;
 	public final BufferStorage bufferStorage;
-
-	public final RGPixelFormat pixelFormat;
-	public final BaseVertex baseVertex;
 
 	public GlCompat(GLCapabilities caps) {
 		mapBufferRange = getLatest(MapBufferRange.class, caps);
 
-		vao = getLatest(VertexArrayObject.class, caps);
 		instancedArrays = getLatest(InstancedArrays.class, caps);
-		drawInstanced = getLatest(DrawInstanced.class, caps);
-		baseVertex = getLatest(BaseVertex.class, caps);
-		blit = getLatest(Blit.class, caps);
-		fbo = getLatest(Framebuffer.class, caps);
 		bufferStorage = getLatest(BufferStorage.class, caps);
-
-		pixelFormat = getLatest(RGPixelFormat.class, caps);
-	}
-
-	public boolean vertexArrayObjectsSupported() {
-		return vao != VertexArrayObject.UNSUPPORTED;
 	}
 
 	public boolean instancedArraysSupported() {
 		return instancedArrays != InstancedArrays.UNSUPPORTED;
-	}
-
-	public boolean drawInstancedSupported() {
-		return drawInstanced != DrawInstanced.UNSUPPORTED;
-	}
-
-	public boolean fbosSupported() {
-		return fbo != Framebuffer.UNSUPPORTED;
-	}
-
-	public boolean blitSupported() {
-		return blit != Blit.UNSUPPORTED;
 	}
 
 	public boolean bufferStorageSupported() {
