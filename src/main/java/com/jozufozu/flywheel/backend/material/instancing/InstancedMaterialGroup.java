@@ -22,13 +22,15 @@ import net.minecraft.client.renderer.RenderType;
 public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialGroup {
 
 	protected final InstancingEngine<P> owner;
+	protected final RenderType type;
 
 	protected final ArrayList<InstancedMaterialRenderer<P>> renderers = new ArrayList<>();
 
 	private final Map<MaterialSpec<?>, InstancedMaterial<?>> materials = new HashMap<>();
 
-	public InstancedMaterialGroup(InstancingEngine<P> owner) {
+	public InstancedMaterialGroup(InstancingEngine<P> owner, RenderType type) {
 		this.owner = owner;
+		this.type = type;
 	}
 
 	/**
@@ -43,7 +45,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 		return (InstancedMaterial<D>) materials.computeIfAbsent(spec, this::createInstanceMaterial);
 	}
 
-	public void render(RenderType type, Matrix4f viewProjection, double camX, double camY, double camZ) {
+	public void render(Matrix4f viewProjection, double camX, double camY, double camZ) {
 		type.setupRenderState();
 		TextureBinder.bindActiveTextures();
 		for (InstancedMaterialRenderer<P> renderer : renderers) {

@@ -4,6 +4,9 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
@@ -60,15 +63,15 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	}
 
 	/**
-	 * Get a material group that will render in the given layer with the given state.
+	 * Get a material group that will render in the given layer with the given type.
 	 *
 	 * @param layer The {@link RenderLayer} you want to draw in.
-	 * @param state The {@link RenderType} you need to draw with.
+	 * @param type The {@link RenderType} you need to draw with.
 	 * @return A material group whose children will
 	 */
 	@Override
-	public MaterialGroup state(RenderLayer layer, RenderType state) {
-		return layers.get(layer).computeIfAbsent(state, $ -> groupFactory.create(this));
+	public MaterialGroup state(RenderLayer layer, RenderType type) {
+		return layers.get(layer).computeIfAbsent(type, t -> groupFactory.create(this, t));
 	}
 
 	/**
@@ -76,32 +79,42 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	 */
 	@Override
 	public void render(RenderLayerEvent event, MultiBufferSource buffers) {
-		double camX = event.camX;
-		double camY = event.camY;
-		double camZ = event.camZ;
-		Matrix4f viewProjection = event.viewProjection;
+		double camX;
+		double camY;
+		double camZ;
+		Matrix4f viewProjection;
 		if (!ignoreOriginCoordinate) {
-			camX -= originCoordinate.getX();
-			camY -= originCoordinate.getY();
-			camZ -= originCoordinate.getZ();
+			camX = event.camX - originCoordinate.getX();
+			camY = event.camY - originCoordinate.getY();
+			camZ = event.camZ - originCoordinate.getZ();
 
-			Matrix4f translate = Matrix4f.createTranslateMatrix((float) -camX, (float) -camY, (float) -camZ);
-
-			translate.multiplyBackward(viewProjection);
-
-			viewProjection = translate;
+			viewProjection = Matrix4f.createTranslateMatrix((float) -camX, (float) -camY, (float) -camZ);
+			viewProjection.multiplyBackward(event.viewProjection);
+		} else {
+			camX = event.camX;
+			camY = event.camY;
+			camZ = event.camZ;
+			viewProjection = event.viewProjection;
 		}
 
-		for (Map.Entry<RenderType, InstancedMaterialGroup<P>> entry : layers.get(event.getLayer()).entrySet()) {
-			RenderType state = entry.getKey();
-			InstancedMaterialGroup<P> group = entry.getValue();
-
-			group.render(state, viewProjection, camX, camY, camZ);
-		}
+		getGroupsToRender(event.getLayer()).forEach(group -> group.render(viewProjection, camX, camY, camZ));
 
 		GlBufferType.ELEMENT_ARRAY_BUFFER.unbind();
 		GlBufferType.ARRAY_BUFFER.unbind();
 		GlVertexArray.unbind();
+	}
+
+	private Stream<InstancedMaterialGroup<P>> getGroupsToRender(@Nullable RenderLayer layer) {
+		if (layer != null) {
+			return layers.get(layer)
+					.values()
+					.stream();
+		} else {
+			return layers.values()
+					.stream()
+					.flatMap(it -> it.values()
+							.stream());
+		}
 	}
 
 	@Override
@@ -159,7 +172,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 	@FunctionalInterface
 	public interface GroupFactory<P extends WorldProgram> {
-		InstancedMaterialGroup<P> create(InstancingEngine<P> materialManager);
+		InstancedMaterialGroup<P> create(InstancingEngine<P> engine, RenderType type);
 	}
 
 	public static class Builder<P extends WorldProgram> {
