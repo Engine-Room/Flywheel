@@ -4,7 +4,7 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
-import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
+import com.jozufozu.flywheel.backend.material.MaterialManager;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class TileInstanceManager extends InstanceManager<BlockEntity> {
 
-	public TileInstanceManager(MaterialManagerImpl<?> materialManager) {
+	public TileInstanceManager(MaterialManager materialManager) {
 		super(materialManager);
 	}
 

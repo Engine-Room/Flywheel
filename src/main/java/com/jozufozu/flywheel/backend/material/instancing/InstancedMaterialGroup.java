@@ -1,10 +1,12 @@
-package com.jozufozu.flywheel.backend.material;
+package com.jozufozu.flywheel.backend.material.instancing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.jozufozu.flywheel.backend.instancing.InstanceData;
+import com.jozufozu.flywheel.backend.material.MaterialGroup;
+import com.jozufozu.flywheel.backend.material.MaterialSpec;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.util.TextureBinder;
 import com.mojang.math.Matrix4f;
@@ -17,15 +19,15 @@ import net.minecraft.client.renderer.RenderType;
  * The children of a material group will all be rendered at the same time.
  * No guarantees are made about the order of draw calls.
  */
-public class MaterialGroupImpl<P extends WorldProgram> implements MaterialGroup {
+public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialGroup {
 
-	protected final MaterialManagerImpl<P> owner;
+	protected final InstancingEngine<P> owner;
 
-	protected final ArrayList<MaterialRenderer<P>> renderers = new ArrayList<>();
+	protected final ArrayList<InstancedMaterialRenderer<P>> renderers = new ArrayList<>();
 
-	private final Map<MaterialSpec<?>, MaterialImpl<?>> materials = new HashMap<>();
+	private final Map<MaterialSpec<?>, InstancedMaterial<?>> materials = new HashMap<>();
 
-	public MaterialGroupImpl(MaterialManagerImpl<P> owner) {
+	public InstancedMaterialGroup(InstancingEngine<P> owner) {
 		this.owner = owner;
 	}
 
@@ -37,14 +39,14 @@ public class MaterialGroupImpl<P extends WorldProgram> implements MaterialGroup 
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public <D extends InstanceData> MaterialImpl<D> material(MaterialSpec<D> spec) {
-		return (MaterialImpl<D>) materials.computeIfAbsent(spec, this::createInstanceMaterial);
+	public <D extends InstanceData> InstancedMaterial<D> material(MaterialSpec<D> spec) {
+		return (InstancedMaterial<D>) materials.computeIfAbsent(spec, this::createInstanceMaterial);
 	}
 
 	public void render(RenderType type, Matrix4f viewProjection, double camX, double camY, double camZ) {
 		type.setupRenderState();
 		TextureBinder.bindActiveTextures();
-		for (MaterialRenderer<P> renderer : renderers) {
+		for (InstancedMaterialRenderer<P> renderer : renderers) {
 			renderer.render(viewProjection, camX, camY, camZ);
 		}
 		type.clearRenderState();
@@ -55,21 +57,21 @@ public class MaterialGroupImpl<P extends WorldProgram> implements MaterialGroup 
 	}
 
 	public void clear() {
-		materials.values().forEach(MaterialImpl::clear);
+		materials.values().forEach(InstancedMaterial::clear);
 	}
 
 	public void delete() {
 		materials.values()
-				.forEach(MaterialImpl::delete);
+				.forEach(InstancedMaterial::delete);
 
 		materials.clear();
 		renderers.clear();
 	}
 
-	private MaterialImpl<?> createInstanceMaterial(MaterialSpec<?> type) {
-		MaterialImpl<?> material = new MaterialImpl<>(type);
+	private InstancedMaterial<?> createInstanceMaterial(MaterialSpec<?> type) {
+		InstancedMaterial<?> material = new InstancedMaterial<>(type);
 
-		this.renderers.add(new MaterialRenderer<>(owner.getProgram(type.getProgramName()), material, this::setup));
+		this.renderers.add(new InstancedMaterialRenderer<>(owner.getProgram(type.getProgramName()), material, this::setup));
 
 		return material;
 	}
