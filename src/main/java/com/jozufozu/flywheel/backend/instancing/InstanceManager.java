@@ -294,9 +294,15 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 					.addListener(renderer);
 			instances.put(obj, renderer);
 
-			if (renderer instanceof IDynamicInstance) dynamicInstances.put(obj, (IDynamicInstance) renderer);
+			if (renderer instanceof ITickableInstance r) {
+				tickableInstances.put(obj, r);
+				r.tick();
+			}
 
-			if (renderer instanceof ITickableInstance) tickableInstances.put(obj, ((ITickableInstance) renderer));
+			if (renderer instanceof IDynamicInstance r) {
+				dynamicInstances.put(obj, r);
+				r.beginFrame();
+			}
 		}
 
 		return renderer;
