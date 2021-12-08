@@ -21,7 +21,7 @@ import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
 public interface ITickableInstance extends IInstance {
 
 	/**
-	 * Called every tick.
+	 * Called every tick, and after initialization.
 	 * <br>
 	 * <em>DISPATCHED IN PARALLEL</em>, don't attempt to mutate anything outside of this instance.
 	 * <br>
