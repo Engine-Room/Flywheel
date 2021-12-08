@@ -3,7 +3,8 @@ package com.jozufozu.flywheel.backend.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jozufozu.flywheel.backend.Backend;
+import org.lwjgl.opengl.GL32;
+
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
@@ -195,7 +196,7 @@ public class ModelPool implements ModelAllocator {
 
 		@Override
 		public void drawCall() {
-			Backend.getInstance().compat.baseVertex.drawElementsBaseVertex(GlPrimitive.TRIANGLES, ebo.elementCount, ebo.eboIndexType, 0, first);
+			GL32.glDrawElementsBaseVertex(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0, first);
 		}
 
 		@Override
@@ -206,7 +207,7 @@ public class ModelPool implements ModelAllocator {
 
 			//Backend.log.info(StringUtil.args("drawElementsInstancedBaseVertex", GlPrimitive.TRIANGLES, ebo.elementCount, ebo.eboIndexType, 0, instanceCount, first));
 
-			Backend.getInstance().compat.baseVertex.drawElementsInstancedBaseVertex(GlPrimitive.TRIANGLES, ebo.elementCount, ebo.eboIndexType, 0, instanceCount, first);
+			GL32.glDrawElementsInstancedBaseVertex(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0, instanceCount, first);
 		}
 
 		@Override

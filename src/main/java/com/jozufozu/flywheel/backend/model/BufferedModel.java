@@ -2,7 +2,8 @@ package com.jozufozu.flywheel.backend.model;
 
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 
-import com.jozufozu.flywheel.backend.Backend;
+import org.lwjgl.opengl.GL31;
+
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
@@ -74,7 +75,7 @@ public class BufferedModel implements IBufferedModel {
 	public void drawInstances(int instanceCount) {
 		if (!valid()) return;
 
-		Backend.getInstance().compat.drawInstanced.drawArraysInstanced(primitiveMode, 0, getVertexCount(), instanceCount);
+		GL31.glDrawArraysInstanced(primitiveMode.glEnum, 0, getVertexCount(), instanceCount);
 	}
 
 	public void delete() {

@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.backend.model;
 
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL31;
 
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.core.model.IModel;
 
@@ -43,6 +43,6 @@ public class IndexedModel extends BufferedModel {
 	public void drawInstances(int instanceCount) {
 		if (!valid()) return;
 
-		Backend.getInstance().compat.drawInstanced.drawElementsInstanced(primitiveMode, ebo.elementCount, ebo.eboIndexType, 0, instanceCount);
+		GL31.glDrawElementsInstanced(primitiveMode.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0, instanceCount);
 	}
 }

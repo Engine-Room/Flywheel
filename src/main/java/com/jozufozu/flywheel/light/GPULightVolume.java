@@ -23,10 +23,10 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE4;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL14.GL_MIRRORED_REPEAT;
 
-import com.jozufozu.flywheel.backend.Backend;
+import org.lwjgl.opengl.GL30;
+
 import com.jozufozu.flywheel.backend.gl.GlTexture;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
-import com.jozufozu.flywheel.backend.gl.versioned.RGPixelFormat;
 
 import net.minecraft.world.level.LightLayer;
 
@@ -35,7 +35,6 @@ public class GPULightVolume extends LightVolume {
 	protected final GridAlignedBB sampleVolume = new GridAlignedBB();
 	private final GlTexture glTexture;
 
-	private final RGPixelFormat pixelFormat;
 	private final GlTextureUnit textureUnit = GlTextureUnit.T4;
 	protected boolean bufferDirty;
 
@@ -43,7 +42,6 @@ public class GPULightVolume extends LightVolume {
 		super(sampleVolume);
 		this.sampleVolume.assign(sampleVolume);
 
-		pixelFormat = Backend.getInstance().compat.pixelFormat;
 		glTexture = new GlTexture(GL_TEXTURE_3D);
 
 		// allocate space for the texture
@@ -53,7 +51,7 @@ public class GPULightVolume extends LightVolume {
 		int sizeX = box.sizeX();
 		int sizeY = box.sizeY();
 		int sizeZ = box.sizeZ();
-		glTexImage3D(GL_TEXTURE_3D, 0, pixelFormat.internalFormat(), sizeX, sizeY, sizeZ, 0, pixelFormat.format(), GL_UNSIGNED_BYTE, 0);
+		glTexImage3D(GL_TEXTURE_3D, 0, GL30.GL_RG8, sizeX, sizeY, sizeZ, 0, GL30.GL_RG, GL_UNSIGNED_BYTE, 0);
 
 		glTexture.unbind();
 		glActiveTexture(GL_TEXTURE0);
@@ -94,7 +92,7 @@ public class GPULightVolume extends LightVolume {
 			int sizeY = box.sizeY();
 			int sizeZ = box.sizeZ();
 
-			glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, sizeX, sizeY, sizeZ, pixelFormat.format(), GL_UNSIGNED_BYTE, lightData);
+			glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, sizeX, sizeY, sizeZ, GL30.GL_RG, GL_UNSIGNED_BYTE, lightData);
 
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // 4 is the default
 			bufferDirty = false;
@@ -150,7 +148,7 @@ public class GPULightVolume extends LightVolume {
 
 	@Override
 	protected int getStride() {
-		return Backend.getInstance().compat.pixelFormat.byteCount();
+		return 2;
 	}
 
 	@Override
