@@ -53,15 +53,13 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 				.setPosition(getInstancePosition());
 		lid = lidInstance();
 
-		if (block instanceof AbstractChestBlock) {
+		if (block instanceof AbstractChestBlock<?> chestBlock) {
 
 			float horizontalAngle = blockState.getValue(ChestBlock.FACING).toYRot();
 
 			baseRotation = Vector3f.YP.rotationDegrees(-horizontalAngle);
 
 			body.setRotation(baseRotation);
-
-			AbstractChestBlock<?> chestBlock = (AbstractChestBlock<?>) block;
 
 			DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> wrapper = chestBlock.combine(blockState, world, getWorldPosition(), true);
 

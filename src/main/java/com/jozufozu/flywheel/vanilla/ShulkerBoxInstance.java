@@ -86,14 +86,14 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxBlockEntity
 	}
 
 	private ModelData makeBaseInstance() {
-        return materialManager.cutout(RenderType.entityCutout(Sheets.SHULKER_SHEET))
+        return materialManager.cutout(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET))
                 .material(Materials.TRANSFORMED)
 				.model("base_" + texture.getName(), this::makeBaseModel)
 				.createInstance();
 	}
 
 	private ModelData makeLidInstance() {
-        return materialManager.cutout(RenderType.entityCutout(Sheets.SHULKER_SHEET))
+        return materialManager.cutout(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET))
                 .material(Materials.TRANSFORMED)
 				.model("lid_" + texture.getName(), this::makeLidModel)
 				.createInstance();
