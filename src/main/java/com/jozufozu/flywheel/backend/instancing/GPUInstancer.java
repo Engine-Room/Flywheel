@@ -51,10 +51,6 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 		// persistent mapping sync point
 		instanceVBO.doneForThisFrame();
-
-		GlVertexArray.unbind();
-
-		GlError.pollAndThrow(() -> modelData.name() + "_unbind");
 	}
 
 	private boolean invalid() {
