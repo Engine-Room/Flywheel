@@ -211,6 +211,10 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	}
 
 	protected void processQueuedAdditions() {
+		if (queuedAdditions.isEmpty()) {
+			return;
+		}
+
 		ArrayList<T> queued;
 
 		synchronized (queuedAdditions) {
@@ -218,7 +222,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 			queuedAdditions.clear();
 		}
 
-		if (queued.size() > 0) {
+		if (!queued.isEmpty()) {
 			queued.forEach(this::addInternal);
 		}
 	}
@@ -303,5 +307,11 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		ArrayList<T> instancedTiles = new ArrayList<>(instances.keySet());
 		invalidate();
 		instancedTiles.forEach(this::add);
+	}
+
+	public void detachLightListeners() {
+		for (AbstractInstance value : instances.values()) {
+			LightUpdater.get(value.world).removeListener(value);
+		}
 	}
 }

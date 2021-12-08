@@ -91,7 +91,7 @@ public class Loader implements ResourceManagerReloadListener {
 			ClientLevel world = Minecraft.getInstance().level;
 			if (Backend.isFlywheelWorld(world)) {
 				// TODO: looks like it might be good to have another event here
-				InstancedRenderDispatcher.loadAllInWorld(world);
+				InstancedRenderDispatcher.resetInstanceWorld(world);
 				CrumblingRenderer.reset();
 			}
 		}
