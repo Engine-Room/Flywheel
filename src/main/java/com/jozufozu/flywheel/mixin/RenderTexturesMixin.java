@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 @Mixin(RenderSystem.class)
 public class RenderTexturesMixin {
 
-	@Inject(method = "_setShaderTexture(ILnet/minecraft/resources/ResourceLocation;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/TextureManager;getTexture(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/texture/AbstractTexture;"))
+	@Inject(method = "_setShaderTexture(ILnet/minecraft/resources/ResourceLocation;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/AbstractTexture;getId()I"))
 	private static void storeTextureLoc(int pShaderTexture, ResourceLocation pTextureId, CallbackInfo ci) {
 		RenderTextures._setShaderTexture(pShaderTexture, pTextureId);
 	}
