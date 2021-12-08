@@ -48,11 +48,10 @@ public class CrumblingGroup<P extends CrumblingProgram> extends MaterialGroupImp
 	}
 
 	private void updateAtlasSize() {
-		ResourceLocation texture = RenderTextures.getShaderTexture(0);
 
-		if (texture != null) {
-			SheetData atlasData = AtlasInfo.getAtlasData(texture);
+		SheetData atlasData = AtlasInfo.getAtlasData(RenderTextures.getShaderTexture(0));
 
+		if (atlasData != null) {
 			width = atlasData.width;
 			height = atlasData.height;
 		} else {
