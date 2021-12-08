@@ -18,12 +18,12 @@ public class CrumblingGroup<P extends CrumblingProgram> extends InstancedMateria
 	private int width;
 	private int height;
 
-	public CrumblingGroup(InstancingEngine<P> owner) {
-		super(owner);
+	public CrumblingGroup(InstancingEngine<P> owner, RenderType type) {
+		super(owner, type);
 	}
 
 	@Override
-	public void render(RenderType type, Matrix4f viewProjection, double camX, double camY, double camZ) {
+	public void render(Matrix4f viewProjection, double camX, double camY, double camZ) {
 		type.setupRenderState();
 
 		int renderTex = RenderSystem.getShaderTexture(0);
