@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.api;
+package com.jozufozu.flywheel.api;
 
 public interface MaterialGroup {
 	/**

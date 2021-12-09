@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.ShaderContext;
-import com.jozufozu.flywheel.backend.api.MaterialSpec;
+import com.jozufozu.flywheel.api.MaterialSpec;
 import com.jozufozu.flywheel.backend.pipeline.ShaderPipeline;
 import com.jozufozu.flywheel.core.shader.ContextAwareProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;

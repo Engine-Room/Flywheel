@@ -6,8 +6,8 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-import com.jozufozu.flywheel.backend.api.InstanceData;
-import com.jozufozu.flywheel.backend.api.Instancer;
+import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.Instancer;
 
 public class SelectInstance<D extends InstanceData> {
 

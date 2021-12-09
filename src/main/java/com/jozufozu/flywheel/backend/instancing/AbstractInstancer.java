@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.backend.instancing;
 import java.util.ArrayList;
 import java.util.BitSet;
 
-import com.jozufozu.flywheel.backend.api.InstanceData;
-import com.jozufozu.flywheel.backend.api.Instancer;
+import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.backend.struct.StructType;
 import com.jozufozu.flywheel.core.model.Model;
 

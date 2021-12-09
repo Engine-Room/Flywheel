@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.core.materials;
 
-import com.jozufozu.flywheel.backend.api.InstanceData;
+import com.jozufozu.flywheel.api.InstanceData;
 
 /**
  * An interface that implementors of {@link InstanceData} should also implement

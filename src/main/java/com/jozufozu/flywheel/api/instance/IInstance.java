@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.api.instance;
+package com.jozufozu.flywheel.api.instance;
 
 import net.minecraft.core.BlockPos;
 

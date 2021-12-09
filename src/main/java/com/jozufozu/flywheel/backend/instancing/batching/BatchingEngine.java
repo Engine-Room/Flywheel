@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.jozufozu.flywheel.backend.instancing.Engine;
-import com.jozufozu.flywheel.backend.api.MaterialGroup;
+import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.backend.RenderLayer;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 

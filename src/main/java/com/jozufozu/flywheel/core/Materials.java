@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.core;
 
-import com.jozufozu.flywheel.backend.api.MaterialSpec;
+import com.jozufozu.flywheel.api.MaterialSpec;
 import com.jozufozu.flywheel.backend.struct.StructType;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.materials.model.ModelType;
