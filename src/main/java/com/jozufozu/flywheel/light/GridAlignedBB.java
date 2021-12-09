@@ -385,7 +385,7 @@ public class GridAlignedBB implements ImmutableBox {
 	}
 
 	@Override
-	public void forEachContained(ICoordinateConsumer func) {
+	public void forEachContained(CoordinateConsumer func) {
 		if (empty()) return;
 
 		for (int x = minX; x < maxX; x++) {

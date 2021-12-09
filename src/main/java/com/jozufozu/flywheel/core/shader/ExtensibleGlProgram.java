@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import com.jozufozu.flywheel.backend.ShaderContext;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.shader.extension.IExtensionInstance;
 
@@ -17,7 +18,7 @@ import net.minecraft.resources.ResourceLocation;
  * the caller using the program. This is used by some programs to implement the different fog modes. Other uses might
  * include binding extra textures to allow for blocks to have normal maps, for example. As the extensions are
  * per-program, this also allows for same extra specialization within a
- * {@link com.jozufozu.flywheel.backend.ShaderContext ShaderContext}.
+ * {@link ShaderContext ShaderContext}.
  */
 public class ExtensibleGlProgram extends GlProgram {
 

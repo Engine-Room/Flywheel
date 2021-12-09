@@ -24,7 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * A model of a single block.
  */
-public class BlockModel implements IModel {
+public class BlockModel implements Model {
 	private static final PoseStack IDENTITY = new PoseStack();
 
 	private final BufferBuilderReader reader;

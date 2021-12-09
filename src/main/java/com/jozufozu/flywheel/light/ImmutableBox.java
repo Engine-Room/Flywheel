@@ -107,7 +107,7 @@ public interface ImmutableBox {
 		return this.getMinX() < maxX && this.getMaxX() > minX && this.getMinY() < maxY && this.getMaxY() > minY && this.getMinZ() < maxZ && this.getMaxZ() > minZ;
 	}
 
-	default void forEachContained(ICoordinateConsumer func) {
+	default void forEachContained(CoordinateConsumer func) {
 		if (empty()) return;
 
 		for (int x = getMinX(); x < getMaxX(); x++) {
@@ -119,7 +119,7 @@ public interface ImmutableBox {
 		}
 	}
 
-	default  AABB toAABB() {
+	default AABB toAABB() {
 		return new AABB(getMinX(), getMinY(), getMinZ(), getMaxX(), getMaxY(), getMaxZ());
 	}
 

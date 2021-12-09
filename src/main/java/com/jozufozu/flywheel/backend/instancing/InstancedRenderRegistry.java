@@ -5,11 +5,12 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.Maps;
+import com.jozufozu.flywheel.backend.api.FlywheelRendered;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
 import com.jozufozu.flywheel.backend.instancing.entity.IEntityInstanceFactory;
 import com.jozufozu.flywheel.backend.instancing.tile.ITileInstanceFactory;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
-import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.backend.api.MaterialManager;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
@@ -34,11 +35,11 @@ public class InstancedRenderRegistry {
 	}
 
 	public <T extends BlockEntity> boolean shouldSkipRender(T type) {
-		return _skipRender(type.getType()) || ((type instanceof IInstanceRendered) && !((IInstanceRendered) type).shouldRenderNormally());
+		return _skipRender(type.getType()) || ((type instanceof FlywheelRendered) && !((FlywheelRendered) type).shouldRenderNormally());
 	}
 
 	public <T extends Entity> boolean shouldSkipRender(T type) {
-		return _skipRender(type.getType()) || ((type instanceof IInstanceRendered) && !((IInstanceRendered) type).shouldRenderNormally());
+		return _skipRender(type.getType()) || ((type instanceof FlywheelRendered) && !((FlywheelRendered) type).shouldRenderNormally());
 	}
 
 	public <T extends BlockEntity> boolean canInstance(BlockEntityType<? extends T> type) {

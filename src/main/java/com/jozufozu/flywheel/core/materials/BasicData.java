@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.core.materials;
 
-import com.jozufozu.flywheel.backend.instancing.InstanceData;
+import com.jozufozu.flywheel.backend.api.InstanceData;
 
-public abstract class BasicData extends InstanceData implements IFlatLight<BasicData> {
+public abstract class BasicData extends InstanceData implements FlatLit<BasicData> {
 
 	public byte blockLight;
 	public byte skyLight;
