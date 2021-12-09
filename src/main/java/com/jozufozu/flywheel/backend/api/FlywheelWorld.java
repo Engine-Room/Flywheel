@@ -1,0 +1,13 @@
+package com.jozufozu.flywheel.backend.api;
+
+/**
+ * A marker interface custom worlds can override to indicate
+ * that tiles inside the world should render with Flywheel.
+ *
+ * {@link net.minecraft.client.Minecraft#level Minecraft#level} is special cased and will support Flywheel by default.
+ */
+public interface FlywheelWorld {
+	default boolean supportsFlywheel() {
+		return true;
+	}
+}

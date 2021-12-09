@@ -1,23 +1,16 @@
 package com.jozufozu.flywheel.light;
 
-import java.util.Map;
-import java.util.WeakHashMap;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
 
+/**
+ * Wraps a world and minimally lowers the interface.
+ */
 public class BasicProvider implements LightProvider {
 
-	private static final Map<BlockAndTintGetter, BasicProvider> wrappers = new WeakHashMap<>();
-
-	public static BasicProvider get(BlockAndTintGetter world) {
-		return wrappers.computeIfAbsent(world, BasicProvider::new);
-	}
-
-	private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-
 	private final BlockAndTintGetter reader;
+	private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
 	public BasicProvider(BlockAndTintGetter reader) {
 		this.reader = reader;

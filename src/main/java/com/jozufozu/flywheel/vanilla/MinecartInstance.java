@@ -1,12 +1,12 @@
 package com.jozufozu.flywheel.vanilla;
 
-import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
-import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
+import com.jozufozu.flywheel.backend.api.instance.IDynamicInstance;
+import com.jozufozu.flywheel.backend.api.instance.ITickableInstance;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
-import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.backend.api.MaterialManager;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
-import com.jozufozu.flywheel.core.model.IModel;
+import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.core.model.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
@@ -153,7 +153,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 				.createInstance();
 	}
 
-	private IModel getBodyModel() {
+	private Model getBodyModel() {
 		int y = -3;
 		return ModelPart.builder("minecart", 64, 32)
 				.cuboid().invertYZ().start(-10, -8, -y).size(20, 16, 2).textureOffset(0, 10).rotateZ((float) Math.PI).rotateX(((float)Math.PI / 2F)).endCuboid()

@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.shader.spec.IGameStateCondition;
 import com.jozufozu.flywheel.util.Pair;
 
-public class GameStateProgram<P extends GlProgram> implements IMultiProgram<P> {
+public class GameStateProgram<P extends GlProgram> implements ContextAwareProgram<P> {
 
 	private final List<Pair<IGameStateCondition, P>> variants;
 	private final P fallback;
@@ -55,7 +55,7 @@ public class GameStateProgram<P extends GlProgram> implements IMultiProgram<P> {
 			return this;
 		}
 
-		public IMultiProgram<P> build() {
+		public ContextAwareProgram<P> build() {
 			return new GameStateProgram<>(ImmutableList.copyOf(variants), fallback);
 		}
 	}

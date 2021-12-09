@@ -1,10 +1,10 @@
 package com.jozufozu.flywheel.backend.instancing.tile;
 
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
-import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
-import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
-import com.jozufozu.flywheel.backend.material.Material;
-import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.backend.api.instance.IDynamicInstance;
+import com.jozufozu.flywheel.backend.api.instance.ITickableInstance;
+import com.jozufozu.flywheel.backend.api.Material;
+import com.jozufozu.flywheel.backend.api.MaterialManager;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;

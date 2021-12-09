@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.jozufozu.flywheel.backend.instancing.InstanceData;
-import com.jozufozu.flywheel.backend.instancing.Instancer;
+import com.jozufozu.flywheel.backend.api.InstanceData;
+import com.jozufozu.flywheel.backend.api.Instancer;
 
 public class GroupInstance<D extends InstanceData> extends AbstractCollection<D> {
 

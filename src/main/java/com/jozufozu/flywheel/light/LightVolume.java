@@ -7,7 +7,7 @@ import org.lwjgl.system.MemoryUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LightLayer;
 
-public class LightVolume implements ImmutableBox, ILightUpdateListener {
+public class LightVolume implements ImmutableBox, LightListener {
 
 	protected final GridAlignedBB box = new GridAlignedBB();
 	protected ByteBuffer lightData;

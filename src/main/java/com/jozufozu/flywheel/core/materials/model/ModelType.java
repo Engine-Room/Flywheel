@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.backend.struct.StructWriter;
 import com.jozufozu.flywheel.backend.struct.Writeable;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.materials.model.writer.UnsafeModelWriter;
-import com.jozufozu.flywheel.core.model.IModel;
+import com.jozufozu.flywheel.core.model.Model;
 
 public class ModelType implements Writeable<ModelData>, Batched<ModelData> {
 
@@ -28,7 +28,7 @@ public class ModelType implements Writeable<ModelData>, Batched<ModelData> {
 	}
 
 	@Override
-	public BatchingTransformer<ModelData> getTransformer(IModel model) {
+	public BatchingTransformer<ModelData> getTransformer(Model model) {
 		return null;
 	}
 }

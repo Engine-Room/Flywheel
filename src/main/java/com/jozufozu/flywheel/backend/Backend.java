@@ -13,9 +13,10 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 
+import com.jozufozu.flywheel.backend.api.FlywheelWorld;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
-import com.jozufozu.flywheel.backend.instancing.InstanceData;
-import com.jozufozu.flywheel.backend.material.MaterialSpec;
+import com.jozufozu.flywheel.backend.api.InstanceData;
+import com.jozufozu.flywheel.backend.api.MaterialSpec;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
@@ -41,7 +42,7 @@ public class Backend {
 	private boolean instancedArrays;
 	private boolean enabled;
 
-	private final List<IShaderContext<?>> contexts = new ArrayList<>();
+	private final List<ShaderContext<?>> contexts = new ArrayList<>();
 	private final Map<ResourceLocation, MaterialSpec<?>> materialRegistry = new HashMap<>();
 	private final Map<ResourceLocation, ProgramSpec> programSpecRegistry = new HashMap<>();
 
@@ -82,7 +83,7 @@ public class Backend {
 	/**
 	 * Register a shader context.
 	 */
-	public <C extends IShaderContext<?>> C register(C spec) {
+	public <C extends ShaderContext<?>> C register(C spec) {
 		contexts.add(spec);
 		return spec;
 	}
@@ -97,8 +98,7 @@ public class Backend {
 		}
 		materialRegistry.put(name, spec);
 
-		log.debug("registered material '" + name + "' with vertex size " + spec.getModelFormat()
-				.getStride() + " and instance size " + spec.getInstanceType().format().getStride());
+		log.debug("registered material '" + name + "' with instance size " + spec.getInstanceType().format().getStride());
 
 		return spec;
 	}
@@ -151,7 +151,7 @@ public class Backend {
 		return programSpecRegistry.values();
 	}
 
-	public Collection<IShaderContext<?>> allContexts() {
+	public Collection<ShaderContext<?>> allContexts() {
 		return contexts;
 	}
 
@@ -163,7 +163,7 @@ public class Backend {
 
 		if (!world.isClientSide()) return false;
 
-		if (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel()) return true;
+		if (world instanceof FlywheelWorld && ((FlywheelWorld) world).supportsFlywheel()) return true;
 
 		return world == Minecraft.getInstance().level;
 	}
@@ -182,7 +182,7 @@ public class Backend {
 	public void _clearContexts() {
 		GameStateRegistry.clear();
 		programSpecRegistry.clear();
-		contexts.forEach(IShaderContext::delete);
+		contexts.forEach(ShaderContext::delete);
 		contexts.clear();
 		materialRegistry.clear();
 	}

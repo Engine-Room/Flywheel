@@ -6,24 +6,24 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.IShaderContext;
-import com.jozufozu.flywheel.backend.material.MaterialSpec;
-import com.jozufozu.flywheel.backend.pipeline.IShaderPipeline;
-import com.jozufozu.flywheel.core.shader.IMultiProgram;
+import com.jozufozu.flywheel.backend.ShaderContext;
+import com.jozufozu.flywheel.backend.api.MaterialSpec;
+import com.jozufozu.flywheel.backend.pipeline.ShaderPipeline;
+import com.jozufozu.flywheel.core.shader.ContextAwareProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class WorldContext<P extends WorldProgram> implements IShaderContext<P> {
+public class WorldContext<P extends WorldProgram> implements ShaderContext<P> {
 	public final Backend backend;
-	protected final Map<ResourceLocation, IMultiProgram<P>> programs = new HashMap<>();
+	protected final Map<ResourceLocation, ContextAwareProgram<P>> programs = new HashMap<>();
 	protected final ResourceLocation name;
 	protected final Supplier<Stream<ResourceLocation>> specStream;
 
-	public final IShaderPipeline<P> pipeline;
+	public final ShaderPipeline<P> pipeline;
 
-	public WorldContext(Backend backend, ResourceLocation name, Supplier<Stream<ResourceLocation>> specStream, IShaderPipeline<P> pipeline) {
+	public WorldContext(Backend backend, ResourceLocation name, Supplier<Stream<ResourceLocation>> specStream, ShaderPipeline<P> pipeline) {
 		this.backend = backend;
 		this.name = name;
 		this.specStream = specStream;
@@ -61,7 +61,7 @@ public class WorldContext<P extends WorldProgram> implements IShaderContext<P> {
 	@Override
 	public void delete() {
 		programs.values()
-				.forEach(IMultiProgram::delete);
+				.forEach(ContextAwareProgram::delete);
 		programs.clear();
 	}
 
@@ -84,7 +84,7 @@ public class WorldContext<P extends WorldProgram> implements IShaderContext<P> {
 			return this;
 		}
 
-		public <P extends WorldProgram> WorldContext<P> build(IShaderPipeline<P> pipeline) {
+		public <P extends WorldProgram> WorldContext<P> build(ShaderPipeline<P> pipeline) {
 			if (specStream == null) {
 				specStream = () -> backend.allMaterials()
 						.stream()

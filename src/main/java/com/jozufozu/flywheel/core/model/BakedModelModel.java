@@ -23,7 +23,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 
-public class BakedModelModel implements IModel {
+public class BakedModelModel implements Model {
 	// DOWN, UP, NORTH, SOUTH, WEST, EAST, null
 	private static final Direction[] dirs;
 

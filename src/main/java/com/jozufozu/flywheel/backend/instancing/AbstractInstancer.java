@@ -3,19 +3,20 @@ package com.jozufozu.flywheel.backend.instancing;
 import java.util.ArrayList;
 import java.util.BitSet;
 
+import com.jozufozu.flywheel.backend.api.InstanceData;
+import com.jozufozu.flywheel.backend.api.Instancer;
 import com.jozufozu.flywheel.backend.struct.StructType;
-import com.jozufozu.flywheel.core.model.IModel;
+import com.jozufozu.flywheel.core.model.Model;
 
-public class AbstractInstancer<D extends InstanceData> implements Instancer<D> {
+public abstract class AbstractInstancer<D extends InstanceData> implements Instancer<D> {
 
 	protected final StructType<D> type;
-	protected final IModel modelData;
+	protected final Model modelData;
 	protected final ArrayList<D> data = new ArrayList<>();
 
-	boolean anyToRemove;
-	boolean anyToUpdate;
+	protected boolean anyToRemove;
 
-	public AbstractInstancer(StructType<D> type, IModel modelData) {
+	protected AbstractInstancer(StructType<D> type, Model modelData) {
 		this.type = type;
 		this.modelData = modelData;
 	}
@@ -25,9 +26,7 @@ public class AbstractInstancer<D extends InstanceData> implements Instancer<D> {
 	 */
 	@Override
 	public D createInstance() {
-		D data = type.create();
-		data.owner = this;
-		return _add(data);
+		return _add(type.create());
 	}
 
 	/**
@@ -38,24 +37,17 @@ public class AbstractInstancer<D extends InstanceData> implements Instancer<D> {
 	 */
 	@Override
 	public void stealInstance(D inOther) {
-		if (inOther.owner == this) return;
+		if (inOther.getOwner() == this) return;
 
-		inOther.delete();
-		// sike, we want to keep it, changing the owner reference will still delete it in the other
-		inOther.removed = false;
+		// Changing the owner reference will delete it in the other instancer
+		inOther.getOwner()
+				.notifyRemoval();
 		_add(inOther);
 	}
 
 	@Override
-	public void markDirty(InstanceData instanceData) {
-		anyToUpdate = true;
-		instanceData.dirty = true;
-	}
-
-	@Override
-	public void markRemoval(InstanceData instanceData) {
+	public void notifyRemoval() {
 		anyToRemove = true;
-		instanceData.removed = true;
 	}
 
 	/**
@@ -72,10 +64,8 @@ public class AbstractInstancer<D extends InstanceData> implements Instancer<D> {
 
 		for (int i = 0; i < size; i++) {
 			D element = data.get(i);
-			if (element.dirty) {
+			if (element.checkDirtyAndClear()) {
 				dirtySet.set(i);
-
-				element.dirty = false;
 			}
 		}
 		return dirtySet;
@@ -88,7 +78,7 @@ public class AbstractInstancer<D extends InstanceData> implements Instancer<D> {
 		final BitSet removeSet = new BitSet(oldSize);
 		for (int i = 0; i < oldSize; i++) {
 			final D element = this.data.get(i);
-			if (element.removed || element.owner != this) {
+			if (element.isRemoved() || element.getOwner() != this) {
 				removeSet.set(i);
 				removeCount++;
 			}
@@ -103,11 +93,12 @@ public class AbstractInstancer<D extends InstanceData> implements Instancer<D> {
 			if (i != j) {
 				D element = data.get(i);
 				data.set(j, element);
-				element.dirty = true;
+				// Marking the data dirty marks us dirty too.
+				// Perhaps there will be some wasted cycles, but the JVM should be able to
+				// generate code that moves the repeated segment out of the loop.
+				element.markDirty();
 			}
 		}
-
-		anyToUpdate = true;
 
 		data.subList(newSize, oldSize)
 				.clear();
@@ -115,10 +106,9 @@ public class AbstractInstancer<D extends InstanceData> implements Instancer<D> {
 	}
 
 	private D _add(D instanceData) {
-		instanceData.owner = this;
+		instanceData.setOwner(this);
 
-		instanceData.dirty = true;
-		anyToUpdate = true;
+		instanceData.markDirty();
 		synchronized (data) {
 			data.add(instanceData);
 		}

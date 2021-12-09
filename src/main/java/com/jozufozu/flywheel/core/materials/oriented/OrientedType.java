@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.backend.struct.StructWriter;
 import com.jozufozu.flywheel.backend.struct.Writeable;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.materials.oriented.writer.UnsafeOrientedWriter;
-import com.jozufozu.flywheel.core.model.IModel;
+import com.jozufozu.flywheel.core.model.Model;
 
 public class OrientedType implements Writeable<OrientedData>, Batched<OrientedData> {
 
@@ -28,7 +28,7 @@ public class OrientedType implements Writeable<OrientedData>, Batched<OrientedDa
 	}
 
 	@Override
-	public BatchingTransformer<OrientedData> getTransformer(IModel model) {
+	public BatchingTransformer<OrientedData> getTransformer(Model model) {
 		return null;
 	}
 }
