@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.backend.instancing;
 
-import com.jozufozu.flywheel.backend.api.instance.IDynamicInstance;
-import com.jozufozu.flywheel.backend.api.instance.ITickableInstance;
+import com.jozufozu.flywheel.api.instance.IDynamicInstance;
+import com.jozufozu.flywheel.api.instance.ITickableInstance;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.batching.BatchingEngine;

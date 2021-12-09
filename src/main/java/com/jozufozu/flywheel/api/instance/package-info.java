@@ -1,5 +1,5 @@
 @ParametersAreNonnullByDefault @MethodsReturnNonnullByDefault
-package com.jozufozu.flywheel.backend.api;
+package com.jozufozu.flywheel.api.instance;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

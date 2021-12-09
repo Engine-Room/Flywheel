@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.api;
+package com.jozufozu.flywheel.api;
 
 import net.minecraft.world.level.Level;
 

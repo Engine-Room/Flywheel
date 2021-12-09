@@ -10,7 +10,7 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
-import com.jozufozu.flywheel.backend.api.InstanceData;
+import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.backend.model.IBufferedModel;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
 import com.jozufozu.flywheel.backend.struct.StructType;

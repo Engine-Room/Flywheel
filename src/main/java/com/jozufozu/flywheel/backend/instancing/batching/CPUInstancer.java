@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.backend.instancing.batching;
 
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
-import com.jozufozu.flywheel.backend.api.InstanceData;
+import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.backend.struct.BatchingTransformer;
 import com.jozufozu.flywheel.backend.struct.StructType;
 import com.jozufozu.flywheel.core.model.Model;

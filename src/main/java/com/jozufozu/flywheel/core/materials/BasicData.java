@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.core.materials;
 
-import com.jozufozu.flywheel.backend.api.InstanceData;
+import com.jozufozu.flywheel.api.InstanceData;
 
 public abstract class BasicData extends InstanceData implements FlatLit<BasicData> {
 

@@ -3,9 +3,9 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jozufozu.flywheel.backend.api.InstanceData;
-import com.jozufozu.flywheel.backend.api.MaterialGroup;
-import com.jozufozu.flywheel.backend.api.MaterialSpec;
+import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.MaterialGroup;
+import com.jozufozu.flywheel.api.MaterialSpec;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
