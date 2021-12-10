@@ -1,4 +1,16 @@
-0.3.0:
-Update to 1.17
-New
+0.4.0:
+Update to 1.18
+Fixes
+ - Fix potential nullpointer rendering breaking overlay
+ - Fix inconsistency in minecart model
+ - Fix memory leak when instance worlds get reset
 Technical/API
+ - No more MaterialSpec, everything is StructType
+ - Move most user facing interfaces to flywheel.api package
+ - Refactor InstanceData to have no package private fields
+ - Rename many interfaces
+ - All materials use the same vertex format: UNLIT_MODEL
+ - call #tick and #beginFrame on instance creation
+ - Fixes weird delay in object appearance when reloading chunks
+ - Add instances when chunks are built for rendering
+ - Server worlds are not flywheel worlds
