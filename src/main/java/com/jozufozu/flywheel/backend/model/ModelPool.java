@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL32;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
@@ -115,34 +116,35 @@ public class ModelPool implements ModelAllocator {
 	}
 
 	private void uploadAll() {
-		MappedBuffer buffer = vbo.getBuffer(0, bufferSize);
+		try (MappedBuffer buffer = vbo.getBuffer(0, bufferSize)) {
 
-		VecBufferWriter consumer = new VecBufferWriter(buffer);
+			VecBufferWriter consumer = new VecBufferWriter(buffer);
 
-		for (PooledModel model : models) {
-			model.model.buffer(consumer);
-			if (model.callback != null)
-				model.callback.onAlloc(model);
+			for (PooledModel model : models) {
+				model.model.buffer(consumer);
+				if (model.callback != null) model.callback.onAlloc(model);
+			}
+
+		} catch (Exception e) {
+			Flywheel.log.error("Error uploading pooled models:", e);
 		}
-
-		buffer.flush();
 	}
 
 	private void uploadPending() {
-		MappedBuffer buffer = vbo.getBuffer(0, bufferSize);
-		VecBufferWriter consumer = new VecBufferWriter(buffer);
+		try (MappedBuffer buffer = vbo.getBuffer(0, bufferSize)) {
+			VecBufferWriter consumer = new VecBufferWriter(buffer);
 
-		int stride = format.getStride();
-		for (PooledModel model : pendingUpload) {
-			int pos = model.first * stride;
-			buffer.position(pos);
-			model.model.buffer(consumer);
-			if (model.callback != null)
-				model.callback.onAlloc(model);
+			int stride = format.getStride();
+			for (PooledModel model : pendingUpload) {
+				int pos = model.first * stride;
+				buffer.position(pos);
+				model.model.buffer(consumer);
+				if (model.callback != null) model.callback.onAlloc(model);
+			}
+			pendingUpload.clear();
+		} catch (Exception e) {
+			Flywheel.log.error("Error uploading pooled models:", e);
 		}
-		pendingUpload.clear();
-
-		buffer.flush();
 	}
 
 	private void setDirty() {

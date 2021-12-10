@@ -4,6 +4,7 @@ import static org.lwjgl.opengl.GL11.glDrawArrays;
 
 import org.lwjgl.opengl.GL31;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
@@ -32,9 +33,11 @@ public class BufferedModel implements IBufferedModel {
 		vbo.alloc(model.size());
 
 		// mirror it in system memory so we can write to it, and upload our model.
-		MappedBuffer buffer = vbo.getBuffer(0, model.size());
-		model.buffer(new VecBufferWriter(buffer));
-		buffer.flush();
+		try (MappedBuffer buffer = vbo.getBuffer(0, model.size())) {
+			model.buffer(new VecBufferWriter(buffer));
+		} catch (Exception e) {
+			Flywheel.log.error(String.format("Error uploading model '%s':", model.name()), e);
+		}
 
 		vbo.unbind();
 	}
