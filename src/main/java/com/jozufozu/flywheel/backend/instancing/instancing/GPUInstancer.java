@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 
 import java.util.BitSet;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
@@ -136,9 +137,11 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		final int offset = size * instanceFormat.getStride();
 		final int length = glBufferSize - offset;
 		if (length > 0) {
-			instanceVBO.getBuffer(offset, length)
-					.putByteArray(new byte[length])
-					.flush();
+			try (MappedBuffer buf = instanceVBO.getBuffer(offset, length)) {
+				buf.putByteArray(new byte[length]);
+			} catch (Exception e) {
+				Flywheel.log.error("Error clearing buffer tail:", e);
+			}
 		}
 	}
 
@@ -159,16 +162,19 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		final int length = (1 + lastDirty - firstDirty) * stride;
 
 		if (length > 0) {
-			MappedBuffer mapped = instanceVBO.getBuffer(offset, length);
+			try (MappedBuffer mapped = instanceVBO.getBuffer(offset, length)) {
 
-			StructWriter<D> writer = type.asInstanced().getWriter(mapped);
+				StructWriter<D> writer = type.asInstanced()
+						.getWriter(mapped);
 
-			dirtySet.stream()
-					.forEach(i -> {
-						writer.seek(i);
-						writer.write(data.get(i));
-					});
-			mapped.flush();
+				dirtySet.stream()
+						.forEach(i -> {
+							writer.seek(i);
+							writer.write(data.get(i));
+						});
+			} catch (Exception e) {
+				Flywheel.log.error("Error updating GPUInstancer:", e);
+			}
 		}
 	}
 
@@ -180,12 +186,15 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 			glBufferSize = requiredSize + stride * 16;
 			instanceVBO.alloc(glBufferSize);
 
-			MappedBuffer buffer = instanceVBO.getBuffer(0, glBufferSize);
-			StructWriter<D> writer = type.asInstanced().getWriter(buffer);
-			for (D datum : data) {
-				writer.write(datum);
+			try (MappedBuffer buffer = instanceVBO.getBuffer(0, glBufferSize)) {
+				StructWriter<D> writer = type.asInstanced()
+						.getWriter(buffer);
+				for (D datum : data) {
+					writer.write(datum);
+				}
+			} catch (Exception e) {
+				Flywheel.log.error("Error reallocating GPUInstancer:", e);
 			}
-			buffer.flush();
 
 			glInstanceCount = size;
 

@@ -5,7 +5,11 @@ import java.nio.ByteBuffer;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;
 
-public class MappedGlBuffer extends GlBuffer {
+import com.jozufozu.flywheel.backend.gl.error.GlError;
+import com.jozufozu.flywheel.backend.gl.error.GlException;
+import com.jozufozu.flywheel.util.StringUtil;
+
+public class MappedGlBuffer extends GlBuffer implements Mappable {
 
 	protected final GlBufferUsage usage;
 
@@ -27,6 +31,22 @@ public class MappedGlBuffer extends GlBuffer {
 	}
 
 	public MappedBuffer getBuffer(int offset, int length) {
-		return new MappedBufferRange(this, offset, length, GL30.GL_MAP_WRITE_BIT);
+		ByteBuffer byteBuffer = GL30.glMapBufferRange(type.glEnum, offset, length, GL30.GL_MAP_WRITE_BIT);
+
+		if (byteBuffer == null) {
+			throw new GlException(GlError.poll(), "Could not map buffer");
+		}
+
+		return new MappedBuffer(this, byteBuffer, offset, length);
+	}
+
+	@Override
+	public GlBufferType getType() {
+		return type;
+	}
+
+	@Override
+	public boolean isPersistent() {
+		return false;
 	}
 }

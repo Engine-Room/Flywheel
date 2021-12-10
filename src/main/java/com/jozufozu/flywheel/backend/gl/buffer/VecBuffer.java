@@ -24,10 +24,6 @@ public class VecBuffer {
 		return new VecBuffer(buffer);
 	}
 
-	protected void setInternal(@Nullable ByteBuffer internal) {
-		this.internal = internal;
-	}
-
 	public ByteBuffer unwrap() {
 		return internal;
 	}
