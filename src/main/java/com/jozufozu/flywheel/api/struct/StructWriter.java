@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.struct;
+package com.jozufozu.flywheel.api.struct;
 
 /**
  * StructWriters can quickly consume many instances of S and write them to some backing buffer.

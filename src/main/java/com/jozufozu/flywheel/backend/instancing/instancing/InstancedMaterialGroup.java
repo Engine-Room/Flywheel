@@ -7,6 +7,7 @@ import java.util.Map;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.api.MaterialSpec;
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.util.TextureBinder;
 import com.mojang.math.Matrix4f;
@@ -26,7 +27,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 
 	protected final ArrayList<InstancedMaterialRenderer<P>> renderers = new ArrayList<>();
 
-	private final Map<MaterialSpec<?>, InstancedMaterial<?>> materials = new HashMap<>();
+	private final Map<StructType<? extends InstanceData>, InstancedMaterial<?>> materials = new HashMap<>();
 
 	public InstancedMaterialGroup(InstancingEngine<P> owner, RenderType type) {
 		this.owner = owner;
@@ -41,7 +42,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public <D extends InstanceData> InstancedMaterial<D> material(MaterialSpec<D> spec) {
+	public <D extends InstanceData> InstancedMaterial<D> material(StructType<D> spec) {
 		return (InstancedMaterial<D>) materials.computeIfAbsent(spec, this::createInstanceMaterial);
 	}
 
@@ -70,10 +71,11 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 		renderers.clear();
 	}
 
-	private InstancedMaterial<?> createInstanceMaterial(MaterialSpec<?> type) {
+	private InstancedMaterial<?> createInstanceMaterial(StructType<? extends InstanceData> type) {
 		InstancedMaterial<?> material = new InstancedMaterial<>(type);
 
-		this.renderers.add(new InstancedMaterialRenderer<>(owner.getProgram(type.getProgramName()), material, this::setup));
+		this.renderers.add(new InstancedMaterialRenderer<>(owner.getProgram(type.asInstanced()
+				.getProgramSpec()), material, this::setup));
 
 		return material;
 	}

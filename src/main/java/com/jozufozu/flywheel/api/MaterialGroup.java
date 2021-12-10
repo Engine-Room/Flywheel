@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.api;
 
+import com.jozufozu.flywheel.api.struct.StructType;
+
 public interface MaterialGroup {
 	/**
 	 * Get the material as defined by the given {@link MaterialSpec spec}.
@@ -8,5 +10,5 @@ public interface MaterialGroup {
 	 * @param <D>  The type representing the per instance data.
 	 * @return A material you can use to render models.
 	 */
-	<D extends InstanceData> Material<D> material(MaterialSpec<D> spec);
+	<D extends InstanceData> Material<D> material(StructType<D> spec);
 }

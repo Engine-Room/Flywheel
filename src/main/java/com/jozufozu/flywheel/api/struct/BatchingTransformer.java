@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.struct;
+package com.jozufozu.flywheel.api.struct;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;

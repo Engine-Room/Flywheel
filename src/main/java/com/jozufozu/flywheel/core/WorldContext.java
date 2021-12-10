@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.ShaderContext;
-import com.jozufozu.flywheel.api.MaterialSpec;
 import com.jozufozu.flywheel.backend.pipeline.ShaderPipeline;
 import com.jozufozu.flywheel.core.shader.ContextAwareProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
@@ -88,7 +87,8 @@ public class WorldContext<P extends WorldProgram> implements ShaderContext<P> {
 			if (specStream == null) {
 				specStream = () -> backend.allMaterials()
 						.stream()
-						.map(MaterialSpec::getProgramName);
+						.map(type -> type.asInstanced()
+								.getProgramSpec());
 			}
 			return new WorldContext<>(backend, name, specStream, pipeline);
 		}

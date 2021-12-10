@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.Material;
 import com.jozufozu.flywheel.api.MaterialSpec;
 import com.jozufozu.flywheel.backend.model.ModelPool;
-import com.jozufozu.flywheel.backend.struct.StructType;
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.model.Model;
 
@@ -25,8 +25,8 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 	protected final Cache<Object, GPUInstancer<D>> models;
 	protected final StructType<D> type;
 
-	public InstancedMaterial(MaterialSpec<D> spec) {
-		this.type = spec.getInstanceType();
+	public InstancedMaterial(StructType<D> spec) {
+		this.type = spec;
 
 		modelPool = new ModelPool(Formats.UNLIT_MODEL, 64);
 		this.models = CacheBuilder.newBuilder()

@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.api;
 
-import net.minecraft.world.level.Level;
-
 /**
  * Something (a BlockEntity or Entity) that can be rendered using the instancing API.
  */
@@ -13,6 +11,4 @@ public interface FlywheelRendered {
 	default boolean shouldRenderNormally() {
 		return false;
 	}
-
-	Level getWorld();
 }

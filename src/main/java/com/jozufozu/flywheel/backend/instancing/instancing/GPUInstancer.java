@@ -13,8 +13,8 @@ import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.backend.model.IBufferedModel;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
-import com.jozufozu.flywheel.backend.struct.StructType;
-import com.jozufozu.flywheel.backend.struct.StructWriter;
+import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.util.AttribUtil;
 
@@ -161,7 +161,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		if (length > 0) {
 			MappedBuffer mapped = instanceVBO.getBuffer(offset, length);
 
-			StructWriter<D> writer = type.asWriteable().getWriter(mapped);
+			StructWriter<D> writer = type.asInstanced().getWriter(mapped);
 
 			dirtySet.stream()
 					.forEach(i -> {
@@ -181,7 +181,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 			instanceVBO.alloc(glBufferSize);
 
 			MappedBuffer buffer = instanceVBO.getBuffer(0, glBufferSize);
-			StructWriter<D> writer = type.asWriteable().getWriter(buffer);
+			StructWriter<D> writer = type.asInstanced().getWriter(buffer);
 			for (D datum : data) {
 				writer.write(datum);
 			}

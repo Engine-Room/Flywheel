@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.Material;
 import com.jozufozu.flywheel.api.MaterialSpec;
-import com.jozufozu.flywheel.backend.struct.StructType;
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.core.model.Model;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -18,8 +18,8 @@ public class BatchedMaterial<D extends InstanceData> implements Material<D> {
 	protected final Map<Object, CPUInstancer<D>> models;
 	private final StructType<D> type;
 
-	public BatchedMaterial(MaterialSpec<D> spec) {
-		type = spec.getInstanceType();
+	public BatchedMaterial(StructType<D> type) {
+		this.type = type;
 
 		this.models = new HashMap<>();
 	}
