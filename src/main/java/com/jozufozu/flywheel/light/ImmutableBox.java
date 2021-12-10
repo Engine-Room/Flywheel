@@ -111,7 +111,7 @@ public interface ImmutableBox {
 		if (empty()) return;
 
 		for (int x = getMinX(); x < getMaxX(); x++) {
-			for (int y = Math.max(getMinY(), 0); y < Math.min(getMaxY(), 255); y++) { // clamp to world height limits
+			for (int y = getMinY(); y < getMaxY(); y++) {
 				for (int z = getMinZ(); z < getMaxZ(); z++) {
 					func.consume(x, y, z);
 				}
