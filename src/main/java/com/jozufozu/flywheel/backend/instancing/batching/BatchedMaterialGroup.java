@@ -6,6 +6,7 @@ import java.util.Map;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.api.MaterialSpec;
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -16,7 +17,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 
 	protected final RenderType state;
 
-	private final Map<MaterialSpec<?>, BatchedMaterial<?>> materials = new HashMap<>();
+	private final Map<StructType<? extends InstanceData>, BatchedMaterial<?>> materials = new HashMap<>();
 
 	public BatchedMaterialGroup(RenderType state) {
 		this.state = state;
@@ -30,7 +31,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public <D extends InstanceData> BatchedMaterial<D> material(MaterialSpec<D> spec) {
+	public <D extends InstanceData> BatchedMaterial<D> material(StructType<D> spec) {
 		return (BatchedMaterial<D>) materials.computeIfAbsent(spec, BatchedMaterial::new);
 	}
 

@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.backend.struct;
 
+import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 

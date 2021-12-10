@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.struct;
+package com.jozufozu.flywheel.api.struct;
 
 import com.jozufozu.flywheel.core.model.Model;
 

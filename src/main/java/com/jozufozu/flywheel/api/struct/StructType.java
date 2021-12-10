@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.struct;
+package com.jozufozu.flywheel.api.struct;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 
@@ -18,7 +18,7 @@ public interface StructType<S> {
 	 */
 	VertexFormat format();
 
-	Writeable<S> asWriteable();
+	Instanced<S> asInstanced();
 
 	Batched<S> asBatched();
 }

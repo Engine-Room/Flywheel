@@ -1,8 +1,10 @@
-package com.jozufozu.flywheel.backend.struct;
+package com.jozufozu.flywheel.api.struct;
 
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 
-public interface Writeable<S> extends StructType<S> {
+import net.minecraft.resources.ResourceLocation;
+
+public interface Instanced<S> extends StructType<S> {
 	/**
 	 * Create a {@link StructWriter} that will consume instances of S and write them to the given buffer.
 	 *
@@ -10,8 +12,10 @@ public interface Writeable<S> extends StructType<S> {
 	 */
 	StructWriter<S> getWriter(VecBuffer backing);
 
+	ResourceLocation getProgramSpec();
+
 	@Override
-	default Writeable<S> asWriteable() {
+	default Instanced<S> asInstanced() {
 		return this;
 	}
 }
