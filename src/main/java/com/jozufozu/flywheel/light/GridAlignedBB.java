@@ -389,7 +389,7 @@ public class GridAlignedBB implements ImmutableBox {
 		if (empty()) return;
 
 		for (int x = minX; x < maxX; x++) {
-			for (int y = Math.max(minY, 0); y < Math.min(maxY, 255); y++) { // clamp to world height limits
+			for (int y = minY; y < maxY; y++) {
 				for (int z = minZ; z < maxZ; z++) {
 					func.consume(x, y, z);
 				}
