@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.Material;
-import com.jozufozu.flywheel.api.MaterialSpec;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.core.model.Model;
 import com.mojang.blaze3d.vertex.PoseStack;

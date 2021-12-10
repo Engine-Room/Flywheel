@@ -4,7 +4,7 @@ import com.jozufozu.flywheel.api.struct.StructType;
 
 public interface MaterialGroup {
 	/**
-	 * Get the material as defined by the given {@link MaterialSpec spec}.
+	 * Get the material as defined by the given {@link StructType type}.
 	 *
 	 * @param spec The material you want to create instances with.
 	 * @param <D>  The type representing the per instance data.
