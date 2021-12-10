@@ -13,7 +13,6 @@ import com.jozufozu.flywheel.backend.gl.GlFence;
 import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.gl.error.GlException;
 import com.jozufozu.flywheel.util.StringUtil;
-import com.jozufozu.flywheel.util.Unimplemented;
 
 
 public class PersistentGlBuffer extends GlBuffer implements Mappable {
@@ -69,7 +68,7 @@ public class PersistentGlBuffer extends GlBuffer implements Mappable {
 
 	@Override
 	public void upload(ByteBuffer directBuffer) {
-		throw new Unimplemented("FIXME: Nothing calls #upload on a persistent buffer as of 12/10/2021.");
+		throw new UnsupportedOperationException("FIXME: Nothing calls #upload on a persistent buffer as of 12/10/2021.");
 	}
 
 	@Override
