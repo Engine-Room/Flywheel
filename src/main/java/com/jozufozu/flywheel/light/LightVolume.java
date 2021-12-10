@@ -15,7 +15,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 	public LightVolume(ImmutableBox sampleVolume) {
 		this.setBox(sampleVolume);
 
-		this.lightData = MemoryUtil.memAlloc(this.box.volume() * getStride());
+		this.lightData = MemoryUtil.memAlloc(this.box.volume() * 2);
 	}
 
 	protected void setBox(ImmutableBox box) {
@@ -58,9 +58,9 @@ public class LightVolume implements ImmutableBox, LightListener {
 		if (lightData == null) return;
 
 		setBox(newSampleVolume);
-		int volume = box.volume();
-		if (volume * 2 > lightData.capacity()) {
-			lightData = MemoryUtil.memRealloc(lightData, volume * 2);
+		int neededCapacity = box.volume() * 2;
+		if (neededCapacity > lightData.capacity()) {
+			lightData = MemoryUtil.memRealloc(lightData, neededCapacity);
 		}
 		initialize(world);
 	}
@@ -198,14 +198,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 	}
 
 	protected int boxPosToBufferIndex(int x, int y, int z) {
-		return (x + box.sizeX() * (y + z * box.sizeY())) * getStride();
-	}
-
-	/**
-	 * @return The stride of the texels, in bytes.
-	 */
-	protected int getStride() {
-		return 2;
+		return (x + box.sizeX() * (y + z * box.sizeY())) * 2;
 	}
 
 	@Override

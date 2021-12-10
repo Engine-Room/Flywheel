@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import javax.annotation.Nullable;
+
 public class VecBuffer {
 
 	protected ByteBuffer internal;
@@ -22,7 +24,7 @@ public class VecBuffer {
 		return new VecBuffer(buffer);
 	}
 
-	protected void setInternal(ByteBuffer internal) {
+	protected void setInternal(@Nullable ByteBuffer internal) {
 		this.internal = internal;
 	}
 

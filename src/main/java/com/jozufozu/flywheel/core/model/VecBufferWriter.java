@@ -2,19 +2,15 @@ package com.jozufozu.flywheel.core.model;
 
 import static com.jozufozu.flywheel.util.RenderMath.nb;
 
-import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-public class VecBufferConsumer implements VertexConsumer {
-
+public class VecBufferWriter implements VertexConsumer {
 
 	private final VecBuffer buffer;
-	private final VertexFormat format;
 
-	public VecBufferConsumer(VecBuffer buffer, VertexFormat format) {
+	public VecBufferWriter(VecBuffer buffer) {
 		this.buffer = buffer;
-		this.format = format;
 	}
 
 	@Override
