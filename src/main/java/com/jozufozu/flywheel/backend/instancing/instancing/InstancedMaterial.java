@@ -9,7 +9,6 @@ import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.Material;
-import com.jozufozu.flywheel.api.MaterialSpec;
 import com.jozufozu.flywheel.backend.model.ModelPool;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.core.Formats;

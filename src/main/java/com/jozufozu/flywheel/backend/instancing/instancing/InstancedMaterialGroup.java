@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
-import com.jozufozu.flywheel.api.MaterialSpec;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.util.TextureBinder;
