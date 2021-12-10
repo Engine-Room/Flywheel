@@ -44,8 +44,10 @@ public class GPULightVolume extends LightVolume {
 
 		glTexture = new GlTexture(GL_TEXTURE_3D);
 
+		GlTextureUnit oldState = GlTextureUnit.getActive();
+
 		// allocate space for the texture
-		glActiveTexture(GL_TEXTURE4);
+		textureUnit.makeActive();
 		glTexture.bind();
 
 		int sizeX = box.sizeX();
@@ -54,7 +56,7 @@ public class GPULightVolume extends LightVolume {
 		glTexImage3D(GL_TEXTURE_3D, 0, GL30.GL_RG8, sizeX, sizeY, sizeZ, 0, GL30.GL_RG, GL_UNSIGNED_BYTE, 0);
 
 		glTexture.unbind();
-		glActiveTexture(GL_TEXTURE0);
+		oldState.makeActive();
 	}
 
 	@Override
@@ -67,15 +69,15 @@ public class GPULightVolume extends LightVolume {
 
 	public void bind() {
 		// just in case something goes wrong, or we accidentally call this before this volume is properly disposed of.
-		if (lightData == null) return;
+		if (lightData == null || lightData.capacity() == 0) return;
 
 		textureUnit.makeActive();
 		glTexture.bind();
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+		glTexture.setParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexture.setParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexture.setParameteri(GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+		glTexture.setParameteri(GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+		glTexture.setParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
 		uploadTexture();
 	}
@@ -87,7 +89,7 @@ public class GPULightVolume extends LightVolume {
 			glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 			glPixelStorei(GL_UNPACK_SKIP_IMAGES, 0);
 			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 2); // we use 2 bytes per texel
 			int sizeX = box.sizeX();
 			int sizeY = box.sizeY();
 			int sizeZ = box.sizeZ();
@@ -144,11 +146,6 @@ public class GPULightVolume extends LightVolume {
 	public void initialize(LightProvider world) {
 		super.initialize(world);
 		bufferDirty = true;
-	}
-
-	@Override
-	protected int getStride() {
-		return 2;
 	}
 
 	@Override

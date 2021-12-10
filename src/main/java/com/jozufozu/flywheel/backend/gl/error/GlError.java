@@ -35,7 +35,7 @@ public enum GlError {
 		this.glEnum = glEnum;
 	}
 
-
+	// Great for use in your debugger's expression evaluator
 	public static GlError poll() {
 		return errorLookup.get(GL20.glGetError());
 	}

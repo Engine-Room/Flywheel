@@ -22,4 +22,8 @@ public class GlTexture extends GlObject {
 	public void unbind() {
 		GL20.glBindTexture(textureType, 0);
 	}
+
+	public void setParameteri(int parameter, int value) {
+		GL20.glTexParameteri(textureType, parameter, value);
+	}
 }

@@ -12,7 +12,7 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.core.model.Model;
-import com.jozufozu.flywheel.core.model.VecBufferConsumer;
+import com.jozufozu.flywheel.core.model.VecBufferWriter;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 public class ModelPool implements ModelAllocator {
@@ -117,7 +117,7 @@ public class ModelPool implements ModelAllocator {
 	private void uploadAll() {
 		MappedBuffer buffer = vbo.getBuffer(0, bufferSize);
 
-		VecBufferConsumer consumer = new VecBufferConsumer(buffer, format);
+		VecBufferWriter consumer = new VecBufferWriter(buffer);
 
 		for (PooledModel model : models) {
 			model.model.buffer(consumer);
@@ -130,7 +130,7 @@ public class ModelPool implements ModelAllocator {
 
 	private void uploadPending() {
 		MappedBuffer buffer = vbo.getBuffer(0, bufferSize);
-		VecBufferConsumer consumer = new VecBufferConsumer(buffer, format);
+		VecBufferWriter consumer = new VecBufferWriter(buffer);
 
 		int stride = format.getStride();
 		for (PooledModel model : pendingUpload) {

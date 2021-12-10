@@ -2,6 +2,8 @@ package com.jozufozu.flywheel.backend.gl.buffer;
 
 import java.nio.ByteBuffer;
 
+import org.lwjgl.opengl.GL30;
+
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.gl.error.GlException;
@@ -19,13 +21,9 @@ public class PersistentMappedBuffer extends MappedBuffer {
 		offset = 0;
 		length = owner.size;
 
-		ByteBuffer byteBuffer = Backend.getInstance().compat.mapBufferRange.mapBuffer(owner.type, offset, length, owner.flags);
+		ByteBuffer byteBuffer = GL30.glMapBufferRange(owner.type.glEnum, offset, length, owner.flags);
 
-		GlError error = GlError.poll();
-
-		if (error != null) {
-			throw new GlException(error, StringUtil.args("mapBuffer", owner.type, offset, length, owner.flags));
-		}
+		GlError.pollAndThrow(() -> StringUtil.args("mapBuffer", owner.type, offset, length, owner.flags));
 
 		setInternal(byteBuffer);
 	}

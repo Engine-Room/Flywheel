@@ -16,14 +16,11 @@ import org.lwjgl.system.MemoryUtil;
  * system.
  */
 public class GlCompat {
-	public final MapBufferRange mapBufferRange;
 
 	public final InstancedArrays instancedArrays;
 	public final BufferStorage bufferStorage;
 
 	public GlCompat(GLCapabilities caps) {
-		mapBufferRange = getLatest(MapBufferRange.class, caps);
-
 		instancedArrays = getLatest(InstancedArrays.class, caps);
 		bufferStorage = getLatest(BufferStorage.class, caps);
 	}

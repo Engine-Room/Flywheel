@@ -48,11 +48,7 @@ public class PersistentGlBuffer extends GlBuffer {
 
 		Backend.getInstance().compat.bufferStorage.bufferStorage(type, size, flags);
 
-		GlError error = GlError.poll();
-
-		if (error != null) {
-			throw new GlException(error, StringUtil.args("bufferStorage", type, size, flags));
-		}
+		GlError.pollAndThrow(() -> StringUtil.args("bufferStorage", type, size, flags));
 
 		buffer = new PersistentMappedBuffer(this);
 	}
