@@ -2,3 +2,29 @@
 Update to 1.17
 New
 Technical/API
+- #init() method for instances
+- Make StitchedSprite work like PartialModel
+- Allow StitchedSprite instances to be created directly
+- Allow StitchSprites to be created for any atlas
+- Use texture stitch post event instead of lazy computation for filling StitchedSprites
+- Remove legacy method from AngleHelper
+- Change artifact name from flywheel to flywheel-forge
+- Split TransformStack interface to Translate Rotate and Scale
+- Internal change to ModelData, store matrices directly
+- Implement Translate Rotate and Scale for ModelData
+- Implement Translate and Rotate for OrientedData
+- WriteSafe and WriteUnsafe for matrices
+- Instance writing handled externally
+- Switch to using vanilla interfaces
+- IModels now accept a VertexConsumer
+- IRenderState -> RenderType
+- AbstractInstancer for dealing with InstanceData tidyness
+- Alter crumbling renderer to match new system
+- Add hack to keep track of bound atlas textures
+- json extensions don't make sense, was only ever used for fog
+- Was the same for every material
+- Made things unnecessarily complex
+- Fix fog
+- Convert ProgramState to record
+- Completely change how shaders are loaded
+- And many more technical changes
