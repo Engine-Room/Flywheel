@@ -14,7 +14,6 @@ import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.gl.error.GlException;
 import com.jozufozu.flywheel.util.StringUtil;
 
-
 public class PersistentGlBuffer extends GlBuffer implements Mappable {
 
 	private MappedBuffer buffer;
