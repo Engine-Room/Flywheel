@@ -95,12 +95,13 @@ public class LightVolume implements ImmutableBox, LightListener {
 	public void initialize(LightProvider world) {
 		if (lightData == null) return;
 
-		ImmutableBox box = getVolume();
+		// the volume is indexed based on the greater bounding box
 		int shiftX = box.getMinX();
 		int shiftY = box.getMinY();
 		int shiftZ = box.getMinZ();
 
-		box.forEachContained((x, y, z) -> {
+		// ... but we only iterate over the (potentially) smaller sample volume
+		getVolume().forEachContained((x, y, z) -> {
 			int blockLight = world.getLight(LightLayer.BLOCK, x, y, z);
 			int skyLight = world.getLight(LightLayer.SKY, x, y, z);
 
