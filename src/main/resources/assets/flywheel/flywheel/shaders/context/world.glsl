@@ -16,9 +16,7 @@ void FLWFinalizeNormal(inout vec3 normal) {
 
 #if defined(VERTEX_SHADER)
 void FLWFinalizeWorldPos(inout vec4 worldPos) {
-    #if defined(USE_FOG)
-    FragDistance = length(worldPos.xyz - uCameraPos);
-    #endif
+    FragDistance = cylindrical_distance(worldPos.xyz, uCameraPos);
 
     gl_Position = uViewProjection * worldPos;
 }
@@ -41,13 +39,11 @@ vec4 FLWBlockTexture(vec2 texCoords) {
 }
 
 void FLWFinalizeColor(vec4 color) {
-    #if defined(USE_FOG)
     float a = color.a;
     float fog = clamp(FLWFogFactor(), 0., 1.);
 
     color = mix(uFogColor, color, fog);
     color.a = a;
-    #endif
 
     #if defined(ALPHA_DISCARD)
     if (color.a < ALPHA_DISCARD) {

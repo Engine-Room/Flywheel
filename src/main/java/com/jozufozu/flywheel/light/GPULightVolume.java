@@ -55,6 +55,12 @@ public class GPULightVolume extends LightVolume {
 		int sizeZ = box.sizeZ();
 		glTexImage3D(GL_TEXTURE_3D, 0, GL30.GL_RG8, sizeX, sizeY, sizeZ, 0, GL30.GL_RG, GL_UNSIGNED_BYTE, 0);
 
+		glTexture.setParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexture.setParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexture.setParameteri(GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+		glTexture.setParameteri(GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+		glTexture.setParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
 		glTexture.unbind();
 		oldState.makeActive();
 	}
@@ -73,11 +79,6 @@ public class GPULightVolume extends LightVolume {
 
 		textureUnit.makeActive();
 		glTexture.bind();
-		glTexture.setParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexture.setParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexture.setParameteri(GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-		glTexture.setParameteri(GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
-		glTexture.setParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
 		uploadTexture();
 	}
