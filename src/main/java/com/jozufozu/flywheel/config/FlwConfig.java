@@ -25,7 +25,6 @@ import net.fabricmc.loader.api.FabricLoader;
 
 public class FlwConfig {
 	protected static final Logger LOGGER = LogManager.getLogger("Flywheel Config");
-	protected static final JsonParser PARSER = new JsonParser();
 	protected static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 	private static final FlwConfig INSTANCE = new FlwConfig(FabricLoader.getInstance().getConfigDir().resolve("flywheel.json").toFile());
@@ -63,7 +62,7 @@ public class FlwConfig {
 	public void load() {
 		if (file.exists()) {
 			try (FileReader reader = new FileReader(file)) {
-				fromJson(PARSER.parse(reader));
+				fromJson(JsonParser.parseReader(reader));
 			} catch (Exception e) {
 				LOGGER.error("Could not load config from file '" + file.getAbsolutePath() + "'", e);
 			}

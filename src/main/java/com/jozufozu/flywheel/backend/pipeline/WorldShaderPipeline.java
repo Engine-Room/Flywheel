@@ -9,14 +9,14 @@ import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.core.shader.ExtensibleGlProgram;
 import com.jozufozu.flywheel.core.shader.GameStateProgram;
-import com.jozufozu.flywheel.core.shader.IMultiProgram;
+import com.jozufozu.flywheel.core.shader.ContextAwareProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 import com.jozufozu.flywheel.core.shader.spec.ProgramState;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class WorldShaderPipeline<P extends WorldProgram> implements IShaderPipeline<P> {
+public class WorldShaderPipeline<P extends WorldProgram> implements ShaderPipeline<P> {
 
 	private final ExtensibleGlProgram.Factory<P> factory;
 
@@ -29,14 +29,14 @@ public class WorldShaderPipeline<P extends WorldProgram> implements IShaderPipel
 		this.header = header;
 	}
 
-	public IMultiProgram<P> compile(ProgramSpec spec) {
+	public ContextAwareProgram<P> compile(ProgramSpec spec) {
 
 		SourceFile file = spec.getSource().getFile();
 
 		return compile(spec.name, file, spec.getStates());
 	}
 
-	public IMultiProgram<P> compile(ResourceLocation name, SourceFile file, List<ProgramState> variants) {
+	public ContextAwareProgram<P> compile(ResourceLocation name, SourceFile file, List<ProgramState> variants) {
 		WorldShader shader = new WorldShader(name, template, header)
 				.setMainSource(file);
 

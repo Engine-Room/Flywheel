@@ -107,11 +107,11 @@ public interface ImmutableBox {
 		return this.getMinX() < maxX && this.getMaxX() > minX && this.getMinY() < maxY && this.getMaxY() > minY && this.getMinZ() < maxZ && this.getMaxZ() > minZ;
 	}
 
-	default void forEachContained(ICoordinateConsumer func) {
+	default void forEachContained(CoordinateConsumer func) {
 		if (empty()) return;
 
 		for (int x = getMinX(); x < getMaxX(); x++) {
-			for (int y = Math.max(getMinY(), 0); y < Math.min(getMaxY(), 255); y++) { // clamp to world height limits
+			for (int y = getMinY(); y < getMaxY(); y++) {
 				for (int z = getMinZ(); z < getMaxZ(); z++) {
 					func.consume(x, y, z);
 				}
@@ -119,7 +119,7 @@ public interface ImmutableBox {
 		}
 	}
 
-	default  AABB toAABB() {
+	default AABB toAABB() {
 		return new AABB(getMinX(), getMinY(), getMinZ(), getMaxX(), getMaxY(), getMaxZ());
 	}
 

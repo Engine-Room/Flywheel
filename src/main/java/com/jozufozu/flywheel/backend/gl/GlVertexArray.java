@@ -1,21 +1,21 @@
 package com.jozufozu.flywheel.backend.gl;
 
-import com.jozufozu.flywheel.backend.Backend;
+import com.mojang.blaze3d.platform.GlStateManager;
 
 public class GlVertexArray extends GlObject {
 	public GlVertexArray() {
-		setHandle(Backend.getInstance().compat.vao.genVertexArrays());
+		setHandle(GlStateManager._glGenVertexArrays());
 	}
 
 	public void bind() {
-		Backend.getInstance().compat.vao.bindVertexArray(handle());
+		GlStateManager._glBindVertexArray(handle());
 	}
 
-	public void unbind() {
-		Backend.getInstance().compat.vao.bindVertexArray(0);
+	public static void unbind() {
+		GlStateManager._glBindVertexArray(0);
 	}
 
 	protected void deleteInternal(int handle) {
-		Backend.getInstance().compat.vao.deleteVertexArrays(handle);
+		GlStateManager._glDeleteVertexArrays(handle);
 	}
 }

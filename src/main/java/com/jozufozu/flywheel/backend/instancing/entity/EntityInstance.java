@@ -1,13 +1,13 @@
 package com.jozufozu.flywheel.backend.instancing.entity;
 
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
-import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
-import com.jozufozu.flywheel.backend.instancing.ITickableInstance;
+import com.jozufozu.flywheel.api.instance.IDynamicInstance;
+import com.jozufozu.flywheel.api.instance.ITickableInstance;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
-import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.light.GridAlignedBB;
-import com.jozufozu.flywheel.light.ILightUpdateListener;
-import com.jozufozu.flywheel.light.IMovingListener;
+import com.jozufozu.flywheel.light.LightListener;
+import com.jozufozu.flywheel.light.MovingListener;
 import com.jozufozu.flywheel.light.LightProvider;
 import com.mojang.math.Vector3f;
 
@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
  *
  * @param <E> The type of {@link Entity} your class is an instance of.
  */
-public abstract class EntityInstance<E extends Entity> extends AbstractInstance implements ILightUpdateListener, IMovingListener {
+public abstract class EntityInstance<E extends Entity> extends AbstractInstance implements LightListener, MovingListener {
 
 	protected final E entity;
 	protected final GridAlignedBB bounds;

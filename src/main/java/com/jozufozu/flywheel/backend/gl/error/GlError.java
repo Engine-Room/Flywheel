@@ -35,16 +35,16 @@ public enum GlError {
 		this.glEnum = glEnum;
 	}
 
-
+	// Great for use in your debugger's expression evaluator
 	public static GlError poll() {
 		return errorLookup.get(GL20.glGetError());
 	}
 
 	public static void pollAndThrow(Supplier<String> context) {
 		// TODO: build flag? to enable or disable this function
-		GlError poll = GlError.poll();
-		if (poll != null) {
-			Flywheel.log.error("{}: {}", poll.name(), context.get());
+		GlError err = GlError.poll();
+		if (err != null) {
+			Flywheel.log.error("{}: {}", err.name(), context.get());
 		}
 	}
 }

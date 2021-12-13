@@ -11,11 +11,8 @@ import java.nio.channels.ReadableByteChannel;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 public class StreamUtil {
 	public static String readToString(InputStream is) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
 		ByteBuffer bytebuffer = null;
 
 		try {

@@ -25,12 +25,12 @@ public class LightUpdater {
 
 	private final LightProvider provider;
 
-	private final WeakHashSet<IMovingListener> movingListeners = new WeakHashSet<>();
-	private final WeakContainmentMultiMap<ILightUpdateListener> sections = new WeakContainmentMultiMap<>();
-	private final WeakContainmentMultiMap<ILightUpdateListener> chunks = new WeakContainmentMultiMap<>();
+	private final WeakHashSet<MovingListener> movingListeners = new WeakHashSet<>();
+	private final WeakContainmentMultiMap<LightListener> sections = new WeakContainmentMultiMap<>();
+	private final WeakContainmentMultiMap<LightListener> chunks = new WeakContainmentMultiMap<>();
 
 	public LightUpdater(BlockAndTintGetter world) {
-		provider = BasicProvider.get(world);
+		provider = new BasicProvider(world);
 	}
 
 	public LightProvider getProvider() {
@@ -38,7 +38,7 @@ public class LightUpdater {
 	}
 
 	public void tick() {
-		for (IMovingListener listener : movingListeners) {
+		for (MovingListener listener : movingListeners) {
 			if (listener.update(provider)) {
 				addListener(listener);
 			}
@@ -47,12 +47,12 @@ public class LightUpdater {
 
 	/**
 	 * Add a listener.
-
+	 *
 	 * @param listener The object that wants to receive light update notifications.
 	 */
-	public void addListener(ILightUpdateListener listener) {
-		if (listener instanceof IMovingListener)
-			movingListeners.add(((IMovingListener) listener));
+	public void addListener(LightListener listener) {
+		if (listener instanceof MovingListener)
+			movingListeners.add(((MovingListener) listener));
 
 		ImmutableBox box = listener.getVolume();
 
@@ -80,18 +80,18 @@ public class LightUpdater {
 		}
 	}
 
-	public void removeListener(ILightUpdateListener listener) {
+	public void removeListener(LightListener listener) {
 		this.sections.remove(listener);
 		this.chunks.remove(listener);
 	}
 
 	/**
-	 * Dispatch light updates to all registered {@link ILightUpdateListener}s.
+	 * Dispatch light updates to all registered {@link LightListener}s.
 	 * @param type       The type of light that changed.
 	 * @param sectionPos A long representing the section position where light changed.
 	 */
 	public void onLightUpdate(LightLayer type, long sectionPos) {
-		Set<ILightUpdateListener> set = sections.get(sectionPos);
+		Set<LightListener> set = sections.get(sectionPos);
 
 		if (set == null || set.isEmpty()) return;
 
@@ -99,26 +99,26 @@ public class LightUpdater {
 
 		ImmutableBox chunkBox = GridAlignedBB.from(SectionPos.of(sectionPos));
 
-		for (ILightUpdateListener listener : set) {
+		for (LightListener listener : set) {
 			listener.onLightUpdate(provider, type, chunkBox);
 		}
 	}
 
 	/**
-	 * Dispatch light updates to all registered {@link ILightUpdateListener}s
+	 * Dispatch light updates to all registered {@link LightListener}s
 	 * when the server sends lighting data for an entire chunk.
 	 *
 	 */
 	public void onLightPacket(int chunkX, int chunkZ) {
 		long chunkPos = SectionPos.asLong(chunkX, 0, chunkZ);
 
-		Set<ILightUpdateListener> set = chunks.get(chunkPos);
+		Set<LightListener> set = chunks.get(chunkPos);
 
 		if (set == null || set.isEmpty()) return;
 
 		set.removeIf(l -> l.status().shouldRemove());
 
-		for (ILightUpdateListener listener : set) {
+		for (LightListener listener : set) {
 			listener.onLightPacket(provider, chunkX, chunkZ);
 		}
 	}
@@ -132,7 +132,7 @@ public class LightUpdater {
 	}
 
 	public Stream<ImmutableBox> getAllBoxes() {
-		return chunks.stream().map(ILightUpdateListener::getVolume);
+		return chunks.stream().map(LightListener::getVolume);
 	}
 
 	public boolean isEmpty() {

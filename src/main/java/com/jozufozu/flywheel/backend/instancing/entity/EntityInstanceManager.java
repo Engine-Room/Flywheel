@@ -4,7 +4,7 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
-import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
+import com.jozufozu.flywheel.api.MaterialManager;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
 
 public class EntityInstanceManager extends InstanceManager<Entity> {
 
-	public EntityInstanceManager(MaterialManagerImpl<?> materialManager) {
+	public EntityInstanceManager(MaterialManager materialManager) {
 		super(materialManager);
 	}
 

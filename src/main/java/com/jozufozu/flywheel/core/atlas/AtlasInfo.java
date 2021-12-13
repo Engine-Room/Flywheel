@@ -3,6 +3,8 @@ package com.jozufozu.flywheel.core.atlas;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import com.jozufozu.flywheel.mixin.atlas.SheetDataAccessor;
 
 import net.minecraft.client.Minecraft;
@@ -24,15 +26,18 @@ public class AtlasInfo {
 			return null;
 	}
 
+	@Nullable
 	public static SheetData getAtlasData(TextureAtlasSprite texture) {
 		return getAtlasData(texture.atlas());
 	}
 
+	@Nullable
 	public static SheetData getAtlasData(TextureAtlas atlas) {
 		return getAtlasData(atlas.location());
 	}
 
-	public static SheetData getAtlasData(ResourceLocation loc) {
+	@Nullable
+	public static SheetData getAtlasData(@Nullable ResourceLocation loc) {
 		return sheetData.get(loc);
 	}
 

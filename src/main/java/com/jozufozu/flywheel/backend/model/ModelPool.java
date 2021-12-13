@@ -3,15 +3,17 @@ package com.jozufozu.flywheel.backend.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jozufozu.flywheel.backend.Backend;
+import org.lwjgl.opengl.GL32;
+
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
-import com.jozufozu.flywheel.core.model.IModel;
-import com.jozufozu.flywheel.core.model.VecBufferConsumer;
+import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.VecBufferWriter;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 public class ModelPool implements ModelAllocator {
@@ -48,7 +50,7 @@ public class ModelPool implements ModelAllocator {
 	 * @return A handle to the allocated model.
 	 */
 	@Override
-	public PooledModel alloc(IModel model, Callback callback) {
+	public PooledModel alloc(Model model, Callback callback) {
 		PooledModel bufferedModel = new PooledModel(model, vertices);
 		bufferedModel.callback = callback;
 		vertices += model.vertexCount();
@@ -114,34 +116,35 @@ public class ModelPool implements ModelAllocator {
 	}
 
 	private void uploadAll() {
-		MappedBuffer buffer = vbo.getBuffer(0, bufferSize);
+		try (MappedBuffer buffer = vbo.getBuffer(0, bufferSize)) {
 
-		VecBufferConsumer consumer = new VecBufferConsumer(buffer, format);
+			VecBufferWriter consumer = new VecBufferWriter(buffer);
 
-		for (PooledModel model : models) {
-			model.model.buffer(consumer);
-			if (model.callback != null)
-				model.callback.onAlloc(model);
+			for (PooledModel model : models) {
+				model.model.buffer(consumer);
+				if (model.callback != null) model.callback.onAlloc(model);
+			}
+
+		} catch (Exception e) {
+			Flywheel.log.error("Error uploading pooled models:", e);
 		}
-
-		buffer.flush();
 	}
 
 	private void uploadPending() {
-		MappedBuffer buffer = vbo.getBuffer(0, bufferSize);
-		VecBufferConsumer consumer = new VecBufferConsumer(buffer, format);
+		try (MappedBuffer buffer = vbo.getBuffer(0, bufferSize)) {
+			VecBufferWriter consumer = new VecBufferWriter(buffer);
 
-		int stride = format.getStride();
-		for (PooledModel model : pendingUpload) {
-			int pos = model.first * stride;
-			buffer.position(pos);
-			model.model.buffer(consumer);
-			if (model.callback != null)
-				model.callback.onAlloc(model);
+			int stride = format.getStride();
+			for (PooledModel model : pendingUpload) {
+				int pos = model.first * stride;
+				buffer.position(pos);
+				model.model.buffer(consumer);
+				if (model.callback != null) model.callback.onAlloc(model);
+			}
+			pendingUpload.clear();
+		} catch (Exception e) {
+			Flywheel.log.error("Error uploading pooled models:", e);
 		}
-		pendingUpload.clear();
-
-		buffer.flush();
 	}
 
 	private void setDirty() {
@@ -157,12 +160,12 @@ public class ModelPool implements ModelAllocator {
 		private final ElementBuffer ebo;
 		private Callback callback;
 
-		private final IModel model;
+		private final Model model;
 		private int first;
 
 		private boolean remove;
 
-		public PooledModel(IModel model, int first) {
+		public PooledModel(Model model, int first) {
 			this.model = model;
 			this.first = first;
 			ebo = model.createEBO();
@@ -195,7 +198,7 @@ public class ModelPool implements ModelAllocator {
 
 		@Override
 		public void drawCall() {
-			Backend.getInstance().compat.baseVertex.drawElementsBaseVertex(GlPrimitive.TRIANGLES, ebo.elementCount, ebo.eboIndexType, 0, first);
+			GL32.glDrawElementsBaseVertex(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0, first);
 		}
 
 		@Override
@@ -206,7 +209,7 @@ public class ModelPool implements ModelAllocator {
 
 			//Backend.log.info(StringUtil.args("drawElementsInstancedBaseVertex", GlPrimitive.TRIANGLES, ebo.elementCount, ebo.eboIndexType, 0, instanceCount, first));
 
-			Backend.getInstance().compat.baseVertex.drawElementsInstancedBaseVertex(GlPrimitive.TRIANGLES, ebo.elementCount, ebo.eboIndexType, 0, instanceCount, first);
+			GL32.glDrawElementsInstancedBaseVertex(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0, instanceCount, first);
 		}
 
 		@Override

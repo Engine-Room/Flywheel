@@ -8,6 +8,8 @@ import org.lwjgl.opengl.GL40;
 import org.lwjgl.opengl.GL42;
 import org.lwjgl.opengl.GL43;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+
 public enum GlBufferType {
 	ARRAY_BUFFER(GL15C.GL_ARRAY_BUFFER),
 	ELEMENT_ARRAY_BUFFER(GL15C.GL_ELEMENT_ARRAY_BUFFER),
@@ -28,5 +30,13 @@ public enum GlBufferType {
 
 	GlBufferType(int glEnum) {
 		this.glEnum = glEnum;
+	}
+
+	public void bind(int buffer) {
+		GlStateManager._glBindBuffer(glEnum, buffer);
+	}
+
+	public void unbind() {
+		GlStateManager._glBindBuffer(glEnum, 0);
 	}
 }

@@ -2,25 +2,27 @@ package com.jozufozu.flywheel.backend.model;
 
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 
-import com.jozufozu.flywheel.backend.Backend;
+import org.lwjgl.opengl.GL31;
+
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
-import com.jozufozu.flywheel.core.model.IModel;
-import com.jozufozu.flywheel.core.model.VecBufferConsumer;
+import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.VecBufferWriter;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 public class BufferedModel implements IBufferedModel {
 
-	protected final IModel model;
+	protected final Model model;
 	protected final GlPrimitive primitiveMode;
 	protected GlBuffer vbo;
 	protected boolean deleted;
 
-	public BufferedModel(GlPrimitive primitiveMode, IModel model) {
+	public BufferedModel(GlPrimitive primitiveMode, Model model) {
 		this.model = model;
 		this.primitiveMode = primitiveMode;
 
@@ -31,9 +33,11 @@ public class BufferedModel implements IBufferedModel {
 		vbo.alloc(model.size());
 
 		// mirror it in system memory so we can write to it, and upload our model.
-		MappedBuffer buffer = vbo.getBuffer(0, model.size());
-		model.buffer(new VecBufferConsumer(buffer, model.format()));
-		buffer.flush();
+		try (MappedBuffer buffer = vbo.getBuffer(0, model.size())) {
+			model.buffer(new VecBufferWriter(buffer));
+		} catch (Exception e) {
+			Flywheel.log.error(String.format("Error uploading model '%s':", model.name()), e);
+		}
 
 		vbo.unbind();
 	}
@@ -74,7 +78,7 @@ public class BufferedModel implements IBufferedModel {
 	public void drawInstances(int instanceCount) {
 		if (!valid()) return;
 
-		Backend.getInstance().compat.drawInstanced.drawArraysInstanced(primitiveMode, 0, getVertexCount(), instanceCount);
+		GL31.glDrawArraysInstanced(primitiveMode.glEnum, 0, getVertexCount(), instanceCount);
 	}
 
 	public void delete() {

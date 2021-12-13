@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.struct;
 
 import org.lwjgl.system.MemoryUtil;
 
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 
 /**

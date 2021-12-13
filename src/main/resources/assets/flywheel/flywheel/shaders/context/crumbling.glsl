@@ -18,7 +18,7 @@ void FLWFinalizeNormal(inout vec3 normal) {
 #if defined(VERTEX_SHADER)
 void FLWFinalizeWorldPos(inout vec4 worldPos) {
     #if defined(USE_FOG)
-    FragDistance = length(worldPos.xyz - uCameraPos);
+    FragDistance = cylindrical_distance(worldPos.xyz, uCameraPos);
     #endif
 
     gl_Position = uViewProjection * worldPos;

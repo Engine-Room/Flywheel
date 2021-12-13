@@ -6,16 +6,17 @@ import static org.lwjgl.opengl.GL44.GL_MAP_PERSISTENT_BIT;
 
 import java.nio.ByteBuffer;
 
+import org.lwjgl.opengl.GL30;
+
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlFence;
 import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.gl.error.GlException;
 import com.jozufozu.flywheel.util.StringUtil;
 
+public class PersistentGlBuffer extends GlBuffer implements Mappable {
 
-public class PersistentGlBuffer extends GlBuffer {
-
-	private PersistentMappedBuffer buffer;
+	private MappedBuffer buffer;
 	int flags;
 
 	long size;
@@ -49,17 +50,24 @@ public class PersistentGlBuffer extends GlBuffer {
 		Backend.getInstance().compat.bufferStorage.bufferStorage(type, size, flags);
 
 		GlError error = GlError.poll();
-
 		if (error != null) {
+			// If this error is being thrown but everything seems fine,
+			// GlError.poll() might be returning an error from something earlier.
 			throw new GlException(error, StringUtil.args("bufferStorage", type, size, flags));
 		}
 
-		buffer = new PersistentMappedBuffer(this);
+		ByteBuffer byteBuffer = GL30.glMapBufferRange(type.glEnum, 0, size, flags);
+
+		if (byteBuffer == null) {
+			throw new GlException(GlError.poll(), "Could not map buffer");
+		}
+
+		buffer = new MappedBuffer(this, byteBuffer, 0, size);
 	}
 
 	@Override
 	public void upload(ByteBuffer directBuffer) {
-
+		throw new UnsupportedOperationException("FIXME: Nothing calls #upload on a persistent buffer as of 12/10/2021.");
 	}
 
 	@Override
@@ -70,5 +78,15 @@ public class PersistentGlBuffer extends GlBuffer {
 		buffer.position(offset);
 
 		return buffer;
+	}
+
+	@Override
+	public GlBufferType getType() {
+		return type;
+	}
+
+	@Override
+	public boolean isPersistent() {
+		return true;
 	}
 }

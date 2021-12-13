@@ -44,8 +44,8 @@ public class RenderHooksMixin {
 	private RenderBuffers renderBuffers;
 
 	@Inject(at = @At("HEAD"), method = "setupRender")
-	private void setupRender(Camera info, Frustum clippingHelper, boolean p_228437_3_, int frameCount, boolean isSpectator, CallbackInfo ci) {
-		FlywheelEvents.BEGIN_FRAME.invoker().handleEvent(new BeginFrameEvent(level, info, clippingHelper));
+	private void setupRender(Camera camera, Frustum frustum, boolean queue, boolean isSpectator, CallbackInfo ci) {
+		FlywheelEvents.BEGIN_FRAME.invoker().handleEvent(new BeginFrameEvent(level, camera, frustum));
 	}
 
 	/**
@@ -80,13 +80,9 @@ public class RenderHooksMixin {
 		if (!Backend.getInstance()
 				.available()) return;
 
-		Matrix4f view = stack.last()
-				.pose();
-		Matrix4f viewProjection = view.copy();
-		Matrix4fHelper.multiplyBackward(viewProjection, RenderSystem.getProjectionMatrix());
-
 		Vec3 cameraPos = info.getPosition();
-		CrumblingRenderer.renderBreaking(level, viewProjection, cameraPos.x, cameraPos.y, cameraPos.z);
+
+		CrumblingRenderer.renderBreaking(new RenderLayerEvent(level, null, stack, null, cameraPos.x, cameraPos.y, cameraPos.z));
 
 		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
 	}

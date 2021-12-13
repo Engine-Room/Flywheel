@@ -23,10 +23,10 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE4;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL14.GL_MIRRORED_REPEAT;
 
-import com.jozufozu.flywheel.backend.Backend;
+import org.lwjgl.opengl.GL30;
+
 import com.jozufozu.flywheel.backend.gl.GlTexture;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
-import com.jozufozu.flywheel.backend.gl.versioned.RGPixelFormat;
 
 import net.minecraft.world.level.LightLayer;
 
@@ -35,7 +35,6 @@ public class GPULightVolume extends LightVolume {
 	protected final GridAlignedBB sampleVolume = new GridAlignedBB();
 	private final GlTexture glTexture;
 
-	private final RGPixelFormat pixelFormat;
 	private final GlTextureUnit textureUnit = GlTextureUnit.T4;
 	protected boolean bufferDirty;
 
@@ -43,20 +42,27 @@ public class GPULightVolume extends LightVolume {
 		super(sampleVolume);
 		this.sampleVolume.assign(sampleVolume);
 
-		pixelFormat = Backend.getInstance().compat.pixelFormat;
 		glTexture = new GlTexture(GL_TEXTURE_3D);
 
+		GlTextureUnit oldState = GlTextureUnit.getActive();
+
 		// allocate space for the texture
-		glActiveTexture(GL_TEXTURE4);
+		textureUnit.makeActive();
 		glTexture.bind();
 
 		int sizeX = box.sizeX();
 		int sizeY = box.sizeY();
 		int sizeZ = box.sizeZ();
-		glTexImage3D(GL_TEXTURE_3D, 0, pixelFormat.internalFormat(), sizeX, sizeY, sizeZ, 0, pixelFormat.format(), GL_UNSIGNED_BYTE, 0);
+		glTexImage3D(GL_TEXTURE_3D, 0, GL30.GL_RG8, sizeX, sizeY, sizeZ, 0, GL30.GL_RG, GL_UNSIGNED_BYTE, 0);
+
+		glTexture.setParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexture.setParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexture.setParameteri(GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+		glTexture.setParameteri(GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+		glTexture.setParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
 		glTexture.unbind();
-		glActiveTexture(GL_TEXTURE0);
+		oldState.makeActive();
 	}
 
 	@Override
@@ -69,15 +75,10 @@ public class GPULightVolume extends LightVolume {
 
 	public void bind() {
 		// just in case something goes wrong, or we accidentally call this before this volume is properly disposed of.
-		if (lightData == null) return;
+		if (lightData == null || lightData.capacity() == 0) return;
 
 		textureUnit.makeActive();
 		glTexture.bind();
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
 		uploadTexture();
 	}
@@ -89,12 +90,12 @@ public class GPULightVolume extends LightVolume {
 			glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 			glPixelStorei(GL_UNPACK_SKIP_IMAGES, 0);
 			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 2); // we use 2 bytes per texel
 			int sizeX = box.sizeX();
 			int sizeY = box.sizeY();
 			int sizeZ = box.sizeZ();
 
-			glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, sizeX, sizeY, sizeZ, pixelFormat.format(), GL_UNSIGNED_BYTE, lightData);
+			glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, sizeX, sizeY, sizeZ, GL30.GL_RG, GL_UNSIGNED_BYTE, lightData);
 
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // 4 is the default
 			bufferDirty = false;
@@ -146,11 +147,6 @@ public class GPULightVolume extends LightVolume {
 	public void initialize(LightProvider world) {
 		super.initialize(world);
 		bufferDirty = true;
-	}
-
-	@Override
-	protected int getStride() {
-		return Backend.getInstance().compat.pixelFormat.byteCount();
 	}
 
 	@Override

@@ -9,8 +9,10 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.material.MaterialManager;
-import com.jozufozu.flywheel.backend.material.MaterialManagerImpl;
+import com.jozufozu.flywheel.api.instance.IDynamicInstance;
+import com.jozufozu.flywheel.api.instance.ITickableInstance;
+import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.light.LightUpdater;
 import com.mojang.math.Vector3f;
 
@@ -19,7 +21,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 
-public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginShiftListener {
+public abstract class InstanceManager<T> implements InstancingEngine.OriginShiftListener {
 
 	public final MaterialManager materialManager;
 
@@ -33,7 +35,7 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 	protected int frame;
 	protected int tick;
 
-	public InstanceManager(MaterialManagerImpl<?> materialManager) {
+	public InstanceManager(MaterialManager materialManager) {
 		this.materialManager = materialManager;
 		this.queuedUpdates = new HashSet<>(64);
 		this.queuedAdditions = new HashSet<>(64);
@@ -41,8 +43,6 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 
 		this.dynamicInstances = new Object2ObjectOpenHashMap<>();
 		this.tickableInstances = new Object2ObjectOpenHashMap<>();
-
-		materialManager.addListener(this);
 	}
 
 	/**
@@ -213,6 +213,10 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 	}
 
 	protected void processQueuedAdditions() {
+		if (queuedAdditions.isEmpty()) {
+			return;
+		}
+
 		ArrayList<T> queued;
 
 		synchronized (queuedAdditions) {
@@ -220,7 +224,7 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 			queuedAdditions.clear();
 		}
 
-		if (queued.size() > 0) {
+		if (!queued.isEmpty()) {
 			queued.forEach(this::addInternal);
 		}
 	}
@@ -292,9 +296,15 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 					.addListener(renderer);
 			instances.put(obj, renderer);
 
-			if (renderer instanceof IDynamicInstance) dynamicInstances.put(obj, (IDynamicInstance) renderer);
+			if (renderer instanceof ITickableInstance r) {
+				tickableInstances.put(obj, r);
+				r.tick();
+			}
 
-			if (renderer instanceof ITickableInstance) tickableInstances.put(obj, ((ITickableInstance) renderer));
+			if (renderer instanceof IDynamicInstance r) {
+				dynamicInstances.put(obj, r);
+				r.beginFrame();
+			}
 		}
 
 		return renderer;
@@ -305,5 +315,11 @@ public abstract class InstanceManager<T> implements MaterialManagerImpl.OriginSh
 		ArrayList<T> instancedTiles = new ArrayList<>(instances.keySet());
 		invalidate();
 		instancedTiles.forEach(this::add);
+	}
+
+	public void detachLightListeners() {
+		for (AbstractInstance value : instances.values()) {
+			LightUpdater.get(value.world).removeListener(value);
+		}
 	}
 }

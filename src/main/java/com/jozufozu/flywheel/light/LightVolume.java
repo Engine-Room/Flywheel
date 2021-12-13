@@ -7,7 +7,7 @@ import org.lwjgl.system.MemoryUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LightLayer;
 
-public class LightVolume implements ImmutableBox, ILightUpdateListener {
+public class LightVolume implements ImmutableBox, LightListener {
 
 	protected final GridAlignedBB box = new GridAlignedBB();
 	protected ByteBuffer lightData;
@@ -15,7 +15,7 @@ public class LightVolume implements ImmutableBox, ILightUpdateListener {
 	public LightVolume(ImmutableBox sampleVolume) {
 		this.setBox(sampleVolume);
 
-		this.lightData = MemoryUtil.memAlloc(this.box.volume() * getStride());
+		this.lightData = MemoryUtil.memAlloc(this.box.volume() * 2);
 	}
 
 	protected void setBox(ImmutableBox box) {
@@ -58,9 +58,9 @@ public class LightVolume implements ImmutableBox, ILightUpdateListener {
 		if (lightData == null) return;
 
 		setBox(newSampleVolume);
-		int volume = box.volume();
-		if (volume * 2 > lightData.capacity()) {
-			lightData = MemoryUtil.memRealloc(lightData, volume * 2);
+		int neededCapacity = box.volume() * 2;
+		if (neededCapacity > lightData.capacity()) {
+			lightData = MemoryUtil.memRealloc(lightData, neededCapacity);
 		}
 		initialize(world);
 	}
@@ -95,12 +95,13 @@ public class LightVolume implements ImmutableBox, ILightUpdateListener {
 	public void initialize(LightProvider world) {
 		if (lightData == null) return;
 
-		ImmutableBox box = getVolume();
+		// the volume is indexed based on the greater bounding box
 		int shiftX = box.getMinX();
 		int shiftY = box.getMinY();
 		int shiftZ = box.getMinZ();
 
-		box.forEachContained((x, y, z) -> {
+		// ... but we only iterate over the (potentially) smaller sample volume
+		getVolume().forEachContained((x, y, z) -> {
 			int blockLight = world.getLight(LightLayer.BLOCK, x, y, z);
 			int skyLight = world.getLight(LightLayer.SKY, x, y, z);
 
@@ -198,14 +199,7 @@ public class LightVolume implements ImmutableBox, ILightUpdateListener {
 	}
 
 	protected int boxPosToBufferIndex(int x, int y, int z) {
-		return (x + box.sizeX() * (y + z * box.sizeY())) * getStride();
-	}
-
-	/**
-	 * @return The stride of the texels, in bytes.
-	 */
-	protected int getStride() {
-		return 2;
+		return (x + box.sizeX() * (y + z * box.sizeY())) * 2;
 	}
 
 	@Override

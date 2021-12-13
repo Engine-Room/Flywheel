@@ -6,7 +6,7 @@ import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.core.Formats;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-public class ModelPart implements IModel {
+public class ModelPart implements Model {
 
 	private final List<PartBuilder.CuboidBuilder> cuboids;
 	private int vertices;

@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.vanilla;
 
-import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
+import com.jozufozu.flywheel.api.instance.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
-import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.model.ModelPart;
@@ -86,14 +86,14 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxBlockEntity
 	}
 
 	private ModelData makeBaseInstance() {
-        return materialManager.cutout(RenderType.entityCutout(Sheets.SHULKER_SHEET))
+        return materialManager.cutout(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET))
                 .material(Materials.TRANSFORMED)
 				.model("base_" + texture.getName(), this::makeBaseModel)
 				.createInstance();
 	}
 
 	private ModelData makeLidInstance() {
-        return materialManager.cutout(RenderType.entityCutout(Sheets.SHULKER_SHEET))
+        return materialManager.cutout(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET))
                 .material(Materials.TRANSFORMED)
 				.model("lid_" + texture.getName(), this::makeLidModel)
 				.createInstance();

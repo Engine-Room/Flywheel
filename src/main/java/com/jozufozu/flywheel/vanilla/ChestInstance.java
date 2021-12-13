@@ -4,9 +4,9 @@ import java.util.Calendar;
 
 import javax.annotation.Nonnull;
 
-import com.jozufozu.flywheel.backend.instancing.IDynamicInstance;
+import com.jozufozu.flywheel.api.instance.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
-import com.jozufozu.flywheel.backend.material.MaterialManager;
+import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
@@ -53,15 +53,13 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 				.setPosition(getInstancePosition());
 		lid = lidInstance();
 
-		if (block instanceof AbstractChestBlock) {
+		if (block instanceof AbstractChestBlock<?> chestBlock) {
 
 			float horizontalAngle = blockState.getValue(ChestBlock.FACING).toYRot();
 
 			baseRotation = Vector3f.YP.rotationDegrees(-horizontalAngle);
 
 			body.setRotation(baseRotation);
-
-			AbstractChestBlock<?> chestBlock = (AbstractChestBlock<?>) block;
 
 			DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> wrapper = chestBlock.combine(blockState, world, getWorldPosition(), true);
 

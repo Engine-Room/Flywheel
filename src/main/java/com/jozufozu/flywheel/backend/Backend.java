@@ -13,9 +13,10 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 
+import com.jozufozu.flywheel.api.FlywheelWorld;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
-import com.jozufozu.flywheel.backend.instancing.InstanceData;
-import com.jozufozu.flywheel.backend.material.MaterialSpec;
+import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
@@ -41,8 +42,8 @@ public class Backend {
 	private boolean instancedArrays;
 	private boolean enabled;
 
-	private final List<IShaderContext<?>> contexts = new ArrayList<>();
-	private final Map<ResourceLocation, MaterialSpec<?>> materialRegistry = new HashMap<>();
+	private final List<ShaderContext<?>> contexts = new ArrayList<>();
+	private final Map<ResourceLocation, StructType<?>> materialRegistry = new HashMap<>();
 	private final Map<ResourceLocation, ProgramSpec> programSpecRegistry = new HashMap<>();
 
 	protected Backend() {
@@ -82,7 +83,7 @@ public class Backend {
 	/**
 	 * Register a shader context.
 	 */
-	public <C extends IShaderContext<?>> C register(C spec) {
+	public <C extends ShaderContext<?>> C register(C spec) {
 		contexts.add(spec);
 		return spec;
 	}
@@ -90,15 +91,13 @@ public class Backend {
 	/**
 	 * Register an instancing material.
 	 */
-	public <D extends InstanceData> MaterialSpec<D> register(MaterialSpec<D> spec) {
-		ResourceLocation name = spec.name;
+	public <D extends InstanceData> StructType<D> register(ResourceLocation name, StructType<D> spec) {
 		if (materialRegistry.containsKey(name)) {
 			throw new IllegalStateException("Material spec '" + name + "' already registered.");
 		}
 		materialRegistry.put(name, spec);
 
-		log.debug("registered material '" + name + "' with vertex size " + spec.getModelFormat()
-				.getStride() + " and instance size " + spec.getInstanceType().format().getStride());
+		log.debug("registered material '" + name + "' with instance size " + spec.format().getStride());
 
 		return spec;
 	}
@@ -133,7 +132,7 @@ public class Backend {
 
 		compat = new GlCompat(capabilities);
 
-		instancedArrays = compat.vertexArrayObjectsSupported() && compat.drawInstancedSupported() && compat.instancedArraysSupported();
+		instancedArrays = compat.instancedArraysSupported();
 
 		enabled = FlwConfig.get()
 				.enabled() && !OptifineHandler.usingShaders();
@@ -143,7 +142,7 @@ public class Backend {
 		return canUseInstancing() && isFlywheelWorld(world);
 	}
 
-	public Collection<MaterialSpec<?>> allMaterials() {
+	public Collection<StructType<?>> allMaterials() {
 		return materialRegistry.values();
 	}
 
@@ -151,7 +150,7 @@ public class Backend {
 		return programSpecRegistry.values();
 	}
 
-	public Collection<IShaderContext<?>> allContexts() {
+	public Collection<ShaderContext<?>> allContexts() {
 		return contexts;
 	}
 
@@ -161,7 +160,9 @@ public class Backend {
 	public static boolean isFlywheelWorld(@Nullable LevelAccessor world) {
 		if (world == null) return false;
 
-		if (world instanceof IFlywheelWorld && ((IFlywheelWorld) world).supportsFlywheel()) return true;
+		if (!world.isClientSide()) return false;
+
+		if (world instanceof FlywheelWorld && ((FlywheelWorld) world).supportsFlywheel()) return true;
 
 		return world == Minecraft.getInstance().level;
 	}
@@ -180,7 +181,7 @@ public class Backend {
 	public void _clearContexts() {
 		GameStateRegistry.clear();
 		programSpecRegistry.clear();
-		contexts.forEach(IShaderContext::delete);
+		contexts.forEach(ShaderContext::delete);
 		contexts.clear();
 		materialRegistry.clear();
 	}

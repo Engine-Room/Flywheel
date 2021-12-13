@@ -76,13 +76,12 @@ public class InstancedRenderDispatcher {
 		ClientLevel world = event.getWorld();
 		if (Backend.getInstance()
 				.canUseInstancing() && world != null) {
-			loadAllInWorld(world);
+			resetInstanceWorld(world);
 		}
 	}
 
-	public static void loadAllInWorld(ClientLevel world) {
-		instanceWorlds.replace(world, InstanceWorld::delete)
-				.loadAll(world);
+	public static void resetInstanceWorld(ClientLevel world) {
+		instanceWorlds.replace(world, InstanceWorld::delete);
 	}
 
 }

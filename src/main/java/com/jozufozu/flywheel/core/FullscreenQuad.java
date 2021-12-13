@@ -1,11 +1,15 @@
 package com.jozufozu.flywheel.core;
 
+import static org.lwjgl.opengl.GL20.*;
+
 import org.lwjgl.opengl.GL20;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
+import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.util.Lazy;
 
@@ -28,25 +32,27 @@ public class FullscreenQuad {
 		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
 		vbo.bind();
 		vbo.alloc(bufferSize);
-		vbo.getBuffer(0, bufferSize)
-				.putFloatArray(vertices)
-				.flush();
+		try (MappedBuffer buffer = vbo.getBuffer(0, bufferSize)) {
+			buffer.putFloatArray(vertices);
+		} catch (Exception e) {
+			Flywheel.log.error("Could not create fullscreen quad.", e);
+		}
 
 		vao = new GlVertexArray();
 		vao.bind();
 
-		GL20.glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(0);
 
-		GL20.glVertexAttribPointer(0, 4, GlNumericType.FLOAT.getGlEnum(), false, 4 * 4, 0);
+		glVertexAttribPointer(0, 4, GlNumericType.FLOAT.getGlEnum(), false, 4 * 4, 0);
 
-		vao.unbind();
+		GlVertexArray.unbind();
 		vbo.unbind();
 	}
 
 	public void draw() {
 		vao.bind();
-		GL20.glDrawArrays(GL20.GL_TRIANGLES, 0, 6);
-		vao.unbind();
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		GlVertexArray.unbind();
 	}
 
 	public void delete() {
