@@ -6,6 +6,7 @@ Fixes
  - Fix crash affecting systems that don't support persistent mapping
  - Fix crash when Create contraptions extend below Y=0
  - Fix Create contraptions having misaligned light when launched after world load
+ - Fix minecarts disappearing on chunk reload
 
 0.4.0:
 Update to 1.18
