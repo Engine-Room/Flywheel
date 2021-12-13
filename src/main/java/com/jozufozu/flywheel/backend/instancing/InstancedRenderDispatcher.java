@@ -93,7 +93,8 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static void resetInstanceWorld(ClientLevel world) {
-		instanceWorlds.replace(world, InstanceWorld::delete);
+		instanceWorlds.replace(world, InstanceWorld::delete)
+				.loadEntities(world);
 	}
 
 }
