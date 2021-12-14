@@ -22,12 +22,6 @@ public class BatchedMaterialGroup implements MaterialGroup {
 		this.state = state;
 	}
 
-	/**
-	 * Get the material as defined by the given {@link StructType type}.
-	 * @param spec The material you want to create instances with.
-	 * @param <D> The type representing the per instance data.
-	 * @return A
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public <D extends InstanceData> BatchedMaterial<D> material(StructType<D> spec) {
