@@ -43,6 +43,8 @@ public class IndexedModel extends BufferedModel {
 	public void drawInstances(int instanceCount) {
 		if (!valid()) return;
 
+		ebo.bind();
+
 		GL31.glDrawElementsInstanced(primitiveMode.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0, instanceCount);
 	}
 }

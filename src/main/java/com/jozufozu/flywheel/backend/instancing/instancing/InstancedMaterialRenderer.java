@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import com.jozufozu.flywheel.backend.model.ModelPool;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.mojang.math.Matrix4f;
 
@@ -28,8 +29,10 @@ public class InstancedMaterialRenderer<P extends WorldProgram> {
 
 		// initialize all uninitialized instancers...
 		instancers.forEach(GPUInstancer::init);
-		// ...and then flush the model arena in case anything was marked for upload
-		material.modelPool.flush();
+		if (material.allocator instanceof ModelPool pool) {
+			// ...and then flush the model arena in case anything was marked for upload
+			pool.flush();
+		}
 
 		P program = this.program.get();
 
