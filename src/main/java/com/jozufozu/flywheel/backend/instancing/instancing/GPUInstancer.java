@@ -77,7 +77,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		model = modelAllocator.alloc(modelData, arenaModel -> {
 			vao.bind();
 
-			model.setupState();
+			arenaModel.setupState();
 		});
 
 		vao.bind();
