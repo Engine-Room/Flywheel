@@ -1,13 +1,10 @@
 package com.jozufozu.flywheel.core.model;
 
-import static com.jozufozu.flywheel.util.RenderMath.nb;
-
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Quaternion;

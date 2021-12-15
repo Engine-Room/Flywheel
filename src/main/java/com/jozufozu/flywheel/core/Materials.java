@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.core;
 
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.materials.model.ModelType;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
