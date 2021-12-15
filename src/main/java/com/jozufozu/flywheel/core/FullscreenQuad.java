@@ -1,8 +1,9 @@
 package com.jozufozu.flywheel.core;
 
-import static org.lwjgl.opengl.GL20.*;
-
-import org.lwjgl.opengl.GL20;
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.GlNumericType;

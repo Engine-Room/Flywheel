@@ -2,10 +2,10 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import com.jozufozu.flywheel.api.instance.IDynamicInstance;
 import com.jozufozu.flywheel.api.instance.ITickableInstance;
-import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
-import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.batching.BatchingEngine;
+import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
+import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;

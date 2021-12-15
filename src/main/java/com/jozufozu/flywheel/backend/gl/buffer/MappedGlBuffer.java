@@ -7,7 +7,6 @@ import org.lwjgl.opengl.GL30;
 
 import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.gl.error.GlException;
-import com.jozufozu.flywheel.util.StringUtil;
 
 public class MappedGlBuffer extends GlBuffer implements Mappable {
 
