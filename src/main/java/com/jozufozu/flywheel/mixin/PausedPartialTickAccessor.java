@@ -9,5 +9,5 @@ import net.minecraft.client.Minecraft;
 public interface PausedPartialTickAccessor {
 
 	@Accessor("pausePartialTick")
-	float getPausePartialTick();
+	float flywheel$getPartialTicksPaused();
 }
