@@ -2,12 +2,18 @@ package com.jozufozu.flywheel.core.model;
 
 import static com.jozufozu.flywheel.util.RenderMath.nb;
 
+import java.nio.ByteBuffer;
+
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 public class VecBufferWriter implements VertexConsumer {
 
 	private final VecBuffer buffer;
+
+	public VecBufferWriter(ByteBuffer buffer) {
+		this.buffer = new VecBuffer(buffer);
+	}
 
 	public VecBufferWriter(VecBuffer buffer) {
 		this.buffer = buffer;

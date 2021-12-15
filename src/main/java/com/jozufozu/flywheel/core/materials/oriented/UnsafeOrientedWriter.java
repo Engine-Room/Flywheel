@@ -1,26 +1,20 @@
-package com.jozufozu.flywheel.core.materials.oriented.writer;
+package com.jozufozu.flywheel.core.materials.oriented;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.backend.struct.UnsafeBufferWriter;
-import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
+import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.core.materials.UnsafeBasicWriter;
 
-public class UnsafeOrientedWriter extends UnsafeBufferWriter<OrientedData> {
+public class UnsafeOrientedWriter extends UnsafeBasicWriter<OrientedData> {
 	public UnsafeOrientedWriter(VecBuffer backingBuffer, StructType<OrientedData> vertexType) {
 		super(backingBuffer, vertexType);
 	}
 
 	@Override
-	public void write(OrientedData d) {
+	protected void writeInternal(OrientedData d) {
 		long addr = writePointer;
-		MemoryUtil.memPutByte(addr, d.blockLight);
-		MemoryUtil.memPutByte(addr + 1, d.skyLight);
-		MemoryUtil.memPutByte(addr + 2, d.r);
-		MemoryUtil.memPutByte(addr + 3, d.g);
-		MemoryUtil.memPutByte(addr + 4, d.b);
-		MemoryUtil.memPutByte(addr + 5, d.a);
+		super.writeInternal(d);
 
 		MemoryUtil.memPutFloat(addr + 6, d.posX);
 		MemoryUtil.memPutFloat(addr + 10, d.posY);
@@ -32,7 +26,5 @@ public class UnsafeOrientedWriter extends UnsafeBufferWriter<OrientedData> {
 		MemoryUtil.memPutFloat(addr + 34, d.qY);
 		MemoryUtil.memPutFloat(addr + 38, d.qZ);
 		MemoryUtil.memPutFloat(addr + 42, d.qW);
-
-		advance();
 	}
 }

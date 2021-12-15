@@ -18,13 +18,21 @@ public abstract class BufferWriter<S> implements StructWriter<S> {
 		this.stride = this.format.getStride();
 	}
 
-	/**
-	 * Advances the write pointer forward by the stride of one vertex. This should always be called after a
-	 * vertex is written. Implementations which override this should always call invoke the super implementation.
-	 */
-	protected void advance() {
-
+	@Override
+	public final void write(S struct) {
+		writeInternal(struct);
+		advance();
 	}
+
+	/**
+	 * Advances the write pointer forward by the stride of one vertex.
+	 * This will always be called after a struct is written, implementors need not call it themselves.
+	 *
+	 * @see #write
+	 */
+	protected abstract void advance();
+
+	protected abstract void writeInternal(S s);
 
 	@Override
 	public void seek(int pos) {

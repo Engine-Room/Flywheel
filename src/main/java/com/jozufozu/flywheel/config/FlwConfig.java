@@ -39,12 +39,16 @@ public class FlwConfig {
 
 	public static class ClientConfig {
 		public final BooleanValue enabled;
+		public final ForgeConfigSpec.EnumValue<FlwEngine> engine;
 		public final BooleanValue debugNormals;
 
 		public ClientConfig(ForgeConfigSpec.Builder builder) {
 
 			enabled = builder.comment("Enable or disable the entire engine")
 					.define("enabled", true);
+
+			engine = builder.comment("Enable or disable the entire engine")
+					.defineEnum("backend", FlwEngine.GL33);
 
 			debugNormals = builder.comment("Enable or disable a debug overlay that colors pixels by their normal")
 					.define("debugNormals", false);

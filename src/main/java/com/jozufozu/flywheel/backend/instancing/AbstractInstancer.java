@@ -58,6 +58,14 @@ public abstract class AbstractInstancer<D extends InstanceData> implements Insta
 		anyToRemove = true;
 	}
 
+	public int getModelVertexCount() {
+		return modelData.vertexCount();
+	}
+
+	public int numInstances() {
+		return data.size();
+	}
+
 	protected BitSet getDirtyBitSet() {
 		final int size = data.size();
 		final BitSet dirtySet = new BitSet(size);

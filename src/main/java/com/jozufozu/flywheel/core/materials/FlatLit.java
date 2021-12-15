@@ -24,4 +24,6 @@ public interface FlatLit<D extends InstanceData & FlatLit<D>> {
 	 * @return <code>this</code>
 	 */
 	D setSkyLight(int skyLight);
+
+	int getPackedLight();
 }

@@ -2,10 +2,12 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import com.jozufozu.flywheel.api.instance.IDynamicInstance;
 import com.jozufozu.flywheel.api.instance.ITickableInstance;
+import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.batching.BatchingEngine;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
+import com.jozufozu.flywheel.config.FlwEngine;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
@@ -29,12 +31,11 @@ public class InstanceWorld {
 
 	public InstanceWorld() {
 
-		// TODO: finish impl
-		if (false) {
-			engine = new BatchingEngine();
-			entityInstanceManager = new EntityInstanceManager(engine);
-			tileEntityInstanceManager = new TileInstanceManager(engine);
-		} else {
+		FlwEngine engine = Backend.getInstance()
+				.getEngine();
+
+		switch (engine) {
+		case GL33 -> {
 			InstancingEngine<WorldProgram> manager = InstancingEngine.builder(Contexts.WORLD)
 					.build();
 
@@ -43,7 +44,14 @@ public class InstanceWorld {
 
 			manager.addListener(entityInstanceManager);
 			manager.addListener(tileEntityInstanceManager);
-			engine = manager;
+			this.engine = manager;
+		}
+		case BATCHING -> {
+			this.engine = new BatchingEngine();
+			entityInstanceManager = new EntityInstanceManager(this.engine);
+			tileEntityInstanceManager = new TileInstanceManager(this.engine);
+		}
+		default -> throw new IllegalArgumentException("Unknown engine type");
 		}
 	}
 

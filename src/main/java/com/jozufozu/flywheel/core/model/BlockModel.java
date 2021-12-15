@@ -5,6 +5,7 @@ import java.util.Arrays;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.util.BufferBuilderReader;
+import com.jozufozu.flywheel.util.ModelReader;
 import com.jozufozu.flywheel.util.RenderMath;
 import com.jozufozu.flywheel.util.VirtualEmptyModelData;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -27,7 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class BlockModel implements Model {
 	private static final PoseStack IDENTITY = new PoseStack();
 
-	private final BufferBuilderReader reader;
+	private final ModelReader reader;
 
 	private final String name;
 
@@ -69,12 +70,17 @@ public class BlockModel implements Model {
 		for (int i = 0; i < vertexCount; i++) {
 			buffer.vertex(reader.getX(i), reader.getY(i), reader.getZ(i));
 
-			buffer.normal(RenderMath.f(reader.getNX(i)), RenderMath.f(reader.getNY(i)), RenderMath.f(reader.getNZ(i)));
+			buffer.normal(reader.getNX(i), reader.getNY(i), reader.getNZ(i));
 
 			buffer.uv(reader.getU(i), reader.getV(i));
 
 			buffer.endVertex();
 		}
+	}
+
+	@Override
+	public ModelReader getReader() {
+		return reader;
 	}
 
 	public static BufferBuilder getBufferBuilder(BakedModel model, BlockState referenceState, PoseStack ms) {
@@ -96,12 +102,4 @@ public class BlockModel implements Model {
 		return builder;
 	}
 
-	// DOWN, UP, NORTH, SOUTH, WEST, EAST, null
-	private static final Direction[] dirs;
-
-	static {
-		Direction[] directions = Direction.values();
-
-		dirs = Arrays.copyOf(directions, directions.length + 1);
-	}
 }

@@ -41,6 +41,10 @@ public class InstancedRenderDispatcher {
 		getEntities(entity.level).queueUpdate(entity);
 	}
 
+	public static String getEngineName(LevelAccessor world) {
+		return instanceWorlds.get(world).engine.getName();
+	}
+
 	public static InstanceManager<BlockEntity> getTiles(LevelAccessor world) {
 		return instanceWorlds.get(world)
 				.getTileEntityInstanceManager();
