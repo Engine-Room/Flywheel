@@ -5,6 +5,7 @@ import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.StitchedSprite;
+import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
 
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -26,5 +27,12 @@ public class FlywheelClient {
 		modEventBus.addListener(StitchedSprite::onTextureStitchPost);
 
 		VanillaInstances.init();
+
+		// https://github.com/Jozufozu/Flywheel/issues/69
+		// Weird issue with accessor loading.
+		// Only thing I've seen that's close to a fix is to force the class to load before trying to use it.
+		// From the SpongePowered discord:
+		// https://discord.com/channels/142425412096491520/626802111455297538/675007581168599041
+		Flywheel.log.info("Successfully loaded {}", PausedPartialTickAccessor.class.getName());
 	}
 }
