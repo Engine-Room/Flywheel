@@ -17,10 +17,13 @@ import com.jozufozu.flywheel.api.FlywheelWorld;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
+import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.config.FlwConfig;
+import com.jozufozu.flywheel.config.FlwEngine;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -29,6 +32,7 @@ public class Backend {
 	public static final Logger log = LogManager.getLogger(Backend.class);
 
 	protected static final Backend INSTANCE = new Backend();
+	private FlwEngine engine;
 
 	public static Backend getInstance() {
 		return INSTANCE;
@@ -57,12 +61,13 @@ public class Backend {
 	 * (Meshlet, MDI, GL31 Draw Instanced are planned), this will name which one is in use.
 	 */
 	public String getBackendDescriptor() {
-		if (canUseInstancing()) {
-			return "GL33 Instanced Arrays";
-		}
+		if (enabled) {
+			ClientLevel level = Minecraft.getInstance().level;
 
-		if (canUseVBOs()) {
-			return "VBOs";
+			if (level == null) {
+				return "Invalid";
+			}
+			return InstancedRenderDispatcher.getEngineName(level);
 		}
 
 		return "Disabled";
@@ -134,8 +139,9 @@ public class Backend {
 
 		instancedArrays = compat.instancedArraysSupported();
 
-		enabled = FlwConfig.get()
-				.enabled() && !OptifineHandler.usingShaders();
+		FlwConfig config = FlwConfig.get();
+		enabled = config.enabled() && !OptifineHandler.usingShaders();
+		engine = config.client.engine.get();
 	}
 
 	public boolean canUseInstancing(@Nullable Level world) {
@@ -187,5 +193,9 @@ public class Backend {
 	}
 
 	public static void init() {
+	}
+
+	public FlwEngine getEngine() {
+		return engine;
 	}
 }

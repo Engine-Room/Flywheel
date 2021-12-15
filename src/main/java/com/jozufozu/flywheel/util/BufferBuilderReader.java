@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
 
-public class BufferBuilderReader {
+public class BufferBuilderReader implements ModelReader {
 
 	private final ByteBuffer buffer;
 	private final int vertexCount;
@@ -35,66 +35,81 @@ public class BufferBuilderReader {
 		//		}
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return vertexCount == 0;
 	}
 
-	public int vertIdx(int vertexIndex) {
+	private int vertIdx(int vertexIndex) {
 		return vertexIndex * formatSize;
 	}
 
+	@Override
 	public float getX(int index) {
 		return buffer.getFloat(vertIdx(index));
 	}
 
+	@Override
 	public float getY(int index) {
 		return buffer.getFloat(vertIdx(index) + 4);
 	}
 
+	@Override
 	public float getZ(int index) {
 		return buffer.getFloat(vertIdx(index) + 8);
 	}
 
+	@Override
 	public byte getR(int index) {
 		return buffer.get(vertIdx(index) + 12);
 	}
 
+	@Override
 	public byte getG(int index) {
 		return buffer.get(vertIdx(index) + 13);
 	}
 
+	@Override
 	public byte getB(int index) {
 		return buffer.get(vertIdx(index) + 14);
 	}
 
+	@Override
 	public byte getA(int index) {
 		return buffer.get(vertIdx(index) + 15);
 	}
 
+	@Override
 	public float getU(int index) {
 		return buffer.getFloat(vertIdx(index) + 16);
 	}
 
+	@Override
 	public float getV(int index) {
 		return buffer.getFloat(vertIdx(index) + 20);
 	}
 
+	@Override
 	public int getLight(int index) {
 		return buffer.getInt(vertIdx(index) + 24);
 	}
 
-	public byte getNX(int index) {
-		return buffer.get(vertIdx(index) + 28);
+	@Override
+	public float getNX(int index) {
+		return RenderMath.f(buffer.get(vertIdx(index) + 28));
 	}
 
-	public byte getNY(int index) {
-		return buffer.get(vertIdx(index) + 29);
+	@Override
+	public float getNY(int index) {
+		return RenderMath.f(buffer.get(vertIdx(index) + 29));
 	}
 
-	public byte getNZ(int index) {
-		return buffer.get(vertIdx(index) + 30);
+	@Override
+	public float getNZ(int index) {
+		return RenderMath.f(buffer.get(vertIdx(index) + 30));
 	}
 
+	@Override
 	public int getVertexCount() {
 		return vertexCount;
 	}

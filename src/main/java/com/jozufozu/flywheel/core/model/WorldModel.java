@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.util.BufferBuilderReader;
+import com.jozufozu.flywheel.util.ModelReader;
 import com.jozufozu.flywheel.util.RenderMath;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -15,7 +16,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 
 public class WorldModel implements Model {
 
-	private final BufferBuilderReader reader;
+	private final ModelReader reader;
 	private final String name;
 
 	public WorldModel(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks, String name) {
@@ -33,7 +34,7 @@ public class WorldModel implements Model {
 		for (int i = 0; i < vertexCount(); i++) {
 			vertices.vertex(reader.getX(i), reader.getY(i), reader.getZ(i));
 
-			vertices.normal(RenderMath.f(reader.getNX(i)), RenderMath.f(reader.getNY(i)), RenderMath.f(reader.getNZ(i)));
+			vertices.normal(reader.getNX(i), reader.getNY(i), reader.getNZ(i));
 
 			vertices.uv(reader.getU(i), reader.getV(i));
 
@@ -60,4 +61,8 @@ public class WorldModel implements Model {
 		return Formats.COLORED_LIT_MODEL;
 	}
 
+	@Override
+	public ModelReader getReader() {
+		return reader;
+	}
 }

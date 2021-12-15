@@ -8,8 +8,6 @@ import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.Programs;
-import com.jozufozu.flywheel.core.materials.model.writer.UnsafeModelWriter;
-import com.jozufozu.flywheel.core.model.Model;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -36,7 +34,11 @@ public class ModelType implements Instanced<ModelData>, Batched<ModelData> {
 	}
 
 	@Override
-	public BatchingTransformer<ModelData> getTransformer(Model model) {
-		return null;
+	public BatchingTransformer<ModelData> getTransformer() {
+		return (d, b) -> {
+			b.transform(d.model, d.normal)
+					.color(d.r, d.g, d.b, d.a)
+					.light(d.getPackedLight());
+		};
 	}
 }

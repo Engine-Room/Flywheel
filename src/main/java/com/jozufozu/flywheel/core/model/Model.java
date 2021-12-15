@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.core.model;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.core.QuadConverter;
+import com.jozufozu.flywheel.util.ModelReader;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 /**
@@ -76,4 +77,6 @@ public interface Model {
 	default boolean empty() {
 		return vertexCount() == 0;
 	}
+
+	ModelReader getReader();
 }

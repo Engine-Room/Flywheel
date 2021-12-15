@@ -5,18 +5,23 @@ import com.jozufozu.flywheel.api.struct.BatchingTransformer;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.SuperByteBuffer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 
 public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
-	private final BatchingTransformer<D> renderer;
+	private final BatchingTransformer<D> transform;
+
+	private final SuperByteBuffer sbb;
 
 	public CPUInstancer(StructType<D> type, Model modelData) {
 		super(type, modelData);
 
-		renderer = type.asBatched()
-				.getTransformer(modelData);
+		sbb = new SuperByteBuffer(modelData);
+		transform = type.asBatched()
+				.getTransformer();
 	}
 
 	@Override
@@ -24,15 +29,19 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		// noop
 	}
 
-	public void drawAll(PoseStack stack, VertexConsumer buffer) {
-		if (renderer == null) {
+	public void drawAll(PoseStack stack, VertexConsumer buffer, FormatContext context) {
+		if (transform == null) {
 			return;
 		}
 
 		renderSetup();
 
 		for (D d : data) {
-			renderer.draw(d, stack, buffer);
+			if (context.usesOverlay()) sbb.entityMode();
+
+			transform.transform(d, sbb);
+
+			sbb.renderInto(stack, buffer);
 		}
 	}
 

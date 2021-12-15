@@ -24,5 +24,11 @@ public class FlwPackets {
 				.encoder(SConfigureBooleanPacket::encode)
 				.consumer(SConfigureBooleanPacket::execute)
 				.add();
+
+		channel.messageBuilder(SConfigureEnginePacket.class, 1, NetworkDirection.PLAY_TO_CLIENT)
+				.decoder(SConfigureEnginePacket::new)
+				.encoder(SConfigureEnginePacket::encode)
+				.consumer(SConfigureEnginePacket::execute)
+				.add();
 	}
 }

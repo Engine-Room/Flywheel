@@ -8,6 +8,7 @@ import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.backend.RenderLayer;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -40,15 +41,28 @@ public class BatchingEngine implements Engine {
 
 	@Override
 	public void render(RenderLayerEvent event, MultiBufferSource buffers) {
+		PoseStack stack = event.stack;
+
+		stack.pushPose();
+
+		stack.translate(-event.camX, -event.camY, -event.camZ);
+
 		for (Map.Entry<RenderType, BatchedMaterialGroup> entry : layers.get(event.getLayer()).entrySet()) {
 			BatchedMaterialGroup group = entry.getValue();
 
-			group.render(event.stack, buffers);
+			group.render(stack, buffers);
 		}
+
+		stack.popPose();
 	}
 
 	@Override
 	public void beginFrame(Camera info) {
 
+	}
+
+	@Override
+	public String getName() {
+		return "Batching";
 	}
 }

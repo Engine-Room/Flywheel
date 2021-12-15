@@ -1,11 +1,9 @@
 package com.jozufozu.flywheel.api.struct;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.jozufozu.flywheel.core.model.SuperByteBuffer;
 
-public abstract class BatchingTransformer<S> {
+@FunctionalInterface
+public interface BatchingTransformer<S> {
 
-	public void draw(S s, PoseStack stack, VertexConsumer consumer) {
-
-	}
+	void transform(S s, SuperByteBuffer b);
 }
