@@ -3,6 +3,8 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.backend.RenderLayer;
@@ -22,11 +24,15 @@ public class BatchingEngine implements Engine {
 
 	protected final Map<RenderLayer, Map<RenderType, BatchedMaterialGroup>> layers;
 
+	private final BatchExecutor pool;
+
 	public BatchingEngine() {
 		this.layers = new EnumMap<>(RenderLayer.class);
 		for (RenderLayer value : RenderLayer.values()) {
 			layers.put(value, new HashMap<>());
 		}
+
+		pool = new BatchExecutor(Executors.newWorkStealingPool(ForkJoinPool.getCommonPoolParallelism()));
 	}
 
 	@Override
@@ -50,7 +56,12 @@ public class BatchingEngine implements Engine {
 		for (Map.Entry<RenderType, BatchedMaterialGroup> entry : layers.get(event.getLayer()).entrySet()) {
 			BatchedMaterialGroup group = entry.getValue();
 
-			group.render(stack, buffers);
+			group.render(stack, buffers, pool);
+		}
+
+		try {
+			pool.await();
+		} catch (InterruptedException ignored) {
 		}
 
 		stack.popPose();

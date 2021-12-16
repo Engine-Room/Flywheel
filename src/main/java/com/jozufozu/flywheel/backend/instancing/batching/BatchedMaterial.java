@@ -30,7 +30,8 @@ public class BatchedMaterial<D extends InstanceData> implements Material<D> {
 
 	public void render(PoseStack stack, VertexConsumer buffer, FormatContext context) {
 		for (CPUInstancer<D> instancer : models.values()) {
-			instancer.drawAll(stack, buffer, context);
+			instancer.setup(context);
+			instancer.drawAll(stack, buffer);
 		}
 	}
 

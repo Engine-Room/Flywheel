@@ -38,21 +38,19 @@ public abstract class BufferBuilderMixin implements DirectBufferBuilder {
 	private int nextElementByte;
 
 	@Override
-	public DirectVertexConsumer intoDirectConsumer(int neededVerts) {
-		ensureCapacity(neededVerts * this.format.getVertexSize());
-		return new DirectVertexConsumer(this.buffer, this.format);
-	}
+	public DirectVertexConsumer intoDirectConsumer(int vertexCount) {
+		int bytes = vertexCount * format.getVertexSize();
+		ensureCapacity(bytes);
 
-	@Override
-	public void updateAfterWriting(DirectVertexConsumer complete) {
-		int vertexCount = complete.getVertexCount();
-		int totalWrittenBytes = vertexCount * format.getVertexSize();
+		DirectVertexConsumer consumer = new DirectVertexConsumer(this.buffer, this.format);
 
 		this.vertices += vertexCount;
 		this.currentElement = format.getElements()
 				.get(0);
 		this.elementIndex = 0;
-		this.nextElementByte += totalWrittenBytes;
-		this.buffer.position(complete.startPos + totalWrittenBytes);
+		this.nextElementByte += bytes;
+		this.buffer.position(consumer.startPos + bytes);
+
+		return consumer;
 	}
 }
