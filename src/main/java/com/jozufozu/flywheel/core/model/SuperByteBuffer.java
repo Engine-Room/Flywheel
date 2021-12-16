@@ -1,10 +1,7 @@
 package com.jozufozu.flywheel.core.model;
 
 import com.jozufozu.flywheel.util.ModelReader;
-import com.jozufozu.flywheel.util.transform.Rotate;
-import com.jozufozu.flywheel.util.transform.Scale;
-import com.jozufozu.flywheel.util.transform.TStack;
-import com.jozufozu.flywheel.util.transform.Translate;
+import com.jozufozu.flywheel.util.transform.Transform;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.*;
@@ -15,23 +12,26 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 
-public class SuperByteBuffer implements Scale<SuperByteBuffer>, Translate<SuperByteBuffer>, Rotate<SuperByteBuffer>, TStack<SuperByteBuffer> {
+public class SuperByteBuffer {
 
 	private final Model model;
 	private final ModelReader template;
 
-	// Vertex Position
-	private final PoseStack transforms;
-
 	private final Params defaultParams = Params.defaultParams();
 	private final Params params = defaultParams.copy();
+
+	public Params getDefaultParams() {
+		return defaultParams;
+	}
+
+	public Params getParams() {
+		return params;
+	}
 
 	// Temporary
 	private static final Long2IntMap WORLD_LIGHT_CACHE = new Long2IntOpenHashMap();
@@ -42,9 +42,6 @@ public class SuperByteBuffer implements Scale<SuperByteBuffer>, Translate<SuperB
 	public SuperByteBuffer(Model model) {
 		this.model = model;
 		template = model.getReader();
-
-		transforms = new PoseStack();
-		transforms.pushPose();
 	}
 
 	public void renderInto(PoseStack input, VertexConsumer builder) {
@@ -54,17 +51,15 @@ public class SuperByteBuffer implements Scale<SuperByteBuffer>, Translate<SuperB
 		Matrix4f modelMat = input.last()
 				.pose()
 				.copy();
-		Matrix4f localTransforms = transforms.last()
-				.pose();
-		modelMat.multiply(localTransforms);
+		modelMat.multiply(params.model);
 
 		Matrix3f normalMat;
 
 		if (params.fullNormalTransform) {
 			normalMat = input.last().normal().copy();
-			normalMat.mul(transforms.last().normal());
+			normalMat.mul(params.normal);
 		} else {
-			normalMat = transforms.last().normal().copy();
+			normalMat = params.normal.copy();
 		}
 
 		if (params.useWorldLight) {
@@ -148,7 +143,7 @@ public class SuperByteBuffer implements Scale<SuperByteBuffer>, Translate<SuperB
 			int light;
 			if (params.useWorldLight) {
 				lightPos.set(((x - f) * 15 / 16f) + f, (y - f) * 15 / 16f + f, (z - f) * 15 / 16f + f, 1F);
-				lightPos.transform(localTransforms);
+				lightPos.transform(params.model);
 				if (params.lightTransform != null) {
 					lightPos.transform(params.lightTransform);
 				}
@@ -178,160 +173,13 @@ public class SuperByteBuffer implements Scale<SuperByteBuffer>, Translate<SuperB
 	}
 
 	public SuperByteBuffer reset() {
-		while (!transforms.clear())
-			transforms.popPose();
-		transforms.pushPose();
-
 		params.load(defaultParams);
 
 		return this;
 	}
 
-	@Override
-	public SuperByteBuffer translate(double x, double y, double z) {
-		transforms.translate(x, y, z);
-		return this;
-	}
-
-	@Override
-	public SuperByteBuffer multiply(Quaternion quaternion) {
-		transforms.mulPose(quaternion);
-		return this;
-	}
-
-	public SuperByteBuffer transform(PoseStack stack) {
-		PoseStack.Pose last = stack.last();
-		return transform(last.pose(), last.normal());
-	}
-
-	public SuperByteBuffer transform(Matrix4f pose, Matrix3f normal) {
-		transforms.last()
-				.pose()
-				.multiply(pose);
-		transforms.last()
-				.normal()
-				.mul(normal);
-		return this;
-	}
-
-	public SuperByteBuffer rotateCentered(Direction axis, float radians) {
-		translate(.5f, .5f, .5f).rotate(axis, radians)
-			.translate(-.5f, -.5f, -.5f);
-		return this;
-	}
-
-	public SuperByteBuffer rotateCentered(Quaternion q) {
-		translate(.5f, .5f, .5f).multiply(q)
-			.translate(-.5f, -.5f, -.5f);
-		return this;
-	}
-
-	public SuperByteBuffer color(int r, int g, int b, int a) {
-		params.colorMode = ColorMode.RECOLOR;
-		params.r = r;
-		params.g = g;
-		params.b = b;
-		params.a = a;
-		return this;
-	}
-
-	public SuperByteBuffer color(byte r, byte g, byte b, byte a) {
-		params.colorMode = ColorMode.RECOLOR;
-		params.r = Byte.toUnsignedInt(r);
-		params.g = Byte.toUnsignedInt(g);
-		params.b = Byte.toUnsignedInt(b);
-		params.a = Byte.toUnsignedInt(a);
-		return this;
-	}
-
-	public SuperByteBuffer color(int color) {
-		params.colorMode = ColorMode.RECOLOR;
-		params.r = ((color >> 16) & 0xFF);
-		params.g = ((color >> 8) & 0xFF);
-		params.b = (color & 0xFF);
-		params.a = 255;
-		return this;
-	}
-
-	public SuperByteBuffer shiftUV(SpriteShiftFunc entry) {
-		params.spriteShiftFunc = entry;
-		return this;
-	}
-
-	public SuperByteBuffer overlay() {
-		params.hasOverlay = true;
-		return this;
-	}
-
-	public SuperByteBuffer overlay(int overlay) {
-		params.hasOverlay = true;
-		params.overlay = overlay;
-		return this;
-	}
-
-	/**
-	 * Transforms normals not only by the local matrix stack, but also by the passed matrix stack.
-	 */
-	public SuperByteBuffer entityMode() {
-		params.hasOverlay = true;
-		params.fullNormalTransform = true;
-		params.diffuseMode = DiffuseMode.NONE;
-		params.colorMode = ColorMode.RECOLOR;
-		return this;
-	}
-
-	public SuperByteBuffer light() {
-		params.useWorldLight = true;
-		return this;
-	}
-
-	public SuperByteBuffer light(Matrix4f lightTransform) {
-		params.useWorldLight = true;
-		params.lightTransform = lightTransform;
-		return this;
-	}
-
-	public SuperByteBuffer light(int packedLightCoords) {
-		params.hasCustomLight = true;
-		params.packedLightCoords = packedLightCoords;
-		return this;
-	}
-
-	public SuperByteBuffer light(Matrix4f lightTransform, int packedLightCoords) {
-		light(lightTransform);
-		light(packedLightCoords);
-		return this;
-	}
-
-	/**
-	 * Uses max light from calculated light (world light or custom light) and vertex light for the final light value.
-	 * Ineffective if any other light method was not called.
-	 */
-	public SuperByteBuffer hybridLight() {
-		params.hybridLight = true;
-		return this;
-	}
-
 	public boolean isEmpty() {
 		return template.isEmpty();
-	}
-
-	@Override
-	public SuperByteBuffer scale(float factorX, float factorY, float factorZ) {
-		transforms.scale(factorX, factorY, factorZ);
-		return this;
-	}
-
-	@Override
-	public SuperByteBuffer pushPose() {
-		transforms.pushPose();
-		return this;
-	}
-
-	@Override
-	public SuperByteBuffer popPose() {
-		transforms.popPose();
-		return this;
 	}
 
 	@Override
@@ -375,7 +223,11 @@ public class SuperByteBuffer implements Scale<SuperByteBuffer>, Translate<SuperB
 		INSTANCE_OVER_STATIC,
 	}
 
-	public static class Params {
+	public static class Params implements Transform<Params> {
+		// Vertex Position
+		public final Matrix4f model = new Matrix4f();
+		public final Matrix3f normal = new Matrix3f();
+
 		// Vertex Coloring
 		public ColorMode colorMode = ColorMode.DIFFUSE_ONLY;
 		public DiffuseMode diffuseMode = DiffuseMode.INSTANCE;
@@ -402,6 +254,8 @@ public class SuperByteBuffer implements Scale<SuperByteBuffer>, Translate<SuperB
 		public boolean fullNormalTransform;
 
 		public void load(Params from) {
+			model.load(from.model);
+			normal.load(from.normal);
 			colorMode = from.colorMode;
 			diffuseMode = from.diffuseMode;
 			r = from.r;
@@ -425,8 +279,140 @@ public class SuperByteBuffer implements Scale<SuperByteBuffer>, Translate<SuperB
 			return params;
 		}
 
+		public Params color(int r, int g, int b, int a) {
+			this.colorMode = ColorMode.RECOLOR;
+			this.r = r;
+			this.g = g;
+			this.b = b;
+			this.a = a;
+			return this;
+		}
+
+		public Params color(byte r, byte g, byte b, byte a) {
+			this.colorMode = ColorMode.RECOLOR;
+			this.r = Byte.toUnsignedInt(r);
+			this.g = Byte.toUnsignedInt(g);
+			this.b = Byte.toUnsignedInt(b);
+			this.a = Byte.toUnsignedInt(a);
+			return this;
+		}
+
+		public Params color(int color) {
+			this.colorMode = ColorMode.RECOLOR;
+			this.r = ((color >> 16) & 0xFF);
+			this.g = ((color >> 8) & 0xFF);
+			this.b = (color & 0xFF);
+			this.a = 255;
+			return this;
+		}
+
+		public Params shiftUV(SpriteShiftFunc entry) {
+			this.spriteShiftFunc = entry;
+			return this;
+		}
+
+		public Params overlay() {
+			this.hasOverlay = true;
+			return this;
+		}
+
+		public Params overlay(int overlay) {
+			this.hasOverlay = true;
+			this.overlay = overlay;
+			return this;
+		}
+
+		/**
+		 * Transforms normals not only by the local matrix stack, but also by the passed matrix stack.
+		 */
+		public Params entityMode() {
+			this.hasOverlay = true;
+			this.fullNormalTransform = true;
+			this.diffuseMode = DiffuseMode.NONE;
+			this.colorMode = ColorMode.RECOLOR;
+			return this;
+		}
+
+		public Params light() {
+			this.useWorldLight = true;
+			return this;
+		}
+
+		public Params light(Matrix4f lightTransform) {
+			this.useWorldLight = true;
+			this.lightTransform = lightTransform;
+			return this;
+		}
+
+		public Params light(int packedLightCoords) {
+			this.hasCustomLight = true;
+			this.packedLightCoords = packedLightCoords;
+			return this;
+		}
+
+		public Params light(Matrix4f lightTransform, int packedLightCoords) {
+			light(lightTransform);
+			light(packedLightCoords);
+			return this;
+		}
+
+		/**
+		 * Uses max light from calculated light (world light or custom light) and vertex light for the final light value.
+		 * Ineffective if any other light method was not called.
+		 */
+		public Params hybridLight() {
+			hybridLight = true;
+			return this;
+		}
+
+		@Override
+		public Params multiply(Quaternion quaternion) {
+			model.multiply(quaternion);
+			return this;
+		}
+
+		@Override
+		public Params scale(float pX, float pY, float pZ) {
+			model.multiply(Matrix4f.createScaleMatrix(pX, pY, pZ));
+			if (pX == pY && pY == pZ) {
+				if (pX > 0.0F) {
+					return this;
+				}
+
+				normal.mul(-1.0F);
+			}
+
+			float f = 1.0F / pX;
+			float f1 = 1.0F / pY;
+			float f2 = 1.0F / pZ;
+			float f3 = Mth.fastInvCubeRoot(f * f1 * f2);
+			normal.mul(Matrix3f.createScaleMatrix(f3 * f, f3 * f1, f3 * f2));
+			return this;
+		}
+
+		@Override
+		public Params translate(double x, double y, double z) {
+			model.multiplyWithTranslation((float) x, (float) y, (float) z);
+
+			return this;
+		}
+
+		@Override
+		public Params mulPose(Matrix4f pose) {
+			this.model.multiply(pose);
+			return this;
+		}
+
+		@Override
+		public Params mulNormal(Matrix3f normal) {
+			this.normal.mul(normal);
+			return this;
+		}
+
 		public static Params defaultParams() {
 			Params out = new Params();
+			out.model.setIdentity();
+			out.normal.setIdentity();
 			out.colorMode = ColorMode.DIFFUSE_ONLY;
 			out.diffuseMode = DiffuseMode.INSTANCE;
 			out.r = 0xFF;
@@ -442,26 +428,6 @@ public class SuperByteBuffer implements Scale<SuperByteBuffer>, Translate<SuperB
 			out.packedLightCoords = 0;
 			out.hybridLight = false;
 			out.fullNormalTransform = false;
-			return out;
-		}
-
-		public static Params newEntityParams() {
-			Params out = new Params();
-			out.colorMode = ColorMode.RECOLOR;
-			out.diffuseMode = DiffuseMode.NONE;
-			out.r = 0xFF;
-			out.g = 0xFF;
-			out.b = 0xFF;
-			out.a = 0xFF;
-			out.spriteShiftFunc = null;
-			out.hasOverlay = true;
-			out.overlay = OverlayTexture.NO_OVERLAY;
-			out.useWorldLight = false;
-			out.lightTransform = null;
-			out.hasCustomLight = false;
-			out.packedLightCoords = 0;
-			out.hybridLight = false;
-			out.fullNormalTransform = true;
 			return out;
 		}
 	}

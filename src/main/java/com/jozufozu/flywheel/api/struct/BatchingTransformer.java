@@ -5,5 +5,5 @@ import com.jozufozu.flywheel.core.model.SuperByteBuffer;
 @FunctionalInterface
 public interface BatchingTransformer<S> {
 
-	void transform(S s, SuperByteBuffer b);
+	void transform(S s, SuperByteBuffer.Params b);
 }
