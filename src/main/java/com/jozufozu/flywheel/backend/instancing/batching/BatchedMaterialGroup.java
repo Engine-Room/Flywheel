@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
@@ -30,15 +31,20 @@ public class BatchedMaterialGroup implements MaterialGroup {
 		return (BatchedMaterial<D>) materials.computeIfAbsent(spec, BatchedMaterial::new);
 	}
 
-	public void render(PoseStack stack, MultiBufferSource source) {
+	public void render(PoseStack stack, MultiBufferSource source, Executor pool) {
 		VertexConsumer buffer = source.getBuffer(state);
 
 		if (buffer instanceof DirectBufferBuilder direct) {
 			DirectVertexConsumer consumer = direct.intoDirectConsumer(calculateNeededVertices());
+			FormatContext context = new FormatContext(consumer.hasOverlay());
 
-			renderInto(stack, consumer, new FormatContext(consumer.hasOverlay()));
+			for (BatchedMaterial<?> material : materials.values()) {
+				for (CPUInstancer<?> instancer : material.models.values()) {
+					instancer.setup(context);
 
-			direct.updateAfterWriting(consumer);
+					instancer.submitTasks(stack, pool, consumer);
+				}
+			}
 		} else {
 			renderInto(stack, buffer, FormatContext.defaultContext());
 		}
@@ -48,7 +54,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 		int total = 0;
 		for (BatchedMaterial<?> material : materials.values()) {
 			for (CPUInstancer<?> instancer : material.models.values()) {
-				total += instancer.getModelVertexCount() * instancer.numInstances();
+				total += instancer.getTotalVertexCount();
 			}
 		}
 

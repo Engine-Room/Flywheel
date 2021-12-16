@@ -10,7 +10,6 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 
 public class DirectVertexConsumer implements VertexConsumer {
-
 	public final VertexFormat format;
 	private final int stride;
 	public final int startPos;
@@ -23,7 +22,6 @@ public class DirectVertexConsumer implements VertexConsumer {
 	private int uv2 = -1;
 
 	private long vertexBase;
-	private int vertexCount;
 
 	public DirectVertexConsumer(ByteBuffer buffer, VertexFormat format) {
 		this.format = format;
@@ -49,11 +47,40 @@ public class DirectVertexConsumer implements VertexConsumer {
 			offset += element.getByteSize();
 		}
 
-		this.vertexBase = MemoryUtil.memAddress(buffer);
+		this.vertexBase = MemoryUtil.memAddress(buffer, startPos);
+	}
+
+	private DirectVertexConsumer(DirectVertexConsumer parent) {
+		this.format = parent.format;
+		this.stride = parent.stride;
+		this.startPos = parent.startPos;
+		this.position = parent.position;
+		this.normal = parent.normal;
+		this.color = parent.color;
+		this.uv = parent.uv;
+		this.uv1 = parent.uv1;
+		this.uv2 = parent.uv2;
+
+		this.vertexBase = parent.vertexBase;
 	}
 
 	public boolean hasOverlay() {
 		return uv1 >= 0;
+	}
+
+	/**
+	 * Split off the head of this consumer into a new object and advance our write-pointer.
+	 * @param vertexCount The number of vertices that must be written to the head.
+	 * @return The head of this consumer.
+	 */
+	public DirectVertexConsumer split(int vertexCount) {
+		int bytes = vertexCount * stride;
+
+		DirectVertexConsumer head = new DirectVertexConsumer(this);
+
+		this.vertexBase += bytes;
+
+		return head;
 	}
 
 	@Override
@@ -117,7 +144,6 @@ public class DirectVertexConsumer implements VertexConsumer {
 	@Override
 	public void endVertex() {
 		vertexBase += stride;
-		vertexCount++;
 	}
 
 	@Override
@@ -128,9 +154,5 @@ public class DirectVertexConsumer implements VertexConsumer {
 	@Override
 	public void unsetDefaultColor() {
 
-	}
-
-	public int getVertexCount() {
-		return vertexCount;
 	}
 }

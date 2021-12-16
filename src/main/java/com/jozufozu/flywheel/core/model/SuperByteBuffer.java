@@ -22,31 +22,21 @@ public class SuperByteBuffer {
 	private final Model model;
 	private final ModelReader template;
 
-	private final Params defaultParams = Params.defaultParams();
-	private final Params params = defaultParams.copy();
-
-	public Params getDefaultParams() {
-		return defaultParams;
-	}
-
-	public Params getParams() {
-		return params;
-	}
-
 	// Temporary
 	private static final Long2IntMap WORLD_LIGHT_CACHE = new Long2IntOpenHashMap();
-	private final Vector4f pos = new Vector4f();
-	private final Vector3f normal = new Vector3f();
-	private final Vector4f lightPos = new Vector4f();
 
 	public SuperByteBuffer(Model model) {
 		this.model = model;
 		template = model.getReader();
 	}
 
-	public void renderInto(PoseStack input, VertexConsumer builder) {
+	public void renderInto(Params params, PoseStack input, VertexConsumer builder) {
 		if (isEmpty())
 			return;
+
+		Vector4f pos = new Vector4f();
+		Vector3f normal = new Vector3f();
+		Vector4f lightPos = new Vector4f();
 
 		Matrix4f modelMat = input.last()
 				.pose()
@@ -168,14 +158,6 @@ public class SuperByteBuffer {
 
 			builder.endVertex();
 		}
-
-		reset();
-	}
-
-	public SuperByteBuffer reset() {
-		params.load(defaultParams);
-
-		return this;
 	}
 
 	public boolean isEmpty() {

@@ -66,6 +66,10 @@ public abstract class AbstractInstancer<D extends InstanceData> implements Insta
 		return data.size();
 	}
 
+	public int getTotalVertexCount() {
+		return getModelVertexCount() * numInstances();
+	}
+
 	protected BitSet getDirtyBitSet() {
 		final int size = data.size();
 		final BitSet dirtySet = new BitSet(size);
