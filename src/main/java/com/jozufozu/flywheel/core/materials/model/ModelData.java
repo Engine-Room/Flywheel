@@ -1,8 +1,10 @@
 package com.jozufozu.flywheel.core.materials.model;
 
 import com.jozufozu.flywheel.core.materials.BasicData;
+import com.jozufozu.flywheel.core.model.SuperByteBuffer;
 import com.jozufozu.flywheel.util.transform.Rotate;
 import com.jozufozu.flywheel.util.transform.Scale;
+import com.jozufozu.flywheel.util.transform.Transform;
 import com.jozufozu.flywheel.util.transform.Translate;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
@@ -11,7 +13,7 @@ import com.mojang.math.Quaternion;
 
 import net.minecraft.util.Mth;
 
-public class ModelData extends BasicData implements Translate<ModelData>, Rotate<ModelData>, Scale<ModelData> {
+public class ModelData extends BasicData implements Transform<ModelData> {
 	public final Matrix4f model = new Matrix4f();
 	public final Matrix3f normal = new Matrix3f();
 
@@ -81,6 +83,18 @@ public class ModelData extends BasicData implements Translate<ModelData>, Rotate
 		markDirty();
 
 		model.multiplyWithTranslation((float) x, (float) y, (float) z);
+		return this;
+	}
+
+	@Override
+	public ModelData mulPose(Matrix4f pose) {
+		this.model.multiply(pose);
+		return this;
+	}
+
+	@Override
+	public ModelData mulNormal(Matrix3f normal) {
+		this.normal.mul(normal);
 		return this;
 	}
 }

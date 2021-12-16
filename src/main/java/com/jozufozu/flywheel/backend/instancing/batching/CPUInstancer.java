@@ -36,10 +36,14 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 		renderSetup();
 
-		for (D d : data) {
-			if (context.usesOverlay()) sbb.entityMode();
+		if (context.usesOverlay()) {
+			sbb.getDefaultParams().entityMode();
+		}
 
-			transform.transform(d, sbb);
+		sbb.reset();
+
+		for (D d : data) {
+			transform.transform(d, sbb.getParams());
 
 			sbb.renderInto(stack, buffer);
 		}
