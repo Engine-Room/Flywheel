@@ -1,11 +1,10 @@
 package com.jozufozu.flywheel.backend.instancing.batching;
 
-import java.util.concurrent.Executor;
-
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.struct.BatchingTransformer;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
+import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
 import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.core.model.ModelTransformer;
@@ -32,7 +31,7 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		}
 	}
 
-	void submitTasks(PoseStack stack, Executor pool, DirectVertexConsumer consumer) {
+	void submitTasks(PoseStack stack, TaskEngine pool, DirectVertexConsumer consumer) {
 		int instances = numInstances();
 
 		while (instances > 0) {
@@ -44,7 +43,7 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 			DirectVertexConsumer sub = consumer.split(verts);
 
-			pool.execute(() -> drawRange(stack, sub, start, end));
+			pool.submit(() -> drawRange(stack, sub, start, end));
 		}
 	}
 
@@ -81,7 +80,6 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 			removeDeletedInstances();
 			anyToRemove = false;
 		}
-
 
 		if (context.usesOverlay()) {
 			defaultParams.overlay();

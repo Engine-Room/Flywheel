@@ -3,11 +3,10 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
 
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.backend.RenderLayer;
+import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -20,19 +19,16 @@ import net.minecraft.core.Vec3i;
 
 public class BatchingEngine implements Engine {
 
-	protected BlockPos originCoordinate = BlockPos.ZERO;
-
 	protected final Map<RenderLayer, Map<RenderType, BatchedMaterialGroup>> layers;
+	protected final TaskEngine taskEngine;
 
-	private final BatchExecutor pool;
-
-	public BatchingEngine() {
+	public BatchingEngine(TaskEngine taskEngine) {
 		this.layers = new EnumMap<>(RenderLayer.class);
 		for (RenderLayer value : RenderLayer.values()) {
 			layers.put(value, new HashMap<>());
 		}
 
-		pool = new BatchExecutor(Executors.newWorkStealingPool(ForkJoinPool.getCommonPoolParallelism()));
+		this.taskEngine = taskEngine;
 	}
 
 	@Override
@@ -42,7 +38,7 @@ public class BatchingEngine implements Engine {
 
 	@Override
 	public Vec3i getOriginCoordinate() {
-		return originCoordinate;
+		return BlockPos.ZERO;
 	}
 
 	@Override
@@ -53,20 +49,23 @@ public class BatchingEngine implements Engine {
 
 		stack.translate(-event.camX, -event.camY, -event.camZ);
 
+		taskEngine.syncPoint();
+
 		for (Map.Entry<RenderType, BatchedMaterialGroup> entry : layers.get(event.getLayer()).entrySet()) {
 			BatchedMaterialGroup group = entry.getValue();
 
-			group.render(stack, buffers, pool);
+			group.render(stack, buffers, taskEngine);
 		}
 
-		try {
-			pool.await();
-		} catch (InterruptedException ignored) {
-		}
+		taskEngine.syncPoint();
 
 		stack.popPose();
 
 		event.buffers.bufferSource().endBatch();
+	}
+
+	@Override
+	public void delete() {
 	}
 
 	@Override

@@ -21,7 +21,5 @@ public interface RenderDispatcher {
 	 */
 	void beginFrame(Camera info);
 
-	default void delete() {
-
-	}
+	void delete();
 }
