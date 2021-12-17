@@ -2,11 +2,11 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.DirectBufferBuilder;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -31,7 +31,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 		return (BatchedMaterial<D>) materials.computeIfAbsent(spec, BatchedMaterial::new);
 	}
 
-	public void render(PoseStack stack, MultiBufferSource source, Executor pool) {
+	public void render(PoseStack stack, MultiBufferSource source, TaskEngine pool) {
 		VertexConsumer buffer = source.getBuffer(state);
 
 		if (buffer instanceof DirectBufferBuilder direct) {
@@ -41,7 +41,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 		}
 	}
 
-	private void renderParallel(PoseStack stack, Executor pool, DirectBufferBuilder direct) {
+	private void renderParallel(PoseStack stack, TaskEngine pool, DirectBufferBuilder direct) {
 		int vertexCount = calculateNeededVertices();
 		DirectVertexConsumer consumer = direct.intoDirectConsumer(vertexCount);
 		FormatContext context = new FormatContext(consumer.hasOverlay());

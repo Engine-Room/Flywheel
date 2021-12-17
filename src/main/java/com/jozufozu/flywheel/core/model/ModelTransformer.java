@@ -34,7 +34,6 @@ public class ModelTransformer {
 		modelMat.multiply(params.model);
 
 		Matrix3f normalMat;
-
 		if (params.fullNormalTransform) {
 			normalMat = input.last().normal().copy();
 			normalMat.mul(params.normal);

@@ -29,7 +29,12 @@ public class InstanceWorld {
 	protected final InstanceManager<Entity> entityInstanceManager;
 	protected final InstanceManager<BlockEntity> tileEntityInstanceManager;
 
+	protected final BatchExecutor executor;
+
 	public InstanceWorld() {
+
+		this.executor = new BatchExecutor();
+		this.executor.startWorkers();
 
 		FlwEngine engine = Backend.getInstance()
 				.getEngine();
@@ -37,7 +42,7 @@ public class InstanceWorld {
 		switch (engine) {
 		case GL33 -> {
 			InstancingEngine<WorldProgram> manager = InstancingEngine.builder(Contexts.WORLD)
-					.build();
+					.build(this.executor);
 
 			entityInstanceManager = new EntityInstanceManager(manager);
 			tileEntityInstanceManager = new TileInstanceManager(manager);
@@ -47,7 +52,7 @@ public class InstanceWorld {
 			this.engine = manager;
 		}
 		case BATCHING -> {
-			this.engine = new BatchingEngine();
+			this.engine = new BatchingEngine(this.executor);
 			entityInstanceManager = new EntityInstanceManager(this.engine);
 			tileEntityInstanceManager = new TileInstanceManager(this.engine);
 		}
@@ -67,6 +72,7 @@ public class InstanceWorld {
 	 * Free all acquired resources and invalidate this instance world.
 	 */
 	public void delete() {
+		this.executor.stopWorkers();
 		engine.delete();
 		entityInstanceManager.detachLightListeners();
 		tileEntityInstanceManager.detachLightListeners();
