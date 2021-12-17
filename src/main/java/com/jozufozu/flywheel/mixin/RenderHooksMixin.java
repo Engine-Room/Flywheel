@@ -60,10 +60,6 @@ public class RenderHooksMixin {
 		RenderBuffers renderBuffers = this.renderBuffers;
 
 		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(level, type, stack, renderBuffers, camX, camY, camZ));
-
-		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
-
-		renderBuffers.bufferSource().endBatch(type);
 	}
 
 	@Inject(at = @At("TAIL"), method = "allChanged")
@@ -84,8 +80,6 @@ public class RenderHooksMixin {
 		Vec3 cameraPos = info.getPosition();
 
 		CrumblingRenderer.renderBreaking(new RenderLayerEvent(level, null, stack, null, cameraPos.x, cameraPos.y, cameraPos.z));
-
-		if (!OptifineHandler.usingShaders()) GL20.glUseProgram(0);
 	}
 
 	// Instancing

@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.model;
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
@@ -22,8 +23,9 @@ public class DirectVertexConsumer implements VertexConsumer {
 	private int uv2 = -1;
 
 	private long vertexBase;
+	private final long end;
 
-	public DirectVertexConsumer(ByteBuffer buffer, VertexFormat format) {
+	public DirectVertexConsumer(ByteBuffer buffer, VertexFormat format, int maxVertices) {
 		this.format = format;
 		startPos = buffer.position();
 		stride = format.getVertexSize();
@@ -48,9 +50,10 @@ public class DirectVertexConsumer implements VertexConsumer {
 		}
 
 		this.vertexBase = MemoryUtil.memAddress(buffer, startPos);
+		this.end = vertexBase + (long) maxVertices * stride;
 	}
 
-	private DirectVertexConsumer(DirectVertexConsumer parent) {
+	private DirectVertexConsumer(DirectVertexConsumer parent, int maxVertices) {
 		this.format = parent.format;
 		this.stride = parent.stride;
 		this.startPos = parent.startPos;
@@ -62,6 +65,7 @@ public class DirectVertexConsumer implements VertexConsumer {
 		this.uv2 = parent.uv2;
 
 		this.vertexBase = parent.vertexBase;
+		this.end = parent.vertexBase + (long) maxVertices * this.stride;
 	}
 
 	public boolean hasOverlay() {
@@ -76,7 +80,7 @@ public class DirectVertexConsumer implements VertexConsumer {
 	public DirectVertexConsumer split(int vertexCount) {
 		int bytes = vertexCount * stride;
 
-		DirectVertexConsumer head = new DirectVertexConsumer(this);
+		DirectVertexConsumer head = new DirectVertexConsumer(this, vertexCount);
 
 		this.vertexBase += bytes;
 
@@ -85,6 +89,7 @@ public class DirectVertexConsumer implements VertexConsumer {
 
 	@Override
 	public VertexConsumer vertex(double x, double y, double z) {
+		checkOverflow();
 		if (position < 0) return this;
 		long base = vertexBase + position;
 		MemoryUtil.memPutFloat(base, (float) x);
@@ -97,6 +102,8 @@ public class DirectVertexConsumer implements VertexConsumer {
 	public VertexConsumer color(int r, int g, int b, int a) {
 		if (color < 0) return this;
 		long base = vertexBase + color;
+		int color = ((r & 0xFF)) | ((g & 0xFF) << 8) | ((b & 0xFF) << 16) | ((a & 0xFF) << 24);
+		//MemoryUtil.memPutInt(base, color);
 		MemoryUtil.memPutByte(base, (byte) r);
 		MemoryUtil.memPutByte(base + 1, (byte) g);
 		MemoryUtil.memPutByte(base + 2, (byte) b);
@@ -154,5 +161,11 @@ public class DirectVertexConsumer implements VertexConsumer {
 	@Override
 	public void unsetDefaultColor() {
 
+	}
+
+	private void checkOverflow() {
+		if (vertexBase >= end) {
+			throw new BufferOverflowException();
+		}
 	}
 }

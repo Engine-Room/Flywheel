@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.util.transform;
 
-import com.jozufozu.flywheel.core.model.SuperByteBuffer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;

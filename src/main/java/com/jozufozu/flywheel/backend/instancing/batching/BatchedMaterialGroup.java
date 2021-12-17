@@ -35,18 +35,29 @@ public class BatchedMaterialGroup implements MaterialGroup {
 		VertexConsumer buffer = source.getBuffer(state);
 
 		if (buffer instanceof DirectBufferBuilder direct) {
-			DirectVertexConsumer consumer = direct.intoDirectConsumer(calculateNeededVertices());
-			FormatContext context = new FormatContext(consumer.hasOverlay());
-
-			for (BatchedMaterial<?> material : materials.values()) {
-				for (CPUInstancer<?> instancer : material.models.values()) {
-					instancer.setup(context);
-
-					instancer.submitTasks(stack, pool, consumer);
-				}
-			}
+			renderParallel(stack, pool, direct);
 		} else {
-			renderInto(stack, buffer, FormatContext.defaultContext());
+			renderSerial(stack, buffer, FormatContext.defaultContext());
+		}
+	}
+
+	private void renderParallel(PoseStack stack, Executor pool, DirectBufferBuilder direct) {
+		int vertexCount = calculateNeededVertices();
+		DirectVertexConsumer consumer = direct.intoDirectConsumer(vertexCount);
+		FormatContext context = new FormatContext(consumer.hasOverlay());
+
+		for (BatchedMaterial<?> material : materials.values()) {
+			for (CPUInstancer<?> instancer : material.models.values()) {
+				instancer.setup(context);
+
+				instancer.submitTasks(stack, pool, consumer);
+			}
+		}
+	}
+
+	private void renderSerial(PoseStack stack, VertexConsumer consumer, FormatContext context) {
+		for (BatchedMaterial<?> value : materials.values()) {
+			value.render(stack, consumer, context);
 		}
 	}
 
@@ -59,12 +70,6 @@ public class BatchedMaterialGroup implements MaterialGroup {
 		}
 
 		return total;
-	}
-
-	private void renderInto(PoseStack stack, VertexConsumer consumer, FormatContext context) {
-		for (BatchedMaterial<?> value : materials.values()) {
-			value.render(stack, consumer, context);
-		}
 	}
 
 	public void clear() {

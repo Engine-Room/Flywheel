@@ -1,11 +1,7 @@
 package com.jozufozu.flywheel.core.materials.model;
 
 import com.jozufozu.flywheel.core.materials.BasicData;
-import com.jozufozu.flywheel.core.model.SuperByteBuffer;
-import com.jozufozu.flywheel.util.transform.Rotate;
-import com.jozufozu.flywheel.util.transform.Scale;
 import com.jozufozu.flywheel.util.transform.Transform;
-import com.jozufozu.flywheel.util.transform.Translate;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;

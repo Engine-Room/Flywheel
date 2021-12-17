@@ -42,7 +42,7 @@ public abstract class BufferBuilderMixin implements DirectBufferBuilder {
 		int bytes = vertexCount * format.getVertexSize();
 		ensureCapacity(bytes);
 
-		DirectVertexConsumer consumer = new DirectVertexConsumer(this.buffer, this.format);
+		DirectVertexConsumer consumer = new DirectVertexConsumer(this.buffer, this.format, vertexCount);
 
 		this.vertices += vertexCount;
 		this.currentElement = format.getElements()
