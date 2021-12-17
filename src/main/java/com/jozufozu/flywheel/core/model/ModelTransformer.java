@@ -6,28 +6,19 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.*;
 
-import it.unimi.dsi.fastutil.longs.Long2IntMap;
-import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 
-public class SuperByteBuffer {
+public class ModelTransformer {
 
 	private final Model model;
-	private final ModelReader template;
+	private final ModelReader reader;
 
-	// Temporary
-	private static final Long2IntMap WORLD_LIGHT_CACHE = new Long2IntOpenHashMap();
-
-	public SuperByteBuffer(Model model) {
+	public ModelTransformer(Model model) {
 		this.model = model;
-		template = model.getReader();
+		reader = model.getReader();
 	}
 
 	public void renderInto(Params params, PoseStack input, VertexConsumer builder) {
@@ -36,7 +27,6 @@ public class SuperByteBuffer {
 
 		Vector4f pos = new Vector4f();
 		Vector3f normal = new Vector3f();
-		Vector4f lightPos = new Vector4f();
 
 		Matrix4f modelMat = input.last()
 				.pose()
@@ -52,23 +42,18 @@ public class SuperByteBuffer {
 			normalMat = params.normal.copy();
 		}
 
-		if (params.useWorldLight) {
-			WORLD_LIGHT_CACHE.clear();
-		}
-
-		float f = .5f;
-		int vertexCount = template.getVertexCount();
+		int vertexCount = reader.getVertexCount();
 		for (int i = 0; i < vertexCount; i++) {
-			float x = template.getX(i);
-			float y = template.getY(i);
-			float z = template.getZ(i);
+			float x = reader.getX(i);
+			float y = reader.getY(i);
+			float z = reader.getZ(i);
 			pos.set(x, y, z, 1F);
 			pos.transform(modelMat);
 			builder.vertex(pos.x(), pos.y(), pos.z());
 
-			float normalX = template.getNX(i);
-			float normalY = template.getNY(i);
-			float normalZ = template.getNZ(i);
+			float normalX = reader.getNX(i);
+			float normalY = reader.getNY(i);
+			float normalZ = reader.getNZ(i);
 
 			normal.set(normalX, normalY, normalZ);
 			normal.transform(normalMat);
@@ -80,13 +65,13 @@ public class SuperByteBuffer {
 			float instanceDiffuse = LightUtil.diffuseLight(nx, ny, nz);
 
 			switch (params.colorMode) {
-			case MODEL_ONLY -> builder.color(template.getR(i), template.getG(i), template.getB(i), template.getA(i));
+			case MODEL_ONLY -> builder.color(reader.getR(i), reader.getG(i), reader.getB(i), reader.getA(i));
 			case DIFFUSE_ONLY -> builder.color(instanceDiffuse, instanceDiffuse, instanceDiffuse, 1f);
 			case MODEL_DIFFUSE -> {
-				int r = Byte.toUnsignedInt(template.getR(i));
-				int g = Byte.toUnsignedInt(template.getG(i));
-				int b = Byte.toUnsignedInt(template.getB(i));
-				int a = Byte.toUnsignedInt(template.getA(i));
+				int r = Byte.toUnsignedInt(reader.getR(i));
+				int g = Byte.toUnsignedInt(reader.getG(i));
+				int b = Byte.toUnsignedInt(reader.getB(i));
+				int a = Byte.toUnsignedInt(reader.getA(i));
 
 				float diffuse = switch (params.diffuseMode) {
 				case NONE -> 1f;
@@ -118,8 +103,8 @@ public class SuperByteBuffer {
 			//builder.color(Math.max(0, (int) (nx * 255)), Math.max(0, (int) (ny * 255)), Math.max(0, (int) (nz * 255)), 0xFF);
 			//builder.color(Math.max(0, (int) (normalX * 255)), Math.max(0, (int) (normalY * 255)), Math.max(0, (int) (normalZ * 255)), 0xFF);
 
-			float u = template.getU(i);
-			float v = template.getV(i);
+			float u = reader.getU(i);
+			float v = reader.getV(i);
 			if (params.spriteShiftFunc != null) {
 				params.spriteShiftFunc.shift(builder, u, v);
 			} else {
@@ -130,29 +115,7 @@ public class SuperByteBuffer {
 				builder.overlayCoords(params.overlay);
 			}
 
-			int light;
-			if (params.useWorldLight) {
-				lightPos.set(((x - f) * 15 / 16f) + f, (y - f) * 15 / 16f + f, (z - f) * 15 / 16f + f, 1F);
-				lightPos.transform(params.model);
-				if (params.lightTransform != null) {
-					lightPos.transform(params.lightTransform);
-				}
-
-				light = getLight(Minecraft.getInstance().level, lightPos);
-				if (params.hasCustomLight) {
-					light = maxLight(light, params.packedLightCoords);
-				}
-			} else if (params.hasCustomLight) {
-				light = params.packedLightCoords;
-			} else {
-				light = template.getLight(i);
-			}
-
-			if (params.hybridLight) {
-				builder.uv2(maxLight(light, template.getLight(i)));
-			} else {
-				builder.uv2(light);
-			}
+			builder.uv2(params.hasCustomLight ? params.packedLightCoords : reader.getLight(i));
 
 			builder.normal(nx, ny, nz);
 
@@ -161,7 +124,7 @@ public class SuperByteBuffer {
 	}
 
 	public boolean isEmpty() {
-		return template.isEmpty();
+		return reader.isEmpty();
 	}
 
 	@Override
@@ -171,19 +134,6 @@ public class SuperByteBuffer {
 
 	public static int transformColor(int component, float scale) {
 		return Mth.clamp((int) (component * scale), 0, 255);
-	}
-
-	public static int maxLight(int packedLight1, int packedLight2) {
-		int blockLight1 = LightTexture.block(packedLight1);
-		int skyLight1 = LightTexture.sky(packedLight1);
-		int blockLight2 = LightTexture.block(packedLight2);
-		int skyLight2 = LightTexture.sky(packedLight2);
-		return LightTexture.pack(Math.max(blockLight1, blockLight2), Math.max(skyLight1, skyLight2));
-	}
-
-	private static int getLight(Level world, Vector4f lightPos) {
-		BlockPos pos = new BlockPos(lightPos.x(), lightPos.y(), lightPos.z());
-		return WORLD_LIGHT_CACHE.computeIfAbsent(pos.asLong(), $ -> LevelRenderer.getLightColor(world, pos));
 	}
 
 	@FunctionalInterface
@@ -207,12 +157,12 @@ public class SuperByteBuffer {
 
 	public static class Params implements Transform<Params> {
 		// Vertex Position
-		public final Matrix4f model = new Matrix4f();
-		public final Matrix3f normal = new Matrix3f();
+		public final Matrix4f model;
+		public final Matrix3f normal;
 
 		// Vertex Coloring
-		public ColorMode colorMode = ColorMode.DIFFUSE_ONLY;
-		public DiffuseMode diffuseMode = DiffuseMode.INSTANCE;
+		public ColorMode colorMode;
+		public DiffuseMode diffuseMode;
 		public int r;
 		public int g;
 		public int b;
@@ -223,17 +173,19 @@ public class SuperByteBuffer {
 
 		// Vertex Overlay Color
 		public boolean hasOverlay;
-		public int overlay = OverlayTexture.NO_OVERLAY;
+		public int overlay;
 
 		// Vertex Lighting
-		public boolean useWorldLight;
-		public Matrix4f lightTransform;
 		public boolean hasCustomLight;
 		public int packedLightCoords;
-		public boolean hybridLight;
 
 		// Vertex Normals
 		public boolean fullNormalTransform;
+
+		public Params() {
+			model = new Matrix4f();
+			normal = new Matrix3f();
+		}
 
 		public void load(Params from) {
 			model.load(from.model);
@@ -247,11 +199,8 @@ public class SuperByteBuffer {
 			spriteShiftFunc = from.spriteShiftFunc;
 			hasOverlay = from.hasOverlay;
 			overlay = from.overlay;
-			useWorldLight = from.useWorldLight;
-			lightTransform = from.lightTransform;
 			hasCustomLight = from.hasCustomLight;
 			packedLightCoords = from.packedLightCoords;
-			hybridLight = from.hybridLight;
 			fullNormalTransform = from.fullNormalTransform;
 		}
 
@@ -307,23 +256,11 @@ public class SuperByteBuffer {
 		/**
 		 * Transforms normals not only by the local matrix stack, but also by the passed matrix stack.
 		 */
-		public Params entityMode() {
+		public void entityMode() {
 			this.hasOverlay = true;
 			this.fullNormalTransform = true;
 			this.diffuseMode = DiffuseMode.NONE;
 			this.colorMode = ColorMode.RECOLOR;
-			return this;
-		}
-
-		public Params light() {
-			this.useWorldLight = true;
-			return this;
-		}
-
-		public Params light(Matrix4f lightTransform) {
-			this.useWorldLight = true;
-			this.lightTransform = lightTransform;
-			return this;
 		}
 
 		public Params light(int packedLightCoords) {
@@ -332,24 +269,10 @@ public class SuperByteBuffer {
 			return this;
 		}
 
-		public Params light(Matrix4f lightTransform, int packedLightCoords) {
-			light(lightTransform);
-			light(packedLightCoords);
-			return this;
-		}
-
-		/**
-		 * Uses max light from calculated light (world light or custom light) and vertex light for the final light value.
-		 * Ineffective if any other light method was not called.
-		 */
-		public Params hybridLight() {
-			hybridLight = true;
-			return this;
-		}
-
 		@Override
 		public Params multiply(Quaternion quaternion) {
 			model.multiply(quaternion);
+			normal.mul(quaternion);
 			return this;
 		}
 
@@ -404,11 +327,8 @@ public class SuperByteBuffer {
 			out.spriteShiftFunc = null;
 			out.hasOverlay = false;
 			out.overlay = OverlayTexture.NO_OVERLAY;
-			out.useWorldLight = false;
-			out.lightTransform = null;
 			out.hasCustomLight = false;
-			out.packedLightCoords = 0;
-			out.hybridLight = false;
+			out.packedLightCoords = LightTexture.FULL_BRIGHT;
 			out.fullNormalTransform = false;
 			return out;
 		}

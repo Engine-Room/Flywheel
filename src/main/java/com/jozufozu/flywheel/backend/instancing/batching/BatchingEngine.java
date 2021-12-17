@@ -65,6 +65,8 @@ public class BatchingEngine implements Engine {
 		}
 
 		stack.popPose();
+
+		event.buffers.bufferSource().endBatch();
 	}
 
 	@Override

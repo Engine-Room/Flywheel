@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
 import com.jozufozu.flywheel.core.model.Model;
-import com.jozufozu.flywheel.core.model.SuperByteBuffer;
+import com.jozufozu.flywheel.core.model.ModelTransformer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -16,14 +16,14 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 	private final BatchingTransformer<D> transform;
 
-	private final SuperByteBuffer sbb;
-	private final SuperByteBuffer.Params defaultParams;
+	private final ModelTransformer sbb;
+	private final ModelTransformer.Params defaultParams;
 
 	public CPUInstancer(StructType<D> type, Model modelData) {
 		super(type, modelData);
 
-		sbb = new SuperByteBuffer(modelData);
-		defaultParams = SuperByteBuffer.Params.defaultParams();
+		sbb = new ModelTransformer(modelData);
+		defaultParams = ModelTransformer.Params.defaultParams();
 		transform = type.asBatched()
 				.getTransformer();
 
@@ -37,7 +37,7 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 		while (instances > 0) {
 			int end = instances;
-			instances -= 100;
+			instances -= 512;
 			int start = Math.max(instances, 0);
 
 			int verts = getModelVertexCount() * (end - start);
@@ -54,7 +54,7 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 	}
 
 	private void drawRange(PoseStack stack, VertexConsumer buffer, int from, int to) {
-		SuperByteBuffer.Params params = defaultParams.copy();
+		ModelTransformer.Params params = defaultParams.copy();
 
 		for (D d : data.subList(from, to)) {
 			transform.transform(d, params);
@@ -66,7 +66,7 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 	}
 
 	void drawAll(PoseStack stack, VertexConsumer buffer) {
-		SuperByteBuffer.Params params = defaultParams.copy();
+		ModelTransformer.Params params = defaultParams.copy();
 		for (D d : data) {
 			transform.transform(d, params);
 
@@ -77,18 +77,15 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 	}
 
 	void setup(FormatContext context) {
-		renderSetup();
-
-		if (context.usesOverlay()) {
-			defaultParams.entityMode();
-		}
-	}
-
-	protected void renderSetup() {
 		if (anyToRemove) {
 			removeDeletedInstances();
+			anyToRemove = false;
 		}
 
-		anyToRemove = false;
+
+		if (context.usesOverlay()) {
+			defaultParams.overlay();
+		}
 	}
+
 }
