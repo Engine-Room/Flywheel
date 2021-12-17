@@ -29,12 +29,12 @@ public class InstanceWorld {
 	protected final InstanceManager<Entity> entityInstanceManager;
 	protected final InstanceManager<BlockEntity> tileEntityInstanceManager;
 
-	protected final BatchExecutor executor;
+	protected final BatchExecutor taskEngine;
 
 	public InstanceWorld() {
 
-		this.executor = new BatchExecutor();
-		this.executor.startWorkers();
+		this.taskEngine = new BatchExecutor();
+		this.taskEngine.startWorkers();
 
 		FlwEngine engine = Backend.getInstance()
 				.getEngine();
@@ -42,19 +42,19 @@ public class InstanceWorld {
 		switch (engine) {
 		case GL33 -> {
 			InstancingEngine<WorldProgram> manager = InstancingEngine.builder(Contexts.WORLD)
-					.build(this.executor);
+					.build(this.taskEngine);
 
-			entityInstanceManager = new EntityInstanceManager(manager);
-			tileEntityInstanceManager = new TileInstanceManager(manager);
+			entityInstanceManager = new EntityInstanceManager(this.taskEngine, manager);
+			tileEntityInstanceManager = new TileInstanceManager(this.taskEngine, manager);
 
 			manager.addListener(entityInstanceManager);
 			manager.addListener(tileEntityInstanceManager);
 			this.engine = manager;
 		}
 		case BATCHING -> {
-			this.engine = new BatchingEngine(this.executor);
-			entityInstanceManager = new EntityInstanceManager(this.engine);
-			tileEntityInstanceManager = new TileInstanceManager(this.engine);
+			this.engine = new BatchingEngine(this.taskEngine);
+			entityInstanceManager = new EntityInstanceManager(this.taskEngine, this.engine);
+			tileEntityInstanceManager = new TileInstanceManager(this.taskEngine, this.engine);
 		}
 		default -> throw new IllegalArgumentException("Unknown engine type");
 		}
@@ -72,7 +72,7 @@ public class InstanceWorld {
 	 * Free all acquired resources and invalidate this instance world.
 	 */
 	public void delete() {
-		this.executor.stopWorkers();
+		this.taskEngine.stopWorkers();
 		engine.delete();
 		entityInstanceManager.detachLightListeners();
 		tileEntityInstanceManager.detachLightListeners();
@@ -88,6 +88,8 @@ public class InstanceWorld {
 	 */
 	public void beginFrame(BeginFrameEvent event) {
 		engine.beginFrame(event.getInfo());
+
+		taskEngine.syncPoint();
 
 		tileEntityInstanceManager.beginFrame(event.getInfo());
 		entityInstanceManager.beginFrame(event.getInfo());
@@ -113,6 +115,7 @@ public class InstanceWorld {
 	 * Draw the given layer.
 	 */
 	public void renderLayer(RenderLayerEvent event) {
+		taskEngine.syncPoint();
 		engine.render(event, event.buffers.bufferSource());
 	}
 

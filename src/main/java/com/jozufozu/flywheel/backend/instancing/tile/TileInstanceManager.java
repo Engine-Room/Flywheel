@@ -3,8 +3,10 @@ package com.jozufozu.flywheel.backend.instancing.tile;
 import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
+import com.jozufozu.flywheel.backend.instancing.BatchExecutor;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
+import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
@@ -13,8 +15,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class TileInstanceManager extends InstanceManager<BlockEntity> {
 
-	public TileInstanceManager(MaterialManager materialManager) {
-		super(materialManager);
+	public TileInstanceManager(TaskEngine executor, MaterialManager materialManager) {
+		super(executor, materialManager);
 	}
 
 	@Override

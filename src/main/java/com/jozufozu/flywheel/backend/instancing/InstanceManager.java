@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.backend.instancing;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,11 +32,13 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	protected final Map<T, AbstractInstance> instances;
 	protected final Object2ObjectOpenHashMap<T, ITickableInstance> tickableInstances;
 	protected final Object2ObjectOpenHashMap<T, IDynamicInstance> dynamicInstances;
+	private final TaskEngine taskEngine;
 
 	protected int frame;
 	protected int tick;
 
-	public InstanceManager(MaterialManager materialManager) {
+	public InstanceManager(TaskEngine taskEngine, MaterialManager materialManager) {
+		this.taskEngine = taskEngine;
 		this.materialManager = materialManager;
 		this.queuedUpdates = new HashSet<>(64);
 		this.queuedAdditions = new HashSet<>(64);
@@ -84,23 +87,37 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		int cY = (int) cameraY;
 		int cZ = (int) cameraZ;
 
-		if (tickableInstances.size() > 0) {
-			tickableInstances.object2ObjectEntrySet().parallelStream().forEach(e -> {
-				ITickableInstance instance = e.getValue();
-				if (!instance.decreaseTickRateWithDistance()) {
-					instance.tick();
-					return;
+		ArrayList<ITickableInstance> instances = new ArrayList<>(tickableInstances.values());
+		int incr = 500;
+		int size = instances.size();
+		int start = 0;
+		while (start < size) {
+			int end = Math.min(start + incr, size);
+
+			List<ITickableInstance> sub = instances.subList(start, end);
+			taskEngine.submit(() -> {
+				for (ITickableInstance instance : sub) {
+					tickInstance(cX, cY, cZ, instance);
 				}
-
-				BlockPos pos = instance.getWorldPosition();
-
-				int dX = pos.getX() - cX;
-				int dY = pos.getY() - cY;
-				int dZ = pos.getZ() - cZ;
-
-				if ((tick % getUpdateDivisor(dX, dY, dZ)) == 0) instance.tick();
 			});
+
+			start += incr;
 		}
+	}
+
+	private void tickInstance(int cX, int cY, int cZ, ITickableInstance instance) {
+		if (!instance.decreaseTickRateWithDistance()) {
+			instance.tick();
+			return;
+		}
+
+		BlockPos pos = instance.getWorldPosition();
+
+		int dX = pos.getX() - cX;
+		int dY = pos.getY() - cY;
+		int dZ = pos.getZ() - cZ;
+
+		if ((tick % getUpdateDivisor(dX, dY, dZ)) == 0) instance.tick();
 	}
 
 	public void beginFrame(Camera info) {
@@ -117,14 +134,22 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		int cY = (int) info.getPosition().y;
 		int cZ = (int) info.getPosition().z;
 
-		if (dynamicInstances.size() > 0) {
-			dynamicInstances.object2ObjectEntrySet()
-					.parallelStream()
-					.forEach(e -> {
-						IDynamicInstance dyn = e.getValue();
-						if (!dyn.decreaseFramerateWithDistance() || shouldFrameUpdate(dyn.getWorldPosition(), lookX, lookY, lookZ, cX, cY, cZ))
-							dyn.beginFrame();
-					});
+		ArrayList<IDynamicInstance> instances = new ArrayList<>(dynamicInstances.values());
+		int incr = 500;
+		int size = instances.size();
+		int start = 0;
+		while (start < size) {
+			int end = Math.min(start + incr, size);
+
+			List<IDynamicInstance> sub = instances.subList(start, end);
+			taskEngine.submit(() -> {
+				for (IDynamicInstance dyn : sub) {
+					if (!dyn.decreaseFramerateWithDistance() || shouldFrameUpdate(dyn.getWorldPosition(), lookX, lookY, lookZ, cX, cY, cZ))
+						dyn.beginFrame();
+				}
+			});
+
+			start += incr;
 		}
 	}
 
