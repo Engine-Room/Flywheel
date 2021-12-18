@@ -150,31 +150,20 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 		if (size <= 0) return;
 
-		final int stride = instanceFormat.getStride();
-		final BitSet dirtySet = getDirtyBitSet();
+		try (MappedBuffer mapped = instanceVBO.getBuffer(0, glBufferSize)) {
 
-		if (dirtySet.isEmpty()) return;
+			final StructWriter<D> writer = type.asInstanced()
+					.getWriter(mapped);
 
-		final int firstDirty = dirtySet.nextSetBit(0);
-		final int lastDirty = dirtySet.previousSetBit(size);
-
-		final int offset = firstDirty * stride;
-		final int length = (1 + lastDirty - firstDirty) * stride;
-
-		if (length > 0) {
-			try (MappedBuffer mapped = instanceVBO.getBuffer(offset, length)) {
-
-				StructWriter<D> writer = type.asInstanced()
-						.getWriter(mapped);
-
-				dirtySet.stream()
-						.forEach(i -> {
-							writer.seek(i);
-							writer.write(data.get(i));
-						});
-			} catch (Exception e) {
-				Flywheel.log.error("Error updating GPUInstancer:", e);
+			for (int i = 0; i < size; i++) {
+				final D element = data.get(i);
+				if (element.checkDirtyAndClear()) {
+					writer.seek(i);
+					writer.write(element);
+				}
 			}
+		} catch (Exception e) {
+			Flywheel.log.error("Error updating GPUInstancer:", e);
 		}
 	}
 
