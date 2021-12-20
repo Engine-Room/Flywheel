@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.api.instance;
 
-import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
 
 /**

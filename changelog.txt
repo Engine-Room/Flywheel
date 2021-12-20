@@ -1,3 +1,8 @@
+0.4.1a:
+Fixes
+ - Partially fix crash on intel and mesa drivers (needs Create to update)
+ - Fix garbage rendering on AMD GPUs
+
 0.4.1:
 Update to 1.18.1
 Changes
@@ -6,6 +11,7 @@ Fixes
  - Fix crash affecting systems that don't support persistent mapping
  - Fix crash when Create contraptions extend below Y=0
  - Fix Create contraptions having misaligned light when launched after world load
+ - Fix minecarts disappearing on chunk reload
 
 0.4.0:
 Update to 1.18

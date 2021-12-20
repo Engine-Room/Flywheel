@@ -9,6 +9,8 @@ import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
+import net.minecraft.Util;
+
 /**
  * An instance of this class stores information about what OpenGL features are available.
  * <br>
@@ -19,13 +21,27 @@ public class GlCompat {
 
 	public final InstancedArrays instancedArrays;
 	public final BufferStorage bufferStorage;
+	public final boolean amd;
 
 	public GlCompat(GLCapabilities caps) {
 		instancedArrays = getLatest(InstancedArrays.class, caps);
 		bufferStorage = getLatest(BufferStorage.class, caps);
+
+
+		if (Util.getPlatform() == Util.OS.WINDOWS) {
+			String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
+			// vendor string I got was "ATI Technologies Inc."
+			amd = vendor.contains("ATI") || vendor.contains("AMD");
+		} else {
+			amd = false;
+		}
 	}
 
-	public boolean instancedArraysSupported() {
+	public boolean onAMDWindows() {
+		return amd;
+	}
+
+    public boolean instancedArraysSupported() {
 		return instancedArrays != InstancedArrays.UNSUPPORTED;
 	}
 

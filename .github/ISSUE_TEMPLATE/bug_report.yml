@@ -47,11 +47,19 @@ body:
             placeholder: Windows 11
         validations:
             required: true
+    -   type: input
+        attributes:
+            label: What is your GPU?
+            description: Enter the vendor and model of the GPU you were using when the bug occured
+            placeholder: Nvidia GeForce RTX 3060
+        validations:
+            required: true
     -   type: dropdown
         attributes:
             label: Mod Version
             description: The version of the mod you were using when the bug occured
             options:
+                - "0.4.2-rc"
                 - "0.4.1"
                 - "0.3.0"
         validations:

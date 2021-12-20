@@ -13,6 +13,7 @@ import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.event.EntityWorldHandler;
 import com.jozufozu.flywheel.event.ForgeEvents;
 import com.jozufozu.flywheel.fabric.event.FlywheelEvents;
+import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
 
 import net.fabricmc.api.ClientModInitializer;
@@ -51,5 +52,12 @@ public class FlywheelClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(ForgeEvents::tickLight);
 
 		FlwConfig.init();
+
+		// https://github.com/Jozufozu/Flywheel/issues/69
+		// Weird issue with accessor loading.
+		// Only thing I've seen that's close to a fix is to force the class to load before trying to use it.
+		// From the SpongePowered discord:
+		// https://discord.com/channels/142425412096491520/626802111455297538/675007581168599041
+		Flywheel.log.info("Successfully loaded {}", PausedPartialTickAccessor.class.getName());
 	}
 }

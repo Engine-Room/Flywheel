@@ -2,16 +2,17 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import com.jozufozu.flywheel.api.instance.IDynamicInstance;
 import com.jozufozu.flywheel.api.instance.ITickableInstance;
-import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
-import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.batching.BatchingEngine;
+import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
+import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -99,5 +100,15 @@ public class InstanceWorld {
 	 */
 	public void renderLayer(RenderLayerEvent event) {
 		engine.render(event, event.buffers.bufferSource());
+	}
+
+	/**
+	 * Instantiate all the necessary instances to render the given world.
+	 */
+	public void loadEntities(ClientLevel world) {
+		// Block entities are loaded while chunks are baked.
+		// Entities are loaded with the world, so when chunks are reloaded they need to be re-added.
+		world.entitiesForRendering()
+				.forEach(entityInstanceManager::add);
 	}
 }

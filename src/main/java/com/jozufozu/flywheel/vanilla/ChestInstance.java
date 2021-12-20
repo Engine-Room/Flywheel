@@ -4,9 +4,9 @@ import java.util.Calendar;
 
 import javax.annotation.Nonnull;
 
+import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.api.instance.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
-import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
@@ -125,80 +125,76 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 
 	private ModelPart getBaseModel() {
 
-		switch (chestType) {
-		case LEFT:
-			return ModelPart.builder("chest_base_left", 64, 64)
-				.sprite(renderMaterial.sprite())
-				.cuboid()
-				.textureOffset(0, 19)
-				.start(0, 0, 1)
-				.size(15, 10, 14)
-				.endCuboid()
-				.build();
-		case RIGHT:
-			return ModelPart.builder("chest_base_right", 64, 64)
-				.sprite(renderMaterial.sprite())
-				.cuboid()
-				.textureOffset(0, 19)
-				.start(1, 0, 1)
-				.size(15, 10, 14)
-				.endCuboid()
-				.build();
-		}
+		return switch (chestType) {
+			case LEFT -> ModelPart.builder("chest_base_left", 64, 64)
+					.sprite(renderMaterial.sprite())
+					.cuboid()
+					.textureOffset(0, 19)
+					.start(0, 0, 1)
+					.size(15, 10, 14)
+					.endCuboid()
+					.build();
+			case RIGHT -> ModelPart.builder("chest_base_right", 64, 64)
+					.sprite(renderMaterial.sprite())
+					.cuboid()
+					.textureOffset(0, 19)
+					.start(1, 0, 1)
+					.size(15, 10, 14)
+					.endCuboid()
+					.build();
+			default -> ModelPart.builder("chest_base", 64, 64)
+					.sprite(renderMaterial.sprite())
+					.cuboid()
+					.textureOffset(0, 19)
+					.start(1, 0, 1)
+					.end(15, 10, 15)
+					.endCuboid()
+					.build();
+		};
 
-		return ModelPart.builder("chest_base", 64, 64)
-				.sprite(renderMaterial.sprite())
-				.cuboid()
-				.textureOffset(0, 19)
-				.start(1, 0, 1)
-				.end(15, 10, 15)
-				.endCuboid()
-				.build();
 	}
 
 	private ModelPart getLidModel() {
 
-		switch (chestType) {
-		case LEFT:
-		return ModelPart.builder("chest_lid_left", 64, 64)
-				.sprite(renderMaterial.sprite())
-				.cuboid()
-				.textureOffset(0, 0)
-				.start(0, 0, 1)
-				.size(15, 5, 14)
-				.endCuboid()
-				.cuboid()
-				.start(0, -2, 15)
-				.size(1, 4, 1)
-				.endCuboid()
-				.build();
-		case RIGHT:
-		return ModelPart.builder("chest_lid_right", 64, 64)
-				.sprite(renderMaterial.sprite())
-				.cuboid()
-				.textureOffset(0, 0)
-				.start(1, 0, 1)
-				.size(15, 5, 14)
-				.endCuboid()
-				.cuboid()
-				.start(15, -2, 15)
-				.size(1, 4, 1)
-				.endCuboid()
-				.build();
-		}
+		return switch (chestType) {
+			case LEFT -> ModelPart.builder("chest_lid_left", 64, 64)
+					.sprite(renderMaterial.sprite())
+					.cuboid()
+					.textureOffset(0, 0)
+					.start(0, 0, 1)
+					.size(15, 5, 14)
+					.endCuboid()
+					.cuboid()
+					.start(0, -2, 15)
+					.size(1, 4, 1)
+					.endCuboid()
+					.build();
+			case RIGHT -> ModelPart.builder("chest_lid_right", 64, 64)
+					.sprite(renderMaterial.sprite())
+					.cuboid()
+					.textureOffset(0, 0)
+					.start(1, 0, 1)
+					.size(15, 5, 14)
+					.endCuboid()
+					.cuboid()
+					.start(15, -2, 15)
+					.size(1, 4, 1)
+					.endCuboid()
+					.build();
+			default -> ModelPart.builder("chest_lid", 64, 64)
+					.sprite(renderMaterial.sprite())
+					.cuboid()
+					.textureOffset(0, 0)
+					.start(1, 0, 1)
+					.size(14, 5, 14)
+					.endCuboid()
+					.cuboid()
+					.start(7, -2, 15)
+					.size(2, 4, 1)
+					.endCuboid()
+					.build();
+		};
 
-		return ModelPart.builder("chest_lid", 64, 64)
-				.sprite(renderMaterial.sprite())
-				.cuboid()
-				.textureOffset(0, 0)
-				.start(1, 0, 1)
-				.size(14, 5, 14)
-				.endCuboid()
-				.cuboid()
-				.start(7, -2, 15)
-				.size(2, 4, 1)
-				.endCuboid()
-				.build();
 	}
 
 	public static boolean isChristmas() {

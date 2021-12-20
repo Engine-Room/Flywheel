@@ -8,10 +8,10 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.api.instance.IDynamicInstance;
 import com.jozufozu.flywheel.api.instance.ITickableInstance;
-import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.light.LightUpdater;
 import com.mojang.math.Vector3f;

@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.core.crumbling;
 
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancedMaterialGroup;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
-import com.jozufozu.flywheel.backend.instancing.instancing.InstancedMaterialRenderer;
 import com.jozufozu.flywheel.core.atlas.AtlasInfo;
 import com.jozufozu.flywheel.core.atlas.SheetData;
 import com.jozufozu.flywheel.util.RenderTextures;
@@ -39,9 +38,7 @@ public class CrumblingGroup<P extends CrumblingProgram> extends InstancedMateria
 		RenderSystem.setShaderTexture(4, breakingTex);
 
 		TextureBinder.bindActiveTextures();
-		for (InstancedMaterialRenderer<P> renderer : renderers) {
-			renderer.render(viewProjection, camX, camY, camZ);
-		}
+		renderAll(viewProjection, camX, camY, camZ);
 
 		CrumblingRenderer._currentLayer.clearRenderState();
 	}

@@ -56,6 +56,7 @@ public class WorldShader {
 		finalSource.append("#version ")
 				.append(template.getVersion())
 				.append('\n')
+				.append("#extension GL_ARB_conservative_depth : enable\n")
 				.append("#define ")
 				.append(type.define) // special case shader type declaration
 				.append('\n')

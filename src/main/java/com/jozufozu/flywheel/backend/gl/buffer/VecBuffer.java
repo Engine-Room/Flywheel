@@ -5,8 +5,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import javax.annotation.Nullable;
-
 public class VecBuffer {
 
 	protected ByteBuffer internal;

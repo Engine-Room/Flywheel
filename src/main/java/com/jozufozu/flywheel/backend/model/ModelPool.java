@@ -120,9 +120,12 @@ public class ModelPool implements ModelAllocator {
 
 			VecBufferWriter consumer = new VecBufferWriter(buffer);
 
+			int vertices = 0;
 			for (PooledModel model : models) {
+				model.first = vertices;
 				model.model.buffer(consumer);
 				if (model.callback != null) model.callback.onAlloc(model);
+				vertices += model.getVertexCount();
 			}
 
 		} catch (Exception e) {

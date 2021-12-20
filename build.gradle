@@ -136,7 +136,6 @@ curseforge {
         changelog = file('changelog.txt')
         releaseType = project.curse_type
         mainArtifact jar
-        addGameVersion '1.18'
         addGameVersion '1.18.1'
     }
 }

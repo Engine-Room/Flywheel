@@ -3,6 +3,9 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 import java.util.BitSet;
 
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
@@ -11,11 +14,8 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
-import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.backend.model.IBufferedModel;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
-import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.util.AttribUtil;
 
@@ -77,7 +77,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		model = modelAllocator.alloc(modelData, arenaModel -> {
 			vao.bind();
 
-			model.setupState();
+			arenaModel.setupState();
 		});
 
 		vao.bind();

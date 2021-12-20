@@ -5,12 +5,15 @@ import java.util.function.Supplier;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.Material;
-import com.jozufozu.flywheel.backend.model.ModelPool;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.RenderWork;
+import com.jozufozu.flywheel.backend.model.ImmediateAllocator;
+import com.jozufozu.flywheel.backend.model.ModelAllocator;
+import com.jozufozu.flywheel.backend.model.ModelPool;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.model.Model;
 
@@ -20,14 +23,18 @@ import com.jozufozu.flywheel.core.model.Model;
  */
 public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 
-	final ModelPool modelPool;
+	final ModelAllocator allocator;
 	protected final Cache<Object, GPUInstancer<D>> models;
 	protected final StructType<D> type;
 
 	public InstancedMaterial(StructType<D> spec) {
 		this.type = spec;
 
-		modelPool = new ModelPool(Formats.UNLIT_MODEL, 64);
+		if (Backend.getInstance().compat.onAMDWindows()) {
+			allocator = ImmediateAllocator.INSTANCE;
+		} else {
+			allocator = new ModelPool(Formats.UNLIT_MODEL, 64);
+		}
 		this.models = CacheBuilder.newBuilder()
 				.removalListener(notification -> {
 					GPUInstancer<?> instancer = (GPUInstancer<?>) notification.getValue();
@@ -46,7 +53,7 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 	@Override
 	public Instancer<D> model(Object key, Supplier<Model> modelSupplier) {
 		try {
-			return models.get(key, () -> new GPUInstancer<>(type, modelSupplier.get(), modelPool));
+			return models.get(key, () -> new GPUInstancer<>(type, modelSupplier.get(), allocator));
 		} catch (ExecutionException e) {
 			throw new RuntimeException("error creating instancer", e);
 		}
@@ -61,7 +68,7 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 
 	public void delete() {
 		models.invalidateAll();
-		modelPool.delete();
+		if (allocator instanceof ModelPool pool) pool.delete();
 	}
 
 	/**

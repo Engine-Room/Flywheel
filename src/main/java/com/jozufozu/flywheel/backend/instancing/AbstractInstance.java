@@ -3,14 +3,14 @@ package com.jozufozu.flywheel.backend.instancing;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.api.instance.IDynamicInstance;
 import com.jozufozu.flywheel.api.instance.IInstance;
 import com.jozufozu.flywheel.api.instance.ITickableInstance;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
-import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.core.materials.FlatLit;
-import com.jozufozu.flywheel.light.LightListener;
 import com.jozufozu.flywheel.light.ImmutableBox;
+import com.jozufozu.flywheel.light.LightListener;
 import com.jozufozu.flywheel.light.LightProvider;
 import com.jozufozu.flywheel.light.ListenerStatus;
 

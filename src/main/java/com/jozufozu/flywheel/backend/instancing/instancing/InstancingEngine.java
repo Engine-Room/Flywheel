@@ -8,11 +8,11 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.jozufozu.flywheel.api.MaterialGroup;
+import com.jozufozu.flywheel.backend.RenderLayer;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.instancing.Engine;
-import com.jozufozu.flywheel.api.MaterialGroup;
-import com.jozufozu.flywheel.backend.RenderLayer;
 import com.jozufozu.flywheel.core.WorldContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
