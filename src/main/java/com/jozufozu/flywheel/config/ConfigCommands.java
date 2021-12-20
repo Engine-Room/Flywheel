@@ -18,7 +18,7 @@ public final class ConfigCommands {
 	public static void init(FlwConfig config) {
 		ConfigCommandBuilder commandBuilder = new ConfigCommandBuilder("flywheel");
 
-		commandBuilder.addOption(config.enabled, (builder, option) -> booleanOptionCommand(builder, config, option,
+		commandBuilder.addOption(config.enabled, "backend", (builder, option) -> booleanOptionCommand(builder, config, option,
 				(source, value) -> {
 					Component text = new TextComponent("Flywheel renderer is currently: ").append(boolToText(value));
 					source.sendFeedback(text);
@@ -83,7 +83,11 @@ public final class ConfigCommands {
 		}
 
 		public <T extends Option<?>> void addOption(T option, BiConsumer<LiteralArgumentBuilder<FabricClientCommandSource>, T> consumer) {
-			LiteralArgumentBuilder<FabricClientCommandSource> builder = ClientCommandManager.literal(option.getKey());
+			addOption(option, option.getKey(), consumer);
+		}
+
+		public <T extends Option<?>> void addOption(T option, String subcommand, BiConsumer<LiteralArgumentBuilder<FabricClientCommandSource>, T> consumer) {
+			LiteralArgumentBuilder<FabricClientCommandSource> builder = ClientCommandManager.literal(subcommand);
 			consumer.accept(builder, option);
 			command.then(builder);
 		}
