@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
+import com.jozufozu.flywheel.api.struct.Batched;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.DirectBufferBuilder;
@@ -19,7 +20,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 
 	protected final RenderType state;
 
-	private final Map<StructType<? extends InstanceData>, BatchedMaterial<?>> materials = new HashMap<>();
+	private final Map<Batched<? extends InstanceData>, BatchedMaterial<?>> materials = new HashMap<>();
 
 	public BatchedMaterialGroup(RenderType state) {
 		this.state = state;
@@ -27,8 +28,12 @@ public class BatchedMaterialGroup implements MaterialGroup {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <D extends InstanceData> BatchedMaterial<D> material(StructType<D> spec) {
-		return (BatchedMaterial<D>) materials.computeIfAbsent(spec, BatchedMaterial::new);
+	public <D extends InstanceData> BatchedMaterial<D> material(StructType<D> type) {
+		if (type instanceof Batched<D> batched) {
+			return (BatchedMaterial<D>) materials.computeIfAbsent(batched, BatchedMaterial::new);
+		} else {
+			throw new ClassCastException("Cannot use type '" + type + "' with CPU instancing.");
+		}
 	}
 
 	public void render(PoseStack stack, MultiBufferSource source, TaskEngine pool) {

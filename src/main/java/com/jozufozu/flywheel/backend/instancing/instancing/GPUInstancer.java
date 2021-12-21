@@ -4,6 +4,7 @@ import java.util.BitSet;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.Backend;
@@ -23,6 +24,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 	private final ModelAllocator modelAllocator;
 	private final VertexFormat instanceFormat;
+	private final Instanced<D> instancedType;
 
 	private IBufferedModel model;
 	private GlVertexArray vao;
@@ -34,10 +36,11 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 	protected boolean anyToUpdate;
 
-	public GPUInstancer(StructType<D> type, Model model, ModelAllocator modelAllocator) {
-		super(type, model);
+	public GPUInstancer(Instanced<D> type, Model model, ModelAllocator modelAllocator) {
+		super(type::create, model);
 		this.modelAllocator = modelAllocator;
 		this.instanceFormat = type.format();
+		instancedType = type;
 	}
 
 	@Override
@@ -152,8 +155,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 		try (MappedBuffer mapped = instanceVBO.getBuffer(0, glBufferSize)) {
 
-			final StructWriter<D> writer = type.asInstanced()
-					.getWriter(mapped);
+			final StructWriter<D> writer = instancedType.getWriter(mapped);
 
 			for (int i = 0; i < size; i++) {
 				final D element = data.get(i);
@@ -176,8 +178,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 			instanceVBO.alloc(glBufferSize);
 
 			try (MappedBuffer buffer = instanceVBO.getBuffer(0, glBufferSize)) {
-				StructWriter<D> writer = type.asInstanced()
-						.getWriter(buffer);
+				StructWriter<D> writer = instancedType.getWriter(buffer);
 				for (D datum : data) {
 					writer.write(datum);
 				}

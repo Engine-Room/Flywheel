@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
@@ -10,13 +11,13 @@ import com.jozufozu.flywheel.core.model.Model;
 
 public abstract class AbstractInstancer<D extends InstanceData> implements Instancer<D> {
 
-	protected final StructType<D> type;
+	protected final Supplier<D> type;
 	protected final Model modelData;
 	protected final ArrayList<D> data = new ArrayList<>();
 
 	protected boolean anyToRemove;
 
-	protected AbstractInstancer(StructType<D> type, Model modelData) {
+	protected AbstractInstancer(Supplier<D> type, Model modelData) {
 		this.type = type;
 		this.modelData = modelData;
 	}
@@ -26,7 +27,7 @@ public abstract class AbstractInstancer<D extends InstanceData> implements Insta
 	 */
 	@Override
 	public D createInstance() {
-		return _add(type.create());
+		return _add(type.get());
 	}
 
 	/**

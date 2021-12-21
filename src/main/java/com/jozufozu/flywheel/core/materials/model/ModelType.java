@@ -1,13 +1,13 @@
 package com.jozufozu.flywheel.core.materials.model;
 
 import com.jozufozu.flywheel.api.struct.Batched;
-import com.jozufozu.flywheel.api.struct.BatchingTransformer;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.Programs;
+import com.jozufozu.flywheel.core.model.ModelTransformer;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -34,11 +34,9 @@ public class ModelType implements Instanced<ModelData>, Batched<ModelData> {
 	}
 
 	@Override
-	public BatchingTransformer<ModelData> getTransformer() {
-		return (d, b) -> {
-			b.transform(d.model, d.normal)
-					.color(d.r, d.g, d.b, d.a)
-					.light(d.getPackedLight());
-		};
+	public void transform(ModelData d, ModelTransformer.Params b) {
+		b.transform(d.model, d.normal)
+				.color(d.r, d.g, d.b, d.a)
+				.light(d.getPackedLight());
 	}
 }

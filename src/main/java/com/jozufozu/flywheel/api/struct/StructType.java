@@ -18,7 +18,4 @@ public interface StructType<S> {
 	 */
 	VertexFormat format();
 
-	Instanced<S> asInstanced();
-
-	Batched<S> asBatched();
 }
