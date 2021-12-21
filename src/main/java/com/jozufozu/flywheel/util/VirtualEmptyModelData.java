@@ -12,6 +12,10 @@ public enum VirtualEmptyModelData implements IModelData {
 
 	INSTANCE;
 
+	public static boolean is(IModelData data) {
+		return data == INSTANCE;
+	}
+
 	@Override
 	public boolean hasProperty(ModelProperty<?> prop) {
 		return false;
