@@ -49,9 +49,7 @@ public class BatchingEngine implements Engine {
 
 		stack.translate(-event.camX, -event.camY, -event.camZ);
 
-		for (Map.Entry<RenderType, BatchedMaterialGroup> entry : layers.get(event.getLayer()).entrySet()) {
-			BatchedMaterialGroup group = entry.getValue();
-
+		for (BatchedMaterialGroup group : layers.get(event.getLayer()).values()) {
 			group.render(stack, buffers, taskEngine);
 		}
 

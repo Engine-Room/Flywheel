@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.backend.instancing.batching;
 
 import com.jozufozu.flywheel.api.InstanceData;
-import com.jozufozu.flywheel.api.struct.BatchingTransformer;
+import com.jozufozu.flywheel.api.struct.Batched;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
@@ -13,22 +13,17 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
-	private final BatchingTransformer<D> transform;
+	private final Batched<D> batchingType;
 
 	private final ModelTransformer sbb;
 	private final ModelTransformer.Params defaultParams;
 
-	public CPUInstancer(StructType<D> type, Model modelData) {
-		super(type, modelData);
+	public CPUInstancer(Batched<D> type, Model modelData) {
+		super(type::create, modelData);
+		batchingType = type;
 
 		sbb = new ModelTransformer(modelData);
 		defaultParams = ModelTransformer.Params.defaultParams();
-		transform = type.asBatched()
-				.getTransformer();
-
-		if (transform == null) {
-			throw new NullPointerException("Cannot batch " + type.toString());
-		}
 	}
 
 	void submitTasks(PoseStack stack, TaskEngine pool, DirectVertexConsumer consumer) {
@@ -56,7 +51,7 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		ModelTransformer.Params params = defaultParams.copy();
 
 		for (D d : data.subList(from, to)) {
-			transform.transform(d, params);
+			batchingType.transform(d, params);
 
 			sbb.renderInto(params, stack, buffer);
 
@@ -67,7 +62,7 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 	void drawAll(PoseStack stack, VertexConsumer buffer) {
 		ModelTransformer.Params params = defaultParams.copy();
 		for (D d : data) {
-			transform.transform(d, params);
+			batchingType.transform(d, params);
 
 			sbb.renderInto(params, stack, buffer);
 

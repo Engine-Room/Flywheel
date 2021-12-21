@@ -109,6 +109,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	}
 
 	private Stream<InstancedMaterialGroup<P>> getGroupsToRender(@Nullable RenderLayer layer) {
+		// layer is null when this is called from CrumblingRenderer
 		if (layer != null) {
 			return layers.get(layer)
 					.values()
