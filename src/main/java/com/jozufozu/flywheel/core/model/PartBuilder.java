@@ -5,7 +5,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.jozufozu.flywheel.core.vertex.PosTexNormalWriter;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -160,7 +160,7 @@ public class PartBuilder {
 			return visibleFaces.size() * 4;
 		}
 
-		public void buffer(VertexConsumer buffer) {
+		public void buffer(PosTexNormalWriter buffer) {
 
 			float sizeX = posX2 - posX1;
 			float sizeY = posY2 - posY1;
@@ -235,11 +235,11 @@ public class PartBuilder {
 			}
 		}
 
-		public void quad(VertexConsumer buffer, Vector3f[] vertices, float minU, float minV, float maxU, float maxV, Vector3f normal) {
-			buffer.vertex(vertices[0].x(), vertices[0].y(), vertices[0].z()).normal(normal.x(), normal.y(), normal.z()).uv(maxU, minV).endVertex();
-			buffer.vertex(vertices[1].x(), vertices[1].y(), vertices[1].z()).normal(normal.x(), normal.y(), normal.z()).uv(minU, minV).endVertex();
-			buffer.vertex(vertices[2].x(), vertices[2].y(), vertices[2].z()).normal(normal.x(), normal.y(), normal.z()).uv(minU, maxV).endVertex();
-			buffer.vertex(vertices[3].x(), vertices[3].y(), vertices[3].z()).normal(normal.x(), normal.y(), normal.z()).uv(maxU, maxV).endVertex();
+		public void quad(PosTexNormalWriter buffer, Vector3f[] vertices, float minU, float minV, float maxU, float maxV, Vector3f normal) {
+			buffer.putVertex(vertices[0].x(), vertices[0].y(), vertices[0].z(), normal.x(), normal.y(), normal.z(), maxU, minV);
+			buffer.putVertex(vertices[1].x(), vertices[1].y(), vertices[1].z(), normal.x(), normal.y(), normal.z(), minU, minV);
+			buffer.putVertex(vertices[2].x(), vertices[2].y(), vertices[2].z(), normal.x(), normal.y(), normal.z(), minU, maxV);
+			buffer.putVertex(vertices[3].x(), vertices[3].y(), vertices[3].z(), normal.x(), normal.y(), normal.z(), maxU, maxV);
 
 		}
 

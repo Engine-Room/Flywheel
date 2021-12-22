@@ -77,7 +77,7 @@ public class CrumblingRenderer {
 
 				instanceManager.beginFrame(info);
 
-				materials.render(event, null);
+				materials.render(event);
 
 				instanceManager.invalidate();
 			}

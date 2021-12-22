@@ -1,12 +1,8 @@
 package com.jozufozu.flywheel.core.model;
 
-import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
-import com.jozufozu.flywheel.core.Formats;
-import com.jozufozu.flywheel.util.BufferBuilderReader;
+import com.jozufozu.flywheel.util.UnsafeBlockFormatReader;
 import com.jozufozu.flywheel.util.ModelReader;
-import com.jozufozu.flywheel.util.RenderMath;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.BakedModel;
@@ -33,8 +29,13 @@ public class BlockModel implements Model {
 	}
 
 	public BlockModel(BakedModel model, BlockState referenceState, PoseStack ms) {
-		reader = new BufferBuilderReader(ModelUtil.getBufferBuilder(model, referenceState, ms));
+		reader = new UnsafeBlockFormatReader(ModelUtil.getBufferBuilder(model, referenceState, ms));
 		name = referenceState.toString();
+	}
+
+	@Override
+	public void configure(ModelTransformer.Context ctx) {
+		ctx.inputHasDiffuse = true;
 	}
 
 	@Override
@@ -43,28 +44,12 @@ public class BlockModel implements Model {
 	}
 
 	@Override
-	public VertexFormat format() {
-		return Formats.UNLIT_MODEL;
-	}
-
-	@Override
 	public int vertexCount() {
 		return reader.getVertexCount();
 	}
 
 	@Override
-	public void buffer(VertexConsumer buffer) {
-
-		int vertexCount = vertexCount();
-
-		for (int i = 0; i < vertexCount; i++) {
-			buffer.vertex(reader.getX(i), reader.getY(i), reader.getZ(i));
-
-			buffer.normal(reader.getNX(i), reader.getNY(i), reader.getNZ(i));
-
-			buffer.uv(reader.getU(i), reader.getV(i));
-
-			buffer.endVertex();
-		}
+	public ModelReader getReader() {
+		return reader;
 	}
 }

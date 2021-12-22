@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.model;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,12 +14,12 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.core.model.Model;
-import com.jozufozu.flywheel.core.model.VecBufferWriter;
+import com.jozufozu.flywheel.core.vertex.VertexType;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 public class ModelPool implements ModelAllocator {
 
-	protected final VertexFormat format;
+	protected final VertexType vertexType;
 
 	private final List<PooledModel> models = new ArrayList<>();
 
@@ -32,9 +33,9 @@ public class ModelPool implements ModelAllocator {
 	private boolean dirty;
 	private boolean anyToRemove;
 
-	public ModelPool(VertexFormat format, int initialSize) {
-		this.format = format;
-		bufferSize = format.getStride() * initialSize;
+	public ModelPool(VertexType vertexType, int initialSize) {
+		this.vertexType = vertexType;
+		bufferSize = vertexType.getStride() * initialSize;
 
 		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
 
@@ -104,7 +105,7 @@ public class ModelPool implements ModelAllocator {
 	 * @return true if the buffer was reallocated
 	 */
 	private boolean realloc() {
-		int neededSize = vertices * format.getStride();
+		int neededSize = vertices * vertexType.getStride();
 		if (neededSize > bufferSize) {
 			bufferSize = neededSize + 128;
 			vbo.alloc(bufferSize);
@@ -117,14 +118,14 @@ public class ModelPool implements ModelAllocator {
 
 	private void uploadAll() {
 		try (MappedBuffer buffer = vbo.getBuffer(0, bufferSize)) {
-
-			VecBufferWriter consumer = new VecBufferWriter(buffer);
+			ByteBuffer buf = buffer.unwrap();
 
 			int vertices = 0;
 			for (PooledModel model : models) {
 				model.first = vertices;
-				model.model.buffer(consumer);
-				if (model.callback != null) model.callback.onAlloc(model);
+
+				buffer(buf, model);
+
 				vertices += model.getVertexCount();
 			}
 
@@ -135,19 +136,21 @@ public class ModelPool implements ModelAllocator {
 
 	private void uploadPending() {
 		try (MappedBuffer buffer = vbo.getBuffer(0, bufferSize)) {
-			VecBufferWriter consumer = new VecBufferWriter(buffer);
-
-			int stride = format.getStride();
+			ByteBuffer buf = buffer.unwrap();
 			for (PooledModel model : pendingUpload) {
-				int pos = model.first * stride;
-				buffer.position(pos);
-				model.model.buffer(consumer);
-				if (model.callback != null) model.callback.onAlloc(model);
+				buffer(buf, model);
 			}
 			pendingUpload.clear();
 		} catch (Exception e) {
 			Flywheel.log.error("Error uploading pooled models:", e);
 		}
+	}
+
+	private void buffer(ByteBuffer buf, PooledModel model) {
+		int pos = model.first * vertexType.getStride();
+		buf.position(pos);
+		vertexType.copyInto(buf, model.model.getReader());
+		if (model.callback != null) model.callback.onAlloc(model);
 	}
 
 	private void setDirty() {

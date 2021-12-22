@@ -116,7 +116,7 @@ public class InstanceWorld {
 	 */
 	public void renderLayer(RenderLayerEvent event) {
 		taskEngine.syncPoint();
-		engine.render(event, event.buffers.bufferSource());
+		engine.render(event);
 	}
 
 	/**

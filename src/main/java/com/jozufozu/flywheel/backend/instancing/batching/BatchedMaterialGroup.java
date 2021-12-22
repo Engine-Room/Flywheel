@@ -42,39 +42,42 @@ public class BatchedMaterialGroup implements MaterialGroup {
 		if (buffer instanceof DirectBufferBuilder direct) {
 			renderParallel(stack, pool, direct);
 		} else {
-			renderSerial(stack, buffer, FormatContext.defaultContext());
+			renderSerial(stack, buffer);
 		}
 	}
 
 	private void renderParallel(PoseStack stack, TaskEngine pool, DirectBufferBuilder direct) {
-		int vertexCount = calculateNeededVertices();
+		int vertexCount = 0;
+		for (BatchedMaterial<?> material : materials.values()) {
+			for (CPUInstancer<?> instancer : material.models.values()) {
+				instancer.setup();
+				vertexCount += instancer.getTotalVertexCount();
+			}
+		}
+
 		DirectVertexConsumer consumer = direct.intoDirectConsumer(vertexCount);
-		FormatContext context = new FormatContext(consumer.hasOverlay());
+
+		// avoids rendering garbage, but doesn't fix the issue of some instances not being buffered
+		consumer.memSetZero();
 
 		for (BatchedMaterial<?> material : materials.values()) {
 			for (CPUInstancer<?> instancer : material.models.values()) {
-				instancer.setup(context);
-
+				if (consumer.hasOverlay()) {
+					instancer.sbb.context.fullNormalTransform = false;
+					instancer.sbb.context.outputColorDiffuse = false;
+				} else {
+					instancer.sbb.context.fullNormalTransform = false;
+					instancer.sbb.context.outputColorDiffuse = true;
+				}
 				instancer.submitTasks(stack, pool, consumer);
 			}
 		}
 	}
 
-	private void renderSerial(PoseStack stack, VertexConsumer consumer, FormatContext context) {
+	private void renderSerial(PoseStack stack, VertexConsumer consumer) {
 		for (BatchedMaterial<?> value : materials.values()) {
-			value.render(stack, consumer, context);
+			value.setupAndRenderInto(stack, consumer);
 		}
-	}
-
-	private int calculateNeededVertices() {
-		int total = 0;
-		for (BatchedMaterial<?> material : materials.values()) {
-			for (CPUInstancer<?> instancer : material.models.values()) {
-				total += instancer.getTotalVertexCount();
-			}
-		}
-
-		return total;
 	}
 
 	public void clear() {

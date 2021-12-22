@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.instancing.batching.WaitGroup;
 
 import net.minecraft.util.Mth;
@@ -104,7 +105,7 @@ public class BatchExecutor implements TaskEngine {
 		Runnable job;
 
 		// Finish everyone else's work...
-		while ((job = getNextTask(false)) != null) {
+		while ((job = this.jobQueue.pollLast()) != null) {
 			processTask(job);
 		}
 
@@ -116,10 +117,10 @@ public class BatchExecutor implements TaskEngine {
 	}
 
 	@Nullable
-	private Runnable getNextTask(boolean block) {
-		Runnable job = this.jobQueue.poll();
+	private Runnable getNextTask() {
+		Runnable job = this.jobQueue.pollFirst();
 
-		if (job == null && block) {
+		if (job == null) {
 			synchronized (BatchExecutor.this.jobNotifier) {
 				try {
 					BatchExecutor.this.jobNotifier.wait();
@@ -134,6 +135,8 @@ public class BatchExecutor implements TaskEngine {
 	private void processTask(Runnable job) {
 		try {
 			job.run();
+		} catch (Exception e) {
+			Flywheel.log.error(e);
 		} finally {
 			BatchExecutor.this.wg.done();
 		}
@@ -158,13 +161,13 @@ public class BatchExecutor implements TaskEngine {
 		public void run() {
 			// Run until the chunk builder shuts down
 			while (this.running.get()) {
-				Runnable job = BatchExecutor.this.getNextTask(true);
+				Runnable job = BatchExecutor.this.getNextTask();
 
 				if (job == null) {
 					continue;
 				}
 
-				processTask(job);
+				BatchExecutor.this.processTask(job);
 			}
 		}
 
