@@ -4,27 +4,23 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
+import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.util.RenderMath;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.datafixers.util.Pair;
 
 public class BlockVertexListUnsafe implements VertexList {
 
+	private final ByteBuffer buffer;
 	private final int vertexCount;
-	private final int stride;
 	private final long base;
 
-	public BlockVertexListUnsafe(BufferBuilder builder) {
-		VertexFormat vertexFormat = builder.getVertexFormat();
-		Pair<BufferBuilder.DrawState, ByteBuffer> data = builder.popNextBuffer();
-		this.base = MemoryUtil.memAddress(data.getSecond());
-		this.vertexCount = data.getFirst().vertexCount();
-		this.stride = vertexFormat.getVertexSize();
+	public BlockVertexListUnsafe(ByteBuffer buffer, int vertexCount) {
+		this.buffer = buffer;
+		this.base = MemoryUtil.memAddress(buffer);
+		this.vertexCount = vertexCount;
 	}
 
 	private long ptr(long index) {
-		return base + index * stride;
+		return base + index * 32;
 	}
 
 	@Override

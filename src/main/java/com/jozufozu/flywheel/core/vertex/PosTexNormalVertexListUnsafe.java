@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
+import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.util.RenderMath;
 
 public class PosTexNormalVertexListUnsafe implements VertexList {

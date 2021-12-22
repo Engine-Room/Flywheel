@@ -55,7 +55,7 @@ public class ModelUtil {
 
 		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 		blockRenderer.tesselateBlock(VirtualEmptyBlockGetter.INSTANCE, model, referenceState, BlockPos.ZERO, ms, builder,
-				true, new Random(), 42, OverlayTexture.NO_OVERLAY, VirtualEmptyModelData.INSTANCE);
+				false, new Random(), 42, OverlayTexture.NO_OVERLAY, VirtualEmptyModelData.INSTANCE);
 		builder.end();
 		return builder;
 	}

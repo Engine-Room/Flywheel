@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.backend.gl.attrib;
+package com.jozufozu.flywheel.core.layout;
 
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
 
-public class VertexAttribSpec implements IAttribSpec {
+public class PrimitiveItem implements LayoutItem {
 
 	private final GlNumericType type;
 	private final int count;
@@ -12,11 +12,11 @@ public class VertexAttribSpec implements IAttribSpec {
 	private final int attributeCount;
 	private final boolean normalized;
 
-	public VertexAttribSpec(GlNumericType type, int count) {
+	public PrimitiveItem(GlNumericType type, int count) {
 		this(type, count, false);
 	}
 
-	public VertexAttribSpec(GlNumericType type, int count, boolean normalized) {
+	public PrimitiveItem(GlNumericType type, int count, boolean normalized) {
 		this.type = type;
 		this.count = count;
 		this.size = type.getByteWidth() * count;

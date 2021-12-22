@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.api.struct;
 
-import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
+import com.jozufozu.flywheel.core.layout.BufferLayout;
 
 /**
  * A StructType contains metadata for a specific instance struct that Flywheel can interface with.
@@ -9,13 +9,13 @@ import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 public interface StructType<S> {
 
 	/**
-	 * @return A new, zeroed instance of the struct.
+	 * @return A new, zeroed instance of S.
 	 */
 	S create();
 
 	/**
-	 * @return The format descriptor of the struct type.
+	 * @return The layout of S when buffered.
 	 */
-	VertexFormat format();
+	BufferLayout getLayout();
 
 }

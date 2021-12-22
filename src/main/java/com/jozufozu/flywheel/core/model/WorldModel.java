@@ -3,9 +3,8 @@ package com.jozufozu.flywheel.core.model;
 import java.util.Collection;
 
 import com.jozufozu.flywheel.core.Formats;
-import com.jozufozu.flywheel.core.vertex.VertexList;
-import com.jozufozu.flywheel.core.vertex.VertexType;
-import com.jozufozu.flywheel.core.vertex.BlockVertexListUnsafe;
+import com.jozufozu.flywheel.api.vertex.VertexList;
+import com.jozufozu.flywheel.api.vertex.VertexType;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -17,7 +16,7 @@ public class WorldModel implements Model {
 	private final String name;
 
 	public WorldModel(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks, String name) {
-		reader = new BlockVertexListUnsafe(ModelUtil.getBufferBuilderFromTemplate(renderWorld, layer, blocks));
+		reader = Formats.BLOCK.createReader(ModelUtil.getBufferBuilderFromTemplate(renderWorld, layer, blocks));
 		this.name = name;
 	}
 

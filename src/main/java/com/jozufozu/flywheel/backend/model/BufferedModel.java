@@ -1,90 +1,41 @@
 package com.jozufozu.flywheel.backend.model;
 
-import static org.lwjgl.opengl.GL11.glDrawArrays;
+import com.jozufozu.flywheel.core.layout.BufferLayout;
+import com.jozufozu.flywheel.api.vertex.VertexType;
 
-import org.lwjgl.opengl.GL31;
+public interface BufferedModel {
 
-import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.backend.gl.GlPrimitive;
-import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
-import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
-import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
-import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
-import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
-import com.jozufozu.flywheel.core.model.Model;
-import com.jozufozu.flywheel.util.AttribUtil;
+	VertexType getType();
 
-public class BufferedModel implements IBufferedModel {
-
-	protected final Model model;
-	protected final GlPrimitive primitiveMode;
-	protected GlBuffer vbo;
-	protected boolean deleted;
-
-	public BufferedModel(GlPrimitive primitiveMode, Model model) {
-		this.model = model;
-		this.primitiveMode = primitiveMode;
-
-		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
-
-		vbo.bind();
-		// allocate the buffer on the gpu
-		vbo.alloc(model.size());
-
-		// mirror it in system memory so we can write to it, and upload our model.
-		try (MappedBuffer buffer = vbo.getBuffer(0, model.size())) {
-			model.getType().copyInto(buffer.unwrap(), model.getReader());
-		} catch (Exception e) {
-			Flywheel.log.error(String.format("Error uploading model '%s':", model.name()), e);
-		}
-
-		vbo.unbind();
-	}
-
-	public boolean isDeleted() {
-		return deleted;
-	}
-
-	public VertexFormat getFormat() {
-		return model.format();
-	}
-
-	public int getVertexCount() {
-		return model.vertexCount();
-	}
+	int getVertexCount();
 
 	/**
 	 * The VBO/VAO should be bound externally.
 	 */
-	public void setupState() {
-		vbo.bind();
-		AttribUtil.enableArrays(getAttributeCount());
-		getFormat().vertexAttribPointers(0);
-	}
+	void setupState();
 
-	public void clearState() {
-		AttribUtil.disableArrays(getAttributeCount());
-		vbo.unbind();
-	}
+	void clearState();
 
-	public void drawCall() {
-		glDrawArrays(primitiveMode.glEnum, 0, getVertexCount());
-	}
+	void drawCall();
 
 	/**
 	 * Draws many instances of this model, assuming the appropriate state is already bound.
 	 */
-	public void drawInstances(int instanceCount) {
-		if (!valid()) return;
+	void drawInstances(int instanceCount);
 
-		GL31.glDrawArraysInstanced(primitiveMode.glEnum, 0, getVertexCount(), instanceCount);
+	boolean isDeleted();
+
+	void delete();
+
+	default BufferLayout getFormat() {
+		return getType().getLayout();
 	}
 
-	public void delete() {
-		if (deleted) return;
+	default boolean valid() {
+		return getVertexCount() > 0 && !isDeleted();
+	}
 
-		deleted = true;
-		vbo.delete();
+	default int getAttributeCount() {
+		return getFormat().getAttributeCount();
 	}
 }
-

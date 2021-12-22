@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.core.model;
 
-import com.jozufozu.flywheel.core.vertex.VertexList;
+import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.util.RenderMath;
 import com.jozufozu.flywheel.util.transform.Transform;
 import com.mojang.blaze3d.vertex.PoseStack;

@@ -1,5 +1,5 @@
 @ParametersAreNonnullByDefault @MethodsReturnNonnullByDefault
-package com.jozufozu.flywheel.backend.gl.attrib;
+package com.jozufozu.flywheel.core.vertex;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

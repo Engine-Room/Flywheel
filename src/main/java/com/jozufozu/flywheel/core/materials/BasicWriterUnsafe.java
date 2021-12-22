@@ -6,9 +6,9 @@ import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.backend.struct.UnsafeBufferWriter;
 
-public abstract class UnsafeBasicWriter<D extends BasicData> extends UnsafeBufferWriter<D> {
+public abstract class BasicWriterUnsafe<D extends BasicData> extends UnsafeBufferWriter<D> {
 
-	public UnsafeBasicWriter(VecBuffer backingBuffer, StructType<D> vertexType) {
+	public BasicWriterUnsafe(VecBuffer backingBuffer, StructType<D> vertexType) {
 		super(backingBuffer, vertexType);
 	}
 

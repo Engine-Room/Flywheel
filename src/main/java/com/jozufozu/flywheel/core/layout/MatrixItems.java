@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.backend.gl.attrib;
+package com.jozufozu.flywheel.core.layout;
 
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
 
-public enum MatrixAttributes implements IAttribSpec {
+public enum MatrixItems implements LayoutItem {
 	MAT3(3, 3),
 	MAT4(4, 4),
 	;
@@ -12,7 +12,7 @@ public enum MatrixAttributes implements IAttribSpec {
 	private final int rows;
 	private final int cols;
 
-	MatrixAttributes(int rows, int cols) {
+	MatrixItems(int rows, int cols) {
 		this.rows = rows;
 		this.cols = cols;
 	}
