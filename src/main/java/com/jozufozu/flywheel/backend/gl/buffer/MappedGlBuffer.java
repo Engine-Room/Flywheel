@@ -21,7 +21,7 @@ public class MappedGlBuffer extends GlBuffer implements Mappable {
 		this.usage = usage;
 	}
 
-	public void alloc(long size) {
+	protected void alloc(long size) {
 		GL15.glBufferData(type.glEnum, size, usage.glEnum);
 	}
 
@@ -29,7 +29,7 @@ public class MappedGlBuffer extends GlBuffer implements Mappable {
 		GL15.glBufferData(type.glEnum, directBuffer, usage.glEnum);
 	}
 
-	public MappedBuffer getBuffer(int offset, int length) {
+	public MappedBuffer getBuffer(long offset, long length) {
 		ByteBuffer byteBuffer = GL30.glMapBufferRange(type.glEnum, offset, length, GL30.GL_MAP_WRITE_BIT);
 
 		if (byteBuffer == null) {

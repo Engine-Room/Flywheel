@@ -35,7 +35,7 @@ public class PersistentGlBuffer extends GlBuffer implements Mappable {
 	}
 
 	@Override
-	public void alloc(long size) {
+	protected void alloc(long size) {
 		this.size = size;
 
 		if (buffer != null) {
@@ -71,11 +71,11 @@ public class PersistentGlBuffer extends GlBuffer implements Mappable {
 	}
 
 	@Override
-	public MappedBuffer getBuffer(int offset, int length) {
+	public MappedBuffer getBuffer(long offset, long length) {
 
 		fence.waitSync();
 
-		buffer.position(offset);
+		buffer.position((int) offset);
 
 		return buffer;
 	}

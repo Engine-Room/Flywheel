@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.gl;
 
+import com.jozufozu.flywheel.util.AttribUtil;
 import com.mojang.blaze3d.platform.GlStateManager;
 
 public class GlVertexArray extends GlObject {
@@ -17,5 +18,9 @@ public class GlVertexArray extends GlObject {
 
 	protected void deleteInternal(int handle) {
 		GlStateManager._glDeleteVertexArrays(handle);
+	}
+
+	public void enableArrays(int count) {
+		AttribUtil.enableArrays(count);
 	}
 }
