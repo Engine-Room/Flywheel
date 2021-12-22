@@ -9,6 +9,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ColorResolver;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
@@ -33,7 +34,7 @@ public enum VirtualEmptyBlockGetter implements BlockAndTintGetter {
 
 		@Override
 		public BlockGetter getLevel() {
-			return VirtualEmptyBlockGetter.this;
+			return null;
 		}
 	}, false, false) {
 		private static final LayerLightEventListener SKY_DUMMY_LISTENER = new LayerLightEventListener() {
