@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.util.WeakHashSet;
+import com.jozufozu.flywheel.util.box.GridAlignedBB;
+import com.jozufozu.flywheel.util.box.ImmutableBox;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;

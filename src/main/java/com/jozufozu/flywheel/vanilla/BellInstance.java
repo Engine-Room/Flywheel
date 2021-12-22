@@ -5,7 +5,7 @@ import com.jozufozu.flywheel.api.instance.IDynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
-import com.jozufozu.flywheel.core.model.ModelPart;
+import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;

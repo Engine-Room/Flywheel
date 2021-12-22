@@ -8,11 +8,13 @@ import com.jozufozu.flywheel.util.RenderMath;
 
 public class PosTexNormalWriter {
 
+	private final ByteBuffer buffer;
 	private long addr;
 
 	private int vertexCount;
 
 	public PosTexNormalWriter(ByteBuffer buffer) {
+		this.buffer = buffer;
 		addr = MemoryUtil.memAddress(buffer);
 	}
 
@@ -32,5 +34,9 @@ public class PosTexNormalWriter {
 
 	public int getVertexCount() {
 		return vertexCount;
+	}
+
+	public PosTexNormalVertexListUnsafe intoReader() {
+		return new PosTexNormalVertexListUnsafe(buffer, vertexCount);
 	}
 }

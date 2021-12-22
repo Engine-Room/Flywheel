@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.light;
+package com.jozufozu.flywheel.util.box;
 
 @FunctionalInterface
 public interface CoordinateConsumer {

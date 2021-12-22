@@ -14,8 +14,8 @@ import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.model.ImmediateAllocator;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
 import com.jozufozu.flywheel.backend.model.ModelPool;
+import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.model.Model;
-import com.jozufozu.flywheel.core.vertex.PosNormalTexType;
 
 /**
  * A collection of Instancers that all have the same format.
@@ -33,7 +33,7 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 		if (Backend.getInstance().compat.onAMDWindows()) {
 			allocator = ImmediateAllocator.INSTANCE;
 		} else {
-			allocator = new ModelPool(PosNormalTexType.INSTANCE, 64);
+			allocator = new ModelPool(Formats.POS_TEX_NORMAL, 64);
 		}
 		this.models = CacheBuilder.newBuilder()
 				.removalListener(notification -> {

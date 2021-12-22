@@ -2,10 +2,10 @@ package com.jozufozu.flywheel.core.model;
 
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
+import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.QuadConverter;
-import com.jozufozu.flywheel.core.vertex.PosNormalTexType;
+import com.jozufozu.flywheel.core.vertex.VertexList;
 import com.jozufozu.flywheel.core.vertex.VertexType;
-import com.jozufozu.flywheel.util.ModelReader;
 
 /**
  * A model that can be rendered by flywheel.
@@ -34,7 +34,7 @@ public interface Model {
 	 */
 	String name();
 
-	ModelReader getReader();
+	VertexList getReader();
 
 	/**
 	 * @return The number of vertices the model has.
@@ -46,7 +46,7 @@ public interface Model {
 	}
 
 	default VertexType getType() {
-		return PosNormalTexType.INSTANCE;
+		return Formats.POS_TEX_NORMAL;
 	}
 
 	/**

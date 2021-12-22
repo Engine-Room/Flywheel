@@ -1,20 +1,21 @@
-package com.jozufozu.flywheel.util;
+package com.jozufozu.flywheel.core.vertex;
 
 import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
+import com.jozufozu.flywheel.util.RenderMath;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
 
-public class UnsafeBlockFormatReader implements ModelReader {
+public class BlockVertexListUnsafe implements VertexList {
 
 	private final int vertexCount;
 	private final int stride;
 	private final long base;
 
-	public UnsafeBlockFormatReader(BufferBuilder builder) {
+	public BlockVertexListUnsafe(BufferBuilder builder) {
 		VertexFormat vertexFormat = builder.getVertexFormat();
 		Pair<BufferBuilder.DrawState, ByteBuffer> data = builder.popNextBuffer();
 		this.base = MemoryUtil.memAddress(data.getSecond());

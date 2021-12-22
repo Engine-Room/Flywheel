@@ -1,18 +1,18 @@
-package com.jozufozu.flywheel.core.model;
+package com.jozufozu.flywheel.core.hardcoded;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
-import com.jozufozu.flywheel.core.vertex.PosNormalTexReader;
+import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.vertex.VertexList;
+import com.jozufozu.flywheel.core.vertex.PosTexNormalVertexListUnsafe;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalWriter;
-import com.jozufozu.flywheel.util.ModelReader;
 import com.mojang.blaze3d.platform.MemoryTracker;
 
 public class ModelPart implements Model {
 
 	private final int vertices;
 	private final String name;
-	private final PosNormalTexReader reader;
+	private final PosTexNormalVertexListUnsafe reader;
 
 	public ModelPart(List<PartBuilder.CuboidBuilder> cuboids, String name) {
 		this.name = name;
@@ -25,13 +25,12 @@ public class ModelPart implements Model {
 			this.vertices = vertices;
 		}
 
-		ByteBuffer buffer = MemoryTracker.create(size());
-		PosTexNormalWriter writer = new PosTexNormalWriter(buffer);
+		PosTexNormalWriter writer = new PosTexNormalWriter(MemoryTracker.create(size()));
 		for (PartBuilder.CuboidBuilder cuboid : cuboids) {
 			cuboid.buffer(writer);
 		}
 
-		reader = new PosNormalTexReader(buffer, vertices);
+		reader = writer.intoReader();
 	}
 
 	public static PartBuilder builder(String name, int sizeU, int sizeV) {
@@ -49,7 +48,7 @@ public class ModelPart implements Model {
 	}
 
 	@Override
-	public ModelReader getReader() {
+	public VertexList getReader() {
 		return reader;
 	}
 }

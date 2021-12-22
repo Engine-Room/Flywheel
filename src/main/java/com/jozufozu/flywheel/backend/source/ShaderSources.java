@@ -8,7 +8,7 @@ import java.util.Map;
 
 import com.google.common.collect.Lists;
 import com.jozufozu.flywheel.util.ResourceUtil;
-import com.jozufozu.flywheel.util.StreamUtil;
+import com.jozufozu.flywheel.util.StringUtil;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -37,7 +37,7 @@ public class ShaderSources implements ISourceHolder {
 			try {
 				Resource resource = manager.getResource(location);
 
-				String source = StreamUtil.readToString(resource.getInputStream());
+				String source = StringUtil.readToString(resource.getInputStream());
 
 				ResourceLocation name = ResourceUtil.removePrefixUnchecked(location, SHADER_DIR);
 

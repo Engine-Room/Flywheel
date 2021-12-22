@@ -2,10 +2,7 @@ package com.jozufozu.flywheel.core.crumbling;
 
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancedMaterialGroup;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
-import com.jozufozu.flywheel.core.atlas.AtlasInfo;
-import com.jozufozu.flywheel.core.atlas.SheetData;
-import com.jozufozu.flywheel.util.RenderTextures;
-import com.jozufozu.flywheel.util.TextureBinder;
+import com.jozufozu.flywheel.util.Textures;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
 
@@ -37,7 +34,7 @@ public class CrumblingGroup<P extends CrumblingProgram> extends InstancedMateria
 		RenderSystem.setShaderTexture(0, renderTex);
 		RenderSystem.setShaderTexture(4, breakingTex);
 
-		TextureBinder.bindActiveTextures();
+		Textures.bindActiveTextures();
 		renderAll(viewProjection, camX, camY, camZ);
 
 		CrumblingRenderer._currentLayer.clearRenderState();
@@ -45,11 +42,11 @@ public class CrumblingGroup<P extends CrumblingProgram> extends InstancedMateria
 
 	private void updateAtlasSize() {
 
-		SheetData atlasData = AtlasInfo.getAtlasData(RenderTextures.getShaderTexture(0));
+		AtlasInfo.SheetSize sheetSize = AtlasInfo.getSheetSize(Textures.getShaderTexture(0));
 
-		if (atlasData != null) {
-			width = atlasData.width;
-			height = atlasData.height;
+		if (sheetSize != null) {
+			width = sheetSize.width();
+			height = sheetSize.height();
 		} else {
 			width = height = 256;
 		}

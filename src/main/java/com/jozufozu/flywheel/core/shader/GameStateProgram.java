@@ -21,8 +21,8 @@ public class GameStateProgram<P extends GlProgram> implements ContextAwareProgra
 	@Override
 	public P get() {
 		for (Pair<IGameStateCondition, P> variant : variants) {
-			if (variant.getFirst()
-					.isMet()) return variant.getSecond();
+            if (variant.first()
+					.isMet()) return variant.second();
 		}
 
 		return fallback;
@@ -31,7 +31,7 @@ public class GameStateProgram<P extends GlProgram> implements ContextAwareProgra
 	@Override
 	public void delete() {
 		for (Pair<IGameStateCondition, P> variant : variants) {
-			variant.getSecond()
+			variant.second()
 					.delete();
 		}
 

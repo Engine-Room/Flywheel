@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.light;
+package com.jozufozu.flywheel.util.box;
 
-import com.jozufozu.flywheel.util.RenderUtil;
+import com.jozufozu.flywheel.util.RenderMath;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -116,9 +116,9 @@ public class GridAlignedBB implements ImmutableBox {
 		int sizeY = sizeY();
 		int sizeZ = sizeZ();
 
-		int newSizeX = RenderUtil.nextPowerOf2(sizeX);
-		int newSizeY = RenderUtil.nextPowerOf2(sizeY);
-		int newSizeZ = RenderUtil.nextPowerOf2(sizeZ);
+		int newSizeX = RenderMath.nextPowerOf2(sizeX);
+		int newSizeY = RenderMath.nextPowerOf2(sizeY);
+		int newSizeZ = RenderMath.nextPowerOf2(sizeZ);
 
 		int diffX = newSizeX - sizeX;
 		int diffY = newSizeY - sizeY;
@@ -136,9 +136,9 @@ public class GridAlignedBB implements ImmutableBox {
 	 * Grow this bounding box to have power of 2 side lengths, scaling from the minimum coords.
 	 */
 	public void nextPowerOf2() {
-		int sizeX = RenderUtil.nextPowerOf2(sizeX());
-		int sizeY = RenderUtil.nextPowerOf2(sizeY());
-		int sizeZ = RenderUtil.nextPowerOf2(sizeZ());
+		int sizeX = RenderMath.nextPowerOf2(sizeX());
+		int sizeY = RenderMath.nextPowerOf2(sizeY());
+		int sizeZ = RenderMath.nextPowerOf2(sizeZ());
 
 		maxX = minX + sizeX;
 		maxY = minY + sizeY;

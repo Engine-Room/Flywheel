@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.core.model;
 
-import com.jozufozu.flywheel.util.ModelReader;
+import com.jozufozu.flywheel.core.vertex.VertexList;
 import com.jozufozu.flywheel.util.RenderMath;
 import com.jozufozu.flywheel.util.transform.Transform;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -15,7 +15,7 @@ import net.minecraftforge.client.model.pipeline.LightUtil;
 public class ModelTransformer {
 
 	private final Model model;
-	private final ModelReader reader;
+	private final VertexList reader;
 
 	public final Context context = new Context();
 

@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.light;
+package com.jozufozu.flywheel.util.box;
 
-import static com.jozufozu.flywheel.util.RenderUtil.isPowerOf2;
+import static com.jozufozu.flywheel.util.RenderMath.isPowerOf2;
 
 import net.minecraft.world.phys.AABB;
 

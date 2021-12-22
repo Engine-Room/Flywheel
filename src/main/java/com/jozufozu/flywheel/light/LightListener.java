@@ -1,5 +1,8 @@
 package com.jozufozu.flywheel.light;
 
+import com.jozufozu.flywheel.util.box.GridAlignedBB;
+import com.jozufozu.flywheel.util.box.ImmutableBox;
+
 import net.minecraft.world.level.LightLayer;
 
 public interface LightListener {

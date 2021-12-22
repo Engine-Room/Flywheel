@@ -3,9 +3,9 @@ package com.jozufozu.flywheel.core.materials.oriented;
 import com.jozufozu.flywheel.api.struct.Batched;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructWriter;
+import com.jozufozu.flywheel.backend.gl.attrib.CommonAttributes;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.Programs;
 import com.jozufozu.flywheel.core.model.ModelTransformer;
 import com.mojang.math.Quaternion;
@@ -14,6 +14,11 @@ import net.minecraft.resources.ResourceLocation;
 
 public class OrientedType implements Instanced<OrientedData>, Batched<OrientedData> {
 
+	public static final VertexFormat FORMAT = VertexFormat.builder()
+			.addAttributes(CommonAttributes.LIGHT, CommonAttributes.RGBA)
+			.addAttributes(CommonAttributes.VEC3, CommonAttributes.VEC3, CommonAttributes.QUATERNION)
+			.build();
+
 	@Override
 	public OrientedData create() {
 		return new OrientedData();
@@ -21,7 +26,7 @@ public class OrientedType implements Instanced<OrientedData>, Batched<OrientedDa
 
 	@Override
 	public VertexFormat format() {
-		return Formats.ORIENTED;
+		return FORMAT;
 	}
 
 	@Override

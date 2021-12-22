@@ -23,6 +23,8 @@ import org.lwjgl.opengl.GL30;
 
 import com.jozufozu.flywheel.backend.gl.GlTexture;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
+import com.jozufozu.flywheel.util.box.GridAlignedBB;
+import com.jozufozu.flywheel.util.box.ImmutableBox;
 
 import net.minecraft.world.level.LightLayer;
 
