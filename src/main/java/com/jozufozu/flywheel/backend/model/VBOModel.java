@@ -29,10 +29,10 @@ public class VBOModel implements BufferedModel {
 
 		vbo.bind();
 		// allocate the buffer on the gpu
-		vbo.alloc(model.size());
+		vbo.ensureCapacity(model.size());
 
-		// mirror it in system memory so we can write to it, and upload our model.
-		try (MappedBuffer buffer = vbo.getBuffer(0, model.size())) {
+		// mirror it in system memory, so we can write to it, and upload our model.
+		try (MappedBuffer buffer = vbo.getBuffer()) {
 			model.writeInto(buffer.unwrap());
 		} catch (Exception e) {
 			Flywheel.log.error(String.format("Error uploading model '%s':", model.name()), e);

@@ -36,11 +36,10 @@ public class ArrayModelRenderer extends ModelRenderer {
 		vao = new GlVertexArray();
 
 		vao.bind();
+		vao.enableArrays(this.model.getAttributeCount());
 
 		// bind the model's vbo to our vao
 		this.model.setupState();
-
-		AttribUtil.enableArrays(this.model.getAttributeCount());
 
 		GlVertexArray.unbind();
 

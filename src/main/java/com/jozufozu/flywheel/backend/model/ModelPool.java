@@ -25,7 +25,6 @@ public class ModelPool implements ModelAllocator {
 	private final List<PooledModel> pendingUpload = new ArrayList<>();
 
 	private final GlBuffer vbo;
-	private int bufferSize;
 
 	private int vertices;
 
@@ -34,12 +33,13 @@ public class ModelPool implements ModelAllocator {
 
 	public ModelPool(VertexType vertexType, int initialSize) {
 		this.vertexType = vertexType;
-		bufferSize = vertexType.getStride() * initialSize;
+		int stride = vertexType.getStride();
 
 		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
 
 		vbo.bind();
-		vbo.alloc(bufferSize);
+		vbo.ensureCapacity((long) stride * initialSize);
+		vbo.setGrowthMargin(stride * 64);
 		vbo.unbind();
 	}
 
@@ -104,19 +104,11 @@ public class ModelPool implements ModelAllocator {
 	 * @return true if the buffer was reallocated
 	 */
 	private boolean realloc() {
-		int neededSize = vertices * vertexType.getStride();
-		if (neededSize > bufferSize) {
-			bufferSize = neededSize + 128;
-			vbo.alloc(bufferSize);
-
-			return true;
-		}
-
-		return false;
+		return vbo.ensureCapacity((long) vertices * vertexType.getStride());
 	}
 
 	private void uploadAll() {
-		try (MappedBuffer buffer = vbo.getBuffer(0, bufferSize)) {
+		try (MappedBuffer buffer = vbo.getBuffer()) {
 			VertexWriter writer = vertexType.createWriter(buffer.unwrap());
 
 			int vertices = 0;
@@ -134,7 +126,7 @@ public class ModelPool implements ModelAllocator {
 	}
 
 	private void uploadPending() {
-		try (MappedBuffer buffer = vbo.getBuffer(0, bufferSize)) {
+		try (MappedBuffer buffer = vbo.getBuffer()) {
 			VertexWriter writer = vertexType.createWriter(buffer.unwrap());
 			for (PooledModel model : pendingUpload) {
 				buffer(writer, model);

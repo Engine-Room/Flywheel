@@ -32,8 +32,8 @@ public class FullscreenQuad {
 	private FullscreenQuad() {
 		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
 		vbo.bind();
-		vbo.alloc(bufferSize);
-		try (MappedBuffer buffer = vbo.getBuffer(0, bufferSize)) {
+		vbo.ensureCapacity(bufferSize);
+		try (MappedBuffer buffer = vbo.getBuffer()) {
 			buffer.putFloatArray(vertices);
 		} catch (Exception e) {
 			Flywheel.log.error("Could not create fullscreen quad.", e);

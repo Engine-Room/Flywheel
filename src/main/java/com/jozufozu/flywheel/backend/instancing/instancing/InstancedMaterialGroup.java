@@ -59,7 +59,10 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 					.values();
 
 			// initialize all uninitialized instancers...
-			instancers.forEach(GPUInstancer::init);
+			for (GPUInstancer<?> gpuInstancer : instancers) {
+				gpuInstancer.init();
+			}
+
 			if (material.allocator instanceof ModelPool pool) {
 				// ...and then flush the model arena in case anything was marked for upload
 				pool.flush();
@@ -74,7 +77,9 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 
 			setup(program);
 
-			instancers.forEach(GPUInstancer::render);
+			for (GPUInstancer<?> instancer : instancers) {
+				instancer.render();
+			}
 		}
 	}
 
