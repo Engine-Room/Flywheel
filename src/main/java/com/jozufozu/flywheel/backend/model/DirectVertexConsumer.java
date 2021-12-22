@@ -10,6 +10,11 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 
+/**
+ * An unsafe vertex consumer allowing for unchecked writes into a ByteBuffer.
+ *
+ * @see DirectBufferBuilder
+ */
 public class DirectVertexConsumer implements VertexConsumer {
 	public final VertexFormat format;
 	private final int stride;
@@ -68,12 +73,16 @@ public class DirectVertexConsumer implements VertexConsumer {
 		this.end = parent.vertexBase + (long) maxVertices * this.stride;
 	}
 
+	public void memSetZero() {
+		MemoryUtil.memSet(vertexBase, 0, end - vertexBase);
+	}
+
 	public boolean hasOverlay() {
 		return uv1 >= 0;
 	}
 
 	/**
-	 * Split off the head of this consumer into a new object and advance our write-pointer.
+	 * Split off the head of this consumer into a new object and advance this object's write-pointer.
 	 * @param vertexCount The number of vertices that must be written to the head.
 	 * @return The head of this consumer.
 	 */
@@ -102,8 +111,8 @@ public class DirectVertexConsumer implements VertexConsumer {
 	public VertexConsumer color(int r, int g, int b, int a) {
 		if (color < 0) return this;
 		long base = vertexBase + color;
-		int color = ((r & 0xFF)) | ((g & 0xFF) << 8) | ((b & 0xFF) << 16) | ((a & 0xFF) << 24);
-		//MemoryUtil.memPutInt(base, color);
+//		int color = ((r & 0xFF)) | ((g & 0xFF) << 8) | ((b & 0xFF) << 16) | ((a & 0xFF) << 24);
+//		MemoryUtil.memPutInt(base, color);
 		MemoryUtil.memPutByte(base, (byte) r);
 		MemoryUtil.memPutByte(base + 1, (byte) g);
 		MemoryUtil.memPutByte(base + 2, (byte) b);

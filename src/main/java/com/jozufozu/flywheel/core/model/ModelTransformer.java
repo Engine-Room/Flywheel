@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.core.model;
 
 import com.jozufozu.flywheel.util.ModelReader;
+import com.jozufozu.flywheel.util.RenderMath;
 import com.jozufozu.flywheel.util.transform.Transform;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -15,6 +16,8 @@ public class ModelTransformer {
 
 	private final Model model;
 	private final ModelReader reader;
+
+	public final Context context = new Context();
 
 	public ModelTransformer(Model model) {
 		this.model = model;
@@ -34,7 +37,7 @@ public class ModelTransformer {
 		modelMat.multiply(params.model);
 
 		Matrix3f normalMat;
-		if (params.fullNormalTransform) {
+		if (context.fullNormalTransform) {
 			normalMat = input.last().normal().copy();
 			normalMat.mul(params.normal);
 		} else {
@@ -61,42 +64,46 @@ public class ModelTransformer {
 			float ny = normal.y();
 			float nz = normal.z();
 
-			float instanceDiffuse = LightUtil.diffuseLight(nx, ny, nz);
-
-			switch (params.colorMode) {
-			case MODEL_ONLY -> builder.color(reader.getR(i), reader.getG(i), reader.getB(i), reader.getA(i));
-			case DIFFUSE_ONLY -> builder.color(instanceDiffuse, instanceDiffuse, instanceDiffuse, 1f);
-			case MODEL_DIFFUSE -> {
-				int r = Byte.toUnsignedInt(reader.getR(i));
-				int g = Byte.toUnsignedInt(reader.getG(i));
-				int b = Byte.toUnsignedInt(reader.getB(i));
-				int a = Byte.toUnsignedInt(reader.getA(i));
-
-				float diffuse = switch (params.diffuseMode) {
-				case NONE -> 1f;
-				case INSTANCE -> instanceDiffuse;
-				case ONE_OVER_STATIC -> 1 / LightUtil.diffuseLight(normalX, normalY, normalZ);
-				case INSTANCE_OVER_STATIC -> instanceDiffuse / LightUtil.diffuseLight(normalX, normalY, normalZ);
-				};
-
-				if (diffuse != 1) {
-					r = transformColor(r, diffuse);
-					g = transformColor(g, diffuse);
-					b = transformColor(b, diffuse);
-				}
-
-				builder.color(r, g, b, a);
-			}
-			case RECOLOR -> {
-				if (params.diffuseMode == DiffuseMode.NONE) {
-					builder.color(params.r, params.g, params.b, params.a);
-				} else {
+			if (params.useParamColor) {
+				if (context.outputColorDiffuse) {
+					float instanceDiffuse = LightUtil.diffuseLight(nx, ny, nz);
 					int colorR = transformColor(params.r, instanceDiffuse);
 					int colorG = transformColor(params.g, instanceDiffuse);
 					int colorB = transformColor(params.b, instanceDiffuse);
 					builder.color(colorR, colorG, colorB, params.a);
+				} else {
+					builder.color(params.r, params.g, params.b, params.a);
 				}
-			}
+			} else {
+				if (context.inputHasDiffuse) {
+					int r = Byte.toUnsignedInt(reader.getR(i));
+					int g = Byte.toUnsignedInt(reader.getG(i));
+					int b = Byte.toUnsignedInt(reader.getB(i));
+					int a = Byte.toUnsignedInt(reader.getA(i));
+
+					float undoStaticDiffuse = 1 / LightUtil.diffuseLight(normalX, normalY, normalZ);
+					float diffuse;
+					if (context.outputColorDiffuse) {
+						diffuse = LightUtil.diffuseLight(nx, ny, nz) * undoStaticDiffuse;
+					} else {
+						diffuse = undoStaticDiffuse;
+					}
+
+					if (diffuse != 1) {
+						r = transformColor(r, diffuse);
+						g = transformColor(g, diffuse);
+						b = transformColor(b, diffuse);
+					}
+
+					builder.color(r, g, b, a);
+				} else {
+					if (context.outputColorDiffuse) {
+						int d = RenderMath.unb(LightUtil.diffuseLight(nx, ny, nz));
+						builder.color(d, d, d, 0xFF);
+					} else {
+						builder.color(reader.getR(i), reader.getG(i), reader.getB(i), reader.getA(i));
+					}
+				}
 			}
 
 			//builder.color(Math.max(0, (int) (nx * 255)), Math.max(0, (int) (ny * 255)), Math.max(0, (int) (nz * 255)), 0xFF);
@@ -110,11 +117,10 @@ public class ModelTransformer {
 				builder.uv(u, v);
 			}
 
-			if (params.hasOverlay) {
-				builder.overlayCoords(params.overlay);
-			}
+			// not always used, but will be ignored by formats that don't use it
+			builder.overlayCoords(params.overlay);
 
-			builder.uv2(params.hasCustomLight ? params.packedLightCoords : reader.getLight(i));
+			builder.uv2(params.useParamLight ? params.packedLightCoords : reader.getLight(i));
 
 			builder.normal(nx, ny, nz);
 
@@ -128,7 +134,7 @@ public class ModelTransformer {
 
 	@Override
 	public String toString() {
-		return "SuperByteBuffer[" + model + ']';
+		return "ModelTransformer[" + model + ']';
 	}
 
 	public static int transformColor(int component, float scale) {
@@ -140,28 +146,32 @@ public class ModelTransformer {
 		void shift(VertexConsumer builder, float u, float v);
 	}
 
-	public enum ColorMode {
-		MODEL_ONLY,
-		MODEL_DIFFUSE,
-		DIFFUSE_ONLY,
-		RECOLOR
-	}
+	public static class Context {
+		/**
+		 * Do we need to include the PoseStack transforms in our transformation of the normal?
+		 */
+		public boolean fullNormalTransform = false;
 
-	public enum DiffuseMode {
-		NONE,
-		INSTANCE,
-		ONE_OVER_STATIC,
-		INSTANCE_OVER_STATIC,
+		/**
+		 * Does the model we're transforming have diffuse light baked into its colors?
+		 */
+		public boolean inputHasDiffuse = false;
+
+		/**
+		 * Do we need to bake diffuse lighting into the output colors?
+		 */
+		public boolean outputColorDiffuse = true;
+
 	}
 
 	public static class Params implements Transform<Params> {
-		// Vertex Position
+
+		// Transform
 		public final Matrix4f model;
 		public final Matrix3f normal;
 
 		// Vertex Coloring
-		public ColorMode colorMode;
-		public DiffuseMode diffuseMode;
+		public boolean useParamColor;
 		public int r;
 		public int g;
 		public int b;
@@ -171,46 +181,47 @@ public class ModelTransformer {
 		public SpriteShiftFunc spriteShiftFunc;
 
 		// Vertex Overlay Color
-		public boolean hasOverlay;
 		public int overlay;
 
 		// Vertex Lighting
-		public boolean hasCustomLight;
+		public boolean useParamLight;
 		public int packedLightCoords;
-
-		// Vertex Normals
-		public boolean fullNormalTransform;
 
 		public Params() {
 			model = new Matrix4f();
 			normal = new Matrix3f();
 		}
 
+		public void loadDefault() {
+			model.setIdentity();
+			normal.setIdentity();
+			useParamColor = true;
+			r = 0xFF;
+			g = 0xFF;
+			b = 0xFF;
+			a = 0xFF;
+			spriteShiftFunc = null;
+			overlay = OverlayTexture.NO_OVERLAY;
+			useParamLight = false;
+			packedLightCoords = LightTexture.FULL_BRIGHT;
+		}
+
 		public void load(Params from) {
 			model.load(from.model);
 			normal.load(from.normal);
-			colorMode = from.colorMode;
-			diffuseMode = from.diffuseMode;
+			useParamColor = from.useParamColor;
 			r = from.r;
 			g = from.g;
 			b = from.b;
 			a = from.a;
 			spriteShiftFunc = from.spriteShiftFunc;
-			hasOverlay = from.hasOverlay;
 			overlay = from.overlay;
-			hasCustomLight = from.hasCustomLight;
+			useParamLight = from.useParamLight;
 			packedLightCoords = from.packedLightCoords;
-			fullNormalTransform = from.fullNormalTransform;
-		}
-
-		public Params copy() {
-			Params params = new Params();
-			params.load(this);
-			return params;
 		}
 
 		public Params color(int r, int g, int b, int a) {
-			this.colorMode = ColorMode.RECOLOR;
+			this.useParamColor = true;
 			this.r = r;
 			this.g = g;
 			this.b = b;
@@ -219,7 +230,7 @@ public class ModelTransformer {
 		}
 
 		public Params color(byte r, byte g, byte b, byte a) {
-			this.colorMode = ColorMode.RECOLOR;
+			this.useParamColor = true;
 			this.r = Byte.toUnsignedInt(r);
 			this.g = Byte.toUnsignedInt(g);
 			this.b = Byte.toUnsignedInt(b);
@@ -228,7 +239,7 @@ public class ModelTransformer {
 		}
 
 		public Params color(int color) {
-			this.colorMode = ColorMode.RECOLOR;
+			this.useParamColor = true;
 			this.r = ((color >> 16) & 0xFF);
 			this.g = ((color >> 8) & 0xFF);
 			this.b = (color & 0xFF);
@@ -241,29 +252,13 @@ public class ModelTransformer {
 			return this;
 		}
 
-		public Params overlay() {
-			this.hasOverlay = true;
-			return this;
-		}
-
 		public Params overlay(int overlay) {
-			this.hasOverlay = true;
 			this.overlay = overlay;
 			return this;
 		}
 
-		/**
-		 * Transforms normals not only by the local matrix stack, but also by the passed matrix stack.
-		 */
-		public void entityMode() {
-			this.hasOverlay = true;
-			this.fullNormalTransform = true;
-			this.diffuseMode = DiffuseMode.NONE;
-			this.colorMode = ColorMode.RECOLOR;
-		}
-
 		public Params light(int packedLightCoords) {
-			this.hasCustomLight = true;
+			this.useParamLight = true;
 			this.packedLightCoords = packedLightCoords;
 			return this;
 		}
@@ -313,23 +308,5 @@ public class ModelTransformer {
 			return this;
 		}
 
-		public static Params defaultParams() {
-			Params out = new Params();
-			out.model.setIdentity();
-			out.normal.setIdentity();
-			out.colorMode = ColorMode.DIFFUSE_ONLY;
-			out.diffuseMode = DiffuseMode.INSTANCE;
-			out.r = 0xFF;
-			out.g = 0xFF;
-			out.b = 0xFF;
-			out.a = 0xFF;
-			out.spriteShiftFunc = null;
-			out.hasOverlay = false;
-			out.overlay = OverlayTexture.NO_OVERLAY;
-			out.hasCustomLight = false;
-			out.packedLightCoords = LightTexture.FULL_BRIGHT;
-			out.fullNormalTransform = false;
-			return out;
-		}
 	}
 }

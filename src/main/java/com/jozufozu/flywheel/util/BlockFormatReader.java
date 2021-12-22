@@ -3,36 +3,24 @@ package com.jozufozu.flywheel.util;
 import java.nio.ByteBuffer;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
 
-public class BufferBuilderReader implements ModelReader {
+public class BlockFormatReader implements ModelReader {
 
 	private final ByteBuffer buffer;
 	private final int vertexCount;
-	private final int formatSize;
-	private final int size;
+	private final int stride;
 
-	public BufferBuilderReader(BufferBuilder builder) {
-		VertexFormat vertexFormat = builder.getVertexFormat();
+	public BlockFormatReader(BufferBuilder builder) {
 		Pair<BufferBuilder.DrawState, ByteBuffer> data = builder.popNextBuffer();
 		buffer = data.getSecond();
 
-		formatSize = vertexFormat.getVertexSize();
+		stride = builder.getVertexFormat()
+				.getVertexSize();
 
 		vertexCount = data.getFirst()
 				.vertexCount();
 
-		size = vertexCount * formatSize;
-
-		// TODO: adjust the getters based on the input format
-		//		ImmutableList<VertexFormatElement> elements = vertexFormat.getElements();
-		//		for (int i = 0, size = elements.size(); i < size; i++) {
-		//			VertexFormatElement element = elements.get(i);
-		//			int offset = vertexFormat.getOffset(i);
-		//
-		//			element.getUsage()
-		//		}
 	}
 
 	@Override
@@ -41,7 +29,7 @@ public class BufferBuilderReader implements ModelReader {
 	}
 
 	private int vertIdx(int vertexIndex) {
-		return vertexIndex * formatSize;
+		return vertexIndex * stride;
 	}
 
 	@Override
@@ -114,7 +102,4 @@ public class BufferBuilderReader implements ModelReader {
 		return vertexCount;
 	}
 
-	public int getSize() {
-		return size;
-	}
 }

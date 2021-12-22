@@ -2,12 +2,12 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.struct.Batched;
-import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
 import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.core.model.ModelTransformer;
+import com.jozufozu.flywheel.util.Color;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -15,15 +15,14 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 	private final Batched<D> batchingType;
 
-	private final ModelTransformer sbb;
-	private final ModelTransformer.Params defaultParams;
+	final ModelTransformer sbb;
 
 	public CPUInstancer(Batched<D> type, Model modelData) {
 		super(type::create, modelData);
 		batchingType = type;
 
 		sbb = new ModelTransformer(modelData);
-		defaultParams = ModelTransformer.Params.defaultParams();
+		modelData.configure(sbb.context);
 	}
 
 	void submitTasks(PoseStack stack, TaskEngine pool, DirectVertexConsumer consumer) {
@@ -42,43 +41,47 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		}
 	}
 
-	@Override
-	public void notifyDirty() {
-		// noop
-	}
-
 	private void drawRange(PoseStack stack, VertexConsumer buffer, int from, int to) {
-		ModelTransformer.Params params = defaultParams.copy();
+		ModelTransformer.Params params = new ModelTransformer.Params();
+
+		// Color color = Color.generateFromLong(from);
 
 		for (D d : data.subList(from, to)) {
+			params.loadDefault();
+
 			batchingType.transform(d, params);
 
-			sbb.renderInto(params, stack, buffer);
+			//params.color(color.getRGB());
 
-			params.load(defaultParams);
+			sbb.renderInto(params, stack, buffer);
 		}
 	}
 
 	void drawAll(PoseStack stack, VertexConsumer buffer) {
-		ModelTransformer.Params params = defaultParams.copy();
+		ModelTransformer.Params params = new ModelTransformer.Params();
 		for (D d : data) {
+			params.loadDefault();
+
 			batchingType.transform(d, params);
 
 			sbb.renderInto(params, stack, buffer);
-
-			params.load(defaultParams);
 		}
 	}
 
-	void setup(FormatContext context) {
+	void setup() {
 		if (anyToRemove) {
-			removeDeletedInstances();
+			data.removeIf(InstanceData::isRemoved);
 			anyToRemove = false;
 		}
 
-		if (context.usesOverlay()) {
-			defaultParams.overlay();
+		if (false) {
+			this.sbb.context.outputColorDiffuse = false;
+			this.sbb.context.fullNormalTransform = false;
 		}
 	}
 
+	@Override
+	public void notifyDirty() {
+		// noop
+	}
 }

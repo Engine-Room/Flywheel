@@ -82,7 +82,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	 * Render every model for every material.
 	 */
 	@Override
-	public void render(RenderLayerEvent event, MultiBufferSource buffers) {
+	public void render(RenderLayerEvent event) {
 		double camX;
 		double camY;
 		double camZ;

@@ -28,9 +28,9 @@ public class BatchedMaterial<D extends InstanceData> implements Material<D> {
 		return models.computeIfAbsent(key, $ -> new CPUInstancer<>(type, modelSupplier.get()));
 	}
 
-	public void render(PoseStack stack, VertexConsumer buffer, FormatContext context) {
+	public void setupAndRenderInto(PoseStack stack, VertexConsumer buffer) {
 		for (CPUInstancer<D> instancer : models.values()) {
-			instancer.setup(context);
+			instancer.setup();
 			instancer.drawAll(stack, buffer);
 		}
 	}

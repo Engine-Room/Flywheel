@@ -6,7 +6,7 @@ import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 
 public class Formats {
 	public static final VertexFormat UNLIT_MODEL = VertexFormat.builder()
-			.addAttributes(CommonAttributes.VEC3, CommonAttributes.NORMAL, CommonAttributes.UV)
+			.addAttributes(CommonAttributes.VEC3, CommonAttributes.UV, CommonAttributes.NORMAL)
 			.build();
 
 	public static final VertexFormat COLORED_LIT_MODEL = VertexFormat.builder()

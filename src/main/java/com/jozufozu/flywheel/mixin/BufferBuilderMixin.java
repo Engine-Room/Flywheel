@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.mixin;
 
 import java.nio.ByteBuffer;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,9 +39,11 @@ public abstract class BufferBuilderMixin implements DirectBufferBuilder {
 	private int nextElementByte;
 
 	@Override
+	@Nonnull
 	public DirectVertexConsumer intoDirectConsumer(int vertexCount) {
 		int bytes = vertexCount * format.getVertexSize();
-		ensureCapacity(bytes);
+		// ensure we have capacity for one extra vertex, BufferBuilder does this on #endVertex
+		ensureCapacity(bytes + format.getVertexSize());
 
 		DirectVertexConsumer consumer = new DirectVertexConsumer(this.buffer, this.format, vertexCount);
 
@@ -49,7 +52,7 @@ public abstract class BufferBuilderMixin implements DirectBufferBuilder {
 				.get(0);
 		this.elementIndex = 0;
 		this.nextElementByte += bytes;
-		this.buffer.position(consumer.startPos + bytes);
+		this.buffer.position(this.buffer.position() + bytes);
 
 		return consumer;
 	}

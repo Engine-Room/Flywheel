@@ -3,8 +3,9 @@ package com.jozufozu.flywheel.core.model;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.core.QuadConverter;
+import com.jozufozu.flywheel.core.vertex.PosNormalTexType;
+import com.jozufozu.flywheel.core.vertex.VertexType;
 import com.jozufozu.flywheel.util.ModelReader;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
 /**
  * A model that can be rendered by flywheel.
@@ -33,20 +34,27 @@ public interface Model {
 	 */
 	String name();
 
-	/**
-	 * Copy this model into the given buffer.
-	 */
-	void buffer(VertexConsumer buffer);
+	ModelReader getReader();
 
 	/**
 	 * @return The number of vertices the model has.
 	 */
 	int vertexCount();
 
+	default void configure(ModelTransformer.Context ctx) {
+
+	}
+
+	default VertexType getType() {
+		return PosNormalTexType.INSTANCE;
+	}
+
 	/**
 	 * @return The format of this model's vertices
 	 */
-	VertexFormat format();
+	default VertexFormat format() {
+		return getType().getFormat();
+	}
 
 	/**
 	 * Create an element buffer object that indexes the vertices of this model.
@@ -77,6 +85,4 @@ public interface Model {
 	default boolean empty() {
 		return vertexCount() == 0;
 	}
-
-	ModelReader getReader();
 }

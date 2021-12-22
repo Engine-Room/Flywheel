@@ -10,9 +10,8 @@ public interface RenderDispatcher {
 	 * Render every model for every material.
 	 *
 	 * @param event     Context for rendering.
-	 * @param buffers	The buffer source for which batched rendering should happen.
 	 */
-	void render(RenderLayerEvent event, MultiBufferSource buffers);
+	void render(RenderLayerEvent event);
 
 	/**
 	 * Maintain the integer origin coordinate to be within a certain distance from the camera in all directions.

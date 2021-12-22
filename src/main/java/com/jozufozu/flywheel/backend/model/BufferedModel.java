@@ -34,7 +34,7 @@ public class BufferedModel implements IBufferedModel {
 
 		// mirror it in system memory so we can write to it, and upload our model.
 		try (MappedBuffer buffer = vbo.getBuffer(0, model.size())) {
-			model.buffer(new VecBufferWriter(buffer));
+			model.getType().copyInto(buffer.unwrap(), model.getReader());
 		} catch (Exception e) {
 			Flywheel.log.error(String.format("Error uploading model '%s':", model.name()), e);
 		}
