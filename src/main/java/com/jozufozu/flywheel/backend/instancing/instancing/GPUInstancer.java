@@ -1,21 +1,18 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
-import java.util.BitSet;
-
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.struct.Instanced;
-import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
-import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
+import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
-import com.jozufozu.flywheel.backend.model.IBufferedModel;
+import com.jozufozu.flywheel.backend.model.BufferedModel;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
 import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.util.AttribUtil;
@@ -23,10 +20,10 @@ import com.jozufozu.flywheel.util.AttribUtil;
 public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 	private final ModelAllocator modelAllocator;
-	private final VertexFormat instanceFormat;
+	private final BufferLayout instanceFormat;
 	private final Instanced<D> instancedType;
 
-	private IBufferedModel model;
+	private BufferedModel model;
 	private GlVertexArray vao;
 	private GlBuffer instanceVBO;
 	private int glBufferSize = -1;
@@ -39,7 +36,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 	public GPUInstancer(Instanced<D> type, Model model, ModelAllocator modelAllocator) {
 		super(type::create, model);
 		this.modelAllocator = modelAllocator;
-		this.instanceFormat = type.format();
+		this.instanceFormat = type.getLayout();
 		instancedType = type;
 	}
 

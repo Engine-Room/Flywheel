@@ -9,10 +9,10 @@ public interface ModelAllocator {
 	 * @param model The model to allocate.
 	 * @return A handle to the allocated model.
 	 */
-	IBufferedModel alloc(Model model, Callback allocationCallback);
+	BufferedModel alloc(Model model, Callback allocationCallback);
 
 	@FunctionalInterface
 	interface Callback {
-		void onAlloc(IBufferedModel arenaModel);
+		void onAlloc(BufferedModel arenaModel);
 	}
 }

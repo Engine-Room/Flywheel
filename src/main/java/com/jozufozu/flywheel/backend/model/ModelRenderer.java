@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.core.model.Model;
 public class ModelRenderer {
 
 	protected Supplier<Model> modelSupplier;
-	protected IBufferedModel model;
+	protected BufferedModel model;
 
 	protected boolean initialized;
 

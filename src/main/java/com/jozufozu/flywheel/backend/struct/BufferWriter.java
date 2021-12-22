@@ -2,20 +2,17 @@ package com.jozufozu.flywheel.backend.struct;
 
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
-import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 
 public abstract class BufferWriter<S> implements StructWriter<S> {
 	protected final VecBuffer backingBuffer;
 
-	protected final VertexFormat format;
 	protected final int stride;
 
 	protected BufferWriter(VecBuffer backingBuffer, StructType<S> vertexType) {
 		this.backingBuffer = backingBuffer;
 
-		this.format = vertexType.format();
-		this.stride = this.format.getStride();
+		this.stride = vertexType.getLayout().getStride();
 	}
 
 	@Override
@@ -36,6 +33,6 @@ public abstract class BufferWriter<S> implements StructWriter<S> {
 
 	@Override
 	public void seek(int pos) {
-		backingBuffer.position(pos * stride);
+			backingBuffer.position(pos * stride);
 	}
 }

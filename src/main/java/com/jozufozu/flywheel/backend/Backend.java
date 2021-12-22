@@ -102,7 +102,7 @@ public class Backend {
 		}
 		materialRegistry.put(name, spec);
 
-		log.debug("registered material '" + name + "' with instance size " + spec.format().getStride());
+		log.debug("registered material '" + name + "' with instance size " + spec.getLayout().getStride());
 
 		return spec;
 	}

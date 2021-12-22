@@ -2,70 +2,49 @@ package com.jozufozu.flywheel.core.vertex;
 
 import java.nio.ByteBuffer;
 
-import org.lwjgl.system.MemoryUtil;
-
-import com.jozufozu.flywheel.backend.gl.attrib.CommonAttributes;
-import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
-import com.jozufozu.flywheel.util.RenderMath;
-
-import net.minecraft.client.renderer.LightTexture;
+import com.jozufozu.flywheel.api.vertex.VertexList;
+import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.core.layout.CommonItems;
+import com.jozufozu.flywheel.core.layout.BufferLayout;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.datafixers.util.Pair;
 
 public class BlockVertex implements VertexType {
 
-	public static final VertexFormat FORMAT = VertexFormat.builder()
-			.addAttributes(CommonAttributes.VEC3,
-					CommonAttributes.UV,
-					CommonAttributes.RGBA,
-					CommonAttributes.LIGHT,
-					CommonAttributes.NORMAL)
+	public static final BufferLayout FORMAT = BufferLayout.builder()
+			.addItems(CommonItems.VEC3,
+					CommonItems.RGBA,
+					CommonItems.UV,
+					CommonItems.LIGHT_SHORT,
+					CommonItems.NORMAL,
+					CommonItems.PADDING_BYTE)
 			.build();
 
 	@Override
-	public VertexFormat getFormat() {
+	public BufferLayout getLayout() {
 		return FORMAT;
 	}
 
 	@Override
-	public void copyInto(ByteBuffer buffer, VertexList reader) {
-		int stride = getStride();
-		long addr = MemoryUtil.memAddress(buffer);
+	public BlockWriterUnsafe createWriter(ByteBuffer buffer) {
+		return new BlockWriterUnsafe(this, buffer);
+	}
 
-		int vertexCount = reader.getVertexCount();
-		for (int i = 0; i < vertexCount; i++) {
-			float x = reader.getX(i);
-			float y = reader.getY(i);
-			float z = reader.getZ(i);
+	@Override
+	public BlockVertexListUnsafe createReader(ByteBuffer buffer, int vertexCount) {
+		return new BlockVertexListUnsafe(buffer, vertexCount);
+	}
 
-			float xN = reader.getNX(i);
-			float yN = reader.getNY(i);
-			float zN = reader.getNZ(i);
+	public VertexList createReader(BufferBuilder bufferBuilder) {
+		// TODO: try to avoid virtual model rendering
+		Pair<BufferBuilder.DrawState, ByteBuffer> pair = bufferBuilder.popNextBuffer();
+		BufferBuilder.DrawState drawState = pair.getFirst();
 
-			float u = reader.getU(i);
-			float v = reader.getV(i);
-
-			byte r = reader.getR(i);
-			byte g = reader.getG(i);
-			byte b = reader.getB(i);
-			byte a = reader.getA(i);
-
-			int light = reader.getLight(i);
-
-			MemoryUtil.memPutFloat(addr, x);
-			MemoryUtil.memPutFloat(addr + 4, y);
-			MemoryUtil.memPutFloat(addr + 8, z);
-			MemoryUtil.memPutFloat(addr + 12, u);
-			MemoryUtil.memPutFloat(addr + 16, v);
-			MemoryUtil.memPutByte(addr + 20, r);
-			MemoryUtil.memPutByte(addr + 21, g);
-			MemoryUtil.memPutByte(addr + 22, b);
-			MemoryUtil.memPutByte(addr + 23, a);
-			MemoryUtil.memPutByte(addr + 24, (byte) (LightTexture.block(light) << 4));
-			MemoryUtil.memPutByte(addr + 25, (byte) (LightTexture.sky(light) << 4));
-			MemoryUtil.memPutByte(addr + 26, RenderMath.nb(xN));
-			MemoryUtil.memPutByte(addr + 27, RenderMath.nb(yN));
-			MemoryUtil.memPutByte(addr + 28, RenderMath.nb(zN));
-
-			addr += stride;
+		if (drawState.format() != DefaultVertexFormat.BLOCK) {
+			throw new RuntimeException("Cannot use BufferBuilder with " + drawState.format());
 		}
+
+		return new BlockVertexListUnsafe(pair.getSecond(), drawState.vertexCount());
 	}
 }

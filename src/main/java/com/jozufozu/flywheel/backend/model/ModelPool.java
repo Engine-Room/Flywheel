@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.backend.model;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,13 +7,13 @@ import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
-import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.core.model.Model;
-import com.jozufozu.flywheel.core.vertex.VertexType;
+import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.api.vertex.VertexWriter;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 public class ModelPool implements ModelAllocator {
@@ -118,13 +117,13 @@ public class ModelPool implements ModelAllocator {
 
 	private void uploadAll() {
 		try (MappedBuffer buffer = vbo.getBuffer(0, bufferSize)) {
-			ByteBuffer buf = buffer.unwrap();
+			VertexWriter writer = vertexType.createWriter(buffer.unwrap());
 
 			int vertices = 0;
 			for (PooledModel model : models) {
 				model.first = vertices;
 
-				buffer(buf, model);
+				buffer(writer, model);
 
 				vertices += model.getVertexCount();
 			}
@@ -136,9 +135,9 @@ public class ModelPool implements ModelAllocator {
 
 	private void uploadPending() {
 		try (MappedBuffer buffer = vbo.getBuffer(0, bufferSize)) {
-			ByteBuffer buf = buffer.unwrap();
+			VertexWriter writer = vertexType.createWriter(buffer.unwrap());
 			for (PooledModel model : pendingUpload) {
-				buffer(buf, model);
+				buffer(writer, model);
 			}
 			pendingUpload.clear();
 		} catch (Exception e) {
@@ -146,10 +145,9 @@ public class ModelPool implements ModelAllocator {
 		}
 	}
 
-	private void buffer(ByteBuffer buf, PooledModel model) {
-		int pos = model.first * vertexType.getStride();
-		buf.position(pos);
-		vertexType.copyInto(buf, model.model.getReader());
+	private void buffer(VertexWriter writer, PooledModel model) {
+		writer.seekToVertex(model.first);
+		writer.writeVertexList(model.model.getReader());
 		if (model.callback != null) model.callback.onAlloc(model);
 	}
 
@@ -161,7 +159,7 @@ public class ModelPool implements ModelAllocator {
 		vbo.delete();
 	}
 
-	public class PooledModel implements IBufferedModel {
+	public class PooledModel implements BufferedModel {
 
 		private final ElementBuffer ebo;
 		private Callback callback;
@@ -178,8 +176,8 @@ public class ModelPool implements ModelAllocator {
 		}
 
 		@Override
-		public VertexFormat getFormat() {
-			return model.format();
+		public VertexType getType() {
+			return ModelPool.this.vertexType;
 		}
 
 		@Override
@@ -192,7 +190,7 @@ public class ModelPool implements ModelAllocator {
 			vbo.bind();
 			ebo.bind();
 			AttribUtil.enableArrays(getAttributeCount());
-			getFormat().vertexAttribPointers(0);
+			ModelPool.this.vertexType.getLayout().vertexAttribPointers(0);
 		}
 
 		@Override

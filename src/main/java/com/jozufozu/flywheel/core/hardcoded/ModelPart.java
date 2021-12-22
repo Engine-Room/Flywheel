@@ -2,17 +2,17 @@ package com.jozufozu.flywheel.core.hardcoded;
 
 import java.util.List;
 
+import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.model.Model;
-import com.jozufozu.flywheel.core.vertex.VertexList;
-import com.jozufozu.flywheel.core.vertex.PosTexNormalVertexListUnsafe;
-import com.jozufozu.flywheel.core.vertex.PosTexNormalWriter;
+import com.jozufozu.flywheel.api.vertex.VertexList;
+import com.jozufozu.flywheel.core.vertex.PosTexNormalWriterUnsafe;
 import com.mojang.blaze3d.platform.MemoryTracker;
 
 public class ModelPart implements Model {
 
 	private final int vertices;
 	private final String name;
-	private final PosTexNormalVertexListUnsafe reader;
+	private final VertexList reader;
 
 	public ModelPart(List<PartBuilder.CuboidBuilder> cuboids, String name) {
 		this.name = name;
@@ -25,7 +25,7 @@ public class ModelPart implements Model {
 			this.vertices = vertices;
 		}
 
-		PosTexNormalWriter writer = new PosTexNormalWriter(MemoryTracker.create(size()));
+		PosTexNormalWriterUnsafe writer = Formats.POS_TEX_NORMAL.createWriter(MemoryTracker.create(size()));
 		for (PartBuilder.CuboidBuilder cuboid : cuboids) {
 			cuboid.buffer(writer);
 		}

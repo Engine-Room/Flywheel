@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.core.vertex;
 
 import java.nio.ByteBuffer;
 
+import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.util.RenderMath;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.datafixers.util.Pair;

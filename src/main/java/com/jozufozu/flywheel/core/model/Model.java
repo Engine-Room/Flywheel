@@ -1,11 +1,12 @@
 package com.jozufozu.flywheel.core.model;
 
-import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
+import java.nio.ByteBuffer;
+
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.QuadConverter;
-import com.jozufozu.flywheel.core.vertex.VertexList;
-import com.jozufozu.flywheel.core.vertex.VertexType;
+import com.jozufozu.flywheel.api.vertex.VertexList;
+import com.jozufozu.flywheel.api.vertex.VertexType;
 
 /**
  * A model that can be rendered by flywheel.
@@ -50,13 +51,6 @@ public interface Model {
 	}
 
 	/**
-	 * @return The format of this model's vertices
-	 */
-	default VertexFormat format() {
-		return getType().getFormat();
-	}
-
-	/**
 	 * Create an element buffer object that indexes the vertices of this model.
 	 *
 	 * <p>
@@ -75,7 +69,7 @@ public interface Model {
 	 * The size in bytes that this model's data takes up.
 	 */
 	default int size() {
-		return vertexCount() * format().getStride();
+		return getType().byteOffset(vertexCount());
 	}
 
 	/**
@@ -84,5 +78,9 @@ public interface Model {
 	 */
 	default boolean empty() {
 		return vertexCount() == 0;
+	}
+
+	default void writeInto(ByteBuffer buffer) {
+		getType().createWriter(buffer).writeVertexList(getReader());
 	}
 }

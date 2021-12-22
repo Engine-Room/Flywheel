@@ -2,38 +2,28 @@ package com.jozufozu.flywheel.core.vertex;
 
 import java.nio.ByteBuffer;
 
-import com.jozufozu.flywheel.backend.gl.attrib.CommonAttributes;
-import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
+import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.core.layout.CommonItems;
+import com.jozufozu.flywheel.core.layout.BufferLayout;
 
 public class PosTexNormalVertex implements VertexType {
 
-	public static final VertexFormat FORMAT = VertexFormat.builder()
-			.addAttributes(CommonAttributes.VEC3, CommonAttributes.UV, CommonAttributes.NORMAL)
+	public static final BufferLayout FORMAT = BufferLayout.builder()
+			.addItems(CommonItems.VEC3, CommonItems.UV, CommonItems.NORMAL)
 			.build();
 
 	@Override
-	public VertexFormat getFormat() {
+	public BufferLayout getLayout() {
 		return FORMAT;
 	}
 
 	@Override
-	public void copyInto(ByteBuffer buffer, VertexList reader) {
-		PosTexNormalWriter writer = new PosTexNormalWriter(buffer);
+	public PosTexNormalWriterUnsafe createWriter(ByteBuffer buffer) {
+		return new PosTexNormalWriterUnsafe(this, buffer);
+	}
 
-		int vertexCount = reader.getVertexCount();
-		for (int i = 0; i < vertexCount; i++) {
-			float x = reader.getX(i);
-			float y = reader.getY(i);
-			float z = reader.getZ(i);
-
-			float u = reader.getU(i);
-			float v = reader.getV(i);
-
-			float xN = reader.getNX(i);
-			float yN = reader.getNY(i);
-			float zN = reader.getNZ(i);
-
-			writer.putVertex(x, y, z, xN, yN, zN, u, v);
-		}
+	@Override
+	public PosTexNormalVertexListUnsafe createReader(ByteBuffer buffer, int vertexCount) {
+		return new PosTexNormalVertexListUnsafe(buffer, vertexCount);
 	}
 }

@@ -11,14 +11,14 @@ import com.jozufozu.flywheel.core.model.Model;
 
 public abstract class AbstractInstancer<D extends InstanceData> implements Instancer<D> {
 
-	protected final Supplier<D> type;
+	protected final Supplier<D> factory;
 	protected final Model modelData;
 	protected final ArrayList<D> data = new ArrayList<>();
 
 	protected boolean anyToRemove;
 
-	protected AbstractInstancer(Supplier<D> type, Model modelData) {
-		this.type = type;
+	protected AbstractInstancer(Supplier<D> factory, Model modelData) {
+		this.factory = factory;
 		this.modelData = modelData;
 	}
 
@@ -27,7 +27,7 @@ public abstract class AbstractInstancer<D extends InstanceData> implements Insta
 	 */
 	@Override
 	public D createInstance() {
-		return _add(type.get());
+		return _add(factory.get());
 	}
 
 	/**

@@ -5,7 +5,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import com.jozufozu.flywheel.core.vertex.PosTexNormalWriter;
+import com.jozufozu.flywheel.core.vertex.PosTexNormalWriterUnsafe;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -160,7 +160,7 @@ public class PartBuilder {
 			return visibleFaces.size() * 4;
 		}
 
-		public void buffer(PosTexNormalWriter buffer) {
+		public void buffer(PosTexNormalWriterUnsafe buffer) {
 
 			float sizeX = posX2 - posX1;
 			float sizeY = posY2 - posY1;
@@ -235,7 +235,7 @@ public class PartBuilder {
 			}
 		}
 
-		public void quad(PosTexNormalWriter buffer, Vector3f[] vertices, float minU, float minV, float maxU, float maxV, Vector3f normal) {
+		public void quad(PosTexNormalWriterUnsafe buffer, Vector3f[] vertices, float minU, float minV, float maxU, float maxV, Vector3f normal) {
 			buffer.putVertex(vertices[0].x(), vertices[0].y(), vertices[0].z(), normal.x(), normal.y(), normal.z(), maxU, minV);
 			buffer.putVertex(vertices[1].x(), vertices[1].y(), vertices[1].z(), normal.x(), normal.y(), normal.z(), minU, minV);
 			buffer.putVertex(vertices[2].x(), vertices[2].y(), vertices[2].z(), normal.x(), normal.y(), normal.z(), minU, maxV);
