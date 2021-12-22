@@ -49,8 +49,8 @@ public class CrumblingRenderer {
 	static {
 		Pair<Lazy<State>, Lazy.KillSwitch<State>> state = Lazy.ofKillable(State::new, State::kill);
 
-		STATE = state.getFirst();
-		INVALIDATOR = state.getSecond();
+        STATE = state.first();
+		INVALIDATOR = state.second();
 	}
 
 	public static void renderBreaking(RenderLayerEvent event) {

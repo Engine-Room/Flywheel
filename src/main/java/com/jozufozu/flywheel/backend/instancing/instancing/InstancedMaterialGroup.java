@@ -10,7 +10,7 @@ import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.model.ModelPool;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
-import com.jozufozu.flywheel.util.TextureBinder;
+import com.jozufozu.flywheel.util.Textures;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.renderer.RenderType;
@@ -45,7 +45,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 
 	public void render(Matrix4f viewProjection, double camX, double camY, double camZ) {
 		type.setupRenderState();
-		TextureBinder.bindActiveTextures();
+		Textures.bindActiveTextures();
 		renderAll(viewProjection, camX, camY, camZ);
 		type.clearRenderState();
 	}

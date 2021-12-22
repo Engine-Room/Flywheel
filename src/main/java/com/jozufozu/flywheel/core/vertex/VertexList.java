@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.util;
+package com.jozufozu.flywheel.core.vertex;
 
-public interface ModelReader {
+public interface VertexList {
 	float getX(int index);
 
 	float getY(int index);

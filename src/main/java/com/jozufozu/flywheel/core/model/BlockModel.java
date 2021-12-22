@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.core.model;
 
-import com.jozufozu.flywheel.util.UnsafeBlockFormatReader;
-import com.jozufozu.flywheel.util.ModelReader;
+import com.jozufozu.flywheel.core.vertex.VertexList;
+import com.jozufozu.flywheel.core.vertex.BlockVertexListUnsafe;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class BlockModel implements Model {
 	private static final PoseStack IDENTITY = new PoseStack();
 
-	private final ModelReader reader;
+	private final VertexList reader;
 
 	private final String name;
 
@@ -29,7 +29,7 @@ public class BlockModel implements Model {
 	}
 
 	public BlockModel(BakedModel model, BlockState referenceState, PoseStack ms) {
-		reader = new UnsafeBlockFormatReader(ModelUtil.getBufferBuilder(model, referenceState, ms));
+		reader = new BlockVertexListUnsafe(ModelUtil.getBufferBuilder(model, referenceState, ms));
 		name = referenceState.toString();
 	}
 
@@ -49,7 +49,7 @@ public class BlockModel implements Model {
 	}
 
 	@Override
-	public ModelReader getReader() {
+	public VertexList getReader() {
 		return reader;
 	}
 }

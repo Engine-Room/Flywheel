@@ -3,10 +3,12 @@ package com.jozufozu.flywheel.core.model;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
+import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.VirtualEmptyBlockGetter;
 import com.jozufozu.flywheel.util.VirtualEmptyModelData;
+import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -90,5 +92,16 @@ public class ModelUtil {
 
 		builder.end();
 		return builder;
+	}
+
+	public static Supplier<PoseStack> rotateToFace(Direction facing) {
+		return () -> {
+			PoseStack stack = new PoseStack();
+			TransformStack.cast(stack)
+					.centre()
+					.rotateToFace(facing)
+					.unCentre();
+			return stack;
+		};
 	}
 }

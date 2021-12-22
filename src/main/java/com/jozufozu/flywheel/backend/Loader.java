@@ -13,7 +13,7 @@ import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 import com.jozufozu.flywheel.event.GatherContextEvent;
 import com.jozufozu.flywheel.util.ResourceUtil;
-import com.jozufozu.flywheel.util.StreamUtil;
+import com.jozufozu.flywheel.util.StringUtil;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
@@ -106,7 +106,7 @@ public class Loader implements ResourceManagerReloadListener {
 			try {
 				Resource file = manager.getResource(location);
 
-				String s = StreamUtil.readToString(file.getInputStream());
+				String s = StringUtil.readToString(file.getInputStream());
 
 				ResourceLocation specName = ResourceUtil.trim(location, PROGRAM_DIR, ".json");
 

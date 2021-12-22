@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.core.crumbling;
 
 import static org.lwjgl.opengl.GL20.glUniform2f;
 
-import com.jozufozu.flywheel.core.atlas.AtlasInfo;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 
 import net.minecraft.client.renderer.texture.TextureAtlas;

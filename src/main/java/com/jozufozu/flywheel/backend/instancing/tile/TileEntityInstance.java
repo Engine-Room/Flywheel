@@ -8,8 +8,8 @@ import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
-import com.jozufozu.flywheel.light.GridAlignedBB;
-import com.jozufozu.flywheel.light.ImmutableBox;
+import com.jozufozu.flywheel.util.box.GridAlignedBB;
+import com.jozufozu.flywheel.util.box.ImmutableBox;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;

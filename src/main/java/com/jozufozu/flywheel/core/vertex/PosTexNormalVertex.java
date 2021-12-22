@@ -2,21 +2,22 @@ package com.jozufozu.flywheel.core.vertex;
 
 import java.nio.ByteBuffer;
 
+import com.jozufozu.flywheel.backend.gl.attrib.CommonAttributes;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
-import com.jozufozu.flywheel.core.Formats;
-import com.jozufozu.flywheel.util.ModelReader;
 
-public class PosNormalTexType implements VertexType {
+public class PosTexNormalVertex implements VertexType {
 
-	public static final PosNormalTexType INSTANCE = new PosNormalTexType();
+	public static final VertexFormat FORMAT = VertexFormat.builder()
+			.addAttributes(CommonAttributes.VEC3, CommonAttributes.UV, CommonAttributes.NORMAL)
+			.build();
 
 	@Override
 	public VertexFormat getFormat() {
-		return Formats.UNLIT_MODEL;
+		return FORMAT;
 	}
 
 	@Override
-	public void copyInto(ByteBuffer buffer, ModelReader reader) {
+	public void copyInto(ByteBuffer buffer, VertexList reader) {
 		PosTexNormalWriter writer = new PosTexNormalWriter(buffer);
 
 		int vertexCount = reader.getVertexCount();

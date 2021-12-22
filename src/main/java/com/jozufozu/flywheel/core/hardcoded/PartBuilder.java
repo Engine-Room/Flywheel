@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.model;
+package com.jozufozu.flywheel.core.hardcoded;
 
 import java.util.ArrayList;
 import java.util.EnumSet;

@@ -4,18 +4,15 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.util.ModelReader;
 import com.jozufozu.flywheel.util.RenderMath;
 
-import net.minecraft.client.renderer.LightTexture;
-
-public class PosNormalTexReader implements ModelReader {
+public class PosTexNormalVertexListUnsafe implements VertexList {
 
 	private final ByteBuffer buffer;
 	private final int vertexCount;
 	private final long base;
 
-	public PosNormalTexReader(ByteBuffer buffer, int vertexCount) {
+	public PosTexNormalVertexListUnsafe(ByteBuffer buffer, int vertexCount) {
 		this.buffer = buffer;
 		this.vertexCount = vertexCount;
 		this.base = MemoryUtil.memAddress(buffer);

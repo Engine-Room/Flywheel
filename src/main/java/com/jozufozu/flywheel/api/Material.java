@@ -5,8 +5,8 @@ import java.util.function.Supplier;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.model.BlockModel;
 import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.ModelUtil;
 import com.jozufozu.flywheel.util.Pair;
-import com.jozufozu.flywheel.util.RenderUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.core.Direction;
@@ -27,7 +27,7 @@ public interface Material<D extends InstanceData> {
 	}
 
 	default Instancer<D> getModel(PartialModel partial, BlockState referenceState, Direction dir) {
-		return getModel(partial, referenceState, dir, RenderUtil.rotateToFace(dir));
+		return getModel(partial, referenceState, dir, ModelUtil.rotateToFace(dir));
 	}
 
 	default Instancer<D> getModel(PartialModel partial, BlockState referenceState, Direction dir, Supplier<PoseStack> modelTransform) {

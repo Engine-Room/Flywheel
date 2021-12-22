@@ -1,17 +1,18 @@
-package com.jozufozu.flywheel.util;
+package com.jozufozu.flywheel.core.vertex;
 
 import java.nio.ByteBuffer;
 
+import com.jozufozu.flywheel.util.RenderMath;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.datafixers.util.Pair;
 
-public class BlockFormatReader implements ModelReader {
+public class BlockVertexList implements VertexList {
 
 	private final ByteBuffer buffer;
 	private final int vertexCount;
 	private final int stride;
 
-	public BlockFormatReader(BufferBuilder builder) {
+	public BlockVertexList(BufferBuilder builder) {
 		Pair<BufferBuilder.DrawState, ByteBuffer> data = builder.popNextBuffer();
 		buffer = data.getSecond();
 

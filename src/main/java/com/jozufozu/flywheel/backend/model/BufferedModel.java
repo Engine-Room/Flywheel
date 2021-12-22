@@ -12,7 +12,6 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.core.model.Model;
-import com.jozufozu.flywheel.core.model.VecBufferWriter;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 public class BufferedModel implements IBufferedModel {

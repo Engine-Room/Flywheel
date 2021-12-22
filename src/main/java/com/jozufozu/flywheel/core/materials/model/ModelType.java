@@ -3,15 +3,21 @@ package com.jozufozu.flywheel.core.materials.model;
 import com.jozufozu.flywheel.api.struct.Batched;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructWriter;
+import com.jozufozu.flywheel.backend.gl.attrib.CommonAttributes;
+import com.jozufozu.flywheel.backend.gl.attrib.MatrixAttributes;
 import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.Programs;
 import com.jozufozu.flywheel.core.model.ModelTransformer;
 
 import net.minecraft.resources.ResourceLocation;
 
 public class ModelType implements Instanced<ModelData>, Batched<ModelData> {
+
+	public static final VertexFormat FORMAT = VertexFormat.builder()
+			.addAttributes(CommonAttributes.LIGHT, CommonAttributes.RGBA)
+			.addAttributes(MatrixAttributes.MAT4, MatrixAttributes.MAT3)
+			.build();
 
 	@Override
 	public ModelData create() {
@@ -20,7 +26,7 @@ public class ModelType implements Instanced<ModelData>, Batched<ModelData> {
 
 	@Override
 	public VertexFormat format() {
-		return Formats.TRANSFORMED;
+		return FORMAT;
 	}
 
 	@Override
