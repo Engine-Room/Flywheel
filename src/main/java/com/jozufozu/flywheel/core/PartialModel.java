@@ -44,7 +44,7 @@ public class PartialModel {
 
 	public static void onModelRegistry(ResourceManager manager, Consumer<ResourceLocation> out) {
 		for (PartialModel partial : ALL)
-			out.accept(partial.modelLocation);
+			out.accept(partial.getLocation());
 
 		tooLate = true;
 	}

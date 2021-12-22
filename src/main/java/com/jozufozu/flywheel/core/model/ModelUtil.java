@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 
+import com.jozufozu.flywheel.fabric.model.CullingBakedModel;
+import com.jozufozu.flywheel.fabric.model.DefaultLayerFilteringBakedModel;
+import com.jozufozu.flywheel.fabric.model.LayerFilteringBakedModel;
 import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.VirtualEmptyBlockGetter;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -12,7 +15,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
@@ -25,7 +27,6 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
-// TODO
 public class ModelUtil {
 	private static final Lazy<ModelBlockRenderer> MODEL_RENDERER = Lazy.of(() -> new ModelBlockRenderer(Minecraft.getInstance().getBlockColors()));
 
@@ -50,8 +51,9 @@ public class ModelUtil {
 		//				.collect(Collectors.toList());
 
 		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+		model = DefaultLayerFilteringBakedModel.wrap(model);
 		blockRenderer.tesselateBlock(VirtualEmptyBlockGetter.INSTANCE, model, referenceState, BlockPos.ZERO, ms, builder,
-				true, new Random(), 42, OverlayTexture.NO_OVERLAY);
+				false, new Random(), 42, OverlayTexture.NO_OVERLAY);
 		builder.end();
 		return builder;
 	}
@@ -65,27 +67,25 @@ public class ModelUtil {
 		BufferBuilder builder = new BufferBuilder(512);
 		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
-//		ForgeHooksClient.setRenderType(layer);
 		ModelBlockRenderer.enableCaching();
 		for (StructureTemplate.StructureBlockInfo info : blocks) {
 			BlockState state = info.state;
 
 			if (state.getRenderShape() != RenderShape.MODEL)
 				continue;
-//			if (!ItemBlockRenderTypes.canRenderInLayer(state, layer))
-			if (ItemBlockRenderTypes.getChunkRenderType(state) != layer)
-				continue;
 
 			BlockPos pos = info.pos;
 
 			ms.pushPose();
 			ms.translate(pos.getX(), pos.getY(), pos.getZ());
-			modelRenderer.tesselateBlock(renderWorld, blockModels.getBlockModel(state), state, pos, ms, builder,
+			BakedModel model = blockModels.getBlockModel(state);
+			model = CullingBakedModel.wrap(model);
+			model = LayerFilteringBakedModel.wrap(model, layer);
+			modelRenderer.tesselateBlock(renderWorld, model, state, pos, ms, builder,
 					true, random, 42, OverlayTexture.NO_OVERLAY);
 			ms.popPose();
 		}
 		ModelBlockRenderer.clearCache();
-//		ForgeHooksClient.setRenderType(null);
 
 		builder.end();
 		return builder;

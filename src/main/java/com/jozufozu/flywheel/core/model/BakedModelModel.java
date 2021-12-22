@@ -21,6 +21,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 
+// TODO Fabric
 public class BakedModelModel implements Model {
 	// DOWN, UP, NORTH, SOUTH, WEST, EAST, null
 	private static final Direction[] dirs;
@@ -44,7 +45,6 @@ public class BakedModelModel implements Model {
 
 		for (Direction dir : dirs) {
 			random.setSeed(42);
-			// TODO
 			List<BakedQuad> quads = model.getQuads(null, dir, random/*, VirtualEmptyModelData.INSTANCE*/);
 
 			numQuads += quads.size();
@@ -69,7 +69,6 @@ public class BakedModelModel implements Model {
 
 		for (Direction dir : dirs) {
 			random.setSeed(42);
-			// TODO
 			List<BakedQuad> quads = model.getQuads(null, dir, random/*, VirtualEmptyModelData.INSTANCE*/);
 
 			for (BakedQuad bakedQuad : quads) {

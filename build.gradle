@@ -28,6 +28,13 @@ repositories {
     maven {
         url 'https://maven.parchmentmc.org/'
     }
+    maven {
+        name 'Modrinth'
+        url 'https://api.modrinth.com/maven'
+    }
+    maven {
+        url 'https://maven.vram.io'
+    }
 }
 
 dependencies {
@@ -44,6 +51,8 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    modCompileOnly 'maven.modrinth:indium:1.0.2-alpha1+mc1.18'
+    modCompileOnly 'io.vram:frex-fabric-mc118:6.0.229'
 
     //implementation 'org.joml:joml:1.10.1'
 }
