@@ -99,7 +99,7 @@ public class ModelUtil {
 			PoseStack stack = new PoseStack();
 			TransformStack.cast(stack)
 					.centre()
-					.rotateToFace(facing)
+					.rotateToFace(facing.getOpposite())
 					.unCentre();
 			return stack;
 		};

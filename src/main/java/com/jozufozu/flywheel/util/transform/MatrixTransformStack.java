@@ -1,6 +1,8 @@
 package com.jozufozu.flywheel.util.transform;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 
 public class MatrixTransformStack implements TransformStack {
@@ -62,6 +64,18 @@ public class MatrixTransformStack implements TransformStack {
 	@Override
 	public TransformStack popPose() {
 		internal.popPose();
+		return this;
+	}
+
+	@Override
+	public TransformStack mulPose(Matrix4f pose) {
+		internal.last().pose().multiply(pose);
+		return this;
+	}
+
+	@Override
+	public TransformStack mulNormal(Matrix3f normal) {
+		internal.last().normal().mul(normal);
 		return this;
 	}
 }
