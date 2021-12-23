@@ -9,6 +9,7 @@ import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.config.FlwPackets;
 
 import net.minecraft.commands.synchronization.ArgumentTypes;
+import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -41,6 +42,6 @@ public class Flywheel {
 
     private void setup(final FMLCommonSetupEvent event) {
 		FlwPackets.registerPackets();
-		ArgumentTypes.register("flywheel:engine", EngineArgument.class, EngineArgument.SERIALIZER);
+		ArgumentTypes.register("flywheel:engine", EngineArgument.class, new EmptyArgumentSerializer<>(EngineArgument::getInstance));
 	}
 }
