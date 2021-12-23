@@ -7,13 +7,11 @@ import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.api.struct.Batched;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.backend.instancing.SuperBufferSource;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
-import com.jozufozu.flywheel.backend.model.DirectBufferBuilder;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 
 public class BatchedMaterialGroup implements MaterialGroup {
@@ -36,17 +34,8 @@ public class BatchedMaterialGroup implements MaterialGroup {
 		}
 	}
 
-	public void render(PoseStack stack, MultiBufferSource source, TaskEngine pool) {
-		VertexConsumer buffer = source.getBuffer(state);
+	public void render(PoseStack stack, SuperBufferSource source, TaskEngine pool) {
 
-		if (buffer instanceof DirectBufferBuilder direct) {
-			renderParallel(stack, pool, direct);
-		} else {
-			renderSerial(stack, buffer);
-		}
-	}
-
-	private void renderParallel(PoseStack stack, TaskEngine pool, DirectBufferBuilder direct) {
 		int vertexCount = 0;
 		for (BatchedMaterial<?> material : materials.values()) {
 			for (CPUInstancer<?> instancer : material.models.values()) {
@@ -55,7 +44,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 			}
 		}
 
-		DirectVertexConsumer consumer = direct.intoDirectConsumer(vertexCount);
+		DirectVertexConsumer consumer = source.getBuffer(state, vertexCount);
 
 		// avoids rendering garbage, but doesn't fix the issue of some instances not being buffered
 		consumer.memSetZero();
@@ -71,12 +60,6 @@ public class BatchedMaterialGroup implements MaterialGroup {
 				}
 				instancer.submitTasks(stack, pool, consumer);
 			}
-		}
-	}
-
-	private void renderSerial(PoseStack stack, VertexConsumer consumer) {
-		for (BatchedMaterial<?> value : materials.values()) {
-			value.setupAndRenderInto(stack, consumer);
 		}
 	}
 

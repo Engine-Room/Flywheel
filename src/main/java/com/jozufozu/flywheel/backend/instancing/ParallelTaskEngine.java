@@ -17,7 +17,7 @@ import com.jozufozu.flywheel.backend.instancing.batching.WaitGroup;
 import net.minecraft.util.Mth;
 
 // https://github.com/CaffeineMC/sodium-fabric/blob/5d364ed5ba63f9067fcf72a078ca310bff4db3e9/src/main/java/me/jellysquid/mods/sodium/client/render/chunk/compile/ChunkBuilder.java
-public class BatchExecutor implements TaskEngine {
+public class ParallelTaskEngine implements TaskEngine {
 	private static final Logger LOGGER = LogManager.getLogger("BatchExecutor");
 
 	private final AtomicBoolean running = new AtomicBoolean(false);
@@ -30,7 +30,10 @@ public class BatchExecutor implements TaskEngine {
 
 	private final int threadCount;
 
-	public BatchExecutor() {
+	private final String name;
+
+	public ParallelTaskEngine(String name) {
+		this.name = name;
 		threadCount = getOptimalThreadCount();
 	}
 
@@ -49,7 +52,7 @@ public class BatchExecutor implements TaskEngine {
 
 		for (int i = 0; i < this.threadCount; i++) {
 
-			Thread thread = new Thread(new WorkerRunnable(), "Engine Executor " + i);
+			Thread thread = new Thread(new WorkerRunnable(), name + " " + i);
 			thread.setPriority(Math.max(0, Thread.NORM_PRIORITY - 2));
 			thread.start();
 
@@ -121,9 +124,9 @@ public class BatchExecutor implements TaskEngine {
 		Runnable job = this.jobQueue.pollFirst();
 
 		if (job == null) {
-			synchronized (BatchExecutor.this.jobNotifier) {
+			synchronized (ParallelTaskEngine.this.jobNotifier) {
 				try {
-					BatchExecutor.this.jobNotifier.wait();
+					ParallelTaskEngine.this.jobNotifier.wait();
 				} catch (InterruptedException ignored) {
 				}
 			}
@@ -138,7 +141,7 @@ public class BatchExecutor implements TaskEngine {
 		} catch (Exception e) {
 			Flywheel.log.error(e);
 		} finally {
-			BatchExecutor.this.wg.done();
+			ParallelTaskEngine.this.wg.done();
 		}
 	}
 
@@ -155,19 +158,19 @@ public class BatchExecutor implements TaskEngine {
 	}
 	private class WorkerRunnable implements Runnable {
 
-		private final AtomicBoolean running = BatchExecutor.this.running;
+		private final AtomicBoolean running = ParallelTaskEngine.this.running;
 
 		@Override
 		public void run() {
 			// Run until the chunk builder shuts down
 			while (this.running.get()) {
-				Runnable job = BatchExecutor.this.getNextTask();
+				Runnable job = ParallelTaskEngine.this.getNextTask();
 
 				if (job == null) {
 					continue;
 				}
 
-				BatchExecutor.this.processTask(job);
+				ParallelTaskEngine.this.processTask(job);
 			}
 		}
 

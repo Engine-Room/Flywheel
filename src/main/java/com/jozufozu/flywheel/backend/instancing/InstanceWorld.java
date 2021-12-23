@@ -16,6 +16,8 @@ import com.jozufozu.flywheel.event.RenderLayerEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
@@ -29,11 +31,12 @@ public class InstanceWorld {
 	protected final InstanceManager<Entity> entityInstanceManager;
 	protected final InstanceManager<BlockEntity> tileEntityInstanceManager;
 
-	protected final BatchExecutor taskEngine;
+	protected final ParallelTaskEngine taskEngine;
 
-	public InstanceWorld() {
+	public InstanceWorld(LevelAccessor levelAccessor) {
+		Level world = (Level) levelAccessor;
 
-		this.taskEngine = new BatchExecutor();
+		this.taskEngine = new ParallelTaskEngine("Flywheel " + world.dimension().location());
 		this.taskEngine.startWorkers();
 
 		FlwEngine engine = Backend.getInstance()
@@ -42,19 +45,19 @@ public class InstanceWorld {
 		switch (engine) {
 		case INSTANCING -> {
 			InstancingEngine<WorldProgram> manager = InstancingEngine.builder(Contexts.WORLD)
-					.build(this.taskEngine);
+					.build();
 
-			entityInstanceManager = new EntityInstanceManager(this.taskEngine, manager);
-			tileEntityInstanceManager = new TileInstanceManager(this.taskEngine, manager);
+			entityInstanceManager = new EntityInstanceManager(manager);
+			tileEntityInstanceManager = new TileInstanceManager(manager);
 
 			manager.addListener(entityInstanceManager);
 			manager.addListener(tileEntityInstanceManager);
 			this.engine = manager;
 		}
 		case BATCHING -> {
-			this.engine = new BatchingEngine(this.taskEngine);
-			entityInstanceManager = new EntityInstanceManager(this.taskEngine, this.engine);
-			tileEntityInstanceManager = new TileInstanceManager(this.taskEngine, this.engine);
+			this.engine = new BatchingEngine();
+			entityInstanceManager = new EntityInstanceManager(this.engine);
+			tileEntityInstanceManager = new TileInstanceManager(this.engine);
 		}
 		default -> throw new IllegalArgumentException("Unknown engine type");
 		}
@@ -91,8 +94,8 @@ public class InstanceWorld {
 
 		taskEngine.syncPoint();
 
-		tileEntityInstanceManager.beginFrame(event.getInfo());
-		entityInstanceManager.beginFrame(event.getInfo());
+		tileEntityInstanceManager.beginFrame(taskEngine, event.getInfo());
+		entityInstanceManager.beginFrame(taskEngine, event.getInfo());
 	}
 
 	/**
@@ -107,8 +110,8 @@ public class InstanceWorld {
 
 		if (renderViewEntity == null) return;
 
-		tileEntityInstanceManager.tick(renderViewEntity.getX(), renderViewEntity.getY(), renderViewEntity.getZ());
-		entityInstanceManager.tick(renderViewEntity.getX(), renderViewEntity.getY(), renderViewEntity.getZ());
+		tileEntityInstanceManager.tick(taskEngine, renderViewEntity.getX(), renderViewEntity.getY(), renderViewEntity.getZ());
+		entityInstanceManager.tick(taskEngine, renderViewEntity.getX(), renderViewEntity.getY(), renderViewEntity.getZ());
 	}
 
 	/**
@@ -116,7 +119,10 @@ public class InstanceWorld {
 	 */
 	public void renderLayer(RenderLayerEvent event) {
 		taskEngine.syncPoint();
-		engine.render(event);
+		event.stack.pushPose();
+		event.stack.translate(-event.camX, -event.camY, -event.camZ);
+		engine.render(taskEngine, event);
+		event.stack.popPose();
 	}
 
 	/**

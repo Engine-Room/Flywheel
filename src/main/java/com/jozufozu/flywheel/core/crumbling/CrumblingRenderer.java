@@ -6,6 +6,7 @@ import java.util.SortedSet;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
+import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.core.Contexts;
@@ -74,9 +75,9 @@ public class CrumblingRenderer {
 			if (_currentLayer != null) {
 				stage.getValue().forEach(instanceManager::add);
 
-				instanceManager.beginFrame(info);
+				instanceManager.beginFrame(SerialTaskEngine.INSTANCE, info);
 
-				materials.render(event);
+				materials.render(SerialTaskEngine.INSTANCE, event);
 
 				instanceManager.invalidate();
 			}

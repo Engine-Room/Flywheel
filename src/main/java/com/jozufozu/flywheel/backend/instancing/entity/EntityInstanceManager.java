@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.instancing.entity;
 import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
-import com.jozufozu.flywheel.backend.instancing.BatchExecutor;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
@@ -15,8 +14,8 @@ import net.minecraft.world.level.Level;
 
 public class EntityInstanceManager extends InstanceManager<Entity> {
 
-	public EntityInstanceManager(TaskEngine executor, MaterialManager materialManager) {
-		super(executor, materialManager);
+	public EntityInstanceManager(MaterialManager materialManager) {
+		super(materialManager);
 	}
 
 	@Override
