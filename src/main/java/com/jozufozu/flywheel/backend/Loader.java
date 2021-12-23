@@ -64,36 +64,34 @@ public class Loader implements ResourceManagerReloadListener {
 	public void onResourceManagerReload(ResourceManager manager) {
 		backend.refresh();
 
-		if (backend.gl20()) {
-			shouldCrash = false;
-			backend._clearContexts();
+		shouldCrash = false;
+		backend._clearContexts();
 
-			Resolver.INSTANCE.invalidate();
-			ModLoader.get()
-					.postEvent(new GatherContextEvent(backend, firstLoad));
+		Resolver.INSTANCE.invalidate();
+		ModLoader.get()
+				.postEvent(new GatherContextEvent(backend, firstLoad));
 
-			ShaderSources sources = new ShaderSources(manager);
+		ShaderSources sources = new ShaderSources(manager);
 
-			loadProgramSpecs(manager);
+		loadProgramSpecs(manager);
 
-			Resolver.INSTANCE.resolve(sources);
+		Resolver.INSTANCE.resolve(sources);
 
-			for (ShaderContext<?> context : backend.allContexts()) {
-				context.load();
-			}
+		for (ShaderContext<?> context : backend.allContexts()) {
+			context.load();
+		}
 
-			if (shouldCrash) {
-				throw new ShaderLoadingException("Could not load all shaders, see log for details");
-			}
+		if (shouldCrash) {
+			throw new ShaderLoadingException("Could not load all shaders, see log for details");
+		}
 
-			Backend.log.info("Loaded all shader programs.");
+		Backend.log.info("Loaded all shader programs.");
 
-			ClientLevel world = Minecraft.getInstance().level;
-			if (Backend.isFlywheelWorld(world)) {
-				// TODO: looks like it might be good to have another event here
-				InstancedRenderDispatcher.resetInstanceWorld(world);
-				CrumblingRenderer.reset();
-			}
+		ClientLevel world = Minecraft.getInstance().level;
+		if (Backend.isFlywheelWorld(world)) {
+			// TODO: looks like it might be good to have another event here
+			InstancedRenderDispatcher.resetInstanceWorld(world);
+			CrumblingRenderer.reset();
 		}
 
 		firstLoad = false;

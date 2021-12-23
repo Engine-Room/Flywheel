@@ -29,9 +29,7 @@ public class SConfigureEnginePacket {
 	}
 
 	public void execute(Supplier<NetworkEvent.Context> ctx) {
-		if (type != null) {
-			type.switchTo();
-		}
+		FlwEngine.handle(type);
 		ctx.get()
 				.setPacketHandled(true);
 	}

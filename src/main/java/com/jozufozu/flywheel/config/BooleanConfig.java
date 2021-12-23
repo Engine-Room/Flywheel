@@ -17,7 +17,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public enum BooleanConfig {
-	ENGINE(() -> BooleanConfig::enabled),
 	NORMAL_OVERLAY(() -> BooleanConfig::normalOverlay),
 	;
 
@@ -50,29 +49,6 @@ public enum BooleanConfig {
 			return values[t];
 		else
 			return null;
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	private static void enabled(BooleanDirective state) {
-		LocalPlayer player = Minecraft.getInstance().player;
-		if (player == null || state == null) return;
-
-		if (state == BooleanDirective.DISPLAY) {
-			Component text = new TextComponent("Flywheel renderer is currently: ").append(boolToText(FlwConfig.get().enabled()));
-			player.displayClientMessage(text, false);
-			return;
-		}
-
-		boolean enabled = state.get();
-		boolean cannotUse = OptifineHandler.usingShaders() && enabled;
-
-		FlwConfig.get().client.enabled.set(enabled);
-
-		Component text = boolToText(FlwConfig.get().enabled()).append(new TextComponent(" Flywheel renderer").withStyle(ChatFormatting.WHITE));
-		Component error = new TextComponent("Flywheel renderer does not support Optifine Shaders").withStyle(ChatFormatting.RED);
-
-		player.displayClientMessage(cannotUse ? error : text, false);
-		Backend.reloadWorldRenderers();
 	}
 
 	@OnlyIn(Dist.CLIENT)
