@@ -41,10 +41,6 @@ public class InstancedRenderDispatcher {
 		getEntities(entity.level).queueUpdate(entity);
 	}
 
-	public static String getEngineName(LevelAccessor world) {
-		return instanceWorlds.get(world).engine.getName();
-	}
-
 	public static InstanceManager<BlockEntity> getTiles(LevelAccessor world) {
 		return instanceWorlds.get(world)
 				.getTileEntityInstanceManager();
@@ -81,8 +77,7 @@ public class InstancedRenderDispatcher {
 		if (event.layer == null) return;
 
 		ClientLevel world = event.getWorld();
-		if (!Backend.getInstance()
-				.canUseInstancing(world)) return;
+		if (!Backend.canUseInstancing(world)) return;
 
 		instanceWorlds.get(world).renderLayer(event);
 	}
@@ -90,8 +85,7 @@ public class InstancedRenderDispatcher {
 	@SubscribeEvent
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		ClientLevel world = event.getWorld();
-		if (Backend.getInstance()
-				.canUseInstancing() && world != null) {
+		if (Backend.isOn() && world != null) {
 			resetInstanceWorld(world);
 		}
 	}

@@ -17,13 +17,11 @@ import com.jozufozu.flywheel.api.FlywheelWorld;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.config.FlwEngine;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -32,20 +30,18 @@ public class Backend {
 	public static final Logger log = LogManager.getLogger(Backend.class);
 
 	protected static final Backend INSTANCE = new Backend();
-	private FlwEngine engine;
-
 	public static Backend getInstance() {
 		return INSTANCE;
 	}
 
-	public final Loader loader;
+	private FlwEngine engine;
 
 	public GLCapabilities capabilities;
 	public GlCompat compat;
 
-	private boolean instancedArrays;
 	private boolean enabled;
 
+	public final Loader loader;
 	private final List<ShaderContext<?>> contexts = new ArrayList<>();
 	private final Map<ResourceLocation, StructType<?>> materialRegistry = new HashMap<>();
 	private final Map<ResourceLocation, ProgramSpec> programSpecRegistry = new HashMap<>();
@@ -61,16 +57,11 @@ public class Backend {
 	 * (Meshlet, MDI, GL31 Draw Instanced are planned), this will name which one is in use.
 	 */
 	public String getBackendDescriptor() {
-		if (enabled) {
-			ClientLevel level = Minecraft.getInstance().level;
+		return engine.getProperName();
+	}
 
-			if (level == null) {
-				return "Invalid";
-			}
-			return InstancedRenderDispatcher.getEngineName(level);
-		}
-
-		return "Disabled";
+	public FlwEngine getEngine() {
+		return engine;
 	}
 
 	/**
@@ -111,41 +102,22 @@ public class Backend {
 		return programSpecRegistry.get(name);
 	}
 
-	public boolean available() {
-		return canUseVBOs();
-	}
-
-	public boolean canUseInstancing() {
-		return enabled && instancedArrays;
-	}
-
-	public boolean canUseVBOs() {
-		return enabled && gl20();
-	}
-
-	public boolean gl33() {
-		return capabilities.OpenGL33;
-	}
-
-	public boolean gl20() {
-		return capabilities.OpenGL20;
-	}
-
 	public void refresh() {
 		OptifineHandler.refresh();
+		boolean usingShaders = OptifineHandler.usingShaders();
+
 		capabilities = GL.createCapabilities();
 
 		compat = new GlCompat(capabilities);
 
-		instancedArrays = compat.instancedArraysSupported();
+		engine = FlwConfig.get()
+				.getEngine();
 
-		FlwConfig config = FlwConfig.get();
-		enabled = config.enabled() && !OptifineHandler.usingShaders();
-		engine = config.client.engine.get();
-	}
-
-	public boolean canUseInstancing(@Nullable Level world) {
-		return canUseInstancing() && isFlywheelWorld(world);
+		enabled = switch (engine) {
+			case OFF -> false;
+			case BATCHING -> true;
+			case INSTANCING -> !usingShaders && compat.instancedArraysSupported();
+		};
 	}
 
 	public Collection<StructType<?>> allMaterials() {
@@ -158,6 +130,14 @@ public class Backend {
 
 	public Collection<ShaderContext<?>> allContexts() {
 		return contexts;
+	}
+
+	public static boolean isOn() {
+		return getInstance().enabled;
+	}
+
+	public static boolean canUseInstancing(@Nullable Level world) {
+		return isOn() && isFlywheelWorld(world);
 	}
 
 	/**
@@ -184,7 +164,7 @@ public class Backend {
 	/**
 	 * INTERNAL USE ONLY
 	 */
-	public void _clearContexts() {
+	void _clearContexts() {
 		GameStateRegistry.clear();
 		programSpecRegistry.clear();
 		contexts.forEach(ShaderContext::delete);
@@ -193,9 +173,5 @@ public class Backend {
 	}
 
 	public static void init() {
-	}
-
-	public FlwEngine getEngine() {
-		return engine;
 	}
 }

@@ -40,7 +40,7 @@ public class InstanceWorld {
 				.getEngine();
 
 		switch (engine) {
-		case GL33 -> {
+		case INSTANCING -> {
 			InstancingEngine<WorldProgram> manager = InstancingEngine.builder(Contexts.WORLD)
 					.build(this.taskEngine);
 

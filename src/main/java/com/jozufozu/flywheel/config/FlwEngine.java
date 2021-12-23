@@ -1,9 +1,12 @@
 package com.jozufozu.flywheel.config;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.OptifineHandler;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -13,15 +16,50 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
 public enum FlwEngine {
-	BATCHING(new TextComponent("Batching").withStyle(ChatFormatting.BLUE)),
-	GL33(new TextComponent("GL 3.3 Instanced Arrays").withStyle(ChatFormatting.GREEN)),
-
+	OFF("off", "Off", new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED)),
+	BATCHING("batching", "Parallel Batching", new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN)),
+	INSTANCING("instancing", "GL33 Instanced Arrays", new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN)),
 	;
 
-	private final Component name;
+	private static final Map<String, FlwEngine> lookup;
 
-	FlwEngine(Component name) {
-		this.name = name;
+	static {
+		lookup = new HashMap<>();
+		for (FlwEngine value : values()) {
+			lookup.put(value.shortName, value);
+		}
+	}
+
+	private final Component message;
+	private final String shortName;
+	private final String properName;
+
+	FlwEngine(String shortName, String properName, Component message) {
+		this.shortName = shortName;
+		this.properName = properName;
+		this.message = message;
+	}
+
+	public String getProperName() {
+		return properName;
+	}
+
+	public void encode(FriendlyByteBuf buffer) {
+		buffer.writeByte(this.ordinal());
+	}
+
+	public static void handle(@Nullable FlwEngine type) {
+		LocalPlayer player = Minecraft.getInstance().player;
+		if (player == null) return;
+
+		if (type != null) {
+			FlwConfig.get().client.engine.set(type);
+
+			player.displayClientMessage(type.message, false);
+			Backend.reloadWorldRenderers();
+		} else {
+			player.displayClientMessage(FlwConfig.get().getEngine().message, false);
+		}
 	}
 
 	@Nullable
@@ -33,25 +71,12 @@ public enum FlwEngine {
 		return values()[b];
 	}
 
-	public void encode(FriendlyByteBuf buffer) {
-		buffer.writeByte(this.ordinal());
+	@Nullable
+	public static FlwEngine byName(String name) {
+		return lookup.get(name);
 	}
 
-	public void switchTo() {
-		LocalPlayer player = Minecraft.getInstance().player;
-		if (player == null) return;
-
-//		if (state == BooleanDirective.DISPLAY) {
-//			Component text = new TextComponent("Flywheel renderer is currently: ").append(boolToText(FlwConfig.get().enabled()));
-//			player.displayClientMessage(text, false);
-//			return;
-//		}
-
-		FlwConfig.get().client.engine.set(this);
-
-		Component text = new TextComponent("Using ").withStyle(ChatFormatting.WHITE).append(name);
-
-		player.displayClientMessage(text, false);
-		Backend.reloadWorldRenderers();
+	public static Collection<String> validNames() {
+		return lookup.keySet();
 	}
 }

@@ -54,8 +54,7 @@ public class CrumblingRenderer {
 	}
 
 	public static void renderBreaking(RenderLayerEvent event) {
-		if (!Backend.getInstance()
-				.canUseInstancing(event.getWorld())) return;
+		if (!Backend.canUseInstancing(event.getWorld())) return;
 
 		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageTiles(event.getWorld());
 
@@ -120,8 +119,7 @@ public class CrumblingRenderer {
 	@SubscribeEvent
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		ClientLevel world = event.getWorld();
-		if (Backend.getInstance()
-				.canUseInstancing() && world != null) {
+        if (Backend.isOn() && world != null) {
 			reset();
 		}
 	}

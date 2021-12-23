@@ -154,8 +154,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	}
 
 	public void add(T obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return;
+		if (!Backend.isOn()) return;
 
 		if (canInstance(obj)) {
 			addInternal(obj);
@@ -163,8 +162,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	}
 
 	public void queueAdd(T obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return;
+		if (!Backend.isOn()) return;
 
 		synchronized (queuedAdditions) {
 			queuedAdditions.add(obj);
@@ -172,8 +170,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	}
 
 	public void queueUpdate(T obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return;
+		if (!Backend.isOn()) return;
 		synchronized (queuedUpdates) {
 			queuedUpdates.add(obj);
 		}
@@ -191,8 +188,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	 * @param obj the object to update.
 	 */
 	public void update(T obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return;
+		if (!Backend.isOn()) return;
 
 		if (canInstance(obj)) {
 			AbstractInstance instance = getInstance(obj);
@@ -213,8 +209,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	}
 
 	public void remove(T obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return;
+		if (!Backend.isOn()) return;
 
 		if (canInstance(obj)) {
 			AbstractInstance instance = getInstance(obj);
@@ -231,8 +226,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 
 	@Nullable
 	protected <I extends T> AbstractInstance getInstance(I obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return null;
+		if (!Backend.isOn()) return null;
 
 		return instances.get(obj);
 	}
@@ -291,8 +285,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	}
 
 	protected void addInternal(T obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return;
+		if (!Backend.isOn()) return;
 
 		AbstractInstance instance = instances.get(obj);
 

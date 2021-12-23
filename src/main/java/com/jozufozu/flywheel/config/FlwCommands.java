@@ -15,9 +15,8 @@ public class FlwCommands {
 				.getDispatcher();
 
 		dispatcher.register(Commands.literal("flywheel")
-									.then(new BooleanConfigCommand("backend", BooleanConfig.ENGINE).register())
 									.then(new BooleanConfigCommand("debugNormals", BooleanConfig.NORMAL_OVERLAY).register())
-									.then(new EngineConfigCommand().register())
+									.then(EngineConfigCommand.register())
 		);
 	}
 }

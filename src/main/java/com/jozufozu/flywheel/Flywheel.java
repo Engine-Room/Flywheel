@@ -3,10 +3,12 @@ package com.jozufozu.flywheel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.jozufozu.flywheel.config.EngineArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.config.FlwPackets;
 
+import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -39,5 +41,6 @@ public class Flywheel {
 
     private void setup(final FMLCommonSetupEvent event) {
 		FlwPackets.registerPackets();
+		ArgumentTypes.register("flywheel:engine", EngineArgument.class, EngineArgument.SERIALIZER);
 	}
 }
