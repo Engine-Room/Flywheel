@@ -14,10 +14,9 @@ public class ModelWriterUnsafe extends BasicWriterUnsafe<ModelData> {
 	@Override
 	protected void writeInternal(ModelData d) {
 		super.writeInternal(d);
-		long addr = writePointer + 6;
+		long ptr = writePointer + 6;
 
-		((WriteUnsafe) (Object) d.model).writeUnsafe(addr);
-		addr += 4 * 16;
-		((WriteUnsafe) (Object) d.normal).writeUnsafe(addr);
+		((WriteUnsafe) (Object) d.model).writeUnsafe(ptr);
+		((WriteUnsafe) (Object) d.normal).writeUnsafe(ptr + 4 * 16);
 	}
 }
