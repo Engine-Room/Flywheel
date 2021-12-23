@@ -2,11 +2,11 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ImmediateExecutor implements TaskEngine {
+public class SerialTaskEngine implements TaskEngine {
 
-	public static final ImmediateExecutor INSTANCE = new ImmediateExecutor();
+	public static final SerialTaskEngine INSTANCE = new SerialTaskEngine();
 
-	private ImmediateExecutor() {
+	private SerialTaskEngine() {
 	}
 
 	@Override

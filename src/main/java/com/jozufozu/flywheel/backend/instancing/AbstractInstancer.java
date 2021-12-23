@@ -115,4 +115,9 @@ public abstract class AbstractInstancer<D extends InstanceData> implements Insta
 
 		return instanceData;
 	}
+
+	@Override
+	public String toString() {
+		return "Instancer[" + modelData + ']';
+	}
 }

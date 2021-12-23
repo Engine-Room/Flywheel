@@ -32,13 +32,11 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	protected final Map<T, AbstractInstance> instances;
 	protected final Object2ObjectOpenHashMap<T, ITickableInstance> tickableInstances;
 	protected final Object2ObjectOpenHashMap<T, IDynamicInstance> dynamicInstances;
-	private final TaskEngine taskEngine;
 
 	protected int frame;
 	protected int tick;
 
-	public InstanceManager(TaskEngine taskEngine, MaterialManager materialManager) {
-		this.taskEngine = taskEngine;
+	public InstanceManager(MaterialManager materialManager) {
 		this.materialManager = materialManager;
 		this.queuedUpdates = new HashSet<>(64);
 		this.queuedAdditions = new HashSet<>(64);
@@ -78,7 +76,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	 *     Queued updates are processed.
 	 * </p>
 	 */
-	public void tick(double cameraX, double cameraY, double cameraZ) {
+	public void tick(TaskEngine taskEngine, double cameraX, double cameraY, double cameraZ) {
 		tick++;
 		processQueuedUpdates();
 
@@ -120,7 +118,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		if ((tick % getUpdateDivisor(dX, dY, dZ)) == 0) instance.tick();
 	}
 
-	public void beginFrame(Camera info) {
+	public void beginFrame(TaskEngine taskEngine, Camera info) {
 		frame++;
 		processQueuedAdditions();
 

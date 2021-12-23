@@ -22,7 +22,7 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class InstancedRenderDispatcher {
 
-	private static final WorldAttached<InstanceWorld> instanceWorlds = new WorldAttached<>($ -> new InstanceWorld());
+	private static final WorldAttached<InstanceWorld> instanceWorlds = new WorldAttached<>(InstanceWorld::new);
 
 	/**
 	 * Call this when you want to manually run {@link AbstractInstance#update()}.
