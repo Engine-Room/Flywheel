@@ -34,23 +34,23 @@ public abstract class Matrix4fMixin implements WriteUnsafe, WriteSafe {
 	@Shadow protected float m33;
 
 	@Override
-	public void writeUnsafe(long addr) {
-		MemoryUtil.memPutFloat(addr, m00);
-		MemoryUtil.memPutFloat(addr += 4L, m10);
-		MemoryUtil.memPutFloat(addr += 4L, m20);
-		MemoryUtil.memPutFloat(addr += 4L, m30);
-		MemoryUtil.memPutFloat(addr += 4L, m01);
-		MemoryUtil.memPutFloat(addr += 4L, m11);
-		MemoryUtil.memPutFloat(addr += 4L, m21);
-		MemoryUtil.memPutFloat(addr += 4L, m31);
-		MemoryUtil.memPutFloat(addr += 4L, m02);
-		MemoryUtil.memPutFloat(addr += 4L, m12);
-		MemoryUtil.memPutFloat(addr += 4L, m22);
-		MemoryUtil.memPutFloat(addr += 4L, m32);
-		MemoryUtil.memPutFloat(addr += 4L, m03);
-		MemoryUtil.memPutFloat(addr += 4L, m13);
-		MemoryUtil.memPutFloat(addr += 4L, m23);
-		MemoryUtil.memPutFloat(addr += 4L, m33);
+	public void writeUnsafe(long ptr) {
+		MemoryUtil.memPutFloat(ptr, m00);
+		MemoryUtil.memPutFloat(ptr + 4, m10);
+		MemoryUtil.memPutFloat(ptr + 8, m20);
+		MemoryUtil.memPutFloat(ptr + 12, m30);
+		MemoryUtil.memPutFloat(ptr + 16, m01);
+		MemoryUtil.memPutFloat(ptr + 20, m11);
+		MemoryUtil.memPutFloat(ptr + 24, m21);
+		MemoryUtil.memPutFloat(ptr + 28, m31);
+		MemoryUtil.memPutFloat(ptr + 32, m02);
+		MemoryUtil.memPutFloat(ptr + 36, m12);
+		MemoryUtil.memPutFloat(ptr + 40, m22);
+		MemoryUtil.memPutFloat(ptr + 44, m32);
+		MemoryUtil.memPutFloat(ptr + 48, m03);
+		MemoryUtil.memPutFloat(ptr + 52, m13);
+		MemoryUtil.memPutFloat(ptr + 56, m23);
+		MemoryUtil.memPutFloat(ptr + 60, m33);
 	}
 
 	@Override

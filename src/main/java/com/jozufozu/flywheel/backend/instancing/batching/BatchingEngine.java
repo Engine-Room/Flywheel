@@ -9,9 +9,11 @@ import com.jozufozu.flywheel.backend.RenderLayer;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -59,6 +61,15 @@ public class BatchingEngine implements Engine, MultiBufferSource {
 		taskEngine.syncPoint();
 
 		stack.popPose();
+
+		// FIXME: this probably breaks some vanilla stuff but it works much better for flywheel
+		Matrix4f mat = new Matrix4f();
+		mat.setIdentity();
+		if (event.getWorld().effects().constantAmbientLight()) {
+			Lighting.setupNetherLevel(mat);
+		} else {
+			Lighting.setupLevel(mat);
+		}
 
 		// TODO: when/if this causes trouble with shaders, try to inject our BufferBuilders
 		//  into the RenderBuffers from context.

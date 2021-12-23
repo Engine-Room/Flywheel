@@ -13,18 +13,18 @@ public class OrientedWriterUnsafe extends BasicWriterUnsafe<OrientedData> {
 
 	@Override
 	protected void writeInternal(OrientedData d) {
-		long addr = writePointer;
+		long ptr = writePointer;
 		super.writeInternal(d);
 
-		MemoryUtil.memPutFloat(addr + 6, d.posX);
-		MemoryUtil.memPutFloat(addr + 10, d.posY);
-		MemoryUtil.memPutFloat(addr + 14, d.posZ);
-		MemoryUtil.memPutFloat(addr + 18, d.pivotX);
-		MemoryUtil.memPutFloat(addr + 22, d.pivotY);
-		MemoryUtil.memPutFloat(addr + 26, d.pivotZ);
-		MemoryUtil.memPutFloat(addr + 30, d.qX);
-		MemoryUtil.memPutFloat(addr + 34, d.qY);
-		MemoryUtil.memPutFloat(addr + 38, d.qZ);
-		MemoryUtil.memPutFloat(addr + 42, d.qW);
+		MemoryUtil.memPutFloat(ptr + 6, d.posX);
+		MemoryUtil.memPutFloat(ptr + 10, d.posY);
+		MemoryUtil.memPutFloat(ptr + 14, d.posZ);
+		MemoryUtil.memPutFloat(ptr + 18, d.pivotX);
+		MemoryUtil.memPutFloat(ptr + 22, d.pivotY);
+		MemoryUtil.memPutFloat(ptr + 26, d.pivotZ);
+		MemoryUtil.memPutFloat(ptr + 30, d.qX);
+		MemoryUtil.memPutFloat(ptr + 34, d.qY);
+		MemoryUtil.memPutFloat(ptr + 38, d.qZ);
+		MemoryUtil.memPutFloat(ptr + 42, d.qW);
 	}
 }

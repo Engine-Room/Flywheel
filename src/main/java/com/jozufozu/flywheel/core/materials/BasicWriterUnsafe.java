@@ -14,12 +14,12 @@ public abstract class BasicWriterUnsafe<D extends BasicData> extends UnsafeBuffe
 
 	@Override
 	protected void writeInternal(D d) {
-		long addr = writePointer;
-		MemoryUtil.memPutByte(addr, (byte) (d.blockLight << 4));
-		MemoryUtil.memPutByte(addr + 1, (byte) (d.skyLight << 4));
-		MemoryUtil.memPutByte(addr + 2, d.r);
-		MemoryUtil.memPutByte(addr + 3, d.g);
-		MemoryUtil.memPutByte(addr + 4, d.b);
-		MemoryUtil.memPutByte(addr + 5, d.a);
+		long ptr = writePointer;
+		MemoryUtil.memPutByte(ptr, (byte) (d.blockLight << 4));
+		MemoryUtil.memPutByte(ptr + 1, (byte) (d.skyLight << 4));
+		MemoryUtil.memPutByte(ptr + 2, d.r);
+		MemoryUtil.memPutByte(ptr + 3, d.g);
+		MemoryUtil.memPutByte(ptr + 4, d.b);
+		MemoryUtil.memPutByte(ptr + 5, d.a);
 	}
 }
