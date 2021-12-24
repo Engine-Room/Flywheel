@@ -96,7 +96,7 @@ public class CrumblingRenderer {
 
 		Int2ObjectMap<List<BlockEntity>> breakingEntities = new Int2ObjectArrayMap<>();
 
-		for (Long2ObjectMap.Entry<SortedSet<BlockDestructionProgress>> entry : ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).getDestructionProgress()
+		for (Long2ObjectMap.Entry<SortedSet<BlockDestructionProgress>> entry : ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).flywheel$getDestructionProgress()
 				.long2ObjectEntrySet()) {
 			BlockPos breakingPos = BlockPos.of(entry.getLongKey());
 
