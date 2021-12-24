@@ -44,7 +44,7 @@ public abstract class BufferBuilderMixin implements BufferBuilderHack {
 	private int vertices;
 
 	@Override
-	public void freeBuffer() {
+	public void flywheel$freeBuffer() {
 		if (this.buffer != null) {
 			MemoryUtil.memFree(this.buffer);
 			this.buffer = null;
@@ -52,7 +52,7 @@ public abstract class BufferBuilderMixin implements BufferBuilderHack {
 	}
 
 	@Override
-	public void hackBegin(@Nonnull ByteBuffer buffer, @Nonnull VertexFormat format, int vertexCount) {
+	public void flywheel$hackBegin(@Nonnull ByteBuffer buffer, @Nonnull VertexFormat format, int vertexCount) {
 		this.building = true;
 		this.mode = VertexFormat.Mode.QUADS;
 

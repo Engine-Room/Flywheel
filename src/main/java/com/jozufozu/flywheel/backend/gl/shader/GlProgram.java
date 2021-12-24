@@ -31,12 +31,12 @@ public abstract class GlProgram extends GlObject {
 	public void bind() {
 		int handle = handle();
 		ProgramManager.glUseProgram(handle);
-		ShaderInstanceAccessor.setLastProgramId(handle);
+		ShaderInstanceAccessor.flywheel$setLastProgramId(handle);
 	}
 
 	public void unbind() {
 		ProgramManager.glUseProgram(0);
-		ShaderInstanceAccessor.setLastProgramId(0);
+		ShaderInstanceAccessor.flywheel$setLastProgramId(0);
 	}
 
 	/**

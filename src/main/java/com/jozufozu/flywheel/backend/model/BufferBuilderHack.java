@@ -10,7 +10,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
  */
 public interface BufferBuilderHack {
 
-	void freeBuffer();
+	void flywheel$freeBuffer();
 
-	void hackBegin(ByteBuffer buffer, VertexFormat format, int vertexCount);
+	void flywheel$hackBegin(ByteBuffer buffer, VertexFormat format, int vertexCount);
 }

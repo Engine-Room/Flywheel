@@ -11,6 +11,6 @@ import net.minecraft.server.level.BlockDestructionProgress;
 
 @Mixin(LevelRenderer.class)
 public interface LevelRendererAccessor {
-	@Accessor
-	Long2ObjectMap<SortedSet<BlockDestructionProgress>> getDestructionProgress();
+	@Accessor("destructionProgress")
+	Long2ObjectMap<SortedSet<BlockDestructionProgress>> flywheel$getDestructionProgress();
 }

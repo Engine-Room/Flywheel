@@ -20,7 +20,7 @@ public class SuperBufferSource {
 	public SuperBufferSource() {
 		scratch = new BufferBuilder(8);
 
-		((BufferBuilderHack) scratch).freeBuffer();
+		((BufferBuilderHack) scratch).flywheel$freeBuffer();
 	}
 
 	public DirectVertexConsumer getBuffer(RenderType renderType, int vertexCount) {
@@ -40,7 +40,7 @@ public class SuperBufferSource {
 			if (builder.expectedVertices > 0) {
 				RenderType type = entry.getKey();
 
-				hack.hackBegin(builder.backingBuffer, type.format(), builder.expectedVertices);
+				hack.flywheel$hackBegin(builder.backingBuffer, type.format(), builder.expectedVertices);
 
 				type.end(scratch, 0, 0, 0);
 

@@ -5,8 +5,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.util.WriteSafe;
-import com.jozufozu.flywheel.util.WriteUnsafe;
+import com.jozufozu.flywheel.util.MatrixWrite;
 import com.mojang.math.Matrix4f;
 
 import net.minecraftforge.api.distmarker.Dist;
@@ -14,7 +13,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 @Mixin(Matrix4f.class)
-public abstract class Matrix4fMixin implements WriteUnsafe, WriteSafe {
+public abstract class Matrix4fMixin implements MatrixWrite {
 
 	@Shadow protected float m00;
 	@Shadow protected float m01;
@@ -34,7 +33,7 @@ public abstract class Matrix4fMixin implements WriteUnsafe, WriteSafe {
 	@Shadow protected float m33;
 
 	@Override
-	public void writeUnsafe(long ptr) {
+	public void flywheel$writeUnsafe(long ptr) {
 		MemoryUtil.memPutFloat(ptr, m00);
 		MemoryUtil.memPutFloat(ptr + 4, m10);
 		MemoryUtil.memPutFloat(ptr + 8, m20);
@@ -54,7 +53,7 @@ public abstract class Matrix4fMixin implements WriteUnsafe, WriteSafe {
 	}
 
 	@Override
-	public void write(VecBuffer buf) {
+	public void flywheel$write(VecBuffer buf) {
 		buf.putFloat(m00);
 		buf.putFloat(m10);
 		buf.putFloat(m20);

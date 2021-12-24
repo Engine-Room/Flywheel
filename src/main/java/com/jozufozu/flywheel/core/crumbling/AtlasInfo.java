@@ -40,7 +40,7 @@ public class AtlasInfo {
 	 * FOR USE IN MIXIN
 	 */
 	public static void _setAtlasData(ResourceLocation atlas, SheetDataAccessor accessor) {
-		sheetData.put(atlas, new SheetSize(accessor.getWidth(), accessor.getHeight()));
+		sheetData.put(atlas, new SheetSize(accessor.flywheel$getWidth(), accessor.flywheel$getHeight()));
 	}
 
 	public record SheetSize(int width, int height) {
