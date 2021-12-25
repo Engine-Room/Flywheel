@@ -7,7 +7,6 @@ import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
 import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.core.model.ModelTransformer;
-import com.jozufozu.flywheel.util.Color;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -22,7 +21,6 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		batchingType = type;
 
 		sbb = new ModelTransformer(modelData);
-		modelData.configure(sbb.context);
 	}
 
 	void submitTasks(PoseStack stack, TaskEngine pool, DirectVertexConsumer consumer) {
@@ -44,14 +42,10 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 	private void drawRange(PoseStack stack, VertexConsumer buffer, int from, int to) {
 		ModelTransformer.Params params = new ModelTransformer.Params();
 
-		// Color color = Color.generateFromLong(from);
-
 		for (D d : data.subList(from, to)) {
 			params.loadDefault();
 
 			batchingType.transform(d, params);
-
-			//params.color(color.getRGB());
 
 			sbb.renderInto(params, stack, buffer);
 		}
@@ -72,11 +66,6 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		if (anyToRemove) {
 			data.removeIf(InstanceData::isRemoved);
 			anyToRemove = false;
-		}
-
-		if (false) {
-			this.sbb.context.outputColorDiffuse = false;
-			this.sbb.context.fullNormalTransform = false;
 		}
 	}
 

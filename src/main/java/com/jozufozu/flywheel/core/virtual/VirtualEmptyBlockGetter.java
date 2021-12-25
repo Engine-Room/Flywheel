@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.util;
+package com.jozufozu.flywheel.core.virtual;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -120,7 +120,7 @@ public enum VirtualEmptyBlockGetter implements BlockAndTintGetter {
 
 	@Override
 	public float getShade(Direction direction, boolean bool) {
-		return Minecraft.getInstance().level.getShade(direction, bool);
+		return 1f;
 	}
 
 	@Override

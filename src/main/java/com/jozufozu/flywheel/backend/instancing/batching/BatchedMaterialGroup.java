@@ -51,13 +51,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 
 		for (BatchedMaterial<?> material : materials.values()) {
 			for (CPUInstancer<?> instancer : material.models.values()) {
-				if (consumer.hasOverlay()) {
-					instancer.sbb.context.fullNormalTransform = false;
-					instancer.sbb.context.outputColorDiffuse = false;
-				} else {
-					instancer.sbb.context.fullNormalTransform = false;
-					instancer.sbb.context.outputColorDiffuse = true;
-				}
+				instancer.sbb.context.outputColorDiffuse = !consumer.hasOverlay();
 				instancer.submitTasks(stack, pool, consumer);
 			}
 		}
