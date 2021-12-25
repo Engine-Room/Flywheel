@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 public class NormalDebugStateProvider implements IBooleanStateProvider {
 
 	public static final NormalDebugStateProvider INSTANCE = new NormalDebugStateProvider();
-	public static final ResourceLocation NAME = new ResourceLocation(Flywheel.ID, "normal_debug");
+	public static final ResourceLocation NAME = Flywheel.rl("normal_debug");
 
 	protected NormalDebugStateProvider() {
 

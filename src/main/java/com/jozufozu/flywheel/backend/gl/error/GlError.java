@@ -44,7 +44,7 @@ public enum GlError {
 		// TODO: build flag? to enable or disable this function
 		GlError err = GlError.poll();
 		if (err != null) {
-			Flywheel.log.error("{}: {}", err.name(), context.get());
+			Flywheel.LOGGER.error("{}: {}", err.name(), context.get());
 		}
 	}
 }

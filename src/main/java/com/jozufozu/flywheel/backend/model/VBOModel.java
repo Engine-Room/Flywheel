@@ -35,7 +35,7 @@ public class VBOModel implements BufferedModel {
 		try (MappedBuffer buffer = vbo.getBuffer()) {
 			model.writeInto(buffer.unwrap());
 		} catch (Exception e) {
-			Flywheel.log.error(String.format("Error uploading model '%s':", model.name()), e);
+			Flywheel.LOGGER.error(String.format("Error uploading model '%s':", model.name()), e);
 		}
 
 		vbo.unbind();
