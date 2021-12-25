@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.util;
 
 import org.lwjgl.opengl.GL20;
 
+// TODO: move this functionality into GlVertexArray and track it
 public class AttribUtil {
 
 	public static void enableArrays(int count) {

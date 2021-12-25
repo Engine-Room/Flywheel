@@ -15,7 +15,7 @@ import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
  */
 public abstract class UnsafeBufferWriter<S> extends BufferWriter<S> {
 	/**
-	 * The write pointer into the buffer storage. This is advanced by the vertex stride every time
+	 * The write pointer into the buffer storage. This is advanced by the stride every time
 	 * {@link UnsafeBufferWriter#advance()} is called.
 	 */
 	protected long writePointer;
@@ -35,8 +35,6 @@ public abstract class UnsafeBufferWriter<S> extends BufferWriter<S> {
 	@Override
 	protected void advance() {
 		this.writePointer += this.stride;
-
-		super.advance();
 	}
 
 	private void acquireWritePointer() {

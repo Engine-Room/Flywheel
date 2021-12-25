@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.backend.instancing;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -75,7 +76,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	 *     Queued updates are processed.
 	 * </p>
 	 */
-	public void tick(double cameraX, double cameraY, double cameraZ) {
+	public void tick(TaskEngine taskEngine, double cameraX, double cameraY, double cameraZ) {
 		tick++;
 		processQueuedUpdates();
 
@@ -84,26 +85,40 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		int cY = (int) cameraY;
 		int cZ = (int) cameraZ;
 
-		if (tickableInstances.size() > 0) {
-			tickableInstances.object2ObjectEntrySet().parallelStream().forEach(e -> {
-				ITickableInstance instance = e.getValue();
-				if (!instance.decreaseTickRateWithDistance()) {
-					instance.tick();
-					return;
+		ArrayList<ITickableInstance> instances = new ArrayList<>(tickableInstances.values());
+		int incr = 500;
+		int size = instances.size();
+		int start = 0;
+		while (start < size) {
+			int end = Math.min(start + incr, size);
+
+			List<ITickableInstance> sub = instances.subList(start, end);
+			taskEngine.submit(() -> {
+				for (ITickableInstance instance : sub) {
+					tickInstance(cX, cY, cZ, instance);
 				}
-
-				BlockPos pos = instance.getWorldPosition();
-
-				int dX = pos.getX() - cX;
-				int dY = pos.getY() - cY;
-				int dZ = pos.getZ() - cZ;
-
-				if ((tick % getUpdateDivisor(dX, dY, dZ)) == 0) instance.tick();
 			});
+
+			start += incr;
 		}
 	}
 
-	public void beginFrame(Camera info) {
+	private void tickInstance(int cX, int cY, int cZ, ITickableInstance instance) {
+		if (!instance.decreaseTickRateWithDistance()) {
+			instance.tick();
+			return;
+		}
+
+		BlockPos pos = instance.getWorldPosition();
+
+		int dX = pos.getX() - cX;
+		int dY = pos.getY() - cY;
+		int dZ = pos.getZ() - cZ;
+
+		if ((tick % getUpdateDivisor(dX, dY, dZ)) == 0) instance.tick();
+	}
+
+	public void beginFrame(TaskEngine taskEngine, Camera info) {
 		frame++;
 		processQueuedAdditions();
 
@@ -117,20 +132,27 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		int cY = (int) info.getPosition().y;
 		int cZ = (int) info.getPosition().z;
 
-		if (dynamicInstances.size() > 0) {
-			dynamicInstances.object2ObjectEntrySet()
-					.parallelStream()
-					.forEach(e -> {
-						IDynamicInstance dyn = e.getValue();
-						if (!dyn.decreaseFramerateWithDistance() || shouldFrameUpdate(dyn.getWorldPosition(), lookX, lookY, lookZ, cX, cY, cZ))
-							dyn.beginFrame();
-					});
+		ArrayList<IDynamicInstance> instances = new ArrayList<>(dynamicInstances.values());
+		int incr = 500;
+		int size = instances.size();
+		int start = 0;
+		while (start < size) {
+			int end = Math.min(start + incr, size);
+
+			List<IDynamicInstance> sub = instances.subList(start, end);
+			taskEngine.submit(() -> {
+				for (IDynamicInstance dyn : sub) {
+					if (!dyn.decreaseFramerateWithDistance() || shouldFrameUpdate(dyn.getWorldPosition(), lookX, lookY, lookZ, cX, cY, cZ))
+						dyn.beginFrame();
+				}
+			});
+
+			start += incr;
 		}
 	}
 
 	public void add(T obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return;
+		if (!Backend.isOn()) return;
 
 		if (canInstance(obj)) {
 			addInternal(obj);
@@ -138,8 +160,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	}
 
 	public void queueAdd(T obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return;
+		if (!Backend.isOn()) return;
 
 		synchronized (queuedAdditions) {
 			queuedAdditions.add(obj);
@@ -147,8 +168,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	}
 
 	public void queueUpdate(T obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return;
+		if (!Backend.isOn()) return;
 		synchronized (queuedUpdates) {
 			queuedUpdates.add(obj);
 		}
@@ -166,8 +186,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	 * @param obj the object to update.
 	 */
 	public void update(T obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return;
+		if (!Backend.isOn()) return;
 
 		if (canInstance(obj)) {
 			AbstractInstance instance = getInstance(obj);
@@ -188,8 +207,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	}
 
 	public void remove(T obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return;
+		if (!Backend.isOn()) return;
 
 		if (canInstance(obj)) {
 			AbstractInstance instance = getInstance(obj);
@@ -206,8 +224,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 
 	@Nullable
 	protected <I extends T> AbstractInstance getInstance(I obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return null;
+		if (!Backend.isOn()) return null;
 
 		return instances.get(obj);
 	}
@@ -266,8 +283,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	}
 
 	protected void addInternal(T obj) {
-		if (!Backend.getInstance()
-				.canUseInstancing()) return;
+		if (!Backend.isOn()) return;
 
 		AbstractInstance instance = instances.get(obj);
 

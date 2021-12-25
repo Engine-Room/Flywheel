@@ -4,7 +4,6 @@ import static org.lwjgl.opengl.GL20.glDeleteProgram;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
-import static org.lwjgl.opengl.GL20.glUseProgram;
 
 import java.nio.FloatBuffer;
 
@@ -12,6 +11,8 @@ import org.lwjgl.system.MemoryStack;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
+import com.jozufozu.flywheel.mixin.ShaderInstanceAccessor;
+import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.resources.ResourceLocation;
@@ -28,11 +29,14 @@ public abstract class GlProgram extends GlObject {
 	}
 
 	public void bind() {
-		glUseProgram(handle());
+		int handle = handle();
+		ProgramManager.glUseProgram(handle);
+		ShaderInstanceAccessor.flywheel$setLastProgramId(handle);
 	}
 
 	public void unbind() {
-		glUseProgram(0);
+		ProgramManager.glUseProgram(0);
+		ShaderInstanceAccessor.flywheel$setLastProgramId(0);
 	}
 
 	/**

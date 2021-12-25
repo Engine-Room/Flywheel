@@ -5,12 +5,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.util.WriteSafe;
-import com.jozufozu.flywheel.util.WriteUnsafe;
+import com.jozufozu.flywheel.util.MatrixWrite;
 import com.mojang.math.Matrix3f;
 
 @Mixin(Matrix3f.class)
-public abstract class Matrix3fMixin implements WriteUnsafe, WriteSafe {
+public abstract class Matrix3fMixin implements MatrixWrite {
 
 	@Shadow protected float m00;
 	@Shadow protected float m01;
@@ -23,20 +22,20 @@ public abstract class Matrix3fMixin implements WriteUnsafe, WriteSafe {
 	@Shadow protected float m22;
 
 	@Override
-	public void writeUnsafe(long addr) {
-		MemoryUtil.memPutFloat(addr, m00);
-		MemoryUtil.memPutFloat(addr += 4L, m10);
-		MemoryUtil.memPutFloat(addr += 4L, m20);
-		MemoryUtil.memPutFloat(addr += 4L, m01);
-		MemoryUtil.memPutFloat(addr += 4L, m11);
-		MemoryUtil.memPutFloat(addr += 4L, m21);
-		MemoryUtil.memPutFloat(addr += 4L, m02);
-		MemoryUtil.memPutFloat(addr += 4L, m12);
-		MemoryUtil.memPutFloat(addr += 4L, m22);
+	public void flywheel$writeUnsafe(long ptr) {
+		MemoryUtil.memPutFloat(ptr, m00);
+		MemoryUtil.memPutFloat(ptr + 4, m10);
+		MemoryUtil.memPutFloat(ptr + 8, m20);
+		MemoryUtil.memPutFloat(ptr + 12, m01);
+		MemoryUtil.memPutFloat(ptr + 16, m11);
+		MemoryUtil.memPutFloat(ptr + 20, m21);
+		MemoryUtil.memPutFloat(ptr + 24, m02);
+		MemoryUtil.memPutFloat(ptr + 28, m12);
+		MemoryUtil.memPutFloat(ptr + 32, m22);
 	}
 
 	@Override
-	public void write(VecBuffer buffer) {
+	public void flywheel$write(VecBuffer buffer) {
 		buffer.putFloat(m00);
 		buffer.putFloat(m10);
 		buffer.putFloat(m20);

@@ -6,6 +6,7 @@ import java.util.SortedSet;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
+import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.core.Contexts;
@@ -43,13 +44,12 @@ public class CrumblingRenderer {
 	static {
 		Pair<Lazy<State>, Lazy.KillSwitch<State>> state = Lazy.ofKillable(State::new, State::kill);
 
-		STATE = state.getFirst();
-		INVALIDATOR = state.getSecond();
+        STATE = state.first();
+		INVALIDATOR = state.second();
 	}
 
 	public static void renderBreaking(RenderLayerEvent event) {
-		if (!Backend.getInstance()
-				.canUseInstancing(event.getWorld())) return;
+		if (!Backend.canUseInstancing(event.getWorld())) return;
 
 		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageTiles(event.getWorld());
 
@@ -69,9 +69,9 @@ public class CrumblingRenderer {
 			if (_currentLayer != null) {
 				stage.getValue().forEach(instanceManager::add);
 
-				instanceManager.beginFrame(info);
+				instanceManager.beginFrame(SerialTaskEngine.INSTANCE, info);
 
-				materials.render(event, null);
+				materials.render(SerialTaskEngine.INSTANCE, event);
 
 				instanceManager.invalidate();
 			}
@@ -90,7 +90,7 @@ public class CrumblingRenderer {
 
 		Int2ObjectMap<List<BlockEntity>> breakingEntities = new Int2ObjectArrayMap<>();
 
-		for (Long2ObjectMap.Entry<SortedSet<BlockDestructionProgress>> entry : ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).getDestructionProgress()
+		for (Long2ObjectMap.Entry<SortedSet<BlockDestructionProgress>> entry : ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).flywheel$getDestructionProgress()
 				.long2ObjectEntrySet()) {
 			BlockPos breakingPos = BlockPos.of(entry.getLongKey());
 
@@ -113,8 +113,7 @@ public class CrumblingRenderer {
 
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		ClientLevel world = event.getWorld();
-		if (Backend.getInstance()
-				.canUseInstancing() && world != null) {
+        if (Backend.isOn() && world != null) {
 			reset();
 		}
 	}

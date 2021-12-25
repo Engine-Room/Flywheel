@@ -1,9 +1,12 @@
 package com.jozufozu.flywheel.core.model;
 
-import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
+import java.nio.ByteBuffer;
+
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
+import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.QuadConverter;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.jozufozu.flywheel.api.vertex.VertexList;
+import com.jozufozu.flywheel.api.vertex.VertexType;
 
 /**
  * A model that can be rendered by flywheel.
@@ -32,20 +35,20 @@ public interface Model {
 	 */
 	String name();
 
-	/**
-	 * Copy this model into the given buffer.
-	 */
-	void buffer(VertexConsumer buffer);
+	VertexList getReader();
 
 	/**
 	 * @return The number of vertices the model has.
 	 */
 	int vertexCount();
 
-	/**
-	 * @return The format of this model's vertices
-	 */
-	VertexFormat format();
+	default void configure(ModelTransformer.Context ctx) {
+
+	}
+
+	default VertexType getType() {
+		return Formats.POS_TEX_NORMAL;
+	}
 
 	/**
 	 * Create an element buffer object that indexes the vertices of this model.
@@ -66,7 +69,7 @@ public interface Model {
 	 * The size in bytes that this model's data takes up.
 	 */
 	default int size() {
-		return vertexCount() * format().getStride();
+		return getType().byteOffset(vertexCount());
 	}
 
 	/**
@@ -75,5 +78,9 @@ public interface Model {
 	 */
 	default boolean empty() {
 		return vertexCount() == 0;
+	}
+
+	default void writeInto(ByteBuffer buffer) {
+		getType().createWriter(buffer).writeVertexList(getReader());
 	}
 }

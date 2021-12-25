@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class InstancedRenderDispatcher {
 
-	private static final WorldAttached<InstanceWorld> instanceWorlds = new WorldAttached<>($ -> new InstanceWorld());
+	private static final WorldAttached<InstanceWorld> instanceWorlds = new WorldAttached<>(InstanceWorld::new);
 
 	/**
 	 * Call this when you want to manually run {@link AbstractInstance#update()}.
@@ -66,16 +66,14 @@ public class InstancedRenderDispatcher {
 		if (event.layer == null) return;
 
 		ClientLevel world = event.getWorld();
-		if (!Backend.getInstance()
-				.canUseInstancing(world)) return;
+		if (!Backend.canUseInstancing(world)) return;
 
 		instanceWorlds.get(world).renderLayer(event);
 	}
 
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		ClientLevel world = event.getWorld();
-		if (Backend.getInstance()
-				.canUseInstancing() && world != null) {
+		if (Backend.isOn() && world != null) {
 			resetInstanceWorld(world);
 		}
 	}

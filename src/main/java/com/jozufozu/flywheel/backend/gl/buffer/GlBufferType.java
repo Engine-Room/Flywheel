@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL40;
 import org.lwjgl.opengl.GL42;
 import org.lwjgl.opengl.GL43;
 
+import com.jozufozu.flywheel.mixin.BufferUploaderAccessor;
 import com.mojang.blaze3d.platform.GlStateManager;
 
 public enum GlBufferType {
@@ -34,9 +35,19 @@ public enum GlBufferType {
 
 	public void bind(int buffer) {
 		GlStateManager._glBindBuffer(glEnum, buffer);
+
+		switch (this.glEnum) {
+		case GL15C.GL_ELEMENT_ARRAY_BUFFER -> BufferUploaderAccessor.flywheel$setLastEBO(buffer);
+		case GL15C.GL_ARRAY_BUFFER -> BufferUploaderAccessor.flywheel$setLastVBO(buffer);
+		}
 	}
 
 	public void unbind() {
 		GlStateManager._glBindBuffer(glEnum, 0);
+
+		switch (this.glEnum) {
+		case GL15C.GL_ELEMENT_ARRAY_BUFFER -> BufferUploaderAccessor.flywheel$setLastEBO(0);
+		case GL15C.GL_ARRAY_BUFFER -> BufferUploaderAccessor.flywheel$setLastVBO(0);
+		}
 	}
 }

@@ -7,39 +7,39 @@ import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
-import com.jozufozu.flywheel.backend.gl.attrib.VertexFormat;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.core.model.Model;
-import com.jozufozu.flywheel.core.model.VecBufferWriter;
+import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.api.vertex.VertexWriter;
 import com.jozufozu.flywheel.util.AttribUtil;
 
 public class ModelPool implements ModelAllocator {
 
-	protected final VertexFormat format;
+	protected final VertexType vertexType;
 
 	private final List<PooledModel> models = new ArrayList<>();
 
 	private final List<PooledModel> pendingUpload = new ArrayList<>();
 
 	private final GlBuffer vbo;
-	private int bufferSize;
 
 	private int vertices;
 
 	private boolean dirty;
 	private boolean anyToRemove;
 
-	public ModelPool(VertexFormat format, int initialSize) {
-		this.format = format;
-		bufferSize = format.getStride() * initialSize;
+	public ModelPool(VertexType vertexType, int initialSize) {
+		this.vertexType = vertexType;
+		int stride = vertexType.getStride();
 
 		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
 
 		vbo.bind();
-		vbo.alloc(bufferSize);
+		vbo.ensureCapacity((long) stride * initialSize);
+		vbo.setGrowthMargin(stride * 64);
 		vbo.unbind();
 	}
 
@@ -104,27 +104,19 @@ public class ModelPool implements ModelAllocator {
 	 * @return true if the buffer was reallocated
 	 */
 	private boolean realloc() {
-		int neededSize = vertices * format.getStride();
-		if (neededSize > bufferSize) {
-			bufferSize = neededSize + 128;
-			vbo.alloc(bufferSize);
-
-			return true;
-		}
-
-		return false;
+		return vbo.ensureCapacity((long) vertices * vertexType.getStride());
 	}
 
 	private void uploadAll() {
-		try (MappedBuffer buffer = vbo.getBuffer(0, bufferSize)) {
-
-			VecBufferWriter consumer = new VecBufferWriter(buffer);
+		try (MappedBuffer buffer = vbo.getBuffer()) {
+			VertexWriter writer = vertexType.createWriter(buffer.unwrap());
 
 			int vertices = 0;
 			for (PooledModel model : models) {
 				model.first = vertices;
-				model.model.buffer(consumer);
-				if (model.callback != null) model.callback.onAlloc(model);
+
+				buffer(writer, model);
+
 				vertices += model.getVertexCount();
 			}
 
@@ -134,20 +126,21 @@ public class ModelPool implements ModelAllocator {
 	}
 
 	private void uploadPending() {
-		try (MappedBuffer buffer = vbo.getBuffer(0, bufferSize)) {
-			VecBufferWriter consumer = new VecBufferWriter(buffer);
-
-			int stride = format.getStride();
+		try (MappedBuffer buffer = vbo.getBuffer()) {
+			VertexWriter writer = vertexType.createWriter(buffer.unwrap());
 			for (PooledModel model : pendingUpload) {
-				int pos = model.first * stride;
-				buffer.position(pos);
-				model.model.buffer(consumer);
-				if (model.callback != null) model.callback.onAlloc(model);
+				buffer(writer, model);
 			}
 			pendingUpload.clear();
 		} catch (Exception e) {
 			Flywheel.log.error("Error uploading pooled models:", e);
 		}
+	}
+
+	private void buffer(VertexWriter writer, PooledModel model) {
+		writer.seekToVertex(model.first);
+		writer.writeVertexList(model.model.getReader());
+		if (model.callback != null) model.callback.onAlloc(model);
 	}
 
 	private void setDirty() {
@@ -158,7 +151,7 @@ public class ModelPool implements ModelAllocator {
 		vbo.delete();
 	}
 
-	public class PooledModel implements IBufferedModel {
+	public class PooledModel implements BufferedModel {
 
 		private final ElementBuffer ebo;
 		private Callback callback;
@@ -175,8 +168,8 @@ public class ModelPool implements ModelAllocator {
 		}
 
 		@Override
-		public VertexFormat getFormat() {
-			return model.format();
+		public VertexType getType() {
+			return ModelPool.this.vertexType;
 		}
 
 		@Override
@@ -189,7 +182,7 @@ public class ModelPool implements ModelAllocator {
 			vbo.bind();
 			ebo.bind();
 			AttribUtil.enableArrays(getAttributeCount());
-			getFormat().vertexAttribPointers(0);
+			ModelPool.this.vertexType.getLayout().vertexAttribPointers(0);
 		}
 
 		@Override

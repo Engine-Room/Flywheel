@@ -40,11 +40,10 @@ repositories {
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${minecraft_version}"
-//    mappings loom.layered() {
-//        officialMojangMappings()
-//        parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
-//    }
-    mappings loom.officialMojangMappings() // TODO: waiting for parchment 1.18
+    mappings loom.layered() {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
+    }
     modImplementation "net.fabricmc:fabric-loader:${loader_version}"
 
     // Fabric API
@@ -53,8 +52,6 @@ dependencies {
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     modCompileOnly 'maven.modrinth:indium:1.0.2-alpha1+mc1.18'
     modCompileOnly 'io.vram:frex-fabric-mc118:6.0.229'
-
-    //implementation 'org.joml:joml:1.10.1'
 }
 
 processResources {

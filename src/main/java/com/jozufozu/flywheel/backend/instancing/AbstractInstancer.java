@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
@@ -10,14 +11,14 @@ import com.jozufozu.flywheel.core.model.Model;
 
 public abstract class AbstractInstancer<D extends InstanceData> implements Instancer<D> {
 
-	protected final StructType<D> type;
+	protected final Supplier<D> factory;
 	protected final Model modelData;
 	protected final ArrayList<D> data = new ArrayList<>();
 
 	protected boolean anyToRemove;
 
-	protected AbstractInstancer(StructType<D> type, Model modelData) {
-		this.type = type;
+	protected AbstractInstancer(Supplier<D> factory, Model modelData) {
+		this.factory = factory;
 		this.modelData = modelData;
 	}
 
@@ -26,7 +27,7 @@ public abstract class AbstractInstancer<D extends InstanceData> implements Insta
 	 */
 	@Override
 	public D createInstance() {
-		return _add(type.create());
+		return _add(factory.get());
 	}
 
 	/**
@@ -58,17 +59,16 @@ public abstract class AbstractInstancer<D extends InstanceData> implements Insta
 		anyToRemove = true;
 	}
 
-	protected BitSet getDirtyBitSet() {
-		final int size = data.size();
-		final BitSet dirtySet = new BitSet(size);
+	public int getModelVertexCount() {
+		return modelData.vertexCount();
+	}
 
-		for (int i = 0; i < size; i++) {
-			D element = data.get(i);
-			if (element.checkDirtyAndClear()) {
-				dirtySet.set(i);
-			}
-		}
-		return dirtySet;
+	public int numInstances() {
+		return data.size();
+	}
+
+	public int getTotalVertexCount() {
+		return getModelVertexCount() * numInstances();
 	}
 
 	protected void removeDeletedInstances() {
@@ -114,5 +114,10 @@ public abstract class AbstractInstancer<D extends InstanceData> implements Insta
 		}
 
 		return instanceData;
+	}
+
+	@Override
+	public String toString() {
+		return "Instancer[" + modelData + ']';
 	}
 }

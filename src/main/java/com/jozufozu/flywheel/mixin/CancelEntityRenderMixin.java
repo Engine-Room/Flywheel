@@ -23,8 +23,7 @@ public class CancelEntityRenderMixin {
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;entitiesForRendering()Ljava/lang/Iterable;"))
 	private Iterable<Entity> filterEntities(ClientLevel world) {
 		Iterable<Entity> entities = world.entitiesForRendering();
-		if (Backend.getInstance()
-				.canUseInstancing()) {
+		if (Backend.isOn()) {
 
 			ArrayList<Entity> filtered = Lists.newArrayList(entities);
 

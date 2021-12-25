@@ -55,4 +55,34 @@ public interface Option<T> {
 			set(json.getAsBoolean());
 		}
 	}
+
+	public class EnumOption<E extends Enum<E>> extends BaseOption<E> {
+		protected final Class<E> enumType;
+
+		@SuppressWarnings("unchecked")
+		public EnumOption(String id, E defaultValue) {
+			super(id, defaultValue);
+			enumType = (Class<E>) defaultValue.getClass();
+		}
+
+		@Override
+		public JsonElement toJson() {
+			return new JsonPrimitive(get().name());
+		}
+
+		@Override
+		public void fromJson(JsonElement json) throws JsonParseException {
+			String constantName = json.getAsString();
+			for (E constant : enumType.getEnumConstants()) {
+				if (constant.name().equals(constantName)) {
+					set(constant);
+					break;
+				}
+			}
+		}
+
+		public Class<E> getEnumType() {
+			return enumType;
+		}
+	}
 }

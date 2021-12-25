@@ -2,9 +2,11 @@ package com.jozufozu.flywheel.core;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.ShaderContext;
 import com.jozufozu.flywheel.backend.pipeline.ShaderPipeline;
@@ -87,8 +89,9 @@ public class WorldContext<P extends WorldProgram> implements ShaderContext<P> {
 			if (specStream == null) {
 				specStream = () -> backend.allMaterials()
 						.stream()
-						.map(type -> type.asInstanced()
-								.getProgramSpec());
+						.map(t -> t instanceof Instanced<?> i ? i : null)
+						.filter(Objects::nonNull)
+						.map(Instanced::getProgramSpec);
 			}
 			return new WorldContext<>(backend, name, specStream, pipeline);
 		}

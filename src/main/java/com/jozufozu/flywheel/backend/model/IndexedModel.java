@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.core.model.Model;
  *
  * <br><em>This should be favored over a normal BufferedModel.</em>
  */
-public class IndexedModel extends BufferedModel {
+public class IndexedModel extends VBOModel {
 
 	protected ElementBuffer ebo;
 

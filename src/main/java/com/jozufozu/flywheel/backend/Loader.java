@@ -18,7 +18,7 @@ import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 import com.jozufozu.flywheel.event.GatherContextEvent;
 import com.jozufozu.flywheel.fabric.event.FlywheelEvents;
 import com.jozufozu.flywheel.util.ResourceUtil;
-import com.jozufozu.flywheel.util.StreamUtil;
+import com.jozufozu.flywheel.util.StringUtil;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
@@ -61,36 +61,34 @@ public class Loader {
 	public void onResourceManagerReload(ResourceManager manager) {
 		backend.refresh();
 
-		if (backend.gl20()) {
-			shouldCrash = false;
-			backend._clearContexts();
+		shouldCrash = false;
+		backend._clearContexts();
 
-			Resolver.INSTANCE.invalidate();
-			FlywheelEvents.GATHER_CONTEXT.invoker()
-					.handleEvent(new GatherContextEvent(backend, firstLoad));
+		Resolver.INSTANCE.invalidate();
+		FlywheelEvents.GATHER_CONTEXT.invoker()
+				.handleEvent(new GatherContextEvent(backend, firstLoad));
 
-			ShaderSources sources = new ShaderSources(manager);
+		ShaderSources sources = new ShaderSources(manager);
 
-			loadProgramSpecs(manager);
+		loadProgramSpecs(manager);
 
-			Resolver.INSTANCE.resolve(sources);
+		Resolver.INSTANCE.resolve(sources);
 
-			for (ShaderContext<?> context : backend.allContexts()) {
-				context.load();
-			}
+		for (ShaderContext<?> context : backend.allContexts()) {
+			context.load();
+		}
 
-			if (shouldCrash) {
-				throw new ShaderLoadingException("Could not load all shaders, see log for details");
-			}
+		if (shouldCrash) {
+			throw new ShaderLoadingException("Could not load all shaders, see log for details");
+		}
 
-			Backend.log.info("Loaded all shader programs.");
+		Backend.log.info("Loaded all shader programs.");
 
-			ClientLevel world = Minecraft.getInstance().level;
-			if (Backend.isFlywheelWorld(world)) {
-				// TODO: looks like it might be good to have another event here
-				InstancedRenderDispatcher.resetInstanceWorld(world);
-				CrumblingRenderer.reset();
-			}
+		ClientLevel world = Minecraft.getInstance().level;
+		if (Backend.isFlywheelWorld(world)) {
+			// TODO: looks like it might be good to have another event here
+			InstancedRenderDispatcher.resetInstanceWorld(world);
+			CrumblingRenderer.reset();
 		}
 
 		firstLoad = false;
@@ -103,7 +101,7 @@ public class Loader {
 			try {
 				Resource file = manager.getResource(location);
 
-				String s = StreamUtil.readToString(file.getInputStream());
+				String s = StringUtil.readToString(file.getInputStream());
 
 				ResourceLocation specName = ResourceUtil.trim(location, PROGRAM_DIR, ".json");
 

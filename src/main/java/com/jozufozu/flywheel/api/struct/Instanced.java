@@ -14,8 +14,4 @@ public interface Instanced<S> extends StructType<S> {
 
 	ResourceLocation getProgramSpec();
 
-	@Override
-	default Instanced<S> asInstanced() {
-		return this;
-	}
 }

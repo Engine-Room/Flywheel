@@ -6,10 +6,11 @@ import java.util.Map;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
+import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.model.ModelPool;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
-import com.jozufozu.flywheel.util.TextureBinder;
+import com.jozufozu.flywheel.util.Textures;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.renderer.RenderType;
@@ -25,7 +26,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 	protected final InstancingEngine<P> owner;
 	protected final RenderType type;
 
-	private final Map<StructType<? extends InstanceData>, InstancedMaterial<?>> materials = new HashMap<>();
+	private final Map<Instanced<? extends InstanceData>, InstancedMaterial<?>> materials = new HashMap<>();
 
 	public InstancedMaterialGroup(InstancingEngine<P> owner, RenderType type) {
 		this.owner = owner;
@@ -34,19 +35,23 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <D extends InstanceData> InstancedMaterial<D> material(StructType<D> spec) {
-		return (InstancedMaterial<D>) materials.computeIfAbsent(spec, InstancedMaterial::new);
+	public <D extends InstanceData> InstancedMaterial<D> material(StructType<D> type) {
+		if (type instanceof Instanced<D> instanced) {
+			return (InstancedMaterial<D>) materials.computeIfAbsent(instanced, InstancedMaterial::new);
+		} else {
+			throw new ClassCastException("Cannot use type '" + type + "' with GPU instancing.");
+		}
 	}
 
 	public void render(Matrix4f viewProjection, double camX, double camY, double camZ) {
 		type.setupRenderState();
-		TextureBinder.bindActiveTextures();
+		Textures.bindActiveTextures();
 		renderAll(viewProjection, camX, camY, camZ);
 		type.clearRenderState();
 	}
 
 	protected void renderAll(Matrix4f viewProjection, double camX, double camY, double camZ) {
-		for (Map.Entry<StructType<? extends InstanceData>, InstancedMaterial<?>> entry : materials.entrySet()) {
+		for (Map.Entry<Instanced<? extends InstanceData>, InstancedMaterial<?>> entry : materials.entrySet()) {
 			InstancedMaterial<?> material = entry.getValue();
 			if (material.nothingToRender()) continue;
 
@@ -54,14 +59,16 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 					.values();
 
 			// initialize all uninitialized instancers...
-			instancers.forEach(GPUInstancer::init);
+			for (GPUInstancer<?> gpuInstancer : instancers) {
+				gpuInstancer.init();
+			}
+
 			if (material.allocator instanceof ModelPool pool) {
 				// ...and then flush the model arena in case anything was marked for upload
 				pool.flush();
 			}
 
 			P program = owner.getProgram(entry.getKey()
-					.asInstanced()
 					.getProgramSpec()).get();
 
 			program.bind();
@@ -70,7 +77,9 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 
 			setup(program);
 
-			instancers.forEach(GPUInstancer::render);
+			for (GPUInstancer<?> instancer : instancers) {
+				instancer.render();
+			}
 		}
 	}
 

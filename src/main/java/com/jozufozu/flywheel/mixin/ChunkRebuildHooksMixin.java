@@ -20,7 +20,7 @@ public class ChunkRebuildHooksMixin {
 	@Inject(method = "handleBlockEntity", at = @At("HEAD"), cancellable = true)
 	private <E extends BlockEntity> void addAndFilterBEs(ChunkRenderDispatcher.CompiledChunk compiledChunk, Set<BlockEntity> set, E be, CallbackInfo ci) {
 
-		if (Backend.getInstance().canUseInstancing() && Backend.isFlywheelWorld(be.getLevel())) {
+		if (Backend.isOn() && Backend.isFlywheelWorld(be.getLevel())) {
 
 			InstancedRenderRegistry registry = InstancedRenderRegistry.getInstance();
 			if (registry.canInstance(be.getType()))

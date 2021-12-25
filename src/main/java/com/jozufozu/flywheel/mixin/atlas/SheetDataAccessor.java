@@ -9,9 +9,9 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 public interface SheetDataAccessor {
 
 	@Accessor("width")
-	int getWidth();
+	int flywheel$getWidth();
 
 	@Accessor("height")
-	int getHeight();
+	int flywheel$getHeight();
 
 }

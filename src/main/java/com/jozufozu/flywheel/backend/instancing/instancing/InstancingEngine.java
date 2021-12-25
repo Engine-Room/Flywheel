@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.api.MaterialGroup;
+import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.RenderLayer;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
@@ -21,7 +22,6 @@ import com.jozufozu.flywheel.util.WeakHashSet;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -42,7 +42,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 	private final WeakHashSet<OriginShiftListener> listeners;
 
-	public InstancingEngine(WorldContext<P> context) {
+	public InstancingEngine(WorldContext<P> context, TaskEngine taskEngine) {
 		this(context, InstancedMaterialGroup::new, false);
 	}
 
@@ -79,7 +79,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	 * Render every model for every material.
 	 */
 	@Override
-	public void render(RenderLayerEvent event, MultiBufferSource buffers) {
+	public void render(TaskEngine taskEngine, RenderLayerEvent event) {
 		double camX;
 		double camY;
 		double camZ;
@@ -106,6 +106,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	}
 
 	private Stream<InstancedMaterialGroup<P>> getGroupsToRender(@Nullable RenderLayer layer) {
+		// layer is null when this is called from CrumblingRenderer
 		if (layer != null) {
 			return layers.get(layer)
 					.values()
@@ -164,6 +165,11 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 			listeners.forEach(OriginShiftListener::onOriginShift);
 		}
+	}
+
+	@Override
+	public String getName() {
+		return "GL33 Instanced Arrays";
 	}
 
 	@FunctionalInterface

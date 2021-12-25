@@ -17,6 +17,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.jozufozu.flywheel.config.Option.BooleanOption;
+import com.jozufozu.flywheel.config.Option.EnumOption;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
@@ -34,7 +35,7 @@ public class FlwConfig {
 	protected final Map<String, Option<?>> optionMapView = Collections.unmodifiableMap(optionMap);
 
 	/** Enable or disable the entire engine */
-	public final BooleanOption enabled = addOption(new BooleanOption("enabled", true));
+	public final EnumOption<FlwEngine> engine = addOption(new EnumOption<>("engine", FlwEngine.INSTANCING));
 	/** Enable or disable a debug overlay that colors pixels by their normal */
 	public final BooleanOption debugNormals = addOption(new BooleanOption("debugNormals", false));
 
@@ -51,8 +52,8 @@ public class FlwConfig {
 		ConfigCommands.init(INSTANCE);
 	}
 
-	public boolean enabled() {
-		return enabled.get();
+	public FlwEngine getEngine() {
+		return engine.get();
 	}
 
 	public boolean debugNormals() {

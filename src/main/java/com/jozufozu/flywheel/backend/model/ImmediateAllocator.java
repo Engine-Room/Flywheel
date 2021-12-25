@@ -7,7 +7,7 @@ public class ImmediateAllocator implements ModelAllocator {
 	public static final ImmediateAllocator INSTANCE = new ImmediateAllocator();
 
 	@Override
-	public IBufferedModel alloc(Model model, Callback allocationCallback) {
+	public BufferedModel alloc(Model model, Callback allocationCallback) {
 		IndexedModel out = new IndexedModel(model);
 		allocationCallback.onAlloc(out);
 		return out;

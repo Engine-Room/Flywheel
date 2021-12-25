@@ -8,7 +8,7 @@ import com.google.common.cache.CacheBuilder;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.Material;
-import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.model.ImmediateAllocator;
@@ -25,15 +25,15 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 
 	final ModelAllocator allocator;
 	protected final Cache<Object, GPUInstancer<D>> models;
-	protected final StructType<D> type;
+	protected final Instanced<D> type;
 
-	public InstancedMaterial(StructType<D> spec) {
-		this.type = spec;
+	public InstancedMaterial(Instanced<D> type) {
+		this.type = type;
 
 		if (Backend.getInstance().compat.onAMDWindows()) {
 			allocator = ImmediateAllocator.INSTANCE;
 		} else {
-			allocator = new ModelPool(Formats.UNLIT_MODEL, 64);
+			allocator = new ModelPool(Formats.POS_TEX_NORMAL, 64);
 		}
 		this.models = CacheBuilder.newBuilder()
 				.removalListener(notification -> {

@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.jozufozu.flywheel.core.atlas.AtlasInfo;
+import com.jozufozu.flywheel.core.crumbling.AtlasInfo;
 
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
@@ -23,10 +23,6 @@ public abstract class AtlasDataMixin {
 
 	@Inject(method = "prepareToStitch", at = @At("RETURN"))
 	public void stealAtlasData(ResourceManager resourceManager, Stream<ResourceLocation> locationStream, ProfilerFiller profiler, int mipMapLevels, CallbackInfoReturnable<TextureAtlas.Preparations> cir) {
-		TextureAtlas.Preparations value = cir.getReturnValue();
-
-		SheetDataAccessor dataAccessor = (SheetDataAccessor) value;
-
-		AtlasInfo.setAtlasData(location(), dataAccessor);
+		AtlasInfo._setAtlasData(location(), (SheetDataAccessor) cir.getReturnValue());
 	}
 }

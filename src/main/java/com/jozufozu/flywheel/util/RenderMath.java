@@ -29,4 +29,46 @@ public class RenderMath {
 	public static byte unb(float f) {
 		return (byte) Math.floor(f * 255);
 	}
+
+	public static int nextPowerOf2(int a) {
+		int h = Integer.highestOneBit(a);
+		return (h == a) ? h : (h << 1);
+	}
+
+	public static boolean isPowerOf2(int n) {
+		int b = n & (n - 1);
+		return b == 0 && n != 0;
+	}
+
+	public static double lengthSqr(double x, double y, double z) {
+		return x * x + y * y + z * z;
+	}
+
+	public static double length(double x, double y, double z) {
+		return Math.sqrt(lengthSqr(x, y, z));
+	}
+
+	public static float rad(double angle) {
+		if (angle == 0) return 0;
+		return (float) (angle / 180 * Math.PI);
+	}
+
+	public static float deg(double angle) {
+		if (angle == 0) return 0;
+		return (float) (angle * 180 / Math.PI);
+	}
+
+	public static float angleLerp(double pct, double current, double target) {
+		return (float) (current + getShortestAngleDiff(current, target) * pct);
+	}
+
+	public static float getShortestAngleDiff(double current, double target) {
+		current = current % 360;
+		target = target % 360;
+		return (float) (((((target - current) % 360) + 540) % 360) - 180);
+	}
+
+	public static float diffuseLight(float x, float y, float z) {
+		return Math.min(x * x * 0.6f + y * y * ((3f + y) / 4f) + z * z * 0.8f, 1f);
+	}
 }

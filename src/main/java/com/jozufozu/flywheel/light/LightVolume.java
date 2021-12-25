@@ -4,6 +4,9 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
+import com.jozufozu.flywheel.util.box.GridAlignedBB;
+import com.jozufozu.flywheel.util.box.ImmutableBox;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LightLayer;
 

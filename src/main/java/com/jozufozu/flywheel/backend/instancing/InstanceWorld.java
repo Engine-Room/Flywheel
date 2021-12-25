@@ -2,10 +2,12 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import com.jozufozu.flywheel.api.instance.IDynamicInstance;
 import com.jozufozu.flywheel.api.instance.ITickableInstance;
+import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.batching.BatchingEngine;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
+import com.jozufozu.flywheel.config.FlwEngine;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
@@ -14,6 +16,8 @@ import com.jozufozu.flywheel.event.RenderLayerEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
@@ -27,14 +31,19 @@ public class InstanceWorld {
 	protected final InstanceManager<Entity> entityInstanceManager;
 	protected final InstanceManager<BlockEntity> tileEntityInstanceManager;
 
-	public InstanceWorld() {
+	protected final ParallelTaskEngine taskEngine;
 
-		// TODO: finish impl
-		if (false) {
-			engine = new BatchingEngine();
-			entityInstanceManager = new EntityInstanceManager(engine);
-			tileEntityInstanceManager = new TileInstanceManager(engine);
-		} else {
+	public InstanceWorld(LevelAccessor levelAccessor) {
+		Level world = (Level) levelAccessor;
+
+		this.taskEngine = new ParallelTaskEngine("Flywheel " + world.dimension().location());
+		this.taskEngine.startWorkers();
+
+		FlwEngine engine = Backend.getInstance()
+				.getEngine();
+
+		switch (engine) {
+		case INSTANCING -> {
 			InstancingEngine<WorldProgram> manager = InstancingEngine.builder(Contexts.WORLD)
 					.build();
 
@@ -43,7 +52,14 @@ public class InstanceWorld {
 
 			manager.addListener(entityInstanceManager);
 			manager.addListener(tileEntityInstanceManager);
-			engine = manager;
+			this.engine = manager;
+		}
+		case BATCHING -> {
+			this.engine = new BatchingEngine();
+			entityInstanceManager = new EntityInstanceManager(this.engine);
+			tileEntityInstanceManager = new TileInstanceManager(this.engine);
+		}
+		default -> throw new IllegalArgumentException("Unknown engine type");
 		}
 	}
 
@@ -59,6 +75,7 @@ public class InstanceWorld {
 	 * Free all acquired resources and invalidate this instance world.
 	 */
 	public void delete() {
+		this.taskEngine.stopWorkers();
 		engine.delete();
 		entityInstanceManager.detachLightListeners();
 		tileEntityInstanceManager.detachLightListeners();
@@ -75,8 +92,10 @@ public class InstanceWorld {
 	public void beginFrame(BeginFrameEvent event) {
 		engine.beginFrame(event.getInfo());
 
-		tileEntityInstanceManager.beginFrame(event.getInfo());
-		entityInstanceManager.beginFrame(event.getInfo());
+		taskEngine.syncPoint();
+
+		tileEntityInstanceManager.beginFrame(taskEngine, event.getInfo());
+		entityInstanceManager.beginFrame(taskEngine, event.getInfo());
 	}
 
 	/**
@@ -91,15 +110,19 @@ public class InstanceWorld {
 
 		if (renderViewEntity == null) return;
 
-		tileEntityInstanceManager.tick(renderViewEntity.getX(), renderViewEntity.getY(), renderViewEntity.getZ());
-		entityInstanceManager.tick(renderViewEntity.getX(), renderViewEntity.getY(), renderViewEntity.getZ());
+		tileEntityInstanceManager.tick(taskEngine, renderViewEntity.getX(), renderViewEntity.getY(), renderViewEntity.getZ());
+		entityInstanceManager.tick(taskEngine, renderViewEntity.getX(), renderViewEntity.getY(), renderViewEntity.getZ());
 	}
 
 	/**
 	 * Draw the given layer.
 	 */
 	public void renderLayer(RenderLayerEvent event) {
-		engine.render(event, event.buffers.bufferSource());
+		taskEngine.syncPoint();
+		event.stack.pushPose();
+		event.stack.translate(-event.camX, -event.camY, -event.camZ);
+		engine.render(taskEngine, event);
+		event.stack.popPose();
 	}
 
 	/**

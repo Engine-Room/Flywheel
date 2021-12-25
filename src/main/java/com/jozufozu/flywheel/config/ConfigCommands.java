@@ -2,13 +2,16 @@ package com.jozufozu.flywheel.config;
 
 import java.util.function.BiConsumer;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.OptifineHandler;
+import com.jozufozu.flywheel.config.Option.EnumOption;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -18,19 +21,12 @@ public final class ConfigCommands {
 	public static void init(FlwConfig config) {
 		ConfigCommandBuilder commandBuilder = new ConfigCommandBuilder("flywheel");
 
-		commandBuilder.addOption(config.enabled, "backend", (builder, option) -> booleanOptionCommand(builder, config, option,
+		commandBuilder.addOption(config.engine, "backend", (builder, option) -> enumOptionCommand(builder, config, option,
 				(source, value) -> {
-					Component text = new TextComponent("Flywheel renderer is currently: ").append(boolToText(value));
-					source.sendFeedback(text);
+					source.sendFeedback(getEngineMessage(value));
 				},
 				(source, value) -> {
-					Component text;
-					if (OptifineHandler.usingShaders() && value) {
-						text = new TextComponent("Flywheel renderer does not support Optifine Shaders").withStyle(ChatFormatting.RED);
-					} else {
-						text = boolToText(value).append(new TextComponent(" Flywheel renderer").withStyle(ChatFormatting.WHITE));
-					}
-					source.sendFeedback(text);
+					source.sendFeedback(getEngineMessage(value));
 					Backend.reloadWorldRenderers();
 				}
 			));
@@ -71,8 +67,48 @@ public final class ConfigCommands {
 				}));
 	}
 
+	public static <E extends Enum<E>> void enumOptionCommand(LiteralArgumentBuilder<FabricClientCommandSource> builder, FlwConfig config, EnumOption<E> option, BiConsumer<FabricClientCommandSource, E> displayAction, BiConsumer<FabricClientCommandSource, E> setAction) {
+		builder.executes(context -> {
+			displayAction.accept(context.getSource(), option.get());
+			return Command.SINGLE_SUCCESS;
+		});
+		for (E constant : option.getEnumType().getEnumConstants()) {
+			String name;
+			if (constant instanceof CommandNameProviderEnum nameProvider) {
+				name = nameProvider.getCommandName();
+			} else {
+				name = constant.name();
+			}
+			builder.then(ClientCommandManager.literal(name)
+				.executes(context -> {
+					option.set(constant);
+					setAction.accept(context.getSource(), option.get());
+					config.save();
+					return Command.SINGLE_SUCCESS;
+				}));
+		}
+	}
+
 	public static MutableComponent boolToText(boolean b) {
 		return b ? new TextComponent("enabled").withStyle(ChatFormatting.DARK_GREEN) : new TextComponent("disabled").withStyle(ChatFormatting.RED);
+	}
+
+	public static Component getEngineMessage(@NotNull FlwEngine type) {
+		return switch (type) {
+			case OFF -> new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED);
+			case INSTANCING -> new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN);
+			case BATCHING -> {
+				MutableComponent msg = new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN);
+
+				if (FabricLoader.getInstance()
+						.isModLoaded("create")) {
+					// FIXME: batching engine contraption lighting issues
+					msg.append(new TextComponent("\nWARNING: May cause issues with Create Contraptions").withStyle(ChatFormatting.RED));
+				}
+
+				yield msg;
+			}
+		};
 	}
 
 	public static class ConfigCommandBuilder {
@@ -95,5 +131,9 @@ public final class ConfigCommands {
 		public void build() {
 			ClientCommandManager.DISPATCHER.register(command);
 		}
+	}
+
+	public interface CommandNameProviderEnum {
+		String getCommandName();
 	}
 }

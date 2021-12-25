@@ -1,46 +1,87 @@
 package com.jozufozu.flywheel.backend.instancing.batching;
 
 import com.jozufozu.flywheel.api.InstanceData;
-import com.jozufozu.flywheel.api.struct.BatchingTransformer;
-import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.struct.Batched;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
+import com.jozufozu.flywheel.backend.instancing.TaskEngine;
+import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
 import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.ModelTransformer;
+import com.jozufozu.flywheel.util.Color;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
-	private final BatchingTransformer<D> renderer;
+	private final Batched<D> batchingType;
 
-	public CPUInstancer(StructType<D> type, Model modelData) {
-		super(type, modelData);
+	final ModelTransformer sbb;
 
-		renderer = type.asBatched()
-				.getTransformer(modelData);
+	public CPUInstancer(Batched<D> type, Model modelData) {
+		super(type::create, modelData);
+		batchingType = type;
+
+		sbb = new ModelTransformer(modelData);
+		modelData.configure(sbb.context);
+	}
+
+	void submitTasks(PoseStack stack, TaskEngine pool, DirectVertexConsumer consumer) {
+		int instances = numInstances();
+
+		while (instances > 0) {
+			int end = instances;
+			instances -= 512;
+			int start = Math.max(instances, 0);
+
+			int verts = getModelVertexCount() * (end - start);
+
+			DirectVertexConsumer sub = consumer.split(verts);
+
+			pool.submit(() -> drawRange(stack, sub, start, end));
+		}
+	}
+
+	private void drawRange(PoseStack stack, VertexConsumer buffer, int from, int to) {
+		ModelTransformer.Params params = new ModelTransformer.Params();
+
+		// Color color = Color.generateFromLong(from);
+
+		for (D d : data.subList(from, to)) {
+			params.loadDefault();
+
+			batchingType.transform(d, params);
+
+			//params.color(color.getRGB());
+
+			sbb.renderInto(params, stack, buffer);
+		}
+	}
+
+	void drawAll(PoseStack stack, VertexConsumer buffer) {
+		ModelTransformer.Params params = new ModelTransformer.Params();
+		for (D d : data) {
+			params.loadDefault();
+
+			batchingType.transform(d, params);
+
+			sbb.renderInto(params, stack, buffer);
+		}
+	}
+
+	void setup() {
+		if (anyToRemove) {
+			data.removeIf(InstanceData::isRemoved);
+			anyToRemove = false;
+		}
+
+		if (false) {
+			this.sbb.context.outputColorDiffuse = false;
+			this.sbb.context.fullNormalTransform = false;
+		}
 	}
 
 	@Override
 	public void notifyDirty() {
 		// noop
-	}
-
-	public void drawAll(PoseStack stack, VertexConsumer buffer) {
-		if (renderer == null) {
-			return;
-		}
-
-		renderSetup();
-
-		for (D d : data) {
-			renderer.draw(d, stack, buffer);
-		}
-	}
-
-	protected void renderSetup() {
-		if (anyToRemove) {
-			removeDeletedInstances();
-		}
-
-		anyToRemove = false;
 	}
 }

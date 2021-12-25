@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.core.materials.oriented;
 
 import com.jozufozu.flywheel.core.materials.BasicData;
-import com.jozufozu.flywheel.util.vec.Vec3;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
@@ -36,11 +35,6 @@ public class OrientedData extends BasicData {
 		return this;
 	}
 
-
-	public OrientedData nudge(Vec3 pos) {
-		return nudge(pos.getX(), pos.getY(), pos.getZ());
-	}
-
 	public OrientedData nudge(float x, float y, float z) {
 		this.posX += x;
 		this.posY += y;
@@ -55,10 +49,6 @@ public class OrientedData extends BasicData {
 
 	public OrientedData setPivot(net.minecraft.world.phys.Vec3 pos) {
 		return setPosition((float) pos.x(), (float) pos.y(), (float) pos.z());
-	}
-
-	public OrientedData setPivot(Vec3 pos) {
-		return setPivot(pos.getX(), pos.getY(), pos.getZ());
 	}
 
 	public OrientedData setPivot(float x, float y, float z) {
