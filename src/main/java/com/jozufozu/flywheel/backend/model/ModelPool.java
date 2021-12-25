@@ -121,7 +121,7 @@ public class ModelPool implements ModelAllocator {
 			}
 
 		} catch (Exception e) {
-			Flywheel.log.error("Error uploading pooled models:", e);
+			Flywheel.LOGGER.error("Error uploading pooled models:", e);
 		}
 	}
 
@@ -133,7 +133,7 @@ public class ModelPool implements ModelAllocator {
 			}
 			pendingUpload.clear();
 		} catch (Exception e) {
-			Flywheel.log.error("Error uploading pooled models:", e);
+			Flywheel.LOGGER.error("Error uploading pooled models:", e);
 		}
 	}
 

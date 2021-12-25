@@ -137,7 +137,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 			try (MappedBuffer buf = instanceVBO.getBuffer(offset, length)) {
 				MemoryUtil.memSet(MemoryUtil.memAddress(buf.unwrap()), 0, length);
 			} catch (Exception e) {
-				Flywheel.log.error("Error clearing buffer tail:", e);
+				Flywheel.LOGGER.error("Error clearing buffer tail:", e);
 			}
 		}
 	}
@@ -159,7 +159,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 				}
 			}
 		} catch (Exception e) {
-			Flywheel.log.error("Error updating GPUInstancer:", e);
+			Flywheel.LOGGER.error("Error updating GPUInstancer:", e);
 		}
 	}
 
@@ -175,7 +175,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 					writer.write(datum);
 				}
 			} catch (Exception e) {
-				Flywheel.log.error("Error reallocating GPUInstancer:", e);
+				Flywheel.LOGGER.error("Error reallocating GPUInstancer:", e);
 			}
 
 			glInstanceCount = size;

@@ -8,8 +8,8 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public class FlwPackets {
-	public static final ResourceLocation CHANNEL_NAME = new ResourceLocation(Flywheel.ID, "network");
-	public static final String NETWORK_VERSION = new ResourceLocation(Flywheel.ID, "1").toString();
+	public static final ResourceLocation CHANNEL_NAME = Flywheel.rl("main");
+	public static final String NETWORK_VERSION = String.valueOf(1);
 	public static SimpleChannel channel;
 
 	public static void registerPackets() {
@@ -19,13 +19,15 @@ public class FlwPackets {
 				.networkProtocolVersion(() -> NETWORK_VERSION)
 				.simpleChannel();
 
-		channel.messageBuilder(SConfigureBooleanPacket.class, 0, NetworkDirection.PLAY_TO_CLIENT)
+		int id = 0;
+
+		channel.messageBuilder(SConfigureBooleanPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
 				.decoder(SConfigureBooleanPacket::new)
 				.encoder(SConfigureBooleanPacket::encode)
 				.consumer(SConfigureBooleanPacket::execute)
 				.add();
 
-		channel.messageBuilder(SConfigureEnginePacket.class, 1, NetworkDirection.PLAY_TO_CLIENT)
+		channel.messageBuilder(SConfigureEnginePacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
 				.decoder(SConfigureEnginePacket::new)
 				.encoder(SConfigureEnginePacket::encode)
 				.consumer(SConfigureEnginePacket::execute)

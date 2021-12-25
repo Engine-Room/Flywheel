@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class WorldFog implements IExtensionInstance {
 
-	public static final ResourceLocation NAME = new ResourceLocation(Flywheel.ID, "fog");
+	public static final ResourceLocation NAME = Flywheel.rl("fog");
 
 	private final int uFogColor;
 	private final int uFogRange;
@@ -28,6 +28,6 @@ public class WorldFog implements IExtensionInstance {
 
 	@Override
 	public ResourceLocation name() {
-			return NAME;
-		}
+		return NAME;
+	}
 }

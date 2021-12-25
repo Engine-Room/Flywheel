@@ -33,6 +33,6 @@ public class FlywheelClient {
 		// Only thing I've seen that's close to a fix is to force the class to load before trying to use it.
 		// From the SpongePowered discord:
 		// https://discord.com/channels/142425412096491520/626802111455297538/675007581168599041
-		Flywheel.log.info("Successfully loaded {}", PausedPartialTickAccessor.class.getName());
+		Flywheel.LOGGER.info("Successfully loaded {}", PausedPartialTickAccessor.class.getName());
 	}
 }

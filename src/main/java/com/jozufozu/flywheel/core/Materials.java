@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.core;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
@@ -25,7 +26,7 @@ public class Materials {
 	}
 
 	public static class Names {
-		public static final ResourceLocation MODEL = new ResourceLocation("create", "model");
-		public static final ResourceLocation ORIENTED = new ResourceLocation("create", "oriented");
+		public static final ResourceLocation MODEL = Flywheel.rl("model");
+		public static final ResourceLocation ORIENTED = Flywheel.rl("oriented");
 	}
 }

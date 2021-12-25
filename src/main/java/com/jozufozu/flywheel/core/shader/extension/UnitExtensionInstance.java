@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class UnitExtensionInstance implements IExtensionInstance {
 
-	public static final ResourceLocation NAME = new ResourceLocation(Flywheel.ID, "unit");
+	public static final ResourceLocation NAME = Flywheel.rl("unit");
 
 	public UnitExtensionInstance(GlProgram program) {
 	}

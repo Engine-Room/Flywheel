@@ -139,7 +139,7 @@ public class ParallelTaskEngine implements TaskEngine {
 		try {
 			job.run();
 		} catch (Exception e) {
-			Flywheel.log.error(e);
+			Flywheel.LOGGER.error(e);
 		} finally {
 			ParallelTaskEngine.this.wg.done();
 		}

@@ -18,11 +18,11 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-@Mod("flywheel")
+@Mod(Flywheel.ID)
 public class Flywheel {
 
 	public static final String ID = "flywheel";
-	public static final Logger log = LogManager.getLogger(Flywheel.class);
+	public static final Logger LOGGER = LogManager.getLogger(Flywheel.class);
 
 	public Flywheel() {
 		FMLJavaModLoadingContext.get()
@@ -42,6 +42,6 @@ public class Flywheel {
 
     private void setup(final FMLCommonSetupEvent event) {
 		FlwPackets.registerPackets();
-		ArgumentTypes.register("flywheel:engine", EngineArgument.class, new EmptyArgumentSerializer<>(EngineArgument::getInstance));
+		ArgumentTypes.register(rl("engine").toString(), EngineArgument.class, new EmptyArgumentSerializer<>(EngineArgument::getInstance));
 	}
 }
