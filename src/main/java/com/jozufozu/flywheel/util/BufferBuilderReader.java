@@ -18,6 +18,7 @@ public class BufferBuilderReader {
 		VertexFormat vertexFormat = BufferBuilderHelper.getVertexFormat(builder);
 		Pair<BufferBuilder.DrawState, ByteBuffer> data = builder.popNextBuffer();
 		buffer = data.getSecond();
+		BufferBuilderHelper.fixByteOrder(builder, buffer);
 
 		formatSize = vertexFormat.getVertexSize();
 

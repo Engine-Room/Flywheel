@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.fabric.helper;
 
-import com.jozufozu.flywheel.mixin.fabric.VertexFormatAccessor;
+import com.jozufozu.flywheel.fabric.mixin.VertexFormatAccessor;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 public final class VertexFormatHelper {

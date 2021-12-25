@@ -21,13 +21,6 @@
         "matrix.Matrix3fMixin",
         "matrix.Matrix4fMixin",
         "matrix.PoseStackMixin"
-        ,
-        "fabric.BufferBuilderAccessor",
-        "fabric.DebugScreenOverlayMixin",
-        "fabric.Matrix4fMixin",
-        "fabric.MinecraftMixin",
-        "fabric.TextureAtlasMixin",
-        "fabric.VertexFormatAccessor"
     ],
     "injectors": {
         "defaultRequire": 1

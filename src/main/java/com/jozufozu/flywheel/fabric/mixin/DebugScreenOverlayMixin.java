@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.mixin.fabric;
+package com.jozufozu.flywheel.fabric.mixin;
 
 import java.util.List;
 
