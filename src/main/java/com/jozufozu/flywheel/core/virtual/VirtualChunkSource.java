@@ -3,8 +3,6 @@ package com.jozufozu.flywheel.core.virtual;
 import java.util.HashMap;
 import java.util.function.BooleanSupplier;
 
-import javax.annotation.Nullable;
-
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -22,7 +20,6 @@ public class VirtualChunkSource extends ChunkSource {
 		this.world = world;
 	}
 
-	@Nullable
 	@Override
 	public BlockGetter getChunkForLighting(int x, int z) {
 		return getChunk(x, z);
@@ -33,7 +30,6 @@ public class VirtualChunkSource extends ChunkSource {
 		return world;
 	}
 
-	@Nullable
 	@Override
 	public ChunkAccess getChunk(int x, int z, ChunkStatus status, boolean p_212849_4_) {
 		return getChunk(x, z);
