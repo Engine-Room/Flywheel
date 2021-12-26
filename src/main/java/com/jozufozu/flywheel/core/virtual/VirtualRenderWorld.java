@@ -29,7 +29,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.lighting.LevelLightEngine;
@@ -45,17 +47,24 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	public final Set<SectionPos> spannedSections = new HashSet<>();
 	private final BlockPos.MutableBlockPos scratch = new BlockPos.MutableBlockPos();
 
-	public final LevelLightEngine lighter;
-	public final VirtualChunkSource chunkSource;
+	protected final Level level;
+	protected final LevelLightEngine lighter;
+	protected final VirtualChunkSource chunkSource;
+	protected final LevelEntityGetter<Entity> entityGetter = new VirtualLevelEntityGetter<>();
 
-	protected Level level;
-
-	protected LevelEntityGetter<Entity> entityGetter = new VirtualLevelEntityGetter<>();
+	protected final int height;
+	protected final int minBuildHeight;
 
 	public VirtualRenderWorld(Level level) {
+		this(level, level.getHeight(), level.getMinBuildHeight());
+	}
+
+	public VirtualRenderWorld(Level level, int height, int minBuildHeight) {
 		super((WritableLevelData) level.getLevelData(), level.dimension(), level.dimensionType(), level::getProfiler,
 				true, false, 0);
 		this.level = level;
+		this.height = height;
+		this.minBuildHeight = minBuildHeight;
 		this.chunkSource = new VirtualChunkSource(this);
 		this.lighter = new LevelLightEngine(chunkSource, true, false);
 	}
@@ -86,6 +95,16 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	}
 
 	// MEANINGFUL OVERRIDES
+
+	@Override
+	public int getHeight() {
+		return height;
+	}
+
+	@Override
+	public int getMinBuildHeight() {
+		return minBuildHeight;
+	}
 
 	@Override
 	public ChunkSource getChunkSource() {
@@ -262,4 +281,60 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	@Override
 	public void sendBlockUpdated(BlockPos pos, BlockState oldState, BlockState newState, int flags) {}
 
+	// Override Starlight's ExtendedWorld interface methods:
+
+	public LevelChunk getChunkAtImmediately(final int chunkX, final int chunkZ) {
+		return chunkSource.getChunk(chunkX, chunkZ, false);
+	}
+
+	public ChunkAccess getAnyChunkImmediately(final int chunkX, final int chunkZ) {
+		return chunkSource.getChunk(chunkX, chunkZ);
+	}
+
+	// Intentionally copied from LevelHeightAccessor. Lithium overrides these methods so we need to, too.
+
+	@Override
+	public int getMaxBuildHeight() {
+		return this.getMinBuildHeight() + this.getHeight();
+	}
+
+	@Override
+	public int getSectionsCount() {
+		return this.getMaxSection() - this.getMinSection();
+	}
+
+	@Override
+	public int getMinSection() {
+		return SectionPos.blockToSectionCoord(this.getMinBuildHeight());
+	}
+
+	@Override
+	public int getMaxSection() {
+		return SectionPos.blockToSectionCoord(this.getMaxBuildHeight() - 1) + 1;
+	}
+
+	@Override
+	public boolean isOutsideBuildHeight(BlockPos pos) {
+		return this.isOutsideBuildHeight(pos.getY());
+	}
+
+	@Override
+	public boolean isOutsideBuildHeight(int y) {
+		return y < this.getMinBuildHeight() || y >= this.getMaxBuildHeight();
+	}
+
+	@Override
+	public int getSectionIndex(int y) {
+		return this.getSectionIndexFromSectionY(SectionPos.blockToSectionCoord(y));
+	}
+
+	@Override
+	public int getSectionIndexFromSectionY(int sectionY) {
+		return sectionY - this.getMinSection();
+	}
+
+	@Override
+	public int getSectionYFromSectionIndex(int sectionIndex) {
+		return sectionIndex + this.getMinSection();
+	}
 }

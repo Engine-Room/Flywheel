@@ -7,6 +7,10 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.jozufozu.flywheel.util.Mods;
+
+import ca.spottedleaf.starlight.common.chunk.ExtendedChunk;
+import ca.spottedleaf.starlight.common.light.StarLightEngine;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.minecraft.core.BlockPos;
@@ -48,11 +52,17 @@ public class VirtualChunk extends ChunkAccess {
 		this.x = x;
 		this.z = z;
 
-		this.sections = new LevelChunkSection[16];
+		int sectionCount = world.getSectionsCount();
+		this.sections = new LevelChunkSection[sectionCount];
 
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < sectionCount; i++) {
 			sections[i] = new VirtualChunkSection(this, i << 4);
 		}
+
+		Mods.STARLIGHT.executeIfInstalled(() -> () -> {
+			((ExtendedChunk)this).setBlockNibbles(StarLightEngine.getFilledEmptyLight(this));
+			((ExtendedChunk)this).setSkyNibbles(StarLightEngine.getFilledEmptyLight(this));
+		});
 	}
 
 	@Override
