@@ -1,4 +1,12 @@
-0.4.1a:
+0.5.0:
+New
+ - Added parallel batching backend, effectively a CPU instancer.
+ - Now partially compatible with starlight.
+Technical/API
+ - Much more flexible vertex formats.
+ - Do instance updates/ticking entirely async.
+
+0.4.2-rc:
 Fixes
  - Partially fix crash on intel and mesa drivers (needs Create to update)
  - Fix garbage rendering on AMD GPUs
