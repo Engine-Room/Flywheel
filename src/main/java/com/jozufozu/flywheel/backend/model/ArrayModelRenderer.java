@@ -4,7 +4,6 @@ import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.core.model.Model;
-import com.jozufozu.flywheel.util.AttribUtil;
 
 public class ArrayModelRenderer extends ModelRenderer {
 
@@ -36,7 +35,6 @@ public class ArrayModelRenderer extends ModelRenderer {
 		vao = new GlVertexArray();
 
 		vao.bind();
-		vao.enableArrays(this.model.getAttributeCount());
 
 		// bind the model's vbo to our vao
 		this.model.setupState();

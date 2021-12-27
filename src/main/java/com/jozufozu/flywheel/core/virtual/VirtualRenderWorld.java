@@ -97,6 +97,22 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	// MEANINGFUL OVERRIDES
 
 	@Override
+	public boolean setBlock(BlockPos pos, BlockState newState, int flags) {
+		blocksAdded.put(pos, newState);
+
+		SectionPos sectionPos = SectionPos.of(pos);
+		if (spannedSections.add(sectionPos)) {
+			lighter.updateSectionStatus(sectionPos, false);
+		}
+
+		if ((flags & Block.UPDATE_SUPPRESS_LIGHT) == 0) {
+			lighter.checkBlock(pos);
+		}
+
+		return true;
+	}
+
+	@Override
 	public int getHeight() {
 		return height;
 	}
@@ -132,22 +148,6 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	@Override
 	public boolean setBlockAndUpdate(BlockPos pos, BlockState state) {
 		return setBlock(pos, state, 0);
-	}
-
-	@Override
-	public boolean setBlock(BlockPos pos, BlockState newState, int flags) {
-		blocksAdded.put(pos, newState);
-
-		SectionPos sectionPos = SectionPos.of(pos);
-		if (spannedSections.add(sectionPos)) {
-			lighter.updateSectionStatus(sectionPos, false);
-		}
-
-		if ((flags & Block.UPDATE_SUPPRESS_LIGHT) == 0) {
-			lighter.checkBlock(pos);
-		}
-
-		return true;
 	}
 
 	@Override

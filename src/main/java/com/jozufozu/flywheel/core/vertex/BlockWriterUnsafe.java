@@ -46,7 +46,7 @@ public class BlockWriterUnsafe extends VertexWriterUnsafe<BlockVertex> {
 		MemoryUtil.memPutByte(ptr + 15, a);
 		MemoryUtil.memPutFloat(ptr + 16, u);
 		MemoryUtil.memPutFloat(ptr + 20, v);
-		MemoryUtil.memPutInt(ptr + 24, light);
+		MemoryUtil.memPutInt(ptr + 24, light << 8); // light is packed in the low byte of each short
 		MemoryUtil.memPutByte(ptr + 28, RenderMath.nb(nX));
 		MemoryUtil.memPutByte(ptr + 29, RenderMath.nb(nY));
 		MemoryUtil.memPutByte(ptr + 30, RenderMath.nb(nZ));
