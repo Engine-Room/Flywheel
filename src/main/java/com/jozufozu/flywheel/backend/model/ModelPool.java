@@ -6,15 +6,15 @@ import java.util.List;
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.api.vertex.VertexWriter;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
+import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.core.model.Model;
-import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.api.vertex.VertexWriter;
-import com.jozufozu.flywheel.util.AttribUtil;
 
 public class ModelPool implements ModelAllocator {
 
@@ -178,18 +178,10 @@ public class ModelPool implements ModelAllocator {
 		}
 
 		@Override
-		public void setupState() {
+		public void setupState(GlVertexArray vao) {
 			vbo.bind();
-			ebo.bind();
-			AttribUtil.enableArrays(getAttributeCount());
-			ModelPool.this.vertexType.getLayout().vertexAttribPointers(0);
-		}
-
-		@Override
-		public void clearState() {
-			AttribUtil.disableArrays(getAttributeCount());
-			ebo.unbind();
-			vbo.unbind();
+			vao.enableArrays(getAttributeCount());
+			vao.bindAttributes(0, vertexType.getLayout());
 		}
 
 		@Override
