@@ -1,7 +1,8 @@
 package com.jozufozu.flywheel.backend.model;
 
-import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.gl.GlVertexArray;
+import com.jozufozu.flywheel.core.layout.BufferLayout;
 
 public interface BufferedModel {
 
@@ -10,11 +11,9 @@ public interface BufferedModel {
 	int getVertexCount();
 
 	/**
-	 * The VBO/VAO should be bound externally.
+	 * The VAO must be bound externally.
 	 */
-	void setupState();
-
-	void clearState();
+	void setupState(GlVertexArray vao);
 
 	void drawCall();
 
@@ -27,7 +26,7 @@ public interface BufferedModel {
 
 	void delete();
 
-	default BufferLayout getFormat() {
+	default BufferLayout getLayout() {
 		return getType().getLayout();
 	}
 
@@ -36,6 +35,6 @@ public interface BufferedModel {
 	}
 
 	default int getAttributeCount() {
-		return getFormat().getAttributeCount();
+		return getType().getLayout().getAttributeCount();
 	}
 }
