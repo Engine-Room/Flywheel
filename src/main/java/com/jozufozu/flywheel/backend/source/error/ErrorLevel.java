@@ -1,13 +1,14 @@
 package com.jozufozu.flywheel.backend.source.error;
 
-public enum Level {
+public enum ErrorLevel {
 	WARN("warn"),
 	ERROR("error"),
+	HINT("hint"),
 	;
 
 	private final String error;
 
-	Level(String error) {
+	ErrorLevel(String error) {
 		this.error = error;
 	}
 

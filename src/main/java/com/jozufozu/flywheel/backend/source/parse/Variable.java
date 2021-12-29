@@ -4,25 +4,41 @@ import com.jozufozu.flywheel.backend.source.span.Span;
 
 public class Variable extends AbstractShaderElement {
 
-	private final Span type;
-	private final Span name;
+	public final Span qualifierSpan;
+	public final Span type;
+	public final Span name;
+	public final Qualifier qualifier;
 
-	public Variable(Span self, Span type, Span name) {
+	public Variable(Span self, Span qualifier, Span type, Span name) {
 		super(self);
+		this.qualifierSpan = qualifier;
 		this.type = type;
 		this.name = name;
-	}
-
-	public Span typeName() {
-		return type;
-	}
-
-	public Span getName() {
-		return name;
+		this.qualifier = Qualifier.fromSpan(qualifierSpan);
 	}
 
 	@Override
 	public String toString() {
 		return type + " " + name;
+	}
+
+	public enum Qualifier {
+		NONE,
+		IN,
+		OUT,
+		INOUT,
+		ERROR;
+
+		public static Qualifier fromSpan(Span s) {
+			String span = s.toString();
+
+			return switch (span) {
+				case "" -> NONE;
+				case "in" -> IN;
+				case "inout" -> INOUT;
+				case "out" -> OUT;
+				default -> ERROR;
+			};
+		}
 	}
 }

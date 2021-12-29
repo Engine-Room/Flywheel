@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.Lists;
 import com.jozufozu.flywheel.util.ResourceUtil;
 import com.jozufozu.flywheel.util.StringUtil;
@@ -17,7 +19,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 /**
  * The main object for loading and parsing source files.
  */
-public class ShaderSources implements ISourceHolder {
+public class ShaderSources implements SourceFinder {
 	public static final String SHADER_DIR = "flywheel/shaders/";
 	public static final ArrayList<String> EXTENSIONS = Lists.newArrayList(".vert", ".vsh", ".frag", ".fsh", ".glsl");
 
@@ -51,13 +53,9 @@ public class ShaderSources implements ISourceHolder {
 	}
 
 	@Override
+	@Nullable
 	public SourceFile findSource(ResourceLocation name) {
-		SourceFile source = shaderSources.get(name);
 
-		if (source == null) {
-			throw new ShaderLoadingException(String.format("shader '%s' does not exist", name));
-		}
-
-		return source;
+		return shaderSources.get(name);
 	}
 }

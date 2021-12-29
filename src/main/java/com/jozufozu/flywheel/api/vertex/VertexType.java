@@ -39,4 +39,6 @@ public interface VertexType {
 	default int byteOffset(int vertexIndex) {
 		return getStride() * vertexIndex;
 	}
+
+	String writeShaderHeader();
 }

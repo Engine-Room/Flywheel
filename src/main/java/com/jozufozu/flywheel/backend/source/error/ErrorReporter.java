@@ -1,12 +1,15 @@
 package com.jozufozu.flywheel.backend.source.error;
 
+import java.util.List;
 import java.util.Optional;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.backend.source.parse.ShaderFunction;
 import com.jozufozu.flywheel.backend.source.parse.ShaderStruct;
 import com.jozufozu.flywheel.backend.source.span.Span;
+import com.jozufozu.flywheel.util.FlwUtil;
 
 public class ErrorReporter {
 
@@ -42,7 +45,7 @@ public class ErrorReporter {
 
 		ErrorBuilder error = ErrorBuilder.error(msg)
 				.pointAtFile(file)
-				.pointAt(vertexName, 2)
+				.pointAt(vertexName, 1)
 				.hintIncludeFor(span.orElse(null), hint);
 
 		Backend.log.error(error.build());
@@ -64,4 +67,29 @@ public class ErrorReporter {
 
 		Backend.log.error(error.build());
 	}
+
+	public static void printLines(CharSequence source) {
+		String string = source.toString();
+
+		List<String> lines = string.lines()
+				.toList();
+
+		int size = lines.size();
+
+		int maxWidth = FlwUtil.numDigits(size) + 1;
+
+		StringBuilder builder = new StringBuilder().append('\n');
+
+		for (int i = 0; i < size; i++) {
+
+			builder.append(i)
+					.append(FlwUtil.repeatChar(' ', maxWidth - FlwUtil.numDigits(i)))
+					.append("| ")
+					.append(lines.get(i))
+					.append('\n');
+		}
+
+		Flywheel.LOGGER.error(builder.toString());
+	}
+
 }

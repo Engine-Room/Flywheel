@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.pipeline;
 
+import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.shader.ContextAwareProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
@@ -10,6 +11,6 @@ import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
  */
 public interface ShaderPipeline<P extends WorldProgram> {
 
-	ContextAwareProgram<P> compile(ProgramSpec spec);
+	ContextAwareProgram<P> compile(ProgramSpec spec, VertexType vertexType);
 
 }

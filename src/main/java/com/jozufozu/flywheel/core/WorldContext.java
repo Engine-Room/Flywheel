@@ -6,11 +6,13 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import com.jozufozu.flywheel.api.shader.FlexibleShader;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.ShaderContext;
+import com.jozufozu.flywheel.backend.pipeline.LazyCompiler;
 import com.jozufozu.flywheel.backend.pipeline.ShaderPipeline;
-import com.jozufozu.flywheel.core.shader.ContextAwareProgram;
+import com.jozufozu.flywheel.backend.source.ShaderLoadingException;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
@@ -18,7 +20,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class WorldContext<P extends WorldProgram> implements ShaderContext<P> {
 	public final Backend backend;
-	protected final Map<ResourceLocation, ContextAwareProgram<P>> programs = new HashMap<>();
+	protected final Map<ResourceLocation, LazyCompiler<P>> programs = new HashMap<>();
 	protected final ResourceLocation name;
 	protected final Supplier<Stream<ResourceLocation>> specStream;
 
@@ -44,25 +46,27 @@ public class WorldContext<P extends WorldProgram> implements ShaderContext<P> {
 	private void loadSpec(ProgramSpec spec) {
 
 		try {
-			programs.put(spec.name, pipeline.compile(spec));
+			programs.put(spec.name, new LazyCompiler<>(pipeline, spec));
 
 			Backend.log.debug("Loaded program {}", spec.name);
 		} catch (Exception e) {
 			Backend.log.error("Error loading program {}", spec.name);
-			Backend.log.error("", e);
+			if (!(e instanceof ShaderLoadingException)) {
+				Backend.log.error("", e);
+			}
 			backend.loader.notifyError();
 		}
 	}
 
 	@Override
-	public Supplier<P> getProgramSupplier(ResourceLocation spec) {
+	public FlexibleShader<P> getProgramSupplier(ResourceLocation spec) {
 		return programs.get(spec);
 	}
 
 	@Override
 	public void delete() {
 		programs.values()
-				.forEach(ContextAwareProgram::delete);
+				.forEach(LazyCompiler::delete);
 		programs.clear();
 	}
 

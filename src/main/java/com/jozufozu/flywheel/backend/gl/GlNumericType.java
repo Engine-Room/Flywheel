@@ -26,15 +26,15 @@ public enum GlNumericType {
 
 	private static final GlNumericType[] VALUES = values();
 	private static final Map<String, GlNumericType> NAME_LOOKUP = Arrays.stream(VALUES)
-			.collect(Collectors.toMap(GlNumericType::getDisplayName, type -> type));
+			.collect(Collectors.toMap(GlNumericType::getTypeName, type -> type));
 
 	private final int byteWidth;
-	private final String displayName;
+	private final String typeName;
 	private final int glEnum;
 
 	GlNumericType(int bytes, String name, int glEnum) {
 		this.byteWidth = bytes;
-		this.displayName = name;
+		this.typeName = name;
 		this.glEnum = glEnum;
 	}
 
@@ -42,8 +42,8 @@ public enum GlNumericType {
 		return this.byteWidth;
 	}
 
-	public String getDisplayName() {
-		return this.displayName;
+	public String getTypeName() {
+		return this.typeName;
 	}
 
 	public int getGlEnum() {
@@ -63,5 +63,10 @@ public enum GlNumericType {
 	@Nullable
 	public static GlNumericType byName(String name) {
 		return name == null ? null : NAME_LOOKUP.get(name.toLowerCase(Locale.ROOT));
+	}
+
+	@Override
+	public String toString() {
+		return typeName;
 	}
 }

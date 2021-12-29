@@ -14,6 +14,10 @@ public interface ErrorLine {
 		return left() + divider() + right();
 	}
 
-	String left();
-	String right();
+	default String left() {
+		return "";
+	}
+	default String right() {
+		return "";
+	}
 }

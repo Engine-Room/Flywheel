@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.core.layout;
 
-record PaddingItem(int bytes) implements LayoutItem {
+record Padding(int bytes) implements LayoutItem {
 
 	@Override
 	public void vertexAttribPointer(int stride, int index, int offset) {
@@ -8,12 +8,13 @@ record PaddingItem(int bytes) implements LayoutItem {
 	}
 
 	@Override
-	public int getSize() {
+	public int size() {
 		return bytes;
 	}
 
 	@Override
-	public int getAttributeCount() {
+	public int attributeCount() {
 		return 0;
 	}
+
 }

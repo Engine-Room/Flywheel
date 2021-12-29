@@ -29,6 +29,48 @@ public class SourceLines {
 		this.lines = getLines(source, lineStarts);
 	}
 
+	public int getLineCount() {
+		return lines.size();
+	}
+
+	public String getLine(int lineNo) {
+		return lines.get(lineNo);
+	}
+
+	public int getLineStart(int lineNo) {
+
+		return lineStarts.getInt(lineNo);
+	}
+
+	public CharPos getCharPos(int charPos) {
+		int lineNo = 0;
+		for (; lineNo < lineStarts.size(); lineNo++) {
+			int ls = lineStarts.getInt(lineNo);
+
+			if (charPos < ls) {
+				break;
+			}
+		}
+
+		lineNo -= 1;
+
+		int lineStart = lineStarts.getInt(lineNo);
+
+		return new CharPos(charPos, lineNo, charPos - lineStart);
+	}
+
+	public String printLinesWithNumbers() {
+		StringBuilder builder = new StringBuilder();
+
+		for (int i = 0, linesSize = lines.size(); i < linesSize; i++) {
+			builder.append(String.format("%1$4s: ", i + 1))
+					.append(lines.get(i))
+					.append('\n');
+		}
+
+		return builder.toString();
+	}
+
 	/**
 	 * Scan the source for line breaks, recording the position of the first character of each line.
 	 * @param source
@@ -56,42 +98,5 @@ public class SourceLines {
 		}
 
 		return builder.build();
-	}
-
-	public CharPos getCharPos(int charPos) {
-		int lineNo = 0;
-		for (; lineNo < lineStarts.size(); lineNo++) {
-			int ls = lineStarts.getInt(lineNo);
-
-			if (charPos < ls) {
-				break;
-			}
-		}
-
-		lineNo -= 1;
-
-		int lineStart = lineStarts.getInt(lineNo);
-
-		return new CharPos(charPos, lineNo, charPos - lineStart);
-	}
-
-	public int getLineCount() {
-		return lines.size();
-	}
-
-	public String getLine(int lineNo) {
-		return lines.get(lineNo);
-	}
-
-	public String printLinesWithNumbers() {
-		StringBuilder builder = new StringBuilder();
-
-		for (int i = 0, linesSize = lines.size(); i < linesSize; i++) {
-			builder.append(String.format("%1$4s: ", i + 1))
-					.append(lines.get(i))
-					.append('\n');
-		}
-
-		return builder.toString();
 	}
 }
