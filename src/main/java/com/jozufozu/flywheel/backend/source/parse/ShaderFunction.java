@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.backend.source.span.Span;
 
 public class ShaderFunction extends AbstractShaderElement {
 
-	public static final Pattern argument = Pattern.compile("(\\w+)\\s+(\\w+)");
+	public static final Pattern argument = Pattern.compile("(?:(inout|in|out) )?(\\w+)\\s+(\\w+)");
 	public static final Pattern assignment = Pattern.compile("(\\w+)\\s*=");
 
 	private final Span type;
@@ -66,10 +66,11 @@ public class ShaderFunction extends AbstractShaderElement {
 
 		while (arguments.find()) {
 			Span self = Span.fromMatcher(args, arguments);
-			Span type = Span.fromMatcher(args, arguments, 1);
-			Span name = Span.fromMatcher(args, arguments, 2);
+			Span qualifier = Span.fromMatcher(args, arguments, 1);
+			Span type = Span.fromMatcher(args, arguments, 2);
+			Span name = Span.fromMatcher(args, arguments, 3);
 
-			builder.add(new Variable(self, type, name));
+			builder.add(new Variable(self, qualifier, type, name));
 		}
 
 		return builder.build();
@@ -79,7 +80,7 @@ public class ShaderFunction extends AbstractShaderElement {
 	public String toString() {
 
 		String p = parameters.stream()
-				.map(Variable::typeName)
+				.map(variable -> variable.type)
 				.map(Span::get)
 				.collect(Collectors.joining(","));
 

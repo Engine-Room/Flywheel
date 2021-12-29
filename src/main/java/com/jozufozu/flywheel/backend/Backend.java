@@ -115,7 +115,7 @@ public class Backend {
 
 		enabled = switch (engine) {
 			case OFF -> false;
-			case BATCHING -> !usingShaders;
+			case BATCHING -> true;
 			case INSTANCING -> !usingShaders && compat.instancedArraysSupported();
 		};
 	}

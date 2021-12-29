@@ -1,13 +1,11 @@
 package com.jozufozu.flywheel.backend.pipeline;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
-import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.backend.source.parse.ShaderStruct;
 import com.jozufozu.flywheel.backend.source.parse.StructField;
@@ -21,29 +19,17 @@ import com.jozufozu.flywheel.backend.source.parse.StructField;
  * </p>
  * @param <D> Holds metadata, generates errors.
  */
-public abstract class Template<D> {
+public class Template<D extends TemplateData> {
 
 	private final Map<SourceFile, D> metadata = new HashMap<>();
 
 	private final Function<SourceFile, D> reader;
+	private final GLSLVersion glslVersion;
 
-	protected Template(Function<SourceFile, D> reader) {
+	public Template(GLSLVersion glslVersion, Function<SourceFile, D> reader) {
 		this.reader = reader;
+		this.glslVersion = glslVersion;
 	}
-
-	/**
-	 * Generate the necessary glue code here.
-	 *
-	 * <p>
-	 *     See {@link InstancingTemplate} and {@link OneShotTemplate} for examples.
-	 * </p>
-	 * @param builder The builder to generate the source into.
-	 * @param type The shader stage glue code is needed for.
-	 * @param file The SourceFile with user written code.
-	 */
-	public abstract void generateTemplateSource(StringBuilder builder, ShaderType type, SourceFile file);
-
-	public abstract Collection<ShaderInput> getShaderInputs(SourceFile file);
 
 	public D getMetadata(SourceFile file) {
 		// lazily read files, cache results
@@ -51,7 +37,7 @@ public abstract class Template<D> {
 	}
 
 	public GLSLVersion getVersion() {
-		return GLSLVersion.V150;
+		return glslVersion;
 	}
 
 	public static void prefixFields(StringBuilder builder, ShaderStruct struct, String qualifier, String prefix) {
@@ -68,8 +54,10 @@ public abstract class Template<D> {
 		}
 	}
 
-	public static void assignFields(StringBuilder builder, ShaderStruct struct, String prefix1, String prefix2) {
+	public static StringBuilder assignFields(ShaderStruct struct, String prefix1, String prefix2) {
 		ImmutableList<StructField> fields = struct.getFields();
+
+		StringBuilder builder = new StringBuilder();
 
 		for (StructField field : fields) {
 			builder.append(prefix1)
@@ -79,5 +67,7 @@ public abstract class Template<D> {
 					.append(field.name)
 					.append(";\n");
 		}
+
+		return builder;
 	}
 }

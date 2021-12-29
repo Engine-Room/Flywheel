@@ -39,8 +39,8 @@ public class GlVertexArray extends GlObject {
 		int offset = 0;
 		for (LayoutItem spec : type.getLayoutItems()) {
 			spec.vertexAttribPointer(type.getStride(), startIndex, offset);
-			startIndex += spec.getAttributeCount();
-			offset += spec.getSize();
+			startIndex += spec.attributeCount();
+			offset += spec.size();
 		}
 	}
 

@@ -62,16 +62,15 @@ public class FileResolution {
 	 *     Called after all files are loaded. If we can't find the file here, it doesn't exist.
 	 * </p>
 	 */
-	void resolve(ISourceHolder sources) {
+	void resolve(SourceFinder sources) {
+		file = sources.findSource(fileLoc);
 
-		try {
-			file = sources.findSource(fileLoc);
-		} catch (RuntimeException error) {
+		if (file == null) {
 			ErrorBuilder builder = ErrorBuilder.error(String.format("could not find source for file %s", fileLoc));
 			// print the location of all places where this file was referenced
 			for (Span span : foundSpans) {
 				builder.pointAtFile(span.getSourceFile())
-						.pointAt(span, 2);
+						.pointAt(span, 1);
 			}
 			Backend.log.error(builder.build());
 		}

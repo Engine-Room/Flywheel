@@ -30,12 +30,13 @@ public class PrimitiveItem implements LayoutItem {
 	}
 
 	@Override
-	public int getSize() {
+	public int size() {
 		return size;
 	}
 
 	@Override
-	public int getAttributeCount() {
+	public int attributeCount() {
 		return attributeCount;
 	}
+
 }

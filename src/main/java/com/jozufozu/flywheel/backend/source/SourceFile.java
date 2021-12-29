@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.jozufozu.flywheel.backend.pipeline.ShaderCompiler;
 import com.jozufozu.flywheel.backend.source.parse.Import;
 import com.jozufozu.flywheel.backend.source.parse.ShaderFunction;
 import com.jozufozu.flywheel.backend.source.parse.ShaderStruct;
@@ -74,6 +75,23 @@ public class SourceFile {
 		this.elided = elideSource(source, elisions).toString();
 	}
 
+	public Span getLineSpan(int line) {
+		int begin = lines.getLineStart(line);
+		int end = begin + lines.getLine(line).length();
+		return new StringSpan(this, lines.getCharPos(begin), lines.getCharPos(end));
+	}
+
+	public Span getLineSpanNoWhitespace(int line) {
+		int begin = lines.getLineStart(line);
+		int end = begin + lines.getLine(line).length();
+
+		while (begin < end && Character.isWhitespace(source.charAt(begin))) {
+			begin++;
+		}
+
+		return new StringSpan(this, lines.getCharPos(begin), lines.getCharPos(end));
+	}
+
 	/**
 	 * Search this file and recursively search all imports to find a struct definition matching the given name.
 	 *
@@ -120,18 +138,25 @@ public class SourceFile {
 		return "#use " + '"' + name + '"';
 	}
 
-	public CharSequence generateFinalSource() {
+	public CharSequence generateFinalSource(ShaderCompiler env) {
 		StringBuilder builder = new StringBuilder();
-		generateFinalSource(builder);
+		generateFinalSource(env, builder);
 		return builder;
 	}
 
-	public void generateFinalSource(StringBuilder source) {
+	public void generateFinalSource(ShaderCompiler env, StringBuilder source) {
 		for (Import include : imports) {
 			SourceFile file = include.getFile();
 
-			if (file != null) file.generateFinalSource(source);
+			if (file != null) file.generateFinalSource(env, source);
 		}
+
+		int i = env.allocateFile(this);
+		source.append("#line ")
+				.append(0)
+				.append(' ')
+				.append(i)
+				.append('\n');
 		source.append(elided);
 	}
 
