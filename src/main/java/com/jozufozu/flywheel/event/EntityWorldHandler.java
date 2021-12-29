@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.event;
 
+import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 
 import net.minecraftforge.api.distmarker.Dist;
@@ -13,13 +14,13 @@ public class EntityWorldHandler {
 
 	@SubscribeEvent
 	public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
-		if (event.getWorld().isClientSide) InstancedRenderDispatcher.getEntities(event.getWorld())
+		if (event.getWorld().isClientSide && Backend.isOn()) InstancedRenderDispatcher.getEntities(event.getWorld())
 				.queueAdd(event.getEntity());
 	}
 
 	@SubscribeEvent
 	public static void onEntityLeaveWorld(EntityLeaveWorldEvent event) {
-		if (event.getWorld().isClientSide) InstancedRenderDispatcher.getEntities(event.getWorld())
+		if (event.getWorld().isClientSide && Backend.isOn()) InstancedRenderDispatcher.getEntities(event.getWorld())
 				.remove(event.getEntity());
 	}
 }
