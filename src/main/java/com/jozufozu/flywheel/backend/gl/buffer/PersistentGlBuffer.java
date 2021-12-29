@@ -12,7 +12,6 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlFence;
 import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.gl.error.GlException;
-import com.jozufozu.flywheel.util.StringUtil;
 
 public class PersistentGlBuffer extends GlBuffer implements Mappable {
 
@@ -48,13 +47,6 @@ public class PersistentGlBuffer extends GlBuffer implements Mappable {
 		fence.clear();
 
 		Backend.getInstance().compat.bufferStorage.bufferStorage(type, size, flags);
-
-		GlError error = GlError.poll();
-		if (error != null) {
-			// If this error is being thrown but everything seems fine,
-			// GlError.poll() might be returning an error from something earlier.
-			throw new GlException(error, StringUtil.args("bufferStorage", type, size, flags));
-		}
 
 		ByteBuffer byteBuffer = GL30.glMapBufferRange(type.glEnum, 0, size, flags);
 
