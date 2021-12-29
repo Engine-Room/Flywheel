@@ -47,7 +47,7 @@ public class FabricModelUtil {
 					return BlendMode.DEFAULT;
 				};
 			} catch (Exception e) {
-				Flywheel.log.error("Detected FREX but failed to load wrapper field.", e);
+				Flywheel.LOGGER.error("Detected FREX but failed to load wrapper field.", e);
 				return material -> BlendMode.DEFAULT;
 			}
 		} else if (INDIUM_LOADED) {

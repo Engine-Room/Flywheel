@@ -1,48 +1,54 @@
 package com.jozufozu.flywheel.backend.model;
 
-import java.util.function.Supplier;
-
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.core.model.Model;
-import com.jozufozu.flywheel.util.AttribUtil;
 
-public class ArrayModelRenderer extends ModelRenderer {
+public class ArrayModelRenderer {
 
+	private final Model model;
 	protected GlVertexArray vao;
+	protected BufferedModel vbo;
+	protected boolean initialized;
 
-	public ArrayModelRenderer(Supplier<Model> model) {
-		super(model);
+	public ArrayModelRenderer(Model model) {
+		this.model = model;
 	}
 
-	@Override
+	/**
+	 * Renders this model, checking first if there is anything to render.
+	 */
 	public void draw() {
 		if (!initialized) init();
 		if (!isValid()) return;
 
 		vao.bind();
 
-		model.drawCall();
+		vbo.drawCall();
 	}
 
-	@Override
 	protected void init() {
 		initialized = true;
-		Model model = modelSupplier.get();
 
 		if (model.empty()) return;
 
-		this.model = new IndexedModel(model);
+		this.vbo = new IndexedModel(model);
 
 		vao = new GlVertexArray();
 
 		vao.bind();
-		vao.enableArrays(this.model.getAttributeCount());
 
 		// bind the model's vbo to our vao
-		this.model.setupState();
+		this.vbo.setupState(vao);
 
 		GlVertexArray.unbind();
+	}
 
-		this.model.clearState();
+	public void delete() {
+		if (vbo != null)
+			vbo.delete();
+	}
+
+	protected boolean isValid() {
+		return vbo != null && vbo.valid();
 	}
 }

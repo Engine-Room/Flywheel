@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.core.model;
 
-import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.api.vertex.VertexList;
+import com.jozufozu.flywheel.core.Formats;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
@@ -31,11 +31,6 @@ public class BlockModel implements Model {
 	public BlockModel(BakedModel model, BlockState referenceState, PoseStack ms) {
 		reader = Formats.BLOCK.createReader(ModelUtil.getBufferBuilder(model, referenceState, ms));
 		name = referenceState.toString();
-	}
-
-	@Override
-	public void configure(ModelTransformer.Context ctx) {
-		ctx.inputHasDiffuse = true;
 	}
 
 	@Override

@@ -5,7 +5,11 @@ import com.jozufozu.flywheel.util.RenderMath;
 import com.jozufozu.flywheel.util.transform.Transform;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.*;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
+import com.mojang.math.Vector4f;
 
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -74,34 +78,11 @@ public class ModelTransformer {
 					builder.color(params.r, params.g, params.b, params.a);
 				}
 			} else {
-				if (context.inputHasDiffuse) {
-					int r = Byte.toUnsignedInt(reader.getR(i));
-					int g = Byte.toUnsignedInt(reader.getG(i));
-					int b = Byte.toUnsignedInt(reader.getB(i));
-					int a = Byte.toUnsignedInt(reader.getA(i));
-
-					float undoStaticDiffuse = 1 / RenderMath.diffuseLight(normalX, normalY, normalZ);
-					float diffuse;
-					if (context.outputColorDiffuse) {
-						diffuse = RenderMath.diffuseLight(nx, ny, nz) * undoStaticDiffuse;
-					} else {
-						diffuse = undoStaticDiffuse;
-					}
-
-					if (diffuse != 1) {
-						r = transformColor(r, diffuse);
-						g = transformColor(g, diffuse);
-						b = transformColor(b, diffuse);
-					}
-
-					builder.color(r, g, b, a);
+				if (context.outputColorDiffuse) {
+					int d = RenderMath.unb(RenderMath.diffuseLight(nx, ny, nz));
+					builder.color(d, d, d, 0xFF);
 				} else {
-					if (context.outputColorDiffuse) {
-						int d = RenderMath.unb(RenderMath.diffuseLight(nx, ny, nz));
-						builder.color(d, d, d, 0xFF);
-					} else {
-						builder.color(reader.getR(i), reader.getG(i), reader.getB(i), reader.getA(i));
-					}
+					builder.color(reader.getR(i), reader.getG(i), reader.getB(i), reader.getA(i));
 				}
 			}
 
@@ -150,11 +131,6 @@ public class ModelTransformer {
 		 * Do we need to include the PoseStack transforms in our transformation of the normal?
 		 */
 		public boolean fullNormalTransform = false;
-
-		/**
-		 * Does the model we're transforming have diffuse light baked into its colors?
-		 */
-		public boolean inputHasDiffuse = false;
 
 		/**
 		 * Do we need to bake diffuse lighting into the output colors?

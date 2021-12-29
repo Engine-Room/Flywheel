@@ -5,14 +5,14 @@ import static org.lwjgl.opengl.GL11.glDrawArrays;
 import org.lwjgl.opengl.GL31;
 
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
+import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.core.model.Model;
-import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.util.AttribUtil;
 
 public class VBOModel implements BufferedModel {
 
@@ -35,7 +35,7 @@ public class VBOModel implements BufferedModel {
 		try (MappedBuffer buffer = vbo.getBuffer()) {
 			model.writeInto(buffer.unwrap());
 		} catch (Exception e) {
-			Flywheel.log.error(String.format("Error uploading model '%s':", model.name()), e);
+			Flywheel.LOGGER.error(String.format("Error uploading model '%s':", model.name()), e);
 		}
 
 		vbo.unbind();
@@ -57,15 +57,10 @@ public class VBOModel implements BufferedModel {
 	/**
 	 * The VBO/VAO should be bound externally.
 	 */
-	public void setupState() {
+	public void setupState(GlVertexArray vao) {
 		vbo.bind();
-		AttribUtil.enableArrays(getAttributeCount());
-		getFormat().vertexAttribPointers(0);
-	}
-
-	public void clearState() {
-		AttribUtil.disableArrays(getAttributeCount());
-		vbo.unbind();
+		vao.enableArrays(getAttributeCount());
+		vao.bindAttributes(0, getLayout());
 	}
 
 	public void drawCall() {

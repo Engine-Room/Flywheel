@@ -8,13 +8,13 @@ import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
-import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.backend.model.BufferedModel;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
+import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.model.Model;
 
 public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
@@ -73,14 +73,14 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		model = modelAllocator.alloc(modelData, arenaModel -> {
 			vao.bind();
 
-			arenaModel.setupState();
+			arenaModel.setupState(vao);
 		});
 
 		vao.bind();
+		vao.enableArrays(model.getAttributeCount() + instanceFormat.getAttributeCount());
 
 		instanceVBO = GlBuffer.requestPersistent(GlBufferType.ARRAY_BUFFER);
 		instanceVBO.setGrowthMargin(instanceFormat.getStride() * 16);
-		vao.enableArrays(model.getAttributeCount() + instanceFormat.getAttributeCount());
 	}
 
 	public boolean isInitialized() {
@@ -137,7 +137,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 			try (MappedBuffer buf = instanceVBO.getBuffer(offset, length)) {
 				MemoryUtil.memSet(MemoryUtil.memAddress(buf.unwrap()), 0, length);
 			} catch (Exception e) {
-				Flywheel.log.error("Error clearing buffer tail:", e);
+				Flywheel.LOGGER.error("Error clearing buffer tail:", e);
 			}
 		}
 	}
@@ -159,7 +159,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 				}
 			}
 		} catch (Exception e) {
-			Flywheel.log.error("Error updating GPUInstancer:", e);
+			Flywheel.LOGGER.error("Error updating GPUInstancer:", e);
 		}
 	}
 
@@ -175,24 +175,24 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 					writer.write(datum);
 				}
 			} catch (Exception e) {
-				Flywheel.log.error("Error reallocating GPUInstancer:", e);
+				Flywheel.LOGGER.error("Error reallocating GPUInstancer:", e);
 			}
 
 			glInstanceCount = size;
 
-			informAttribDivisors();
+			bindInstanceAttributes();
 
 			return true;
 		}
 		return false;
 	}
 
-	private void informAttribDivisors() {
-		int staticAttributes = model.getAttributeCount();
-		instanceFormat.vertexAttribPointers(staticAttributes);
+	private void bindInstanceAttributes() {
+		int attributeBaseIndex = model.getAttributeCount();
+		vao.bindAttributes(attributeBaseIndex, instanceFormat);
 
 		for (int i = 0; i < instanceFormat.getAttributeCount(); i++) {
-			Backend.getInstance().compat.instancedArrays.vertexAttribDivisor(i + staticAttributes, 1);
+			Backend.getInstance().compat.instancedArrays.vertexAttribDivisor(attributeBaseIndex + i, 1);
 		}
 	}
 }

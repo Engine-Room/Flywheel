@@ -22,6 +22,12 @@ println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getPro
 
 repositories {
     maven {
+        url 'https://www.cursemaven.com'
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    maven {
         name 'tterrag maven'
         url 'https://maven.tterrag.com/'
     }
@@ -48,6 +54,8 @@ dependencies {
 
     // Fabric API
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+
+    modCompileOnly 'curse.maven:starlight-521783:3554912'
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     modCompileOnly 'maven.modrinth:indium:1.0.2-alpha1+mc1.18'

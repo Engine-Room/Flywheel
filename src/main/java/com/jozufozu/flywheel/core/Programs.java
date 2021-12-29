@@ -5,6 +5,6 @@ import com.jozufozu.flywheel.Flywheel;
 import net.minecraft.resources.ResourceLocation;
 
 public class Programs {
-	public static final ResourceLocation TRANSFORMED = new ResourceLocation(Flywheel.ID, "model");
-	public static final ResourceLocation ORIENTED = new ResourceLocation(Flywheel.ID, "oriented");
+	public static final ResourceLocation TRANSFORMED = Flywheel.rl("model");
+	public static final ResourceLocation ORIENTED = Flywheel.rl("oriented");
 }

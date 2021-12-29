@@ -18,9 +18,7 @@ public abstract class GlObject {
 
 	protected final void checkHandle() {
 		if (this.isInvalid()) {
-			String descriptor = getDescriptor();
-			String message = (descriptor == null ? "" : (descriptor + " ")) + "handle is not valid.";
-			throw new IllegalStateException(message);
+			throw new IllegalStateException("handle is not valid.");
 		}
 	}
 
@@ -33,10 +31,8 @@ public abstract class GlObject {
 	}
 
 	public void delete() {
-		if (isInvalid()) {
-			String descriptor = getDescriptor();
-			String message = (descriptor == null ? "" : (descriptor + " ")) + "handle already deleted.";
-			throw new IllegalStateException(message);
+		if (this.isInvalid()) {
+			throw new IllegalStateException("handle already deleted.");
 		}
 
 		deleteInternal(handle);
@@ -45,7 +41,4 @@ public abstract class GlObject {
 
 	protected abstract void deleteInternal(int handle);
 
-	protected String getDescriptor() {
-		return "";
-	}
 }

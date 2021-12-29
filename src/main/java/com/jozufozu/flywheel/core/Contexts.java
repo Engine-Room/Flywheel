@@ -37,7 +37,7 @@ public class Contexts {
 	}
 
 	public static class Names {
-		public static final ResourceLocation CRUMBLING = new ResourceLocation(Flywheel.ID, "context/crumbling");
-		public static final ResourceLocation WORLD = new ResourceLocation(Flywheel.ID, "context/world");
+		public static final ResourceLocation CRUMBLING = Flywheel.rl("context/crumbling");
+		public static final ResourceLocation WORLD = Flywheel.rl("context/world");
 	}
 }

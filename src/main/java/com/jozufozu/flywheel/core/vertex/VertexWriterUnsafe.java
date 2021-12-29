@@ -24,6 +24,7 @@ public abstract class VertexWriterUnsafe<V extends VertexType> implements Vertex
 
 	protected void advance() {
 		writeVertex++;
+		// account for seeking
 		if (writeVertex > totalVertices) totalVertices = writeVertex;
 	}
 

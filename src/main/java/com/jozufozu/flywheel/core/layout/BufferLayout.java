@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
  * Classic Vertex Format struct with a clever name.
  *
  * <p>
- *     Used for vertices and instance. Describes the layout of a datatype in a buffer object.
+ *     Used for vertices and instances. Describes the layout of a datatype in a buffer object.
  * </p>
  *
  * @see com.jozufozu.flywheel.api.struct.StructType
@@ -34,21 +34,16 @@ public class BufferLayout {
 		this.stride = stride;
 	}
 
+	public List<LayoutItem> getLayoutItems() {
+		return allAttributes;
+	}
+
 	public int getAttributeCount() {
 		return numAttributes;
 	}
 
 	public int getStride() {
 		return stride;
-	}
-
-	public void vertexAttribPointers(int index) {
-		int offset = 0;
-		for (LayoutItem spec : this.allAttributes) {
-			spec.vertexAttribPointer(stride, index, offset);
-			index += spec.getAttributeCount();
-			offset += spec.getSize();
-		}
 	}
 
 	public static Builder builder() {

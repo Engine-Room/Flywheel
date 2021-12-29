@@ -5,11 +5,11 @@ import java.util.Collection;
 import java.util.Random;
 import java.util.function.Supplier;
 
+import com.jozufozu.flywheel.core.virtual.VirtualEmptyBlockGetter;
 import com.jozufozu.flywheel.fabric.model.CullingBakedModel;
 import com.jozufozu.flywheel.fabric.model.DefaultLayerFilteringBakedModel;
 import com.jozufozu.flywheel.fabric.model.LayerFilteringBakedModel;
 import com.jozufozu.flywheel.util.Lazy;
-import com.jozufozu.flywheel.util.VirtualEmptyBlockGetter;
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -44,14 +44,6 @@ public class ModelUtil {
 	public static BufferBuilder getBufferBuilder(BakedModel model, BlockState referenceState, PoseStack ms) {
 		ModelBlockRenderer blockRenderer = Minecraft.getInstance().getBlockRenderer().getModelRenderer();
 		BufferBuilder builder = new BufferBuilder(512);
-
-		//		BakedQuadWrapper quadReader = new BakedQuadWrapper();
-		//
-		//		IModelData modelData = model.getModelData(VirtualEmptyBlockGetter.INSTANCE, BlockPos.ZERO, referenceState, VirtualEmptyModelData.INSTANCE);
-		//		List<BakedQuad> quads = Arrays.stream(CULL_FACES)
-		//				.flatMap(dir -> model.getQuads(referenceState, dir, new Random(), modelData).stream())
-		//				.collect(Collectors.toList());
-
 		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 		model = DefaultLayerFilteringBakedModel.wrap(model);
 		blockRenderer.tesselateBlock(VirtualEmptyBlockGetter.INSTANCE, model, referenceState, BlockPos.ZERO, ms, builder,
