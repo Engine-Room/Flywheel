@@ -27,7 +27,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 
 public class Backend {
-	public static final Logger log = LogManager.getLogger(Backend.class);
+	public static final Logger LOGGER = LogManager.getLogger(Backend.class);
 
 	protected static final Backend INSTANCE = new Backend();
 	public static Backend getInstance() {
@@ -38,8 +38,6 @@ public class Backend {
 
 	public GLCapabilities capabilities;
 	public GlCompat compat;
-
-	private boolean enabled;
 
 	public final Loader loader;
 	private final List<ShaderContext<?>> contexts = new ArrayList<>();
@@ -93,7 +91,7 @@ public class Backend {
 		}
 		materialRegistry.put(name, spec);
 
-		log.debug("registered material '" + name + "' with instance size " + spec.getLayout().getStride());
+		LOGGER.debug("registered material '" + name + "' with instance size " + spec.getLayout().getStride());
 
 		return spec;
 	}
@@ -104,20 +102,12 @@ public class Backend {
 
 	public void refresh() {
 		OptifineHandler.refresh();
-		boolean usingShaders = OptifineHandler.usingShaders();
 
 		capabilities = GL.createCapabilities();
 
 		compat = new GlCompat(capabilities);
 
-		engine = FlwConfig.get()
-				.getEngine();
-
-		enabled = switch (engine) {
-			case OFF -> false;
-			case BATCHING -> !usingShaders;
-			case INSTANCING -> !usingShaders && compat.instancedArraysSupported();
-		};
+		engine = chooseEngine(compat);
 	}
 
 	public Collection<StructType<?>> allMaterials() {
@@ -133,7 +123,7 @@ public class Backend {
 	}
 
 	public static boolean isOn() {
-		return getInstance().enabled;
+		return getInstance().engine != FlwEngine.OFF;
 	}
 
 	public static boolean canUseInstancing(@Nullable Level world) {
@@ -173,5 +163,19 @@ public class Backend {
 	}
 
 	public static void init() {
+	}
+
+	private static FlwEngine chooseEngine(GlCompat compat) {
+		FlwEngine preferredChoice = FlwConfig.get()
+				.getEngine();
+
+		boolean usingShaders = OptifineHandler.usingShaders();
+		boolean canUseEngine = switch (preferredChoice) {
+			case OFF -> true;
+			case BATCHING -> !usingShaders;
+			case INSTANCING -> !usingShaders && compat.instancedArraysSupported();
+		};
+
+		return canUseEngine ? preferredChoice : FlwEngine.OFF;
 	}
 }

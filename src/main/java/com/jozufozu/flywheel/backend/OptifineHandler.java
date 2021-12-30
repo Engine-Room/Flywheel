@@ -44,9 +44,9 @@ public class OptifineHandler {
 		optifine = Package.getPackage(OPTIFINE_ROOT_PACKAGE);
 
 		if (optifine == null) {
-			Backend.log.info("Optifine not detected.");
+			Backend.LOGGER.info("Optifine not detected.");
 		} else {
-			Backend.log.info("Optifine detected.");
+			Backend.LOGGER.info("Optifine detected.");
 
 			refresh();
 		}
@@ -79,7 +79,7 @@ public class OptifineHandler {
 						return false;
 					});
 		} catch (IOException e) {
-			Backend.log.info("No shader config found.");
+			Backend.LOGGER.info("No shader config found.");
 		}
 		return shadersOff;
 	}
