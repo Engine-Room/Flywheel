@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
-import com.jozufozu.flywheel.backend.pipeline.ShaderCompiler;
 import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.backend.source.SourceLines;
 import com.jozufozu.flywheel.backend.source.error.lines.ErrorLine;
@@ -17,6 +16,7 @@ import com.jozufozu.flywheel.backend.source.error.lines.SourceLine;
 import com.jozufozu.flywheel.backend.source.error.lines.SpanHighlightLine;
 import com.jozufozu.flywheel.backend.source.error.lines.TextLine;
 import com.jozufozu.flywheel.backend.source.span.Span;
+import com.jozufozu.flywheel.core.pipeline.ShaderCompiler;
 import com.jozufozu.flywheel.util.FlwUtil;
 
 public class ErrorBuilder {

@@ -1,9 +1,9 @@
 package com.jozufozu.flywheel.core;
 
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
-import com.jozufozu.flywheel.backend.pipeline.InstancingTemplateData;
-import com.jozufozu.flywheel.backend.pipeline.OneShotTemplateData;
-import com.jozufozu.flywheel.backend.pipeline.Template;
+import com.jozufozu.flywheel.core.pipeline.InstancingTemplateData;
+import com.jozufozu.flywheel.core.pipeline.OneShotTemplateData;
+import com.jozufozu.flywheel.core.pipeline.Template;
 
 public class Templates {
 
