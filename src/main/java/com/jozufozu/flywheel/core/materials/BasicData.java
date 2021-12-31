@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.core.materials;
 
 import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.util.Color;
 
 import net.minecraft.client.renderer.LightTexture;
 
@@ -31,6 +32,15 @@ public abstract class BasicData extends InstanceData implements FlatLit<BasicDat
 	@Override
 	public int getPackedLight() {
 		return LightTexture.pack(this.blockLight, this.skyLight);
+	}
+
+	public BasicData setColor(Color color) {
+		this.r = (byte) color.getRed();
+		this.g = (byte) color.getGreen();
+		this.b = (byte) color.getBlue();
+		this.a = (byte) color.getAlpha();
+		markDirty();
+		return this;
 	}
 
 	public BasicData setColor(int color) {

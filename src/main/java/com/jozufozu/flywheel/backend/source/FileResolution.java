@@ -3,8 +3,6 @@ package com.jozufozu.flywheel.backend.source;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.source.error.ErrorBuilder;
 import com.jozufozu.flywheel.backend.source.span.Span;
@@ -37,7 +35,6 @@ public class FileResolution {
 		return fileLoc;
 	}
 
-	@Nullable
 	public SourceFile getFile() {
 		return file;
 	}
@@ -73,6 +70,7 @@ public class FileResolution {
 						.pointAt(span, 1);
 			}
 			Backend.LOGGER.error(builder.build());
+			throw new ShaderLoadingException();
 		}
 	}
 

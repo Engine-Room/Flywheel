@@ -1,8 +1,10 @@
 package com.jozufozu.flywheel.core.shader.spec;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.source.Resolver;
 import com.jozufozu.flywheel.backend.source.SourceFile;
@@ -38,11 +40,11 @@ public class ProgramSpec {
 	public ResourceLocation name;
 	public final FileResolution source;
 
-	public final List<ProgramState> states;
+	public final ImmutableList<ProgramState> states;
 
 	public ProgramSpec(ResourceLocation source, List<ProgramState> states) {
 		this.source = Resolver.INSTANCE.findShader(source);
-		this.states = states;
+		this.states = ImmutableList.copyOf(states);
 	}
 
 	public void setName(ResourceLocation name) {
@@ -53,12 +55,40 @@ public class ProgramSpec {
 		return source.getFileLoc();
 	}
 
-	public FileResolution getSource() {
-		return source;
+	public SourceFile getSource() {
+		return source.getFile();
 	}
 
-	public List<ProgramState> getStates() {
+	public ImmutableList<ProgramState> getStates() {
 		return states;
 	}
 
+	/**
+	 * Calculate a unique ID representing the current game state.
+	 */
+    public long getCurrentStateID() {
+        long ctx = 0;
+        for (ProgramState state : states) {
+            if (state.context().isTrue()) {
+                ctx |= 1;
+            }
+            ctx <<= 1;
+        }
+        return ctx;
+    }
+
+	/**
+	 * Given the stateID, get a list of defines to include at the top of a compiling program.
+	 */
+	public List<String> getDefines(long stateID) {
+		List<String> defines = new ArrayList<>();
+
+		for (ProgramState state : states) {
+			if ((stateID & 1) == 1) {
+				defines.addAll(state.defines());
+			}
+			stateID >>= 1;
+		}
+		return defines;
+	}
 }

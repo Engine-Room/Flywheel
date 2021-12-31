@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.pipeline;
+package com.jozufozu.flywheel.core.pipeline;
 
 import java.util.HashMap;
 import java.util.Map;

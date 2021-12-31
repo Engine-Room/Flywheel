@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.pipeline;
+package com.jozufozu.flywheel.core.pipeline;
 
 import java.util.Optional;
 
@@ -107,7 +107,7 @@ public class InstancingTemplateData implements TemplateData {
 					.append("a_i_")
 					.append(field.name)
 					.append(";\n");
-			attributeBinding += ShaderInput.from(field).attribCount;
+			attributeBinding += TypeHelper.getAttributeCount(field.type);
 		}
 		Template.prefixFields(template, interpolant, "out", "v2f_");
 

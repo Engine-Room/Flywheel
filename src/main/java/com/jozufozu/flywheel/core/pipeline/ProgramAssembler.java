@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.pipeline;
+package com.jozufozu.flywheel.core.pipeline;
 
 import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.pipeline;
+package com.jozufozu.flywheel.core.pipeline;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,15 +6,16 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.backend.source.error.ErrorBuilder;
+import com.jozufozu.flywheel.backend.source.error.ErrorReporter;
 import com.jozufozu.flywheel.backend.source.span.Span;
 import com.jozufozu.flywheel.core.shader.ExtensibleGlProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
-import com.jozufozu.flywheel.core.shader.spec.ProgramState;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -24,27 +25,22 @@ public class ShaderCompiler {
 	public final Template<?> template;
 	private final FileResolution header;
 
-	@Nullable
-	private ProgramState variant;
+	private final List<String> defines;
 
 	public final VertexType vertexType;
 
-	public SourceFile mainFile;
+	public final SourceFile mainFile;
 
-	public ShaderCompiler(ResourceLocation name, SourceFile mainSource, Template<?> template, FileResolution header, VertexType vertexType) {
-		this.name = name;
+	private final List<SourceFile> files = new ArrayList<>();
+
+	public ShaderCompiler(CompilationContext usage, Template<?> template, FileResolution header) {
+		this.name = usage.spec().name;
 		this.template = template;
 		this.header = header;
-		this.mainFile = mainSource;
-		this.vertexType = vertexType;
-	}
-
-	public ShaderCompiler setMainSource(SourceFile file) {
-		if (mainFile == file) return this;
-
-		mainFile = file;
-
-		return this;
+		this.mainFile = usage.getFile();
+		this.defines = usage.spec()
+				.getDefines(usage.ctx());
+		this.vertexType = usage.vertexType();
 	}
 
 	public GlShader compile(ShaderType type) {
@@ -60,13 +56,10 @@ public class ShaderCompiler {
 				.append(type.define) // special case shader type declaration
 				.append('\n');
 
-		ProgramState variant = getVariant();
-		if (variant != null) {
-			for (String def : variant.defines()) {
-				finalSource.append("#define ")
-						.append(def)
-						.append('\n');
-			}
+		for (String def : defines) {
+			finalSource.append("#define ")
+					.append(def)
+					.append('\n');
 		}
 
 		if (type == ShaderType.VERTEX) {
@@ -83,9 +76,7 @@ public class ShaderCompiler {
 		}
 
 		files.clear();
-		if (header.getFile() != null) {
-			header.getFile().generateFinalSource(this, finalSource);
-		}
+		header.getFile().generateFinalSource(this, finalSource);
 		mainFile.generateFinalSource(this, finalSource);
 
 		template.getMetadata(mainFile).generateFooter(finalSource, type, this);
@@ -93,18 +84,21 @@ public class ShaderCompiler {
 		return new GlShader(this, type, finalSource.toString());
 	}
 
-	@Nullable
-	public ProgramState getVariant() {
-		return variant;
+	public <P extends WorldProgram> P compile(ExtensibleGlProgram.Factory<P> worldShaderPipeline) {
+		return new ProgramAssembler(this.name)
+				.attachShader(compile(ShaderType.VERTEX))
+				.attachShader(compile(ShaderType.FRAGMENT))
+				.link()
+				.deleteLinkedShaders()
+				.build(worldShaderPipeline);
 	}
 
-	public void setVariant(@Nullable ProgramState variant) {
-		this.variant = variant;
-	}
-
-	private final List<SourceFile> files = new ArrayList<>();
-
-	public int allocateFile(SourceFile sourceFile) {
+	/**
+	 * Returns an arbitrary file ID for use this compilation context, or generates one if missing.
+	 * @param sourceFile The file to retrieve the ID for.
+	 * @return A file ID unique to the given sourceFile.
+	 */
+	public int getFileID(SourceFile sourceFile) {
 		int i = files.indexOf(sourceFile);
 		if (i != -1) {
 			return i;
@@ -121,8 +115,32 @@ public class ShaderCompiler {
 		return file.getLineSpanNoWhitespace(lineNo);
 	}
 
+	public void printShaderInfoLog(String source, String log, ResourceLocation name) {
+		List<String> lines = log.lines()
+				.toList();
+
+		boolean needsSourceDump = false;
+
+		StringBuilder errors = new StringBuilder();
+		for (String line : lines) {
+			ErrorBuilder builder = parseCompilerError(line);
+
+			if (builder != null) {
+				errors.append(builder.build());
+			} else {
+				errors.append(line).append('\n');
+				needsSourceDump = true;
+			}
+		}
+		Backend.LOGGER.error("Errors compiling '" + name + "': \n" + errors);
+		if (needsSourceDump) {
+			// TODO: generated code gets its own "file"
+			ErrorReporter.printLines(source);
+		}
+	}
+
 	@Nullable
-	public ErrorBuilder parseCompilerError(String line) {
+	private ErrorBuilder parseCompilerError(String line) {
 		try {
 			ErrorBuilder error = ErrorBuilder.fromLogLine(this, line);
 			if (error != null) {
@@ -132,14 +150,5 @@ public class ShaderCompiler {
 		}
 
 		return null;
-	}
-
-	public <P extends WorldProgram> P compile(ExtensibleGlProgram.Factory<P> worldShaderPipeline) {
-		return new ProgramAssembler(this.name)
-				.attachShader(compile(ShaderType.VERTEX))
-				.attachShader(compile(ShaderType.FRAGMENT))
-				.link()
-				.deleteLinkedShaders()
-				.build(worldShaderPipeline);
 	}
 }

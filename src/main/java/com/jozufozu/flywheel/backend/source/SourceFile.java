@@ -10,13 +10,13 @@ import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.jozufozu.flywheel.backend.pipeline.ShaderCompiler;
 import com.jozufozu.flywheel.backend.source.parse.Import;
 import com.jozufozu.flywheel.backend.source.parse.ShaderFunction;
 import com.jozufozu.flywheel.backend.source.parse.ShaderStruct;
 import com.jozufozu.flywheel.backend.source.span.ErrorSpan;
 import com.jozufozu.flywheel.backend.source.span.Span;
 import com.jozufozu.flywheel.backend.source.span.StringSpan;
+import com.jozufozu.flywheel.core.pipeline.ShaderCompiler;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -138,12 +138,6 @@ public class SourceFile {
 		return "#use " + '"' + name + '"';
 	}
 
-	public CharSequence generateFinalSource(ShaderCompiler env) {
-		StringBuilder builder = new StringBuilder();
-		generateFinalSource(env, builder);
-		return builder;
-	}
-
 	public void generateFinalSource(ShaderCompiler env, StringBuilder source) {
 		for (Import include : imports) {
 			SourceFile file = include.getFile();
@@ -151,24 +145,16 @@ public class SourceFile {
 			if (file != null) file.generateFinalSource(env, source);
 		}
 
-		int i = env.allocateFile(this);
 		source.append("#line ")
 				.append(0)
 				.append(' ')
-				.append(i)
+				.append(env.getFileID(this))
 				.append('\n');
 		source.append(elided);
 	}
 
 	public String printSource() {
-		StringBuilder builder = new StringBuilder();
-
-		builder.append("Source for shader '")
-				.append(name)
-				.append("':\n")
-				.append(lines.printLinesWithNumbers());
-
-		return builder.toString();
+		return "Source for shader '" + name + "':\n" + lines.printLinesWithNumbers();
 	}
 
 	private static CharSequence elideSource(String source, List<Span> elisions) {

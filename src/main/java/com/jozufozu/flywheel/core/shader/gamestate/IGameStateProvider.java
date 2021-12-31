@@ -11,5 +11,5 @@ public interface IGameStateProvider {
 
 	ResourceLocation getID();
 
-	Object getValue();
+	boolean isTrue();
 }

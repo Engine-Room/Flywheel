@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.pipeline;
+package com.jozufozu.flywheel.core.pipeline;
 
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 
