@@ -50,7 +50,7 @@ public class ProtoProgram {
 		String log = glGetProgramInfoLog(this.program);
 
 		if (!log.isEmpty()) {
-			Backend.log.debug("Program link log for " + parent.name + ": " + log);
+			Backend.LOGGER.debug("Program link log for " + parent.name + ": " + log);
 		}
 
 		int result = glGetProgrami(this.program, GL_LINK_STATUS);

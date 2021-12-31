@@ -24,8 +24,8 @@ public class GlShader extends GlObject {
 		String log = GL20.glGetShaderInfoLog(handle);
 
 		if (!log.isEmpty()) {
-			Backend.log.error("Shader compilation log for " + name + ": " + log);
-			Backend.log.error(source);
+			Backend.LOGGER.error("Shader compilation log for " + name + ": " + log);
+			Backend.LOGGER.error(source);
 		}
 		//Backend.log.debug(shader.printSource());
 

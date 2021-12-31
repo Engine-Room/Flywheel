@@ -1,3 +1,8 @@
+0.5.0a:
+Fixes
+ - Address crash experienced by some users while rendering any tile.
+ - Fix crash caused by loading a world with flywheel backend off.
+
 0.5.0:
 New
  - Added parallel batching backend, effectively a CPU instancer.

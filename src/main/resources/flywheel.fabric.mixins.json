@@ -8,6 +8,7 @@
     "DebugScreenOverlayMixin",
     "Matrix4fMixin",
     "MinecraftMixin",
+    "SystemReportMixin",
     "TextureAtlasMixin",
     "VertexFormatAccessor"
   ],
