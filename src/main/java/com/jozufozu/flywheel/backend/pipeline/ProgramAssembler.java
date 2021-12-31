@@ -38,7 +38,7 @@ public class ProgramAssembler {
 		String log = glGetProgramInfoLog(this.program);
 
 		if (!log.isEmpty()) {
-			Backend.log.debug("Program link log for " + name + ": " + log);
+			Backend.LOGGER.debug("Program link log for " + name + ": " + log);
 		}
 
 		int result = glGetProgrami(this.program, GL_LINK_STATUS);

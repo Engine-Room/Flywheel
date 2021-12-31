@@ -46,7 +46,7 @@ public class GlShader extends GlObject {
 					needsSourceDump = true;
 				}
 			}
-			Backend.log.error("Errors compiling '" + name + "': \n" + errors);
+			Backend.LOGGER.error("Errors compiling '" + name + "': \n" + errors);
 			if (needsSourceDump) {
 				// TODO: generated code gets its own "file"
 				ErrorReporter.printLines(source);

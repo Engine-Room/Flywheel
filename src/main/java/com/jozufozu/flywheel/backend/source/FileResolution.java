@@ -72,7 +72,7 @@ public class FileResolution {
 				builder.pointAtFile(span.getSourceFile())
 						.pointAt(span, 1);
 			}
-			Backend.log.error(builder.build());
+			Backend.LOGGER.error(builder.build());
 		}
 	}
 

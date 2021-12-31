@@ -49,7 +49,7 @@ public abstract class GlProgram extends GlObject {
 		int index = glGetUniformLocation(this.handle(), uniform);
 
 		if (index < 0) {
-			Backend.log.debug("No active uniform '{}' exists in program '{}'. Could be unused.", uniform, this.name);
+			Backend.LOGGER.debug("No active uniform '{}' exists in program '{}'. Could be unused.", uniform, this.name);
 		}
 
 		return index;

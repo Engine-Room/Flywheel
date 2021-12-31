@@ -21,7 +21,7 @@ public class ErrorReporter {
 				.pointAt(span, 2)
 				.build();
 
-		Backend.log.error(error);
+		Backend.LOGGER.error(error);
 	}
 
 	public static void generateFileError(SourceFile file, String message) {
@@ -30,7 +30,7 @@ public class ErrorReporter {
 				.pointAtFile(file)
 				.build();
 
-		Backend.log.error(error);
+		Backend.LOGGER.error(error);
 	}
 
 	public static void generateMissingStruct(SourceFile file, Span vertexName, CharSequence msg) {
@@ -48,7 +48,7 @@ public class ErrorReporter {
 				.pointAt(vertexName, 1)
 				.hintIncludeFor(span.orElse(null), hint);
 
-		Backend.log.error(error.build());
+		Backend.LOGGER.error(error.build());
 	}
 
 	public static void generateMissingFunction(SourceFile file, CharSequence functionName, CharSequence msg) {
@@ -65,7 +65,7 @@ public class ErrorReporter {
 				.pointAtFile(file)
 				.hintIncludeFor(span.orElse(null), hint);
 
-		Backend.log.error(error.build());
+		Backend.LOGGER.error(error.build());
 	}
 
 	public static void printLines(CharSequence source) {
