@@ -9,11 +9,15 @@ import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
 
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.CrashReportCallables;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 public class FlywheelClient {
 
 	public static void clientInit() {
+
+		CrashReportCallables.registerCrashCallable("Flywheel Backend", () ->
+				Backend.getInstance().getBackendDescriptor());
 
 		Backend.init();
 		IEventBus modEventBus = FMLJavaModLoadingContext.get()
