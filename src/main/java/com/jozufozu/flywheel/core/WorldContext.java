@@ -36,7 +36,7 @@ public class WorldContext<P extends WorldProgram> implements ShaderContext<P> {
 	@Override
 	public void load() {
 
-		Backend.log.info("Loading context '{}'", name);
+		Backend.LOGGER.info("Loading context '{}'", name);
 
 		specStream.get()
 				.map(backend::getSpec)
@@ -48,11 +48,11 @@ public class WorldContext<P extends WorldProgram> implements ShaderContext<P> {
 		try {
 			programs.put(spec.name, new LazyCompiler<>(pipeline, spec));
 
-			Backend.log.debug("Loaded program {}", spec.name);
+			Backend.LOGGER.debug("Loaded program {}", spec.name);
 		} catch (Exception e) {
-			Backend.log.error("Error loading program {}", spec.name);
+			Backend.LOGGER.error("Error loading program {}", spec.name);
 			if (!(e instanceof ShaderLoadingException)) {
-				Backend.log.error("", e);
+				Backend.LOGGER.error("", e);
 			}
 			backend.loader.notifyError();
 		}

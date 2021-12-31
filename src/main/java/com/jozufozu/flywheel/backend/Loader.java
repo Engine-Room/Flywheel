@@ -85,10 +85,10 @@ public class Loader implements ResourceManagerReloadListener {
 			throw new ShaderLoadingException("Could not load all shaders, see log for details");
 		}
 
-		Backend.log.info("Loaded all shader programs.");
+		Backend.LOGGER.info("Loaded all shader programs.");
 
 		ClientLevel world = Minecraft.getInstance().level;
-		if (Backend.isFlywheelWorld(world)) {
+		if (Backend.canUseInstancing(world)) {
 			// TODO: looks like it might be good to have another event here
 			InstancedRenderDispatcher.resetInstanceWorld(world);
 			CrumblingRenderer.reset();
@@ -118,7 +118,7 @@ public class Loader implements ResourceManagerReloadListener {
 
 				backend.register(spec);
 			} catch (Exception e) {
-				Backend.log.error(e);
+				Backend.LOGGER.error(e);
 			}
 		}
 	}
