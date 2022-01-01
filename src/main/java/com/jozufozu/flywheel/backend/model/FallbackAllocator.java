@@ -2,9 +2,8 @@ package com.jozufozu.flywheel.backend.model;
 
 import com.jozufozu.flywheel.core.model.Model;
 
-public class ImmediateAllocator implements ModelAllocator {
-
-	public static final ImmediateAllocator INSTANCE = new ImmediateAllocator();
+public enum FallbackAllocator implements ModelAllocator {
+	INSTANCE;
 
 	@Override
 	public BufferedModel alloc(Model model, Callback allocationCallback) {

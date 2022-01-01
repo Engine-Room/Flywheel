@@ -95,7 +95,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 			viewProjection = event.viewProjection;
 		}
 
-		getGroupsToRender(event.getLayer()).forEach(group -> group.render(viewProjection, camX, camY, camZ));
+		getGroupsToRender(event.getLayer()).forEach(group -> group.render(viewProjection, camX, camY, camZ, event.getLayer()));
 
 		GlBufferType.ELEMENT_ARRAY_BUFFER.unbind();
 		GlBufferType.ARRAY_BUFFER.unbind();

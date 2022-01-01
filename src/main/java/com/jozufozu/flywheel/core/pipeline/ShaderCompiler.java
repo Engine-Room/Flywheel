@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.RenderLayer;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.source.FileResolution;
@@ -27,20 +28,22 @@ public class ShaderCompiler {
 
 	private final List<String> defines;
 
+	private final RenderLayer layer;
 	public final VertexType vertexType;
 
 	public final SourceFile mainFile;
 
 	private final List<SourceFile> files = new ArrayList<>();
 
-	public ShaderCompiler(CompilationContext usage, Template<?> template, FileResolution header) {
-		this.name = usage.spec().name;
+	public ShaderCompiler(CompilationContext context, Template<?> template, FileResolution header) {
+		this.name = context.spec().name;
 		this.template = template;
 		this.header = header;
-		this.mainFile = usage.getFile();
-		this.defines = usage.spec()
-				.getDefines(usage.ctx());
-		this.vertexType = usage.vertexType();
+		this.mainFile = context.getFile();
+		this.defines = context.spec()
+				.getDefines(context.ctx());
+		this.vertexType = context.vertexType();
+		layer = context.layer();
 	}
 
 	public GlShader compile(ShaderType type) {
@@ -55,6 +58,10 @@ public class ShaderCompiler {
 				.append("#define ")
 				.append(type.define) // special case shader type declaration
 				.append('\n');
+
+		if (layer == RenderLayer.CUTOUT) {
+			finalSource.append("#define ALPHA_DISCARD 0.1\n");
+		}
 
 		for (String def : defines) {
 			finalSource.append("#define ")

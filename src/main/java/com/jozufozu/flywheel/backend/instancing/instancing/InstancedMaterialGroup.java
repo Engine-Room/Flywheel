@@ -8,7 +8,8 @@ import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.model.ImmediateAllocator;
+import com.jozufozu.flywheel.backend.RenderLayer;
+import com.jozufozu.flywheel.backend.model.FallbackAllocator;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
 import com.jozufozu.flywheel.backend.model.ModelPool;
 import com.jozufozu.flywheel.core.Formats;
@@ -36,7 +37,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 		this.owner = owner;
 		this.type = type;
 		if (Backend.getInstance().compat.onAMDWindows()) {
-			this.allocator = ImmediateAllocator.INSTANCE;
+			this.allocator = FallbackAllocator.INSTANCE;
 		} else {
 			this.allocator = new ModelPool(Formats.POS_TEX_NORMAL, 2048);
 		}
@@ -52,14 +53,14 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 		}
 	}
 
-	public void render(Matrix4f viewProjection, double camX, double camY, double camZ) {
+	public void render(Matrix4f viewProjection, double camX, double camY, double camZ, RenderLayer layer) {
 		type.setupRenderState();
 		Textures.bindActiveTextures();
-		renderAll(viewProjection, camX, camY, camZ);
+		renderAll(viewProjection, camX, camY, camZ, layer);
 		type.clearRenderState();
 	}
 
-	protected void renderAll(Matrix4f viewProjection, double camX, double camY, double camZ) {
+	protected void renderAll(Matrix4f viewProjection, double camX, double camY, double camZ, RenderLayer layer) {
 		// initialize all uninitialized instancers...
 		for (InstancedMaterial<?> material : materials.values()) {
 			for (GPUInstancer<?> instancer : material.uninitialized) {
@@ -78,7 +79,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 			if (material.nothingToRender()) continue;
 
 			P program = owner.context.getProgram(entry.getKey()
-					.getProgramSpec(), Formats.POS_TEX_NORMAL);
+					.getProgramSpec(), Formats.POS_TEX_NORMAL, layer);
 
 			program.bind();
 			program.uploadViewProjection(viewProjection);

@@ -9,9 +9,11 @@ import java.util.stream.Stream;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.RenderLayer;
 import com.jozufozu.flywheel.backend.ShaderContext;
 import com.jozufozu.flywheel.backend.source.ShaderLoadingException;
 import com.jozufozu.flywheel.core.pipeline.CachingCompiler;
+import com.jozufozu.flywheel.core.pipeline.CompilationContext;
 import com.jozufozu.flywheel.core.pipeline.PipelineCompiler;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
@@ -58,14 +60,14 @@ public class WorldContext<P extends WorldProgram> implements ShaderContext<P> {
 	}
 
 	@Override
-	public P getProgram(ResourceLocation loc, VertexType vertexType) {
+	public P getProgram(ResourceLocation loc, VertexType vertexType, RenderLayer layer) {
 		ProgramSpec spec = programs.get(loc);
 
 		if (spec == null) {
 			throw new NullPointerException("Cannot compile shader because '" + loc + "' is not recognized.");
 		}
 
-		return programCache.getProgram(spec, vertexType);
+		return programCache.getProgram(CompilationContext.create(vertexType, layer, spec));
 	}
 
 	@Override
