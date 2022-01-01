@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public interface ShaderContext<P extends GlProgram> {
 
-	P getProgram(ResourceLocation loc, VertexType vertexType);
+	P getProgram(ResourceLocation loc, VertexType vertexType, RenderLayer layer);
 
 	/**
 	 * Load all programs associated with this context. This might be just one, if the context is very specialized.

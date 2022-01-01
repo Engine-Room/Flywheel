@@ -3,9 +3,7 @@ package com.jozufozu.flywheel.core.pipeline;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
 /**
  * Lazily compiles shader programs, caching the results.
@@ -23,12 +21,11 @@ public class CachingCompiler<P extends GlProgram> {
 	/**
 	 * Get or compile a spec to the given vertex type, accounting for all game state conditions specified by the spec.
 	 *
-	 * @param spec The ProgramSpec to target.
-	 * @param vertexType The VertexType to target.
+	 * @param context The context of compilation.
 	 * @return A compiled GlProgram.
 	 */
-	public P getProgram(ProgramSpec spec, VertexType vertexType) {
-		return cache.computeIfAbsent(new CompilationContext(vertexType, spec, spec.getCurrentStateID()), this.pipeline::compile);
+	public P getProgram(CompilationContext context) {
+		return cache.computeIfAbsent(context, this.pipeline::compile);
 	}
 
 	public void invalidate() {

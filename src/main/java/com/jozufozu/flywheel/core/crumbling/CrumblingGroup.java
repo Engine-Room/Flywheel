@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.core.crumbling;
 
+import com.jozufozu.flywheel.backend.RenderLayer;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancedMaterialGroup;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.util.Textures;
@@ -18,7 +19,7 @@ public class CrumblingGroup<P extends CrumblingProgram> extends InstancedMateria
 	}
 
 	@Override
-	public void render(Matrix4f viewProjection, double camX, double camY, double camZ) {
+	public void render(Matrix4f viewProjection, double camX, double camY, double camZ, RenderLayer layer) {
 		type.setupRenderState();
 
 		int renderTex = RenderSystem.getShaderTexture(0);
@@ -35,7 +36,7 @@ public class CrumblingGroup<P extends CrumblingProgram> extends InstancedMateria
 		RenderSystem.setShaderTexture(4, breakingTex);
 
 		Textures.bindActiveTextures();
-		renderAll(viewProjection, camX, camY, camZ);
+		renderAll(viewProjection, camX, camY, camZ, layer);
 
 		CrumblingRenderer._currentLayer.clearRenderState();
 	}
