@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    implementation fg.deobf("com.jozufozu.flywheel:Flywheel-Fabric:${flywheel_version}")
+    modImplementation "com.jozufozu.flywheel:Flywheel-Fabric:${flywheel_version}"
 }
 ```
 `${flywheel_version}` gets replaced by the version of Flywheel you want to use, eg. `1.18-0.3.0.3`
