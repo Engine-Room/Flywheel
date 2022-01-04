@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.mixin;
 
+import javax.annotation.Nullable;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -15,12 +17,13 @@ public class EntityTypeMixin<T extends Entity> implements EntityTypeExtension<T>
 	private EntityInstancingController<? super T> flywheel$instancingController;
 
 	@Override
+	@Nullable
 	public EntityInstancingController<? super T> flywheel$getInstancingController() {
 		return flywheel$instancingController;
 	}
 
 	@Override
-	public void flywheel$setInstancingController(EntityInstancingController<? super T> instancingController) {
+	public void flywheel$setInstancingController(@Nullable EntityInstancingController<? super T> instancingController) {
 		this.flywheel$instancingController = instancingController;
 	}
 }
