@@ -1,22 +1,22 @@
 package com.jozufozu.flywheel.core.shader.spec;
 
-import com.jozufozu.flywheel.core.shader.gamestate.IGameStateProvider;
+import com.jozufozu.flywheel.core.shader.gamestate.GameStateProvider;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class SpecificValueCondition implements IGameStateCondition {
+public class SpecificValueCondition implements GameStateCondition {
 
-	public static final Codec<SpecificValueCondition> CODEC = RecordCodecBuilder.create(condition -> condition.group(IGameStateProvider.CODEC.fieldOf("provider")
+	public static final Codec<SpecificValueCondition> CODEC = RecordCodecBuilder.create(condition -> condition.group(GameStateProvider.CODEC.fieldOf("provider")
 					.forGetter(SpecificValueCondition::getStateProvider), Codec.STRING.fieldOf("value")
 					.forGetter(SpecificValueCondition::getValue))
 			.apply(condition, SpecificValueCondition::new));
 
 	private final String required;
-	private final IGameStateProvider context;
+	private final GameStateProvider context;
 
-	public SpecificValueCondition(IGameStateProvider context, String required) {
+	public SpecificValueCondition(GameStateProvider context, String required) {
 		this.required = required;
 		this.context = context;
 	}
@@ -31,7 +31,7 @@ public class SpecificValueCondition implements IGameStateCondition {
 	}
 
 	@Override
-	public IGameStateProvider getStateProvider() {
+	public GameStateProvider getStateProvider() {
 		return context;
 	}
 

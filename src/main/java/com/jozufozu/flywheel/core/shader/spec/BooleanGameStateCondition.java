@@ -1,22 +1,22 @@
 package com.jozufozu.flywheel.core.shader.spec;
 
-import com.jozufozu.flywheel.core.shader.gamestate.IGameStateProvider;
+import com.jozufozu.flywheel.core.shader.gamestate.GameStateProvider;
 import com.mojang.serialization.Codec;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class BooleanGameStateCondition implements IGameStateCondition {
+public class BooleanGameStateCondition implements GameStateCondition {
 
-	public static final Codec<BooleanGameStateCondition> BOOLEAN_SUGAR = IGameStateProvider.CODEC.xmap(gameContext -> {
-		if (gameContext instanceof IBooleanStateProvider) {
-			return new BooleanGameStateCondition(((IBooleanStateProvider) gameContext));
+	public static final Codec<BooleanGameStateCondition> BOOLEAN_SUGAR = GameStateProvider.CODEC.xmap(gameContext -> {
+		if (gameContext instanceof BooleanStateProvider) {
+			return new BooleanGameStateCondition(((BooleanStateProvider) gameContext));
 		}
 
 		return null;
-	}, IGameStateCondition::getStateProvider);
-	protected final IBooleanStateProvider context;
+	}, GameStateCondition::getStateProvider);
+	protected final BooleanStateProvider context;
 
-	public BooleanGameStateCondition(IBooleanStateProvider context) {
+	public BooleanGameStateCondition(BooleanStateProvider context) {
 		this.context = context;
 	}
 
@@ -26,7 +26,7 @@ public class BooleanGameStateCondition implements IGameStateCondition {
 	}
 
 	@Override
-	public IGameStateProvider getStateProvider() {
+	public GameStateProvider getStateProvider() {
 		return context;
 	}
 

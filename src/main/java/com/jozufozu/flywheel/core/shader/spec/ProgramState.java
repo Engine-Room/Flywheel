@@ -9,10 +9,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-public record ProgramState(IGameStateCondition context, List<String> defines) {
+public record ProgramState(GameStateCondition context, List<String> defines) {
 
 	// TODO: Use Codec.dispatch
-	private static final Codec<IGameStateCondition> WHEN = Codec.either(BooleanGameStateCondition.BOOLEAN_SUGAR, SpecificValueCondition.CODEC)
+	private static final Codec<GameStateCondition> WHEN = Codec.either(BooleanGameStateCondition.BOOLEAN_SUGAR, SpecificValueCondition.CODEC)
 			.flatXmap(either -> either.map(DataResult::success, DataResult::success), any -> {
 				if (any instanceof BooleanGameStateCondition) {
 					return DataResult.success(Either.left((BooleanGameStateCondition) any));

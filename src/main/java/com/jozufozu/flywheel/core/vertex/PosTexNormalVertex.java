@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.core.vertex;
 import java.nio.ByteBuffer;
 
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.core.layout.CommonItems;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
+import com.jozufozu.flywheel.core.layout.CommonItems;
 
 public class PosTexNormalVertex implements VertexType {
 

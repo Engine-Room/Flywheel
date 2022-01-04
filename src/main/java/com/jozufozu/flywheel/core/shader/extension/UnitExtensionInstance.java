@@ -5,7 +5,7 @@ import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class UnitExtensionInstance implements IExtensionInstance {
+public class UnitExtensionInstance implements ExtensionInstance {
 
 	public static final ResourceLocation NAME = Flywheel.rl("unit");
 

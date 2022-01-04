@@ -1,14 +1,14 @@
 package com.jozufozu.flywheel.backend.instancing.entity;
 
 import com.jozufozu.flywheel.api.MaterialManager;
-import com.jozufozu.flywheel.api.instance.IDynamicInstance;
-import com.jozufozu.flywheel.api.instance.ITickableInstance;
+import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
-import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
-import com.jozufozu.flywheel.util.box.GridAlignedBB;
+import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.light.LightListener;
 import com.jozufozu.flywheel.light.LightProvider;
 import com.jozufozu.flywheel.light.MovingListener;
+import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.core.BlockPos;
@@ -24,8 +24,8 @@ import net.minecraft.world.phys.Vec3;
  * *
  * <br><br> There are a few additional features that overriding classes can opt in to:
  * <ul>
- *     <li>{@link IDynamicInstance}</li>
- *     <li>{@link ITickableInstance}</li>
+ *     <li>{@link DynamicInstance}</li>
+ *     <li>{@link TickableInstance}</li>
  * </ul>
  * See the interfaces' documentation for more information about each one.
  *
@@ -65,7 +65,7 @@ public abstract class EntityInstance<E extends Entity> extends AbstractInstance 
 
 	/**
 	 * In order to accommodate for floating point precision errors at high coordinates,
-	 * {@link TileInstanceManager}s are allowed to arbitrarily adjust the origin, and
+	 * {@link BlockEntityInstanceManager}s are allowed to arbitrarily adjust the origin, and
 	 * shift the world matrix provided as a shader uniform accordingly.
 	 *
 	 * @return The position this instance should be rendered at to appear in the correct location.
@@ -78,7 +78,7 @@ public abstract class EntityInstance<E extends Entity> extends AbstractInstance 
 
 	/**
 	 * In order to accommodate for floating point precision errors at high coordinates,
-	 * {@link TileInstanceManager}s are allowed to arbitrarily adjust the origin, and
+	 * {@link BlockEntityInstanceManager}s are allowed to arbitrarily adjust the origin, and
 	 * shift the world matrix provided as a shader uniform accordingly.
 	 *
 	 * @return The position this instance should be rendered at to appear in the correct location.

@@ -1,5 +1,5 @@
 @ParametersAreNonnullByDefault @MethodsReturnNonnullByDefault
-package com.jozufozu.flywheel.backend.instancing.tile;
+package com.jozufozu.flywheel.backend.instancing.blockentity;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

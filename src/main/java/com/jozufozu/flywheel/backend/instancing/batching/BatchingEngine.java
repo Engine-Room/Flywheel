@@ -6,18 +6,14 @@ import java.util.Map;
 
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.backend.RenderLayer;
+import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.SuperBufferSource;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
-import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;

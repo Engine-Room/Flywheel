@@ -6,8 +6,8 @@ import java.util.SortedSet;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
-import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
+import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -36,7 +36,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * Responsible for rendering the block breaking overlay for instanced tiles.
+ * Responsible for rendering the block breaking overlay for instanced block entities.
  */
 @OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(Dist.CLIENT)
@@ -57,7 +57,7 @@ public class CrumblingRenderer {
 	public static void renderBreaking(RenderLayerEvent event) {
 		if (!Backend.canUseInstancing(event.getWorld())) return;
 
-		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageTiles(event.getWorld());
+		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageBlockEntities(event.getWorld());
 
 		if (activeStages.isEmpty()) return;
 
@@ -90,9 +90,9 @@ public class CrumblingRenderer {
 	}
 
 	/**
-	 * Associate each breaking stage with a list of all tile entities at that stage.
+	 * Associate each breaking stage with a list of all block entities at that stage.
 	 */
-	private static Int2ObjectMap<List<BlockEntity>> getActiveStageTiles(ClientLevel world) {
+	private static Int2ObjectMap<List<BlockEntity>> getActiveStageBlockEntities(ClientLevel world) {
 
 		Int2ObjectMap<List<BlockEntity>> breakingEntities = new Int2ObjectArrayMap<>();
 
@@ -105,11 +105,11 @@ public class CrumblingRenderer {
 				int blockDamage = progresses.last()
 						.getProgress();
 
-				BlockEntity tileEntity = world.getBlockEntity(breakingPos);
+				BlockEntity blockEntity = world.getBlockEntity(breakingPos);
 
-				if (tileEntity != null) {
-					List<BlockEntity> tileEntities = breakingEntities.computeIfAbsent(blockDamage, $ -> new ArrayList<>());
-					tileEntities.add(tileEntity);
+				if (blockEntity != null) {
+					List<BlockEntity> blockEntities = breakingEntities.computeIfAbsent(blockDamage, $ -> new ArrayList<>());
+					blockEntities.add(blockEntity);
 				}
 			}
 		}
