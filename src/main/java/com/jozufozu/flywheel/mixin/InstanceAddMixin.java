@@ -26,9 +26,9 @@ public class InstanceAddMixin {
 
 	@Inject(method = "setBlockEntity",
 			at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))
-	private void tileAdded(BlockEntity be, CallbackInfo ci) {
+	private void blockEntityAdded(BlockEntity be, CallbackInfo ci) {
 		if (level.isClientSide && Backend.isOn()) {
-			InstancedRenderDispatcher.getTiles(this.level)
+			InstancedRenderDispatcher.getBlockEntities(this.level)
 					.add(be);
 		}
 	}

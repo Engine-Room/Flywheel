@@ -24,11 +24,9 @@ public class CancelEntityRenderMixin {
 	private Iterable<Entity> filterEntities(ClientLevel world) {
 		Iterable<Entity> entities = world.entitiesForRendering();
 		if (Backend.isOn()) {
-
 			ArrayList<Entity> filtered = Lists.newArrayList(entities);
 
-			InstancedRenderRegistry r = InstancedRenderRegistry.getInstance();
-			filtered.removeIf(r::shouldSkipRender);
+			filtered.removeIf(InstancedRenderRegistry::shouldSkipRender);
 
 			return filtered;
 		}

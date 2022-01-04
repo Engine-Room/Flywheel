@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.core.layout.CommonItems;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
+import com.jozufozu.flywheel.core.layout.CommonItems;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.datafixers.util.Pair;

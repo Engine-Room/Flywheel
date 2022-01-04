@@ -5,9 +5,9 @@ import com.mojang.serialization.Codec;
 
 import net.minecraft.resources.ResourceLocation;
 
-public interface IGameStateProvider {
+public interface GameStateProvider {
 
-	Codec<IGameStateProvider> CODEC = ResourceLocation.CODEC.xmap(GameStateRegistry::getStateProvider, IGameStateProvider::getID);
+	Codec<GameStateProvider> CODEC = ResourceLocation.CODEC.xmap(GameStateRegistry::getStateProvider, GameStateProvider::getID);
 
 	ResourceLocation getID();
 
