@@ -19,14 +19,11 @@ public class ChunkRebuildHooksMixin {
 
 	@Inject(method = "handleBlockEntity", at = @At("HEAD"), cancellable = true)
 	private <E extends BlockEntity> void addAndFilterBEs(ChunkRenderDispatcher.CompiledChunk compiledChunk, Set<BlockEntity> set, E be, CallbackInfo ci) {
-
 		if (Backend.canUseInstancing(be.getLevel())) {
+			if (InstancedRenderRegistry.canInstance(be.getType()))
+				InstancedRenderDispatcher.getBlockEntities(be.getLevel()).queueAdd(be);
 
-			InstancedRenderRegistry registry = InstancedRenderRegistry.getInstance();
-			if (registry.canInstance(be.getType()))
-				InstancedRenderDispatcher.getTiles(be.getLevel()).queueAdd(be);
-
-			if (registry.shouldSkipRender(be))
+			if (InstancedRenderRegistry.shouldSkipRender(be))
 				ci.cancel();
 		}
 	}

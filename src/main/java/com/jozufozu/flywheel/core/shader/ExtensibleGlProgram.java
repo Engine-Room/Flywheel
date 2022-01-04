@@ -7,13 +7,13 @@ import javax.annotation.Nonnull;
 
 import com.jozufozu.flywheel.backend.ShaderContext;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.core.shader.extension.IExtensionInstance;
+import com.jozufozu.flywheel.core.shader.extension.ExtensionInstance;
 
 import net.minecraft.resources.ResourceLocation;
 
 /**
  * A shader program that be arbitrarily "extended". This class can take in any number of program extensions, and
- * will initialize them and then call their {@link IExtensionInstance#bind() bind} function every subsequent time this
+ * will initialize them and then call their {@link ExtensionInstance#bind() bind} function every subsequent time this
  * program is bound. An "extension" is something that interacts with the shader program in a way that is invisible to
  * the caller using the program. This is used by some programs to implement the different fog modes. Other uses might
  * include binding extra textures to allow for blocks to have normal maps, for example. As the extensions are
@@ -22,7 +22,7 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class ExtensibleGlProgram extends GlProgram {
 
-	protected final List<IExtensionInstance> extensions = new ArrayList<>();
+	protected final List<ExtensionInstance> extensions = new ArrayList<>();
 
 	public ExtensibleGlProgram(ResourceLocation name, int handle) {
 		super(name, handle);
@@ -32,7 +32,7 @@ public class ExtensibleGlProgram extends GlProgram {
 	public void bind() {
 		super.bind();
 
-		extensions.forEach(IExtensionInstance::bind);
+		extensions.forEach(ExtensionInstance::bind);
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class ExtensibleGlProgram extends GlProgram {
 				.append(name)
 				.append('[');
 
-		for (IExtensionInstance extension : extensions) {
+		for (ExtensionInstance extension : extensions) {
 			builder.append(extension)
 					.append('+');
 		}

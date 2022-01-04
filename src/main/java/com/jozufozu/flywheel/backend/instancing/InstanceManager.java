@@ -10,8 +10,8 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.api.MaterialManager;
-import com.jozufozu.flywheel.api.instance.IDynamicInstance;
-import com.jozufozu.flywheel.api.instance.ITickableInstance;
+import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.light.LightUpdater;
@@ -30,8 +30,8 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	private final Set<T> queuedUpdates;
 
 	protected final Map<T, AbstractInstance> instances;
-	protected final Object2ObjectOpenHashMap<T, ITickableInstance> tickableInstances;
-	protected final Object2ObjectOpenHashMap<T, IDynamicInstance> dynamicInstances;
+	protected final Object2ObjectOpenHashMap<T, TickableInstance> tickableInstances;
+	protected final Object2ObjectOpenHashMap<T, DynamicInstance> dynamicInstances;
 
 	protected int frame;
 	protected int tick;
@@ -71,7 +71,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	 * Ticks the InstanceManager.
 	 *
 	 * <p>
-	 *     {@link ITickableInstance}s get ticked.
+	 *     {@link TickableInstance}s get ticked.
 	 *     <br>
 	 *     Queued updates are processed.
 	 * </p>
@@ -85,16 +85,16 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		int cY = (int) cameraY;
 		int cZ = (int) cameraZ;
 
-		ArrayList<ITickableInstance> instances = new ArrayList<>(tickableInstances.values());
+		ArrayList<TickableInstance> instances = new ArrayList<>(tickableInstances.values());
 		int incr = 500;
 		int size = instances.size();
 		int start = 0;
 		while (start < size) {
 			int end = Math.min(start + incr, size);
 
-			List<ITickableInstance> sub = instances.subList(start, end);
+			List<TickableInstance> sub = instances.subList(start, end);
 			taskEngine.submit(() -> {
-				for (ITickableInstance instance : sub) {
+				for (TickableInstance instance : sub) {
 					tickInstance(cX, cY, cZ, instance);
 				}
 			});
@@ -103,7 +103,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		}
 	}
 
-	private void tickInstance(int cX, int cY, int cZ, ITickableInstance instance) {
+	private void tickInstance(int cX, int cY, int cZ, TickableInstance instance) {
 		if (!instance.decreaseTickRateWithDistance()) {
 			instance.tick();
 			return;
@@ -132,16 +132,16 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		int cY = (int) info.getPosition().y;
 		int cZ = (int) info.getPosition().z;
 
-		ArrayList<IDynamicInstance> instances = new ArrayList<>(dynamicInstances.values());
+		ArrayList<DynamicInstance> instances = new ArrayList<>(dynamicInstances.values());
 		int incr = 500;
 		int size = instances.size();
 		int start = 0;
 		while (start < size) {
 			int end = Math.min(start + incr, size);
 
-			List<IDynamicInstance> sub = instances.subList(start, end);
+			List<DynamicInstance> sub = instances.subList(start, end);
 			taskEngine.submit(() -> {
-				for (IDynamicInstance dyn : sub) {
+				for (DynamicInstance dyn : sub) {
 					if (!dyn.decreaseFramerateWithDistance() || shouldFrameUpdate(dyn.getWorldPosition(), lookX, lookY, lookZ, cX, cY, cZ))
 						dyn.beginFrame();
 				}
@@ -179,8 +179,8 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	 *
 	 * <p>
 	 *     By default this is the only hook an IInstance has to change its internal state. This is the lowest frequency
-	 *     update hook IInstance gets. For more frequent updates, see {@link ITickableInstance} and
-	 *     {@link IDynamicInstance}.
+	 *     update hook IInstance gets. For more frequent updates, see {@link TickableInstance} and
+	 *     {@link DynamicInstance}.
 	 * </p>
 	 *
 	 * @param obj the object to update.
@@ -312,12 +312,12 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 					.addListener(renderer);
 			instances.put(obj, renderer);
 
-			if (renderer instanceof ITickableInstance r) {
+			if (renderer instanceof TickableInstance r) {
 				tickableInstances.put(obj, r);
 				r.tick();
 			}
 
-			if (renderer instanceof IDynamicInstance r) {
+			if (renderer instanceof DynamicInstance r) {
 				dynamicInstances.put(obj, r);
 				r.beginFrame();
 			}
@@ -328,9 +328,9 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 
 	@Override
 	public void onOriginShift() {
-		ArrayList<T> instancedTiles = new ArrayList<>(instances.keySet());
+		ArrayList<T> instanced = new ArrayList<>(instances.keySet());
 		invalidate();
-		instancedTiles.forEach(this::add);
+		instanced.forEach(this::add);
 	}
 
 	public void detachLightListeners() {

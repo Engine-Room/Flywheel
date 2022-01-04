@@ -19,13 +19,13 @@ public class InstancedRenderDispatcher {
 
 	/**
 	 * Call this when you want to manually run {@link AbstractInstance#update()}.
-	 * @param te The tile whose instance you want to update.
+	 * @param blockEntity The block entity whose instance you want to update.
 	 */
-	public static void enqueueUpdate(BlockEntity te) {
-		if (Backend.isOn() && te.hasLevel() && te.getLevel() instanceof ClientLevel) {
-			instanceWorlds.get(te.getLevel())
-					.getTileEntityInstanceManager()
-					.queueUpdate(te);
+	public static void enqueueUpdate(BlockEntity blockEntity) {
+		if (Backend.isOn() && blockEntity.hasLevel() && blockEntity.getLevel() instanceof ClientLevel) {
+			instanceWorlds.get(blockEntity.getLevel())
+					.getBlockEntityInstanceManager()
+					.queueUpdate(blockEntity);
 		}
 	}
 
@@ -41,10 +41,10 @@ public class InstancedRenderDispatcher {
 		}
 	}
 
-	public static InstanceManager<BlockEntity> getTiles(LevelAccessor world) {
+	public static InstanceManager<BlockEntity> getBlockEntities(LevelAccessor world) {
 		if (Backend.isOn()) {
 			return instanceWorlds.get(world)
-					.getTileEntityInstanceManager();
+					.getBlockEntityInstanceManager();
 		} else {
 			throw new NullPointerException("Backend is off, cannot retrieve instance world.");
 		}

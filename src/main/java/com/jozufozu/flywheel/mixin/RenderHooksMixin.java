@@ -84,7 +84,7 @@ public class RenderHooksMixin {
 	@Inject(at = @At("TAIL"), method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;)V")
 	private void checkUpdate(BlockPos pos, BlockState lastState, BlockState newState, CallbackInfo ci) {
 		if (Backend.isOn()) {
-			InstancedRenderDispatcher.getTiles(level)
+			InstancedRenderDispatcher.getBlockEntities(level)
 					.update(level.getBlockEntity(pos));
 		}
 	}

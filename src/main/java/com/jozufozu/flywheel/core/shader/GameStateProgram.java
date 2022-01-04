@@ -5,22 +5,22 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.core.shader.spec.IGameStateCondition;
+import com.jozufozu.flywheel.core.shader.spec.GameStateCondition;
 import com.jozufozu.flywheel.util.Pair;
 
 public class GameStateProgram<P extends GlProgram> implements ContextAwareProgram<P> {
 
-	private final List<Pair<IGameStateCondition, P>> variants;
+	private final List<Pair<GameStateCondition, P>> variants;
 	private final P fallback;
 
-	protected GameStateProgram(List<Pair<IGameStateCondition, P>> variants, P fallback) {
+	protected GameStateProgram(List<Pair<GameStateCondition, P>> variants, P fallback) {
 		this.variants = variants;
 		this.fallback = fallback;
 	}
 
 	@Override
 	public P get() {
-		for (Pair<IGameStateCondition, P> variant : variants) {
+		for (Pair<GameStateCondition, P> variant : variants) {
             if (variant.first()
 					.isMet()) return variant.second();
 		}
@@ -30,7 +30,7 @@ public class GameStateProgram<P extends GlProgram> implements ContextAwareProgra
 
 	@Override
 	public void delete() {
-		for (Pair<IGameStateCondition, P> variant : variants) {
+		for (Pair<GameStateCondition, P> variant : variants) {
 			variant.second()
 					.delete();
 		}
@@ -44,13 +44,13 @@ public class GameStateProgram<P extends GlProgram> implements ContextAwareProgra
 
 	public static class Builder<P extends GlProgram> {
 		private final P fallback;
-		private final List<Pair<IGameStateCondition, P>> variants = new ArrayList<>();
+		private final List<Pair<GameStateCondition, P>> variants = new ArrayList<>();
 
 		public Builder(P fallback) {
 			this.fallback = fallback;
 		}
 
-		public Builder<P> withVariant(IGameStateCondition condition, P program) {
+		public Builder<P> withVariant(GameStateCondition condition, P program) {
 			variants.add(Pair.of(condition, program));
 			return this;
 		}
