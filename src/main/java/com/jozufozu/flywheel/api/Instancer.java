@@ -50,4 +50,14 @@ public interface Instancer<D extends InstanceData> {
 	 * </p>
 	 */
 	void notifyRemoval();
+
+	/**
+	 * Populate arr with new instances of this model.
+	 * @param arr An array to fill.
+	 */
+	default void createInstances(D[] arr) {
+		for (int i = 0; i < arr.length; i++) {
+			arr[i] = createInstance();
+		}
+	}
 }
