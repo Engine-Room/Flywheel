@@ -79,6 +79,10 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	 */
 	@Override
 	public void render(TaskEngine taskEngine, RenderLayerEvent event) {
+		int ebo = GlBufferType.ELEMENT_ARRAY_BUFFER.getBoundBuffer();
+		int vbo = GlBufferType.ARRAY_BUFFER.getBoundBuffer();
+		int vao = GlVertexArray.getBoundVertexArray();
+
 		double camX;
 		double camY;
 		double camZ;
@@ -99,9 +103,9 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 		getGroupsToRender(event.getLayer()).forEach(group -> group.render(viewProjection, camX, camY, camZ));
 
-		GlBufferType.ELEMENT_ARRAY_BUFFER.unbind();
-		GlBufferType.ARRAY_BUFFER.unbind();
-		GlVertexArray.unbind();
+		GlBufferType.ELEMENT_ARRAY_BUFFER.bind(ebo);
+		GlBufferType.ARRAY_BUFFER.bind(vbo);
+		GlVertexArray.bind(vao);
 	}
 
 	private Stream<InstancedMaterialGroup<P>> getGroupsToRender(@Nullable RenderLayer layer) {

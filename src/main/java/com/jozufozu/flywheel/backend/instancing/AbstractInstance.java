@@ -65,13 +65,13 @@ public abstract class AbstractInstance implements Instance, LightListener {
 	 * When an instance is reset, the instance is deleted and re-created.
 	 *
 	 * <p>
-	 *     Just before {@link #update()} would be called, <code>shouldReset()</code> is checked.
-	 *     If this function returns <code>true</code>, then this instance will be {@link #remove removed},
+	 *     Just before {@link #update()} would be called, {@code shouldReset()} is checked.
+	 *     If this function returns {@code true}, then this instance will be {@link #remove removed},
 	 *     and another instance will be constructed to replace it. This allows for more sane resource
 	 *     acquisition compared to trying to update everything within the lifetime of an instance.
 	 * </p>
 	 *
-	 * @return <code>true</code> if this instance should be discarded and refreshed.
+	 * @return {@code true} if this instance should be discarded and refreshed.
 	 */
 	public boolean shouldReset() {
 		return false;

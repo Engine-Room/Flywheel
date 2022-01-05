@@ -217,7 +217,7 @@ public class SourceFile {
 	}
 
 	/**
-	 * Scan the source for <code>#use "..."</code> directives.
+	 * Scan the source for {@code #use "..."} directives.
 	 * Records the contents of the directive into an {@link Import} object, and marks the directive for elision.
 	 * @param elisions
 	 */
