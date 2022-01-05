@@ -21,4 +21,19 @@ public interface BufferUploaderAccessor {
 	static void flywheel$setLastEBO(int id) {
 		throw new AssertionError();
 	}
+
+	@Accessor("lastIndexBufferObject")
+	static int flywheel$getLastEBO() {
+		throw new AssertionError();
+	}
+
+	@Accessor("lastVertexBufferObject")
+	static int flywheel$getLastVBO() {
+		throw new AssertionError();
+	}
+
+	@Accessor("lastVertexArrayObject")
+	static int flywheel$getLastVAO() {
+		throw new AssertionError();
+	}
 }
