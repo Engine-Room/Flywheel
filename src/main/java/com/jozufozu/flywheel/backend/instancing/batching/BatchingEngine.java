@@ -6,8 +6,8 @@ import java.util.Map;
 
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.backend.RenderLayer;
+import com.jozufozu.flywheel.backend.instancing.BatchDrawingTracker;
 import com.jozufozu.flywheel.backend.instancing.Engine;
-import com.jozufozu.flywheel.backend.instancing.SuperBufferSource;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.mojang.blaze3d.platform.Lighting;
@@ -21,7 +21,7 @@ import net.minecraft.core.Vec3i;
 public class BatchingEngine implements Engine {
 
 	private final Map<RenderLayer, Map<RenderType, BatchedMaterialGroup>> layers;
-	private final SuperBufferSource superBufferSource = new SuperBufferSource();
+	private final BatchDrawingTracker batchTracker = new BatchDrawingTracker();
 
 	public BatchingEngine() {
 		this.layers = new EnumMap<>(RenderLayer.class);
@@ -43,13 +43,10 @@ public class BatchingEngine implements Engine {
 
 	@Override
 	public void render(TaskEngine taskEngine, RenderLayerEvent event) {
-
 		Map<RenderType, BatchedMaterialGroup> groups = layers.get(event.getLayer());
 		for (BatchedMaterialGroup group : groups.values()) {
-			group.render(event.stack, superBufferSource, taskEngine);
+			group.render(event.stack, batchTracker, taskEngine);
 		}
-
-		taskEngine.syncPoint();
 
 		// FIXME: this probably breaks some vanilla stuff but it works much better for flywheel
 		Matrix4f mat = new Matrix4f();
@@ -60,7 +57,8 @@ public class BatchingEngine implements Engine {
 			Lighting.setupLevel(mat);
 		}
 
-		superBufferSource.endBatch();
+		taskEngine.syncPoint();
+		batchTracker.endBatch();
 	}
 
 	@Override

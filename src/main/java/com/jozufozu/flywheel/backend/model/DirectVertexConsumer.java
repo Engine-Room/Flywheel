@@ -13,7 +13,7 @@ import com.mojang.blaze3d.vertex.VertexFormatElement;
 /**
  * An unsafe vertex consumer allowing for unchecked writes into a ByteBuffer.
  *
- * @see BufferBuilderHack
+ * @see BufferBuilderExtension
  */
 public class DirectVertexConsumer implements VertexConsumer {
 	public final VertexFormat format;
