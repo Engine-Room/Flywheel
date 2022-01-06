@@ -90,12 +90,12 @@ public class InstanceWorld {
 	 * </p>
 	 */
 	public void beginFrame(BeginFrameEvent event) {
-		engine.beginFrame(event.getInfo());
+		engine.beginFrame(event.getCamera());
 
 		taskEngine.syncPoint();
 
-		blockEntityInstanceManager.beginFrame(taskEngine, event.getInfo());
-		entityInstanceManager.beginFrame(taskEngine, event.getInfo());
+		blockEntityInstanceManager.beginFrame(taskEngine, event.getCamera());
+		entityInstanceManager.beginFrame(taskEngine, event.getCamera());
 	}
 
 	/**

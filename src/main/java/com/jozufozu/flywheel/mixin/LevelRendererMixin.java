@@ -33,7 +33,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 @OnlyIn(Dist.CLIENT)
 @Mixin(LevelRenderer.class)
-public class RenderHooksMixin {
+public class LevelRendererMixin {
 
 	@Shadow
 	private ClientLevel level;
@@ -52,7 +52,7 @@ public class RenderHooksMixin {
 	 * layer-correct custom rendering. RenderWorldLast is not refined enough for rendering world objects.
 	 * This should probably be a forge event.
 	 */
-	@Inject(at = @At("TAIL"), method = "renderChunkLayer")
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ShaderInstance;clear()V"), method = "renderChunkLayer")
 	private void renderLayer(RenderType type, PoseStack stack, double camX, double camY, double camZ, Matrix4f p_172999_, CallbackInfo ci) {
 
 		RenderBuffers renderBuffers = this.renderBuffers;
