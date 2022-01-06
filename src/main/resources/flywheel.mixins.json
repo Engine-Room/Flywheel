@@ -19,7 +19,6 @@
     "LevelRendererMixin",
     "PausedPartialTickAccessor",
     "RenderTexturesMixin",
-    "ShaderCloseMixin",
     "ShaderInstanceAccessor",
     "atlas.AtlasDataMixin",
     "atlas.SheetDataAccessor",

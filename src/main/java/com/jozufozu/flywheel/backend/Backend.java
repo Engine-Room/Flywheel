@@ -1,6 +1,10 @@
 package com.jozufozu.flywheel.backend;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -42,8 +46,6 @@ public class Backend {
 
 	protected Backend() {
 		loader = new Loader(this);
-
-		OptifineHandler.init();
 	}
 
 	/**
@@ -97,8 +99,6 @@ public class Backend {
 	}
 
 	public void refresh() {
-		OptifineHandler.refresh();
-
 		capabilities = GL.createCapabilities();
 
 		compat = new GlCompat(capabilities);
@@ -165,7 +165,7 @@ public class Backend {
 		FlwEngine preferredChoice = FlwConfig.get()
 				.getEngine();
 
-		boolean usingShaders = OptifineHandler.usingShaders();
+		boolean usingShaders = IrisShaderHandler.isShaderPackInUse();
 		boolean canUseEngine = switch (preferredChoice) {
 			case OFF -> true;
 			case BATCHING -> !usingShaders;

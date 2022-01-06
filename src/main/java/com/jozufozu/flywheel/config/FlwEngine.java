@@ -6,7 +6,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-public enum FlwEngine implements ConfigCommands.CommandNameProviderEnum {
+public enum FlwEngine {
 	OFF("off", "Off"),
 	BATCHING("batching", "Parallel Batching"),
 	INSTANCING("instancing", "GL33 Instanced Arrays"),
@@ -29,8 +29,7 @@ public enum FlwEngine implements ConfigCommands.CommandNameProviderEnum {
 		this.properName = properName;
 	}
 
-	@Override
-	public String getCommandName() {
+	public String getShortName() {
 		return shortName;
 	}
 

@@ -57,6 +57,8 @@ dependencies {
 
     modCompileOnly 'curse.maven:starlight-521783:3554912'
 
+    modCompileOnly 'maven.modrinth:iris:1.18.x-v1.1.4'
+
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     modCompileOnly 'maven.modrinth:indium:1.0.2-alpha1+mc1.18'
     modCompileOnly 'io.vram:frex-fabric-mc118:6.0.229'

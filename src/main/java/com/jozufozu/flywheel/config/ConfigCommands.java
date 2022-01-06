@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.config;
 
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -22,6 +23,7 @@ public final class ConfigCommands {
 		ConfigCommandBuilder commandBuilder = new ConfigCommandBuilder("flywheel");
 
 		commandBuilder.addOption(config.engine, "backend", (builder, option) -> enumOptionCommand(builder, config, option,
+				FlwEngine::getShortName,
 				(source, value) -> {
 					source.sendFeedback(getEngineMessage(value));
 				},
@@ -67,19 +69,13 @@ public final class ConfigCommands {
 				}));
 	}
 
-	public static <E extends Enum<E>> void enumOptionCommand(LiteralArgumentBuilder<FabricClientCommandSource> builder, FlwConfig config, EnumOption<E> option, BiConsumer<FabricClientCommandSource, E> displayAction, BiConsumer<FabricClientCommandSource, E> setAction) {
+	public static <E extends Enum<E>> void enumOptionCommand(LiteralArgumentBuilder<FabricClientCommandSource> builder, FlwConfig config, EnumOption<E> option, Function<E, String> nameFunc, BiConsumer<FabricClientCommandSource, E> displayAction, BiConsumer<FabricClientCommandSource, E> setAction) {
 		builder.executes(context -> {
 			displayAction.accept(context.getSource(), option.get());
 			return Command.SINGLE_SUCCESS;
 		});
 		for (E constant : option.getEnumType().getEnumConstants()) {
-			String name;
-			if (constant instanceof CommandNameProviderEnum nameProvider) {
-				name = nameProvider.getCommandName();
-			} else {
-				name = constant.name();
-			}
-			builder.then(ClientCommandManager.literal(name)
+			builder.then(ClientCommandManager.literal(nameFunc.apply(constant))
 				.executes(context -> {
 					option.set(constant);
 					setAction.accept(context.getSource(), option.get());
@@ -131,9 +127,5 @@ public final class ConfigCommands {
 		public void build() {
 			ClientCommandManager.DISPATCHER.register(command);
 		}
-	}
-
-	public interface CommandNameProviderEnum {
-		String getCommandName();
 	}
 }

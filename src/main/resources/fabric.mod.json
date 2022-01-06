@@ -34,5 +34,8 @@
     "fabric": "*",
     "minecraft": "1.18.x",
     "java": ">=17"
+  },
+  "breaks": {
+    "iris": "<1.1.4"
   }
 }
