@@ -15,11 +15,11 @@ import net.minecraft.resources.ResourceLocation;
  * An object describing a shader program that can be loaded by flywheel.
  *
  * <p>
- *     These are defined through json. All ProgramSpecs in <code>assets/modid/flywheel/programs</code> are parsed and
+ *     These are defined through json. All ProgramSpecs in {@code assets/modid/flywheel/programs} are parsed and
  *     processed. One ProgramSpec typically specifies one "material" that can be used in game to render things.
  * </p>
  * <p>
- *     All shader source files in <code>assets/modid/flywheel/shaders</code> are completely loaded and parsed into
+ *     All shader source files in {@code assets/modid/flywheel/shaders} are completely loaded and parsed into
  *     {@link SourceFile SourceFiles}, but not compiled until one of them is
  *     referenced by a ProgramSpec.
  * </p>

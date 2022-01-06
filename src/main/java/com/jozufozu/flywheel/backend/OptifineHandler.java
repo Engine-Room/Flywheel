@@ -4,7 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
+
+import com.jozufozu.flywheel.util.Lazy;
 
 import net.minecraft.client.Minecraft;
 
@@ -14,6 +18,23 @@ public class OptifineHandler {
 
 	private static Package optifine;
 	private static OptifineHandler handler;
+
+	private static final Lazy<BooleanSupplier> isShadowPass = Lazy.of(() -> {
+		try {
+			Class<?> ofShaders = Class.forName("net.optifine.shaders.Shaders");
+			Field field = ofShaders.getDeclaredField("isShadowPass");
+			field.setAccessible(true);
+			return () -> {
+				try {
+					return field.getBoolean(null);
+				} catch (IllegalAccessException ignored) {
+					return false;
+				}
+			};
+		} catch (Exception ignored) {
+			return () -> false;
+		}
+	});
 
 	public final boolean usingShaders;
 
@@ -38,6 +59,10 @@ public class OptifineHandler {
 		return OptifineHandler.get()
 				.map(OptifineHandler::isUsingShaders)
 				.orElse(false);
+	}
+
+	public static boolean isShadowPass() {
+		return isShadowPass.get().getAsBoolean();
 	}
 
 	public static void init() {

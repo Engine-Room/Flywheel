@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GLCapabilities;
 
 /**
  * This interface should be implemented by enums such that the
- * last defined variant <em>always</em> returns <code>true</code>.
+ * last defined variant <em>always</em> returns {@code true}
  */
 public interface GlVersioned {
 	/**

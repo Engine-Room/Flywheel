@@ -30,7 +30,7 @@ public interface DynamicInstance extends Instance {
 	 * <br> You might want to opt out of this if you want your animations to remain smooth
 	 * even when far away from the camera. It is recommended to keep this as is, however.
 	 *
-	 * @return <code>true</code> if your instance should be slow ticked.
+	 * @return {@code true} if your instance should be slow ticked.
 	 */
 	default boolean decreaseFramerateWithDistance() {
 		return true;

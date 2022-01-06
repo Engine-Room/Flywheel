@@ -50,4 +50,12 @@ public enum GlBufferType {
 		case GL15C.GL_ARRAY_BUFFER -> BufferUploaderAccessor.flywheel$setLastVBO(0);
 		}
 	}
+
+	public int getBoundBuffer() {
+		return switch (this.glEnum) {
+		case GL15C.GL_ELEMENT_ARRAY_BUFFER -> BufferUploaderAccessor.flywheel$getLastEBO();
+		case GL15C.GL_ARRAY_BUFFER -> BufferUploaderAccessor.flywheel$getLastVBO();
+		default -> -1;
+		};
+	}
 }
