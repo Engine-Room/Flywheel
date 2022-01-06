@@ -1,10 +1,6 @@
 package com.jozufozu.flywheel.backend;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Nullable;
 
@@ -55,7 +51,7 @@ public class Backend {
 	 * (Meshlet, MDI, GL31 Draw Instanced are planned), this will name which one is in use.
 	 */
 	public String getBackendDescriptor() {
-		return engine.getProperName();
+		return engine == null ? "" : engine.getProperName();
 	}
 
 	public FlwEngine getEngine() {
