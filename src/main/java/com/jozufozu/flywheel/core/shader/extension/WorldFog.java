@@ -8,7 +8,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class WorldFog implements IExtensionInstance {
+public class WorldFog implements ExtensionInstance {
 
 	public static final ResourceLocation NAME = Flywheel.rl("fog");
 

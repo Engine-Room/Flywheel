@@ -4,6 +4,7 @@ run/
 .gradle/
 build/
 gradle-app.setting
+out/
 
 ## IntelliJ IDEA
 

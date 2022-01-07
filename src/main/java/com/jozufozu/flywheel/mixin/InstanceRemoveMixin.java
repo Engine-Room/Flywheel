@@ -25,18 +25,18 @@ public class InstanceRemoveMixin {
 	@Inject(at = @At("TAIL"), method = "setRemoved")
 	private void removeInstance(CallbackInfo ci) {
 		if (level instanceof ClientLevel && Backend.isOn()) {
-			InstancedRenderDispatcher.getTiles(this.level)
+			InstancedRenderDispatcher.getBlockEntities(this.level)
 					.remove((BlockEntity) (Object) this);
 		}
 	}
 
 //	/**
 //	 * Don't do this.
-//	 * It can cause infinite loops if an instance class tries to access another tile entity in its constructor.
+//	 * It can cause infinite loops if an instance class tries to access another block entity in its constructor.
 //	 */
 //	@Inject(at = @At("TAIL"), method = "clearRemoved")
 //	private void addInstance(CallbackInfo ci) {
-//		if (level.isClientSide) InstancedRenderDispatcher.getTiles(this.level)
+//		if (level.isClientSide) InstancedRenderDispatcher.getBlockEntities(this.level)
 //				.add((BlockEntity) (Object) this);
 //	}
 }

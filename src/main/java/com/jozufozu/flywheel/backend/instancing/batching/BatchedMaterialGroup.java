@@ -7,7 +7,8 @@ import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.api.struct.Batched;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.instancing.SuperBufferSource;
+import com.jozufozu.flywheel.backend.OptifineHandler;
+import com.jozufozu.flywheel.backend.instancing.BatchDrawingTracker;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -34,7 +35,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 		}
 	}
 
-	public void render(PoseStack stack, SuperBufferSource source, TaskEngine pool) {
+	public void render(PoseStack stack, BatchDrawingTracker source, TaskEngine pool) {
 
 		int vertexCount = 0;
 		for (BatchedMaterial<?> material : materials.values()) {
@@ -44,14 +45,14 @@ public class BatchedMaterialGroup implements MaterialGroup {
 			}
 		}
 
-		DirectVertexConsumer consumer = source.getBuffer(state, vertexCount);
+		DirectVertexConsumer consumer = source.getDirectConsumer(state, vertexCount);
 
 		// avoids rendering garbage, but doesn't fix the issue of some instances not being buffered
 		consumer.memSetZero();
 
 		for (BatchedMaterial<?> material : materials.values()) {
 			for (CPUInstancer<?> instancer : material.models.values()) {
-				instancer.sbb.context.outputColorDiffuse = !consumer.hasOverlay();
+				instancer.sbb.context.outputColorDiffuse = !consumer.hasOverlay() && !OptifineHandler.usingShaders();
 				instancer.submitTasks(stack, pool, consumer);
 			}
 		}

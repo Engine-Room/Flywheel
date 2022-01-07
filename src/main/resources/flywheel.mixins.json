@@ -5,17 +5,22 @@
     "compatibilityLevel": "JAVA_17",
     "refmap": "flywheel.refmap.json",
     "client": [
+        "BlockEntityTypeMixin",
         "BufferBuilderMixin",
         "BufferUploaderAccessor",
+        "CameraMixin",
         "CancelEntityRenderMixin",
         "ChunkRebuildHooksMixin",
+        "EntityTypeMixin",
         "FixFabulousDepthMixin",
+        "FrustumMixin",
         "InstanceAddMixin",
         "InstanceRemoveMixin",
         "LevelRendererAccessor",
+        "LevelRendererMixin",
         "PausedPartialTickAccessor",
-        "RenderHooksMixin",
         "RenderTexturesMixin",
+        "RenderTypeMixin",
         "ShaderCloseMixin",
         "ShaderInstanceAccessor",
         "atlas.AtlasDataMixin",
@@ -28,5 +33,5 @@
     ],
     "injectors": {
         "defaultRequire": 1
-    }
+  }
 }

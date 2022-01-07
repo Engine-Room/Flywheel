@@ -4,15 +4,15 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.api.MaterialManager;
-import com.jozufozu.flywheel.api.instance.IDynamicInstance;
-import com.jozufozu.flywheel.api.instance.IInstance;
-import com.jozufozu.flywheel.api.instance.ITickableInstance;
-import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
+import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.TickableInstance;
+import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.core.materials.FlatLit;
-import com.jozufozu.flywheel.util.box.ImmutableBox;
 import com.jozufozu.flywheel.light.LightListener;
 import com.jozufozu.flywheel.light.LightProvider;
 import com.jozufozu.flywheel.light.ListenerStatus;
+import com.jozufozu.flywheel.util.box.ImmutableBox;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -20,9 +20,9 @@ import net.minecraft.world.level.LightLayer;
 
 /**
  * A general interface providing information about any type of thing that could use Flywheel's instanced rendering.
- * Right now, that's only {@link TileInstanceManager}, but there could be an entity equivalent in the future.
+ * Right now, that's only {@link BlockEntityInstanceManager}, but there could be an entity equivalent in the future.
  */
-public abstract class AbstractInstance implements IInstance, LightListener {
+public abstract class AbstractInstance implements Instance, LightListener {
 
 	protected final MaterialManager materialManager;
 	public final Level world;
@@ -48,7 +48,7 @@ public abstract class AbstractInstance implements IInstance, LightListener {
 	 * Update instance data here. Good for when data doesn't change very often and when animations are GPU based.
 	 * Don't query lighting data here, that's handled separately in {@link #updateLight()}.
 	 *
-	 * <br><br> If your animations are complex or more CPU driven, see {@link IDynamicInstance} or {@link ITickableInstance}.
+	 * <br><br> If your animations are complex or more CPU driven, see {@link DynamicInstance} or {@link TickableInstance}.
 	 */
 	public void update() {
 	}
@@ -65,13 +65,13 @@ public abstract class AbstractInstance implements IInstance, LightListener {
 	 * When an instance is reset, the instance is deleted and re-created.
 	 *
 	 * <p>
-	 *     Just before {@link #update()} would be called, <code>shouldReset()</code> is checked.
-	 *     If this function returns <code>true</code>, then this instance will be {@link #remove removed},
+	 *     Just before {@link #update()} would be called, {@code shouldReset()} is checked.
+	 *     If this function returns {@code true}, then this instance will be {@link #remove removed},
 	 *     and another instance will be constructed to replace it. This allows for more sane resource
 	 *     acquisition compared to trying to update everything within the lifetime of an instance.
 	 * </p>
 	 *
-	 * @return <code>true</code> if this instance should be discarded and refreshed.
+	 * @return {@code true} if this instance should be discarded and refreshed.
 	 */
 	public boolean shouldReset() {
 		return false;

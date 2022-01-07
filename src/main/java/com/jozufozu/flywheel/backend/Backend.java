@@ -55,7 +55,7 @@ public class Backend {
 	 * (Meshlet, MDI, GL31 Draw Instanced are planned), this will name which one is in use.
 	 */
 	public String getBackendDescriptor() {
-		return engine.getProperName();
+		return engine == null ? "" : engine.getProperName();
 	}
 
 	public FlwEngine getEngine() {

@@ -1,11 +1,11 @@
 package com.jozufozu.flywheel.vanilla;
 
 import com.jozufozu.flywheel.api.MaterialManager;
-import com.jozufozu.flywheel.api.instance.IDynamicInstance;
-import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
+import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.Materials;
-import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
+import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
 import com.mojang.math.Quaternion;
@@ -19,7 +19,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
-public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxBlockEntity> implements IDynamicInstance {
+public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntity> implements DynamicInstance {
 
 	private final TextureAtlasSprite texture;
 
@@ -29,10 +29,10 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxBlockEntity
 
 	private float lastProgress = Float.NaN;
 
-	public ShulkerBoxInstance(MaterialManager materialManager, ShulkerBoxBlockEntity tile) {
-		super(materialManager, tile);
+	public ShulkerBoxInstance(MaterialManager materialManager, ShulkerBoxBlockEntity blockEntity) {
+		super(materialManager, blockEntity);
 
-		DyeColor color = tile.getColor();
+		DyeColor color = blockEntity.getColor();
 		if (color == null) {
 			texture = Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION.sprite();
 		} else {
@@ -56,7 +56,7 @@ public class ShulkerBoxInstance extends TileEntityInstance<ShulkerBoxBlockEntity
 
 	@Override
 	public void beginFrame() {
-		float progress = tile.getProgress(AnimationTickHolder.getPartialTicks());
+		float progress = blockEntity.getProgress(AnimationTickHolder.getPartialTicks());
 
 		if (progress == lastProgress) return;
 		lastProgress = progress;
