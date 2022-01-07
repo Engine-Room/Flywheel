@@ -19,7 +19,7 @@ import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.config.FlwEngine;
-import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
+import com.jozufozu.flywheel.core.shader.ProgramSpec;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;

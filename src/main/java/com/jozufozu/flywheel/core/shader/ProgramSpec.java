@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.shader.spec;
+package com.jozufozu.flywheel.core.shader;
 
 import java.util.ArrayList;
 import java.util.Collections;

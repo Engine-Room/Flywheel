@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.backend;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jozufozu.flywheel.core.shader.gamestate.GameStateProvider;
+import com.jozufozu.flywheel.core.shader.GameStateProvider;
 
 import net.minecraft.resources.ResourceLocation;
 

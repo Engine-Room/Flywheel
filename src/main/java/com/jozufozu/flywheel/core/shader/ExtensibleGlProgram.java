@@ -7,7 +7,6 @@ import javax.annotation.Nonnull;
 
 import com.jozufozu.flywheel.backend.ShaderContext;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.core.shader.extension.ExtensionInstance;
 
 import net.minecraft.resources.ResourceLocation;
 

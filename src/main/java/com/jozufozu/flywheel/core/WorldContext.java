@@ -15,8 +15,8 @@ import com.jozufozu.flywheel.backend.source.ShaderLoadingException;
 import com.jozufozu.flywheel.core.pipeline.CachingCompiler;
 import com.jozufozu.flywheel.core.pipeline.CompilationContext;
 import com.jozufozu.flywheel.core.pipeline.PipelineCompiler;
+import com.jozufozu.flywheel.core.shader.ProgramSpec;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
-import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
 
 import net.minecraft.resources.ResourceLocation;
 

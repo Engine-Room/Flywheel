@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.shader.gamestate;
+package com.jozufozu.flywheel.core.shader;
 
 import com.jozufozu.flywheel.backend.GameStateRegistry;
 import com.mojang.serialization.Codec;

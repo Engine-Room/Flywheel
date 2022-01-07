@@ -8,8 +8,8 @@ import com.jozufozu.flywheel.backend.source.Resolver;
 import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
 import com.jozufozu.flywheel.core.pipeline.PipelineCompiler;
 import com.jozufozu.flywheel.core.pipeline.WorldCompiler;
+import com.jozufozu.flywheel.core.shader.NormalDebugStateProvider;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
-import com.jozufozu.flywheel.core.shader.gamestate.NormalDebugStateProvider;
 import com.jozufozu.flywheel.event.GatherContextEvent;
 import com.jozufozu.flywheel.util.ResourceUtil;
 
