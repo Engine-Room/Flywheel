@@ -17,7 +17,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 /**
  * The main object for loading and parsing source files.
  */
-public class ShaderSources implements SourceHolder {
+public class ShaderSources implements SourceFinder {
 	public static final String SHADER_DIR = "flywheel/shaders/";
 	public static final ArrayList<String> EXTENSIONS = Lists.newArrayList(".vert", ".vsh", ".frag", ".fsh", ".glsl");
 
