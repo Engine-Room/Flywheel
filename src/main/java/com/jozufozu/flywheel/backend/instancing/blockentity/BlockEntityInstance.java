@@ -1,9 +1,9 @@
-package com.jozufozu.flywheel.backend.instancing.tile;
+package com.jozufozu.flywheel.backend.instancing.blockentity;
 
 import com.jozufozu.flywheel.api.Material;
 import com.jozufozu.flywheel.api.MaterialManager;
-import com.jozufozu.flywheel.api.instance.IDynamicInstance;
-import com.jozufozu.flywheel.api.instance.ITickableInstance;
+import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
@@ -22,46 +22,46 @@ import net.minecraft.world.level.block.state.BlockState;
  *
  * <br><br> There are a few additional features that overriding classes can opt in to:
  * <ul>
- *     <li>{@link IDynamicInstance}</li>
- *     <li>{@link ITickableInstance}</li>
+ *     <li>{@link DynamicInstance}</li>
+ *     <li>{@link TickableInstance}</li>
  * </ul>
  * See the interfaces' documentation for more information about each one.
  *
- * <br> Implementing one or more of these will give a {@link TileEntityInstance} access
+ * <br> Implementing one or more of these will give a {@link BlockEntityInstance} access
  * to more interesting and regular points within a tick or a frame.
  *
  * @param <T> The type of {@link BlockEntity} your class is an instance of.
  */
-public abstract class TileEntityInstance<T extends BlockEntity> extends AbstractInstance {
+public abstract class BlockEntityInstance<T extends BlockEntity> extends AbstractInstance {
 
-	protected final T tile;
+	protected final T blockEntity;
 	protected final BlockPos pos;
 	protected final BlockPos instancePos;
 	protected final BlockState blockState;
 
-	public TileEntityInstance(MaterialManager materialManager, T tile) {
-		super(materialManager, tile.getLevel());
-		this.tile = tile;
-		this.pos = tile.getBlockPos();
-		this.blockState = tile.getBlockState();
+	public BlockEntityInstance(MaterialManager materialManager, T blockEntity) {
+		super(materialManager, blockEntity.getLevel());
+		this.blockEntity = blockEntity;
+		this.pos = blockEntity.getBlockPos();
+		this.blockState = blockEntity.getBlockState();
 		this.instancePos = pos.subtract(materialManager.getOriginCoordinate());
 	}
 
 	/**
-	 * Just before {@link #update()} would be called, <code>shouldReset()</code> is checked.
-	 * If this function returns <code>true</code>, then this instance will be {@link #remove removed},
+	 * Just before {@link #update()} would be called, {@code shouldReset()} is checked.
+	 * If this function returns {@code true}, then this instance will be {@link #remove removed},
 	 * and another instance will be constructed to replace it. This allows for more sane resource
 	 * acquisition compared to trying to update everything within the lifetime of an instance.
 	 *
-	 * @return <code>true</code> if this instance should be discarded and refreshed.
+	 * @return {@code true} if this instance should be discarded and refreshed.
 	 */
 	public boolean shouldReset() {
-		return tile.getBlockState() != blockState;
+		return blockEntity.getBlockState() != blockState;
 	}
 
 	/**
 	 * In order to accommodate for floating point precision errors at high coordinates,
-	 * {@link TileInstanceManager}s are allowed to arbitrarily adjust the origin, and
+	 * {@link BlockEntityInstanceManager}s are allowed to arbitrarily adjust the origin, and
 	 * shift the world matrix provided as a shader uniform accordingly.
 	 *
 	 * @return The {@link BlockPos position} of the {@link BlockEntity} this instance

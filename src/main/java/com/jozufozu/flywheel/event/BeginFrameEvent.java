@@ -8,28 +8,28 @@ import net.minecraftforge.eventbus.api.Event;
 
 public class BeginFrameEvent extends Event {
 	private final ClientLevel world;
-	private final Camera info;
-	private final Frustum clippingHelper;
+	private final Camera camera;
+	private final Frustum frustum;
 
-	public BeginFrameEvent(ClientLevel world, Camera info, Frustum clippingHelper) {
+	public BeginFrameEvent(ClientLevel world, Camera camera, Frustum frustum) {
 		this.world = world;
-		this.info = info;
-		this.clippingHelper = clippingHelper;
+		this.camera = camera;
+		this.frustum = frustum;
 	}
 
 	public ClientLevel getWorld() {
 		return world;
 	}
 
-	public Camera getInfo() {
-		return info;
+	public Camera getCamera() {
+		return camera;
 	}
 
-	public Frustum getClippingHelper() {
-		return clippingHelper;
+	public Frustum getFrustum() {
+		return frustum;
 	}
 
 	public Vec3 getCameraPos() {
-		return info.getPosition();
+		return camera.getPosition();
 	}
 }

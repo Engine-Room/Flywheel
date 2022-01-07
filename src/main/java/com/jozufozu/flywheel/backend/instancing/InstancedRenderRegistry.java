@@ -1,134 +1,304 @@
 package com.jozufozu.flywheel.backend.instancing;
 
-import java.util.Map;
+import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-import com.google.common.collect.Maps;
-import com.jozufozu.flywheel.api.FlywheelRendered;
 import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
+import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstancingController;
+import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityTypeExtension;
+import com.jozufozu.flywheel.backend.instancing.blockentity.SimpleBlockEntityInstancingController;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
-import com.jozufozu.flywheel.backend.instancing.entity.IEntityInstanceFactory;
-import com.jozufozu.flywheel.backend.instancing.tile.ITileInstanceFactory;
-import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
+import com.jozufozu.flywheel.backend.instancing.entity.EntityInstancingController;
+import com.jozufozu.flywheel.backend.instancing.entity.EntityTypeExtension;
+import com.jozufozu.flywheel.backend.instancing.entity.SimpleEntityInstancingController;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
+/**
+ * A utility class for registering and retrieving {@code InstancingController}s.
+ */
+@SuppressWarnings("unchecked")
 public class InstancedRenderRegistry {
-	private static final InstancedRenderRegistry INSTANCE = new InstancedRenderRegistry();
-
-	public static InstancedRenderRegistry getInstance() {
-		return INSTANCE;
+	/**
+	 * Checks if the given block entity type can be instanced.
+	 * @param type The block entity type to check.
+	 * @param <T> The type of the block entity.
+	 * @return {@code true} if the block entity type can be instanced.
+	 */
+	public static <T extends BlockEntity> boolean canInstance(BlockEntityType<? extends T> type) {
+		return getController(type) != null;
 	}
 
-	private final Object2BooleanMap<Object> skipRender = new Object2BooleanLinkedOpenHashMap<>();
-	private final Map<BlockEntityType<?>, ITileInstanceFactory<?>> tiles = Maps.newHashMap();
-	private final Map<EntityType<?>, IEntityInstanceFactory<?>> entities = Maps.newHashMap();
-
-	protected InstancedRenderRegistry() {
-		skipRender.defaultReturnValue(false);
+	/**
+	 * Checks if the given entity type can be instanced.
+	 * @param type The entity type to check.
+	 * @param <T> The type of the entity.
+	 * @return {@code true} if the entity type can be instanced.
+	 */
+	public static <T extends Entity> boolean canInstance(EntityType<? extends T> type) {
+		return getController(type) != null;
 	}
 
-	public <T extends BlockEntity> boolean shouldSkipRender(T type) {
-		return _skipRender(type.getType()) || ((type instanceof FlywheelRendered) && !((FlywheelRendered) type).shouldRenderNormally());
+	/**
+	 * Creates an instance for the given block entity, if possible.
+	 * @param materialManager The material manager to use.
+	 * @param blockEntity The block entity to create an instance of.
+	 * @param <T> The type of the block entity.
+	 * @return An instance of the block entity, or {@code null} if the block entity cannot be instanced.
+	 */
+	@Nullable
+	public static <T extends BlockEntity> BlockEntityInstance<? super T> createInstance(MaterialManager materialManager, T blockEntity) {
+		BlockEntityInstancingController<? super T> controller = getController(getType(blockEntity));
+		if (controller == null) {
+			return null;
+		}
+		return controller.createInstance(materialManager, blockEntity);
 	}
 
-	public <T extends Entity> boolean shouldSkipRender(T type) {
-		return _skipRender(type.getType()) || ((type instanceof FlywheelRendered) && !((FlywheelRendered) type).shouldRenderNormally());
+	/**
+	 * Creates an instance for the given entity, if possible.
+	 * @param materialManager The material manager to use.
+	 * @param entity The entity to create an instance of.
+	 * @param <T> The type of the entity.
+	 * @return An instance of the entity, or {@code null} if the entity cannot be instanced.
+	 */
+	@Nullable
+	public static <T extends Entity> EntityInstance<? super T> createInstance(MaterialManager materialManager, T entity) {
+		EntityInstancingController<? super T> controller = getController(getType(entity));
+		if (controller == null) {
+			return null;
+		}
+		return controller.createInstance(materialManager, entity);
 	}
 
-	public <T extends BlockEntity> boolean canInstance(BlockEntityType<? extends T> type) {
-		return tiles.containsKey(type);
+	/**
+	 * Checks if the given block entity is instanced and should not be rendered normally.
+	 * @param blockEntity The block entity to check.
+	 * @param <T> The type of the block entity.
+	 * @return {@code true} if the block entity is instanced and should not be rendered normally.
+	 */
+	public static <T extends BlockEntity> boolean shouldSkipRender(T blockEntity) {
+		BlockEntityInstancingController<? super T> controller = getController(getType(blockEntity));
+		if (controller == null) {
+			return false;
+		}
+		return controller.shouldSkipRender(blockEntity);
 	}
 
-	public <T extends Entity> boolean canInstance(EntityType<? extends T> type) {
-		return entities.containsKey(type);
+	/**
+	 * Checks if the given entity is instanced and should not be rendered normally.
+	 * @param entity The entity to check.
+	 * @param <T> The type of the entity.
+	 * @return {@code true} if the entity is instanced and should not be rendered normally.
+	 */
+	public static <T extends Entity> boolean shouldSkipRender(T entity) {
+		EntityInstancingController<? super T> controller = getController(getType(entity));
+		if (controller == null) {
+			return false;
+		}
+		return controller.shouldSkipRender(entity);
 	}
 
-	public <T extends BlockEntity> TileConfig<? extends T> tile(BlockEntityType<? extends T> type) {
-		return new TileConfig<>(type);
+	/**
+	 * Get an object to configure the instancing controller for the given block entity type.
+	 * @param type The block entity type to configure.
+	 * @param <T> The type of the block entity.
+	 * @return The configuration object.
+	 */
+	public static <T extends BlockEntity> BlockEntityConfig<T> configure(BlockEntityType<T> type) {
+		return new BlockEntityConfig<>(type);
 	}
 
-	public <T extends Entity> EntityConfig<? extends T> entity(EntityType<? extends T> type) {
+	/**
+	 * Get an object to configure the instancing controller for the given entity type.
+	 * @param type The entity type to configure.
+	 * @param <T> The type of the entity.
+	 * @return The configuration object.
+	 */
+	public static <T extends Entity> EntityConfig<T> configure(EntityType<T> type) {
 		return new EntityConfig<>(type);
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * Gets the instancing controller for the given block entity type, if one exists.
+	 * @param type The block entity type to get the instancing controller for.
+	 * @param <T> The type of the block entity.
+	 * @return The instancing controller for the given block entity type, or {@code null} if none exists.
+	 */
 	@Nullable
-	public <T extends BlockEntity> TileEntityInstance<? super T> create(MaterialManager manager, T tile) {
-		BlockEntityType<?> type = tile.getType();
-		ITileInstanceFactory<? super T> factory = (ITileInstanceFactory<? super T>) this.tiles.get(type);
-
-		if (factory == null) return null;
-		else return factory.create(manager, tile);
+	public static <T extends BlockEntity> BlockEntityInstancingController<? super T> getController(BlockEntityType<T> type) {
+		return ((BlockEntityTypeExtension<T>) type).flywheel$getInstancingController();
 	}
 
-
-	@SuppressWarnings("unchecked")
+	/**
+	 * Gets the instancing controller for the given entity type, if one exists.
+	 * @param type The entity type to get the instancing controller for.
+	 * @param <T> The type of the entity.
+	 * @return The instancing controller for the given entity type, or {@code null} if none exists.
+	 */
 	@Nullable
-	public <T extends Entity> EntityInstance<? super T> create(MaterialManager manager, T tile) {
-		EntityType<?> type = tile.getType();
-		IEntityInstanceFactory<? super T> factory = (IEntityInstanceFactory<? super T>) this.entities.get(type);
-
-		if (factory == null) return null;
-		else return factory.create(manager, tile);
+	public static <T extends Entity> EntityInstancingController<? super T> getController(EntityType<T> type) {
+		return ((EntityTypeExtension<T>) type).flywheel$getInstancingController();
 	}
 
-	private boolean _skipRender(Object o) {
-		return skipRender.getBoolean(o);
+	/**
+	 * Sets the instancing controller for the given block entity type.
+	 * @param type The block entity type to set the instancing controller for.
+	 * @param instancingController The instancing controller to set.
+	 * @param <T> The type of the block entity.
+	 */
+	public static <T extends BlockEntity> void setController(BlockEntityType<T> type, BlockEntityInstancingController<? super T> instancingController) {
+		((BlockEntityTypeExtension<T>) type).flywheel$setInstancingController(instancingController);
 	}
 
-	public interface Config<CONFIG extends Config<CONFIG, FACTORY>, FACTORY> {
-
-		CONFIG factory(FACTORY rendererFactory);
-
-		CONFIG setSkipRender(boolean skipRender);
+	/**
+	 * Sets the instancing controller for the given entity type.
+	 * @param type The entity type to set the instancing controller for.
+	 * @param instancingController The instancing controller to set.
+	 * @param <T> The type of the entity.
+	 */
+	public static <T extends Entity> void setController(EntityType<T> type, EntityInstancingController<? super T> instancingController) {
+		((EntityTypeExtension<T>) type).flywheel$setInstancingController(instancingController);
 	}
 
-	public class TileConfig<T extends BlockEntity> implements Config<TileConfig<T>, ITileInstanceFactory<? super T>> {
+	/**
+	 * Gets the type of the given block entity.
+	 * @param blockEntity The block entity to get the type of.
+	 * @param <T> The type of the block entity.
+	 * @return The {@link BlockEntityType} associated with the given block entity.
+	 */
+	public static <T extends BlockEntity> BlockEntityType<? super T> getType(T blockEntity) {
+		return (BlockEntityType<? super T>) blockEntity.getType();
+	}
 
-		private final BlockEntityType<T> type;
+	/**
+	 * Gets the type of the given entity.
+	 * @param entity The entity to get the type of.
+	 * @param <T> The type of the entity.
+	 * @return The {@link EntityType} associated with the given entity.
+	 */
+	public static <T extends Entity> EntityType<? super T> getType(T entity) {
+		return (EntityType<? super T>) entity.getType();
+	}
 
-		public TileConfig(BlockEntityType<T> type) {
+	/**
+	 * An object to configure the instancing controller for a block entity.
+	 * @param <T> The type of the block entity.
+	 */
+	public static class BlockEntityConfig<T extends BlockEntity> {
+		protected BlockEntityType<T> type;
+		protected BiFunction<MaterialManager, T, BlockEntityInstance<? super T>> instanceFactory;
+		protected Predicate<T> skipRender;
+
+		public BlockEntityConfig(BlockEntityType<T> type) {
 			this.type = type;
 		}
 
-		public TileConfig<T> factory(ITileInstanceFactory<? super T> rendererFactory) {
-			tiles.put(type, rendererFactory);
+		/**
+		 * Sets the instance factory for the block entity.
+		 * @param instanceFactory The instance factory.
+		 * @return {@code this}
+		 */
+		public BlockEntityConfig<T> factory(BiFunction<MaterialManager, T, BlockEntityInstance<? super T>> instanceFactory) {
+			this.instanceFactory = instanceFactory;
 			return this;
 		}
 
-		public TileConfig<T> setSkipRender(boolean skipRender) {
-			InstancedRenderRegistry.this.skipRender.put(type, skipRender);
+		/**
+		 * Sets a predicate to determine whether to skip rendering a block entity.
+		 * @param skipRender The predicate.
+		 * @return {@code this}
+		 */
+		public BlockEntityConfig<T> skipRender(Predicate<T> skipRender) {
+			this.skipRender = skipRender;
 			return this;
 		}
 
+		/**
+		 * Sets a predicate to always skip rendering for block entities of this type.
+		 * @return {@code this}
+		 */
+		public BlockEntityConfig<T> alwaysSkipRender() {
+			this.skipRender = be -> true;
+			return this;
+		}
+
+		/**
+		 * Constructs the block entity instancing controller, and sets it for the block entity type.
+		 * @return The block entity instancing controller.
+		 */
+		public SimpleBlockEntityInstancingController<T> apply() {
+			Objects.requireNonNull(instanceFactory, "Instance factory cannot be null!");
+			if (skipRender == null) {
+				skipRender = be -> false;
+			}
+			SimpleBlockEntityInstancingController<T> controller = new SimpleBlockEntityInstancingController<>(instanceFactory, skipRender);
+			setController(type, controller);
+			return controller;
+		}
 	}
 
-	public class EntityConfig<T extends Entity> implements Config<EntityConfig<T>, IEntityInstanceFactory<? super T>> {
-
-		private final EntityType<T> type;
+	/**
+	 * An object to configure the instancing controller for an entity.
+	 * @param <T> The type of the entity.
+	 */
+	public static class EntityConfig<T extends Entity> {
+		protected EntityType<T> type;
+		protected BiFunction<MaterialManager, T, EntityInstance<? super T>> instanceFactory;
+		protected Predicate<T> skipRender;
 
 		public EntityConfig(EntityType<T> type) {
 			this.type = type;
 		}
 
-		public EntityConfig<T> factory(IEntityInstanceFactory<? super T> rendererFactory) {
-			entities.put(type, rendererFactory);
+		/**
+		 * Sets the instance factory for the entity.
+		 * @param instanceFactory The instance factory.
+		 * @return {@code this}
+		 */
+		public EntityConfig<T> factory(BiFunction<MaterialManager, T, EntityInstance<? super T>> instanceFactory) {
+			this.instanceFactory = instanceFactory;
 			return this;
 		}
 
-		public EntityConfig<T> setSkipRender(boolean skipRender) {
-			InstancedRenderRegistry.this.skipRender.put(type, skipRender);
-
+		/**
+		 * Sets a predicate to determine whether to skip rendering an entity.
+		 * @param skipRender The predicate.
+		 * @return {@code this}
+		 */
+		public EntityConfig<T> skipRender(Predicate<T> skipRender) {
+			this.skipRender = skipRender;
 			return this;
 		}
 
+		/**
+		 * Sets a predicate to always skip rendering for entities of this type.
+		 * @return {@code this}
+		 */
+		public EntityConfig<T> alwaysSkipRender() {
+			this.skipRender = entity -> true;
+			return this;
+		}
+
+		/**
+		 * Constructs the entity instancing controller, and sets it for the entity type.
+		 * @return The entity instancing controller.
+		 */
+		public SimpleEntityInstancingController<T> apply() {
+			Objects.requireNonNull(instanceFactory, "Instance factory cannot be null!");
+			if (skipRender == null) {
+				skipRender = entity -> false;
+			}
+			SimpleEntityInstancingController<T> controller = new SimpleEntityInstancingController<>(instanceFactory, skipRender);
+			setController(type, controller);
+			return controller;
+		}
 	}
-
 }

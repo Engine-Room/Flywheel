@@ -43,7 +43,7 @@ import net.minecraft.world.ticks.LevelTickAccess;
 
 public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	public final Map<BlockPos, BlockState> blocksAdded = new HashMap<>();
-	public final Map<BlockPos, BlockEntity> tesAdded = new HashMap<>();
+	public final Map<BlockPos, BlockEntity> besAdded = new HashMap<>();
 	public final Set<SectionPos> spannedSections = new HashSet<>();
 	private final BlockPos.MutableBlockPos scratch = new BlockPos.MutableBlockPos();
 
@@ -85,9 +85,9 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 		lighter.runUpdates(Integer.MAX_VALUE, false, false);
 	}
 
-	public void setTileEntities(Collection<BlockEntity> tileEntities) {
-		tesAdded.clear();
-		tileEntities.forEach(te -> tesAdded.put(te.getBlockPos(), te));
+	public void setBlockEntities(Collection<BlockEntity> blockEntities) {
+		besAdded.clear();
+		blockEntities.forEach(be -> besAdded.put(be.getBlockPos(), be));
 	}
 
 	public void clear() {
@@ -153,7 +153,7 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	@Override
 	@Nullable
 	public BlockEntity getBlockEntity(BlockPos pos) {
-		return tesAdded.get(pos);
+		return besAdded.get(pos);
 	}
 
 	@Override

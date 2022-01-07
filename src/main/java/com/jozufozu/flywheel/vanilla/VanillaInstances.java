@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.vanilla;
 
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
+import static com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry.configure;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -28,34 +28,40 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 public class VanillaInstances {
 
 	public static void init() {
-		InstancedRenderRegistry r = InstancedRenderRegistry.getInstance();
+		configure(BlockEntityType.CHEST)
+				.alwaysSkipRender()
+				.factory(ChestInstance::new)
+				.apply();
+		configure(BlockEntityType.ENDER_CHEST)
+				.alwaysSkipRender()
+				.factory(ChestInstance::new)
+				.apply();
+		configure(BlockEntityType.TRAPPED_CHEST)
+				.alwaysSkipRender()
+				.factory(ChestInstance::new)
+				.apply();
 
-		r.tile(BlockEntityType.CHEST)
-				.setSkipRender(true)
-				.factory(ChestInstance::new);
-		r.tile(BlockEntityType.ENDER_CHEST)
-				.setSkipRender(true)
-				.factory(ChestInstance::new);
-		r.tile(BlockEntityType.TRAPPED_CHEST)
-				.setSkipRender(true)
-				.factory(ChestInstance::new);
+		configure(BlockEntityType.BELL)
+				.alwaysSkipRender()
+				.factory(BellInstance::new)
+				.apply();
 
-		r.tile(BlockEntityType.BELL)
-				.setSkipRender(true)
-				.factory(BellInstance::new);
+		configure(BlockEntityType.SHULKER_BOX)
+				.alwaysSkipRender()
+				.factory(ShulkerBoxInstance::new)
+				.apply();
 
-		r.tile(BlockEntityType.SHULKER_BOX)
-				.setSkipRender(true)
-				.factory(ShulkerBoxInstance::new);
-
-		r.entity(EntityType.MINECART)
-				.setSkipRender(true)
-				.factory(MinecartInstance::new);
-		r.entity(EntityType.HOPPER_MINECART)
-				.setSkipRender(true)
-				.factory(MinecartInstance::new);
-		r.entity(EntityType.FURNACE_MINECART)
-				.setSkipRender(true)
-				.factory(MinecartInstance::new);
+		configure(EntityType.MINECART)
+				.alwaysSkipRender()
+				.factory(MinecartInstance::new)
+				.apply();
+		configure(EntityType.HOPPER_MINECART)
+				.alwaysSkipRender()
+				.factory(MinecartInstance::new)
+				.apply();
+		configure(EntityType.FURNACE_MINECART)
+				.alwaysSkipRender()
+				.factory(MinecartInstance::new)
+				.apply();
 	}
 }

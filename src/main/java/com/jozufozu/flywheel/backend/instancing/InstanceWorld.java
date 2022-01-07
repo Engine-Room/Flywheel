@@ -1,12 +1,12 @@
 package com.jozufozu.flywheel.backend.instancing;
 
-import com.jozufozu.flywheel.api.instance.IDynamicInstance;
-import com.jozufozu.flywheel.api.instance.ITickableInstance;
+import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.batching.BatchingEngine;
+import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
-import com.jozufozu.flywheel.backend.instancing.tile.TileInstanceManager;
 import com.jozufozu.flywheel.config.FlwEngine;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
@@ -29,7 +29,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public class InstanceWorld {
 	protected final Engine engine;
 	protected final InstanceManager<Entity> entityInstanceManager;
-	protected final InstanceManager<BlockEntity> tileEntityInstanceManager;
+	protected final InstanceManager<BlockEntity> blockEntityInstanceManager;
 
 	protected final ParallelTaskEngine taskEngine;
 
@@ -48,16 +48,16 @@ public class InstanceWorld {
 					.build();
 
 			entityInstanceManager = new EntityInstanceManager(manager);
-			tileEntityInstanceManager = new TileInstanceManager(manager);
+			blockEntityInstanceManager = new BlockEntityInstanceManager(manager);
 
 			manager.addListener(entityInstanceManager);
-			manager.addListener(tileEntityInstanceManager);
+			manager.addListener(blockEntityInstanceManager);
 			this.engine = manager;
 		}
 		case BATCHING -> {
 			this.engine = new BatchingEngine();
 			entityInstanceManager = new EntityInstanceManager(this.engine);
-			tileEntityInstanceManager = new TileInstanceManager(this.engine);
+			blockEntityInstanceManager = new BlockEntityInstanceManager(this.engine);
 		}
 		default -> throw new IllegalArgumentException("Unknown engine type");
 		}
@@ -67,8 +67,8 @@ public class InstanceWorld {
 		return entityInstanceManager;
 	}
 
-	public InstanceManager<BlockEntity> getTileEntityInstanceManager() {
-		return tileEntityInstanceManager;
+	public InstanceManager<BlockEntity> getBlockEntityInstanceManager() {
+		return blockEntityInstanceManager;
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class InstanceWorld {
 		this.taskEngine.stopWorkers();
 		engine.delete();
 		entityInstanceManager.detachLightListeners();
-		tileEntityInstanceManager.detachLightListeners();
+		blockEntityInstanceManager.detachLightListeners();
 	}
 
 	/**
@@ -86,22 +86,22 @@ public class InstanceWorld {
 	 * <p>
 	 *     Check and shift the origin coordinate.
 	 *     <br>
-	 *     Call {@link IDynamicInstance#beginFrame()} on all instances in this world.
+	 *     Call {@link DynamicInstance#beginFrame()} on all instances in this world.
 	 * </p>
 	 */
 	public void beginFrame(BeginFrameEvent event) {
-		engine.beginFrame(event.getInfo());
+		engine.beginFrame(event.getCamera());
 
 		taskEngine.syncPoint();
 
-		tileEntityInstanceManager.beginFrame(taskEngine, event.getInfo());
-		entityInstanceManager.beginFrame(taskEngine, event.getInfo());
+		blockEntityInstanceManager.beginFrame(taskEngine, event.getCamera());
+		entityInstanceManager.beginFrame(taskEngine, event.getCamera());
 	}
 
 	/**
 	 * Tick the renderers after the game has ticked:
 	 * <p>
-	 *     Call {@link ITickableInstance#tick()} on all instances in this world.
+	 *     Call {@link TickableInstance#tick()} on all instances in this world.
 	 * </p>
 	 */
 	public void tick() {
@@ -110,7 +110,7 @@ public class InstanceWorld {
 
 		if (renderViewEntity == null) return;
 
-		tileEntityInstanceManager.tick(taskEngine, renderViewEntity.getX(), renderViewEntity.getY(), renderViewEntity.getZ());
+		blockEntityInstanceManager.tick(taskEngine, renderViewEntity.getX(), renderViewEntity.getY(), renderViewEntity.getZ());
 		entityInstanceManager.tick(taskEngine, renderViewEntity.getX(), renderViewEntity.getY(), renderViewEntity.getZ());
 	}
 

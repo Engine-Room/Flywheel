@@ -3,9 +3,6 @@ package com.jozufozu.flywheel.config;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.OptifineHandler;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

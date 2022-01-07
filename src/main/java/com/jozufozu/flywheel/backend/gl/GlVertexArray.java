@@ -12,10 +12,17 @@ public class GlVertexArray extends GlObject {
 		setHandle(GlStateManager._glGenVertexArrays());
 	}
 
+	public static void bind(int vao) {
+		GlStateManager._glBindVertexArray(vao);
+		BufferUploaderAccessor.flywheel$setLastVAO(vao);
+	}
+
 	public void bind() {
-		int handle = handle();
-		GlStateManager._glBindVertexArray(handle);
-		BufferUploaderAccessor.flywheel$setLastVAO(handle);
+		bind(handle());
+	}
+
+	public static int getBoundVertexArray() {
+		return BufferUploaderAccessor.flywheel$getLastVAO();
 	}
 
 	public static void unbind() {

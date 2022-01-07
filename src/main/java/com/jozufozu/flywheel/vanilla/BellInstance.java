@@ -1,11 +1,11 @@
 package com.jozufozu.flywheel.vanilla;
 
 import com.jozufozu.flywheel.api.MaterialManager;
-import com.jozufozu.flywheel.api.instance.IDynamicInstance;
-import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
+import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.Materials;
-import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
+import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -14,14 +14,14 @@ import net.minecraft.client.renderer.blockentity.BellRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BellBlockEntity;
 
-public class BellInstance extends TileEntityInstance<BellBlockEntity> implements IDynamicInstance {
+public class BellInstance extends BlockEntityInstance<BellBlockEntity> implements DynamicInstance {
 
 	private final OrientedData bell;
 
 	private float lastRingTime = Float.NaN;
 
-	public BellInstance(MaterialManager materialManager, BellBlockEntity tile) {
-		super(materialManager, tile);
+	public BellInstance(MaterialManager materialManager, BellBlockEntity blockEntity) {
+		super(materialManager, blockEntity);
 
 		bell = createBellInstance()
 				.setPivot(0.5f, 0.75f, 0.5f)
@@ -30,15 +30,15 @@ public class BellInstance extends TileEntityInstance<BellBlockEntity> implements
 
 	@Override
 	public void beginFrame() {
-		float ringTime = (float)tile.ticks + AnimationTickHolder.getPartialTicks();
+		float ringTime = (float)blockEntity.ticks + AnimationTickHolder.getPartialTicks();
 
 		if (ringTime == lastRingTime) return;
 		lastRingTime = ringTime;
 
-		if (tile.shaking) {
+		if (blockEntity.shaking) {
 			float angle = Mth.sin(ringTime / (float) Math.PI) / (4.0F + ringTime / 3.0F);
 
-			Vector3f ringAxis = tile.clickDirection.getCounterClockWise().step();
+			Vector3f ringAxis = blockEntity.clickDirection.getCounterClockWise().step();
 
 			bell.setRotation(ringAxis.rotation(angle));
 		} else {
@@ -59,7 +59,7 @@ public class BellInstance extends TileEntityInstance<BellBlockEntity> implements
 	private OrientedData createBellInstance() {
         return materialManager.defaultCutout()
                 .material(Materials.ORIENTED)
-				.model(tile.getType(), BellInstance::createBellModel)
+				.model(blockEntity.getType(), BellInstance::createBellModel)
 				.createInstance();
 	}
 

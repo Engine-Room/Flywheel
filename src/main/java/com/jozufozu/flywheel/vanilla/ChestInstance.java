@@ -5,12 +5,12 @@ import java.util.Calendar;
 import javax.annotation.Nonnull;
 
 import com.jozufozu.flywheel.api.MaterialManager;
-import com.jozufozu.flywheel.api.instance.IDynamicInstance;
-import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
+import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.Materials;
+import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
-import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -28,7 +28,7 @@ import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.properties.ChestType;
 
-public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileEntityInstance<T> implements IDynamicInstance {
+public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends BlockEntityInstance<T> implements DynamicInstance {
 
 	private final OrientedData body;
 	private final ModelData lid;
@@ -41,13 +41,13 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 
 	private float lastProgress = Float.NaN;
 
-	public ChestInstance(MaterialManager materialManager, T tile) {
-		super(materialManager, tile);
+	public ChestInstance(MaterialManager materialManager, T blockEntity) {
+		super(materialManager, blockEntity);
 
 		Block block = blockState.getBlock();
 
 		chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
-		renderMaterial = Sheets.chooseMaterial(tile, chestType, isChristmas());
+		renderMaterial = Sheets.chooseMaterial(blockEntity, chestType, isChristmas());
 
 		body = baseInstance()
 				.setPosition(getInstancePosition());
@@ -63,7 +63,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends TileE
 
 			DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> wrapper = chestBlock.combine(blockState, world, getWorldPosition(), true);
 
-			this.lidProgress = wrapper.apply(ChestBlock.opennessCombiner(tile));
+			this.lidProgress = wrapper.apply(ChestBlock.opennessCombiner(blockEntity));
 
 
 		} else {

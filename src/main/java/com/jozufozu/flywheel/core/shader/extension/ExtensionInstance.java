@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.core.shader.extension;
 
 import net.minecraft.resources.ResourceLocation;
 
-public interface IExtensionInstance {
+public interface ExtensionInstance {
 
 	/**
 	 * Bind the extra program state. It is recommended to grab the state information from global variables.

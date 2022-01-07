@@ -2,13 +2,13 @@ package com.jozufozu.flywheel.api.instance;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
-import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
+import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 
 /**
- * An interface giving {@link TileEntityInstance}s a hook to have a function called at
- * the end of every tick. By implementing {@link ITickableInstance}, a {@link TileEntityInstance}
+ * An interface giving {@link BlockEntityInstance}s a hook to have a function called at
+ * the end of every tick. By implementing {@link TickableInstance}, a {@link BlockEntityInstance}
  * can update frequently, but not every frame.
- * <br> There are a few cases in which this should be considered over {@link IDynamicInstance}:
+ * <br> There are a few cases in which this should be considered over {@link DynamicInstance}:
  * <ul>
  *     <li>
  *         You'd like to change something about the instance every now and then.
@@ -20,7 +20,7 @@ import com.jozufozu.flywheel.backend.instancing.tile.TileEntityInstance;
  *     </li>
  * </ul>
  */
-public interface ITickableInstance extends IInstance {
+public interface TickableInstance extends Instance {
 
 	/**
 	 * Called every tick, and after initialization.
@@ -38,7 +38,7 @@ public interface ITickableInstance extends IInstance {
 	 * <br> You might want to opt out of this if you want your animations to remain smooth
 	 * even when far away from the camera. It is recommended to keep this as is, however.
 	 *
-	 * @return <code>true</code> if your instance should be slow ticked.
+	 * @return {@code true} if your instance should be slow ticked.
 	 */
 	default boolean decreaseTickRateWithDistance() {
 		return true;
