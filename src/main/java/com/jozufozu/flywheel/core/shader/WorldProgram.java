@@ -4,7 +4,6 @@ import static org.lwjgl.opengl.GL20.glUniform1f;
 import static org.lwjgl.opengl.GL20.glUniform2f;
 import static org.lwjgl.opengl.GL20.glUniform3f;
 
-import com.jozufozu.flywheel.core.shader.extension.WorldFog;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.math.Matrix4f;

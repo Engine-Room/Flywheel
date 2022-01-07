@@ -10,7 +10,7 @@ import com.jozufozu.flywheel.backend.source.Resolver;
 import com.jozufozu.flywheel.backend.source.ShaderLoadingException;
 import com.jozufozu.flywheel.backend.source.ShaderSources;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
-import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
+import com.jozufozu.flywheel.core.shader.ProgramSpec;
 import com.jozufozu.flywheel.event.GatherContextEvent;
 import com.jozufozu.flywheel.util.ResourceUtil;
 import com.jozufozu.flywheel.util.StringUtil;

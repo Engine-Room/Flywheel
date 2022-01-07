@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.shader.extension;
+package com.jozufozu.flywheel.core.shader;
 
 import net.minecraft.resources.ResourceLocation;
 

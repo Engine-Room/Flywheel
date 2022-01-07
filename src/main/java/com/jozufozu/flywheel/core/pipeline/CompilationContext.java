@@ -5,7 +5,7 @@ import java.util.Objects;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.RenderLayer;
 import com.jozufozu.flywheel.backend.source.SourceFile;
-import com.jozufozu.flywheel.core.shader.spec.ProgramSpec;
+import com.jozufozu.flywheel.core.shader.ProgramSpec;
 
 /**
  * Represents the entire context of a program's usage.
