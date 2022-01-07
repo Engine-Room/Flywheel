@@ -28,7 +28,7 @@ public class Resolver {
 	/**
 	 * Try and resolve all referenced source files, printing errors if any aren't found.
 	 */
-	public void resolve(SourceHolder sources) {
+	public void resolve(SourceFinder sources) {
 		for (FileResolution resolution : resolutions.values()) {
 			resolution.resolve(sources);
 		}
