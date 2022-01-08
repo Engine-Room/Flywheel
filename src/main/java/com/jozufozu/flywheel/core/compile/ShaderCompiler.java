@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.pipeline;
+package com.jozufozu.flywheel.core.compile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.RenderLayer;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.source.FileResolution;
@@ -15,27 +15,50 @@ import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.backend.source.error.ErrorBuilder;
 import com.jozufozu.flywheel.backend.source.error.ErrorReporter;
 import com.jozufozu.flywheel.backend.source.span.Span;
-import com.jozufozu.flywheel.core.shader.ExtensibleGlProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class ShaderCompiler {
+/**
+ * Compiles a shader program.
+ */
+public class ShaderCompiler implements FileIndex {
 
+	/**
+	 * The name of the file responsible for this compilation.
+	 */
 	public final ResourceLocation name;
-	public final Template<?> template;
+
+	/**
+	 * The template we'll be using to generate the final source.
+	 */
+	public final Template template;
+
 	private final FileResolution header;
 
+	/**
+	 * Extra {@code #define}s to be added to the shader.
+	 */
 	private final List<String> defines;
 
-	private final RenderLayer layer;
+	/**
+	 * Alpha threshold below which pixels are discarded.
+	 */
+	private final float alphaDiscard;
+
+	/**
+	 * The vertex type to use.
+	 */
 	public final VertexType vertexType;
 
+	/**
+	 * The main file to compile.
+	 */
 	public final SourceFile mainFile;
 
 	private final List<SourceFile> files = new ArrayList<>();
 
-	public ShaderCompiler(CompilationContext context, Template<?> template, FileResolution header) {
+	public ShaderCompiler(ProgramContext context, Template template, FileResolution header) {
 		this.name = context.spec().name;
 		this.template = template;
 		this.header = header;
@@ -43,7 +66,7 @@ public class ShaderCompiler {
 		this.defines = context.spec()
 				.getDefines(context.ctx());
 		this.vertexType = context.vertexType();
-		layer = context.layer();
+		this.alphaDiscard = context.alphaDiscard();
 	}
 
 	public GlShader compile(ShaderType type) {
@@ -55,11 +78,9 @@ public class ShaderCompiler {
 				.append('\n')
 				.append("#extension GL_ARB_explicit_attrib_location : enable\n")
 				.append("#extension GL_ARB_conservative_depth : enable\n")
-				.append("#define ")
-				.append(type.define) // special case shader type declaration
-				.append('\n');
+				.append(type.getDefineStatement()); // special case shader type declaration
 
-		if (layer == RenderLayer.CUTOUT) {
+		if (alphaDiscard > 0) {
 			finalSource.append("#define ALPHA_DISCARD 0.1\n");
 		}
 
@@ -91,7 +112,7 @@ public class ShaderCompiler {
 		return new GlShader(this, type, finalSource.toString());
 	}
 
-	public <P extends WorldProgram> P compile(ExtensibleGlProgram.Factory<P> worldShaderPipeline) {
+	public <P extends WorldProgram> P compile(GlProgram.Factory<P> worldShaderPipeline) {
 		return new ProgramAssembler(this.name)
 				.attachShader(compile(ShaderType.VERTEX))
 				.attachShader(compile(ShaderType.FRAGMENT))
@@ -105,6 +126,7 @@ public class ShaderCompiler {
 	 * @param sourceFile The file to retrieve the ID for.
 	 * @return A file ID unique to the given sourceFile.
 	 */
+	@Override
 	public int getFileID(SourceFile sourceFile) {
 		int i = files.indexOf(sourceFile);
 		if (i != -1) {

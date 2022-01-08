@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.pipeline;
+package com.jozufozu.flywheel.core.compile;
 
 import java.util.Optional;
 
@@ -134,7 +134,7 @@ public class InstancingTemplateData implements TemplateData {
 		));
 	}
 
-	public void fragmentFooter(StringBuilder template, ShaderCompiler shader) {
+	public void fragmentFooter(StringBuilder template, FileIndex shader) {
 		Template.prefixFields(template, interpolant, "in", "v2f_");
 
 		template.append(String.format("""

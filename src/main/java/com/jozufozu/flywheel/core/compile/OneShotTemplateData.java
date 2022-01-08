@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.pipeline;
+package com.jozufozu.flywheel.core.compile;
 
 import java.util.Optional;
 
@@ -99,7 +99,7 @@ public class OneShotTemplateData implements TemplateData {
 						""");
     }
 
-	public void fragmentFooter(StringBuilder template, ShaderCompiler file) {
+	public void fragmentFooter(StringBuilder template, FileIndex file) {
 		Template.prefixFields(template, interpolant, "in", "v2f_");
 
 		template.append(String.format("""

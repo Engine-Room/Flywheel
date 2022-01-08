@@ -1,0 +1,9 @@
+{
+  "source": "flywheel:passthru.vert",
+  "states": [
+    {
+      "when": "flywheel:normal_debug",
+      "define": "DEBUG_NORMAL"
+    }
+  ]
+}

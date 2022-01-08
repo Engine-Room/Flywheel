@@ -9,29 +9,51 @@ import net.minecraft.resources.ResourceLocation;
  * Manages deferred file resolution.
  *
  * <p>
- *     Interns all referenced files in all sources, duplicating the final lookups and allowing for more dev-friendly
- *     error reporting.
- * </p><p>
- *     See {@link FileResolution} for more information.
+ *     Interns all file names in shader sources and program specs, deduplicating the final lookups and allowing for more
+ *     dev-friendly error reporting.
  * </p>
+ *
+ * @see FileResolution
  */
 public class Resolver {
 
 	public static final Resolver INSTANCE = new Resolver();
 
 	private final Map<ResourceLocation, FileResolution> resolutions = new HashMap<>();
+	private boolean hasRun = false;
 
-	public FileResolution findShader(ResourceLocation fileLoc) {
-		return resolutions.computeIfAbsent(fileLoc, FileResolution::new);
+	public FileResolution get(ResourceLocation file) {
+		if (!hasRun) {
+			return resolutions.computeIfAbsent(file, FileResolution::new);
+		} else {
+			// Lock the map after resolution has run.
+			FileResolution fileResolution = resolutions.get(file);
+
+			// ...so crash immediately if the file isn't found.
+			if (fileResolution == null) {
+				throw new RuntimeException("could not find source for file: " + file);
+			}
+
+			return fileResolution;
+		}
 	}
 
 	/**
 	 * Try and resolve all referenced source files, printing errors if any aren't found.
 	 */
-	public void resolve(SourceFinder sources) {
+	public void run(SourceFinder sources) {
+		boolean needsCrash = false;
 		for (FileResolution resolution : resolutions.values()) {
-			resolution.resolve(sources);
+			if (!resolution.resolve(sources)) {
+				needsCrash = true;
+			}
 		}
+
+		if (needsCrash) {
+			throw new ShaderLoadingException("Failed to resolve all source files, see log for details");
+		}
+
+		hasRun = true;
 	}
 
 	/**
@@ -43,5 +65,6 @@ public class Resolver {
 	 */
 	public void invalidate() {
 		resolutions.values().forEach(FileResolution::invalidate);
+		hasRun = false;
 	}
 }

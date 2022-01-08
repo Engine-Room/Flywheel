@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.core.pipeline;
+package com.jozufozu.flywheel.core.compile;
 
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 
 public interface TemplateData {
 	void vertexFooter(StringBuilder builder, ShaderCompiler file);
-	void fragmentFooter(StringBuilder builder, ShaderCompiler file);
+	void fragmentFooter(StringBuilder builder, FileIndex file);
 
 	/**
 	 * Generate the necessary glue code here.

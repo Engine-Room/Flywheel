@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.source;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.source.error.ErrorBuilder;
@@ -21,13 +22,13 @@ import net.minecraft.resources.ResourceLocation;
 public class FileResolution {
 
 	/**
-	 * Spans that have references that resolved to this.
+	 * Extra info about where this resolution is required. Includes ProgramSpecs and shader Spans.
 	 */
-	private final List<Span> foundSpans = new ArrayList<>();
+	private final List<Consumer<ErrorBuilder>> extraCrashInfoProviders = new ArrayList<>();
 	private final ResourceLocation fileLoc;
 	private SourceFile file;
 
-	public FileResolution(ResourceLocation fileLoc) {
+	FileResolution(ResourceLocation fileLoc) {
 		this.fileLoc = fileLoc;
 	}
 
@@ -35,6 +36,10 @@ public class FileResolution {
 		return fileLoc;
 	}
 
+	/**
+	 * Non-null if this file is resolved because there would have been a crash otherwise.
+	 * @return The file that this resolution resolves to.
+	 */
 	public SourceFile getFile() {
 		return file;
 	}
@@ -48,8 +53,13 @@ public class FileResolution {
 	 * @param span A span where this file is referenced.
 	 */
 	public FileResolution addSpan(Span span) {
-		foundSpans.add(span);
+		extraCrashInfoProviders.add(builder -> builder.pointAtFile(span.getSourceFile())
+				.pointAt(span, 1));
 		return this;
+	}
+
+	public void addSpec(ResourceLocation name) {
+		extraCrashInfoProviders.add(builder -> builder.extra("needed by spec: " + name + ".json"));
 	}
 
 	/**
@@ -58,24 +68,29 @@ public class FileResolution {
 	 * <p>
 	 *     Called after all files are loaded. If we can't find the file here, it doesn't exist.
 	 * </p>
+	 *
+	 * @return True if this file is resolved.
 	 */
-	void resolve(SourceFinder sources) {
+	boolean resolve(SourceFinder sources) {
 		file = sources.findSource(fileLoc);
 
 		if (file == null) {
 			ErrorBuilder builder = ErrorBuilder.error(String.format("could not find source for file %s", fileLoc));
-			// print the location of all places where this file was referenced
-			for (Span span : foundSpans) {
-				builder.pointAtFile(span.getSourceFile())
-						.pointAt(span, 1);
+			for (Consumer<ErrorBuilder> consumer : extraCrashInfoProviders) {
+				consumer.accept(builder);
 			}
 			Backend.LOGGER.error(builder.build());
-			throw new ShaderLoadingException();
+
+			return false;
 		}
+
+		// Let the GC do its thing
+		extraCrashInfoProviders.clear();
+		return true;
 	}
 
 	void invalidate() {
-		foundSpans.clear();
+		extraCrashInfoProviders.clear();
 		file = null;
 	}
 }

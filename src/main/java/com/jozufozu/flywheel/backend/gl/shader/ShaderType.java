@@ -16,4 +16,8 @@ public enum ShaderType {
 		this.define = define;
 		this.glEnum = glEnum;
 	}
+
+	public String getDefineStatement() {
+		return "#define " + define + "\n";
+	}
 }

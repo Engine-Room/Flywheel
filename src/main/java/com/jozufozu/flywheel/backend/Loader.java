@@ -7,7 +7,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.source.Resolver;
-import com.jozufozu.flywheel.backend.source.ShaderLoadingException;
 import com.jozufozu.flywheel.backend.source.ShaderSources;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.core.shader.ProgramSpec;
@@ -39,7 +38,6 @@ public class Loader implements ResourceManagerReloadListener {
 	private static final Gson GSON = new GsonBuilder().create();
 
 	private final Backend backend;
-	private boolean shouldCrash;
 
 	private boolean firstLoad = true;
 
@@ -56,15 +54,10 @@ public class Loader implements ResourceManagerReloadListener {
 		}
 	}
 
-	public void notifyError() {
-		shouldCrash = true;
-	}
-
 	@Override
 	public void onResourceManagerReload(ResourceManager manager) {
 		backend.refresh();
 
-		shouldCrash = false;
 		backend._clearContexts();
 
 		Resolver.INSTANCE.invalidate();
@@ -75,17 +68,9 @@ public class Loader implements ResourceManagerReloadListener {
 
 		loadProgramSpecs(manager);
 
-		Resolver.INSTANCE.resolve(sources);
+		Resolver.INSTANCE.run(sources);
 
-		for (ShaderContext<?> context : backend.allContexts()) {
-			context.load();
-		}
-
-		if (shouldCrash) {
-			throw new ShaderLoadingException("Could not load all shaders, see log for details");
-		}
-
-		Backend.LOGGER.info("Loaded all shader programs.");
+		Backend.LOGGER.info("Loaded all shader sources.");
 
 		ClientLevel world = Minecraft.getInstance().level;
 		if (Backend.canUseInstancing(world)) {
