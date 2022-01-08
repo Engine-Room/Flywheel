@@ -13,7 +13,7 @@ import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
-import com.jozufozu.flywheel.core.WorldContext;
+import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.util.WeakHashSet;
@@ -31,7 +31,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 	protected BlockPos originCoordinate = BlockPos.ZERO;
 
-	protected final WorldContext<P> context;
+	protected final ProgramCompiler<P> context;
 	protected final GroupFactory<P> groupFactory;
 	protected final boolean ignoreOriginCoordinate;
 
@@ -39,15 +39,11 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 	private final WeakHashSet<OriginShiftListener> listeners;
 
-	public InstancingEngine(WorldContext<P> context, TaskEngine taskEngine) {
-		this(context, InstancedMaterialGroup::new, false);
-	}
-
-	public static <P extends WorldProgram> Builder<P> builder(WorldContext<P> context) {
+	public static <P extends WorldProgram> Builder<P> builder(ProgramCompiler<P> context) {
 		return new Builder<>(context);
 	}
 
-	public InstancingEngine(WorldContext<P> context, GroupFactory<P> groupFactory, boolean ignoreOriginCoordinate) {
+	public InstancingEngine(ProgramCompiler<P> context, GroupFactory<P> groupFactory, boolean ignoreOriginCoordinate) {
 		this.context = context;
 		this.ignoreOriginCoordinate = ignoreOriginCoordinate;
 
@@ -180,11 +176,11 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	}
 
 	public static class Builder<P extends WorldProgram> {
-		protected final WorldContext<P> context;
+		protected final ProgramCompiler<P> context;
 		protected GroupFactory<P> groupFactory = InstancedMaterialGroup::new;
 		protected boolean ignoreOriginCoordinate;
 
-		public Builder(WorldContext<P> context) {
+		public Builder(ProgramCompiler<P> context) {
 			this.context = context;
 		}
 

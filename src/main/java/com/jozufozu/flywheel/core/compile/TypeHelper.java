@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.pipeline;
+package com.jozufozu.flywheel.core.compile;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

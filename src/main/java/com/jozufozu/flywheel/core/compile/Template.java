@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.pipeline;
+package com.jozufozu.flywheel.core.compile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,6 +6,8 @@ import java.util.function.Function;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
+import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.backend.source.parse.ShaderStruct;
 import com.jozufozu.flywheel.backend.source.parse.StructField;
@@ -17,23 +19,33 @@ import com.jozufozu.flywheel.backend.source.parse.StructField;
  *     Shader files are written somewhat abstractly. Subclasses of Template handle those abstractions, using SourceFile
  *     metadata to generate shader code that OpenGL can use to call into our shader programs.
  * </p>
- * @param <D> Holds metadata, generates errors.
  */
-public class Template<D extends TemplateData> {
+public class Template {
 
-	private final Map<SourceFile, D> metadata = new HashMap<>();
+	private final Map<SourceFile, TemplateData> metadata = new HashMap<>();
 
-	private final Function<SourceFile, D> reader;
+	private final Function<SourceFile, TemplateData> reader;
 	private final GLSLVersion glslVersion;
 
-	public Template(GLSLVersion glslVersion, Function<SourceFile, D> reader) {
+	public Template(GLSLVersion glslVersion, Function<SourceFile, TemplateData> reader) {
 		this.reader = reader;
 		this.glslVersion = glslVersion;
 	}
 
-	public D getMetadata(SourceFile file) {
+	public TemplateData getMetadata(SourceFile file) {
 		// lazily read files, cache results
 		return metadata.computeIfAbsent(file, reader);
+	}
+
+	/**
+	 * Creates a program compiler using this template.
+	 * @param factory A factory to add meaning to compiled programs.
+	 * @param header The header file to use for the program.
+	 * @param <P> The type of program to compile.
+	 * @return A program compiler.
+	 */
+	public <P extends GlProgram> ProgramCompiler<P> programCompiler(GlProgram.Factory<P> factory, FileResolution header) {
+		return new ProgramCompiler<>(factory, this, header);
 	}
 
 	public GLSLVersion getVersion() {

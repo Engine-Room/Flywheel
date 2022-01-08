@@ -16,7 +16,7 @@ import com.jozufozu.flywheel.backend.source.error.lines.SourceLine;
 import com.jozufozu.flywheel.backend.source.error.lines.SpanHighlightLine;
 import com.jozufozu.flywheel.backend.source.error.lines.TextLine;
 import com.jozufozu.flywheel.backend.source.span.Span;
-import com.jozufozu.flywheel.core.pipeline.ShaderCompiler;
+import com.jozufozu.flywheel.core.compile.ShaderCompiler;
 import com.jozufozu.flywheel.util.FlwUtil;
 
 public class ErrorBuilder {
@@ -127,6 +127,7 @@ public class ErrorBuilder {
 		}
 
 		StringBuilder builder = new StringBuilder();
+		builder.append('\n');
 		for (ErrorLine line : lines) {
 			int length = line.neededMargin();
 

@@ -1,5 +1,5 @@
 @ParametersAreNonnullByDefault @MethodsReturnNonnullByDefault
-package com.jozufozu.flywheel.core.pipeline;
+package com.jozufozu.flywheel.core.shader;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

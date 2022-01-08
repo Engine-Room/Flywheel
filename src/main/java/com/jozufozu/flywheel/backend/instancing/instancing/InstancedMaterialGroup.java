@@ -13,6 +13,7 @@ import com.jozufozu.flywheel.backend.model.FallbackAllocator;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
 import com.jozufozu.flywheel.backend.model.ModelPool;
 import com.jozufozu.flywheel.core.Formats;
+import com.jozufozu.flywheel.core.compile.ProgramContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.util.Textures;
 import com.mojang.math.Matrix4f;
@@ -78,8 +79,8 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 			InstancedMaterial<?> material = entry.getValue();
 			if (material.nothingToRender()) continue;
 
-			P program = owner.context.getProgram(entry.getKey()
-					.getProgramSpec(), Formats.POS_TEX_NORMAL, layer);
+			P program = owner.context.getProgram(ProgramContext.create(entry.getKey()
+					.getProgramSpec(), Formats.POS_TEX_NORMAL, layer));
 
 			program.bind();
 			program.uploadViewProjection(viewProjection);

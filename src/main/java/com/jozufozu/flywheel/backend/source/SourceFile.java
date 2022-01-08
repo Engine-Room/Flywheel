@@ -16,7 +16,7 @@ import com.jozufozu.flywheel.backend.source.parse.ShaderStruct;
 import com.jozufozu.flywheel.backend.source.span.ErrorSpan;
 import com.jozufozu.flywheel.backend.source.span.Span;
 import com.jozufozu.flywheel.backend.source.span.StringSpan;
-import com.jozufozu.flywheel.core.pipeline.ShaderCompiler;
+import com.jozufozu.flywheel.core.compile.FileIndex;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -138,7 +138,7 @@ public class SourceFile {
 		return "#use " + '"' + name + '"';
 	}
 
-	public void generateFinalSource(ShaderCompiler env, StringBuilder source) {
+	public void generateFinalSource(FileIndex env, StringBuilder source) {
 		for (Import include : imports) {
 			SourceFile file = include.getFile();
 

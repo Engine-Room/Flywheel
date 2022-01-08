@@ -1,9 +1,7 @@
 package com.jozufozu.flywheel.backend;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -40,7 +38,6 @@ public class Backend {
 	public GlCompat compat;
 
 	public final Loader loader;
-	private final List<ShaderContext<?>> contexts = new ArrayList<>();
 	private final Map<ResourceLocation, StructType<?>> materialRegistry = new HashMap<>();
 	private final Map<ResourceLocation, ProgramSpec> programSpecRegistry = new HashMap<>();
 
@@ -75,14 +72,6 @@ public class Backend {
 	}
 
 	/**
-	 * Register a shader context.
-	 */
-	public <C extends ShaderContext<?>> C register(C spec) {
-		contexts.add(spec);
-		return spec;
-	}
-
-	/**
 	 * Register an instancing material.
 	 */
 	public <D extends InstanceData> StructType<D> register(ResourceLocation name, StructType<D> spec) {
@@ -96,6 +85,7 @@ public class Backend {
 		return spec;
 	}
 
+	@Nullable
 	public ProgramSpec getSpec(ResourceLocation name) {
 		return programSpecRegistry.get(name);
 	}
@@ -116,10 +106,6 @@ public class Backend {
 
 	public Collection<ProgramSpec> allPrograms() {
 		return programSpecRegistry.values();
-	}
-
-	public Collection<ShaderContext<?>> allContexts() {
-		return contexts;
 	}
 
 	public static boolean isOn() {
@@ -157,8 +143,6 @@ public class Backend {
 	void _clearContexts() {
 		GameStateRegistry.clear();
 		programSpecRegistry.clear();
-		contexts.forEach(ShaderContext::delete);
-		contexts.clear();
 		materialRegistry.clear();
 	}
 

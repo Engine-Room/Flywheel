@@ -26,7 +26,7 @@ public class Import extends AbstractShaderElement {
 		super(self);
 		this.file = file;
 
-		resolution = resolver.findShader(toRL(file))
+		resolution = resolver.get(toRL(file))
 				.addSpan(file);
 
 		IMPORTS.add(this);

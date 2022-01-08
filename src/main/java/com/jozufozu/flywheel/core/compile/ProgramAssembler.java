@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.pipeline;
+package com.jozufozu.flywheel.core.compile;
 
 import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
@@ -11,9 +11,8 @@ import static org.lwjgl.opengl.GL20.glLinkProgram;
 import java.util.List;
 
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
-import com.jozufozu.flywheel.core.shader.ExtensibleGlProgram;
-import com.jozufozu.flywheel.core.shader.WorldProgram;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.resources.ResourceLocation;
@@ -61,7 +60,7 @@ public class ProgramAssembler {
 		return this;
 	}
 
-	public <P extends WorldProgram> P build(ExtensibleGlProgram.Factory<P> factory) {
+	public <P extends GlProgram> P build(GlProgram.Factory<P> factory) {
 		return factory.create(name, program);
 	}
 }

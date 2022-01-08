@@ -7,6 +7,8 @@ import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 
 import java.nio.FloatBuffer;
 
+import javax.annotation.Nonnull;
+
 import org.lwjgl.system.MemoryStack;
 
 import com.jozufozu.flywheel.backend.Backend;
@@ -86,5 +88,14 @@ public abstract class GlProgram extends GlObject {
 	@Override
 	public String toString() {
 		return "program " + name;
+	}
+
+	/**
+	 * A factory interface to create a {@link GlProgram}.
+	 */
+	public interface Factory<P extends GlProgram> {
+
+		@Nonnull
+		P create(ResourceLocation name, int handle);
 	}
 }

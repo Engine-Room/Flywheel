@@ -28,5 +28,6 @@ public class Materials {
 	public static class Names {
 		public static final ResourceLocation MODEL = Flywheel.rl("model");
 		public static final ResourceLocation ORIENTED = Flywheel.rl("oriented");
+		public static final ResourceLocation PASSTHRU = Flywheel.rl("passthru");
 	}
 }

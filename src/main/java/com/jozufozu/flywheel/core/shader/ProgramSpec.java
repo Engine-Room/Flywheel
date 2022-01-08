@@ -43,12 +43,13 @@ public class ProgramSpec {
 	public final ImmutableList<ProgramState> states;
 
 	public ProgramSpec(ResourceLocation source, List<ProgramState> states) {
-		this.source = Resolver.INSTANCE.findShader(source);
+		this.source = Resolver.INSTANCE.get(source);
 		this.states = ImmutableList.copyOf(states);
 	}
 
 	public void setName(ResourceLocation name) {
 		this.name = name;
+		this.source.addSpec(name);
 	}
 
 	public ResourceLocation getSourceLoc() {
