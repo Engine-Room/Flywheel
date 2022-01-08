@@ -4,7 +4,6 @@ import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.LayoutItem;
-import com.jozufozu.flywheel.mixin.BufferUploaderAccessor;
 import com.mojang.blaze3d.platform.GlStateManager;
 
 public class GlVertexArray extends GlObject {
@@ -14,20 +13,14 @@ public class GlVertexArray extends GlObject {
 
 	public static void bind(int vao) {
 		GlStateManager._glBindVertexArray(vao);
-		BufferUploaderAccessor.flywheel$setLastVAO(vao);
 	}
 
 	public void bind() {
 		bind(handle());
 	}
 
-	public static int getBoundVertexArray() {
-		return BufferUploaderAccessor.flywheel$getLastVAO();
-	}
-
 	public static void unbind() {
 		GlStateManager._glBindVertexArray(0);
-		BufferUploaderAccessor.flywheel$setLastVAO(0);
 	}
 
 	public void enableArrays(int count) {
