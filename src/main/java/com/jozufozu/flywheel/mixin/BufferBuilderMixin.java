@@ -9,13 +9,13 @@ import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import com.jozufozu.flywheel.backend.model.BufferBuilderHack;
+import com.jozufozu.flywheel.backend.model.BufferBuilderExtension;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 
 @Mixin(BufferBuilder.class)
-public abstract class BufferBuilderMixin implements BufferBuilderHack {
+public abstract class BufferBuilderMixin implements BufferBuilderExtension {
 	@Shadow
 	private ByteBuffer buffer;
 
@@ -50,7 +50,7 @@ public abstract class BufferBuilderMixin implements BufferBuilderHack {
 	}
 
 	@Override
-	public void flywheel$hackBegin(@Nonnull ByteBuffer buffer, @Nonnull VertexFormat format, int vertexCount) {
+	public void flywheel$injectForRender(@Nonnull ByteBuffer buffer, @Nonnull VertexFormat format, int vertexCount) {
 		this.building = true;
 		this.mode = VertexFormat.Mode.QUADS;
 

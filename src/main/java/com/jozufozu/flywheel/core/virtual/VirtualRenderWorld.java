@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagContainer;
@@ -25,6 +26,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -54,19 +56,37 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 
 	protected final int height;
 	protected final int minBuildHeight;
+	protected final Vec3i biomeOffset;
 
 	public VirtualRenderWorld(Level level) {
-		this(level, level.getHeight(), level.getMinBuildHeight());
+		this(level, Vec3i.ZERO, level.getHeight(), level.getMinBuildHeight());
 	}
 
-	public VirtualRenderWorld(Level level, int height, int minBuildHeight) {
+	public VirtualRenderWorld(Level level, Vec3i biomeOffset) {
+		this(level, biomeOffset, level.getHeight(), level.getMinBuildHeight());
+	}
+
+	public VirtualRenderWorld(Level level, Vec3i biomeOffset, int height, int minBuildHeight) {
 		super((WritableLevelData) level.getLevelData(), level.dimension(), level.dimensionType(), level::getProfiler,
 				true, false, 0);
+		this.biomeOffset = biomeOffset;
 		this.level = level;
-		this.height = height;
-		this.minBuildHeight = minBuildHeight;
+		this.height = nextMultipleOf16(height);
+		this.minBuildHeight = nextMultipleOf16(minBuildHeight);
 		this.chunkSource = new VirtualChunkSource(this);
 		this.lighter = new LevelLightEngine(chunkSource, true, false);
+	}
+
+	/**
+	 * We need to ensure that height and minBuildHeight are multiples of 16.
+	 * Adapted from: https://math.stackexchange.com/questions/291468
+	 */
+	public static int nextMultipleOf16(int a) {
+		if (a < 0) {
+			return -(((Math.abs(a) - 1) | 15) + 1);
+		} else {
+			return ((a - 1) | 15) + 1;
+		}
 	}
 
 	/**
@@ -165,6 +185,27 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 		return getBlockState(scratch.set(x, y, z));
 	}
 
+	// BIOME OFFSET
+
+	@Override
+	public Biome getBiome(BlockPos pPos) {
+		return super.getBiome(pPos.offset(biomeOffset));
+	}
+
+	@Override
+	public Biome getUncachedNoiseBiome(int pX, int pY, int pZ) {
+		// Control flow should never reach this method,
+		// so we add biomeOffset in case some other mod calls this directly.
+		return level.getUncachedNoiseBiome(pX + biomeOffset.getX(), pY + biomeOffset.getY(), pZ + biomeOffset.getZ());
+	}
+
+	@Override
+	public Biome getNoiseBiome(int pX, int pY, int pZ) {
+		// Control flow should never reach this method,
+		// so we add biomeOffset in case some other mod calls this directly.
+		return level.getNoiseBiome(pX + biomeOffset.getX(), pY + biomeOffset.getY(), pZ + biomeOffset.getZ());
+	}
+
 	// RENDERING CONSTANTS
 
 	@Override
@@ -178,6 +219,11 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	}
 
 	// THIN WRAPPERS AHEAD
+
+	@Override
+	public BiomeManager getBiomeManager() {
+		return level.getBiomeManager();
+	}
 
 	@Override
 	public RegistryAccess registryAccess() {
@@ -212,11 +258,6 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	@Override
 	public Scoreboard getScoreboard() {
 		return level.getScoreboard();
-	}
-
-	@Override
-	public Biome getUncachedNoiseBiome(int p_225604_1_, int p_225604_2_, int p_225604_3_) {
-		return level.getUncachedNoiseBiome(p_225604_1_, p_225604_2_, p_225604_3_);
 	}
 
 	// UNIMPORTANT CONSTANTS

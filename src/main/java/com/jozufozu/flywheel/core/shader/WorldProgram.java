@@ -28,7 +28,7 @@ public class WorldProgram extends ExtensibleGlProgram {
 
 		super.bind();
 		registerSamplers();
-		super.unbind();
+		unbind();
 	}
 
 	protected void registerSamplers() {
