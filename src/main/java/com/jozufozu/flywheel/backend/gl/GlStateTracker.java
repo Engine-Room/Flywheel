@@ -45,11 +45,18 @@ public class GlStateTracker {
 			GlBufferType[] values = GlBufferType.values();
 
 			for (int i = 0; i < values.length; i++) {
-				GlStateManager._glBindBuffer(values[i].glEnum, buffers[i]);
+				if (buffers[i] != GlStateTracker.buffers[i]) {
+					GlStateManager._glBindBuffer(values[i].glEnum, buffers[i]);
+				}
 			}
 
-			GlStateManager._glBindVertexArray(vao);
-			GlStateManager._glUseProgram(program);
+			if (vao != GlStateTracker.vao) {
+				GlStateManager._glBindVertexArray(vao);
+			}
+
+			if (program != GlStateTracker.program) {
+				GlStateManager._glUseProgram(program);
+			}
 		}
 	}
 }
