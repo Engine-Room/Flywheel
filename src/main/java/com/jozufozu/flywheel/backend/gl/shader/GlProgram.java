@@ -13,7 +13,6 @@ import org.lwjgl.system.MemoryStack;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
-import com.jozufozu.flywheel.mixin.ShaderInstanceAccessor;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.math.Matrix4f;
 
@@ -31,14 +30,11 @@ public abstract class GlProgram extends GlObject {
 	}
 
 	public void bind() {
-		int handle = handle();
-		ProgramManager.glUseProgram(handle);
-		ShaderInstanceAccessor.flywheel$setLastProgramId(handle);
+		ProgramManager.glUseProgram(handle());
 	}
 
-	public void unbind() {
+	public static void unbind() {
 		ProgramManager.glUseProgram(0);
-		ShaderInstanceAccessor.flywheel$setLastProgramId(0);
 	}
 
 	/**
