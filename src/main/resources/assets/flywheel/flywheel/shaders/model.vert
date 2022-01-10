@@ -1,6 +1,3 @@
-#use "flywheel:block.frag"
-
-#if defined(VERTEX_SHADER)
 
 struct Instance {
     vec2 light;
@@ -15,4 +12,3 @@ void vertex(inout Vertex v, Instance i) {
     v.color = i.color;
     v.light = i.light;
 }
-#endif

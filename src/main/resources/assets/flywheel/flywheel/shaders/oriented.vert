@@ -1,6 +1,3 @@
-#use "flywheel:block.frag"
-
-#if defined(VERTEX_SHADER)
 #use "flywheel:core/quaternion.glsl"
 
 struct Oriented {
@@ -17,4 +14,3 @@ void vertex(inout Vertex v, Oriented o) {
     v.color = o.color;
     v.light = o.light;
 }
-#endif

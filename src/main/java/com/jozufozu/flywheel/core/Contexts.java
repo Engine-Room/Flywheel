@@ -27,8 +27,8 @@ public class Contexts {
 		FileResolution worldBuiltins = Resolver.INSTANCE.get(ResourceUtil.subPath(Names.WORLD, ".glsl"));
 		FileResolution crumblingBuiltins = Resolver.INSTANCE.get(ResourceUtil.subPath(Names.CRUMBLING, ".glsl"));
 
-		WORLD = Templates.INSTANCING.programCompiler(WorldProgram::new, worldBuiltins);
-		CRUMBLING = Templates.INSTANCING.programCompiler(CrumblingProgram::new, crumblingBuiltins);
+		WORLD = ProgramCompiler.create(Templates.INSTANCING, WorldProgram::new, worldBuiltins);
+		CRUMBLING = ProgramCompiler.create(Templates.INSTANCING, CrumblingProgram::new, crumblingBuiltins);
 	}
 
 	public static class Names {

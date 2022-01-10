@@ -2,10 +2,12 @@ package com.jozufozu.flywheel.core.compile;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.source.FileResolution;
+import com.jozufozu.flywheel.core.Templates;
 
 /**
  * A caching compiler.
@@ -18,15 +20,27 @@ import com.jozufozu.flywheel.backend.source.FileResolution;
 public class ProgramCompiler<P extends GlProgram> {
 
 	protected final Map<ProgramContext, P> cache = new HashMap<>();
+
 	private final GlProgram.Factory<P> factory;
+	private final Function<ProgramContext, GlShader> vertexCompiler;
+	private final Function<ProgramContext, GlShader> fragmentCompiler;
 
-	private final Template template;
-	private final FileResolution header;
-
-	public ProgramCompiler(GlProgram.Factory<P> factory, Template template, FileResolution header) {
+	public ProgramCompiler(GlProgram.Factory<P> factory, Function<ProgramContext, GlShader> vertexCompiler, Function<ProgramContext, GlShader> fragmentCompiler) {
 		this.factory = factory;
-		this.template = template;
-		this.header = header;
+		this.vertexCompiler = vertexCompiler;
+		this.fragmentCompiler = fragmentCompiler;
+	}
+
+	/**
+	 * Creates a program compiler using this template.
+	 * @param template The vertex template to use.
+	 * @param factory A factory to add meaning to compiled programs.
+	 * @param header The header file to use for the program.
+	 * @param <P> The type of program to compile.
+	 * @return A program compiler.
+	 */
+	public static <T extends VertexData, P extends GlProgram> ProgramCompiler<P> create(Template<T> template, GlProgram.Factory<P> factory, FileResolution header) {
+		return new ProgramCompiler<>(factory, ctx -> ShaderCompiler.compileVertex(ctx, template, header), ctx -> ShaderCompiler.compileFragment(ctx, Templates.FRAGMENT, header));
 	}
 
 	/**
@@ -45,11 +59,10 @@ public class ProgramCompiler<P extends GlProgram> {
 	}
 
 	private P compile(ProgramContext ctx) {
-		ShaderCompiler compiler = new ShaderCompiler(ctx, template, header);
 
-		return new ProgramAssembler(compiler.name)
-				.attachShader(compiler.compile(ShaderType.VERTEX))
-				.attachShader(compiler.compile(ShaderType.FRAGMENT))
+		return new ProgramAssembler(ctx.spec().name)
+				.attachShader(vertexCompiler.apply(ctx))
+				.attachShader(fragmentCompiler.apply(ctx))
 				.link()
 				.deleteLinkedShaders()
 				.build(this.factory);

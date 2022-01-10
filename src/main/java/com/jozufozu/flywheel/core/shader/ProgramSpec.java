@@ -30,34 +30,47 @@ public class ProgramSpec {
 
 	// TODO: Block model style inheritance?
 	public static final Codec<ProgramSpec> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			ResourceLocation.CODEC.fieldOf("source")
+			ResourceLocation.CODEC.fieldOf("vertex")
 					.forGetter(ProgramSpec::getSourceLoc),
+				ResourceLocation.CODEC.fieldOf("fragment")
+					.forGetter(ProgramSpec::getFragmentLoc),
 			ProgramState.CODEC.listOf()
 					.optionalFieldOf("states", Collections.emptyList())
 					.forGetter(ProgramSpec::getStates))
 			.apply(instance, ProgramSpec::new));
 
 	public ResourceLocation name;
-	public final FileResolution source;
+	public final FileResolution vertex;
+	public final FileResolution fragment;
 
 	public final ImmutableList<ProgramState> states;
 
-	public ProgramSpec(ResourceLocation source, List<ProgramState> states) {
-		this.source = Resolver.INSTANCE.get(source);
+	public ProgramSpec(ResourceLocation vertex, ResourceLocation fragment, List<ProgramState> states) {
+		this.vertex = Resolver.INSTANCE.get(vertex);
+		this.fragment = Resolver.INSTANCE.get(fragment);
 		this.states = ImmutableList.copyOf(states);
 	}
 
 	public void setName(ResourceLocation name) {
 		this.name = name;
-		this.source.addSpec(name);
+		this.vertex.addSpec(name);
+		this.fragment.addSpec(name);
 	}
 
 	public ResourceLocation getSourceLoc() {
-		return source.getFileLoc();
+		return vertex.getFileLoc();
 	}
 
-	public SourceFile getSource() {
-		return source.getFile();
+	public ResourceLocation getFragmentLoc() {
+		return fragment.getFileLoc();
+	}
+
+	public SourceFile getVertexFile() {
+		return vertex.getFile();
+	}
+
+	public SourceFile getFragmentFile() {
+		return fragment.getFile();
 	}
 
 	public ImmutableList<ProgramState> getStates() {

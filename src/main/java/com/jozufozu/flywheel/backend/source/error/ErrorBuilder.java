@@ -16,7 +16,7 @@ import com.jozufozu.flywheel.backend.source.error.lines.SourceLine;
 import com.jozufozu.flywheel.backend.source.error.lines.SpanHighlightLine;
 import com.jozufozu.flywheel.backend.source.error.lines.TextLine;
 import com.jozufozu.flywheel.backend.source.span.Span;
-import com.jozufozu.flywheel.core.compile.ShaderCompiler;
+import com.jozufozu.flywheel.core.compile.FileIndex;
 import com.jozufozu.flywheel.util.FlwUtil;
 
 public class ErrorBuilder {
@@ -45,7 +45,7 @@ public class ErrorBuilder {
 	}
 
 	@Nullable
-	public static ErrorBuilder fromLogLine(ShaderCompiler env, String s) {
+	public static ErrorBuilder fromLogLine(FileIndex env, String s) {
 		Matcher matcher = ERROR_LINE.matcher(s);
 
 		if (matcher.find()) {

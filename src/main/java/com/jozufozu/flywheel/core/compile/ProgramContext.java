@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.core.compile;
 
+import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
@@ -7,7 +8,6 @@ import javax.annotation.Nullable;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.RenderLayer;
-import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.core.shader.ProgramSpec;
 
 import net.minecraft.resources.ResourceLocation;
@@ -51,8 +51,8 @@ public record ProgramContext(float alphaDiscard, VertexType vertexType, ProgramS
 		return layer == RenderLayer.CUTOUT ? 0.1f : 0f;
 	}
 
-	public SourceFile getFile() {
-		return spec().getSource();
+	public List<String> createDefines() {
+		return spec().getDefines(ctx());
 	}
 
 	@Override

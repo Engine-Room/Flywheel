@@ -3,15 +3,12 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.backend.RenderLayer;
-import com.jozufozu.flywheel.backend.gl.GlVertexArray;
-import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
@@ -24,7 +21,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 public class InstancingEngine<P extends WorldProgram> implements Engine {
