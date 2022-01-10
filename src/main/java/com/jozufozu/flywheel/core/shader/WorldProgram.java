@@ -29,7 +29,7 @@ public class WorldProgram extends GlProgram {
 
 		super.bind();
 		registerSamplers();
-		super.unbind();
+		unbind();
 	}
 
 	protected void registerSamplers() {

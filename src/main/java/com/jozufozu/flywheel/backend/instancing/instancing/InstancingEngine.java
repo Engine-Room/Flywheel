@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -23,6 +24,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 public class InstancingEngine<P extends WorldProgram> implements Engine {
@@ -73,10 +75,6 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	 */
 	@Override
 	public void render(TaskEngine taskEngine, RenderLayerEvent event) {
-		int ebo = GlBufferType.ELEMENT_ARRAY_BUFFER.getBoundBuffer();
-		int vbo = GlBufferType.ARRAY_BUFFER.getBoundBuffer();
-		int vao = GlVertexArray.getBoundVertexArray();
-
 		double camX;
 		double camY;
 		double camZ;
@@ -96,10 +94,6 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		}
 
 		getGroupsToRender(event.getLayer()).forEach(group -> group.render(viewProjection, camX, camY, camZ, event.getLayer()));
-
-		GlBufferType.ELEMENT_ARRAY_BUFFER.bind(ebo);
-		GlBufferType.ARRAY_BUFFER.bind(vbo);
-		GlVertexArray.bind(vao);
 	}
 
 	private Stream<InstancedMaterialGroup<P>> getGroupsToRender(@Nullable RenderLayer layer) {

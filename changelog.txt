@@ -1,3 +1,13 @@
+0.5.1:
+Fixes
+ - Fix crash on resource reload with backend off
+ - Fix artifacts while using Optifine shaders
+ - Fix crash when trying to access biomes in a VirtualRenderWorld
+Technical/API
+ - Refactor instance renderer registration to separate client and server logic (thanks Pepper!)
+ - VirtualRenderWorlds now have a "biomeOffset" field which gets added when looking up biomes
+ - Added GlStateTracker which hooks into GlStateManager to track changes in buffer, vertex array, and program bindings
+
 0.5.0a:
 Fixes
  - Address crash experienced by some users while rendering any tile.

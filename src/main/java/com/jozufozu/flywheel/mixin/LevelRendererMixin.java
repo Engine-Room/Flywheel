@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
@@ -57,7 +58,11 @@ public class LevelRendererMixin {
 
 		RenderBuffers renderBuffers = this.renderBuffers;
 
+		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
+
 		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(level, type, stack, renderBuffers, camX, camY, camZ));
+
+		restoreState.restore();
 	}
 
 	@Inject(at = @At("TAIL"), method = "allChanged")
@@ -76,7 +81,9 @@ public class LevelRendererMixin {
 
 		Vec3 cameraPos = info.getPosition();
 
+		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
 		CrumblingRenderer.renderBreaking(new RenderLayerEvent(level, null, stack, null, cameraPos.x, cameraPos.y, cameraPos.z));
+		restoreState.restore();
 	}
 
 	// Instancing
