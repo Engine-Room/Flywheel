@@ -13,42 +13,26 @@ import com.jozufozu.flywheel.backend.source.parse.StructField;
 import com.jozufozu.flywheel.backend.source.parse.Variable;
 import com.jozufozu.flywheel.backend.source.span.Span;
 
-public class InstancingTemplateData implements TemplateData {
+public class InstancingTemplateData implements VertexData {
 
 	public final SourceFile file;
 	public final ShaderFunction vertexMain;
-	public final ShaderFunction fragmentMain;
-	public final Span interpolantName;
 	public final Span vertexName;
 	public final Span instanceName;
-	public final ShaderStruct interpolant;
 	public final ShaderStruct instance;
 
 	public InstancingTemplateData(SourceFile file) {
 		this.file = file;
 
 		Optional<ShaderFunction> vertexFunc = file.findFunction("vertex");
-		Optional<ShaderFunction> fragmentFunc = file.findFunction("fragment");
 
-		if (fragmentFunc.isEmpty()) {
-			ErrorReporter.generateMissingFunction(file, "fragment", "\"fragment\" function not defined");
-		}
 		if (vertexFunc.isEmpty()) {
 			ErrorReporter.generateFileError(file, "could not find \"vertex\" function");
-		}
-
-		if (fragmentFunc.isEmpty() || vertexFunc.isEmpty()) {
 			throw new ShaderLoadingException();
 		}
 
-		fragmentMain = fragmentFunc.get();
 		vertexMain = vertexFunc.get();
-		ImmutableList<Variable> parameters = fragmentMain.getParameters();
 		ImmutableList<Variable> vertexParams = vertexMain.getParameters();
-
-		if (parameters.size() != 1) {
-			ErrorReporter.generateSpanError(fragmentMain.getArgs(), "instancing requires fragment function to have 1 argument");
-		}
 
 		if (vertexParams.size() != 2) {
 			ErrorReporter.generateSpanError(vertexMain.getArgs(), "instancing requires vertex function to have 2 arguments");
@@ -68,34 +52,26 @@ public class InstancingTemplateData implements TemplateData {
 			throw new ShaderLoadingException();
 		}
 
-		interpolantName = parameters.get(0).type;
 		instanceName = vertexParams.get(1).type;
 
-		Optional<ShaderStruct> maybeInterpolant = file.findStruct(interpolantName);
 		Optional<ShaderStruct> maybeInstance = file.findStruct(instanceName);
-
-		if (maybeInterpolant.isEmpty()) {
-			ErrorReporter.generateMissingStruct(file, interpolantName, "struct not defined");
-		}
 
 		if (maybeInstance.isEmpty()) {
 			ErrorReporter.generateMissingStruct(file, instanceName, "struct not defined");
-		}
-
-		if (maybeInterpolant.isEmpty() || maybeInstance.isEmpty()) {
 			throw new ShaderLoadingException();
 		}
 
-		interpolant = maybeInterpolant.get();
 		instance = maybeInstance.get();
 	}
 
-	public void vertexFooter(StringBuilder template, ShaderCompiler shader) {
+	@Override
+	public String generateFooter(FileIndex shader, VertexType vertexType) {
 		ImmutableList<StructField> fields = instance.getFields();
-		VertexType vertexType = shader.vertexType;
 
 		int attributeBinding = vertexType.getLayout()
 				.getAttributeCount();
+
+		StringBuilder template = new StringBuilder();
 
 		for (StructField field : fields) {
 			template.append("layout(location = ")
@@ -109,9 +85,12 @@ public class InstancingTemplateData implements TemplateData {
 					.append(";\n");
 			attributeBinding += TypeHelper.getAttributeCount(field.type);
 		}
-		Template.prefixFields(template, interpolant, "out", "v2f_");
-
 		template.append(String.format("""
+						out vec4 v2f_color;
+						out vec2 v2f_texCoords;
+						out vec2 v2f_light;
+						out float v2f_diffuse;
+
 						void main() {
 						    Vertex v = FLWCreateVertex();
 						    %s i;
@@ -130,26 +109,26 @@ public class InstancingTemplateData implements TemplateData {
 						}
 						""",
 				instanceName,
-				Template.assignFields(instance, "i.", "a_i_")
+				assignFields(instance, "i.", "a_i_")
 		));
+
+		return template.toString();
 	}
 
-	public void fragmentFooter(StringBuilder template, FileIndex shader) {
-		Template.prefixFields(template, interpolant, "in", "v2f_");
+	public static StringBuilder assignFields(ShaderStruct struct, String prefix1, String prefix2) {
+		ImmutableList<StructField> fields = struct.getFields();
 
-		template.append(String.format("""
-				void main() {
-				    Fragment o;
-					o.color = v2f_color;
-					o.texCoords = v2f_texCoords;
-					o.light = v2f_light;
-					o.diffuse = v2f_diffuse;
+		StringBuilder builder = new StringBuilder();
 
-				    vec4 color = %s;
-				    FLWFinalizeColor(color);
-				}
-				""",
-				fragmentMain.call("o")
-		));
+		for (StructField field : fields) {
+			builder.append(prefix1)
+					.append(field.name)
+					.append(" = ")
+					.append(prefix2)
+					.append(field.name)
+					.append(";\n");
+		}
+
+		return builder;
 	}
 }

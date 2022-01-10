@@ -6,10 +6,8 @@ struct Fragment {
     vec2 light;
 };
 
-#if defined(FRAGMENT_SHADER)
 vec4 fragment(Fragment r) {
     vec4 tex = FLWBlockTexture(r.texCoords);
 
     return vec4(tex.rgb * FLWLight(r.light).rgb * r.diffuse, tex.a) * r.color;
 }
-#endif

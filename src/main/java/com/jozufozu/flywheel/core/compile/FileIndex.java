@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.core.compile;
 
 import com.jozufozu.flywheel.backend.source.SourceFile;
+import com.jozufozu.flywheel.backend.source.span.Span;
 
 public interface FileIndex {
 	/**
@@ -10,4 +11,10 @@ public interface FileIndex {
 	 * @return A file ID unique to the given sourceFile.
 	 */
 	int getFileID(SourceFile sourceFile);
+
+	SourceFile getFile(int fileID);
+
+	default Span getLineSpan(int fileId, int lineNo) {
+		return getFile(fileId).getLineSpanNoWhitespace(lineNo);
+	}
 }

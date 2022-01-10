@@ -28,7 +28,7 @@ public class PosTexNormalVertex implements VertexType {
 	}
 
 	@Override
-	public String writeShaderHeader() {
+	public String getShaderHeader() {
 		return """
 layout (location = 0) in vec3 _flw_v_pos;
 layout (location = 1) in vec2 _flw_v_texCoords;

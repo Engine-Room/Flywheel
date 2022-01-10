@@ -37,7 +37,7 @@ public class BlockVertex implements VertexType {
 	}
 
 	@Override
-	public String writeShaderHeader() {
+	public String getShaderHeader() {
 		return """
 layout (location = 0) in vec3 _flw_v_pos;
 layout (location = 1) in vec4 _flw_v_color;

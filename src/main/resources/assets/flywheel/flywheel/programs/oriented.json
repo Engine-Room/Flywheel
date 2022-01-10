@@ -1,5 +1,6 @@
 {
-  "source": "flywheel:oriented.vert",
+  "vertex": "flywheel:oriented.vert",
+  "fragment": "flywheel:block.frag",
   "states": [
     {
       "when": "flywheel:normal_debug",
