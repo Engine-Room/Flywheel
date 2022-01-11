@@ -38,10 +38,23 @@ public enum RenderLayer {
 	;
 
 	@Nullable
-	public static RenderLayer fromRenderType(RenderType type) {
+	public static RenderLayer getPrimaryLayer(RenderType type) {
 		if (type == RenderType.solid()) {
 			return SOLID;
 		} else if (type == RenderType.cutoutMipped()) {
+			return CUTOUT;
+		} else if (type == RenderType.translucent()) {
+			return TRANSPARENT;
+		}
+
+		return null;
+	}
+
+	@Nullable
+	public static RenderLayer getLayer(RenderType type) {
+		if (type == RenderType.solid()) {
+			return SOLID;
+		} else if (type == RenderType.cutoutMipped() || type == RenderType.cutout()) {
 			return CUTOUT;
 		} else if (type == RenderType.translucent()) {
 			return TRANSPARENT;

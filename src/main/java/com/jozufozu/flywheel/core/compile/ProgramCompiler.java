@@ -1,13 +1,12 @@
 package com.jozufozu.flywheel.core.compile;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.core.Templates;
+import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 
 /**
  * A caching compiler.
@@ -17,18 +16,20 @@ import com.jozufozu.flywheel.core.Templates;
  *     compiled programs, and will only compile a program if it is not already in the cache.
  * </p>
  */
-public class ProgramCompiler<P extends GlProgram> {
+public class ProgramCompiler<P extends GlProgram> extends Memoizer<ProgramContext, P> {
 
-	protected final Map<ProgramContext, P> cache = new HashMap<>();
+	private static final List<ProgramCompiler<?>> ALL_COMPILERS = new ArrayList<>();
 
 	private final GlProgram.Factory<P> factory;
-	private final Function<ProgramContext, GlShader> vertexCompiler;
-	private final Function<ProgramContext, GlShader> fragmentCompiler;
+	private final VertexCompiler vertexCompiler;
+	private final FragmentCompiler fragmentCompiler;
 
-	public ProgramCompiler(GlProgram.Factory<P> factory, Function<ProgramContext, GlShader> vertexCompiler, Function<ProgramContext, GlShader> fragmentCompiler) {
+	public ProgramCompiler(GlProgram.Factory<P> factory, VertexCompiler vertexCompiler, FragmentCompiler fragmentCompiler) {
 		this.factory = factory;
 		this.vertexCompiler = vertexCompiler;
 		this.fragmentCompiler = fragmentCompiler;
+
+		ALL_COMPILERS.add(this);
 	}
 
 	/**
@@ -40,7 +41,7 @@ public class ProgramCompiler<P extends GlProgram> {
 	 * @return A program compiler.
 	 */
 	public static <T extends VertexData, P extends GlProgram> ProgramCompiler<P> create(Template<T> template, GlProgram.Factory<P> factory, FileResolution header) {
-		return new ProgramCompiler<>(factory, ctx -> ShaderCompiler.compileVertex(ctx, template, header), ctx -> ShaderCompiler.compileFragment(ctx, Templates.FRAGMENT, header));
+		return new ProgramCompiler<>(factory, new VertexCompiler(template, header), new FragmentCompiler(Templates.FRAGMENT, header));
 	}
 
 	/**
@@ -50,22 +51,30 @@ public class ProgramCompiler<P extends GlProgram> {
 	 * @return A compiled GlProgram.
 	 */
 	public P getProgram(ProgramContext ctx) {
-		return cache.computeIfAbsent(ctx, this::compile);
+		return super.get(ctx);
 	}
 
 	public void invalidate() {
-		cache.values().forEach(P::delete);
-		cache.clear();
+		super.invalidate();
+		vertexCompiler.invalidate();
+		fragmentCompiler.invalidate();
 	}
 
-	private P compile(ProgramContext ctx) {
-
+	@Override
+	protected P _create(ProgramContext ctx) {
 		return new ProgramAssembler(ctx.spec().name)
-				.attachShader(vertexCompiler.apply(ctx))
-				.attachShader(fragmentCompiler.apply(ctx))
+				.attachShader(vertexCompiler.get(ctx))
+				.attachShader(fragmentCompiler.get(ctx))
 				.link()
-				.deleteLinkedShaders()
 				.build(this.factory);
 	}
 
+	@Override
+	protected void _destroy(P value) {
+		value.delete();
+	}
+
+	public static void invalidateAll(ReloadRenderersEvent event) {
+		ALL_COMPILERS.forEach(ProgramCompiler::invalidate);
+	}
 }

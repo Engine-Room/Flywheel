@@ -5,9 +5,12 @@ import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.StitchedSprite;
+import com.jozufozu.flywheel.core.compile.ProgramCompiler;
+import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.CrashReportCallables;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -28,6 +31,8 @@ public class FlywheelClient {
 		modEventBus.addListener(PartialModel::onModelBake);
 		modEventBus.addListener(StitchedSprite::onTextureStitchPre);
 		modEventBus.addListener(StitchedSprite::onTextureStitchPost);
+
+		MinecraftForge.EVENT_BUS.<ReloadRenderersEvent>addListener(ProgramCompiler::invalidateAll);
 
 		VanillaInstances.init();
 
