@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.core.compile;
 
-import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
@@ -41,18 +40,15 @@ public record ProgramContext(float alphaDiscard, VertexType vertexType, ProgramS
 		return new ProgramContext(getAlphaDiscard(layer), vertexType, spec, spec.getCurrentStateID());
 	}
 
-	/**
-	 * Gets the alpha discard threshold for the given render layer.
-	 *
-	 * @param layer The render layer to get the alpha discard threshold for.
-	 * @return The alpha discard threshold.
-	 */
-	public static float getAlphaDiscard(@Nullable RenderLayer layer) {
-		return layer == RenderLayer.CUTOUT ? 0.1f : 0f;
-	}
+	public ShaderConstants getShaderConstants() {
+		ShaderConstants shaderConstants = new ShaderConstants();
+		shaderConstants.defineAll(spec.getDefines(ctx));
 
-	public List<String> createDefines() {
-		return spec().getDefines(ctx());
+		if (alphaDiscard > 0) {
+			shaderConstants.define("ALPHA_DISCARD", alphaDiscard);
+		}
+
+		return shaderConstants;
 	}
 
 	@Override
@@ -67,5 +63,15 @@ public record ProgramContext(float alphaDiscard, VertexType vertexType, ProgramS
 	@Override
 	public int hashCode() {
 		return Objects.hash(alphaDiscard, vertexType, spec, ctx);
+	}
+
+	/**
+	 * Gets the alpha discard threshold for the given render layer.
+	 *
+	 * @param layer The render layer to get the alpha discard threshold for.
+	 * @return The alpha discard threshold.
+	 */
+	public static float getAlphaDiscard(@Nullable RenderLayer layer) {
+		return layer == RenderLayer.CUTOUT ? 0.1f : 0f;
 	}
 }

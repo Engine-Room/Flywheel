@@ -38,7 +38,7 @@ public class RenderLayerEvent extends Event {
 		this.camY = camY;
 		this.camZ = camZ;
 
-		this.layer = RenderLayer.fromRenderType(type);
+		this.layer = RenderLayer.getPrimaryLayer(type);
 	}
 
 	@Nullable
