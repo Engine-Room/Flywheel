@@ -6,21 +6,18 @@ import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.GameStateRegistry;
 import com.jozufozu.flywheel.backend.RenderLayer;
 import com.jozufozu.flywheel.core.shader.ProgramSpec;
+import com.jozufozu.flywheel.core.shader.StateSnapshot;
 
 import net.minecraft.resources.ResourceLocation;
 
 /**
  * Represents the entire context of a program's usage.
  *
- * @param alphaDiscard Alpha threshold below which pixels are discarded.
- * @param vertexType   The vertexType the program should be adapted for.
- * @param spec         The generic program name.
- * @param ctx          An ID representing the state at the time of usage.
  */
-public record ProgramContext(float alphaDiscard, VertexType vertexType, ProgramSpec spec, long ctx) {
-
+public final class ProgramContext {
 	/**
 	 * Creates a compilation context for the given program, vertex type and render layer.
 	 *
@@ -37,32 +34,7 @@ public record ProgramContext(float alphaDiscard, VertexType vertexType, ProgramS
 			throw new NullPointerException("Cannot compile shader because '" + programName + "' is not recognized.");
 		}
 
-		return new ProgramContext(getAlphaDiscard(layer), vertexType, spec, spec.getCurrentStateID());
-	}
-
-	public ShaderConstants getShaderConstants() {
-		ShaderConstants shaderConstants = new ShaderConstants();
-		shaderConstants.defineAll(spec.getDefines(ctx));
-
-		if (alphaDiscard > 0) {
-			shaderConstants.define("ALPHA_DISCARD", alphaDiscard);
-		}
-
-		return shaderConstants;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		ProgramContext that = (ProgramContext) o;
-		// override for instance equality on vertexType
-		return alphaDiscard == that.alphaDiscard && ctx == that.ctx && vertexType == that.vertexType && spec.equals(that.spec);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(alphaDiscard, vertexType, spec, ctx);
+		return new ProgramContext(spec, getAlphaDiscard(layer), vertexType, GameStateRegistry.takeSnapshot());
 	}
 
 	/**
@@ -73,5 +45,41 @@ public record ProgramContext(float alphaDiscard, VertexType vertexType, ProgramS
 	 */
 	public static float getAlphaDiscard(@Nullable RenderLayer layer) {
 		return layer == RenderLayer.CUTOUT ? 0.1f : 0f;
+	}
+
+	public final ProgramSpec spec;
+	public final float alphaDiscard;
+	public final VertexType vertexType;
+	public final StateSnapshot ctx;
+
+	/**
+	 * @param spec			The program to use.
+	 * @param alphaDiscard 	Alpha threshold below which pixels are discarded.
+	 * @param vertexType   	The vertexType the program should be adapted for.
+	 * @param ctx          	A snapshot of the game state.
+	 */
+	public ProgramContext(ProgramSpec spec, float alphaDiscard, VertexType vertexType, StateSnapshot ctx) {
+		this.spec = spec;
+		this.alphaDiscard = alphaDiscard;
+		this.vertexType = vertexType;
+		this.ctx = ctx;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		var that = (ProgramContext) o;
+		return spec == that.spec && vertexType == that.vertexType && ctx.equals(that.ctx) && Float.floatToIntBits(alphaDiscard) == Float.floatToIntBits(that.alphaDiscard);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(spec, alphaDiscard, vertexType, ctx);
+	}
+
+	@Override
+	public String toString() {
+		return "ProgramContext{" + "spec=" + spec + ", alphaDiscard=" + alphaDiscard + ", vertexType=" + vertexType + ", ctx=" + ctx + '}';
 	}
 }

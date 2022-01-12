@@ -62,9 +62,9 @@ public class ProgramCompiler<P extends GlProgram> extends Memoizer<ProgramContex
 
 	@Override
 	protected P _create(ProgramContext ctx) {
-		return new ProgramAssembler(ctx.spec().name)
-				.attachShader(vertexCompiler.get(ctx))
-				.attachShader(fragmentCompiler.get(ctx))
+		return new ProgramAssembler(ctx.spec.name)
+				.attachShader(vertexCompiler.get(new VertexCompiler.Context(ctx.spec.getVertexFile(), ctx.ctx, ctx.vertexType)))
+				.attachShader(fragmentCompiler.get(new FragmentCompiler.Context(ctx.spec.getFragmentFile(), ctx.ctx, ctx.alphaDiscard)))
 				.link()
 				.build(this.factory);
 	}
