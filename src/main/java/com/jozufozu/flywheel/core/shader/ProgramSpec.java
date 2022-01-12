@@ -1,10 +1,5 @@
 package com.jozufozu.flywheel.core.shader;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.source.Resolver;
 import com.jozufozu.flywheel.backend.source.SourceFile;
@@ -28,27 +23,20 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class ProgramSpec {
 
-	// TODO: Block model style inheritance?
 	public static final Codec<ProgramSpec> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			ResourceLocation.CODEC.fieldOf("vertex")
 					.forGetter(ProgramSpec::getSourceLoc),
 				ResourceLocation.CODEC.fieldOf("fragment")
-					.forGetter(ProgramSpec::getFragmentLoc),
-			ProgramState.CODEC.listOf()
-					.optionalFieldOf("states", Collections.emptyList())
-					.forGetter(ProgramSpec::getStates))
+					.forGetter(ProgramSpec::getFragmentLoc))
 			.apply(instance, ProgramSpec::new));
 
 	public ResourceLocation name;
 	public final FileResolution vertex;
 	public final FileResolution fragment;
 
-	public final ImmutableList<ProgramState> states;
-
-	public ProgramSpec(ResourceLocation vertex, ResourceLocation fragment, List<ProgramState> states) {
+	public ProgramSpec(ResourceLocation vertex, ResourceLocation fragment) {
 		this.vertex = Resolver.INSTANCE.get(vertex);
 		this.fragment = Resolver.INSTANCE.get(fragment);
-		this.states = ImmutableList.copyOf(states);
 	}
 
 	public void setName(ResourceLocation name) {
@@ -73,36 +61,8 @@ public class ProgramSpec {
 		return fragment.getFile();
 	}
 
-	public ImmutableList<ProgramState> getStates() {
-		return states;
-	}
-
-	/**
-	 * Calculate a unique ID representing the current game state.
-	 */
-    public long getCurrentStateID() {
-        long ctx = 0;
-        for (ProgramState state : states) {
-            if (state.context().isTrue()) {
-                ctx |= 1;
-            }
-            ctx <<= 1;
-        }
-        return ctx;
-    }
-
-	/**
-	 * Given the stateID, get a list of defines to include at the top of a compiling program.
-	 */
-	public List<String> getDefines(long stateID) {
-		List<String> defines = new ArrayList<>();
-
-		for (ProgramState state : states) {
-			if ((stateID & 1) == 1) {
-				defines.addAll(state.defines());
-			}
-			stateID >>= 1;
-		}
-		return defines;
+	@Override
+	public String toString() {
+		return name.toString();
 	}
 }

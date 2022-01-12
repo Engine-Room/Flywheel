@@ -1,12 +1,15 @@
 package com.jozufozu.flywheel.core.compile;
 
+import java.util.Objects;
+
+import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.backend.source.SourceFile;
-import com.jozufozu.flywheel.core.shader.ProgramSpec;
+import com.jozufozu.flywheel.core.shader.StateSnapshot;
 
-public class VertexCompiler extends Memoizer<ProgramContext, GlShader> {
+public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 	private final Template<? extends VertexData> template;
 	private final FileResolution header;
 
@@ -16,12 +19,12 @@ public class VertexCompiler extends Memoizer<ProgramContext, GlShader> {
 	}
 
 	@Override
-	protected GlShader _create(ProgramContext key) {
+	protected GlShader _create(Context key) {
 		StringBuilder finalSource = new StringBuilder();
 
 		finalSource.append(CompileUtil.generateHeader(template.getVersion(), ShaderType.VERTEX));
 
-		key.getShaderConstants().writeInto(finalSource);
+		key.ctx.getDefines().writeInto(finalSource);
 
 		finalSource.append("""
 				struct Vertex {
@@ -32,25 +35,47 @@ public class VertexCompiler extends Memoizer<ProgramContext, GlShader> {
 					vec3 normal;
 				};
 				""");
-		finalSource.append(key.vertexType()
-				.getShaderHeader());
+		finalSource.append(key.vertexType.getShaderHeader());
 
 		FileIndexImpl index = new FileIndexImpl();
 
 		header.getFile().generateFinalSource(index, finalSource);
-		ProgramSpec spec = key.spec();
-		SourceFile vertexFile = spec.getVertexFile();
 
-		vertexFile.generateFinalSource(index, finalSource);
+		key.file.generateFinalSource(index, finalSource);
 
-		VertexData appliedTemplate = template.apply(vertexFile);
-		finalSource.append(appliedTemplate.generateFooter(index, key.vertexType()));
+		VertexData appliedTemplate = template.apply(key.file);
+		finalSource.append(appliedTemplate.generateFooter(index, key.vertexType));
 
-		return new GlShader(spec.name, ShaderType.VERTEX, finalSource.toString());
+		return new GlShader(key.file.name, ShaderType.VERTEX, finalSource.toString());
 	}
 
 	@Override
 	protected void _destroy(GlShader value) {
 		value.delete();
+	}
+
+	public static class Context {
+		private final SourceFile file;
+		private final StateSnapshot ctx;
+		private final VertexType vertexType;
+
+		public Context(SourceFile file, StateSnapshot ctx, VertexType vertexType) {
+			this.file = file;
+			this.ctx = ctx;
+			this.vertexType = vertexType;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			var that = (Context) o;
+			return file == that.file && vertexType == that.vertexType && ctx.equals(that.ctx);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(file, ctx, vertexType);
+		}
 	}
 }

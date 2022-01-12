@@ -3,7 +3,9 @@ package com.jozufozu.flywheel.backend;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.jozufozu.flywheel.core.compile.ShaderConstants;
 import com.jozufozu.flywheel.core.shader.GameStateProvider;
+import com.jozufozu.flywheel.core.shader.StateSnapshot;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -31,5 +33,29 @@ public class GameStateRegistry {
 		}
 
 		registeredStateProviders.put(context.getID(), context);
+	}
+
+	public static StateSnapshot takeSnapshot() {
+		long ctx = 0;
+		for (GameStateProvider state : registeredStateProviders.values()) {
+			if (state.isTrue()) {
+				ctx |= 1;
+			}
+			ctx <<= 1;
+		}
+		return new StateSnapshot(ctx);
+	}
+
+	public static ShaderConstants getDefines(long ctx) {
+		long stateID = ctx;
+		ShaderConstants shaderConstants = new ShaderConstants();
+
+		for (GameStateProvider state : registeredStateProviders.values()) {
+			if ((stateID & 1) == 1) {
+				state.alterConstants(shaderConstants);
+			}
+			stateID >>= 1;
+		}
+		return shaderConstants;
 	}
 }
