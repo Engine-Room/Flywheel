@@ -198,7 +198,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		vao.bindAttributes(attributeBaseIndex, instanceFormat);
 
 		for (int i = 0; i < instanceFormat.getAttributeCount(); i++) {
-			Backend.getInstance().compat.instancedArrays.vertexAttribDivisor(attributeBaseIndex + i, 1);
+			Backend.compat.instancedArrays.vertexAttribDivisor(attributeBaseIndex + i, 1);
 		}
 	}
 }

@@ -37,7 +37,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 	public InstancedMaterialGroup(InstancingEngine<P> owner, RenderType type) {
 		this.owner = owner;
 		this.type = type;
-		if (Backend.getInstance().compat.onAMDWindows()) {
+		if (Backend.compat.onAMDWindows()) {
 			this.allocator = FallbackAllocator.INSTANCE;
 		} else {
 			this.allocator = new ModelPool(Formats.POS_TEX_NORMAL, 2048);

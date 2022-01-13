@@ -3,13 +3,13 @@ package com.jozufozu.flywheel.core.compile;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.backend.source.SourceFile;
-import com.jozufozu.flywheel.backend.source.error.ErrorReporter;
-import com.jozufozu.flywheel.backend.source.parse.ShaderFunction;
-import com.jozufozu.flywheel.backend.source.parse.ShaderStruct;
-import com.jozufozu.flywheel.backend.source.parse.StructField;
-import com.jozufozu.flywheel.backend.source.parse.Variable;
-import com.jozufozu.flywheel.backend.source.span.Span;
+import com.jozufozu.flywheel.core.source.SourceFile;
+import com.jozufozu.flywheel.core.source.error.ErrorReporter;
+import com.jozufozu.flywheel.core.source.parse.ShaderFunction;
+import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
+import com.jozufozu.flywheel.core.source.parse.StructField;
+import com.jozufozu.flywheel.core.source.parse.Variable;
+import com.jozufozu.flywheel.core.source.span.Span;
 
 public class FragmentTemplateData implements FragmentData {
 	public final SourceFile file;

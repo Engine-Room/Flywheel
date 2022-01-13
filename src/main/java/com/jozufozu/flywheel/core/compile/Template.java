@@ -1,11 +1,9 @@
 package com.jozufozu.flywheel.core.compile;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
-import com.jozufozu.flywheel.backend.source.SourceFile;
+import com.jozufozu.flywheel.core.source.SourceFile;
 
 /**
  * A class that generates glsl glue code given a SourceFile.
@@ -15,9 +13,7 @@ import com.jozufozu.flywheel.backend.source.SourceFile;
  *     metadata to generate shader code that OpenGL can use to call into our shader programs.
  * </p>
  */
-public class Template<T> {
-
-	private final Map<SourceFile, T> metadata = new HashMap<>();
+public class Template<T> extends Memoizer<SourceFile, T> {
 
 	private final Function<SourceFile, T> reader;
 	private final GLSLVersion glslVersion;
@@ -34,7 +30,7 @@ public class Template<T> {
 	 */
 	public T apply(SourceFile file) {
 		// lazily read files, cache results
-		return metadata.computeIfAbsent(file, reader);
+		return super.get(file);
 	}
 
 	/**
@@ -44,4 +40,13 @@ public class Template<T> {
 		return glslVersion;
 	}
 
+	@Override
+	protected T _create(SourceFile key) {
+		return reader.apply(key);
+	}
+
+	@Override
+	protected void _destroy(T value) {
+		// noop
+	}
 }

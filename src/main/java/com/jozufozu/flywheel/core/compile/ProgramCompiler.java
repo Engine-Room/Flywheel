@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.backend.source.FileResolution;
 import com.jozufozu.flywheel.core.Templates;
+import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 
 /**

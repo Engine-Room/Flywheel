@@ -1,19 +1,11 @@
 package com.jozufozu.flywheel.backend;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.annotation.Nullable;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GLCapabilities;
 
 import com.jozufozu.flywheel.api.FlywheelWorld;
-import com.jozufozu.flywheel.api.InstanceData;
-import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.config.FlwEngine;
@@ -27,89 +19,39 @@ import net.minecraft.world.level.LevelAccessor;
 public class Backend {
 	public static final Logger LOGGER = LogManager.getLogger(Backend.class);
 
-	protected static final Backend INSTANCE = new Backend();
-	public static Backend getInstance() {
-		return INSTANCE;
-	}
+	private static FlwEngine engine;
 
-	private FlwEngine engine;
+	public static GlCompat compat;
 
-	public GLCapabilities capabilities;
-	public GlCompat compat;
-
-	public final Loader loader;
-	private final Map<ResourceLocation, StructType<?>> materialRegistry = new HashMap<>();
-	private final Map<ResourceLocation, ProgramSpec> programSpecRegistry = new HashMap<>();
-
-	protected Backend() {
-		loader = new Loader(this);
-
-		OptifineHandler.init();
-	}
+	private static final Loader loader = new Loader();
 
 	/**
 	 * Get a string describing the Flywheel backend. When there are eventually multiple backends
 	 * (Meshlet, MDI, GL31 Draw Instanced are planned), this will name which one is in use.
 	 */
-	public String getBackendDescriptor() {
+	public static String getBackendDescriptor() {
 		return engine == null ? "" : engine.getProperName();
 	}
 
-	public FlwEngine getEngine() {
+	public static FlwEngine getEngine() {
 		return engine;
 	}
 
-	/**
-	 * Register a shader program.
-	 */
-	public ProgramSpec register(ProgramSpec spec) {
-		ResourceLocation name = spec.name;
-		if (programSpecRegistry.containsKey(name)) {
-			throw new IllegalStateException("Program spec '" + name + "' already registered.");
-		}
-		programSpecRegistry.put(name, spec);
-		return spec;
-	}
-
-	/**
-	 * Register an instancing material.
-	 */
-	public <D extends InstanceData> StructType<D> register(ResourceLocation name, StructType<D> spec) {
-		if (materialRegistry.containsKey(name)) {
-			throw new IllegalStateException("Material spec '" + name + "' already registered.");
-		}
-		materialRegistry.put(name, spec);
-
-		LOGGER.debug("registered material '" + name + "' with instance size " + spec.getLayout().getStride());
-
-		return spec;
-	}
-
 	@Nullable
-	public ProgramSpec getSpec(ResourceLocation name) {
-		return programSpecRegistry.get(name);
+	public static ProgramSpec getSpec(ResourceLocation name) {
+		return loader.get(name);
 	}
 
-	public void refresh() {
+	public static void refresh() {
 		OptifineHandler.refresh();
 
-		capabilities = GL.createCapabilities();
-
-		compat = new GlCompat(capabilities);
+		compat = new GlCompat();
 
 		engine = chooseEngine(compat);
 	}
 
-	public Collection<StructType<?>> allMaterials() {
-		return materialRegistry.values();
-	}
-
-	public Collection<ProgramSpec> allPrograms() {
-		return programSpecRegistry.values();
-	}
-
 	public static boolean isOn() {
-		return getInstance().engine != FlwEngine.OFF;
+		return engine != FlwEngine.OFF;
 	}
 
 	public static boolean canUseInstancing(@Nullable Level world) {
@@ -137,18 +79,6 @@ public class Backend {
 		RenderWork.enqueue(Minecraft.getInstance().levelRenderer::allChanged);
 	}
 
-	/**
-	 * INTERNAL USE ONLY
-	 */
-	void _clearContexts() {
-		GameStateRegistry.clear();
-		programSpecRegistry.clear();
-		materialRegistry.clear();
-	}
-
-	public static void init() {
-	}
-
 	private static FlwEngine chooseEngine(GlCompat compat) {
 		FlwEngine preferredChoice = FlwConfig.get()
 				.getEngine();
@@ -161,5 +91,13 @@ public class Backend {
 		};
 
 		return canUseEngine ? preferredChoice : FlwEngine.OFF;
+	}
+
+	public static void init() {
+		// noop
+	}
+
+	private Backend() {
+		throw new UnsupportedOperationException("Backend is a static class!");
 	}
 }

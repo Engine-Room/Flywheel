@@ -6,8 +6,8 @@ import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.GameStateRegistry;
 import com.jozufozu.flywheel.backend.RenderLayer;
+import com.jozufozu.flywheel.core.GameStateRegistry;
 import com.jozufozu.flywheel.core.shader.ProgramSpec;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
 
@@ -15,7 +15,6 @@ import net.minecraft.resources.ResourceLocation;
 
 /**
  * Represents the entire context of a program's usage.
- *
  */
 public final class ProgramContext {
 	/**
@@ -27,8 +26,7 @@ public final class ProgramContext {
 	 * @return A compilation context.
 	 */
 	public static ProgramContext create(ResourceLocation programName, VertexType vertexType, @Nullable RenderLayer layer) {
-		ProgramSpec spec = Backend.getInstance()
-				.getSpec(programName);
+		ProgramSpec spec = Backend.getSpec(programName);
 
 		if (spec == null) {
 			throw new NullPointerException("Cannot compile shader because '" + programName + "' is not recognized.");

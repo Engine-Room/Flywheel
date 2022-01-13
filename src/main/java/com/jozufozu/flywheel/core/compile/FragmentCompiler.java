@@ -4,9 +4,11 @@ import java.util.Objects;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
-import com.jozufozu.flywheel.backend.source.FileResolution;
-import com.jozufozu.flywheel.backend.source.SourceFile;
+import com.jozufozu.flywheel.core.shader.ShaderConstants;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
+import com.jozufozu.flywheel.core.source.FileIndexImpl;
+import com.jozufozu.flywheel.core.source.FileResolution;
+import com.jozufozu.flywheel.core.source.SourceFile;
 
 public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShader> {
 	private final FileResolution header;
@@ -43,9 +45,23 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 		value.delete();
 	}
 
+	/**
+	 * Represents the conditions under which a shader is compiled.
+	 */
 	public static final class Context {
+		/**
+		 * The file to compile.
+		 */
 		private final SourceFile file;
+
+		/**
+		 * The shader constants to apply.
+		 */
 		private final StateSnapshot ctx;
+
+		/**
+		 * Alpha threshold below which fragments are discarded.
+		 */
 		private final float alphaDiscard;
 
 		public Context(SourceFile file, StateSnapshot ctx, float alphaDiscard) {

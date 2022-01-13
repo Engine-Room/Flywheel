@@ -24,8 +24,7 @@ public class ForgeEvents {
 
 			ArrayList<String> right = event.getRight();
 
-			String text = "Flywheel: " + Backend.getInstance()
-					.getBackendDescriptor();
+			String text = "Flywheel: " + Backend.getBackendDescriptor();
 			if (right.size() < 10) {
 				right.add("");
 				right.add(text);
