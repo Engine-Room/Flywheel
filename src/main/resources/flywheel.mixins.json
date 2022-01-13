@@ -2,7 +2,6 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.jozufozu.flywheel.mixin",
-  "plugin": "com.jozufozu.flywheel.mixin.FlywheelMixinPlugin",
   "compatibilityLevel": "JAVA_17",
   "client": [
     "BlockEntityTypeMixin",
@@ -24,7 +23,6 @@
     "RenderTypeMixin",
     "atlas.AtlasDataMixin",
     "atlas.SheetDataAccessor",
-    "compat.sodium.LevelRendererMixin",
     "light.LightUpdateMixin",
     "light.NetworkLightUpdateMixin",
     "matrix.Matrix3fMixin",
