@@ -71,7 +71,7 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 		}
 
 		public ShaderConstants getShaderConstants() {
-			ShaderConstants shaderConstants = ctx.getDefines();
+			ShaderConstants shaderConstants = ctx.getShaderConstants();
 
 			if (alphaDiscard > 0) {
 				shaderConstants.define("ALPHA_DISCARD", alphaDiscard);
