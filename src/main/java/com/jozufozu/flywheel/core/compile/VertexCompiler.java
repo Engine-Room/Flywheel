@@ -5,9 +5,10 @@ import java.util.Objects;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
-import com.jozufozu.flywheel.backend.source.FileResolution;
-import com.jozufozu.flywheel.backend.source.SourceFile;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
+import com.jozufozu.flywheel.core.source.FileIndexImpl;
+import com.jozufozu.flywheel.core.source.FileResolution;
+import com.jozufozu.flywheel.core.source.SourceFile;
 
 public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 	private final Template<? extends VertexData> template;
@@ -55,8 +56,19 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 	}
 
 	public static class Context {
+		/**
+		 * The file to compile.
+		 */
 		private final SourceFile file;
+
+		/**
+		 * The shader constants to apply.
+		 */
 		private final StateSnapshot ctx;
+
+		/**
+		 * The vertex type to use.
+		 */
 		private final VertexType vertexType;
 
 		public Context(SourceFile file, StateSnapshot ctx, VertexType vertexType) {

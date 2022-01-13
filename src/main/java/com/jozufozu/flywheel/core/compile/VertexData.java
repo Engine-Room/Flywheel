@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.core.compile;
 
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.core.source.FileIndex;
 
 public interface VertexData {
 	/**

@@ -4,11 +4,12 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.source.ShaderLoadingException;
-import com.jozufozu.flywheel.backend.source.SourceFile;
-import com.jozufozu.flywheel.backend.source.error.ErrorReporter;
-import com.jozufozu.flywheel.backend.source.parse.ShaderFunction;
-import com.jozufozu.flywheel.backend.source.parse.Variable;
+import com.jozufozu.flywheel.core.source.FileIndex;
+import com.jozufozu.flywheel.core.source.ShaderLoadingException;
+import com.jozufozu.flywheel.core.source.SourceFile;
+import com.jozufozu.flywheel.core.source.error.ErrorReporter;
+import com.jozufozu.flywheel.core.source.parse.ShaderFunction;
+import com.jozufozu.flywheel.core.source.parse.Variable;
 
 public class OneShotTemplateData implements VertexData {
 

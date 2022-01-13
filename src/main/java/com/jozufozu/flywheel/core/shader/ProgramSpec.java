@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.core.shader;
 
-import com.jozufozu.flywheel.backend.source.FileResolution;
-import com.jozufozu.flywheel.backend.source.Resolver;
-import com.jozufozu.flywheel.backend.source.SourceFile;
+import com.jozufozu.flywheel.core.source.FileResolution;
+import com.jozufozu.flywheel.core.source.Resolver;
+import com.jozufozu.flywheel.core.source.SourceFile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 

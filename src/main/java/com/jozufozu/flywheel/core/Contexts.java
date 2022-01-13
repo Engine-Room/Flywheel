@@ -1,13 +1,12 @@
 package com.jozufozu.flywheel.core;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.backend.GameStateRegistry;
-import com.jozufozu.flywheel.backend.source.FileResolution;
-import com.jozufozu.flywheel.backend.source.Resolver;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
 import com.jozufozu.flywheel.core.shader.NormalDebugStateProvider;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
+import com.jozufozu.flywheel.core.source.FileResolution;
+import com.jozufozu.flywheel.core.source.Resolver;
 import com.jozufozu.flywheel.event.GatherContextEvent;
 import com.jozufozu.flywheel.util.ResourceUtil;
 

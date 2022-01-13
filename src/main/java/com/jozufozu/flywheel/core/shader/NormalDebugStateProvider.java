@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.core.shader;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.core.compile.ShaderConstants;
 
 import net.minecraft.resources.ResourceLocation;
 

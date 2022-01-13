@@ -1,15 +1,20 @@
 package com.jozufozu.flywheel.backend;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
-import com.jozufozu.flywheel.backend.source.Resolver;
-import com.jozufozu.flywheel.backend.source.ShaderSources;
+import com.jozufozu.flywheel.core.GameStateRegistry;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.core.shader.ProgramSpec;
+import com.jozufozu.flywheel.core.source.Resolver;
+import com.jozufozu.flywheel.core.source.ShaderSources;
 import com.jozufozu.flywheel.event.GatherContextEvent;
 import com.jozufozu.flywheel.util.ResourceUtil;
 import com.jozufozu.flywheel.util.StringUtil;
@@ -37,13 +42,11 @@ public class Loader implements ResourceManagerReloadListener {
 	public static final String PROGRAM_DIR = "flywheel/programs/";
 	private static final Gson GSON = new GsonBuilder().create();
 
-	private final Backend backend;
+	private final Map<ResourceLocation, ProgramSpec> programSpecRegistry = new HashMap<>();
 
 	private boolean firstLoad = true;
 
-	public Loader(Backend backend) {
-		this.backend = backend;
-
+	Loader() {
 		// Can be null when running datagenerators due to the unfortunate time we call this
 		Minecraft minecraft = Minecraft.getInstance();
 		if (minecraft != null) {
@@ -54,15 +57,20 @@ public class Loader implements ResourceManagerReloadListener {
 		}
 	}
 
+	@Nullable
+	public ProgramSpec get(ResourceLocation name) {
+		return programSpecRegistry.get(name);
+	}
+
 	@Override
 	public void onResourceManagerReload(ResourceManager manager) {
-		backend.refresh();
+		Backend.refresh();
 
-		backend._clearContexts();
+		GameStateRegistry._clear();
 
 		Resolver.INSTANCE.invalidate();
 		ModLoader.get()
-				.postEvent(new GatherContextEvent(backend, firstLoad));
+				.postEvent(new GatherContextEvent(firstLoad));
 
 		ShaderSources sources = new ShaderSources(manager);
 
@@ -101,10 +109,21 @@ public class Loader implements ResourceManagerReloadListener {
 
 				spec.setName(specName);
 
-				backend.register(spec);
+				register(spec);
 			} catch (Exception e) {
 				Backend.LOGGER.error(e);
 			}
 		}
+	}
+
+	/**
+	 * Register a shader program.
+	 */
+	private void register(ProgramSpec spec) {
+		ResourceLocation name = spec.name;
+		if (programSpecRegistry.containsKey(name)) {
+			throw new IllegalStateException("Program spec '" + name + "' already registered.");
+		}
+		programSpecRegistry.put(name, spec);
 	}
 }
