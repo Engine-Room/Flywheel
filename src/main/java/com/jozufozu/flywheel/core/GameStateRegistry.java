@@ -1,61 +1,58 @@
 package com.jozufozu.flywheel.core;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
 
 import com.jozufozu.flywheel.core.shader.GameStateProvider;
 import com.jozufozu.flywheel.core.shader.ShaderConstants;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
 
-import net.minecraft.resources.ResourceLocation;
-
 public class GameStateRegistry {
 
-	private static final Map<ResourceLocation, GameStateProvider> registeredStateProviders = new HashMap<>();
+	private static final List<GameStateProvider> PROVIDERS = new ArrayList<>();
 
-	public static void _clear() {
-		registeredStateProviders.clear();
+	/**
+	 * Registers a game state provider.
+	 * @param provider The provider to register.
+	 */
+	public static void register(GameStateProvider provider) {
+		PROVIDERS.add(provider);
 	}
 
-	public static GameStateProvider getStateProvider(ResourceLocation location) {
-		GameStateProvider out = registeredStateProviders.get(location);
-
-		if (out == null) {
-			throw new IllegalArgumentException("State provider '" + location + "' does not exist.");
-		}
-
-		return out;
-	}
-
-	public static void register(GameStateProvider context) {
-		if (registeredStateProviders.containsKey(context.getID())) {
-			throw new IllegalStateException("Duplicate game state provider: " + context.getID());
-		}
-
-		registeredStateProviders.put(context.getID(), context);
-	}
-
+	/**
+	 * Takes a snapshot of the current game state, storing it in a bit set.
+	 * @return An object that represents the current game state.
+	 */
 	public static StateSnapshot takeSnapshot() {
-		long ctx = 0;
-		for (GameStateProvider state : registeredStateProviders.values()) {
-			if (state.isTrue()) {
-				ctx |= 1;
+		BitSet bitSet = new BitSet(PROVIDERS.size());
+
+		for (int i = 0, listSize = PROVIDERS.size(); i < listSize; i++) {
+			if (PROVIDERS.get(i).isTrue()) {
+				bitSet.set(i);
 			}
-			ctx <<= 1;
 		}
-		return new StateSnapshot(ctx);
+		return new StateSnapshot(bitSet);
 	}
 
-	public static ShaderConstants getDefines(long ctx) {
-		long stateID = ctx;
+	/**
+	 * Based on the given snapshot, gathers shader constants to be injected during shader compilation.
+	 * @param snapshot The snapshot to use.
+	 * @return A list of shader constants.
+	 */
+	public static ShaderConstants getShaderConstants(StateSnapshot snapshot) {
+		BitSet ctx = snapshot.ctx();
 		ShaderConstants shaderConstants = new ShaderConstants();
 
-		for (GameStateProvider state : registeredStateProviders.values()) {
-			if ((stateID & 1) == 1) {
-				state.alterConstants(shaderConstants);
+		for (int i = 0, listSize = PROVIDERS.size(); i < listSize; i++) {
+			if (ctx.get(i)) {
+				PROVIDERS.get(i).alterConstants(shaderConstants);
 			}
-			stateID >>= 1;
 		}
 		return shaderConstants;
+	}
+
+	public static void _clear() {
+		PROVIDERS.clear();
 	}
 }

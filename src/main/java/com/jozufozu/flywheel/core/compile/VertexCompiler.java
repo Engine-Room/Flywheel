@@ -25,7 +25,7 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 
 		finalSource.append(CompileUtil.generateHeader(template.getVersion(), ShaderType.VERTEX));
 
-		key.ctx.getDefines().writeInto(finalSource);
+		key.ctx.getShaderConstants().writeInto(finalSource);
 
 		finalSource.append("""
 				struct Vertex {
