@@ -3,7 +3,9 @@ package com.jozufozu.flywheel.mixin;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -30,7 +32,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-@Mixin(LevelRenderer.class)
+@Mixin(value = LevelRenderer.class, priority = 1001) // Higher priority to go after sodium
 public class LevelRendererMixin {
 
 	@Shadow
@@ -45,14 +47,33 @@ public class LevelRendererMixin {
 		FlywheelEvents.BEGIN_FRAME.invoker().handleEvent(new BeginFrameEvent(level, camera, frustum));
 	}
 
+	@Unique
+	private boolean flywheel$LayerRendered;
+
 	/**
-	 * JUSTIFICATION: This method is called once per layer per frame. It allows us to perform
-	 * layer-correct custom rendering. RenderWorldLast is not refined enough for rendering world objects.
-	 * This should probably be a forge event.
+	 * This only gets injected if renderChunkLayer is not Overwritten
 	 */
+	@Group(name = "flywheel$renderLayer", min = 1, max = 2)
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ShaderInstance;clear()V"), method = "renderChunkLayer")
 	private void renderLayer(RenderType type, PoseStack stack, double camX, double camY, double camZ, Matrix4f p_172999_, CallbackInfo ci) {
+		flywheel$renderLayer(type, stack, camX, camY, camZ);
+		flywheel$LayerRendered = true;
+	}
 
+	/**
+	 * This always gets injected.
+	 */
+	@Group(name = "flywheel$renderLayer")
+	@Inject(at = @At("TAIL"), method = "renderChunkLayer")
+	private void renderLayerSodium(RenderType type, PoseStack stack, double camX, double camY, double camZ, Matrix4f p_172999_, CallbackInfo ci) {
+		if (!flywheel$LayerRendered) {
+			flywheel$renderLayer(type, stack, camX, camY, camZ);
+		}
+		flywheel$LayerRendered = false;
+	}
+
+	@Unique
+	private void flywheel$renderLayer(RenderType type, PoseStack stack, double camX, double camY, double camZ) {
 		RenderBuffers renderBuffers = this.renderBuffers;
 
 		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
