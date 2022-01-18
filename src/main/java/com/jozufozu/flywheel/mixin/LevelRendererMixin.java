@@ -16,6 +16,7 @@ import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
@@ -73,6 +74,7 @@ public class LevelRendererMixin {
 			flywheel$renderLayer(type, stack, camX, camY, camZ);
 		}
 		flywheel$LayerRendered = false;
+		BufferUploader.reset();
 	}
 
 	@Unique
