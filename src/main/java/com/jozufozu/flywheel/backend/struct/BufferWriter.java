@@ -33,6 +33,6 @@ public abstract class BufferWriter<S> implements StructWriter<S> {
 
 	@Override
 	public void seek(int pos) {
-			backingBuffer.position(pos * stride);
+		backingBuffer.position(pos * stride);
 	}
 }

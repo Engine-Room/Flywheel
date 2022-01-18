@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.system.MemoryStack;
@@ -23,10 +24,10 @@ public class GlCompat {
 	public final BufferStorage bufferStorage;
 	public final boolean amd;
 
-	public GlCompat(GLCapabilities caps) {
+	public GlCompat() {
+		GLCapabilities caps = GL.createCapabilities();
 		instancedArrays = getLatest(InstancedArrays.class, caps);
 		bufferStorage = getLatest(BufferStorage.class, caps);
-
 
 		if (Util.getPlatform() == Util.OS.WINDOWS) {
 			String vendor = GL20C.glGetString(GL20C.GL_VENDOR);

@@ -46,7 +46,7 @@ public class PersistentGlBuffer extends GlBuffer implements Mappable {
 
 		fence.clear();
 
-		Backend.getInstance().compat.bufferStorage.bufferStorage(type, size, flags);
+		Backend.compat.bufferStorage.bufferStorage(type, size, flags);
 
 		ByteBuffer byteBuffer = GL30.glMapBufferRange(type.glEnum, 0, size, flags);
 

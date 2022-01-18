@@ -1,16 +1,12 @@
 package com.jozufozu.flywheel.core;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.GameStateRegistry;
-import com.jozufozu.flywheel.backend.pipeline.InstancingTemplate;
-import com.jozufozu.flywheel.backend.pipeline.ShaderPipeline;
-import com.jozufozu.flywheel.backend.pipeline.WorldShaderPipeline;
-import com.jozufozu.flywheel.backend.source.FileResolution;
-import com.jozufozu.flywheel.backend.source.Resolver;
+import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
+import com.jozufozu.flywheel.core.shader.NormalDebugStateProvider;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
-import com.jozufozu.flywheel.core.shader.gamestate.NormalDebugStateProvider;
+import com.jozufozu.flywheel.core.source.FileResolution;
+import com.jozufozu.flywheel.core.source.Resolver;
 import com.jozufozu.flywheel.event.GatherContextEvent;
 import com.jozufozu.flywheel.util.ResourceUtil;
 
@@ -21,22 +17,17 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class Contexts {
 
-	public static WorldContext<WorldProgram> WORLD;
-	public static WorldContext<CrumblingProgram> CRUMBLING;
+	public static ProgramCompiler<WorldProgram> WORLD;
+	public static ProgramCompiler<CrumblingProgram> CRUMBLING;
 
 	public static void flwInit(GatherContextEvent event) {
-		Backend backend = event.getBackend();
-
 		GameStateRegistry.register(NormalDebugStateProvider.INSTANCE);
 
-        FileResolution crumblingBuiltins = Resolver.INSTANCE.findShader(ResourceUtil.subPath(Names.CRUMBLING, ".glsl"));
-        FileResolution worldBuiltins = Resolver.INSTANCE.findShader(ResourceUtil.subPath(Names.WORLD, ".glsl"));
+		FileResolution worldBuiltins = Resolver.INSTANCE.get(ResourceUtil.subPath(Names.WORLD, ".glsl"));
+		FileResolution crumblingBuiltins = Resolver.INSTANCE.get(ResourceUtil.subPath(Names.CRUMBLING, ".glsl"));
 
-		ShaderPipeline<CrumblingProgram> crumblingPipeline = new WorldShaderPipeline<>(CrumblingProgram::new, InstancingTemplate.INSTANCE, crumblingBuiltins);
-		ShaderPipeline<WorldProgram> worldPipeline = new WorldShaderPipeline<>(WorldProgram::new, InstancingTemplate.INSTANCE, worldBuiltins);
-
-		CRUMBLING = backend.register(WorldContext.builder(backend, Names.CRUMBLING).build(crumblingPipeline));
-		WORLD = backend.register(WorldContext.builder(backend, Names.WORLD).build(worldPipeline));
+		WORLD = ProgramCompiler.create(Templates.INSTANCING, WorldProgram::new, worldBuiltins);
+		CRUMBLING = ProgramCompiler.create(Templates.INSTANCING, CrumblingProgram::new, crumblingBuiltins);
 	}
 
 	public static class Names {
