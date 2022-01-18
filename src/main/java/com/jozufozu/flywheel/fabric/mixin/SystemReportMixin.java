@@ -14,6 +14,6 @@ public class SystemReportMixin {
 	@Inject(method = "<init>()V", at = @At("TAIL"))
 	private void onTailInit(CallbackInfo ci) {
 		SystemReport self = (SystemReport) (Object) this;
-		self.setDetail("Flywheel Backend", () -> Backend.getInstance().getBackendDescriptor());
+		self.setDetail("Flywheel Backend", Backend::getBackendDescriptor);
 	}
 }

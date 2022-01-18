@@ -151,11 +151,17 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 			final StructWriter<D> writer = instancedType.getWriter(mapped);
 
+			boolean sequential = true;
 			for (int i = 0; i < size; i++) {
 				final D element = data.get(i);
 				if (element.checkDirtyAndClear()) {
-					writer.seek(i);
+					if (!sequential) {
+						writer.seek(i);
+					}
 					writer.write(element);
+					sequential = true;
+				} else {
+					sequential = false;
 				}
 			}
 		} catch (Exception e) {
@@ -192,7 +198,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		vao.bindAttributes(attributeBaseIndex, instanceFormat);
 
 		for (int i = 0; i < instanceFormat.getAttributeCount(); i++) {
-			Backend.getInstance().compat.instancedArrays.vertexAttribDivisor(attributeBaseIndex + i, 1);
+			Backend.compat.instancedArrays.vertexAttribDivisor(attributeBaseIndex + i, 1);
 		}
 	}
 }

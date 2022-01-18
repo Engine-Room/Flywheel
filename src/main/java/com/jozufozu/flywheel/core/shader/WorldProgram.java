@@ -4,7 +4,7 @@ import static org.lwjgl.opengl.GL20.glUniform1f;
 import static org.lwjgl.opengl.GL20.glUniform2f;
 import static org.lwjgl.opengl.GL20.glUniform3f;
 
-import com.jozufozu.flywheel.core.shader.extension.WorldFog;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.math.Matrix4f;
@@ -12,11 +12,12 @@ import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 
-public class WorldProgram extends ExtensibleGlProgram {
+public class WorldProgram extends GlProgram {
 	protected final int uTime = getUniformLocation("uTime");
 	protected final int uViewProjection = getUniformLocation("uViewProjection");
 	protected final int uCameraPos = getUniformLocation("uCameraPos");
 	protected final int uWindowSize = getUniformLocation("uWindowSize");
+	private final WorldFog fog;
 
 	protected int uBlockAtlas;
 	protected int uLightMap;
@@ -24,7 +25,7 @@ public class WorldProgram extends ExtensibleGlProgram {
 	public WorldProgram(ResourceLocation name, int handle) {
 		super(name, handle);
 
-		this.extensions.add(new WorldFog(this));
+		fog = new WorldFog(this);
 
 		super.bind();
 		registerSamplers();
@@ -67,7 +68,7 @@ public class WorldProgram extends ExtensibleGlProgram {
 	@Override
 	public void bind() {
 		super.bind();
-
+		fog.bind();
 		uploadWindowSize();
 		uploadTime(AnimationTickHolder.getRenderTime());
 	}

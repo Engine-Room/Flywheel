@@ -37,6 +37,27 @@ public class BlockVertex implements VertexType {
 		return new BlockVertexListUnsafe(buffer, vertexCount);
 	}
 
+	@Override
+	public String getShaderHeader() {
+		return """
+layout (location = 0) in vec3 _flw_v_pos;
+layout (location = 1) in vec4 _flw_v_color;
+layout (location = 2) in vec2 _flw_v_texCoords;
+layout (location = 3) in vec2 _flw_v_light;
+layout (location = 4) in vec3 _flw_v_normal;
+
+Vertex FLWCreateVertex() {
+	Vertex v;
+	v.pos = _flw_v_pos;
+	v.color = _flw_v_color;
+	v.texCoords = _flw_v_texCoords;
+	v.light = _flw_v_light;
+	v.normal = _flw_v_normal;
+	return v;
+}
+				""";
+	}
+
 	public VertexList createReader(BufferBuilder bufferBuilder) {
 		// TODO: try to avoid virtual model rendering
 		Pair<BufferBuilder.DrawState, ByteBuffer> pair = bufferBuilder.popNextBuffer();

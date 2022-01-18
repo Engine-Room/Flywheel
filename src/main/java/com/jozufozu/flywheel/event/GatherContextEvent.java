@@ -1,20 +1,13 @@
 package com.jozufozu.flywheel.event;
 
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.fabric.event.EventContext;
 
 public class GatherContextEvent extends EventContext {
 
-	private final Backend backend;
 	private final boolean firstLoad;
 
-	public GatherContextEvent(Backend backend, boolean firstLoad) {
-		this.backend = backend;
+	public GatherContextEvent(boolean firstLoad) {
 		this.firstLoad = firstLoad;
-	}
-
-	public Backend getBackend() {
-		return backend;
 	}
 
 	/**

@@ -31,6 +31,12 @@ public class ModelPool implements ModelAllocator {
 	private boolean dirty;
 	private boolean anyToRemove;
 
+	/**
+	 * Create a new model pool.
+	 *
+	 * @param vertexType The vertex type of the models that will be stored in the pool.
+	 * @param initialSize The initial size of the pool, in vertices.
+	 */
 	public ModelPool(VertexType vertexType, int initialSize) {
 		this.vertexType = vertexType;
 		int stride = vertexType.getStride();
@@ -40,7 +46,6 @@ public class ModelPool implements ModelAllocator {
 		vbo.bind();
 		vbo.ensureCapacity((long) stride * initialSize);
 		vbo.setGrowthMargin(stride * 64);
-		vbo.unbind();
 	}
 
 	/**

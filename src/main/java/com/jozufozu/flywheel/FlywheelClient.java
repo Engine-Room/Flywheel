@@ -6,9 +6,9 @@ import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.Contexts;
-import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.QuadConverter;
+import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.event.EntityWorldHandler;
 import com.jozufozu.flywheel.event.ForgeEvents;
@@ -31,9 +31,10 @@ public class FlywheelClient implements ClientModInitializer {
 		Backend.init();
 
 		FlywheelEvents.GATHER_CONTEXT.register(Contexts::flwInit);
-		FlywheelEvents.GATHER_CONTEXT.register(Materials::flwInit);
 		ModelLoadingRegistry.INSTANCE.registerModelProvider(PartialModel::onModelRegistry);
 		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(PartialModel.ResourceReloadListener.INSTANCE);
+
+		FlywheelEvents.RELOAD_RENDERERS.register(ProgramCompiler::invalidateAll);
 
 		VanillaInstances.init();
 

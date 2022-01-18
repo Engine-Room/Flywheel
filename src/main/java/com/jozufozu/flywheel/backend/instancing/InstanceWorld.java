@@ -39,8 +39,7 @@ public class InstanceWorld {
 		this.taskEngine = new ParallelTaskEngine("Flywheel " + world.dimension().location());
 		this.taskEngine.startWorkers();
 
-		FlwEngine engine = Backend.getInstance()
-				.getEngine();
+		FlwEngine engine = Backend.getEngine();
 
 		switch (engine) {
 		case INSTANCING -> {

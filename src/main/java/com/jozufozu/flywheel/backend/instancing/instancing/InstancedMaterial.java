@@ -1,20 +1,17 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
-import java.util.concurrent.ExecutionException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.Material;
 import com.jozufozu.flywheel.api.struct.Instanced;
-import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.RenderWork;
-import com.jozufozu.flywheel.backend.model.ImmediateAllocator;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
-import com.jozufozu.flywheel.backend.model.ModelPool;
-import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.model.Model;
 
 /**
@@ -23,24 +20,14 @@ import com.jozufozu.flywheel.core.model.Model;
  */
 public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 
-	final ModelAllocator allocator;
-	protected final Cache<Object, GPUInstancer<D>> models;
+	protected final ModelAllocator allocator;
+	protected final Map<Object, GPUInstancer<D>> models = new HashMap<>();
 	protected final Instanced<D> type;
+	protected final List<GPUInstancer<D>> uninitialized = new ArrayList<>();
 
-	public InstancedMaterial(Instanced<D> type) {
+	public InstancedMaterial(Instanced<D> type, ModelAllocator allocator) {
 		this.type = type;
-
-		if (Backend.getInstance().compat.onAMDWindows()) {
-			allocator = ImmediateAllocator.INSTANCE;
-		} else {
-			allocator = new ModelPool(Formats.POS_TEX_NORMAL, 64);
-		}
-		this.models = CacheBuilder.newBuilder()
-				.removalListener(notification -> {
-					GPUInstancer<?> instancer = (GPUInstancer<?>) notification.getValue();
-					RenderWork.enqueue(instancer::delete);
-				})
-				.build();
+		this.allocator = allocator;
 	}
 
 	/**
@@ -52,32 +39,33 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 	 */
 	@Override
 	public Instancer<D> model(Object key, Supplier<Model> modelSupplier) {
-		try {
-			return models.get(key, () -> new GPUInstancer<>(type, modelSupplier.get(), allocator));
-		} catch (ExecutionException e) {
-			throw new RuntimeException("error creating instancer", e);
-		}
+		return models.computeIfAbsent(key, $ -> {
+			GPUInstancer<D> instancer = new GPUInstancer<>(type, modelSupplier.get(), allocator);
+			uninitialized.add(instancer);
+			return instancer;
+		});
 	}
 
 	public boolean nothingToRender() {
-		return models.size() > 0 && models.asMap()
-				.values()
+		return models.size() > 0 && models.values()
 				.stream()
 				.allMatch(GPUInstancer::isEmpty);
 	}
 
 	public void delete() {
-		models.invalidateAll();
-		if (allocator instanceof ModelPool pool) pool.delete();
+		models.values().forEach(GPUInstancer::delete);
+		models.clear();
 	}
 
 	/**
 	 * Clear all instance data without freeing resources.
 	 */
 	public void clear() {
-		models.asMap()
-				.values()
+		models.values()
 				.forEach(GPUInstancer::clear);
 	}
 
+	public Collection<GPUInstancer<D>> getAllInstancers() {
+		return models.values();
+	}
 }

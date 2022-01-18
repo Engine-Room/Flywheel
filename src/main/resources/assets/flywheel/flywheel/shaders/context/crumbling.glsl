@@ -1,4 +1,5 @@
 #use "flywheel:context/fog.glsl"
+#use "flywheel:core/diffuse.glsl"
 
 uniform float uTime;
 uniform mat4 uViewProjection;
@@ -11,17 +12,11 @@ uniform sampler2D uCrumbling;
 
 uniform vec2 uWindowSize;
 
-void FLWFinalizeNormal(inout vec3 normal) {
-    // noop
-}
-
 #if defined(VERTEX_SHADER)
-void FLWFinalizeWorldPos(inout vec4 worldPos) {
-    #if defined(USE_FOG)
-    FragDistance = cylindrical_distance(worldPos.xyz, uCameraPos);
-    #endif
+vec4 FLWVertex(inout Vertex v) {
+    FragDistance = cylindrical_distance(v.pos, uCameraPos);
 
-    gl_Position = uViewProjection * worldPos;
+    return uViewProjection * vec4(v.pos, 1.);
 }
 
 #elif defined(FRAGMENT_SHADER)

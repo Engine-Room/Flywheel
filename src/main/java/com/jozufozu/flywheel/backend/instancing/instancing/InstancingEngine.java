@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -12,7 +11,7 @@ import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.backend.RenderLayer;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
-import com.jozufozu.flywheel.core.WorldContext;
+import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.fabric.helper.Matrix4fHelper;
@@ -23,7 +22,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 public class InstancingEngine<P extends WorldProgram> implements Engine {
@@ -32,7 +30,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 	protected BlockPos originCoordinate = BlockPos.ZERO;
 
-	protected final WorldContext<P> context;
+	protected final ProgramCompiler<P> context;
 	protected final GroupFactory<P> groupFactory;
 	protected final boolean ignoreOriginCoordinate;
 
@@ -40,15 +38,11 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 	private final WeakHashSet<OriginShiftListener> listeners;
 
-	public InstancingEngine(WorldContext<P> context, TaskEngine taskEngine) {
-		this(context, InstancedMaterialGroup::new, false);
-	}
-
-	public static <P extends WorldProgram> Builder<P> builder(WorldContext<P> context) {
+	public static <P extends WorldProgram> Builder<P> builder(ProgramCompiler<P> context) {
 		return new Builder<>(context);
 	}
 
-	public InstancingEngine(WorldContext<P> context, GroupFactory<P> groupFactory, boolean ignoreOriginCoordinate) {
+	public InstancingEngine(ProgramCompiler<P> context, GroupFactory<P> groupFactory, boolean ignoreOriginCoordinate) {
 		this.context = context;
 		this.ignoreOriginCoordinate = ignoreOriginCoordinate;
 
@@ -96,7 +90,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 			viewProjection = event.viewProjection;
 		}
 
-		getGroupsToRender(event.getLayer()).forEach(group -> group.render(viewProjection, camX, camY, camZ));
+		getGroupsToRender(event.getLayer()).forEach(group -> group.render(viewProjection, camX, camY, camZ, event.getLayer()));
 	}
 
 	private Stream<InstancedMaterialGroup<P>> getGroupsToRender(@Nullable RenderLayer layer) {
@@ -119,10 +113,6 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 			groups.values().forEach(InstancedMaterialGroup::delete);
 		}
-	}
-
-	public Supplier<P> getProgram(ResourceLocation name) {
-		return context.getProgramSupplier(name);
 	}
 
 	@Override
@@ -161,11 +151,6 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		}
 	}
 
-	@Override
-	public String getName() {
-		return "GL33 Instanced Arrays";
-	}
-
 	@FunctionalInterface
 	public interface OriginShiftListener {
 		void onOriginShift();
@@ -177,11 +162,11 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	}
 
 	public static class Builder<P extends WorldProgram> {
-		protected final WorldContext<P> context;
+		protected final ProgramCompiler<P> context;
 		protected GroupFactory<P> groupFactory = InstancedMaterialGroup::new;
 		protected boolean ignoreOriginCoordinate;
 
-		public Builder(WorldContext<P> context) {
+		public Builder(ProgramCompiler<P> context) {
 			this.context = context;
 		}
 
