@@ -32,6 +32,8 @@ public interface VertexType {
 	 */
 	VertexList createReader(ByteBuffer buffer, int vertexCount);
 
+	String getShaderHeader();
+
 	default int getStride() {
 		return getLayout().getStride();
 	}

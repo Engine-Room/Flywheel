@@ -21,7 +21,7 @@ public abstract class GlBuffer extends GlObject {
 	 * @return A buffer that will be persistent if the driver supports it.
 	 */
 	public static GlBuffer requestPersistent(GlBufferType type) {
-		if (Backend.getInstance().compat.bufferStorageSupported()) {
+		if (Backend.compat.bufferStorageSupported()) {
 			return new PersistentGlBuffer(type);
 		} else {
 			return new MappedGlBuffer(type);

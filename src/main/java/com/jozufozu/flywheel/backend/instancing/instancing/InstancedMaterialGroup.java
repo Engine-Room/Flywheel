@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,7 +7,13 @@ import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.RenderLayer;
+import com.jozufozu.flywheel.backend.model.FallbackAllocator;
+import com.jozufozu.flywheel.backend.model.ModelAllocator;
 import com.jozufozu.flywheel.backend.model.ModelPool;
+import com.jozufozu.flywheel.core.Formats;
+import com.jozufozu.flywheel.core.compile.ProgramContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.util.Textures;
 import com.mojang.math.Matrix4f;
@@ -27,49 +32,55 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 	protected final RenderType type;
 
 	private final Map<Instanced<? extends InstanceData>, InstancedMaterial<?>> materials = new HashMap<>();
+	private final ModelAllocator allocator;
 
 	public InstancedMaterialGroup(InstancingEngine<P> owner, RenderType type) {
 		this.owner = owner;
 		this.type = type;
+		if (Backend.compat.onAMDWindows()) {
+			this.allocator = FallbackAllocator.INSTANCE;
+		} else {
+			this.allocator = new ModelPool(Formats.POS_TEX_NORMAL, 2048);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <D extends InstanceData> InstancedMaterial<D> material(StructType<D> type) {
 		if (type instanceof Instanced<D> instanced) {
-			return (InstancedMaterial<D>) materials.computeIfAbsent(instanced, InstancedMaterial::new);
+			return (InstancedMaterial<D>) materials.computeIfAbsent(instanced, t -> new InstancedMaterial<>(t, allocator));
 		} else {
 			throw new ClassCastException("Cannot use type '" + type + "' with GPU instancing.");
 		}
 	}
 
-	public void render(Matrix4f viewProjection, double camX, double camY, double camZ) {
+	public void render(Matrix4f viewProjection, double camX, double camY, double camZ, RenderLayer layer) {
 		type.setupRenderState();
 		Textures.bindActiveTextures();
-		renderAll(viewProjection, camX, camY, camZ);
+		renderAll(viewProjection, camX, camY, camZ, layer);
 		type.clearRenderState();
 	}
 
-	protected void renderAll(Matrix4f viewProjection, double camX, double camY, double camZ) {
+	protected void renderAll(Matrix4f viewProjection, double camX, double camY, double camZ, RenderLayer layer) {
+		// initialize all uninitialized instancers...
+		for (InstancedMaterial<?> material : materials.values()) {
+			for (GPUInstancer<?> instancer : material.uninitialized) {
+				instancer.init();
+			}
+			material.uninitialized.clear();
+		}
+
+		if (allocator instanceof ModelPool pool) {
+			// ...and then flush the model arena in case anything was marked for upload
+			pool.flush();
+		}
+
 		for (Map.Entry<Instanced<? extends InstanceData>, InstancedMaterial<?>> entry : materials.entrySet()) {
 			InstancedMaterial<?> material = entry.getValue();
 			if (material.nothingToRender()) continue;
 
-			Collection<? extends GPUInstancer<?>> instancers = material.models.asMap()
-					.values();
-
-			// initialize all uninitialized instancers...
-			for (GPUInstancer<?> gpuInstancer : instancers) {
-				gpuInstancer.init();
-			}
-
-			if (material.allocator instanceof ModelPool pool) {
-				// ...and then flush the model arena in case anything was marked for upload
-				pool.flush();
-			}
-
-			P program = owner.getProgram(entry.getKey()
-					.getProgramSpec()).get();
+			P program = owner.context.getProgram(ProgramContext.create(entry.getKey()
+					.getProgramSpec(), Formats.POS_TEX_NORMAL, layer));
 
 			program.bind();
 			program.uploadViewProjection(viewProjection);
@@ -77,7 +88,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 
 			setup(program);
 
-			for (GPUInstancer<?> instancer : instancers) {
+			for (GPUInstancer<?> instancer : material.getAllInstancers()) {
 				instancer.render();
 			}
 		}

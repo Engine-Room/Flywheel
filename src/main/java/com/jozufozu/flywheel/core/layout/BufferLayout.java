@@ -27,8 +27,8 @@ public class BufferLayout {
 
 		int numAttributes = 0, stride = 0;
 		for (LayoutItem spec : allAttributes) {
-			numAttributes += spec.getAttributeCount();
-			stride += spec.getSize();
+			numAttributes += spec.attributeCount();
+			stride += spec.size();
 		}
 		this.numAttributes = numAttributes;
 		this.stride = stride;

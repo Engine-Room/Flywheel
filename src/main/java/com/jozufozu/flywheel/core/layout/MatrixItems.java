@@ -26,12 +26,13 @@ public enum MatrixItems implements LayoutItem {
 	}
 
 	@Override
-	public int getSize() {
+	public int size() {
 		return GlNumericType.FLOAT.getByteWidth() * rows * cols;
 	}
 
 	@Override
-	public int getAttributeCount() {
+	public int attributeCount() {
 		return rows;
 	}
+
 }
