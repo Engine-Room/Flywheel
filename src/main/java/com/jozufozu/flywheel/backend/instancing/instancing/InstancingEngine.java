@@ -160,11 +160,6 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		}
 	}
 
-	@Override
-	public String getName() {
-		return "GL33 Instanced Arrays";
-	}
-
 	@FunctionalInterface
 	public interface OriginShiftListener {
 		void onOriginShift();

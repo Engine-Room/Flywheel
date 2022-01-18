@@ -70,8 +70,4 @@ public class BatchingEngine implements Engine {
 
 	}
 
-	@Override
-	public String getName() {
-		return "Batching";
-	}
 }
