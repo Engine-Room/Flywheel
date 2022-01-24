@@ -5,8 +5,6 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
 
 public class BooleanConfigCommand {
 
@@ -22,23 +20,17 @@ public class BooleanConfigCommand {
 	public ArgumentBuilder<CommandSourceStack, ?> register() {
 		return Commands.literal(name)
 				.executes(context -> {
-					ServerPlayer player = context.getSource()
-							.getPlayerOrException();
-					FlwPackets.channel.send(PacketDistributor.PLAYER.with(() -> player), new SConfigureBooleanPacket(value, BooleanDirective.DISPLAY));
+					value.receiver.get().accept(BooleanDirective.DISPLAY);
 					return Command.SINGLE_SUCCESS;
 				})
 				.then(Commands.literal("on")
 							  .executes(context -> {
-								  ServerPlayer player = context.getSource()
-										  .getPlayerOrException();
-								  FlwPackets.channel.send(PacketDistributor.PLAYER.with(() -> player), new SConfigureBooleanPacket(value, BooleanDirective.TRUE));
+								  value.receiver.get().accept(BooleanDirective.TRUE);
 								  return Command.SINGLE_SUCCESS;
 							  }))
 				.then(Commands.literal("off")
 							  .executes(context -> {
-								  ServerPlayer player = context.getSource()
-										  .getPlayerOrException();
-								  FlwPackets.channel.send(PacketDistributor.PLAYER.with(() -> player), new SConfigureBooleanPacket(value, BooleanDirective.FALSE));
+								  value.receiver.get().accept(BooleanDirective.FALSE);
 								  return Command.SINGLE_SUCCESS;
 							  }));
 	}

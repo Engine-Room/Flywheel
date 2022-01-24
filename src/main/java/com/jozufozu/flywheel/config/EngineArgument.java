@@ -14,17 +14,13 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.TranslatableComponent;
 
-public class EngineArgument implements ArgumentType<FlwEngine> {
-
-	private static final EngineArgument INSTANCE = new EngineArgument();
+public enum EngineArgument implements ArgumentType<FlwEngine> {
+	INSTANCE;
 
 	private static final Dynamic2CommandExceptionType INVALID = new Dynamic2CommandExceptionType((found, constants) -> {
 		// TODO: don't steal lang
 		return new TranslatableComponent("commands.forge.arguments.enum.invalid", constants, found);
 	});
-
-	private EngineArgument() {
-	}
 
 	@Override
 	public FlwEngine parse(StringReader reader) throws CommandSyntaxException {
