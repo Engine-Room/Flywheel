@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -21,31 +20,6 @@ public enum BooleanConfig {
 
 	BooleanConfig(Supplier<Consumer<BooleanDirective>> receiver) {
 		this.receiver = receiver;
-	}
-
-	public SConfigureBooleanPacket packet(BooleanDirective directive) {
-		return new SConfigureBooleanPacket(this, directive);
-	}
-
-	/**
-	 * Encode a variant of BooleanConfig. Symmetrical function to {@link #decode}
-	 */
-	public void encode(FriendlyByteBuf buffer) {
-		buffer.writeByte(this.ordinal());
-	}
-
-	/**
-	 * Safely decode a variant of BooleanConfig. Symmetrical function to {@link #encode}
-	 */
-	public static BooleanConfig decode(FriendlyByteBuf buffer) {
-		byte t = buffer.readByte();
-		BooleanConfig[] values = values();
-		// Protects against version differences.
-		// Shouldn't ever happen but do a sanity check for safety.
-		if (t >= 0 && t < values.length)
-			return values[t];
-		else
-			return null;
 	}
 
 	@OnlyIn(Dist.CLIENT)

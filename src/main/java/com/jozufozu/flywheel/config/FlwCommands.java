@@ -6,17 +6,11 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 
 public class FlwCommands {
-	@SubscribeEvent
-	public static void onServerStarting(ServerStartingEvent event) {
-		CommandDispatcher<CommandSourceStack> dispatcher = event.getServer()
-				.getCommands()
-				.getDispatcher();
+	public static void onServerStarting(RegisterClientCommandsEvent event) {
+		CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
 
 		dispatcher.register(Commands.literal("flywheel")
 									.then(debugCommand())
@@ -31,18 +25,15 @@ public class FlwCommands {
 	private static ArgumentBuilder<CommandSourceStack, ?> backendCommand() {
 		return Commands.literal("backend")
 				.executes(context -> {
-					ServerPlayer player = context.getSource()
-							.getPlayerOrException();
-					FlwPackets.channel.send(PacketDistributor.PLAYER.with(() -> player), new SConfigureEnginePacket());
+					FlwEngine.handle(null);
+
 					return Command.SINGLE_SUCCESS;
 				})
-				.then(Commands.argument("type", EngineArgument.getInstance())
+				.then(Commands.argument("type", EngineArgument.INSTANCE)
 						.executes(context -> {
 							FlwEngine type = context.getArgument("type", FlwEngine.class);
 
-							ServerPlayer player = context.getSource()
-									.getPlayerOrException();
-							FlwPackets.channel.send(PacketDistributor.PLAYER.with(() -> player), new SConfigureEnginePacket(type));
+							FlwEngine.handle(type);
 
 							return Command.SINGLE_SUCCESS;
 						}));

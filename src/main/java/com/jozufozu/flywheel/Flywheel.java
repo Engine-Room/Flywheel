@@ -6,7 +6,6 @@ import org.apache.logging.log4j.Logger;
 import com.jozufozu.flywheel.config.EngineArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.config.FlwPackets;
 
 import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
@@ -41,7 +40,6 @@ public class Flywheel {
 	}
 
     private void setup(final FMLCommonSetupEvent event) {
-		FlwPackets.registerPackets();
 		ArgumentTypes.register(rl("engine").toString(), EngineArgument.class, new EmptyArgumentSerializer<>(EngineArgument::getInstance));
 	}
 }

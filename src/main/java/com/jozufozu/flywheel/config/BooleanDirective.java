@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.config;
 
-import net.minecraft.network.FriendlyByteBuf;
-
 public enum BooleanDirective {
 	TRUE(true),
 	FALSE(false),
@@ -20,19 +18,5 @@ public enum BooleanDirective {
 	public boolean get() {
 		if (this == DISPLAY) throw new IllegalStateException("DISPLAY directive has no value");
 		return b;
-	}
-
-	/**
-	 * Encode a variant of BooleanDirective. Symmetrical function to {@link #decode}
-	 */
-	public void encode(FriendlyByteBuf buffer) {
-		buffer.writeByte(this.ordinal());
-	}
-
-	/**
-	 * Safely decode a variant of BooleanDirective. Symmetrical function to {@link #encode}
-	 */
-	public static BooleanDirective decode(FriendlyByteBuf buffer) {
-		return values()[buffer.readByte()];
 	}
 }
