@@ -29,6 +29,14 @@ public class Backend {
 		return engine;
 	}
 
+	/**
+	 * Get a string describing the Flywheel backend. When there are eventually multiple backends
+	 * (Meshlet, MDI, GL31 Draw Instanced are planned), this will name which one is in use.
+	 */
+	public static String getBackendDescriptor() {
+		return engine == null ? "" : engine.getProperName();
+	}
+
 	@Nullable
 	public static ProgramSpec getSpec(ResourceLocation name) {
 		return loader.get(name);
