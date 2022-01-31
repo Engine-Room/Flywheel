@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -14,6 +15,7 @@ import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
+import com.jozufozu.flywheel.util.FlwUtil;
 import com.jozufozu.flywheel.util.WeakHashSet;
 import com.mojang.math.Matrix4f;
 
@@ -101,8 +103,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		} else {
 			return layers.values()
 					.stream()
-					.flatMap(it -> it.values()
-							.stream());
+					.flatMap(FlwUtil::mapValues);
 		}
 	}
 
@@ -148,6 +149,14 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 			listeners.forEach(OriginShiftListener::onOriginShift);
 		}
+	}
+
+	@Override
+	public void addDebugInfo(List<String> info) {
+		info.add("GL33 Instanced Arrays");
+		info.add("Origin: " + originCoordinate.getX() + ", " + originCoordinate.getY() + ", " + originCoordinate.getZ());
+		info.add("Instances: " + getGroupsToRender(null).mapToInt(InstancedMaterialGroup::getInstanceCount).sum());
+		info.add("Vertices: " + getGroupsToRender(null).mapToInt(InstancedMaterialGroup::getVertexCount).sum());
 	}
 
 	@FunctionalInterface

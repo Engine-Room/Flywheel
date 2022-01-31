@@ -2,6 +2,7 @@ package com.jozufozu.flywheel;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 import com.jozufozu.flywheel.config.EngineArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
@@ -13,17 +14,27 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.forgespi.language.IModFileInfo;
 
 @Mod(Flywheel.ID)
 public class Flywheel {
 
 	public static final String ID = "flywheel";
 	public static final Logger LOGGER = LogManager.getLogger(Flywheel.class);
+	public static ArtifactVersion VERSION;
 
 	public Flywheel() {
+		IModFileInfo modFileById = ModList.get()
+				.getModFileById(ID);
+
+		VERSION = modFileById.getMods()
+				.get(0)
+				.getVersion();
+
 		FMLJavaModLoadingContext.get()
 				.getModEventBus()
 				.addListener(this::setup);

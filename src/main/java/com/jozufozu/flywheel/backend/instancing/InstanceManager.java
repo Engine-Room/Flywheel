@@ -47,6 +47,15 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	}
 
 	/**
+	 * Get the number of game objects that are currently being instanced.
+	 *
+	 * @return The object count.
+	 */
+	public int getObjectCount() {
+		return instances.size();
+	}
+
+	/**
 	 * Is the given object capable of being instanced at all?
 	 *
 	 * @return false if on object cannot be instanced.

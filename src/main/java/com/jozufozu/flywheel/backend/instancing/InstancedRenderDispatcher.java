@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.backend.instancing;
 
+import java.util.List;
+
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -113,4 +115,8 @@ public class InstancedRenderDispatcher {
 				.loadEntities(world);
 	}
 
+	public static void getDebugString(List<String> debug) {
+		instanceWorlds.get(Minecraft.getInstance().level)
+				.getDebugString(debug);
+	}
 }

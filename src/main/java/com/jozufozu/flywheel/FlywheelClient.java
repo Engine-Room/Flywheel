@@ -18,7 +18,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class FlywheelClient {
 
 	public static void clientInit() {
-		CrashReportCallables.registerCrashCallable("Flywheel Backend", Backend::getBackendDescriptor);
+		CrashReportCallables.registerCrashCallable("Flywheel Backend", () -> Backend.getEngine().getProperName());
 
 		OptifineHandler.init();
 		Backend.init();
