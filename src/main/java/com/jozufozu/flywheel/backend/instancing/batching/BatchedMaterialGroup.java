@@ -20,6 +20,8 @@ public class BatchedMaterialGroup implements MaterialGroup {
 	protected final RenderType state;
 
 	private final Map<Batched<? extends InstanceData>, BatchedMaterial<?>> materials = new HashMap<>();
+	private int vertexCount;
+	private int instanceCount;
 
 	public BatchedMaterialGroup(RenderType state) {
 		this.state = state;
@@ -37,11 +39,13 @@ public class BatchedMaterialGroup implements MaterialGroup {
 
 	public void render(PoseStack stack, BatchDrawingTracker source, TaskEngine pool) {
 
-		int vertexCount = 0;
+		vertexCount = 0;
+		instanceCount = 0;
 		for (BatchedMaterial<?> material : materials.values()) {
 			for (CPUInstancer<?> instancer : material.models.values()) {
 				instancer.setup();
-				vertexCount += instancer.getTotalVertexCount();
+				vertexCount += instancer.getVertexCount();
+				instanceCount += instancer.getInstanceCount();
 			}
 		}
 
@@ -64,5 +68,21 @@ public class BatchedMaterialGroup implements MaterialGroup {
 
 	public void delete() {
 		materials.clear();
+	}
+
+	/**
+	 * Get the number of instances drawn last frame.
+	 * @return The instance count.
+	 */
+	public int getInstanceCount() {
+		return instanceCount;
+	}
+
+	/**
+	 * Get the number of vertices drawn last frame.
+	 * @return The vertex count.
+	 */
+	public int getVertexCount() {
+		return vertexCount;
 	}
 }

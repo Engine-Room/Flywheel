@@ -1,5 +1,8 @@
 package com.jozufozu.flywheel.backend.instancing;
 
+import java.util.List;
+
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.Backend;
@@ -74,7 +77,7 @@ public class InstanceWorld {
 	 * Free all acquired resources and invalidate this instance world.
 	 */
 	public void delete() {
-		this.taskEngine.stopWorkers();
+		taskEngine.stopWorkers();
 		engine.delete();
 		entityInstanceManager.detachLightListeners();
 		blockEntityInstanceManager.detachLightListeners();
@@ -132,5 +135,12 @@ public class InstanceWorld {
 		// Entities are loaded with the world, so when chunks are reloaded they need to be re-added.
 		world.entitiesForRendering()
 				.forEach(entityInstanceManager::add);
+	}
+
+	public void getDebugString(List<String> debug) {
+		debug.add("");
+		debug.add("Flywheel: " + Flywheel.VERSION);
+		debug.add("B: " + blockEntityInstanceManager.getObjectCount() + ", E: " + entityInstanceManager.getObjectCount());
+		engine.addDebugInfo(debug);
 	}
 }

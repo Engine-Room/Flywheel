@@ -1,8 +1,7 @@
 package com.jozufozu.flywheel.event;
 
-import java.util.ArrayList;
-
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.light.LightUpdater;
 import com.jozufozu.flywheel.util.WorldAttached;
 
@@ -22,16 +21,7 @@ public class ForgeEvents {
 
 		if (Minecraft.getInstance().options.renderDebug) {
 
-			ArrayList<String> right = event.getRight();
-
-			String text = "Flywheel: " + Backend.getBackendDescriptor();
-			if (right.size() < 10) {
-				right.add("");
-				right.add(text);
-			} else {
-				right.add(9, "");
-				right.add(10, text);
-			}
+			InstancedRenderDispatcher.getDebugString(event.getLeft());
 		}
 	}
 

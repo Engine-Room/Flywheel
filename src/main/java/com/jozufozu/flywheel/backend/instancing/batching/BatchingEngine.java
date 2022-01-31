@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.jozufozu.flywheel.api.MaterialGroup;
@@ -10,6 +11,7 @@ import com.jozufozu.flywheel.backend.instancing.BatchDrawingTracker;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
+import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.math.Matrix4f;
 
@@ -28,7 +30,6 @@ public class BatchingEngine implements Engine {
 		for (RenderLayer value : RenderLayer.values()) {
 			layers.put(value, new HashMap<>());
 		}
-
 	}
 
 	@Override
@@ -70,4 +71,18 @@ public class BatchingEngine implements Engine {
 
 	}
 
+	@Override
+	public void addDebugInfo(List<String> info) {
+		info.add("Batching");
+		info.add("Instances: " + layers.values()
+				.stream()
+				.flatMap(FlwUtil::mapValues)
+				.mapToInt(BatchedMaterialGroup::getInstanceCount)
+				.sum());
+		info.add("Vertices: " + layers.values()
+				.stream()
+				.flatMap(FlwUtil::mapValues)
+				.mapToInt(BatchedMaterialGroup::getVertexCount)
+				.sum());
+	}
 }

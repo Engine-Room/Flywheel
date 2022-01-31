@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.util;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.mixin.BlockEntityRenderDispatcherAccessor;
 
@@ -67,5 +68,9 @@ public class FlwUtil {
 				}
 			}
 		}
+	}
+
+	public static <R> Stream<R> mapValues(Map<?, R> map) {
+		return map.values().stream();
 	}
 }

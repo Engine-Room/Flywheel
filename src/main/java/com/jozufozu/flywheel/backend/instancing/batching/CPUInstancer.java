@@ -24,7 +24,7 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 	}
 
 	void submitTasks(PoseStack stack, TaskEngine pool, DirectVertexConsumer consumer) {
-		int instances = numInstances();
+		int instances = getInstanceCount();
 
 		while (instances > 0) {
 			int end = instances;

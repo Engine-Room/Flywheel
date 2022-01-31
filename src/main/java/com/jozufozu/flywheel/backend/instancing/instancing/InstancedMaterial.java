@@ -46,6 +46,14 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 		});
 	}
 
+	public int getInstanceCount() {
+		return models.values().stream().mapToInt(GPUInstancer::getInstanceCount).sum();
+	}
+
+	public int getVertexCount() {
+		return models.values().stream().mapToInt(GPUInstancer::getVertexCount).sum();
+	}
+
 	public boolean nothingToRender() {
 		return models.size() > 0 && models.values()
 				.stream()
