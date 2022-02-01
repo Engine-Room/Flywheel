@@ -4,15 +4,26 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 
+import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.OptifineHandler;
 import com.jozufozu.flywheel.config.EngineArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
+import com.jozufozu.flywheel.core.Contexts;
+import com.jozufozu.flywheel.core.PartialModel;
+import com.jozufozu.flywheel.core.StitchedSprite;
+import com.jozufozu.flywheel.core.compile.ProgramCompiler;
+import com.jozufozu.flywheel.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
+import com.jozufozu.flywheel.vanilla.VanillaInstances;
 
 import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.CrashReportCallables;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
@@ -39,18 +50,44 @@ public class Flywheel {
 				.getModEventBus()
 				.addListener(this::setup);
 
-		MinecraftForge.EVENT_BUS.addListener(FlwCommands::onServerStarting);
-
 		FlwConfig.init();
 
-		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> FlywheelClient::clientInit);
+		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> Flywheel::clientInit);
 	}
 
 	public static ResourceLocation rl(String path) {
 		return new ResourceLocation(ID, path);
 	}
 
-    private void setup(final FMLCommonSetupEvent event) {
+	public static void clientInit() {
+		CrashReportCallables.registerCrashCallable("Flywheel Backend", Backend::getBackendDescriptor);
+
+		OptifineHandler.init();
+		Backend.init();
+		IEventBus modEventBus = FMLJavaModLoadingContext.get()
+				.getModEventBus();
+
+		modEventBus.addListener(Contexts::flwInit);
+		modEventBus.addListener(PartialModel::onModelRegistry);
+		modEventBus.addListener(PartialModel::onModelBake);
+		modEventBus.addListener(StitchedSprite::onTextureStitchPre);
+		modEventBus.addListener(StitchedSprite::onTextureStitchPost);
+
+		MinecraftForge.EVENT_BUS.addListener(FlwCommands::registerClientCommands);
+
+		MinecraftForge.EVENT_BUS.<ReloadRenderersEvent>addListener(ProgramCompiler::invalidateAll);
+
+		VanillaInstances.init();
+
+		// https://github.com/Jozufozu/Flywheel/issues/69
+		// Weird issue with accessor loading.
+		// Only thing I've seen that's close to a fix is to force the class to load before trying to use it.
+		// From the SpongePowered discord:
+		// https://discord.com/channels/142425412096491520/626802111455297538/675007581168599041
+		LOGGER.info("Successfully loaded {}", PausedPartialTickAccessor.class.getName());
+	}
+
+	private void setup(final FMLCommonSetupEvent event) {
 		ArgumentTypes.register(rl("engine").toString(), EngineArgument.class, new EmptyArgumentSerializer<>(EngineArgument::getInstance));
 	}
 }

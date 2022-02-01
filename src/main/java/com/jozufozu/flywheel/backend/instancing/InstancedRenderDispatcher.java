@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.List;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -116,7 +117,16 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static void getDebugString(List<String> debug) {
-		instanceWorlds.get(Minecraft.getInstance().level)
-				.getDebugString(debug);
+		debug.add("");
+		debug.add("Flywheel: " + Flywheel.VERSION);
+
+		if (Backend.isOn()) {
+			InstanceWorld instanceWorld = instanceWorlds.get(Minecraft.getInstance().level);
+
+			debug.add("B: " + instanceWorld.blockEntityInstanceManager.getObjectCount() + ", E: " + instanceWorld.entityInstanceManager.getObjectCount());
+			instanceWorld.engine.addDebugInfo(debug);
+		} else {
+			debug.add("Disabled");
+		}
 	}
 }

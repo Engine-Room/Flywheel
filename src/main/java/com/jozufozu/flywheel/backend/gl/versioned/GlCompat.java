@@ -20,11 +20,20 @@ import net.minecraft.Util;
  */
 public class GlCompat {
 
+	private static GlCompat instance;
+
+	public static GlCompat getInstance() {
+		if (instance == null) {
+			instance = new GlCompat();
+		}
+		return instance;
+	}
+
 	public final InstancedArrays instancedArrays;
 	public final BufferStorage bufferStorage;
 	public final boolean amd;
 
-	public GlCompat() {
+	private GlCompat() {
 		GLCapabilities caps = GL.createCapabilities();
 		instancedArrays = getLatest(InstancedArrays.class, caps);
 		bufferStorage = getLatest(BufferStorage.class, caps);

@@ -9,7 +9,7 @@ import net.minecraft.commands.Commands;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 
 public class FlwCommands {
-	public static void onServerStarting(RegisterClientCommandsEvent event) {
+	public static void registerClientCommands(RegisterClientCommandsEvent event) {
 		CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
 
 		dispatcher.register(Commands.literal("flywheel")

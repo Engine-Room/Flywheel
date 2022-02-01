@@ -42,7 +42,7 @@ public class Loader implements ResourceManagerReloadListener {
 	public static final String PROGRAM_DIR = "flywheel/programs/";
 	private static final Gson GSON = new GsonBuilder().create();
 
-	private final Map<ResourceLocation, ProgramSpec> programSpecRegistry = new HashMap<>();
+	private final Map<ResourceLocation, ProgramSpec> programs = new HashMap<>();
 
 	private boolean firstLoad = true;
 
@@ -59,7 +59,7 @@ public class Loader implements ResourceManagerReloadListener {
 
 	@Nullable
 	public ProgramSpec get(ResourceLocation name) {
-		return programSpecRegistry.get(name);
+		return programs.get(name);
 	}
 
 	@Override
@@ -91,6 +91,8 @@ public class Loader implements ResourceManagerReloadListener {
 	}
 
 	private void loadProgramSpecs(ResourceManager manager) {
+		programs.clear();
+
 		Collection<ResourceLocation> programSpecs = manager.listResources(PROGRAM_DIR, s -> s.endsWith(".json"));
 
 		for (ResourceLocation location : programSpecs) {
@@ -109,21 +111,15 @@ public class Loader implements ResourceManagerReloadListener {
 
 				spec.setName(specName);
 
-				register(spec);
+				if (programs.containsKey(specName)) {
+					throw new IllegalStateException("Program spec '" + specName + "' already registered.");
+				}
+				programs.put(specName, spec);
+
 			} catch (Exception e) {
 				Backend.LOGGER.error(e);
 			}
 		}
 	}
 
-	/**
-	 * Register a shader program.
-	 */
-	private void register(ProgramSpec spec) {
-		ResourceLocation name = spec.name;
-		if (programSpecRegistry.containsKey(name)) {
-			throw new IllegalStateException("Program spec '" + name + "' already registered.");
-		}
-		programSpecRegistry.put(name, spec);
-	}
 }

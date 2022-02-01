@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.opengl.GL20;
 
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
+import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 
 public abstract class GlBuffer extends GlObject {
 
@@ -21,7 +21,8 @@ public abstract class GlBuffer extends GlObject {
 	 * @return A buffer that will be persistent if the driver supports it.
 	 */
 	public static GlBuffer requestPersistent(GlBufferType type) {
-		if (Backend.compat.bufferStorageSupported()) {
+		if (GlCompat.getInstance()
+                .bufferStorageSupported()) {
 			return new PersistentGlBuffer(type);
 		} else {
 			return new MappedGlBuffer(type);
