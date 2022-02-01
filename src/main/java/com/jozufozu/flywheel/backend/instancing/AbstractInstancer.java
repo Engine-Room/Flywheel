@@ -62,12 +62,12 @@ public abstract class AbstractInstancer<D extends InstanceData> implements Insta
 		return modelData.vertexCount();
 	}
 
-	public int numInstances() {
+	public int getInstanceCount() {
 		return data.size();
 	}
 
-	public int getTotalVertexCount() {
-		return getModelVertexCount() * numInstances();
+	public int getVertexCount() {
+		return getModelVertexCount() * getInstanceCount();
 	}
 
 	protected void removeDeletedInstances() {

@@ -4,6 +4,7 @@
   "package": "com.jozufozu.flywheel.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "BlockEntityRenderDispatcherAccessor",
     "BlockEntityTypeMixin",
     "BufferBuilderMixin",
     "BufferUploaderMixin",

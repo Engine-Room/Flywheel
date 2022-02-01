@@ -56,8 +56,13 @@ public interface Translate<Self> {
 		return translate(-vec.getX(), -vec.getY(), -vec.getZ());
 	}
 
-	default Self nudge(int id) {
-		long randomBits = (long) id * 31L * 493286711L;
+	/**
+	 * Translates this object randomly by a very small amount.
+	 * @param seed The seed to use to generate the random offsets.
+	 * @return {@code this}
+	 */
+	default Self nudge(int seed) {
+		long randomBits = (long) seed * 31L * 493286711L;
 		randomBits = randomBits * randomBits * 4392167121L + randomBits * 98761L;
 		float xNudge = (((float) (randomBits >> 16 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
 		float yNudge = (((float) (randomBits >> 20 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;

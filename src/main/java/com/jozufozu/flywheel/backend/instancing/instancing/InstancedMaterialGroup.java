@@ -34,6 +34,9 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 	private final Map<Instanced<? extends InstanceData>, InstancedMaterial<?>> materials = new HashMap<>();
 	private final ModelAllocator allocator;
 
+	private int vertexCount;
+	private int instanceCount;
+
 	public InstancedMaterialGroup(InstancingEngine<P> owner, RenderType type) {
 		this.owner = owner;
 		this.type = type;
@@ -52,6 +55,22 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 		} else {
 			throw new ClassCastException("Cannot use type '" + type + "' with GPU instancing.");
 		}
+	}
+
+	/**
+	 * Get the number of instances drawn last frame.
+	 * @return The instance count.
+	 */
+	public int getInstanceCount() {
+		return instanceCount;
+	}
+
+	/**
+	 * Get the number of vertices drawn last frame.
+	 * @return The vertex count.
+	 */
+	public int getVertexCount() {
+		return vertexCount;
 	}
 
 	public void render(Matrix4f viewProjection, double camX, double camY, double camZ, RenderLayer layer) {
@@ -75,6 +94,9 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 			pool.flush();
 		}
 
+		vertexCount = 0;
+		instanceCount = 0;
+
 		for (Map.Entry<Instanced<? extends InstanceData>, InstancedMaterial<?>> entry : materials.entrySet()) {
 			InstancedMaterial<?> material = entry.getValue();
 			if (material.nothingToRender()) continue;
@@ -90,6 +112,8 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 
 			for (GPUInstancer<?> instancer : material.getAllInstancers()) {
 				instancer.render();
+				vertexCount += instancer.getVertexCount();
+				instanceCount += instancer.getInstanceCount();
 			}
 		}
 	}

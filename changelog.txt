@@ -1,3 +1,15 @@
+0.6.0:
+With this release, Flywheel is no longer needed on servers! Forge finally has client commands,
+and the /flywheel command now takes advantage of this.
+Fixes
+ - Fix crash when running with sodium/magnesium.
+Technical/API
+ - Backend is now a static class.
+ - Shaders are now compiled on-the-fly and cached.
+ - Significantly reduced the amount of boilerplate needed in instancing shaders.
+ - Struct types no longer need to be registered ahead of time.
+ - Simplify unnecessarily complicated game state system.
+
 0.5.1:
 Fixes
  - Fix crash on resource reload with backend off

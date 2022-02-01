@@ -28,6 +28,8 @@ public class FlywheelClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		Flywheel.initVersion();
+
 		Backend.init();
 
 		FlywheelEvents.GATHER_CONTEXT.register(Contexts::flwInit);
