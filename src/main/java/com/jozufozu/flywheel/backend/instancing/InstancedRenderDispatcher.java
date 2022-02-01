@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.config.BooleanConfig;
+import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
@@ -123,6 +125,7 @@ public class InstancedRenderDispatcher {
 		if (Backend.isOn()) {
 			InstanceWorld instanceWorld = instanceWorlds.get(Minecraft.getInstance().level);
 
+			debug.add("Update limiting: " + BooleanConfig.boolToText(FlwConfig.get().limitUpdates()).getString());
 			debug.add("B: " + instanceWorld.blockEntityInstanceManager.getObjectCount() + ", E: " + instanceWorld.entityInstanceManager.getObjectCount());
 			instanceWorld.engine.addDebugInfo(debug);
 		} else {

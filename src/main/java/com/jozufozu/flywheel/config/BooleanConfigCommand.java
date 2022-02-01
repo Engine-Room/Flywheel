@@ -20,17 +20,17 @@ public class BooleanConfigCommand {
 	public ArgumentBuilder<CommandSourceStack, ?> register() {
 		return Commands.literal(name)
 				.executes(context -> {
-					value.receiver.get().accept(BooleanDirective.DISPLAY);
+					value.receiver.accept(BooleanDirective.DISPLAY);
 					return Command.SINGLE_SUCCESS;
 				})
 				.then(Commands.literal("on")
 							  .executes(context -> {
-								  value.receiver.get().accept(BooleanDirective.TRUE);
+								  value.receiver.accept(BooleanDirective.TRUE);
 								  return Command.SINGLE_SUCCESS;
 							  }))
 				.then(Commands.literal("off")
 							  .executes(context -> {
-								  value.receiver.get().accept(BooleanDirective.FALSE);
+								  value.receiver.accept(BooleanDirective.FALSE);
 								  return Command.SINGLE_SUCCESS;
 							  }));
 	}

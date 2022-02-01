@@ -13,13 +13,18 @@ public class FlwCommands {
 		CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
 
 		dispatcher.register(Commands.literal("flywheel")
-									.then(debugCommand())
-									.then(backendCommand())
+				.then(debugNormalsCommand())
+				.then(backendCommand())
+				.then(limitUpdatesCommand())
 		);
 	}
 
-	private static ArgumentBuilder<CommandSourceStack, ?> debugCommand() {
+	private static ArgumentBuilder<CommandSourceStack, ?> debugNormalsCommand() {
 		return new BooleanConfigCommand("debugNormals", BooleanConfig.NORMAL_OVERLAY).register();
+	}
+
+	private static ArgumentBuilder<CommandSourceStack, ?> limitUpdatesCommand() {
+		return new BooleanConfigCommand("limitUpdates", BooleanConfig.LIMIT_UPDATES).register();
 	}
 
 	private static ArgumentBuilder<CommandSourceStack, ?> backendCommand() {
