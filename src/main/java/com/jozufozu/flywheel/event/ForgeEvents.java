@@ -21,7 +21,7 @@ public class ForgeEvents {
 
 		if (Minecraft.getInstance().options.renderDebug) {
 
-			InstancedRenderDispatcher.getDebugString(event.getLeft());
+			InstancedRenderDispatcher.getDebugString(event.getRight());
 		}
 	}
 

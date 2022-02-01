@@ -1,7 +1,8 @@
 package com.jozufozu.flywheel.config;
 
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+
+import com.jozufozu.flywheel.backend.Backend;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -9,20 +10,36 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 public enum BooleanConfig {
-	NORMAL_OVERLAY(() -> BooleanConfig::normalOverlay),
-	;
+	NORMAL_OVERLAY(BooleanConfig::normalOverlay),
+	LIMIT_UPDATES(BooleanConfig::limitUpdates);
 
-	final Supplier<Consumer<BooleanDirective>> receiver;
+	final Consumer<BooleanDirective> receiver;
 
-	BooleanConfig(Supplier<Consumer<BooleanDirective>> receiver) {
+	BooleanConfig(Consumer<BooleanDirective> receiver) {
 		this.receiver = receiver;
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	private static void limitUpdates(BooleanDirective booleanDirective) {
+		LocalPlayer player = Minecraft.getInstance().player;
+		if (player == null || booleanDirective == null) return;
+
+		if (booleanDirective == BooleanDirective.DISPLAY) {
+			Component text = new TextComponent("Update limiting is currently: ").append(boolToText(FlwConfig.get().limitUpdates()));
+			player.displayClientMessage(text, false);
+			return;
+		}
+
+		FlwConfig.get().client.limitUpdates.set(booleanDirective.get());
+
+		Component text = boolToText(FlwConfig.get().limitUpdates()).append(new TextComponent(" update limiting.").withStyle(ChatFormatting.WHITE));
+
+		player.displayClientMessage(text, false);
+
+		Backend.reloadWorldRenderers();
+	}
+
 	private static void normalOverlay(BooleanDirective state) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null || state == null) return;
@@ -40,7 +57,7 @@ public enum BooleanConfig {
 		player.displayClientMessage(text, false);
 	}
 
-	private static MutableComponent boolToText(boolean b) {
+	public static MutableComponent boolToText(boolean b) {
 		return b ? new TextComponent("enabled").withStyle(ChatFormatting.DARK_GREEN) : new TextComponent("disabled").withStyle(ChatFormatting.RED);
 	}
 }

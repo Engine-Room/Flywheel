@@ -154,9 +154,9 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	@Override
 	public void addDebugInfo(List<String> info) {
 		info.add("GL33 Instanced Arrays");
-		info.add("Origin: " + originCoordinate.getX() + ", " + originCoordinate.getY() + ", " + originCoordinate.getZ());
 		info.add("Instances: " + getGroupsToRender(null).mapToInt(InstancedMaterialGroup::getInstanceCount).sum());
 		info.add("Vertices: " + getGroupsToRender(null).mapToInt(InstancedMaterialGroup::getVertexCount).sum());
+		info.add("Origin: " + originCoordinate.getX() + ", " + originCoordinate.getY() + ", " + originCoordinate.getZ());
 	}
 
 	@FunctionalInterface
