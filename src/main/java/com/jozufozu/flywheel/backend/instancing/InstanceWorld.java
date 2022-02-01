@@ -1,8 +1,5 @@
 package com.jozufozu.flywheel.backend.instancing;
 
-import java.util.List;
-
-import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.Backend;
@@ -137,10 +134,4 @@ public class InstanceWorld {
 				.forEach(entityInstanceManager::add);
 	}
 
-	public void getDebugString(List<String> debug) {
-		debug.add("");
-		debug.add("Flywheel: " + Flywheel.VERSION);
-		debug.add("B: " + blockEntityInstanceManager.getObjectCount() + ", E: " + entityInstanceManager.getObjectCount());
-		engine.addDebugInfo(debug);
-	}
 }

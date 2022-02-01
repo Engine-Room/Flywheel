@@ -7,8 +7,8 @@ import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.RenderLayer;
+import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.model.FallbackAllocator;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
 import com.jozufozu.flywheel.backend.model.ModelPool;
@@ -40,7 +40,8 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 	public InstancedMaterialGroup(InstancingEngine<P> owner, RenderType type) {
 		this.owner = owner;
 		this.type = type;
-		if (Backend.compat.onAMDWindows()) {
+        if (GlCompat.getInstance()
+                .onAMDWindows()) {
 			this.allocator = FallbackAllocator.INSTANCE;
 		} else {
 			this.allocator = new ModelPool(Formats.POS_TEX_NORMAL, 2048);

@@ -6,11 +6,11 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructWriter;
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
+import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.backend.model.BufferedModel;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
@@ -198,7 +198,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		vao.bindAttributes(attributeBaseIndex, instanceFormat);
 
 		for (int i = 0; i < instanceFormat.getAttributeCount(); i++) {
-			Backend.compat.instancedArrays.vertexAttribDivisor(attributeBaseIndex + i, 1);
+            GlCompat.getInstance().instancedArrays.vertexAttribDivisor(attributeBaseIndex + i, 1);
 		}
 	}
 }
