@@ -36,30 +36,26 @@ public class Flywheel {
 
 	public static final String ID = "flywheel";
 	public static final Logger LOGGER = LogManager.getLogger(Flywheel.class);
-	public static ArtifactVersion VERSION;
+	private static ArtifactVersion version;
 
 	public Flywheel() {
 		IModFileInfo modFileById = ModList.get()
 				.getModFileById(ID);
 
-		VERSION = modFileById.getMods()
+		version = modFileById.getMods()
 				.get(0)
 				.getVersion();
 
 		FMLJavaModLoadingContext.get()
 				.getModEventBus()
-				.addListener(this::setup);
+				.addListener(Flywheel::setup);
 
 		FlwConfig.init();
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> Flywheel::clientInit);
 	}
 
-	public static ResourceLocation rl(String path) {
-		return new ResourceLocation(ID, path);
-	}
-
-	public static void clientInit() {
+	private static void clientInit() {
 		CrashReportCallables.registerCrashCallable("Flywheel Backend", Backend::getBackendDescriptor);
 
 		OptifineHandler.init();
@@ -74,7 +70,6 @@ public class Flywheel {
 		modEventBus.addListener(StitchedSprite::onTextureStitchPost);
 
 		MinecraftForge.EVENT_BUS.addListener(FlwCommands::registerClientCommands);
-
 		MinecraftForge.EVENT_BUS.<ReloadRenderersEvent>addListener(ProgramCompiler::invalidateAll);
 
 		VanillaInstances.init();
@@ -84,10 +79,18 @@ public class Flywheel {
 		// Only thing I've seen that's close to a fix is to force the class to load before trying to use it.
 		// From the SpongePowered discord:
 		// https://discord.com/channels/142425412096491520/626802111455297538/675007581168599041
-		LOGGER.info("Successfully loaded {}", PausedPartialTickAccessor.class.getName());
+		LOGGER.debug("Successfully loaded {}", PausedPartialTickAccessor.class.getName());
 	}
 
-	private void setup(final FMLCommonSetupEvent event) {
+	private static void setup(final FMLCommonSetupEvent event) {
 		ArgumentTypes.register(rl("engine").toString(), EngineArgument.class, new EmptyArgumentSerializer<>(EngineArgument::getInstance));
+	}
+
+	public static ArtifactVersion getVersion() {
+		return version;
+	}
+
+	public static ResourceLocation rl(String path) {
+		return new ResourceLocation(ID, path);
 	}
 }

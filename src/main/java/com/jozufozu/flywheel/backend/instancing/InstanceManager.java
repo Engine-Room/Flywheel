@@ -14,7 +14,9 @@ import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
+import com.jozufozu.flywheel.backend.instancing.ratelimit.BandedPrimeLimiter;
 import com.jozufozu.flywheel.backend.instancing.ratelimit.DistanceUpdateLimiter;
+import com.jozufozu.flywheel.backend.instancing.ratelimit.NonLimiter;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.light.LightUpdater;
 import com.mojang.math.Vector3f;
@@ -46,9 +48,16 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		this.dynamicInstances = new Object2ObjectOpenHashMap<>();
 		this.tickableInstances = new Object2ObjectOpenHashMap<>();
 
-		FlwConfig config = FlwConfig.get();
-		frame = config.createUpdateLimiter();
-		tick = config.createUpdateLimiter();
+		frame = createUpdateLimiter();
+		tick = createUpdateLimiter();
+	}
+
+	protected DistanceUpdateLimiter createUpdateLimiter() {
+		if (FlwConfig.get().limitUpdates()) {
+			return new BandedPrimeLimiter();
+		} else {
+			return new NonLimiter();
+		}
 	}
 
 	/**
