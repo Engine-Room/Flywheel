@@ -2,7 +2,10 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.List;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.config.FlwCommands;
+import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
@@ -62,7 +65,6 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static void tick(Minecraft mc) {
-
 		if (!Backend.isGameActive()) {
 			return;
 		}
@@ -104,7 +106,17 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static void getDebugString(List<String> debug) {
-		instanceWorlds.get(Minecraft.getInstance().level)
-				.getDebugString(debug);
+		debug.add("");
+		debug.add("Flywheel: " + Flywheel.getVersion());
+
+		if (Backend.isOn()) {
+			InstanceWorld instanceWorld = instanceWorlds.get(Minecraft.getInstance().level);
+
+			debug.add("Update limiting: " + FlwCommands.boolToText(FlwConfig.get().limitUpdates()).getString());
+			debug.add("B: " + instanceWorld.blockEntityInstanceManager.getObjectCount() + ", E: " + instanceWorld.entityInstanceManager.getObjectCount());
+			instanceWorld.engine.addDebugInfo(debug);
+		} else {
+			debug.add("Disabled");
+		}
 	}
 }

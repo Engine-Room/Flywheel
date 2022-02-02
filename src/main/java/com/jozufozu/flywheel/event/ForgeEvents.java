@@ -12,9 +12,9 @@ import net.minecraft.client.multiplayer.ClientLevel;
 
 public class ForgeEvents {
 
-	public static void addToDebugScreen(List<String> left) {
+	public static void addToDebugScreen(List<String> right) {
 
-		InstancedRenderDispatcher.getDebugString(left);
+		InstancedRenderDispatcher.getDebugString(right);
 	}
 
 	public static void unloadWorld(ClientLevel world) {

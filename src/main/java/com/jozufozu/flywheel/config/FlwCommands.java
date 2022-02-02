@@ -18,7 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 
-public final class ConfigCommands {
+public final class FlwCommands {
 	public static void init(FlwConfig config) {
 		ConfigCommandBuilder commandBuilder = new ConfigCommandBuilder("flywheel");
 
@@ -40,6 +40,17 @@ public final class ConfigCommands {
 				},
 				(source, value) -> {
 					Component text = boolToText(value).append(new TextComponent(" normal debug mode").withStyle(ChatFormatting.WHITE));
+					source.sendFeedback(text);
+				}
+			));
+
+		commandBuilder.addOption(config.limitUpdates, (builder, option) -> booleanOptionCommand(builder, config, option,
+				(source, value) -> {
+					Component text = new TextComponent("Update limiting is currently: ").append(boolToText(value));
+					source.sendFeedback(text);
+				},
+				(source, value) -> {
+					Component text = boolToText(value).append(new TextComponent(" update limiting.").withStyle(ChatFormatting.WHITE));
 					source.sendFeedback(text);
 				}
 			));

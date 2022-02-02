@@ -38,6 +38,8 @@ public class FlwConfig {
 	public final EnumOption<FlwEngine> engine = addOption(new EnumOption<>("engine", FlwEngine.INSTANCING));
 	/** Enable or disable a debug overlay that colors pixels by their normal */
 	public final BooleanOption debugNormals = addOption(new BooleanOption("debugNormals", false));
+	/** Enable or disable instance update limiting with distance. */
+	public final BooleanOption limitUpdates = addOption(new BooleanOption("limitUpdates", true));
 
 	public FlwConfig(File file) {
 		this.file = file;
@@ -49,7 +51,7 @@ public class FlwConfig {
 
 	public static void init() {
 		INSTANCE.load();
-		ConfigCommands.init(INSTANCE);
+		FlwCommands.init(INSTANCE);
 	}
 
 	public FlwEngine getEngine() {
@@ -58,6 +60,10 @@ public class FlwConfig {
 
 	public boolean debugNormals() {
 		return debugNormals.get();
+	}
+
+	public boolean limitUpdates() {
+		return limitUpdates.get();
 	}
 
 	public void load() {

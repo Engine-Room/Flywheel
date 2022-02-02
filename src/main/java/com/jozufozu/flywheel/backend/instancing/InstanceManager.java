@@ -14,13 +14,16 @@ import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
+import com.jozufozu.flywheel.backend.instancing.ratelimit.BandedPrimeLimiter;
+import com.jozufozu.flywheel.backend.instancing.ratelimit.DistanceUpdateLimiter;
+import com.jozufozu.flywheel.backend.instancing.ratelimit.NonLimiter;
+import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.light.LightUpdater;
 import com.mojang.math.Vector3f;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
 
 public abstract class InstanceManager<T> implements InstancingEngine.OriginShiftListener {
 
@@ -33,8 +36,8 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	protected final Object2ObjectOpenHashMap<T, TickableInstance> tickableInstances;
 	protected final Object2ObjectOpenHashMap<T, DynamicInstance> dynamicInstances;
 
-	protected int frame;
-	protected int tick;
+	protected DistanceUpdateLimiter frame;
+	protected DistanceUpdateLimiter tick;
 
 	public InstanceManager(MaterialManager materialManager) {
 		this.materialManager = materialManager;
@@ -44,6 +47,17 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 
 		this.dynamicInstances = new Object2ObjectOpenHashMap<>();
 		this.tickableInstances = new Object2ObjectOpenHashMap<>();
+
+		frame = createUpdateLimiter();
+		tick = createUpdateLimiter();
+	}
+
+	protected DistanceUpdateLimiter createUpdateLimiter() {
+		if (FlwConfig.get().limitUpdates()) {
+			return new BandedPrimeLimiter();
+		} else {
+			return new NonLimiter();
+		}
 	}
 
 	/**
@@ -86,7 +100,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	 * </p>
 	 */
 	public void tick(TaskEngine taskEngine, double cameraX, double cameraY, double cameraZ) {
-		tick++;
+		tick.tick();
 		processQueuedUpdates();
 
 		// integer camera pos as a micro-optimization
@@ -112,7 +126,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		}
 	}
 
-	private void tickInstance(int cX, int cY, int cZ, TickableInstance instance) {
+	protected void tickInstance(int cX, int cY, int cZ, TickableInstance instance) {
 		if (!instance.decreaseTickRateWithDistance()) {
 			instance.tick();
 			return;
@@ -124,11 +138,11 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		int dY = pos.getY() - cY;
 		int dZ = pos.getZ() - cZ;
 
-		if ((tick % getUpdateDivisor(dX, dY, dZ)) == 0) instance.tick();
+		if (tick.shouldUpdate(dX, dY, dZ)) instance.tick();
 	}
 
 	public void beginFrame(TaskEngine taskEngine, Camera info) {
-		frame++;
+		frame.tick();
 		processQueuedAdditions();
 
 		Vector3f look = info.getLookVector();
@@ -151,13 +165,34 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 			List<DynamicInstance> sub = instances.subList(start, end);
 			taskEngine.submit(() -> {
 				for (DynamicInstance dyn : sub) {
-					if (!dyn.decreaseFramerateWithDistance() || shouldFrameUpdate(dyn.getWorldPosition(), lookX, lookY, lookZ, cX, cY, cZ))
-						dyn.beginFrame();
+					updateInstance(dyn, lookX, lookY, lookZ, cX, cY, cZ);
 				}
 			});
 
 			start += incr;
 		}
+	}
+
+	protected void updateInstance(DynamicInstance dyn, float lookX, float lookY, float lookZ, int cX, int cY, int cZ) {
+		if (!dyn.decreaseFramerateWithDistance()) {
+			dyn.beginFrame();
+			return;
+		}
+
+		BlockPos worldPos = dyn.getWorldPosition();
+		int dX = worldPos.getX() - cX;
+		int dY = worldPos.getY() - cY;
+		int dZ = worldPos.getZ() - cZ;
+
+		// is it more than 2 blocks behind the camera?
+		int dist = 2;
+		float dot = (dX + lookX * dist) * lookX + (dY + lookY * dist) * lookY + (dZ + lookZ * dist) * lookZ;
+		if (dot < 0) {
+			return;
+		}
+
+		if (frame.shouldUpdate(dX, dY, dZ))
+			dyn.beginFrame();
 	}
 
 	public void add(T obj) {
@@ -266,29 +301,6 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		if (queued.size() > 0) {
 			queued.forEach(this::update);
 		}
-	}
-
-	protected boolean shouldFrameUpdate(BlockPos worldPos, float lookX, float lookY, float lookZ, int cX, int cY, int cZ) {
-		int dX = worldPos.getX() - cX;
-		int dY = worldPos.getY() - cY;
-		int dZ = worldPos.getZ() - cZ;
-
-		// is it more than 2 blocks behind the camera?
-		int dist = 2;
-		float dot = (dX + lookX * dist) * lookX + (dY + lookY * dist) * lookY + (dZ + lookZ * dist) * lookZ;
-		if (dot < 0) return false;
-
-		return (frame % getUpdateDivisor(dX, dY, dZ)) == 0;
-	}
-
-	// 1 followed by the prime numbers
-	private static final int[] divisorSequence = new int[] { 1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31 };
-	protected int getUpdateDivisor(int dX, int dY, int dZ) {
-		int dSq = dX * dX + dY * dY + dZ * dZ;
-
-		int i = (dSq / 2048);
-
-		return divisorSequence[Mth.clamp(i, 0, divisorSequence.length - 1)];
 	}
 
 	protected void addInternal(T obj) {

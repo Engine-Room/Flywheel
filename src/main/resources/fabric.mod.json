@@ -21,7 +21,7 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "com.jozufozu.flywheel.FlywheelClient"
+      "com.jozufozu.flywheel.Flywheel"
     ]
   },
   "mixins": [

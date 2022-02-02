@@ -21,8 +21,6 @@ public class Backend {
 
 	private static FlwEngine engine;
 
-	public static GlCompat compat;
-
 	private static final Loader loader = new Loader();
 
 	public static FlwEngine getEngine() {
@@ -43,9 +41,7 @@ public class Backend {
 	}
 
 	public static void refresh() {
-		compat = new GlCompat();
-
-		engine = chooseEngine(compat);
+		engine = chooseEngine();
 	}
 
 	public static boolean isOn() {
@@ -77,7 +73,7 @@ public class Backend {
 		RenderWork.enqueue(Minecraft.getInstance().levelRenderer::allChanged);
 	}
 
-	private static FlwEngine chooseEngine(GlCompat compat) {
+	private static FlwEngine chooseEngine() {
 		FlwEngine preferredChoice = FlwConfig.get()
 				.getEngine();
 
@@ -85,7 +81,7 @@ public class Backend {
 		boolean canUseEngine = switch (preferredChoice) {
 			case OFF -> true;
 			case BATCHING -> !usingShaders;
-			case INSTANCING -> !usingShaders && compat.instancedArraysSupported();
+			case INSTANCING -> !usingShaders && GlCompat.getInstance().instancedArraysSupported();
 		};
 
 		return canUseEngine ? preferredChoice : FlwEngine.OFF;

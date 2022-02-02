@@ -8,10 +8,10 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.opengl.GL30;
 
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlFence;
 import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.gl.error.GlException;
+import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 
 public class PersistentGlBuffer extends GlBuffer implements Mappable {
 
@@ -46,7 +46,7 @@ public class PersistentGlBuffer extends GlBuffer implements Mappable {
 
 		fence.clear();
 
-		Backend.compat.bufferStorage.bufferStorage(type, size, flags);
+        GlCompat.getInstance().bufferStorage.bufferStorage(type, size, flags);
 
 		ByteBuffer byteBuffer = GL30.glMapBufferRange(type.glEnum, 0, size, flags);
 
