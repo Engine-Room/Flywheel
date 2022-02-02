@@ -1,46 +1,152 @@
 package com.jozufozu.flywheel.config;
 
+import java.util.function.BiConsumer;
+
+import org.jetbrains.annotations.NotNull;
+
+import com.jozufozu.flywheel.backend.Backend;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
+import net.minecraftforge.fml.ModList;
 
 public class FlwCommands {
 	public static void registerClientCommands(RegisterClientCommandsEvent event) {
-		CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
+		FlwConfig config = FlwConfig.get();
 
-		dispatcher.register(Commands.literal("flywheel")
-				.then(debugNormalsCommand())
-				.then(backendCommand())
-				.then(limitUpdatesCommand())
-		);
-	}
+		ConfigCommandBuilder commandBuilder = new ConfigCommandBuilder("flywheel");
 
-	private static ArgumentBuilder<CommandSourceStack, ?> debugNormalsCommand() {
-		return new BooleanConfigCommand("debugNormals", BooleanConfig.NORMAL_OVERLAY).register();
-	}
-
-	private static ArgumentBuilder<CommandSourceStack, ?> limitUpdatesCommand() {
-		return new BooleanConfigCommand("limitUpdates", BooleanConfig.LIMIT_UPDATES).register();
-	}
-
-	private static ArgumentBuilder<CommandSourceStack, ?> backendCommand() {
-		return Commands.literal("backend")
+		commandBuilder.addValue(config.client.engine, "backend", (builder, value) ->
+			builder
 				.executes(context -> {
-					FlwEngine.handle(null);
-
+					LocalPlayer player = Minecraft.getInstance().player;
+					if (player != null) {
+						player.displayClientMessage(getEngineMessage(value.get()), false);
+					}
 					return Command.SINGLE_SUCCESS;
 				})
 				.then(Commands.argument("type", EngineArgument.INSTANCE)
-						.executes(context -> {
+					.executes(context -> {
+						LocalPlayer player = Minecraft.getInstance().player;
+						if (player != null) {
 							FlwEngine type = context.getArgument("type", FlwEngine.class);
+							value.set(type);
 
-							FlwEngine.handle(type);
+							Component message = getEngineMessage(type);
+							player.displayClientMessage(message, false);
 
-							return Command.SINGLE_SUCCESS;
-						}));
+							Backend.reloadWorldRenderers();
+						}
+						return Command.SINGLE_SUCCESS;
+					})));
+
+		commandBuilder.addValue(config.client.debugNormals, "debugNormals", (builder, value) -> booleanValueCommand(builder, config, value,
+				(source, bool) -> {
+					LocalPlayer player = Minecraft.getInstance().player;
+					if (player == null) return;
+
+					Component text = new TextComponent("Normal debug mode is currently: ").append(boolToText(bool));
+					player.displayClientMessage(text, false);
+				},
+				(source, bool) -> {
+					LocalPlayer player = Minecraft.getInstance().player;
+					if (player == null) return;
+
+					Component text = boolToText(bool).append(new TextComponent(" normal debug mode").withStyle(ChatFormatting.WHITE));
+					player.displayClientMessage(text, false);
+				}
+			));
+
+		commandBuilder.addValue(config.client.limitUpdates, "limitUpdates", (builder, value) -> booleanValueCommand(builder, config, value,
+				(source, bool) -> {
+					LocalPlayer player = Minecraft.getInstance().player;
+					if (player == null) return;
+
+					Component text = new TextComponent("Update limiting is currently: ").append(boolToText(bool));
+					player.displayClientMessage(text, false);
+				},
+				(source, bool) -> {
+					LocalPlayer player = Minecraft.getInstance().player;
+					if (player == null) return;
+
+					Component text = boolToText(bool).append(new TextComponent(" update limiting.").withStyle(ChatFormatting.WHITE));
+					player.displayClientMessage(text, false);
+
+					Backend.reloadWorldRenderers();
+				}
+			));
+
+		commandBuilder.build(event.getDispatcher());
+	}
+
+	public static void booleanValueCommand(LiteralArgumentBuilder<CommandSourceStack> builder, FlwConfig config, ConfigValue<Boolean> value, BiConsumer<CommandSourceStack, Boolean> displayAction, BiConsumer<CommandSourceStack, Boolean> setAction) {
+		builder
+			.executes(context -> {
+				displayAction.accept(context.getSource(), value.get());
+				return Command.SINGLE_SUCCESS;
+			})
+			.then(Commands.literal("on")
+				.executes(context -> {
+					value.set(true);
+					setAction.accept(context.getSource(), value.get());
+					return Command.SINGLE_SUCCESS;
+				}))
+			.then(Commands.literal("off")
+				.executes(context -> {
+					value.set(false);
+					setAction.accept(context.getSource(), value.get());
+					return Command.SINGLE_SUCCESS;
+				}));
+	}
+
+	public static MutableComponent boolToText(boolean b) {
+		return b ? new TextComponent("enabled").withStyle(ChatFormatting.DARK_GREEN) : new TextComponent("disabled").withStyle(ChatFormatting.RED);
+	}
+
+	public static Component getEngineMessage(@NotNull FlwEngine type) {
+		return switch (type) {
+			case OFF -> new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED);
+			case INSTANCING -> new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN);
+			case BATCHING -> {
+				MutableComponent msg = new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN);
+
+				if (ModList.get()
+						.isLoaded("create")) {
+					// FIXME: batching engine contraption lighting issues
+					msg.append(new TextComponent("\nWARNING: May cause issues with Create Contraptions").withStyle(ChatFormatting.RED));
+				}
+
+				yield msg;
+			}
+		};
+	}
+
+	public static class ConfigCommandBuilder {
+		protected LiteralArgumentBuilder<CommandSourceStack> command;
+
+		public ConfigCommandBuilder(String baseLiteral) {
+			command = Commands.literal(baseLiteral);
+		}
+
+		public <T extends ConfigValue<?>> void addValue(T value, String subcommand, BiConsumer<LiteralArgumentBuilder<CommandSourceStack>, T> consumer) {
+			LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(subcommand);
+			consumer.accept(builder, value);
+			command.then(builder);
+		}
+
+		public void build(CommandDispatcher<CommandSourceStack> dispatcher) {
+			dispatcher.register(command);
+		}
 	}
 }

@@ -54,6 +54,7 @@ public class ProgramCompiler<P extends GlProgram> extends Memoizer<ProgramContex
 		return super.get(ctx);
 	}
 
+	@Override
 	public void invalidate() {
 		super.invalidate();
 		vertexCompiler.invalidate();
