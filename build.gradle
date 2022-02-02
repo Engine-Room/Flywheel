@@ -58,7 +58,7 @@ dependencies {
     modCompileOnly 'curse.maven:starlight-521783:3554912'
 
     modCompileOnly 'maven.modrinth:iris:1.18.x-v1.1.4'
-    modImplementation 'maven.modrinth:sodium:mc1.18.1-0.4.0-alpha6'
+    modCompileOnly 'maven.modrinth:sodium:mc1.18.1-0.4.0-alpha6'
     implementation "org.joml:joml:1.10.2"
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
