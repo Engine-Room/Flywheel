@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(ChunkRenderRebuildTask.class)
+@Mixin(value = ChunkRenderRebuildTask.class, remap = false)
 public class ChunkRenderRebuildTaskMixin {
 	@Redirect(method = "performBuild", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/render/chunk/data/ChunkRenderData$Builder;addBlockEntity(Lnet/minecraft/world/level/block/entity/BlockEntity;Z)V"))
 	private void skipBlockEntities(ChunkRenderData.Builder instance, BlockEntity be, boolean cull) {
