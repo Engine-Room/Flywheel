@@ -77,7 +77,7 @@ public class Backend {
 		FlwEngine preferredChoice = FlwConfig.get()
 				.getEngine();
 
-		boolean usingShaders = IrisShaderHandler.isShaderPackInUse();
+		boolean usingShaders = IrisShaderHandler.areShadersEnabled();
 		boolean canUseEngine = switch (preferredChoice) {
 			case OFF -> true;
 			case BATCHING -> !usingShaders;
