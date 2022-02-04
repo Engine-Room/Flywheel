@@ -26,7 +26,8 @@
   },
   "mixins": [
     "flywheel.mixins.json",
-    "flywheel.fabric.mixins.json"
+    "flywheel.fabric.mixins.json",
+    "flywheel.sodium.mixins.json"
   ],
 
   "depends": {
