@@ -10,6 +10,7 @@ import com.jozufozu.flywheel.util.Pair;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface Material<D extends InstanceData> {
@@ -24,6 +25,10 @@ public interface Material<D extends InstanceData> {
 
 	default Instancer<D> getModel(PartialModel partial, BlockState referenceState) {
 		return model(partial, () -> new BlockModel(partial.get(), referenceState));
+	}
+
+	default Instancer<D> getModel(PartialModel partial) {
+		return model(partial, () -> new BlockModel(partial.get(), Blocks.AIR.defaultBlockState()));
 	}
 
 	default Instancer<D> getModel(PartialModel partial, BlockState referenceState, Direction dir) {
