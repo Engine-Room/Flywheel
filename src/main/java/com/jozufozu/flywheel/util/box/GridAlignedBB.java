@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.util.box;
 
+import java.util.Collection;
+
 import com.jozufozu.flywheel.util.RenderMath;
 
 import net.minecraft.core.BlockPos;
@@ -61,7 +63,28 @@ public class GridAlignedBB implements ImmutableBox {
 		return new GridAlignedBB(startX, 0, startZ, startX + 16, 256, startZ + 16);
 	}
 
-	public void fixMinMax() {
+	public static ImmutableBox containingAll(Collection<BlockPos> positions) {
+		if (positions.isEmpty()) {
+			return new GridAlignedBB();
+		}
+		int minX = Integer.MAX_VALUE;
+		int minY = Integer.MAX_VALUE;
+		int minZ = Integer.MAX_VALUE;
+		int maxX = Integer.MIN_VALUE;
+		int maxY = Integer.MIN_VALUE;
+		int maxZ = Integer.MIN_VALUE;
+		for (BlockPos pos : positions) {
+			minX = Math.min(minX, pos.getX());
+			minY = Math.min(minY, pos.getY());
+			minZ = Math.min(minZ, pos.getZ());
+			maxX = Math.max(maxX, pos.getX());
+			maxY = Math.max(maxY, pos.getY());
+			maxZ = Math.max(maxZ, pos.getZ());
+		}
+		return new GridAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+	}
+
+    public void fixMinMax() {
 		int minX = Math.min(this.minX, this.maxX);
 		int minY = Math.min(this.minY, this.maxY);
 		int minZ = Math.min(this.minZ, this.maxZ);
