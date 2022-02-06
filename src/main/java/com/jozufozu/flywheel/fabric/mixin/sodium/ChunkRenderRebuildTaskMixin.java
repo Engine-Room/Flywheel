@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 @Mixin(value = ChunkRenderRebuildTask.class, remap = false)
 public class ChunkRenderRebuildTaskMixin {
-	@Redirect(method = "performBuild", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderDispatcher;getRenderer(Lnet/minecraft/world/level/block/entity/BlockEntity;)Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;"))
+	@Redirect(method = "performBuild", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderDispatcher;getRenderer(Lnet/minecraft/world/level/block/entity/BlockEntity;)Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;", remap = true))
 	private BlockEntityRenderer<?> redirectGetRenderer(BlockEntityRenderDispatcher dispatcher, BlockEntity blockEntity) {
 		if (Backend.canUseInstancing(blockEntity.getLevel())) {
 			if (InstancedRenderRegistry.canInstance(blockEntity.getType()))
