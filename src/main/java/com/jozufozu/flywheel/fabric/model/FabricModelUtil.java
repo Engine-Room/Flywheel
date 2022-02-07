@@ -10,6 +10,9 @@ import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
 import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
 import net.fabricmc.fabric.impl.client.indigo.renderer.RenderMaterialImpl;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class FabricModelUtil {
 	public static final boolean INDIUM_LOADED = FabricLoader.getInstance().isModLoaded("indium");
@@ -59,6 +62,10 @@ public class FabricModelUtil {
 
 	public static BlendMode getBlendMode(RenderMaterial material) {
 		return BLEND_MODE_GETTER.getBlendMode(material);
+	}
+
+	public static boolean doesLayerMatch(BlockState modelState, RenderType layer) {
+		return ItemBlockRenderTypes.getChunkRenderType(modelState) == layer;
 	}
 
 	private interface BlendModeGetter {

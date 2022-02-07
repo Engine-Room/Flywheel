@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import com.jozufozu.flywheel.core.virtual.VirtualEmptyBlockGetter;
 import com.jozufozu.flywheel.fabric.model.CullingBakedModel;
 import com.jozufozu.flywheel.fabric.model.DefaultLayerFilteringBakedModel;
+import com.jozufozu.flywheel.fabric.model.FabricModelUtil;
 import com.jozufozu.flywheel.fabric.model.LayerFilteringBakedModel;
 import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.transform.TransformStack;
@@ -16,6 +17,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockModelShaper;
@@ -68,13 +70,20 @@ public class ModelUtil {
 			if (state.getRenderShape() != RenderShape.MODEL)
 				continue;
 
+			BakedModel model = blockModels.getBlockModel(state);
+			if (((FabricBakedModel) model).isVanillaAdapter()) {
+				if (!FabricModelUtil.doesLayerMatch(state, layer)) {
+					continue;
+				}
+			} else {
+				model = CullingBakedModel.wrap(model);
+				model = LayerFilteringBakedModel.wrap(model, layer);
+			}
+
 			BlockPos pos = info.pos;
 
 			ms.pushPose();
 			ms.translate(pos.getX(), pos.getY(), pos.getZ());
-			BakedModel model = blockModels.getBlockModel(state);
-			model = CullingBakedModel.wrap(model);
-			model = LayerFilteringBakedModel.wrap(model, layer);
 			modelRenderer.tesselateBlock(renderWorld, model, state, pos, ms, builder,
 					true, random, 42, OverlayTexture.NO_OVERLAY);
 			ms.popPose();

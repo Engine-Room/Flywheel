@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.fabric.model;
 import java.util.Random;
 import java.util.function.Supplier;
 
-import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.resources.model.BakedModel;
@@ -22,7 +21,7 @@ public class CullingBakedModel extends ForwardingBakedModel {
 	protected final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
 	public static BakedModel wrap(BakedModel model) {
-		if (!FabricModelUtil.FREX_LOADED && !((FabricBakedModel) model).isVanillaAdapter()) {
+		if (!FabricModelUtil.FREX_LOADED) {
 			CullingBakedModel wrapper = THREAD_LOCAL.get();
 			wrapper.wrapped = model;
 			return wrapper;

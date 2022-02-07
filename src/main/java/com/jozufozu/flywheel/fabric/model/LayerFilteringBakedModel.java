@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.fabric.model;
 import java.util.Random;
 import java.util.function.Supplier;
 
-import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -36,7 +35,7 @@ public class LayerFilteringBakedModel extends ForwardingBakedModel {
 	@Override
 	public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
 		RenderType defaultLayer = ItemBlockRenderTypes.getChunkRenderType(state);
-		if (((FabricBakedModel) wrapped).isVanillaAdapter()) {
+		if (super.isVanillaAdapter()) {
 			if (defaultLayer == targetLayer) {
 				super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
 			}
