@@ -7,7 +7,8 @@ import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
-import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
+import com.jozufozu.flywheel.util.transform.TransformStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
@@ -25,7 +26,7 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 
 	private final ModelData base;
 	private final ModelData lid;
-	private final MatrixTransformStack stack = new MatrixTransformStack();
+	private final PoseStack stack = new PoseStack();
 
 	private float lastProgress = Float.NaN;
 
@@ -40,18 +41,20 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 		}
 		Quaternion rotation = getDirection().getRotation();
 
-		stack.translate(getInstancePosition())
+		TransformStack tstack = TransformStack.cast(stack);
+
+		tstack.translate(getInstancePosition())
 				.scale(0.9995f)
 				.translateAll(0.00025)
 				.centre()
 				.multiply(rotation)
 				.unCentre();
 
-		base = makeBaseInstance().setTransform(stack.unwrap());
+		base = makeBaseInstance().setTransform(stack);
 
-		stack.translateY(0.25);
+		tstack.translateY(0.25);
 
-		lid = makeLidInstance().setTransform(stack.unwrap());
+		lid = makeLidInstance().setTransform(stack);
 	}
 
 	@Override
@@ -63,13 +66,15 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 
 		Quaternion spin = Vector3f.YP.rotationDegrees(270.0F * progress);
 
-		stack.pushPose()
+		TransformStack tstack = TransformStack.cast(stack);
+
+		tstack.pushPose()
 				.centre()
 				.multiply(spin)
 				.unCentre()
 				.translateY(progress * 0.5f);
 
-		lid.setTransform(stack.unwrap());
+		lid.setTransform(stack);
 
 		stack.popPose();
 	}

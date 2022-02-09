@@ -24,10 +24,10 @@ apply plugin: 'org.spongepowered.mixin'
 
 boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
 
-ext.buildnumber = 0
-project.buildnumber = System.getenv('BUILD_NUMBER') != null ? System.getenv('BUILD_NUMBER') : 'custom'
+ext.buildNumber = System.getenv('BUILD_NUMBER')
+if (buildNumber == null) buildNumber = 'custom'
 
-version = "${mc_update_version}-${mod_version}" + (dev ? ".${buildnumber}" : '')
+version = "${mc_update_version}-${mod_version}" + (dev ? ".${buildNumber}" : '')
 group = 'com.jozufozu.flywheel'
 archivesBaseName = 'flywheel-forge'
 
@@ -107,7 +107,7 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compileOnly fg.deobf("curse.maven:starlight-526854:3559934")
+    compileOnly fg.deobf("curse.maven:starlight-526854:3599856")
 
     // https://discord.com/channels/313125603924639766/725850371834118214/910619168821354497
     // Prevent Mixin annotation processor from getting into IntelliJ's annotation processor settings

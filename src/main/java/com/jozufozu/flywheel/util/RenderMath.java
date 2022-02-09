@@ -67,4 +67,8 @@ public class RenderMath {
 		target = target % 360;
 		return (float) (((((target - current) % 360) + 540) % 360) - 180);
 	}
+
+	public static float diffuseLightNether(float x, float y, float z) {
+		return Math.min(x * x * 0.6f + y * y * 0.9f + z * z * 0.8f, 1f);
+	}
 }
