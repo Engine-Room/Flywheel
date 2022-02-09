@@ -47,12 +47,9 @@ public class ModelTransformer {
 			normalMat = params.normal.copy();
 		}
 
-		DiffuseLightCalculator diffuseCalculator = params.diffuseCalculator;
-		if (diffuseCalculator == null) {
-			diffuseCalculator = DiffuseLightCalculator.forCurrentLevel();
-		}
+		final DiffuseLightCalculator diffuseCalculator = DiffuseLightCalculator.forCurrentLevel();
 
-		int vertexCount = reader.getVertexCount();
+		final int vertexCount = reader.getVertexCount();
 		for (int i = 0; i < vertexCount; i++) {
 			float x = reader.getX(i);
 			float y = reader.getY(i);
@@ -173,9 +170,6 @@ public class ModelTransformer {
 		public boolean useParamLight;
 		public int packedLightCoords;
 
-		// Diffuse
-		public DiffuseLightCalculator diffuseCalculator;
-
 		public Params() {
 			model = new Matrix4f();
 			normal = new Matrix3f();
@@ -193,7 +187,6 @@ public class ModelTransformer {
 			overlay = OverlayTexture.NO_OVERLAY;
 			useParamLight = false;
 			packedLightCoords = LightTexture.FULL_BRIGHT;
-			diffuseCalculator = null;
 		}
 
 		public void load(Params from) {
@@ -208,7 +201,6 @@ public class ModelTransformer {
 			overlay = from.overlay;
 			useParamLight = from.useParamLight;
 			packedLightCoords = from.packedLightCoords;
-			diffuseCalculator = from.diffuseCalculator;
 		}
 
 		public Params color(int r, int g, int b, int a) {

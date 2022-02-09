@@ -7,15 +7,11 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.function.BooleanSupplier;
 
-import org.apache.commons.lang3.mutable.MutableInt;
-
 import net.minecraft.client.Minecraft;
 
 public final class OptifineHandler {
 	public static final String OPTIFINE_ROOT_PACKAGE = "net.optifine";
 	public static final String SHADER_PACKAGE = "net.optifine.shaders";
-
-	private static final ThreadLocal<MutableInt> FORCE_DIFFUSE = ThreadLocal.withInitial(MutableInt::new);
 
 	private static boolean isOptifineInstalled;
 	private static boolean isUsingShaders;
@@ -98,24 +94,5 @@ public final class OptifineHandler {
 
 	public static boolean isShadowPass() {
 		return shadowPassSupplier.getAsBoolean();
-	}
-
-	public static void pushForceDiffuse() {
-		if (isOptifineInstalled) {
-			FORCE_DIFFUSE.get().increment();
-		}
-	}
-
-	public static void popForceDiffuse() {
-		if (isOptifineInstalled) {
-			FORCE_DIFFUSE.get().decrement();
-		}
-	}
-
-	public static boolean shouldApplyDiffuse() {
-		if (isOptifineInstalled) {
-			return !isUsingShaders || (FORCE_DIFFUSE.get().intValue() > 0);
-		}
-		return true;
 	}
 }
