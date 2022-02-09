@@ -56,7 +56,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 
 		for (BatchedMaterial<?> material : materials.values()) {
 			for (CPUInstancer<?> instancer : material.models.values()) {
-				instancer.sbb.context.outputColorDiffuse = !consumer.hasOverlay() && !OptifineHandler.usingShaders();
+				instancer.sbb.context.outputColorDiffuse = !consumer.hasOverlay() && OptifineHandler.shouldApplyDiffuse();
 				instancer.submitTasks(stack, pool, consumer);
 			}
 		}

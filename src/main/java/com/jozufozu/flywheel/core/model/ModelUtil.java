@@ -1,13 +1,13 @@
 package com.jozufozu.flywheel.core.model;
 
-import java.util.Arrays;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Random;
 import java.util.function.Supplier;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.core.virtual.VirtualEmptyBlockGetter;
 import com.jozufozu.flywheel.core.virtual.VirtualEmptyModelData;
-import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -17,7 +17,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockModelShaper;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
@@ -29,21 +29,33 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 public class ModelUtil {
-	private static final Lazy<ModelBlockRenderer> MODEL_RENDERER = Lazy.of(() -> new ModelBlockRenderer(Minecraft.getInstance().getBlockColors()));
+	/**
+	 * An alternative BlockRenderDispatcher that circumvents the Forge rendering pipeline to ensure consistency.
+	 * Meant to be used for virtual rendering.
+	 */
+	public static final BlockRenderDispatcher VANILLA_RENDERER = createVanillaRenderer();
 
-	// DOWN, UP, NORTH, SOUTH, WEST, EAST, null
-	private static final Direction[] CULL_FACES;
-
-	static {
-		Direction[] directions = Direction.values();
-
-		CULL_FACES = Arrays.copyOf(directions, directions.length + 1);
+	private static BlockRenderDispatcher createVanillaRenderer() {
+		BlockRenderDispatcher defaultDispatcher = Minecraft.getInstance().getBlockRenderer();
+		BlockRenderDispatcher dispatcher = new BlockRenderDispatcher(null, null, null);
+		try {
+			for (Field field : BlockRenderDispatcher.class.getDeclaredFields()) {
+				field.setAccessible(true);
+				field.set(dispatcher, field.get(defaultDispatcher));
+			}
+			ObfuscationReflectionHelper.setPrivateValue(BlockRenderDispatcher.class, dispatcher, new ModelBlockRenderer(Minecraft.getInstance().getBlockColors()), "f_110900_");
+		} catch (Exception e) {
+			Flywheel.LOGGER.error("Failed to initialize vanilla BlockRenderDispatcher!", e);
+			return defaultDispatcher;
+		}
+		return dispatcher;
 	}
 
 	public static BufferBuilder getBufferBuilder(BakedModel model, BlockState referenceState, PoseStack ms) {
-		ModelBlockRenderer blockRenderer = Minecraft.getInstance().getBlockRenderer().getModelRenderer();
+		ModelBlockRenderer blockRenderer = VANILLA_RENDERER.getModelRenderer();
 		BufferBuilder builder = new BufferBuilder(512);
 		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 		blockRenderer.tesselateBlock(VirtualEmptyBlockGetter.INSTANCE, model, referenceState, BlockPos.ZERO, ms, builder,
@@ -53,8 +65,7 @@ public class ModelUtil {
 	}
 
 	public static BufferBuilder getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks) {
-		ModelBlockRenderer modelRenderer = MODEL_RENDERER.get();
-		BlockModelShaper blockModels = Minecraft.getInstance().getModelManager().getBlockModelShaper();
+		ModelBlockRenderer modelRenderer = VANILLA_RENDERER.getModelRenderer();
 
 		PoseStack ms = new PoseStack();
 		Random random = new Random();
@@ -75,7 +86,7 @@ public class ModelUtil {
 
 			ms.pushPose();
 			ms.translate(pos.getX(), pos.getY(), pos.getZ());
-			modelRenderer.tesselateBlock(renderWorld, blockModels.getBlockModel(state), state, pos, ms, builder,
+			modelRenderer.tesselateBlock(renderWorld, VANILLA_RENDERER.getBlockModel(state), state, pos, ms, builder,
 					true, random, 42, OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
 			ms.popPose();
 		}

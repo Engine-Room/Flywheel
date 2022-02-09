@@ -23,7 +23,7 @@ public class ShaderCloseMixin {
 
 	@Inject(at = @At("HEAD"), method = "setScreen")
 	private void whenScreenChanges(Screen screen, CallbackInfo info) {
-		if (OptifineHandler.optifineInstalled() && screen instanceof VideoSettingsScreen) {
+		if (OptifineHandler.isOptifineInstalled() && screen instanceof VideoSettingsScreen) {
 			Screen old = this.screen;
 			if (old != null && old.getClass()
 					.getName()
