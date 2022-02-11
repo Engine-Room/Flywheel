@@ -41,8 +41,6 @@ public class Backend {
 	}
 
 	public static void refresh() {
-		OptifineHandler.refresh();
-
 		engine = chooseEngine();
 	}
 
