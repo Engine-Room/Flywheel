@@ -52,7 +52,7 @@ public class LevelRendererMixin {
 	private Frustum cullingFrustum;
 
 	@Inject(at = @At("HEAD"), method = "compileChunks")
-	private void setupRender(Camera camera, CallbackInfo ci) {
+	private void setupFrame(Camera camera, CallbackInfo ci) {
 		FlywheelEvents.BEGIN_FRAME.invoker().handleEvent(new BeginFrameEvent(level, camera, this.capturedFrustum != null ? this.capturedFrustum : this.cullingFrustum));
 	}
 
