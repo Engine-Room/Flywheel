@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.mixin;
 
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,9 +44,16 @@ public class LevelRendererMixin {
 	@Final
 	private RenderBuffers renderBuffers;
 
-	@Inject(at = @At("HEAD"), method = "setupRender")
-	private void setupRender(Camera camera, Frustum frustum, boolean queue, boolean isSpectator, CallbackInfo ci) {
-		FlywheelEvents.BEGIN_FRAME.invoker().handleEvent(new BeginFrameEvent(level, camera, frustum));
+	@Shadow
+	@Nullable
+	private Frustum capturedFrustum;
+
+	@Shadow
+	private Frustum cullingFrustum;
+
+	@Inject(at = @At("HEAD"), method = "compileChunks")
+	private void setupRender(Camera camera, CallbackInfo ci) {
+		FlywheelEvents.BEGIN_FRAME.invoker().handleEvent(new BeginFrameEvent(level, camera, this.capturedFrustum != null ? this.capturedFrustum : this.cullingFrustum));
 	}
 
 	@Unique
