@@ -9,7 +9,8 @@ import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
-import com.jozufozu.flywheel.util.transform.MatrixTransformStack;
+import com.jozufozu.flywheel.util.transform.TransformStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.client.renderer.RenderType;
@@ -25,7 +26,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 
 	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
 
-	MatrixTransformStack stack = new MatrixTransformStack();
+	private final PoseStack stack = new PoseStack();
 
 	private final ModelData body;
 	private ModelData contents;
@@ -53,11 +54,12 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 
 	@Override
 	public void beginFrame() {
+		TransformStack tstack = TransformStack.cast(stack);
 		stack.setIdentity();
 		float pt = AnimationTickHolder.getPartialTicks();
 
 		Vec3i originCoordinate = materialManager.getOriginCoordinate();
-		stack.translate(
+		tstack.translate(
 				Mth.lerp(pt, entity.xOld, entity.getX()) - originCoordinate.getX(),
 				Mth.lerp(pt, entity.yOld, entity.getY()) - originCoordinate.getY(),
 				Mth.lerp(pt, entity.zOld, entity.getZ()) - originCoordinate.getZ());
@@ -69,8 +71,8 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		float f = (((float)(i >> 16 & 7L) + 0.5F) / 8 - 0.5F) * 0.004F;
 		float f1 = (((float)(i >> 20 & 7L) + 0.5F) / 8 - 0.5F) * 0.004F;
 		float f2 = (((float)(i >> 24 & 7L) + 0.5F) / 8 - 0.5F) * 0.004F;
-		stack.translate(f, f1, f2);
-		stack.nudge(entity.getId());
+		tstack.translate(f, f1, f2);
+		tstack.nudge(entity.getId());
 		double d0 = Mth.lerp(pt, entity.xOld, entity.getX());
 		double d1 = Mth.lerp(pt, entity.yOld, entity.getY());
 		double d2 = Mth.lerp(pt, entity.zOld, entity.getZ());
@@ -87,7 +89,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 				vector3d2 = vector3d;
 			}
 
-			stack.translate(vector3d.x - d0, (vector3d1.y + vector3d2.y) / 2.0D - d1, vector3d.z - d2);
+			tstack.translate(vector3d.x - d0, (vector3d1.y + vector3d2.y) / 2.0D - d1, vector3d.z - d2);
 			Vec3 vector3d3 = vector3d2.add(-vector3d1.x, -vector3d1.y, -vector3d1.z);
 			if (vector3d3.length() != 0.0D) {
 				vector3d3 = vector3d3.normalize();
@@ -96,9 +98,9 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 			}
 		}
 
-		stack.translate(0.0D, 0.375D, 0.0D);
-		stack.multiply(Vector3f.YP.rotationDegrees(180 - yaw));
-		stack.multiply(Vector3f.ZP.rotationDegrees(-f3));
+		tstack.translate(0.0D, 0.375D, 0.0D);
+		tstack.multiply(Vector3f.YP.rotationDegrees(180 - yaw));
+		tstack.multiply(Vector3f.ZP.rotationDegrees(-f3));
 		float f5 = (float)entity.getHurtTime() - pt;
 		float f6 = entity.getDamage() - pt;
 		if (f6 < 0) {
@@ -106,20 +108,20 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		}
 
 		if (f5 > 0) {
-			stack.multiply(Vector3f.XP.rotationDegrees(Mth.sin(f5) * f5 * f6 / 10 * (float)entity.getHurtDir()));
+			tstack.multiply(Vector3f.XP.rotationDegrees(Mth.sin(f5) * f5 * f6 / 10 * (float)entity.getHurtDir()));
 		}
 
 		int j = entity.getDisplayOffset();
 		if (contents != null) {
-			stack.pushPose();
-			stack.scale(0.75F);
-			stack.translate(-0.5D, (float)(j - 8) / 16, 0.5D);
-			stack.multiply(Vector3f.YP.rotationDegrees(90));
-			contents.setTransform(stack.unwrap());
-			stack.popPose();
+			tstack.pushPose();
+			tstack.scale(0.75F);
+			tstack.translate(-0.5D, (float)(j - 8) / 16, 0.5D);
+			tstack.multiply(Vector3f.YP.rotationDegrees(90));
+			contents.setTransform(stack);
+			tstack.popPose();
 		}
 
-		body.setTransform(stack.unwrap());
+		body.setTransform(stack);
 	}
 
 	@Override

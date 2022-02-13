@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.core.model;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 import java.util.function.Supplier;
@@ -10,7 +9,6 @@ import com.jozufozu.flywheel.fabric.model.CullingBakedModel;
 import com.jozufozu.flywheel.fabric.model.DefaultLayerFilteringBakedModel;
 import com.jozufozu.flywheel.fabric.model.FabricModelUtil;
 import com.jozufozu.flywheel.fabric.model.LayerFilteringBakedModel;
-import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -20,7 +18,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockModelShaper;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
@@ -32,17 +30,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class ModelUtil {
-	private static final Lazy<ModelBlockRenderer> MODEL_RENDERER = Lazy.of(() -> new ModelBlockRenderer(Minecraft.getInstance().getBlockColors()));
-
-	// DOWN, UP, NORTH, SOUTH, WEST, EAST, null
-	private static final Direction[] CULL_FACES;
-
-	static {
-		Direction[] directions = Direction.values();
-
-		CULL_FACES = Arrays.copyOf(directions, directions.length + 1);
-	}
-
 	public static BufferBuilder getBufferBuilder(BakedModel model, BlockState referenceState, PoseStack ms) {
 		ModelBlockRenderer blockRenderer = Minecraft.getInstance().getBlockRenderer().getModelRenderer();
 		BufferBuilder builder = new BufferBuilder(512);
@@ -55,8 +42,8 @@ public class ModelUtil {
 	}
 
 	public static BufferBuilder getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks) {
-		ModelBlockRenderer modelRenderer = MODEL_RENDERER.get();
-		BlockModelShaper blockModels = Minecraft.getInstance().getModelManager().getBlockModelShaper();
+		BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
+		ModelBlockRenderer modelRenderer = dispatcher.getModelRenderer();
 
 		PoseStack ms = new PoseStack();
 		Random random = new Random();
@@ -70,7 +57,7 @@ public class ModelUtil {
 			if (state.getRenderShape() != RenderShape.MODEL)
 				continue;
 
-			BakedModel model = blockModels.getBlockModel(state);
+			BakedModel model = dispatcher.getBlockModel(state);
 			if (((FabricBakedModel) model).isVanillaAdapter()) {
 				if (!FabricModelUtil.doesLayerMatch(state, layer)) {
 					continue;

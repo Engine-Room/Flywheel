@@ -19,10 +19,6 @@ public class IrisShaderHandler {
 	private IrisShaderHandler() {
 	}
 
-	public static boolean areShadersEnabled() {
-		return HANDLER.areShadersEnabled();
-	}
-
 	public static boolean isShaderPackInUse() {
 		return HANDLER.isShaderPackInUse();
 	}
@@ -32,10 +28,6 @@ public class IrisShaderHandler {
 	}
 
 	private interface InternalHandler {
-		default boolean areShadersEnabled() {
-			return false;
-		};
-
 		default boolean isShaderPackInUse() {
 			return false;
 		};
@@ -46,11 +38,6 @@ public class IrisShaderHandler {
 	}
 
 	private static class InternalHandlerImpl implements InternalHandler {
-		@Override
-		public boolean areShadersEnabled() {
-			return IrisApi.getInstance().getConfig().areShadersEnabled();
-		};
-
 		@Override
 		public boolean isShaderPackInUse() {
 			return IrisApi.getInstance().isShaderPackInUse();

@@ -12,6 +12,7 @@ import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
+import com.jozufozu.flywheel.util.ClientLevelExtension;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -130,7 +131,8 @@ public class InstanceWorld {
 	public void loadEntities(ClientLevel world) {
 		// Block entities are loaded while chunks are baked.
 		// Entities are loaded with the world, so when chunks are reloaded they need to be re-added.
-		world.entitiesForRendering()
+		ClientLevelExtension.cast(world)
+				.flywheel$getAllLoadedEntities()
 				.forEach(entityInstanceManager::add);
 	}
 

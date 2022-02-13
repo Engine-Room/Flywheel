@@ -9,7 +9,7 @@
     "BufferBuilderMixin",
     "BufferUploaderMixin",
     "CameraMixin",
-    "CancelEntityRenderMixin",
+    "ClientLevelMixin",
     "ChunkRebuildHooksMixin",
     "EntityTypeMixin",
     "FixFabulousDepthMixin",

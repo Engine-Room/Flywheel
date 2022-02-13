@@ -32,7 +32,7 @@ public class Backend {
 	 * (Meshlet, MDI, GL31 Draw Instanced are planned), this will name which one is in use.
 	 */
 	public static String getBackendDescriptor() {
-		return engine == null ? "" : engine.getProperName();
+		return engine == null ? "Uninitialized" : engine.getProperName();
 	}
 
 	@Nullable
@@ -77,7 +77,7 @@ public class Backend {
 		FlwEngine preferredChoice = FlwConfig.get()
 				.getEngine();
 
-		boolean usingShaders = IrisShaderHandler.areShadersEnabled();
+		boolean usingShaders = IrisShaderHandler.isShaderPackInUse();
 		boolean canUseEngine = switch (preferredChoice) {
 			case OFF -> true;
 			case BATCHING -> !usingShaders;

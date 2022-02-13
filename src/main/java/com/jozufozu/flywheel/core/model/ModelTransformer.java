@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.core.model;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
-import com.jozufozu.flywheel.util.RenderMath;
+import com.jozufozu.flywheel.util.DiffuseLightCalculator;
 import com.jozufozu.flywheel.util.transform.Transform;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -47,7 +47,9 @@ public class ModelTransformer {
 			normalMat = params.normal.copy();
 		}
 
-		int vertexCount = reader.getVertexCount();
+		final DiffuseLightCalculator diffuseCalculator = DiffuseLightCalculator.forCurrentLevel();
+
+		final int vertexCount = reader.getVertexCount();
 		for (int i = 0; i < vertexCount; i++) {
 			float x = reader.getX(i);
 			float y = reader.getY(i);
@@ -67,23 +69,26 @@ public class ModelTransformer {
 			float ny = normal.y();
 			float nz = normal.z();
 
+			byte r, g, b, a;
 			if (params.useParamColor) {
-				if (context.outputColorDiffuse) {
-					float instanceDiffuse = RenderMath.diffuseLight(nx, ny, nz);
-					int colorR = transformColor(params.r, instanceDiffuse);
-					int colorG = transformColor(params.g, instanceDiffuse);
-					int colorB = transformColor(params.b, instanceDiffuse);
-					builder.color(colorR, colorG, colorB, params.a);
-				} else {
-					builder.color(params.r, params.g, params.b, params.a);
-				}
+				r = (byte) params.r;
+				g = (byte) params.g;
+				b = (byte) params.b;
+				a = (byte) params.a;
 			} else {
-				if (context.outputColorDiffuse) {
-					int d = RenderMath.unb(RenderMath.diffuseLight(nx, ny, nz));
-					builder.color(d, d, d, 0xFF);
-				} else {
-					builder.color(reader.getR(i), reader.getG(i), reader.getB(i), reader.getA(i));
-				}
+				r = reader.getR(i);
+				g = reader.getG(i);
+				b = reader.getB(i);
+				a = reader.getA(i);
+			}
+			if (context.outputColorDiffuse) {
+				float instanceDiffuse = diffuseCalculator.getDiffuse(nx, ny, nz);
+				int colorR = transformColor(r, instanceDiffuse);
+				int colorG = transformColor(g, instanceDiffuse);
+				int colorB = transformColor(b, instanceDiffuse);
+				builder.color(colorR, colorG, colorB, a);
+			} else {
+				builder.color(r, g, b, a);
 			}
 
 			//builder.color(Math.max(0, (int) (nx * 255)), Math.max(0, (int) (ny * 255)), Math.max(0, (int) (nz * 255)), 0xFF);
@@ -117,6 +122,10 @@ public class ModelTransformer {
 		return "ModelTransformer[" + model + ']';
 	}
 
+	public static int transformColor(byte component, float scale) {
+		return Mth.clamp((int) (Byte.toUnsignedInt(component) * scale), 0, 255);
+	}
+
 	public static int transformColor(int component, float scale) {
 		return Mth.clamp((int) (component * scale), 0, 255);
 	}
@@ -136,7 +145,6 @@ public class ModelTransformer {
 		 * Do we need to bake diffuse lighting into the output colors?
 		 */
 		public boolean outputColorDiffuse = true;
-
 	}
 
 	public static class Params implements Transform<Params> {
