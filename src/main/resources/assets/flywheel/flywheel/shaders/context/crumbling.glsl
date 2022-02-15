@@ -1,5 +1,4 @@
 #use "flywheel:context/fog.glsl"
-#use "flywheel:core/diffuse.glsl"
 
 uniform float uTime;
 uniform mat4 uViewProjection;
