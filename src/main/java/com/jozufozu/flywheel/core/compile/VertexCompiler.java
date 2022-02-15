@@ -5,6 +5,7 @@ import java.util.Objects;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.core.Templates;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
 import com.jozufozu.flywheel.core.source.FileIndexImpl;
 import com.jozufozu.flywheel.core.source.FileResolution;
@@ -40,6 +41,7 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 
 		FileIndexImpl index = new FileIndexImpl();
 
+		Templates.DIFFUSE_FILE.getFile().generateFinalSource(index, finalSource);
 		header.getFile().generateFinalSource(index, finalSource);
 
 		key.file.generateFinalSource(index, finalSource);
