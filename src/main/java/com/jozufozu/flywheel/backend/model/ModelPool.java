@@ -35,16 +35,14 @@ public class ModelPool implements ModelAllocator {
 	 * Create a new model pool.
 	 *
 	 * @param vertexType The vertex type of the models that will be stored in the pool.
-	 * @param initialSize The initial size of the pool, in vertices.
 	 */
-	public ModelPool(VertexType vertexType, int initialSize) {
+	public ModelPool(VertexType vertexType) {
 		this.vertexType = vertexType;
 		int stride = vertexType.getStride();
 
 		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
 
 		vbo.bind();
-		vbo.ensureCapacity((long) stride * initialSize);
 		vbo.setGrowthMargin(stride * 64);
 	}
 
