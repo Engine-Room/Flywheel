@@ -16,7 +16,7 @@ import com.jozufozu.flywheel.core.QuadConverter;
  * </p>
  *
  * <pre>{@code
- * IModel model = ...;
+ * Model model = ...;
  * VecBuffer into = ...;
  *
  * int initial = VecBuffer.unwrap().position();

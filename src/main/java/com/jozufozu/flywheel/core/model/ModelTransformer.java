@@ -1,5 +1,8 @@
 package com.jozufozu.flywheel.core.model;
 
+import java.util.function.IntPredicate;
+
+import com.jozufozu.flywheel.api.vertex.ShadedVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.util.DiffuseLightCalculator;
 import com.jozufozu.flywheel.util.transform.Transform;
@@ -19,12 +22,18 @@ public class ModelTransformer {
 
 	private final Model model;
 	private final VertexList reader;
+	private final IntPredicate shadedPredicate;
 
 	public final Context context = new Context();
 
 	public ModelTransformer(Model model) {
 		this.model = model;
 		reader = model.getReader();
+		if (reader instanceof ShadedVertexList shaded) {
+			shadedPredicate = shaded::isShaded;
+		} else {
+			shadedPredicate = index -> true;
+		}
 	}
 
 	public void renderInto(Params params, PoseStack input, VertexConsumer builder) {
@@ -82,7 +91,7 @@ public class ModelTransformer {
 				a = reader.getA(i);
 			}
 			if (context.outputColorDiffuse) {
-				float instanceDiffuse = diffuseCalculator.getDiffuse(nx, ny, nz);
+				float instanceDiffuse = diffuseCalculator.getDiffuse(nx, ny, nz, shadedPredicate.test(i));
 				int colorR = transformColor(r, instanceDiffuse);
 				int colorG = transformColor(g, instanceDiffuse);
 				int colorB = transformColor(b, instanceDiffuse);

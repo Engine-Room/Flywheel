@@ -12,6 +12,8 @@ import com.mojang.blaze3d.vertex.VertexFormat;
  */
 public interface BufferBuilderExtension {
 
+	int flywheel$getVertices();
+
 	/**
 	 * Frees the internal ByteBuffer, if it exists.
 	 */
@@ -24,4 +26,12 @@ public interface BufferBuilderExtension {
 	 * @param vertexCount The number of vertices in the buffer.
 	 */
 	void flywheel$injectForRender(ByteBuffer buffer, VertexFormat format, int vertexCount);
+
+	/**
+	 * Appends the remaining bytes from the given buffer to this BufferBuilder.
+	 * @param buffer The buffer from which to copy bytes.
+	 * @throws IllegalStateException If this BufferBuilder is not started or is the process of writing a vertex
+	 * @throws IllegalArgumentException If the given buffer does not contain a whole number of vertices
+	 */
+	void flywheel$appendBufferUnsafe(ByteBuffer buffer);
 }
