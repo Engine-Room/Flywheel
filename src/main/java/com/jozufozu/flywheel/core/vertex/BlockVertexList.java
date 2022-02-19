@@ -2,7 +2,9 @@ package com.jozufozu.flywheel.core.vertex;
 
 import java.nio.ByteBuffer;
 
+import com.jozufozu.flywheel.api.vertex.ShadedVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexList;
+import com.jozufozu.flywheel.core.model.ShadeSeparatedBufferBuilder;
 import com.jozufozu.flywheel.util.RenderMath;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.datafixers.util.Pair;
@@ -102,6 +104,22 @@ public class BlockVertexList implements VertexList {
 	@Override
 	public int getVertexCount() {
 		return vertexCount;
+	}
+
+	public static class Shaded extends BlockVertexList implements ShadedVertexList {
+
+		private final int unshadedStartVertex;
+
+		public Shaded(ShadeSeparatedBufferBuilder builder) {
+			super(builder);
+			unshadedStartVertex = builder.getUnshadedStartVertex();
+		}
+
+		@Override
+		public boolean isShaded(int index) {
+			return index < unshadedStartVertex;
+		}
+
 	}
 
 }

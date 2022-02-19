@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.util;
 
+import net.minecraftforge.client.model.pipeline.LightUtil;
+
 public class RenderMath {
 
 	/**
@@ -68,7 +70,17 @@ public class RenderMath {
 		return (float) (((((target - current) % 360) + 540) % 360) - 180);
 	}
 
-	public static float diffuseLightNether(float x, float y, float z) {
+	public static float diffuseLight(float x, float y, float z, boolean shaded) {
+		if (!shaded) {
+			return 1f;
+		}
+		return LightUtil.diffuseLight(x, y, z);
+	}
+
+	public static float diffuseLightNether(float x, float y, float z, boolean shaded) {
+		if (!shaded) {
+			return 0.9f;
+		}
 		return Math.min(x * x * 0.6f + y * y * 0.9f + z * z * 0.8f, 1f);
 	}
 }

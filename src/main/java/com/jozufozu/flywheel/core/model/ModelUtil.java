@@ -38,6 +38,8 @@ public class ModelUtil {
 	 */
 	public static final BlockRenderDispatcher VANILLA_RENDERER = createVanillaRenderer();
 
+	private static final ThreadLocal<ThreadLocalObjects> THREAD_LOCAL_OBJECTS = ThreadLocal.withInitial(ThreadLocalObjects::new);
+
 	private static BlockRenderDispatcher createVanillaRenderer() {
 		BlockRenderDispatcher defaultDispatcher = Minecraft.getInstance().getBlockRenderer();
 		BlockRenderDispatcher dispatcher = new BlockRenderDispatcher(null, null, null);
@@ -54,23 +56,47 @@ public class ModelUtil {
 		return dispatcher;
 	}
 
-	public static BufferBuilder getBufferBuilder(BakedModel model, BlockState referenceState, PoseStack ms) {
+	public static ShadeSeparatedBufferBuilder getBufferBuilder(BakedModel model, BlockState referenceState, PoseStack poseStack) {
+		return getBufferBuilder(VirtualEmptyBlockGetter.INSTANCE, model, referenceState, poseStack);
+	}
+
+	public static ShadeSeparatedBufferBuilder getBufferBuilder(BlockAndTintGetter renderWorld, BakedModel model, BlockState referenceState, PoseStack poseStack) {
 		ModelBlockRenderer blockRenderer = VANILLA_RENDERER.getModelRenderer();
-		BufferBuilder builder = new BufferBuilder(512);
+		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
+
+		ShadeSeparatingVertexConsumer shadeSeparatingWrapper = objects.shadeSeparatingWrapper;
+		ShadeSeparatedBufferBuilder builder = new ShadeSeparatedBufferBuilder(512);
+		BufferBuilder unshadedBuilder = objects.unshadedBuilder;
+
 		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-		blockRenderer.tesselateBlock(VirtualEmptyBlockGetter.INSTANCE, model, referenceState, BlockPos.ZERO, ms, builder,
-				false, new Random(), 42, OverlayTexture.NO_OVERLAY, VirtualEmptyModelData.INSTANCE);
+		unshadedBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+		shadeSeparatingWrapper.prepare(builder, unshadedBuilder);
+		blockRenderer.tesselateBlock(renderWorld, model, referenceState, BlockPos.ZERO, poseStack, shadeSeparatingWrapper,
+				false, objects.random, 42, OverlayTexture.NO_OVERLAY, VirtualEmptyModelData.INSTANCE);
+		shadeSeparatingWrapper.clear();
+		unshadedBuilder.end();
+		builder.appendUnshadedVertices(unshadedBuilder);
 		builder.end();
+
 		return builder;
 	}
 
-	public static BufferBuilder getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks) {
-		ModelBlockRenderer modelRenderer = VANILLA_RENDERER.getModelRenderer();
+	public static ShadeSeparatedBufferBuilder getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks) {
+		return getBufferBuilderFromTemplate(renderWorld, layer, blocks, new PoseStack());
+	}
 
-		PoseStack ms = new PoseStack();
-		Random random = new Random();
-		BufferBuilder builder = new BufferBuilder(512);
+	public static ShadeSeparatedBufferBuilder getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks, PoseStack poseStack) {
+		ModelBlockRenderer modelRenderer = VANILLA_RENDERER.getModelRenderer();
+		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
+
+		Random random = objects.random;
+		ShadeSeparatingVertexConsumer shadeSeparatingWrapper = objects.shadeSeparatingWrapper;
+		ShadeSeparatedBufferBuilder builder = new ShadeSeparatedBufferBuilder(512);
+		BufferBuilder unshadedBuilder = objects.unshadedBuilder;
+
 		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+		unshadedBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+		shadeSeparatingWrapper.prepare(builder, unshadedBuilder);
 
 		ForgeHooksClient.setRenderType(layer);
 		ModelBlockRenderer.enableCaching();
@@ -84,16 +110,20 @@ public class ModelUtil {
 
 			BlockPos pos = info.pos;
 
-			ms.pushPose();
-			ms.translate(pos.getX(), pos.getY(), pos.getZ());
-			modelRenderer.tesselateBlock(renderWorld, VANILLA_RENDERER.getBlockModel(state), state, pos, ms, builder,
+			poseStack.pushPose();
+			poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
+			modelRenderer.tesselateBlock(renderWorld, VANILLA_RENDERER.getBlockModel(state), state, pos, poseStack, shadeSeparatingWrapper,
 					true, random, 42, OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
-			ms.popPose();
+			poseStack.popPose();
 		}
 		ModelBlockRenderer.clearCache();
 		ForgeHooksClient.setRenderType(null);
 
+		shadeSeparatingWrapper.clear();
+		unshadedBuilder.end();
+		builder.appendUnshadedVertices(unshadedBuilder);
 		builder.end();
+
 		return builder;
 	}
 
@@ -106,5 +136,11 @@ public class ModelUtil {
 					.unCentre();
 			return stack;
 		};
+	}
+
+	private static class ThreadLocalObjects {
+		public final Random random = new Random();
+		public final ShadeSeparatingVertexConsumer shadeSeparatingWrapper = new ShadeSeparatingVertexConsumer();
+		public final BufferBuilder unshadedBuilder = new BufferBuilder(512);
 	}
 }

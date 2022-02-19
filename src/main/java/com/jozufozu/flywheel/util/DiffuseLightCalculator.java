@@ -2,10 +2,9 @@ package com.jozufozu.flywheel.util;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraftforge.client.model.pipeline.LightUtil;
 
 public interface DiffuseLightCalculator {
-	DiffuseLightCalculator DEFAULT = LightUtil::diffuseLight;
+	DiffuseLightCalculator DEFAULT = RenderMath::diffuseLight;
 	DiffuseLightCalculator NETHER = RenderMath::diffuseLightNether;
 
 	static DiffuseLightCalculator forCurrentLevel() {
@@ -16,5 +15,5 @@ public interface DiffuseLightCalculator {
 		return level.effects().constantAmbientLight() ? NETHER : DEFAULT;
 	}
 
-	float getDiffuse(float normalX, float normalY, float normalZ);
+	float getDiffuse(float normalX, float normalY, float normalZ, boolean shaded);
 }

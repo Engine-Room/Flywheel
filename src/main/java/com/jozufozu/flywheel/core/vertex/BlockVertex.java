@@ -6,6 +6,7 @@ import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
+import com.jozufozu.flywheel.core.model.ShadeSeparatedBufferBuilder;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.datafixers.util.Pair;
@@ -57,6 +58,10 @@ Vertex FLWCreateVertex() {
 				""";
 	}
 
+	public BlockVertexListUnsafe.Shaded createReader(ByteBuffer buffer, int vertexCount, int unshadedStartVertex) {
+		return new BlockVertexListUnsafe.Shaded(buffer, vertexCount, unshadedStartVertex);
+	}
+
 	public VertexList createReader(BufferBuilder bufferBuilder) {
 		// TODO: try to avoid virtual model rendering
 		Pair<BufferBuilder.DrawState, ByteBuffer> pair = bufferBuilder.popNextBuffer();
@@ -66,6 +71,10 @@ Vertex FLWCreateVertex() {
 			throw new RuntimeException("Cannot use BufferBuilder with " + drawState.format());
 		}
 
-		return new BlockVertexListUnsafe(pair.getSecond(), drawState.vertexCount());
+		if (bufferBuilder instanceof ShadeSeparatedBufferBuilder separated) {
+			return createReader(pair.getSecond(), drawState.vertexCount(), separated.getUnshadedStartVertex());
+		} else {
+			return createReader(pair.getSecond(), drawState.vertexCount());
+		}
 	}
 }
