@@ -44,7 +44,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
                 .onAMDWindows()) {
 			this.allocator = FallbackAllocator.INSTANCE;
 		} else {
-			this.allocator = new ModelPool(Formats.POS_TEX_NORMAL, 2048);
+			this.allocator = new ModelPool(Formats.POS_TEX_NORMAL);
 		}
 	}
 

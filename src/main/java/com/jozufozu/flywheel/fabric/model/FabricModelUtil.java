@@ -6,9 +6,12 @@ import com.jozufozu.flywheel.Flywheel;
 
 import io.vram.frex.api.material.MaterialConstants;
 import io.vram.frex.fabric.compat.FabricMaterial;
+import io.vram.frex.fabric.compat.FabricQuadView;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
 import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
 import net.fabricmc.fabric.impl.client.indigo.renderer.RenderMaterialImpl;
+import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.QuadViewImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -19,6 +22,7 @@ public class FabricModelUtil {
 	public static final boolean FREX_LOADED = FabricLoader.getInstance().isModLoaded("frex");
 
 	private static final BlendModeGetter BLEND_MODE_GETTER = createBlendModeGetter();
+	private static final ShadedPredicate SHADED_PREDICATE = createShadedPredicate();
 
 	private static BlendModeGetter createBlendModeGetter() {
 		if (FREX_LOADED) {
@@ -50,7 +54,7 @@ public class FabricModelUtil {
 					return BlendMode.DEFAULT;
 				};
 			} catch (Exception e) {
-				Flywheel.LOGGER.error("Detected FREX but failed to load wrapper field.", e);
+				Flywheel.LOGGER.error("Detected FREX but failed to load material wrapper field.", e);
 				return material -> BlendMode.DEFAULT;
 			}
 		} else if (INDIUM_LOADED) {
@@ -60,8 +64,36 @@ public class FabricModelUtil {
 		}
 	}
 
+	private static ShadedPredicate createShadedPredicate() {
+		if (FREX_LOADED) {
+			try {
+				Field frexQuadViewField = FabricQuadView.class.getDeclaredField("wrapped");
+				frexQuadViewField.setAccessible(true);
+				return quad -> {
+					try {
+						io.vram.frex.api.mesh.QuadView frexQuadView = (io.vram.frex.api.mesh.QuadView) frexQuadViewField.get(quad);
+						return !frexQuadView.material().disableDiffuse();
+					} catch (Exception e) {
+					}
+					return true;
+				};
+			} catch (Exception e) {
+				Flywheel.LOGGER.error("Detected FREX but failed to load quad view wrapper field.", e);
+				return quad -> true;
+			}
+		} else if (INDIUM_LOADED) {
+			return quad -> ((link.infra.indium.renderer.mesh.QuadViewImpl) quad).hasShade();
+		} else {
+			return quad -> ((QuadViewImpl) quad).hasShade();
+		}
+	}
+
 	public static BlendMode getBlendMode(RenderMaterial material) {
 		return BLEND_MODE_GETTER.getBlendMode(material);
+	}
+
+	public static boolean isShaded(QuadView quad) {
+		return SHADED_PREDICATE.isShaded(quad);
 	}
 
 	public static boolean doesLayerMatch(BlockState modelState, RenderType layer) {
@@ -70,5 +102,9 @@ public class FabricModelUtil {
 
 	private interface BlendModeGetter {
 		BlendMode getBlendMode(RenderMaterial material);
+	}
+
+	private interface ShadedPredicate {
+		boolean isShaded(QuadView quad);
 	}
 }

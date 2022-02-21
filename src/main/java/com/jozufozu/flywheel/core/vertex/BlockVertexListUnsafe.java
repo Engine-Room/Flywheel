@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
+import com.jozufozu.flywheel.api.vertex.ShadedVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.util.RenderMath;
 
@@ -97,4 +98,21 @@ public class BlockVertexListUnsafe implements VertexList {
 	public int getVertexCount() {
 		return vertexCount;
 	}
+
+	public static class Shaded extends BlockVertexListUnsafe implements ShadedVertexList {
+
+		private final int unshadedStartVertex;
+
+		public Shaded(ByteBuffer buffer, int vertexCount, int unshadedStartVertex) {
+			super(buffer, vertexCount);
+			this.unshadedStartVertex = unshadedStartVertex;
+		}
+
+		@Override
+		public boolean isShaded(int index) {
+			return index < unshadedStartVertex;
+		}
+
+	}
+
 }
