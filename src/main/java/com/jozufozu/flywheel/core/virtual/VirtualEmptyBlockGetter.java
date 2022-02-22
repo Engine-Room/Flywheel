@@ -22,115 +22,119 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 
-public enum VirtualEmptyBlockGetter implements BlockAndTintGetter {
-	INSTANCE;
-
-	private final LevelLightEngine lightEngine = new LevelLightEngine(new LightChunkGetter() {
-		@Override
-		public BlockGetter getChunkForLighting(int p_63023_, int p_63024_) {
-			return VirtualEmptyBlockGetter.this;
-		}
-
-		@Override
-		public BlockGetter getLevel() {
-			return VirtualEmptyBlockGetter.this;
-		}
-	}, false, false) {
-		private static final LayerLightEventListener SKY_DUMMY_LISTENER = new LayerLightEventListener() {
-			@Override
-			public void checkBlock(BlockPos pos) {
-			}
-
-			@Override
-			public void onBlockEmissionIncrease(BlockPos pos, int p_164456_) {
-			}
-
-			@Override
-			public boolean hasLightWork() {
-				return false;
-			}
-
-			@Override
-			public int runUpdates(int p_164449_, boolean p_164450_, boolean p_164451_) {
-				return p_164449_;
-			}
-
-			@Override
-			public void updateSectionStatus(SectionPos pos, boolean p_75838_) {
-			}
-
-			@Override
-			public void enableLightSources(ChunkPos pos, boolean p_164453_) {
-			}
-
-			@Override
-			public DataLayer getDataLayerData(SectionPos pos) {
-				return null;
-			}
-
-			@Override
-			public int getLightValue(BlockPos pos) {
-				return 15;
-			}
-		};
-
-		@Override
-		public LayerLightEventListener getLayerListener(LightLayer layer) {
-			if (layer == LightLayer.BLOCK) {
-				return LayerLightEventListener.DummyLightLayerEventListener.INSTANCE;
-			} else {
-				return SKY_DUMMY_LISTENER;
-			}
-		}
-
-		@Override
-		public int getRawBrightness(BlockPos pos, int skyDarken) {
-			return 15 - skyDarken;
-		}
-	};
+public interface VirtualEmptyBlockGetter extends BlockAndTintGetter {
+	public static final VirtualEmptyBlockGetter INSTANCE = new StaticLightImpl(0, 15);
+	public static final VirtualEmptyBlockGetter FULL_BRIGHT = new StaticLightImpl(15, 15);
+	public static final VirtualEmptyBlockGetter FULL_DARK = new StaticLightImpl(0, 0);
 
 	public static boolean is(BlockAndTintGetter blockGetter) {
-		return blockGetter == INSTANCE;
+		return blockGetter instanceof VirtualEmptyBlockGetter;
 	}
 
 	@Override
-	public BlockEntity getBlockEntity(BlockPos pos) {
+	default BlockEntity getBlockEntity(BlockPos pos) {
 		return null;
 	}
 
 	@Override
-	public BlockState getBlockState(BlockPos pos) {
+	default BlockState getBlockState(BlockPos pos) {
 		return Blocks.AIR.defaultBlockState();
 	}
 
 	@Override
-	public FluidState getFluidState(BlockPos pos) {
+	default FluidState getFluidState(BlockPos pos) {
 		return Fluids.EMPTY.defaultFluidState();
 	}
 
 	@Override
-	public int getHeight() {
+	default int getHeight() {
 		return 1;
 	}
 
 	@Override
-	public int getMinBuildHeight() {
+	default int getMinBuildHeight() {
 		return 0;
 	}
 
 	@Override
-	public float getShade(Direction direction, boolean bool) {
+	default float getShade(Direction direction, boolean shaded) {
 		return 1f;
 	}
 
 	@Override
-	public LevelLightEngine getLightEngine() {
-		return lightEngine;
-	}
-
-	@Override
-	public int getBlockTint(BlockPos pos, ColorResolver resolver) {
+	default int getBlockTint(BlockPos pos, ColorResolver resolver) {
 		Biome plainsBiome = Minecraft.getInstance().getConnection().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getOrThrow(Biomes.PLAINS);
 		return resolver.getColor(plainsBiome, pos.getX(), pos.getZ());
+	}
+
+	public static class StaticLightImpl implements VirtualEmptyBlockGetter {
+		private final LevelLightEngine lightEngine;
+
+		public StaticLightImpl(int blockLight, int skyLight) {
+			lightEngine = new LevelLightEngine(new LightChunkGetter() {
+				@Override
+				public BlockGetter getChunkForLighting(int p_63023_, int p_63024_) {
+					return StaticLightImpl.this;
+				}
+
+				@Override
+				public BlockGetter getLevel() {
+					return StaticLightImpl.this;
+				}
+			}, false, false) {
+				private final LayerLightEventListener blockListener = createStaticListener(blockLight);
+				private final LayerLightEventListener skyListener = createStaticListener(skyLight);
+
+				@Override
+				public LayerLightEventListener getLayerListener(LightLayer layer) {
+					return layer == LightLayer.BLOCK ? blockListener : skyListener;
+				}
+			};
+		}
+
+		private static LayerLightEventListener createStaticListener(int light) {
+			return new LayerLightEventListener() {
+				@Override
+				public void checkBlock(BlockPos pos) {
+				}
+
+				@Override
+				public void onBlockEmissionIncrease(BlockPos pos, int p_164456_) {
+				}
+
+				@Override
+				public boolean hasLightWork() {
+					return false;
+				}
+
+				@Override
+				public int runUpdates(int p_164449_, boolean p_164450_, boolean p_164451_) {
+					return p_164449_;
+				}
+
+				@Override
+				public void updateSectionStatus(SectionPos pos, boolean p_75838_) {
+				}
+
+				@Override
+				public void enableLightSources(ChunkPos pos, boolean p_164453_) {
+				}
+
+				@Override
+				public DataLayer getDataLayerData(SectionPos pos) {
+					return null;
+				}
+
+				@Override
+				public int getLightValue(BlockPos pos) {
+					return light;
+				}
+			};
+		}
+
+		@Override
+		public LevelLightEngine getLightEngine() {
+			return lightEngine;
+		}
 	}
 }

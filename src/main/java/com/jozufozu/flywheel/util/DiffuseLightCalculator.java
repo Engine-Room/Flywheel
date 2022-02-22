@@ -15,5 +15,5 @@ public interface DiffuseLightCalculator {
 		return level.effects().constantAmbientLight() ? NETHER : DEFAULT;
 	}
 
-	float getDiffuse(float normalX, float normalY, float normalZ);
+	float getDiffuse(float normalX, float normalY, float normalZ, boolean shaded);
 }

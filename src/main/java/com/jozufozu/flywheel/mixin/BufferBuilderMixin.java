@@ -20,16 +20,10 @@ public abstract class BufferBuilderMixin implements BufferBuilderExtension {
 	private ByteBuffer buffer;
 
 	@Shadow
-	private boolean building;
+	private int nextElementByte;
 
 	@Shadow
-	public abstract void begin(VertexFormat.Mode p_166780_, VertexFormat p_166781_);
-
-	@Shadow
-	private VertexFormat.Mode mode;
-
-	@Shadow
-	private VertexFormat format;
+	private int vertices;
 
 	@Shadow
 	@Nullable
@@ -39,7 +33,22 @@ public abstract class BufferBuilderMixin implements BufferBuilderExtension {
 	private int elementIndex;
 
 	@Shadow
-	private int vertices;
+	private VertexFormat format;
+
+	@Shadow
+	private VertexFormat.Mode mode;
+
+	@Shadow
+	private boolean building;
+
+	@Shadow
+	private void ensureCapacity(int increaseAmount) {
+	}
+
+	@Override
+	public int flywheel$getVertices() {
+		return vertices;
+	}
 
 	@Override
 	public void flywheel$freeBuffer() {
@@ -60,5 +69,30 @@ public abstract class BufferBuilderMixin implements BufferBuilderExtension {
 
 		this.currentElement = this.format.getElements().get(0);
 		this.elementIndex = 0;
+	}
+
+	@Override
+	public void flywheel$appendBufferUnsafe(ByteBuffer buffer) {
+		if (!building) {
+			throw new IllegalStateException("BufferBuilder not started");
+		}
+		if (elementIndex != 0) {
+			throw new IllegalStateException("Cannot append buffer while building vertex");
+		}
+
+		int numBytes = buffer.remaining();
+		if (numBytes % format.getVertexSize() != 0) {
+			throw new IllegalArgumentException("Cannot append buffer with non-whole number of vertices");
+		}
+		int numVertices = numBytes / format.getVertexSize();
+
+		ensureCapacity(numBytes + format.getVertexSize());
+		int originalPosition = this.buffer.position();
+		this.buffer.position(nextElementByte);
+		MemoryUtil.memCopy(buffer, this.buffer);
+		this.buffer.position(originalPosition);
+
+		nextElementByte += numBytes;
+		vertices += numVertices;
 	}
 }
