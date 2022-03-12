@@ -7,12 +7,11 @@ license = "MIT"
 modId = "flywheel"
 version = "${file.jarVersion}"
 displayName = "Flywheel"
-logoFile="logo.png"
+logoFile = "logo.png"
 displayURL = "https://www.curseforge.com/minecraft/mc-mods/flywheel"
-authors="Jozufozu"
+authors = "Jozufozu"
 description = '''
-A modern engine for modded minecraft.
-'''
+A modern engine for modded minecraft.'''
 
 [[dependencies.flywheel]]
 modId = "forge"
