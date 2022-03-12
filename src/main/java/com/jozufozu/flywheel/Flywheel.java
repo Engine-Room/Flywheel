@@ -25,11 +25,12 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.CrashReportCallables;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.IExtensionPoint;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.forgespi.language.IModFileInfo;
+import net.minecraftforge.network.NetworkConstants;
 
 @Mod(Flywheel.ID)
 public class Flywheel {
@@ -39,38 +40,42 @@ public class Flywheel {
 	private static ArtifactVersion version;
 
 	public Flywheel() {
-		IModFileInfo modFileById = ModList.get()
-				.getModFileById(ID);
+		ModLoadingContext modLoadingContext = ModLoadingContext.get();
 
-		version = modFileById.getMods()
-				.get(0)
+		version = modLoadingContext
+				.getActiveContainer()
+				.getModInfo()
 				.getVersion();
 
-		FMLJavaModLoadingContext.get()
-				.getModEventBus()
-				.addListener(Flywheel::setup);
+		IEventBus forgeEventBus = MinecraftForge.EVENT_BUS;
+		IEventBus modEventBus = FMLJavaModLoadingContext.get()
+				.getModEventBus();
+		modEventBus.addListener(Flywheel::setup);
 
 		FlwConfig.init();
 
-		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> Flywheel::clientInit);
+		modLoadingContext.registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(
+				() -> NetworkConstants.IGNORESERVERONLY,
+				(serverVersion, isNetwork) -> isNetwork
+		));
+
+		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> Flywheel.clientInit(forgeEventBus, modEventBus));
 	}
 
-	private static void clientInit() {
+	private static void clientInit(IEventBus forgeEventBus, IEventBus modEventBus) {
 		CrashReportCallables.registerCrashCallable("Flywheel Backend", Backend::getBackendDescriptor);
 
 		OptifineHandler.init();
 		Backend.init();
-		IEventBus modEventBus = FMLJavaModLoadingContext.get()
-				.getModEventBus();
+
+		forgeEventBus.addListener(FlwCommands::registerClientCommands);
+		forgeEventBus.<ReloadRenderersEvent>addListener(ProgramCompiler::invalidateAll);
 
 		modEventBus.addListener(Contexts::flwInit);
 		modEventBus.addListener(PartialModel::onModelRegistry);
 		modEventBus.addListener(PartialModel::onModelBake);
 		modEventBus.addListener(StitchedSprite::onTextureStitchPre);
 		modEventBus.addListener(StitchedSprite::onTextureStitchPost);
-
-		MinecraftForge.EVENT_BUS.addListener(FlwCommands::registerClientCommands);
-		MinecraftForge.EVENT_BUS.<ReloadRenderersEvent>addListener(ProgramCompiler::invalidateAll);
 
 		VanillaInstances.init();
 
