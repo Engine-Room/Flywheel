@@ -1,8 +1,7 @@
 package com.jozufozu.flywheel;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.OptifineHandler;
@@ -16,6 +15,7 @@ import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
+import com.mojang.logging.LogUtils;
 
 import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
@@ -36,7 +36,7 @@ import net.minecraftforge.network.NetworkConstants;
 public class Flywheel {
 
 	public static final String ID = "flywheel";
-	public static final Logger LOGGER = LogManager.getLogger(Flywheel.class);
+	public static final Logger LOGGER = LogUtils.getLogger();
 	private static ArtifactVersion version;
 
 	public Flywheel() {

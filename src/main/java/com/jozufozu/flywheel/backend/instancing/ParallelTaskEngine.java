@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.instancing.batching.WaitGroup;
@@ -18,7 +18,7 @@ import net.minecraft.util.Mth;
 
 // https://github.com/CaffeineMC/sodium-fabric/blob/5d364ed5ba63f9067fcf72a078ca310bff4db3e9/src/main/java/me/jellysquid/mods/sodium/client/render/chunk/compile/ChunkBuilder.java
 public class ParallelTaskEngine implements TaskEngine {
-	private static final Logger LOGGER = LogManager.getLogger("BatchExecutor");
+	private static final Logger LOGGER = LoggerFactory.getLogger("BatchExecutor");
 
 	private final AtomicBoolean running = new AtomicBoolean(false);
 	private final WaitGroup wg = new WaitGroup();
@@ -135,11 +135,12 @@ public class ParallelTaskEngine implements TaskEngine {
 		return job;
 	}
 
+	// TODO: job context
 	private void processTask(Runnable job) {
 		try {
 			job.run();
 		} catch (Exception e) {
-			Flywheel.LOGGER.error(e);
+			Flywheel.LOGGER.error("Error running job", e);
 		} finally {
 			ParallelTaskEngine.this.wg.done();
 		}

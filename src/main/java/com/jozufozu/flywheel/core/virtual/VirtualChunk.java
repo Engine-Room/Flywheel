@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.core.virtual;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -12,6 +13,7 @@ import com.jozufozu.flywheel.util.Mods;
 import ca.spottedleaf.starlight.common.chunk.ExtendedChunk;
 import ca.spottedleaf.starlight.common.light.StarLightEngine;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -26,7 +28,7 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -191,35 +193,40 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public void addReferenceForFeature(StructureFeature<?> arg0, long arg1) {}
-
-	@Override
-	public Map<StructureFeature<?>, LongSet> getAllReferences() {
+	@Nullable
+	public StructureStart getStartForFeature(ConfiguredStructureFeature<?, ?> pStructure) {
 		return null;
 	}
 
 	@Override
-	public LongSet getReferencesForFeature(StructureFeature<?> arg0) {
-		return null;
+	public void setStartForFeature(ConfiguredStructureFeature<?, ?> pStructure, StructureStart pStart) {
 	}
 
 	@Override
-	public StructureStart<?> getStartForFeature(StructureFeature<?> arg0) {
-		return null;
+	public Map<ConfiguredStructureFeature<?, ?>, StructureStart> getAllStarts() {
+		return Collections.emptyMap();
 	}
 
 	@Override
-	public void setAllReferences(Map<StructureFeature<?>, LongSet> arg0) {}
+	public void setAllStarts(Map<ConfiguredStructureFeature<?, ?>, StructureStart> pStructureStarts) {
+	}
 
 	@Override
-	public void setStartForFeature(StructureFeature<?> arg0, StructureStart<?> arg1) {}
+	public LongSet getReferencesForFeature(ConfiguredStructureFeature<?, ?> pStructure) {
+		return LongSets.emptySet();
+	}
 
 	@Override
-	public void setAllStarts(Map<StructureFeature<?>, StructureStart<?>> p_201612_1_) {}
+	public void addReferenceForFeature(ConfiguredStructureFeature<?, ?> pStructure, long pReference) {
+	}
 
 	@Override
-	public Map<StructureFeature<?>, StructureStart<?>> getAllStarts() {
-		return null;
+	public Map<ConfiguredStructureFeature<?, ?>, LongSet> getAllReferences() {
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public void setAllReferences(Map<ConfiguredStructureFeature<?, ?>, LongSet> pStructureReferences) {
 	}
 
 	@Override
