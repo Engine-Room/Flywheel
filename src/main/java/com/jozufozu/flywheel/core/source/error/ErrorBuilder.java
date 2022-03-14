@@ -117,7 +117,7 @@ public class ErrorBuilder {
 		return this;
 	}
 
-	public CharSequence build() {
+	public String build() {
 
 		int maxLength = -1;
 		for (ErrorLine line : lines) {
@@ -136,6 +136,6 @@ public class ErrorBuilder {
 					.append('\n');
 		}
 
-		return builder;
+		return builder.toString();
 	}
 }

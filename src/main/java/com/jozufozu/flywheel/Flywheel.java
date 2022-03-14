@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.Loader;
@@ -18,6 +17,7 @@ import com.jozufozu.flywheel.event.ForgeEvents;
 import com.jozufozu.flywheel.fabric.event.FlywheelEvents;
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
+import com.mojang.logging.LogUtils;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
@@ -34,7 +34,7 @@ import net.minecraft.server.packs.PackType;
 public class Flywheel implements ClientModInitializer {
 
 	public static final String ID = "flywheel";
-	public static final Logger LOGGER = LogManager.getLogger(Flywheel.class);
+	public static final Logger LOGGER = LogUtils.getLogger();
 	private static SemanticVersion version;
 
 	@Override
@@ -53,11 +53,11 @@ public class Flywheel implements ClientModInitializer {
 
 		Backend.init();
 
+		FlywheelEvents.RELOAD_RENDERERS.register(ProgramCompiler::invalidateAll);
+
 		FlywheelEvents.GATHER_CONTEXT.register(Contexts::flwInit);
 		ModelLoadingRegistry.INSTANCE.registerModelProvider(PartialModel::onModelRegistry);
 		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(PartialModel.ResourceReloadListener.INSTANCE);
-
-		FlywheelEvents.RELOAD_RENDERERS.register(ProgramCompiler::invalidateAll);
 
 		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(Loader.ResourceReloadListener.INSTANCE);
 

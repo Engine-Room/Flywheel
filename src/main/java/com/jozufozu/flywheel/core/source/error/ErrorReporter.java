@@ -16,7 +16,7 @@ public class ErrorReporter {
 	public static void generateSpanError(Span span, String message) {
 		SourceFile file = span.getSourceFile();
 
-		CharSequence error = ErrorBuilder.error(message)
+		String error = ErrorBuilder.error(message)
 				.pointAtFile(file)
 				.pointAt(span, 2)
 				.build();
@@ -26,7 +26,7 @@ public class ErrorReporter {
 
 	public static void generateFileError(SourceFile file, String message) {
 
-		CharSequence error = ErrorBuilder.error(message)
+		String error = ErrorBuilder.error(message)
 				.pointAtFile(file)
 				.build();
 

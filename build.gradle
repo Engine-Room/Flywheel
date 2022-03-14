@@ -55,14 +55,14 @@ dependencies {
     // Fabric API
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-    modCompileOnly 'curse.maven:starlight-521783:3599857'
+    modCompileOnly 'curse.maven:starlight-521783:3667443'
 
-    modCompileOnly 'maven.modrinth:iris:1.18.x-v1.1.4'
-    modCompileOnly 'maven.modrinth:sodium:mc1.18.1-0.4.0-alpha6'
+    modCompileOnly 'maven.modrinth:iris:1.18.x-v1.2.2'
+    modCompileOnly 'maven.modrinth:sodium:mc1.18.2-0.4.1'
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
-    modCompileOnly 'maven.modrinth:indium:1.0.2-alpha1+mc1.18'
-    modCompileOnly 'io.vram:frex-fabric-mc118:6.0.229'
+    modCompileOnly 'maven.modrinth:indium:1.0.2+mc1.18.2'
+    modCompileOnly 'io.vram:frex-fabric-mc118:6.0.242'
 }
 
 processResources {
@@ -153,6 +153,6 @@ curseforge {
         changelog = file('changelog.txt')
         releaseType = project.curse_type
         mainArtifact jar
-        addGameVersion '1.18.1'
+        addGameVersion '1.18.2'
     }
 }

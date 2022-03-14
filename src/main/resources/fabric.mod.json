@@ -33,10 +33,7 @@
   "depends": {
     "fabricloader": ">=0.11.3",
     "fabric": "*",
-    "minecraft": "1.18.x",
+    "minecraft": ">=1.18.2",
     "java": ">=17"
-  },
-  "breaks": {
-    "iris": "<1.1.4"
   }
 }

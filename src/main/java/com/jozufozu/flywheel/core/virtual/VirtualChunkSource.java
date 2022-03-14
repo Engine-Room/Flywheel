@@ -52,7 +52,8 @@ public class VirtualChunkSource extends ChunkSource {
 	}
 
 	@Override
-	public void tick(BooleanSupplier pHasTimeLeft) {}
+	public void tick(BooleanSupplier p_202162_, boolean p_202163_) {
+	}
 
 	@Override
 	public int getLoadedChunksCount() {

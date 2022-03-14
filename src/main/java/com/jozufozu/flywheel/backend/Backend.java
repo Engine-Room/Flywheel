@@ -2,14 +2,14 @@ package com.jozufozu.flywheel.backend;
 
 import javax.annotation.Nullable;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.api.FlywheelWorld;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.config.FlwEngine;
 import com.jozufozu.flywheel.core.shader.ProgramSpec;
+import com.mojang.logging.LogUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 
 public class Backend {
-	public static final Logger LOGGER = LogManager.getLogger(Backend.class);
+	public static final Logger LOGGER = LogUtils.getLogger();
 
 	private static FlwEngine engine;
 
