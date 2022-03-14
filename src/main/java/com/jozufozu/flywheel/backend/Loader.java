@@ -117,7 +117,7 @@ public class Loader implements ResourceManagerReloadListener {
 				programs.put(specName, spec);
 
 			} catch (Exception e) {
-				Backend.LOGGER.error(e);
+				Backend.LOGGER.error("Could not load program " + location, e);
 			}
 		}
 	}

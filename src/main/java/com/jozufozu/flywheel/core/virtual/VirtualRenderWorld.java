@@ -15,12 +15,12 @@ import com.jozufozu.flywheel.api.FlywheelWorld;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.TagContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -67,7 +67,7 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	}
 
 	public VirtualRenderWorld(Level level, Vec3i biomeOffset, int height, int minBuildHeight) {
-		super((WritableLevelData) level.getLevelData(), level.dimension(), level.dimensionType(), level::getProfiler,
+		super((WritableLevelData) level.getLevelData(), level.dimension(), level.dimensionTypeRegistration(), level::getProfiler,
 				true, false, 0);
 		this.biomeOffset = biomeOffset;
 		this.level = level;
@@ -188,19 +188,19 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	// BIOME OFFSET
 
 	@Override
-	public Biome getBiome(BlockPos pPos) {
+	public Holder<Biome> getBiome(BlockPos pPos) {
 		return super.getBiome(pPos.offset(biomeOffset));
 	}
 
 	@Override
-	public Biome getUncachedNoiseBiome(int pX, int pY, int pZ) {
+	public Holder<Biome> getUncachedNoiseBiome(int pX, int pY, int pZ) {
 		// Control flow should never reach this method,
 		// so we add biomeOffset in case some other mod calls this directly.
 		return level.getUncachedNoiseBiome(pX + biomeOffset.getX(), pY + biomeOffset.getY(), pZ + biomeOffset.getZ());
 	}
 
 	@Override
-	public Biome getNoiseBiome(int pX, int pY, int pZ) {
+	public Holder<Biome> getNoiseBiome(int pX, int pY, int pZ) {
 		// Control flow should never reach this method,
 		// so we add biomeOffset in case some other mod calls this directly.
 		return level.getNoiseBiome(pX + biomeOffset.getX(), pY + biomeOffset.getY(), pZ + biomeOffset.getZ());
@@ -243,11 +243,6 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	@Override
 	public RecipeManager getRecipeManager() {
 		return level.getRecipeManager();
-	}
-
-	@Override
-	public TagContainer getTagManager() {
-		return level.getTagManager();
 	}
 
 	@Override
