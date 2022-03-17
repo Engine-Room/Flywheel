@@ -54,7 +54,7 @@ public class CrumblingGroup<P extends CrumblingProgram> extends InstancedMateria
 	}
 
 	@Override
-	public void setup(P p) {
+    protected void setup(P p) {
 		p.setAtlasSize(width, height);
 	}
 }

@@ -11,7 +11,6 @@ import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.Material;
 import com.jozufozu.flywheel.api.struct.Instanced;
-import com.jozufozu.flywheel.backend.model.ModelAllocator;
 import com.jozufozu.flywheel.core.model.Model;
 
 /**
@@ -20,14 +19,12 @@ import com.jozufozu.flywheel.core.model.Model;
  */
 public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 
-	protected final ModelAllocator allocator;
 	protected final Map<Object, GPUInstancer<D>> models = new HashMap<>();
 	protected final Instanced<D> type;
 	protected final List<GPUInstancer<D>> uninitialized = new ArrayList<>();
 
-	public InstancedMaterial(Instanced<D> type, ModelAllocator allocator) {
+	public InstancedMaterial(Instanced<D> type) {
 		this.type = type;
-		this.allocator = allocator;
 	}
 
 	/**
@@ -40,7 +37,7 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 	@Override
 	public Instancer<D> model(Object key, Supplier<Model> modelSupplier) {
 		return models.computeIfAbsent(key, $ -> {
-			GPUInstancer<D> instancer = new GPUInstancer<>(type, modelSupplier.get(), allocator);
+			GPUInstancer<D> instancer = new GPUInstancer<>(type, modelSupplier.get());
 			uninitialized.add(instancer);
 			return instancer;
 		});
