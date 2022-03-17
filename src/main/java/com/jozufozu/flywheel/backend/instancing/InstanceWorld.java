@@ -32,7 +32,7 @@ public class InstanceWorld {
 	protected final InstanceManager<Entity> entityInstanceManager;
 	protected final InstanceManager<BlockEntity> blockEntityInstanceManager;
 
-	protected final ParallelTaskEngine taskEngine;
+	public final ParallelTaskEngine taskEngine;
 
 	public InstanceWorld(LevelAccessor levelAccessor) {
 		Level world = (Level) levelAccessor;

@@ -1,18 +1,21 @@
 package com.jozufozu.flywheel.light;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
+import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.backend.instancing.ParallelTaskEngine;
 import com.jozufozu.flywheel.util.WeakHashSet;
+import com.jozufozu.flywheel.util.WorldAttached;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
 
 /**
@@ -20,9 +23,11 @@ import net.minecraft.world.level.LightLayer;
  */
 public class LightUpdater {
 
-	private static final Map<BlockAndTintGetter, LightUpdater> light = new HashMap<>();
-	public static LightUpdater get(BlockAndTintGetter world) {
-		return light.computeIfAbsent(world, LightUpdater::new);
+	private static final WorldAttached<LightUpdater> light = new WorldAttached<>(LightUpdater::new);
+	private final ParallelTaskEngine taskEngine;
+
+	public static LightUpdater get(LevelAccessor world) {
+		return light.get(world);
 	}
 
 	private final LightProvider provider;
@@ -31,7 +36,8 @@ public class LightUpdater {
 	private final WeakContainmentMultiMap<LightListener> sections = new WeakContainmentMultiMap<>();
 	private final WeakContainmentMultiMap<LightListener> chunks = new WeakContainmentMultiMap<>();
 
-	public LightUpdater(BlockAndTintGetter world) {
+	public LightUpdater(LevelAccessor world) {
+		taskEngine = InstancedRenderDispatcher.getTaskEngine(world);
 		provider = new BasicProvider(world);
 	}
 
@@ -40,11 +46,16 @@ public class LightUpdater {
 	}
 
 	public void tick() {
-		for (MovingListener listener : movingListeners) {
-			if (listener.update(provider)) {
-				addListener(listener);
-			}
-		}
+		Queue<LightListener> listeners = new ConcurrentLinkedQueue<>();
+
+		taskEngine.group("LightUpdater")
+				.addTasks(movingListeners.stream(), listener -> {
+					if (listener.update(provider)) {
+						listeners.add(listener);
+					}
+				})
+				.onComplete(() -> listeners.forEach(this::addListener))
+				.submit();
 	}
 
 	/**
