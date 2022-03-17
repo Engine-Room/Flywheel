@@ -54,18 +54,24 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static InstanceManager<BlockEntity> getBlockEntities(LevelAccessor world) {
-		if (Backend.isOn()) {
-			return instanceWorlds.get(world)
-					.getBlockEntityInstanceManager();
-		} else {
-			throw new NullPointerException("Backend is off, cannot retrieve instance world.");
-		}
+		return getInstanceWorld(world).getBlockEntityInstanceManager();
 	}
 
 	public static InstanceManager<Entity> getEntities(LevelAccessor world) {
+		return getInstanceWorld(world).getEntityInstanceManager();
+	}
+
+	public static ParallelTaskEngine getTaskEngine(LevelAccessor world) {
+		return getInstanceWorld(world).taskEngine;
+	}
+
+	/**
+	 * Get or create the {@link InstanceWorld} for the given world.
+	 * @throws NullPointerException if the backend is off
+	 */
+	public static InstanceWorld getInstanceWorld(LevelAccessor world) {
 		if (Backend.isOn()) {
-			return instanceWorlds.get(world)
-					.getEntityInstanceManager();
+			return instanceWorlds.get(world);
 		} else {
 			throw new NullPointerException("Backend is off, cannot retrieve instance world.");
 		}
