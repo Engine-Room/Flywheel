@@ -96,9 +96,9 @@ body:
             required: true
     -   type: input
         attributes:
-            label: Forge Version
-            description: The version of Forge you were using when the bug occured
-            placeholder: 39.0.0
+            label: Loader Version
+            description: The version of Forge or Fabric you were using when the bug occured
+            placeholder: Forge 39.0.0
         validations:
             required: true
     -   type: textarea
