@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.OptifineHandler;
-import com.jozufozu.flywheel.config.EngineArgument;
+import com.jozufozu.flywheel.config.BackendTypeArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.Contexts;
@@ -88,7 +88,7 @@ public class Flywheel {
 	}
 
 	private static void setup(final FMLCommonSetupEvent event) {
-		ArgumentTypes.register(rl("engine").toString(), EngineArgument.class, new EmptyArgumentSerializer<>(EngineArgument::getInstance));
+		ArgumentTypes.register(rl("engine").toString(), BackendTypeArgument.class, new EmptyArgumentSerializer<>(BackendTypeArgument::getInstance));
 	}
 
 	public static ArtifactVersion getVersion() {

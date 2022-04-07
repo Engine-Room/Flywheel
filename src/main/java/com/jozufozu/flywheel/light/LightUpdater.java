@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.ParallelTaskEngine;
 import com.jozufozu.flywheel.util.WeakHashSet;
 import com.jozufozu.flywheel.util.WorldAttached;
@@ -37,7 +37,7 @@ public class LightUpdater {
 	private final WeakContainmentMultiMap<LightListener> chunks = new WeakContainmentMultiMap<>();
 
 	public LightUpdater(LevelAccessor world) {
-		taskEngine = InstancedRenderDispatcher.getTaskEngine(world);
+		taskEngine = Backend.getTaskEngine();
 		provider = new BasicProvider(world);
 	}
 

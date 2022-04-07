@@ -6,8 +6,9 @@ import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.api.FlywheelWorld;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
+import com.jozufozu.flywheel.backend.instancing.ParallelTaskEngine;
 import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.config.FlwEngine;
+import com.jozufozu.flywheel.config.BackendType;
 import com.jozufozu.flywheel.core.shader.ProgramSpec;
 import com.mojang.logging.LogUtils;
 
@@ -19,12 +20,30 @@ import net.minecraft.world.level.LevelAccessor;
 public class Backend {
 	public static final Logger LOGGER = LogUtils.getLogger();
 
-	private static FlwEngine engine;
+	private static BackendType backendType;
+
+	private static ParallelTaskEngine taskEngine;
 
 	private static final Loader loader = new Loader();
 
-	public static FlwEngine getEngine() {
-		return engine;
+	/**
+	 * Get the current Flywheel backend type.
+	 */
+	public static BackendType getBackendType() {
+		return backendType;
+	}
+
+	/**
+	 * Get a thread pool for running Flywheel related work in parallel.
+	 * @return A global Flywheel thread pool.
+	 */
+	public static ParallelTaskEngine getTaskEngine() {
+		if (taskEngine == null) {
+			taskEngine = new ParallelTaskEngine("Flywheel");
+			taskEngine.startWorkers();
+		}
+
+		return taskEngine;
 	}
 
 	/**
@@ -32,7 +51,7 @@ public class Backend {
 	 * (Meshlet, MDI, GL31 Draw Instanced are planned), this will name which one is in use.
 	 */
 	public static String getBackendDescriptor() {
-		return engine == null ? "Uninitialized" : engine.getProperName();
+		return backendType == null ? "Uninitialized" : backendType.getProperName();
 	}
 
 	@Nullable
@@ -41,11 +60,11 @@ public class Backend {
 	}
 
 	public static void refresh() {
-		engine = chooseEngine();
+		backendType = chooseEngine();
 	}
 
 	public static boolean isOn() {
-		return engine != FlwEngine.OFF;
+		return backendType != BackendType.OFF;
 	}
 
 	public static boolean canUseInstancing(@Nullable Level world) {
@@ -73,9 +92,9 @@ public class Backend {
 		RenderWork.enqueue(Minecraft.getInstance().levelRenderer::allChanged);
 	}
 
-	private static FlwEngine chooseEngine() {
-		FlwEngine preferredChoice = FlwConfig.get()
-				.getEngine();
+	private static BackendType chooseEngine() {
+		BackendType preferredChoice = FlwConfig.get()
+				.getBackendType();
 
 		boolean usingShaders = OptifineHandler.isUsingShaders();
 		boolean canUseEngine = switch (preferredChoice) {
@@ -84,7 +103,7 @@ public class Backend {
 			case INSTANCING -> !usingShaders && GlCompat.getInstance().instancedArraysSupported();
 		};
 
-		return canUseEngine ? preferredChoice : FlwEngine.OFF;
+		return canUseEngine ? preferredChoice : BackendType.OFF;
 	}
 
 	public static void init() {

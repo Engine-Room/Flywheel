@@ -27,8 +27,8 @@ public class FlwConfig {
 		return INSTANCE;
 	}
 
-	public FlwEngine getEngine() {
-		return client.engine.get();
+	public BackendType getBackendType() {
+		return client.backend.get();
 	}
 
 	public boolean debugNormals() {
@@ -43,15 +43,15 @@ public class FlwConfig {
 	}
 
 	public static class ClientConfig {
-		public final EnumValue<FlwEngine> engine;
+		public final EnumValue<BackendType> backend;
 		public final BooleanValue debugNormals;
 		public final BooleanValue limitUpdates;
 
 		public ClientConfig(ForgeConfigSpec.Builder builder) {
-			engine = builder.comment("Enable or disable the entire engine")
-					.defineEnum("backend", FlwEngine.INSTANCING);
+			backend = builder.comment("Select the backend to use.")
+					.defineEnum("backend", BackendType.INSTANCING);
 
-			debugNormals = builder.comment("Enable or disable a debug overlay that colors pixels by their normal")
+			debugNormals = builder.comment("Enable or disable a debug overlay that colors pixels by their normal.")
 					.define("debugNormals", false);
 
 			limitUpdates = builder.comment("Enable or disable instance update limiting with distance.")

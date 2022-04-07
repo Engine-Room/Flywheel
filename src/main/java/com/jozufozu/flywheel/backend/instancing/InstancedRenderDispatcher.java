@@ -27,7 +27,7 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class InstancedRenderDispatcher {
 
-	private static final WorldAttached<InstanceWorld> instanceWorlds = new WorldAttached<>(InstanceWorld::new);
+	private static final WorldAttached<InstanceWorld> instanceWorlds = new WorldAttached<>(InstanceWorld::create);
 
 	/**
 	 * Call this when you want to manually run {@link AbstractInstance#update()}.
@@ -59,10 +59,6 @@ public class InstancedRenderDispatcher {
 
 	public static InstanceManager<Entity> getEntities(LevelAccessor world) {
 		return getInstanceWorld(world).getEntityInstanceManager();
-	}
-
-	public static ParallelTaskEngine getTaskEngine(LevelAccessor world) {
-		return getInstanceWorld(world).taskEngine;
 	}
 
 	/**
