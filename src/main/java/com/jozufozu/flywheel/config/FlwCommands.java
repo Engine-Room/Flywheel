@@ -27,7 +27,7 @@ public class FlwCommands {
 
 		ConfigCommandBuilder commandBuilder = new ConfigCommandBuilder("flywheel");
 
-		commandBuilder.addValue(config.client.engine, "backend", (builder, value) ->
+		commandBuilder.addValue(config.client.backend, "backend", (builder, value) ->
 			builder
 				.executes(context -> {
 					LocalPlayer player = Minecraft.getInstance().player;
@@ -36,11 +36,11 @@ public class FlwCommands {
 					}
 					return Command.SINGLE_SUCCESS;
 				})
-				.then(Commands.argument("type", EngineArgument.INSTANCE)
+				.then(Commands.argument("type", BackendTypeArgument.INSTANCE)
 					.executes(context -> {
 						LocalPlayer player = Minecraft.getInstance().player;
 						if (player != null) {
-							FlwEngine type = context.getArgument("type", FlwEngine.class);
+							BackendType type = context.getArgument("type", BackendType.class);
 							value.set(type);
 
 							Component message = getEngineMessage(type);
@@ -51,7 +51,7 @@ public class FlwCommands {
 						return Command.SINGLE_SUCCESS;
 					})));
 
-		commandBuilder.addValue(config.client.debugNormals, "debugNormals", (builder, value) -> booleanValueCommand(builder, config, value,
+		commandBuilder.addValue(config.client.debugNormals, "debugNormals", (builder, value) -> booleanValueCommand(builder, value,
 				(source, bool) -> {
 					LocalPlayer player = Minecraft.getInstance().player;
 					if (player == null) return;
@@ -68,7 +68,7 @@ public class FlwCommands {
 				}
 			));
 
-		commandBuilder.addValue(config.client.limitUpdates, "limitUpdates", (builder, value) -> booleanValueCommand(builder, config, value,
+		commandBuilder.addValue(config.client.limitUpdates, "limitUpdates", (builder, value) -> booleanValueCommand(builder, value,
 				(source, bool) -> {
 					LocalPlayer player = Minecraft.getInstance().player;
 					if (player == null) return;
@@ -90,7 +90,7 @@ public class FlwCommands {
 		commandBuilder.build(event.getDispatcher());
 	}
 
-	public static void booleanValueCommand(LiteralArgumentBuilder<CommandSourceStack> builder, FlwConfig config, ConfigValue<Boolean> value, BiConsumer<CommandSourceStack, Boolean> displayAction, BiConsumer<CommandSourceStack, Boolean> setAction) {
+	public static void booleanValueCommand(LiteralArgumentBuilder<CommandSourceStack> builder, ConfigValue<Boolean> value, BiConsumer<CommandSourceStack, Boolean> displayAction, BiConsumer<CommandSourceStack, Boolean> setAction) {
 		builder
 			.executes(context -> {
 				displayAction.accept(context.getSource(), value.get());
@@ -114,7 +114,7 @@ public class FlwCommands {
 		return b ? new TextComponent("enabled").withStyle(ChatFormatting.DARK_GREEN) : new TextComponent("disabled").withStyle(ChatFormatting.RED);
 	}
 
-	public static Component getEngineMessage(@NotNull FlwEngine type) {
+	public static Component getEngineMessage(@NotNull BackendType type) {
 		return switch (type) {
 			case OFF -> new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED);
 			case INSTANCING -> new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN);

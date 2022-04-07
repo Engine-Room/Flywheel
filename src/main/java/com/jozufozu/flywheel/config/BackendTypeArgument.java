@@ -14,7 +14,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.TranslatableComponent;
 
-public enum EngineArgument implements ArgumentType<FlwEngine> {
+public enum BackendTypeArgument implements ArgumentType<BackendType> {
 	INSTANCE;
 
 	private static final Dynamic2CommandExceptionType INVALID = new Dynamic2CommandExceptionType((found, constants) -> {
@@ -23,28 +23,28 @@ public enum EngineArgument implements ArgumentType<FlwEngine> {
 	});
 
 	@Override
-	public FlwEngine parse(StringReader reader) throws CommandSyntaxException {
+	public BackendType parse(StringReader reader) throws CommandSyntaxException {
 		String string = reader.readUnquotedString();
 
-		FlwEngine engine = FlwEngine.byName(string);
+		BackendType engine = BackendType.byName(string);
 
 		if (engine == null) {
-			throw INVALID.createWithContext(reader, string, FlwEngine.validNames());
+			throw INVALID.createWithContext(reader, string, BackendType.validNames());
 		}
 
 		return engine;
 	}
 
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-		return SharedSuggestionProvider.suggest(FlwEngine.validNames(), builder);
+		return SharedSuggestionProvider.suggest(BackendType.validNames(), builder);
 	}
 
 	@Override
 	public Collection<String> getExamples() {
-		return FlwEngine.validNames();
+		return BackendType.validNames();
 	}
 
-	public static EngineArgument getInstance() {
+	public static BackendTypeArgument getInstance() {
 		return INSTANCE;
 	}
 }

@@ -7,7 +7,6 @@ import com.jozufozu.flywheel.backend.instancing.batching.BatchingEngine;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
-import com.jozufozu.flywheel.config.FlwEngine;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
@@ -17,7 +16,6 @@ import com.jozufozu.flywheel.util.ClientLevelExtension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -34,33 +32,35 @@ public class InstanceWorld {
 
 	public final ParallelTaskEngine taskEngine;
 
-	public InstanceWorld(LevelAccessor levelAccessor) {
-		Level world = (Level) levelAccessor;
-
-		this.taskEngine = new ParallelTaskEngine("Flywheel " + world.dimension().location());
-		this.taskEngine.startWorkers();
-
-		FlwEngine engine = Backend.getEngine();
-
-		switch (engine) {
+	public static InstanceWorld create(LevelAccessor level) {
+		return switch (Backend.getBackendType()) {
 		case INSTANCING -> {
 			InstancingEngine<WorldProgram> manager = InstancingEngine.builder(Contexts.WORLD)
 					.build();
 
-			entityInstanceManager = new EntityInstanceManager(manager);
-			blockEntityInstanceManager = new BlockEntityInstanceManager(manager);
+			var entityInstanceManager = new EntityInstanceManager(manager);
+			var blockEntityInstanceManager = new BlockEntityInstanceManager(manager);
 
 			manager.addListener(entityInstanceManager);
 			manager.addListener(blockEntityInstanceManager);
-			this.engine = manager;
+			yield new InstanceWorld(manager, entityInstanceManager, blockEntityInstanceManager);
 		}
 		case BATCHING -> {
-			this.engine = new BatchingEngine();
-			entityInstanceManager = new EntityInstanceManager(this.engine);
-			blockEntityInstanceManager = new BlockEntityInstanceManager(this.engine);
+			var manager = new BatchingEngine();
+			var entityInstanceManager = new EntityInstanceManager(manager);
+			var blockEntityInstanceManager = new BlockEntityInstanceManager(manager);
+
+			yield new InstanceWorld(manager, entityInstanceManager, blockEntityInstanceManager);
 		}
 		default -> throw new IllegalArgumentException("Unknown engine type");
-		}
+		};
+	}
+
+	public InstanceWorld(Engine engine, InstanceManager<Entity> entityInstanceManager, InstanceManager<BlockEntity> blockEntityInstanceManager) {
+		this.engine = engine;
+		this.entityInstanceManager = entityInstanceManager;
+		this.blockEntityInstanceManager = blockEntityInstanceManager;
+		this.taskEngine = Backend.getTaskEngine();
 	}
 
 	public InstanceManager<Entity> getEntityInstanceManager() {
@@ -75,7 +75,6 @@ public class InstanceWorld {
 	 * Free all acquired resources and invalidate this instance world.
 	 */
 	public void delete() {
-		taskEngine.stopWorkers();
 		engine.delete();
 		entityInstanceManager.detachLightListeners();
 		blockEntityInstanceManager.detachLightListeners();
