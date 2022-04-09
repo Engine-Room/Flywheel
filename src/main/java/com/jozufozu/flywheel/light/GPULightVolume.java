@@ -114,15 +114,8 @@ public class GPULightVolume extends LightVolume {
 		if (lightData == null) return;
 
 		if (box.contains(newSampleVolume)) {
-			if (newSampleVolume.intersects(sampleVolume)) {
-				GridAlignedBB newArea = newSampleVolume.intersect(sampleVolume);
-				sampleVolume.assign(newSampleVolume);
-
-				copyLight(world, newArea);
-			} else {
-				sampleVolume.assign(newSampleVolume);
-				initialize(world);
-			}
+			sampleVolume.assign(newSampleVolume);
+			initialize(world);
 		} else {
 			super.move(world, newSampleVolume);
 		}
