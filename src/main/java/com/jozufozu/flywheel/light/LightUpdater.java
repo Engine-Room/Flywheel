@@ -46,6 +46,19 @@ public class LightUpdater {
 	}
 
 	public void tick() {
+		tickSerial();
+		//tickParallel();
+	}
+
+	private void tickSerial() {
+		for (MovingListener movingListener : movingListeners) {
+			if (movingListener.update(provider)) {
+				addListener(movingListener);
+			}
+		}
+	}
+
+	private void tickParallel() {
 		Queue<LightListener> listeners = new ConcurrentLinkedQueue<>();
 
 		taskEngine.group("LightUpdater")
