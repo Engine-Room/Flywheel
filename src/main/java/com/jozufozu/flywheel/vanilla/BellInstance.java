@@ -3,24 +3,24 @@ package com.jozufozu.flywheel.vanilla;
 import javax.annotation.Nonnull;
 
 import com.jozufozu.flywheel.api.MaterialManager;
-import com.jozufozu.flywheel.api.ModelSupplier;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.Materials;
-import com.jozufozu.flywheel.core.SimpleModelSupplier;
+import com.jozufozu.flywheel.core.ModelSupplier;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BellRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BellBlockEntity;
 
 public class BellInstance extends BlockEntityInstance<BellBlockEntity> implements DynamicInstance {
 
-	private static final ModelSupplier MODEL = new SimpleModelSupplier(BellInstance::createBellModel);
+	private static final ModelSupplier MODEL = new ModelSupplier(BellInstance::createBellModel, RenderType.cutoutMipped());
 
 	private final OrientedData bell;
 
@@ -63,8 +63,7 @@ public class BellInstance extends BlockEntityInstance<BellBlockEntity> implement
 	}
 
 	private OrientedData createBellInstance() {
-        return materialManager.defaultCutout()
-                .material(Materials.ORIENTED)
+		return materialManager.material(Materials.ORIENTED)
 				.model(MODEL)
 				.createInstance();
 	}

@@ -5,7 +5,7 @@ import com.jozufozu.flywheel.api.struct.Batched;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
-import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.ModelSupplier;
 import com.jozufozu.flywheel.core.model.ModelTransformer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -16,11 +16,11 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 	final ModelTransformer sbb;
 
-	public CPUInstancer(Batched<D> type, Model modelData) {
+	public CPUInstancer(Batched<D> type, ModelSupplier modelData) {
 		super(type::create, modelData);
 		batchingType = type;
 
-		sbb = new ModelTransformer(modelData);
+		sbb = new ModelTransformer(modelData.get());
 	}
 
 	void submitTasks(PoseStack stack, TaskEngine pool, DirectVertexConsumer consumer) {

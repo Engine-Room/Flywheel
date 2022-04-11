@@ -1,14 +1,6 @@
 package com.jozufozu.flywheel.api;
 
-import java.util.function.Supplier;
-
-import com.jozufozu.flywheel.core.Models;
-import com.jozufozu.flywheel.core.PartialModel;
-import com.jozufozu.flywheel.core.model.ModelUtil;
-import com.mojang.blaze3d.vertex.PoseStack;
-
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.state.BlockState;
+import com.jozufozu.flywheel.core.ModelSupplier;
 
 public interface Material<D extends InstanceData> {
 
@@ -20,19 +12,4 @@ public interface Material<D extends InstanceData> {
 	 */
 	Instancer<D> model(ModelSupplier modelKey);
 
-	default Instancer<D> getModel(PartialModel partial) {
-		return model(Models.partial(partial));
-	}
-
-	default Instancer<D> getModel(PartialModel partial, Direction dir) {
-		return model(Models.partial(partial, dir, () -> ModelUtil.rotateToFace(dir)));
-	}
-
-	default Instancer<D> getModel(PartialModel partial, Direction dir, Supplier<PoseStack> modelTransform) {
-		return model(Models.partial(partial, dir, modelTransform));
-	}
-
-	default Instancer<D> getModel(BlockState toRender) {
-		return model(Models.block(toRender));
-	}
 }

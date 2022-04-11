@@ -36,7 +36,7 @@ public class CrumblingGroup<P extends CrumblingProgram> extends InstancedMateria
 		RenderSystem.setShaderTexture(4, breakingTex);
 
 		Textures.bindActiveTextures();
-		renderAll(viewProjection, camX, camY, camZ, layer);
+		//renderAll(viewProjection, camX, camY, camZ, layer);
 
 		CrumblingRenderer._currentLayer.clearRenderState();
 	}

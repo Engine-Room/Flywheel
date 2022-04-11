@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.jozufozu.flywheel.api.MaterialGroup;
+import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.RenderLayer;
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.BatchDrawingTracker;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
+import com.jozufozu.flywheel.backend.instancing.instancing.InstancedMaterial;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.platform.Lighting;
@@ -33,8 +35,8 @@ public class BatchingEngine implements Engine {
 	}
 
 	@Override
-	public MaterialGroup state(RenderLayer layer, RenderType type) {
-		return layers.get(layer).computeIfAbsent(type, BatchedMaterialGroup::new);
+	public <D extends InstanceData> InstancedMaterial<D> material(StructType<D> type) {
+		return null;
 	}
 
 	@Override

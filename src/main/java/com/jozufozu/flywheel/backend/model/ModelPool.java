@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL43;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.vertex.VertexType;

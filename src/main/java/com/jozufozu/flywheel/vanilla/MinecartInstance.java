@@ -2,13 +2,14 @@ package com.jozufozu.flywheel.vanilla;
 
 import javax.annotation.Nonnull;
 
+import com.jozufozu.flywheel.api.Material;
 import com.jozufozu.flywheel.api.MaterialManager;
-import com.jozufozu.flywheel.api.ModelSupplier;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
 import com.jozufozu.flywheel.core.Materials;
-import com.jozufozu.flywheel.core.SimpleModelSupplier;
+import com.jozufozu.flywheel.core.ModelSupplier;
+import com.jozufozu.flywheel.core.Models;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.model.Model;
@@ -29,7 +30,7 @@ import net.minecraft.world.phys.Vec3;
 public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance<T> implements DynamicInstance, TickableInstance {
 
 	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
-	private static final ModelSupplier MODEL = new SimpleModelSupplier(MinecartInstance::getBodyModel);
+	private static final ModelSupplier MODEL = new ModelSupplier(MinecartInstance::getBodyModel, RenderType.entitySolid(MINECART_LOCATION));
 
 	private final PoseStack stack = new PoseStack();
 
@@ -147,15 +148,13 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		if (blockstate.getRenderShape() == RenderShape.INVISIBLE)
 			return null;
 
-		return materialManager.defaultSolid()
-				.material(Materials.TRANSFORMED)
-				.getModel(blockstate)
+        return materialManager.material(Materials.TRANSFORMED)
+				.model(Models.block(blockstate))
 				.createInstance();
 	}
 
 	private ModelData getBody() {
-		return materialManager.solid(RenderType.entitySolid(MINECART_LOCATION))
-				.material(Materials.TRANSFORMED)
+		return materialManager.material(Materials.TRANSFORMED)
 				.model(MODEL)
 				.createInstance();
 	}
