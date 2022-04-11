@@ -9,6 +9,7 @@ import com.jozufozu.flywheel.config.BackendTypeArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.Contexts;
+import com.jozufozu.flywheel.core.Models;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.StitchedSprite;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
@@ -70,6 +71,7 @@ public class Flywheel {
 
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);
 		forgeEventBus.<ReloadRenderersEvent>addListener(ProgramCompiler::invalidateAll);
+		forgeEventBus.addListener(Models::onReload);
 
 		modEventBus.addListener(Contexts::flwInit);
 		modEventBus.addListener(PartialModel::onModelRegistry);

@@ -1,21 +1,27 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 
-import com.jozufozu.flywheel.api.MaterialGroup;
-import com.jozufozu.flywheel.api.RenderLayer;
+import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.struct.Instanced;
+import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.Engine;
+import com.jozufozu.flywheel.backend.instancing.Renderable;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
+import com.jozufozu.flywheel.backend.model.FallbackAllocator;
+import com.jozufozu.flywheel.backend.model.ModelAllocator;
+import com.jozufozu.flywheel.backend.model.ModelPool;
+import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
+import com.jozufozu.flywheel.core.compile.ProgramContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
-import com.jozufozu.flywheel.util.FlwUtil;
+import com.jozufozu.flywheel.util.Textures;
 import com.jozufozu.flywheel.util.WeakHashSet;
 import com.mojang.math.Matrix4f;
 
@@ -34,10 +40,13 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	protected final ProgramCompiler<P> context;
 	protected final GroupFactory<P> groupFactory;
 	protected final boolean ignoreOriginCoordinate;
+	private ModelAllocator allocator;
 
-	protected final Map<RenderLayer, Map<RenderType, InstancedMaterialGroup<P>>> layers;
+	private final Map<Instanced<? extends InstanceData>, InstancedMaterial<?>> materials = new HashMap<>();
 
 	private final WeakHashSet<OriginShiftListener> listeners;
+	private int vertexCount;
+	private int instanceCount;
 
 	public static <P extends WorldProgram> Builder<P> builder(ProgramCompiler<P> context) {
 		return new Builder<>(context);
@@ -49,30 +58,24 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 		this.listeners = new WeakHashSet<>();
 		this.groupFactory = groupFactory;
+	}
 
-		this.layers = new EnumMap<>(RenderLayer.class);
-		for (RenderLayer value : RenderLayer.values()) {
-			layers.put(value, new HashMap<>());
+	@SuppressWarnings("unchecked")
+	@Nonnull
+	@Override
+	public <D extends InstanceData> InstancedMaterial<D> material(StructType<D> type) {
+		if (type instanceof Instanced<D> instanced) {
+			return (InstancedMaterial<D>) materials.computeIfAbsent(instanced, InstancedMaterial::new);
+		} else {
+			throw new ClassCastException("Cannot use type '" + type + "' with GPU instancing.");
 		}
 	}
 
-	/**
-	 * Get a material group that will render in the given layer with the given type.
-	 *
-	 * @param layer
-	 * @param type The {@link RenderType} you need to draw with.
-	 * @return A material group whose children will
-	 */
-	@Override
-	public MaterialGroup state(RenderLayer layer, RenderType type) {
-		return layers.get(layer).computeIfAbsent(type, t -> groupFactory.create(this, t));
-	}
-
-	/**
-	 * Render every model for every material.
-	 */
 	@Override
 	public void render(TaskEngine taskEngine, RenderLayerEvent event) {
+
+		RenderType type = event.getType();
+
 		double camX;
 		double camY;
 		double camZ;
@@ -91,28 +94,46 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 			viewProjection = event.viewProjection;
 		}
 
-		getGroupsToRender(event.getLayer()).forEach(group -> group.render(viewProjection, camX, camY, camZ, event.getLayer()));
+		vertexCount = 0;
+		instanceCount = 0;
+
+		type.setupRenderState();
+		Textures.bindActiveTextures();
+
+		for (Map.Entry<Instanced<? extends InstanceData>, InstancedMaterial<?>> entry : materials.entrySet()) {
+			List<Renderable> renderables = entry.getValue()
+					.getRenderables(type);
+
+			if (renderables == null || renderables.isEmpty()) {
+				continue;
+			}
+
+			P program = context.getProgram(ProgramContext.create(entry.getKey()
+					.getProgramSpec(), Formats.POS_TEX_NORMAL, event.layer));
+
+			program.bind();
+			program.uploadViewProjection(viewProjection);
+			program.uploadCameraPos(camX, camY, camZ);
+
+			//setup(program);
+			for (Renderable renderable : renderables) {
+				renderable.draw();
+			}
+		}
+
+		type.clearRenderState();
 	}
 
-	private Stream<InstancedMaterialGroup<P>> getGroupsToRender(@Nullable RenderLayer layer) {
-		// layer is null when this is called from CrumblingRenderer
-		if (layer != null) {
-			return layers.get(layer)
-					.values()
-					.stream();
-		} else {
-			return layers.values()
-					.stream()
-					.flatMap(FlwUtil::mapValues);
-		}
+	public void clearAll() {
+		materials.values().forEach(InstancedMaterial::clear);
 	}
 
 	@Override
 	public void delete() {
-		for (Map<RenderType, InstancedMaterialGroup<P>> groups : layers.values()) {
+		materials.values()
+				.forEach(InstancedMaterial::delete);
 
-			groups.values().forEach(InstancedMaterialGroup::delete);
-		}
+		materials.clear();
 	}
 
 	@Override
@@ -143,20 +164,46 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 			originCoordinate = new BlockPos(cX, cY, cZ);
 
-			for (Map<RenderType, InstancedMaterialGroup<P>> groups : layers.values()) {
-				groups.values().forEach(InstancedMaterialGroup::clear);
-			}
+			materials.values().forEach(InstancedMaterial::clear);
 
 			listeners.forEach(OriginShiftListener::onOriginShift);
 		}
+
+		ModelAllocator allocator = getModelAllocator();
+
+		for (InstancedMaterial<?> material : materials.values()) {
+			material.init(allocator);
+		}
+
+		if (allocator instanceof ModelPool pool) {
+			// ...and then flush the model arena in case anything was marked for upload
+			pool.flush();
+		}
+
 	}
 
 	@Override
 	public void addDebugInfo(List<String> info) {
 		info.add("GL33 Instanced Arrays");
-		info.add("Instances: " + getGroupsToRender(null).mapToInt(InstancedMaterialGroup::getInstanceCount).sum());
-		info.add("Vertices: " + getGroupsToRender(null).mapToInt(InstancedMaterialGroup::getVertexCount).sum());
+		info.add("Instances: " + instanceCount);
+		info.add("Vertices: " + vertexCount);
 		info.add("Origin: " + originCoordinate.getX() + ", " + originCoordinate.getY() + ", " + originCoordinate.getZ());
+	}
+
+	private ModelAllocator getModelAllocator() {
+		if (allocator == null) {
+			allocator = createAllocator();
+		}
+		return this.allocator;
+	}
+
+	private static ModelAllocator createAllocator() {
+		if (GlCompat.getInstance()
+				.onAMDWindows()) {
+			return FallbackAllocator.INSTANCE;
+		} else {
+			return new ModelPool(Formats.POS_TEX_NORMAL);
+		}
 	}
 
 	@FunctionalInterface

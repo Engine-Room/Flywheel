@@ -6,11 +6,10 @@ import java.util.function.BiFunction;
 import javax.annotation.Nonnull;
 
 import com.jozufozu.flywheel.api.MaterialManager;
-import com.jozufozu.flywheel.api.ModelSupplier;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.Materials;
-import com.jozufozu.flywheel.core.SimpleModelSupplier;
+import com.jozufozu.flywheel.core.ModelSupplier;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
@@ -35,8 +34,8 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends BlockEntityInstance<T> implements DynamicInstance {
 
-	private static final BiFunction<ChestType, TextureAtlasSprite, ModelSupplier> LID = Util.memoize((type, sprite) -> new SimpleModelSupplier(() -> createLidModel(type, sprite)));
-	private static final BiFunction<ChestType, TextureAtlasSprite, ModelSupplier> BASE = Util.memoize((type, sprite) -> new SimpleModelSupplier(() -> createBaseModel(type, sprite)));
+	private static final BiFunction<ChestType, Material, ModelSupplier> LID = Util.memoize((type, mat) -> new ModelSupplier(() -> createLidModel(type, mat.sprite()), RenderType.entitySolid(mat.atlasLocation())));
+	private static final BiFunction<ChestType, Material, ModelSupplier> BASE = Util.memoize((type, mat) -> new ModelSupplier(() -> createBaseModel(type, mat.sprite()), RenderType.entitySolid(mat.atlasLocation())));
 
 	private final OrientedData body;
 	private final ModelData lid;
@@ -117,17 +116,15 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Block
 
 	private OrientedData baseInstance() {
 
-		return materialManager.solid(RenderType.entitySolid(renderMaterial.atlasLocation()))
-                .material(Materials.ORIENTED)
-				.model(BASE.apply(chestType, renderMaterial.sprite()))
+		return materialManager.material(Materials.ORIENTED)
+				.model(BASE.apply(chestType, renderMaterial))
 				.createInstance();
 	}
 
 	private ModelData lidInstance() {
 
-		return materialManager.solid(RenderType.entitySolid(renderMaterial.atlasLocation()))
-                .material(Materials.TRANSFORMED)
-				.model(LID.apply(chestType, renderMaterial.sprite()))
+		return materialManager.material(Materials.TRANSFORMED)
+				.model(LID.apply(chestType, renderMaterial))
 				.createInstance();
 	}
 

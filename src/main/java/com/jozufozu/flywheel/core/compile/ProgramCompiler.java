@@ -75,7 +75,7 @@ public class ProgramCompiler<P extends GlProgram> extends Memoizer<ProgramContex
 		value.delete();
 	}
 
-	public static void invalidateAll(ReloadRenderersEvent event) {
+	public static void invalidateAll(ReloadRenderersEvent ignored) {
 		ALL_COMPILERS.forEach(ProgramCompiler::invalidate);
 	}
 }

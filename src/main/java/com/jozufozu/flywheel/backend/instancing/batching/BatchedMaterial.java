@@ -2,14 +2,12 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.Material;
-import com.jozufozu.flywheel.api.ModelSupplier;
 import com.jozufozu.flywheel.api.struct.Batched;
-import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.ModelSupplier;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -26,7 +24,7 @@ public class BatchedMaterial<D extends InstanceData> implements Material<D> {
 
 	@Override
 	public Instancer<D> model(ModelSupplier modelKey) {
-		return models.computeIfAbsent(modelKey, k -> new CPUInstancer<>(type, k.get()));
+		return models.computeIfAbsent(modelKey, k -> new CPUInstancer<>(type, k));
 	}
 
 	public void setupAndRenderInto(PoseStack stack, VertexConsumer buffer) {

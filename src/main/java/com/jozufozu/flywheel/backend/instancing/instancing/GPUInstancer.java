@@ -1,7 +1,10 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
+import java.util.Map;
+
 import org.lwjgl.system.MemoryUtil;
 
+import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.struct.Instanced;
@@ -12,10 +15,13 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
+import com.jozufozu.flywheel.backend.instancing.Renderable;
 import com.jozufozu.flywheel.backend.model.BufferedModel;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
+import com.jozufozu.flywheel.core.ModelSupplier;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
-import com.jozufozu.flywheel.core.model.Model;
+
+import net.minecraft.client.renderer.RenderType;
 
 public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
@@ -31,7 +37,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 	protected boolean anyToUpdate;
 
-	public GPUInstancer(Instanced<D> type, Model model) {
+	public GPUInstancer(Instanced<D> type, ModelSupplier model) {
 		super(type::create, model);
 		this.instanceFormat = type.getLayout();
 		instancedType = type;
@@ -61,14 +67,17 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		return deleted || model == null;
 	}
 
-	public void init(ModelAllocator modelAllocator) {
-		if (isInitialized()) return;
+	public Map<RenderType, Renderable> init(ModelAllocator modelAllocator) {
+		if (isInitialized()) return ImmutableMap.of();
 
 		initialized = true;
 
+		instanceVBO = GlBuffer.requestPersistent(GlBufferType.ARRAY_BUFFER);
+		instanceVBO.setGrowthMargin(instanceFormat.getStride() * 16);
+
 		vao = new GlVertexArray();
 
-		model = modelAllocator.alloc(modelData, arenaModel -> {
+		model = modelAllocator.alloc(modelData.get(), arenaModel -> {
 			vao.bind();
 
 			arenaModel.setupState(vao);
@@ -77,8 +86,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		vao.bind();
 		vao.enableArrays(model.getAttributeCount() + instanceFormat.getAttributeCount());
 
-		instanceVBO = GlBuffer.requestPersistent(GlBufferType.ARRAY_BUFFER);
-		instanceVBO.setGrowthMargin(instanceFormat.getStride() * 16);
+		return ImmutableMap.of(modelData.getRenderType(), this::render);
 	}
 
 	public boolean isInitialized() {

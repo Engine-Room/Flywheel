@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.util;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
@@ -22,6 +23,10 @@ public class Lazy<T> implements Supplier<T> {
 		}
 
 		return value;
+	}
+
+	public <Q> Lazy<Q> map(Function<T, Q> func) {
+		return new Lazy<>(() -> func.apply(get()));
 	}
 
 	public static <T> Lazy<T> of(NonNullSupplier<T> factory) {

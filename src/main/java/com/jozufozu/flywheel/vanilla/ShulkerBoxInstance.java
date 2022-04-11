@@ -3,11 +3,10 @@ package com.jozufozu.flywheel.vanilla;
 import java.util.function.Function;
 
 import com.jozufozu.flywheel.api.MaterialManager;
-import com.jozufozu.flywheel.api.ModelSupplier;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.Materials;
-import com.jozufozu.flywheel.core.SimpleModelSupplier;
+import com.jozufozu.flywheel.core.ModelSupplier;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
@@ -27,8 +26,8 @@ import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
 public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntity> implements DynamicInstance {
 
-	private static final Function<TextureAtlasSprite, ModelSupplier> BASE = Util.memoize(it -> new SimpleModelSupplier(() -> makeBaseModel(it)));
-	private static final Function<TextureAtlasSprite, ModelSupplier> LID = Util.memoize(it -> new SimpleModelSupplier(() -> makeLidModel(it)));
+	private static final Function<TextureAtlasSprite, ModelSupplier> BASE = Util.memoize(it -> new ModelSupplier(() -> makeBaseModel(it), RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET)));
+	private static final Function<TextureAtlasSprite, ModelSupplier> LID = Util.memoize(it -> new ModelSupplier(() -> makeLidModel(it), RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET)));
 
 	private final TextureAtlasSprite texture;
 
@@ -74,9 +73,8 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 
 		Quaternion spin = Vector3f.YP.rotationDegrees(270.0F * progress);
 
-		TransformStack tstack = TransformStack.cast(stack);
-
-		tstack.pushPose()
+		TransformStack.cast(stack)
+				.pushPose()
 				.centre()
 				.multiply(spin)
 				.unCentre()
@@ -99,15 +97,13 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 	}
 
 	private ModelData makeBaseInstance() {
-        return materialManager.cutout(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET))
-                .material(Materials.TRANSFORMED)
+		return materialManager.material(Materials.TRANSFORMED)
 				.model(BASE.apply(texture))
 				.createInstance();
 	}
 
 	private ModelData makeLidInstance() {
-        return materialManager.cutout(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET))
-                .material(Materials.TRANSFORMED)
+		return materialManager.material(Materials.TRANSFORMED)
 				.model(LID.apply(texture))
 				.createInstance();
 	}

@@ -2,12 +2,12 @@ package com.jozufozu.flywheel.core;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.jozufozu.flywheel.api.ModelSupplier;
 import com.jozufozu.flywheel.core.model.BlockModel;
+import com.jozufozu.flywheel.core.model.ModelUtil;
+import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.util.Pair;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -19,19 +19,29 @@ import net.minecraft.world.level.block.state.BlockState;
 public class Models {
 
 	public static ModelSupplier block(BlockState state) {
-		return BLOCK_STATE.apply(state);
+		return BLOCK_STATE.computeIfAbsent(state, it -> new ModelSupplier(() -> new BlockModel(it)));
 	}
 
 	public static ModelSupplier partial(PartialModel partial) {
-		return PARTIAL.apply(partial);
+		return PARTIAL.computeIfAbsent(partial, it -> new ModelSupplier(() -> new BlockModel(it.get(), Blocks.AIR.defaultBlockState())));
+	}
+
+	public static ModelSupplier partial(PartialModel partial, Direction dir) {
+		return partial(partial, dir, () -> ModelUtil.rotateToFace(dir));
 	}
 
 	public static ModelSupplier partial(PartialModel partial, Direction dir, Supplier<PoseStack> modelTransform) {
-		return PARTIAL_DIR.computeIfAbsent(Pair.of(dir, partial), $ -> new SimpleModelSupplier(() -> new BlockModel(partial.get(), Blocks.AIR.defaultBlockState(), modelTransform.get())));
+		return PARTIAL_DIR.computeIfAbsent(Pair.of(dir, partial), $ -> new ModelSupplier(() -> new BlockModel(partial.get(), Blocks.AIR.defaultBlockState(), modelTransform.get())));
 	}
 
-	private static final Function<BlockState, ModelSupplier> BLOCK_STATE = Util.memoize(it -> new SimpleModelSupplier(() -> new BlockModel(it)));
-	private static final Function<PartialModel, ModelSupplier> PARTIAL = Util.memoize(it -> new SimpleModelSupplier(() -> new BlockModel(it.get(), Blocks.AIR.defaultBlockState())));
+	public static void onReload(ReloadRenderersEvent ignored) {
+		BLOCK_STATE.clear();
+		PARTIAL.clear();
+		PARTIAL_DIR.clear();
+	}
+
+	private static final Map<BlockState, ModelSupplier> BLOCK_STATE = new HashMap<>();
+	private static final Map<PartialModel, ModelSupplier> PARTIAL = new HashMap<>();
 	private static final Map<Pair<Direction, PartialModel>, ModelSupplier> PARTIAL_DIR = new HashMap<>();
 
 }
