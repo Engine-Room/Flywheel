@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.jozufozu.flywheel.api.MaterialGroup;
-import com.jozufozu.flywheel.backend.RenderLayer;
+import com.jozufozu.flywheel.api.RenderLayer;
 import com.jozufozu.flywheel.backend.instancing.BatchDrawingTracker;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
@@ -33,8 +33,8 @@ public class BatchingEngine implements Engine {
 	}
 
 	@Override
-	public MaterialGroup state(RenderLayer layer, RenderType state) {
-		return layers.get(layer).computeIfAbsent(state, BatchedMaterialGroup::new);
+	public MaterialGroup state(RenderLayer layer, RenderType type) {
+		return layers.get(layer).computeIfAbsent(type, BatchedMaterialGroup::new);
 	}
 
 	@Override

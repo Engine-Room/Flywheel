@@ -44,14 +44,10 @@ public class CrumblingRenderer {
 
 	static RenderType _currentLayer;
 
-	private static final Lazy<State> STATE;
-	private static final Lazy.KillSwitch<State> INVALIDATOR;
+	private static Lazy<State> STATE;
 
 	static {
-		Pair<Lazy<State>, Lazy.KillSwitch<State>> state = Lazy.ofKillable(State::new, State::kill);
-
-        STATE = state.first();
-		INVALIDATOR = state.second();
+		_init();
 	}
 
 	public static void renderBreaking(RenderLayerEvent event) {
@@ -126,7 +122,12 @@ public class CrumblingRenderer {
 	}
 
 	public static void reset() {
-		INVALIDATOR.killValue();
+		STATE.ifPresent(State::kill);
+		_init();
+	}
+
+	private static void _init() {
+		STATE = Lazy.of(State::new);
 	}
 
 	private static class State {

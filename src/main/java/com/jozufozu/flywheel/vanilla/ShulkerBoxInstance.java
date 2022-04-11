@@ -1,9 +1,13 @@
 package com.jozufozu.flywheel.vanilla;
 
+import java.util.function.Function;
+
 import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.api.ModelSupplier;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.Materials;
+import com.jozufozu.flywheel.core.SimpleModelSupplier;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
@@ -12,6 +16,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
+import net.minecraft.Util;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -21,6 +26,9 @@ import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
 public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntity> implements DynamicInstance {
+
+	private static final Function<TextureAtlasSprite, ModelSupplier> BASE = Util.memoize(it -> new SimpleModelSupplier(() -> makeBaseModel(it)));
+	private static final Function<TextureAtlasSprite, ModelSupplier> LID = Util.memoize(it -> new SimpleModelSupplier(() -> makeLidModel(it)));
 
 	private final TextureAtlasSprite texture;
 
@@ -93,18 +101,18 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 	private ModelData makeBaseInstance() {
         return materialManager.cutout(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET))
                 .material(Materials.TRANSFORMED)
-				.model("base_" + texture.getName(), this::makeBaseModel)
+				.model(BASE.apply(texture))
 				.createInstance();
 	}
 
 	private ModelData makeLidInstance() {
         return materialManager.cutout(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET))
                 .material(Materials.TRANSFORMED)
-				.model("lid_" + texture.getName(), this::makeLidModel)
+				.model(LID.apply(texture))
 				.createInstance();
 	}
 
-	private ModelPart makeBaseModel() {
+	private static ModelPart makeBaseModel(TextureAtlasSprite texture) {
 		return ModelPart.builder("shulker_base", 64, 64)
 				.sprite(texture)
 				.cuboid()
@@ -115,7 +123,7 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 				.build();
 	}
 
-	private ModelPart makeLidModel() {
+	private static ModelPart makeLidModel(TextureAtlasSprite texture) {
 		return ModelPart.builder("shulker_lid", 64, 64)
 				.sprite(texture)
 				.cuboid()
