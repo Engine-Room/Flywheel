@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.RenderLayer;
+import com.jozufozu.flywheel.api.RenderLayer;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.model.FallbackAllocator;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;

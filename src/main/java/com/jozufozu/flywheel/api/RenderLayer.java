@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend;
+package com.jozufozu.flywheel.api;
 
 import javax.annotation.Nullable;
 

@@ -1,10 +1,14 @@
 package com.jozufozu.flywheel.vanilla;
 
+import javax.annotation.Nonnull;
+
 import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.api.ModelSupplier;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
 import com.jozufozu.flywheel.core.Materials;
+import com.jozufozu.flywheel.core.SimpleModelSupplier;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.model.Model;
@@ -25,6 +29,7 @@ import net.minecraft.world.phys.Vec3;
 public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance<T> implements DynamicInstance, TickableInstance {
 
 	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
+	private static final ModelSupplier MODEL = new SimpleModelSupplier(MinecartInstance::getBodyModel);
 
 	private final PoseStack stack = new PoseStack();
 
@@ -151,11 +156,12 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 	private ModelData getBody() {
 		return materialManager.solid(RenderType.entitySolid(MINECART_LOCATION))
 				.material(Materials.TRANSFORMED)
-				.model(entity.getType(), this::getBodyModel)
+				.model(MODEL)
 				.createInstance();
 	}
 
-	private Model getBodyModel() {
+	@Nonnull
+	private static Model getBodyModel() {
 		int y = -3;
 		return ModelPart.builder("minecart", 64, 32)
 				.cuboid().invertYZ().start(-10, -8, -y).size(20, 16, 2).textureOffset(0, 10).rotateZ((float) Math.PI).rotateX(((float)Math.PI / 2F)).endCuboid()
