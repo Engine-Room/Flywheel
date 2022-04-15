@@ -8,13 +8,16 @@ import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceM
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.core.Contexts;
+import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
-import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.util.ClientLevelExtension;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -35,8 +38,7 @@ public class InstanceWorld {
 	public static InstanceWorld create(LevelAccessor level) {
 		return switch (Backend.getBackendType()) {
 		case INSTANCING -> {
-			InstancingEngine<WorldProgram> manager = InstancingEngine.builder(Contexts.WORLD)
-					.build();
+			InstancingEngine<WorldProgram> manager = new InstancingEngine<>(Contexts.WORLD);
 
 			var entityInstanceManager = new EntityInstanceManager(manager);
 			var blockEntityInstanceManager = new BlockEntityInstanceManager(manager);
@@ -116,12 +118,12 @@ public class InstanceWorld {
 	/**
 	 * Draw the given layer.
 	 */
-	public void renderLayer(RenderLayerEvent event) {
+	public void renderLayer(RenderContext context) {
 		taskEngine.syncPoint();
-		event.stack.pushPose();
-		event.stack.translate(-event.camX, -event.camY, -event.camZ);
-		engine.render(taskEngine, event);
-		event.stack.popPose();
+		context.pushPose();
+		context.translateBack(context.camX(), context.camY(), context.camZ());
+		engine.render(taskEngine, context);
+		context.popPose();
 	}
 
 	/**

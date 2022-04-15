@@ -6,13 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.Material;
 import com.jozufozu.flywheel.api.struct.Instanced;
-import com.jozufozu.flywheel.backend.instancing.Renderable;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
 import com.jozufozu.flywheel.core.ModelSupplier;
 
@@ -27,17 +24,10 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 	protected final Map<ModelSupplier, GPUInstancer<D>> models = new HashMap<>();
 	protected final Instanced<D> type;
 
-	public final Map<RenderType, List<Renderable>> renderables = new HashMap<>();
-
 	protected final List<GPUInstancer<D>> uninitialized = new ArrayList<>();
 
 	public InstancedMaterial(Instanced<D> type) {
 		this.type = type;
-	}
-
-	@Nullable
-	public List<Renderable> getRenderables(RenderType type) {
-		return renderables.get(type);
 	}
 
 	@Override
@@ -80,17 +70,18 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 		return models.values();
 	}
 
-	void init(ModelAllocator allocator) {
+	public void init(ModelAllocator allocator) {
 		for (GPUInstancer<?> instancer : uninitialized) {
-
-			instancer.init(allocator)
-					.forEach(this::addRenderable);
+			instancer.init(allocator);
 		}
 		uninitialized.clear();
 	}
 
-	private void addRenderable(RenderType type, Renderable renderable) {
-		this.renderables.computeIfAbsent(type, k -> new ArrayList<>())
-				.add(renderable);
+	public void renderIn(RenderType layer) {
+		for (GPUInstancer<?> instancer : models.values()) {
+			if (instancer.shouldRenderIn(layer)) {
+				instancer.renderIn(layer);
+			}
+		}
 	}
 }

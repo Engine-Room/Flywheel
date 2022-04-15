@@ -2,11 +2,8 @@ package com.jozufozu.flywheel.core.compile;
 
 import java.util.Objects;
 
-import javax.annotation.Nullable;
-
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.api.RenderLayer;
 import com.jozufozu.flywheel.core.GameStateRegistry;
 import com.jozufozu.flywheel.core.shader.ProgramSpec;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
@@ -20,29 +17,19 @@ public final class ProgramContext {
 	/**
 	 * Creates a compilation context for the given program, vertex type and render layer.
 	 *
-	 * @param programName The name of the program to use.
-	 * @param vertexType  The vertex type to use.
-	 * @param layer       If cutout, the alpha discard threshold is 0.1, otherwise 0.
+	 * @param programName 	The name of the program to use.
+	 * @param vertexType  	The vertex type to use.
+	 * @param alphaDiscard	The alpha threshold below which pixels are discarded.
 	 * @return A compilation context.
 	 */
-	public static ProgramContext create(ResourceLocation programName, VertexType vertexType, @Nullable RenderLayer layer) {
+	public static ProgramContext create(ResourceLocation programName, VertexType vertexType, float alphaDiscard) {
 		ProgramSpec spec = Backend.getSpec(programName);
 
 		if (spec == null) {
 			throw new NullPointerException("Cannot compile shader because '" + programName + "' is not recognized.");
 		}
 
-		return new ProgramContext(spec, getAlphaDiscard(layer), vertexType, GameStateRegistry.takeSnapshot());
-	}
-
-	/**
-	 * Gets the alpha discard threshold for the given render layer.
-	 *
-	 * @param layer The render layer to get the alpha discard threshold for.
-	 * @return The alpha discard threshold.
-	 */
-	public static float getAlphaDiscard(@Nullable RenderLayer layer) {
-		return layer == RenderLayer.CUTOUT ? 0.1f : 0f;
+		return new ProgramContext(spec, alphaDiscard, vertexType, GameStateRegistry.takeSnapshot());
 	}
 
 	public final ProgramSpec spec;

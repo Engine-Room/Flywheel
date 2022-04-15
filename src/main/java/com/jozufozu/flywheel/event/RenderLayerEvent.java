@@ -1,8 +1,6 @@
 package com.jozufozu.flywheel.event;
 
-import javax.annotation.Nullable;
-
-import com.jozufozu.flywheel.api.RenderLayer;
+import com.jozufozu.flywheel.core.RenderContext;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
@@ -13,65 +11,51 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraftforge.eventbus.api.Event;
 
 public class RenderLayerEvent extends Event {
-	private final ClientLevel world;
-	public final RenderType type;
-	public final PoseStack stack;
-	public final Matrix4f viewProjection;
-	public final RenderBuffers buffers;
-	public final double camX;
-	public final double camY;
-	public final double camZ;
-	public final RenderLayer layer;
+	public final RenderContext context;
 
 	public RenderLayerEvent(ClientLevel world, RenderType type, PoseStack stack, RenderBuffers buffers, double camX, double camY, double camZ) {
-		this.world = world;
-		this.type = type;
-		this.stack = stack;
-
-		viewProjection = stack.last()
+		var viewProjection = stack.last()
 				.pose()
 				.copy();
         viewProjection.multiplyBackward(RenderSystem.getProjectionMatrix());
 
-		this.buffers = buffers;
-		this.camX = camX;
-		this.camY = camY;
-		this.camZ = camZ;
-
-		this.layer = RenderLayer.getPrimaryLayer(type);
-	}
-
-	@Nullable
-	public RenderLayer getLayer() {
-		return layer;
-	}
-
-	public ClientLevel getWorld() {
-		return world;
-	}
-
-	public RenderType getType() {
-		return type;
-	}
-
-	public Matrix4f getViewProjection() {
-		return viewProjection;
-	}
-
-	public double getCamX() {
-		return camX;
-	}
-
-	public double getCamY() {
-		return camY;
-	}
-
-	public double getCamZ() {
-		return camZ;
+		context = new RenderContext(world, type, stack, viewProjection, buffers, camX, camY, camZ);
 	}
 
 	@Override
 	public String toString() {
-		return "RenderLayerEvent[" + layer + "][" + "world=" + world + ", type=" + type + ", stack=" + stack + ", viewProjection=" + viewProjection + ", buffers=" + buffers + ", camX=" + camX + ", camY=" + camY + ", camZ=" + camZ + ']';
+		return "RenderLayerEvent{" + context + "}";
+	}
+
+	public ClientLevel getWorld() {
+		return context.level();
+	}
+
+	public RenderType getType() {
+		return context.type();
+	}
+
+	public PoseStack getStack() {
+		return context.stack();
+	}
+
+	public Matrix4f getViewProjection() {
+		return context.viewProjection();
+	}
+
+	public RenderBuffers getBuffers() {
+		return context.buffers();
+	}
+
+	public double getCamX() {
+		return context.camX();
+	}
+
+	public double getCamY() {
+		return context.camY();
+	}
+
+	public double getCamZ() {
+		return context.camZ();
 	}
 }
