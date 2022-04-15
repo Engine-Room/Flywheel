@@ -9,6 +9,7 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructWriter;
+import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
@@ -67,8 +68,16 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		return deleted || model == null;
 	}
 
-	public Map<RenderType, Renderable> init(ModelAllocator modelAllocator) {
-		if (isInitialized()) return ImmutableMap.of();
+	public boolean shouldRenderIn(RenderType renderType) {
+		return modelData.getRenderType() == renderType;
+	}
+
+	public void renderIn(RenderType renderType) {
+		render();
+	}
+
+	public void init(ModelAllocator modelAllocator) {
+		if (isInitialized()) return;
 
 		initialized = true;
 
@@ -77,16 +86,10 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 		vao = new GlVertexArray();
 
-		model = modelAllocator.alloc(modelData.get(), arenaModel -> {
-			vao.bind();
-
-			arenaModel.setupState(vao);
-		});
+		model = modelAllocator.alloc(modelData.get(), vao);
 
 		vao.bind();
 		vao.enableArrays(model.getAttributeCount() + instanceFormat.getAttributeCount());
-
-		return ImmutableMap.of(modelData.getRenderType(), this::render);
 	}
 
 	public boolean isInitialized() {

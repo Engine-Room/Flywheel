@@ -98,12 +98,10 @@ public class InstancedRenderDispatcher {
 
 	@SubscribeEvent
 	public static void renderLayer(RenderLayerEvent event) {
-		if (event.layer == null) return;
-
 		ClientLevel world = event.getWorld();
 		if (!Backend.canUseInstancing(world)) return;
 
-		instanceWorlds.get(world).renderLayer(event);
+		instanceWorlds.get(world).renderLayer(event.context);
 	}
 
 	@SubscribeEvent

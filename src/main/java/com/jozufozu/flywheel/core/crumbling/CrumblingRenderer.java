@@ -2,20 +2,26 @@ package com.jozufozu.flywheel.core.crumbling;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 
+import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
+import com.jozufozu.flywheel.backend.instancing.instancing.InstancedMaterial;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.core.Contexts;
+import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
-import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
 import com.jozufozu.flywheel.util.Lazy;
-import com.jozufozu.flywheel.util.Pair;
+import com.jozufozu.flywheel.util.Textures;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -50,16 +56,17 @@ public class CrumblingRenderer {
 		_init();
 	}
 
-	public static void renderBreaking(RenderLayerEvent event) {
-		if (!Backend.canUseInstancing(event.getWorld())) return;
+	public static void renderBreaking(ClientLevel level, PoseStack stack, double x, double y, double z, Matrix4f viewProjection) {
 
-		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageBlockEntities(event.getWorld());
+		if (!Backend.canUseInstancing(level)) return;
+
+		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageBlockEntities(level);
 
 		if (activeStages.isEmpty()) return;
 
 		State state = STATE.get();
-		InstanceManager<BlockEntity> instanceManager = state.instanceManager;
-		InstancingEngine<CrumblingProgram> materials = state.materialManager;
+		var instanceManager = state.instanceManager;
+		var materials = state.materialManager;
 
 		TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 		Camera info = Minecraft.getInstance().gameRenderer.getMainCamera();
@@ -72,8 +79,11 @@ public class CrumblingRenderer {
 				stage.getValue().forEach(instanceManager::add);
 
 				instanceManager.beginFrame(SerialTaskEngine.INSTANCE, info);
+				materials.beginFrame(info);
 
-				materials.render(SerialTaskEngine.INSTANCE, event);
+				var ctx = new RenderContext(level, _currentLayer, stack, viewProjection, null, x, y, z);
+
+				materials.render(SerialTaskEngine.INSTANCE, ctx);
 
 				instanceManager.invalidate();
 			}
@@ -131,13 +141,11 @@ public class CrumblingRenderer {
 	}
 
 	private static class State {
-		private final InstancingEngine<CrumblingProgram> materialManager;
+		private final CrumblingEngine materialManager;
 		private final InstanceManager<BlockEntity> instanceManager;
 
 		private State() {
-			materialManager = InstancingEngine.builder(Contexts.CRUMBLING)
-					.setGroupFactory(CrumblingGroup::new)
-					.build();
+			materialManager = new CrumblingEngine();
 			instanceManager = new CrumblingInstanceManager(materialManager);
 			materialManager.addListener(instanceManager);
 		}
@@ -145,6 +153,53 @@ public class CrumblingRenderer {
 		private void kill() {
 			materialManager.delete();
 			instanceManager.invalidate();
+		}
+	}
+
+	private static class CrumblingEngine extends InstancingEngine<CrumblingProgram> {
+
+		public CrumblingEngine() {
+			super(Contexts.CRUMBLING);
+		}
+
+		@Override
+		protected void render(RenderType type, double camX, double camY, double camZ, Matrix4f viewProjection) {
+			type.setupRenderState();
+
+			int renderTex = RenderSystem.getShaderTexture(0);
+
+			AtlasInfo.SheetSize sheetSize = AtlasInfo.getSheetSize(Textures.getShaderTexture(0));
+
+			int width;
+			int height;
+			if (sheetSize != null) {
+				width = sheetSize.width();
+				height = sheetSize.height();
+			} else {
+				width = height = 256;
+			}
+
+			type.clearRenderState();
+
+			CrumblingRenderer._currentLayer.setupRenderState();
+
+			int breakingTex = RenderSystem.getShaderTexture(0);
+
+			RenderSystem.setShaderTexture(0, renderTex);
+			RenderSystem.setShaderTexture(4, breakingTex);
+
+			Textures.bindActiveTextures();
+
+			for (Map.Entry<Instanced<? extends InstanceData>, InstancedMaterial<?>> entry : materials.entrySet()) {
+				CrumblingProgram program = setup(type, camX, camY, camZ, viewProjection, entry.getKey()
+							.getProgramSpec());
+
+				program.setAtlasSize(width, height);
+
+				//entry.getValue().getAllRenderables().forEach(Renderable::draw);
+			}
+
+			CrumblingRenderer._currentLayer.clearRenderState();
 		}
 	}
 }

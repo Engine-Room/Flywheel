@@ -64,8 +64,8 @@ public class IndexedModel implements BufferedModel {
 	}
 
 	/**
-		 * Draws many instances of this model, assuming the appropriate state is already bound.
-		 */
+	 * Draws many instances of this model, assuming the appropriate state is already bound.
+	 */
 	@Override
 	public void drawInstances(int instanceCount) {
 		if (!valid()) return;

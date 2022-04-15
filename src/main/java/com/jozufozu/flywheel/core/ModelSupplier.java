@@ -8,9 +8,7 @@ import com.jozufozu.flywheel.util.NonNullSupplier;
 
 import net.minecraft.client.renderer.RenderType;
 
-public class ModelSupplier {
-
-	private final Lazy<Model> supplier;
+public class ModelSupplier extends Lazy<Model> {
 
 	private RenderType renderType;
 
@@ -19,7 +17,7 @@ public class ModelSupplier {
 	}
 
 	public ModelSupplier(NonNullSupplier<Model> supplier, RenderType renderType) {
-		this.supplier = Lazy.of(supplier);
+		super(supplier);
 		this.renderType = renderType;
 	}
 
@@ -33,12 +31,16 @@ public class ModelSupplier {
 	}
 
 	@Nonnull
-	public Model get() {
-		return supplier.get();
-	}
-
-	@Nonnull
 	public RenderType getRenderType() {
 		return renderType;
+	}
+
+	public int getVertexCount() {
+		return map(Model::vertexCount).orElse(0);
+	}
+
+	@Override
+	public String toString() {
+		return "ModelSupplier{" + map(Model::name).orElse("Uninitialized") + '}';
 	}
 }

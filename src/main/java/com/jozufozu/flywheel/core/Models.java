@@ -23,7 +23,7 @@ public class Models {
 	}
 
 	public static ModelSupplier partial(PartialModel partial) {
-		return PARTIAL.computeIfAbsent(partial, it -> new ModelSupplier(() -> new BlockModel(it.get(), Blocks.AIR.defaultBlockState())));
+		return PARTIAL.computeIfAbsent(partial, it -> new ModelSupplier(() -> new BlockModel(it)));
 	}
 
 	public static ModelSupplier partial(PartialModel partial, Direction dir) {
@@ -31,7 +31,7 @@ public class Models {
 	}
 
 	public static ModelSupplier partial(PartialModel partial, Direction dir, Supplier<PoseStack> modelTransform) {
-		return PARTIAL_DIR.computeIfAbsent(Pair.of(dir, partial), $ -> new ModelSupplier(() -> new BlockModel(partial.get(), Blocks.AIR.defaultBlockState(), modelTransform.get())));
+		return PARTIAL_DIR.computeIfAbsent(Pair.of(dir, partial), $ -> new ModelSupplier(() -> new BlockModel(partial, modelTransform.get())));
 	}
 
 	public static void onReload(ReloadRenderersEvent ignored) {

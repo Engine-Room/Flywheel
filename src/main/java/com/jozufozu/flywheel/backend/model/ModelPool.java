@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.opengl.GL32;
-import org.lwjgl.opengl.GL43;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.vertex.VertexType;
@@ -51,12 +50,12 @@ public class ModelPool implements ModelAllocator {
 	 * Allocate a model in the arena.
 	 *
 	 * @param model The model to allocate.
+	 * @param vao	The vertex array object to attach the model to.
 	 * @return A handle to the allocated model.
 	 */
 	@Override
-	public PooledModel alloc(Model model, Callback callback) {
-		PooledModel bufferedModel = new PooledModel(model, vertices);
-		bufferedModel.callback = callback;
+	public PooledModel alloc(Model model, GlVertexArray vao) {
+		PooledModel bufferedModel = new PooledModel(vao, model, vertices);
 		vertices += model.vertexCount();
 		models.add(bufferedModel);
 		pendingUpload.add(bufferedModel);
@@ -119,7 +118,7 @@ public class ModelPool implements ModelAllocator {
 			for (PooledModel model : models) {
 				model.first = vertices;
 
-				buffer(writer, model);
+				model.buffer(writer);
 
 				vertices += model.getVertexCount();
 			}
@@ -133,18 +132,12 @@ public class ModelPool implements ModelAllocator {
 		try (MappedBuffer buffer = vbo.getBuffer()) {
 			VertexWriter writer = vertexType.createWriter(buffer.unwrap());
 			for (PooledModel model : pendingUpload) {
-				buffer(writer, model);
+				model.buffer(writer);
 			}
 			pendingUpload.clear();
 		} catch (Exception e) {
 			Flywheel.LOGGER.error("Error uploading pooled models:", e);
 		}
-	}
-
-	private void buffer(VertexWriter writer, PooledModel model) {
-		writer.seekToVertex(model.first);
-		writer.writeVertexList(model.model.getReader());
-		if (model.callback != null) model.callback.onAlloc(model);
 	}
 
 	private void setDirty() {
@@ -158,14 +151,15 @@ public class ModelPool implements ModelAllocator {
 	public class PooledModel implements BufferedModel {
 
 		private final ElementBuffer ebo;
-		private Callback callback;
+		private final GlVertexArray vao;
 
 		private final Model model;
 		private int first;
 
-		private boolean remove;
+		private boolean deleted;
 
-		public PooledModel(Model model, int first) {
+		public PooledModel(GlVertexArray vao, Model model, int first) {
+			this.vao = vao;
 			this.model = model;
 			this.first = first;
 			ebo = model.createEBO();
@@ -183,7 +177,7 @@ public class ModelPool implements ModelAllocator {
 
 		@Override
 		public void setupState(GlVertexArray vao) {
-			vbo.bind();
+			vao.bind();
 			vao.enableArrays(getAttributeCount());
 			vao.bindAttributes(0, vertexType.getLayout());
 		}
@@ -206,14 +200,22 @@ public class ModelPool implements ModelAllocator {
 
 		@Override
 		public boolean isDeleted() {
-			return false;
+			return deleted;
 		}
 
 		@Override
 		public void delete() {
 			setDirty();
 			anyToRemove = true;
-			remove = true;
+			deleted = true;
+		}
+
+		private void buffer(VertexWriter writer) {
+			writer.seekToVertex(first);
+			writer.writeVertexList(model.getReader());
+
+			vao.bind();
+			setupState(vao);
 		}
 	}
 

@@ -11,16 +11,16 @@ import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.Engine;
-import com.jozufozu.flywheel.backend.instancing.Renderable;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.FallbackAllocator;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
 import com.jozufozu.flywheel.backend.model.ModelPool;
 import com.jozufozu.flywheel.core.Formats;
+import com.jozufozu.flywheel.core.RenderContext;
+import com.jozufozu.flywheel.core.RenderTypeRegistry;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.compile.ProgramContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
-import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.util.Textures;
 import com.jozufozu.flywheel.util.WeakHashSet;
 import com.mojang.math.Matrix4f;
@@ -29,6 +29,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 public class InstancingEngine<P extends WorldProgram> implements Engine {
@@ -38,26 +39,18 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	protected BlockPos originCoordinate = BlockPos.ZERO;
 
 	protected final ProgramCompiler<P> context;
-	protected final GroupFactory<P> groupFactory;
-	protected final boolean ignoreOriginCoordinate;
 	private ModelAllocator allocator;
 
-	private final Map<Instanced<? extends InstanceData>, InstancedMaterial<?>> materials = new HashMap<>();
+	protected final Map<Instanced<? extends InstanceData>, InstancedMaterial<?>> materials = new HashMap<>();
 
 	private final WeakHashSet<OriginShiftListener> listeners;
 	private int vertexCount;
 	private int instanceCount;
 
-	public static <P extends WorldProgram> Builder<P> builder(ProgramCompiler<P> context) {
-		return new Builder<>(context);
-	}
-
-	public InstancingEngine(ProgramCompiler<P> context, GroupFactory<P> groupFactory, boolean ignoreOriginCoordinate) {
+	public InstancingEngine(ProgramCompiler<P> context) {
 		this.context = context;
-		this.ignoreOriginCoordinate = ignoreOriginCoordinate;
 
 		this.listeners = new WeakHashSet<>();
-		this.groupFactory = groupFactory;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -72,28 +65,20 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	}
 
 	@Override
-	public void render(TaskEngine taskEngine, RenderLayerEvent event) {
+	public void render(TaskEngine taskEngine, RenderContext context) {
 
-		RenderType type = event.getType();
+		var camX = context.camX() - originCoordinate.getX();
+		var camY = context.camY() - originCoordinate.getY();
+		var camZ = context.camZ() - originCoordinate.getZ();
 
-		double camX;
-		double camY;
-		double camZ;
-		Matrix4f viewProjection;
-		if (!ignoreOriginCoordinate) {
-			camX = event.camX - originCoordinate.getX();
-			camY = event.camY - originCoordinate.getY();
-			camZ = event.camZ - originCoordinate.getZ();
+		// don't want to mutate viewProjection
+		var vp = context.viewProjection().copy();
+		vp.multiply(Matrix4f.createTranslateMatrix((float) -camX, (float) -camY, (float) -camZ));
 
-			viewProjection = Matrix4f.createTranslateMatrix((float) -camX, (float) -camY, (float) -camZ);
-			viewProjection.multiplyBackward(event.viewProjection);
-		} else {
-			camX = event.camX;
-			camY = event.camY;
-			camZ = event.camZ;
-			viewProjection = event.viewProjection;
-		}
+		render(context.type(), camX, camY, camZ, vp);
+	}
 
+	protected void render(RenderType type, double camX, double camY, double camZ, Matrix4f viewProjection) {
 		vertexCount = 0;
 		instanceCount = 0;
 
@@ -101,27 +86,28 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		Textures.bindActiveTextures();
 
 		for (Map.Entry<Instanced<? extends InstanceData>, InstancedMaterial<?>> entry : materials.entrySet()) {
-			List<Renderable> renderables = entry.getValue()
-					.getRenderables(type);
+			InstancedMaterial<?> material = entry.getValue();
+			Instanced<? extends InstanceData> instanceType = entry.getKey();
 
-			if (renderables == null || renderables.isEmpty()) {
-				continue;
-			}
+			setup(type, camX, camY, camZ, viewProjection, instanceType.getProgramSpec());
 
-			P program = context.getProgram(ProgramContext.create(entry.getKey()
-					.getProgramSpec(), Formats.POS_TEX_NORMAL, event.layer));
+			instanceCount += material.getInstanceCount();
+			vertexCount += material.getVertexCount();
 
-			program.bind();
-			program.uploadViewProjection(viewProjection);
-			program.uploadCameraPos(camX, camY, camZ);
-
-			//setup(program);
-			for (Renderable renderable : renderables) {
-				renderable.draw();
-			}
+			material.renderIn(type);
 		}
 
 		type.clearRenderState();
+	}
+
+	protected P setup(RenderType layer, double camX, double camY, double camZ, Matrix4f viewProjection, ResourceLocation programSpec) {
+		P program = context.getProgram(ProgramContext.create(programSpec, Formats.POS_TEX_NORMAL, RenderTypeRegistry.getAlphaDiscard(layer)));
+
+		program.bind();
+		program.uploadViewProjection(viewProjection);
+		program.uploadCameraPos(camX, camY, camZ);
+
+		return program;
 	}
 
 	public void clearAll() {
@@ -152,22 +138,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	 */
 	@Override
 	public void beginFrame(Camera info) {
-		int cX = Mth.floor(info.getPosition().x);
-		int cY = Mth.floor(info.getPosition().y);
-		int cZ = Mth.floor(info.getPosition().z);
-
-		int dX = cX - originCoordinate.getX();
-		int dY = cY - originCoordinate.getY();
-		int dZ = cZ - originCoordinate.getZ();
-
-		if (Math.abs(dX) > MAX_ORIGIN_DISTANCE || Math.abs(dY) > MAX_ORIGIN_DISTANCE || Math.abs(dZ) > MAX_ORIGIN_DISTANCE) {
-
-			originCoordinate = new BlockPos(cX, cY, cZ);
-
-			materials.values().forEach(InstancedMaterial::clear);
-
-			listeners.forEach(OriginShiftListener::onOriginShift);
-		}
+		checkOriginDistance(info);
 
 		ModelAllocator allocator = getModelAllocator();
 
@@ -180,6 +151,29 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 			pool.flush();
 		}
 
+	}
+
+	private void checkOriginDistance(Camera info) {
+		int cX = Mth.floor(info.getPosition().x);
+		int cY = Mth.floor(info.getPosition().y);
+		int cZ = Mth.floor(info.getPosition().z);
+
+		int dX = cX - originCoordinate.getX();
+		int dY = cY - originCoordinate.getY();
+		int dZ = cZ - originCoordinate.getZ();
+
+		if (Math.abs(dX) > MAX_ORIGIN_DISTANCE || Math.abs(dY) > MAX_ORIGIN_DISTANCE || Math.abs(dZ) > MAX_ORIGIN_DISTANCE) {
+
+			shiftListeners(cX, cY, cZ);
+		}
+	}
+
+	private void shiftListeners(int cX, int cY, int cZ) {
+		originCoordinate = new BlockPos(cX, cY, cZ);
+
+		materials.values().forEach(InstancedMaterial::clear);
+
+		listeners.forEach(OriginShiftListener::onOriginShift);
 	}
 
 	@Override
@@ -209,34 +203,5 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	@FunctionalInterface
 	public interface OriginShiftListener {
 		void onOriginShift();
-	}
-
-	@FunctionalInterface
-	public interface GroupFactory<P extends WorldProgram> {
-		InstancedMaterialGroup<P> create(InstancingEngine<P> engine, RenderType type);
-	}
-
-	public static class Builder<P extends WorldProgram> {
-		protected final ProgramCompiler<P> context;
-		protected GroupFactory<P> groupFactory = InstancedMaterialGroup::new;
-		protected boolean ignoreOriginCoordinate;
-
-		public Builder(ProgramCompiler<P> context) {
-			this.context = context;
-		}
-
-		public Builder<P> setGroupFactory(GroupFactory<P> groupFactory) {
-			this.groupFactory = groupFactory;
-			return this;
-		}
-
-		public Builder<P> setIgnoreOriginCoordinate(boolean ignoreOriginCoordinate) {
-			this.ignoreOriginCoordinate = ignoreOriginCoordinate;
-			return this;
-		}
-
-		public InstancingEngine<P> build() {
-			return new InstancingEngine<>(context, groupFactory, ignoreOriginCoordinate);
-		}
 	}
 }

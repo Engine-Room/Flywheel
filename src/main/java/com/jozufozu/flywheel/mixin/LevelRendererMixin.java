@@ -16,6 +16,7 @@ import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
@@ -48,7 +49,9 @@ public class LevelRendererMixin {
 
 	@Inject(at = @At("HEAD"), method = "setupRender")
 	private void setupRender(Camera camera, Frustum frustum, boolean queue, boolean isSpectator, CallbackInfo ci) {
+		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
 		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, camera, frustum));
+		restoreState.restore();
 	}
 
 	@Unique
@@ -103,8 +106,13 @@ public class LevelRendererMixin {
 
 		Vec3 cameraPos = info.getPosition();
 
+		Matrix4f viewProjection = stack.last()
+				.pose()
+				.copy();
+		viewProjection.multiplyBackward(RenderSystem.getProjectionMatrix());
+
 		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
-		CrumblingRenderer.renderBreaking(new RenderLayerEvent(level, null, stack, null, cameraPos.x, cameraPos.y, cameraPos.z));
+		CrumblingRenderer.renderBreaking(level, stack, cameraPos.x, cameraPos.y, cameraPos.z, viewProjection);
 		restoreState.restore();
 	}
 

@@ -8,7 +8,7 @@ import net.minecraft.core.Vec3i;
 
 public interface MaterialManager {
 
-	<D extends InstanceData> InstancedMaterial<D> material(StructType<D> type);
+	<D extends InstanceData> Material<D> material(StructType<D> type);
 
 	Vec3i getOriginCoordinate();
 

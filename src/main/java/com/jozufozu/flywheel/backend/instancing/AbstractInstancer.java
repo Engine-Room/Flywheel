@@ -59,7 +59,7 @@ public abstract class AbstractInstancer<D extends InstanceData> implements Insta
 	}
 
 	public int getModelVertexCount() {
-		return 0;
+		return modelData.getVertexCount();
 	}
 
 	public int getInstanceCount() {
