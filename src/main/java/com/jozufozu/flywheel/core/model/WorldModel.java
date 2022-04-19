@@ -19,7 +19,10 @@ public class WorldModel implements Model {
 	 * It is expected that {@code renderWorld.getShade(...)} returns a constant.
 	 */
 	public WorldModel(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks, String name) {
-		reader = Formats.BLOCK.createReader(ModelUtil.getBufferBuilderFromTemplate(renderWorld, layer, blocks));
+		reader = Formats.BLOCK.createReader(ModelUtil.worldLayer(layer)
+				.withBlocks(blocks)
+				.withRenderWorld(renderWorld)
+				.build());
 		this.name = name;
 	}
 

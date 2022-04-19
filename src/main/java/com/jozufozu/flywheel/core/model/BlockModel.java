@@ -7,7 +7,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -35,11 +34,18 @@ public class BlockModel implements Model {
 	}
 
 	public BlockModel(PartialModel model, PoseStack ms) {
-		this(Formats.BLOCK.createReader(ModelUtil.getBufferBuilder(model.get(), Blocks.AIR.defaultBlockState(), ms)), model.getLocation().toString());
+		this(ModelUtil.bakedModel(model.get())
+				.withPoseStack(ms), model.getName());
 	}
 
 	public BlockModel(BakedModel model, BlockState referenceState, PoseStack ms) {
-		this(Formats.BLOCK.createReader(ModelUtil.getBufferBuilder(model, referenceState, ms)), referenceState.toString());
+		this(ModelUtil.bakedModel(model)
+				.withReferenceState(referenceState)
+				.withPoseStack(ms), referenceState.toString());
+	}
+
+	public BlockModel(BakedModelBuilder builder, String name) {
+		this(Formats.BLOCK.createReader(builder.build()), name);
 	}
 
 	public BlockModel(VertexList reader, String name) {
