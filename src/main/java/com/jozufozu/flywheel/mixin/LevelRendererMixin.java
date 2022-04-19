@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -46,49 +47,28 @@ public class LevelRendererMixin {
 	@Shadow
 	@Final
 	private RenderBuffers renderBuffers;
+//
+//	@Inject(at = @At("HEAD"), method = "setupRender")
+//	private void setupRender(Camera camera, Frustum frustum, boolean queue, boolean isSpectator, CallbackInfo ci) {
+//
+//		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
+//		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, camera, frustum));
+//		restoreState.restore();
+//	}
 
-	@Inject(at = @At("HEAD"), method = "setupRender")
-	private void setupRender(Camera camera, Frustum frustum, boolean queue, boolean isSpectator, CallbackInfo ci) {
+	@Inject(at = @At("HEAD"), method = "renderLevel")
+	private void beginRender(PoseStack pPoseStack, float pPartialTick, long pFinishNanoTime, boolean pRenderBlockOutline, Camera pCamera, GameRenderer pGameRenderer, LightTexture pLightTexture, Matrix4f pProjectionMatrix, CallbackInfo ci) {
+		Vec3 position = pCamera.getPosition();
+		RenderContext.CURRENT = new RenderContext(level, null, pPoseStack, RenderLayerEvent.createViewProjection(pPoseStack), renderBuffers, position.x, position.y, position.z);
+
 		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
-		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, camera, frustum));
+		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, pCamera, null));
 		restoreState.restore();
 	}
 
-	@Unique
-	private boolean flywheel$LayerRendered;
-
-	/**
-	 * This only gets injected if renderChunkLayer is not Overwritten
-	 */
-	@Group(name = "flywheel$renderLayer", min = 1, max = 2)
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ShaderInstance;clear()V"), method = "renderChunkLayer")
-	private void renderLayer(RenderType type, PoseStack stack, double camX, double camY, double camZ, Matrix4f p_172999_, CallbackInfo ci) {
-		flywheel$renderLayer(type, stack, camX, camY, camZ);
-		flywheel$LayerRendered = true;
-	}
-
-	/**
-	 * This always gets injected.
-	 */
-	@Group(name = "flywheel$renderLayer")
-	@Inject(at = @At("TAIL"), method = "renderChunkLayer")
-	private void renderLayerSodium(RenderType type, PoseStack stack, double camX, double camY, double camZ, Matrix4f p_172999_, CallbackInfo ci) {
-		if (!flywheel$LayerRendered) {
-			flywheel$renderLayer(type, stack, camX, camY, camZ);
-		}
-		flywheel$LayerRendered = false;
-		BufferUploader.reset();
-	}
-
-	@Unique
-	private void flywheel$renderLayer(RenderType type, PoseStack stack, double camX, double camY, double camZ) {
-		RenderBuffers renderBuffers = this.renderBuffers;
-
-		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
-
-		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(level, type, stack, renderBuffers, camX, camY, camZ));
-
-		restoreState.restore();
+	@Inject(at = @At("TAIL"), method = "renderLevel")
+	private void endRender(PoseStack pPoseStack, float pPartialTick, long pFinishNanoTime, boolean pRenderBlockOutline, Camera pCamera, GameRenderer pGameRenderer, LightTexture pLightTexture, Matrix4f pProjectionMatrix, CallbackInfo ci) {
+		RenderContext.CURRENT = null;
 	}
 
 	@Inject(at = @At("TAIL"), method = "allChanged")

@@ -84,4 +84,13 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 			}
 		}
 	}
+
+	public boolean anythingToRender(RenderType type) {
+		for (GPUInstancer<?> instancer : models.values()) {
+			if (instancer.shouldRenderIn(type)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

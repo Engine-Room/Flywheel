@@ -34,8 +34,8 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends BlockEntityInstance<T> implements DynamicInstance {
 
-	private static final BiFunction<ChestType, Material, ModelSupplier> LID = Util.memoize((type, mat) -> new ModelSupplier(() -> createLidModel(type, mat.sprite()), RenderType.entitySolid(mat.atlasLocation())));
-	private static final BiFunction<ChestType, Material, ModelSupplier> BASE = Util.memoize((type, mat) -> new ModelSupplier(() -> createBaseModel(type, mat.sprite()), RenderType.entitySolid(mat.atlasLocation())));
+	private static final BiFunction<ChestType, Material, ModelSupplier> LID = Util.memoize((type, mat) -> new ModelSupplier(() -> createLidModel(type, mat.sprite()), Sheets.chestSheet()));
+	private static final BiFunction<ChestType, Material, ModelSupplier> BASE = Util.memoize((type, mat) -> new ModelSupplier(() -> createBaseModel(type, mat.sprite()), Sheets.chestSheet()));
 
 	private final OrientedData body;
 	private final ModelData lid;
