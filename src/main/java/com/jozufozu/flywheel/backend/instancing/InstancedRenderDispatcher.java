@@ -14,6 +14,7 @@ import com.jozufozu.flywheel.util.WorldAttached;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -101,7 +102,7 @@ public class InstancedRenderDispatcher {
 		ClientLevel world = event.getWorld();
 		if (!Backend.canUseInstancing(world)) return;
 
-		instanceWorlds.get(world).renderLayer(event.context);
+		instanceWorlds.get(world).renderLayer(event.context);//.withRenderType(Sheets.chestSheet()));
 	}
 
 	@SubscribeEvent

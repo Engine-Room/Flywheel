@@ -87,14 +87,17 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 		for (Map.Entry<Instanced<? extends InstanceData>, InstancedMaterial<?>> entry : materials.entrySet()) {
 			InstancedMaterial<?> material = entry.getValue();
-			Instanced<? extends InstanceData> instanceType = entry.getKey();
 
-			setup(type, camX, camY, camZ, viewProjection, instanceType.getProgramSpec());
+			//if (material.anythingToRender(type)) {
+				Instanced<? extends InstanceData> instanceType = entry.getKey();
 
-			instanceCount += material.getInstanceCount();
-			vertexCount += material.getVertexCount();
+				setup(type, camX, camY, camZ, viewProjection, instanceType.getProgramSpec());
 
-			material.renderIn(type);
+				instanceCount += material.getInstanceCount();
+				vertexCount += material.getVertexCount();
+
+				material.renderIn(type);
+			//}
 		}
 
 		type.clearRenderState();
