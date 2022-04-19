@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -47,6 +49,12 @@ public class PartialModel {
 		Map<ResourceLocation, BakedModel> modelRegistry = event.getModelRegistry();
 		for (PartialModel partial : ALL)
 			partial.set(modelRegistry.get(partial.getLocation()));
+	}
+
+	@Nonnull
+	public String getName() {
+		return getLocation()
+				.toString();
 	}
 
 	protected void set(BakedModel bakedModel) {
