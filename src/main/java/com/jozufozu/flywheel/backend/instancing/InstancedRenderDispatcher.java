@@ -6,15 +6,15 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
+import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
-import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.WorldAttached;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -97,12 +97,18 @@ public class InstancedRenderDispatcher {
 		}
 	}
 
-	@SubscribeEvent
-	public static void renderLayer(RenderLayerEvent event) {
-		ClientLevel world = event.getWorld();
+	public static void renderSpecificType(RenderContext context, RenderType type) {
+		ClientLevel world = context.level();
 		if (!Backend.canUseInstancing(world)) return;
 
-		instanceWorlds.get(world).renderLayer(event.context);//.withRenderType(Sheets.chestSheet()));
+		instanceWorlds.get(world).renderSpecificType(context, type);
+	}
+
+	public static void renderAllRemaining(RenderContext context) {
+		ClientLevel world = context.level();
+		if (!Backend.canUseInstancing(world)) return;
+
+		instanceWorlds.get(world).renderAllRemaining(context);
 	}
 
 	@SubscribeEvent

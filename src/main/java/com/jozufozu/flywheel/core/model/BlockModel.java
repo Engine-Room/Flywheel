@@ -44,7 +44,7 @@ public class BlockModel implements Model {
 				.withPoseStack(ms), referenceState.toString());
 	}
 
-	public BlockModel(BakedModelBuilder builder, String name) {
+	public BlockModel(Bufferable builder, String name) {
 		this(Formats.BLOCK.createReader(builder.build()), name);
 	}
 

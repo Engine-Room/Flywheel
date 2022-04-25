@@ -14,14 +14,11 @@ import net.minecraftforge.eventbus.api.Event;
 
 public class RenderLayerEvent extends Event {
 	public final RenderContext context;
+	public final RenderType type;
 
-	public RenderLayerEvent(RenderContext context) {
+	public RenderLayerEvent(RenderContext context, RenderType type) {
 		this.context = context;
-	}
-
-	public RenderLayerEvent(ClientLevel world, RenderType type, PoseStack stack, RenderBuffers buffers, double camX, double camY, double camZ) {
-
-		context = new RenderContext(world, type, stack, createViewProjection(stack), buffers, camX, camY, camZ);
+		this.type = type;
 	}
 
 	@NotNull
@@ -43,7 +40,7 @@ public class RenderLayerEvent extends Event {
 	}
 
 	public RenderType getType() {
-		return context.type();
+		return type;
 	}
 
 	public PoseStack getStack() {

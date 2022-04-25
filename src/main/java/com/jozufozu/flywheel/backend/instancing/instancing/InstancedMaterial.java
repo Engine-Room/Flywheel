@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.Material;
@@ -25,6 +27,8 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 	protected final Instanced<D> type;
 
 	protected final List<GPUInstancer<D>> uninitialized = new ArrayList<>();
+
+	protected final Multimap<RenderType, Renderable> renderables = ArrayListMultimap.create();
 
 	public InstancedMaterial(Instanced<D> type) {
 		this.type = type;
@@ -56,6 +60,7 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 	public void delete() {
 		models.values().forEach(GPUInstancer::delete);
 		models.clear();
+		renderables.clear();
 	}
 
 	/**
@@ -72,25 +77,18 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 
 	public void init(ModelAllocator allocator) {
 		for (GPUInstancer<?> instancer : uninitialized) {
-			instancer.init(allocator);
+			var map = instancer.init(allocator);
+
+			map.forEach((type, renderable) -> renderables.get(type).add(renderable));
 		}
 		uninitialized.clear();
 	}
 
 	public void renderIn(RenderType layer) {
-		for (GPUInstancer<?> instancer : models.values()) {
-			if (instancer.shouldRenderIn(layer)) {
-				instancer.renderIn(layer);
-			}
-		}
+		renderables.get(layer).forEach(Renderable::render);
 	}
 
 	public boolean anythingToRender(RenderType type) {
-		for (GPUInstancer<?> instancer : models.values()) {
-			if (instancer.shouldRenderIn(type)) {
-				return true;
-			}
-		}
-		return false;
+		return renderables.get(type).size() > 0;
 	}
 }
