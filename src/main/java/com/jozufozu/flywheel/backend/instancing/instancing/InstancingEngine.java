@@ -1,11 +1,17 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructType;
@@ -43,6 +49,8 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 	protected final Map<Instanced<? extends InstanceData>, InstancedMaterial<?>> materials = new HashMap<>();
 
+	protected final Set<RenderType> toRender = new HashSet<>();
+
 	private final WeakHashSet<OriginShiftListener> listeners;
 	private int vertexCount;
 	private int instanceCount;
@@ -65,7 +73,23 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	}
 
 	@Override
-	public void render(TaskEngine taskEngine, RenderContext context) {
+	public void renderAllRemaining(TaskEngine taskEngine, RenderContext context) {
+		var camX = context.camX() - originCoordinate.getX();
+		var camY = context.camY() - originCoordinate.getY();
+		var camZ = context.camZ() - originCoordinate.getZ();
+
+		// don't want to mutate viewProjection
+		var vp = context.viewProjection().copy();
+		vp.multiply(Matrix4f.createTranslateMatrix((float) -camX, (float) -camY, (float) -camZ));
+
+		for (RenderType renderType : toRender) {
+			render(renderType, camX, camY, camZ, vp);
+		}
+		toRender.clear();
+	}
+
+	@Override
+	public void renderSpecificType(TaskEngine taskEngine, RenderContext context, RenderType type) {
 
 		var camX = context.camX() - originCoordinate.getX();
 		var camY = context.camY() - originCoordinate.getY();
@@ -75,7 +99,9 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		var vp = context.viewProjection().copy();
 		vp.multiply(Matrix4f.createTranslateMatrix((float) -camX, (float) -camY, (float) -camZ));
 
-		render(context.type(), camX, camY, camZ, vp);
+		if (toRender.remove(type)) {
+			render(type, camX, camY, camZ, vp);
+		}
 	}
 
 	protected void render(RenderType type, double camX, double camY, double camZ, Matrix4f viewProjection) {
@@ -88,7 +114,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		for (Map.Entry<Instanced<? extends InstanceData>, InstancedMaterial<?>> entry : materials.entrySet()) {
 			InstancedMaterial<?> material = entry.getValue();
 
-			//if (material.anythingToRender(type)) {
+			if (material.anythingToRender(type)) {
 				Instanced<? extends InstanceData> instanceType = entry.getKey();
 
 				setup(type, camX, camY, camZ, viewProjection, instanceType.getProgramSpec());
@@ -97,7 +123,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 				vertexCount += material.getVertexCount();
 
 				material.renderIn(type);
-			//}
+			}
 		}
 
 		type.clearRenderState();
@@ -147,6 +173,8 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 		for (InstancedMaterial<?> material : materials.values()) {
 			material.init(allocator);
+
+			toRender.addAll(material.renderables.keySet());
 		}
 
 		if (allocator instanceof ModelPool pool) {

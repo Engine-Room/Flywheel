@@ -66,7 +66,7 @@ public class CrumblingRenderer {
 
 		State state = STATE.get();
 		var instanceManager = state.instanceManager;
-		var materials = state.materialManager;
+		var engine = state.materialManager;
 
 		TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 		Camera info = Minecraft.getInstance().gameRenderer.getMainCamera();
@@ -79,11 +79,11 @@ public class CrumblingRenderer {
 				stage.getValue().forEach(instanceManager::add);
 
 				instanceManager.beginFrame(SerialTaskEngine.INSTANCE, info);
-				materials.beginFrame(info);
+				engine.beginFrame(info);
 
-				var ctx = new RenderContext(level, _currentLayer, stack, viewProjection, null, x, y, z);
+				var ctx = new RenderContext(level, stack, viewProjection, null, x, y, z);
 
-				materials.render(SerialTaskEngine.INSTANCE, ctx);
+				engine.renderAllRemaining(SerialTaskEngine.INSTANCE, ctx);
 
 				instanceManager.invalidate();
 			}

@@ -15,6 +15,7 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 
@@ -39,7 +40,12 @@ public class BatchingEngine implements Engine {
 	}
 
 	@Override
-	public void render(TaskEngine taskEngine, RenderContext context) {
+	public void renderSpecificType(TaskEngine taskEngine, RenderContext context, RenderType type) {
+
+	}
+
+	@Override
+	public void renderAllRemaining(TaskEngine taskEngine, RenderContext context) {
 
 //		vertexCount = 0;
 //		instanceCount = 0;

@@ -3,9 +3,7 @@ package com.jozufozu.flywheel.mixin;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -18,7 +16,6 @@ import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
@@ -29,7 +26,6 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -47,22 +43,25 @@ public class LevelRendererMixin {
 	@Shadow
 	@Final
 	private RenderBuffers renderBuffers;
-//
-//	@Inject(at = @At("HEAD"), method = "setupRender")
-//	private void setupRender(Camera camera, Frustum frustum, boolean queue, boolean isSpectator, CallbackInfo ci) {
-//
-//		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
-//		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, camera, frustum));
-//		restoreState.restore();
-//	}
 
 	@Inject(at = @At("HEAD"), method = "renderLevel")
 	private void beginRender(PoseStack pPoseStack, float pPartialTick, long pFinishNanoTime, boolean pRenderBlockOutline, Camera pCamera, GameRenderer pGameRenderer, LightTexture pLightTexture, Matrix4f pProjectionMatrix, CallbackInfo ci) {
 		Vec3 position = pCamera.getPosition();
-		RenderContext.CURRENT = new RenderContext(level, null, pPoseStack, RenderLayerEvent.createViewProjection(pPoseStack), renderBuffers, position.x, position.y, position.z);
+		RenderContext.CURRENT = new RenderContext(level, pPoseStack, RenderLayerEvent.createViewProjection(pPoseStack), renderBuffers, position.x, position.y, position.z);
 
 		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
 		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, pCamera, null));
+		restoreState.restore();
+	}
+
+	@Inject(at = @At("TAIL"), method = "renderChunkLayer")
+	private void renderChunkLayer(RenderType pRenderType, PoseStack pPoseStack, double pCamX, double pCamY, double pCamZ, Matrix4f pProjectionMatrix, CallbackInfo ci) {
+		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
+
+		// TODO: Is this necessary?
+		InstancedRenderDispatcher.renderSpecificType(RenderContext.CURRENT, pRenderType);
+		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(RenderContext.CURRENT, pRenderType));
+
 		restoreState.restore();
 	}
 

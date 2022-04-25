@@ -12,8 +12,6 @@ import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.util.ClientLevelExtension;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -118,11 +116,22 @@ public class InstanceWorld {
 	/**
 	 * Draw the given layer.
 	 */
-	public void renderLayer(RenderContext context) {
+	public void renderSpecificType(RenderContext context, RenderType type) {
 		taskEngine.syncPoint();
 		context.pushPose();
 		context.translateBack(context.camX(), context.camY(), context.camZ());
-		engine.render(taskEngine, context);
+		engine.renderSpecificType(taskEngine, context, type);
+		context.popPose();
+	}
+
+	/**
+	 * Draw the given layer.
+	 */
+	public void renderAllRemaining(RenderContext context) {
+		taskEngine.syncPoint();
+		context.pushPose();
+		context.translateBack(context.camX(), context.camY(), context.camZ());
+		engine.renderAllRemaining(taskEngine, context);
 		context.popPose();
 	}
 

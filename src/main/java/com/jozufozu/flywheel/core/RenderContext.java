@@ -8,16 +8,11 @@ import com.mojang.math.Quaternion;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderBuffers;
-import net.minecraft.client.renderer.RenderType;
 
-public record RenderContext(ClientLevel level, RenderType type, PoseStack stack, Matrix4f viewProjection, RenderBuffers buffers,
+public record RenderContext(ClientLevel level, PoseStack stack, Matrix4f viewProjection, RenderBuffers buffers,
 							double camX, double camY, double camZ) implements TransformStack {
 
 	public static RenderContext CURRENT;
-
-	public RenderContext withRenderType(RenderType renderType) {
-		return new RenderContext(level, renderType, stack, viewProjection, buffers, camX, camY, camZ);
-	}
 
 	@Override
 	public TransformStack multiply(Quaternion quaternion) {

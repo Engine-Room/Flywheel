@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.lwjgl.system.MemoryUtil;
@@ -16,7 +17,6 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
-import com.jozufozu.flywheel.backend.instancing.Renderable;
 import com.jozufozu.flywheel.backend.model.BufferedModel;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
 import com.jozufozu.flywheel.core.ModelSupplier;
@@ -68,16 +68,8 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		return deleted || model == null;
 	}
 
-	public boolean shouldRenderIn(RenderType renderType) {
-		return modelData.getRenderType() == renderType;
-	}
-
-	public void renderIn(RenderType renderType) {
-		render();
-	}
-
-	public void init(ModelAllocator modelAllocator) {
-		if (isInitialized()) return;
+	public Map<RenderType, Renderable> init(ModelAllocator modelAllocator) {
+		if (isInitialized()) return Collections.emptyMap();
 
 		initialized = true;
 
@@ -90,6 +82,8 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 		vao.bind();
 		vao.enableArrays(model.getAttributeCount() + instanceFormat.getAttributeCount());
+
+		return ImmutableMap.of(modelData.getRenderType(), this::render);
 	}
 
 	public boolean isInitialized() {
