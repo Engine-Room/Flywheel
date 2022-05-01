@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.api;
 
-import com.jozufozu.flywheel.core.ModelSupplier;
+import com.jozufozu.flywheel.core.model.ModelSupplier;
 
 public interface Material<D extends InstanceData> {
 

@@ -12,43 +12,43 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * A model of a single block.
  */
-public class BlockModel implements Model {
+public class BlockMesh implements Mesh {
 	private static final PoseStack IDENTITY = new PoseStack();
 
 	private final VertexList reader;
 
 	private final String name;
 
-	public BlockModel(BlockState state) {
+	public BlockMesh(BlockState state) {
 		this(Minecraft.getInstance()
 				.getBlockRenderer()
 				.getBlockModel(state), state);
 	}
 
-	public BlockModel(BakedModel model, BlockState referenceState) {
+	public BlockMesh(BakedModel model, BlockState referenceState) {
 		this(model, referenceState, IDENTITY);
 	}
 
-	public BlockModel(PartialModel model) {
+	public BlockMesh(PartialModel model) {
 		this(model, IDENTITY);
 	}
 
-	public BlockModel(PartialModel model, PoseStack ms) {
+	public BlockMesh(PartialModel model, PoseStack ms) {
 		this(ModelUtil.bakedModel(model.get())
 				.withPoseStack(ms), model.getName());
 	}
 
-	public BlockModel(BakedModel model, BlockState referenceState, PoseStack ms) {
+	public BlockMesh(BakedModel model, BlockState referenceState, PoseStack ms) {
 		this(ModelUtil.bakedModel(model)
 				.withReferenceState(referenceState)
 				.withPoseStack(ms), referenceState.toString());
 	}
 
-	public BlockModel(Bufferable builder, String name) {
+	public BlockMesh(Bufferable builder, String name) {
 		this(Formats.BLOCK.createReader(builder.build()), name);
 	}
 
-	public BlockModel(VertexList reader, String name) {
+	public BlockMesh(VertexList reader, String name) {
 		this.reader = reader;
 		this.name = name;
 	}
@@ -59,12 +59,12 @@ public class BlockModel implements Model {
 	}
 
 	@Override
-	public int vertexCount() {
-		return reader.getVertexCount();
+	public VertexList getReader() {
+		return reader;
 	}
 
 	@Override
-	public VertexList getReader() {
-		return reader;
+	public String toString() {
+		return "BlockMesh{" + "name='" + name + "',type='" + reader.getVertexType() + "}";
 	}
 }

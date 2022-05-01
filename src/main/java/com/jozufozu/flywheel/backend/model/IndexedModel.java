@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
-import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.Mesh;
 
 /**
  * An indexed triangle model. Just what the driver ordered.
@@ -20,32 +20,32 @@ import com.jozufozu.flywheel.core.model.Model;
  */
 public class IndexedModel implements BufferedModel {
 
-	protected final Model model;
+	protected final Mesh mesh;
 	protected final GlPrimitive primitiveMode;
 	protected ElementBuffer ebo;
 	protected GlBuffer vbo;
 	protected boolean deleted;
 
-	public IndexedModel(Model model) {
-		this.model = model;
+	public IndexedModel(Mesh mesh) {
+		this.mesh = mesh;
 		this.primitiveMode = GlPrimitive.TRIANGLES;
 
 		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
 
 		vbo.bind();
 		// allocate the buffer on the gpu
-		vbo.ensureCapacity(model.size());
+		vbo.ensureCapacity(mesh.size());
 
 		// mirror it in system memory, so we can write to it, and upload our model.
 		try (MappedBuffer buffer = vbo.getBuffer()) {
-			model.writeInto(buffer.unwrap());
+			mesh.writeInto(buffer.unwrap());
 		} catch (Exception e) {
-			Flywheel.LOGGER.error(String.format("Error uploading model '%s':", model.name()), e);
+			Flywheel.LOGGER.error(String.format("Error uploading model '%s':", mesh.name()), e);
 		}
 
 		vbo.unbind();
 
-		this.ebo = model.createEBO();
+		this.ebo = mesh.createEBO();
 	}
 
 	/**
@@ -81,11 +81,11 @@ public class IndexedModel implements BufferedModel {
 
 	@Override
 	public VertexType getType() {
-		return model.getType();
+		return mesh.getType();
 	}
 
 	public int getVertexCount() {
-		return model.vertexCount();
+		return mesh.vertexCount();
 	}
 
 	public void delete() {

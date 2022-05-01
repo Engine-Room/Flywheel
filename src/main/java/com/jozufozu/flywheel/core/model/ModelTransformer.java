@@ -20,15 +20,15 @@ import net.minecraft.util.Mth;
 
 public class ModelTransformer {
 
-	private final Model model;
+	private final Mesh mesh;
 	private final VertexList reader;
 	private final IntPredicate shadedPredicate;
 
 	public final Context context = new Context();
 
-	public ModelTransformer(Model model) {
-		this.model = model;
-		reader = model.getReader();
+	public ModelTransformer(Mesh mesh) {
+		this.mesh = mesh;
+		reader = mesh.getReader();
 		if (reader instanceof ShadedVertexList shaded) {
 			shadedPredicate = shaded::isShaded;
 		} else {
@@ -128,7 +128,7 @@ public class ModelTransformer {
 
 	@Override
 	public String toString() {
-		return "ModelTransformer[" + model + ']';
+		return "ModelTransformer[" + mesh + ']';
 	}
 
 	public static int transformColor(byte component, float scale) {

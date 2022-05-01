@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.Materials;
-import com.jozufozu.flywheel.core.ModelSupplier;
+import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
@@ -19,7 +19,6 @@ import com.mojang.math.Vector3f;
 
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.minecraft.Util;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
@@ -34,8 +33,8 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends BlockEntityInstance<T> implements DynamicInstance {
 
-	private static final BiFunction<ChestType, Material, ModelSupplier> LID = Util.memoize((type, mat) -> new ModelSupplier(() -> createLidModel(type, mat.sprite()), Sheets.chestSheet()));
-	private static final BiFunction<ChestType, Material, ModelSupplier> BASE = Util.memoize((type, mat) -> new ModelSupplier(() -> createBaseModel(type, mat.sprite()), Sheets.chestSheet()));
+	private static final BiFunction<ChestType, Material, BasicModelSupplier> LID = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createLidModel(type, mat.sprite()), Sheets.chestSheet()));
+	private static final BiFunction<ChestType, Material, BasicModelSupplier> BASE = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createBaseModel(type, mat.sprite()), Sheets.chestSheet()));
 
 	private final OrientedData body;
 	private final ModelData lid;

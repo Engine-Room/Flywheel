@@ -42,7 +42,7 @@ public class FullscreenQuad {
 		vao = new GlVertexArray();
 		vao.bind();
 
-		glEnableVertexAttribArray(0);
+		vao.enableArrays(1);
 
 		glVertexAttribPointer(0, 4, GlNumericType.FLOAT.getGlEnum(), false, 4 * 4, 0);
 

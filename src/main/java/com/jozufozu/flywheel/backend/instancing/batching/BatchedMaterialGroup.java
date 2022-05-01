@@ -39,27 +39,27 @@ public class BatchedMaterialGroup implements MaterialGroup {
 
 	public void render(PoseStack stack, BatchDrawingTracker source, TaskEngine pool) {
 
-		vertexCount = 0;
-		instanceCount = 0;
-		for (BatchedMaterial<?> material : materials.values()) {
-			for (CPUInstancer<?> instancer : material.models.values()) {
-				instancer.setup();
-				vertexCount += instancer.getVertexCount();
-				instanceCount += instancer.getInstanceCount();
-			}
-		}
-
-		DirectVertexConsumer consumer = source.getDirectConsumer(state, vertexCount);
-
-		// avoids rendering garbage, but doesn't fix the issue of some instances not being buffered
-		consumer.memSetZero();
-
-		for (BatchedMaterial<?> material : materials.values()) {
-			for (CPUInstancer<?> instancer : material.models.values()) {
-				instancer.sbb.context.outputColorDiffuse = !consumer.hasOverlay() && !OptifineHandler.isUsingShaders();
-				instancer.submitTasks(stack, pool, consumer);
-			}
-		}
+//		vertexCount = 0;
+//		instanceCount = 0;
+//		for (BatchedMaterial<?> material : materials.values()) {
+//			for (CPUInstancer<?> instancer : material.models.values()) {
+//				instancer.setup();
+//				vertexCount += instancer.getVertexCount();
+//				instanceCount += instancer.getInstanceCount();
+//			}
+//		}
+//
+//		DirectVertexConsumer consumer = source.getDirectConsumer(state, vertexCount);
+//
+//		// avoids rendering garbage, but doesn't fix the issue of some instances not being buffered
+//		consumer.memSetZero();
+//
+//		for (BatchedMaterial<?> material : materials.values()) {
+//			for (CPUInstancer<?> instancer : material.models.values()) {
+//				instancer.sbb.context.outputColorDiffuse = !consumer.hasOverlay() && !OptifineHandler.isUsingShaders();
+//				instancer.submitTasks(stack, pool, consumer);
+//			}
+//		}
 	}
 
 	public void clear() {

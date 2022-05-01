@@ -1,45 +1,31 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
-import java.util.Collections;
-import java.util.Map;
-
 import org.lwjgl.system.MemoryUtil;
 
-import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructWriter;
-import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
-import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
-import com.jozufozu.flywheel.backend.model.BufferedModel;
-import com.jozufozu.flywheel.backend.model.ModelAllocator;
-import com.jozufozu.flywheel.core.ModelSupplier;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
-
-import net.minecraft.client.renderer.RenderType;
 
 public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
-	private final BufferLayout instanceFormat;
-	private final Instanced<D> instancedType;
+	final BufferLayout instanceFormat;
+	final Instanced<D> instancedType;
 
-	private BufferedModel model;
-	private GlVertexArray vao;
-	private GlBuffer instanceVBO;
-	private int glInstanceCount = 0;
-	private boolean deleted;
-	private boolean initialized;
+	GlBuffer vbo;
+	int attributeBaseIndex;
+	int glInstanceCount = 0;
 
-	protected boolean anyToUpdate;
+	boolean anyToUpdate;
 
-	public GPUInstancer(Instanced<D> type, ModelSupplier model) {
-		super(type::create, model);
+	public GPUInstancer(Instanced<D> type) {
+		super(type::create);
 		this.instanceFormat = type.getLayout();
 		instancedType = type;
 	}
@@ -49,72 +35,24 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		anyToUpdate = true;
 	}
 
-	public void render() {
-		if (invalid()) return;
+	public void init() {
+		if (vbo != null) return;
 
-		vao.bind();
-
-		renderSetup();
-
-		if (glInstanceCount > 0) {
-			model.drawInstances(glInstanceCount);
-		}
-
-		// persistent mapping sync point
-		instanceVBO.doneForThisFrame();
-	}
-
-	private boolean invalid() {
-		return deleted || model == null;
-	}
-
-	public Map<RenderType, Renderable> init(ModelAllocator modelAllocator) {
-		if (isInitialized()) return Collections.emptyMap();
-
-		initialized = true;
-
-		instanceVBO = GlBuffer.requestPersistent(GlBufferType.ARRAY_BUFFER);
-		instanceVBO.setGrowthMargin(instanceFormat.getStride() * 16);
-
-		vao = new GlVertexArray();
-
-		model = modelAllocator.alloc(modelData.get(), vao);
-
-		vao.bind();
-		vao.enableArrays(model.getAttributeCount() + instanceFormat.getAttributeCount());
-
-		return ImmutableMap.of(modelData.getRenderType(), this::render);
-	}
-
-	public boolean isInitialized() {
-		return initialized;
+		vbo = GlBuffer.requestPersistent(GlBufferType.ARRAY_BUFFER);
+		vbo.setGrowthMargin(instanceFormat.getStride() * 16);
 	}
 
 	public boolean isEmpty() {
 		return !anyToUpdate && !anyToRemove && glInstanceCount == 0;
 	}
 
-	/**
-	 * Free acquired resources. All other Instancer methods are undefined behavior after calling delete.
-	 */
-	public void delete() {
-		if (invalid()) return;
-
-		deleted = true;
-
-		model.delete();
-
-		instanceVBO.delete();
-		vao.delete();
-	}
-
-	protected void renderSetup() {
+	void renderSetup(GlVertexArray vao) {
 		if (anyToRemove) {
 			removeDeletedInstances();
 		}
 
-		instanceVBO.bind();
-		if (!realloc()) {
+		vbo.bind();
+		if (!realloc(vao)) {
 
 			if (anyToRemove) {
 				clearBufferTail();
@@ -127,7 +65,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 			glInstanceCount = data.size();
 		}
 
-		instanceVBO.unbind();
+		vbo.unbind();
 
 		anyToRemove = anyToUpdate = false;
 	}
@@ -135,9 +73,9 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 	private void clearBufferTail() {
 		int size = data.size();
 		final int offset = size * instanceFormat.getStride();
-		final long length = instanceVBO.getCapacity() - offset;
+		final long length = vbo.getCapacity() - offset;
 		if (length > 0) {
-			try (MappedBuffer buf = instanceVBO.getBuffer(offset, length)) {
+			try (MappedBuffer buf = vbo.getBuffer(offset, length)) {
 				MemoryUtil.memSet(MemoryUtil.memAddress(buf.unwrap()), 0, length);
 			} catch (Exception e) {
 				Flywheel.LOGGER.error("Error clearing buffer tail:", e);
@@ -150,7 +88,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 		if (size <= 0) return;
 
-		try (MappedBuffer mapped = instanceVBO.getBuffer()) {
+		try (MappedBuffer mapped = vbo.getBuffer()) {
 
 			final StructWriter<D> writer = instancedType.getWriter(mapped);
 
@@ -172,13 +110,13 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		}
 	}
 
-	private boolean realloc() {
+	private boolean realloc(GlVertexArray vao) {
 		int size = this.data.size();
 		int stride = instanceFormat.getStride();
 		int requiredSize = size * stride;
-		if (instanceVBO.ensureCapacity(requiredSize)) {
+		if (vbo.ensureCapacity(requiredSize)) {
 
-			try (MappedBuffer buffer = instanceVBO.getBuffer()) {
+			try (MappedBuffer buffer = vbo.getBuffer()) {
 				StructWriter<D> writer = instancedType.getWriter(buffer);
 				for (D datum : data) {
 					writer.write(datum);
@@ -189,19 +127,18 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 			glInstanceCount = size;
 
-			bindInstanceAttributes();
+			bindInstanceAttributes(vao);
 
 			return true;
 		}
 		return false;
 	}
 
-	private void bindInstanceAttributes() {
-		int attributeBaseIndex = model.getAttributeCount();
+	private void bindInstanceAttributes(GlVertexArray vao) {
 		vao.bindAttributes(attributeBaseIndex, instanceFormat);
 
 		for (int i = 0; i < instanceFormat.getAttributeCount(); i++) {
-            GlCompat.getInstance().instancedArrays.vertexAttribDivisor(attributeBaseIndex + i, 1);
+			vao.setAttributeDivisor(attributeBaseIndex + i, 1);
 		}
 	}
 }

@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,9 +8,6 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructType;
@@ -19,8 +15,8 @@ import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.FallbackAllocator;
-import com.jozufozu.flywheel.backend.model.ModelAllocator;
-import com.jozufozu.flywheel.backend.model.ModelPool;
+import com.jozufozu.flywheel.backend.model.MeshAllocator;
+import com.jozufozu.flywheel.backend.model.MeshPool;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.RenderTypeRegistry;
@@ -45,7 +41,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	protected BlockPos originCoordinate = BlockPos.ZERO;
 
 	protected final ProgramCompiler<P> context;
-	private ModelAllocator allocator;
+	private MeshAllocator allocator;
 
 	protected final Map<Instanced<? extends InstanceData>, InstancedMaterial<?>> materials = new HashMap<>();
 
@@ -169,7 +165,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	public void beginFrame(Camera info) {
 		checkOriginDistance(info);
 
-		ModelAllocator allocator = getModelAllocator();
+		MeshAllocator allocator = getModelAllocator();
 
 		for (InstancedMaterial<?> material : materials.values()) {
 			material.init(allocator);
@@ -177,7 +173,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 			toRender.addAll(material.renderables.keySet());
 		}
 
-		if (allocator instanceof ModelPool pool) {
+		if (allocator instanceof MeshPool pool) {
 			// ...and then flush the model arena in case anything was marked for upload
 			pool.flush();
 		}
@@ -215,19 +211,19 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		info.add("Origin: " + originCoordinate.getX() + ", " + originCoordinate.getY() + ", " + originCoordinate.getZ());
 	}
 
-	private ModelAllocator getModelAllocator() {
+	private MeshAllocator getModelAllocator() {
 		if (allocator == null) {
 			allocator = createAllocator();
 		}
 		return this.allocator;
 	}
 
-	private static ModelAllocator createAllocator() {
+	private static MeshAllocator createAllocator() {
 		if (GlCompat.getInstance()
 				.onAMDWindows()) {
 			return FallbackAllocator.INSTANCE;
 		} else {
-			return new ModelPool(Formats.POS_TEX_NORMAL);
+			return new MeshPool(Formats.POS_TEX_NORMAL);
 		}
 	}
 

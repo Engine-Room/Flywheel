@@ -1,20 +1,19 @@
 package com.jozufozu.flywheel.core.layout;
 
+import java.util.function.Consumer;
+
+import com.jozufozu.flywheel.backend.gl.VertexAttribute;
+
 record Padding(int bytes) implements LayoutItem {
 
 	@Override
-	public void vertexAttribPointer(int stride, int index, int offset) {
+	public void provideAttributes(Consumer<VertexAttribute> consumer) {
 
 	}
 
 	@Override
-	public int size() {
+	public int getByteWidth() {
 		return bytes;
-	}
-
-	@Override
-	public int attributeCount() {
-		return 0;
 	}
 
 }

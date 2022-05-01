@@ -38,6 +38,8 @@ public interface VertexList {
 
 	int getVertexCount();
 
+	VertexType getVertexType();
+
 	default boolean isEmpty() {
 		return getVertexCount() == 0;
 	}

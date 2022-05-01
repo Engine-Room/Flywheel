@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
-import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.QuadConverter;
 
 /**
@@ -28,7 +27,7 @@ import com.jozufozu.flywheel.core.QuadConverter;
  * assert model.size() == final - initial;
  * }</pre>
  */
-public interface Model {
+public interface Mesh {
 
 	/**
 	 * A name uniquely identifying this model.
@@ -40,10 +39,12 @@ public interface Model {
 	/**
 	 * @return The number of vertices the model has.
 	 */
-	int vertexCount();
+	default int vertexCount() {
+		return getReader().getVertexCount();
+	}
 
 	default VertexType getType() {
-		return Formats.POS_TEX_NORMAL;
+		return getReader().getVertexType();
 	}
 
 	/**

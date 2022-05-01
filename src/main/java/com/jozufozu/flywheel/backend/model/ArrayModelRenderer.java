@@ -1,17 +1,17 @@
 package com.jozufozu.flywheel.backend.model;
 
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
-import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.Mesh;
 
 public class ArrayModelRenderer {
 
-	private final Model model;
+	private final Mesh mesh;
 	protected GlVertexArray vao;
 	protected BufferedModel vbo;
 	protected boolean initialized;
 
-	public ArrayModelRenderer(Model model) {
-		this.model = model;
+	public ArrayModelRenderer(Mesh mesh) {
+		this.mesh = mesh;
 	}
 
 	/**
@@ -29,13 +29,11 @@ public class ArrayModelRenderer {
 	protected void init() {
 		initialized = true;
 
-		if (model.empty()) return;
+		if (mesh.empty()) return;
 
-		this.vbo = new IndexedModel(model);
+		this.vbo = new IndexedModel(mesh);
 
 		vao = new GlVertexArray();
-
-		vao.bind();
 
 		// bind the model's vbo to our vao
 		this.vbo.setupState(vao);

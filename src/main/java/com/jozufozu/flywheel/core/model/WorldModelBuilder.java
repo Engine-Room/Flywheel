@@ -76,4 +76,8 @@ public final class WorldModelBuilder implements Bufferable {
 		this.poseStack = poseStack;
 		return this;
 	}
+
+	public BlockMesh finish() {
+		return new BlockMesh(this, "name");
+	}
 }
