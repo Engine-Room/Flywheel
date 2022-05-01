@@ -1,10 +1,13 @@
 package com.jozufozu.flywheel.core.layout;
 
+import java.util.function.Consumer;
+
+import com.jozufozu.flywheel.backend.gl.VertexAttribute;
+
 public interface LayoutItem {
 
-	void vertexAttribPointer(int stride, int index, int offset);
+	void provideAttributes(Consumer<VertexAttribute> consumer);
 
-	int size();
+	int getByteWidth();
 
-	int attributeCount();
 }

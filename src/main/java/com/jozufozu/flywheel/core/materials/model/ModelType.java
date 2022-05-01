@@ -7,7 +7,6 @@ import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.Programs;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
-import com.jozufozu.flywheel.core.layout.MatrixItems;
 import com.jozufozu.flywheel.core.model.ModelTransformer;
 
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +15,7 @@ public class ModelType implements Instanced<ModelData>, Batched<ModelData> {
 
 	public static final BufferLayout FORMAT = BufferLayout.builder()
 			.addItems(CommonItems.LIGHT, CommonItems.RGBA)
-			.addItems(MatrixItems.MAT4, MatrixItems.MAT3)
+			.addItems(CommonItems.MAT4, CommonItems.MAT3)
 			.build();
 
 	@Override

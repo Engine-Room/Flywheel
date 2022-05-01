@@ -14,9 +14,9 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
-import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.Mesh;
 
-public class ModelPool implements ModelAllocator {
+public class MeshPool implements MeshAllocator {
 
 	protected final VertexType vertexType;
 
@@ -36,7 +36,7 @@ public class ModelPool implements ModelAllocator {
 	 *
 	 * @param vertexType The vertex type of the models that will be stored in the pool.
 	 */
-	public ModelPool(VertexType vertexType) {
+	public MeshPool(VertexType vertexType) {
 		this.vertexType = vertexType;
 		int stride = vertexType.getStride();
 
@@ -49,14 +49,14 @@ public class ModelPool implements ModelAllocator {
 	/**
 	 * Allocate a model in the arena.
 	 *
-	 * @param model The model to allocate.
+	 * @param mesh The model to allocate.
 	 * @param vao	The vertex array object to attach the model to.
 	 * @return A handle to the allocated model.
 	 */
 	@Override
-	public PooledModel alloc(Model model, GlVertexArray vao) {
-		PooledModel bufferedModel = new PooledModel(vao, model, vertices);
-		vertices += model.vertexCount();
+	public PooledModel alloc(Mesh mesh, GlVertexArray vao) {
+		PooledModel bufferedModel = new PooledModel(vao, mesh, vertices);
+		vertices += mesh.vertexCount();
 		models.add(bufferedModel);
 		pendingUpload.add(bufferedModel);
 
@@ -94,7 +94,7 @@ public class ModelPool implements ModelAllocator {
 
 			model.first = vertices;
 
-			vertices += model.getVertexCount();
+			vertices += model.mesh.vertexCount();
 		}
 
 		this.vertices = vertices;
@@ -120,7 +120,7 @@ public class ModelPool implements ModelAllocator {
 
 				model.buffer(writer);
 
-				vertices += model.getVertexCount();
+				vertices += model.mesh.vertexCount();
 			}
 
 		} catch (Exception e) {
@@ -153,31 +153,31 @@ public class ModelPool implements ModelAllocator {
 		private final ElementBuffer ebo;
 		private final GlVertexArray vao;
 
-		private final Model model;
+		private final Mesh mesh;
 		private int first;
 
 		private boolean deleted;
 
-		public PooledModel(GlVertexArray vao, Model model, int first) {
+		public PooledModel(GlVertexArray vao, Mesh mesh, int first) {
 			this.vao = vao;
-			this.model = model;
+			this.mesh = mesh;
 			this.first = first;
-			ebo = model.createEBO();
+			ebo = mesh.createEBO();
 		}
 
 		@Override
 		public VertexType getType() {
-			return ModelPool.this.vertexType;
+			return MeshPool.this.vertexType;
 		}
 
 		@Override
 		public int getVertexCount() {
-			return model.vertexCount();
+			return mesh.vertexCount();
 		}
 
 		@Override
 		public void setupState(GlVertexArray vao) {
-			vao.bind();
+			vbo.bind();
 			vao.enableArrays(getAttributeCount());
 			vao.bindAttributes(0, vertexType.getLayout());
 		}
@@ -212,9 +212,8 @@ public class ModelPool implements ModelAllocator {
 
 		private void buffer(VertexWriter writer) {
 			writer.seekToVertex(first);
-			writer.writeVertexList(model.getReader());
+			writer.writeVertexList(mesh.getReader());
 
-			vao.bind();
 			setupState(vao);
 		}
 	}

@@ -6,19 +6,17 @@ import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
-import com.jozufozu.flywheel.core.ModelSupplier;
+import com.jozufozu.flywheel.core.model.ModelSupplier;
 
 public abstract class AbstractInstancer<D extends InstanceData> implements Instancer<D> {
 
 	protected final Supplier<D> factory;
-	protected final ModelSupplier modelData;
 	protected final ArrayList<D> data = new ArrayList<>();
 
 	protected boolean anyToRemove;
 
-	protected AbstractInstancer(Supplier<D> factory, ModelSupplier modelData) {
+	protected AbstractInstancer(Supplier<D> factory) {
 		this.factory = factory;
-		this.modelData = modelData;
 	}
 
 	/**
@@ -58,16 +56,8 @@ public abstract class AbstractInstancer<D extends InstanceData> implements Insta
 		anyToRemove = true;
 	}
 
-	public int getModelVertexCount() {
-		return modelData.getVertexCount();
-	}
-
 	public int getInstanceCount() {
 		return data.size();
-	}
-
-	public int getVertexCount() {
-		return getModelVertexCount() * getInstanceCount();
 	}
 
 	protected void removeDeletedInstances() {
@@ -117,6 +107,6 @@ public abstract class AbstractInstancer<D extends InstanceData> implements Insta
 
 	@Override
 	public String toString() {
-		return "Instancer[" + modelData + ']';
+		return "Instancer[" + getInstanceCount() + ']';
 	}
 }

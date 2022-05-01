@@ -1,9 +1,11 @@
 package com.jozufozu.flywheel.core.layout;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.gl.VertexAttribute;
 
 /**
  * Classic Vertex Format struct with a clever name.
@@ -17,29 +19,29 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
  */
 public class BufferLayout {
 
-	private final List<LayoutItem> allAttributes;
+	private final List<VertexAttribute> attributes;
 
-	private final int numAttributes;
 	private final int stride;
 
-	public BufferLayout(List<LayoutItem> allAttributes) {
-		this.allAttributes = allAttributes;
+	public BufferLayout(List<LayoutItem> layoutItems) {
 
-		int numAttributes = 0, stride = 0;
-		for (LayoutItem spec : allAttributes) {
-			numAttributes += spec.attributeCount();
-			stride += spec.size();
+		ImmutableList.Builder<VertexAttribute> attributes = ImmutableList.builder();
+
+		stride = calculateStride(layoutItems);
+
+		for (LayoutItem item : layoutItems) {
+			item.provideAttributes(attributes::add);
 		}
-		this.numAttributes = numAttributes;
-		this.stride = stride;
+
+		this.attributes = attributes.build();
 	}
 
-	public List<LayoutItem> getLayoutItems() {
-		return allAttributes;
+	public Collection<VertexAttribute> getAttributes() {
+		return attributes;
 	}
 
 	public int getAttributeCount() {
-		return numAttributes;
+		return attributes.size();
 	}
 
 	public int getStride() {
@@ -48,6 +50,14 @@ public class BufferLayout {
 
 	public static Builder builder() {
 		return new Builder();
+	}
+
+	private static int calculateStride(List<LayoutItem> layoutItems) {
+		int stride = 0;
+		for (LayoutItem spec : layoutItems) {
+			stride += spec.getByteWidth();
+		}
+		return stride;
 	}
 
 	public static class Builder {
@@ -66,4 +76,5 @@ public class BufferLayout {
 			return new BufferLayout(allItems.build());
 		}
 	}
+
 }

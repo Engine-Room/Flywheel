@@ -12,30 +12,30 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
-import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.core.model.Mesh;
 
 public class VBOModel implements BufferedModel {
 
-	protected final Model model;
+	protected final Mesh mesh;
 	protected final GlPrimitive primitiveMode;
 	protected GlBuffer vbo;
 	protected boolean deleted;
 
-	public VBOModel(GlPrimitive primitiveMode, Model model) {
-		this.model = model;
+	public VBOModel(GlPrimitive primitiveMode, Mesh mesh) {
+		this.mesh = mesh;
 		this.primitiveMode = primitiveMode;
 
 		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
 
 		vbo.bind();
 		// allocate the buffer on the gpu
-		vbo.ensureCapacity(model.size());
+		vbo.ensureCapacity(mesh.size());
 
 		// mirror it in system memory, so we can write to it, and upload our model.
 		try (MappedBuffer buffer = vbo.getBuffer()) {
-			model.writeInto(buffer.unwrap());
+			mesh.writeInto(buffer.unwrap());
 		} catch (Exception e) {
-			Flywheel.LOGGER.error(String.format("Error uploading model '%s':", model.name()), e);
+			Flywheel.LOGGER.error(String.format("Error uploading model '%s':", mesh.name()), e);
 		}
 
 		vbo.unbind();
@@ -47,11 +47,11 @@ public class VBOModel implements BufferedModel {
 
 	@Override
 	public VertexType getType() {
-		return model.getType();
+		return mesh.getType();
 	}
 
 	public int getVertexCount() {
-		return model.vertexCount();
+		return mesh.vertexCount();
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class VBOModel implements BufferedModel {
 	}
 
 	public void drawCall() {
-		glDrawArrays(primitiveMode.glEnum, 0, getVertexCount());
+		glDrawArrays(primitiveMode.glEnum, 0, mesh.vertexCount());
 	}
 
 	/**
@@ -73,7 +73,7 @@ public class VBOModel implements BufferedModel {
 	public void drawInstances(int instanceCount) {
 		if (!valid()) return;
 
-		GL31.glDrawArraysInstanced(primitiveMode.glEnum, 0, getVertexCount(), instanceCount);
+		GL31.glDrawArraysInstanced(primitiveMode.glEnum, 0, mesh.vertexCount(), instanceCount);
 	}
 
 	public void delete() {

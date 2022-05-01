@@ -12,8 +12,8 @@ import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.Material;
 import com.jozufozu.flywheel.api.struct.Instanced;
-import com.jozufozu.flywheel.backend.model.ModelAllocator;
-import com.jozufozu.flywheel.core.ModelSupplier;
+import com.jozufozu.flywheel.backend.model.MeshAllocator;
+import com.jozufozu.flywheel.core.model.ModelSupplier;
 
 import net.minecraft.client.renderer.RenderType;
 
@@ -23,10 +23,10 @@ import net.minecraft.client.renderer.RenderType;
  */
 public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 
-	protected final Map<ModelSupplier, GPUInstancer<D>> models = new HashMap<>();
+	protected final Map<ModelSupplier, InstancedModel<D>> models = new HashMap<>();
 	protected final Instanced<D> type;
 
-	protected final List<GPUInstancer<D>> uninitialized = new ArrayList<>();
+	protected final List<InstancedModel<D>> uninitialized = new ArrayList<>();
 
 	protected final Multimap<RenderType, Renderable> renderables = ArrayListMultimap.create();
 
@@ -36,29 +36,32 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 
 	@Override
 	public Instancer<D> model(ModelSupplier modelKey) {
-		return models.computeIfAbsent(modelKey, k -> {
-			GPUInstancer<D> instancer = new GPUInstancer<>(type, modelKey);
-			uninitialized.add(instancer);
-			return instancer;
-		});
+		return models.computeIfAbsent(modelKey, this::createInstancer).instancer;
 	}
 
 	public int getInstanceCount() {
-		return models.values().stream().mapToInt(GPUInstancer::getInstanceCount).sum();
+		return models.values()
+				.stream()
+				.map(InstancedModel::getInstancer)
+				.mapToInt(GPUInstancer::getInstanceCount)
+				.sum();
 	}
 
 	public int getVertexCount() {
-		return models.values().stream().mapToInt(GPUInstancer::getVertexCount).sum();
+		return models.values()
+				.stream()
+				.mapToInt(InstancedModel::getVertexCount)
+				.sum();
 	}
 
 	public boolean nothingToRender() {
 		return models.size() > 0 && models.values()
 				.stream()
-				.allMatch(GPUInstancer::isEmpty);
+				.allMatch(InstancedModel::isEmpty);
 	}
 
 	public void delete() {
-		models.values().forEach(GPUInstancer::delete);
+		models.values().forEach(InstancedModel::delete);
 		models.clear();
 		renderables.clear();
 	}
@@ -68,16 +71,15 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 	 */
 	public void clear() {
 		models.values()
+				.stream()
+				.map(InstancedModel::getInstancer)
 				.forEach(GPUInstancer::clear);
 	}
 
-	public Collection<GPUInstancer<D>> getAllInstancers() {
-		return models.values();
-	}
+	public void init(MeshAllocator allocator) {
+		for (var instanced : uninitialized) {
 
-	public void init(ModelAllocator allocator) {
-		for (GPUInstancer<?> instancer : uninitialized) {
-			var map = instancer.init(allocator);
+			var map = instanced.init(allocator);
 
 			map.forEach((type, renderable) -> renderables.get(type).add(renderable));
 		}
@@ -90,5 +92,11 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 
 	public boolean anythingToRender(RenderType type) {
 		return renderables.get(type).size() > 0;
+	}
+
+	private InstancedModel<D> createInstancer(ModelSupplier model) {
+		var instancer = new InstancedModel<>(new GPUInstancer<>(type), model);
+		uninitialized.add(instancer);
+		return instancer;
 	}
 }

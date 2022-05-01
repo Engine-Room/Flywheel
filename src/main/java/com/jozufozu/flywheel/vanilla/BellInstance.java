@@ -6,7 +6,7 @@ import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.Materials;
-import com.jozufozu.flywheel.core.ModelSupplier;
+import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.entity.BellBlockEntity;
 
 public class BellInstance extends BlockEntityInstance<BellBlockEntity> implements DynamicInstance {
 
-	private static final ModelSupplier MODEL = new ModelSupplier(BellInstance::createBellModel, RenderType.cutoutMipped());
+	private static final BasicModelSupplier MODEL = new BasicModelSupplier(BellInstance::createBellModel, RenderType.cutoutMipped());
 
 	private final OrientedData bell;
 
