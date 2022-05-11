@@ -22,9 +22,4 @@ public class PrimitiveItem implements LayoutItem {
 		consumer.accept(attribute);
 	}
 
-	@Override
-	public int getByteWidth() {
-		return attribute.getByteWidth();
-	}
-
 }

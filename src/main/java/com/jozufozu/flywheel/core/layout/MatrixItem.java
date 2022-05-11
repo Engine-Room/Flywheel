@@ -14,9 +14,4 @@ public record MatrixItem(int rows, int cols) implements LayoutItem {
 		}
 	}
 
-	@Override
-	public int getByteWidth() {
-		return GlNumericType.FLOAT.getByteWidth() * rows * cols;
-	}
-
 }

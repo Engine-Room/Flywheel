@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,7 @@ import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.Material;
 import com.jozufozu.flywheel.api.struct.Instanced;
-import com.jozufozu.flywheel.backend.model.MeshAllocator;
+import com.jozufozu.flywheel.backend.model.MeshPool;
 import com.jozufozu.flywheel.core.model.ModelSupplier;
 
 import net.minecraft.client.renderer.RenderType;
@@ -54,12 +53,6 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 				.sum();
 	}
 
-	public boolean nothingToRender() {
-		return models.size() > 0 && models.values()
-				.stream()
-				.allMatch(InstancedModel::isEmpty);
-	}
-
 	public void delete() {
 		models.values().forEach(InstancedModel::delete);
 		models.clear();
@@ -76,7 +69,7 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 				.forEach(GPUInstancer::clear);
 	}
 
-	public void init(MeshAllocator allocator) {
+	public void init(MeshPool allocator) {
 		for (var instanced : uninitialized) {
 
 			var map = instanced.init(allocator);
@@ -84,14 +77,6 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 			map.forEach((type, renderable) -> renderables.get(type).add(renderable));
 		}
 		uninitialized.clear();
-	}
-
-	public void renderIn(RenderType layer) {
-		renderables.get(layer).forEach(Renderable::render);
-	}
-
-	public boolean anythingToRender(RenderType type) {
-		return renderables.get(type).size() > 0;
 	}
 
 	private InstancedModel<D> createInstancer(ModelSupplier model) {

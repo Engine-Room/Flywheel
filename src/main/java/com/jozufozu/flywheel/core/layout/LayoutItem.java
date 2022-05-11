@@ -8,6 +8,4 @@ public interface LayoutItem {
 
 	void provideAttributes(Consumer<VertexAttribute> consumer);
 
-	int getByteWidth();
-
 }

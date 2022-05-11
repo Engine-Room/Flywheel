@@ -19,7 +19,6 @@ public class CommonItems {
 	public static final PrimitiveItem LIGHT_SHORT = new PrimitiveItem(GlNumericType.USHORT, 2, true);
 
 	public static final PrimitiveItem NORMALIZED_BYTE = new PrimitiveItem(GlNumericType.BYTE, 1, true);
-	public static final LayoutItem PADDING_BYTE = new Padding(1);
 
 	public static final MatrixItem MAT3 = new MatrixItem(3, 3);
 	public static final MatrixItem MAT4 = new MatrixItem(4, 4);

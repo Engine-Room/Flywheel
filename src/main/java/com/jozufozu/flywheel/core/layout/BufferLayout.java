@@ -23,17 +23,16 @@ public class BufferLayout {
 
 	private final int stride;
 
-	public BufferLayout(List<LayoutItem> layoutItems) {
+	public BufferLayout(List<LayoutItem> layoutItems, int padding) {
 
 		ImmutableList.Builder<VertexAttribute> attributes = ImmutableList.builder();
-
-		stride = calculateStride(layoutItems);
 
 		for (LayoutItem item : layoutItems) {
 			item.provideAttributes(attributes::add);
 		}
 
 		this.attributes = attributes.build();
+		this.stride = calculateStride(this.attributes) + padding;
 	}
 
 	public Collection<VertexAttribute> getAttributes() {
@@ -52,9 +51,9 @@ public class BufferLayout {
 		return new Builder();
 	}
 
-	private static int calculateStride(List<LayoutItem> layoutItems) {
+	private static int calculateStride(List<VertexAttribute> layoutItems) {
 		int stride = 0;
-		for (LayoutItem spec : layoutItems) {
+		for (VertexAttribute spec : layoutItems) {
 			stride += spec.getByteWidth();
 		}
 		return stride;
@@ -62,6 +61,7 @@ public class BufferLayout {
 
 	public static class Builder {
 		private final ImmutableList.Builder<LayoutItem> allItems;
+		private int padding;
 
 		public Builder() {
 			allItems = ImmutableList.builder();
@@ -72,8 +72,13 @@ public class BufferLayout {
 			return this;
 		}
 
+		public Builder withPadding(int padding) {
+			this.padding = padding;
+			return this;
+		}
+
 		public BufferLayout build() {
-			return new BufferLayout(allItems.build());
+			return new BufferLayout(allItems.build(), padding);
 		}
 	}
 

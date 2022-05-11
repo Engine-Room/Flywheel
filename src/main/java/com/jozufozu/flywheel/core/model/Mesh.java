@@ -39,7 +39,7 @@ public interface Mesh {
 	/**
 	 * @return The number of vertices the model has.
 	 */
-	default int vertexCount() {
+	default int getVertexCount() {
 		return getReader().getVertexCount();
 	}
 
@@ -59,14 +59,14 @@ public interface Mesh {
 	 */
 	default ElementBuffer createEBO() {
 		return QuadConverter.getInstance()
-				.quads2Tris(vertexCount() / 4);
+				.quads2Tris(getVertexCount() / 4);
 	}
 
 	/**
 	 * The size in bytes that this model's data takes up.
 	 */
 	default int size() {
-		return getType().byteOffset(vertexCount());
+		return getType().byteOffset(getVertexCount());
 	}
 
 	/**
@@ -74,7 +74,7 @@ public interface Mesh {
 	 * @return true if there are no vertices.
 	 */
 	default boolean empty() {
-		return vertexCount() == 0;
+		return getVertexCount() == 0;
 	}
 
 	default void writeInto(ByteBuffer buffer) {

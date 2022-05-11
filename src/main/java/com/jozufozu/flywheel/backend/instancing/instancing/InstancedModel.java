@@ -2,61 +2,88 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
-import com.jozufozu.flywheel.backend.model.BufferedModel;
-import com.jozufozu.flywheel.backend.model.MeshAllocator;
+import com.jozufozu.flywheel.backend.model.MeshPool;
+import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.model.ModelSupplier;
+import com.jozufozu.flywheel.util.Pair;
 
 import net.minecraft.client.renderer.RenderType;
 
 public class InstancedModel<D extends InstanceData> {
 
-	GPUInstancer<D> instancer;
-	ModelSupplier model;
-
-	@Nullable
-	private BufferedModel bufferedMesh;
-	@Nullable
-	private GlVertexArray vao;
+	final GPUInstancer<D> instancer;
+	final ModelSupplier model;
+	private Map<RenderType, Layer> layers;
 
 	public InstancedModel(GPUInstancer<D> instancer, ModelSupplier model) {
 		this.instancer = instancer;
 		this.model = model;
 	}
 
-	public Map<RenderType, Renderable> init(MeshAllocator allocator) {
+	public Map<RenderType, ? extends Renderable> init(MeshPool allocator) {
 		instancer.init();
 
-		vao = new GlVertexArray();
+		layers = model.get()
+				.entrySet()
+				.stream()
+				.map(entry -> Pair.of(entry.getKey(), new Layer(allocator, entry.getKey(), entry.getValue())))
+				.collect(ImmutableMap.toImmutableMap(Pair::first, Pair::second));
 
-		bufferedMesh = allocator.alloc(model.get(), vao);
-		instancer.attributeBaseIndex = bufferedMesh.getAttributeCount();
-		vao.enableArrays(bufferedMesh.getAttributeCount() + instancer.instanceFormat.getAttributeCount());
 
-		return ImmutableMap.of(RenderType.solid(), this::render);
+		return layers;
 	}
 
-	public void render() {
-		if (invalid()) return;
+	private class Layer implements Renderable {
 
-		vao.bind();
+		final RenderType type;
+		MeshPool.BufferedMesh bufferedMesh;
+		GlVertexArray vao;
 
-		instancer.renderSetup(vao);
-
-		if (instancer.glInstanceCount > 0) {
-			bufferedMesh.drawInstances(instancer.glInstanceCount);
+		private Layer(MeshPool allocator, RenderType type, Mesh mesh) {
+			this.type = type;
+			vao = new GlVertexArray();
+			bufferedMesh = allocator.alloc(mesh, vao);
+			instancer.attributeBaseIndex = bufferedMesh.getAttributeCount();
+			vao.enableArrays(bufferedMesh.getAttributeCount() + instancer.instanceFormat.getAttributeCount());
 		}
 
-		// persistent mapping sync point
-		instancer.vbo.doneForThisFrame();
-	}
+		@Override
+		public void render() {
+			if (invalid()) return;
 
-	private boolean invalid() {
-		return instancer.vbo == null || bufferedMesh == null || vao == null;
+			vao.bind();
+
+			instancer.renderSetup(vao);
+
+			if (instancer.glInstanceCount > 0) {
+				bufferedMesh.drawInstances(instancer.glInstanceCount);
+			}
+
+			// persistent mapping sync point
+			instancer.vbo.doneForThisFrame();
+		}
+
+		@Override
+		public boolean shouldRemove() {
+			return invalid();
+		}
+
+		private boolean invalid() {
+			return instancer.vbo == null || bufferedMesh == null || vao == null;
+		}
+
+		public void delete() {
+			if (invalid()) return;
+
+			vao.delete();
+			bufferedMesh.delete();
+
+			vao = null;
+			bufferedMesh = null;
+		}
 	}
 
 	public GPUInstancer<D> getInstancer() {
@@ -71,19 +98,14 @@ public class InstancedModel<D extends InstanceData> {
 		return model.getVertexCount() * instancer.glInstanceCount;
 	}
 
-	public boolean isEmpty() {
-		return instancer.isEmpty();
-	}
-
 	public void delete() {
-		if (invalid()) return;
+		if (instancer.vbo == null) return;
 
-		vao.delete();
-		bufferedMesh.delete();
 		instancer.vbo.delete();
-
-		vao = null;
-		bufferedMesh = null;
 		instancer.vbo = null;
+
+		for (var layer : layers.values()) {
+			layer.delete();
+		}
 	}
 }

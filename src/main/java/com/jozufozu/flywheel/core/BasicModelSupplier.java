@@ -1,7 +1,10 @@
 package com.jozufozu.flywheel.core;
 
+import java.util.Map;
+
 import javax.annotation.Nonnull;
 
+import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.model.ModelSupplier;
 import com.jozufozu.flywheel.util.Lazy;
@@ -33,17 +36,12 @@ public class BasicModelSupplier implements ModelSupplier {
 	}
 
 	@Override
-	public Mesh get() {
-		return supplier.get();
-	}
-
-	@Nonnull
-	public RenderType getRenderType() {
-		return renderType;
+	public Map<RenderType, Mesh> get() {
+		return ImmutableMap.of(renderType, supplier.get());
 	}
 
 	public int getVertexCount() {
-		return supplier.map(Mesh::vertexCount)
+		return supplier.map(Mesh::getVertexCount)
 				.orElse(0);
 	}
 

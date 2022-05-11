@@ -18,8 +18,8 @@ public class BlockVertex implements VertexType {
 					CommonItems.RGBA,
 					CommonItems.UV,
 					CommonItems.LIGHT_SHORT,
-					CommonItems.NORMAL,
-					CommonItems.PADDING_BYTE)
+					CommonItems.NORMAL)
+			.withPadding(1)
 			.build();
 
 	@Override

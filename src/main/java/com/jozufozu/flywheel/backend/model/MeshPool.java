@@ -16,13 +16,13 @@ import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.core.model.Mesh;
 
-public class MeshPool implements MeshAllocator {
+public class MeshPool {
 
 	protected final VertexType vertexType;
 
-	private final List<PooledModel> models = new ArrayList<>();
+	private final List<BufferedMesh> models = new ArrayList<>();
 
-	private final List<PooledModel> pendingUpload = new ArrayList<>();
+	private final List<BufferedMesh> pendingUpload = new ArrayList<>();
 
 	private final GlBuffer vbo;
 
@@ -53,10 +53,9 @@ public class MeshPool implements MeshAllocator {
 	 * @param vao	The vertex array object to attach the model to.
 	 * @return A handle to the allocated model.
 	 */
-	@Override
-	public PooledModel alloc(Mesh mesh, GlVertexArray vao) {
-		PooledModel bufferedModel = new PooledModel(vao, mesh, vertices);
-		vertices += mesh.vertexCount();
+	public BufferedMesh alloc(Mesh mesh, GlVertexArray vao) {
+		BufferedMesh bufferedModel = new BufferedMesh(vao, mesh, vertices);
+		vertices += mesh.getVertexCount();
 		models.add(bufferedModel);
 		pendingUpload.add(bufferedModel);
 
@@ -84,17 +83,17 @@ public class MeshPool implements MeshAllocator {
 	private void processDeletions() {
 
 		// remove deleted models
-		models.removeIf(PooledModel::isDeleted);
+		models.removeIf(BufferedMesh::isDeleted);
 
 		// re-evaluate first vertex for each model
 		int vertices = 0;
-		for (PooledModel model : models) {
+		for (BufferedMesh model : models) {
 			if (model.first != vertices)
 				pendingUpload.add(model);
 
 			model.first = vertices;
 
-			vertices += model.mesh.vertexCount();
+			vertices += model.mesh.getVertexCount();
 		}
 
 		this.vertices = vertices;
@@ -115,12 +114,12 @@ public class MeshPool implements MeshAllocator {
 			VertexWriter writer = vertexType.createWriter(buffer.unwrap());
 
 			int vertices = 0;
-			for (PooledModel model : models) {
+			for (BufferedMesh model : models) {
 				model.first = vertices;
 
 				model.buffer(writer);
 
-				vertices += model.mesh.vertexCount();
+				vertices += model.mesh.getVertexCount();
 			}
 
 		} catch (Exception e) {
@@ -131,7 +130,7 @@ public class MeshPool implements MeshAllocator {
 	private void uploadPending() {
 		try (MappedBuffer buffer = vbo.getBuffer()) {
 			VertexWriter writer = vertexType.createWriter(buffer.unwrap());
-			for (PooledModel model : pendingUpload) {
+			for (BufferedMesh model : pendingUpload) {
 				model.buffer(writer);
 			}
 			pendingUpload.clear();
@@ -148,7 +147,7 @@ public class MeshPool implements MeshAllocator {
 		vbo.delete();
 	}
 
-	public class PooledModel implements BufferedModel {
+	public class BufferedMesh {
 
 		private final ElementBuffer ebo;
 		private final GlVertexArray vao;
@@ -158,38 +157,20 @@ public class MeshPool implements MeshAllocator {
 
 		private boolean deleted;
 
-		public PooledModel(GlVertexArray vao, Mesh mesh, int first) {
+		public BufferedMesh(GlVertexArray vao, Mesh mesh, int first) {
 			this.vao = vao;
 			this.mesh = mesh;
 			this.first = first;
 			ebo = mesh.createEBO();
 		}
 
-		@Override
-		public VertexType getType() {
-			return MeshPool.this.vertexType;
-		}
-
-		@Override
-		public int getVertexCount() {
-			return mesh.vertexCount();
-		}
-
-		@Override
-		public void setupState(GlVertexArray vao) {
-			vbo.bind();
-			vao.enableArrays(getAttributeCount());
-			vao.bindAttributes(0, vertexType.getLayout());
-		}
-
-		@Override
 		public void drawCall() {
+			ebo.bind();
 			GL32.glDrawElementsBaseVertex(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0, first);
 		}
 
-		@Override
 		public void drawInstances(int instanceCount) {
-			if (!valid()) return;
+			if (mesh.getVertexCount() <= 0 || isDeleted()) return;
 
 			ebo.bind();
 
@@ -198,12 +179,10 @@ public class MeshPool implements MeshAllocator {
 			GL32.glDrawElementsInstancedBaseVertex(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0, instanceCount, first);
 		}
 
-		@Override
 		public boolean isDeleted() {
 			return deleted;
 		}
 
-		@Override
 		public void delete() {
 			setDirty();
 			anyToRemove = true;
@@ -214,7 +193,12 @@ public class MeshPool implements MeshAllocator {
 			writer.seekToVertex(first);
 			writer.writeVertexList(mesh.getReader());
 
-			setupState(vao);
+			vao.enableArrays(getAttributeCount());
+			vao.bindAttributes(0, vertexType.getLayout());
+		}
+
+		public int getAttributeCount() {
+			return MeshPool.this.vertexType.getLayout().getAttributeCount();
 		}
 	}
 
