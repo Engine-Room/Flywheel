@@ -11,11 +11,8 @@ import javax.annotation.Nonnull;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
-import com.jozufozu.flywheel.backend.model.FallbackAllocator;
-import com.jozufozu.flywheel.backend.model.MeshAllocator;
 import com.jozufozu.flywheel.backend.model.MeshPool;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.RenderContext;
@@ -41,7 +38,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	protected BlockPos originCoordinate = BlockPos.ZERO;
 
 	protected final ProgramCompiler<P> context;
-	private MeshAllocator allocator;
+	private MeshPool allocator;
 
 	protected final Map<Instanced<? extends InstanceData>, InstancedMaterial<?>> materials = new HashMap<>();
 
@@ -110,7 +107,10 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		for (Map.Entry<Instanced<? extends InstanceData>, InstancedMaterial<?>> entry : materials.entrySet()) {
 			InstancedMaterial<?> material = entry.getValue();
 
-			if (material.anythingToRender(type)) {
+			var toRender = material.renderables.get(type);
+			toRender.removeIf(Renderable::shouldRemove);
+
+			if (!toRender.isEmpty()) {
 				Instanced<? extends InstanceData> instanceType = entry.getKey();
 
 				setup(type, camX, camY, camZ, viewProjection, instanceType.getProgramSpec());
@@ -118,7 +118,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 				instanceCount += material.getInstanceCount();
 				vertexCount += material.getVertexCount();
 
-				material.renderIn(type);
+				toRender.forEach(Renderable::render);
 			}
 		}
 
@@ -165,7 +165,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	public void beginFrame(Camera info) {
 		checkOriginDistance(info);
 
-		MeshAllocator allocator = getModelAllocator();
+		MeshPool allocator = getModelAllocator();
 
 		for (InstancedMaterial<?> material : materials.values()) {
 			material.init(allocator);
@@ -173,10 +173,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 			toRender.addAll(material.renderables.keySet());
 		}
 
-		if (allocator instanceof MeshPool pool) {
-			// ...and then flush the model arena in case anything was marked for upload
-			pool.flush();
-		}
+		allocator.flush();
 
 	}
 
@@ -211,20 +208,17 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		info.add("Origin: " + originCoordinate.getX() + ", " + originCoordinate.getY() + ", " + originCoordinate.getZ());
 	}
 
-	private MeshAllocator getModelAllocator() {
+	private MeshPool getModelAllocator() {
 		if (allocator == null) {
 			allocator = createAllocator();
 		}
 		return this.allocator;
 	}
 
-	private static MeshAllocator createAllocator() {
-		if (GlCompat.getInstance()
-				.onAMDWindows()) {
-			return FallbackAllocator.INSTANCE;
-		} else {
-			return new MeshPool(Formats.POS_TEX_NORMAL);
-		}
+	private static MeshPool createAllocator() {
+
+		// FIXME: Windows AMD Drivers don't like ..BaseVertex
+		return new MeshPool(Formats.POS_TEX_NORMAL);
 	}
 
 	@FunctionalInterface

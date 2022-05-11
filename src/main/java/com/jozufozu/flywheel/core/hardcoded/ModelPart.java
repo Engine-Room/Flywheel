@@ -45,7 +45,7 @@ public class ModelPart implements Mesh {
 	}
 
 	@Override
-	public int vertexCount() {
+	public int getVertexCount() {
 		return vertices;
 	}
 

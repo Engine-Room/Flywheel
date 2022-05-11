@@ -1,5 +1,8 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.Flywheel;
@@ -46,13 +49,18 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		return !anyToUpdate && !anyToRemove && glInstanceCount == 0;
 	}
 
+	private final Set<GlVertexArray> boundTo = new HashSet<>();
+
 	void renderSetup(GlVertexArray vao) {
 		if (anyToRemove) {
 			removeDeletedInstances();
 		}
 
 		vbo.bind();
-		if (!realloc(vao)) {
+
+		if (!realloc()) {
+
+			boundTo.clear();
 
 			if (anyToRemove) {
 				clearBufferTail();
@@ -63,6 +71,10 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 			}
 
 			glInstanceCount = data.size();
+		}
+
+		if (boundTo.add(vao)) {
+			bindInstanceAttributes(vao);
 		}
 
 		vbo.unbind();
@@ -110,7 +122,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		}
 	}
 
-	private boolean realloc(GlVertexArray vao) {
+	private boolean realloc() {
 		int size = this.data.size();
 		int stride = instanceFormat.getStride();
 		int requiredSize = size * stride;
@@ -126,8 +138,6 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 			}
 
 			glInstanceCount = size;
-
-			bindInstanceAttributes(vao);
 
 			return true;
 		}
