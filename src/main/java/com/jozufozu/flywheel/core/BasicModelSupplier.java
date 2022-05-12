@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.core;
 
 import java.util.Map;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.core.model.Mesh;
@@ -30,7 +30,7 @@ public class BasicModelSupplier implements ModelSupplier {
 		return setRenderType(RenderType.cutoutMipped());
 	}
 
-	public BasicModelSupplier setRenderType(@Nonnull RenderType renderType) {
+	public BasicModelSupplier setRenderType(@NotNull RenderType renderType) {
 		this.renderType = renderType;
 		return this;
 	}

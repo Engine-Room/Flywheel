@@ -8,10 +8,6 @@ import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.util.MatrixWrite;
 import com.mojang.math.Matrix4f;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-
-@OnlyIn(Dist.CLIENT)
 @Mixin(Matrix4f.class)
 public abstract class Matrix4fMixin implements MatrixWrite {
 

@@ -1,13 +1,13 @@
 package com.jozufozu.flywheel.vanilla;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
-import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.BasicModelSupplier;
+import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.Models;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.materials.model.ModelData;
@@ -158,7 +158,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 				.createInstance();
 	}
 
-	@Nonnull
+	@NotNull
 	private static Mesh getBodyModel() {
 		int y = -3;
 		return ModelPart.builder("minecart", 64, 32)

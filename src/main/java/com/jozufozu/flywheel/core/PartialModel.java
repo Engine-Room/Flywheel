@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
@@ -51,7 +51,7 @@ public class PartialModel {
 			partial.set(modelRegistry.get(partial.getLocation()));
 	}
 
-	@Nonnull
+	@NotNull
 	public String getName() {
 		return getLocation()
 				.toString();

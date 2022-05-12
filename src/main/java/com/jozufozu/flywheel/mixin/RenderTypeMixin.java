@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.mixin;
 
-import javax.annotation.Nonnull;
-
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -17,7 +16,7 @@ public class RenderTypeMixin implements RenderTypeExtension {
 	private final DrawBuffer flywheel$drawBuffer = new DrawBuffer((RenderType) (Object) this);
 
 	@Override
-	@Nonnull
+	@NotNull
 	public DrawBuffer flywheel$getDrawBuffer() {
 		return flywheel$drawBuffer;
 	}

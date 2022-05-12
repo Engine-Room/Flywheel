@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing.blockentity;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 

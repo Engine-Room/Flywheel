@@ -2,9 +2,8 @@ package com.jozufozu.flywheel.mixin;
 
 import java.nio.ByteBuffer;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -59,7 +58,7 @@ public abstract class BufferBuilderMixin implements BufferBuilderExtension {
 	}
 
 	@Override
-	public void flywheel$injectForRender(@Nonnull ByteBuffer buffer, @Nonnull VertexFormat format, int vertexCount) {
+	public void flywheel$injectForRender(@NotNull ByteBuffer buffer, @NotNull VertexFormat format, int vertexCount) {
 		this.building = true;
 		this.mode = VertexFormat.Mode.QUADS;
 

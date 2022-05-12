@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
-import com.jozufozu.flywheel.core.model.ModelSupplier;
 
 public abstract class AbstractInstancer<D extends InstanceData> implements Instancer<D> {
 

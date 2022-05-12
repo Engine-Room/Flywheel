@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.FlywheelWorld;
 

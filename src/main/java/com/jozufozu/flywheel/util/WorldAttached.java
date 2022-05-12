@@ -10,7 +10,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.world.level.LevelAccessor;
 
@@ -42,7 +42,7 @@ public class WorldAttached<T> {
 		}
 	}
 
-	@Nonnull
+	@NotNull
 	public T get(LevelAccessor world) {
 		T t = attached.get(world);
 		if (t != null) return t;
@@ -58,7 +58,7 @@ public class WorldAttached<T> {
 	/**
 	 * Replaces the entry with a new one from the factory and returns the new entry.
 	 */
-	@Nonnull
+	@NotNull
 	public T replace(LevelAccessor world) {
 		attached.remove(world);
 
@@ -68,7 +68,7 @@ public class WorldAttached<T> {
 	/**
 	 * Replaces the entry with a new one from the factory and returns the new entry.
 	 */
-	@Nonnull
+	@NotNull
 	public T replace(LevelAccessor world, Consumer<T> finalizer) {
 		T remove = attached.remove(world);
 

@@ -29,11 +29,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 
-@OnlyIn(Dist.CLIENT)
 @Mixin(value = LevelRenderer.class, priority = 1001) // Higher priority to go after sodium
 public class LevelRendererMixin {
 
