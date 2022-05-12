@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.core.instancing;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;

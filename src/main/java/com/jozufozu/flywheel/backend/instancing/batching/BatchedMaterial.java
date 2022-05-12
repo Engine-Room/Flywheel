@@ -7,7 +7,6 @@ import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.Material;
 import com.jozufozu.flywheel.api.struct.Batched;
-import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.model.ModelSupplier;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;

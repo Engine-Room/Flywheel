@@ -5,7 +5,6 @@ import com.jozufozu.flywheel.api.struct.Batched;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
-import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 

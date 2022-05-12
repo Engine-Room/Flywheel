@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.util;
 
-import javax.annotation.Nullable;
-
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL32;
 
 import com.mojang.blaze3d.systems.RenderSystem;

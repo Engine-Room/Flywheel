@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.struct.Instanced;
@@ -55,7 +55,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nonnull
+	@NotNull
 	@Override
 	public <D extends InstanceData> InstancedMaterial<D> material(StructType<D> type) {
 		if (type instanceof Instanced<D> instanced) {

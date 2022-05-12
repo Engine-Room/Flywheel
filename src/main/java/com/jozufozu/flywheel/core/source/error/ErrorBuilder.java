@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.core.source.FileIndex;
 import com.jozufozu.flywheel.core.source.SourceFile;

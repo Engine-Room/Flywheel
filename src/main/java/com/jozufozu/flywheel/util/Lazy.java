@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class Lazy<T> implements Supplier<T> {
 
@@ -17,7 +17,7 @@ public class Lazy<T> implements Supplier<T> {
 		this.supplier = supplier;
 	}
 
-	@Nonnull
+	@NotNull
 	public T get() {
 		if (value == null) {
 			value = supplier.get();

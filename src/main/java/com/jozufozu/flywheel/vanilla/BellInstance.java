@@ -1,12 +1,12 @@
 package com.jozufozu.flywheel.vanilla;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
-import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.BasicModelSupplier;
+import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
@@ -68,7 +68,7 @@ public class BellInstance extends BlockEntityInstance<BellBlockEntity> implement
 				.createInstance();
 	}
 
-	@Nonnull
+	@NotNull
 	private static ModelPart createBellModel() {
 		return ModelPart.builder("bell", 32, 32)
 				.sprite(BellRenderer.BELL_RESOURCE_LOCATION.sprite())

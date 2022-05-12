@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.core.hardcoded;
 import java.util.List;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
-import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalVertex;

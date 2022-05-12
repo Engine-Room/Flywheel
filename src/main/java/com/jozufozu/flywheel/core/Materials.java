@@ -8,10 +8,7 @@ import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
 import com.jozufozu.flywheel.core.materials.oriented.OrientedType;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class Materials {
 
 	public static final StructType<OrientedData> ORIENTED = new OrientedType();

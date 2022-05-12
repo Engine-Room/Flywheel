@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.core.crumbling;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.mixin.atlas.SheetDataAccessor;
 
