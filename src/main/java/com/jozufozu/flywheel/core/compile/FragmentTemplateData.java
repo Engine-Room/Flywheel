@@ -30,7 +30,6 @@ public class FragmentTemplateData implements FragmentData {
 		fragmentMain = maybeFragmentMain.get();
 		ImmutableList<Variable> fragmentParameters = fragmentMain.getParameters();
 
-
 		if (fragmentParameters.size() != 1) {
 			ErrorReporter.generateSpanError(fragmentMain.getArgs(), "fragment function must have exactly one argument");
 			throw new RuntimeException();

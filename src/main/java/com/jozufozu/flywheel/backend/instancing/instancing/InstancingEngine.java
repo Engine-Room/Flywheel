@@ -16,16 +16,20 @@ import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.MeshPool;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.RenderContext;
-import com.jozufozu.flywheel.core.RenderTypeRegistry;
+import com.jozufozu.flywheel.core.CoreShaderInfoMap;
+import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.compile.ProgramContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.util.Textures;
 import com.jozufozu.flywheel.util.WeakHashSet;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
@@ -73,10 +77,10 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 		// don't want to mutate viewProjection
 		var vp = context.viewProjection().copy();
-		vp.multiply(Matrix4f.createTranslateMatrix((float) -camX, (float) -camY, (float) -camZ));
+		vp.multiplyWithTranslation((float) -camX, (float) -camY, (float) -camZ);
 
 		for (RenderType renderType : toRender) {
-			render(renderType, camX, camY, camZ, vp);
+			render(renderType, camX, camY, camZ, vp, context.level());
 		}
 		toRender.clear();
 	}
@@ -90,19 +94,20 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 		// don't want to mutate viewProjection
 		var vp = context.viewProjection().copy();
-		vp.multiply(Matrix4f.createTranslateMatrix((float) -camX, (float) -camY, (float) -camZ));
+		vp.multiplyWithTranslation((float) -camX, (float) -camY, (float) -camZ);
 
 		if (toRender.remove(type)) {
-			render(type, camX, camY, camZ, vp);
+			render(type, camX, camY, camZ, vp, context.level());
 		}
 	}
 
-	protected void render(RenderType type, double camX, double camY, double camZ, Matrix4f viewProjection) {
+	protected void render(RenderType type, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
 		vertexCount = 0;
 		instanceCount = 0;
 
 		type.setupRenderState();
 		Textures.bindActiveTextures();
+		CoreShaderInfo coreShaderInfo = getCoreShaderInfo();
 
 		for (Map.Entry<Instanced<? extends InstanceData>, InstancedMaterial<?>> entry : materials.entrySet()) {
 			InstancedMaterial<?> material = entry.getValue();
@@ -113,7 +118,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 			if (!toRender.isEmpty()) {
 				Instanced<? extends InstanceData> instanceType = entry.getKey();
 
-				setup(type, camX, camY, camZ, viewProjection, instanceType.getProgramSpec());
+				setup(instanceType.getProgramSpec(), coreShaderInfo, camX, camY, camZ, viewProjection, level);
 
 				instanceCount += material.getInstanceCount();
 				vertexCount += material.getVertexCount();
@@ -125,12 +130,33 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		type.clearRenderState();
 	}
 
-	protected P setup(RenderType layer, double camX, double camY, double camZ, Matrix4f viewProjection, ResourceLocation programSpec) {
-		P program = context.getProgram(ProgramContext.create(programSpec, Formats.POS_TEX_NORMAL, RenderTypeRegistry.getAlphaDiscard(layer)));
+	protected CoreShaderInfo getCoreShaderInfo() {
+		CoreShaderInfo coreShaderInfo;
+		ShaderInstance coreShader = RenderSystem.getShader();
+		if (coreShader != null) {
+			String coreShaderName = coreShader.getName();
+			coreShaderInfo = CoreShaderInfoMap.getInfo(coreShaderName);
+		} else {
+			coreShaderInfo = null;
+		}
+		if (coreShaderInfo == null) {
+			coreShaderInfo = CoreShaderInfo.DEFAULT;
+		}
+		return coreShaderInfo;
+	}
+
+	protected P setup(ResourceLocation programSpec, CoreShaderInfo coreShaderInfo, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
+		float alphaDiscard = coreShaderInfo.alphaDiscard();
+		if (alphaDiscard == 0) {
+			alphaDiscard = 0.0001f;
+		} else if (alphaDiscard < 0) {
+			alphaDiscard = 0;
+		}
+
+		P program = context.getProgram(ProgramContext.create(programSpec, Formats.POS_TEX_NORMAL, alphaDiscard, coreShaderInfo.fogType()));
 
 		program.bind();
-		program.uploadViewProjection(viewProjection);
-		program.uploadCameraPos(camX, camY, camZ);
+		program.uploadUniforms(camX, camY, camZ, viewProjection, level);
 
 		return program;
 	}

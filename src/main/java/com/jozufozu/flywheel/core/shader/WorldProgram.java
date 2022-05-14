@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.core.shader;
 
 import static org.lwjgl.opengl.GL20.glUniform1f;
+import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL20.glUniform2f;
 import static org.lwjgl.opengl.GL20.glUniform3f;
 
@@ -10,6 +11,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
 
 public class WorldProgram extends GlProgram {
@@ -17,6 +19,7 @@ public class WorldProgram extends GlProgram {
 	protected final int uViewProjection = getUniformLocation("uViewProjection");
 	protected final int uCameraPos = getUniformLocation("uCameraPos");
 	protected final int uWindowSize = getUniformLocation("uWindowSize");
+	protected final int uConstantAmbientLight = getUniformLocation("uConstantAmbientLight");
 	private final WorldFog fog;
 
 	protected int uBlockAtlas;
@@ -27,7 +30,7 @@ public class WorldProgram extends GlProgram {
 
 		fog = new WorldFog(this);
 
-		super.bind();
+		bind();
 		registerSamplers();
 		unbind();
 	}
@@ -37,13 +40,34 @@ public class WorldProgram extends GlProgram {
 		uLightMap = setSamplerBinding("uLightMap", 2);
 	}
 
-	public void uploadViewProjection(Matrix4f viewProjection) {
+	public void uploadUniforms(double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
+		fog.uploadUniforms();
+		uploadTime(AnimationTickHolder.getRenderTime());
+		uploadViewProjection(viewProjection);
+		uploadCameraPos(camX, camY, camZ);
+		uploadWindowSize();
+		uploadConstantAmbientLight(level);
+	}
+
+	protected void uploadTime(float renderTime) {
+		if (uTime < 0) return;
+
+		glUniform1f(uTime, renderTime);
+	}
+
+	protected void uploadViewProjection(Matrix4f viewProjection) {
 		if (uViewProjection < 0) return;
 
 		uploadMatrixUniform(uViewProjection, viewProjection);
 	}
 
-	public void uploadWindowSize() {
+	protected void uploadCameraPos(double camX, double camY, double camZ) {
+		if (uCameraPos < 0) return;
+
+		glUniform3f(uCameraPos, (float) camX, (float) camY, (float) camZ);
+	}
+
+	protected void uploadWindowSize() {
 		if (uWindowSize < 0) return;
 
 		Window window = Minecraft.getInstance().getWindow();
@@ -53,23 +77,9 @@ public class WorldProgram extends GlProgram {
 		glUniform2f(uWindowSize, width, height);
 	}
 
-	public void uploadCameraPos(double camX, double camY, double camZ) {
-		if (uCameraPos < 0) return;
+	protected void uploadConstantAmbientLight(ClientLevel level) {
+		if (uConstantAmbientLight < 0) return;
 
-		glUniform3f(uCameraPos, (float) camX, (float) camY, (float) camZ);
-	}
-
-	public void uploadTime(float renderTime) {
-		if (uTime < 0) return;
-
-		glUniform1f(uTime, renderTime);
-	}
-
-	@Override
-	public void bind() {
-		super.bind();
-		fog.bind();
-		uploadWindowSize();
-		uploadTime(AnimationTickHolder.getRenderTime());
+		glUniform1i(uConstantAmbientLight, level.effects().constantAmbientLight() ? 1 : 0);
 	}
 }

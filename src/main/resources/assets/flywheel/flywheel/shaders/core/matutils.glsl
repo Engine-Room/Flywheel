@@ -1,4 +1,3 @@
-
 mat4 rotate(vec3 axis, float angle) {
     float s = sin(angle);
     float c = cos(angle);
