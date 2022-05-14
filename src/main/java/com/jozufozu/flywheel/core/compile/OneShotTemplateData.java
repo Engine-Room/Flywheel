@@ -63,7 +63,7 @@ public class OneShotTemplateData implements VertexData {
 					v2f_color = v.color;
 					v2f_texCoords = v.texCoords;
 					v2f_light = v.light;
-					v2f_diffuse = diffuse(v.normal);
+					v2f_diffuse = FLWDiffuse(v.normal);
 					#if defined(DEBUG_NORMAL)
 					v2f_color = vec4(v.normal, 1.);
 					#endif

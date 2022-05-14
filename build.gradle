@@ -36,7 +36,6 @@ println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getPro
 minecraft {
     mappings channel: 'parchment', version: "${parchment_version}-${minecraft_version}"
 
-
     runs {
         client {
             workingDirectory project.file('run')
@@ -107,7 +106,7 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compileOnly fg.deobf("curse.maven:starlight-526854:3599856")
+    compileOnly fg.deobf("curse.maven:starlight-526854:3706539")
 
     // https://discord.com/channels/313125603924639766/725850371834118214/910619168821354497
     // Prevent Mixin annotation processor from getting into IntelliJ's annotation processor settings

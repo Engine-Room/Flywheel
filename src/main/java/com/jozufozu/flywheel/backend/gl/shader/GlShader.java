@@ -21,8 +21,8 @@ public class GlShader extends GlObject {
 		GlCompat.safeShaderSource(handle, source);
 		GL20.glCompileShader(handle);
 
-		String log = GL20.glGetShaderInfoLog(handle);
-
+//		String log = GL20.glGetShaderInfoLog(handle);
+//
 //		if (!log.isEmpty()) {
 //			env.printShaderInfoLog(source, log, this.name);
 //		}

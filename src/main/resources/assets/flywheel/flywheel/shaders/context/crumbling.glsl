@@ -3,6 +3,7 @@
 uniform float uTime;
 uniform mat4 uViewProjection;
 uniform vec3 uCameraPos;
+uniform int uConstantAmbientLight;
 
 uniform vec2 uTextureScale;
 uniform sampler2D uBlockAtlas;
@@ -11,11 +12,22 @@ uniform sampler2D uCrumbling;
 
 uniform vec2 uWindowSize;
 
-#if defined(VERTEX_SHADER)
+#ifdef VERTEX_SHADER
+
+#use "flywheel:context/diffuse.glsl"
+
 vec4 FLWVertex(inout Vertex v) {
-    FragDistance = cylindrical_distance(v.pos, uCameraPos);
+    fragDistance = fog_distance(v.pos, uCameraPos);
 
     return uViewProjection * vec4(v.pos, 1.);
+}
+
+float FLWDiffuse(vec3 normal) {
+    if (uConstantAmbientLight == 1) {
+        return diffuseNether(normal);
+    } else {
+        return diffuse(normal);
+    }
 }
 
 #elif defined(FRAGMENT_SHADER)
@@ -29,23 +41,24 @@ vec4 FLWBlockTexture(vec2 texCoords) {
     return cr;
 }
 
+vec4 FLWLight(vec2 lightCoords) {
+    return vec4(1.);
+}
+
 void FLWFinalizeColor(vec4 color) {
-    #if defined(USE_FOG)
-    float a = color.a;
-    float fog = clamp(FLWFogFactor(), 0., 1.);
-
-    color = mix(uFogColor, color, fog);
-    color.a = a;
-    #endif
-
-    if (color.a < 0.1) {
+    #ifdef ALPHA_DISCARD
+    if (color.a < ALPHA_DISCARD) {
         discard;
     }
+    #endif
+
+    #ifdef COLOR_FOG
+    color = linear_fog(color);
+    #elif defined(FADE_FOG)
+    color = linear_fog_fade(color);
+    #endif
 
     fragColor = color;
 }
 
-vec4 FLWLight(vec2 lightCoords) {
-    return vec4(1.);
-}
 #endif

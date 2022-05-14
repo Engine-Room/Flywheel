@@ -1,4 +1,3 @@
-
 #define PIOVER2 1.5707963268
 
 vec4 quat(vec3 axis, float angle) {

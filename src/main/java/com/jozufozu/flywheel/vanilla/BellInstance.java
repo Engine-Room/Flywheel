@@ -13,14 +13,14 @@ import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BellRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BellBlockEntity;
 
 public class BellInstance extends BlockEntityInstance<BellBlockEntity> implements DynamicInstance {
 
-	private static final BasicModelSupplier MODEL = new BasicModelSupplier(BellInstance::createBellModel, RenderType.cutoutMipped());
+	private static final BasicModelSupplier MODEL = new BasicModelSupplier(BellInstance::createBellModel, Sheets.solidBlockSheet());
 
 	private final OrientedData bell;
 

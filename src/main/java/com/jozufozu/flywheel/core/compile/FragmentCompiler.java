@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo.FogType;
 import com.jozufozu.flywheel.core.shader.ShaderConstants;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
 import com.jozufozu.flywheel.core.source.FileIndexImpl;
@@ -11,33 +12,31 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.SourceFile;
 
 public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShader> {
+	private final Template<? extends FragmentData> template;
 	private final FileResolution header;
-	private final Template<FragmentTemplateData> fragment;
 
-	public FragmentCompiler(Template<FragmentTemplateData> fragment, FileResolution header) {
+	public FragmentCompiler(Template<? extends FragmentData> template, FileResolution header) {
 		this.header = header;
-		this.fragment = fragment;
+		this.template = template;
 	}
 
 	@Override
 	protected GlShader _create(Context key) {
-		SourceFile fragmentFile = key.file;
-		FragmentTemplateData appliedTemplate = fragment.apply(fragmentFile);
+		StringBuilder finalSource = new StringBuilder();
 
-		StringBuilder builder = new StringBuilder();
+		finalSource.append(CompileUtil.generateHeader(template.getVersion(), ShaderType.FRAGMENT));
 
-		builder.append(CompileUtil.generateHeader(fragment.getVersion(), ShaderType.FRAGMENT));
-
-		key.getShaderConstants().writeInto(builder);
+		key.getShaderConstants().writeInto(finalSource);
 
 		FileIndexImpl index = new FileIndexImpl();
 
-		header.getFile().generateFinalSource(index, builder);
-		fragmentFile.generateFinalSource(index, builder);
+		header.getFile().generateFinalSource(index, finalSource);
+		key.file.generateFinalSource(index, finalSource);
 
-		builder.append(appliedTemplate.generateFooter());
+		FragmentData appliedTemplate = template.apply(key.file);
+		finalSource.append(appliedTemplate.generateFooter());
 
-		return new GlShader(fragmentFile.name, ShaderType.FRAGMENT, builder.toString());
+		return new GlShader(key.file.name, ShaderType.FRAGMENT, finalSource.toString());
 	}
 
 	@Override
@@ -64,10 +63,16 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 		 */
 		private final float alphaDiscard;
 
-		public Context(SourceFile file, StateSnapshot ctx, float alphaDiscard) {
+		/**
+		 * Which type of fog should be applied.
+		 */
+		private final FogType fogType;
+
+		public Context(SourceFile file, StateSnapshot ctx, float alphaDiscard, FogType fogType) {
 			this.file = file;
 			this.ctx = ctx;
 			this.alphaDiscard = alphaDiscard;
+			this.fogType = fogType;
 		}
 
 		public ShaderConstants getShaderConstants() {
@@ -76,6 +81,7 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 			if (alphaDiscard > 0) {
 				shaderConstants.define("ALPHA_DISCARD", alphaDiscard);
 			}
+			shaderConstants.define(fogType.name());
 
 			return shaderConstants;
 		}
@@ -85,17 +91,17 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 			if (obj == this) return true;
 			if (obj == null || obj.getClass() != this.getClass()) return false;
 			var that = (Context) obj;
-			return this.file == that.file && Objects.equals(this.ctx, that.ctx) && Float.floatToIntBits(this.alphaDiscard) == Float.floatToIntBits(that.alphaDiscard);
+			return this.file == that.file && Objects.equals(this.ctx, that.ctx) && Float.floatToIntBits(this.alphaDiscard) == Float.floatToIntBits(that.alphaDiscard) && fogType == that.fogType;
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(file, ctx, alphaDiscard);
+			return Objects.hash(file, ctx, alphaDiscard, fogType);
 		}
 
 		@Override
 		public String toString() {
-			return "Context[" + "file=" + file + ", " + "ctx=" + ctx + ", " + "alphaDiscard=" + alphaDiscard + ']';
+			return "Context[" + "file=" + file + ", " + "ctx=" + ctx + ", " + "alphaDiscard=" + alphaDiscard + ", " + "fogType=" + fogType + ']';
 		}
 
 	}
