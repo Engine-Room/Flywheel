@@ -32,10 +32,14 @@ public class FileIndexImpl implements FileIndex {
 	}
 
 	@Override
+	public boolean exists(SourceFile sourceFile) {
+		return files.indexOf(sourceFile) != -1;
+	}
+
+	@Override
 	public SourceFile getFile(int fileId) {
 		return files.get(fileId);
 	}
-
 
 	public void printShaderInfoLog(String source, String log, ResourceLocation name) {
 		List<String> lines = log.lines()

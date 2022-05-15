@@ -8,7 +8,7 @@ import java.util.Random;
 import java.util.function.Function;
 
 import com.google.common.collect.ImmutableMap;
-import com.jozufozu.flywheel.core.Formats;
+import com.jozufozu.flywheel.core.vertex.Formats;
 import com.jozufozu.flywheel.core.virtual.VirtualEmptyBlockGetter;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;

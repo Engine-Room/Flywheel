@@ -53,7 +53,6 @@ public class ShaderSources implements SourceFinder {
 	@Override
 	@Nullable
 	public SourceFile findSource(ResourceLocation name) {
-
 		return shaderSources.get(name);
 	}
 }

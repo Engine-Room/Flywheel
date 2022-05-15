@@ -1,8 +1,7 @@
 package com.jozufozu.flywheel.api.struct;
 
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-
-import net.minecraft.resources.ResourceLocation;
+import com.jozufozu.flywheel.core.source.FileResolution;
 
 public interface Instanced<S> extends StructType<S> {
 	/**
@@ -12,6 +11,5 @@ public interface Instanced<S> extends StructType<S> {
 	 */
 	StructWriter<S> getWriter(VecBuffer backing);
 
-	ResourceLocation getProgramSpec();
-
+	FileResolution getInstanceShader();
 }

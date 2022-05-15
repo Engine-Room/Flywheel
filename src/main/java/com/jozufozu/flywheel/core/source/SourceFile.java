@@ -2,11 +2,12 @@ package com.jozufozu.flywheel.core.source;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -27,10 +28,6 @@ import net.minecraft.resources.ResourceLocation;
  * </p>
  */
 public class SourceFile {
-	private static final Pattern includePattern = Pattern.compile("#use \"(.*)\"");
-
-	// https://regexr.com/60n3d
-	public static final Pattern functionDeclaration = Pattern.compile("(\\w+)\\s+(\\w+)\\s*\\(([\\w,\\s]*)\\)\\s*\\{");
 
 	public final ResourceLocation name;
 
@@ -141,15 +138,20 @@ public class SourceFile {
 		for (Import include : imports) {
 			SourceFile file = include.getFile();
 
-			if (file != null) file.generateFinalSource(env, source);
+			if (file != null && !env.exists(file)) {
+				file.generateFinalSource(env, source);
+			}
 		}
 
 		source.append("#line ")
 				.append(0)
 				.append(' ')
 				.append(env.getFileID(this))
+				.append(" // ")
+				.append(name)
 				.append('\n');
 		source.append(elided);
+		source.append('\n');
 	}
 
 	public String printSource() {
@@ -176,7 +178,7 @@ public class SourceFile {
 	 * Scan the source for function definitions and "parse" them into objects that contain properties of the function.
 	 */
 	private ImmutableMap<String, ShaderFunction> parseFunctions() {
-		Matcher matcher = functionDeclaration.matcher(source);
+		Matcher matcher = ShaderFunction.functionDeclaration.matcher(source);
 
 		Map<String, ShaderFunction> functions = new HashMap<>();
 
@@ -210,7 +212,7 @@ public class SourceFile {
 	 * Scan the source for function definitions and "parse" them into objects that contain properties of the function.
 	 */
 	private ImmutableMap<String, ShaderStruct> parseStructs() {
-		Matcher matcher = ShaderStruct.struct.matcher(source);
+		Matcher matcher = ShaderStruct.PATTERN.matcher(source);
 
 		ImmutableMap.Builder<String, ShaderStruct> structs = ImmutableMap.builder();
 		while (matcher.find()) {
@@ -232,15 +234,22 @@ public class SourceFile {
 	 * @param elisions
 	 */
 	private ImmutableList<Import> parseImports(List<Span> elisions) {
-		Matcher uses = includePattern.matcher(source);
+		Matcher uses = Import.PATTERN.matcher(source);
 
+		Set<String> importedFiles = new HashSet<>();
 		List<Import> imports = new ArrayList<>();
 
 		while (uses.find()) {
 			Span use = Span.fromMatcher(this, uses);
 			Span file = Span.fromMatcher(this, uses, 1);
 
-			imports.add(new Import(Resolver.INSTANCE, use, file));
+			String fileName = file.get();
+			if (importedFiles.add(fileName)) {
+				Import import1 = Import.create(Resolver.INSTANCE, use, file);
+				if (import1 != null) {
+					imports.add(import1);
+				}
+			}
 
 			elisions.add(use); // we have to trim that later
 		}

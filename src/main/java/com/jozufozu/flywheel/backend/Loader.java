@@ -1,32 +1,15 @@
 package com.jozufozu.flywheel.backend;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.jetbrains.annotations.Nullable;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.core.GameStateRegistry;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
-import com.jozufozu.flywheel.core.shader.ProgramSpec;
 import com.jozufozu.flywheel.core.source.Resolver;
 import com.jozufozu.flywheel.core.source.ShaderSources;
 import com.jozufozu.flywheel.event.GatherContextEvent;
-import com.jozufozu.flywheel.util.ResourceUtil;
-import com.jozufozu.flywheel.util.StringUtil;
-import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.JsonOps;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraftforge.fml.ModLoader;
@@ -39,11 +22,6 @@ import net.minecraftforge.fml.ModLoader;
  * </p>
  */
 public class Loader implements ResourceManagerReloadListener {
-	public static final String PROGRAM_DIR = "flywheel/programs/";
-	private static final Gson GSON = new GsonBuilder().create();
-
-	private final Map<ResourceLocation, ProgramSpec> programs = new HashMap<>();
-
 	private boolean firstLoad = true;
 
 	Loader() {
@@ -55,11 +33,6 @@ public class Loader implements ResourceManagerReloadListener {
 				((ReloadableResourceManager) manager).registerReloadListener(this);
 			}
 		}
-	}
-
-	@Nullable
-	public ProgramSpec get(ResourceLocation name) {
-		return programs.get(name);
 	}
 
 	@Override
@@ -74,8 +47,6 @@ public class Loader implements ResourceManagerReloadListener {
 
 		ShaderSources sources = new ShaderSources(manager);
 
-		loadProgramSpecs(manager);
-
 		Resolver.INSTANCE.run(sources);
 
 		Backend.LOGGER.info("Loaded all shader sources.");
@@ -89,35 +60,4 @@ public class Loader implements ResourceManagerReloadListener {
 
 		firstLoad = false;
 	}
-
-	private void loadProgramSpecs(ResourceManager manager) {
-		programs.clear();
-
-		Collection<ResourceLocation> programSpecs = manager.listResources(PROGRAM_DIR, s -> s.endsWith(".json"));
-
-		for (ResourceLocation location : programSpecs) {
-			try (Resource file = manager.getResource(location)) {
-				String s = StringUtil.readToString(file.getInputStream());
-
-				ResourceLocation specName = ResourceUtil.trim(location, PROGRAM_DIR, ".json");
-
-				DataResult<Pair<ProgramSpec, JsonElement>> result = ProgramSpec.CODEC.decode(JsonOps.INSTANCE, GSON.fromJson(s, JsonElement.class));
-
-				ProgramSpec spec = result.get()
-						.orThrow()
-						.getFirst();
-
-				spec.setName(specName);
-
-				if (programs.containsKey(specName)) {
-					throw new IllegalStateException("Program spec '" + specName + "' already registered.");
-				}
-				programs.put(specName, spec);
-
-			} catch (Exception e) {
-				Backend.LOGGER.error("Could not load program " + location, e);
-			}
-		}
-	}
-
 }

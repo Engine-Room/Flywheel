@@ -9,6 +9,9 @@ import com.jozufozu.flywheel.core.source.span.Span;
 
 public class ShaderFunction extends AbstractShaderElement {
 
+	// https://regexr.com/60n3d
+	public static final Pattern functionDeclaration = Pattern.compile("(\\w+)\\s+(\\w+)\\s*\\(([\\w,\\s]*)\\)\\s*\\{");
+
 	public static final Pattern argument = Pattern.compile("(?:(inout|in|out) )?(\\w+)\\s+(\\w+)");
 	public static final Pattern assignment = Pattern.compile("(\\w+)\\s*=");
 

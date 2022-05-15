@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import com.jozufozu.flywheel.api.vertex.ShadedVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.model.ShadeSeparatedBufferBuilder;
 import com.jozufozu.flywheel.util.RenderMath;
 import com.mojang.blaze3d.vertex.BufferBuilder;

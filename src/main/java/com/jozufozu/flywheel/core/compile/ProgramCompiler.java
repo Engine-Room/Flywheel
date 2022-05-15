@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.core.Templates;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 
@@ -33,15 +32,17 @@ public class ProgramCompiler<P extends GlProgram> extends Memoizer<ProgramContex
 	}
 
 	/**
-	 * Creates a program compiler using this template.
-	 * @param template The vertex template to use.
+	 * Creates a program compiler using provided templates and headers.
 	 * @param factory A factory to add meaning to compiled programs.
-	 * @param header The header file to use for the program.
+	 * @param vertexTemplate The vertex template to use.
+	 * @param fragmentTemplate The fragment template to use.
+	 * @param vertexContextShader The context shader to use when compiling vertex shaders.
+	 * @param fragmentContextShader The context shader to use when compiling fragment shaders.
 	 * @param <P> The type of program to compile.
 	 * @return A program compiler.
 	 */
-	public static <T extends VertexData, P extends GlProgram> ProgramCompiler<P> create(Template<T> template, GlProgram.Factory<P> factory, FileResolution header) {
-		return new ProgramCompiler<>(factory, new VertexCompiler(template, header), new FragmentCompiler(Templates.FRAGMENT, header));
+	public static <V extends VertexData, F extends FragmentData, P extends GlProgram> ProgramCompiler<P> create(GlProgram.Factory<P> factory, Template<V> vertexTemplate, Template<F> fragmentTemplate, FileResolution vertexContextShader, FileResolution fragmentContextShader) {
+		return new ProgramCompiler<>(factory, new VertexCompiler(vertexTemplate, vertexContextShader), new FragmentCompiler(fragmentTemplate, fragmentContextShader));
 	}
 
 	/**
@@ -63,9 +64,9 @@ public class ProgramCompiler<P extends GlProgram> extends Memoizer<ProgramContex
 
 	@Override
 	protected P _create(ProgramContext ctx) {
-		return new ProgramAssembler(ctx.spec.name)
-				.attachShader(vertexCompiler.get(new VertexCompiler.Context(ctx.spec.getVertexFile(), ctx.ctx, ctx.vertexType)))
-				.attachShader(fragmentCompiler.get(new FragmentCompiler.Context(ctx.spec.getFragmentFile(), ctx.ctx, ctx.alphaDiscard, ctx.fogType)))
+		return new ProgramAssembler(ctx.instanceShader.getFileLoc())
+				.attachShader(vertexCompiler.get(new VertexCompiler.Context(ctx.vertexType, ctx.instanceShader.getFile(), ctx.ctx)))
+				.attachShader(fragmentCompiler.get(new FragmentCompiler.Context(ctx.alphaDiscard, ctx.fogType, ctx.ctx)))
 				.link()
 				.build(this.factory);
 	}

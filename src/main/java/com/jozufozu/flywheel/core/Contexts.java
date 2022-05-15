@@ -20,11 +20,13 @@ public class Contexts {
 	public static void flwInit(GatherContextEvent event) {
 		GameStateRegistry.register(NormalDebugStateProvider.INSTANCE);
 
-		FileResolution worldBuiltins = Resolver.INSTANCE.get(ResourceUtil.subPath(Names.WORLD, ".glsl"));
-		FileResolution crumblingBuiltins = Resolver.INSTANCE.get(ResourceUtil.subPath(Names.CRUMBLING, ".glsl"));
+		FileResolution worldVertex = Resolver.INSTANCE.get(ResourceUtil.subPath(Names.WORLD, ".vert"));
+		FileResolution worldFragment = Resolver.INSTANCE.get(ResourceUtil.subPath(Names.WORLD, ".frag"));
+		FileResolution crumblingVertex = Resolver.INSTANCE.get(ResourceUtil.subPath(Names.CRUMBLING, ".vert"));
+		FileResolution crumblingFragment = Resolver.INSTANCE.get(ResourceUtil.subPath(Names.CRUMBLING, ".frag"));
 
-		WORLD = ProgramCompiler.create(Templates.INSTANCING, WorldProgram::new, worldBuiltins);
-		CRUMBLING = ProgramCompiler.create(Templates.INSTANCING, CrumblingProgram::new, crumblingBuiltins);
+		WORLD = ProgramCompiler.create(WorldProgram::new, Templates.INSTANCING, Templates.FRAGMENT, worldVertex, worldFragment);
+		CRUMBLING = ProgramCompiler.create(CrumblingProgram::new, Templates.INSTANCING, Templates.FRAGMENT, crumblingVertex, crumblingFragment);
 	}
 
 	public static class Names {

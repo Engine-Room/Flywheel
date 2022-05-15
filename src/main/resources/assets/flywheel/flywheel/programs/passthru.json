@@ -1,4 +1,0 @@
-{
-  "vertex": "flywheel:passthru.vert",
-  "fragment": "flywheel:block.frag"
-}

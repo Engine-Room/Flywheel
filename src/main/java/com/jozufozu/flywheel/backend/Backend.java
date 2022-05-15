@@ -8,11 +8,9 @@ import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.ParallelTaskEngine;
 import com.jozufozu.flywheel.config.BackendType;
 import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.core.shader.ProgramSpec;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 
@@ -51,11 +49,6 @@ public class Backend {
 	 */
 	public static String getBackendDescriptor() {
 		return backendType == null ? "Uninitialized" : backendType.getProperName();
-	}
-
-	@Nullable
-	public static ProgramSpec getSpec(ResourceLocation name) {
-		return loader.get(name);
 	}
 
 	public static void refresh() {

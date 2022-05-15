@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.api.vertex;
 import java.nio.ByteBuffer;
 
 import com.jozufozu.flywheel.core.layout.BufferLayout;
+import com.jozufozu.flywheel.core.source.FileResolution;
 
 /**
  * A vertex type containing metadata about a specific vertex layout.
@@ -32,7 +33,7 @@ public interface VertexType {
 	 */
 	VertexList createReader(ByteBuffer buffer, int vertexCount);
 
-	String getShaderHeader();
+	FileResolution getLayoutShader();
 
 	default int getStride() {
 		return getLayout().getStride();

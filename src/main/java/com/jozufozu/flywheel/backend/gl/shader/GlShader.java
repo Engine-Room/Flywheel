@@ -21,10 +21,20 @@ public class GlShader extends GlObject {
 		GlCompat.safeShaderSource(handle, source);
 		GL20.glCompileShader(handle);
 
+//		File dir = new File(Minecraft.getInstance().gameDirectory, "flywheel_sources");
+//		dir.mkdirs();
+//		File file = new File(dir, name.toString().replaceAll("[:/]", "_"));
+//		try (FileWriter writer = new FileWriter(file)) {
+//			writer.write(source);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+
 //		String log = GL20.glGetShaderInfoLog(handle);
 //
 //		if (!log.isEmpty()) {
-//			env.printShaderInfoLog(source, log, this.name);
+//			System.out.println(log);
+////			env.printShaderInfoLog(source, log, this.name);
 //		}
 
 		if (GL20.glGetShaderi(handle, GL20.GL_COMPILE_STATUS) != GL20.GL_TRUE) {
