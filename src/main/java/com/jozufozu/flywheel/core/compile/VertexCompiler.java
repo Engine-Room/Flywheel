@@ -12,11 +12,11 @@ import com.jozufozu.flywheel.core.source.SourceFile;
 
 public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 	private final Template<? extends VertexData> template;
-	private final FileResolution header;
+	private final FileResolution contextShader;
 
-	public VertexCompiler(Template<? extends VertexData> template, FileResolution header) {
+	public VertexCompiler(Template<? extends VertexData> template, FileResolution contextShader) {
 		this.template = template;
-		this.header = header;
+		this.contextShader = contextShader;
 	}
 
 	@Override
@@ -26,28 +26,21 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 		finalSource.append(CompileUtil.generateHeader(template.getVersion(), ShaderType.VERTEX));
 
 		key.ctx.getShaderConstants().writeInto(finalSource);
-
-		finalSource.append("""
-				struct Vertex {
-					vec3 pos;
-					vec4 color;
-					vec2 texCoords;
-					vec2 light;
-					vec3 normal;
-				};
-				""");
-		finalSource.append(key.vertexType.getShaderHeader());
+		finalSource.append('\n');
 
 		FileIndexImpl index = new FileIndexImpl();
 
-		header.getFile().generateFinalSource(index, finalSource);
+		FileResolution layoutShader = key.vertexType.getLayoutShader();
+		layoutShader.getFile().generateFinalSource(index, finalSource);
 
-		key.file.generateFinalSource(index, finalSource);
+		contextShader.getFile().generateFinalSource(index, finalSource);
 
-		VertexData appliedTemplate = template.apply(key.file);
+		key.instanceShader.generateFinalSource(index, finalSource);
+
+		VertexData appliedTemplate = template.apply(key.instanceShader);
 		finalSource.append(appliedTemplate.generateFooter(index, key.vertexType));
 
-		return new GlShader(key.file.name, ShaderType.VERTEX, finalSource.toString());
+		return new GlShader(key.instanceShader.name, ShaderType.VERTEX, finalSource.toString());
 	}
 
 	@Override
@@ -57,24 +50,24 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 
 	public static class Context {
 		/**
-		 * The file to compile.
+		 * The vertex type to use.
 		 */
-		private final SourceFile file;
+		private final VertexType vertexType;
+
+		/**
+		 * The instance shader source.
+		 */
+		private final SourceFile instanceShader;
 
 		/**
 		 * The shader constants to apply.
 		 */
 		private final StateSnapshot ctx;
 
-		/**
-		 * The vertex type to use.
-		 */
-		private final VertexType vertexType;
-
-		public Context(SourceFile file, StateSnapshot ctx, VertexType vertexType) {
-			this.file = file;
-			this.ctx = ctx;
+		public Context(VertexType vertexType, SourceFile instanceShader, StateSnapshot ctx) {
 			this.vertexType = vertexType;
+			this.instanceShader = instanceShader;
+			this.ctx = ctx;
 		}
 
 		@Override
@@ -82,12 +75,12 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 			var that = (Context) o;
-			return file == that.file && vertexType == that.vertexType && ctx.equals(that.ctx);
+			return vertexType == that.vertexType && instanceShader == that.instanceShader && ctx.equals(that.ctx);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(file, ctx, vertexType);
+			return Objects.hash(vertexType, instanceShader, ctx);
 		}
 	}
 }

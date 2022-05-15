@@ -6,7 +6,6 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.util.RenderMath;
 
 public class PosTexNormalVertexListUnsafe implements VertexList {

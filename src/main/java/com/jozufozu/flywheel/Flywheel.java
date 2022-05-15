@@ -13,6 +13,8 @@ import com.jozufozu.flywheel.core.Models;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.StitchedSprite;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
+import com.jozufozu.flywheel.core.materials.InstanceShaders;
+import com.jozufozu.flywheel.core.vertex.LayoutShaders;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
@@ -73,6 +75,8 @@ public class Flywheel {
 		forgeEventBus.<ReloadRenderersEvent>addListener(ProgramCompiler::invalidateAll);
 		forgeEventBus.addListener(Models::onReload);
 
+		modEventBus.addListener(LayoutShaders::flwInit);
+		modEventBus.addListener(InstanceShaders::flwInit);
 		modEventBus.addListener(Contexts::flwInit);
 		modEventBus.addListener(PartialModel::onModelRegistry);
 		modEventBus.addListener(PartialModel::onModelBake);

@@ -4,12 +4,11 @@ import com.jozufozu.flywheel.api.struct.Batched;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.core.Programs;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
+import com.jozufozu.flywheel.core.materials.InstanceShaders;
 import com.jozufozu.flywheel.core.model.ModelTransformer;
-
-import net.minecraft.resources.ResourceLocation;
+import com.jozufozu.flywheel.core.source.FileResolution;
 
 public class ModelType implements Instanced<ModelData>, Batched<ModelData> {
 
@@ -34,8 +33,8 @@ public class ModelType implements Instanced<ModelData>, Batched<ModelData> {
 	}
 
 	@Override
-	public ResourceLocation getProgramSpec() {
-		return Programs.TRANSFORMED;
+	public FileResolution getInstanceShader() {
+		return InstanceShaders.MODEL;
 	}
 
 	@Override

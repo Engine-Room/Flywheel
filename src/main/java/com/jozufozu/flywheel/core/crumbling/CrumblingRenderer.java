@@ -14,8 +14,8 @@ import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancedMaterial;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.core.Contexts;
-import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo;
+import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
 import com.jozufozu.flywheel.util.Lazy;
@@ -191,7 +191,7 @@ public class CrumblingRenderer {
 			CoreShaderInfo coreShaderInfo = getCoreShaderInfo();
 
 			for (Map.Entry<Instanced<? extends InstanceData>, InstancedMaterial<?>> entry : materials.entrySet()) {
-				CrumblingProgram program = setup(entry.getKey().getProgramSpec(), coreShaderInfo, camX, camY, camZ, viewProjection, level);
+				CrumblingProgram program = setup(entry.getKey(), coreShaderInfo, camX, camY, camZ, viewProjection, level);
 
 				program.setAtlasSize(width, height);
 

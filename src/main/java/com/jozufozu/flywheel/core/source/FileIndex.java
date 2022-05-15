@@ -11,6 +11,8 @@ public interface FileIndex {
 	 */
 	int getFileID(SourceFile sourceFile);
 
+	boolean exists(SourceFile sourceFile);
+
 	SourceFile getFile(int fileID);
 
 	default Span getLineSpan(int fileId, int lineNo) {

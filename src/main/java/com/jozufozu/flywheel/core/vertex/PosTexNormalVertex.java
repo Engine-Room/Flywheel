@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
+import com.jozufozu.flywheel.core.source.FileResolution;
 
 public class PosTexNormalVertex implements VertexType {
 
@@ -28,21 +29,7 @@ public class PosTexNormalVertex implements VertexType {
 	}
 
 	@Override
-	public String getShaderHeader() {
-		return """
-layout (location = 0) in vec3 _flw_v_pos;
-layout (location = 1) in vec2 _flw_v_texCoords;
-layout (location = 2) in vec3 _flw_v_normal;
-
-Vertex FLWCreateVertex() {
-	Vertex v;
-	v.pos = _flw_v_pos;
-	v.color = vec4(1.);
-	v.texCoords = _flw_v_texCoords;
-	v.light = vec2(0.);
-	v.normal = _flw_v_normal;
-	return v;
-}
-				""";
+	public FileResolution getLayoutShader() {
+		return LayoutShaders.POS_TEX_NORMAL;
 	}
 }

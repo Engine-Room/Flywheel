@@ -25,7 +25,6 @@ public class ErrorReporter {
 	}
 
 	public static void generateFileError(SourceFile file, String message) {
-
 		String error = ErrorBuilder.error(message)
 				.pointAtFile(file)
 				.build();

@@ -15,45 +15,30 @@ import com.jozufozu.flywheel.core.source.parse.Variable;
 import com.jozufozu.flywheel.core.source.span.Span;
 
 public class InstancingTemplateData implements VertexData {
-
 	public final SourceFile file;
-	public final ShaderFunction vertexMain;
-	public final Span vertexName;
+	public final ShaderFunction instanceVertex;
 	public final Span instanceName;
 	public final ShaderStruct instance;
 
 	public InstancingTemplateData(SourceFile file) {
 		this.file = file;
 
-		Optional<ShaderFunction> vertexFunc = file.findFunction("vertex");
+		Optional<ShaderFunction> maybeInstanceVertex = file.findFunction("flw_instanceVertex");
 
-		if (vertexFunc.isEmpty()) {
-			ErrorReporter.generateFileError(file, "could not find \"vertex\" function");
+		if (maybeInstanceVertex.isEmpty()) {
+			ErrorReporter.generateMissingFunction(file, "flw_instanceVertex", "\"flw_instanceVertex\" function not defined");
 			throw new ShaderLoadingException();
 		}
 
-		vertexMain = vertexFunc.get();
-		ImmutableList<Variable> vertexParams = vertexMain.getParameters();
+		instanceVertex = maybeInstanceVertex.get();
+		ImmutableList<Variable> params = instanceVertex.getParameters();
 
-		if (vertexParams.size() != 2) {
-			ErrorReporter.generateSpanError(vertexMain.getArgs(), "instancing requires vertex function to have 2 arguments");
+		if (params.size() != 1) {
+			ErrorReporter.generateSpanError(instanceVertex.getArgs(), "\"flw_contextFragment\" function must have exactly 1 argument");
 			throw new ShaderLoadingException();
 		}
 
-		Variable vertexParam = vertexParams.get(0);
-		vertexName = vertexParam.type;
-
-		boolean namedVertex = vertexParam.type
-				.toString()
-				.equals("Vertex");
-
-		if (!(namedVertex && vertexParam.qualifier == Variable.Qualifier.INOUT)) {
-			ErrorReporter.generateSpanError(vertexParam.qualifierSpan, "first parameter must be inout Vertex");
-			throw new ShaderLoadingException();
-		}
-
-		instanceName = vertexParams.get(1).type;
-
+		instanceName = params.get(0).type;
 		Optional<ShaderStruct> maybeInstance = file.findStruct(instanceName);
 
 		if (maybeInstance.isEmpty()) {
@@ -80,36 +65,26 @@ public class InstancingTemplateData implements VertexData {
 					.append(' ')
 					.append(field.type)
 					.append(' ')
-					.append("a_i_")
+					.append("_flw_a_i_")
 					.append(field.name)
 					.append(";\n");
 			attributeBinding += CompileUtil.getAttributeCount(field.type);
 		}
+		template.append('\n');
+
 		template.append(String.format("""
-						out vec4 v2f_color;
-						out vec2 v2f_texCoords;
-						out vec2 v2f_light;
-						out float v2f_diffuse;
-
 						void main() {
-						    Vertex v = FLWCreateVertex();
-						    %s i;
-						    %s
-						    vertex(v, i);
-						    gl_Position = FLWVertex(v);
-						    v.normal = normalize(v.normal);
+							flw_layoutVertex();
 
-						    v2f_color = v.color;
-						    v2f_texCoords = v.texCoords;
-						    v2f_light = v.light;
-						    v2f_diffuse = FLWDiffuse(v.normal);
-						    #if defined(DEBUG_NORMAL)
-						    v2f_color = vec4(v.normal, 1.);
-						    #endif
+							%s instance;
+							%s
+							flw_instanceVertex(instance);
+
+							flw_contextVertex();
 						}
 						""",
 				instanceName,
-				assignFields(instance, "i.", "a_i_")
+				assignFields(instance, "instance.", "_flw_a_i_")
 		));
 
 		return template.toString();

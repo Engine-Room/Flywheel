@@ -14,13 +14,14 @@ import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.MeshPool;
-import com.jozufozu.flywheel.core.Formats;
-import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.CoreShaderInfoMap;
 import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo;
+import com.jozufozu.flywheel.core.GameStateRegistry;
+import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.compile.ProgramContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
+import com.jozufozu.flywheel.core.vertex.Formats;
 import com.jozufozu.flywheel.util.Textures;
 import com.jozufozu.flywheel.util.WeakHashSet;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -32,7 +33,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 public class InstancingEngine<P extends WorldProgram> implements Engine {
@@ -118,7 +118,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 			if (!toRender.isEmpty()) {
 				Instanced<? extends InstanceData> instanceType = entry.getKey();
 
-				setup(instanceType.getProgramSpec(), coreShaderInfo, camX, camY, camZ, viewProjection, level);
+				setup(instanceType, coreShaderInfo, camX, camY, camZ, viewProjection, level);
 
 				instanceCount += material.getInstanceCount();
 				vertexCount += material.getVertexCount();
@@ -145,7 +145,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		return coreShaderInfo;
 	}
 
-	protected P setup(ResourceLocation programSpec, CoreShaderInfo coreShaderInfo, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
+	protected P setup(Instanced<?> instanceType, CoreShaderInfo coreShaderInfo, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
 		float alphaDiscard = coreShaderInfo.alphaDiscard();
 		if (alphaDiscard == 0) {
 			alphaDiscard = 0.0001f;
@@ -153,7 +153,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 			alphaDiscard = 0;
 		}
 
-		P program = context.getProgram(ProgramContext.create(programSpec, Formats.POS_TEX_NORMAL, alphaDiscard, coreShaderInfo.fogType()));
+		P program = context.getProgram(new ProgramContext(Formats.POS_TEX_NORMAL, instanceType.getInstanceShader(), alphaDiscard, coreShaderInfo.fogType(), GameStateRegistry.takeSnapshot()));
 
 		program.bind();
 		program.uploadUniforms(camX, camY, camZ, viewProjection, level);

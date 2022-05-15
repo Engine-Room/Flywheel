@@ -9,15 +9,14 @@ import com.jozufozu.flywheel.core.shader.ShaderConstants;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
 import com.jozufozu.flywheel.core.source.FileIndexImpl;
 import com.jozufozu.flywheel.core.source.FileResolution;
-import com.jozufozu.flywheel.core.source.SourceFile;
 
 public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShader> {
 	private final Template<? extends FragmentData> template;
-	private final FileResolution header;
+	private final FileResolution contextShader;
 
-	public FragmentCompiler(Template<? extends FragmentData> template, FileResolution header) {
-		this.header = header;
+	public FragmentCompiler(Template<? extends FragmentData> template, FileResolution contextShader) {
 		this.template = template;
+		this.contextShader = contextShader;
 	}
 
 	@Override
@@ -27,16 +26,16 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 		finalSource.append(CompileUtil.generateHeader(template.getVersion(), ShaderType.FRAGMENT));
 
 		key.getShaderConstants().writeInto(finalSource);
+		finalSource.append('\n');
 
 		FileIndexImpl index = new FileIndexImpl();
 
-		header.getFile().generateFinalSource(index, finalSource);
-		key.file.generateFinalSource(index, finalSource);
+		contextShader.getFile().generateFinalSource(index, finalSource);
 
-		FragmentData appliedTemplate = template.apply(key.file);
+		FragmentData appliedTemplate = template.apply(contextShader.getFile());
 		finalSource.append(appliedTemplate.generateFooter());
 
-		return new GlShader(key.file.name, ShaderType.FRAGMENT, finalSource.toString());
+		return new GlShader(contextShader.getFile().name, ShaderType.FRAGMENT, finalSource.toString());
 	}
 
 	@Override
@@ -48,11 +47,6 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 	 * Represents the conditions under which a shader is compiled.
 	 */
 	public static final class Context {
-		/**
-		 * The file to compile.
-		 */
-		private final SourceFile file;
-
 		/**
 		 * The shader constants to apply.
 		 */
@@ -68,11 +62,10 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 		 */
 		private final FogType fogType;
 
-		public Context(SourceFile file, StateSnapshot ctx, float alphaDiscard, FogType fogType) {
-			this.file = file;
-			this.ctx = ctx;
+		public Context(float alphaDiscard, FogType fogType, StateSnapshot ctx) {
 			this.alphaDiscard = alphaDiscard;
 			this.fogType = fogType;
+			this.ctx = ctx;
 		}
 
 		public ShaderConstants getShaderConstants() {
@@ -91,17 +84,17 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 			if (obj == this) return true;
 			if (obj == null || obj.getClass() != this.getClass()) return false;
 			var that = (Context) obj;
-			return this.file == that.file && Objects.equals(this.ctx, that.ctx) && Float.floatToIntBits(this.alphaDiscard) == Float.floatToIntBits(that.alphaDiscard) && fogType == that.fogType;
+			return Objects.equals(this.ctx, that.ctx) && Float.floatToIntBits(this.alphaDiscard) == Float.floatToIntBits(that.alphaDiscard) && fogType == that.fogType;
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(file, ctx, alphaDiscard, fogType);
+			return Objects.hash(alphaDiscard, fogType, ctx);
 		}
 
 		@Override
 		public String toString() {
-			return "Context[" + "file=" + file + ", " + "ctx=" + ctx + ", " + "alphaDiscard=" + alphaDiscard + ", " + "fogType=" + fogType + ']';
+			return "Context[" + "alphaDiscard=" + alphaDiscard + ", " + "fogType=" + fogType + ", " + "ctx=" + ctx + ']';
 		}
 
 	}

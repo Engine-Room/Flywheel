@@ -10,7 +10,7 @@ import com.jozufozu.flywheel.core.source.span.Span;
 public class ShaderStruct extends AbstractShaderElement {
 
 	// https://regexr.com/61rpe
-	public static final Pattern struct = Pattern.compile("struct\\s+([\\w\\d]*)\\s*\\{([\\w\\d\\s,;]*)}\\s*;\\s");
+	public static final Pattern PATTERN = Pattern.compile("struct\\s+([\\w\\d]*)\\s*\\{([\\w\\d\\s,;]*)}\\s*;\\s");
 
 	public final Span name;
 	public final Span body;

@@ -93,4 +93,9 @@ public class FileResolution {
 		extraCrashInfoProviders.clear();
 		file = null;
 	}
+
+	@Override
+	public String toString() {
+		return "FileResolution[" + fileLoc + "]";
+	}
 }
