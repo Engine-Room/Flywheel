@@ -2,13 +2,15 @@ package com.jozufozu.flywheel.vanilla;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
-import com.jozufozu.flywheel.core.materials.Materials;
-import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
+import com.jozufozu.flywheel.core.material.MaterialShaders;
+import com.jozufozu.flywheel.core.structs.StructTypes;
+import com.jozufozu.flywheel.core.structs.oriented.OrientedData;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -20,14 +22,14 @@ import net.minecraft.world.level.block.entity.BellBlockEntity;
 
 public class BellInstance extends BlockEntityInstance<BellBlockEntity> implements DynamicInstance {
 
-	private static final BasicModelSupplier MODEL = new BasicModelSupplier(BellInstance::createBellModel, Sheets.solidBlockSheet());
+	private static final BasicModelSupplier MODEL = new BasicModelSupplier(BellInstance::createBellModel, new Material(Sheets.solidBlockSheet(), () -> MaterialShaders.SHADED_VERTEX, () -> MaterialShaders.DEFAULT_FRAGMENT));
 
 	private final OrientedData bell;
 
 	private float lastRingTime = Float.NaN;
 
-	public BellInstance(MaterialManager materialManager, BellBlockEntity blockEntity) {
-		super(materialManager, blockEntity);
+	public BellInstance(InstancerManager instancerManager, BellBlockEntity blockEntity) {
+		super(instancerManager, blockEntity);
 
 		bell = createBellInstance()
 				.setPivot(0.5f, 0.75f, 0.5f)
@@ -63,7 +65,7 @@ public class BellInstance extends BlockEntityInstance<BellBlockEntity> implement
 	}
 
 	private OrientedData createBellInstance() {
-		return materialManager.material(Materials.ORIENTED)
+		return instancerManager.factory(StructTypes.ORIENTED)
 				.model(MODEL)
 				.createInstance();
 	}

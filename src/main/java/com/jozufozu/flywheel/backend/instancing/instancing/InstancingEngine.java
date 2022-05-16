@@ -9,6 +9,7 @@ import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.Engine;
@@ -44,7 +45,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	protected final ProgramCompiler<P> context;
 	private MeshPool allocator;
 
-	protected final Map<Instanced<? extends InstanceData>, InstancedMaterial<?>> materials = new HashMap<>();
+	protected final Map<Instanced<? extends InstanceData>, GPUInstancerFactory<?>> factories = new HashMap<>();
 
 	protected final Set<RenderType> toRender = new HashSet<>();
 
@@ -61,9 +62,9 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	@SuppressWarnings("unchecked")
 	@NotNull
 	@Override
-	public <D extends InstanceData> InstancedMaterial<D> material(StructType<D> type) {
+	public <D extends InstanceData> GPUInstancerFactory<D> factory(StructType<D> type) {
 		if (type instanceof Instanced<D> instanced) {
-			return (InstancedMaterial<D>) materials.computeIfAbsent(instanced, InstancedMaterial::new);
+			return (GPUInstancerFactory<D>) factories.computeIfAbsent(instanced, GPUInstancerFactory::new);
 		} else {
 			throw new ClassCastException("Cannot use type '" + type + "' with GPU instancing.");
 		}
@@ -87,7 +88,6 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 	@Override
 	public void renderSpecificType(TaskEngine taskEngine, RenderContext context, RenderType type) {
-
 		var camX = context.camX() - originCoordinate.getX();
 		var camY = context.camY() - originCoordinate.getY();
 		var camZ = context.camZ() - originCoordinate.getZ();
@@ -109,21 +109,23 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		Textures.bindActiveTextures();
 		CoreShaderInfo coreShaderInfo = getCoreShaderInfo();
 
-		for (Map.Entry<Instanced<? extends InstanceData>, InstancedMaterial<?>> entry : materials.entrySet()) {
-			InstancedMaterial<?> material = entry.getValue();
+		for (Map.Entry<Instanced<? extends InstanceData>, GPUInstancerFactory<?>> entry : factories.entrySet()) {
+			Instanced<? extends InstanceData> instanceType = entry.getKey();
+			GPUInstancerFactory<?> factory = entry.getValue();
 
-			var toRender = material.renderables.get(type);
-			toRender.removeIf(Renderable::shouldRemove);
+			var materials = factory.materials.get(type);
+			for (Material material : materials) {
+				var toRender = factory.renderables.get(material);
+				toRender.removeIf(Renderable::shouldRemove);
 
-			if (!toRender.isEmpty()) {
-				Instanced<? extends InstanceData> instanceType = entry.getKey();
+				if (!toRender.isEmpty()) {
+					setup(instanceType, material, coreShaderInfo, camX, camY, camZ, viewProjection, level);
 
-				setup(instanceType, coreShaderInfo, camX, camY, camZ, viewProjection, level);
+					instanceCount += factory.getInstanceCount();
+					vertexCount += factory.getVertexCount();
 
-				instanceCount += material.getInstanceCount();
-				vertexCount += material.getVertexCount();
-
-				toRender.forEach(Renderable::render);
+					toRender.forEach(Renderable::render);
+				}
 			}
 		}
 
@@ -145,7 +147,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		return coreShaderInfo;
 	}
 
-	protected P setup(Instanced<?> instanceType, CoreShaderInfo coreShaderInfo, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
+	protected P setup(Instanced<?> instanceType, Material material, CoreShaderInfo coreShaderInfo, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
 		float alphaDiscard = coreShaderInfo.alphaDiscard();
 		if (alphaDiscard == 0) {
 			alphaDiscard = 0.0001f;
@@ -153,7 +155,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 			alphaDiscard = 0;
 		}
 
-		P program = context.getProgram(new ProgramContext(Formats.POS_TEX_NORMAL, instanceType.getInstanceShader(), alphaDiscard, coreShaderInfo.fogType(), GameStateRegistry.takeSnapshot()));
+		P program = context.getProgram(new ProgramContext(Formats.POS_TEX_NORMAL, instanceType.getInstanceShader(), material.getVertexShader(), material.getFragmentShader(), alphaDiscard, coreShaderInfo.fogType(), GameStateRegistry.takeSnapshot()));
 
 		program.bind();
 		program.uploadUniforms(camX, camY, camZ, viewProjection, level);
@@ -162,15 +164,15 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	}
 
 	public void clearAll() {
-		materials.values().forEach(InstancedMaterial::clear);
+		factories.values().forEach(GPUInstancerFactory::clear);
 	}
 
 	@Override
 	public void delete() {
-		materials.values()
-				.forEach(InstancedMaterial::delete);
+		factories.values()
+				.forEach(GPUInstancerFactory::delete);
 
-		materials.clear();
+		factories.clear();
 	}
 
 	@Override
@@ -193,10 +195,10 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 		MeshPool allocator = getModelAllocator();
 
-		for (InstancedMaterial<?> material : materials.values()) {
-			material.init(allocator);
+		for (GPUInstancerFactory<?> factory : factories.values()) {
+			factory.init(allocator);
 
-			toRender.addAll(material.renderables.keySet());
+			toRender.addAll(factory.materials.keySet());
 		}
 
 		allocator.flush();
@@ -221,7 +223,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	private void shiftListeners(int cX, int cY, int cZ) {
 		originCoordinate = new BlockPos(cX, cY, cZ);
 
-		materials.values().forEach(InstancedMaterial::clear);
+		factories.values().forEach(GPUInstancerFactory::clear);
 
 		listeners.forEach(OriginShiftListener::onOriginShift);
 	}

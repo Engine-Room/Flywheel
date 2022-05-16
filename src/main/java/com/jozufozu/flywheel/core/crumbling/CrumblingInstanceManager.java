@@ -1,13 +1,13 @@
 package com.jozufozu.flywheel.core.crumbling;
 
-import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 
 public class CrumblingInstanceManager extends BlockEntityInstanceManager {
 
-	public CrumblingInstanceManager(MaterialManager materialManager) {
-		super(materialManager);
+	public CrumblingInstanceManager(InstancerManager instancerManager) {
+		super(instancerManager);
 	}
 
 	@Override

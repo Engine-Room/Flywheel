@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.core.materials.oriented;
+package com.jozufozu.flywheel.core.structs.oriented;
 
-import com.jozufozu.flywheel.core.materials.BasicData;
+import com.jozufozu.flywheel.core.structs.BasicData;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 

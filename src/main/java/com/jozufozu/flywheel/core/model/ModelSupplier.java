@@ -2,11 +2,10 @@ package com.jozufozu.flywheel.core.model;
 
 import java.util.Map;
 
-import net.minecraft.client.renderer.RenderType;
+import com.jozufozu.flywheel.api.material.Material;
 
 public interface ModelSupplier {
-
-	Map<RenderType, Mesh> get();
+	Map<Material, Mesh> get();
 
 	int getVertexCount();
 }

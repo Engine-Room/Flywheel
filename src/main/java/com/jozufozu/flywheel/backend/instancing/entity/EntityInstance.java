@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing.entity;
 
-import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
@@ -39,8 +39,8 @@ public abstract class EntityInstance<E extends Entity> extends AbstractInstance 
 	protected final E entity;
 	protected final GridAlignedBB bounds;
 
-	public EntityInstance(MaterialManager materialManager, E entity) {
-		super(materialManager, entity.level);
+	public EntityInstance(InstancerManager instancerManager, E entity) {
+		super(instancerManager, entity.level);
 		this.entity = entity;
 		bounds = GridAlignedBB.from(entity.getBoundingBox());
 	}
@@ -72,7 +72,7 @@ public abstract class EntityInstance<E extends Entity> extends AbstractInstance 
 	 */
 	public Vector3f getInstancePosition() {
 		Vec3 pos = entity.position();
-		Vec3i origin = materialManager.getOriginCoordinate();
+		Vec3i origin = instancerManager.getOriginCoordinate();
 		return new Vector3f((float) (pos.x - origin.getX()), (float) (pos.y - origin.getY()), (float) (pos.z - origin.getZ()));
 	}
 
@@ -85,7 +85,7 @@ public abstract class EntityInstance<E extends Entity> extends AbstractInstance 
 	 */
 	public Vector3f getInstancePosition(float partialTicks) {
 		Vec3 pos = entity.position();
-		Vec3i origin = materialManager.getOriginCoordinate();
+		Vec3i origin = instancerManager.getOriginCoordinate();
 		return new Vector3f(
 				(float) (Mth.lerp(partialTicks, entity.xOld, pos.x) - origin.getX()),
 				(float) (Mth.lerp(partialTicks, entity.yOld, pos.y) - origin.getY()),

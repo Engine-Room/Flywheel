@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing.blockentity;
 
-import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.api.InstancerManager;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -10,12 +10,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  */
 public interface BlockEntityInstancingController<T extends BlockEntity> {
 	/**
-	 * Given a block entity and a material manager, constructs an instance for the block entity.
-	 * @param materialManager The material manager to use.
+	 * Given a block entity and an instancer manager, constructs an instance for the block entity.
+	 * @param instancerManager The instancer manager to use.
 	 * @param blockEntity The block entity to construct an instance for.
 	 * @return The instance.
 	 */
-	BlockEntityInstance<? super T> createInstance(MaterialManager materialManager, T blockEntity);
+	BlockEntityInstance<? super T> createInstance(InstancerManager instancerManager, T blockEntity);
 
 	/**
 	 * Checks if the given block entity should not be rendered normally.

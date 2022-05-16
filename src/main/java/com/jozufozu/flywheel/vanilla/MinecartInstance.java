@@ -2,16 +2,18 @@ package com.jozufozu.flywheel.vanilla;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
+import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
 import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.Models;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
-import com.jozufozu.flywheel.core.materials.Materials;
-import com.jozufozu.flywheel.core.materials.model.ModelData;
+import com.jozufozu.flywheel.core.material.MaterialShaders;
 import com.jozufozu.flywheel.core.model.Mesh;
+import com.jozufozu.flywheel.core.structs.StructTypes;
+import com.jozufozu.flywheel.core.structs.model.ModelData;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -29,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
 public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance<T> implements DynamicInstance, TickableInstance {
 
 	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
-	private static final BasicModelSupplier MODEL = new BasicModelSupplier(MinecartInstance::getBodyModel, RenderType.entitySolid(MINECART_LOCATION));
+	private static final BasicModelSupplier MODEL = new BasicModelSupplier(MinecartInstance::getBodyModel, new Material(RenderType.entitySolid(MINECART_LOCATION), () -> MaterialShaders.SHADED_VERTEX, () -> MaterialShaders.DEFAULT_FRAGMENT));
 
 	private final PoseStack stack = new PoseStack();
 
@@ -37,8 +39,8 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 	private ModelData contents;
 	private BlockState blockstate;
 
-	public MinecartInstance(MaterialManager materialManager, T entity) {
-		super(materialManager, entity);
+	public MinecartInstance(InstancerManager instancerManager, T entity) {
+		super(instancerManager, entity);
 
 		blockstate = entity.getDisplayBlockState();
 		contents = getContents();
@@ -63,7 +65,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		stack.setIdentity();
 		float pt = AnimationTickHolder.getPartialTicks();
 
-		Vec3i originCoordinate = materialManager.getOriginCoordinate();
+		Vec3i originCoordinate = instancerManager.getOriginCoordinate();
 		tstack.translate(
 				Mth.lerp(pt, entity.xOld, entity.getX()) - originCoordinate.getX(),
 				Mth.lerp(pt, entity.yOld, entity.getY()) - originCoordinate.getY(),
@@ -147,13 +149,13 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		if (blockstate.getRenderShape() == RenderShape.INVISIBLE)
 			return null;
 
-        return materialManager.material(Materials.TRANSFORMED)
+        return instancerManager.factory(StructTypes.MODEL)
 				.model(Models.block(blockstate))
 				.createInstance();
 	}
 
 	private ModelData getBody() {
-		return materialManager.material(Materials.TRANSFORMED)
+		return instancerManager.factory(StructTypes.MODEL)
 				.model(MODEL)
 				.createInstance();
 	}

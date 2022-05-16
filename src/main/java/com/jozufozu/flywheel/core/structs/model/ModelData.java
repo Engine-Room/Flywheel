@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.core.materials.model;
+package com.jozufozu.flywheel.core.structs.model;
 
-import com.jozufozu.flywheel.core.materials.BasicData;
+import com.jozufozu.flywheel.core.structs.BasicData;
 import com.jozufozu.flywheel.util.transform.Transform;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;

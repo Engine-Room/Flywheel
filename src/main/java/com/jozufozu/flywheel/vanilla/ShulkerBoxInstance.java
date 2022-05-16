@@ -2,13 +2,15 @@ package com.jozufozu.flywheel.vanilla;
 
 import java.util.function.Function;
 
-import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
-import com.jozufozu.flywheel.core.materials.Materials;
-import com.jozufozu.flywheel.core.materials.model.ModelData;
+import com.jozufozu.flywheel.core.material.MaterialShaders;
+import com.jozufozu.flywheel.core.structs.StructTypes;
+import com.jozufozu.flywheel.core.structs.model.ModelData;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -26,8 +28,8 @@ import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
 public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntity> implements DynamicInstance {
 
-	private static final Function<TextureAtlasSprite, BasicModelSupplier> BASE = Util.memoize(it -> new BasicModelSupplier(() -> makeBaseModel(it), RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET)));
-	private static final Function<TextureAtlasSprite, BasicModelSupplier> LID = Util.memoize(it -> new BasicModelSupplier(() -> makeLidModel(it), RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET)));
+	private static final Function<TextureAtlasSprite, BasicModelSupplier> BASE = Util.memoize(it -> new BasicModelSupplier(() -> makeBaseModel(it), new Material(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET), () -> MaterialShaders.SHADED_VERTEX, () -> MaterialShaders.DEFAULT_FRAGMENT)));
+	private static final Function<TextureAtlasSprite, BasicModelSupplier> LID = Util.memoize(it -> new BasicModelSupplier(() -> makeLidModel(it), new Material(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET), () -> MaterialShaders.SHADED_VERTEX, () -> MaterialShaders.DEFAULT_FRAGMENT)));
 
 	private final TextureAtlasSprite texture;
 
@@ -37,8 +39,8 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 
 	private float lastProgress = Float.NaN;
 
-	public ShulkerBoxInstance(MaterialManager materialManager, ShulkerBoxBlockEntity blockEntity) {
-		super(materialManager, blockEntity);
+	public ShulkerBoxInstance(InstancerManager instancerManager, ShulkerBoxBlockEntity blockEntity) {
+		super(instancerManager, blockEntity);
 
 		DyeColor color = blockEntity.getColor();
 		if (color == null) {
@@ -97,13 +99,13 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 	}
 
 	private ModelData makeBaseInstance() {
-		return materialManager.material(Materials.TRANSFORMED)
+		return instancerManager.factory(StructTypes.MODEL)
 				.model(BASE.apply(texture))
 				.createInstance();
 	}
 
 	private ModelData makeLidInstance() {
-		return materialManager.material(Materials.TRANSFORMED)
+		return instancerManager.factory(StructTypes.MODEL)
 				.model(LID.apply(texture))
 				.createInstance();
 	}

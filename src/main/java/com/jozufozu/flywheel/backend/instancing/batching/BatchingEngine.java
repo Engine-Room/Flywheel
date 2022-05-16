@@ -21,16 +21,16 @@ import net.minecraft.core.Vec3i;
 
 public class BatchingEngine implements Engine {
 
-	private final Map<Batched<? extends InstanceData>, BatchedMaterial<?>> materials = new HashMap<>();
+	private final Map<Batched<? extends InstanceData>, CPUInstancerFactory<?>> factories = new HashMap<>();
 	private final BatchDrawingTracker batchTracker = new BatchDrawingTracker();
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <D extends InstanceData> BatchedMaterial<D> material(StructType<D> type) {
+	public <D extends InstanceData> CPUInstancerFactory<D> factory(StructType<D> type) {
 		if (type instanceof Batched<D> batched) {
-			return (BatchedMaterial<D>) materials.computeIfAbsent(batched, BatchedMaterial::new);
+			return (CPUInstancerFactory<D>) factories.computeIfAbsent(batched, CPUInstancerFactory::new);
 		} else {
-			throw new ClassCastException("Cannot use type '" + type + "' with batching.");
+			throw new ClassCastException("Cannot use type '" + type + "' with CPU instancing.");
 		}
 	}
 
@@ -46,7 +46,6 @@ public class BatchingEngine implements Engine {
 
 	@Override
 	public void renderAllRemaining(TaskEngine taskEngine, RenderContext context) {
-
 //		vertexCount = 0;
 //		instanceCount = 0;
 //		for (BatchedMaterial<?> material : materials.values()) {

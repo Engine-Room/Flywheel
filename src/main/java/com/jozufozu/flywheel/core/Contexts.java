@@ -25,8 +25,8 @@ public class Contexts {
 		FileResolution crumblingVertex = Resolver.INSTANCE.get(ResourceUtil.subPath(Names.CRUMBLING, ".vert"));
 		FileResolution crumblingFragment = Resolver.INSTANCE.get(ResourceUtil.subPath(Names.CRUMBLING, ".frag"));
 
-		WORLD = ProgramCompiler.create(WorldProgram::new, Templates.INSTANCING, Templates.FRAGMENT, worldVertex, worldFragment);
-		CRUMBLING = ProgramCompiler.create(CrumblingProgram::new, Templates.INSTANCING, Templates.FRAGMENT, crumblingVertex, crumblingFragment);
+		WORLD = ProgramCompiler.create(WorldProgram::new, worldVertex, worldFragment);
+		CRUMBLING = ProgramCompiler.create(CrumblingProgram::new, crumblingVertex, crumblingFragment);
 	}
 
 	public static class Names {

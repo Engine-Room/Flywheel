@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.Backend;
@@ -27,7 +27,7 @@ import net.minecraft.core.BlockPos;
 
 public abstract class InstanceManager<T> implements InstancingEngine.OriginShiftListener {
 
-	public final MaterialManager materialManager;
+	public final InstancerManager instancerManager;
 
 	private final Set<T> queuedAdditions;
 	private final Set<T> queuedUpdates;
@@ -39,8 +39,8 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	protected DistanceUpdateLimiter frame;
 	protected DistanceUpdateLimiter tick;
 
-	public InstanceManager(MaterialManager materialManager) {
-		this.materialManager = materialManager;
+	public InstanceManager(InstancerManager instancerManager) {
+		this.instancerManager = instancerManager;
 		this.queuedUpdates = new HashSet<>(64);
 		this.queuedAdditions = new HashSet<>(64);
 		this.instances = new HashMap<>();
@@ -318,7 +318,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		instances.remove(obj);
 		dynamicInstances.remove(obj);
 		tickableInstances.remove(obj);
-		LightUpdater.get(instance.world)
+		LightUpdater.get(instance.level)
 				.removeListener(instance);
 	}
 
@@ -329,7 +329,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		if (renderer != null) {
 			renderer.init();
 			renderer.updateLight();
-			LightUpdater.get(renderer.world)
+			LightUpdater.get(renderer.level)
 					.addListener(renderer);
 			instances.put(obj, renderer);
 
@@ -356,7 +356,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 
 	public void detachLightListeners() {
 		for (AbstractInstance value : instances.values()) {
-			LightUpdater.get(value.world).removeListener(value);
+			LightUpdater.get(value.level).removeListener(value);
 		}
 	}
 }

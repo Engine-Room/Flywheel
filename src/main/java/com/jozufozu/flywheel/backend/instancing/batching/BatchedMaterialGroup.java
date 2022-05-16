@@ -17,7 +17,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 
 	protected final RenderType state;
 
-	private final Map<Batched<? extends InstanceData>, BatchedMaterial<?>> materials = new HashMap<>();
+	private final Map<Batched<? extends InstanceData>, CPUInstancerFactory<?>> materials = new HashMap<>();
 	private int vertexCount;
 	private int instanceCount;
 
@@ -27,9 +27,9 @@ public class BatchedMaterialGroup implements MaterialGroup {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <D extends InstanceData> BatchedMaterial<D> material(StructType<D> type) {
+	public <D extends InstanceData> CPUInstancerFactory<D> material(StructType<D> type) {
 		if (type instanceof Batched<D> batched) {
-			return (BatchedMaterial<D>) materials.computeIfAbsent(batched, BatchedMaterial::new);
+			return (CPUInstancerFactory<D>) materials.computeIfAbsent(batched, CPUInstancerFactory::new);
 		} else {
 			throw new ClassCastException("Cannot use type '" + type + "' with CPU instancing.");
 		}
@@ -61,7 +61,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 	}
 
 	public void clear() {
-		materials.values().forEach(BatchedMaterial::clear);
+		materials.values().forEach(CPUInstancerFactory::clear);
 	}
 
 	public void delete() {

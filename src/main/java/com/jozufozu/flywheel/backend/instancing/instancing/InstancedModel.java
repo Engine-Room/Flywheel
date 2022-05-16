@@ -4,26 +4,25 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.model.MeshPool;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.model.ModelSupplier;
 import com.jozufozu.flywheel.util.Pair;
 
-import net.minecraft.client.renderer.RenderType;
-
 public class InstancedModel<D extends InstanceData> {
 
 	final GPUInstancer<D> instancer;
 	final ModelSupplier model;
-	private Map<RenderType, Layer> layers;
+	private Map<Material, Layer> layers;
 
 	public InstancedModel(GPUInstancer<D> instancer, ModelSupplier model) {
 		this.instancer = instancer;
 		this.model = model;
 	}
 
-	public Map<RenderType, ? extends Renderable> init(MeshPool allocator) {
+	public Map<Material, ? extends Renderable> init(MeshPool allocator) {
 		instancer.init();
 
 		layers = model.get()
@@ -38,12 +37,12 @@ public class InstancedModel<D extends InstanceData> {
 
 	private class Layer implements Renderable {
 
-		final RenderType type;
+		final Material material;
 		MeshPool.BufferedMesh bufferedMesh;
 		GlVertexArray vao;
 
-		private Layer(MeshPool allocator, RenderType type, Mesh mesh) {
-			this.type = type;
+		private Layer(MeshPool allocator, Material material, Mesh mesh) {
+			this.material = material;
 			vao = new GlVertexArray();
 			bufferedMesh = allocator.alloc(mesh, vao);
 			instancer.attributeBaseIndex = bufferedMesh.getAttributeCount();

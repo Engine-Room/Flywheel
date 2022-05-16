@@ -14,14 +14,12 @@ uniform vec4 uFogColor;
 uniform sampler2D uBlockAtlas;
 uniform sampler2D uLightMap;
 
-in float _flw_diffuse;
-
 out vec4 fragColor;
 
 void flw_contextFragment() {
     vec4 texColor = texture(uBlockAtlas, flw_vertexTexCoord);
     vec4 lightColor = texture(uLightMap, flw_vertexLight);
-    vec4 color = flw_vertexColor * vec4(texColor.rgb * lightColor.rgb * _flw_diffuse, texColor.a);
+    vec4 color = flw_vertexColor * vec4(texColor.rgb * lightColor.rgb, texColor.a);
 
     #ifdef ALPHA_DISCARD
     if (color.a < ALPHA_DISCARD) {

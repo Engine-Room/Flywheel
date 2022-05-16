@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.core.materials.model;
+package com.jozufozu.flywheel.core.structs.model;
 
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.core.materials.BasicWriterUnsafe;
+import com.jozufozu.flywheel.core.structs.BasicWriterUnsafe;
 import com.jozufozu.flywheel.util.MatrixWrite;
 
 public class ModelWriterUnsafe extends BasicWriterUnsafe<ModelData> {
