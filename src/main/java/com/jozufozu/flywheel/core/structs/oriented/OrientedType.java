@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.materials.oriented;
+package com.jozufozu.flywheel.core.structs.oriented;
 
 import com.jozufozu.flywheel.api.struct.Batched;
 import com.jozufozu.flywheel.api.struct.Instanced;
@@ -6,9 +6,9 @@ import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
-import com.jozufozu.flywheel.core.materials.InstanceShaders;
 import com.jozufozu.flywheel.core.model.ModelTransformer;
 import com.jozufozu.flywheel.core.source.FileResolution;
+import com.jozufozu.flywheel.core.structs.InstanceShaders;
 import com.mojang.math.Quaternion;
 
 public class OrientedType implements Instanced<OrientedData>, Batched<OrientedData> {

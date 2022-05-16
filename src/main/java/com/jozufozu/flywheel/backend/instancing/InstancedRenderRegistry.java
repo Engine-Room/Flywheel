@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstancingController;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityTypeExtension;
@@ -48,34 +48,34 @@ public class InstancedRenderRegistry {
 
 	/**
 	 * Creates an instance for the given block entity, if possible.
-	 * @param materialManager The material manager to use.
+	 * @param instancerManager The instancer manager to use.
 	 * @param blockEntity The block entity to create an instance of.
 	 * @param <T> The type of the block entity.
 	 * @return An instance of the block entity, or {@code null} if the block entity cannot be instanced.
 	 */
 	@Nullable
-	public static <T extends BlockEntity> BlockEntityInstance<? super T> createInstance(MaterialManager materialManager, T blockEntity) {
+	public static <T extends BlockEntity> BlockEntityInstance<? super T> createInstance(InstancerManager instancerManager, T blockEntity) {
 		BlockEntityInstancingController<? super T> controller = getController(getType(blockEntity));
 		if (controller == null) {
 			return null;
 		}
-		return controller.createInstance(materialManager, blockEntity);
+		return controller.createInstance(instancerManager, blockEntity);
 	}
 
 	/**
 	 * Creates an instance for the given entity, if possible.
-	 * @param materialManager The material manager to use.
+	 * @param instancerManager The instancer manager to use.
 	 * @param entity The entity to create an instance of.
 	 * @param <T> The type of the entity.
 	 * @return An instance of the entity, or {@code null} if the entity cannot be instanced.
 	 */
 	@Nullable
-	public static <T extends Entity> EntityInstance<? super T> createInstance(MaterialManager materialManager, T entity) {
+	public static <T extends Entity> EntityInstance<? super T> createInstance(InstancerManager instancerManager, T entity) {
 		EntityInstancingController<? super T> controller = getController(getType(entity));
 		if (controller == null) {
 			return null;
 		}
-		return controller.createInstance(materialManager, entity);
+		return controller.createInstance(instancerManager, entity);
 	}
 
 	/**
@@ -194,7 +194,7 @@ public class InstancedRenderRegistry {
 	 */
 	public static class BlockEntityConfig<T extends BlockEntity> {
 		protected BlockEntityType<T> type;
-		protected BiFunction<MaterialManager, T, BlockEntityInstance<? super T>> instanceFactory;
+		protected BiFunction<InstancerManager, T, BlockEntityInstance<? super T>> instanceFactory;
 		protected Predicate<T> skipRender;
 
 		public BlockEntityConfig(BlockEntityType<T> type) {
@@ -206,7 +206,7 @@ public class InstancedRenderRegistry {
 		 * @param instanceFactory The instance factory.
 		 * @return {@code this}
 		 */
-		public BlockEntityConfig<T> factory(BiFunction<MaterialManager, T, BlockEntityInstance<? super T>> instanceFactory) {
+		public BlockEntityConfig<T> factory(BiFunction<InstancerManager, T, BlockEntityInstance<? super T>> instanceFactory) {
 			this.instanceFactory = instanceFactory;
 			return this;
 		}
@@ -251,7 +251,7 @@ public class InstancedRenderRegistry {
 	 */
 	public static class EntityConfig<T extends Entity> {
 		protected EntityType<T> type;
-		protected BiFunction<MaterialManager, T, EntityInstance<? super T>> instanceFactory;
+		protected BiFunction<InstancerManager, T, EntityInstance<? super T>> instanceFactory;
 		protected Predicate<T> skipRender;
 
 		public EntityConfig(EntityType<T> type) {
@@ -263,7 +263,7 @@ public class InstancedRenderRegistry {
 		 * @param instanceFactory The instance factory.
 		 * @return {@code this}
 		 */
-		public EntityConfig<T> factory(BiFunction<MaterialManager, T, EntityInstance<? super T>> instanceFactory) {
+		public EntityConfig<T> factory(BiFunction<InstancerManager, T, EntityInstance<? super T>> instanceFactory) {
 			this.instanceFactory = instanceFactory;
 			return this;
 		}

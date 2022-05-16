@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.core.materials.oriented;
+package com.jozufozu.flywheel.core.structs.oriented;
 
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
-import com.jozufozu.flywheel.core.materials.BasicWriterUnsafe;
+import com.jozufozu.flywheel.core.structs.BasicWriterUnsafe;
 
 public class OrientedWriterUnsafe extends BasicWriterUnsafe<OrientedData> {
 	public OrientedWriterUnsafe(VecBuffer backingBuffer, StructType<OrientedData> vertexType) {

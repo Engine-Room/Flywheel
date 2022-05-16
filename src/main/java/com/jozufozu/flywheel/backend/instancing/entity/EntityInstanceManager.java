@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing.entity;
 
-import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
@@ -13,8 +13,8 @@ import net.minecraft.world.level.Level;
 
 public class EntityInstanceManager extends InstanceManager<Entity> {
 
-	public EntityInstanceManager(MaterialManager materialManager) {
-		super(materialManager);
+	public EntityInstanceManager(InstancerManager instancerManager) {
+		super(instancerManager);
 	}
 
 	@Override
@@ -24,7 +24,7 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 
 	@Override
 	protected AbstractInstance createRaw(Entity obj) {
-		return InstancedRenderRegistry.createInstance(materialManager, obj);
+		return InstancedRenderRegistry.createInstance(instancerManager, obj);
 	}
 
 	@Override

@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 /**
  * A manager class for a single world where instancing is supported.
  * <p>
- *     The material manager is shared between the different instance managers.
+ *     The instancer manager is shared between the different instance managers.
  * </p>
  */
 public class InstanceWorld {

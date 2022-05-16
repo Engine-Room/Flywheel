@@ -1,5 +1,5 @@
 @ParametersAreNonnullByDefault @MethodsReturnNonnullByDefault
-package com.jozufozu.flywheel.core.materials.model;
+package com.jozufozu.flywheel.core.structs;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

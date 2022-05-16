@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.materials;
+package com.jozufozu.flywheel.core.structs;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.core.source.FileResolution;

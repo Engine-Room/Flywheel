@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.materials;
+package com.jozufozu.flywheel.core.structs;
 
 import org.lwjgl.system.MemoryUtil;
 

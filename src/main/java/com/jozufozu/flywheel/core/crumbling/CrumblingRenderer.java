@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
-import com.jozufozu.flywheel.backend.instancing.instancing.InstancedMaterial;
+import com.jozufozu.flywheel.backend.instancing.instancing.GPUInstancerFactory;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo;
@@ -65,7 +65,7 @@ public class CrumblingRenderer {
 
 		State state = STATE.get();
 		var instanceManager = state.instanceManager;
-		var engine = state.materialManager;
+		var engine = state.instancerManager;
 
 		TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 		Camera info = Minecraft.getInstance().gameRenderer.getMainCamera();
@@ -140,17 +140,17 @@ public class CrumblingRenderer {
 	}
 
 	private static class State {
-		private final CrumblingEngine materialManager;
+		private final CrumblingEngine instancerManager;
 		private final InstanceManager<BlockEntity> instanceManager;
 
 		private State() {
-			materialManager = new CrumblingEngine();
-			instanceManager = new CrumblingInstanceManager(materialManager);
-			materialManager.addListener(instanceManager);
+			instancerManager = new CrumblingEngine();
+			instanceManager = new CrumblingInstanceManager(instancerManager);
+			instancerManager.addListener(instanceManager);
 		}
 
 		private void kill() {
-			materialManager.delete();
+			instancerManager.delete();
 			instanceManager.invalidate();
 		}
 	}
@@ -190,10 +190,10 @@ public class CrumblingRenderer {
 			Textures.bindActiveTextures();
 			CoreShaderInfo coreShaderInfo = getCoreShaderInfo();
 
-			for (Map.Entry<Instanced<? extends InstanceData>, InstancedMaterial<?>> entry : materials.entrySet()) {
-				CrumblingProgram program = setup(entry.getKey(), coreShaderInfo, camX, camY, camZ, viewProjection, level);
+			for (Map.Entry<Instanced<? extends InstanceData>, GPUInstancerFactory<?>> entry : factories.entrySet()) {
+				//CrumblingProgram program = setup(entry.getKey(), coreShaderInfo, camX, camY, camZ, viewProjection, level);
 
-				program.setAtlasSize(width, height);
+				//program.setAtlasSize(width, height);
 
 				//entry.getValue().getAllRenderables().forEach(Renderable::draw);
 			}

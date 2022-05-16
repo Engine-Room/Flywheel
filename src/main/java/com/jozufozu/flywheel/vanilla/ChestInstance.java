@@ -5,14 +5,15 @@ import java.util.function.BiFunction;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
-import com.jozufozu.flywheel.core.materials.Materials;
-import com.jozufozu.flywheel.core.materials.model.ModelData;
-import com.jozufozu.flywheel.core.materials.oriented.OrientedData;
+import com.jozufozu.flywheel.core.material.MaterialShaders;
+import com.jozufozu.flywheel.core.structs.StructTypes;
+import com.jozufozu.flywheel.core.structs.model.ModelData;
+import com.jozufozu.flywheel.core.structs.oriented.OrientedData;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -33,8 +34,8 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends BlockEntityInstance<T> implements DynamicInstance {
 
-	private static final BiFunction<ChestType, Material, BasicModelSupplier> LID = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createLidModel(type, mat.sprite()), Sheets.chestSheet()));
-	private static final BiFunction<ChestType, Material, BasicModelSupplier> BASE = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createBaseModel(type, mat.sprite()), Sheets.chestSheet()));
+	private static final BiFunction<ChestType, Material, BasicModelSupplier> LID = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createLidModel(type, mat.sprite()), new com.jozufozu.flywheel.api.material.Material(Sheets.chestSheet(), () -> MaterialShaders.SHADED_VERTEX, () -> MaterialShaders.DEFAULT_FRAGMENT)));
+	private static final BiFunction<ChestType, Material, BasicModelSupplier> BASE = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createBaseModel(type, mat.sprite()), new com.jozufozu.flywheel.api.material.Material(Sheets.chestSheet(), () -> MaterialShaders.SHADED_VERTEX, () -> MaterialShaders.DEFAULT_FRAGMENT)));
 
 	private final OrientedData body;
 	private final ModelData lid;
@@ -47,8 +48,8 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Block
 
 	private float lastProgress = Float.NaN;
 
-	public ChestInstance(MaterialManager materialManager, T blockEntity) {
-		super(materialManager, blockEntity);
+	public ChestInstance(InstancerManager instancerManager, T blockEntity) {
+		super(instancerManager, blockEntity);
 
 		Block block = blockState.getBlock();
 
@@ -67,7 +68,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Block
 
 			body.setRotation(baseRotation);
 
-			DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> wrapper = chestBlock.combine(blockState, world, getWorldPosition(), true);
+			DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> wrapper = chestBlock.combine(blockState, level, getWorldPosition(), true);
 
 			this.lidProgress = wrapper.apply(ChestBlock.opennessCombiner(blockEntity));
 
@@ -115,14 +116,14 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Block
 
 	private OrientedData baseInstance() {
 
-		return materialManager.material(Materials.ORIENTED)
+		return instancerManager.factory(StructTypes.ORIENTED)
 				.model(BASE.apply(chestType, renderMaterial))
 				.createInstance();
 	}
 
 	private ModelData lidInstance() {
 
-		return materialManager.material(Materials.TRANSFORMED)
+		return instancerManager.factory(StructTypes.MODEL)
 				.model(LID.apply(chestType, renderMaterial))
 				.createInstance();
 	}

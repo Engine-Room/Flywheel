@@ -34,15 +34,13 @@ public class ProgramCompiler<P extends GlProgram> extends Memoizer<ProgramContex
 	/**
 	 * Creates a program compiler using provided templates and headers.
 	 * @param factory A factory to add meaning to compiled programs.
-	 * @param vertexTemplate The vertex template to use.
-	 * @param fragmentTemplate The fragment template to use.
 	 * @param vertexContextShader The context shader to use when compiling vertex shaders.
 	 * @param fragmentContextShader The context shader to use when compiling fragment shaders.
 	 * @param <P> The type of program to compile.
 	 * @return A program compiler.
 	 */
-	public static <V extends VertexData, F extends FragmentData, P extends GlProgram> ProgramCompiler<P> create(GlProgram.Factory<P> factory, Template<V> vertexTemplate, Template<F> fragmentTemplate, FileResolution vertexContextShader, FileResolution fragmentContextShader) {
-		return new ProgramCompiler<>(factory, new VertexCompiler(vertexTemplate, vertexContextShader), new FragmentCompiler(fragmentTemplate, fragmentContextShader));
+	public static <P extends GlProgram> ProgramCompiler<P> create(GlProgram.Factory<P> factory, FileResolution vertexContextShader, FileResolution fragmentContextShader) {
+		return new ProgramCompiler<>(factory, new VertexCompiler(vertexContextShader), new FragmentCompiler(fragmentContextShader));
 	}
 
 	/**
@@ -65,8 +63,8 @@ public class ProgramCompiler<P extends GlProgram> extends Memoizer<ProgramContex
 	@Override
 	protected P _create(ProgramContext ctx) {
 		return new ProgramAssembler(ctx.instanceShader.getFileLoc())
-				.attachShader(vertexCompiler.get(new VertexCompiler.Context(ctx.vertexType, ctx.instanceShader.getFile(), ctx.ctx)))
-				.attachShader(fragmentCompiler.get(new FragmentCompiler.Context(ctx.alphaDiscard, ctx.fogType, ctx.ctx)))
+				.attachShader(vertexCompiler.get(new VertexCompiler.Context(ctx.vertexType, ctx.instanceShader.getFile(), ctx.vertexMaterialShader.getFile(), ctx.ctx)))
+				.attachShader(fragmentCompiler.get(new FragmentCompiler.Context(ctx.fragmentMaterialShader.getFile(), ctx.alphaDiscard, ctx.fogType, ctx.ctx)))
 				.link()
 				.build(this.factory);
 	}

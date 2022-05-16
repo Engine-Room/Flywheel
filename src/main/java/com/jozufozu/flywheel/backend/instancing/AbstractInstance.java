@@ -3,12 +3,12 @@ package com.jozufozu.flywheel.backend.instancing;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import com.jozufozu.flywheel.api.MaterialManager;
+import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
-import com.jozufozu.flywheel.core.materials.FlatLit;
+import com.jozufozu.flywheel.core.structs.FlatLit;
 import com.jozufozu.flywheel.light.LightListener;
 import com.jozufozu.flywheel.light.LightProvider;
 import com.jozufozu.flywheel.light.ListenerStatus;
@@ -24,12 +24,12 @@ import net.minecraft.world.level.LightLayer;
  */
 public abstract class AbstractInstance implements Instance, LightListener {
 
-	protected final MaterialManager materialManager;
-	public final Level world;
+	protected final InstancerManager instancerManager;
+	public final Level level;
 
-	public AbstractInstance(MaterialManager materialManager, Level world) {
-		this.materialManager = materialManager;
-		this.world = world;
+	public AbstractInstance(InstancerManager instancerManager, Level level) {
+		this.instancerManager = instancerManager;
+		this.level = level;
 	}
 
 	/**
@@ -88,11 +88,11 @@ public abstract class AbstractInstance implements Instance, LightListener {
 	}
 
 	protected void relight(BlockPos pos, FlatLit<?>... models) {
-		relight(world.getBrightness(LightLayer.BLOCK, pos), world.getBrightness(LightLayer.SKY, pos), models);
+		relight(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos), models);
 	}
 
 	protected <L extends FlatLit<?>> void relight(BlockPos pos, Stream<L> models) {
-		relight(world.getBrightness(LightLayer.BLOCK, pos), world.getBrightness(LightLayer.SKY, pos), models);
+		relight(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos), models);
 	}
 
 	protected void relight(int block, int sky, FlatLit<?>... models) {

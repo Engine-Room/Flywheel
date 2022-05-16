@@ -4,9 +4,9 @@ import com.jozufozu.flywheel.api.struct.StructType;
 
 import net.minecraft.core.Vec3i;
 
-public interface MaterialManager {
+public interface InstancerManager {
 
-	<D extends InstanceData> Material<D> material(StructType<D> type);
+	<D extends InstanceData> InstancerFactory<D> factory(StructType<D> type);
 
 	Vec3i getOriginCoordinate();
 
