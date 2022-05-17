@@ -76,14 +76,15 @@ public class Flywheel {
 		forgeEventBus.<ReloadRenderersEvent>addListener(ProgramCompiler::invalidateAll);
 		forgeEventBus.addListener(Models::onReload);
 
-		modEventBus.addListener(LayoutShaders::flwInit);
-		modEventBus.addListener(InstanceShaders::flwInit);
-		modEventBus.addListener(MaterialShaders::flwInit);
-		modEventBus.addListener(Contexts::flwInit);
 		modEventBus.addListener(PartialModel::onModelRegistry);
 		modEventBus.addListener(PartialModel::onModelBake);
 		modEventBus.addListener(StitchedSprite::onTextureStitchPre);
 		modEventBus.addListener(StitchedSprite::onTextureStitchPost);
+
+		LayoutShaders.init();
+		InstanceShaders.init();
+		Contexts.init();
+		MaterialShaders.init();
 
 		VanillaInstances.init();
 

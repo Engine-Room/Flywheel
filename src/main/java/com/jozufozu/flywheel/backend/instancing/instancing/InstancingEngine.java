@@ -20,7 +20,6 @@ import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo;
 import com.jozufozu.flywheel.core.GameStateRegistry;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
-import com.jozufozu.flywheel.core.compile.ProgramContext;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.vertex.Formats;
 import com.jozufozu.flywheel.util.Textures;
@@ -155,7 +154,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 			alphaDiscard = 0;
 		}
 
-		P program = context.getProgram(new ProgramContext(Formats.POS_TEX_NORMAL, instanceType.getInstanceShader(), material.getVertexShader(), material.getFragmentShader(), alphaDiscard, coreShaderInfo.fogType(), GameStateRegistry.takeSnapshot()));
+		P program = context.getProgram(new ProgramCompiler.Context(Formats.POS_TEX_NORMAL, instanceType.getInstanceShader(), material.getVertexShader(), material.getFragmentShader(), alphaDiscard, coreShaderInfo.fogType(), GameStateRegistry.takeSnapshot()));
 
 		program.bind();
 		program.uploadUniforms(camX, camY, camZ, viewProjection, level);

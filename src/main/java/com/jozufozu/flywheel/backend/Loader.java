@@ -1,18 +1,17 @@
 package com.jozufozu.flywheel.backend;
 
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
-import com.jozufozu.flywheel.core.GameStateRegistry;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
-import com.jozufozu.flywheel.core.source.Resolver;
+import com.jozufozu.flywheel.core.source.FileResolution;
+import com.jozufozu.flywheel.core.source.ShaderLoadingException;
 import com.jozufozu.flywheel.core.source.ShaderSources;
-import com.jozufozu.flywheel.event.GatherContextEvent;
+import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.minecraftforge.fml.ModLoader;
 
 /**
  * The main entity for loading shaders.
@@ -22,7 +21,6 @@ import net.minecraftforge.fml.ModLoader;
  * </p>
  */
 public class Loader implements ResourceManagerReloadListener {
-	private boolean firstLoad = true;
 
 	Loader() {
 		// Can be null when running datagenerators due to the unfortunate time we call this
@@ -39,15 +37,15 @@ public class Loader implements ResourceManagerReloadListener {
 	public void onResourceManagerReload(ResourceManager manager) {
 		Backend.refresh();
 
-		GameStateRegistry._clear();
+		var errorReporter = new ErrorReporter();
+		ShaderSources sources = new ShaderSources(errorReporter, manager);
 
-		Resolver.INSTANCE.invalidate();
-		ModLoader.get()
-				.postEvent(new GatherContextEvent(firstLoad));
+		FileResolution.run(errorReporter, sources);
 
-		ShaderSources sources = new ShaderSources(manager);
-
-		Resolver.INSTANCE.run(sources);
+		if (errorReporter.hasErrored()) {
+			errorReporter.dump();
+			throw new ShaderLoadingException("Failed to resolve all source files, see log for details");
+		}
 
 		Backend.LOGGER.info("Loaded all shader sources.");
 
@@ -58,6 +56,5 @@ public class Loader implements ResourceManagerReloadListener {
 			CrumblingRenderer.reset();
 		}
 
-		firstLoad = false;
 	}
 }

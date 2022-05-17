@@ -1,8 +1,11 @@
 package com.jozufozu.flywheel.core.source.span;
 
+import java.util.Optional;
 import java.util.regex.Matcher;
 
 import com.jozufozu.flywheel.core.source.SourceFile;
+import com.jozufozu.flywheel.core.source.parse.ShaderFunction;
+import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
 
 /**
  * A segment of code in a {@link SourceFile}.
@@ -120,5 +123,19 @@ public abstract class Span implements CharSequence {
 
 	public static Span fromMatcher(Span superSpan, Matcher m) {
 		return superSpan.subSpan(m.start(), m.end());
+	}
+
+	public Optional<ShaderStruct> findStruct() {
+		if (isErr()) {
+			return Optional.empty();
+		}
+		return in.findStruct(this);
+	}
+
+	public Optional<ShaderFunction> findFunction() {
+		if (isErr()) {
+			return Optional.empty();
+		}
+		return in.findFunction(this);
 	}
 }

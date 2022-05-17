@@ -51,8 +51,4 @@ public class GameStateRegistry {
 		}
 		return shaderConstants;
 	}
-
-	public static void _clear() {
-		PROVIDERS.clear();
-	}
 }

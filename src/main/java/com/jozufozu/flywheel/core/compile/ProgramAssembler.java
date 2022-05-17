@@ -21,8 +21,6 @@ public class ProgramAssembler {
 	public final int program;
 	private final ResourceLocation name;
 
-	private final List<GlShader> shaders = new ObjectArrayList<>();
-
 	public ProgramAssembler(ResourceLocation name) {
 		this.name = name;
 		this.program = glCreateProgram();
@@ -49,13 +47,7 @@ public class ProgramAssembler {
 		return this;
 	}
 
-	public ProgramAssembler deleteLinkedShaders() {
-		shaders.forEach(GlShader::delete);
-		return this;
-	}
-
 	public ProgramAssembler attachShader(GlShader glShader) {
-		shaders.add(glShader);
 		glAttachShader(this.program, glShader.handle());
 		return this;
 	}

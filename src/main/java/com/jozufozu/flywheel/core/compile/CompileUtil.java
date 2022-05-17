@@ -2,9 +2,14 @@ package com.jozufozu.flywheel.core.compile;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.core.source.SourceFile;
 
 public class CompileUtil {
 
@@ -45,4 +50,11 @@ public class CompileUtil {
 
 		return 1;
 	}
+
+    @NotNull
+    public static String generateDebugName(SourceFile... stages) {
+        return Stream.of(stages)
+                .map(SourceFile::toString)
+                .collect(Collectors.joining(" -> "));
+    }
 }
