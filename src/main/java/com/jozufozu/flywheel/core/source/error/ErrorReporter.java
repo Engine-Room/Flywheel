@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.core.source.error;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,58 +14,78 @@ import com.jozufozu.flywheel.util.FlwUtil;
 
 public class ErrorReporter {
 
-	public static void generateSpanError(Span span, String message) {
-		SourceFile file = span.getSourceFile();
+	private final List<ErrorBuilder> reportedErrors = new ArrayList<>();
 
-		String error = ErrorBuilder.error(message)
-				.pointAtFile(file)
-				.pointAt(span, 2)
-				.build();
-
-		Backend.LOGGER.error(error);
-	}
-
-	public static void generateFileError(SourceFile file, String message) {
-		String error = ErrorBuilder.error(message)
-				.pointAtFile(file)
-				.build();
-
-		Backend.LOGGER.error(error);
-	}
-
-	public static void generateMissingStruct(SourceFile file, Span vertexName, CharSequence msg) {
+	public void generateMissingStruct(SourceFile file, Span vertexName, CharSequence msg) {
 		generateMissingStruct(file, vertexName, msg, "");
 	}
 
-	public static void generateMissingStruct(SourceFile file, Span vertexName, CharSequence msg, CharSequence hint) {
+	public void generateMissingStruct(SourceFile file, Span vertexName, CharSequence msg, CharSequence hint) {
 		Optional<Span> span = file.parent.index.getStructDefinitionsMatching(vertexName)
 				.stream()
 				.findFirst()
 				.map(ShaderStruct::getName);
 
-		ErrorBuilder error = ErrorBuilder.error(msg)
+		this.error(msg)
 				.pointAtFile(file)
 				.pointAt(vertexName, 1)
 				.hintIncludeFor(span.orElse(null), hint);
-
-		Backend.LOGGER.error(error.build());
 	}
 
-	public static void generateMissingFunction(SourceFile file, CharSequence functionName, CharSequence msg) {
+	public void generateMissingFunction(SourceFile file, CharSequence functionName, CharSequence msg) {
 		generateMissingFunction(file, functionName, msg, "");
 	}
 
-	public static void generateMissingFunction(SourceFile file, CharSequence functionName, CharSequence msg, CharSequence hint) {
+	public void generateMissingFunction(SourceFile file, CharSequence functionName, CharSequence msg, CharSequence hint) {
 		Optional<Span> span = file.parent.index.getFunctionDefinitionsMatching(functionName)
 				.stream()
 				.findFirst()
 				.map(ShaderFunction::getName);
 
-		ErrorBuilder error = ErrorBuilder.error(msg)
+		this.error(msg)
 				.pointAtFile(file)
 				.hintIncludeFor(span.orElse(null), hint);
+	}
 
-		Backend.LOGGER.error(error.build());
+	public ErrorBuilder generateFunctionArgumentCountError(String name, int requiredArguments, Span span) {
+		var msg = '"' + name + "\" function must ";
+
+		if (requiredArguments == 0) {
+			msg += "not have any arguments";
+		} else {
+			msg += "have exactly " + requiredArguments + " argument" + (requiredArguments == 1 ? "" : "s");
+		}
+
+		return generateSpanError(span, msg);
+	}
+
+	public ErrorBuilder generateSpanError(Span span, String message) {
+		SourceFile file = span.getSourceFile();
+
+		return error(message)
+				.pointAtFile(file)
+				.pointAt(span, 2);
+	}
+
+	public ErrorBuilder generateFileError(SourceFile file, String message) {
+		return error(message)
+				.pointAtFile(file);
+	}
+
+	public ErrorBuilder error(CharSequence msg) {
+		var out = ErrorBuilder.error(msg);
+		reportedErrors.add(out);
+		return out;
+	}
+
+	public boolean hasErrored() {
+		return !reportedErrors.isEmpty();
+	}
+
+	public void dump() {
+		for (var error : reportedErrors) {
+			Backend.LOGGER.error(error.build());
+		}
 	}
 
 	public static void printLines(CharSequence source) {

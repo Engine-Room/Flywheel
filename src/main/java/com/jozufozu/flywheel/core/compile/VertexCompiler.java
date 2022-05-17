@@ -1,8 +1,5 @@
 package com.jozufozu.flywheel.core.compile;
 
-import java.util.Objects;
-import java.util.Optional;
-
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
@@ -11,132 +8,63 @@ import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
 import com.jozufozu.flywheel.core.source.FileIndexImpl;
 import com.jozufozu.flywheel.core.source.FileResolution;
-import com.jozufozu.flywheel.core.source.ShaderLoadingException;
 import com.jozufozu.flywheel.core.source.SourceFile;
-import com.jozufozu.flywheel.core.source.error.ErrorReporter;
-import com.jozufozu.flywheel.core.source.parse.ShaderFunction;
 import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
 import com.jozufozu.flywheel.core.source.parse.StructField;
-import com.jozufozu.flywheel.core.source.parse.Variable;
-import com.jozufozu.flywheel.core.source.span.Span;
 
+/**
+ * Handles compilation and deletion of vertex shaders.
+ */
 public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 	private final FileResolution contextShader;
+	private final GLSLVersion glslVersion;
 
-	public VertexCompiler(FileResolution contextShader) {
+	public VertexCompiler(FileResolution contextShader, GLSLVersion glslVersion) {
 		this.contextShader = contextShader;
+		this.glslVersion = glslVersion;
 	}
 
 	@Override
 	protected GlShader _create(Context key) {
 		StringBuilder finalSource = new StringBuilder();
 
-		finalSource.append(CompileUtil.generateHeader(GLSLVersion.V330, ShaderType.VERTEX));
+		finalSource.append(CompileUtil.generateHeader(glslVersion, ShaderType.VERTEX));
 
-		key.ctx.getShaderConstants().writeInto(finalSource);
+		var shaderConstants = key.ctx.getShaderConstants();
+		shaderConstants.writeInto(finalSource);
 		finalSource.append('\n');
 
-		FileIndexImpl index = new FileIndexImpl();
+		var index = new FileIndexImpl();
 
-		//
+		// LAYOUT
 
-		SourceFile layoutShader = key.vertexType.getLayoutShader().getFile();
-
-		Optional<ShaderFunction> maybeLayoutVertex = layoutShader.findFunction("flw_layoutVertex");
-
-		if (maybeLayoutVertex.isEmpty()) {
-			ErrorReporter.generateMissingFunction(layoutShader, "flw_layoutVertex", "\"flw_layoutVertex\" function not defined");
-			throw new ShaderLoadingException();
-		}
-
-		ShaderFunction layoutVertex = maybeLayoutVertex.get();
-		ImmutableList<Variable> params = layoutVertex.getParameters();
-
-		if (params.size() != 0) {
-			ErrorReporter.generateSpanError(layoutVertex.getArgs(), "\"flw_layoutVertex\" function must not have any arguments");
-			throw new ShaderLoadingException();
-		}
-
+		var layoutShader = key.vertexType.getLayoutShader().getFile();
 		layoutShader.generateFinalSource(index, finalSource);
 
-		//
+		// INSTANCE
 
-		SourceFile instanceShader = key.instanceShader;
-
-		Optional<ShaderFunction> maybeInstanceVertex = instanceShader.findFunction("flw_instanceVertex");
-
-		if (maybeInstanceVertex.isEmpty()) {
-			ErrorReporter.generateMissingFunction(instanceShader, "flw_instanceVertex", "\"flw_instanceVertex\" function not defined");
-			throw new ShaderLoadingException();
-		}
-
-		ShaderFunction instanceVertex = maybeInstanceVertex.get();
-		params = instanceVertex.getParameters();
-
-		if (params.size() != 1) {
-			ErrorReporter.generateSpanError(instanceVertex.getArgs(), "\"flw_instanceVertex\" function must have exactly 1 argument");
-			throw new ShaderLoadingException();
-		}
-
-		Span instanceName = params.get(0).type;
-		Optional<ShaderStruct> maybeInstance = instanceShader.findStruct(instanceName);
-
-		if (maybeInstance.isEmpty()) {
-			ErrorReporter.generateMissingStruct(instanceShader, instanceName, "instance struct not defined");
-			throw new ShaderLoadingException();
-		}
-
-		ShaderStruct instance = maybeInstance.get();
-
+		var instanceShader = key.instanceShader;
 		instanceShader.generateFinalSource(index, finalSource);
 
-		//
+		// MATERIAL
 
-		SourceFile materialShader = key.materialShader;
-
-		Optional<ShaderFunction> maybeMaterialVertex = materialShader.findFunction("flw_materialVertex");
-
-		if (maybeMaterialVertex.isEmpty()) {
-			ErrorReporter.generateMissingFunction(materialShader, "flw_materialVertex", "\"flw_materialVertex\" function not defined");
-			throw new ShaderLoadingException();
-		}
-
-		ShaderFunction materialVertex = maybeMaterialVertex.get();
-		params = materialVertex.getParameters();
-
-		if (params.size() != 0) {
-			ErrorReporter.generateSpanError(materialVertex.getArgs(), "\"flw_materialVertex\" function must not have any arguments");
-			throw new ShaderLoadingException();
-		}
-
+		var materialShader = key.materialShader;
 		materialShader.generateFinalSource(index, finalSource);
 
-		//
+		// CONTEXT
 
-		SourceFile contextShaderSource = contextShader.getFile();
-
-		Optional<ShaderFunction> maybeContextVertex = contextShaderSource.findFunction("flw_contextVertex");
-
-		if (maybeContextVertex.isEmpty()) {
-			ErrorReporter.generateMissingFunction(contextShaderSource, "flw_contextVertex", "\"flw_contextVertex\" function not defined");
-			throw new ShaderLoadingException();
-		}
-
-		ShaderFunction contextVertex = maybeContextVertex.get();
-		params = contextVertex.getParameters();
-
-		if (params.size() != 0) {
-			ErrorReporter.generateSpanError(contextVertex.getArgs(), "\"flw_contextVertex\" function must not have any arguments");
-			throw new ShaderLoadingException();
-		}
-
+		var contextShaderSource = contextShader.getFile();
 		contextShaderSource.generateFinalSource(index, finalSource);
 
-		//
+		// MAIN
 
-		finalSource.append(generateFooter(key.vertexType, instance));
+		var instanceStruct = instanceShader.findFunction("flw_instanceVertex")
+				.flatMap(f -> f.getParameterType(0)
+						.findStruct())
+				.orElseThrow();
+		finalSource.append(generateFooter(key.vertexType, instanceStruct));
 
-		return new GlShader(instanceShader.name, ShaderType.VERTEX, finalSource.toString());
+		return new GlShader(finalSource.toString(), ShaderType.VERTEX, ImmutableList.of(layoutShader.name, instanceShader.name, materialShader.name, contextShaderSource.name), shaderConstants);
 	}
 
 	protected String generateFooter(VertexType vertexType, ShaderStruct instance) {
@@ -203,45 +131,12 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 		value.delete();
 	}
 
-	public static class Context {
-		/**
-		 * The vertex type to use.
-		 */
-		private final VertexType vertexType;
-
-		/**
-		 * The instance shader source.
-		 */
-		private final SourceFile instanceShader;
-
-		/**
-		 * The vertex material shader source.
-		 */
-		private final SourceFile materialShader;
-
-		/**
-		 * The shader constants to apply.
-		 */
-		private final StateSnapshot ctx;
-
-		public Context(VertexType vertexType, SourceFile instanceShader, SourceFile materialShader, StateSnapshot ctx) {
-			this.vertexType = vertexType;
-			this.instanceShader = instanceShader;
-			this.materialShader = materialShader;
-			this.ctx = ctx;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			var that = (Context) o;
-			return vertexType == that.vertexType && instanceShader == that.instanceShader && materialShader == that.materialShader && ctx.equals(that.ctx);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(vertexType, instanceShader, materialShader, ctx);
-		}
+	/**
+	 * @param vertexType The vertex type to use.
+	 * @param instanceShader The instance shader source.
+	 * @param materialShader The vertex material shader source.
+	 * @param ctx The shader constants to apply.
+	 */
+	public record Context(VertexType vertexType, SourceFile instanceShader, SourceFile materialShader, StateSnapshot ctx) {
 	}
 }

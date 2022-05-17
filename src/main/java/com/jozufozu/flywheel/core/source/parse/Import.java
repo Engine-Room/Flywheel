@@ -6,7 +6,6 @@ import java.util.regex.Pattern;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.core.source.FileResolution;
-import com.jozufozu.flywheel.core.source.Resolver;
 import com.jozufozu.flywheel.core.source.SourceFile;
 import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 import com.jozufozu.flywheel.core.source.span.Span;
@@ -26,16 +25,16 @@ public class Import extends AbstractShaderElement {
 	}
 
 	@Nullable
-	public static Import create(Resolver resolver, Span self, Span file) {
+	public static Import create(ErrorReporter errorReporter, Span self, Span file) {
 		ResourceLocation fileLocation;
 		try {
 			fileLocation = new ResourceLocation(file.get());
 		} catch (ResourceLocationException e) {
-			ErrorReporter.generateSpanError(file, "malformed source location");
+			errorReporter.generateSpanError(file, "malformed source location");
 			return null;
 		}
 
-		return new Import(self, resolver.get(fileLocation), file);
+		return new Import(self, FileResolution.get(fileLocation), file);
 	}
 
 	public FileResolution getResolution() {

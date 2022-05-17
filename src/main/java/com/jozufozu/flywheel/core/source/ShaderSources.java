@@ -9,6 +9,7 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
+import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 import com.jozufozu.flywheel.util.ResourceUtil;
 import com.jozufozu.flywheel.util.StringUtil;
 
@@ -20,14 +21,14 @@ import net.minecraft.server.packs.resources.ResourceManager;
  * The main object for loading and parsing source files.
  */
 public class ShaderSources implements SourceFinder {
-	public static final String SHADER_DIR = "flywheel/shaders/";
+	public static final String SHADER_DIR = "flywheel/";
 	public static final ArrayList<String> EXTENSIONS = Lists.newArrayList(".vert", ".vsh", ".frag", ".fsh", ".glsl");
 
 	private final Map<ResourceLocation, SourceFile> shaderSources = new HashMap<>();
 
 	public final Index index;
 
-	public ShaderSources(ResourceManager manager) {
+	public ShaderSources(ErrorReporter errorReporter, ResourceManager manager) {
 		Collection<ResourceLocation> allShaders = manager.listResources(SHADER_DIR, s -> {
 			for (String ext : EXTENSIONS) {
 				if (s.endsWith(ext)) return true;
@@ -41,7 +42,7 @@ public class ShaderSources implements SourceFinder {
 
 				ResourceLocation name = ResourceUtil.removePrefixUnchecked(location, SHADER_DIR);
 
-				shaderSources.put(name, new SourceFile(this, name, source));
+				shaderSources.put(name, new SourceFile(errorReporter, this, name, source));
 			} catch (IOException e) {
 				//
 			}

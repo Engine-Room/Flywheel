@@ -11,9 +11,11 @@ import java.util.regex.Matcher;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 import com.jozufozu.flywheel.core.source.parse.Import;
 import com.jozufozu.flywheel.core.source.parse.ShaderFunction;
 import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
+import com.jozufozu.flywheel.core.source.parse.Variable;
 import com.jozufozu.flywheel.core.source.span.ErrorSpan;
 import com.jozufozu.flywheel.core.source.span.Span;
 import com.jozufozu.flywheel.core.source.span.StringSpan;
@@ -55,7 +57,7 @@ public class SourceFile {
 	 */
 	public final ImmutableList<Import> imports;
 
-	public SourceFile(ShaderSources parent, ResourceLocation name, String source) {
+	public SourceFile(ErrorReporter errorReporter, ShaderSources parent, ResourceLocation name, String source) {
 		this.parent = parent;
 		this.name = name;
 		this.source = source;
@@ -64,7 +66,7 @@ public class SourceFile {
 
 		List<Span> elisions = new ArrayList<>();
 
-		this.imports = parseImports(elisions);
+		this.imports = parseImports(errorReporter, elisions);
 		this.functions = parseFunctions();
 		this.structs = parseStructs();
 
@@ -233,7 +235,7 @@ public class SourceFile {
 	 * Records the contents of the directive into an {@link Import} object, and marks the directive for elision.
 	 * @param elisions
 	 */
-	private ImmutableList<Import> parseImports(List<Span> elisions) {
+	private ImmutableList<Import> parseImports(ErrorReporter errorReporter, List<Span> elisions) {
 		Matcher uses = Import.PATTERN.matcher(source);
 
 		Set<String> importedFiles = new HashSet<>();
@@ -245,9 +247,9 @@ public class SourceFile {
 
 			String fileName = file.get();
 			if (importedFiles.add(fileName)) {
-				Import import1 = Import.create(Resolver.INSTANCE, use, file);
-				if (import1 != null) {
-					imports.add(import1);
+				var checked = Import.create(errorReporter, use, file);
+				if (checked != null) {
+					imports.add(checked);
 				}
 			}
 
@@ -279,5 +281,16 @@ public class SourceFile {
 	@Override
 	public String toString() {
 		return name.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		// SourceFiles are only equal by reference.
+		return this == o;
+	}
+
+	@Override
+	public int hashCode() {
+		return System.identityHashCode(this);
 	}
 }

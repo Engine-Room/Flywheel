@@ -1,11 +1,13 @@
 package com.jozufozu.flywheel.core.source;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Map;
+import java.util.function.BiConsumer;
 
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.core.source.error.ErrorBuilder;
+import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 import com.jozufozu.flywheel.core.source.span.Span;
 
 import net.minecraft.resources.ResourceLocation;
@@ -21,15 +23,71 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class FileResolution {
 
+	private static final Map<ResourceLocation, FileResolution> ALL = new HashMap<>();
+	private static boolean tooLate = false;
+
 	/**
-	 * Extra info about where this resolution is required. Includes ProgramSpecs and shader Spans.
+	 * Extra info about where this resolution is required. Includes shader Spans.
 	 */
-	private final List<Consumer<ErrorBuilder>> extraCrashInfoProviders = new ArrayList<>();
+	private final List<Span> neededAt = new ArrayList<>();
+	private final List<BiConsumer<ErrorReporter, SourceFile>> checks = new ArrayList<>();
+
 	private final ResourceLocation fileLoc;
+
 	private SourceFile file;
 
 	FileResolution(ResourceLocation fileLoc) {
 		this.fileLoc = fileLoc;
+	}
+
+	public static FileResolution get(ResourceLocation file) {
+		if (!tooLate) {
+			return ALL.computeIfAbsent(file, FileResolution::new);
+		} else {
+			// Lock the map after resolution has run.
+			FileResolution fileResolution = ALL.get(file);
+
+			// ...so crash immediately if the file isn't found.
+			if (fileResolution == null) {
+				throw new ShaderLoadingException("could not find source for file: " + file);
+			}
+
+			return fileResolution;
+		}
+	}
+
+	/**
+	 * Try and resolve all referenced source files, printing errors if any aren't found.
+	 */
+	public static void run(ErrorReporter errorReporter, SourceFinder sources) {
+		for (FileResolution resolution : ALL.values()) {
+			resolution.resolveAndCheck(errorReporter, sources);
+		}
+
+		tooLate = true;
+	}
+
+	private void resolveAndCheck(ErrorReporter errorReporter, SourceFinder sources) {
+		file = sources.findSource(fileLoc);
+
+		if (file == null) {
+			ErrorBuilder builder = errorReporter.error(String.format("could not find source for file %s", fileLoc));
+			for (Span location : neededAt) {
+				builder.pointAtFile(location.getSourceFile())
+						.pointAt(location, 1);
+			}
+		} else {
+			runChecks(errorReporter);
+		}
+
+		// Let the GC do its thing
+		neededAt.clear();
+	}
+
+	private void runChecks(ErrorReporter errorReporter) {
+		for (var check : checks) {
+			check.accept(errorReporter, file);
+		}
 	}
 
 	public ResourceLocation getFileLoc() {
@@ -53,45 +111,13 @@ public class FileResolution {
 	 * @param span A span where this file is referenced.
 	 */
 	public FileResolution addSpan(Span span) {
-		extraCrashInfoProviders.add(builder -> builder.pointAtFile(span.getSourceFile())
-				.pointAt(span, 1));
+		neededAt.add(span);
 		return this;
 	}
 
-	public void addSpec(ResourceLocation name) {
-		extraCrashInfoProviders.add(builder -> builder.extra("needed by spec: " + name + ".json"));
-	}
-
-	/**
-	 * Check to see if this file actually resolves to something.
-	 *
-	 * <p>
-	 *     Called after all files are loaded. If we can't find the file here, it doesn't exist.
-	 * </p>
-	 *
-	 * @return True if this file is resolved.
-	 */
-	boolean resolve(SourceFinder sources) {
-		file = sources.findSource(fileLoc);
-
-		if (file == null) {
-			ErrorBuilder builder = ErrorBuilder.error(String.format("could not find source for file %s", fileLoc));
-			for (Consumer<ErrorBuilder> consumer : extraCrashInfoProviders) {
-				consumer.accept(builder);
-			}
-			Backend.LOGGER.error(builder.build());
-
-			return false;
-		}
-
-		// Let the GC do its thing
-		extraCrashInfoProviders.clear();
-		return true;
-	}
-
-	void invalidate() {
-		extraCrashInfoProviders.clear();
-		file = null;
+	public FileResolution validateWith(BiConsumer<ErrorReporter, SourceFile> check) {
+		checks.add(check);
+		return this;
 	}
 
 	@Override

@@ -52,6 +52,10 @@ public class ShaderFunction extends AbstractShaderElement {
 		return name + "(" + String.join(", ", args) + ")";
 	}
 
+	public Span getParameterType(int index) {
+		return parameters.get(index).type;
+	}
+
 	public ImmutableList<Variable> getParameters() {
 		return parameters;
 	}

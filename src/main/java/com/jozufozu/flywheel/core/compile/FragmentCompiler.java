@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.core.compile;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
@@ -12,92 +11,57 @@ import com.jozufozu.flywheel.core.shader.ShaderConstants;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
 import com.jozufozu.flywheel.core.source.FileIndexImpl;
 import com.jozufozu.flywheel.core.source.FileResolution;
-import com.jozufozu.flywheel.core.source.ShaderLoadingException;
 import com.jozufozu.flywheel.core.source.SourceFile;
-import com.jozufozu.flywheel.core.source.error.ErrorReporter;
-import com.jozufozu.flywheel.core.source.parse.ShaderFunction;
-import com.jozufozu.flywheel.core.source.parse.Variable;
 
+/**
+ * Handles compilation and deletion of fragment shaders.
+ */
 public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShader> {
 	private final FileResolution contextShader;
+	private final GLSLVersion glslVersion;
 
-	public FragmentCompiler(FileResolution contextShader) {
+	public FragmentCompiler(FileResolution contextShader, GLSLVersion glslVersion) {
 		this.contextShader = contextShader;
+		this.glslVersion = glslVersion;
 	}
 
 	@Override
 	protected GlShader _create(Context key) {
 		StringBuilder finalSource = new StringBuilder();
 
-		finalSource.append(CompileUtil.generateHeader(GLSLVersion.V150, ShaderType.FRAGMENT));
+		finalSource.append(CompileUtil.generateHeader(glslVersion, ShaderType.FRAGMENT));
 
-		key.getShaderConstants().writeInto(finalSource);
+		ShaderConstants shaderConstants = key.getShaderConstants();
+		shaderConstants.writeInto(finalSource);
 		finalSource.append('\n');
 
 		FileIndexImpl index = new FileIndexImpl();
 
-		//
+		// MATERIAL
 
 		SourceFile materialShader = key.materialShader;
-
-		Optional<ShaderFunction> maybeMaterialFragment = materialShader.findFunction("flw_materialFragment");
-
-		if (maybeMaterialFragment.isEmpty()) {
-			ErrorReporter.generateMissingFunction(materialShader, "flw_materialFragment", "\"flw_materialFragment\" function not defined");
-			throw new ShaderLoadingException();
-		}
-
-		ShaderFunction materialFragment = maybeMaterialFragment.get();
-		ImmutableList<Variable> params = materialFragment.getParameters();
-
-		if (params.size() != 0) {
-			ErrorReporter.generateSpanError(materialFragment.getArgs(), "\"flw_materialFragment\" function must not have any arguments");
-			throw new ShaderLoadingException();
-		}
-
 		materialShader.generateFinalSource(index, finalSource);
 
-		//
+		// CONTEXT
 
 		SourceFile contextShaderSource = contextShader.getFile();
-
-		Optional<ShaderFunction> maybeContextFragment = contextShaderSource.findFunction("flw_contextFragment");
-
-		if (maybeContextFragment.isEmpty()) {
-			ErrorReporter.generateMissingFunction(contextShaderSource, "flw_contextFragment", "\"flw_contextFragment\" function not defined");
-			throw new ShaderLoadingException();
-		}
-
-		ShaderFunction contextFragment = maybeContextFragment.get();
-		params = contextFragment.getParameters();
-
-		if (params.size() != 0) {
-			ErrorReporter.generateSpanError(contextFragment.getArgs(), "\"flw_contextFragment\" function must not have any arguments");
-			throw new ShaderLoadingException();
-		}
-
 		contextShaderSource.generateFinalSource(index, finalSource);
 
-		//
+		// MAIN
 
 		finalSource.append(generateFooter());
 
-		return new GlShader(contextShader.getFile().name, ShaderType.FRAGMENT, finalSource.toString());
+		return new GlShader(finalSource.toString(), ShaderType.FRAGMENT, ImmutableList.of(materialShader.name, contextShaderSource.name), shaderConstants);
 	}
 
 	protected String generateFooter() {
-		StringBuilder footer = new StringBuilder();
-
-		footer.append("""
+		return """
 				void main() {
 					flw_materialFragment();
 
 				    flw_contextFragment();
 				}
-				"""
-		);
-
-		return footer.toString();
+				""";
 	}
 
 	@Override
@@ -107,34 +71,12 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 
 	/**
 	 * Represents the conditions under which a shader is compiled.
+	 * @param materialShader The fragment material shader source.
+	 * @param alphaDiscard Alpha threshold below which fragments are discarded.
+	 * @param fogType Which type of fog should be applied.
+	 * @param ctx The shader constants to apply.
 	 */
-	public static final class Context {
-		/**
-		 * The fragment material shader source.
-		 */
-		private final SourceFile materialShader;
-
-		/**
-		 * Alpha threshold below which fragments are discarded.
-		 */
-		private final float alphaDiscard;
-
-		/**
-		 * Which type of fog should be applied.
-		 */
-		private final FogType fogType;
-
-		/**
-		 * The shader constants to apply.
-		 */
-		private final StateSnapshot ctx;
-
-		public Context(SourceFile materialShader, float alphaDiscard, FogType fogType, StateSnapshot ctx) {
-			this.materialShader = materialShader;
-			this.alphaDiscard = alphaDiscard;
-			this.fogType = fogType;
-			this.ctx = ctx;
-		}
+	public record Context(SourceFile materialShader, float alphaDiscard, FogType fogType, StateSnapshot ctx) {
 
 		public ShaderConstants getShaderConstants() {
 			ShaderConstants shaderConstants = ctx.getShaderConstants();
@@ -145,24 +87,6 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 			shaderConstants.define(fogType.name());
 
 			return shaderConstants;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == this) return true;
-			if (obj == null || obj.getClass() != this.getClass()) return false;
-			var that = (Context) obj;
-			return materialShader == that.materialShader && Objects.equals(this.ctx, that.ctx) && Float.floatToIntBits(this.alphaDiscard) == Float.floatToIntBits(that.alphaDiscard) && fogType == that.fogType;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(materialShader, alphaDiscard, fogType, ctx);
-		}
-
-		@Override
-		public String toString() {
-			return "Context[" + "materialShader=" + materialShader + ", " + "alphaDiscard=" + alphaDiscard + ", " + "fogType=" + fogType + ", " + "ctx=" + ctx + ']';
 		}
 	}
 }

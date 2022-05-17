@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.core.shader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A class for manipulating a list of {@code #define} directives.
@@ -51,5 +52,18 @@ public class ShaderConstants {
 			}
 			acc.append('\n');
 		}
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ShaderConstants that = (ShaderConstants) o;
+		return Objects.equals(definitions, that.definitions);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(definitions);
 	}
 }

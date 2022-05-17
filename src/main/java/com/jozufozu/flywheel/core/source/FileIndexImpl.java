@@ -33,7 +33,7 @@ public class FileIndexImpl implements FileIndex {
 
 	@Override
 	public boolean exists(SourceFile sourceFile) {
-		return files.indexOf(sourceFile) != -1;
+		return files.contains(sourceFile);
 	}
 
 	@Override
@@ -68,10 +68,7 @@ public class FileIndexImpl implements FileIndex {
 	@Nullable
 	private ErrorBuilder parseCompilerError(String line) {
 		try {
-			ErrorBuilder error = ErrorBuilder.fromLogLine(this, line);
-			if (error != null) {
-				return error;
-			}
+			return ErrorBuilder.fromLogLine(this, line);
 		} catch (Exception ignored) {
 		}
 

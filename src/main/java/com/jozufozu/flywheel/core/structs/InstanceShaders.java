@@ -2,8 +2,7 @@ package com.jozufozu.flywheel.core.structs;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.core.source.FileResolution;
-import com.jozufozu.flywheel.core.source.Resolver;
-import com.jozufozu.flywheel.event.GatherContextEvent;
+import com.jozufozu.flywheel.core.source.SourceChecks;
 import com.jozufozu.flywheel.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
@@ -12,9 +11,13 @@ public class InstanceShaders {
 	public static FileResolution MODEL;
 	public static FileResolution ORIENTED;
 
-	public static void flwInit(GatherContextEvent event) {
-		MODEL = Resolver.INSTANCE.get(ResourceUtil.subPath(Names.MODEL, ".vert"));
-		ORIENTED = Resolver.INSTANCE.get(ResourceUtil.subPath(Names.ORIENTED, ".vert"));
+	public static void init() {
+		var check = SourceChecks.checkFunctionParameterTypeExists("flw_instanceVertex", 1, 0);
+
+		MODEL = FileResolution.get(ResourceUtil.subPath(Names.MODEL, ".vert"))
+				.validateWith(check);
+		ORIENTED = FileResolution.get(ResourceUtil.subPath(Names.ORIENTED, ".vert"))
+				.validateWith(check);
 	}
 
 	public static class Names {

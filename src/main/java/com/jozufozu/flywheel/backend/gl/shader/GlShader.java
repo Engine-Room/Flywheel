@@ -1,34 +1,37 @@
 package com.jozufozu.flywheel.backend.gl.shader;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.backend.gl.GlObject;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
+import com.jozufozu.flywheel.core.shader.ShaderConstants;
 import com.jozufozu.flywheel.core.source.ShaderLoadingException;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 
 public class GlShader extends GlObject {
 
-	public final ResourceLocation name;
 	public final ShaderType type;
+	private final List<ResourceLocation> parts;
+	private final ShaderConstants constants;
 
-	public GlShader(ResourceLocation name, ShaderType type, String source) {
-		this.name = name;
+	public GlShader(String source, ShaderType type, List<ResourceLocation> parts, ShaderConstants constants) {
+		this.parts = parts;
 		this.type = type;
+		this.constants = constants;
 		int handle = GL20.glCreateShader(type.glEnum);
 
 		GlCompat.safeShaderSource(handle, source);
 		GL20.glCompileShader(handle);
 
-//		File dir = new File(Minecraft.getInstance().gameDirectory, "flywheel_sources");
-//		dir.mkdirs();
-//		File file = new File(dir, name.toString().replaceAll("[:/]", "_"));
-//		try (FileWriter writer = new FileWriter(file)) {
-//			writer.write(source);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		dumpSource(source, type);
 
 //		String log = GL20.glGetShaderInfoLog(handle);
 //
@@ -38,7 +41,7 @@ public class GlShader extends GlObject {
 //		}
 
 		if (GL20.glGetShaderi(handle, GL20.GL_COMPILE_STATUS) != GL20.GL_TRUE) {
-			throw new ShaderLoadingException("Could not compile " + name + ". See log for details.");
+			throw new ShaderLoadingException("Could not compile " + getName() + ". See log for details.");
 		}
 
 		setHandle(handle);
@@ -49,4 +52,22 @@ public class GlShader extends GlObject {
 		GL20.glDeleteShader(handle);
 	}
 
+	public String getName() {
+		return parts.stream()
+				.map(ResourceLocation::toString)
+				.map(s -> s.replaceAll("/", "_")
+						.replaceAll(":", "\\$"))
+				.collect(Collectors.joining(";")) + ';' + Integer.toHexString(constants.hashCode());
+	}
+
+	private void dumpSource(String source, ShaderType type) {
+		File dir = new File(Minecraft.getInstance().gameDirectory, "flywheel_sources");
+		dir.mkdirs();
+		File file = new File(dir, type.getFileName(getName()));
+		try (FileWriter writer = new FileWriter(file)) {
+			writer.write(source);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
