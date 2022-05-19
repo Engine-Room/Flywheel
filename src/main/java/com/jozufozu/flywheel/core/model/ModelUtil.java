@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.core.model;
 
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.Random;
-import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.core.virtual.VirtualEmptyBlockGetter;
 import com.jozufozu.flywheel.fabric.model.CullingBakedModel;
@@ -114,18 +114,28 @@ public class ModelUtil {
 		return builder;
 	}
 
-	public static Supplier<PoseStack> rotateToFace(Direction facing) {
-		return () -> {
-			PoseStack stack = new PoseStack();
-			TransformStack.cast(stack)
-					.centre()
-					.rotateToFace(facing.getOpposite())
-					.unCentre();
-			return stack;
-		};
+	private static PoseStack createRotation(Direction facing) {
+		PoseStack stack = new PoseStack();
+		TransformStack.cast(stack)
+				.centre()
+				.rotateToFace(facing.getOpposite())
+				.unCentre();
+		return stack;
 	}
 
-	private static class ThreadLocalObjects {
+	public static PoseStack rotateToFace(Direction facing) {
+		return TRANSFORMS.get(facing);
+	}
+
+	private static final EnumMap<Direction, PoseStack> TRANSFORMS = new EnumMap<>(Direction.class);
+
+	static {
+		for (Direction value : Direction.values()) {
+			TRANSFORMS.put(value, createRotation(value));
+		}
+	}
+
+    private static class ThreadLocalObjects {
 		public final Random random = new Random();
 		public final ShadeSeparatingVertexConsumer shadeSeparatingWrapper = new ShadeSeparatingVertexConsumer();
 		public final BufferBuilder unshadedBuilder = new BufferBuilder(512);

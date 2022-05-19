@@ -5,6 +5,9 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,9 +23,15 @@ import net.minecraft.util.Mth;
 public class ParallelTaskEngine implements TaskEngine {
 	private static final Logger LOGGER = LoggerFactory.getLogger("BatchExecutor");
 
+	private final String name;
+
+	/**
+	 * If set to false, the engine will shut down.
+	 */
 	private final AtomicBoolean running = new AtomicBoolean(false);
 	private final WaitGroup wg = new WaitGroup();
 
+	private final Deque<Runnable> syncTasks = new ConcurrentLinkedDeque<>();
 	private final Deque<Runnable> jobQueue = new ConcurrentLinkedDeque<>();
 	private final List<Thread> threads = new ArrayList<>();
 
@@ -30,11 +39,13 @@ public class ParallelTaskEngine implements TaskEngine {
 
 	private final int threadCount;
 
-	private final String name;
-
 	public ParallelTaskEngine(String name) {
 		this.name = name;
 		threadCount = getOptimalThreadCount();
+	}
+
+	public WorkGroupBuilder group(String name) {
+		return new WorkGroupBuilder(name);
 	}
 
 	/**
@@ -117,6 +128,10 @@ public class ParallelTaskEngine implements TaskEngine {
 			this.wg.await();
 		} catch (InterruptedException ignored) {
 		}
+
+		while ((job = this.syncTasks.pollLast()) != null) {
+			job.run();
+		}
 	}
 
 	@Nullable
@@ -157,6 +172,7 @@ public class ParallelTaskEngine implements TaskEngine {
 	private static int getMaxThreadCount() {
 		return Runtime.getRuntime().availableProcessors();
 	}
+
 	private class WorkerRunnable implements Runnable {
 
 		private final AtomicBoolean running = ParallelTaskEngine.this.running;
@@ -175,5 +191,88 @@ public class ParallelTaskEngine implements TaskEngine {
 			}
 		}
 
+	}
+
+	public class WorkGroupBuilder {
+		final String name;
+
+		@Nullable
+		Runnable finalizer;
+
+		Stream<Runnable> tasks;
+
+		public WorkGroupBuilder(String name) {
+			this.name = name;
+		}
+
+		public <T> WorkGroupBuilder addTasks(Stream<T> iterable, Consumer<T> consumer) {
+			return addTasks(iterable.map(it -> () -> consumer.accept(it)));
+		}
+
+		public WorkGroupBuilder addTasks(Stream<Runnable> tasks) {
+			if (this.tasks == null) {
+				this.tasks = tasks;
+			} else {
+				this.tasks = Stream.concat(this.tasks, tasks);
+			}
+			return this;
+		}
+
+		public WorkGroupBuilder onComplete(Runnable runnable) {
+			this.finalizer = runnable;
+			return this;
+		}
+
+		public void submit() {
+			if (this.tasks == null) {
+				return;
+			}
+
+			WorkGroup workGroup = new WorkGroup(name, finalizer);
+
+			tasks.map(task -> new WorkGroupTask(workGroup, task)).forEach(ParallelTaskEngine.this::submit);
+		}
+
+	}
+
+	private static class WorkGroupTask implements Runnable {
+
+		private final WorkGroup parent;
+		private final Runnable wrapped;
+
+		public WorkGroupTask(WorkGroup parent, Runnable wrapped) {
+			this.parent = parent;
+			this.wrapped = wrapped;
+
+			this.parent.running.incrementAndGet();
+		}
+
+		@Override
+		public void run() {
+			this.wrapped.run();
+
+			this.parent.oneDown();
+		}
+	}
+
+	private class WorkGroup {
+		final String name;
+
+		final Runnable finalizer;
+
+		final AtomicInteger running = new AtomicInteger(0);
+
+		public WorkGroup(String name, @Nullable Runnable finalizer) {
+			this.name = name;
+			this.finalizer = finalizer;
+		}
+
+		public void oneDown() {
+			if (running.decrementAndGet() == 0) {
+				if (finalizer != null) {
+					ParallelTaskEngine.this.syncTasks.add(finalizer);
+				}
+			}
+		}
 	}
 }

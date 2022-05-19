@@ -22,8 +22,8 @@ public final class FlwCommands {
 	public static void init(FlwConfig config) {
 		ConfigCommandBuilder commandBuilder = new ConfigCommandBuilder("flywheel");
 
-		commandBuilder.addOption(config.engine, "backend", (builder, option) -> enumOptionCommand(builder, config, option,
-				FlwEngine::getShortName,
+		commandBuilder.addOption(config.backend, (builder, option) -> enumOptionCommand(builder, config, option,
+				BackendType::getShortName,
 				(source, value) -> {
 					source.sendFeedback(getEngineMessage(value));
 				},
@@ -100,7 +100,7 @@ public final class FlwCommands {
 		return b ? new TextComponent("enabled").withStyle(ChatFormatting.DARK_GREEN) : new TextComponent("disabled").withStyle(ChatFormatting.RED);
 	}
 
-	public static Component getEngineMessage(@NotNull FlwEngine type) {
+	public static Component getEngineMessage(@NotNull BackendType type) {
 		return switch (type) {
 			case OFF -> new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED);
 			case INSTANCING -> new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN);

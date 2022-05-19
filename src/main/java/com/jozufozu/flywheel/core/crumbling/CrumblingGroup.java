@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.core.crumbling;
 
-import com.jozufozu.flywheel.backend.RenderLayer;
+import com.jozufozu.flywheel.api.RenderLayer;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancedMaterialGroup;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.util.Textures;
@@ -54,7 +54,7 @@ public class CrumblingGroup<P extends CrumblingProgram> extends InstancedMateria
 	}
 
 	@Override
-	public void setup(P p) {
+    protected void setup(P p) {
 		p.setAtlasSize(width, height);
 	}
 }

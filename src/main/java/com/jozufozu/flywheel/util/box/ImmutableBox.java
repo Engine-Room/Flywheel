@@ -42,6 +42,15 @@ public interface ImmutableBox {
 		return getMinX() == other.getMinX() && getMinY() == other.getMinY() && getMinZ() == other.getMinZ() && getMaxX() == other.getMaxX() && getMaxY() == other.getMaxY() && getMaxZ() == other.getMaxZ();
 	}
 
+	default boolean sameAs(ImmutableBox other, int margin) {
+		return getMinX() == other.getMinX() - margin &&
+				getMinY() == other.getMinY() - margin &&
+				getMinZ() == other.getMinZ() - margin &&
+				getMaxX() == other.getMaxX() + margin &&
+				getMaxY() == other.getMaxY() + margin &&
+				getMaxZ() == other.getMaxZ() + margin;
+	}
+
 	default boolean sameAs(AABB other) {
 		return getMinX() == Math.floor(other.minX)
 				&& getMinY() == Math.floor(other.minY)

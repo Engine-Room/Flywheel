@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.api;
 
-import com.jozufozu.flywheel.backend.RenderLayer;
-
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Vec3i;
 
@@ -11,10 +9,10 @@ public interface MaterialManager {
 	 * Get a material group that will render in the given layer with the given state.
 	 *
 	 * @param layer The {@link RenderLayer} you want to draw in.
-	 * @param state The {@link RenderType} you need to draw with.
+	 * @param type The {@link RenderType} you need to draw with.
 	 * @return A material group whose children will
 	 */
-	MaterialGroup state(RenderLayer layer, RenderType state);
+	MaterialGroup state(RenderLayer layer, RenderType type);
 
 	Vec3i getOriginCoordinate();
 

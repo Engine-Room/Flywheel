@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.api.MaterialGroup;
-import com.jozufozu.flywheel.backend.RenderLayer;
+import com.jozufozu.flywheel.api.RenderLayer;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
@@ -60,7 +60,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	/**
 	 * Get a material group that will render in the given layer with the given type.
 	 *
-	 * @param layer The {@link RenderLayer} you want to draw in.
+	 * @param layer
 	 * @param type The {@link RenderType} you need to draw with.
 	 * @return A material group whose children will
 	 */

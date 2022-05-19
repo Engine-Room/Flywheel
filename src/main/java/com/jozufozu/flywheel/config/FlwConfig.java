@@ -34,9 +34,9 @@ public class FlwConfig {
 	protected final Object2ObjectLinkedOpenHashMap<String, Option<?>> optionMap = new Object2ObjectLinkedOpenHashMap<>();
 	protected final Map<String, Option<?>> optionMapView = Collections.unmodifiableMap(optionMap);
 
-	/** Enable or disable the entire engine */
-	public final EnumOption<FlwEngine> engine = addOption(new EnumOption<>("engine", FlwEngine.INSTANCING));
-	/** Enable or disable a debug overlay that colors pixels by their normal */
+	/** Select the backend to use. */
+	public final EnumOption<BackendType> backend = addOption(new EnumOption<>("backend", BackendType.INSTANCING));
+	/** Enable or disable a debug overlay that colors pixels by their normal. */
 	public final BooleanOption debugNormals = addOption(new BooleanOption("debugNormals", false));
 	/** Enable or disable instance update limiting with distance. */
 	public final BooleanOption limitUpdates = addOption(new BooleanOption("limitUpdates", true));
@@ -54,8 +54,8 @@ public class FlwConfig {
 		FlwCommands.init(INSTANCE);
 	}
 
-	public FlwEngine getEngine() {
-		return engine.get();
+	public BackendType getBackendType() {
+		return backend.get();
 	}
 
 	public boolean debugNormals() {

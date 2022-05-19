@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.RenderLayer;
+import com.jozufozu.flywheel.api.RenderLayer;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.model.FallbackAllocator;
 import com.jozufozu.flywheel.backend.model.ModelAllocator;
@@ -32,27 +32,21 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 	protected final RenderType type;
 
 	private final Map<Instanced<? extends InstanceData>, InstancedMaterial<?>> materials = new HashMap<>();
-	private final ModelAllocator allocator;
 
+	private ModelAllocator allocator;
 	private int vertexCount;
 	private int instanceCount;
 
 	public InstancedMaterialGroup(InstancingEngine<P> owner, RenderType type) {
 		this.owner = owner;
 		this.type = type;
-        if (GlCompat.getInstance()
-                .onAMDWindows()) {
-			this.allocator = FallbackAllocator.INSTANCE;
-		} else {
-			this.allocator = new ModelPool(Formats.POS_TEX_NORMAL);
-		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <D extends InstanceData> InstancedMaterial<D> material(StructType<D> type) {
 		if (type instanceof Instanced<D> instanced) {
-			return (InstancedMaterial<D>) materials.computeIfAbsent(instanced, t -> new InstancedMaterial<>(t, allocator));
+			return (InstancedMaterial<D>) materials.computeIfAbsent(instanced, InstancedMaterial::new);
 		} else {
 			throw new ClassCastException("Cannot use type '" + type + "' with GPU instancing.");
 		}
@@ -82,18 +76,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 	}
 
 	protected void renderAll(Matrix4f viewProjection, double camX, double camY, double camZ, RenderLayer layer) {
-		// initialize all uninitialized instancers...
-		for (InstancedMaterial<?> material : materials.values()) {
-			for (GPUInstancer<?> instancer : material.uninitialized) {
-				instancer.init();
-			}
-			material.uninitialized.clear();
-		}
-
-		if (allocator instanceof ModelPool pool) {
-			// ...and then flush the model arena in case anything was marked for upload
-			pool.flush();
-		}
+		initializeInstancers();
 
 		vertexCount = 0;
 		instanceCount = 0;
@@ -119,7 +102,24 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 		}
 	}
 
-	public void setup(P program) {
+	private void initializeInstancers() {
+		ModelAllocator allocator = getModelAllocator();
+
+		// initialize all uninitialized instancers...
+		for (InstancedMaterial<?> material : materials.values()) {
+			for (GPUInstancer<?> instancer : material.uninitialized) {
+				instancer.init(allocator);
+			}
+			material.uninitialized.clear();
+		}
+
+		if (allocator instanceof ModelPool pool) {
+			// ...and then flush the model arena in case anything was marked for upload
+			pool.flush();
+		}
+	}
+
+	protected void setup(P program) {
 
 	}
 
@@ -132,5 +132,21 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 				.forEach(InstancedMaterial::delete);
 
 		materials.clear();
+	}
+
+	private ModelAllocator getModelAllocator() {
+		if (allocator == null) {
+			allocator = createAllocator();
+		}
+		return this.allocator;
+	}
+
+	private static ModelAllocator createAllocator() {
+		if (GlCompat.getInstance()
+				.onAMDWindows()) {
+			return FallbackAllocator.INSTANCE;
+		} else {
+			return new ModelPool(Formats.POS_TEX_NORMAL);
+		}
 	}
 }
