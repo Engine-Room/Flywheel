@@ -89,7 +89,9 @@ public class LevelRendererMixin {
 	private void refresh(CallbackInfo ci) {
 		Backend.refresh();
 
-		FlywheelEvents.RELOAD_RENDERERS.invoker().handleEvent(new ReloadRenderersEvent(level));
+		if (FlywheelEvents.triggersReloadEvent) {
+			FlywheelEvents.RELOAD_RENDERERS.invoker().handleEvent(new ReloadRenderersEvent(level));
+		}
 	}
 
 

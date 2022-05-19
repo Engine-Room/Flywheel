@@ -10,6 +10,8 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
 public final class FlywheelEvents {
+	public static boolean triggersReloadEvent = true;
+
 	public static final Event<Listener<BeginFrameEvent>> BEGIN_FRAME = createSimple();
 	public static final Event<Listener<GatherContextEvent>> GATHER_CONTEXT = createSimple();
 	public static final Event<Listener<ReloadRenderersEvent>> RELOAD_RENDERERS = createSimple();
