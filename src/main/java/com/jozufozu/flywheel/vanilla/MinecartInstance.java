@@ -31,36 +31,44 @@ import net.minecraft.world.phys.Vec3;
 public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance<T> implements DynamicInstance, TickableInstance {
 
 	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
-	private static final BasicModelSupplier MODEL = new BasicModelSupplier(MinecartInstance::getBodyModel, new Material(RenderType.entitySolid(MINECART_LOCATION), () -> MaterialShaders.SHADED_VERTEX, () -> MaterialShaders.DEFAULT_FRAGMENT));
+	private static final BasicModelSupplier MODEL = new BasicModelSupplier(MinecartInstance::getBodyModel, new Material(RenderType.entitySolid(MINECART_LOCATION), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT));
 
 	private final PoseStack stack = new PoseStack();
 
 	private final ModelData body;
 	private ModelData contents;
-	private BlockState blockstate;
+	private BlockState blockState;
+	private boolean active;
 
 	public MinecartInstance(InstancerManager instancerManager, T entity) {
 		super(instancerManager, entity);
 
-		blockstate = entity.getDisplayBlockState();
-		contents = getContents();
 		body = getBody();
+		blockState = entity.getDisplayBlockState();
+		contents = getContents();
 	}
 
 	@Override
 	public void tick() {
 		BlockState displayBlockState = entity.getDisplayBlockState();
 
-		if (displayBlockState != blockstate) {
-			blockstate = displayBlockState;
+		if (displayBlockState != blockState) {
+			blockState = displayBlockState;
 			contents.delete();
 			contents = getContents();
-			updateLight();
+			if (contents != null) {
+				relight(getWorldPosition(), contents);
+			}
 		}
 	}
 
 	@Override
 	public void beginFrame() {
+		// TODO: add proper way to temporarily disable rendering a specific instance
+		if (!active) {
+			return;
+		}
+
 		TransformStack tstack = TransformStack.cast(stack);
 		stack.setIdentity();
 		float pt = AnimationTickHolder.getPartialTicks();
@@ -146,11 +154,20 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 	}
 
 	private ModelData getContents() {
-		if (blockstate.getRenderShape() == RenderShape.INVISIBLE)
+		RenderShape shape = blockState.getRenderShape();
+
+		if (shape == RenderShape.ENTITYBLOCK_ANIMATED) {
+			body.setEmptyTransform();
+			active = false;
+			return null;
+		}
+		active = true;
+
+		if (shape == RenderShape.INVISIBLE)
 			return null;
 
         return instancerManager.factory(StructTypes.MODEL)
-				.model(Models.block(blockstate))
+				.model(Models.block(blockState))
 				.createInstance();
 	}
 
@@ -170,5 +187,9 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 				.cuboid().invertYZ().start(-8, y, -8).size(16, 8, 2).rotateY((float)Math.PI).endCuboid()
 				.cuboid().invertYZ().start(-8, y, -8).size(16, 8, 2).endCuboid()
 				.build();
+	}
+
+	public static boolean shouldSkipRender(AbstractMinecart minecart) {
+		return minecart.getDisplayBlockState().getRenderShape() != RenderShape.ENTITYBLOCK_ANIMATED;
 	}
 }

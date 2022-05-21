@@ -1,23 +1,27 @@
 package com.jozufozu.flywheel.core.structs;
 
+import java.util.function.BiConsumer;
+
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.SourceChecks;
+import com.jozufozu.flywheel.core.source.SourceFile;
+import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 import com.jozufozu.flywheel.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 
 public class InstanceShaders {
-	public static FileResolution MODEL;
-	public static FileResolution ORIENTED;
+	public static final BiConsumer<ErrorReporter, SourceFile> CHECK = SourceChecks.checkFunctionParameterTypeExists("flw_instanceVertex", 1, 0);
+
+	public static final FileResolution MODEL = create(ResourceUtil.subPath(Names.MODEL, ".vert"));
+	public static final FileResolution ORIENTED = create(ResourceUtil.subPath(Names.ORIENTED, ".vert"));
+
+	public static FileResolution create(ResourceLocation location) {
+		return FileResolution.get(location).validateWith(CHECK);
+	}
 
 	public static void init() {
-		var check = SourceChecks.checkFunctionParameterTypeExists("flw_instanceVertex", 1, 0);
-
-		MODEL = FileResolution.get(ResourceUtil.subPath(Names.MODEL, ".vert"))
-				.validateWith(check);
-		ORIENTED = FileResolution.get(ResourceUtil.subPath(Names.ORIENTED, ".vert"))
-				.validateWith(check);
 	}
 
 	public static class Names {

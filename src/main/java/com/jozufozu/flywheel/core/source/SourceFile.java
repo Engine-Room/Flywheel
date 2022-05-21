@@ -15,7 +15,6 @@ import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 import com.jozufozu.flywheel.core.source.parse.Import;
 import com.jozufozu.flywheel.core.source.parse.ShaderFunction;
 import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
-import com.jozufozu.flywheel.core.source.parse.Variable;
 import com.jozufozu.flywheel.core.source.span.ErrorSpan;
 import com.jozufozu.flywheel.core.source.span.Span;
 import com.jozufozu.flywheel.core.source.span.StringSpan;

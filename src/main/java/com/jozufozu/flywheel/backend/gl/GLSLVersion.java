@@ -11,6 +11,9 @@ public enum GLSLVersion {
 	V410(410),
 	V420(420),
 	V430(430),
+	V440(440),
+	V450(450),
+	V460(460),
 	;
 
 	public final int version;

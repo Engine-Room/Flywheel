@@ -10,6 +10,9 @@ import com.mojang.math.Quaternion;
 import net.minecraft.util.Mth;
 
 public class ModelData extends BasicData implements Transform<ModelData> {
+	private static final Matrix4f EMPTY_MATRIX_4f = new Matrix4f();
+	private static final Matrix3f EMPTY_MATRIX_3f = new Matrix3f();
+
 	public final Matrix4f model = new Matrix4f();
 	public final Matrix3f normal = new Matrix3f();
 
@@ -31,8 +34,8 @@ public class ModelData extends BasicData implements Transform<ModelData> {
 	public ModelData setEmptyTransform() {
 		markDirty();
 
-		this.model.load(new Matrix4f());
-		this.normal.load(new Matrix3f());
+		this.model.load(EMPTY_MATRIX_4f);
+		this.normal.load(EMPTY_MATRIX_3f);
 		return this;
 	}
 
@@ -64,12 +67,13 @@ public class ModelData extends BasicData implements Transform<ModelData> {
 			}
 
 			normal.mul(-1.0F);
+			return this;
 		}
 
 		float f = 1.0F / pX;
 		float f1 = 1.0F / pY;
 		float f2 = 1.0F / pZ;
-		float f3 = Mth.fastInvCubeRoot(f * f1 * f2);
+		float f3 = Mth.fastInvCubeRoot(Math.abs(f * f1 * f2));
 		normal.mul(Matrix3f.createScaleMatrix(f3 * f, f3 * f1, f3 * f2));
 		return this;
 	}

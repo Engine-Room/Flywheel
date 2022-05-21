@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.entity.BellBlockEntity;
 
 public class BellInstance extends BlockEntityInstance<BellBlockEntity> implements DynamicInstance {
 
-	private static final BasicModelSupplier MODEL = new BasicModelSupplier(BellInstance::createBellModel, new Material(Sheets.solidBlockSheet(), () -> MaterialShaders.SHADED_VERTEX, () -> MaterialShaders.DEFAULT_FRAGMENT));
+	private static final BasicModelSupplier MODEL = new BasicModelSupplier(BellInstance::createBellModel, new Material(Sheets.solidBlockSheet(), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT));
 
 	private final OrientedData bell;
 

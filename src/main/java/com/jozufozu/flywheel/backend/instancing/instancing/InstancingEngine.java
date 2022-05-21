@@ -214,7 +214,6 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		int dZ = cZ - originCoordinate.getZ();
 
 		if (Math.abs(dX) > MAX_ORIGIN_DISTANCE || Math.abs(dY) > MAX_ORIGIN_DISTANCE || Math.abs(dZ) > MAX_ORIGIN_DISTANCE) {
-
 			shiftListeners(cX, cY, cZ);
 		}
 	}
