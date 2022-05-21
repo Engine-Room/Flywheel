@@ -52,15 +52,23 @@ public class VanillaInstances {
 				.apply();
 
 		configure(EntityType.MINECART)
-				.alwaysSkipRender()
+				.skipRender(MinecartInstance::shouldSkipRender)
 				.factory(MinecartInstance::new)
 				.apply();
-		configure(EntityType.HOPPER_MINECART)
-				.alwaysSkipRender()
+		configure(EntityType.COMMAND_BLOCK_MINECART)
+				.skipRender(MinecartInstance::shouldSkipRender)
 				.factory(MinecartInstance::new)
 				.apply();
 		configure(EntityType.FURNACE_MINECART)
-				.alwaysSkipRender()
+				.skipRender(MinecartInstance::shouldSkipRender)
+				.factory(MinecartInstance::new)
+				.apply();
+		configure(EntityType.HOPPER_MINECART)
+				.skipRender(MinecartInstance::shouldSkipRender)
+				.factory(MinecartInstance::new)
+				.apply();
+		configure(EntityType.TNT_MINECART)
+				.skipRender(MinecartInstance::shouldSkipRender)
 				.factory(MinecartInstance::new)
 				.apply();
 	}

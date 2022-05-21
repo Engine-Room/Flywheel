@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.gl.shader;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL20;

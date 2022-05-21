@@ -15,7 +15,7 @@ import com.jozufozu.flywheel.util.NonNullSupplier;
 import net.minecraft.client.renderer.RenderType;
 
 public class BasicModelSupplier implements ModelSupplier {
-	private static final Material DEFAULT_MATERIAL = new Material(RenderType.solid(), () -> MaterialShaders.DEFAULT_VERTEX, () -> MaterialShaders.DEFAULT_FRAGMENT);
+	private static final Material DEFAULT_MATERIAL = new Material(RenderType.solid(), MaterialShaders.DEFAULT_VERTEX, MaterialShaders.DEFAULT_FRAGMENT);
 
 	private Material material;
 	private final Lazy<Mesh> supplier;

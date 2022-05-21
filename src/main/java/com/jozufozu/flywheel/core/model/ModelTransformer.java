@@ -271,12 +271,13 @@ public class ModelTransformer {
 				}
 
 				normal.mul(-1.0F);
+				return this;
 			}
 
 			float f = 1.0F / pX;
 			float f1 = 1.0F / pY;
 			float f2 = 1.0F / pZ;
-			float f3 = Mth.fastInvCubeRoot(f * f1 * f2);
+			float f3 = Mth.fastInvCubeRoot(Math.abs(f * f1 * f2));
 			normal.mul(Matrix3f.createScaleMatrix(f3 * f, f3 * f1, f3 * f2));
 			return this;
 		}

@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.core.compile;
 
-import java.util.Objects;
-
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;

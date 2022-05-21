@@ -9,11 +9,13 @@ import com.jozufozu.flywheel.config.BackendTypeArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.Contexts;
+import com.jozufozu.flywheel.core.GameStateRegistry;
 import com.jozufozu.flywheel.core.Models;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.StitchedSprite;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.material.MaterialShaders;
+import com.jozufozu.flywheel.core.shader.NormalDebugStateProvider;
 import com.jozufozu.flywheel.core.structs.InstanceShaders;
 import com.jozufozu.flywheel.core.vertex.LayoutShaders;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -85,6 +87,8 @@ public class Flywheel {
 		InstanceShaders.init();
 		Contexts.init();
 		MaterialShaders.init();
+
+		GameStateRegistry.register(NormalDebugStateProvider.INSTANCE);
 
 		VanillaInstances.init();
 

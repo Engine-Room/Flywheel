@@ -6,7 +6,6 @@ import com.jozufozu.flywheel.light.LightUpdater;
 import com.jozufozu.flywheel.util.WorldAttached;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.TickEvent;
