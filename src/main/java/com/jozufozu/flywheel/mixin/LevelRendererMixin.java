@@ -4,6 +4,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -15,7 +16,6 @@ import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
@@ -74,22 +74,10 @@ public class LevelRendererMixin {
 		MinecraftForge.EVENT_BUS.post(new ReloadRenderersEvent(level));
 	}
 
-
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;checkPoseStack(Lcom/mojang/blaze3d/vertex/PoseStack;)V", ordinal = 2 // after the game renders the breaking overlay normally
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderBuffers;crumblingBufferSource()Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;", ordinal = 2, shift = Shift.BY, by = 2 // after the game renders the breaking overlay normally
 	), method = "renderLevel")
-	private void renderBlockBreaking(PoseStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, Camera info, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f p_228426_9_, CallbackInfo ci) {
-		if (!Backend.isOn()) return;
-
-		Vec3 cameraPos = info.getPosition();
-
-		Matrix4f viewProjection = stack.last()
-				.pose()
-				.copy();
-		viewProjection.multiplyBackward(RenderSystem.getProjectionMatrix());
-
-		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
-		CrumblingRenderer.renderBreaking(level, stack, cameraPos.x, cameraPos.y, cameraPos.z, viewProjection);
-		restoreState.restore();
+	private void renderBlockBreaking(PoseStack poseStack, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
+		CrumblingRenderer.renderCrumbling((LevelRenderer) (Object) this, level, poseStack, camera, projectionMatrix);
 	}
 
 	// Instancing

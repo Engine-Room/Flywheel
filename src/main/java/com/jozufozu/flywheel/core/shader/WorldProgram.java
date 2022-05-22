@@ -40,6 +40,7 @@ public class WorldProgram extends GlProgram {
 		uLightMap = setSamplerBinding("uLightMap", 2);
 	}
 
+	// TODO: create uniform registry
 	public void uploadUniforms(double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
 		fog.uploadUniforms();
 		uploadTime(AnimationTickHolder.getRenderTime());

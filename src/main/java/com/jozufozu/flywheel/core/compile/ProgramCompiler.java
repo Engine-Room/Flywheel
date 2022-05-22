@@ -69,6 +69,7 @@ public class ProgramCompiler<P extends GlProgram> extends Memoizer<ProgramCompil
 
 	@Override
 	protected P _create(Context ctx) {
+		// TODO: try-catch here to prevent crashing if shaders failed to compile
 		return new ProgramAssembler(ctx.instanceShader().getFileLoc())
 				.attachShader(vertexCompiler.get(new VertexCompiler.Context(ctx.vertexType(), ctx.instanceShader().getFile(), ctx.vertexMaterialShader().getFile(), ctx.ctx())))
 				.attachShader(fragmentCompiler.get(new FragmentCompiler.Context(ctx.fragmentMaterialShader().getFile(), ctx.alphaDiscard(), ctx.fogType(), ctx.ctx())))

@@ -6,7 +6,7 @@ import java.util.Map;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.InstancerFactory;
-import com.jozufozu.flywheel.api.struct.Batched;
+import com.jozufozu.flywheel.api.struct.BatchedStructType;
 import com.jozufozu.flywheel.core.model.ModelSupplier;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -14,9 +14,9 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 public class CPUInstancerFactory<D extends InstanceData> implements InstancerFactory<D> {
 
 	protected final Map<ModelSupplier, CPUInstancer<D>> models;
-	private final Batched<D> type;
+	private final BatchedStructType<D> type;
 
-	public CPUInstancerFactory(Batched<D> type) {
+	public CPUInstancerFactory(BatchedStructType<D> type) {
 		this.type = type;
 
 		this.models = new HashMap<>();

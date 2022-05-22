@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.struct.Instanced;
+import com.jozufozu.flywheel.api.struct.InstancedStructType;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
@@ -44,7 +44,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	protected final ProgramCompiler<P> context;
 	private MeshPool allocator;
 
-	protected final Map<Instanced<? extends InstanceData>, GPUInstancerFactory<?>> factories = new HashMap<>();
+	protected final Map<InstancedStructType<? extends InstanceData>, GPUInstancerFactory<?>> factories = new HashMap<>();
 
 	protected final Set<RenderType> toRender = new HashSet<>();
 
@@ -62,7 +62,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	@NotNull
 	@Override
 	public <D extends InstanceData> GPUInstancerFactory<D> factory(StructType<D> type) {
-		if (type instanceof Instanced<D> instanced) {
+		if (type instanceof InstancedStructType<D> instanced) {
 			return (GPUInstancerFactory<D>) factories.computeIfAbsent(instanced, GPUInstancerFactory::new);
 		} else {
 			throw new ClassCastException("Cannot use type '" + type + "' with GPU instancing.");
@@ -108,8 +108,8 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		Textures.bindActiveTextures();
 		CoreShaderInfo coreShaderInfo = getCoreShaderInfo();
 
-		for (Map.Entry<Instanced<? extends InstanceData>, GPUInstancerFactory<?>> entry : factories.entrySet()) {
-			Instanced<? extends InstanceData> instanceType = entry.getKey();
+		for (Map.Entry<InstancedStructType<? extends InstanceData>, GPUInstancerFactory<?>> entry : factories.entrySet()) {
+			InstancedStructType<? extends InstanceData> instanceType = entry.getKey();
 			GPUInstancerFactory<?> factory = entry.getValue();
 
 			var materials = factory.materials.get(type);
@@ -146,7 +146,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		return coreShaderInfo;
 	}
 
-	protected P setup(Instanced<?> instanceType, Material material, CoreShaderInfo coreShaderInfo, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
+	protected P setup(InstancedStructType<?> instanceType, Material material, CoreShaderInfo coreShaderInfo, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
 		float alphaDiscard = coreShaderInfo.alphaDiscard();
 		if (alphaDiscard == 0) {
 			alphaDiscard = 0.0001f;
@@ -201,7 +201,6 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		}
 
 		allocator.flush();
-
 	}
 
 	private void checkOriginDistance(Camera info) {

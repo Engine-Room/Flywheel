@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
-import com.jozufozu.flywheel.api.struct.Batched;
+import com.jozufozu.flywheel.api.struct.BatchedStructType;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.BatchDrawingTracker;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
@@ -17,7 +17,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 
 	protected final RenderType state;
 
-	private final Map<Batched<? extends InstanceData>, CPUInstancerFactory<?>> materials = new HashMap<>();
+	private final Map<BatchedStructType<? extends InstanceData>, CPUInstancerFactory<?>> materials = new HashMap<>();
 	private int vertexCount;
 	private int instanceCount;
 
@@ -28,7 +28,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <D extends InstanceData> CPUInstancerFactory<D> material(StructType<D> type) {
-		if (type instanceof Batched<D> batched) {
+		if (type instanceof BatchedStructType<D> batched) {
 			return (CPUInstancerFactory<D>) materials.computeIfAbsent(batched, CPUInstancerFactory::new);
 		} else {
 			throw new ClassCastException("Cannot use type '" + type + "' with CPU instancing.");

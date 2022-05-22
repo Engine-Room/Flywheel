@@ -3,18 +3,31 @@
 
 uniform vec2 uFogRange;
 uniform vec4 uFogColor;
-uniform vec2 uTextureScale;
 
-uniform sampler2D uBlockAtlas;
-uniform sampler2D uCrumbling;
+uniform sampler2D uCrumblingTex;
 
 out vec4 fragColor;
 
+vec2 flattenedPos(vec3 pos, vec3 normal) {
+    pos -= floor(pos) + vec3(0.5);
+
+    float sinYRot = -normal.x;
+    float sqLength = normal.x * normal.x + normal.z * normal.z;
+    if (sqLength > 0) {
+        sinYRot /= sqrt(sqLength);
+        sinYRot = clamp(sinYRot, -1, 1);
+    }
+
+    vec3 tangent = vec3(sqrt(1 - sinYRot * sinYRot) * (normal.z < 0 ? -1 : 1), 0, sinYRot);
+    vec3 bitangent = cross(tangent, normal);
+    mat3 tbn = mat3(tangent, bitangent, normal);
+
+    // transpose is the same as inverse for orthonormal matrices
+    return (transpose(tbn) * pos).xy + vec2(0.5);
+}
+
 void flw_contextFragment() {
-    vec4 texColor = texture(uBlockAtlas, flw_vertexTexCoord);
-    vec4 crumblingColor = texture(uCrumbling, flw_vertexTexCoord * uTextureScale);
-    crumblingColor.a *= texColor.a;
-    vec4 color = flw_vertexColor * vec4(crumblingColor.rgb, crumblingColor.a);
+    vec4 color = texture(uCrumblingTex, flattenedPos(flw_vertexPos.xyz, flw_vertexNormal));
 
     #ifdef ALPHA_DISCARD
     if (color.a < ALPHA_DISCARD) {

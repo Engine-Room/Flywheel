@@ -30,6 +30,7 @@ public class GlShader extends GlObject {
 		GlCompat.safeShaderSource(handle, source);
 		GL20.glCompileShader(handle);
 
+		// TODO: control this via a JVM flag or other
 		dumpSource(source, type);
 
 //		String log = GL20.glGetShaderInfoLog(handle);

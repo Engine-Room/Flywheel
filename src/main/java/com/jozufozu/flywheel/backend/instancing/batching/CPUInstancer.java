@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.backend.instancing.batching;
 
 import com.jozufozu.flywheel.api.InstanceData;
-import com.jozufozu.flywheel.api.struct.Batched;
+import com.jozufozu.flywheel.api.struct.BatchedStructType;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
@@ -14,7 +14,7 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 //
 //	final ModelTransformer sbb;
 
-	public CPUInstancer(Batched<D> type) {
+	public CPUInstancer(BatchedStructType<D> type) {
 		super(type::create);
 //		batchingType = type;
 //
