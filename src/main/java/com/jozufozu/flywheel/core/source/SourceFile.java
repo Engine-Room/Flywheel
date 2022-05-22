@@ -246,6 +246,7 @@ public class SourceFile {
 
 			String fileName = file.get();
 			if (importedFiles.add(fileName)) {
+				// FIXME: creating imports after the first resource reload crashes the game
 				var checked = Import.create(errorReporter, use, file);
 				if (checked != null) {
 					imports.add(checked);

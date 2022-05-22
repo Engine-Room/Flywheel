@@ -141,19 +141,19 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		if (tick.shouldUpdate(dX, dY, dZ)) instance.tick();
 	}
 
-	public void beginFrame(TaskEngine taskEngine, Camera info) {
+	public void beginFrame(TaskEngine taskEngine, Camera camera) {
 		frame.tick();
 		processQueuedAdditions();
 
-		Vector3f look = info.getLookVector();
+		Vector3f look = camera.getLookVector();
 		float lookX = look.x();
 		float lookY = look.y();
 		float lookZ = look.z();
 
 		// integer camera pos
-		int cX = (int) info.getPosition().x;
-		int cY = (int) info.getPosition().y;
-		int cZ = (int) info.getPosition().z;
+		int cX = (int) camera.getPosition().x;
+		int cY = (int) camera.getPosition().y;
+		int cZ = (int) camera.getPosition().z;
 
 		ArrayList<DynamicInstance> instances = new ArrayList<>(dynamicInstances.values());
 		int incr = 500;

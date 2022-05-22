@@ -6,13 +6,15 @@ import java.util.Map;
 import java.util.SortedSet;
 
 import com.jozufozu.flywheel.api.InstanceData;
-import com.jozufozu.flywheel.api.struct.Instanced;
+import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.api.struct.InstancedStructType;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
+import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
 import com.jozufozu.flywheel.backend.instancing.instancing.GPUInstancerFactory;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
+import com.jozufozu.flywheel.backend.instancing.instancing.Renderable;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo;
 import com.jozufozu.flywheel.core.RenderContext;
@@ -20,34 +22,32 @@ import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
 import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.Textures;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+// TODO: merge directly into InstancingEngine for efficiency
 /**
- * Responsible for rendering the block breaking overlay for instanced block entities.
+ * Responsible for rendering the crumbling overlay for instanced block entities.
  */
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class CrumblingRenderer {
-
-	static RenderType _currentLayer;
 
 	private static Lazy<State> STATE;
 
@@ -55,66 +55,77 @@ public class CrumblingRenderer {
 		_init();
 	}
 
-	public static void renderBreaking(ClientLevel level, PoseStack stack, double x, double y, double z, Matrix4f viewProjection) {
-
+	public static void renderCrumbling(LevelRenderer levelRenderer, ClientLevel level, PoseStack poseStack, Camera camera, Matrix4f projectionMatrix) {
 		if (!Backend.canUseInstancing(level)) return;
 
-		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageBlockEntities(level);
-
+		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageBlockEntities(levelRenderer, level);
 		if (activeStages.isEmpty()) return;
+
+		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
+
+		Matrix4f viewProjection = poseStack.last()
+				.pose()
+				.copy();
+		viewProjection.multiplyBackward(projectionMatrix);
 
 		State state = STATE.get();
 		var instanceManager = state.instanceManager;
 		var engine = state.instancerManager;
 
-		TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-		Camera info = Minecraft.getInstance().gameRenderer.getMainCamera();
+		renderCrumblingInner(activeStages, instanceManager, engine, level, poseStack, camera, viewProjection);
+
+		restoreState.restore();
+	}
+
+	private static void renderCrumblingInner(Int2ObjectMap<List<BlockEntity>> activeStages, InstanceManager<BlockEntity> instanceManager, CrumblingEngine engine, ClientLevel level, PoseStack stack, Camera camera, Matrix4f viewProjection) {
+		Vec3 cameraPos = camera.getPosition();
+		RenderContext ctx = new RenderContext(level, stack, viewProjection, null, cameraPos.x, cameraPos.y, cameraPos.z);
 
 		for (Int2ObjectMap.Entry<List<BlockEntity>> stage : activeStages.int2ObjectEntrySet()) {
-			_currentLayer = ModelBakery.DESTROY_TYPES.get(stage.getIntKey());
+			RenderType currentLayer = ModelBakery.DESTROY_TYPES.get(stage.getIntKey());
 
 			// something about when we call this means that the textures are not ready for use on the first frame they should appear
-			if (_currentLayer != null) {
+			if (currentLayer != null) {
+				engine.currentLayer = currentLayer;
+
 				stage.getValue().forEach(instanceManager::add);
 
-				instanceManager.beginFrame(SerialTaskEngine.INSTANCE, info);
-				engine.beginFrame(info);
-
-				var ctx = new RenderContext(level, stack, viewProjection, null, x, y, z);
+				instanceManager.beginFrame(SerialTaskEngine.INSTANCE, camera);
+				engine.beginFrame(camera);
 
 				engine.renderAllRemaining(SerialTaskEngine.INSTANCE, ctx);
 
 				instanceManager.invalidate();
 			}
-
 		}
-
-		GlTextureUnit.T0.makeActive();
-		AbstractTexture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(0));
-		if (breaking != null) RenderSystem.bindTexture(breaking.getId());
 	}
 
 	/**
 	 * Associate each breaking stage with a list of all block entities at that stage.
 	 */
-	private static Int2ObjectMap<List<BlockEntity>> getActiveStageBlockEntities(ClientLevel world) {
+	private static Int2ObjectMap<List<BlockEntity>> getActiveStageBlockEntities(LevelRenderer levelRenderer, ClientLevel level) {
+		Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress = ((LevelRendererAccessor) levelRenderer).flywheel$getDestructionProgress();
+		if (destructionProgress.isEmpty()) {
+			return Int2ObjectMaps.emptyMap();
+		}
 
 		Int2ObjectMap<List<BlockEntity>> breakingEntities = new Int2ObjectArrayMap<>();
+		BlockPos.MutableBlockPos breakingPos = new BlockPos.MutableBlockPos();
 
-		for (Long2ObjectMap.Entry<SortedSet<BlockDestructionProgress>> entry : ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).flywheel$getDestructionProgress()
-				.long2ObjectEntrySet()) {
-			BlockPos breakingPos = BlockPos.of(entry.getLongKey());
+		for (Long2ObjectMap.Entry<SortedSet<BlockDestructionProgress>> entry : destructionProgress.long2ObjectEntrySet()) {
+			breakingPos.set(entry.getLongKey());
 
 			SortedSet<BlockDestructionProgress> progresses = entry.getValue();
 			if (progresses != null && !progresses.isEmpty()) {
-				int blockDamage = progresses.last()
+				int progress = progresses.last()
 						.getProgress();
+				if (progress >= 0) {
+					BlockEntity blockEntity = level.getBlockEntity(breakingPos);
 
-				BlockEntity blockEntity = world.getBlockEntity(breakingPos);
-
-				if (blockEntity != null) {
-					List<BlockEntity> blockEntities = breakingEntities.computeIfAbsent(blockDamage, $ -> new ArrayList<>());
-					blockEntities.add(blockEntity);
+					if (blockEntity != null) {
+						List<BlockEntity> blockEntities = breakingEntities.computeIfAbsent(progress, $ -> new ArrayList<>());
+						blockEntities.add(blockEntity);
+					}
 				}
 			}
 		}
@@ -156,6 +167,7 @@ public class CrumblingRenderer {
 	}
 
 	private static class CrumblingEngine extends InstancingEngine<CrumblingProgram> {
+		private RenderType currentLayer;
 
 		public CrumblingEngine() {
 			super(Contexts.CRUMBLING);
@@ -163,42 +175,32 @@ public class CrumblingRenderer {
 
 		@Override
 		protected void render(RenderType type, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
-			type.setupRenderState();
-
-			int renderTex = RenderSystem.getShaderTexture(0);
-
-			AtlasInfo.SheetSize sheetSize = AtlasInfo.getSheetSize(Textures.getShaderTexture(0));
-
-			int width;
-			int height;
-			if (sheetSize != null) {
-				width = sheetSize.width();
-				height = sheetSize.height();
-			} else {
-				width = height = 256;
+			if (!type.affectsCrumbling()) {
+				return;
 			}
 
-			type.clearRenderState();
-
-			CrumblingRenderer._currentLayer.setupRenderState();
-
-			int breakingTex = RenderSystem.getShaderTexture(0);
-
-			RenderSystem.setShaderTexture(0, renderTex);
-			RenderSystem.setShaderTexture(4, breakingTex);
-
+			currentLayer.setupRenderState();
 			Textures.bindActiveTextures();
 			CoreShaderInfo coreShaderInfo = getCoreShaderInfo();
 
-			for (Map.Entry<Instanced<? extends InstanceData>, GPUInstancerFactory<?>> entry : factories.entrySet()) {
-				//CrumblingProgram program = setup(entry.getKey(), coreShaderInfo, camX, camY, camZ, viewProjection, level);
+			for (Map.Entry<InstancedStructType<? extends InstanceData>, GPUInstancerFactory<?>> entry : factories.entrySet()) {
+				InstancedStructType<? extends InstanceData> instanceType = entry.getKey();
+				GPUInstancerFactory<?> factory = entry.getValue();
 
-				//program.setAtlasSize(width, height);
+				var materials = factory.materials.get(type);
+				for (Material material : materials) {
+					var toRender = factory.renderables.get(material);
+					toRender.removeIf(Renderable::shouldRemove);
 
-				//entry.getValue().getAllRenderables().forEach(Renderable::draw);
+					if (!toRender.isEmpty()) {
+						setup(instanceType, material, coreShaderInfo, camX, camY, camZ, viewProjection, level);
+
+						toRender.forEach(Renderable::render);
+					}
+				}
 			}
 
-			CrumblingRenderer._currentLayer.clearRenderState();
+			currentLayer.clearRenderState();
 		}
 	}
 }

@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.core.structs.model;
 
-import com.jozufozu.flywheel.api.struct.Batched;
-import com.jozufozu.flywheel.api.struct.Instanced;
+import com.jozufozu.flywheel.api.struct.BatchedStructType;
+import com.jozufozu.flywheel.api.struct.InstancedStructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
@@ -10,7 +10,7 @@ import com.jozufozu.flywheel.core.model.ModelTransformer;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.structs.InstanceShaders;
 
-public class ModelType implements Instanced<ModelData>, Batched<ModelData> {
+public class ModelType implements InstancedStructType<ModelData>, BatchedStructType<ModelData> {
 
 	public static final BufferLayout FORMAT = BufferLayout.builder()
 			.addItems(CommonItems.LIGHT, CommonItems.RGBA)

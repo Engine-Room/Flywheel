@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.core.structs.oriented;
 
-import com.jozufozu.flywheel.api.struct.Batched;
-import com.jozufozu.flywheel.api.struct.Instanced;
+import com.jozufozu.flywheel.api.struct.BatchedStructType;
+import com.jozufozu.flywheel.api.struct.InstancedStructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.structs.InstanceShaders;
 import com.mojang.math.Quaternion;
 
-public class OrientedType implements Instanced<OrientedData>, Batched<OrientedData> {
+public class OrientedType implements InstancedStructType<OrientedData>, BatchedStructType<OrientedData> {
 
 	public static final BufferLayout FORMAT = BufferLayout.builder()
 			.addItems(CommonItems.LIGHT, CommonItems.RGBA)
