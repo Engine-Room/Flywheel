@@ -17,4 +17,9 @@ public class ReloadRenderersEvent extends EventContext {
 	public ClientLevel getWorld() {
 		return world;
 	}
+
+	@Override
+	public boolean isCancelable() {
+		return true;
+	}
 }

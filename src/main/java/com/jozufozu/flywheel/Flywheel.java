@@ -53,7 +53,7 @@ public class Flywheel implements ClientModInitializer {
 
 		Backend.init();
 
-		FlywheelEvents.RELOAD_RENDERERS.register(ProgramCompiler::invalidateAll);
+		FlywheelEvents.RELOAD_RENDERERS.register(FlywheelEvents.MAIN_STAGE, ProgramCompiler::invalidateAll);
 
 		FlywheelEvents.GATHER_CONTEXT.register(Contexts::flwInit);
 		ModelLoadingRegistry.INSTANCE.registerModelProvider(PartialModel::onModelRegistry);
@@ -65,9 +65,9 @@ public class Flywheel implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(InstancedRenderDispatcher::tick);
 		FlywheelEvents.BEGIN_FRAME.register(InstancedRenderDispatcher::onBeginFrame);
 		FlywheelEvents.RENDER_LAYER.register(InstancedRenderDispatcher::renderLayer);
-		FlywheelEvents.RELOAD_RENDERERS.register(InstancedRenderDispatcher::onReloadRenderers);
-		FlywheelEvents.RELOAD_RENDERERS.register(QuadConverter::onRendererReload);
-		FlywheelEvents.RELOAD_RENDERERS.register(CrumblingRenderer::onReloadRenderers);
+		FlywheelEvents.RELOAD_RENDERERS.register(FlywheelEvents.MAIN_STAGE, InstancedRenderDispatcher::onReloadRenderers);
+		FlywheelEvents.RELOAD_RENDERERS.register(FlywheelEvents.MAIN_STAGE, QuadConverter::onRendererReload);
+		FlywheelEvents.RELOAD_RENDERERS.register(FlywheelEvents.MAIN_STAGE, CrumblingRenderer::onReloadRenderers);
 		ClientEntityEvents.ENTITY_LOAD.register(EntityWorldHandler::onEntityJoinWorld);
 		ClientEntityEvents.ENTITY_UNLOAD.register(EntityWorldHandler::onEntityLeaveWorld);
 		ClientTickEvents.END_CLIENT_TICK.register(ForgeEvents::tickLight);
