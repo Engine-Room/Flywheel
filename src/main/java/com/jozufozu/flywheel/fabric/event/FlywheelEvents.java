@@ -11,13 +11,12 @@ import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.resources.ResourceLocation;
 
 public final class FlywheelEvents {
+	public static final ResourceLocation PRE_PHASE = new ResourceLocation("flywheel:pre_phase");
+
 	public static final Event<Listener<BeginFrameEvent>> BEGIN_FRAME = createSimple();
 	public static final Event<Listener<GatherContextEvent>> GATHER_CONTEXT = createSimple();
 	public static final Event<Listener<ReloadRenderersEvent>> RELOAD_RENDERERS = createSimple();
 	public static final Event<Listener<RenderLayerEvent>> RENDER_LAYER = createSimple();
-
-	public static final ResourceLocation PRE_STAGE = new ResourceLocation("flywheel:pre_stage");
-	public static final ResourceLocation MAIN_STAGE = new ResourceLocation("flywheel:main_stage");
 
 	private static <C extends EventContext> Event<Listener<C>> createSimple() {
 		return EventFactory.createWithPhases(Listener.class,
@@ -29,7 +28,7 @@ public final class FlywheelEvents {
 						return;
 					}
 				}
-			}, PRE_STAGE, MAIN_STAGE
+			}, PRE_PHASE, Event.DEFAULT_PHASE
 		);
 	}
 }

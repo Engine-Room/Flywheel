@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel;
 
+import net.fabricmc.fabric.api.event.Event;
+
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.backend.Backend;
@@ -53,7 +55,7 @@ public class Flywheel implements ClientModInitializer {
 
 		Backend.init();
 
-		FlywheelEvents.RELOAD_RENDERERS.register(FlywheelEvents.MAIN_STAGE, ProgramCompiler::invalidateAll);
+		FlywheelEvents.RELOAD_RENDERERS.register(Event.DEFAULT_PHASE, ProgramCompiler::invalidateAll);
 
 		FlywheelEvents.GATHER_CONTEXT.register(Contexts::flwInit);
 		ModelLoadingRegistry.INSTANCE.registerModelProvider(PartialModel::onModelRegistry);
@@ -65,9 +67,9 @@ public class Flywheel implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(InstancedRenderDispatcher::tick);
 		FlywheelEvents.BEGIN_FRAME.register(InstancedRenderDispatcher::onBeginFrame);
 		FlywheelEvents.RENDER_LAYER.register(InstancedRenderDispatcher::renderLayer);
-		FlywheelEvents.RELOAD_RENDERERS.register(FlywheelEvents.MAIN_STAGE, InstancedRenderDispatcher::onReloadRenderers);
-		FlywheelEvents.RELOAD_RENDERERS.register(FlywheelEvents.MAIN_STAGE, QuadConverter::onRendererReload);
-		FlywheelEvents.RELOAD_RENDERERS.register(FlywheelEvents.MAIN_STAGE, CrumblingRenderer::onReloadRenderers);
+		FlywheelEvents.RELOAD_RENDERERS.register(Event.DEFAULT_PHASE, InstancedRenderDispatcher::onReloadRenderers);
+		FlywheelEvents.RELOAD_RENDERERS.register(Event.DEFAULT_PHASE, QuadConverter::onRendererReload);
+		FlywheelEvents.RELOAD_RENDERERS.register(Event.DEFAULT_PHASE, CrumblingRenderer::onReloadRenderers);
 		ClientEntityEvents.ENTITY_LOAD.register(EntityWorldHandler::onEntityJoinWorld);
 		ClientEntityEvents.ENTITY_UNLOAD.register(EntityWorldHandler::onEntityLeaveWorld);
 		ClientTickEvents.END_CLIENT_TICK.register(ForgeEvents::tickLight);
