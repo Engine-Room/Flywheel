@@ -2,8 +2,7 @@ package com.jozufozu.flywheel.core.structs.oriented;
 
 import java.nio.ByteBuffer;
 
-import com.jozufozu.flywheel.api.struct.BatchedStructType;
-import com.jozufozu.flywheel.api.struct.InstancedStructType;
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
@@ -12,7 +11,7 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.structs.InstanceShaders;
 import com.mojang.math.Quaternion;
 
-public class OrientedType implements InstancedStructType<OrientedData>, BatchedStructType<OrientedData> {
+public class OrientedType implements StructType<OrientedData> {
 
 	public static final BufferLayout FORMAT = BufferLayout.builder()
 			.addItems(CommonItems.LIGHT, CommonItems.RGBA)

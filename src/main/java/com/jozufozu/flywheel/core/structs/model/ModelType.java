@@ -2,8 +2,7 @@ package com.jozufozu.flywheel.core.structs.model;
 
 import java.nio.ByteBuffer;
 
-import com.jozufozu.flywheel.api.struct.BatchedStructType;
-import com.jozufozu.flywheel.api.struct.InstancedStructType;
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
@@ -11,7 +10,7 @@ import com.jozufozu.flywheel.core.model.ModelTransformer;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.structs.InstanceShaders;
 
-public class ModelType implements InstancedStructType<ModelData>, BatchedStructType<ModelData> {
+public class ModelType implements StructType<ModelData> {
 
 	public static final BufferLayout FORMAT = BufferLayout.builder()
 			.addItems(CommonItems.LIGHT, CommonItems.RGBA)

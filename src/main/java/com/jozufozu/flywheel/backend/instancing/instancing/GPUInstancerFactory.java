@@ -12,7 +12,7 @@ import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.InstancerFactory;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.struct.InstancedStructType;
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.model.MeshPool;
 import com.jozufozu.flywheel.core.model.ModelSupplier;
 
@@ -25,7 +25,7 @@ import net.minecraft.client.renderer.RenderType;
 public class GPUInstancerFactory<D extends InstanceData> implements InstancerFactory<D> {
 
 	protected final Map<ModelSupplier, InstancedModel<D>> models = new HashMap<>();
-	protected final InstancedStructType<D> type;
+	protected final StructType<D> type;
 
 	protected final List<InstancedModel<D>> uninitialized = new ArrayList<>();
 
@@ -33,7 +33,7 @@ public class GPUInstancerFactory<D extends InstanceData> implements InstancerFac
 	public final Multimap<RenderType, Material> materials = HashMultimap.create();
 	public final Multimap<Material, Renderable> renderables = ArrayListMultimap.create();
 
-	public GPUInstancerFactory(InstancedStructType<D> type) {
+	public GPUInstancerFactory(StructType<D> type) {
 		this.type = type;
 	}
 

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.InstanceData;
-import com.jozufozu.flywheel.api.struct.InstancedStructType;
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
@@ -17,7 +17,7 @@ import com.jozufozu.flywheel.core.layout.BufferLayout;
 public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 	final BufferLayout instanceFormat;
-	final InstancedStructType<D> instancedType;
+	final StructType<D> instancedType;
 
 	GlBuffer vbo;
 	int attributeBaseIndex;
@@ -25,7 +25,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 	boolean anyToUpdate;
 
-	public GPUInstancer(InstancedStructType<D> type) {
+	public GPUInstancer(StructType<D> type) {
 		super(type::create);
 		this.instanceFormat = type.getLayout();
 		instancedType = type;
