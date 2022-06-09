@@ -1,14 +1,15 @@
 package com.jozufozu.flywheel.core.structs.model;
 
+import java.nio.ByteBuffer;
+
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.structs.BasicWriterUnsafe;
 import com.jozufozu.flywheel.util.MatrixWrite;
 
 public class ModelWriterUnsafe extends BasicWriterUnsafe<ModelData> {
 
-	public ModelWriterUnsafe(VecBuffer backingBuffer, StructType<ModelData> vertexType) {
-		super(backingBuffer, vertexType);
+	public ModelWriterUnsafe(StructType<ModelData> structType, ByteBuffer byteBuffer) {
+		super(structType, byteBuffer);
 	}
 
 	@Override

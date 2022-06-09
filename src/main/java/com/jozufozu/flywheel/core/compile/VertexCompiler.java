@@ -6,7 +6,7 @@ import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
-import com.jozufozu.flywheel.core.source.FileIndexImpl;
+import com.jozufozu.flywheel.core.source.FileIndex;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.SourceFile;
 import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
@@ -34,7 +34,7 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 		shaderConstants.writeInto(finalSource);
 		finalSource.append('\n');
 
-		var index = new FileIndexImpl();
+		var index = new FileIndex();
 
 		// LAYOUT
 
@@ -64,7 +64,11 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 				.orElseThrow();
 		finalSource.append(generateFooter(key.vertexType, instanceStruct));
 
-		return new GlShader(finalSource.toString(), ShaderType.VERTEX, ImmutableList.of(layoutShader.name, instanceShader.name, materialShader.name, contextShaderSource.name), shaderConstants);
+		try {
+			return new GlShader(finalSource.toString(), ShaderType.VERTEX, ImmutableList.of(layoutShader.name, instanceShader.name, materialShader.name, contextShaderSource.name), shaderConstants);
+		} catch (ShaderCompilationException e) {
+			throw e.withErrorLog(index);
+		}
 	}
 
 	protected String generateFooter(VertexType vertexType, ShaderStruct instance) {

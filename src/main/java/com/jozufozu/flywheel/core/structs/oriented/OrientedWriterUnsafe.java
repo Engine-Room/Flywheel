@@ -1,14 +1,15 @@
 package com.jozufozu.flywheel.core.structs.oriented;
 
+import java.nio.ByteBuffer;
+
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.structs.BasicWriterUnsafe;
 
 public class OrientedWriterUnsafe extends BasicWriterUnsafe<OrientedData> {
-	public OrientedWriterUnsafe(VecBuffer backingBuffer, StructType<OrientedData> vertexType) {
-		super(backingBuffer, vertexType);
+	public OrientedWriterUnsafe(StructType<OrientedData> structType, ByteBuffer byteBuffer) {
+		super(structType, byteBuffer);
 	}
 
 	@Override

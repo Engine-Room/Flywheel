@@ -1,6 +1,10 @@
 package com.jozufozu.flywheel.event;
 
+import java.util.ArrayList;
+
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.FlywheelMemory;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.light.LightUpdater;
 import com.jozufozu.flywheel.util.WorldAttached;
@@ -21,7 +25,15 @@ public class ForgeEvents {
 
 		if (Minecraft.getInstance().options.renderDebug) {
 
-			InstancedRenderDispatcher.getDebugString(event.getRight());
+			ArrayList<String> debug = event.getRight();
+			debug.add("");
+			debug.add("Flywheel: " + Flywheel.getVersion());
+
+			InstancedRenderDispatcher.getDebugString(debug);
+
+			debug.add("Memory used:");
+			debug.add("GPU: " + FlywheelMemory.getGPUMemory());
+			debug.add("CPU: " + FlywheelMemory.getCPUMemory());
 		}
 	}
 

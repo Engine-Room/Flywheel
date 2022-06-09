@@ -19,22 +19,20 @@ public class MultiBufferSourceMixin {
 	@Inject(method = "endBatch(Lnet/minecraft/client/renderer/RenderType;)V", at = @At("TAIL"))
 	private void renderLayer(RenderType renderType, CallbackInfo ci) {
 		if (RenderContext.CURRENT != null && Backend.isGameActive() && Backend.isOn()) {
-			GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
+			try (var restoreState = GlStateTracker.getRestoreState()) {
 
-			InstancedRenderDispatcher.renderSpecificType(RenderContext.CURRENT, renderType);
+				InstancedRenderDispatcher.renderSpecificType(RenderContext.CURRENT, renderType);
 
-			restoreState.restore();
+			}
 		}
 	}
 
 	@Inject(method = "endBatch()V", at = @At("TAIL"))
 	private void endBatch(CallbackInfo ci) {
 		if (RenderContext.CURRENT != null && Backend.isGameActive() && Backend.isOn()) {
-			GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
-
-			InstancedRenderDispatcher.renderAllRemaining(RenderContext.CURRENT);
-
-			restoreState.restore();
+			try (var restoreState = GlStateTracker.getRestoreState()) {
+				InstancedRenderDispatcher.renderAllRemaining(RenderContext.CURRENT);
+			}
 		}
 	}
 }

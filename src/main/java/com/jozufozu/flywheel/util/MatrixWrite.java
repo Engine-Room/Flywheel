@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.util;
 
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
+import java.nio.ByteBuffer;
 
 /**
  * @see com.jozufozu.flywheel.mixin.matrix.Matrix3fMixin
@@ -13,5 +13,5 @@ public interface MatrixWrite {
 	 */
 	void flywheel$writeUnsafe(long ptr);
 
-	void flywheel$write(VecBuffer buf);
+	void flywheel$write(ByteBuffer buf);
 }

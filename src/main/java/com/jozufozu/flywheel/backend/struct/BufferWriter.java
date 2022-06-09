@@ -1,18 +1,19 @@
 package com.jozufozu.flywheel.backend.struct;
 
+import java.nio.ByteBuffer;
+
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 
 public abstract class BufferWriter<S> implements StructWriter<S> {
-	protected final VecBuffer backingBuffer;
+	protected final ByteBuffer backingBuffer;
 
 	protected final int stride;
 
-	protected BufferWriter(VecBuffer backingBuffer, StructType<S> vertexType) {
-		this.backingBuffer = backingBuffer;
+	protected BufferWriter(StructType<S> structType, ByteBuffer byteBuffer) {
+		this.backingBuffer = byteBuffer;
 
-		this.stride = vertexType.getLayout().getStride();
+		this.stride = structType.getLayout().getStride();
 	}
 
 	@Override

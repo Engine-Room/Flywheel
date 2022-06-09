@@ -5,6 +5,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.model.MeshPool;
 import com.jozufozu.flywheel.core.model.Mesh;
@@ -44,7 +45,7 @@ public class InstancedModel<D extends InstanceData> {
 		private Layer(MeshPool allocator, Material material, Mesh mesh) {
 			this.material = material;
 			vao = new GlVertexArray();
-			bufferedMesh = allocator.alloc(mesh, vao);
+			bufferedMesh = allocator.alloc(mesh);
 			instancer.attributeBaseIndex = bufferedMesh.getAttributeCount();
 			vao.enableArrays(bufferedMesh.getAttributeCount() + instancer.instanceFormat.getAttributeCount());
 		}
@@ -53,16 +54,17 @@ public class InstancedModel<D extends InstanceData> {
 		public void render() {
 			if (invalid()) return;
 
-			vao.bind();
+			try (var ignored = GlStateTracker.getRestoreState()) {
 
-			instancer.renderSetup(vao);
+				instancer.renderSetup(vao);
 
-			if (instancer.glInstanceCount > 0) {
-				bufferedMesh.drawInstances(instancer.glInstanceCount);
+				if (instancer.glInstanceCount > 0) {
+					bufferedMesh.drawInstances(vao, instancer.glInstanceCount);
+				}
+
+				// persistent mapping sync point
+				instancer.vbo.doneForThisFrame();
 			}
-
-			// persistent mapping sync point
-			instancer.vbo.doneForThisFrame();
 		}
 
 		@Override

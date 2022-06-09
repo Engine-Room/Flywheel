@@ -43,6 +43,7 @@ minecraft {
             property 'forge.logging.markers', ''
             property 'forge.logging.console.level', 'debug'
             property 'mixin.debug.export', 'true'
+            property 'flw.dumpShaderSource', 'true'
 
             arg '-mixin.config=flywheel.mixins.json'
 

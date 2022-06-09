@@ -12,9 +12,10 @@ vec2 flattenedPos(vec3 pos, vec3 normal) {
     pos -= floor(pos) + vec3(0.5);
 
     float sinYRot = -normal.x;
-    float sqLength = normal.x * normal.x + normal.z * normal.z;
+    vec2 XZ = normal.xz;
+    float sqLength = dot(XZ, XZ);
     if (sqLength > 0) {
-        sinYRot /= sqrt(sqLength);
+        sinYRot *= inversesqrt(sqLength);
         sinYRot = clamp(sinYRot, -1, 1);
     }
 

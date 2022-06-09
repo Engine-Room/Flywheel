@@ -1,9 +1,10 @@
 package com.jozufozu.flywheel.core.structs.oriented;
 
+import java.nio.ByteBuffer;
+
 import com.jozufozu.flywheel.api.struct.BatchedStructType;
 import com.jozufozu.flywheel.api.struct.InstancedStructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
 import com.jozufozu.flywheel.core.model.ModelTransformer;
@@ -29,8 +30,8 @@ public class OrientedType implements InstancedStructType<OrientedData>, BatchedS
 	}
 
 	@Override
-	public StructWriter<OrientedData> getWriter(VecBuffer backing) {
-		return new OrientedWriterUnsafe(backing, this);
+	public StructWriter<OrientedData> getWriter(ByteBuffer backing) {
+		return new OrientedWriterUnsafe(this, backing);
 	}
 
 	@Override

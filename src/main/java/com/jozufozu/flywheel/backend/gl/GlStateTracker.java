@@ -40,7 +40,7 @@ public class GlStateTracker {
 		return new State(buffers.clone(), vao, program);
 	}
 
-	public static record State(int[] buffers, int vao, int program) {
+	public record State(int[] buffers, int vao, int program) implements AutoCloseable {
 		public void restore() {
 			GlBufferType[] values = GlBufferType.values();
 
@@ -57,6 +57,11 @@ public class GlStateTracker {
 			if (program != GlStateTracker.program) {
 				GlStateManager._glUseProgram(program);
 			}
+		}
+
+		@Override
+		public void close() {
+			restore();
 		}
 	}
 }

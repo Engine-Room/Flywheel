@@ -46,20 +46,19 @@ public class LevelRendererMixin {
 		Vec3 position = pCamera.getPosition();
 		RenderContext.CURRENT = new RenderContext(level, pPoseStack, RenderLayerEvent.createViewProjection(pPoseStack), renderBuffers, position.x, position.y, position.z);
 
-		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
-		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, pCamera, null));
-		restoreState.restore();
+		try (var restoreState = GlStateTracker.getRestoreState()) {
+			MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, pCamera, null));
+		}
 	}
 
 	@Inject(at = @At("TAIL"), method = "renderChunkLayer")
 	private void renderChunkLayer(RenderType pRenderType, PoseStack pPoseStack, double pCamX, double pCamY, double pCamZ, Matrix4f pProjectionMatrix, CallbackInfo ci) {
-		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
+		try (var restoreState = GlStateTracker.getRestoreState()) {
 
-		// TODO: Is this necessary?
-		InstancedRenderDispatcher.renderSpecificType(RenderContext.CURRENT, pRenderType);
-		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(RenderContext.CURRENT, pRenderType));
-
-		restoreState.restore();
+			// TODO: Is this necessary?
+			InstancedRenderDispatcher.renderSpecificType(RenderContext.CURRENT, pRenderType);
+			MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(RenderContext.CURRENT, pRenderType));
+		}
 	}
 
 	@Inject(at = @At("TAIL"), method = "renderLevel")

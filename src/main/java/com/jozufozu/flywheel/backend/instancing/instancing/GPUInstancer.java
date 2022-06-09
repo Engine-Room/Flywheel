@@ -3,8 +3,6 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.lwjgl.system.MemoryUtil;
-
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.struct.InstancedStructType;
@@ -56,65 +54,48 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 			removeDeletedInstances();
 		}
 
-		vbo.bind();
-
-		if (!realloc()) {
-
+		if (checkAndGrowBuffer()) {
+			// The instance vbo has moved, so we need to re-bind attributes
 			boundTo.clear();
-
-			if (anyToRemove) {
-				clearBufferTail();
-			}
-
-			if (anyToUpdate) {
-				updateBuffer();
-			}
-
-			glInstanceCount = data.size();
 		}
+
+		if (anyToUpdate) {
+			clearAndUpdateBuffer();
+		}
+
+		glInstanceCount = data.size();
 
 		if (boundTo.add(vao)) {
 			bindInstanceAttributes(vao);
 		}
 
-		vbo.unbind();
-
 		anyToRemove = anyToUpdate = false;
 	}
 
-	private void clearBufferTail() {
-		int size = data.size();
-		final int offset = size * instanceFormat.getStride();
-		final long length = vbo.getCapacity() - offset;
-		if (length > 0) {
-			try (MappedBuffer buf = vbo.getBuffer(offset, length)) {
-				MemoryUtil.memSet(MemoryUtil.memAddress(buf.unwrap()), 0, length);
-			} catch (Exception e) {
-				Flywheel.LOGGER.error("Error clearing buffer tail:", e);
-			}
-		}
-	}
-
-	private void updateBuffer() {
+	private void clearAndUpdateBuffer() {
 		final int size = data.size();
+		final long clearStart = (long) size * instanceFormat.getStride();
+		final long clearLength = vbo.getSize() - clearStart;
 
-		if (size <= 0) return;
+		try (MappedBuffer buf = vbo.map()) {
+			buf.clear(clearStart, clearLength);
 
-		try (MappedBuffer mapped = vbo.getBuffer()) {
+			if (size > 0) {
 
-			final StructWriter<D> writer = instancedType.getWriter(mapped);
+				final StructWriter<D> writer = instancedType.getWriter(buf.unwrap());
 
-			boolean sequential = true;
-			for (int i = 0; i < size; i++) {
-				final D element = data.get(i);
-				if (element.checkDirtyAndClear()) {
-					if (!sequential) {
-						writer.seek(i);
+				boolean sequential = true;
+				for (int i = 0; i < size; i++) {
+					final D element = data.get(i);
+					if (element.checkDirtyAndClear()) {
+						if (!sequential) {
+							writer.seek(i);
+						}
+						writer.write(element);
+						sequential = true;
+					} else {
+						sequential = false;
 					}
-					writer.write(element);
-					sequential = true;
-				} else {
-					sequential = false;
 				}
 			}
 		} catch (Exception e) {
@@ -122,33 +103,22 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		}
 	}
 
-	private boolean realloc() {
+	/**
+	 * @return {@code true} if the buffer moved.
+	 */
+	private boolean checkAndGrowBuffer() {
 		int size = this.data.size();
 		int stride = instanceFormat.getStride();
 		int requiredSize = size * stride;
-		if (vbo.ensureCapacity(requiredSize)) {
 
-			try (MappedBuffer buffer = vbo.getBuffer()) {
-				StructWriter<D> writer = instancedType.getWriter(buffer);
-				for (D datum : data) {
-					writer.write(datum);
-				}
-			} catch (Exception e) {
-				Flywheel.LOGGER.error("Error reallocating GPUInstancer:", e);
-			}
-
-			glInstanceCount = size;
-
-			return true;
-		}
-		return false;
+		return vbo.ensureCapacity(requiredSize);
 	}
 
 	private void bindInstanceAttributes(GlVertexArray vao) {
-		vao.bindAttributes(attributeBaseIndex, instanceFormat);
+		vao.bindAttributes(this.vbo, this.attributeBaseIndex, this.instanceFormat);
 
-		for (int i = 0; i < instanceFormat.getAttributeCount(); i++) {
-			vao.setAttributeDivisor(attributeBaseIndex + i, 1);
+		for (int i = 0; i < this.instanceFormat.getAttributeCount(); i++) {
+			vao.setAttributeDivisor(this.attributeBaseIndex + i, 1);
 		}
 	}
 }

@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo.FogType;
 import com.jozufozu.flywheel.core.shader.ShaderConstants;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
-import com.jozufozu.flywheel.core.source.FileIndexImpl;
+import com.jozufozu.flywheel.core.source.FileIndex;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.SourceFile;
 
@@ -33,7 +33,7 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 		shaderConstants.writeInto(finalSource);
 		finalSource.append('\n');
 
-		FileIndexImpl index = new FileIndexImpl();
+		FileIndex index = new FileIndex();
 
 		// MATERIAL
 
@@ -49,7 +49,11 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 
 		finalSource.append(generateFooter());
 
-		return new GlShader(finalSource.toString(), ShaderType.FRAGMENT, ImmutableList.of(materialShader.name, contextShaderSource.name), shaderConstants);
+		try {
+			return new GlShader(finalSource.toString(), ShaderType.FRAGMENT, ImmutableList.of(materialShader.name, contextShaderSource.name), shaderConstants);
+		} catch (ShaderCompilationException e) {
+			throw e.withErrorLog(index);
+		}
 	}
 
 	protected String generateFooter() {

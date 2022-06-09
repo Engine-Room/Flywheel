@@ -1,7 +1,9 @@
 package com.jozufozu.flywheel.backend.instancing;
 
+import java.lang.ref.Cleaner;
 import java.nio.ByteBuffer;
 
+import com.jozufozu.flywheel.backend.FlywheelMemory;
 import com.jozufozu.flywheel.backend.model.BufferBuilderExtension;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
 import com.mojang.blaze3d.platform.MemoryTracker;
@@ -14,11 +16,12 @@ import net.minecraft.client.renderer.RenderType;
  *
  * The number of vertices needs to be known ahead of time.
  */
-public class DrawBuffer {
+public class DrawBuffer implements AutoCloseable {
 
 	private final RenderType parent;
 	private ByteBuffer backingBuffer;
 	private int expectedVertices;
+	private Cleaner.Cleanable cleanable;
 
 	public DrawBuffer(RenderType parent) {
 		this.parent = parent;
@@ -43,9 +46,12 @@ public class DrawBuffer {
 
 		if (backingBuffer == null) {
 			backingBuffer = MemoryTracker.create(byteSize);
+			cleanable = FlywheelMemory.track(this, backingBuffer);
 		}
 		if (byteSize > backingBuffer.capacity()) {
+			cleanable.clean();
 			backingBuffer = MemoryTracker.resize(backingBuffer, byteSize);
+			cleanable = FlywheelMemory.track(this, backingBuffer);
 		}
 
 		return new DirectVertexConsumer(backingBuffer, format, vertexCount);
@@ -73,5 +79,12 @@ public class DrawBuffer {
 	 */
 	public void reset() {
 		this.expectedVertices = 0;
+	}
+
+	@Override
+	public void close() {
+		if (cleanable != null) {
+			cleanable.clean();
+		}
 	}
 }

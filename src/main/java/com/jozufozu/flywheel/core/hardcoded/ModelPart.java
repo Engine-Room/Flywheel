@@ -2,6 +2,8 @@ package com.jozufozu.flywheel.core.hardcoded;
 
 import java.util.List;
 
+import org.lwjgl.system.MemoryStack;
+
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.vertex.Formats;
@@ -26,12 +28,14 @@ public class ModelPart implements Mesh {
 			this.vertices = vertices;
 		}
 
-		PosTexNormalWriterUnsafe writer = getType().createWriter(MemoryTracker.create(size()));
-		for (PartBuilder.CuboidBuilder cuboid : cuboids) {
-			cuboid.buffer(writer);
-		}
+		try (var stack = MemoryStack.stackPush()) {
+			PosTexNormalWriterUnsafe writer = getType().createWriter(stack.malloc(size()));
+			for (PartBuilder.CuboidBuilder cuboid : cuboids) {
+				cuboid.buffer(writer);
+			}
 
-		reader = writer.intoReader();
+			reader = writer.intoReader();
+		}
 	}
 
 	public static PartBuilder builder(String name, int sizeU, int sizeV) {
