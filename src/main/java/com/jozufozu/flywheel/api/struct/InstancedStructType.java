@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.api.struct;
 
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
+import java.nio.ByteBuffer;
+
 import com.jozufozu.flywheel.core.source.FileResolution;
 
 public interface InstancedStructType<S> extends StructType<S> {
@@ -9,7 +10,7 @@ public interface InstancedStructType<S> extends StructType<S> {
 	 *
 	 * @param backing The buffer that the StructWriter will write to.
 	 */
-	StructWriter<S> getWriter(VecBuffer backing);
+	StructWriter<S> getWriter(ByteBuffer backing);
 
 	FileResolution getInstanceShader();
 }

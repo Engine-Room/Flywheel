@@ -38,13 +38,7 @@ public class GlCompat {
 		instancedArrays = getLatest(InstancedArrays.class, caps);
 		bufferStorage = getLatest(BufferStorage.class, caps);
 
-		if (Util.getPlatform() == Util.OS.WINDOWS) {
-			String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
-			// vendor string I got was "ATI Technologies Inc."
-			amd = vendor.contains("ATI") || vendor.contains("AMD");
-		} else {
-			amd = false;
-		}
+		amd = _isAmdWindows();
 	}
 
 	public boolean onAMDWindows() {
@@ -82,7 +76,7 @@ public class GlCompat {
 
 	/**
 	 * Copied from:
-	 * <br> https://github.com/grondag/canvas/commit/820bf754092ccaf8d0c169620c2ff575722d7d96
+	 * <br> <a href="https://github.com/grondag/canvas/commit/820bf754092ccaf8d0c169620c2ff575722d7d96">canvas</a>
 	 *
 	 * <p>Identical in function to {@link GL20C#glShaderSource(int, CharSequence)} but
 	 * passes a null pointer for string length to force the driver to rely on the null
@@ -106,6 +100,21 @@ public class GlCompat {
 		} finally {
 			stack.setPointer(stackPointer);
 		}
+	}
+
+	private static boolean _isAmdWindows() {
+		if (Util.getPlatform() != Util.OS.WINDOWS) {
+			return false;
+		}
+
+		String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
+
+		if (vendor == null) {
+			return false;
+		}
+
+		// vendor string I got was "ATI Technologies Inc."
+		return vendor.contains("ATI") || vendor.contains("AMD");
 	}
 }
 

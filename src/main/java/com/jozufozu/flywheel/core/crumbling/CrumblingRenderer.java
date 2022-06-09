@@ -61,20 +61,19 @@ public class CrumblingRenderer {
 		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageBlockEntities(levelRenderer, level);
 		if (activeStages.isEmpty()) return;
 
-		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
+		try (var restoreState = GlStateTracker.getRestoreState()) {
 
-		Matrix4f viewProjection = poseStack.last()
-				.pose()
-				.copy();
-		viewProjection.multiplyBackward(projectionMatrix);
+			Matrix4f viewProjection = poseStack.last()
+					.pose()
+					.copy();
+			viewProjection.multiplyBackward(projectionMatrix);
 
-		State state = STATE.get();
-		var instanceManager = state.instanceManager;
-		var engine = state.instancerManager;
+			State state = STATE.get();
+			var instanceManager = state.instanceManager;
+			var engine = state.instancerManager;
 
-		renderCrumblingInner(activeStages, instanceManager, engine, level, poseStack, camera, viewProjection);
-
-		restoreState.restore();
+			renderCrumblingInner(activeStages, instanceManager, engine, level, poseStack, camera, viewProjection);
+		}
 	}
 
 	private static void renderCrumblingInner(Int2ObjectMap<List<BlockEntity>> activeStages, InstanceManager<BlockEntity> instanceManager, CrumblingEngine engine, ClientLevel level, PoseStack stack, Camera camera, Matrix4f viewProjection) {

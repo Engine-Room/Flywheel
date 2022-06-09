@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.backend;
 
+import java.lang.ref.Cleaner;
+
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -16,6 +18,8 @@ import net.minecraft.world.level.LevelAccessor;
 
 public class Backend {
 	public static final Logger LOGGER = LogUtils.getLogger();
+
+	public static boolean dumpShaderSource = Boolean.getBoolean("flw.dumpShaderSource");
 
 	private static BackendType backendType;
 
@@ -105,4 +109,5 @@ public class Backend {
 	private Backend() {
 		throw new UnsupportedOperationException("Backend is a static class!");
 	}
+
 }

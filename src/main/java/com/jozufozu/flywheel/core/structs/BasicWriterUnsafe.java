@@ -1,15 +1,16 @@
 package com.jozufozu.flywheel.core.structs;
 
+import java.nio.ByteBuffer;
+
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.backend.struct.UnsafeBufferWriter;
 
 public abstract class BasicWriterUnsafe<D extends BasicData> extends UnsafeBufferWriter<D> {
 
-	public BasicWriterUnsafe(VecBuffer backingBuffer, StructType<D> vertexType) {
-		super(backingBuffer, vertexType);
+	public BasicWriterUnsafe(StructType<D> structType, ByteBuffer byteBuffer) {
+		super(structType, byteBuffer);
 	}
 
 	@Override

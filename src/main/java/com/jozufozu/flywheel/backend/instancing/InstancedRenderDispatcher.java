@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
@@ -123,9 +122,6 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static void getDebugString(List<String> debug) {
-		debug.add("");
-		debug.add("Flywheel: " + Flywheel.getVersion());
-
 		if (Backend.isOn()) {
 			InstanceWorld instanceWorld = instanceWorlds.get(Minecraft.getInstance().level);
 

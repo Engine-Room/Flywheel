@@ -6,20 +6,21 @@ import static org.lwjgl.opengl.GL44.GL_MAP_PERSISTENT_BIT;
 
 import java.nio.ByteBuffer;
 
-import org.lwjgl.opengl.GL30;
+import org.jetbrains.annotations.Nullable;
+import org.lwjgl.opengl.GL32;
+import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.backend.gl.GlFence;
 import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.gl.error.GlException;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 
-public class PersistentGlBuffer extends GlBuffer implements Mappable {
+public class PersistentGlBuffer extends GlBuffer {
 
-	private MappedBuffer buffer;
+	@Nullable
+	private MappedBuffer access;
 	int flags;
-
-	long size;
-	GlFence fence;
+	private final GlFence fence;
 
 	public PersistentGlBuffer(GlBufferType type) {
 		super(type);
@@ -34,47 +35,98 @@ public class PersistentGlBuffer extends GlBuffer implements Mappable {
 	}
 
 	@Override
-	protected void alloc(long size) {
-		this.size = size;
-
-		if (buffer != null) {
-			deleteInternal(handle());
-			_create();
-
-			bind();
+	public boolean ensureCapacity(long size) {
+		if (size < 0) {
+			throw new IllegalArgumentException("Size " + size + " < 0");
 		}
 
-		fence.clear();
+		if (size == 0) {
+			return false;
+		}
 
-        GlCompat.getInstance().bufferStorage.bufferStorage(type, size, flags);
+		if (this.size == 0) {
+			this.size = size;
+			bind();
+			GlCompat.getInstance().bufferStorage.bufferStorage(type, this.size, flags);
+			return true;
+		}
 
-		ByteBuffer byteBuffer = GL30.glMapBufferRange(type.glEnum, 0, size, flags);
+		if (size > this.size) {
+			var oldSize = this.size;
+			this.size = size + growthMargin;
+
+			fence.clear();
+
+			realloc(this.size, oldSize);
+
+			access = null;
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public void upload(ByteBuffer directBuffer) {
+		ensureCapacity(directBuffer.capacity());
+
+		var access = getWriteAccess();
+
+		ByteBuffer ourBuffer = access.unwrap();
+
+		ourBuffer.reset();
+
+		MemoryUtil.memCopy(directBuffer, ourBuffer);
+
+		int uploadSize = directBuffer.remaining();
+		int ourSize = ourBuffer.capacity();
+
+		if (uploadSize < ourSize) {
+			long clearFrom = access.getMemAddress() + uploadSize;
+			MemoryUtil.memSet(clearFrom, 0, ourSize - uploadSize);
+		}
+	}
+
+	private void mapToClientMemory() {
+		bind();
+		ByteBuffer byteBuffer = GL32.glMapBufferRange(type.glEnum, 0, size, flags);
 
 		if (byteBuffer == null) {
 			throw new GlException(GlError.poll(), "Could not map buffer");
 		}
 
-		buffer = new MappedBuffer(this, byteBuffer, 0, size);
+		access = new MappedBuffer(this, byteBuffer, 0, size);
+	}
+
+	private void realloc(long newSize, long oldSize) {
+		int oldHandle = handle();
+		int newHandle = GL32.glGenBuffers();
+
+		GlBufferType.COPY_READ_BUFFER.bind(oldHandle);
+		type.bind(newHandle);
+
+		GlCompat.getInstance().bufferStorage.bufferStorage(type, newSize, flags);
+
+		GL32.glCopyBufferSubData(GlBufferType.COPY_READ_BUFFER.glEnum, type.glEnum, 0, 0, oldSize);
+
+		delete();
+		setHandle(newHandle);
 	}
 
 	@Override
-	public void upload(ByteBuffer directBuffer) {
-		throw new UnsupportedOperationException("FIXME: Nothing calls #upload on a persistent buffer as of 12/10/2021.");
+	public MappedBuffer map() {
+		return getWriteAccess()
+				.position(0);
 	}
 
-	@Override
-	public MappedBuffer getBuffer(long offset, long length) {
+	private MappedBuffer getWriteAccess() {
+		if (access == null) {
+			mapToClientMemory();
+		} else {
+			fence.waitSync(); // FIXME: Hangs too much, needs double/triple buffering
+		}
 
-		fence.waitSync();
-
-		buffer.position((int) offset);
-
-		return buffer;
-	}
-
-	@Override
-	public GlBufferType getType() {
-		return type;
+		return access;
 	}
 
 	@Override

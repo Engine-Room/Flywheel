@@ -1,9 +1,10 @@
 package com.jozufozu.flywheel.core.structs.model;
 
+import java.nio.ByteBuffer;
+
 import com.jozufozu.flywheel.api.struct.BatchedStructType;
 import com.jozufozu.flywheel.api.struct.InstancedStructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
 import com.jozufozu.flywheel.core.model.ModelTransformer;
@@ -28,8 +29,8 @@ public class ModelType implements InstancedStructType<ModelData>, BatchedStructT
 	}
 
 	@Override
-	public StructWriter<ModelData> getWriter(VecBuffer backing) {
-		return new ModelWriterUnsafe(backing, this);
+	public StructWriter<ModelData> getWriter(ByteBuffer backing) {
+		return new ModelWriterUnsafe(this, backing);
 	}
 
 	@Override

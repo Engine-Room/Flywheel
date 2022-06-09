@@ -10,7 +10,7 @@ public class ArrayModelRenderer {
 
 	public ArrayModelRenderer(BlockMesh mesh, MeshPool meshPool) {
 		this.vao = new GlVertexArray();
-		this.mesh = meshPool.alloc(mesh, this.vao);
+		this.mesh = meshPool.alloc(mesh);
 	}
 
 	/**
@@ -19,9 +19,7 @@ public class ArrayModelRenderer {
 	public void draw() {
 		if (mesh.isDeleted()) return;
 
-		vao.bind();
-
-		mesh.drawCall();
+		mesh.drawCall(vao);
 	}
 
 	public void delete() {

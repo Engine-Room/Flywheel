@@ -1,9 +1,10 @@
 package com.jozufozu.flywheel.backend.struct;
 
+import java.nio.ByteBuffer;
+
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.gl.buffer.VecBuffer;
 
 /**
  * This class copied/adapted from jellysquid's
@@ -20,8 +21,8 @@ public abstract class UnsafeBufferWriter<S> extends BufferWriter<S> {
 	 */
 	protected long writePointer;
 
-	protected UnsafeBufferWriter(VecBuffer backingBuffer, StructType<S> vertexType) {
-		super(backingBuffer, vertexType);
+	protected UnsafeBufferWriter(StructType<S> structType, ByteBuffer byteBuffer) {
+		super(structType, byteBuffer);
 
 		acquireWritePointer();
 	}
@@ -38,6 +39,6 @@ public abstract class UnsafeBufferWriter<S> extends BufferWriter<S> {
 	}
 
 	private void acquireWritePointer() {
-		this.writePointer = MemoryUtil.memAddress(this.backingBuffer.unwrap(), this.backingBuffer.position());
+		this.writePointer = MemoryUtil.memAddress(this.backingBuffer, this.backingBuffer.position());
 	}
 }

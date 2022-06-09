@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import com.jozufozu.flywheel.backend.Backend;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import net.minecraft.ChatFormatting;
@@ -14,9 +15,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.fml.ModList;
@@ -86,6 +90,25 @@ public class FlwCommands {
 					Backend.reloadWorldRenderers();
 				}
 			));
+
+		commandBuilder.command.then(Commands.literal("debugCrumble")
+				.then(Commands.argument("pos", BlockPosArgument.blockPos())
+						.then(Commands.argument("stage", IntegerArgumentType.integer(0, 9))
+								.executes(context -> {
+									BlockPos pos = BlockPosArgument.getLoadedBlockPos(context, "pos");
+									int value = IntegerArgumentType.getInteger(context, "stage");
+
+									Entity executor = context.getSource()
+											.getEntity();
+
+									if (executor == null) {
+										return 0;
+									}
+
+									executor.level.destroyBlockProgress(executor.getId(), pos, value);
+
+									return 1;
+								}))));
 
 		commandBuilder.build(event.getDispatcher());
 	}

@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.core.model;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.util.EnumMap;
 import java.util.Random;
 
@@ -10,6 +11,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -52,24 +54,17 @@ public class ModelUtil {
 		return new WorldModelBuilder(layer);
 	}
 
-	public static ShadeSeparatedBufferBuilder getBufferBuilder(Bufferable object) {
+	public static ShadeSeparatedBufferBuilder getBufferBuilder(Bufferable bufferable) {
 		ModelBlockRenderer blockRenderer = VANILLA_RENDERER.getModelRenderer();
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 
-		ShadeSeparatedBufferBuilder builder = new ShadeSeparatedBufferBuilder(512);
+		objects.begin();
 
-		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-		objects.unshadedBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-		objects.shadeSeparatingWrapper.prepare(builder, objects.unshadedBuilder);
+		bufferable.bufferInto(blockRenderer, objects.shadeSeparatingWrapper, objects.random);
 
-		object.bufferInto(blockRenderer, objects.shadeSeparatingWrapper, objects.random);
+		objects.end();
 
-		objects.shadeSeparatingWrapper.clear();
-		objects.unshadedBuilder.end();
-		builder.appendUnshadedVertices(objects.unshadedBuilder);
-		builder.end();
-
-		return builder;
+		return objects.separatedBufferBuilder;
 	}
 
 	private static PoseStack createRotation(Direction facing) {
@@ -96,7 +91,21 @@ public class ModelUtil {
 	private static class ThreadLocalObjects {
 		public final Random random = new Random();
 		public final ShadeSeparatingVertexConsumer shadeSeparatingWrapper = new ShadeSeparatingVertexConsumer();
+		public final ShadeSeparatedBufferBuilder separatedBufferBuilder = new ShadeSeparatedBufferBuilder(512);
 		public final BufferBuilder unshadedBuilder = new BufferBuilder(512);
+
+		private void begin() {
+			this.separatedBufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+			this.unshadedBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+			this.shadeSeparatingWrapper.prepare(this.separatedBufferBuilder, this.unshadedBuilder);
+		}
+
+		private void end() {
+			this.shadeSeparatingWrapper.clear();
+			this.unshadedBuilder.end();
+			this.separatedBufferBuilder.appendUnshadedVertices(this.unshadedBuilder);
+			this.separatedBufferBuilder.end();
+		}
 	}
 
 }

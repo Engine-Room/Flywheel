@@ -20,9 +20,9 @@ public class FrustumMixin {
 	@Inject(method = "prepare", at = @At("TAIL"))
 	private void onPrepare(double x, double y, double z, CallbackInfo ci) {
 		if (OptifineHandler.isShadowPass()) {
-			GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
-			MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(Minecraft.getInstance().level, LastActiveCamera.getActiveCamera(), (Frustum) (Object) this));
-			restoreState.restore();
+			try (var restoreState = GlStateTracker.getRestoreState()) {
+				MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(Minecraft.getInstance().level, LastActiveCamera.getActiveCamera(), (Frustum) (Object) this));
+			}
 		}
 	}
 }

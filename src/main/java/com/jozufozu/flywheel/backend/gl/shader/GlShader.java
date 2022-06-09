@@ -7,10 +7,11 @@ import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL20;
 
+import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
+import com.jozufozu.flywheel.core.compile.ShaderCompilationException;
 import com.jozufozu.flywheel.core.shader.ShaderConstants;
-import com.jozufozu.flywheel.core.source.ShaderLoadingException;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -30,18 +31,10 @@ public class GlShader extends GlObject {
 		GlCompat.safeShaderSource(handle, source);
 		GL20.glCompileShader(handle);
 
-		// TODO: control this via a JVM flag or other
 		dumpSource(source, type);
 
-//		String log = GL20.glGetShaderInfoLog(handle);
-//
-//		if (!log.isEmpty()) {
-//			System.out.println(log);
-////			env.printShaderInfoLog(source, log, this.name);
-//		}
-
 		if (GL20.glGetShaderi(handle, GL20.GL_COMPILE_STATUS) != GL20.GL_TRUE) {
-			throw new ShaderLoadingException("Could not compile " + getName() + ". See log for details.");
+			throw new ShaderCompilationException("Could not compile " + getName(), handle);
 		}
 
 		setHandle(handle);
@@ -61,6 +54,10 @@ public class GlShader extends GlObject {
 	}
 
 	private void dumpSource(String source, ShaderType type) {
+		if (!Backend.dumpShaderSource) {
+			return;
+		}
+
 		File dir = new File(Minecraft.getInstance().gameDirectory, "flywheel_sources");
 		dir.mkdirs();
 		File file = new File(dir, type.getFileName(getName()));

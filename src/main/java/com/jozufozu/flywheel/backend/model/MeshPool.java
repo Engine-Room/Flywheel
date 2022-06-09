@@ -1,7 +1,9 @@
 package com.jozufozu.flywheel.backend.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.lwjgl.opengl.GL32;
 
@@ -42,7 +44,6 @@ public class MeshPool {
 
 		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
 
-		vbo.bind();
 		vbo.setGrowthMargin(stride * 64);
 	}
 
@@ -50,16 +51,15 @@ public class MeshPool {
 	 * Allocate a model in the arena.
 	 *
 	 * @param mesh The model to allocate.
-	 * @param vao	The vertex array object to attach the model to.
 	 * @return A handle to the allocated model.
 	 */
-	public BufferedMesh alloc(Mesh mesh, GlVertexArray vao) {
-		BufferedMesh bufferedModel = new BufferedMesh(vao, mesh, vertices);
+	public BufferedMesh alloc(Mesh mesh) {
+		BufferedMesh bufferedModel = new BufferedMesh(mesh, vertices);
 		vertices += mesh.getVertexCount();
 		models.add(bufferedModel);
 		pendingUpload.add(bufferedModel);
 
-		setDirty();
+		dirty = true;
 		return bufferedModel;
 	}
 
@@ -67,13 +67,11 @@ public class MeshPool {
 		if (dirty) {
 			if (anyToRemove) processDeletions();
 
-			vbo.bind();
 			if (realloc()) {
 				uploadAll();
 			} else {
 				uploadPending();
 			}
-			vbo.unbind();
 
 			dirty = false;
 			pendingUpload.clear();
@@ -110,7 +108,7 @@ public class MeshPool {
 	}
 
 	private void uploadAll() {
-		try (MappedBuffer buffer = vbo.getBuffer()) {
+		try (MappedBuffer buffer = vbo.map()) {
 			VertexWriter writer = vertexType.createWriter(buffer.unwrap());
 
 			int vertices = 0;
@@ -128,7 +126,7 @@ public class MeshPool {
 	}
 
 	private void uploadPending() {
-		try (MappedBuffer buffer = vbo.getBuffer()) {
+		try (MappedBuffer buffer = vbo.map()) {
 			VertexWriter writer = vertexType.createWriter(buffer.unwrap());
 			for (BufferedMesh model : pendingUpload) {
 				model.buffer(writer);
@@ -139,10 +137,6 @@ public class MeshPool {
 		}
 	}
 
-	private void setDirty() {
-		dirty = true;
-	}
-
 	public void delete() {
 		vbo.delete();
 	}
@@ -150,51 +144,60 @@ public class MeshPool {
 	public class BufferedMesh {
 
 		private final ElementBuffer ebo;
-		private final GlVertexArray vao;
-
 		private final Mesh mesh;
 		private int first;
 
 		private boolean deleted;
 
-		public BufferedMesh(GlVertexArray vao, Mesh mesh, int first) {
-			this.vao = vao;
+		private final Set<GlVertexArray> boundTo = new HashSet<>();
+
+		public BufferedMesh(Mesh mesh, int first) {
 			this.mesh = mesh;
 			this.first = first;
-			ebo = mesh.createEBO();
+			this.ebo = mesh.createEBO();
 		}
 
-		public void drawCall() {
-			ebo.bind();
-			GL32.glDrawElementsBaseVertex(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0, first);
+		public void drawCall(GlVertexArray vao) {
+			attachTo(vao);
+			vao.bind();
+			this.ebo.bind();
+			GL32.glDrawElementsBaseVertex(GlPrimitive.TRIANGLES.glEnum, this.ebo.elementCount, this.ebo.eboIndexType.getGlEnum(), 0, this.first);
 		}
 
-		public void drawInstances(int instanceCount) {
+		public void drawInstances(GlVertexArray vao, int instanceCount) {
 			if (mesh.getVertexCount() <= 0 || isDeleted()) return;
 
-			ebo.bind();
+			attachTo(vao);
+
+			vao.bind();
+			this.ebo.bind();
 
 			//Backend.log.info(StringUtil.args("drawElementsInstancedBaseVertex", GlPrimitive.TRIANGLES, ebo.elementCount, ebo.eboIndexType, 0, instanceCount, first));
 
-			GL32.glDrawElementsInstancedBaseVertex(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0, instanceCount, first);
+			GL32.glDrawElementsInstancedBaseVertex(GlPrimitive.TRIANGLES.glEnum, this.ebo.elementCount, this.ebo.eboIndexType.getGlEnum(), 0, instanceCount, this.first);
+		}
+
+		private void attachTo(GlVertexArray vao) {
+			if (this.boundTo.add(vao)) {
+				vao.enableArrays(getAttributeCount());
+				vao.bindAttributes(MeshPool.this.vbo, 0, MeshPool.this.vertexType.getLayout());
+			}
 		}
 
 		public boolean isDeleted() {
-			return deleted;
+			return this.deleted;
 		}
 
 		public void delete() {
-			setDirty();
-			anyToRemove = true;
-			deleted = true;
+			MeshPool.this.dirty = true;
+			MeshPool.this.anyToRemove = true;
+			this.deleted = true;
 		}
 
 		private void buffer(VertexWriter writer) {
-			writer.seekToVertex(first);
-			writer.writeVertexList(mesh.getReader());
-
-			vao.enableArrays(getAttributeCount());
-			vao.bindAttributes(0, vertexType.getLayout());
+			writer.seekToVertex(this.first);
+			writer.writeVertexList(this.mesh.getReader());
+			this.boundTo.clear();
 		}
 
 		public int getAttributeCount() {

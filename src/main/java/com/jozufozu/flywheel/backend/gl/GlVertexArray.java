@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.backend.gl;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL32;
 
+import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
@@ -61,16 +62,19 @@ public class GlVertexArray extends GlObject {
 		GlStateManager._glBindVertexArray(0);
 	}
 
-	public void bindAttributes(int startIndex, BufferLayout type) {
-		int boundBuffer = GlStateTracker.getBuffer(GlBufferType.ARRAY_BUFFER);
-
+	public void bindAttributes(GlBuffer buffer, int startIndex, BufferLayout type) {
 		bind();
+
+		int targetBuffer = buffer.handle();
+
+		GlBufferType.ARRAY_BUFFER.bind(targetBuffer);
+
 		int i = startIndex;
 		int offset = 0;
 		final int stride = type.getStride();
 
 		for (VertexAttribute attribute : type.getAttributes()) {
-			targets[i] = boundBuffer;
+			targets[i] = targetBuffer;
 			attributes[i] = attribute;
 			offsets[i] = offset;
 			strides[i] = stride;

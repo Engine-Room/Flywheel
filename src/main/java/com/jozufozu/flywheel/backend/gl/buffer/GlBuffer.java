@@ -29,12 +29,12 @@ public abstract class GlBuffer extends GlObject {
 		}
 	}
 
-	protected final GlBufferType type;
+	public final GlBufferType type;
 
 	/**
 	 * The size (in bytes) of the buffer on the GPU.
 	 */
-	protected long capacity;
+	protected long size;
 
 	/**
 	 * How much extra room to give the buffer when we reallocate.
@@ -42,7 +42,7 @@ public abstract class GlBuffer extends GlObject {
 	protected int growthMargin;
 
 	public GlBuffer(GlBufferType type) {
-		_create();
+		setHandle(GL20.glGenBuffers());
 		this.type = type;
 	}
 
@@ -50,41 +50,13 @@ public abstract class GlBuffer extends GlObject {
 		this.growthMargin = growthMargin;
 	}
 
-	public long getCapacity() {
-		return capacity;
+	public long getSize() {
+		return size;
 	}
 
-	public MappedBuffer getBuffer() {
-		return getBuffer(0, capacity);
+	public GlBufferType getType() {
+		return type;
 	}
-
-	public abstract MappedBuffer getBuffer(long offset, long length);
-
-	/**
-	 * Ensure that the buffer has at least enough room to store size bytes.
-	 *
-	 * @return true if the buffer grew.
-	 */
-	public boolean ensureCapacity(long size) {
-		if (size > capacity) {
-			capacity = size + growthMargin;
-			alloc(capacity);
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Call this after all draw calls using this buffer are complete.
-	 */
-	public void doneForThisFrame() {
-
-	}
-
-	protected abstract void alloc(long size);
-
-	public abstract void upload(ByteBuffer directBuffer);
 
 	public void bind() {
 		type.bind(handle());
@@ -94,11 +66,31 @@ public abstract class GlBuffer extends GlObject {
 		type.unbind();
 	}
 
-	protected void _create() {
-		setHandle(GL20.glGenBuffers());
+	public abstract void upload(ByteBuffer directBuffer);
+
+	public abstract MappedBuffer map();
+
+	/**
+	 * Ensure that the buffer has at least enough room to store {@code size} bytes.
+	 *
+	 * @return {@code true} if the buffer moved.
+	 */
+	public abstract boolean ensureCapacity(long size);
+
+	/**
+	 * Call this after all draw calls using this buffer are complete.
+	 */
+	public void doneForThisFrame() {
+
 	}
 
 	protected void deleteInternal(int handle) {
 		GL20.glDeleteBuffers(handle);
 	}
+
+	/**
+	 * Indicates that this buffer need not be #flush()'d for its contents to sync.
+	 * @return true if this buffer is persistently mapped.
+	 */
+	public abstract boolean isPersistent();
 }
