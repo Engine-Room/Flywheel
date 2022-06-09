@@ -2,17 +2,13 @@ package com.jozufozu.flywheel.core.crumbling;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedSet;
 
-import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.struct.InstancedStructType;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
-import com.jozufozu.flywheel.backend.instancing.instancing.GPUInstancerFactory;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.backend.instancing.instancing.Renderable;
 import com.jozufozu.flywheel.core.Contexts;
@@ -182,9 +178,9 @@ public class CrumblingRenderer {
 			Textures.bindActiveTextures();
 			CoreShaderInfo coreShaderInfo = getCoreShaderInfo();
 
-			for (Map.Entry<InstancedStructType<? extends InstanceData>, GPUInstancerFactory<?>> entry : factories.entrySet()) {
-				InstancedStructType<? extends InstanceData> instanceType = entry.getKey();
-				GPUInstancerFactory<?> factory = entry.getValue();
+			for (var entry : factories.entrySet()) {
+				var instanceType = entry.getKey();
+				var factory = entry.getValue();
 
 				var materials = factory.materials.get(type);
 				for (Material material : materials) {

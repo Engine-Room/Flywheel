@@ -54,7 +54,7 @@ public class GlShader extends GlObject {
 	}
 
 	private void dumpSource(String source, ShaderType type) {
-		if (!Backend.dumpShaderSource) {
+		if (!Backend.DUMP_SHADER_SOURCE) {
 			return;
 		}
 

@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.backend;
 
-import java.lang.ref.Cleaner;
-
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -19,19 +17,19 @@ import net.minecraft.world.level.LevelAccessor;
 public class Backend {
 	public static final Logger LOGGER = LogUtils.getLogger();
 
-	public static boolean dumpShaderSource = Boolean.getBoolean("flw.dumpShaderSource");
+	public static boolean DUMP_SHADER_SOURCE = System.getProperty("flw.dumpShaderSource") != null;
 
-	private static BackendType backendType;
+	private static BackendType TYPE;
 
-	private static ParallelTaskEngine taskEngine;
+	private static ParallelTaskEngine EXECUTOR;
 
-	private static final Loader loader = new Loader();
+	private static final Loader LOADER = new Loader();
 
 	/**
 	 * Get the current Flywheel backend type.
 	 */
 	public static BackendType getBackendType() {
-		return backendType;
+		return TYPE;
 	}
 
 	/**
@@ -39,12 +37,12 @@ public class Backend {
 	 * @return A global Flywheel thread pool.
 	 */
 	public static ParallelTaskEngine getTaskEngine() {
-		if (taskEngine == null) {
-			taskEngine = new ParallelTaskEngine("Flywheel");
-			taskEngine.startWorkers();
+		if (EXECUTOR == null) {
+			EXECUTOR = new ParallelTaskEngine("Flywheel");
+			EXECUTOR.startWorkers();
 		}
 
-		return taskEngine;
+		return EXECUTOR;
 	}
 
 	/**
@@ -52,15 +50,15 @@ public class Backend {
 	 * (Meshlet, MDI, GL31 Draw Instanced are planned), this will name which one is in use.
 	 */
 	public static String getBackendDescriptor() {
-		return backendType == null ? "Uninitialized" : backendType.getProperName();
+		return TYPE == null ? "Uninitialized" : TYPE.getProperName();
 	}
 
 	public static void refresh() {
-		backendType = chooseEngine();
+		TYPE = chooseEngine();
 	}
 
 	public static boolean isOn() {
-		return backendType != BackendType.OFF;
+		return TYPE != BackendType.OFF;
 	}
 
 	public static boolean canUseInstancing(@Nullable Level world) {
