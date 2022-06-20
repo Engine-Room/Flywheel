@@ -36,12 +36,14 @@ public class GlVertexArray extends GlObject {
 	/**
 	 * Each attribute's offset.
 	 */
-	private final int[] offsets = new int[MAX_ATTRIBS];
+	private final long[] offsets = new long[MAX_ATTRIBS];
 
 	/**
 	 * Each attribute's stride.
 	 */
 	private final int[] strides = new int[MAX_ATTRIBS];
+
+	private int elementBufferBinding = 0;
 
 
 	public GlVertexArray() {
@@ -62,15 +64,20 @@ public class GlVertexArray extends GlObject {
 		GlStateManager._glBindVertexArray(0);
 	}
 
-	public void bindAttributes(GlBuffer buffer, int startIndex, BufferLayout type) {
+	/**
+	 * @param buffer The buffer where the data is stored.
+	 * @param startAttrib The first attribute to be used by the data.
+	 * @param type The format of the attributes.
+	 * @param offset The offset in bytes to the start of the data.
+	 */
+	public void bindAttributes(GlBuffer buffer, int startAttrib, BufferLayout type, long offset) {
 		bind();
 
 		int targetBuffer = buffer.handle();
 
 		GlBufferType.ARRAY_BUFFER.bind(targetBuffer);
 
-		int i = startIndex;
-		int offset = 0;
+		int i = startAttrib;
 		final int stride = type.getStride();
 
 		for (VertexAttribute attribute : type.getAttributes()) {
@@ -124,6 +131,15 @@ public class GlVertexArray extends GlObject {
 			bind();
 			GlCompat.getInstance().instancedArrays.vertexAttribDivisor(index, divisor);
 			divisors[index] = divisor;
+		}
+	}
+
+	public void bindElementArray(GlBuffer ebo) {
+		int handle = ebo.handle();
+		if (elementBufferBinding != handle) {
+			bind();
+			GlBufferType.ELEMENT_ARRAY_BUFFER.bind(handle);
+			elementBufferBinding = handle;
 		}
 	}
 }

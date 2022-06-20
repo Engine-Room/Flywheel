@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.api.instance;
 
-import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 
@@ -27,7 +27,7 @@ public interface TickableInstance extends Instance {
 	 * <br>
 	 * <em>DISPATCHED IN PARALLEL</em>, don't attempt to mutate anything outside of this instance.
 	 * <br>
-	 * {@link Instancer}/{@link InstanceData} creation/acquisition is safe here.
+	 * {@link Instancer}/{@link InstancedPart} creation/acquisition is safe here.
 	 */
 	void tick();
 

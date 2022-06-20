@@ -16,7 +16,7 @@ public interface ClientLevelExtension {
 	 */
 	Iterable<Entity> flywheel$getAllLoadedEntities();
 
-	static ClientLevelExtension cast(ClientLevel level) {
-		return (ClientLevelExtension) level;
+	static Iterable<Entity> getAllLoadedEntities(ClientLevel level) {
+		return ((ClientLevelExtension) level).flywheel$getAllLoadedEntities();
 	}
 }

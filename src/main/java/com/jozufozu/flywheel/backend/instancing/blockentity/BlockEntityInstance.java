@@ -1,13 +1,17 @@
 package com.jozufozu.flywheel.backend.instancing.blockentity;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.InstancerFactory;
 import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.core.structs.StructTypes;
-import com.jozufozu.flywheel.core.structs.model.ModelData;
-import com.jozufozu.flywheel.core.structs.oriented.OrientedData;
+import com.jozufozu.flywheel.core.structs.model.TransformedPart;
+import com.jozufozu.flywheel.core.structs.oriented.OrientedPart;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
 
@@ -47,6 +51,16 @@ public abstract class BlockEntityInstance<T extends BlockEntity> extends Abstrac
 		this.instancePos = pos.subtract(instancerManager.getOriginCoordinate());
 	}
 
+	public List<InstancedPart> getCrumblingParts() {
+		var out = new ArrayList<InstancedPart>();
+		addCrumblingParts(out);
+		return out;
+	}
+
+	public void addCrumblingParts(List<InstancedPart> data) {
+
+	}
+
 	/**
 	 * Just before {@link #update()} would be called, {@code shouldReset()} is checked.
 	 * If this function returns {@code true}, then this instance will be {@link #remove removed},
@@ -76,11 +90,11 @@ public abstract class BlockEntityInstance<T extends BlockEntity> extends Abstrac
 		return pos;
 	}
 
-	protected InstancerFactory<ModelData> getTransformFactory() {
-        return instancerManager.factory(StructTypes.MODEL);
+	protected InstancerFactory<TransformedPart> getTransformFactory() {
+        return instancerManager.factory(StructTypes.TRANSFORMED);
     }
 
-	protected InstancerFactory<OrientedData> getOrientedFactory() {
+	protected InstancerFactory<OrientedPart> getOrientedFactory() {
         return instancerManager.factory(StructTypes.ORIENTED);
 	}
 

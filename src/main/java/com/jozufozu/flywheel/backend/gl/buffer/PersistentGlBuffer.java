@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.backend.gl.GlFence;
 import com.jozufozu.flywheel.backend.gl.error.GlError;
 import com.jozufozu.flywheel.backend.gl.error.GlException;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
@@ -19,19 +18,12 @@ public class PersistentGlBuffer extends GlBuffer {
 
 	@Nullable
 	private MappedBuffer access;
-	int flags;
-	private final GlFence fence;
+	private final int storageFlags;
 
 	public PersistentGlBuffer(GlBufferType type) {
 		super(type);
 
-		flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-		fence = new GlFence();
-	}
-
-	@Override
-	public void doneForThisFrame() {
-		fence.post();
+		storageFlags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
 	}
 
 	@Override
@@ -47,15 +39,13 @@ public class PersistentGlBuffer extends GlBuffer {
 		if (this.size == 0) {
 			this.size = size;
 			bind();
-			GlCompat.getInstance().bufferStorage.bufferStorage(type, this.size, flags);
+			GlCompat.getInstance().bufferStorage.bufferStorage(type, this.size, storageFlags);
 			return true;
 		}
 
 		if (size > this.size) {
 			var oldSize = this.size;
 			this.size = size + growthMargin;
-
-			fence.clear();
 
 			realloc(this.size, oldSize);
 
@@ -89,7 +79,7 @@ public class PersistentGlBuffer extends GlBuffer {
 
 	private void mapToClientMemory() {
 		bind();
-		ByteBuffer byteBuffer = GL32.glMapBufferRange(type.glEnum, 0, size, flags);
+		ByteBuffer byteBuffer = GL32.glMapBufferRange(type.glEnum, 0, size, storageFlags);
 
 		if (byteBuffer == null) {
 			throw new GlException(GlError.poll(), "Could not map buffer");
@@ -105,7 +95,7 @@ public class PersistentGlBuffer extends GlBuffer {
 		GlBufferType.COPY_READ_BUFFER.bind(oldHandle);
 		type.bind(newHandle);
 
-		GlCompat.getInstance().bufferStorage.bufferStorage(type, newSize, flags);
+		GlCompat.getInstance().bufferStorage.bufferStorage(type, newSize, storageFlags);
 
 		GL32.glCopyBufferSubData(GlBufferType.COPY_READ_BUFFER.glEnum, type.glEnum, 0, 0, oldSize);
 
@@ -122,8 +112,6 @@ public class PersistentGlBuffer extends GlBuffer {
 	private MappedBuffer getWriteAccess() {
 		if (access == null) {
 			mapToClientMemory();
-		} else {
-			fence.waitSync(); // FIXME: Hangs too much, needs double/triple buffering
 		}
 
 		return access;

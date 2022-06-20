@@ -5,10 +5,10 @@ import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.Instancer;
 
-public class ConditionalInstance<D extends InstanceData> {
+public class ConditionalInstance<D extends InstancedPart> {
 
 	final Instancer<D> model;
 	ICondition condition;

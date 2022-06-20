@@ -13,7 +13,7 @@ import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.material.MaterialShaders;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.structs.StructTypes;
-import com.jozufozu.flywheel.core.structs.model.ModelData;
+import com.jozufozu.flywheel.core.structs.model.TransformedPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -35,8 +35,8 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 
 	private final PoseStack stack = new PoseStack();
 
-	private final ModelData body;
-	private ModelData contents;
+	private final TransformedPart body;
+	private TransformedPart contents;
 	private BlockState blockState;
 	private boolean active;
 
@@ -46,6 +46,11 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		body = getBody();
 		blockState = entity.getDisplayBlockState();
 		contents = getContents();
+	}
+
+	@Override
+	public boolean decreaseFramerateWithDistance() {
+		return false;
 	}
 
 	@Override
@@ -153,7 +158,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		if (contents != null) contents.delete();
 	}
 
-	private ModelData getContents() {
+	private TransformedPart getContents() {
 		RenderShape shape = blockState.getRenderShape();
 
 		if (shape == RenderShape.ENTITYBLOCK_ANIMATED) {
@@ -166,13 +171,13 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		if (shape == RenderShape.INVISIBLE)
 			return null;
 
-        return instancerManager.factory(StructTypes.MODEL)
+        return instancerManager.factory(StructTypes.TRANSFORMED)
 				.model(Models.block(blockState))
 				.createInstance();
 	}
 
-	private ModelData getBody() {
-		return instancerManager.factory(StructTypes.MODEL)
+	private TransformedPart getBody() {
+		return instancerManager.factory(StructTypes.TRANSFORMED)
 				.model(MODEL)
 				.createInstance();
 	}

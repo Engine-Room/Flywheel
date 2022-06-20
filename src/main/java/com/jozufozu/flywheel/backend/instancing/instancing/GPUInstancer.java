@@ -4,20 +4,22 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 
-public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
+public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> {
 
-	final BufferLayout instanceFormat;
-	final StructType<D> instancedType;
+	public final BufferLayout instanceFormat;
+	public final StructType<D> structType;
+	public final InstancedModel<D> parent;
 
 	GlBuffer vbo;
 	int attributeBaseIndex;
@@ -25,10 +27,11 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 	boolean anyToUpdate;
 
-	public GPUInstancer(StructType<D> type) {
-		super(type::create);
+	public GPUInstancer(InstancedModel<D> parent, StructType<D> type) {
+		super(type);
+		this.parent = parent;
 		this.instanceFormat = type.getLayout();
-		instancedType = type;
+		this.structType = type;
 	}
 
 	@Override
@@ -39,7 +42,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 	public void init() {
 		if (vbo != null) return;
 
-		vbo = GlBuffer.requestPersistent(GlBufferType.ARRAY_BUFFER);
+		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
 		vbo.setGrowthMargin(instanceFormat.getStride() * 16);
 	}
 
@@ -82,7 +85,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 			if (size > 0) {
 
-				final StructWriter<D> writer = instancedType.getWriter(buf.unwrap());
+				final StructWriter<D> writer = structType.getWriter(buf.unwrap());
 
 				boolean sequential = true;
 				for (int i = 0; i < size; i++) {
@@ -115,7 +118,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 	}
 
 	private void bindInstanceAttributes(GlVertexArray vao) {
-		vao.bindAttributes(this.vbo, this.attributeBaseIndex, this.instanceFormat);
+		vao.bindAttributes(this.vbo, this.attributeBaseIndex, this.instanceFormat, 0L);
 
 		for (int i = 0; i < this.instanceFormat.getAttributeCount(); i++) {
 			vao.setAttributeDivisor(this.attributeBaseIndex + i, 1);

@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.Instancer;
 
-public class GroupInstance<D extends InstanceData> extends AbstractCollection<D> {
+public class GroupInstance<D extends InstancedPart> extends AbstractCollection<D> {
 
 	final Instancer<D> model;
 	final List<D> backing;
@@ -48,14 +48,14 @@ public class GroupInstance<D extends InstanceData> extends AbstractCollection<D>
 			}
 		} else {
 			List<D> unnecessary = backing.subList(count, size);
-			unnecessary.forEach(InstanceData::delete);
+			unnecessary.forEach(InstancedPart::delete);
 			unnecessary.clear();
 		}
 
 		return true;
 	}
 
-	public InstanceData addInstance() {
+	public InstancedPart addInstance() {
 		D instance = model.createInstance();
 		backing.add(instance);
 
@@ -78,7 +78,7 @@ public class GroupInstance<D extends InstanceData> extends AbstractCollection<D>
 
 	@Override
 	public void clear() {
-		backing.forEach(InstanceData::delete);
+		backing.forEach(InstancedPart::delete);
 		backing.clear();
 	}
 }

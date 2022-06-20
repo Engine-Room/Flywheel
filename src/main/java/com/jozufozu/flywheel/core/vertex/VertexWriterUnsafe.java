@@ -12,8 +12,6 @@ public abstract class VertexWriterUnsafe<V extends VertexType> implements Vertex
 
 	public final V type;
 	protected final ByteBuffer buffer;
-	private int totalVertices;
-	private int writeVertex;
 	protected long ptr;
 
 	protected VertexWriterUnsafe(V type, ByteBuffer buffer) {
@@ -22,21 +20,14 @@ public abstract class VertexWriterUnsafe<V extends VertexType> implements Vertex
 		this.ptr = MemoryUtil.memAddress(buffer);
 	}
 
-	protected void advance() {
-		writeVertex++;
-		// account for seeking
-		if (writeVertex > totalVertices) totalVertices = writeVertex;
-	}
-
 	@Override
-	public void seekToVertex(int vertex) {
-		buffer.position(type.byteOffset(vertex));
-		writeVertex = vertex;
+	public void seek(long offset) {
+		buffer.position((int) offset);
 		ptr = MemoryUtil.memAddress(buffer);
 	}
 
 	@Override
-	public VertexList intoReader() {
-		return type.createReader(buffer, totalVertices);
+	public VertexList intoReader(int vertices) {
+		return type.createReader(buffer, vertices);
 	}
 }

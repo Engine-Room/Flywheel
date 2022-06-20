@@ -42,20 +42,20 @@ public class GlStateTracker {
 
 	public record State(int[] buffers, int vao, int program) implements AutoCloseable {
 		public void restore() {
-			GlBufferType[] values = GlBufferType.values();
-
-			for (int i = 0; i < values.length; i++) {
-				if (buffers[i] != GlStateTracker.buffers[i]) {
-					GlStateManager._glBindBuffer(values[i].glEnum, buffers[i]);
-				}
+			if (program != GlStateTracker.program) {
+				GlStateManager._glUseProgram(program);
 			}
 
 			if (vao != GlStateTracker.vao) {
 				GlStateManager._glBindVertexArray(vao);
 			}
 
-			if (program != GlStateTracker.program) {
-				GlStateManager._glUseProgram(program);
+			GlBufferType[] values = GlBufferType.values();
+
+			for (int i = 0; i < values.length; i++) {
+				if (buffers[i] != GlStateTracker.buffers[i]) {
+					GlStateManager._glBindBuffer(values[i].glEnum, buffers[i]);
+				}
 			}
 		}
 

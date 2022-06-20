@@ -2,20 +2,20 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.function.Supplier;
 
-import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.Instancer;
+import com.jozufozu.flywheel.api.struct.StructType;
 
-public abstract class AbstractInstancer<D extends InstanceData> implements Instancer<D> {
+public abstract class AbstractInstancer<D extends InstancedPart> implements Instancer<D> {
 
-	protected final Supplier<D> factory;
+	protected final StructType<D> type;
 	protected final ArrayList<D> data = new ArrayList<>();
 
 	protected boolean anyToRemove;
 
-	protected AbstractInstancer(Supplier<D> factory) {
-		this.factory = factory;
+	protected AbstractInstancer(StructType<D> type) {
+		this.type = type;
 	}
 
 	/**
@@ -23,7 +23,7 @@ public abstract class AbstractInstancer<D extends InstanceData> implements Insta
 	 */
 	@Override
 	public D createInstance() {
-		return _add(factory.get());
+		return _add(type.create());
 	}
 
 	/**

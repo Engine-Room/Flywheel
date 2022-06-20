@@ -10,7 +10,7 @@ import com.jozufozu.flywheel.core.model.ModelTransformer;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.structs.InstanceShaders;
 
-public class ModelType implements StructType<ModelData> {
+public class TransformedType implements StructType<TransformedPart> {
 
 	public static final BufferLayout FORMAT = BufferLayout.builder()
 			.addItems(CommonItems.LIGHT, CommonItems.RGBA)
@@ -18,8 +18,8 @@ public class ModelType implements StructType<ModelData> {
 			.build();
 
 	@Override
-	public ModelData create() {
-		return new ModelData();
+	public TransformedPart create() {
+		return new TransformedPart();
 	}
 
 	@Override
@@ -28,17 +28,17 @@ public class ModelType implements StructType<ModelData> {
 	}
 
 	@Override
-	public StructWriter<ModelData> getWriter(ByteBuffer backing) {
-		return new ModelWriterUnsafe(this, backing);
+	public StructWriter<TransformedPart> getWriter(ByteBuffer backing) {
+		return new TransformedWriterUnsafe(this, backing);
 	}
 
 	@Override
 	public FileResolution getInstanceShader() {
-		return InstanceShaders.MODEL;
+		return InstanceShaders.TRANSFORMED;
 	}
 
 	@Override
-	public void transform(ModelData d, ModelTransformer.Params b) {
+	public void transform(TransformedPart d, ModelTransformer.Params b) {
 		b.transform(d.model, d.normal)
 				.color(d.r, d.g, d.b, d.a)
 				.light(d.getPackedLight());

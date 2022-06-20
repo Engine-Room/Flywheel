@@ -1,20 +1,20 @@
 package com.jozufozu.flywheel.core.structs;
 
-import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.InstancedPart;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
 
 /**
- * An interface that implementors of {@link InstanceData} should also implement
+ * An interface that implementors of {@link InstancedPart} should also implement
  * if they wish to make use of Flywheel's provided light update methods.
  * <p>
  * This only covers flat lighting, smooth lighting is still TODO.
  *
  * @param <D> The name of the class that implements this interface.
  */
-public interface FlatLit<D extends InstanceData & FlatLit<D>> {
+public interface FlatLit<D extends InstancedPart & FlatLit<D>> {
 	/**
 	 * @param blockLight An integer in the range [0, 15] representing the
 	 *                   amount of block light this instance should receive.

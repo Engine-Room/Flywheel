@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.BatchDrawingTracker;
@@ -16,7 +16,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 
 	protected final RenderType state;
 
-	private final Map<StructType<? extends InstanceData>, CPUInstancerFactory<?>> materials = new HashMap<>();
+	private final Map<StructType<? extends InstancedPart>, CPUInstancerFactory<?>> materials = new HashMap<>();
 	private int vertexCount;
 	private int instanceCount;
 
@@ -26,7 +26,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <D extends InstanceData> CPUInstancerFactory<D> material(StructType<D> type) {
+	public <D extends InstancedPart> CPUInstancerFactory<D> material(StructType<D> type) {
 		return (CPUInstancerFactory<D>) materials.computeIfAbsent(type, CPUInstancerFactory::new);
 	}
 

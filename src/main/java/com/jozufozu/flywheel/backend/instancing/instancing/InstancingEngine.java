@@ -1,38 +1,59 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+
+import javax.annotation.Nonnull;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.gl.GlVertexArray;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.instancing.Engine;
+import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
+import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
+import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.backend.model.MeshPool;
-import com.jozufozu.flywheel.core.CoreShaderInfoMap;
+import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo;
 import com.jozufozu.flywheel.core.GameStateRegistry;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
+import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
+import com.jozufozu.flywheel.core.model.Mesh;
+import com.jozufozu.flywheel.core.model.ModelSupplier;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.vertex.Formats;
+import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
 import com.jozufozu.flywheel.util.Textures;
 import com.jozufozu.flywheel.util.WeakHashSet;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 
 public class InstancingEngine<P extends WorldProgram> implements Engine {
 
@@ -41,11 +62,10 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	protected BlockPos originCoordinate = BlockPos.ZERO;
 
 	protected final ProgramCompiler<P> context;
-	private MeshPool allocator;
 
-	protected final Map<StructType<? extends InstanceData>, GPUInstancerFactory<?>> factories = new HashMap<>();
+	protected final Map<StructType<? extends InstancedPart>, GPUInstancerFactory<?>> factories = new HashMap<>();
 
-	protected final Set<RenderType> toRender = new HashSet<>();
+	protected final Set<RenderType> layersToProcess = new HashSet<>();
 
 	private final WeakHashSet<OriginShiftListener> listeners;
 	private int vertexCount;
@@ -60,7 +80,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	@SuppressWarnings("unchecked")
 	@NotNull
 	@Override
-	public <D extends InstanceData> GPUInstancerFactory<D> factory(StructType<D> type) {
+	public <D extends InstancedPart> GPUInstancerFactory<D> factory(StructType<D> type) {
 		return (GPUInstancerFactory<D>) factories.computeIfAbsent(type, GPUInstancerFactory::new);
 	}
 
@@ -74,14 +94,18 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		var vp = context.viewProjection().copy();
 		vp.multiplyWithTranslation((float) -camX, (float) -camY, (float) -camZ);
 
-		for (RenderType renderType : toRender) {
+		for (RenderType renderType : layersToProcess) {
 			render(renderType, camX, camY, camZ, vp, context.level());
 		}
-		toRender.clear();
+		layersToProcess.clear();
 	}
 
 	@Override
 	public void renderSpecificType(TaskEngine taskEngine, RenderContext context, RenderType type) {
+		if (!layersToProcess.remove(type)) {
+			return;
+		}
+
 		var camX = context.camX() - originCoordinate.getX();
 		var camY = context.camY() - originCoordinate.getY();
 		var camZ = context.camZ() - originCoordinate.getZ();
@@ -90,9 +114,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		var vp = context.viewProjection().copy();
 		vp.multiplyWithTranslation((float) -camX, (float) -camY, (float) -camZ);
 
-		if (toRender.remove(type)) {
-			render(type, camX, camY, camZ, vp, context.level());
-		}
+		render(type, camX, camY, camZ, vp, context.level());
 	}
 
 	protected void render(RenderType type, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
@@ -101,55 +123,36 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 		type.setupRenderState();
 		Textures.bindActiveTextures();
-		CoreShaderInfo coreShaderInfo = getCoreShaderInfo();
+		CoreShaderInfo coreShaderInfo = CoreShaderInfo.get();
 
 		for (var entry : factories.entrySet()) {
 			var instanceType = entry.getKey();
 			var factory = entry.getValue();
 
-			var materials = factory.materials.get(type);
-			for (Material material : materials) {
-				var toRender = factory.renderables.get(material);
-				toRender.removeIf(Renderable::shouldRemove);
+			var toRender = factory.getRenderList(type);
 
-				if (!toRender.isEmpty()) {
-					setup(instanceType, material, coreShaderInfo, camX, camY, camZ, viewProjection, level);
-
-					instanceCount += factory.getInstanceCount();
-					vertexCount += factory.getVertexCount();
-
-					toRender.forEach(Renderable::render);
-				}
+			if (toRender.isEmpty()) {
+				continue;
 			}
+
+			for (Renderable renderable : toRender) {
+				setup(instanceType, renderable.getMaterial(), coreShaderInfo, camX, camY, camZ, viewProjection, level, renderable.getVertexType());
+
+				renderable.render();
+			}
+
+			instanceCount += factory.getInstanceCount();
+			vertexCount += factory.getVertexCount();
 		}
 
 		type.clearRenderState();
 	}
 
-	protected CoreShaderInfo getCoreShaderInfo() {
-		CoreShaderInfo coreShaderInfo;
-		ShaderInstance coreShader = RenderSystem.getShader();
-		if (coreShader != null) {
-			String coreShaderName = coreShader.getName();
-			coreShaderInfo = CoreShaderInfoMap.getInfo(coreShaderName);
-		} else {
-			coreShaderInfo = null;
-		}
-		if (coreShaderInfo == null) {
-			coreShaderInfo = CoreShaderInfo.DEFAULT;
-		}
-		return coreShaderInfo;
-	}
+	protected P setup(StructType<?> instanceType, Material material, CoreShaderInfo coreShaderInfo, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level, VertexType vertexType) {
 
-	protected P setup(StructType<?> instanceType, Material material, CoreShaderInfo coreShaderInfo, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
-		float alphaDiscard = coreShaderInfo.alphaDiscard();
-		if (alphaDiscard == 0) {
-			alphaDiscard = 0.0001f;
-		} else if (alphaDiscard < 0) {
-			alphaDiscard = 0;
-		}
-
-		P program = context.getProgram(new ProgramCompiler.Context(Formats.POS_TEX_NORMAL, instanceType.getInstanceShader(), material.getVertexShader(), material.getFragmentShader(), alphaDiscard, coreShaderInfo.fogType(), GameStateRegistry.takeSnapshot()));
+		P program = context.getProgram(new ProgramCompiler.Context(vertexType, instanceType.getInstanceShader(),
+				material.getVertexShader(), material.getFragmentShader(), coreShaderInfo.getAdjustedAlphaDiscard(),
+				coreShaderInfo.fogType(), GameStateRegistry.takeSnapshot()));
 
 		program.bind();
 		program.uploadUniforms(camX, camY, camZ, viewProjection, level);
@@ -187,15 +190,15 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	public void beginFrame(Camera info) {
 		checkOriginDistance(info);
 
-		MeshPool allocator = getModelAllocator();
 
 		for (GPUInstancerFactory<?> factory : factories.values()) {
-			factory.init(allocator);
+			factory.init();
 
-			toRender.addAll(factory.materials.keySet());
+			factory.gatherLayers(layersToProcess);
 		}
 
-		allocator.flush();
+		MeshPool.getInstance()
+				.flush();
 	}
 
 	private void checkOriginDistance(Camera info) {
@@ -228,17 +231,130 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		info.add("Origin: " + originCoordinate.getX() + ", " + originCoordinate.getY() + ", " + originCoordinate.getZ());
 	}
 
-	private MeshPool getModelAllocator() {
-		if (allocator == null) {
-			allocator = createAllocator();
+	public void renderCrumbling(LevelRenderer levelRenderer, ClientLevel level, PoseStack stack, Camera camera, Matrix4f projectionMatrix) {
+		var dataByStage = getDataByStage(levelRenderer, level);
+		if (dataByStage.isEmpty()) {
+			return;
 		}
-		return this.allocator;
+
+		var map = modelsToParts(dataByStage);
+		var stateSnapshot = GameStateRegistry.takeSnapshot();
+
+		Vec3 cameraPosition = camera.getPosition();
+		var camX = cameraPosition.x - originCoordinate.getX();
+		var camY = cameraPosition.y - originCoordinate.getY();
+		var camZ = cameraPosition.z - originCoordinate.getZ();
+
+		// don't want to mutate viewProjection
+		var vp = projectionMatrix.copy();
+		vp.multiplyWithTranslation((float) -camX, (float) -camY, (float) -camZ);
+
+		GlBuffer instanceBuffer = GlBuffer.requestPersistent(GlBufferType.ARRAY_BUFFER);
+
+		GlVertexArray crumblingVAO = new GlVertexArray();
+
+		crumblingVAO.bind();
+
+		// crumblingVAO.bindAttributes();
+
+		for (var entry : map.entrySet()) {
+			var model = entry.getKey();
+			var parts = entry.getValue();
+
+			if (parts.isEmpty()) {
+				continue;
+			}
+
+			StructType<?> structType = parts.get(0).type;
+
+			for (var meshEntry : model.get()
+					.entrySet()) {
+				Material material = meshEntry.getKey();
+				Mesh mesh = meshEntry.getValue();
+
+				MeshPool.BufferedMesh bufferedMesh = MeshPool.getInstance()
+						.get(mesh);
+
+				if (bufferedMesh == null || !bufferedMesh.isGpuResident()) {
+					continue;
+				}
+
+				material.getRenderType().setupRenderState();
+
+				CoreShaderInfo coreShaderInfo = CoreShaderInfo.get();
+
+
+				CrumblingProgram program = Contexts.CRUMBLING.getProgram(new ProgramCompiler.Context(Formats.POS_TEX_NORMAL,
+						structType.getInstanceShader(), material.getVertexShader(), material.getFragmentShader(),
+						coreShaderInfo.getAdjustedAlphaDiscard(), coreShaderInfo.fogType(),
+						GameStateRegistry.takeSnapshot()));
+
+				program.bind();
+				program.uploadUniforms(camX, camY, camZ, vp, level);
+
+				// bufferedMesh.drawInstances();
+			}
+		}
 	}
 
-	private static MeshPool createAllocator() {
+	@NotNull
+	private Map<ModelSupplier, List<InstancedPart>> modelsToParts(Int2ObjectMap<List<BlockEntityInstance<?>>> dataByStage) {
+		var map = new HashMap<ModelSupplier, List<InstancedPart>>();
 
-		// FIXME: Windows AMD Drivers don't like ..BaseVertex
-		return new MeshPool(Formats.POS_TEX_NORMAL);
+		for (var entry : dataByStage.int2ObjectEntrySet()) {
+			RenderType currentLayer = ModelBakery.DESTROY_TYPES.get(entry.getIntKey());
+
+			// something about when we call this means that the textures are not ready for use on the first frame they should appear
+			if (currentLayer == null) {
+				continue;
+			}
+
+			for (var blockEntityInstance : entry.getValue()) {
+
+				for (var part : blockEntityInstance.getCrumblingParts()) {
+					if (part.getOwner() instanceof GPUInstancer instancer) {
+
+						// queue the instances for copying to the crumbling instance buffer
+						map.computeIfAbsent(instancer.parent.model, k -> new ArrayList<>()).add(part);
+					}
+				}
+			}
+		}
+		return map;
+	}
+
+	@Nonnull
+	private Int2ObjectMap<List<BlockEntityInstance<?>>> getDataByStage(LevelRenderer levelRenderer, ClientLevel level) {
+		var destructionProgress = ((LevelRendererAccessor) levelRenderer).flywheel$getDestructionProgress();
+		if (destructionProgress.isEmpty()) {
+			return Int2ObjectMaps.emptyMap();
+		}
+
+		if (!(InstancedRenderDispatcher.getInstanceWorld(level)
+				.getBlockEntityInstanceManager() instanceof BlockEntityInstanceManager beim)) {
+			return Int2ObjectMaps.emptyMap();
+		}
+
+		var dataByStage = new Int2ObjectArrayMap<List<BlockEntityInstance<?>>>();
+
+		for (var entry : destructionProgress.long2ObjectEntrySet()) {
+			SortedSet<BlockDestructionProgress> progresses = entry.getValue();
+
+			if (progresses == null || progresses.isEmpty()) {
+				continue;
+			}
+
+			int progress = progresses.last()
+					.getProgress();
+
+			var data = dataByStage.computeIfAbsent(progress, $ -> new ArrayList<>());
+
+			long pos = entry.getLongKey();
+
+			beim.getCrumblingInstances(pos, data);
+		}
+
+		return dataByStage;
 	}
 
 	@FunctionalInterface

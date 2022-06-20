@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.BatchDrawingTracker;
 import com.jozufozu.flywheel.backend.instancing.Engine;
@@ -20,12 +20,12 @@ import net.minecraft.core.Vec3i;
 
 public class BatchingEngine implements Engine {
 
-	private final Map<StructType<? extends InstanceData>, CPUInstancerFactory<?>> factories = new HashMap<>();
+	private final Map<StructType<? extends InstancedPart>, CPUInstancerFactory<?>> factories = new HashMap<>();
 	private final BatchDrawingTracker batchTracker = new BatchDrawingTracker();
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <D extends InstanceData> CPUInstancerFactory<D> factory(StructType<D> type) {
+	public <D extends InstancedPart> CPUInstancerFactory<D> factory(StructType<D> type) {
 		return (CPUInstancerFactory<D>) factories.computeIfAbsent(type, CPUInstancerFactory::new);
 	}
 

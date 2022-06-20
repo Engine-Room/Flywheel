@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing.batching;
 
-import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
@@ -8,14 +8,14 @@ import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
+public class CPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> {
 
 //	private final Batched<D> batchingType;
 //
 //	final ModelTransformer sbb;
 
 	public CPUInstancer(StructType<D> type) {
-		super(type::create);
+		super(type);
 //		batchingType = type;
 //
 //		sbb = new ModelTransformer(modelData.get());

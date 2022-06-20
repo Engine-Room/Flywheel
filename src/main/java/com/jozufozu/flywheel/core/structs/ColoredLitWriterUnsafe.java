@@ -7,9 +7,9 @@ import org.lwjgl.system.MemoryUtil;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.struct.UnsafeBufferWriter;
 
-public abstract class BasicWriterUnsafe<D extends BasicData> extends UnsafeBufferWriter<D> {
+public abstract class ColoredLitWriterUnsafe<D extends ColoredLitPart> extends UnsafeBufferWriter<D> {
 
-	public BasicWriterUnsafe(StructType<D> structType, ByteBuffer byteBuffer) {
+	public ColoredLitWriterUnsafe(StructType<D> structType, ByteBuffer byteBuffer) {
 		super(structType, byteBuffer);
 	}
 

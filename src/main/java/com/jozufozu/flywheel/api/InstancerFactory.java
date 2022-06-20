@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.api;
 
 import com.jozufozu.flywheel.core.model.ModelSupplier;
 
-public interface InstancerFactory<D extends InstanceData> {
+public interface InstancerFactory<D extends InstancedPart> {
 
 	/**
 	 * Get an instancer for the given model. Calling this method twice with the same key will return the same instancer.

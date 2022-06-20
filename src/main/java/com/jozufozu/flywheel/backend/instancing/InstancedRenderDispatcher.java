@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.backend.instancing;
 import java.util.List;
 
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.model.MeshPool;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.RenderContext;
@@ -22,7 +23,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
 public class InstancedRenderDispatcher {
 
 	private static final WorldAttached<InstanceWorld> instanceWorlds = new WorldAttached<>(InstanceWorld::create);
@@ -71,7 +71,6 @@ public class InstancedRenderDispatcher {
 		}
 	}
 
-	@SubscribeEvent
 	public static void tick(TickEvent.ClientTickEvent event) {
 		if (!Backend.isGameActive() || event.phase == TickEvent.Phase.START) {
 			return;
@@ -86,7 +85,6 @@ public class InstancedRenderDispatcher {
 		}
 	}
 
-	@SubscribeEvent
 	public static void onBeginFrame(BeginFrameEvent event) {
 		if (Backend.isGameActive() && Backend.isOn()) {
 			instanceWorlds.get(event.getWorld())
@@ -108,7 +106,6 @@ public class InstancedRenderDispatcher {
 		instanceWorlds.get(world).renderAllRemaining(context);
 	}
 
-	@SubscribeEvent
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		ClientLevel world = event.getWorld();
 		if (Backend.isOn() && world != null) {
