@@ -2,16 +2,16 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 
 import javax.annotation.Nonnull;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimaps;
 import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StructType;
@@ -34,6 +34,7 @@ import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.model.ModelSupplier;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
+import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.vertex.Formats;
 import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
 import com.jozufozu.flywheel.util.Textures;
@@ -65,7 +66,8 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 	protected final Map<StructType<? extends InstancedPart>, GPUInstancerFactory<?>> factories = new HashMap<>();
 
-	protected final Set<RenderType> layersToProcess = new HashSet<>();
+	protected final List<InstancedModel<?>> uninitializedModels = new ArrayList<>();
+	protected final RenderLists renderLists = new RenderLists();
 
 	private final WeakHashSet<OriginShiftListener> listeners;
 	private int vertexCount;
@@ -81,7 +83,12 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	@NotNull
 	@Override
 	public <D extends InstancedPart> GPUInstancerFactory<D> factory(StructType<D> type) {
-		return (GPUInstancerFactory<D>) factories.computeIfAbsent(type, GPUInstancerFactory::new);
+		return (GPUInstancerFactory<D>) factories.computeIfAbsent(type, this::createFactory);
+	}
+
+	@NotNull
+	private <D extends InstancedPart> GPUInstancerFactory<D> createFactory(StructType<D> type) {
+		return new GPUInstancerFactory<>(type, uninitializedModels::add);
 	}
 
 	@Override
@@ -94,15 +101,14 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		var vp = context.viewProjection().copy();
 		vp.multiplyWithTranslation((float) -camX, (float) -camY, (float) -camZ);
 
-		for (RenderType renderType : layersToProcess) {
+		for (RenderType renderType : renderLists.drainLayers()) {
 			render(renderType, camX, camY, camZ, vp, context.level());
 		}
-		layersToProcess.clear();
 	}
 
 	@Override
 	public void renderSpecificType(TaskEngine taskEngine, RenderContext context, RenderType type) {
-		if (!layersToProcess.remove(type)) {
+		if (!renderLists.process(type)) {
 			return;
 		}
 
@@ -121,37 +127,50 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		vertexCount = 0;
 		instanceCount = 0;
 
+		var multimap = renderLists.get(type);
+
+		if (multimap.isEmpty()) {
+			return;
+		}
+
+		render(type, multimap, camX, camY, camZ, viewProjection, level);
+	}
+
+	protected void render(RenderType type, ListMultimap<ShaderState, DrawCall> multimap, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
 		type.setupRenderState();
 		Textures.bindActiveTextures();
 		CoreShaderInfo coreShaderInfo = CoreShaderInfo.get();
 
-		for (var entry : factories.entrySet()) {
-			var instanceType = entry.getKey();
-			var factory = entry.getValue();
+		for (var entry : Multimaps.asMap(multimap).entrySet()) {
+			var shader = entry.getKey();
+			var drawCalls = entry.getValue();
 
-			var toRender = factory.getRenderList(type);
+			drawCalls.removeIf(DrawCall::shouldRemove);
 
-			if (toRender.isEmpty()) {
+			if (drawCalls.isEmpty()) {
 				continue;
 			}
 
-			for (Renderable renderable : toRender) {
-				setup(instanceType, renderable.getMaterial(), coreShaderInfo, camX, camY, camZ, viewProjection, level, renderable.getVertexType());
+			setup(shader, coreShaderInfo, camX, camY, camZ, viewProjection, level);
 
-				renderable.render();
+			for (var drawCall : drawCalls) {
+				drawCall.render();
 			}
 
-			instanceCount += factory.getInstanceCount();
-			vertexCount += factory.getVertexCount();
 		}
 
 		type.clearRenderState();
 	}
 
-	protected P setup(StructType<?> instanceType, Material material, CoreShaderInfo coreShaderInfo, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level, VertexType vertexType) {
+	protected P setup(ShaderState desc, CoreShaderInfo coreShaderInfo, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
 
-		P program = context.getProgram(new ProgramCompiler.Context(vertexType, instanceType.getInstanceShader(),
-				material.getVertexShader(), material.getFragmentShader(), coreShaderInfo.getAdjustedAlphaDiscard(),
+		VertexType vertexType = desc.vertex();
+		FileResolution instanceShader = desc.instance()
+				.getInstanceShader();
+		Material material = desc.material();
+
+		P program = context.getProgram(new ProgramCompiler.Context(vertexType, instanceShader,
+				material.vertexShader(), material.fragmentShader(), coreShaderInfo.getAdjustedAlphaDiscard(),
 				coreShaderInfo.fogType(), GameStateRegistry.takeSnapshot()));
 
 		program.bind();
@@ -190,12 +209,12 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	public void beginFrame(Camera info) {
 		checkOriginDistance(info);
 
-
-		for (GPUInstancerFactory<?> factory : factories.values()) {
-			factory.init();
-
-			factory.gatherLayers(layersToProcess);
+		for (var factory : uninitializedModels) {
+			factory.init(renderLists);
 		}
+		uninitializedModels.clear();
+
+		renderLists.prepare();
 
 		MeshPool.getInstance()
 				.flush();
@@ -279,13 +298,13 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 					continue;
 				}
 
-				material.getRenderType().setupRenderState();
+				material.renderType().setupRenderState();
 
 				CoreShaderInfo coreShaderInfo = CoreShaderInfo.get();
 
 
 				CrumblingProgram program = Contexts.CRUMBLING.getProgram(new ProgramCompiler.Context(Formats.POS_TEX_NORMAL,
-						structType.getInstanceShader(), material.getVertexShader(), material.getFragmentShader(),
+						structType.getInstanceShader(), material.vertexShader(), material.fragmentShader(),
 						coreShaderInfo.getAdjustedAlphaDiscard(), coreShaderInfo.fogType(),
 						GameStateRegistry.takeSnapshot()));
 

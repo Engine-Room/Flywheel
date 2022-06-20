@@ -9,14 +9,11 @@ import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
-import com.jozufozu.flywheel.backend.instancing.instancing.Renderable;
 import com.jozufozu.flywheel.core.Contexts;
-import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
 import com.jozufozu.flywheel.util.Lazy;
-import com.jozufozu.flywheel.util.Textures;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
@@ -168,30 +165,13 @@ public class CrumblingRenderer {
 				return;
 			}
 
-			currentLayer.setupRenderState();
-			Textures.bindActiveTextures();
-			CoreShaderInfo coreShaderInfo = CoreShaderInfo.get();
+			var multimap = renderLists.get(type);
 
-			for (var entry : factories.entrySet()) {
-				var instanceType = entry.getKey();
-				var factory = entry.getValue();
-
-				var toRender = factory.getRenderList(type);
-
-				if (toRender.isEmpty()) {
-					continue;
-				}
-
-				for (var renderable : toRender) {
-
-					setup(instanceType, renderable.getMaterial(), coreShaderInfo, camX, camY, camZ, viewProjection, level, renderable.getVertexType());
-
-					renderable.render();
-				}
-
+			if (multimap.isEmpty()) {
+				return;
 			}
 
-			currentLayer.clearRenderState();
+			render(currentLayer, multimap, camX, camY, camZ, viewProjection, level);
 		}
 	}
 }
