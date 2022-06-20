@@ -1,15 +1,9 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Consumer;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimap;
 import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.InstancerFactory;
@@ -26,13 +20,11 @@ public class GPUInstancerFactory<D extends InstancedPart> implements InstancerFa
 
 	protected final Map<ModelSupplier, InstancedModel<D>> models = new HashMap<>();
 	protected final StructType<D> type;
+	private final Consumer<InstancedModel<D>> creationListener;
 
-	protected final List<InstancedModel<D>> uninitialized = new ArrayList<>();
-
-	private final ListMultimap<RenderType, Renderable> renderLists = ArrayListMultimap.create();
-
-	public GPUInstancerFactory(StructType<D> type) {
+	public GPUInstancerFactory(StructType<D> type, Consumer<InstancedModel<D>> creationListener) {
 		this.type = type;
+		this.creationListener = creationListener;
 	}
 
 	@Override
@@ -58,7 +50,6 @@ public class GPUInstancerFactory<D extends InstancedPart> implements InstancerFa
 	public void delete() {
 		models.values().forEach(InstancedModel::delete);
 		models.clear();
-		renderLists.clear();
 	}
 
 	/**
@@ -71,35 +62,9 @@ public class GPUInstancerFactory<D extends InstancedPart> implements InstancerFa
 				.forEach(GPUInstancer::clear);
 	}
 
-	public void init() {
-		for (var instanced : uninitialized) {
-			instanced.init();
-
-			for (Renderable renderable : instanced.getLayers()) {
-				renderLists.put(renderable.getMaterial()
-						.getRenderType(), renderable);
-			}
-		}
-		uninitialized.clear();
-	}
-
 	private InstancedModel<D> createInstancer(ModelSupplier model) {
 		var instancer = new InstancedModel<>(type, model);
-		uninitialized.add(instancer);
+		this.creationListener.accept(instancer);
 		return instancer;
-	}
-
-	/**
-	 * Adds all the RenderTypes that this InstancerFactory will render to the given set.
-	 * @param layersToProcess The set of RenderTypes that the InstancingEngine will process.
-	 */
-	public void gatherLayers(Set<RenderType> layersToProcess) {
-		layersToProcess.addAll(renderLists.keySet());
-	}
-
-	public List<Renderable> getRenderList(RenderType type) {
-		var out = renderLists.get(type);
-		out.removeIf(Renderable::shouldRemove);
-		return out;
 	}
 }

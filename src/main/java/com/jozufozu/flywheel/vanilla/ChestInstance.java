@@ -37,8 +37,9 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends BlockEntityInstance<T> implements DynamicInstance {
 
-	private static final BiFunction<ChestType, Material, BasicModelSupplier> LID = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createLidModel(type, mat.sprite()), new com.jozufozu.flywheel.api.material.Material(Sheets.chestSheet(), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT)));
-	private static final BiFunction<ChestType, Material, BasicModelSupplier> BASE = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createBaseModel(type, mat.sprite()), new com.jozufozu.flywheel.api.material.Material(Sheets.chestSheet(), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT)));
+	private static final com.jozufozu.flywheel.api.material.Material CHEST_MATERIAL = new com.jozufozu.flywheel.api.material.Material(Sheets.chestSheet(), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT);
+	private static final BiFunction<ChestType, Material, BasicModelSupplier> LID = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createLidModel(type, mat.sprite()), CHEST_MATERIAL));
+	private static final BiFunction<ChestType, Material, BasicModelSupplier> BASE = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createBaseModel(type, mat.sprite()), CHEST_MATERIAL));
 
 	private final OrientedPart body;
 	private final TransformedPart lid;
