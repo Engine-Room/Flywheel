@@ -34,7 +34,7 @@ public class ModelPart implements Mesh {
 				cuboid.buffer(writer);
 			}
 
-			reader = writer.intoReader();
+			reader = writer.intoReader(this.vertices);
 		}
 	}
 

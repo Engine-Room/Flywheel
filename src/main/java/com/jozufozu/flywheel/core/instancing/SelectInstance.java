@@ -6,10 +6,10 @@ import java.util.Optional;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.Instancer;
 
-public class SelectInstance<D extends InstanceData> {
+public class SelectInstance<D extends InstancedPart> {
 
 	final List<Instancer<D>> models;
 

@@ -10,6 +10,9 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.backend.OptifineHandler;
+import com.mojang.blaze3d.systems.RenderSystem;
+
+import net.minecraft.client.renderer.ShaderInstance;
 
 public class CoreShaderInfoMap {
 	private static final Map<String, CoreShaderInfo> MAP = new HashMap<>();
@@ -85,6 +88,29 @@ public class CoreShaderInfoMap {
 
 	public record CoreShaderInfo(float alphaDiscard, boolean appliesDiffuse, FogType fogType) {
 		public static final CoreShaderInfo DEFAULT = new CoreShaderInfo(-1, false, NO_FOG);
+
+		public static CoreShaderInfo get() {
+			CoreShaderInfo out = null;
+			ShaderInstance coreShader = RenderSystem.getShader();
+			if (coreShader != null) {
+				String coreShaderName = coreShader.getName();
+				out = getInfo(coreShaderName);
+			}
+			if (out == null) {
+				out = DEFAULT;
+			}
+			return out;
+		}
+
+		public float getAdjustedAlphaDiscard() {
+			float alphaDiscard = alphaDiscard();
+			if (alphaDiscard == 0) {
+				alphaDiscard = 0.0001f;
+			} else if (alphaDiscard < 0) {
+				alphaDiscard = 0;
+			}
+			return alphaDiscard;
+		}
 
 		public enum FogType {
 			NO_FOG,

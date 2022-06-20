@@ -1,10 +1,13 @@
 package com.jozufozu.flywheel.vanilla;
 
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.BiFunction;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
@@ -12,8 +15,8 @@ import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.material.MaterialShaders;
 import com.jozufozu.flywheel.core.structs.StructTypes;
-import com.jozufozu.flywheel.core.structs.model.ModelData;
-import com.jozufozu.flywheel.core.structs.oriented.OrientedData;
+import com.jozufozu.flywheel.core.structs.model.TransformedPart;
+import com.jozufozu.flywheel.core.structs.oriented.OrientedPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -37,8 +40,8 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Block
 	private static final BiFunction<ChestType, Material, BasicModelSupplier> LID = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createLidModel(type, mat.sprite()), new com.jozufozu.flywheel.api.material.Material(Sheets.chestSheet(), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT)));
 	private static final BiFunction<ChestType, Material, BasicModelSupplier> BASE = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createBaseModel(type, mat.sprite()), new com.jozufozu.flywheel.api.material.Material(Sheets.chestSheet(), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT)));
 
-	private final OrientedData body;
-	private final ModelData lid;
+	private final OrientedPart body;
+	private final TransformedPart lid;
 
 	private final Float2FloatFunction lidProgress;
 	private final Material renderMaterial;
@@ -109,21 +112,26 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Block
 	}
 
 	@Override
+	public void addCrumblingParts(List<InstancedPart> data) {
+		Collections.addAll(data, body, lid);
+	}
+
+	@Override
 	public void remove() {
 		body.delete();
 		lid.delete();
 	}
 
-	private OrientedData baseInstance() {
+	private OrientedPart baseInstance() {
 
 		return instancerManager.factory(StructTypes.ORIENTED)
 				.model(BASE.apply(chestType, renderMaterial))
 				.createInstance();
 	}
 
-	private ModelData lidInstance() {
+	private TransformedPart lidInstance() {
 
-		return instancerManager.factory(StructTypes.MODEL)
+		return instancerManager.factory(StructTypes.TRANSFORMED)
 				.model(LID.apply(chestType, renderMaterial))
 				.createInstance();
 	}

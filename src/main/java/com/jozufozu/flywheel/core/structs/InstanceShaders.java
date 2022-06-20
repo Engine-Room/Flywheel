@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 public class InstanceShaders {
 	public static final BiConsumer<ErrorReporter, SourceFile> CHECK = SourceChecks.checkFunctionParameterTypeExists("flw_instanceVertex", 1, 0);
 
-	public static final FileResolution MODEL = create(ResourceUtil.subPath(Names.MODEL, ".vert"));
+	public static final FileResolution TRANSFORMED = create(ResourceUtil.subPath(Names.TRANSFORMED, ".vert"));
 	public static final FileResolution ORIENTED = create(ResourceUtil.subPath(Names.ORIENTED, ".vert"));
 
 	public static FileResolution create(ResourceLocation location) {
@@ -25,7 +25,7 @@ public class InstanceShaders {
 	}
 
 	public static class Names {
-		public static final ResourceLocation MODEL = Flywheel.rl("instance/model");
+		public static final ResourceLocation TRANSFORMED = Flywheel.rl("instance/transformed");
 		public static final ResourceLocation ORIENTED = Flywheel.rl("instance/oriented");
 	}
 }

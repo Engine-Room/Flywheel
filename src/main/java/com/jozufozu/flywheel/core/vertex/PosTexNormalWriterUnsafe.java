@@ -40,6 +40,5 @@ public class PosTexNormalWriterUnsafe extends VertexWriterUnsafe<PosTexNormalVer
 		MemoryUtil.memPutByte(ptr + 22, RenderMath.nb(nZ));
 
 		ptr += 23;
-		advance();
 	}
 }

@@ -77,13 +77,6 @@ public abstract class GlBuffer extends GlObject {
 	 */
 	public abstract boolean ensureCapacity(long size);
 
-	/**
-	 * Call this after all draw calls using this buffer are complete.
-	 */
-	public void doneForThisFrame() {
-
-	}
-
 	protected void deleteInternal(int handle) {
 		GL20.glDeleteBuffers(handle);
 	}

@@ -18,7 +18,7 @@ package com.jozufozu.flywheel.api;
  *
  * @param <D> the data that represents a copy of the instanced model.
  */
-public interface Instancer<D extends InstanceData> {
+public interface Instancer<D extends InstancedPart> {
 	/**
 	 * @return a handle to a new copy of this model.
 	 */

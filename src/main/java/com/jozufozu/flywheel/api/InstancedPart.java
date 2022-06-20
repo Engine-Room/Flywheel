@@ -1,11 +1,18 @@
 package com.jozufozu.flywheel.api;
 
-public abstract class InstanceData {
+import com.jozufozu.flywheel.api.struct.StructType;
 
+public abstract class InstancedPart {
+
+	public final StructType<?> type;
 	private Instancer<?> owner;
 
 	private boolean dirty;
 	private boolean removed;
+
+	protected InstancedPart(StructType<?> type) {
+		this.type = type;
+	}
 
 	public final void markDirty() {
 		dirty = true;
@@ -34,8 +41,9 @@ public abstract class InstanceData {
 		return owner;
 	}
 
-	public InstanceData setOwner(Instancer<?> owner) {
+	public void setOwner(Instancer<?> owner) {
 		this.owner = owner;
-		return this;
 	}
+
+    public abstract InstancedPart copy();
 }

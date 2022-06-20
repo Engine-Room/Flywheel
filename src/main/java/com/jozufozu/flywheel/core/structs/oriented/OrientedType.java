@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.structs.InstanceShaders;
 import com.mojang.math.Quaternion;
 
-public class OrientedType implements StructType<OrientedData> {
+public class OrientedType implements StructType<OrientedPart> {
 
 	public static final BufferLayout FORMAT = BufferLayout.builder()
 			.addItems(CommonItems.LIGHT, CommonItems.RGBA)
@@ -19,8 +19,8 @@ public class OrientedType implements StructType<OrientedData> {
 			.build();
 
 	@Override
-	public OrientedData create() {
-		return new OrientedData();
+	public OrientedPart create() {
+		return new OrientedPart();
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public class OrientedType implements StructType<OrientedData> {
 	}
 
 	@Override
-	public StructWriter<OrientedData> getWriter(ByteBuffer backing) {
+	public StructWriter<OrientedPart> getWriter(ByteBuffer backing) {
 		return new OrientedWriterUnsafe(this, backing);
 	}
 
@@ -39,7 +39,7 @@ public class OrientedType implements StructType<OrientedData> {
 	}
 
 	@Override
-	public void transform(OrientedData d, ModelTransformer.Params b) {
+	public void transform(OrientedPart d, ModelTransformer.Params b) {
 		b.light(d.getPackedLight())
 				.color(d.r, d.g, d.b, d.a)
 				.translate(d.posX + d.pivotX, d.posY + d.pivotY, d.posZ + d.pivotZ)

@@ -5,6 +5,9 @@ import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.OptifineHandler;
+import com.jozufozu.flywheel.backend.RenderWork;
+import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.backend.model.MeshPool;
 import com.jozufozu.flywheel.config.BackendTypeArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
@@ -12,12 +15,16 @@ import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.GameStateRegistry;
 import com.jozufozu.flywheel.core.Models;
 import com.jozufozu.flywheel.core.PartialModel;
+import com.jozufozu.flywheel.core.QuadConverter;
 import com.jozufozu.flywheel.core.StitchedSprite;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
+import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.core.material.MaterialShaders;
 import com.jozufozu.flywheel.core.shader.NormalDebugStateProvider;
 import com.jozufozu.flywheel.core.structs.InstanceShaders;
 import com.jozufozu.flywheel.core.vertex.LayoutShaders;
+import com.jozufozu.flywheel.event.EntityWorldHandler;
+import com.jozufozu.flywheel.event.ForgeEvents;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
@@ -28,6 +35,7 @@ import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.CrashReportCallables;
 import net.minecraftforge.fml.DistExecutor;
@@ -75,8 +83,25 @@ public class Flywheel {
 		Backend.init();
 
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);
+
+		forgeEventBus.addListener(EventPriority.HIGHEST, QuadConverter::onRendererReload);
 		forgeEventBus.<ReloadRenderersEvent>addListener(ProgramCompiler::invalidateAll);
 		forgeEventBus.addListener(Models::onReload);
+		forgeEventBus.addListener(MeshPool::reset);
+		forgeEventBus.addListener(CrumblingRenderer::onReloadRenderers);
+
+		forgeEventBus.addListener(InstancedRenderDispatcher::onReloadRenderers);
+		forgeEventBus.addListener(InstancedRenderDispatcher::onBeginFrame);
+		forgeEventBus.addListener(InstancedRenderDispatcher::tick);
+
+		forgeEventBus.addListener(EntityWorldHandler::onEntityJoinWorld);
+		forgeEventBus.addListener(EntityWorldHandler::onEntityLeaveWorld);
+
+		forgeEventBus.addListener(ForgeEvents::addToDebugScreen);
+		forgeEventBus.addListener(ForgeEvents::unloadWorld);
+		forgeEventBus.addListener(ForgeEvents::tickLight);
+
+		forgeEventBus.addListener(EventPriority.LOWEST, RenderWork::onRenderWorldLast);
 
 		modEventBus.addListener(PartialModel::onModelRegistry);
 		modEventBus.addListener(PartialModel::onModelBake);

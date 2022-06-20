@@ -2,10 +2,8 @@ package com.jozufozu.flywheel.core;
 
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.backend.gl.GlNumericType;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
@@ -52,8 +50,8 @@ public class FullscreenQuad {
 
 			vao.enableArrays(1);
 
-			vao.bindAttributes(vbo, 0, LAYOUT);
-		}
+            vao.bindAttributes(vbo, 0, LAYOUT, 0L);
+        }
 	}
 
 	public void draw() {

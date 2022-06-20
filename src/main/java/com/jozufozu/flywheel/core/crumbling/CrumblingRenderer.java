@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 
-import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
@@ -34,15 +33,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
 // TODO: merge directly into InstancingEngine for efficiency
 /**
  * Responsible for rendering the crumbling overlay for instanced block entities.
  */
-@Mod.EventBusSubscriber(Dist.CLIENT)
 public class CrumblingRenderer {
 
 	private static Lazy<State> STATE;
@@ -128,7 +123,6 @@ public class CrumblingRenderer {
 		return breakingEntities;
 	}
 
-	@SubscribeEvent
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		ClientLevel world = event.getWorld();
         if (Backend.isOn() && world != null) {
@@ -176,23 +170,25 @@ public class CrumblingRenderer {
 
 			currentLayer.setupRenderState();
 			Textures.bindActiveTextures();
-			CoreShaderInfo coreShaderInfo = getCoreShaderInfo();
+			CoreShaderInfo coreShaderInfo = CoreShaderInfo.get();
 
 			for (var entry : factories.entrySet()) {
 				var instanceType = entry.getKey();
 				var factory = entry.getValue();
 
-				var materials = factory.materials.get(type);
-				for (Material material : materials) {
-					var toRender = factory.renderables.get(material);
-					toRender.removeIf(Renderable::shouldRemove);
+				var toRender = factory.getRenderList(type);
 
-					if (!toRender.isEmpty()) {
-						setup(instanceType, material, coreShaderInfo, camX, camY, camZ, viewProjection, level);
-
-						toRender.forEach(Renderable::render);
-					}
+				if (toRender.isEmpty()) {
+					continue;
 				}
+
+				for (var renderable : toRender) {
+
+					setup(instanceType, renderable.getMaterial(), coreShaderInfo, camX, camY, camZ, viewProjection, level, renderable.getVertexType());
+
+					renderable.render();
+				}
+
 			}
 
 			currentLayer.clearRenderState();

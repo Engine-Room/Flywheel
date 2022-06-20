@@ -141,8 +141,7 @@ public class InstanceWorld {
 	public void loadEntities(ClientLevel world) {
 		// Block entities are loaded while chunks are baked.
 		// Entities are loaded with the world, so when chunks are reloaded they need to be re-added.
-		ClientLevelExtension.cast(world)
-				.flywheel$getAllLoadedEntities()
+		ClientLevelExtension.getAllLoadedEntities(world)
 				.forEach(entityInstanceManager::add);
 	}
 

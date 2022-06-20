@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.api.vertex.VertexWriter;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.core.QuadConverter;
 
@@ -77,7 +78,9 @@ public interface Mesh {
 		return getVertexCount() == 0;
 	}
 
-	default void writeInto(ByteBuffer buffer) {
-		getType().createWriter(buffer).writeVertexList(getReader());
+	default void writeInto(ByteBuffer buffer, long byteIndex) {
+		VertexWriter writer = getType().createWriter(buffer);
+		writer.seek(byteIndex);
+		writer.writeVertexList(getReader());
 	}
 }

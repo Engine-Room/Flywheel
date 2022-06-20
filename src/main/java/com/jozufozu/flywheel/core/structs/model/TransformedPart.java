@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.core.structs.model;
 
-import com.jozufozu.flywheel.core.structs.BasicData;
+import com.jozufozu.flywheel.core.structs.ColoredLitPart;
+import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.util.transform.Transform;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
@@ -9,14 +10,18 @@ import com.mojang.math.Quaternion;
 
 import net.minecraft.util.Mth;
 
-public class ModelData extends BasicData implements Transform<ModelData> {
+public class TransformedPart extends ColoredLitPart implements Transform<TransformedPart> {
 	private static final Matrix4f EMPTY_MATRIX_4f = new Matrix4f();
 	private static final Matrix3f EMPTY_MATRIX_3f = new Matrix3f();
 
 	public final Matrix4f model = new Matrix4f();
 	public final Matrix3f normal = new Matrix3f();
 
-	public ModelData setTransform(PoseStack stack) {
+	public TransformedPart() {
+		super(StructTypes.TRANSFORMED);
+	}
+
+	public TransformedPart setTransform(PoseStack stack) {
 		markDirty();
 
 		this.model.load(stack.last().pose());
@@ -31,7 +36,7 @@ public class ModelData extends BasicData implements Transform<ModelData> {
 	 *     This will allow the gpu to quickly discard all geometry for this instance, effectively "turning it off".
 	 * </p>
 	 */
-	public ModelData setEmptyTransform() {
+	public TransformedPart setEmptyTransform() {
 		markDirty();
 
 		this.model.load(EMPTY_MATRIX_4f);
@@ -39,7 +44,7 @@ public class ModelData extends BasicData implements Transform<ModelData> {
 		return this;
 	}
 
-	public ModelData loadIdentity() {
+	public TransformedPart loadIdentity() {
 		markDirty();
 
 		this.model.setIdentity();
@@ -48,7 +53,7 @@ public class ModelData extends BasicData implements Transform<ModelData> {
 	}
 
 	@Override
-	public ModelData multiply(Quaternion quaternion) {
+	public TransformedPart multiply(Quaternion quaternion) {
 		markDirty();
 
 		model.multiply(quaternion);
@@ -57,7 +62,7 @@ public class ModelData extends BasicData implements Transform<ModelData> {
 	}
 
 	@Override
-	public ModelData scale(float pX, float pY, float pZ) {
+	public TransformedPart scale(float pX, float pY, float pZ) {
 		markDirty();
 
 		model.multiply(Matrix4f.createScaleMatrix(pX, pY, pZ));
@@ -79,7 +84,7 @@ public class ModelData extends BasicData implements Transform<ModelData> {
 	}
 
 	@Override
-	public ModelData translate(double x, double y, double z) {
+	public TransformedPart translate(double x, double y, double z) {
 		markDirty();
 
 		model.multiplyWithTranslation((float) x, (float) y, (float) z);
@@ -87,14 +92,28 @@ public class ModelData extends BasicData implements Transform<ModelData> {
 	}
 
 	@Override
-	public ModelData mulPose(Matrix4f pose) {
+	public TransformedPart mulPose(Matrix4f pose) {
 		this.model.multiply(pose);
 		return this;
 	}
 
 	@Override
-	public ModelData mulNormal(Matrix3f normal) {
+	public TransformedPart mulNormal(Matrix3f normal) {
 		this.normal.mul(normal);
 		return this;
+	}
+
+	@Override
+	public TransformedPart copy() {
+		var out = new TransformedPart();
+		out.model.load(this.model);
+		out.normal.load(this.normal);
+		out.r = this.r;
+		out.g = this.g;
+		out.b = this.b;
+		out.a = this.a;
+		out.blockLight = this.blockLight;
+		out.skyLight = this.skyLight;
+		return out;
 	}
 }

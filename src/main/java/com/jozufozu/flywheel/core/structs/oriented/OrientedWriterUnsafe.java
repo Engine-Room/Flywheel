@@ -5,15 +5,15 @@ import java.nio.ByteBuffer;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.core.structs.BasicWriterUnsafe;
+import com.jozufozu.flywheel.core.structs.ColoredLitWriterUnsafe;
 
-public class OrientedWriterUnsafe extends BasicWriterUnsafe<OrientedData> {
-	public OrientedWriterUnsafe(StructType<OrientedData> structType, ByteBuffer byteBuffer) {
+public class OrientedWriterUnsafe extends ColoredLitWriterUnsafe<OrientedPart> {
+	public OrientedWriterUnsafe(StructType<OrientedPart> structType, ByteBuffer byteBuffer) {
 		super(structType, byteBuffer);
 	}
 
 	@Override
-	protected void writeInternal(OrientedData d) {
+	protected void writeInternal(OrientedPart d) {
 		long ptr = writePointer;
 		super.writeInternal(d);
 

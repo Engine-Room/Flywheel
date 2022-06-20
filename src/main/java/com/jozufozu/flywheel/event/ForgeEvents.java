@@ -17,10 +17,8 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
 public class ForgeEvents {
 
-	@SubscribeEvent
 	public static void addToDebugScreen(RenderGameOverlayEvent.Text event) {
 
 		if (Minecraft.getInstance().options.renderDebug) {
@@ -37,12 +35,10 @@ public class ForgeEvents {
 		}
 	}
 
-	@SubscribeEvent
 	public static void unloadWorld(WorldEvent.Unload event) {
 		WorldAttached.invalidateWorld(event.getWorld());
 	}
 
-	@SubscribeEvent
 	public static void tickLight(TickEvent.ClientTickEvent e) {
 		if (e.phase == TickEvent.Phase.END && Backend.isGameActive()) {
 			LightUpdater.get(Minecraft.getInstance().level)

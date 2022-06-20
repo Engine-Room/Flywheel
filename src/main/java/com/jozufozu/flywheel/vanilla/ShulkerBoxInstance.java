@@ -1,7 +1,10 @@
 package com.jozufozu.flywheel.vanilla;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.material.Material;
@@ -10,7 +13,7 @@ import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.material.MaterialShaders;
 import com.jozufozu.flywheel.core.structs.StructTypes;
-import com.jozufozu.flywheel.core.structs.model.ModelData;
+import com.jozufozu.flywheel.core.structs.model.TransformedPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -33,8 +36,8 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 
 	private final TextureAtlasSprite texture;
 
-	private final ModelData base;
-	private final ModelData lid;
+	private final TransformedPart base;
+	private final TransformedPart lid;
 	private final PoseStack stack = new PoseStack();
 
 	private float lastProgress = Float.NaN;
@@ -88,6 +91,11 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 	}
 
 	@Override
+	public void addCrumblingParts(List<InstancedPart> data) {
+		Collections.addAll(data, base, lid);
+	}
+
+	@Override
 	public void remove() {
 		base.delete();
 		lid.delete();
@@ -98,14 +106,14 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 		relight(pos, base, lid);
 	}
 
-	private ModelData makeBaseInstance() {
-		return instancerManager.factory(StructTypes.MODEL)
+	private TransformedPart makeBaseInstance() {
+		return instancerManager.factory(StructTypes.TRANSFORMED)
 				.model(BASE.apply(texture))
 				.createInstance();
 	}
 
-	private ModelData makeLidInstance() {
-		return instancerManager.factory(StructTypes.MODEL)
+	private TransformedPart makeLidInstance() {
+		return instancerManager.factory(StructTypes.TRANSFORMED)
 				.model(LID.apply(texture))
 				.createInstance();
 	}

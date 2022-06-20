@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jozufozu.flywheel.api.InstanceData;
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.InstancerFactory;
 import com.jozufozu.flywheel.api.struct.StructType;
@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.core.model.ModelSupplier;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-public class CPUInstancerFactory<D extends InstanceData> implements InstancerFactory<D> {
+public class CPUInstancerFactory<D extends InstancedPart> implements InstancerFactory<D> {
 
 	protected final Map<ModelSupplier, CPUInstancer<D>> models;
 	private final StructType<D> type;

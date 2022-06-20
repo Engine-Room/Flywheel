@@ -52,6 +52,5 @@ public class BlockWriterUnsafe extends VertexWriterUnsafe<BlockVertex> {
 		MemoryUtil.memPutByte(ptr + 30, RenderMath.nb(nZ));
 
 		ptr += 32;
-		advance();
 	}
 }
