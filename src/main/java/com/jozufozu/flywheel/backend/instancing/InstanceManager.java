@@ -327,31 +327,44 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		AbstractInstance renderer = createRaw(obj);
 
 		if (renderer != null) {
-			renderer.init();
-			renderer.updateLight();
-			LightUpdater.get(renderer.level)
-					.addListener(renderer);
+			setup(obj, renderer);
 			instances.put(obj, renderer);
-
-			if (renderer instanceof TickableInstance r) {
-				tickableInstances.put(obj, r);
-				r.tick();
-			}
-
-			if (renderer instanceof DynamicInstance r) {
-				dynamicInstances.put(obj, r);
-				r.beginFrame();
-			}
 		}
 
 		return renderer;
 	}
 
+	private void setup(T obj, AbstractInstance renderer) {
+		renderer.init();
+		renderer.updateLight();
+		LightUpdater.get(renderer.level)
+				.addListener(renderer);
+		if (renderer instanceof TickableInstance r) {
+			tickableInstances.put(obj, r);
+			r.tick();
+		}
+
+		if (renderer instanceof DynamicInstance r) {
+			dynamicInstances.put(obj, r);
+			r.beginFrame();
+		}
+	}
+
 	@Override
 	public void onOriginShift() {
-		ArrayList<T> instanced = new ArrayList<>(instances.keySet());
-		invalidate();
-		instanced.forEach(this::add);
+		dynamicInstances.clear();
+		tickableInstances.clear();
+		instances.replaceAll((obj, instance) -> {
+			instance.remove();
+
+			AbstractInstance out = createRaw(obj);
+
+			if (out != null) {
+				setup(obj, out);
+			}
+
+			return out;
+		});
 	}
 
 	public void detachLightListeners() {

@@ -33,6 +33,7 @@ import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.model.ModelSupplier;
+import com.jozufozu.flywheel.core.shader.StateSnapshot;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.vertex.Formats;
@@ -140,6 +141,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		type.setupRenderState();
 		Textures.bindActiveTextures();
 		CoreShaderInfo coreShaderInfo = CoreShaderInfo.get();
+		StateSnapshot state = GameStateRegistry.takeSnapshot();
 
 		for (var entry : Multimaps.asMap(multimap).entrySet()) {
 			var shader = entry.getKey();
@@ -151,7 +153,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 				continue;
 			}
 
-			setup(shader, coreShaderInfo, camX, camY, camZ, viewProjection, level);
+			setup(shader, coreShaderInfo, camX, camY, camZ, viewProjection, level, state);
 
 			for (var drawCall : drawCalls) {
 				drawCall.render();
@@ -162,7 +164,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		type.clearRenderState();
 	}
 
-	protected P setup(ShaderState desc, CoreShaderInfo coreShaderInfo, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
+	protected P setup(ShaderState desc, CoreShaderInfo coreShaderInfo, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level, StateSnapshot ctx) {
 
 		VertexType vertexType = desc.vertex();
 		FileResolution instanceShader = desc.instance()
@@ -171,7 +173,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 		P program = context.getProgram(new ProgramCompiler.Context(vertexType, instanceShader,
 				material.vertexShader(), material.fragmentShader(), coreShaderInfo.getAdjustedAlphaDiscard(),
-				coreShaderInfo.fogType(), GameStateRegistry.takeSnapshot()));
+				coreShaderInfo.fogType(), ctx));
 
 		program.bind();
 		program.uploadUniforms(camX, camY, camZ, viewProjection, level);
