@@ -10,6 +10,7 @@ import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
@@ -42,7 +43,7 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 	public void init() {
 		if (vbo != null) return;
 
-		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
+		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER, GlBufferUsage.DYNAMIC_DRAW);
 		vbo.setGrowthMargin(instanceFormat.getStride() * 16);
 	}
 
@@ -53,6 +54,14 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 	private final Set<GlVertexArray> boundTo = new HashSet<>();
 
 	void renderSetup(GlVertexArray vao) {
+		update();
+
+		if (boundTo.add(vao)) {
+			bindInstanceAttributes(vao);
+		}
+	}
+
+	private void update() {
 		if (anyToRemove) {
 			removeDeletedInstances();
 		}
@@ -67,10 +76,6 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 		}
 
 		glInstanceCount = data.size();
-
-		if (boundTo.add(vao)) {
-			bindInstanceAttributes(vao);
-		}
 
 		anyToRemove = anyToUpdate = false;
 	}

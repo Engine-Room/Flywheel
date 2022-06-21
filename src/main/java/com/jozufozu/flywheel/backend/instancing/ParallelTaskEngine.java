@@ -268,8 +268,8 @@ public class ParallelTaskEngine implements TaskEngine {
 		}
 
 		public void oneDown() {
-			if (running.decrementAndGet() == 0) {
-				if (finalizer != null) {
+			if (finalizer != null) {
+				if (running.decrementAndGet() == 0) {
 					ParallelTaskEngine.this.syncTasks.add(finalizer);
 				}
 			}
