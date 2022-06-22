@@ -20,14 +20,23 @@ import net.minecraft.world.level.LightLayer;
 
 /**
  * Keeps track of what chunks/sections each listener is in, so we can update exactly what needs to be updated.
+ *
+ * @apiNote Custom/fake levels (that are {@code != Minecraft.getInstance.level}) need to implement
+ *          {@link LightUpdated} for LightUpdater to work with them.
  */
 public class LightUpdater {
 
-	private static final WorldAttached<LightUpdater> light = new WorldAttached<>(LightUpdater::new);
+	private static final WorldAttached<LightUpdater> LEVELS = new WorldAttached<>(LightUpdater::new);
 	private final ParallelTaskEngine taskEngine;
 
-	public static LightUpdater get(LevelAccessor world) {
-		return light.get(world);
+	public static LightUpdater get(LevelAccessor level) {
+		if (LightUpdated.receivesLightUpdates(level)) {
+			// The level is valid, add it to the map.
+			return LEVELS.get(level);
+		} else {
+			// Fake light updater for a fake level.
+			return DummyLightUpdater.INSTANCE;
+		}
 	}
 
 	private final LightProvider provider;

@@ -28,7 +28,7 @@ public class WorldAttached<T> {
 	}
 
 	public static void invalidateWorld(LevelAccessor world) {
-		Iterator<WeakReference<Map<LevelAccessor, ?>>> i = allMaps.iterator();
+		var i = allMaps.iterator();
 		while (i.hasNext()) {
 			Map<LevelAccessor, ?> map = i.next()
 					.get();
