@@ -1,0 +1,32 @@
+package com.jozufozu.flywheel.mixin;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+
+@Mixin(LevelRenderer.class)
+public class LevelRendererInstanceUpdateMixin {
+	@Shadow
+	private ClientLevel level;
+
+	/**
+	 * This gets called when a block is marked for rerender by vanilla.
+	 */
+	@Inject(at = @At("TAIL"), method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;)V")
+	private void checkUpdate(BlockPos pos, BlockState lastState, BlockState newState, CallbackInfo ci) {
+		if (Backend.isOn()) {
+			InstancedRenderDispatcher.getBlockEntities(level)
+					.update(level.getBlockEntity(pos));
+		}
+	}
+}

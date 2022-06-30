@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 
 /**
@@ -14,7 +15,7 @@ import com.jozufozu.flywheel.api.struct.StructType;
  * better optimized code than other implementations. The implementation does not check for invalid memory accesses,
  * meaning that errors can corrupt process memory.
  */
-public abstract class UnsafeBufferWriter<S> extends BufferWriter<S> {
+public abstract class UnsafeBufferWriter<S extends InstancedPart> extends BufferWriter<S> {
 	/**
 	 * The write pointer into the buffer storage. This is advanced by the stride every time
 	 * {@link UnsafeBufferWriter#advance()} is called.

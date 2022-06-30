@@ -8,6 +8,7 @@ import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.Instancer;
 import com.jozufozu.flywheel.api.InstancerFactory;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.core.model.ModelSupplier;
 
 import net.minecraft.client.renderer.RenderType;
@@ -36,7 +37,7 @@ public class GPUInstancerFactory<D extends InstancedPart> implements InstancerFa
 		return models.values()
 				.stream()
 				.map(InstancedModel::getInstancer)
-				.mapToInt(GPUInstancer::getInstanceCount)
+				.mapToInt(AbstractInstancer::getInstanceCount)
 				.sum();
 	}
 
@@ -59,7 +60,7 @@ public class GPUInstancerFactory<D extends InstancedPart> implements InstancerFa
 		models.values()
 				.stream()
 				.map(InstancedModel::getInstancer)
-				.forEach(GPUInstancer::clear);
+				.forEach(AbstractInstancer::clear);
 	}
 
 	private InstancedModel<D> createInstancer(ModelSupplier model) {

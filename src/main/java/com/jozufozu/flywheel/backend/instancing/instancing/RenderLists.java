@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.RenderType;
 
 public class RenderLists {
 
-	private Map<RenderType, ListMultimap<ShaderState, DrawCall>> renderLists = new HashMap<>();
+	private final Map<RenderType, ListMultimap<ShaderState, DrawCall>> renderLists = new HashMap<>();
 	public final Set<RenderType> layersToProcess = new HashSet<>();
 
 	public ListMultimap<ShaderState, DrawCall> get(RenderType type) {

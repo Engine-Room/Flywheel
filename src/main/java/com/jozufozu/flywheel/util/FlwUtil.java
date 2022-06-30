@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.mixin.BlockEntityRenderDispatcherAccessor;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -27,6 +28,13 @@ public class FlwUtil {
 		Arrays.fill(arr, c);
 
 		return new String(arr);
+	}
+
+	public static PoseStack copyPoseStack(PoseStack stack) {
+		PoseStack copy = new PoseStack();
+		copy.last().pose().load(stack.last().pose());
+		copy.last().normal().load(stack.last().normal());
+		return copy;
 	}
 
 	public static int numDigits(int number) {
