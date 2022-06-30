@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.api.struct.StructType;
 
 public abstract class AbstractInstancer<D extends InstancedPart> implements Instancer<D> {
 
-	protected final StructType<D> type;
+	public final StructType<D> type;
 	protected final ArrayList<D> data = new ArrayList<>();
 
 	protected boolean anyToRemove;
@@ -103,6 +103,8 @@ public abstract class AbstractInstancer<D extends InstancedPart> implements Inst
 
 		return instanceData;
 	}
+
+	public abstract void delete();
 
 	@Override
 	public String toString() {

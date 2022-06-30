@@ -16,12 +16,11 @@ import net.minecraft.client.renderer.RenderType;
  *
  * The number of vertices needs to be known ahead of time.
  */
-public class DrawBuffer implements AutoCloseable {
+public class DrawBuffer {
 
 	private final RenderType parent;
 	private ByteBuffer backingBuffer;
 	private int expectedVertices;
-	private Cleaner.Cleanable cleanable;
 
 	public DrawBuffer(RenderType parent) {
 		this.parent = parent;
@@ -46,12 +45,8 @@ public class DrawBuffer implements AutoCloseable {
 
 		if (backingBuffer == null) {
 			backingBuffer = MemoryTracker.create(byteSize);
-			cleanable = FlywheelMemory.track(this, backingBuffer);
-		}
-		if (byteSize > backingBuffer.capacity()) {
-			cleanable.clean();
+		} else if (byteSize > backingBuffer.capacity()) {
 			backingBuffer = MemoryTracker.resize(backingBuffer, byteSize);
-			cleanable = FlywheelMemory.track(this, backingBuffer);
 		}
 
 		return new DirectVertexConsumer(backingBuffer, format, vertexCount);
@@ -79,12 +74,5 @@ public class DrawBuffer implements AutoCloseable {
 	 */
 	public void reset() {
 		this.expectedVertices = 0;
-	}
-
-	@Override
-	public void close() {
-		if (cleanable != null) {
-			cleanable.clean();
-		}
 	}
 }

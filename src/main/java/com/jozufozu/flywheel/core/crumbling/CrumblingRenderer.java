@@ -44,7 +44,8 @@ public class CrumblingRenderer {
 	}
 
 	public static void renderCrumbling(LevelRenderer levelRenderer, ClientLevel level, PoseStack poseStack, Camera camera, Matrix4f projectionMatrix) {
-		if (!Backend.canUseInstancing(level)) return;
+		// TODO: one pass base/crumbling
+		if (true) return;
 
 		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageBlockEntities(levelRenderer, level);
 		if (activeStages.isEmpty()) return;
@@ -78,7 +79,7 @@ public class CrumblingRenderer {
 				stage.getValue().forEach(instanceManager::add);
 
 				instanceManager.beginFrame(SerialTaskEngine.INSTANCE, camera);
-				engine.beginFrame(camera);
+				engine.beginFrame(SerialTaskEngine.INSTANCE, camera);
 
 				engine.renderAllRemaining(SerialTaskEngine.INSTANCE, ctx);
 
@@ -143,7 +144,7 @@ public class CrumblingRenderer {
 		private State() {
 			instancerManager = new CrumblingEngine();
 			instanceManager = new CrumblingInstanceManager(instancerManager);
-			instancerManager.addListener(instanceManager);
+			instancerManager.attachManager(instanceManager);
 		}
 
 		private void kill() {

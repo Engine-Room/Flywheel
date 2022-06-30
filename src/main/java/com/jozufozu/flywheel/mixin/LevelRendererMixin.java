@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.mixin;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -26,8 +27,6 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -51,16 +50,6 @@ public class LevelRendererMixin {
 		}
 	}
 
-	@Inject(at = @At("TAIL"), method = "renderChunkLayer")
-	private void renderChunkLayer(RenderType pRenderType, PoseStack pPoseStack, double pCamX, double pCamY, double pCamZ, Matrix4f pProjectionMatrix, CallbackInfo ci) {
-		try (var restoreState = GlStateTracker.getRestoreState()) {
-
-			// TODO: Is this necessary?
-			InstancedRenderDispatcher.renderSpecificType(RenderContext.CURRENT, pRenderType);
-			MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(RenderContext.CURRENT, pRenderType));
-		}
-	}
-
 	@Inject(at = @At("TAIL"), method = "renderLevel")
 	private void endRender(PoseStack pPoseStack, float pPartialTick, long pFinishNanoTime, boolean pRenderBlockOutline, Camera pCamera, GameRenderer pGameRenderer, LightTexture pLightTexture, Matrix4f pProjectionMatrix, CallbackInfo ci) {
 		RenderContext.CURRENT = null;
@@ -77,18 +66,5 @@ public class LevelRendererMixin {
 	), method = "renderLevel")
 	private void renderBlockBreaking(PoseStack poseStack, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
 		CrumblingRenderer.renderCrumbling((LevelRenderer) (Object) this, level, poseStack, camera, projectionMatrix);
-	}
-
-	// Instancing
-
-	/**
-	 * This gets called when a block is marked for rerender by vanilla.
-	 */
-	@Inject(at = @At("TAIL"), method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;)V")
-	private void checkUpdate(BlockPos pos, BlockState lastState, BlockState newState, CallbackInfo ci) {
-		if (Backend.isOn()) {
-			InstancedRenderDispatcher.getBlockEntities(level)
-					.update(level.getBlockEntity(pos));
-		}
 	}
 }

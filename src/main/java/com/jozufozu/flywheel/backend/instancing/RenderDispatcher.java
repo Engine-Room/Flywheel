@@ -12,11 +12,13 @@ public interface RenderDispatcher {
 	void renderSpecificType(TaskEngine taskEngine, RenderContext context, RenderType type);
 
 	/**
-	 * Maintain the integer origin coordinate to be within a certain distance from the camera in all directions.
-	 * <p>
-	 * This prevents floating point precision issues at high coordinates.
+	 * Maintain the integer origin coordinate to be within a certain distance from the camera in all directions,
+	 * preventing floating point precision issues at high coordinates.
+	 * @return {@code true} if the origin coordinate was changed, {@code false} otherwise.
 	 */
-	void beginFrame(Camera info);
+	boolean maintainOriginCoordinate(Camera camera);
+
+	void beginFrame(TaskEngine taskEngine, Camera info);
 
 	void delete();
 }

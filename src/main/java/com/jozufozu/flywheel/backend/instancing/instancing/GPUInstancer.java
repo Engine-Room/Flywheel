@@ -129,4 +129,10 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 			vao.setAttributeDivisor(this.attributeBaseIndex + i, 1);
 		}
 	}
+
+	@Override
+	public void delete() {
+		vbo.delete();
+		vbo = null;
+	}
 }

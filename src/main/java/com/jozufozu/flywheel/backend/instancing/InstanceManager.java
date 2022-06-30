@@ -13,7 +13,6 @@ import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.backend.instancing.ratelimit.BandedPrimeLimiter;
 import com.jozufozu.flywheel.backend.instancing.ratelimit.DistanceUpdateLimiter;
 import com.jozufozu.flywheel.backend.instancing.ratelimit.NonLimiter;
@@ -25,7 +24,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 
-public abstract class InstanceManager<T> implements InstancingEngine.OriginShiftListener {
+public abstract class InstanceManager<T> {
 
 	public final InstancerManager instancerManager;
 
@@ -350,7 +349,6 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 		}
 	}
 
-	@Override
 	public void onOriginShift() {
 		dynamicInstances.clear();
 		tickableInstances.clear();

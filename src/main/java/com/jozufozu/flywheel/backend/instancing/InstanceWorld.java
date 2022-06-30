@@ -13,6 +13,7 @@ import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.util.ClientLevelExtension;
 
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
@@ -36,21 +37,21 @@ public class InstanceWorld {
 	public static InstanceWorld create(LevelAccessor level) {
 		return switch (Backend.getBackendType()) {
 		case INSTANCING -> {
-			InstancingEngine<WorldProgram> manager = new InstancingEngine<>(Contexts.WORLD);
+			InstancingEngine<WorldProgram> engine = new InstancingEngine<>(Contexts.WORLD);
 
-			var entityInstanceManager = new EntityInstanceManager(manager);
-			var blockEntityInstanceManager = new BlockEntityInstanceManager(manager);
+			var entityInstanceManager = new EntityInstanceManager(engine);
+			var blockEntityInstanceManager = new BlockEntityInstanceManager(engine);
 
-			manager.addListener(entityInstanceManager);
-			manager.addListener(blockEntityInstanceManager);
-			yield new InstanceWorld(manager, entityInstanceManager, blockEntityInstanceManager);
+			engine.attachManager(entityInstanceManager);
+			engine.attachManager(blockEntityInstanceManager);
+			yield new InstanceWorld(engine, entityInstanceManager, blockEntityInstanceManager);
 		}
 		case BATCHING -> {
-			var manager = new BatchingEngine();
-			var entityInstanceManager = new EntityInstanceManager(manager);
-			var blockEntityInstanceManager = new BlockEntityInstanceManager(manager);
+			var engine = new BatchingEngine();
+			var entityInstanceManager = new EntityInstanceManager(engine);
+			var blockEntityInstanceManager = new BlockEntityInstanceManager(engine);
 
-			yield new InstanceWorld(manager, entityInstanceManager, blockEntityInstanceManager);
+			yield new InstanceWorld(engine, entityInstanceManager, blockEntityInstanceManager);
 		}
 		default -> throw new IllegalArgumentException("Unknown engine type");
 		};
@@ -89,12 +90,17 @@ public class InstanceWorld {
 	 * </p>
 	 */
 	public void beginFrame(BeginFrameEvent event) {
-		engine.beginFrame(event.getCamera());
+		Camera camera = event.getCamera();
+		boolean shifted = engine.maintainOriginCoordinate(camera);
 
 		taskEngine.syncPoint();
 
-		blockEntityInstanceManager.beginFrame(taskEngine, event.getCamera());
-		entityInstanceManager.beginFrame(taskEngine, event.getCamera());
+		if (!shifted) {
+			blockEntityInstanceManager.beginFrame(taskEngine, camera);
+			entityInstanceManager.beginFrame(taskEngine, camera);
+		}
+
+		engine.beginFrame(taskEngine, camera);
 	}
 
 	/**

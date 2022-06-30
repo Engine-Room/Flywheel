@@ -20,6 +20,7 @@ import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.instancing.Engine;
+import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
@@ -65,19 +66,22 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 
 	protected final ProgramCompiler<P> context;
 
-	protected final Map<StructType<? extends InstancedPart>, GPUInstancerFactory<?>> factories = new HashMap<>();
+	protected final Map<StructType<?>, GPUInstancerFactory<?>> factories = new HashMap<>();
 
 	protected final List<InstancedModel<?>> uninitializedModels = new ArrayList<>();
 	protected final RenderLists renderLists = new RenderLists();
 
-	private final WeakHashSet<OriginShiftListener> listeners;
+	/**
+	 * The set of instance managers that are attached to this engine.
+	 */
+	private final WeakHashSet<InstanceManager<?>> instanceManagers;
 	private int vertexCount;
 	private int instanceCount;
 
 	public InstancingEngine(ProgramCompiler<P> context) {
 		this.context = context;
 
-		this.listeners = new WeakHashSet<>();
+		this.instanceManagers = new WeakHashSet<>();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -198,21 +202,29 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		return originCoordinate;
 	}
 
-	public void addListener(OriginShiftListener listener) {
-		listeners.add(listener);
+	public void attachManager(InstanceManager<?> listener) {
+		instanceManagers.add(listener);
 	}
 
-	/**
-	 * Maintain the integer origin coordinate to be within a certain distance from the camera in all directions.
-	 *
-	 * This prevents floating point precision issues at high coordinates.
-	 */
 	@Override
-	public void beginFrame(Camera info) {
-		checkOriginDistance(info);
+	public boolean maintainOriginCoordinate(Camera camera) {
+		Vec3 cameraPos = camera.getPosition();
 
-		for (var factory : uninitializedModels) {
-			factory.init(renderLists);
+		double distanceSqr = Vec3.atLowerCornerOf(originCoordinate)
+				.subtract(cameraPos)
+				.lengthSqr();
+
+		if (distanceSqr > MAX_ORIGIN_DISTANCE * MAX_ORIGIN_DISTANCE) {
+			shiftListeners(Mth.floor(cameraPos.x), Mth.floor(cameraPos.y), Mth.floor(cameraPos.z));
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public void beginFrame(TaskEngine taskEngine, Camera info) {
+		for (var model : uninitializedModels) {
+			model.init(renderLists);
 		}
 		uninitializedModels.clear();
 
@@ -222,26 +234,12 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 				.flush();
 	}
 
-	private void checkOriginDistance(Camera info) {
-		int cX = Mth.floor(info.getPosition().x);
-		int cY = Mth.floor(info.getPosition().y);
-		int cZ = Mth.floor(info.getPosition().z);
-
-		int dX = cX - originCoordinate.getX();
-		int dY = cY - originCoordinate.getY();
-		int dZ = cZ - originCoordinate.getZ();
-
-		if (Math.abs(dX) > MAX_ORIGIN_DISTANCE || Math.abs(dY) > MAX_ORIGIN_DISTANCE || Math.abs(dZ) > MAX_ORIGIN_DISTANCE) {
-			shiftListeners(cX, cY, cZ);
-		}
-	}
-
 	private void shiftListeners(int cX, int cY, int cZ) {
 		originCoordinate = new BlockPos(cX, cY, cZ);
 
 		factories.values().forEach(GPUInstancerFactory::clear);
 
-		listeners.forEach(OriginShiftListener::onOriginShift);
+		instanceManagers.forEach(InstanceManager::onOriginShift);
 	}
 
 	@Override
@@ -336,7 +334,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 					if (part.getOwner() instanceof GPUInstancer instancer) {
 
 						// queue the instances for copying to the crumbling instance buffer
-						map.computeIfAbsent(instancer.parent.model, k -> new ArrayList<>()).add(part);
+						map.computeIfAbsent(instancer.parent.getModel(), k -> new ArrayList<>()).add(part);
 					}
 				}
 			}
@@ -378,8 +376,4 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		return dataByStage;
 	}
 
-	@FunctionalInterface
-	public interface OriginShiftListener {
-		void onOriginShift();
-	}
 }

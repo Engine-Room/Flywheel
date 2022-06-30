@@ -4,13 +4,14 @@ import java.util.List;
 
 import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.core.model.ModelSupplier;
 
 public class InstancedModel<D extends InstancedPart> {
 
-	public final GPUInstancer<D> instancer;
-	public final ModelSupplier model;
+	private final ModelSupplier model;
 	private final StructType<D> type;
+	private final GPUInstancer<D> instancer;
 	private List<DrawCall> layers;
 
 	public InstancedModel(StructType<D> type, ModelSupplier model) {
@@ -48,8 +49,7 @@ public class InstancedModel<D extends InstancedPart> {
 	public void delete() {
 		if (instancer.vbo == null) return;
 
-		instancer.vbo.delete();
-		instancer.vbo = null;
+		instancer.delete();
 
 		for (var layer : layers) {
 			layer.delete();

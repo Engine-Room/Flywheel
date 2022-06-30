@@ -2,10 +2,11 @@ package com.jozufozu.flywheel.backend.struct;
 
 import java.nio.ByteBuffer;
 
+import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 
-public abstract class BufferWriter<S> implements StructWriter<S> {
+public abstract class BufferWriter<S extends InstancedPart> implements StructWriter<S> {
 	protected final ByteBuffer backingBuffer;
 
 	protected final int stride;

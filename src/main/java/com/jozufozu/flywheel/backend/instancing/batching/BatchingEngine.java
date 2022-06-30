@@ -1,37 +1,69 @@
 package com.jozufozu.flywheel.backend.instancing.batching;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.backend.OptifineHandler;
 import com.jozufozu.flywheel.backend.instancing.BatchDrawingTracker;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.RenderContext;
+import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.phys.Vec3;
 
 public class BatchingEngine implements Engine {
 
-	private final Map<StructType<? extends InstancedPart>, CPUInstancerFactory<?>> factories = new HashMap<>();
+	private final Map<StructType<?>, CPUInstancerFactory<?>> factories = new HashMap<>();
 	private final BatchDrawingTracker batchTracker = new BatchDrawingTracker();
+
+	private final BatchLists batchLists = new BatchLists();
+
+	protected final List<BatchedModel<?>> uninitializedModels = new ArrayList<>();
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <D extends InstancedPart> CPUInstancerFactory<D> factory(StructType<D> type) {
-		return (CPUInstancerFactory<D>) factories.computeIfAbsent(type, CPUInstancerFactory::new);
+		return (CPUInstancerFactory<D>) factories.computeIfAbsent(type, this::createFactory);
+	}
+
+	public <D extends InstancedPart> CPUInstancerFactory<D> createFactory(StructType<D> type) {
+		return new CPUInstancerFactory<>(type, uninitializedModels::add);
 	}
 
 	@Override
 	public Vec3i getOriginCoordinate() {
 		return BlockPos.ZERO;
+	}
+
+	public void submitTasks(PoseStack stack, TaskEngine taskEngine) {
+		batchLists.renderLists.forEach((renderType, renderList) -> {
+			int vertices = 0;
+			for (var transformSet : renderList) {
+				vertices += transformSet.getTotalVertexCount();
+			}
+
+			var consumer = batchTracker.getDirectConsumer(renderType, vertices);
+			consumer.memSetZero();
+
+			var outputColorDiffuse = !consumer.hasOverlay() && !OptifineHandler.isUsingShaders();
+
+			for (var transformSet : renderList) {
+				transformSet.setOutputColorDiffuse(outputColorDiffuse);
+				transformSet.submitTasks(stack, taskEngine, consumer);
+			}
+		});
 	}
 
 	@Override
@@ -41,27 +73,6 @@ public class BatchingEngine implements Engine {
 
 	@Override
 	public void renderAllRemaining(TaskEngine taskEngine, RenderContext context) {
-//		vertexCount = 0;
-//		instanceCount = 0;
-//		for (BatchedMaterial<?> material : materials.values()) {
-//			for (CPUInstancer<?> instancer : material.models.values()) {
-//				instancer.setup();
-//				vertexCount += instancer.getVertexCount();
-//				instanceCount += instancer.getInstanceCount();
-//			}
-//		}
-//
-//		DirectVertexConsumer consumer = batchTracker.getDirectConsumer(state, vertexCount);
-//
-//		// avoids rendering garbage, but doesn't fix the issue of some instances not being buffered
-//		consumer.memSetZero();
-//
-//		for (BatchedMaterial<?> material : materials.values()) {
-//			for (CPUInstancer<?> instancer : material.models.values()) {
-//				instancer.sbb.context.outputColorDiffuse = !consumer.hasOverlay() && !OptifineHandler.isUsingShaders();
-//				instancer.submitTasks(stack, pool, consumer);
-//			}
-//		}
 
 		// FIXME: this probably breaks some vanilla stuff but it works much better for flywheel
 		Matrix4f mat = new Matrix4f();
@@ -81,8 +92,24 @@ public class BatchingEngine implements Engine {
 	}
 
 	@Override
-	public void beginFrame(Camera info) {
+	public boolean maintainOriginCoordinate(Camera camera) {
+		// do nothing
+		return false;
+	}
 
+	@Override
+	public void beginFrame(TaskEngine taskEngine, Camera info) {
+		for (var model : uninitializedModels) {
+			model.init(batchLists);
+		}
+
+		uninitializedModels.clear();
+
+		Vec3 cameraPos = info.getPosition();
+		var stack = FlwUtil.copyPoseStack(RenderContext.CURRENT.stack());
+		stack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+
+		submitTasks(stack, taskEngine);
 	}
 
 	@Override
