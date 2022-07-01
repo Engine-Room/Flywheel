@@ -1,3 +1,6 @@
+0.6.2:
+Update to 1.18.2
+
 0.6.1:
 Fixes
 - Fix crash when loading block entities for Flywheel to render, most common when exploring the end.

@@ -81,9 +81,9 @@ body:
             required: true
     -   type: input
         attributes:
-            label: Fabric API Version
-            description: The version of Fabric API you were using when the bug occured
-            placeholder: 0.44.0+1.18
+            label: Loader Version
+            description: The version of Forge or Fabric you were using when the bug occured
+            placeholder: Forge 39.0.0
         validations:
             required: true
     -   type: textarea

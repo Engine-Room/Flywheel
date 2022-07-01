@@ -19,7 +19,6 @@ import com.jozufozu.flywheel.core.model.Model;
 
 public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
-	private final ModelAllocator modelAllocator;
 	private final BufferLayout instanceFormat;
 	private final Instanced<D> instancedType;
 
@@ -32,9 +31,8 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 	protected boolean anyToUpdate;
 
-	public GPUInstancer(Instanced<D> type, Model model, ModelAllocator modelAllocator) {
+	public GPUInstancer(Instanced<D> type, Model model) {
 		super(type::create, model);
-		this.modelAllocator = modelAllocator;
 		this.instanceFormat = type.getLayout();
 		instancedType = type;
 	}
@@ -63,7 +61,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		return deleted || model == null;
 	}
 
-	public void init() {
+	public void init(ModelAllocator modelAllocator) {
 		if (isInitialized()) return;
 
 		initialized = true;
