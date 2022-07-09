@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.core.compile;
 
+import java.util.ArrayList;
+
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
@@ -8,9 +10,12 @@ import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
 import com.jozufozu.flywheel.core.source.FileIndex;
 import com.jozufozu.flywheel.core.source.FileResolution;
+import com.jozufozu.flywheel.core.source.ShaderField;
 import com.jozufozu.flywheel.core.source.SourceFile;
 import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
 import com.jozufozu.flywheel.core.source.parse.StructField;
+import com.jozufozu.flywheel.core.source.span.Span;
+import com.jozufozu.flywheel.util.Pair;
 
 /**
  * Handles compilation and deletion of vertex shaders.
@@ -43,8 +48,21 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 
 		// INSTANCE
 
+		int attributeBaseIndex = key.vertexType.getLayout()
+				.getAttributeCount();
+
 		var instanceShader = key.instanceShader;
-		instanceShader.generateFinalSource(index, finalSource);
+		var replacements = new ArrayList<Pair<Span, String>>();
+		for (ShaderField field : instanceShader.fields.values()) {
+			if (field.decoration != ShaderField.Decoration.IN) {
+				continue;
+			}
+
+			int location = Integer.parseInt(field.location.get());
+			int newLocation = location + attributeBaseIndex;
+			replacements.add(Pair.of(field.location, Integer.toString(newLocation)));
+		}
+		instanceShader.generateFinalSource(index, finalSource, replacements);
 
 		// MATERIAL
 
@@ -58,76 +76,23 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 
 		// MAIN
 
-		var instanceStruct = instanceShader.findFunction("flw_instanceVertex")
-				.flatMap(f -> f.getParameterType(0)
-						.findStruct())
-				.orElseThrow();
-		finalSource.append(generateFooter(key.vertexType, instanceStruct));
+		finalSource.append("""
+				void main() {
+					flw_layoutVertex();
+
+					flw_instanceVertex();
+
+					flw_materialVertex();
+
+					flw_contextVertex();
+				}
+				""");
 
 		try {
 			return new GlShader(finalSource.toString(), ShaderType.VERTEX, ImmutableList.of(layoutShader.name, instanceShader.name, materialShader.name, contextShaderSource.name), shaderConstants);
 		} catch (ShaderCompilationException e) {
 			throw e.withErrorLog(index);
 		}
-	}
-
-	protected String generateFooter(VertexType vertexType, ShaderStruct instance) {
-		ImmutableList<StructField> fields = instance.getFields();
-
-		int attributeBinding = vertexType.getLayout()
-				.getAttributeCount();
-
-		StringBuilder footer = new StringBuilder();
-
-		for (StructField field : fields) {
-			footer.append("layout(location = ")
-					.append(attributeBinding)
-					.append(") in")
-					.append(' ')
-					.append(field.type)
-					.append(' ')
-					.append("_flw_a_i_")
-					.append(field.name)
-					.append(";\n");
-			attributeBinding += CompileUtil.getAttributeCount(field.type);
-		}
-		footer.append('\n');
-
-		footer.append(String.format("""
-						void main() {
-							flw_layoutVertex();
-
-							%s instance;
-							%s
-							flw_instanceVertex(instance);
-
-							flw_materialVertex();
-
-							flw_contextVertex();
-						}
-						""",
-				instance.name,
-				assignFields(instance, "instance.", "_flw_a_i_")
-		));
-
-		return footer.toString();
-	}
-
-	protected static StringBuilder assignFields(ShaderStruct struct, String prefix1, String prefix2) {
-		ImmutableList<StructField> fields = struct.getFields();
-
-		StringBuilder builder = new StringBuilder();
-
-		for (StructField field : fields) {
-			builder.append(prefix1)
-					.append(field.name)
-					.append(" = ")
-					.append(prefix2)
-					.append(field.name)
-					.append(";\n");
-		}
-
-		return builder;
 	}
 
 	@Override

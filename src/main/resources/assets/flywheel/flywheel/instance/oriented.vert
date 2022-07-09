@@ -2,17 +2,15 @@
 #use "flywheel:util/light.glsl"
 #use "flywheel:util/quaternion.glsl"
 
-struct Oriented {
-    vec2 light;
-    vec4 color;
-    vec3 pos;
-    vec3 pivot;
-    vec4 rotation;
-};
+layout (location = 0) in vec2 oriented_light;
+layout (location = 1) in vec4 oriented_color;
+layout (location = 2) in vec3 oriented_pos;
+layout (location = 3) in vec3 oriented_pivot;
+layout (location = 4) in vec4 oriented_rotation;
 
-void flw_instanceVertex(Oriented oriented) {
-    flw_vertexPos = vec4(rotateVertexByQuat(flw_vertexPos.xyz - oriented.pivot, oriented.rotation) + oriented.pivot + oriented.pos, 1.0);
-    flw_vertexNormal = rotateVertexByQuat(flw_vertexNormal, oriented.rotation);
-    flw_vertexColor = oriented.color;
-    flw_vertexLight = shiftLight(oriented.light);
+void flw_instanceVertex() {
+    flw_vertexPos = vec4(rotateVertexByQuat(flw_vertexPos.xyz - oriented_pivot, oriented_rotation) + oriented_pivot + oriented_pos, 1.0);
+    flw_vertexNormal = rotateVertexByQuat(flw_vertexNormal, oriented_rotation);
+    flw_vertexColor = oriented_color;
+    flw_vertexLight = shiftLight(oriented_light);
 }

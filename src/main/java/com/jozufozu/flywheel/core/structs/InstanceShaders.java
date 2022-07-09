@@ -12,7 +12,7 @@ import com.jozufozu.flywheel.util.ResourceUtil;
 import net.minecraft.resources.ResourceLocation;
 
 public class InstanceShaders {
-	public static final BiConsumer<ErrorReporter, SourceFile> CHECK = SourceChecks.checkFunctionParameterTypeExists("flw_instanceVertex", 1, 0);
+	public static final BiConsumer<ErrorReporter, SourceFile> CHECK = SourceChecks.checkFunctionArity("flw_instanceVertex", 0);
 
 	public static final FileResolution TRANSFORMED = create(ResourceUtil.subPath(Names.TRANSFORMED, ".vert"));
 	public static final FileResolution ORIENTED = create(ResourceUtil.subPath(Names.ORIENTED, ".vert"));
