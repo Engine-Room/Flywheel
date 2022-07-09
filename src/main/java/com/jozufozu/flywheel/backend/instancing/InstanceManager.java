@@ -260,7 +260,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	}
 
 	public void invalidate() {
-		instances.values().forEach(AbstractInstance::remove);
+		instances.values().forEach(AbstractInstance::removeAndMark);
 		instances.clear();
 		dynamicInstances.clear();
 		tickableInstances.clear();
@@ -314,7 +314,7 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	}
 
 	protected void removeInternal(T obj, AbstractInstance instance) {
-		instance.remove();
+		instance.removeAndMark();
 		instances.remove(obj);
 		dynamicInstances.remove(obj);
 		tickableInstances.remove(obj);
