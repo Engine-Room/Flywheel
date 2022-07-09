@@ -6,8 +6,7 @@ import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.light.LightListener;
-import com.jozufozu.flywheel.light.LightProvider;
-import com.jozufozu.flywheel.light.MovingListener;
+import com.jozufozu.flywheel.light.TickingLightListener;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.mojang.math.Vector3f;
 
@@ -34,7 +33,7 @@ import net.minecraft.world.phys.Vec3;
  *
  * @param <E> The type of {@link Entity} your class is an instance of.
  */
-public abstract class EntityInstance<E extends Entity> extends AbstractInstance implements LightListener, MovingListener {
+public abstract class EntityInstance<E extends Entity> extends AbstractInstance implements LightListener, TickingLightListener {
 
 	protected final E entity;
 	protected final GridAlignedBB bounds;
@@ -51,7 +50,7 @@ public abstract class EntityInstance<E extends Entity> extends AbstractInstance 
 	}
 
 	@Override
-	public boolean update(LightProvider provider) {
+	public boolean tickLightListener() {
 		AABB boundsNow = entity.getBoundingBox();
 
 		if (bounds.sameAs(boundsNow)) return false;

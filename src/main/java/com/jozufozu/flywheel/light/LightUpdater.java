@@ -39,19 +39,15 @@ public class LightUpdater {
 		}
 	}
 
-	private final LightProvider provider;
+	private final LevelAccessor level;
 
-	private final WeakHashSet<MovingListener> movingListeners = new WeakHashSet<>();
+	private final WeakHashSet<TickingLightListener> tickingLightListeners = new WeakHashSet<>();
 	private final WeakContainmentMultiMap<LightListener> sections = new WeakContainmentMultiMap<>();
 	private final WeakContainmentMultiMap<LightListener> chunks = new WeakContainmentMultiMap<>();
 
-	public LightUpdater(LevelAccessor world) {
+	public LightUpdater(LevelAccessor level) {
 		taskEngine = Backend.getTaskEngine();
-		provider = new BasicProvider(world);
-	}
-
-	public LightProvider getProvider() {
-		return provider;
+		this.level = level;
 	}
 
 	public void tick() {
@@ -60,9 +56,9 @@ public class LightUpdater {
 	}
 
 	private void tickSerial() {
-		for (MovingListener movingListener : movingListeners) {
-			if (movingListener.update(provider)) {
-				addListener(movingListener);
+		for (TickingLightListener tickingLightListener : tickingLightListeners) {
+			if (tickingLightListener.tickLightListener()) {
+				addListener(tickingLightListener);
 			}
 		}
 	}
@@ -71,8 +67,8 @@ public class LightUpdater {
 		Queue<LightListener> listeners = new ConcurrentLinkedQueue<>();
 
 		taskEngine.group("LightUpdater")
-				.addTasks(movingListeners.stream(), listener -> {
-					if (listener.update(provider)) {
+				.addTasks(tickingLightListeners.stream(), listener -> {
+					if (listener.tickLightListener()) {
 						listeners.add(listener);
 					}
 				})
@@ -86,8 +82,8 @@ public class LightUpdater {
 	 * @param listener The object that wants to receive light update notifications.
 	 */
 	public void addListener(LightListener listener) {
-		if (listener instanceof MovingListener)
-			movingListeners.add(((MovingListener) listener));
+		if (listener instanceof TickingLightListener)
+			tickingLightListeners.add(((TickingLightListener) listener));
 
 		ImmutableBox box = listener.getVolume();
 
@@ -130,12 +126,12 @@ public class LightUpdater {
 
 		if (set == null || set.isEmpty()) return;
 
-		set.removeIf(l -> l.status().shouldRemove());
+		set.removeIf(LightListener::isListenerInvalid);
 
 		ImmutableBox chunkBox = GridAlignedBB.from(SectionPos.of(sectionPos));
 
 		for (LightListener listener : set) {
-			listener.onLightUpdate(provider, type, chunkBox);
+			listener.onLightUpdate(type, chunkBox);
 		}
 	}
 
@@ -151,10 +147,10 @@ public class LightUpdater {
 
 		if (set == null || set.isEmpty()) return;
 
-		set.removeIf(l -> l.status().shouldRemove());
+		set.removeIf(LightListener::isListenerInvalid);
 
 		for (LightListener listener : set) {
-			listener.onLightPacket(provider, chunkX, chunkZ);
+			listener.onLightPacket(chunkX, chunkZ);
 		}
 	}
 
