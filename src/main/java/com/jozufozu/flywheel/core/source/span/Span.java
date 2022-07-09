@@ -3,6 +3,8 @@ package com.jozufozu.flywheel.core.source.span;
 import java.util.Optional;
 import java.util.regex.Matcher;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.jozufozu.flywheel.core.source.SourceFile;
 import com.jozufozu.flywheel.core.source.parse.ShaderFunction;
 import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
@@ -14,7 +16,7 @@ import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
  *     Spans are used for pretty-printing errors.
  * </p>
  */
-public abstract class Span implements CharSequence {
+public abstract class Span implements CharSequence, Comparable<Span> {
 
 	protected final SourceFile in;
 	protected final CharPos start;
@@ -137,5 +139,10 @@ public abstract class Span implements CharSequence {
 			return Optional.empty();
 		}
 		return in.findFunction(this);
+	}
+
+	@Override
+	public int compareTo(@NotNull Span o) {
+		return Integer.compareUnsigned(getStartPos(), o.getStartPos());
 	}
 }

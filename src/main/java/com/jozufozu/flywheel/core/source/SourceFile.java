@@ -1,6 +1,8 @@
 package com.jozufozu.flywheel.core.source;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +20,7 @@ import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
 import com.jozufozu.flywheel.core.source.span.ErrorSpan;
 import com.jozufozu.flywheel.core.source.span.Span;
 import com.jozufozu.flywheel.core.source.span.StringSpan;
+import com.jozufozu.flywheel.util.Pair;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -34,10 +37,6 @@ public class SourceFile {
 
 	public final ShaderSources parent;
 	public final String source;
-	/**
-	 * Sections of the source that must be trimmed for compilation. Currently, it only contains the spans of imports.
-	 */
-	public final String elided;
 
 	public final SourceLines lines;
 
@@ -55,6 +54,8 @@ public class SourceFile {
 	 * Includes ordered as defined in the source.
 	 */
 	public final ImmutableList<Import> imports;
+	public final ImmutableMap<String, ShaderField> fields;
+	private final List<Span> elisions;
 
 	public SourceFile(ErrorReporter errorReporter, ShaderSources parent, ResourceLocation name, String source) {
 		this.parent = parent;
@@ -63,13 +64,12 @@ public class SourceFile {
 
 		this.lines = new SourceLines(source);
 
-		List<Span> elisions = new ArrayList<>();
+		this.elisions = new ArrayList<>();
 
-		this.imports = parseImports(errorReporter, elisions);
+		this.imports = parseImports(errorReporter);
 		this.functions = parseFunctions();
 		this.structs = parseStructs();
-
-		this.elided = elideSource(source, elisions).toString();
+		this.fields = parseFields();
 	}
 
 	public Span getLineSpan(int line) {
@@ -136,11 +136,15 @@ public class SourceFile {
 	}
 
 	public void generateFinalSource(FileIndex env, StringBuilder source) {
+		generateFinalSource(env, source, Collections.emptyList());
+	}
+
+	public void generateFinalSource(FileIndex env, StringBuilder source, List<Pair<Span, String>> replacements) {
 		for (Import include : imports) {
 			SourceFile file = include.getFile();
 
 			if (file != null && !env.exists(file)) {
-				file.generateFinalSource(env, source);
+				file.generateFinalSource(env, source, replacements);
 			}
 		}
 
@@ -151,7 +155,13 @@ public class SourceFile {
 				.append(" // ")
 				.append(name)
 				.append('\n');
-		source.append(elided);
+
+		var replacementsAndElisions = new ArrayList<>(replacements);
+		for (Span elision : elisions) {
+			replacementsAndElisions.add(Pair.of(elision, ""));
+		}
+
+		source.append(this.replace(replacementsAndElisions));
 		source.append('\n');
 	}
 
@@ -159,18 +169,27 @@ public class SourceFile {
 		return "Source for shader '" + name + "':\n" + lines.printLinesWithNumbers();
 	}
 
-	private static CharSequence elideSource(String source, List<Span> elisions) {
+	private CharSequence replace(List<Pair<Span, String>> replacements) {
 		StringBuilder out = new StringBuilder();
 
 		int lastEnd = 0;
 
-		for (Span elision : elisions) {
-			out.append(source, lastEnd, elision.getStartPos());
+		replacements.sort(Comparator.comparing(Pair::first));
 
-			lastEnd = elision.getEndPos();
+		for (var replacement : replacements) {
+			var loc = replacement.first();
+
+			if (loc.getSourceFile() != this) {
+				continue;
+			}
+
+			out.append(this.source, lastEnd, loc.getStartPos());
+			out.append(replacement.second());
+
+			lastEnd = loc.getEndPos();
 		}
 
-		out.append(source, lastEnd, source.length());
+		out.append(this.source, lastEnd, this.source.length());
 
 		return out;
 	}
@@ -179,7 +198,7 @@ public class SourceFile {
 	 * Scan the source for function definitions and "parse" them into objects that contain properties of the function.
 	 */
 	private ImmutableMap<String, ShaderFunction> parseFunctions() {
-		Matcher matcher = ShaderFunction.functionDeclaration.matcher(source);
+		Matcher matcher = ShaderFunction.PATTERN.matcher(source);
 
 		Map<String, ShaderFunction> functions = new HashMap<>();
 
@@ -230,11 +249,30 @@ public class SourceFile {
 	}
 
 	/**
+	 * Scan the source for function definitions and "parse" them into objects that contain properties of the function.
+	 */
+	private ImmutableMap<String, ShaderField> parseFields() {
+		Matcher matcher = ShaderField.PATTERN.matcher(source);
+
+		ImmutableMap.Builder<String, ShaderField> fields = ImmutableMap.builder();
+		while (matcher.find()) {
+			Span self = Span.fromMatcher(this, matcher);
+			Span location = Span.fromMatcher(this, matcher, 1);
+			Span decoration = Span.fromMatcher(this, matcher, 2);
+			Span type = Span.fromMatcher(this, matcher, 3);
+			Span name = Span.fromMatcher(this, matcher, 4);
+
+			fields.put(location.get(), new ShaderField(self, location, decoration, type, name));
+		}
+
+		return fields.build();
+	}
+
+	/**
 	 * Scan the source for {@code #use "..."} directives.
 	 * Records the contents of the directive into an {@link Import} object, and marks the directive for elision.
-	 * @param elisions
 	 */
-	private ImmutableList<Import> parseImports(ErrorReporter errorReporter, List<Span> elisions) {
+	private ImmutableList<Import> parseImports(ErrorReporter errorReporter) {
 		Matcher uses = Import.PATTERN.matcher(source);
 
 		Set<String> importedFiles = new HashSet<>();
@@ -253,7 +291,7 @@ public class SourceFile {
 				}
 			}
 
-			elisions.add(use); // we have to trim that later
+			this.elisions.add(use); // we have to trim that later
 		}
 
 		return ImmutableList.copyOf(imports);
