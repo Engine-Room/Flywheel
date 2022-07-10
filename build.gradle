@@ -44,6 +44,8 @@ minecraft {
             property 'forge.logging.markers', ''
             property 'forge.logging.console.level', 'debug'
             property 'mixin.debug.export', 'true'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             arg '-mixin.config=flywheel.mixins.json'
 
@@ -102,12 +104,23 @@ repositories {
         name 'tterrag maven'
         url 'https://maven.tterrag.com/'
     }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compileOnly fg.deobf("curse.maven:starlight-526854:3599856")
+    // switch to implementation for debugging
+    compileOnly fg.deobf("maven.modrinth:starlight-forge:1.0.2+1.18.2")
+
+    compileOnly fg.deobf("maven.modrinth:rubidium:0.5.2a")
+    compileOnly fg.deobf("curse.maven:oculus-581495:3821406")
 
     // https://discord.com/channels/313125603924639766/725850371834118214/910619168821354497
     // Prevent Mixin annotation processor from getting into IntelliJ's annotation processor settings
