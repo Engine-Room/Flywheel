@@ -60,7 +60,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 		return box.getMaxZ();
 	}
 
-	public void move(BlockAndTintGetter level, ImmutableBox newSampleVolume) {
+	public void move(ImmutableBox newSampleVolume) {
 		if (lightData == null) return;
 
 		setBox(newSampleVolume);

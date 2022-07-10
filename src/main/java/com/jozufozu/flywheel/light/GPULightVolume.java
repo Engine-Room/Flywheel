@@ -27,7 +27,6 @@ import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
 
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.LightLayer;
 
 public class GPULightVolume extends LightVolume {
 
@@ -111,14 +110,14 @@ public class GPULightVolume extends LightVolume {
 		glTexture.delete();
 	}
 
-	public void move(BlockAndTintGetter level, ImmutableBox newSampleVolume) {
+	public void move(ImmutableBox newSampleVolume) {
 		if (lightData == null) return;
 
 		if (box.contains(newSampleVolume)) {
 			sampleVolume.assign(newSampleVolume);
 			initialize();
 		} else {
-			super.move(level, newSampleVolume);
+			super.move(newSampleVolume);
 		}
 	}
 
