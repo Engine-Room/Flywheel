@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.api.InstanceData;
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.api.struct.Batched;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.OptifineHandler;
+import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.instancing.BatchDrawingTracker;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
@@ -56,7 +56,7 @@ public class BatchedMaterialGroup implements MaterialGroup {
 
 		for (BatchedMaterial<?> material : materials.values()) {
 			for (CPUInstancer<?> instancer : material.models.values()) {
-				instancer.sbb.context.outputColorDiffuse = !consumer.hasOverlay() && !OptifineHandler.isUsingShaders();
+				instancer.sbb.context.outputColorDiffuse = !consumer.hasOverlay() && !ShadersModHandler.isShaderPackInUse();
 				instancer.submitTasks(stack, pool, consumer);
 			}
 		}
