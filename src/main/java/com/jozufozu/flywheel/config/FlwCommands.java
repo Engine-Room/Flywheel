@@ -118,17 +118,7 @@ public class FlwCommands {
 		return switch (type) {
 			case OFF -> new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED);
 			case INSTANCING -> new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN);
-			case BATCHING -> {
-				MutableComponent msg = new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN);
-
-				if (ModList.get()
-						.isLoaded("create")) {
-					// FIXME: batching engine contraption lighting issues
-					msg.append(new TextComponent("\nWARNING: May cause issues with Create Contraptions").withStyle(ChatFormatting.RED));
-				}
-
-				yield msg;
-			}
+			case BATCHING ->  new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN);
 		};
 	}
 

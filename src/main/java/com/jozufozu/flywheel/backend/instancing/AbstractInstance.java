@@ -38,7 +38,7 @@ public abstract class AbstractInstance implements Instance, LightListener {
 
 	}
 
-	final void removeAndMark() {
+	public final void removeAndMark() {
 		if (removed) {
 			return;
 		}
