@@ -1,22 +1,28 @@
 package com.jozufozu.flywheel.core.vertex;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.util.RenderMath;
+import com.mojang.blaze3d.platform.MemoryTracker;
 
 public class PosTexNormalVertexListUnsafe implements VertexList {
 
-	private final ByteBuffer buffer;
+	private final ByteBuffer contents;
 	private final int vertexCount;
 	private final long base;
 
-	public PosTexNormalVertexListUnsafe(ByteBuffer buffer, int vertexCount) {
-		this.buffer = buffer;
+	public PosTexNormalVertexListUnsafe(ByteBuffer copyFrom, int vertexCount) {
+		this.contents = MemoryTracker.create(copyFrom.capacity());
+		this.contents.order(copyFrom.order());
+		this.contents.put(copyFrom);
+		((Buffer) this.contents).flip();
+
+		this.base = MemoryUtil.memAddress(this.contents);
 		this.vertexCount = vertexCount;
-		this.base = MemoryUtil.memAddress(buffer);
 	}
 
 	private long ptr(long idx) {
