@@ -10,20 +10,10 @@ import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.util.RenderMath;
 import com.mojang.blaze3d.platform.MemoryTracker;
 
-public class BlockVertexListUnsafe implements VertexList {
-
-	private final ByteBuffer contents;
-	private final int vertexCount;
-	private final long base;
+public class BlockVertexListUnsafe extends AbstractVertexList {
 
 	public BlockVertexListUnsafe(ByteBuffer copyFrom, int vertexCount) {
-		this.contents = MemoryTracker.create(copyFrom.capacity());
-		this.contents.order(copyFrom.order());
-		this.contents.put(copyFrom);
-		((Buffer) this.contents).flip();
-
-		this.base = MemoryUtil.memAddress(this.contents);
-		this.vertexCount = vertexCount;
+		super(copyFrom, vertexCount);
 	}
 
 	private long ptr(long index) {
@@ -98,11 +88,6 @@ public class BlockVertexListUnsafe implements VertexList {
 	@Override
 	public float getNZ(int index) {
 		return RenderMath.f(MemoryUtil.memGetByte(ptr(index) + 30));
-	}
-
-	@Override
-	public int getVertexCount() {
-		return vertexCount;
 	}
 
 	public static class Shaded extends BlockVertexListUnsafe implements ShadedVertexList {
