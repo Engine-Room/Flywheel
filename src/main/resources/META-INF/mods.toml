@@ -9,6 +9,7 @@ version = "${file.jarVersion}"
 displayName = "Flywheel"
 logoFile = "logo.png"
 displayURL = "https://www.curseforge.com/minecraft/mc-mods/flywheel"
+updateJSONURL = "https://api.modrinth.com/updates/5lpsZoRi/forge_updates.json"
 authors = "Jozufozu"
 description = '''
 A modern engine for modded minecraft.'''
