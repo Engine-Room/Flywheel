@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.util;
 
-import net.minecraftforge.client.model.pipeline.LightUtil;
+import net.minecraftforge.client.model.lighting.QuadLighter;
 
 public class RenderMath {
 
@@ -74,13 +74,13 @@ public class RenderMath {
 		if (!shaded) {
 			return 1f;
 		}
-		return LightUtil.diffuseLight(x, y, z);
+		return QuadLighter.calculateShade(x, y, z, false);
 	}
 
 	public static float diffuseLightNether(float x, float y, float z, boolean shaded) {
 		if (!shaded) {
 			return 0.9f;
 		}
-		return Math.min(x * x * 0.6f + y * y * 0.9f + z * z * 0.8f, 1f);
+		return QuadLighter.calculateShade(x, y, z, true);
 	}
 }

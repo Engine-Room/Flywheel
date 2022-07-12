@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend;
 
-import java.util.Collection;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -93,13 +93,11 @@ public class Loader implements ResourceManagerReloadListener {
 	private void loadProgramSpecs(ResourceManager manager) {
 		programs.clear();
 
-		Collection<ResourceLocation> programSpecs = manager.listResources(PROGRAM_DIR, s -> s.endsWith(".json"));
+		Map<ResourceLocation, Resource> programSpecs = manager.listResources(PROGRAM_DIR, loc -> loc.getPath().endsWith(".json"));
 
-		for (ResourceLocation location : programSpecs) {
-			try {
-				Resource file = manager.getResource(location);
-
-				String s = StringUtil.readToString(file.getInputStream());
+		programSpecs.forEach((location, resource) -> {
+			try (InputStream inputStream = resource.open()) {
+				String s = StringUtil.readToString(inputStream);
 
 				ResourceLocation specName = ResourceUtil.trim(location, PROGRAM_DIR, ".json");
 
@@ -119,7 +117,7 @@ public class Loader implements ResourceManagerReloadListener {
 			} catch (Exception e) {
 				Backend.LOGGER.error("Could not load program " + location, e);
 			}
-		}
+		});
 	}
 
 }

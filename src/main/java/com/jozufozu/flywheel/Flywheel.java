@@ -17,8 +17,9 @@ import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
 import com.mojang.logging.LogUtils;
 
-import net.minecraft.commands.synchronization.ArgumentTypes;
-import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,9 +29,9 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkConstants;
+import net.minecraftforge.registries.RegisterEvent;
 
 @Mod(Flywheel.ID)
 public class Flywheel {
@@ -50,7 +51,7 @@ public class Flywheel {
 		IEventBus forgeEventBus = MinecraftForge.EVENT_BUS;
 		IEventBus modEventBus = FMLJavaModLoadingContext.get()
 				.getModEventBus();
-		modEventBus.addListener(Flywheel::setup);
+		modEventBus.addListener(Flywheel::registerArgumentTypes);
 
 		FlwConfig.init();
 
@@ -87,8 +88,10 @@ public class Flywheel {
 		LOGGER.debug("Successfully loaded {}", PausedPartialTickAccessor.class.getName());
 	}
 
-	private static void setup(final FMLCommonSetupEvent event) {
-		ArgumentTypes.register(rl("engine").toString(), BackendTypeArgument.class, new EmptyArgumentSerializer<>(BackendTypeArgument::getInstance));
+	private static void registerArgumentTypes(RegisterEvent event) {
+		event.register(Registry.COMMAND_ARGUMENT_TYPE_REGISTRY, rl("engine"), () -> {
+			return ArgumentTypeInfos.registerByClass(BackendTypeArgument.class, SingletonArgumentInfo.contextFree(BackendTypeArgument::getInstance));
+		});
 	}
 
 	public static ArtifactVersion getVersion() {

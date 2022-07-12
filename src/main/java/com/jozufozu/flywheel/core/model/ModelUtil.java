@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.core.model;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.Random;
 import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.Flywheel;
@@ -18,9 +17,12 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 public class ModelUtil {
@@ -29,6 +31,9 @@ public class ModelUtil {
 	 * Meant to be used for virtual rendering.
 	 */
 	public static final BlockRenderDispatcher VANILLA_RENDERER = createVanillaRenderer();
+
+	public static final ModelProperty<Boolean> VIRTUAL_PROPERTY = new ModelProperty<>();
+	public static final ModelData VIRTUAL_DATA = ModelData.builder().with(VIRTUAL_PROPERTY, true).build();
 
 	private static final ThreadLocal<ThreadLocalObjects> THREAD_LOCAL_OBJECTS = ThreadLocal.withInitial(ThreadLocalObjects::new);
 
@@ -99,7 +104,7 @@ public class ModelUtil {
 	}
 
 	private static class ThreadLocalObjects {
-		public final Random random = new Random();
+		public final RandomSource random = RandomSource.create();
 		public final ShadeSeparatingVertexConsumer shadeSeparatingWrapper = new ShadeSeparatingVertexConsumer();
 		public final ShadeSeparatedBufferBuilder separatedBufferBuilder = new ShadeSeparatedBufferBuilder(512);
 		public final BufferBuilder unshadedBuilder = new BufferBuilder(512);

@@ -6,9 +6,7 @@ import java.util.Map;
 
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.ModelBakeEvent;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ForgeModelBakery;
+import net.minecraftforge.client.event.ModelEvent;
 
 /**
  * A helper class for loading and accessing json models.
@@ -30,23 +28,23 @@ public class PartialModel {
 	protected BakedModel bakedModel;
 
 	public PartialModel(ResourceLocation modelLocation) {
-		if (tooLate) throw new RuntimeException("PartialModel '" + modelLocation + "' loaded after ModelRegistryEvent");
+		if (tooLate) throw new RuntimeException("PartialModel '" + modelLocation + "' loaded after ModelEvent.RegisterAdditional");
 
 		this.modelLocation = modelLocation;
 		ALL.add(this);
 	}
 
-	public static void onModelRegistry(ModelRegistryEvent event) {
+	public static void onModelRegistry(ModelEvent.RegisterAdditional event) {
 		for (PartialModel partial : ALL)
-			ForgeModelBakery.addSpecialModel(partial.getLocation());
+			event.register(partial.getLocation());
 
 		tooLate = true;
 	}
 
-	public static void onModelBake(ModelBakeEvent event) {
-		Map<ResourceLocation, BakedModel> modelRegistry = event.getModelRegistry();
+	public static void onModelBake(ModelEvent.BakingCompleted event) {
+		Map<ResourceLocation, BakedModel> models = event.getModels();
 		for (PartialModel partial : ALL)
-			partial.set(modelRegistry.get(partial.getLocation()));
+			partial.set(models.get(partial.getLocation()));
 	}
 
 	protected void set(BakedModel bakedModel) {

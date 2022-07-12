@@ -12,14 +12,14 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public enum BackendTypeArgument implements ArgumentType<BackendType> {
 	INSTANCE;
 
 	private static final Dynamic2CommandExceptionType INVALID = new Dynamic2CommandExceptionType((found, constants) -> {
 		// TODO: don't steal lang
-		return new TranslatableComponent("commands.forge.arguments.enum.invalid", constants, found);
+		return Component.translatable("commands.forge.arguments.enum.invalid", constants, found);
 	});
 
 	@Override

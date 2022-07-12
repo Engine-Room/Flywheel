@@ -7,9 +7,9 @@ import com.jozufozu.flywheel.util.WorldAttached;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -17,17 +17,15 @@ import net.minecraftforge.fml.common.Mod;
 public class ForgeEvents {
 
 	@SubscribeEvent
-	public static void addToDebugScreen(RenderGameOverlayEvent.Text event) {
-
+	public static void addToDebugScreen(CustomizeGuiOverlayEvent.DebugText event) {
 		if (Minecraft.getInstance().options.renderDebug) {
-
 			InstancedRenderDispatcher.getDebugString(event.getRight());
 		}
 	}
 
 	@SubscribeEvent
-	public static void unloadWorld(WorldEvent.Unload event) {
-		WorldAttached.invalidateWorld(event.getWorld());
+	public static void unloadWorld(LevelEvent.Unload event) {
+		WorldAttached.invalidateWorld(event.getLevel());
 	}
 
 	@SubscribeEvent

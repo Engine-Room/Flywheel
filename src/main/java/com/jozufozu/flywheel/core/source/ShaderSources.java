@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.core.source;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,18 +28,17 @@ public class ShaderSources implements SourceFinder {
 	public final Index index;
 
 	public ShaderSources(ResourceManager manager) {
-		Collection<ResourceLocation> allShaders = manager.listResources(SHADER_DIR, s -> {
+		Map<ResourceLocation, Resource> allShaders = manager.listResources(SHADER_DIR, loc -> {
+			String path = loc.getPath();
 			for (String ext : EXTENSIONS) {
-				if (s.endsWith(ext)) return true;
+				if (path.endsWith(ext)) return true;
 			}
 			return false;
 		});
 
-		for (ResourceLocation location : allShaders) {
-			try {
-				Resource resource = manager.getResource(location);
-
-				String source = StringUtil.readToString(resource.getInputStream());
+		allShaders.forEach((location, resource) -> {
+			try (InputStream inputStream = resource.open()) {
+				String source = StringUtil.readToString(inputStream);
 
 				ResourceLocation name = ResourceUtil.removePrefixUnchecked(location, SHADER_DIR);
 
@@ -47,7 +46,7 @@ public class ShaderSources implements SourceFinder {
 			} catch (IOException e) {
 
 			}
-		}
+		});
 
 		index = new Index(shaderSources);
 	}

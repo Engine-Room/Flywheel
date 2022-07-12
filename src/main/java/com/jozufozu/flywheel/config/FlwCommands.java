@@ -16,10 +16,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
-import net.minecraftforge.fml.ModList;
 
 public class FlwCommands {
 	public static void registerClientCommands(RegisterClientCommandsEvent event) {
@@ -56,14 +54,14 @@ public class FlwCommands {
 					LocalPlayer player = Minecraft.getInstance().player;
 					if (player == null) return;
 
-					Component text = new TextComponent("Normal debug mode is currently: ").append(boolToText(bool));
+					Component text = Component.literal("Normal debug mode is currently: ").append(boolToText(bool));
 					player.displayClientMessage(text, false);
 				},
 				(source, bool) -> {
 					LocalPlayer player = Minecraft.getInstance().player;
 					if (player == null) return;
 
-					Component text = boolToText(bool).append(new TextComponent(" normal debug mode").withStyle(ChatFormatting.WHITE));
+					Component text = boolToText(bool).append(Component.literal(" normal debug mode").withStyle(ChatFormatting.WHITE));
 					player.displayClientMessage(text, false);
 				}
 			));
@@ -73,14 +71,14 @@ public class FlwCommands {
 					LocalPlayer player = Minecraft.getInstance().player;
 					if (player == null) return;
 
-					Component text = new TextComponent("Update limiting is currently: ").append(boolToText(bool));
+					Component text = Component.literal("Update limiting is currently: ").append(boolToText(bool));
 					player.displayClientMessage(text, false);
 				},
 				(source, bool) -> {
 					LocalPlayer player = Minecraft.getInstance().player;
 					if (player == null) return;
 
-					Component text = boolToText(bool).append(new TextComponent(" update limiting.").withStyle(ChatFormatting.WHITE));
+					Component text = boolToText(bool).append(Component.literal(" update limiting.").withStyle(ChatFormatting.WHITE));
 					player.displayClientMessage(text, false);
 
 					Backend.reloadWorldRenderers();
@@ -111,14 +109,14 @@ public class FlwCommands {
 	}
 
 	public static MutableComponent boolToText(boolean b) {
-		return b ? new TextComponent("enabled").withStyle(ChatFormatting.DARK_GREEN) : new TextComponent("disabled").withStyle(ChatFormatting.RED);
+		return b ? Component.literal("enabled").withStyle(ChatFormatting.DARK_GREEN) : Component.literal("disabled").withStyle(ChatFormatting.RED);
 	}
 
 	public static Component getEngineMessage(@NotNull BackendType type) {
 		return switch (type) {
-			case OFF -> new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED);
-			case INSTANCING -> new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN);
-			case BATCHING ->  new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN);
+			case OFF -> Component.literal("Disabled Flywheel").withStyle(ChatFormatting.RED);
+			case INSTANCING -> Component.literal("Using Instancing Engine").withStyle(ChatFormatting.GREEN);
+			case BATCHING ->  Component.literal("Using Batching Engine").withStyle(ChatFormatting.GREEN);
 		};
 	}
 
