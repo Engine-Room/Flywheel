@@ -136,8 +136,19 @@ mixin {
     add sourceSets.main, 'flywheel.refmap.json'
 }
 
+// Fix for SpongePowered/MixinGradle#38
+afterEvaluate {
+    tasks.configureReobfTaskForReobfJar.mustRunAfter(tasks.compileJava)
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+javadoc {
+    source = [sourceSets.main.allJava]
+    // prevent java 8's strict doclint for javadocs from failing builds
+    options.addStringOption('Xdoclint:none', '-quiet')
 }
 
 jar {
@@ -153,12 +164,6 @@ jar {
                 'MixinConfigs'            : 'flywheel.mixins.json'
         ])
     }
-}
-
-javadoc {
-    source = [sourceSets.main.allJava]
-    // prevent java 8's strict doclint for javadocs from failing builds
-    options.addStringOption('Xdoclint:none', '-quiet')
 }
 
 java {
