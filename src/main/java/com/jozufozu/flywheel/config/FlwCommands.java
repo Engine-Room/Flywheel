@@ -19,7 +19,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
-import net.minecraftforge.fml.ModList;
 
 public class FlwCommands {
 	public static void registerClientCommands(RegisterClientCommandsEvent event) {

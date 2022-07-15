@@ -1,14 +1,11 @@
 package com.jozufozu.flywheel.core.vertex;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.ShadedVertexList;
-import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.util.RenderMath;
-import com.mojang.blaze3d.platform.MemoryTracker;
 
 public class BlockVertexListUnsafe extends AbstractVertexList {
 

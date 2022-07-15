@@ -5,7 +5,7 @@ license = "MIT"
 
 [[mods]]
 modId = "flywheel"
-version = "${file.jarVersion}"
+version = "${version}"
 displayName = "Flywheel"
 logoFile = "logo.png"
 displayURL = "https://www.curseforge.com/minecraft/mc-mods/flywheel"
