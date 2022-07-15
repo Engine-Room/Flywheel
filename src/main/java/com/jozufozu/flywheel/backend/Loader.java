@@ -96,10 +96,8 @@ public class Loader implements ResourceManagerReloadListener {
 		Collection<ResourceLocation> programSpecs = manager.listResources(PROGRAM_DIR, s -> s.endsWith(".json"));
 
 		for (ResourceLocation location : programSpecs) {
-			try {
-				Resource file = manager.getResource(location);
-
-				String s = StringUtil.readToString(file.getInputStream());
+			try (Resource resource = manager.getResource(location)) {
+				String s = StringUtil.readToString(resource.getInputStream());
 
 				ResourceLocation specName = ResourceUtil.trim(location, PROGRAM_DIR, ".json");
 

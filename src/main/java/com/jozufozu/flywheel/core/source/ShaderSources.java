@@ -36,16 +36,14 @@ public class ShaderSources implements SourceFinder {
 		});
 
 		for (ResourceLocation location : allShaders) {
-			try {
-				Resource resource = manager.getResource(location);
-
+			try (Resource resource = manager.getResource(location)) {
 				String source = StringUtil.readToString(resource.getInputStream());
 
 				ResourceLocation name = ResourceUtil.removePrefixUnchecked(location, SHADER_DIR);
 
 				shaderSources.put(name, new SourceFile(this, name, source));
 			} catch (IOException e) {
-
+				//
 			}
 		}
 
