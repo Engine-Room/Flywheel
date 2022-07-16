@@ -124,19 +124,11 @@ dependencies {
     }
 }
 
-processResources {
-    inputs.property 'version', mod_version
-
-    filesMatching('META-INF/mods.toml') {
-        expand 'version': mod_version
-    }
-}
-
 mixin {
     add sourceSets.main, 'flywheel.refmap.json'
 }
 
-// Fix for SpongePowered/MixinGradle#38
+// Workaround for SpongePowered/MixinGradle#38
 afterEvaluate {
     tasks.configureReobfTaskForReobfJar.mustRunAfter(tasks.compileJava)
 }
@@ -172,8 +164,8 @@ java {
 }
 
 void addLicense(jarTask) {
-    jarTask.from('LICENSE') {
-        rename { "${it}_${project.archivesBaseName}" }
+    jarTask.from('LICENSE.md') {
+        rename '(.*)\\.(.*)', '$1_' + archivesBaseName + '.$2'
     }
 }
 
