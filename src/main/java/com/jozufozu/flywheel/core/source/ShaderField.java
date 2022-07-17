@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.core.source.parse.AbstractShaderElement;
 import com.jozufozu.flywheel.core.source.span.Span;
 
 public class ShaderField extends AbstractShaderElement {
-	public static final Pattern PATTERN = Pattern.compile("layout\\s+\\(location\\s+=\\s+(\\d+)\\)\\s+(in|out)\\s+([\\w\\d]+)\\s+" + "([\\w\\d]+)");
+	public static final Pattern PATTERN = Pattern.compile("layout\\s*\\(location\\s*=\\s*(\\d+)\\)\\s+(in|out)\\s+([\\w\\d]+)\\s+" + "([\\w\\d]+)");
 
 	public final Span location;
 	public final @Nullable Decoration decoration;

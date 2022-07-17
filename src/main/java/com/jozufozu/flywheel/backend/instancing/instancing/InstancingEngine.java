@@ -19,8 +19,8 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
-import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
+import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
@@ -202,8 +202,9 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		return originCoordinate;
 	}
 
-	public void attachManager(InstanceManager<?> listener) {
-		instanceManagers.add(listener);
+	@Override
+	public void attachManagers(InstanceManager<?>... listener) {
+		instanceManagers.addAll(List.of(listener));
 	}
 
 	@Override
@@ -350,7 +351,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		}
 
 		if (!(InstancedRenderDispatcher.getInstanceWorld(level)
-				.getBlockEntityInstanceManager() instanceof BlockEntityInstanceManager beim)) {
+				.getBlockEntities() instanceof BlockEntityInstanceManager beim)) {
 			return Int2ObjectMaps.emptyMap();
 		}
 

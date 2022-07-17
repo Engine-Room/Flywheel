@@ -8,9 +8,7 @@ import java.util.Map;
 import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.OptifineHandler;
-import com.jozufozu.flywheel.backend.instancing.BatchDrawingTracker;
-import com.jozufozu.flywheel.backend.instancing.Engine;
-import com.jozufozu.flywheel.backend.instancing.TaskEngine;
+import com.jozufozu.flywheel.backend.instancing.*;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.platform.Lighting;
@@ -110,6 +108,11 @@ public class BatchingEngine implements Engine {
 		stack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
 		submitTasks(stack, taskEngine);
+	}
+
+	@Override
+	public void attachManagers(InstanceManager<?>... listener) {
+		// noop
 	}
 
 	@Override

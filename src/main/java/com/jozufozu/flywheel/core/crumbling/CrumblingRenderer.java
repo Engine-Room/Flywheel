@@ -144,7 +144,7 @@ public class CrumblingRenderer {
 		private State() {
 			instancerManager = new CrumblingEngine();
 			instanceManager = new CrumblingInstanceManager(instancerManager);
-			instancerManager.attachManager(instanceManager);
+			instancerManager.attachManagers(instanceManager);
 		}
 
 		private void kill() {
