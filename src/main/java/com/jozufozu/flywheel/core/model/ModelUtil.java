@@ -4,114 +4,61 @@ import java.util.Collection;
 import java.util.Random;
 import java.util.function.Supplier;
 
-import com.jozufozu.flywheel.core.virtual.VirtualEmptyBlockGetter;
-import com.jozufozu.flywheel.fabric.model.CullingBakedModel;
-import com.jozufozu.flywheel.fabric.model.DefaultLayerFilteringBakedModel;
-import com.jozufozu.flywheel.fabric.model.FabricModelUtil;
-import com.jozufozu.flywheel.fabric.model.LayerFilteringBakedModel;
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
-import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class ModelUtil {
-
 	private static final ThreadLocal<ThreadLocalObjects> THREAD_LOCAL_OBJECTS = ThreadLocal.withInitial(ThreadLocalObjects::new);
 
-	public static ShadeSeparatedBufferBuilder getBufferBuilder(BakedModel model, BlockState referenceState, PoseStack poseStack) {
-		return getBufferBuilder(VirtualEmptyBlockGetter.INSTANCE, model, referenceState, poseStack);
-	}
-
-	public static ShadeSeparatedBufferBuilder getBufferBuilder(BlockAndTintGetter renderWorld, BakedModel model, BlockState referenceState, PoseStack poseStack) {
+	public static ShadeSeparatedBufferBuilder getBufferBuilder(Bufferable bufferable) {
 		ModelBlockRenderer blockRenderer = Minecraft.getInstance().getBlockRenderer().getModelRenderer();
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 
-		ShadeSeparatingVertexConsumer shadeSeparatingWrapper = objects.shadeSeparatingWrapper;
-		ShadeSeparatedBufferBuilder builder = new ShadeSeparatedBufferBuilder(512);
-		BufferBuilder unshadedBuilder = objects.unshadedBuilder;
+		objects.begin();
 
-		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-		unshadedBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-		shadeSeparatingWrapper.prepare(builder, unshadedBuilder);
-		model = DefaultLayerFilteringBakedModel.wrap(model);
-		model = shadeSeparatingWrapper.wrapModel(model);
-		blockRenderer.tesselateBlock(renderWorld, model, referenceState, BlockPos.ZERO, poseStack, shadeSeparatingWrapper,
-				false, objects.random, 42, OverlayTexture.NO_OVERLAY);
-		shadeSeparatingWrapper.clear();
-		unshadedBuilder.end();
-		builder.appendUnshadedVertices(unshadedBuilder);
-		builder.end();
+		bufferable.bufferInto(blockRenderer, objects.shadeSeparatingWrapper, objects.random);
 
-		return builder;
+		objects.end();
+
+		return objects.separatedBufferBuilder;
+	}
+
+	public static ShadeSeparatedBufferBuilder getBufferBuilder(BakedModel model, BlockState referenceState, PoseStack poseStack) {
+		return new BakedModelBuilder(model).withReferenceState(referenceState)
+				.withPoseStack(poseStack)
+				.build();
+	}
+
+	public static ShadeSeparatedBufferBuilder getBufferBuilder(BlockAndTintGetter renderWorld, BakedModel model, BlockState referenceState, PoseStack poseStack) {
+		return new BakedModelBuilder(model).withReferenceState(referenceState)
+				.withPoseStack(poseStack)
+				.withRenderWorld(renderWorld)
+				.build();
 	}
 
 	public static ShadeSeparatedBufferBuilder getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks) {
-		return getBufferBuilderFromTemplate(renderWorld, layer, blocks, new PoseStack());
+		return new WorldModelBuilder(layer).withRenderWorld(renderWorld)
+				.withBlocks(blocks)
+				.build();
 	}
 
 	public static ShadeSeparatedBufferBuilder getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks, PoseStack poseStack) {
-		BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();	
-		ModelBlockRenderer modelRenderer = dispatcher.getModelRenderer();
-		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
-
-		Random random = objects.random;
-		ShadeSeparatingVertexConsumer shadeSeparatingWrapper = objects.shadeSeparatingWrapper;
-		ShadeSeparatedBufferBuilder builder = new ShadeSeparatedBufferBuilder(512);
-		BufferBuilder unshadedBuilder = objects.unshadedBuilder;
-
-		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-		unshadedBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-		shadeSeparatingWrapper.prepare(builder, unshadedBuilder);
-
-		ModelBlockRenderer.enableCaching();
-		for (StructureTemplate.StructureBlockInfo info : blocks) {
-			BlockState state = info.state;
-
-			if (state.getRenderShape() != RenderShape.MODEL)
-				continue;
-
-			BakedModel model = dispatcher.getBlockModel(state);
-			if (((FabricBakedModel) model).isVanillaAdapter()) {
-				if (!FabricModelUtil.doesLayerMatch(state, layer)) {
-					continue;
-				}
-			} else {
-				model = CullingBakedModel.wrap(model);
-				model = LayerFilteringBakedModel.wrap(model, layer);
-				model = shadeSeparatingWrapper.wrapModel(model);
-			}
-
-			BlockPos pos = info.pos;
-
-			poseStack.pushPose();
-			poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
-			modelRenderer.tesselateBlock(renderWorld, model, state, pos, poseStack, shadeSeparatingWrapper,
-					true, random, 42, OverlayTexture.NO_OVERLAY);
-			poseStack.popPose();
-		}
-		ModelBlockRenderer.clearCache();
-
-		shadeSeparatingWrapper.clear();
-		unshadedBuilder.end();
-		builder.appendUnshadedVertices(unshadedBuilder);
-		builder.end();
-
-		return builder;
+		return new WorldModelBuilder(layer).withRenderWorld(renderWorld)
+				.withBlocks(blocks)
+				.withPoseStack(poseStack)
+				.build();
 	}
 
 	public static Supplier<PoseStack> rotateToFace(Direction facing) {
@@ -128,6 +75,20 @@ public class ModelUtil {
 	private static class ThreadLocalObjects {
 		public final Random random = new Random();
 		public final ShadeSeparatingVertexConsumer shadeSeparatingWrapper = new ShadeSeparatingVertexConsumer();
+		public final ShadeSeparatedBufferBuilder separatedBufferBuilder = new ShadeSeparatedBufferBuilder(512);
 		public final BufferBuilder unshadedBuilder = new BufferBuilder(512);
+
+		private void begin() {
+			this.separatedBufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+			this.unshadedBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+			this.shadeSeparatingWrapper.prepare(this.separatedBufferBuilder, this.unshadedBuilder);
+		}
+
+		private void end() {
+			this.shadeSeparatingWrapper.clear();
+			this.unshadedBuilder.end();
+			this.separatedBufferBuilder.appendUnshadedVertices(this.unshadedBuilder);
+			this.separatedBufferBuilder.end();
+		}
 	}
 }

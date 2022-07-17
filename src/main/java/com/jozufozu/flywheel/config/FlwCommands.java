@@ -12,7 +12,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -104,17 +103,7 @@ public final class FlwCommands {
 		return switch (type) {
 			case OFF -> new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED);
 			case INSTANCING -> new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN);
-			case BATCHING -> {
-				MutableComponent msg = new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN);
-
-				if (FabricLoader.getInstance()
-						.isModLoaded("create")) {
-					// FIXME: batching engine contraption lighting issues
-					msg.append(new TextComponent("\nWARNING: May cause issues with Create Contraptions").withStyle(ChatFormatting.RED));
-				}
-
-				yield msg;
-			}
+			case BATCHING ->  new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN);
 		};
 	}
 

@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import com.jozufozu.flywheel.api.FlywheelWorld;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.ParallelTaskEngine;
-import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.config.BackendType;
+import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.shader.ProgramSpec;
 import com.mojang.logging.LogUtils;
 
@@ -96,7 +96,7 @@ public class Backend {
 		BackendType preferredChoice = FlwConfig.get()
 				.getBackendType();
 
-		boolean usingShaders = IrisShaderHandler.isShaderPackInUse();
+		boolean usingShaders = ShadersModHandler.isShaderPackInUse();
 		boolean canUseEngine = switch (preferredChoice) {
 			case OFF -> true;
 			case BATCHING -> !usingShaders;

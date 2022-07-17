@@ -44,6 +44,6 @@ public class DefaultLayerFilteringBakedModel extends ForwardingBakedModel {
 	}
 
 	public static boolean hasDefaultBlendMode(QuadView quad) {
-		return FabricModelUtil.getBlendMode(quad.material()) == BlendMode.DEFAULT;
+		return FabricModelUtil.getBlendMode(quad) == BlendMode.DEFAULT;
 	}
 }

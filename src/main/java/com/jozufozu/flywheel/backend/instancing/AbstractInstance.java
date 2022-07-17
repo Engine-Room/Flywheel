@@ -10,8 +10,6 @@ import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.core.materials.FlatLit;
 import com.jozufozu.flywheel.light.LightListener;
-import com.jozufozu.flywheel.light.LightProvider;
-import com.jozufozu.flywheel.light.ListenerStatus;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
 
 import net.minecraft.core.BlockPos;
@@ -26,6 +24,7 @@ public abstract class AbstractInstance implements Instance, LightListener {
 
 	protected final MaterialManager materialManager;
 	public final Level world;
+	protected boolean removed = false;
 
 	public AbstractInstance(MaterialManager materialManager, Level world) {
 		this.materialManager = materialManager;
@@ -39,10 +38,19 @@ public abstract class AbstractInstance implements Instance, LightListener {
 
 	}
 
+	public final void removeAndMark() {
+		if (removed) {
+			return;
+		}
+
+		remove();
+		removed = true;
+	}
+
 	/**
 	 * Free any acquired resources.
 	 */
-	public abstract void remove();
+	protected abstract void remove();
 
 	/**
 	 * Update instance data here. Good for when data doesn't change very often and when animations are GPU based.
@@ -78,12 +86,12 @@ public abstract class AbstractInstance implements Instance, LightListener {
 	}
 
 	@Override
-	public ListenerStatus status() {
-		return ListenerStatus.OKAY;
+	public boolean isListenerInvalid() {
+		return removed;
 	}
 
 	@Override
-	public void onLightUpdate(LightProvider world, LightLayer type, ImmutableBox changed) {
+	public void onLightUpdate(LightLayer type, ImmutableBox changed) {
 		updateLight();
 	}
 
@@ -103,4 +111,5 @@ public abstract class AbstractInstance implements Instance, LightListener {
 		models.forEach(model -> model.setBlockLight(block)
 				.setSkyLight(sky));
 	}
+
 }

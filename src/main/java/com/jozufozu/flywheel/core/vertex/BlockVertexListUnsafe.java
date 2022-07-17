@@ -5,19 +5,12 @@ import java.nio.ByteBuffer;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.ShadedVertexList;
-import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.util.RenderMath;
 
-public class BlockVertexListUnsafe implements VertexList {
+public class BlockVertexListUnsafe extends AbstractVertexList {
 
-	private final ByteBuffer buffer;
-	private final int vertexCount;
-	private final long base;
-
-	public BlockVertexListUnsafe(ByteBuffer buffer, int vertexCount) {
-		this.buffer = buffer;
-		this.base = MemoryUtil.memAddress(buffer);
-		this.vertexCount = vertexCount;
+	public BlockVertexListUnsafe(ByteBuffer copyFrom, int vertexCount) {
+		super(copyFrom, vertexCount);
 	}
 
 	private long ptr(long index) {
@@ -92,11 +85,6 @@ public class BlockVertexListUnsafe implements VertexList {
 	@Override
 	public float getNZ(int index) {
 		return RenderMath.f(MemoryUtil.memGetByte(ptr(index) + 30));
-	}
-
-	@Override
-	public int getVertexCount() {
-		return vertexCount;
 	}
 
 	public static class Shaded extends BlockVertexListUnsafe implements ShadedVertexList {

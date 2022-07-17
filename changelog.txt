@@ -1,3 +1,16 @@
+0.6.4:
+Fixes
+ - Fix shader detection with oculus
+Technical/API
+ - LightUpdater is simplified to increase reliability and reflect how it is actually used
+ - ModelUtil is superseded by model builders, to be improved more in 0.7.0
+ - VertexLists now copy input buffers to reduce memory usage
+
+0.6.3:
+Technical/API
+ - Light updates are now processed in parallel.
+ - The light updater is now more selective of the levels it processes, fixing a memory leak.
+
 0.6.2:
 Update to 1.18.2
 

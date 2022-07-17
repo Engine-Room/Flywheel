@@ -4,19 +4,12 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.util.RenderMath;
 
-public class PosTexNormalVertexListUnsafe implements VertexList {
+public class PosTexNormalVertexListUnsafe extends AbstractVertexList {
 
-	private final ByteBuffer buffer;
-	private final int vertexCount;
-	private final long base;
-
-	public PosTexNormalVertexListUnsafe(ByteBuffer buffer, int vertexCount) {
-		this.buffer = buffer;
-		this.vertexCount = vertexCount;
-		this.base = MemoryUtil.memAddress(buffer);
+	public PosTexNormalVertexListUnsafe(ByteBuffer copyFrom, int vertexCount) {
+		super(copyFrom, vertexCount);
 	}
 
 	private long ptr(long idx) {
@@ -86,10 +79,5 @@ public class PosTexNormalVertexListUnsafe implements VertexList {
 	@Override
 	public float getNZ(int index) {
 		return RenderMath.f(MemoryUtil.memGetByte(ptr(index) + 22));
-	}
-
-	@Override
-	public int getVertexCount() {
-		return vertexCount;
 	}
 }

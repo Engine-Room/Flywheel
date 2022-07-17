@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.Loader;
 import com.jozufozu.flywheel.backend.RenderWork;
+import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.Contexts;
@@ -51,6 +52,7 @@ public class Flywheel implements ClientModInitializer {
 
 		FlwConfig.init();
 
+		ShadersModHandler.init();
 		Backend.init();
 
 		FlywheelEvents.RELOAD_RENDERERS.register(ProgramCompiler::invalidateAll);

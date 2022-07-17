@@ -7,11 +7,10 @@ plugins {
 boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
 
 ext.buildNumber = System.getenv('BUILD_NUMBER')
-if (buildNumber == null) buildNumber = 'custom'
 
-version = "${mc_update_version}-${mod_version}" + (dev ? ".${buildNumber}" : '')
 group = 'com.jozufozu.flywheel'
-archivesBaseName = 'flywheel-fabric'
+archivesBaseName = "flywheel-fabric-${artifact_minecraft_version}"
+version = mod_version + (dev && buildNumber != null ? "-${buildNumber}" : '')
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -41,6 +40,13 @@ repositories {
     maven {
         url 'https://maven.vram.io'
     }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
@@ -57,12 +63,12 @@ dependencies {
 
     modCompileOnly 'curse.maven:starlight-521783:3667443'
 
-    modCompileOnly 'maven.modrinth:iris:1.18.x-v1.2.2'
+    modCompileOnly 'maven.modrinth:iris:1.18.x-v1.2.5'
     modCompileOnly 'maven.modrinth:sodium:mc1.18.2-0.4.1'
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
-    modCompileOnly 'maven.modrinth:indium:1.0.2+mc1.18.2'
-    modCompileOnly 'io.vram:frex-fabric-mc118:6.0.242'
+    modCompileOnly 'maven.modrinth:indium:1.0.6+mc1.18.2'
+    modCompileOnly 'io.vram:frex-fabric-mc118:6.0.263'
 }
 
 processResources {
@@ -76,35 +82,7 @@ processResources {
 tasks.withType(JavaCompile).configureEach {
     // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
     it.options.release = 17
-}
-
-java {
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
-    withSourcesJar()
-}
-
-jar {
-    from('LICENSE') {
-        rename { "${it}_${archivesBaseName}" }
-    }
-}
-
-// Example for how to get properties into the manifest for reading by the runtime..
-jar {
-    manifest {
-        attributes([
-                'Specification-Title'     : 'flywheel',
-                //'Specification-Vendor': 'flywheel authors',
-                'Specification-Version'   : '1', // We are version 1 of ourselves
-                'Implementation-Title'    : project.name,
-                'Implementation-Version'  : project.version,
-                //'Implementation-Vendor': 'flywheel authors',
-                'MixinConfigs'            : 'flywheel.mixins.json',
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
 
 javadoc {
@@ -113,24 +91,40 @@ javadoc {
     options.addStringOption('Xdoclint:none', '-quiet')
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    from javadoc.destinationDir
-    archiveClassifier.set('javadoc')
+jar {
+    manifest {
+        attributes([
+                'Specification-Title'     : 'flywheel',
+                //'Specification-Vendor': 'flywheel authors',
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : project.jar.baseName,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                //'Implementation-Vendor': 'flywheel authors',
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                'MixinConfigs'            : 'flywheel.mixins.json'
+        ])
+    }
 }
 
-artifacts {
-    archives remapJar, sourcesJar, javadocJar
+java {
+    withSourcesJar()
+    withJavadocJar()
 }
+
+void addLicense(jarTask) {
+    jarTask.from('LICENSE.md') {
+        rename '(.*)\\.(.*)', '$1_' + archivesBaseName + '.$2'
+    }
+}
+
+addLicense(jar)
 
 publishing {
-    tasks.publish.dependsOn 'build'
     publications {
         mavenJava(MavenPublication) {
-            artifact remapJar
-            artifact(sourcesJar) {
-                builtBy remapSourcesJar
-            }
-            artifact javadocJar
+            artifactId = archivesBaseName
+
+            from components.java
         }
     }
 
