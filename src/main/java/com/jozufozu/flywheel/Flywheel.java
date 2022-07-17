@@ -28,6 +28,7 @@ import com.jozufozu.flywheel.event.ForgeEvents;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
+import com.jozufozu.flywheel.vanilla.effect.ExampleEffect;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.commands.synchronization.ArgumentTypes;
@@ -107,6 +108,8 @@ public class Flywheel {
 		modEventBus.addListener(PartialModel::onModelBake);
 		modEventBus.addListener(StitchedSprite::onTextureStitchPre);
 		modEventBus.addListener(StitchedSprite::onTextureStitchPost);
+
+		// forgeEventBus.addListener(ExampleEffect::spawn);
 
 		LayoutShaders.init();
 		InstanceShaders.init();

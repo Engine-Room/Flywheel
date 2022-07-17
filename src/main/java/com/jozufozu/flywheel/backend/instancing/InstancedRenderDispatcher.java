@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.backend.instancing;
 import java.util.List;
 
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.instancing.effect.Effect;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.RenderContext;
@@ -10,6 +11,7 @@ import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.WorldAttached;
+import com.jozufozu.flywheel.vanilla.effect.ExampleEffect;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -30,7 +32,7 @@ public class InstancedRenderDispatcher {
 	public static void enqueueUpdate(BlockEntity blockEntity) {
 		if (Backend.isOn() && blockEntity.hasLevel() && blockEntity.getLevel() instanceof ClientLevel) {
 			instanceWorlds.get(blockEntity.getLevel())
-					.getBlockEntityInstanceManager()
+					.getBlockEntities()
 					.queueUpdate(blockEntity);
 		}
 	}
@@ -42,17 +44,21 @@ public class InstancedRenderDispatcher {
 	public static void enqueueUpdate(Entity entity) {
 		if (Backend.isOn()) {
 			instanceWorlds.get(entity.level)
-					.getEntityInstanceManager()
+					.getEntities()
 					.queueUpdate(entity);
 		}
 	}
 
 	public static InstanceManager<BlockEntity> getBlockEntities(LevelAccessor world) {
-		return getInstanceWorld(world).getBlockEntityInstanceManager();
+		return getInstanceWorld(world).getBlockEntities();
 	}
 
 	public static InstanceManager<Entity> getEntities(LevelAccessor world) {
-		return getInstanceWorld(world).getEntityInstanceManager();
+		return getInstanceWorld(world).getEntities();
+	}
+
+	public static InstanceManager<Effect> getEffects(LevelAccessor world) {
+		return getInstanceWorld(world).getEffects();
 	}
 
 	/**
@@ -119,7 +125,7 @@ public class InstancedRenderDispatcher {
 			InstanceWorld instanceWorld = instanceWorlds.get(Minecraft.getInstance().level);
 
 			debug.add("Update limiting: " + FlwCommands.boolToText(FlwConfig.get().limitUpdates()).getString());
-			debug.add("B: " + instanceWorld.blockEntityInstanceManager.getObjectCount() + ", E: " + instanceWorld.entityInstanceManager.getObjectCount());
+			debug.add("B: " + instanceWorld.blockEntities.getObjectCount() + ", E: " + instanceWorld.entities.getObjectCount());
 			instanceWorld.engine.addDebugInfo(debug);
 		} else {
 			debug.add("Disabled");

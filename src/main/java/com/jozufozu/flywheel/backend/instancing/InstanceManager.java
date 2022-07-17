@@ -1,15 +1,9 @@
 package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import org.jetbrains.annotations.Nullable;
-
-import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.Backend;
@@ -20,36 +14,37 @@ import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.light.LightUpdater;
 import com.mojang.math.Vector3f;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 
 public abstract class InstanceManager<T> {
 
-	public final InstancerManager instancerManager;
-
 	private final Set<T> queuedAdditions;
 	private final Set<T> queuedUpdates;
-
-	protected final Map<T, AbstractInstance> instances;
-	protected final Object2ObjectOpenHashMap<T, TickableInstance> tickableInstances;
-	protected final Object2ObjectOpenHashMap<T, DynamicInstance> dynamicInstances;
 
 	protected DistanceUpdateLimiter frame;
 	protected DistanceUpdateLimiter tick;
 
-	public InstanceManager(InstancerManager instancerManager) {
-		this.instancerManager = instancerManager;
+	public InstanceManager() {
 		this.queuedUpdates = new HashSet<>(64);
 		this.queuedAdditions = new HashSet<>(64);
-		this.instances = new HashMap<>();
-
-		this.dynamicInstances = new Object2ObjectOpenHashMap<>();
-		this.tickableInstances = new Object2ObjectOpenHashMap<>();
 
 		frame = createUpdateLimiter();
 		tick = createUpdateLimiter();
 	}
+
+	public abstract Storage<T> getStorage();
+
+	/**
+	 * Is the given object currently capable of being instanced?
+	 *
+	 * <p>
+	 *     This won't be the case for TEs or entities that are outside of loaded chunks.
+	 * </p>
+	 *
+	 * @return true if the object is currently capable of being instanced.
+	 */
+	protected abstract boolean canCreateInstance(T obj);
 
 	protected DistanceUpdateLimiter createUpdateLimiter() {
 		if (FlwConfig.get().limitUpdates()) {
@@ -65,29 +60,8 @@ public abstract class InstanceManager<T> {
 	 * @return The object count.
 	 */
 	public int getObjectCount() {
-		return instances.size();
+		return getStorage().getObjectCount();
 	}
-
-	/**
-	 * Is the given object capable of being instanced at all?
-	 *
-	 * @return false if on object cannot be instanced.
-	 */
-	protected abstract boolean canInstance(T obj);
-
-	/**
-	 * Is the given object currently capable of being instanced?
-	 *
-	 * <p>
-	 *     This won't be the case for TEs or entities that are outside of loaded chunks.
-	 * </p>
-	 *
-	 * @return true if the object is currently capable of being instanced.
-	 */
-	protected abstract boolean canCreateInstance(T obj);
-
-	@Nullable
-	protected abstract AbstractInstance createRaw(T obj);
 
 	/**
 	 * Ticks the InstanceManager.
@@ -107,14 +81,14 @@ public abstract class InstanceManager<T> {
 		int cY = (int) cameraY;
 		int cZ = (int) cameraZ;
 
-		ArrayList<TickableInstance> instances = new ArrayList<>(tickableInstances.values());
+		var instances = getStorage().getInstancesForTicking();
 		int incr = 500;
 		int size = instances.size();
 		int start = 0;
 		while (start < size) {
 			int end = Math.min(start + incr, size);
 
-			List<TickableInstance> sub = instances.subList(start, end);
+			var sub = instances.subList(start, end);
 			taskEngine.submit(() -> {
 				for (TickableInstance instance : sub) {
 					tickInstance(cX, cY, cZ, instance);
@@ -154,14 +128,14 @@ public abstract class InstanceManager<T> {
 		int cY = (int) camera.getPosition().y;
 		int cZ = (int) camera.getPosition().z;
 
-		ArrayList<DynamicInstance> instances = new ArrayList<>(dynamicInstances.values());
+		var instances = getStorage().getInstancesForUpdate();
 		int incr = 500;
 		int size = instances.size();
 		int start = 0;
 		while (start < size) {
 			int end = Math.min(start + incr, size);
 
-			List<DynamicInstance> sub = instances.subList(start, end);
+			var sub = instances.subList(start, end);
 			taskEngine.submit(() -> {
 				for (DynamicInstance dyn : sub) {
 					updateInstance(dyn, lookX, lookY, lookZ, cX, cY, cZ);
@@ -197,13 +171,19 @@ public abstract class InstanceManager<T> {
 	public void add(T obj) {
 		if (!Backend.isOn()) return;
 
-		if (canInstance(obj)) {
-			addInternal(obj);
+		if (canCreateInstance(obj)) {
+			getStorage().add(obj);
 		}
 	}
 
 	public void queueAdd(T obj) {
-		if (!Backend.isOn()) return;
+		if (!Backend.isOn()) {
+			return;
+		}
+
+		if (!canCreateInstance(obj)) {
+			return;
+		}
 
 		synchronized (queuedAdditions) {
 			queuedAdditions.add(obj);
@@ -212,6 +192,11 @@ public abstract class InstanceManager<T> {
 
 	public void queueUpdate(T obj) {
 		if (!Backend.isOn()) return;
+
+		if (!canCreateInstance(obj)) {
+			return;
+		}
+
 		synchronized (queuedUpdates) {
 			queuedUpdates.add(obj);
 		}
@@ -231,45 +216,21 @@ public abstract class InstanceManager<T> {
 	public void update(T obj) {
 		if (!Backend.isOn()) return;
 
-		if (canInstance(obj)) {
-			AbstractInstance instance = getInstance(obj);
-
-			if (instance != null) {
-
-				// resetting instances is by default used to handle block state changes.
-				if (instance.shouldReset()) {
-					// delete and re-create the instance.
-					// resetting an instance supersedes updating it.
-					removeInternal(obj, instance);
-					createInternal(obj);
-				} else {
-					instance.update();
-				}
-			}
+		if (canCreateInstance(obj)) {
+			getStorage().update(obj);
 		}
 	}
 
 	public void remove(T obj) {
 		if (!Backend.isOn()) return;
 
-		if (canInstance(obj)) {
-			AbstractInstance instance = getInstance(obj);
-			if (instance != null) removeInternal(obj, instance);
+		if (canCreateInstance(obj)) {
+			getStorage().remove(obj);
 		}
 	}
 
 	public void invalidate() {
-		instances.values().forEach(AbstractInstance::remove);
-		instances.clear();
-		dynamicInstances.clear();
-		tickableInstances.clear();
-	}
-
-	@Nullable
-	protected <I extends T> AbstractInstance getInstance(I obj) {
-		if (!Backend.isOn()) return null;
-
-		return instances.get(obj);
+		getStorage().invalidate();
 	}
 
 	protected void processQueuedAdditions() {
@@ -285,7 +246,7 @@ public abstract class InstanceManager<T> {
 		}
 
 		if (!queued.isEmpty()) {
-			queued.forEach(this::addInternal);
+			queued.forEach(getStorage()::add);
 		}
 	}
 
@@ -298,75 +259,16 @@ public abstract class InstanceManager<T> {
 		}
 
 		if (queued.size() > 0) {
-			queued.forEach(this::update);
-		}
-	}
-
-	protected void addInternal(T obj) {
-		if (!Backend.isOn()) return;
-
-		AbstractInstance instance = instances.get(obj);
-
-		if (instance == null && canCreateInstance(obj)) {
-			createInternal(obj);
-		}
-	}
-
-	protected void removeInternal(T obj, AbstractInstance instance) {
-		instance.remove();
-		instances.remove(obj);
-		dynamicInstances.remove(obj);
-		tickableInstances.remove(obj);
-		LightUpdater.get(instance.level)
-				.removeListener(instance);
-	}
-
-	@Nullable
-	protected AbstractInstance createInternal(T obj) {
-		AbstractInstance renderer = createRaw(obj);
-
-		if (renderer != null) {
-			setup(obj, renderer);
-			instances.put(obj, renderer);
-		}
-
-		return renderer;
-	}
-
-	private void setup(T obj, AbstractInstance renderer) {
-		renderer.init();
-		renderer.updateLight();
-		LightUpdater.get(renderer.level)
-				.addListener(renderer);
-		if (renderer instanceof TickableInstance r) {
-			tickableInstances.put(obj, r);
-			r.tick();
-		}
-
-		if (renderer instanceof DynamicInstance r) {
-			dynamicInstances.put(obj, r);
-			r.beginFrame();
+			queued.forEach(getStorage()::update);
 		}
 	}
 
 	public void onOriginShift() {
-		dynamicInstances.clear();
-		tickableInstances.clear();
-		instances.replaceAll((obj, instance) -> {
-			instance.remove();
-
-			AbstractInstance out = createRaw(obj);
-
-			if (out != null) {
-				setup(obj, out);
-			}
-
-			return out;
-		});
+		getStorage().recreateAll();
 	}
 
-	public void detachLightListeners() {
-		for (AbstractInstance value : instances.values()) {
+	public void delete() {
+		for (AbstractInstance value : getStorage().allInstances()) {
 			LightUpdater.get(value.level).removeListener(value);
 		}
 	}

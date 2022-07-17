@@ -2,11 +2,11 @@
 #use "flywheel:util/light.glsl"
 #use "flywheel:util/quaternion.glsl"
 
-layout (location = 0) in vec2 oriented_light;
-layout (location = 1) in vec4 oriented_color;
-layout (location = 2) in vec3 oriented_pos;
-layout (location = 3) in vec3 oriented_pivot;
-layout (location = 4) in vec4 oriented_rotation;
+layout(location = 0) in vec2 oriented_light;
+layout(location = 1) in vec4 oriented_color;
+layout(location = 2) in vec3 oriented_pos;
+layout(location = 3) in vec3 oriented_pivot;
+layout(location = 4) in vec4 oriented_rotation;
 
 void flw_instanceVertex() {
     flw_vertexPos = vec4(rotateVertexByQuat(flw_vertexPos.xyz - oriented_pivot, oriented_rotation) + oriented_pivot + oriented_pos, 1.0);

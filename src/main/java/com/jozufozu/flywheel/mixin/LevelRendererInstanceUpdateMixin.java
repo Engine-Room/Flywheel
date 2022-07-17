@@ -12,6 +12,7 @@ import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(LevelRenderer.class)
@@ -24,9 +25,16 @@ public class LevelRendererInstanceUpdateMixin {
 	 */
 	@Inject(at = @At("TAIL"), method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;)V")
 	private void checkUpdate(BlockPos pos, BlockState lastState, BlockState newState, CallbackInfo ci) {
-		if (Backend.isOn()) {
-			InstancedRenderDispatcher.getBlockEntities(level)
-					.update(level.getBlockEntity(pos));
+		if (!Backend.isOn()) {
+			return;
 		}
+		BlockEntity blockEntity = level.getBlockEntity(pos);
+
+		if (blockEntity == null) {
+			return;
+		}
+
+		InstancedRenderDispatcher.getBlockEntities(level)
+				.update(blockEntity);
 	}
 }
