@@ -14,9 +14,16 @@ public class ShadeSeparatedBufferBuilder extends BufferBuilder {
 	}
 
 	public void appendUnshadedVertices(BufferBuilder unshadedBuilder) {
-		Pair<DrawState, ByteBuffer> data = unshadedBuilder.popNextBuffer();
+		RenderedBuffer renderedBuffer = unshadedBuilder.endOrDiscardIfEmpty();
+
+		if (renderedBuffer == null) {
+			return;
+		}
+
+		// FIXME: Unshaded indices
+		ByteBuffer buffer = renderedBuffer.vertexBuffer();
 		unshadedStartVertex = ((BufferBuilderExtension) this).flywheel$getVertices();
-		((BufferBuilderExtension) this).flywheel$appendBufferUnsafe(data.getSecond());
+		((BufferBuilderExtension) this).flywheel$appendBufferUnsafe(buffer);
 	}
 
 	public int getUnshadedStartVertex() {

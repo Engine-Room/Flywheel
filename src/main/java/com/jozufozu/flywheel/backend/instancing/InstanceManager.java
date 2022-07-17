@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -357,6 +358,16 @@ public abstract class InstanceManager<T> implements InstancingEngine.OriginShift
 	public void detachLightListeners() {
 		for (AbstractInstance value : instances.values()) {
 			LightUpdater.get(value.world).removeListener(value);
+		}
+	}
+
+	public void queueAddAll(Collection<? extends T> objects) {
+		if (!Backend.isOn() || objects.isEmpty()) {
+			return;
+		}
+
+		synchronized (queuedAdditions) {
+			queuedAdditions.addAll(objects);
 		}
 	}
 }

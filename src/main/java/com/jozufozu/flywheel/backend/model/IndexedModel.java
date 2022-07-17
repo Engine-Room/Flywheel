@@ -60,7 +60,7 @@ public class IndexedModel implements BufferedModel {
 	@Override
 	public void drawCall() {
 		ebo.bind();
-		GL20.glDrawElements(primitiveMode.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0);
+		GL20.glDrawElements(primitiveMode.glEnum, ebo.elementCount, ebo.eboIndexType.asGLType, 0);
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class IndexedModel implements BufferedModel {
 
 		ebo.bind();
 
-		GL31.glDrawElementsInstanced(primitiveMode.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0, instanceCount);
+		GL31.glDrawElementsInstanced(primitiveMode.glEnum, ebo.elementCount, ebo.eboIndexType.asGLType, 0, instanceCount);
 	}
 
 	public boolean isDeleted() {

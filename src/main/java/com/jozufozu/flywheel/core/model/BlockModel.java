@@ -1,8 +1,25 @@
 package com.jozufozu.flywheel.core.model;
 
+import java.lang.management.MemoryUsage;
+import java.nio.ByteBuffer;
+import java.util.function.Supplier;
+
+import org.lwjgl.system.MemoryUtil;
+
 import com.jozufozu.flywheel.api.vertex.VertexList;
+import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.gl.GlNumericType;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;
+import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
+import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.core.Formats;
+import com.jozufozu.flywheel.core.QuadConverter;
+import com.mojang.blaze3d.platform.MemoryTracker;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.BakedModel;
@@ -12,11 +29,11 @@ import net.minecraft.world.level.block.state.BlockState;
  * A model of a single block.
  */
 public class BlockModel implements Model {
-	private static final PoseStack IDENTITY = new PoseStack();
-
 	private final VertexList reader;
 
 	private final String name;
+
+	private final Supplier<ElementBuffer> eboSupplier;
 
 	public BlockModel(BlockState state) {
 		this(Minecraft.getInstance()
@@ -25,12 +42,49 @@ public class BlockModel implements Model {
 	}
 
 	public BlockModel(BakedModel model, BlockState referenceState) {
-		this(model, referenceState, IDENTITY);
+		this(new BakedModelBuilder(model).withReferenceState(referenceState), referenceState.toString());
 	}
 
 	public BlockModel(BakedModel model, BlockState referenceState, PoseStack ms) {
-		reader = Formats.BLOCK.createReader(ModelUtil.getBufferBuilder(model, referenceState, ms));
-		name = referenceState.toString();
+		this(new BakedModelBuilder(model).withReferenceState(referenceState)
+				.withPoseStack(ms), referenceState.toString());
+	}
+
+	public BlockModel(Bufferable bufferable, String name) {
+		this(bufferable.build(), name);
+	}
+
+	public BlockModel(ShadeSeparatedBufferBuilder buffer, String name) {
+		this.name = name;
+
+		BufferBuilder.RenderedBuffer renderedBuffer = buffer.endOrDiscardIfEmpty();
+
+		if (renderedBuffer == null) {
+			reader = null;
+			eboSupplier = () -> null;
+			return;
+		}
+
+		BufferBuilder.DrawState drawState = renderedBuffer.drawState();
+
+		reader = Formats.BLOCK.createReader(renderedBuffer, buffer.getUnshadedStartVertex());
+
+		if (drawState.sequentialIndex()) {
+			ByteBuffer src = renderedBuffer.indexBuffer();
+			ByteBuffer indexBuffer = MemoryTracker.create(src.capacity());
+			MemoryUtil.memCopy(src, indexBuffer);
+			eboSupplier = () -> {
+
+				MappedGlBuffer vbo = new MappedGlBuffer(GlBufferType.ELEMENT_ARRAY_BUFFER, GlBufferUsage.STATIC_DRAW);
+
+				vbo.upload(indexBuffer);
+
+				return new ElementBuffer(vbo, drawState.indexCount(), drawState.indexType());
+			};
+		} else {
+			eboSupplier = () -> QuadConverter.getInstance()
+					.quads2Tris(vertexCount() / 4);
+		}
 	}
 
 	@Override
@@ -46,5 +100,15 @@ public class BlockModel implements Model {
 	@Override
 	public VertexList getReader() {
 		return reader;
+	}
+
+	@Override
+	public ElementBuffer createEBO() {
+		return eboSupplier.get();
+	}
+
+	@Override
+	public VertexType getType() {
+		return Formats.BLOCK;
 	}
 }

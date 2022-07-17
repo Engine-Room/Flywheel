@@ -56,10 +56,7 @@ public interface Model {
 	 * </p>
 	 * @return an element buffer object indexing this model's vertices.
 	 */
-	default ElementBuffer createEBO() {
-		return QuadConverter.getInstance()
-				.quads2Tris(vertexCount() / 4);
-	}
+	ElementBuffer createEBO();
 
 	/**
 	 * The size in bytes that this model's data takes up.

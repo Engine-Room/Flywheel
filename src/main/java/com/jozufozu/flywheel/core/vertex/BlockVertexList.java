@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.core.vertex;
 
+import java.nio.ByteBuffer;
+
 import com.jozufozu.flywheel.api.vertex.ShadedVertexList;
 import com.jozufozu.flywheel.core.model.ShadeSeparatedBufferBuilder;
 import com.jozufozu.flywheel.util.RenderMath;
@@ -9,10 +11,9 @@ public class BlockVertexList extends AbstractVertexList {
 
 	private final int stride;
 
-	public BlockVertexList(BufferBuilder builder) {
-		super(builder);
-		this.stride = builder.getVertexFormat()
-				.getVertexSize();
+	public BlockVertexList(ByteBuffer copyFrom, int vertexCount, int stride) {
+		super(copyFrom, vertexCount);
+		this.stride = stride;
 	}
 
 	@Override
@@ -93,9 +94,9 @@ public class BlockVertexList extends AbstractVertexList {
 
 		private final int unshadedStartVertex;
 
-		public Shaded(ShadeSeparatedBufferBuilder builder) {
-			super(builder);
-			unshadedStartVertex = builder.getUnshadedStartVertex();
+		public Shaded(ByteBuffer copyFrom, int vertexCount, int stride, int unshadedStartVertex) {
+			super(copyFrom, vertexCount, stride);
+			this.unshadedStartVertex = unshadedStartVertex;
 		}
 
 		@Override

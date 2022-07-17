@@ -22,15 +22,6 @@ public abstract class AbstractVertexList implements VertexList, AutoCloseable {
 		init(copyFrom);
 	}
 
-	public AbstractVertexList(BufferBuilder builder) {
-		var pair = builder.popNextBuffer();
-		ByteBuffer copyFrom = pair.getSecond();
-		this.contents = MemoryTracker.create(copyFrom.capacity());
-		this.vertexCount = pair.getFirst().vertexCount();
-		this.base = MemoryUtil.memAddress(this.contents);
-		init(copyFrom);
-	}
-
 	private void init(ByteBuffer copyFrom) {
 		this.contents.order(copyFrom.order());
 		this.contents.put(copyFrom);

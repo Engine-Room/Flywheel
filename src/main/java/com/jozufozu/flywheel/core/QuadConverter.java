@@ -3,41 +3,30 @@ package com.jozufozu.flywheel.core;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.EnumMap;
-import java.util.Map;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.lwjgl.system.MemoryStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
-import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
+import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
-
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import com.mojang.blaze3d.vertex.VertexFormat;
 
 /**
  * A class to manage EBOs that index quads as triangles.
  */
-@Mod.EventBusSubscriber(Dist.CLIENT)
 public class QuadConverter {
-
-	public static final int STARTING_CAPACITY = 42; // 255 / 6 = 42
 
 	private static QuadConverter INSTANCE;
 
-	@Nonnull
+	@NotNull
 	public static QuadConverter getInstance() {
 		if (INSTANCE == null) {
-			INSTANCE = new QuadConverter(STARTING_CAPACITY);
+			INSTANCE = new QuadConverter();
 		}
 
 		return INSTANCE;
@@ -48,130 +37,80 @@ public class QuadConverter {
 		return INSTANCE;
 	}
 
-	Map<GlNumericType, GlBuffer> ebos;
-	int[] capacities;
+	private final MappedGlBuffer ebo;
+	private int quadCapacity;
 
-	public QuadConverter(int initialCapacity) {
-		this.ebos = new EnumMap<>(GlNumericType.class);
-		initCapacities();
-
-		fillBuffer(initialCapacity);
+	public QuadConverter() {
+		this.ebo = new MappedGlBuffer(GlBufferType.ELEMENT_ARRAY_BUFFER);
+		this.quadCapacity = 0;
 	}
 
 	public ElementBuffer quads2Tris(int quads) {
 		int indexCount = quads * 6;
-		GlNumericType type = getSmallestIndexType(indexCount);
 
-		if (quads > getCapacity(type)) {
-			fillBuffer(quads, indexCount, type);
+		if (quads > quadCapacity) {
+			ebo.bind();
+			ebo.ensureCapacity((long) indexCount * GlNumericType.UINT.getByteWidth());
+
+			try (MappedBuffer map = ebo.getBuffer()) {
+				ByteBuffer indices = map.unwrap();
+
+				fillBuffer(indices, quads);
+			}
+			ebo.unbind();
+
+			this.quadCapacity = quads;
 		}
 
-		return new ElementBuffer(getBuffer(type), indexCount, type);
-	}
-
-	private void initCapacities() {
-		this.capacities = new int[GlNumericType.values().length];
-	}
-
-	private int getCapacity(GlNumericType type) {
-		return capacities[type.ordinal()];
-	}
-
-	private void updateCapacity(GlNumericType type, int capacity) {
-		if (getCapacity(type) < capacity) {
-			capacities[type.ordinal()] = capacity;
-		}
+		return new ElementBuffer(ebo, indexCount, VertexFormat.IndexType.INT);
 	}
 
 	public void delete() {
-		ebos.values()
-				.forEach(GlBuffer::delete);
-		ebos.clear();
-		initCapacities();
+		ebo.delete();
+		this.quadCapacity = 0;
 	}
 
-	private void fillBuffer(int quads) {
-		int indexCount = quads * 6;
+	private void fillBuffer(ByteBuffer indices, int quads) {
+		long addr = MemoryUtil.memAddress(indices);
+		int numVertices = 4 * quads;
+		int baseVertex = 0;
+		while (baseVertex < numVertices) {
+			// writeQuadIndices(indices, baseVertex);
+			writeQuadIndicesUnsafe(addr, baseVertex);
 
-		fillBuffer(quads, indexCount, getSmallestIndexType(indexCount));
-	}
-
-	private void fillBuffer(int quads, int indexCount, GlNumericType type) {
-		MemoryStack stack = MemoryStack.stackPush();
-		int bytes = indexCount * type.getByteWidth();
-
-		ByteBuffer indices;
-		if (bytes > stack.getSize()) {
-			indices = MemoryUtil.memAlloc(bytes); // not enough space on the preallocated stack
-		} else {
-			stack.push();
-			indices = stack.malloc(bytes);
+			baseVertex += 4;
+			addr += 6 * 4;
 		}
-
-		indices.order(ByteOrder.nativeOrder());
-
-		fillBuffer(indices, type, quads);
-
-		GlBuffer buffer = getBuffer(type);
-
-		buffer.bind();
-		buffer.upload(indices);
-		buffer.unbind();
-
-		if (bytes > stack.getSize()) {
-			MemoryUtil.memFree(indices);
-		} else {
-			stack.pop();
-		}
-
-		updateCapacity(type, quads);
+		// ((Buffer) indices).flip();
 	}
 
-	private void fillBuffer(ByteBuffer indices, GlNumericType type, int quads) {
-		for (int i = 0, max = 4 * quads; i < max; i += 4) {
-			// triangle a
-			type.castAndBuffer(indices, i);
-			type.castAndBuffer(indices, i + 1);
-			type.castAndBuffer(indices, i + 2);
-			// triangle b
-			type.castAndBuffer(indices, i);
-			type.castAndBuffer(indices, i + 2);
-			type.castAndBuffer(indices, i + 3);
-		}
-		((Buffer) indices).flip();
+	private void writeQuadIndices(ByteBuffer indices, int baseVertex) {
+		// triangle a
+		indices.putInt(baseVertex);
+		indices.putInt(baseVertex + 1);
+		indices.putInt(baseVertex + 2);
+		// triangle b
+		indices.putInt(baseVertex);
+		indices.putInt(baseVertex + 2);
+		indices.putInt(baseVertex + 3);
 	}
 
-	private GlBuffer getBuffer(GlNumericType type) {
-		return ebos.computeIfAbsent(type, $ -> new MappedGlBuffer(GlBufferType.ELEMENT_ARRAY_BUFFER));
-	}
-
-	/**
-	 * Given the needed number of indices, what is the smallest bit width type that can index everything? <br>
-	 *
-	 * <pre>
-	 * | indexCount   | type  |
-	 * |--------------|-------|
-	 * | [0, 255)     | byte  |
-	 * | [256, 65536)	| short	|
-	 * | [65537, )	| int	|
-	 * </pre>
-	 */
-	private static GlNumericType getSmallestIndexType(int indexCount) {
-//		indexCount = indexCount >>> 8;
-//		if (indexCount == 0) {
-//			return GlNumericType.UBYTE;
-//		}
-//		indexCount = indexCount >>> 8;
-//		if (indexCount == 0) {
-//			return GlNumericType.USHORT;
-//		}
-
-		return GlNumericType.UINT;
+	private void writeQuadIndicesUnsafe(long addr, int baseVertex) {
+		// triangle a
+		MemoryUtil.memPutInt(addr, baseVertex);
+		MemoryUtil.memPutInt(addr + 4, baseVertex + 1);
+		MemoryUtil.memPutInt(addr + 8, baseVertex + 2);
+		// triangle b
+		MemoryUtil.memPutInt(addr + 12, baseVertex);
+		MemoryUtil.memPutInt(addr + 16, baseVertex + 2);
+		MemoryUtil.memPutInt(addr + 20, baseVertex + 3);
 	}
 
 	// make sure this gets reset first so it has a chance to repopulate
-	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public static void onRendererReload(ReloadRenderersEvent event) {
-		if (INSTANCE != null) INSTANCE.delete();
+		if (INSTANCE != null) {
+			INSTANCE.delete();
+			INSTANCE = null;
+		}
 	}
 }

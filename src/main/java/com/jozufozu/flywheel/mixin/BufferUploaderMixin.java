@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 @Mixin(BufferUploader.class)
@@ -17,13 +18,13 @@ public class BufferUploaderMixin {
 
 	@Shadow
 	@Nullable
-	private static VertexFormat lastFormat;
+	private static VertexBuffer lastImmediateBuffer;
 
 	@Inject(method = "reset", at = @At("HEAD"))
 	private static void stopBufferUploaderFromClearingBufferStateIfNothingIsBound(CallbackInfo ci) {
 		// Trust our tracker over BufferUploader's.
 		if (GlStateTracker.getVertexArray() == 0) {
-			lastFormat = null;
+			lastImmediateBuffer = null;
 		}
 	}
 }
