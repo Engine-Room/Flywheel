@@ -43,7 +43,7 @@ public class ShaderSources implements SourceFinder {
 				ResourceLocation name = ResourceUtil.removePrefixUnchecked(location, SHADER_DIR);
 
 				shaderSources.put(name, new SourceFile(this, name, source));
-			} catch (IOException e) {
+			} catch (IOException ignored) {
 
 			}
 		});

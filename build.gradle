@@ -11,10 +11,10 @@ buildscript {
         classpath "org.parchmentmc:librarian:${librarian_version}"
     }
 }
+
 plugins {
     id 'com.matthewprenger.cursegradle' version "${cursegradle_version}"
 }
-
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'eclipse'
@@ -24,11 +24,10 @@ apply plugin: 'org.spongepowered.mixin'
 boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
 
 ext.buildNumber = System.getenv('BUILD_NUMBER')
-if (buildNumber == null) buildNumber = 'custom'
 
-version = "${mc_update_version}-${mod_version}" + (dev ? ".${buildNumber}" : '')
 group = 'com.jozufozu.flywheel'
-archivesBaseName = 'flywheel-forge'
+archivesBaseName = "flywheel-forge-${artifact_minecraft_version}"
+version = mod_version + (dev && buildNumber != null ? "-${buildNumber}" : '')
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -89,10 +88,6 @@ minecraft {
     }
 }
 
-mixin {
-    add sourceSets.main, 'flywheel.refmap.json'
-}
-
 repositories {
     maven {
         url 'https://www.cursemaven.com'
@@ -130,23 +125,18 @@ dependencies {
     }
 }
 
-// Example for how to get properties into the manifest for reading by the runtime..
-jar {
-    manifest {
-        attributes([
-                'Specification-Title'     : 'flywheel',
-                //'Specification-Vendor': 'flywheel authors',
-                'Specification-Version'   : '1', // We are version 1 of ourselves
-                'Implementation-Title'    : project.name,
-                'Implementation-Version'  : project.version,
-                //'Implementation-Vendor': 'flywheel authors',
-                'MixinConfigs'            : 'flywheel.mixins.json',
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
+mixin {
+    add sourceSets.main, 'flywheel.refmap.json'
 }
 
-jar.finalizedBy('reobfJar')
+// Workaround for SpongePowered/MixinGradle#38
+afterEvaluate {
+    tasks.configureReobfTaskForReobfJar.mustRunAfter(tasks.compileJava)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
 
 javadoc {
     source = [sourceSets.main.allJava]
@@ -154,29 +144,42 @@ javadoc {
     options.addStringOption('Xdoclint:none', '-quiet')
 }
 
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allSource
-    archiveBaseName.set(project.archivesBaseName)
-    archiveVersion.set("${project.version}")
-    archiveClassifier.set('sources')
+jar {
+    manifest {
+        attributes([
+                'Specification-Title'     : 'flywheel',
+                //'Specification-Vendor': 'flywheel authors',
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : project.jar.baseName,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                //'Implementation-Vendor': 'flywheel authors',
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                'MixinConfigs'            : 'flywheel.mixins.json'
+        ])
+    }
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    from javadoc.destinationDir
-    archiveClassifier.set('javadoc')
+java {
+    withSourcesJar()
+    withJavadocJar()
 }
 
-artifacts {
-    archives jar, sourcesJar, javadocJar
+void addLicense(jarTask) {
+    jarTask.from('LICENSE.md') {
+        rename '(.*)\\.(.*)', '$1_' + archivesBaseName + '.$2'
+    }
 }
+
+jar.finalizedBy('reobfJar')
+addLicense(jar)
 
 publishing {
-    tasks.publish.dependsOn 'build'
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
-            artifact sourcesJar
-            artifact javadocJar
+            artifactId = archivesBaseName
+
+            from components.java
+            fg.component(it)
         }
     }
 
