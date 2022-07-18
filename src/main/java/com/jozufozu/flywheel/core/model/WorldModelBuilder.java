@@ -53,9 +53,9 @@ public final class WorldModelBuilder implements Bufferable {
 			} else {
 				model = CullingBakedModel.wrap(model);
 				model = LayerFilteringBakedModel.wrap(model, layer);
-				if (consumer instanceof ShadeSeparatingVertexConsumer shadeSeparatingWrapper) {
-					model = shadeSeparatingWrapper.wrapModel(model);
-				}
+			}
+			if (consumer instanceof ShadeSeparatingVertexConsumer shadeSeparatingWrapper) {
+				model = shadeSeparatingWrapper.wrapModel(model);
 			}
 
 			BlockPos pos = info.pos;
