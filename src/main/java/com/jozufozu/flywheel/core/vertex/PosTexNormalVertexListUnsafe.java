@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.core.vertex;
 
-import java.lang.ref.Cleaner;
 import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
@@ -9,12 +8,11 @@ import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.FlywheelMemory;
 import com.jozufozu.flywheel.util.RenderMath;
-import com.mojang.blaze3d.platform.MemoryTracker;
 
-public class PosTexNormalVertexListUnsafe extends TrackedVertexList {
+public class PosTexNormalVertexListUnsafe extends AbstractVertexList {
 
-	public PosTexNormalVertexListUnsafe(ByteBuffer buffer, int vertexCount) {
-		super(buffer, vertexCount);
+	public PosTexNormalVertexListUnsafe(ByteBuffer copyFrom, int vertexCount) {
+		super(copyFrom, vertexCount);
 	}
 
 	private long ptr(long idx) {

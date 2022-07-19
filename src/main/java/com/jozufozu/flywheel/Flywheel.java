@@ -4,7 +4,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.OptifineHandler;
+import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.model.MeshPool;
@@ -80,7 +80,7 @@ public class Flywheel {
 	private static void clientInit(IEventBus forgeEventBus, IEventBus modEventBus) {
 		CrashReportCallables.registerCrashCallable("Flywheel Backend", Backend::getBackendDescriptor);
 
-		OptifineHandler.init();
+		ShadersModHandler.init();
 		Backend.init();
 
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);

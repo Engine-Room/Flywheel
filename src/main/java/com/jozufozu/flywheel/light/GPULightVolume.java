@@ -26,7 +26,7 @@ import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
 
-import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.BlockAndTintGetter;
 
 public class GPULightVolume extends LightVolume {
 
@@ -36,8 +36,8 @@ public class GPULightVolume extends LightVolume {
 	private final GlTextureUnit textureUnit = GlTextureUnit.T4;
 	protected boolean bufferDirty;
 
-	public GPULightVolume(ImmutableBox sampleVolume) {
-		super(sampleVolume);
+	public GPULightVolume(BlockAndTintGetter level, ImmutableBox sampleVolume) {
+		super(level, sampleVolume);
 		this.sampleVolume.assign(sampleVolume);
 
 		glTexture = new GlTexture(GL_TEXTURE_3D);
@@ -110,38 +110,24 @@ public class GPULightVolume extends LightVolume {
 		glTexture.delete();
 	}
 
-	public void move(LightProvider world, ImmutableBox newSampleVolume) {
+	public void move(ImmutableBox newSampleVolume) {
 		if (lightData == null) return;
 
 		if (box.contains(newSampleVolume)) {
 			sampleVolume.assign(newSampleVolume);
-			initialize(world);
+			initialize();
 		} else {
-			super.move(world, newSampleVolume);
+			super.move(newSampleVolume);
 		}
-	}
-
-	public void onLightUpdate(LightProvider world, LightLayer type, ImmutableBox changedVolume) {
-		super.onLightUpdate(world, type, changedVolume);
-		bufferDirty = true;
-	}
-
-	public void onLightPacket(LightProvider world, int chunkX, int chunkZ) {
-		super.onLightPacket(world, chunkX, chunkZ);
-		bufferDirty = true;
-	}
-
-	/**
-	 * Completely (re)populate this volume with block and sky lighting data.
-	 * This is expensive and should be avoided.
-	 */
-	public void initialize(LightProvider world) {
-		super.initialize(world);
-		bufferDirty = true;
 	}
 
 	@Override
 	public ImmutableBox getVolume() {
 		return sampleVolume;
+	}
+
+	@Override
+	protected void markDirty() {
+		this.bufferDirty = true;
 	}
 }

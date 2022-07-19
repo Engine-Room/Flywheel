@@ -69,7 +69,7 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 
 		@Override
 		public void invalidate() {
-			instances.values().forEach(AbstractInstance::remove);
+			instances.values().forEach(AbstractInstance::removeAndMark);
 			instances.clear();
 			tickableInstances.clear();
 			dynamicInstances.clear();
@@ -115,7 +115,7 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 		public void recreateAll() {
 			this.dynamicInstances.clear();
 			this.tickableInstances.clear();
-			this.instances.values().forEach(AbstractInstance::remove);
+			this.instances.values().forEach(AbstractInstance::removeAndMark);
 
 			var backup = new ArrayList<>(this.instances.keySet());
 			this.instances.clear();

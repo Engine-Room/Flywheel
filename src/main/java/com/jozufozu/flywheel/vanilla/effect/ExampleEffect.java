@@ -15,7 +15,6 @@ import com.jozufozu.flywheel.core.Models;
 import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.core.structs.model.TransformedPart;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
-import com.jozufozu.flywheel.repack.joml.Vector3f;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
@@ -28,6 +27,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
+import repack.joml.Vector3f;
 
 // http://www.kfish.org/boids/pseudocode.html
 public class ExampleEffect implements Effect {
