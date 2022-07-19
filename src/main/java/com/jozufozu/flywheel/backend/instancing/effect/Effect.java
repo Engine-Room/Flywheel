@@ -7,5 +7,5 @@ import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 
 public interface Effect {
 
-	Collection<? extends AbstractInstance> createInstances(InstancerManager instancerManager);
+	Collection<AbstractInstance> createInstances(InstancerManager instancerManager);
 }

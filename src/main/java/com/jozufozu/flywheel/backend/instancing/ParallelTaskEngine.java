@@ -44,6 +44,11 @@ public class ParallelTaskEngine implements TaskEngine {
 		threadCount = getOptimalThreadCount();
 	}
 
+	@Override
+	public int getThreadCount() {
+		return threadCount;
+	}
+
 	public WorkGroupBuilder group(String name) {
 		return new WorkGroupBuilder(name);
 	}
