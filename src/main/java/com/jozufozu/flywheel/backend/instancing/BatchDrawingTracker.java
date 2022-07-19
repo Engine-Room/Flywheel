@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.jozufozu.flywheel.backend.model.BufferBuilderExtension;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
+import com.jozufozu.flywheel.util.RenderTypeExtension;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 
 import net.minecraft.client.renderer.RenderType;

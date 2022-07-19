@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 import com.jozufozu.flywheel.backend.instancing.DrawBuffer;
-import com.jozufozu.flywheel.backend.instancing.RenderTypeExtension;
+import com.jozufozu.flywheel.util.RenderTypeExtension;
 
 import net.minecraft.client.renderer.RenderType;
 

@@ -1,4 +1,6 @@
-package com.jozufozu.flywheel.backend.instancing;
+package com.jozufozu.flywheel.util;
+
+import com.jozufozu.flywheel.backend.instancing.DrawBuffer;
 
 import net.minecraft.client.renderer.RenderType;
 

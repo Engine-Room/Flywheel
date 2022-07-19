@@ -31,8 +31,9 @@ import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
 public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntity> implements DynamicInstance {
 
-	private static final Function<TextureAtlasSprite, BasicModelSupplier> BASE = Util.memoize(it -> new BasicModelSupplier(() -> makeBaseModel(it), new Material(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT)));
-	private static final Function<TextureAtlasSprite, BasicModelSupplier> LID = Util.memoize(it -> new BasicModelSupplier(() -> makeLidModel(it), new Material(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT)));
+	private static final Material SHULKER_BOX_MATERIAL = new Material(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT);
+	private static final Function<TextureAtlasSprite, BasicModelSupplier> BASE = Util.memoize(it -> new BasicModelSupplier(() -> makeBaseModel(it), SHULKER_BOX_MATERIAL));
+	private static final Function<TextureAtlasSprite, BasicModelSupplier> LID = Util.memoize(it -> new BasicModelSupplier(() -> makeLidModel(it), SHULKER_BOX_MATERIAL));
 
 	private final TextureAtlasSprite texture;
 
