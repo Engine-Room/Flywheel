@@ -8,14 +8,17 @@ import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
 
 public class LightVolume implements ImmutableBox, LightListener {
 
+	protected final BlockAndTintGetter level;
 	protected final GridAlignedBB box = new GridAlignedBB();
 	protected ByteBuffer lightData;
 
-	public LightVolume(ImmutableBox sampleVolume) {
+	public LightVolume(BlockAndTintGetter level, ImmutableBox sampleVolume) {
+		this.level = level;
 		this.setBox(sampleVolume);
 
 		this.lightData = MemoryUtil.memAlloc(this.box.volume() * 2);
@@ -57,7 +60,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 		return box.getMaxZ();
 	}
 
-	public void move(LightProvider world, ImmutableBox newSampleVolume) {
+	public void move(ImmutableBox newSampleVolume) {
 		if (lightData == null) return;
 
 		setBox(newSampleVolume);
@@ -65,51 +68,43 @@ public class LightVolume implements ImmutableBox, LightListener {
 		if (neededCapacity > lightData.capacity()) {
 			lightData = MemoryUtil.memRealloc(lightData, neededCapacity);
 		}
-		initialize(world);
+		initialize();
 	}
 
 	@Override
-	public void onLightUpdate(LightProvider world, LightLayer type, ImmutableBox changedVolume) {
+	public void onLightUpdate(LightLayer type, ImmutableBox changedVolume) {
 		if (lightData == null) return;
 
 		GridAlignedBB vol = changedVolume.copy();
 		if (!vol.intersects(getVolume())) return;
 		vol.intersectAssign(getVolume()); // compute the region contained by us that has dirty lighting data.
 
-		if (type == LightLayer.BLOCK) copyBlock(world, vol);
-		else if (type == LightLayer.SKY) copySky(world, vol);
+		if (type == LightLayer.BLOCK) copyBlock(vol);
+		else if (type == LightLayer.SKY) copySky(vol);
+		markDirty();
 	}
 
 	@Override
-	public void onLightPacket(LightProvider world, int chunkX, int chunkZ) {
+	public void onLightPacket(int chunkX, int chunkZ) {
 		if (lightData == null) return;
 
 		GridAlignedBB changedVolume = GridAlignedBB.from(chunkX, chunkZ);
 		if (!changedVolume.intersects(getVolume())) return;
 		changedVolume.intersectAssign(getVolume()); // compute the region contained by us that has dirty lighting data.
 
-		copyLight(world, changedVolume);
+		copyLight(changedVolume);
+		markDirty();
 	}
 
 	/**
 	 * Completely (re)populate this volume with block and sky lighting data.
 	 * This is expensive and should be avoided.
 	 */
-	public void initialize(LightProvider world) {
+	public void initialize() {
 		if (lightData == null) return;
 
-		// the volume is indexed based on the greater bounding box
-		int shiftX = box.getMinX();
-		int shiftY = box.getMinY();
-		int shiftZ = box.getMinZ();
-
-		// ... but we only iterate over the (potentially) smaller sample volume
-		getVolume().forEachContained((x, y, z) -> {
-			int blockLight = world.getLight(LightLayer.BLOCK, x, y, z);
-			int skyLight = world.getLight(LightLayer.SKY, x, y, z);
-
-			writeLight(x - shiftX, y - shiftY, z - shiftZ, blockLight, skyLight);
-		});
+		copyLight(getVolume());
+		markDirty();
 	}
 
 	/**
@@ -117,13 +112,15 @@ public class LightVolume implements ImmutableBox, LightListener {
 	 *
 	 * @param worldVolume the region in the world to copy data from.
 	 */
-	public void copyBlock(LightProvider world, ImmutableBox worldVolume) {
+	public void copyBlock(ImmutableBox worldVolume) {
+		var pos = new BlockPos.MutableBlockPos();
+
 		int xShift = box.getMinX();
 		int yShift = box.getMinY();
 		int zShift = box.getMinZ();
 
 		worldVolume.forEachContained((x, y, z) -> {
-			int light = world.getLight(LightLayer.BLOCK, x, y, z);
+			int light = this.level.getBrightness(LightLayer.BLOCK, pos.set(x, y, z));
 
 			writeBlock(x - xShift, y - yShift, z - zShift, light);
 		});
@@ -134,13 +131,15 @@ public class LightVolume implements ImmutableBox, LightListener {
 	 *
 	 * @param worldVolume the region in the world to copy data from.
 	 */
-	public void copySky(LightProvider world, ImmutableBox worldVolume) {
+	public void copySky(ImmutableBox worldVolume) {
+		var pos = new BlockPos.MutableBlockPos();
+
 		int xShift = box.getMinX();
 		int yShift = box.getMinY();
 		int zShift = box.getMinZ();
 
 		worldVolume.forEachContained((x, y, z) -> {
-			int light = world.getLight(LightLayer.SKY, x, y, z);
+			int light = this.level.getBrightness(LightLayer.SKY, pos.set(x, y, z));
 
 			writeSky(x - xShift, y - yShift, z - zShift, light);
 		});
@@ -151,7 +150,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 	 *
 	 * @param worldVolume the region in the world to copy data from.
 	 */
-	public void copyLight(LightProvider world, ImmutableBox worldVolume) {
+	public void copyLight(ImmutableBox worldVolume) {
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
 		int xShift = box.getMinX();
@@ -161,8 +160,8 @@ public class LightVolume implements ImmutableBox, LightListener {
 		worldVolume.forEachContained((x, y, z) -> {
 			pos.set(x, y, z);
 
-			int block = world.getLight(LightLayer.BLOCK, x, y, z);
-			int sky = world.getLight(LightLayer.SKY, x, y, z);
+			int block = this.level.getBrightness(LightLayer.BLOCK, pos);
+			int sky = this.level.getBrightness(LightLayer.SKY, pos);
 
 			writeLight(x - xShift, y - yShift, z - zShift, block, sky);
 		});
@@ -171,6 +170,10 @@ public class LightVolume implements ImmutableBox, LightListener {
 	public void delete() {
 		MemoryUtil.memFree(lightData);
 		lightData = null;
+	}
+
+	protected void markDirty() {
+		// noop
 	}
 
 	protected void writeLight(int x, int y, int z, int block, int sky) {
@@ -211,8 +214,8 @@ public class LightVolume implements ImmutableBox, LightListener {
 	}
 
 	@Override
-	public ListenerStatus status() {
-		return ListenerStatus.OKAY;
+	public boolean isListenerInvalid() {
+		return lightData == null;
 	}
 
 }

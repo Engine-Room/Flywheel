@@ -90,7 +90,7 @@ public class Backend {
 		BackendType preferredChoice = FlwConfig.get()
 				.getBackendType();
 
-		boolean usingShaders = OptifineHandler.isUsingShaders();
+		boolean usingShaders = ShadersModHandler.isShaderPackInUse();
 		boolean canUseEngine = switch (preferredChoice) {
 			case OFF -> true;
 			case BATCHING -> !usingShaders;

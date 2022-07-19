@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.backend.OptifineHandler;
+import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.renderer.ShaderInstance;
@@ -31,7 +31,7 @@ public class CoreShaderInfoMap {
 		registerInfo("position_tex_color_normal", new CoreShaderInfo(0.1f, false, COLOR_FOG));
 		registerInfo("position_tex_lightmap_color", new CoreShaderInfo(0.1f, false, NO_FOG));
 		registerInfo("rendertype_solid", new CoreShaderInfo(-1, false, COLOR_FOG));
-		registerInfo("rendertype_cutout_mipped", new CoreShaderInfo(OptifineHandler.isOptifineInstalled() ? 0.1f : 0.5f, false, COLOR_FOG));
+		registerInfo("rendertype_cutout_mipped", new CoreShaderInfo(ShadersModHandler.isShaderPackInUse() ? 0.1f : 0.5f, false, COLOR_FOG));
 		registerInfo("rendertype_cutout", new CoreShaderInfo(0.1f, false, COLOR_FOG));
 		registerInfo("rendertype_translucent", new CoreShaderInfo(-1, false, COLOR_FOG));
 		registerInfo("rendertype_translucent_moving_block", new CoreShaderInfo(-1, false, NO_FOG));

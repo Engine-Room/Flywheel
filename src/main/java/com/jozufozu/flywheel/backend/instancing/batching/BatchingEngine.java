@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.OptifineHandler;
+import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.instancing.*;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.util.FlwUtil;
@@ -55,7 +55,7 @@ public class BatchingEngine implements Engine {
 			var consumer = batchTracker.getDirectConsumer(renderType, vertices);
 			consumer.memSetZero();
 
-			var outputColorDiffuse = !consumer.hasOverlay() && !OptifineHandler.isUsingShaders();
+			var outputColorDiffuse = !consumer.hasOverlay() && !ShadersModHandler.isShaderPackInUse();
 
 			for (var transformSet : renderList) {
 				transformSet.setOutputColorDiffuse(outputColorDiffuse);

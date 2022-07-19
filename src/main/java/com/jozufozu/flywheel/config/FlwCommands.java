@@ -23,7 +23,6 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
-import net.minecraftforge.fml.ModList;
 
 public class FlwCommands {
 	public static void registerClientCommands(RegisterClientCommandsEvent event) {
@@ -141,17 +140,7 @@ public class FlwCommands {
 		return switch (type) {
 			case OFF -> new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED);
 			case INSTANCING -> new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN);
-			case BATCHING -> {
-				MutableComponent msg = new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN);
-
-				if (ModList.get()
-						.isLoaded("create")) {
-					// FIXME: batching engine contraption lighting issues
-					msg.append(new TextComponent("\nWARNING: May cause issues with Create Contraptions").withStyle(ChatFormatting.RED));
-				}
-
-				yield msg;
-			}
+			case BATCHING ->  new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN);
 		};
 	}
 

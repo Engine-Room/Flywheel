@@ -9,10 +9,10 @@ import com.jozufozu.flywheel.api.vertex.ShadedVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.util.RenderMath;
 
-public class BlockVertexListUnsafe extends TrackedVertexList {
+public class BlockVertexListUnsafe extends AbstractVertexList {
 
-	public BlockVertexListUnsafe(ByteBuffer buffer, int vertexCount) {
-		super(buffer, vertexCount);
+	public BlockVertexListUnsafe(ByteBuffer copyFrom, int vertexCount) {
+		super(copyFrom, vertexCount);
 	}
 
 	private long ptr(long index) {

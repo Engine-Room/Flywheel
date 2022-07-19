@@ -57,6 +57,9 @@ public final class WorldModelBuilder implements Bufferable {
 		ForgeHooksClient.setRenderType(null);
 	}
 
+	/**
+	 * It is expected that {@code renderWorld.getShade(...)} returns a constant.
+	 */
 	public WorldModelBuilder withRenderWorld(BlockAndTintGetter renderWorld) {
 		this.renderWorld = renderWorld;
 		return this;
