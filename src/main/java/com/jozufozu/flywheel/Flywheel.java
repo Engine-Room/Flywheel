@@ -109,7 +109,8 @@ public class Flywheel {
 		modEventBus.addListener(StitchedSprite::onTextureStitchPre);
 		modEventBus.addListener(StitchedSprite::onTextureStitchPost);
 
-		// forgeEventBus.addListener(ExampleEffect::spawn);
+//		forgeEventBus.addListener(ExampleEffect::tick);
+//		forgeEventBus.addListener(ExampleEffect::onReload);
 
 		LayoutShaders.init();
 		InstanceShaders.init();

@@ -114,6 +114,9 @@ public class InstanceWorld {
 	 */
 	public void tick() {
 		Minecraft mc = Minecraft.getInstance();
+
+		if (mc.isPaused()) return;
+
 		Entity renderViewEntity = mc.cameraEntity != null ? mc.cameraEntity : mc.player;
 
 		if (renderViewEntity == null) return;

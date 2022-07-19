@@ -9,4 +9,6 @@ public interface TaskEngine {
 	 * Wait for all running jobs to finish.
 	 */
 	void syncPoint();
+
+	int getThreadCount();
 }

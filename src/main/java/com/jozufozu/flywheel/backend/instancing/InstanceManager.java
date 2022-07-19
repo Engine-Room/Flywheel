@@ -2,7 +2,9 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
@@ -82,24 +84,10 @@ public abstract class InstanceManager<T> {
 		int cZ = (int) cameraZ;
 
 		var instances = getStorage().getInstancesForTicking();
-		int incr = 500;
-		int size = instances.size();
-		int start = 0;
-		while (start < size) {
-			int end = Math.min(start + incr, size);
-
-			var sub = instances.subList(start, end);
-			taskEngine.submit(() -> {
-				for (TickableInstance instance : sub) {
-					tickInstance(cX, cY, cZ, instance);
-				}
-			});
-
-			start += incr;
-		}
+		distributeWork(taskEngine, instances, instance -> tickInstance(instance, cX, cY, cZ));
 	}
 
-	protected void tickInstance(int cX, int cY, int cZ, TickableInstance instance) {
+	protected void tickInstance(TickableInstance instance, int cX, int cY, int cZ) {
 		if (!instance.decreaseTickRateWithDistance()) {
 			instance.tick();
 			return;
@@ -129,20 +117,23 @@ public abstract class InstanceManager<T> {
 		int cZ = (int) camera.getPosition().z;
 
 		var instances = getStorage().getInstancesForUpdate();
-		int incr = 500;
-		int size = instances.size();
-		int start = 0;
-		while (start < size) {
-			int end = Math.min(start + incr, size);
+		distributeWork(taskEngine, instances, instance -> updateInstance(instance, lookX, lookY, lookZ, cX, cY, cZ));
+	}
 
-			var sub = instances.subList(start, end);
-			taskEngine.submit(() -> {
-				for (DynamicInstance dyn : sub) {
-					updateInstance(dyn, lookX, lookY, lookZ, cX, cY, cZ);
-				}
-			});
+	private static <I> void distributeWork(TaskEngine taskEngine, List<I> instances, Consumer<I> action) {
+		final int size = instances.size();
+		final int threadCount = taskEngine.getThreadCount();
 
-			start += incr;
+		if (threadCount == 1) {
+			taskEngine.submit(() -> instances.forEach(action));
+		} else {
+			final int stride = Math.max(size / (threadCount * 2), 1);
+			for (int start = 0; start < size; start += stride) {
+				int end = Math.min(start + stride, size);
+
+				var sub = instances.subList(start, end);
+				taskEngine.submit(() -> sub.forEach(action));
+			}
 		}
 	}
 
@@ -224,9 +215,7 @@ public abstract class InstanceManager<T> {
 	public void remove(T obj) {
 		if (!Backend.isOn()) return;
 
-		if (canCreateInstance(obj)) {
-			getStorage().remove(obj);
-		}
+		getStorage().remove(obj);
 	}
 
 	public void invalidate() {

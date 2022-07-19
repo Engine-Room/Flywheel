@@ -2,87 +2,255 @@ package com.jozufozu.flywheel.vanilla.effect;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.effect.Effect;
 import com.jozufozu.flywheel.core.Models;
 import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.core.structs.model.TransformedPart;
+import com.jozufozu.flywheel.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.repack.joml.Vector3f;
+import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.fml.LogicalSide;
 
+// http://www.kfish.org/boids/pseudocode.html
 public class ExampleEffect implements Effect {
 
-	private static final int INSTANCE_COUNT = 50;
+	private static final List<ExampleEffect> ALL_EFFECTS = new ArrayList<>();
+
+	private static final int INSTANCE_COUNT = 500;
+	private static final float SPAWN_RADIUS = 8.0f;
+	private static final float LIMIT_RANGE = 10.0f;
+	private static final float SPEED_LIMIT = 0.1f;
+	private static final float RENDER_SCALE = 1 / 16f;
+
+	private static final float SIGHT_RANGE = 5;
+
+
+	private static final float COHERENCE = 1f / 60f;
+	private static final float SEPARATION = 0.05f;
+	private static final float ALIGNMENT = 1 / 20f;
+	private static final float TENDENCY = 1 / 1000f;
+	private static final float AVERSION = 1;
+
+	private static final float GNAT_JITTER = 0.05f;
 
 	private final Level level;
-	private final Vec3 targetPoint;
+	private final Vector3f targetPoint;
 	private final BlockPos blockPos;
 	private final ImmutableBox volume;
 
 	private final List<Instance> effects;
 
-	public ExampleEffect(Level level, Vec3 targetPoint) {
+	private final List<Boid> boids;
+
+	public ExampleEffect(Level level, Vector3f targetPoint) {
 		this.level = level;
 		this.targetPoint = targetPoint;
-		this.blockPos = new BlockPos(targetPoint);
-		this.effects = new ArrayList<>();
+		this.blockPos = new BlockPos(targetPoint.x, targetPoint.y, targetPoint.z);
 		this.volume = GridAlignedBB.from(this.blockPos);
+		this.effects = new ArrayList<>(INSTANCE_COUNT);
+		this.boids = new ArrayList<>(INSTANCE_COUNT);
 	}
 
-	public static void spawn(TickEvent.PlayerTickEvent event) {
-		if (event.side == LogicalSide.SERVER || event.phase == TickEvent.Phase.START) {
+	public static void tick(TickEvent.ClientTickEvent event) {
+		if (event.phase == TickEvent.Phase.END || Minecraft.getInstance().isPaused()) {
 			return;
 		}
 
-		Player player = event.player;
-		Level level = player.level;
+		trySpawnNewEffect();
+	}
 
-		if (level.random.nextFloat() > 0.01) {
+	public static void onReload(ReloadRenderersEvent event) {
+		ALL_EFFECTS.clear();
+	}
+
+	private static void trySpawnNewEffect() {
+		Level level = Minecraft.getInstance().level;
+		Player player = Minecraft.getInstance().player;
+
+		if (player == null || level == null) {
 			return;
 		}
 
-		var effects = InstancedRenderDispatcher.getEffects(level);
+		if (!ALL_EFFECTS.isEmpty() && level.random.nextFloat() > 0.005f) {
+			return;
+		}
 
-		effects.add(new ExampleEffect(level, player.position()));
+		Vec3 playerPos = player.position();
+
+		var x = (float) (playerPos.x + level.random.nextFloat(-20, 20));
+		var y = (float) (playerPos.y + level.random.nextFloat(0, 5));
+		var z = (float) (playerPos.z + level.random.nextFloat(-20, 20));
+
+		ExampleEffect effect = new ExampleEffect(level, new Vector3f(x, y, z));
+		ALL_EFFECTS.add(effect);
+		InstancedRenderDispatcher.getEffects(level)
+				.queueAdd(effect);
 	}
 
 	@Override
-	public Collection<? extends AbstractInstance> createInstances(InstancerManager instancerManager) {
+	public Collection<AbstractInstance> createInstances(InstancerManager instancerManager) {
 		effects.clear();
+		boids.clear();
 		for (int i = 0; i < INSTANCE_COUNT; i++) {
-			effects.add(new Instance(instancerManager, level));
+			var x = targetPoint.x + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
+			var y = targetPoint.y + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
+			var z = targetPoint.z + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
+
+			Boid boid = new Boid(x, y, z);
+			boids.add(boid);
+			effects.add(new Instance(instancerManager, level, boid));
 		}
-		return effects;
+		return Collections.unmodifiableList(effects);
 	}
 
-	public class Instance extends AbstractInstance implements DynamicInstance {
+	public class Boid {
+		final Vector3f lastPosition;
+		final Vector3f position;
+		final Vector3f lastVelocity = new Vector3f(0);
+		final Vector3f velocity = new Vector3f(0);
 
-		TransformedPart firefly;
+		final Vector3f scratch = new Vector3f(0);
+		final Vector3f coherence = new Vector3f(0);
+		final Vector3f alignment = new Vector3f(0);
 
-		public Instance(InstancerManager instancerManager, Level level) {
+		public Boid(float x, float y, float z) {
+			lastPosition = new Vector3f(x, y, z);
+			position = new Vector3f(x, y, z);
+		}
+
+
+		private void beginTick() {
+			lastVelocity.set(velocity);
+			lastPosition.set(position);
+		}
+
+		public void tick() {
+			beginTick();
+
+			int seen = 0;
+			coherence.set(0);
+			alignment.set(0);
+			for (Boid boid : boids) {
+				if (boid == this) {
+					continue;
+				}
+
+				float distance = boid.lastPosition.distance(lastPosition);
+
+				if (distance > SIGHT_RANGE) {
+					continue;
+				}
+				seen++;
+
+				coherence(boid);
+				separation(boid);
+				alignment(boid);
+			}
+
+			if (seen > 0) {
+				coherencePost(seen);
+				alignmentPost(seen);
+			}
+			//tend(ExampleEffect.this.targetPoint);
+
+			avoidPlayer();
+
+			position.add(capSpeed(velocity));
+		}
+
+		private void avoidPlayer() {
+			var player = Minecraft.getInstance().player.position();
+			scratch.set(player.x, player.y, player.z);
+
+			float dsq = lastPosition.distanceSquared(scratch);
+			if (dsq > SIGHT_RANGE * SIGHT_RANGE) {
+				return;
+			}
+
+			lastPosition.sub(scratch, scratch)
+					.mul(AVERSION / dsq);
+
+			velocity.add(capSpeed(scratch));
+		}
+
+		private void coherence(Boid other) {
+			this.coherence.add(other.lastPosition);
+		}
+
+		private void separation(Boid other) {
+			float dsq = lastPosition.distanceSquared(other.lastPosition);
+			var push = other.lastPosition.sub(lastPosition, this.scratch)
+					.mul(SEPARATION / dsq);
+
+			this.velocity.sub(push);
+		}
+
+		private void alignment(Boid boid) {
+			this.alignment.add(boid.lastVelocity);
+		}
+
+		private void coherencePost(int seen) {
+			this.coherence.div(seen)
+					.sub(lastPosition)
+					.mul(COHERENCE);
+			this.velocity.add(capSpeed(this.coherence));
+		}
+
+		private void alignmentPost(int seen) {
+			this.alignment.div(seen)
+					.sub(lastVelocity)
+					.mul(ALIGNMENT);
+
+			this.velocity.add(this.alignment);
+		}
+
+		private void tend(Vector3f target) {
+			this.scratch.set(target)
+					.sub(lastPosition)
+					.mul(TENDENCY);
+			this.velocity.add(capSpeed(this.scratch));
+		}
+
+		private static Vector3f capSpeed(Vector3f vec) {
+			return vec.normalize(SPEED_LIMIT);
+		}
+	}
+
+	public class Instance extends AbstractInstance implements DynamicInstance, TickableInstance {
+
+		private final Boid self;
+		TransformedPart instance;
+
+		public Instance(InstancerManager instancerManager, Level level, Boid self) {
 			super(instancerManager, level);
+			this.self = self;
 		}
 
 		@Override
 		public void init() {
-			firefly = instancerManager.factory(StructTypes.TRANSFORMED)
+			instance = instancerManager.factory(StructTypes.TRANSFORMED)
 					.model(Models.block(Blocks.SHROOMLIGHT.defaultBlockState()))
 					.createInstance();
 
-			firefly.setBlockLight(15)
+			instance.setBlockLight(15)
 					.setSkyLight(15);
 		}
 
@@ -93,7 +261,7 @@ public class ExampleEffect implements Effect {
 
 		@Override
 		public void remove() {
-			firefly.delete();
+			instance.delete();
 		}
 
 		@Override
@@ -102,16 +270,32 @@ public class ExampleEffect implements Effect {
 		}
 
 		@Override
-		public void beginFrame() {
-			var x = level.random.nextFloat() * 3 - 1.5;
-			var y = level.random.nextFloat() * 3 - 1.5;
-			var z = level.random.nextFloat() * 3 - 1.5;
+		public void tick() {
+			self.tick();
+		}
 
-			firefly.loadIdentity()
-					.translate(instancerManager.getOriginCoordinate())
-					.translate(targetPoint)
+		@Override
+		public void beginFrame() {
+			float partialTicks = AnimationTickHolder.getPartialTicks();
+
+			var x = Mth.lerp(partialTicks, self.lastPosition.x, self.position.x);
+			var y = Mth.lerp(partialTicks, self.lastPosition.y, self.position.y);
+			var z = Mth.lerp(partialTicks, self.lastPosition.z, self.position.z);
+
+			instance.loadIdentity()
+					.translateBack(instancerManager.getOriginCoordinate())
 					.translate(x, y, z)
-					.scale(1 / 16f);
+					.scale(RENDER_SCALE);
+		}
+
+		@Override
+		public boolean decreaseTickRateWithDistance() {
+			return false;
+		}
+
+		@Override
+		public boolean decreaseFramerateWithDistance() {
+			return false;
 		}
 	}
 }

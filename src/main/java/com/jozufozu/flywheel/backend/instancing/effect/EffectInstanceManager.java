@@ -115,17 +115,11 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 		public void recreateAll() {
 			this.dynamicInstances.clear();
 			this.tickableInstances.clear();
-			this.instances.asMap()
-					.forEach((obj, instances) -> {
-						instances.forEach(AbstractInstance::remove);
-						instances.clear();
+			this.instances.values().forEach(AbstractInstance::remove);
 
-						var newInstances = obj.createInstances(manager);
-
-						newInstances.forEach(this::setup);
-
-						instances.addAll(newInstances);
-					});
+			var backup = new ArrayList<>(this.instances.keySet());
+			this.instances.clear();
+			backup.forEach(this::create);
 		}
 
 		private void create(T obj) {

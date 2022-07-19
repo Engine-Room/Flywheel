@@ -18,4 +18,9 @@ public class SerialTaskEngine implements TaskEngine {
 	public void syncPoint() {
 		// noop
 	}
+
+	@Override
+	public int getThreadCount() {
+		return 1;
+	}
 }
