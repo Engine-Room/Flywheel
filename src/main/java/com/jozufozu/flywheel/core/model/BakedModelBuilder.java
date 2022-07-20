@@ -4,6 +4,7 @@ package com.jozufozu.flywheel.core.model;
 import java.util.Random;
 
 import com.jozufozu.flywheel.core.virtual.VirtualEmptyBlockGetter;
+import com.jozufozu.flywheel.fabric.model.DefaultLayerFilteringBakedModel;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -42,6 +43,10 @@ public final class BakedModelBuilder implements Bufferable {
 
 	@Override
 	public void bufferInto(ModelBlockRenderer blockRenderer, VertexConsumer consumer, Random random) {
+		BakedModel model = DefaultLayerFilteringBakedModel.wrap(this.model);
+		if (consumer instanceof ShadeSeparatingVertexConsumer shadeSeparatingWrapper) {
+			model = shadeSeparatingWrapper.wrapModel(model);
+		}
 		blockRenderer.tesselateBlock(renderWorld, model, referenceState, BlockPos.ZERO, poseStack, consumer, false, random, 42, OverlayTexture.NO_OVERLAY);
 	}
 }
