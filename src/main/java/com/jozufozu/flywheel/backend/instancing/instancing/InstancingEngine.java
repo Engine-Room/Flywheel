@@ -12,15 +12,16 @@ import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
-import com.jozufozu.flywheel.api.InstancedPart;
+import com.jozufozu.flywheel.api.RenderStage;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
-import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.Engine;
+import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
@@ -75,8 +76,6 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	 * The set of instance managers that are attached to this engine.
 	 */
 	private final WeakHashSet<InstanceManager<?>> instanceManagers;
-	private int vertexCount;
-	private int instanceCount;
 
 	public InstancingEngine(ProgramCompiler<P> context) {
 		this.context = context;
@@ -97,48 +96,62 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	}
 
 	@Override
-	public void renderAllRemaining(TaskEngine taskEngine, RenderContext context) {
-		var camX = context.camX() - originCoordinate.getX();
-		var camY = context.camY() - originCoordinate.getY();
-		var camZ = context.camZ() - originCoordinate.getZ();
+	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
+		if (!renderLists.process(stage)) {
+			return;
+		}
+
+		var camPos = context.camera().getPosition();
+		var camX = camPos.x - originCoordinate.getX();
+		var camY = camPos.y - originCoordinate.getY();
+		var camZ = camPos.z - originCoordinate.getZ();
 
 		// don't want to mutate viewProjection
 		var vp = context.viewProjection().copy();
 		vp.multiplyWithTranslation((float) -camX, (float) -camY, (float) -camZ);
 
-		for (RenderType renderType : renderLists.drainLayers()) {
-			render(renderType, camX, camY, camZ, vp, context.level());
+		var renderList = renderLists.get(stage);
+		for (var entry : renderList.entrySet()) {
+			var multimap = entry.getValue();
+
+			if (multimap.isEmpty()) {
+				return;
+			}
+
+			render(entry.getKey(), multimap, camX, camY, camZ, vp, context.level());
 		}
 	}
 
-	@Override
-	public void renderSpecificType(TaskEngine taskEngine, RenderContext context, RenderType type) {
-		if (!renderLists.process(type)) {
+	// TODO: Is this useful? Should it be added to the base interface? Currently it is only used for the old CrumblingRenderer.
+	@Deprecated
+	public void renderAll(TaskEngine taskEngine, RenderContext context) {
+		if (renderLists.isEmpty()) {
 			return;
 		}
 
-		var camX = context.camX() - originCoordinate.getX();
-		var camY = context.camY() - originCoordinate.getY();
-		var camZ = context.camZ() - originCoordinate.getZ();
+		var camPos = context.camera().getPosition();
+		var camX = camPos.x - originCoordinate.getX();
+		var camY = camPos.y - originCoordinate.getY();
+		var camZ = camPos.z - originCoordinate.getZ();
 
 		// don't want to mutate viewProjection
 		var vp = context.viewProjection().copy();
 		vp.multiplyWithTranslation((float) -camX, (float) -camY, (float) -camZ);
 
-		render(type, camX, camY, camZ, vp, context.level());
-	}
-
-	protected void render(RenderType type, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
-		vertexCount = 0;
-		instanceCount = 0;
-
-		var multimap = renderLists.get(type);
-
-		if (multimap.isEmpty()) {
-			return;
+		for (RenderStage stage : renderLists.stagesToProcess) {
+			var renderList = renderLists.get(stage);
+			for (var entry : renderList.entrySet()) {
+				var multimap = entry.getValue();
+	
+				if (multimap.isEmpty()) {
+					return;
+				}
+	
+				render(entry.getKey(), multimap, camX, camY, camZ, vp, context.level());
+			}
 		}
 
-		render(type, multimap, camX, camY, camZ, viewProjection, level);
+		renderLists.stagesToProcess.clear();
 	}
 
 	protected void render(RenderType type, ListMultimap<ShaderState, DrawCall> multimap, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
@@ -176,7 +189,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 		Material material = desc.material();
 
 		P program = context.getProgram(new ProgramCompiler.Context(vertexType, instanceShader,
-				material.vertexShader(), material.fragmentShader(), coreShaderInfo.getAdjustedAlphaDiscard(),
+				material.getVertexShader(), material.getFragmentShader(), coreShaderInfo.getAdjustedAlphaDiscard(),
 				coreShaderInfo.fogType(), ctx));
 
 		program.bind();
@@ -223,7 +236,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	}
 
 	@Override
-	public void beginFrame(TaskEngine taskEngine, Camera info) {
+	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
 		for (var model : uninitializedModels) {
 			model.init(renderLists);
 		}
@@ -246,8 +259,6 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	@Override
 	public void addDebugInfo(List<String> info) {
 		info.add("GL33 Instanced Arrays");
-		info.add("Instances: " + instanceCount);
-		info.add("Vertices: " + vertexCount);
 		info.add("Origin: " + originCoordinate.getX() + ", " + originCoordinate.getY() + ", " + originCoordinate.getZ());
 	}
 
@@ -299,13 +310,13 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 					continue;
 				}
 
-				material.renderType().setupRenderState();
+				material.getRenderType().setupRenderState();
 
 				CoreShaderInfo coreShaderInfo = CoreShaderInfo.get();
 
 
 				CrumblingProgram program = Contexts.CRUMBLING.getProgram(new ProgramCompiler.Context(Formats.POS_TEX_NORMAL,
-						structType.getInstanceShader(), material.vertexShader(), material.fragmentShader(),
+						structType.getInstanceShader(), material.getVertexShader(), material.getFragmentShader(),
 						coreShaderInfo.getAdjustedAlphaDiscard(), coreShaderInfo.fogType(),
 						GameStateRegistry.takeSnapshot()));
 
@@ -332,7 +343,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 			for (var blockEntityInstance : entry.getValue()) {
 
 				for (var part : blockEntityInstance.getCrumblingParts()) {
-					if (part.getOwner() instanceof GPUInstancer instancer) {
+					if (part.getOwner() instanceof GPUInstancer<?> instancer) {
 
 						// queue the instances for copying to the crumbling instance buffer
 						map.computeIfAbsent(instancer.parent.getModel(), k -> new ArrayList<>()).add(part);

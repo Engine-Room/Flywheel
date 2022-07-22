@@ -13,6 +13,7 @@ import com.jozufozu.flywheel.backend.instancing.ratelimit.BandedPrimeLimiter;
 import com.jozufozu.flywheel.backend.instancing.ratelimit.DistanceUpdateLimiter;
 import com.jozufozu.flywheel.backend.instancing.ratelimit.NonLimiter;
 import com.jozufozu.flywheel.config.FlwConfig;
+import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.light.LightUpdater;
 import com.mojang.math.Vector3f;
 
@@ -102,19 +103,21 @@ public abstract class InstanceManager<T> {
 		if (tick.shouldUpdate(dX, dY, dZ)) instance.tick();
 	}
 
-	public void beginFrame(TaskEngine taskEngine, Camera camera) {
+	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
 		frame.tick();
 		processQueuedAdditions();
 
+		Camera camera = context.camera();
 		Vector3f look = camera.getLookVector();
 		float lookX = look.x();
 		float lookY = look.y();
 		float lookZ = look.z();
 
 		// integer camera pos
-		int cX = (int) camera.getPosition().x;
-		int cY = (int) camera.getPosition().y;
-		int cZ = (int) camera.getPosition().z;
+		BlockPos cameraIntPos = camera.getBlockPosition();
+		int cX = cameraIntPos.getX();
+		int cY = cameraIntPos.getY();
+		int cZ = cameraIntPos.getZ();
 
 		var instances = getStorage().getInstancesForUpdate();
 		distributeWork(taskEngine, instances, instance -> updateInstance(instance, lookX, lookY, lookZ, cX, cY, cZ));

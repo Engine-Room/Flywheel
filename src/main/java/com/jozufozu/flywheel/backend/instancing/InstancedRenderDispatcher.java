@@ -6,16 +6,14 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.effect.Effect;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.event.RenderStageEvent;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.WorldAttached;
-import com.jozufozu.flywheel.vanilla.effect.ExampleEffect;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -89,23 +87,16 @@ public class InstancedRenderDispatcher {
 
 	public static void onBeginFrame(BeginFrameEvent event) {
 		if (Backend.isGameActive() && Backend.isOn()) {
-			instanceWorlds.get(event.getWorld())
+			instanceWorlds.get(event.getContext().level())
 					.beginFrame(event);
 		}
 	}
 
-	public static void renderSpecificType(RenderContext context, RenderType type) {
-		ClientLevel world = context.level();
+	public static void onRenderStage(RenderStageEvent event) {
+		ClientLevel world = event.getContext().level();
 		if (!Backend.canUseInstancing(world)) return;
 
-		instanceWorlds.get(world).renderSpecificType(context, type);
-	}
-
-	public static void renderAllRemaining(RenderContext context) {
-		ClientLevel world = context.level();
-		if (!Backend.canUseInstancing(world)) return;
-
-		instanceWorlds.get(world).renderAllRemaining(context);
+		instanceWorlds.get(world).renderStage(event.getContext(), event.getStage());
 	}
 
 	public static void onReloadRenderers(ReloadRenderersEvent event) {

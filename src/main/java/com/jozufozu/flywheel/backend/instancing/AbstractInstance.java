@@ -3,10 +3,10 @@ package com.jozufozu.flywheel.backend.instancing;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
+import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.core.structs.FlatLit;
 import com.jozufozu.flywheel.light.LightListener;

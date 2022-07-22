@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.gl.GlVertexArray;

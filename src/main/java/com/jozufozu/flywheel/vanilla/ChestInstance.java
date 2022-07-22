@@ -7,13 +7,15 @@ import java.util.function.BiFunction;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.api.InstancedPart;
-import com.jozufozu.flywheel.api.InstancerManager;
+import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.material.MaterialShaders;
+import com.jozufozu.flywheel.core.material.SimpleMaterial;
 import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.core.structs.model.TransformedPart;
 import com.jozufozu.flywheel.core.structs.oriented.OrientedPart;
@@ -37,7 +39,7 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends BlockEntityInstance<T> implements DynamicInstance {
 
-	private static final com.jozufozu.flywheel.api.material.Material CHEST_MATERIAL = new com.jozufozu.flywheel.api.material.Material(Sheets.chestSheet(), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT);
+	private static final com.jozufozu.flywheel.api.material.Material CHEST_MATERIAL = new SimpleMaterial(RenderStage.AFTER_BLOCK_ENTITIES, Sheets.chestSheet(), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT);
 	private static final BiFunction<ChestType, Material, BasicModelSupplier> LID = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createLidModel(type, mat.sprite()), CHEST_MATERIAL));
 	private static final BiFunction<ChestType, Material, BasicModelSupplier> BASE = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createBaseModel(type, mat.sprite()), CHEST_MATERIAL));
 

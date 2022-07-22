@@ -4,8 +4,8 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.RenderWork;
+import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.model.MeshPool;
 import com.jozufozu.flywheel.config.BackendTypeArgument;
@@ -28,7 +28,6 @@ import com.jozufozu.flywheel.event.ForgeEvents;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
-import com.jozufozu.flywheel.vanilla.effect.ExampleEffect;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.commands.synchronization.ArgumentTypes;
@@ -92,6 +91,7 @@ public class Flywheel {
 		forgeEventBus.addListener(CrumblingRenderer::onReloadRenderers);
 
 		forgeEventBus.addListener(InstancedRenderDispatcher::onReloadRenderers);
+		forgeEventBus.addListener(InstancedRenderDispatcher::onRenderStage);
 		forgeEventBus.addListener(InstancedRenderDispatcher::onBeginFrame);
 		forgeEventBus.addListener(InstancedRenderDispatcher::tick);
 

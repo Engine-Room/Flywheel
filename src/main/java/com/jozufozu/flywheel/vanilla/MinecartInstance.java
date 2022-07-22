@@ -2,15 +2,16 @@ package com.jozufozu.flywheel.vanilla;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.api.InstancerManager;
+import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
-import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
 import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.Models;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.material.MaterialShaders;
+import com.jozufozu.flywheel.core.material.SimpleMaterial;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.core.structs.model.TransformedPart;
@@ -31,7 +32,7 @@ import net.minecraft.world.phys.Vec3;
 public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance<T> implements DynamicInstance, TickableInstance {
 
 	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
-	private static final BasicModelSupplier MODEL = new BasicModelSupplier(MinecartInstance::getBodyModel, new Material(RenderType.entitySolid(MINECART_LOCATION), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT));
+	private static final BasicModelSupplier MODEL = new BasicModelSupplier(MinecartInstance::getBodyModel, new SimpleMaterial(RenderStage.AFTER_ENTITIES, RenderType.entitySolid(MINECART_LOCATION), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT));
 
 	private final PoseStack stack = new PoseStack();
 

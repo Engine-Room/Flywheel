@@ -4,14 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import com.jozufozu.flywheel.api.InstancedPart;
-import com.jozufozu.flywheel.api.Instancer;
-import com.jozufozu.flywheel.api.InstancerFactory;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.Instancer;
+import com.jozufozu.flywheel.api.instancer.InstancerFactory;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.core.model.ModelSupplier;
-
-import net.minecraft.client.renderer.RenderType;
 
 /**
  * A collection of Instancers that all have the same format.
