@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing;
 
+import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.Backend;
@@ -13,12 +14,9 @@ import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.util.ClientLevelExtension;
-import com.jozufozu.flywheel.vanilla.effect.ExampleEffect;
 
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -92,18 +90,18 @@ public class InstanceWorld {
 	 * </p>
 	 */
 	public void beginFrame(BeginFrameEvent event) {
-		Camera camera = event.getCamera();
-		boolean shifted = engine.maintainOriginCoordinate(camera);
+		RenderContext context = event.getContext();
+		boolean shifted = engine.maintainOriginCoordinate(context.camera());
 
 		taskEngine.syncPoint();
 
 		if (!shifted) {
-			blockEntities.beginFrame(taskEngine, camera);
-			entities.beginFrame(taskEngine, camera);
-			effects.beginFrame(taskEngine, camera);
+			blockEntities.beginFrame(taskEngine, context);
+			entities.beginFrame(taskEngine, context);
+			effects.beginFrame(taskEngine, context);
 		}
 
-		engine.beginFrame(taskEngine, camera);
+		engine.beginFrame(taskEngine, context);
 	}
 
 	/**
@@ -131,24 +129,13 @@ public class InstanceWorld {
 	}
 
 	/**
-	 * Draw the given layer.
+	 * Draw all instances for the given stage.
 	 */
-	public void renderSpecificType(RenderContext context, RenderType type) {
+	public void renderStage(RenderContext context, RenderStage stage) {
 		taskEngine.syncPoint();
 		context.pushPose();
-		context.translateBack(context.camX(), context.camY(), context.camZ());
-		engine.renderSpecificType(taskEngine, context, type);
-		context.popPose();
-	}
-
-	/**
-	 * Draw the given layer.
-	 */
-	public void renderAllRemaining(RenderContext context) {
-		taskEngine.syncPoint();
-		context.pushPose();
-		context.translateBack(context.camX(), context.camY(), context.camZ());
-		engine.renderAllRemaining(taskEngine, context);
+		context.translateBack(context.camera().getPosition());
+		engine.renderStage(taskEngine, context, stage);
 		context.popPose();
 	}
 

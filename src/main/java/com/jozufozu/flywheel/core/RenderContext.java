@@ -1,18 +1,20 @@
 package com.jozufozu.flywheel.core;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 
+import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 
-public record RenderContext(ClientLevel level, PoseStack stack, Matrix4f viewProjection, RenderBuffers buffers,
-							double camX, double camY, double camZ) implements TransformStack {
-
-	public static RenderContext CURRENT;
+public record RenderContext(LevelRenderer renderer, ClientLevel level, PoseStack stack, Matrix4f viewProjection,
+							Matrix4f projection, RenderBuffers buffers, Camera camera) implements TransformStack {
 
 	@Override
 	public TransformStack multiply(Quaternion quaternion) {
@@ -49,5 +51,12 @@ public record RenderContext(ClientLevel level, PoseStack stack, Matrix4f viewPro
 	@Override
 	public TransformStack translate(double x, double y, double z) {
 		return TransformStack.cast(stack).translate(x, y, z);
+	}
+
+	@NotNull
+	public static Matrix4f createViewProjection(PoseStack view, Matrix4f projection) {
+		var viewProjection = projection.copy();
+		viewProjection.multiply(view.last().pose());
+		return viewProjection;
 	}
 }

@@ -22,7 +22,7 @@ public class GlShader extends GlObject {
 	private final List<ResourceLocation> parts;
 	private final ShaderConstants constants;
 
-	public GlShader(String source, ShaderType type, List<ResourceLocation> parts, ShaderConstants constants) {
+	public GlShader(String source, ShaderType type, List<ResourceLocation> parts, ShaderConstants constants) throws ShaderCompilationException {
 		this.parts = parts;
 		this.type = type;
 		this.constants = constants;

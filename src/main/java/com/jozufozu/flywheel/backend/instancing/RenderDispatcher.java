@@ -1,15 +1,13 @@
 package com.jozufozu.flywheel.backend.instancing;
 
+import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.core.RenderContext;
 
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.RenderType;
 
 public interface RenderDispatcher {
 
-	void renderAllRemaining(TaskEngine taskEngine, RenderContext context);
-
-	void renderSpecificType(TaskEngine taskEngine, RenderContext context, RenderType type);
+	void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage);
 
 	/**
 	 * Maintain the integer origin coordinate to be within a certain distance from the camera in all directions,
@@ -18,7 +16,7 @@ public interface RenderDispatcher {
 	 */
 	boolean maintainOriginCoordinate(Camera camera);
 
-	void beginFrame(TaskEngine taskEngine, Camera info);
+	void beginFrame(TaskEngine taskEngine, RenderContext context);
 
 	void delete();
 }

@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.backend.gl;
 
-import com.jozufozu.flywheel.backend.RenderWork;
-
 // Utility class for safely dealing with gl object handles.
 public abstract class GlObject {
 	private static final int INVALID_HANDLE = Integer.MIN_VALUE;

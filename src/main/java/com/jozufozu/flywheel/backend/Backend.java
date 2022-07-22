@@ -17,7 +17,7 @@ import net.minecraft.world.level.LevelAccessor;
 public class Backend {
 	public static final Logger LOGGER = LogUtils.getLogger();
 
-	public static boolean DUMP_SHADER_SOURCE = System.getProperty("flw.dumpShaderSource") != null;
+	public static final boolean DUMP_SHADER_SOURCE = System.getProperty("flw.dumpShaderSource") != null;
 
 	private static BackendType TYPE;
 

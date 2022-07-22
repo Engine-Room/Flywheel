@@ -5,10 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.jozufozu.flywheel.api.InstancedPart;
+import com.jozufozu.flywheel.api.RenderStage;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
-import com.jozufozu.flywheel.backend.instancing.*;
+import com.jozufozu.flywheel.backend.instancing.BatchDrawingTracker;
+import com.jozufozu.flywheel.backend.instancing.Engine;
+import com.jozufozu.flywheel.backend.instancing.InstanceManager;
+import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.platform.Lighting;
@@ -16,7 +20,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
@@ -65,12 +68,11 @@ public class BatchingEngine implements Engine {
 	}
 
 	@Override
-	public void renderSpecificType(TaskEngine taskEngine, RenderContext context, RenderType type) {
-
-	}
-
-	@Override
-	public void renderAllRemaining(TaskEngine taskEngine, RenderContext context) {
+	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
+		// FIXME: properly support material stages
+		if (stage != RenderStage.AFTER_FINAL_END_BATCH) {
+			return;
+		}
 
 		// FIXME: this probably breaks some vanilla stuff but it works much better for flywheel
 		Matrix4f mat = new Matrix4f();
@@ -96,15 +98,15 @@ public class BatchingEngine implements Engine {
 	}
 
 	@Override
-	public void beginFrame(TaskEngine taskEngine, Camera info) {
+	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
 		for (var model : uninitializedModels) {
 			model.init(batchLists);
 		}
 
 		uninitializedModels.clear();
 
-		Vec3 cameraPos = info.getPosition();
-		var stack = FlwUtil.copyPoseStack(RenderContext.CURRENT.stack());
+		Vec3 cameraPos = context.camera().getPosition();
+		var stack = FlwUtil.copyPoseStack(context.stack());
 		stack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
 		submitTasks(stack, taskEngine);
@@ -118,7 +120,5 @@ public class BatchingEngine implements Engine {
 	@Override
 	public void addDebugInfo(List<String> info) {
 		info.add("Batching");
-		info.add("Instances: " + 0);
-		info.add("Vertices: " + 0);
 	}
 }

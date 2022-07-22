@@ -12,8 +12,6 @@ import com.jozufozu.flywheel.core.source.FileIndex;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.ShaderField;
 import com.jozufozu.flywheel.core.source.SourceFile;
-import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
-import com.jozufozu.flywheel.core.source.parse.StructField;
 import com.jozufozu.flywheel.core.source.span.Span;
 import com.jozufozu.flywheel.util.Pair;
 

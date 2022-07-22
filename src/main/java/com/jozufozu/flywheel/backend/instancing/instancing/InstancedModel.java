@@ -2,9 +2,8 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.api.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.core.model.ModelSupplier;
 
 public class InstancedModel<D extends InstancedPart> {

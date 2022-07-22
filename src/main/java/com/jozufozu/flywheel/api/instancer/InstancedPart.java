@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api;
+package com.jozufozu.flywheel.api.instancer;
 
 import com.jozufozu.flywheel.api.struct.StructType;
 

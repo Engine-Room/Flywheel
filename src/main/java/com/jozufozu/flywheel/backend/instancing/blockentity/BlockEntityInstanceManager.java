@@ -2,11 +2,11 @@ package com.jozufozu.flywheel.backend.instancing.blockentity;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.api.InstancerManager;
+import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
+import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 import com.jozufozu.flywheel.backend.instancing.One2OneStorage;
 import com.jozufozu.flywheel.backend.instancing.Storage;
 
