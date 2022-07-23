@@ -9,11 +9,10 @@ import com.jozufozu.flywheel.backend.instancing.effect.Effect;
 import com.jozufozu.flywheel.backend.instancing.effect.EffectInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
-import com.jozufozu.flywheel.core.Contexts;
+import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.util.ClientLevelExtension;
-import com.jozufozu.flywheel.vanilla.effect.ExampleEffect;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -39,7 +38,7 @@ public class InstanceWorld {
 
 	public static InstanceWorld create(LevelAccessor level) {
 		var engine = switch (Backend.getBackendType()) {
-			case INSTANCING -> new InstancingEngine<>(Contexts.WORLD);
+			case INSTANCING -> new InstancingEngine(Components.WORLD);
 			case BATCHING -> new BatchingEngine();
 			case OFF -> throw new IllegalStateException("Cannot create instance world when backend is off.");
 		};

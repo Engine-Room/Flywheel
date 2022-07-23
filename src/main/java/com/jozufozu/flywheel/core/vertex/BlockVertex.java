@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
 import com.jozufozu.flywheel.core.model.ShadeSeparatedBufferBuilder;
@@ -40,7 +41,7 @@ public class BlockVertex implements VertexType {
 
 	@Override
 	public FileResolution getLayoutShader() {
-		return LayoutShaders.BLOCK;
+		return Components.Files.BLOCK_LAYOUT;
 	}
 
 	public BlockVertexListUnsafe.Shaded createReader(ByteBuffer buffer, int vertexCount, int unshadedStartVertex) {

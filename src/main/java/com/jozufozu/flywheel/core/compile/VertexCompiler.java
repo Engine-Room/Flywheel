@@ -8,12 +8,9 @@ import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
-import com.jozufozu.flywheel.core.source.FileIndex;
-import com.jozufozu.flywheel.core.source.FileResolution;
+import com.jozufozu.flywheel.core.source.CompilationContext;
 import com.jozufozu.flywheel.core.source.ShaderField;
 import com.jozufozu.flywheel.core.source.SourceFile;
-import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
-import com.jozufozu.flywheel.core.source.parse.StructField;
 import com.jozufozu.flywheel.core.source.span.Span;
 import com.jozufozu.flywheel.util.Pair;
 
@@ -21,30 +18,26 @@ import com.jozufozu.flywheel.util.Pair;
  * Handles compilation and deletion of vertex shaders.
  */
 public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
-	private final FileResolution contextShader;
-	private final GLSLVersion glslVersion;
 
-	public VertexCompiler(FileResolution contextShader, GLSLVersion glslVersion) {
-		this.contextShader = contextShader;
-		this.glslVersion = glslVersion;
+	public VertexCompiler() {
 	}
 
 	@Override
 	protected GlShader _create(Context key) {
 		StringBuilder finalSource = new StringBuilder();
 
-		finalSource.append(CompileUtil.generateHeader(glslVersion, ShaderType.VERTEX));
+		finalSource.append(CompileUtil.generateHeader(GLSLVersion.V420, ShaderType.VERTEX));
 
 		var shaderConstants = key.ctx.getShaderConstants();
 		shaderConstants.writeInto(finalSource);
 		finalSource.append('\n');
 
-		var index = new FileIndex();
+		var index = new CompilationContext();
 
 		// LAYOUT
 
 		var layoutShader = key.vertexType.getLayoutShader().getFile();
-		layoutShader.generateFinalSource(index, finalSource);
+		finalSource.append(layoutShader.generateFinalSource(index));
 
 		// INSTANCE
 
@@ -62,17 +55,17 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 			int newLocation = location + attributeBaseIndex;
 			replacements.add(Pair.of(field.location, Integer.toString(newLocation)));
 		}
-		instanceShader.generateFinalSource(index, finalSource, replacements);
+		finalSource.append(instanceShader.generateFinalSource(index, replacements));
 
 		// MATERIAL
 
 		var materialShader = key.materialShader;
-		materialShader.generateFinalSource(index, finalSource);
+		finalSource.append(materialShader.generateFinalSource(index));
 
 		// CONTEXT
 
-		var contextShaderSource = contextShader.getFile();
-		contextShaderSource.generateFinalSource(index, finalSource);
+		var contextShaderSource = key.contextShader;
+		finalSource.append(contextShaderSource.generateFinalSource(index));
 
 		// MAIN
 
@@ -104,8 +97,9 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 	 * @param vertexType The vertex type to use.
 	 * @param instanceShader The instance shader source.
 	 * @param materialShader The vertex material shader source.
+	 * @param contextShader The context shader source.
 	 * @param ctx The shader constants to apply.
 	 */
-	public record Context(VertexType vertexType, SourceFile instanceShader, SourceFile materialShader, StateSnapshot ctx) {
+	public record Context(VertexType vertexType, SourceFile instanceShader, SourceFile materialShader, SourceFile contextShader, StateSnapshot ctx) {
 	}
 }

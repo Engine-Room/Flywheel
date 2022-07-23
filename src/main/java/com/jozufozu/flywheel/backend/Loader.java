@@ -47,6 +47,10 @@ public class Loader implements ResourceManagerReloadListener {
 			throw new ShaderLoadingException("Failed to resolve all source files, see log for details");
 		}
 
+		sources.postResolve();
+
+		FileResolution.checkAll(errorReporter);
+
 		Backend.LOGGER.info("Loaded all shader sources.");
 
 		ClientLevel world = Minecraft.getInstance().level;

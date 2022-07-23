@@ -7,43 +7,38 @@ import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo.FogType;
 import com.jozufozu.flywheel.core.shader.ShaderConstants;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
-import com.jozufozu.flywheel.core.source.FileIndex;
-import com.jozufozu.flywheel.core.source.FileResolution;
+import com.jozufozu.flywheel.core.source.CompilationContext;
 import com.jozufozu.flywheel.core.source.SourceFile;
 
 /**
  * Handles compilation and deletion of fragment shaders.
  */
 public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShader> {
-	private final FileResolution contextShader;
-	private final GLSLVersion glslVersion;
 
-	public FragmentCompiler(FileResolution contextShader, GLSLVersion glslVersion) {
-		this.contextShader = contextShader;
-		this.glslVersion = glslVersion;
+	public FragmentCompiler() {
 	}
 
 	@Override
 	protected GlShader _create(Context key) {
 		StringBuilder finalSource = new StringBuilder();
 
-		finalSource.append(CompileUtil.generateHeader(glslVersion, ShaderType.FRAGMENT));
+		finalSource.append(CompileUtil.generateHeader(GLSLVersion.V420, ShaderType.FRAGMENT));
 
-		ShaderConstants shaderConstants = key.getShaderConstants();
+		var shaderConstants = key.getShaderConstants();
 		shaderConstants.writeInto(finalSource);
 		finalSource.append('\n');
 
-		FileIndex index = new FileIndex();
+		var ctx = new CompilationContext();
 
 		// MATERIAL
 
 		SourceFile materialShader = key.materialShader;
-		materialShader.generateFinalSource(index, finalSource);
+		finalSource.append(materialShader.generateFinalSource(ctx));
 
 		// CONTEXT
 
-		SourceFile contextShaderSource = contextShader.getFile();
-		contextShaderSource.generateFinalSource(index, finalSource);
+		SourceFile contextShaderSource = key.contextShader;
+		finalSource.append(contextShaderSource.generateFinalSource(ctx));
 
 		// MAIN
 
@@ -52,7 +47,7 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 		try {
 			return new GlShader(finalSource.toString(), ShaderType.FRAGMENT, ImmutableList.of(materialShader.name, contextShaderSource.name), shaderConstants);
 		} catch (ShaderCompilationException e) {
-			throw e.withErrorLog(index);
+			throw e.withErrorLog(ctx);
 		}
 	}
 
@@ -78,7 +73,7 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 	 * @param fogType Which type of fog should be applied.
 	 * @param ctx The shader constants to apply.
 	 */
-	public record Context(SourceFile materialShader, float alphaDiscard, FogType fogType, StateSnapshot ctx) {
+	public record Context(SourceFile materialShader, SourceFile contextShader, float alphaDiscard, FogType fogType, StateSnapshot ctx) {
 
 		public ShaderConstants getShaderConstants() {
 			ShaderConstants shaderConstants = ctx.getShaderConstants();

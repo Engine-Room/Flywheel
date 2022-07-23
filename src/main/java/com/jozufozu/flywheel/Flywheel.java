@@ -11,24 +11,15 @@ import com.jozufozu.flywheel.backend.model.MeshPool;
 import com.jozufozu.flywheel.config.BackendTypeArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.core.Contexts;
-import com.jozufozu.flywheel.core.GameStateRegistry;
-import com.jozufozu.flywheel.core.Models;
-import com.jozufozu.flywheel.core.PartialModel;
-import com.jozufozu.flywheel.core.QuadConverter;
-import com.jozufozu.flywheel.core.StitchedSprite;
+import com.jozufozu.flywheel.core.*;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
-import com.jozufozu.flywheel.core.material.MaterialShaders;
 import com.jozufozu.flywheel.core.shader.NormalDebugStateProvider;
-import com.jozufozu.flywheel.core.structs.InstanceShaders;
-import com.jozufozu.flywheel.core.vertex.LayoutShaders;
 import com.jozufozu.flywheel.event.EntityWorldHandler;
 import com.jozufozu.flywheel.event.ForgeEvents;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
-import com.jozufozu.flywheel.vanilla.effect.ExampleEffect;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.commands.synchronization.ArgumentTypes;
@@ -112,10 +103,7 @@ public class Flywheel {
 //		forgeEventBus.addListener(ExampleEffect::tick);
 //		forgeEventBus.addListener(ExampleEffect::onReload);
 
-		LayoutShaders.init();
-		InstanceShaders.init();
-		Contexts.init();
-		MaterialShaders.init();
+		Components.init();
 
 		GameStateRegistry.register(NormalDebugStateProvider.INSTANCE);
 

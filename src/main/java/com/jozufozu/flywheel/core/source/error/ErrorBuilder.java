@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.core.source.FileIndex;
+import com.jozufozu.flywheel.core.source.CompilationContext;
 import com.jozufozu.flywheel.core.source.SourceFile;
 import com.jozufozu.flywheel.core.source.SourceLines;
 import com.jozufozu.flywheel.core.source.error.lines.ErrorLine;
@@ -45,7 +45,7 @@ public class ErrorBuilder {
 	}
 
 	@Nullable
-	public static ErrorBuilder fromLogLine(FileIndex env, String s) {
+	public static ErrorBuilder fromLogLine(CompilationContext env, String s) {
 		Matcher matcher = ERROR_LINE.matcher(s);
 
 		if (matcher.find()) {

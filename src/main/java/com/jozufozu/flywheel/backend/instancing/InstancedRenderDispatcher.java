@@ -16,6 +16,7 @@ import com.jozufozu.flywheel.vanilla.effect.ExampleEffect;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -130,5 +131,9 @@ public class InstancedRenderDispatcher {
 		} else {
 			debug.add("Disabled");
 		}
+	}
+
+	public static Vec3i getOriginCoordinate(ClientLevel level) {
+		return instanceWorlds.get(level).engine.getOriginCoordinate();
 	}
 }

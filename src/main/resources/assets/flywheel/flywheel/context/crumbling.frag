@@ -1,8 +1,6 @@
 #use "flywheel:api/fragment.glsl"
 #use "flywheel:util/fog.glsl"
-
-uniform vec2 uFogRange;
-uniform vec4 uFogColor;
+#use "flywheel:uniform/fog.glsl"
 
 uniform sampler2D uCrumblingTex;
 
@@ -37,9 +35,9 @@ void flw_contextFragment() {
     #endif
 
     #ifdef COLOR_FOG
-    color = linear_fog(color, flw_distance, uFogRange.x, uFogRange.y, uFogColor);
+    color = linear_fog(color, flw_distance, flw_fogRange.x, flw_fogRange.y, flw_fogColor);
     #elif defined(FADE_FOG)
-    color = linear_fog_fade(color, flw_distance, uFogRange.x, uFogRange.y);
+    color = linear_fog_fade(color, flw_distance, flw_fogRange.x, flw_fogRange.y);
     #endif
 
     fragColor = color;

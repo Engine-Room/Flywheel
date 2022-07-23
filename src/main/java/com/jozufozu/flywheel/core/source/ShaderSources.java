@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
@@ -29,14 +30,8 @@ public class ShaderSources implements SourceFinder {
 	public final Index index;
 
 	public ShaderSources(ErrorReporter errorReporter, ResourceManager manager) {
-		Collection<ResourceLocation> allShaders = manager.listResources(SHADER_DIR, s -> {
-			for (String ext : EXTENSIONS) {
-				if (s.endsWith(ext)) return true;
-			}
-			return false;
-		});
 
-		for (ResourceLocation location : allShaders) {
+		for (ResourceLocation location : getValidShaderFiles(manager)) {
 			try (Resource resource = manager.getResource(location)) {
 				String source = StringUtil.readToString(resource.getInputStream());
 
@@ -51,9 +46,25 @@ public class ShaderSources implements SourceFinder {
 		index = new Index(shaderSources);
 	}
 
+	public void postResolve() {
+		for (SourceFile file : shaderSources.values()) {
+			file.postResolve();
+		}
+	}
+
 	@Override
 	@Nullable
 	public SourceFile findSource(ResourceLocation name) {
 		return shaderSources.get(name);
+	}
+
+	@NotNull
+	private static Collection<ResourceLocation> getValidShaderFiles(ResourceManager manager) {
+		return manager.listResources(SHADER_DIR, s -> {
+			for (String ext : EXTENSIONS) {
+				if (s.endsWith(ext)) return true;
+			}
+			return false;
+		});
 	}
 }

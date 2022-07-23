@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.core.vertex;
 import java.nio.ByteBuffer;
 
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
 import com.jozufozu.flywheel.core.source.FileResolution;
@@ -30,6 +31,6 @@ public class PosTexNormalVertex implements VertexType {
 
 	@Override
 	public FileResolution getLayoutShader() {
-		return LayoutShaders.POS_TEX_NORMAL;
+		return Components.Files.POS_TEX_NORMAL_LAYOUT;
 	}
 }

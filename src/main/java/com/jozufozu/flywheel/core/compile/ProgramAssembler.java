@@ -49,7 +49,7 @@ public class ProgramAssembler {
 		return this;
 	}
 
-	public <P extends GlProgram> P build(GlProgram.Factory<P> factory) {
+	public GlProgram build(GlProgram.Factory factory) {
 		return factory.create(name, program);
 	}
 }

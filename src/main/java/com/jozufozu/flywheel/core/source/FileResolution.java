@@ -24,6 +24,7 @@ import net.minecraft.resources.ResourceLocation;
 public class FileResolution {
 
 	private static final Map<ResourceLocation, FileResolution> ALL = new HashMap<>();
+	private static final Map<ResourceLocation, FileResolution> WEAK = new HashMap<>();
 	private static boolean tooLate = false;
 
 	/**
@@ -57,31 +58,62 @@ public class FileResolution {
 	}
 
 	/**
+	 * Weak resolutions don't persist through resource reloads.<p>
+	 * This should be used inside parsing code.
+	 *
+	 * @param file The location of the file to resolve.
+	 * @return A weak resolution for the given file.
+	 */
+	public static FileResolution weak(ResourceLocation file) {
+		FileResolution fileResolution = ALL.get(file);
+
+		if (fileResolution != null) {
+			return fileResolution;
+		}
+		// never too late for weak resolutions.
+		return WEAK.computeIfAbsent(file, FileResolution::new);
+	}
+
+	/**
 	 * Try and resolve all referenced source files, printing errors if any aren't found.
 	 */
 	public static void run(ErrorReporter errorReporter, SourceFinder sources) {
 		for (FileResolution resolution : ALL.values()) {
-			resolution.resolveAndCheck(errorReporter, sources);
+			resolution.resolve(errorReporter, sources);
 		}
+
+		for (FileResolution resolution : WEAK.values()) {
+			resolution.resolve(errorReporter, sources);
+		}
+
+		WEAK.clear();
 
 		tooLate = true;
 	}
 
-	private void resolveAndCheck(ErrorReporter errorReporter, SourceFinder sources) {
+	public static void checkAll(ErrorReporter errorReporter) {
+		for (FileResolution resolution : ALL.values()) {
+			resolution.runChecks(errorReporter);
+		}
+	}
+
+	private void resolve(ErrorReporter errorReporter, SourceFinder sources) {
 		file = sources.findSource(fileLoc);
 
 		if (file == null) {
-			ErrorBuilder builder = errorReporter.error(String.format("could not find source for file %s", fileLoc));
-			for (Span location : neededAt) {
-				builder.pointAtFile(location.getSourceFile())
-						.pointAt(location, 1);
-			}
-		} else {
-			runChecks(errorReporter);
+			reportMissing(errorReporter);
 		}
 
 		// Let the GC do its thing
 		neededAt.clear();
+	}
+
+	private void reportMissing(ErrorReporter errorReporter) {
+		ErrorBuilder builder = errorReporter.error(String.format("could not find source for file %s", fileLoc));
+		for (Span location : neededAt) {
+			builder.pointAtFile(location.getSourceFile())
+					.pointAt(location, 1);
+		}
 	}
 
 	private void runChecks(ErrorReporter errorReporter) {
