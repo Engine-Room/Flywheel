@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.core.model;
 
 import java.lang.reflect.Field;
-import java.nio.ByteBuffer;
 import java.util.EnumMap;
 import java.util.Random;
 
@@ -11,7 +10,6 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;

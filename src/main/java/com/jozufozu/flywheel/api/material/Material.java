@@ -1,17 +1,17 @@
 package com.jozufozu.flywheel.api.material;
 
+import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.SourceFile;
 
 import net.minecraft.client.renderer.RenderType;
 
-public record Material(RenderType renderType, FileResolution vertexShader, FileResolution fragmentShader) {
+public interface Material {
+	RenderStage getRenderStage();
 
-	public SourceFile getVertexShader() {
-		return vertexShader.getFile();
-	}
+	RenderType getRenderType();
 
-	public SourceFile getFragmentShader() {
-		return fragmentShader.getFile();
-	}
+	FileResolution getVertexShader();
+
+	FileResolution getFragmentShader();
 }

@@ -6,8 +6,8 @@ import java.util.Optional;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.InstancedPart;
-import com.jozufozu.flywheel.api.Instancer;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.Instancer;
 
 public class SelectInstance<D extends InstancedPart> {
 

@@ -4,8 +4,8 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.RenderWork;
+import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.model.MeshPool;
 import com.jozufozu.flywheel.config.BackendTypeArgument;
@@ -83,6 +83,7 @@ public class Flywheel {
 		forgeEventBus.addListener(CrumblingRenderer::onReloadRenderers);
 
 		forgeEventBus.addListener(InstancedRenderDispatcher::onReloadRenderers);
+		forgeEventBus.addListener(InstancedRenderDispatcher::onRenderStage);
 		forgeEventBus.addListener(InstancedRenderDispatcher::onBeginFrame);
 		forgeEventBus.addListener(InstancedRenderDispatcher::tick);
 

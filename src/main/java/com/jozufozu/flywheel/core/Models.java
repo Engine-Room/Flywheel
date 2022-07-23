@@ -14,13 +14,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class Models {
-
 	public static BasicModelSupplier block(BlockState state) {
-		return BLOCK_STATE.computeIfAbsent(state, it -> new BasicModelSupplier(() -> new BlockMesh(it)));
+		return BLOCK_STATE.computeIfAbsent(state, it -> new BasicModelSupplier(() -> new BlockMesh(it), Materials.DEFAULT));
 	}
 
 	public static BasicModelSupplier partial(PartialModel partial) {
-		return PARTIAL.computeIfAbsent(partial, it -> new BasicModelSupplier(() -> new BlockMesh(it)));
+		return PARTIAL.computeIfAbsent(partial, it -> new BasicModelSupplier(() -> new BlockMesh(it), Materials.DEFAULT));
 	}
 
 	public static BasicModelSupplier partial(PartialModel partial, Direction dir) {
@@ -28,7 +27,7 @@ public class Models {
 	}
 
 	public static BasicModelSupplier partial(PartialModel partial, Direction dir, Supplier<PoseStack> modelTransform) {
-		return PARTIAL_DIR.computeIfAbsent(Pair.of(dir, partial), $ -> new BasicModelSupplier(() -> new BlockMesh(partial, modelTransform.get())));
+		return PARTIAL_DIR.computeIfAbsent(Pair.of(dir, partial), $ -> new BasicModelSupplier(() -> new BlockMesh(partial, modelTransform.get()), Materials.DEFAULT));
 	}
 
 	public static void onReload(ReloadRenderersEvent ignored) {

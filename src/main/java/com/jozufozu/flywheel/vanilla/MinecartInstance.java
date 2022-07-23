@@ -2,9 +2,10 @@ package com.jozufozu.flywheel.vanilla;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.api.InstancerManager;
+import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
+import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
 import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.Materials;

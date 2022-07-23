@@ -23,7 +23,7 @@ public class ComponentRegistry {
 
 	// TODO: fill out the rest of the registry
 
-	public static Material register(Material material) {
+	public static <T extends Material> T register(T material) {
 		return material;
 	}
 

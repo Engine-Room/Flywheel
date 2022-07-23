@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.api.struct;
 
 import java.nio.ByteBuffer;
 
-import com.jozufozu.flywheel.api.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.model.ModelTransformer;
 import com.jozufozu.flywheel.core.source.FileResolution;

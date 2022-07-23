@@ -25,16 +25,13 @@ import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 public class ProgramCompiler extends Memoizer<ProgramCompiler.Context, GlProgram> {
 
 	public static final ProgramCompiler INSTANCE = new ProgramCompiler();
-	private static final List<ProgramCompiler> ALL_COMPILERS = new ArrayList<>();
 
 	private final VertexCompiler vertexCompiler;
 	private final FragmentCompiler fragmentCompiler;
 
-	public ProgramCompiler() {
+	private ProgramCompiler() {
 		this.vertexCompiler = new VertexCompiler();
 		this.fragmentCompiler = new FragmentCompiler();
-
-		ALL_COMPILERS.add(this);
 	}
 
 	/**
@@ -62,10 +59,10 @@ public class ProgramCompiler extends Memoizer<ProgramCompiler.Context, GlProgram
 		FileResolution instanceShader = ctx.instanceShader();
 		ContextShader contextShader = ctx.contextShader;
 
-		var vertex = new VertexCompiler.Context(ctx.vertexType(), instanceShader.getFile(), material.getVertexShader(),
+		var vertex = new VertexCompiler.Context(ctx.vertexType(), instanceShader.getFile(), material.getVertexShader().getFile(),
 				contextShader.getVertexShader(), snapshot);
 
-		var fragment = new FragmentCompiler.Context(material.getFragmentShader(), contextShader.getFragmentShader(),
+		var fragment = new FragmentCompiler.Context(material.getFragmentShader().getFile(), contextShader.getFragmentShader(),
 				ctx.alphaDiscard(), ctx.fogType(), snapshot);
 
 		return new ProgramAssembler(instanceShader.getFileLoc())
@@ -81,7 +78,7 @@ public class ProgramCompiler extends Memoizer<ProgramCompiler.Context, GlProgram
 	}
 
 	public static void invalidateAll(ReloadRenderersEvent ignored) {
-		ALL_COMPILERS.forEach(ProgramCompiler::invalidate);
+		INSTANCE.invalidate();
 	}
 
 	/**

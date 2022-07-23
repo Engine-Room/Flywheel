@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.api.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.instancing.GPUInstancer;
@@ -36,14 +36,14 @@ public class SadCrumbling {
 //		var map = modelsToParts(dataByStage);
 //		var stateSnapshot = GameStateRegistry.takeSnapshot();
 //
-////		Vec3 cameraPosition = camera.getPosition();
-////		var camX = cameraPosition.x - originCoordinate.getX();
-////		var camY = cameraPosition.y - originCoordinate.getY();
-////		var camZ = cameraPosition.z - originCoordinate.getZ();
-////
-////		// don't want to mutate viewProjection
-////		var vp = projectionMatrix.copy();
-////		vp.multiplyWithTranslation((float) -camX, (float) -camY, (float) -camZ);
+//		Vec3 cameraPosition = camera.getPosition();
+//		var camX = cameraPosition.x - originCoordinate.getX();
+//		var camY = cameraPosition.y - originCoordinate.getY();
+//		var camZ = cameraPosition.z - originCoordinate.getZ();
+//
+//		// don't want to mutate viewProjection
+//		var vp = projectionMatrix.copy();
+//		vp.multiplyWithTranslation((float) -camX, (float) -camY, (float) -camZ);
 //
 //		GlBuffer instanceBuffer = GlBuffer.requestPersistent(GlBufferType.ARRAY_BUFFER);
 //
@@ -75,17 +75,18 @@ public class SadCrumbling {
 //					continue;
 //				}
 //
-//				material.renderType().setupRenderState();
+//				material.getRenderType().setupRenderState();
 //
-//				CoreShaderInfoMap.CoreShaderInfo coreShaderInfo = CoreShaderInfoMap.CoreShaderInfo.get();
+//				CoreShaderInfo coreShaderInfo = CoreShaderInfo.get();
 //
 //
-//				var program = Compile.PROGRAM.getProgram(new ProgramCompiler.Context(Formats.POS_TEX_NORMAL,
-//						material, structType.getInstanceShader(), Components.CRUMBLING,
+//				CrumblingProgram program = Contexts.CRUMBLING.getProgram(new ProgramCompiler.Context(Formats.POS_TEX_NORMAL,
+//						structType.getInstanceShader(), material.getVertexShader(), material.getFragmentShader(),
 //						coreShaderInfo.getAdjustedAlphaDiscard(), coreShaderInfo.fogType(),
 //						GameStateRegistry.takeSnapshot()));
 //
 //				program.bind();
+//				program.uploadUniforms(camX, camY, camZ, vp, level);
 //
 //				// bufferedMesh.drawInstances();
 //			}
@@ -107,7 +108,7 @@ public class SadCrumbling {
 			for (var blockEntityInstance : entry.getValue()) {
 
 				for (var part : blockEntityInstance.getCrumblingParts()) {
-					if (part.getOwner() instanceof GPUInstancer instancer) {
+					if (part.getOwner() instanceof GPUInstancer<?> instancer) {
 
 						// queue the instances for copying to the crumbling instance buffer
 						map.computeIfAbsent(instancer.parent.getModel(), k -> new ArrayList<>()).add(part);

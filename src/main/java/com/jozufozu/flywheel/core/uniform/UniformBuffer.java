@@ -71,6 +71,7 @@ public class UniformBuffer {
 			return;
 		}
 
+		// TODO: upload only changed bytes
 		changedBytes.clear();
 
 		buffer.upload(data);

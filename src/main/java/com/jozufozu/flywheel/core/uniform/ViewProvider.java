@@ -14,6 +14,7 @@ import com.jozufozu.flywheel.util.MatrixWrite;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 
 public class ViewProvider extends UniformProvider {
@@ -23,7 +24,7 @@ public class ViewProvider extends UniformProvider {
 	}
 
 	public void beginFrame(BeginFrameEvent event) {
-		update(RenderContext.CURRENT);
+		update(event.getContext());
 	}
 
 	@Override
@@ -42,10 +43,12 @@ public class ViewProvider extends UniformProvider {
 				.constantAmbientLight() ? 1 : 0;
 
 		Vec3i originCoordinate = InstancedRenderDispatcher.getOriginCoordinate(level);
+		Vec3 camera = context.camera()
+				.getPosition();
 
-		var camX = (float) (context.camX() - originCoordinate.getX());
-		var camY = (float) (context.camY() - originCoordinate.getY());
-		var camZ = (float) (context.camZ() - originCoordinate.getZ());
+		var camX = (float) (camera.x - originCoordinate.getX());
+		var camY = (float) (camera.y - originCoordinate.getY());
+		var camZ = (float) (camera.z - originCoordinate.getZ());
 
 		// don't want to mutate viewProjection
 		var vp = context.viewProjection().copy();

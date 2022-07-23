@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api;
+package com.jozufozu.flywheel.api.instancer;
 
 /**
  * An instancer is how you interact with an instanced model.
