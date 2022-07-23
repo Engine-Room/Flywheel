@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.InstancerManager;
+import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstancingController;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityTypeExtension;

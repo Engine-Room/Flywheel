@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.core.structs;
 
-import com.jozufozu.flywheel.api.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.util.Color;
 

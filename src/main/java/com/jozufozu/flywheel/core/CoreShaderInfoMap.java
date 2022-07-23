@@ -10,6 +10,7 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.backend.ShadersModHandler;
+import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo.FogType;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.renderer.ShaderInstance;

@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.core.vertex;
 
-import java.lang.ref.Cleaner;
 import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;

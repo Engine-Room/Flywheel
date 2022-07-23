@@ -7,9 +7,10 @@ import java.util.function.BiFunction;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.api.InstancedPart;
-import com.jozufozu.flywheel.api.InstancerManager;
+import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.Materials;

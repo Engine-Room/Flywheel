@@ -8,12 +8,18 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.ListMultimap;
-import com.jozufozu.flywheel.api.InstancedPart;
+import com.google.common.collect.Multimaps;
+import com.jozufozu.flywheel.api.RenderStage;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.instancing.InstanceManager;
+import com.jozufozu.flywheel.backend.gl.GlVertexArray;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.instancing.Engine;
+import com.jozufozu.flywheel.backend.instancing.InstanceManager;
+import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.MeshPool;
 import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo;
@@ -51,8 +57,6 @@ public class InstancingEngine implements Engine {
 	 * The set of instance managers that are attached to this engine.
 	 */
 	private final WeakHashSet<InstanceManager<?>> instanceManagers;
-	private int vertexCount;
-	private int instanceCount;
 
 	public InstancingEngine(ContextShader context) {
 		this.context = context;
@@ -73,32 +77,44 @@ public class InstancingEngine implements Engine {
 	}
 
 	@Override
-	public void renderAllRemaining(TaskEngine taskEngine, RenderContext context) {
-		for (RenderType renderType : renderLists.drainLayers()) {
-			render(renderType);
-		}
-	}
-
-	@Override
-	public void renderSpecificType(TaskEngine taskEngine, RenderContext context, RenderType type) {
-		if (!renderLists.process(type)) {
+	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
+		if (!renderLists.process(stage)) {
 			return;
 		}
 
-		render(type);
+		var renderList = renderLists.get(stage);
+		for (var entry : renderList.entrySet()) {
+			var multimap = entry.getValue();
+
+			if (multimap.isEmpty()) {
+				return;
+			}
+
+			render(entry.getKey(), multimap);
+		}
 	}
 
-	protected void render(RenderType type) {
-		vertexCount = 0;
-		instanceCount = 0;
-
-		var multimap = renderLists.get(type);
-
-		if (multimap.isEmpty()) {
+	// TODO: Is this useful? Should it be added to the base interface? Currently it is only used for the old CrumblingRenderer.
+	@Deprecated
+	public void renderAll(TaskEngine taskEngine, RenderContext context) {
+		if (renderLists.isEmpty()) {
 			return;
 		}
 
-		render(type, multimap);
+		for (RenderStage stage : renderLists.stagesToProcess) {
+			var renderList = renderLists.get(stage);
+			for (var entry : renderList.entrySet()) {
+				var multimap = entry.getValue();
+
+				if (multimap.isEmpty()) {
+					return;
+				}
+
+				render(entry.getKey(), multimap);
+			}
+		}
+
+		renderLists.stagesToProcess.clear();
 	}
 
 	protected void render(RenderType type, ListMultimap<ShaderState, DrawCall> multimap) {
@@ -180,7 +196,7 @@ public class InstancingEngine implements Engine {
 	}
 
 	@Override
-	public void beginFrame(TaskEngine taskEngine, Camera info) {
+	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
 		for (var model : uninitializedModels) {
 			model.init(renderLists);
 		}
@@ -203,8 +219,6 @@ public class InstancingEngine implements Engine {
 	@Override
 	public void addDebugInfo(List<String> info) {
 		info.add("GL33 Instanced Arrays");
-		info.add("Instances: " + instanceCount);
-		info.add("Vertices: " + vertexCount);
 		info.add("Origin: " + originCoordinate.getX() + ", " + originCoordinate.getY() + ", " + originCoordinate.getZ());
 	}
 }

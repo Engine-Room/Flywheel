@@ -9,7 +9,6 @@ import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.vertex.Formats;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalVertex;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalWriterUnsafe;
-import com.mojang.blaze3d.platform.MemoryTracker;
 
 public class ModelPart implements Mesh {
 

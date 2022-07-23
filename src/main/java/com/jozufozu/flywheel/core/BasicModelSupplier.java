@@ -12,13 +12,8 @@ import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.NonNullSupplier;
 
 public class BasicModelSupplier implements ModelSupplier {
-
-	private Material material;
 	private final Lazy<Mesh> supplier;
-
-	public BasicModelSupplier(NonNullSupplier<Mesh> supplier) {
-		this(supplier, Materials.DEFAULT);
-	}
+	private Material material;
 
 	public BasicModelSupplier(NonNullSupplier<Mesh> supplier, Material material) {
 		this.supplier = Lazy.of(supplier);

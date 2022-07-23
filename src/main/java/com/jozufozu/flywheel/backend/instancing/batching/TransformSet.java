@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.api.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;

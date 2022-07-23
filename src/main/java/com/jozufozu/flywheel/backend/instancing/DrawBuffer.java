@@ -1,9 +1,7 @@
 package com.jozufozu.flywheel.backend.instancing;
 
-import java.lang.ref.Cleaner;
 import java.nio.ByteBuffer;
 
-import com.jozufozu.flywheel.backend.FlywheelMemory;
 import com.jozufozu.flywheel.backend.model.BufferBuilderExtension;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
 import com.mojang.blaze3d.platform.MemoryTracker;

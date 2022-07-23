@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.backend.instancing;
 import java.util.ArrayList;
 import java.util.BitSet;
 
-import com.jozufozu.flywheel.api.InstancedPart;
-import com.jozufozu.flywheel.api.Instancer;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.struct.StructType;
 
 public abstract class AbstractInstancer<D extends InstancedPart> implements Instancer<D> {

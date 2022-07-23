@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 
 /**
