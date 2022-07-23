@@ -11,8 +11,8 @@ import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.BasicModelSupplier;
+import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
-import com.jozufozu.flywheel.core.material.MaterialShaders;
 import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.core.structs.oriented.OrientedPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.entity.BellBlockEntity;
 
 public class BellInstance extends BlockEntityInstance<BellBlockEntity> implements DynamicInstance {
 
-	private static final BasicModelSupplier MODEL = new BasicModelSupplier(BellInstance::createBellModel, new Material(Sheets.solidBlockSheet(), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT));
+	private static final BasicModelSupplier MODEL = new BasicModelSupplier(BellInstance::createBellModel, new Material(Sheets.solidBlockSheet(), Components.Files.SHADED_VERTEX, Components.Files.DEFAULT_FRAGMENT));
 
 	private final OrientedPart bell;
 

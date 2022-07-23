@@ -57,6 +57,9 @@ public class SourceFile {
 	public final ImmutableMap<String, ShaderField> fields;
 	private final List<Span> elisions;
 
+	// POST-RESOLUTION
+	private List<Import> flattenedImports;
+
 	public SourceFile(ErrorReporter errorReporter, ShaderSources parent, ResourceLocation name, String source) {
 		this.parent = parent;
 		this.name = name;
@@ -70,6 +73,37 @@ public class SourceFile {
 		this.functions = parseFunctions();
 		this.structs = parseStructs();
 		this.fields = parseFields();
+	}
+
+	public void postResolve() {
+		this.flattenImports();
+	}
+
+	private void flattenImports() {
+		// somebody #used us and got resolved before we did
+		if (this.flattenedImports != null) {
+			return;
+		}
+
+		if (this.imports.isEmpty()) {
+			this.flattenedImports = Collections.emptyList();
+			return;
+		}
+
+		List<Import> flat = new ArrayList<>(this.imports.size());
+
+		for (Import include : this.imports) {
+			SourceFile file = include.resolution.getFile();
+
+			file.flattenImports();
+
+			flat.addAll(file.flattenedImports);
+			flat.add(include);
+		}
+
+		this.flattenedImports = flat.stream()
+				.distinct()
+				.toList();
 	}
 
 	public Span getLineSpan(int line) {
@@ -95,16 +129,23 @@ public class SourceFile {
 	 * @param name The name of the struct to find.
 	 * @return null if no definition matches the name.
 	 */
-	public Optional<ShaderStruct> findStruct(CharSequence name) {
-		ShaderStruct struct = structs.get(name.toString());
+	public Optional<ShaderStruct> findStruct(String name) {
+		ShaderStruct struct = structs.get(name);
 
 		if (struct != null) return Optional.of(struct);
 
-		for (Import include : imports) {
-			Optional<ShaderStruct> externalStruct = include.getOptional()
-					.flatMap(file -> file.findStruct(name));
+		for (Import include : flattenedImports) {
+			var file = include.getFile();
 
-			if (externalStruct.isPresent()) return externalStruct;
+			if (file == null) {
+				continue;
+			}
+
+			var external = file.structs.get(name);
+
+			if (external != null) {
+				return Optional.of(external);
+			}
 		}
 
 		return Optional.empty();
@@ -116,16 +157,23 @@ public class SourceFile {
 	 * @param name The name of the function to find.
 	 * @return Optional#empty() if no definition matches the name.
 	 */
-	public Optional<ShaderFunction> findFunction(CharSequence name) {
-		ShaderFunction local = functions.get(name.toString());
+	public Optional<ShaderFunction> findFunction(String name) {
+		ShaderFunction local = functions.get(name);
 
 		if (local != null) return Optional.of(local);
 
 		for (Import include : imports) {
-			Optional<ShaderFunction> external = include.getOptional()
-					.flatMap(file -> file.findFunction(name));
+			var file = include.getFile();
 
-			if (external.isPresent()) return external;
+			if (file == null) {
+				continue;
+			}
+
+			var external = file.functions.get(name);
+
+			if (external != null) {
+				return Optional.of(external);
+			}
 		}
 
 		return Optional.empty();
@@ -135,38 +183,44 @@ public class SourceFile {
 		return "#use " + '"' + name + '"';
 	}
 
-	public void generateFinalSource(FileIndex env, StringBuilder source) {
-		generateFinalSource(env, source, Collections.emptyList());
+	public String generateFinalSource(CompilationContext env) {
+		return generateFinalSource(env, Collections.emptyList());
 	}
 
-	public void generateFinalSource(FileIndex env, StringBuilder source, List<Pair<Span, String>> replacements) {
-		for (Import include : imports) {
+	public String generateFinalSource(CompilationContext env, List<Pair<Span, String>> replacements) {
+		var out = new StringBuilder();
+		for (Import include : flattenedImports) {
 			SourceFile file = include.getFile();
 
-			if (file != null && !env.exists(file)) {
-				file.generateFinalSource(env, source, replacements);
+			if (file == null || env.contains(file)) {
+				continue;
 			}
+
+			out.append(file.generateLineHeader(env))
+					.append(file.replaceAndElide(replacements));
 		}
 
-		source.append("#line ")
-				.append(0)
-				.append(' ')
-				.append(env.getFileID(this))
-				.append(" // ")
-				.append(name)
-				.append('\n');
+		out.append(this.generateLineHeader(env))
+				.append(this.replaceAndElide(replacements));
 
-		var replacementsAndElisions = new ArrayList<>(replacements);
-		for (Span elision : elisions) {
-			replacementsAndElisions.add(Pair.of(elision, ""));
-		}
+		return out.toString();
+	}
 
-		source.append(this.replace(replacementsAndElisions));
-		source.append('\n');
+	private String generateLineHeader(CompilationContext env) {
+		return "#line " + 0 + ' ' + env.getFileID(this) + " // " + name + '\n';
 	}
 
 	public String printSource() {
 		return "Source for shader '" + name + "':\n" + lines.printLinesWithNumbers();
+	}
+
+	private CharSequence replaceAndElide(List<Pair<Span, String>> replacements) {
+		var replacementsAndElisions = new ArrayList<>(replacements);
+		for (var include : imports) {
+			replacementsAndElisions.add(Pair.of(include.self, ""));
+		}
+
+		return this.replace(replacementsAndElisions);
 	}
 
 	private CharSequence replace(List<Pair<Span, String>> replacements) {
@@ -276,7 +330,7 @@ public class SourceFile {
 		Matcher uses = Import.PATTERN.matcher(source);
 
 		Set<String> importedFiles = new HashSet<>();
-		List<Import> imports = new ArrayList<>();
+		var imports = ImmutableList.<Import>builder();
 
 		while (uses.find()) {
 			Span use = Span.fromMatcher(this, uses);
@@ -284,17 +338,14 @@ public class SourceFile {
 
 			String fileName = file.get();
 			if (importedFiles.add(fileName)) {
-				// FIXME: creating imports after the first resource reload crashes the game
 				var checked = Import.create(errorReporter, use, file);
 				if (checked != null) {
 					imports.add(checked);
 				}
 			}
-
-			this.elisions.add(use); // we have to trim that later
 		}
 
-		return ImmutableList.copyOf(imports);
+		return imports.build();
 	}
 
 	/**

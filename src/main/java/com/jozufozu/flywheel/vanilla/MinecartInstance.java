@@ -5,12 +5,11 @@ import org.jetbrains.annotations.NotNull;
 import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
-import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
 import com.jozufozu.flywheel.core.BasicModelSupplier;
+import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.Models;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
-import com.jozufozu.flywheel.core.material.MaterialShaders;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.core.structs.model.TransformedPart;
@@ -19,9 +18,7 @@ import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.block.RenderShape;
@@ -30,8 +27,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance<T> implements DynamicInstance, TickableInstance {
 
-	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
-	private static final BasicModelSupplier MODEL = new BasicModelSupplier(MinecartInstance::getBodyModel, new Material(RenderType.entitySolid(MINECART_LOCATION), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT));
+	private static final BasicModelSupplier MODEL = new BasicModelSupplier(MinecartInstance::getBodyModel, Materials.MINECART);
 
 	private final PoseStack stack = new PoseStack();
 

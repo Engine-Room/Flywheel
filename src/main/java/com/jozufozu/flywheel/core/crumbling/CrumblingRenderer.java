@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
-import com.jozufozu.flywheel.core.Contexts;
+import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
@@ -153,15 +153,15 @@ public class CrumblingRenderer {
 		}
 	}
 
-	private static class CrumblingEngine extends InstancingEngine<CrumblingProgram> {
+	private static class CrumblingEngine extends InstancingEngine {
 		private RenderType currentLayer;
 
 		public CrumblingEngine() {
-			super(Contexts.CRUMBLING);
+			super(Components.CRUMBLING);
 		}
 
 		@Override
-		protected void render(RenderType type, double camX, double camY, double camZ, Matrix4f viewProjection, ClientLevel level) {
+		protected void render(RenderType type) {
 			if (!type.affectsCrumbling()) {
 				return;
 			}
@@ -172,7 +172,7 @@ public class CrumblingRenderer {
 				return;
 			}
 
-			render(currentLayer, multimap, camX, camY, camZ, viewProjection, level);
+			render(currentLayer, multimap);
 		}
 	}
 }

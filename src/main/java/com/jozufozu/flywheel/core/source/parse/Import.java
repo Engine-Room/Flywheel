@@ -17,7 +17,7 @@ public class Import extends AbstractShaderElement {
 
 	public static final Pattern PATTERN = Pattern.compile("^\\s*#\\s*use\\s+\"(.*)\"", Pattern.MULTILINE);
 
-	private final FileResolution resolution;
+	public final FileResolution resolution;
 
 	protected Import(Span self, FileResolution resolution, Span file) {
 		super(self);
@@ -34,11 +34,7 @@ public class Import extends AbstractShaderElement {
 			return null;
 		}
 
-		return new Import(self, FileResolution.get(fileLocation), file);
-	}
-
-	public FileResolution getResolution() {
-		return resolution;
+		return new Import(self, FileResolution.weak(fileLocation), file);
 	}
 
 	public Optional<SourceFile> getOptional() {

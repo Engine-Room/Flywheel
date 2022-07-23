@@ -12,8 +12,8 @@ import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.BasicModelSupplier;
+import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
-import com.jozufozu.flywheel.core.material.MaterialShaders;
 import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.core.structs.model.TransformedPart;
 import com.jozufozu.flywheel.core.structs.oriented.OrientedPart;
@@ -25,7 +25,6 @@ import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.Material;
 import net.minecraft.world.level.block.AbstractChestBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ChestBlock;
@@ -37,15 +36,14 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends BlockEntityInstance<T> implements DynamicInstance {
 
-	private static final com.jozufozu.flywheel.api.material.Material CHEST_MATERIAL = new com.jozufozu.flywheel.api.material.Material(Sheets.chestSheet(), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT);
-	private static final BiFunction<ChestType, Material, BasicModelSupplier> LID = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createLidModel(type, mat.sprite()), CHEST_MATERIAL));
-	private static final BiFunction<ChestType, Material, BasicModelSupplier> BASE = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createBaseModel(type, mat.sprite()), CHEST_MATERIAL));
+	private static final BiFunction<ChestType, TextureAtlasSprite, BasicModelSupplier> LID = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createLidModel(type, mat), Materials.CHEST));
+	private static final BiFunction<ChestType, TextureAtlasSprite, BasicModelSupplier> BASE = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createBaseModel(type, mat), Materials.CHEST));
 
 	private final OrientedPart body;
 	private final TransformedPart lid;
 
 	private final Float2FloatFunction lidProgress;
-	private final Material renderMaterial;
+	private final TextureAtlasSprite sprite;
 	@NotNull
 	private final ChestType chestType;
 	private final Quaternion baseRotation;
@@ -58,7 +56,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Block
 		Block block = blockState.getBlock();
 
 		chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
-		renderMaterial = Sheets.chooseMaterial(blockEntity, chestType, isChristmas());
+		sprite = Sheets.chooseMaterial(blockEntity, chestType, isChristmas()).sprite();
 
 		body = baseInstance()
 				.setPosition(getInstancePosition());
@@ -126,14 +124,14 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Block
 	private OrientedPart baseInstance() {
 
 		return instancerManager.factory(StructTypes.ORIENTED)
-				.model(BASE.apply(chestType, renderMaterial))
+				.model(BASE.apply(chestType, sprite))
 				.createInstance();
 	}
 
 	private TransformedPart lidInstance() {
 
 		return instancerManager.factory(StructTypes.TRANSFORMED)
-				.model(LID.apply(chestType, renderMaterial))
+				.model(LID.apply(chestType, sprite))
 				.createInstance();
 	}
 

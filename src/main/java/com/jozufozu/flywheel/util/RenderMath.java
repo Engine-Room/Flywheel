@@ -50,26 +50,6 @@ public class RenderMath {
 		return Math.sqrt(lengthSqr(x, y, z));
 	}
 
-	public static float rad(double angle) {
-		if (angle == 0) return 0;
-		return (float) (angle / 180 * Math.PI);
-	}
-
-	public static float deg(double angle) {
-		if (angle == 0) return 0;
-		return (float) (angle * 180 / Math.PI);
-	}
-
-	public static float angleLerp(double pct, double current, double target) {
-		return (float) (current + getShortestAngleDiff(current, target) * pct);
-	}
-
-	public static float getShortestAngleDiff(double current, double target) {
-		current = current % 360;
-		target = target % 360;
-		return (float) (((((target - current) % 360) + 540) % 360) - 180);
-	}
-
 	public static float diffuseLight(float x, float y, float z, boolean shaded) {
 		if (!shaded) {
 			return 1f;

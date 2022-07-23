@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.core.compile;
 
 import org.lwjgl.opengl.GL20;
 
-import com.jozufozu.flywheel.core.source.FileIndex;
+import com.jozufozu.flywheel.core.source.CompilationContext;
 import com.jozufozu.flywheel.core.source.ShaderLoadingException;
 
 public class ShaderCompilationException extends ShaderLoadingException {
@@ -16,11 +16,11 @@ public class ShaderCompilationException extends ShaderLoadingException {
 		this.shaderHandle = shaderHandle;
 	}
 
-	public ShaderLoadingException withErrorLog(FileIndex fileIndex) {
+	public ShaderLoadingException withErrorLog(CompilationContext ctx) {
 		if (this.shaderHandle == -1)
 			return this;
 
-		this.errors = fileIndex.parseErrors(GL20.glGetShaderInfoLog(this.shaderHandle));
+		this.errors = ctx.parseErrors(GL20.glGetShaderInfoLog(this.shaderHandle));
 
 		return this;
 	}

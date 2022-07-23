@@ -7,11 +7,10 @@ import java.util.function.Function;
 import com.jozufozu.flywheel.api.InstancedPart;
 import com.jozufozu.flywheel.api.InstancerManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
-import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.core.BasicModelSupplier;
+import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
-import com.jozufozu.flywheel.core.material.MaterialShaders;
 import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.core.structs.model.TransformedPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
@@ -21,7 +20,6 @@ import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.Util;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
@@ -31,9 +29,8 @@ import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
 public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntity> implements DynamicInstance {
 
-	private static final Material SHULKER_BOX_MATERIAL = new Material(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET), MaterialShaders.SHADED_VERTEX, MaterialShaders.DEFAULT_FRAGMENT);
-	private static final Function<TextureAtlasSprite, BasicModelSupplier> BASE = Util.memoize(it -> new BasicModelSupplier(() -> makeBaseModel(it), SHULKER_BOX_MATERIAL));
-	private static final Function<TextureAtlasSprite, BasicModelSupplier> LID = Util.memoize(it -> new BasicModelSupplier(() -> makeLidModel(it), SHULKER_BOX_MATERIAL));
+	private static final Function<TextureAtlasSprite, BasicModelSupplier> BASE = Util.memoize(it -> new BasicModelSupplier(() -> makeBaseModel(it), Materials.SHULKER));
+	private static final Function<TextureAtlasSprite, BasicModelSupplier> LID = Util.memoize(it -> new BasicModelSupplier(() -> makeLidModel(it), Materials.SHULKER));
 
 	private final TextureAtlasSprite texture;
 

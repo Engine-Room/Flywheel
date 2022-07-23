@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import com.jozufozu.flywheel.core.source.error.ErrorBuilder;
 import com.jozufozu.flywheel.core.source.span.Span;
 
-public class FileIndex {
+public class CompilationContext {
 	public final List<SourceFile> files = new ArrayList<>();
 
 	/**
@@ -27,7 +27,7 @@ public class FileIndex {
 		return size;
 	}
 
-	public boolean exists(SourceFile sourceFile) {
+	public boolean contains(SourceFile sourceFile) {
 		return files.contains(sourceFile);
 	}
 

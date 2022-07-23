@@ -88,9 +88,9 @@ public abstract class GlProgram extends GlObject {
 	/**
 	 * A factory interface to create a {@link GlProgram}.
 	 */
-	public interface Factory<P extends GlProgram> {
+	public interface Factory {
 
 		@NotNull
-		P create(ResourceLocation name, int handle);
+		GlProgram create(ResourceLocation name, int handle);
 	}
 }

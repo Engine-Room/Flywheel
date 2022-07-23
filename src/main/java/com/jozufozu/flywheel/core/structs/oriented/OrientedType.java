@@ -4,11 +4,11 @@ import java.nio.ByteBuffer;
 
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
+import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
 import com.jozufozu.flywheel.core.model.ModelTransformer;
 import com.jozufozu.flywheel.core.source.FileResolution;
-import com.jozufozu.flywheel.core.structs.InstanceShaders;
 import com.mojang.math.Quaternion;
 
 public class OrientedType implements StructType<OrientedPart> {
@@ -35,7 +35,7 @@ public class OrientedType implements StructType<OrientedPart> {
 
 	@Override
 	public FileResolution getInstanceShader() {
-		return InstanceShaders.ORIENTED;
+		return Components.Files.ORIENTED;
 	}
 
 	@Override

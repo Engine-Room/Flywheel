@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.core.compile;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.CoreShaderInfoMap;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
@@ -22,32 +22,19 @@ import com.jozufozu.flywheel.event.ReloadRenderersEvent;
  *     A ProgramCompiler is also responsible for deleting programs and shaders on renderer reload.
  * </p>
  */
-public class ProgramCompiler<P extends GlProgram> extends Memoizer<ProgramCompiler.Context, P> {
+public class ProgramCompiler extends Memoizer<ProgramCompiler.Context, GlProgram> {
 
-	private static final List<ProgramCompiler<?>> ALL_COMPILERS = new ArrayList<>();
+	public static final ProgramCompiler INSTANCE = new ProgramCompiler();
+	private static final List<ProgramCompiler> ALL_COMPILERS = new ArrayList<>();
 
-	private final GlProgram.Factory<P> factory;
 	private final VertexCompiler vertexCompiler;
 	private final FragmentCompiler fragmentCompiler;
 
-	public ProgramCompiler(GlProgram.Factory<P> factory, VertexCompiler vertexCompiler, FragmentCompiler fragmentCompiler) {
-		this.factory = factory;
-		this.vertexCompiler = vertexCompiler;
-		this.fragmentCompiler = fragmentCompiler;
+	public ProgramCompiler() {
+		this.vertexCompiler = new VertexCompiler();
+		this.fragmentCompiler = new FragmentCompiler();
 
 		ALL_COMPILERS.add(this);
-	}
-
-	/**
-	 * Creates a program compiler using provided templates and headers.
-	 * @param factory A factory to add meaning to compiled programs.
-	 * @param vertexContextShader The context shader to use when compiling vertex shaders.
-	 * @param fragmentContextShader The context shader to use when compiling fragment shaders.
-	 * @param <P> The type of program to compile.
-	 * @return A program compiler.
-	 */
-	public static <P extends GlProgram> ProgramCompiler<P> create(GlProgram.Factory<P> factory, FileResolution vertexContextShader, FileResolution fragmentContextShader, GLSLVersion glslVersion) {
-		return new ProgramCompiler<>(factory, new VertexCompiler(vertexContextShader, glslVersion), new FragmentCompiler(fragmentContextShader, glslVersion));
 	}
 
 	/**
@@ -56,7 +43,7 @@ public class ProgramCompiler<P extends GlProgram> extends Memoizer<ProgramCompil
 	 * @param ctx The context of compilation.
 	 * @return A compiled GlProgram.
 	 */
-	public P getProgram(Context ctx) {
+	public GlProgram getProgram(ProgramCompiler.Context ctx) {
 		return super.get(ctx);
 	}
 
@@ -68,17 +55,28 @@ public class ProgramCompiler<P extends GlProgram> extends Memoizer<ProgramCompil
 	}
 
 	@Override
-	protected P _create(Context ctx) {
+	protected GlProgram _create(ProgramCompiler.Context ctx) {
 		// TODO: try-catch here to prevent crashing if shaders failed to compile
-		return new ProgramAssembler(ctx.instanceShader().getFileLoc())
-				.attachShader(vertexCompiler.get(new VertexCompiler.Context(ctx.vertexType(), ctx.instanceShader().getFile(), ctx.vertexMaterialShader().getFile(), ctx.ctx())))
-				.attachShader(fragmentCompiler.get(new FragmentCompiler.Context(ctx.fragmentMaterialShader().getFile(), ctx.alphaDiscard(), ctx.fogType(), ctx.ctx())))
+		Material material = ctx.material;
+		StateSnapshot snapshot = ctx.ctx();
+		FileResolution instanceShader = ctx.instanceShader();
+		ContextShader contextShader = ctx.contextShader;
+
+		var vertex = new VertexCompiler.Context(ctx.vertexType(), instanceShader.getFile(), material.getVertexShader(),
+				contextShader.getVertexShader(), snapshot);
+
+		var fragment = new FragmentCompiler.Context(material.getFragmentShader(), contextShader.getFragmentShader(),
+				ctx.alphaDiscard(), ctx.fogType(), snapshot);
+
+		return new ProgramAssembler(instanceShader.getFileLoc())
+				.attachShader(vertexCompiler.get(vertex))
+				.attachShader(fragmentCompiler.get(fragment))
 				.link()
-				.build(this.factory);
+				.build(contextShader.factory());
 	}
 
 	@Override
-	protected void _destroy(P value) {
+	protected void _destroy(GlProgram value) {
 		value.delete();
 	}
 
@@ -89,15 +87,16 @@ public class ProgramCompiler<P extends GlProgram> extends Memoizer<ProgramCompil
 	/**
 	 * Represents the entire context of a program's usage.
 	 *
-	 * @param vertexType             The vertexType the program should be adapted for.
-	 * @param instanceShader         The instance shader to use.
-	 * @param vertexMaterialShader   The vertex material shader to use.
-	 * @param fragmentMaterialShader The fragment material shader to use.
-	 * @param alphaDiscard           Alpha threshold below which pixels are discarded.
-	 * @param fogType                Which type of fog should be applied.
-	 * @param ctx                    A snapshot of the game state.
+	 * @param vertexType      	The vertexType the program should be adapted for.
+	 * @param material        	The material shader to use.
+	 * @param instanceShader	The instance shader to use.
+	 * @param contextShader		The context shader to use.
+	 * @param alphaDiscard    	Alpha threshold below which pixels are discarded.
+	 * @param fogType         	Which type of fog should be applied.
+	 * @param ctx             	A snapshot of the game state.
 	 */
-	public record Context(VertexType vertexType, FileResolution instanceShader, FileResolution vertexMaterialShader,
-						  FileResolution fragmentMaterialShader, float alphaDiscard, CoreShaderInfoMap.CoreShaderInfo.FogType fogType, StateSnapshot ctx) {
+	public record Context(VertexType vertexType, Material material, FileResolution instanceShader,
+						  ContextShader contextShader, float alphaDiscard,
+						  CoreShaderInfoMap.CoreShaderInfo.FogType fogType, StateSnapshot ctx) {
 	}
 }
