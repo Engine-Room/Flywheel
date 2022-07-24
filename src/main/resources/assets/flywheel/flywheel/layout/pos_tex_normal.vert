@@ -8,6 +8,7 @@ void flw_layoutVertex() {
     flw_vertexPos = vec4(_flw_v_pos, 1.0);
     flw_vertexColor = vec4(1.0);
     flw_vertexTexCoord = _flw_v_texCoord;
-    flw_vertexLight = vec2(0.0);
+    flw_vertexOverlay = ivec2(0, 10);
+    flw_vertexLight = vec2(1.0);
     flw_vertexNormal = _flw_v_normal;
 }

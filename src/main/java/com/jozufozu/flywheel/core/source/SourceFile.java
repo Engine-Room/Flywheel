@@ -15,6 +15,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 import com.jozufozu.flywheel.core.source.parse.Import;
+import com.jozufozu.flywheel.core.source.parse.ShaderField;
 import com.jozufozu.flywheel.core.source.parse.ShaderFunction;
 import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
 import com.jozufozu.flywheel.core.source.span.ErrorSpan;

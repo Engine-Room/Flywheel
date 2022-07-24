@@ -7,8 +7,9 @@ import net.minecraft.resources.ResourceLocation;
 public class WorldProgram extends GlProgram {
 
 	// TODO: sampler registry?
-	protected int uBlockAtlas;
-	protected int uLightMap;
+	protected int diffuseTex;
+	protected int overlayTex;
+	protected int lightTex;
 
 	public WorldProgram(ResourceLocation name, int handle) {
 		super(name, handle);
@@ -19,7 +20,8 @@ public class WorldProgram extends GlProgram {
 	}
 
 	protected void registerSamplers() {
-		uBlockAtlas = setSamplerBinding("uBlockAtlas", 0);
-		uLightMap = setSamplerBinding("uLightMap", 2);
+		diffuseTex = setSamplerBinding("flw_diffuseTex", 0);
+		overlayTex = setSamplerBinding("flw_overlayTex", 1);
+		lightTex = setSamplerBinding("flw_lightTex", 2);
 	}
 }

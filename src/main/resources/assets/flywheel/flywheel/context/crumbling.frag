@@ -2,7 +2,7 @@
 #use "flywheel:util/fog.glsl"
 #use "flywheel:uniform/fog.glsl"
 
-uniform sampler2D uCrumblingTex;
+uniform sampler2D flw_diffuseTex;
 
 out vec4 fragColor;
 
@@ -25,8 +25,16 @@ vec2 flattenedPos(vec3 pos, vec3 normal) {
     return (transpose(tbn) * pos).xy + vec2(0.5);
 }
 
+void flw_initFragment() {
+    flw_sampleColor = texture(flw_diffuseTex, flattenedPos(flw_vertexPos.xyz, flw_vertexNormal));
+    // Crumbling ignores vertex colors
+    flw_fragColor = flw_sampleColor;
+    flw_fragOverlay = flw_vertexOverlay;
+    flw_fragLight = flw_vertexLight;
+}
+
 void flw_contextFragment() {
-    vec4 color = texture(uCrumblingTex, flattenedPos(flw_vertexPos.xyz, flw_vertexNormal));
+    vec4 color = flw_fragColor;
 
     #ifdef ALPHA_DISCARD
     if (color.a < ALPHA_DISCARD) {

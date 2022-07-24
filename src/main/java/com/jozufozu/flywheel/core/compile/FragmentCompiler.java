@@ -54,9 +54,11 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 	protected String generateFooter() {
 		return """
 				void main() {
+					flw_initFragment();
+
 					flw_materialFragment();
 
-				    flw_contextFragment();
+					flw_contextFragment();
 				}
 				""";
 	}

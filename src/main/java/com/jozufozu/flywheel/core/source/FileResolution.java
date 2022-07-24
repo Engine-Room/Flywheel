@@ -34,16 +34,18 @@ public class FileResolution {
 	private final List<BiConsumer<ErrorReporter, SourceFile>> checks = new ArrayList<>();
 
 	private final ResourceLocation fileLoc;
+	private final boolean weak;
 
 	private SourceFile file;
 
-	FileResolution(ResourceLocation fileLoc) {
+	private FileResolution(ResourceLocation fileLoc, boolean weak) {
 		this.fileLoc = fileLoc;
+		this.weak = weak;
 	}
 
 	public static FileResolution get(ResourceLocation file) {
 		if (!tooLate) {
-			return ALL.computeIfAbsent(file, FileResolution::new);
+			return ALL.computeIfAbsent(file, loc -> new FileResolution(loc, false));
 		} else {
 			// Lock the map after resolution has run.
 			FileResolution fileResolution = ALL.get(file);
@@ -71,7 +73,7 @@ public class FileResolution {
 			return fileResolution;
 		}
 		// never too late for weak resolutions.
-		return WEAK.computeIfAbsent(file, FileResolution::new);
+		return WEAK.computeIfAbsent(file, loc -> new FileResolution(loc, true));
 	}
 
 	/**
@@ -132,6 +134,10 @@ public class FileResolution {
 	 */
 	public SourceFile getFile() {
 		return file;
+	}
+
+	public boolean isWeak() {
+		return weak;
 	}
 
 	/**

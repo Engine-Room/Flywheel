@@ -17,7 +17,6 @@ import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
 import com.jozufozu.flywheel.util.Lazy;
-import com.mojang.math.Matrix4f;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;

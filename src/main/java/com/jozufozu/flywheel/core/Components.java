@@ -95,7 +95,7 @@ public class Components {
 		public static final BiConsumer<ErrorReporter, SourceFile> MATERIAL_VERTEX = SourceChecks.checkFunctionArity("flw_materialVertex", 0);
 		public static final BiConsumer<ErrorReporter, SourceFile> MATERIAL_FRAGMENT = SourceChecks.checkFunctionArity("flw_materialFragment", 0);
 		public static final BiConsumer<ErrorReporter, SourceFile> CONTEXT_VERTEX = SourceChecks.checkFunctionArity("flw_contextVertex", 0);
-		public static final BiConsumer<ErrorReporter, SourceFile> CONTEXT_FRAGMENT = SourceChecks.checkFunctionArity("flw_contextFragment", 0);
+		public static final BiConsumer<ErrorReporter, SourceFile> CONTEXT_FRAGMENT = SourceChecks.checkFunctionArity("flw_contextFragment", 0).andThen(SourceChecks.checkFunctionArity("flw_initFragment", 0));
 	}
 
 	public static class Names {
