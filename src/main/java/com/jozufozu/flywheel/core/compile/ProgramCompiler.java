@@ -1,8 +1,5 @@
 package com.jozufozu.flywheel.core.compile;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;

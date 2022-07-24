@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.util;
 
 import java.nio.ByteBuffer;
 
-import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 
 /**

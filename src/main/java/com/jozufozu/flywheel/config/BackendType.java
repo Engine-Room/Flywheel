@@ -26,18 +26,24 @@ public enum BackendType {
 	static {
 		lookup = new HashMap<>();
 		for (BackendType value : values()) {
-			lookup.put(value.name().toLowerCase(Locale.ROOT), value);
+			lookup.put(value.getShortName(), value);
 		}
 	}
 
 	private final String properName;
+	private final String shortName;
 
 	BackendType(String properName) {
 		this.properName = properName;
+		shortName = name().toLowerCase(Locale.ROOT);
 	}
 
 	public String getProperName() {
 		return properName;
+	}
+
+	public String getShortName() {
+		return shortName;
 	}
 
 	@Nullable

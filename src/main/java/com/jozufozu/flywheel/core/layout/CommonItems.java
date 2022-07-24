@@ -15,8 +15,8 @@ public class CommonItems {
 
 	public static final PrimitiveItem RGBA = new PrimitiveItem(GlNumericType.UBYTE, 4, true);
 	public static final PrimitiveItem RGB = new PrimitiveItem(GlNumericType.UBYTE, 3, true);
-	public static final PrimitiveItem LIGHT = new PrimitiveItem(GlNumericType.UBYTE, 2, true);
-	public static final PrimitiveItem LIGHT_SHORT = new PrimitiveItem(GlNumericType.USHORT, 2, true);
+	public static final PrimitiveItem LIGHT = new PrimitiveItem(GlNumericType.UBYTE, 2, false);
+	public static final PrimitiveItem LIGHT_SHORT = new PrimitiveItem(GlNumericType.USHORT, 2, false);
 
 	public static final PrimitiveItem NORMALIZED_BYTE = new PrimitiveItem(GlNumericType.BYTE, 1, true);
 

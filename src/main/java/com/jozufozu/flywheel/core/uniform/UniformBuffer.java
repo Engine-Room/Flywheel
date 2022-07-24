@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLongArray;
 
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.system.MemoryUtil;

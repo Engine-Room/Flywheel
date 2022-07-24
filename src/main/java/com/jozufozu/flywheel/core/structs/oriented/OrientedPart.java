@@ -108,4 +108,3 @@ public class OrientedPart extends ColoredLitPart {
 		return out;
 	}
 }
-

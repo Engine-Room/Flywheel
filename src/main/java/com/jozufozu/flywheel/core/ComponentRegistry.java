@@ -12,7 +12,6 @@ import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.uniform.UniformProvider;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.compile.ContextShader;
-import com.jozufozu.flywheel.core.vertex.BlockVertex;
 
 import net.minecraft.resources.ResourceLocation;
 

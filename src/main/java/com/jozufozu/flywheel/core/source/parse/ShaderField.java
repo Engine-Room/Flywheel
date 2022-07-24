@@ -1,10 +1,9 @@
-package com.jozufozu.flywheel.core.source;
+package com.jozufozu.flywheel.core.source.parse;
 
 import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.core.source.parse.AbstractShaderElement;
 import com.jozufozu.flywheel.core.source.span.Span;
 
 public class ShaderField extends AbstractShaderElement {

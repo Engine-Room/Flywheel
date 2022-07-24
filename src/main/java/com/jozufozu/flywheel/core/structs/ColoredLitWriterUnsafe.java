@@ -16,8 +16,8 @@ public abstract class ColoredLitWriterUnsafe<D extends ColoredLitPart> extends U
 	@Override
 	protected void writeInternal(D d) {
 		long ptr = writePointer;
-		MemoryUtil.memPutByte(ptr, (byte) (d.blockLight << 4));
-		MemoryUtil.memPutByte(ptr + 1, (byte) (d.skyLight << 4));
+		MemoryUtil.memPutByte(ptr, d.blockLight);
+		MemoryUtil.memPutByte(ptr + 1, d.skyLight);
 		MemoryUtil.memPutByte(ptr + 2, d.r);
 		MemoryUtil.memPutByte(ptr + 3, d.g);
 		MemoryUtil.memPutByte(ptr + 4, d.b);

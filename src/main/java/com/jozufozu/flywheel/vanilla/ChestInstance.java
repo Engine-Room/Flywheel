@@ -7,7 +7,6 @@ import java.util.function.BiFunction;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;

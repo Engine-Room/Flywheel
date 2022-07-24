@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.gl;
 
+// TODO: support glVertexAttribIPointer
 /**
  * A bindable attribute in a vertex array.
  *

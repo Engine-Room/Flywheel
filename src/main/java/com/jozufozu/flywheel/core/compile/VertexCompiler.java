@@ -9,8 +9,8 @@ import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.core.shader.StateSnapshot;
 import com.jozufozu.flywheel.core.source.CompilationContext;
-import com.jozufozu.flywheel.core.source.ShaderField;
 import com.jozufozu.flywheel.core.source.SourceFile;
+import com.jozufozu.flywheel.core.source.parse.ShaderField;
 import com.jozufozu.flywheel.core.source.span.Span;
 import com.jozufozu.flywheel.util.Pair;
 

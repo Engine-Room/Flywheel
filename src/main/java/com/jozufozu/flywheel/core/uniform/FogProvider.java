@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.core.uniform;
 
-import java.nio.ByteBuffer;
-
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.uniform.UniformProvider;
