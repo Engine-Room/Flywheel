@@ -1,6 +1,6 @@
 #use "flywheel:api/vertex.glsl"
 
-layout(location = 0) in vec2 transformed_light; // TODO: switch to ivec2
+layout(location = 0) in ivec2 transformed_light;
 layout(location = 1) in vec4 transformed_color;
 layout(location = 2) in mat4 transformed_pose;
 layout(location = 6) in mat3 transformed_normal;

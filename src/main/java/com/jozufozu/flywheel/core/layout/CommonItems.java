@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.core.layout;
 
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
+import com.jozufozu.flywheel.backend.gl.array.VertexAttributeI;
 
 public class CommonItems {
 
@@ -15,8 +16,8 @@ public class CommonItems {
 
 	public static final PrimitiveItem RGBA = new PrimitiveItem(GlNumericType.UBYTE, 4, true);
 	public static final PrimitiveItem RGB = new PrimitiveItem(GlNumericType.UBYTE, 3, true);
-	public static final PrimitiveItem LIGHT = new PrimitiveItem(GlNumericType.UBYTE, 2, false);
-	public static final PrimitiveItem LIGHT_SHORT = new PrimitiveItem(GlNumericType.USHORT, 2, false);
+	public static final PrimitiveItem LIGHT = new PrimitiveItem(new VertexAttributeI(GlNumericType.UBYTE, 2));
+	public static final PrimitiveItem LIGHT_SHORT = new PrimitiveItem(new VertexAttributeI(GlNumericType.USHORT, 2));
 
 	public static final PrimitiveItem NORMALIZED_BYTE = new PrimitiveItem(GlNumericType.BYTE, 1, true);
 

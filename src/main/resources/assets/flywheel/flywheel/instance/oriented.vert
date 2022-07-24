@@ -1,7 +1,7 @@
 #use "flywheel:api/vertex.glsl"
 #use "flywheel:util/quaternion.glsl"
 
-layout(location = 0) in vec2 oriented_light; // TODO: switch to ivec2
+layout(location = 0) in ivec2 oriented_light;
 layout(location = 1) in vec4 oriented_color;
 layout(location = 2) in vec3 oriented_pos;
 layout(location = 3) in vec3 oriented_pivot;
