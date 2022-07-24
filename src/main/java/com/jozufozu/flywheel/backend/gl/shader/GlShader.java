@@ -11,7 +11,6 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.core.compile.ShaderCompilationException;
-import com.jozufozu.flywheel.core.shader.ShaderConstants;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -20,12 +19,10 @@ public class GlShader extends GlObject {
 
 	public final ShaderType type;
 	private final List<ResourceLocation> parts;
-	private final ShaderConstants constants;
 
-	public GlShader(String source, ShaderType type, List<ResourceLocation> parts, ShaderConstants constants) throws ShaderCompilationException {
+	public GlShader(String source, ShaderType type, List<ResourceLocation> parts) throws ShaderCompilationException {
 		this.parts = parts;
 		this.type = type;
-		this.constants = constants;
 		int handle = GL20.glCreateShader(type.glEnum);
 
 		GlCompat.safeShaderSource(handle, source);
@@ -50,7 +47,7 @@ public class GlShader extends GlObject {
 				.map(ResourceLocation::toString)
 				.map(s -> s.replaceAll("/", "_")
 						.replaceAll(":", "\\$"))
-				.collect(Collectors.joining(";")) + ';' + Integer.toHexString(constants.hashCode());
+				.collect(Collectors.joining(";"));
 	}
 
 	private void dumpSource(String source, ShaderType type) {

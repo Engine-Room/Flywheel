@@ -91,6 +91,11 @@ public abstract class AbstractInstance implements Instance, LightListener {
 	}
 
 	@Override
+	public boolean isRemoved() {
+		return removed;
+	}
+
+	@Override
 	public void onLightUpdate(LightLayer type, ImmutableBox changed) {
 		updateLight();
 	}

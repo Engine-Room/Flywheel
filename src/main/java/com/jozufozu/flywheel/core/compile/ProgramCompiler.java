@@ -3,8 +3,6 @@ package com.jozufozu.flywheel.core.compile;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.core.CoreShaderInfoMap;
-import com.jozufozu.flywheel.core.shader.StateSnapshot;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 
@@ -52,15 +50,13 @@ public class ProgramCompiler extends Memoizer<ProgramCompiler.Context, GlProgram
 	protected GlProgram _create(ProgramCompiler.Context ctx) {
 		// TODO: try-catch here to prevent crashing if shaders failed to compile
 		Material material = ctx.material;
-		StateSnapshot snapshot = ctx.ctx();
 		FileResolution instanceShader = ctx.instanceShader();
 		ContextShader contextShader = ctx.contextShader;
 
 		var vertex = new VertexCompiler.Context(ctx.vertexType(), instanceShader.getFile(), material.getVertexShader().getFile(),
-				contextShader.getVertexShader(), snapshot);
+				contextShader.getVertexShader());
 
-		var fragment = new FragmentCompiler.Context(material.getFragmentShader().getFile(), contextShader.getFragmentShader(),
-				ctx.alphaDiscard(), ctx.fogType(), snapshot);
+		var fragment = new FragmentCompiler.Context(material.getFragmentShader().getFile(), contextShader.getFragmentShader());
 
 		return new ProgramAssembler(instanceShader.getFileLoc())
 				.attachShader(vertexCompiler.get(vertex))
@@ -81,16 +77,12 @@ public class ProgramCompiler extends Memoizer<ProgramCompiler.Context, GlProgram
 	/**
 	 * Represents the entire context of a program's usage.
 	 *
-	 * @param vertexType      	The vertexType the program should be adapted for.
-	 * @param material        	The material shader to use.
-	 * @param instanceShader	The instance shader to use.
-	 * @param contextShader		The context shader to use.
-	 * @param alphaDiscard    	Alpha threshold below which pixels are discarded.
-	 * @param fogType         	Which type of fog should be applied.
-	 * @param ctx             	A snapshot of the game state.
+	 * @param vertexType     The vertexType the program should be adapted for.
+	 * @param material       The material shader to use.
+	 * @param instanceShader The instance shader to use.
+	 * @param contextShader  The context shader to use.
 	 */
 	public record Context(VertexType vertexType, Material material, FileResolution instanceShader,
-						  ContextShader contextShader, float alphaDiscard,
-						  CoreShaderInfoMap.CoreShaderInfo.FogType fogType, StateSnapshot ctx) {
+						  ContextShader contextShader) {
 	}
 }

@@ -19,3 +19,16 @@ in vec4 flw_var3;
 vec4 flw_fragColor;
 ivec2 flw_fragOverlay;
 vec2 flw_fragLight;
+
+/*
+ * Must be implemented by materials.
+ */
+vec4 flw_fogFilter(vec4 color);
+
+/*
+ * May be implemented by materials.
+ * If implemented, a material must define FLW_DISCARD
+ *
+ * Guard calls with FLW_DISCARD
+ */
+bool flw_discardPredicate(vec4 finalColor);

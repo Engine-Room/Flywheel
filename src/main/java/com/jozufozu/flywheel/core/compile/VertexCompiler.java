@@ -7,7 +7,6 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
-import com.jozufozu.flywheel.core.shader.StateSnapshot;
 import com.jozufozu.flywheel.core.source.CompilationContext;
 import com.jozufozu.flywheel.core.source.SourceFile;
 import com.jozufozu.flywheel.core.source.parse.ShaderField;
@@ -27,10 +26,6 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 		StringBuilder finalSource = new StringBuilder();
 
 		finalSource.append(CompileUtil.generateHeader(GLSLVersion.V420, ShaderType.VERTEX));
-
-		var shaderConstants = key.ctx.getShaderConstants();
-		shaderConstants.writeInto(finalSource);
-		finalSource.append('\n');
 
 		var index = new CompilationContext();
 
@@ -82,7 +77,7 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 				""");
 
 		try {
-			return new GlShader(finalSource.toString(), ShaderType.VERTEX, ImmutableList.of(layoutShader.name, instanceShader.name, materialShader.name, contextShaderSource.name), shaderConstants);
+			return new GlShader(finalSource.toString(), ShaderType.VERTEX, ImmutableList.of(layoutShader.name, instanceShader.name, materialShader.name, contextShaderSource.name));
 		} catch (ShaderCompilationException e) {
 			throw e.withErrorLog(index);
 		}
@@ -98,8 +93,7 @@ public class VertexCompiler extends Memoizer<VertexCompiler.Context, GlShader> {
 	 * @param instanceShader The instance shader source.
 	 * @param materialShader The vertex material shader source.
 	 * @param contextShader The context shader source.
-	 * @param ctx The shader constants to apply.
 	 */
-	public record Context(VertexType vertexType, SourceFile instanceShader, SourceFile materialShader, SourceFile contextShader, StateSnapshot ctx) {
+	public record Context(VertexType vertexType, SourceFile instanceShader, SourceFile materialShader, SourceFile contextShader) {
 	}
 }

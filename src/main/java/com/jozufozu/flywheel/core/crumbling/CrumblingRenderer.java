@@ -145,14 +145,5 @@ public class CrumblingRenderer {
 		public CrumblingEngine() {
 			super(Components.CRUMBLING);
 		}
-
-		@Override
-		protected void render(RenderType type, ListMultimap<ShaderState, DrawCall> multimap) {
-			if (!type.affectsCrumbling()) {
-				return;
-			}
-
-			super.render(type, multimap);
-		}
 	}
 }

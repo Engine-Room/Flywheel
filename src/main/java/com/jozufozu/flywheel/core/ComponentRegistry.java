@@ -16,44 +16,55 @@ import com.jozufozu.flywheel.core.compile.ContextShader;
 import net.minecraft.resources.ResourceLocation;
 
 public class ComponentRegistry {
+	private static final Registry<UniformProvider> uniformProviders = new Registry<>();
 
-	private static final Set<ResourceLocation> uniformProviderFiles = new HashSet<>();
-	private static final List<UniformProvider> uniformProviders = new ArrayList<>();
+	public static final Set<Material> materials = new HashSet<>();
+	public static final Set<StructType<?>> structTypes = new HashSet<>();
+	public static final Set<VertexType> vertexTypes = new HashSet<>();
+	public static final Set<ContextShader> contextShaders = new HashSet<>();
 
 	// TODO: fill out the rest of the registry
 
 	public static <T extends Material> T register(T material) {
+		materials.add(material);
 		return material;
 	}
 
 	public static <T extends StructType<?>> T register(T type) {
-
+		structTypes.add(type);
 		return type;
 	}
 
 	public static <T extends VertexType> T register(T vertexType) {
+		vertexTypes.add(vertexType);
 		return vertexType;
 	}
 
 	public static ContextShader register(ContextShader contextShader) {
+		contextShaders.add(contextShader);
 		return contextShader;
 	}
 
 	public static <T extends UniformProvider> T register(T provider) {
-
-		var file = provider.getUniformShader();
-
-		ResourceLocation location = file.getFileLoc();
-		if (uniformProviderFiles.contains(location)) {
-			throw new IllegalArgumentException("UniformProvider for '" + location + "' already registered");
-		}
-
-		uniformProviderFiles.add(location);
-		uniformProviders.add(provider);
-		return provider;
+		return uniformProviders.register(provider.getUniformShader()
+				.getFileLoc(), provider);
 	}
 
 	public static Collection<UniformProvider> getAllUniformProviders() {
-		return Collections.unmodifiableCollection(uniformProviders);
+		return Collections.unmodifiableCollection(uniformProviders.objects);
+	}
+
+	private static class Registry<T> {
+		private final Set<ResourceLocation> files = new HashSet<>();
+		private final List<T> objects = new ArrayList<>();
+
+		public <O extends T> O register(ResourceLocation loc, O object) {
+			if (files.contains(loc)) {
+				throw new IllegalArgumentException("Shader file already registered: " + loc);
+			}
+			files.add(loc);
+			objects.add(object);
+			return object;
+		}
 	}
 }

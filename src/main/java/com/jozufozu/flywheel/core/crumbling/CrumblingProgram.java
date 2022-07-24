@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.core.crumbling;
 
-import com.jozufozu.flywheel.core.shader.WorldProgram;
+import com.jozufozu.flywheel.core.WorldProgram;
 
 import net.minecraft.resources.ResourceLocation;
 

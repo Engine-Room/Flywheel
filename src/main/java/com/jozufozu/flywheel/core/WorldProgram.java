@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.shader;
+package com.jozufozu.flywheel.core;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 

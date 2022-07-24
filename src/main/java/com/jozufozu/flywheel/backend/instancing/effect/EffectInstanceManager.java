@@ -11,6 +11,7 @@ import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
+import com.jozufozu.flywheel.backend.instancing.AbstractStorage;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.Storage;
 import com.jozufozu.flywheel.light.LightUpdater;
@@ -33,18 +34,13 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 		return true;
 	}
 
-	public static class EffectStorage<T extends Effect> implements Storage<T> {
+	public static class EffectStorage<T extends Effect> extends AbstractStorage<T> {
 
 		private final Multimap<T, AbstractInstance> instances;
-		private final Set<DynamicInstance> dynamicInstances;
-		private final Set<TickableInstance> tickableInstances;
-		private final InstancerManager manager;
 
 		public EffectStorage(InstancerManager manager) {
+			super(manager);
 			this.instances = HashMultimap.create();
-			this.dynamicInstances = new HashSet<>();
-			this.tickableInstances = new HashSet<>();
-			this.manager = manager;
 		}
 
 		@Override
@@ -55,16 +51,6 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 		@Override
 		public Iterable<AbstractInstance> allInstances() {
 			return instances.values();
-		}
-
-		@Override
-		public List<TickableInstance> getInstancesForTicking() {
-			return new ArrayList<>(tickableInstances);
-		}
-
-		@Override
-		public List<DynamicInstance> getInstancesForUpdate() {
-			return new ArrayList<>(dynamicInstances);
 		}
 
 		@Override
@@ -123,27 +109,11 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 		}
 
 		private void create(T obj) {
-			var instances = obj.createInstances(manager);
+			var instances = obj.createInstances(instancerManager);
 
 			this.instances.putAll(obj, instances);
 
 			instances.forEach(this::setup);
-		}
-
-		private void setup(AbstractInstance renderer) {
-			renderer.init();
-			renderer.updateLight();
-			LightUpdater.get(renderer.level)
-					.addListener(renderer);
-			if (renderer instanceof TickableInstance r) {
-				tickableInstances.add(r);
-				r.tick();
-			}
-
-			if (renderer instanceof DynamicInstance r) {
-				dynamicInstances.add(r);
-				r.beginFrame();
-			}
 		}
 	}
 }
