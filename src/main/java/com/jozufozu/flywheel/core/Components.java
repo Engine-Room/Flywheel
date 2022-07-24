@@ -5,7 +5,6 @@ import java.util.function.BiConsumer;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.core.compile.ContextShader;
 import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
-import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.SourceChecks;
 import com.jozufozu.flywheel.core.source.SourceFile;
@@ -24,7 +23,7 @@ public class Components {
 	public static final ViewProvider VIEW_PROVIDER = ComponentRegistry.register(new ViewProvider());
 	public static final FogProvider FOG_PROVIDER = ComponentRegistry.register(new FogProvider());
 	public static final ContextShader WORLD = ComponentRegistry.register(new ContextShader(WorldProgram::new, Files.WORLD_VERTEX, Files.WORLD_FRAGMENT));
-	public static final ContextShader CRUMBLING = ComponentRegistry.register(new ContextShader(CrumblingProgram::new, Files.CRUMBLING_VERTEX, Files.CRUMBLING_FRAGMENT));
+	public static final ContextShader CRUMBLING = ComponentRegistry.register(new ContextShader(CrumblingProgram::new, Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT));
 
 	public static void init() {
 		Files.init();
@@ -42,43 +41,44 @@ public class Components {
 		public static final FileResolution TRANSFORMED = instanceVertex(ResourceUtil.subPath(Names.TRANSFORMED, ".vert"));
 		public static final FileResolution ORIENTED = instanceVertex(ResourceUtil.subPath(Names.ORIENTED, ".vert"));
 		public static final FileResolution DEFAULT_VERTEX = materialVertex(ResourceUtil.subPath(Names.DEFAULT, ".vert"));
-		public static final FileResolution DEFAULT_FRAGMENT = materialFragment(ResourceUtil.subPath(Names.DEFAULT, ".frag"));
 		public static final FileResolution SHADED_VERTEX = materialVertex(ResourceUtil.subPath(Names.SHADED, ".vert"));
+		public static final FileResolution DEFAULT_FRAGMENT = materialFragment(ResourceUtil.subPath(Names.DEFAULT, ".frag"));
+		public static final FileResolution CUTOUT_FRAGMENT = materialFragment(ResourceUtil.subPath(Names.CUTOUT, ".frag"));
 		public static final FileResolution WORLD_VERTEX = contextVertex(ResourceUtil.subPath(Names.WORLD, ".vert"));
 		public static final FileResolution WORLD_FRAGMENT = contextFragment(ResourceUtil.subPath(Names.WORLD, ".frag"));
 		public static final FileResolution CRUMBLING_VERTEX = contextVertex(ResourceUtil.subPath(Names.CRUMBLING, ".vert"));
 		public static final FileResolution CRUMBLING_FRAGMENT = contextFragment(ResourceUtil.subPath(Names.CRUMBLING, ".frag"));
 
-		public static FileResolution uniform(ResourceLocation location) {
+		private static FileResolution uniform(ResourceLocation location) {
 			return FileResolution.get(location);
 		}
 
-		public static FileResolution layoutVertex(ResourceLocation location) {
+		private static FileResolution layoutVertex(ResourceLocation location) {
 			return FileResolution.get(location)
 					.validateWith(Checks.LAYOUT_VERTEX);
 		}
 
-		public static FileResolution instanceVertex(ResourceLocation location) {
+		private static FileResolution instanceVertex(ResourceLocation location) {
 			return FileResolution.get(location)
 					.validateWith(Checks.INSTANCE_VERTEX);
 		}
 
-		public static FileResolution materialVertex(ResourceLocation location) {
+		private static FileResolution materialVertex(ResourceLocation location) {
 			return FileResolution.get(location)
 					.validateWith(Checks.MATERIAL_VERTEX);
 		}
 
-		public static FileResolution materialFragment(ResourceLocation location) {
+		private static FileResolution materialFragment(ResourceLocation location) {
 			return FileResolution.get(location)
 					.validateWith(Checks.MATERIAL_FRAGMENT);
 		}
 
-		public static FileResolution contextVertex(ResourceLocation location) {
+		private static FileResolution contextVertex(ResourceLocation location) {
 			return FileResolution.get(location)
 					.validateWith(Checks.CONTEXT_VERTEX);
 		}
 
-		public static FileResolution contextFragment(ResourceLocation location) {
+		private static FileResolution contextFragment(ResourceLocation location) {
 			return FileResolution.get(location)
 					.validateWith(Checks.CONTEXT_FRAGMENT);
 		}
@@ -106,6 +106,7 @@ public class Components {
 		public static final ResourceLocation ORIENTED = Flywheel.rl("instance/oriented");
 
 		public static final ResourceLocation DEFAULT = Flywheel.rl("material/default");
+		public static final ResourceLocation CUTOUT = Flywheel.rl("material/cutout");
 		public static final ResourceLocation SHADED = Flywheel.rl("material/shaded");
 		public static final ResourceLocation WORLD = Flywheel.rl("context/world");
 		public static final ResourceLocation CRUMBLING = Flywheel.rl("context/crumbling");

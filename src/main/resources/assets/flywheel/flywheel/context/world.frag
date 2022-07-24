@@ -1,6 +1,4 @@
 #use "flywheel:api/fragment.glsl"
-#use "flywheel:util/fog.glsl"
-#use "flywheel:uniform/fog.glsl"
 
 // optimize discard usage
 #ifdef ALPHA_DISCARD
@@ -30,17 +28,11 @@ void flw_contextFragment() {
     color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
     color *= lightColor;
 
-    #ifdef ALPHA_DISCARD
-    if (color.a < ALPHA_DISCARD) {
+    #ifdef FLW_DISCARD
+      if (flw_discardPredicate(color)) {
         discard;
     }
     #endif
 
-    #ifdef COLOR_FOG
-    color = linear_fog(color, flw_distance, flw_fogRange.x, flw_fogRange.y, flw_fogColor);
-    #elif defined(FADE_FOG)
-    color = linear_fog_fade(color, flw_distance, flw_fogRange.x, flw_fogRange.y);
-    #endif
-
-    fragColor = color;
+    fragColor = flw_fogFilter(color);
 }

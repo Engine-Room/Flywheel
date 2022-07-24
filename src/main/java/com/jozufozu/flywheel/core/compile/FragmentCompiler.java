@@ -4,9 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
-import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo.FogType;
-import com.jozufozu.flywheel.core.shader.ShaderConstants;
-import com.jozufozu.flywheel.core.shader.StateSnapshot;
 import com.jozufozu.flywheel.core.source.CompilationContext;
 import com.jozufozu.flywheel.core.source.SourceFile;
 
@@ -23,10 +20,6 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 		StringBuilder finalSource = new StringBuilder();
 
 		finalSource.append(CompileUtil.generateHeader(GLSLVersion.V420, ShaderType.FRAGMENT));
-
-		var shaderConstants = key.getShaderConstants();
-		shaderConstants.writeInto(finalSource);
-		finalSource.append('\n');
 
 		var ctx = new CompilationContext();
 
@@ -45,7 +38,7 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 		finalSource.append(generateFooter());
 
 		try {
-			return new GlShader(finalSource.toString(), ShaderType.FRAGMENT, ImmutableList.of(materialShader.name, contextShaderSource.name), shaderConstants);
+			return new GlShader(finalSource.toString(), ShaderType.FRAGMENT, ImmutableList.of(materialShader.name, contextShaderSource.name));
 		} catch (ShaderCompilationException e) {
 			throw e.withErrorLog(ctx);
 		}
@@ -70,22 +63,10 @@ public class FragmentCompiler extends Memoizer<FragmentCompiler.Context, GlShade
 
 	/**
 	 * Represents the conditions under which a shader is compiled.
+	 *
 	 * @param materialShader The fragment material shader source.
-	 * @param alphaDiscard Alpha threshold below which fragments are discarded.
-	 * @param fogType Which type of fog should be applied.
-	 * @param ctx The shader constants to apply.
 	 */
-	public record Context(SourceFile materialShader, SourceFile contextShader, float alphaDiscard, FogType fogType, StateSnapshot ctx) {
+	public record Context(SourceFile materialShader, SourceFile contextShader) {
 
-		public ShaderConstants getShaderConstants() {
-			ShaderConstants shaderConstants = ctx.getShaderConstants();
-
-			if (alphaDiscard > 0) {
-				shaderConstants.define("ALPHA_DISCARD", alphaDiscard);
-			}
-			shaderConstants.define(fogType.name());
-
-			return shaderConstants;
-		}
 	}
 }

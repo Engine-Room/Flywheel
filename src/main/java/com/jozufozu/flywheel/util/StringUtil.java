@@ -8,12 +8,28 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import org.lwjgl.system.MemoryUtil;
 
 public class StringUtil {
+
+	private static final NumberFormat timeFormat = new DecimalFormat("#0.000");
+
+	public static String formatTime(long ns) {
+		if (ns < 1000) {
+			return ns + " ns";
+		} else if (ns < 1000000) {
+			return timeFormat.format(ns / 1000.) + " μs";
+		} else if (ns < 1000000000) {
+			return timeFormat.format(ns / 1000000.) + " ms";
+		} else {
+			return timeFormat.format(ns / 1000000000.) + " s";
+		}
+	}
 
 	public static String args(String functionName, Object... args) {
 

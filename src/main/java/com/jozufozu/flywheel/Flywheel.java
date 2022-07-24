@@ -12,14 +12,12 @@ import com.jozufozu.flywheel.config.BackendTypeArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.Components;
-import com.jozufozu.flywheel.core.GameStateRegistry;
 import com.jozufozu.flywheel.core.Models;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.QuadConverter;
 import com.jozufozu.flywheel.core.StitchedSprite;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
-import com.jozufozu.flywheel.core.shader.NormalDebugStateProvider;
 import com.jozufozu.flywheel.event.EntityWorldHandler;
 import com.jozufozu.flywheel.event.ForgeEvents;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -110,8 +108,6 @@ public class Flywheel {
 //		forgeEventBus.addListener(ExampleEffect::onReload);
 
 		Components.init();
-
-		GameStateRegistry.register(NormalDebugStateProvider.INSTANCE);
 
 		VanillaInstances.init();
 

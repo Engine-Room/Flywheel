@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,20 +13,12 @@ import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.light.LightUpdater;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-
-public abstract class One2OneStorage<T> implements Storage<T> {
+public abstract class One2OneStorage<T> extends AbstractStorage<T> {
 	private final Map<T, AbstractInstance> instances;
-	private final Object2ObjectOpenHashMap<T, TickableInstance> tickableInstances;
-	private final Object2ObjectOpenHashMap<T, DynamicInstance> dynamicInstances;
-	protected final InstancerManager instancerManager;
 
 	public One2OneStorage(InstancerManager instancerManager) {
-		this.instancerManager = instancerManager;
+		super(instancerManager);
 		this.instances = new HashMap<>();
-
-		this.dynamicInstances = new Object2ObjectOpenHashMap<>();
-		this.tickableInstances = new Object2ObjectOpenHashMap<>();
 	}
 
 	@Override
@@ -36,16 +29,6 @@ public abstract class One2OneStorage<T> implements Storage<T> {
 	@Override
 	public Iterable<AbstractInstance> allInstances() {
 		return instances.values();
-	}
-
-	@Override
-	public List<TickableInstance> getInstancesForTicking() {
-		return new ArrayList<>(tickableInstances.values());
-	}
-
-	@Override
-	public List<DynamicInstance> getInstancesForUpdate() {
-		return new ArrayList<>(dynamicInstances.values());
 	}
 
 	@Override
@@ -74,8 +57,8 @@ public abstract class One2OneStorage<T> implements Storage<T> {
 		}
 
 		instance.remove();
-		dynamicInstances.remove(obj);
-		tickableInstances.remove(obj);
+		dynamicInstances.remove(instance);
+		tickableInstances.remove(instance);
 		LightUpdater.get(instance.level)
 				.removeListener(instance);
 	}
@@ -109,7 +92,7 @@ public abstract class One2OneStorage<T> implements Storage<T> {
 			AbstractInstance out = createRaw(obj);
 
 			if (out != null) {
-				setup(obj, out);
+				setup(out);
 			}
 
 			return out;
@@ -120,7 +103,7 @@ public abstract class One2OneStorage<T> implements Storage<T> {
 		AbstractInstance renderer = createRaw(obj);
 
 		if (renderer != null) {
-			setup(obj, renderer);
+			setup(renderer);
 			instances.put(obj, renderer);
 		}
 
@@ -128,20 +111,4 @@ public abstract class One2OneStorage<T> implements Storage<T> {
 
 	@Nullable
 	protected abstract AbstractInstance createRaw(T obj);
-
-	private void setup(T obj, AbstractInstance renderer) {
-		renderer.init();
-		renderer.updateLight();
-		LightUpdater.get(renderer.level)
-				.addListener(renderer);
-		if (renderer instanceof TickableInstance r) {
-			tickableInstances.put(obj, r);
-			r.tick();
-		}
-
-		if (renderer instanceof DynamicInstance r) {
-			dynamicInstances.put(obj, r);
-			r.beginFrame();
-		}
-	}
 }

@@ -86,7 +86,7 @@ public class GlVertexArray extends GlObject {
 			offsets[i] = offset;
 			strides[i] = stride;
 
-			GL20.glVertexAttribPointer(i++, attribute.size(), attribute.type().getGlEnum(), attribute.normalized(), stride, offset);
+			GL32.glVertexAttribPointer(i++, attribute.size(), attribute.type().getGlEnum(), attribute.normalized(), stride, offset);
 
 			offset += attribute.getByteWidth();
 		}

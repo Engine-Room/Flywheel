@@ -4,4 +4,6 @@ import net.minecraft.core.BlockPos;
 
 public interface Instance {
     BlockPos getWorldPosition();
+
+	boolean isRemoved();
 }

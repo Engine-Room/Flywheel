@@ -29,7 +29,12 @@ public class ShaderSources implements SourceFinder {
 
 	public final Index index;
 
+	public final long loadTimeNs;
+	public final long indexTimeNs;
+	public final long totalTimeNs;
+
 	public ShaderSources(ErrorReporter errorReporter, ResourceManager manager) {
+		long loadStart = System.nanoTime();
 
 		for (ResourceLocation location : getValidShaderFiles(manager)) {
 			try (Resource resource = manager.getResource(location)) {
@@ -42,8 +47,15 @@ public class ShaderSources implements SourceFinder {
 				//
 			}
 		}
+		long loadEnd = System.nanoTime();
 
+		long indexStart = System.nanoTime();
 		index = new Index(shaderSources);
+		long indexEnd = System.nanoTime();
+
+		loadTimeNs = loadEnd - loadStart;
+		indexTimeNs = indexEnd - indexStart;
+		totalTimeNs = indexEnd - loadStart;
 	}
 
 	public void postResolve() {
@@ -66,5 +78,9 @@ public class ShaderSources implements SourceFinder {
 			}
 			return false;
 		});
+	}
+
+	public String getLoadTime() {
+		return StringUtil.formatTime(totalTimeNs);
 	}
 }

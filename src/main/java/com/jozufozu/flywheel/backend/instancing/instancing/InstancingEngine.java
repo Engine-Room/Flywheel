@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.opengl.GL32;
 
 import com.google.common.collect.ListMultimap;
 import com.jozufozu.flywheel.api.RenderStage;
@@ -13,23 +14,21 @@ import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.model.MeshPool;
-import com.jozufozu.flywheel.core.CoreShaderInfoMap.CoreShaderInfo;
-import com.jozufozu.flywheel.core.GameStateRegistry;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.compile.ContextShader;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
-import com.jozufozu.flywheel.core.shader.StateSnapshot;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.uniform.UniformBuffer;
-import com.jozufozu.flywheel.util.Textures;
 import com.jozufozu.flywheel.util.WeakHashSet;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
@@ -73,20 +72,11 @@ public class InstancingEngine implements Engine {
 
 	@Override
 	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
-		if (!renderLists.process(stage)) {
-			return;
-		}
+		var multimap = renderLists.get(stage);
 
-		var renderList = renderLists.get(stage);
-		for (var entry : renderList.entrySet()) {
-			var multimap = entry.getValue();
+		setup();
 
-			if (multimap.isEmpty()) {
-				return;
-			}
-
-			render(entry.getKey(), multimap);
-		}
+		render(multimap);
 	}
 
 	// TODO: Is this useful? Should it be added to the base interface? Currently it is only used for the old CrumblingRenderer.
@@ -96,27 +86,28 @@ public class InstancingEngine implements Engine {
 			return;
 		}
 
-		for (RenderStage stage : renderLists.stagesToProcess) {
-			var renderList = renderLists.get(stage);
-			for (var entry : renderList.entrySet()) {
-				var multimap = entry.getValue();
+		setup();
 
-				if (multimap.isEmpty()) {
-					return;
-				}
-
-				render(entry.getKey(), multimap);
-			}
+		for (var multimap : renderLists.getAll()) {
+			render(multimap);
 		}
-
-		renderLists.stagesToProcess.clear();
 	}
 
-	protected void render(RenderType type, ListMultimap<ShaderState, DrawCall> multimap) {
-		type.setupRenderState();
-		Textures.bindActiveTextures();
-		CoreShaderInfo coreShaderInfo = CoreShaderInfo.get();
-		StateSnapshot state = GameStateRegistry.takeSnapshot();
+	private void setup() {
+		GlTextureUnit.T2.makeActive();
+		Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
+
+		RenderSystem.depthMask(true);
+		RenderSystem.colorMask(true, true, true, true);
+		RenderSystem.enableDepthTest();
+		RenderSystem.depthFunc(GL32.GL_LEQUAL);
+		RenderSystem.enableCull();
+	}
+
+	protected void render(ListMultimap<ShaderState, DrawCall> multimap) {
+		if (multimap.isEmpty()) {
+			return;
+		}
 
 		for (var entry : multimap.asMap().entrySet()) {
 			var shader = entry.getKey();
@@ -128,28 +119,29 @@ public class InstancingEngine implements Engine {
 				continue;
 			}
 
-			setup(shader, coreShaderInfo, state);
+			setup(shader);
+
+			shader.material().setup();
 
 			for (var drawCall : drawCalls) {
 				drawCall.render();
 			}
 
+			shader.material().clear();
 		}
-
-		type.clearRenderState();
 	}
 
-	protected void setup(ShaderState desc, CoreShaderInfo coreShaderInfo, StateSnapshot ctx) {
+	protected void setup(ShaderState desc) {
 
 		VertexType vertexType = desc.vertex();
 		FileResolution instanceShader = desc.instance()
 				.getInstanceShader();
 		Material material = desc.material();
 
-		var program = ProgramCompiler.INSTANCE.getProgram(new ProgramCompiler.Context(vertexType, material,
-				instanceShader, context, coreShaderInfo.getAdjustedAlphaDiscard(), coreShaderInfo.fogType(), ctx));
+		var ctx = new ProgramCompiler.Context(vertexType, material, instanceShader, context);
 
-		program.bind();
+		ProgramCompiler.INSTANCE.getProgram(ctx)
+				.bind();
 		UniformBuffer.getInstance().sync();
 	}
 
@@ -196,8 +188,6 @@ public class InstancingEngine implements Engine {
 			model.init(renderLists);
 		}
 		uninitializedModels.clear();
-
-		renderLists.prepare();
 
 		MeshPool.getInstance()
 				.flush();

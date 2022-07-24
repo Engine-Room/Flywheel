@@ -12,6 +12,7 @@ public class BatchLists {
 	public final Map<RenderType, List<TransformSet<?>>> renderLists = new HashMap<>();
 
 	public void add(TransformSet<?> set) {
-		renderLists.computeIfAbsent(set.material.getRenderType(), k -> new ArrayList<>()).add(set);
+		renderLists.computeIfAbsent(set.material.getBatchingRenderType(), k -> new ArrayList<>())
+				.add(set);
 	}
 }
