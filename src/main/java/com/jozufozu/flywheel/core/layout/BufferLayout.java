@@ -5,7 +5,8 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.gl.VertexAttribute;
+import com.jozufozu.flywheel.backend.gl.array.VertexAttribute;
+import com.jozufozu.flywheel.backend.gl.array.VertexAttributeF;
 
 /**
  * Classic Vertex Format struct with a clever name.
@@ -53,7 +54,7 @@ public class BufferLayout {
 
 	private static int calculateStride(List<VertexAttribute> layoutItems) {
 		int stride = 0;
-		for (VertexAttribute spec : layoutItems) {
+		for (var spec : layoutItems) {
 			stride += spec.getByteWidth();
 		}
 		return stride;

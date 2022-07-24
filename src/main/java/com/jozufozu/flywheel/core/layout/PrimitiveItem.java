@@ -3,7 +3,8 @@ package com.jozufozu.flywheel.core.layout;
 import java.util.function.Consumer;
 
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
-import com.jozufozu.flywheel.backend.gl.VertexAttribute;
+import com.jozufozu.flywheel.backend.gl.array.VertexAttribute;
+import com.jozufozu.flywheel.backend.gl.array.VertexAttributeF;
 
 public class PrimitiveItem implements LayoutItem {
 
@@ -14,7 +15,11 @@ public class PrimitiveItem implements LayoutItem {
 	}
 
 	public PrimitiveItem(GlNumericType type, int count, boolean normalized) {
-		attribute = new VertexAttribute(count, type, normalized);
+		this(new VertexAttributeF(type, count, normalized));
+	}
+
+	public PrimitiveItem(VertexAttribute attribute) {
+		this.attribute = attribute;
 	}
 
 	@Override

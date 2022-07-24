@@ -5,7 +5,7 @@ import static org.lwjgl.opengl.GL11.glDrawArrays;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
-import com.jozufozu.flywheel.backend.gl.GlVertexArray;
+import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;

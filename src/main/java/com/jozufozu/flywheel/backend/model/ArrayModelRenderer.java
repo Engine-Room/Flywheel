@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.model;
 
-import com.jozufozu.flywheel.backend.gl.GlVertexArray;
+import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.core.model.BlockMesh;
 
 public class ArrayModelRenderer {

@@ -1,8 +1,10 @@
-package com.jozufozu.flywheel.backend.gl;
+package com.jozufozu.flywheel.backend.gl.array;
 
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL32;
 
+import com.jozufozu.flywheel.backend.gl.GlObject;
+import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
@@ -80,14 +82,15 @@ public class GlVertexArray extends GlObject {
 		int i = startAttrib;
 		final int stride = type.getStride();
 
-		for (VertexAttribute attribute : type.getAttributes()) {
+		for (var attribute : type.getAttributes()) {
 			targets[i] = targetBuffer;
 			attributes[i] = attribute;
 			offsets[i] = offset;
 			strides[i] = stride;
 
-			GL32.glVertexAttribPointer(i++, attribute.size(), attribute.type().getGlEnum(), attribute.normalized(), stride, offset);
+			attribute.pointer(offset, i, stride);
 
+			i++;
 			offset += attribute.getByteWidth();
 		}
 	}
