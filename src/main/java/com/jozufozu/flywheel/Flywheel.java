@@ -12,15 +12,15 @@ import com.jozufozu.flywheel.config.BackendTypeArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.Components;
+import com.jozufozu.flywheel.core.DebugRender;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.QuadConverter;
 import com.jozufozu.flywheel.core.StitchedSprite;
-import com.jozufozu.flywheel.core.compile.ProgramCompiler;
+import com.jozufozu.flywheel.core.compile.InstancedArraysCompiler;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.core.model.Models;
 import com.jozufozu.flywheel.event.EntityWorldHandler;
 import com.jozufozu.flywheel.event.ForgeEvents;
-import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
 import com.mojang.logging.LogUtils;
@@ -80,7 +80,7 @@ public class Flywheel {
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);
 
 		forgeEventBus.addListener(EventPriority.HIGHEST, QuadConverter::onRendererReload);
-		forgeEventBus.<ReloadRenderersEvent>addListener(ProgramCompiler::invalidateAll);
+		forgeEventBus.addListener(InstancedArraysCompiler::invalidateAll);
 		forgeEventBus.addListener(Models::onReload);
 		forgeEventBus.addListener(MeshPool::reset);
 		forgeEventBus.addListener(CrumblingRenderer::onReloadRenderers);
@@ -108,6 +108,7 @@ public class Flywheel {
 //		forgeEventBus.addListener(ExampleEffect::onReload);
 
 		Components.init();
+		DebugRender.init();
 
 		VanillaInstances.init();
 

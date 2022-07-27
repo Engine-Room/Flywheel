@@ -43,7 +43,9 @@ public class LevelRendererMixin {
 
 	@Inject(at = @At("HEAD"), method = "renderLevel")
 	private void beginRender(PoseStack pPoseStack, float pPartialTick, long pFinishNanoTime, boolean pRenderBlockOutline, Camera pCamera, GameRenderer pGameRenderer, LightTexture pLightTexture, Matrix4f pProjectionMatrix, CallbackInfo ci) {
-		renderContext = new RenderContext((LevelRenderer) (Object) this, level, pPoseStack, RenderContext.createViewProjection(pPoseStack, pProjectionMatrix), pProjectionMatrix, renderBuffers, pCamera);
+		var viewProjection = RenderContext.createViewProjection(pPoseStack, pProjectionMatrix);
+		var culler = RenderContext.createCuller(pCamera, viewProjection);
+		renderContext = new RenderContext((LevelRenderer) (Object) this, level, pPoseStack, viewProjection, pProjectionMatrix, renderBuffers, pCamera, culler);
 
 		try (var restoreState = GlStateTracker.getRestoreState()) {
 			MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(renderContext));

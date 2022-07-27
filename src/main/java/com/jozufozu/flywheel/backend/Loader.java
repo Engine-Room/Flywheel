@@ -6,7 +6,7 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.core.ComponentRegistry;
 import com.jozufozu.flywheel.core.compile.ContextShader;
-import com.jozufozu.flywheel.core.compile.ProgramCompiler;
+import com.jozufozu.flywheel.core.compile.InstancedArraysCompiler;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.ShaderLoadingException;
@@ -70,8 +70,8 @@ public class Loader implements ResourceManagerReloadListener {
 			for (StructType<?> structType : ComponentRegistry.structTypes) {
 				for (VertexType vertexType : ComponentRegistry.vertexTypes) {
 					for (ContextShader contextShader : ComponentRegistry.contextShaders) {
-						var ctx = new ProgramCompiler.Context(vertexType, material, structType.getInstanceShader(), contextShader);
-						ProgramCompiler.INSTANCE.getProgram(ctx);
+						var ctx = new InstancedArraysCompiler.Context(vertexType, material, structType.getInstanceShader(), contextShader);
+						InstancedArraysCompiler.INSTANCE.getProgram(ctx);
 					}
 				}
 			}

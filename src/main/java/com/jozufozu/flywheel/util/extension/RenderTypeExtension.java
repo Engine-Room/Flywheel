@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.util;
+package com.jozufozu.flywheel.util.extension;
 
 import com.jozufozu.flywheel.backend.instancing.batching.DrawBuffer;
 

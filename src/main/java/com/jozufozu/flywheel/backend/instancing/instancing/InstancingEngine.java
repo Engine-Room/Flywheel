@@ -20,7 +20,7 @@ import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.compile.ContextShader;
-import com.jozufozu.flywheel.core.compile.ProgramCompiler;
+import com.jozufozu.flywheel.core.compile.InstancedArraysCompiler;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.uniform.UniformBuffer;
 import com.jozufozu.flywheel.util.WeakHashSet;
@@ -137,9 +137,9 @@ public class InstancingEngine implements Engine {
 				.getInstanceShader();
 		Material material = desc.material();
 
-		var ctx = new ProgramCompiler.Context(vertexType, material, instanceShader, context);
+		var ctx = new InstancedArraysCompiler.Context(vertexType, material, instanceShader, context);
 
-		ProgramCompiler.INSTANCE.getProgram(ctx)
+		InstancedArraysCompiler.INSTANCE.getProgram(ctx)
 				.bind();
 		UniformBuffer.getInstance().sync();
 	}

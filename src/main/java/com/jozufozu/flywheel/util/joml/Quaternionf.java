@@ -32,6 +32,8 @@ import java.nio.FloatBuffer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import com.mojang.math.Quaternion;
+
 /**
  * Quaternion of 4 single-precision floats which can represent rotation and uniform scaling.
  *
@@ -129,6 +131,13 @@ public class Quaternionf implements Externalizable, Cloneable, Quaternionfc {
         z = axisAngle.z * sin;
         w = cos;
     }
+
+	public Quaternionf(Quaternion moj) {
+		x = moj.i();
+		y = moj.j();
+		z = moj.k();
+		w = moj.r();
+	}
 
     /**
      * @return the first component of the vector part
