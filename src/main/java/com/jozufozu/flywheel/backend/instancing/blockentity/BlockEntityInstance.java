@@ -14,6 +14,7 @@ import com.jozufozu.flywheel.core.structs.model.TransformedPart;
 import com.jozufozu.flywheel.core.structs.oriented.OrientedPart;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
+import com.jozufozu.flywheel.util.joml.FrustumIntersection;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -90,16 +91,13 @@ public abstract class BlockEntityInstance<T extends BlockEntity> extends Abstrac
 		return pos;
 	}
 
-	protected InstancerFactory<TransformedPart> getTransformFactory() {
-        return instancerManager.factory(StructTypes.TRANSFORMED);
-    }
-
-	protected InstancerFactory<OrientedPart> getOrientedFactory() {
-        return instancerManager.factory(StructTypes.ORIENTED);
-	}
-
 	@Override
 	public ImmutableBox getVolume() {
 		return GridAlignedBB.from(pos);
+	}
+
+	@Override
+	public boolean checkFrustum(FrustumIntersection frustum) {
+		return frustum.testAab(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
 	}
 }

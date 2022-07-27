@@ -26,6 +26,10 @@ public class Lazy<T> implements Supplier<T> {
 		return value;
 	}
 
+	public boolean isInitialized() {
+		return value != null;
+	}
+
 	public <Q> Lazy<Q> lazyMap(Function<T, Q> func) {
 		return new Lazy<>(() -> func.apply(get()));
 	}

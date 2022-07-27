@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.backend.instancing.batching.DrawBuffer;
-import com.jozufozu.flywheel.util.RenderTypeExtension;
+import com.jozufozu.flywheel.util.extension.RenderTypeExtension;
 
 import net.minecraft.client.renderer.RenderType;
 

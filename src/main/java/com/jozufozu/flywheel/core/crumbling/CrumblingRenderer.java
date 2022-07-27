@@ -8,6 +8,8 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
+import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
+import com.jozufozu.flywheel.backend.instancing.instancing.DrawCall;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
@@ -128,7 +130,7 @@ public class CrumblingRenderer {
 
 		private State() {
 			instancerManager = new CrumblingEngine();
-			instanceManager = new CrumblingInstanceManager(instancerManager);
+			instanceManager = new BlockEntityInstanceManager(instancerManager);
 			instancerManager.attachManagers(instanceManager);
 		}
 

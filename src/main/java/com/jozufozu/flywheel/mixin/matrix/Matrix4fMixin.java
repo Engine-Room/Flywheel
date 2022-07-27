@@ -6,11 +6,12 @@ import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import com.jozufozu.flywheel.util.MatrixWrite;
+import com.jozufozu.flywheel.util.extension.Matrix4fExtension;
+import com.jozufozu.flywheel.util.extension.MatrixExtension;
 import com.mojang.math.Matrix4f;
 
 @Mixin(Matrix4f.class)
-public abstract class Matrix4fMixin implements MatrixWrite {
+public abstract class Matrix4fMixin implements MatrixExtension, Matrix4fExtension {
 
 	@Shadow protected float m00;
 	@Shadow protected float m01;
@@ -67,5 +68,14 @@ public abstract class Matrix4fMixin implements MatrixWrite {
 		buf.putFloat(m13);
 		buf.putFloat(m23);
 		buf.putFloat(m33);
+	}
+
+	@Override
+	public com.jozufozu.flywheel.util.joml.Matrix4f flywheel$store(com.jozufozu.flywheel.util.joml.Matrix4f matrix) {
+		return matrix.set(
+				m00, m10, m20, m30,
+				m01, m11, m21, m31,
+				m02, m12, m22, m32,
+				m03, m13, m23, m33);
 	}
 }

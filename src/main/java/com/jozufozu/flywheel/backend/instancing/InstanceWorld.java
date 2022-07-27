@@ -13,7 +13,7 @@ import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
-import com.jozufozu.flywheel.util.ClientLevelExtension;
+import com.jozufozu.flywheel.util.extension.ClientLevelExtension;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -133,10 +133,7 @@ public class InstanceWorld {
 	 */
 	public void renderStage(RenderContext context, RenderStage stage) {
 		taskEngine.syncPoint();
-		context.pushPose();
-		context.translateBack(context.camera().getPosition());
 		engine.renderStage(taskEngine, context, stage);
-		context.popPose();
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.util;
+package com.jozufozu.flywheel.util.extension;
 
 import java.nio.ByteBuffer;
 
@@ -8,7 +8,7 @@ import com.mojang.math.Matrix4f;
  * @see com.jozufozu.flywheel.mixin.matrix.Matrix3fMixin
  * @see com.jozufozu.flywheel.mixin.matrix.Matrix4fMixin
  */
-public interface MatrixWrite {
+public interface MatrixExtension {
 
 	/**
 	 * Write the contents of this object into sequential memory starting at the given address.
@@ -18,10 +18,10 @@ public interface MatrixWrite {
 	void flywheel$write(ByteBuffer buf);
 
 	static void write(Matrix4f matrix, ByteBuffer buf) {
-		((MatrixWrite) (Object) matrix).flywheel$write(buf);
+		((MatrixExtension) (Object) matrix).flywheel$write(buf);
 	}
 
 	static void writeUnsafe(Matrix4f matrix, long ptr) {
-		((MatrixWrite) (Object) matrix).flywheel$writeUnsafe(ptr);
+		((MatrixExtension) (Object) matrix).flywheel$writeUnsafe(ptr);
 	}
 }

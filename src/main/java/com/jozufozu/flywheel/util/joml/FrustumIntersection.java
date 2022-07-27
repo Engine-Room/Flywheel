@@ -23,6 +23,9 @@
  */
 package com.jozufozu.flywheel.util.joml;
 
+import java.nio.ByteBuffer;
+
+import org.lwjgl.system.MemoryUtil;
 /**
  * Efficiently performs frustum intersection tests by caching the frustum planes of an arbitrary transformation {@link Matrix4fc matrix}.
  * <p>
@@ -950,4 +953,40 @@ public class FrustumIntersection {
         return da >= 0.0f || db >= 0.0f;
     }
 
+	public void bufferPlanes(ByteBuffer buffer) {
+
+		Vector3f scratch = new Vector3f();
+		Vector3f result = new Vector3f();
+
+		long addr = MemoryUtil.memAddress(buffer);
+		planeIntersect(planes[0], planes[2], planes[4], result, scratch); result.getToAddress(addr);
+		planeIntersect(planes[0], planes[2], planes[5], result, scratch); result.getToAddress(addr + 12);
+		planeIntersect(planes[0], planes[3], planes[4], result, scratch); result.getToAddress(addr + 24);
+		planeIntersect(planes[0], planes[3], planes[5], result, scratch); result.getToAddress(addr + 36);
+		planeIntersect(planes[1], planes[2], planes[4], result, scratch); result.getToAddress(addr + 48);
+		planeIntersect(planes[1], planes[2], planes[5], result, scratch); result.getToAddress(addr + 60);
+		planeIntersect(planes[1], planes[3], planes[4], result, scratch); result.getToAddress(addr + 72);
+		planeIntersect(planes[1], planes[3], planes[5], result, scratch); result.getToAddress(addr + 84);
+	}
+
+	private Vector3f planeIntersect(Vector4f a, Vector4f b, Vector4f c, Vector3f result, Vector3f scratch) {
+		// Formula used
+		//                d1 ( N2 * N3 ) + d2 ( N3 * N1 ) + d3 ( N1 * N2 )
+		//P =   ---------------------------------------------------------------------
+		//                             N1 . ( N2 * N3 )
+		//
+		// Note: N refers to the normal, d refers to the displacement. '.' means dot product. '*' means cross product
+
+		float f = result.set(b.x, b.y, b.z).cross(c.x, c.y, c.z).dot(a.x, a.y, a.z);
+
+		result.set(0);
+		scratch.set(b.x, b.y, b.z).cross(c.x, c.y, c.z).mul(a.z);
+		result.add(scratch);
+		scratch.set(c.x, c.y, c.z).cross(a.x, a.y, a.z).mul(b.z);
+		result.add(scratch);
+		scratch.set(a.x, a.y, a.z).cross(b.x, b.y, b.z).mul(c.z);
+		result.add(scratch);
+
+		return result.div(f);
+	}
 }
