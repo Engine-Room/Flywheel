@@ -95,6 +95,7 @@ public class Backend {
 			case OFF -> true;
 			case BATCHING -> !usingShaders;
 			case INSTANCING -> !usingShaders && GlCompat.getInstance().instancedArraysSupported();
+			case INDIRECT -> !usingShaders && GlCompat.getInstance().supportsIndirect();
 		};
 
 		return canUseEngine ? preferredChoice : BackendType.OFF;

@@ -31,6 +31,8 @@ version = mod_version + (dev && buildNumber != null ? "-${buildNumber}" : '')
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+jarJar.enable()
+
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
     mappings channel: 'parchment', version: "${parchment_version}-${minecraft_version}"
@@ -111,6 +113,11 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
+    implementation "com.dreizak:miniball:1.0.3"
+    jarJar(group: 'com.dreizak', name: 'miniball', version: '[1.0,2.0)') {
+        jarJar.pin(it, "[1.0,2.0)")
+    }
+
     // switch to implementation for debugging
     compileOnly fg.deobf("maven.modrinth:starlight-forge:1.0.2+1.18.2")
 
@@ -171,7 +178,9 @@ void addLicense(jarTask) {
 }
 
 jar.finalizedBy('reobfJar')
+tasks.jarJar.finalizedBy('reobfJarJar')
 addLicense(jar)
+addLicense(tasks.jarJar)
 
 publishing {
     publications {
@@ -180,6 +189,7 @@ publishing {
 
             from components.java
             fg.component(it)
+            jarJar.component(it)
         }
     }
 

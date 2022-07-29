@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.dreizak.miniball.highdim.Miniball;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.VertexList;

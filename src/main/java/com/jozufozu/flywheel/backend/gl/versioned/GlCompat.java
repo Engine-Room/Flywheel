@@ -32,11 +32,14 @@ public class GlCompat {
 	public final InstancedArrays instancedArrays;
 	public final BufferStorage bufferStorage;
 	public final boolean amd;
+	public final boolean supportsIndirect;
 
 	private GlCompat() {
 		GLCapabilities caps = GL.createCapabilities();
 		instancedArrays = getLatest(InstancedArrays.class, caps);
 		bufferStorage = getLatest(BufferStorage.class, caps);
+
+		supportsIndirect = caps.OpenGL46;
 
 		amd = _isAmdWindows();
 	}
@@ -115,6 +118,10 @@ public class GlCompat {
 
 		// vendor string I got was "ATI Technologies Inc."
 		return vendor.contains("ATI") || vendor.contains("AMD");
+	}
+
+	public boolean supportsIndirect() {
+		return supportsIndirect;
 	}
 }
 

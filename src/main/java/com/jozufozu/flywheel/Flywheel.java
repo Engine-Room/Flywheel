@@ -16,7 +16,7 @@ import com.jozufozu.flywheel.core.DebugRender;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.QuadConverter;
 import com.jozufozu.flywheel.core.StitchedSprite;
-import com.jozufozu.flywheel.core.compile.InstancedArraysCompiler;
+import com.jozufozu.flywheel.backend.instancing.instancing.InstancedArraysCompiler;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.core.model.Models;
 import com.jozufozu.flywheel.event.EntityWorldHandler;

@@ -19,6 +19,11 @@ public enum BackendType {
 	 * Use GPU instancing to render everything.
 	 */
 	INSTANCING("GL33 Instanced Arrays"),
+
+	/**
+	 * Use Compute shaders to cull instances.
+	 */
+	INDIRECT("GL46 Compute Culling"),
 	;
 
 	private static final Map<String, BackendType> lookup;
