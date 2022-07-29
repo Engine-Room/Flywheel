@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.core;
 import java.util.function.BiConsumer;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.core.compile.ContextShader;
+import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.SourceChecks;
@@ -48,6 +48,11 @@ public class Components {
 		public static final FileResolution WORLD_FRAGMENT = contextFragment(ResourceUtil.subPath(Names.WORLD, ".frag"));
 		public static final FileResolution CRUMBLING_VERTEX = contextVertex(ResourceUtil.subPath(Names.CRUMBLING, ".vert"));
 		public static final FileResolution CRUMBLING_FRAGMENT = contextFragment(ResourceUtil.subPath(Names.CRUMBLING, ".frag"));
+		public static final FileResolution CULL_INSTANCES = compute(Flywheel.rl("compute/cull_instances.glsl"));
+
+		private static FileResolution compute(ResourceLocation rl) {
+			return FileResolution.get(rl);
+		}
 
 		private static FileResolution uniform(ResourceLocation location) {
 			return FileResolution.get(location);

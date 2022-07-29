@@ -6,7 +6,6 @@ import java.util.Set;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
@@ -89,22 +88,7 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 			buf.clear(clearStart, clearLength);
 
 			if (size > 0) {
-
-				final StructWriter<D> writer = structType.getWriter(buf.unwrap());
-
-				boolean sequential = true;
-				for (int i = 0; i < size; i++) {
-					final D element = data.get(i);
-					if (element.checkDirtyAndClear()) {
-						if (!sequential) {
-							writer.seek(i);
-						}
-						writer.write(element);
-						sequential = true;
-					} else {
-						sequential = false;
-					}
-				}
+				writeChangedUnchecked(structType.getWriter(buf.unwrap()));
 			}
 		} catch (Exception e) {
 			Flywheel.LOGGER.error("Error updating GPUInstancer:", e);

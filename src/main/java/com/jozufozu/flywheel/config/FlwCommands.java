@@ -141,6 +141,7 @@ public class FlwCommands {
 			case OFF -> new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED);
 			case INSTANCING -> new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN);
 			case BATCHING ->  new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN);
+			case INDIRECT -> new TextComponent("Using Indirect Engine").withStyle(ChatFormatting.GREEN);
 		};
 	}
 

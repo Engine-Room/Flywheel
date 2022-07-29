@@ -6,6 +6,7 @@ import java.util.BitSet;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.struct.StructWriter;
 
 public abstract class AbstractInstancer<D extends InstancedPart> implements Instancer<D> {
 
@@ -28,7 +29,7 @@ public abstract class AbstractInstancer<D extends InstancedPart> implements Inst
 
 	/**
 	 * Copy a data from another Instancer to this.
-	 *
+	 * <p>
 	 * This has the effect of swapping out one model for another.
 	 * @param inOther the data associated with a different model.
 	 */
@@ -102,6 +103,22 @@ public abstract class AbstractInstancer<D extends InstancedPart> implements Inst
 		}
 
 		return instanceData;
+	}
+
+	protected void writeChangedUnchecked(StructWriter<D> writer) {
+		boolean sequential = true;
+		for (int i = 0; i < data.size(); i++) {
+			final D element = data.get(i);
+			if (element.checkDirtyAndClear()) {
+				if (!sequential) {
+					writer.seek(i);
+				}
+				writer.write(element);
+				sequential = true;
+			} else {
+				sequential = false;
+			}
+		}
 	}
 
 	public abstract void delete();

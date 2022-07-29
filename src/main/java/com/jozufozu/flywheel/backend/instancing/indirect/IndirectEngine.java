@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.instancing.instancing;
+package com.jozufozu.flywheel.backend.instancing.indirect;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +8,6 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL32;
 
-import com.google.common.collect.ListMultimap;
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.material.Material;
@@ -18,8 +17,10 @@ import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
+import com.jozufozu.flywheel.backend.instancing.instancing.MeshPool;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.api.context.ContextShader;
+import com.jozufozu.flywheel.backend.instancing.instancing.InstancedArraysCompiler;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.uniform.UniformBuffer;
 import com.jozufozu.flywheel.util.WeakHashSet;
@@ -32,7 +33,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
-public class InstancingEngine implements Engine {
+public class IndirectEngine implements Engine {
 
 	public static int MAX_ORIGIN_DISTANCE = 100;
 
@@ -40,7 +41,7 @@ public class InstancingEngine implements Engine {
 
 	protected final ContextShader context;
 
-	protected final Map<StructType<?>, GPUInstancerFactory<?>> factories = new HashMap<>();
+	protected final Map<StructType<?>, IndirectFactory<?>> factories = new HashMap<>();
 
 	protected final List<InstancedModel<?>> uninitializedModels = new ArrayList<>();
 	protected final RenderLists renderLists = new RenderLists();
@@ -50,7 +51,7 @@ public class InstancingEngine implements Engine {
 	 */
 	private final WeakHashSet<InstanceManager<?>> instanceManagers;
 
-	public InstancingEngine(ContextShader context) {
+	public IndirectEngine(ContextShader context) {
 		this.context = context;
 
 		this.instanceManagers = new WeakHashSet<>();
@@ -59,36 +60,25 @@ public class InstancingEngine implements Engine {
 	@SuppressWarnings("unchecked")
 	@NotNull
 	@Override
-	public <D extends InstancedPart> GPUInstancerFactory<D> factory(StructType<D> type) {
-		return (GPUInstancerFactory<D>) factories.computeIfAbsent(type, this::createFactory);
+	public <D extends InstancedPart> IndirectFactory<D> factory(StructType<D> type) {
+		return (IndirectFactory<D>) factories.computeIfAbsent(type, this::createFactory);
 	}
 
 	@NotNull
-	private <D extends InstancedPart> GPUInstancerFactory<D> createFactory(StructType<D> type) {
-		return new GPUInstancerFactory<>(type, uninitializedModels::add);
+	private <D extends InstancedPart> IndirectFactory<D> createFactory(StructType<D> type) {
+		return new IndirectFactory<>(type, uninitializedModels::add);
 	}
 
 	@Override
 	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
-		var multimap = renderLists.get(stage);
+		var groups = renderLists.get(stage);
 
 		setup();
 
-		render(multimap);
-	}
-
-	// TODO: Is this useful? Should it be added to the base interface? Currently it is only used for the old CrumblingRenderer.
-	@Deprecated
-	public void renderAll(TaskEngine taskEngine, RenderContext context) {
-		if (renderLists.isEmpty()) {
-			return;
+		for (var group : groups) {
+			group.submit();
 		}
 
-		setup();
-
-		for (var multimap : renderLists.getAll()) {
-			render(multimap);
-		}
 	}
 
 	private void setup() {
@@ -100,33 +90,6 @@ public class InstancingEngine implements Engine {
 		RenderSystem.enableDepthTest();
 		RenderSystem.depthFunc(GL32.GL_LEQUAL);
 		RenderSystem.enableCull();
-	}
-
-	protected void render(ListMultimap<ShaderState, DrawCall> multimap) {
-		if (multimap.isEmpty()) {
-			return;
-		}
-
-		for (var entry : multimap.asMap().entrySet()) {
-			var shader = entry.getKey();
-			var drawCalls = entry.getValue();
-
-			drawCalls.removeIf(DrawCall::shouldRemove);
-
-			if (drawCalls.isEmpty()) {
-				continue;
-			}
-
-			setup(shader);
-
-			shader.material().setup();
-
-			for (var drawCall : drawCalls) {
-				drawCall.render();
-			}
-
-			shader.material().clear();
-		}
 	}
 
 	protected void setup(ShaderState desc) {
@@ -144,13 +107,13 @@ public class InstancingEngine implements Engine {
 	}
 
 	public void clearAll() {
-		factories.values().forEach(GPUInstancerFactory::clear);
+		factories.values().forEach(IndirectFactory::clear);
 	}
 
 	@Override
 	public void delete() {
 		factories.values()
-				.forEach(GPUInstancerFactory::delete);
+				.forEach(IndirectFactory::delete);
 
 		factories.clear();
 	}
@@ -194,7 +157,7 @@ public class InstancingEngine implements Engine {
 	private void shiftListeners(int cX, int cY, int cZ) {
 		originCoordinate = new BlockPos(cX, cY, cZ);
 
-		factories.values().forEach(GPUInstancerFactory::clear);
+		factories.values().forEach(IndirectFactory::clear);
 
 		instanceManagers.forEach(InstanceManager::onOriginShift);
 	}

@@ -19,8 +19,8 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
-import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.model.Mesh;
+import com.jozufozu.flywheel.core.vertex.Formats;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 
 public class MeshPool {
@@ -49,6 +49,7 @@ public class MeshPool {
 	private final GlBuffer vbo;
 
 	private long byteSize;
+	private int vertexCount;
 
 	private boolean dirty;
 	private boolean anyToRemove;
@@ -70,8 +71,10 @@ public class MeshPool {
 	 */
 	public BufferedMesh alloc(Mesh mesh) {
 		return meshes.computeIfAbsent(mesh, m -> {
-			BufferedMesh bufferedModel = new BufferedMesh(m, byteSize);
-			byteSize += m.size();
+			// FIXME: culling experiments fixing everything to Formats.BLOCK
+			BufferedMesh bufferedModel = new BufferedMesh(Formats.BLOCK, m, byteSize, vertexCount);
+			byteSize += bufferedModel.getByteSize();
+			vertexCount += bufferedModel.mesh.getVertexCount();
 			allBuffered.add(bufferedModel);
 			pendingUpload.add(bufferedModel);
 
@@ -115,17 +118,21 @@ public class MeshPool {
 
 		// re-evaluate first vertex for each model
 		int byteIndex = 0;
+		int baseVertex = 0;
 		for (BufferedMesh model : allBuffered) {
 			if (model.byteIndex != byteIndex) {
 				pendingUpload.add(model);
 			}
 
 			model.byteIndex = byteIndex;
+			model.baseVertex = baseVertex;
 
-			byteIndex += model.mesh.size();
+			byteIndex += model.getByteSize();
+			baseVertex += model.mesh.getVertexCount();
 		}
 
 		this.byteSize = byteIndex;
+		this.vertexCount = baseVertex;
 		this.anyToRemove = false;
 	}
 
@@ -143,12 +150,15 @@ public class MeshPool {
 			ByteBuffer buffer = mapped.unwrap();
 
 			int byteIndex = 0;
+			int baseVertex = 0;
 			for (BufferedMesh model : allBuffered) {
 				model.byteIndex = byteIndex;
+				model.baseVertex = baseVertex;
 
 				model.buffer(buffer);
 
-				byteIndex += model.mesh.size();
+				byteIndex += model.getByteSize();
+				baseVertex += model.mesh.getVertexCount();
 			}
 
 		} catch (Exception e) {
@@ -179,8 +189,9 @@ public class MeshPool {
 
 		private final ElementBuffer ebo;
 		private final Mesh mesh;
-		private final BufferLayout layout;
+		private final VertexType type;
 		private long byteIndex;
+		private int baseVertex;
 
 		private boolean deleted;
 
@@ -188,12 +199,20 @@ public class MeshPool {
 
 		private final Set<GlVertexArray> boundTo = new HashSet<>();
 
-		public BufferedMesh(Mesh mesh, long byteIndex) {
+		public BufferedMesh(Mesh mesh, long byteIndex, int baseVertex) {
 			this.mesh = mesh;
 			this.byteIndex = byteIndex;
+			this.baseVertex = baseVertex;
 			this.ebo = mesh.createEBO();
-			this.layout = mesh.getVertexType()
-					.getLayout();
+			this.type = mesh.getVertexType();
+		}
+
+		public BufferedMesh(VertexType type, Mesh mesh, long byteIndex, int baseVertex) {
+			this.mesh = mesh;
+			this.byteIndex = byteIndex;
+			this.baseVertex = baseVertex;
+			this.ebo = mesh.createEBO();
+			this.type = type;
 		}
 
 		public void drawCall(GlVertexArray vao) {
@@ -223,7 +242,7 @@ public class MeshPool {
 		private void setup(GlVertexArray vao) {
 			if (this.boundTo.add(vao)) {
 				vao.enableArrays(getAttributeCount());
-				vao.bindAttributes(MeshPool.this.vbo, 0, this.layout, this.byteIndex);
+				vao.bindAttributes(MeshPool.this.vbo, 0, type.getLayout(), this.byteIndex);
 			}
 			vao.bindElementArray(this.ebo.buffer);
 			vao.bind();
@@ -240,14 +259,17 @@ public class MeshPool {
 		}
 
 		private void buffer(ByteBuffer buffer) {
-			this.mesh.writeInto(buffer, this.byteIndex);
+			var writer = type.createWriter(buffer);
+			writer.seek(this.byteIndex);
+			writer.writeVertexList(this.mesh.getReader());
 
 			this.boundTo.clear();
 			this.gpuResident = true;
 		}
 
 		public int getAttributeCount() {
-			return this.layout.getAttributeCount();
+			return this.type.getLayout()
+					.getAttributeCount();
 		}
 
 		public boolean isGpuResident() {
@@ -255,7 +277,19 @@ public class MeshPool {
 		}
 
 		public VertexType getVertexType() {
-			return this.mesh.getVertexType();
+			return this.type;
+		}
+
+		public int getByteSize() {
+			return this.type.getLayout().getStride() * this.mesh.getVertexCount();
+		}
+
+		public int getBaseVertex() {
+			return baseVertex;
+		}
+
+		public int getVertexCount() {
+			return this.mesh.getVertexCount();
 		}
 	}
 

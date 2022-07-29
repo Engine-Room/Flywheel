@@ -88,7 +88,7 @@ public class DebugRender {
 			try (var stack = MemoryStack.stackPush()) {
 				var buf = stack.malloc(3 * 8 * 4);
 
-				culler.bufferPlanes(buf);
+				culler.getCorners(buf);
 
 				GL46.glNamedBufferSubData(buffer, indicesSize, buf);
 			}

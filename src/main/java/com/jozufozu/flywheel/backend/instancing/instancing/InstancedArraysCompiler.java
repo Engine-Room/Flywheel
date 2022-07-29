@@ -1,14 +1,16 @@
-package com.jozufozu.flywheel.core.compile;
+package com.jozufozu.flywheel.backend.instancing.instancing;
 
 import java.util.ArrayList;
 
 import com.google.common.collect.ImmutableList;
+import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.core.compile.*;
 import com.jozufozu.flywheel.core.source.CompilationContext;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.SourceFile;
