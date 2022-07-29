@@ -4,23 +4,23 @@ import java.util.List;
 
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.core.model.ModelSupplier;
+import com.jozufozu.flywheel.core.model.Model;
 
 public class BatchedModel<D extends InstancedPart> {
 
-	CPUInstancer<D> instancer;
-	ModelSupplier model;
-	StructType<D> type;
+	private final StructType<D> type;
+	private final Model model;
+	private final CPUInstancer<D> instancer;
 	private List<TransformSet<D>> layers;
 
-	public BatchedModel(StructType<D> type, ModelSupplier model) {
+	public BatchedModel(StructType<D> type, Model model) {
 		this.type = type;
 		this.model = model;
 		this.instancer = new CPUInstancer<>(type);
 	}
 
 	public void init(BatchLists batchLists) {
-		layers = model.get()
+		layers = model.getMeshes()
 				.entrySet()
 				.stream()
 				.map(entry -> new TransformSet<>(instancer, entry.getKey(), entry.getValue()))
@@ -29,6 +29,14 @@ public class BatchedModel<D extends InstancedPart> {
 		for (TransformSet<D> layer : layers) {
 			batchLists.add(layer);
 		}
+	}
+
+	public Model getModel() {
+		return model;
+	}
+
+	public CPUInstancer<D> getInstancer() {
+		return instancer;
 	}
 
 	public void clear() {

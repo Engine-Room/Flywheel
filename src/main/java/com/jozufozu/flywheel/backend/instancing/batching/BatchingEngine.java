@@ -8,8 +8,6 @@ import java.util.Map;
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.ShadersModHandler;
-import com.jozufozu.flywheel.backend.instancing.BatchDrawingTracker;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
@@ -20,6 +18,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
@@ -48,21 +47,20 @@ public class BatchingEngine implements Engine {
 		return BlockPos.ZERO;
 	}
 
-	public void submitTasks(PoseStack stack, TaskEngine taskEngine) {
-		batchLists.renderLists.forEach((renderType, renderList) -> {
+	public void submitTasks(TaskEngine taskEngine, PoseStack stack, ClientLevel level) {
+		batchLists.renderLists.asMap().forEach((renderType, renderList) -> {
 			int vertices = 0;
 			for (var transformSet : renderList) {
 				vertices += transformSet.getTotalVertexCount();
 			}
 
-			var consumer = batchTracker.getDirectConsumer(renderType, vertices);
-			consumer.memSetZero();
+			DrawBuffer buffer = batchTracker.getBuffer(renderType);
+			buffer.prepare(vertices);
 
-			var outputColorDiffuse = !consumer.hasOverlay() && !ShadersModHandler.isShaderPackInUse();
-
+			int startVertex = 0;
 			for (var transformSet : renderList) {
-				transformSet.setOutputColorDiffuse(outputColorDiffuse);
-				transformSet.submitTasks(stack, taskEngine, consumer);
+				transformSet.submitTasks(taskEngine, buffer, startVertex, stack, level);
+				startVertex += transformSet.getTotalVertexCount();
 			}
 		});
 	}
@@ -83,7 +81,6 @@ public class BatchingEngine implements Engine {
 			Lighting.setupLevel(mat);
 		}
 
-		taskEngine.syncPoint();
 		batchTracker.endBatch();
 	}
 
@@ -109,7 +106,7 @@ public class BatchingEngine implements Engine {
 		var stack = FlwUtil.copyPoseStack(context.stack());
 		stack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
-		submitTasks(stack, taskEngine);
+		submitTasks(taskEngine, stack, context.level());
 	}
 
 	@Override

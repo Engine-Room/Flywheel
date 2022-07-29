@@ -3,9 +3,11 @@ package com.jozufozu.flywheel.api.struct;
 import java.nio.ByteBuffer;
 
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
-import com.jozufozu.flywheel.core.model.ModelTransformer;
 import com.jozufozu.flywheel.core.source.FileResolution;
+
+import net.minecraft.client.multiplayer.ClientLevel;
 
 /**
  * A StructType contains metadata for a specific instance struct that Flywheel can interface with.
@@ -32,6 +34,10 @@ public interface StructType<S extends InstancedPart> {
 
 	FileResolution getInstanceShader();
 
-	void transform(S d, ModelTransformer.Params b);
+	VertexTransformer<? extends S> getVertexTransformer();
+
+	public interface VertexTransformer<S extends InstancedPart> {
+		void transform(MutableVertexList vertexList, S struct, ClientLevel level);
+	}
 
 }

@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.api.instancer;
 
-import com.jozufozu.flywheel.core.model.ModelSupplier;
+import com.jozufozu.flywheel.core.model.Model;
 
 public interface InstancerFactory<D extends InstancedPart> {
 
@@ -10,6 +10,6 @@ public interface InstancerFactory<D extends InstancedPart> {
 	 * @param modelKey An object that uniquely identifies and provides the model.
 	 * @return An instancer for the given model, capable of rendering many copies for little cost.
 	 */
-	Instancer<D> model(ModelSupplier modelKey);
+	Instancer<D> model(Model modelKey);
 
 }

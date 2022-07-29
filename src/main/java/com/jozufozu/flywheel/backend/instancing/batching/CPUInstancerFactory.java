@@ -8,11 +8,11 @@ import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.instancer.InstancerFactory;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.core.model.ModelSupplier;
+import com.jozufozu.flywheel.core.model.Model;
 
 public class CPUInstancerFactory<D extends InstancedPart> implements InstancerFactory<D> {
 
-	protected final Map<ModelSupplier, BatchedModel<D>> models;
+	protected final Map<Model, BatchedModel<D>> models;
 	private final StructType<D> type;
 	private final Consumer<BatchedModel<D>> creationListener;
 
@@ -25,8 +25,8 @@ public class CPUInstancerFactory<D extends InstancedPart> implements InstancerFa
 	}
 
 	@Override
-	public Instancer<D> model(ModelSupplier modelKey) {
-		return models.computeIfAbsent(modelKey, this::createModel).instancer;
+	public Instancer<D> model(Model modelKey) {
+		return models.computeIfAbsent(modelKey, this::createModel).getInstancer();
 	}
 
 	/**
@@ -37,7 +37,7 @@ public class CPUInstancerFactory<D extends InstancedPart> implements InstancerFa
 				.forEach(BatchedModel::clear);
 	}
 
-	private BatchedModel<D> createModel(ModelSupplier k) {
+	private BatchedModel<D> createModel(Model k) {
 		var out = new BatchedModel<>(type, k);
 		creationListener.accept(out);
 		return out;

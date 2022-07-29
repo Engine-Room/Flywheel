@@ -4,14 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 
-import com.google.common.collect.ListMultimap;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
-import com.jozufozu.flywheel.backend.instancing.instancing.DrawCall;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
-import com.jozufozu.flywheel.backend.instancing.instancing.ShaderState;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;

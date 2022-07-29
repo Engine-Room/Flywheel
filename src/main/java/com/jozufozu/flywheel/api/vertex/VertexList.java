@@ -10,35 +10,39 @@ package com.jozufozu.flywheel.api.vertex;
  * TODO: more flexible elements?
  */
 public interface VertexList {
-	float getX(int index);
+	float x(int index);
 
-	float getY(int index);
+	float y(int index);
 
-	float getZ(int index);
+	float z(int index);
 
-	byte getR(int index);
+	byte r(int index);
 
-	byte getG(int index);
+	byte g(int index);
 
-	byte getB(int index);
+	byte b(int index);
 
-	byte getA(int index);
+	byte a(int index);
 
-	float getU(int index);
+	default int color(int index) {
+		return a(index) << 24 | r(index) << 16 | g(index) << 8 | b(index);
+	}
 
-	float getV(int index);
+	float u(int index);
 
-	int getLight(int index);
+	float v(int index);
 
-	float getNX(int index);
+	int overlay(int index);
 
-	float getNY(int index);
+	int light(int index);
 
-	float getNZ(int index);
+	float normalX(int index);
+
+	float normalY(int index);
+
+	float normalZ(int index);
 
 	int getVertexCount();
-
-	VertexType getVertexType();
 
 	default boolean isEmpty() {
 		return getVertexCount() == 0;

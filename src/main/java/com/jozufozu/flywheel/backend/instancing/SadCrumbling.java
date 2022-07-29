@@ -14,7 +14,7 @@ import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.instancing.GPUInstancer;
-import com.jozufozu.flywheel.core.model.ModelSupplier;
+import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
@@ -94,8 +94,8 @@ public class SadCrumbling {
 //	}
 
 	@NotNull
-	private Map<ModelSupplier, List<InstancedPart>> modelsToParts(Int2ObjectMap<List<BlockEntityInstance<?>>> dataByStage) {
-		var map = new HashMap<ModelSupplier, List<InstancedPart>>();
+	private Map<Model, List<InstancedPart>> modelsToParts(Int2ObjectMap<List<BlockEntityInstance<?>>> dataByStage) {
+		var map = new HashMap<Model, List<InstancedPart>>();
 
 		for (var entry : dataByStage.int2ObjectEntrySet()) {
 			RenderType currentLayer = ModelBakery.DESTROY_TYPES.get(entry.getIntKey());

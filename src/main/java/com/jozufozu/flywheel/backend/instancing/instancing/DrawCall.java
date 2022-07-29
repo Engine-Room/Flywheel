@@ -4,13 +4,12 @@ import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
-import com.jozufozu.flywheel.backend.model.MeshPool;
 import com.jozufozu.flywheel.core.model.Mesh;
 
 public class DrawCall {
 
-	final Material material;
 	private final GPUInstancer<?> instancer;
+	private final Material material;
 	MeshPool.BufferedMesh bufferedMesh;
 	GlVertexArray vao;
 

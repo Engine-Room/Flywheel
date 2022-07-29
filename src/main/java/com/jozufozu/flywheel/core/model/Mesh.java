@@ -5,27 +5,27 @@ import java.nio.ByteBuffer;
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.api.vertex.VertexWriter;
-import com.jozufozu.flywheel.backend.model.ElementBuffer;
+import com.jozufozu.flywheel.backend.instancing.instancing.ElementBuffer;
 import com.jozufozu.flywheel.core.QuadConverter;
 
 /**
- * A model that can be rendered by flywheel.
+ * A mesh that can be rendered by flywheel.
  *
  * <p>
  *     It is expected that the following assertion will not fail:
  * </p>
  *
  * <pre>{@code
- * Model model = ...;
+ * Mesh mesh = ...;
  * VecBuffer into = ...;
  *
  * int initial = VecBuffer.unwrap().position();
  *
- * model.buffer(into);
+ * mesh.buffer(into);
  *
  * int final = VecBuffer.unwrap().position();
  *
- * assert model.size() == final - initial;
+ * assert mesh.size() == final - initial;
  * }</pre>
  */
 public interface Mesh {
@@ -34,6 +34,8 @@ public interface Mesh {
 	 * A name uniquely identifying this model.
 	 */
 	String name();
+
+	VertexType getVertexType();
 
 	VertexList getReader();
 
@@ -44,8 +46,19 @@ public interface Mesh {
 		return getReader().getVertexCount();
 	}
 
-	default VertexType getType() {
-		return getReader().getVertexType();
+	/**
+	 * Is there nothing to render?
+	 * @return true if there are no vertices.
+	 */
+	default boolean isEmpty() {
+		return getReader().isEmpty();
+	}
+
+	/**
+	 * The size in bytes that this model's data takes up.
+	 */
+	default int size() {
+		return getVertexType().byteOffset(getVertexCount());
 	}
 
 	/**
@@ -63,23 +76,8 @@ public interface Mesh {
 				.quads2Tris(getVertexCount() / 4);
 	}
 
-	/**
-	 * The size in bytes that this model's data takes up.
-	 */
-	default int size() {
-		return getType().byteOffset(getVertexCount());
-	}
-
-	/**
-	 * Is there nothing to render?
-	 * @return true if there are no vertices.
-	 */
-	default boolean empty() {
-		return getVertexCount() == 0;
-	}
-
 	default void writeInto(ByteBuffer buffer, long byteIndex) {
-		VertexWriter writer = getType().createWriter(buffer);
+		VertexWriter writer = getVertexType().createWriter(buffer);
 		writer.seek(byteIndex);
 		writer.writeVertexList(getReader());
 	}

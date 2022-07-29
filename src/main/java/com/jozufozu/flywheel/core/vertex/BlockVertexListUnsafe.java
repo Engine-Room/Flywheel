@@ -4,9 +4,9 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.vertex.ShadedVertexList;
-import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.util.RenderMath;
+
+import net.minecraft.client.renderer.texture.OverlayTexture;
 
 public class BlockVertexListUnsafe extends AbstractVertexList {
 
@@ -19,89 +19,73 @@ public class BlockVertexListUnsafe extends AbstractVertexList {
 	}
 
 	@Override
-	public float getX(int index) {
+	public float x(int index) {
 		return MemoryUtil.memGetFloat(ptr(index));
 	}
 
 	@Override
-	public float getY(int index) {
+	public float y(int index) {
 		return MemoryUtil.memGetFloat(ptr(index) + 4);
 	}
 
 	@Override
-	public float getZ(int index) {
+	public float z(int index) {
 		return MemoryUtil.memGetFloat(ptr(index) + 8);
 	}
 
 	@Override
-	public byte getR(int index) {
+	public byte r(int index) {
 		return MemoryUtil.memGetByte(ptr(index) + 12);
 	}
 
 	@Override
-	public byte getG(int index) {
+	public byte g(int index) {
 		return MemoryUtil.memGetByte(ptr(index) + 13);
 	}
 
 	@Override
-	public byte getB(int index) {
+	public byte b(int index) {
 		return MemoryUtil.memGetByte(ptr(index) + 14);
 	}
 
 	@Override
-	public byte getA(int index) {
+	public byte a(int index) {
 		return MemoryUtil.memGetByte(ptr(index) + 15);
 	}
 
 	@Override
-	public float getU(int index) {
+	public float u(int index) {
 		return MemoryUtil.memGetFloat(ptr(index) + 16);
 	}
 
 	@Override
-	public float getV(int index) {
+	public float v(int index) {
 		return MemoryUtil.memGetFloat(ptr(index) + 20);
 	}
 
 	@Override
-	public int getLight(int index) {
+	public int overlay(int index) {
+		return OverlayTexture.NO_OVERLAY;
+	}
+
+	@Override
+	public int light(int index) {
 		return MemoryUtil.memGetInt(ptr(index) + 24);
 	}
 
 	@Override
-	public float getNX(int index) {
+	public float normalX(int index) {
 		return RenderMath.f(MemoryUtil.memGetByte(ptr(index) + 28));
 	}
 
 	@Override
-	public float getNY(int index) {
+	public float normalY(int index) {
 		return RenderMath.f(MemoryUtil.memGetByte(ptr(index) + 29));
 	}
 
 	@Override
-	public float getNZ(int index) {
+	public float normalZ(int index) {
 		return RenderMath.f(MemoryUtil.memGetByte(ptr(index) + 30));
-	}
-
-	@Override
-	public VertexType getVertexType() {
-		return Formats.BLOCK;
-	}
-
-	public static class Shaded extends BlockVertexListUnsafe implements ShadedVertexList {
-
-		private final int unshadedStartVertex;
-
-		public Shaded(ByteBuffer buffer, int vertexCount, int unshadedStartVertex) {
-			super(buffer, vertexCount);
-			this.unshadedStartVertex = unshadedStartVertex;
-		}
-
-		@Override
-		public boolean isShaded(int index) {
-			return index < unshadedStartVertex;
-		}
-
 	}
 
 }

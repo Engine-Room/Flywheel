@@ -15,16 +15,16 @@ public class PosTexNormalWriterUnsafe extends VertexWriterUnsafe<PosTexNormalVer
 
 	@Override
 	public void writeVertex(VertexList list, int i) {
-		float x = list.getX(i);
-		float y = list.getY(i);
-		float z = list.getZ(i);
+		float x = list.x(i);
+		float y = list.y(i);
+		float z = list.z(i);
 
-		float u = list.getU(i);
-		float v = list.getV(i);
+		float u = list.u(i);
+		float v = list.v(i);
 
-		float xN = list.getNX(i);
-		float yN = list.getNY(i);
-		float zN = list.getNZ(i);
+		float xN = list.normalX(i);
+		float yN = list.normalY(i);
+		float zN = list.normalZ(i);
 
 		putVertex(x, y, z, xN, yN, zN, u, v);
 	}

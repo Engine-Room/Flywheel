@@ -11,9 +11,9 @@ import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
-import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
+import com.jozufozu.flywheel.core.model.SimpleLazyModel;
 import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.core.structs.model.TransformedPart;
 import com.jozufozu.flywheel.core.structs.oriented.OrientedPart;
@@ -36,8 +36,8 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends BlockEntityInstance<T> implements DynamicInstance {
 
-	private static final BiFunction<ChestType, TextureAtlasSprite, BasicModelSupplier> LID = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createLidModel(type, mat), Materials.CHEST));
-	private static final BiFunction<ChestType, TextureAtlasSprite, BasicModelSupplier> BASE = Util.memoize((type, mat) -> new BasicModelSupplier(() -> createBaseModel(type, mat), Materials.CHEST));
+	private static final BiFunction<ChestType, TextureAtlasSprite, SimpleLazyModel> LID = Util.memoize((type, mat) -> new SimpleLazyModel(() -> createLidModel(type, mat), Materials.CHEST));
+	private static final BiFunction<ChestType, TextureAtlasSprite, SimpleLazyModel> BASE = Util.memoize((type, mat) -> new SimpleLazyModel(() -> createBaseModel(type, mat), Materials.CHEST));
 
 	private final OrientedPart body;
 	private final TransformedPart lid;
