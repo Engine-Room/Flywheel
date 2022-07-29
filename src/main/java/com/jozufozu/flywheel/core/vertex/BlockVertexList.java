@@ -1,10 +1,9 @@
 package com.jozufozu.flywheel.core.vertex;
 
-import com.jozufozu.flywheel.api.vertex.ShadedVertexList;
-import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.core.model.ShadeSeparatedBufferBuilder;
 import com.jozufozu.flywheel.util.RenderMath;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+
+import net.minecraft.client.renderer.texture.OverlayTexture;
 
 public class BlockVertexList extends AbstractVertexList {
 
@@ -26,89 +25,73 @@ public class BlockVertexList extends AbstractVertexList {
 	}
 
 	@Override
-	public float getX(int index) {
+	public float x(int index) {
 		return contents.getFloat(vertIdx(index));
 	}
 
 	@Override
-	public float getY(int index) {
+	public float y(int index) {
 		return contents.getFloat(vertIdx(index) + 4);
 	}
 
 	@Override
-	public float getZ(int index) {
+	public float z(int index) {
 		return contents.getFloat(vertIdx(index) + 8);
 	}
 
 	@Override
-	public byte getR(int index) {
+	public byte r(int index) {
 		return contents.get(vertIdx(index) + 12);
 	}
 
 	@Override
-	public byte getG(int index) {
+	public byte g(int index) {
 		return contents.get(vertIdx(index) + 13);
 	}
 
 	@Override
-	public byte getB(int index) {
+	public byte b(int index) {
 		return contents.get(vertIdx(index) + 14);
 	}
 
 	@Override
-	public byte getA(int index) {
+	public byte a(int index) {
 		return contents.get(vertIdx(index) + 15);
 	}
 
 	@Override
-	public float getU(int index) {
+	public float u(int index) {
 		return contents.getFloat(vertIdx(index) + 16);
 	}
 
 	@Override
-	public float getV(int index) {
+	public float v(int index) {
 		return contents.getFloat(vertIdx(index) + 20);
 	}
 
 	@Override
-	public int getLight(int index) {
+	public int overlay(int index) {
+		return OverlayTexture.NO_OVERLAY;
+	}
+
+	@Override
+	public int light(int index) {
 		return contents.getInt(vertIdx(index) + 24);
 	}
 
 	@Override
-	public float getNX(int index) {
+	public float normalX(int index) {
 		return RenderMath.f(contents.get(vertIdx(index) + 28));
 	}
 
 	@Override
-	public float getNY(int index) {
+	public float normalY(int index) {
 		return RenderMath.f(contents.get(vertIdx(index) + 29));
 	}
 
 	@Override
-	public float getNZ(int index) {
+	public float normalZ(int index) {
 		return RenderMath.f(contents.get(vertIdx(index) + 30));
-	}
-
-	@Override
-	public VertexType getVertexType() {
-		return Formats.BLOCK;
-	}
-
-	public static class Shaded extends BlockVertexList implements ShadedVertexList {
-
-		private final int unshadedStartVertex;
-
-		public Shaded(ShadeSeparatedBufferBuilder builder) {
-			super(builder);
-			unshadedStartVertex = builder.getUnshadedStartVertex();
-		}
-
-		@Override
-		public boolean isShaded(int index) {
-			return index < unshadedStartVertex;
-		}
-
 	}
 
 }

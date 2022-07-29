@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.model;
+package com.jozufozu.flywheel.backend.instancing.instancing;
 
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;

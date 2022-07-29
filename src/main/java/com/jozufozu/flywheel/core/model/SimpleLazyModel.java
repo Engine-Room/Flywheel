@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core;
+package com.jozufozu.flywheel.core.model;
 
 import java.util.Map;
 
@@ -6,27 +6,25 @@ import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.core.model.Mesh;
-import com.jozufozu.flywheel.core.model.ModelSupplier;
 import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.NonNullSupplier;
 
-public class BasicModelSupplier implements ModelSupplier {
+public class SimpleLazyModel implements Model {
 	private final Lazy<Mesh> supplier;
 	private Material material;
 
-	public BasicModelSupplier(NonNullSupplier<Mesh> supplier, Material material) {
+	public SimpleLazyModel(NonNullSupplier<Mesh> supplier, Material material) {
 		this.supplier = Lazy.of(supplier);
 		this.material = material;
 	}
 
-	public BasicModelSupplier setMaterial(@NotNull Material material) {
+	public SimpleLazyModel setMaterial(@NotNull Material material) {
 		this.material = material;
 		return this;
 	}
 
 	@Override
-	public Map<Material, Mesh> get() {
+	public Map<Material, Mesh> getMeshes() {
 		return ImmutableMap.of(material, supplier.get());
 	}
 

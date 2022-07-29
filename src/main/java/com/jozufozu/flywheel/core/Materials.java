@@ -2,44 +2,189 @@ package com.jozufozu.flywheel.core;
 
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.backend.ShadersModHandler;
+import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.core.material.SimpleMaterial;
+import com.jozufozu.flywheel.core.material.SimpleMaterial.GlStateShard;
+import com.jozufozu.flywheel.util.DiffuseLightCalculator;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.inventory.InventoryMenu;
 
-public class Materials {
+public final class Materials {
+	public static final Material.VertexTransformer SHADING_TRANSFORMER = (vertexList, level) -> {
+		if (ShadersModHandler.isShaderPackInUse()) {
+			return;
+		}
+
+		DiffuseLightCalculator diffuseCalc = DiffuseLightCalculator.forLevel(level);
+		for (int i = 0; i < vertexList.getVertexCount(); i++) {
+			float diffuse = diffuseCalc.getDiffuse(vertexList.normalX(i), vertexList.normalY(i), vertexList.normalZ(i), true);
+			vertexList.r(i, (byte) Mth.clamp((int) (Byte.toUnsignedInt(vertexList.r(i)) * diffuse), 0, 255));
+			vertexList.g(i, (byte) Mth.clamp((int) (Byte.toUnsignedInt(vertexList.g(i)) * diffuse), 0, 255));
+			vertexList.b(i, (byte) Mth.clamp((int) (Byte.toUnsignedInt(vertexList.b(i)) * diffuse), 0, 255));
+		}
+	};
+
 	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
-	public static final Material DEFAULT = SimpleMaterial.builder()
+
+	public static final Material CHUNK_SOLID_SHADED = SimpleMaterial.builder()
 			.stage(RenderStage.AFTER_SOLID_TERRAIN)
-			.renderType(RenderType.cutout())
-			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
+			.vertexShader(Components.Files.SHADED_VERTEX)
+			.fragmentShader(Components.Files.DEFAULT_FRAGMENT)
+			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
+			.batchingRenderType(RenderType.solid())
+			.vertexTransformer(SHADING_TRANSFORMER)
 			.register();
+	public static final Material CHUNK_SOLID_UNSHADED = SimpleMaterial.builder()
+			.stage(RenderStage.AFTER_SOLID_TERRAIN)
+			.vertexShader(Components.Files.DEFAULT_VERTEX)
+			.fragmentShader(Components.Files.DEFAULT_FRAGMENT)
+			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
+			.batchingRenderType(RenderType.solid())
+			.register();
+
+	public static final Material CHUNK_CUTOUT_MIPPED_SHADED = SimpleMaterial.builder()
+			.stage(RenderStage.AFTER_SOLID_TERRAIN)
+			.vertexShader(Components.Files.SHADED_VERTEX)
+			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
+			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
+			.batchingRenderType(RenderType.cutoutMipped())
+			.vertexTransformer(SHADING_TRANSFORMER)
+			.register();
+	public static final Material CHUNK_CUTOUT_MIPPED_UNSHADED = SimpleMaterial.builder()
+			.stage(RenderStage.AFTER_SOLID_TERRAIN)
+			.vertexShader(Components.Files.DEFAULT_VERTEX)
+			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
+			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
+			.batchingRenderType(RenderType.cutoutMipped())
+			.register();
+
+	public static final Material CHUNK_CUTOUT_SHADED = SimpleMaterial.builder()
+			.stage(RenderStage.AFTER_SOLID_TERRAIN)
+			.vertexShader(Components.Files.SHADED_VERTEX)
+			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
+			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, false))
+			.batchingRenderType(RenderType.cutout())
+			.vertexTransformer(SHADING_TRANSFORMER)
+			.register();
+	public static final Material CHUNK_CUTOUT_UNSHADED = SimpleMaterial.builder()
+			.stage(RenderStage.AFTER_SOLID_TERRAIN)
+			.vertexShader(Components.Files.DEFAULT_VERTEX)
+			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
+			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, false))
+			.batchingRenderType(RenderType.cutout())
+			.register();
+
+	public static final Material CHUNK_TRANSLUCENT_SHADED = SimpleMaterial.builder()
+			.stage(RenderStage.AFTER_TRANSLUCENT_TERRAIN)
+			.vertexShader(Components.Files.SHADED_VERTEX)
+			.fragmentShader(Components.Files.DEFAULT_FRAGMENT)
+			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
+			.addShard(Shards.TRANSLUCENT_TRANSPARENCY)
+			.batchingRenderType(RenderType.translucent())
+			.vertexTransformer(SHADING_TRANSFORMER)
+			.register();
+	public static final Material CHUNK_TRANSLUCENT_UNSHADED = SimpleMaterial.builder()
+			.stage(RenderStage.AFTER_TRANSLUCENT_TERRAIN)
+			.vertexShader(Components.Files.DEFAULT_VERTEX)
+			.fragmentShader(Components.Files.DEFAULT_FRAGMENT)
+			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
+			.addShard(Shards.TRANSLUCENT_TRANSPARENCY)
+			.batchingRenderType(RenderType.translucent())
+			.register();
+
+	public static final Material CHUNK_TRIPWIRE_SHADED = SimpleMaterial.builder()
+			.stage(RenderStage.AFTER_TRANSLUCENT_TERRAIN)
+			.vertexShader(Components.Files.SHADED_VERTEX)
+			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
+			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
+			.addShard(Shards.TRANSLUCENT_TRANSPARENCY)
+			.batchingRenderType(RenderType.tripwire())
+			.vertexTransformer(SHADING_TRANSFORMER)
+			.register();
+	public static final Material CHUNK_TRIPWIRE_UNSHADED = SimpleMaterial.builder()
+			.stage(RenderStage.AFTER_TRANSLUCENT_TERRAIN)
+			.vertexShader(Components.Files.DEFAULT_VERTEX)
+			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
+			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
+			.addShard(Shards.TRANSLUCENT_TRANSPARENCY)
+			.batchingRenderType(RenderType.tripwire())
+			.register();
+
 	public static final Material CHEST = SimpleMaterial.builder()
 			.stage(RenderStage.AFTER_BLOCK_ENTITIES)
-			.renderType(Sheets.chestSheet())
-			.diffuseTex(Sheets.CHEST_SHEET)
+			.vertexShader(Components.Files.SHADED_VERTEX)
+			.addShard(Shards.diffuseTex(Sheets.CHEST_SHEET, false, false))
+			.batchingRenderType(Sheets.chestSheet())
 			.register();
 	public static final Material SHULKER = SimpleMaterial.builder()
 			.stage(RenderStage.AFTER_BLOCK_ENTITIES)
-			.renderType(Sheets.shulkerBoxSheet())
-			.diffuseTex(Sheets.SHULKER_SHEET)
+			.vertexShader(Components.Files.SHADED_VERTEX)
 			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
-			.alsoSetup(RenderSystem::disableCull)
-			.alsoClear(RenderSystem::enableCull)
+			.addShard(Shards.diffuseTex(Sheets.SHULKER_SHEET, false, false))
+			.addShard(Shards.DISABLE_CULL)
+			.batchingRenderType(Sheets.shulkerBoxSheet())
 			.register();
 	public static final Material BELL = SimpleMaterial.builder()
 			.stage(RenderStage.AFTER_BLOCK_ENTITIES)
-			.renderType(Sheets.solidBlockSheet())
+			.vertexShader(Components.Files.SHADED_VERTEX)
+			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, false))
+			.batchingRenderType(Sheets.solidBlockSheet())
 			.register();
 	public static final Material MINECART = SimpleMaterial.builder()
 			.stage(RenderStage.AFTER_ENTITIES)
-			.renderType(RenderType.entitySolid(MINECART_LOCATION))
-			.diffuseTex(MINECART_LOCATION)
+			.vertexShader(Components.Files.SHADED_VERTEX)
+			.addShard(Shards.diffuseTex(MINECART_LOCATION, false, false))
+			.batchingRenderType(RenderType.entitySolid(MINECART_LOCATION))
 			.register();
 
 	public static void init() {
 		// noop
+	}
+
+	public static final class Shards {
+		public static final GlStateShard DISABLE_CULL = new GlStateShard(
+				() -> {
+					RenderSystem.disableCull();
+				},
+				() -> {
+					RenderSystem.enableCull();
+				}
+		);
+
+		public static final GlStateShard TRANSLUCENT_TRANSPARENCY = new GlStateShard(
+				() -> {
+					RenderSystem.enableBlend();
+					RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+				},
+				() -> {
+					RenderSystem.disableBlend();
+					RenderSystem.defaultBlendFunc();
+				}
+		);
+
+		public static GlStateShard diffuseTex(ResourceLocation loc, boolean blur, boolean mipmap) {
+			return new GlStateShard(
+					() -> {
+						GlTextureUnit.T0.makeActive();
+						RenderSystem.enableTexture();
+						AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(loc);
+						texture.setFilter(blur, mipmap);
+						RenderSystem.setShaderTexture(0, texture.getId());
+					},
+					() -> {
+						GlTextureUnit.T0.makeActive();
+						RenderSystem.setShaderTexture(0, 0);
+					}
+			);
+		}
 	}
 }

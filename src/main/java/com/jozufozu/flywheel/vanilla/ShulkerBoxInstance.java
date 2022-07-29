@@ -8,9 +8,9 @@ import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
-import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
+import com.jozufozu.flywheel.core.model.SimpleLazyModel;
 import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.core.structs.model.TransformedPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
@@ -29,8 +29,8 @@ import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
 public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntity> implements DynamicInstance {
 
-	private static final Function<TextureAtlasSprite, BasicModelSupplier> BASE = Util.memoize(it -> new BasicModelSupplier(() -> makeBaseModel(it), Materials.SHULKER));
-	private static final Function<TextureAtlasSprite, BasicModelSupplier> LID = Util.memoize(it -> new BasicModelSupplier(() -> makeLidModel(it), Materials.SHULKER));
+	private static final Function<TextureAtlasSprite, SimpleLazyModel> BASE = Util.memoize(it -> new SimpleLazyModel(() -> makeBaseModel(it), Materials.SHULKER));
+	private static final Function<TextureAtlasSprite, SimpleLazyModel> LID = Util.memoize(it -> new SimpleLazyModel(() -> makeLidModel(it), Materials.SHULKER));
 
 	private final TextureAtlasSprite texture;
 

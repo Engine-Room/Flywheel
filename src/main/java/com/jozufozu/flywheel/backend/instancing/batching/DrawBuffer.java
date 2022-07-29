@@ -1,45 +1,47 @@
-package com.jozufozu.flywheel.backend.instancing;
+package com.jozufozu.flywheel.backend.instancing.batching;
 
 import java.nio.ByteBuffer;
 
-import com.jozufozu.flywheel.backend.model.BufferBuilderExtension;
-import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
+import org.lwjgl.system.MemoryUtil;
+
 import com.mojang.blaze3d.platform.MemoryTracker;
-import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.renderer.RenderType;
 
 /**
- * A byte buffer that can be used to draw vertices through a {@link DirectVertexConsumer}.
+ * A byte buffer that can be used to draw vertices through multiple {@link MutableVertexListImpl}s.
  *
  * The number of vertices needs to be known ahead of time.
  */
 public class DrawBuffer {
-
 	private final RenderType parent;
+	private final VertexFormatInfo formatInfo;
+
 	private ByteBuffer backingBuffer;
 	private int expectedVertices;
+	private long ptr;
 
 	public DrawBuffer(RenderType parent) {
 		this.parent = parent;
+		formatInfo = new VertexFormatInfo(parent.format());
 	}
 
 	/**
-	 * Creates a direct vertex consumer that can be used to write vertices into this buffer.
+	 * Prepares this buffer by initializing a block of memory.
 	 * @param vertexCount The number of vertices to reserve memory for.
-	 * @return A direct vertex consumer.
 	 * @throws IllegalStateException If the buffer is already in use.
 	 */
-	public DirectVertexConsumer begin(int vertexCount) {
+	public void prepare(int vertexCount) {
 		if (expectedVertices != 0) {
 			throw new IllegalStateException("Already drawing");
 		}
 
 		this.expectedVertices = vertexCount;
 
-		VertexFormat format = parent.format();
-
-		int byteSize = format.getVertexSize() * vertexCount;
+		// Add one extra vertex to uphold the vanilla assumption that BufferBuilders have at least
+		// enough buffer space for one more vertex. Sodium checks for this extra space when popNextBuffer
+		// is called and reallocates the buffer if there is not space for one more vertex.
+		int byteSize = formatInfo.stride * (vertexCount + 1);
 
 		if (backingBuffer == null) {
 			backingBuffer = MemoryTracker.create(byteSize);
@@ -47,7 +49,13 @@ public class DrawBuffer {
 			backingBuffer = MemoryTracker.resize(backingBuffer, byteSize);
 		}
 
-		return new DirectVertexConsumer(backingBuffer, format, vertexCount);
+		backingBuffer.clear();
+		ptr = MemoryUtil.memAddress(backingBuffer);
+		MemoryUtil.memSet(ptr, 0, byteSize);
+	}
+
+	public MutableVertexListImpl slice(int startVertex, int vertexCount) {
+		return new MutableVertexListImpl(ptr + startVertex * formatInfo.stride, formatInfo, vertexCount);
 	}
 
 	/**
@@ -55,7 +63,11 @@ public class DrawBuffer {
 	 * @param bufferBuilder The buffer builder to inject into.
 	 */
 	public void inject(BufferBuilderExtension bufferBuilder) {
-		bufferBuilder.flywheel$injectForRender(backingBuffer, parent.format(), expectedVertices);
+		bufferBuilder.flywheel$injectForRender(backingBuffer, formatInfo.format, expectedVertices);
+	}
+
+	public int getVertexCount() {
+		return expectedVertices;
 	}
 
 	/**

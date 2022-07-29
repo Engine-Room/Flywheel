@@ -7,8 +7,9 @@ import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
-import com.jozufozu.flywheel.core.model.ModelTransformer;
 import com.jozufozu.flywheel.core.source.FileResolution;
+import com.mojang.math.Vector3f;
+import com.mojang.math.Vector4f;
 
 public class TransformedType implements StructType<TransformedPart> {
 
@@ -38,9 +39,41 @@ public class TransformedType implements StructType<TransformedPart> {
 	}
 
 	@Override
-	public void transform(TransformedPart d, ModelTransformer.Params b) {
-		b.transform(d.model, d.normal)
-				.color(d.r, d.g, d.b, d.a)
-				.light(d.getPackedLight());
+	public VertexTransformer<? extends TransformedPart> getVertexTransformer() {
+		return (vertexList, struct, level) -> {
+			Vector4f pos = new Vector4f();
+			Vector3f normal = new Vector3f();
+
+			int light = struct.getPackedLight();
+			for (int i = 0; i < vertexList.getVertexCount(); i++) {
+				pos.set(
+						vertexList.x(i),
+						vertexList.y(i),
+						vertexList.z(i),
+						1F
+				);
+				pos.transform(struct.model);
+				vertexList.x(i, pos.x());
+				vertexList.y(i, pos.y());
+				vertexList.z(i, pos.z());
+
+				normal.set(
+						vertexList.normalX(i),
+						vertexList.normalY(i),
+						vertexList.normalZ(i)
+				);
+				normal.transform(struct.normal);
+				normal.normalize();
+				vertexList.normalX(i, normal.x());
+				vertexList.normalY(i, normal.y());
+				vertexList.normalZ(i, normal.z());
+
+				vertexList.r(i, struct.r);
+				vertexList.g(i, struct.g);
+				vertexList.b(i, struct.b);
+				vertexList.a(i, struct.a);
+				vertexList.light(i, light);
+			}
+		};
 	}
 }

@@ -10,7 +10,7 @@ import com.jozufozu.flywheel.backend.gl.GlNumericType;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
-import com.jozufozu.flywheel.backend.model.ElementBuffer;
+import com.jozufozu.flywheel.backend.instancing.instancing.ElementBuffer;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 
 /**

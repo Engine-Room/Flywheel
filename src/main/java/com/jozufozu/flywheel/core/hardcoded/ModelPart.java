@@ -28,7 +28,7 @@ public class ModelPart implements Mesh {
 		}
 
 		try (var stack = MemoryStack.stackPush()) {
-			PosTexNormalWriterUnsafe writer = getType().createWriter(stack.malloc(size()));
+			PosTexNormalWriterUnsafe writer = getVertexType().createWriter(stack.malloc(size()));
 			for (PartBuilder.CuboidBuilder cuboid : cuboids) {
 				cuboid.buffer(writer);
 			}
@@ -57,7 +57,7 @@ public class ModelPart implements Mesh {
 	}
 
 	@Override
-	public PosTexNormalVertex getType() {
+	public PosTexNormalVertex getVertexType() {
 		return Formats.POS_TEX_NORMAL;
 	}
 }

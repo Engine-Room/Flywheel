@@ -15,23 +15,23 @@ public class BlockWriterUnsafe extends VertexWriterUnsafe<BlockVertex> {
 
 	@Override
 	public void writeVertex(VertexList list, int i) {
-		float x = list.getX(i);
-		float y = list.getY(i);
-		float z = list.getZ(i);
+		float x = list.x(i);
+		float y = list.y(i);
+		float z = list.z(i);
 
-		float xN = list.getNX(i);
-		float yN = list.getNY(i);
-		float zN = list.getNZ(i);
+		float xN = list.normalX(i);
+		float yN = list.normalY(i);
+		float zN = list.normalZ(i);
 
-		float u = list.getU(i);
-		float v = list.getV(i);
+		float u = list.u(i);
+		float v = list.v(i);
 
-		byte r = list.getR(i);
-		byte g = list.getG(i);
-		byte b = list.getB(i);
-		byte a = list.getA(i);
+		byte r = list.r(i);
+		byte g = list.g(i);
+		byte b = list.b(i);
+		byte a = list.a(i);
 
-		int light = list.getLight(i);
+		int light = list.light(i);
 
 		putVertex(x, y, z, u, v, r, g, b, a, light, xN, yN, zN);
 	}

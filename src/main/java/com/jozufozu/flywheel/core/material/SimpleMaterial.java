@@ -1,39 +1,31 @@
 package com.jozufozu.flywheel.core.material;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.core.ComponentRegistry;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.source.FileResolution;
-import com.mojang.blaze3d.systems.RenderSystem;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
 
 public class SimpleMaterial implements Material {
 	protected final RenderStage stage;
-	protected final RenderType type;
 	protected final FileResolution vertexShader;
 	protected final FileResolution fragmentShader;
-	protected final ResourceLocation diffuseTex;
-	@Nullable
 	protected final Runnable setup;
-	@Nullable
 	protected final Runnable clear;
+	protected final RenderType batchingRenderType;
+	protected final VertexTransformer vertexTransformer;
 
-	public SimpleMaterial(RenderStage stage, RenderType type, FileResolution vertexShader, FileResolution fragmentShader, ResourceLocation diffuseTex, @Nullable Runnable setup, @Nullable Runnable clear) {
+	public SimpleMaterial(RenderStage stage, FileResolution vertexShader, FileResolution fragmentShader, Runnable setup, Runnable clear, RenderType batchingRenderType, VertexTransformer vertexTransformer) {
 		this.stage = stage;
-		this.type = type;
 		this.vertexShader = vertexShader;
 		this.fragmentShader = fragmentShader;
-		this.diffuseTex = diffuseTex;
 		this.setup = setup;
 		this.clear = clear;
+		this.batchingRenderType = batchingRenderType;
+		this.vertexTransformer = vertexTransformer;
 	}
 
 	public static Builder builder() {
@@ -43,11 +35,6 @@ public class SimpleMaterial implements Material {
 	@Override
 	public RenderStage getRenderStage() {
 		return stage;
-	}
-
-	@Override
-	public RenderType getBatchingRenderType() {
-		return type;
 	}
 
 	@Override
@@ -62,45 +49,38 @@ public class SimpleMaterial implements Material {
 
 	@Override
 	public void setup() {
-
-		GlTextureUnit.T0.makeActive();
-		RenderSystem.setShaderTexture(0, diffuseTex);
-		Minecraft.getInstance().textureManager.bindForSetup(diffuseTex);
-
-		if (setup != null) {
-			setup.run();
-		}
+		setup.run();
 	}
 
 	@Override
 	public void clear() {
-		GlTextureUnit.T0.makeActive();
-		RenderSystem.setShaderTexture(0, 0);
+		clear.run();
+	}
 
-		if (clear != null) {
-			clear.run();
-		}
+	@Override
+	public RenderType getBatchingRenderType() {
+		return batchingRenderType;
+	}
+
+	@Override
+	public VertexTransformer getVertexTransformer() {
+		return vertexTransformer;
 	}
 
 	public static class Builder {
 		protected RenderStage stage = RenderStage.AFTER_SOLID_TERRAIN;
-		protected RenderType type = RenderType.solid();
-		protected FileResolution vertexShader = Components.Files.SHADED_VERTEX;
+		protected FileResolution vertexShader = Components.Files.DEFAULT_VERTEX;
 		protected FileResolution fragmentShader = Components.Files.DEFAULT_FRAGMENT;
-		protected ResourceLocation diffuseTex = InventoryMenu.BLOCK_ATLAS;
-		protected Runnable setup = null;
-		protected Runnable clear = null;
+		protected Runnable setup = () -> {};
+		protected Runnable clear = () -> {};
+		protected RenderType batchingRenderType = RenderType.solid();
+		protected VertexTransformer vertexTransformer = (vertexList, level) -> {};
 
 		public Builder() {
 		}
 
 		public Builder stage(RenderStage stage) {
 			this.stage = stage;
-			return this;
-		}
-
-		public Builder renderType(RenderType type) {
-			this.type = type;
 			return this;
 		}
 
@@ -114,33 +94,63 @@ public class SimpleMaterial implements Material {
 			return this;
 		}
 
-		public Builder shaded() {
-			this.vertexShader = Components.Files.SHADED_VERTEX;
+		public Builder addSetup(Runnable setup) {
+			this.setup = chain(this.setup, setup);
 			return this;
 		}
 
-		public Builder unShaded() {
-			this.vertexShader = Components.Files.DEFAULT_VERTEX;
+		public Builder addClear(Runnable clear) {
+			this.clear = chain(this.clear, clear);
 			return this;
 		}
 
-		public Builder diffuseTex(ResourceLocation diffuseTex) {
-			this.diffuseTex = diffuseTex;
+		public Builder addShard(GlStateShard shard) {
+			addSetup(shard.getSetup());
+			addClear(shard.getClear());
 			return this;
 		}
 
-		public Builder alsoSetup(Runnable runnable) {
-			this.setup = runnable;
+		public Builder batchingRenderType(RenderType type) {
+			this.batchingRenderType = type;
 			return this;
 		}
 
-		public Builder alsoClear(Runnable clear) {
-			this.clear = clear;
+		public Builder vertexTransformer(VertexTransformer vertexTransformer) {
+			this.vertexTransformer = vertexTransformer;
 			return this;
 		}
 
 		public SimpleMaterial register() {
-			return ComponentRegistry.register(new SimpleMaterial(stage, type, vertexShader, fragmentShader, diffuseTex, setup, clear));
+			return ComponentRegistry.register(new SimpleMaterial(stage, vertexShader, fragmentShader, setup, clear, batchingRenderType, vertexTransformer));
+		}
+
+		private static Runnable chain(Runnable runnable1, Runnable runnable2) {
+			return () -> {
+				runnable1.run();
+				runnable2.run();
+			};
+		}
+	}
+
+	public static class GlStateShard {
+		protected final Runnable setup;
+		protected final Runnable clear;
+
+		public GlStateShard(Runnable setup, Runnable clear) {
+			this.setup = setup;
+			this.clear = clear;
+		}
+
+		public static GlStateShard fromVanilla(RenderStateShard vanillaShard) {
+			return new GlStateShard(() -> vanillaShard.setupRenderState(), () -> vanillaShard.clearRenderState());
+		}
+
+		public Runnable getSetup() {
+			return setup;
+		}
+
+		public Runnable getClear() {
+			return clear;
 		}
 	}
 }

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.model;
+package com.jozufozu.flywheel.backend.instancing.instancing;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -192,7 +192,7 @@ public class MeshPool {
 			this.mesh = mesh;
 			this.byteIndex = byteIndex;
 			this.ebo = mesh.createEBO();
-			this.layout = mesh.getType()
+			this.layout = mesh.getVertexType()
 					.getLayout();
 		}
 
@@ -255,7 +255,7 @@ public class MeshPool {
 		}
 
 		public VertexType getVertexType() {
-			return this.mesh.getType();
+			return this.mesh.getVertexType();
 		}
 	}
 

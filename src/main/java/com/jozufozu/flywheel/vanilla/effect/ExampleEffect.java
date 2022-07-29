@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.effect.Effect;
-import com.jozufozu.flywheel.core.Models;
+import com.jozufozu.flywheel.core.model.Models;
 import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.core.structs.model.TransformedPart;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;

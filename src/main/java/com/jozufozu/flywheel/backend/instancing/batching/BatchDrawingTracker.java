@@ -1,10 +1,8 @@
-package com.jozufozu.flywheel.backend.instancing;
+package com.jozufozu.flywheel.backend.instancing.batching;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import com.jozufozu.flywheel.backend.model.BufferBuilderExtension;
-import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
 import com.jozufozu.flywheel.util.RenderTypeExtension;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 
@@ -21,16 +19,9 @@ public class BatchDrawingTracker {
 		((BufferBuilderExtension) scratch).flywheel$freeBuffer();
 	}
 
-	/**
-	 * Get a direct vertex consumer for drawing the given number of vertices to the given RenderType.
-	 * @param renderType The RenderType to draw to.
-	 * @param vertexCount The number of vertices that will be drawn.
-	 * @return A direct vertex consumer.
-	 */
-	public DirectVertexConsumer getDirectConsumer(RenderType renderType, int vertexCount) {
+	public DrawBuffer getBuffer(RenderType renderType) {
 		activeTypes.add(renderType);
-		return RenderTypeExtension.getDrawBuffer(renderType)
-				.begin(vertexCount);
+		return RenderTypeExtension.getDrawBuffer(renderType);
 	}
 
 	/**

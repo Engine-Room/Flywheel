@@ -6,11 +6,11 @@ import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
-import com.jozufozu.flywheel.core.BasicModelSupplier;
 import com.jozufozu.flywheel.core.Materials;
-import com.jozufozu.flywheel.core.Models;
 import com.jozufozu.flywheel.core.hardcoded.ModelPart;
 import com.jozufozu.flywheel.core.model.Mesh;
+import com.jozufozu.flywheel.core.model.Models;
+import com.jozufozu.flywheel.core.model.SimpleLazyModel;
 import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.core.structs.model.TransformedPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
@@ -27,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance<T> implements DynamicInstance, TickableInstance {
 
-	private static final BasicModelSupplier MODEL = new BasicModelSupplier(MinecartInstance::getBodyModel, Materials.MINECART);
+	private static final SimpleLazyModel MODEL = new SimpleLazyModel(MinecartInstance::getBodyModel, Materials.MINECART);
 
 	private final PoseStack stack = new PoseStack();
 
