@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.core.model;
 
-import java.lang.management.MemoryUsage;
 import java.nio.ByteBuffer;
 import java.util.function.Supplier;
 
@@ -8,18 +7,17 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.gl.GlNumericType;
-import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.QuadConverter;
+import com.jozufozu.flywheel.util.Pair;
 import com.mojang.blaze3d.platform.MemoryTracker;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferBuilder.RenderedBuffer;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexBuffer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.BakedModel;
@@ -54,11 +52,10 @@ public class BlockModel implements Model {
 		this(bufferable.build(), name);
 	}
 
-	public BlockModel(ShadeSeparatedBufferBuilder buffer, String name) {
+	public BlockModel(Pair<RenderedBuffer, Integer> pair, String name) {
 		this.name = name;
 
-		BufferBuilder.RenderedBuffer renderedBuffer = buffer.endOrDiscardIfEmpty();
-
+		RenderedBuffer renderedBuffer = pair.first();
 		if (renderedBuffer == null) {
 			reader = null;
 			eboSupplier = () -> null;
@@ -67,7 +64,7 @@ public class BlockModel implements Model {
 
 		BufferBuilder.DrawState drawState = renderedBuffer.drawState();
 
-		reader = Formats.BLOCK.createReader(renderedBuffer, buffer.getUnshadedStartVertex());
+		reader = Formats.BLOCK.createReader(renderedBuffer, pair.second());
 
 		if (drawState.sequentialIndex()) {
 			ByteBuffer src = renderedBuffer.indexBuffer();

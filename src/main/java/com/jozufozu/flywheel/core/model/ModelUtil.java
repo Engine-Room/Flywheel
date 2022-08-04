@@ -5,8 +5,11 @@ import java.util.Collection;
 import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.backend.model.BufferBuilderExtension;
+import com.jozufozu.flywheel.util.Pair;
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferBuilder.RenderedBuffer;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -53,7 +56,22 @@ public class ModelUtil {
 		return dispatcher;
 	}
 
-	public static ShadeSeparatedBufferBuilder getBufferBuilder(Bufferable bufferable) {
+	public static boolean isVirtual(ModelData data) {
+		return data.has(ModelUtil.VIRTUAL_PROPERTY) && data.get(ModelUtil.VIRTUAL_PROPERTY);
+	}
+
+	public static Pair<RenderedBuffer, Integer> endShadeSeparated(BufferBuilder shadedBuilder, BufferBuilder unshadedBuilder) {
+		int unshadedStartVertex = ((BufferBuilderExtension) shadedBuilder).flywheel$getVertices();
+		RenderedBuffer unshadedBuffer = unshadedBuilder.endOrDiscardIfEmpty();
+		if (unshadedBuffer != null) {
+			// FIXME: Unshaded indices
+			((BufferBuilderExtension) shadedBuilder).flywheel$appendBufferUnsafe(unshadedBuffer.vertexBuffer());
+		}
+		RenderedBuffer buffer = shadedBuilder.endOrDiscardIfEmpty();
+		return Pair.of(buffer, unshadedStartVertex);
+	}
+
+	public static Pair<RenderedBuffer, Integer> getRenderedBuffer(Bufferable bufferable) {
 		ModelBlockRenderer blockRenderer = VANILLA_RENDERER.getModelRenderer();
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 
@@ -61,31 +79,29 @@ public class ModelUtil {
 
 		bufferable.bufferInto(blockRenderer, objects.shadeSeparatingWrapper, objects.random);
 
-		objects.end();
-
-		return objects.separatedBufferBuilder;
+		return objects.end();
 	}
 
-	public static ShadeSeparatedBufferBuilder getBufferBuilder(BakedModel model, BlockState referenceState, PoseStack poseStack) {
+	public static Pair<RenderedBuffer, Integer> getBufferBuilder(BakedModel model, BlockState referenceState, PoseStack poseStack) {
 		return new BakedModelBuilder(model).withReferenceState(referenceState)
 				.withPoseStack(poseStack)
 				.build();
 	}
 
-	public static ShadeSeparatedBufferBuilder getBufferBuilder(BlockAndTintGetter renderWorld, BakedModel model, BlockState referenceState, PoseStack poseStack) {
+	public static Pair<RenderedBuffer, Integer> getBufferBuilder(BlockAndTintGetter renderWorld, BakedModel model, BlockState referenceState, PoseStack poseStack) {
 		return new BakedModelBuilder(model).withReferenceState(referenceState)
 				.withPoseStack(poseStack)
 				.withRenderWorld(renderWorld)
 				.build();
 	}
 
-	public static ShadeSeparatedBufferBuilder getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks) {
+	public static Pair<RenderedBuffer, Integer> getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks) {
 		return new WorldModelBuilder(layer).withRenderWorld(renderWorld)
 				.withBlocks(blocks)
 				.build();
 	}
 
-	public static ShadeSeparatedBufferBuilder getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks, PoseStack poseStack) {
+	public static Pair<RenderedBuffer, Integer> getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks, PoseStack poseStack) {
 		return new WorldModelBuilder(layer).withRenderWorld(renderWorld)
 				.withBlocks(blocks)
 				.withPoseStack(poseStack)
@@ -106,20 +122,18 @@ public class ModelUtil {
 	private static class ThreadLocalObjects {
 		public final RandomSource random = RandomSource.create();
 		public final ShadeSeparatingVertexConsumer shadeSeparatingWrapper = new ShadeSeparatingVertexConsumer();
-		public final ShadeSeparatedBufferBuilder separatedBufferBuilder = new ShadeSeparatedBufferBuilder(512);
+		public final BufferBuilder shadedBuilder = new BufferBuilder(512);
 		public final BufferBuilder unshadedBuilder = new BufferBuilder(512);
 
 		private void begin() {
-			this.separatedBufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+			this.shadedBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 			this.unshadedBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-			this.shadeSeparatingWrapper.prepare(this.separatedBufferBuilder, this.unshadedBuilder);
+			this.shadeSeparatingWrapper.prepare(this.shadedBuilder, this.unshadedBuilder);
 		}
 
-		private void end() {
+		private Pair<RenderedBuffer, Integer> end() {
 			this.shadeSeparatingWrapper.clear();
-			this.unshadedBuilder.end();
-			this.separatedBufferBuilder.appendUnshadedVertices(this.unshadedBuilder);
-			this.separatedBufferBuilder.end();
+			return ModelUtil.endShadeSeparated(shadedBuilder, unshadedBuilder);
 		}
 	}
 }

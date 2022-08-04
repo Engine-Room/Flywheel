@@ -6,10 +6,8 @@ import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
-import com.jozufozu.flywheel.core.model.ShadeSeparatedBufferBuilder;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.datafixers.util.Pair;
 
 public class BlockVertex implements VertexType {
 
@@ -72,10 +70,11 @@ Vertex FLWCreateVertex() {
 		}
 		ByteBuffer vertexBuffer = renderedBuffer.vertexBuffer();
 
-		if (unshadedStartVertex > 0) {
-			return createReader(vertexBuffer, drawState.vertexCount(), unshadedStartVertex);
+		int vertexCount = drawState.vertexCount();
+		if (unshadedStartVertex > 0 && unshadedStartVertex < vertexCount) {
+			return createReader(vertexBuffer, vertexCount, unshadedStartVertex);
 		} else {
-			return createReader(vertexBuffer, drawState.vertexCount());
+			return createReader(vertexBuffer, vertexCount);
 		}
 	}
 }
