@@ -7,6 +7,7 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.api.vertex.VertexWriter;
 import com.jozufozu.flywheel.backend.instancing.instancing.ElementBuffer;
 import com.jozufozu.flywheel.core.QuadConverter;
+import com.jozufozu.flywheel.util.joml.Vector4fc;
 
 /**
  * A mesh that can be rendered by flywheel.
@@ -38,6 +39,8 @@ public interface Mesh {
 	VertexType getVertexType();
 
 	VertexList getReader();
+
+	Vector4fc getBoundingSphere();
 
 	/**
 	 * @return The number of vertices the model has.

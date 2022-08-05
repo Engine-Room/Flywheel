@@ -184,24 +184,24 @@ public class SourceFile {
 		return "#use " + '"' + name + '"';
 	}
 
-	public String generateFinalSource(CompilationContext env) {
-		return generateFinalSource(env, Collections.emptyList());
+	public String generateFinalSource(CompilationContext context) {
+		return generateFinalSource(context, Collections.emptyList());
 	}
 
-	public String generateFinalSource(CompilationContext env, List<Pair<Span, String>> replacements) {
+	public String generateFinalSource(CompilationContext context, List<Pair<Span, String>> replacements) {
 		var out = new StringBuilder();
 		for (Import include : flattenedImports) {
 			SourceFile file = include.getFile();
 
-			if (file == null || env.contains(file)) {
+			if (file == null || context.contains(file)) {
 				continue;
 			}
 
-			out.append(file.generateLineHeader(env))
+			out.append(file.generateLineHeader(context))
 					.append(file.replaceAndElide(replacements));
 		}
 
-		out.append(this.generateLineHeader(env))
+		out.append(this.generateLineHeader(context))
 				.append(this.replaceAndElide(replacements));
 
 		return out.toString();

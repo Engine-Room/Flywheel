@@ -19,14 +19,6 @@ public class CPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 		}
 	}
 
-	public List<D> getRange(int start, int end) {
-		return data.subList(start, end);
-	}
-
-	public List<D> getAll() {
-		return data;
-	}
-
 	@Override
 	public void notifyDirty() {
 		// noop

@@ -36,6 +36,8 @@ public interface StructType<S extends InstancedPart> {
 
 	VertexTransformer<? extends S> getVertexTransformer();
 
+	StorageBufferWriter<S> getStorageBufferWriter();
+
 	public interface VertexTransformer<S extends InstancedPart> {
 		void transform(MutableVertexList vertexList, S struct, ClientLevel level);
 	}

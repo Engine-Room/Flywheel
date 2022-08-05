@@ -21,6 +21,8 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
+jarJar.enable()
+
 boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
 
 ext.buildNumber = System.getenv('BUILD_NUMBER')
@@ -30,8 +32,6 @@ archivesBaseName = "flywheel-forge-${artifact_minecraft_version}"
 version = mod_version + (dev && buildNumber != null ? "-${buildNumber}" : '')
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-jarJar.enable()
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
@@ -47,6 +47,7 @@ minecraft {
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             property 'flw.dumpShaderSource', 'true'
+            property 'flw.loadRenderDoc', 'true'
 
             arg '-mixin.config=flywheel.mixins.json'
 
@@ -108,15 +109,31 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+    mavenCentral()
 }
+
+// Fix for loading non-mod libraries in dev-env, used for miniball.
+// https://gist.github.com/SizableShrimp/66b22f1b24c255e1491c8d98d3f11f83
+// v--------------------------------------------------------------------v
+configurations {
+    library
+    implementation.extendsFrom library
+}
+
+minecraft.runs.all {
+    lazyToken('minecraft_classpath') {
+        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+    }
+}
+// ^--------------------------------------------------------------------^
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    implementation "com.dreizak:miniball:1.0.3"
-    jarJar(group: 'com.dreizak', name: 'miniball', version: '[1.0,2.0)') {
-        jarJar.pin(it, "[1.0,2.0)")
+    jarJar(group: 'com.dreizak', name: 'miniball', version: "1.0.3") {
+        jarJar.ranged(it, "[1.0,2.0)")
     }
+    library "com.dreizak:miniball:1.0.3"
 
     // switch to implementation for debugging
     compileOnly fg.deobf("maven.modrinth:starlight-forge:1.0.2+1.18.2")
@@ -139,6 +156,7 @@ mixin {
 // Workaround for SpongePowered/MixinGradle#38
 afterEvaluate {
     tasks.configureReobfTaskForReobfJar.mustRunAfter(tasks.compileJava)
+    tasks.configureReobfTaskForReobfJarJar.mustRunAfter(tasks.compileJava)
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -149,6 +167,10 @@ javadoc {
     source = [sourceSets.main.allJava]
     // prevent java 8's strict doclint for javadocs from failing builds
     options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+compileJava {
+    options.compilerArgs = ['-Xdiags:verbose']
 }
 
 jar {

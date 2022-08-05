@@ -11,7 +11,7 @@ public class IndirectInstancer<D extends InstancedPart> extends AbstractInstance
 	public final BufferLayout instanceFormat;
 	public final StructType<D> structType;
 	public final InstancedModel<D> parent;
-	int maxInstanceCount = 0;
+	int instanceCount = 0;
 
 	boolean anyToUpdate;
 
@@ -28,7 +28,7 @@ public class IndirectInstancer<D extends InstancedPart> extends AbstractInstance
 	}
 
 	public boolean isEmpty() {
-		return !anyToUpdate && !anyToRemove && maxInstanceCount == 0;
+		return !anyToUpdate && !anyToRemove && instanceCount == 0;
 	}
 
 	void update() {
@@ -36,7 +36,7 @@ public class IndirectInstancer<D extends InstancedPart> extends AbstractInstance
 			removeDeletedInstances();
 		}
 
-		maxInstanceCount = data.size();
+		instanceCount = data.size();
 
 		anyToRemove = false;
 	}

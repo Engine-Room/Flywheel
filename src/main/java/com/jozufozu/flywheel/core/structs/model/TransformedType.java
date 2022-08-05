@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.core.structs.model;
 
 import java.nio.ByteBuffer;
 
+import com.jozufozu.flywheel.api.struct.StorageBufferWriter;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.core.Components;
@@ -31,6 +32,11 @@ public class TransformedType implements StructType<TransformedPart> {
 	@Override
 	public StructWriter<TransformedPart> getWriter(ByteBuffer backing) {
 		return new TransformedWriterUnsafe(this, backing);
+	}
+
+	@Override
+	public StorageBufferWriter<TransformedPart> getStorageBufferWriter() {
+		return null; // TODO
 	}
 
 	@Override
