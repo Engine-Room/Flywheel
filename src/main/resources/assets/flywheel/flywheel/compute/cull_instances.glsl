@@ -1,10 +1,9 @@
-#version 450
 #define FLW_SUBGROUP_SIZE 32
 layout(local_size_x = FLW_SUBGROUP_SIZE) in;
 #use "flywheel:compute/objects.glsl"
 #use "flywheel:util/quaternion.glsl"
 
-layout(std130, binding = 3) uniform FrameData {
+layout(std140, binding = 3) uniform FrameData {
     vec4 a1; // vec4(nx.x, px.x, ny.x, py.x)
     vec4 a2; // vec4(nx.y, px.y, ny.y, py.y)
     vec4 a3; // vec4(nx.z, px.z, ny.z, py.z)
@@ -13,23 +12,22 @@ layout(std130, binding = 3) uniform FrameData {
     vec2 b2; // vec2(nz.y, pz.y)
     vec2 b3; // vec2(nz.z, pz.z)
     vec2 b4; // vec2(nz.w, pz.w)
-    uint drawCount;
 } frustum;
 
 // populated by instancers
-layout(binding = 0) readonly buffer ObjectBuffer {
+layout(std430, binding = 0) readonly buffer ObjectBuffer {
     Instance objects[];
 };
 
-layout(binding = 1) writeonly buffer TargetBuffer {
+layout(std430, binding = 1) writeonly buffer TargetBuffer {
     uint objectIDs[];
 };
 
-layout(binding = 2) readonly buffer BoundingSpheres {
+layout(std430, binding = 2) readonly buffer BoundingSpheres {
     vec4 boundingSpheres[];
 };
 
-layout(binding = 3) buffer DrawCommands {
+layout(std430, binding = 3) buffer DrawCommands {
     MeshDrawCommand drawCommands[];
 };
 
@@ -44,16 +42,16 @@ bool isVisible(uint objectID, uint batchID) {
     vec4 sphere = boundingSpheres[batchID];
 
     vec3 pivot = objects[objectID].pivot;
-    vec3 center = rotateQuat(sphere.xyz - pivot, objects[objectID].orientation) + pivot + objects[objectID].position;
+    vec3 center = rotateVertexByQuat(sphere.xyz - pivot, objects[objectID].rotation) + pivot + objects[objectID].pos;
     float radius = sphere.r;
 
-    return testSphere(center, radius);
+    return true; //testSphere(center, radius);
 }
 
 void main() {
     uint objectID = gl_GlobalInvocationID.x;
 
-    if (objectID >= frustum.drawCount) {
+    if (objectID >= objects.length()) {
         return;
     }
 

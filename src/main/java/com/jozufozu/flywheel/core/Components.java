@@ -49,6 +49,8 @@ public class Components {
 		public static final FileResolution CRUMBLING_VERTEX = contextVertex(ResourceUtil.subPath(Names.CRUMBLING, ".vert"));
 		public static final FileResolution CRUMBLING_FRAGMENT = contextFragment(ResourceUtil.subPath(Names.CRUMBLING, ".frag"));
 		public static final FileResolution CULL_INSTANCES = compute(Flywheel.rl("compute/cull_instances.glsl"));
+		public static final FileResolution DRAW_INDIRECT_VERTEX = FileResolution.get(ResourceUtil.subPath(Names.DRAW_INDIRECT, ".vert"));
+		public static final FileResolution DRAW_INDIRECT_FRAGMENT = FileResolution.get(ResourceUtil.subPath(Names.DRAW_INDIRECT, ".frag"));
 
 		private static FileResolution compute(ResourceLocation rl) {
 			return FileResolution.get(rl);
@@ -115,5 +117,6 @@ public class Components {
 		public static final ResourceLocation SHADED = Flywheel.rl("material/shaded");
 		public static final ResourceLocation WORLD = Flywheel.rl("context/world");
 		public static final ResourceLocation CRUMBLING = Flywheel.rl("context/crumbling");
+		public static final ResourceLocation DRAW_INDIRECT = Flywheel.rl("compute/draw_instances");
 	}
 }

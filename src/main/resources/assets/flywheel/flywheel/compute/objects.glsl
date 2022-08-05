@@ -1,14 +1,14 @@
 
 struct Instance {
-    ivec2 light;
-    vec4 color;
+    vec4 rotation;
     vec3 pos;
     vec3 pivot;
-    vec4 rotation;
+    uint light;
+    uint color;
     uint batchID;
 };
 
-struct MeshDrawCommands {
+struct MeshDrawCommand {
     uint indexCount;
     uint instanceCount;
     uint firstIndex;

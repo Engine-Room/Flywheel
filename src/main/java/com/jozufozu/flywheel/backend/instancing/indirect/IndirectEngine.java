@@ -149,9 +149,6 @@ public class IndirectEngine implements Engine {
 			model.init(renderLists);
 		}
 		uninitializedModels.clear();
-
-		MeshPool.getInstance()
-				.flush();
 	}
 
 	private void shiftListeners(int cX, int cY, int cZ) {

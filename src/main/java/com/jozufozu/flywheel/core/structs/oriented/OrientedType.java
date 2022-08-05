@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.core.structs.oriented;
 
 import java.nio.ByteBuffer;
 
+import com.jozufozu.flywheel.api.struct.StorageBufferWriter;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.core.Components;
@@ -34,6 +35,11 @@ public class OrientedType implements StructType<OrientedPart> {
 	@Override
 	public StructWriter<OrientedPart> getWriter(ByteBuffer backing) {
 		return new OrientedWriterUnsafe(this, backing);
+	}
+
+	@Override
+	public OrientedStorageWriter getStorageBufferWriter() {
+		return OrientedStorageWriter.INSTANCE;
 	}
 
 	@Override

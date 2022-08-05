@@ -27,7 +27,7 @@ public class MeshPool {
 
 	private static MeshPool allocator;
 
-	public static MeshPool getInstance() {
+	static MeshPool getInstance() {
 		if (allocator == null) {
 			allocator = new MeshPool();
 		}
@@ -188,7 +188,7 @@ public class MeshPool {
 	public class BufferedMesh {
 
 		private final ElementBuffer ebo;
-		private final Mesh mesh;
+		public final Mesh mesh;
 		private final VertexType type;
 		private long byteIndex;
 		private int baseVertex;

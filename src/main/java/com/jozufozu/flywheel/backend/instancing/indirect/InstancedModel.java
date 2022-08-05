@@ -1,13 +1,7 @@
 package com.jozufozu.flywheel.backend.instancing.indirect;
 
-import java.util.List;
-import java.util.Map;
-
-import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
-import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.model.Model;
 
 public class InstancedModel<D extends InstancedPart> {
@@ -42,7 +36,7 @@ public class InstancedModel<D extends InstancedPart> {
 	}
 
 	public int getVertexCount() {
-		return model.getVertexCount() * instancer.maxInstanceCount;
+		return model.getVertexCount() * instancer.instanceCount;
 	}
 
 	public void delete() {

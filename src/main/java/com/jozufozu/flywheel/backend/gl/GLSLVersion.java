@@ -26,4 +26,8 @@ public enum GLSLVersion {
 	public String toString() {
 		return Integer.toString(version);
 	}
+
+	public String getVersionLine() {
+		return "#version " + version + '\n';
+	}
 }
