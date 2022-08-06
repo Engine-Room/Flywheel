@@ -26,7 +26,7 @@ public class ViewProvider extends UniformProvider {
 	}
 
 	@Override
-	public int getSize() {
+	public int getActualByteSize() {
 		return 4 * 16 + 16 + 4;
 	}
 

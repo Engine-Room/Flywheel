@@ -9,7 +9,7 @@ public abstract class UniformProvider {
 	protected ByteBuffer buffer;
 	protected Notifier notifier;
 
-	public abstract int getSize();
+	public abstract int getActualByteSize();
 
 	public void updatePtr(ByteBuffer backing, Notifier notifier) {
 		this.buffer = backing;
