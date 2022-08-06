@@ -23,13 +23,10 @@ public record RenderContext(LevelRenderer renderer, ClientLevel level, PoseStack
 		return viewProjection;
 	}
 
-	public static FrustumIntersection createCuller(Camera camera, Matrix4f viewProjection) {
+	public static FrustumIntersection createCuller(Matrix4f viewProjection, float camX, float camY, float camZ) {
 		com.jozufozu.flywheel.util.joml.Matrix4f proj = Matrix4fExtension.clone(viewProjection);
 
-		Vec3 cam = camera
-				.getPosition();
-
-		proj.translate((float) -cam.x, (float) -cam.y, (float) -cam.z);
+		proj.translate(camX, camY, camZ);
 
 		return new FrustumIntersection(proj);
 	}

@@ -1004,11 +1004,9 @@ public class FrustumIntersection {
 	 * {@code vec2(nzZ, pzZ)}<br>
 	 * {@code vec2(nzW, pzW)}<br>
 	 *
-	 * @param buffer The buffer to write the planes to.
+	 * @param addr The buffer to write the planes to.
 	 */
-	public void getJozuPackedPlanes(ByteBuffer buffer) {
-		long addr = MemoryUtil.memAddress(buffer);
-
+	public void getJozuPackedPlanes(long addr) {
 		MemoryUtil.memPutFloat(addr, nxX);
 		MemoryUtil.memPutFloat(addr + 4, pxX);
 		MemoryUtil.memPutFloat(addr + 8, nyX);

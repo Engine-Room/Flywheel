@@ -3,7 +3,10 @@ layout(local_size_x = FLW_SUBGROUP_SIZE) in;
 #use "flywheel:compute/objects.glsl"
 #use "flywheel:util/quaternion.glsl"
 
-layout(std140, binding = 3) uniform FrameData {
+uint flw_objectID;
+uint flw_batchID;
+
+layout(std140, binding = 0) uniform FrameData {
     vec4 a1; // vec4(nx.x, px.x, ny.x, py.x)
     vec4 a2; // vec4(nx.y, px.y, ny.y, py.y)
     vec4 a3; // vec4(nx.z, px.z, ny.z, py.z)
@@ -31,37 +34,55 @@ layout(std430, binding = 3) buffer DrawCommands {
     MeshDrawCommand drawCommands[];
 };
 
+layout(std430, binding = 4) writeonly buffer DebugVisibility {
+    uint objectVisibilityBits[];
+};
+
 // 83 - 27 = 56 spirv instruction results
 bool testSphere(vec3 center, float radius) {
-    return
-    all(lessThanEqual(fma(frustum.a1, center.xxxx, fma(frustum.a2, center.yyyy, fma(frustum.a3, center.zzzz, frustum.a4))), -radius.xxxx)) &&
-    all(lessThanEqual(fma(frustum.b1, center.xx, fma(frustum.b2, center.yy, fma(frustum.b3, center.zz, frustum.b4))), -radius.xx));
+    bvec4 resultA = greaterThanEqual(fma(frustum.a1, center.xxxx, fma(frustum.a2, center.yyyy, fma(frustum.a3, center.zzzz, frustum.a4))), -radius.xxxx);
+    bvec2 resultB = greaterThanEqual(fma(frustum.b1, center.xx, fma(frustum.b2, center.yy, fma(frustum.b3, center.zz, frustum.b4))), -radius.xx);
+
+    uint debug = uint(resultA.x);
+    debug |= uint(resultA.y) << 1;
+    debug |= uint(resultA.z) << 2;
+    debug |= uint(resultA.w) << 3;
+    debug |= uint(resultB.x) << 4;
+    debug |= uint(resultB.y) << 5;
+
+    objectVisibilityBits[flw_objectID] = debug;
+
+    return all(resultA) && all(resultB);
 }
 
-bool isVisible(uint objectID, uint batchID) {
-    vec4 sphere = boundingSpheres[batchID];
+void flw_transformBoundingSphere(in Instance i, inout vec3 center, inout float radius) {
+    center = rotateVertexByQuat(center - i.pivot, i.rotation) + i.pivot + i.pos;
+    radius = radius;
+}
 
-    vec3 pivot = objects[objectID].pivot;
-    vec3 center = rotateVertexByQuat(sphere.xyz - pivot, objects[objectID].rotation) + pivot + objects[objectID].pos;
+bool isVisible() {
+    vec4 sphere = boundingSpheres[flw_batchID];
+
+    vec3 center = sphere.xyz;
     float radius = sphere.r;
+    flw_transformBoundingSphere(objects[flw_objectID], center, radius);
 
-    return true; //testSphere(center, radius);
+    return testSphere(center, radius);
 }
 
 void main() {
-    uint objectID = gl_GlobalInvocationID.x;
+    flw_objectID = gl_GlobalInvocationID.x;
 
-    if (objectID >= objects.length()) {
+    if (flw_objectID >= objects.length()) {
         return;
     }
 
-    uint batchID = objects[objectID].batchID;
-    bool visible = isVisible(objectID, batchID);
+    flw_batchID = objects[objectID].batchID;
 
-    if (visible) {
-        uint batchIndex = atomicAdd(drawCommands[batchID].instanceCount, 1);
-        uint globalIndex = drawCommands[batchID].baseInstance + batchIndex;
+    if (isVisible()) {
+        uint batchIndex = atomicAdd(drawCommands[flw_batchID].instanceCount, 1);
+        uint globalIndex = drawCommands[flw_batchID].baseInstance + batchIndex;
 
-        objectIDs[globalIndex] = objectID;
+        objectIDs[globalIndex] = flw_objectID;
     }
 }

@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing.indirect;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;

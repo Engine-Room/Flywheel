@@ -2,18 +2,15 @@ package com.jozufozu.flywheel.backend.instancing.indirect;
 
 import static org.lwjgl.opengl.GL46.*;
 
-import java.text.Format;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lwjgl.opengl.GL46C;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StorageBufferWriter;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.gl.GlNumericType;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.Materials;
@@ -24,7 +21,7 @@ import com.jozufozu.flywheel.core.vertex.Formats;
 
 public class IndirectList<T extends InstancedPart> {
 
-	private static final int DRAW_COMMAND_STRIDE = 20;
+	private static final long DRAW_COMMAND_STRIDE = 20;
 
 	final StorageBufferWriter<T> storageBufferWriter;
 	final GlProgram compute;
@@ -51,12 +48,13 @@ public class IndirectList<T extends InstancedPart> {
 	 * Stores drawIndirect structs.
 	 */
 	int drawBuffer;
+	int debugBuffer;
 
 	final IndirectMeshPool meshPool;
 
 	int vertexArray;
 
-	final int[] shaderStorageBuffers = new int[4];
+	final int[] shaderStorageBuffers = new int[5];
 
 	final List<Batch<T>> batches = new ArrayList<>();
 
@@ -73,10 +71,11 @@ public class IndirectList<T extends InstancedPart> {
 		targetBuffer = shaderStorageBuffers[1];
 		boundingSphereBuffer = shaderStorageBuffers[2];
 		drawBuffer = shaderStorageBuffers[3];
+		debugBuffer = shaderStorageBuffers[4];
 		meshPool = new IndirectMeshPool(Formats.BLOCK, 1024);
 
 		// FIXME: Resizable buffers
-		maxObjectCount = 1024L * 100L;
+		maxObjectCount = 1024L;
 		maxBatchCount = 64;
 
 		// +4 for the batch id
@@ -85,6 +84,7 @@ public class IndirectList<T extends InstancedPart> {
 		glNamedBufferStorage(targetBuffer, 4 * maxObjectCount, GL_DYNAMIC_STORAGE_BIT);
 		glNamedBufferStorage(boundingSphereBuffer, 16 * maxBatchCount, GL_DYNAMIC_STORAGE_BIT);
 		glNamedBufferStorage(drawBuffer, DRAW_COMMAND_STRIDE * maxBatchCount, GL_DYNAMIC_STORAGE_BIT);
+		glNamedBufferStorage(debugBuffer, 4 * maxObjectCount, GL_DYNAMIC_STORAGE_BIT);
 
 		objectClientStorage = MemoryUtil.nmemAlloc(objectStride * maxObjectCount);
 
@@ -115,17 +115,13 @@ public class IndirectList<T extends InstancedPart> {
 			offset += attribute
 					.getByteWidth();
 		}
-
-		glEnableVertexArrayAttrib(vertexArray, meshAttribs);
-		glVertexArrayVertexBuffer(vertexArray, meshAttribs, targetBuffer, 0, 4);
-		glVertexArrayAttribIFormat(vertexArray, meshAttribs, 1, GlNumericType.UINT.getGlEnum(), 0);
 	}
 
 	public void add(Mesh mesh, IndirectInstancer<T> instancer) {
 		batches.add(new Batch<>(instancer, meshPool.alloc(mesh)));
 	}
 
-	void submit() {
+	void submit(FrustumUBO frustumUBO) {
 		int instanceCountThisFrame = calculateTotalInstanceCount();
 
 		if (instanceCountThisFrame == 0) {
@@ -137,14 +133,15 @@ public class IndirectList<T extends InstancedPart> {
 		uploadBoundingSpheres();
 		uploadIndirectCommands();
 
-		UniformBuffer.getInstance().sync();
-
+		frustumUBO.bind();
 		dispatchCompute(instanceCountThisFrame);
 		issueMemoryBarrier();
 		dispatchDraw();
 	}
 
 	private void dispatchDraw() {
+		UniformBuffer.getInstance().sync();
+
 		draw.bind();
 		Materials.BELL.setup();
 		glVertexArrayElementBuffer(vertexArray, elementBuffer);
@@ -170,13 +167,17 @@ public class IndirectList<T extends InstancedPart> {
 				ptr += 16;
 			}
 
-			GL46C.nglNamedBufferSubData(boundingSphereBuffer, 0, size, basePtr);
+			nglNamedBufferSubData(boundingSphereBuffer, 0, size, basePtr);
 		}
 	}
 
 	private void dispatchCompute(int instanceCount) {
 		compute.bind();
-		glBindBuffersBase(GL_SHADER_STORAGE_BUFFER, 0, shaderStorageBuffers);
+		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 0, objectBuffer, 0, instanceCount * objectStride);
+		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 1, targetBuffer, 0, instanceCount * 4L);
+		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 2, boundingSphereBuffer, 0, batches.size() * 16L);
+		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 3, drawBuffer, 0, batches.size() * DRAW_COMMAND_STRIDE);
+		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 4, debugBuffer, 0, instanceCount * 4L);
 
 		var groupCount = (instanceCount + 31) >> 5; // ceil(totalInstanceCount / 32)
 		glDispatchCompute(groupCount, 1, 1);
@@ -197,20 +198,20 @@ public class IndirectList<T extends InstancedPart> {
 			batchID++;
 		}
 
-		GL46C.nglNamedBufferSubData(objectBuffer, 0, ptr - objectClientStorage, objectClientStorage);
+		nglNamedBufferSubData(objectBuffer, 0, ptr - objectClientStorage, objectClientStorage);
 
 	}
 
 	private void uploadIndirectCommands() {
 		try (var stack = MemoryStack.stackPush()) {
-			var size = batches.size() * DRAW_COMMAND_STRIDE;
-			long basePtr = stack.nmalloc(size);
+			long size = batches.size() * DRAW_COMMAND_STRIDE;
+			long basePtr = stack.nmalloc((int) size);
 			long writePtr = basePtr;
 			for (Batch<T> batch : batches) {
 				batch.writeIndirectCommand(writePtr);
 				writePtr += DRAW_COMMAND_STRIDE;
 			}
-			GL46C.nglNamedBufferSubData(drawBuffer, 0, size, basePtr);
+			nglNamedBufferSubData(drawBuffer, 0, size, basePtr);
 		}
 	}
 
