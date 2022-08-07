@@ -17,9 +17,7 @@ public class CompileUtil {
 	public static final Pattern matType = Pattern.compile("^mat([234])(?:x([234]))?$");
 
 	public static String generateHeader(GLSLVersion version, ShaderType type) {
-		return "#version " + version + '\n'
-				+ "#extension GL_ARB_explicit_attrib_location : enable\n"
-				+ "#extension GL_ARB_conservative_depth : enable\n"
+		return version.getVersionLine()
 				+ type.getDefineStatement()
 				+ '\n';
 	}

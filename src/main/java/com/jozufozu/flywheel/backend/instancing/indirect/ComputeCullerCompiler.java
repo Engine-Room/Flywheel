@@ -5,6 +5,7 @@ import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.core.compile.CompileUtil;
 import com.jozufozu.flywheel.core.compile.Memoizer;
 import com.jozufozu.flywheel.core.compile.ProgramAssembler;
 import com.jozufozu.flywheel.core.compile.ShaderCompilationException;
@@ -24,7 +25,7 @@ public class ComputeCullerCompiler extends Memoizer<FileResolution, GlProgram> {
 
 		CompilationContext context = new CompilationContext();
 
-		var header = GLSLVersion.V460.getVersionLine();
+		var header = CompileUtil.generateHeader(GLSLVersion.V460, ShaderType.COMPUTE);
 		String source = file.getFile()
 				.generateFinalSource(context);
 

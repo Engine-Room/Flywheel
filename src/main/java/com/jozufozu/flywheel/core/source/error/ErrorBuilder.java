@@ -88,6 +88,10 @@ public class ErrorBuilder {
 				.pointAt(span, 0);
 	}
 
+	public ErrorBuilder pointAt(Span span) {
+		return pointAt(span, 0);
+	}
+
 	public ErrorBuilder pointAt(Span span, int ctxLines) {
 
 		if (span.lines() == 1) {
@@ -123,7 +127,9 @@ public class ErrorBuilder {
 		for (ErrorLine line : lines) {
 			int length = line.neededMargin();
 
-			if (length > maxLength) maxLength = length;
+			if (length > maxLength) {
+				maxLength = length;
+			}
 		}
 
 		StringBuilder builder = new StringBuilder();

@@ -11,6 +11,7 @@ import com.jozufozu.flywheel.core.source.SourceFile;
 import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.core.uniform.FogProvider;
+import com.jozufozu.flywheel.core.uniform.FrustumProvider;
 import com.jozufozu.flywheel.core.uniform.ViewProvider;
 import com.jozufozu.flywheel.core.vertex.Formats;
 import com.jozufozu.flywheel.util.ResourceUtil;
@@ -22,6 +23,7 @@ public class Components {
 
 	public static final ViewProvider VIEW_PROVIDER = ComponentRegistry.register(new ViewProvider());
 	public static final FogProvider FOG_PROVIDER = ComponentRegistry.register(new FogProvider());
+	public static final FrustumProvider FRUSTUM_PROVIDER = ComponentRegistry.register(new FrustumProvider());
 	public static final ContextShader WORLD = ComponentRegistry.register(new ContextShader(WorldProgram::new, Files.WORLD_VERTEX, Files.WORLD_FRAGMENT));
 	public static final ContextShader CRUMBLING = ComponentRegistry.register(new ContextShader(CrumblingProgram::new, Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT));
 
@@ -36,6 +38,7 @@ public class Components {
 
 		public static final FileResolution VIEW_UNIFORMS = uniform(Flywheel.rl("uniform/view.glsl"));
 		public static final FileResolution FOG_UNIFORMS = uniform(Flywheel.rl("uniform/fog.glsl"));
+		public static final FileResolution FRUSTUM_UNIFORMS = uniform(Flywheel.rl("uniform/frustum.glsl"));
 		public static final FileResolution BLOCK_LAYOUT = layoutVertex(ResourceUtil.subPath(Names.BLOCK, ".vert"));
 		public static final FileResolution POS_TEX_NORMAL_LAYOUT = layoutVertex(ResourceUtil.subPath(Names.POS_TEX_NORMAL, ".vert"));
 		public static final FileResolution TRANSFORMED = instanceVertex(ResourceUtil.subPath(Names.TRANSFORMED, ".vert"));

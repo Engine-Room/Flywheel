@@ -21,7 +21,8 @@ import com.jozufozu.flywheel.core.vertex.Formats;
 
 public class IndirectList<T extends InstancedPart> {
 
-	private static final long DRAW_COMMAND_STRIDE = 20;
+	private static final long DRAW_COMMAND_STRIDE = 48;
+	private static final long DRAW_COMMAND_OFFSET = 0;
 
 	final StorageBufferWriter<T> storageBufferWriter;
 	final GlProgram compute;
@@ -31,18 +32,15 @@ public class IndirectList<T extends InstancedPart> {
 	private final long objectStride;
 	private final int maxBatchCount;
 	private final long objectClientStorage;
+	private final long batchIDClientStorage;
 	private final int elementBuffer;
 
 	/**
 	 * Stores raw instance data per-object.
 	 */
 	int objectBuffer;
-
 	int targetBuffer;
-	/**
-	 * Stores bounding spheres
-	 */
-	int boundingSphereBuffer;
+	int batchBuffer;
 
 	/**
 	 * Stores drawIndirect structs.
@@ -69,7 +67,7 @@ public class IndirectList<T extends InstancedPart> {
 		glCreateBuffers(shaderStorageBuffers);
 		objectBuffer = shaderStorageBuffers[0];
 		targetBuffer = shaderStorageBuffers[1];
-		boundingSphereBuffer = shaderStorageBuffers[2];
+		batchBuffer = shaderStorageBuffers[2];
 		drawBuffer = shaderStorageBuffers[3];
 		debugBuffer = shaderStorageBuffers[4];
 		meshPool = new IndirectMeshPool(Formats.BLOCK, 1024);
@@ -78,15 +76,15 @@ public class IndirectList<T extends InstancedPart> {
 		maxObjectCount = 1024L;
 		maxBatchCount = 64;
 
-		// +4 for the batch id
 		objectStride = storageBufferWriter.getAlignment();
 		glNamedBufferStorage(objectBuffer, objectStride * maxObjectCount, GL_DYNAMIC_STORAGE_BIT);
 		glNamedBufferStorage(targetBuffer, 4 * maxObjectCount, GL_DYNAMIC_STORAGE_BIT);
-		glNamedBufferStorage(boundingSphereBuffer, 16 * maxBatchCount, GL_DYNAMIC_STORAGE_BIT);
+		glNamedBufferStorage(batchBuffer, 4 * maxObjectCount, GL_DYNAMIC_STORAGE_BIT);
 		glNamedBufferStorage(drawBuffer, DRAW_COMMAND_STRIDE * maxBatchCount, GL_DYNAMIC_STORAGE_BIT);
 		glNamedBufferStorage(debugBuffer, 4 * maxObjectCount, GL_DYNAMIC_STORAGE_BIT);
 
 		objectClientStorage = MemoryUtil.nmemAlloc(objectStride * maxObjectCount);
+		batchIDClientStorage = MemoryUtil.nmemAlloc(4 * maxObjectCount);
 
 		vertexArray = glCreateVertexArrays();
 
@@ -121,7 +119,7 @@ public class IndirectList<T extends InstancedPart> {
 		batches.add(new Batch<>(instancer, meshPool.alloc(mesh)));
 	}
 
-	void submit(FrustumUBO frustumUBO) {
+	void submit() {
 		int instanceCountThisFrame = calculateTotalInstanceCount();
 
 		if (instanceCountThisFrame == 0) {
@@ -130,24 +128,22 @@ public class IndirectList<T extends InstancedPart> {
 
 		meshPool.uploadAll();
 		uploadInstanceData();
-		uploadBoundingSpheres();
 		uploadIndirectCommands();
 
-		frustumUBO.bind();
+		UniformBuffer.getInstance().sync();
+
 		dispatchCompute(instanceCountThisFrame);
 		issueMemoryBarrier();
 		dispatchDraw();
 	}
 
 	private void dispatchDraw() {
-		UniformBuffer.getInstance().sync();
-
 		draw.bind();
 		Materials.BELL.setup();
 		glVertexArrayElementBuffer(vertexArray, elementBuffer);
 		glBindVertexArray(vertexArray);
 		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, drawBuffer);
-		glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, batches.size(), 0);
+		glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, DRAW_COMMAND_OFFSET, batches.size(), (int) DRAW_COMMAND_STRIDE);
 		Materials.BELL.clear();
 	}
 
@@ -155,27 +151,11 @@ public class IndirectList<T extends InstancedPart> {
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 	}
 
-	private void uploadBoundingSpheres() {
-		try (var stack = MemoryStack.stackPush()) {
-			final int size = batches.size() * 16;
-			final long basePtr = stack.nmalloc(size);
-
-			long ptr = basePtr;
-			for (Batch<T> batch : batches) {
-				var boundingSphere = batch.mesh.mesh.getBoundingSphere();
-				boundingSphere.getToAddress(ptr);
-				ptr += 16;
-			}
-
-			nglNamedBufferSubData(boundingSphereBuffer, 0, size, basePtr);
-		}
-	}
-
 	private void dispatchCompute(int instanceCount) {
 		compute.bind();
 		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 0, objectBuffer, 0, instanceCount * objectStride);
 		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 1, targetBuffer, 0, instanceCount * 4L);
-		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 2, boundingSphereBuffer, 0, batches.size() * 16L);
+		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 2, batchBuffer, 0, instanceCount * 4L);
 		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 3, drawBuffer, 0, batches.size() * DRAW_COMMAND_STRIDE);
 		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 4, debugBuffer, 0, instanceCount * 4L);
 
@@ -184,22 +164,28 @@ public class IndirectList<T extends InstancedPart> {
 	}
 
 	private void uploadInstanceData() {
-		long ptr = objectClientStorage;
+		long objectPtr = objectClientStorage;
+		long batchIDPtr = batchIDClientStorage;
 		int baseInstance = 0;
 		int batchID = 0;
 		for (var batch : batches) {
 			batch.baseInstance = baseInstance;
 			var instancer = batch.instancer;
 			for (T t : instancer.getAll()) {
-				storageBufferWriter.write(ptr, t, batchID);
-				ptr += objectStride;
+				// write object
+				storageBufferWriter.write(objectPtr, t);
+				objectPtr += objectStride;
+
+				// write batchID
+				MemoryUtil.memPutInt(batchIDPtr, batchID);
+				batchIDPtr += 4;
 			}
 			baseInstance += batch.instancer.instanceCount;
 			batchID++;
 		}
 
-		nglNamedBufferSubData(objectBuffer, 0, ptr - objectClientStorage, objectClientStorage);
-
+		nglNamedBufferSubData(objectBuffer, 0, objectPtr - objectClientStorage, objectClientStorage);
+		nglNamedBufferSubData(batchBuffer, 0, batchIDPtr - batchIDClientStorage, batchIDClientStorage);
 	}
 
 	private void uploadIndirectCommands() {
@@ -235,11 +221,15 @@ public class IndirectList<T extends InstancedPart> {
 		}
 
 		public void writeIndirectCommand(long ptr) {
-			MemoryUtil.memPutInt(ptr, mesh.getVertexCount()); // count
+			var boundingSphere = mesh.mesh.getBoundingSphere();
+
+			MemoryUtil.memPutInt(ptr, mesh.getIndexCount()); // count
 			MemoryUtil.memPutInt(ptr + 4, 0); // instanceCount - to be incremented by the compute shader
 			MemoryUtil.memPutInt(ptr + 8, 0); // firstIndex - all models share the same index buffer
 			MemoryUtil.memPutInt(ptr + 12, mesh.getBaseVertex()); // baseVertex
 			MemoryUtil.memPutInt(ptr + 16, baseInstance); // baseInstance
+
+			boundingSphere.getToAddress(ptr + 32); // boundingSphere
 		}
 	}
 }
