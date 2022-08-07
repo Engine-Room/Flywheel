@@ -13,7 +13,7 @@ public class OrientedStorageWriter implements StorageBufferWriter<OrientedPart> 
 	}
 
 	@Override
-	public void write(final long ptr, OrientedPart d, final int batchID) {
+	public void write(final long ptr, OrientedPart d) {
 		MemoryUtil.memPutFloat(ptr, d.qX);
 		MemoryUtil.memPutFloat(ptr + 4, d.qY);
 		MemoryUtil.memPutFloat(ptr + 8, d.qZ);
@@ -27,15 +27,13 @@ public class OrientedStorageWriter implements StorageBufferWriter<OrientedPart> 
 		MemoryUtil.memPutFloat(ptr + 36, d.pivotY);
 		MemoryUtil.memPutFloat(ptr + 40, d.pivotZ);
 
-		MemoryUtil.memPutShort(ptr + 44, d.blockLight);
-		MemoryUtil.memPutShort(ptr + 46, d.skyLight);
+		MemoryUtil.memPutShort(ptr + 44, d.skyLight);
+		MemoryUtil.memPutShort(ptr + 46, d.blockLight);
 
 		MemoryUtil.memPutByte(ptr + 48, d.r);
 		MemoryUtil.memPutByte(ptr + 49, d.g);
 		MemoryUtil.memPutByte(ptr + 50, d.b);
 		MemoryUtil.memPutByte(ptr + 51, d.a);
-
-		MemoryUtil.memPutInt(ptr + 52, batchID);
 	}
 
 	@Override

@@ -52,8 +52,7 @@ public class Loader implements ResourceManagerReloadListener {
 		FileResolution.run(errorReporter, sources);
 
 		if (errorReporter.hasErrored()) {
-			errorReporter.dump();
-			throw new ShaderLoadingException("Failed to resolve all source files, see log for details");
+			throw errorReporter.dump();
 		}
 
 		sources.postResolve();

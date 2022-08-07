@@ -45,8 +45,6 @@ public class IndirectEngine implements Engine {
 	protected final List<InstancedModel<?>> uninitializedModels = new ArrayList<>();
 	protected final RenderLists renderLists = new RenderLists();
 
-	private FrustumUBO frustumUBO;
-
 	/**
 	 * The set of instance managers that are attached to this engine.
 	 */
@@ -77,7 +75,7 @@ public class IndirectEngine implements Engine {
 		setup();
 
 		for (var group : groups) {
-			group.submit(frustumUBO);
+			group.submit();
 		}
 
 	}
@@ -146,26 +144,10 @@ public class IndirectEngine implements Engine {
 
 	@Override
 	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
-		if (frustumUBO == null) {
-			frustumUBO = new FrustumUBO();
-		}
-
 		for (var model : uninitializedModels) {
 			model.init(renderLists);
 		}
 		uninitializedModels.clear();
-
-		Vec3 camera = context.camera()
-				.getPosition();
-
-		var camX = (float) (camera.x - originCoordinate.getX());
-		var camY = (float) (camera.y - originCoordinate.getY());
-		var camZ = (float) (camera.z - originCoordinate.getZ());
-
-		var culler = RenderContext.createCuller(context.viewProjection(), -camX, -camY, -camZ);
-
-		frustumUBO.update(culler);
-
 	}
 
 	private void shiftListeners(int cX, int cY, int cZ) {

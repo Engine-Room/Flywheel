@@ -89,11 +89,14 @@ public class IndirectMeshPool {
 	public class BufferedMesh {
 
 		public final Mesh mesh;
+		private final int vertexCount;
 		private long byteIndex;
 		private int baseVertex;
 
 		public BufferedMesh(Mesh mesh) {
 			this.mesh = mesh;
+
+			vertexCount = mesh.getVertexCount();
 		}
 
 		private void buffer(ByteBuffer buffer) {
@@ -103,7 +106,7 @@ public class IndirectMeshPool {
 		}
 
 		public int getByteSize() {
-			return IndirectMeshPool.this.vertexType.getLayout().getStride() * this.mesh.getVertexCount();
+			return IndirectMeshPool.this.vertexType.getLayout().getStride() * this.vertexCount;
 		}
 
 		public int getBaseVertex() {
@@ -111,7 +114,11 @@ public class IndirectMeshPool {
 		}
 
 		public int getVertexCount() {
-			return this.mesh.getVertexCount();
+			return this.vertexCount;
+		}
+
+		public int getIndexCount() {
+			return this.vertexCount * 6 / 4;
 		}
 	}
 

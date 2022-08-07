@@ -114,7 +114,7 @@ public class FileResolution {
 		ErrorBuilder builder = errorReporter.error(String.format("could not find source for file %s", fileLoc));
 		for (Span location : neededAt) {
 			builder.pointAtFile(location.getSourceFile())
-					.pointAt(location, 1);
+					.pointAt(location);
 		}
 	}
 

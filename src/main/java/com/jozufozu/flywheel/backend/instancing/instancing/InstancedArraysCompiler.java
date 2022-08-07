@@ -112,6 +112,7 @@ public class InstancedArraysCompiler extends Memoizer<InstancedArraysCompiler.Co
 			StringBuilder finalSource = new StringBuilder();
 
 			finalSource.append(CompileUtil.generateHeader(GLSLVersion.V420, ShaderType.VERTEX));
+			finalSource.append("#extension GL_ARB_explicit_attrib_location : enable\n");
 
 			var index = new CompilationContext();
 
@@ -197,6 +198,7 @@ public class InstancedArraysCompiler extends Memoizer<InstancedArraysCompiler.Co
 			StringBuilder finalSource = new StringBuilder();
 
 			finalSource.append(CompileUtil.generateHeader(GLSLVersion.V420, ShaderType.FRAGMENT));
+			finalSource.append("#extension GL_ARB_conservative_depth : enable\n");
 
 			var ctx = new CompilationContext();
 

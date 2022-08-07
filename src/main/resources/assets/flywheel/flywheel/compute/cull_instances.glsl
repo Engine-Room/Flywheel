@@ -1,67 +1,60 @@
 #define FLW_SUBGROUP_SIZE 32
 layout(local_size_x = FLW_SUBGROUP_SIZE) in;
-#use "flywheel:compute/objects.glsl"
+#use "flywheel:api/cull.glsl"
 #use "flywheel:util/quaternion.glsl"
+#use "flywheel:uniform/frustum.glsl"
+#use "flywheel:instance/oriented_indirect.glsl"
 
-uint flw_objectID;
-uint flw_batchID;
+struct MeshDrawCommand {
+    uint indexCount;
+    uint instanceCount;
+    uint firstIndex;
+    uint vertexOffset;
+    uint baseInstance;
 
-layout(std140, binding = 0) uniform FrameData {
-    vec4 a1; // vec4(nx.x, px.x, ny.x, py.x)
-    vec4 a2; // vec4(nx.y, px.y, ny.y, py.y)
-    vec4 a3; // vec4(nx.z, px.z, ny.z, py.z)
-    vec4 a4; // vec4(nx.w, px.w, ny.w, py.w)
-    vec2 b1; // vec2(nz.x, pz.x)
-    vec2 b2; // vec2(nz.y, pz.y)
-    vec2 b3; // vec2(nz.z, pz.z)
-    vec2 b4; // vec2(nz.w, pz.w)
-} frustum;
-
-// populated by instancers
-layout(std430, binding = 0) readonly buffer ObjectBuffer {
-    Instance objects[];
+    vec4 boundingSphere;
 };
 
-layout(std430, binding = 1) writeonly buffer TargetBuffer {
+// populated by instancers
+layout(std430, binding = 0) restrict readonly buffer ObjectBuffer {
+    FLW_INSTANCE_STRUCT objects[];
+};
+
+layout(std430, binding = 1) restrict writeonly buffer TargetBuffer {
     uint objectIDs[];
 };
 
-layout(std430, binding = 2) readonly buffer BoundingSpheres {
-    vec4 boundingSpheres[];
+layout(std430, binding = 2) restrict readonly buffer BatchBuffer {
+    uint batchIDs[];
 };
 
-layout(std430, binding = 3) buffer DrawCommands {
+layout(std430, binding = 3) restrict buffer DrawCommands {
     MeshDrawCommand drawCommands[];
 };
 
-layout(std430, binding = 4) writeonly buffer DebugVisibility {
+layout(std430, binding = 4) restrict writeonly buffer DebugVisibility {
     uint objectVisibilityBits[];
 };
 
 // 83 - 27 = 56 spirv instruction results
 bool testSphere(vec3 center, float radius) {
-    bvec4 resultA = greaterThanEqual(fma(frustum.a1, center.xxxx, fma(frustum.a2, center.yyyy, fma(frustum.a3, center.zzzz, frustum.a4))), -radius.xxxx);
-    bvec2 resultB = greaterThanEqual(fma(frustum.b1, center.xx, fma(frustum.b2, center.yy, fma(frustum.b3, center.zz, frustum.b4))), -radius.xx);
+    bvec4 xyInside = greaterThanEqual(fma(flw_planes.xyX, center.xxxx, fma(flw_planes.xyY, center.yyyy, fma(flw_planes.xyZ, center.zzzz, flw_planes.xyW))), -radius.xxxx);
+    bvec2 zInside = greaterThanEqual(fma(flw_planes.zX, center.xx, fma(flw_planes.zY, center.yy, fma(flw_planes.zZ, center.zz, flw_planes.zW))), -radius.xx);
 
-    uint debug = uint(resultA.x);
-    debug |= uint(resultA.y) << 1;
-    debug |= uint(resultA.z) << 2;
-    debug |= uint(resultA.w) << 3;
-    debug |= uint(resultB.x) << 4;
-    debug |= uint(resultB.y) << 5;
+    uint debug = uint(xyInside.x);
+    debug |= uint(xyInside.y) << 1;
+    debug |= uint(xyInside.z) << 2;
+    debug |= uint(xyInside.w) << 3;
+    debug |= uint(zInside.x) << 4;
+    debug |= uint(zInside.y) << 5;
 
     objectVisibilityBits[flw_objectID] = debug;
 
-    return all(resultA) && all(resultB);
-}
-
-void flw_transformBoundingSphere(in Instance i, inout vec3 center, inout float radius) {
-    center = rotateVertexByQuat(center - i.pivot, i.rotation) + i.pivot + i.pos;
-    radius = radius;
+    return all(xyInside) && all(zInside);
 }
 
 bool isVisible() {
-    vec4 sphere = boundingSpheres[flw_batchID];
+    vec4 sphere = drawCommands[flw_batchID].boundingSphere;
 
     vec3 center = sphere.xyz;
     float radius = sphere.r;
@@ -77,7 +70,7 @@ void main() {
         return;
     }
 
-    flw_batchID = objects[objectID].batchID;
+    flw_batchID = batchIDs[flw_objectID];
 
     if (isVisible()) {
         uint batchIndex = atomicAdd(drawCommands[flw_batchID].instanceCount, 1);
