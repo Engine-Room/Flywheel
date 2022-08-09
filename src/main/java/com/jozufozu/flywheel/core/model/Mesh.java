@@ -2,9 +2,8 @@ package com.jozufozu.flywheel.core.model;
 
 import java.nio.ByteBuffer;
 
-import com.jozufozu.flywheel.api.vertex.VertexList;
+import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.api.vertex.VertexWriter;
 import com.jozufozu.flywheel.backend.instancing.instancing.ElementBuffer;
 import com.jozufozu.flywheel.core.QuadConverter;
 
@@ -30,39 +29,34 @@ import com.jozufozu.flywheel.core.QuadConverter;
  */
 public interface Mesh {
 
-	/**
-	 * A name uniquely identifying this model.
-	 */
-	String name();
-
 	VertexType getVertexType();
 
-	VertexList getReader();
-
 	/**
-	 * @return The number of vertices the model has.
+	 * @return The number of vertices this mesh has.
 	 */
-	default int getVertexCount() {
-		return getReader().getVertexCount();
-	}
+	int getVertexCount();
 
 	/**
 	 * Is there nothing to render?
 	 * @return true if there are no vertices.
 	 */
 	default boolean isEmpty() {
-		return getReader().isEmpty();
+		return getVertexCount() == 0;
 	}
 
 	/**
-	 * The size in bytes that this model's data takes up.
+	 * The size in bytes that this mesh's data takes up.
 	 */
 	default int size() {
 		return getVertexType().byteOffset(getVertexCount());
 	}
 
+	void writeInto(ByteBuffer buffer, long byteIndex);
+
+	void writeInto(MutableVertexList vertexList);
+
 	/**
-	 * Create an element buffer object that indexes the vertices of this model.
+	 * Create an element buffer object that indexes the vertices of this mesh.
 	 *
 	 * <p>
 	 *     Very often models in minecraft are made up of sequential quads, which is a very predictable pattern.
@@ -76,9 +70,10 @@ public interface Mesh {
 				.quads2Tris(getVertexCount() / 4);
 	}
 
-	default void writeInto(ByteBuffer buffer, long byteIndex) {
-		VertexWriter writer = getVertexType().createWriter(buffer);
-		writer.seek(byteIndex);
-		writer.writeVertexList(getReader());
-	}
+	void close();
+
+	/**
+	 * A name uniquely identifying this mesh.
+	 */
+	String name();
 }

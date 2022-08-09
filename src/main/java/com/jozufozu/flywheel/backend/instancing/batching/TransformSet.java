@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructType.VertexTransformer;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
-import com.jozufozu.flywheel.api.vertex.VertexList;
+import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -49,67 +49,43 @@ public class TransformSet<D extends InstancedPart> {
 			int start = Math.max(instances, 0);
 
 			int vertexCount = mesh.getVertexCount() * (end - start);
-			MutableVertexListImpl sub = buffer.slice(startVertex, vertexCount);
+			ReusableVertexList sub = buffer.slice(startVertex, vertexCount);
 			startVertex += vertexCount;
 
 			pool.submit(() -> drawRange(sub, start, end, stack, level));
 		}
 	}
 
-	private void drawRange(MutableVertexListImpl vertexList, int from, int to, PoseStack stack, ClientLevel level) {
+	private void drawRange(ReusableVertexList vertexList, int from, int to, PoseStack stack, ClientLevel level) {
 		drawList(vertexList, instancer.getRange(from, to), stack, level);
 	}
 
-	void drawAll(MutableVertexListImpl vertexList, PoseStack stack, ClientLevel level) {
+	void drawAll(ReusableVertexList vertexList, PoseStack stack, ClientLevel level) {
 		drawList(vertexList, instancer.getAll(), stack, level);
 	}
 
-	private void drawList(MutableVertexListImpl vertexList, List<D> list, PoseStack stack, ClientLevel level) {
-		int startVertex = 0;
-		int meshVertexCount = mesh.getVertexCount();
+	private void drawList(ReusableVertexList vertexList, List<D> list, PoseStack stack, ClientLevel level) {
+		long anchorPtr = vertexList.ptr();
+		int totalVertexCount = vertexList.getVertexCount();
 
-		VertexList meshReader = mesh.getReader();
+		int meshVertexCount = mesh.getVertexCount();
+		vertexList.setVertexCount(meshVertexCount);
+
 		@SuppressWarnings("unchecked")
 		StructType.VertexTransformer<D> structVertexTransformer = (VertexTransformer<D>) instancer.type.getVertexTransformer();
 
 		for (D d : list) {
-			vertexList.setRange(startVertex, meshVertexCount);
-
-			writeMesh(vertexList, meshReader);
+			mesh.writeInto(vertexList);
 
 			structVertexTransformer.transform(vertexList, d, level);
 
-			startVertex += meshVertexCount;
+			vertexList.shiftPtr(meshVertexCount);
 		}
 
-		vertexList.setFullRange();
+		vertexList.ptr(anchorPtr);
+		vertexList.setVertexCount(totalVertexCount);
 		material.getVertexTransformer().transform(vertexList, level);
 		applyPoseStack(vertexList, stack, false);
-	}
-
-	// TODO: remove this
-	// The VertexWriter API and VertexFormat conversion needs to be rewritten to make this unnecessary
-	private static void writeMesh(MutableVertexList vertexList, VertexList meshReader) {
-		for (int i = 0; i < meshReader.getVertexCount(); i++) {
-			vertexList.x(i, meshReader.x(i));
-			vertexList.y(i, meshReader.y(i));
-			vertexList.z(i, meshReader.z(i));
-
-			vertexList.r(i, meshReader.r(i));
-			vertexList.g(i, meshReader.g(i));
-			vertexList.b(i, meshReader.b(i));
-			vertexList.a(i, meshReader.a(i));
-
-			vertexList.u(i, meshReader.u(i));
-			vertexList.v(i, meshReader.v(i));
-
-			vertexList.overlay(i, meshReader.overlay(i));
-			vertexList.light(i, meshReader.light(i));
-
-			vertexList.normalX(i, meshReader.normalX(i));
-			vertexList.normalY(i, meshReader.normalY(i));
-			vertexList.normalZ(i, meshReader.normalZ(i));
-		}
 	}
 
 	private static void applyPoseStack(MutableVertexList vertexList, PoseStack stack, boolean applyNormalMatrix) {

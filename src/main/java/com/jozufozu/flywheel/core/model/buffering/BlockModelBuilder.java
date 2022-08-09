@@ -1,9 +1,11 @@
 package com.jozufozu.flywheel.core.model.buffering;
 
+import java.nio.ByteBuffer;
 import java.util.function.BiFunction;
 
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.model.ModelUtil;
 import com.jozufozu.flywheel.core.model.SimpleMesh;
@@ -12,13 +14,13 @@ import com.jozufozu.flywheel.core.model.buffering.ModelBufferingUtil.BufferFacto
 import com.jozufozu.flywheel.core.model.buffering.ModelBufferingUtil.ResultConsumer;
 import com.jozufozu.flywheel.core.model.buffering.ModelBufferingUtil.ShadeSeparatedBufferFactory;
 import com.jozufozu.flywheel.core.model.buffering.ModelBufferingUtil.ShadeSeparatedResultConsumer;
-import com.jozufozu.flywheel.core.vertex.Formats;
 import com.jozufozu.flywheel.core.virtual.VirtualEmptyBlockGetter;
 import com.jozufozu.flywheel.core.virtual.VirtualEmptyModelData;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -28,7 +30,6 @@ import net.minecraftforge.client.model.data.IModelData;
 public class BlockModelBuilder {
 	private final BlockState state;
 	private boolean shadeSeparated = true;
-	private VertexFormat vertexFormat;
 	private BlockAndTintGetter renderWorld;
 	private PoseStack poseStack;
 	private IModelData modelData;
@@ -40,11 +41,6 @@ public class BlockModelBuilder {
 
 	public BlockModelBuilder disableShadeSeparation() {
 		shadeSeparated = false;
-		return this;
-	}
-
-	public BlockModelBuilder vertexFormat(VertexFormat vertexFormat) {
-		this.vertexFormat = vertexFormat;
 		return this;
 	}
 
@@ -72,9 +68,6 @@ public class BlockModelBuilder {
 	public TessellatedModel build() {
 		ModelBufferingObjects objects = ModelBufferingObjects.THREAD_LOCAL.get();
 
-		if (vertexFormat == null) {
-			vertexFormat = DefaultVertexFormat.BLOCK;
-		}
 		if (renderWorld == null) {
 			renderWorld = VirtualEmptyBlockGetter.INSTANCE;
 		}
@@ -93,28 +86,30 @@ public class BlockModelBuilder {
 		if (shadeSeparated) {
 			ShadeSeparatedBufferFactory<BufferBuilder> bufferFactory = (renderType, shaded) -> {
 				BufferBuilder buffer = new BufferBuilder(64);
-				buffer.begin(VertexFormat.Mode.QUADS, vertexFormat);
+				buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 				return buffer;
 			};
 			ShadeSeparatedResultConsumer<BufferBuilder> resultConsumer = (renderType, shaded, buffer) -> {
 				buffer.end();
 				Material material = materialFunc.apply(renderType, shaded);
 				if (material != null) {
-					meshMapBuilder.put(material, new SimpleMesh(ModelUtil.createVertexList(buffer), Formats.BLOCK, "state=" + state.toString() + ",renderType=" + renderType.toString() + ",shaded=" + shaded));
+					Pair<VertexType, ByteBuffer> pair = ModelUtil.convertBlockBuffer(buffer.popNextBuffer());
+					meshMapBuilder.put(material, new SimpleMesh(pair.getFirst(), pair.getSecond(), "state=" + state.toString() + ",renderType=" + renderType.toString() + ",shaded=" + shaded));
 				}
 			};
 			ModelBufferingUtil.bufferBlockShadeSeparated(ModelUtil.VANILLA_RENDERER, renderWorld, state, poseStack, bufferFactory, objects.shadeSeparatingBufferWrapper, objects.random, modelData, resultConsumer);
 		} else {
 			BufferFactory<BufferBuilder> bufferFactory = (renderType) -> {
 				BufferBuilder buffer = new BufferBuilder(64);
-				buffer.begin(VertexFormat.Mode.QUADS, vertexFormat);
+				buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 				return buffer;
 			};
 			ResultConsumer<BufferBuilder> resultConsumer = (renderType, buffer) -> {
 				buffer.end();
 				Material material = materialFunc.apply(renderType, false);
 				if (material != null) {
-					meshMapBuilder.put(material, new SimpleMesh(ModelUtil.createVertexList(buffer), Formats.BLOCK, "state=" + state.toString() + ",renderType=" + renderType.toString()));
+					Pair<VertexType, ByteBuffer> pair = ModelUtil.convertBlockBuffer(buffer.popNextBuffer());
+					meshMapBuilder.put(material, new SimpleMesh(pair.getFirst(), pair.getSecond(), "state=" + state.toString() + ",renderType=" + renderType.toString()));
 				}
 			};
 			ModelBufferingUtil.bufferBlock(ModelUtil.VANILLA_RENDERER, renderWorld, state, poseStack, bufferFactory, objects.bufferWrapper, objects.random, modelData, resultConsumer);
