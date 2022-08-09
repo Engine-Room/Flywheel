@@ -12,6 +12,7 @@ import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StorageBufferWriter;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
+import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.QuadConverter;
@@ -21,7 +22,7 @@ import com.jozufozu.flywheel.core.vertex.Formats;
 
 public class IndirectList<T extends InstancedPart> {
 
-	private static final long DRAW_COMMAND_STRIDE = 48;
+	private static final long DRAW_COMMAND_STRIDE = 36;
 	private static final long DRAW_COMMAND_OFFSET = 0;
 
 	final StorageBufferWriter<T> storageBufferWriter;
@@ -73,18 +74,20 @@ public class IndirectList<T extends InstancedPart> {
 		meshPool = new IndirectMeshPool(Formats.BLOCK, 1024);
 
 		// FIXME: Resizable buffers
-		maxObjectCount = 1024L;
+		maxObjectCount = 64 * 64 * 64;
 		maxBatchCount = 64;
 
 		objectStride = storageBufferWriter.getAlignment();
-		glNamedBufferStorage(objectBuffer, objectStride * maxObjectCount, GL_DYNAMIC_STORAGE_BIT);
-		glNamedBufferStorage(targetBuffer, 4 * maxObjectCount, GL_DYNAMIC_STORAGE_BIT);
-		glNamedBufferStorage(batchBuffer, 4 * maxObjectCount, GL_DYNAMIC_STORAGE_BIT);
+		int persistentBits = GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT;
+		glNamedBufferStorage(objectBuffer, objectStride * maxObjectCount, persistentBits);
+		glNamedBufferStorage(targetBuffer, 4 * maxObjectCount, 0);
+		glNamedBufferStorage(batchBuffer, 4 * maxObjectCount, persistentBits);
 		glNamedBufferStorage(drawBuffer, DRAW_COMMAND_STRIDE * maxBatchCount, GL_DYNAMIC_STORAGE_BIT);
-		glNamedBufferStorage(debugBuffer, 4 * maxObjectCount, GL_DYNAMIC_STORAGE_BIT);
+		glNamedBufferStorage(debugBuffer, 4 * maxObjectCount, 0);
 
-		objectClientStorage = MemoryUtil.nmemAlloc(objectStride * maxObjectCount);
-		batchIDClientStorage = MemoryUtil.nmemAlloc(4 * maxObjectCount);
+		int mapBits = persistentBits | GL_MAP_FLUSH_EXPLICIT_BIT;
+		objectClientStorage = nglMapNamedBufferRange(objectBuffer, 0, objectStride * maxObjectCount, mapBits);
+		batchIDClientStorage = nglMapNamedBufferRange(batchBuffer, 0, 4 * maxObjectCount, mapBits);
 
 		vertexArray = glCreateVertexArrays();
 
@@ -92,8 +95,8 @@ public class IndirectList<T extends InstancedPart> {
 				.quads2Tris(2048).buffer.handle();
 		setupVertexArray();
 
-		compute = ComputeCullerCompiler.INSTANCE.get(Components.Files.CULL_INSTANCES);
-		draw = IndirectDrawCompiler.INSTANCE.get(new IndirectDrawCompiler.Program(Components.Files.DRAW_INDIRECT_VERTEX, Components.Files.DRAW_INDIRECT_FRAGMENT));
+		compute = ComputeCullerCompiler.INSTANCE.get(Components.Files.ORIENTED_INDIRECT);
+		draw = PipelineCompiler.INSTANCE.get(new PipelineCompiler.Context(Formats.BLOCK, Materials.BELL, Components.Files.ORIENTED_INDIRECT, Components.WORLD, Components.INDIRECT));
 	}
 
 	private void setupVertexArray() {
@@ -184,8 +187,8 @@ public class IndirectList<T extends InstancedPart> {
 			batchID++;
 		}
 
-		nglNamedBufferSubData(objectBuffer, 0, objectPtr - objectClientStorage, objectClientStorage);
-		nglNamedBufferSubData(batchBuffer, 0, batchIDPtr - batchIDClientStorage, batchIDClientStorage);
+		glFlushMappedNamedBufferRange(objectBuffer, 0, objectPtr - objectClientStorage);
+		glFlushMappedNamedBufferRange(batchBuffer, 0, batchIDPtr - batchIDClientStorage);
 	}
 
 	private void uploadIndirectCommands() {
@@ -229,7 +232,7 @@ public class IndirectList<T extends InstancedPart> {
 			MemoryUtil.memPutInt(ptr + 12, mesh.getBaseVertex()); // baseVertex
 			MemoryUtil.memPutInt(ptr + 16, baseInstance); // baseInstance
 
-			boundingSphere.getToAddress(ptr + 32); // boundingSphere
+			boundingSphere.getToAddress(ptr + 20); // boundingSphere
 		}
 	}
 }

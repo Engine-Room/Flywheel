@@ -54,4 +54,12 @@ public class SourceChecks {
 
 		return func;
 	}
+
+	public static BiConsumer<? super ErrorReporter, ? super SourceFile> checkDefine(String define) {
+		return (errorReporter, file) -> {
+//			if (!file.hasDefine(define)) {
+//				errorReporter.generateMissingDefine(file, define, "\"" + define + "\" define not defined");
+//			}
+		};
+	}
 }

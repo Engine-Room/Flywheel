@@ -162,4 +162,25 @@ public class FileResolution {
 	public String toString() {
 		return "FileResolution[" + fileLoc + "]";
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		FileResolution that = (FileResolution) o;
+
+		return fileLoc.equals(that.fileLoc);
+	}
+
+	@Override
+	public int hashCode() {
+		// FileResolutions are interned and therefore can be hashed based on object identity.
+		// Overriding this to make it explicit.
+		return System.identityHashCode(this);
+	}
 }

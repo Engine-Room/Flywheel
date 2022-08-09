@@ -16,7 +16,7 @@ import com.jozufozu.flywheel.core.DebugRender;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.QuadConverter;
 import com.jozufozu.flywheel.core.StitchedSprite;
-import com.jozufozu.flywheel.backend.instancing.instancing.InstancedArraysCompiler;
+import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.core.model.Models;
 import com.jozufozu.flywheel.event.EntityWorldHandler;
@@ -80,7 +80,7 @@ public class Flywheel {
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);
 
 		forgeEventBus.addListener(EventPriority.HIGHEST, QuadConverter::onRendererReload);
-		forgeEventBus.addListener(InstancedArraysCompiler::invalidateAll);
+		forgeEventBus.addListener(PipelineCompiler::invalidateAll);
 		forgeEventBus.addListener(Models::onReload);
 		forgeEventBus.addListener(MeshPool::reset);
 		forgeEventBus.addListener(CrumblingRenderer::onReloadRenderers);

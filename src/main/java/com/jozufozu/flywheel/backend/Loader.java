@@ -6,10 +6,10 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.core.ComponentRegistry;
 import com.jozufozu.flywheel.api.context.ContextShader;
-import com.jozufozu.flywheel.backend.instancing.instancing.InstancedArraysCompiler;
+import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
+import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.core.source.FileResolution;
-import com.jozufozu.flywheel.core.source.ShaderLoadingException;
 import com.jozufozu.flywheel.core.source.ShaderSources;
 import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 import com.jozufozu.flywheel.util.StringUtil;
@@ -69,8 +69,8 @@ public class Loader implements ResourceManagerReloadListener {
 			for (StructType<?> structType : ComponentRegistry.structTypes) {
 				for (VertexType vertexType : ComponentRegistry.vertexTypes) {
 					for (ContextShader contextShader : ComponentRegistry.contextShaders) {
-						var ctx = new InstancedArraysCompiler.Context(vertexType, material, structType.getInstanceShader(), contextShader);
-						InstancedArraysCompiler.INSTANCE.getProgram(ctx);
+						var ctx = new PipelineCompiler.Context(vertexType, material, structType.getInstanceShader(), contextShader, Components.INSTANCED_ARRAYS);
+						PipelineCompiler.INSTANCE.getProgram(ctx);
 					}
 				}
 			}
