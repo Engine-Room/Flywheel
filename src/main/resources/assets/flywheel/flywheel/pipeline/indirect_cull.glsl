@@ -1,9 +1,8 @@
 #define FLW_SUBGROUP_SIZE 32
 layout(local_size_x = FLW_SUBGROUP_SIZE) in;
 #use "flywheel:api/cull.glsl"
-#use "flywheel:util/quaternion.glsl"
 #use "flywheel:uniform/frustum.glsl"
-#use "flywheel:instance/oriented_indirect.glsl"
+#use "flywheel:util/types.glsl"
 
 struct MeshDrawCommand {
     uint indexCount;
@@ -12,7 +11,7 @@ struct MeshDrawCommand {
     uint vertexOffset;
     uint baseInstance;
 
-    vec4 boundingSphere;
+    BoundingSphere boundingSphere;
 };
 
 // populated by instancers
@@ -54,10 +53,11 @@ bool testSphere(vec3 center, float radius) {
 }
 
 bool isVisible() {
-    vec4 sphere = drawCommands[flw_batchID].boundingSphere;
+    BoundingSphere sphere = drawCommands[flw_batchID].boundingSphere;
 
-    vec3 center = sphere.xyz;
-    float radius = sphere.r;
+    vec3 center;
+    float radius;
+    unpackBoundingSphere(sphere, center, radius);
     flw_transformBoundingSphere(objects[flw_objectID], center, radius);
 
     return testSphere(center, radius);

@@ -19,7 +19,7 @@ import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.api.context.ContextShader;
-import com.jozufozu.flywheel.backend.instancing.instancing.InstancedArraysCompiler;
+import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.uniform.UniformBuffer;
 import com.jozufozu.flywheel.util.WeakHashSet;
@@ -89,20 +89,6 @@ public class IndirectEngine implements Engine {
 		RenderSystem.enableDepthTest();
 		RenderSystem.depthFunc(GL32.GL_LEQUAL);
 		RenderSystem.enableCull();
-	}
-
-	protected void setup(ShaderState desc) {
-
-		VertexType vertexType = desc.vertex();
-		FileResolution instanceShader = desc.instance()
-				.getInstanceShader();
-		Material material = desc.material();
-
-		var ctx = new InstancedArraysCompiler.Context(vertexType, material, instanceShader, context);
-
-		InstancedArraysCompiler.INSTANCE.getProgram(ctx)
-				.bind();
-		UniformBuffer.getInstance().sync();
 	}
 
 	public void clearAll() {

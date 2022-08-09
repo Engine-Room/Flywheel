@@ -5,6 +5,7 @@ import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.compile.CompileUtil;
 import com.jozufozu.flywheel.core.compile.Memoizer;
 import com.jozufozu.flywheel.core.compile.ProgramAssembler;
@@ -23,14 +24,18 @@ public class ComputeCullerCompiler extends Memoizer<FileResolution, GlProgram> {
 	@Override
 	protected GlProgram _create(FileResolution file) {
 
+		var finalSource = new StringBuilder();
 		CompilationContext context = new CompilationContext();
 
-		var header = CompileUtil.generateHeader(GLSLVersion.V460, ShaderType.COMPUTE);
-		String source = file.getFile()
-				.generateFinalSource(context);
+		finalSource.append(CompileUtil.generateHeader(GLSLVersion.V460, ShaderType.COMPUTE));
+		finalSource.append(file.getFile()
+				.generateFinalSource(context));
+
+		finalSource.append(Components.Pipeline.INDIRECT_CULL.getFile()
+				.generateFinalSource(context));
 
 		try {
-			var shader = new GlShader(header + source, ShaderType.COMPUTE, ImmutableList.of(file.getFileLoc()));
+			var shader = new GlShader(finalSource.toString(), ShaderType.COMPUTE, ImmutableList.of(file.getFileLoc()));
 
 			return new ProgramAssembler(file.getFileLoc()).attachShader(shader)
 					.link()

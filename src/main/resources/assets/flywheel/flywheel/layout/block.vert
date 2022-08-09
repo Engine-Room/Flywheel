@@ -5,6 +5,7 @@ layout(location = 1) in vec4 _flw_v_color;
 layout(location = 2) in vec2 _flw_v_texCoord;
 layout(location = 3) in ivec2 _flw_v_light;
 layout(location = 4) in vec3 _flw_v_normal;
+#define FLW_INSTANCE_BASE_INDEX 5
 
 void flw_layoutVertex() {
     flw_vertexPos = vec4(_flw_v_pos, 1.0);

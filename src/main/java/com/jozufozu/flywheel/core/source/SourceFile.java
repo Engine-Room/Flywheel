@@ -185,10 +185,7 @@ public class SourceFile {
 	}
 
 	public String generateFinalSource(CompilationContext context) {
-		return generateFinalSource(context, Collections.emptyList());
-	}
-
-	public String generateFinalSource(CompilationContext context, List<Pair<Span, String>> replacements) {
+		List<Pair<Span, String>> replacements = Collections.emptyList();
 		var out = new StringBuilder();
 		for (Import include : flattenedImports) {
 			SourceFile file = include.getFile();

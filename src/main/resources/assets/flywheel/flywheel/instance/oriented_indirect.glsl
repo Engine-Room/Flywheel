@@ -1,7 +1,7 @@
 #use "flywheel:api/vertex.glsl"
 #use "flywheel:util/quaternion.glsl"
-#define FLW_INSTANCE_STRUCT Instance
 
+#define FLW_INSTANCE_STRUCT Instance
 struct Instance {
     vec4 rotation;
     vec3 pos;
