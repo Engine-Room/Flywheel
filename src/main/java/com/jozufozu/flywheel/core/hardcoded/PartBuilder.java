@@ -5,7 +5,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import com.jozufozu.flywheel.core.vertex.PosTexNormalWriterUnsafe;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -160,8 +159,7 @@ public class PartBuilder {
 			return visibleFaces.size() * 4;
 		}
 
-		public void buffer(PosTexNormalWriterUnsafe buffer) {
-
+		public void write(VertexWriter writer) {
 			float sizeX = posX2 - posX1;
 			float sizeY = posY2 - posY1;
 			float sizeZ = posZ2 - posZ1;
@@ -219,28 +217,27 @@ public class PartBuilder {
 			float f12 = getV((float)textureOffsetV + sizeZ + sizeY);
 
 			if (invertYZ) {
-				quad(buffer, new Vector3f[]{hlh, llh, lll, hll}, f6, f11, f7, f10, down);
-				quad(buffer, new Vector3f[]{hhl, lhl, lhh, hhh}, f5, f10, f6, f11, up);
-				quad(buffer, new Vector3f[]{lll, llh, lhh, lhl}, f5, f12, f4, f11, west);
-				quad(buffer, new Vector3f[]{hll, lll, lhl, hhl}, f9, f12, f8, f11, north);
-				quad(buffer, new Vector3f[]{hlh, hll, hhl, hhh}, f8, f12, f6, f11, east);
-				quad(buffer, new Vector3f[]{llh, hlh, hhh, lhh}, f6, f12, f5, f11, south);
+				quad(writer, new Vector3f[]{hlh, llh, lll, hll}, f6, f11, f7, f10, down);
+				quad(writer, new Vector3f[]{hhl, lhl, lhh, hhh}, f5, f10, f6, f11, up);
+				quad(writer, new Vector3f[]{lll, llh, lhh, lhl}, f5, f12, f4, f11, west);
+				quad(writer, new Vector3f[]{hll, lll, lhl, hhl}, f9, f12, f8, f11, north);
+				quad(writer, new Vector3f[]{hlh, hll, hhl, hhh}, f8, f12, f6, f11, east);
+				quad(writer, new Vector3f[]{llh, hlh, hhh, lhh}, f6, f12, f5, f11, south);
 			} else {
-				quad(buffer, new Vector3f[]{hlh, llh, lll, hll}, f5, f10, f6, f11, down);
-				quad(buffer, new Vector3f[]{hhl, lhl, lhh, hhh}, f6, f11, f7, f10, up);
-				quad(buffer, new Vector3f[]{lll, llh, lhh, lhl}, f4, f11, f5, f12, west);
-				quad(buffer, new Vector3f[]{hll, lll, lhl, hhl}, f5, f11, f6, f12, north);
-				quad(buffer, new Vector3f[]{hlh, hll, hhl, hhh}, f6, f11, f8, f12, east);
-				quad(buffer, new Vector3f[]{llh, hlh, hhh, lhh}, f8, f11, f9, f12, south);
+				quad(writer, new Vector3f[]{hlh, llh, lll, hll}, f5, f10, f6, f11, down);
+				quad(writer, new Vector3f[]{hhl, lhl, lhh, hhh}, f6, f11, f7, f10, up);
+				quad(writer, new Vector3f[]{lll, llh, lhh, lhl}, f4, f11, f5, f12, west);
+				quad(writer, new Vector3f[]{hll, lll, lhl, hhl}, f5, f11, f6, f12, north);
+				quad(writer, new Vector3f[]{hlh, hll, hhl, hhh}, f6, f11, f8, f12, east);
+				quad(writer, new Vector3f[]{llh, hlh, hhh, lhh}, f8, f11, f9, f12, south);
 			}
 		}
 
-		public void quad(PosTexNormalWriterUnsafe buffer, Vector3f[] vertices, float minU, float minV, float maxU, float maxV, Vector3f normal) {
-			buffer.putVertex(vertices[0].x(), vertices[0].y(), vertices[0].z(), normal.x(), normal.y(), normal.z(), maxU, minV);
-			buffer.putVertex(vertices[1].x(), vertices[1].y(), vertices[1].z(), normal.x(), normal.y(), normal.z(), minU, minV);
-			buffer.putVertex(vertices[2].x(), vertices[2].y(), vertices[2].z(), normal.x(), normal.y(), normal.z(), minU, maxV);
-			buffer.putVertex(vertices[3].x(), vertices[3].y(), vertices[3].z(), normal.x(), normal.y(), normal.z(), maxU, maxV);
-
+		public void quad(VertexWriter writer, Vector3f[] vertices, float minU, float minV, float maxU, float maxV, Vector3f normal) {
+			writer.putVertex(vertices[0].x(), vertices[0].y(), vertices[0].z(), maxU, minV, normal.x(), normal.y(), normal.z());
+			writer.putVertex(vertices[1].x(), vertices[1].y(), vertices[1].z(), minU, minV, normal.x(), normal.y(), normal.z());
+			writer.putVertex(vertices[2].x(), vertices[2].y(), vertices[2].z(), minU, maxV, normal.x(), normal.y(), normal.z());
+			writer.putVertex(vertices[3].x(), vertices[3].y(), vertices[3].z(), maxU, maxV, normal.x(), normal.y(), normal.z());
 		}
 
 		public float getU(float u) {
@@ -257,6 +254,5 @@ public class PartBuilder {
 				return v / partBuilder.sizeV;
 		}
 	}
-
 
 }

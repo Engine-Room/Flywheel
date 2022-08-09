@@ -152,7 +152,7 @@ public class MeshPool {
 			}
 
 		} catch (Exception e) {
-			Flywheel.LOGGER.error("Error uploading pooled models:", e);
+			Flywheel.LOGGER.error("Error uploading pooled meshes:", e);
 		}
 	}
 
@@ -164,7 +164,7 @@ public class MeshPool {
 			}
 			pendingUpload.clear();
 		} catch (Exception e) {
-			Flywheel.LOGGER.error("Error uploading pooled models:", e);
+			Flywheel.LOGGER.error("Error uploading pooled meshes:", e);
 		}
 	}
 
@@ -209,7 +209,7 @@ public class MeshPool {
 		}
 
 		private boolean hasAnythingToRender() {
-			return mesh.getVertexCount() <= 0 || isDeleted();
+			return mesh.isEmpty() || isDeleted();
 		}
 
 		private void draw(int instanceCount) {

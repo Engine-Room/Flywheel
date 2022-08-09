@@ -68,6 +68,7 @@ public class BatchingEngine implements Engine {
 	@Override
 	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
 		// FIXME: properly support material stages
+		// This also breaks block outlines on batched block entities
 		if (stage != RenderStage.AFTER_FINAL_END_BATCH) {
 			return;
 		}
