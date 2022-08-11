@@ -13,9 +13,7 @@ public sealed interface MemoryBlock permits MemoryBlockImpl {
 
 	void copyTo(long ptr, long bytes);
 
-	default void copyTo(long ptr) {
-		copyTo(ptr, size());
-	}
+	void copyTo(long ptr);
 
 	void clear();
 
