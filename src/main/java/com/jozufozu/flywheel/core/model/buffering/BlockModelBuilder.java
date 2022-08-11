@@ -1,11 +1,11 @@
 package com.jozufozu.flywheel.core.model.buffering;
 
-import java.nio.ByteBuffer;
 import java.util.function.BiFunction;
 
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.model.ModelUtil;
 import com.jozufozu.flywheel.core.model.SimpleMesh;
@@ -93,7 +93,7 @@ public class BlockModelBuilder {
 				buffer.end();
 				Material material = materialFunc.apply(renderType, shaded);
 				if (material != null) {
-					Pair<VertexType, ByteBuffer> pair = ModelUtil.convertBlockBuffer(buffer.popNextBuffer());
+					Pair<VertexType, MemoryBlock> pair = ModelUtil.convertBlockBuffer(buffer.popNextBuffer());
 					meshMapBuilder.put(material, new SimpleMesh(pair.getFirst(), pair.getSecond(), "state=" + state.toString() + ",renderType=" + renderType.toString() + ",shaded=" + shaded));
 				}
 			};
@@ -108,7 +108,7 @@ public class BlockModelBuilder {
 				buffer.end();
 				Material material = materialFunc.apply(renderType, false);
 				if (material != null) {
-					Pair<VertexType, ByteBuffer> pair = ModelUtil.convertBlockBuffer(buffer.popNextBuffer());
+					Pair<VertexType, MemoryBlock> pair = ModelUtil.convertBlockBuffer(buffer.popNextBuffer());
 					meshMapBuilder.put(material, new SimpleMesh(pair.getFirst(), pair.getSecond(), "state=" + state.toString() + ",renderType=" + renderType.toString()));
 				}
 			};

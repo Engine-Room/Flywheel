@@ -2,12 +2,10 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 
 import java.nio.ByteBuffer;
 
-import org.lwjgl.system.MemoryUtil;
-
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexListProvider;
+import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 import com.jozufozu.flywheel.core.vertex.VertexListProviderRegistry;
-import com.mojang.blaze3d.platform.MemoryTracker;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.renderer.RenderType;
@@ -23,9 +21,10 @@ public class DrawBuffer {
 	private final int stride;
 	private final VertexListProvider provider;
 
-	private ByteBuffer backingBuffer;
+	private MemoryBlock memory;
+	private ByteBuffer buffer;
+
 	private int expectedVertices;
-	private long ptr;
 
 	public DrawBuffer(RenderType parent) {
 		this.parent = parent;
@@ -41,7 +40,7 @@ public class DrawBuffer {
 	 */
 	public void prepare(int vertexCount) {
 		if (expectedVertices != 0) {
-			throw new IllegalStateException("Already drawing");
+			throw new IllegalStateException("Already drawing!");
 		}
 
 		this.expectedVertices = vertexCount;
@@ -51,20 +50,20 @@ public class DrawBuffer {
 		// is called and reallocates the buffer if there is not space for one more vertex.
 		int byteSize = stride * (vertexCount + 1);
 
-		if (backingBuffer == null) {
-			backingBuffer = MemoryTracker.create(byteSize);
-		} else if (byteSize > backingBuffer.capacity()) {
-			backingBuffer = MemoryTracker.resize(backingBuffer, byteSize);
+		if (memory == null) {
+			memory = MemoryBlock.malloc(byteSize);
+			buffer = memory.asBuffer();
+		} else if (byteSize > memory.size()) {
+			memory = memory.realloc(byteSize);
+			buffer = memory.asBuffer();
 		}
 
-		backingBuffer.clear();
-		ptr = MemoryUtil.memAddress(backingBuffer);
-		MemoryUtil.memSet(ptr, 0, byteSize);
+		memory.clear();
 	}
 
 	public ReusableVertexList slice(int startVertex, int vertexCount) {
 		ReusableVertexList vertexList = provider.createVertexList();
-		vertexList.ptr(ptr + startVertex * stride);
+		vertexList.ptr(memory.ptr() + startVertex * stride);
 		vertexList.setVertexCount(vertexCount);
 		return vertexList;
 	}
@@ -74,7 +73,8 @@ public class DrawBuffer {
 	 * @param bufferBuilder The buffer builder to inject into.
 	 */
 	public void inject(BufferBuilderExtension bufferBuilder) {
-		bufferBuilder.flywheel$injectForRender(backingBuffer, format, expectedVertices);
+		buffer.clear();
+		bufferBuilder.flywheel$injectForRender(buffer, format, expectedVertices);
 	}
 
 	public int getVertexCount() {
@@ -95,5 +95,10 @@ public class DrawBuffer {
 	 */
 	public void reset() {
 		this.expectedVertices = 0;
+	}
+
+	public void free() {
+		buffer = null;
+		memory.free();
 	}
 }

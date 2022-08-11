@@ -12,9 +12,9 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.uniform.UniformProvider;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
+import com.jozufozu.flywheel.backend.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.core.ComponentRegistry;
 import com.jozufozu.flywheel.util.RenderMath;
-import com.mojang.blaze3d.platform.MemoryTracker;
 
 public class UniformBuffer {
 
@@ -57,7 +57,7 @@ public class UniformBuffer {
 
 		allocatedProviders = builder.build();
 
-		data = MemoryTracker.create(totalBytes);
+		data = FlwMemoryTracker.mallocBuffer(totalBytes);
 		changedBytes = new BitSet(totalBytes);
 
 		for (Allocated p : allocatedProviders) {

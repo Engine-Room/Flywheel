@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL32;
+import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.vertex.VertexType;
@@ -240,7 +241,9 @@ public class MeshPool {
 		}
 
 		private void buffer(ByteBuffer buffer) {
-			this.mesh.writeInto(buffer, this.byteIndex);
+			buffer.position((int) this.byteIndex);
+			long ptr = MemoryUtil.memAddress(buffer);
+			this.mesh.write(ptr);
 
 			this.boundTo.clear();
 			this.gpuResident = true;

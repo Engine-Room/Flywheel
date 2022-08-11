@@ -1,35 +1,31 @@
 package com.jozufozu.flywheel.core.model;
 
-import java.nio.ByteBuffer;
-
-import org.lwjgl.system.MemoryUtil;
-
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 
 public class SimpleMesh implements Mesh {
 	private final VertexType vertexType;
 	private final int vertexCount;
-	private final ByteBuffer contents;
+	private final MemoryBlock contents;
 	private final ReusableVertexList vertexList;
 	private final String name;
 
-	public SimpleMesh(VertexType vertexType, ByteBuffer contents, String name) {
+	public SimpleMesh(VertexType vertexType, MemoryBlock contents, String name) {
 		this.vertexType = vertexType;
 		this.contents = contents;
 		this.name = name;
 
-		contents.clear();
-		int bytes = contents.remaining();
+		int bytes = (int) contents.size();
 		int stride = vertexType.getStride();
 		if (bytes % stride != 0) {
-			throw new IllegalArgumentException("Buffer contains non-whole amount of vertices!");
+			throw new IllegalArgumentException("MemoryBlock contains non-whole amount of vertices!");
 		}
 		vertexCount = bytes / stride;
 
 		vertexList = getVertexType().createVertexList();
-		vertexList.ptr(MemoryUtil.memAddress(contents));
+		vertexList.ptr(contents.ptr());
 		vertexList.setVertexCount(vertexCount);
 	}
 
@@ -44,19 +40,18 @@ public class SimpleMesh implements Mesh {
 	}
 
 	@Override
-	public void writeInto(ByteBuffer buffer, long byteIndex) {
-		buffer.position((int) byteIndex);
-		MemoryUtil.memCopy(contents, buffer);
+	public void write(long ptr) {
+		contents.copyTo(ptr);
 	}
 
 	@Override
-	public void writeInto(MutableVertexList dst) {
+	public void write(MutableVertexList dst) {
 		vertexList.writeAll(dst);
 	}
 
 	@Override
 	public void close() {
-		MemoryUtil.memFree(contents);
+		contents.free();
 	}
 
 	@Override

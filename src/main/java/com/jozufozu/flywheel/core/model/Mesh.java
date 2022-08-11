@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.core.model;
 
-import java.nio.ByteBuffer;
-
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.instancing.instancing.ElementBuffer;
@@ -51,9 +49,9 @@ public interface Mesh {
 		return getVertexType().byteOffset(getVertexCount());
 	}
 
-	void writeInto(ByteBuffer buffer, long byteIndex);
+	void write(long ptr);
 
-	void writeInto(MutableVertexList vertexList);
+	void write(MutableVertexList vertexList);
 
 	/**
 	 * Create an element buffer object that indexes the vertices of this mesh.

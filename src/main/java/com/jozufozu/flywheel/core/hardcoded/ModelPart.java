@@ -1,20 +1,17 @@
 package com.jozufozu.flywheel.core.hardcoded;
 
-import java.nio.ByteBuffer;
 import java.util.List;
-
-import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
+import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.vertex.Formats;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalVertex;
-import com.mojang.blaze3d.platform.MemoryTracker;
 
 public class ModelPart implements Mesh {
 	private final int vertexCount;
-	private final ByteBuffer contents;
+	private final MemoryBlock contents;
 	private final ReusableVertexList vertexList;
 	private final String name;
 
@@ -29,8 +26,8 @@ public class ModelPart implements Mesh {
 			this.vertexCount = vertices;
 		}
 
-		contents = MemoryTracker.create(size());
-		long ptr = MemoryUtil.memAddress(contents);
+		contents = MemoryBlock.malloc(size());
+		long ptr = contents.ptr();
 		VertexWriter writer = new VertexWriterImpl(ptr);
 		for (PartBuilder.CuboidBuilder cuboid : cuboids) {
 			cuboid.write(writer);
@@ -56,19 +53,18 @@ public class ModelPart implements Mesh {
 	}
 
 	@Override
-	public void writeInto(ByteBuffer buffer, long byteIndex) {
-		buffer.position((int) byteIndex);
-		MemoryUtil.memCopy(contents, buffer);
+	public void write(long ptr) {
+		contents.copyTo(ptr);
 	}
 
 	@Override
-	public void writeInto(MutableVertexList dst) {
+	public void write(MutableVertexList dst) {
 		vertexList.writeAll(dst);
 	}
 
 	@Override
 	public void close() {
-		MemoryUtil.memFree(contents);
+		contents.free();
 	}
 
 	@Override

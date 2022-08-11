@@ -8,7 +8,6 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.system.MemoryUtil;
 
 import net.minecraft.Util;
 
@@ -75,7 +74,7 @@ public class GlCompat {
 	}
 
 	/**
-	 * Copied from:
+	 * Modified from:
 	 * <br> <a href="https://github.com/grondag/canvas/commit/820bf754092ccaf8d0c169620c2ff575722d7d96">canvas</a>
 	 *
 	 * <p>Identical in function to {@link GL20C#glShaderSource(int, CharSequence)} but
@@ -87,18 +86,11 @@ public class GlCompat {
 	 * <p>Hat tip to fewizz for the find and the fix.
 	 */
 	public static void safeShaderSource(int glId, CharSequence source) {
-		final MemoryStack stack = MemoryStack.stackGet();
-		final int stackPointer = stack.getPointer();
-
-		try {
-			final ByteBuffer sourceBuffer = MemoryUtil.memUTF8(source, true);
+		try (MemoryStack stack = MemoryStack.stackPush()) {
+			final ByteBuffer sourceBuffer = stack.UTF8(source, true);
 			final PointerBuffer pointers = stack.mallocPointer(1);
 			pointers.put(sourceBuffer);
-
 			GL20C.nglShaderSource(glId, 1, pointers.address0(), 0);
-			org.lwjgl.system.APIUtil.apiArrayFree(pointers.address0(), 1);
-		} finally {
-			stack.setPointer(stackPointer);
 		}
 	}
 
