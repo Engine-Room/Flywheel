@@ -21,50 +21,40 @@ public class FlwMemoryTracker {
 
 	public static MemoryBlock mallocBlock(long size) {
 		MemoryBlock block = new MemoryBlockImpl(malloc(size), size);
-		cpuMemory += block.size();
+		_allocCPUMemory(block.size());
 		return block;
 	}
 
 	public static MemoryBlock mallocBlockTracked(long size) {
-		TrackedMemoryBlockImpl block = new TrackedMemoryBlockImpl(malloc(size), size);
-		block.cleanable = CLEANER.register(block, () -> {
-			if (!block.isFreed()) {
-				block.free();
-			}
-		});
-		cpuMemory += block.size();
+		MemoryBlock block = new TrackedMemoryBlockImpl(malloc(size), size, CLEANER);
+		_allocCPUMemory(block.size());
 		return block;
 	}
 
 	@Deprecated
 	public static ByteBuffer mallocBuffer(int size) {
 		ByteBuffer buffer = MemoryUtil.memByteBuffer(malloc(size), size);
-		cpuMemory += buffer.capacity();
+		_allocCPUMemory(buffer.capacity());
 		return buffer;
 	}
 
 	public static long calloc(long num, long size) {
 		long ptr = MemoryUtil.nmemCalloc(num, size);
 		if (ptr == MemoryUtil.NULL) {
-			throw new OutOfMemoryError("Failed to allocate " + num + " blocks of size " + size + " bytes");
+			throw new OutOfMemoryError("Failed to allocate " + num + " elements of size " + size + " bytes");
 		}
 		return ptr;
 	}
 
 	public static MemoryBlock callocBlock(long num, long size) {
 		MemoryBlock block = new MemoryBlockImpl(calloc(num, size), num * size);
-		cpuMemory += block.size();
+		_allocCPUMemory(block.size());
 		return block;
 	}
 
 	public static MemoryBlock callocBlockTracked(long num, long size) {
-		TrackedMemoryBlockImpl block = new TrackedMemoryBlockImpl(calloc(num, size), num * size);
-		block.cleanable = CLEANER.register(block, () -> {
-			if (!block.isFreed()) {
-				block.free();
-			}
-		});
-		cpuMemory += block.size();
+		MemoryBlock block = new TrackedMemoryBlockImpl(calloc(num, size), num * size, CLEANER);
+		_allocCPUMemory(block.size());
 		return block;
 	}
 
@@ -78,25 +68,23 @@ public class FlwMemoryTracker {
 
 	public static MemoryBlock reallocBlock(MemoryBlock block, long size) {
 		MemoryBlock newBlock = new MemoryBlockImpl(realloc(block.ptr(), size), size);
-		cpuMemory += -block.size() + newBlock.size();
+		_freeCPUMemory(block.size());
+		_allocCPUMemory(newBlock.size());
 		return newBlock;
 	}
 
 	public static MemoryBlock reallocBlockTracked(MemoryBlock block, long size) {
-		TrackedMemoryBlockImpl newBlock = new TrackedMemoryBlockImpl(realloc(block.ptr(), size), size);
-		newBlock.cleanable = CLEANER.register(newBlock, () -> {
-			if (!newBlock.isFreed()) {
-				newBlock.free();
-			}
-		});
-		cpuMemory += -block.size() + newBlock.size();
+		MemoryBlock newBlock = new TrackedMemoryBlockImpl(realloc(block.ptr(), size), size, CLEANER);
+		_freeCPUMemory(block.size());
+		_allocCPUMemory(newBlock.size());
 		return newBlock;
 	}
 
 	@Deprecated
 	public static ByteBuffer reallocBuffer(ByteBuffer buffer, int size) {
 		ByteBuffer newBuffer = MemoryUtil.memByteBuffer(realloc(MemoryUtil.memAddress(buffer), size), size);
-		cpuMemory += -buffer.capacity() + newBuffer.capacity();
+		_freeCPUMemory(buffer.capacity());
+		_allocCPUMemory(newBuffer.capacity());
 		return newBuffer;
 	}
 
@@ -106,13 +94,13 @@ public class FlwMemoryTracker {
 
 	public static void freeBlock(MemoryBlock block) {
 		free(block.ptr());
-		cpuMemory -= block.size();
+		_freeCPUMemory(block.size());
 	}
 
 	@Deprecated
 	public static void freeBuffer(ByteBuffer buffer) {
 		free(MemoryUtil.memAddress(buffer));
-		cpuMemory -= buffer.capacity();
+		_freeCPUMemory(buffer.capacity());
 	}
 
 	public static void _allocCPUMemory(long size) {

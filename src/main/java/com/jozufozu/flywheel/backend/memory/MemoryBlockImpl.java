@@ -41,6 +41,11 @@ sealed class MemoryBlockImpl implements MemoryBlock permits TrackedMemoryBlockIm
 	}
 
 	@Override
+	public void copyTo(long ptr) {
+		copyTo(ptr, size);
+	}
+
+	@Override
 	public void clear() {
 		MemoryUtil.memSet(ptr, 0, size);
 	}
