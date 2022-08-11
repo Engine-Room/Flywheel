@@ -3,6 +3,8 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.lwjgl.system.MemoryUtil;
+
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
@@ -89,20 +91,14 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 			buf.clear(clearStart, clearLength);
 
 			if (size > 0) {
+				final long ptr = MemoryUtil.memAddress(buf.unwrap());
+				final int stride = structType.getLayout().getStride();
+				final StructWriter<D> writer = structType.getWriter();
 
-				final StructWriter<D> writer = structType.getWriter(buf.unwrap());
-
-				boolean sequential = true;
 				for (int i = 0; i < size; i++) {
 					final D element = data.get(i);
 					if (element.checkDirtyAndClear()) {
-						if (!sequential) {
-							writer.seek(i);
-						}
-						writer.write(element);
-						sequential = true;
-					} else {
-						sequential = false;
+						writer.write(ptr + i * stride, element);
 					}
 				}
 			}

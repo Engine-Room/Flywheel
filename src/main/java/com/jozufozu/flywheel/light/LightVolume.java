@@ -2,8 +2,7 @@ package com.jozufozu.flywheel.light;
 
 import java.nio.ByteBuffer;
 
-import org.lwjgl.system.MemoryUtil;
-
+import com.jozufozu.flywheel.backend.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
 
@@ -21,7 +20,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 		this.level = level;
 		this.setBox(sampleVolume);
 
-		this.lightData = MemoryUtil.memAlloc(this.box.volume() * 2);
+		this.lightData = FlwMemoryTracker.mallocBuffer(this.box.volume() * 2);
 	}
 
 	protected void setBox(ImmutableBox box) {
@@ -66,7 +65,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 		setBox(newSampleVolume);
 		int neededCapacity = box.volume() * 2;
 		if (neededCapacity > lightData.capacity()) {
-			lightData = MemoryUtil.memRealloc(lightData, neededCapacity);
+			lightData = FlwMemoryTracker.reallocBuffer(lightData, neededCapacity);
 		}
 		initialize();
 	}
@@ -168,7 +167,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 	}
 
 	public void delete() {
-		MemoryUtil.memFree(lightData);
+		FlwMemoryTracker.freeBuffer(lightData);
 		lightData = null;
 	}
 

@@ -10,10 +10,10 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.vertex.Formats;
 import com.jozufozu.flywheel.core.vertex.VertexListProviderRegistry;
-import com.mojang.blaze3d.platform.MemoryTracker;
 import com.mojang.blaze3d.vertex.BufferBuilder.DrawState;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
@@ -47,16 +47,16 @@ public class ModelUtil {
 		return dispatcher;
 	}
 
-	public static Pair<VertexType, ByteBuffer> convertBlockBuffer(Pair<DrawState, ByteBuffer> pair) {
+	public static Pair<VertexType, MemoryBlock> convertBlockBuffer(Pair<DrawState, ByteBuffer> pair) {
 		DrawState drawState = pair.getFirst();
 		int vertexCount = drawState.vertexCount();
 		VertexFormat srcFormat = drawState.format();
 		VertexType dstVertexType = Formats.BLOCK;
 
 		ByteBuffer src = pair.getSecond();
-		ByteBuffer dst = MemoryTracker.create(src.capacity());
+		MemoryBlock dst = MemoryBlock.malloc(src.capacity());
 		long srcPtr = MemoryUtil.memAddress(src);
-		long dstPtr = MemoryUtil.memAddress(dst);
+		long dstPtr = dst.ptr();
 
 		ReusableVertexList srcList = VertexListProviderRegistry.getOrInfer(srcFormat).createVertexList();
 		ReusableVertexList dstList = dstVertexType.createVertexList();

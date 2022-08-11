@@ -9,8 +9,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 public class FogProvider extends UniformProvider {
 
-
-
 	@Override
 	public int getSize() {
 		return 16 + 8 + 4;

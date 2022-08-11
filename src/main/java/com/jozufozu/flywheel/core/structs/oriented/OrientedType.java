@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.core.structs.oriented;
 
-import java.nio.ByteBuffer;
-
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.core.Components;
@@ -32,8 +30,8 @@ public class OrientedType implements StructType<OrientedPart> {
 	}
 
 	@Override
-	public StructWriter<OrientedPart> getWriter(ByteBuffer backing) {
-		return new OrientedWriterUnsafe(this, backing);
+	public StructWriter<OrientedPart> getWriter() {
+		return OrientedWriter.INSTANCE;
 	}
 
 	@Override
@@ -42,7 +40,7 @@ public class OrientedType implements StructType<OrientedPart> {
 	}
 
 	@Override
-	public VertexTransformer<? extends OrientedPart> getVertexTransformer() {
+	public VertexTransformer<OrientedPart> getVertexTransformer() {
 		return (vertexList, struct, level) -> {
 			Vector4f pos = new Vector4f();
 			Vector3f normal = new Vector3f();

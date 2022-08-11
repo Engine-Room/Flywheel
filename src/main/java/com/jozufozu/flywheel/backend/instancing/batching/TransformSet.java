@@ -5,7 +5,6 @@ import java.util.List;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.api.struct.StructType.VertexTransformer;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
@@ -71,11 +70,10 @@ public class TransformSet<D extends InstancedPart> {
 		int meshVertexCount = mesh.getVertexCount();
 		vertexList.setVertexCount(meshVertexCount);
 
-		@SuppressWarnings("unchecked")
-		StructType.VertexTransformer<D> structVertexTransformer = (VertexTransformer<D>) instancer.type.getVertexTransformer();
+		StructType.VertexTransformer<D> structVertexTransformer = instancer.type.getVertexTransformer();
 
 		for (D d : list) {
-			mesh.writeInto(vertexList);
+			mesh.write(vertexList);
 
 			structVertexTransformer.transform(vertexList, d, level);
 

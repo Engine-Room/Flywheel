@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.FlywheelMemory;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.backend.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.light.LightUpdater;
 import com.jozufozu.flywheel.util.WorldAttached;
 
@@ -24,10 +24,7 @@ public class ForgeEvents {
 
 			InstancedRenderDispatcher.getDebugString(debug);
 
-			// TODO: compress into one line
-			debug.add("Memory used:");
-			debug.add("GPU: " + FlywheelMemory.getGPUMemory());
-			debug.add("CPU: " + FlywheelMemory.getCPUMemory());
+			debug.add("Memory Usage: CPU: " + FlwMemoryTracker.getCPUMemory() / 1024 + "KiB GPU: " + FlwMemoryTracker.getGPUMemory() / 1024 + "KiB");
 		}
 	}
 

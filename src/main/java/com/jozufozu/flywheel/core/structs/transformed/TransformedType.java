@@ -1,6 +1,4 @@
-package com.jozufozu.flywheel.core.structs.model;
-
-import java.nio.ByteBuffer;
+package com.jozufozu.flywheel.core.structs.transformed;
 
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
@@ -29,8 +27,8 @@ public class TransformedType implements StructType<TransformedPart> {
 	}
 
 	@Override
-	public StructWriter<TransformedPart> getWriter(ByteBuffer backing) {
-		return new TransformedWriterUnsafe(this, backing);
+	public StructWriter<TransformedPart> getWriter() {
+		return TransformedWriter.INSTANCE;
 	}
 
 	@Override
@@ -39,7 +37,7 @@ public class TransformedType implements StructType<TransformedPart> {
 	}
 
 	@Override
-	public VertexTransformer<? extends TransformedPart> getVertexTransformer() {
+	public VertexTransformer<TransformedPart> getVertexTransformer() {
 		return (vertexList, struct, level) -> {
 			Vector4f pos = new Vector4f();
 			Vector3f normal = new Vector3f();
