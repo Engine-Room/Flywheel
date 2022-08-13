@@ -39,7 +39,10 @@ public class DrawBuffer {
 
 		VertexFormat format = parent.format();
 
-		int byteSize = format.getVertexSize() * vertexCount;
+		// Add one extra vertex to uphold the vanilla assumption that BufferBuilders have at least
+		// enough buffer space for one more vertex. Rubidium checks for this extra space when popNextBuffer
+		// is called and reallocates the buffer if there is not space for one more vertex.
+		int byteSize = format.getVertexSize() * (vertexCount + 1);
 
 		if (backingBuffer == null) {
 			backingBuffer = MemoryTracker.create(byteSize);

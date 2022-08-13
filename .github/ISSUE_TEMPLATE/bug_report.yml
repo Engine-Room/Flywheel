@@ -59,6 +59,7 @@ body:
             label: Mod Version
             description: The version of the mod you were using when the bug occured
             options:
+                - "0.6.5"
                 - "0.6.4"
                 - "0.6.3"
                 - "0.6.2"
