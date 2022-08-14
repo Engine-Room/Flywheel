@@ -36,12 +36,17 @@ public class TransformedType implements StructType<TransformedPart> {
 
 	@Override
 	public StorageBufferWriter<TransformedPart> getStorageBufferWriter() {
-		return null; // TODO
+		return TransformedStorageWriter.INSTANCE;
 	}
 
 	@Override
 	public FileResolution getInstanceShader() {
 		return Components.Files.TRANSFORMED;
+	}
+
+	@Override
+	public FileResolution getIndirectShader() {
+		return Components.Files.TRANSFORMED_INDIRECT;
 	}
 
 	@Override

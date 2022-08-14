@@ -21,7 +21,7 @@ public class InstancedModel<D extends InstancedPart> {
 		for (var entry : materialMeshMap.entrySet()) {
 			var material = entry.getKey();
 			var mesh = entry.getValue();
-			renderLists.add(material.getRenderStage(), type, mesh, instancer);
+			renderLists.add(instancer, material, mesh);
 
 			return; // TODO: support multiple meshes per model
 		}

@@ -48,6 +48,11 @@ public class OrientedType implements StructType<OrientedPart> {
 	}
 
 	@Override
+	public FileResolution getIndirectShader() {
+		return Components.Files.ORIENTED_INDIRECT;
+	}
+
+	@Override
 	public VertexTransformer<? extends OrientedPart> getVertexTransformer() {
 		return (vertexList, struct, level) -> {
 			Vector4f pos = new Vector4f();

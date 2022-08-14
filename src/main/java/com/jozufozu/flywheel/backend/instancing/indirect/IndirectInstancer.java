@@ -41,30 +41,6 @@ public class IndirectInstancer<D extends InstancedPart> extends AbstractInstance
 		anyToRemove = false;
 	}
 
-	void writeAll(final StructWriter<D> writer) {
-		anyToUpdate = false;
-
-		for (var instance : data) {
-			writer.write(instance);
-		}
-	}
-
-	void writeChanged(final StructWriter<D> writer) {
-		if (!anyToUpdate) {
-			return;
-		}
-
-		anyToUpdate = false;
-
-		final int size = data.size();
-
-		if (size == 0) {
-			return;
-		}
-
-		writeChangedUnchecked(writer);
-	}
-
 	@Override
 	public void delete() {
 		// noop

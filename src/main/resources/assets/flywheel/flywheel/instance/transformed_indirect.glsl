@@ -1,6 +1,6 @@
 #use "flywheel:api/vertex.glsl"
-#define FLW_INSTANCE_STRUCT Instance
 
+#define FLW_INSTANCE_STRUCT Instance
 struct Instance {
     mat4 pose;
     mat3 normal;

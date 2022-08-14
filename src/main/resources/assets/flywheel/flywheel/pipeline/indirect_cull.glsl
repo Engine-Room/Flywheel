@@ -31,23 +31,10 @@ layout(std430, binding = 3) restrict buffer DrawCommands {
     MeshDrawCommand drawCommands[];
 };
 
-layout(std430, binding = 4) restrict writeonly buffer DebugVisibility {
-    uint objectVisibilityBits[];
-};
-
 // 83 - 27 = 56 spirv instruction results
 bool testSphere(vec3 center, float radius) {
     bvec4 xyInside = greaterThanEqual(fma(flw_planes.xyX, center.xxxx, fma(flw_planes.xyY, center.yyyy, fma(flw_planes.xyZ, center.zzzz, flw_planes.xyW))), -radius.xxxx);
     bvec2 zInside = greaterThanEqual(fma(flw_planes.zX, center.xx, fma(flw_planes.zY, center.yy, fma(flw_planes.zZ, center.zz, flw_planes.zW))), -radius.xx);
-
-    uint debug = uint(xyInside.x);
-    debug |= uint(xyInside.y) << 1;
-    debug |= uint(xyInside.z) << 2;
-    debug |= uint(xyInside.w) << 3;
-    debug |= uint(zInside.x) << 4;
-    debug |= uint(zInside.y) << 5;
-
-    objectVisibilityBits[flw_objectID] = debug;
 
     return all(xyInside) && all(zInside);
 }
