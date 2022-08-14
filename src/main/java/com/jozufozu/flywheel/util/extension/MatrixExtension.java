@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.util.extension;
 
 import java.nio.ByteBuffer;
 
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 
 /**
@@ -22,6 +23,10 @@ public interface MatrixExtension {
 	}
 
 	static void writeUnsafe(Matrix4f matrix, long ptr) {
+		((MatrixExtension) (Object) matrix).flywheel$writeUnsafe(ptr);
+	}
+
+	static void writeUnsafe(Matrix3f matrix, long ptr) {
 		((MatrixExtension) (Object) matrix).flywheel$writeUnsafe(ptr);
 	}
 }

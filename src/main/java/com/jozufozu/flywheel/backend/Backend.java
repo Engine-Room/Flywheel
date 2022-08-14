@@ -54,8 +54,7 @@ public class Backend {
 	}
 
 	public static void refresh() {
-		// TODO: Revert when done testing
-		TYPE = BackendType.INDIRECT; // chooseEngine();
+		TYPE = chooseEngine();
 	}
 
 	public static boolean isOn() {

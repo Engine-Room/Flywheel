@@ -5,12 +5,15 @@ import static org.lwjgl.opengl.GL46.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lwjgl.system.MemoryStack;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.system.MemoryUtil;
 
+import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StorageBufferWriter;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
 import com.jozufozu.flywheel.core.Components;
@@ -18,76 +21,37 @@ import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.QuadConverter;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.uniform.UniformBuffer;
-import com.jozufozu.flywheel.core.vertex.Formats;
 
 public class IndirectList<T extends InstancedPart> {
-
-	private static final long DRAW_COMMAND_STRIDE = 36;
-	private static final long DRAW_COMMAND_OFFSET = 0;
 
 	final StorageBufferWriter<T> storageBufferWriter;
 	final GlProgram compute;
 	final GlProgram draw;
-	private final StructType<T> type;
-	private final long maxObjectCount;
+	private final StructType<T> structType;
+	private final VertexType vertexType;
 	private final long objectStride;
-	private final int maxBatchCount;
-	private final long objectClientStorage;
-	private final long batchIDClientStorage;
-	private final int elementBuffer;
 
-	/**
-	 * Stores raw instance data per-object.
-	 */
-	int objectBuffer;
-	int targetBuffer;
-	int batchBuffer;
-
-	/**
-	 * Stores drawIndirect structs.
-	 */
-	int drawBuffer;
-	int debugBuffer;
+	final IndirectBuffers buffers;
 
 	final IndirectMeshPool meshPool;
+	private final int elementBuffer;
 
 	int vertexArray;
 
-	final int[] shaderStorageBuffers = new int[5];
-
 	final List<Batch<T>> batches = new ArrayList<>();
 
-	IndirectList(StructType<T> structType) {
-		type = structType;
-		storageBufferWriter = type.getStorageBufferWriter();
-
-		if (storageBufferWriter == null) {
-			throw new NullPointerException();
-		}
-
-		glCreateBuffers(shaderStorageBuffers);
-		objectBuffer = shaderStorageBuffers[0];
-		targetBuffer = shaderStorageBuffers[1];
-		batchBuffer = shaderStorageBuffers[2];
-		drawBuffer = shaderStorageBuffers[3];
-		debugBuffer = shaderStorageBuffers[4];
-		meshPool = new IndirectMeshPool(Formats.BLOCK, 1024);
-
-		// FIXME: Resizable buffers
-		maxObjectCount = 64 * 64 * 64;
-		maxBatchCount = 64;
+	IndirectList(StructType<T> structType, VertexType vertexType) {
+		this.structType = structType;
+		this.vertexType = vertexType;
+		storageBufferWriter = this.structType.getStorageBufferWriter();
 
 		objectStride = storageBufferWriter.getAlignment();
-		int persistentBits = GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT;
-		glNamedBufferStorage(objectBuffer, objectStride * maxObjectCount, persistentBits);
-		glNamedBufferStorage(targetBuffer, 4 * maxObjectCount, 0);
-		glNamedBufferStorage(batchBuffer, 4 * maxObjectCount, persistentBits);
-		glNamedBufferStorage(drawBuffer, DRAW_COMMAND_STRIDE * maxBatchCount, GL_DYNAMIC_STORAGE_BIT);
-		glNamedBufferStorage(debugBuffer, 4 * maxObjectCount, 0);
+		buffers = new IndirectBuffers(objectStride);
+		buffers.createBuffers();
+		buffers.createObjectStorage(64 * 64 * 64);
+		buffers.createDrawStorage(64);
 
-		int mapBits = persistentBits | GL_MAP_FLUSH_EXPLICIT_BIT;
-		objectClientStorage = nglMapNamedBufferRange(objectBuffer, 0, objectStride * maxObjectCount, mapBits);
-		batchIDClientStorage = nglMapNamedBufferRange(batchBuffer, 0, 4 * maxObjectCount, mapBits);
+		meshPool = new IndirectMeshPool(vertexType, 1024);
 
 		vertexArray = glCreateVertexArrays();
 
@@ -95,14 +59,15 @@ public class IndirectList<T extends InstancedPart> {
 				.quads2Tris(2048).buffer.handle();
 		setupVertexArray();
 
-		compute = ComputeCullerCompiler.INSTANCE.get(Components.Files.ORIENTED_INDIRECT);
-		draw = PipelineCompiler.INSTANCE.get(new PipelineCompiler.Context(Formats.BLOCK, Materials.BELL, Components.Files.ORIENTED_INDIRECT, Components.WORLD, Components.INDIRECT));
+		var indirectShader = this.structType.getIndirectShader();
+		compute = ComputeCullerCompiler.INSTANCE.get(indirectShader);
+		draw = PipelineCompiler.INSTANCE.get(new PipelineCompiler.Context(vertexType, Materials.CHEST, indirectShader, Components.WORLD, Components.INDIRECT));
 	}
 
 	private void setupVertexArray() {
 		glVertexArrayElementBuffer(vertexArray, elementBuffer);
 
-		var meshLayout = Formats.BLOCK.getLayout();
+		var meshLayout = vertexType.getLayout();
 		var meshAttribs = meshLayout.getAttributeCount();
 
 		var attributes = meshLayout.getAttributes();
@@ -118,17 +83,23 @@ public class IndirectList<T extends InstancedPart> {
 		}
 	}
 
-	public void add(Mesh mesh, IndirectInstancer<T> instancer) {
-		batches.add(new Batch<>(instancer, meshPool.alloc(mesh)));
+	public void add(IndirectInstancer<T> instancer, Material material, Mesh mesh) {
+		batches.add(new Batch<>(instancer, material, meshPool.alloc(mesh)));
 	}
 
-	void submit() {
+	void submit(RenderStage stage) {
+		if (batches.isEmpty()) {
+			return;
+		}
 		int instanceCountThisFrame = calculateTotalInstanceCount();
 
 		if (instanceCountThisFrame == 0) {
 			return;
 		}
 
+		// TODO: Sort meshes by material and draw many contiguous sections of the draw indirect buffer,
+		//  adjusting uniforms/textures accordingly
+		buffers.updateCounts(instanceCountThisFrame, batches.size());
 		meshPool.uploadAll();
 		uploadInstanceData();
 		uploadIndirectCommands();
@@ -136,39 +107,38 @@ public class IndirectList<T extends InstancedPart> {
 		UniformBuffer.getInstance().sync();
 
 		dispatchCompute(instanceCountThisFrame);
-		issueMemoryBarrier();
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		dispatchDraw();
 	}
 
 	private void dispatchDraw() {
 		draw.bind();
-		Materials.BELL.setup();
 		glVertexArrayElementBuffer(vertexArray, elementBuffer);
 		glBindVertexArray(vertexArray);
-		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, drawBuffer);
-		glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, DRAW_COMMAND_OFFSET, batches.size(), (int) DRAW_COMMAND_STRIDE);
-		Materials.BELL.clear();
-	}
+		buffers.bindIndirectBuffer();
 
-	private static void issueMemoryBarrier() {
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+		final int stride = (int) IndirectBuffers.DRAW_COMMAND_STRIDE;
+		long offset = 0;
+		for (Batch<T> batch : batches) {
+
+			batch.material.setup();
+			glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, offset, 1, stride);
+			batch.material.clear();
+			offset += stride;
+		}
 	}
 
 	private void dispatchCompute(int instanceCount) {
 		compute.bind();
-		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 0, objectBuffer, 0, instanceCount * objectStride);
-		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 1, targetBuffer, 0, instanceCount * 4L);
-		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 2, batchBuffer, 0, instanceCount * 4L);
-		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 3, drawBuffer, 0, batches.size() * DRAW_COMMAND_STRIDE);
-		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 4, debugBuffer, 0, instanceCount * 4L);
+		buffers.bindAll();
 
-		var groupCount = (instanceCount + 31) >> 5; // ceil(totalInstanceCount / 32)
+		var groupCount = (instanceCount + 31) >> 5; // ceil(instanceCount / 32)
 		glDispatchCompute(groupCount, 1, 1);
 	}
 
 	private void uploadInstanceData() {
-		long objectPtr = objectClientStorage;
-		long batchIDPtr = batchIDClientStorage;
+		long objectPtr = buffers.objectPtr;
+		long batchIDPtr = buffers.batchPtr;
 		int baseInstance = 0;
 		int batchID = 0;
 		for (var batch : batches) {
@@ -181,27 +151,23 @@ public class IndirectList<T extends InstancedPart> {
 
 				// write batchID
 				MemoryUtil.memPutInt(batchIDPtr, batchID);
-				batchIDPtr += 4;
+				batchIDPtr += IndirectBuffers.INT_SIZE;
 			}
 			baseInstance += batch.instancer.instanceCount;
 			batchID++;
 		}
 
-		glFlushMappedNamedBufferRange(objectBuffer, 0, objectPtr - objectClientStorage);
-		glFlushMappedNamedBufferRange(batchBuffer, 0, batchIDPtr - batchIDClientStorage);
+		buffers.flushObjects(objectPtr - buffers.objectPtr);
+		buffers.flushBatchIDs(batchIDPtr - buffers.batchPtr);
 	}
 
 	private void uploadIndirectCommands() {
-		try (var stack = MemoryStack.stackPush()) {
-			long size = batches.size() * DRAW_COMMAND_STRIDE;
-			long basePtr = stack.nmalloc((int) size);
-			long writePtr = basePtr;
-			for (Batch<T> batch : batches) {
-				batch.writeIndirectCommand(writePtr);
-				writePtr += DRAW_COMMAND_STRIDE;
-			}
-			nglNamedBufferSubData(drawBuffer, 0, size, basePtr);
+		long writePtr = buffers.drawPtr;
+		for (Batch<T> batch : batches) {
+			batch.writeIndirectCommand(writePtr);
+			writePtr += IndirectBuffers.DRAW_COMMAND_STRIDE;
 		}
+		buffers.flushDrawCommands(writePtr - buffers.drawPtr);
 	}
 
 	private int calculateTotalInstanceCount() {
@@ -216,10 +182,12 @@ public class IndirectList<T extends InstancedPart> {
 	private static final class Batch<T extends InstancedPart> {
 		final IndirectInstancer<T> instancer;
 		final IndirectMeshPool.BufferedMesh mesh;
-		int baseInstance;
+		final Material material;
+		int baseInstance = -1;
 
-		private Batch(IndirectInstancer<T> instancer, IndirectMeshPool.BufferedMesh mesh) {
+		private Batch(IndirectInstancer<T> instancer, Material material, IndirectMeshPool.BufferedMesh mesh) {
 			this.instancer = instancer;
+			this.material = material;
 			this.mesh = mesh;
 		}
 

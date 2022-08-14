@@ -77,6 +77,8 @@ public class IndirectMeshPool {
 			baseVertex += model.mesh.getVertexCount();
 		}
 
+		clientStorage.rewind();
+
 		glNamedBufferSubData(vbo, 0, clientStorage);
 	}
 

@@ -39,7 +39,7 @@ public class GlCompat {
 		instancedArrays = getLatest(InstancedArrays.class, caps);
 		bufferStorage = getLatest(BufferStorage.class, caps);
 
-		supportsIndirect = caps.OpenGL46;
+		supportsIndirect = true;
 
 		amd = _isAmdWindows();
 	}

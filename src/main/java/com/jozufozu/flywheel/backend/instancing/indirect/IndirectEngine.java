@@ -70,12 +70,14 @@ public class IndirectEngine implements Engine {
 
 	@Override
 	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
-		var groups = renderLists.get(stage);
+		if (stage != RenderStage.AFTER_SOLID_TERRAIN) {
+			return;
+		}
 
 		setup();
 
-		for (var group : groups) {
-			group.submit();
+		for (IndirectList<?> list : renderLists.lists.values()) {
+			list.submit(stage);
 		}
 
 	}
