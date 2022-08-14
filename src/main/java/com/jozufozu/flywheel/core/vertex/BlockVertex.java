@@ -71,7 +71,7 @@ Vertex FLWCreateVertex() {
 		ByteBuffer vertexBuffer = renderedBuffer.vertexBuffer();
 
 		int vertexCount = drawState.vertexCount();
-		if (unshadedStartVertex > 0 && unshadedStartVertex < vertexCount) {
+		if (unshadedStartVertex >= 0 && unshadedStartVertex < vertexCount) {
 			return createReader(vertexBuffer, vertexCount, unshadedStartVertex);
 		} else {
 			return createReader(vertexBuffer, vertexCount);

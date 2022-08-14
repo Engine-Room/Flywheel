@@ -67,7 +67,7 @@ public class ModelUtil {
 			// FIXME: Unshaded indices
 			((BufferBuilderExtension) shadedBuilder).flywheel$appendBufferUnsafe(unshadedBuffer.vertexBuffer());
 		}
-		RenderedBuffer buffer = shadedBuilder.endOrDiscardIfEmpty();
+		RenderedBuffer buffer = shadedBuilder.end();
 		return Pair.of(buffer, unshadedStartVertex);
 	}
 

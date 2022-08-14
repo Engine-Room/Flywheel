@@ -56,17 +56,10 @@ public class BlockModel implements Model {
 		this.name = name;
 
 		RenderedBuffer renderedBuffer = pair.first();
-		if (renderedBuffer == null) {
-			reader = null;
-			eboSupplier = () -> null;
-			return;
-		}
-
 		BufferBuilder.DrawState drawState = renderedBuffer.drawState();
-
 		reader = Formats.BLOCK.createReader(renderedBuffer, pair.second());
 
-		if (drawState.sequentialIndex()) {
+		if (!drawState.sequentialIndex()) {
 			ByteBuffer src = renderedBuffer.indexBuffer();
 			ByteBuffer indexBuffer = MemoryTracker.create(src.capacity());
 			MemoryUtil.memCopy(src, indexBuffer);

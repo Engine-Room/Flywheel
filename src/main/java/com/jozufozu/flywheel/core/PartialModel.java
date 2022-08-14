@@ -14,7 +14,7 @@ import net.minecraftforge.client.event.ModelEvent;
  * Creating a PartialModel will make the associated modelLocation automatically load.
  * PartialModels must be initialized during {@link net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent FMLClientSetupEvent}.
  * <br>
- * Once {@link ModelBakeEvent} finishes, all PartialModels (with valid modelLocations)
+ * Once {@link ModelEvent.BakingCompleted} finishes, all PartialModels (with valid modelLocations)
  * will have their bakedModel fields populated.
  * <br>
  * Attempting to create a PartialModel after ModelRegistryEvent will cause an error.

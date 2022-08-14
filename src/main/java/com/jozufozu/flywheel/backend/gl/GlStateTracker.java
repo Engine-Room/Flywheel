@@ -44,6 +44,10 @@ public class GlStateTracker {
 		public void restore() {
 			GlBufferType[] values = GlBufferType.values();
 
+			if (GlStateTracker.vao != 0) {
+				GlStateManager._glBindVertexArray(0);
+			}
+
 			for (int i = 0; i < values.length; i++) {
 				if (buffers[i] != GlStateTracker.buffers[i]) {
 					GlStateManager._glBindBuffer(values[i].glEnum, buffers[i]);
