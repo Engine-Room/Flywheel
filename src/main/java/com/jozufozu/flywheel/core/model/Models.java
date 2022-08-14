@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.core.model;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,8 +42,16 @@ public class Models {
 	}
 
 	public static void onReload(ReloadRenderersEvent event) {
+		deleteAll(BLOCK_STATE.values());
+		deleteAll(PARTIAL.values());
+		deleteAll(PARTIAL_DIR.values());
+
 		BLOCK_STATE.clear();
 		PARTIAL.clear();
 		PARTIAL_DIR.clear();
+	}
+
+	private static void deleteAll(Collection<Model> values) {
+		values.forEach(Model::delete);
 	}
 }

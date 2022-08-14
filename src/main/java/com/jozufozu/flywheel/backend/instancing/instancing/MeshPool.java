@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,16 +9,14 @@ import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL32;
-import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
-import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
-import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -58,7 +55,7 @@ public class MeshPool {
 	 * Create a new mesh pool.
 	 */
 	public MeshPool() {
-		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
+		vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER);
 
 		vbo.setGrowthMargin(2048);
 	}
@@ -141,13 +138,13 @@ public class MeshPool {
 
 	private void uploadAll() {
 		try (MappedBuffer mapped = vbo.map()) {
-			ByteBuffer buffer = mapped.unwrap();
+			long ptr = mapped.getPtr();
 
 			int byteIndex = 0;
 			for (BufferedMesh model : allBuffered) {
 				model.byteIndex = byteIndex;
 
-				model.buffer(buffer);
+				model.buffer(ptr);
 
 				byteIndex += model.mesh.size();
 			}
@@ -159,7 +156,7 @@ public class MeshPool {
 
 	private void uploadPending() {
 		try (MappedBuffer mapped = vbo.map()) {
-			ByteBuffer buffer = mapped.unwrap();
+			long buffer = mapped.getPtr();
 			for (BufferedMesh model : pendingUpload) {
 				model.buffer(buffer);
 			}
@@ -240,10 +237,8 @@ public class MeshPool {
 			this.deleted = true;
 		}
 
-		private void buffer(ByteBuffer buffer) {
-			buffer.position((int) this.byteIndex);
-			long ptr = MemoryUtil.memAddress(buffer);
-			this.mesh.write(ptr);
+		private void buffer(long ptr) {
+			this.mesh.write(ptr + byteIndex);
 
 			this.boundTo.clear();
 			this.gpuResident = true;

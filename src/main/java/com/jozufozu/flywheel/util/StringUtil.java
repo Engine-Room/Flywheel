@@ -19,17 +19,29 @@ import com.jozufozu.flywheel.backend.memory.FlwMemoryTracker;
 
 public class StringUtil {
 
-	private static final NumberFormat timeFormat = new DecimalFormat("#0.000");
+	private static final NumberFormat THREE_DECIMAL_PLACES = new DecimalFormat("#0.000");
+
+	public static String formatBytes(long bytes) {
+		if (bytes < 1024) {
+			return bytes + " B";
+		} else if (bytes < 1024 * 1024) {
+			return THREE_DECIMAL_PLACES.format(bytes / 1024f) + " KB";
+		} else if (bytes < 1024 * 1024 * 1024) {
+			return THREE_DECIMAL_PLACES.format(bytes / 1024f / 1024f) + " MB";
+		} else {
+			return THREE_DECIMAL_PLACES.format(bytes / 1024f / 1024f / 1024f) + " GB";
+		}
+	}
 
 	public static String formatTime(long ns) {
 		if (ns < 1000) {
 			return ns + " ns";
 		} else if (ns < 1000000) {
-			return timeFormat.format(ns / 1000.) + " μs";
+			return THREE_DECIMAL_PLACES.format(ns / 1000f) + " μs";
 		} else if (ns < 1000000000) {
-			return timeFormat.format(ns / 1000000.) + " ms";
+			return THREE_DECIMAL_PLACES.format(ns / 1000000f) + " ms";
 		} else {
-			return timeFormat.format(ns / 1000000000.) + " s";
+			return THREE_DECIMAL_PLACES.format(ns / 1000000000f) + " s";
 		}
 	}
 

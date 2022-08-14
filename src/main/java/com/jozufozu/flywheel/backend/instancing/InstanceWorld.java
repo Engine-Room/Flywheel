@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  *     The instancer manager is shared between the different instance managers.
  * </p>
  */
-public class InstanceWorld {
+public class InstanceWorld implements AutoCloseable {
 	protected final Engine engine;
 	protected final InstanceManager<Entity> entities;
 	protected final InstanceManager<BlockEntity> blockEntities;
@@ -149,4 +149,8 @@ public class InstanceWorld {
 				.forEach(entities::add);
 	}
 
+	@Override
+	public void close() {
+		delete();
+	}
 }

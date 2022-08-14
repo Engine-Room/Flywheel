@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.core.uniform;
 
-import java.nio.ByteBuffer;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.List;
@@ -11,8 +10,8 @@ import org.lwjgl.system.MemoryUtil;
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.uniform.UniformProvider;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
-import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
-import com.jozufozu.flywheel.backend.memory.FlwMemoryTracker;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 import com.jozufozu.flywheel.core.ComponentRegistry;
 import com.jozufozu.flywheel.util.RenderMath;
 
@@ -33,13 +32,13 @@ public class UniformBuffer {
 		return instance;
 	}
 
-	private final MappedGlBuffer buffer;
-	private final ByteBuffer data;
+	private final GlBuffer buffer;
+	private final MemoryBlock data;
 
 	private final BitSet changedBytes;
 
 	private UniformBuffer() {
-		buffer = new MappedGlBuffer(GlBufferType.UNIFORM_BUFFER);
+		buffer = new GlBuffer(GlBufferType.UNIFORM_BUFFER);
 
 		Collection<UniformProvider> providers = ComponentRegistry.getAllUniformProviders();
 
@@ -57,7 +56,7 @@ public class UniformBuffer {
 
 		allocatedProviders = builder.build();
 
-		data = FlwMemoryTracker.mallocBuffer(totalBytes);
+		data = MemoryBlock.mallocTracked(totalBytes);
 		changedBytes = new BitSet(totalBytes);
 
 		for (Allocated p : allocatedProviders) {
@@ -108,8 +107,8 @@ public class UniformBuffer {
 			changedBytes.set(offset, offset + size);
 		}
 
-		private void updatePtr(ByteBuffer bufferBase) {
-			provider.updatePtr(MemoryUtil.memSlice(bufferBase, offset, size), this);
+		private void updatePtr(MemoryBlock bufferBase) {
+			provider.updatePtr(bufferBase.ptr() + offset, this);
 		}
 
 		public UniformProvider provider() {

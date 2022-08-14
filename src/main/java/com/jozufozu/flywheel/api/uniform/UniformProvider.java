@@ -6,13 +6,13 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 
 public abstract class UniformProvider {
 
-	protected ByteBuffer buffer;
+	protected long ptr;
 	protected Notifier notifier;
 
 	public abstract int getSize();
 
-	public void updatePtr(ByteBuffer backing, Notifier notifier) {
-		this.buffer = backing;
+	public void updatePtr(long ptr, Notifier notifier) {
+		this.ptr = ptr;
 		this.notifier = notifier;
 	}
 

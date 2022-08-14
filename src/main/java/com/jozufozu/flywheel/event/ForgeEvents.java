@@ -7,6 +7,7 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.light.LightUpdater;
+import com.jozufozu.flywheel.util.StringUtil;
 import com.jozufozu.flywheel.util.WorldAttached;
 
 import net.minecraft.client.Minecraft;
@@ -24,7 +25,7 @@ public class ForgeEvents {
 
 			InstancedRenderDispatcher.getDebugString(debug);
 
-			debug.add("Memory Usage: CPU: " + FlwMemoryTracker.getCPUMemory() / 1024 + "KiB GPU: " + FlwMemoryTracker.getGPUMemory() / 1024 + "KiB");
+			debug.add("Memory Usage: CPU: " + StringUtil.formatBytes(FlwMemoryTracker.getCPUMemory()) + ", GPU: " + StringUtil.formatBytes(FlwMemoryTracker.getGPUMemory()));
 		}
 	}
 

@@ -19,6 +19,12 @@ public class TessellatedModel implements Model {
 		return meshes;
 	}
 
+	@Override
+	public void delete() {
+		meshes.values()
+				.forEach(Mesh::close);
+	}
+
 	public boolean isShadeSeparated() {
 		return shadeSeparated;
 	}
