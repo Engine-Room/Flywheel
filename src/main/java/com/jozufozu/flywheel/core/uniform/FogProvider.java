@@ -15,13 +15,11 @@ public class FogProvider extends UniformProvider {
 	}
 
 	public void update() {
-		if (buffer == null) {
+		if (ptr == MemoryUtil.NULL) {
 			return;
 		}
 
 		var color = RenderSystem.getShaderFogColor();
-
-		long ptr = MemoryUtil.memAddress(buffer);
 
 		MemoryUtil.memPutFloat(ptr, color[0]);
 		MemoryUtil.memPutFloat(ptr + 4, color[1]);

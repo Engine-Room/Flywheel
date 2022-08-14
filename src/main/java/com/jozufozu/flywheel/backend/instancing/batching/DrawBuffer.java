@@ -89,7 +89,7 @@ public class DrawBuffer {
 	}
 
 	/**
-	 * Reset the draw buffer to have no vertices.
+	 * Reset the draw buffer to have no vertices.<p>
 	 *
 	 * Does not clear the backing buffer.
 	 */
