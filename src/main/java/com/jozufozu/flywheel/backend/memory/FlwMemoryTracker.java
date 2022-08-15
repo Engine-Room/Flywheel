@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import org.lwjgl.system.MemoryUtil;
 
 public class FlwMemoryTracker {
-	private static final Cleaner CLEANER = Cleaner.create();
+	static final Cleaner CLEANER = Cleaner.create();
 
 	private static long cpuMemory = 0;
 	private static long gpuMemory = 0;
@@ -19,18 +19,11 @@ public class FlwMemoryTracker {
 		return ptr;
 	}
 
-	public static MemoryBlock mallocBlock(long size) {
-		MemoryBlock block = new MemoryBlockImpl(malloc(size), size);
-		_allocCPUMemory(block.size());
-		return block;
-	}
-
-	public static MemoryBlock mallocBlockTracked(long size) {
-		MemoryBlock block = new TrackedMemoryBlockImpl(malloc(size), size, CLEANER);
-		_allocCPUMemory(block.size());
-		return block;
-	}
-
+	/**
+	 * @deprecated Use {@link MemoryBlock#malloc(long)} or {@link MemoryBlock#mallocTracked(long)} and
+	 * {@link MemoryBlock#asBuffer()} instead. This method should only be used if specifically a {@linkplain ByteBuffer} is needed and it is
+	 * short-lived.
+	 */
 	@Deprecated
 	public static ByteBuffer mallocBuffer(int size) {
 		ByteBuffer buffer = MemoryUtil.memByteBuffer(malloc(size), size);
@@ -46,16 +39,16 @@ public class FlwMemoryTracker {
 		return ptr;
 	}
 
-	public static MemoryBlock callocBlock(long num, long size) {
-		MemoryBlock block = new MemoryBlockImpl(calloc(num, size), num * size);
-		_allocCPUMemory(block.size());
-		return block;
-	}
-
-	public static MemoryBlock callocBlockTracked(long num, long size) {
-		MemoryBlock block = new TrackedMemoryBlockImpl(calloc(num, size), num * size, CLEANER);
-		_allocCPUMemory(block.size());
-		return block;
+	/**
+	 * @deprecated Use {@link MemoryBlock#calloc(long, long)} or {@link MemoryBlock#callocTracked(long, long)} and
+	 * {@link MemoryBlock#asBuffer()} instead. This method should only be used if specifically a {@linkplain ByteBuffer} is needed and it is
+	 * short-lived.
+	 */
+	@Deprecated
+	public static ByteBuffer callocBuffer(int num, int size) {
+		ByteBuffer buffer = MemoryUtil.memByteBuffer(calloc(num, size), num * size);
+		_allocCPUMemory(buffer.capacity());
+		return buffer;
 	}
 
 	public static long realloc(long ptr, long size) {
@@ -66,20 +59,10 @@ public class FlwMemoryTracker {
 		return ptr;
 	}
 
-	public static MemoryBlock reallocBlock(MemoryBlock block, long size) {
-		MemoryBlock newBlock = new MemoryBlockImpl(realloc(block.ptr(), size), size);
-		_freeCPUMemory(block.size());
-		_allocCPUMemory(newBlock.size());
-		return newBlock;
-	}
-
-	public static MemoryBlock reallocBlockTracked(MemoryBlock block, long size) {
-		MemoryBlock newBlock = new TrackedMemoryBlockImpl(realloc(block.ptr(), size), size, CLEANER);
-		_freeCPUMemory(block.size());
-		_allocCPUMemory(newBlock.size());
-		return newBlock;
-	}
-
+	/**
+	 * @deprecated Use {@link MemoryBlock#realloc(long)} or {@link MemoryBlock#reallocTracked(long)} instead. This method
+	 * should only be used if specifically a {@linkplain ByteBuffer} is needed and it is short-lived.
+	 */
 	@Deprecated
 	public static ByteBuffer reallocBuffer(ByteBuffer buffer, int size) {
 		ByteBuffer newBuffer = MemoryUtil.memByteBuffer(realloc(MemoryUtil.memAddress(buffer), size), size);
@@ -92,11 +75,10 @@ public class FlwMemoryTracker {
 		MemoryUtil.nmemFree(ptr);
 	}
 
-	public static void freeBlock(MemoryBlock block) {
-		free(block.ptr());
-		_freeCPUMemory(block.size());
-	}
-
+	/**
+	 * @deprecated Use {@link MemoryBlock#free} instead. This method should only be used if specifically a {@linkplain ByteBuffer} is needed and
+	 * it is short-lived.
+	 */
 	@Deprecated
 	public static void freeBuffer(ByteBuffer buffer) {
 		free(MemoryUtil.memAddress(buffer));

@@ -1,6 +1,12 @@
 package com.jozufozu.flywheel.backend.gl.buffer;
 
-import static org.lwjgl.opengl.GL32.*;
+import static org.lwjgl.opengl.GL15.glBufferData;
+import static org.lwjgl.opengl.GL15.glDeleteBuffers;
+import static org.lwjgl.opengl.GL15.glGenBuffers;
+import static org.lwjgl.opengl.GL15.nglBufferData;
+import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
+import static org.lwjgl.opengl.GL30.nglMapBufferRange;
+import static org.lwjgl.opengl.GL31.glCopyBufferSubData;
 
 import org.lwjgl.system.MemoryUtil;
 

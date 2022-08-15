@@ -83,20 +83,15 @@ public class TransformSet<D extends InstancedPart> {
 		vertexList.ptr(anchorPtr);
 		vertexList.setVertexCount(totalVertexCount);
 		material.getVertexTransformer().transform(vertexList, level);
-		applyPoseStack(vertexList, stack, false);
+		applyPoseStack(vertexList, stack);
 	}
 
-	private static void applyPoseStack(MutableVertexList vertexList, PoseStack stack, boolean applyNormalMatrix) {
+	private static void applyPoseStack(MutableVertexList vertexList, PoseStack stack) {
 		Vector4f pos = new Vector4f();
 		Vector3f normal = new Vector3f();
 
 		Matrix4f modelMatrix = stack.last().pose();
-		Matrix3f normalMatrix;
-		if (applyNormalMatrix) {
-			normalMatrix = stack.last().normal();
-		} else {
-			normalMatrix = null;
-		}
+		Matrix3f normalMatrix = stack.last().normal();
 
 		for (int i = 0; i < vertexList.getVertexCount(); i++) {
 			pos.set(
@@ -110,18 +105,16 @@ public class TransformSet<D extends InstancedPart> {
 			vertexList.y(i, pos.y());
 			vertexList.z(i, pos.z());
 
-			if (applyNormalMatrix) {
-				normal.set(
-						vertexList.normalX(i),
-						vertexList.normalY(i),
-						vertexList.normalZ(i)
-				);
-				normal.transform(normalMatrix);
-				normal.normalize();
-				vertexList.normalX(i, normal.x());
-				vertexList.normalY(i, normal.y());
-				vertexList.normalZ(i, normal.z());
-			}
+			normal.set(
+					vertexList.normalX(i),
+					vertexList.normalY(i),
+					vertexList.normalZ(i)
+			);
+			normal.transform(normalMatrix);
+			normal.normalize();
+			vertexList.normalX(i, normal.x());
+			vertexList.normalY(i, normal.y());
+			vertexList.normalZ(i, normal.z());
 		}
 	}
 

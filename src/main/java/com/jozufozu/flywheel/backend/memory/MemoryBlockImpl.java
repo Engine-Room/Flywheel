@@ -59,23 +59,42 @@ sealed class MemoryBlockImpl implements MemoryBlock permits TrackedMemoryBlockIm
 		return MemoryUtil.memByteBuffer(ptr, intSize);
 	}
 
+	void freeInner() {
+		FlwMemoryTracker._freeCPUMemory(size);
+		freed = true;
+	}
+
 	@Override
 	public MemoryBlock realloc(long size) {
-		MemoryBlock block = FlwMemoryTracker.reallocBlock(this, size);
-		freed = true;
+		MemoryBlock block = new MemoryBlockImpl(FlwMemoryTracker.realloc(ptr, size), size);
+		FlwMemoryTracker._allocCPUMemory(block.size());
+		freeInner();
 		return block;
 	}
 
 	@Override
 	public MemoryBlock reallocTracked(long size) {
-		MemoryBlock block = FlwMemoryTracker.reallocBlockTracked(this, size);
-		freed = true;
+		MemoryBlock block = new TrackedMemoryBlockImpl(FlwMemoryTracker.realloc(ptr, size), size, FlwMemoryTracker.CLEANER);
+		FlwMemoryTracker._allocCPUMemory(block.size());
+		freeInner();
 		return block;
 	}
 
 	@Override
 	public void free() {
-		FlwMemoryTracker.freeBlock(this);
-		freed = true;
+		FlwMemoryTracker.free(ptr);
+		freeInner();
+	}
+
+	static MemoryBlock mallocBlock(long size) {
+		MemoryBlock block = new MemoryBlockImpl(FlwMemoryTracker.malloc(size), size);
+		FlwMemoryTracker._allocCPUMemory(block.size());
+		return block;
+	}
+
+	static MemoryBlock callocBlock(long num, long size) {
+		MemoryBlock block = new MemoryBlockImpl(FlwMemoryTracker.calloc(num, size), num * size);
+		FlwMemoryTracker._allocCPUMemory(block.size());
+		return block;
 	}
 }

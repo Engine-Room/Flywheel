@@ -28,6 +28,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.IModelData;
 
 public class BlockModelBuilder {
+	private static final int STARTING_CAPACITY = 64;
+
 	private final BlockState state;
 	private boolean shadeSeparated = true;
 	private BlockAndTintGetter renderWorld;
@@ -85,7 +87,7 @@ public class BlockModelBuilder {
 
 		if (shadeSeparated) {
 			ShadeSeparatedBufferFactory<BufferBuilder> bufferFactory = (renderType, shaded) -> {
-				BufferBuilder buffer = new BufferBuilder(64);
+				BufferBuilder buffer = new BufferBuilder(STARTING_CAPACITY);
 				buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 				return buffer;
 			};
@@ -100,7 +102,7 @@ public class BlockModelBuilder {
 			ModelBufferingUtil.bufferBlockShadeSeparated(ModelUtil.VANILLA_RENDERER, renderWorld, state, poseStack, bufferFactory, objects.shadeSeparatingBufferWrapper, objects.random, modelData, resultConsumer);
 		} else {
 			BufferFactory<BufferBuilder> bufferFactory = (renderType) -> {
-				BufferBuilder buffer = new BufferBuilder(64);
+				BufferBuilder buffer = new BufferBuilder(STARTING_CAPACITY);
 				buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 				return buffer;
 			};
