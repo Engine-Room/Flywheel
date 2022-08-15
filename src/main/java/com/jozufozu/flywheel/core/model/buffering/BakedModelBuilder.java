@@ -30,6 +30,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.IModelData;
 
 public class BakedModelBuilder {
+	private static final int STARTING_CAPACITY = 64;
+
 	private final BakedModel bakedModel;
 	private boolean shadeSeparated = true;
 	private BlockAndTintGetter renderWorld;
@@ -96,7 +98,7 @@ public class BakedModelBuilder {
 
 		if (shadeSeparated) {
 			ShadeSeparatedBufferFactory<BufferBuilder> bufferFactory = (renderType, shaded) -> {
-				BufferBuilder buffer = new BufferBuilder(64);
+				BufferBuilder buffer = new BufferBuilder(STARTING_CAPACITY);
 				buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 				return buffer;
 			};
@@ -111,7 +113,7 @@ public class BakedModelBuilder {
 			ModelBufferingUtil.bufferSingleShadeSeparated(ModelUtil.VANILLA_RENDERER.getModelRenderer(), renderWorld, bakedModel, blockState, poseStack, bufferFactory, objects.shadeSeparatingBufferWrapper, objects.random, modelData, resultConsumer);
 		} else {
 			BufferFactory<BufferBuilder> bufferFactory = (renderType) -> {
-				BufferBuilder buffer = new BufferBuilder(64);
+				BufferBuilder buffer = new BufferBuilder(STARTING_CAPACITY);
 				buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 				return buffer;
 			};

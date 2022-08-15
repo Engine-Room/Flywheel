@@ -29,7 +29,7 @@ public interface StructType<S extends InstancedPart> {
 
 	VertexTransformer<S> getVertexTransformer();
 
-	public interface VertexTransformer<S extends InstancedPart> {
+	interface VertexTransformer<S extends InstancedPart> {
 		void transform(MutableVertexList vertexList, S struct, ClientLevel level);
 	}
 

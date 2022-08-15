@@ -6,24 +6,7 @@ import com.jozufozu.flywheel.backend.instancing.instancing.ElementBuffer;
 import com.jozufozu.flywheel.core.QuadConverter;
 
 /**
- * A mesh that can be rendered by flywheel.
- *
- * <p>
- *     It is expected that the following assertion will not fail:
- * </p>
- *
- * <pre>{@code
- * Mesh mesh = ...;
- * VecBuffer into = ...;
- *
- * int initial = VecBuffer.unwrap().position();
- *
- * mesh.buffer(into);
- *
- * int final = VecBuffer.unwrap().position();
- *
- * assert mesh.size() == final - initial;
- * }</pre>
+ * A holder for arbitrary vertex data that can be written to memory or a vertex list.
  */
 public interface Mesh {
 
@@ -49,8 +32,18 @@ public interface Mesh {
 		return getVertexType().byteOffset(getVertexCount());
 	}
 
+	/**
+	 * Write this mesh into memory. The written data will use the format defined by {@link #getVertexType()} and the amount of
+	 * bytes written will be the same as the return value of {@link #size()}.
+	 * @param ptr The address to which data is written to.
+	 */
 	void write(long ptr);
 
+	/**
+	 * Write this mesh into a vertex list. Vertices with index {@literal <}0 or {@literal >=}{@link #getVertexCount()} will not be
+	 * modified.
+	 * @param vertexList The vertex list to which data is written to.
+	 */
 	void write(MutableVertexList vertexList);
 
 	/**

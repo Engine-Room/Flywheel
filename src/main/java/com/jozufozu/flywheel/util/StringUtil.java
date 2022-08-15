@@ -25,11 +25,11 @@ public class StringUtil {
 		if (bytes < 1024) {
 			return bytes + " B";
 		} else if (bytes < 1024 * 1024) {
-			return THREE_DECIMAL_PLACES.format(bytes / 1024f) + " KB";
+			return THREE_DECIMAL_PLACES.format(bytes / 1024f) + " KiB";
 		} else if (bytes < 1024 * 1024 * 1024) {
-			return THREE_DECIMAL_PLACES.format(bytes / 1024f / 1024f) + " MB";
+			return THREE_DECIMAL_PLACES.format(bytes / 1024f / 1024f) + " MiB";
 		} else {
-			return THREE_DECIMAL_PLACES.format(bytes / 1024f / 1024f / 1024f) + " GB";
+			return THREE_DECIMAL_PLACES.format(bytes / 1024f / 1024f / 1024f) + " GiB";
 		}
 	}
 

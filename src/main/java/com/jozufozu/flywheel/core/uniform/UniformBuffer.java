@@ -5,12 +5,11 @@ import java.util.Collection;
 import java.util.List;
 
 import org.lwjgl.opengl.GL32;
-import org.lwjgl.system.MemoryUtil;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.uniform.UniformProvider;
-import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 import com.jozufozu.flywheel.core.ComponentRegistry;
 import com.jozufozu.flywheel.util.RenderMath;

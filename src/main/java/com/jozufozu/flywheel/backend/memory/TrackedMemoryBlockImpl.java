@@ -17,30 +17,23 @@ final class TrackedMemoryBlockImpl extends MemoryBlockImpl {
 		return true;
 	}
 
+	@Override
 	void freeInner() {
-		freed = true;
+		super.freeInner();
 		cleaningAction.freed = true;
 		cleanable.clean();
 	}
 
-	@Override
-	public MemoryBlock realloc(long size) {
-		MemoryBlock block = FlwMemoryTracker.reallocBlock(this, size);
-		freeInner();
+	static MemoryBlock mallocBlockTracked(long size) {
+		MemoryBlock block = new TrackedMemoryBlockImpl(FlwMemoryTracker.malloc(size), size, FlwMemoryTracker.CLEANER);
+		FlwMemoryTracker._allocCPUMemory(block.size());
 		return block;
 	}
 
-	@Override
-	public MemoryBlock reallocTracked(long size) {
-		MemoryBlock block = FlwMemoryTracker.reallocBlockTracked(this, size);
-		freeInner();
+	static MemoryBlock callocBlockTracked(long num, long size) {
+		MemoryBlock block = new TrackedMemoryBlockImpl(FlwMemoryTracker.calloc(num, size), num * size, FlwMemoryTracker.CLEANER);
+		FlwMemoryTracker._allocCPUMemory(block.size());
 		return block;
-	}
-
-	@Override
-	public void free() {
-		FlwMemoryTracker.freeBlock(this);
-		freeInner();
 	}
 
 	static class CleaningAction implements Runnable {

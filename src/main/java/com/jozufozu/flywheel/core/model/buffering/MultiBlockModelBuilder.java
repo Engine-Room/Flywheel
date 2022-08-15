@@ -31,6 +31,8 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraftforge.client.model.data.IModelData;
 
 public class MultiBlockModelBuilder {
+	private static final int STARTING_CAPACITY = 1024;
+
 	private final Collection<StructureTemplate.StructureBlockInfo> blocks;
 	private boolean shadeSeparated = true;
 	private VertexFormat vertexFormat;
@@ -92,7 +94,7 @@ public class MultiBlockModelBuilder {
 
 		if (shadeSeparated) {
 			ShadeSeparatedBufferFactory<BufferBuilder> bufferFactory = (renderType, shaded) -> {
-				BufferBuilder buffer = new BufferBuilder(1024);
+				BufferBuilder buffer = new BufferBuilder(STARTING_CAPACITY);
 				buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 				return buffer;
 			};
@@ -107,7 +109,7 @@ public class MultiBlockModelBuilder {
 			ModelBufferingUtil.bufferMultiBlockShadeSeparated(blocks, ModelUtil.VANILLA_RENDERER, renderWorld, poseStack, bufferFactory, objects.shadeSeparatingBufferWrapper, objects.random, modelDataMap, resultConsumer);
 		} else {
 			BufferFactory<BufferBuilder> bufferFactory = (renderType) -> {
-				BufferBuilder buffer = new BufferBuilder(1024);
+				BufferBuilder buffer = new BufferBuilder(STARTING_CAPACITY);
 				buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 				return buffer;
 			};
