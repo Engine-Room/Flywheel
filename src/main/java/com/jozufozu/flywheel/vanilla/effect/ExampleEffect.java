@@ -13,7 +13,7 @@ import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.effect.Effect;
 import com.jozufozu.flywheel.core.model.Models;
 import com.jozufozu.flywheel.core.structs.StructTypes;
-import com.jozufozu.flywheel.core.structs.model.TransformedPart;
+import com.jozufozu.flywheel.core.structs.transformed.TransformedPart;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;

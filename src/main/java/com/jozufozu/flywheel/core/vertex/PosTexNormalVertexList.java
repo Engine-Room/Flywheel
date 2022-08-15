@@ -6,11 +6,11 @@ import com.jozufozu.flywheel.util.RenderMath;
 
 import net.minecraft.client.renderer.texture.OverlayTexture;
 
-public class BlockVertexList extends AbstractVertexList {
-	protected static final int STRIDE = 32;
+public class PosTexNormalVertexList extends AbstractVertexList {
+	protected static final int STRIDE = 23;
 
-	protected long idxPtr(int index) {
-		return ptr + index * STRIDE;
+	protected long idxPtr(long idx) {
+		return ptr + idx * STRIDE;
 	}
 
 	@Override
@@ -30,32 +30,32 @@ public class BlockVertexList extends AbstractVertexList {
 
 	@Override
 	public byte r(int index) {
-		return MemoryUtil.memGetByte(idxPtr(index) + 12);
+		return (byte) 0xFF;
 	}
 
 	@Override
 	public byte g(int index) {
-		return MemoryUtil.memGetByte(idxPtr(index) + 13);
+		return (byte) 0xFF;
 	}
 
 	@Override
 	public byte b(int index) {
-		return MemoryUtil.memGetByte(idxPtr(index) + 14);
+		return (byte) 0xFF;
 	}
 
 	@Override
 	public byte a(int index) {
-		return MemoryUtil.memGetByte(idxPtr(index) + 15);
+		return (byte) 0xFF;
 	}
 
 	@Override
 	public float u(int index) {
-		return MemoryUtil.memGetFloat(idxPtr(index) + 16);
+		return MemoryUtil.memGetFloat(idxPtr(index) + 12);
 	}
 
 	@Override
 	public float v(int index) {
-		return MemoryUtil.memGetFloat(idxPtr(index) + 20);
+		return MemoryUtil.memGetFloat(idxPtr(index) + 16);
 	}
 
 	@Override
@@ -65,22 +65,22 @@ public class BlockVertexList extends AbstractVertexList {
 
 	@Override
 	public int light(int index) {
-		return MemoryUtil.memGetInt(idxPtr(index) + 24) << 4;
+		return 0;
 	}
 
 	@Override
 	public float normalX(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(idxPtr(index) + 28));
+		return RenderMath.f(MemoryUtil.memGetByte(idxPtr(index) + 20));
 	}
 
 	@Override
 	public float normalY(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(idxPtr(index) + 29));
+		return RenderMath.f(MemoryUtil.memGetByte(idxPtr(index) + 21));
 	}
 
 	@Override
 	public float normalZ(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(idxPtr(index) + 30));
+		return RenderMath.f(MemoryUtil.memGetByte(idxPtr(index) + 22));
 	}
 
 	@Override
@@ -100,32 +100,28 @@ public class BlockVertexList extends AbstractVertexList {
 
 	@Override
 	public void r(int index, byte r) {
-		MemoryUtil.memPutByte(idxPtr(index) + 12, r);
 	}
 
 	@Override
 	public void g(int index, byte g) {
-		MemoryUtil.memPutByte(idxPtr(index) + 13, g);
 	}
 
 	@Override
 	public void b(int index, byte b) {
-		MemoryUtil.memPutByte(idxPtr(index) + 14, b);
 	}
 
 	@Override
 	public void a(int index, byte a) {
-		MemoryUtil.memPutByte(idxPtr(index) + 15, a);
 	}
 
 	@Override
 	public void u(int index, float u) {
-		MemoryUtil.memPutFloat(idxPtr(index) + 16, u);
+		MemoryUtil.memPutFloat(idxPtr(index) + 12, u);
 	}
 
 	@Override
 	public void v(int index, float v) {
-		MemoryUtil.memPutFloat(idxPtr(index) + 20, v);
+		MemoryUtil.memPutFloat(idxPtr(index) + 16, v);
 	}
 
 	@Override
@@ -134,22 +130,21 @@ public class BlockVertexList extends AbstractVertexList {
 
 	@Override
 	public void light(int index, int light) {
-		MemoryUtil.memPutInt(idxPtr(index) + 24, light >> 4);
 	}
 
 	@Override
 	public void normalX(int index, float normalX) {
-		MemoryUtil.memPutByte(idxPtr(index) + 28, RenderMath.nb(normalX));
+		MemoryUtil.memPutByte(idxPtr(index) + 20, RenderMath.nb(normalX));
 	}
 
 	@Override
 	public void normalY(int index, float normalY) {
-		MemoryUtil.memPutByte(idxPtr(index) + 29, RenderMath.nb(normalY));
+		MemoryUtil.memPutByte(idxPtr(index) + 21, RenderMath.nb(normalY));
 	}
 
 	@Override
 	public void normalZ(int index, float normalZ) {
-		MemoryUtil.memPutByte(idxPtr(index) + 30, RenderMath.nb(normalZ));
+		MemoryUtil.memPutByte(idxPtr(index) + 22, RenderMath.nb(normalZ));
 	}
 
 	@Override

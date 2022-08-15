@@ -13,6 +13,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.instancing.instancing.ElementBuffer;
+import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 import com.jozufozu.flywheel.core.model.Mesh;
 
 public class IndirectMeshPool {
@@ -23,7 +24,7 @@ public class IndirectMeshPool {
 	final VertexType vertexType;
 
 	final int vbo;
-	private final ByteBuffer clientStorage;
+	private final MemoryBlock clientStorage;
 
 	private boolean dirty;
 
@@ -35,7 +36,7 @@ public class IndirectMeshPool {
 		vbo = glCreateBuffers();
 		var byteCapacity = type.byteOffset(vertexCapacity);
 		glNamedBufferStorage(vbo, byteCapacity, GL_DYNAMIC_STORAGE_BIT);
-		clientStorage = MemoryUtil.memAlloc(byteCapacity);
+		clientStorage = MemoryBlock.malloc(byteCapacity);
 	}
 
 	/**
@@ -65,24 +66,25 @@ public class IndirectMeshPool {
 		}
 		dirty = false;
 
+		final long ptr = clientStorage.ptr();
+
 		int byteIndex = 0;
 		int baseVertex = 0;
 		for (BufferedMesh model : meshList) {
 			model.byteIndex = byteIndex;
 			model.baseVertex = baseVertex;
 
-			model.buffer(clientStorage);
+			model.buffer(ptr);
 
 			byteIndex += model.getByteSize();
 			baseVertex += model.mesh.getVertexCount();
 		}
 
-		clientStorage.rewind();
-
-		glNamedBufferSubData(vbo, 0, clientStorage);
+		nglNamedBufferSubData(vbo, 0, byteIndex, ptr);
 	}
 
 	public void delete() {
+		clientStorage.free();
 		glDeleteBuffers(vbo);
 		meshes.clear();
 		meshList.clear();
@@ -101,10 +103,8 @@ public class IndirectMeshPool {
 			vertexCount = mesh.getVertexCount();
 		}
 
-		private void buffer(ByteBuffer buffer) {
-			var writer = IndirectMeshPool.this.vertexType.createWriter(buffer);
-			writer.seek(this.byteIndex);
-			writer.writeVertexList(this.mesh.getReader());
+		private void buffer(long ptr) {
+			this.mesh.write(ptr + byteIndex);
 		}
 
 		public int getByteSize() {

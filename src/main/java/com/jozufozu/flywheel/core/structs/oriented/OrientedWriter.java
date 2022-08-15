@@ -1,21 +1,15 @@
 package com.jozufozu.flywheel.core.structs.oriented;
 
-import java.nio.ByteBuffer;
-
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.core.structs.ColoredLitWriterUnsafe;
+import com.jozufozu.flywheel.core.structs.ColoredLitWriter;
 
-public class OrientedWriterUnsafe extends ColoredLitWriterUnsafe<OrientedPart> {
-	public OrientedWriterUnsafe(StructType<OrientedPart> structType, ByteBuffer byteBuffer) {
-		super(structType, byteBuffer);
-	}
+public class OrientedWriter extends ColoredLitWriter<OrientedPart> {
+	public static final OrientedWriter INSTANCE = new OrientedWriter();
 
 	@Override
-	protected void writeInternal(OrientedPart d) {
-		long ptr = writePointer;
-		super.writeInternal(d);
+	public void write(long ptr, OrientedPart d) {
+		super.write(ptr, d);
 
 		MemoryUtil.memPutFloat(ptr + 6, d.posX);
 		MemoryUtil.memPutFloat(ptr + 10, d.posY);

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.structs.model;
+package com.jozufozu.flywheel.core.structs.transformed;
 
 import com.jozufozu.flywheel.core.structs.ColoredLitPart;
 import com.jozufozu.flywheel.core.structs.StructTypes;

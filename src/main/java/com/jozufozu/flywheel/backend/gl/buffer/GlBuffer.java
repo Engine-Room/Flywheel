@@ -1,49 +1,111 @@
 package com.jozufozu.flywheel.backend.gl.buffer;
 
-import java.nio.ByteBuffer;
+import static org.lwjgl.opengl.GL15.glBufferData;
+import static org.lwjgl.opengl.GL15.glDeleteBuffers;
+import static org.lwjgl.opengl.GL15.glGenBuffers;
+import static org.lwjgl.opengl.GL15.nglBufferData;
+import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
+import static org.lwjgl.opengl.GL30.nglMapBufferRange;
+import static org.lwjgl.opengl.GL31.glCopyBufferSubData;
 
-import org.lwjgl.opengl.GL20;
+import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.backend.gl.GlObject;
-import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
+import com.jozufozu.flywheel.backend.gl.error.GlError;
+import com.jozufozu.flywheel.backend.gl.error.GlException;
+import com.jozufozu.flywheel.backend.memory.FlwMemoryTracker;
+import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 
-public abstract class GlBuffer extends GlObject {
-
-	/**
-	 * Request a Persistent mapped buffer.
-	 *
-	 * <p>
-	 *     If Persistent buffers are supported, this will provide one. Otherwise it will fall back to a classic mapped
-	 *     buffer.
-	 * </p>
-	 *
-	 * @param type The type of buffer you want.
-	 * @return A buffer that will be persistent if the driver supports it.
-	 */
-	public static GlBuffer requestPersistent(GlBufferType type) {
-		if (GlCompat.getInstance()
-                .bufferStorageSupported()) {
-			return new PersistentGlBuffer(type);
-		} else {
-			return new MappedGlBuffer(type);
-		}
-	}
+public class GlBuffer extends GlObject {
 
 	public final GlBufferType type;
-
+	protected final GlBufferUsage usage;
 	/**
 	 * The size (in bytes) of the buffer on the GPU.
 	 */
 	protected long size;
-
 	/**
 	 * How much extra room to give the buffer when we reallocate.
 	 */
 	protected int growthMargin;
 
 	public GlBuffer(GlBufferType type) {
-		setHandle(GL20.glGenBuffers());
+		this(type, GlBufferUsage.STATIC_DRAW);
+	}
+
+	public GlBuffer(GlBufferType type, GlBufferUsage usage) {
+		setHandle(glGenBuffers());
 		this.type = type;
+		this.usage = usage;
+	}
+
+	public boolean ensureCapacity(long size) {
+		if (size < 0) {
+			throw new IllegalArgumentException("Size " + size + " < 0");
+		}
+
+		if (size == 0) {
+			return false;
+		}
+
+		if (this.size == 0) {
+			this.size = size;
+			bind();
+			glBufferData(type.glEnum, size, usage.glEnum);
+			FlwMemoryTracker._allocGPUMemory(size);
+
+			return true;
+		}
+
+		if (size > this.size) {
+			var oldSize = this.size;
+			this.size = size + growthMargin;
+
+			realloc(oldSize, this.size);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	private void realloc(long oldSize, long newSize) {
+		FlwMemoryTracker._freeGPUMemory(oldSize);
+		FlwMemoryTracker._allocGPUMemory(newSize);
+		var oldHandle = handle();
+		var newHandle = glGenBuffers();
+
+		GlBufferType.COPY_READ_BUFFER.bind(oldHandle);
+		type.bind(newHandle);
+
+		glBufferData(type.glEnum, newSize, usage.glEnum);
+		glCopyBufferSubData(GlBufferType.COPY_READ_BUFFER.glEnum, type.glEnum, 0, 0, oldSize);
+
+		glDeleteBuffers(oldHandle);
+		setHandle(newHandle);
+	}
+
+	public void upload(MemoryBlock directBuffer) {
+		bind();
+		FlwMemoryTracker._freeGPUMemory(size);
+		nglBufferData(type.glEnum, directBuffer.size(), directBuffer.ptr(), usage.glEnum);
+		this.size = directBuffer.size();
+		FlwMemoryTracker._allocGPUMemory(size);
+	}
+
+	public MappedBuffer map() {
+		bind();
+		long ptr = nglMapBufferRange(type.glEnum, 0, size, GL_MAP_WRITE_BIT);
+
+		if (ptr == MemoryUtil.NULL) {
+			throw new GlException(GlError.poll(), "Could not map buffer");
+		}
+
+		return new MappedBuffer(this, ptr, 0, size);
+	}
+
+	public boolean isPersistent() {
+		return false;
 	}
 
 	public void setGrowthMargin(int growthMargin) {
@@ -66,24 +128,8 @@ public abstract class GlBuffer extends GlObject {
 		type.unbind();
 	}
 
-	public abstract void upload(ByteBuffer directBuffer);
-
-	public abstract MappedBuffer map();
-
-	/**
-	 * Ensure that the buffer has at least enough room to store {@code size} bytes.
-	 *
-	 * @return {@code true} if the buffer moved.
-	 */
-	public abstract boolean ensureCapacity(long size);
-
 	protected void deleteInternal(int handle) {
-		GL20.glDeleteBuffers(handle);
+		glDeleteBuffers(handle);
+		FlwMemoryTracker._freeGPUMemory(size);
 	}
-
-	/**
-	 * Indicates that this buffer need not be #flush()'d for its contents to sync.
-	 * @return true if this buffer is persistently mapped.
-	 */
-	public abstract boolean isPersistent();
 }

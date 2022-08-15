@@ -36,7 +36,16 @@ public class WorldAttached<T> {
 				i.remove();
 			} else {
 				// Prevent leaks
-				map.remove(world);
+				Object attached = map.remove(world);
+
+				// No, *really* prevent leaks
+				if (attached instanceof AutoCloseable closeable) {
+					try {
+						closeable.close();
+					} catch (Exception ignored) {
+
+					}
+				}
 			}
 		}
 	}

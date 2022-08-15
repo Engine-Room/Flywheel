@@ -3,13 +3,14 @@ package com.jozufozu.flywheel.core;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 
+import org.lwjgl.system.MemoryUtil;
+
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
-import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
 import com.jozufozu.flywheel.util.Lazy;
@@ -34,13 +35,14 @@ public class FullscreenQuad {
 
 	private FullscreenQuad() {
 		try (var restoreState = GlStateTracker.getRestoreState()) {
-			vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
+			vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER);
 			vbo.ensureCapacity(bufferSize);
 			try (MappedBuffer buffer = vbo.map()) {
+				var ptr = buffer.getPtr();
 
-				buffer.unwrap()
-						.asFloatBuffer()
-						.put(vertices);
+				for (var i = 0; i < vertices.length; i++) {
+					MemoryUtil.memPutFloat(ptr + i * Float.BYTES, vertices[i]);
+				}
 
 			} catch (Exception e) {
 				Flywheel.LOGGER.error("Could not create fullscreen quad.", e);

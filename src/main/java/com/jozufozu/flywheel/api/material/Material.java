@@ -22,7 +22,7 @@ public interface Material {
 
 	VertexTransformer getVertexTransformer();
 
-	public interface VertexTransformer {
+	interface VertexTransformer {
 		void transform(MutableVertexList vertexList, ClientLevel level);
 	}
 }

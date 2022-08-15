@@ -13,9 +13,7 @@ import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.util.FlwUtil;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -68,17 +66,9 @@ public class BatchingEngine implements Engine {
 	@Override
 	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
 		// FIXME: properly support material stages
+		// This also breaks block outlines on batched block entities
 		if (stage != RenderStage.AFTER_FINAL_END_BATCH) {
 			return;
-		}
-
-		// FIXME: this probably breaks some vanilla stuff but it works much better for flywheel
-		Matrix4f mat = new Matrix4f();
-		mat.setIdentity();
-		if (context.level().effects().constantAmbientLight()) {
-			Lighting.setupNetherLevel(mat);
-		} else {
-			Lighting.setupLevel(mat);
 		}
 
 		batchTracker.endBatch();

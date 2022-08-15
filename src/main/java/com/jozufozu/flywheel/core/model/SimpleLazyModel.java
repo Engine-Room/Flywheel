@@ -28,6 +28,11 @@ public class SimpleLazyModel implements Model {
 		return ImmutableMap.of(material, supplier.get());
 	}
 
+	@Override
+	public void delete() {
+		supplier.ifPresent(Mesh::close);
+	}
+
 	public int getVertexCount() {
 		return supplier.map(Mesh::getVertexCount)
 				.orElse(0);

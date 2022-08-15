@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.api.struct;
 
-import java.nio.ByteBuffer;
-
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
@@ -25,22 +23,17 @@ public interface StructType<S extends InstancedPart> {
 	 */
 	BufferLayout getLayout();
 
-	/**
-	 * Create a {@link StructWriter} that will consume instances of S and write them to the given buffer.
-	 *
-	 * @param backing The buffer that the StructWriter will write to.
-	 */
-	StructWriter<S> getWriter(ByteBuffer backing);
+	StructWriter<S> getWriter();
 
 	FileResolution getInstanceShader();
 
-	VertexTransformer<? extends S> getVertexTransformer();
+	VertexTransformer<S> getVertexTransformer();
 
 	StorageBufferWriter<S> getStorageBufferWriter();
 
 	FileResolution getIndirectShader();
 
-	public interface VertexTransformer<S extends InstancedPart> {
+	interface VertexTransformer<S extends InstancedPart> {
 		void transform(MutableVertexList vertexList, S struct, ClientLevel level);
 	}
 
