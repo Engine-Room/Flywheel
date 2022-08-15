@@ -31,7 +31,7 @@ public class ViewProvider extends UniformProvider {
 	}
 
 	public void update(RenderContext context) {
-		if (buffer == null) {
+		if (ptr == MemoryUtil.NULL) {
 			return;
 		}
 
@@ -51,8 +51,6 @@ public class ViewProvider extends UniformProvider {
 		// don't want to mutate viewProjection
 		var vp = context.viewProjection().copy();
 		vp.multiplyWithTranslation(-camX, -camY, -camZ);
-
-		long ptr = MemoryUtil.memAddress(buffer);
 
 		MatrixExtension.writeUnsafe(vp, ptr);
 		MemoryUtil.memPutFloat(ptr + 64, camX);

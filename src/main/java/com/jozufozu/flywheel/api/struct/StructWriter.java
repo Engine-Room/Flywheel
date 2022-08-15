@@ -1,17 +1,13 @@
 package com.jozufozu.flywheel.api.struct;
 
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
+
 /**
- * StructWriters can quickly consume many instances of S and write them to some backing buffer.
+ * StructWriters can quickly consume many instances of S and write them to some memory address.
  */
-public interface StructWriter<S> {
-
+public interface StructWriter<S extends InstancedPart> {
 	/**
-	 * Write the given struct to the backing array.
+	 * Write the given struct to the given memory address.
 	 */
-	void write(S struct);
-
-	/**
-	 * Seek to the given position. The next write will occur there.
-	 */
-	void seek(int pos);
+	void write(long ptr, S struct);
 }

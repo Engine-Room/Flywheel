@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.gl.buffer;
 
-import java.nio.ByteBuffer;
+import static org.lwjgl.system.MemoryUtil.NULL;
 
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.system.MemoryUtil;
@@ -11,10 +11,10 @@ public class MappedBuffer implements AutoCloseable {
 	private final long length;
 	private final GlBuffer owner;
 	private final boolean persistent;
-	private ByteBuffer internal;
+	private long ptr;
 
-	public MappedBuffer(GlBuffer owner, ByteBuffer internal, long offset, long length) {
-		this.internal = internal;
+	public MappedBuffer(GlBuffer owner, long ptr, long offset, long length) {
+		this.ptr = ptr;
 		this.owner = owner;
 		this.offset = offset;
 		this.length = length;
@@ -27,19 +27,11 @@ public class MappedBuffer implements AutoCloseable {
 	public void flush() {
 		if (persistent) return;
 
-		if (internal == null) return;
+		if (ptr == NULL) return;
 
 		owner.bind();
 		GL15.glUnmapBuffer(owner.getType().glEnum);
-		internal = null;
-	}
-
-	public MappedBuffer position(int p) {
-		if (p < offset || p >= offset + length) {
-			throw new IndexOutOfBoundsException("Index " + p + " is not mapped");
-		}
-		internal.position(p - (int) offset);
-		return this;
+		ptr = NULL;
 	}
 
 	@Override
@@ -47,12 +39,8 @@ public class MappedBuffer implements AutoCloseable {
 		flush();
 	}
 
-	public ByteBuffer unwrap() {
-		return internal;
-	}
-
-	public long getMemAddress() {
-		return MemoryUtil.memAddress(internal);
+	public long getPtr() {
+		return ptr;
 	}
 
 	public void clear(long clearStart, long clearLength) {
@@ -64,7 +52,7 @@ public class MappedBuffer implements AutoCloseable {
 			throw new IndexOutOfBoundsException("Clear range [" + clearStart + "," + (clearStart + clearLength) + "] is not mapped");
 		}
 
-		long addr = MemoryUtil.memAddress(unwrap()) + clearStart;
+		long addr = ptr + clearStart;
 
 		MemoryUtil.memSet(addr, 0, clearLength);
 	}

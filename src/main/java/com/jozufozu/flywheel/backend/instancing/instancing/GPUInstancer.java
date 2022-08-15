@@ -6,12 +6,12 @@ import java.util.Set;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
-import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 
@@ -42,7 +42,7 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 	public void init() {
 		if (vbo != null) return;
 
-		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER, GlBufferUsage.DYNAMIC_DRAW);
+		vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER, GlBufferUsage.DYNAMIC_DRAW);
 		vbo.setGrowthMargin(instanceFormat.getStride() * 16);
 	}
 
@@ -88,7 +88,16 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 			buf.clear(clearStart, clearLength);
 
 			if (size > 0) {
-				writeChangedUnchecked(structType.getWriter(buf.unwrap()));
+				final long ptr = buf.getPtr();
+				final long stride = structType.getLayout().getStride();
+				final StructWriter<D> writer = structType.getWriter();
+
+				for (int i = 0; i < size; i++) {
+					final D element = data.get(i);
+					if (element.checkDirtyAndClear()) {
+						writer.write(ptr + i * stride, element);
+					}
+				}
 			}
 		} catch (Exception e) {
 			Flywheel.LOGGER.error("Error updating GPUInstancer:", e);

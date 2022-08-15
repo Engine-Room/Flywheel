@@ -73,7 +73,7 @@ public class GPULightVolume extends LightVolume {
 
 	public void bind() {
 		// just in case something goes wrong, or we accidentally call this before this volume is properly disposed of.
-		if (lightData == null || lightData.capacity() == 0) return;
+		if (lightData == null || lightData.size() == 0) return;
 
 		textureUnit.makeActive();
 		glTexture.bind();
@@ -93,7 +93,7 @@ public class GPULightVolume extends LightVolume {
 			int sizeY = box.sizeY();
 			int sizeZ = box.sizeZ();
 
-			glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, sizeX, sizeY, sizeZ, GL30.GL_RG, GL_UNSIGNED_BYTE, lightData);
+			glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, sizeX, sizeY, sizeZ, GL30.GL_RG, GL_UNSIGNED_BYTE, lightData.ptr());
 
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // 4 is the default
 			bufferDirty = false;

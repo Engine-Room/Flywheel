@@ -1,71 +1,56 @@
 package com.jozufozu.flywheel.core.model;
 
-import java.nio.ByteBuffer;
-
-import com.jozufozu.flywheel.api.vertex.VertexList;
+import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.api.vertex.VertexWriter;
 import com.jozufozu.flywheel.backend.instancing.instancing.ElementBuffer;
 import com.jozufozu.flywheel.core.QuadConverter;
 import com.jozufozu.flywheel.util.joml.Vector4fc;
 
 /**
- * A mesh that can be rendered by flywheel.
- *
- * <p>
- *     It is expected that the following assertion will not fail:
- * </p>
- *
- * <pre>{@code
- * Mesh mesh = ...;
- * VecBuffer into = ...;
- *
- * int initial = VecBuffer.unwrap().position();
- *
- * mesh.buffer(into);
- *
- * int final = VecBuffer.unwrap().position();
- *
- * assert mesh.size() == final - initial;
- * }</pre>
+ * A holder for arbitrary vertex data that can be written to memory or a vertex list.
  */
 public interface Mesh {
 
-	/**
-	 * A name uniquely identifying this model.
-	 */
-	String name();
-
 	VertexType getVertexType();
-
-	VertexList getReader();
 
 	Vector4fc getBoundingSphere();
 
 	/**
-	 * @return The number of vertices the model has.
+	 * @return The number of vertices this mesh has.
 	 */
-	default int getVertexCount() {
-		return getReader().getVertexCount();
-	}
+	int getVertexCount();
 
 	/**
 	 * Is there nothing to render?
 	 * @return true if there are no vertices.
 	 */
 	default boolean isEmpty() {
-		return getReader().isEmpty();
+		return getVertexCount() == 0;
 	}
 
 	/**
-	 * The size in bytes that this model's data takes up.
+	 * The size in bytes that this mesh's data takes up.
 	 */
 	default int size() {
 		return getVertexType().byteOffset(getVertexCount());
 	}
 
 	/**
-	 * Create an element buffer object that indexes the vertices of this model.
+	 * Write this mesh into memory. The written data will use the format defined by {@link #getVertexType()} and the amount of
+	 * bytes written will be the same as the return value of {@link #size()}.
+	 * @param ptr The address to which data is written to.
+	 */
+	void write(long ptr);
+
+	/**
+	 * Write this mesh into a vertex list. Vertices with index {@literal <}0 or {@literal >=}{@link #getVertexCount()} will not be
+	 * modified.
+	 * @param vertexList The vertex list to which data is written to.
+	 */
+	void write(MutableVertexList vertexList);
+
+	/**
+	 * Create an element buffer object that indexes the vertices of this mesh.
 	 *
 	 * <p>
 	 *     Very often models in minecraft are made up of sequential quads, which is a very predictable pattern.
@@ -79,9 +64,10 @@ public interface Mesh {
 				.quads2Tris(getVertexCount() / 4);
 	}
 
-	default void writeInto(ByteBuffer buffer, long byteIndex) {
-		VertexWriter writer = getVertexType().createWriter(buffer);
-		writer.seek(byteIndex);
-		writer.writeVertexList(getReader());
-	}
+	void close();
+
+	/**
+	 * A name uniquely identifying this mesh.
+	 */
+	String name();
 }

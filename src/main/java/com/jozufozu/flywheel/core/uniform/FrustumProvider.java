@@ -37,7 +37,7 @@ public class FrustumProvider extends UniformProvider {
 	}
 
 	public void update(RenderContext context) {
-		if (buffer == null) {
+		if (ptr == MemoryUtil.NULL) {
 			return;
 		}
 
@@ -50,8 +50,6 @@ public class FrustumProvider extends UniformProvider {
 		var camZ = (float) (camera.z - originCoordinate.getZ());
 
 		var shiftedCuller = RenderContext.createCuller(context.viewProjection(), -camX, -camY, -camZ);
-
-		long ptr = MemoryUtil.memAddress(buffer);
 
 		shiftedCuller.getJozuPackedPlanes(ptr);
 

@@ -44,6 +44,37 @@ public interface VertexList extends PointSet {
 
 	float normalZ(int index);
 
+	default void write(MutableVertexList dst, int srcIndex, int dstIndex) {
+		dst.x(dstIndex, x(srcIndex));
+		dst.y(dstIndex, y(srcIndex));
+		dst.z(dstIndex, z(srcIndex));
+
+		dst.r(dstIndex, r(srcIndex));
+		dst.g(dstIndex, g(srcIndex));
+		dst.b(dstIndex, b(srcIndex));
+		dst.a(dstIndex, a(srcIndex));
+
+		dst.u(dstIndex, u(srcIndex));
+		dst.v(dstIndex, v(srcIndex));
+
+		dst.overlay(dstIndex, overlay(srcIndex));
+		dst.light(dstIndex, light(srcIndex));
+
+		dst.normalX(dstIndex, normalX(srcIndex));
+		dst.normalY(dstIndex, normalY(srcIndex));
+		dst.normalZ(dstIndex, normalZ(srcIndex));
+	}
+
+	default void write(MutableVertexList dst, int srcStartIndex, int dstStartIndex, int vertexCount) {
+		for (int i = 0; i < vertexCount; i++) {
+			write(dst, srcStartIndex + i, dstStartIndex + i);
+		}
+	}
+
+	default void writeAll(MutableVertexList dst) {
+		write(dst, 0, 0, getVertexCount());
+	}
+
 	int getVertexCount();
 
 	default boolean isEmpty() {

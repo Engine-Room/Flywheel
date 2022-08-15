@@ -9,21 +9,17 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 public class FogProvider extends UniformProvider {
 
-
-
 	@Override
 	public int getActualByteSize() {
 		return 16 + 8 + 4;
 	}
 
 	public void update() {
-		if (buffer == null) {
+		if (ptr == MemoryUtil.NULL) {
 			return;
 		}
 
 		var color = RenderSystem.getShaderFogColor();
-
-		long ptr = MemoryUtil.memAddress(buffer);
 
 		MemoryUtil.memPutFloat(ptr, color[0]);
 		MemoryUtil.memPutFloat(ptr + 4, color[1]);

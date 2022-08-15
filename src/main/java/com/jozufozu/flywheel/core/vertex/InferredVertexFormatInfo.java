@@ -1,9 +1,9 @@
-package com.jozufozu.flywheel.backend.instancing.batching;
+package com.jozufozu.flywheel.core.vertex;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 
-public class VertexFormatInfo {
+public class InferredVertexFormatInfo {
 	public final VertexFormat format;
 	public final int stride;
 
@@ -14,7 +14,7 @@ public class VertexFormatInfo {
 	public final int lightOffset;
 	public final int normalOffset;
 
-	public VertexFormatInfo(VertexFormat format) {
+	public InferredVertexFormatInfo(VertexFormat format) {
 		this.format = format;
 		stride = format.getVertexSize();
 
@@ -51,7 +51,7 @@ public class VertexFormatInfo {
 		this.normalOffset = normalOffset;
 	}
 
-	protected VertexFormatInfo(VertexFormatInfo formatInfo) {
+	protected InferredVertexFormatInfo(InferredVertexFormatInfo formatInfo) {
 		format = formatInfo.format;
 		stride = formatInfo.stride;
 		positionOffset = formatInfo.positionOffset;
