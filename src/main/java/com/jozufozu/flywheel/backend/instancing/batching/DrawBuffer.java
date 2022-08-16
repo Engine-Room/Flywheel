@@ -2,6 +2,8 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 
 import java.nio.ByteBuffer;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexListProvider;
 import com.jozufozu.flywheel.backend.memory.MemoryBlock;
@@ -26,6 +28,7 @@ public class DrawBuffer {
 
 	private int expectedVertices;
 
+	@ApiStatus.Internal
 	public DrawBuffer(RenderType parent) {
 		this.parent = parent;
 		format = parent.format();
