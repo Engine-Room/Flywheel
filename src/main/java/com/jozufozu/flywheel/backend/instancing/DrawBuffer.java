@@ -2,6 +2,8 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import java.nio.ByteBuffer;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import com.jozufozu.flywheel.backend.model.BufferBuilderExtension;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
 import com.mojang.blaze3d.platform.MemoryTracker;
@@ -20,6 +22,7 @@ public class DrawBuffer {
 	private ByteBuffer backingBuffer;
 	private int expectedVertices;
 
+	@ApiStatus.Internal
 	public DrawBuffer(RenderType parent) {
 		this.parent = parent;
 	}
