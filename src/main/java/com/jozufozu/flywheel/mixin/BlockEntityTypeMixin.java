@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstancingController;
-import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityTypeExtension;
+import com.jozufozu.flywheel.extension.BlockEntityTypeExtension;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;

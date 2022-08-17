@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.util;
+package com.jozufozu.flywheel.extension;
 
 import java.nio.ByteBuffer;
 

@@ -45,6 +45,10 @@ public class StringUtil {
 		}
 	}
 
+	public static String formatAddress(long address) {
+		return "0x" + Long.toHexString(address);
+	}
+
 	public static String args(String functionName, Object... args) {
 
 		return functionName + '(' + Arrays.stream(args)

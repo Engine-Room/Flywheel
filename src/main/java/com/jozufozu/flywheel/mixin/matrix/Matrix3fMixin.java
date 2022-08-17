@@ -6,12 +6,11 @@ import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import com.jozufozu.flywheel.util.MatrixWrite;
+import com.jozufozu.flywheel.extension.MatrixWrite;
 import com.mojang.math.Matrix3f;
 
 @Mixin(Matrix3f.class)
 public abstract class Matrix3fMixin implements MatrixWrite {
-
 	@Shadow protected float m00;
 	@Shadow protected float m01;
 	@Shadow protected float m02;

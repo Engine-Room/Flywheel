@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.Instancer;

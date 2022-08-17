@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.backend.memory;
 
 import java.lang.ref.Cleaner;
 
-final class TrackedMemoryBlockImpl extends MemoryBlockImpl {
+class TrackedMemoryBlockImpl extends MemoryBlockImpl {
 	final CleaningAction cleaningAction;
 	final Cleaner.Cleanable cleanable;
 
@@ -24,13 +24,13 @@ final class TrackedMemoryBlockImpl extends MemoryBlockImpl {
 		cleanable.clean();
 	}
 
-	static MemoryBlock mallocBlockTracked(long size) {
+	static MemoryBlock malloc(long size) {
 		MemoryBlock block = new TrackedMemoryBlockImpl(FlwMemoryTracker.malloc(size), size, FlwMemoryTracker.CLEANER);
 		FlwMemoryTracker._allocCPUMemory(block.size());
 		return block;
 	}
 
-	static MemoryBlock callocBlockTracked(long num, long size) {
+	static MemoryBlock calloc(long num, long size) {
 		MemoryBlock block = new TrackedMemoryBlockImpl(FlwMemoryTracker.calloc(num, size), num * size, FlwMemoryTracker.CLEANER);
 		FlwMemoryTracker._allocCPUMemory(block.size());
 		return block;

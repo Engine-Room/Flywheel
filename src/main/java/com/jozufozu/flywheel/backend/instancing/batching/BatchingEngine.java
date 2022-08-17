@@ -67,6 +67,7 @@ public class BatchingEngine implements Engine {
 	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
 		// FIXME: properly support material stages
 		// This also breaks block outlines on batched block entities
+		// and makes translucent blocks occlude everything Flywheel renders
 		if (stage != RenderStage.AFTER_FINAL_END_BATCH) {
 			return;
 		}

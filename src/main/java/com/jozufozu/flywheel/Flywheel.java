@@ -7,6 +7,7 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.backend.instancing.batching.DrawBuffer;
 import com.jozufozu.flywheel.config.BackendTypeArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
@@ -18,7 +19,6 @@ import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.model.Models;
 import com.jozufozu.flywheel.event.EntityWorldHandler;
 import com.jozufozu.flywheel.event.ForgeEvents;
-import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
 import com.mojang.logging.LogUtils;
@@ -77,9 +77,10 @@ public class Flywheel {
 
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);
 
-		forgeEventBus.addListener(EventPriority.HIGHEST, QuadConverter::onRendererReload);
-		forgeEventBus.addListener(ProgramCompiler::invalidateAll);
-		forgeEventBus.addListener(Models::onReload);
+		forgeEventBus.addListener(EventPriority.HIGHEST, QuadConverter::onReloadRenderers);
+		forgeEventBus.addListener(ProgramCompiler::onReloadRenderers);
+		forgeEventBus.addListener(Models::onReloadRenderers);
+		forgeEventBus.addListener(DrawBuffer::onReloadRenderers);
 
 		forgeEventBus.addListener(InstancedRenderDispatcher::onReloadRenderers);
 		forgeEventBus.addListener(InstancedRenderDispatcher::onRenderStage);

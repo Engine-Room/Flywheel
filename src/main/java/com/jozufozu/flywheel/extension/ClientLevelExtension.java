@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.util;
+package com.jozufozu.flywheel.extension;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;

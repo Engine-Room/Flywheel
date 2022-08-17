@@ -45,6 +45,7 @@ minecraft {
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             property 'flw.dumpShaderSource', 'true'
+            property 'flw.debugMemorySafety', 'true'
 
             arg '-mixin.config=flywheel.mixins.json'
 
@@ -114,8 +115,8 @@ dependencies {
     // switch to implementation for debugging
     compileOnly fg.deobf("maven.modrinth:starlight-forge:1.0.2+1.18.2")
 
-    compileOnly fg.deobf("maven.modrinth:rubidium:0.5.2a")
-    compileOnly fg.deobf("curse.maven:oculus-581495:3821406")
+    compileOnly fg.deobf("maven.modrinth:rubidium:0.5.3a")
+    compileOnly fg.deobf("maven.modrinth:oculus:1.18.2-1.2.5a")
 
     // https://discord.com/channels/313125603924639766/725850371834118214/910619168821354497
     // Prevent Mixin annotation processor from getting into IntelliJ's annotation processor settings

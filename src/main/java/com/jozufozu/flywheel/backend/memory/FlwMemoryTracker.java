@@ -5,7 +5,11 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
+import com.jozufozu.flywheel.util.StringUtil;
+
 public class FlwMemoryTracker {
+	public static final boolean DEBUG_MEMORY_SAFETY = System.getProperty("flw.debugMemorySafety") != null;
+
 	static final Cleaner CLEANER = Cleaner.create();
 
 	private static long cpuMemory = 0;
@@ -54,7 +58,7 @@ public class FlwMemoryTracker {
 	public static long realloc(long ptr, long size) {
 		ptr = MemoryUtil.nmemRealloc(ptr, size);
 		if (ptr == MemoryUtil.NULL) {
-			throw new OutOfMemoryError("Failed to reallocate " + size + " bytes for address 0x" + Long.toHexString(ptr));
+			throw new OutOfMemoryError("Failed to reallocate " + size + " bytes for address " + StringUtil.formatAddress(ptr));
 		}
 		return ptr;
 	}

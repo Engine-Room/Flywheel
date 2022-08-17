@@ -7,16 +7,6 @@ public abstract class AbstractVertexList implements ReusableVertexList {
 	protected int vertexCount;
 
 	@Override
-	public int getVertexCount() {
-		return vertexCount;
-	}
-
-	@Override
-	public void setVertexCount(int vertexCount) {
-		this.vertexCount = vertexCount;
-	}
-
-	@Override
 	public long ptr() {
 		return ptr;
 	}
@@ -24,5 +14,15 @@ public abstract class AbstractVertexList implements ReusableVertexList {
 	@Override
 	public void ptr(long ptr) {
 		this.ptr = ptr;
+	}
+
+	@Override
+	public int getVertexCount() {
+		return vertexCount;
+	}
+
+	@Override
+	public void setVertexCount(int vertexCount) {
+		this.vertexCount = vertexCount;
 	}
 }

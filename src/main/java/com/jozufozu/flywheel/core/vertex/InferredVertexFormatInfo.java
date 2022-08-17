@@ -50,15 +50,4 @@ public class InferredVertexFormatInfo {
 		this.lightOffset = lightOffset;
 		this.normalOffset = normalOffset;
 	}
-
-	protected InferredVertexFormatInfo(InferredVertexFormatInfo formatInfo) {
-		format = formatInfo.format;
-		stride = formatInfo.stride;
-		positionOffset = formatInfo.positionOffset;
-		colorOffset = formatInfo.colorOffset;
-		textureOffset = formatInfo.textureOffset;
-		overlayOffset = formatInfo.overlayOffset;
-		lightOffset = formatInfo.lightOffset;
-		normalOffset = formatInfo.normalOffset;
-	}
 }

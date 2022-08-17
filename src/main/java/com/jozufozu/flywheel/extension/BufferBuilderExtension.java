@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.instancing.batching;
+package com.jozufozu.flywheel.extension;
 
 import java.nio.ByteBuffer;
 

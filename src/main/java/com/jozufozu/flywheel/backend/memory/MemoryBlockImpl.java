@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
-sealed class MemoryBlockImpl implements MemoryBlock permits TrackedMemoryBlockImpl {
+non-sealed class MemoryBlockImpl implements MemoryBlock {
 	final long ptr;
 	final long size;
 
@@ -86,13 +86,13 @@ sealed class MemoryBlockImpl implements MemoryBlock permits TrackedMemoryBlockIm
 		freeInner();
 	}
 
-	static MemoryBlock mallocBlock(long size) {
+	static MemoryBlock malloc(long size) {
 		MemoryBlock block = new MemoryBlockImpl(FlwMemoryTracker.malloc(size), size);
 		FlwMemoryTracker._allocCPUMemory(block.size());
 		return block;
 	}
 
-	static MemoryBlock callocBlock(long num, long size) {
+	static MemoryBlock calloc(long num, long size) {
 		MemoryBlock block = new MemoryBlockImpl(FlwMemoryTracker.calloc(num, size), num * size);
 		FlwMemoryTracker._allocCPUMemory(block.size());
 		return block;

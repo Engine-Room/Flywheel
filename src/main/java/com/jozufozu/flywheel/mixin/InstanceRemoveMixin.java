@@ -16,13 +16,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 @Mixin(BlockEntity.class)
 public class InstanceRemoveMixin {
-
 	@Shadow
 	@Nullable
 	protected Level level;
 
 	@Inject(at = @At("TAIL"), method = "setRemoved")
-	private void removeInstance(CallbackInfo ci) {
+	private void flywheel$removeInstance(CallbackInfo ci) {
 		if (level instanceof ClientLevel && Backend.isOn()) {
 			InstancedRenderDispatcher.getBlockEntities(this.level)
 					.remove((BlockEntity) (Object) this);

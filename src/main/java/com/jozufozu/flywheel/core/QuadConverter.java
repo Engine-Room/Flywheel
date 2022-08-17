@@ -85,7 +85,7 @@ public class QuadConverter {
 	}
 
 	// make sure this gets reset first, so it has a chance to repopulate
-	public static void onRendererReload(ReloadRenderersEvent event) {
+	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		if (INSTANCE != null) {
 			INSTANCE.delete();
 			INSTANCE = null;

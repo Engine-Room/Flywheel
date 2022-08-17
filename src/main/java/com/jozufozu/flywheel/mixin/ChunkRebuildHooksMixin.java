@@ -16,9 +16,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 @Mixin(targets = "net.minecraft.client.renderer.chunk.ChunkRenderDispatcher$RenderChunk$RebuildTask")
 public class ChunkRebuildHooksMixin {
-
 	@Inject(method = "handleBlockEntity", at = @At("HEAD"), cancellable = true)
-	private <E extends BlockEntity> void addAndFilterBEs(ChunkRenderDispatcher.CompiledChunk compiledChunk, Set<BlockEntity> set, E be, CallbackInfo ci) {
+	private <E extends BlockEntity> void flywheel$addAndFilterBEs(ChunkRenderDispatcher.CompiledChunk compiledChunk, Set<BlockEntity> set, E be, CallbackInfo ci) {
 		if (Backend.canUseInstancing(be.getLevel())) {
 			if (InstancedRenderRegistry.canInstance(be.getType()))
 				InstancedRenderDispatcher.getBlockEntities(be.getLevel()).queueAdd(be);
