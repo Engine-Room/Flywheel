@@ -1,16 +1,17 @@
 package com.jozufozu.flywheel.backend.instancing.batching;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jetbrains.annotations.ApiStatus;
 
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexListProvider;
 import com.jozufozu.flywheel.backend.memory.MemoryBlock;
-import com.jozufozu.flywheel.core.vertex.VertexListProviderRegistry;
+import com.jozufozu.flywheel.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.extension.BufferBuilderExtension;
 import com.mojang.blaze3d.vertex.VertexFormat;
-
-import net.minecraft.client.renderer.RenderType;
 
 /**
  * A byte buffer that can be used to draw vertices through multiple {@link ReusableVertexList}s.
@@ -18,7 +19,8 @@ import net.minecraft.client.renderer.RenderType;
  * The number of vertices needs to be known ahead of time.
  */
 public class DrawBuffer {
-	private final RenderType parent;
+	private static final List<DrawBuffer> ALL = new ArrayList<>();
+
 	private final VertexFormat format;
 	private final int stride;
 	private final VertexListProvider provider;
@@ -29,11 +31,12 @@ public class DrawBuffer {
 	private int expectedVertices;
 
 	@ApiStatus.Internal
-	public DrawBuffer(RenderType parent) {
-		this.parent = parent;
-		format = parent.format();
+	public DrawBuffer(VertexFormat format) {
+		this.format = format;
 		stride = format.getVertexSize();
-		provider = VertexListProviderRegistry.getOrInfer(format);
+		provider = VertexListProvider.get(format);
+
+		ALL.add(this);
 	}
 
 	/**
@@ -66,7 +69,8 @@ public class DrawBuffer {
 
 	public ReusableVertexList slice(int startVertex, int vertexCount) {
 		ReusableVertexList vertexList = provider.createVertexList();
-		vertexList.ptr(memory.ptr() + startVertex * stride);
+		vertexList.ptr(memory.ptr());
+		vertexList.shiftPtr(startVertex);
 		vertexList.setVertexCount(vertexCount);
 		return vertexList;
 	}
@@ -101,7 +105,12 @@ public class DrawBuffer {
 	}
 
 	public void free() {
-		buffer = null;
 		memory.free();
+		memory = null;
+		buffer = null;
+	}
+
+	public static void onReloadRenderers(ReloadRenderersEvent event) {
+		ALL.forEach(DrawBuffer::free);
 	}
 }

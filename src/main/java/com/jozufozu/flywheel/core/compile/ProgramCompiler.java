@@ -70,7 +70,7 @@ public class ProgramCompiler extends Memoizer<ProgramCompiler.Context, GlProgram
 		value.delete();
 	}
 
-	public static void invalidateAll(ReloadRenderersEvent ignored) {
+	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		INSTANCE.invalidate();
 	}
 

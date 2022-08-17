@@ -26,18 +26,26 @@ public sealed interface MemoryBlock permits MemoryBlockImpl {
 	void free();
 
 	static MemoryBlock malloc(long size) {
-		return MemoryBlockImpl.mallocBlock(size);
+		if (FlwMemoryTracker.DEBUG_MEMORY_SAFETY) {
+			return DebugMemoryBlockImpl.malloc(size);
+		} else {
+			return MemoryBlockImpl.malloc(size);
+		}
 	}
 
 	static MemoryBlock mallocTracked(long size) {
-		return TrackedMemoryBlockImpl.mallocBlockTracked(size);
+		return TrackedMemoryBlockImpl.malloc(size);
 	}
 
 	static MemoryBlock calloc(long num, long size) {
-		return MemoryBlockImpl.callocBlock(num, size);
+		if (FlwMemoryTracker.DEBUG_MEMORY_SAFETY) {
+			return DebugMemoryBlockImpl.calloc(num, size);
+		} else {
+			return MemoryBlockImpl.calloc(num, size);
+		}
 	}
 
 	static MemoryBlock callocTracked(long num, long size) {
-		return TrackedMemoryBlockImpl.callocBlockTracked(num, size);
+		return TrackedMemoryBlockImpl.calloc(num, size);
 	}
 }

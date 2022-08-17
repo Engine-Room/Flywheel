@@ -13,13 +13,13 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 @Mixin(BufferUploader.class)
 public class BufferUploaderMixin {
-
 	@Shadow
 	@Nullable
 	private static VertexFormat lastFormat;
 
+	// Stop BufferUploader from clearing buffer state if nothing is bound
 	@Inject(method = "reset", at = @At("HEAD"))
-	private static void stopBufferUploaderFromClearingBufferStateIfNothingIsBound(CallbackInfo ci) {
+	private static void flywheel$onReset(CallbackInfo ci) {
 		// Trust our tracker over BufferUploader's.
 		if (GlStateTracker.getVertexArray() == 0) {
 			lastFormat = null;

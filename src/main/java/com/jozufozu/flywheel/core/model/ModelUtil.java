@@ -9,11 +9,11 @@ import org.lwjgl.system.MemoryUtil;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
+import com.jozufozu.flywheel.api.vertex.VertexListProvider;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.vertex.Formats;
-import com.jozufozu.flywheel.core.vertex.VertexListProviderRegistry;
 import com.mojang.blaze3d.vertex.BufferBuilder.DrawState;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
@@ -58,7 +58,7 @@ public class ModelUtil {
 		long srcPtr = MemoryUtil.memAddress(src);
 		long dstPtr = dst.ptr();
 
-		ReusableVertexList srcList = VertexListProviderRegistry.getOrInfer(srcFormat).createVertexList();
+		ReusableVertexList srcList = VertexListProvider.get(srcFormat).createVertexList();
 		ReusableVertexList dstList = dstVertexType.createVertexList();
 		srcList.ptr(srcPtr);
 		dstList.ptr(dstPtr);

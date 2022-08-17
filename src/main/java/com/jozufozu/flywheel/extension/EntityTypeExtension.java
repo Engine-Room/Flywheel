@@ -1,6 +1,8 @@
-package com.jozufozu.flywheel.backend.instancing.entity;
+package com.jozufozu.flywheel.extension;
 
 import org.jetbrains.annotations.Nullable;
+
+import com.jozufozu.flywheel.backend.instancing.entity.EntityInstancingController;
 
 import net.minecraft.world.entity.Entity;
 

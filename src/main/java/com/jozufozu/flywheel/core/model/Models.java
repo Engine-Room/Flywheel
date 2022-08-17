@@ -41,7 +41,7 @@ public class Models {
 		return stack;
 	}
 
-	public static void onReload(ReloadRenderersEvent event) {
+	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		deleteAll(BLOCK_STATE.values());
 		deleteAll(PARTIAL.values());
 		deleteAll(PARTIAL_DIR.values());

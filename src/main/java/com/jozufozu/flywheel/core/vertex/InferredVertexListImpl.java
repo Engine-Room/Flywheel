@@ -4,18 +4,33 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.util.RenderMath;
+import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.renderer.texture.OverlayTexture;
 
-public final class InferredVertexListImpl extends InferredVertexFormatInfo implements ReusableVertexList {
-	private long ptr;
-	private int vertexCount;
+public class InferredVertexListImpl extends AbstractVertexList implements ReusableVertexList {
+	protected final VertexFormat format;
+	protected final int stride;
+
+	protected final int positionOffset;
+	protected final int colorOffset;
+	protected final int textureOffset;
+	protected final int overlayOffset;
+	protected final int lightOffset;
+	protected final int normalOffset;
 
 	public InferredVertexListImpl(InferredVertexFormatInfo formatInfo) {
-		super(formatInfo);
+		format = formatInfo.format;
+		stride = formatInfo.stride;
+		positionOffset = formatInfo.positionOffset;
+		colorOffset = formatInfo.colorOffset;
+		textureOffset = formatInfo.textureOffset;
+		overlayOffset = formatInfo.overlayOffset;
+		lightOffset = formatInfo.lightOffset;
+		normalOffset = formatInfo.normalOffset;
 	}
 
-	private long idxPtr(int index) {
+	protected long idxPtr(int index) {
 		return ptr + index * stride;
 	}
 
@@ -188,27 +203,7 @@ public final class InferredVertexListImpl extends InferredVertexFormatInfo imple
 	}
 
 	@Override
-	public int getVertexCount() {
-		return vertexCount;
-	}
-
-	@Override
-	public long ptr() {
-		return ptr;
-	}
-
-	@Override
-	public void ptr(long ptr) {
-		this.ptr = ptr;
-	}
-
-	@Override
 	public void shiftPtr(int vertices) {
 		ptr += vertices * stride;
-	}
-
-	@Override
-	public void setVertexCount(int vertexCount) {
-		this.vertexCount = vertexCount;
 	}
 }

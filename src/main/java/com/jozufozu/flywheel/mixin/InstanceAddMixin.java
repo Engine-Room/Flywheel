@@ -16,14 +16,13 @@ import net.minecraft.world.level.chunk.LevelChunk;
 
 @Mixin(LevelChunk.class)
 public class InstanceAddMixin {
-
 	@Shadow
 	@Final
 	Level level;
 
 	@Inject(method = "setBlockEntity",
 			at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))
-	private void blockEntityAdded(BlockEntity be, CallbackInfo ci) {
+	private void flywheel$onBlockEntityAdded(BlockEntity be, CallbackInfo ci) {
 		if (level.isClientSide && Backend.isOn()) {
 			InstancedRenderDispatcher.getBlockEntities(this.level)
 					.add(be);

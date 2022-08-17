@@ -16,9 +16,8 @@ import net.minecraft.client.renderer.LightTexture;
 
 @Mixin(LevelRenderer.class)
 public class FixFabulousDepthMixin {
-
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/client/renderer/PostChain;process(F)V"))
-	private void disableTransparencyShaderDepth(PoseStack p_228426_1_, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, Camera p_228426_6_, GameRenderer p_228426_7_, LightTexture p_228426_8_, Matrix4f p_228426_9_, CallbackInfo ci) {
+	private void flywheel$disableTransparencyShaderDepth(PoseStack poseStack, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
 		GlStateManager._depthMask(false);
 	}
 }
