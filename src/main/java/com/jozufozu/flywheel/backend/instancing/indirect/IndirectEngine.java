@@ -10,18 +10,13 @@ import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
-import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.api.context.ContextShader;
-import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
-import com.jozufozu.flywheel.core.source.FileResolution;
-import com.jozufozu.flywheel.core.uniform.UniformBuffer;
 import com.jozufozu.flywheel.util.WeakHashSet;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -42,7 +37,7 @@ public class IndirectEngine implements Engine {
 
 	protected final Map<StructType<?>, IndirectFactory<?>> factories = new HashMap<>();
 
-	protected final List<InstancedModel<?>> uninitializedModels = new ArrayList<>();
+	protected final List<IndirectModel<?>> uninitializedModels = new ArrayList<>();
 	protected final RenderLists renderLists = new RenderLists();
 
 	/**
@@ -101,6 +96,8 @@ public class IndirectEngine implements Engine {
 	public void delete() {
 		factories.values()
 				.forEach(IndirectFactory::delete);
+
+		renderLists.lists.values().forEach(IndirectList::delete);
 
 		factories.clear();
 	}

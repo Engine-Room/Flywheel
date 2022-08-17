@@ -4,16 +4,14 @@ import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.core.model.Model;
 
-public class InstancedModel<D extends InstancedPart> {
+public class IndirectModel<D extends InstancedPart> {
 
 	private final Model model;
-	private final StructType<D> type;
 	private final IndirectInstancer<D> instancer;
 
-	public InstancedModel(StructType<D> type, Model model) {
+	public IndirectModel(StructType<D> type, Model model) {
 		this.model = model;
 		this.instancer = new IndirectInstancer<>(this, type);
-		this.type = type;
 	}
 
 	public void init(RenderLists renderLists) {

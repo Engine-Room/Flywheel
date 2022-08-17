@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.backend.instancing.indirect;
 
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 
@@ -10,12 +9,12 @@ public class IndirectInstancer<D extends InstancedPart> extends AbstractInstance
 
 	public final BufferLayout instanceFormat;
 	public final StructType<D> structType;
-	public final InstancedModel<D> parent;
+	public final IndirectModel<D> parent;
 	int instanceCount = 0;
 
 	boolean anyToUpdate;
 
-	public IndirectInstancer(InstancedModel<D> parent, StructType<D> type) {
+	public IndirectInstancer(IndirectModel<D> parent, StructType<D> type) {
 		super(type);
 		this.parent = parent;
 		this.instanceFormat = type.getLayout();
