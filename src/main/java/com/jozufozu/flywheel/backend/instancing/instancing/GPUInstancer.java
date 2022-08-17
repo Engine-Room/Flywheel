@@ -17,19 +17,17 @@ import com.jozufozu.flywheel.core.layout.BufferLayout;
 
 public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> {
 
-	public final BufferLayout instanceFormat;
-	public final StructType<D> structType;
-	public final InstancedModel<D> parent;
-
+	final BufferLayout instanceFormat;
+	final StructType<D> structType;
+	final Set<GlVertexArray> boundTo = new HashSet<>();
 	GlBuffer vbo;
-	int attributeBaseIndex;
 	int glInstanceCount = 0;
 
 	boolean anyToUpdate;
 
-	public GPUInstancer(InstancedModel<D> parent, StructType<D> type) {
+
+	public GPUInstancer(StructType<D> type) {
 		super(type);
-		this.parent = parent;
 		this.instanceFormat = type.getLayout();
 		this.structType = type;
 	}
@@ -40,7 +38,9 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 	}
 
 	public void init() {
-		if (vbo != null) return;
+		if (vbo != null) {
+			return;
+		}
 
 		vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER, GlBufferUsage.DYNAMIC_DRAW);
 		vbo.setGrowthMargin(instanceFormat.getStride() * 16);
@@ -50,17 +50,7 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 		return !anyToUpdate && !anyToRemove && glInstanceCount == 0;
 	}
 
-	private final Set<GlVertexArray> boundTo = new HashSet<>();
-
-	void renderSetup(GlVertexArray vao) {
-		update();
-
-		if (boundTo.add(vao)) {
-			bindInstanceAttributes(vao);
-		}
-	}
-
-	private void update() {
+	void update() {
 		if (anyToRemove) {
 			removeDeletedInstances();
 		}
@@ -113,14 +103,6 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 		int requiredSize = size * stride;
 
 		return vbo.ensureCapacity(requiredSize);
-	}
-
-	private void bindInstanceAttributes(GlVertexArray vao) {
-		vao.bindAttributes(this.vbo, this.attributeBaseIndex, this.instanceFormat, 0L);
-
-		for (int i = 0; i < this.instanceFormat.getAttributeCount(); i++) {
-			vao.setAttributeDivisor(this.attributeBaseIndex + i, 1);
-		}
 	}
 
 	@Override

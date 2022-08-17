@@ -7,7 +7,6 @@ import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.core.ComponentRegistry;
 import com.jozufozu.flywheel.core.compile.ContextShader;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
-import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.ShaderLoadingException;
 import com.jozufozu.flywheel.core.source.ShaderSources;
@@ -83,9 +82,7 @@ public class Loader implements ResourceManagerReloadListener {
 
 		ClientLevel world = Minecraft.getInstance().level;
 		if (Backend.canUseInstancing(world)) {
-			// TODO: looks like it might be good to have another event here
 			InstancedRenderDispatcher.resetInstanceWorld(world);
-			CrumblingRenderer.reset();
 		}
 
 	}

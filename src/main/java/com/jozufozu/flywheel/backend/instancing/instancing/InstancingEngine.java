@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +7,6 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL32;
 
-import com.google.common.collect.ListMultimap;
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.material.Material;
@@ -43,8 +41,7 @@ public class InstancingEngine implements Engine {
 
 	protected final Map<StructType<?>, GPUInstancerFactory<?>> factories = new HashMap<>();
 
-	protected final List<InstancedModel<?>> uninitializedModels = new ArrayList<>();
-	protected final RenderLists renderLists = new RenderLists();
+	protected final InstancingDrawManager drawManager = new InstancingDrawManager();
 
 	/**
 	 * The set of instance managers that are attached to this engine.
@@ -66,30 +63,20 @@ public class InstancingEngine implements Engine {
 
 	@NotNull
 	private <D extends InstancedPart> GPUInstancerFactory<D> createFactory(StructType<D> type) {
-		return new GPUInstancerFactory<>(type, uninitializedModels::add);
+		return new GPUInstancerFactory<>(type, drawManager::create);
 	}
 
 	@Override
 	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
-		var multimap = renderLists.get(stage);
+		var drawSet = drawManager.get(stage);
 
-		setup();
-
-		render(multimap);
-	}
-
-	// TODO: Is this useful? Should it be added to the base interface? Currently it is only used for the old CrumblingRenderer.
-	@Deprecated
-	public void renderAll(TaskEngine taskEngine, RenderContext context) {
-		if (renderLists.isEmpty()) {
+		if (drawSet.isEmpty()) {
 			return;
 		}
 
 		setup();
 
-		for (var multimap : renderLists.getAll()) {
-			render(multimap);
-		}
+		render(drawSet);
 	}
 
 	private void setup() {
@@ -103,12 +90,12 @@ public class InstancingEngine implements Engine {
 		RenderSystem.enableCull();
 	}
 
-	protected void render(ListMultimap<ShaderState, DrawCall> multimap) {
-		if (multimap.isEmpty()) {
+	protected void render(InstancingDrawManager.DrawSet drawSet) {
+		if (drawSet.isEmpty()) {
 			return;
 		}
 
-		for (var entry : multimap.asMap().entrySet()) {
+		for (var entry : drawSet) {
 			var shader = entry.getKey();
 			var drawCalls = entry.getValue();
 
@@ -144,16 +131,10 @@ public class InstancingEngine implements Engine {
 		UniformBuffer.getInstance().sync();
 	}
 
-	public void clearAll() {
-		factories.values().forEach(GPUInstancerFactory::clear);
-	}
-
 	@Override
 	public void delete() {
-		factories.values()
-				.forEach(GPUInstancerFactory::delete);
-
 		factories.clear();
+		drawManager.delete();
 	}
 
 	@Override
@@ -183,19 +164,13 @@ public class InstancingEngine implements Engine {
 
 	@Override
 	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
-		for (var model : uninitializedModels) {
-			model.init(renderLists);
-		}
-		uninitializedModels.clear();
-
-		MeshPool.getInstance()
-				.flush();
+		drawManager.flush();
 	}
 
 	private void shiftListeners(int cX, int cY, int cZ) {
 		originCoordinate = new BlockPos(cX, cY, cZ);
 
-		factories.values().forEach(GPUInstancerFactory::clear);
+		drawManager.clearInstancers();
 
 		instanceManagers.forEach(InstanceManager::onOriginShift);
 	}
