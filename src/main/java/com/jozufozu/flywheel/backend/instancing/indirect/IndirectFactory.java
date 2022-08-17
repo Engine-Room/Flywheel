@@ -13,11 +13,11 @@ import com.jozufozu.flywheel.core.model.Model;
 
 public class IndirectFactory<D extends InstancedPart> implements InstancerFactory<D> {
 
-	protected final Map<Model, InstancedModel<D>> models = new HashMap<>();
+	protected final Map<Model, IndirectModel<D>> models = new HashMap<>();
 	protected final StructType<D> type;
-	private final Consumer<InstancedModel<D>> creationListener;
+	private final Consumer<IndirectModel<D>> creationListener;
 
-	public IndirectFactory(StructType<D> type, Consumer<InstancedModel<D>> creationListener) {
+	public IndirectFactory(StructType<D> type, Consumer<IndirectModel<D>> creationListener) {
 		this.type = type;
 		this.creationListener = creationListener;
 	}
@@ -27,23 +27,8 @@ public class IndirectFactory<D extends InstancedPart> implements InstancerFactor
 		return models.computeIfAbsent(modelKey, this::createInstancer).getInstancer();
 	}
 
-	public int getInstanceCount() {
-		return models.values()
-				.stream()
-				.map(InstancedModel::getInstancer)
-				.mapToInt(AbstractInstancer::getInstanceCount)
-				.sum();
-	}
-
-	public int getVertexCount() {
-		return models.values()
-				.stream()
-				.mapToInt(InstancedModel::getVertexCount)
-				.sum();
-	}
-
 	public void delete() {
-		models.values().forEach(InstancedModel::delete);
+		models.values().forEach(IndirectModel::delete);
 		models.clear();
 	}
 
@@ -53,21 +38,13 @@ public class IndirectFactory<D extends InstancedPart> implements InstancerFactor
 	public void clear() {
 		models.values()
 				.stream()
-				.map(InstancedModel::getInstancer)
+				.map(IndirectModel::getInstancer)
 				.forEach(AbstractInstancer::clear);
 	}
 
-	private InstancedModel<D> createInstancer(Model model) {
-		var instancer = new InstancedModel<>(type, model);
+	private IndirectModel<D> createInstancer(Model model) {
+		var instancer = new IndirectModel<>(type, model);
 		this.creationListener.accept(instancer);
 		return instancer;
 	}
-
-//	private void bindInstanceAttributes(GlVertexArray vao) {
-//		vao.bindAttributes(this.vbo, this.attributeBaseIndex, this.instanceFormat, 0L);
-//
-//		for (int i = 0; i < this.instanceFormat.getAttributeCount(); i++) {
-//			vao.setAttributeDivisor(this.attributeBaseIndex + i, 1);
-//		}
-//	}
 }

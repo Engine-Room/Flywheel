@@ -5,7 +5,6 @@ import static org.lwjgl.opengl.GL46.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.RenderStage;
@@ -27,7 +26,6 @@ public class IndirectList<T extends InstancedPart> {
 	final StorageBufferWriter<T> storageBufferWriter;
 	final GlProgram compute;
 	final GlProgram draw;
-	private final StructType<T> structType;
 	private final VertexType vertexType;
 	private final long objectStride;
 
@@ -38,12 +36,11 @@ public class IndirectList<T extends InstancedPart> {
 
 	int vertexArray;
 
-	final List<Batch<T>> batches = new ArrayList<>();
+	final List<Batch> batches = new ArrayList<>();
 
 	IndirectList(StructType<T> structType, VertexType vertexType) {
-		this.structType = structType;
 		this.vertexType = vertexType;
-		storageBufferWriter = this.structType.getStorageBufferWriter();
+		storageBufferWriter = structType.getStorageBufferWriter();
 
 		objectStride = storageBufferWriter.getAlignment();
 		buffers = new IndirectBuffers(objectStride);
@@ -59,7 +56,7 @@ public class IndirectList<T extends InstancedPart> {
 				.quads2Tris(2048).buffer.handle();
 		setupVertexArray();
 
-		var indirectShader = this.structType.getIndirectShader();
+		var indirectShader = structType.getIndirectShader();
 		compute = ComputeCullerCompiler.INSTANCE.get(indirectShader);
 		draw = PipelineCompiler.INSTANCE.get(new PipelineCompiler.Context(vertexType, Materials.CHEST, indirectShader, Components.WORLD, Components.INDIRECT));
 	}
@@ -84,14 +81,14 @@ public class IndirectList<T extends InstancedPart> {
 	}
 
 	public void add(IndirectInstancer<T> instancer, Material material, Mesh mesh) {
-		batches.add(new Batch<>(instancer, material, meshPool.alloc(mesh)));
+		batches.add(new Batch(instancer, material, meshPool.alloc(mesh)));
 	}
 
 	void submit(RenderStage stage) {
 		if (batches.isEmpty()) {
 			return;
 		}
-		int instanceCountThisFrame = calculateTotalInstanceCount();
+		int instanceCountThisFrame = calculateTotalInstanceCountAndPrepareBatches();
 
 		if (instanceCountThisFrame == 0) {
 			return;
@@ -119,7 +116,7 @@ public class IndirectList<T extends InstancedPart> {
 
 		final int stride = (int) IndirectBuffers.DRAW_COMMAND_STRIDE;
 		long offset = 0;
-		for (Batch<T> batch : batches) {
+		for (var batch : batches) {
 
 			batch.material.setup();
 			glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, offset, 1, stride);
@@ -139,22 +136,14 @@ public class IndirectList<T extends InstancedPart> {
 	private void uploadInstanceData() {
 		long objectPtr = buffers.objectPtr;
 		long batchIDPtr = buffers.batchPtr;
-		int baseInstance = 0;
-		int batchID = 0;
-		for (var batch : batches) {
-			batch.baseInstance = baseInstance;
-			var instancer = batch.instancer;
-			for (T t : instancer.getAll()) {
-				// write object
-				storageBufferWriter.write(objectPtr, t);
-				objectPtr += objectStride;
 
-				// write batchID
-				MemoryUtil.memPutInt(batchIDPtr, batchID);
-				batchIDPtr += IndirectBuffers.INT_SIZE;
-			}
-			baseInstance += batch.instancer.instanceCount;
-			batchID++;
+		for (int i = 0, batchesSize = batches.size(); i < batchesSize; i++) {
+			var batch = batches.get(i);
+			var instanceCount = batch.instancer.getInstanceCount();
+			batch.write(objectPtr, batchIDPtr, i);
+
+			objectPtr += instanceCount * objectStride;
+			batchIDPtr += instanceCount * IndirectBuffers.INT_SIZE;
 		}
 
 		buffers.flushObjects(objectPtr - buffers.objectPtr);
@@ -163,32 +152,83 @@ public class IndirectList<T extends InstancedPart> {
 
 	private void uploadIndirectCommands() {
 		long writePtr = buffers.drawPtr;
-		for (Batch<T> batch : batches) {
+		for (var batch : batches) {
 			batch.writeIndirectCommand(writePtr);
 			writePtr += IndirectBuffers.DRAW_COMMAND_STRIDE;
 		}
 		buffers.flushDrawCommands(writePtr - buffers.drawPtr);
 	}
 
-	private int calculateTotalInstanceCount() {
-		int total = 0;
-		for (Batch<T> batch : batches) {
-			batch.instancer.update();
-			total += batch.instancer.instanceCount;
+	private int calculateTotalInstanceCountAndPrepareBatches() {
+		int baseInstance = 0;
+		for (var batch : batches) {
+			batch.prepare(baseInstance);
+			baseInstance += batch.instancer.instanceCount;
 		}
-		return total;
+		return baseInstance;
 	}
 
-	private static final class Batch<T extends InstancedPart> {
+	public void delete() {
+		glDeleteVertexArrays(vertexArray);
+		buffers.delete();
+		meshPool.delete();
+	}
+
+	private final class Batch {
 		final IndirectInstancer<T> instancer;
 		final IndirectMeshPool.BufferedMesh mesh;
 		final Material material;
 		int baseInstance = -1;
 
+		boolean needsFullWrite = true;
+
 		private Batch(IndirectInstancer<T> instancer, Material material, IndirectMeshPool.BufferedMesh mesh) {
 			this.instancer = instancer;
 			this.material = material;
 			this.mesh = mesh;
+		}
+
+		public void prepare(int baseInstance) {
+			instancer.update();
+			if (baseInstance == this.baseInstance) {
+				needsFullWrite = false;
+				return;
+			}
+			this.baseInstance = baseInstance;
+			needsFullWrite = true;
+		}
+
+		private void write(long objectPtr, long batchIDPtr, int batchID) {
+			if (needsFullWrite) {
+				writeFull(objectPtr, batchIDPtr, batchID);
+			} else if (instancer.anyToUpdate) {
+				writeSparse(objectPtr, batchIDPtr, batchID);
+			}
+			instancer.anyToUpdate = false;
+		}
+
+		private void writeSparse(long objectPtr, long batchIDPtr, int batchID) {
+			var all = instancer.getAll();
+			for (int i = 0; i < all.size(); i++) {
+				final var element = all.get(i);
+				if (element.checkDirtyAndClear()) {
+					storageBufferWriter.write(objectPtr + i * objectStride, element);
+
+					MemoryUtil.memPutInt(batchIDPtr + i * IndirectBuffers.INT_SIZE, batchID);
+				}
+			}
+		}
+
+		private void writeFull(long objectPtr, long batchIDPtr, int batchID) {
+			for (var object : this.instancer.getAll()) {
+				// write object
+				storageBufferWriter.write(objectPtr, object);
+				objectPtr += objectStride;
+
+				// write batchID
+				MemoryUtil.memPutInt(batchIDPtr, batchID);
+				batchIDPtr += IndirectBuffers.INT_SIZE;
+			}
 		}
 
 		public void writeIndirectCommand(long ptr) {
