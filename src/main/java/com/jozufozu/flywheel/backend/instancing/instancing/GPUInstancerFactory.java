@@ -2,13 +2,13 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.instancer.InstancerFactory;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.core.model.Model;
 
 /**
@@ -17,53 +17,23 @@ import com.jozufozu.flywheel.core.model.Model;
  */
 public class GPUInstancerFactory<D extends InstancedPart> implements InstancerFactory<D> {
 
-	protected final Map<Model, InstancedModel<D>> models = new HashMap<>();
+	protected final Map<Model, GPUInstancer<D>> models = new HashMap<>();
 	protected final StructType<D> type;
-	private final Consumer<InstancedModel<D>> creationListener;
+	private final BiConsumer<GPUInstancer<?>, Model> creationListener;
 
-	public GPUInstancerFactory(StructType<D> type, Consumer<InstancedModel<D>> creationListener) {
+	public GPUInstancerFactory(StructType<D> type, BiConsumer<GPUInstancer<?>, Model> creationListener) {
 		this.type = type;
 		this.creationListener = creationListener;
 	}
 
 	@Override
 	public Instancer<D> model(Model modelKey) {
-		return models.computeIfAbsent(modelKey, this::createInstancer).getInstancer();
+		return models.computeIfAbsent(modelKey, this::createInstancer);
 	}
 
-	public int getInstanceCount() {
-		return models.values()
-				.stream()
-				.map(InstancedModel::getInstancer)
-				.mapToInt(AbstractInstancer::getInstanceCount)
-				.sum();
-	}
-
-	public int getVertexCount() {
-		return models.values()
-				.stream()
-				.mapToInt(InstancedModel::getVertexCount)
-				.sum();
-	}
-
-	public void delete() {
-		models.values().forEach(InstancedModel::delete);
-		models.clear();
-	}
-
-	/**
-	 * Clear all instance data without freeing resources.
-	 */
-	public void clear() {
-		models.values()
-				.stream()
-				.map(InstancedModel::getInstancer)
-				.forEach(AbstractInstancer::clear);
-	}
-
-	private InstancedModel<D> createInstancer(Model model) {
-		var instancer = new InstancedModel<>(type, model);
-		this.creationListener.accept(instancer);
+	private GPUInstancer<D> createInstancer(Model model) {
+		var instancer = new GPUInstancer<>(type);
+		this.creationListener.accept(instancer, model);
 		return instancer;
 	}
 }

@@ -14,7 +14,6 @@ import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.core.RenderContext;
-import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderStageEvent;
@@ -66,7 +65,7 @@ public class LevelRendererMixin {
 	), method = "renderLevel")
 	private void renderCrumbling(PoseStack poseStack, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
 		if (renderContext != null) {
-			CrumblingRenderer.renderCrumbling(renderContext);
+			// TODO: Crumbling
 		}
 	}
 

@@ -4,23 +4,23 @@ import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
-import com.jozufozu.flywheel.core.model.Mesh;
+import com.jozufozu.flywheel.core.layout.BufferLayout;
 
 public class DrawCall {
 
-	private final GPUInstancer<?> instancer;
-	private final Material material;
+	final GPUInstancer<?> instancer;
+	final Material material;
+	private final int meshAttributes;
 	MeshPool.BufferedMesh bufferedMesh;
 	GlVertexArray vao;
 
-	DrawCall(GPUInstancer<?> instancer, Material material, Mesh mesh) {
+	DrawCall(GPUInstancer<?> instancer, Material material, MeshPool.BufferedMesh mesh) {
 		this.instancer = instancer;
 		this.material = material;
 		this.vao = new GlVertexArray();
-		this.bufferedMesh = MeshPool.getInstance()
-				.alloc(mesh);
-		this.instancer.attributeBaseIndex = this.bufferedMesh.getAttributeCount();
-		this.vao.enableArrays(this.bufferedMesh.getAttributeCount() + instancer.instanceFormat.getAttributeCount());
+		this.bufferedMesh = mesh;
+		this.meshAttributes = this.bufferedMesh.getAttributeCount();
+		this.vao.enableArrays(this.meshAttributes + instancer.instanceFormat.getAttributeCount());
 	}
 
 	public Material getMaterial() {
@@ -32,11 +32,15 @@ public class DrawCall {
 	}
 
 	public void render() {
-		if (invalid()) return;
+		if (invalid()) {
+			return;
+		}
 
 		try (var ignored = GlStateTracker.getRestoreState()) {
 
-			this.instancer.renderSetup(vao);
+			this.instancer.update();
+
+			bindInstancerToVAO();
 
 			if (this.instancer.glInstanceCount > 0) {
 				bufferedMesh.drawInstances(vao, this.instancer.glInstanceCount);
@@ -55,8 +59,24 @@ public class DrawCall {
 		return this.instancer.vbo == null || bufferedMesh == null || vao == null;
 	}
 
+	private void bindInstancerToVAO() {
+		if (!this.instancer.boundTo.add(vao)) {
+			return;
+		}
+
+		var instanceFormat = this.instancer.instanceFormat;
+
+		vao.bindAttributes(this.instancer.vbo, this.meshAttributes, instanceFormat, 0L);
+
+		for (int i = 0; i < instanceFormat.getAttributeCount(); i++) {
+			vao.setAttributeDivisor(this.meshAttributes + i, 1);
+		}
+	}
+
 	public void delete() {
-		if (invalid()) return;
+		if (invalid()) {
+			return;
+		}
 
 		vao.delete();
 		bufferedMesh.delete();

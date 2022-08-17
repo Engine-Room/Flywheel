@@ -17,28 +17,12 @@ import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
-import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.model.Mesh;
-import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 
 public class MeshPool {
 
-	private static MeshPool allocator;
 
-	public static MeshPool getInstance() {
-		if (allocator == null) {
-			allocator = new MeshPool();
-		}
-		return allocator;
-	}
-
-	public static void reset(ReloadRenderersEvent ignored) {
-		if (allocator != null) {
-			allocator.delete();
-			allocator = null;
-		}
-	}
-
+	private final VertexType vertexType;
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
 	private final List<BufferedMesh> allBuffered = new ArrayList<>();
 
@@ -54,10 +38,12 @@ public class MeshPool {
 	/**
 	 * Create a new mesh pool.
 	 */
-	public MeshPool() {
-		vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER);
+	public MeshPool(VertexType vertexType) {
+		this.vertexType = vertexType;
+		int stride = vertexType.getStride();
+		this.vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER);
 
-		vbo.setGrowthMargin(2048);
+		this.vbo.setGrowthMargin(stride * 32);
 	}
 
 	/**
@@ -68,6 +54,10 @@ public class MeshPool {
 	 */
 	public BufferedMesh alloc(Mesh mesh) {
 		return meshes.computeIfAbsent(mesh, m -> {
+			if (m.getVertexType() != vertexType) {
+				throw new IllegalArgumentException("Mesh has wrong vertex type");
+			}
+
 			BufferedMesh bufferedModel = new BufferedMesh(m, byteSize);
 			byteSize += m.size();
 			allBuffered.add(bufferedModel);
@@ -173,16 +163,17 @@ public class MeshPool {
 		pendingUpload.clear();
 	}
 
+	@Override
+	public String toString() {
+		return "MeshPool{" + "vertexType=" + vertexType + ", byteSize=" + byteSize + ", meshCount=" + meshes.size() + '}';
+	}
+
 	public class BufferedMesh {
 
 		private final ElementBuffer ebo;
 		private final Mesh mesh;
-		private final BufferLayout layout;
 		private long byteIndex;
-
 		private boolean deleted;
-
-		private boolean gpuResident = false;
 
 		private final Set<GlVertexArray> boundTo = new HashSet<>();
 
@@ -190,8 +181,6 @@ public class MeshPool {
 			this.mesh = mesh;
 			this.byteIndex = byteIndex;
 			this.ebo = mesh.createEBO();
-			this.layout = mesh.getVertexType()
-					.getLayout();
 		}
 
 		public void drawCall(GlVertexArray vao) {
@@ -199,7 +188,9 @@ public class MeshPool {
 		}
 
 		public void drawInstances(GlVertexArray vao, int instanceCount) {
-			if (hasAnythingToRender()) return;
+			if (hasAnythingToRender()) {
+				return;
+			}
 
 			setup(vao);
 
@@ -221,7 +212,7 @@ public class MeshPool {
 		private void setup(GlVertexArray vao) {
 			if (this.boundTo.add(vao)) {
 				vao.enableArrays(getAttributeCount());
-				vao.bindAttributes(MeshPool.this.vbo, 0, this.layout, this.byteIndex);
+				vao.bindAttributes(MeshPool.this.vbo, 0, vertexType.getLayout(), this.byteIndex);
 			}
 			vao.bindElementArray(this.ebo.buffer);
 			vao.bind();
@@ -241,19 +232,14 @@ public class MeshPool {
 			this.mesh.write(ptr + byteIndex);
 
 			this.boundTo.clear();
-			this.gpuResident = true;
 		}
 
 		public int getAttributeCount() {
-			return this.layout.getAttributeCount();
-		}
-
-		public boolean isGpuResident() {
-			return gpuResident;
+			return vertexType.getLayout().getAttributeCount();
 		}
 
 		public VertexType getVertexType() {
-			return this.mesh.getVertexType();
+			return vertexType;
 		}
 	}
 
