@@ -21,7 +21,6 @@ import com.jozufozu.flywheel.core.model.Mesh;
 
 public class MeshPool {
 
-
 	private final VertexType vertexType;
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
 	private final List<BufferedMesh> allBuffered = new ArrayList<>();

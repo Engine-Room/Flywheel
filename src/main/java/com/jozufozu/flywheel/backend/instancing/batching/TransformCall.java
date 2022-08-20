@@ -17,13 +17,13 @@ import com.mojang.math.Vector4f;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 
-public class TransformSet<D extends InstancedPart> {
+public class TransformCall<D extends InstancedPart> {
 
 	private final CPUInstancer<D> instancer;
 	private final Material material;
 	private final Mesh mesh;
 
-	public TransformSet(CPUInstancer<D> instancer, Material material, Mesh mesh) {
+	public TransformCall(CPUInstancer<D> instancer, Material material, Mesh mesh) {
 		this.instancer = instancer;
 		this.material = material;
 		this.mesh = mesh;
@@ -51,19 +51,19 @@ public class TransformSet<D extends InstancedPart> {
 			ReusableVertexList sub = buffer.slice(startVertex, vertexCount);
 			startVertex += vertexCount;
 
-			pool.submit(() -> drawRange(sub, start, end, stack, level));
+			pool.submit(() -> transformRange(sub, start, end, stack, level));
 		}
 	}
 
-	private void drawRange(ReusableVertexList vertexList, int from, int to, PoseStack stack, ClientLevel level) {
-		drawList(vertexList, instancer.getRange(from, to), stack, level);
+	private void transformRange(ReusableVertexList vertexList, int from, int to, PoseStack stack, ClientLevel level) {
+		transformList(vertexList, instancer.getRange(from, to), stack, level);
 	}
 
-	void drawAll(ReusableVertexList vertexList, PoseStack stack, ClientLevel level) {
-		drawList(vertexList, instancer.getAll(), stack, level);
+	void transformAll(ReusableVertexList vertexList, PoseStack stack, ClientLevel level) {
+		transformList(vertexList, instancer.getAll(), stack, level);
 	}
 
-	private void drawList(ReusableVertexList vertexList, List<D> list, PoseStack stack, ClientLevel level) {
+	private void transformList(ReusableVertexList vertexList, List<D> parts, PoseStack stack, ClientLevel level) {
 		long anchorPtr = vertexList.ptr();
 		int totalVertexCount = vertexList.getVertexCount();
 
@@ -72,7 +72,7 @@ public class TransformSet<D extends InstancedPart> {
 
 		StructType.VertexTransformer<D> structVertexTransformer = instancer.type.getVertexTransformer();
 
-		for (D d : list) {
+		for (D d : parts) {
 			mesh.write(vertexList);
 
 			structVertexTransformer.transform(vertexList, d, level);

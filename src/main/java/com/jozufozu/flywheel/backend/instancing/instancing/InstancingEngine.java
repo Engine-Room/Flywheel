@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,25 +34,22 @@ import net.minecraft.world.phys.Vec3;
 
 public class InstancingEngine implements Engine {
 
-	public static int MAX_ORIGIN_DISTANCE = 100;
-
-	protected BlockPos originCoordinate = BlockPos.ZERO;
-
-	protected final ContextShader context;
-
-	protected final Map<StructType<?>, GPUInstancerFactory<?>> factories = new HashMap<>();
-
 	protected final InstancingDrawManager drawManager = new InstancingDrawManager();
+	protected final Map<StructType<?>, GPUInstancerFactory<?>> factories = new HashMap<>();
 
 	/**
 	 * The set of instance managers that are attached to this engine.
 	 */
-	private final WeakHashSet<InstanceManager<?>> instanceManagers;
+	private final WeakHashSet<InstanceManager<?>> instanceManagers = new WeakHashSet<>();
 
-	public InstancingEngine(ContextShader context) {
+	protected final ContextShader context;
+	protected final int sqrMaxOriginDistance;
+
+	protected BlockPos originCoordinate = BlockPos.ZERO;
+
+	public InstancingEngine(ContextShader context, int sqrMaxOriginDistance) {
 		this.context = context;
-
-		this.instanceManagers = new WeakHashSet<>();
+		this.sqrMaxOriginDistance = sqrMaxOriginDistance;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -67,6 +65,11 @@ public class InstancingEngine implements Engine {
 	}
 
 	@Override
+	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
+		drawManager.flush();
+	}
+
+	@Override
 	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
 		var drawSet = drawManager.get(stage);
 
@@ -79,7 +82,7 @@ public class InstancingEngine implements Engine {
 		render(drawSet);
 	}
 
-	private void setup() {
+	protected void setup() {
 		GlTextureUnit.T2.makeActive();
 		Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
 
@@ -91,10 +94,6 @@ public class InstancingEngine implements Engine {
 	}
 
 	protected void render(InstancingDrawManager.DrawSet drawSet) {
-		if (drawSet.isEmpty()) {
-			return;
-		}
-
 		for (var entry : drawSet) {
 			var shader = entry.getKey();
 			var drawCalls = entry.getValue();
@@ -118,7 +117,6 @@ public class InstancingEngine implements Engine {
 	}
 
 	protected void setup(ShaderState desc) {
-
 		VertexType vertexType = desc.vertex();
 		FileResolution instanceShader = desc.instance()
 				.getInstanceShader();
@@ -132,22 +130,6 @@ public class InstancingEngine implements Engine {
 	}
 
 	@Override
-	public void delete() {
-		factories.clear();
-		drawManager.delete();
-	}
-
-	@Override
-	public Vec3i getOriginCoordinate() {
-		return originCoordinate;
-	}
-
-	@Override
-	public void attachManagers(InstanceManager<?>... listener) {
-		instanceManagers.addAll(List.of(listener));
-	}
-
-	@Override
 	public boolean maintainOriginCoordinate(Camera camera) {
 		Vec3 cameraPos = camera.getPosition();
 
@@ -155,16 +137,11 @@ public class InstancingEngine implements Engine {
 				.subtract(cameraPos)
 				.lengthSqr();
 
-		if (distanceSqr > MAX_ORIGIN_DISTANCE * MAX_ORIGIN_DISTANCE) {
+		if (distanceSqr > sqrMaxOriginDistance) {
 			shiftListeners(Mth.floor(cameraPos.x), Mth.floor(cameraPos.y), Mth.floor(cameraPos.z));
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
-		drawManager.flush();
 	}
 
 	private void shiftListeners(int cX, int cY, int cZ) {
@@ -173,6 +150,22 @@ public class InstancingEngine implements Engine {
 		drawManager.clearInstancers();
 
 		instanceManagers.forEach(InstanceManager::onOriginShift);
+	}
+
+	@Override
+	public void attachManagers(InstanceManager<?>... listener) {
+		Collections.addAll(instanceManagers, listener);
+	}
+
+	@Override
+	public Vec3i getOriginCoordinate() {
+		return originCoordinate;
+	}
+
+	@Override
+	public void delete() {
+		factories.clear();
+		drawManager.delete();
 	}
 
 	@Override

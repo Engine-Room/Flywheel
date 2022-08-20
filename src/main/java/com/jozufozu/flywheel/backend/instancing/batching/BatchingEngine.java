@@ -1,9 +1,10 @@
 package com.jozufozu.flywheel.backend.instancing.batching;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
@@ -23,36 +24,44 @@ import net.minecraft.world.phys.Vec3;
 
 public class BatchingEngine implements Engine {
 
-	private final Map<StructType<?>, CPUInstancerFactory<?>> factories = new HashMap<>();
-	private final BatchDrawingTracker batchTracker = new BatchDrawingTracker();
-
-	private final BatchLists batchLists = new BatchLists();
-
-	protected final List<BatchedModel<?>> uninitializedModels = new ArrayList<>();
+	protected final BatchingDrawManager drawManager = new BatchingDrawManager();
+	protected final Map<StructType<?>, CPUInstancerFactory<?>> factories = new HashMap<>();
 
 	@SuppressWarnings("unchecked")
+	@NotNull
 	@Override
 	public <D extends InstancedPart> CPUInstancerFactory<D> factory(StructType<D> type) {
 		return (CPUInstancerFactory<D>) factories.computeIfAbsent(type, this::createFactory);
 	}
 
-	public <D extends InstancedPart> CPUInstancerFactory<D> createFactory(StructType<D> type) {
-		return new CPUInstancerFactory<>(type, uninitializedModels::add);
+	@NotNull
+	private <D extends InstancedPart> CPUInstancerFactory<D> createFactory(StructType<D> type) {
+		return new CPUInstancerFactory<>(type, drawManager::create);
 	}
 
 	@Override
-	public Vec3i getOriginCoordinate() {
-		return BlockPos.ZERO;
+	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
+		drawManager.flush();
+
+		Vec3 cameraPos = context.camera().getPosition();
+		var stack = FlwUtil.copyPoseStack(context.stack());
+		stack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+
+		submitTasks(taskEngine, stack, context.level());
 	}
 
 	public void submitTasks(TaskEngine taskEngine, PoseStack stack, ClientLevel level) {
-		batchLists.renderLists.asMap().forEach((renderType, renderList) -> {
+		BatchingDrawManager.TransformSet drawSet = drawManager.get(RenderStage.AFTER_FINAL_END_BATCH);
+		for (var entry : drawSet) {
+			var renderType = entry.getKey();
+			var renderList = entry.getValue();
+
 			int vertices = 0;
 			for (var transformSet : renderList) {
 				vertices += transformSet.getTotalVertexCount();
 			}
 
-			DrawBuffer buffer = batchTracker.getBuffer(renderType);
+			DrawBuffer buffer = drawManager.batchTracker.getBuffer(renderType);
 			buffer.prepare(vertices);
 
 			int startVertex = 0;
@@ -60,7 +69,7 @@ public class BatchingEngine implements Engine {
 				transformSet.submitTasks(taskEngine, buffer, startVertex, stack, level);
 				startVertex += transformSet.getTotalVertexCount();
 			}
-		});
+		};
 	}
 
 	@Override
@@ -72,11 +81,7 @@ public class BatchingEngine implements Engine {
 			return;
 		}
 
-		batchTracker.endBatch();
-	}
-
-	@Override
-	public void delete() {
+		drawManager.batchTracker.endBatch();
 	}
 
 	@Override
@@ -86,23 +91,19 @@ public class BatchingEngine implements Engine {
 	}
 
 	@Override
-	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
-		for (var model : uninitializedModels) {
-			model.init(batchLists);
-		}
-
-		uninitializedModels.clear();
-
-		Vec3 cameraPos = context.camera().getPosition();
-		var stack = FlwUtil.copyPoseStack(context.stack());
-		stack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-
-		submitTasks(taskEngine, stack, context.level());
+	public void attachManagers(InstanceManager<?>... listener) {
+		// noop
 	}
 
 	@Override
-	public void attachManagers(InstanceManager<?>... listener) {
-		// noop
+	public Vec3i getOriginCoordinate() {
+		return BlockPos.ZERO;
+	}
+
+	@Override
+	public void delete() {
+		factories.clear();
+		drawManager.delete();
 	}
 
 	@Override

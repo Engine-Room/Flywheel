@@ -37,7 +37,7 @@ public class InstanceWorld implements AutoCloseable {
 
 	public static InstanceWorld create(LevelAccessor level) {
 		var engine = switch (Backend.getBackendType()) {
-			case INSTANCING -> new InstancingEngine(Components.WORLD);
+			case INSTANCING -> new InstancingEngine(Components.WORLD, 100 * 100);
 			case BATCHING -> new BatchingEngine();
 			case OFF -> throw new IllegalStateException("Cannot create instance world when backend is off.");
 		};

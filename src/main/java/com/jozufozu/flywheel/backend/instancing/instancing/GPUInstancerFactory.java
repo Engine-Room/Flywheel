@@ -16,9 +16,9 @@ import com.jozufozu.flywheel.core.model.Model;
  */
 public class GPUInstancerFactory<D extends InstancedPart> implements InstancerFactory<D> {
 
-	protected final Map<Model, GPUInstancer<D>> models = new HashMap<>();
 	protected final StructType<D> type;
 	private final BiConsumer<GPUInstancer<?>, Model> creationListener;
+	protected final Map<Model, GPUInstancer<D>> models = new HashMap<>();
 
 	public GPUInstancerFactory(StructType<D> type, BiConsumer<GPUInstancer<?>, Model> creationListener) {
 		this.type = type;
@@ -32,7 +32,7 @@ public class GPUInstancerFactory<D extends InstancedPart> implements InstancerFa
 
 	private GPUInstancer<D> createInstancer(Model model) {
 		var instancer = new GPUInstancer<>(type);
-		this.creationListener.accept(instancer, model);
+		creationListener.accept(instancer, model);
 		return instancer;
 	}
 }
