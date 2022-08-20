@@ -7,6 +7,8 @@ import net.minecraft.client.Camera;
 
 public interface RenderDispatcher {
 
+	void beginFrame(TaskEngine taskEngine, RenderContext context);
+
 	void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage);
 
 	/**
@@ -15,8 +17,6 @@ public interface RenderDispatcher {
 	 * @return {@code true} if the origin coordinate was changed, {@code false} otherwise.
 	 */
 	boolean maintainOriginCoordinate(Camera camera);
-
-	void beginFrame(TaskEngine taskEngine, RenderContext context);
 
 	void delete();
 }

@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
@@ -12,34 +12,31 @@ import com.jozufozu.flywheel.core.model.Model;
 
 public class CPUInstancerFactory<D extends InstancedPart> implements InstancerFactory<D> {
 
-	protected final Map<Model, BatchedModel<D>> models;
-	private final StructType<D> type;
-	private final Consumer<BatchedModel<D>> creationListener;
+	protected final StructType<D> type;
+	private final BiConsumer<CPUInstancer<?>, Model> creationListener;
+	protected final Map<Model, CPUInstancer<D>> models = new HashMap<>();
 
-	public CPUInstancerFactory(StructType<D> type, Consumer<BatchedModel<D>> creationListener) {
+	public CPUInstancerFactory(StructType<D> type, BiConsumer<CPUInstancer<?>, Model> creationListener) {
 		this.type = type;
-
 		this.creationListener = creationListener;
-
-		this.models = new HashMap<>();
 	}
 
 	@Override
 	public Instancer<D> model(Model modelKey) {
-		return models.computeIfAbsent(modelKey, this::createModel).getInstancer();
+		return models.computeIfAbsent(modelKey, this::createInstancer);
 	}
 
-	/**
-	 * Clear all instance data without freeing resources.
-	 */
-	public void clear() {
-		models.values()
-				.forEach(BatchedModel::clear);
-	}
+//	/**
+//	 * Clear all instance data without freeing resources.
+//	 */
+//	public void clear() {
+//		models.values()
+//				.forEach(BatchedModel::clear);
+//	}
 
-	private BatchedModel<D> createModel(Model k) {
-		var out = new BatchedModel<>(type, k);
-		creationListener.accept(out);
-		return out;
+	private CPUInstancer<D> createInstancer(Model model) {
+		var instancer = new CPUInstancer<>(type);
+		creationListener.accept(instancer, model);
+		return instancer;
 	}
 }

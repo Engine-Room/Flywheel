@@ -29,8 +29,8 @@ public class InstancingDrawManager {
 		return renderLists.getOrDefault(stage, DrawSet.EMPTY);
 	}
 
-	public void create(GPUInstancer<?> gpuInstancer, Model model) {
-		uninitializedModels.add(new UninitializedModel(gpuInstancer, model));
+	public void create(GPUInstancer<?> instancer, Model model) {
+		uninitializedModels.add(new UninitializedModel(instancer, model));
 	}
 
 	public void flush() {
@@ -67,12 +67,12 @@ public class InstancingDrawManager {
 	private void add(GPUInstancer<?> instancer, Model model) {
 		var meshes = model.getMeshes();
 		for (var entry : meshes.entrySet()) {
-			DrawCall layer = new DrawCall(instancer, entry.getKey(), alloc(entry.getValue()));
-			var material = layer.getMaterial();
-			var shaderState = new ShaderState(material, layer.getVertexType(), layer.instancer.type);
+			DrawCall drawCall = new DrawCall(instancer, entry.getKey(), alloc(entry.getValue()));
+			var material = drawCall.getMaterial();
+			var shaderState = new ShaderState(material, drawCall.getVertexType(), drawCall.instancer.type);
 
 			renderLists.computeIfAbsent(material.getRenderStage(), DrawSet::new)
-					.put(shaderState, layer);
+					.put(shaderState, drawCall);
 		}
 		allInstancers.add(instancer);
 	}
@@ -102,8 +102,8 @@ public class InstancingDrawManager {
 			drawCalls.clear();
 		}
 
-		public void put(ShaderState shaderState, DrawCall layer) {
-			drawCalls.put(shaderState, layer);
+		public void put(ShaderState shaderState, DrawCall drawCall) {
+			drawCalls.put(shaderState, drawCall);
 		}
 
 		public boolean isEmpty() {
@@ -120,6 +120,5 @@ public class InstancingDrawManager {
 	}
 
 	private record UninitializedModel(GPUInstancer<?> instancer, Model model) {
-
 	}
 }
