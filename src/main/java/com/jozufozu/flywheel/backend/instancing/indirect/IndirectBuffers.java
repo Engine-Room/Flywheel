@@ -5,6 +5,7 @@ import static org.lwjgl.opengl.GL46.*;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.Pointer;
 
+import com.jozufozu.flywheel.backend.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 
 public class IndirectBuffers {
@@ -43,8 +44,11 @@ public class IndirectBuffers {
 	long batchPtr;
 	long drawPtr;
 
-	int maxObjectCount;
-	int maxDrawCount;
+	int maxObjectCount = 0;
+	int maxDrawCount = 0;
+
+	float objectGrowthFactor = 2f;
+	float drawGrowthFactor = 2f;
 
 	IndirectBuffers(long objectStride) {
 		this.objectStride = objectStride;
@@ -63,10 +67,18 @@ public class IndirectBuffers {
 	void updateCounts(int objectCount, int drawCount) {
 
 		if (objectCount > maxObjectCount) {
-			createObjectStorage(objectCount);
+			var newObjectCount = maxObjectCount;
+			while (newObjectCount <= objectCount) {
+				newObjectCount *= objectGrowthFactor;
+			}
+			createObjectStorage(newObjectCount);
 		}
 		if (drawCount > maxDrawCount) {
-			createDrawStorage(drawCount);
+			var newDrawCount = maxDrawCount;
+			while (newDrawCount <= drawCount) {
+				newDrawCount *= drawGrowthFactor;
+			}
+			createDrawStorage(newDrawCount);
 		}
 
 		final long objectSize = objectStride * objectCount;
@@ -81,24 +93,62 @@ public class IndirectBuffers {
 	}
 
 	void createObjectStorage(int objectCount) {
+		freeObjectStogare();
 		var objectSize = objectStride * objectCount;
 		var targetSize = INT_SIZE * objectCount;
 
-		glNamedBufferStorage(object, objectSize, PERSISTENT_BITS);
-		glNamedBufferStorage(target, targetSize, GPU_ONLY_BITS);
-		glNamedBufferStorage(batch, targetSize, PERSISTENT_BITS);
+		if (maxObjectCount > 0) {
+			var ptr = buffers.ptr();
+			nglCreateBuffers(3, ptr);
+
+			int objectNew = MemoryUtil.memGetInt(ptr);
+			int targetNew = MemoryUtil.memGetInt(ptr + 4);
+			int batchNew = MemoryUtil.memGetInt(ptr + 8);
+
+			glNamedBufferStorage(objectNew, objectSize, PERSISTENT_BITS);
+			glNamedBufferStorage(targetNew, targetSize, GPU_ONLY_BITS);
+			glNamedBufferStorage(batchNew, targetSize, PERSISTENT_BITS);
+
+			glCopyNamedBufferSubData(object, objectNew, 0, 0, objectStride * maxObjectCount);
+			glCopyNamedBufferSubData(target, targetNew, 0, 0, INT_SIZE * maxObjectCount);
+			glCopyNamedBufferSubData(batch, batchNew, 0, 0, INT_SIZE * maxObjectCount);
+
+			glDeleteBuffers(object);
+			glDeleteBuffers(target);
+			glDeleteBuffers(batch);
+
+			object = objectNew;
+			target = targetNew;
+			batch = batchNew;
+		} else {
+			glNamedBufferStorage(object, objectSize, PERSISTENT_BITS);
+			glNamedBufferStorage(target, targetSize, GPU_ONLY_BITS);
+			glNamedBufferStorage(batch, targetSize, PERSISTENT_BITS);
+		}
 
 		objectPtr = nglMapNamedBufferRange(object, 0, objectSize, MAP_BITS);
 		batchPtr = nglMapNamedBufferRange(batch, 0, targetSize, MAP_BITS);
 		maxObjectCount = objectCount;
+
+		FlwMemoryTracker._allocGPUMemory(maxObjectCount * objectStride + maxObjectCount * INT_SIZE);
 	}
 
 	void createDrawStorage(int drawCount) {
+		freeDrawStorage();
 		var drawSize = DRAW_COMMAND_STRIDE * drawCount;
 		glNamedBufferStorage(draw, drawSize, SUB_DATA_BITS);
 		drawPtr = MemoryUtil.nmemAlloc(drawSize);
 		// drawPtr = nglMapNamedBufferRange(draw, 0, drawSize, MAP_BITS);
 		maxDrawCount = drawCount;
+		FlwMemoryTracker._allocGPUMemory(maxDrawCount * DRAW_COMMAND_STRIDE);
+	}
+
+	private void freeObjectStogare() {
+		FlwMemoryTracker._freeGPUMemory(maxObjectCount * objectStride + maxObjectCount * INT_SIZE);
+	}
+
+	private void freeDrawStorage() {
+		FlwMemoryTracker._freeGPUMemory(maxDrawCount * DRAW_COMMAND_STRIDE);
 	}
 
 	public void bindAll() {
@@ -138,5 +188,7 @@ public class IndirectBuffers {
 	public void delete() {
 		nglDeleteBuffers(BUFFER_COUNT, buffers.ptr());
 		buffers.free();
+		freeObjectStogare();
+		freeDrawStorage();
 	}
 }
