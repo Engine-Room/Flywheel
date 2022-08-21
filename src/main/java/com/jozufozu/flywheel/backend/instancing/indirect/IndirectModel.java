@@ -14,12 +14,12 @@ public class IndirectModel<D extends InstancedPart> {
 		this.instancer = new IndirectInstancer<>(this, type);
 	}
 
-	public void init(RenderLists renderLists) {
+	public void init(IndirectDrawManager indirectDrawManager) {
 		var materialMeshMap = this.model.getMeshes();
 		for (var entry : materialMeshMap.entrySet()) {
 			var material = entry.getKey();
 			var mesh = entry.getValue();
-			renderLists.add(instancer, material, mesh);
+			indirectDrawManager.add(instancer, material, mesh);
 
 			return; // TODO: support multiple meshes per model
 		}
