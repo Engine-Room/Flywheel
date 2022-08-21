@@ -26,14 +26,6 @@ public class CPUInstancerFactory<D extends InstancedPart> implements InstancerFa
 		return models.computeIfAbsent(modelKey, this::createInstancer);
 	}
 
-//	/**
-//	 * Clear all instance data without freeing resources.
-//	 */
-//	public void clear() {
-//		models.values()
-//				.forEach(BatchedModel::clear);
-//	}
-
 	private CPUInstancer<D> createInstancer(Model model) {
 		var instancer = new CPUInstancer<>(type);
 		creationListener.accept(instancer, model);

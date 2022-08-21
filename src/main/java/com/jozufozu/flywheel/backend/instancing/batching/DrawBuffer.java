@@ -28,7 +28,8 @@ public class DrawBuffer {
 	private MemoryBlock memory;
 	private ByteBuffer buffer;
 
-	private int expectedVertices;
+	private boolean prepared;
+	private int vertexCount;
 
 	@ApiStatus.Internal
 	public DrawBuffer(VertexFormat format) {
@@ -45,11 +46,11 @@ public class DrawBuffer {
 	 * @throws IllegalStateException If the buffer is already in use.
 	 */
 	public void prepare(int vertexCount) {
-		if (expectedVertices != 0) {
-			throw new IllegalStateException("Already drawing!");
+		if (prepared) {
+			throw new IllegalStateException("Cannot prepare DrawBuffer twice!");
 		}
 
-		this.expectedVertices = vertexCount;
+		this.vertexCount = vertexCount;
 
 		// Add one extra vertex to uphold the vanilla assumption that BufferBuilders have at least
 		// enough buffer space for one more vertex. Rubidium checks for this extra space when popNextBuffer
@@ -65,9 +66,14 @@ public class DrawBuffer {
 		}
 
 		memory.clear();
+		prepared = true;
 	}
 
 	public ReusableVertexList slice(int startVertex, int vertexCount) {
+		if (!prepared) {
+			throw new IllegalStateException("Cannot slice DrawBuffer that is not prepared!");
+		}
+
 		ReusableVertexList vertexList = provider.createVertexList();
 		vertexList.ptr(memory.ptr());
 		vertexList.shiftPtr(startVertex);
@@ -80,19 +86,27 @@ public class DrawBuffer {
 	 * @param bufferBuilder The buffer builder to inject into.
 	 */
 	public void inject(BufferBuilderExtension bufferBuilder) {
+		if (!prepared) {
+			throw new IllegalStateException("Cannot inject DrawBuffer that is not prepared!");
+		}
+
 		buffer.clear();
-		bufferBuilder.flywheel$injectForRender(buffer, format, expectedVertices);
+		bufferBuilder.flywheel$injectForRender(buffer, format, vertexCount);
+	}
+
+	public boolean isPrepared() {
+		return prepared;
 	}
 
 	public int getVertexCount() {
-		return expectedVertices;
+		return vertexCount;
 	}
 
 	/**
 	 * @return {@code true} if the buffer has any vertices.
 	 */
 	public boolean hasVertices() {
-		return expectedVertices > 0;
+		return vertexCount > 0;
 	}
 
 	/**
@@ -101,7 +115,8 @@ public class DrawBuffer {
 	 * Does not clear the backing buffer.
 	 */
 	public void reset() {
-		this.expectedVertices = 0;
+		prepared = false;
+		vertexCount = 0;
 	}
 
 	public void free() {

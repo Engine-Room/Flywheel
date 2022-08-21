@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,15 +18,19 @@ import com.jozufozu.flywheel.core.model.Model;
 
 import net.minecraft.client.renderer.RenderType;
 
-public class BatchingDrawManager {
+public class BatchingTransformManager {
 
 	private final List<UninitializedModel> uninitializedModels = new ArrayList<>();
 	private final List<CPUInstancer<?>> allInstancers = new ArrayList<>();
-	public final Map<RenderStage, TransformSet> renderLists = new EnumMap<>(RenderStage.class);
-	public final BatchDrawingTracker batchTracker = new BatchDrawingTracker();
+	private final Map<RenderStage, TransformSet> transformSets = new EnumMap<>(RenderStage.class);
+	private final Map<RenderStage, TransformSet> transformSetsView = Collections.unmodifiableMap(transformSets);
 
 	public TransformSet get(RenderStage stage) {
-		return renderLists.getOrDefault(stage, TransformSet.EMPTY);
+		return transformSets.getOrDefault(stage, TransformSet.EMPTY);
+	}
+
+	public Map<RenderStage, TransformSet> getTransformSetsView() {
+		return transformSetsView;
 	}
 
 	public void create(CPUInstancer<?> instancer, Model model) {
@@ -55,8 +60,8 @@ public class BatchingDrawManager {
 			var material = transformCall.getMaterial();
 			var renderType = material.getBatchingRenderType();
 
-//			renderLists.computeIfAbsent(material.getRenderStage(), TransformSet::new)
-			renderLists.computeIfAbsent(RenderStage.AFTER_FINAL_END_BATCH, TransformSet::new)
+//			transformSets.computeIfAbsent(material.getRenderStage(), TransformSet::new)
+			transformSets.computeIfAbsent(RenderStage.AFTER_FINAL_END_BATCH, TransformSet::new)
 					.put(renderType, transformCall);
 		}
 		allInstancers.add(instancer);

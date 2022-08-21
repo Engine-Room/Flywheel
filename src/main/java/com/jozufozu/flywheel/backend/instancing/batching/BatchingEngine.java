@@ -24,7 +24,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class BatchingEngine implements Engine {
 
-	protected final BatchingDrawManager drawManager = new BatchingDrawManager();
+	protected final BatchingTransformManager transformManager = new BatchingTransformManager();
+	protected final BatchingDrawTracker drawTracker = new BatchingDrawTracker();
 	protected final Map<StructType<?>, CPUInstancerFactory<?>> factories = new HashMap<>();
 
 	@SuppressWarnings("unchecked")
@@ -36,12 +37,12 @@ public class BatchingEngine implements Engine {
 
 	@NotNull
 	private <D extends InstancedPart> CPUInstancerFactory<D> createFactory(StructType<D> type) {
-		return new CPUInstancerFactory<>(type, drawManager::create);
+		return new CPUInstancerFactory<>(type, transformManager::create);
 	}
 
 	@Override
 	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
-		drawManager.flush();
+		transformManager.flush();
 
 		Vec3 cameraPos = context.camera().getPosition();
 		var stack = FlwUtil.copyPoseStack(context.stack());
@@ -51,25 +52,29 @@ public class BatchingEngine implements Engine {
 	}
 
 	public void submitTasks(TaskEngine taskEngine, PoseStack stack, ClientLevel level) {
-		BatchingDrawManager.TransformSet drawSet = drawManager.get(RenderStage.AFTER_FINAL_END_BATCH);
-		for (var entry : drawSet) {
+		BatchingTransformManager.TransformSet transformSet = transformManager.get(RenderStage.AFTER_FINAL_END_BATCH);
+		for (var entry : transformSet) {
 			var renderType = entry.getKey();
-			var renderList = entry.getValue();
+			var transformCalls = entry.getValue();
 
 			int vertices = 0;
-			for (var transformSet : renderList) {
-				vertices += transformSet.getTotalVertexCount();
+			for (var transformCall : transformCalls) {
+				vertices += transformCall.getTotalVertexCount();
 			}
 
-			DrawBuffer buffer = drawManager.batchTracker.getBuffer(renderType);
+			if (vertices == 0) {
+				continue;
+			}
+
+			DrawBuffer buffer = drawTracker.getBuffer(renderType);
 			buffer.prepare(vertices);
 
 			int startVertex = 0;
-			for (var transformSet : renderList) {
-				transformSet.submitTasks(taskEngine, buffer, startVertex, stack, level);
-				startVertex += transformSet.getTotalVertexCount();
+			for (var transformCall : transformCalls) {
+				transformCall.submitTasks(taskEngine, buffer, startVertex, stack, level);
+				startVertex += transformCall.getTotalVertexCount();
 			}
-		};
+		}
 	}
 
 	@Override
@@ -81,7 +86,7 @@ public class BatchingEngine implements Engine {
 			return;
 		}
 
-		drawManager.batchTracker.endBatch();
+		drawTracker.drawAll();
 	}
 
 	@Override
@@ -103,7 +108,7 @@ public class BatchingEngine implements Engine {
 	@Override
 	public void delete() {
 		factories.clear();
-		drawManager.delete();
+		transformManager.delete();
 	}
 
 	@Override

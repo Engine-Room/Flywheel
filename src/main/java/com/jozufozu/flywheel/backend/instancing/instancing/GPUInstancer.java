@@ -25,7 +25,6 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 
 	boolean anyToUpdate;
 
-
 	public GPUInstancer(StructType<D> type) {
 		super(type);
 		this.instanceFormat = type.getLayout();
