@@ -88,10 +88,6 @@ public class IndirectEngine implements Engine {
 		RenderSystem.enableCull();
 	}
 
-	public void clearAll() {
-		factories.values().forEach(IndirectFactory::clear);
-	}
-
 	@Override
 	public void delete() {
 		factories.values()

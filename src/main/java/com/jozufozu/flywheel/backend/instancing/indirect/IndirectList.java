@@ -45,8 +45,8 @@ public class IndirectList<T extends InstancedPart> {
 		objectStride = storageBufferWriter.getAlignment();
 		buffers = new IndirectBuffers(objectStride);
 		buffers.createBuffers();
-		buffers.createObjectStorage(64 * 64 * 64);
-		buffers.createDrawStorage(64);
+		buffers.createObjectStorage(128);
+		buffers.createDrawStorage(16);
 
 		meshPool = new IndirectMeshPool(vertexType, 1024);
 
