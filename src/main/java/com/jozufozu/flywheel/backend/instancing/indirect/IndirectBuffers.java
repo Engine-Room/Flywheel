@@ -1,6 +1,22 @@
 package com.jozufozu.flywheel.backend.instancing.indirect;
 
-import static org.lwjgl.opengl.GL46.*;
+import static org.lwjgl.opengl.GL46.GL_DRAW_INDIRECT_BUFFER;
+import static org.lwjgl.opengl.GL46.GL_DYNAMIC_STORAGE_BIT;
+import static org.lwjgl.opengl.GL46.GL_MAP_FLUSH_EXPLICIT_BIT;
+import static org.lwjgl.opengl.GL46.GL_MAP_PERSISTENT_BIT;
+import static org.lwjgl.opengl.GL46.GL_MAP_WRITE_BIT;
+import static org.lwjgl.opengl.GL46.GL_SHADER_STORAGE_BUFFER;
+import static org.lwjgl.opengl.GL46.glBindBuffer;
+import static org.lwjgl.opengl.GL46.glCopyNamedBufferSubData;
+import static org.lwjgl.opengl.GL46.glDeleteBuffers;
+import static org.lwjgl.opengl.GL46.glFlushMappedNamedBufferRange;
+import static org.lwjgl.opengl.GL46.glGenBuffers;
+import static org.lwjgl.opengl.GL46.glNamedBufferStorage;
+import static org.lwjgl.opengl.GL46.nglBindBuffersRange;
+import static org.lwjgl.opengl.GL46.nglCreateBuffers;
+import static org.lwjgl.opengl.GL46.nglDeleteBuffers;
+import static org.lwjgl.opengl.GL46.nglMapNamedBufferRange;
+import static org.lwjgl.opengl.GL46.nglNamedBufferSubData;
 
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.Pointer;
@@ -135,10 +151,23 @@ public class IndirectBuffers {
 
 	void createDrawStorage(int drawCount) {
 		freeDrawStorage();
+
 		var drawSize = DRAW_COMMAND_STRIDE * drawCount;
-		glNamedBufferStorage(draw, drawSize, SUB_DATA_BITS);
-		drawPtr = MemoryUtil.nmemAlloc(drawSize);
-		// drawPtr = nglMapNamedBufferRange(draw, 0, drawSize, MAP_BITS);
+		if (maxDrawCount > 0) {
+			int drawNew = glGenBuffers();
+
+			glNamedBufferStorage(drawNew, drawSize, SUB_DATA_BITS);
+
+			glDeleteBuffers(draw);
+
+			MemoryUtil.memPutInt(buffers.ptr() + INT_SIZE * 3, drawNew);
+			draw = drawNew;
+			drawPtr = MemoryUtil.nmemRealloc(drawPtr, drawSize);
+		} else {
+
+			glNamedBufferStorage(draw, drawSize, SUB_DATA_BITS);
+			drawPtr = MemoryUtil.nmemAlloc(drawSize);
+		}
 		maxDrawCount = drawCount;
 		FlwMemoryTracker._allocGPUMemory(maxDrawCount * DRAW_COMMAND_STRIDE);
 	}

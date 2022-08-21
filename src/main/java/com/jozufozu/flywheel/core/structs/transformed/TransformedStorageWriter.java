@@ -16,16 +16,16 @@ public class TransformedStorageWriter implements StorageBufferWriter<Transformed
 	public void write(long ptr, TransformedPart instance) {
 		MatrixExtension.writeUnsafe(instance.model, ptr);
 		MatrixExtension.writeUnsafe(instance.normal, ptr + 64);
-		MemoryUtil.memPutByte(ptr + 112, instance.r);
-		MemoryUtil.memPutByte(ptr + 113, instance.g);
-		MemoryUtil.memPutByte(ptr + 114, instance.b);
-		MemoryUtil.memPutByte(ptr + 115, instance.a);
-		MemoryUtil.memPutShort(ptr + 116, instance.skyLight);
-		MemoryUtil.memPutShort(ptr + 118, instance.blockLight);
+		MemoryUtil.memPutByte(ptr + 100, instance.r);
+		MemoryUtil.memPutByte(ptr + 101, instance.g);
+		MemoryUtil.memPutByte(ptr + 102, instance.b);
+		MemoryUtil.memPutByte(ptr + 103, instance.a);
+		MemoryUtil.memPutShort(ptr + 104, instance.skyLight);
+		MemoryUtil.memPutShort(ptr + 106, instance.blockLight);
 	}
 
 	@Override
 	public int getAlignment() {
-		return 128;
+		return 108;
 	}
 }

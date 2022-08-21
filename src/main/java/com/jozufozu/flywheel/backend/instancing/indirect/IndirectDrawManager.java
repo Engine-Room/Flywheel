@@ -10,15 +10,14 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.util.Pair;
 
-public class RenderLists {
+public class IndirectDrawManager {
 
-	public final Map<Pair<StructType<?>, VertexType>, IndirectList<?>> lists = new HashMap<>();
+	public final Map<Pair<StructType<?>, VertexType>, IndirectCullingGroup<?>> lists = new HashMap<>();
 
 	@SuppressWarnings("unchecked")
 	public <D extends InstancedPart> void add(IndirectInstancer<D> instancer, Material material, Mesh mesh) {
-		var indirectList = (IndirectList<D>) lists.computeIfAbsent(Pair.of(instancer.structType, mesh.getVertexType()),
-				p -> new IndirectList<>(p.first(), p.second()));
+		var indirectList = (IndirectCullingGroup<D>) lists.computeIfAbsent(Pair.of(instancer.type, mesh.getVertexType()), p -> new IndirectCullingGroup<>(p.first(), p.second()));
 
-		indirectList.add(instancer, material, mesh);
+		indirectList.drawSet.add(instancer, material, indirectList.meshPool.alloc(mesh));
 	}
 }

@@ -8,10 +8,7 @@ import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
-import com.jozufozu.flywheel.util.extension.MatrixExtension;
-import com.jozufozu.flywheel.util.joml.FrustumIntersection;
 
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;

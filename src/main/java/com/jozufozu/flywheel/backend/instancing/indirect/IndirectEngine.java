@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.RenderStage;
+import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
@@ -16,7 +17,6 @@ import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.RenderContext;
-import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.util.WeakHashSet;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -38,7 +38,7 @@ public class IndirectEngine implements Engine {
 	protected final Map<StructType<?>, IndirectFactory<?>> factories = new HashMap<>();
 
 	protected final List<IndirectModel<?>> uninitializedModels = new ArrayList<>();
-	protected final RenderLists renderLists = new RenderLists();
+	protected final IndirectDrawManager indirectDrawManager = new IndirectDrawManager();
 
 	/**
 	 * The set of instance managers that are attached to this engine.
@@ -65,16 +65,11 @@ public class IndirectEngine implements Engine {
 
 	@Override
 	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
-		if (stage != RenderStage.AFTER_SOLID_TERRAIN) {
-			return;
-		}
-
 		setup();
 
-		for (IndirectList<?> list : renderLists.lists.values()) {
+		for (var list : indirectDrawManager.lists.values()) {
 			list.submit(stage);
 		}
-
 	}
 
 	private void setup() {
@@ -93,7 +88,8 @@ public class IndirectEngine implements Engine {
 		factories.values()
 				.forEach(IndirectFactory::delete);
 
-		renderLists.lists.values().forEach(IndirectList::delete);
+		indirectDrawManager.lists.values()
+				.forEach(IndirectCullingGroup::delete);
 
 		factories.clear();
 	}
@@ -126,9 +122,13 @@ public class IndirectEngine implements Engine {
 	@Override
 	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
 		for (var model : uninitializedModels) {
-			model.init(renderLists);
+			model.init(indirectDrawManager);
 		}
 		uninitializedModels.clear();
+
+		for (IndirectCullingGroup<?> value : indirectDrawManager.lists.values()) {
+			value.beginFrame();
+		}
 	}
 
 	private void shiftListeners(int cX, int cY, int cZ) {
@@ -141,7 +141,7 @@ public class IndirectEngine implements Engine {
 
 	@Override
 	public void addDebugInfo(List<String> info) {
-		info.add("GL33 Instanced Arrays");
+		info.add("GL46 Indirect");
 		info.add("Origin: " + originCoordinate.getX() + ", " + originCoordinate.getY() + ", " + originCoordinate.getZ());
 	}
 }

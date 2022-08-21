@@ -23,21 +23,21 @@ public class OrientedStorageWriter implements StorageBufferWriter<OrientedPart> 
 		MemoryUtil.memPutFloat(ptr + 20, d.posY);
 		MemoryUtil.memPutFloat(ptr + 24, d.posZ);
 
-		MemoryUtil.memPutFloat(ptr + 32, d.pivotX);
-		MemoryUtil.memPutFloat(ptr + 36, d.pivotY);
-		MemoryUtil.memPutFloat(ptr + 40, d.pivotZ);
+		MemoryUtil.memPutFloat(ptr + 28, d.pivotX);
+		MemoryUtil.memPutFloat(ptr + 32, d.pivotY);
+		MemoryUtil.memPutFloat(ptr + 36, d.pivotZ);
 
-		MemoryUtil.memPutShort(ptr + 44, d.skyLight);
-		MemoryUtil.memPutShort(ptr + 46, d.blockLight);
+		MemoryUtil.memPutShort(ptr + 40, d.skyLight);
+		MemoryUtil.memPutShort(ptr + 42, d.blockLight);
 
-		MemoryUtil.memPutByte(ptr + 48, d.r);
-		MemoryUtil.memPutByte(ptr + 49, d.g);
-		MemoryUtil.memPutByte(ptr + 50, d.b);
-		MemoryUtil.memPutByte(ptr + 51, d.a);
+		MemoryUtil.memPutByte(ptr + 44, d.r);
+		MemoryUtil.memPutByte(ptr + 45, d.g);
+		MemoryUtil.memPutByte(ptr + 46, d.b);
+		MemoryUtil.memPutByte(ptr + 47, d.a);
 	}
 
 	@Override
 	public int getAlignment() {
-		return 64;
+		return 48;
 	}
 }
