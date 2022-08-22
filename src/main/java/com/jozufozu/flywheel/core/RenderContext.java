@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.core;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.util.extension.Matrix4fExtension;
+import com.jozufozu.flywheel.extension.Matrix4fExtension;
 import com.jozufozu.flywheel.util.joml.FrustumIntersection;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
@@ -11,7 +11,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
-import net.minecraft.world.phys.Vec3;
 
 public record RenderContext(LevelRenderer renderer, ClientLevel level, PoseStack stack, Matrix4f viewProjection,
 							Matrix4f projection, RenderBuffers buffers, Camera camera, FrustumIntersection culler) {

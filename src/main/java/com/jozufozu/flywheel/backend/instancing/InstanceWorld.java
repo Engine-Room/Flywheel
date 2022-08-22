@@ -14,7 +14,7 @@ import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
-import com.jozufozu.flywheel.util.extension.ClientLevelExtension;
+import com.jozufozu.flywheel.extension.ClientLevelExtension;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;

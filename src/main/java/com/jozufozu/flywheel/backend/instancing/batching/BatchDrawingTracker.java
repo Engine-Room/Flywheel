@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.backend.instancing.batching;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.jozufozu.flywheel.util.extension.RenderTypeExtension;
+import com.jozufozu.flywheel.extension.RenderTypeExtension;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 
 import net.minecraft.client.renderer.RenderType;

@@ -6,22 +6,31 @@ import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import com.jozufozu.flywheel.util.extension.Matrix4fExtension;
-import com.jozufozu.flywheel.util.extension.MatrixExtension;
+import com.jozufozu.flywheel.extension.Matrix4fExtension;
+import com.jozufozu.flywheel.extension.MatrixWrite;
 import com.mojang.math.Matrix4f;
 
 @Mixin(Matrix4f.class)
-public abstract class Matrix4fMixin implements MatrixExtension, Matrix4fExtension {
+public abstract class Matrix4fMixin implements MatrixWrite, Matrix4fExtension {
 
-	@Shadow protected float m00;
-	@Shadow protected float m01;
-	@Shadow protected float m02;
-	@Shadow protected float m03;
-	@Shadow protected float m10;
-	@Shadow protected float m11;
-	@Shadow protected float m12;
-	@Shadow protected float m13;
-	@Shadow protected float m20;
+	@Shadow
+	protected float m00;
+	@Shadow
+	protected float m01;
+	@Shadow
+	protected float m02;
+	@Shadow
+	protected float m03;
+	@Shadow
+	protected float m10;
+	@Shadow
+	protected float m11;
+	@Shadow
+	protected float m12;
+	@Shadow
+	protected float m13;
+	@Shadow
+	protected float m20;
 	@Shadow protected float m21;
 	@Shadow protected float m22;
 	@Shadow protected float m23;

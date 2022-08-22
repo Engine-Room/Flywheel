@@ -6,22 +6,31 @@ import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import com.jozufozu.flywheel.util.extension.Matrix3fExtension;
-import com.jozufozu.flywheel.util.extension.MatrixExtension;
+import com.jozufozu.flywheel.extension.Matrix3fExtension;
+import com.jozufozu.flywheel.extension.MatrixWrite;
 import com.mojang.math.Matrix3f;
 
 @Mixin(Matrix3f.class)
-public abstract class Matrix3fMixin implements MatrixExtension, Matrix3fExtension {
+public abstract class Matrix3fMixin implements MatrixWrite, Matrix3fExtension {
 
-	@Shadow protected float m00;
-	@Shadow protected float m01;
-	@Shadow protected float m02;
-	@Shadow protected float m10;
-	@Shadow protected float m11;
-	@Shadow protected float m12;
-	@Shadow protected float m20;
-	@Shadow protected float m21;
-	@Shadow protected float m22;
+	@Shadow
+	protected float m00;
+	@Shadow
+	protected float m01;
+	@Shadow
+	protected float m02;
+	@Shadow
+	protected float m10;
+	@Shadow
+	protected float m11;
+	@Shadow
+	protected float m12;
+	@Shadow
+	protected float m20;
+	@Shadow
+	protected float m21;
+	@Shadow
+	protected float m22;
 
 	@Override
 	public void flywheel$writeUnsafe(long ptr) {
