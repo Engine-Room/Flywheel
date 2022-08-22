@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.util.extension;
+package com.jozufozu.flywheel.extension;
 
 import com.jozufozu.flywheel.util.joml.Matrix3f;
 

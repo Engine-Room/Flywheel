@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.core.structs.transformed;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.struct.StorageBufferWriter;
-import com.jozufozu.flywheel.util.extension.MatrixExtension;
+import com.jozufozu.flywheel.extension.MatrixWrite;
 
 public class TransformedStorageWriter implements StorageBufferWriter<TransformedPart> {
 
@@ -14,8 +14,8 @@ public class TransformedStorageWriter implements StorageBufferWriter<Transformed
 
 	@Override
 	public void write(long ptr, TransformedPart instance) {
-		MatrixExtension.writeUnsafe(instance.model, ptr);
-		MatrixExtension.writeUnsafe(instance.normal, ptr + 64);
+		MatrixWrite.writeUnsafe(instance.model, ptr);
+		MatrixWrite.writeUnsafe(instance.normal, ptr + 64);
 		MemoryUtil.memPutByte(ptr + 100, instance.r);
 		MemoryUtil.memPutByte(ptr + 101, instance.g);
 		MemoryUtil.memPutByte(ptr + 102, instance.b);
