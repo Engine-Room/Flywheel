@@ -26,6 +26,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 
 @Mixin(value = LevelRenderer.class, priority = 1001) // Higher priority to go after Sodium
@@ -42,7 +43,10 @@ public class LevelRendererMixin {
 
 	@Inject(at = @At("HEAD"), method = "renderLevel")
 	private void flywheel$beginRender(PoseStack pPoseStack, float pPartialTick, long pFinishNanoTime, boolean pRenderBlockOutline, Camera pCamera, GameRenderer pGameRenderer, LightTexture pLightTexture, Matrix4f pProjectionMatrix, CallbackInfo ci) {
-		flywheel$renderContext = new RenderContext((LevelRenderer) (Object) this, level, pPoseStack, RenderContext.createViewProjection(pPoseStack, pProjectionMatrix), pProjectionMatrix, renderBuffers, pCamera);
+		var viewProjection = RenderContext.createViewProjection(pPoseStack, pProjectionMatrix);
+		var cameraPos = pCamera.getPosition();
+		var culler = RenderContext.createCuller(viewProjection, (float) -cameraPos.x, (float) -cameraPos.y, (float) -cameraPos.z);
+		flywheel$renderContext = new RenderContext((LevelRenderer) (Object) this, level, pPoseStack, viewProjection, pProjectionMatrix, renderBuffers, pCamera, culler);
 
 		try (var restoreState = GlStateTracker.getRestoreState()) {
 			MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(flywheel$renderContext));

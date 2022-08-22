@@ -25,12 +25,9 @@ public abstract class InstancedPart {
 	}
 
 	public final boolean checkDirtyAndClear() {
-		if (dirty) {
-			dirty = false;
-			return true;
-		} else {
-			return false;
-		}
+		boolean wasDirty = dirty;
+		dirty = false;
+		return wasDirty;
 	}
 
 	public final boolean isRemoved() {

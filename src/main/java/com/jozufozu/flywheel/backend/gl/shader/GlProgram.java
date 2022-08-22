@@ -5,25 +5,19 @@ import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 
-import java.nio.FloatBuffer;
-
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.system.MemoryStack;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
 import com.mojang.blaze3d.shaders.ProgramManager;
-import com.mojang.math.Matrix4f;
 
 import net.minecraft.resources.ResourceLocation;
 
-public abstract class GlProgram extends GlObject {
-	private static final FloatBuffer floatBuffer = MemoryStack.stackGet()
-			.mallocFloat(16);
+public class GlProgram extends GlObject {
 
 	public final ResourceLocation name;
 
-	protected GlProgram(ResourceLocation name, int handle) {
+	public GlProgram(ResourceLocation name, int handle) {
 		this.name = name;
 		setHandle(handle);
 	}
@@ -68,11 +62,6 @@ public abstract class GlProgram extends GlObject {
 		}
 
 		return samplerUniform;
-	}
-
-	protected static void uploadMatrixUniform(int uniform, Matrix4f mat) {
-		mat.store(floatBuffer);
-		glUniformMatrix4fv(uniform, false, floatBuffer);
 	}
 
 	@Override

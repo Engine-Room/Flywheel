@@ -11,6 +11,7 @@
     "BufferUploaderMixin",
     "ChunkRebuildHooksMixin",
     "ClientLevelMixin",
+    "ClientMainMixin",
     "EntityTypeMixin",
     "FixFabulousDepthMixin",
     "FogUpdateMixin",

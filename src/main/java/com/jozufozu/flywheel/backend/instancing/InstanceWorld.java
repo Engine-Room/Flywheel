@@ -9,6 +9,7 @@ import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceM
 import com.jozufozu.flywheel.backend.instancing.effect.Effect;
 import com.jozufozu.flywheel.backend.instancing.effect.EffectInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
+import com.jozufozu.flywheel.backend.instancing.indirect.IndirectEngine;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
@@ -37,6 +38,7 @@ public class InstanceWorld implements AutoCloseable {
 
 	public static InstanceWorld create(LevelAccessor level) {
 		var engine = switch (Backend.getBackendType()) {
+			case INDIRECT -> new IndirectEngine(Components.WORLD);
 			case INSTANCING -> new InstancingEngine(Components.WORLD, 100 * 100);
 			case BATCHING -> new BatchingEngine();
 			case OFF -> throw new IllegalStateException("Cannot create instance world when backend is off.");
@@ -133,10 +135,7 @@ public class InstanceWorld implements AutoCloseable {
 	 */
 	public void renderStage(RenderContext context, RenderStage stage) {
 		taskEngine.syncPoint();
-		context.pushPose();
-		context.translateBack(context.camera().getPosition());
 		engine.renderStage(taskEngine, context, stage);
-		context.popPose();
 	}
 
 	/**

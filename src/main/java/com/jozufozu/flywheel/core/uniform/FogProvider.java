@@ -10,7 +10,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 public class FogProvider extends UniformProvider {
 
 	@Override
-	public int getSize() {
+	public int getActualByteSize() {
 		return 16 + 8 + 4;
 	}
 

@@ -35,7 +35,7 @@ public class BufferLayout {
 		this.stride = calculateStride(this.attributes) + padding;
 	}
 
-	public Collection<VertexAttribute> getAttributes() {
+	public List<VertexAttribute> getAttributes() {
 		return attributes;
 	}
 

@@ -3,9 +3,11 @@ package com.jozufozu.flywheel.core.source.error;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.core.source.ShaderLoadingException;
 import com.jozufozu.flywheel.core.source.SourceFile;
 import com.jozufozu.flywheel.core.source.parse.ShaderFunction;
 import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
@@ -82,10 +84,12 @@ public class ErrorReporter {
 		return !reportedErrors.isEmpty();
 	}
 
-	public void dump() {
-		for (var error : reportedErrors) {
-			Backend.LOGGER.error(error.build());
-		}
+	public ShaderLoadingException dump() {
+		var allErrors = reportedErrors.stream()
+				.map(ErrorBuilder::build)
+				.collect(Collectors.joining());
+
+		return new ShaderLoadingException(allErrors);
 	}
 
 	public static void printLines(CharSequence source) {

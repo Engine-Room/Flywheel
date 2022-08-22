@@ -5,10 +5,10 @@ import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.core.ComponentRegistry;
-import com.jozufozu.flywheel.core.compile.ContextShader;
-import com.jozufozu.flywheel.core.compile.ProgramCompiler;
+import com.jozufozu.flywheel.api.context.ContextShader;
+import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
+import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.source.FileResolution;
-import com.jozufozu.flywheel.core.source.ShaderLoadingException;
 import com.jozufozu.flywheel.core.source.ShaderSources;
 import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 import com.jozufozu.flywheel.util.StringUtil;
@@ -51,8 +51,7 @@ public class Loader implements ResourceManagerReloadListener {
 		FileResolution.run(errorReporter, sources);
 
 		if (errorReporter.hasErrored()) {
-			errorReporter.dump();
-			throw new ShaderLoadingException("Failed to resolve all source files, see log for details");
+			throw errorReporter.dump();
 		}
 
 		sources.postResolve();
@@ -69,8 +68,8 @@ public class Loader implements ResourceManagerReloadListener {
 			for (StructType<?> structType : ComponentRegistry.structTypes) {
 				for (VertexType vertexType : ComponentRegistry.vertexTypes) {
 					for (ContextShader contextShader : ComponentRegistry.contextShaders) {
-						var ctx = new ProgramCompiler.Context(vertexType, material, structType.getInstanceShader(), contextShader);
-						ProgramCompiler.INSTANCE.getProgram(ctx);
+						var ctx = new PipelineCompiler.Context(vertexType, material, structType.getInstanceShader(), contextShader, Components.INSTANCED_ARRAYS);
+						PipelineCompiler.INSTANCE.getProgram(ctx);
 					}
 				}
 			}

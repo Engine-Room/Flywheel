@@ -4,6 +4,7 @@ import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.instancing.instancing.ElementBuffer;
 import com.jozufozu.flywheel.core.QuadConverter;
+import com.jozufozu.flywheel.util.joml.Vector4fc;
 
 /**
  * A holder for arbitrary vertex data that can be written to memory or a vertex list.
@@ -11,6 +12,8 @@ import com.jozufozu.flywheel.core.QuadConverter;
 public interface Mesh {
 
 	VertexType getVertexType();
+
+	Vector4fc getBoundingSphere();
 
 	/**
 	 * @return The number of vertices this mesh has.

@@ -7,7 +7,7 @@ public abstract class UniformProvider {
 	protected long ptr;
 	protected Notifier notifier;
 
-	public abstract int getSize();
+	public abstract int getActualByteSize();
 
 	public void updatePtr(long ptr, Notifier notifier) {
 		this.ptr = ptr;

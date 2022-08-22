@@ -26,7 +26,7 @@ public class ViewProvider extends UniformProvider {
 	}
 
 	@Override
-	public int getSize() {
+	public int getActualByteSize() {
 		return 4 * 16 + 16 + 4;
 	}
 
@@ -56,7 +56,7 @@ public class ViewProvider extends UniformProvider {
 		MemoryUtil.memPutFloat(ptr + 64, camX);
 		MemoryUtil.memPutFloat(ptr + 68, camY);
 		MemoryUtil.memPutFloat(ptr + 72, camZ);
-		MemoryUtil.memPutInt(ptr + 80, constantAmbientLight);
+		MemoryUtil.memPutInt(ptr + 76, constantAmbientLight);
 
 		notifier.signalChanged();
 	}

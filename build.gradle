@@ -21,6 +21,8 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
+jarJar.enable()
+
 boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
 
 ext.buildNumber = System.getenv('BUILD_NUMBER')
@@ -45,6 +47,7 @@ minecraft {
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             property 'flw.dumpShaderSource', 'true'
+            property 'flw.loadRenderDoc', 'true'
             property 'flw.debugMemorySafety', 'true'
 
             arg '-mixin.config=flywheel.mixins.json'
@@ -107,10 +110,31 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+    mavenCentral()
 }
+
+// Fix for loading non-mod libraries in dev-env, used for miniball.
+// https://gist.github.com/SizableShrimp/66b22f1b24c255e1491c8d98d3f11f83
+// v--------------------------------------------------------------------v
+configurations {
+    library
+    implementation.extendsFrom library
+}
+
+minecraft.runs.all {
+    lazyToken('minecraft_classpath') {
+        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+    }
+}
+// ^--------------------------------------------------------------------^
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    jarJar(group: 'com.dreizak', name: 'miniball', version: "1.0.3") {
+        jarJar.ranged(it, "[1.0,2.0)")
+    }
+    library "com.dreizak:miniball:1.0.3"
 
     // switch to implementation for debugging
     compileOnly fg.deobf("maven.modrinth:starlight-forge:1.0.2+1.18.2")
@@ -133,6 +157,7 @@ mixin {
 // Workaround for SpongePowered/MixinGradle#38
 afterEvaluate {
     tasks.configureReobfTaskForReobfJar.mustRunAfter(tasks.compileJava)
+    tasks.configureReobfTaskForReobfJarJar.mustRunAfter(tasks.compileJava)
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -143,6 +168,10 @@ javadoc {
     source = [sourceSets.main.allJava]
     // prevent java 8's strict doclint for javadocs from failing builds
     options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+compileJava {
+    options.compilerArgs = ['-Xdiags:verbose']
 }
 
 jar {
@@ -172,7 +201,9 @@ void addLicense(jarTask) {
 }
 
 jar.finalizedBy('reobfJar')
+tasks.jarJar.finalizedBy('reobfJarJar')
 addLicense(jar)
+addLicense(tasks.jarJar)
 
 publishing {
     publications {
@@ -181,6 +212,7 @@ publishing {
 
             from components.java
             fg.component(it)
+            jarJar.component(it)
         }
     }
 

@@ -4,6 +4,8 @@ import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.memory.MemoryBlock;
+import com.jozufozu.flywheel.util.joml.Vector4f;
+import com.jozufozu.flywheel.util.joml.Vector4fc;
 
 public class SimpleMesh implements Mesh {
 	private final VertexType vertexType;
@@ -11,6 +13,7 @@ public class SimpleMesh implements Mesh {
 	private final MemoryBlock contents;
 	private final ReusableVertexList vertexList;
 	private final String name;
+	private final Vector4f boundingSphere;
 
 	public SimpleMesh(VertexType vertexType, MemoryBlock contents, String name) {
 		this.vertexType = vertexType;
@@ -27,6 +30,8 @@ public class SimpleMesh implements Mesh {
 		vertexList = getVertexType().createVertexList();
 		vertexList.ptr(contents.ptr());
 		vertexList.setVertexCount(vertexCount);
+
+		boundingSphere = ModelUtil.computeBoundingSphere(vertexList);
 	}
 
 	@Override
@@ -57,6 +62,11 @@ public class SimpleMesh implements Mesh {
 	@Override
 	public String name() {
 		return name;
+	}
+
+	@Override
+	public Vector4fc getBoundingSphere() {
+		return boundingSphere;
 	}
 
 	@Override

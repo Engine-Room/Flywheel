@@ -3,17 +3,21 @@ package com.jozufozu.flywheel.core.model;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
+import com.dreizak.miniball.highdim.Miniball;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
+import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexListProvider;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.vertex.Formats;
+import com.jozufozu.flywheel.util.joml.Vector4f;
 import com.mojang.blaze3d.vertex.BufferBuilder.DrawState;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
@@ -89,4 +93,12 @@ public class ModelUtil {
 		}
 		return null;
 	}
+
+    @NotNull
+    public static Vector4f computeBoundingSphere(VertexList reader) {
+        var miniball = new Miniball(reader);
+        double[] center = miniball.center();
+        double radius = miniball.radius();
+        return new Vector4f((float) center[0], (float) center[1], (float) center[2], (float) radius);
+    }
 }

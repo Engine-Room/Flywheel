@@ -45,11 +45,11 @@ public class UniformBuffer {
 		int totalBytes = 0;
 		int index = 0;
 		for (UniformProvider provider : providers) {
-			int size = provider.getSize();
+			int size = alignPo2(provider.getActualByteSize(), 16);
 
 			builder.add(new Allocated(provider, totalBytes, size, index));
 
-			totalBytes = align(totalBytes + size);
+			totalBytes = alignUniformBuffer(totalBytes + size);
 			index++;
 		}
 
@@ -80,12 +80,16 @@ public class UniformBuffer {
 	}
 
 	// https://stackoverflow.com/questions/3407012/rounding-up-to-the-nearest-multiple-of-a-number
-	private static int align(int numToRound) {
+	private static int alignUniformBuffer(int numToRound) {
 		if (PO2_ALIGNMENT) {
 			return (numToRound + OFFSET_ALIGNMENT - 1) & -OFFSET_ALIGNMENT;
 		} else {
 			return ((numToRound + OFFSET_ALIGNMENT - 1) / OFFSET_ALIGNMENT) * OFFSET_ALIGNMENT;
 		}
+	}
+
+	private static int alignPo2(int numToRound, int alignment) {
+		return (numToRound + alignment - 1) & -alignment;
 	}
 
 	private class Allocated implements UniformProvider.Notifier {

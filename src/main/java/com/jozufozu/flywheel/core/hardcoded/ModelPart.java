@@ -6,25 +6,23 @@ import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 import com.jozufozu.flywheel.core.model.Mesh;
+import com.jozufozu.flywheel.core.model.ModelUtil;
 import com.jozufozu.flywheel.core.vertex.Formats;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalVertex;
+import com.jozufozu.flywheel.util.joml.Vector4f;
+import com.jozufozu.flywheel.util.joml.Vector4fc;
 
 public class ModelPart implements Mesh {
 	private final int vertexCount;
 	private final MemoryBlock contents;
 	private final ReusableVertexList vertexList;
 	private final String name;
+	private final Vector4f boundingSphere;
 
 	public ModelPart(List<PartBuilder.CuboidBuilder> cuboids, String name) {
 		this.name = name;
 
-		{
-			int vertices = 0;
-			for (PartBuilder.CuboidBuilder cuboid : cuboids) {
-				vertices += cuboid.vertices();
-			}
-			this.vertexCount = vertices;
-		}
+		this.vertexCount = countVertices(cuboids);
 
 		contents = MemoryBlock.malloc(size());
 		long ptr = contents.ptr();
@@ -36,6 +34,8 @@ public class ModelPart implements Mesh {
 		vertexList = getVertexType().createVertexList();
 		vertexList.ptr(ptr);
 		vertexList.setVertexCount(vertexCount);
+
+		boundingSphere = ModelUtil.computeBoundingSphere(vertexList);
 	}
 
 	public static PartBuilder builder(String name, int sizeU, int sizeV) {
@@ -70,5 +70,18 @@ public class ModelPart implements Mesh {
 	@Override
 	public String name() {
 		return name;
+	}
+
+	@Override
+	public Vector4fc getBoundingSphere() {
+		return boundingSphere;
+	}
+
+	private static int countVertices(List<PartBuilder.CuboidBuilder> cuboids) {
+		int vertices = 0;
+		for (PartBuilder.CuboidBuilder cuboid : cuboids) {
+			vertices += cuboid.vertices();
+		}
+		return vertices;
 	}
 }
