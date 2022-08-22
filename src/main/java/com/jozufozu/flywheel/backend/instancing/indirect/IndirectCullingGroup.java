@@ -137,6 +137,9 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 		buffers.bindObjectAndTarget();
 		buffers.bindIndirectBuffer();
 
+		UniformBuffer.getInstance()
+				.sync();
+
 		memoryBarrier();
 
 		drawSet.submit(stage);

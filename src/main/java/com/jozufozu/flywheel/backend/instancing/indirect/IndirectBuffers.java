@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing.indirect;
 
+import static org.lwjgl.opengl.GL45.glCreateBuffers;
 import static org.lwjgl.opengl.GL46.GL_DRAW_INDIRECT_BUFFER;
 import static org.lwjgl.opengl.GL46.GL_DYNAMIC_STORAGE_BIT;
 import static org.lwjgl.opengl.GL46.GL_MAP_FLUSH_EXPLICIT_BIT;
@@ -10,7 +11,6 @@ import static org.lwjgl.opengl.GL46.glBindBuffer;
 import static org.lwjgl.opengl.GL46.glCopyNamedBufferSubData;
 import static org.lwjgl.opengl.GL46.glDeleteBuffers;
 import static org.lwjgl.opengl.GL46.glFlushMappedNamedBufferRange;
-import static org.lwjgl.opengl.GL46.glGenBuffers;
 import static org.lwjgl.opengl.GL46.glNamedBufferStorage;
 import static org.lwjgl.opengl.GL46.nglBindBuffersRange;
 import static org.lwjgl.opengl.GL46.nglCreateBuffers;
@@ -154,7 +154,7 @@ public class IndirectBuffers {
 
 		var drawSize = DRAW_COMMAND_STRIDE * drawCount;
 		if (maxDrawCount > 0) {
-			int drawNew = glGenBuffers();
+			int drawNew = glCreateBuffers();
 
 			glNamedBufferStorage(drawNew, drawSize, SUB_DATA_BITS);
 
