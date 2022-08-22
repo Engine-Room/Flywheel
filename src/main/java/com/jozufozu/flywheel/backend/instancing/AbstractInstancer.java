@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.List;
 
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
@@ -28,7 +29,7 @@ public abstract class AbstractInstancer<D extends InstancedPart> implements Inst
 
 	/**
 	 * Copy a data from another Instancer to this.
-	 *
+	 * <p>
 	 * This has the effect of swapping out one model for another.
 	 * @param inOther the data associated with a different model.
 	 */
@@ -57,6 +58,14 @@ public abstract class AbstractInstancer<D extends InstancedPart> implements Inst
 
 	public int getInstanceCount() {
 		return data.size();
+	}
+
+	public List<D> getRange(int start, int end) {
+		return data.subList(start, end);
+	}
+
+	public List<D> getAll() {
+		return data;
 	}
 
 	protected void removeDeletedInstances() {

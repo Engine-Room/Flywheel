@@ -23,6 +23,9 @@
  */
 package com.jozufozu.flywheel.util.joml;
 
+import java.nio.ByteBuffer;
+
+import org.lwjgl.system.MemoryUtil;
 /**
  * Efficiently performs frustum intersection tests by caching the frustum planes of an arbitrary transformation {@link Matrix4fc matrix}.
  * <p>
@@ -950,4 +953,94 @@ public class FrustumIntersection {
         return da >= 0.0f || db >= 0.0f;
     }
 
+	public void getCorners(ByteBuffer buffer) {
+
+		Vector3f scratch = new Vector3f();
+		Vector3f result = new Vector3f();
+
+		long addr = MemoryUtil.memAddress(buffer);
+		planeIntersect(planes[0], planes[2], planes[4], result, scratch); result.getToAddress(addr);
+		planeIntersect(planes[0], planes[2], planes[5], result, scratch); result.getToAddress(addr + 12);
+		planeIntersect(planes[0], planes[3], planes[4], result, scratch); result.getToAddress(addr + 24);
+		planeIntersect(planes[0], planes[3], planes[5], result, scratch); result.getToAddress(addr + 36);
+		planeIntersect(planes[1], planes[2], planes[4], result, scratch); result.getToAddress(addr + 48);
+		planeIntersect(planes[1], planes[2], planes[5], result, scratch); result.getToAddress(addr + 60);
+		planeIntersect(planes[1], planes[3], planes[4], result, scratch); result.getToAddress(addr + 72);
+		planeIntersect(planes[1], planes[3], planes[5], result, scratch); result.getToAddress(addr + 84);
+	}
+
+	private Vector3f planeIntersect(Vector4f a, Vector4f b, Vector4f c, Vector3f result, Vector3f scratch) {
+		// Formula used
+		//                d1 ( N2 * N3 ) + d2 ( N3 * N1 ) + d3 ( N1 * N2 )
+		//P =   ---------------------------------------------------------------------
+		//                             N1 . ( N2 * N3 )
+		//
+		// Note: N refers to the normal, d refers to the displacement. '.' means dot product. '*' means cross product
+
+		float f = result.set(b.x, b.y, b.z).cross(c.x, c.y, c.z).dot(a.x, a.y, a.z);
+
+		result.set(0);
+		scratch.set(b.x, b.y, b.z).cross(c.x, c.y, c.z).mul(a.z);
+		result.add(scratch);
+		scratch.set(c.x, c.y, c.z).cross(a.x, a.y, a.z).mul(b.z);
+		result.add(scratch);
+		scratch.set(a.x, a.y, a.z).cross(b.x, b.y, b.z).mul(c.z);
+		result.add(scratch);
+
+		return result.div(f);
+	}
+
+	/**
+	 * Writes the planes of this frustum to the given buffer.<p>
+	 * Uses a different format that is friendly towards an optimized instruction-parallel
+	 * implementation of sphere-frustum intersection.<p>
+	 * The format is as follows:<p>
+	 * {@code vec4(nxX, pxX, nyX, pyX)}<br>
+	 * {@code vec4(nxY, pxY, nyY, pyY)}<br>
+	 * {@code vec4(nxZ, pxZ, nyZ, pyZ)}<br>
+	 * {@code vec4(nxW, pxW, nyW, pyW)}<br>
+	 * {@code vec2(nzX, pzX)}<br>
+	 * {@code vec2(nzY, pzY)}<br>
+	 * {@code vec2(nzZ, pzZ)}<br>
+	 * {@code vec2(nzW, pzW)}<br>
+	 *
+	 * @param addr The buffer to write the planes to.
+	 */
+	public void getJozuPackedPlanes(long addr) {
+		MemoryUtil.memPutFloat(addr, nxX);
+		MemoryUtil.memPutFloat(addr + 4, pxX);
+		MemoryUtil.memPutFloat(addr + 8, nyX);
+		MemoryUtil.memPutFloat(addr + 12, pyX);
+		MemoryUtil.memPutFloat(addr + 16, nxY);
+		MemoryUtil.memPutFloat(addr + 20, pxY);
+		MemoryUtil.memPutFloat(addr + 24, nyY);
+		MemoryUtil.memPutFloat(addr + 28, pyY);
+		MemoryUtil.memPutFloat(addr + 32, nxZ);
+		MemoryUtil.memPutFloat(addr + 36, pxZ);
+		MemoryUtil.memPutFloat(addr + 40, nyZ);
+		MemoryUtil.memPutFloat(addr + 44, pyZ);
+		MemoryUtil.memPutFloat(addr + 48, nxW);
+		MemoryUtil.memPutFloat(addr + 52, pxW);
+		MemoryUtil.memPutFloat(addr + 56, nyW);
+		MemoryUtil.memPutFloat(addr + 60, pyW);
+		MemoryUtil.memPutFloat(addr + 64, nzX);
+		MemoryUtil.memPutFloat(addr + 68, pzX);
+		MemoryUtil.memPutFloat(addr + 72, nzY);
+		MemoryUtil.memPutFloat(addr + 76, pzY);
+		MemoryUtil.memPutFloat(addr + 80, nzZ);
+		MemoryUtil.memPutFloat(addr + 84, pzZ);
+		MemoryUtil.memPutFloat(addr + 88, nzW);
+		MemoryUtil.memPutFloat(addr + 92, pzW);
+	}
+
+	public void getPlanes(ByteBuffer buffer) {
+		long addr = MemoryUtil.memAddress(buffer);
+
+		planes[0].getToAddress(addr);
+		planes[1].getToAddress(addr + 16);
+		planes[2].getToAddress(addr + 32);
+		planes[3].getToAddress(addr + 48);
+		planes[4].getToAddress(addr + 64);
+		planes[5].getToAddress(addr + 80);
+	}
 }

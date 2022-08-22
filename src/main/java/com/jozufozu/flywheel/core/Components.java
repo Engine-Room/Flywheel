@@ -3,7 +3,9 @@ package com.jozufozu.flywheel.core;
 import java.util.function.BiConsumer;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.core.compile.ContextShader;
+import com.jozufozu.flywheel.api.context.ContextShader;
+import com.jozufozu.flywheel.api.pipeline.PipelineShader;
+import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.SourceChecks;
@@ -11,6 +13,7 @@ import com.jozufozu.flywheel.core.source.SourceFile;
 import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 import com.jozufozu.flywheel.core.structs.StructTypes;
 import com.jozufozu.flywheel.core.uniform.FogProvider;
+import com.jozufozu.flywheel.core.uniform.FrustumProvider;
 import com.jozufozu.flywheel.core.uniform.ViewProvider;
 import com.jozufozu.flywheel.core.vertex.Formats;
 import com.jozufozu.flywheel.util.ResourceUtil;
@@ -22,8 +25,12 @@ public class Components {
 
 	public static final ViewProvider VIEW_PROVIDER = ComponentRegistry.register(new ViewProvider());
 	public static final FogProvider FOG_PROVIDER = ComponentRegistry.register(new FogProvider());
+	public static final FrustumProvider FRUSTUM_PROVIDER = ComponentRegistry.register(new FrustumProvider());
 	public static final ContextShader WORLD = ComponentRegistry.register(new ContextShader(WorldProgram::new, Files.WORLD_VERTEX, Files.WORLD_FRAGMENT));
 	public static final ContextShader CRUMBLING = ComponentRegistry.register(new ContextShader(CrumblingProgram::new, Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT));
+
+	public static final PipelineShader INSTANCED_ARRAYS = new PipelineShader(GLSLVersion.V420, Pipeline.INSTANCED_ARRAYS_DRAW, Pipeline.DRAW_FRAGMENT);
+	public static final PipelineShader INDIRECT = new PipelineShader(GLSLVersion.V460, Pipeline.INDIRECT_DRAW, Pipeline.DRAW_FRAGMENT);
 
 	public static void init() {
 		Files.init();
@@ -32,14 +39,29 @@ public class Components {
 		Materials.init();
 	}
 
+	public static class Pipeline {
+		public static final FileResolution DRAW_FRAGMENT = pipeline("pipeline/draw.frag");
+		public static final FileResolution INSTANCED_ARRAYS_DRAW = pipeline("pipeline/instanced_arrays_draw.vert");
+		public static final FileResolution INDIRECT_DRAW = pipeline("pipeline/indirect_draw.vert");
+		public static final FileResolution INDIRECT_CULL = pipeline("pipeline/indirect_cull.glsl");
+
+		private static FileResolution pipeline(String name) {
+			return FileResolution.get(Flywheel.rl(name))
+					.validateWith(Checks.PIPELINE);
+		}
+	}
+
 	public static class Files {
 
 		public static final FileResolution VIEW_UNIFORMS = uniform(Flywheel.rl("uniform/view.glsl"));
 		public static final FileResolution FOG_UNIFORMS = uniform(Flywheel.rl("uniform/fog.glsl"));
+		public static final FileResolution FRUSTUM_UNIFORMS = uniform(Flywheel.rl("uniform/frustum.glsl"));
 		public static final FileResolution BLOCK_LAYOUT = layoutVertex(ResourceUtil.subPath(Names.BLOCK, ".vert"));
 		public static final FileResolution POS_TEX_NORMAL_LAYOUT = layoutVertex(ResourceUtil.subPath(Names.POS_TEX_NORMAL, ".vert"));
 		public static final FileResolution TRANSFORMED = instanceVertex(ResourceUtil.subPath(Names.TRANSFORMED, ".vert"));
+		public static final FileResolution TRANSFORMED_INDIRECT = instanceVertex(ResourceUtil.subPath(Names.TRANSFORMED, "_indirect.glsl"));
 		public static final FileResolution ORIENTED = instanceVertex(ResourceUtil.subPath(Names.ORIENTED, ".vert"));
+		public static final FileResolution ORIENTED_INDIRECT = instanceVertex(ResourceUtil.subPath(Names.ORIENTED, "_indirect.glsl"));
 		public static final FileResolution DEFAULT_VERTEX = materialVertex(ResourceUtil.subPath(Names.DEFAULT, ".vert"));
 		public static final FileResolution SHADED_VERTEX = materialVertex(ResourceUtil.subPath(Names.SHADED, ".vert"));
 		public static final FileResolution DEFAULT_FRAGMENT = materialFragment(ResourceUtil.subPath(Names.DEFAULT, ".frag"));
@@ -48,6 +70,10 @@ public class Components {
 		public static final FileResolution WORLD_FRAGMENT = contextFragment(ResourceUtil.subPath(Names.WORLD, ".frag"));
 		public static final FileResolution CRUMBLING_VERTEX = contextVertex(ResourceUtil.subPath(Names.CRUMBLING, ".vert"));
 		public static final FileResolution CRUMBLING_FRAGMENT = contextFragment(ResourceUtil.subPath(Names.CRUMBLING, ".frag"));
+
+		private static FileResolution compute(ResourceLocation rl) {
+			return FileResolution.get(rl);
+		}
 
 		private static FileResolution uniform(ResourceLocation location) {
 			return FileResolution.get(location);
@@ -59,8 +85,7 @@ public class Components {
 		}
 
 		private static FileResolution instanceVertex(ResourceLocation location) {
-			return FileResolution.get(location)
-					.validateWith(Checks.INSTANCE_VERTEX);
+			return FileResolution.get(location); // .validateWith(Checks.INSTANCE_VERTEX);
 		}
 
 		private static FileResolution materialVertex(ResourceLocation location) {
@@ -90,12 +115,16 @@ public class Components {
 
 	public static class Checks {
 
-		public static final BiConsumer<ErrorReporter, SourceFile> LAYOUT_VERTEX = SourceChecks.checkFunctionArity("flw_layoutVertex", 0);
-		public static final BiConsumer<ErrorReporter, SourceFile> INSTANCE_VERTEX = SourceChecks.checkFunctionArity("flw_instanceVertex", 0);
+		public static final BiConsumer<ErrorReporter, SourceFile> LAYOUT_VERTEX = SourceChecks.checkFunctionArity("flw_layoutVertex", 0)
+				.andThen(SourceChecks.checkDefine("FLW_INSTANCE_BASE_INDEX"));
+		public static final BiConsumer<ErrorReporter, SourceFile> INSTANCE_VERTEX = SourceChecks.checkFunctionParameterTypeExists("flw_instanceVertex", 1, 0)
+				.andThen(SourceChecks.checkDefine("FLW_INSTANCE_STRUCT"));
 		public static final BiConsumer<ErrorReporter, SourceFile> MATERIAL_VERTEX = SourceChecks.checkFunctionArity("flw_materialVertex", 0);
 		public static final BiConsumer<ErrorReporter, SourceFile> MATERIAL_FRAGMENT = SourceChecks.checkFunctionArity("flw_materialFragment", 0);
 		public static final BiConsumer<ErrorReporter, SourceFile> CONTEXT_VERTEX = SourceChecks.checkFunctionArity("flw_contextVertex", 0);
 		public static final BiConsumer<ErrorReporter, SourceFile> CONTEXT_FRAGMENT = SourceChecks.checkFunctionArity("flw_contextFragment", 0).andThen(SourceChecks.checkFunctionArity("flw_initFragment", 0));
+
+		public static final BiConsumer<ErrorReporter, SourceFile> PIPELINE = SourceChecks.checkFunctionArity("main", 0);
 	}
 
 	public static class Names {
@@ -110,5 +139,6 @@ public class Components {
 		public static final ResourceLocation SHADED = Flywheel.rl("material/shaded");
 		public static final ResourceLocation WORLD = Flywheel.rl("context/world");
 		public static final ResourceLocation CRUMBLING = Flywheel.rl("context/crumbling");
+		public static final ResourceLocation DRAW_INDIRECT = Flywheel.rl("compute/draw_instances");
 	}
 }

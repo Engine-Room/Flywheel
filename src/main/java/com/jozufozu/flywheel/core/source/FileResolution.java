@@ -114,7 +114,7 @@ public class FileResolution {
 		ErrorBuilder builder = errorReporter.error(String.format("could not find source for file %s", fileLoc));
 		for (Span location : neededAt) {
 			builder.pointAtFile(location.getSourceFile())
-					.pointAt(location, 1);
+					.pointAt(location);
 		}
 	}
 
@@ -161,5 +161,26 @@ public class FileResolution {
 	@Override
 	public String toString() {
 		return "FileResolution[" + fileLoc + "]";
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		FileResolution that = (FileResolution) o;
+
+		return fileLoc.equals(that.fileLoc);
+	}
+
+	@Override
+	public int hashCode() {
+		// FileResolutions are interned and therefore can be hashed based on object identity.
+		// Overriding this to make it explicit.
+		return System.identityHashCode(this);
 	}
 }

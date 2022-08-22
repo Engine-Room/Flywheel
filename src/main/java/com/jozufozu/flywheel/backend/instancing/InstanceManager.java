@@ -15,9 +15,8 @@ import com.jozufozu.flywheel.backend.instancing.ratelimit.NonLimiter;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.light.LightUpdater;
-import com.mojang.math.Vector3f;
+import com.jozufozu.flywheel.util.joml.FrustumIntersection;
 
-import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 
 public abstract class InstanceManager<T> {
@@ -100,27 +99,26 @@ public abstract class InstanceManager<T> {
 		int dY = pos.getY() - cY;
 		int dZ = pos.getZ() - cZ;
 
-		if (tick.shouldUpdate(dX, dY, dZ)) instance.tick();
+		if (!tick.shouldUpdate(dX, dY, dZ)) {
+			return;
+		}
+
+		instance.tick();
 	}
 
 	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
 		frame.tick();
 		processQueuedAdditions();
 
-		Camera camera = context.camera();
-		Vector3f look = camera.getLookVector();
-		float lookX = look.x();
-		float lookY = look.y();
-		float lookZ = look.z();
-
 		// integer camera pos
-		BlockPos cameraIntPos = camera.getBlockPosition();
+		BlockPos cameraIntPos = context.camera().getBlockPosition();
 		int cX = cameraIntPos.getX();
 		int cY = cameraIntPos.getY();
 		int cZ = cameraIntPos.getZ();
+		FrustumIntersection culler = context.culler();
 
 		var instances = getStorage().getInstancesForUpdate();
-		distributeWork(taskEngine, instances, instance -> updateInstance(instance, lookX, lookY, lookZ, cX, cY, cZ));
+		distributeWork(taskEngine, instances, instance -> updateInstance(instance, culler, cX, cY, cZ));
 	}
 
 	private static <I> void distributeWork(TaskEngine taskEngine, List<I> instances, Consumer<I> action) {
@@ -140,7 +138,7 @@ public abstract class InstanceManager<T> {
 		}
 	}
 
-	protected void updateInstance(DynamicInstance dyn, float lookX, float lookY, float lookZ, int cX, int cY, int cZ) {
+	protected void updateInstance(DynamicInstance dyn, FrustumIntersection test, int cX, int cY, int cZ) {
 		if (!dyn.decreaseFramerateWithDistance()) {
 			dyn.beginFrame();
 			return;
@@ -151,15 +149,14 @@ public abstract class InstanceManager<T> {
 		int dY = worldPos.getY() - cY;
 		int dZ = worldPos.getZ() - cZ;
 
-		// is it more than 2 blocks behind the camera?
-		int dist = 2;
-		float dot = (dX + lookX * dist) * lookX + (dY + lookY * dist) * lookY + (dZ + lookZ * dist) * lookZ;
-		if (dot < 0) {
+		if (!frame.shouldUpdate(dX, dY, dZ)) {
 			return;
 		}
 
-		if (frame.shouldUpdate(dX, dY, dZ))
+		if (dyn.checkFrustum(test)) {
 			dyn.beginFrame();
+		}
+
 	}
 
 	public void add(T obj) {

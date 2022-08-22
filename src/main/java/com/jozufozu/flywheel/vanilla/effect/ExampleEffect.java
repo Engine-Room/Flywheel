@@ -18,6 +18,7 @@ import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
+import com.jozufozu.flywheel.util.joml.FrustumIntersection;
 import com.jozufozu.flywheel.util.joml.Vector3f;
 
 import net.minecraft.client.Minecraft;
@@ -296,6 +297,11 @@ public class ExampleEffect implements Effect {
 		@Override
 		public boolean decreaseFramerateWithDistance() {
 			return false;
+		}
+
+		@Override
+		public boolean checkFrustum(FrustumIntersection frustum) {
+			return true;
 		}
 	}
 }

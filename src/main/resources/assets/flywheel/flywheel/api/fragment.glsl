@@ -1,3 +1,4 @@
+#ifdef FRAGMENT_SHADER
 in vec4 flw_vertexPos;
 in vec4 flw_vertexColor;
 in vec2 flw_vertexTexCoord;
@@ -32,3 +33,4 @@ vec4 flw_fogFilter(vec4 color);
  * Guard calls with FLW_DISCARD
  */
 bool flw_discardPredicate(vec4 finalColor);
+#endif

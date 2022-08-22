@@ -8,6 +8,7 @@ import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceM
 import com.jozufozu.flywheel.light.LightListener;
 import com.jozufozu.flywheel.light.TickingLightListener;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
+import com.jozufozu.flywheel.util.joml.FrustumIntersection;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.core.BlockPos;
@@ -95,5 +96,12 @@ public abstract class EntityInstance<E extends Entity> extends AbstractInstance 
 	@Override
 	public BlockPos getWorldPosition() {
 		return entity.blockPosition();
+	}
+
+	@Override
+	public boolean checkFrustum(FrustumIntersection frustum) {
+		AABB aabb = entity.getBoundingBox();
+		return frustum.testAab((float) aabb.minX, (float) aabb.minY, (float) aabb.minZ,
+				(float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ);
 	}
 }

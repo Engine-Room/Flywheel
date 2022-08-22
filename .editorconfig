@@ -4,7 +4,7 @@ root = true
 [*]
 indent_style = space
 indent_size = 4
-continuation_indent_size = 8
+ij_continuation_indent_size = 8
 end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = true
@@ -16,6 +16,10 @@ indent_size = 2
 
 [*.java]
 indent_style = tab
+ij_java_blank_lines_before_class_end = 0
+ij_java_blank_lines_after_anonymous_class_header = 0
+ij_java_blank_lines_after_class_header = 0
+ij_java_blank_lines_before_method_body = 0
 ij_java_else_on_new_line = false
 ij_continuation_indent_size = 8
 ij_java_class_count_to_use_import_on_demand = 99

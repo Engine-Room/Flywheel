@@ -120,6 +120,10 @@ public class DrawBuffer {
 	}
 
 	public void free() {
+		if (memory == null) {
+			return;
+		}
+
 		memory.free();
 		memory = null;
 		buffer = null;

@@ -1,10 +1,12 @@
 package com.jozufozu.flywheel.backend.gl.shader;
 
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL43;
 
 public enum ShaderType {
 	VERTEX("vertex", "VERTEX_SHADER", "vert", GL20.GL_VERTEX_SHADER),
 	FRAGMENT("fragment", "FRAGMENT_SHADER", "frag", GL20.GL_FRAGMENT_SHADER),
+	COMPUTE("compute", "COMPUTE_SHADER", "glsl", GL43.GL_COMPUTE_SHADER),
 	;
 
 	public final String name;

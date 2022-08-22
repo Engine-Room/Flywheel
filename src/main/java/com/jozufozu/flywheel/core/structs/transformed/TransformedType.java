@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.core.structs.transformed;
 
+import com.jozufozu.flywheel.api.struct.StorageBufferWriter;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.core.Components;
@@ -32,8 +33,18 @@ public class TransformedType implements StructType<TransformedPart> {
 	}
 
 	@Override
+	public StorageBufferWriter<TransformedPart> getStorageBufferWriter() {
+		return TransformedStorageWriter.INSTANCE;
+	}
+
+	@Override
 	public FileResolution getInstanceShader() {
 		return Components.Files.TRANSFORMED;
+	}
+
+	@Override
+	public FileResolution getIndirectShader() {
+		return Components.Files.TRANSFORMED_INDIRECT;
 	}
 
 	@Override

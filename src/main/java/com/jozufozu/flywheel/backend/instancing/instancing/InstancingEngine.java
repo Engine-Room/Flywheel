@@ -16,10 +16,11 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
+import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
+import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
-import com.jozufozu.flywheel.core.compile.ContextShader;
-import com.jozufozu.flywheel.core.compile.ProgramCompiler;
+import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.uniform.UniformBuffer;
 import com.jozufozu.flywheel.util.WeakHashSet;
@@ -122,9 +123,9 @@ public class InstancingEngine implements Engine {
 				.getInstanceShader();
 		Material material = desc.material();
 
-		var ctx = new ProgramCompiler.Context(vertexType, material, instanceShader, context);
+		var ctx = new PipelineCompiler.Context(vertexType, material, instanceShader, context, Components.INSTANCED_ARRAYS);
 
-		ProgramCompiler.INSTANCE.getProgram(ctx)
+		PipelineCompiler.INSTANCE.getProgram(ctx)
 				.bind();
 		UniformBuffer.getInstance().sync();
 	}
