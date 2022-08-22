@@ -15,6 +15,9 @@ import net.minecraftforge.common.MinecraftForge;
 
 public class FrustumProvider extends UniformProvider {
 
+	public static boolean PAUSED = false;
+	public static boolean CAPTURE = false;
+
 	public FrustumProvider() {
 		MinecraftForge.EVENT_BUS.addListener(this::beginFrame);
 	}
@@ -34,7 +37,7 @@ public class FrustumProvider extends UniformProvider {
 	}
 
 	public void update(RenderContext context) {
-		if (ptr == MemoryUtil.NULL) {
+		if (ptr == MemoryUtil.NULL || (PAUSED && !CAPTURE)) {
 			return;
 		}
 
@@ -51,5 +54,6 @@ public class FrustumProvider extends UniformProvider {
 		shiftedCuller.getJozuPackedPlanes(ptr);
 
 		notifier.signalChanged();
+		CAPTURE = false;
 	}
 }
