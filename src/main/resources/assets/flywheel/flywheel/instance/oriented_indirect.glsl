@@ -19,7 +19,7 @@ void flw_transformBoundingSphere(in Instance i, inout vec3 center, inout float r
     center = rotateVertexByQuat(center - pivot, rotation) + pivot + pos;
 }
 
-    #ifdef VERTEX_SHADER
+#ifdef VERTEX_SHADER
 void flw_instanceVertex(Instance i) {
     vec4 rotation = unpackVec4F(i.rotation);
     vec3 pivot = unpackVec3F(i.pivot);

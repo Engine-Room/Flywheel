@@ -10,10 +10,14 @@ struct Instance {
 };
 
 void flw_transformBoundingSphere(in Instance i, inout vec3 center, inout float radius) {
-    center = (unpackMat4F(i.pose) * vec4(center, 1.0)).xyz;
+    mat4 pose = unpackMat4F(i.pose);
+    center = (pose * vec4(center, 1.0)).xyz;
+
+    float scale = max(length(pose[0].xyz), max(length(pose[1].xyz), length(pose[2].xyz)));
+    radius *= scale;
 }
 
-#ifdef VERTEX_SHADER
+    #ifdef VERTEX_SHADER
 void flw_instanceVertex(Instance i) {
     flw_vertexPos = unpackMat4F(i.pose) * flw_vertexPos;
     flw_vertexNormal = unpackMat3F(i.normal) * flw_vertexNormal;
