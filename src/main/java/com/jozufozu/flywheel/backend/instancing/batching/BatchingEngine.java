@@ -48,6 +48,8 @@ public class BatchingEngine implements Engine {
 		var stack = FlwUtil.copyPoseStack(context.stack());
 		stack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
+		// TODO: async task engine barriers
+		taskEngine.syncPoint();
 		submitTasks(taskEngine, stack, context.level());
 	}
 

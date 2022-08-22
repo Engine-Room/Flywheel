@@ -53,8 +53,9 @@ public class BatchingDrawTracker {
 			BufferBuilderExtension scratch = (BufferBuilderExtension) this.scratch;
 			buffer.inject(scratch);
 			renderType.end(this.scratch, 0, 0, 0);
-			buffer.reset();
 		}
+
+		buffer.reset();
 	}
 
 	/**
