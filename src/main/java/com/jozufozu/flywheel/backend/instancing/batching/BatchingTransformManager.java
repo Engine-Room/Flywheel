@@ -19,7 +19,6 @@ import com.jozufozu.flywheel.core.model.Model;
 import net.minecraft.client.renderer.RenderType;
 
 public class BatchingTransformManager {
-
 	private final List<UninitializedModel> uninitializedModels = new ArrayList<>();
 	private final List<CPUInstancer<?>> allInstancers = new ArrayList<>();
 	private final Map<RenderStage, TransformSet> transformSets = new EnumMap<>(RenderStage.class);
@@ -60,15 +59,13 @@ public class BatchingTransformManager {
 			var material = transformCall.getMaterial();
 			var renderType = material.getBatchingRenderType();
 
-//			transformSets.computeIfAbsent(material.getRenderStage(), TransformSet::new)
-			transformSets.computeIfAbsent(RenderStage.AFTER_FINAL_END_BATCH, TransformSet::new)
+			transformSets.computeIfAbsent(material.getRenderStage(), TransformSet::new)
 					.put(renderType, transformCall);
 		}
 		allInstancers.add(instancer);
 	}
 
 	public static class TransformSet implements Iterable<Map.Entry<RenderType, Collection<TransformCall<?>>>> {
-
 		public static final TransformSet EMPTY = new TransformSet(ImmutableListMultimap.of());
 
 		final ListMultimap<RenderType, TransformCall<?>> transformCalls;

@@ -4,8 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexListProvider;
 import com.jozufozu.flywheel.backend.memory.MemoryBlock;
@@ -31,11 +29,10 @@ public class DrawBuffer {
 	private boolean prepared;
 	private int vertexCount;
 
-	@ApiStatus.Internal
-	public DrawBuffer(VertexFormat format) {
+	DrawBuffer(VertexFormat format, int stride, VertexListProvider provider) {
 		this.format = format;
-		stride = format.getVertexSize();
-		provider = VertexListProvider.get(format);
+		this.stride = stride;
+		this.provider = provider;
 
 		ALL.add(this);
 	}
@@ -120,6 +117,9 @@ public class DrawBuffer {
 	}
 
 	public void free() {
+		if (memory == null) {
+			return;
+		}
 		memory.free();
 		memory = null;
 		buffer = null;
