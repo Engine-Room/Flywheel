@@ -5,6 +5,9 @@ import java.util.function.BiConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.BackendType;
+import com.jozufozu.flywheel.backend.SimpleBackendType;
+import com.jozufozu.flywheel.core.BackendTypes;
 import com.jozufozu.flywheel.core.uniform.FrustumProvider;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -36,7 +39,8 @@ public class FlwCommands {
 				.executes(context -> {
 					LocalPlayer player = Minecraft.getInstance().player;
 					if (player != null) {
-						player.displayClientMessage(getEngineMessage(value.get()), false);
+						player.displayClientMessage(BackendTypes.getBackendType(value.get())
+								.getEngineMessage(), false);
 					}
 					return Command.SINGLE_SUCCESS;
 				})
@@ -44,8 +48,8 @@ public class FlwCommands {
 					.executes(context -> {
 						LocalPlayer player = Minecraft.getInstance().player;
 						if (player != null) {
-							BackendType type = context.getArgument("type", BackendType.class);
-							value.set(type);
+							BackendType type = context.getArgument("type", SimpleBackendType.class);
+							value.set(type.getShortName());
 
 							Component message = getEngineMessage(type);
 							player.displayClientMessage(message, false);
@@ -155,12 +159,7 @@ public class FlwCommands {
 	}
 
 	public static Component getEngineMessage(@NotNull BackendType type) {
-		return switch (type) {
-			case OFF -> new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED);
-			case INSTANCING -> new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN);
-			case BATCHING ->  new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN);
-			case INDIRECT -> new TextComponent("Using Indirect Engine").withStyle(ChatFormatting.GREEN);
-		};
+		return type.getEngineMessage();
 	}
 
 	public static class ConfigCommandBuilder {

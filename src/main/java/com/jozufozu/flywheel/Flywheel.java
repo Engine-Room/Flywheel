@@ -12,6 +12,7 @@ import com.jozufozu.flywheel.backend.instancing.batching.DrawBuffer;
 import com.jozufozu.flywheel.config.BackendTypeArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
+import com.jozufozu.flywheel.core.BackendTypes;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.DebugRender;
 import com.jozufozu.flywheel.core.PartialModel;
@@ -74,6 +75,7 @@ public class Flywheel {
 		CrashReportCallables.registerCrashCallable("Flywheel Backend", Backend::getBackendDescriptor);
 
 		ShadersModHandler.init();
+		BackendTypes.init();
 		Backend.init();
 
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);

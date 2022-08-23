@@ -3,6 +3,8 @@ package com.jozufozu.flywheel.config;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
+import com.jozufozu.flywheel.backend.BackendType;
+import com.jozufozu.flywheel.core.BackendTypes;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -26,22 +28,22 @@ public enum BackendTypeArgument implements ArgumentType<BackendType> {
 	public BackendType parse(StringReader reader) throws CommandSyntaxException {
 		String string = reader.readUnquotedString();
 
-		BackendType engine = BackendType.byName(string);
+		BackendType engine = BackendTypes.getBackendType(string);
 
 		if (engine == null) {
-			throw INVALID.createWithContext(reader, string, BackendType.validNames());
+			throw INVALID.createWithContext(reader, string, BackendTypes.validNames());
 		}
 
 		return engine;
 	}
 
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-		return SharedSuggestionProvider.suggest(BackendType.validNames(), builder);
+		return SharedSuggestionProvider.suggest(BackendTypes.validNames(), builder);
 	}
 
 	@Override
 	public Collection<String> getExamples() {
-		return BackendType.validNames();
+		return BackendTypes.validNames();
 	}
 
 	public static BackendTypeArgument getInstance() {

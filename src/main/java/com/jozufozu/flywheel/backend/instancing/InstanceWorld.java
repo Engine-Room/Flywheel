@@ -4,14 +4,10 @@ import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.instancing.batching.BatchingEngine;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.effect.Effect;
 import com.jozufozu.flywheel.backend.instancing.effect.EffectInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
-import com.jozufozu.flywheel.backend.instancing.indirect.IndirectEngine;
-import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
-import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.extension.ClientLevelExtension;
@@ -37,12 +33,8 @@ public class InstanceWorld implements AutoCloseable {
 	private final InstanceManager<Effect> effects;
 
 	public static InstanceWorld create(LevelAccessor level) {
-		var engine = switch (Backend.getBackendType()) {
-			case INDIRECT -> new IndirectEngine(Components.WORLD);
-			case INSTANCING -> new InstancingEngine(Components.WORLD, 100 * 100);
-			case BATCHING -> new BatchingEngine();
-			case OFF -> throw new IllegalStateException("Cannot create instance world when backend is off.");
-		};
+		var engine = Backend.getBackendType()
+				.createEngine();
 
 		var entities = new EntityInstanceManager(engine);
 		var blockEntities = new BlockEntityInstanceManager(engine);
