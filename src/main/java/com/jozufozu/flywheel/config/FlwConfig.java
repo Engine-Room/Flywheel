@@ -2,9 +2,11 @@ package com.jozufozu.flywheel.config;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.jozufozu.flywheel.backend.BackendType;
+import com.jozufozu.flywheel.core.BackendTypes;
+
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
-import net.minecraftforge.common.ForgeConfigSpec.EnumValue;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 
@@ -28,7 +30,7 @@ public class FlwConfig {
 	}
 
 	public BackendType getBackendType() {
-		return client.backend.get();
+		return BackendTypes.getBackendType(client.backend.get());
 	}
 
 	public boolean debugNormals() {
@@ -43,13 +45,14 @@ public class FlwConfig {
 	}
 
 	public static class ClientConfig {
-		public final EnumValue<BackendType> backend;
+		public final ForgeConfigSpec.ConfigValue<String> backend;
 		public final BooleanValue debugNormals;
 		public final BooleanValue limitUpdates;
 
 		public ClientConfig(ForgeConfigSpec.Builder builder) {
 			backend = builder.comment("Select the backend to use.")
-					.defineEnum("backend", BackendType.INSTANCING);
+					.define("backend", BackendTypes.defaultForCurrentPC()
+							.getShortName());
 
 			debugNormals = builder.comment("Enable or disable a debug overlay that colors pixels by their normal.")
 					.define("debugNormals", false);

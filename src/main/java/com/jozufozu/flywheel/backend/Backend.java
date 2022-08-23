@@ -4,10 +4,9 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.api.FlywheelWorld;
-import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.ParallelTaskEngine;
-import com.jozufozu.flywheel.config.BackendType;
 import com.jozufozu.flywheel.config.FlwConfig;
+import com.jozufozu.flywheel.core.BackendTypes;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.client.Minecraft;
@@ -58,7 +57,7 @@ public class Backend {
 	}
 
 	public static boolean isOn() {
-		return TYPE != BackendType.OFF;
+		return TYPE != BackendTypes.OFF;
 	}
 
 	public static boolean canUseInstancing(@Nullable Level world) {
@@ -87,18 +86,15 @@ public class Backend {
 	}
 
 	private static BackendType chooseEngine() {
-		BackendType preferredChoice = FlwConfig.get()
+		var preferred = FlwConfig.get()
 				.getBackendType();
+		var actual = preferred.findFallback();
 
-		boolean usingShaders = ShadersModHandler.isShaderPackInUse();
-		boolean canUseEngine = switch (preferredChoice) {
-			case OFF -> true;
-			case BATCHING -> !usingShaders;
-			case INSTANCING -> !usingShaders && GlCompat.getInstance().instancedArraysSupported();
-			case INDIRECT -> !usingShaders && GlCompat.getInstance().supportsIndirect();
-		};
+		if (preferred != actual) {
+			LOGGER.warn("Flywheel backend fell back from '{}' to '{}'", preferred.getShortName(), actual.getShortName());
+		}
 
-		return canUseEngine ? preferredChoice : BackendType.OFF;
+		return actual;
 	}
 
 	public static void init() {
