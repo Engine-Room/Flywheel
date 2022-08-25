@@ -10,10 +10,10 @@ public class DrawCall {
 	final GPUInstancer<?> instancer;
 	final Material material;
 	private final int meshAttributes;
-	MeshPool.BufferedMesh bufferedMesh;
+	InstancedMeshPool.BufferedMesh bufferedMesh;
 	GlVertexArray vao;
 
-	DrawCall(GPUInstancer<?> instancer, Material material, MeshPool.BufferedMesh mesh) {
+	DrawCall(GPUInstancer<?> instancer, Material material, InstancedMeshPool.BufferedMesh mesh) {
 		this.instancer = instancer;
 		this.material = material;
 		this.vao = new GlVertexArray();

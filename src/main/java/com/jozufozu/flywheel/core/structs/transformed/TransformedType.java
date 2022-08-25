@@ -43,7 +43,7 @@ public class TransformedType implements StructType<TransformedPart> {
 			Vector3f normal = new Vector3f();
 
 			int light = struct.getPackedLight();
-			for (int i = 0; i < vertexList.getVertexCount(); i++) {
+			for (int i = 0; i < vertexList.vertexCount(); i++) {
 				pos.set(
 						vertexList.x(i),
 						vertexList.y(i),

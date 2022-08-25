@@ -35,7 +35,7 @@ public class ModelPart implements Mesh {
 
 		vertexList = getVertexType().createVertexList();
 		vertexList.ptr(ptr);
-		vertexList.setVertexCount(vertexCount);
+		vertexList.vertexCount(vertexCount);
 	}
 
 	public static PartBuilder builder(String name, int sizeU, int sizeV) {

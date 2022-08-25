@@ -72,9 +72,8 @@ public class DrawBuffer {
 		}
 
 		ReusableVertexList vertexList = provider.createVertexList();
-		vertexList.ptr(memory.ptr());
-		vertexList.shiftPtr(startVertex);
-		vertexList.setVertexCount(vertexCount);
+		vertexList.ptr(memory.ptr() + startVertex * vertexList.vertexStride());
+		vertexList.vertexCount(vertexCount);
 		return vertexList;
 	}
 
@@ -89,6 +88,10 @@ public class DrawBuffer {
 
 		buffer.clear();
 		bufferBuilder.flywheel$injectForRender(buffer, format, vertexCount);
+	}
+
+	public VertexFormat getVertexFormat() {
+		return format;
 	}
 
 	public boolean isPrepared() {

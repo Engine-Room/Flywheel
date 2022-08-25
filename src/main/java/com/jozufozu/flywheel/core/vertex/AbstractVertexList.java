@@ -17,12 +17,12 @@ public abstract class AbstractVertexList implements ReusableVertexList {
 	}
 
 	@Override
-	public int getVertexCount() {
+	public int vertexCount() {
 		return vertexCount;
 	}
 
 	@Override
-	public void setVertexCount(int vertexCount) {
+	public void vertexCount(int vertexCount) {
 		this.vertexCount = vertexCount;
 	}
 }
