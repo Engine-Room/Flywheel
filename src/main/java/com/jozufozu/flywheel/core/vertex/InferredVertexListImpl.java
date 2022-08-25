@@ -203,7 +203,7 @@ public class InferredVertexListImpl extends AbstractVertexList implements Reusab
 	}
 
 	@Override
-	public void shiftPtr(int vertices) {
-		ptr += vertices * stride;
+	public int vertexStride() {
+		return stride;
 	}
 }

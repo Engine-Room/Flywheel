@@ -8,8 +8,8 @@ import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
-import com.jozufozu.flywheel.core.model.Mesh;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
@@ -18,23 +18,22 @@ import com.mojang.math.Vector4f;
 import net.minecraft.client.multiplayer.ClientLevel;
 
 public class TransformCall<D extends InstancedPart> {
-
 	private final CPUInstancer<D> instancer;
 	private final Material material;
-	private final Mesh mesh;
+	private final BatchedMeshPool.BufferedMesh bufferedMesh;
 
-	public TransformCall(CPUInstancer<D> instancer, Material material, Mesh mesh) {
+	public TransformCall(CPUInstancer<D> instancer, Material material, BatchedMeshPool.BufferedMesh mesh) {
 		this.instancer = instancer;
 		this.material = material;
-		this.mesh = mesh;
+		this.bufferedMesh = mesh;
 	}
 
 	public Material getMaterial() {
 		return material;
 	}
 
-	public Mesh getMesh() {
-		return mesh;
+	public VertexFormat getVertexFormat() {
+		return bufferedMesh.getVertexFormat();
 	}
 
 	void submitTasks(TaskEngine pool, DrawBuffer buffer, int startVertex, PoseStack stack, ClientLevel level) {
@@ -47,7 +46,7 @@ public class TransformCall<D extends InstancedPart> {
 			instances -= 512;
 			int start = Math.max(instances, 0);
 
-			int vertexCount = mesh.getVertexCount() * (end - start);
+			int vertexCount = bufferedMesh.getMesh().getVertexCount() * (end - start);
 			ReusableVertexList sub = buffer.slice(startVertex, vertexCount);
 			startVertex += vertexCount;
 
@@ -65,23 +64,24 @@ public class TransformCall<D extends InstancedPart> {
 
 	private void transformList(ReusableVertexList vertexList, List<D> parts, PoseStack stack, ClientLevel level) {
 		long anchorPtr = vertexList.ptr();
-		int totalVertexCount = vertexList.getVertexCount();
+		int totalVertexCount = vertexList.vertexCount();
 
-		int meshVertexCount = mesh.getVertexCount();
-		vertexList.setVertexCount(meshVertexCount);
+		int meshVertexCount = bufferedMesh.getMesh().getVertexCount();
+		int meshByteSize = bufferedMesh.size();
+		vertexList.vertexCount(meshVertexCount);
 
 		StructType.VertexTransformer<D> structVertexTransformer = instancer.type.getVertexTransformer();
 
 		for (D d : parts) {
-			mesh.write(vertexList);
+			bufferedMesh.copyTo(vertexList.ptr());
 
 			structVertexTransformer.transform(vertexList, d, level);
 
-			vertexList.shiftPtr(meshVertexCount);
+			vertexList.ptr(vertexList.ptr() + meshByteSize);
 		}
 
 		vertexList.ptr(anchorPtr);
-		vertexList.setVertexCount(totalVertexCount);
+		vertexList.vertexCount(totalVertexCount);
 		material.getVertexTransformer().transform(vertexList, level);
 		applyPoseStack(vertexList, stack);
 	}
@@ -93,7 +93,7 @@ public class TransformCall<D extends InstancedPart> {
 		Matrix4f modelMatrix = stack.last().pose();
 		Matrix3f normalMatrix = stack.last().normal();
 
-		for (int i = 0; i < vertexList.getVertexCount(); i++) {
+		for (int i = 0; i < vertexList.vertexCount(); i++) {
 			pos.set(
 					vertexList.x(i),
 					vertexList.y(i),
@@ -119,6 +119,6 @@ public class TransformCall<D extends InstancedPart> {
 	}
 
 	public int getTotalVertexCount() {
-		return mesh.getVertexCount() * instancer.getInstanceCount();
+		return bufferedMesh.getMesh().getVertexCount() * instancer.getInstanceCount();
 	}
 }

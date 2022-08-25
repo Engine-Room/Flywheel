@@ -26,7 +26,7 @@ public class SimpleMesh implements Mesh {
 
 		vertexList = getVertexType().createVertexList();
 		vertexList.ptr(contents.ptr());
-		vertexList.setVertexCount(vertexCount);
+		vertexList.vertexCount(vertexCount);
 	}
 
 	@Override
