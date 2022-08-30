@@ -1,23 +1,24 @@
 package com.jozufozu.flywheel.backend.instancing;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.pipeline.PipelineShader;
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.core.SourceComponent;
 import com.jozufozu.flywheel.core.compile.CompileUtil;
 import com.jozufozu.flywheel.core.compile.Memoizer;
 import com.jozufozu.flywheel.core.compile.ProgramAssembler;
 import com.jozufozu.flywheel.core.compile.ShaderCompilationException;
 import com.jozufozu.flywheel.core.source.CompilationContext;
-import com.jozufozu.flywheel.core.source.FileResolution;
-import com.jozufozu.flywheel.core.source.SourceFile;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 
 import net.minecraft.resources.ResourceLocation;
@@ -68,8 +69,8 @@ public class PipelineCompiler extends Memoizer<PipelineCompiler.Context, GlProgr
 		var vertex = new ShaderCompiler.Context(glslVersion, ShaderType.VERTEX, ctx.getVertexComponents());
 		var fragment = new ShaderCompiler.Context(glslVersion, ShaderType.FRAGMENT, ctx.getFragmentComponents());
 
-		return new ProgramAssembler(ctx.instanceShader.getFileLoc())
-				.attachShader(shaderCompiler.get(vertex))
+		return new ProgramAssembler(ctx.structType.getInstanceShader()
+				.getFileLoc()).attachShader(shaderCompiler.get(vertex))
 				.attachShader(shaderCompiler.get(fragment))
 				.link()
 				.build(ctx.contextShader.factory());
@@ -87,22 +88,35 @@ public class PipelineCompiler extends Memoizer<PipelineCompiler.Context, GlProgr
 	/**
 	 * Represents the entire context of a program's usage.
 	 *
-	 * @param vertexType     The vertexType the program should be adapted for.
-	 * @param material       The material shader to use. TODO: Flatten materials
-	 * @param instanceShader The instance shader to use.
-	 * @param contextShader  The context shader to use.
+	 * @param vertexType    The vertexType the program should be adapted for.
+	 * @param material      The material shader to use. TODO: Flatten materials
+	 * @param structType    The instance shader to use.
+	 * @param contextShader The context shader to use.
 	 */
-	public record Context(VertexType vertexType, Material material, FileResolution instanceShader,
+	public record Context(VertexType vertexType, Material material, StructType<?> structType,
 						  ContextShader contextShader, PipelineShader pipelineShader) {
 
-		ImmutableList<SourceFile> getVertexComponents() {
-			return ImmutableList.of(vertexType.getLayoutShader().getFile(), instanceShader.getFile(), material.getVertexShader().getFile(),
-					contextShader.getVertexShader(), pipelineShader.vertex().getFile());
+		ImmutableList<SourceComponent> getVertexComponents() {
+			var layout = vertexType.getLayoutShader()
+					.getFile();
+			var instanceAssembly = pipelineShader.assemble(structType);
+			var instance = structType.getInstanceShader()
+					.getFile();
+			var material = this.material.getVertexShader()
+					.getFile();
+			var context = contextShader.getVertexShader();
+			var pipeline = pipelineShader.vertex()
+					.getFile();
+			return ImmutableList.of(layout, instanceAssembly, instance, material, context, pipeline);
 		}
 
-		ImmutableList<SourceFile> getFragmentComponents() {
-			return ImmutableList.of(material.getFragmentShader().getFile(), contextShader.getFragmentShader(),
-					pipelineShader.fragment().getFile());
+		ImmutableList<SourceComponent> getFragmentComponents() {
+			var material = this.material.getFragmentShader()
+					.getFile();
+			var context = contextShader.getFragmentShader();
+			var pipeline = pipelineShader.fragment()
+					.getFile();
+			return ImmutableList.of(material, context, pipeline);
 		}
 	}
 
@@ -116,9 +130,7 @@ public class PipelineCompiler extends Memoizer<PipelineCompiler.Context, GlProgr
 
 		@Override
 		protected GlShader _create(Context key) {
-			StringBuilder finalSource = new StringBuilder();
-
-			finalSource.append(key.generateHeader());
+			StringBuilder finalSource = new StringBuilder(key.generateHeader());
 			finalSource.append("#extension GL_ARB_explicit_attrib_location : enable\n");
 			finalSource.append("#extension GL_ARB_conservative_depth : enable\n");
 			finalSource.append("#extension GL_ARB_enhanced_layouts : enable\n");
@@ -126,9 +138,18 @@ public class PipelineCompiler extends Memoizer<PipelineCompiler.Context, GlProgr
 			var ctx = new CompilationContext();
 
 			var names = ImmutableList.<ResourceLocation>builder();
-			for (var file : key.components) {
-				finalSource.append(file.generateFinalSource(ctx));
-				names.add(file.name);
+			var included = new LinkedHashSet<SourceComponent>(); // linked to preserve order
+			for (var component : key.sourceComponents) {
+				included.addAll(component.included());
+				names.add(component.name());
+			}
+
+			for (var include : included) {
+				finalSource.append(include.source(ctx));
+			}
+
+			for (var component : key.sourceComponents) {
+				finalSource.append(component.source(ctx));
 			}
 
 			try {
@@ -144,14 +165,15 @@ public class PipelineCompiler extends Memoizer<PipelineCompiler.Context, GlProgr
 		}
 
 		/**
-		 * @param glslVersion The GLSL version to use.
-		 * @param components A list of shader components to stitch together, in order.
+		 * @param glslVersion      The GLSL version to use.
+		 * @param sourceComponents A list of shader components to stitch together, in order.
 		 */
-		public record Context(GLSLVersion glslVersion, ShaderType shaderType, List<SourceFile> components) {
+		public record Context(GLSLVersion glslVersion, ShaderType shaderType, List<SourceComponent> sourceComponents) {
 
 			public String generateHeader() {
 				return CompileUtil.generateHeader(glslVersion, shaderType);
 			}
 		}
+
 	}
 }

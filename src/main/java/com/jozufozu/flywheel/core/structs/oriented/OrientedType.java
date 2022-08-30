@@ -15,8 +15,11 @@ import com.mojang.math.Vector4f;
 public class OrientedType implements StructType<OrientedPart> {
 
 	public static final BufferLayout FORMAT = BufferLayout.builder()
-			.addItems(CommonItems.LIGHT, CommonItems.RGBA)
-			.addItems(CommonItems.VEC3, CommonItems.VEC3, CommonItems.QUATERNION)
+			.addItem(CommonItems.LIGHT_COORD, "light")
+			.addItem(CommonItems.UNORM_4x8, "color")
+			.addItem(CommonItems.VEC3, "position")
+			.addItem(CommonItems.VEC3, "pivot")
+			.addItem(CommonItems.VEC4, "rotation")
 			.build();
 
 	@Override
@@ -42,11 +45,6 @@ public class OrientedType implements StructType<OrientedPart> {
 	@Override
 	public FileResolution getInstanceShader() {
 		return Components.Files.ORIENTED;
-	}
-
-	@Override
-	public FileResolution getIndirectShader() {
-		return Components.Files.ORIENTED_INDIRECT;
 	}
 
 	@Override

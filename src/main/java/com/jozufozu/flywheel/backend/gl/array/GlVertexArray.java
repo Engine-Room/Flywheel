@@ -82,7 +82,7 @@ public class GlVertexArray extends GlObject {
 		int i = startAttrib;
 		final int stride = type.getStride();
 
-		for (var attribute : type.getAttributes()) {
+		for (var attribute : type.attributes()) {
 			targets[i] = targetBuffer;
 			attributes[i] = attribute;
 			offsets[i] = offset;

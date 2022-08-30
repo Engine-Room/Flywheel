@@ -8,11 +8,11 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 
 public class BlockVertex implements VertexType {
 	public static final BufferLayout FORMAT = BufferLayout.builder()
-			.addItems(CommonItems.VEC3,
-					CommonItems.RGBA,
-					CommonItems.UV,
-					CommonItems.LIGHT_SHORT,
-					CommonItems.NORMAL)
+			.addItem(CommonItems.VEC3, "position")
+			.addItem(CommonItems.UNORM_4x8, "color")
+			.addItem(CommonItems.VEC2, "tex")
+			.addItem(CommonItems.LIGHT_COORD, "light")
+			.addItem(CommonItems.NORM_3x8, "normal")
 			.withPadding(1)
 			.build();
 

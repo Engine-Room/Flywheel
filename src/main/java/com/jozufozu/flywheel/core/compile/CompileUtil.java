@@ -24,7 +24,9 @@ public class CompileUtil {
 
 	public static int getElementCount(String type) {
 		Matcher vec = vecType.matcher(type);
-		if (vec.find()) return Integer.parseInt(vec.group(1));
+		if (vec.find()) {
+			return Integer.parseInt(vec.group(1));
+		}
 
 		Matcher mat = matType.matcher(type);
 		if (mat.find()) {
@@ -32,7 +34,9 @@ public class CompileUtil {
 
 			String m = mat.group(2);
 
-			if (m != null) return Integer.parseInt(m) * n;
+			if (m != null) {
+				return Integer.parseInt(m) * n;
+			}
 
 			return n;
 		}

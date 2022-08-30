@@ -68,11 +68,17 @@ public class DebugCompiler extends Memoizer<DebugCompiler.Context, GlProgram> {
 		protected GlShader _create(Context ctx) {
 			var index = new CompilationContext();
 
-			String source = CompileUtil.generateHeader(GLSLVersion.V420, ctx.type) + ctx.source.getFile()
-					.generateFinalSource(index);
+			StringBuilder source = new StringBuilder(CompileUtil.generateHeader(GLSLVersion.V420, ctx.type));
+
+			var file = ctx.source.getFile();
+			for (var include : file.flattenedImports) {
+				source.append(include.source(index));
+			}
+
+			source.append(file.source(index));
 
 			try {
-				return new GlShader(source, ctx.type, ImmutableList.of(ctx.source.getFileLoc()));
+				return new GlShader(source.toString(), ctx.type, ImmutableList.of(ctx.source.getFileLoc()));
 			} catch (ShaderCompilationException e) {
 				throw e.withErrorLog(index);
 			}

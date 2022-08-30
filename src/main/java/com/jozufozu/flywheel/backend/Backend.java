@@ -88,6 +88,9 @@ public class Backend {
 	private static BackendType chooseEngine() {
 		var preferred = FlwConfig.get()
 				.getBackendType();
+		if (preferred == null) {
+			return BackendTypes.defaultForCurrentPC();
+		}
 		var actual = preferred.findFallback();
 
 		if (preferred != actual) {

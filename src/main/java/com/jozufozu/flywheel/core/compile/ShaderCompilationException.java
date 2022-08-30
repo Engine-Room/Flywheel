@@ -9,7 +9,7 @@ public class ShaderCompilationException extends ShaderLoadingException {
 
 	private final int shaderHandle;
 
-	private String errors = "";
+	public String errors = "";
 
 	public ShaderCompilationException(String message, int shaderHandle) {
 		super(message);

@@ -9,10 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.RenderStage;
+import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
-import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
@@ -20,8 +19,6 @@ import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
-import com.jozufozu.flywheel.api.context.ContextShader;
-import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.uniform.UniformBuffer;
 import com.jozufozu.flywheel.util.WeakHashSet;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -118,16 +115,16 @@ public class InstancingEngine implements Engine {
 	}
 
 	protected void setup(ShaderState desc) {
-		VertexType vertexType = desc.vertex();
-		FileResolution instanceShader = desc.instance()
-				.getInstanceShader();
-		Material material = desc.material();
+		var vertexType = desc.vertex();
+		var structType = desc.instance();
+		var material = desc.material();
 
-		var ctx = new PipelineCompiler.Context(vertexType, material, instanceShader, context, Components.INSTANCED_ARRAYS);
+		var ctx = new PipelineCompiler.Context(vertexType, material, structType, context, Components.INSTANCED_ARRAYS);
 
 		PipelineCompiler.INSTANCE.getProgram(ctx)
 				.bind();
-		UniformBuffer.getInstance().sync();
+		UniformBuffer.getInstance()
+				.sync();
 	}
 
 	@Override

@@ -64,9 +64,8 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 				.quads2Tris(2048).buffer.handle();
 		setupVertexArray();
 
-		var indirectShader = structType.getIndirectShader();
-		compute = ComputeCullerCompiler.INSTANCE.get(indirectShader);
-		draw = PipelineCompiler.INSTANCE.get(new PipelineCompiler.Context(vertexType, Materials.SHULKER, indirectShader, Components.WORLD, Components.INDIRECT));
+		compute = ComputeCullerCompiler.INSTANCE.get(structType);
+		draw = PipelineCompiler.INSTANCE.get(new PipelineCompiler.Context(vertexType, Materials.SHULKER, structType, Components.WORLD, Components.INDIRECT));
 	}
 
 	private void setupVertexArray() {
@@ -75,7 +74,7 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 		var meshLayout = vertexType.getLayout();
 		var meshAttribs = meshLayout.getAttributeCount();
 
-		var attributes = meshLayout.getAttributes();
+		var attributes = meshLayout.attributes();
 
 		long offset = 0;
 		for (int i = 0; i < meshAttribs; i++) {

@@ -13,8 +13,10 @@ import com.mojang.math.Vector4f;
 public class TransformedType implements StructType<TransformedPart> {
 
 	public static final BufferLayout FORMAT = BufferLayout.builder()
-			.addItems(CommonItems.LIGHT, CommonItems.RGBA)
-			.addItems(CommonItems.MAT4, CommonItems.MAT3)
+			.addItem(CommonItems.LIGHT_COORD, "light")
+			.addItem(CommonItems.UNORM_4x8, "color")
+			.addItem(CommonItems.MAT4, "pose")
+			.addItem(CommonItems.MAT3, "normal")
 			.build();
 
 	@Override
@@ -40,11 +42,6 @@ public class TransformedType implements StructType<TransformedPart> {
 	@Override
 	public FileResolution getInstanceShader() {
 		return Components.Files.TRANSFORMED;
-	}
-
-	@Override
-	public FileResolution getIndirectShader() {
-		return Components.Files.TRANSFORMED_INDIRECT;
 	}
 
 	@Override

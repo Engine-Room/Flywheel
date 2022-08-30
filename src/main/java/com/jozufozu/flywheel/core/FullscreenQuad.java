@@ -19,7 +19,7 @@ public class FullscreenQuad {
 
 	public static final Lazy<FullscreenQuad> INSTANCE = Lazy.of(FullscreenQuad::new);
 	private static final BufferLayout LAYOUT = BufferLayout.builder()
-			.addItems(CommonItems.VEC4)
+			.addItem(CommonItems.VEC4, "posTex")
 			.build();
 
 	private static final float[] vertices = {

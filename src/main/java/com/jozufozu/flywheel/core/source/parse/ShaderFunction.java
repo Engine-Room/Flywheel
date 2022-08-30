@@ -20,7 +20,7 @@ public class ShaderFunction extends AbstractShaderElement {
 	private final Span args;
 	private final Span body;
 
-	private final ImmutableList<Variable> parameters;
+	private final ImmutableList<ShaderVariable> parameters;
 
 	public ShaderFunction(Span self, Span type, Span name, Span args, Span body) {
 		super(self);
@@ -56,7 +56,7 @@ public class ShaderFunction extends AbstractShaderElement {
 		return parameters.get(index).type;
 	}
 
-	public ImmutableList<Variable> getParameters() {
+	public ImmutableList<ShaderVariable> getParameters() {
 		return parameters;
 	}
 
@@ -64,12 +64,12 @@ public class ShaderFunction extends AbstractShaderElement {
 		return type.get();
 	}
 
-	protected ImmutableList<Variable> parseArguments() {
+	protected ImmutableList<ShaderVariable> parseArguments() {
 		if (args.isErr() || args.isEmpty()) return ImmutableList.of();
 
 		Matcher arguments = argument.matcher(args.get());
 
-		ImmutableList.Builder<Variable> builder = ImmutableList.builder();
+		ImmutableList.Builder<ShaderVariable> builder = ImmutableList.builder();
 
 		while (arguments.find()) {
 			Span self = Span.fromMatcher(args, arguments);
@@ -77,7 +77,7 @@ public class ShaderFunction extends AbstractShaderElement {
 			Span type = Span.fromMatcher(args, arguments, 2);
 			Span name = Span.fromMatcher(args, arguments, 3);
 
-			builder.add(new Variable(self, qualifier, type, name));
+			builder.add(new ShaderVariable(self, qualifier, type, name));
 		}
 
 		return builder.build();

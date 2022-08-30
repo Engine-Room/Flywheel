@@ -2,7 +2,8 @@
 
 void main() {
     flw_layoutVertex();
-    flw_instanceVertex();
+    FlwInstance i = flw_unpackInstance();
+    flw_instanceVertex(i);
     flw_materialVertex();
     flw_contextVertex();
 }
