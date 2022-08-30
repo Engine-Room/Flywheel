@@ -16,7 +16,7 @@ struct MeshDrawCommand {
 
 // populated by instancers
 layout(std430, binding = 0) restrict readonly buffer ObjectBuffer {
-    FLW_INSTANCE_STRUCT objects[];
+    FlwPackedInstance objects[];
 };
 
 layout(std430, binding = 1) restrict writeonly buffer TargetBuffer {
@@ -45,7 +45,9 @@ bool isVisible() {
     vec3 center;
     float radius;
     unpackBoundingSphere(sphere, center, radius);
-    flw_transformBoundingSphere(objects[flw_objectID], center, radius);
+
+    FlwInstance object = flw_unpackInstance(objects[flw_objectID]);
+    flw_transformBoundingSphere(object, center, radius);
 
     return testSphere(center, radius);
 }

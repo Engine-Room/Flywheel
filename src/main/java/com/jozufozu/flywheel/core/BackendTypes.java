@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.core;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
@@ -55,7 +56,7 @@ public class BackendTypes {
 
 	@Nullable
 	public static BackendType getBackendType(String name) {
-		return BACKEND_TYPES.get(name);
+		return BACKEND_TYPES.get(name.toLowerCase(Locale.ROOT));
 	}
 
 	/**

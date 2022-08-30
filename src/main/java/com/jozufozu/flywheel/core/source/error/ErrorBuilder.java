@@ -53,6 +53,11 @@ public class ErrorBuilder {
 			String lineNo = matcher.group(2);
 			String msg = matcher.group(3);
 			Span span = env.getLineSpan(Integer.parseInt(fileId), Integer.parseInt(lineNo));
+
+			if (span == null) {
+				return ErrorBuilder.compError("Error in generated code");
+			}
+
 			return ErrorBuilder.compError(msg)
 					.pointAtFile(span.getSourceFile())
 					.pointAt(span, 1);

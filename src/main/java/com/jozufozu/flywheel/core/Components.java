@@ -29,8 +29,11 @@ public class Components {
 	public static final ContextShader WORLD = ComponentRegistry.register(new ContextShader(WorldProgram::new, Files.WORLD_VERTEX, Files.WORLD_FRAGMENT));
 	public static final ContextShader CRUMBLING = ComponentRegistry.register(new ContextShader(CrumblingProgram::new, Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT));
 
-	public static final PipelineShader INSTANCED_ARRAYS = new PipelineShader(GLSLVersion.V420, Pipeline.INSTANCED_ARRAYS_DRAW, Pipeline.DRAW_FRAGMENT);
-	public static final PipelineShader INDIRECT = new PipelineShader(GLSLVersion.V460, Pipeline.INDIRECT_DRAW, Pipeline.DRAW_FRAGMENT);
+	public static final PipelineShader INSTANCED_ARRAYS = new PipelineShader(GLSLVersion.V420, Pipeline.INSTANCED_ARRAYS_DRAW, Pipeline.DRAW_FRAGMENT, (structType) -> structType.getLayout()
+			.getInstancedArraysComponent());
+	public static final PipelineShader INDIRECT = new PipelineShader(GLSLVersion.V460, Pipeline.INDIRECT_DRAW, Pipeline.DRAW_FRAGMENT, (structType) -> structType.getLayout()
+			.getIndirectComponent());
+	public static final FileResolution UTIL_TYPES = FileResolution.get(Flywheel.rl("util/types.glsl"));
 
 	public static void init() {
 		Files.init();
@@ -59,9 +62,7 @@ public class Components {
 		public static final FileResolution BLOCK_LAYOUT = layoutVertex(ResourceUtil.subPath(Names.BLOCK, ".vert"));
 		public static final FileResolution POS_TEX_NORMAL_LAYOUT = layoutVertex(ResourceUtil.subPath(Names.POS_TEX_NORMAL, ".vert"));
 		public static final FileResolution TRANSFORMED = instanceVertex(ResourceUtil.subPath(Names.TRANSFORMED, ".vert"));
-		public static final FileResolution TRANSFORMED_INDIRECT = instanceVertex(ResourceUtil.subPath(Names.TRANSFORMED, "_indirect.glsl"));
 		public static final FileResolution ORIENTED = instanceVertex(ResourceUtil.subPath(Names.ORIENTED, ".vert"));
-		public static final FileResolution ORIENTED_INDIRECT = instanceVertex(ResourceUtil.subPath(Names.ORIENTED, "_indirect.glsl"));
 		public static final FileResolution DEFAULT_VERTEX = materialVertex(ResourceUtil.subPath(Names.DEFAULT, ".vert"));
 		public static final FileResolution SHADED_VERTEX = materialVertex(ResourceUtil.subPath(Names.SHADED, ".vert"));
 		public static final FileResolution DEFAULT_FRAGMENT = materialFragment(ResourceUtil.subPath(Names.DEFAULT, ".frag"));

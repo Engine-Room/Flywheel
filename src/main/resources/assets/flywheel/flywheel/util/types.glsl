@@ -32,6 +32,10 @@ struct BoundingSphere {
     float radius;
 };
 
+struct LightCoord {
+    uint p;
+};
+
 vec3 unpackVec3F(in Vec3F v) {
     return vec3(v.x, v.y, v.z);
 }
@@ -60,4 +64,8 @@ mat3 unpackMat3F(in Mat3F m) {
 void unpackBoundingSphere(in BoundingSphere sphere, out vec3 center, out float radius) {
     center = unpackVec3F(sphere.center);
     radius = sphere.radius;
+}
+
+vec2 unpackLightCoord(in LightCoord light) {
+    return vec2(float((light.p >> 16) & 0xFFFFu), float(light.p & 0xFFFFu)) / 15.0;
 }

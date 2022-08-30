@@ -11,28 +11,58 @@ import com.jozufozu.flywheel.core.source.span.Span;
 public class CompilationContext {
 	public final List<SourceFile> files = new ArrayList<>();
 
-	/**
-	 * Returns an arbitrary file ID for use this compilation context, or generates one if missing.
-	 * @param sourceFile The file to retrieve the ID for.
-	 * @return A file ID unique to the given sourceFile.
-	 */
-	public int getFileID(SourceFile sourceFile) {
-		int i = files.indexOf(sourceFile);
-		if (i != -1) {
-			return i;
+	private String generatedSource = "";
+	private int generatedLines = 0;
+
+	String sourceHeader(SourceFile sourceFile) {
+		return "#line " + 0 + ' ' + getOrCreateFileID(sourceFile) + " // " + sourceFile.name + '\n';
+	}
+
+	public String generatedHeader(String generatedCode, @Nullable String comment) {
+		generatedSource += generatedCode;
+		int lines = generatedCode.split("\n").length;
+
+		var out = "#line " + generatedLines + ' ' + 0;
+
+		generatedLines += lines;
+
+		if (comment != null) {
+			out += " // " + comment;
 		}
 
-		int size = files.size();
-		files.add(sourceFile);
-		return size;
+		return out + '\n';
 	}
 
 	public boolean contains(SourceFile sourceFile) {
 		return files.contains(sourceFile);
 	}
 
-	public SourceFile getFile(int fileId) {
-		return files.get(fileId);
+	/**
+	 * Returns an arbitrary file ID for use this compilation context, or generates one if missing.
+	 *
+	 * @param sourceFile The file to retrieve the ID for.
+	 * @return A file ID unique to the given sourceFile.
+	 */
+	private int getOrCreateFileID(SourceFile sourceFile) {
+		int i = files.indexOf(sourceFile);
+		if (i != -1) {
+			return i + 1;
+		}
+
+		files.add(sourceFile);
+		return files.size();
+	}
+
+	public Span getLineSpan(int fileId, int lineNo) {
+		if (fileId == 0) {
+			// TODO: Valid spans for generated code.
+			return null;
+		}
+		return getFile(fileId).getLineSpanNoWhitespace(lineNo);
+	}
+
+	private SourceFile getFile(int fileId) {
+		return files.get(fileId - 1);
 	}
 
 	public String parseErrors(String log) {
@@ -60,9 +90,5 @@ public class CompilationContext {
 		}
 
 		return null;
-	}
-
-	public Span getLineSpan(int fileId, int lineNo) {
-		return getFile(fileId).getLineSpanNoWhitespace(lineNo);
 	}
 }

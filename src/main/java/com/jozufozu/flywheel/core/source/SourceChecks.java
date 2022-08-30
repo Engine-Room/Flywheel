@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 import com.jozufozu.flywheel.core.source.parse.ShaderFunction;
-import com.jozufozu.flywheel.core.source.parse.Variable;
+import com.jozufozu.flywheel.core.source.parse.ShaderVariable;
 
 public class SourceChecks {
 
@@ -46,7 +46,7 @@ public class SourceChecks {
 		}
 
 		ShaderFunction func = maybeFunc.get();
-		ImmutableList<Variable> params = func.getParameters();
+		ImmutableList<ShaderVariable> params = func.getParameters();
 		if (params.size() != arity) {
 			errorReporter.generateFunctionArgumentCountError(name, arity, func.getArgs());
 			return null;

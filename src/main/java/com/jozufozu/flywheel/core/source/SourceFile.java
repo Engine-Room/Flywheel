@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.core.source;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.jozufozu.flywheel.core.SourceComponent;
 import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 import com.jozufozu.flywheel.core.source.parse.Import;
 import com.jozufozu.flywheel.core.source.parse.ShaderField;
@@ -21,7 +22,6 @@ import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
 import com.jozufozu.flywheel.core.source.span.ErrorSpan;
 import com.jozufozu.flywheel.core.source.span.Span;
 import com.jozufozu.flywheel.core.source.span.StringSpan;
-import com.jozufozu.flywheel.util.Pair;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -29,10 +29,10 @@ import net.minecraft.resources.ResourceLocation;
  * Immutable class representing a shader file.
  *
  * <p>
- *     This class parses shader files and generates what is effectively a high level AST of the source.
+ * This class parses shader files and generates what is effectively a high level AST of the source.
  * </p>
  */
-public class SourceFile {
+public class SourceFile implements SourceComponent {
 
 	public final ResourceLocation name;
 
@@ -56,10 +56,9 @@ public class SourceFile {
 	 */
 	public final ImmutableList<Import> imports;
 	public final ImmutableMap<String, ShaderField> fields;
-	private final List<Span> elisions;
 
 	// POST-RESOLUTION
-	private List<Import> flattenedImports;
+	public List<SourceFile> flattenedImports;
 
 	public SourceFile(ErrorReporter errorReporter, ShaderSources parent, ResourceLocation name, String source) {
 		this.parent = parent;
@@ -68,12 +67,25 @@ public class SourceFile {
 
 		this.lines = new SourceLines(source);
 
-		this.elisions = new ArrayList<>();
-
 		this.imports = parseImports(errorReporter);
 		this.functions = parseFunctions();
 		this.structs = parseStructs();
 		this.fields = parseFields();
+	}
+
+	@Override
+	public Collection<? extends SourceComponent> included() {
+		return flattenedImports;
+	}
+
+	@Override
+	public String source(CompilationContext ctx) {
+		return ctx.sourceHeader(this) + this.elideImports();
+	}
+
+	@Override
+	public ResourceLocation name() {
+		return name;
 	}
 
 	public void postResolve() {
@@ -91,7 +103,7 @@ public class SourceFile {
 			return;
 		}
 
-		List<Import> flat = new ArrayList<>(this.imports.size());
+		ArrayList<SourceFile> flat = new ArrayList<>(this.imports.size());
 
 		for (Import include : this.imports) {
 			SourceFile file = include.resolution.getFile();
@@ -99,7 +111,7 @@ public class SourceFile {
 			file.flattenImports();
 
 			flat.addAll(file.flattenedImports);
-			flat.add(include);
+			flat.add(file);
 		}
 
 		this.flattenedImports = flat.stream()
@@ -135,14 +147,8 @@ public class SourceFile {
 
 		if (struct != null) return Optional.of(struct);
 
-		for (Import include : flattenedImports) {
-			var file = include.getFile();
-
-			if (file == null) {
-				continue;
-			}
-
-			var external = file.structs.get(name);
+		for (var include : flattenedImports) {
+			var external = include.structs.get(name);
 
 			if (external != null) {
 				return Optional.of(external);
@@ -163,14 +169,8 @@ public class SourceFile {
 
 		if (local != null) return Optional.of(local);
 
-		for (Import include : imports) {
-			var file = include.getFile();
-
-			if (file == null) {
-				continue;
-			}
-
-			var external = file.functions.get(name);
+		for (var include : flattenedImports) {
+			var external = include.functions.get(name);
 
 			if (external != null) {
 				return Optional.of(external);
@@ -184,59 +184,19 @@ public class SourceFile {
 		return "#use " + '"' + name + '"';
 	}
 
-	public String generateFinalSource(CompilationContext context) {
-		List<Pair<Span, String>> replacements = Collections.emptyList();
-		var out = new StringBuilder();
-		for (Import include : flattenedImports) {
-			SourceFile file = include.getFile();
-
-			if (file == null || context.contains(file)) {
-				continue;
-			}
-
-			out.append(file.generateLineHeader(context))
-					.append(file.replaceAndElide(replacements));
-		}
-
-		out.append(this.generateLineHeader(context))
-				.append(this.replaceAndElide(replacements));
-
-		return out.toString();
-	}
-
-	private String generateLineHeader(CompilationContext env) {
-		return "#line " + 0 + ' ' + env.getFileID(this) + " // " + name + '\n';
-	}
-
 	public String printSource() {
 		return "Source for shader '" + name + "':\n" + lines.printLinesWithNumbers();
 	}
 
-	private CharSequence replaceAndElide(List<Pair<Span, String>> replacements) {
-		var replacementsAndElisions = new ArrayList<>(replacements);
-		for (var include : imports) {
-			replacementsAndElisions.add(Pair.of(include.self, ""));
-		}
-
-		return this.replace(replacementsAndElisions);
-	}
-
-	private CharSequence replace(List<Pair<Span, String>> replacements) {
+	private CharSequence elideImports() {
 		StringBuilder out = new StringBuilder();
 
 		int lastEnd = 0;
 
-		replacements.sort(Comparator.comparing(Pair::first));
-
-		for (var replacement : replacements) {
-			var loc = replacement.first();
-
-			if (loc.getSourceFile() != this) {
-				continue;
-			}
+		for (var include : imports) {
+			var loc = include.self;
 
 			out.append(this.source, lastEnd, loc.getStartPos());
-			out.append(replacement.second());
 
 			lastEnd = loc.getEndPos();
 		}

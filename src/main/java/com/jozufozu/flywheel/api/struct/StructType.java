@@ -31,8 +31,6 @@ public interface StructType<S extends InstancedPart> {
 
 	StorageBufferWriter<S> getStorageBufferWriter();
 
-	FileResolution getIndirectShader();
-
 	interface VertexTransformer<S extends InstancedPart> {
 		void transform(MutableVertexList vertexList, S struct, ClientLevel level);
 	}

@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.config;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.backend.BackendType;
 import com.jozufozu.flywheel.core.BackendTypes;
@@ -29,6 +30,7 @@ public class FlwConfig {
 		return INSTANCE;
 	}
 
+	@Nullable
 	public BackendType getBackendType() {
 		return BackendTypes.getBackendType(client.backend.get());
 	}

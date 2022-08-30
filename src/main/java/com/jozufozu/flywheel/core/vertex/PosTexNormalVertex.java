@@ -8,7 +8,9 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 
 public class PosTexNormalVertex implements VertexType {
 	public static final BufferLayout FORMAT = BufferLayout.builder()
-			.addItems(CommonItems.VEC3, CommonItems.UV, CommonItems.NORMAL)
+			.addItem(CommonItems.VEC3, "position")
+			.addItem(CommonItems.VEC2, "tex")
+			.addItem(CommonItems.NORM_3x8, "normal")
 			.build();
 
 	@Override
