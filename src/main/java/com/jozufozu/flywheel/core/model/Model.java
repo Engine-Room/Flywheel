@@ -6,7 +6,6 @@ import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.core.Formats;
-import com.jozufozu.flywheel.core.QuadConverter;
 
 /**
  * A model that can be rendered by flywheel.
