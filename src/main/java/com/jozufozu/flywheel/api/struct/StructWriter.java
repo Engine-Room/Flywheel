@@ -9,5 +9,6 @@ public interface StructWriter<S extends InstancedPart> {
 	/**
 	 * Write the given struct to the given memory address.
 	 */
-	void write(long ptr, S struct);
+	void write(final long ptr, final S struct);
+
 }

@@ -59,8 +59,8 @@ public class BufferLayout {
 		return stride;
 	}
 
-	public InstancedArraysComponent getInstancedArraysComponent() {
-		return new InstancedArraysComponent();
+	public InstancedArraysComponent getInstancedArraysComponent(int baseIndex) {
+		return new InstancedArraysComponent(baseIndex);
 	}
 
 	public IndirectComponent getIndirectComponent() {
@@ -109,6 +109,14 @@ public class BufferLayout {
 	}
 
 	public class InstancedArraysComponent implements SourceComponent {
+		private static final String ATTRIBUTE_SUFFIX = "_vertex_in";
+
+		private final int baseIndex;
+
+		public InstancedArraysComponent(int baseIndex) {
+			this.baseIndex = baseIndex;
+		}
+
 		@Override
 		public Collection<? extends SourceComponent> included() {
 			return Collections.emptyList();
@@ -116,7 +124,8 @@ public class BufferLayout {
 
 		@Override
 		public String source(CompilationContext ctx) {
-			return generateInstancedArrays(5, "Instance");
+			var generated = generateInstancedArrays("Instance");
+			return ctx.generatedHeader(generated, name().toString()) + generated;
 		}
 
 		@Override
@@ -124,17 +133,16 @@ public class BufferLayout {
 			return Flywheel.rl("generated_instanced_arrays");
 		}
 
-		public String generateInstancedArrays(int baseIndex, String structName) {
+		public String generateInstancedArrays(String structName) {
 			var builder = new GlslBuilder();
 			builder.define("FlwInstance", structName);
 
 			int i = baseIndex;
-			final var attributeSuffix = "_vertex_in";
 			for (var field : layoutItems) {
 				builder.vertexInput()
 						.binding(i)
 						.type(field.type.typeName())
-						.name(field.name + attributeSuffix);
+						.name(field.name + ATTRIBUTE_SUFFIX);
 
 				i += field.type.attributeCount();
 			}
@@ -155,7 +163,7 @@ public class BufferLayout {
 					.name("flw_unpackInstance");
 
 			var args = layoutItems.stream()
-					.map(it -> new GlslExpr.Variable(it.name + attributeSuffix))
+					.map(it -> new GlslExpr.Variable(it.name + ATTRIBUTE_SUFFIX))
 					.map(GlslExpr::minPrint)
 					.collect(Collectors.joining(", "));
 
@@ -169,7 +177,7 @@ public class BufferLayout {
 
 		private static final String UNPACK_ARG = "p";
 
-		private static GlslExpr intoGlsl(LayoutItem layoutItem) {
+		private static GlslExpr genGlslForLayoutItem(LayoutItem layoutItem) {
 			return GlslExpr.variable(UNPACK_ARG)
 					.access(layoutItem.name)
 					.transform(layoutItem.type::unpack);
@@ -187,8 +195,8 @@ public class BufferLayout {
 
 		@Override
 		public String source(CompilationContext ctx) {
-			var content = generateIndirect("IndirectStruct");
-			return ctx.generatedHeader(content, name().toString()) + content;
+			var generated = generateIndirect("IndirectStruct");
+			return ctx.generatedHeader(generated, name().toString()) + generated;
 		}
 
 		public String generateIndirect(String structName) {
@@ -216,7 +224,7 @@ public class BufferLayout {
 					.argumentIn(packedStructName, UNPACK_ARG);
 
 			var args = layoutItems.stream()
-					.map(IndirectComponent::intoGlsl)
+					.map(IndirectComponent::genGlslForLayoutItem)
 					.map(GlslExpr::minPrint)
 					.collect(Collectors.joining(", "));
 

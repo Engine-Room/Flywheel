@@ -11,7 +11,7 @@ public class IndirectModel<D extends InstancedPart> {
 
 	public IndirectModel(StructType<D> type, Model model) {
 		this.model = model;
-		this.instancer = new IndirectInstancer<>(this, type);
+		this.instancer = new IndirectInstancer<>(type);
 	}
 
 	public void init(IndirectDrawManager indirectDrawManager) {

@@ -7,11 +7,10 @@ public class TransformedWriter extends ColoredLitWriter<TransformedPart> {
 	public static final TransformedWriter INSTANCE = new TransformedWriter();
 
 	@Override
-	public void write(long ptr, TransformedPart d) {
+	public void write(final long ptr, final TransformedPart d) {
 		super.write(ptr, d);
-		ptr += 6;
-
-		((MatrixWrite) (Object) d.model).flywheel$writeUnsafe(ptr);
-		((MatrixWrite) (Object) d.normal).flywheel$writeUnsafe(ptr + 4 * 16);
+		MatrixWrite.writeUnsafe(d.model, ptr + 8);
+		MatrixWrite.writeUnsafe(d.normal, ptr + 72);
 	}
+
 }

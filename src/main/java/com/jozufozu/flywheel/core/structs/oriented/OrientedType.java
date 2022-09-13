@@ -38,11 +38,6 @@ public class OrientedType implements StructType<OrientedPart> {
 	}
 
 	@Override
-	public OrientedStorageWriter getStorageBufferWriter() {
-		return OrientedStorageWriter.INSTANCE;
-	}
-
-	@Override
 	public FileResolution getInstanceShader() {
 		return Components.Files.ORIENTED;
 	}

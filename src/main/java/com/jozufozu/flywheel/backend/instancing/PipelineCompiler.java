@@ -99,7 +99,7 @@ public class PipelineCompiler extends Memoizer<PipelineCompiler.Context, GlProgr
 		ImmutableList<SourceComponent> getVertexComponents() {
 			var layout = vertexType.getLayoutShader()
 					.getFile();
-			var instanceAssembly = pipelineShader.assemble(structType);
+			var instanceAssembly = pipelineShader.assemble(vertexType, structType);
 			var instance = structType.getInstanceShader()
 					.getFile();
 			var material = this.material.getVertexShader()
@@ -133,7 +133,6 @@ public class PipelineCompiler extends Memoizer<PipelineCompiler.Context, GlProgr
 			StringBuilder finalSource = new StringBuilder(key.generateHeader());
 			finalSource.append("#extension GL_ARB_explicit_attrib_location : enable\n");
 			finalSource.append("#extension GL_ARB_conservative_depth : enable\n");
-			finalSource.append("#extension GL_ARB_enhanced_layouts : enable\n");
 
 			var ctx = new CompilationContext();
 
