@@ -13,8 +13,8 @@ import static org.lwjgl.opengl.GL46.glVertexArrayVertexBuffer;
 
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
-import com.jozufozu.flywheel.api.struct.StorageBufferWriter;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
@@ -27,7 +27,7 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 
 	private static final int BARRIER_BITS = GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT;
 
-	final StorageBufferWriter<T> storageBufferWriter;
+	final StructWriter<T> storageBufferWriter;
 	final GlProgram compute;
 	final GlProgram draw;
 	private final VertexType vertexType;
@@ -48,9 +48,10 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 
 	IndirectCullingGroup(StructType<T> structType, VertexType vertexType) {
 		this.vertexType = vertexType;
-		storageBufferWriter = structType.getStorageBufferWriter();
+		storageBufferWriter = structType.getWriter();
 
-		objectStride = storageBufferWriter.getAlignment();
+		objectStride = structType.getLayout()
+				.getStride();
 		buffers = new IndirectBuffers(objectStride);
 		buffers.createBuffers();
 		buffers.createObjectStorage(128);

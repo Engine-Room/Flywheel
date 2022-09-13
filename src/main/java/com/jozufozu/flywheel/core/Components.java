@@ -29,9 +29,10 @@ public class Components {
 	public static final ContextShader WORLD = ComponentRegistry.register(new ContextShader(WorldProgram::new, Files.WORLD_VERTEX, Files.WORLD_FRAGMENT));
 	public static final ContextShader CRUMBLING = ComponentRegistry.register(new ContextShader(CrumblingProgram::new, Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT));
 
-	public static final PipelineShader INSTANCED_ARRAYS = new PipelineShader(GLSLVersion.V420, Pipeline.INSTANCED_ARRAYS_DRAW, Pipeline.DRAW_FRAGMENT, (structType) -> structType.getLayout()
-			.getInstancedArraysComponent());
-	public static final PipelineShader INDIRECT = new PipelineShader(GLSLVersion.V460, Pipeline.INDIRECT_DRAW, Pipeline.DRAW_FRAGMENT, (structType) -> structType.getLayout()
+	public static final PipelineShader INSTANCED_ARRAYS = new PipelineShader(GLSLVersion.V420, Pipeline.INSTANCED_ARRAYS_DRAW, Pipeline.DRAW_FRAGMENT, (vertexType, structType) -> structType.getLayout()
+			.getInstancedArraysComponent(vertexType.getLayout()
+					.getAttributeCount()));
+	public static final PipelineShader INDIRECT = new PipelineShader(GLSLVersion.V460, Pipeline.INDIRECT_DRAW, Pipeline.DRAW_FRAGMENT, (vertexType, structType) -> structType.getLayout()
 			.getIndirectComponent());
 	public static final FileResolution UTIL_TYPES = FileResolution.get(Flywheel.rl("util/types.glsl"));
 

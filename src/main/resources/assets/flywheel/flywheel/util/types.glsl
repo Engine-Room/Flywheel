@@ -66,6 +66,6 @@ void unpackBoundingSphere(in BoundingSphere sphere, out vec3 center, out float r
     radius = sphere.radius;
 }
 
-vec2 unpackLightCoord(in LightCoord light) {
-    return vec2(float((light.p >> 16) & 0xFFFFu), float(light.p & 0xFFFFu)) / 15.0;
+ivec2 unpackLightCoord(in LightCoord light) {
+    return ivec2(light.p & 0xFFFFu, (light.p >> 16) & 0xFFFFu);
 }
