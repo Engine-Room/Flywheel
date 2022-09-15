@@ -1,6 +1,5 @@
 #use "flywheel:api/vertex.glsl"
 #use "flywheel:util/quaternion.glsl"
-#use "flywheel:util/types.glsl"
 
 void flw_transformBoundingSphere(in FlwInstance i, inout vec3 center, inout float radius) {
     vec4 rotation = i.rotation;

@@ -6,6 +6,8 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.pipeline.PipelineShader;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
+import com.jozufozu.flywheel.backend.instancing.indirect.IndirectComponent;
+import com.jozufozu.flywheel.backend.instancing.instancing.InstancedArraysComponent;
 import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.SourceChecks;
@@ -29,11 +31,9 @@ public class Components {
 	public static final ContextShader WORLD = ComponentRegistry.register(new ContextShader(WorldProgram::new, Files.WORLD_VERTEX, Files.WORLD_FRAGMENT));
 	public static final ContextShader CRUMBLING = ComponentRegistry.register(new ContextShader(CrumblingProgram::new, Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT));
 
-	public static final PipelineShader INSTANCED_ARRAYS = new PipelineShader(GLSLVersion.V420, Pipeline.INSTANCED_ARRAYS_DRAW, Pipeline.DRAW_FRAGMENT, (vertexType, structType) -> structType.getLayout()
-			.getInstancedArraysComponent(vertexType.getLayout()
-					.getAttributeCount()));
-	public static final PipelineShader INDIRECT = new PipelineShader(GLSLVersion.V460, Pipeline.INDIRECT_DRAW, Pipeline.DRAW_FRAGMENT, (vertexType, structType) -> structType.getLayout()
-			.getIndirectComponent());
+	public static final PipelineShader INSTANCED_ARRAYS = new PipelineShader(GLSLVersion.V420, Pipeline.INSTANCED_ARRAYS_DRAW, Pipeline.DRAW_FRAGMENT, (vertexType, structType) -> new InstancedArraysComponent(structType.getLayout().layoutItems, vertexType.getLayout()
+			.getAttributeCount()));
+	public static final PipelineShader INDIRECT = new PipelineShader(GLSLVersion.V460, Pipeline.INDIRECT_DRAW, Pipeline.DRAW_FRAGMENT, (vertexType, structType) -> new IndirectComponent(structType.getLayout().layoutItems));
 	public static final FileResolution UTIL_TYPES = FileResolution.get(Flywheel.rl("util/types.glsl"));
 
 	public static void init() {
@@ -117,14 +117,13 @@ public class Components {
 
 	public static class Checks {
 
-		public static final BiConsumer<ErrorReporter, SourceFile> LAYOUT_VERTEX = SourceChecks.checkFunctionArity("flw_layoutVertex", 0)
-				.andThen(SourceChecks.checkDefine("FLW_INSTANCE_BASE_INDEX"));
-		public static final BiConsumer<ErrorReporter, SourceFile> INSTANCE_VERTEX = SourceChecks.checkFunctionParameterTypeExists("flw_instanceVertex", 1, 0)
-				.andThen(SourceChecks.checkDefine("FLW_INSTANCE_STRUCT"));
+		public static final BiConsumer<ErrorReporter, SourceFile> LAYOUT_VERTEX = SourceChecks.checkFunctionArity("flw_layoutVertex", 0);
+		public static final BiConsumer<ErrorReporter, SourceFile> INSTANCE_VERTEX = SourceChecks.checkFunctionParameterTypeExists("flw_instanceVertex", 1, 0);
 		public static final BiConsumer<ErrorReporter, SourceFile> MATERIAL_VERTEX = SourceChecks.checkFunctionArity("flw_materialVertex", 0);
 		public static final BiConsumer<ErrorReporter, SourceFile> MATERIAL_FRAGMENT = SourceChecks.checkFunctionArity("flw_materialFragment", 0);
 		public static final BiConsumer<ErrorReporter, SourceFile> CONTEXT_VERTEX = SourceChecks.checkFunctionArity("flw_contextVertex", 0);
-		public static final BiConsumer<ErrorReporter, SourceFile> CONTEXT_FRAGMENT = SourceChecks.checkFunctionArity("flw_contextFragment", 0).andThen(SourceChecks.checkFunctionArity("flw_initFragment", 0));
+		public static final BiConsumer<ErrorReporter, SourceFile> CONTEXT_FRAGMENT = SourceChecks.checkFunctionArity("flw_contextFragment", 0)
+				.andThen(SourceChecks.checkFunctionArity("flw_initFragment", 0));
 
 		public static final BiConsumer<ErrorReporter, SourceFile> PIPELINE = SourceChecks.checkFunctionArity("main", 0);
 	}
