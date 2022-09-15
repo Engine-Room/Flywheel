@@ -11,7 +11,7 @@ public class GlslBuilder {
 	private final List<SourceElement> elements = new ArrayList<>();
 
 	public void define(String name, String value) {
-		elements.add(new Define(name, value));
+		add(new Define(name, value));
 	}
 
 	public StructBuilder struct() {
@@ -31,6 +31,9 @@ public class GlslBuilder {
 		return element;
 	}
 
+	public void blankLine() {
+		elements.add(Separators.BLANK_LINE);
+	}
 
 	public String build() {
 		return elements.stream()
@@ -38,8 +41,8 @@ public class GlslBuilder {
 				.collect(Collectors.joining("\n"));
 	}
 
-	public void blankLine() {
-		elements.add(Separators.BLANK_LINE);
+	public interface SourceElement {
+		String build();
 	}
 
 	public enum Separators implements SourceElement {
@@ -51,15 +54,11 @@ public class GlslBuilder {
 		Separators(String separator) {
 			this.separator = separator;
 		}
-
 		@Override
 		public String build() {
 			return separator;
 		}
-	}
 
-	public interface SourceElement {
-		String build();
 	}
 
 	public record Define(String name, String value) implements SourceElement {

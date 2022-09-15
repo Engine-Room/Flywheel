@@ -72,40 +72,40 @@ public class SimpleBackendType implements BackendType {
 		private Component engineMessage;
 		private Supplier<Engine> engineSupplier;
 		private Supplier<BackendType> fallback;
-		private BooleanSupplier booleanSupplier;
+		private BooleanSupplier isSupported;
 
-		public Builder setProperName(String properName) {
+		public Builder properName(String properName) {
 			this.properName = properName;
 			return this;
 		}
 
-		public Builder setShortName(String shortName) {
+		public Builder shortName(String shortName) {
 			this.shortName = shortName;
 			return this;
 		}
 
-		public Builder setEngineMessage(Component engineMessage) {
+		public Builder engineMessage(Component engineMessage) {
 			this.engineMessage = engineMessage;
 			return this;
 		}
 
-		public Builder setEngineSupplier(Supplier<Engine> engineSupplier) {
+		public Builder engineSupplier(Supplier<Engine> engineSupplier) {
 			this.engineSupplier = engineSupplier;
 			return this;
 		}
 
-		public Builder setFallback(Supplier<BackendType> fallback) {
+		public Builder fallback(Supplier<BackendType> fallback) {
 			this.fallback = fallback;
 			return this;
 		}
 
-		public Builder supported(BooleanSupplier booleanSupplier) {
-			this.booleanSupplier = booleanSupplier;
+		public Builder supported(BooleanSupplier isSupported) {
+			this.isSupported = isSupported;
 			return this;
 		}
 
 		public BackendType register() {
-			return BackendTypes.register(new SimpleBackendType(properName, shortName, engineMessage, engineSupplier, fallback, booleanSupplier));
+			return BackendTypes.register(new SimpleBackendType(properName, shortName, engineMessage, engineSupplier, fallback, isSupported));
 		}
 	}
 }

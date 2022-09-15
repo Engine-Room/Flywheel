@@ -7,8 +7,8 @@ import com.jozufozu.flywheel.backend.gl.array.VertexAttribute;
 import com.jozufozu.flywheel.backend.gl.array.VertexAttributeF;
 import com.jozufozu.flywheel.core.source.generate.GlslExpr;
 
-public record MatrixItem(int rows, int cols, String typeName, String packedTypeName,
-						 String unpackingFunction) implements InputType {
+public record MatInput(int rows, int cols, String typeName, String packedTypeName,
+					   String unpackingFunction) implements InputType {
 
 	@Override
 	public void provideAttributes(Consumer<VertexAttribute> consumer) {

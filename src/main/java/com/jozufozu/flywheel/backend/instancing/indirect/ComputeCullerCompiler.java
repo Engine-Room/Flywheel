@@ -33,8 +33,7 @@ public class ComputeCullerCompiler extends Memoizer<StructType<?>, GlProgram> {
 
 		var finalSource = new StringBuilder();
 		CompilationContext context = new CompilationContext();
-		var components = List.of(structType.getLayout()
-				.getIndirectComponent(), location.getFile(), Components.Pipeline.INDIRECT_CULL.getFile());
+		var components = List.of(new IndirectComponent(structType.getLayout().layoutItems), location.getFile(), Components.Pipeline.INDIRECT_CULL.getFile());
 
 		var names = ImmutableList.<ResourceLocation>builder();
 		var included = new LinkedHashSet<SourceComponent>(); // linked to preserve order
