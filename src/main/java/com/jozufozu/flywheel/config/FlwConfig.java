@@ -31,10 +31,6 @@ public class FlwConfig {
 		return client.backend.get();
 	}
 
-	public boolean debugNormals() {
-		return client.debugNormals.get();
-	}
-
 	public boolean limitUpdates() {
 		return client.limitUpdates.get();
 	}
@@ -44,15 +40,11 @@ public class FlwConfig {
 
 	public static class ClientConfig {
 		public final EnumValue<BackendType> backend;
-		public final BooleanValue debugNormals;
 		public final BooleanValue limitUpdates;
 
 		public ClientConfig(ForgeConfigSpec.Builder builder) {
 			backend = builder.comment("Select the backend to use.")
 					.defineEnum("backend", BackendType.INSTANCING);
-
-			debugNormals = builder.comment("Enable or disable a debug overlay that colors pixels by their normal.")
-					.define("debugNormals", false);
 
 			limitUpdates = builder.comment("Enable or disable instance update limiting with distance.")
 					.define("limitUpdates", true);

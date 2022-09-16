@@ -6,12 +6,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
 
 public class RenderWork {
-	private static final Queue<Runnable> runs = new ConcurrentLinkedQueue<>();
+	private static final Queue<Runnable> RUNS = new ConcurrentLinkedQueue<>();
 
-
-	public static void onRenderWorldLast(RenderLevelLastEvent event) {
-		while (!runs.isEmpty()) {
-			runs.remove()
+	public static void onRenderLevelLast(RenderLevelLastEvent event) {
+		while (!RUNS.isEmpty()) {
+			RUNS.remove()
 					.run();
 		}
 	}
@@ -20,6 +19,6 @@ public class RenderWork {
 	 * Queue work to be executed at the end of a frame
 	 */
 	public static void enqueue(Runnable run) {
-		runs.add(run);
+		RUNS.add(run);
 	}
 }
