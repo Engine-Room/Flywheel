@@ -59,23 +59,6 @@ public class FlwCommands {
 						return Command.SINGLE_SUCCESS;
 					})));
 
-		commandBuilder.addValue(config.client.debugNormals, "debugNormals", (builder, value) -> booleanValueCommand(builder, value,
-				(source, bool) -> {
-					LocalPlayer player = Minecraft.getInstance().player;
-					if (player == null) return;
-
-					Component text = new TextComponent("Normal debug mode is currently: ").append(boolToText(bool));
-					player.displayClientMessage(text, false);
-				},
-				(source, bool) -> {
-					LocalPlayer player = Minecraft.getInstance().player;
-					if (player == null) return;
-
-					Component text = boolToText(bool).append(new TextComponent(" normal debug mode").withStyle(ChatFormatting.WHITE));
-					player.displayClientMessage(text, false);
-				}
-			));
-
 		commandBuilder.addValue(config.client.limitUpdates, "limitUpdates", (builder, value) -> booleanValueCommand(builder, value,
 				(source, bool) -> {
 					LocalPlayer player = Minecraft.getInstance().player;
@@ -95,7 +78,18 @@ public class FlwCommands {
 				}
 			));
 
-		commandBuilder.command.then(Commands.literal("debugCrumble")
+		// TODO
+		commandBuilder.command.then(Commands.literal("debugNormals"))
+				.executes(context -> {
+					LocalPlayer player = Minecraft.getInstance().player;
+					if (player == null) return 0;
+
+					player.displayClientMessage(new TextComponent("This command is not yet implemented."), false);
+
+					return Command.SINGLE_SUCCESS;
+				});
+
+		commandBuilder.command.then(Commands.literal("debugCrumbling")
 				.then(Commands.argument("pos", BlockPosArgument.blockPos())
 						.then(Commands.argument("stage", IntegerArgumentType.integer(0, 9))
 								.executes(context -> {
@@ -111,7 +105,7 @@ public class FlwCommands {
 
 									executor.level.destroyBlockProgress(executor.getId(), pos, value);
 
-									return 1;
+									return Command.SINGLE_SUCCESS;
 								}))));
 
 		commandBuilder.command.then(Commands.literal("debugFrustum")

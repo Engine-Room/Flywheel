@@ -33,7 +33,7 @@ public class ModelPart implements Mesh {
 
 		vertexList = getVertexType().createVertexList();
 		vertexList.ptr(ptr);
-		vertexList.setVertexCount(vertexCount);
+		vertexList.vertexCount(vertexCount);
 
 		boundingSphere = ModelUtil.computeBoundingSphere(vertexList);
 	}

@@ -6,14 +6,14 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraftforge.eventbus.api.Event;
 
 public class ReloadRenderersEvent extends Event {
-	private final ClientLevel world;
+	private final ClientLevel level;
 
-	public ReloadRenderersEvent(ClientLevel world) {
-		this.world = world;
+	public ReloadRenderersEvent(ClientLevel level) {
+		this.level = level;
 	}
 
 	@Nullable
-	public ClientLevel getWorld() {
-		return world;
+	public ClientLevel getLevel() {
+		return level;
 	}
 }

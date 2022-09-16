@@ -5,7 +5,7 @@ public interface ReusableVertexList extends MutableVertexList {
 
 	void ptr(long ptr);
 
-	void shiftPtr(int vertices);
+	int vertexStride();
 
-	void setVertexCount(int vertexCount);
+	void vertexCount(int vertexCount);
 }

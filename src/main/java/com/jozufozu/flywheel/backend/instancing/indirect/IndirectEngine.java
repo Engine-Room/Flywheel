@@ -12,6 +12,7 @@ import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
@@ -65,10 +66,12 @@ public class IndirectEngine implements Engine {
 
 	@Override
 	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
-		setup();
-
-		for (var list : indirectDrawManager.lists.values()) {
-			list.submit(stage);
+		try (var restoreState = GlStateTracker.getRestoreState()) {
+			setup();
+	
+			for (var list : indirectDrawManager.lists.values()) {
+				list.submit(stage);
+			}
 		}
 	}
 
@@ -121,13 +124,15 @@ public class IndirectEngine implements Engine {
 
 	@Override
 	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
-		for (var model : uninitializedModels) {
-			model.init(indirectDrawManager);
-		}
-		uninitializedModels.clear();
-
-		for (IndirectCullingGroup<?> value : indirectDrawManager.lists.values()) {
-			value.beginFrame();
+		try (var restoreState = GlStateTracker.getRestoreState()) {
+			for (var model : uninitializedModels) {
+				model.init(indirectDrawManager);
+			}
+			uninitializedModels.clear();
+	
+			for (IndirectCullingGroup<?> value : indirectDrawManager.lists.values()) {
+				value.beginFrame();
+			}
 		}
 	}
 

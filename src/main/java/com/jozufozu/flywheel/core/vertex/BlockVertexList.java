@@ -153,7 +153,7 @@ public class BlockVertexList extends AbstractVertexList {
 	}
 
 	@Override
-	public void shiftPtr(int vertices) {
-		ptr += vertices * STRIDE;
+	public int vertexStride() {
+		return STRIDE;
 	}
 }

@@ -18,14 +18,14 @@ public class NetworkLightUpdateMixin {
 	@Inject(at = @At("TAIL"), method = "handleLightUpdatePacket")
 	private void flywheel$onLightPacket(ClientboundLightUpdatePacket packet, CallbackInfo ci) {
 		RenderWork.enqueue(() -> {
-			ClientLevel world = Minecraft.getInstance().level;
+			ClientLevel level = Minecraft.getInstance().level;
 
-			if (world == null) return;
+			if (level == null) return;
 
 			int chunkX = packet.getX();
 			int chunkZ = packet.getZ();
 
-			LightUpdater.get(world)
+			LightUpdater.get(level)
 					.onLightPacket(chunkX, chunkZ);
 		});
 	}

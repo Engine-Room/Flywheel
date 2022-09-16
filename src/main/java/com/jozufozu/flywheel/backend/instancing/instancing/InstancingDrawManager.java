@@ -23,7 +23,7 @@ public class InstancingDrawManager {
 	private final List<UninitializedModel> uninitializedModels = new ArrayList<>();
 	private final List<GPUInstancer<?>> allInstancers = new ArrayList<>();
 	private final Map<RenderStage, DrawSet> renderLists = new EnumMap<>(RenderStage.class);
-	private final Map<VertexType, MeshPool> meshPools = new HashMap<>();
+	private final Map<VertexType, InstancedMeshPool> meshPools = new HashMap<>();
 
 	public DrawSet get(RenderStage stage) {
 		return renderLists.getOrDefault(stage, DrawSet.EMPTY);
@@ -49,7 +49,7 @@ public class InstancingDrawManager {
 
 	public void delete() {
 		meshPools.values()
-				.forEach(MeshPool::delete);
+				.forEach(InstancedMeshPool::delete);
 		meshPools.clear();
 
 		renderLists.values()
@@ -77,8 +77,8 @@ public class InstancingDrawManager {
 		allInstancers.add(instancer);
 	}
 
-	private MeshPool.BufferedMesh alloc(Mesh mesh) {
-		return meshPools.computeIfAbsent(mesh.getVertexType(), MeshPool::new)
+	private InstancedMeshPool.BufferedMesh alloc(Mesh mesh) {
+		return meshPools.computeIfAbsent(mesh.getVertexType(), InstancedMeshPool::new)
 				.alloc(mesh);
 	}
 

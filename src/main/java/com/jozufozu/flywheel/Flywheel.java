@@ -97,7 +97,7 @@ public class Flywheel {
 		forgeEventBus.addListener(ForgeEvents::unloadWorld);
 		forgeEventBus.addListener(ForgeEvents::tickLight);
 
-		forgeEventBus.addListener(EventPriority.LOWEST, RenderWork::onRenderWorldLast);
+		forgeEventBus.addListener(EventPriority.LOWEST, RenderWork::onRenderLevelLast);
 
 		modEventBus.addListener(PartialModel::onModelRegistry);
 		modEventBus.addListener(PartialModel::onModelBake);

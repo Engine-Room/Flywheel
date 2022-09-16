@@ -109,9 +109,9 @@ public class Loader implements ResourceManagerReloadListener {
 			throw new ShaderLoadingException("Compilation failed");
 		}
 
-		ClientLevel world = Minecraft.getInstance().level;
-		if (Backend.canUseInstancing(world)) {
-			InstancedRenderDispatcher.resetInstanceWorld(world);
+		ClientLevel level = Minecraft.getInstance().level;
+		if (Backend.canUseInstancing(level)) {
+			InstancedRenderDispatcher.resetInstanceLevel(level);
 		}
 
 	}

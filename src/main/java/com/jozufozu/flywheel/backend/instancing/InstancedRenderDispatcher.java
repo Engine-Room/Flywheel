@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.backend.instancing;
 import java.util.List;
 
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.instancing.effect.Effect;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
@@ -77,11 +78,11 @@ public class InstancedRenderDispatcher {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		ClientLevel world = mc.level;
+		ClientLevel level = mc.level;
 		AnimationTickHolder.tick();
 
 		if (Backend.isOn()) {
-			instanceWorlds.get(world)
+			instanceWorlds.get(level)
 					.tick();
 		}
 	}
@@ -94,22 +95,22 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static void onRenderStage(RenderStageEvent event) {
-		ClientLevel world = event.getContext().level();
-		if (!Backend.canUseInstancing(world)) return;
+		ClientLevel level = event.getContext().level();
+		if (!Backend.canUseInstancing(level)) return;
 
-		instanceWorlds.get(world).renderStage(event.getContext(), event.getStage());
+		instanceWorlds.get(level).renderStage(event.getContext(), event.getStage());
 	}
 
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
-		ClientLevel world = event.getWorld();
-		if (Backend.isOn() && world != null) {
-			resetInstanceWorld(world);
+		ClientLevel level = event.getLevel();
+		if (Backend.isOn() && level != null) {
+			resetInstanceLevel(level);
 		}
 	}
 
-	public static void resetInstanceWorld(ClientLevel world) {
-		instanceWorlds.replace(world, InstanceWorld::delete)
-				.loadEntities(world);
+	public static void resetInstanceLevel(ClientLevel level) {
+		instanceWorlds.replace(level, InstanceWorld::delete)
+				.loadEntities(level);
 	}
 
 	public static void getDebugString(List<String> debug) {

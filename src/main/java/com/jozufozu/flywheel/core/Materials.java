@@ -25,7 +25,7 @@ public final class Materials {
 		}
 
 		DiffuseLightCalculator diffuseCalc = DiffuseLightCalculator.forLevel(level);
-		for (int i = 0; i < vertexList.getVertexCount(); i++) {
+		for (int i = 0; i < vertexList.vertexCount(); i++) {
 			float diffuse = diffuseCalc.getDiffuse(vertexList.normalX(i), vertexList.normalY(i), vertexList.normalZ(i), true);
 			vertexList.r(i, (byte) Mth.clamp((int) (Byte.toUnsignedInt(vertexList.r(i)) * diffuse), 0, 255));
 			vertexList.g(i, (byte) Mth.clamp((int) (Byte.toUnsignedInt(vertexList.g(i)) * diffuse), 0, 255));

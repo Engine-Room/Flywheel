@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -48,9 +47,7 @@ public class LevelRendererMixin {
 		var culler = RenderContext.createCuller(viewProjection, (float) -cameraPos.x, (float) -cameraPos.y, (float) -cameraPos.z);
 		flywheel$renderContext = new RenderContext((LevelRenderer) (Object) this, level, pPoseStack, viewProjection, pProjectionMatrix, renderBuffers, pCamera, culler);
 
-		try (var restoreState = GlStateTracker.getRestoreState()) {
-			MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(flywheel$renderContext));
-		}
+		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(flywheel$renderContext));
 	}
 
 	@Inject(at = @At("TAIL"), method = "renderLevel")
@@ -78,9 +75,7 @@ public class LevelRendererMixin {
 	@Unique
 	private void flywheel$dispatch(RenderStage stage) {
 		if (flywheel$renderContext != null) {
-			try (var restoreState = GlStateTracker.getRestoreState()) {
-				MinecraftForge.EVENT_BUS.post(new RenderStageEvent(flywheel$renderContext, stage));
-			}
+			MinecraftForge.EVENT_BUS.post(new RenderStageEvent(flywheel$renderContext, stage));
 		}
 	}
 

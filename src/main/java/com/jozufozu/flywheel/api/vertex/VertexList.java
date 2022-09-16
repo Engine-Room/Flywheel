@@ -72,18 +72,18 @@ public interface VertexList extends PointSet {
 	}
 
 	default void writeAll(MutableVertexList dst) {
-		write(dst, 0, 0, getVertexCount());
+		write(dst, 0, 0, vertexCount());
 	}
 
-	int getVertexCount();
+	int vertexCount();
 
 	default boolean isEmpty() {
-		return getVertexCount() == 0;
+		return vertexCount() == 0;
 	}
 
 	@Override
 	default int size() {
-		return getVertexCount();
+		return vertexCount();
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,16 +15,18 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.jozufozu.flywheel.api.RenderStage;
+import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.model.Model;
+import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.renderer.RenderType;
 
 public class BatchingTransformManager {
-
 	private final List<UninitializedModel> uninitializedModels = new ArrayList<>();
 	private final List<CPUInstancer<?>> allInstancers = new ArrayList<>();
 	private final Map<RenderStage, TransformSet> transformSets = new EnumMap<>(RenderStage.class);
 	private final Map<RenderStage, TransformSet> transformSetsView = Collections.unmodifiableMap(transformSets);
+	private final Map<VertexFormat, BatchedMeshPool> meshPools = new HashMap<>();
 
 	public TransformSet get(RenderStage stage) {
 		return transformSets.getOrDefault(stage, TransformSet.EMPTY);
@@ -42,9 +45,17 @@ public class BatchingTransformManager {
 			add(model.instancer(), model.model());
 		}
 		uninitializedModels.clear();
+
+		for (var pool : meshPools.values()) {
+			pool.flush();
+		}
 	}
 
 	public void delete() {
+		meshPools.values()
+				.forEach(BatchedMeshPool::delete);
+		meshPools.clear();
+
 		allInstancers.forEach(CPUInstancer::delete);
 		allInstancers.clear();
 	}
@@ -56,19 +67,22 @@ public class BatchingTransformManager {
 	private void add(CPUInstancer<?> instancer, Model model) {
 		var meshes = model.getMeshes();
 		for (var entry : meshes.entrySet()) {
-			TransformCall<?> transformCall = new TransformCall<>(instancer, entry.getKey(), entry.getValue());
-			var material = transformCall.getMaterial();
+			var material = entry.getKey();
 			var renderType = material.getBatchingRenderType();
+			TransformCall<?> transformCall = new TransformCall<>(instancer, material, alloc(entry.getValue(), renderType.format()));
 
-//			transformSets.computeIfAbsent(material.getRenderStage(), TransformSet::new)
-			transformSets.computeIfAbsent(RenderStage.AFTER_FINAL_END_BATCH, TransformSet::new)
+			transformSets.computeIfAbsent(material.getRenderStage(), TransformSet::new)
 					.put(renderType, transformCall);
 		}
 		allInstancers.add(instancer);
 	}
 
-	public static class TransformSet implements Iterable<Map.Entry<RenderType, Collection<TransformCall<?>>>> {
+	private BatchedMeshPool.BufferedMesh alloc(Mesh mesh, VertexFormat format) {
+		return meshPools.computeIfAbsent(format, BatchedMeshPool::new)
+				.alloc(mesh);
+	}
 
+	public static class TransformSet implements Iterable<Map.Entry<RenderType, Collection<TransformCall<?>>>> {
 		public static final TransformSet EMPTY = new TransformSet(ImmutableListMultimap.of());
 
 		final ListMultimap<RenderType, TransformCall<?>> transformCalls;

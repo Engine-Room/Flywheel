@@ -19,16 +19,14 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.core.model.Mesh;
 
-public class MeshPool {
-
+public class InstancedMeshPool {
 	private final VertexType vertexType;
+
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
 	private final List<BufferedMesh> allBuffered = new ArrayList<>();
-
 	private final List<BufferedMesh> pendingUpload = new ArrayList<>();
 
 	private final GlBuffer vbo;
-
 	private long byteSize;
 
 	private boolean dirty;
@@ -37,7 +35,7 @@ public class MeshPool {
 	/**
 	 * Create a new mesh pool.
 	 */
-	public MeshPool(VertexType vertexType) {
+	public InstancedMeshPool(VertexType vertexType) {
 		this.vertexType = vertexType;
 		int stride = vertexType.getStride();
 		this.vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER);
@@ -46,10 +44,10 @@ public class MeshPool {
 	}
 
 	/**
-	 * Allocate a model in the arena.
+	 * Allocate a mesh in the arena.
 	 *
-	 * @param mesh The model to allocate.
-	 * @return A handle to the allocated model.
+	 * @param mesh The mesh to allocate.
+	 * @return A handle to the allocated mesh.
 	 */
 	public BufferedMesh alloc(Mesh mesh) {
 		return meshes.computeIfAbsent(mesh, m -> {
@@ -57,13 +55,13 @@ public class MeshPool {
 				throw new IllegalArgumentException("Mesh has wrong vertex type");
 			}
 
-			BufferedMesh bufferedModel = new BufferedMesh(m, byteSize);
-			byteSize += m.size();
-			allBuffered.add(bufferedModel);
-			pendingUpload.add(bufferedModel);
+			BufferedMesh bufferedMesh = new BufferedMesh(m, byteSize);
+			byteSize += bufferedMesh.size();
+			allBuffered.add(bufferedMesh);
+			pendingUpload.add(bufferedMesh);
 
 			dirty = true;
-			return bufferedModel;
+			return bufferedMesh;
 		});
 	}
 
@@ -90,7 +88,6 @@ public class MeshPool {
 	}
 
 	private void processDeletions() {
-
 		// remove deleted meshes
 		allBuffered.removeIf(bufferedMesh -> {
 			boolean deleted = bufferedMesh.isDeleted();
@@ -100,16 +97,16 @@ public class MeshPool {
 			return deleted;
 		});
 
-		// re-evaluate first vertex for each model
+		// re-evaluate first vertex for each mesh
 		int byteIndex = 0;
-		for (BufferedMesh model : allBuffered) {
-			if (model.byteIndex != byteIndex) {
-				pendingUpload.add(model);
+		for (BufferedMesh mesh : allBuffered) {
+			if (mesh.byteIndex != byteIndex) {
+				pendingUpload.add(mesh);
 			}
 
-			model.byteIndex = byteIndex;
+			mesh.byteIndex = byteIndex;
 
-			byteIndex += model.mesh.size();
+			byteIndex += mesh.size();
 		}
 
 		this.byteSize = byteIndex;
@@ -130,14 +127,13 @@ public class MeshPool {
 			long ptr = mapped.getPtr();
 
 			int byteIndex = 0;
-			for (BufferedMesh model : allBuffered) {
-				model.byteIndex = byteIndex;
+			for (BufferedMesh mesh : allBuffered) {
+				mesh.byteIndex = byteIndex;
 
-				model.buffer(ptr);
+				mesh.buffer(ptr);
 
-				byteIndex += model.mesh.size();
+				byteIndex += mesh.size();
 			}
-
 		} catch (Exception e) {
 			Flywheel.LOGGER.error("Error uploading pooled meshes:", e);
 		}
@@ -145,10 +141,12 @@ public class MeshPool {
 
 	private void uploadPending() {
 		try (MappedBuffer mapped = vbo.map()) {
-			long buffer = mapped.getPtr();
-			for (BufferedMesh model : pendingUpload) {
-				model.buffer(buffer);
+			long ptr = mapped.getPtr();
+
+			for (BufferedMesh mesh : pendingUpload) {
+				mesh.buffer(ptr);
 			}
+
 			pendingUpload.clear();
 		} catch (Exception e) {
 			Flywheel.LOGGER.error("Error uploading pooled meshes:", e);
@@ -162,24 +160,33 @@ public class MeshPool {
 		pendingUpload.clear();
 	}
 
+	public VertexType getVertexType() {
+		return vertexType;
+	}
+
 	@Override
 	public String toString() {
-		return "MeshPool{" + "vertexType=" + vertexType + ", byteSize=" + byteSize + ", meshCount=" + meshes.size() + '}';
+		return "InstancedMeshPool{" + "vertexType=" + vertexType + ", byteSize=" + byteSize + ", meshCount=" + meshes.size() + '}';
 	}
 
 	public class BufferedMesh {
-
-		private final ElementBuffer ebo;
 		private final Mesh mesh;
+		private final ElementBuffer ebo;
 		private long byteIndex;
 		private boolean deleted;
 
 		private final Set<GlVertexArray> boundTo = new HashSet<>();
 
-		public BufferedMesh(Mesh mesh, long byteIndex) {
+		private BufferedMesh(Mesh mesh, long byteIndex) {
 			this.mesh = mesh;
 			this.byteIndex = byteIndex;
 			this.ebo = mesh.createEBO();
+		}
+
+		private void buffer(long ptr) {
+			mesh.write(ptr + byteIndex);
+
+			boundTo.clear();
 		}
 
 		public void drawCall(GlVertexArray vao) {
@@ -187,7 +194,7 @@ public class MeshPool {
 		}
 
 		public void drawInstances(GlVertexArray vao, int instanceCount) {
-			if (hasAnythingToRender()) {
+			if (isEmpty()) {
 				return;
 			}
 
@@ -196,50 +203,51 @@ public class MeshPool {
 			draw(instanceCount);
 		}
 
-		private boolean hasAnythingToRender() {
+		private boolean isEmpty() {
 			return mesh.isEmpty() || isDeleted();
+		}
+
+		private void setup(GlVertexArray vao) {
+			if (boundTo.add(vao)) {
+				vao.enableArrays(getAttributeCount());
+				vao.bindAttributes(InstancedMeshPool.this.vbo, 0, vertexType.getLayout(), byteIndex);
+			}
+			vao.bindElementArray(ebo.buffer);
+			vao.bind();
 		}
 
 		private void draw(int instanceCount) {
 			if (instanceCount > 1) {
-				GL32.glDrawElementsInstanced(GlPrimitive.TRIANGLES.glEnum, this.ebo.elementCount, this.ebo.eboIndexType.getGlEnum(), 0, instanceCount);
+				GL32.glDrawElementsInstanced(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0, instanceCount);
 			} else {
-				GL32.glDrawElements(GlPrimitive.TRIANGLES.glEnum, this.ebo.elementCount, this.ebo.eboIndexType.getGlEnum(), 0);
+				GL32.glDrawElements(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0);
 			}
-		}
-
-		private void setup(GlVertexArray vao) {
-			if (this.boundTo.add(vao)) {
-				vao.enableArrays(getAttributeCount());
-				vao.bindAttributes(MeshPool.this.vbo, 0, vertexType.getLayout(), this.byteIndex);
-			}
-			vao.bindElementArray(this.ebo.buffer);
-			vao.bind();
-		}
-
-		public boolean isDeleted() {
-			return this.deleted;
 		}
 
 		public void delete() {
-			MeshPool.this.dirty = true;
-			MeshPool.this.anyToRemove = true;
-			this.deleted = true;
+			deleted = true;
+			InstancedMeshPool.this.dirty = true;
+			InstancedMeshPool.this.anyToRemove = true;
 		}
 
-		private void buffer(long ptr) {
-			this.mesh.write(ptr + byteIndex);
+		public Mesh getMesh() {
+			return mesh;
+		}
 
-			this.boundTo.clear();
+		public int size() {
+			return mesh.size();
+		}
+
+		public VertexType getVertexType() {
+			return vertexType;
 		}
 
 		public int getAttributeCount() {
 			return vertexType.getLayout().getAttributeCount();
 		}
 
-		public VertexType getVertexType() {
-			return vertexType;
+		public boolean isDeleted() {
+			return deleted;
 		}
 	}
-
 }
