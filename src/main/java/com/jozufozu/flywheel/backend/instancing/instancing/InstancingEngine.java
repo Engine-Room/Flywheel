@@ -12,6 +12,7 @@ import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
@@ -64,7 +65,9 @@ public class InstancingEngine implements Engine {
 
 	@Override
 	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
-		drawManager.flush();
+		try (var restoreState = GlStateTracker.getRestoreState()) {
+			drawManager.flush();
+		}
 	}
 
 	@Override
@@ -75,9 +78,11 @@ public class InstancingEngine implements Engine {
 			return;
 		}
 
-		setup();
-
-		render(drawSet);
+		try (var restoreState = GlStateTracker.getRestoreState()) {
+			setup();
+	
+			render(drawSet);
+		}
 	}
 
 	protected void setup() {

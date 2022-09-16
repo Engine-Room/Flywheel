@@ -23,7 +23,6 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 
 public class BatchingEngine implements Engine {
-
 	protected final BatchingTransformManager transformManager = new BatchingTransformManager();
 	protected final BatchingDrawTracker drawTracker = new BatchingDrawTracker();
 	protected final Map<StructType<?>, CPUInstancerFactory<?>> factories = new HashMap<>();
@@ -54,41 +53,38 @@ public class BatchingEngine implements Engine {
 	}
 
 	public void submitTasks(TaskEngine taskEngine, PoseStack stack, ClientLevel level) {
-		BatchingTransformManager.TransformSet transformSet = transformManager.get(RenderStage.AFTER_FINAL_END_BATCH);
-		for (var entry : transformSet) {
-			var renderType = entry.getKey();
-			var transformCalls = entry.getValue();
+		for (var transformSetEntry : transformManager.getTransformSetsView().entrySet()) {
+			var stage = transformSetEntry.getKey();
+			var transformSet = transformSetEntry.getValue();
 
-			int vertices = 0;
-			for (var transformCall : transformCalls) {
-				vertices += transformCall.getTotalVertexCount();
-			}
+			for (var entry : transformSet) {
+				var renderType = entry.getKey();
+				var transformCalls = entry.getValue();
 
-			if (vertices == 0) {
-				continue;
-			}
+				int vertices = 0;
+				for (var transformCall : transformCalls) {
+					vertices += transformCall.getTotalVertexCount();
+				}
 
-			DrawBuffer buffer = drawTracker.getBuffer(renderType);
-			buffer.prepare(vertices);
+				if (vertices == 0) {
+					continue;
+				}
 
-			int startVertex = 0;
-			for (var transformCall : transformCalls) {
-				transformCall.submitTasks(taskEngine, buffer, startVertex, stack, level);
-				startVertex += transformCall.getTotalVertexCount();
+				DrawBuffer buffer = drawTracker.getBuffer(renderType, stage);
+				buffer.prepare(vertices);
+
+				int startVertex = 0;
+				for (var transformCall : transformCalls) {
+					transformCall.submitTasks(taskEngine, buffer, startVertex, stack, level);
+					startVertex += transformCall.getTotalVertexCount();
+				}
 			}
 		}
 	}
 
 	@Override
 	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
-		// FIXME: properly support material stages
-		// This also breaks block outlines on batched block entities
-		// and makes translucent blocks occlude everything Flywheel renders
-		if (stage != RenderStage.AFTER_FINAL_END_BATCH) {
-			return;
-		}
-
-		drawTracker.drawAll();
+		drawTracker.draw(stage);
 	}
 
 	@Override

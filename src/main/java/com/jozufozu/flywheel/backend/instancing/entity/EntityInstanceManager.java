@@ -42,12 +42,12 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 			return false;
 		}
 
-		Level world = entity.level;
+		Level level = entity.level;
 
-		if (Backend.isFlywheelWorld(world)) {
+		if (Backend.isFlywheelLevel(level)) {
 			BlockPos pos = entity.blockPosition();
 
-			BlockGetter existingChunk = world.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
+			BlockGetter existingChunk = level.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
 
 			return existingChunk != null;
 		}

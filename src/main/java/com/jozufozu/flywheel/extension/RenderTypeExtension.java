@@ -1,27 +1,26 @@
 package com.jozufozu.flywheel.extension;
 
-import com.jozufozu.flywheel.backend.instancing.batching.DrawBuffer;
+import com.jozufozu.flywheel.backend.instancing.batching.DrawBufferSet;
 
 import net.minecraft.client.renderer.RenderType;
 
 /**
- * Duck interface to make RenderType store a DrawBuffer.
+ * Duck interface to make RenderType store a DrawBufferSet.
  *
  * @see RenderType
  */
 public interface RenderTypeExtension {
+	/**
+	 * @return The DrawBufferSet associated with this RenderType.
+	 */
+	DrawBufferSet flywheel$getDrawBufferSet();
 
 	/**
-	 * @return The DrawBuffer associated with this RenderType.
+	 * Helper function to cast a RenderType to a RenderTypeExtension and get its DrawBufferSet.
+	 * @param type The RenderType to get the DrawBufferSet from.
+	 * @return The DrawBufferSet associated with the given RenderType.
 	 */
-	DrawBuffer flywheel$getDrawBuffer();
-
-	/**
-	 * Helper function to cast a RenderType to a RenderTypeExtension and get its DrawBuffer.
-	 * @param type The RenderType to get the DrawBuffer from.
-	 * @return The DrawBuffer associated with the given RenderType.
-	 */
-	static DrawBuffer getDrawBuffer(RenderType type) {
-		return ((RenderTypeExtension) type).flywheel$getDrawBuffer();
+	static DrawBufferSet getDrawBufferSet(RenderType type) {
+		return ((RenderTypeExtension) type).flywheel$getDrawBufferSet();
 	}
 }

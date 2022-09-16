@@ -47,20 +47,20 @@ public class BlockEntityInstanceManager extends InstanceManager<BlockEntity> {
 			return false;
 		}
 
-		Level world = blockEntity.getLevel();
+		Level level = blockEntity.getLevel();
 
-		if (world == null) {
+		if (level == null) {
 			return false;
 		}
 
-		if (world.isEmptyBlock(blockEntity.getBlockPos())) {
+		if (level.isEmptyBlock(blockEntity.getBlockPos())) {
 			return false;
 		}
 
-		if (Backend.isFlywheelWorld(world)) {
+		if (Backend.isFlywheelLevel(level)) {
 			BlockPos pos = blockEntity.getBlockPos();
 
-			BlockGetter existingChunk = world.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
+			BlockGetter existingChunk = level.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
 
 			return existingChunk != null;
 		}

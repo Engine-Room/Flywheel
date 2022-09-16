@@ -66,8 +66,8 @@ public class ModelUtil {
 		ReusableVertexList dstList = dstVertexType.createVertexList();
 		srcList.ptr(srcPtr);
 		dstList.ptr(dstPtr);
-		srcList.setVertexCount(vertexCount);
-		dstList.setVertexCount(vertexCount);
+		srcList.vertexCount(vertexCount);
+		dstList.vertexCount(vertexCount);
 
 		srcList.writeAll(dstList);
 

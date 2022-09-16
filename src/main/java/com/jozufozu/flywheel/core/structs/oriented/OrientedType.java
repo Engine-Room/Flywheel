@@ -59,7 +59,7 @@ public class OrientedType implements StructType<OrientedPart> {
 			Matrix3f normalMatrix = new Matrix3f(q);
 
 			int light = struct.getPackedLight();
-			for (int i = 0; i < vertexList.getVertexCount(); i++) {
+			for (int i = 0; i < vertexList.vertexCount(); i++) {
 				pos.set(
 						vertexList.x(i),
 						vertexList.y(i),
