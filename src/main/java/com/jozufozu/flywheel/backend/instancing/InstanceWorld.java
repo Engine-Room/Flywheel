@@ -142,10 +142,10 @@ public class InstanceWorld implements AutoCloseable {
 	/**
 	 * Instantiate all the necessary instances to render the given world.
 	 */
-	public void loadEntities(ClientLevel world) {
+	public void loadEntities(ClientLevel level) {
 		// Block entities are loaded while chunks are baked.
-		// Entities are loaded with the world, so when chunks are reloaded they need to be re-added.
-		ClientLevelExtension.getAllLoadedEntities(world)
+		// Entities are loaded with the level, so when chunks are reloaded they need to be re-added.
+		ClientLevelExtension.getAllLoadedEntities(level)
 				.forEach(entities::add);
 	}
 

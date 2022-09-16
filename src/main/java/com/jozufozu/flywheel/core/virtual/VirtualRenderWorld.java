@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.FlywheelWorld;
+import com.jozufozu.flywheel.api.FlywheelLevel;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -43,7 +43,7 @@ import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.LevelTickAccess;
 
-public class VirtualRenderWorld extends Level implements FlywheelWorld {
+public class VirtualRenderWorld extends Level implements FlywheelLevel {
 	public final Map<BlockPos, BlockState> blocksAdded = new HashMap<>();
 	public final Map<BlockPos, BlockEntity> besAdded = new HashMap<>();
 	public final Set<SectionPos> spannedSections = new HashSet<>();

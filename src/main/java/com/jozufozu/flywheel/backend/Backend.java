@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.backend;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import com.jozufozu.flywheel.api.FlywheelWorld;
+import com.jozufozu.flywheel.api.FlywheelLevel;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.ParallelTaskEngine;
 import com.jozufozu.flywheel.config.BackendType;
@@ -61,21 +61,21 @@ public class Backend {
 		return TYPE != BackendType.OFF;
 	}
 
-	public static boolean canUseInstancing(@Nullable Level world) {
-		return isOn() && isFlywheelWorld(world);
+	public static boolean canUseInstancing(@Nullable Level level) {
+		return isOn() && isFlywheelLevel(level);
 	}
 
 	/**
-	 * Used to avoid calling Flywheel functions on (fake) worlds that don't specifically support it.
+	 * Used to avoid calling Flywheel functions on (fake) levels that don't specifically support it.
 	 */
-	public static boolean isFlywheelWorld(@Nullable LevelAccessor world) {
-		if (world == null) return false;
+	public static boolean isFlywheelLevel(@Nullable LevelAccessor level) {
+		if (level == null) return false;
 
-		if (!world.isClientSide()) return false;
+		if (!level.isClientSide()) return false;
 
-		if (world instanceof FlywheelWorld && ((FlywheelWorld) world).supportsFlywheel()) return true;
+		if (level instanceof FlywheelLevel && ((FlywheelLevel) level).supportsFlywheel()) return true;
 
-		return world == Minecraft.getInstance().level;
+		return level == Minecraft.getInstance().level;
 	}
 
 	public static boolean isGameActive() {

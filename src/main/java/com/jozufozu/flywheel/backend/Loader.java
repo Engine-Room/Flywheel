@@ -80,9 +80,9 @@ public class Loader implements ResourceManagerReloadListener {
 
 		Backend.LOGGER.info("Compiled all programs in " + StringUtil.formatTime(compileEnd - compileStart));
 
-		ClientLevel world = Minecraft.getInstance().level;
-		if (Backend.canUseInstancing(world)) {
-			InstancedRenderDispatcher.resetInstanceWorld(world);
+		ClientLevel level = Minecraft.getInstance().level;
+		if (Backend.canUseInstancing(level)) {
+			InstancedRenderDispatcher.resetInstanceLevel(level);
 		}
 
 	}
