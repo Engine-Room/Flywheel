@@ -1,23 +1,66 @@
 package com.jozufozu.flywheel.backend.instancing.indirect;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
-import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.core.model.Mesh;
+import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.util.Pair;
 
 public class IndirectDrawManager {
 
-	public final Map<Pair<StructType<?>, VertexType>, IndirectCullingGroup<?>> lists = new HashMap<>();
+	private final List<UninitializedModel> uninitializedModels = new ArrayList<>();
+	private final List<IndirectInstancer<?>> allInstancers = new ArrayList<>();
+	public final Map<Pair<StructType<?>, VertexType>, IndirectCullingGroup<?>> renderLists = new HashMap<>();
+
+	public void create(IndirectInstancer<?> instancer, Model model) {
+		uninitializedModels.add(new UninitializedModel(instancer, model));
+	}
+
+	public void flush() {
+		for (var model : uninitializedModels) {
+			add(model.instancer(), model.model());
+		}
+		uninitializedModels.clear();
+
+		for (IndirectCullingGroup<?> value : renderLists.values()) {
+			value.beginFrame();
+		}
+	}
+
+	public void delete() {
+		renderLists.values()
+				.forEach(IndirectCullingGroup::delete);
+		renderLists.clear();
+
+		allInstancers.forEach(IndirectInstancer::delete);
+		allInstancers.clear();
+	}
+
+	public void clearInstancers() {
+		allInstancers.forEach(IndirectInstancer::clear);
+	}
 
 	@SuppressWarnings("unchecked")
-	public <D extends InstancedPart> void add(IndirectInstancer<D> instancer, Material material, Mesh mesh) {
-		var indirectList = (IndirectCullingGroup<D>) lists.computeIfAbsent(Pair.of(instancer.type, mesh.getVertexType()), p -> new IndirectCullingGroup<>(p.first(), p.second()));
+	private <D extends InstancedPart> void add(IndirectInstancer<D> instancer, Model model) {
+		var meshes = model.getMeshes();
+		for (var entry : meshes.entrySet()) {
+			var material = entry.getKey();
+			var mesh = entry.getValue();
 
-		indirectList.drawSet.add(instancer, material, indirectList.meshPool.alloc(mesh));
+			var indirectList = (IndirectCullingGroup<D>) renderLists.computeIfAbsent(Pair.of(instancer.type, mesh.getVertexType()), p -> new IndirectCullingGroup<>(p.first(), p.second()));
+
+			indirectList.drawSet.add(instancer, material, indirectList.meshPool.alloc(mesh));
+
+			break; // TODO: support multiple meshes per model
+		}
+		allInstancers.add(instancer);
+	}
+
+	private record UninitializedModel(IndirectInstancer<?> instancer, Model model) {
 	}
 }

@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing.indirect;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,52 +30,55 @@ import net.minecraft.world.phys.Vec3;
 
 public class IndirectEngine implements Engine {
 
-	public static int MAX_ORIGIN_DISTANCE = 100;
-
-	protected BlockPos originCoordinate = BlockPos.ZERO;
-
-	protected final ContextShader context;
-
-	protected final Map<StructType<?>, IndirectFactory<?>> factories = new HashMap<>();
-
-	protected final List<IndirectModel<?>> uninitializedModels = new ArrayList<>();
-	protected final IndirectDrawManager indirectDrawManager = new IndirectDrawManager();
+	protected final IndirectDrawManager drawManager = new IndirectDrawManager();
+	protected final Map<StructType<?>, IndirectInstancerFactory<?>> factories = new HashMap<>();
 
 	/**
 	 * The set of instance managers that are attached to this engine.
 	 */
-	private final WeakHashSet<InstanceManager<?>> instanceManagers;
+	private final WeakHashSet<InstanceManager<?>> instanceManagers = new WeakHashSet<>();
 
-	public IndirectEngine(ContextShader context) {
+	protected final ContextShader context;
+	protected final int sqrMaxOriginDistance;
+
+	protected BlockPos originCoordinate = BlockPos.ZERO;
+
+	public IndirectEngine(ContextShader context, int sqrMaxOriginDistance) {
 		this.context = context;
-
-		this.instanceManagers = new WeakHashSet<>();
+		this.sqrMaxOriginDistance = sqrMaxOriginDistance;
 	}
 
 	@SuppressWarnings("unchecked")
 	@NotNull
 	@Override
-	public <D extends InstancedPart> IndirectFactory<D> factory(StructType<D> type) {
-		return (IndirectFactory<D>) factories.computeIfAbsent(type, this::createFactory);
+	public <D extends InstancedPart> IndirectInstancerFactory<D> factory(StructType<D> type) {
+		return (IndirectInstancerFactory<D>) factories.computeIfAbsent(type, this::createFactory);
 	}
 
 	@NotNull
-	private <D extends InstancedPart> IndirectFactory<D> createFactory(StructType<D> type) {
-		return new IndirectFactory<>(type, uninitializedModels::add);
+	private <D extends InstancedPart> IndirectInstancerFactory<D> createFactory(StructType<D> type) {
+		return new IndirectInstancerFactory<>(type, drawManager::create);
+	}
+
+	@Override
+	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
+		try (var restoreState = GlStateTracker.getRestoreState()) {
+			drawManager.flush();
+		}
 	}
 
 	@Override
 	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
 		try (var restoreState = GlStateTracker.getRestoreState()) {
 			setup();
-	
-			for (var list : indirectDrawManager.lists.values()) {
+
+			for (var list : drawManager.renderLists.values()) {
 				list.submit(stage);
 			}
 		}
 	}
 
-	private void setup() {
+	protected void setup() {
 		GlTextureUnit.T2.makeActive();
 		Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
 
@@ -87,14 +90,31 @@ public class IndirectEngine implements Engine {
 	}
 
 	@Override
-	public void delete() {
-		factories.values()
-				.forEach(IndirectFactory::delete);
+	public boolean maintainOriginCoordinate(Camera camera) {
+		Vec3 cameraPos = camera.getPosition();
 
-		indirectDrawManager.lists.values()
-				.forEach(IndirectCullingGroup::delete);
+		double distanceSqr = Vec3.atLowerCornerOf(originCoordinate)
+				.subtract(cameraPos)
+				.lengthSqr();
 
-		factories.clear();
+		if (distanceSqr > sqrMaxOriginDistance) {
+			shiftListeners(Mth.floor(cameraPos.x), Mth.floor(cameraPos.y), Mth.floor(cameraPos.z));
+			return true;
+		}
+		return false;
+	}
+
+	private void shiftListeners(int cX, int cY, int cZ) {
+		originCoordinate = new BlockPos(cX, cY, cZ);
+
+		drawManager.clearInstancers();
+
+		instanceManagers.forEach(InstanceManager::onOriginShift);
+	}
+
+	@Override
+	public void attachManagers(InstanceManager<?>... listener) {
+		Collections.addAll(instanceManagers, listener);
 	}
 
 	@Override
@@ -103,45 +123,9 @@ public class IndirectEngine implements Engine {
 	}
 
 	@Override
-	public void attachManagers(InstanceManager<?>... listener) {
-		instanceManagers.addAll(List.of(listener));
-	}
-
-	@Override
-	public boolean maintainOriginCoordinate(Camera camera) {
-		Vec3 cameraPos = camera.getPosition();
-
-		double distanceSqr = Vec3.atLowerCornerOf(originCoordinate)
-				.subtract(cameraPos)
-				.lengthSqr();
-
-		if (distanceSqr > MAX_ORIGIN_DISTANCE * MAX_ORIGIN_DISTANCE) {
-			shiftListeners(Mth.floor(cameraPos.x), Mth.floor(cameraPos.y), Mth.floor(cameraPos.z));
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
-		try (var restoreState = GlStateTracker.getRestoreState()) {
-			for (var model : uninitializedModels) {
-				model.init(indirectDrawManager);
-			}
-			uninitializedModels.clear();
-	
-			for (IndirectCullingGroup<?> value : indirectDrawManager.lists.values()) {
-				value.beginFrame();
-			}
-		}
-	}
-
-	private void shiftListeners(int cX, int cY, int cZ) {
-		originCoordinate = new BlockPos(cX, cY, cZ);
-
-		factories.values().forEach(IndirectFactory::clear);
-
-		instanceManagers.forEach(InstanceManager::onOriginShift);
+	public void delete() {
+		factories.clear();
+		drawManager.delete();
 	}
 
 	@Override
