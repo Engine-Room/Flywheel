@@ -64,7 +64,7 @@ public class BackendTypes {
 			.properName("GL46 Compute Culling")
 			.shortName("indirect")
 			.engineMessage(new TextComponent("Using Indirect Engine").withStyle(ChatFormatting.GREEN))
-			.engineSupplier(() -> new IndirectEngine(Components.WORLD))
+			.engineSupplier(() -> new IndirectEngine(Components.WORLD, 100 * 100))
 			.fallback(() -> BackendTypes.INSTANCING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
 					.supportsIndirect())

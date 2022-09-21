@@ -80,7 +80,7 @@ public class InstancingEngine implements Engine {
 
 		try (var restoreState = GlStateTracker.getRestoreState()) {
 			setup();
-	
+
 			render(drawSet);
 		}
 	}

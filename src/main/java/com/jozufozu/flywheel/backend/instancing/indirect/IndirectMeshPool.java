@@ -1,27 +1,27 @@
 package com.jozufozu.flywheel.backend.instancing.indirect;
 
-import static org.lwjgl.opengl.GL46.*;
+import static org.lwjgl.opengl.GL15.glDeleteBuffers;
+import static org.lwjgl.opengl.GL44.GL_DYNAMIC_STORAGE_BIT;
+import static org.lwjgl.opengl.GL45.glCreateBuffers;
+import static org.lwjgl.opengl.GL45.glNamedBufferStorage;
+import static org.lwjgl.opengl.GL45.nglNamedBufferSubData;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.instancing.instancing.ElementBuffer;
 import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 import com.jozufozu.flywheel.core.model.Mesh;
 
 public class IndirectMeshPool {
+	private final VertexType vertexType;
 
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
 	private final List<BufferedMesh> meshList = new ArrayList<>();
-
-	final VertexType vertexType;
 
 	final int vbo;
 	private final MemoryBlock clientStorage;
@@ -76,7 +76,7 @@ public class IndirectMeshPool {
 
 			model.buffer(ptr);
 
-			byteIndex += model.getByteSize();
+			byteIndex += model.size();
 			baseVertex += model.mesh.getVertexCount();
 		}
 
@@ -90,38 +90,44 @@ public class IndirectMeshPool {
 		meshList.clear();
 	}
 
-	public class BufferedMesh {
+	public VertexType getVertexType() {
+		return vertexType;
+	}
 
+	public class BufferedMesh {
 		public final Mesh mesh;
 		private final int vertexCount;
 		private long byteIndex;
 		private int baseVertex;
 
-		public BufferedMesh(Mesh mesh) {
+		private BufferedMesh(Mesh mesh) {
 			this.mesh = mesh;
 
 			vertexCount = mesh.getVertexCount();
 		}
 
 		private void buffer(long ptr) {
-			this.mesh.write(ptr + byteIndex);
+			mesh.write(ptr + byteIndex);
 		}
 
-		public int getByteSize() {
-			return IndirectMeshPool.this.vertexType.getLayout().getStride() * this.vertexCount;
+		public Mesh getMesh() {
+			return mesh;
+		}
+
+		public int size() {
+			return mesh.size();
 		}
 
 		public int getBaseVertex() {
 			return baseVertex;
 		}
 
-		public int getVertexCount() {
-			return this.vertexCount;
+		public int getIndexCount() {
+			return vertexCount * 6 / 4;
 		}
 
-		public int getIndexCount() {
-			return this.vertexCount * 6 / 4;
+		public VertexType getVertexType() {
+			return vertexType;
 		}
 	}
-
 }
