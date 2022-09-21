@@ -8,7 +8,6 @@
     "BlockEntityRenderDispatcherAccessor",
     "BlockEntityTypeMixin",
     "BufferBuilderMixin",
-    "BufferUploaderMixin",
     "CameraMixin",
     "ClientLevelMixin",
     "ChunkRebuildHooksMixin",
