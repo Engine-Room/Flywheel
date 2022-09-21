@@ -6,9 +6,7 @@ import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 
 public class EntityInstanceManager extends InstanceManager<Entity> {
@@ -29,18 +27,13 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 
 	@Override
 	protected boolean canCreateInstance(Entity entity) {
-		if (!entity.isAlive()) return false;
+		if (!entity.isAlive()) {
+			return false;
+		}
 
 		Level world = entity.level;
 
-		if (Backend.isFlywheelWorld(world)) {
-			BlockPos pos = entity.blockPosition();
+		return Backend.isFlywheelWorld(world);
 
-			BlockGetter existingChunk = world.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
-
-			return existingChunk != null;
-		}
-
-		return false;
 	}
 }

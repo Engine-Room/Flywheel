@@ -14,11 +14,14 @@ import net.minecraft.client.renderer.RenderType;
 public class RenderTypeMixin implements RenderTypeExtension {
 
 	@Unique
-	private final DrawBuffer flywheel$drawBuffer = new DrawBuffer((RenderType) (Object) this);
+	private DrawBuffer flywheel$drawBuffer;
 
 	@Override
 	@Nonnull
 	public DrawBuffer flywheel$getDrawBuffer() {
+		if (flywheel$drawBuffer == null) {
+			flywheel$drawBuffer = new DrawBuffer((RenderType) (Object) this);
+		}
 		return flywheel$drawBuffer;
 	}
 }
