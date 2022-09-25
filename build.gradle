@@ -112,7 +112,7 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     // switch to implementation for debugging
-    compileOnly fg.deobf("maven.modrinth:starlight-forge:1.0.2+1.18.2")
+    compileOnly fg.deobf("maven.modrinth:starlight-forge:1.1.1+1.19")
 
     compileOnly fg.deobf("maven.modrinth:rubidium:0.6.1")
     compileOnly fg.deobf("maven.modrinth:oculus:1.19-1.2.5a")

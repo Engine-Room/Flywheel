@@ -3,9 +3,7 @@ package com.jozufozu.flywheel.mixin;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -48,33 +46,8 @@ public class LevelRendererMixin {
 		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(level, camera, frustum));
 	}
 
-	@Unique
-	private boolean flywheel$LayerRendered;
-
-	/**
-	 * This only gets injected if renderChunkLayer is not Overwritten
-	 */
-	@Group(name = "flywheel$renderLayer", min = 1, max = 2)
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", ordinal = 1), method = "renderChunkLayer")
-	private void renderLayer(RenderType type, PoseStack stack, double camX, double camY, double camZ, Matrix4f p_172999_, CallbackInfo ci) {
-		flywheel$renderLayer(type, stack, camX, camY, camZ);
-		flywheel$LayerRendered = true;
-	}
-
-	/**
-	 * This always gets injected.
-	 */
-	@Group(name = "flywheel$renderLayer")
 	@Inject(at = @At("TAIL"), method = "renderChunkLayer")
-	private void renderLayerSodium(RenderType type, PoseStack stack, double camX, double camY, double camZ, Matrix4f p_172999_, CallbackInfo ci) {
-		if (!flywheel$LayerRendered) {
-			flywheel$renderLayer(type, stack, camX, camY, camZ);
-		}
-		flywheel$LayerRendered = false;
-	}
-
-	@Unique
-	private void flywheel$renderLayer(RenderType type, PoseStack stack, double camX, double camY, double camZ) {
+	private void renderLayer(RenderType type, PoseStack stack, double camX, double camY, double camZ, Matrix4f p_172999_, CallbackInfo ci) {
 		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(level, type, stack, renderBuffers, camX, camY, camZ));
 	}
 
