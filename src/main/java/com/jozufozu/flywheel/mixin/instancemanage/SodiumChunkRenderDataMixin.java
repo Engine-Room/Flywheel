@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
@@ -30,13 +31,17 @@ public class SodiumChunkRenderDataMixin {
 
 	@Inject(method = "addBlockEntity", at = @At("HEAD"), cancellable = true, require = 0)
 	private void flywheel$onAddBlockEntity(BlockEntity be, boolean cull, CallbackInfo ci) {
+		if (flywheel$level == null) {
+			flywheel$level = be.getLevel();
+		}
+
+		if (!Backend.canUseInstancing(flywheel$level)) {
+			return;
+		}
+
 		if (InstancedRenderRegistry.canInstance(be.getType())) {
 			if (flywheel$blockEntities == null) {
 				flywheel$blockEntities = new ArrayList<>();
-			}
-
-			if (flywheel$level == null) {
-				flywheel$level = be.getLevel();
 			}
 
 			// Collect BEs in a temporary list to avoid excessive synchronization in InstancedRenderDispatcher.
@@ -50,7 +55,7 @@ public class SodiumChunkRenderDataMixin {
 
 	@Inject(method = "build", at = @At("HEAD"))
 	private void flywheel$onBuild(CallbackInfoReturnable<ChunkRenderData> cir) {
-		if (flywheel$level == null || flywheel$blockEntities == null) {
+		if (flywheel$level == null || flywheel$blockEntities == null || !Backend.canUseInstancing(flywheel$level)) {
 			return;
 		}
 
