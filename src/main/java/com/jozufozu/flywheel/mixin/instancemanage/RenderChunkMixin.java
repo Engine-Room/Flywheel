@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 @Mixin(ChunkRenderDispatcher.RenderChunk.class)
 public class RenderChunkMixin implements com.jozufozu.flywheel.util.RenderChunkExtension {
 
-	@Shadow
+	@Shadow(aliases = "this$0") // Optifine does not use the obfuscated name so the mapped name must be included as an alias
 	@Final
 	private ChunkRenderDispatcher this$0;
 
