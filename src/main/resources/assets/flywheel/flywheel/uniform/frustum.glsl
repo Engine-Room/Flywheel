@@ -9,6 +9,4 @@ struct FLWPackedPlanes {
     vec2 zW; // <nz.w, pz.w>
 };
 
-layout(std140, binding = 2) uniform FLWFrustum {
-    FLWPackedPlanes flw_planes;
-};
+FLWPackedPlanes flw_planes;

@@ -17,11 +17,9 @@ import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
+import com.jozufozu.flywheel.backend.instancing.compile.FlwCompiler;
 import com.jozufozu.flywheel.core.Components;
-import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.QuadConverter;
-import com.jozufozu.flywheel.core.uniform.UniformBuffer;
 
 public class IndirectCullingGroup<T extends InstancedPart> {
 
@@ -65,8 +63,8 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 				.quads2Tris(2048).buffer.handle();
 		setupVertexArray();
 
-		compute = ComputeCullerCompiler.INSTANCE.get(structType);
-		draw = PipelineCompiler.INSTANCE.get(new PipelineCompiler.Context(vertexType, Materials.SHULKER, structType, Components.WORLD, Components.INDIRECT));
+		compute = FlwCompiler.INSTANCE.getCullingProgram(structType);
+		draw = FlwCompiler.INSTANCE.getPipelineProgram(vertexType, structType, Components.WORLD, Components.INDIRECT);
 	}
 
 	private void setupVertexArray() {
@@ -116,9 +114,6 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 		uploadInstanceData();
 		uploadIndirectCommands();
 
-		UniformBuffer.getInstance()
-				.sync();
-
 		compute.bind();
 		buffers.bindAll();
 
@@ -136,9 +131,6 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 		glBindVertexArray(vertexArray);
 		buffers.bindObjectAndTarget();
 		buffers.bindIndirectBuffer();
-
-		UniformBuffer.getInstance()
-				.sync();
 
 		memoryBarrier();
 

@@ -3,6 +3,9 @@ package com.jozufozu.flywheel.backend;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.Nullable;
+
+import com.jozufozu.flywheel.api.pipeline.PipelineShader;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.core.BackendTypes;
 
@@ -17,14 +20,16 @@ public class SimpleBackendType implements BackendType {
 	private final Supplier<Engine> engineSupplier;
 	private final Supplier<BackendType> fallback;
 	private final BooleanSupplier isSupported;
+	private final PipelineShader pipelineShader;
 
-	public SimpleBackendType(String properName, String shortName, Component engineMessage, Supplier<Engine> engineSupplier, Supplier<BackendType> fallback, BooleanSupplier isSupported) {
+	public SimpleBackendType(String properName, String shortName, Component engineMessage, Supplier<Engine> engineSupplier, Supplier<BackendType> fallback, BooleanSupplier isSupported, @Nullable PipelineShader pipelineShader) {
 		this.properName = properName;
 		this.shortName = shortName;
 		this.engineMessage = engineMessage;
 		this.engineSupplier = engineSupplier;
 		this.fallback = fallback;
 		this.isSupported = isSupported;
+		this.pipelineShader = pipelineShader;
 	}
 
 	public static Builder builder() {
@@ -66,6 +71,11 @@ public class SimpleBackendType implements BackendType {
 		return isSupported.getAsBoolean();
 	}
 
+	@Override
+	public @Nullable PipelineShader pipelineShader() {
+		return pipelineShader;
+	}
+
 	public static class Builder {
 		private String properName;
 		private String shortName;
@@ -73,6 +83,7 @@ public class SimpleBackendType implements BackendType {
 		private Supplier<Engine> engineSupplier;
 		private Supplier<BackendType> fallback;
 		private BooleanSupplier isSupported;
+		private PipelineShader pipelineShader;
 
 		public Builder properName(String properName) {
 			this.properName = properName;
@@ -104,8 +115,13 @@ public class SimpleBackendType implements BackendType {
 			return this;
 		}
 
+		public Builder pipelineShader(PipelineShader pipelineShader) {
+			this.pipelineShader = pipelineShader;
+			return this;
+		}
+
 		public BackendType register() {
-			return BackendTypes.register(new SimpleBackendType(properName, shortName, engineMessage, engineSupplier, fallback, isSupported));
+			return BackendTypes.register(new SimpleBackendType(properName, shortName, engineMessage, engineSupplier, fallback, isSupported, pipelineShader));
 		}
 	}
 }

@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.core.uniform;
 
+import java.util.function.Consumer;
+
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.uniform.UniformProvider;
@@ -15,54 +17,75 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 
-public class ViewProvider extends UniformProvider {
+public class ViewProvider implements UniformProvider {
 
-	public ViewProvider() {
-		MinecraftForge.EVENT_BUS.addListener(this::beginFrame);
-	}
+	public static final int SIZE = 4 * 16 + 16 + 4;
 
-	public void beginFrame(BeginFrameEvent event) {
-		update(event.getContext());
+	@Override
+	public int byteSize() {
+		return SIZE;
 	}
 
 	@Override
-	public int getActualByteSize() {
-		return 4 * 16 + 16 + 4;
+	public FileResolution uniformShader() {
+		return Components.Files.VIEW_UNIFORMS;
 	}
 
-	public void update(RenderContext context) {
-		if (ptr == MemoryUtil.NULL) {
-			return;
+	@Override
+	public ActiveUniformProvider activate(long ptr, Notifier notifier) {
+		return new Active(ptr, notifier);
+	}
+
+	public static class Active implements ActiveUniformProvider, Consumer<BeginFrameEvent> {
+		private final long ptr;
+		private final Notifier notifier;
+
+		public Active(long ptr, Notifier notifier) {
+			this.ptr = ptr;
+			this.notifier = notifier;
+			MinecraftForge.EVENT_BUS.addListener(this);
 		}
 
-		ClientLevel level = context.level();
+		@Override
+		public void delete() {
+			MinecraftForge.EVENT_BUS.unregister(this);
+		}
 
-		int constantAmbientLight = level.effects()
-				.constantAmbientLight() ? 1 : 0;
+		@Override
+		public void poll() {
+		}
 
-		Vec3i originCoordinate = InstancedRenderDispatcher.getOriginCoordinate(level);
-		Vec3 camera = context.camera()
-				.getPosition();
+		@Override
+		public void accept(BeginFrameEvent event) {
+			update(event.getContext());
+		}
 
-		var camX = (float) (camera.x - originCoordinate.getX());
-		var camY = (float) (camera.y - originCoordinate.getY());
-		var camZ = (float) (camera.z - originCoordinate.getZ());
+		public void update(RenderContext context) {
+			ClientLevel level = context.level();
 
-		// don't want to mutate viewProjection
-		var vp = context.viewProjection().copy();
-		vp.multiplyWithTranslation(-camX, -camY, -camZ);
+			int constantAmbientLight = level.effects()
+					.constantAmbientLight() ? 1 : 0;
 
-		MatrixWrite.writeUnsafe(vp, ptr);
-		MemoryUtil.memPutFloat(ptr + 64, camX);
-		MemoryUtil.memPutFloat(ptr + 68, camY);
-		MemoryUtil.memPutFloat(ptr + 72, camZ);
-		MemoryUtil.memPutInt(ptr + 76, constantAmbientLight);
+			Vec3i originCoordinate = InstancedRenderDispatcher.getOriginCoordinate(level);
+			Vec3 camera = context.camera()
+					.getPosition();
 
-		notifier.signalChanged();
-	}
+			var camX = (float) (camera.x - originCoordinate.getX());
+			var camY = (float) (camera.y - originCoordinate.getY());
+			var camZ = (float) (camera.z - originCoordinate.getZ());
 
-	@Override
-	public FileResolution getUniformShader() {
-		return Components.Files.VIEW_UNIFORMS;
+			// don't want to mutate viewProjection
+			var vp = context.viewProjection()
+					.copy();
+			vp.multiplyWithTranslation(-camX, -camY, -camZ);
+
+			MatrixWrite.writeUnsafe(vp, ptr);
+			MemoryUtil.memPutFloat(ptr + 64, camX);
+			MemoryUtil.memPutFloat(ptr + 68, camY);
+			MemoryUtil.memPutFloat(ptr + 72, camZ);
+			MemoryUtil.memPutInt(ptr + 76, constantAmbientLight);
+
+			notifier.signalChanged();
+		}
 	}
 }

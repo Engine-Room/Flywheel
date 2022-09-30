@@ -2,8 +2,6 @@ package com.jozufozu.flywheel.core;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 
-import net.minecraft.resources.ResourceLocation;
-
 public class WorldProgram extends GlProgram {
 
 	// TODO: sampler registry?
@@ -11,8 +9,8 @@ public class WorldProgram extends GlProgram {
 	protected int overlayTex;
 	protected int lightTex;
 
-	public WorldProgram(ResourceLocation name, int handle) {
-		super(name, handle);
+	public WorldProgram(int handle) {
+		super(handle);
 
 		bind();
 		registerSamplers();

@@ -7,33 +7,59 @@ import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-public class FogProvider extends UniformProvider {
+public class FogProvider implements UniformProvider {
+
+	public static boolean FOG_UPDATE = true;
 
 	@Override
-	public int getActualByteSize() {
+	public int byteSize() {
 		return 16 + 8 + 4;
 	}
 
-	public void update() {
-		if (ptr == MemoryUtil.NULL) {
-			return;
-		}
-
-		var color = RenderSystem.getShaderFogColor();
-
-		MemoryUtil.memPutFloat(ptr, color[0]);
-		MemoryUtil.memPutFloat(ptr + 4, color[1]);
-		MemoryUtil.memPutFloat(ptr + 8, color[2]);
-		MemoryUtil.memPutFloat(ptr + 12, color[3]);
-		MemoryUtil.memPutFloat(ptr + 16, RenderSystem.getShaderFogStart());
-		MemoryUtil.memPutFloat(ptr + 20, RenderSystem.getShaderFogEnd());
-		MemoryUtil.memPutInt(ptr + 24, RenderSystem.getShaderFogShape().getIndex());
-
-		notifier.signalChanged();
+	@Override
+	public FileResolution uniformShader() {
+		return Components.Files.FOG_UNIFORMS;
 	}
 
 	@Override
-	public FileResolution getUniformShader() {
-		return Components.Files.FOG_UNIFORMS;
+	public ActiveUniformProvider activate(long ptr, Notifier notifier) {
+		return new Active(ptr, notifier);
+	}
+
+	public static class Active implements ActiveUniformProvider {
+
+		private final long ptr;
+		private final Notifier notifier;
+
+		public Active(long ptr, Notifier notifier) {
+			this.ptr = ptr;
+			this.notifier = notifier;
+		}
+
+		@Override
+		public void delete() {
+		}
+
+		@Override
+		public void poll() {
+			if (!FOG_UPDATE) {
+				return;
+			}
+
+			var color = RenderSystem.getShaderFogColor();
+
+			MemoryUtil.memPutFloat(ptr, color[0]);
+			MemoryUtil.memPutFloat(ptr + 4, color[1]);
+			MemoryUtil.memPutFloat(ptr + 8, color[2]);
+			MemoryUtil.memPutFloat(ptr + 12, color[3]);
+			MemoryUtil.memPutFloat(ptr + 16, RenderSystem.getShaderFogStart());
+			MemoryUtil.memPutFloat(ptr + 20, RenderSystem.getShaderFogEnd());
+			MemoryUtil.memPutInt(ptr + 24, RenderSystem.getShaderFogShape()
+					.getIndex());
+
+			notifier.signalChanged();
+
+			FOG_UPDATE = false;
+		}
 	}
 }

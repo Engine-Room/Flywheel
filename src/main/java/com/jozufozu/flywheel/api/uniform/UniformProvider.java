@@ -2,21 +2,21 @@ package com.jozufozu.flywheel.api.uniform;
 
 import com.jozufozu.flywheel.core.source.FileResolution;
 
-public abstract class UniformProvider {
+public interface UniformProvider {
 
-	protected long ptr;
-	protected Notifier notifier;
+	int byteSize();
 
-	public abstract int getActualByteSize();
+	FileResolution uniformShader();
 
-	public void updatePtr(long ptr, Notifier notifier) {
-		this.ptr = ptr;
-		this.notifier = notifier;
+	ActiveUniformProvider activate(long ptr, Notifier notifier);
+
+	interface ActiveUniformProvider {
+		void delete();
+
+		void poll();
 	}
 
-	public abstract FileResolution getUniformShader();
-
-	public interface Notifier {
+	interface Notifier {
 		void signalChanged();
 	}
 }

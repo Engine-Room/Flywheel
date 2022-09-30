@@ -2,13 +2,15 @@ package com.jozufozu.flywheel.core.source.generate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.jozufozu.flywheel.util.Pair;
 
 public class GlslBuilder {
+	public static final String INDENT = "    ";
 
-	private final List<SourceElement> elements = new ArrayList<>();
+	private final List<GlslRootElement> elements = new ArrayList<>();
 
 	public void define(String name, String value) {
 		add(new Define(name, value));
@@ -26,7 +28,7 @@ public class GlslBuilder {
 		return add(new VertexInputBuilder());
 	}
 
-	public <T extends SourceElement> T add(T element) {
+	public <T extends GlslRootElement> T add(T element) {
 		elements.add(element);
 		return element;
 	}
@@ -37,15 +39,19 @@ public class GlslBuilder {
 
 	public String build() {
 		return elements.stream()
-				.map(SourceElement::build)
+				.map(GlslRootElement::minPrint)
 				.collect(Collectors.joining("\n"));
 	}
 
-	public interface SourceElement {
-		String build();
+	public static String indent(int indentation) {
+		return INDENT.repeat(indentation);
 	}
 
-	public enum Separators implements SourceElement {
+	public interface GlslRootElement {
+		String minPrint();
+	}
+
+	public enum Separators implements GlslRootElement {
 		BLANK_LINE(""),
 		;
 
@@ -54,21 +60,21 @@ public class GlslBuilder {
 		Separators(String separator) {
 			this.separator = separator;
 		}
+
 		@Override
-		public String build() {
+		public String minPrint() {
 			return separator;
 		}
-
 	}
 
-	public record Define(String name, String value) implements SourceElement {
+	public record Define(String name, String value) implements GlslRootElement {
 		@Override
-		public String build() {
+		public String minPrint() {
 			return "#define " + name + " " + value;
 		}
 	}
 
-	public static class VertexInputBuilder implements SourceElement {
+	public static class VertexInputBuilder implements GlslRootElement {
 
 		private int binding;
 		private String type;
@@ -90,12 +96,12 @@ public class GlslBuilder {
 		}
 
 		@Override
-		public String build() {
+		public String minPrint() {
 			return "layout(location = " + binding + ") in " + type + " " + name + ";";
 		}
 	}
 
-	public static class StructBuilder implements SourceElement {
+	public static class StructBuilder implements GlslRootElement {
 
 		private final List<Pair<String, String>> fields = new ArrayList<>();
 		private String name;
@@ -110,11 +116,11 @@ public class GlslBuilder {
 
 		private String buildFields() {
 			return fields.stream()
-					.map(p -> '\t' + p.first() + ' ' + p.second() + ';')
+					.map(p -> INDENT + p.first() + ' ' + p.second() + ';')
 					.collect(Collectors.joining("\n"));
 		}
 
-		public String build() {
+		public String minPrint() {
 			return """
 					struct %s {
 					%s
@@ -123,9 +129,9 @@ public class GlslBuilder {
 		}
 	}
 
-	public static class FunctionBuilder implements SourceElement {
+	public static class FunctionBuilder implements GlslRootElement {
 		private final List<Pair<String, String>> arguments = new ArrayList<>();
-		private final List<String> body = new ArrayList<>();
+		private final BlockBuilder body = new BlockBuilder();
 		private String returnType;
 		private String name;
 
@@ -149,30 +155,80 @@ public class GlslBuilder {
 			return this;
 		}
 
-		public FunctionBuilder statement(String statement) {
-			this.body.add(statement);
+		public FunctionBuilder body(Consumer<BlockBuilder> f) {
+			f.accept(body);
 			return this;
 		}
 
-
-		public String build() {
+		public String minPrint() {
 			return """
 					%s %s(%s) {
 					%s
 					}
-					""".formatted(returnType, name, buildArguments(), buildBody());
-		}
-
-		private String buildBody() {
-			return body.stream()
-					.map(s -> '\t' + s)
-					.collect(Collectors.joining("\n"));
+					""".formatted(returnType, name, buildArguments(), body.prettyPrint());
 		}
 
 		private String buildArguments() {
 			return arguments.stream()
 					.map(p -> p.first() + ' ' + p.second())
 					.collect(Collectors.joining(", "));
+		}
+	}
+
+	public static class BlockBuilder implements LangItem {
+		private final List<GlslStmt> body = new ArrayList<>();
+
+		public BlockBuilder add(GlslStmt stmt) {
+			body.add(stmt);
+			return this;
+		}
+
+		public BlockBuilder eval(GlslExpr expr) {
+			return add(GlslStmt.eval(expr));
+		}
+
+		public BlockBuilder switchOn(GlslExpr expr, Consumer<SwitchBuilder> f) {
+			var builder = new SwitchBuilder(expr);
+			f.accept(builder);
+			return add(builder.build());
+		}
+
+		public void ret(GlslExpr call) {
+			add(GlslStmt.ret(call));
+		}
+
+		public void break_() {
+			add(GlslStmt.BREAK);
+		}
+
+		@Override
+		public String prettyPrint() {
+			return body.stream()
+					.map(GlslStmt::prettyPrint)
+					.collect(Collectors.joining("\n"));
+		}
+
+	}
+
+	public static class SwitchBuilder {
+
+		private final GlslExpr on;
+
+		private final List<Pair<GlslExpr, BlockBuilder>> cases = new ArrayList<>();
+
+		public SwitchBuilder(GlslExpr on) {
+			this.on = on;
+		}
+
+		public SwitchBuilder case_(int expr, Consumer<BlockBuilder> f) {
+			var builder = new BlockBuilder();
+			f.accept(builder);
+			cases.add(Pair.of(GlslExpr.literal(expr), builder));
+			return this;
+		}
+
+		public GlslStmt.Switch build() {
+			return new GlslStmt.Switch(on, cases);
 		}
 	}
 }

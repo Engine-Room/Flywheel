@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.backend.instancing.indirect;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.core.Components;
@@ -60,17 +59,13 @@ public class IndirectComponent implements SourceComponent {
 
 		builder.blankLine();
 
-		var func = builder.function()
+		builder.function()
 				.returnType(structName)
 				.name("flw_unpackInstance")
-				.argumentIn(packedStructName, UNPACK_ARG);
-
-		var args = layoutItems.stream()
-				.map(layoutItem -> layoutItem.unpackField(UNPACKING_VARIABLE))
-				.map(GlslExpr::minPrint)
-				.collect(Collectors.joining(", "));
-
-		func.statement("return " + structName + "(" + args + ");");
+				.argumentIn(packedStructName, UNPACK_ARG)
+				.body(b -> b.ret(GlslExpr.call(structName, layoutItems.stream()
+						.map(layoutItem -> layoutItem.unpackField(UNPACKING_VARIABLE))
+						.toList())));
 
 		return builder.build();
 	}

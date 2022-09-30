@@ -7,14 +7,13 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
-import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
 import com.jozufozu.flywheel.backend.instancing.batching.DrawBuffer;
+import com.jozufozu.flywheel.backend.instancing.compile.FlwCompiler;
 import com.jozufozu.flywheel.config.BackendTypeArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.BackendTypes;
 import com.jozufozu.flywheel.core.Components;
-import com.jozufozu.flywheel.core.DebugRender;
 import com.jozufozu.flywheel.core.PartialModel;
 import com.jozufozu.flywheel.core.QuadConverter;
 import com.jozufozu.flywheel.core.StitchedSprite;
@@ -81,7 +80,7 @@ public class Flywheel {
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);
 
 		forgeEventBus.addListener(EventPriority.HIGHEST, QuadConverter::onReloadRenderers);
-		forgeEventBus.addListener(PipelineCompiler::onReloadRenderers);
+		forgeEventBus.addListener(FlwCompiler::onReloadRenderers);
 		forgeEventBus.addListener(Models::onReloadRenderers);
 		forgeEventBus.addListener(DrawBuffer::onReloadRenderers);
 
@@ -108,7 +107,6 @@ public class Flywheel {
 //		forgeEventBus.addListener(ExampleEffect::onReload);
 
 		Components.init();
-		DebugRender.init();
 
 		VanillaInstances.init();
 

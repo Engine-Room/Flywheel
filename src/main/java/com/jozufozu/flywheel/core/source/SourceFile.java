@@ -80,7 +80,7 @@ public class SourceFile implements SourceComponent {
 
 	@Override
 	public String source(CompilationContext ctx) {
-		return ctx.sourceHeader(this) + this.elideImports();
+		return ctx.sourceHeader(this) + this.genFinalSource();
 	}
 
 	@Override
@@ -188,7 +188,7 @@ public class SourceFile implements SourceComponent {
 		return "Source for shader '" + name + "':\n" + lines.printLinesWithNumbers();
 	}
 
-	private CharSequence elideImports() {
+	private CharSequence genFinalSource() {
 		StringBuilder out = new StringBuilder();
 
 		int lastEnd = 0;

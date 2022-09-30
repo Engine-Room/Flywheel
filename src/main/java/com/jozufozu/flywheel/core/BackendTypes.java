@@ -4,9 +4,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.jozufozu.flywheel.api.pipeline.PipelineShader;
 import com.jozufozu.flywheel.backend.BackendType;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.SimpleBackendType;
@@ -55,6 +58,7 @@ public class BackendTypes {
 			.fallback(() -> BackendTypes.BATCHING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
 					.instancedArraysSupported())
+			.pipelineShader(Components.INSTANCED_ARRAYS)
 			.register();
 
 	/**
@@ -68,6 +72,7 @@ public class BackendTypes {
 			.fallback(() -> BackendTypes.INSTANCING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
 					.supportsIndirect())
+			.pipelineShader(Components.INDIRECT)
 			.register();
 
 	public static BackendType register(BackendType type) {
@@ -94,4 +99,12 @@ public class BackendTypes {
 	}
 
 
+	public static Collection<PipelineShader> availablePipelineShaders() {
+		return BACKEND_TYPES.values()
+				.stream()
+				.filter(BackendType::supported)
+				.map(BackendType::pipelineShader)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
+	}
 }
