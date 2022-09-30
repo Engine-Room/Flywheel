@@ -10,7 +10,7 @@ import org.lwjgl.opengl.GL20;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
-import com.jozufozu.flywheel.core.compile.ShaderCompilationException;
+import com.jozufozu.flywheel.backend.instancing.compile.ShaderCompilationException;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;

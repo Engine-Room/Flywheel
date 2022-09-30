@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.core.SourceComponent;
@@ -68,16 +67,13 @@ public class InstancedArraysComponent implements SourceComponent {
 
 		builder.blankLine();
 
-		var func = builder.function()
+		// unpacking function
+		builder.function()
 				.returnType(structName)
-				.name("flw_unpackInstance");
-
-		var args = layoutItems.stream()
-				.map(it -> new GlslExpr.Variable(it.name() + ATTRIBUTE_SUFFIX))
-				.map(GlslExpr::minPrint)
-				.collect(Collectors.joining(", "));
-
-		func.statement("return " + structName + "(" + args + ");");
+				.name("flw_unpackInstance")
+				.body(b -> b.ret(GlslExpr.call(structName, layoutItems.stream()
+						.map(it -> new GlslExpr.Variable(it.name() + ATTRIBUTE_SUFFIX))
+						.toList())));
 
 		return builder.build();
 	}

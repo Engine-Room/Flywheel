@@ -27,11 +27,11 @@ public class CompilationContext {
 
 		generatedLines += lines;
 
-		if (comment != null) {
-			out += " // " + comment;
+		if (comment == null) {
+			comment = "";
 		}
 
-		return out + '\n';
+		return out + " // (generated) " + comment + '\n';
 	}
 
 	public boolean contains(SourceFile sourceFile) {

@@ -45,7 +45,7 @@ public class UniformBuffer {
 		int totalBytes = 0;
 		int index = 0;
 		for (UniformProvider provider : providers) {
-			int size = alignPo2(provider.getActualByteSize(), 16);
+			int size = align16(provider.byteSize());
 
 			builder.add(new Allocated(provider, totalBytes, size, index));
 
@@ -64,6 +64,7 @@ public class UniformBuffer {
 	}
 
 	public void sync() {
+		allocatedProviders.forEach(Allocated::pollActive);
 		if (changedBytes.isEmpty()) {
 			return;
 		}
@@ -88,8 +89,8 @@ public class UniformBuffer {
 		}
 	}
 
-	private static int alignPo2(int numToRound, int alignment) {
-		return (numToRound + alignment - 1) & -alignment;
+	private static int align16(int numToRound) {
+		return (numToRound + 16 - 1) & -16;
 	}
 
 	private class Allocated implements UniformProvider.Notifier {
@@ -97,6 +98,7 @@ public class UniformBuffer {
 		private final int offset;
 		private final int size;
 		private final int index;
+		private UniformProvider.ActiveUniformProvider activeProvider;
 
 		private Allocated(UniformProvider provider, int offset, int size, int index) {
 			this.provider = provider;
@@ -111,7 +113,10 @@ public class UniformBuffer {
 		}
 
 		private void updatePtr(MemoryBlock bufferBase) {
-			provider.updatePtr(bufferBase.ptr() + offset, this);
+			if (activeProvider != null) {
+				activeProvider.delete();
+			}
+			activeProvider = provider.activate(bufferBase.ptr() + offset, this);
 		}
 
 		public UniformProvider provider() {
@@ -128,6 +133,12 @@ public class UniformBuffer {
 
 		public int index() {
 			return index;
+		}
+
+		public void pollActive() {
+			if (activeProvider != null) {
+				activeProvider.poll();
+			}
 		}
 	}
 }

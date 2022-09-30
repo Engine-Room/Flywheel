@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.gl.shader;
 import static org.lwjgl.opengl.GL20.glDeleteProgram;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform1i;
-import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -11,17 +10,13 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
 import com.mojang.blaze3d.shaders.ProgramManager;
 
-import net.minecraft.resources.ResourceLocation;
-
 public class GlProgram extends GlObject {
 
-	public final ResourceLocation name;
-
-	public GlProgram(ResourceLocation name, int handle) {
-		this.name = name;
+	public GlProgram(int handle) {
 		setHandle(handle);
 	}
 
+	// TODO: Programs bind the uniform buffers they need
 	public void bind() {
 		ProgramManager.glUseProgram(handle());
 	}
@@ -40,7 +35,7 @@ public class GlProgram extends GlObject {
 		int index = glGetUniformLocation(this.handle(), uniform);
 
 		if (index < 0) {
-			Backend.LOGGER.debug("No active uniform '{}' exists in program '{}'. Could be unused.", uniform, this.name);
+			Backend.LOGGER.debug("No active uniform '{}' exists. Could be unused.", uniform);
 		}
 
 		return index;
@@ -69,17 +64,11 @@ public class GlProgram extends GlObject {
 		glDeleteProgram(handle);
 	}
 
-	@Override
-	public String toString() {
-		return "program " + name;
-	}
-
 	/**
 	 * A factory interface to create a {@link GlProgram}.
 	 */
 	public interface Factory {
 
-		@NotNull
-		GlProgram create(ResourceLocation name, int handle);
+		@NotNull GlProgram create(int handle);
 	}
 }

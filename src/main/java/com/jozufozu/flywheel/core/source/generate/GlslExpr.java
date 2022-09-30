@@ -1,8 +1,12 @@
 package com.jozufozu.flywheel.core.source.generate;
 
+import java.util.Collection;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
-public sealed interface GlslExpr {
+import com.google.common.collect.ImmutableList;
+
+public interface GlslExpr extends LangItem {
 
 	/**
 	 * Create a glsl variable with the given name.
@@ -14,7 +18,17 @@ public sealed interface GlslExpr {
 		return new Variable(name);
 	}
 
-	String minPrint();
+	static FunctionCall call(String functionName, Collection<? extends GlslExpr> args) {
+		return new FunctionCall(functionName, args);
+	}
+
+	static FunctionCall0 call(String functionName) {
+		return new FunctionCall0(functionName);
+	}
+
+	static GlslExpr literal(int expr) {
+		return new Literal(expr);
+	}
 
 	/**
 	 * Call a one-parameter function with the given name on this expression.
@@ -58,29 +72,55 @@ public sealed interface GlslExpr {
 
 	record Variable(String name) implements GlslExpr {
 		@Override
-		public String minPrint() {
+		public String prettyPrint() {
 			return name;
 		}
+
 	}
 
-	record FunctionCall(String name, GlslExpr target) implements GlslExpr {
-		@Override
-		public String minPrint() {
-			return name + "(" + target.minPrint() + ")";
+	record FunctionCall(String name, Collection<? extends GlslExpr> args) implements GlslExpr {
+		public FunctionCall(String name, GlslExpr target) {
+			this(name, ImmutableList.of(target));
 		}
+
+		@Override
+		public String prettyPrint() {
+			var args = this.args.stream()
+					.map(GlslExpr::prettyPrint)
+					.collect(Collectors.joining(","));
+			return name + "(" + args + ")";
+		}
+
+	}
+
+	record FunctionCall0(String name) implements GlslExpr {
+		@Override
+		public String prettyPrint() {
+			return name + "()";
+		}
+
 	}
 
 	record Swizzle(GlslExpr target, String selection) implements GlslExpr {
 		@Override
-		public String minPrint() {
-			return target.minPrint() + "." + selection;
+		public String prettyPrint() {
+			return target.prettyPrint() + "." + selection;
 		}
+
 	}
 
 	record Access(GlslExpr target, String argName) implements GlslExpr {
 		@Override
-		public String minPrint() {
-			return target.minPrint() + "." + argName;
+		public String prettyPrint() {
+			return target.prettyPrint() + "." + argName;
+		}
+
+	}
+
+	record Literal(int value) implements GlslExpr {
+		@Override
+		public String prettyPrint() {
+			return Integer.toString(value);
 		}
 	}
 }

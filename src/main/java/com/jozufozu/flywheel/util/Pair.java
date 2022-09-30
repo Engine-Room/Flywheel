@@ -1,11 +1,16 @@
 package com.jozufozu.flywheel.util;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 public record Pair<F, S>(F first, S second) {
 
 	public static <F, S> Pair<F, S> of(F first, S second) {
 		return new Pair<>(first, second);
+	}
+
+	public static <I, O> Function<Pair<? extends I, ? extends I>, Pair<O, O>> both(Function<I, O> map) {
+		return pair -> of(map.apply(pair.first), map.apply(pair.second));
 	}
 
 	public Pair<S, F> swap() {

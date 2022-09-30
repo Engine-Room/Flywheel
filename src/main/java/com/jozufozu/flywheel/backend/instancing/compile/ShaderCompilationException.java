@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.compile;
+package com.jozufozu.flywheel.backend.instancing.compile;
 
 import org.lwjgl.opengl.GL20;
 

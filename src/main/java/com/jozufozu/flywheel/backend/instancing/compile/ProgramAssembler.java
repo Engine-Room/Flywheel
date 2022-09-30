@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.core.compile;
+package com.jozufozu.flywheel.backend.instancing.compile;
 
 import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
@@ -9,30 +9,26 @@ import static org.lwjgl.opengl.GL20.glGetProgrami;
 import static org.lwjgl.opengl.GL20.glLinkProgram;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 
-import net.minecraft.resources.ResourceLocation;
-
+@Deprecated
 public class ProgramAssembler {
-	public final int program;
-	private final ResourceLocation name;
+	private final int program;
 
-	public ProgramAssembler(ResourceLocation name) {
-		this.name = name;
+	public ProgramAssembler() {
 		this.program = glCreateProgram();
 	}
 
 	/**
 	 * Links the attached shaders to this program.
 	 */
-	public ProgramAssembler link() {
+	public int link() {
 		glLinkProgram(this.program);
 
 		String log = glGetProgramInfoLog(this.program);
 
 		if (!log.isEmpty()) {
-			Backend.LOGGER.debug("Program link log for " + name + ": " + log);
+			Backend.LOGGER.debug("Program link log: " + log);
 		}
 
 		int result = glGetProgrami(this.program, GL_LINK_STATUS);
@@ -41,15 +37,11 @@ public class ProgramAssembler {
 			throw new RuntimeException("Shader program linking failed, see log for details");
 		}
 
-		return this;
+		return program;
 	}
 
 	public ProgramAssembler attachShader(GlShader glShader) {
 		glAttachShader(this.program, glShader.handle());
 		return this;
-	}
-
-	public GlProgram build(GlProgram.Factory factory) {
-		return factory.create(name, program);
 	}
 }
