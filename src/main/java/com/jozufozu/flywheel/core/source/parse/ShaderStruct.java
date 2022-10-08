@@ -7,19 +7,20 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.core.source.span.Span;
 
-public class ShaderStruct extends AbstractShaderElement {
+public class ShaderStruct {
 
 	// https://regexr.com/61rpe
 	public static final Pattern PATTERN = Pattern.compile("struct\\s+([\\w\\d]*)\\s*\\{([\\w\\d\\s,;]*)}\\s*;\\s");
 
 	public final Span name;
 	public final Span body;
+	public final Span self;
 
 	private final ImmutableList<StructField> fields;
 	private final ImmutableMap<String, Span> fields2Types;
 
 	public ShaderStruct(Span self, Span name, Span body) {
-		super(self);
+		this.self = self;
 		this.name = name;
 		this.body = body;
 		this.fields = parseFields();

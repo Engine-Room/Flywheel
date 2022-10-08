@@ -15,7 +15,7 @@ public class CompilationContext {
 	private int generatedLines = 0;
 
 
-	String sourceHeader(SourceFile sourceFile) {
+	public String sourceHeader(SourceFile sourceFile) {
 		return "#line " + 0 + ' ' + getOrCreateFileID(sourceFile) + " // " + sourceFile.name + '\n';
 	}
 

@@ -19,6 +19,7 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.instancing.compile.FlwCompiler;
 import com.jozufozu.flywheel.core.Components;
+import com.jozufozu.flywheel.core.Pipelines;
 import com.jozufozu.flywheel.core.QuadConverter;
 
 public class IndirectCullingGroup<T extends InstancedPart> {
@@ -64,7 +65,7 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 		setupVertexArray();
 
 		compute = FlwCompiler.INSTANCE.getCullingProgram(structType);
-		draw = FlwCompiler.INSTANCE.getPipelineProgram(vertexType, structType, Components.WORLD, Components.INDIRECT);
+		draw = FlwCompiler.INSTANCE.getPipelineProgram(vertexType, structType, Components.WORLD, Pipelines.INDIRECT);
 	}
 
 	private void setupVertexArray() {

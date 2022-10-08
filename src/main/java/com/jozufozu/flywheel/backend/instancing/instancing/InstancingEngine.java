@@ -18,7 +18,7 @@ import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.instancing.compile.FlwCompiler;
-import com.jozufozu.flywheel.core.Components;
+import com.jozufozu.flywheel.core.Pipelines;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.util.WeakHashSet;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -123,7 +123,7 @@ public class InstancingEngine implements Engine {
 		var structType = desc.instance();
 		var material = desc.material();
 
-		FlwCompiler.INSTANCE.getPipelineProgram(vertexType, structType, context, Components.INSTANCED_ARRAYS)
+		FlwCompiler.INSTANCE.getPipelineProgram(vertexType, structType, context, Pipelines.INSTANCED_ARRAYS)
 				.bind();
 	}
 

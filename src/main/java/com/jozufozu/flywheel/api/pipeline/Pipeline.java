@@ -1,27 +1,27 @@
 package com.jozufozu.flywheel.api.pipeline;
 
-import java.util.function.BiFunction;
-
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.core.SourceComponent;
 import com.jozufozu.flywheel.core.source.FileResolution;
+import com.jozufozu.flywheel.core.source.ShaderSources;
 
-public record PipelineShader(GLSLVersion glslVersion, FileResolution vertex, FileResolution fragment,
-							 InstanceAssemblerFactory factory) {
+public interface Pipeline {
+
+	GLSLVersion glslVersion();
+
+	FileResolution vertex();
+
+	FileResolution fragment();
 
 	/**
 	 * Generate the source component necessary to convert a packed {@link StructType} into its shader representation.
 	 *
-	 * @param structType The struct type to convert.
 	 * @return A source component defining functions that unpack a representation of the given struct type.
 	 */
-	public SourceComponent assemble(VertexType vertexType, StructType<?> structType) {
-		return factory.apply(vertexType, structType);
-	}
+	SourceComponent assemble(InstanceAssemblerContext context);
 
-	public interface InstanceAssemblerFactory extends BiFunction<VertexType, StructType<?>, SourceComponent> {
-
+	record InstanceAssemblerContext(ShaderSources sources, VertexType vertexType, StructType<?> structType) {
 	}
 }

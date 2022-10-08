@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.backend;
 
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.compile.FlwCompiler;
-import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.ShaderSources;
 import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 
@@ -24,11 +23,12 @@ public class Loader implements ResourceManagerReloadListener {
 	Loader() {
 		// Can be null when running datagenerators due to the unfortunate time we call this
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft != null) {
-			ResourceManager manager = minecraft.getResourceManager();
-			if (manager instanceof ReloadableResourceManager) {
-				((ReloadableResourceManager) manager).registerReloadListener(this);
-			}
+		if (minecraft == null) {
+			return;
+		}
+
+		if (minecraft.getResourceManager() instanceof ReloadableResourceManager reloadable) {
+			reloadable.registerReloadListener(this);
 		}
 	}
 
@@ -39,23 +39,7 @@ public class Loader implements ResourceManagerReloadListener {
 		var errorReporter = new ErrorReporter();
 		ShaderSources sources = new ShaderSources(errorReporter, manager);
 
-		Backend.LOGGER.info("Loaded all shader sources in " + sources.getLoadTime());
-
-		FileResolution.run(errorReporter, sources);
-
-		if (errorReporter.hasErrored()) {
-			throw errorReporter.dump();
-		}
-
-		sources.postResolve();
-
-		Backend.LOGGER.info("Successfully resolved all source files.");
-
-		FileResolution.checkAll(errorReporter);
-
-		Backend.LOGGER.info("All shaders passed checks.");
-
-		FlwCompiler.INSTANCE.run();
+		FlwCompiler.INSTANCE = new FlwCompiler(sources);
 
 		ClientLevel level = Minecraft.getInstance().level;
 		if (Backend.canUseInstancing(level)) {

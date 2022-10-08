@@ -3,11 +3,15 @@ package com.jozufozu.flywheel.backend.instancing.indirect;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.core.Components;
+import com.jozufozu.flywheel.api.pipeline.Pipeline;
+import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.core.Pipelines;
 import com.jozufozu.flywheel.core.SourceComponent;
 import com.jozufozu.flywheel.core.layout.LayoutItem;
-import com.jozufozu.flywheel.core.source.CompilationContext;
+import com.jozufozu.flywheel.core.source.ShaderSources;
+import com.jozufozu.flywheel.core.source.SourceFile;
 import com.jozufozu.flywheel.core.source.generate.GlslBuilder;
 import com.jozufozu.flywheel.core.source.generate.GlslExpr;
 
@@ -19,14 +23,20 @@ public class IndirectComponent implements SourceComponent {
 	private static final GlslExpr.Variable UNPACKING_VARIABLE = GlslExpr.variable(UNPACK_ARG);
 
 	private final List<LayoutItem> layoutItems;
+	private final ImmutableList<SourceFile> included;
 
-	public IndirectComponent(List<LayoutItem> layoutItems) {
-		this.layoutItems = layoutItems;
+	public IndirectComponent(Pipeline.InstanceAssemblerContext ctx) {
+		this(ctx.sources(), ctx.structType());
+	}
+
+	public IndirectComponent(ShaderSources sources, StructType<?> structType) {
+		this.layoutItems = structType.getLayout().layoutItems;
+		included = ImmutableList.of(sources.find(Pipelines.Files.UTIL_TYPES.resourceLocation()));
 	}
 
 	@Override
 	public Collection<? extends SourceComponent> included() {
-		return List.of(Components.UTIL_TYPES.getFile());
+		return included;
 	}
 
 	@Override
@@ -35,9 +45,8 @@ public class IndirectComponent implements SourceComponent {
 	}
 
 	@Override
-	public String source(CompilationContext ctx) {
-		var generated = generateIndirect("IndirectStruct");
-		return ctx.generatedHeader(generated, name().toString()) + generated;
+	public String source() {
+		return generateIndirect("IndirectStruct");
 	}
 
 	public String generateIndirect(String structName) {

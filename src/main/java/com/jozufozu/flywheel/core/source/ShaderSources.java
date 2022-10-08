@@ -1,13 +1,14 @@
 package com.jozufozu.flywheel.core.source;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nonnull;
 
 import com.google.common.collect.Lists;
 import com.jozufozu.flywheel.core.source.error.ErrorReporter;
@@ -15,72 +16,66 @@ import com.jozufozu.flywheel.util.ResourceUtil;
 import com.jozufozu.flywheel.util.StringUtil;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 /**
  * The main object for loading and parsing source files.
  */
-public class ShaderSources implements SourceFinder {
+public class ShaderSources {
 	public static final String SHADER_DIR = "flywheel/";
 	public static final ArrayList<String> EXTENSIONS = Lists.newArrayList(".vert", ".vsh", ".frag", ".fsh", ".glsl");
 
-	private final Map<ResourceLocation, SourceFile> shaderSources = new HashMap<>();
+	private final Map<ResourceLocation, SourceFile> cache = new HashMap<>();
 
-	public final Index index;
+	/**
+	 * Tracks
+	 */
+	private final Deque<ResourceLocation> findStack = new ArrayDeque<>();
 
-	public final long loadTimeNs;
-	public final long indexTimeNs;
-	public final long totalTimeNs;
+	private final ResourceManager manager;
+	private final ErrorReporter errorReporter;
 
 	public ShaderSources(ErrorReporter errorReporter, ResourceManager manager) {
-		long loadStart = System.nanoTime();
+		this.errorReporter = errorReporter;
+		this.manager = manager;
+	}
 
-		for (ResourceLocation location : getValidShaderFiles(manager)) {
-			try (Resource resource = manager.getResource(location)) {
-				String source = StringUtil.readToString(resource.getInputStream());
-
-				ResourceLocation name = ResourceUtil.removePrefixUnchecked(location, SHADER_DIR);
-
-				shaderSources.put(name, new SourceFile(errorReporter, this, name, source));
-			} catch (IOException e) {
-				//
-			}
+	@Nonnull
+	public SourceFile find(ResourceLocation location) {
+		if (findStack.contains(location)) {
+			generateRecursiveImportException(location);
 		}
-		long loadEnd = System.nanoTime();
-
-		long indexStart = System.nanoTime();
-		index = new Index(shaderSources);
-		long indexEnd = System.nanoTime();
-
-		loadTimeNs = loadEnd - loadStart;
-		indexTimeNs = indexEnd - indexStart;
-		totalTimeNs = indexEnd - loadStart;
+		findStack.add(location);
+		// Can't use computeIfAbsent because mutual recursion causes ConcurrentModificationExceptions
+		var out = cache.get(location);
+		if (out == null) {
+			out = load(location);
+			cache.put(location, out);
+		}
+		findStack.pop();
+		return out;
 	}
 
-	public void postResolve() {
-		for (SourceFile file : shaderSources.values()) {
-			file.postResolve();
+	@Nonnull
+	private SourceFile load(ResourceLocation loc) {
+		try {
+			var resource = manager.getResource(ResourceUtil.prefixed(SHADER_DIR, loc));
+
+			var sourceString = StringUtil.readToString(resource.getInputStream());
+
+			return new SourceFile(this, loc, sourceString);
+		} catch (IOException ioException) {
+			throw new ShaderLoadingException("Could not load shader " + loc, ioException);
 		}
 	}
 
-	@Override
-	@Nullable
-	public SourceFile findSource(ResourceLocation name) {
-		return shaderSources.get(name);
-	}
-
-	@NotNull
-	private static Collection<ResourceLocation> getValidShaderFiles(ResourceManager manager) {
-		return manager.listResources(SHADER_DIR, s -> {
-			for (String ext : EXTENSIONS) {
-				if (s.endsWith(ext)) return true;
-			}
-			return false;
-		});
-	}
-
-	public String getLoadTime() {
-		return StringUtil.formatTime(totalTimeNs);
+	private void generateRecursiveImportException(ResourceLocation location) {
+		findStack.add(location);
+		String path = findStack.stream()
+				.dropWhile(l -> !l.equals(location))
+				.map(ResourceLocation::toString)
+				.collect(Collectors.joining(" -> "));
+		findStack.clear();
+		throw new ShaderLoadingException("recursive import: " + path);
 	}
 }

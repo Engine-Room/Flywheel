@@ -4,10 +4,6 @@ import java.util.function.BiConsumer;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.ContextShader;
-import com.jozufozu.flywheel.api.pipeline.PipelineShader;
-import com.jozufozu.flywheel.backend.gl.GLSLVersion;
-import com.jozufozu.flywheel.backend.instancing.indirect.IndirectComponent;
-import com.jozufozu.flywheel.backend.instancing.instancing.InstancedArraysComponent;
 import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.SourceChecks;
@@ -31,28 +27,12 @@ public class Components {
 	public static final ContextShader WORLD = ComponentRegistry.register(new ContextShader(WorldProgram::new, Files.WORLD_VERTEX, Files.WORLD_FRAGMENT));
 	public static final ContextShader CRUMBLING = ComponentRegistry.register(new ContextShader(CrumblingProgram::new, Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT));
 
-	public static final PipelineShader INSTANCED_ARRAYS = new PipelineShader(GLSLVersion.V420, Pipeline.INSTANCED_ARRAYS_DRAW, Pipeline.DRAW_FRAGMENT, (vertexType, structType) -> new InstancedArraysComponent(structType.getLayout().layoutItems, vertexType.getLayout()
-			.getAttributeCount()));
-	public static final PipelineShader INDIRECT = new PipelineShader(GLSLVersion.V460, Pipeline.INDIRECT_DRAW, Pipeline.DRAW_FRAGMENT, (vertexType, structType) -> new IndirectComponent(structType.getLayout().layoutItems));
-	public static final FileResolution UTIL_TYPES = FileResolution.get(Flywheel.rl("util/types.glsl"));
-
 	public static void init() {
 		Files.init();
 		Formats.init();
 		StructTypes.init();
 		Materials.init();
-	}
-
-	public static class Pipeline {
-		public static final FileResolution DRAW_FRAGMENT = pipeline("pipeline/draw.frag");
-		public static final FileResolution INSTANCED_ARRAYS_DRAW = pipeline("pipeline/instanced_arrays_draw.vert");
-		public static final FileResolution INDIRECT_DRAW = pipeline("pipeline/indirect_draw.vert");
-		public static final FileResolution INDIRECT_CULL = pipeline("pipeline/indirect_cull.glsl");
-
-		private static FileResolution pipeline(String name) {
-			return FileResolution.get(Flywheel.rl(name))
-					.validateWith(Checks.PIPELINE);
-		}
+		Pipelines.init();
 	}
 
 	public static class Files {

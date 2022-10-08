@@ -53,7 +53,7 @@ public class ComponentRegistry {
 
 	public static <T extends UniformProvider> T register(T provider) {
 		return uniformProviders.register(provider.uniformShader()
-				.getFileLoc(), provider);
+				.resourceLocation(), provider);
 	}
 
 	public static Collection<UniformProvider> getAllUniformProviders() {

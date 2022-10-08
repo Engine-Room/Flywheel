@@ -36,8 +36,6 @@ public class FileResolution {
 	private final ResourceLocation fileLoc;
 	private final boolean weak;
 
-	private SourceFile file;
-
 	private FileResolution(ResourceLocation fileLoc, boolean weak) {
 		this.fileLoc = fileLoc;
 		this.weak = weak;
@@ -76,38 +74,10 @@ public class FileResolution {
 		return WEAK.computeIfAbsent(file, loc -> new FileResolution(loc, true));
 	}
 
-	/**
-	 * Try and resolve all referenced source files, printing errors if any aren't found.
-	 */
-	public static void run(ErrorReporter errorReporter, SourceFinder sources) {
-		for (FileResolution resolution : ALL.values()) {
-			resolution.resolve(errorReporter, sources);
-		}
-
-		for (FileResolution resolution : WEAK.values()) {
-			resolution.resolve(errorReporter, sources);
-		}
-
-		WEAK.clear();
-
-		tooLate = true;
-	}
-
 	public static void checkAll(ErrorReporter errorReporter) {
 		for (FileResolution resolution : ALL.values()) {
 			resolution.runChecks(errorReporter);
 		}
-	}
-
-	private void resolve(ErrorReporter errorReporter, SourceFinder sources) {
-		file = sources.findSource(fileLoc);
-
-		if (file == null) {
-			reportMissing(errorReporter);
-		}
-
-		// Let the GC do its thing
-		neededAt.clear();
 	}
 
 	private void reportMissing(ErrorReporter errorReporter) {
@@ -119,22 +89,15 @@ public class FileResolution {
 	}
 
 	private void runChecks(ErrorReporter errorReporter) {
-		for (var check : checks) {
-			check.accept(errorReporter, file);
-		}
+		//		for (var check : checks) {
+		//			check.accept(errorReporter, file);
+		//		}
 	}
 
-	public ResourceLocation getFileLoc() {
+	public ResourceLocation resourceLocation() {
 		return fileLoc;
 	}
 
-	/**
-	 * Non-null if this file is resolved because there would have been a crash otherwise.
-	 * @return The file that this resolution resolves to.
-	 */
-	public SourceFile getFile() {
-		return file;
-	}
 
 	public boolean isWeak() {
 		return weak;
