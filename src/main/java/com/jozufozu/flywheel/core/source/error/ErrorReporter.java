@@ -2,15 +2,11 @@ package com.jozufozu.flywheel.core.source.error;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.core.source.ShaderLoadingException;
 import com.jozufozu.flywheel.core.source.SourceFile;
-import com.jozufozu.flywheel.core.source.parse.ShaderFunction;
-import com.jozufozu.flywheel.core.source.parse.ShaderStruct;
 import com.jozufozu.flywheel.core.source.span.Span;
 import com.jozufozu.flywheel.util.FlwUtil;
 
@@ -23,15 +19,15 @@ public class ErrorReporter {
 	}
 
 	public void generateMissingStruct(SourceFile file, Span vertexName, CharSequence msg, CharSequence hint) {
-		Optional<Span> span = file.parent.index.getStructDefinitionsMatching(vertexName)
-				.stream()
-				.findFirst()
-				.map(ShaderStruct::getName);
-
-		this.error(msg)
-				.pointAtFile(file)
-				.pointAt(vertexName, 1)
-				.hintIncludeFor(span.orElse(null), hint);
+		//		Optional<Span> span = file.parent.index.getStructDefinitionsMatching(vertexName)
+		//				.stream()
+		//				.findFirst()
+		//				.map(ShaderStruct::getName);
+		//
+		//		this.error(msg)
+		//				.pointAtFile(file)
+		//				.pointAt(vertexName, 1)
+		//				.hintIncludeFor(span.orElse(null), hint);
 	}
 
 	public void generateMissingFunction(SourceFile file, CharSequence functionName, CharSequence msg) {
@@ -39,14 +35,14 @@ public class ErrorReporter {
 	}
 
 	public void generateMissingFunction(SourceFile file, CharSequence functionName, CharSequence msg, CharSequence hint) {
-		Optional<Span> span = file.parent.index.getFunctionDefinitionsMatching(functionName)
-				.stream()
-				.findFirst()
-				.map(ShaderFunction::getName);
-
-		this.error(msg)
-				.pointAtFile(file)
-				.hintIncludeFor(span.orElse(null), hint);
+		//		Optional<Span> span = file.parent.index.getFunctionDefinitionsMatching(functionName)
+		//				.stream()
+		//				.findFirst()
+		//				.map(ShaderFunction::getName);
+		//
+		//		this.error(msg)
+		//				.pointAtFile(file)
+		//				.hintIncludeFor(span.orElse(null), hint);
 	}
 
 	public ErrorBuilder generateFunctionArgumentCountError(String name, int requiredArguments, Span span) {

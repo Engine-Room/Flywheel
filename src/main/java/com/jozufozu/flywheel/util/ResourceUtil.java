@@ -27,4 +27,9 @@ public class ResourceUtil {
 		return UNSAFE_CHARS.matcher(rl.toString())
 				.replaceAll("_");
 	}
+
+	public static ResourceLocation prefixed(String basePath, ResourceLocation resourceLocation) {
+		String path = resourceLocation.getPath();
+		return new ResourceLocation(resourceLocation.getNamespace(), basePath + path);
+	}
 }

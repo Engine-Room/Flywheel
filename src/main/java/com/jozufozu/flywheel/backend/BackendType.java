@@ -2,8 +2,8 @@ package com.jozufozu.flywheel.backend;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.pipeline.PipelineShader;
 import com.jozufozu.flywheel.backend.instancing.Engine;
+import com.jozufozu.flywheel.core.pipeline.SimplePipeline;
 
 import net.minecraft.network.chat.Component;
 
@@ -21,5 +21,5 @@ public interface BackendType {
 
 	boolean supported();
 
-	@Nullable PipelineShader pipelineShader();
+	@Nullable SimplePipeline pipelineShader();
 }

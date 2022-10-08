@@ -13,6 +13,8 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.backend.memory.FlwMemoryTracker;
@@ -65,7 +67,8 @@ public class StringUtil {
 		return value.substring(0, len);
 	}
 
-	public static String readToString(InputStream is) {
+	@Nonnull
+	public static String readToString(InputStream is) throws IOException {
 		ByteBuffer bytebuffer = null;
 
 		try {
@@ -73,17 +76,14 @@ public class StringUtil {
 			int i = bytebuffer.position();
 			((Buffer) bytebuffer).rewind();
 			return MemoryUtil.memASCII(bytebuffer, i);
-		} catch (IOException ignored) {
-			//
 		} finally {
 			if (bytebuffer != null) {
 				FlwMemoryTracker.freeBuffer(bytebuffer);
 			}
 		}
-
-		return null;
 	}
 
+	@Nonnull
 	public static ByteBuffer readToBuffer(InputStream is) throws IOException {
 		if (is instanceof FileInputStream fileinputstream) {
 			return readFileInputStream(fileinputstream);
@@ -92,6 +92,7 @@ public class StringUtil {
 		}
 	}
 
+	@Nonnull
 	private static ByteBuffer readInputStream(InputStream is) throws IOException {
 		ByteBuffer bytebuffer = FlwMemoryTracker.mallocBuffer(8192);
 		ReadableByteChannel readablebytechannel = Channels.newChannel(is);
@@ -104,6 +105,7 @@ public class StringUtil {
 		return bytebuffer;
 	}
 
+	@Nonnull
 	private static ByteBuffer readFileInputStream(FileInputStream fileinputstream) throws IOException {
 		FileChannel filechannel = fileinputstream.getChannel();
 		ByteBuffer bytebuffer = FlwMemoryTracker.mallocBuffer((int) filechannel.size() + 1);

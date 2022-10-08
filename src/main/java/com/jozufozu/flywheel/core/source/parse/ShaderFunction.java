@@ -7,13 +7,14 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.core.source.span.Span;
 
-public class ShaderFunction extends AbstractShaderElement {
+public class ShaderFunction {
 
 	// https://regexr.com/60n3d
 	public static final Pattern PATTERN = Pattern.compile("(\\w+)\\s+(\\w+)\\s*\\(([\\w,\\s]*)\\)\\s*\\{");
 
 	public static final Pattern argument = Pattern.compile("(?:(inout|in|out) )?(\\w+)\\s+(\\w+)");
 	public static final Pattern assignment = Pattern.compile("(\\w+)\\s*=");
+	public final Span self;
 
 	private final Span type;
 	private final Span name;
@@ -23,7 +24,7 @@ public class ShaderFunction extends AbstractShaderElement {
 	private final ImmutableList<ShaderVariable> parameters;
 
 	public ShaderFunction(Span self, Span type, Span name, Span args, Span body) {
-		super(self);
+		this.self = self;
 		this.type = type;
 		this.name = name;
 		this.args = args;

@@ -2,15 +2,16 @@ package com.jozufozu.flywheel.core.source.parse;
 
 import com.jozufozu.flywheel.core.source.span.Span;
 
-public class ShaderVariable extends AbstractShaderElement {
+public class ShaderVariable {
 
 	public final Span qualifierSpan;
 	public final Span type;
 	public final Span name;
 	public final Qualifier qualifier;
+	public final Span self;
 
 	public ShaderVariable(Span self, Span qualifier, Span type, Span name) {
-		super(self);
+		this.self = self;
 		this.qualifierSpan = qualifier;
 		this.type = type;
 		this.name = name;

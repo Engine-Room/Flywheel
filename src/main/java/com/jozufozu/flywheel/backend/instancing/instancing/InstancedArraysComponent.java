@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.pipeline.Pipeline;
 import com.jozufozu.flywheel.core.SourceComponent;
 import com.jozufozu.flywheel.core.layout.LayoutItem;
-import com.jozufozu.flywheel.core.source.CompilationContext;
 import com.jozufozu.flywheel.core.source.generate.GlslBuilder;
 import com.jozufozu.flywheel.core.source.generate.GlslExpr;
 
@@ -19,9 +19,12 @@ public class InstancedArraysComponent implements SourceComponent {
 	private final List<LayoutItem> layoutItems;
 	private final int baseIndex;
 
-	public InstancedArraysComponent(List<LayoutItem> layoutItems, int baseIndex) {
-		this.layoutItems = layoutItems;
-		this.baseIndex = baseIndex;
+	public InstancedArraysComponent(Pipeline.InstanceAssemblerContext ctx) {
+		this.layoutItems = ctx.structType()
+				.getLayout().layoutItems;
+		this.baseIndex = ctx.vertexType()
+				.getLayout()
+				.getAttributeCount();
 	}
 
 	@Override
@@ -30,9 +33,8 @@ public class InstancedArraysComponent implements SourceComponent {
 	}
 
 	@Override
-	public String source(CompilationContext ctx) {
-		var generated = generateInstancedArrays("Instance");
-		return ctx.generatedHeader(generated, name().toString()) + generated;
+	public String source() {
+		return generateInstancedArrays("Instance");
 	}
 
 	@Override

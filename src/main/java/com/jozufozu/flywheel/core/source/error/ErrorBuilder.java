@@ -100,7 +100,7 @@ public class ErrorBuilder {
 	public ErrorBuilder pointAt(Span span, int ctxLines) {
 
 		if (span.lines() == 1) {
-			SourceLines lines = span.getSourceFile().lines;
+			SourceLines lines = span.getSourceFile().source;
 
 			int spanLine = span.firstLine();
 

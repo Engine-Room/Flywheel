@@ -3,6 +3,8 @@ package com.jozufozu.flywheel.core.source;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.core.source.span.CharPos;
 import com.jozufozu.flywheel.util.StringUtil;
@@ -10,7 +12,7 @@ import com.jozufozu.flywheel.util.StringUtil;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
-public class SourceLines {
+public class SourceLines implements CharSequence {
 
 	private static final Pattern newLine = Pattern.compile("(\\r\\n|\\r|\\n)");
 
@@ -23,10 +25,12 @@ public class SourceLines {
 	 * 0-indexed line lookup
 	 */
 	private final ImmutableList<String> lines;
+	public final String raw;
 
-	public SourceLines(String source) {
-		this.lineStarts = createLineLookup(source);
-		this.lines = getLines(source, lineStarts);
+	public SourceLines(String raw) {
+		this.raw = raw;
+		this.lineStarts = createLineLookup(raw);
+		this.lines = getLines(raw, lineStarts);
 	}
 
 	public int getLineCount() {
@@ -38,7 +42,6 @@ public class SourceLines {
 	}
 
 	public int getLineStart(int lineNo) {
-
 		return lineStarts.getInt(lineNo);
 	}
 
@@ -98,5 +101,24 @@ public class SourceLines {
 		}
 
 		return builder.build();
+	}
+
+	@Override
+	public String toString() {
+		return raw;
+	}
+
+	@NotNull
+	@Override
+	public CharSequence subSequence(int start, int end) {
+		return raw.subSequence(start, end);
+	}
+
+	public char charAt(int i) {
+		return raw.charAt(i);
+	}
+
+	public int length() {
+		return raw.length();
 	}
 }

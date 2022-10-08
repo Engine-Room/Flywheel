@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.pipeline.PipelineShader;
 import com.jozufozu.flywheel.backend.BackendType;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.SimpleBackendType;
@@ -17,6 +16,7 @@ import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.batching.BatchingEngine;
 import com.jozufozu.flywheel.backend.instancing.indirect.IndirectEngine;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
+import com.jozufozu.flywheel.core.pipeline.SimplePipeline;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TextComponent;
@@ -58,7 +58,7 @@ public class BackendTypes {
 			.fallback(() -> BackendTypes.BATCHING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
 					.instancedArraysSupported())
-			.pipelineShader(Components.INSTANCED_ARRAYS)
+			.pipelineShader(Pipelines.INSTANCED_ARRAYS)
 			.register();
 
 	/**
@@ -72,7 +72,7 @@ public class BackendTypes {
 			.fallback(() -> BackendTypes.INSTANCING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
 					.supportsIndirect())
-			.pipelineShader(Components.INDIRECT)
+			.pipelineShader(Pipelines.INDIRECT)
 			.register();
 
 	public static BackendType register(BackendType type) {
@@ -99,7 +99,7 @@ public class BackendTypes {
 	}
 
 
-	public static Collection<PipelineShader> availablePipelineShaders() {
+	public static Collection<SimplePipeline> availablePipelineShaders() {
 		return BACKEND_TYPES.values()
 				.stream()
 				.filter(BackendType::supported)

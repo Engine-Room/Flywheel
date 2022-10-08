@@ -5,9 +5,9 @@ import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.pipeline.PipelineShader;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.core.BackendTypes;
+import com.jozufozu.flywheel.core.pipeline.SimplePipeline;
 
 import net.minecraft.network.chat.Component;
 
@@ -20,9 +20,9 @@ public class SimpleBackendType implements BackendType {
 	private final Supplier<Engine> engineSupplier;
 	private final Supplier<BackendType> fallback;
 	private final BooleanSupplier isSupported;
-	private final PipelineShader pipelineShader;
+	private final SimplePipeline pipelineShader;
 
-	public SimpleBackendType(String properName, String shortName, Component engineMessage, Supplier<Engine> engineSupplier, Supplier<BackendType> fallback, BooleanSupplier isSupported, @Nullable PipelineShader pipelineShader) {
+	public SimpleBackendType(String properName, String shortName, Component engineMessage, Supplier<Engine> engineSupplier, Supplier<BackendType> fallback, BooleanSupplier isSupported, @Nullable SimplePipeline pipelineShader) {
 		this.properName = properName;
 		this.shortName = shortName;
 		this.engineMessage = engineMessage;
@@ -72,7 +72,7 @@ public class SimpleBackendType implements BackendType {
 	}
 
 	@Override
-	public @Nullable PipelineShader pipelineShader() {
+	public @Nullable SimplePipeline pipelineShader() {
 		return pipelineShader;
 	}
 
@@ -83,7 +83,7 @@ public class SimpleBackendType implements BackendType {
 		private Supplier<Engine> engineSupplier;
 		private Supplier<BackendType> fallback;
 		private BooleanSupplier isSupported;
-		private PipelineShader pipelineShader;
+		private SimplePipeline pipelineShader;
 
 		public Builder properName(String properName) {
 			this.properName = properName;
@@ -115,7 +115,7 @@ public class SimpleBackendType implements BackendType {
 			return this;
 		}
 
-		public Builder pipelineShader(PipelineShader pipelineShader) {
+		public Builder pipelineShader(SimplePipeline pipelineShader) {
 			this.pipelineShader = pipelineShader;
 			return this;
 		}
