@@ -23,6 +23,11 @@ public class StringUtil {
 
 	private static final NumberFormat THREE_DECIMAL_PLACES = new DecimalFormat("#0.000");
 
+	public static int countLines(String s) {
+		return (int) s.lines()
+				.count();
+	}
+
 	public static String formatBytes(long bytes) {
 		if (bytes < 1024) {
 			return bytes + " B";
@@ -113,5 +118,13 @@ public class StringUtil {
 		while (filechannel.read(bytebuffer) != -1) {
 		}
 		return bytebuffer;
+	}
+
+	public static String repeatChar(char c, int n) {
+		char[] arr = new char[n];
+
+		Arrays.fill(arr, c);
+
+		return new String(arr);
 	}
 }

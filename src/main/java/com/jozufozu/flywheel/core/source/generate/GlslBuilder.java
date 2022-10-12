@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 import com.jozufozu.flywheel.util.Pair;
 
 public class GlslBuilder {
-	public static final String INDENT = "    ";
-
 	private final List<GlslRootElement> elements = new ArrayList<>();
 
 	public void define(String name, String value) {
@@ -39,16 +37,12 @@ public class GlslBuilder {
 
 	public String build() {
 		return elements.stream()
-				.map(GlslRootElement::minPrint)
+				.map(GlslRootElement::prettyPrint)
 				.collect(Collectors.joining("\n"));
 	}
 
-	public static String indent(int indentation) {
-		return INDENT.repeat(indentation);
-	}
-
 	public interface GlslRootElement {
-		String minPrint();
+		String prettyPrint();
 	}
 
 	public enum Separators implements GlslRootElement {
@@ -62,14 +56,14 @@ public class GlslBuilder {
 		}
 
 		@Override
-		public String minPrint() {
+		public String prettyPrint() {
 			return separator;
 		}
 	}
 
 	public record Define(String name, String value) implements GlslRootElement {
 		@Override
-		public String minPrint() {
+		public String prettyPrint() {
 			return "#define " + name + " " + value;
 		}
 	}
@@ -96,7 +90,7 @@ public class GlslBuilder {
 		}
 
 		@Override
-		public String minPrint() {
+		public String prettyPrint() {
 			return "layout(location = " + binding + ") in " + type + " " + name + ";";
 		}
 	}
@@ -116,16 +110,16 @@ public class GlslBuilder {
 
 		private String buildFields() {
 			return fields.stream()
-					.map(p -> INDENT + p.first() + ' ' + p.second() + ';')
+					.map(p -> p.first() + ' ' + p.second() + ';')
 					.collect(Collectors.joining("\n"));
 		}
 
-		public String minPrint() {
+		public String prettyPrint() {
 			return """
 					struct %s {
 					%s
 					};
-					""".formatted(name, buildFields());
+					""".formatted(name, buildFields().indent(4));
 		}
 	}
 
@@ -160,12 +154,13 @@ public class GlslBuilder {
 			return this;
 		}
 
-		public String minPrint() {
+		public String prettyPrint() {
 			return """
 					%s %s(%s) {
 					%s
 					}
-					""".formatted(returnType, name, buildArguments(), body.prettyPrint());
+					""".formatted(returnType, name, buildArguments(), body.prettyPrint()
+					.indent(4));
 		}
 
 		private String buildArguments() {

@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.util;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -20,14 +19,6 @@ public class FlwUtil {
 	public static Map<BlockEntityType<?>, BlockEntityRenderer<?>> getBlockEntityRenderers() {
 		Minecraft mc = Minecraft.getInstance();
 		return ((BlockEntityRenderDispatcherAccessor) mc.getBlockEntityRenderDispatcher()).flywheel$getRenderers();
-	}
-
-	public static String repeatChar(char c, int n) {
-		char[] arr = new char[n];
-
-		Arrays.fill(arr, c);
-
-		return new String(arr);
 	}
 
 	public static PoseStack copyPoseStack(PoseStack stack) {

@@ -11,6 +11,7 @@ import com.jozufozu.flywheel.util.StringUtil;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntLists;
 
 public class SourceLines implements CharSequence {
 
@@ -33,15 +34,15 @@ public class SourceLines implements CharSequence {
 		this.lines = getLines(raw, lineStarts);
 	}
 
-	public int getLineCount() {
+	public int count() {
 		return lines.size();
 	}
 
-	public String getLine(int lineNo) {
+	public String lineString(int lineNo) {
 		return lines.get(lineNo);
 	}
 
-	public int getLineStart(int lineNo) {
+	public int lineStartIndex(int lineNo) {
 		return lineStarts.getInt(lineNo);
 	}
 
@@ -76,9 +77,12 @@ public class SourceLines implements CharSequence {
 
 	/**
 	 * Scan the source for line breaks, recording the position of the first character of each line.
-	 * @param source
 	 */
 	private static IntList createLineLookup(String source) {
+		if (source.isEmpty()) {
+			return IntLists.emptyList();
+		}
+
 		IntList l = new IntArrayList();
 		l.add(0); // first line is always at position 0
 
@@ -87,6 +91,7 @@ public class SourceLines implements CharSequence {
 		while (matcher.find()) {
 			l.add(matcher.end());
 		}
+
 		return l;
 	}
 
@@ -120,5 +125,29 @@ public class SourceLines implements CharSequence {
 
 	public int length() {
 		return raw.length();
+	}
+
+	public int lineStartCol(int spanLine) {
+		return 0;
+	}
+
+	public int lineWidth(int spanLine) {
+		return lines.get(spanLine)
+				.length();
+	}
+
+	public int lineStartColTrimmed(final int line) {
+		final var lineString = lineString(line);
+		final int end = lineString.length();
+
+		int col = 0;
+		while (col < end && Character.isWhitespace(charAt(col))) {
+			col++;
+		}
+		return col;
+	}
+
+	public int lineStartPosTrimmed(final int line) {
+		return lineStartIndex(line) + lineStartColTrimmed(line);
 	}
 }
