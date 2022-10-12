@@ -98,15 +98,15 @@ public class SourceFile implements SourceComponent {
 	}
 
 	public Span getLineSpan(int lineNo) {
-		int begin = source.getLineStart(lineNo);
-		int end = begin + source.getLine(lineNo)
+		int begin = source.lineStartIndex(lineNo);
+		int end = begin + source.lineString(lineNo)
 				.length();
 		return new StringSpan(this, source.getCharPos(begin), source.getCharPos(end));
 	}
 
 	public Span getLineSpanNoWhitespace(int line) {
-		int begin = source.getLineStart(line);
-		int end = begin + source.getLine(line)
+		int begin = source.lineStartIndex(line);
+		int end = begin + source.lineString(line)
 				.length();
 
 		while (begin < end && Character.isWhitespace(source.charAt(begin))) {

@@ -54,7 +54,7 @@ public interface GlslStmt extends LangItem {
 					.prettyPrint();
 			return """
 					case %s:
-					%s""".formatted(variant, block);
+					%s""".formatted(variant, block.indent(4));
 		}
 	}
 }

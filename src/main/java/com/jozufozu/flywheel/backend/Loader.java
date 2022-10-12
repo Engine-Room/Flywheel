@@ -39,6 +39,10 @@ public class Loader implements ResourceManagerReloadListener {
 		var errorReporter = new ErrorReporter();
 		ShaderSources sources = new ShaderSources(errorReporter, manager);
 
+		if (FlwCompiler.INSTANCE != null) {
+			FlwCompiler.INSTANCE.delete();
+		}
+
 		FlwCompiler.INSTANCE = new FlwCompiler(sources);
 
 		ClientLevel level = Minecraft.getInstance().level;

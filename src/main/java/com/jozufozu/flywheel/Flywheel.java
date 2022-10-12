@@ -8,7 +8,6 @@ import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.batching.DrawBuffer;
-import com.jozufozu.flywheel.backend.instancing.compile.FlwCompiler;
 import com.jozufozu.flywheel.config.BackendTypeArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
@@ -80,7 +79,6 @@ public class Flywheel {
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);
 
 		forgeEventBus.addListener(EventPriority.HIGHEST, QuadConverter::onReloadRenderers);
-		forgeEventBus.addListener(FlwCompiler::onReloadRenderers);
 		forgeEventBus.addListener(Models::onReloadRenderers);
 		forgeEventBus.addListener(DrawBuffer::onReloadRenderers);
 
