@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -60,6 +61,7 @@ public class Backend {
 		return TYPE != BackendTypes.OFF;
 	}
 
+	@Contract("null -> false")
 	public static boolean canUseInstancing(@Nullable Level level) {
 		return isOn() && isFlywheelLevel(level);
 	}

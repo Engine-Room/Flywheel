@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.pipeline.Pipeline;
 import com.jozufozu.flywheel.api.struct.StructType;
@@ -28,6 +29,8 @@ import com.jozufozu.flywheel.core.SourceComponent;
 import com.jozufozu.flywheel.core.pipeline.SimplePipeline;
 import com.jozufozu.flywheel.core.source.ShaderLoadingException;
 import com.jozufozu.flywheel.core.source.ShaderSources;
+import com.jozufozu.flywheel.core.source.generate.FnSignature;
+import com.jozufozu.flywheel.core.source.generate.GlslExpr;
 import com.jozufozu.flywheel.util.StringUtil;
 
 public class FlwCompiler {
@@ -36,10 +39,9 @@ public class FlwCompiler {
 
 	final long compileStart = System.nanoTime();
 	private final ShaderSources sources;
-	private final VertexMaterialComponent vertexMaterialComponent;
-	private final FragmentMaterialComponent fragmentMaterialComponent;
+	private final MaterialAdapterComponent vertexMaterialComponent;
+	private final MaterialAdapterComponent fragmentMaterialComponent;
 	private final List<PipelineContext> pipelineContexts;
-
 
 	final ShaderCompiler shaderCompiler;
 	final Multimap<Set<UniformProvider>, PipelineContext> uniformProviderGroups = ArrayListMultimap.create();
@@ -50,8 +52,26 @@ public class FlwCompiler {
 	public FlwCompiler(ShaderSources sources) {
 		this.shaderCompiler = new ShaderCompiler(errors::add);
 		this.sources = sources;
-		this.vertexMaterialComponent = new VertexMaterialComponent(sources, ComponentRegistry.materials.vertexSources());
-		this.fragmentMaterialComponent = new FragmentMaterialComponent(sources, ComponentRegistry.materials.fragmentSources());
+		this.vertexMaterialComponent = MaterialAdapterComponent.builder(Flywheel.rl("vertex_material_adapter"))
+				.materialSources(ComponentRegistry.materials.vertexSources())
+				.adapt(FnSignature.ofVoid("flw_materialVertex"))
+				.switchOn(GlslExpr.variable("flw_materialVertexID"))
+				.build(sources);
+		this.fragmentMaterialComponent = MaterialAdapterComponent.builder(Flywheel.rl("fragment_material_adapter"))
+				.materialSources(ComponentRegistry.materials.fragmentSources())
+				.adapt(FnSignature.ofVoid("flw_materialFragment"))
+				.adapt(FnSignature.create()
+						.returnType("bool")
+						.name("flw_discardPredicate")
+						.arg("vec4", "color")
+						.build(), GlslExpr.literal(false))
+				.adapt(FnSignature.create()
+						.returnType("vec4")
+						.name("flw_fogFilter")
+						.arg("vec4", "color")
+						.build(), GlslExpr.variable("color"))
+				.switchOn(GlslExpr.variable("flw_materialFragmentID"))
+				.build(sources);
 
 		this.pipelineContexts = buildPipelineSet();
 

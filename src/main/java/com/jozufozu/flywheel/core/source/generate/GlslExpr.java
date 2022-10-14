@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 
-public interface GlslExpr extends LangItem {
+public interface GlslExpr {
 
 	/**
 	 * Create a glsl variable with the given name.
@@ -27,7 +27,11 @@ public interface GlslExpr extends LangItem {
 	}
 
 	static GlslExpr literal(int expr) {
-		return new Literal(expr);
+		return new IntLiteral(expr);
+	}
+
+	static GlslExpr literal(boolean expr) {
+		return new BoolLiteral(expr);
 	}
 
 	/**
@@ -69,6 +73,8 @@ public interface GlslExpr extends LangItem {
 	default GlslExpr transform(Function<GlslExpr, GlslExpr> f) {
 		return f.apply(this);
 	}
+
+	String prettyPrint();
 
 	record Variable(String name) implements GlslExpr {
 		@Override
@@ -117,10 +123,17 @@ public interface GlslExpr extends LangItem {
 
 	}
 
-	record Literal(int value) implements GlslExpr {
+	record IntLiteral(int value) implements GlslExpr {
 		@Override
 		public String prettyPrint() {
 			return Integer.toString(value);
+		}
+	}
+
+	record BoolLiteral(boolean value) implements GlslExpr {
+		@Override
+		public String prettyPrint() {
+			return Boolean.toString(value);
 		}
 	}
 }
