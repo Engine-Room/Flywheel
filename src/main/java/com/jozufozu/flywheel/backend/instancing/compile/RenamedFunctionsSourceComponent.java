@@ -11,24 +11,29 @@ import net.minecraft.resources.ResourceLocation;
 public final class RenamedFunctionsSourceComponent implements SourceComponent {
 	private final SourceComponent source;
 	private final Map<String, String> replacements;
+	private final String sourceString;
 
 	public RenamedFunctionsSourceComponent(SourceComponent source, String find, String replace) {
-		this.source = source;
-		this.replacements = Map.of(find, replace);
+		this(source, Map.of(find, replace));
 	}
 
 	public RenamedFunctionsSourceComponent(SourceComponent source, Map<String, String> replacements) {
 		this.source = source;
 		this.replacements = replacements;
+		this.sourceString = source.source();
 	}
 
-	public String replacement(String name) {
+	public String remapFnName(String name) {
 		return replacements.getOrDefault(name, name);
+	}
+
+	public boolean replaces(String name) {
+		return replacements.containsKey(name) && sourceString.contains(name);
 	}
 
 	@Override
 	public String source() {
-		var source = this.source.source();
+		var source = sourceString;
 
 		for (var entry : replacements.entrySet()) {
 			source = source.replace(entry.getKey(), entry.getValue());

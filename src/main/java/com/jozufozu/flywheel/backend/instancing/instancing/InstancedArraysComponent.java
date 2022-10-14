@@ -8,6 +8,8 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.pipeline.Pipeline;
 import com.jozufozu.flywheel.core.SourceComponent;
 import com.jozufozu.flywheel.core.layout.LayoutItem;
+import com.jozufozu.flywheel.core.source.generate.FnSignature;
+import com.jozufozu.flywheel.core.source.generate.GlslBlock;
 import com.jozufozu.flywheel.core.source.generate.GlslBuilder;
 import com.jozufozu.flywheel.core.source.generate.GlslExpr;
 
@@ -15,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class InstancedArraysComponent implements SourceComponent {
 	private static final String ATTRIBUTE_SUFFIX = "_vertex_in";
+	private static final String STRUCT_NAME = "Instance";
 
 	private final List<LayoutItem> layoutItems;
 	private final int baseIndex;
@@ -33,18 +36,14 @@ public class InstancedArraysComponent implements SourceComponent {
 	}
 
 	@Override
-	public String source() {
-		return generateInstancedArrays("Instance");
-	}
-
-	@Override
 	public ResourceLocation name() {
 		return Flywheel.rl("generated_instanced_arrays");
 	}
 
-	public String generateInstancedArrays(String structName) {
+	@Override
+	public String source() {
 		var builder = new GlslBuilder();
-		builder.define("FlwInstance", structName);
+		builder.define("FlwInstance", STRUCT_NAME);
 
 		int i = baseIndex;
 		for (var field : layoutItems) {
@@ -61,7 +60,7 @@ public class InstancedArraysComponent implements SourceComponent {
 		builder.blankLine();
 
 		var structBuilder = builder.struct();
-		structBuilder.setName(structName);
+		structBuilder.setName(STRUCT_NAME);
 
 		for (var field : layoutItems) {
 			field.addToStruct(structBuilder);
@@ -71,13 +70,16 @@ public class InstancedArraysComponent implements SourceComponent {
 
 		// unpacking function
 		builder.function()
-				.returnType(structName)
-				.name("flw_unpackInstance")
-				.body(b -> b.ret(GlslExpr.call(structName, layoutItems.stream()
-						.map(it -> new GlslExpr.Variable(it.name() + ATTRIBUTE_SUFFIX))
-						.toList())));
+				.signature(FnSignature.of(STRUCT_NAME, "flw_unpackInstance"))
+				.body(this::generateUnpackingBody);
 
 		return builder.build();
 	}
 
+	private void generateUnpackingBody(GlslBlock b) {
+		var fields = layoutItems.stream()
+				.map(it -> new GlslExpr.Variable(it.name() + ATTRIBUTE_SUFFIX))
+				.toList();
+		b.ret(GlslExpr.call(STRUCT_NAME, fields));
+	}
 }

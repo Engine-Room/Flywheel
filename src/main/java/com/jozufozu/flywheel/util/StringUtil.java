@@ -12,6 +12,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -70,6 +71,25 @@ public class StringUtil {
 			len--;
 		}
 		return value.substring(0, len);
+	}
+
+	/**
+	 * Copy of {@link String#indent(int)} with the trailing newline removed.
+	 */
+	public static String indent(String str, int n) {
+		if (str.isEmpty()) {
+			return "";
+		}
+		Stream<String> stream = str.lines();
+		if (n > 0) {
+			final String spaces = repeatChar(' ', n);
+			stream = stream.map(s -> spaces + s);
+		} else if (n == Integer.MIN_VALUE) {
+			stream = stream.map(String::stripLeading);
+		} else if (n < 0) {
+			throw new IllegalArgumentException("Requested indentation (" + n + ") is unsupported");
+		}
+		return stream.collect(Collectors.joining("\n"));
 	}
 
 	@Nonnull
