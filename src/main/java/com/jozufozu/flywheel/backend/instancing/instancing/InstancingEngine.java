@@ -74,6 +74,7 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	 */
 	@Override
 	public void render(TaskEngine taskEngine, RenderLayerEvent event) {
+		// XXX Restore state
 		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
 
 		double camX;
