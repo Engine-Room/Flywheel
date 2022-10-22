@@ -46,6 +46,7 @@ public interface Model {
 		return Formats.POS_TEX_NORMAL;
 	}
 
+	// XXX Since this is public API (technically) we cannot make assumptions about what GL state this method can use or modify unless a contract is established.
 	/**
 	 * Create an element buffer object that indexes the vertices of this model.
 	 *
