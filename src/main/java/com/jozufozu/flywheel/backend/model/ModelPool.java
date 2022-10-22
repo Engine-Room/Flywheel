@@ -42,6 +42,7 @@ public class ModelPool implements ModelAllocator {
 
 		vbo = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
 
+		// XXX ARRAY_BUFFER is bound and not reset or restored
 		vbo.bind();
 		vbo.setGrowthMargin(stride * 64);
 	}
@@ -68,6 +69,7 @@ public class ModelPool implements ModelAllocator {
 		if (dirty) {
 			if (anyToRemove) processDeletions();
 
+			// XXX ARRAY_BUFFER is bound and reset
 			vbo.bind();
 			if (realloc()) {
 				uploadAll();
@@ -182,25 +184,25 @@ public class ModelPool implements ModelAllocator {
 
 		@Override
 		public void setupState(GlVertexArray vao) {
+			// XXX ARRAY_BUFFER is bound and not reset or restored
 			vbo.bind();
 			vao.enableArrays(getAttributeCount());
 			vao.bindAttributes(0, vertexType.getLayout());
+			ebo.bind();
 		}
 
 		@Override
 		public void drawCall() {
-			GL32.glDrawElementsBaseVertex(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.asGLType, 0, first);
+			GL32.glDrawElementsBaseVertex(GlPrimitive.TRIANGLES.glEnum, ebo.getElementCount(), ebo.getEboIndexType().asGLType, 0, first);
 		}
 
 		@Override
 		public void drawInstances(int instanceCount) {
 			if (!valid()) return;
 
-			ebo.bind();
-
 			//Backend.log.info(StringUtil.args("drawElementsInstancedBaseVertex", GlPrimitive.TRIANGLES, ebo.elementCount, ebo.eboIndexType, 0, instanceCount, first));
 
-			GL32.glDrawElementsInstancedBaseVertex(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.asGLType, 0, instanceCount, first);
+			GL32.glDrawElementsInstancedBaseVertex(GlPrimitive.TRIANGLES.glEnum, ebo.getElementCount(), ebo.getEboIndexType().asGLType, 0, instanceCount, first);
 		}
 
 		@Override

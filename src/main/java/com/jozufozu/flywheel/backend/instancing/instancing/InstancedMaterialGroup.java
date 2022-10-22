@@ -68,15 +68,23 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 		return vertexCount;
 	}
 
+	// XXX Overriden in CrumblingGroup
+	// XXX Runs inside of restore state
 	public void render(Matrix4f viewProjection, double camX, double camY, double camZ, RenderLayer layer) {
 		type.setupRenderState();
-		Textures.bindActiveTextures();
-		renderAll(viewProjection, camX, camY, camZ, layer);
+		Textures.bindActiveTextures(); // XXX Changes active unit and bound textures
+		renderAll(viewProjection, camX, camY, camZ, layer); // XXX May change ARRAY_BUFFER binding (reset or not reset), VAO binding (not reset), shader binding (not reset), call Model.createEBO
 		type.clearRenderState();
+		// XXX Should texture bindings be reset or restored?
+		// XXX Should the active unit be reset or restored?
+		// XXX Should the VAO binding be reset or restored?
+		// XXX Should the ARRAY_BUFFER binding be reset or restored?
+		// XXX Should the shader binding be reset or restored?
 	}
 
+	// XXX Internal GL state changes are inconsistent; sometimes bindings are reset to 0, sometimes not
 	protected void renderAll(Matrix4f viewProjection, double camX, double camY, double camZ, RenderLayer layer) {
-		initializeInstancers();
+		initializeInstancers(); // XXX May change ARRAY_BUFFER binding (reset or not reset), VAO binding (not reset), call Model.createEBO
 
 		vertexCount = 0;
 		instanceCount = 0;
@@ -88,6 +96,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 			P program = owner.context.getProgram(ProgramContext.create(entry.getKey()
 					.getProgramSpec(), Formats.POS_TEX_NORMAL, layer));
 
+			// XXX Shader is bound and not reset or restored
 			program.bind();
 			program.uploadViewProjection(viewProjection);
 			program.uploadCameraPos(camX, camY, camZ);
@@ -95,7 +104,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 			setup(program);
 
 			for (GPUInstancer<?> instancer : material.getAllInstancers()) {
-				instancer.render();
+				instancer.render(); // XXX May change VAO binding (not reset), ARRAY_BUFFER binding (reset)
 				vertexCount += instancer.getVertexCount();
 				instanceCount += instancer.getInstanceCount();
 			}
@@ -103,19 +112,19 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 	}
 
 	private void initializeInstancers() {
-		ModelAllocator allocator = getModelAllocator();
+		ModelAllocator allocator = getModelAllocator(); // XXX May change ARRAY_BUFFER binding (not reset)
 
 		// initialize all uninitialized instancers...
 		for (InstancedMaterial<?> material : materials.values()) {
 			for (GPUInstancer<?> instancer : material.uninitialized) {
-				instancer.init(allocator);
+				instancer.init(allocator); // XXX May change VAO binding (not reset), ARRAY_BUFFER binding (not reset), call Model.createEBO
 			}
 			material.uninitialized.clear();
 		}
 
 		if (allocator instanceof ModelPool pool) {
 			// ...and then flush the model arena in case anything was marked for upload
-			pool.flush();
+			pool.flush(); // XXX May change ARRAY_BUFFER binding (reset)
 		}
 	}
 

@@ -39,7 +39,7 @@ public class GlStateTracker {
 		return new State(BUFFERS.clone(), vao, program);
 	}
 
-	public static record State(int[] buffers, int vao, int program) {
+	public record State(int[] buffers, int vao, int program) {
 		public void restore() {
 			if (vao != GlStateTracker.vao) {
 				GlStateManager._glBindVertexArray(vao);
@@ -48,7 +48,7 @@ public class GlStateTracker {
 			GlBufferType[] values = GlBufferType.values();
 
 			for (int i = 0; i < values.length; i++) {
-				if (buffers[i] != GlStateTracker.BUFFERS[i]) {
+				if (buffers[i] != GlStateTracker.BUFFERS[i] && values[i] != GlBufferType.ELEMENT_ARRAY_BUFFER) {
 					GlStateManager._glBindBuffer(values[i].glEnum, buffers[i]);
 				}
 			}

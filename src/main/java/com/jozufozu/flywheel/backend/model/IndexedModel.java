@@ -59,27 +59,26 @@ public class IndexedModel implements BufferedModel {
 	 * The VBO/VAO should be bound externally.
 	 */
 	public void setupState(GlVertexArray vao) {
+		// XXX ARRAY_BUFFER is bound and not reset or restored
 		vbo.bind();
 		vao.enableArrays(getAttributeCount());
 		vao.bindAttributes(0, getType().getLayout());
+		ebo.bind();
 	}
 
 	@Override
 	public void drawCall() {
-		ebo.bind();
-		GL20.glDrawElements(primitiveMode.glEnum, ebo.elementCount, ebo.eboIndexType.asGLType, 0);
+		GL20.glDrawElements(primitiveMode.glEnum, ebo.getElementCount(), ebo.getEboIndexType().asGLType, 0);
 	}
 
 	/**
-		 * Draws many instances of this model, assuming the appropriate state is already bound.
-		 */
+	 * Draws many instances of this model, assuming the appropriate state is already bound.
+	 */
 	@Override
 	public void drawInstances(int instanceCount) {
 		if (!valid()) return;
 
-		ebo.bind();
-
-		GL31.glDrawElementsInstanced(primitiveMode.glEnum, ebo.elementCount, ebo.eboIndexType.asGLType, 0, instanceCount);
+		GL31.glDrawElementsInstanced(primitiveMode.glEnum, ebo.getElementCount(), ebo.getEboIndexType().asGLType, 0, instanceCount);
 	}
 
 	public boolean isDeleted() {

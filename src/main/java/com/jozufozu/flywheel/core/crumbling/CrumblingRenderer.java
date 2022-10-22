@@ -65,6 +65,7 @@ public class CrumblingRenderer {
 
 		Vec3 cameraPos = camera.getPosition();
 
+		// XXX Restore state
 		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
 		CrumblingRenderer.renderBreaking(activeStages, new RenderLayerEvent(level, null, stack, null, cameraPos.x, cameraPos.y, cameraPos.z));
 		restoreState.restore();
@@ -87,6 +88,7 @@ public class CrumblingRenderer {
 
 				instanceManager.beginFrame(SerialTaskEngine.INSTANCE, info);
 
+				// XXX Each call applies another restore state even though we are already inside of a restore state
 				materials.render(SerialTaskEngine.INSTANCE, event);
 
 				instanceManager.invalidate();
@@ -94,6 +96,9 @@ public class CrumblingRenderer {
 
 		}
 
+		// XXX Inconsistent GL state cleanup
+		// If texture binding and active unit need to be restored, store them in variables before GL state is changed
+		// instead of guessing that unit 0 and crumbling tex 0 are correct
 		GlTextureUnit.T0.makeActive();
 		AbstractTexture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(0));
 		if (breaking != null) RenderSystem.bindTexture(breaking.getId());

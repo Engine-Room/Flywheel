@@ -1,20 +1,20 @@
 package com.jozufozu.flywheel.core;
 
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL32C;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.backend.gl.GlNumericType;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
-import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
-import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.mojang.blaze3d.vertex.VertexFormat;
+
+import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 
 /**
  * A class to manage EBOs that index quads as triangles.
@@ -37,76 +37,74 @@ public class QuadConverter {
 		return INSTANCE;
 	}
 
-	private final MappedGlBuffer ebo;
+	private final Int2ReferenceMap<ElementBuffer> cache = new Int2ReferenceArrayMap<>();
+	private final int ebo;
 	private int quadCapacity;
 
 	public QuadConverter() {
-		this.ebo = new MappedGlBuffer(GlBufferType.ELEMENT_ARRAY_BUFFER);
+		this.ebo = GL32.glGenBuffers();
 		this.quadCapacity = 0;
 	}
 
 	public ElementBuffer quads2Tris(int quads) {
-		int indexCount = quads * 6;
-
 		if (quads > quadCapacity) {
-			ebo.bind();
-			ebo.ensureCapacity((long) indexCount * GlNumericType.UINT.getByteWidth());
-
-			try (MappedBuffer map = ebo.getBuffer()) {
-				ByteBuffer indices = map.unwrap();
-
-				fillBuffer(indices, quads);
-			}
-			ebo.unbind();
-
-			this.quadCapacity = quads;
+			grow(quads * 2);
 		}
 
-		return new ElementBuffer(ebo, indexCount, VertexFormat.IndexType.INT);
+		return cache.computeIfAbsent(quads, this::createElementBuffer);
+	}
+
+	@NotNull
+	private ElementBuffer createElementBuffer(int quads) {
+		return new ElementBuffer(ebo, quads * 6, VertexFormat.IndexType.INT);
+	}
+
+	private void grow(int quads) {
+		int byteSize = quads * 6 * GlNumericType.UINT.getByteWidth();
+		final long ptr = MemoryUtil.nmemAlloc(byteSize);
+
+		fillBuffer(ptr, quads);
+
+		// XXX ARRAY_BUFFER is bound and reset
+		final var bufferType = GlBufferType.ARRAY_BUFFER;
+		final int oldBuffer = bufferType.getBoundBuffer();
+		bufferType.bind(ebo);
+		GL32C.nglBufferData(bufferType.glEnum, byteSize, ptr, GlBufferUsage.STATIC_DRAW.glEnum);
+		bufferType.bind(oldBuffer);
+
+		MemoryUtil.nmemFree(ptr);
+
+		this.quadCapacity = quads;
 	}
 
 	public void delete() {
-		ebo.delete();
+		GL32.glDeleteBuffers(ebo);
 		this.quadCapacity = 0;
 	}
 
-	private void fillBuffer(ByteBuffer indices, int quads) {
-		long addr = MemoryUtil.memAddress(indices);
+	private void fillBuffer(long ptr, int quads) {
 		int numVertices = 4 * quads;
 		int baseVertex = 0;
 		while (baseVertex < numVertices) {
-			// writeQuadIndices(indices, baseVertex);
-			writeQuadIndicesUnsafe(addr, baseVertex);
+			writeQuadIndicesUnsafe(ptr, baseVertex);
 
 			baseVertex += 4;
-			addr += 6 * 4;
+			ptr += 6 * 4;
 		}
-		// ((Buffer) indices).flip();
 	}
 
-	private void writeQuadIndices(ByteBuffer indices, int baseVertex) {
+	private void writeQuadIndicesUnsafe(long ptr, int baseVertex) {
 		// triangle a
-		indices.putInt(baseVertex);
-		indices.putInt(baseVertex + 1);
-		indices.putInt(baseVertex + 2);
+		MemoryUtil.memPutInt(ptr, baseVertex);
+		MemoryUtil.memPutInt(ptr + 4, baseVertex + 1);
+		MemoryUtil.memPutInt(ptr + 8, baseVertex + 2);
 		// triangle b
-		indices.putInt(baseVertex);
-		indices.putInt(baseVertex + 2);
-		indices.putInt(baseVertex + 3);
+		MemoryUtil.memPutInt(ptr + 12, baseVertex);
+		MemoryUtil.memPutInt(ptr + 16, baseVertex + 2);
+		MemoryUtil.memPutInt(ptr + 20, baseVertex + 3);
 	}
 
-	private void writeQuadIndicesUnsafe(long addr, int baseVertex) {
-		// triangle a
-		MemoryUtil.memPutInt(addr, baseVertex);
-		MemoryUtil.memPutInt(addr + 4, baseVertex + 1);
-		MemoryUtil.memPutInt(addr + 8, baseVertex + 2);
-		// triangle b
-		MemoryUtil.memPutInt(addr + 12, baseVertex);
-		MemoryUtil.memPutInt(addr + 16, baseVertex + 2);
-		MemoryUtil.memPutInt(addr + 20, baseVertex + 3);
-	}
-
-	// make sure this gets reset first so it has a chance to repopulate
+	// make sure this gets reset first, so it has a chance to repopulate
 	public static void onRendererReload(ReloadRenderersEvent event) {
 		if (INSTANCE != null) {
 			INSTANCE.delete();

@@ -45,6 +45,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 	public void render() {
 		if (invalid()) return;
 
+		// XXX VAO is bound and not reset or restored
 		vao.bind();
 
 		renderSetup();
@@ -68,12 +69,15 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 		vao = new GlVertexArray();
 
+		// XXX Callback seems unnecessary. Remove and extract code to run after alloc call?
 		model = modelAllocator.alloc(modelData, arenaModel -> {
+			// XXX VAO is bound and not reset or restored
 			vao.bind();
 
 			arenaModel.setupState(vao);
 		});
 
+		// XXX VAO is already guaranteed to be bound in model callback
 		vao.bind();
 		vao.enableArrays(model.getAttributeCount() + instanceFormat.getAttributeCount());
 
@@ -108,6 +112,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 			removeDeletedInstances();
 		}
 
+		// XXX ARRAY_BUFFER is bound and reset
 		instanceVBO.bind();
 		if (!realloc()) {
 

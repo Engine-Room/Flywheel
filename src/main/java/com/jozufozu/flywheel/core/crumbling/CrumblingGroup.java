@@ -18,6 +18,7 @@ public class CrumblingGroup<P extends CrumblingProgram> extends InstancedMateria
 		super(owner, type);
 	}
 
+	// XXX See notes of overriden method
 	@Override
 	public void render(Matrix4f viewProjection, double camX, double camY, double camZ, RenderLayer layer) {
 		type.setupRenderState();

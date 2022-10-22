@@ -3,13 +3,14 @@ package com.jozufozu.flywheel.core.model;
 import java.nio.ByteBuffer;
 import java.util.function.Supplier;
 
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL32;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;
-import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.QuadConverter;
@@ -64,10 +65,15 @@ public class BlockModel implements Model {
 			ByteBuffer indexBuffer = MemoryTracker.create(src.capacity());
 			MemoryUtil.memCopy(src, indexBuffer);
 			eboSupplier = () -> {
+				int vbo = GL32.glGenBuffers();
 
-				MappedGlBuffer vbo = new MappedGlBuffer(GlBufferType.ELEMENT_ARRAY_BUFFER, GlBufferUsage.STATIC_DRAW);
-
-				vbo.upload(indexBuffer);
+				// XXX ARRAY_BUFFER is bound and restored
+				var bufferType = GlBufferType.ARRAY_BUFFER;
+				var oldBuffer = bufferType.getBoundBuffer();
+				bufferType.bind(vbo);
+				GL15.glBufferData(bufferType.glEnum, indexBuffer, GlBufferUsage.STATIC_DRAW.glEnum);
+				bufferType.bind(oldBuffer);
+				MemoryUtil.memFree(indexBuffer);
 
 				return new ElementBuffer(vbo, drawState.indexCount(), drawState.indexType());
 			};
