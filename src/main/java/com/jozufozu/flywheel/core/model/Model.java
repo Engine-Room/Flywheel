@@ -62,6 +62,8 @@ public interface Model {
 				.quads2Tris(vertexCount() / 4);
 	}
 
+	void delete();
+
 	/**
 	 * The size in bytes that this model's data takes up.
 	 */

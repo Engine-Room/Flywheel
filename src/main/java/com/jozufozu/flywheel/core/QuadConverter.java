@@ -79,6 +79,7 @@ public class QuadConverter {
 
 	public void delete() {
 		GL32.glDeleteBuffers(ebo);
+		this.cache.clear();
 		this.quadCapacity = 0;
 	}
 
