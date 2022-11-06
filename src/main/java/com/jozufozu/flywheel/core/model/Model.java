@@ -58,6 +58,8 @@ public interface Model {
 	 */
 	ElementBuffer createEBO();
 
+	void delete();
+
 	/**
 	 * The size in bytes that this model's data takes up.
 	 */

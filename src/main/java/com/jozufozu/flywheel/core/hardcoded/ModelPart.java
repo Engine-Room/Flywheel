@@ -59,4 +59,15 @@ public class ModelPart implements Model {
 		return QuadConverter.getInstance()
 				.quads2Tris(vertices / 4);
 	}
+
+	@Override
+	public void delete() {
+		if (reader instanceof AutoCloseable closeable) {
+			try {
+				closeable.close();
+			} catch (Exception e) {
+				//
+			}
+		}
+	}
 }

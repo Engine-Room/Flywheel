@@ -19,6 +19,7 @@ import com.mojang.blaze3d.platform.MemoryTracker;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferBuilder.RenderedBuffer;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexFormat.IndexType;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.BakedModel;
@@ -32,7 +33,7 @@ public class BlockModel implements Model {
 
 	private final String name;
 
-	private final Supplier<ElementBuffer> eboSupplier;
+	private final EBOSupplier eboSupplier;
 
 	public BlockModel(BlockState state) {
 		this(Minecraft.getInstance()
@@ -61,22 +62,7 @@ public class BlockModel implements Model {
 		reader = Formats.BLOCK.createReader(renderedBuffer, pair.second());
 
 		if (!drawState.sequentialIndex()) {
-			ByteBuffer src = renderedBuffer.indexBuffer();
-			ByteBuffer indexBuffer = MemoryTracker.create(src.capacity());
-			MemoryUtil.memCopy(src, indexBuffer);
-			eboSupplier = () -> {
-				int vbo = GL32.glGenBuffers();
-
-				// XXX ARRAY_BUFFER is bound and restored
-				var bufferType = GlBufferType.ARRAY_BUFFER;
-				var oldBuffer = bufferType.getBoundBuffer();
-				bufferType.bind(vbo);
-				GL15.glBufferData(bufferType.glEnum, indexBuffer, GlBufferUsage.STATIC_DRAW.glEnum);
-				bufferType.bind(oldBuffer);
-				MemoryUtil.memFree(indexBuffer);
-
-				return new ElementBuffer(vbo, drawState.indexCount(), drawState.indexType());
-			};
+			eboSupplier = new BufferEBOSupplier(renderedBuffer.indexBuffer(), drawState.indexCount(), drawState.indexType());
 		} else {
 			eboSupplier = () -> QuadConverter.getInstance()
 					.quads2Tris(vertexCount() / 4);
@@ -106,5 +92,66 @@ public class BlockModel implements Model {
 	@Override
 	public VertexType getType() {
 		return Formats.BLOCK;
+	}
+
+	@Override
+	public void delete() {
+		if (reader instanceof AutoCloseable closeable) {
+			try {
+				closeable.close();
+			} catch (Exception e) {
+				//
+			}
+		}
+		eboSupplier.delete();
+	}
+
+	private interface EBOSupplier extends Supplier<ElementBuffer> {
+		default void delete() {
+		}
+	}
+
+	private static class BufferEBOSupplier implements EBOSupplier {
+		private final ByteBuffer indexBuffer;
+		private final int indexCount;
+		private final IndexType indexType;
+
+		private int eboName = -1;
+		private ElementBuffer ebo;
+
+		public BufferEBOSupplier(ByteBuffer indexBufferSrc, int indexCount, IndexType indexType) {
+			indexBuffer = MemoryTracker.create(indexBufferSrc.capacity());
+			MemoryUtil.memCopy(indexBufferSrc, indexBuffer);
+			this.indexCount = indexCount;
+			this.indexType = indexType;
+		}
+
+		@Override
+		public ElementBuffer get() {
+			if (eboName == -1) {
+				eboName = createEBO();
+				ebo = new ElementBuffer(eboName, indexCount, indexType);
+				MemoryUtil.memFree(indexBuffer);
+			}
+
+			return ebo;
+		}
+
+		private int createEBO() {
+			int vbo = GL32.glGenBuffers();
+
+			// XXX ARRAY_BUFFER is bound and restored
+			var bufferType = GlBufferType.ARRAY_BUFFER;
+			var oldBuffer = bufferType.getBoundBuffer();
+			bufferType.bind(vbo);
+			GL15.glBufferData(bufferType.glEnum, indexBuffer, GlBufferUsage.STATIC_DRAW.glEnum);
+			bufferType.bind(oldBuffer);
+			return vbo;
+		}
+
+		@Override
+		public void delete() {
+			GL32.glDeleteBuffers(eboName);
+		}
 	}
 }
