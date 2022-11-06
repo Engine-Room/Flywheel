@@ -47,4 +47,15 @@ public class BlockModel implements Model {
 	public VertexList getReader() {
 		return reader;
 	}
+
+	@Override
+	public void delete() {
+		if (reader instanceof AutoCloseable closeable) {
+			try {
+				closeable.close();
+			} catch (Exception e) {
+				//
+			}
+		}
+	}
 }
