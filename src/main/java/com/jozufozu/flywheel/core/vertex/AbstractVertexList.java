@@ -7,7 +7,6 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.mojang.blaze3d.platform.MemoryTracker;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 
 public abstract class AbstractVertexList implements VertexList, AutoCloseable {
 

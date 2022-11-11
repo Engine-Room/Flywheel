@@ -29,8 +29,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * A model of a single block.
  */
 public class BlockModel implements Model {
-	private final VertexList reader;
 
+	private final VertexList reader;
 	private final String name;
 
 	private final EBOSupplier eboSupplier;

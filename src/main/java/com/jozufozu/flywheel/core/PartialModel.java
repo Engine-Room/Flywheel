@@ -12,12 +12,12 @@ import net.minecraftforge.client.event.ModelEvent;
  * A helper class for loading and accessing json models.
  * <br>
  * Creating a PartialModel will make the associated modelLocation automatically load.
- * PartialModels must be initialized during {@link net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent FMLClientSetupEvent}.
+ * PartialModels must be initialized the mod class constructor.
  * <br>
  * Once {@link ModelEvent.BakingCompleted} finishes, all PartialModels (with valid modelLocations)
  * will have their bakedModel fields populated.
  * <br>
- * Attempting to create a PartialModel after ModelRegistryEvent will cause an error.
+ * Attempting to create a PartialModel after {@link ModelEvent.RegisterAdditional} will cause an error.
  */
 public class PartialModel {
 

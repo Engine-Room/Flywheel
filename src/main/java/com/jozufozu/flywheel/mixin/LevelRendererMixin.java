@@ -47,7 +47,7 @@ public class LevelRendererMixin {
 	}
 
 	@Inject(at = @At("TAIL"), method = "renderChunkLayer")
-	private void renderLayer(RenderType type, PoseStack stack, double camX, double camY, double camZ, Matrix4f p_172999_, CallbackInfo ci) {
+	private void renderLayer(RenderType type, PoseStack stack, double camX, double camY, double camZ, Matrix4f projection, CallbackInfo ci) {
 		MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(level, type, stack, renderBuffers, camX, camY, camZ));
 	}
 
