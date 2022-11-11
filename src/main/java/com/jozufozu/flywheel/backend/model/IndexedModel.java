@@ -20,6 +20,7 @@ import com.jozufozu.flywheel.core.model.Model;
  */
 public class IndexedModel implements BufferedModel {
 
+	protected final VertexType type;
 	protected final Model model;
 	protected final GlPrimitive primitiveMode;
 	protected ElementBuffer ebo;
@@ -27,6 +28,11 @@ public class IndexedModel implements BufferedModel {
 	protected boolean deleted;
 
 	public IndexedModel(Model model) {
+		this(model, model.getType());
+	}
+
+	public IndexedModel(Model model, VertexType type) {
+		this.type = type;
 		this.model = model;
 		this.primitiveMode = GlPrimitive.TRIANGLES;
 
@@ -38,7 +44,8 @@ public class IndexedModel implements BufferedModel {
 
 		// mirror it in system memory, so we can write to it, and upload our model.
 		try (MappedBuffer buffer = vbo.getBuffer()) {
-			model.writeInto(buffer.unwrap());
+			type.createWriter(buffer.unwrap())
+					.writeVertexList(model.getReader());
 		} catch (Exception e) {
 			Flywheel.LOGGER.error(String.format("Error uploading model '%s':", model.name()), e);
 		}
@@ -52,27 +59,26 @@ public class IndexedModel implements BufferedModel {
 	 * The VBO/VAO should be bound externally.
 	 */
 	public void setupState(GlVertexArray vao) {
+		// XXX ARRAY_BUFFER is bound and not reset or restored
 		vbo.bind();
 		vao.enableArrays(getAttributeCount());
 		vao.bindAttributes(0, getType().getLayout());
+		ebo.bind();
 	}
 
 	@Override
 	public void drawCall() {
-		ebo.bind();
-		GL20.glDrawElements(primitiveMode.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0);
+		GL20.glDrawElements(primitiveMode.glEnum, ebo.getElementCount(), ebo.getEboIndexType().asGLType, 0);
 	}
 
 	/**
-		 * Draws many instances of this model, assuming the appropriate state is already bound.
-		 */
+	 * Draws many instances of this model, assuming the appropriate state is already bound.
+	 */
 	@Override
 	public void drawInstances(int instanceCount) {
 		if (!valid()) return;
 
-		ebo.bind();
-
-		GL31.glDrawElementsInstanced(primitiveMode.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0, instanceCount);
+		GL31.glDrawElementsInstanced(primitiveMode.glEnum, ebo.getElementCount(), ebo.getEboIndexType().asGLType, 0, instanceCount);
 	}
 
 	public boolean isDeleted() {
@@ -81,7 +87,7 @@ public class IndexedModel implements BufferedModel {
 
 	@Override
 	public VertexType getType() {
-		return model.getType();
+		return type;
 	}
 
 	public int getVertexCount() {

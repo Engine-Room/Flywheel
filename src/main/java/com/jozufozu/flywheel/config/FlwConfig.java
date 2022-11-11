@@ -35,7 +35,7 @@ public class FlwConfig {
 	protected final Map<String, Option<?>> optionMapView = Collections.unmodifiableMap(optionMap);
 
 	/** Select the backend to use. */
-	public final EnumOption<BackendType> backend = addOption(new EnumOption<>("engine", BackendType.INSTANCING));
+	public final EnumOption<BackendType> backend = addOption(new EnumOption<>("backend", BackendType.INSTANCING));
 	/** Enable or disable a debug overlay that colors pixels by their normal. */
 	public final BooleanOption debugNormals = addOption(new BooleanOption("debugNormals", false));
 	/** Enable or disable instance update limiting with distance. */

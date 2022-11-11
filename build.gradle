@@ -71,6 +71,14 @@ dependencies {
     modCompileOnly 'io.vram:frex-fabric-mc118:6.0.263'
 }
 
+loom {
+    runs {
+        client {
+            property('flw.loadRenderDoc', 'true')
+        }
+    }
+}
+
 processResources {
     inputs.property 'version', project.version
 

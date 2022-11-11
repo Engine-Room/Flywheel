@@ -58,6 +58,7 @@ public class VBOModel implements BufferedModel {
 	 * The VBO/VAO should be bound externally.
 	 */
 	public void setupState(GlVertexArray vao) {
+		// XXX ARRAY_BUFFER is bound and not reset or restored
 		vbo.bind();
 		vao.enableArrays(getAttributeCount());
 		vao.bindAttributes(0, getLayout());

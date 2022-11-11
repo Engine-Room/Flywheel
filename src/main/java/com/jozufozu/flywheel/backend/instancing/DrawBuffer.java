@@ -2,6 +2,8 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import java.nio.ByteBuffer;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import com.jozufozu.flywheel.backend.model.BufferBuilderExtension;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
 import com.mojang.blaze3d.platform.MemoryTracker;
@@ -20,6 +22,7 @@ public class DrawBuffer {
 	private ByteBuffer backingBuffer;
 	private int expectedVertices;
 
+	@ApiStatus.Internal
 	public DrawBuffer(RenderType parent) {
 		this.parent = parent;
 	}
@@ -39,7 +42,10 @@ public class DrawBuffer {
 
 		VertexFormat format = parent.format();
 
-		int byteSize = format.getVertexSize() * vertexCount;
+		// Add one extra vertex to uphold the vanilla assumption that BufferBuilders have at least
+		// enough buffer space for one more vertex. Rubidium checks for this extra space when popNextBuffer
+		// is called and reallocates the buffer if there is not space for one more vertex.
+		int byteSize = format.getVertexSize() * (vertexCount + 1);
 
 		if (backingBuffer == null) {
 			backingBuffer = MemoryTracker.create(byteSize);

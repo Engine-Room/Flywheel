@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.core.hardcoded;
 import java.util.List;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
+import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalWriterUnsafe;
@@ -50,5 +51,21 @@ public class ModelPart implements Model {
 	@Override
 	public VertexList getReader() {
 		return reader;
+	}
+
+	@Override
+	public VertexType getType() {
+		return Formats.POS_TEX_NORMAL;
+	}
+
+	@Override
+	public void delete() {
+		if (reader instanceof AutoCloseable closeable) {
+			try {
+				closeable.close();
+			} catch (Exception e) {
+				//
+			}
+		}
 	}
 }

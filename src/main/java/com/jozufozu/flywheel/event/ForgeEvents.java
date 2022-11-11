@@ -13,7 +13,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 public class ForgeEvents {
 
 	public static void addToDebugScreen(List<String> right) {
-
 		InstancedRenderDispatcher.getDebugString(right);
 	}
 

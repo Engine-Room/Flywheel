@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.SortedSet;
 
 import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
@@ -16,6 +17,7 @@ import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
 import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.Pair;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -30,6 +32,7 @@ import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Responsible for rendering the block breaking overlay for instanced block entities.
@@ -48,13 +51,21 @@ public class CrumblingRenderer {
 		INVALIDATOR = state.second();
 	}
 
-	public static void renderBreaking(RenderLayerEvent event) {
-		if (!Backend.canUseInstancing(event.getWorld())) return;
+	public static void render(ClientLevel level, Camera camera, PoseStack stack) {
+		if (!Backend.canUseInstancing(level)) return;
 
-		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageBlockEntities(event.getWorld());
-
+		Int2ObjectMap<List<BlockEntity>> activeStages = getActiveStageBlockEntities(level);
 		if (activeStages.isEmpty()) return;
 
+		Vec3 cameraPos = camera.getPosition();
+
+		// XXX Restore state
+		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
+		CrumblingRenderer.renderBreaking(activeStages, new RenderLayerEvent(level, null, stack, null, cameraPos.x, cameraPos.y, cameraPos.z));
+		restoreState.restore();
+	}
+
+	private static void renderBreaking(Int2ObjectMap<List<BlockEntity>> activeStages, RenderLayerEvent event) {
 		State state = STATE.get();
 		InstanceManager<BlockEntity> instanceManager = state.instanceManager;
 		InstancingEngine<CrumblingProgram> materials = state.materialManager;
@@ -71,6 +82,7 @@ public class CrumblingRenderer {
 
 				instanceManager.beginFrame(SerialTaskEngine.INSTANCE, info);
 
+				// XXX Each call applies another restore state even though we are already inside of a restore state
 				materials.render(SerialTaskEngine.INSTANCE, event);
 
 				instanceManager.invalidate();
@@ -78,6 +90,9 @@ public class CrumblingRenderer {
 
 		}
 
+		// XXX Inconsistent GL state cleanup
+		// If texture binding and active unit need to be restored, store them in variables before GL state is changed
+		// instead of guessing that unit 0 and crumbling tex 0 are correct
 		GlTextureUnit.T0.makeActive();
 		AbstractTexture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(0));
 		if (breaking != null) RenderSystem.bindTexture(breaking.getId());

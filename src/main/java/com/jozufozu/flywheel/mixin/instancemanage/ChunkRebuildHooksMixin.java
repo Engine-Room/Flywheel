@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.mixin;
+package com.jozufozu.flywheel.mixin.instancemanage;
 
 import java.util.Set;
 
