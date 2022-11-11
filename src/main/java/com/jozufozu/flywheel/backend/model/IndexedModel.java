@@ -20,6 +20,7 @@ import com.jozufozu.flywheel.core.model.Model;
  */
 public class IndexedModel implements BufferedModel {
 
+	protected final VertexType type;
 	protected final Model model;
 	protected final GlPrimitive primitiveMode;
 	protected ElementBuffer ebo;
@@ -27,6 +28,11 @@ public class IndexedModel implements BufferedModel {
 	protected boolean deleted;
 
 	public IndexedModel(Model model) {
+		this(model, model.getType());
+	}
+
+	public IndexedModel(Model model, VertexType type) {
+		this.type = type;
 		this.model = model;
 		this.primitiveMode = GlPrimitive.TRIANGLES;
 
@@ -38,7 +44,8 @@ public class IndexedModel implements BufferedModel {
 
 		// mirror it in system memory, so we can write to it, and upload our model.
 		try (MappedBuffer buffer = vbo.getBuffer()) {
-			model.writeInto(buffer.unwrap());
+			type.createWriter(buffer.unwrap())
+					.writeVertexList(model.getReader());
 		} catch (Exception e) {
 			Flywheel.LOGGER.error(String.format("Error uploading model '%s':", model.name()), e);
 		}
@@ -80,7 +87,7 @@ public class IndexedModel implements BufferedModel {
 
 	@Override
 	public VertexType getType() {
-		return model.getType();
+		return type;
 	}
 
 	public int getVertexCount() {

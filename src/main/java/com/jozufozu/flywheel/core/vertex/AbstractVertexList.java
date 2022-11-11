@@ -7,7 +7,6 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.mojang.blaze3d.platform.MemoryTracker;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 
 public abstract class AbstractVertexList implements VertexList, AutoCloseable {
 
@@ -18,15 +17,6 @@ public abstract class AbstractVertexList implements VertexList, AutoCloseable {
 	protected AbstractVertexList(ByteBuffer copyFrom, int vertexCount) {
 		this.contents = MemoryTracker.create(copyFrom.capacity());
 		this.vertexCount = vertexCount;
-		this.base = MemoryUtil.memAddress(this.contents);
-		init(copyFrom);
-	}
-
-	public AbstractVertexList(BufferBuilder builder) {
-		var pair = builder.popNextBuffer();
-		ByteBuffer copyFrom = pair.getSecond();
-		this.contents = MemoryTracker.create(copyFrom.capacity());
-		this.vertexCount = pair.getFirst().vertexCount();
 		this.base = MemoryUtil.memAddress(this.contents);
 		init(copyFrom);
 	}

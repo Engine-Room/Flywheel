@@ -44,6 +44,7 @@ minecraft {
             property 'mixin.debug.export', 'true'
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property 'flw.loadRenderDoc', 'true'
 
             arg '-mixin.config=flywheel.mixins.json'
 
