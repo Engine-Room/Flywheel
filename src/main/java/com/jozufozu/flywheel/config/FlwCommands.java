@@ -8,17 +8,20 @@ import org.jetbrains.annotations.NotNull;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.config.Option.EnumOption;
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
-import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 
 public final class FlwCommands {
-	public static void init(FlwConfig config) {
+	public static void registerClientCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
+		FlwConfig config = FlwConfig.get();
+
 		ConfigCommandBuilder commandBuilder = new ConfigCommandBuilder("flywheel");
 
 		commandBuilder.addOption(config.backend, (builder, option) -> enumOptionCommand(builder, config, option,
@@ -34,27 +37,27 @@ public final class FlwCommands {
 
 		commandBuilder.addOption(config.debugNormals, (builder, option) -> booleanOptionCommand(builder, config, option,
 				(source, value) -> {
-					Component text = new TextComponent("Normal debug mode is currently: ").append(boolToText(value));
+					Component text = Component.literal("Normal debug mode is currently: ").append(boolToText(value));
 					source.sendFeedback(text);
 				},
 				(source, value) -> {
-					Component text = boolToText(value).append(new TextComponent(" normal debug mode").withStyle(ChatFormatting.WHITE));
+					Component text = boolToText(value).append(Component.literal(" normal debug mode").withStyle(ChatFormatting.WHITE));
 					source.sendFeedback(text);
 				}
 			));
 
 		commandBuilder.addOption(config.limitUpdates, (builder, option) -> booleanOptionCommand(builder, config, option,
 				(source, value) -> {
-					Component text = new TextComponent("Update limiting is currently: ").append(boolToText(value));
+					Component text = Component.literal("Update limiting is currently: ").append(boolToText(value));
 					source.sendFeedback(text);
 				},
 				(source, value) -> {
-					Component text = boolToText(value).append(new TextComponent(" update limiting.").withStyle(ChatFormatting.WHITE));
+					Component text = boolToText(value).append(Component.literal(" update limiting.").withStyle(ChatFormatting.WHITE));
 					source.sendFeedback(text);
 				}
 			));
 
-		commandBuilder.build();
+		commandBuilder.build(dispatcher);
 	}
 
 	public static void booleanOptionCommand(LiteralArgumentBuilder<FabricClientCommandSource> builder, FlwConfig config, Option<Boolean> option, BiConsumer<FabricClientCommandSource, Boolean> displayAction, BiConsumer<FabricClientCommandSource, Boolean> setAction) {
@@ -96,14 +99,14 @@ public final class FlwCommands {
 	}
 
 	public static MutableComponent boolToText(boolean b) {
-		return b ? new TextComponent("enabled").withStyle(ChatFormatting.DARK_GREEN) : new TextComponent("disabled").withStyle(ChatFormatting.RED);
+		return b ? Component.literal("enabled").withStyle(ChatFormatting.DARK_GREEN) : Component.literal("disabled").withStyle(ChatFormatting.RED);
 	}
 
 	public static Component getEngineMessage(@NotNull BackendType type) {
 		return switch (type) {
-			case OFF -> new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED);
-			case INSTANCING -> new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN);
-			case BATCHING ->  new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN);
+			case OFF -> Component.literal("Disabled Flywheel").withStyle(ChatFormatting.RED);
+			case INSTANCING -> Component.literal("Using Instancing Engine").withStyle(ChatFormatting.GREEN);
+			case BATCHING ->  Component.literal("Using Batching Engine").withStyle(ChatFormatting.GREEN);
 		};
 	}
 
@@ -124,8 +127,8 @@ public final class FlwCommands {
 			command.then(builder);
 		}
 
-		public void build() {
-			ClientCommandManager.DISPATCHER.register(command);
+		public void build(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+			dispatcher.register(command);
 		}
 	}
 }

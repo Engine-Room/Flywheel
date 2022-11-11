@@ -7,6 +7,7 @@ import com.jozufozu.flywheel.backend.Loader;
 import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.Contexts;
 import com.jozufozu.flywheel.core.PartialModel;
@@ -21,6 +22,7 @@ import com.jozufozu.flywheel.vanilla.VanillaInstances;
 import com.mojang.logging.LogUtils;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
@@ -55,6 +57,7 @@ public class Flywheel implements ClientModInitializer {
 		ShadersModHandler.init();
 		Backend.init();
 
+		ClientCommandRegistrationCallback.EVENT.register(FlwCommands::registerClientCommands);
 		FlywheelEvents.RELOAD_RENDERERS.register(ProgramCompiler::invalidateAll);
 
 		FlywheelEvents.GATHER_CONTEXT.register(Contexts::flwInit);

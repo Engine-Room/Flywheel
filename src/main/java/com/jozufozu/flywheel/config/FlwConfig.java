@@ -51,7 +51,6 @@ public class FlwConfig {
 
 	public static void init() {
 		INSTANCE.load();
-		FlwCommands.init(INSTANCE);
 	}
 
 	public BackendType getBackendType() {

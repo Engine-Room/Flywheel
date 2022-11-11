@@ -61,7 +61,8 @@ dependencies {
     // Fabric API
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-    modCompileOnly 'curse.maven:starlight-521783:3667443'
+	// switch to implementation for debugging
+    modCompileOnly 'maven.modrinth:starlight:1.1.1+1.19'
 
     modCompileOnly 'maven.modrinth:iris:1.18.x-v1.2.5'
     modCompileOnly 'maven.modrinth:sodium:mc1.18.2-0.4.1'
@@ -155,6 +156,6 @@ curseforge {
         changelog = file('changelog.txt')
         releaseType = project.curse_type
         mainArtifact jar
-        addGameVersion '1.18.2'
+        addGameVersion '1.19.2'
     }
 }

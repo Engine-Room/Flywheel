@@ -22,10 +22,10 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
  * Creating a PartialModel will make the associated modelLocation automatically load.
  * PartialModels must be initialized the mod class constructor.
  * <br>
- * Once {@link ModelBakeEvent} finishes, all PartialModels (with valid modelLocations)
+ * Once {@link ModelEvent.BakingCompleted} finishes, all PartialModels (with valid modelLocations)
  * will have their bakedModel fields populated.
  * <br>
- * Attempting to create a PartialModel after {@link ModelRegistryEvent} will cause an error.
+ * Attempting to create a PartialModel after {@link ModelEvent.RegisterAdditional} will cause an error.
  */
 public class PartialModel {
 
@@ -36,7 +36,7 @@ public class PartialModel {
 	protected BakedModel bakedModel;
 
 	public PartialModel(ResourceLocation modelLocation) {
-		if (tooLate) throw new RuntimeException("PartialModel '" + modelLocation + "' loaded after ModelRegistryEvent");
+		if (tooLate) throw new RuntimeException("PartialModel '" + modelLocation + "' loaded after ModelEvent.RegisterAdditional");
 
 		this.modelLocation = modelLocation;
 		ALL.add(this);

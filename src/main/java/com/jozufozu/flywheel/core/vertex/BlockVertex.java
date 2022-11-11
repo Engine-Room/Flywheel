@@ -6,11 +6,8 @@ import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
-import com.jozufozu.flywheel.core.model.ShadeSeparatedBufferBuilder;
-import com.jozufozu.flywheel.fabric.helper.BufferBuilderHelper;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.datafixers.util.Pair;
 
 public class BlockVertex implements VertexType {
 
@@ -63,21 +60,21 @@ Vertex FLWCreateVertex() {
 		return new BlockVertexListUnsafe.Shaded(buffer, vertexCount, unshadedStartVertex);
 	}
 
-	public VertexList createReader(BufferBuilder bufferBuilder) {
+	public VertexList createReader(BufferBuilder.RenderedBuffer renderedBuffer, int unshadedStartVertex) {
+
 		// TODO: try to avoid virtual model rendering
-		Pair<BufferBuilder.DrawState, ByteBuffer> pair = bufferBuilder.popNextBuffer();
-		BufferBuilder.DrawState drawState = pair.getFirst();
+		BufferBuilder.DrawState drawState = renderedBuffer.drawState();
 
 		if (drawState.format() != DefaultVertexFormat.BLOCK) {
 			throw new RuntimeException("Cannot use BufferBuilder with " + drawState.format());
 		}
+		ByteBuffer vertexBuffer = renderedBuffer.vertexBuffer();
 
-		ByteBuffer buffer = pair.getSecond();
-		BufferBuilderHelper.fixByteOrder(bufferBuilder, buffer);
-		if (bufferBuilder instanceof ShadeSeparatedBufferBuilder separated) {
-			return createReader(buffer, drawState.vertexCount(), separated.getUnshadedStartVertex());
+		int vertexCount = drawState.vertexCount();
+		if (unshadedStartVertex >= 0 && unshadedStartVertex < vertexCount) {
+			return createReader(vertexBuffer, vertexCount, unshadedStartVertex);
 		} else {
-			return createReader(buffer, drawState.vertexCount());
+			return createReader(vertexBuffer, vertexCount);
 		}
 	}
 }
