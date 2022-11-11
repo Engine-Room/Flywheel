@@ -202,6 +202,6 @@ curseforge {
         changelog = file('changelog.txt')
         releaseType = project.curse_type
         mainArtifact jar
-        addGameVersion '1.19'
+        addGameVersion '1.19.2'
     }
 }

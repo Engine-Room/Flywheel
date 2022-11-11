@@ -32,7 +32,6 @@ public class BlockModel implements Model {
 
 	private final VertexList reader;
 	private final String name;
-
 	private final EBOSupplier eboSupplier;
 
 	public BlockModel(BlockState state) {

@@ -192,43 +192,6 @@ public class VirtualChunk extends ChunkAccess {
 		return null;
 	}
 
-//	@Override
-//	@Nullable
-//	public StructureStart getStartForFeature(ConfiguredStructureFeature<?, ?> pStructure) {
-//		return null;
-//	}
-//
-//	@Override
-//	public void setStartForFeature(ConfiguredStructureFeature<?, ?> pStructure, StructureStart pStart) {
-//	}
-//
-//	@Override
-//	public Map<ConfiguredStructureFeature<?, ?>, StructureStart> getAllStarts() {
-//		return Collections.emptyMap();
-//	}
-//
-//	@Override
-//	public void setAllStarts(Map<ConfiguredStructureFeature<?, ?>, StructureStart> pStructureStarts) {
-//	}
-//
-//	@Override
-//	public LongSet getReferencesForFeature(ConfiguredStructureFeature<?, ?> pStructure) {
-//		return LongSets.emptySet();
-//	}
-//
-//	@Override
-//	public void addReferenceForFeature(ConfiguredStructureFeature<?, ?> pStructure, long pReference) {
-//	}
-//
-//	@Override
-//	public Map<ConfiguredStructureFeature<?, ?>, LongSet> getAllReferences() {
-//		return Collections.emptyMap();
-//	}
-//
-//	@Override
-//	public void setAllReferences(Map<ConfiguredStructureFeature<?, ?>, LongSet> pStructureReferences) {
-//	}
-
 	@Override
 	@Nullable
 	public StructureStart getStartForStructure(Structure structure) {

@@ -4,9 +4,7 @@ import java.util.List;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.core.Formats;
-import com.jozufozu.flywheel.core.QuadConverter;
 import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalWriterUnsafe;
 import com.mojang.blaze3d.platform.MemoryTracker;
@@ -58,12 +56,6 @@ public class ModelPart implements Model {
 	@Override
 	public VertexType getType() {
 		return Formats.POS_TEX_NORMAL;
-	}
-
-	@Override
-	public ElementBuffer createEBO() {
-		return QuadConverter.getInstance()
-				.quads2Tris(vertices / 4);
 	}
 
 	@Override

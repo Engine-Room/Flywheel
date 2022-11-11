@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
+import com.jozufozu.flywheel.core.QuadConverter;
 
 /**
  * A model that can be rendered by flywheel.
@@ -53,7 +54,10 @@ public interface Model {
 	 * </p>
 	 * @return an element buffer object indexing this model's vertices.
 	 */
-	ElementBuffer createEBO();
+	default ElementBuffer createEBO() {
+		return QuadConverter.getInstance()
+				.quads2Tris(vertexCount() / 4);
+	}
 
 	void delete();
 
