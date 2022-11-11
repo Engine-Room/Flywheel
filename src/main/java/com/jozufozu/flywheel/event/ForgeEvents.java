@@ -18,9 +18,7 @@ public class ForgeEvents {
 
 	@SubscribeEvent
 	public static void addToDebugScreen(RenderGameOverlayEvent.Text event) {
-
 		if (Minecraft.getInstance().options.renderDebug) {
-
 			InstancedRenderDispatcher.getDebugString(event.getRight());
 		}
 	}

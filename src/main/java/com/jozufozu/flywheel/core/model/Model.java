@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
-import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.QuadConverter;
 
 /**
@@ -42,9 +41,7 @@ public interface Model {
 	 */
 	int vertexCount();
 
-	default VertexType getType() {
-		return Formats.POS_TEX_NORMAL;
-	}
+	VertexType getType();
 
 	// XXX Since this is public API (technically) we cannot make assumptions about what GL state this method can use or modify unless a contract is established.
 	/**
