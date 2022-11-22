@@ -73,4 +73,8 @@ public class CPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 	public void notifyDirty() {
 		// noop
 	}
+
+	public void delete() {
+		modelData.delete();
+	}
 }
