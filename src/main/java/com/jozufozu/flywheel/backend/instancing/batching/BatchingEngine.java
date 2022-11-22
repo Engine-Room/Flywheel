@@ -64,11 +64,13 @@ public class BatchingEngine implements Engine {
 
 	@Override
 	public void delete() {
+		for (Map<RenderType, BatchedMaterialGroup> groups : layers.values()) {
+			groups.values().forEach(BatchedMaterialGroup::delete);
+		}
 	}
 
 	@Override
 	public void beginFrame(Camera info) {
-
 	}
 
 	@Override
