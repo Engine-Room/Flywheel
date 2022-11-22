@@ -43,6 +43,10 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 		});
 	}
 
+	public Collection<GPUInstancer<D>> getAllInstancers() {
+		return models.values();
+	}
+
 	public int getInstanceCount() {
 		return models.values().stream().mapToInt(GPUInstancer::getInstanceCount).sum();
 	}
@@ -57,11 +61,6 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 				.allMatch(GPUInstancer::isEmpty);
 	}
 
-	public void delete() {
-		models.values().forEach(GPUInstancer::delete);
-		models.clear();
-	}
-
 	/**
 	 * Clear all instance data without freeing resources.
 	 */
@@ -70,7 +69,8 @@ public class InstancedMaterial<D extends InstanceData> implements Material<D> {
 				.forEach(GPUInstancer::clear);
 	}
 
-	public Collection<GPUInstancer<D>> getAllInstancers() {
-		return models.values();
+	public void delete() {
+		models.values().forEach(GPUInstancer::delete);
+		models.clear();
 	}
 }

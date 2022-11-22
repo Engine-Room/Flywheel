@@ -42,4 +42,9 @@ public class BatchedMaterial<D extends InstanceData> implements Material<D> {
 		models.values()
 				.forEach(CPUInstancer::clear);
 	}
+
+	public void delete() {
+		models.values().forEach(CPUInstancer::delete);
+		models.clear();
+	}
 }

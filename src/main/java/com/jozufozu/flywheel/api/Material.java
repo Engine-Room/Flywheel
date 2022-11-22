@@ -19,6 +19,7 @@ public interface Material<D extends InstanceData> {
 	 *
 	 * @param key           An object that uniquely identifies the model.
 	 * @param modelSupplier A factory that creates the Model that you want to render.
+	 *                      <b>Each time {@link Supplier#get()} is called, a new Model must be created.</b>
 	 * @return An instancer for the given model, capable of rendering many copies for little cost.
 	 */
 	Instancer<D> model(Object key, Supplier<Model> modelSupplier);

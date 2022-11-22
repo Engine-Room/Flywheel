@@ -67,6 +67,9 @@ public class BatchedMaterialGroup implements MaterialGroup {
 	}
 
 	public void delete() {
+		materials.values()
+				.forEach(BatchedMaterial::delete);
+
 		materials.clear();
 	}
 
