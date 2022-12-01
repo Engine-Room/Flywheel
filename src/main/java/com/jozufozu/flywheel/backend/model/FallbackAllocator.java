@@ -8,7 +8,7 @@ public enum FallbackAllocator implements ModelAllocator {
 
 	@Override
 	public BufferedModel alloc(Model model, Callback allocationCallback) {
-		IndexedModel out = new IndexedModel(model, Formats.POS_TEX_NORMAL);
+		IndexedModel out = new IndexedModel(model, Formats.BLOCK);
 		allocationCallback.onAlloc(out);
 		return out;
 	}
