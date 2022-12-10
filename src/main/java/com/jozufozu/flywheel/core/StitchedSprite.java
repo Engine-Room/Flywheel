@@ -28,16 +28,6 @@ public class StitchedSprite {
 		this(InventoryMenu.BLOCK_ATLAS, location);
 	}
 
-	public static void onTextureStitchPre(TextureStitchEvent.Pre event) {
-		ResourceLocation atlasLocation = event.getAtlas().location();
-		List<StitchedSprite> sprites = ALL.get(atlasLocation);
-		if (sprites != null) {
-			for (StitchedSprite sprite : sprites) {
-				event.addSprite(sprite.getLocation());
-			}
-		}
-	}
-
 	public static void onTextureStitchPost(TextureStitchEvent.Post event) {
 		TextureAtlas atlas = event.getAtlas();
 		ResourceLocation atlasLocation = atlas.location();

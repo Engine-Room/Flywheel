@@ -39,7 +39,8 @@ import net.minecraftforge.fml.ModLoader;
  * </p>
  */
 public class Loader implements ResourceManagerReloadListener {
-	public static final String PROGRAM_DIR = "flywheel/programs/";
+	public static final String PROGRAM_DIR = "flywheel/programs";
+	public static final String PROGRAM_DIR_SLASH = PROGRAM_DIR + "/";
 	private static final Gson GSON = new GsonBuilder().create();
 
 	private final Map<ResourceLocation, ProgramSpec> programs = new HashMap<>();
@@ -99,7 +100,7 @@ public class Loader implements ResourceManagerReloadListener {
 			try (InputStream inputStream = resource.open()) {
 				String s = StringUtil.readToString(inputStream);
 
-				ResourceLocation specName = ResourceUtil.trim(location, PROGRAM_DIR, ".json");
+				ResourceLocation specName = ResourceUtil.trim(location, PROGRAM_DIR_SLASH, ".json");
 
 				DataResult<Pair<ProgramSpec, JsonElement>> result = ProgramSpec.CODEC.decode(JsonOps.INSTANCE, GSON.fromJson(s, JsonElement.class));
 

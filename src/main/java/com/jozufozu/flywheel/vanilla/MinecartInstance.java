@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Vec3i;
@@ -99,8 +99,8 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		}
 
 		tstack.translate(0.0D, 0.375D, 0.0D);
-		tstack.multiply(Vector3f.YP.rotationDegrees(180 - yaw));
-		tstack.multiply(Vector3f.ZP.rotationDegrees(-f3));
+		tstack.multiply(Axis.YP.rotationDegrees(180 - yaw));
+		tstack.multiply(Axis.ZP.rotationDegrees(-f3));
 		float f5 = (float)entity.getHurtTime() - pt;
 		float f6 = entity.getDamage() - pt;
 		if (f6 < 0) {
@@ -108,7 +108,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		}
 
 		if (f5 > 0) {
-			tstack.multiply(Vector3f.XP.rotationDegrees(Mth.sin(f5) * f5 * f6 / 10 * (float)entity.getHurtDir()));
+			tstack.multiply(Axis.XP.rotationDegrees(Mth.sin(f5) * f5 * f6 / 10 * (float)entity.getHurtDir()));
 		}
 
 		int j = entity.getDisplayOffset();
@@ -116,7 +116,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 			tstack.pushPose();
 			tstack.scale(0.75F);
 			tstack.translate(-0.5D, (float)(j - 8) / 16, 0.5D);
-			tstack.multiply(Vector3f.YP.rotationDegrees(90));
+			tstack.multiply(Axis.YP.rotationDegrees(90));
 			contents.setTransform(stack);
 			tstack.popPose();
 		}

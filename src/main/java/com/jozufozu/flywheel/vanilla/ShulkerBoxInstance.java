@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.vanilla;
 
+import org.joml.Quaternionf;
+
 import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
@@ -9,8 +11,7 @@ import com.jozufozu.flywheel.core.materials.model.ModelData;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
@@ -39,7 +40,7 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 		} else {
 			texture = Sheets.SHULKER_TEXTURE_LOCATION.get(color.getId()).sprite();
 		}
-		Quaternion rotation = getDirection().getRotation();
+		Quaternionf rotation = getDirection().getRotation();
 
 		TransformStack tstack = TransformStack.cast(stack);
 
@@ -64,7 +65,7 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 		if (progress == lastProgress) return;
 		lastProgress = progress;
 
-		Quaternion spin = Vector3f.YP.rotationDegrees(270.0F * progress);
+		Quaternionf spin = Axis.YP.rotationDegrees(270.0F * progress);
 
 		TransformStack tstack = TransformStack.cast(stack);
 
@@ -93,14 +94,14 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 	private ModelData makeBaseInstance() {
         return materialManager.cutout(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET))
                 .material(Materials.TRANSFORMED)
-				.model("base_" + texture.getName(), this::makeBaseModel)
+				.model("base_" + texture.contents().name(), this::makeBaseModel)
 				.createInstance();
 	}
 
 	private ModelData makeLidInstance() {
         return materialManager.cutout(RenderType.entityCutoutNoCull(Sheets.SHULKER_SHEET))
                 .material(Materials.TRANSFORMED)
-				.model("lid_" + texture.getName(), this::makeLidModel)
+				.model("lid_" + texture.contents().name(), this::makeLidModel)
 				.createInstance();
 	}
 

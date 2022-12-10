@@ -2,10 +2,11 @@ package com.jozufozu.flywheel.event;
 
 import javax.annotation.Nullable;
 
+import org.joml.Matrix4f;
+
 import com.jozufozu.flywheel.backend.RenderLayer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderBuffers;
@@ -28,10 +29,9 @@ public class RenderLayerEvent extends Event {
 		this.type = type;
 		this.stack = stack;
 
-		viewProjection = stack.last()
-				.pose()
-				.copy();
-        viewProjection.multiplyBackward(RenderSystem.getProjectionMatrix());
+		viewProjection = new Matrix4f(stack.last()
+				.pose());
+        viewProjection.mulLocal(RenderSystem.getProjectionMatrix());
 
 		this.buffers = buffers;
 		this.camX = camX;

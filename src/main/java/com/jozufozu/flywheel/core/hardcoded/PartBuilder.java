@@ -5,10 +5,10 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+import org.joml.Matrix3f;
+import org.joml.Vector3f;
+
 import com.jozufozu.flywheel.core.vertex.PosTexNormalWriterUnsafe;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
@@ -191,21 +191,21 @@ public class PartBuilder {
 			Vector3f south = Direction.SOUTH.step();
 
 			if (useRotation) {
-				Matrix3f matrix3f = new Matrix3f(new Quaternion(rotationX, rotationY, rotationZ, false));
-				lll.transform(matrix3f);
-				hll.transform(matrix3f);
-				hhl.transform(matrix3f);
-				lhl.transform(matrix3f);
-				llh.transform(matrix3f);
-				hlh.transform(matrix3f);
-				hhh.transform(matrix3f);
-				lhh.transform(matrix3f);
-				down.transform(matrix3f);
-				up.transform(matrix3f);
-				west.transform(matrix3f);
-				north.transform(matrix3f);
-				east.transform(matrix3f);
-				south.transform(matrix3f);
+				Matrix3f matrix3f = new Matrix3f().rotateXYZ(rotationX, rotationY, rotationZ);
+				lll.mul(matrix3f);
+				hll.mul(matrix3f);
+				hhl.mul(matrix3f);
+				lhl.mul(matrix3f);
+				llh.mul(matrix3f);
+				hlh.mul(matrix3f);
+				hhh.mul(matrix3f);
+				lhh.mul(matrix3f);
+				down.mul(matrix3f);
+				up.mul(matrix3f);
+				west.mul(matrix3f);
+				north.mul(matrix3f);
+				east.mul(matrix3f);
+				south.mul(matrix3f);
 			}
 
 			float f4 = getU((float)textureOffsetU);

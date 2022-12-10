@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.joml.Matrix4f;
+
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.backend.RenderLayer;
 import com.jozufozu.flywheel.backend.instancing.BatchDrawingTracker;
@@ -13,7 +15,6 @@ import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.RenderType;
@@ -51,7 +52,6 @@ public class BatchingEngine implements Engine {
 
 		// FIXME: this probably breaks some vanilla stuff but it works much better for flywheel
 		Matrix4f mat = new Matrix4f();
-		mat.setIdentity();
 		if (event.getWorld().effects().constantAmbientLight()) {
 			Lighting.setupNetherLevel(mat);
 		} else {

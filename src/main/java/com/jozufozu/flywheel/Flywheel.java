@@ -19,7 +19,7 @@ import com.mojang.logging.LogUtils;
 
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -75,7 +75,6 @@ public class Flywheel {
 		modEventBus.addListener(Contexts::flwInit);
 		modEventBus.addListener(PartialModel::onModelRegistry);
 		modEventBus.addListener(PartialModel::onModelBake);
-		modEventBus.addListener(StitchedSprite::onTextureStitchPre);
 		modEventBus.addListener(StitchedSprite::onTextureStitchPost);
 
 		VanillaInstances.init();
@@ -89,7 +88,7 @@ public class Flywheel {
 	}
 
 	private static void registerArgumentTypes(RegisterEvent event) {
-		event.register(Registry.COMMAND_ARGUMENT_TYPE_REGISTRY, rl("engine"), () -> {
+		event.register(Registries.COMMAND_ARGUMENT_TYPE, rl("engine"), () -> {
 			return ArgumentTypeInfos.registerByClass(BackendTypeArgument.class, SingletonArgumentInfo.contextFree(BackendTypeArgument::getInstance));
 		});
 	}

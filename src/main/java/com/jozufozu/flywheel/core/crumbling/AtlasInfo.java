@@ -5,10 +5,9 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import com.jozufozu.flywheel.mixin.atlas.SheetDataAccessor;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.SpriteLoader;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 
@@ -39,8 +38,8 @@ public class AtlasInfo {
 	/**
 	 * FOR USE IN MIXIN
 	 */
-	public static void _setAtlasData(ResourceLocation atlas, SheetDataAccessor accessor) {
-		sheetData.put(atlas, new SheetSize(accessor.flywheel$getWidth(), accessor.flywheel$getHeight()));
+	public static void _setAtlasData(ResourceLocation atlas, SpriteLoader.Preparations preparations) {
+		sheetData.put(atlas, new SheetSize(preparations.width(), preparations.height()));
 	}
 
 	public record SheetSize(int width, int height) {

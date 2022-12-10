@@ -16,7 +16,7 @@ public class ModelWriterUnsafe extends BasicWriterUnsafe<ModelData> {
 		super.writeInternal(d);
 		long ptr = writePointer + 6;
 
-		((MatrixWrite) (Object) d.model).flywheel$writeUnsafe(ptr);
-		((MatrixWrite) (Object) d.normal).flywheel$writeUnsafe(ptr + 4 * 16);
+		MatrixWrite.writeUnsafe(d.model, ptr);
+		MatrixWrite.writeUnsafe(d.normal, ptr + 4 * 16);
 	}
 }

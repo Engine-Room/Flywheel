@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.backend.instancing.entity;
 
+import org.joml.Vector3f;
+
 import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
@@ -8,7 +10,6 @@ import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceM
 import com.jozufozu.flywheel.light.LightListener;
 import com.jozufozu.flywheel.light.TickingLightListener;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
-import com.mojang.math.Vector3f;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;

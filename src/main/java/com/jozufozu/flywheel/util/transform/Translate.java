@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.util.transform;
 
-import com.mojang.math.Vector3f;
+import org.joml.Vector3f;
 
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;

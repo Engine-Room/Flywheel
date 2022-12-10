@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.core.materials.oriented;
 
+import org.joml.Quaternionf;
+
 import com.jozufozu.flywheel.api.struct.Batched;
 import com.jozufozu.flywheel.api.struct.Instanced;
 import com.jozufozu.flywheel.api.struct.StructWriter;
@@ -8,7 +10,6 @@ import com.jozufozu.flywheel.core.Programs;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
 import com.jozufozu.flywheel.core.model.ModelTransformer;
-import com.mojang.math.Quaternion;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -44,7 +45,7 @@ public class OrientedType implements Instanced<OrientedData>, Batched<OrientedDa
 		b.light(d.getPackedLight())
 				.color(d.r, d.g, d.b, d.a)
 				.translate(d.posX + d.pivotX, d.posY + d.pivotY, d.posZ + d.pivotZ)
-				.multiply(new Quaternion(d.qX, d.qY, d.qZ, d.qW))
+				.multiply(new Quaternionf(d.qX, d.qY, d.qZ, d.qW))
 				.translate(-d.pivotX, -d.pivotY, -d.pivotZ);
 	}
 }

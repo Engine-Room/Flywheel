@@ -1,9 +1,10 @@
 package com.jozufozu.flywheel.util.transform;
 
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
 
 import net.minecraft.core.Direction;
 
@@ -28,7 +29,7 @@ public interface Transform<Self extends Transform<Self>> extends Translate<Self>
 		return (Self) this;
 	}
 
-	default Self rotateCentered(Quaternion q) {
+	default Self rotateCentered(Quaternionf q) {
 		translate(.5f, .5f, .5f).multiply(q)
 				.translate(-.5f, -.5f, -.5f);
 		return (Self) this;

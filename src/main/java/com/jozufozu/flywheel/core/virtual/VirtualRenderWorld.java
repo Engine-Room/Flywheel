@@ -23,6 +23,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -304,7 +305,11 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 			SoundEvent p_220367_, SoundSource p_220368_, float p_220369_, float p_220370_, long p_220371_) {}
 
 	@Override
-	public void playSeededSound(Player p_220372_, Entity p_220373_, SoundEvent p_220374_, SoundSource p_220375_,
+	public void playSeededSound(Player p_262953_, double p_263004_, double p_263398_, double p_263376_,
+			Holder<SoundEvent> p_263359_, SoundSource p_263020_, float p_263055_, float p_262914_, long p_262991_) {}
+
+	@Override
+	public void playSeededSound(Player p_220372_, Entity p_220373_, Holder<SoundEvent> p_263500_, SoundSource p_220375_,
 			float p_220376_, float p_220377_, long p_220378_) {}
 
 	@Override
@@ -385,5 +390,10 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	@Override
 	public int getSectionYFromSectionIndex(int sectionIndex) {
 		return sectionIndex + this.getMinSection();
+	}
+
+	@Override
+	public FeatureFlagSet enabledFeatures() {
+		return FeatureFlagSet.of();
 	}
 }

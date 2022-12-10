@@ -33,7 +33,8 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'parchment', version: "${parchment_version}-${minecraft_version}"
+    mappings channel: 'official', version: "${minecraft_version}"
+    //mappings channel: 'parchment', version: "${parchment_version}-${minecraft_version}"
 
     runs {
         client {
@@ -202,6 +203,6 @@ curseforge {
         changelog = file('changelog.txt')
         releaseType = project.curse_type
         mainArtifact jar
-        addGameVersion '1.19.2'
+        addGameVersion '1.19.3'
     }
 }

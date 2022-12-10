@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.core.virtual;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -63,7 +63,7 @@ public interface VirtualEmptyBlockGetter extends BlockAndTintGetter {
 
 	@Override
 	default int getBlockTint(BlockPos pos, ColorResolver resolver) {
-		Biome plainsBiome = Minecraft.getInstance().getConnection().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getOrThrow(Biomes.PLAINS);
+		Biome plainsBiome = Minecraft.getInstance().getConnection().registryAccess().registryOrThrow(Registries.BIOME).getOrThrow(Biomes.PLAINS);
 		return resolver.getColor(plainsBiome, pos.getX(), pos.getZ());
 	}
 

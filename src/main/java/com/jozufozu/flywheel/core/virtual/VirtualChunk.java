@@ -16,7 +16,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
@@ -46,8 +46,7 @@ public class VirtualChunk extends ChunkAccess {
 
 	public VirtualChunk(VirtualRenderWorld world, int x, int z) {
 		super(new ChunkPos(x, z), UpgradeData.EMPTY, world, world.registryAccess()
-			.registry(Registry.BIOME_REGISTRY)
-			.orElseThrow(), 0L, null, null);
+			.registryOrThrow(Registries.BIOME), 0L, null, null);
 
 		this.world = world;
 		this.needsLight = true;

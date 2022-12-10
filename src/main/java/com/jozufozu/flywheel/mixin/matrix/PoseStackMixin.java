@@ -1,16 +1,16 @@
 package com.jozufozu.flywheel.mixin.matrix;
 
+import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Mixin;
 
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
 
 @Mixin(PoseStack.class)
 public abstract class PoseStackMixin implements TransformStack {
 
 	@Override
-	public TransformStack multiply(Quaternion quaternion) {
+	public TransformStack multiply(Quaternionf quaternion) {
 		((PoseStack)(Object) this).mulPose(quaternion);
 		return this;
 	}

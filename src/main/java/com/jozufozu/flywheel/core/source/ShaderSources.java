@@ -20,7 +20,8 @@ import net.minecraft.server.packs.resources.ResourceManager;
  * The main object for loading and parsing source files.
  */
 public class ShaderSources implements SourceFinder {
-	public static final String SHADER_DIR = "flywheel/shaders/";
+	public static final String SHADER_DIR = "flywheel/shaders";
+	public static final String SHADER_DIR_SLASH = SHADER_DIR + "/";
 	public static final ArrayList<String> EXTENSIONS = Lists.newArrayList(".vert", ".vsh", ".frag", ".fsh", ".glsl");
 
 	private final Map<ResourceLocation, SourceFile> shaderSources = new HashMap<>();
@@ -40,7 +41,7 @@ public class ShaderSources implements SourceFinder {
 			try (InputStream inputStream = resource.open()) {
 				String source = StringUtil.readToString(inputStream);
 
-				ResourceLocation name = ResourceUtil.removePrefixUnchecked(location, SHADER_DIR);
+				ResourceLocation name = ResourceUtil.removePrefixUnchecked(location, SHADER_DIR_SLASH);
 
 				shaderSources.put(name, new SourceFile(this, name, source));
 			} catch (IOException ignored) {

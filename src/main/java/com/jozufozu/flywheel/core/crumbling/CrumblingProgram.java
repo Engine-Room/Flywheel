@@ -36,7 +36,7 @@ public class CrumblingProgram extends WorldProgram {
 
 		TextureAtlasSprite sprite = blockAtlas.getSprite(ModelBakery.BREAKING_LOCATIONS.get(0));
 
-		setTextureScale(width / (float) sprite.getWidth(), height / (float) sprite.getHeight());
+		setTextureScale(width / (float) sprite.contents().width(), height / (float) sprite.contents().height());
 	}
 
 }
