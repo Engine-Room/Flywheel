@@ -8,15 +8,16 @@ public interface UniformProvider {
 
 	FileResolution uniformShader();
 
-	ActiveUniformProvider activate(long ptr, Notifier notifier);
+	ActiveUniformProvider activate(long ptr);
 
 	interface ActiveUniformProvider {
 		void delete();
 
-		void poll();
-	}
-
-	interface Notifier {
-		void signalChanged();
+		/**
+		 * Poll the provider for changes.
+		 *
+		 * @return {@code true} if the provider updated its backing store.
+		 */
+		boolean poll();
 	}
 }

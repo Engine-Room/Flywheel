@@ -13,6 +13,7 @@ import com.jozufozu.flywheel.core.source.SourceLines;
 import com.jozufozu.flywheel.core.source.error.ErrorBuilder;
 import com.jozufozu.flywheel.core.source.span.Span;
 import com.jozufozu.flywheel.util.ConsoleColors;
+import com.jozufozu.flywheel.util.StringUtil;
 
 public class FailedCompilation {
 	private static final Pattern ERROR_LINE = Pattern.compile("(\\d+)\\((\\d+)\\) : (.*)");
@@ -49,7 +50,8 @@ public class FailedCompilation {
 		if (matcher.find()) {
 			int fileId = Integer.parseInt(matcher.group(1));
 			int lineNo = Integer.parseInt(matcher.group(2));
-			var msg = matcher.group(3);
+			var msg = StringUtil.trimPrefix(matcher.group(3), "error")
+					.stripLeading();
 
 			if (fileId == 0) {
 				return interpretGeneratedError(lineNo, msg);

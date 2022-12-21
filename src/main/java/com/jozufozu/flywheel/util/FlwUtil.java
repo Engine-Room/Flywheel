@@ -70,6 +70,11 @@ public class FlwUtil {
 	}
 
 	public static <R> Stream<R> mapValues(Map<?, R> map) {
-		return map.values().stream();
+		return map.values()
+				.stream();
+	}
+
+	public static <T> void noop(T object) {
+		// noop
 	}
 }

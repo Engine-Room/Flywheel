@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.core.source.span.CharPos;
-import com.jozufozu.flywheel.util.StringUtil;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -102,7 +101,8 @@ public class SourceLines implements CharSequence {
 			int start = lines.getInt(i - 1);
 			int end = lines.getInt(i);
 
-			builder.add(StringUtil.trimEnd(source.substring(start, end)));
+			builder.add(source.substring(start, end)
+					.stripTrailing());
 		}
 
 		return builder.build();

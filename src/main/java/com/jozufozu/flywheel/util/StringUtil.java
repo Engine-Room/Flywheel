@@ -64,13 +64,20 @@ public class StringUtil {
 				.collect(Collectors.joining(", ")) + ')';
 	}
 
-	public static String trimEnd(String value) {
-		int len = value.length();
-		int st = 0;
-		while ((st < len) && Character.isWhitespace(value.charAt(len - 1))) {
-			len--;
+	public static String trimPrefix(String s, String prefix) {
+		if (s.startsWith(prefix)) {
+			return s.substring(prefix.length());
+		} else {
+			return s;
 		}
-		return value.substring(0, len);
+	}
+
+	public static String trimSuffix(String s, String prefix) {
+		if (s.endsWith(prefix)) {
+			return s.substring(0, s.length() - prefix.length());
+		} else {
+			return s;
+		}
 	}
 
 	/**

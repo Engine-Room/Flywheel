@@ -1,5 +1,9 @@
 package com.jozufozu.flywheel.backend.instancing.compile;
 
+import static org.lwjgl.opengl.GL20.glAttachShader;
+import static org.lwjgl.opengl.GL20.glCreateProgram;
+import static org.lwjgl.opengl.GL20.glLinkProgram;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,9 +25,7 @@ import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.instancing.indirect.IndirectComponent;
-import com.jozufozu.flywheel.core.BackendTypes;
 import com.jozufozu.flywheel.core.ComponentRegistry;
-import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.Pipelines;
 import com.jozufozu.flywheel.core.SourceComponent;
 import com.jozufozu.flywheel.core.pipeline.SimplePipeline;
@@ -41,7 +43,9 @@ public class FlwCompiler {
 	private final ShaderSources sources;
 	private final MaterialAdapterComponent vertexMaterialComponent;
 	private final MaterialAdapterComponent fragmentMaterialComponent;
-	private final List<PipelineContext> pipelineContexts;
+
+	private final PipelineContextSet pipelineContexts;
+	private final CullingContextSet cullingContexts;
 
 	final ShaderCompiler shaderCompiler;
 	final Multimap<Set<UniformProvider>, PipelineContext> uniformProviderGroups = ArrayListMultimap.create();
@@ -50,7 +54,10 @@ public class FlwCompiler {
 	final List<FailedCompilation> errors = new ArrayList<>();
 
 	public FlwCompiler(ShaderSources sources) {
-		this.shaderCompiler = new ShaderCompiler(errors::add);
+		this.shaderCompiler = ShaderCompiler.builder()
+				.errorConsumer(errors::add)
+				.build();
+
 		this.sources = sources;
 		this.vertexMaterialComponent = MaterialAdapterComponent.builder(Flywheel.rl("vertex_material_adapter"))
 				.materialSources(ComponentRegistry.materials.vertexSources())
@@ -73,19 +80,22 @@ public class FlwCompiler {
 				.switchOn(GlslExpr.variable("flw_materialFragmentID"))
 				.build(sources);
 
-		this.pipelineContexts = buildPipelineSet();
+		this.pipelineContexts = PipelineContextSet.create();
+		this.cullingContexts = CullingContextSet.create();
 
-		// TODO: analyze uniform providers and group them into sets; break up this ctor
-
-		for (PipelineContext context : pipelineContexts) {
-			compilePipelineContext(context);
-		}
-
-		for (StructType<?> type : ComponentRegistry.structTypes) {
-			compileComputeCuller(type);
-		}
+		doCompilation();
 
 		finish();
+	}
+
+	private void doCompilation() {
+		for (var ctx : pipelineContexts.all()) {
+			compilePipelineContext(ctx);
+		}
+
+		for (var ctx : cullingContexts.all()) {
+			compileComputeCuller(ctx);
+		}
 	}
 
 	private void finish() {
@@ -132,22 +142,31 @@ public class FlwCompiler {
 			return;
 		}
 
-		pipelinePrograms.put(ctx, ctx.contextShader()
-				.factory()
-				.create(new ProgramAssembler().attachShader(vertex)
-						.attachShader(fragment)
-						.link()));
+		var glProgram = link(vertex.handle(), fragment.handle());
+		ctx.contextShader()
+				.setup(glProgram);
+		pipelinePrograms.put(ctx, glProgram);
 	}
 
-	private void compileComputeCuller(StructType<?> structType) {
-		var result = shaderCompiler.compile(GLSLVersion.V460, ShaderType.COMPUTE, getComputeComponents(structType));
+	private void compileComputeCuller(CullingContext ctx) {
+		var computeComponents = getComputeComponents(ctx.structType());
+		var result = shaderCompiler.compile(GLSLVersion.V460, ShaderType.COMPUTE, computeComponents);
 
 		if (result == null) {
 			return;
 		}
 
-		cullingPrograms.put(structType, new GlProgram(new ProgramAssembler().attachShader(result)
-				.link()));
+		cullingPrograms.put(ctx.structType(), link(result.handle()));
+	}
+
+	private GlProgram link(int... shaders) {
+		var handle = glCreateProgram();
+		for (var shader : shaders) {
+			glAttachShader(handle, shader);
+		}
+		glLinkProgram(handle);
+		CompileUtil.checkLinkLog(handle);
+		return new GlProgram(handle);
 	}
 
 	private ImmutableList<SourceComponent> getVertexComponents(PipelineContext ctx) {
@@ -189,16 +208,4 @@ public class FlwCompiler {
 		return ImmutableList.of(instanceAssembly, instance, pipeline);
 	}
 
-	private static List<PipelineContext> buildPipelineSet() {
-		ImmutableList.Builder<PipelineContext> builder = ImmutableList.builder();
-		for (SimplePipeline pipelineShader : BackendTypes.availablePipelineShaders()) {
-			for (StructType<?> structType : ComponentRegistry.structTypes) {
-				for (VertexType vertexType : ComponentRegistry.vertexTypes) {
-					// TODO: context ubershaders, or not?
-					builder.add(new PipelineContext(vertexType, structType, Components.WORLD, pipelineShader));
-				}
-			}
-		}
-		return builder.build();
-	}
 }

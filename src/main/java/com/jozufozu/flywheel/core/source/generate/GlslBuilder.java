@@ -11,6 +11,10 @@ public class GlslBuilder {
 		add(new Define(name, value));
 	}
 
+	public void undef(String key) {
+		add(new Undef(key));
+	}
+
 	public GlslStruct struct() {
 		return add(new GlslStruct());
 	}
@@ -30,6 +34,10 @@ public class GlslBuilder {
 
 	public void blankLine() {
 		elements.add(Separators.BLANK_LINE);
+	}
+
+	public void _addRaw(String sourceString) {
+		elements.add(() -> sourceString);
 	}
 
 	public String build() {
@@ -62,6 +70,13 @@ public class GlslBuilder {
 		@Override
 		public String prettyPrint() {
 			return "#define " + name + " " + value;
+		}
+	}
+
+	public record Undef(String name) implements Declaration {
+		@Override
+		public String prettyPrint() {
+			return "#undef " + name;
 		}
 	}
 

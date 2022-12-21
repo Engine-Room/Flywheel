@@ -31,18 +31,17 @@ public class FrustumProvider implements UniformProvider {
 	}
 
 	@Override
-	public ActiveUniformProvider activate(long ptr, Notifier notifier) {
-		return new Active(ptr, notifier);
+	public ActiveUniformProvider activate(long ptr) {
+		return new Active(ptr);
 	}
 
 	static class Active implements ActiveUniformProvider, Consumer<BeginFrameEvent> {
 
 		private final long ptr;
-		private final Notifier notifier;
+		private boolean dirty = true;
 
-		public Active(long ptr, Notifier notifier) {
+		public Active(long ptr) {
 			this.ptr = ptr;
-			this.notifier = notifier;
 			MinecraftForge.EVENT_BUS.addListener(this);
 		}
 
@@ -52,8 +51,12 @@ public class FrustumProvider implements UniformProvider {
 		}
 
 		@Override
-		public void poll() {
-
+		public boolean poll() {
+			if (dirty) {
+				dirty = false;
+				return true;
+			}
+			return false;
 		}
 
 		@Override
@@ -78,7 +81,7 @@ public class FrustumProvider implements UniformProvider {
 
 			shiftedCuller.getJozuPackedPlanes(ptr);
 
-			notifier.signalChanged();
+			dirty = true;
 			CAPTURE = false;
 		}
 	}
