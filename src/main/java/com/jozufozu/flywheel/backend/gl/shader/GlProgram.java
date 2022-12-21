@@ -16,7 +16,7 @@ public class GlProgram extends GlObject {
 		setHandle(handle);
 	}
 
-	// TODO: Programs bind the uniform buffers they need
+	// TODO: Programs bind the uniform buffers they need, no more GlProgram inheritance
 	public void bind() {
 		ProgramManager.glUseProgram(handle());
 	}

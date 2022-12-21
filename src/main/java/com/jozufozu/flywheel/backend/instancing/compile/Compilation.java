@@ -83,7 +83,8 @@ public class Compilation {
 					.toString()));
 		}
 
-		fullSource.append(source);
+		fullSource.append(source)
+				.append('\n');
 	}
 
 	private String sourceHeader(SourceFile sourceFile) {

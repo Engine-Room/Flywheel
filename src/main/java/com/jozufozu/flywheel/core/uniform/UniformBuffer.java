@@ -22,7 +22,7 @@ public class UniformBuffer {
 	private static final boolean PO2_ALIGNMENT = RenderMath.isPowerOf2(OFFSET_ALIGNMENT);
 
 	private static UniformBuffer instance;
-	private final List<Allocated> allocatedProviders;
+	private final AllocatedProviderSet providerSet;
 
 	public static UniformBuffer getInstance() {
 		if (instance == null) {
@@ -32,50 +32,19 @@ public class UniformBuffer {
 	}
 
 	private final GlBuffer buffer;
-	private final MemoryBlock data;
-
-	private final BitSet changedBytes;
 
 	private UniformBuffer() {
 		buffer = new GlBuffer(GlBufferType.UNIFORM_BUFFER);
-
-		Collection<UniformProvider> providers = ComponentRegistry.getAllUniformProviders();
-
-		var builder = ImmutableList.<Allocated>builder();
-		int totalBytes = 0;
-		int index = 0;
-		for (UniformProvider provider : providers) {
-			int size = align16(provider.byteSize());
-
-			builder.add(new Allocated(provider, totalBytes, size, index));
-
-			totalBytes = alignUniformBuffer(totalBytes + size);
-			index++;
-		}
-
-		allocatedProviders = builder.build();
-
-		data = MemoryBlock.mallocTracked(totalBytes);
-		changedBytes = new BitSet(totalBytes);
-
-		for (Allocated p : allocatedProviders) {
-			p.updatePtr(data);
-		}
+		providerSet = new AllocatedProviderSet(ComponentRegistry.getAllUniformProviders());
 	}
 
 	public void sync() {
-		allocatedProviders.forEach(Allocated::pollActive);
-		if (changedBytes.isEmpty()) {
-			return;
-		}
+		providerSet.sync();
 
-		// TODO: upload only changed bytes
-		changedBytes.clear();
-
-		buffer.upload(data);
+		buffer.upload(providerSet.data);
 
 		int handle = buffer.handle();
-		for (Allocated p : allocatedProviders) {
+		for (Allocated p : providerSet.allocatedProviders) {
 			GL32.glBindBufferRange(GL32.GL_UNIFORM_BUFFER, p.index, handle, p.offset, p.size);
 		}
 	}
@@ -93,7 +62,7 @@ public class UniformBuffer {
 		return (numToRound + 16 - 1) & -16;
 	}
 
-	private class Allocated implements UniformProvider.Notifier {
+	private static class Allocated {
 		private final UniformProvider provider;
 		private final int offset;
 		private final int size;
@@ -107,20 +76,11 @@ public class UniformBuffer {
 			this.index = index;
 		}
 
-		@Override
-		public void signalChanged() {
-			changedBytes.set(offset, offset + size);
-		}
-
 		private void updatePtr(MemoryBlock bufferBase) {
 			if (activeProvider != null) {
 				activeProvider.delete();
 			}
-			activeProvider = provider.activate(bufferBase.ptr() + offset, this);
-		}
-
-		public UniformProvider provider() {
-			return provider;
+			activeProvider = provider.activate(bufferBase.ptr() + offset);
 		}
 
 		public int offset() {
@@ -135,9 +95,46 @@ public class UniformBuffer {
 			return index;
 		}
 
-		public void pollActive() {
-			if (activeProvider != null) {
-				activeProvider.poll();
+		public boolean maybePoll() {
+			return activeProvider != null && activeProvider.poll();
+		}
+	}
+
+	private static class AllocatedProviderSet {
+		private final List<Allocated> allocatedProviders;
+
+		private final MemoryBlock data;
+
+		private final BitSet changedBytes;
+
+		private AllocatedProviderSet(final Collection<UniformProvider> providers) {
+			var builder = ImmutableList.<Allocated>builder();
+			int totalBytes = 0;
+			int index = 0;
+			for (UniformProvider provider : providers) {
+				int size = align16(provider.byteSize());
+
+				builder.add(new Allocated(provider, totalBytes, size, index));
+
+				totalBytes = alignUniformBuffer(totalBytes + size);
+				index++;
+			}
+
+			allocatedProviders = builder.build();
+
+			data = MemoryBlock.mallocTracked(totalBytes);
+			changedBytes = new BitSet(totalBytes);
+
+			for (Allocated p : allocatedProviders) {
+				p.updatePtr(data);
+			}
+		}
+
+		public void sync() {
+			for (Allocated p : allocatedProviders) {
+				if (p.maybePoll()) {
+					changedBytes.set(p.offset(), p.offset() + p.size());
+				}
 			}
 		}
 	}

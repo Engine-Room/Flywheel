@@ -22,18 +22,16 @@ public class FogProvider implements UniformProvider {
 	}
 
 	@Override
-	public ActiveUniformProvider activate(long ptr, Notifier notifier) {
-		return new Active(ptr, notifier);
+	public ActiveUniformProvider activate(long ptr) {
+		return new Active(ptr);
 	}
 
 	public static class Active implements ActiveUniformProvider {
 
 		private final long ptr;
-		private final Notifier notifier;
 
-		public Active(long ptr, Notifier notifier) {
+		public Active(long ptr) {
 			this.ptr = ptr;
-			this.notifier = notifier;
 		}
 
 		@Override
@@ -41,9 +39,9 @@ public class FogProvider implements UniformProvider {
 		}
 
 		@Override
-		public void poll() {
+		public boolean poll() {
 			if (!FOG_UPDATE) {
-				return;
+				return false;
 			}
 
 			var color = RenderSystem.getShaderFogColor();
@@ -57,9 +55,9 @@ public class FogProvider implements UniformProvider {
 			MemoryUtil.memPutInt(ptr + 24, RenderSystem.getShaderFogShape()
 					.getIndex());
 
-			notifier.signalChanged();
-
 			FOG_UPDATE = false;
+
+			return true;
 		}
 	}
 }

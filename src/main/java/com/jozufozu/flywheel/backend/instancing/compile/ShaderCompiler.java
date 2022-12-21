@@ -1,10 +1,8 @@
 package com.jozufozu.flywheel.backend.instancing.compile;
 
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
@@ -15,13 +13,18 @@ import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.core.SourceComponent;
+import com.jozufozu.flywheel.util.FlwUtil;
 
 public class ShaderCompiler {
 	private final Map<ShaderKey, CompilationResult> shaderCache = new HashMap<>();
 	private final Consumer<FailedCompilation> errorConsumer;
+	private final CompilationFactory factory;
+	private final Includer includer;
 
-	public ShaderCompiler(Consumer<FailedCompilation> errorConsumer) {
+	public ShaderCompiler(Consumer<FailedCompilation> errorConsumer, CompilationFactory factory, Includer includer) {
 		this.errorConsumer = errorConsumer;
+		this.factory = factory;
+		this.includer = includer;
 	}
 
 	public int shaderCount() {
@@ -36,7 +39,7 @@ public class ShaderCompiler {
 			return cached.unwrap();
 		}
 
-		CompilationResult out = compileUncached(glslVersion, shaderType, sourceComponents);
+		CompilationResult out = compileUncached(factory.create(glslVersion, shaderType), sourceComponents);
 		shaderCache.put(key, out);
 		return unwrapAndReportError(out);
 	}
@@ -60,40 +63,51 @@ public class ShaderCompiler {
 	}
 
 	@NotNull
-	private static CompilationResult compileUncached(GLSLVersion glslVersion, ShaderType shaderType, ImmutableList<SourceComponent> sourceComponents) {
-		var ctx = new Compilation(glslVersion, shaderType);
+	private CompilationResult compileUncached(Compilation ctx, ImmutableList<SourceComponent> sourceComponents) {
 		ctx.enableExtension("GL_ARB_explicit_attrib_location");
 		ctx.enableExtension("GL_ARB_conservative_depth");
 
-		for (var include : depthFirstInclude(sourceComponents)) {
-			ctx.appendComponent(include);
-		}
-
-		for (var component : sourceComponents) {
-			ctx.appendComponent(component);
-			ctx.addComponentName(component.name());
-		}
+		includer.expand(sourceComponents, ctx::appendComponent);
 
 		return ctx.compile();
-	}
-
-	private static Set<SourceComponent> depthFirstInclude(ImmutableList<SourceComponent> root) {
-		var included = new LinkedHashSet<SourceComponent>(); // linked to preserve order
-		for (var component : root) {
-			recursiveDepthFirstInclude(included, component);
-		}
-		return included;
-	}
-
-	private static void recursiveDepthFirstInclude(Set<SourceComponent> included, SourceComponent component) {
-		for (var include : component.included()) {
-			recursiveDepthFirstInclude(included, include);
-		}
-		included.addAll(component.included());
 	}
 
 	private record ShaderKey(GLSLVersion glslVersion, ShaderType shaderType,
 							 ImmutableList<SourceComponent> sourceComponents) {
 
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	@FunctionalInterface
+	public interface CompilationFactory {
+		Compilation create(GLSLVersion version, ShaderType shaderType);
+	}
+
+	public static class Builder {
+		private Consumer<FailedCompilation> errorConsumer = FlwUtil::noop;
+		private CompilationFactory factory = Compilation::new;
+		private Includer includer = RecursiveIncluder.INSTANCE;
+
+		public Builder errorConsumer(Consumer<FailedCompilation> errorConsumer) {
+			this.errorConsumer = errorConsumer;
+			return this;
+		}
+
+		public Builder compilationFactory(CompilationFactory factory) {
+			this.factory = factory;
+			return this;
+		}
+
+		public Builder includer(Includer includer) {
+			this.includer = includer;
+			return this;
+		}
+
+		public ShaderCompiler build() {
+			return new ShaderCompiler(errorConsumer, factory, includer);
+		}
 	}
 }

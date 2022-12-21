@@ -32,17 +32,16 @@ public class ViewProvider implements UniformProvider {
 	}
 
 	@Override
-	public ActiveUniformProvider activate(long ptr, Notifier notifier) {
-		return new Active(ptr, notifier);
+	public ActiveUniformProvider activate(long ptr) {
+		return new Active(ptr);
 	}
 
 	public static class Active implements ActiveUniformProvider, Consumer<BeginFrameEvent> {
 		private final long ptr;
-		private final Notifier notifier;
+		private boolean dirty = true;
 
-		public Active(long ptr, Notifier notifier) {
+		public Active(long ptr) {
 			this.ptr = ptr;
-			this.notifier = notifier;
 			MinecraftForge.EVENT_BUS.addListener(this);
 		}
 
@@ -52,7 +51,12 @@ public class ViewProvider implements UniformProvider {
 		}
 
 		@Override
-		public void poll() {
+		public boolean poll() {
+			if (dirty) {
+				dirty = false;
+				return true;
+			}
+			return false;
 		}
 
 		@Override
@@ -85,7 +89,7 @@ public class ViewProvider implements UniformProvider {
 			MemoryUtil.memPutFloat(ptr + 72, camZ);
 			MemoryUtil.memPutInt(ptr + 76, constantAmbientLight);
 
-			notifier.signalChanged();
+			dirty = true;
 		}
 	}
 }
