@@ -1,6 +1,9 @@
 package com.jozufozu.flywheel.core.hardcoded;
 
+import java.nio.ByteBuffer;
 import java.util.List;
+
+import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
@@ -26,12 +29,14 @@ public class ModelPart implements Model {
 			this.vertices = vertices;
 		}
 
-		PosTexNormalWriterUnsafe writer = Formats.POS_TEX_NORMAL.createWriter(MemoryTracker.create(size()));
+		ByteBuffer buffer = MemoryTracker.create(size());
+		PosTexNormalWriterUnsafe writer = Formats.POS_TEX_NORMAL.createWriter(buffer);
 		for (PartBuilder.CuboidBuilder cuboid : cuboids) {
 			cuboid.buffer(writer);
 		}
 
 		reader = writer.intoReader();
+		MemoryUtil.memFree(buffer);
 	}
 
 	public static PartBuilder builder(String name, int sizeU, int sizeV) {

@@ -14,6 +14,10 @@ public class ArrayModelRenderer {
 		this.model = model;
 	}
 
+	public Model getModel() {
+		return model;
+	}
+
 	/**
 	 * Renders this model, checking first if there is anything to render.
 	 */

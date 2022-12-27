@@ -104,6 +104,8 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 
 		instanceVBO.delete();
 		vao.delete();
+
+		modelData.delete();
 	}
 
 	protected void renderSetup() {

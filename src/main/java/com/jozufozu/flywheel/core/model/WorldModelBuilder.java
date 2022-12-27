@@ -87,6 +87,6 @@ public final class WorldModelBuilder implements Bufferable {
 	}
 
 	public BlockModel intoMesh(String name) {
-		return new BlockModel(ModelUtil.getBufferBuilder(this), name);
+		return new BlockModel(this, name);
 	}
 }

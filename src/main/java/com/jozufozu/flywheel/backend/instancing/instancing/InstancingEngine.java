@@ -117,7 +117,6 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 	@Override
 	public void delete() {
 		for (Map<RenderType, InstancedMaterialGroup<P>> groups : layers.values()) {
-
 			groups.values().forEach(InstancedMaterialGroup::delete);
 		}
 	}
