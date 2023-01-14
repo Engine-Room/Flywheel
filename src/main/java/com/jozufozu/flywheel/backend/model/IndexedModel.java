@@ -40,7 +40,7 @@ public class IndexedModel implements BufferedModel {
 
 		vbo.bind();
 		// allocate the buffer on the gpu
-		vbo.ensureCapacity(model.size());
+		vbo.ensureCapacity(type.byteOffset(model.vertexCount()));
 
 		// mirror it in system memory, so we can write to it, and upload our model.
 		try (MappedBuffer buffer = vbo.getBuffer()) {
