@@ -27,7 +27,6 @@ import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.Version;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
@@ -36,7 +35,7 @@ public class Flywheel implements ClientModInitializer {
 
 	public static final String ID = "flywheel";
 	public static final Logger LOGGER = LogUtils.getLogger();
-	private static SemanticVersion version;
+	private static Version version;
 
 	@Override
 	public void onInitializeClient() {
@@ -45,10 +44,10 @@ public class Flywheel implements ClientModInitializer {
 				.orElseThrow(() -> new IllegalStateException("Could not get the mod container for Flywheel!"))
 				.getMetadata()
 				.getVersion();
-		if (!(version instanceof SemanticVersion semver)) {
-			throw new IllegalStateException("Got non-semantic version for Flywheel!");
-		}
-		Flywheel.version = semver;
+//		if (!(version instanceof SemanticVersion semver)) {
+//			throw new IllegalStateException("Got non-semantic version for Flywheel!");
+//		}
+		Flywheel.version = version;
 
 		FlwConfig.init();
 
@@ -84,7 +83,7 @@ public class Flywheel implements ClientModInitializer {
 		LOGGER.debug("Successfully loaded {}", PausedPartialTickAccessor.class.getName());
 	}
 
-	public static SemanticVersion getVersion() {
+	public static Version getVersion() {
 		return version;
 	}
 
