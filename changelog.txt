@@ -1,3 +1,28 @@
+0.6.8:
+Fixes
+ - Fix colored vertices being incorrectly rendered through instancing
+ - Fix some miscellaneous bugs with sodium/rubidium
+ - Fix memory leak associated with model storage
+Technical/API
+ - Memory for models is freed when they are no longer in use
+ - Element buffers now deal in raw gl handles
+ - Element buffers are no longer considered part of state resoration
+ - Quad -> Tri element buffer properly resets itself
+
+0.6.7:
+...is 1.19 only :ioa:
+
+0.6.6:
+Fixes
+ - Fix instanced entities not rendering correctly when chunk loading is slow
+Technical/API
+ - GL state is more reliably managed
+ - Slight memory improvements when using Iris/Oculus through lazy instatiation
+
+0.6.5:
+Fixes
+ - Fix crash with batching backend and Rubidium
+
 0.6.4:
 Fixes
  - Fix shader detection with oculus
