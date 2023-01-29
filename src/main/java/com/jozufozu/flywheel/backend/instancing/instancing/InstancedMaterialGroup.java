@@ -95,7 +95,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 			if (material.nothingToRender()) continue;
 
 			P program = owner.context.getProgram(ProgramContext.create(entry.getKey()
-					.getProgramSpec(), Formats.POS_TEX_NORMAL, layer));
+					.getProgramSpec(), Formats.BLOCK, layer));
 
 			// XXX Shader is bound and not reset or restored
 			program.bind();
@@ -156,7 +156,7 @@ public class InstancedMaterialGroup<P extends WorldProgram> implements MaterialG
 				.onAMDWindows()) {
 			return FallbackAllocator.INSTANCE;
 		} else {
-			return new ModelPool(Formats.POS_TEX_NORMAL);
+			return new ModelPool(Formats.BLOCK);
 		}
 	}
 }
