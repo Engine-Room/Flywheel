@@ -167,14 +167,12 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		if (shape == RenderShape.INVISIBLE)
 			return null;
 
-        return instancerManager.factory(StructTypes.TRANSFORMED)
-				.model(Models.block(blockState))
+        return instancerManager.instancer(StructTypes.TRANSFORMED, Models.block(blockState))
 				.createInstance();
 	}
 
 	private TransformedPart getBody() {
-		return instancerManager.factory(StructTypes.TRANSFORMED)
-				.model(MODEL)
+		return instancerManager.instancer(StructTypes.TRANSFORMED, MODEL)
 				.createInstance();
 	}
 

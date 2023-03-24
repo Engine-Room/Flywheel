@@ -123,15 +123,13 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Block
 
 	private OrientedPart baseInstance() {
 
-		return instancerManager.factory(StructTypes.ORIENTED)
-				.model(BASE.apply(chestType, sprite))
+		return instancerManager.instancer(StructTypes.ORIENTED, BASE.apply(chestType, sprite))
 				.createInstance();
 	}
 
 	private TransformedPart lidInstance() {
 
-		return instancerManager.factory(StructTypes.TRANSFORMED)
-				.model(LID.apply(chestType, sprite))
+		return instancerManager.instancer(StructTypes.TRANSFORMED, LID.apply(chestType, sprite))
 				.createInstance();
 	}
 

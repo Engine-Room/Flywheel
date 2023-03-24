@@ -1,18 +1,16 @@
 package com.jozufozu.flywheel.backend.instancing.batching;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.RenderContext;
+import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -25,18 +23,10 @@ import net.minecraft.world.phys.Vec3;
 public class BatchingEngine implements Engine {
 	protected final BatchingTransformManager transformManager = new BatchingTransformManager();
 	protected final BatchingDrawTracker drawTracker = new BatchingDrawTracker();
-	protected final Map<StructType<?>, CPUInstancerFactory<?>> factories = new HashMap<>();
 
-	@SuppressWarnings("unchecked")
-	@NotNull
 	@Override
-	public <D extends InstancedPart> CPUInstancerFactory<D> factory(StructType<D> type) {
-		return (CPUInstancerFactory<D>) factories.computeIfAbsent(type, this::createFactory);
-	}
-
-	@NotNull
-	private <D extends InstancedPart> CPUInstancerFactory<D> createFactory(StructType<D> type) {
-		return new CPUInstancerFactory<>(type, transformManager::create);
+	public <D extends InstancedPart> Instancer<D> instancer(StructType<D> type, Model model) {
+		return transformManager.getInstancer(type, model);
 	}
 
 	@Override
@@ -105,7 +95,6 @@ public class BatchingEngine implements Engine {
 
 	@Override
 	public void delete() {
-		factories.clear();
 		transformManager.delete();
 	}
 
