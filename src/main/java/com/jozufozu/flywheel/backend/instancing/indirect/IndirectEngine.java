@@ -1,16 +1,14 @@
 package com.jozufozu.flywheel.backend.instancing.indirect;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
@@ -18,6 +16,7 @@ import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.RenderContext;
+import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.util.WeakHashSet;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -31,7 +30,6 @@ import net.minecraft.world.phys.Vec3;
 public class IndirectEngine implements Engine {
 
 	protected final IndirectDrawManager drawManager = new IndirectDrawManager();
-	protected final Map<StructType<?>, IndirectInstancerFactory<?>> factories = new HashMap<>();
 
 	/**
 	 * The set of instance managers that are attached to this engine.
@@ -48,16 +46,9 @@ public class IndirectEngine implements Engine {
 		this.sqrMaxOriginDistance = sqrMaxOriginDistance;
 	}
 
-	@SuppressWarnings("unchecked")
-	@NotNull
 	@Override
-	public <D extends InstancedPart> IndirectInstancerFactory<D> factory(StructType<D> type) {
-		return (IndirectInstancerFactory<D>) factories.computeIfAbsent(type, this::createFactory);
-	}
-
-	@NotNull
-	private <D extends InstancedPart> IndirectInstancerFactory<D> createFactory(StructType<D> type) {
-		return new IndirectInstancerFactory<>(type, drawManager::create);
+	public <D extends InstancedPart> Instancer<D> instancer(StructType<D> type, Model model) {
+		return drawManager.getInstancer(type, model);
 	}
 
 	@Override
@@ -124,7 +115,6 @@ public class IndirectEngine implements Engine {
 
 	@Override
 	public void delete() {
-		factories.clear();
 		drawManager.delete();
 	}
 

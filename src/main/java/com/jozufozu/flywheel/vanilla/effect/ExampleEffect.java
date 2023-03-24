@@ -247,8 +247,7 @@ public class ExampleEffect implements Effect {
 
 		@Override
 		public void init() {
-			instance = instancerManager.factory(StructTypes.TRANSFORMED)
-					.model(Models.block(Blocks.SHROOMLIGHT.defaultBlockState()))
+			instance = instancerManager.instancer(StructTypes.TRANSFORMED, Models.block(Blocks.SHROOMLIGHT.defaultBlockState()))
 					.createInstance();
 
 			instance.setBlockLight(15)

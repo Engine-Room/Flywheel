@@ -105,14 +105,12 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 	}
 
 	private TransformedPart makeBaseInstance() {
-		return instancerManager.factory(StructTypes.TRANSFORMED)
-				.model(BASE.apply(texture))
+		return instancerManager.instancer(StructTypes.TRANSFORMED, BASE.apply(texture))
 				.createInstance();
 	}
 
 	private TransformedPart makeLidInstance() {
-		return instancerManager.factory(StructTypes.TRANSFORMED)
-				.model(LID.apply(texture))
+		return instancerManager.instancer(StructTypes.TRANSFORMED, LID.apply(texture))
 				.createInstance();
 	}
 

@@ -14,12 +14,17 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.jozufozu.flywheel.api.RenderStage;
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.Instancer;
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.instancing.InstancerKey;
 import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.model.Model;
 
 public class InstancingDrawManager {
 
+	private final Map<InstancerKey<?>, GPUInstancer<?>> instancers = new HashMap<>();
 	private final List<UninitializedModel> uninitializedModels = new ArrayList<>();
 	private final List<GPUInstancer<?>> allInstancers = new ArrayList<>();
 	private final Map<RenderStage, DrawSet> renderLists = new EnumMap<>(RenderStage.class);
@@ -29,8 +34,16 @@ public class InstancingDrawManager {
 		return renderLists.getOrDefault(stage, DrawSet.EMPTY);
 	}
 
-	public void create(GPUInstancer<?> instancer, Model model) {
-		uninitializedModels.add(new UninitializedModel(instancer, model));
+	@SuppressWarnings("unchecked")
+	public <D extends InstancedPart> Instancer<D> getInstancer(StructType<D> type, Model model) {
+		InstancerKey<D> key = new InstancerKey<>(type, model);
+		GPUInstancer<D> instancer = (GPUInstancer<D>) instancers.get(key);
+		if (instancer == null) {
+			instancer = new GPUInstancer<>(type);
+			instancers.put(key, instancer);
+			uninitializedModels.add(new UninitializedModel(instancer, model));
+		}
+		return instancer;
 	}
 
 	public void flush() {
@@ -48,6 +61,8 @@ public class InstancingDrawManager {
 	}
 
 	public void delete() {
+		instancers.clear();
+
 		meshPools.values()
 				.forEach(InstancedMeshPool::delete);
 		meshPools.clear();

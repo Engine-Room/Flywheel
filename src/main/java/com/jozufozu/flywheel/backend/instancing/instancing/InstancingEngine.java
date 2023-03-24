@@ -1,16 +1,14 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
@@ -20,6 +18,7 @@ import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
+import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.core.uniform.UniformBuffer;
 import com.jozufozu.flywheel.util.WeakHashSet;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -34,7 +33,6 @@ import net.minecraft.world.phys.Vec3;
 public class InstancingEngine implements Engine {
 
 	protected final InstancingDrawManager drawManager = new InstancingDrawManager();
-	protected final Map<StructType<?>, GPUInstancerFactory<?>> factories = new HashMap<>();
 
 	/**
 	 * The set of instance managers that are attached to this engine.
@@ -51,16 +49,9 @@ public class InstancingEngine implements Engine {
 		this.sqrMaxOriginDistance = sqrMaxOriginDistance;
 	}
 
-	@SuppressWarnings("unchecked")
-	@NotNull
 	@Override
-	public <D extends InstancedPart> GPUInstancerFactory<D> factory(StructType<D> type) {
-		return (GPUInstancerFactory<D>) factories.computeIfAbsent(type, this::createFactory);
-	}
-
-	@NotNull
-	private <D extends InstancedPart> GPUInstancerFactory<D> createFactory(StructType<D> type) {
-		return new GPUInstancerFactory<>(type, drawManager::create);
+	public <D extends InstancedPart> Instancer<D> instancer(StructType<D> type, Model model) {
+		return drawManager.getInstancer(type, model);
 	}
 
 	@Override
@@ -167,7 +158,6 @@ public class InstancingEngine implements Engine {
 
 	@Override
 	public void delete() {
-		factories.clear();
 		drawManager.delete();
 	}
 

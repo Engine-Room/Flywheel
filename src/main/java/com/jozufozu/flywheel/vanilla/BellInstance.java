@@ -72,8 +72,7 @@ public class BellInstance extends BlockEntityInstance<BellBlockEntity> implement
 	}
 
 	private OrientedPart createBellInstance() {
-		return instancerManager.factory(StructTypes.ORIENTED)
-				.model(MODEL)
+		return instancerManager.instancer(StructTypes.ORIENTED, MODEL)
 				.createInstance();
 	}
 
