@@ -25,35 +25,35 @@ import com.jozufozu.flywheel.core.model.Model;
 public class InstancingDrawManager {
 
 	private final Map<InstancerKey<?>, GPUInstancer<?>> instancers = new HashMap<>();
-	private final List<UninitializedModel> uninitializedModels = new ArrayList<>();
-	private final List<GPUInstancer<?>> allInstancers = new ArrayList<>();
-	private final Map<RenderStage, DrawSet> renderLists = new EnumMap<>(RenderStage.class);
+	private final List<UninitializedInstancer> uninitializedInstancers = new ArrayList<>();
+	private final List<GPUInstancer<?>> initializedInstancers = new ArrayList<>();
+	private final Map<RenderStage, DrawSet> drawDets = new EnumMap<>(RenderStage.class);
 	private final Map<VertexType, InstancedMeshPool> meshPools = new HashMap<>();
 
 	public DrawSet get(RenderStage stage) {
-		return renderLists.getOrDefault(stage, DrawSet.EMPTY);
+		return drawDets.getOrDefault(stage, DrawSet.EMPTY);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <D extends InstancedPart> Instancer<D> getInstancer(StructType<D> type, Model model) {
-		InstancerKey<D> key = new InstancerKey<>(type, model);
+	public <D extends InstancedPart> Instancer<D> getInstancer(StructType<D> type, Model model, RenderStage stage) {
+		InstancerKey<D> key = new InstancerKey<>(type, model, stage);
 		GPUInstancer<D> instancer = (GPUInstancer<D>) instancers.get(key);
 		if (instancer == null) {
 			instancer = new GPUInstancer<>(type);
 			instancers.put(key, instancer);
-			uninitializedModels.add(new UninitializedModel(instancer, model));
+			uninitializedInstancers.add(new UninitializedInstancer(instancer, model, stage));
 		}
 		return instancer;
 	}
 
 	public void flush() {
-		for (var model : uninitializedModels) {
-			model.instancer()
+		for (var instancer : uninitializedInstancers) {
+			instancer.instancer()
 					.init();
 
-			add(model.instancer(), model.model());
+			add(instancer.instancer(), instancer.model(), instancer.stage());
 		}
-		uninitializedModels.clear();
+		uninitializedInstancers.clear();
 
 		for (var pool : meshPools.values()) {
 			pool.flush();
@@ -67,29 +67,27 @@ public class InstancingDrawManager {
 				.forEach(InstancedMeshPool::delete);
 		meshPools.clear();
 
-		renderLists.values()
+		drawDets.values()
 				.forEach(DrawSet::delete);
-		renderLists.clear();
+		drawDets.clear();
 
-		allInstancers.forEach(GPUInstancer::delete);
-		allInstancers.clear();
+		initializedInstancers.forEach(GPUInstancer::delete);
+		initializedInstancers.clear();
 	}
 
 	public void clearInstancers() {
-		allInstancers.forEach(GPUInstancer::clear);
+		initializedInstancers.forEach(GPUInstancer::clear);
 	}
 
-	private void add(GPUInstancer<?> instancer, Model model) {
+	private void add(GPUInstancer<?> instancer, Model model, RenderStage stage) {
+		DrawSet drawSet = drawDets.computeIfAbsent(stage, DrawSet::new);
 		var meshes = model.getMeshes();
 		for (var entry : meshes.entrySet()) {
 			DrawCall drawCall = new DrawCall(instancer, entry.getKey(), alloc(entry.getValue()));
-			var material = drawCall.getMaterial();
-			var shaderState = new ShaderState(material, drawCall.getVertexType(), drawCall.instancer.type);
-
-			renderLists.computeIfAbsent(material.getRenderStage(), DrawSet::new)
-					.put(shaderState, drawCall);
+			var shaderState = new ShaderState(drawCall.getMaterial(), drawCall.getVertexType(), drawCall.instancer.type);
+			drawSet.put(shaderState, drawCall);
 		}
-		allInstancers.add(instancer);
+		initializedInstancers.add(instancer);
 	}
 
 	private InstancedMeshPool.BufferedMesh alloc(Mesh mesh) {
@@ -134,6 +132,6 @@ public class InstancingDrawManager {
 		}
 	}
 
-	private record UninitializedModel(GPUInstancer<?> instancer, Model model) {
+	private record UninitializedInstancer(GPUInstancer<?> instancer, Model model, RenderStage stage) {
 	}
 }

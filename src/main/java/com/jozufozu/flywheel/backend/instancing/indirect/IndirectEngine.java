@@ -47,8 +47,8 @@ public class IndirectEngine implements Engine {
 	}
 
 	@Override
-	public <D extends InstancedPart> Instancer<D> instancer(StructType<D> type, Model model) {
-		return drawManager.getInstancer(type, model);
+	public <D extends InstancedPart> Instancer<D> instancer(StructType<D> type, Model model, RenderStage stage) {
+		return drawManager.getInstancer(type, model, stage);
 	}
 
 	@Override

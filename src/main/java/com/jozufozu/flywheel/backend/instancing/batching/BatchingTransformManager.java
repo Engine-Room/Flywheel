@@ -27,8 +27,8 @@ import net.minecraft.client.renderer.RenderType;
 
 public class BatchingTransformManager {
 	private final Map<InstancerKey<?>, CPUInstancer<?>> instancers = new HashMap<>();
-	private final List<UninitializedModel> uninitializedModels = new ArrayList<>();
-	private final List<CPUInstancer<?>> allInstancers = new ArrayList<>();
+	private final List<UninitializedInstancer> uninitializedInstancers = new ArrayList<>();
+	private final List<CPUInstancer<?>> initializedInstancers = new ArrayList<>();
 	private final Map<RenderStage, TransformSet> transformSets = new EnumMap<>(RenderStage.class);
 	private final Map<RenderStage, TransformSet> transformSetsView = Collections.unmodifiableMap(transformSets);
 	private final Map<VertexFormat, BatchedMeshPool> meshPools = new HashMap<>();
@@ -42,22 +42,22 @@ public class BatchingTransformManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <D extends InstancedPart> Instancer<D> getInstancer(StructType<D> type, Model model) {
-		InstancerKey<D> key = new InstancerKey<>(type, model);
+	public <D extends InstancedPart> Instancer<D> getInstancer(StructType<D> type, Model model, RenderStage stage) {
+		InstancerKey<D> key = new InstancerKey<>(type, model, stage);
 		CPUInstancer<D> instancer = (CPUInstancer<D>) instancers.get(key);
 		if (instancer == null) {
 			instancer = new CPUInstancer<>(type);
 			instancers.put(key, instancer);
-			uninitializedModels.add(new UninitializedModel(instancer, model));
+			uninitializedInstancers.add(new UninitializedInstancer(instancer, model, stage));
 		}
 		return instancer;
 	}
 
 	public void flush() {
-		for (var model : uninitializedModels) {
-			add(model.instancer(), model.model());
+		for (var instancer : uninitializedInstancers) {
+			add(instancer.instancer(), instancer.model(), instancer.stage());
 		}
-		uninitializedModels.clear();
+		uninitializedInstancers.clear();
 
 		for (var pool : meshPools.values()) {
 			pool.flush();
@@ -71,25 +71,24 @@ public class BatchingTransformManager {
 				.forEach(BatchedMeshPool::delete);
 		meshPools.clear();
 
-		allInstancers.forEach(CPUInstancer::delete);
-		allInstancers.clear();
+		initializedInstancers.forEach(CPUInstancer::delete);
+		initializedInstancers.clear();
 	}
 
 	public void clearInstancers() {
-		allInstancers.forEach(CPUInstancer::clear);
+		initializedInstancers.forEach(CPUInstancer::clear);
 	}
 
-	private void add(CPUInstancer<?> instancer, Model model) {
+	private void add(CPUInstancer<?> instancer, Model model, RenderStage stage) {
+		TransformSet transformSet = transformSets.computeIfAbsent(stage, TransformSet::new);
 		var meshes = model.getMeshes();
 		for (var entry : meshes.entrySet()) {
 			var material = entry.getKey();
 			var renderType = material.getBatchingRenderType();
 			TransformCall<?> transformCall = new TransformCall<>(instancer, material, alloc(entry.getValue(), renderType.format()));
-
-			transformSets.computeIfAbsent(material.getRenderStage(), TransformSet::new)
-					.put(renderType, transformCall);
+			transformSet.put(renderType, transformCall);
 		}
-		allInstancers.add(instancer);
+		initializedInstancers.add(instancer);
 	}
 
 	private BatchedMeshPool.BufferedMesh alloc(Mesh mesh, VertexFormat format) {
@@ -127,6 +126,6 @@ public class BatchingTransformManager {
 		}
 	}
 
-	private record UninitializedModel(CPUInstancer<?> instancer, Model model) {
+	private record UninitializedInstancer(CPUInstancer<?> instancer, Model model, RenderStage stage) {
 	}
 }

@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.instancing.indirect;
 
 import org.lwjgl.system.MemoryUtil;
 
+import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.material.Material;
 
@@ -9,13 +10,15 @@ public final class IndirectDraw<T extends InstancedPart> {
 	final IndirectInstancer<T> instancer;
 	final IndirectMeshPool.BufferedMesh mesh;
 	final Material material;
+	final RenderStage stage;
 	int baseInstance = -1;
 
 	boolean needsFullWrite = true;
 
-	IndirectDraw(IndirectInstancer<T> instancer, Material material, IndirectMeshPool.BufferedMesh mesh) {
+	IndirectDraw(IndirectInstancer<T> instancer, Material material, RenderStage stage, IndirectMeshPool.BufferedMesh mesh) {
 		this.instancer = instancer;
 		this.material = material;
+		this.stage = stage;
 		this.mesh = mesh;
 	}
 
