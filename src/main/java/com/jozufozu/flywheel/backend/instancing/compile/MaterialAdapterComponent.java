@@ -14,11 +14,7 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.core.SourceComponent;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.ShaderSources;
-import com.jozufozu.flywheel.core.source.generate.FnSignature;
-import com.jozufozu.flywheel.core.source.generate.GlslBlock;
-import com.jozufozu.flywheel.core.source.generate.GlslBuilder;
-import com.jozufozu.flywheel.core.source.generate.GlslExpr;
-import com.jozufozu.flywheel.core.source.generate.GlslSwitch;
+import com.jozufozu.flywheel.core.source.generate.*;
 import com.jozufozu.flywheel.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
@@ -29,9 +25,9 @@ public class MaterialAdapterComponent implements SourceComponent {
 	private final ResourceLocation name;
 	private final GlslExpr switchArg;
 	private final List<AdaptedFn> functionsToAdapt;
-	private final List<RenamedFunctionsSourceComponent> adaptedComponents;
+	private final List<StringSubstitutionSourceComponent> adaptedComponents;
 
-	public MaterialAdapterComponent(ResourceLocation name, GlslExpr switchArg, List<AdaptedFn> functionsToAdapt, List<RenamedFunctionsSourceComponent> adaptedComponents) {
+	public MaterialAdapterComponent(ResourceLocation name, GlslExpr switchArg, List<AdaptedFn> functionsToAdapt, List<StringSubstitutionSourceComponent> adaptedComponents) {
 		this.name = name;
 		this.switchArg = switchArg;
 		this.functionsToAdapt = functionsToAdapt;
@@ -157,13 +153,13 @@ public class MaterialAdapterComponent implements SourceComponent {
 				throw new NullPointerException("Switch argument must be set");
 			}
 
-			var transformed = ImmutableList.<RenamedFunctionsSourceComponent>builder();
+			var transformed = ImmutableList.<StringSubstitutionSourceComponent>builder();
 
 			for (FileResolution fileResolution : sourceMaterials) {
 				var loc = fileResolution.resourceLocation();
 				var sourceFile = sources.find(loc);
 
-				transformed.add(new RenamedFunctionsSourceComponent(sourceFile, createAdapterMap(adaptedFunctions, loc)));
+				transformed.add(new StringSubstitutionSourceComponent(sourceFile, createAdapterMap(adaptedFunctions, loc)));
 			}
 
 			return new MaterialAdapterComponent(name, switchArg, adaptedFunctions, transformed.build());

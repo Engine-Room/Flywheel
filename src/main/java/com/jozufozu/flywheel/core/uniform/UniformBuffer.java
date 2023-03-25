@@ -34,6 +34,7 @@ public class UniformBuffer {
 	private final GlBuffer buffer;
 
 	private UniformBuffer() {
+		// TODO: put everything into one ubo
 		buffer = new GlBuffer(GlBufferType.UNIFORM_BUFFER);
 		providerSet = new AllocatedProviderSet(ComponentRegistry.getAllUniformProviders());
 	}

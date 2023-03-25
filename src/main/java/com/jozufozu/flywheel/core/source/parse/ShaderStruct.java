@@ -10,19 +10,21 @@ import com.jozufozu.flywheel.core.source.span.Span;
 public class ShaderStruct {
 
 	// https://regexr.com/61rpe
-	public static final Pattern PATTERN = Pattern.compile("struct\\s+([\\w\\d]*)\\s*\\{([\\w\\d\\s,;]*)}\\s*;\\s");
+	public static final Pattern PATTERN = Pattern.compile("struct\\s+([\\w_]*)\\s*\\{(.*?)}\\s*([\\w_]*)?\\s*;\\s", Pattern.DOTALL);
 
 	public final Span name;
 	public final Span body;
 	public final Span self;
+	public final Span variableName;
 
 	private final ImmutableList<StructField> fields;
 	private final ImmutableMap<String, Span> fields2Types;
 
-	public ShaderStruct(Span self, Span name, Span body) {
+	public ShaderStruct(Span self, Span name, Span body, Span variableName) {
 		this.self = self;
 		this.name = name;
 		this.body = body;
+		this.variableName = variableName;
 		this.fields = parseFields();
 		this.fields2Types = createTypeLookup();
 	}

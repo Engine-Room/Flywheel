@@ -1,19 +1,14 @@
 package com.jozufozu.flywheel.backend.instancing.compile;
 
-import static org.lwjgl.opengl.GL20.glAttachShader;
-import static org.lwjgl.opengl.GL20.glCreateProgram;
-import static org.lwjgl.opengl.GL20.glLinkProgram;
+import static org.lwjgl.opengl.GL20.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.pipeline.Pipeline;
@@ -41,6 +36,7 @@ public class FlwCompiler {
 
 	final long compileStart = System.nanoTime();
 	private final ShaderSources sources;
+	private final UniformComponent uniformComponent;
 	private final MaterialAdapterComponent vertexMaterialComponent;
 	private final MaterialAdapterComponent fragmentMaterialComponent;
 
@@ -48,7 +44,6 @@ public class FlwCompiler {
 	private final CullingContextSet cullingContexts;
 
 	final ShaderCompiler shaderCompiler;
-	final Multimap<Set<UniformProvider>, PipelineContext> uniformProviderGroups = ArrayListMultimap.create();
 	final Map<PipelineContext, GlProgram> pipelinePrograms = new HashMap<>();
 	final Map<StructType<?>, GlProgram> cullingPrograms = new HashMap<>();
 	final List<FailedCompilation> errors = new ArrayList<>();
@@ -69,16 +64,22 @@ public class FlwCompiler {
 				.adapt(FnSignature.ofVoid("flw_materialFragment"))
 				.adapt(FnSignature.create()
 						.returnType("bool")
-						.name("flw_discardPredicate")
-						.arg("vec4", "color")
-						.build(), GlslExpr.literal(false))
-				.adapt(FnSignature.create()
-						.returnType("vec4")
-						.name("flw_fogFilter")
-						.arg("vec4", "color")
-						.build(), GlslExpr.variable("color"))
-				.switchOn(GlslExpr.variable("flw_materialFragmentID"))
-				.build(sources);
+					.name("flw_discardPredicate")
+					.arg("vec4", "color")
+					.build(), GlslExpr.literal(false))
+			.adapt(FnSignature.create()
+				.returnType("vec4")
+				.name("flw_fogFilter")
+				.arg("vec4", "color")
+				.build(), GlslExpr.variable("color"))
+			.switchOn(GlslExpr.variable("flw_materialFragmentID"))
+			.build(sources);
+		this.uniformComponent = UniformComponent.builder(Flywheel.rl("uniforms"))
+			.sources(ComponentRegistry.getAllUniformProviders()
+				.stream()
+				.map(UniformProvider::uniformShader)
+				.toList())
+			.build(sources);
 
 		this.pipelineContexts = PipelineContextSet.create();
 		this.cullingContexts = CullingContextSet.create();
@@ -186,7 +187,7 @@ public class FlwCompiler {
 				.vertex()
 				.resourceLocation());
 
-		return ImmutableList.of(vertexMaterialComponent, instanceAssembly, layout, instance, context, pipeline);
+		return ImmutableList.of(uniformComponent, vertexMaterialComponent, instanceAssembly, layout, instance, context, pipeline);
 	}
 
 	private ImmutableList<SourceComponent> getFragmentComponents(PipelineContext ctx) {
@@ -196,7 +197,7 @@ public class FlwCompiler {
 		var pipeline = sources.find(ctx.pipelineShader()
 				.fragment()
 				.resourceLocation());
-		return ImmutableList.of(fragmentMaterialComponent, context, pipeline);
+		return ImmutableList.of(uniformComponent, fragmentMaterialComponent, context, pipeline);
 	}
 
 	private ImmutableList<SourceComponent> getComputeComponents(StructType<?> structType) {
@@ -205,7 +206,7 @@ public class FlwCompiler {
 				.resourceLocation());
 		var pipeline = sources.find(Pipelines.Files.INDIRECT_CULL.resourceLocation());
 
-		return ImmutableList.of(instanceAssembly, instance, pipeline);
+		return ImmutableList.of(uniformComponent, instanceAssembly, instance, pipeline);
 	}
 
 }
