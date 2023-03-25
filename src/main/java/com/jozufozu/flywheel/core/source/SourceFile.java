@@ -1,10 +1,6 @@
 package com.jozufozu.flywheel.core.source;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 
 import com.google.common.collect.ImmutableList;
@@ -72,10 +68,7 @@ public class SourceFile implements SourceComponent {
 					try {
 						var loc = new ResourceLocation(file);
 						var sourceFile = sourceFinder.find(loc);
-
-						if (sourceFile != null) {
-							sink.accept(sourceFile);
-						}
+						sink.accept(sourceFile);
 					} catch (Exception ignored) {
 					}
 				})
@@ -122,10 +115,12 @@ public class SourceFile implements SourceComponent {
 	 * @param name The name of the struct to find.
 	 * @return null if no definition matches the name.
 	 */
-	public Optional<ShaderStruct> findStruct(String name) {
+	public Optional<ShaderStruct> findStructByName(String name) {
 		ShaderStruct struct = structs.get(name);
 
-		if (struct != null) return Optional.of(struct);
+		if (struct != null) {
+			return Optional.of(struct);
+		}
 
 		for (var include : included) {
 			var external = include.structs.get(name);
@@ -268,8 +263,9 @@ public class SourceFile implements SourceComponent {
 			Span self = Span.fromMatcher(this, matcher);
 			Span name = Span.fromMatcher(this, matcher, 1);
 			Span body = Span.fromMatcher(this, matcher, 2);
+			Span variableName = Span.fromMatcher(this, matcher, 3);
 
-			ShaderStruct shaderStruct = new ShaderStruct(self, name, body);
+			ShaderStruct shaderStruct = new ShaderStruct(self, name, body, variableName);
 
 			structs.put(name.get(), shaderStruct);
 		}

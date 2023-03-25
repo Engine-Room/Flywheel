@@ -131,7 +131,7 @@ public abstract class Span implements CharSequence, Comparable<Span> {
 		if (isErr()) {
 			return Optional.empty();
 		}
-		return in.findStruct(this.toString());
+		return in.findStructByName(this.toString());
 	}
 
 	public Optional<ShaderFunction> findFunction() {

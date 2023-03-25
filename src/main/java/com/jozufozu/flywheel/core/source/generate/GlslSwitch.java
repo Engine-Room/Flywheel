@@ -35,21 +35,21 @@ public class GlslSwitch implements GlslStmt {
 	@Override
 	public String prettyPrint() {
 		return """
-				switch (%s) {
-				%s
-				}""".formatted(on.prettyPrint(), getCaseStream());
+            switch (%s) {
+            %s
+            }""".formatted(on.prettyPrint(), formatCases());
 	}
 
-	@NotNull
-	private String getCaseStream() {
-		var cases = this.cases.stream()
-				.map(GlslSwitch::prettyPrintCase)
-				.collect(Collectors.joining("\n"));
-		if (defaultCase != null) {
-			cases += "\ndefault:\n" + StringUtil.indent(defaultCase.prettyPrint(), 4);
-		}
-		return cases;
-	}
+    @NotNull
+    private String formatCases() {
+        var cases = this.cases.stream()
+            .map(GlslSwitch::prettyPrintCase)
+            .collect(Collectors.joining("\n"));
+        if (defaultCase != null) {
+            cases += "\ndefault:\n" + StringUtil.indent(defaultCase.prettyPrint(), 4);
+        }
+        return cases;
+    }
 
 	private static String prettyPrintCase(Pair<GlslExpr, GlslBlock> p) {
 		var variant = p.first()

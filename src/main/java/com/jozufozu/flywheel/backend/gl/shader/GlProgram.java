@@ -1,13 +1,12 @@
 package com.jozufozu.flywheel.backend.gl.shader;
 
-import static org.lwjgl.opengl.GL20.glDeleteProgram;
-import static org.lwjgl.opengl.GL20.glGetUniformLocation;
-import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL20.*;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
+import com.jozufozu.flywheel.core.uniform.UniformBuffer;
 import com.mojang.blaze3d.shaders.ProgramManager;
 
 public class GlProgram extends GlObject {
@@ -18,6 +17,9 @@ public class GlProgram extends GlObject {
 
 	// TODO: Programs bind the uniform buffers they need, no more GlProgram inheritance
 	public void bind() {
+		// TODO: bind textures?
+		UniformBuffer.getInstance()
+			.sync();
 		ProgramManager.glUseProgram(handle());
 	}
 

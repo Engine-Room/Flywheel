@@ -8,16 +8,16 @@ import com.jozufozu.flywheel.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 
-public final class RenamedFunctionsSourceComponent implements SourceComponent {
+public final class StringSubstitutionSourceComponent implements SourceComponent {
 	private final SourceComponent source;
 	private final Map<String, String> replacements;
 	private final String sourceString;
 
-	public RenamedFunctionsSourceComponent(SourceComponent source, String find, String replace) {
+	public StringSubstitutionSourceComponent(SourceComponent source, String find, String replace) {
 		this(source, Map.of(find, replace));
 	}
 
-	public RenamedFunctionsSourceComponent(SourceComponent source, Map<String, String> replacements) {
+	public StringSubstitutionSourceComponent(SourceComponent source, Map<String, String> replacements) {
 		this.source = source;
 		this.replacements = replacements;
 		this.sourceString = source.source();
@@ -44,7 +44,7 @@ public final class RenamedFunctionsSourceComponent implements SourceComponent {
 
 	@Override
 	public ResourceLocation name() {
-		return ResourceUtil.subPath(source.name(), "_renamed");
+		return ResourceUtil.subPath(source.name(), "_string_substitution");
 	}
 
 	@Override
