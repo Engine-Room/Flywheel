@@ -23,19 +23,19 @@ public class IndirectDrawSet<T extends InstancedPart> {
 		return indirectDraws.size();
 	}
 
-	public void add(IndirectInstancer<T> instancer, Material material, IndirectMeshPool.BufferedMesh bufferedMesh) {
-		indirectDraws.add(new IndirectDraw<>(instancer, material, bufferedMesh));
+	public void add(IndirectInstancer<T> instancer, Material material, RenderStage stage, IndirectMeshPool.BufferedMesh bufferedMesh) {
+		indirectDraws.add(new IndirectDraw<>(instancer, material, stage, bufferedMesh));
 	}
 
 	public void submit(RenderStage stage) {
 		final int stride = (int) IndirectBuffers.DRAW_COMMAND_STRIDE;
 		for (int i = 0, indirectDrawsSize = indirectDraws.size(); i < indirectDrawsSize; i++) {
 			var batch = indirectDraws.get(i);
-			var material = batch.material;
-
-			if (material.getRenderStage() != stage) {
+			if (batch.stage != stage) {
 				continue;
 			}
+
+			var material = batch.material;
 			material.setup();
 			glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, i * stride, 1, stride);
 			material.clear();
@@ -44,7 +44,7 @@ public class IndirectDrawSet<T extends InstancedPart> {
 
 	public boolean contains(RenderStage stage) {
 		for (var draw : indirectDraws) {
-			if (draw.material.getRenderStage() == stage) {
+			if (draw.stage == stage) {
 				return true;
 			}
 		}

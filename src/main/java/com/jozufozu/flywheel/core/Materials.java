@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.core;
 
-import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
@@ -36,7 +35,6 @@ public final class Materials {
 	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
 
 	public static final Material CHUNK_SOLID_SHADED = SimpleMaterial.builder()
-			.stage(RenderStage.AFTER_SOLID_TERRAIN)
 			.vertexShader(Components.Files.SHADED_VERTEX)
 			.fragmentShader(Components.Files.DEFAULT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
@@ -44,7 +42,6 @@ public final class Materials {
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.register();
 	public static final Material CHUNK_SOLID_UNSHADED = SimpleMaterial.builder()
-			.stage(RenderStage.AFTER_SOLID_TERRAIN)
 			.vertexShader(Components.Files.DEFAULT_VERTEX)
 			.fragmentShader(Components.Files.DEFAULT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
@@ -52,7 +49,6 @@ public final class Materials {
 			.register();
 
 	public static final Material CHUNK_CUTOUT_MIPPED_SHADED = SimpleMaterial.builder()
-			.stage(RenderStage.AFTER_SOLID_TERRAIN)
 			.vertexShader(Components.Files.SHADED_VERTEX)
 			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
@@ -60,7 +56,6 @@ public final class Materials {
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.register();
 	public static final Material CHUNK_CUTOUT_MIPPED_UNSHADED = SimpleMaterial.builder()
-			.stage(RenderStage.AFTER_SOLID_TERRAIN)
 			.vertexShader(Components.Files.DEFAULT_VERTEX)
 			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
@@ -68,7 +63,6 @@ public final class Materials {
 			.register();
 
 	public static final Material CHUNK_CUTOUT_SHADED = SimpleMaterial.builder()
-			.stage(RenderStage.AFTER_SOLID_TERRAIN)
 			.vertexShader(Components.Files.SHADED_VERTEX)
 			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, false))
@@ -76,7 +70,6 @@ public final class Materials {
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.register();
 	public static final Material CHUNK_CUTOUT_UNSHADED = SimpleMaterial.builder()
-			.stage(RenderStage.AFTER_SOLID_TERRAIN)
 			.vertexShader(Components.Files.DEFAULT_VERTEX)
 			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, false))
@@ -84,7 +77,6 @@ public final class Materials {
 			.register();
 
 	public static final Material CHUNK_TRANSLUCENT_SHADED = SimpleMaterial.builder()
-			.stage(RenderStage.AFTER_TRANSLUCENT_TERRAIN)
 			.vertexShader(Components.Files.SHADED_VERTEX)
 			.fragmentShader(Components.Files.DEFAULT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
@@ -93,7 +85,6 @@ public final class Materials {
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.register();
 	public static final Material CHUNK_TRANSLUCENT_UNSHADED = SimpleMaterial.builder()
-			.stage(RenderStage.AFTER_TRANSLUCENT_TERRAIN)
 			.vertexShader(Components.Files.DEFAULT_VERTEX)
 			.fragmentShader(Components.Files.DEFAULT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
@@ -102,7 +93,6 @@ public final class Materials {
 			.register();
 
 	public static final Material CHUNK_TRIPWIRE_SHADED = SimpleMaterial.builder()
-			.stage(RenderStage.AFTER_TRANSLUCENT_TERRAIN)
 			.vertexShader(Components.Files.SHADED_VERTEX)
 			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
@@ -111,7 +101,6 @@ public final class Materials {
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.register();
 	public static final Material CHUNK_TRIPWIRE_UNSHADED = SimpleMaterial.builder()
-			.stage(RenderStage.AFTER_TRANSLUCENT_TERRAIN)
 			.vertexShader(Components.Files.DEFAULT_VERTEX)
 			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
@@ -120,13 +109,11 @@ public final class Materials {
 			.register();
 
 	public static final Material CHEST = SimpleMaterial.builder()
-			.stage(RenderStage.AFTER_BLOCK_ENTITIES)
 			.vertexShader(Components.Files.SHADED_VERTEX)
 			.addShard(Shards.diffuseTex(Sheets.CHEST_SHEET, false, false))
 			.batchingRenderType(Sheets.chestSheet())
 			.register();
 	public static final Material SHULKER = SimpleMaterial.builder()
-			.stage(RenderStage.AFTER_BLOCK_ENTITIES)
 			.vertexShader(Components.Files.SHADED_VERTEX)
 			.fragmentShader(Components.Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(Sheets.SHULKER_SHEET, false, false))
@@ -134,13 +121,11 @@ public final class Materials {
 			.batchingRenderType(Sheets.shulkerBoxSheet())
 			.register();
 	public static final Material BELL = SimpleMaterial.builder()
-			.stage(RenderStage.AFTER_BLOCK_ENTITIES)
 			.vertexShader(Components.Files.SHADED_VERTEX)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, false))
 			.batchingRenderType(Sheets.solidBlockSheet())
 			.register();
 	public static final Material MINECART = SimpleMaterial.builder()
-			.stage(RenderStage.AFTER_ENTITIES)
 			.vertexShader(Components.Files.SHADED_VERTEX)
 			.addShard(Shards.diffuseTex(MINECART_LOCATION, false, false))
 			.batchingRenderType(RenderType.entitySolid(MINECART_LOCATION))

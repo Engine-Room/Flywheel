@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.backend.instancing.batching;
 
-import java.util.List;
-
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;

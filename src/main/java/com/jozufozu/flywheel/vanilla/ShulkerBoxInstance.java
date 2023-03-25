@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
@@ -105,12 +106,12 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 	}
 
 	private TransformedPart makeBaseInstance() {
-		return instancerManager.instancer(StructTypes.TRANSFORMED, BASE.apply(texture))
+		return instancerManager.instancer(StructTypes.TRANSFORMED, BASE.apply(texture), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 
 	private TransformedPart makeLidInstance() {
-		return instancerManager.instancer(StructTypes.TRANSFORMED, LID.apply(texture))
+		return instancerManager.instancer(StructTypes.TRANSFORMED, LID.apply(texture), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 

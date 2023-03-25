@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
@@ -72,7 +73,7 @@ public class BellInstance extends BlockEntityInstance<BellBlockEntity> implement
 	}
 
 	private OrientedPart createBellInstance() {
-		return instancerManager.instancer(StructTypes.ORIENTED, MODEL)
+		return instancerManager.instancer(StructTypes.ORIENTED, MODEL, RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 
