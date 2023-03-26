@@ -12,9 +12,12 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.core.SourceComponent;
-import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.ShaderSources;
-import com.jozufozu.flywheel.core.source.generate.*;
+import com.jozufozu.flywheel.core.source.generate.FnSignature;
+import com.jozufozu.flywheel.core.source.generate.GlslBlock;
+import com.jozufozu.flywheel.core.source.generate.GlslBuilder;
+import com.jozufozu.flywheel.core.source.generate.GlslExpr;
+import com.jozufozu.flywheel.core.source.generate.GlslSwitch;
 import com.jozufozu.flywheel.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
@@ -100,27 +103,12 @@ public class MaterialAdapterComponent implements SourceComponent {
 		body.add(sw);
 	}
 
-	@NotNull
-	private static HashMap<String, String> createAdapterMap(List<AdaptedFn> adaptedFunctions, ResourceLocation loc) {
-		HashMap<String, String> out = new HashMap<>();
-
-		var suffix = '_' + ResourceUtil.toSafeString(loc);
-
-		for (var adapted : adaptedFunctions) {
-			var fnName = adapted.signature()
-					.name();
-			out.put(fnName, fnName + suffix);
-		}
-
-		return out;
-	}
-
 	private record AdaptedFn(FnSignature signature, @Nullable GlslExpr defaultReturn) {
 	}
 
 	public static class Builder {
 		private final ResourceLocation name;
-		private final List<FileResolution> sourceMaterials = new ArrayList<>();
+		private final List<ResourceLocation> materialSources = new ArrayList<>();
 		private final List<AdaptedFn> adaptedFunctions = new ArrayList<>();
 		private GlslExpr switchArg;
 
@@ -128,8 +116,8 @@ public class MaterialAdapterComponent implements SourceComponent {
 			this.name = name;
 		}
 
-		public Builder materialSources(List<FileResolution> sources) {
-			this.sourceMaterials.addAll(sources);
+		public Builder materialSources(List<ResourceLocation> sources) {
+			this.materialSources.addAll(sources);
 			return this;
 		}
 
@@ -155,14 +143,31 @@ public class MaterialAdapterComponent implements SourceComponent {
 
 			var transformed = ImmutableList.<StringSubstitutionSourceComponent>builder();
 
-			for (FileResolution fileResolution : sourceMaterials) {
-				var loc = fileResolution.resourceLocation();
-				var sourceFile = sources.find(loc);
-
-				transformed.add(new StringSubstitutionSourceComponent(sourceFile, createAdapterMap(adaptedFunctions, loc)));
+			for (var rl : materialSources) {
+				var sourceFile = sources.find(rl);
+				var adapterMap = createAdapterMap(adaptedFunctions, getSuffix(rl));
+				transformed.add(new StringSubstitutionSourceComponent(sourceFile, adapterMap));
 			}
 
 			return new MaterialAdapterComponent(name, switchArg, adaptedFunctions, transformed.build());
 		}
+	}
+
+	@NotNull
+	private static HashMap<String, String> createAdapterMap(List<AdaptedFn> adaptedFunctions, String suffix) {
+		HashMap<String, String> out = new HashMap<>();
+
+		for (var adapted : adaptedFunctions) {
+			var fnName = adapted.signature()
+					.name();
+			out.put(fnName, fnName + suffix);
+		}
+
+		return out;
+	}
+
+	@NotNull
+	private static String getSuffix(ResourceLocation rl) {
+		return '_' + ResourceUtil.toSafeString(rl);
 	}
 }

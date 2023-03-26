@@ -4,21 +4,21 @@ import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.core.ComponentRegistry;
 import com.jozufozu.flywheel.core.Components;
-import com.jozufozu.flywheel.core.source.FileResolution;
 
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 
 public class SimpleMaterial implements Material {
 	protected final RenderStage stage;
-	protected final FileResolution vertexShader;
-	protected final FileResolution fragmentShader;
+	protected final ResourceLocation vertexShader;
+	protected final ResourceLocation fragmentShader;
 	protected final Runnable setup;
 	protected final Runnable clear;
 	protected final RenderType batchingRenderType;
 	protected final VertexTransformer vertexTransformer;
 
-	public SimpleMaterial(RenderStage stage, FileResolution vertexShader, FileResolution fragmentShader, Runnable setup, Runnable clear, RenderType batchingRenderType, VertexTransformer vertexTransformer) {
+	public SimpleMaterial(RenderStage stage, ResourceLocation vertexShader, ResourceLocation fragmentShader, Runnable setup, Runnable clear, RenderType batchingRenderType, VertexTransformer vertexTransformer) {
 		this.stage = stage;
 		this.vertexShader = vertexShader;
 		this.fragmentShader = fragmentShader;
@@ -38,12 +38,12 @@ public class SimpleMaterial implements Material {
 	}
 
 	@Override
-	public FileResolution getVertexShader() {
+	public ResourceLocation vertexShader() {
 		return vertexShader;
 	}
 
 	@Override
-	public FileResolution getFragmentShader() {
+	public ResourceLocation fragmentShader() {
 		return fragmentShader;
 	}
 
@@ -69,12 +69,15 @@ public class SimpleMaterial implements Material {
 
 	public static class Builder {
 		protected RenderStage stage = RenderStage.AFTER_SOLID_TERRAIN;
-		protected FileResolution vertexShader = Components.Files.DEFAULT_VERTEX;
-		protected FileResolution fragmentShader = Components.Files.DEFAULT_FRAGMENT;
-		protected Runnable setup = () -> {};
-		protected Runnable clear = () -> {};
+		protected ResourceLocation vertexShader = Components.Files.DEFAULT_VERTEX;
+		protected ResourceLocation fragmentShader = Components.Files.DEFAULT_FRAGMENT;
+		protected Runnable setup = () -> {
+		};
+		protected Runnable clear = () -> {
+		};
 		protected RenderType batchingRenderType = RenderType.solid();
-		protected VertexTransformer vertexTransformer = (vertexList, level) -> {};
+		protected VertexTransformer vertexTransformer = (vertexList, level) -> {
+		};
 
 		public Builder() {
 		}
@@ -84,12 +87,12 @@ public class SimpleMaterial implements Material {
 			return this;
 		}
 
-		public Builder vertexShader(FileResolution vertexShader) {
+		public Builder vertexShader(ResourceLocation vertexShader) {
 			this.vertexShader = vertexShader;
 			return this;
 		}
 
-		public Builder fragmentShader(FileResolution fragmentShader) {
+		public Builder fragmentShader(ResourceLocation fragmentShader) {
 			this.fragmentShader = fragmentShader;
 			return this;
 		}

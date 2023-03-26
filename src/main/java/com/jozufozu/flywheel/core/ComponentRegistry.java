@@ -1,25 +1,31 @@
 package com.jozufozu.flywheel.core;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.context.ContextShader;
+import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.api.uniform.UniformProvider;
+import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.core.source.FileResolution;
 
 import net.minecraft.resources.ResourceLocation;
 
 public class ComponentRegistry {
-	private static final Registry<UniformProvider> uniformProviders = new Registry<>();
+	private static final Registry<ShaderUniforms> uniformProviders = new Registry<>();
 
 	public static final MaterialRegistry materials = new MaterialRegistry();
 	public static final Set<StructType<?>> structTypes = new HashSet<>();
 	public static final Set<VertexType> vertexTypes = new HashSet<>();
-	public static final Set<ContextShader> contextShaders = new HashSet<>();
+	public static final Set<Context> contextShaders = new HashSet<>();
 
 	// TODO: fill out the rest of the registry
 
@@ -37,22 +43,21 @@ public class ComponentRegistry {
 		return vertexType;
 	}
 
-	public static ContextShader register(ContextShader contextShader) {
+	public static <T extends Context> T register(T contextShader) {
 		contextShaders.add(contextShader);
 		return contextShader;
 	}
 
-	public static <T extends UniformProvider> T register(T provider) {
-		return uniformProviders.register(provider.uniformShader()
-				.resourceLocation(), provider);
+	public static <T extends ShaderUniforms> T register(T provider) {
+		return uniformProviders.register(provider.uniformShader(), provider);
 	}
 
-	public static Collection<UniformProvider> getAllUniformProviders() {
+	public static Collection<ShaderUniforms> getAllUniformProviders() {
 		return Collections.unmodifiableCollection(uniformProviders.objects);
 	}
 
 	@Nullable
-	public static UniformProvider getUniformProvider(ResourceLocation loc) {
+	public static ShaderUniforms getUniformProvider(ResourceLocation loc) {
 		return uniformProviders.get(loc);
 	}
 
@@ -84,8 +89,8 @@ public class ComponentRegistry {
 		public <T extends Material> T add(T material) {
 			materials.add(material);
 
-			vertexSources.register(material.getVertexShader());
-			fragmentSources.register(material.getFragmentShader());
+			vertexSources.register(material.vertexShader());
+			fragmentSources.register(material.fragmentShader());
 
 			return material;
 		}
@@ -93,31 +98,31 @@ public class ComponentRegistry {
 		/**
 		 * @return a list of vertex shader sources where the index in the list is the shader's ID.
 		 */
-		public List<FileResolution> vertexSources() {
+		public List<ResourceLocation> vertexSources() {
 			return vertexSources.sourceView;
 		}
 
 		/**
 		 * @return a list of fragment shader sources where the index in the list is the shader's ID.
 		 */
-		public List<FileResolution> fragmentSources() {
+		public List<ResourceLocation> fragmentSources() {
 			return fragmentSources.sourceView;
 		}
 
 		public int getVertexID(Material material) {
-			return vertexSources.orderedSources.indexOf(material.getVertexShader());
+			return vertexSources.orderedSources.indexOf(material.vertexShader());
 		}
 
 		public int getFragmentID(Material material) {
-			return fragmentSources.orderedSources.indexOf(material.getFragmentShader());
+			return fragmentSources.orderedSources.indexOf(material.fragmentShader());
 		}
 
 		private static class MaterialSources {
-			private final Set<FileResolution> registered = new HashSet<>();
-			private final List<FileResolution> orderedSources = new ArrayList<>();
-			private final List<FileResolution> sourceView = Collections.unmodifiableList(orderedSources);
+			private final Set<ResourceLocation> registered = new HashSet<>();
+			private final List<ResourceLocation> orderedSources = new ArrayList<>();
+			private final List<ResourceLocation> sourceView = Collections.unmodifiableList(orderedSources);
 
-			public void register(FileResolution vertexShader) {
+			public void register(ResourceLocation vertexShader) {
 				if (registered.add(vertexShader)) {
 					orderedSources.add(vertexShader);
 				}

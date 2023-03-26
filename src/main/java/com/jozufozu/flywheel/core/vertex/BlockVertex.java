@@ -4,7 +4,8 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
-import com.jozufozu.flywheel.core.source.FileResolution;
+
+import net.minecraft.resources.ResourceLocation;
 
 public class BlockVertex implements VertexType {
 	public static final BufferLayout FORMAT = BufferLayout.builder()
@@ -22,7 +23,7 @@ public class BlockVertex implements VertexType {
 	}
 
 	@Override
-	public FileResolution getLayoutShader() {
+	public ResourceLocation layoutShader() {
 		return Components.Files.BLOCK_LAYOUT;
 	}
 

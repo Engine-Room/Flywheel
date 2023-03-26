@@ -4,16 +4,17 @@ import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.core.SourceComponent;
-import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.ShaderSources;
+
+import net.minecraft.resources.ResourceLocation;
 
 public interface Pipeline {
 
 	GLSLVersion glslVersion();
 
-	FileResolution vertex();
+	ResourceLocation vertexShader();
 
-	FileResolution fragment();
+	ResourceLocation fragmentShader();
 
 	/**
 	 * Generate the source component necessary to convert a packed {@link StructType} into its shader representation.

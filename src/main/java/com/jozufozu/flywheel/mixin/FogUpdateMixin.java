@@ -5,14 +5,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.core.uniform.FlwUniformProvider;
+import com.jozufozu.flywheel.core.uniform.FlwShaderUniforms;
 
 import net.minecraft.client.renderer.FogRenderer;
 
 @Mixin(FogRenderer.class)
 public class FogUpdateMixin {
 	private static void flywheel$updateFog() {
-        FlwUniformProvider.FOG_UPDATE = true;
+		FlwShaderUniforms.FOG_UPDATE = true;
 	}
 
 	@Inject(method = "setupNoFog", at = @At("TAIL"))

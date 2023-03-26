@@ -35,7 +35,7 @@ public class IndirectComponent implements SourceComponent {
 
 	public IndirectComponent(ShaderSources sources, StructType<?> structType) {
 		this.layoutItems = structType.getLayout().layoutItems;
-		included = ImmutableList.of(sources.find(Pipelines.Files.UTIL_TYPES.resourceLocation()));
+		included = ImmutableList.of(sources.find(Pipelines.Files.UTIL_TYPES));
 	}
 
 	@Override

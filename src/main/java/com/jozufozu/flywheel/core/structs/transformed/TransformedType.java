@@ -5,9 +5,10 @@ import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
-import com.jozufozu.flywheel.core.source.FileResolution;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
+
+import net.minecraft.resources.ResourceLocation;
 
 public class TransformedType implements StructType<TransformedPart> {
 
@@ -34,7 +35,7 @@ public class TransformedType implements StructType<TransformedPart> {
 	}
 
 	@Override
-	public FileResolution getInstanceShader() {
+	public ResourceLocation instanceShader() {
 		return Components.Files.TRANSFORMED;
 	}
 

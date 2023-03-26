@@ -4,15 +4,16 @@ import com.jozufozu.flywheel.api.pipeline.Pipeline;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.core.SourceComponent;
-import com.jozufozu.flywheel.core.source.FileResolution;
+
+import net.minecraft.resources.ResourceLocation;
 
 public final class SimplePipeline implements Pipeline {
 	private final GLSLVersion glslVersion;
-	private final FileResolution vertex;
-	private final FileResolution fragment;
+	private final ResourceLocation vertex;
+	private final ResourceLocation fragment;
 	private final InstanceAssemblerFactory factory;
 
-	public SimplePipeline(GLSLVersion glslVersion, FileResolution vertex, FileResolution fragment, InstanceAssemblerFactory factory) {
+	public SimplePipeline(GLSLVersion glslVersion, ResourceLocation vertex, ResourceLocation fragment, InstanceAssemblerFactory factory) {
 		this.glslVersion = glslVersion;
 		this.vertex = vertex;
 		this.fragment = fragment;
@@ -35,12 +36,12 @@ public final class SimplePipeline implements Pipeline {
 	}
 
 	@Override
-	public FileResolution vertex() {
+	public ResourceLocation vertexShader() {
 		return vertex;
 	}
 
 	@Override
-	public FileResolution fragment() {
+	public ResourceLocation fragmentShader() {
 		return fragment;
 	}
 
@@ -55,8 +56,8 @@ public final class SimplePipeline implements Pipeline {
 
 	public static class Builder {
 		private GLSLVersion glslVersion;
-		private FileResolution vertex;
-		private FileResolution fragment;
+		private ResourceLocation vertex;
+		private ResourceLocation fragment;
 		private InstanceAssemblerFactory factory;
 
 		public Builder glslVersion(GLSLVersion glslVersion) {
@@ -64,12 +65,12 @@ public final class SimplePipeline implements Pipeline {
 			return this;
 		}
 
-		public Builder vertex(FileResolution vertex) {
+		public Builder vertex(ResourceLocation vertex) {
 			this.vertex = vertex;
 			return this;
 		}
 
-		public Builder fragment(FileResolution fragment) {
+		public Builder fragment(ResourceLocation fragment) {
 			this.fragment = fragment;
 			return this;
 		}

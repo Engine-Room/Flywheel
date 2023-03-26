@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.BackendTypes;
 import com.jozufozu.flywheel.core.ComponentRegistry;
 import com.jozufozu.flywheel.core.Components;
+import com.jozufozu.flywheel.core.context.SimpleContext;
 import com.jozufozu.flywheel.core.pipeline.SimplePipeline;
 
 public class PipelineContextSet {
@@ -39,7 +39,7 @@ public class PipelineContextSet {
 		return contexts.size();
 	}
 
-	private void add(VertexType vertexType, StructType<?> structType, ContextShader world, SimplePipeline pipelineShader) {
+	private void add(VertexType vertexType, StructType<?> structType, SimpleContext world, SimplePipeline pipelineShader) {
 		var ctx = new PipelineContext(vertexType, structType, world, pipelineShader);
 
 
