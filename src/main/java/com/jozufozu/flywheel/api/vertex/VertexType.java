@@ -14,12 +14,4 @@ public interface VertexType extends VertexListProvider {
 	BufferLayout getLayout();
 
 	FileResolution getLayoutShader();
-
-	default int getStride() {
-		return getLayout().getStride();
-	}
-
-	default int byteOffset(int vertexIndex) {
-		return getStride() * vertexIndex;
-	}
 }

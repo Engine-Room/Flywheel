@@ -9,7 +9,6 @@ import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
@@ -20,23 +19,25 @@ import net.minecraft.client.multiplayer.ClientLevel;
 public class TransformCall<D extends InstancedPart> {
 	private final CPUInstancer<D> instancer;
 	private final Material material;
-	private final BatchedMeshPool.BufferedMesh bufferedMesh;
+	private final BatchedMeshPool.BufferedMesh mesh;
+
+	private final int meshVertexCount;
+	private final int meshByteSize;
 
 	public TransformCall(CPUInstancer<D> instancer, Material material, BatchedMeshPool.BufferedMesh mesh) {
 		this.instancer = instancer;
 		this.material = material;
-		this.bufferedMesh = mesh;
+		this.mesh = mesh;
+
+		meshVertexCount = mesh.getVertexCount();
+		meshByteSize = mesh.size();
 	}
 
-	public Material getMaterial() {
-		return material;
+	public int getTotalVertexCount() {
+		return meshVertexCount * instancer.getInstanceCount();
 	}
 
-	public VertexFormat getVertexFormat() {
-		return bufferedMesh.getVertexFormat();
-	}
-
-	void submitTasks(TaskEngine pool, DrawBuffer buffer, int startVertex, PoseStack stack, ClientLevel level) {
+	void submitTasks(TaskEngine pool, DrawBuffer buffer, int startVertex, PoseStack.Pose matrices, ClientLevel level) {
 		instancer.setup();
 
 		int instances = instancer.getInstanceCount();
@@ -46,34 +47,32 @@ public class TransformCall<D extends InstancedPart> {
 			instances -= 512;
 			int start = Math.max(instances, 0);
 
-			int vertexCount = bufferedMesh.getMesh().getVertexCount() * (end - start);
+			int vertexCount = meshVertexCount * (end - start);
 			ReusableVertexList sub = buffer.slice(startVertex, vertexCount);
 			startVertex += vertexCount;
 
-			pool.submit(() -> transformRange(sub, start, end, stack, level));
+			pool.submit(() -> transformRange(sub, start, end, matrices, level));
 		}
 	}
 
-	private void transformRange(ReusableVertexList vertexList, int from, int to, PoseStack stack, ClientLevel level) {
-		transformList(vertexList, instancer.getRange(from, to), stack, level);
+	private void transformRange(ReusableVertexList vertexList, int from, int to, PoseStack.Pose matrices, ClientLevel level) {
+		transformList(vertexList, instancer.getRange(from, to), matrices, level);
 	}
 
-	void transformAll(ReusableVertexList vertexList, PoseStack stack, ClientLevel level) {
-		transformList(vertexList, instancer.getAll(), stack, level);
+	void transformAll(ReusableVertexList vertexList, PoseStack.Pose matrices, ClientLevel level) {
+		transformList(vertexList, instancer.getAll(), matrices, level);
 	}
 
-	private void transformList(ReusableVertexList vertexList, List<D> parts, PoseStack stack, ClientLevel level) {
+	private void transformList(ReusableVertexList vertexList, List<D> parts, PoseStack.Pose matrices, ClientLevel level) {
 		long anchorPtr = vertexList.ptr();
 		int totalVertexCount = vertexList.vertexCount();
 
-		int meshVertexCount = bufferedMesh.getMesh().getVertexCount();
-		int meshByteSize = bufferedMesh.size();
 		vertexList.vertexCount(meshVertexCount);
 
 		StructType.VertexTransformer<D> structVertexTransformer = instancer.type.getVertexTransformer();
 
 		for (D d : parts) {
-			bufferedMesh.copyTo(vertexList.ptr());
+			mesh.copyTo(vertexList.ptr());
 
 			structVertexTransformer.transform(vertexList, d, level);
 
@@ -83,15 +82,15 @@ public class TransformCall<D extends InstancedPart> {
 		vertexList.ptr(anchorPtr);
 		vertexList.vertexCount(totalVertexCount);
 		material.getVertexTransformer().transform(vertexList, level);
-		applyPoseStack(vertexList, stack);
+		applyPoseStack(vertexList, matrices);
 	}
 
-	private static void applyPoseStack(MutableVertexList vertexList, PoseStack stack) {
+	private static void applyPoseStack(MutableVertexList vertexList, PoseStack.Pose matrices) {
 		Vector4f pos = new Vector4f();
 		Vector3f normal = new Vector3f();
 
-		Matrix4f modelMatrix = stack.last().pose();
-		Matrix3f normalMatrix = stack.last().normal();
+		Matrix4f modelMatrix = matrices.pose();
+		Matrix3f normalMatrix = matrices.normal();
 
 		for (int i = 0; i < vertexList.vertexCount(); i++) {
 			pos.set(
@@ -116,9 +115,5 @@ public class TransformCall<D extends InstancedPart> {
 			vertexList.normalY(i, normal.y());
 			vertexList.normalZ(i, normal.z());
 		}
-	}
-
-	public int getTotalVertexCount() {
-		return bufferedMesh.getMesh().getVertexCount() * instancer.getInstanceCount();
 	}
 }

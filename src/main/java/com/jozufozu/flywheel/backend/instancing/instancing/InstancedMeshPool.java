@@ -37,7 +37,7 @@ public class InstancedMeshPool {
 	 */
 	public InstancedMeshPool(VertexType vertexType) {
 		this.vertexType = vertexType;
-		int stride = vertexType.getStride();
+		int stride = vertexType.getLayout().getStride();
 		this.vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER);
 
 		this.vbo.setGrowthMargin(stride * 32);
@@ -183,6 +183,26 @@ public class InstancedMeshPool {
 			this.ebo = mesh.createEBO();
 		}
 
+		public int size() {
+			return mesh.size();
+		}
+
+		public VertexType getVertexType() {
+			return vertexType;
+		}
+
+		public int getAttributeCount() {
+			return vertexType.getLayout().getAttributeCount();
+		}
+
+		public boolean isDeleted() {
+			return deleted;
+		}
+
+		private boolean isEmpty() {
+			return mesh.isEmpty() || isDeleted();
+		}
+
 		private void buffer(long ptr) {
 			mesh.write(ptr + byteIndex);
 
@@ -201,10 +221,6 @@ public class InstancedMeshPool {
 			setup(vao);
 
 			draw(instanceCount);
-		}
-
-		private boolean isEmpty() {
-			return mesh.isEmpty() || isDeleted();
 		}
 
 		private void setup(GlVertexArray vao) {
@@ -228,26 +244,6 @@ public class InstancedMeshPool {
 			deleted = true;
 			InstancedMeshPool.this.dirty = true;
 			InstancedMeshPool.this.anyToRemove = true;
-		}
-
-		public Mesh getMesh() {
-			return mesh;
-		}
-
-		public int size() {
-			return mesh.size();
-		}
-
-		public VertexType getVertexType() {
-			return vertexType;
-		}
-
-		public int getAttributeCount() {
-			return vertexType.getLayout().getAttributeCount();
-		}
-
-		public boolean isDeleted() {
-			return deleted;
 		}
 	}
 }

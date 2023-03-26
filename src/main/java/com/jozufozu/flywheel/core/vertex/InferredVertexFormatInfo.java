@@ -1,11 +1,11 @@
 package com.jozufozu.flywheel.core.vertex;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 
 public class InferredVertexFormatInfo {
 	public final VertexFormat format;
-	public final int stride;
 
 	public final int positionOffset;
 	public final int colorOffset;
@@ -16,7 +16,6 @@ public class InferredVertexFormatInfo {
 
 	public InferredVertexFormatInfo(VertexFormat format) {
 		this.format = format;
-		stride = format.getVertexSize();
 
 		int positionOffset = -1;
 		int colorOffset = -1;
@@ -27,17 +26,18 @@ public class InferredVertexFormatInfo {
 
 		int offset = 0;
 		for (VertexFormatElement element : format.getElements()) {
-			switch (element.getUsage()) {
-			case POSITION -> positionOffset = offset;
-			case NORMAL -> normalOffset = offset;
-			case COLOR -> colorOffset = offset;
-			case UV -> {
-				switch (element.getIndex()) {
-					case 0 -> textureOffset = offset;
-					case 1 -> overlayOffset = offset;
-					case 2 -> lightOffset = offset;
-				}
-			}
+			if (element == DefaultVertexFormat.ELEMENT_POSITION) {
+				positionOffset = offset;
+			} else if (element == DefaultVertexFormat.ELEMENT_COLOR) {
+				colorOffset = offset;
+			} else if (element == DefaultVertexFormat.ELEMENT_UV0) {
+				textureOffset = offset;
+			} else if (element == DefaultVertexFormat.ELEMENT_UV1) {
+				overlayOffset = offset;
+			} else if (element == DefaultVertexFormat.ELEMENT_UV2) {
+				lightOffset = offset;
+			} else if (element == DefaultVertexFormat.ELEMENT_NORMAL) {
+				normalOffset = offset;
 			}
 
 			offset += element.getByteSize();

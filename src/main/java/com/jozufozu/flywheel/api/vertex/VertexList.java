@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.api.vertex;
 
-import com.dreizak.miniball.model.PointSet;
-
 /**
  * A read only view of a vertex buffer.
  *
@@ -11,24 +9,20 @@ import com.dreizak.miniball.model.PointSet;
  * </p>
  * TODO: more flexible elements?
  */
-public interface VertexList extends PointSet {
+public interface VertexList {
 	float x(int index);
 
 	float y(int index);
 
 	float z(int index);
 
-	byte r(int index);
+	float r(int index);
 
-	byte g(int index);
+	float g(int index);
 
-	byte b(int index);
+	float b(int index);
 
-	byte a(int index);
-
-	default int color(int index) {
-		return a(index) << 24 | r(index) << 16 | g(index) << 8 | b(index);
-	}
+	float a(int index);
 
 	float u(int index);
 
@@ -79,25 +73,5 @@ public interface VertexList extends PointSet {
 
 	default boolean isEmpty() {
 		return vertexCount() == 0;
-	}
-
-	@Override
-	default int size() {
-		return vertexCount();
-	}
-
-	@Override
-	default int dimension() {
-		return 3;
-	}
-
-	@Override
-	default double coord(int i, int j) {
-		return switch (j) {
-			case 0 -> x(i);
-			case 1 -> y(i);
-			case 2 -> z(i);
-			default -> throw new IllegalArgumentException("Invalid dimension: " + j);
-		};
 	}
 }

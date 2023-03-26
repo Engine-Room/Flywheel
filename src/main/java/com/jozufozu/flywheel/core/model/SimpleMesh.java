@@ -12,8 +12,8 @@ public class SimpleMesh implements Mesh {
 	private final int vertexCount;
 	private final MemoryBlock contents;
 	private final ReusableVertexList vertexList;
-	private final String name;
 	private final Vector4f boundingSphere;
+	private final String name;
 
 	public SimpleMesh(VertexType vertexType, MemoryBlock contents, String name) {
 		this.vertexType = vertexType;
@@ -21,7 +21,7 @@ public class SimpleMesh implements Mesh {
 		this.name = name;
 
 		int bytes = (int) contents.size();
-		int stride = vertexType.getStride();
+		int stride = vertexType.getLayout().getStride();
 		if (bytes % stride != 0) {
 			throw new IllegalArgumentException("MemoryBlock contains non-whole amount of vertices!");
 		}
@@ -55,18 +55,18 @@ public class SimpleMesh implements Mesh {
 	}
 
 	@Override
-	public void close() {
+	public Vector4fc getBoundingSphere() {
+		return boundingSphere;
+	}
+
+	@Override
+	public void delete() {
 		contents.free();
 	}
 
 	@Override
 	public String name() {
 		return name;
-	}
-
-	@Override
-	public Vector4fc getBoundingSphere() {
-		return boundingSphere;
 	}
 
 	@Override

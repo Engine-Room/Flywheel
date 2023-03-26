@@ -30,7 +30,7 @@ public class SimpleLazyModel implements Model {
 
 	@Override
 	public void delete() {
-		supplier.ifPresent(Mesh::close);
+		supplier.ifPresent(Mesh::delete);
 	}
 
 	public int getVertexCount() {
@@ -40,7 +40,7 @@ public class SimpleLazyModel implements Model {
 
 	@Override
 	public String toString() {
-		return "BasicModelSupplier{" + supplier.map(Mesh::name)
+		return "SimpleLazyModel{" + supplier.map(Mesh::name)
 				.orElse("Uninitialized") + '}';
 	}
 }

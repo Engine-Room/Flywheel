@@ -6,6 +6,7 @@ import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
 import com.jozufozu.flywheel.core.source.FileResolution;
+import com.jozufozu.flywheel.util.RenderMath;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
@@ -58,7 +59,12 @@ public class OrientedType implements StructType<OrientedPart> {
 
 			Matrix3f normalMatrix = new Matrix3f(q);
 
+			float r = RenderMath.uf(struct.r);
+			float g = RenderMath.uf(struct.g);
+			float b = RenderMath.uf(struct.b);
+			float a = RenderMath.uf(struct.a);
 			int light = struct.getPackedLight();
+
 			for (int i = 0; i < vertexList.vertexCount(); i++) {
 				pos.set(
 						vertexList.x(i),
@@ -82,10 +88,10 @@ public class OrientedType implements StructType<OrientedPart> {
 				vertexList.normalY(i, normal.y());
 				vertexList.normalZ(i, normal.z());
 
-				vertexList.r(i, struct.r);
-				vertexList.g(i, struct.g);
-				vertexList.b(i, struct.b);
-				vertexList.a(i, struct.a);
+				vertexList.r(i, r);
+				vertexList.g(i, g);
+				vertexList.b(i, b);
+				vertexList.a(i, a);
 				vertexList.light(i, light);
 			}
 		};

@@ -39,10 +39,10 @@ public class BatchingEngine implements Engine {
 
 		// TODO: async task engine barriers
 		taskEngine.syncPoint();
-		submitTasks(taskEngine, stack, context.level());
+		submitTasks(taskEngine, stack.last(), context.level());
 	}
 
-	public void submitTasks(TaskEngine taskEngine, PoseStack stack, ClientLevel level) {
+	public void submitTasks(TaskEngine taskEngine, PoseStack.Pose matrices, ClientLevel level) {
 		for (var transformSetEntry : transformManager.getTransformSetsView().entrySet()) {
 			var stage = transformSetEntry.getKey();
 			var transformSet = transformSetEntry.getValue();
@@ -65,7 +65,7 @@ public class BatchingEngine implements Engine {
 
 				int startVertex = 0;
 				for (var transformCall : transformCalls) {
-					transformCall.submitTasks(taskEngine, buffer, startVertex, stack, level);
+					transformCall.submitTasks(taskEngine, buffer, startVertex, matrices, level);
 					startVertex += transformCall.getTotalVertexCount();
 				}
 			}

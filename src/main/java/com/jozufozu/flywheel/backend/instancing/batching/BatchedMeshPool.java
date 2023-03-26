@@ -36,7 +36,7 @@ public class BatchedMeshPool {
 	public BatchedMeshPool(VertexFormat vertexFormat) {
 		this.vertexFormat = vertexFormat;
 		vertexList = VertexListProvider.get(vertexFormat).createVertexList();
-		growthMargin = vertexList.vertexStride() * 32;
+		growthMargin = vertexFormat.getVertexSize() * 32;
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class BatchedMeshPool {
 	 */
 	public BufferedMesh alloc(Mesh mesh) {
 		return meshes.computeIfAbsent(mesh, m -> {
-			BufferedMesh bufferedMesh = new BufferedMesh(m, byteSize, m.getVertexCount() * vertexList.vertexStride());
+			BufferedMesh bufferedMesh = new BufferedMesh(m, byteSize);
 			byteSize += bufferedMesh.size();
 			allBuffered.add(bufferedMesh);
 			pendingUpload.add(bufferedMesh);
@@ -150,19 +150,50 @@ public class BatchedMeshPool {
 
 	public class BufferedMesh {
 		private final Mesh mesh;
+		private final int byteSize;
+		private final int vertexCount;
+
 		private long byteIndex;
-		private int byteSize;
 		private boolean deleted;
 
-		private BufferedMesh(Mesh mesh, long byteIndex, int byteSize) {
+		private BufferedMesh(Mesh mesh, long byteIndex) {
 			this.mesh = mesh;
+			vertexCount = mesh.getVertexCount();
+			byteSize = vertexCount * vertexFormat.getVertexSize();
 			this.byteIndex = byteIndex;
-			this.byteSize = byteSize;
+		}
+
+		public int size() {
+			return byteSize;
+		}
+
+		public int getVertexCount() {
+			return vertexCount;
+		}
+
+		public VertexFormat getVertexFormat() {
+			return vertexFormat;
+		}
+
+		public boolean isDeleted() {
+			return deleted;
+		}
+
+		private boolean isEmpty() {
+			return mesh.isEmpty() || isDeleted();
+		}
+
+		private long ptr() {
+			return BatchedMeshPool.this.memory.ptr() + byteIndex;
 		}
 
 		private void buffer(ReusableVertexList vertexList) {
+			if (isEmpty()) {
+				return;
+			}
+
 			vertexList.ptr(ptr());
-			vertexList.vertexCount(mesh.getVertexCount());
+			vertexList.vertexCount(vertexCount);
 
 			mesh.write(vertexList);
 		}
@@ -175,34 +206,10 @@ public class BatchedMeshPool {
 			MemoryUtil.memCopy(ptr(), ptr, byteSize);
 		}
 
-		private boolean isEmpty() {
-			return mesh.isEmpty() || isDeleted();
-		}
-
-		private long ptr() {
-			return BatchedMeshPool.this.memory.ptr() + byteIndex;
-		}
-
 		public void delete() {
 			deleted = true;
 			BatchedMeshPool.this.dirty = true;
 			BatchedMeshPool.this.anyToRemove = true;
-		}
-
-		public Mesh getMesh() {
-			return mesh;
-		}
-
-		public int size() {
-			return byteSize;
-		}
-
-		public VertexFormat getVertexFormat() {
-			return vertexFormat;
-		}
-
-		public boolean isDeleted() {
-			return deleted;
 		}
 	}
 }

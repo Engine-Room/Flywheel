@@ -2,60 +2,58 @@ package com.jozufozu.flywheel.core.vertex;
 
 import org.lwjgl.system.MemoryUtil;
 
+import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.util.RenderMath;
 
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 
 public class PosTexNormalVertexList extends AbstractVertexList {
-	protected static final int STRIDE = 23;
-
-	protected long idxPtr(long idx) {
-		return ptr + idx * STRIDE;
-	}
+	private static final int STRIDE = 23;
 
 	@Override
 	public float x(int index) {
-		return MemoryUtil.memGetFloat(idxPtr(index));
+		return MemoryUtil.memGetFloat(ptr + index * STRIDE);
 	}
 
 	@Override
 	public float y(int index) {
-		return MemoryUtil.memGetFloat(idxPtr(index) + 4);
+		return MemoryUtil.memGetFloat(ptr + index * STRIDE + 4);
 	}
 
 	@Override
 	public float z(int index) {
-		return MemoryUtil.memGetFloat(idxPtr(index) + 8);
+		return MemoryUtil.memGetFloat(ptr + index * STRIDE + 8);
 	}
 
 	@Override
-	public byte r(int index) {
-		return (byte) 0xFF;
+	public float r(int index) {
+		return 1;
 	}
 
 	@Override
-	public byte g(int index) {
-		return (byte) 0xFF;
+	public float g(int index) {
+		return 1;
 	}
 
 	@Override
-	public byte b(int index) {
-		return (byte) 0xFF;
+	public float b(int index) {
+		return 1;
 	}
 
 	@Override
-	public byte a(int index) {
-		return (byte) 0xFF;
+	public float a(int index) {
+		return 1;
 	}
 
 	@Override
 	public float u(int index) {
-		return MemoryUtil.memGetFloat(idxPtr(index) + 12);
+		return MemoryUtil.memGetFloat(ptr + index * STRIDE + 12);
 	}
 
 	@Override
 	public float v(int index) {
-		return MemoryUtil.memGetFloat(idxPtr(index) + 16);
+		return MemoryUtil.memGetFloat(ptr + index * STRIDE + 16);
 	}
 
 	@Override
@@ -65,63 +63,63 @@ public class PosTexNormalVertexList extends AbstractVertexList {
 
 	@Override
 	public int light(int index) {
-		return 0;
+		return LightTexture.FULL_BRIGHT;
 	}
 
 	@Override
 	public float normalX(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(idxPtr(index) + 20));
+		return RenderMath.f(MemoryUtil.memGetByte(ptr + index * STRIDE + 20));
 	}
 
 	@Override
 	public float normalY(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(idxPtr(index) + 21));
+		return RenderMath.f(MemoryUtil.memGetByte(ptr + index * STRIDE + 21));
 	}
 
 	@Override
 	public float normalZ(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(idxPtr(index) + 22));
+		return RenderMath.f(MemoryUtil.memGetByte(ptr + index * STRIDE + 22));
 	}
 
 	@Override
 	public void x(int index, float x) {
-		MemoryUtil.memPutFloat(idxPtr(index), x);
+		MemoryUtil.memPutFloat(ptr + index * STRIDE, x);
 	}
 
 	@Override
 	public void y(int index, float y) {
-		MemoryUtil.memPutFloat(idxPtr(index) + 4, y);
+		MemoryUtil.memPutFloat(ptr + index * STRIDE + 4, y);
 	}
 
 	@Override
 	public void z(int index, float z) {
-		MemoryUtil.memPutFloat(idxPtr(index) + 8, z);
+		MemoryUtil.memPutFloat(ptr + index * STRIDE + 8, z);
 	}
 
 	@Override
-	public void r(int index, byte r) {
+	public void r(int index, float r) {
 	}
 
 	@Override
-	public void g(int index, byte g) {
+	public void g(int index, float g) {
 	}
 
 	@Override
-	public void b(int index, byte b) {
+	public void b(int index, float b) {
 	}
 
 	@Override
-	public void a(int index, byte a) {
+	public void a(int index, float a) {
 	}
 
 	@Override
 	public void u(int index, float u) {
-		MemoryUtil.memPutFloat(idxPtr(index) + 12, u);
+		MemoryUtil.memPutFloat(ptr + index * STRIDE + 12, u);
 	}
 
 	@Override
 	public void v(int index, float v) {
-		MemoryUtil.memPutFloat(idxPtr(index) + 16, v);
+		MemoryUtil.memPutFloat(ptr + index * STRIDE + 16, v);
 	}
 
 	@Override
@@ -134,21 +132,46 @@ public class PosTexNormalVertexList extends AbstractVertexList {
 
 	@Override
 	public void normalX(int index, float normalX) {
-		MemoryUtil.memPutByte(idxPtr(index) + 20, RenderMath.nb(normalX));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 20, RenderMath.nb(normalX));
 	}
 
 	@Override
 	public void normalY(int index, float normalY) {
-		MemoryUtil.memPutByte(idxPtr(index) + 21, RenderMath.nb(normalY));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 21, RenderMath.nb(normalY));
 	}
 
 	@Override
 	public void normalZ(int index, float normalZ) {
-		MemoryUtil.memPutByte(idxPtr(index) + 22, RenderMath.nb(normalZ));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 22, RenderMath.nb(normalZ));
 	}
 
 	@Override
-	public int vertexStride() {
-		return STRIDE;
+	public void write(MutableVertexList dst, int srcIndex, int dstIndex) {
+		if (getClass() == dst.getClass()) {
+			long dstPtr = ((PosTexNormalVertexList) dst).ptr;
+			MemoryUtil.memCopy(ptr + srcIndex * STRIDE, dstPtr + dstIndex * STRIDE, STRIDE);
+		} else {
+			super.write(dst, srcIndex, dstIndex);
+		}
+	}
+
+	@Override
+	public void write(MutableVertexList dst, int srcStartIndex, int dstStartIndex, int vertexCount) {
+		if (getClass() == dst.getClass()) {
+			long dstPtr = ((PosTexNormalVertexList) dst).ptr;
+			MemoryUtil.memCopy(ptr + srcStartIndex * STRIDE, dstPtr + dstStartIndex * STRIDE, vertexCount * STRIDE);
+		} else {
+			super.write(dst, srcStartIndex, dstStartIndex, vertexCount);
+		}
+	}
+
+	@Override
+	public void writeAll(MutableVertexList dst) {
+		if (getClass() == dst.getClass()) {
+			long dstPtr = ((PosTexNormalVertexList) dst).ptr;
+			MemoryUtil.memCopy(ptr, dstPtr, vertexCount * STRIDE);
+		} else {
+			super.writeAll(dst);
+		}
 	}
 }

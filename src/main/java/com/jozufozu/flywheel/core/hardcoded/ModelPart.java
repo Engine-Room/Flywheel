@@ -16,8 +16,8 @@ public class ModelPart implements Mesh {
 	private final int vertexCount;
 	private final MemoryBlock contents;
 	private final ReusableVertexList vertexList;
-	private final String name;
 	private final Vector4f boundingSphere;
+	private final String name;
 
 	public ModelPart(List<PartBuilder.CuboidBuilder> cuboids, String name) {
 		this.name = name;
@@ -63,18 +63,18 @@ public class ModelPart implements Mesh {
 	}
 
 	@Override
-	public void close() {
+	public Vector4fc getBoundingSphere() {
+		return boundingSphere;
+	}
+
+	@Override
+	public void delete() {
 		contents.free();
 	}
 
 	@Override
 	public String name() {
 		return name;
-	}
-
-	@Override
-	public Vector4fc getBoundingSphere() {
-		return boundingSphere;
 	}
 
 	private static int countVertices(List<PartBuilder.CuboidBuilder> cuboids) {

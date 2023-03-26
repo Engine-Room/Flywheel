@@ -22,7 +22,7 @@ public class TessellatedModel implements Model {
 	@Override
 	public void delete() {
 		meshes.values()
-				.forEach(Mesh::close);
+				.forEach(Mesh::delete);
 	}
 
 	public boolean isShadeSeparated() {
