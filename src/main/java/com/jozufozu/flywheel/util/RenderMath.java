@@ -5,31 +5,31 @@ import net.minecraftforge.client.model.pipeline.LightUtil;
 public class RenderMath {
 
 	/**
-	 * Convert a signed, normalized floating point value into a normalized byte.
-	 */
-	public static byte nb(float f) {
-		return (byte) (f * 127);
-	}
-
-	/**
-	 * Convert a signed byte into a normalized float.
+	 * Convert a signed byte into a signed, normalized float.
 	 */
 	public static float f(byte b) {
 		return b / 127f;
 	}
 
 	/**
-	 * Convert an unsigned byte into a normalized float.
+	 * Convert a signed, normalized float into a signed byte.
+	 */
+	public static byte nb(float f) {
+		return (byte) (f * 127);
+	}
+
+	/**
+	 * Convert an unsigned byte into an unsigned, normalized float.
 	 */
 	public static float uf(byte b) {
 		return (float) (Byte.toUnsignedInt(b)) / 255f;
 	}
 
 	/**
-	 * Convert an unsigned, normalized float into an unsigned normalized byte.
+	 * Convert an unsigned, normalized float into an unsigned byte.
 	 */
 	public static byte unb(float f) {
-		return (byte) Math.floor(f * 255);
+		return (byte) (int) (f * 255);
 	}
 
 	public static int nextPowerOf2(int a) {

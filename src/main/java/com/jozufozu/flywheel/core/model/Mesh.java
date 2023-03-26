@@ -13,8 +13,6 @@ public interface Mesh {
 
 	VertexType getVertexType();
 
-	Vector4fc getBoundingSphere();
-
 	/**
 	 * @return The number of vertices this mesh has.
 	 */
@@ -32,7 +30,7 @@ public interface Mesh {
 	 * The size in bytes that this mesh's data takes up.
 	 */
 	default int size() {
-		return getVertexType().byteOffset(getVertexCount());
+		return getVertexType().getLayout().getStride() * getVertexCount();
 	}
 
 	/**
@@ -64,7 +62,9 @@ public interface Mesh {
 				.quads2Tris(getVertexCount() / 4);
 	}
 
-	void close();
+	Vector4fc getBoundingSphere();
+
+	void delete();
 
 	/**
 	 * A name uniquely identifying this mesh.

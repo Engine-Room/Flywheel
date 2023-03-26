@@ -7,20 +7,13 @@ public interface MutableVertexList extends VertexList {
 
 	void z(int index, float z);
 
-	void r(int index, byte r);
+	void r(int index, float r);
 
-	void g(int index, byte g);
+	void g(int index, float g);
 
-	void b(int index, byte b);
+	void b(int index, float b);
 
-	void a(int index, byte a);
-
-	default void color(int index, int color) {
-		a(index, (byte) (color >> 24 & 0xFF));
-		r(index, (byte) (color >> 16 & 0xFF));
-		g(index, (byte) (color >> 8 & 0xFF));
-		b(index, (byte) (color & 0xFF));
-	}
+	void a(int index, float a);
 
 	void u(int index, float u);
 

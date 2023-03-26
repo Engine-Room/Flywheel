@@ -3,11 +3,11 @@ package com.jozufozu.flywheel.core.model;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
 import com.dreizak.miniball.highdim.Miniball;
+import com.dreizak.miniball.model.PointSet;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
@@ -58,7 +58,7 @@ public class ModelUtil {
 		VertexType dstVertexType = Formats.BLOCK;
 
 		ByteBuffer src = pair.getSecond();
-		MemoryBlock dst = MemoryBlock.malloc(src.capacity());
+		MemoryBlock dst = MemoryBlock.malloc(vertexCount * dstVertexType.getLayout().getStride());
 		long srcPtr = MemoryUtil.memAddress(src);
 		long dstPtr = dst.ptr();
 
@@ -94,11 +94,34 @@ public class ModelUtil {
 		return null;
 	}
 
-    @NotNull
-    public static Vector4f computeBoundingSphere(VertexList reader) {
-        var miniball = new Miniball(reader);
-        double[] center = miniball.center();
-        double radius = miniball.radius();
-        return new Vector4f((float) center[0], (float) center[1], (float) center[2], (float) radius);
-    }
+	public static Vector4f computeBoundingSphere(VertexList vertexList) {
+		return computeBoundingSphere(new PointSet() {
+			@Override
+			public int size() {
+				return vertexList.vertexCount();
+			}
+
+			@Override
+			public int dimension() {
+				return 3;
+			}
+
+			@Override
+			public double coord(int i, int j) {
+				return switch (j) {
+					case 0 -> vertexList.x(i);
+					case 1 -> vertexList.y(i);
+					case 2 -> vertexList.z(i);
+					default -> throw new IllegalArgumentException("Invalid dimension: " + j);
+				};
+			}
+		});
+	}
+
+	public static Vector4f computeBoundingSphere(PointSet points) {
+		var miniball = new Miniball(points);
+		double[] center = miniball.center();
+		double radius = miniball.radius();
+		return new Vector4f((float) center[0], (float) center[1], (float) center[2], (float) radius);
+	}
 }

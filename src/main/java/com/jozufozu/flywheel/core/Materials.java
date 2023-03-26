@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
 
 public final class Materials {
@@ -26,9 +25,9 @@ public final class Materials {
 		DiffuseLightCalculator diffuseCalc = DiffuseLightCalculator.forLevel(level);
 		for (int i = 0; i < vertexList.vertexCount(); i++) {
 			float diffuse = diffuseCalc.getDiffuse(vertexList.normalX(i), vertexList.normalY(i), vertexList.normalZ(i), true);
-			vertexList.r(i, (byte) Mth.clamp((int) (Byte.toUnsignedInt(vertexList.r(i)) * diffuse), 0, 255));
-			vertexList.g(i, (byte) Mth.clamp((int) (Byte.toUnsignedInt(vertexList.g(i)) * diffuse), 0, 255));
-			vertexList.b(i, (byte) Mth.clamp((int) (Byte.toUnsignedInt(vertexList.b(i)) * diffuse), 0, 255));
+			vertexList.r(i, vertexList.r(i) * diffuse);
+			vertexList.g(i, vertexList.g(i) * diffuse);
+			vertexList.b(i, vertexList.b(i) * diffuse);
 		}
 	};
 

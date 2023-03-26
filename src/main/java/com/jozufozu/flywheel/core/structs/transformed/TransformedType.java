@@ -6,6 +6,7 @@ import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
 import com.jozufozu.flywheel.core.source.FileResolution;
+import com.jozufozu.flywheel.util.RenderMath;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 
@@ -44,13 +45,18 @@ public class TransformedType implements StructType<TransformedPart> {
 			Vector4f pos = new Vector4f();
 			Vector3f normal = new Vector3f();
 
+			float r = RenderMath.uf(struct.r);
+			float g = RenderMath.uf(struct.g);
+			float b = RenderMath.uf(struct.b);
+			float a = RenderMath.uf(struct.a);
 			int light = struct.getPackedLight();
+
 			for (int i = 0; i < vertexList.vertexCount(); i++) {
 				pos.set(
 						vertexList.x(i),
 						vertexList.y(i),
 						vertexList.z(i),
-						1F
+						1f
 				);
 				pos.transform(struct.model);
 				vertexList.x(i, pos.x());
@@ -68,10 +74,10 @@ public class TransformedType implements StructType<TransformedPart> {
 				vertexList.normalY(i, normal.y());
 				vertexList.normalZ(i, normal.z());
 
-				vertexList.r(i, struct.r);
-				vertexList.g(i, struct.g);
-				vertexList.b(i, struct.b);
-				vertexList.a(i, struct.a);
+				vertexList.r(i, r);
+				vertexList.g(i, g);
+				vertexList.b(i, b);
+				vertexList.a(i, a);
 				vertexList.light(i, light);
 			}
 		};

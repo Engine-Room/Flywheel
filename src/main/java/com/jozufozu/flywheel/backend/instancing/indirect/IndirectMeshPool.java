@@ -34,7 +34,7 @@ public class IndirectMeshPool {
 	public IndirectMeshPool(VertexType type, int vertexCapacity) {
 		vertexType = type;
 		vbo = glCreateBuffers();
-		var byteCapacity = type.byteOffset(vertexCapacity);
+		var byteCapacity = type.getLayout().getStride() * vertexCapacity;
 		glNamedBufferStorage(vbo, byteCapacity, GL_DYNAMIC_STORAGE_BIT);
 		clientStorage = MemoryBlock.malloc(byteCapacity);
 	}
