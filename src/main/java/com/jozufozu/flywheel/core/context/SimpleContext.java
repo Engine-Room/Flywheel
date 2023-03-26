@@ -1,9 +1,11 @@
-package com.jozufozu.flywheel.api.context;
+package com.jozufozu.flywheel.core.context;
 
+import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.core.source.FileResolution;
 
-public record ContextShader(FileResolution vertexShader, FileResolution fragmentShader) implements Context {
+import net.minecraft.resources.ResourceLocation;
+
+public record SimpleContext(ResourceLocation vertexShader, ResourceLocation fragmentShader) implements Context {
 	@Override
 	public void onProgramLink(GlProgram program) {
 		program.bind();
@@ -14,12 +16,12 @@ public record ContextShader(FileResolution vertexShader, FileResolution fragment
 	}
 
 	@Override
-	public FileResolution vertexShader() {
+	public ResourceLocation vertexShader() {
 		return vertexShader;
 	}
 
 	@Override
-	public FileResolution fragmentShader() {
+	public ResourceLocation fragmentShader() {
 		return fragmentShader;
 	}
 }

@@ -3,23 +3,9 @@ package com.jozufozu.flywheel.util;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import com.jozufozu.flywheel.mixin.BlockEntityRenderDispatcherAccessor;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-
 public class FlwUtil {
-
-	/**
-	 * Get the (effectively global) map of BlockEntityTypes to Renderers.
-	 * @return An immutable map of BlockEntityTypes to BlockEntityRenderers.
-	 */
-	public static Map<BlockEntityType<?>, BlockEntityRenderer<?>> getBlockEntityRenderers() {
-		Minecraft mc = Minecraft.getInstance();
-		return ((BlockEntityRenderDispatcherAccessor) mc.getBlockEntityRenderDispatcher()).flywheel$getRenderers();
-	}
 
 	public static PoseStack copyPoseStack(PoseStack stack) {
 		PoseStack copy = new PoseStack();
@@ -76,5 +62,9 @@ public class FlwUtil {
 
 	public static <T> void noop(T object) {
 		// noop
+	}
+
+	public static int align16(int numToRound) {
+		return (numToRound + 16 - 1) & -16;
 	}
 }

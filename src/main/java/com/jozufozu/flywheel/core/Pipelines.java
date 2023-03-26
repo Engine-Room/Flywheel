@@ -5,7 +5,8 @@ import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.instancing.indirect.IndirectComponent;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancedArraysComponent;
 import com.jozufozu.flywheel.core.pipeline.SimplePipeline;
-import com.jozufozu.flywheel.core.source.FileResolution;
+
+import net.minecraft.resources.ResourceLocation;
 
 public class Pipelines {
 	public static final SimplePipeline INSTANCED_ARRAYS = SimplePipeline.builder()
@@ -26,15 +27,10 @@ public class Pipelines {
 	}
 
 	public static class Files {
-		public static final FileResolution DRAW_FRAGMENT = pipeline("pipeline/draw.frag");
-		public static final FileResolution INSTANCED_ARRAYS_DRAW = pipeline("pipeline/instanced_arrays_draw.vert");
-		public static final FileResolution INDIRECT_DRAW = pipeline("pipeline/indirect_draw.vert");
-		public static final FileResolution INDIRECT_CULL = pipeline("pipeline/indirect_cull.glsl");
-		public static final FileResolution UTIL_TYPES = FileResolution.get(Flywheel.rl("util/types.glsl"));
-
-		private static FileResolution pipeline(String name) {
-			return FileResolution.get(Flywheel.rl(name))
-					.validateWith(Components.Checks.PIPELINE);
-		}
+		public static final ResourceLocation DRAW_FRAGMENT = Flywheel.rl("pipeline/draw.frag");
+		public static final ResourceLocation INSTANCED_ARRAYS_DRAW = Flywheel.rl("pipeline/instanced_arrays_draw.vert");
+		public static final ResourceLocation INDIRECT_DRAW = Flywheel.rl("pipeline/indirect_draw.vert");
+		public static final ResourceLocation INDIRECT_CULL = Flywheel.rl("pipeline/indirect_cull.glsl");
+		public static final ResourceLocation UTIL_TYPES = Flywheel.rl("util/types.glsl");
 	}
 }

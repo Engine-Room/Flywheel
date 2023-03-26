@@ -1,9 +1,9 @@
 package com.jozufozu.flywheel.backend.instancing.compile;
 
-import com.jozufozu.flywheel.api.context.ContextShader;
+import com.jozufozu.flywheel.api.context.Context;
+import com.jozufozu.flywheel.api.pipeline.Pipeline;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.core.pipeline.SimplePipeline;
 
 /**
  * Represents the entire context of a program's usage.
@@ -12,6 +12,6 @@ import com.jozufozu.flywheel.core.pipeline.SimplePipeline;
  * @param structType    The instance shader to use.
  * @param contextShader The context shader to use.
  */
-public record PipelineContext(VertexType vertexType, StructType<?> structType, ContextShader contextShader,
-							  SimplePipeline pipelineShader) {
+public record PipelineContext(VertexType vertexType, StructType<?> structType, Context contextShader,
+							  Pipeline pipelineShader) {
 }

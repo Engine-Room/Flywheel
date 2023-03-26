@@ -1,12 +1,13 @@
 package com.jozufozu.flywheel.api.context;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.core.source.FileResolution;
+
+import net.minecraft.resources.ResourceLocation;
 
 public interface Context {
 	void onProgramLink(GlProgram program);
 
-	FileResolution vertexShader();
+	ResourceLocation vertexShader();
 
-	FileResolution fragmentShader();
+	ResourceLocation fragmentShader();
 }

@@ -28,7 +28,7 @@ public class ShaderSources {
 	private final Map<ResourceLocation, SourceFile> cache = new HashMap<>();
 
 	/**
-	 * Tracks
+	 * Tracks where we are in the mutual recursion to detect circular imports.
 	 */
 	private final Deque<ResourceLocation> findStack = new ArrayDeque<>();
 
@@ -42,17 +42,14 @@ public class ShaderSources {
 
 	@Nonnull
 	public SourceFile find(ResourceLocation location) {
-		if (findStack.contains(location)) {
-			generateRecursiveImportException(location);
-		}
-		findStack.add(location);
+		pushFindStack(location);
 		// Can't use computeIfAbsent because mutual recursion causes ConcurrentModificationExceptions
 		var out = cache.get(location);
 		if (out == null) {
 			out = load(location);
 			cache.put(location, out);
 		}
-		findStack.pop();
+		popFindStack();
 		return out;
 	}
 
@@ -77,5 +74,16 @@ public class ShaderSources {
 				.collect(Collectors.joining(" -> "));
 		findStack.clear();
 		throw new ShaderLoadingException("recursive import: " + path);
+	}
+
+	private void pushFindStack(ResourceLocation location) {
+		if (findStack.contains(location)) {
+			generateRecursiveImportException(location);
+		}
+		findStack.add(location);
+	}
+
+	private void popFindStack() {
+		findStack.pop();
 	}
 }

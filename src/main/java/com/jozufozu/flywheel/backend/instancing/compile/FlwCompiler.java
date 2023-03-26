@@ -1,6 +1,8 @@
 package com.jozufozu.flywheel.backend.instancing.compile;
 
-import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL20.glAttachShader;
+import static org.lwjgl.opengl.GL20.glCreateProgram;
+import static org.lwjgl.opengl.GL20.glLinkProgram;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,10 +12,9 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.pipeline.Pipeline;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.api.uniform.UniformProvider;
+import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GLSLVersion;
@@ -23,6 +24,7 @@ import com.jozufozu.flywheel.backend.instancing.indirect.IndirectComponent;
 import com.jozufozu.flywheel.core.ComponentRegistry;
 import com.jozufozu.flywheel.core.Pipelines;
 import com.jozufozu.flywheel.core.SourceComponent;
+import com.jozufozu.flywheel.core.context.SimpleContext;
 import com.jozufozu.flywheel.core.pipeline.SimplePipeline;
 import com.jozufozu.flywheel.core.source.ShaderLoadingException;
 import com.jozufozu.flywheel.core.source.ShaderSources;
@@ -76,8 +78,8 @@ public class FlwCompiler {
 			.build(sources);
 		this.uniformComponent = UniformComponent.builder(Flywheel.rl("uniforms"))
 			.sources(ComponentRegistry.getAllUniformProviders()
-				.stream()
-				.map(UniformProvider::uniformShader)
+					.stream()
+					.map(ShaderUniforms::uniformShader)
 				.toList())
 			.build(sources);
 
@@ -124,7 +126,7 @@ public class FlwCompiler {
 		shaderCompiler.delete();
 	}
 
-	public GlProgram getPipelineProgram(VertexType vertexType, StructType<?> structType, ContextShader contextShader, SimplePipeline pipelineShader) {
+	public GlProgram getPipelineProgram(VertexType vertexType, StructType<?> structType, SimpleContext contextShader, SimplePipeline pipelineShader) {
 		return pipelinePrograms.get(new PipelineContext(vertexType, structType, contextShader, pipelineShader));
 	}
 
@@ -175,36 +177,29 @@ public class FlwCompiler {
 				.assemble(new Pipeline.InstanceAssemblerContext(sources, ctx.vertexType(), ctx.structType()));
 
 		var layout = sources.find(ctx.vertexType()
-				.getLayoutShader()
-				.resourceLocation());
+				.layoutShader());
 		var instance = sources.find(ctx.structType()
-				.getInstanceShader()
-				.resourceLocation());
+				.instanceShader());
 		var context = sources.find(ctx.contextShader()
-				.vertexShader()
-				.resourceLocation());
+				.vertexShader());
 		var pipeline = sources.find(ctx.pipelineShader()
-				.vertex()
-				.resourceLocation());
+				.vertexShader());
 
 		return ImmutableList.of(uniformComponent, vertexMaterialComponent, instanceAssembly, layout, instance, context, pipeline);
 	}
 
 	private ImmutableList<SourceComponent> getFragmentComponents(PipelineContext ctx) {
 		var context = sources.find(ctx.contextShader()
-				.fragmentShader()
-				.resourceLocation());
+				.fragmentShader());
 		var pipeline = sources.find(ctx.pipelineShader()
-				.fragment()
-				.resourceLocation());
+				.fragmentShader());
 		return ImmutableList.of(uniformComponent, fragmentMaterialComponent, context, pipeline);
 	}
 
 	private ImmutableList<SourceComponent> getComputeComponents(StructType<?> structType) {
 		var instanceAssembly = new IndirectComponent(sources, structType);
-		var instance = sources.find(structType.getInstanceShader()
-				.resourceLocation());
-		var pipeline = sources.find(Pipelines.Files.INDIRECT_CULL.resourceLocation());
+		var instance = sources.find(structType.instanceShader());
+		var pipeline = sources.find(Pipelines.Files.INDIRECT_CULL);
 
 		return ImmutableList.of(uniformComponent, instanceAssembly, instance, pipeline);
 	}

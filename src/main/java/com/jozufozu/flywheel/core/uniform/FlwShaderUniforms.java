@@ -4,21 +4,20 @@ import java.util.function.Consumer;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.uniform.UniformProvider;
+import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
-import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.extension.MatrixWrite;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 
-public class FlwUniformProvider implements UniformProvider {
+public class FlwShaderUniforms implements ShaderUniforms {
 
 	public static final int SIZE = 224;
 
@@ -32,16 +31,16 @@ public class FlwUniformProvider implements UniformProvider {
 	}
 
 	@Override
-	public FileResolution uniformShader() {
+	public ResourceLocation uniformShader() {
 		return Components.Files.UNIFORMS;
 	}
 
 	@Override
-	public ActiveUniformProvider activate(long ptr) {
+	public Provider activate(long ptr) {
 		return new Active(ptr);
 	}
 
-	public static class Active implements ActiveUniformProvider, Consumer<BeginFrameEvent> {
+	public static class Active implements Provider, Consumer<BeginFrameEvent> {
 		private final long ptr;
 
 		private boolean dirty;
@@ -66,8 +65,41 @@ public class FlwUniformProvider implements UniformProvider {
 
 		@Override
 		public void accept(BeginFrameEvent event) {
-			updateFrustum(event.getContext());
-			updateView(event.getContext());
+			if (ptr == MemoryUtil.NULL) {
+				return;
+			}
+			RenderContext context = event.getContext();
+
+			Vec3i originCoordinate = InstancedRenderDispatcher.getOriginCoordinate(context.level());
+			Vec3 camera = context.camera()
+					.getPosition();
+
+			var camX = (float) (camera.x - originCoordinate.getX());
+			var camY = (float) (camera.y - originCoordinate.getY());
+			var camZ = (float) (camera.z - originCoordinate.getZ());
+
+			// don't want to mutate viewProjection
+			var vp = context.viewProjection()
+					.copy();
+			vp.multiplyWithTranslation(-camX, -camY, -camZ);
+
+			MatrixWrite.writeUnsafe(vp, ptr + 32);
+			MemoryUtil.memPutFloat(ptr + 96, camX);
+			MemoryUtil.memPutFloat(ptr + 100, camY);
+			MemoryUtil.memPutFloat(ptr + 104, camZ);
+			MemoryUtil.memPutFloat(ptr + 108, 0f); // vec4 alignment
+			MemoryUtil.memPutInt(ptr + 112, getConstantAmbientLightFlag(context));
+
+			updateFrustum(context, camX, camY, camZ);
+
+			dirty = true;
+		}
+
+		private static int getConstantAmbientLightFlag(RenderContext context) {
+			var constantAmbientLight = context.level()
+					.effects()
+					.constantAmbientLight();
+			return constantAmbientLight ? 1 : 0;
 		}
 
 		private boolean maybeUpdateFog() {
@@ -84,65 +116,23 @@ public class FlwUniformProvider implements UniformProvider {
 			MemoryUtil.memPutFloat(ptr + 16, RenderSystem.getShaderFogStart());
 			MemoryUtil.memPutFloat(ptr + 20, RenderSystem.getShaderFogEnd());
 			MemoryUtil.memPutInt(ptr + 24, RenderSystem.getShaderFogShape()
-				.getIndex());
+					.getIndex());
 
 			FOG_UPDATE = false;
 
 			return true;
 		}
 
-		public void updateFrustum(RenderContext context) {
-			if (ptr == MemoryUtil.NULL || (FRUSTUM_PAUSED && !FRUSTUM_CAPTURE)) {
+		private void updateFrustum(RenderContext context, float camX, float camY, float camZ) {
+			if (FRUSTUM_PAUSED && !FRUSTUM_CAPTURE) {
 				return;
 			}
-
-			Vec3i originCoordinate = InstancedRenderDispatcher.getOriginCoordinate(context.level());
-			Vec3 camera = context.camera()
-				.getPosition();
-
-			var camX = (float) (camera.x - originCoordinate.getX());
-			var camY = (float) (camera.y - originCoordinate.getY());
-			var camZ = (float) (camera.z - originCoordinate.getZ());
 
 			var shiftedCuller = RenderContext.createCuller(context.viewProjection(), -camX, -camY, -camZ);
 
 			shiftedCuller.getJozuPackedPlanes(ptr + 128);
 
-			dirty = true;
 			FRUSTUM_CAPTURE = false;
-		}
-
-		public void updateView(RenderContext context) {
-			if (ptr == MemoryUtil.NULL) {
-				return;
-			}
-
-			ClientLevel level = context.level();
-
-			int constantAmbientLight = level.effects()
-				.constantAmbientLight() ? 1 : 0;
-
-			Vec3i originCoordinate = InstancedRenderDispatcher.getOriginCoordinate(level);
-			Vec3 camera = context.camera()
-				.getPosition();
-
-			var camX = (float) (camera.x - originCoordinate.getX());
-			var camY = (float) (camera.y - originCoordinate.getY());
-			var camZ = (float) (camera.z - originCoordinate.getZ());
-
-			// don't want to mutate viewProjection
-			var vp = context.viewProjection()
-				.copy();
-			vp.multiplyWithTranslation(-camX, -camY, -camZ);
-
-			MatrixWrite.writeUnsafe(vp, ptr + 32);
-			MemoryUtil.memPutFloat(ptr + 96, camX);
-			MemoryUtil.memPutFloat(ptr + 100, camY);
-			MemoryUtil.memPutFloat(ptr + 104, camZ);
-			MemoryUtil.memPutFloat(ptr + 108, 0f); // vec4 alignment
-			MemoryUtil.memPutInt(ptr + 112, constantAmbientLight);
-
-			dirty = true;
 		}
 	}
 }

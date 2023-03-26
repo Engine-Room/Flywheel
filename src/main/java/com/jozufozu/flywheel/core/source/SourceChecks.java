@@ -12,6 +12,17 @@ import com.jozufozu.flywheel.core.source.parse.ShaderVariable;
 
 public class SourceChecks {
 
+	// TODO: recycle to be invoked by the shader compiler
+
+	public static final BiConsumer<ErrorReporter, SourceFile> LAYOUT_VERTEX = checkFunctionArity("flw_layoutVertex", 0);
+	public static final BiConsumer<ErrorReporter, SourceFile> INSTANCE_VERTEX = checkFunctionParameterTypeExists("flw_instanceVertex", 1, 0);
+	public static final BiConsumer<ErrorReporter, SourceFile> MATERIAL_VERTEX = checkFunctionArity("flw_materialVertex", 0);
+	public static final BiConsumer<ErrorReporter, SourceFile> MATERIAL_FRAGMENT = checkFunctionArity("flw_materialFragment", 0);
+	public static final BiConsumer<ErrorReporter, SourceFile> CONTEXT_VERTEX = checkFunctionArity("flw_contextVertex", 0);
+	public static final BiConsumer<ErrorReporter, SourceFile> CONTEXT_FRAGMENT = checkFunctionArity("flw_contextFragment", 0).andThen(checkFunctionArity("flw_initFragment", 0));
+	public static final BiConsumer<ErrorReporter, SourceFile> PIPELINE = checkFunctionArity("main", 0);
+
+
 	public static BiConsumer<ErrorReporter, SourceFile> checkFunctionArity(String name, int arity) {
 		return (errorReporter, file) -> checkFunctionArity(errorReporter, file, name, arity);
 	}

@@ -9,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.RenderStage;
-import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
@@ -18,6 +17,7 @@ import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.RenderContext;
+import com.jozufozu.flywheel.core.context.SimpleContext;
 import com.jozufozu.flywheel.util.WeakHashSet;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -38,12 +38,12 @@ public class IndirectEngine implements Engine {
 	 */
 	private final WeakHashSet<InstanceManager<?>> instanceManagers = new WeakHashSet<>();
 
-	protected final ContextShader context;
+	protected final SimpleContext context;
 	protected final int sqrMaxOriginDistance;
 
 	protected BlockPos originCoordinate = BlockPos.ZERO;
 
-	public IndirectEngine(ContextShader context, int sqrMaxOriginDistance) {
+	public IndirectEngine(SimpleContext context, int sqrMaxOriginDistance) {
 		this.context = context;
 		this.sqrMaxOriginDistance = sqrMaxOriginDistance;
 	}
