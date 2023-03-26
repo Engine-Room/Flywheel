@@ -4,7 +4,6 @@ import java.util.function.BiConsumer;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.ContextShader;
-import com.jozufozu.flywheel.core.crumbling.CrumblingProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.core.source.SourceChecks;
 import com.jozufozu.flywheel.core.source.SourceFile;
@@ -19,9 +18,9 @@ import net.minecraft.resources.ResourceLocation;
 public class Components {
 
 
-    public static final FlwUniformProvider UNIFORM_PROVIDER = ComponentRegistry.register(new FlwUniformProvider());
-    public static final ContextShader WORLD = ComponentRegistry.register(new ContextShader(WorldProgram::new, Files.WORLD_VERTEX, Files.WORLD_FRAGMENT));
-	public static final ContextShader CRUMBLING = ComponentRegistry.register(new ContextShader(CrumblingProgram::new, Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT));
+	public static final FlwUniformProvider UNIFORM_PROVIDER = ComponentRegistry.register(new FlwUniformProvider());
+	public static final ContextShader WORLD = ComponentRegistry.register(new ContextShader(Files.WORLD_VERTEX, Files.WORLD_FRAGMENT));
+	public static final ContextShader CRUMBLING = ComponentRegistry.register(new ContextShader(Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT));
 
 	public static void init() {
 		Files.init();

@@ -1,13 +1,6 @@
 package com.jozufozu.flywheel.core;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -18,8 +11,6 @@ import com.jozufozu.flywheel.api.uniform.UniformProvider;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.source.FileResolution;
 
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.resources.ResourceLocation;
 
 public class ComponentRegistry {
@@ -93,8 +84,8 @@ public class ComponentRegistry {
 		public <T extends Material> T add(T material) {
 			materials.add(material);
 
-			vertexSources.register(material, material.getVertexShader());
-			fragmentSources.register(material, material.getFragmentShader());
+			vertexSources.register(material.getVertexShader());
+			fragmentSources.register(material.getFragmentShader());
 
 			return material;
 		}
@@ -113,15 +104,21 @@ public class ComponentRegistry {
 			return fragmentSources.sourceView;
 		}
 
+		public int getVertexID(Material material) {
+			return vertexSources.orderedSources.indexOf(material.getVertexShader());
+		}
+
+		public int getFragmentID(Material material) {
+			return fragmentSources.orderedSources.indexOf(material.getFragmentShader());
+		}
+
 		private static class MaterialSources {
 			private final Set<FileResolution> registered = new HashSet<>();
 			private final List<FileResolution> orderedSources = new ArrayList<>();
-			private final Reference2IntMap<Material> material2ID = new Reference2IntOpenHashMap<>();
 			private final List<FileResolution> sourceView = Collections.unmodifiableList(orderedSources);
 
-			public void register(Material material, FileResolution vertexShader) {
+			public void register(FileResolution vertexShader) {
 				if (registered.add(vertexShader)) {
-					material2ID.put(material, orderedSources.size());
 					orderedSources.add(vertexShader);
 				}
 			}

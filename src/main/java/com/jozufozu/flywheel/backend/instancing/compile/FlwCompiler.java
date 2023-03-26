@@ -145,7 +145,7 @@ public class FlwCompiler {
 
 		var glProgram = link(vertex.handle(), fragment.handle());
 		ctx.contextShader()
-				.setup(glProgram);
+			.onProgramLink(glProgram);
 		pipelinePrograms.put(ctx, glProgram);
 	}
 

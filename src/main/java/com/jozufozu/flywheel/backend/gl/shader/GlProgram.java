@@ -2,8 +2,6 @@ package com.jozufozu.flywheel.backend.gl.shader;
 
 import static org.lwjgl.opengl.GL20.*;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
 import com.jozufozu.flywheel.core.uniform.UniformBuffer;
@@ -15,7 +13,6 @@ public class GlProgram extends GlObject {
 		setHandle(handle);
 	}
 
-	// TODO: Programs bind the uniform buffers they need, no more GlProgram inheritance
 	public void bind() {
 		// TODO: bind textures?
 		UniformBuffer.getInstance()
@@ -48,17 +45,13 @@ public class GlProgram extends GlObject {
 	 *
 	 * @param name    The name of the sampler uniform.
 	 * @param binding The index of the texture unit.
-	 * @return The sampler uniform's index.
-	 * @throws NullPointerException If no uniform exists with the given name.
 	 */
-	public int setSamplerBinding(String name, int binding) {
+	public void setSamplerBinding(String name, int binding) {
 		int samplerUniform = getUniformLocation(name);
 
 		if (samplerUniform >= 0) {
 			glUniform1i(samplerUniform, binding);
 		}
-
-		return samplerUniform;
 	}
 
 	@Override
@@ -66,11 +59,4 @@ public class GlProgram extends GlObject {
 		glDeleteProgram(handle);
 	}
 
-	/**
-	 * A factory interface to create a {@link GlProgram}.
-	 */
-	public interface Factory {
-
-		@NotNull GlProgram create(int handle);
-	}
 }

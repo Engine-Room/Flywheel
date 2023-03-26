@@ -4,7 +4,7 @@ import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
 
 public interface Context {
-	void setup(GlProgram program);
+	void onProgramLink(GlProgram program);
 
 	FileResolution vertexShader();
 

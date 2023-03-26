@@ -3,18 +3,11 @@ package com.jozufozu.flywheel.backend.instancing.indirect;
 import static org.lwjgl.opengl.GL42.GL_COMMAND_BARRIER_BIT;
 import static org.lwjgl.opengl.GL42.glMemoryBarrier;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BARRIER_BIT;
-import static org.lwjgl.opengl.GL46.glBindVertexArray;
-import static org.lwjgl.opengl.GL46.glCreateVertexArrays;
-import static org.lwjgl.opengl.GL46.glDeleteVertexArrays;
-import static org.lwjgl.opengl.GL46.glDispatchCompute;
-import static org.lwjgl.opengl.GL46.glEnableVertexArrayAttrib;
-import static org.lwjgl.opengl.GL46.glVertexArrayElementBuffer;
-import static org.lwjgl.opengl.GL46.glVertexArrayVertexBuffer;
+import static org.lwjgl.opengl.GL46.*;
 
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.instancing.compile.FlwCompiler;
@@ -26,7 +19,6 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 
 	private static final int BARRIER_BITS = GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT;
 
-	final StructWriter<T> storageBufferWriter;
 	final GlProgram compute;
 	final GlProgram draw;
 	private final VertexType vertexType;
@@ -47,7 +39,6 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 
 	IndirectCullingGroup(StructType<T> structType, VertexType vertexType) {
 		this.vertexType = vertexType;
-		storageBufferWriter = structType.getWriter();
 
 		objectStride = structType.getLayout()
 				.getStride();
@@ -116,7 +107,7 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 		uploadIndirectCommands();
 
 		compute.bind();
-		buffers.bindAll();
+		buffers.bindForCompute();
 
 		var groupCount = (instanceCountThisFrame + 31) >> 5; // ceil(instanceCount / 32)
 		glDispatchCompute(groupCount, 1, 1);
@@ -130,8 +121,7 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 
 		draw.bind();
 		glBindVertexArray(vertexArray);
-		buffers.bindObjectAndTarget();
-		buffers.bindIndirectBuffer();
+		buffers.bindForDraw();
 
 		memoryBarrier();
 
