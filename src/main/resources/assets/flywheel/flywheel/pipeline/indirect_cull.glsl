@@ -2,16 +2,7 @@
 layout(local_size_x = FLW_SUBGROUP_SIZE) in;
 #use "flywheel:api/cull.glsl"
 #use "flywheel:util/types.glsl"
-
-struct MeshDrawCommand {
-    uint indexCount;
-    uint instanceCount;
-    uint firstIndex;
-    uint vertexOffset;
-    uint baseInstance;
-
-    BoundingSphere boundingSphere;
-};
+#use "flywheel:pipeline/indirect_draw_command.glsl"
 
 // populated by instancers
 layout(std430, binding = 0) restrict readonly buffer ObjectBuffer {

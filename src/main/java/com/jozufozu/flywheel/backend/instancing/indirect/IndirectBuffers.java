@@ -1,22 +1,7 @@
 package com.jozufozu.flywheel.backend.instancing.indirect;
 
 import static org.lwjgl.opengl.GL45.glCreateBuffers;
-import static org.lwjgl.opengl.GL46.GL_DRAW_INDIRECT_BUFFER;
-import static org.lwjgl.opengl.GL46.GL_DYNAMIC_STORAGE_BIT;
-import static org.lwjgl.opengl.GL46.GL_MAP_FLUSH_EXPLICIT_BIT;
-import static org.lwjgl.opengl.GL46.GL_MAP_PERSISTENT_BIT;
-import static org.lwjgl.opengl.GL46.GL_MAP_WRITE_BIT;
-import static org.lwjgl.opengl.GL46.GL_SHADER_STORAGE_BUFFER;
-import static org.lwjgl.opengl.GL46.glBindBuffer;
-import static org.lwjgl.opengl.GL46.glCopyNamedBufferSubData;
-import static org.lwjgl.opengl.GL46.glDeleteBuffers;
-import static org.lwjgl.opengl.GL46.glFlushMappedNamedBufferRange;
-import static org.lwjgl.opengl.GL46.glNamedBufferStorage;
-import static org.lwjgl.opengl.GL46.nglBindBuffersRange;
-import static org.lwjgl.opengl.GL46.nglCreateBuffers;
-import static org.lwjgl.opengl.GL46.nglDeleteBuffers;
-import static org.lwjgl.opengl.GL46.nglMapNamedBufferRange;
-import static org.lwjgl.opengl.GL46.nglNamedBufferSubData;
+import static org.lwjgl.opengl.GL46.*;
 
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.Pointer;
@@ -30,7 +15,7 @@ public class IndirectBuffers {
 	public static final long PTR_SIZE = Pointer.POINTER_SIZE;
 
 	// DRAW COMMAND
-	public static final long DRAW_COMMAND_STRIDE = 36;
+	public static final long DRAW_COMMAND_STRIDE = 44;
 	public static final long DRAW_COMMAND_OFFSET = 0;
 
 	// BITS
@@ -180,25 +165,22 @@ public class IndirectBuffers {
 		FlwMemoryTracker._freeGPUMemory(maxDrawCount * DRAW_COMMAND_STRIDE);
 	}
 
-	public void bindAll() {
-		bindN(BUFFER_COUNT);
+	public void bindForCompute() {
+		multiBind(BUFFER_COUNT);
 	}
 
-	public void bindObjectAndTarget() {
-		bindN(2);
+	public void bindForDraw() {
+		multiBind(BUFFER_COUNT);
+		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, draw);
 	}
 
-	private void bindN(int bufferCount) {
+	private void multiBind(int bufferCount) {
 		if (bufferCount > BUFFER_COUNT) {
 			throw new IllegalArgumentException("Can't bind more than " + BUFFER_COUNT + " buffers");
 		}
 
 		final long ptr = buffers.ptr();
 		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, 0, bufferCount, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
-	}
-
-	void bindIndirectBuffer() {
-		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, draw);
 	}
 
 	void flushBatchIDs(long length) {
