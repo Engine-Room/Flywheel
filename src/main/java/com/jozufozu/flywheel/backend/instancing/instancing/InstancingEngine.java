@@ -17,6 +17,7 @@ import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.backend.instancing.compile.FlwCompiler;
+import com.jozufozu.flywheel.core.ComponentRegistry;
 import com.jozufozu.flywheel.core.Pipelines;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.context.SimpleContext;
@@ -123,8 +124,13 @@ public class InstancingEngine implements Engine {
 		var structType = desc.instance();
 		var material = desc.material();
 
-		FlwCompiler.INSTANCE.getPipelineProgram(vertexType, structType, context, Pipelines.INSTANCED_ARRAYS)
-				.bind();
+		var program = FlwCompiler.INSTANCE.getPipelineProgram(vertexType, structType, context, Pipelines.INSTANCED_ARRAYS);
+		program.bind();
+
+		var uniformLocation = program.getUniformLocation("_flw_materialID_instancing");
+		var vertexID = ComponentRegistry.materials.getVertexID(material);
+		var fragmentID = ComponentRegistry.materials.getFragmentID(material);
+		GL32.glUniform2ui(uniformLocation, vertexID, fragmentID);
 	}
 
 	@Override
