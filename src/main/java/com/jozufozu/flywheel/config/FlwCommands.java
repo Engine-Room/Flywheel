@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.BackendType;
 import com.jozufozu.flywheel.backend.SimpleBackendType;
 import com.jozufozu.flywheel.core.BackendTypes;
-import com.jozufozu.flywheel.core.uniform.FrustumProvider;
+import com.jozufozu.flywheel.core.uniform.FlwShaderUniforms;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -111,17 +111,17 @@ public class FlwCommands {
 		commandBuilder.command.then(Commands.literal("debugFrustum")
 				.then(Commands.literal("pause")
 						.executes(context -> {
-							FrustumProvider.PAUSED = true;
+							FlwShaderUniforms.FRUSTUM_PAUSED = true;
 							return 1;
 						}))
 				.then(Commands.literal("unpause")
 						.executes(context -> {
-							FrustumProvider.PAUSED = false;
+							FlwShaderUniforms.FRUSTUM_PAUSED = false;
 							return 1;
 						}))
 				.then(Commands.literal("capture")
 						.executes(context -> {
-							FrustumProvider.CAPTURE = true;
+							FlwShaderUniforms.FRUSTUM_CAPTURE = true;
 							return 1;
 						})));
 

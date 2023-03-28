@@ -1,38 +1,17 @@
 package com.jozufozu.flywheel.backend.gl.shader;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.lwjgl.opengl.GL20;
 
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
-import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
-import com.jozufozu.flywheel.core.compile.ShaderCompilationException;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
 
 public class GlShader extends GlObject {
 
 	public final ShaderType type;
-	private final List<ResourceLocation> parts;
+	private final String name;
 
-	public GlShader(String source, ShaderType type, List<ResourceLocation> parts) throws ShaderCompilationException {
-		this.parts = parts;
+	public GlShader(int handle, ShaderType type, String name) {
 		this.type = type;
-		int handle = GL20.glCreateShader(type.glEnum);
-
-		GlCompat.safeShaderSource(handle, source);
-		GL20.glCompileShader(handle);
-
-		dumpSource(source, type);
-
-		if (GL20.glGetShaderi(handle, GL20.GL_COMPILE_STATUS) != GL20.GL_TRUE) {
-			throw new ShaderCompilationException("Could not compile " + getName(), handle);
-		}
+		this.name = name;
 
 		setHandle(handle);
 	}
@@ -42,26 +21,9 @@ public class GlShader extends GlObject {
 		GL20.glDeleteShader(handle);
 	}
 
-	public String getName() {
-		return parts.stream()
-				.map(ResourceLocation::toString)
-				.map(s -> s.replaceAll("/", "_")
-						.replaceAll(":", "\\$"))
-				.collect(Collectors.joining(";"));
+	@Override
+	public String toString() {
+		return "GlShader{" + type.name + handle() + " " + name + "}";
 	}
 
-	private void dumpSource(String source, ShaderType type) {
-		if (!Backend.DUMP_SHADER_SOURCE) {
-			return;
-		}
-
-		File dir = new File(Minecraft.getInstance().gameDirectory, "flywheel_sources");
-		dir.mkdirs();
-		File file = new File(dir, type.getFileName(getName()));
-		try (FileWriter writer = new FileWriter(file)) {
-			writer.write(source);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 }

@@ -4,7 +4,7 @@ public record HeaderLine(String level, CharSequence message) implements ErrorLin
 
 	@Override
 	public int neededMargin() {
-		return 0;
+		return -1;
 	}
 
 	@Override

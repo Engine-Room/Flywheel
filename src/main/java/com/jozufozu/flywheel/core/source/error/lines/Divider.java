@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.core.source.error.lines;
 
 public enum Divider {
 	BAR(" | "),
-	ARROW("-->"),
+	ARROW("-> "),
 	;
 
 	private final String s;

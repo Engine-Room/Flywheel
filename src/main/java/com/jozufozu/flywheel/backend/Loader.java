@@ -1,23 +1,9 @@
 package com.jozufozu.flywheel.backend;
 
-import java.util.List;
-
-import com.jozufozu.flywheel.api.context.ContextShader;
-import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.pipeline.PipelineShader;
-import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
-import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
-import com.jozufozu.flywheel.backend.instancing.indirect.ComputeCullerCompiler;
-import com.jozufozu.flywheel.core.ComponentRegistry;
-import com.jozufozu.flywheel.core.Components;
-import com.jozufozu.flywheel.core.compile.ShaderCompilationException;
-import com.jozufozu.flywheel.core.source.FileResolution;
-import com.jozufozu.flywheel.core.source.ShaderLoadingException;
+import com.jozufozu.flywheel.backend.instancing.compile.FlwCompiler;
 import com.jozufozu.flywheel.core.source.ShaderSources;
 import com.jozufozu.flywheel.core.source.error.ErrorReporter;
-import com.jozufozu.flywheel.util.StringUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -37,11 +23,12 @@ public class Loader implements ResourceManagerReloadListener {
 	Loader() {
 		// Can be null when running datagenerators due to the unfortunate time we call this
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft != null) {
-			ResourceManager manager = minecraft.getResourceManager();
-			if (manager instanceof ReloadableResourceManager) {
-				((ReloadableResourceManager) manager).registerReloadListener(this);
-			}
+		if (minecraft == null) {
+			return;
+		}
+
+		if (minecraft.getResourceManager() instanceof ReloadableResourceManager reloadable) {
+			reloadable.registerReloadListener(this);
 		}
 	}
 
@@ -52,62 +39,11 @@ public class Loader implements ResourceManagerReloadListener {
 		var errorReporter = new ErrorReporter();
 		ShaderSources sources = new ShaderSources(errorReporter, manager);
 
-		Backend.LOGGER.info("Loaded all shader sources in " + sources.getLoadTime());
-
-		FileResolution.run(errorReporter, sources);
-
-		if (errorReporter.hasErrored()) {
-			throw errorReporter.dump();
+		if (FlwCompiler.INSTANCE != null) {
+			FlwCompiler.INSTANCE.delete();
 		}
 
-		sources.postResolve();
-
-		Backend.LOGGER.info("Successfully resolved all source files.");
-
-		FileResolution.checkAll(errorReporter);
-
-		Backend.LOGGER.info("All shaders passed checks.");
-
-		long compileStart = System.nanoTime();
-		int programCounter = 0;
-		boolean crash = false;
-
-		for (Material material : ComponentRegistry.materials) {
-			for (StructType<?> structType : ComponentRegistry.structTypes) {
-				for (VertexType vertexType : ComponentRegistry.vertexTypes) {
-					for (ContextShader contextShader : ComponentRegistry.contextShaders) {
-						for (PipelineShader pipelineShader : List.of(Components.INSTANCED_ARRAYS, Components.INDIRECT)) {
-							var ctx = new PipelineCompiler.Context(vertexType, material, structType, contextShader, pipelineShader);
-							try {
-								PipelineCompiler.INSTANCE.getProgram(ctx);
-							} catch (ShaderCompilationException e) {
-								Backend.LOGGER.error(e.errors);
-								crash = true;
-							}
-							programCounter++;
-						}
-					}
-				}
-			}
-		}
-
-		for (StructType<?> structType : ComponentRegistry.structTypes) {
-			try {
-				ComputeCullerCompiler.INSTANCE.get(structType);
-			} catch (ShaderCompilationException e) {
-				Backend.LOGGER.error(e.errors);
-				crash = true;
-			}
-			programCounter++;
-		}
-
-		long compileEnd = System.nanoTime();
-
-		Backend.LOGGER.info("Compiled " + programCounter + " programs in " + StringUtil.formatTime(compileEnd - compileStart));
-
-		if (crash) {
-			throw new ShaderLoadingException("Compilation failed");
-		}
+		FlwCompiler.INSTANCE = new FlwCompiler(sources);
 
 		ClientLevel level = Minecraft.getInstance().level;
 		if (Backend.canUseInstancing(level)) {

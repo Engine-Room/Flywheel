@@ -4,14 +4,15 @@ import java.util.regex.Pattern;
 
 import com.jozufozu.flywheel.core.source.span.Span;
 
-public class StructField extends AbstractShaderElement {
+public class StructField {
 	public static final Pattern fieldPattern = Pattern.compile("(\\S+)\\s*(\\S+);");
+	public final Span self;
 
 	public Span type;
 	public Span name;
 
 	public StructField(Span self, Span type, Span name) {
-		super(self);
+		this.self = self;
 		this.type = type;
 		this.name = name;
 	}

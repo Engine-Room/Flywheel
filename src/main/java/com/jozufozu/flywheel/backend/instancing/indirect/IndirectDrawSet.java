@@ -10,6 +10,7 @@ import java.util.List;
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.util.Textures;
 
 public class IndirectDrawSet<T extends InstancedPart> {
 
@@ -37,6 +38,7 @@ public class IndirectDrawSet<T extends InstancedPart> {
 
 			var material = batch.material;
 			material.setup();
+			Textures.bindActiveTextures();
 			glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, i * stride, 1, stride);
 			material.clear();
 		}

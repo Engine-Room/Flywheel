@@ -23,7 +23,7 @@ public abstract class Span implements CharSequence, Comparable<Span> {
 	protected final CharPos end;
 
 	public Span(SourceFile in, int start, int end) {
-		this(in, in.lines.getCharPos(start), in.lines.getCharPos(end));
+		this(in, in.source.getCharPos(start), in.source.getCharPos(end));
 	}
 
 	public Span(SourceFile in, CharPos start, CharPos end) {
@@ -131,7 +131,7 @@ public abstract class Span implements CharSequence, Comparable<Span> {
 		if (isErr()) {
 			return Optional.empty();
 		}
-		return in.findStruct(this.toString());
+		return in.findStructByName(this.toString());
 	}
 
 	public Optional<ShaderFunction> findFunction() {

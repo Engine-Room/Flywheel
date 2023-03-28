@@ -7,7 +7,6 @@ import java.util.Set;
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.RenderStage;
-import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.struct.StructType;
@@ -15,12 +14,13 @@ import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
-import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
 import com.jozufozu.flywheel.backend.instancing.TaskExecutor;
-import com.jozufozu.flywheel.core.Components;
+import com.jozufozu.flywheel.backend.instancing.compile.FlwCompiler;
+import com.jozufozu.flywheel.core.ComponentRegistry;
+import com.jozufozu.flywheel.core.Pipelines;
 import com.jozufozu.flywheel.core.RenderContext;
+import com.jozufozu.flywheel.core.context.SimpleContext;
 import com.jozufozu.flywheel.core.model.Model;
-import com.jozufozu.flywheel.core.uniform.UniformBuffer;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -40,12 +40,12 @@ public class InstancingEngine implements Engine {
 	 */
 	private final Set<InstanceManager<?>> instanceManagers = FlwUtil.createWeakHashSet();
 
-	protected final ContextShader context;
+	protected final SimpleContext context;
 	protected final int sqrMaxOriginDistance;
 
 	protected BlockPos originCoordinate = BlockPos.ZERO;
 
-	public InstancingEngine(ContextShader context, int sqrMaxOriginDistance) {
+	public InstancingEngine(SimpleContext context, int sqrMaxOriginDistance) {
 		this.context = context;
 		this.sqrMaxOriginDistance = sqrMaxOriginDistance;
 	}
@@ -116,12 +116,13 @@ public class InstancingEngine implements Engine {
 		var structType = desc.instance();
 		var material = desc.material();
 
-		var ctx = new PipelineCompiler.Context(vertexType, material, structType, context, Components.INSTANCED_ARRAYS);
+		var program = FlwCompiler.INSTANCE.getPipelineProgram(vertexType, structType, context, Pipelines.INSTANCED_ARRAYS);
+		program.bind();
 
-		PipelineCompiler.INSTANCE.getProgram(ctx)
-				.bind();
-		UniformBuffer.getInstance()
-				.sync();
+		var uniformLocation = program.getUniformLocation("_flw_materialID_instancing");
+		var vertexID = ComponentRegistry.materials.getVertexID(material);
+		var fragmentID = ComponentRegistry.materials.getFragmentID(material);
+		GL32.glUniform2ui(uniformLocation, vertexID, fragmentID);
 	}
 
 	@Override

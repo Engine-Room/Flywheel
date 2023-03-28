@@ -13,6 +13,8 @@ in vec4 flw_var1;
 in vec4 flw_var2;
 in vec4 flw_var3;
 
+flat in uint flw_materialFragmentID;
+
 //
 
 /*const*/ vec4 flw_sampleColor;

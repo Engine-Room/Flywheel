@@ -1,37 +1,14 @@
 package com.jozufozu.flywheel.util;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.stream.Stream;
 
-import com.jozufozu.flywheel.mixin.BlockEntityRenderDispatcherAccessor;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-
 public class FlwUtil {
-
-	/**
-	 * Get the (effectively global) map of BlockEntityTypes to Renderers.
-	 * @return An immutable map of BlockEntityTypes to BlockEntityRenderers.
-	 */
-	public static Map<BlockEntityType<?>, BlockEntityRenderer<?>> getBlockEntityRenderers() {
-		Minecraft mc = Minecraft.getInstance();
-		return ((BlockEntityRenderDispatcherAccessor) mc.getBlockEntityRenderDispatcher()).flywheel$getRenderers();
-	}
-
-	public static String repeatChar(char c, int n) {
-		char[] arr = new char[n];
-
-		Arrays.fill(arr, c);
-
-		return new String(arr);
-	}
 
 	public static PoseStack copyPoseStack(PoseStack stack) {
 		PoseStack copy = new PoseStack();
@@ -82,7 +59,16 @@ public class FlwUtil {
 	}
 
 	public static <R> Stream<R> mapValues(Map<?, R> map) {
-		return map.values().stream();
+		return map.values()
+				.stream();
+	}
+
+	public static <T> void noop(T object) {
+		// noop
+	}
+
+	public static int align16(int numToRound) {
+		return (numToRound + 16 - 1) & -16;
 	}
 
 	public static <T> Set<T> createWeakHashSet() {

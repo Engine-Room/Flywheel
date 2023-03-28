@@ -1,20 +1,11 @@
 package com.jozufozu.flywheel.core.source;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.core.SourceComponent;
-import com.jozufozu.flywheel.core.source.error.ErrorReporter;
 import com.jozufozu.flywheel.core.source.parse.Import;
 import com.jozufozu.flywheel.core.source.parse.ShaderField;
 import com.jozufozu.flywheel.core.source.parse.ShaderFunction;
@@ -37,9 +28,8 @@ public class SourceFile implements SourceComponent {
 	public final ResourceLocation name;
 
 	public final ShaderSources parent;
-	public final String source;
 
-	public final SourceLines lines;
+	public final SourceLines source;
 
 	/**
 	 * Function lookup by name.
@@ -57,30 +47,42 @@ public class SourceFile implements SourceComponent {
 	public final ImmutableList<Import> imports;
 	public final ImmutableMap<String, ShaderField> fields;
 
-	// POST-RESOLUTION
-	public List<SourceFile> flattenedImports;
+	public final List<SourceFile> included;
 
-	public SourceFile(ErrorReporter errorReporter, ShaderSources parent, ResourceLocation name, String source) {
-		this.parent = parent;
+	public SourceFile(ShaderSources sourceFinder, ResourceLocation name, String source) {
+		this.parent = sourceFinder;
 		this.name = name;
-		this.source = source;
 
-		this.lines = new SourceLines(source);
+		this.source = new SourceLines(source);
 
-		this.imports = parseImports(errorReporter);
-		this.functions = parseFunctions();
-		this.structs = parseStructs();
-		this.fields = parseFields();
+		this.imports = parseImports(source);
+		this.functions = parseFunctions(source);
+		this.structs = parseStructs(source);
+		this.fields = parseFields(source);
+
+		this.included = imports.stream()
+				.map(i -> i.file)
+				.map(Span::toString)
+				.distinct()
+				.<SourceFile>mapMulti((file, sink) -> {
+					try {
+						var loc = new ResourceLocation(file);
+						var sourceFile = sourceFinder.find(loc);
+						sink.accept(sourceFile);
+					} catch (Exception ignored) {
+					}
+				})
+				.toList();
 	}
 
 	@Override
 	public Collection<? extends SourceComponent> included() {
-		return flattenedImports;
+		return included;
 	}
 
 	@Override
-	public String source(CompilationContext ctx) {
-		return ctx.sourceHeader(this) + this.elideImports();
+	public String source() {
+		return this.genFinalSource();
 	}
 
 	@Override
@@ -88,52 +90,23 @@ public class SourceFile implements SourceComponent {
 		return name;
 	}
 
-	public void postResolve() {
-		this.flattenImports();
-	}
-
-	private void flattenImports() {
-		// somebody #used us and got resolved before we did
-		if (this.flattenedImports != null) {
-			return;
-		}
-
-		if (this.imports.isEmpty()) {
-			this.flattenedImports = Collections.emptyList();
-			return;
-		}
-
-		ArrayList<SourceFile> flat = new ArrayList<>(this.imports.size());
-
-		for (Import include : this.imports) {
-			SourceFile file = include.resolution.getFile();
-
-			file.flattenImports();
-
-			flat.addAll(file.flattenedImports);
-			flat.add(file);
-		}
-
-		this.flattenedImports = flat.stream()
-				.distinct()
-				.toList();
-	}
-
-	public Span getLineSpan(int line) {
-		int begin = lines.getLineStart(line);
-		int end = begin + lines.getLine(line).length();
-		return new StringSpan(this, lines.getCharPos(begin), lines.getCharPos(end));
+	public Span getLineSpan(int lineNo) {
+		int begin = source.lineStartIndex(lineNo);
+		int end = begin + source.lineString(lineNo)
+				.length();
+		return new StringSpan(this, source.getCharPos(begin), source.getCharPos(end));
 	}
 
 	public Span getLineSpanNoWhitespace(int line) {
-		int begin = lines.getLineStart(line);
-		int end = begin + lines.getLine(line).length();
+		int begin = source.lineStartIndex(line);
+		int end = begin + source.lineString(line)
+				.length();
 
 		while (begin < end && Character.isWhitespace(source.charAt(begin))) {
 			begin++;
 		}
 
-		return new StringSpan(this, lines.getCharPos(begin), lines.getCharPos(end));
+		return new StringSpan(this, source.getCharPos(begin), source.getCharPos(end));
 	}
 
 	/**
@@ -142,12 +115,14 @@ public class SourceFile implements SourceComponent {
 	 * @param name The name of the struct to find.
 	 * @return null if no definition matches the name.
 	 */
-	public Optional<ShaderStruct> findStruct(String name) {
+	public Optional<ShaderStruct> findStructByName(String name) {
 		ShaderStruct struct = structs.get(name);
 
-		if (struct != null) return Optional.of(struct);
+		if (struct != null) {
+			return Optional.of(struct);
+		}
 
-		for (var include : flattenedImports) {
+		for (var include : included) {
 			var external = include.structs.get(name);
 
 			if (external != null) {
@@ -169,7 +144,7 @@ public class SourceFile implements SourceComponent {
 
 		if (local != null) return Optional.of(local);
 
-		for (var include : flattenedImports) {
+		for (var include : included) {
 			var external = include.functions.get(name);
 
 			if (external != null) {
@@ -185,10 +160,10 @@ public class SourceFile implements SourceComponent {
 	}
 
 	public String printSource() {
-		return "Source for shader '" + name + "':\n" + lines.printLinesWithNumbers();
+		return "Source for shader '" + name + "':\n" + source.printLinesWithNumbers();
 	}
 
-	private CharSequence elideImports() {
+	private String genFinalSource() {
 		StringBuilder out = new StringBuilder();
 
 		int lastEnd = 0;
@@ -203,13 +178,50 @@ public class SourceFile implements SourceComponent {
 
 		out.append(this.source, lastEnd, this.source.length());
 
-		return out;
+		return out.toString();
 	}
+
+	@Override
+	public String toString() {
+		return name.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		// SourceFiles are only equal by reference.
+		return this == o;
+	}
+
+	@Override
+	public int hashCode() {
+		return System.identityHashCode(this);
+	}
+
+
+	/**
+	 * Scan the source for {@code #use "..."} directives.
+	 * Records the contents of the directive into an {@link Import} object, and marks the directive for elision.
+	 */
+	private ImmutableList<Import> parseImports(String source) {
+		Matcher uses = Import.PATTERN.matcher(source);
+
+		var imports = ImmutableList.<Import>builder();
+
+		while (uses.find()) {
+			Span use = Span.fromMatcher(this, uses);
+			Span file = Span.fromMatcher(this, uses, 1);
+
+			imports.add(new Import(use, file));
+		}
+
+		return imports.build();
+	}
+
 
 	/**
 	 * Scan the source for function definitions and "parse" them into objects that contain properties of the function.
 	 */
-	private ImmutableMap<String, ShaderFunction> parseFunctions() {
+	private ImmutableMap<String, ShaderFunction> parseFunctions(String source) {
 		Matcher matcher = ShaderFunction.PATTERN.matcher(source);
 
 		Map<String, ShaderFunction> functions = new HashMap<>();
@@ -220,7 +232,7 @@ public class SourceFile implements SourceComponent {
 			Span args = Span.fromMatcher(this, matcher, 3);
 
 			int blockStart = matcher.end();
-			int blockEnd = findEndOfBlock(blockStart);
+			int blockEnd = findEndOfBlock(source, blockStart);
 
 			Span self;
 			Span body;
@@ -243,7 +255,7 @@ public class SourceFile implements SourceComponent {
 	/**
 	 * Scan the source for function definitions and "parse" them into objects that contain properties of the function.
 	 */
-	private ImmutableMap<String, ShaderStruct> parseStructs() {
+	private ImmutableMap<String, ShaderStruct> parseStructs(String source) {
 		Matcher matcher = ShaderStruct.PATTERN.matcher(source);
 
 		ImmutableMap.Builder<String, ShaderStruct> structs = ImmutableMap.builder();
@@ -251,8 +263,9 @@ public class SourceFile implements SourceComponent {
 			Span self = Span.fromMatcher(this, matcher);
 			Span name = Span.fromMatcher(this, matcher, 1);
 			Span body = Span.fromMatcher(this, matcher, 2);
+			Span variableName = Span.fromMatcher(this, matcher, 3);
 
-			ShaderStruct shaderStruct = new ShaderStruct(self, name, body);
+			ShaderStruct shaderStruct = new ShaderStruct(self, name, body, variableName);
 
 			structs.put(name.get(), shaderStruct);
 		}
@@ -263,7 +276,7 @@ public class SourceFile implements SourceComponent {
 	/**
 	 * Scan the source for function definitions and "parse" them into objects that contain properties of the function.
 	 */
-	private ImmutableMap<String, ShaderField> parseFields() {
+	private ImmutableMap<String, ShaderField> parseFields(String source) {
 		Matcher matcher = ShaderField.PATTERN.matcher(source);
 
 		ImmutableMap.Builder<String, ShaderField> fields = ImmutableMap.builder();
@@ -281,35 +294,9 @@ public class SourceFile implements SourceComponent {
 	}
 
 	/**
-	 * Scan the source for {@code #use "..."} directives.
-	 * Records the contents of the directive into an {@link Import} object, and marks the directive for elision.
-	 */
-	private ImmutableList<Import> parseImports(ErrorReporter errorReporter) {
-		Matcher uses = Import.PATTERN.matcher(source);
-
-		Set<String> importedFiles = new HashSet<>();
-		var imports = ImmutableList.<Import>builder();
-
-		while (uses.find()) {
-			Span use = Span.fromMatcher(this, uses);
-			Span file = Span.fromMatcher(this, uses, 1);
-
-			String fileName = file.get();
-			if (importedFiles.add(fileName)) {
-				var checked = Import.create(errorReporter, use, file);
-				if (checked != null) {
-					imports.add(checked);
-				}
-			}
-		}
-
-		return imports.build();
-	}
-
-	/**
 	 * Given the position of an opening brace, scans through the source for a paired closing brace.
 	 */
-	private int findEndOfBlock(int start) {
+	private static int findEndOfBlock(String source, int start) {
 		int blockDepth = 0;
 		for (int i = start + 1; i < source.length(); i++) {
 			char ch = source.charAt(i);
@@ -323,21 +310,5 @@ public class SourceFile implements SourceComponent {
 		}
 
 		return -1;
-	}
-
-	@Override
-	public String toString() {
-		return name.toString();
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		// SourceFiles are only equal by reference.
-		return this == o;
-	}
-
-	@Override
-	public int hashCode() {
-		return System.identityHashCode(this);
 	}
 }
