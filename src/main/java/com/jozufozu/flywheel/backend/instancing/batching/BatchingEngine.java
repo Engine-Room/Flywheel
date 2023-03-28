@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
-import com.jozufozu.flywheel.backend.instancing.TaskEngine;
+import com.jozufozu.flywheel.backend.instancing.TaskExecutor;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.util.FlwUtil;
@@ -30,19 +30,19 @@ public class BatchingEngine implements Engine {
 	}
 
 	@Override
-	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
+	public void beginFrame(TaskExecutor executor, RenderContext context) {
 		transformManager.flush();
 
 		Vec3 cameraPos = context.camera().getPosition();
 		var stack = FlwUtil.copyPoseStack(context.stack());
 		stack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
-		// TODO: async task engine barriers
-		taskEngine.syncPoint();
-		submitTasks(taskEngine, stack.last(), context.level());
+		// TODO: async task executor barriers
+		executor.syncPoint();
+		submitTasks(executor, stack.last(), context.level());
 	}
 
-	public void submitTasks(TaskEngine taskEngine, PoseStack.Pose matrices, ClientLevel level) {
+	public void submitTasks(TaskExecutor executor, PoseStack.Pose matrices, ClientLevel level) {
 		for (var transformSetEntry : transformManager.getTransformSetsView().entrySet()) {
 			var stage = transformSetEntry.getKey();
 			var transformSet = transformSetEntry.getValue();
@@ -53,6 +53,7 @@ public class BatchingEngine implements Engine {
 
 				int vertices = 0;
 				for (var transformCall : transformCalls) {
+					transformCall.setup();
 					vertices += transformCall.getTotalVertexCount();
 				}
 
@@ -65,7 +66,7 @@ public class BatchingEngine implements Engine {
 
 				int startVertex = 0;
 				for (var transformCall : transformCalls) {
-					transformCall.submitTasks(taskEngine, buffer, startVertex, matrices, level);
+					transformCall.submitTasks(executor, buffer, startVertex, matrices, level);
 					startVertex += transformCall.getTotalVertexCount();
 				}
 			}
@@ -73,7 +74,7 @@ public class BatchingEngine implements Engine {
 	}
 
 	@Override
-	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
+	public void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage) {
 		drawTracker.draw(stage);
 	}
 

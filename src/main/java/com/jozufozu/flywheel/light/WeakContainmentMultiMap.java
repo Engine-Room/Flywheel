@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.function.LongConsumer;
 
-import com.jozufozu.flywheel.util.WeakHashSet;
+import com.jozufozu.flywheel.util.FlwUtil;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -15,7 +15,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 
 public class WeakContainmentMultiMap<T> extends AbstractCollection<T> {
 
-	private final Long2ObjectMap<WeakHashSet<T>> forward;
+	private final Long2ObjectMap<Set<T>> forward;
 	private final WeakHashMap<T, LongSet> reverse;
 
 	public WeakContainmentMultiMap() {
@@ -38,7 +38,7 @@ public class WeakContainmentMultiMap<T> extends AbstractCollection<T> {
 		LongSet containmentSet = reverse.computeIfAbsent(listener, $ -> new LongRBTreeSet());
 
 		containmentSet.forEach((LongConsumer) l -> {
-			WeakHashSet<T> listeners = forward.get(l);
+			Set<T> listeners = forward.get(l);
 
 			if (listeners != null) listeners.remove(listener);
 		});
@@ -53,7 +53,7 @@ public class WeakContainmentMultiMap<T> extends AbstractCollection<T> {
 	}
 
 	public void put(long sectionPos, T listener) {
-		forward.computeIfAbsent(sectionPos, $ -> new WeakHashSet<>()).add(listener);
+		forward.computeIfAbsent(sectionPos, $ -> FlwUtil.createWeakHashSet()).add(listener);
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class WeakContainmentMultiMap<T> extends AbstractCollection<T> {
 
 		if (containmentSet != null) {
 			containmentSet.forEach((LongConsumer) l -> {
-				WeakHashSet<T> listeners = forward.get(l);
+				Set<T> listeners = forward.get(l);
 
 				if (listeners != null) listeners.remove(o);
 			});

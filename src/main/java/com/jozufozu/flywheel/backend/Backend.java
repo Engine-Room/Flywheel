@@ -4,7 +4,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.api.FlywheelLevel;
-import com.jozufozu.flywheel.backend.instancing.ParallelTaskEngine;
+import com.jozufozu.flywheel.backend.instancing.ParallelTaskExecutor;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.BackendTypes;
 import com.mojang.logging.LogUtils;
@@ -20,7 +20,7 @@ public class Backend {
 
 	private static BackendType TYPE;
 
-	private static ParallelTaskEngine EXECUTOR;
+	private static ParallelTaskExecutor EXECUTOR;
 
 	private static final Loader LOADER = new Loader();
 
@@ -35,9 +35,9 @@ public class Backend {
 	 * Get a thread pool for running Flywheel related work in parallel.
 	 * @return A global Flywheel thread pool.
 	 */
-	public static ParallelTaskEngine getTaskEngine() {
+	public static ParallelTaskExecutor getTaskExecutor() {
 		if (EXECUTOR == null) {
-			EXECUTOR = new ParallelTaskEngine("Flywheel");
+			EXECUTOR = new ParallelTaskExecutor("Flywheel");
 			EXECUTOR.startWorkers();
 		}
 

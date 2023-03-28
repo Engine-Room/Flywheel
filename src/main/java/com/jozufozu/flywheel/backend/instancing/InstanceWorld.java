@@ -29,7 +29,7 @@ public class InstanceWorld implements AutoCloseable {
 	protected final InstanceManager<Entity> entities;
 	protected final InstanceManager<BlockEntity> blockEntities;
 
-	public final ParallelTaskEngine taskEngine;
+	public final ParallelTaskExecutor taskExecutor;
 	private final InstanceManager<Effect> effects;
 
 	public static InstanceWorld create(LevelAccessor level) {
@@ -51,7 +51,7 @@ public class InstanceWorld implements AutoCloseable {
 		this.entities = entities;
 		this.blockEntities = blockEntities;
 		this.effects = effects;
-		this.taskEngine = Backend.getTaskEngine();
+		this.taskExecutor = Backend.getTaskExecutor();
 	}
 
 	public InstanceManager<Entity> getEntities() {
@@ -87,15 +87,15 @@ public class InstanceWorld implements AutoCloseable {
 		RenderContext context = event.getContext();
 		boolean shifted = engine.maintainOriginCoordinate(context.camera());
 
-		taskEngine.syncPoint();
+		taskExecutor.syncPoint();
 
 		if (!shifted) {
-			blockEntities.beginFrame(taskEngine, context);
-			entities.beginFrame(taskEngine, context);
-			effects.beginFrame(taskEngine, context);
+			blockEntities.beginFrame(taskExecutor, context);
+			entities.beginFrame(taskExecutor, context);
+			effects.beginFrame(taskExecutor, context);
 		}
 
-		engine.beginFrame(taskEngine, context);
+		engine.beginFrame(taskExecutor, context);
 	}
 
 	/**
@@ -117,17 +117,17 @@ public class InstanceWorld implements AutoCloseable {
 		double y = renderViewEntity.getY();
 		double z = renderViewEntity.getZ();
 
-		blockEntities.tick(taskEngine, x, y, z);
-		entities.tick(taskEngine, x, y, z);
-		effects.tick(taskEngine, x, y, z);
+		blockEntities.tick(taskExecutor, x, y, z);
+		entities.tick(taskExecutor, x, y, z);
+		effects.tick(taskExecutor, x, y, z);
 	}
 
 	/**
 	 * Draw all instances for the given stage.
 	 */
 	public void renderStage(RenderContext context, RenderStage stage) {
-		taskEngine.syncPoint();
-		engine.renderStage(taskEngine, context, stage);
+		taskExecutor.syncPoint();
+		engine.renderStage(taskExecutor, context, stage);
 	}
 
 	/**

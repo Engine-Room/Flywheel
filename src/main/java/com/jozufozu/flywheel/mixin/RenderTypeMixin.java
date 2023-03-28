@@ -18,7 +18,7 @@ public class RenderTypeMixin implements RenderTypeExtension {
 	@NotNull
 	public DrawBufferSet flywheel$getDrawBufferSet() {
 		if (flywheel$drawBufferSet == null) {
-			flywheel$drawBufferSet = new DrawBufferSet(((RenderType) (Object) this).format());
+			flywheel$drawBufferSet = new DrawBufferSet((RenderType) (Object) this);
 		}
 		return flywheel$drawBufferSet;
 	}

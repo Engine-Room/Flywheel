@@ -11,6 +11,8 @@ import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.extension.BufferBuilderExtension;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import net.minecraft.client.renderer.RenderType;
+
 /**
  * A byte buffer that can be used to draw vertices through multiple {@link ReusableVertexList}s.
  *
@@ -19,6 +21,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 public class DrawBuffer {
 	private static final List<DrawBuffer> ALL = new ArrayList<>();
 
+	private final RenderType renderType;
 	private final VertexFormat format;
 	private final int stride;
 	private final VertexListProvider provider;
@@ -29,7 +32,8 @@ public class DrawBuffer {
 	private boolean prepared;
 	private int vertexCount;
 
-	DrawBuffer(VertexFormat format, int stride, VertexListProvider provider) {
+	DrawBuffer(RenderType renderType, VertexFormat format, int stride, VertexListProvider provider) {
+		this.renderType = renderType;
 		this.format = format;
 		this.stride = stride;
 		this.provider = provider;
@@ -62,7 +66,6 @@ public class DrawBuffer {
 			buffer = memory.asBuffer();
 		}
 
-		memory.clear();
 		prepared = true;
 	}
 
@@ -88,6 +91,10 @@ public class DrawBuffer {
 
 		buffer.clear();
 		bufferBuilder.flywheel$injectForRender(buffer, format, vertexCount);
+	}
+
+	public RenderType getRenderType() {
+		return renderType;
 	}
 
 	public VertexFormat getVertexFormat() {

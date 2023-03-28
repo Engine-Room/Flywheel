@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
-import com.jozufozu.flywheel.extension.MatrixWrite;
+import com.jozufozu.flywheel.util.MatrixUtil;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Vec3i;
@@ -52,7 +52,7 @@ public class ViewProvider extends UniformProvider {
 		var vp = context.viewProjection().copy();
 		vp.multiplyWithTranslation(-camX, -camY, -camZ);
 
-		MatrixWrite.writeUnsafe(vp, ptr);
+		MatrixUtil.writeUnsafe(vp, ptr);
 		MemoryUtil.memPutFloat(ptr + 64, camX);
 		MemoryUtil.memPutFloat(ptr + 68, camY);
 		MemoryUtil.memPutFloat(ptr + 72, camZ);

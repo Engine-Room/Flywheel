@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
-import com.jozufozu.flywheel.backend.instancing.TaskEngine;
+import com.jozufozu.flywheel.backend.instancing.TaskExecutor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
@@ -37,9 +37,11 @@ public class TransformCall<D extends InstancedPart> {
 		return meshVertexCount * instancer.getInstanceCount();
 	}
 
-	void submitTasks(TaskEngine pool, DrawBuffer buffer, int startVertex, PoseStack.Pose matrices, ClientLevel level) {
-		instancer.setup();
+	void setup() {
+		instancer.update();
+	}
 
+	void submitTasks(TaskExecutor executor, DrawBuffer buffer, int startVertex, PoseStack.Pose matrices, ClientLevel level) {
 		int instances = instancer.getInstanceCount();
 
 		while (instances > 0) {
@@ -51,7 +53,7 @@ public class TransformCall<D extends InstancedPart> {
 			ReusableVertexList sub = buffer.slice(startVertex, vertexCount);
 			startVertex += vertexCount;
 
-			pool.submit(() -> transformRange(sub, start, end, matrices, level));
+			executor.execute(() -> transformRange(sub, start, end, matrices, level));
 		}
 	}
 
@@ -82,10 +84,10 @@ public class TransformCall<D extends InstancedPart> {
 		vertexList.ptr(anchorPtr);
 		vertexList.vertexCount(totalVertexCount);
 		material.getVertexTransformer().transform(vertexList, level);
-		applyPoseStack(vertexList, matrices);
+		applyMatrices(vertexList, matrices);
 	}
 
-	private static void applyPoseStack(MutableVertexList vertexList, PoseStack.Pose matrices) {
+	private static void applyMatrices(MutableVertexList vertexList, PoseStack.Pose matrices) {
 		Vector4f pos = new Vector4f();
 		Vector3f normal = new Vector3f();
 

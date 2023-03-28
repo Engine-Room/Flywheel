@@ -10,7 +10,7 @@ public class CPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 		super(type);
 	}
 
-	void setup() {
+	void update() {
 		if (anyToRemove) {
 			data.removeIf(InstancedPart::isRemoved);
 			anyToRemove = false;
