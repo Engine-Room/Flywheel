@@ -2,12 +2,9 @@ package com.jozufozu.flywheel.core.source.error;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.core.source.CompilationContext;
 import com.jozufozu.flywheel.core.source.SourceFile;
 import com.jozufozu.flywheel.core.source.SourceLines;
 import com.jozufozu.flywheel.core.source.error.lines.ErrorLine;
@@ -17,72 +14,61 @@ import com.jozufozu.flywheel.core.source.error.lines.SourceLine;
 import com.jozufozu.flywheel.core.source.error.lines.SpanHighlightLine;
 import com.jozufozu.flywheel.core.source.error.lines.TextLine;
 import com.jozufozu.flywheel.core.source.span.Span;
-import com.jozufozu.flywheel.util.FlwUtil;
+import com.jozufozu.flywheel.util.ConsoleColors;
+import com.jozufozu.flywheel.util.StringUtil;
 
 public class ErrorBuilder {
 
-	private static final Pattern ERROR_LINE = Pattern.compile("(\\d+)\\((\\d+)\\) : (.*)");
-
 	private final List<ErrorLine> lines = new ArrayList<>();
 
-	public ErrorBuilder() {
+	private ErrorBuilder() {
 
 	}
 
-	public static ErrorBuilder error(CharSequence msg) {
-		return new ErrorBuilder()
-				.header(ErrorLevel.ERROR, msg);
+	public static ErrorBuilder create() {
+		return new ErrorBuilder();
 	}
 
-	public static ErrorBuilder compError(CharSequence msg) {
-		return new ErrorBuilder()
-				.extra(msg);
+	public ErrorBuilder error(String msg) {
+		return header(ErrorLevel.ERROR, msg);
 	}
 
-	public static ErrorBuilder warn(CharSequence msg) {
-		return new ErrorBuilder()
-				.header(ErrorLevel.WARN, msg);
+	public ErrorBuilder warn(String msg) {
+		return header(ErrorLevel.WARN, msg);
 	}
 
-	@Nullable
-	public static ErrorBuilder fromLogLine(CompilationContext env, String s) {
-		Matcher matcher = ERROR_LINE.matcher(s);
-
-		if (matcher.find()) {
-			String fileId = matcher.group(1);
-			String lineNo = matcher.group(2);
-			String msg = matcher.group(3);
-			Span span = env.getLineSpan(Integer.parseInt(fileId), Integer.parseInt(lineNo));
-
-			if (span == null) {
-				return ErrorBuilder.compError("Error in generated code");
-			}
-
-			return ErrorBuilder.compError(msg)
-					.pointAtFile(span.getSourceFile())
-					.pointAt(span, 1);
-		} else {
-			return null;
-		}
+	public ErrorBuilder hint(String msg) {
+		return header(ErrorLevel.HINT, msg);
 	}
 
-	public ErrorBuilder header(ErrorLevel level, CharSequence msg) {
+	public ErrorBuilder note(String msg) {
+		return header(ErrorLevel.NOTE, msg);
+	}
+
+	public ErrorBuilder header(ErrorLevel level, String msg) {
 		lines.add(new HeaderLine(level.toString(), msg));
 		return this;
 	}
 
-	public ErrorBuilder extra(CharSequence msg) {
-		lines.add(new TextLine(msg.toString()));
+	public ErrorBuilder extra(String msg) {
+		lines.add(new TextLine(msg));
 		return this;
 	}
 
 	public ErrorBuilder pointAtFile(SourceFile file) {
-		lines.add(new FileLine(file.name.toString()));
+		return pointAtFile(file.name.toString());
+	}
+
+	public ErrorBuilder pointAtFile(String file) {
+		lines.add(new FileLine(file));
 		return this;
 	}
 
-	public ErrorBuilder hintIncludeFor(@Nullable Span span, CharSequence msg) {
-		if (span == null) return this;
+	public ErrorBuilder hintIncludeFor(@Nullable Span span, String msg) {
+		if (span == null) {
+			return this;
+		}
+
 		SourceFile sourceFile = span.getSourceFile();
 
 		String builder = "add " + sourceFile.importStatement() + ' ' + msg + "\n defined here:";
@@ -98,28 +84,37 @@ public class ErrorBuilder {
 	}
 
 	public ErrorBuilder pointAt(Span span, int ctxLines) {
-
 		if (span.lines() == 1) {
-			SourceLines lines = span.getSourceFile().lines;
+			SourceLines lines = span.getSourceFile().source;
 
 			int spanLine = span.firstLine();
+			int firstCol = span.getStart()
+					.col();
+			int lastCol = span.getEnd()
+					.col();
 
-			int firstLine = Math.max(0, spanLine - ctxLines);
-			int lastLine = Math.min(lines.getLineCount(), spanLine + ctxLines);
+			pointAtLine(lines, spanLine, ctxLines, firstCol, lastCol);
+		}
 
-            int firstCol = span.getStart()
-                    .col();
-            int lastCol = span.getEnd()
-                    .col();
+		return this;
+	}
 
-			for (int i = firstLine; i <= lastLine; i++) {
-				CharSequence line = lines.getLine(i);
+	public ErrorBuilder pointAtLine(SourceLines lines, int spanLine, int ctxLines) {
+		return pointAtLine(lines, spanLine, ctxLines, lines.lineStartColTrimmed(spanLine), lines.lineWidth(spanLine));
+	}
 
-				this.lines.add(SourceLine.numbered(i + 1, line.toString()));
+	public ErrorBuilder pointAtLine(SourceLines lines, int spanLine, int ctxLines, int firstCol, int lastCol) {
+		int firstLine = Math.max(0, spanLine - ctxLines);
+		int lastLine = Math.min(lines.count(), spanLine + ctxLines);
 
-				if (i == spanLine) {
-					this.lines.add(new SpanHighlightLine(firstCol, lastCol));
-				}
+
+		for (int i = firstLine; i <= lastLine; i++) {
+			CharSequence line = lines.lineString(i);
+
+			this.lines.add(SourceLine.numbered(i + 1, line.toString()));
+
+			if (i == spanLine) {
+				this.lines.add(new SpanHighlightLine(firstCol, lastCol));
 			}
 		}
 
@@ -127,23 +122,25 @@ public class ErrorBuilder {
 	}
 
 	public String build() {
-
-		int maxLength = -1;
+		int maxMargin = -1;
 		for (ErrorLine line : lines) {
-			int length = line.neededMargin();
+			int neededMargin = line.neededMargin();
 
-			if (length > maxLength) {
-				maxLength = length;
+			if (neededMargin > maxMargin) {
+				maxMargin = neededMargin;
 			}
 		}
 
 		StringBuilder builder = new StringBuilder();
-		builder.append('\n');
 		for (ErrorLine line : lines) {
-			int length = line.neededMargin();
+			int neededMargin = line.neededMargin();
 
-			builder.append(FlwUtil.repeatChar(' ', maxLength - length))
-					.append(line.build())
+			if (neededMargin >= 0) {
+				builder.append(StringUtil.repeatChar(' ', maxMargin - neededMargin));
+			}
+
+			builder.append(line.build())
+					.append(ConsoleColors.RESET)
 					.append('\n');
 		}
 

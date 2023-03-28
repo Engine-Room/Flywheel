@@ -18,7 +18,7 @@ public enum Mods {
 	}
 
 	/**
-	 * @return a boolean of whether the mod is loaded or not based on mod id
+	 * @return a whether the mod is loaded or not based on mod id
 	 */
 	public boolean isLoaded() {
 		return ModList.get().isLoaded(id);
@@ -30,8 +30,10 @@ public enum Mods {
 	 * @return Optional.empty() if the mod is not loaded, otherwise an Optional of the return value of the given supplier
 	 */
 	public <T> Optional<T> runIfInstalled(Supplier<Supplier<T>> toRun) {
-		if (isLoaded())
-			return Optional.of(toRun.get().get());
+		if (isLoaded()) {
+			return Optional.of(toRun.get()
+					.get());
+		}
 		return Optional.empty();
 	}
 

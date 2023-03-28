@@ -3,14 +3,16 @@ package com.jozufozu.flywheel.core.source;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.core.source.span.CharPos;
-import com.jozufozu.flywheel.util.StringUtil;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntLists;
 
-public class SourceLines {
+public class SourceLines implements CharSequence {
 
 	private static final Pattern newLine = Pattern.compile("(\\r\\n|\\r|\\n)");
 
@@ -23,22 +25,23 @@ public class SourceLines {
 	 * 0-indexed line lookup
 	 */
 	private final ImmutableList<String> lines;
+	public final String raw;
 
-	public SourceLines(String source) {
-		this.lineStarts = createLineLookup(source);
-		this.lines = getLines(source, lineStarts);
+	public SourceLines(String raw) {
+		this.raw = raw;
+		this.lineStarts = createLineLookup(raw);
+		this.lines = getLines(raw, lineStarts);
 	}
 
-	public int getLineCount() {
+	public int count() {
 		return lines.size();
 	}
 
-	public String getLine(int lineNo) {
+	public String lineString(int lineNo) {
 		return lines.get(lineNo);
 	}
 
-	public int getLineStart(int lineNo) {
-
+	public int lineStartIndex(int lineNo) {
 		return lineStarts.getInt(lineNo);
 	}
 
@@ -73,9 +76,12 @@ public class SourceLines {
 
 	/**
 	 * Scan the source for line breaks, recording the position of the first character of each line.
-	 * @param source
 	 */
 	private static IntList createLineLookup(String source) {
+		if (source.isEmpty()) {
+			return IntLists.emptyList();
+		}
+
 		IntList l = new IntArrayList();
 		l.add(0); // first line is always at position 0
 
@@ -84,6 +90,7 @@ public class SourceLines {
 		while (matcher.find()) {
 			l.add(matcher.end());
 		}
+
 		return l;
 	}
 
@@ -94,9 +101,53 @@ public class SourceLines {
 			int start = lines.getInt(i - 1);
 			int end = lines.getInt(i);
 
-			builder.add(StringUtil.trimEnd(source.substring(start, end)));
+			builder.add(source.substring(start, end)
+					.stripTrailing());
 		}
 
 		return builder.build();
+	}
+
+	@Override
+	public String toString() {
+		return raw;
+	}
+
+	@NotNull
+	@Override
+	public CharSequence subSequence(int start, int end) {
+		return raw.subSequence(start, end);
+	}
+
+	public char charAt(int i) {
+		return raw.charAt(i);
+	}
+
+	public int length() {
+		return raw.length();
+	}
+
+	public int lineStartCol(int spanLine) {
+		return 0;
+	}
+
+	public int lineWidth(int spanLine) {
+		return lines.get(spanLine)
+				.length();
+	}
+
+	public int lineStartColTrimmed(final int line) {
+		final var lineString = lineString(line);
+		final int end = lineString.length();
+
+		int col = 0;
+		while (col < end && Character.isWhitespace(charAt(col))) {
+			col++;
+		}
+		return col;
+	}
+
+	public int lineStartPosTrimmed(final int line) {
+		return lineStartIndex(line) + lineStartColTrimmed(line);
 	}
 }

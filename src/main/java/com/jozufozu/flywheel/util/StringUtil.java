@@ -12,6 +12,9 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import org.lwjgl.system.MemoryUtil;
 
@@ -20,6 +23,11 @@ import com.jozufozu.flywheel.backend.memory.FlwMemoryTracker;
 public class StringUtil {
 
 	private static final NumberFormat THREE_DECIMAL_PLACES = new DecimalFormat("#0.000");
+
+	public static int countLines(String s) {
+		return (int) s.lines()
+				.count();
+	}
 
 	public static String formatBytes(long bytes) {
 		if (bytes < 1024) {
@@ -56,16 +64,43 @@ public class StringUtil {
 				.collect(Collectors.joining(", ")) + ')';
 	}
 
-	public static String trimEnd(String value) {
-		int len = value.length();
-		int st = 0;
-		while ((st < len) && Character.isWhitespace(value.charAt(len - 1))) {
-			len--;
+	public static String trimPrefix(String s, String prefix) {
+		if (s.startsWith(prefix)) {
+			return s.substring(prefix.length());
+		} else {
+			return s;
 		}
-		return value.substring(0, len);
 	}
 
-	public static String readToString(InputStream is) {
+	public static String trimSuffix(String s, String prefix) {
+		if (s.endsWith(prefix)) {
+			return s.substring(0, s.length() - prefix.length());
+		} else {
+			return s;
+		}
+	}
+
+	/**
+	 * Copy of {@link String#indent(int)} with the trailing newline removed.
+	 */
+	public static String indent(String str, int n) {
+		if (str.isEmpty()) {
+			return "";
+		}
+		Stream<String> stream = str.lines();
+		if (n > 0) {
+			final String spaces = repeatChar(' ', n);
+			stream = stream.map(s -> spaces + s);
+		} else if (n == Integer.MIN_VALUE) {
+			stream = stream.map(String::stripLeading);
+		} else if (n < 0) {
+			throw new IllegalArgumentException("Requested indentation (" + n + ") is unsupported");
+		}
+		return stream.collect(Collectors.joining("\n"));
+	}
+
+	@Nonnull
+	public static String readToString(InputStream is) throws IOException {
 		ByteBuffer bytebuffer = null;
 
 		try {
@@ -73,17 +108,14 @@ public class StringUtil {
 			int i = bytebuffer.position();
 			((Buffer) bytebuffer).rewind();
 			return MemoryUtil.memASCII(bytebuffer, i);
-		} catch (IOException ignored) {
-			//
 		} finally {
 			if (bytebuffer != null) {
 				FlwMemoryTracker.freeBuffer(bytebuffer);
 			}
 		}
-
-		return null;
 	}
 
+	@Nonnull
 	public static ByteBuffer readToBuffer(InputStream is) throws IOException {
 		if (is instanceof FileInputStream fileinputstream) {
 			return readFileInputStream(fileinputstream);
@@ -92,6 +124,7 @@ public class StringUtil {
 		}
 	}
 
+	@Nonnull
 	private static ByteBuffer readInputStream(InputStream is) throws IOException {
 		ByteBuffer bytebuffer = FlwMemoryTracker.mallocBuffer(8192);
 		ReadableByteChannel readablebytechannel = Channels.newChannel(is);
@@ -104,6 +137,7 @@ public class StringUtil {
 		return bytebuffer;
 	}
 
+	@Nonnull
 	private static ByteBuffer readFileInputStream(FileInputStream fileinputstream) throws IOException {
 		FileChannel filechannel = fileinputstream.getChannel();
 		ByteBuffer bytebuffer = FlwMemoryTracker.mallocBuffer((int) filechannel.size() + 1);
@@ -111,5 +145,13 @@ public class StringUtil {
 		while (filechannel.read(bytebuffer) != -1) {
 		}
 		return bytebuffer;
+	}
+
+	public static String repeatChar(char c, int n) {
+		char[] arr = new char[n];
+
+		Arrays.fill(arr, c);
+
+		return new String(arr);
 	}
 }

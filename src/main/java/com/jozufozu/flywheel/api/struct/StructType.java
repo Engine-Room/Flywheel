@@ -3,9 +3,9 @@ package com.jozufozu.flywheel.api.struct;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
-import com.jozufozu.flywheel.core.source.FileResolution;
 
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * A StructType contains metadata for a specific instance struct that Flywheel can interface with.
@@ -25,7 +25,7 @@ public interface StructType<S extends InstancedPart> {
 
 	StructWriter<S> getWriter();
 
-	FileResolution getInstanceShader();
+	ResourceLocation instanceShader();
 
 	VertexTransformer<S> getVertexTransformer();
 

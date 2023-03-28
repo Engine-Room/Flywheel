@@ -5,6 +5,7 @@ import org.lwjgl.system.MemoryUtil;
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.core.ComponentRegistry;
 
 public final class IndirectDraw<T extends InstancedPart> {
 	final IndirectInstancer<T> instancer;
@@ -13,6 +14,9 @@ public final class IndirectDraw<T extends InstancedPart> {
 	final RenderStage stage;
 	int baseInstance = -1;
 
+	final int vertexMaterialID;
+	final int fragmentMaterialID;
+
 	boolean needsFullWrite = true;
 
 	IndirectDraw(IndirectInstancer<T> instancer, Material material, RenderStage stage, IndirectMeshPool.BufferedMesh mesh) {
@@ -20,6 +24,9 @@ public final class IndirectDraw<T extends InstancedPart> {
 		this.material = material;
 		this.stage = stage;
 		this.mesh = mesh;
+
+		this.vertexMaterialID = ComponentRegistry.materials.getVertexID(material);
+		this.fragmentMaterialID = ComponentRegistry.materials.getFragmentID(material);
 	}
 
 	public void prepare(int baseInstance) {
@@ -51,5 +58,8 @@ public final class IndirectDraw<T extends InstancedPart> {
 		MemoryUtil.memPutInt(ptr + 16, baseInstance); // baseInstance
 
 		boundingSphere.getToAddress(ptr + 20); // boundingSphere
+		MemoryUtil.memPutInt(ptr + 36, vertexMaterialID); // vertexMaterialID
+		MemoryUtil.memPutInt(ptr + 40, fragmentMaterialID); // fragmentMaterialID
+
 	}
 }

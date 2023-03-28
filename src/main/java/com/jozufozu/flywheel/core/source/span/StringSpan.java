@@ -19,8 +19,7 @@ public class StringSpan extends Span {
 
 	@Override
 	public String get() {
-		return in.source
-				.substring(start.pos(), end.pos());
+		return in.source.raw.substring(start.pos(), end.pos());
 	}
 
 	@Override

@@ -1,28 +1,22 @@
 package com.jozufozu.flywheel.backend.gl.shader;
 
-import static org.lwjgl.opengl.GL20.glDeleteProgram;
-import static org.lwjgl.opengl.GL20.glGetUniformLocation;
-import static org.lwjgl.opengl.GL20.glUniform1i;
-import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
-
-import org.jetbrains.annotations.NotNull;
+import static org.lwjgl.opengl.GL20.*;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
+import com.jozufozu.flywheel.core.uniform.UniformBuffer;
 import com.mojang.blaze3d.shaders.ProgramManager;
-
-import net.minecraft.resources.ResourceLocation;
 
 public class GlProgram extends GlObject {
 
-	public final ResourceLocation name;
-
-	public GlProgram(ResourceLocation name, int handle) {
-		this.name = name;
+	public GlProgram(int handle) {
 		setHandle(handle);
 	}
 
 	public void bind() {
+		// TODO: bind textures?
+		UniformBuffer.getInstance()
+			.sync();
 		ProgramManager.glUseProgram(handle());
 	}
 
@@ -40,7 +34,7 @@ public class GlProgram extends GlObject {
 		int index = glGetUniformLocation(this.handle(), uniform);
 
 		if (index < 0) {
-			Backend.LOGGER.debug("No active uniform '{}' exists in program '{}'. Could be unused.", uniform, this.name);
+			Backend.LOGGER.debug("No active uniform '{}' exists. Could be unused.", uniform);
 		}
 
 		return index;
@@ -51,17 +45,13 @@ public class GlProgram extends GlObject {
 	 *
 	 * @param name    The name of the sampler uniform.
 	 * @param binding The index of the texture unit.
-	 * @return The sampler uniform's index.
-	 * @throws NullPointerException If no uniform exists with the given name.
 	 */
-	public int setSamplerBinding(String name, int binding) {
+	public void setSamplerBinding(String name, int binding) {
 		int samplerUniform = getUniformLocation(name);
 
 		if (samplerUniform >= 0) {
 			glUniform1i(samplerUniform, binding);
 		}
-
-		return samplerUniform;
 	}
 
 	@Override
@@ -69,17 +59,4 @@ public class GlProgram extends GlObject {
 		glDeleteProgram(handle);
 	}
 
-	@Override
-	public String toString() {
-		return "program " + name;
-	}
-
-	/**
-	 * A factory interface to create a {@link GlProgram}.
-	 */
-	public interface Factory {
-
-		@NotNull
-		GlProgram create(ResourceLocation name, int handle);
-	}
 }

@@ -4,7 +4,7 @@ public record FileLine(String fileName) implements ErrorLine {
 
 	@Override
 	public String left() {
-		return "--";
+		return "-";
 	}
 
 	@Override

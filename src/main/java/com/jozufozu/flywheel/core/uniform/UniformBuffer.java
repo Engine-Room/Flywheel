@@ -1,17 +1,17 @@
 package com.jozufozu.flywheel.core.uniform;
 
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.List;
 
 import org.lwjgl.opengl.GL32;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.api.uniform.UniformProvider;
+import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 import com.jozufozu.flywheel.core.ComponentRegistry;
+import com.jozufozu.flywheel.util.FlwUtil;
 import com.jozufozu.flywheel.util.RenderMath;
 
 public class UniformBuffer {
@@ -22,7 +22,7 @@ public class UniformBuffer {
 	private static final boolean PO2_ALIGNMENT = RenderMath.isPowerOf2(OFFSET_ALIGNMENT);
 
 	private static UniformBuffer instance;
-	private final List<Allocated> allocatedProviders;
+	private final ProviderSet providerSet;
 
 	public static UniformBuffer getInstance() {
 		if (instance == null) {
@@ -32,51 +32,18 @@ public class UniformBuffer {
 	}
 
 	private final GlBuffer buffer;
-	private final MemoryBlock data;
-
-	private final BitSet changedBytes;
 
 	private UniformBuffer() {
 		buffer = new GlBuffer(GlBufferType.UNIFORM_BUFFER);
-
-		Collection<UniformProvider> providers = ComponentRegistry.getAllUniformProviders();
-
-		var builder = ImmutableList.<Allocated>builder();
-		int totalBytes = 0;
-		int index = 0;
-		for (UniformProvider provider : providers) {
-			int size = alignPo2(provider.getActualByteSize(), 16);
-
-			builder.add(new Allocated(provider, totalBytes, size, index));
-
-			totalBytes = alignUniformBuffer(totalBytes + size);
-			index++;
-		}
-
-		allocatedProviders = builder.build();
-
-		data = MemoryBlock.mallocTracked(totalBytes);
-		changedBytes = new BitSet(totalBytes);
-
-		for (Allocated p : allocatedProviders) {
-			p.updatePtr(data);
-		}
+		providerSet = new ProviderSet(ComponentRegistry.getAllUniformProviders());
 	}
 
 	public void sync() {
-		if (changedBytes.isEmpty()) {
-			return;
+		if (providerSet.pollUpdates()) {
+			buffer.upload(providerSet.data);
 		}
 
-		// TODO: upload only changed bytes
-		changedBytes.clear();
-
-		buffer.upload(data);
-
-		int handle = buffer.handle();
-		for (Allocated p : allocatedProviders) {
-			GL32.glBindBufferRange(GL32.GL_UNIFORM_BUFFER, p.index, handle, p.offset, p.size);
-		}
+		GL32.glBindBufferRange(GL32.GL_UNIFORM_BUFFER, 0, buffer.handle(), 0, providerSet.data.size());
 	}
 
 	// https://stackoverflow.com/questions/3407012/rounding-up-to-the-nearest-multiple-of-a-number
@@ -88,46 +55,61 @@ public class UniformBuffer {
 		}
 	}
 
-	private static int alignPo2(int numToRound, int alignment) {
-		return (numToRound + alignment - 1) & -alignment;
-	}
-
-	private class Allocated implements UniformProvider.Notifier {
-		private final UniformProvider provider;
+	private static class LiveProvider {
+		private final ShaderUniforms provider;
 		private final int offset;
 		private final int size;
-		private final int index;
+		private ShaderUniforms.Provider activeProvider;
 
-		private Allocated(UniformProvider provider, int offset, int size, int index) {
+		private LiveProvider(ShaderUniforms provider, int offset, int size) {
 			this.provider = provider;
 			this.offset = offset;
 			this.size = size;
-			this.index = index;
-		}
-
-		@Override
-		public void signalChanged() {
-			changedBytes.set(offset, offset + size);
 		}
 
 		private void updatePtr(MemoryBlock bufferBase) {
-			provider.updatePtr(bufferBase.ptr() + offset, this);
+			if (activeProvider != null) {
+				activeProvider.delete();
+			}
+			activeProvider = provider.activate(bufferBase.ptr() + offset);
 		}
 
-		public UniformProvider provider() {
-			return provider;
+		public boolean maybePoll() {
+			return activeProvider != null && activeProvider.poll();
+		}
+	}
+
+	private static class ProviderSet {
+		private final List<LiveProvider> allocatedProviders;
+
+		private final MemoryBlock data;
+
+		private ProviderSet(final Collection<ShaderUniforms> providers) {
+			var builder = ImmutableList.<LiveProvider>builder();
+			int totalBytes = 0;
+			for (ShaderUniforms provider : providers) {
+				int size = FlwUtil.align16(provider.byteSize());
+
+				builder.add(new LiveProvider(provider, totalBytes, size));
+
+				totalBytes += size;
+			}
+
+			allocatedProviders = builder.build();
+
+			data = MemoryBlock.mallocTracked(totalBytes);
+
+			for (LiveProvider p : allocatedProviders) {
+				p.updatePtr(data);
+			}
 		}
 
-		public int offset() {
-			return offset;
-		}
-
-		public int size() {
-			return size;
-		}
-
-		public int index() {
-			return index;
+		public boolean pollUpdates() {
+			boolean changed = false;
+			for (LiveProvider p : allocatedProviders) {
+				changed |= p.maybePoll();
+			}
+			return changed;
 		}
 	}
 }

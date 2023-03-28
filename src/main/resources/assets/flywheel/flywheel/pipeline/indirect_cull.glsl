@@ -1,18 +1,8 @@
 #define FLW_SUBGROUP_SIZE 32
 layout(local_size_x = FLW_SUBGROUP_SIZE) in;
 #use "flywheel:api/cull.glsl"
-#use "flywheel:uniform/frustum.glsl"
 #use "flywheel:util/types.glsl"
-
-struct MeshDrawCommand {
-    uint indexCount;
-    uint instanceCount;
-    uint firstIndex;
-    uint vertexOffset;
-    uint baseInstance;
-
-    BoundingSphere boundingSphere;
-};
+#use "flywheel:pipeline/indirect_draw_command.glsl"
 
 // populated by instancers
 layout(std430, binding = 0) restrict readonly buffer ObjectBuffer {
@@ -33,8 +23,8 @@ layout(std430, binding = 3) restrict buffer DrawCommands {
 
 // 83 - 27 = 56 spirv instruction results
 bool testSphere(vec3 center, float radius) {
-    bvec4 xyInside = greaterThanEqual(fma(flw_planes.xyX, center.xxxx, fma(flw_planes.xyY, center.yyyy, fma(flw_planes.xyZ, center.zzzz, flw_planes.xyW))), -radius.xxxx);
-    bvec2 zInside = greaterThanEqual(fma(flw_planes.zX, center.xx, fma(flw_planes.zY, center.yy, fma(flw_planes.zZ, center.zz, flw_planes.zW))), -radius.xx);
+    bvec4 xyInside = greaterThanEqual(fma(flywheel.planes.xyX, center.xxxx, fma(flywheel.planes.xyY, center.yyyy, fma(flywheel.planes.xyZ, center.zzzz, flywheel.planes.xyW))), -radius.xxxx);
+    bvec2 zInside = greaterThanEqual(fma(flywheel.planes.zX, center.xx, fma(flywheel.planes.zY, center.yy, fma(flywheel.planes.zZ, center.zz, flywheel.planes.zW))), -radius.xx);
 
     return all(xyInside) && all(zInside);
 }
