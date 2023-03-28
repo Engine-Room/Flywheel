@@ -74,7 +74,7 @@ public abstract class InstanceManager<T> {
 	 *     Queued updates are processed.
 	 * </p>
 	 */
-	public void tick(TaskEngine taskEngine, double cameraX, double cameraY, double cameraZ) {
+	public void tick(TaskExecutor executor, double cameraX, double cameraY, double cameraZ) {
 		tick.tick();
 		processQueuedUpdates();
 
@@ -84,7 +84,7 @@ public abstract class InstanceManager<T> {
 		int cZ = (int) cameraZ;
 
 		var instances = getStorage().getInstancesForTicking();
-		distributeWork(taskEngine, instances, instance -> tickInstance(instance, cX, cY, cZ));
+		distributeWork(executor, instances, instance -> tickInstance(instance, cX, cY, cZ));
 	}
 
 	protected void tickInstance(TickableInstance instance, int cX, int cY, int cZ) {
@@ -106,7 +106,7 @@ public abstract class InstanceManager<T> {
 		instance.tick();
 	}
 
-	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
+	public void beginFrame(TaskExecutor executor, RenderContext context) {
 		frame.tick();
 		processQueuedAdditions();
 
@@ -118,22 +118,22 @@ public abstract class InstanceManager<T> {
 		FrustumIntersection culler = context.culler();
 
 		var instances = getStorage().getInstancesForUpdate();
-		distributeWork(taskEngine, instances, instance -> updateInstance(instance, culler, cX, cY, cZ));
+		distributeWork(executor, instances, instance -> updateInstance(instance, culler, cX, cY, cZ));
 	}
 
-	private static <I> void distributeWork(TaskEngine taskEngine, List<I> instances, Consumer<I> action) {
+	private static <I> void distributeWork(TaskExecutor executor, List<I> instances, Consumer<I> action) {
 		final int size = instances.size();
-		final int threadCount = taskEngine.getThreadCount();
+		final int threadCount = executor.getThreadCount();
 
 		if (threadCount == 1) {
-			taskEngine.submit(() -> instances.forEach(action));
+			executor.execute(() -> instances.forEach(action));
 		} else {
 			final int stride = Math.max(size / (threadCount * 2), 1);
 			for (int start = 0; start < size; start += stride) {
 				int end = Math.min(start + stride, size);
 
 				var sub = instances.subList(start, end);
-				taskEngine.submit(() -> sub.forEach(action));
+				executor.execute(() -> sub.forEach(action));
 			}
 		}
 	}

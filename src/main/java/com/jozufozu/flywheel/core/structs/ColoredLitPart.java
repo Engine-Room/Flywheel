@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.core.structs;
 
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.util.Color;
 
 import net.minecraft.client.renderer.LightTexture;
 
@@ -37,15 +36,6 @@ public abstract class ColoredLitPart extends InstancedPart implements FlatLit<Co
 	@Override
 	public int getPackedLight() {
 		return LightTexture.pack(this.blockLight, this.skyLight);
-	}
-
-	public ColoredLitPart setColor(Color color) {
-		this.r = (byte) color.getRed();
-		this.g = (byte) color.getGreen();
-		this.b = (byte) color.getBlue();
-		this.a = (byte) color.getAlpha();
-		markDirty();
-		return this;
 	}
 
 	public ColoredLitPart setColor(int color) {

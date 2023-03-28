@@ -42,7 +42,7 @@ public interface Mesh {
 
 	/**
 	 * Write this mesh into a vertex list. Vertices with index {@literal <}0 or {@literal >=}{@link #getVertexCount()} will not be
-	 * modified.
+	 * read or modified.
 	 * @param vertexList The vertex list to which data is written to.
 	 */
 	void write(MutableVertexList vertexList);

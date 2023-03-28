@@ -6,8 +6,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.instancing.ParallelTaskEngine;
-import com.jozufozu.flywheel.util.WeakHashSet;
+import com.jozufozu.flywheel.backend.instancing.ParallelTaskExecutor;
+import com.jozufozu.flywheel.backend.instancing.WorkGroup;
+import com.jozufozu.flywheel.util.FlwUtil;
 import com.jozufozu.flywheel.util.WorldAttached;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
@@ -27,7 +28,7 @@ import net.minecraft.world.level.LightLayer;
 public class LightUpdater {
 
 	private static final WorldAttached<LightUpdater> LEVELS = new WorldAttached<>(LightUpdater::new);
-	private final ParallelTaskEngine taskEngine;
+	private final ParallelTaskExecutor taskExecutor;
 
 	public static LightUpdater get(LevelAccessor level) {
 		if (LightUpdated.receivesLightUpdates(level)) {
@@ -41,12 +42,12 @@ public class LightUpdater {
 
 	private final LevelAccessor level;
 
-	private final WeakHashSet<TickingLightListener> tickingLightListeners = new WeakHashSet<>();
+	private final Set<TickingLightListener> tickingLightListeners = FlwUtil.createWeakHashSet();
 	private final WeakContainmentMultiMap<LightListener> sections = new WeakContainmentMultiMap<>();
 	private final WeakContainmentMultiMap<LightListener> chunks = new WeakContainmentMultiMap<>();
 
 	public LightUpdater(LevelAccessor level) {
-		taskEngine = Backend.getTaskEngine();
+		taskExecutor = Backend.getTaskExecutor();
 		this.level = level;
 	}
 
@@ -66,14 +67,14 @@ public class LightUpdater {
 	private void tickParallel() {
 		Queue<LightListener> listeners = new ConcurrentLinkedQueue<>();
 
-		taskEngine.group("LightUpdater")
+		WorkGroup.builder()
 				.addTasks(tickingLightListeners.stream(), listener -> {
 					if (listener.tickLightListener()) {
 						listeners.add(listener);
 					}
 				})
 				.onComplete(() -> listeners.forEach(this::addListener))
-				.submit();
+				.execute(taskExecutor);
 	}
 
 	/**

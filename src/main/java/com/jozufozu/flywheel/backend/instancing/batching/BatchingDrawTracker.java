@@ -1,7 +1,8 @@
 package com.jozufozu.flywheel.backend.instancing.batching;
 
+import java.util.EnumMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import com.jozufozu.flywheel.api.RenderStage;
@@ -12,7 +13,15 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.renderer.RenderType;
 
 public class BatchingDrawTracker {
-	private final Set<RenderType> activeTypes = new HashSet<>();
+	private static final RenderStage[] RENDER_STAGES = RenderStage.values();
+
+	private final Map<RenderStage, Set<DrawBuffer>> activeBuffers = new EnumMap<>(RenderStage.class);
+	{
+		for (RenderStage stage : RENDER_STAGES) {
+			activeBuffers.put(stage, new HashSet<>());
+		}
+	}
+
 	private final BufferBuilder scratch;
 
 	public BatchingDrawTracker() {
@@ -22,22 +31,9 @@ public class BatchingDrawTracker {
 	}
 
 	public DrawBuffer getBuffer(RenderType renderType, RenderStage stage) {
-		return getBufferSet(renderType).getBuffer(stage);
-	}
-
-	public DrawBufferSet getBufferSet(RenderType renderType) {
-		activeTypes.add(renderType);
-		return RenderTypeExtension.getDrawBufferSet(renderType);
-	}
-
-	/**
-	 * Draw and reset all DrawBuffers for the given RenderType.
-	 * @param renderType The RenderType to draw.
-	 */
-	public void draw(RenderType renderType) {
-		_draw(renderType);
-
-		activeTypes.remove(renderType);
+		DrawBuffer buffer = RenderTypeExtension.getDrawBufferSet(renderType).getBuffer(stage);
+		activeBuffers.get(stage).add(buffer);
+		return buffer;
 	}
 
 	/**
@@ -45,59 +41,44 @@ public class BatchingDrawTracker {
 	 * @param stage The RenderStage to draw.
 	 */
 	public void draw(RenderStage stage) {
-		Iterator<RenderType> iterator = activeTypes.iterator();
-		while (iterator.hasNext()) {
-			RenderType renderType = iterator.next();
-			DrawBufferSet bufferSet = RenderTypeExtension.getDrawBufferSet(renderType);
-			DrawBuffer buffer = bufferSet.deactivateBuffer(stage);
-			if (buffer == null) {
-				continue;
-			}
-			if (bufferSet.getActiveStagesView().isEmpty()) {
-				iterator.remove();
-			}
-			_draw(buffer, renderType);
+		Set<DrawBuffer> buffers = activeBuffers.get(stage);
+		for (DrawBuffer buffer : buffers) {
+			_draw(buffer);
+			buffer.reset();
 		}
+		buffers.clear();
 	}
 
 	/**
 	 * Draw and reset all active DrawBuffers.
 	 */
 	public void drawAll() {
-		for (RenderType renderType : activeTypes) {
-			_draw(renderType);
-		}
-
-		activeTypes.clear();
-	}
-
-	private void _draw(RenderType renderType) {
-		DrawBufferSet bufferSet = RenderTypeExtension.getDrawBufferSet(renderType);
-		for (RenderStage stage : bufferSet.getActiveStagesView()) {
-			DrawBuffer buffer = bufferSet.deactivateBuffer(stage);
-			_draw(buffer, renderType);
+		for (Set<DrawBuffer> buffers : activeBuffers.values()) {
+			for (DrawBuffer buffer : buffers) {
+				_draw(buffer);
+				buffer.reset();
+			}
+			buffers.clear();
 		}
 	}
 
-	private void _draw(DrawBuffer buffer, RenderType renderType) {
+	private void _draw(DrawBuffer buffer) {
 		if (buffer.hasVertices()) {
 			BufferBuilderExtension scratch = (BufferBuilderExtension) this.scratch;
 			buffer.inject(scratch);
-			renderType.end(this.scratch, 0, 0, 0);
+			buffer.getRenderType().end(this.scratch, 0, 0, 0);
 		}
-
-		buffer.reset();
 	}
 
 	/**
 	 * Reset all active DrawBuffers.
 	 */
 	public void reset() {
-		for (RenderType type : activeTypes) {
-			RenderTypeExtension.getDrawBufferSet(type)
-					.reset();
+		for (Set<DrawBuffer> buffers : activeBuffers.values()) {
+			for (DrawBuffer buffer : buffers) {
+				buffer.reset();
+			}
+			buffers.clear();
 		}
-
-		activeTypes.clear();
 	}
 }

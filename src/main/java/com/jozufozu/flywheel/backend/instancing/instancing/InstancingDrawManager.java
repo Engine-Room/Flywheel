@@ -99,7 +99,7 @@ public class InstancingDrawManager {
 
 		public static final DrawSet EMPTY = new DrawSet(ImmutableListMultimap.of());
 
-		final ListMultimap<ShaderState, DrawCall> drawCalls;
+		private final ListMultimap<ShaderState, DrawCall> drawCalls;
 
 		public DrawSet(RenderStage renderStage) {
 			drawCalls = ArrayListMultimap.create();

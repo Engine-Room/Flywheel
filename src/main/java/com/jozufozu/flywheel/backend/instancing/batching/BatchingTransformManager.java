@@ -99,7 +99,7 @@ public class BatchingTransformManager {
 	public static class TransformSet implements Iterable<Map.Entry<RenderType, Collection<TransformCall<?>>>> {
 		public static final TransformSet EMPTY = new TransformSet(ImmutableListMultimap.of());
 
-		final ListMultimap<RenderType, TransformCall<?>> transformCalls;
+		private final ListMultimap<RenderType, TransformCall<?>> transformCalls;
 
 		public TransformSet(RenderStage renderStage) {
 			transformCalls = ArrayListMultimap.create();

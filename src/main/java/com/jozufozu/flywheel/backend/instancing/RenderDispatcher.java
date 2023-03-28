@@ -7,9 +7,9 @@ import net.minecraft.client.Camera;
 
 public interface RenderDispatcher {
 
-	void beginFrame(TaskEngine taskEngine, RenderContext context);
+	void beginFrame(TaskExecutor executor, RenderContext context);
 
-	void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage);
+	void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage);
 
 	/**
 	 * Maintain the integer origin coordinate to be within a certain distance from the camera in all directions,

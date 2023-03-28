@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.lwjgl.opengl.GL32;
 
@@ -15,12 +16,12 @@ import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.PipelineCompiler;
-import com.jozufozu.flywheel.backend.instancing.TaskEngine;
+import com.jozufozu.flywheel.backend.instancing.TaskExecutor;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.core.uniform.UniformBuffer;
-import com.jozufozu.flywheel.util.WeakHashSet;
+import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Camera;
@@ -37,7 +38,7 @@ public class InstancingEngine implements Engine {
 	/**
 	 * The set of instance managers that are attached to this engine.
 	 */
-	private final WeakHashSet<InstanceManager<?>> instanceManagers = new WeakHashSet<>();
+	private final Set<InstanceManager<?>> instanceManagers = FlwUtil.createWeakHashSet();
 
 	protected final ContextShader context;
 	protected final int sqrMaxOriginDistance;
@@ -55,14 +56,14 @@ public class InstancingEngine implements Engine {
 	}
 
 	@Override
-	public void beginFrame(TaskEngine taskEngine, RenderContext context) {
+	public void beginFrame(TaskExecutor executor, RenderContext context) {
 		try (var restoreState = GlStateTracker.getRestoreState()) {
 			drawManager.flush();
 		}
 	}
 
 	@Override
-	public void renderStage(TaskEngine taskEngine, RenderContext context, RenderStage stage) {
+	public void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage) {
 		var drawSet = drawManager.get(stage);
 
 		if (drawSet.isEmpty()) {
