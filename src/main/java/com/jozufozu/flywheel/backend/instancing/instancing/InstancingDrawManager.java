@@ -27,11 +27,11 @@ public class InstancingDrawManager {
 	private final Map<InstancerKey<?>, GPUInstancer<?>> instancers = new HashMap<>();
 	private final List<UninitializedInstancer> uninitializedInstancers = new ArrayList<>();
 	private final List<GPUInstancer<?>> initializedInstancers = new ArrayList<>();
-	private final Map<RenderStage, DrawSet> drawDets = new EnumMap<>(RenderStage.class);
+	private final Map<RenderStage, DrawSet> drawSets = new EnumMap<>(RenderStage.class);
 	private final Map<VertexType, InstancedMeshPool> meshPools = new HashMap<>();
 
 	public DrawSet get(RenderStage stage) {
-		return drawDets.getOrDefault(stage, DrawSet.EMPTY);
+		return drawSets.getOrDefault(stage, DrawSet.EMPTY);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -67,9 +67,9 @@ public class InstancingDrawManager {
 				.forEach(InstancedMeshPool::delete);
 		meshPools.clear();
 
-		drawDets.values()
+		drawSets.values()
 				.forEach(DrawSet::delete);
-		drawDets.clear();
+		drawSets.clear();
 
 		initializedInstancers.forEach(GPUInstancer::delete);
 		initializedInstancers.clear();
@@ -80,7 +80,7 @@ public class InstancingDrawManager {
 	}
 
 	private void add(GPUInstancer<?> instancer, Model model, RenderStage stage) {
-		DrawSet drawSet = drawDets.computeIfAbsent(stage, DrawSet::new);
+		DrawSet drawSet = drawSets.computeIfAbsent(stage, DrawSet::new);
 		var meshes = model.getMeshes();
 		for (var entry : meshes.entrySet()) {
 			DrawCall drawCall = new DrawCall(instancer, entry.getKey(), alloc(entry.getValue()));

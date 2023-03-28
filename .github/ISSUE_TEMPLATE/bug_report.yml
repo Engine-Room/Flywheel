@@ -60,6 +60,10 @@ body:
             description: The version of the mod you were using when the bug occured
             options:
                 - "0.7.0"
+                - "0.6.8.a"
+                - "0.6.8"
+                - "0.6.7"
+                - "0.6.6"
                 - "0.6.5"
                 - "0.6.4"
                 - "0.6.3"
@@ -91,6 +95,7 @@ body:
             label: Minecraft Version
             description: The version of Minecraft you were using when the bug occured
             options:
+                - "1.19.2"
                 - "1.18.2"
                 - "1.18.1"
                 - "1.18"

@@ -137,12 +137,11 @@ public class GlVertexArray extends GlObject {
 		}
 	}
 
-	public void bindElementArray(GlBuffer ebo) {
-		int handle = ebo.handle();
-		if (elementBufferBinding != handle) {
+	public void bindElementArray(int ebo) {
+		if (elementBufferBinding != ebo) {
 			bind();
-			GlBufferType.ELEMENT_ARRAY_BUFFER.bind(handle);
-			elementBufferBinding = handle;
+			GlBufferType.ELEMENT_ARRAY_BUFFER.bind(ebo);
+			elementBufferBinding = ebo;
 		}
 	}
 }

@@ -1,6 +1,8 @@
 package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -259,6 +261,16 @@ public abstract class InstanceManager<T> {
 	public void delete() {
 		for (AbstractInstance value : getStorage().allInstances()) {
 			LightUpdater.get(value.level).removeListener(value);
+		}
+	}
+
+	public void queueAddAll(Collection<? extends T> objects) {
+		if (!Backend.isOn() || objects.isEmpty()) {
+			return;
+		}
+
+		synchronized (queuedAdditions) {
+			queuedAdditions.addAll(objects);
 		}
 	}
 }

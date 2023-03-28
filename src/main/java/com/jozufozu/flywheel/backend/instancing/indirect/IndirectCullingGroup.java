@@ -62,7 +62,7 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 		vertexArray = glCreateVertexArrays();
 
 		elementBuffer = QuadConverter.getInstance()
-				.quads2Tris(2048).buffer.handle();
+				.quads2Tris(2048).glBuffer;
 		setupVertexArray();
 
 		compute = ComputeCullerCompiler.INSTANCE.get(structType);
