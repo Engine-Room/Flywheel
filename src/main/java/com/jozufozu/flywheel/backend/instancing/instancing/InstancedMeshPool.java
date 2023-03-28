@@ -228,15 +228,15 @@ public class InstancedMeshPool {
 				vao.enableArrays(getAttributeCount());
 				vao.bindAttributes(InstancedMeshPool.this.vbo, 0, vertexType.getLayout(), byteIndex);
 			}
-			vao.bindElementArray(ebo.buffer);
+			vao.bindElementArray(ebo.glBuffer);
 			vao.bind();
 		}
 
 		private void draw(int instanceCount) {
 			if (instanceCount > 1) {
-				GL32.glDrawElementsInstanced(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0, instanceCount);
+				GL32.glDrawElementsInstanced(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.asGLType, 0, instanceCount);
 			} else {
-				GL32.glDrawElements(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.getGlEnum(), 0);
+				GL32.glDrawElements(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.asGLType, 0);
 			}
 		}
 

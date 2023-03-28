@@ -9,9 +9,7 @@ import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 import com.jozufozu.flywheel.backend.instancing.One2OneStorage;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 
 public class EntityInstanceManager extends InstanceManager<Entity> {
@@ -44,14 +42,6 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 
 		Level level = entity.level;
 
-		if (Backend.isFlywheelLevel(level)) {
-			BlockPos pos = entity.blockPosition();
-
-			BlockGetter existingChunk = level.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
-
-			return existingChunk != null;
-		}
-
-		return false;
+		return Backend.isFlywheelLevel(level);
 	}
 }
