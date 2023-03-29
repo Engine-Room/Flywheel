@@ -48,7 +48,7 @@ public class GlStateTracker {
 			GlBufferType[] values = GlBufferType.values();
 
 			for (int i = 0; i < values.length; i++) {
-				if (buffers[i] != GlStateTracker.BUFFERS[i] && values[i] != GlBufferType.ELEMENT_ARRAY_BUFFER) {
+				if (buffers[i] != GlStateTracker.BUFFERS[i]) {
 					GlStateManager._glBindBuffer(values[i].glEnum, buffers[i]);
 				}
 			}
