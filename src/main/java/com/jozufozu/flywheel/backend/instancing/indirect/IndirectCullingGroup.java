@@ -3,7 +3,13 @@ package com.jozufozu.flywheel.backend.instancing.indirect;
 import static org.lwjgl.opengl.GL42.GL_COMMAND_BARRIER_BIT;
 import static org.lwjgl.opengl.GL42.glMemoryBarrier;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BARRIER_BIT;
-import static org.lwjgl.opengl.GL46.*;
+import static org.lwjgl.opengl.GL46.glBindVertexArray;
+import static org.lwjgl.opengl.GL46.glCreateVertexArrays;
+import static org.lwjgl.opengl.GL46.glDeleteVertexArrays;
+import static org.lwjgl.opengl.GL46.glDispatchCompute;
+import static org.lwjgl.opengl.GL46.glEnableVertexArrayAttrib;
+import static org.lwjgl.opengl.GL46.glVertexArrayElementBuffer;
+import static org.lwjgl.opengl.GL46.glVertexArrayVertexBuffer;
 
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
@@ -142,7 +148,8 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 
 		for (int i = 0, batchesSize = drawSet.indirectDraws.size(); i < batchesSize; i++) {
 			var batch = drawSet.indirectDraws.get(i);
-			var instanceCount = batch.instancer.getInstanceCount();
+			var instanceCount = batch.instancer()
+					.getInstanceCount();
 			batch.writeObjects(objectPtr, batchIDPtr, i);
 
 			objectPtr += instanceCount * objectStride;
@@ -166,7 +173,7 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 		int baseInstance = 0;
 		for (var batch : drawSet.indirectDraws) {
 			batch.prepare(baseInstance);
-			baseInstance += batch.instancer.instanceCount;
+			baseInstance += batch.instancer().instanceCount;
 		}
 		return baseInstance;
 	}

@@ -83,14 +83,18 @@ public class ComponentRegistry {
 	public static class MaterialRegistry {
 
 		private final Set<Material> materials = new HashSet<>();
+		private final List<Material> materialsOrdered = new ArrayList<>();
 		private final MaterialSources vertexSources = new MaterialSources();
 		private final MaterialSources fragmentSources = new MaterialSources();
 
 		public <T extends Material> T add(T material) {
-			materials.add(material);
-
-			vertexSources.register(material.vertexShader());
-			fragmentSources.register(material.fragmentShader());
+			if (materials.add(material)) {
+				materialsOrdered.add(material);
+				vertexSources.register(material.vertexShader());
+				fragmentSources.register(material.fragmentShader());
+			} else {
+				throw new IllegalArgumentException("Material already registered: " + material);
+			}
 
 			return material;
 		}
@@ -115,6 +119,10 @@ public class ComponentRegistry {
 
 		public int getFragmentID(Material material) {
 			return fragmentSources.orderedSources.indexOf(material.fragmentShader());
+		}
+
+		public int getMaterialID(Material material) {
+			return materialsOrdered.indexOf(material);
 		}
 
 		private static class MaterialSources {

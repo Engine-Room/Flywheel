@@ -8,10 +8,10 @@ import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.core.ComponentRegistry;
 
 public final class IndirectDraw<T extends InstancedPart> {
-	final IndirectInstancer<T> instancer;
-	final IndirectMeshPool.BufferedMesh mesh;
-	final Material material;
-	final RenderStage stage;
+	private final IndirectInstancer<T> instancer;
+	private final IndirectMeshPool.BufferedMesh mesh;
+	private final Material material;
+	private final RenderStage stage;
 	int baseInstance = -1;
 
 	final int vertexMaterialID;
@@ -61,5 +61,21 @@ public final class IndirectDraw<T extends InstancedPart> {
 		MemoryUtil.memPutInt(ptr + 36, vertexMaterialID); // vertexMaterialID
 		MemoryUtil.memPutInt(ptr + 40, fragmentMaterialID); // fragmentMaterialID
 
+	}
+
+	public IndirectInstancer<T> instancer() {
+		return instancer;
+	}
+
+	public IndirectMeshPool.BufferedMesh mesh() {
+		return mesh;
+	}
+
+	public Material material() {
+		return material;
+	}
+
+	public RenderStage stage() {
+		return stage;
 	}
 }
