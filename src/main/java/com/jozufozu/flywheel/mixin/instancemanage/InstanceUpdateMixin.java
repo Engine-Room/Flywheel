@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.mixin;
+package com.jozufozu.flywheel.mixin.instancemanage;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(LevelRenderer.class)
-public class LevelRendererInstanceUpdateMixin {
+public class InstanceUpdateMixin {
 	@Shadow
 	private ClientLevel level;
 
