@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.api.instance;
 
-import com.jozufozu.flywheel.util.joml.FrustumIntersection;
+import org.joml.FrustumIntersection;
 
 import net.minecraft.core.BlockPos;
 

@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.backend.instancing.entity;
 
+import org.joml.FrustumIntersection;
+
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
@@ -8,7 +10,6 @@ import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceM
 import com.jozufozu.flywheel.light.LightListener;
 import com.jozufozu.flywheel.light.TickingLightListener;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
-import com.jozufozu.flywheel.util.joml.FrustumIntersection;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.core.BlockPos;

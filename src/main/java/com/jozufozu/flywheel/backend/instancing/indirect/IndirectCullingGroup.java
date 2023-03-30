@@ -1,15 +1,15 @@
 package com.jozufozu.flywheel.backend.instancing.indirect;
 
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
 import static org.lwjgl.opengl.GL42.GL_COMMAND_BARRIER_BIT;
 import static org.lwjgl.opengl.GL42.glMemoryBarrier;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BARRIER_BIT;
-import static org.lwjgl.opengl.GL46.glBindVertexArray;
-import static org.lwjgl.opengl.GL46.glCreateVertexArrays;
-import static org.lwjgl.opengl.GL46.glDeleteVertexArrays;
-import static org.lwjgl.opengl.GL46.glDispatchCompute;
-import static org.lwjgl.opengl.GL46.glEnableVertexArrayAttrib;
-import static org.lwjgl.opengl.GL46.glVertexArrayElementBuffer;
-import static org.lwjgl.opengl.GL46.glVertexArrayVertexBuffer;
+import static org.lwjgl.opengl.GL43.glDispatchCompute;
+import static org.lwjgl.opengl.GL45.glCreateVertexArrays;
+import static org.lwjgl.opengl.GL45.glEnableVertexArrayAttrib;
+import static org.lwjgl.opengl.GL45.glVertexArrayElementBuffer;
+import static org.lwjgl.opengl.GL45.glVertexArrayVertexBuffer;
 
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;

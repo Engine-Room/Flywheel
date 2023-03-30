@@ -16,9 +16,9 @@ import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskExecutor;
 import com.jozufozu.flywheel.core.RenderContext;
+import com.jozufozu.flywheel.core.context.SimpleContext;
 import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.util.FlwUtil;
-import com.jozufozu.flywheel.core.context.SimpleContext;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Camera;

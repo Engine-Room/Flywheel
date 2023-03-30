@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.instancing;
 import java.util.List;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.instancing.effect.Effect;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
