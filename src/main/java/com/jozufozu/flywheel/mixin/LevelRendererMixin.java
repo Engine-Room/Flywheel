@@ -55,7 +55,7 @@ public class LevelRendererMixin {
 	}
 
 	@Inject(at = @At("TAIL"), method = "allChanged")
-	private void refresh(CallbackInfo ci) {
+	private void flywheel$refresh(CallbackInfo ci) {
 		Backend.refresh();
 
 		MinecraftForge.EVENT_BUS.post(new ReloadRenderersEvent(level));

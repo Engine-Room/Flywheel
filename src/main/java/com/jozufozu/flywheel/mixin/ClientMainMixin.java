@@ -10,7 +10,7 @@ import net.minecraft.client.main.Main;
 @Mixin(Main.class)
 public class ClientMainMixin {
 	@Inject(method = "main", at = @At("HEAD"))
-	private static void injectRenderDoc(CallbackInfo ci) {
+	private static void flywheel$injectRenderDoc(CallbackInfo ci) {
 		// Only try to load RenderDoc if a system property is set.
 		if (System.getProperty("flw.loadRenderDoc") == null) {
 			return;
