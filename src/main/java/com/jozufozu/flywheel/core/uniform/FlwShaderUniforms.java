@@ -9,6 +9,7 @@ import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
+import com.jozufozu.flywheel.util.FlwUtil;
 import com.jozufozu.flywheel.util.MatrixUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -128,9 +129,10 @@ public class FlwShaderUniforms implements ShaderUniforms {
 				return;
 			}
 
-			var shiftedCuller = RenderContext.createCuller(context.viewProjection(), -camX, -camY, -camZ);
+			var projection = MatrixUtil.toJoml(context.viewProjection());
+			projection.translate(-camX, -camY, -camZ);
 
-			shiftedCuller.getJozuPackedPlanes(ptr + 128);
+			FlwUtil.writePackedFrustumPlanes(ptr + 128, projection);
 
 			FRUSTUM_CAPTURE = false;
 		}
