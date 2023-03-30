@@ -63,7 +63,7 @@ public class MatrixUtil {
 		buf.putFloat(m.flywheel$m22());
 	}
 
-	public static void store(Matrix4f matrix, com.jozufozu.flywheel.util.joml.Matrix4f jomlMatrix) {
+	public static void store(Matrix4f matrix, org.joml.Matrix4f jomlMatrix) {
 		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
 		jomlMatrix.set(
 				m.flywheel$m00(), m.flywheel$m10(), m.flywheel$m20(), m.flywheel$m30(),
@@ -73,9 +73,9 @@ public class MatrixUtil {
 		);
 	}
 
-	public static com.jozufozu.flywheel.util.joml.Matrix4f toJoml(Matrix4f matrix) {
+	public static org.joml.Matrix4f toJoml(Matrix4f matrix) {
 		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
-		return new com.jozufozu.flywheel.util.joml.Matrix4f(
+		return new org.joml.Matrix4f(
 				m.flywheel$m00(), m.flywheel$m10(), m.flywheel$m20(), m.flywheel$m30(),
 				m.flywheel$m01(), m.flywheel$m11(), m.flywheel$m21(), m.flywheel$m31(),
 				m.flywheel$m02(), m.flywheel$m12(), m.flywheel$m22(), m.flywheel$m32(),
@@ -96,7 +96,7 @@ public class MatrixUtil {
 		MemoryUtil.memPutFloat(ptr + 32, m.flywheel$m22());
 	}
 
-	public static void store(Matrix3f matrix, com.jozufozu.flywheel.util.joml.Matrix3f jomlMatrix) {
+	public static void store(Matrix3f matrix, org.joml.Matrix3f jomlMatrix) {
 		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
 		jomlMatrix.set(
 				m.flywheel$m00(), m.flywheel$m10(), m.flywheel$m20(),
@@ -105,9 +105,9 @@ public class MatrixUtil {
 		);
 	}
 
-	public static com.jozufozu.flywheel.util.joml.Matrix3f toJoml(Matrix3f matrix) {
+	public static org.joml.Matrix3f toJoml(Matrix3f matrix) {
 		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
-		return new com.jozufozu.flywheel.util.joml.Matrix3f(
+		return new org.joml.Matrix3f(
 				m.flywheel$m00(), m.flywheel$m10(), m.flywheel$m20(),
 				m.flywheel$m01(), m.flywheel$m11(), m.flywheel$m21(),
 				m.flywheel$m02(), m.flywheel$m12(), m.flywheel$m22()

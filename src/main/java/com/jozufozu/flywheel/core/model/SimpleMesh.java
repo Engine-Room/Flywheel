@@ -1,11 +1,12 @@
 package com.jozufozu.flywheel.core.model;
 
+import org.joml.Vector4f;
+import org.joml.Vector4fc;
+
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.memory.MemoryBlock;
-import com.jozufozu.flywheel.util.joml.Vector4f;
-import com.jozufozu.flywheel.util.joml.Vector4fc;
 
 public class SimpleMesh implements Mesh {
 	private final VertexType vertexType;

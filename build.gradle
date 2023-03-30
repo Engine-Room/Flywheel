@@ -113,7 +113,7 @@ repositories {
     mavenCentral()
 }
 
-// Fix for loading non-mod libraries in dev-env, used for miniball.
+// Fix for loading non-mod libraries in dev-env, used for JOML and Miniball.
 // https://gist.github.com/SizableShrimp/66b22f1b24c255e1491c8d98d3f11f83
 // v--------------------------------------------------------------------v
 configurations {
@@ -131,14 +131,18 @@ minecraft.runs.all {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    jarJar(group: 'com.dreizak', name: 'miniball', version: "1.0.3") {
-        jarJar.ranged(it, "[1.0,2.0)")
+    jarJar('org.joml:joml:1.10.5') {
+        jarJar.ranged(it, '[1.10.0,1.11.0)')
     }
-    library "com.dreizak:miniball:1.0.3"
+    library 'org.joml:joml:1.10.5'
+
+    jarJar('com.dreizak:miniball:1.0.3') {
+        jarJar.ranged(it, '[1.0,2.0)')
+    }
+    library 'com.dreizak:miniball:1.0.3'
 
     // switch to implementation for debugging
     compileOnly fg.deobf("maven.modrinth:starlight-forge:1.0.2+1.18.2")
-
     compileOnly fg.deobf("maven.modrinth:rubidium:0.5.3a")
     compileOnly fg.deobf("maven.modrinth:oculus:1.18.2-1.2.5a")
 

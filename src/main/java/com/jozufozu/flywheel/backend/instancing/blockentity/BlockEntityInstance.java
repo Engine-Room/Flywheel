@@ -3,6 +3,8 @@ package com.jozufozu.flywheel.backend.instancing.blockentity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joml.FrustumIntersection;
+
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
@@ -10,7 +12,6 @@ import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
-import com.jozufozu.flywheel.util.joml.FrustumIntersection;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;

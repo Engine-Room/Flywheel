@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.joml.FrustumIntersection;
+import org.joml.Vector3f;
+
 import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
@@ -19,8 +22,6 @@ import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
-import com.jozufozu.flywheel.util.joml.FrustumIntersection;
-import com.jozufozu.flywheel.util.joml.Vector3f;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;

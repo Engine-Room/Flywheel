@@ -6,10 +6,10 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.stream.Stream;
 
+import org.joml.Math;
+import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.util.joml.Math;
-import com.jozufozu.flywheel.util.joml.Matrix4f;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public class FlwUtil {

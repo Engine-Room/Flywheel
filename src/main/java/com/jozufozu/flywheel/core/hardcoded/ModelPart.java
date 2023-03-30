@@ -2,6 +2,9 @@ package com.jozufozu.flywheel.core.hardcoded;
 
 import java.util.List;
 
+import org.joml.Vector4f;
+import org.joml.Vector4fc;
+
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.backend.memory.MemoryBlock;
@@ -9,8 +12,6 @@ import com.jozufozu.flywheel.core.model.Mesh;
 import com.jozufozu.flywheel.core.model.ModelUtil;
 import com.jozufozu.flywheel.core.vertex.Formats;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalVertex;
-import com.jozufozu.flywheel.util.joml.Vector4f;
-import com.jozufozu.flywheel.util.joml.Vector4fc;
 
 public class ModelPart implements Mesh {
 	private final int vertexCount;

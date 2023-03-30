@@ -1,7 +1,22 @@
 package com.jozufozu.flywheel.backend.instancing.indirect;
 
+import static org.lwjgl.opengl.GL15.glBindBuffer;
+import static org.lwjgl.opengl.GL15.glDeleteBuffers;
+import static org.lwjgl.opengl.GL15.nglDeleteBuffers;
+import static org.lwjgl.opengl.GL30.GL_MAP_FLUSH_EXPLICIT_BIT;
+import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
+import static org.lwjgl.opengl.GL40.GL_DRAW_INDIRECT_BUFFER;
+import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
+import static org.lwjgl.opengl.GL44.GL_DYNAMIC_STORAGE_BIT;
+import static org.lwjgl.opengl.GL44.GL_MAP_PERSISTENT_BIT;
+import static org.lwjgl.opengl.GL44.nglBindBuffersRange;
+import static org.lwjgl.opengl.GL45.glCopyNamedBufferSubData;
 import static org.lwjgl.opengl.GL45.glCreateBuffers;
-import static org.lwjgl.opengl.GL46.*;
+import static org.lwjgl.opengl.GL45.glFlushMappedNamedBufferRange;
+import static org.lwjgl.opengl.GL45.glNamedBufferStorage;
+import static org.lwjgl.opengl.GL45.nglCreateBuffers;
+import static org.lwjgl.opengl.GL45.nglMapNamedBufferRange;
+import static org.lwjgl.opengl.GL45.nglNamedBufferSubData;
 
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.Pointer;

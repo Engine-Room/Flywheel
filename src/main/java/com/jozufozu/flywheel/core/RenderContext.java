@@ -1,9 +1,9 @@
 package com.jozufozu.flywheel.core;
 
 import org.jetbrains.annotations.NotNull;
+import org.joml.FrustumIntersection;
 
 import com.jozufozu.flywheel.util.MatrixUtil;
-import com.jozufozu.flywheel.util.joml.FrustumIntersection;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
@@ -23,7 +23,7 @@ public record RenderContext(LevelRenderer renderer, ClientLevel level, PoseStack
 	}
 
 	public static FrustumIntersection createCuller(Matrix4f viewProjection, float camX, float camY, float camZ) {
-		com.jozufozu.flywheel.util.joml.Matrix4f proj = MatrixUtil.toJoml(viewProjection);
+		org.joml.Matrix4f proj = MatrixUtil.toJoml(viewProjection);
 
 		proj.translate(camX, camY, camZ);
 

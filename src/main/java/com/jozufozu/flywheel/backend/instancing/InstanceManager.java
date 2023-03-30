@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import org.joml.FrustumIntersection;
+
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.backend.Backend;
@@ -16,7 +18,6 @@ import com.jozufozu.flywheel.backend.instancing.ratelimit.NonLimiter;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.light.LightUpdater;
-import com.jozufozu.flywheel.util.joml.FrustumIntersection;
 
 import net.minecraft.core.BlockPos;
 

@@ -1,6 +1,10 @@
 package com.jozufozu.flywheel.core.source;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 
 import com.google.common.collect.ImmutableList;

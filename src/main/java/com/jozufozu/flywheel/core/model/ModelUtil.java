@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector4f;
 import org.lwjgl.system.MemoryUtil;
 
 import com.dreizak.miniball.highdim.Miniball;
@@ -17,7 +18,6 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 import com.jozufozu.flywheel.core.Materials;
 import com.jozufozu.flywheel.core.vertex.Formats;
-import com.jozufozu.flywheel.util.joml.Vector4f;
 import com.mojang.blaze3d.vertex.BufferBuilder.DrawState;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
