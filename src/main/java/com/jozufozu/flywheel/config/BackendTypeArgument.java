@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.config;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-import com.jozufozu.flywheel.backend.BackendType;
-import com.jozufozu.flywheel.core.BackendTypes;
+import com.jozufozu.flywheel.api.backend.BackendType;
+import com.jozufozu.flywheel.lib.backend.BackendTypes;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;

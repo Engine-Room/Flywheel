@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.core.uniform.FlwShaderUniforms;
+import com.jozufozu.flywheel.lib.uniform.FlwShaderUniforms;
 
 import net.minecraft.client.renderer.FogRenderer;
 

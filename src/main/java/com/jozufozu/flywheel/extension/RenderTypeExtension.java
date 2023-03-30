@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.extension;
 
-import com.jozufozu.flywheel.backend.instancing.batching.DrawBufferSet;
+import com.jozufozu.flywheel.backend.engine.batching.DrawBufferSet;
 
 import net.minecraft.client.renderer.RenderType;
 

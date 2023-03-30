@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.config;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.backend.BackendType;
-import com.jozufozu.flywheel.core.BackendTypes;
+import com.jozufozu.flywheel.api.backend.BackendType;
+import com.jozufozu.flywheel.lib.backend.BackendTypes;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;

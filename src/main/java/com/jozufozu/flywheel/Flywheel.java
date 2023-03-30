@@ -4,21 +4,24 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.RenderWork;
-import com.jozufozu.flywheel.backend.ShadersModHandler;
+import com.jozufozu.flywheel.backend.engine.batching.DrawBuffer;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
-import com.jozufozu.flywheel.backend.instancing.batching.DrawBuffer;
 import com.jozufozu.flywheel.config.BackendTypeArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.core.BackendTypes;
-import com.jozufozu.flywheel.core.Components;
-import com.jozufozu.flywheel.core.PartialModel;
-import com.jozufozu.flywheel.core.QuadConverter;
-import com.jozufozu.flywheel.core.StitchedSprite;
-import com.jozufozu.flywheel.core.model.Models;
-import com.jozufozu.flywheel.event.EntityWorldHandler;
-import com.jozufozu.flywheel.event.ForgeEvents;
+import com.jozufozu.flywheel.handler.EntityWorldHandler;
+import com.jozufozu.flywheel.handler.ForgeEvents;
+import com.jozufozu.flywheel.lib.backend.BackendTypes;
+import com.jozufozu.flywheel.lib.context.Contexts;
+import com.jozufozu.flywheel.lib.format.Formats;
+import com.jozufozu.flywheel.lib.material.Materials;
+import com.jozufozu.flywheel.lib.model.Models;
+import com.jozufozu.flywheel.lib.model.PartialModel;
+import com.jozufozu.flywheel.lib.pipeline.Pipelines;
+import com.jozufozu.flywheel.lib.struct.StructTypes;
+import com.jozufozu.flywheel.lib.util.QuadConverter;
+import com.jozufozu.flywheel.lib.util.RenderWork;
+import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
 import com.mojang.logging.LogUtils;
@@ -98,13 +101,15 @@ public class Flywheel {
 
 		modEventBus.addListener(PartialModel::onModelRegistry);
 		modEventBus.addListener(PartialModel::onModelBake);
-		modEventBus.addListener(StitchedSprite::onTextureStitchPre);
-		modEventBus.addListener(StitchedSprite::onTextureStitchPost);
 
 //		forgeEventBus.addListener(ExampleEffect::tick);
 //		forgeEventBus.addListener(ExampleEffect::onReload);
 
-		Components.init();
+		Formats.init();
+		StructTypes.init();
+		Materials.init();
+		Contexts.init();
+		Pipelines.init();
 
 		VanillaInstances.init();
 

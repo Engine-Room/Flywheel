@@ -4,11 +4,11 @@ import java.util.function.BiConsumer;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.jozufozu.flywheel.api.backend.BackendType;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.BackendType;
-import com.jozufozu.flywheel.backend.SimpleBackendType;
-import com.jozufozu.flywheel.core.BackendTypes;
-import com.jozufozu.flywheel.core.uniform.FlwShaderUniforms;
+import com.jozufozu.flywheel.lib.backend.BackendTypes;
+import com.jozufozu.flywheel.lib.backend.SimpleBackendType;
+import com.jozufozu.flywheel.lib.uniform.FlwShaderUniforms;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;

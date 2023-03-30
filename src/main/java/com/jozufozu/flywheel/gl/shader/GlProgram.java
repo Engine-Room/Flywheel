@@ -5,7 +5,7 @@ import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform1i;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.core.uniform.UniformBuffer;
+import com.jozufozu.flywheel.backend.uniform.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlObject;
 import com.mojang.blaze3d.shaders.ProgramManager;
 

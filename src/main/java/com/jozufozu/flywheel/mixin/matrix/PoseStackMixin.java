@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.mixin.matrix;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import com.jozufozu.flywheel.util.transform.TransformStack;
+import com.jozufozu.flywheel.lib.transform.TransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 

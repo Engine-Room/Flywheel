@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.backend.memory.FlwMemoryTracker;
+import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 
 public class StringUtil {
 

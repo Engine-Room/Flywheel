@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.gl.array;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL32;
 
-import com.jozufozu.flywheel.core.layout.BufferLayout;
+import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.gl.GlObject;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;

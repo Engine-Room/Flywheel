@@ -6,9 +6,9 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
-import com.jozufozu.flywheel.backend.instancing.AbstractStorage;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
-import com.jozufozu.flywheel.backend.instancing.Storage;
+import com.jozufozu.flywheel.backend.instancing.storage.AbstractStorage;
+import com.jozufozu.flywheel.backend.instancing.storage.Storage;
 import com.jozufozu.flywheel.light.LightUpdater;
 
 public class EffectInstanceManager extends InstanceManager<Effect> {

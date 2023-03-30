@@ -6,9 +6,9 @@ import java.util.stream.Stream;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
+import com.jozufozu.flywheel.api.instancer.FlatLit;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
-import com.jozufozu.flywheel.core.structs.FlatLit;
 import com.jozufozu.flywheel.light.LightListener;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
 
@@ -50,7 +50,7 @@ public abstract class AbstractInstance implements Instance, LightListener {
 	/**
 	 * Free any acquired resources.
 	 */
-	protected abstract void remove();
+	public abstract void remove();
 
 	/**
 	 * Update instance data here. Good for when data doesn't change very often and when animations are GPU based.

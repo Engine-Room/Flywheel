@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.api.vertex;
 
-import com.jozufozu.flywheel.core.layout.BufferLayout;
+import com.jozufozu.flywheel.api.layout.BufferLayout;
 
 import net.minecraft.resources.ResourceLocation;
 

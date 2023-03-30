@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
-import com.jozufozu.flywheel.backend.instancing.One2OneStorage;
+import com.jozufozu.flywheel.backend.instancing.storage.One2OneStorage;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;

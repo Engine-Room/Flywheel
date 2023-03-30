@@ -6,8 +6,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.instancing.ParallelTaskExecutor;
-import com.jozufozu.flywheel.backend.instancing.WorkGroup;
+import com.jozufozu.flywheel.backend.task.ParallelTaskExecutor;
+import com.jozufozu.flywheel.backend.task.WorkGroup;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.jozufozu.flywheel.util.WorldAttached;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;

@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.api.vertex;
 
-import com.jozufozu.flywheel.core.vertex.InferredVertexListProviderImpl;
+import com.jozufozu.flywheel.backend.vertex.InferredVertexListProviderImpl;
 import com.jozufozu.flywheel.extension.VertexFormatExtension;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
