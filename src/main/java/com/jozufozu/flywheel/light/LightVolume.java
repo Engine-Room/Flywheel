@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.light;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.backend.memory.MemoryBlock;
+import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.util.box.GridAlignedBB;
 import com.jozufozu.flywheel.util.box.ImmutableBox;
 

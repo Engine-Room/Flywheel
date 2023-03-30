@@ -5,9 +5,11 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.api.FlywheelLevel;
-import com.jozufozu.flywheel.backend.instancing.ParallelTaskExecutor;
+import com.jozufozu.flywheel.api.backend.BackendType;
+import com.jozufozu.flywheel.backend.task.ParallelTaskExecutor;
 import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.core.BackendTypes;
+import com.jozufozu.flywheel.lib.backend.BackendTypes;
+import com.jozufozu.flywheel.lib.util.RenderWork;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.client.Minecraft;

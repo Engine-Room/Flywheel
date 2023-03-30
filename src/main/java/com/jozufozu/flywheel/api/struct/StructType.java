@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.api.struct;
 
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
-import com.jozufozu.flywheel.core.layout.BufferLayout;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;

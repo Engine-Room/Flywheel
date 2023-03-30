@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.backend.RenderWork;
+import com.jozufozu.flywheel.lib.util.RenderWork;
 import com.jozufozu.flywheel.light.LightUpdater;
 
 import net.minecraft.client.Minecraft;

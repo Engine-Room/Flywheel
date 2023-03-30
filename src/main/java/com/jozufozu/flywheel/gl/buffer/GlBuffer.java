@@ -10,11 +10,11 @@ import static org.lwjgl.opengl.GL31.glCopyBufferSubData;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.backend.memory.FlwMemoryTracker;
-import com.jozufozu.flywheel.backend.memory.MemoryBlock;
 import com.jozufozu.flywheel.gl.GlObject;
 import com.jozufozu.flywheel.gl.error.GlError;
 import com.jozufozu.flywheel.gl.error.GlException;
+import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
+import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
 public class GlBuffer extends GlObject {
 

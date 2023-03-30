@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-import com.jozufozu.flywheel.backend.instancing.batching.DrawBufferSet;
+import com.jozufozu.flywheel.backend.engine.batching.DrawBufferSet;
 import com.jozufozu.flywheel.extension.RenderTypeExtension;
 
 import net.minecraft.client.renderer.RenderType;

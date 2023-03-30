@@ -10,12 +10,12 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.api.RenderStage;
+import com.jozufozu.flywheel.api.event.BeginFrameEvent;
+import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.api.event.RenderContext;
+import com.jozufozu.flywheel.api.event.RenderStage;
+import com.jozufozu.flywheel.api.event.RenderStageEvent;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.core.RenderContext;
-import com.jozufozu.flywheel.event.BeginFrameEvent;
-import com.jozufozu.flywheel.event.ReloadRenderersEvent;
-import com.jozufozu.flywheel.event.RenderStageEvent;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 

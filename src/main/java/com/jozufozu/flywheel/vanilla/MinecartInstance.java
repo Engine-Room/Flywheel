@@ -2,20 +2,20 @@ package com.jozufozu.flywheel.vanilla;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.api.RenderStage;
+import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
+import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
-import com.jozufozu.flywheel.core.Materials;
-import com.jozufozu.flywheel.core.hardcoded.ModelPart;
-import com.jozufozu.flywheel.core.model.Mesh;
-import com.jozufozu.flywheel.core.model.Models;
-import com.jozufozu.flywheel.core.model.SimpleLazyModel;
-import com.jozufozu.flywheel.core.structs.StructTypes;
-import com.jozufozu.flywheel.core.structs.transformed.TransformedPart;
+import com.jozufozu.flywheel.lib.material.Materials;
+import com.jozufozu.flywheel.lib.model.Models;
+import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
+import com.jozufozu.flywheel.lib.modelpart.ModelPart;
+import com.jozufozu.flywheel.lib.struct.StructTypes;
+import com.jozufozu.flywheel.lib.struct.TransformedPart;
+import com.jozufozu.flywheel.lib.transform.TransformStack;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
-import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 
