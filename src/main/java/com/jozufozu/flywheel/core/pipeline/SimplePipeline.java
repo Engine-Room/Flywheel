@@ -2,8 +2,8 @@ package com.jozufozu.flywheel.core.pipeline;
 
 import com.jozufozu.flywheel.api.pipeline.Pipeline;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.core.SourceComponent;
+import com.jozufozu.flywheel.gl.GLSLVersion;
 
 import net.minecraft.resources.ResourceLocation;
 

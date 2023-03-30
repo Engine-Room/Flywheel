@@ -12,11 +12,11 @@ import org.jetbrains.annotations.Nullable;
 import com.jozufozu.flywheel.backend.BackendType;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.SimpleBackendType;
-import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.batching.BatchingEngine;
 import com.jozufozu.flywheel.backend.instancing.indirect.IndirectEngine;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.core.pipeline.SimplePipeline;
+import com.jozufozu.flywheel.gl.versioned.GlCompat;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TextComponent;

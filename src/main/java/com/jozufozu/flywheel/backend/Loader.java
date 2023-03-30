@@ -2,8 +2,8 @@ package com.jozufozu.flywheel.backend;
 
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.compile.FlwCompiler;
-import com.jozufozu.flywheel.core.source.ShaderSources;
-import com.jozufozu.flywheel.core.source.error.ErrorReporter;
+import com.jozufozu.flywheel.glsl.ShaderSources;
+import com.jozufozu.flywheel.glsl.error.ErrorReporter;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;

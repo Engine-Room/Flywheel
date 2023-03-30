@@ -2,10 +2,10 @@ package com.jozufozu.flywheel.core.layout;
 
 import java.util.function.Consumer;
 
-import com.jozufozu.flywheel.backend.gl.GlNumericType;
-import com.jozufozu.flywheel.backend.gl.array.VertexAttribute;
-import com.jozufozu.flywheel.backend.gl.array.VertexAttributeF;
-import com.jozufozu.flywheel.core.source.generate.GlslExpr;
+import com.jozufozu.flywheel.gl.GlNumericType;
+import com.jozufozu.flywheel.gl.array.VertexAttribute;
+import com.jozufozu.flywheel.gl.array.VertexAttributeF;
+import com.jozufozu.flywheel.glsl.generate.GlslExpr;
 
 public record MatInput(int rows, int cols, String typeName, String packedTypeName,
 					   String unpackingFunction) implements InputType {

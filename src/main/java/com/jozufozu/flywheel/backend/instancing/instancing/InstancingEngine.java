@@ -10,8 +10,6 @@ import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.struct.StructType;
-import com.jozufozu.flywheel.backend.gl.GlStateTracker;
-import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.Engine;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.TaskExecutor;
@@ -21,6 +19,8 @@ import com.jozufozu.flywheel.core.Pipelines;
 import com.jozufozu.flywheel.core.RenderContext;
 import com.jozufozu.flywheel.core.context.SimpleContext;
 import com.jozufozu.flywheel.core.model.Model;
+import com.jozufozu.flywheel.gl.GlStateTracker;
+import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 

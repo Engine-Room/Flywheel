@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.core.layout;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.jozufozu.flywheel.backend.gl.array.VertexAttribute;
-import com.jozufozu.flywheel.core.source.generate.GlslExpr;
+import com.jozufozu.flywheel.gl.array.VertexAttribute;
+import com.jozufozu.flywheel.glsl.generate.GlslExpr;
 
 public class VecInput implements InputType {
 

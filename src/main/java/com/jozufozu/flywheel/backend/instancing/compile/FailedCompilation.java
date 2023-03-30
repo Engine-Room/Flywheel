@@ -8,10 +8,10 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.core.source.SourceFile;
-import com.jozufozu.flywheel.core.source.SourceLines;
-import com.jozufozu.flywheel.core.source.error.ErrorBuilder;
-import com.jozufozu.flywheel.core.source.span.Span;
+import com.jozufozu.flywheel.glsl.SourceFile;
+import com.jozufozu.flywheel.glsl.SourceLines;
+import com.jozufozu.flywheel.glsl.error.ErrorBuilder;
+import com.jozufozu.flywheel.glsl.span.Span;
 import com.jozufozu.flywheel.util.ConsoleColors;
 import com.jozufozu.flywheel.util.StringUtil;
 

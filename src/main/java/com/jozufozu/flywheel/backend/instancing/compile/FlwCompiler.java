@@ -17,19 +17,19 @@ import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.gl.GLSLVersion;
-import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.instancing.indirect.IndirectComponent;
 import com.jozufozu.flywheel.core.ComponentRegistry;
 import com.jozufozu.flywheel.core.Pipelines;
 import com.jozufozu.flywheel.core.SourceComponent;
 import com.jozufozu.flywheel.core.context.SimpleContext;
 import com.jozufozu.flywheel.core.pipeline.SimplePipeline;
-import com.jozufozu.flywheel.core.source.ShaderLoadingException;
-import com.jozufozu.flywheel.core.source.ShaderSources;
-import com.jozufozu.flywheel.core.source.generate.FnSignature;
-import com.jozufozu.flywheel.core.source.generate.GlslExpr;
+import com.jozufozu.flywheel.gl.GLSLVersion;
+import com.jozufozu.flywheel.gl.shader.GlProgram;
+import com.jozufozu.flywheel.gl.shader.ShaderType;
+import com.jozufozu.flywheel.glsl.ShaderLoadingException;
+import com.jozufozu.flywheel.glsl.ShaderSources;
+import com.jozufozu.flywheel.glsl.generate.FnSignature;
+import com.jozufozu.flywheel.glsl.generate.GlslExpr;
 import com.jozufozu.flywheel.util.StringUtil;
 
 public class FlwCompiler {

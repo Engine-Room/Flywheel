@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.instancing.instancing;
 
-import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
+import com.jozufozu.flywheel.gl.buffer.GlBufferType;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 public class ElementBuffer {

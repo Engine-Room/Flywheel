@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.core.layout;
 
-import com.jozufozu.flywheel.core.source.generate.GlslExpr;
-import com.jozufozu.flywheel.core.source.generate.GlslStruct;
+import com.jozufozu.flywheel.glsl.generate.GlslExpr;
+import com.jozufozu.flywheel.glsl.generate.GlslStruct;
 
 public record LayoutItem(InputType type, String name) {
 	public GlslExpr unpackField(GlslExpr.Variable struct) {
