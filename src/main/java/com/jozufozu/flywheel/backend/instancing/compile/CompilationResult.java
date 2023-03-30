@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.backend.instancing.compile;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.backend.gl.shader.GlShader;
+import com.jozufozu.flywheel.gl.shader.GlShader;
 
 public sealed interface CompilationResult {
 	@Nullable

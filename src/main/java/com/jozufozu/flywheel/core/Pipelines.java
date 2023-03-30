@@ -1,10 +1,10 @@
 package com.jozufozu.flywheel.core;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.backend.instancing.indirect.IndirectComponent;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancedArraysComponent;
 import com.jozufozu.flywheel.core.pipeline.SimplePipeline;
+import com.jozufozu.flywheel.gl.GLSLVersion;
 
 import net.minecraft.resources.ResourceLocation;
 

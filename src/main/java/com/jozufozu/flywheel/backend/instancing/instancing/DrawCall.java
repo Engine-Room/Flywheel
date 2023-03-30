@@ -2,8 +2,8 @@ package com.jozufozu.flywheel.backend.instancing.instancing;
 
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.gl.GlStateTracker;
-import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
+import com.jozufozu.flywheel.gl.GlStateTracker;
+import com.jozufozu.flywheel.gl.array.GlVertexArray;
 
 public class DrawCall {
 

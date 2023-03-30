@@ -15,11 +15,11 @@ import com.jozufozu.flywheel.api.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.instancing.compile.FlwCompiler;
 import com.jozufozu.flywheel.core.Components;
 import com.jozufozu.flywheel.core.Pipelines;
 import com.jozufozu.flywheel.core.QuadConverter;
+import com.jozufozu.flywheel.gl.shader.GlProgram;
 
 public class IndirectCullingGroup<T extends InstancedPart> {
 

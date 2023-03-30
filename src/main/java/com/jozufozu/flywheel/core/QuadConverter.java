@@ -6,11 +6,11 @@ import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL32C;
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.backend.gl.GlNumericType;
-import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
-import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;
 import com.jozufozu.flywheel.backend.instancing.instancing.ElementBuffer;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.gl.GlNumericType;
+import com.jozufozu.flywheel.gl.buffer.GlBufferType;
+import com.jozufozu.flywheel.gl.buffer.GlBufferUsage;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;

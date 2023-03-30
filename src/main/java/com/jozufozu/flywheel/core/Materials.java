@@ -2,9 +2,9 @@ package com.jozufozu.flywheel.core;
 
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
-import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.core.material.SimpleMaterial;
 import com.jozufozu.flywheel.core.material.SimpleMaterial.GlStateShard;
+import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.util.DiffuseLightCalculator;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;

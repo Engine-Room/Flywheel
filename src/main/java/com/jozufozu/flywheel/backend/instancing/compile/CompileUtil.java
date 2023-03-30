@@ -14,9 +14,9 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.gl.GLSLVersion;
-import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
-import com.jozufozu.flywheel.core.source.SourceFile;
+import com.jozufozu.flywheel.gl.GLSLVersion;
+import com.jozufozu.flywheel.gl.shader.ShaderType;
+import com.jozufozu.flywheel.glsl.SourceFile;
 
 public class CompileUtil {
 

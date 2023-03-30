@@ -12,12 +12,12 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.core.SourceComponent;
-import com.jozufozu.flywheel.core.source.ShaderSources;
-import com.jozufozu.flywheel.core.source.generate.FnSignature;
-import com.jozufozu.flywheel.core.source.generate.GlslBlock;
-import com.jozufozu.flywheel.core.source.generate.GlslBuilder;
-import com.jozufozu.flywheel.core.source.generate.GlslExpr;
-import com.jozufozu.flywheel.core.source.generate.GlslSwitch;
+import com.jozufozu.flywheel.glsl.ShaderSources;
+import com.jozufozu.flywheel.glsl.generate.FnSignature;
+import com.jozufozu.flywheel.glsl.generate.GlslBlock;
+import com.jozufozu.flywheel.glsl.generate.GlslBuilder;
+import com.jozufozu.flywheel.glsl.generate.GlslExpr;
+import com.jozufozu.flywheel.glsl.generate.GlslSwitch;
 import com.jozufozu.flywheel.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;

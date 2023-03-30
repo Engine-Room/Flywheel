@@ -2,9 +2,9 @@ package com.jozufozu.flywheel.api.pipeline;
 
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.gl.GLSLVersion;
 import com.jozufozu.flywheel.core.SourceComponent;
-import com.jozufozu.flywheel.core.source.ShaderSources;
+import com.jozufozu.flywheel.gl.GLSLVersion;
+import com.jozufozu.flywheel.glsl.ShaderSources;
 
 import net.minecraft.resources.ResourceLocation;
 

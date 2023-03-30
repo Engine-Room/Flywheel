@@ -5,8 +5,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.backend.gl.GlStateTracker;
-import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
+import com.jozufozu.flywheel.gl.GlStateTracker;
+import com.jozufozu.flywheel.gl.buffer.GlBufferType;
 import com.mojang.blaze3d.platform.GlStateManager;
 
 @Mixin(GlStateManager.class)

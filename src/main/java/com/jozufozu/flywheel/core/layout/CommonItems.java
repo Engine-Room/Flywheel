@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.core.layout;
 
-import com.jozufozu.flywheel.backend.gl.GlNumericType;
-import com.jozufozu.flywheel.backend.gl.array.VertexAttributeF;
-import com.jozufozu.flywheel.backend.gl.array.VertexAttributeI;
+import com.jozufozu.flywheel.gl.GlNumericType;
+import com.jozufozu.flywheel.gl.array.VertexAttributeF;
+import com.jozufozu.flywheel.gl.array.VertexAttributeI;
 
 public class CommonItems {
 
