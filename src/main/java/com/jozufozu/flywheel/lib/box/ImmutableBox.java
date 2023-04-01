@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.util.box;
+package com.jozufozu.flywheel.lib.box;
 
 import static com.jozufozu.flywheel.util.RenderMath.isPowerOf2;
 
@@ -65,14 +65,14 @@ public interface ImmutableBox {
 		return isPowerOf2(volume());
 	}
 
-	default GridAlignedBB intersect(ImmutableBox other) {
+	default MutableBox intersect(ImmutableBox other) {
 		int minX = Math.max(this.getMinX(), other.getMinX());
 		int minY = Math.max(this.getMinY(), other.getMinY());
 		int minZ = Math.max(this.getMinZ(), other.getMinZ());
 		int maxX = Math.min(this.getMaxX(), other.getMaxX());
 		int maxY = Math.min(this.getMaxY(), other.getMaxY());
 		int maxZ = Math.min(this.getMaxZ(), other.getMaxZ());
-		return new GridAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+		return new MutableBox(minX, minY, minZ, maxX, maxY, maxZ);
 	}
 
 	default ImmutableBox union(ImmutableBox other) {
@@ -82,7 +82,7 @@ public interface ImmutableBox {
 		int maxX = Math.max(this.getMaxX(), other.getMaxX());
 		int maxY = Math.max(this.getMaxY(), other.getMaxY());
 		int maxZ = Math.max(this.getMaxZ(), other.getMaxZ());
-		return new GridAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+		return new MutableBox(minX, minY, minZ, maxX, maxY, maxZ);
 	}
 
 
@@ -108,7 +108,7 @@ public interface ImmutableBox {
 				&& other.getMaxZ() <= this.getMaxZ();
 	}
 
-	default boolean isContainedBy(GridAlignedBB other) {
+	default boolean isContainedBy(MutableBox other) {
 		return other.contains(this);
 	}
 
@@ -132,7 +132,12 @@ public interface ImmutableBox {
 		return new AABB(getMinX(), getMinY(), getMinZ(), getMaxX(), getMaxY(), getMaxZ());
 	}
 
-	default GridAlignedBB copy() {
-		return new GridAlignedBB(getMinX(), getMinY(), getMinZ(), getMaxX(), getMaxY(), getMaxZ());
+	default MutableBox copy() {
+		return new MutableBox(getMinX(), getMinY(), getMinZ(), getMaxX(), getMaxY(), getMaxZ());
+	}
+
+	@FunctionalInterface
+	interface CoordinateConsumer {
+		void consume(int x, int y, int z);
 	}
 }

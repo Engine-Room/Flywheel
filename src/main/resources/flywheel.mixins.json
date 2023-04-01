@@ -15,6 +15,7 @@
     "GlStateManagerMixin",
     "LevelRendererAccessor",
     "LevelRendererMixin",
+    "LightUpdateMixin",
     "PausedPartialTickAccessor",
     "RenderTypeMixin",
     "VertexFormatMixin",
@@ -22,8 +23,6 @@
     "instancemanage.InstanceAddMixin",
     "instancemanage.InstanceRemoveMixin",
     "instancemanage.InstanceUpdateMixin",
-    "light.LightUpdateMixin",
-    "light.NetworkLightUpdateMixin",
     "matrix.Matrix3fAccessor",
     "matrix.Matrix4fAccessor",
     "matrix.PoseStackMixin"

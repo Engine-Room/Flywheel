@@ -127,6 +127,8 @@ public class DrawBuffer {
 	}
 
 	public void free() {
+		reset();
+
 		if (memory == null) {
 			return;
 		}

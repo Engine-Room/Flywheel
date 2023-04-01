@@ -7,9 +7,9 @@ import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
-import com.jozufozu.flywheel.light.LightListener;
-import com.jozufozu.flywheel.light.TickingLightListener;
-import com.jozufozu.flywheel.util.box.GridAlignedBB;
+import com.jozufozu.flywheel.lib.box.MutableBox;
+import com.jozufozu.flywheel.lib.light.LightListener;
+import com.jozufozu.flywheel.lib.light.TickingLightListener;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.core.BlockPos;
@@ -38,16 +38,16 @@ import net.minecraft.world.phys.Vec3;
 public abstract class EntityInstance<E extends Entity> extends AbstractInstance implements LightListener, TickingLightListener {
 
 	protected final E entity;
-	protected final GridAlignedBB bounds;
+	protected final MutableBox bounds;
 
 	public EntityInstance(InstancerManager instancerManager, E entity) {
 		super(instancerManager, entity.level);
 		this.entity = entity;
-		bounds = GridAlignedBB.from(entity.getBoundingBox());
+		bounds = MutableBox.from(entity.getBoundingBox());
 	}
 
 	@Override
-	public GridAlignedBB getVolume() {
+	public MutableBox getVolume() {
 		return bounds;
 	}
 

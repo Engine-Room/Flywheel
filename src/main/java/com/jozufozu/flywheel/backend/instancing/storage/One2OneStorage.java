@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
-import com.jozufozu.flywheel.light.LightUpdater;
+import com.jozufozu.flywheel.lib.light.LightUpdater;
 
 public abstract class One2OneStorage<T> extends AbstractStorage<T> {
 	private final Map<T, AbstractInstance> instances;

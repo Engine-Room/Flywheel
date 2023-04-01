@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.util.box;
+package com.jozufozu.flywheel.lib.box;
 
 import java.util.Collection;
 
@@ -10,7 +10,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.AABB;
 
-public class GridAlignedBB implements ImmutableBox {
+public class MutableBox implements ImmutableBox {
 	private int minX;
 	private int minY;
 	private int minZ;
@@ -18,11 +18,11 @@ public class GridAlignedBB implements ImmutableBox {
 	private int maxY;
 	private int maxZ;
 
-	public GridAlignedBB() {
+	public MutableBox() {
 
 	}
 
-	public GridAlignedBB(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+	public MutableBox(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
 		this.minX = minX;
 		this.minY = minY;
 		this.minZ = minZ;
@@ -31,41 +31,41 @@ public class GridAlignedBB implements ImmutableBox {
 		this.maxZ = maxZ;
 	}
 
-	public static GridAlignedBB ofRadius(int radius) {
-		return new GridAlignedBB(-radius, -radius, -radius, radius + 1, radius + 1, radius + 1);
+	public static MutableBox ofRadius(int radius) {
+		return new MutableBox(-radius, -radius, -radius, radius + 1, radius + 1, radius + 1);
 	}
 
-	public static GridAlignedBB from(AABB aabb) {
+	public static MutableBox from(AABB aabb) {
 		int minX = (int) Math.floor(aabb.minX);
 		int minY = (int) Math.floor(aabb.minY);
 		int minZ = (int) Math.floor(aabb.minZ);
 		int maxX = (int) Math.ceil(aabb.maxX);
 		int maxY = (int) Math.ceil(aabb.maxY);
 		int maxZ = (int) Math.ceil(aabb.maxZ);
-		return new GridAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+		return new MutableBox(minX, minY, minZ, maxX, maxY, maxZ);
 	}
 
-	public static GridAlignedBB from(SectionPos pos) {
-		return new GridAlignedBB(pos.minBlockX(), pos.minBlockY(), pos.minBlockZ(), pos.maxBlockX() + 1, pos.maxBlockY() + 1, pos.maxBlockZ() + 1);
+	public static MutableBox from(SectionPos pos) {
+		return new MutableBox(pos.minBlockX(), pos.minBlockY(), pos.minBlockZ(), pos.maxBlockX() + 1, pos.maxBlockY() + 1, pos.maxBlockZ() + 1);
 	}
 
-	public static GridAlignedBB from(BlockPos start, BlockPos end) {
-		return new GridAlignedBB(start.getX(), start.getY(), start.getZ(), end.getX() + 1, end.getY() + 1, end.getZ() + 1);
+	public static MutableBox from(BlockPos start, BlockPos end) {
+		return new MutableBox(start.getX(), start.getY(), start.getZ(), end.getX() + 1, end.getY() + 1, end.getZ() + 1);
 	}
 
-	public static GridAlignedBB from(BlockPos pos) {
-		return new GridAlignedBB(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
+	public static MutableBox from(BlockPos pos) {
+		return new MutableBox(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
 	}
 
-	public static GridAlignedBB from(int sectionX, int sectionZ) {
+	public static MutableBox from(int sectionX, int sectionZ) {
 		int startX = sectionX << 4;
 		int startZ = sectionZ << 4;
-		return new GridAlignedBB(startX, 0, startZ, startX + 16, 256, startZ + 16);
+		return new MutableBox(startX, 0, startZ, startX + 16, 256, startZ + 16);
 	}
 
 	public static ImmutableBox containingAll(Collection<BlockPos> positions) {
 		if (positions.isEmpty()) {
-			return new GridAlignedBB();
+			return new MutableBox();
 		}
 		int minX = Integer.MAX_VALUE;
 		int minY = Integer.MAX_VALUE;
@@ -81,7 +81,7 @@ public class GridAlignedBB implements ImmutableBox {
 			maxY = Math.max(maxY, pos.getY());
 			maxZ = Math.max(maxZ, pos.getZ());
 		}
-		return new GridAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+		return new MutableBox(minX, minY, minZ, maxX, maxY, maxZ);
 	}
 
     public void fixMinMax() {
@@ -277,37 +277,37 @@ public class GridAlignedBB implements ImmutableBox {
 		return maxZ;
 	}
 
-	public GridAlignedBB setMinX(int minX) {
+	public MutableBox setMinX(int minX) {
 		this.minX = minX;
 		return this;
 	}
 
-	public GridAlignedBB setMinY(int minY) {
+	public MutableBox setMinY(int minY) {
 		this.minY = minY;
 		return this;
 	}
 
-	public GridAlignedBB setMinZ(int minZ) {
+	public MutableBox setMinZ(int minZ) {
 		this.minZ = minZ;
 		return this;
 	}
 
-	public GridAlignedBB setMaxX(int maxX) {
+	public MutableBox setMaxX(int maxX) {
 		this.maxX = maxX;
 		return this;
 	}
 
-	public GridAlignedBB setMaxY(int maxY) {
+	public MutableBox setMaxY(int maxY) {
 		this.maxY = maxY;
 		return this;
 	}
 
-	public GridAlignedBB setMaxZ(int maxZ) {
+	public MutableBox setMaxZ(int maxZ) {
 		this.maxZ = maxZ;
 		return this;
 	}
 
-	public GridAlignedBB assign(BlockPos start, BlockPos end) {
+	public MutableBox assign(BlockPos start, BlockPos end) {
 		minX = start.getX();
 		minY = start.getY();
 		minZ = start.getZ();
@@ -317,22 +317,22 @@ public class GridAlignedBB implements ImmutableBox {
 		return this;
 	}
 
-	public GridAlignedBB setMax(Vec3i v) {
+	public MutableBox setMax(Vec3i v) {
 		return setMax(v.getX(), v.getY(), v.getZ());
 	}
 
-	public GridAlignedBB setMin(Vec3i v) {
+	public MutableBox setMin(Vec3i v) {
 		return setMin(v.getX(), v.getY(), v.getZ());
 	}
 
-	public GridAlignedBB setMax(int x, int y, int z) {
+	public MutableBox setMax(int x, int y, int z) {
 		maxX = x;
 		maxY = y;
 		maxZ = z;
 		return this;
 	}
 
-	public GridAlignedBB setMin(int x, int y, int z) {
+	public MutableBox setMin(int x, int y, int z) {
 		minX = x;
 		minY = y;
 		minZ = z;
@@ -376,14 +376,14 @@ public class GridAlignedBB implements ImmutableBox {
 	}
 
 	@Override
-	public GridAlignedBB intersect(ImmutableBox other) {
+	public MutableBox intersect(ImmutableBox other) {
 		int minX = Math.max(this.minX, other.getMinX());
 		int minY = Math.max(this.minY, other.getMinY());
 		int minZ = Math.max(this.minZ, other.getMinZ());
 		int maxX = Math.min(this.maxX, other.getMaxX());
 		int maxY = Math.min(this.maxY, other.getMaxY());
 		int maxZ = Math.min(this.maxZ, other.getMaxZ());
-		return new GridAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+		return new MutableBox(minX, minY, minZ, maxX, maxY, maxZ);
 	}
 
 	@Override
@@ -394,7 +394,7 @@ public class GridAlignedBB implements ImmutableBox {
 		int maxX = Math.max(this.maxX, other.getMaxX());
 		int maxY = Math.max(this.maxY, other.getMaxY());
 		int maxZ = Math.max(this.maxZ, other.getMaxZ());
-		return new GridAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+		return new MutableBox(minX, minY, minZ, maxX, maxY, maxZ);
 	}
 
 	@Override
@@ -426,8 +426,8 @@ public class GridAlignedBB implements ImmutableBox {
 	}
 
 	@Override
-	public GridAlignedBB copy() {
-		return new GridAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+	public MutableBox copy() {
+		return new MutableBox(minX, minY, minZ, maxX, maxY, maxZ);
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.light;
+package com.jozufozu.flywheel.lib.light;
 
 import java.util.Queue;
 import java.util.Set;
@@ -6,15 +6,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.task.ParallelTaskExecutor;
 import com.jozufozu.flywheel.backend.task.WorkGroup;
+import com.jozufozu.flywheel.lib.box.ImmutableBox;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.jozufozu.flywheel.util.WorldAttached;
-import com.jozufozu.flywheel.util.box.GridAlignedBB;
-import com.jozufozu.flywheel.util.box.ImmutableBox;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
@@ -28,7 +25,11 @@ import net.minecraft.world.level.LightLayer;
 public class LightUpdater {
 
 	private static final WorldAttached<LightUpdater> LEVELS = new WorldAttached<>(LightUpdater::new);
-	private final ParallelTaskExecutor taskExecutor;
+
+	private final LevelAccessor level;
+
+	private final WeakContainmentMultiMap<LightListener> listenersBySection = new WeakContainmentMultiMap<>();
+	private final Set<TickingLightListener> tickingListeners = FlwUtil.createWeakHashSet();
 
 	public static LightUpdater get(LevelAccessor level) {
 		if (LightUpdated.receivesLightUpdates(level)) {
@@ -40,14 +41,7 @@ public class LightUpdater {
 		}
 	}
 
-	private final LevelAccessor level;
-
-	private final Set<TickingLightListener> tickingLightListeners = FlwUtil.createWeakHashSet();
-	private final WeakContainmentMultiMap<LightListener> sections = new WeakContainmentMultiMap<>();
-	private final WeakContainmentMultiMap<LightListener> chunks = new WeakContainmentMultiMap<>();
-
 	public LightUpdater(LevelAccessor level) {
-		taskExecutor = Backend.getTaskExecutor();
 		this.level = level;
 	}
 
@@ -57,7 +51,7 @@ public class LightUpdater {
 	}
 
 	private void tickSerial() {
-		for (TickingLightListener tickingLightListener : tickingLightListeners) {
+		for (TickingLightListener tickingLightListener : tickingListeners) {
 			if (tickingLightListener.tickLightListener()) {
 				addListener(tickingLightListener);
 			}
@@ -68,13 +62,13 @@ public class LightUpdater {
 		Queue<LightListener> listeners = new ConcurrentLinkedQueue<>();
 
 		WorkGroup.builder()
-				.addTasks(tickingLightListeners.stream(), listener -> {
+				.addTasks(tickingListeners.stream(), listener -> {
 					if (listener.tickLightListener()) {
 						listeners.add(listener);
 					}
 				})
 				.onComplete(() -> listeners.forEach(this::addListener))
-				.execute(taskExecutor);
+				.execute(Backend.getTaskExecutor());
 	}
 
 	/**
@@ -84,12 +78,11 @@ public class LightUpdater {
 	 */
 	public void addListener(LightListener listener) {
 		if (listener instanceof TickingLightListener)
-			tickingLightListeners.add(((TickingLightListener) listener));
+			tickingListeners.add(((TickingLightListener) listener));
 
 		ImmutableBox box = listener.getVolume();
 
-		LongSet sections = this.sections.getAndResetContainment(listener);
-		LongSet chunks = this.chunks.getAndResetContainment(listener);
+		LongSet sections = this.listenersBySection.getAndResetContainment(listener);
 
 		int minX = SectionPos.blockToSectionCoord(box.getMinX());
 		int minY = SectionPos.blockToSectionCoord(box.getMinY());
@@ -99,75 +92,42 @@ public class LightUpdater {
 		int maxZ = SectionPos.blockToSectionCoord(box.getMaxZ());
 
 		for (int x = minX; x <= maxX; x++) {
-			for (int z = minZ; z <= maxZ; z++) {
-				for (int y = minY; y <= maxY; y++) {
+			for (int y = minY; y <= maxY; y++) {
+				for (int z = minZ; z <= maxZ; z++) {
 					long sectionPos = SectionPos.asLong(x, y, z);
-					this.sections.put(sectionPos, listener);
+					this.listenersBySection.put(sectionPos, listener);
 					sections.add(sectionPos);
 				}
-				long chunkPos = SectionPos.asLong(x, 0, z);
-				this.chunks.put(chunkPos, listener);
-				chunks.add(chunkPos);
 			}
 		}
 	}
 
 	public void removeListener(LightListener listener) {
-		this.sections.remove(listener);
-		this.chunks.remove(listener);
+		this.listenersBySection.remove(listener);
 	}
 
 	/**
 	 * Dispatch light updates to all registered {@link LightListener}s.
-	 * @param type       The type of light that changed.
-	 * @param sectionPos A long representing the section position where light changed.
+	 * @param type The type of light that changed.
+	 * @param pos  The section position where light changed.
 	 */
-	public void onLightUpdate(LightLayer type, long sectionPos) {
-		Set<LightListener> set = sections.get(sectionPos);
+	public void onLightUpdate(LightLayer type, SectionPos pos) {
+		Set<LightListener> listeners = listenersBySection.get(pos.asLong());
 
-		if (set == null || set.isEmpty()) return;
+		if (listeners == null || listeners.isEmpty()) return;
 
-		set.removeIf(LightListener::isListenerInvalid);
+		listeners.removeIf(LightListener::isInvalid);
 
-		ImmutableBox chunkBox = GridAlignedBB.from(SectionPos.of(sectionPos));
-
-		for (LightListener listener : set) {
-			listener.onLightUpdate(type, chunkBox);
+		for (LightListener listener : listeners) {
+			listener.onLightUpdate(type, pos);
 		}
-	}
-
-	/**
-	 * Dispatch light updates to all registered {@link LightListener}s
-	 * when the server sends lighting data for an entire chunk.
-	 *
-	 */
-	public void onLightPacket(int chunkX, int chunkZ) {
-		long chunkPos = SectionPos.asLong(chunkX, 0, chunkZ);
-
-		Set<LightListener> set = chunks.get(chunkPos);
-
-		if (set == null || set.isEmpty()) return;
-
-		set.removeIf(LightListener::isListenerInvalid);
-
-		for (LightListener listener : set) {
-			listener.onLightPacket(chunkX, chunkZ);
-		}
-	}
-
-	public static long blockToSection(BlockPos pos) {
-		return SectionPos.asLong(pos.getX(), pos.getY(), pos.getZ());
-	}
-
-	public static long sectionToChunk(long sectionPos) {
-		return sectionPos & 0xFFFFFFFFFFF_00000L;
 	}
 
 	public Stream<ImmutableBox> getAllBoxes() {
-		return chunks.stream().map(LightListener::getVolume);
+		return listenersBySection.stream().map(LightListener::getVolume);
 	}
 
 	public boolean isEmpty() {
-		return chunks.isEmpty();
+		return listenersBySection.isEmpty();
 	}
 }

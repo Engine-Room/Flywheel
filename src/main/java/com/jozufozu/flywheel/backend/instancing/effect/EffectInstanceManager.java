@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.storage.AbstractStorage;
 import com.jozufozu.flywheel.backend.instancing.storage.Storage;
-import com.jozufozu.flywheel.light.LightUpdater;
+import com.jozufozu.flywheel.lib.light.LightUpdater;
 
 public class EffectInstanceManager extends InstanceManager<Effect> {
 

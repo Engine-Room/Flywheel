@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.lib.light.LightUpdater;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
-import com.jozufozu.flywheel.light.LightUpdater;
 import com.jozufozu.flywheel.util.StringUtil;
 import com.jozufozu.flywheel.util.WorldAttached;
 

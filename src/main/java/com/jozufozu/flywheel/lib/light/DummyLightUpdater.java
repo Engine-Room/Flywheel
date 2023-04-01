@@ -1,9 +1,10 @@
-package com.jozufozu.flywheel.light;
+package com.jozufozu.flywheel.lib.light;
 
 import java.util.stream.Stream;
 
-import com.jozufozu.flywheel.util.box.ImmutableBox;
+import com.jozufozu.flywheel.lib.box.ImmutableBox;
 
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LightLayer;
 
 public class DummyLightUpdater extends LightUpdater {
@@ -29,12 +30,7 @@ public class DummyLightUpdater extends LightUpdater {
 	}
 
 	@Override
-	public void onLightUpdate(LightLayer type, long sectionPos) {
-		// noop
-	}
-
-	@Override
-	public void onLightPacket(int chunkX, int chunkZ) {
+	public void onLightUpdate(LightLayer type, SectionPos pos) {
 		// noop
 	}
 

@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.light;
+package com.jozufozu.flywheel.lib.light;
 
-import com.jozufozu.flywheel.util.box.GridAlignedBB;
-import com.jozufozu.flywheel.util.box.ImmutableBox;
+import com.jozufozu.flywheel.lib.box.ImmutableBox;
 
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LightLayer;
 
 /**
@@ -20,22 +20,10 @@ public interface LightListener {
 	 * @return {@code true} if the listener is invalid/removed/deleted,
 	 * 	       and should no longer receive updates.
 	 */
-	boolean isListenerInvalid();
+	boolean isInvalid();
 
 	/**
 	 * Called when a light updates in a chunk the implementor cares about.
 	 */
-	void onLightUpdate(LightLayer type, ImmutableBox changed);
-
-	/**
-	 * Called when the server sends light data to the client.
-	 *
-	 */
-	default void onLightPacket(int chunkX, int chunkZ) {
-		GridAlignedBB changedVolume = GridAlignedBB.from(chunkX, chunkZ);
-
-		onLightUpdate(LightLayer.BLOCK, changedVolume);
-
-		onLightUpdate(LightLayer.SKY, changedVolume);
-	}
+	void onLightUpdate(LightLayer type, SectionPos pos);
 }
