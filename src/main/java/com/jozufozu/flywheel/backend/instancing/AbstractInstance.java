@@ -9,10 +9,10 @@ import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instancer.FlatLit;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
-import com.jozufozu.flywheel.light.LightListener;
-import com.jozufozu.flywheel.util.box.ImmutableBox;
+import com.jozufozu.flywheel.lib.light.LightListener;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 
@@ -86,7 +86,7 @@ public abstract class AbstractInstance implements Instance, LightListener {
 	}
 
 	@Override
-	public boolean isListenerInvalid() {
+	public boolean isInvalid() {
 		return removed;
 	}
 
@@ -96,7 +96,7 @@ public abstract class AbstractInstance implements Instance, LightListener {
 	}
 
 	@Override
-	public void onLightUpdate(LightLayer type, ImmutableBox changed) {
+	public void onLightUpdate(LightLayer type, SectionPos pos) {
 		updateLight();
 	}
 

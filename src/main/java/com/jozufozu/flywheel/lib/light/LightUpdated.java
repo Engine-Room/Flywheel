@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.light;
+package com.jozufozu.flywheel.lib.light;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.LevelAccessor;

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.light;
+package com.jozufozu.flywheel.lib.light;
 
 import java.util.AbstractCollection;
 import java.util.Iterator;
@@ -24,7 +24,7 @@ public class WeakContainmentMultiMap<T> extends AbstractCollection<T> {
 	}
 
 	/**
-	 * This is a confusing function, but it maintains the internal state of the chunk/section maps.
+	 * This is a confusing function, but it maintains the internal state of the section maps.
 	 *
 	 * <p>
 	 *     First, uses the reverse lookup map to remove listener from all sets in the lookup map.<br>
@@ -32,7 +32,7 @@ public class WeakContainmentMultiMap<T> extends AbstractCollection<T> {
 	 * </p>
 	 *
 	 * @param listener The listener to clean up.
-	 * @return An empty set that should be populated with the chunks/sections the listener is contained in.
+	 * @return An empty set that should be populated with the sections the listener is contained in.
 	 */
 	public LongSet getAndResetContainment(T listener) {
 		LongSet containmentSet = reverse.computeIfAbsent(listener, $ -> new LongRBTreeSet());

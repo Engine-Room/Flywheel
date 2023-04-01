@@ -19,7 +19,7 @@ import com.jozufozu.flywheel.backend.instancing.ratelimit.DistanceUpdateLimiter;
 import com.jozufozu.flywheel.backend.instancing.ratelimit.NonLimiter;
 import com.jozufozu.flywheel.backend.instancing.storage.Storage;
 import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.light.LightUpdater;
+import com.jozufozu.flywheel.lib.light.LightUpdater;
 
 import net.minecraft.core.BlockPos;
 

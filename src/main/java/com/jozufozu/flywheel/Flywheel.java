@@ -20,7 +20,6 @@ import com.jozufozu.flywheel.lib.model.PartialModel;
 import com.jozufozu.flywheel.lib.pipeline.Pipelines;
 import com.jozufozu.flywheel.lib.struct.StructTypes;
 import com.jozufozu.flywheel.lib.util.QuadConverter;
-import com.jozufozu.flywheel.lib.util.RenderWork;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 import com.jozufozu.flywheel.vanilla.VanillaInstances;
@@ -96,8 +95,6 @@ public class Flywheel {
 		forgeEventBus.addListener(ForgeEvents::addToDebugScreen);
 		forgeEventBus.addListener(ForgeEvents::unloadWorld);
 		forgeEventBus.addListener(ForgeEvents::tickLight);
-
-		forgeEventBus.addListener(EventPriority.LOWEST, RenderWork::onRenderLevelLast);
 
 		modEventBus.addListener(PartialModel::onModelRegistry);
 		modEventBus.addListener(PartialModel::onModelBake);

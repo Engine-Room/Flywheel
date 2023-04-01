@@ -16,12 +16,12 @@ import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.effect.Effect;
+import com.jozufozu.flywheel.lib.box.ImmutableBox;
+import com.jozufozu.flywheel.lib.box.MutableBox;
 import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.struct.StructTypes;
 import com.jozufozu.flywheel.lib.struct.TransformedPart;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
-import com.jozufozu.flywheel.util.box.GridAlignedBB;
-import com.jozufozu.flywheel.util.box.ImmutableBox;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -67,7 +67,7 @@ public class ExampleEffect implements Effect {
 		this.level = level;
 		this.targetPoint = targetPoint;
 		this.blockPos = new BlockPos(targetPoint.x, targetPoint.y, targetPoint.z);
-		this.volume = GridAlignedBB.from(this.blockPos);
+		this.volume = MutableBox.from(this.blockPos);
 		this.effects = new ArrayList<>(INSTANCE_COUNT);
 		this.boids = new ArrayList<>(INSTANCE_COUNT);
 	}

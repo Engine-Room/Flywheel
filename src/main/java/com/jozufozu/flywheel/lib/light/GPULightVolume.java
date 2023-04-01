@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.light;
+package com.jozufozu.flywheel.lib.light;
 
 import static org.lwjgl.opengl.GL11.GL_LINEAR;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
@@ -23,14 +23,14 @@ import org.lwjgl.opengl.GL30;
 
 import com.jozufozu.flywheel.gl.GlTexture;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
-import com.jozufozu.flywheel.util.box.GridAlignedBB;
-import com.jozufozu.flywheel.util.box.ImmutableBox;
+import com.jozufozu.flywheel.lib.box.ImmutableBox;
+import com.jozufozu.flywheel.lib.box.MutableBox;
 
 import net.minecraft.world.level.BlockAndTintGetter;
 
 public class GPULightVolume extends LightVolume {
 
-	protected final GridAlignedBB sampleVolume = new GridAlignedBB();
+	protected final MutableBox sampleVolume = new MutableBox();
 	private final GlTexture glTexture;
 
 	private final GlTextureUnit textureUnit = GlTextureUnit.T4;

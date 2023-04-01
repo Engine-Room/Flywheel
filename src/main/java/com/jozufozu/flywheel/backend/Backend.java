@@ -9,7 +9,6 @@ import com.jozufozu.flywheel.api.backend.BackendType;
 import com.jozufozu.flywheel.backend.task.ParallelTaskExecutor;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.lib.backend.BackendTypes;
-import com.jozufozu.flywheel.lib.util.RenderWork;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.client.Minecraft;
@@ -86,7 +85,7 @@ public class Backend {
 	}
 
 	public static void reloadWorldRenderers() {
-		RenderWork.enqueue(Minecraft.getInstance().levelRenderer::allChanged);
+		Minecraft.getInstance().levelRenderer.allChanged();
 	}
 
 	private static BackendType chooseEngine() {

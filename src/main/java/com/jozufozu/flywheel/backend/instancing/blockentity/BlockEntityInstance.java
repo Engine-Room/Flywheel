@@ -10,8 +10,8 @@ import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.InstancerManager;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
-import com.jozufozu.flywheel.util.box.GridAlignedBB;
-import com.jozufozu.flywheel.util.box.ImmutableBox;
+import com.jozufozu.flywheel.lib.box.ImmutableBox;
+import com.jozufozu.flywheel.lib.box.MutableBox;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -90,7 +90,7 @@ public abstract class BlockEntityInstance<T extends BlockEntity> extends Abstrac
 
 	@Override
 	public ImmutableBox getVolume() {
-		return GridAlignedBB.from(pos);
+		return MutableBox.from(pos);
 	}
 
 	@Override

@@ -1,19 +1,20 @@
-package com.jozufozu.flywheel.light;
+package com.jozufozu.flywheel.lib.light;
 
 import org.lwjgl.system.MemoryUtil;
 
+import com.jozufozu.flywheel.lib.box.ImmutableBox;
+import com.jozufozu.flywheel.lib.box.MutableBox;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
-import com.jozufozu.flywheel.util.box.GridAlignedBB;
-import com.jozufozu.flywheel.util.box.ImmutableBox;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
 
 public class LightVolume implements ImmutableBox, LightListener {
 
 	protected final BlockAndTintGetter level;
-	protected final GridAlignedBB box = new GridAlignedBB();
+	protected final MutableBox box = new MutableBox();
 	protected MemoryBlock lightData;
 
 	public LightVolume(BlockAndTintGetter level, ImmutableBox sampleVolume) {
@@ -59,7 +60,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 	}
 
 	@Override
-	public boolean isListenerInvalid() {
+	public boolean isInvalid() {
 		return lightData == null;
 	}
 
@@ -207,27 +208,15 @@ public class LightVolume implements ImmutableBox, LightListener {
 	}
 
 	@Override
-	public void onLightUpdate(LightLayer type, ImmutableBox changedVolume) {
+	public void onLightUpdate(LightLayer type, SectionPos pos) {
 		if (lightData == null) return;
 
-		GridAlignedBB vol = changedVolume.copy();
+		MutableBox vol = MutableBox.from(pos);
 		if (!vol.intersects(getVolume())) return;
 		vol.intersectAssign(getVolume()); // compute the region contained by us that has dirty lighting data.
 
 		if (type == LightLayer.BLOCK) copyBlock(vol);
 		else if (type == LightLayer.SKY) copySky(vol);
-		markDirty();
-	}
-
-	@Override
-	public void onLightPacket(int chunkX, int chunkZ) {
-		if (lightData == null) return;
-
-		GridAlignedBB changedVolume = GridAlignedBB.from(chunkX, chunkZ);
-		if (!changedVolume.intersects(getVolume())) return;
-		changedVolume.intersectAssign(getVolume()); // compute the region contained by us that has dirty lighting data.
-
-		copyLight(changedVolume);
 		markDirty();
 	}
 
