@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -25,7 +25,7 @@ public class InstanceUpdateMixin {
 	 */
 	@Inject(at = @At("TAIL"), method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;)V")
 	private void flywheel$checkUpdate(BlockPos pos, BlockState lastState, BlockState newState, CallbackInfo ci) {
-		if (!Backend.isOn()) {
+		if (!BackendManager.isOn()) {
 			return;
 		}
 		BlockEntity blockEntity = level.getBlockEntity(pos);

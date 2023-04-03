@@ -9,7 +9,6 @@ import java.util.regex.Matcher;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.jozufozu.flywheel.api.pipeline.SourceComponent;
 import com.jozufozu.flywheel.glsl.parse.Import;
 import com.jozufozu.flywheel.glsl.parse.ShaderField;
 import com.jozufozu.flywheel.glsl.parse.ShaderFunction;

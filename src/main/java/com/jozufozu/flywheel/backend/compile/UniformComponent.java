@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.api.pipeline.SourceComponent;
 import com.jozufozu.flywheel.glsl.ShaderSources;
+import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.glsl.generate.GlslBuilder;
 

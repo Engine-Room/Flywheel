@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.extension;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.backend.instancing.entity.EntityInstancingController;
+import com.jozufozu.flywheel.api.instance.entity.EntityInstancingController;
 
 import net.minecraft.world.entity.Entity;
 

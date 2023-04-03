@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.api.pipeline.SourceComponent;
+import com.jozufozu.flywheel.glsl.SourceComponent;
 
 public class RecursiveIncluder implements Includer {
 

@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
-import com.jozufozu.flywheel.api.instancer.InstancerManager;
+import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
@@ -31,7 +31,7 @@ public class BellInstance extends BlockEntityInstance<BellBlockEntity> implement
 
 	private float lastRingTime = Float.NaN;
 
-	public BellInstance(InstancerManager instancerManager, BellBlockEntity blockEntity) {
+	public BellInstance(InstancerProvider instancerManager, BellBlockEntity blockEntity) {
 		super(instancerManager, blockEntity);
 
 		bell = createBellInstance()
@@ -73,7 +73,7 @@ public class BellInstance extends BlockEntityInstance<BellBlockEntity> implement
 	}
 
 	private OrientedPart createBellInstance() {
-		return instancerManager.instancer(StructTypes.ORIENTED, MODEL, RenderStage.AFTER_BLOCK_ENTITIES)
+		return instancerManager.getInstancer(StructTypes.ORIENTED, MODEL, RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 

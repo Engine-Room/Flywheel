@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.component.ComponentRegistry;
 import com.jozufozu.flywheel.api.event.BeginFrameEvent;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
@@ -20,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 
 public class FlwShaderUniforms implements ShaderUniforms {
-	public static final FlwShaderUniforms INSTANCE = ComponentRegistry.register(new FlwShaderUniforms());
+	public static final FlwShaderUniforms INSTANCE = ShaderUniforms.REGISTRY.registerAndGet(new FlwShaderUniforms());
 
 	public static final ResourceLocation FILE = Flywheel.rl("uniform/flywheel.glsl");
 	public static final int SIZE = 224;

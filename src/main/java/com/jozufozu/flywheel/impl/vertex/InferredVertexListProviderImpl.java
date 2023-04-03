@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.vertex;
+package com.jozufozu.flywheel.impl.vertex;
 
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexListProvider;

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.task;
+package com.jozufozu.flywheel.lib.task;
 
 import java.util.Iterator;
 import java.util.concurrent.Executor;

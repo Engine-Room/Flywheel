@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.jozufozu.flywheel.api.instancer.InstancerManager;
+import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.storage.AbstractStorage;
@@ -15,7 +15,7 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 
 	private final EffectStorage<Effect> storage;
 
-	public EffectInstanceManager(InstancerManager instancerManager) {
+	public EffectInstanceManager(InstancerProvider instancerManager) {
 		storage = new EffectStorage<>(instancerManager);
 	}
 
@@ -33,7 +33,7 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 
 		private final Multimap<T, AbstractInstance> instances;
 
-		public EffectStorage(InstancerManager manager) {
+		public EffectStorage(InstancerProvider manager) {
 			super(manager);
 			this.instances = HashMultimap.create();
 		}

@@ -1,18 +1,12 @@
-package com.jozufozu.flywheel.backend.instancing;
-
-import java.util.Objects;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
+package com.jozufozu.flywheel.api.instance;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.instancer.InstancerManager;
+import com.jozufozu.flywheel.api.instance.blockentity.BlockEntityInstancingController;
+import com.jozufozu.flywheel.api.instance.entity.EntityInstancingController;
+import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
-import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstancingController;
-import com.jozufozu.flywheel.backend.instancing.blockentity.SimpleBlockEntityInstancingController;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
-import com.jozufozu.flywheel.backend.instancing.entity.EntityInstancingController;
-import com.jozufozu.flywheel.backend.instancing.entity.SimpleEntityInstancingController;
 import com.jozufozu.flywheel.extension.BlockEntityTypeExtension;
 import com.jozufozu.flywheel.extension.EntityTypeExtension;
 
@@ -54,7 +48,7 @@ public class InstancedRenderRegistry {
 	 * @return An instance of the block entity, or {@code null} if the block entity cannot be instanced.
 	 */
 	@Nullable
-	public static <T extends BlockEntity> BlockEntityInstance<? super T> createInstance(InstancerManager instancerManager, T blockEntity) {
+	public static <T extends BlockEntity> BlockEntityInstance<? super T> createInstance(InstancerProvider instancerManager, T blockEntity) {
 		BlockEntityInstancingController<? super T> controller = getController(getType(blockEntity));
 		if (controller == null) {
 			return null;
@@ -70,7 +64,7 @@ public class InstancedRenderRegistry {
 	 * @return An instance of the entity, or {@code null} if the entity cannot be instanced.
 	 */
 	@Nullable
-	public static <T extends Entity> EntityInstance<? super T> createInstance(InstancerManager instancerManager, T entity) {
+	public static <T extends Entity> EntityInstance<? super T> createInstance(InstancerProvider instancerManager, T entity) {
 		EntityInstancingController<? super T> controller = getController(getType(entity));
 		if (controller == null) {
 			return null;
@@ -104,26 +98,6 @@ public class InstancedRenderRegistry {
 			return false;
 		}
 		return controller.shouldSkipRender(entity);
-	}
-
-	/**
-	 * Get an object to configure the instancing controller for the given block entity type.
-	 * @param type The block entity type to configure.
-	 * @param <T> The type of the block entity.
-	 * @return The configuration object.
-	 */
-	public static <T extends BlockEntity> BlockEntityConfig<T> configure(BlockEntityType<T> type) {
-		return new BlockEntityConfig<>(type);
-	}
-
-	/**
-	 * Get an object to configure the instancing controller for the given entity type.
-	 * @param type The entity type to configure.
-	 * @param <T> The type of the entity.
-	 * @return The configuration object.
-	 */
-	public static <T extends Entity> EntityConfig<T> configure(EntityType<T> type) {
-		return new EntityConfig<>(type);
 	}
 
 	/**
@@ -186,119 +160,5 @@ public class InstancedRenderRegistry {
 	 */
 	public static <T extends Entity> EntityType<? super T> getType(T entity) {
 		return (EntityType<? super T>) entity.getType();
-	}
-
-	/**
-	 * An object to configure the instancing controller for a block entity.
-	 * @param <T> The type of the block entity.
-	 */
-	public static class BlockEntityConfig<T extends BlockEntity> {
-		protected BlockEntityType<T> type;
-		protected BiFunction<InstancerManager, T, BlockEntityInstance<? super T>> instanceFactory;
-		protected Predicate<T> skipRender;
-
-		public BlockEntityConfig(BlockEntityType<T> type) {
-			this.type = type;
-		}
-
-		/**
-		 * Sets the instance factory for the block entity.
-		 * @param instanceFactory The instance factory.
-		 * @return {@code this}
-		 */
-		public BlockEntityConfig<T> factory(BiFunction<InstancerManager, T, BlockEntityInstance<? super T>> instanceFactory) {
-			this.instanceFactory = instanceFactory;
-			return this;
-		}
-
-		/**
-		 * Sets a predicate to determine whether to skip rendering a block entity.
-		 * @param skipRender The predicate.
-		 * @return {@code this}
-		 */
-		public BlockEntityConfig<T> skipRender(Predicate<T> skipRender) {
-			this.skipRender = skipRender;
-			return this;
-		}
-
-		/**
-		 * Sets a predicate to always skip rendering for block entities of this type.
-		 * @return {@code this}
-		 */
-		public BlockEntityConfig<T> alwaysSkipRender() {
-			this.skipRender = be -> true;
-			return this;
-		}
-
-		/**
-		 * Constructs the block entity instancing controller, and sets it for the block entity type.
-		 * @return The block entity instancing controller.
-		 */
-		public SimpleBlockEntityInstancingController<T> apply() {
-			Objects.requireNonNull(instanceFactory, "Instance factory cannot be null!");
-			if (skipRender == null) {
-				skipRender = be -> false;
-			}
-			SimpleBlockEntityInstancingController<T> controller = new SimpleBlockEntityInstancingController<>(instanceFactory, skipRender);
-			setController(type, controller);
-			return controller;
-		}
-	}
-
-	/**
-	 * An object to configure the instancing controller for an entity.
-	 * @param <T> The type of the entity.
-	 */
-	public static class EntityConfig<T extends Entity> {
-		protected EntityType<T> type;
-		protected BiFunction<InstancerManager, T, EntityInstance<? super T>> instanceFactory;
-		protected Predicate<T> skipRender;
-
-		public EntityConfig(EntityType<T> type) {
-			this.type = type;
-		}
-
-		/**
-		 * Sets the instance factory for the entity.
-		 * @param instanceFactory The instance factory.
-		 * @return {@code this}
-		 */
-		public EntityConfig<T> factory(BiFunction<InstancerManager, T, EntityInstance<? super T>> instanceFactory) {
-			this.instanceFactory = instanceFactory;
-			return this;
-		}
-
-		/**
-		 * Sets a predicate to determine whether to skip rendering an entity.
-		 * @param skipRender The predicate.
-		 * @return {@code this}
-		 */
-		public EntityConfig<T> skipRender(Predicate<T> skipRender) {
-			this.skipRender = skipRender;
-			return this;
-		}
-
-		/**
-		 * Sets a predicate to always skip rendering for entities of this type.
-		 * @return {@code this}
-		 */
-		public EntityConfig<T> alwaysSkipRender() {
-			this.skipRender = entity -> true;
-			return this;
-		}
-
-		/**
-		 * Constructs the entity instancing controller, and sets it for the entity type.
-		 * @return The entity instancing controller.
-		 */
-		public SimpleEntityInstancingController<T> apply() {
-			Objects.requireNonNull(instanceFactory, "Instance factory cannot be null!");
-			if (skipRender == null) {
-				skipRender = entity -> false;
-			}
-			SimpleEntityInstancingController<T> controller = new SimpleEntityInstancingController<>(instanceFactory, skipRender);
-			setController(type, controller);
-			return controller;
-		}
 	}
 }

@@ -2,11 +2,11 @@ package com.jozufozu.flywheel.backend.instancing.blockentity;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.api.instancer.InstancerManager;
-import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.api.instance.InstancedRenderRegistry;
+import com.jozufozu.flywheel.api.instancer.InstancerProvider;
+import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 import com.jozufozu.flywheel.backend.instancing.storage.One2OneStorage;
 import com.jozufozu.flywheel.backend.instancing.storage.Storage;
 
@@ -21,7 +21,7 @@ public class BlockEntityInstanceManager extends InstanceManager<BlockEntity> {
 
 	private final BlockEntityStorage storage;
 
-	public BlockEntityInstanceManager(InstancerManager instancerManager) {
+	public BlockEntityInstanceManager(InstancerProvider instancerManager) {
 		storage = new BlockEntityStorage(instancerManager);
 	}
 
@@ -57,7 +57,7 @@ public class BlockEntityInstanceManager extends InstanceManager<BlockEntity> {
 			return false;
 		}
 
-		if (Backend.isFlywheelLevel(level)) {
+		if (BackendUtil.isFlywheelLevel(level)) {
 			BlockPos pos = blockEntity.getBlockPos();
 
 			BlockGetter existingChunk = level.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
@@ -73,7 +73,7 @@ public class BlockEntityInstanceManager extends InstanceManager<BlockEntity> {
 		final Long2ObjectMap<BlockEntityInstance<?>> posLookup = new Long2ObjectOpenHashMap<>();
 
 
-		public BlockEntityStorage(InstancerManager manager) {
+		public BlockEntityStorage(InstancerProvider manager) {
 			super(manager);
 		}
 

@@ -9,12 +9,13 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL20;
 
-import com.jozufozu.flywheel.api.pipeline.SourceComponent;
-import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.gl.GLSLVersion;
 import com.jozufozu.flywheel.gl.shader.GlShader;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.gl.versioned.GlCompat;
+import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.util.StringUtil;
 
@@ -130,7 +131,7 @@ public class Compilation {
 	}
 
 	private static void dumpSource(String source, String fileName) {
-		if (!Backend.DUMP_SHADER_SOURCE) {
+		if (!BackendUtil.DUMP_SHADER_SOURCE) {
 			return;
 		}
 
@@ -140,7 +141,7 @@ public class Compilation {
 		try (FileWriter writer = new FileWriter(file)) {
 			writer.write(source);
 		} catch (Exception e) {
-			Backend.LOGGER.error("Could not dump source.", e);
+			Flywheel.LOGGER.error("Could not dump source.", e);
 		}
 	}
 

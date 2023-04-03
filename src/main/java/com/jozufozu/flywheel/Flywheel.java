@@ -3,17 +3,21 @@ package com.jozufozu.flywheel;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.slf4j.Logger;
 
-import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.api.backend.BackendManager;
+import com.jozufozu.flywheel.backend.Loader;
 import com.jozufozu.flywheel.backend.engine.batching.DrawBuffer;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
-import com.jozufozu.flywheel.config.BackendTypeArgument;
+import com.jozufozu.flywheel.config.BackendArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.handler.EntityWorldHandler;
 import com.jozufozu.flywheel.handler.ForgeEvents;
-import com.jozufozu.flywheel.lib.backend.BackendTypes;
+import com.jozufozu.flywheel.impl.IdRegistryImpl;
+import com.jozufozu.flywheel.impl.RegistryImpl;
+import com.jozufozu.flywheel.lib.backend.Backends;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.format.Formats;
+import com.jozufozu.flywheel.lib.material.MaterialIndicies;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.model.PartialModel;
@@ -61,7 +65,7 @@ public class Flywheel {
 				.getModEventBus();
 		modEventBus.addListener(Flywheel::setup);
 
-		FlwConfig.init();
+		FlwConfig.get().registerSpecs(modLoadingContext);
 
 		modLoadingContext.registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(
 				() -> NetworkConstants.IGNORESERVERONLY,
@@ -72,12 +76,6 @@ public class Flywheel {
 	}
 
 	private static void clientInit(IEventBus forgeEventBus, IEventBus modEventBus) {
-		CrashReportCallables.registerCrashCallable("Flywheel Backend", Backend::getBackendDescriptor);
-
-		ShadersModHandler.init();
-		BackendTypes.init();
-		Backend.init();
-
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);
 
 		forgeEventBus.addListener(EventPriority.HIGHEST, QuadConverter::onReloadRenderers);
@@ -102,13 +100,22 @@ public class Flywheel {
 //		forgeEventBus.addListener(ExampleEffect::tick);
 //		forgeEventBus.addListener(ExampleEffect::onReload);
 
+		ShadersModHandler.init();
+
+		Backends.init();
+		Loader.init();
+
 		Formats.init();
 		StructTypes.init();
 		Materials.init();
 		Contexts.init();
 		Pipelines.init();
 
+		MaterialIndicies.init();
+
 		VanillaInstances.init();
+
+		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManager::getBackendDescriptor);
 
 		// https://github.com/Jozufozu/Flywheel/issues/69
 		// Weird issue with accessor loading.
@@ -119,7 +126,10 @@ public class Flywheel {
 	}
 
 	private static void setup(final FMLCommonSetupEvent event) {
-		ArgumentTypes.register(rl("engine").toString(), BackendTypeArgument.class, new EmptyArgumentSerializer<>(BackendTypeArgument::getInstance));
+		ArgumentTypes.register(rl("backend").toString(), BackendArgument.class, new EmptyArgumentSerializer<>(BackendArgument::getInstance));
+
+		RegistryImpl.freezeAll();
+		IdRegistryImpl.freezeAll();
 	}
 
 	public static ArtifactVersion getVersion() {

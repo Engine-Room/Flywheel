@@ -1,15 +1,15 @@
 package com.jozufozu.flywheel.backend.uniform;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.lwjgl.opengl.GL32;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.api.component.ComponentRegistry;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.gl.buffer.GlBufferType;
+import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.jozufozu.flywheel.util.RenderMath;
@@ -35,7 +35,12 @@ public class UniformBuffer {
 
 	private UniformBuffer() {
 		buffer = new GlBuffer(GlBufferType.UNIFORM_BUFFER);
-		providerSet = new ProviderSet(ComponentRegistry.getAllUniformProviders());
+		providerSet = new ProviderSet(ShaderUniforms.REGISTRY.getAll());
+	}
+
+	public static void syncAndBind(GlProgram program) {
+		getInstance().sync();
+		program.bind();
 	}
 
 	public void sync() {
@@ -84,7 +89,7 @@ public class UniformBuffer {
 
 		private final MemoryBlock data;
 
-		private ProviderSet(final Collection<ShaderUniforms> providers) {
+		private ProviderSet(final Set<ShaderUniforms> providers) {
 			var builder = ImmutableList.<LiveProvider>builder();
 			int totalBytes = 0;
 			for (ShaderUniforms provider : providers) {

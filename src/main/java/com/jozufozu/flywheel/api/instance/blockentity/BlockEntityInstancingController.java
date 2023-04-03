@@ -1,12 +1,13 @@
-package com.jozufozu.flywheel.backend.instancing.blockentity;
+package com.jozufozu.flywheel.api.instance.blockentity;
 
-import com.jozufozu.flywheel.api.instancer.InstancerManager;
+import com.jozufozu.flywheel.api.instancer.InstancerProvider;
+import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * An instancing controller that will be keyed to a block entity type.
- * @param <T> The type of block entity this controller is for.
+ * @param <T> The block entity type.
  */
 public interface BlockEntityInstancingController<T extends BlockEntity> {
 	/**
@@ -15,7 +16,7 @@ public interface BlockEntityInstancingController<T extends BlockEntity> {
 	 * @param blockEntity The block entity to construct an instance for.
 	 * @return The instance.
 	 */
-	BlockEntityInstance<? super T> createInstance(InstancerManager instancerManager, T blockEntity);
+	BlockEntityInstance<? super T> createInstance(InstancerProvider instancerManager, T blockEntity);
 
 	/**
 	 * Checks if the given block entity should not be rendered normally.

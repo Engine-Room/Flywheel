@@ -1,12 +1,13 @@
 package com.jozufozu.flywheel.backend.instancing;
 
+import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.BeginFrameEvent;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
-import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.backend.instancing.effect.Effect;
 import com.jozufozu.flywheel.backend.instancing.effect.EffectInstanceManager;
@@ -35,7 +36,7 @@ public class InstanceWorld implements AutoCloseable {
 	private final InstanceManager<Effect> effects;
 
 	public static InstanceWorld create(LevelAccessor level) {
-		var engine = Backend.getBackendType()
+		var engine = BackendManager.getBackend()
 				.createEngine();
 
 		var entities = new EntityInstanceManager(engine);
@@ -53,7 +54,7 @@ public class InstanceWorld implements AutoCloseable {
 		this.entities = entities;
 		this.blockEntities = blockEntities;
 		this.effects = effects;
-		this.taskExecutor = Backend.getTaskExecutor();
+		this.taskExecutor = BackendUtil.getTaskExecutor();
 	}
 
 	public InstanceManager<Entity> getEntities() {

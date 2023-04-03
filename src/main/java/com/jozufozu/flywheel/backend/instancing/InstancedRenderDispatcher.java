@@ -2,10 +2,11 @@ package com.jozufozu.flywheel.backend.instancing;
 
 import java.util.List;
 
+import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.event.BeginFrameEvent;
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.api.event.RenderStageEvent;
-import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.backend.instancing.effect.Effect;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
@@ -29,7 +30,7 @@ public class InstancedRenderDispatcher {
 	 * @param blockEntity The block entity whose instance you want to update.
 	 */
 	public static void enqueueUpdate(BlockEntity blockEntity) {
-		if (Backend.isOn() && blockEntity.hasLevel() && blockEntity.getLevel() instanceof ClientLevel) {
+		if (BackendManager.isOn() && blockEntity.hasLevel() && blockEntity.getLevel() instanceof ClientLevel) {
 			instanceWorlds.get(blockEntity.getLevel())
 					.getBlockEntities()
 					.queueUpdate(blockEntity);
@@ -41,7 +42,7 @@ public class InstancedRenderDispatcher {
 	 * @param entity The entity whose instance you want to update.
 	 */
 	public static void enqueueUpdate(Entity entity) {
-		if (Backend.isOn()) {
+		if (BackendManager.isOn()) {
 			instanceWorlds.get(entity.level)
 					.getEntities()
 					.queueUpdate(entity);
@@ -65,7 +66,7 @@ public class InstancedRenderDispatcher {
 	 * @throws NullPointerException if the backend is off
 	 */
 	public static InstanceWorld getInstanceWorld(LevelAccessor world) {
-		if (Backend.isOn()) {
+		if (BackendManager.isOn()) {
 			return instanceWorlds.get(world);
 		} else {
 			throw new NullPointerException("Backend is off, cannot retrieve instance world.");
@@ -73,21 +74,21 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static void tick(TickEvent.ClientTickEvent event) {
-		if (!Backend.isGameActive() || event.phase == TickEvent.Phase.START) {
+		if (!BackendUtil.isGameActive() || event.phase == TickEvent.Phase.START) {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
 		ClientLevel level = mc.level;
 		AnimationTickHolder.tick();
 
-		if (Backend.isOn()) {
+		if (BackendManager.isOn()) {
 			instanceWorlds.get(level)
 					.tick();
 		}
 	}
 
 	public static void onBeginFrame(BeginFrameEvent event) {
-		if (Backend.isGameActive() && Backend.isOn()) {
+		if (BackendUtil.isGameActive() && BackendManager.isOn()) {
 			instanceWorlds.get(event.getContext().level())
 					.beginFrame(event);
 		}
@@ -95,14 +96,14 @@ public class InstancedRenderDispatcher {
 
 	public static void onRenderStage(RenderStageEvent event) {
 		ClientLevel level = event.getContext().level();
-		if (!Backend.canUseInstancing(level)) return;
+		if (!BackendUtil.canUseInstancing(level)) return;
 
 		instanceWorlds.get(level).renderStage(event.getContext(), event.getStage());
 	}
 
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		ClientLevel level = event.getLevel();
-		if (Backend.isOn() && level != null) {
+		if (BackendManager.isOn() && level != null) {
 			resetInstanceLevel(level);
 		}
 	}
@@ -113,7 +114,7 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static void getDebugString(List<String> debug) {
-		if (Backend.isOn()) {
+		if (BackendManager.isOn()) {
 			InstanceWorld instanceWorld = instanceWorlds.get(Minecraft.getInstance().level);
 
 			debug.add("Update limiting: " + FlwCommands.boolToText(FlwConfig.get().limitUpdates()).getString());

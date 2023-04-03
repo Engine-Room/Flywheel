@@ -6,7 +6,9 @@ import java.util.function.BooleanSupplier;
 
 import javax.annotation.Nullable;
 
-import com.jozufozu.flywheel.backend.Backend;
+import org.slf4j.Logger;
+
+import com.mojang.logging.LogUtils;
 
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.Camera;
@@ -14,6 +16,8 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraftforge.fml.ModList;
 
 public final class ShadersModHandler {
+	private static final Logger LOGGER = LogUtils.getLogger();
+
 	public static final String OPTIFINE_ROOT_PACKAGE = "net.optifine";
 	public static final String SHADER_PACKAGE = "net.optifine.shaders";
 
@@ -30,13 +34,13 @@ public final class ShadersModHandler {
 		// optfine and oculus are assumed to be mutually exclusive
 
 		if (isOptifineInstalled) {
-			Backend.LOGGER.info("Optifine detected.");
+			LOGGER.info("Optifine detected.");
 			internalHandler = new Optifine();
 		} else if (isOculusLoaded) {
-			Backend.LOGGER.info("Oculus detected.");
+			LOGGER.info("Oculus detected.");
 			internalHandler = new Oculus();
 		} else {
-			Backend.LOGGER.info("No shaders mod detected.");
+			LOGGER.info("No shaders mod detected.");
 			internalHandler = new InternalHandler() {};
 		}
 	}

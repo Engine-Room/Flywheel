@@ -9,10 +9,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.api.pipeline.SourceComponent;
 import com.jozufozu.flywheel.gl.GLSLVersion;
 import com.jozufozu.flywheel.gl.shader.GlShader;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
+import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.util.FlwUtil;
 
 public class ShaderCompiler {

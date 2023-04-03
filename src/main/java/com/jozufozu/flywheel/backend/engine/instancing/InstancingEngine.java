@@ -7,7 +7,6 @@ import java.util.Set;
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.backend.Engine;
-import com.jozufozu.flywheel.api.component.ComponentRegistry;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
@@ -18,8 +17,10 @@ import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.compile.FlwCompiler;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
+import com.jozufozu.flywheel.backend.uniform.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
+import com.jozufozu.flywheel.lib.material.MaterialIndicies;
 import com.jozufozu.flywheel.lib.pipeline.Pipelines;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -51,7 +52,7 @@ public class InstancingEngine implements Engine {
 	}
 
 	@Override
-	public <D extends InstancedPart> Instancer<D> instancer(StructType<D> type, Model model, RenderStage stage) {
+	public <D extends InstancedPart> Instancer<D> getInstancer(StructType<D> type, Model model, RenderStage stage) {
 		return drawManager.getInstancer(type, model, stage);
 	}
 
@@ -117,11 +118,11 @@ public class InstancingEngine implements Engine {
 		var material = desc.material();
 
 		var program = FlwCompiler.INSTANCE.getPipelineProgram(vertexType, structType, context, Pipelines.INSTANCED_ARRAYS);
-		program.bind();
+		UniformBuffer.syncAndBind(program);
 
 		var uniformLocation = program.getUniformLocation("_flw_materialID_instancing");
-		var vertexID = ComponentRegistry.materials.getVertexID(material);
-		var fragmentID = ComponentRegistry.materials.getFragmentID(material);
+		var vertexID = MaterialIndicies.getVertexShaderIndex(material.vertexShader());
+		var fragmentID = MaterialIndicies.getFragmentShaderIndex(material.fragmentShader());
 		GL32.glUniform2ui(uniformLocation, vertexID, fragmentID);
 	}
 

@@ -5,7 +5,6 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.gl.array.VertexAttribute;
-import com.jozufozu.flywheel.lib.layout.LayoutItem;
 
 /**
  * Classic Vertex Format struct with a clever name.

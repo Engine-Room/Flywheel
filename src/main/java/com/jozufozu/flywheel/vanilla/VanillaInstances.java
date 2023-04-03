@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.vanilla;
 
-import static com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry.configure;
+import static com.jozufozu.flywheel.lib.instance.SimpleBlockEntityInstancingController.configure;
+import static com.jozufozu.flywheel.lib.instance.SimpleEntityInstancingController.configure;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.entity.BlockEntityType;

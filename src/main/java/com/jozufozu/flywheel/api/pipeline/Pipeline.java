@@ -4,6 +4,7 @@ import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.gl.GLSLVersion;
 import com.jozufozu.flywheel.glsl.ShaderSources;
+import com.jozufozu.flywheel.glsl.SourceComponent;
 
 import net.minecraft.resources.ResourceLocation;
 

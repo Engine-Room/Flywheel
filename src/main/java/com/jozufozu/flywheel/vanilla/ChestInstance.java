@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
-import com.jozufozu.flywheel.api.instancer.InstancerManager;
+import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
@@ -51,7 +51,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Block
 
 	private float lastProgress = Float.NaN;
 
-	public ChestInstance(InstancerManager instancerManager, T blockEntity) {
+	public ChestInstance(InstancerProvider instancerManager, T blockEntity) {
 		super(instancerManager, blockEntity);
 
 		Block block = blockState.getBlock();
@@ -124,13 +124,13 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Block
 
 	private OrientedPart baseInstance() {
 
-		return instancerManager.instancer(StructTypes.ORIENTED, BASE.apply(chestType, sprite), RenderStage.AFTER_BLOCK_ENTITIES)
+		return instancerManager.getInstancer(StructTypes.ORIENTED, BASE.apply(chestType, sprite), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 
 	private TransformedPart lidInstance() {
 
-		return instancerManager.instancer(StructTypes.TRANSFORMED, LID.apply(chestType, sprite), RenderStage.AFTER_BLOCK_ENTITIES)
+		return instancerManager.getInstancer(StructTypes.TRANSFORMED, LID.apply(chestType, sprite), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 

@@ -12,22 +12,21 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.component.ComponentRegistry;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.pipeline.Pipeline;
-import com.jozufozu.flywheel.api.pipeline.SourceComponent;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.engine.indirect.IndirectComponent;
 import com.jozufozu.flywheel.gl.GLSLVersion;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.ShaderLoadingException;
 import com.jozufozu.flywheel.glsl.ShaderSources;
+import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;
+import com.jozufozu.flywheel.lib.material.MaterialIndicies;
 import com.jozufozu.flywheel.lib.pipeline.Pipelines;
 import com.jozufozu.flywheel.util.StringUtil;
 
@@ -56,12 +55,12 @@ public class FlwCompiler {
 
 		this.sources = sources;
 		this.vertexMaterialComponent = MaterialAdapterComponent.builder(Flywheel.rl("vertex_material_adapter"))
-				.materialSources(ComponentRegistry.materials.vertexSources())
+				.materialSources(MaterialIndicies.getAllVertexShaders())
 				.adapt(FnSignature.ofVoid("flw_materialVertex"))
 				.switchOn(GlslExpr.variable("flw_materialVertexID"))
 				.build(sources);
 		this.fragmentMaterialComponent = MaterialAdapterComponent.builder(Flywheel.rl("fragment_material_adapter"))
-				.materialSources(ComponentRegistry.materials.fragmentSources())
+				.materialSources(MaterialIndicies.getAllFragmentShaders())
 				.adapt(FnSignature.ofVoid("flw_materialFragment"))
 				.adapt(FnSignature.create()
 						.returnType("bool")
@@ -76,7 +75,7 @@ public class FlwCompiler {
 			.switchOn(GlslExpr.variable("flw_materialFragmentID"))
 			.build(sources);
 		this.uniformComponent = UniformComponent.builder(Flywheel.rl("uniforms"))
-			.sources(ComponentRegistry.getAllUniformProviders()
+			.sources(ShaderUniforms.REGISTRY.getAll()
 					.stream()
 					.map(ShaderUniforms::uniformShader)
 				.toList())
@@ -102,12 +101,12 @@ public class FlwCompiler {
 
 	private void finish() {
 		long compileEnd = System.nanoTime();
-		int programCount = pipelineContexts.size() + ComponentRegistry.structTypes.size();
+		int programCount = pipelineContexts.size() + StructType.REGISTRY.getAll().size();
 		int shaderCount = shaderCompiler.shaderCount();
 		int errorCount = errors.size();
 		var elapsed = StringUtil.formatTime(compileEnd - compileStart);
 
-		Backend.LOGGER.info("Compiled " + programCount + " programs and " + shaderCount + " shaders in " + elapsed + " with " + errorCount + " errors.");
+		Flywheel.LOGGER.info("Compiled " + programCount + " programs and " + shaderCount + " shaders in " + elapsed + " with " + errorCount + " errors.");
 
 		if (errorCount > 0) {
 			var details = errors.stream()

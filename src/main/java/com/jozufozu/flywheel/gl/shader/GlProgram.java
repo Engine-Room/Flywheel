@@ -4,21 +4,20 @@ import static org.lwjgl.opengl.GL20.glDeleteProgram;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform1i;
 
-import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.uniform.UniformBuffer;
+import org.slf4j.Logger;
+
 import com.jozufozu.flywheel.gl.GlObject;
 import com.mojang.blaze3d.shaders.ProgramManager;
+import com.mojang.logging.LogUtils;
 
 public class GlProgram extends GlObject {
+	private static final Logger LOGGER = LogUtils.getLogger();
 
 	public GlProgram(int handle) {
 		setHandle(handle);
 	}
 
 	public void bind() {
-		// TODO: bind textures?
-		UniformBuffer.getInstance()
-			.sync();
 		ProgramManager.glUseProgram(handle());
 	}
 
@@ -36,7 +35,7 @@ public class GlProgram extends GlObject {
 		int index = glGetUniformLocation(this.handle(), uniform);
 
 		if (index < 0) {
-			Backend.LOGGER.debug("No active uniform '{}' exists. Could be unused.", uniform);
+			LOGGER.debug("No active uniform '{}' exists. Could be unused.", uniform);
 		}
 
 		return index;

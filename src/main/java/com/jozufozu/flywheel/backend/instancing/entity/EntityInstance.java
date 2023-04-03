@@ -4,7 +4,7 @@ import org.joml.FrustumIntersection;
 
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
-import com.jozufozu.flywheel.api.instancer.InstancerManager;
+import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.lib.box.MutableBox;
@@ -40,7 +40,7 @@ public abstract class EntityInstance<E extends Entity> extends AbstractInstance 
 	protected final E entity;
 	protected final MutableBox bounds;
 
-	public EntityInstance(InstancerManager instancerManager, E entity) {
+	public EntityInstance(InstancerProvider instancerManager, E entity) {
 		super(instancerManager, entity.level);
 		this.entity = entity;
 		bounds = MutableBox.from(entity.getBoundingBox());

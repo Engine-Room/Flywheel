@@ -15,6 +15,7 @@ import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.gl.GlPrimitive;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
+import com.jozufozu.flywheel.gl.buffer.ElementBuffer;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.gl.buffer.MappedBuffer;
@@ -234,9 +235,9 @@ public class InstancedMeshPool {
 
 		private void draw(int instanceCount) {
 			if (instanceCount > 1) {
-				GL32.glDrawElementsInstanced(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.asGLType, 0, instanceCount);
+				GL32.glDrawElementsInstanced(GlPrimitive.TRIANGLES.glEnum, ebo.getElementCount(), ebo.getEboIndexType().asGLType, 0, instanceCount);
 			} else {
-				GL32.glDrawElements(GlPrimitive.TRIANGLES.glEnum, ebo.elementCount, ebo.eboIndexType.asGLType, 0);
+				GL32.glDrawElements(GlPrimitive.TRIANGLES.glEnum, ebo.getElementCount(), ebo.getEboIndexType().asGLType, 0);
 			}
 		}
 

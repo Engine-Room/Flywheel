@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.gl.GLSLVersion;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.SourceFile;
@@ -76,7 +76,7 @@ public class CompileUtil {
 		String log = glGetProgramInfoLog(handle);
 
 		if (!log.isEmpty()) {
-			Backend.LOGGER.debug("Program link log: " + log);
+			Flywheel.LOGGER.debug("Program link log: " + log);
 		}
 
 		int result = glGetProgrami(handle, GL_LINK_STATUS);

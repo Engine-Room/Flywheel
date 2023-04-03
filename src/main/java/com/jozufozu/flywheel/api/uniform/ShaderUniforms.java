@@ -1,8 +1,12 @@
 package com.jozufozu.flywheel.api.uniform;
 
+import com.jozufozu.flywheel.api.registry.Registry;
+import com.jozufozu.flywheel.impl.RegistryImpl;
+
 import net.minecraft.resources.ResourceLocation;
 
 public interface ShaderUniforms {
+	static Registry<ShaderUniforms> REGISTRY = RegistryImpl.createForShaderUniforms();
 
 	Provider activate(long ptr);
 

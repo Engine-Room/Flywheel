@@ -1,23 +1,31 @@
 package com.jozufozu.flywheel.backend.compile;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
-import com.jozufozu.flywheel.api.component.ComponentRegistry;
+import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.pipeline.Pipeline;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.lib.backend.BackendTypes;
 import com.jozufozu.flywheel.lib.context.Contexts;
 
 public class PipelineContextSet {
+	private final List<PipelineContext> contexts = new ArrayList<>();
+	private final List<PipelineContext> contextView = Collections.unmodifiableList(contexts);
+
+	PipelineContextSet() {
+	}
+
 	static PipelineContextSet create() {
 		var builder = new PipelineContextSet();
-		for (Pipeline pipelineShader : BackendTypes.availablePipelineShaders()) {
-			for (StructType<?> structType : ComponentRegistry.structTypes) {
-				for (VertexType vertexType : ComponentRegistry.vertexTypes) {
+		for (Pipeline pipelineShader : availablePipelineShaders()) {
+			for (StructType<?> structType : StructType.REGISTRY.getAll()) {
+				for (VertexType vertexType : VertexType.REGISTRY.getAll()) {
 					builder.add(vertexType, structType, Contexts.WORLD, pipelineShader);
 				}
 			}
@@ -25,10 +33,13 @@ public class PipelineContextSet {
 		return builder;
 	}
 
-	private final List<PipelineContext> contexts = new ArrayList<>();
-	private final List<PipelineContext> contextView = Collections.unmodifiableList(contexts);
-
-	PipelineContextSet() {
+	private static Collection<Pipeline> availablePipelineShaders() {
+		return Backend.REGISTRY.getAll()
+				.stream()
+				.filter(Backend::isSupported)
+				.map(Backend::pipelineShader)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
 	}
 
 	public List<PipelineContext> all() {
@@ -41,7 +52,6 @@ public class PipelineContextSet {
 
 	private void add(VertexType vertexType, StructType<?> structType, Context world, Pipeline pipelineShader) {
 		var ctx = new PipelineContext(vertexType, structType, world, pipelineShader);
-
 
 		contexts.add(ctx);
 	}

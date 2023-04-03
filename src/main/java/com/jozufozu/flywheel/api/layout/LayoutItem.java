@@ -1,6 +1,5 @@
-package com.jozufozu.flywheel.lib.layout;
+package com.jozufozu.flywheel.api.layout;
 
-import com.jozufozu.flywheel.api.layout.InputType;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;
 import com.jozufozu.flywheel.glsl.generate.GlslStruct;
 

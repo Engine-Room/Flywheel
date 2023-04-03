@@ -8,7 +8,7 @@ import org.joml.FrustumIntersection;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
-import com.jozufozu.flywheel.api.instancer.InstancerManager;
+import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.lib.box.ImmutableBox;
 import com.jozufozu.flywheel.lib.box.MutableBox;
@@ -41,7 +41,7 @@ public abstract class BlockEntityInstance<T extends BlockEntity> extends Abstrac
 	protected final BlockPos instancePos;
 	protected final BlockState blockState;
 
-	public BlockEntityInstance(InstancerManager instancerManager, T blockEntity) {
+	public BlockEntityInstance(InstancerProvider instancerManager, T blockEntity) {
 		super(instancerManager, blockEntity.getLevel());
 		this.blockEntity = blockEntity;
 		this.pos = blockEntity.getBlockPos();
