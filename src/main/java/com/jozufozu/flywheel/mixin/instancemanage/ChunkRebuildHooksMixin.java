@@ -7,9 +7,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.backend.Backend;
+import com.jozufozu.flywheel.api.instance.InstancedRenderRegistry;
+import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public class ChunkRebuildHooksMixin {
 	@Inject(method = "handleBlockEntity", at = @At("HEAD"), cancellable = true)
 	private <E extends BlockEntity> void flywheel$addAndFilterBEs(ChunkRenderDispatcher.CompiledChunk compiledChunk, Set<BlockEntity> set, E be, CallbackInfo ci) {
-		if (Backend.canUseInstancing(be.getLevel())) {
+		if (BackendUtil.canUseInstancing(be.getLevel())) {
 			if (InstancedRenderRegistry.canInstance(be.getType()))
 				InstancedRenderDispatcher.getBlockEntities(be.getLevel()).queueAdd(be);
 

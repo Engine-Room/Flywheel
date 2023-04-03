@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
-import com.jozufozu.flywheel.api.instancer.InstancerManager;
+import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
@@ -37,7 +37,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 	private BlockState blockState;
 	private boolean active;
 
-	public MinecartInstance(InstancerManager instancerManager, T entity) {
+	public MinecartInstance(InstancerProvider instancerManager, T entity) {
 		super(instancerManager, entity);
 
 		body = getBody();
@@ -168,12 +168,12 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 		if (shape == RenderShape.INVISIBLE)
 			return null;
 
-        return instancerManager.instancer(StructTypes.TRANSFORMED, Models.block(blockState), RenderStage.AFTER_ENTITIES)
+        return instancerManager.getInstancer(StructTypes.TRANSFORMED, Models.block(blockState), RenderStage.AFTER_ENTITIES)
 				.createInstance();
 	}
 
 	private TransformedPart getBody() {
-		return instancerManager.instancer(StructTypes.TRANSFORMED, MODEL, RenderStage.AFTER_ENTITIES)
+		return instancerManager.getInstancer(StructTypes.TRANSFORMED, MODEL, RenderStage.AFTER_ENTITIES)
 				.createInstance();
 	}
 

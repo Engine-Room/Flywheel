@@ -4,7 +4,7 @@ import org.joml.Vector4fc;
 
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.engine.instancing.ElementBuffer;
+import com.jozufozu.flywheel.gl.buffer.ElementBuffer;
 import com.jozufozu.flywheel.lib.util.QuadConverter;
 
 /**

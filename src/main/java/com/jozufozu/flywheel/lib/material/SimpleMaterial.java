@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.lib.material;
 
-import com.jozufozu.flywheel.api.component.ComponentRegistry;
 import com.jozufozu.flywheel.api.material.Material;
 
 import net.minecraft.client.renderer.RenderStateShard;
@@ -107,7 +106,7 @@ public class SimpleMaterial implements Material {
 		}
 
 		public SimpleMaterial register() {
-			return ComponentRegistry.register(new SimpleMaterial(vertexShader, fragmentShader, setup, clear, batchingRenderType, vertexTransformer));
+			return Material.REGISTRY.registerAndGet(new SimpleMaterial(vertexShader, fragmentShader, setup, clear, batchingRenderType, vertexTransformer));
 		}
 
 		private static Runnable chain(Runnable runnable1, Runnable runnable2) {

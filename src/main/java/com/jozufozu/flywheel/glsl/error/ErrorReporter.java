@@ -4,14 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.jozufozu.flywheel.Flywheel;
+import org.slf4j.Logger;
+
 import com.jozufozu.flywheel.glsl.ShaderLoadingException;
 import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.glsl.span.Span;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.jozufozu.flywheel.util.StringUtil;
+import com.mojang.logging.LogUtils;
 
 public class ErrorReporter {
+	private static final Logger LOGGER = LogUtils.getLogger();
 
 	private final List<ErrorBuilder> reportedErrors = new ArrayList<>();
 
@@ -107,7 +110,7 @@ public class ErrorReporter {
 					.append('\n');
 		}
 
-		Flywheel.LOGGER.error(builder.toString());
+		LOGGER.error(builder.toString());
 	}
 
 }

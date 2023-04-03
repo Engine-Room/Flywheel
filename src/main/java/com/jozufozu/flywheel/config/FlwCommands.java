@@ -2,12 +2,8 @@ package com.jozufozu.flywheel.config;
 
 import java.util.function.BiConsumer;
 
-import org.jetbrains.annotations.NotNull;
-
-import com.jozufozu.flywheel.api.backend.BackendType;
-import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.lib.backend.BackendTypes;
-import com.jozufozu.flywheel.lib.backend.SimpleBackendType;
+import com.jozufozu.flywheel.api.backend.Backend;
+import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.lib.uniform.FlwShaderUniforms;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -15,6 +11,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
@@ -24,6 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
@@ -39,22 +37,38 @@ public class FlwCommands {
 				.executes(context -> {
 					LocalPlayer player = Minecraft.getInstance().player;
 					if (player != null) {
-						player.displayClientMessage(BackendTypes.getBackendType(value.get())
-								.getEngineMessage(), false);
+						String backendIdStr = value.get();
+
+						ResourceLocation backendId;
+						try {
+							backendId = new ResourceLocation(backendIdStr);
+						} catch (ResourceLocationException e) {
+							player.displayClientMessage(new TextComponent("Config contains invalid backend ID '" + backendIdStr + "'!"), false);
+							return 0;
+						}
+
+						Backend backend = Backend.REGISTRY.get(backendId);
+						if (backend == null) {
+							player.displayClientMessage(new TextComponent("Config contains non-existent backend with ID '" + backendId + "'!"), false);
+							return 0;
+						}
+
+						Component message = backend.getEngineMessage();
+						player.displayClientMessage(message, false);
 					}
 					return Command.SINGLE_SUCCESS;
 				})
-				.then(Commands.argument("type", BackendTypeArgument.INSTANCE)
+				.then(Commands.argument("id", BackendArgument.INSTANCE)
 					.executes(context -> {
 						LocalPlayer player = Minecraft.getInstance().player;
 						if (player != null) {
-							BackendType type = context.getArgument("type", SimpleBackendType.class);
-							value.set(type.getShortName());
+							Backend backend = context.getArgument("id", Backend.class);
+							value.set(Backend.REGISTRY.getId(backend).toString());
 
-							Component message = getEngineMessage(type);
+							Component message = backend.getEngineMessage();
 							player.displayClientMessage(message, false);
 
-							Backend.reloadWorldRenderers();
+							BackendUtil.reloadWorldRenderers();
 						}
 						return Command.SINGLE_SUCCESS;
 					})));
@@ -74,7 +88,7 @@ public class FlwCommands {
 					Component text = boolToText(bool).append(new TextComponent(" update limiting.").withStyle(ChatFormatting.WHITE));
 					player.displayClientMessage(text, false);
 
-					Backend.reloadWorldRenderers();
+					BackendUtil.reloadWorldRenderers();
 				}
 			));
 
@@ -150,10 +164,6 @@ public class FlwCommands {
 
 	public static MutableComponent boolToText(boolean b) {
 		return b ? new TextComponent("enabled").withStyle(ChatFormatting.DARK_GREEN) : new TextComponent("disabled").withStyle(ChatFormatting.RED);
-	}
-
-	public static Component getEngineMessage(@NotNull BackendType type) {
-		return type.getEngineMessage();
 	}
 
 	public static class ConfigCommandBuilder {

@@ -1,15 +1,14 @@
 package com.jozufozu.flywheel.lib.struct;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.component.ComponentRegistry;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 
 public class StructTypes {
-	public static final StructType<TransformedPart> TRANSFORMED = ComponentRegistry.register(new TransformedType());
-	public static final StructType<OrientedPart> ORIENTED = ComponentRegistry.register(new OrientedType());
+	public static final StructType<TransformedPart> TRANSFORMED = StructType.REGISTRY.registerAndGet(new TransformedType());
+	public static final StructType<OrientedPart> ORIENTED = StructType.REGISTRY.registerAndGet(new OrientedType());
 
 	public static void init() {
 		// noop

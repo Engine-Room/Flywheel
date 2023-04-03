@@ -12,7 +12,7 @@ import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
-import com.jozufozu.flywheel.api.instancer.InstancerManager;
+import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.effect.Effect;
@@ -109,7 +109,7 @@ public class ExampleEffect implements Effect {
 	}
 
 	@Override
-	public Collection<AbstractInstance> createInstances(InstancerManager instancerManager) {
+	public Collection<AbstractInstance> createInstances(InstancerProvider instancerManager) {
 		effects.clear();
 		boids.clear();
 		for (int i = 0; i < INSTANCE_COUNT; i++) {
@@ -242,14 +242,14 @@ public class ExampleEffect implements Effect {
 		private final Boid self;
 		TransformedPart instance;
 
-		public Instance(InstancerManager instancerManager, Level level, Boid self) {
+		public Instance(InstancerProvider instancerManager, Level level, Boid self) {
 			super(instancerManager, level);
 			this.self = self;
 		}
 
 		@Override
 		public void init() {
-			instance = instancerManager.instancer(StructTypes.TRANSFORMED, Models.block(Blocks.SHROOMLIGHT.defaultBlockState()), RenderStage.AFTER_PARTICLES)
+			instance = instancerManager.getInstancer(StructTypes.TRANSFORMED, Models.block(Blocks.SHROOMLIGHT.defaultBlockState()), RenderStage.AFTER_PARTICLES)
 					.createInstance();
 
 			instance.setBlockLight(15)

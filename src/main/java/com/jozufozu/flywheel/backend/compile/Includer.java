@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.backend.compile;
 import java.util.function.Consumer;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.api.pipeline.SourceComponent;
+import com.jozufozu.flywheel.glsl.SourceComponent;
 
 /**
  * A component of a ShaderCompiler, responsible for expanding root sources into the complete set of included sources.

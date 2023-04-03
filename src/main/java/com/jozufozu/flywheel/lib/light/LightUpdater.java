@@ -5,9 +5,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
-import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.task.WorkGroup;
+import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.lib.box.ImmutableBox;
+import com.jozufozu.flywheel.lib.task.WorkGroup;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.jozufozu.flywheel.util.WorldAttached;
 
@@ -68,7 +68,7 @@ public class LightUpdater {
 					}
 				})
 				.onComplete(() -> listeners.forEach(this::addListener))
-				.execute(Backend.getTaskExecutor());
+				.execute(BackendUtil.getTaskExecutor());
 	}
 
 	/**

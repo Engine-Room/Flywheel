@@ -9,11 +9,11 @@ import java.util.function.Consumer;
 
 import org.joml.FrustumIntersection;
 
+import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.ratelimit.BandedPrimeLimiter;
 import com.jozufozu.flywheel.backend.instancing.ratelimit.DistanceUpdateLimiter;
 import com.jozufozu.flywheel.backend.instancing.ratelimit.NonLimiter;
@@ -164,7 +164,7 @@ public abstract class InstanceManager<T> {
 	}
 
 	public void add(T obj) {
-		if (!Backend.isOn()) return;
+		if (!BackendManager.isOn()) return;
 
 		if (canCreateInstance(obj)) {
 			getStorage().add(obj);
@@ -172,7 +172,7 @@ public abstract class InstanceManager<T> {
 	}
 
 	public void queueAdd(T obj) {
-		if (!Backend.isOn()) {
+		if (!BackendManager.isOn()) {
 			return;
 		}
 
@@ -186,7 +186,7 @@ public abstract class InstanceManager<T> {
 	}
 
 	public void queueUpdate(T obj) {
-		if (!Backend.isOn()) return;
+		if (!BackendManager.isOn()) return;
 
 		if (!canCreateInstance(obj)) {
 			return;
@@ -209,7 +209,7 @@ public abstract class InstanceManager<T> {
 	 * @param obj the object to update.
 	 */
 	public void update(T obj) {
-		if (!Backend.isOn()) return;
+		if (!BackendManager.isOn()) return;
 
 		if (canCreateInstance(obj)) {
 			getStorage().update(obj);
@@ -217,7 +217,7 @@ public abstract class InstanceManager<T> {
 	}
 
 	public void remove(T obj) {
-		if (!Backend.isOn()) return;
+		if (!BackendManager.isOn()) return;
 
 		getStorage().remove(obj);
 	}
@@ -267,7 +267,7 @@ public abstract class InstanceManager<T> {
 	}
 
 	public void queueAddAll(Collection<? extends T> objects) {
-		if (!Backend.isOn() || objects.isEmpty()) {
+		if (!BackendManager.isOn() || objects.isEmpty()) {
 			return;
 		}
 

@@ -1,14 +1,14 @@
 package com.jozufozu.flywheel.lib.context;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.component.ComponentRegistry;
+import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 
 public class Contexts {
-	public static final SimpleContext WORLD = ComponentRegistry.register(new SimpleContext(Files.WORLD_VERTEX, Files.WORLD_FRAGMENT));
-	public static final SimpleContext CRUMBLING = ComponentRegistry.register(new SimpleContext(Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT));
+	public static final SimpleContext WORLD = Context.REGISTRY.registerAndGet(new SimpleContext(Files.WORLD_VERTEX, Files.WORLD_FRAGMENT));
+	public static final SimpleContext CRUMBLING = Context.REGISTRY.registerAndGet(new SimpleContext(Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT));
 
 	public static void init() {
 		// noop

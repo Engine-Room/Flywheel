@@ -2,10 +2,10 @@ package com.jozufozu.flywheel.backend.engine.indirect;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.component.ComponentRegistry;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.lib.material.MaterialIndicies;
 
 public final class IndirectDraw<T extends InstancedPart> {
 	private final IndirectInstancer<T> instancer;
@@ -25,8 +25,8 @@ public final class IndirectDraw<T extends InstancedPart> {
 		this.stage = stage;
 		this.mesh = mesh;
 
-		this.vertexMaterialID = ComponentRegistry.materials.getVertexID(material);
-		this.fragmentMaterialID = ComponentRegistry.materials.getFragmentID(material);
+		this.vertexMaterialID = MaterialIndicies.getVertexShaderIndex(material.vertexShader());
+		this.fragmentMaterialID = MaterialIndicies.getFragmentShaderIndex(material.fragmentShader());
 	}
 
 	public void prepare(int baseInstance) {

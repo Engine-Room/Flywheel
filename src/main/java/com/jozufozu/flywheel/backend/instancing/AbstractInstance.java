@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instancer.FlatLit;
-import com.jozufozu.flywheel.api.instancer.InstancerManager;
+import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.lib.light.LightListener;
 
@@ -22,11 +22,11 @@ import net.minecraft.world.level.LightLayer;
  */
 public abstract class AbstractInstance implements Instance, LightListener {
 
-	protected final InstancerManager instancerManager;
+	protected final InstancerProvider instancerManager;
 	public final Level level;
 	protected boolean removed = false;
 
-	public AbstractInstance(InstancerManager instancerManager, Level level) {
+	public AbstractInstance(InstancerProvider instancerManager, Level level) {
 		this.instancerManager = instancerManager;
 		this.level = level;
 	}

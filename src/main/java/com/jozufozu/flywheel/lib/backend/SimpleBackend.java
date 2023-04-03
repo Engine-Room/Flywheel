@@ -5,26 +5,23 @@ import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.backend.BackendType;
+import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.pipeline.Pipeline;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
-public class SimpleBackendType implements BackendType {
-
-
+public class SimpleBackend implements Backend {
 	private final String properName;
-	private final String shortName;
 	private final Component engineMessage;
 	private final Supplier<Engine> engineSupplier;
-	private final Supplier<BackendType> fallback;
+	private final Supplier<Backend> fallback;
 	private final BooleanSupplier isSupported;
 	private final Pipeline pipelineShader;
 
-	public SimpleBackendType(String properName, String shortName, Component engineMessage, Supplier<Engine> engineSupplier, Supplier<BackendType> fallback, BooleanSupplier isSupported, @Nullable Pipeline pipelineShader) {
+	public SimpleBackend(String properName, Component engineMessage, Supplier<Engine> engineSupplier, Supplier<Backend> fallback, BooleanSupplier isSupported, @Nullable Pipeline pipelineShader) {
 		this.properName = properName;
-		this.shortName = shortName;
 		this.engineMessage = engineMessage;
 		this.engineSupplier = engineSupplier;
 		this.fallback = fallback;
@@ -42,11 +39,6 @@ public class SimpleBackendType implements BackendType {
 	}
 
 	@Override
-	public String getShortName() {
-		return shortName;
-	}
-
-	@Override
 	public Component getEngineMessage() {
 		return engineMessage;
 	}
@@ -57,8 +49,8 @@ public class SimpleBackendType implements BackendType {
 	}
 
 	@Override
-	public BackendType findFallback() {
-		if (this.supported()) {
+	public Backend findFallback() {
+		if (this.isSupported()) {
 			return this;
 		} else {
 			return fallback.get()
@@ -67,7 +59,7 @@ public class SimpleBackendType implements BackendType {
 	}
 
 	@Override
-	public boolean supported() {
+	public boolean isSupported() {
 		return isSupported.getAsBoolean();
 	}
 
@@ -78,20 +70,14 @@ public class SimpleBackendType implements BackendType {
 
 	public static class Builder {
 		private String properName;
-		private String shortName;
 		private Component engineMessage;
 		private Supplier<Engine> engineSupplier;
-		private Supplier<BackendType> fallback;
+		private Supplier<Backend> fallback;
 		private BooleanSupplier isSupported;
 		private Pipeline pipelineShader;
 
 		public Builder properName(String properName) {
 			this.properName = properName;
-			return this;
-		}
-
-		public Builder shortName(String shortName) {
-			this.shortName = shortName;
 			return this;
 		}
 
@@ -105,7 +91,7 @@ public class SimpleBackendType implements BackendType {
 			return this;
 		}
 
-		public Builder fallback(Supplier<BackendType> fallback) {
+		public Builder fallback(Supplier<Backend> fallback) {
 			this.fallback = fallback;
 			return this;
 		}
@@ -120,8 +106,8 @@ public class SimpleBackendType implements BackendType {
 			return this;
 		}
 
-		public BackendType register() {
-			return BackendTypes.register(new SimpleBackendType(properName, shortName, engineMessage, engineSupplier, fallback, isSupported, pipelineShader));
+		public Backend register(ResourceLocation id) {
+			return Backend.REGISTRY.registerAndGet(id, new SimpleBackend(properName, engineMessage, engineSupplier, fallback, isSupported, pipelineShader));
 		}
 	}
 }

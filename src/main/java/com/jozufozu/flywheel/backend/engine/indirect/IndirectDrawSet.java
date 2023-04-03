@@ -10,10 +10,10 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import com.jozufozu.flywheel.api.component.ComponentRegistry;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.lib.material.MaterialIndicies;
 import com.jozufozu.flywheel.util.Textures;
 
 public class IndirectDrawSet<T extends InstancedPart> {
@@ -50,7 +50,7 @@ public class IndirectDrawSet<T extends InstancedPart> {
 		multiDraws.clear();
 		// sort by stage, then material
 		indirectDraws.sort(Comparator.comparing(IndirectDraw<T>::stage)
-				.thenComparing(draw -> ComponentRegistry.materials.getMaterialID(draw.material())));
+				.thenComparing(draw -> MaterialIndicies.getMaterialIndex(draw.material())));
 
 		for (int start = 0, i = 0; i < indirectDraws.size(); i++) {
 			var draw = indirectDraws.get(i);

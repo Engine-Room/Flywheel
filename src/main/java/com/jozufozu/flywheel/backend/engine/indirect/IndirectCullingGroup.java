@@ -16,6 +16,7 @@ import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.compile.FlwCompiler;
+import com.jozufozu.flywheel.backend.uniform.UniformBuffer;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.pipeline.Pipelines;
@@ -112,7 +113,7 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 		uploadInstanceData();
 		uploadIndirectCommands();
 
-		compute.bind();
+		UniformBuffer.syncAndBind(compute);
 		buffers.bindForCompute();
 
 		var groupCount = (instanceCountThisFrame + 31) >> 5; // ceil(instanceCount / 32)
@@ -125,7 +126,7 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 			return;
 		}
 
-		draw.bind();
+		UniformBuffer.syncAndBind(draw);
 		glBindVertexArray(vertexArray);
 		buffers.bindForDraw();
 

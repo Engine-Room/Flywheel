@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend;
 
+import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.backend.compile.FlwCompiler;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.glsl.ShaderSources;
@@ -19,22 +20,14 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
  * </p>
  */
 public class Loader implements ResourceManagerReloadListener {
+	public static final Loader INSTANCE = new Loader();
 
-	Loader() {
-		// Can be null when running datagenerators due to the unfortunate time we call this
-		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft == null) {
-			return;
-		}
-
-		if (minecraft.getResourceManager() instanceof ReloadableResourceManager reloadable) {
-			reloadable.registerReloadListener(this);
-		}
+	private Loader() {
 	}
 
 	@Override
 	public void onResourceManagerReload(ResourceManager manager) {
-		Backend.refresh();
+		BackendManager.refresh();
 
 		var errorReporter = new ErrorReporter();
 		ShaderSources sources = new ShaderSources(errorReporter, manager);
@@ -46,9 +39,20 @@ public class Loader implements ResourceManagerReloadListener {
 		FlwCompiler.INSTANCE = new FlwCompiler(sources);
 
 		ClientLevel level = Minecraft.getInstance().level;
-		if (Backend.canUseInstancing(level)) {
+		if (BackendUtil.canUseInstancing(level)) {
 			InstancedRenderDispatcher.resetInstanceLevel(level);
 		}
+	}
 
+	public static void init() {
+		// Can be null when running datagenerators due to the unfortunate time we call this
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft == null) {
+			return;
+		}
+
+		if (minecraft.getResourceManager() instanceof ReloadableResourceManager reloadable) {
+			reloadable.registerReloadListener(INSTANCE);
+		}
 	}
 }

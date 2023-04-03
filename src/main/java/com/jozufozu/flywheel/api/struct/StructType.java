@@ -2,7 +2,9 @@ package com.jozufozu.flywheel.api.struct;
 
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.layout.BufferLayout;
+import com.jozufozu.flywheel.api.registry.Registry;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
+import com.jozufozu.flywheel.impl.RegistryImpl;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
@@ -12,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
  * @param <S> The java representation of the instance struct.
  */
 public interface StructType<S extends InstancedPart> {
+	static Registry<StructType<?>> REGISTRY = RegistryImpl.create();
 
 	/**
 	 * @return A new, zeroed instance of S.

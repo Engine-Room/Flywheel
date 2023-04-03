@@ -2,54 +2,82 @@ package com.jozufozu.flywheel.config;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
-import com.jozufozu.flywheel.api.backend.BackendType;
-import com.jozufozu.flywheel.lib.backend.BackendTypes;
+import com.jozufozu.flywheel.api.backend.Backend;
+import com.jozufozu.flywheel.api.backend.BackendManager;
+import com.mojang.logging.LogUtils;
 
+import net.minecraft.ResourceLocationException;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
+import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 
 public class FlwConfig {
-
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final FlwConfig INSTANCE = new FlwConfig();
 
 	public final ClientConfig client;
+	private final ForgeConfigSpec clientSpec;
 
 	public FlwConfig() {
 		Pair<ClientConfig, ForgeConfigSpec> client = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
 
 		this.client = client.getLeft();
-
-		ModLoadingContext.get()
-				.registerConfig(ModConfig.Type.CLIENT, client.getRight());
+		clientSpec = client.getRight();
 	}
 
 	public static FlwConfig get() {
 		return INSTANCE;
 	}
 
+	public Backend getBackend() {
+		Backend backend = parseBackend(client.backend.get());
+		if (backend == null) {
+			backend = BackendManager.getDefaultBackend();
+			client.backend.set(Backend.REGISTRY.getId(backend).toString());
+		}
+
+		return backend;
+	}
+
 	@Nullable
-	public BackendType getBackendType() {
-		return BackendTypes.getBackendType(client.backend.get());
+	private static Backend parseBackend(String idStr) {
+		ResourceLocation backendId;
+		try {
+			backendId = new ResourceLocation(idStr);
+		} catch (ResourceLocationException e) {
+			LOGGER.warn("Config contains invalid backend ID '" + idStr + "'!");
+			return null;
+		}
+
+		Backend backend = Backend.REGISTRY.get(backendId);
+		if (backend == null) {
+			LOGGER.warn("Config contains non-existent backend with ID '" + backendId + "'!");
+			return null;
+		}
+
+		return backend;
 	}
 
 	public boolean limitUpdates() {
 		return client.limitUpdates.get();
 	}
 
-	public static void init() {
+	public void registerSpecs(ModLoadingContext context) {
+		context.registerConfig(ModConfig.Type.CLIENT, clientSpec);
 	}
 
 	public static class ClientConfig {
-		public final ForgeConfigSpec.ConfigValue<String> backend;
+		public final ConfigValue<String> backend;
 		public final BooleanValue limitUpdates;
 
 		public ClientConfig(ForgeConfigSpec.Builder builder) {
 			backend = builder.comment("Select the backend to use.")
-					.define("backend", BackendTypes.defaultForCurrentPC()
-							.getShortName());
+					.define("backend", Backend.REGISTRY.getId(BackendManager.getDefaultBackend()).toString());
 
 			limitUpdates = builder.comment("Enable or disable instance update limiting with distance.")
 					.define("limitUpdates", true);

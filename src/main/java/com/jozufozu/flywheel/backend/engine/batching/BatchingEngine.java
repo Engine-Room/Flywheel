@@ -25,7 +25,7 @@ public class BatchingEngine implements Engine {
 	protected final BatchingDrawTracker drawTracker = new BatchingDrawTracker();
 
 	@Override
-	public <D extends InstancedPart> Instancer<D> instancer(StructType<D> type, Model model, RenderStage stage) {
+	public <D extends InstancedPart> Instancer<D> getInstancer(StructType<D> type, Model model, RenderStage stage) {
 		return transformManager.getInstancer(type, model, stage);
 	}
 

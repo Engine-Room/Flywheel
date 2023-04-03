@@ -1,14 +1,14 @@
 package com.jozufozu.flywheel.lib.format;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.component.ComponentRegistry;
+import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 
 public class Formats {
-	public static final BlockVertex BLOCK = ComponentRegistry.register(new BlockVertex());
-	public static final PosTexNormalVertex POS_TEX_NORMAL = ComponentRegistry.register(new PosTexNormalVertex());
+	public static final BlockVertex BLOCK = VertexType.REGISTRY.registerAndGet(new BlockVertex());
+	public static final PosTexNormalVertex POS_TEX_NORMAL = VertexType.REGISTRY.registerAndGet(new PosTexNormalVertex());
 
 	public static void init() {
 		// noop

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api.pipeline;
+package com.jozufozu.flywheel.glsl;
 
 import java.util.Collection;
 

@@ -7,8 +7,8 @@ import org.lwjgl.opengl.GL32C;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
-import com.jozufozu.flywheel.backend.engine.instancing.ElementBuffer;
 import com.jozufozu.flywheel.gl.GlNumericType;
+import com.jozufozu.flywheel.gl.buffer.ElementBuffer;
 import com.jozufozu.flywheel.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.gl.buffer.GlBufferUsage;
 import com.mojang.blaze3d.vertex.VertexFormat;

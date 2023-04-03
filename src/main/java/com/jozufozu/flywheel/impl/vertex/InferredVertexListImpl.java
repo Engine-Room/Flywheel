@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.vertex;
+package com.jozufozu.flywheel.impl.vertex;
 
 import org.lwjgl.system.MemoryUtil;
 
