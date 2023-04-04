@@ -39,7 +39,7 @@ public final class BackendManagerImpl {
 		var actual = preferred.findFallback();
 
 		if (preferred != actual) {
-			LOGGER.warn("Flywheel backend fell back from '{}' to '{}'", Backend.REGISTRY.getId(preferred), Backend.REGISTRY.getId(actual));
+			LOGGER.warn("Flywheel backend fell back from '{}' to '{}'", Backend.REGISTRY.getIdOrThrow(preferred), Backend.REGISTRY.getIdOrThrow(actual));
 		}
 
 		return actual;

@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.api.model.Mesh;
-import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
+import com.jozufozu.flywheel.lib.instance.AbstractEntityInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance<T> implements DynamicInstance, TickableInstance {
+public class MinecartInstance<T extends AbstractMinecart> extends AbstractEntityInstance<T> implements DynamicInstance, TickableInstance {
 
 	private static final SimpleLazyModel MODEL = new SimpleLazyModel(MinecartInstance::getBodyModel, Materials.MINECART);
 
@@ -150,7 +150,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends EntityInstance
 	}
 
 	@Override
-	public void remove() {
+	protected void _delete() {
 		body.delete();
 		if (contents != null) contents.delete();
 	}

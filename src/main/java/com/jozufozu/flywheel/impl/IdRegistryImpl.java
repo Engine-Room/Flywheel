@@ -73,6 +73,24 @@ public class IdRegistryImpl<T> implements IdRegistry<T> {
 	}
 
 	@Override
+	public T getOrThrow(ResourceLocation id) {
+		T object = get(id);
+		if (object == null) {
+			throw new IllegalArgumentException("Could not find object for ID '" + id + "'!");
+		}
+		return object;
+	}
+
+	@Override
+	public ResourceLocation getIdOrThrow(T object) {
+		ResourceLocation id = getId(object);
+		if (id == null) {
+			throw new IllegalArgumentException("Could not find ID for object!");
+		}
+		return id;
+	}
+
+	@Override
 	@Unmodifiable
 	public Set<ResourceLocation> getAllIds() {
 		return keysView;
@@ -107,6 +125,7 @@ public class IdRegistryImpl<T> implements IdRegistry<T> {
 		for (Runnable runnable : freezeCallbacks) {
 			runnable.run();
 		}
+		freezeCallbacks.clear();
 	}
 
 	public static void freezeAll() {

@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.google.common.collect.Lists;
 import com.jozufozu.flywheel.api.backend.BackendManager;
-import com.jozufozu.flywheel.api.instance.InstancedRenderRegistry;
 import com.jozufozu.flywheel.extension.ClientLevelExtension;
+import com.jozufozu.flywheel.lib.instance.InstancingControllerHelper;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
@@ -33,7 +33,7 @@ public abstract class ClientLevelMixin implements ClientLevelExtension {
 			Iterable<Entity> entities = cir.getReturnValue();
 			ArrayList<Entity> filtered = Lists.newArrayList(entities);
 
-			filtered.removeIf(InstancedRenderRegistry::shouldSkipRender);
+			filtered.removeIf(InstancingControllerHelper::shouldSkipRender);
 
 			cir.setReturnValue(filtered);
 		}

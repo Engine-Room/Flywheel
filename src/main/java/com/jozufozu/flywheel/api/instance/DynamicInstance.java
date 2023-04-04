@@ -2,11 +2,10 @@ package com.jozufozu.flywheel.api.instance;
 
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
-import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 
 /**
- * An interface giving {@link BlockEntityInstance}s a hook to have a function called at
- * the start of a frame. By implementing {@link DynamicInstance}, a {@link BlockEntityInstance}
+ * An interface giving {@link Instance}s a hook to have a function called at
+ * the start of a frame. By implementing {@link DynamicInstance}, an {@link Instance}
  * can animate its models in ways that could not be easily achieved by shader attribute
  * parameterization.
  *

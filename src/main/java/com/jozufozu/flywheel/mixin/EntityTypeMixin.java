@@ -4,7 +4,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-import com.jozufozu.flywheel.api.instance.entity.EntityInstancingController;
+import com.jozufozu.flywheel.api.instance.controller.EntityInstancingController;
 import com.jozufozu.flywheel.extension.EntityTypeExtension;
 
 import net.minecraft.world.entity.Entity;

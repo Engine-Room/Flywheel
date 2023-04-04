@@ -5,12 +5,11 @@ import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instancer.InstancerProvider;
-import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
-import com.jozufozu.flywheel.lib.light.LightUpdater;
 
 public abstract class One2OneStorage<T> extends AbstractStorage<T> {
-	private final Map<T, AbstractInstance> instances;
+	private final Map<T, Instance> instances;
 
 	public One2OneStorage(InstancerProvider instancerManager) {
 		super(instancerManager);
@@ -18,26 +17,18 @@ public abstract class One2OneStorage<T> extends AbstractStorage<T> {
 	}
 
 	@Override
-	public int getObjectCount() {
-		return instances.size();
-	}
-
-	@Override
-	public Iterable<AbstractInstance> allInstances() {
+	public Iterable<Instance> getAllInstances() {
 		return instances.values();
 	}
 
 	@Override
-	public void invalidate() {
-		instances.values().forEach(AbstractInstance::remove);
-		instances.clear();
-		dynamicInstances.clear();
-		tickableInstances.clear();
+	public int getInstanceCount() {
+		return instances.size();
 	}
 
 	@Override
 	public void add(T obj) {
-		AbstractInstance instance = instances.get(obj);
+		Instance instance = instances.get(obj);
 
 		if (instance == null) {
 			create(obj);
@@ -46,22 +37,21 @@ public abstract class One2OneStorage<T> extends AbstractStorage<T> {
 
 	@Override
 	public void remove(T obj) {
-		var instance = instances.remove(obj);
+		Instance instance = instances.remove(obj);
 
 		if (instance == null) {
 			return;
 		}
 
-		instance.remove();
+		instance.delete();
 		dynamicInstances.remove(instance);
 		tickableInstances.remove(instance);
-		LightUpdater.get(instance.level)
-				.removeListener(instance);
+		instance.removeNow();
 	}
 
 	@Override
 	public void update(T obj) {
-		AbstractInstance instance = instances.get(obj);
+		Instance instance = instances.get(obj);
 
 		if (instance == null) {
 			return;
@@ -83,9 +73,9 @@ public abstract class One2OneStorage<T> extends AbstractStorage<T> {
 		dynamicInstances.clear();
 		tickableInstances.clear();
 		instances.replaceAll((obj, instance) -> {
-			instance.remove();
+			instance.delete();
 
-			AbstractInstance out = createRaw(obj);
+			Instance out = createRaw(obj);
 
 			if (out != null) {
 				setup(out);
@@ -95,16 +85,23 @@ public abstract class One2OneStorage<T> extends AbstractStorage<T> {
 		});
 	}
 
+	@Override
+	public void invalidate() {
+		instances.values().forEach(Instance::delete);
+		instances.clear();
+		tickableInstances.clear();
+		dynamicInstances.clear();
+	}
+
 	private void create(T obj) {
-		AbstractInstance renderer = createRaw(obj);
+		Instance instance = createRaw(obj);
 
-		if (renderer != null) {
-			setup(renderer);
-			instances.put(obj, renderer);
+		if (instance != null) {
+			setup(instance);
+			instances.put(obj, instance);
 		}
-
 	}
 
 	@Nullable
-	protected abstract AbstractInstance createRaw(T obj);
+	protected abstract Instance createRaw(T obj);
 }

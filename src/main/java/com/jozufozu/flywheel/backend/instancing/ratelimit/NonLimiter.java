@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.instancing.ratelimit;
 public class NonLimiter implements DistanceUpdateLimiter {
 	@Override
 	public void tick() {
-		// noop
 	}
 
 	@Override

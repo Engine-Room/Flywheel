@@ -26,7 +26,7 @@ import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;
-import com.jozufozu.flywheel.lib.material.MaterialIndicies;
+import com.jozufozu.flywheel.lib.material.MaterialIndices;
 import com.jozufozu.flywheel.lib.pipeline.Pipelines;
 import com.jozufozu.flywheel.util.StringUtil;
 
@@ -55,12 +55,12 @@ public class FlwCompiler {
 
 		this.sources = sources;
 		this.vertexMaterialComponent = MaterialAdapterComponent.builder(Flywheel.rl("vertex_material_adapter"))
-				.materialSources(MaterialIndicies.getAllVertexShaders())
+				.materialSources(MaterialIndices.getAllVertexShaders())
 				.adapt(FnSignature.ofVoid("flw_materialVertex"))
 				.switchOn(GlslExpr.variable("flw_materialVertexID"))
 				.build(sources);
 		this.fragmentMaterialComponent = MaterialAdapterComponent.builder(Flywheel.rl("fragment_material_adapter"))
-				.materialSources(MaterialIndicies.getAllFragmentShaders())
+				.materialSources(MaterialIndices.getAllFragmentShaders())
 				.adapt(FnSignature.ofVoid("flw_materialFragment"))
 				.adapt(FnSignature.create()
 						.returnType("bool")

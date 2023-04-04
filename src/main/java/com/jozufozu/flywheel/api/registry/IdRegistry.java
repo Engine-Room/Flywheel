@@ -21,6 +21,10 @@ public interface IdRegistry<T> extends Iterable<T>  {
 	@Nullable
 	ResourceLocation getId(T object);
 
+	T getOrThrow(ResourceLocation id);
+
+	ResourceLocation getIdOrThrow(T object);
+
 	@Unmodifiable
 	Set<ResourceLocation> getAllIds();
 

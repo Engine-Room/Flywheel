@@ -1,14 +1,16 @@
-package com.jozufozu.flywheel.backend.instancing.blockentity;
+package com.jozufozu.flywheel.backend.instancing.manager;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.api.instance.InstancedRenderRegistry;
+import org.jetbrains.annotations.Nullable;
+
+import com.jozufozu.flywheel.api.instance.BlockEntityInstance;
+import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.backend.BackendUtil;
-import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
-import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.storage.One2OneStorage;
 import com.jozufozu.flywheel.backend.instancing.storage.Storage;
+import com.jozufozu.flywheel.lib.instance.InstancingControllerHelper;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -18,7 +20,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class BlockEntityInstanceManager extends InstanceManager<BlockEntity> {
-
 	private final BlockEntityStorage storage;
 
 	public BlockEntityInstanceManager(InstancerProvider instancerManager) {
@@ -26,7 +27,7 @@ public class BlockEntityInstanceManager extends InstanceManager<BlockEntity> {
 	}
 
 	@Override
-	public Storage<BlockEntity> getStorage() {
+	protected Storage<BlockEntity> getStorage() {
 		return storage;
 	}
 
@@ -43,7 +44,7 @@ public class BlockEntityInstanceManager extends InstanceManager<BlockEntity> {
 			return false;
 		}
 
-		if (!InstancedRenderRegistry.canInstance(blockEntity.getType())) {
+		if (!InstancingControllerHelper.canInstance(blockEntity.getType())) {
 			return false;
 		}
 
@@ -68,18 +69,17 @@ public class BlockEntityInstanceManager extends InstanceManager<BlockEntity> {
 		return false;
 	}
 
-	public static class BlockEntityStorage extends One2OneStorage<BlockEntity> {
+	private static class BlockEntityStorage extends One2OneStorage<BlockEntity> {
+		private final Long2ObjectMap<BlockEntityInstance<?>> posLookup = new Long2ObjectOpenHashMap<>();
 
-		final Long2ObjectMap<BlockEntityInstance<?>> posLookup = new Long2ObjectOpenHashMap<>();
-
-
-		public BlockEntityStorage(InstancerProvider manager) {
-			super(manager);
+		public BlockEntityStorage(InstancerProvider instancerManager) {
+			super(instancerManager);
 		}
 
 		@Override
-		protected AbstractInstance createRaw(BlockEntity obj) {
-			var instance = InstancedRenderRegistry.createInstance(instancerManager, obj);
+		@Nullable
+		protected Instance createRaw(BlockEntity obj) {
+			BlockEntityInstance<?> instance = InstancingControllerHelper.createInstance(instancerManager, obj);
 
 			if (instance != null) {
 				BlockPos blockPos = obj.getBlockPos();

@@ -1,15 +1,16 @@
-package com.jozufozu.flywheel.backend.instancing.blockentity;
+package com.jozufozu.flywheel.lib.instance;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.joml.FrustumIntersection;
 
+import com.jozufozu.flywheel.api.instance.BlockEntityInstance;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.InstancerProvider;
-import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
+import com.jozufozu.flywheel.backend.instancing.manager.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.lib.box.ImmutableBox;
 import com.jozufozu.flywheel.lib.box.MutableBox;
 
@@ -29,19 +30,19 @@ import net.minecraft.world.level.block.state.BlockState;
  * </ul>
  * See the interfaces' documentation for more information about each one.
  *
- * <br> Implementing one or more of these will give a {@link BlockEntityInstance} access
+ * <br> Implementing one or more of these will give a {@link AbstractBlockEntityInstance} access
  * to more interesting and regular points within a tick or a frame.
  *
  * @param <T> The type of {@link BlockEntity} your class is an instance of.
  */
-public abstract class BlockEntityInstance<T extends BlockEntity> extends AbstractInstance {
+public abstract class AbstractBlockEntityInstance<T extends BlockEntity> extends AbstractInstance implements BlockEntityInstance<T> {
 
 	protected final T blockEntity;
 	protected final BlockPos pos;
 	protected final BlockPos instancePos;
 	protected final BlockState blockState;
 
-	public BlockEntityInstance(InstancerProvider instancerManager, T blockEntity) {
+	public AbstractBlockEntityInstance(InstancerProvider instancerManager, T blockEntity) {
 		super(instancerManager, blockEntity.getLevel());
 		this.blockEntity = blockEntity;
 		this.pos = blockEntity.getBlockPos();
@@ -49,6 +50,7 @@ public abstract class BlockEntityInstance<T extends BlockEntity> extends Abstrac
 		this.instancePos = pos.subtract(instancerManager.getOriginCoordinate());
 	}
 
+	@Override
 	public List<InstancedPart> getCrumblingParts() {
 		var out = new ArrayList<InstancedPart>();
 		addCrumblingParts(out);

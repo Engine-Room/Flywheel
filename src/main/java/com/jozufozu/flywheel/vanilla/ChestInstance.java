@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.InstancerProvider;
-import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
+import com.jozufozu.flywheel.lib.instance.AbstractBlockEntityInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
 import com.jozufozu.flywheel.lib.modelpart.ModelPart;
@@ -35,7 +35,7 @@ import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.properties.ChestType;
 
-public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends BlockEntityInstance<T> implements DynamicInstance {
+public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends AbstractBlockEntityInstance<T> implements DynamicInstance {
 
 	private static final BiFunction<ChestType, TextureAtlasSprite, SimpleLazyModel> LID = Util.memoize((type, mat) -> new SimpleLazyModel(() -> createLidModel(type, mat), Materials.CHEST));
 	private static final BiFunction<ChestType, TextureAtlasSprite, SimpleLazyModel> BASE = Util.memoize((type, mat) -> new SimpleLazyModel(() -> createBaseModel(type, mat), Materials.CHEST));
@@ -117,7 +117,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Block
 	}
 
 	@Override
-	public void remove() {
+	protected void _delete() {
 		body.delete();
 		lid.delete();
 	}

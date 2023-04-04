@@ -63,7 +63,7 @@ public class FlwCommands {
 						LocalPlayer player = Minecraft.getInstance().player;
 						if (player != null) {
 							Backend backend = context.getArgument("id", Backend.class);
-							value.set(Backend.REGISTRY.getId(backend).toString());
+							value.set(Backend.REGISTRY.getIdOrThrow(backend).toString());
 
 							Component message = backend.getEngineMessage();
 							player.displayClientMessage(message, false);
