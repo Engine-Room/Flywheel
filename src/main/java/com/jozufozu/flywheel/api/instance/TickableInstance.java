@@ -2,11 +2,10 @@ package com.jozufozu.flywheel.api.instance;
 
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
-import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 
 /**
- * An interface giving {@link BlockEntityInstance}s a hook to have a function called at
- * the end of every tick. By implementing {@link TickableInstance}, a {@link BlockEntityInstance}
+ * An interface giving {@link Instance}s a hook to have a function called at
+ * the end of every tick. By implementing {@link TickableInstance}, an {@link Instance}
  * can update frequently, but not every frame.
  * <br> There are a few cases in which this should be considered over {@link DynamicInstance}:
  * <ul>

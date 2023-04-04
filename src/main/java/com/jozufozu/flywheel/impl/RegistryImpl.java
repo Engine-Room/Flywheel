@@ -91,6 +91,7 @@ public class RegistryImpl<T> implements Registry<T> {
 		for (Runnable runnable : freezeCallbacks) {
 			runnable.run();
 		}
+		freezeCallbacks.clear();
 	}
 
 	public static void freezeAll() {

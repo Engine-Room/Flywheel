@@ -1,18 +1,16 @@
-package com.jozufozu.flywheel.backend.instancing.effect;
+package com.jozufozu.flywheel.backend.instancing.manager;
 
 import java.util.ArrayList;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.effect.Effect;
 import com.jozufozu.flywheel.api.instancer.InstancerProvider;
-import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
-import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.storage.AbstractStorage;
 import com.jozufozu.flywheel.backend.instancing.storage.Storage;
-import com.jozufozu.flywheel.lib.light.LightUpdater;
 
 public class EffectInstanceManager extends InstanceManager<Effect> {
-
 	private final EffectStorage<Effect> storage;
 
 	public EffectInstanceManager(InstancerProvider instancerManager) {
@@ -20,7 +18,7 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 	}
 
 	@Override
-	public Storage<Effect> getStorage() {
+	protected Storage<Effect> getStorage() {
 		return storage;
 	}
 
@@ -29,9 +27,8 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 		return true;
 	}
 
-	public static class EffectStorage<T extends Effect> extends AbstractStorage<T> {
-
-		private final Multimap<T, AbstractInstance> instances;
+	private static class EffectStorage<T extends Effect> extends AbstractStorage<T> {
+		private final Multimap<T, Instance> instances;
 
 		public EffectStorage(InstancerProvider manager) {
 			super(manager);
@@ -39,21 +36,13 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 		}
 
 		@Override
-		public int getObjectCount() {
-			return instances.size();
-		}
-
-		@Override
-		public Iterable<AbstractInstance> allInstances() {
+		public Iterable<Instance> getAllInstances() {
 			return instances.values();
 		}
 
 		@Override
-		public void invalidate() {
-			instances.values().forEach(AbstractInstance::removeAndMark);
-			instances.clear();
-			tickableInstances.clear();
-			dynamicInstances.clear();
+		public int getInstanceCount() {
+			return instances.size();
 		}
 
 		@Override
@@ -75,9 +64,8 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 
 			this.tickableInstances.removeAll(instances);
 			this.dynamicInstances.removeAll(instances);
-			for (AbstractInstance instance : instances) {
-				LightUpdater.get(instance.level)
-						.removeListener(instance);
+			for (Instance instance : instances) {
+				instance.removeNow();
 			}
 		}
 
@@ -89,18 +77,26 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 				return;
 			}
 
-			instances.forEach(AbstractInstance::update);
+			instances.forEach(Instance::update);
 		}
 
 		@Override
 		public void recreateAll() {
-			this.dynamicInstances.clear();
-			this.tickableInstances.clear();
-			this.instances.values().forEach(AbstractInstance::removeAndMark);
+			tickableInstances.clear();
+			dynamicInstances.clear();
+			instances.values().forEach(Instance::delete);
 
-			var backup = new ArrayList<>(this.instances.keySet());
-			this.instances.clear();
+			var backup = new ArrayList<>(instances.keySet());
+			instances.clear();
 			backup.forEach(this::create);
+		}
+
+		@Override
+		public void invalidate() {
+			instances.values().forEach(Instance::delete);
+			instances.clear();
+			tickableInstances.clear();
+			dynamicInstances.clear();
 		}
 
 		private void create(T obj) {

@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.InstancerProvider;
-import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
+import com.jozufozu.flywheel.lib.instance.AbstractBlockEntityInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
 import com.jozufozu.flywheel.lib.modelpart.ModelPart;
@@ -23,7 +23,7 @@ import net.minecraft.client.renderer.blockentity.BellRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BellBlockEntity;
 
-public class BellInstance extends BlockEntityInstance<BellBlockEntity> implements DynamicInstance {
+public class BellInstance extends AbstractBlockEntityInstance<BellBlockEntity> implements DynamicInstance {
 
 	private static final SimpleLazyModel MODEL = new SimpleLazyModel(BellInstance::createBellModel, Materials.BELL);
 
@@ -68,7 +68,7 @@ public class BellInstance extends BlockEntityInstance<BellBlockEntity> implement
 	}
 
 	@Override
-	public void remove() {
+	protected void _delete() {
 		bell.delete();
 	}
 

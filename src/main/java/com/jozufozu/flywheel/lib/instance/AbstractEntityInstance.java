@@ -1,14 +1,13 @@
-package com.jozufozu.flywheel.backend.instancing.entity;
+package com.jozufozu.flywheel.lib.instance;
 
 import org.joml.FrustumIntersection;
 
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.instance.EntityInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instancer.InstancerProvider;
-import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
-import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
+import com.jozufozu.flywheel.backend.instancing.manager.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.lib.box.MutableBox;
-import com.jozufozu.flywheel.lib.light.LightListener;
 import com.jozufozu.flywheel.lib.light.TickingLightListener;
 import com.mojang.math.Vector3f;
 
@@ -30,17 +29,17 @@ import net.minecraft.world.phys.Vec3;
  * </ul>
  * See the interfaces' documentation for more information about each one.
  *
- * <br> Implementing one or more of these will give a {@link EntityInstance} access
+ * <br> Implementing one or more of these will give a {@link AbstractEntityInstance} access
  * to more interesting and regular points within a tick or a frame.
  *
  * @param <E> The type of {@link Entity} your class is an instance of.
  */
-public abstract class EntityInstance<E extends Entity> extends AbstractInstance implements LightListener, TickingLightListener {
+public abstract class AbstractEntityInstance<E extends Entity> extends AbstractInstance implements EntityInstance<E>, TickingLightListener {
 
 	protected final E entity;
 	protected final MutableBox bounds;
 
-	public EntityInstance(InstancerProvider instancerManager, E entity) {
+	public AbstractEntityInstance(InstancerProvider instancerManager, E entity) {
 		super(instancerManager, entity.level);
 		this.entity = entity;
 		bounds = MutableBox.from(entity.getBoundingBox());

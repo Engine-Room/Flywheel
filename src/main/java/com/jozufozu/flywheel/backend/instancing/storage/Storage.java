@@ -3,19 +3,17 @@ package com.jozufozu.flywheel.backend.instancing.storage;
 import java.util.List;
 
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
-import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 
 public interface Storage<T> {
-	int getObjectCount();
+	Iterable<Instance> getAllInstances();
 
-	Iterable<AbstractInstance> allInstances();
+	int getInstanceCount();
 
 	List<TickableInstance> getInstancesForTicking();
 
 	List<DynamicInstance> getInstancesForUpdate();
-
-	void invalidate();
 
 	void add(T obj);
 
@@ -24,4 +22,6 @@ public interface Storage<T> {
 	void update(T obj);
 
 	void recreateAll();
+
+	void invalidate();
 }

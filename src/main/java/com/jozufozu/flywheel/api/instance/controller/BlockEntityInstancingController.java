@@ -1,7 +1,7 @@
-package com.jozufozu.flywheel.api.instance.blockentity;
+package com.jozufozu.flywheel.api.instance.controller;
 
+import com.jozufozu.flywheel.api.instance.BlockEntityInstance;
 import com.jozufozu.flywheel.api.instancer.InstancerProvider;
-import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 

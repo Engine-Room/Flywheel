@@ -7,11 +7,12 @@ import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
+import com.jozufozu.flywheel.api.instance.effect.Effect;
 import com.jozufozu.flywheel.backend.BackendUtil;
-import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstanceManager;
-import com.jozufozu.flywheel.backend.instancing.effect.Effect;
-import com.jozufozu.flywheel.backend.instancing.effect.EffectInstanceManager;
-import com.jozufozu.flywheel.backend.instancing.entity.EntityInstanceManager;
+import com.jozufozu.flywheel.backend.instancing.manager.BlockEntityInstanceManager;
+import com.jozufozu.flywheel.backend.instancing.manager.EffectInstanceManager;
+import com.jozufozu.flywheel.backend.instancing.manager.EntityInstanceManager;
+import com.jozufozu.flywheel.backend.instancing.manager.InstanceManager;
 import com.jozufozu.flywheel.backend.task.ParallelTaskExecutor;
 import com.jozufozu.flywheel.extension.ClientLevelExtension;
 

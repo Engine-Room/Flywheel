@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.InstancerProvider;
-import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
+import com.jozufozu.flywheel.lib.instance.AbstractBlockEntityInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
 import com.jozufozu.flywheel.lib.modelpart.ModelPart;
@@ -28,7 +28,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
-public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntity> implements DynamicInstance {
+public class ShulkerBoxInstance extends AbstractBlockEntityInstance<ShulkerBoxBlockEntity> implements DynamicInstance {
 
 	private static final Function<TextureAtlasSprite, SimpleLazyModel> BASE = Util.memoize(it -> new SimpleLazyModel(() -> makeBaseModel(it), Materials.SHULKER));
 	private static final Function<TextureAtlasSprite, SimpleLazyModel> LID = Util.memoize(it -> new SimpleLazyModel(() -> makeLidModel(it), Materials.SHULKER));
@@ -95,7 +95,7 @@ public class ShulkerBoxInstance extends BlockEntityInstance<ShulkerBoxBlockEntit
 	}
 
 	@Override
-	public void remove() {
+	protected void _delete() {
 		base.delete();
 		lid.delete();
 	}

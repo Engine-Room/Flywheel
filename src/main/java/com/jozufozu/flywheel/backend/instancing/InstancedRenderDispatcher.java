@@ -6,8 +6,10 @@ import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.event.BeginFrameEvent;
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.api.event.RenderStageEvent;
+import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.effect.Effect;
 import com.jozufozu.flywheel.backend.BackendUtil;
-import com.jozufozu.flywheel.backend.instancing.effect.Effect;
+import com.jozufozu.flywheel.backend.instancing.manager.InstanceManager;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.util.AnimationTickHolder;
@@ -26,7 +28,7 @@ public class InstancedRenderDispatcher {
 	private static final WorldAttached<InstanceWorld> instanceWorlds = new WorldAttached<>(InstanceWorld::create);
 
 	/**
-	 * Call this when you want to manually run {@link AbstractInstance#update()}.
+	 * Call this when you want to manually run {@link Instance#update()}.
 	 * @param blockEntity The block entity whose instance you want to update.
 	 */
 	public static void enqueueUpdate(BlockEntity blockEntity) {
@@ -38,7 +40,7 @@ public class InstancedRenderDispatcher {
 	}
 
 	/**
-	 * Call this when you want to manually run {@link AbstractInstance#update()}.
+	 * Call this when you want to manually run {@link Instance#update()}.
 	 * @param entity The entity whose instance you want to update.
 	 */
 	public static void enqueueUpdate(Entity entity) {
@@ -118,7 +120,7 @@ public class InstancedRenderDispatcher {
 			InstanceWorld instanceWorld = instanceWorlds.get(Minecraft.getInstance().level);
 
 			debug.add("Update limiting: " + FlwCommands.boolToText(FlwConfig.get().limitUpdates()).getString());
-			debug.add("B: " + instanceWorld.blockEntities.getObjectCount() + ", E: " + instanceWorld.entities.getObjectCount());
+			debug.add("B: " + instanceWorld.blockEntities.getInstanceCount() + ", E: " + instanceWorld.entities.getInstanceCount());
 			instanceWorld.engine.addDebugInfo(debug);
 		} else {
 			debug.add("Disabled");

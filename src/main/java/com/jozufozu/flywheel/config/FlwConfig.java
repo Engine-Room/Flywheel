@@ -24,10 +24,9 @@ public class FlwConfig {
 	private final ForgeConfigSpec clientSpec;
 
 	public FlwConfig() {
-		Pair<ClientConfig, ForgeConfigSpec> client = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
-
-		this.client = client.getLeft();
-		clientSpec = client.getRight();
+		Pair<ClientConfig, ForgeConfigSpec> clientPair = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
+		this.client = clientPair.getLeft();
+		clientSpec = clientPair.getRight();
 	}
 
 	public static FlwConfig get() {
@@ -38,7 +37,7 @@ public class FlwConfig {
 		Backend backend = parseBackend(client.backend.get());
 		if (backend == null) {
 			backend = BackendManager.getDefaultBackend();
-			client.backend.set(Backend.REGISTRY.getId(backend).toString());
+			client.backend.set(Backend.REGISTRY.getIdOrThrow(backend).toString());
 		}
 
 		return backend;
@@ -77,7 +76,7 @@ public class FlwConfig {
 
 		public ClientConfig(ForgeConfigSpec.Builder builder) {
 			backend = builder.comment("Select the backend to use.")
-					.define("backend", Backend.REGISTRY.getId(BackendManager.getDefaultBackend()).toString());
+					.define("backend", Backend.REGISTRY.getIdOrThrow(BackendManager.getDefaultBackend()).toString());
 
 			limitUpdates = builder.comment("Enable or disable instance update limiting with distance.")
 					.define("limitUpdates", true);

@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.instancing.InstancerKey;
+import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.util.Pair;
 
 public class IndirectDrawManager {

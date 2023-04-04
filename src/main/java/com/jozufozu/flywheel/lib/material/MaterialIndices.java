@@ -21,10 +21,10 @@ import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.resources.ResourceLocation;
 
 // TODO: add messages to exceptions
-public class MaterialIndicies {
-	private static Reference2IntMap<Material> materialIndicies;
-	private static Object2IntMap<ResourceLocation> vertexShaderIndicies;
-	private static Object2IntMap<ResourceLocation> fragmentShaderIndicies;
+public class MaterialIndices {
+	private static Reference2IntMap<Material> materialIndices;
+	private static Object2IntMap<ResourceLocation> vertexShaderIndices;
+	private static Object2IntMap<ResourceLocation> fragmentShaderIndices;
 	private static ObjectList<Material> materialsByIndex;
 	private static ObjectList<ResourceLocation> vertexShadersByIndex;
 	private static ObjectList<ResourceLocation> fragmentShadersByIndex;
@@ -34,21 +34,29 @@ public class MaterialIndicies {
 		if (!initialized) {
 			throw new IllegalStateException();
 		}
-		return materialIndicies.getInt(material);
+		return materialIndices.getInt(material);
 	}
 
 	public static int getVertexShaderIndex(ResourceLocation vertexShader) {
 		if (!initialized) {
 			throw new IllegalStateException();
 		}
-		return vertexShaderIndicies.getInt(vertexShader);
+		return vertexShaderIndices.getInt(vertexShader);
 	}
 
 	public static int getFragmentShaderIndex(ResourceLocation fragmentShader) {
 		if (!initialized) {
 			throw new IllegalStateException();
 		}
-		return fragmentShaderIndicies.getInt(fragmentShader);
+		return fragmentShaderIndices.getInt(fragmentShader);
+	}
+
+	public static int getVertexShaderIndex(Material material) {
+		return getVertexShaderIndex(material.vertexShader());
+	}
+
+	public static int getFragmentShaderIndex(Material material) {
+		return getFragmentShaderIndex(material.fragmentShader());
 	}
 
 	public static Material getMaterial(int index) {
@@ -99,9 +107,9 @@ public class MaterialIndicies {
 	private static void initInner() {
 		int amount = Material.REGISTRY.getAll().size();
 
-		Reference2IntMap<Material> materialIndicies = new Reference2IntOpenHashMap<>();
-		Object2IntMap<ResourceLocation> vertexShaderIndicies = new Object2IntOpenHashMap<>();
-		Object2IntMap<ResourceLocation> fragmentShaderIndicies = new Object2IntOpenHashMap<>();
+		Reference2IntMap<Material> materialIndices = new Reference2IntOpenHashMap<>();
+		Object2IntMap<ResourceLocation> vertexShaderIndices = new Object2IntOpenHashMap<>();
+		Object2IntMap<ResourceLocation> fragmentShaderIndices = new Object2IntOpenHashMap<>();
 		ObjectList<Material> materialsByIndex = new ObjectArrayList<>(amount);
 		ObjectList<ResourceLocation> vertexShadersByIndex = new ObjectArrayList<>(amount);
 		ObjectList<ResourceLocation> fragmentShadersByIndex = new ObjectArrayList<>(amount);
@@ -113,35 +121,35 @@ public class MaterialIndicies {
 		int vertexShaderIndex = 0;
 		int fragmentShaderIndex = 0;
 		for (Material material : Material.REGISTRY) {
-			materialIndicies.put(material, materialIndex);
+			materialIndices.put(material, materialIndex);
 			materialsByIndex.add(material);
 			materialIndex++;
 			ResourceLocation vertexShader = material.vertexShader();
 			if (allVertexShaders.add(vertexShader)) {
-				vertexShaderIndicies.put(vertexShader, vertexShaderIndex);
+				vertexShaderIndices.put(vertexShader, vertexShaderIndex);
 				vertexShadersByIndex.add(vertexShader);
 				vertexShaderIndex++;
 			}
 			ResourceLocation fragmentShader = material.fragmentShader();
 			if (allFragmentShaders.add(fragmentShader)) {
-				fragmentShaderIndicies.put(fragmentShader, fragmentShaderIndex);
+				fragmentShaderIndices.put(fragmentShader, fragmentShaderIndex);
 				fragmentShadersByIndex.add(fragmentShader);
 				fragmentShaderIndex++;
 			}
 		}
 
-		MaterialIndicies.materialIndicies = Reference2IntMaps.unmodifiable(materialIndicies);
-		MaterialIndicies.vertexShaderIndicies = Object2IntMaps.unmodifiable(vertexShaderIndicies);
-		MaterialIndicies.fragmentShaderIndicies = Object2IntMaps.unmodifiable(fragmentShaderIndicies);
-		MaterialIndicies.materialsByIndex = ObjectLists.unmodifiable(materialsByIndex);
-		MaterialIndicies.vertexShadersByIndex = ObjectLists.unmodifiable(vertexShadersByIndex);
-		MaterialIndicies.fragmentShadersByIndex = ObjectLists.unmodifiable(fragmentShadersByIndex);
+		MaterialIndices.materialIndices = Reference2IntMaps.unmodifiable(materialIndices);
+		MaterialIndices.vertexShaderIndices = Object2IntMaps.unmodifiable(vertexShaderIndices);
+		MaterialIndices.fragmentShaderIndices = Object2IntMaps.unmodifiable(fragmentShaderIndices);
+		MaterialIndices.materialsByIndex = ObjectLists.unmodifiable(materialsByIndex);
+		MaterialIndices.vertexShadersByIndex = ObjectLists.unmodifiable(vertexShadersByIndex);
+		MaterialIndices.fragmentShadersByIndex = ObjectLists.unmodifiable(fragmentShadersByIndex);
 
 		initialized = true;
 	}
 
 	@ApiStatus.Internal
 	public static void init() {
-		Material.REGISTRY.addFreezeCallback(MaterialIndicies::initInner);
+		Material.REGISTRY.addFreezeCallback(MaterialIndices::initInner);
 	}
 }

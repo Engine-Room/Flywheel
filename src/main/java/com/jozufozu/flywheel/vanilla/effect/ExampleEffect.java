@@ -12,12 +12,12 @@ import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
+import com.jozufozu.flywheel.api.instance.effect.Effect;
 import com.jozufozu.flywheel.api.instancer.InstancerProvider;
-import com.jozufozu.flywheel.backend.instancing.AbstractInstance;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
-import com.jozufozu.flywheel.backend.instancing.effect.Effect;
 import com.jozufozu.flywheel.lib.box.ImmutableBox;
 import com.jozufozu.flywheel.lib.box.MutableBox;
+import com.jozufozu.flywheel.lib.instance.AbstractInstance;
 import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.struct.StructTypes;
 import com.jozufozu.flywheel.lib.struct.TransformedPart;
@@ -109,7 +109,7 @@ public class ExampleEffect implements Effect {
 	}
 
 	@Override
-	public Collection<AbstractInstance> createInstances(InstancerProvider instancerManager) {
+	public Collection<com.jozufozu.flywheel.api.instance.Instance> createInstances(InstancerProvider instancerManager) {
 		effects.clear();
 		boids.clear();
 		for (int i = 0; i < INSTANCE_COUNT; i++) {
@@ -262,7 +262,7 @@ public class ExampleEffect implements Effect {
 		}
 
 		@Override
-		public void remove() {
+		protected void _delete() {
 			instance.delete();
 		}
 

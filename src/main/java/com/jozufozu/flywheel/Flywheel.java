@@ -17,7 +17,7 @@ import com.jozufozu.flywheel.impl.RegistryImpl;
 import com.jozufozu.flywheel.lib.backend.Backends;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.format.Formats;
-import com.jozufozu.flywheel.lib.material.MaterialIndicies;
+import com.jozufozu.flywheel.lib.material.MaterialIndices;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.model.PartialModel;
@@ -111,7 +111,7 @@ public class Flywheel {
 		Contexts.init();
 		Pipelines.init();
 
-		MaterialIndicies.init();
+		MaterialIndices.init();
 
 		VanillaInstances.init();
 
@@ -126,10 +126,10 @@ public class Flywheel {
 	}
 
 	private static void setup(final FMLCommonSetupEvent event) {
-		ArgumentTypes.register(rl("backend").toString(), BackendArgument.class, new EmptyArgumentSerializer<>(BackendArgument::getInstance));
-
 		RegistryImpl.freezeAll();
 		IdRegistryImpl.freezeAll();
+
+		ArgumentTypes.register(rl("backend").toString(), BackendArgument.class, new EmptyArgumentSerializer<>(BackendArgument::getInstance));
 	}
 
 	public static ArtifactVersion getVersion() {

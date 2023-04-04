@@ -16,11 +16,11 @@ import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.compile.FlwCompiler;
-import com.jozufozu.flywheel.backend.instancing.InstanceManager;
-import com.jozufozu.flywheel.backend.uniform.UniformBuffer;
+import com.jozufozu.flywheel.backend.engine.UniformBuffer;
+import com.jozufozu.flywheel.backend.instancing.manager.InstanceManager;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
-import com.jozufozu.flywheel.lib.material.MaterialIndicies;
+import com.jozufozu.flywheel.lib.material.MaterialIndices;
 import com.jozufozu.flywheel.lib.pipeline.Pipelines;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -121,8 +121,8 @@ public class InstancingEngine implements Engine {
 		UniformBuffer.syncAndBind(program);
 
 		var uniformLocation = program.getUniformLocation("_flw_materialID_instancing");
-		var vertexID = MaterialIndicies.getVertexShaderIndex(material.vertexShader());
-		var fragmentID = MaterialIndicies.getFragmentShaderIndex(material.fragmentShader());
+		var vertexID = MaterialIndices.getVertexShaderIndex(material);
+		var fragmentID = MaterialIndices.getFragmentShaderIndex(material);
 		GL32.glUniform2ui(uniformLocation, vertexID, fragmentID);
 	}
 

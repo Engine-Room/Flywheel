@@ -14,6 +14,6 @@ public interface InstancerProvider {
 	 */
 	<D extends InstancedPart> Instancer<D> getInstancer(StructType<D> type, Model model, RenderStage stage);
 
-	// TODO: this method does not belong in the interface
+	// TODO: this method does not belong in this interface
 	Vec3i getOriginCoordinate();
 }

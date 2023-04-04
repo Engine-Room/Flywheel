@@ -4,10 +4,10 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
-import com.jozufozu.flywheel.api.instance.InstancedRenderRegistry;
-import com.jozufozu.flywheel.api.instance.blockentity.BlockEntityInstancingController;
+import com.jozufozu.flywheel.api.instance.BlockEntityInstance;
+import com.jozufozu.flywheel.api.instance.controller.BlockEntityInstancingController;
+import com.jozufozu.flywheel.api.instance.controller.InstancingControllerRegistry;
 import com.jozufozu.flywheel.api.instancer.InstancerProvider;
-import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -93,7 +93,7 @@ public class SimpleBlockEntityInstancingController<T extends BlockEntity> implem
 				skipRender = be -> false;
 			}
 			SimpleBlockEntityInstancingController<T> controller = new SimpleBlockEntityInstancingController<>(instanceFactory, skipRender);
-			InstancedRenderRegistry.setController(type, controller);
+			InstancingControllerRegistry.setController(type, controller);
 			return controller;
 		}
 	}

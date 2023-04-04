@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.api.struct.StructType;
 public class CullingContextSet {
 	static CullingContextSet create() {
 		var builder = new CullingContextSet();
-		for (StructType<?> structType : StructType.REGISTRY.getAll()) {
+		for (StructType<?> structType : StructType.REGISTRY) {
 			builder.add(structType);
 		}
 		return builder;

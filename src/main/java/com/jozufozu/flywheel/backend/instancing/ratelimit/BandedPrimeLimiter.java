@@ -4,7 +4,7 @@ import net.minecraft.util.Mth;
 
 public class BandedPrimeLimiter implements DistanceUpdateLimiter {
 	// 1 followed by the prime numbers
-	private static final int[] divisorSequence = new int[] { 1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31 };
+	private static final int[] DIVISOR_SEQUENCE = new int[] { 1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31 };
 
 	private int tickCount = 0;
 
@@ -23,6 +23,6 @@ public class BandedPrimeLimiter implements DistanceUpdateLimiter {
 
 		int i = (dSq / 2048);
 
-		return divisorSequence[Mth.clamp(i, 0, divisorSequence.length - 1)];
+		return DIVISOR_SEQUENCE[Mth.clamp(i, 0, DIVISOR_SEQUENCE.length - 1)];
 	}
 }

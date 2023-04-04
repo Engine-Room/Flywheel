@@ -15,7 +15,6 @@ public class SerialTaskExecutor implements TaskExecutor {
 
 	@Override
 	public void syncPoint() {
-		// noop
 	}
 
 	@Override

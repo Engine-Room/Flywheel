@@ -24,8 +24,8 @@ public class PipelineContextSet {
 	static PipelineContextSet create() {
 		var builder = new PipelineContextSet();
 		for (Pipeline pipelineShader : availablePipelineShaders()) {
-			for (StructType<?> structType : StructType.REGISTRY.getAll()) {
-				for (VertexType vertexType : VertexType.REGISTRY.getAll()) {
+			for (StructType<?> structType : StructType.REGISTRY) {
+				for (VertexType vertexType : VertexType.REGISTRY) {
 					builder.add(vertexType, structType, Contexts.WORLD, pipelineShader);
 				}
 			}
