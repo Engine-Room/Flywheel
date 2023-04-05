@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.api.instance.controller;
 
 import com.jozufozu.flywheel.api.instance.EntityInstance;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 
 import net.minecraft.world.entity.Entity;
 
@@ -12,11 +11,12 @@ import net.minecraft.world.entity.Entity;
 public interface EntityInstancingController<T extends Entity> {
 	/**
 	 * Given an entity and an instancer manager, constructs an instance for the entity.
-	 * @param instancerManager The instancer manager to use.
+	 *
+	 * @param ctx    Context for creating an Instance.
 	 * @param entity The entity to construct an instance for.
 	 * @return The instance.
 	 */
-	EntityInstance<? super T> createInstance(InstancerProvider instancerManager, T entity);
+	EntityInstance<? super T> createInstance(InstanceContext ctx, T entity);
 
 	/**
 	 * Checks if the given entity should not render normally.

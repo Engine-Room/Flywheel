@@ -5,13 +5,12 @@ import org.joml.FrustumIntersection;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.EntityInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
+import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
 import com.jozufozu.flywheel.backend.instancing.manager.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.lib.box.MutableBox;
 import com.jozufozu.flywheel.lib.light.TickingLightListener;
 import com.mojang.math.Vector3f;
 
-import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -38,8 +37,8 @@ public abstract class AbstractEntityInstance<E extends Entity> extends AbstractI
 	protected final E entity;
 	protected final MutableBox bounds;
 
-	public AbstractEntityInstance(InstancerProvider instancerManager, E entity) {
-		super(instancerManager, entity.level);
+	public AbstractEntityInstance(InstanceContext ctx, E entity) {
+		super(ctx, entity.level);
 		this.entity = entity;
 		bounds = MutableBox.from(entity.getBoundingBox());
 	}
@@ -53,7 +52,9 @@ public abstract class AbstractEntityInstance<E extends Entity> extends AbstractI
 	public boolean tickLightListener() {
 		AABB boundsNow = entity.getBoundingBox();
 
-		if (bounds.sameAs(boundsNow)) return false;
+		if (bounds.sameAs(boundsNow)) {
+			return false;
+		}
 
 		bounds.assign(boundsNow);
 
@@ -71,8 +72,7 @@ public abstract class AbstractEntityInstance<E extends Entity> extends AbstractI
 	 */
 	public Vector3f getInstancePosition() {
 		Vec3 pos = entity.position();
-		Vec3i origin = instancerManager.getOriginCoordinate();
-		return new Vector3f((float) (pos.x - origin.getX()), (float) (pos.y - origin.getY()), (float) (pos.z - origin.getZ()));
+		return new Vector3f((float) (pos.x - renderOrigin.getX()), (float) (pos.y - renderOrigin.getY()), (float) (pos.z - renderOrigin.getZ()));
 	}
 
 	/**
@@ -84,10 +84,7 @@ public abstract class AbstractEntityInstance<E extends Entity> extends AbstractI
 	 */
 	public Vector3f getInstancePosition(float partialTicks) {
 		Vec3 pos = entity.position();
-		Vec3i origin = instancerManager.getOriginCoordinate();
-		return new Vector3f(
-				(float) (Mth.lerp(partialTicks, entity.xOld, pos.x) - origin.getX()),
-				(float) (Mth.lerp(partialTicks, entity.yOld, pos.y) - origin.getY()), (float) (Mth.lerp(partialTicks, entity.zOld, pos.z) - origin.getZ()));
+		return new Vector3f((float) (Mth.lerp(partialTicks, entity.xOld, pos.x) - renderOrigin.getX()), (float) (Mth.lerp(partialTicks, entity.yOld, pos.y) - renderOrigin.getY()), (float) (Mth.lerp(partialTicks, entity.zOld, pos.z) - renderOrigin.getZ()));
 	}
 
 	@Override

@@ -4,17 +4,18 @@ import java.util.ArrayList;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
 import com.jozufozu.flywheel.api.instance.effect.Effect;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.backend.instancing.storage.AbstractStorage;
 import com.jozufozu.flywheel.backend.instancing.storage.Storage;
 
 public class EffectInstanceManager extends InstanceManager<Effect> {
 	private final EffectStorage<Effect> storage;
 
-	public EffectInstanceManager(InstancerProvider instancerManager) {
-		storage = new EffectStorage<>(instancerManager);
+	public EffectInstanceManager(Engine engine) {
+		storage = new EffectStorage<>(engine);
 	}
 
 	@Override
@@ -30,8 +31,8 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 	private static class EffectStorage<T extends Effect> extends AbstractStorage<T> {
 		private final Multimap<T, Instance> instances;
 
-		public EffectStorage(InstancerProvider manager) {
-			super(manager);
+		public EffectStorage(Engine engine) {
+			super(engine);
 			this.instances = HashMultimap.create();
 		}
 
@@ -100,7 +101,7 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 		}
 
 		private void create(T obj) {
-			var instances = obj.createInstances(instancerManager);
+			var instances = obj.createInstances(new InstanceContext(engine, engine.renderOrigin()));
 
 			this.instances.putAll(obj, instances);
 

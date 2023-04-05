@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.instance.BlockEntityInstance;
 import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
+import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
+import com.jozufozu.flywheel.api.instance.controller.InstancingControllerRegistry;
 import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.backend.instancing.storage.One2OneStorage;
 import com.jozufozu.flywheel.backend.instancing.storage.Storage;
@@ -22,8 +24,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public class BlockEntityInstanceManager extends InstanceManager<BlockEntity> {
 	private final BlockEntityStorage storage;
 
-	public BlockEntityInstanceManager(InstancerProvider instancerManager) {
-		storage = new BlockEntityStorage(instancerManager);
+	public BlockEntityInstanceManager(Engine engine) {
+		storage = new BlockEntityStorage(engine);
 	}
 
 	@Override
@@ -72,21 +74,24 @@ public class BlockEntityInstanceManager extends InstanceManager<BlockEntity> {
 	private static class BlockEntityStorage extends One2OneStorage<BlockEntity> {
 		private final Long2ObjectMap<BlockEntityInstance<?>> posLookup = new Long2ObjectOpenHashMap<>();
 
-		public BlockEntityStorage(InstancerProvider instancerManager) {
-			super(instancerManager);
+		public BlockEntityStorage(Engine engine) {
+			super(engine);
 		}
 
 		@Override
 		@Nullable
 		protected Instance createRaw(BlockEntity obj) {
-			BlockEntityInstance<?> instance = InstancingControllerHelper.createInstance(instancerManager, obj);
-
-			if (instance != null) {
-				BlockPos blockPos = obj.getBlockPos();
-				posLookup.put(blockPos.asLong(), instance);
+			var controller = InstancingControllerRegistry.getController(InstancingControllerHelper.getType(obj));
+			if (controller == null) {
+				return null;
 			}
 
-			return instance;
+			var out = controller.createInstance(new InstanceContext(engine, engine.renderOrigin()), obj);
+
+			BlockPos blockPos = obj.getBlockPos();
+			posLookup.put(blockPos.asLong(), out);
+
+			return out;
 		}
 
 		@Override

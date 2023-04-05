@@ -1,13 +1,8 @@
 package com.jozufozu.flywheel.lib.instance;
 
-import org.jetbrains.annotations.Nullable;
-
-import com.jozufozu.flywheel.api.instance.BlockEntityInstance;
-import com.jozufozu.flywheel.api.instance.EntityInstance;
 import com.jozufozu.flywheel.api.instance.controller.BlockEntityInstancingController;
 import com.jozufozu.flywheel.api.instance.controller.EntityInstancingController;
 import com.jozufozu.flywheel.api.instance.controller.InstancingControllerRegistry;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -33,38 +28,6 @@ public final class InstancingControllerHelper {
 	 */
 	public static <T extends Entity> boolean canInstance(EntityType<? extends T> type) {
 		return InstancingControllerRegistry.getController(type) != null;
-	}
-
-	/**
-	 * Creates an instance for the given block entity, if possible.
-	 * @param instancerManager The instancer manager to use.
-	 * @param blockEntity The block entity to create an instance of.
-	 * @param <T> The type of the block entity.
-	 * @return An instance of the block entity, or {@code null} if the block entity cannot be instanced.
-	 */
-	@Nullable
-	public static <T extends BlockEntity> BlockEntityInstance<? super T> createInstance(InstancerProvider instancerManager, T blockEntity) {
-		BlockEntityInstancingController<? super T> controller = InstancingControllerRegistry.getController(getType(blockEntity));
-		if (controller == null) {
-			return null;
-		}
-		return controller.createInstance(instancerManager, blockEntity);
-	}
-
-	/**
-	 * Creates an instance for the given entity, if possible.
-	 * @param instancerManager The instancer manager to use.
-	 * @param entity The entity to create an instance of.
-	 * @param <T> The type of the entity.
-	 * @return An instance of the entity, or {@code null} if the entity cannot be instanced.
-	 */
-	@Nullable
-	public static <T extends Entity> EntityInstance<? super T> createInstance(InstancerProvider instancerManager, T entity) {
-		EntityInstancingController<? super T> controller = InstancingControllerRegistry.getController(getType(entity));
-		if (controller == null) {
-			return null;
-		}
-		return controller.createInstance(instancerManager, entity);
 	}
 
 	/**

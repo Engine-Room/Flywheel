@@ -5,6 +5,7 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 
 import net.minecraft.client.Camera;
+import net.minecraft.core.Vec3i;
 
 public interface RenderDispatcher {
 
@@ -15,9 +16,12 @@ public interface RenderDispatcher {
 	/**
 	 * Maintain the integer origin coordinate to be within a certain distance from the camera in all directions,
 	 * preventing floating point precision issues at high coordinates.
+	 *
 	 * @return {@code true} if the origin coordinate was changed, {@code false} otherwise.
 	 */
 	boolean maintainOriginCoordinate(Camera camera);
+
+	Vec3i renderOrigin();
 
 	void delete();
 }

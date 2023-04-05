@@ -5,14 +5,14 @@ import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 
 public abstract class One2OneStorage<T> extends AbstractStorage<T> {
 	private final Map<T, Instance> instances;
 
-	public One2OneStorage(InstancerProvider instancerManager) {
-		super(instancerManager);
+	public One2OneStorage(Engine engine) {
+		super(engine);
 		this.instances = new HashMap<>();
 	}
 

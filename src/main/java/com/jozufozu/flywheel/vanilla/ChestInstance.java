@@ -9,8 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.lib.instance.AbstractBlockEntityInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
@@ -51,16 +51,16 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Abstr
 
 	private float lastProgress = Float.NaN;
 
-	public ChestInstance(InstancerProvider instancerManager, T blockEntity) {
-		super(instancerManager, blockEntity);
+	public ChestInstance(InstanceContext ctx, T blockEntity) {
+		super(ctx, blockEntity);
 
 		Block block = blockState.getBlock();
 
 		chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
-		sprite = Sheets.chooseMaterial(blockEntity, chestType, isChristmas()).sprite();
+		sprite = Sheets.chooseMaterial(blockEntity, chestType, isChristmas())
+				.sprite();
 
-		body = baseInstance()
-				.setPosition(getInstancePosition());
+		body = baseInstance().setPosition(getInstancePosition());
 		lid = lidInstance();
 
 		if (block instanceof AbstractChestBlock<?> chestBlock) {
