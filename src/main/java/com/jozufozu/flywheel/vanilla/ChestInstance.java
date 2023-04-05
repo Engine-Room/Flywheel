@@ -71,11 +71,9 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Abstr
 
 			body.setRotation(baseRotation);
 
-			DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> wrapper = chestBlock.combine(blockState, level, getWorldPosition(), true);
+			DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> wrapper = chestBlock.combine(blockState, level, pos, true);
 
 			this.lidProgress = wrapper.apply(ChestBlock.opennessCombiner(blockEntity));
-
-
 		} else {
 			baseRotation = Quaternion.ONE;
 			lidProgress = $ -> 0f;
@@ -86,7 +84,9 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Abstr
 	public void beginFrame() {
 		float progress = lidProgress.get(AnimationTickHolder.getPartialTicks());
 
-		if (lastProgress == progress) return;
+		if (lastProgress == progress) {
+			return;
+		}
 
 		lastProgress = progress;
 
@@ -108,7 +108,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Abstr
 
 	@Override
 	public void updateLight() {
-		relight(getWorldPosition(), body, lid);
+		relight(pos, body, lid);
 	}
 
 	@Override
@@ -123,13 +123,11 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Abstr
 	}
 
 	private OrientedPart baseInstance() {
-
 		return instancerManager.getInstancer(StructTypes.ORIENTED, BASE.apply(chestType, sprite), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 
 	private TransformedPart lidInstance() {
-
 		return instancerManager.getInstancer(StructTypes.TRANSFORMED, LID.apply(chestType, sprite), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}

@@ -257,11 +257,6 @@ public class ExampleEffect implements Effect {
 		}
 
 		@Override
-		public BlockPos getWorldPosition() {
-			return blockPos;
-		}
-
-		@Override
 		protected void _delete() {
 			instance.delete();
 		}
@@ -303,6 +298,11 @@ public class ExampleEffect implements Effect {
 		@Override
 		public boolean checkFrustum(FrustumIntersection frustum) {
 			return true;
+		}
+
+		@Override
+		public double distanceSquared(double x, double y, double z) {
+			return 0;
 		}
 	}
 }

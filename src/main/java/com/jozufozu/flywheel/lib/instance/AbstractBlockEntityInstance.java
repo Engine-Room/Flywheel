@@ -63,7 +63,7 @@ public abstract class AbstractBlockEntityInstance<T extends BlockEntity> extends
 
 	/**
 	 * Just before {@link #update()} would be called, {@code shouldReset()} is checked.
-	 * If this function returns {@code true}, then this instance will be {@link #remove removed},
+	 * If this function returns {@code true}, then this instance will be {@link #delete removed},
 	 * and another instance will be constructed to replace it. This allows for more sane resource
 	 * acquisition compared to trying to update everything within the lifetime of an instance.
 	 *
@@ -86,11 +86,6 @@ public abstract class AbstractBlockEntityInstance<T extends BlockEntity> extends
 	}
 
 	@Override
-	public BlockPos getWorldPosition() {
-		return pos;
-	}
-
-	@Override
 	public ImmutableBox getVolume() {
 		return MutableBox.from(pos);
 	}
@@ -98,5 +93,10 @@ public abstract class AbstractBlockEntityInstance<T extends BlockEntity> extends
 	@Override
 	public boolean checkFrustum(FrustumIntersection frustum) {
 		return frustum.testAab(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
+	}
+
+	@Override
+	public double distanceSquared(double x, double y, double z) {
+		return pos.distToCenterSqr(x, y, z);
 	}
 }

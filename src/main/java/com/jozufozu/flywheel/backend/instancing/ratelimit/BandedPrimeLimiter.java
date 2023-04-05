@@ -14,12 +14,12 @@ public class BandedPrimeLimiter implements DistanceUpdateLimiter {
 	}
 
 	@Override
-	public boolean shouldUpdate(int dX, int dY, int dZ) {
-		return (tickCount % getUpdateDivisor(dX, dY, dZ)) == 0;
+	public boolean shouldUpdate(double distanceSquared) {
+		return (tickCount % getUpdateDivisor(distanceSquared)) == 0;
 	}
 
-	protected int getUpdateDivisor(int dX, int dY, int dZ) {
-		int dSq = dX * dX + dY * dY + dZ * dZ;
+	protected int getUpdateDivisor(double distanceSquared) {
+		int dSq = Mth.ceil(distanceSquared);
 
 		int i = (dSq / 2048);
 

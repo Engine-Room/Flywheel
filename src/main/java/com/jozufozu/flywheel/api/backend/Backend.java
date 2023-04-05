@@ -11,15 +11,24 @@ import net.minecraft.network.chat.Component;
 public interface Backend {
 	static IdRegistry<Backend> REGISTRY = IdRegistryImpl.create();
 
-	// TODO: remove and use ID instead? Currently this is only used for the crash log string.
-	String getProperName();
+	/**
+	 * Get a message to display to the user when the engine is enabled.
+	 */
+	Component engineMessage();
 
-	Component getEngineMessage();
-
+	/**
+	 * Create a new engine instance.
+	 */
 	Engine createEngine();
 
+	/**
+	 * Get a fallback backend in case this backend is not supported.
+	 */
 	Backend findFallback();
 
+	/**
+	 * Check if this backend is supported.
+	 */
 	boolean isSupported();
 
 	@Nullable Pipeline pipelineShader();

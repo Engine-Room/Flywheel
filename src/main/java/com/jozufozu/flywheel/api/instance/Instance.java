@@ -2,13 +2,10 @@ package com.jozufozu.flywheel.api.instance;
 
 import org.joml.FrustumIntersection;
 
-import net.minecraft.core.BlockPos;
-
 /**
  * A general interface providing information about any type of thing that could use Flywheel's instanced rendering.
  */
 public interface Instance {
-    BlockPos getWorldPosition();
 
 	/**
 	 * Initialize parts here.
@@ -39,17 +36,25 @@ public interface Instance {
 	/**
 	 * Check this instance against a frustum.<p>
 	 * An implementor may choose to return a constant to skip the frustum check.
+	 *
 	 * @param frustum A frustum intersection tester for the current frame.
 	 * @return {@code true} if this instance should be considered for updates.
 	 */
 	boolean checkFrustum(FrustumIntersection frustum);
 
 	/**
+	 * Calculate the distance squared between this instance and the given <em>world</em> position.
+	 *
+	 * @param x The x coordinate.
+	 * @param y The y coordinate.
+	 * @param z The z coordinate.
+	 * @return The distance squared between this instance and the given position.
+	 */
+	double distanceSquared(double x, double y, double z);
+
+	/**
 	 * Free any acquired resources.
 	 */
 	void delete();
 
-	// TODO
-	@Deprecated
-	void removeNow();
 }

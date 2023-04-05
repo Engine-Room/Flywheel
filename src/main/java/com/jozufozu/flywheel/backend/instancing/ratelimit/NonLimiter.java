@@ -6,7 +6,7 @@ public class NonLimiter implements DistanceUpdateLimiter {
 	}
 
 	@Override
-	public boolean shouldUpdate(int dX, int dY, int dZ) {
+	public boolean shouldUpdate(double distanceSquared) {
 		return true;
 	}
 }

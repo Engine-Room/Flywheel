@@ -86,8 +86,4 @@ public abstract class AbstractInstance implements Instance, LightListener {
 				.setSkyLight(sky));
 	}
 
-	@Override
-	public final void removeNow() {
-		LightUpdater.get(level).removeListener(this);
-	}
 }

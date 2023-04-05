@@ -41,15 +41,18 @@ public class BellInstance extends AbstractBlockEntityInstance<BellBlockEntity> i
 
 	@Override
 	public void beginFrame() {
-		float ringTime = (float)blockEntity.ticks + AnimationTickHolder.getPartialTicks();
+		float ringTime = (float) blockEntity.ticks + AnimationTickHolder.getPartialTicks();
 
-		if (ringTime == lastRingTime) return;
+		if (ringTime == lastRingTime) {
+			return;
+		}
 		lastRingTime = ringTime;
 
 		if (blockEntity.shaking) {
 			float angle = Mth.sin(ringTime / (float) Math.PI) / (4.0F + ringTime / 3.0F);
 
-			Vector3f ringAxis = blockEntity.clickDirection.getCounterClockWise().step();
+			Vector3f ringAxis = blockEntity.clickDirection.getCounterClockWise()
+					.step();
 
 			bell.setRotation(ringAxis.rotation(angle));
 		} else {
@@ -59,7 +62,7 @@ public class BellInstance extends AbstractBlockEntityInstance<BellBlockEntity> i
 
 	@Override
 	public void updateLight() {
-		relight(getWorldPosition(), bell);
+		relight(pos, bell);
 	}
 
 	@Override

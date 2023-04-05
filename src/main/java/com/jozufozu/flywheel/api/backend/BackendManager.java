@@ -16,8 +16,8 @@ public final class BackendManager {
 	/**
 	 * Get a string describing the current backend.
 	 */
-	public static String getBackendDescriptor() {
-		return BackendManagerImpl.getBackendDescriptor();
+	public static String getBackendNameForCrashReport() {
+		return BackendManagerImpl.getBackendNameForCrashReport();
 	}
 
 	public static boolean isOn() {

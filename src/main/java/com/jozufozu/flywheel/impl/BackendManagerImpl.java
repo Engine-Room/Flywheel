@@ -18,8 +18,15 @@ public final class BackendManagerImpl {
 		return backend;
 	}
 
-	public static String getBackendDescriptor() {
-		return backend == null ? "Uninitialized" : backend.getProperName();
+	public static String getBackendNameForCrashReport() {
+		if (backend == null) {
+			return "Uninitialized";
+		}
+		var backendId = Backend.REGISTRY.getId(backend);
+		if (backendId == null) {
+			return "Unregistered";
+		}
+		return backendId.toString();
 	}
 
 	public static boolean isOn() {
