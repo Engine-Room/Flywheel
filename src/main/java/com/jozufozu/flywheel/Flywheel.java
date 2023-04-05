@@ -115,7 +115,7 @@ public class Flywheel {
 
 		VanillaInstances.init();
 
-		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManager::getBackendDescriptor);
+		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManager::getBackendNameForCrashReport);
 
 		// https://github.com/Jozufozu/Flywheel/issues/69
 		// Weird issue with accessor loading.

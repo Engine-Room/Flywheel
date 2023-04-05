@@ -11,7 +11,6 @@ import com.jozufozu.flywheel.lib.box.MutableBox;
 import com.jozufozu.flywheel.lib.light.TickingLightListener;
 import com.mojang.math.Vector3f;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -88,20 +87,17 @@ public abstract class AbstractEntityInstance<E extends Entity> extends AbstractI
 		Vec3i origin = instancerManager.getOriginCoordinate();
 		return new Vector3f(
 				(float) (Mth.lerp(partialTicks, entity.xOld, pos.x) - origin.getX()),
-				(float) (Mth.lerp(partialTicks, entity.yOld, pos.y) - origin.getY()),
-				(float) (Mth.lerp(partialTicks, entity.zOld, pos.z) - origin.getZ())
-		);
-	}
-
-	@Override
-	public BlockPos getWorldPosition() {
-		return entity.blockPosition();
+				(float) (Mth.lerp(partialTicks, entity.yOld, pos.y) - origin.getY()), (float) (Mth.lerp(partialTicks, entity.zOld, pos.z) - origin.getZ()));
 	}
 
 	@Override
 	public boolean checkFrustum(FrustumIntersection frustum) {
 		AABB aabb = entity.getBoundingBox();
-		return frustum.testAab((float) aabb.minX, (float) aabb.minY, (float) aabb.minZ,
-				(float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ);
+		return frustum.testAab((float) aabb.minX, (float) aabb.minY, (float) aabb.minZ, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ);
+	}
+
+	@Override
+	public double distanceSquared(double x, double y, double z) {
+		return entity.distanceToSqr(x, y, z);
 	}
 }

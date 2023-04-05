@@ -21,8 +21,6 @@ import com.jozufozu.flywheel.backend.instancing.ratelimit.NonLimiter;
 import com.jozufozu.flywheel.backend.instancing.storage.Storage;
 import com.jozufozu.flywheel.config.FlwConfig;
 
-import net.minecraft.core.BlockPos;
-
 public abstract class InstanceManager<T> {
 	private final Set<T> queuedAdditions = new HashSet<>(64);
 	private final Set<T> queuedUpdates = new HashSet<>(64);
@@ -144,7 +142,7 @@ public abstract class InstanceManager<T> {
 
 	public void delete() {
 		for (Instance instance : getStorage().getAllInstances()) {
-			instance.removeNow();
+			instance.delete();
 		}
 	}
 
@@ -191,28 +189,19 @@ public abstract class InstanceManager<T> {
 		tickLimiter.tick();
 		processQueuedUpdates();
 
-		// integer camera pos as a micro-optimization
-		int cX = (int) cameraX;
-		int cY = (int) cameraY;
-		int cZ = (int) cameraZ;
-
 		var instances = getStorage().getInstancesForTicking();
-		distributeWork(executor, instances, instance -> tickInstance(instance, cX, cY, cZ));
+		distributeWork(executor, instances, instance -> tickInstance(instance, cameraX, cameraY, cameraZ));
 	}
 
-	protected void tickInstance(TickableInstance instance, int cX, int cY, int cZ) {
+	protected void tickInstance(TickableInstance instance, double cX, double cY, double cZ) {
 		if (!instance.decreaseTickRateWithDistance()) {
 			instance.tick();
 			return;
 		}
 
-		BlockPos pos = instance.getWorldPosition();
+		var dsq = instance.distanceSquared(cX, cY, cZ);
 
-		int dX = pos.getX() - cX;
-		int dY = pos.getY() - cY;
-		int dZ = pos.getZ() - cZ;
-
-		if (!tickLimiter.shouldUpdate(dX, dY, dZ)) {
+		if (!tickLimiter.shouldUpdate(dsq)) {
 			return;
 		}
 
@@ -223,11 +212,11 @@ public abstract class InstanceManager<T> {
 		frameLimiter.tick();
 		processQueuedAdditions();
 
-		// integer camera pos
-		BlockPos cameraIntPos = context.camera().getBlockPosition();
-		int cX = cameraIntPos.getX();
-		int cY = cameraIntPos.getY();
-		int cZ = cameraIntPos.getZ();
+		var cameraPos = context.camera()
+				.getPosition();
+		double cX = cameraPos.x;
+		double cY = cameraPos.y;
+		double cZ = cameraPos.z;
 		FrustumIntersection culler = context.culler();
 
 		var instances = getStorage().getInstancesForUpdate();
@@ -251,18 +240,13 @@ public abstract class InstanceManager<T> {
 		}
 	}
 
-	protected void updateInstance(DynamicInstance instance, FrustumIntersection frustum, int cX, int cY, int cZ) {
+	protected void updateInstance(DynamicInstance instance, FrustumIntersection frustum, double cX, double cY, double cZ) {
 		if (!instance.decreaseFramerateWithDistance()) {
 			instance.beginFrame();
 			return;
 		}
 
-		BlockPos worldPos = instance.getWorldPosition();
-		int dX = worldPos.getX() - cX;
-		int dY = worldPos.getY() - cY;
-		int dZ = worldPos.getZ() - cZ;
-
-		if (!frameLimiter.shouldUpdate(dX, dY, dZ)) {
+		if (!frameLimiter.shouldUpdate(instance.distanceSquared(cX, cY, cZ))) {
 			return;
 		}
 

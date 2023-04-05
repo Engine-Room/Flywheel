@@ -65,7 +65,7 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 			this.tickableInstances.removeAll(instances);
 			this.dynamicInstances.removeAll(instances);
 			for (Instance instance : instances) {
-				instance.removeNow();
+				instance.delete();
 			}
 		}
 

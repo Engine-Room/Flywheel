@@ -53,7 +53,7 @@ public class FlwCommands {
 							return 0;
 						}
 
-						Component message = backend.getEngineMessage();
+						Component message = backend.engineMessage();
 						player.displayClientMessage(message, false);
 					}
 					return Command.SINGLE_SUCCESS;
@@ -65,7 +65,7 @@ public class FlwCommands {
 							Backend backend = context.getArgument("id", Backend.class);
 							value.set(Backend.REGISTRY.getIdOrThrow(backend).toString());
 
-							Component message = backend.getEngineMessage();
+							Component message = backend.engineMessage();
 							player.displayClientMessage(message, false);
 
 							BackendUtil.reloadWorldRenderers();

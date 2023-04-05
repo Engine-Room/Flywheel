@@ -46,7 +46,6 @@ public abstract class One2OneStorage<T> extends AbstractStorage<T> {
 		instance.delete();
 		dynamicInstances.remove(instance);
 		tickableInstances.remove(instance);
-		instance.removeNow();
 	}
 
 	@Override

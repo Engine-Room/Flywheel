@@ -15,7 +15,6 @@ import net.minecraft.network.chat.TextComponent;
 
 public class Backends {
 	public static final Backend OFF = SimpleBackend.builder()
-			.properName("Off")
 			.engineMessage(new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED))
 			.engineSupplier(() -> {
 				throw new IllegalStateException("Cannot create engine when backend is off.");
@@ -28,7 +27,6 @@ public class Backends {
 	 * Use a thread pool to buffer instances in parallel on the CPU.
 	 */
 	public static final Backend BATCHING = SimpleBackend.builder()
-			.properName("Parallel Batching")
 			.engineMessage(new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN))
 			.engineSupplier(BatchingEngine::new)
 			.fallback(() -> Backends.OFF)
@@ -39,7 +37,6 @@ public class Backends {
 	 * Use GPU instancing to render everything.
 	 */
 	public static final Backend INSTANCING = SimpleBackend.builder()
-			.properName("GL33 Instanced Arrays")
 			.engineMessage(new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN))
 			.engineSupplier(() -> new InstancingEngine(Contexts.WORLD, 100 * 100))
 			.fallback(() -> Backends.BATCHING)
@@ -52,7 +49,6 @@ public class Backends {
 	 * Use Compute shaders to cull instances.
 	 */
 	public static final Backend INDIRECT = SimpleBackend.builder()
-			.properName("GL46 Compute Culling")
 			.engineMessage(new TextComponent("Using Indirect Engine").withStyle(ChatFormatting.GREEN))
 			.engineSupplier(() -> new IndirectEngine(Contexts.WORLD, 100 * 100))
 			.fallback(() -> Backends.INSTANCING)

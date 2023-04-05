@@ -59,7 +59,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends AbstractEntity
 			contents.delete();
 			contents = getContents();
 			if (contents != null) {
-				relight(getWorldPosition(), contents);
+				relight(entity.blockPosition(), contents);
 			}
 		}
 	}
@@ -143,16 +143,19 @@ public class MinecartInstance<T extends AbstractMinecart> extends AbstractEntity
 
 	@Override
 	public void updateLight() {
-		if (contents == null)
-			relight(getWorldPosition(), body);
-		else
-			relight(getWorldPosition(), body, contents);
+		if (contents == null) {
+			relight(entity.blockPosition(), body);
+		} else {
+			relight(entity.blockPosition(), body, contents);
+		}
 	}
 
 	@Override
 	protected void _delete() {
 		body.delete();
-		if (contents != null) contents.delete();
+		if (contents != null) {
+			contents.delete();
+		}
 	}
 
 	private TransformedPart getContents() {
@@ -165,8 +168,9 @@ public class MinecartInstance<T extends AbstractMinecart> extends AbstractEntity
 		}
 		active = true;
 
-		if (shape == RenderShape.INVISIBLE)
+		if (shape == RenderShape.INVISIBLE) {
 			return null;
+		}
 
         return instancerManager.getInstancer(StructTypes.TRANSFORMED, Models.block(blockState), RenderStage.AFTER_ENTITIES)
 				.createInstance();

@@ -13,15 +13,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class SimpleBackend implements Backend {
-	private final String properName;
 	private final Component engineMessage;
 	private final Supplier<Engine> engineSupplier;
 	private final Supplier<Backend> fallback;
 	private final BooleanSupplier isSupported;
 	private final Pipeline pipelineShader;
 
-	public SimpleBackend(String properName, Component engineMessage, Supplier<Engine> engineSupplier, Supplier<Backend> fallback, BooleanSupplier isSupported, @Nullable Pipeline pipelineShader) {
-		this.properName = properName;
+	public SimpleBackend(Component engineMessage, Supplier<Engine> engineSupplier, Supplier<Backend> fallback, BooleanSupplier isSupported, @Nullable Pipeline pipelineShader) {
 		this.engineMessage = engineMessage;
 		this.engineSupplier = engineSupplier;
 		this.fallback = fallback;
@@ -34,12 +32,7 @@ public class SimpleBackend implements Backend {
 	}
 
 	@Override
-	public String getProperName() {
-		return properName;
-	}
-
-	@Override
-	public Component getEngineMessage() {
+	public Component engineMessage() {
 		return engineMessage;
 	}
 
@@ -69,17 +62,11 @@ public class SimpleBackend implements Backend {
 	}
 
 	public static class Builder {
-		private String properName;
 		private Component engineMessage;
 		private Supplier<Engine> engineSupplier;
 		private Supplier<Backend> fallback;
 		private BooleanSupplier isSupported;
 		private Pipeline pipelineShader;
-
-		public Builder properName(String properName) {
-			this.properName = properName;
-			return this;
-		}
 
 		public Builder engineMessage(Component engineMessage) {
 			this.engineMessage = engineMessage;
@@ -107,7 +94,7 @@ public class SimpleBackend implements Backend {
 		}
 
 		public Backend register(ResourceLocation id) {
-			return Backend.REGISTRY.registerAndGet(id, new SimpleBackend(properName, engineMessage, engineSupplier, fallback, isSupported, pipelineShader));
+			return Backend.REGISTRY.registerAndGet(id, new SimpleBackend(engineMessage, engineSupplier, fallback, isSupported, pipelineShader));
 		}
 	}
 }
