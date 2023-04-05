@@ -2,8 +2,10 @@ package com.jozufozu.flywheel.backend.instancing.manager;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
+import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
+import com.jozufozu.flywheel.api.instance.controller.InstancingControllerRegistry;
 import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.backend.instancing.storage.One2OneStorage;
 import com.jozufozu.flywheel.backend.instancing.storage.Storage;
@@ -15,8 +17,8 @@ import net.minecraft.world.level.Level;
 public class EntityInstanceManager extends InstanceManager<Entity> {
 	private final EntityStorage storage;
 
-	public EntityInstanceManager(InstancerProvider instancerManager) {
-		storage = new EntityStorage(instancerManager);
+	public EntityInstanceManager(Engine engine) {
+		storage = new EntityStorage(engine);
 	}
 
 	@Override
@@ -40,14 +42,18 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 	}
 
 	private static class EntityStorage extends One2OneStorage<Entity> {
-		public EntityStorage(InstancerProvider instancerManager) {
-			super(instancerManager);
+		public EntityStorage(Engine engine) {
+			super(engine);
 		}
 
 		@Override
 		@Nullable
 		protected Instance createRaw(Entity obj) {
-			return InstancingControllerHelper.createInstance(instancerManager, obj);
+			var controller = InstancingControllerRegistry.getController(InstancingControllerHelper.getType(obj));
+			if (controller == null) {
+				return null;
+			}
+			return controller.createInstance(new InstanceContext(engine, engine.renderOrigin()), obj);
 		}
 	}
 }

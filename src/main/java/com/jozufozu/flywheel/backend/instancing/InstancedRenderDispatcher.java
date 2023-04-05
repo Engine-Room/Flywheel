@@ -128,6 +128,6 @@ public class InstancedRenderDispatcher {
 	}
 
 	public static Vec3i getOriginCoordinate(ClientLevel level) {
-		return instanceWorlds.get(level).engine.getOriginCoordinate();
+		return instanceWorlds.get(level).engine.renderOrigin();
 	}
 }

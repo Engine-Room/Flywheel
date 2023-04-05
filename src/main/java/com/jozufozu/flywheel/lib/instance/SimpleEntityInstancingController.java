@@ -1,29 +1,30 @@
 package com.jozufozu.flywheel.lib.instance;
 
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
+
+import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.api.instance.EntityInstance;
 import com.jozufozu.flywheel.api.instance.controller.EntityInstancingController;
+import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
 import com.jozufozu.flywheel.api.instance.controller.InstancingControllerRegistry;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
 public class SimpleEntityInstancingController<T extends Entity> implements EntityInstancingController<T> {
-	protected BiFunction<InstancerProvider, T, EntityInstance<? super T>> instanceFactory;
+	protected Factory<T> instanceFactory;
 	protected Predicate<T> skipRender;
 
-	public SimpleEntityInstancingController(BiFunction<InstancerProvider, T, EntityInstance<? super T>> instanceFactory, Predicate<T> skipRender) {
+	public SimpleEntityInstancingController(Factory<T> instanceFactory, Predicate<T> skipRender) {
 		this.instanceFactory = instanceFactory;
 		this.skipRender = skipRender;
 	}
 
 	@Override
-	public EntityInstance<? super T> createInstance(InstancerProvider instancerManager, T entity) {
-		return instanceFactory.apply(instancerManager, entity);
+	public EntityInstance<? super T> createInstance(InstanceContext ctx, T entity) {
+		return instanceFactory.create(ctx, entity);
 	}
 
 	@Override
@@ -33,21 +34,28 @@ public class SimpleEntityInstancingController<T extends Entity> implements Entit
 
 	/**
 	 * Get an object to configure the instancing controller for the given entity type.
+	 *
 	 * @param type The entity type to configure.
-	 * @param <T> The type of the entity.
+	 * @param <T>  The type of the entity.
 	 * @return The configuration object.
 	 */
 	public static <T extends Entity> EntityConfig<T> configure(EntityType<T> type) {
 		return new EntityConfig<>(type);
 	}
 
+	@FunctionalInterface
+	public interface Factory<T extends Entity> {
+		@NotNull EntityInstance<? super T> create(InstanceContext ctx, T entity);
+	}
+
 	/**
 	 * An object to configure the instancing controller for an entity.
+	 *
 	 * @param <T> The type of the entity.
 	 */
 	public static class EntityConfig<T extends Entity> {
 		protected EntityType<T> type;
-		protected BiFunction<InstancerProvider, T, EntityInstance<? super T>> instanceFactory;
+		protected Factory<T> instanceFactory;
 		protected Predicate<T> skipRender;
 
 		public EntityConfig(EntityType<T> type) {
@@ -56,10 +64,11 @@ public class SimpleEntityInstancingController<T extends Entity> implements Entit
 
 		/**
 		 * Sets the instance factory for the entity.
+		 *
 		 * @param instanceFactory The instance factory.
 		 * @return {@code this}
 		 */
-		public EntityConfig<T> factory(BiFunction<InstancerProvider, T, EntityInstance<? super T>> instanceFactory) {
+		public EntityConfig<T> factory(Factory<T> instanceFactory) {
 			this.instanceFactory = instanceFactory;
 			return this;
 		}

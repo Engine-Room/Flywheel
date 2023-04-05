@@ -6,8 +6,8 @@ import java.util.function.Function;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.lib.instance.AbstractBlockEntityInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
@@ -41,14 +41,15 @@ public class ShulkerBoxInstance extends AbstractBlockEntityInstance<ShulkerBoxBl
 
 	private float lastProgress = Float.NaN;
 
-	public ShulkerBoxInstance(InstancerProvider instancerManager, ShulkerBoxBlockEntity blockEntity) {
-		super(instancerManager, blockEntity);
+	public ShulkerBoxInstance(InstanceContext ctx, ShulkerBoxBlockEntity blockEntity) {
+		super(ctx, blockEntity);
 
 		DyeColor color = blockEntity.getColor();
 		if (color == null) {
 			texture = Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION.sprite();
 		} else {
-			texture = Sheets.SHULKER_TEXTURE_LOCATION.get(color.getId()).sprite();
+			texture = Sheets.SHULKER_TEXTURE_LOCATION.get(color.getId())
+					.sprite();
 		}
 		Quaternion rotation = getDirection().getRotation();
 

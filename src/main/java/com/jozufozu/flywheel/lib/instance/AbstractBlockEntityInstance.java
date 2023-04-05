@@ -8,8 +8,8 @@ import org.joml.FrustumIntersection;
 import com.jozufozu.flywheel.api.instance.BlockEntityInstance;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
+import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.backend.instancing.manager.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.lib.box.ImmutableBox;
 import com.jozufozu.flywheel.lib.box.MutableBox;
@@ -42,12 +42,12 @@ public abstract class AbstractBlockEntityInstance<T extends BlockEntity> extends
 	protected final BlockPos instancePos;
 	protected final BlockState blockState;
 
-	public AbstractBlockEntityInstance(InstancerProvider instancerManager, T blockEntity) {
-		super(instancerManager, blockEntity.getLevel());
+	public AbstractBlockEntityInstance(InstanceContext ctx, T blockEntity) {
+		super(ctx, blockEntity.getLevel());
 		this.blockEntity = blockEntity;
 		this.pos = blockEntity.getBlockPos();
 		this.blockState = blockEntity.getBlockState();
-		this.instancePos = pos.subtract(instancerManager.getOriginCoordinate());
+		this.instancePos = pos.subtract(renderOrigin);
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public abstract class AbstractBlockEntityInstance<T extends BlockEntity> extends
 	 * represents should be rendered at to appear in the correct location.
 	 */
 	public BlockPos getInstancePosition() {
-		return pos.subtract(instancerManager.getOriginCoordinate());
+		return pos.subtract(renderOrigin);
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.api.instance.controller;
 
 import com.jozufozu.flywheel.api.instance.BlockEntityInstance;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -12,11 +11,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public interface BlockEntityInstancingController<T extends BlockEntity> {
 	/**
 	 * Given a block entity and an instancer manager, constructs an instance for the block entity.
-	 * @param instancerManager The instancer manager to use.
+	 *
+	 * @param ctx         Context for creating an Instance.
 	 * @param blockEntity The block entity to construct an instance for.
 	 * @return The instance.
 	 */
-	BlockEntityInstance<? super T> createInstance(InstancerProvider instancerManager, T blockEntity);
+	BlockEntityInstance<? super T> createInstance(InstanceContext ctx, T blockEntity);
 
 	/**
 	 * Checks if the given block entity should not be rendered normally.

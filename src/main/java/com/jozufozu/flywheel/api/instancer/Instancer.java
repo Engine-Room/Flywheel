@@ -26,7 +26,6 @@ public interface Instancer<D extends InstancedPart> {
 
 	/**
 	 * Copy a data from another Instancer to this.
-	 *
 	 * This has the effect of swapping out one model for another.
 	 * @param inOther the data associated with a different model.
 	 */

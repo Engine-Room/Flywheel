@@ -90,7 +90,7 @@ public class BatchingEngine implements Engine {
 	}
 
 	@Override
-	public Vec3i getOriginCoordinate() {
+	public Vec3i renderOrigin() {
 		return BlockPos.ZERO;
 	}
 

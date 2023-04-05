@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
+import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.lib.instance.AbstractEntityInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
@@ -19,7 +19,6 @@ import com.jozufozu.flywheel.util.AnimationTickHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 
-import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.block.RenderShape;
@@ -37,8 +36,8 @@ public class MinecartInstance<T extends AbstractMinecart> extends AbstractEntity
 	private BlockState blockState;
 	private boolean active;
 
-	public MinecartInstance(InstancerProvider instancerManager, T entity) {
-		super(instancerManager, entity);
+	public MinecartInstance(InstanceContext ctx, T entity) {
+		super(ctx, entity);
 
 		body = getBody();
 		blockState = entity.getDisplayBlockState();
@@ -75,11 +74,7 @@ public class MinecartInstance<T extends AbstractMinecart> extends AbstractEntity
 		stack.setIdentity();
 		float pt = AnimationTickHolder.getPartialTicks();
 
-		Vec3i originCoordinate = instancerManager.getOriginCoordinate();
-		tstack.translate(
-				Mth.lerp(pt, entity.xOld, entity.getX()) - originCoordinate.getX(),
-				Mth.lerp(pt, entity.yOld, entity.getY()) - originCoordinate.getY(),
-				Mth.lerp(pt, entity.zOld, entity.getZ()) - originCoordinate.getZ());
+		tstack.translate(Mth.lerp(pt, entity.xOld, entity.getX()) - renderOrigin.getX(), Mth.lerp(pt, entity.yOld, entity.getY()) - renderOrigin.getY(), Mth.lerp(pt, entity.zOld, entity.getZ()) - renderOrigin.getZ());
 
 		float yaw = Mth.lerp(pt, entity.yRotO, entity.getYRot());
 

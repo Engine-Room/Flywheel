@@ -11,9 +11,10 @@ import org.joml.Vector3f;
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
+import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
+import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
 import com.jozufozu.flywheel.api.instance.effect.Effect;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.lib.box.ImmutableBox;
 import com.jozufozu.flywheel.lib.box.MutableBox;
@@ -59,7 +60,7 @@ public class ExampleEffect implements Effect {
 	private final BlockPos blockPos;
 	private final ImmutableBox volume;
 
-	private final List<Instance> effects;
+	private final List<BoidInstance> effects;
 
 	private final List<Boid> boids;
 
@@ -109,7 +110,7 @@ public class ExampleEffect implements Effect {
 	}
 
 	@Override
-	public Collection<com.jozufozu.flywheel.api.instance.Instance> createInstances(InstancerProvider instancerManager) {
+	public Collection<Instance> createInstances(InstanceContext ctx) {
 		effects.clear();
 		boids.clear();
 		for (int i = 0; i < INSTANCE_COUNT; i++) {
@@ -119,7 +120,7 @@ public class ExampleEffect implements Effect {
 
 			Boid boid = new Boid(x, y, z);
 			boids.add(boid);
-			effects.add(new Instance(instancerManager, level, boid));
+			effects.add(new BoidInstance(ctx, level, boid));
 		}
 		return Collections.unmodifiableList(effects);
 	}
@@ -237,13 +238,13 @@ public class ExampleEffect implements Effect {
 		}
 	}
 
-	public class Instance extends AbstractInstance implements DynamicInstance, TickableInstance {
+	public class BoidInstance extends AbstractInstance implements DynamicInstance, TickableInstance {
 
 		private final Boid self;
 		TransformedPart instance;
 
-		public Instance(InstancerProvider instancerManager, Level level, Boid self) {
-			super(instancerManager, level);
+		public BoidInstance(InstanceContext ctx, Level level, Boid self) {
+			super(ctx, level);
 			this.self = self;
 		}
 
@@ -280,7 +281,7 @@ public class ExampleEffect implements Effect {
 			var z = Mth.lerp(partialTicks, self.lastPosition.z, self.position.z);
 
 			instance.loadIdentity()
-					.translateBack(instancerManager.getOriginCoordinate())
+					.translateBack(renderOrigin)
 					.translate(x, y, z)
 					.scale(RENDER_SCALE);
 		}
