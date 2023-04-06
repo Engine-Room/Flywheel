@@ -16,7 +16,7 @@ import net.minecraft.network.chat.TextComponent;
 public class Backends {
 	public static final Backend OFF = SimpleBackend.builder()
 			.engineMessage(new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED))
-			.engineSupplier(() -> {
+			.engineFactory(level -> {
 				throw new IllegalStateException("Cannot create engine when backend is off.");
 			})
 			.fallback(() -> Backends.OFF)
@@ -28,7 +28,7 @@ public class Backends {
 	 */
 	public static final Backend BATCHING = SimpleBackend.builder()
 			.engineMessage(new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN))
-			.engineSupplier(BatchingEngine::new)
+			.engineFactory(level -> new BatchingEngine())
 			.fallback(() -> Backends.OFF)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse())
 			.register(Flywheel.rl("batching"));
@@ -38,7 +38,7 @@ public class Backends {
 	 */
 	public static final Backend INSTANCING = SimpleBackend.builder()
 			.engineMessage(new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN))
-			.engineSupplier(() -> new InstancingEngine(Contexts.WORLD, 100 * 100))
+			.engineFactory(level -> new InstancingEngine(Contexts.WORLD, 100))
 			.fallback(() -> Backends.BATCHING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
 					.instancedArraysSupported())
@@ -50,7 +50,7 @@ public class Backends {
 	 */
 	public static final Backend INDIRECT = SimpleBackend.builder()
 			.engineMessage(new TextComponent("Using Indirect Engine").withStyle(ChatFormatting.GREEN))
-			.engineSupplier(() -> new IndirectEngine(Contexts.WORLD, 100 * 100))
+			.engineFactory(level -> new IndirectEngine(100))
 			.fallback(() -> Backends.INSTANCING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
 					.supportsIndirect())

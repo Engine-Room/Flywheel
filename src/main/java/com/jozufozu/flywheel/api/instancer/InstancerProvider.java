@@ -10,5 +10,5 @@ public interface InstancerProvider {
 	 *
 	 * @return An instancer for the given struct type, model, and render stage.
 	 */
-	<D extends InstancedPart> Instancer<D> getInstancer(StructType<D> type, Model model, RenderStage stage);
+	<D extends InstancedPart> Instancer<D> instancer(StructType<D> type, Model model, RenderStage stage);
 }

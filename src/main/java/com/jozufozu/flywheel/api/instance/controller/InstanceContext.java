@@ -12,5 +12,4 @@ import net.minecraft.core.Vec3i;
  *                          All models render as if this position is (0, 0, 0).
  */
 public record InstanceContext(InstancerProvider instancerProvider, Vec3i renderOrigin) {
-
 }

@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.api.instance.controller;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.impl.instance.InstancingControllerRegistryImpl;
+import com.jozufozu.flywheel.impl.InstancingControllerRegistryImpl;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;

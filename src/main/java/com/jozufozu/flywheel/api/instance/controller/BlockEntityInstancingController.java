@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  */
 public interface BlockEntityInstancingController<T extends BlockEntity> {
 	/**
-	 * Given a block entity and an instancer manager, constructs an instance for the block entity.
+	 * Given a block entity and context, constructs an instance for the block entity.
 	 *
 	 * @param ctx         Context for creating an Instance.
 	 * @param blockEntity The block entity to construct an instance for.

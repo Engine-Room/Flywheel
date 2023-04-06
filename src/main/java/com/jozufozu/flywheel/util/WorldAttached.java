@@ -78,12 +78,16 @@ public class WorldAttached<T> {
 	 */
 	@NotNull
 	public T replace(LevelAccessor world, Consumer<T> finalizer) {
-		T remove = attached.remove(world);
-
-		if (remove != null)
-			finalizer.accept(remove);
+		remove(world, finalizer);
 
 		return get(world);
+	}
+
+	public void remove(LevelAccessor world, Consumer<T> finalizer) {
+		T removed = attached.remove(world);
+
+		if (removed != null)
+			finalizer.accept(removed);
 	}
 
 	/**

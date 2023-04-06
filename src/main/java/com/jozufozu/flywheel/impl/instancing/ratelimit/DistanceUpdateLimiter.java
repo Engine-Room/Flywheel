@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.instancing.ratelimit;
+package com.jozufozu.flywheel.impl.instancing.ratelimit;
 
 /**
  * Interface for rate-limiting updates based on an object's distance from the camera.

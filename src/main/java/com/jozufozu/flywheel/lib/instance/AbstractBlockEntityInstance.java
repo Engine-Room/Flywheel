@@ -1,16 +1,12 @@
 package com.jozufozu.flywheel.lib.instance;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.joml.FrustumIntersection;
 
 import com.jozufozu.flywheel.api.instance.BlockEntityInstance;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
-import com.jozufozu.flywheel.api.instancer.InstancedPart;
-import com.jozufozu.flywheel.backend.instancing.manager.BlockEntityInstanceManager;
+import com.jozufozu.flywheel.impl.instancing.manager.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.lib.box.ImmutableBox;
 import com.jozufozu.flywheel.lib.box.MutableBox;
 
@@ -30,13 +26,12 @@ import net.minecraft.world.level.block.state.BlockState;
  * </ul>
  * See the interfaces' documentation for more information about each one.
  *
- * <br> Implementing one or more of these will give a {@link AbstractBlockEntityInstance} access
+ * <br> Implementing one or more of these will give an {@link AbstractBlockEntityInstance} access
  * to more interesting and regular points within a tick or a frame.
  *
  * @param <T> The type of {@link BlockEntity} your class is an instance of.
  */
 public abstract class AbstractBlockEntityInstance<T extends BlockEntity> extends AbstractInstance implements BlockEntityInstance<T> {
-
 	protected final T blockEntity;
 	protected final BlockPos pos;
 	protected final BlockPos instancePos;
@@ -50,17 +45,6 @@ public abstract class AbstractBlockEntityInstance<T extends BlockEntity> extends
 		this.instancePos = pos.subtract(renderOrigin);
 	}
 
-	@Override
-	public List<InstancedPart> getCrumblingParts() {
-		var out = new ArrayList<InstancedPart>();
-		addCrumblingParts(out);
-		return out;
-	}
-
-	public void addCrumblingParts(List<InstancedPart> data) {
-
-	}
-
 	/**
 	 * Just before {@link #update()} would be called, {@code shouldReset()} is checked.
 	 * If this function returns {@code true}, then this instance will be {@link #delete removed},
@@ -69,8 +53,19 @@ public abstract class AbstractBlockEntityInstance<T extends BlockEntity> extends
 	 *
 	 * @return {@code true} if this instance should be discarded and refreshed.
 	 */
+	@Override
 	public boolean shouldReset() {
 		return blockEntity.getBlockState() != blockState;
+	}
+
+	@Override
+	public double distanceSquared(double x, double y, double z) {
+		return pos.distToCenterSqr(x, y, z);
+	}
+
+	@Override
+	public ImmutableBox getVolume() {
+		return MutableBox.from(pos);
 	}
 
 	/**
@@ -85,18 +80,7 @@ public abstract class AbstractBlockEntityInstance<T extends BlockEntity> extends
 		return pos.subtract(renderOrigin);
 	}
 
-	@Override
-	public ImmutableBox getVolume() {
-		return MutableBox.from(pos);
-	}
-
-	@Override
-	public boolean checkFrustum(FrustumIntersection frustum) {
+	public boolean isVisible(FrustumIntersection frustum) {
 		return frustum.testAab(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
-	}
-
-	@Override
-	public double distanceSquared(double x, double y, double z) {
-		return pos.distToCenterSqr(x, y, z);
 	}
 }

@@ -10,7 +10,6 @@ import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.backend.instancing.manager.InstanceManager;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -21,11 +20,11 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 
 public class BatchingEngine implements Engine {
-	protected final BatchingTransformManager transformManager = new BatchingTransformManager();
-	protected final BatchingDrawTracker drawTracker = new BatchingDrawTracker();
+	private final BatchingTransformManager transformManager = new BatchingTransformManager();
+	private final BatchingDrawTracker drawTracker = new BatchingDrawTracker();
 
 	@Override
-	public <D extends InstancedPart> Instancer<D> getInstancer(StructType<D> type, Model model, RenderStage stage) {
+	public <D extends InstancedPart> Instancer<D> instancer(StructType<D> type, Model model, RenderStage stage) {
 		return transformManager.getInstancer(type, model, stage);
 	}
 
@@ -42,7 +41,7 @@ public class BatchingEngine implements Engine {
 		submitTasks(executor, stack.last(), context.level());
 	}
 
-	public void submitTasks(TaskExecutor executor, PoseStack.Pose matrices, ClientLevel level) {
+	private void submitTasks(TaskExecutor executor, PoseStack.Pose matrices, ClientLevel level) {
 		for (var transformSetEntry : transformManager.getTransformSetsView().entrySet()) {
 			var stage = transformSetEntry.getKey();
 			var transformSet = transformSetEntry.getValue();
@@ -79,14 +78,8 @@ public class BatchingEngine implements Engine {
 	}
 
 	@Override
-	public boolean maintainOriginCoordinate(Camera camera) {
-		// do nothing
+	public boolean updateRenderOrigin(Camera camera) {
 		return false;
-	}
-
-	@Override
-	public void attachManagers(InstanceManager<?>... listener) {
-		// noop
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.lib.struct;
 
-import com.jozufozu.flywheel.api.instancer.FlatLit;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.struct.StructType;
 

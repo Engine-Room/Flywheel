@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.instancing.manager;
+package com.jozufozu.flywheel.impl.instancing.manager;
 
 import java.util.List;
 
@@ -8,11 +8,10 @@ import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.instance.BlockEntityInstance;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
-import com.jozufozu.flywheel.api.instance.controller.InstancingControllerRegistry;
 import com.jozufozu.flywheel.backend.BackendUtil;
-import com.jozufozu.flywheel.backend.instancing.storage.One2OneStorage;
-import com.jozufozu.flywheel.backend.instancing.storage.Storage;
-import com.jozufozu.flywheel.lib.instance.InstancingControllerHelper;
+import com.jozufozu.flywheel.impl.instancing.InstancingControllerHelper;
+import com.jozufozu.flywheel.impl.instancing.storage.One2OneStorage;
+import com.jozufozu.flywheel.impl.instancing.storage.Storage;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -46,7 +45,7 @@ public class BlockEntityInstanceManager extends InstanceManager<BlockEntity> {
 			return false;
 		}
 
-		if (!InstancingControllerHelper.canInstance(blockEntity.getType())) {
+		if (!InstancingControllerHelper.canInstance(blockEntity)) {
 			return false;
 		}
 
@@ -81,17 +80,17 @@ public class BlockEntityInstanceManager extends InstanceManager<BlockEntity> {
 		@Override
 		@Nullable
 		protected Instance createRaw(BlockEntity obj) {
-			var controller = InstancingControllerRegistry.getController(InstancingControllerHelper.getType(obj));
+			var controller = InstancingControllerHelper.getController(obj);
 			if (controller == null) {
 				return null;
 			}
 
-			var out = controller.createInstance(new InstanceContext(engine, engine.renderOrigin()), obj);
+			var instance = controller.createInstance(new InstanceContext(engine, engine.renderOrigin()), obj);
 
 			BlockPos blockPos = obj.getBlockPos();
-			posLookup.put(blockPos.asLong(), out);
+			posLookup.put(blockPos.asLong(), instance);
 
-			return out;
+			return instance;
 		}
 
 		@Override

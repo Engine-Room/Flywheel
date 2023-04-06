@@ -1,5 +1,6 @@
-package com.jozufozu.flywheel.backend.instancing.storage;
+package com.jozufozu.flywheel.impl.instancing.storage;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
@@ -7,13 +8,11 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 
 public interface Storage<T> {
-	Iterable<Instance> getAllInstances();
+	Collection<Instance> getAllInstances();
 
-	int getInstanceCount();
+	List<TickableInstance> getTickableInstances();
 
-	List<TickableInstance> getInstancesForTicking();
-
-	List<DynamicInstance> getInstancesForUpdate();
+	List<DynamicInstance> getDynamicInstances();
 
 	void add(T obj);
 

@@ -1,5 +1,6 @@
-package com.jozufozu.flywheel.backend.instancing.storage;
+package com.jozufozu.flywheel.impl.instancing.storage;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,21 +10,15 @@ import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.instance.Instance;
 
 public abstract class One2OneStorage<T> extends AbstractStorage<T> {
-	private final Map<T, Instance> instances;
+	private final Map<T, Instance> instances = new HashMap<>();
 
 	public One2OneStorage(Engine engine) {
 		super(engine);
-		this.instances = new HashMap<>();
 	}
 
 	@Override
-	public Iterable<Instance> getAllInstances() {
+	public Collection<Instance> getAllInstances() {
 		return instances.values();
-	}
-
-	@Override
-	public int getInstanceCount() {
-		return instances.size();
 	}
 
 	@Override
@@ -43,9 +38,9 @@ public abstract class One2OneStorage<T> extends AbstractStorage<T> {
 			return;
 		}
 
-		instance.delete();
-		dynamicInstances.remove(instance);
 		tickableInstances.remove(instance);
+		dynamicInstances.remove(instance);
+		instance.delete();
 	}
 
 	@Override
@@ -69,8 +64,8 @@ public abstract class One2OneStorage<T> extends AbstractStorage<T> {
 
 	@Override
 	public void recreateAll() {
-		dynamicInstances.clear();
 		tickableInstances.clear();
+		dynamicInstances.clear();
 		instances.replaceAll((obj, instance) -> {
 			instance.delete();
 
@@ -86,10 +81,10 @@ public abstract class One2OneStorage<T> extends AbstractStorage<T> {
 
 	@Override
 	public void invalidate() {
-		instances.values().forEach(Instance::delete);
-		instances.clear();
 		tickableInstances.clear();
 		dynamicInstances.clear();
+		instances.values().forEach(Instance::delete);
+		instances.clear();
 	}
 
 	private void create(T obj) {

@@ -13,7 +13,7 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexList;
-import com.jozufozu.flywheel.api.vertex.VertexListProvider;
+import com.jozufozu.flywheel.api.vertex.VertexListProviderRegistry;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.lib.format.Formats;
 import com.jozufozu.flywheel.lib.material.Materials;
@@ -62,7 +62,7 @@ public class ModelUtil {
 		long srcPtr = MemoryUtil.memAddress(src);
 		long dstPtr = dst.ptr();
 
-		ReusableVertexList srcList = VertexListProvider.get(srcFormat).createVertexList();
+		ReusableVertexList srcList = VertexListProviderRegistry.getProvider(srcFormat).createVertexList();
 		ReusableVertexList dstList = dstVertexType.createVertexList();
 		srcList.ptr(srcPtr);
 		dstList.ptr(dstPtr);

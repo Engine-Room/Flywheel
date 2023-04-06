@@ -2,9 +2,9 @@ package com.jozufozu.flywheel.backend;
 
 import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.backend.compile.FlwCompiler;
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.error.ErrorReporter;
+import com.jozufozu.flywheel.impl.instancing.InstancedRenderDispatcher;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -39,8 +39,8 @@ public class Loader implements ResourceManagerReloadListener {
 		FlwCompiler.INSTANCE = new FlwCompiler(sources);
 
 		ClientLevel level = Minecraft.getInstance().level;
-		if (BackendUtil.canUseInstancing(level)) {
-			InstancedRenderDispatcher.resetInstanceLevel(level);
+		if (level != null) {
+			InstancedRenderDispatcher.resetInstanceWorld(level);
 		}
 	}
 

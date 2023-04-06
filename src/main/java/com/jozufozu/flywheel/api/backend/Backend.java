@@ -7,6 +7,7 @@ import com.jozufozu.flywheel.api.registry.IdRegistry;
 import com.jozufozu.flywheel.impl.IdRegistryImpl;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.LevelAccessor;
 
 public interface Backend {
 	static IdRegistry<Backend> REGISTRY = IdRegistryImpl.create();
@@ -19,7 +20,7 @@ public interface Backend {
 	/**
 	 * Create a new engine instance.
 	 */
-	Engine createEngine();
+	Engine createEngine(LevelAccessor level);
 
 	/**
 	 * Get a fallback backend in case this backend is not supported.

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.vertex.VertexListProvider;
+import com.jozufozu.flywheel.api.vertex.VertexListProviderRegistry;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.renderer.RenderType;
@@ -24,7 +25,7 @@ public class DrawBufferSet {
 		this.renderType = renderType;
 		format = renderType.format();
 		stride = format.getVertexSize();
-		provider = VertexListProvider.get(format);
+		provider = VertexListProviderRegistry.getProvider(format);
 	}
 
 	public DrawBuffer getBuffer(RenderStage stage) {

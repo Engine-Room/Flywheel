@@ -1,15 +1,14 @@
-package com.jozufozu.flywheel.backend.instancing.manager;
+package com.jozufozu.flywheel.impl.instancing.manager;
 
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
-import com.jozufozu.flywheel.api.instance.controller.InstancingControllerRegistry;
 import com.jozufozu.flywheel.backend.BackendUtil;
-import com.jozufozu.flywheel.backend.instancing.storage.One2OneStorage;
-import com.jozufozu.flywheel.backend.instancing.storage.Storage;
-import com.jozufozu.flywheel.lib.instance.InstancingControllerHelper;
+import com.jozufozu.flywheel.impl.instancing.InstancingControllerHelper;
+import com.jozufozu.flywheel.impl.instancing.storage.One2OneStorage;
+import com.jozufozu.flywheel.impl.instancing.storage.Storage;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -32,7 +31,7 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 			return false;
 		}
 
-		if (!InstancingControllerHelper.canInstance(entity.getType())) {
+		if (!InstancingControllerHelper.canInstance(entity)) {
 			return false;
 		}
 
@@ -49,10 +48,11 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 		@Override
 		@Nullable
 		protected Instance createRaw(Entity obj) {
-			var controller = InstancingControllerRegistry.getController(InstancingControllerHelper.getType(obj));
+			var controller = InstancingControllerHelper.getController(obj);
 			if (controller == null) {
 				return null;
 			}
+
 			return controller.createInstance(new InstanceContext(engine, engine.renderOrigin()), obj);
 		}
 	}

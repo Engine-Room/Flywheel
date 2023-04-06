@@ -11,7 +11,7 @@ import org.lwjgl.system.MemoryUtil;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
-import com.jozufozu.flywheel.api.vertex.VertexListProvider;
+import com.jozufozu.flywheel.api.vertex.VertexListProviderRegistry;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
@@ -35,7 +35,7 @@ public class BatchedMeshPool {
 	 */
 	public BatchedMeshPool(VertexFormat vertexFormat) {
 		this.vertexFormat = vertexFormat;
-		vertexList = VertexListProvider.get(vertexFormat).createVertexList();
+		vertexList = VertexListProviderRegistry.getProvider(vertexFormat).createVertexList();
 		growthMargin = vertexFormat.getVertexSize() * 32;
 	}
 

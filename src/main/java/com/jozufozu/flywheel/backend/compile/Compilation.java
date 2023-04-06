@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.gl.GLSLVersion;
 import com.jozufozu.flywheel.gl.shader.GlShader;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
@@ -29,6 +28,8 @@ import net.minecraft.resources.ResourceLocation;
  * and interprets/pretty prints any errors that occur.
  */
 public class Compilation {
+	public static final boolean DUMP_SHADER_SOURCE = System.getProperty("flw.dumpShaderSource") != null;
+
 	private final List<SourceFile> files = new ArrayList<>();
 	private final List<ResourceLocation> componentNames = new ArrayList<>();
 	private final StringBuilder generatedSource;
@@ -131,7 +132,7 @@ public class Compilation {
 	}
 
 	private static void dumpSource(String source, String fileName) {
-		if (!BackendUtil.DUMP_SHADER_SOURCE) {
+		if (!DUMP_SHADER_SOURCE) {
 			return;
 		}
 

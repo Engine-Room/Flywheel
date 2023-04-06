@@ -11,11 +11,11 @@ import org.joml.Vector3f;
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
-import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.EffectInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
 import com.jozufozu.flywheel.api.instance.effect.Effect;
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.impl.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.lib.box.ImmutableBox;
 import com.jozufozu.flywheel.lib.box.MutableBox;
 import com.jozufozu.flywheel.lib.instance.AbstractInstance;
@@ -110,7 +110,7 @@ public class ExampleEffect implements Effect {
 	}
 
 	@Override
-	public Collection<Instance> createInstances(InstanceContext ctx) {
+	public Collection<EffectInstance<?>> createInstances(InstanceContext ctx) {
 		effects.clear();
 		boids.clear();
 		for (int i = 0; i < INSTANCE_COUNT; i++) {
@@ -238,10 +238,10 @@ public class ExampleEffect implements Effect {
 		}
 	}
 
-	public class BoidInstance extends AbstractInstance implements DynamicInstance, TickableInstance {
+	public class BoidInstance extends AbstractInstance implements EffectInstance<ExampleEffect>, DynamicInstance, TickableInstance {
 
 		private final Boid self;
-		TransformedPart instance;
+		private TransformedPart instance;
 
 		public BoidInstance(InstanceContext ctx, Level level, Boid self) {
 			super(ctx, level);
@@ -250,11 +250,13 @@ public class ExampleEffect implements Effect {
 
 		@Override
 		public void init() {
-			instance = instancerManager.getInstancer(StructTypes.TRANSFORMED, Models.block(Blocks.SHROOMLIGHT.defaultBlockState()), RenderStage.AFTER_PARTICLES)
+			instance = instancerProvider.instancer(StructTypes.TRANSFORMED, Models.block(Blocks.SHROOMLIGHT.defaultBlockState()), RenderStage.AFTER_PARTICLES)
 					.createInstance();
 
 			instance.setBlockLight(15)
 					.setSkyLight(15);
+
+			super.init();
 		}
 
 		@Override
@@ -297,7 +299,7 @@ public class ExampleEffect implements Effect {
 		}
 
 		@Override
-		public boolean checkFrustum(FrustumIntersection frustum) {
+		public boolean isVisible(FrustumIntersection frustum) {
 			return true;
 		}
 

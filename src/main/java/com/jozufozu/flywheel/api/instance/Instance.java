@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.api.instance;
 
-import org.joml.FrustumIntersection;
-
 /**
  * A general interface providing information about any type of thing that could use Flywheel's instanced rendering.
  */
@@ -34,15 +32,6 @@ public interface Instance {
 	boolean shouldReset();
 
 	/**
-	 * Check this instance against a frustum.<p>
-	 * An implementor may choose to return a constant to skip the frustum check.
-	 *
-	 * @param frustum A frustum intersection tester for the current frame.
-	 * @return {@code true} if this instance should be considered for updates.
-	 */
-	boolean checkFrustum(FrustumIntersection frustum);
-
-	/**
 	 * Calculate the distance squared between this instance and the given <em>world</em> position.
 	 *
 	 * @param x The x coordinate.
@@ -56,5 +45,4 @@ public interface Instance {
 	 * Free any acquired resources.
 	 */
 	void delete();
-
 }

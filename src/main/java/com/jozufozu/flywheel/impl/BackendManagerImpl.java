@@ -18,17 +18,6 @@ public final class BackendManagerImpl {
 		return backend;
 	}
 
-	public static String getBackendNameForCrashReport() {
-		if (backend == null) {
-			return "Uninitialized";
-		}
-		var backendId = Backend.REGISTRY.getId(backend);
-		if (backendId == null) {
-			return "Unregistered";
-		}
-		return backendId.toString();
-	}
-
 	public static boolean isOn() {
 		return backend != null && backend != Backends.OFF;
 	}
@@ -56,6 +45,17 @@ public final class BackendManagerImpl {
 		// TODO: Automatically select the best default config based on the user's driver
 		// TODO: Figure out how this will work if custom backends are registered
 		return Backends.INDIRECT;
+	}
+
+	public static String getBackendNameForCrashReport() {
+		if (backend == null) {
+			return "Uninitialized";
+		}
+		var backendId = Backend.REGISTRY.getId(backend);
+		if (backendId == null) {
+			return "Unregistered";
+		}
+		return backendId.toString();
 	}
 
 	private BackendManagerImpl() {

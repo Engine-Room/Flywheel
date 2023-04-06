@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.vanilla;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
@@ -24,18 +23,22 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BellBlockEntity;
 
 public class BellInstance extends AbstractBlockEntityInstance<BellBlockEntity> implements DynamicInstance {
-
 	private static final SimpleLazyModel MODEL = new SimpleLazyModel(BellInstance::createBellModel, Materials.BELL);
 
-	private final OrientedPart bell;
+	private OrientedPart bell;
 
 	private float lastRingTime = Float.NaN;
 
 	public BellInstance(InstanceContext ctx, BellBlockEntity blockEntity) {
 		super(ctx, blockEntity);
+	}
 
+	@Override
+	public void init() {
 		bell = createBellInstance().setPivot(0.5f, 0.75f, 0.5f)
 				.setPosition(getInstancePosition());
+
+		super.init();
 	}
 
 	@Override
@@ -65,8 +68,8 @@ public class BellInstance extends AbstractBlockEntityInstance<BellBlockEntity> i
 	}
 
 	@Override
-	public void addCrumblingParts(List<InstancedPart> data) {
-		Collections.addAll(data, bell);
+	public List<InstancedPart> getCrumblingParts() {
+		return List.of(bell);
 	}
 
 	@Override
@@ -75,7 +78,7 @@ public class BellInstance extends AbstractBlockEntityInstance<BellBlockEntity> i
 	}
 
 	private OrientedPart createBellInstance() {
-		return instancerManager.getInstancer(StructTypes.ORIENTED, MODEL, RenderStage.AFTER_BLOCK_ENTITIES)
+		return instancerProvider.instancer(StructTypes.ORIENTED, MODEL, RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 
