@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.lib.struct;
 
+import com.jozufozu.flywheel.api.instancer.Handle;
 import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
@@ -24,8 +25,8 @@ public class OrientedType implements StructType<OrientedPart> {
 			.build();
 
 	@Override
-	public OrientedPart create() {
-		return new OrientedPart();
+	public OrientedPart create(Handle handle) {
+		return new OrientedPart(handle);
 	}
 
 	@Override

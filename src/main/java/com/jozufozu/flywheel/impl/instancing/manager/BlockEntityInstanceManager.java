@@ -39,42 +39,42 @@ public class BlockEntityInstanceManager extends InstanceManager<BlockEntity> {
 		}
 	}
 
-	@Override
-	protected boolean canCreateInstance(BlockEntity blockEntity) {
-		if (blockEntity.isRemoved()) {
-			return false;
-		}
-
-		if (!InstancingControllerHelper.canInstance(blockEntity)) {
-			return false;
-		}
-
-		Level level = blockEntity.getLevel();
-
-		if (level == null) {
-			return false;
-		}
-
-		if (level.isEmptyBlock(blockEntity.getBlockPos())) {
-			return false;
-		}
-
-		if (BackendUtil.isFlywheelLevel(level)) {
-			BlockPos pos = blockEntity.getBlockPos();
-
-			BlockGetter existingChunk = level.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
-
-			return existingChunk != null;
-		}
-
-		return false;
-	}
-
 	private static class BlockEntityStorage extends One2OneStorage<BlockEntity> {
 		private final Long2ObjectMap<BlockEntityInstance<?>> posLookup = new Long2ObjectOpenHashMap<>();
 
 		public BlockEntityStorage(Engine engine) {
 			super(engine);
+		}
+
+		@Override
+		public boolean willAccept(BlockEntity blockEntity) {
+			if (blockEntity.isRemoved()) {
+				return false;
+			}
+
+			if (!InstancingControllerHelper.canInstance(blockEntity)) {
+				return false;
+			}
+
+			Level level = blockEntity.getLevel();
+
+			if (level == null) {
+				return false;
+			}
+
+			if (level.isEmptyBlock(blockEntity.getBlockPos())) {
+				return false;
+			}
+
+			if (BackendUtil.isFlywheelLevel(level)) {
+				BlockPos pos = blockEntity.getBlockPos();
+
+				BlockGetter existingChunk = level.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
+
+				return existingChunk != null;
+			}
+
+			return false;
 		}
 
 		@Override

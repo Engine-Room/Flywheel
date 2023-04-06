@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.lib.struct;
 
+import com.jozufozu.flywheel.api.instancer.Handle;
 import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
@@ -20,8 +21,8 @@ public class TransformedType implements StructType<TransformedPart> {
 			.build();
 
 	@Override
-	public TransformedPart create() {
-		return new TransformedPart();
+	public TransformedPart create(Handle handle) {
+		return new TransformedPart(handle);
 	}
 
 	@Override

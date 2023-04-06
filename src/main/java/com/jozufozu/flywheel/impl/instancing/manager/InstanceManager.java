@@ -31,17 +31,6 @@ public abstract class InstanceManager<T> {
 
 	protected abstract Storage<T> getStorage();
 
-	/**
-	 * Is the given object currently capable of being instanced?
-	 *
-	 * <p>
-	 *     This won't be the case for block entities or entities that are outside of loaded chunks.
-	 * </p>
-	 *
-	 * @return true if the object is currently capable of being instanced.
-	 */
-	protected abstract boolean canCreateInstance(T obj);
-
 	protected DistanceUpdateLimiter createUpdateLimiter() {
 		if (FlwConfig.get().limitUpdates()) {
 			return new BandedPrimeLimiter();
@@ -60,7 +49,7 @@ public abstract class InstanceManager<T> {
 	}
 
 	public void add(T obj) {
-		if (!canCreateInstance(obj)) {
+		if (!getStorage().willAccept(obj)) {
 			return;
 		}
 
@@ -68,7 +57,7 @@ public abstract class InstanceManager<T> {
 	}
 
 	public void queueAdd(T obj) {
-		if (!canCreateInstance(obj)) {
+		if (!getStorage().willAccept(obj)) {
 			return;
 		}
 
@@ -89,7 +78,7 @@ public abstract class InstanceManager<T> {
 	 * @param obj the object to update.
 	 */
 	public void update(T obj) {
-		if (!canCreateInstance(obj)) {
+		if (!getStorage().willAccept(obj)) {
 			return;
 		}
 
@@ -97,7 +86,7 @@ public abstract class InstanceManager<T> {
 	}
 
 	public void queueUpdate(T obj) {
-		if (!canCreateInstance(obj)) {
+		if (!getStorage().willAccept(obj)) {
 			return;
 		}
 

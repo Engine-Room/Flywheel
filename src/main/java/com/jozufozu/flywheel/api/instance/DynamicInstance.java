@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.api.instance;
 
 import org.joml.FrustumIntersection;
 
-import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
 
 /**
@@ -20,7 +20,7 @@ public interface DynamicInstance extends Instance {
 	 * <br>
 	 * <em>DISPATCHED IN PARALLEL</em>, don't attempt to mutate anything outside this instance.
 	 * <br>
-	 * {@link Instancer}/{@link InstancedPart} creation/acquisition is safe here.
+	 * {@link Instancer}/{@link InstancePart} creation/acquisition is safe here.
 	 */
 	void beginFrame();
 

@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
@@ -15,25 +15,18 @@ import com.jozufozu.flywheel.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.gl.buffer.GlBufferUsage;
 import com.jozufozu.flywheel.gl.buffer.MappedBuffer;
 
-public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> {
+public class GPUInstancer<P extends InstancePart> extends AbstractInstancer<P> {
 
 	final BufferLayout instanceFormat;
-	final StructType<D> structType;
 	final Set<GlVertexArray> boundTo = new HashSet<>();
 	GlBuffer vbo;
 	int glInstanceCount = 0;
 
 	boolean anyToUpdate;
 
-	public GPUInstancer(StructType<D> type) {
+	public GPUInstancer(StructType<P> type) {
 		super(type);
 		this.instanceFormat = type.getLayout();
-		this.structType = type;
-	}
-
-	@Override
-	public void notifyDirty() {
-		anyToUpdate = true;
 	}
 
 	public void init() {
@@ -46,11 +39,11 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 	}
 
 	public boolean isEmpty() {
-		return !anyToUpdate && !anyToRemove && glInstanceCount == 0;
+		return deleted.isEmpty() && changed.isEmpty() && glInstanceCount == 0;
 	}
 
 	void update() {
-		if (anyToRemove) {
+		if (!deleted.isEmpty()) {
 			removeDeletedInstances();
 		}
 
@@ -59,13 +52,11 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 			boundTo.clear();
 		}
 
-		if (anyToUpdate) {
+		if (!changed.isEmpty()) {
 			clearAndUpdateBuffer();
 		}
 
 		glInstanceCount = data.size();
-
-		anyToRemove = anyToUpdate = false;
 	}
 
 	private void clearAndUpdateBuffer() {
@@ -78,15 +69,14 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 
 			if (size > 0) {
 				final long ptr = buf.getPtr();
-				final long stride = structType.getLayout().getStride();
-				final StructWriter<D> writer = structType.getWriter();
+				final long stride = type.getLayout()
+						.getStride();
+				final StructWriter<P> writer = type.getWriter();
 
-				for (int i = 0; i < size; i++) {
-					final D element = data.get(i);
-					if (element.checkDirtyAndClear()) {
-						writer.write(ptr + i * stride, element);
-					}
+				for (int i = changed.nextSetBit(0); i >= 0 && i < size; i = changed.nextSetBit(i + 1)) {
+					writer.write(ptr + i * stride, data.get(i));
 				}
+				changed.clear();
 			}
 		} catch (Exception e) {
 			Flywheel.LOGGER.error("Error updating GPUInstancer:", e);
@@ -104,7 +94,6 @@ public class GPUInstancer<D extends InstancedPart> extends AbstractInstancer<D> 
 		return vbo.ensureCapacity(requiredSize);
 	}
 
-	@Override
 	public void delete() {
 		vbo.delete();
 		vbo = null;

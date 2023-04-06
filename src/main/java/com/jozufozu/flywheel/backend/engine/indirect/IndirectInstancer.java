@@ -2,54 +2,45 @@ package com.jozufozu.flywheel.backend.engine.indirect;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 
-public class IndirectInstancer<D extends InstancedPart> extends AbstractInstancer<D> {
+public class IndirectInstancer<P extends InstancePart> extends AbstractInstancer<P> {
 
 	private final long objectStride;
-	private final StructWriter<D> writer;
+	private final StructWriter<P> writer;
 	int instanceCount = 0;
 
-	boolean anyToUpdate;
-
-	public IndirectInstancer(StructType<D> type) {
+	public IndirectInstancer(StructType<P> type) {
 		super(type);
 		this.objectStride = type.getLayout()
 				.getStride();
 		writer = type.getWriter();
 	}
 
-	@Override
-	public void notifyDirty() {
-		anyToUpdate = true;
-	}
-
 	public boolean isEmpty() {
-		return !anyToUpdate && !anyToRemove && instanceCount == 0;
+		return changed.isEmpty() && deleted.isEmpty() && instanceCount == 0;
 	}
 
 	void update() {
-		if (anyToRemove) {
+		if (!deleted.isEmpty()) {
 			removeDeletedInstances();
 		}
 
 		instanceCount = data.size();
-
-		anyToRemove = false;
 	}
 
 	public void writeSparse(long objectPtr, long batchIDPtr, int batchID) {
-		for (int i = 0, size = data.size(); i < size; i++) {
-			final var element = data.get(i);
-			if (element.checkDirtyAndClear()) {
-				writer.write(objectPtr + i * objectStride, element);
+		final int size = data.size();
 
-				MemoryUtil.memPutInt(batchIDPtr + i * IndirectBuffers.INT_SIZE, batchID);
-			}
+		for (int i = changed.nextSetBit(0); i >= 0 && i < size; i = changed.nextSetBit(i + 1)) {
+			writer.write(objectPtr + i * objectStride, data.get(i));
+
+			MemoryUtil.memPutInt(batchIDPtr + i * IndirectBuffers.INT_SIZE, batchID);
 		}
+		changed.clear();
 	}
 
 	public void writeFull(long objectPtr, long batchIDPtr, int batchID) {
@@ -62,10 +53,6 @@ public class IndirectInstancer<D extends InstancedPart> extends AbstractInstance
 			MemoryUtil.memPutInt(batchIDPtr, batchID);
 			batchIDPtr += IndirectBuffers.INT_SIZE;
 		}
-	}
-
-	@Override
-	public void delete() {
-		// noop
+		changed.clear();
 	}
 }

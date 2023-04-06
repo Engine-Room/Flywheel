@@ -12,7 +12,7 @@ import static org.lwjgl.opengl.GL45.glVertexArrayElementBuffer;
 import static org.lwjgl.opengl.GL45.glVertexArrayVertexBuffer;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.compile.FlwCompiler;
@@ -22,7 +22,7 @@ import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.pipeline.Pipelines;
 import com.jozufozu.flywheel.lib.util.QuadConverter;
 
-public class IndirectCullingGroup<T extends InstancedPart> {
+public class IndirectCullingGroup<P extends InstancePart> {
 
 	private static final int BARRIER_BITS = GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT;
 
@@ -38,13 +38,13 @@ public class IndirectCullingGroup<T extends InstancedPart> {
 
 	int vertexArray;
 
-	final IndirectDrawSet<T> drawSet = new IndirectDrawSet<>();
+	final IndirectDrawSet<P> drawSet = new IndirectDrawSet<>();
 
 	private boolean hasCulledThisFrame;
 	private boolean needsMemoryBarrier;
 	private int instanceCountThisFrame;
 
-	IndirectCullingGroup(StructType<T> structType, VertexType vertexType) {
+	IndirectCullingGroup(StructType<P> structType, VertexType vertexType) {
 		this.vertexType = vertexType;
 
 		objectStride = structType.getLayout()

@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.lib.struct;
 
+import com.jozufozu.flywheel.api.instancer.Handle;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
@@ -18,8 +19,8 @@ public class OrientedPart extends ColoredLitPart {
 	public float qZ;
 	public float qW = 1;
 
-	public OrientedPart() {
-		super(StructTypes.ORIENTED);
+	public OrientedPart(Handle handle) {
+		super(StructTypes.ORIENTED, handle);
 	}
 
 	public OrientedPart setPosition(BlockPos pos) {
@@ -34,7 +35,7 @@ public class OrientedPart extends ColoredLitPart {
 		this.posX = x;
 		this.posY = y;
 		this.posZ = z;
-		markDirty();
+		setChanged();
 		return this;
 	}
 
@@ -42,7 +43,7 @@ public class OrientedPart extends ColoredLitPart {
 		this.posX += x;
 		this.posY += y;
 		this.posZ += z;
-		markDirty();
+		setChanged();
 		return this;
 	}
 
@@ -58,7 +59,7 @@ public class OrientedPart extends ColoredLitPart {
 		this.pivotX = x;
 		this.pivotY = y;
 		this.pivotZ = z;
-		markDirty();
+		setChanged();
 		return this;
 	}
 
@@ -71,7 +72,7 @@ public class OrientedPart extends ColoredLitPart {
 		this.qY = y;
 		this.qZ = z;
 		this.qW = w;
-		markDirty();
+		setChanged();
 		return this;
 	}
 
@@ -80,13 +81,13 @@ public class OrientedPart extends ColoredLitPart {
 		this.qY = 0;
 		this.qZ = 0;
 		this.qW = 1;
-		markDirty();
+		setChanged();
 		return this;
 	}
 
 	@Override
-	public OrientedPart copy() {
-		var out = new OrientedPart();
+	public OrientedPart copy(Handle handle) {
+		var out = new OrientedPart(handle);
 		out.posX = this.posX;
 		out.posY = this.posY;
 		out.posZ = this.posZ;
