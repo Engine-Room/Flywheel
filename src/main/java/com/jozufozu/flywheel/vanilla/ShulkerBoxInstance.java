@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.vanilla;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -33,17 +32,20 @@ public class ShulkerBoxInstance extends AbstractBlockEntityInstance<ShulkerBoxBl
 	private static final Function<TextureAtlasSprite, SimpleLazyModel> BASE = Util.memoize(it -> new SimpleLazyModel(() -> makeBaseModel(it), Materials.SHULKER));
 	private static final Function<TextureAtlasSprite, SimpleLazyModel> LID = Util.memoize(it -> new SimpleLazyModel(() -> makeLidModel(it), Materials.SHULKER));
 
-	private final TextureAtlasSprite texture;
+	private TextureAtlasSprite texture;
 
-	private final TransformedPart base;
-	private final TransformedPart lid;
+	private TransformedPart base;
+	private TransformedPart lid;
 	private final PoseStack stack = new PoseStack();
 
 	private float lastProgress = Float.NaN;
 
 	public ShulkerBoxInstance(InstanceContext ctx, ShulkerBoxBlockEntity blockEntity) {
 		super(ctx, blockEntity);
+	}
 
+	@Override
+	public void init() {
 		DyeColor color = blockEntity.getColor();
 		if (color == null) {
 			texture = Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION.sprite();
@@ -67,6 +69,8 @@ public class ShulkerBoxInstance extends AbstractBlockEntityInstance<ShulkerBoxBl
 		tstack.translateY(0.25);
 
 		lid = makeLidInstance().setTransform(stack);
+
+		super.init();
 	}
 
 	@Override
@@ -91,8 +95,8 @@ public class ShulkerBoxInstance extends AbstractBlockEntityInstance<ShulkerBoxBl
 	}
 
 	@Override
-	public void addCrumblingParts(List<InstancedPart> data) {
-		Collections.addAll(data, base, lid);
+	public List<InstancedPart> getCrumblingParts() {
+		return List.of(base, lid);
 	}
 
 	@Override
@@ -107,12 +111,12 @@ public class ShulkerBoxInstance extends AbstractBlockEntityInstance<ShulkerBoxBl
 	}
 
 	private TransformedPart makeBaseInstance() {
-		return instancerManager.getInstancer(StructTypes.TRANSFORMED, BASE.apply(texture), RenderStage.AFTER_BLOCK_ENTITIES)
+		return instancerProvider.instancer(StructTypes.TRANSFORMED, BASE.apply(texture), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 
 	private TransformedPart makeLidInstance() {
-		return instancerManager.getInstancer(StructTypes.TRANSFORMED, LID.apply(texture), RenderStage.AFTER_BLOCK_ENTITIES)
+		return instancerProvider.instancer(StructTypes.TRANSFORMED, LID.apply(texture), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 

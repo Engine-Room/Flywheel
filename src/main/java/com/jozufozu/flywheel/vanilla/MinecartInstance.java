@@ -26,22 +26,26 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class MinecartInstance<T extends AbstractMinecart> extends AbstractEntityInstance<T> implements DynamicInstance, TickableInstance {
-
 	private static final SimpleLazyModel MODEL = new SimpleLazyModel(MinecartInstance::getBodyModel, Materials.MINECART);
 
 	private final PoseStack stack = new PoseStack();
 
-	private final TransformedPart body;
+	private TransformedPart body;
 	private TransformedPart contents;
 	private BlockState blockState;
 	private boolean active;
 
 	public MinecartInstance(InstanceContext ctx, T entity) {
 		super(ctx, entity);
+	}
 
+	@Override
+	public void init() {
 		body = getBody();
 		blockState = entity.getDisplayBlockState();
 		contents = getContents();
+
+		super.init();
 	}
 
 	@Override
@@ -167,12 +171,12 @@ public class MinecartInstance<T extends AbstractMinecart> extends AbstractEntity
 			return null;
 		}
 
-        return instancerManager.getInstancer(StructTypes.TRANSFORMED, Models.block(blockState), RenderStage.AFTER_ENTITIES)
+        return instancerProvider.instancer(StructTypes.TRANSFORMED, Models.block(blockState), RenderStage.AFTER_ENTITIES)
 				.createInstance();
 	}
 
 	private TransformedPart getBody() {
-		return instancerManager.getInstancer(StructTypes.TRANSFORMED, MODEL, RenderStage.AFTER_ENTITIES)
+		return instancerProvider.instancer(StructTypes.TRANSFORMED, MODEL, RenderStage.AFTER_ENTITIES)
 				.createInstance();
 	}
 

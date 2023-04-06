@@ -1,13 +1,10 @@
 package com.jozufozu.flywheel.backend.engine.indirect;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.backend.Engine;
-import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
@@ -15,40 +12,29 @@ import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.backend.instancing.manager.InstanceManager;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
-import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public class IndirectEngine implements Engine {
+	private final int sqrMaxOriginDistance;
 
-	protected final IndirectDrawManager drawManager = new IndirectDrawManager();
+	private final IndirectDrawManager drawManager = new IndirectDrawManager();
 
-	/**
-	 * The set of instance managers that are attached to this engine.
-	 */
-	private final Set<InstanceManager<?>> instanceManagers = FlwUtil.createWeakHashSet();
+	private BlockPos renderOrigin = BlockPos.ZERO;
 
-	protected final Context context;
-	protected final int sqrMaxOriginDistance;
-
-	protected BlockPos originCoordinate = BlockPos.ZERO;
-
-	public IndirectEngine(Context context, int sqrMaxOriginDistance) {
-		this.context = context;
-		this.sqrMaxOriginDistance = sqrMaxOriginDistance;
+	public IndirectEngine(int maxOriginDistance) {
+		this.sqrMaxOriginDistance = maxOriginDistance * maxOriginDistance;
 	}
 
 	@Override
-	public <D extends InstancedPart> Instancer<D> getInstancer(StructType<D> type, Model model, RenderStage stage) {
+	public <D extends InstancedPart> Instancer<D> instancer(StructType<D> type, Model model, RenderStage stage) {
 		return drawManager.getInstancer(type, model, stage);
 	}
 
@@ -70,7 +56,7 @@ public class IndirectEngine implements Engine {
 		}
 	}
 
-	protected void setup() {
+	private void setup() {
 		GlTextureUnit.T2.makeActive();
 		Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
 
@@ -82,36 +68,25 @@ public class IndirectEngine implements Engine {
 	}
 
 	@Override
-	public boolean maintainOriginCoordinate(Camera camera) {
+	public boolean updateRenderOrigin(Camera camera) {
 		Vec3 cameraPos = camera.getPosition();
+		double dx = renderOrigin.getX() - cameraPos.x;
+		double dy = renderOrigin.getY() - cameraPos.y;
+		double dz = renderOrigin.getZ() - cameraPos.z;
+		double distanceSqr = dx * dx + dy * dy + dz * dz;
 
-		double distanceSqr = Vec3.atLowerCornerOf(originCoordinate)
-				.subtract(cameraPos)
-				.lengthSqr();
-
-		if (distanceSqr > sqrMaxOriginDistance) {
-			shiftListeners(Mth.floor(cameraPos.x), Mth.floor(cameraPos.y), Mth.floor(cameraPos.z));
-			return true;
+		if (distanceSqr <= sqrMaxOriginDistance) {
+			return false;
 		}
-		return false;
-	}
 
-	private void shiftListeners(int cX, int cY, int cZ) {
-		originCoordinate = new BlockPos(cX, cY, cZ);
-
+		renderOrigin = new BlockPos(cameraPos);
 		drawManager.clearInstancers();
-
-		instanceManagers.forEach(InstanceManager::onOriginShift);
-	}
-
-	@Override
-	public void attachManagers(InstanceManager<?>... listener) {
-		Collections.addAll(instanceManagers, listener);
+		return true;
 	}
 
 	@Override
 	public Vec3i renderOrigin() {
-		return originCoordinate;
+		return renderOrigin;
 	}
 
 	@Override
@@ -122,6 +97,6 @@ public class IndirectEngine implements Engine {
 	@Override
 	public void addDebugInfo(List<String> info) {
 		info.add("GL46 Indirect");
-		info.add("Origin: " + originCoordinate.getX() + ", " + originCoordinate.getY() + ", " + originCoordinate.getZ());
+		info.add("Origin: " + renderOrigin.getX() + ", " + renderOrigin.getY() + ", " + renderOrigin.getZ());
 	}
 }

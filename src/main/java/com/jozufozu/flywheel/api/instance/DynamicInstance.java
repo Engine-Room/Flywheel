@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.api.instance;
 
+import org.joml.FrustumIntersection;
+
 import com.jozufozu.flywheel.api.instancer.InstancedPart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
 
@@ -34,4 +36,13 @@ public interface DynamicInstance extends Instance {
 	default boolean decreaseFramerateWithDistance() {
 		return true;
 	}
+
+	/**
+	 * Check this instance against a frustum.<p>
+	 * An implementor may choose to return a constant to skip the frustum check.
+	 *
+	 * @param frustum A frustum intersection tester for the current frame.
+	 * @return {@code true} if this instance should be considered for updates.
+	 */
+	boolean isVisible(FrustumIntersection frustum);
 }

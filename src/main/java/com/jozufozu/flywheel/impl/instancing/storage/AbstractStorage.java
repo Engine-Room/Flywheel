@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.instancing.storage;
+package com.jozufozu.flywheel.impl.instancing.storage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,12 +18,12 @@ public abstract class AbstractStorage<T> implements Storage<T> {
 	}
 
 	@Override
-	public List<TickableInstance> getInstancesForTicking() {
+	public List<TickableInstance> getTickableInstances() {
 		return tickableInstances;
 	}
 
 	@Override
-	public List<DynamicInstance> getInstancesForUpdate() {
+	public List<DynamicInstance> getDynamicInstances() {
 		return dynamicInstances;
 	}
 

@@ -1,4 +1,6 @@
-package com.jozufozu.flywheel.api.instancer;
+package com.jozufozu.flywheel.lib.struct;
+
+import com.jozufozu.flywheel.api.instancer.InstancedPart;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -27,9 +29,13 @@ public interface FlatLit<D extends InstancedPart & FlatLit<D>> {
 	 */
 	D setSkyLight(int skyLight);
 
+	default D setLight(int blockLight, int skyLight) {
+		return setBlockLight(blockLight)
+				.setSkyLight(skyLight);
+	}
+
 	default D updateLight(BlockAndTintGetter level, BlockPos pos) {
-		return setBlockLight(level.getBrightness(LightLayer.BLOCK, pos))
-				.setSkyLight(level.getBrightness(LightLayer.SKY, pos));
+		return setLight(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos));
 	}
 
 	int getPackedLight();

@@ -10,7 +10,7 @@ import net.minecraft.world.entity.Entity;
  */
 public interface EntityInstancingController<T extends Entity> {
 	/**
-	 * Given an entity and an instancer manager, constructs an instance for the entity.
+	 * Given an entity and context, constructs an instance for the entity.
 	 *
 	 * @param ctx    Context for creating an Instance.
 	 * @param entity The entity to construct an instance for.

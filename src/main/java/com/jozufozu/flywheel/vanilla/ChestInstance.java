@@ -1,11 +1,8 @@
 package com.jozufozu.flywheel.vanilla;
 
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
-
-import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
@@ -36,24 +33,25 @@ import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends AbstractBlockEntityInstance<T> implements DynamicInstance {
-
 	private static final BiFunction<ChestType, TextureAtlasSprite, SimpleLazyModel> LID = Util.memoize((type, mat) -> new SimpleLazyModel(() -> createLidModel(type, mat), Materials.CHEST));
 	private static final BiFunction<ChestType, TextureAtlasSprite, SimpleLazyModel> BASE = Util.memoize((type, mat) -> new SimpleLazyModel(() -> createBaseModel(type, mat), Materials.CHEST));
 
-	private final OrientedPart body;
-	private final TransformedPart lid;
+	private OrientedPart body;
+	private TransformedPart lid;
 
-	private final Float2FloatFunction lidProgress;
-	private final TextureAtlasSprite sprite;
-	@NotNull
-	private final ChestType chestType;
-	private final Quaternion baseRotation;
+	private Float2FloatFunction lidProgress;
+	private TextureAtlasSprite sprite;
+	private ChestType chestType;
+	private Quaternion baseRotation;
 
 	private float lastProgress = Float.NaN;
 
 	public ChestInstance(InstanceContext ctx, T blockEntity) {
 		super(ctx, blockEntity);
+	}
 
+	@Override
+	public void init() {
 		Block block = blockState.getBlock();
 
 		chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
@@ -64,7 +62,6 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Abstr
 		lid = lidInstance();
 
 		if (block instanceof AbstractChestBlock<?> chestBlock) {
-
 			float horizontalAngle = blockState.getValue(ChestBlock.FACING).toYRot();
 
 			baseRotation = Vector3f.YP.rotationDegrees(-horizontalAngle);
@@ -78,6 +75,8 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Abstr
 			baseRotation = Quaternion.ONE;
 			lidProgress = $ -> 0f;
 		}
+
+		super.init();
 	}
 
 	@Override
@@ -112,8 +111,8 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Abstr
 	}
 
 	@Override
-	public void addCrumblingParts(List<InstancedPart> data) {
-		Collections.addAll(data, body, lid);
+	public List<InstancedPart> getCrumblingParts() {
+		return List.of(body, lid);
 	}
 
 	@Override
@@ -123,12 +122,12 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Abstr
 	}
 
 	private OrientedPart baseInstance() {
-		return instancerManager.getInstancer(StructTypes.ORIENTED, BASE.apply(chestType, sprite), RenderStage.AFTER_BLOCK_ENTITIES)
+		return instancerProvider.instancer(StructTypes.ORIENTED, BASE.apply(chestType, sprite), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 
 	private TransformedPart lidInstance() {
-		return instancerManager.getInstancer(StructTypes.TRANSFORMED, LID.apply(chestType, sprite), RenderStage.AFTER_BLOCK_ENTITIES)
+		return instancerProvider.instancer(StructTypes.TRANSFORMED, LID.apply(chestType, sprite), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 

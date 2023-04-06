@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.BackendUtil;
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.impl.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.lib.light.LightUpdater;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.util.StringUtil;
@@ -16,14 +16,13 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
 
 public class ForgeEvents {
-
 	public static void addToDebugScreen(RenderGameOverlayEvent.Text event) {
 		if (Minecraft.getInstance().options.renderDebug) {
 			ArrayList<String> debug = event.getRight();
 			debug.add("");
 			debug.add("Flywheel: " + Flywheel.getVersion());
 
-			InstancedRenderDispatcher.getDebugString(debug);
+			InstancedRenderDispatcher.addDebugInfo(debug);
 
 			debug.add("Memory Usage: CPU: " + StringUtil.formatBytes(FlwMemoryTracker.getCPUMemory()) + ", GPU: " + StringUtil.formatBytes(FlwMemoryTracker.getGPUMemory()));
 		}
@@ -39,5 +38,4 @@ public class ForgeEvents {
 					.tick();
 		}
 	}
-
 }

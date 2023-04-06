@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.instancing.ratelimit;
+package com.jozufozu.flywheel.impl.instancing.ratelimit;
 
 import net.minecraft.util.Mth;
 

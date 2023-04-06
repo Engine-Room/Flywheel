@@ -3,10 +3,8 @@ package com.jozufozu.flywheel.config;
 import java.util.function.BiConsumer;
 
 import com.jozufozu.flywheel.api.backend.Backend;
-import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.lib.uniform.FlwShaderUniforms;
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
@@ -30,9 +28,9 @@ public class FlwCommands {
 	public static void registerClientCommands(RegisterClientCommandsEvent event) {
 		FlwConfig config = FlwConfig.get();
 
-		ConfigCommandBuilder commandBuilder = new ConfigCommandBuilder("flywheel");
+		LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("flywheel");
 
-		commandBuilder.addValue(config.client.backend, "backend", (builder, value) ->
+		addValue(command, config.client.backend, "backend", (builder, value) ->
 			builder
 				.executes(context -> {
 					LocalPlayer player = Minecraft.getInstance().player;
@@ -68,12 +66,12 @@ public class FlwCommands {
 							Component message = backend.engineMessage();
 							player.displayClientMessage(message, false);
 
-							BackendUtil.reloadWorldRenderers();
+							Minecraft.getInstance().levelRenderer.allChanged();
 						}
 						return Command.SINGLE_SUCCESS;
 					})));
 
-		commandBuilder.addValue(config.client.limitUpdates, "limitUpdates", (builder, value) -> booleanValueCommand(builder, value,
+		addValue(command, config.client.limitUpdates, "limitUpdates", (builder, value) -> booleanValueCommand(builder, value,
 				(source, bool) -> {
 					LocalPlayer player = Minecraft.getInstance().player;
 					if (player == null) return;
@@ -88,12 +86,12 @@ public class FlwCommands {
 					Component text = boolToText(bool).append(new TextComponent(" update limiting.").withStyle(ChatFormatting.WHITE));
 					player.displayClientMessage(text, false);
 
-					BackendUtil.reloadWorldRenderers();
+					Minecraft.getInstance().levelRenderer.allChanged();
 				}
 			));
 
 		// TODO
-		commandBuilder.command.then(Commands.literal("debugNormals"))
+		command.then(Commands.literal("debugNormals"))
 				.executes(context -> {
 					LocalPlayer player = Minecraft.getInstance().player;
 					if (player == null) return 0;
@@ -103,7 +101,7 @@ public class FlwCommands {
 					return Command.SINGLE_SUCCESS;
 				});
 
-		commandBuilder.command.then(Commands.literal("debugCrumbling")
+		command.then(Commands.literal("debugCrumbling")
 				.then(Commands.argument("pos", BlockPosArgument.blockPos())
 						.then(Commands.argument("stage", IntegerArgumentType.integer(0, 9))
 								.executes(context -> {
@@ -122,7 +120,7 @@ public class FlwCommands {
 									return Command.SINGLE_SUCCESS;
 								}))));
 
-		commandBuilder.command.then(Commands.literal("debugFrustum")
+		command.then(Commands.literal("debugFrustum")
 				.then(Commands.literal("pause")
 						.executes(context -> {
 							FlwShaderUniforms.FRUSTUM_PAUSED = true;
@@ -139,10 +137,16 @@ public class FlwCommands {
 							return 1;
 						})));
 
-		commandBuilder.build(event.getDispatcher());
+		event.getDispatcher().register(command);
 	}
 
-	public static void booleanValueCommand(LiteralArgumentBuilder<CommandSourceStack> builder, ConfigValue<Boolean> value, BiConsumer<CommandSourceStack, Boolean> displayAction, BiConsumer<CommandSourceStack, Boolean> setAction) {
+	private static <T extends ConfigValue<?>> void addValue(LiteralArgumentBuilder<CommandSourceStack> command, T value, String subcommand, BiConsumer<LiteralArgumentBuilder<CommandSourceStack>, T> consumer) {
+		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(subcommand);
+		consumer.accept(builder, value);
+		command.then(builder);
+	}
+
+	private static void booleanValueCommand(LiteralArgumentBuilder<CommandSourceStack> builder, ConfigValue<Boolean> value, BiConsumer<CommandSourceStack, Boolean> displayAction, BiConsumer<CommandSourceStack, Boolean> setAction) {
 		builder
 			.executes(context -> {
 				displayAction.accept(context.getSource(), value.get());
@@ -164,23 +168,5 @@ public class FlwCommands {
 
 	public static MutableComponent boolToText(boolean b) {
 		return b ? new TextComponent("enabled").withStyle(ChatFormatting.DARK_GREEN) : new TextComponent("disabled").withStyle(ChatFormatting.RED);
-	}
-
-	public static class ConfigCommandBuilder {
-		protected LiteralArgumentBuilder<CommandSourceStack> command;
-
-		public ConfigCommandBuilder(String baseLiteral) {
-			command = Commands.literal(baseLiteral);
-		}
-
-		public <T extends ConfigValue<?>> void addValue(T value, String subcommand, BiConsumer<LiteralArgumentBuilder<CommandSourceStack>, T> consumer) {
-			LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(subcommand);
-			consumer.accept(builder, value);
-			command.then(builder);
-		}
-
-		public void build(CommandDispatcher<CommandSourceStack> dispatcher) {
-			dispatcher.register(command);
-		}
 	}
 }

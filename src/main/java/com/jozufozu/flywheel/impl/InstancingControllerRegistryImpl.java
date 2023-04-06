@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.instance;
+package com.jozufozu.flywheel.impl;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -12,6 +12,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
+//TODO: Add freezing
 @SuppressWarnings("unchecked")
 public final class InstancingControllerRegistryImpl {
 	@Nullable

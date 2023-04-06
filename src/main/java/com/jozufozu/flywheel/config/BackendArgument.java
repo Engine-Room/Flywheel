@@ -17,9 +17,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
-public enum BackendArgument implements ArgumentType<Backend> {
-	INSTANCE;
-
+public class BackendArgument implements ArgumentType<Backend> {
 	private static final List<String> STRING_IDS = Backend.REGISTRY.getAllIds().stream().map(ResourceLocation::toString).toList();
 
 	private static final Dynamic2CommandExceptionType INVALID = new Dynamic2CommandExceptionType((found, constants) -> {
@@ -27,9 +25,7 @@ public enum BackendArgument implements ArgumentType<Backend> {
 		return new TranslatableComponent("commands.forge.arguments.enum.invalid", constants, found);
 	});
 
-	public static BackendArgument getInstance() {
-		return INSTANCE;
-	}
+	public static final BackendArgument INSTANCE = new BackendArgument();
 
 	@Override
 	public Backend parse(StringReader reader) throws CommandSyntaxException {

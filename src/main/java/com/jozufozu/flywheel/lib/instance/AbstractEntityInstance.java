@@ -6,19 +6,19 @@ import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.EntityInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
-import com.jozufozu.flywheel.backend.instancing.manager.BlockEntityInstanceManager;
+import com.jozufozu.flywheel.impl.instancing.manager.BlockEntityInstanceManager;
+import com.jozufozu.flywheel.lib.box.ImmutableBox;
 import com.jozufozu.flywheel.lib.box.MutableBox;
 import com.jozufozu.flywheel.lib.light.TickingLightListener;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * The layer between a {@link BlockEntity} and the Flywheel backend.
+ * The layer between an {@link Entity} and the Flywheel backend.
  * *
  * <br><br> There are a few additional features that overriding classes can opt in to:
  * <ul>
@@ -27,13 +27,12 @@ import net.minecraft.world.phys.Vec3;
  * </ul>
  * See the interfaces' documentation for more information about each one.
  *
- * <br> Implementing one or more of these will give a {@link AbstractEntityInstance} access
+ * <br> Implementing one or more of these will give an {@link AbstractEntityInstance} access
  * to more interesting and regular points within a tick or a frame.
  *
  * @param <E> The type of {@link Entity} your class is an instance of.
  */
 public abstract class AbstractEntityInstance<E extends Entity> extends AbstractInstance implements EntityInstance<E>, TickingLightListener {
-
 	protected final E entity;
 	protected final MutableBox bounds;
 
@@ -44,7 +43,12 @@ public abstract class AbstractEntityInstance<E extends Entity> extends AbstractI
 	}
 
 	@Override
-	public MutableBox getVolume() {
+	public double distanceSquared(double x, double y, double z) {
+		return entity.distanceToSqr(x, y, z);
+	}
+
+	@Override
+	public ImmutableBox getVolume() {
 		return bounds;
 	}
 
@@ -87,14 +91,8 @@ public abstract class AbstractEntityInstance<E extends Entity> extends AbstractI
 		return new Vector3f((float) (Mth.lerp(partialTicks, entity.xOld, pos.x) - renderOrigin.getX()), (float) (Mth.lerp(partialTicks, entity.yOld, pos.y) - renderOrigin.getY()), (float) (Mth.lerp(partialTicks, entity.zOld, pos.z) - renderOrigin.getZ()));
 	}
 
-	@Override
-	public boolean checkFrustum(FrustumIntersection frustum) {
+	public boolean isVisible(FrustumIntersection frustum) {
 		AABB aabb = entity.getBoundingBox();
 		return frustum.testAab((float) aabb.minX, (float) aabb.minY, (float) aabb.minZ, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ);
-	}
-
-	@Override
-	public double distanceSquared(double x, double y, double z) {
-		return entity.distanceToSqr(x, y, z);
 	}
 }

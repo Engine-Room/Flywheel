@@ -1,7 +1,5 @@
-package com.jozufozu.flywheel.backend.instancing.manager;
+package com.jozufozu.flywheel.impl.instancing.manager;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,28 +7,26 @@ import java.util.function.Consumer;
 
 import org.joml.FrustumIntersection;
 
-import com.jozufozu.flywheel.api.backend.BackendManager;
-import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.backend.instancing.ratelimit.BandedPrimeLimiter;
-import com.jozufozu.flywheel.backend.instancing.ratelimit.DistanceUpdateLimiter;
-import com.jozufozu.flywheel.backend.instancing.ratelimit.NonLimiter;
-import com.jozufozu.flywheel.backend.instancing.storage.Storage;
 import com.jozufozu.flywheel.config.FlwConfig;
+import com.jozufozu.flywheel.impl.instancing.ratelimit.BandedPrimeLimiter;
+import com.jozufozu.flywheel.impl.instancing.ratelimit.DistanceUpdateLimiter;
+import com.jozufozu.flywheel.impl.instancing.ratelimit.NonLimiter;
+import com.jozufozu.flywheel.impl.instancing.storage.Storage;
 
 public abstract class InstanceManager<T> {
 	private final Set<T> queuedAdditions = new HashSet<>(64);
 	private final Set<T> queuedUpdates = new HashSet<>(64);
 
-	protected DistanceUpdateLimiter frameLimiter;
 	protected DistanceUpdateLimiter tickLimiter;
+	protected DistanceUpdateLimiter frameLimiter;
 
 	public InstanceManager() {
-		frameLimiter = createUpdateLimiter();
 		tickLimiter = createUpdateLimiter();
+		frameLimiter = createUpdateLimiter();
 	}
 
 	protected abstract Storage<T> getStorage();
@@ -60,22 +56,18 @@ public abstract class InstanceManager<T> {
 	 * @return The object count.
 	 */
 	public int getInstanceCount() {
-		return getStorage().getInstanceCount();
+		return getStorage().getAllInstances().size();
 	}
 
 	public void add(T obj) {
-		if (!BackendManager.isOn()) return;
-
-		if (canCreateInstance(obj)) {
-			getStorage().add(obj);
-		}
-	}
-
-	public void queueAdd(T obj) {
-		if (!BackendManager.isOn()) {
+		if (!canCreateInstance(obj)) {
 			return;
 		}
 
+		getStorage().add(obj);
+	}
+
+	public void queueAdd(T obj) {
 		if (!canCreateInstance(obj)) {
 			return;
 		}
@@ -85,38 +77,26 @@ public abstract class InstanceManager<T> {
 		}
 	}
 
-	public void queueAddAll(Collection<? extends T> objects) {
-		if (!BackendManager.isOn() || objects.isEmpty()) {
-			return;
-		}
-
-		synchronized (queuedAdditions) {
-			queuedAdditions.addAll(objects);
-		}
-	}
-
 	/**
 	 * Update the instance associated with an object.
 	 *
 	 * <p>
-	 *     By default this is the only hook an IInstance has to change its internal state. This is the lowest frequency
-	 *     update hook IInstance gets. For more frequent updates, see {@link TickableInstance} and
+	 *     By default this is the only hook an {@link Instance} has to change its internal state. This is the lowest frequency
+	 *     update hook {@link Instance} gets. For more frequent updates, see {@link TickableInstance} and
 	 *     {@link DynamicInstance}.
 	 * </p>
 	 *
 	 * @param obj the object to update.
 	 */
 	public void update(T obj) {
-		if (!BackendManager.isOn()) return;
-
-		if (canCreateInstance(obj)) {
-			getStorage().update(obj);
+		if (!canCreateInstance(obj)) {
+			return;
 		}
+
+		getStorage().update(obj);
 	}
 
 	public void queueUpdate(T obj) {
-		if (!BackendManager.isOn()) return;
-
 		if (!canCreateInstance(obj)) {
 			return;
 		}
@@ -127,12 +107,10 @@ public abstract class InstanceManager<T> {
 	}
 
 	public void remove(T obj) {
-		if (!BackendManager.isOn()) return;
-
 		getStorage().remove(obj);
 	}
 
-	public void onOriginShift() {
+	public void recreateAll() {
 		getStorage().recreateAll();
 	}
 
@@ -140,21 +118,15 @@ public abstract class InstanceManager<T> {
 		getStorage().invalidate();
 	}
 
-	public void delete() {
-		for (Instance instance : getStorage().getAllInstances()) {
-			instance.delete();
-		}
-	}
-
 	protected void processQueuedAdditions() {
 		if (queuedAdditions.isEmpty()) {
 			return;
 		}
 
-		ArrayList<T> queued;
+		List<T> queued;
 
 		synchronized (queuedAdditions) {
-			queued = new ArrayList<>(queuedAdditions);
+			queued = List.copyOf(queuedAdditions);
 			queuedAdditions.clear();
 		}
 
@@ -164,14 +136,18 @@ public abstract class InstanceManager<T> {
 	}
 
 	protected void processQueuedUpdates() {
-		ArrayList<T> queued;
+		if (queuedUpdates.isEmpty()) {
+			return;
+		}
+
+		List<T> queued;
 
 		synchronized (queuedUpdates) {
-			queued = new ArrayList<>(queuedUpdates);
+			queued = List.copyOf(queuedUpdates);
 			queuedUpdates.clear();
 		}
 
-		if (queued.size() > 0) {
+		if (!queued.isEmpty()) {
 			queued.forEach(getStorage()::update);
 		}
 	}
@@ -187,40 +163,34 @@ public abstract class InstanceManager<T> {
 	 */
 	public void tick(TaskExecutor executor, double cameraX, double cameraY, double cameraZ) {
 		tickLimiter.tick();
+		processQueuedAdditions();
 		processQueuedUpdates();
 
-		var instances = getStorage().getInstancesForTicking();
+		var instances = getStorage().getTickableInstances();
 		distributeWork(executor, instances, instance -> tickInstance(instance, cameraX, cameraY, cameraZ));
 	}
 
-	protected void tickInstance(TickableInstance instance, double cX, double cY, double cZ) {
-		if (!instance.decreaseTickRateWithDistance()) {
+	protected void tickInstance(TickableInstance instance, double cameraX, double cameraY, double cameraZ) {
+		if (!instance.decreaseTickRateWithDistance() || tickLimiter.shouldUpdate(instance.distanceSquared(cameraX, cameraY, cameraZ))) {
 			instance.tick();
-			return;
 		}
-
-		var dsq = instance.distanceSquared(cX, cY, cZ);
-
-		if (!tickLimiter.shouldUpdate(dsq)) {
-			return;
-		}
-
-		instance.tick();
 	}
 
-	public void beginFrame(TaskExecutor executor, RenderContext context) {
+	public void beginFrame(TaskExecutor executor, double cameraX, double cameraY, double cameraZ, FrustumIntersection frustum) {
 		frameLimiter.tick();
 		processQueuedAdditions();
+		processQueuedUpdates();
 
-		var cameraPos = context.camera()
-				.getPosition();
-		double cX = cameraPos.x;
-		double cY = cameraPos.y;
-		double cZ = cameraPos.z;
-		FrustumIntersection culler = context.culler();
+		var instances = getStorage().getDynamicInstances();
+		distributeWork(executor, instances, instance -> updateInstance(instance, cameraX, cameraY, cameraZ, frustum));
+	}
 
-		var instances = getStorage().getInstancesForUpdate();
-		distributeWork(executor, instances, instance -> updateInstance(instance, culler, cX, cY, cZ));
+	protected void updateInstance(DynamicInstance instance, double cameraX, double cameraY, double cameraZ, FrustumIntersection frustum) {
+		if (!instance.decreaseFramerateWithDistance() || frameLimiter.shouldUpdate(instance.distanceSquared(cameraX, cameraY, cameraZ))) {
+			if (instance.isVisible(frustum)) {
+				instance.beginFrame();
+			}
+		}
 	}
 
 	private static <I> void distributeWork(TaskExecutor executor, List<I> instances, Consumer<I> action) {
@@ -237,21 +207,6 @@ public abstract class InstanceManager<T> {
 				var sub = instances.subList(start, end);
 				executor.execute(() -> sub.forEach(action));
 			}
-		}
-	}
-
-	protected void updateInstance(DynamicInstance instance, FrustumIntersection frustum, double cX, double cY, double cZ) {
-		if (!instance.decreaseFramerateWithDistance()) {
-			instance.beginFrame();
-			return;
-		}
-
-		if (!frameLimiter.shouldUpdate(instance.distanceSquared(cX, cY, cZ))) {
-			return;
-		}
-
-		if (instance.checkFrustum(frustum)) {
-			instance.beginFrame();
 		}
 	}
 }

@@ -3,17 +3,17 @@ package com.jozufozu.flywheel;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.slf4j.Logger;
 
-import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.backend.Loader;
 import com.jozufozu.flywheel.backend.engine.batching.DrawBuffer;
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.config.BackendArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.handler.EntityWorldHandler;
 import com.jozufozu.flywheel.handler.ForgeEvents;
+import com.jozufozu.flywheel.impl.BackendManagerImpl;
 import com.jozufozu.flywheel.impl.IdRegistryImpl;
 import com.jozufozu.flywheel.impl.RegistryImpl;
+import com.jozufozu.flywheel.impl.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.lib.backend.Backends;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.format.Formats;
@@ -115,7 +115,7 @@ public class Flywheel {
 
 		VanillaInstances.init();
 
-		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManager::getBackendNameForCrashReport);
+		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManagerImpl::getBackendNameForCrashReport);
 
 		// https://github.com/Jozufozu/Flywheel/issues/69
 		// Weird issue with accessor loading.
@@ -129,7 +129,7 @@ public class Flywheel {
 		RegistryImpl.freezeAll();
 		IdRegistryImpl.freezeAll();
 
-		ArgumentTypes.register(rl("backend").toString(), BackendArgument.class, new EmptyArgumentSerializer<>(BackendArgument::getInstance));
+		ArgumentTypes.register(rl("backend").toString(), BackendArgument.class, new EmptyArgumentSerializer<>(() -> BackendArgument.INSTANCE));
 	}
 
 	public static ArtifactVersion getVersion() {

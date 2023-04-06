@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.event.BeginFrameEvent;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.impl.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.jozufozu.flywheel.util.MatrixUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -73,13 +73,13 @@ public class FlwShaderUniforms implements ShaderUniforms {
 			}
 			RenderContext context = event.getContext();
 
-			Vec3i originCoordinate = InstancedRenderDispatcher.getOriginCoordinate(context.level());
+			Vec3i renderOrigin = InstancedRenderDispatcher.getRenderOrigin(context.level());
 			Vec3 camera = context.camera()
 					.getPosition();
 
-			var camX = (float) (camera.x - originCoordinate.getX());
-			var camY = (float) (camera.y - originCoordinate.getY());
-			var camZ = (float) (camera.z - originCoordinate.getZ());
+			var camX = (float) (camera.x - renderOrigin.getX());
+			var camY = (float) (camera.y - renderOrigin.getY());
+			var camZ = (float) (camera.z - renderOrigin.getZ());
 
 			// don't want to mutate viewProjection
 			var vp = context.viewProjection()

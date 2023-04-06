@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.lib.backend;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
@@ -11,17 +12,18 @@ import com.jozufozu.flywheel.api.pipeline.Pipeline;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.LevelAccessor;
 
 public class SimpleBackend implements Backend {
 	private final Component engineMessage;
-	private final Supplier<Engine> engineSupplier;
+	private final Function<LevelAccessor, Engine> engineFactory;
 	private final Supplier<Backend> fallback;
 	private final BooleanSupplier isSupported;
 	private final Pipeline pipelineShader;
 
-	public SimpleBackend(Component engineMessage, Supplier<Engine> engineSupplier, Supplier<Backend> fallback, BooleanSupplier isSupported, @Nullable Pipeline pipelineShader) {
+	public SimpleBackend(Component engineMessage, Function<LevelAccessor, Engine> engineFactory, Supplier<Backend> fallback, BooleanSupplier isSupported, @Nullable Pipeline pipelineShader) {
 		this.engineMessage = engineMessage;
-		this.engineSupplier = engineSupplier;
+		this.engineFactory = engineFactory;
 		this.fallback = fallback;
 		this.isSupported = isSupported;
 		this.pipelineShader = pipelineShader;
@@ -37,8 +39,8 @@ public class SimpleBackend implements Backend {
 	}
 
 	@Override
-	public Engine createEngine() {
-		return engineSupplier.get();
+	public Engine createEngine(LevelAccessor level) {
+		return engineFactory.apply(level);
 	}
 
 	@Override
@@ -63,7 +65,7 @@ public class SimpleBackend implements Backend {
 
 	public static class Builder {
 		private Component engineMessage;
-		private Supplier<Engine> engineSupplier;
+		private Function<LevelAccessor, Engine> engineFactory;
 		private Supplier<Backend> fallback;
 		private BooleanSupplier isSupported;
 		private Pipeline pipelineShader;
@@ -73,8 +75,8 @@ public class SimpleBackend implements Backend {
 			return this;
 		}
 
-		public Builder engineSupplier(Supplier<Engine> engineSupplier) {
-			this.engineSupplier = engineSupplier;
+		public Builder engineFactory(Function<LevelAccessor, Engine> engineFactory) {
+			this.engineFactory = engineFactory;
 			return this;
 		}
 
@@ -94,7 +96,7 @@ public class SimpleBackend implements Backend {
 		}
 
 		public Backend register(ResourceLocation id) {
-			return Backend.REGISTRY.registerAndGet(id, new SimpleBackend(engineMessage, engineSupplier, fallback, isSupported, pipelineShader));
+			return Backend.REGISTRY.registerAndGet(id, new SimpleBackend(engineMessage, engineFactory, fallback, isSupported, pipelineShader));
 		}
 	}
 }
