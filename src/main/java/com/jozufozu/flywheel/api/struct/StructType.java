@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.api.struct;
 
-import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.Handle;
+import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.api.registry.Registry;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
@@ -11,29 +12,31 @@ import net.minecraft.resources.ResourceLocation;
 
 /**
  * A StructType contains metadata for a specific instance struct that Flywheel can interface with.
- * @param <S> The java representation of the instance struct.
+ *
+ * @param <P> The java representation of the instance struct.
  */
-public interface StructType<S extends InstancedPart> {
+public interface StructType<P extends InstancePart> {
 	static Registry<StructType<?>> REGISTRY = RegistryImpl.create();
 
 	/**
+	 * @param handle A handle that allows you to mark the instance as dirty or deleted.
 	 * @return A new, zeroed instance of S.
 	 */
-	S create();
+	P create(Handle handle);
 
 	/**
 	 * @return The layout of S when buffered.
 	 */
 	BufferLayout getLayout();
 
-	StructWriter<S> getWriter();
+	StructWriter<P> getWriter();
 
 	ResourceLocation instanceShader();
 
-	VertexTransformer<S> getVertexTransformer();
+	VertexTransformer<P> getVertexTransformer();
 
-	interface VertexTransformer<S extends InstancedPart> {
-		void transform(MutableVertexList vertexList, S struct, ClientLevel level);
+	interface VertexTransformer<P extends InstancePart> {
+		void transform(MutableVertexList vertexList, P struct, ClientLevel level);
 	}
 
 }

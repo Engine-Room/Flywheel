@@ -21,11 +21,6 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 		return storage;
 	}
 
-	@Override
-	protected boolean canCreateInstance(Effect obj) {
-		return true;
-	}
-
 	private static class EffectStorage extends One2ManyStorage<Effect> {
 		public EffectStorage(Engine engine) {
 			super(engine);
@@ -34,6 +29,11 @@ public class EffectInstanceManager extends InstanceManager<Effect> {
 		@Override
 		protected Collection<? extends Instance> createRaw(Effect obj) {
 			return obj.createInstances(new InstanceContext(engine, engine.renderOrigin()));
+		}
+
+		@Override
+		public boolean willAccept(Effect obj) {
+			return true;
 		}
 	}
 }

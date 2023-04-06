@@ -3,12 +3,12 @@ package com.jozufozu.flywheel.backend.engine.indirect;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
 
-public final class IndirectDraw<T extends InstancedPart> {
-	private final IndirectInstancer<T> instancer;
+public final class IndirectDraw<P extends InstancePart> {
+	private final IndirectInstancer<P> instancer;
 	private final IndirectMeshPool.BufferedMesh mesh;
 	private final Material material;
 	private final RenderStage stage;
@@ -19,7 +19,7 @@ public final class IndirectDraw<T extends InstancedPart> {
 
 	boolean needsFullWrite = true;
 
-	IndirectDraw(IndirectInstancer<T> instancer, Material material, RenderStage stage, IndirectMeshPool.BufferedMesh mesh) {
+	IndirectDraw(IndirectInstancer<P> instancer, Material material, RenderStage stage, IndirectMeshPool.BufferedMesh mesh) {
 		this.instancer = instancer;
 		this.material = material;
 		this.stage = stage;
@@ -42,10 +42,9 @@ public final class IndirectDraw<T extends InstancedPart> {
 	void writeObjects(long objectPtr, long batchIDPtr, int batchID) {
 		if (needsFullWrite) {
 			instancer.writeFull(objectPtr, batchIDPtr, batchID);
-		} else if (instancer.anyToUpdate) {
+		} else {
 			instancer.writeSparse(objectPtr, batchIDPtr, batchID);
 		}
-		instancer.anyToUpdate = false;
 	}
 
 	public void writeIndirectCommand(long ptr) {
@@ -63,7 +62,7 @@ public final class IndirectDraw<T extends InstancedPart> {
 
 	}
 
-	public IndirectInstancer<T> instancer() {
+	public IndirectInstancer<P> instancer() {
 		return instancer;
 	}
 

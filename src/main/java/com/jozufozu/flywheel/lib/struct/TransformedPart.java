@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.lib.struct;
 
+import com.jozufozu.flywheel.api.instancer.Handle;
 import com.jozufozu.flywheel.lib.transform.Transform;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
@@ -15,15 +16,17 @@ public class TransformedPart extends ColoredLitPart implements Transform<Transfo
 	public final Matrix4f model = new Matrix4f();
 	public final Matrix3f normal = new Matrix3f();
 
-	public TransformedPart() {
-		super(StructTypes.TRANSFORMED);
+	public TransformedPart(Handle handle) {
+		super(StructTypes.TRANSFORMED, handle);
 	}
 
 	public TransformedPart setTransform(PoseStack stack) {
-		markDirty();
+		setChanged();
 
-		this.model.load(stack.last().pose());
-		this.normal.load(stack.last().normal());
+		this.model.load(stack.last()
+				.pose());
+		this.normal.load(stack.last()
+				.normal());
 		return this;
 	}
 
@@ -35,7 +38,7 @@ public class TransformedPart extends ColoredLitPart implements Transform<Transfo
 	 * </p>
 	 */
 	public TransformedPart setEmptyTransform() {
-		markDirty();
+		setChanged();
 
 		this.model.load(EMPTY_MATRIX_4f);
 		this.normal.load(EMPTY_MATRIX_3f);
@@ -43,7 +46,7 @@ public class TransformedPart extends ColoredLitPart implements Transform<Transfo
 	}
 
 	public TransformedPart loadIdentity() {
-		markDirty();
+		setChanged();
 
 		this.model.setIdentity();
 		this.normal.setIdentity();
@@ -52,7 +55,7 @@ public class TransformedPart extends ColoredLitPart implements Transform<Transfo
 
 	@Override
 	public TransformedPart multiply(Quaternion quaternion) {
-		markDirty();
+		setChanged();
 
 		model.multiply(quaternion);
 		normal.mul(quaternion);
@@ -61,7 +64,7 @@ public class TransformedPart extends ColoredLitPart implements Transform<Transfo
 
 	@Override
 	public TransformedPart scale(float pX, float pY, float pZ) {
-		markDirty();
+		setChanged();
 
 		model.multiply(Matrix4f.createScaleMatrix(pX, pY, pZ));
 		if (pX == pY && pY == pZ) {
@@ -83,7 +86,7 @@ public class TransformedPart extends ColoredLitPart implements Transform<Transfo
 
 	@Override
 	public TransformedPart translate(double x, double y, double z) {
-		markDirty();
+		setChanged();
 
 		model.multiplyWithTranslation((float) x, (float) y, (float) z);
 		return this;
@@ -102,8 +105,8 @@ public class TransformedPart extends ColoredLitPart implements Transform<Transfo
 	}
 
 	@Override
-	public TransformedPart copy() {
-		var out = new TransformedPart();
+	public TransformedPart copy(Handle handle) {
+		var out = new TransformedPart(handle);
 		out.model.load(this.model);
 		out.normal.load(this.normal);
 		out.r = this.r;

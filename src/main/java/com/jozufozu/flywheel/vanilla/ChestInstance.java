@@ -7,7 +7,7 @@ import java.util.function.BiFunction;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
-import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.lib.instance.AbstractBlockEntityInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
@@ -111,7 +111,7 @@ public class ChestInstance<T extends BlockEntity & LidBlockEntity> extends Abstr
 	}
 
 	@Override
-	public List<InstancedPart> getCrumblingParts() {
+	public List<InstancePart> getCrumblingParts() {
 		return List.of(body, lid);
 	}
 

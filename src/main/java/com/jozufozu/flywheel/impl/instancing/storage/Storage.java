@@ -14,6 +14,13 @@ public interface Storage<T> {
 
 	List<DynamicInstance> getDynamicInstances();
 
+	/**
+	 * Is the given object currently capable of being added?
+	 *
+	 * @return true if the object is currently capable of being instanced.
+	 */
+	boolean willAccept(T obj);
+
 	void add(T obj);
 
 	void remove(T obj);

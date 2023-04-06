@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.backend.engine.batching;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
@@ -16,15 +16,15 @@ import com.mojang.math.Vector4f;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 
-public class TransformCall<D extends InstancedPart> {
-	private final CPUInstancer<D> instancer;
+public class TransformCall<P extends InstancePart> {
+	private final CPUInstancer<P> instancer;
 	private final Material material;
 	private final BatchedMeshPool.BufferedMesh mesh;
 
 	private final int meshVertexCount;
 	private final int meshByteSize;
 
-	public TransformCall(CPUInstancer<D> instancer, Material material, BatchedMeshPool.BufferedMesh mesh) {
+	public TransformCall(CPUInstancer<P> instancer, Material material, BatchedMeshPool.BufferedMesh mesh) {
 		this.instancer = instancer;
 		this.material = material;
 		this.mesh = mesh;
@@ -65,18 +65,18 @@ public class TransformCall<D extends InstancedPart> {
 		transformList(vertexList, instancer.getAll(), matrices, level);
 	}
 
-	private void transformList(ReusableVertexList vertexList, List<D> parts, PoseStack.Pose matrices, ClientLevel level) {
+	private void transformList(ReusableVertexList vertexList, List<P> parts, PoseStack.Pose matrices, ClientLevel level) {
 		long anchorPtr = vertexList.ptr();
 		int totalVertexCount = vertexList.vertexCount();
 
 		vertexList.vertexCount(meshVertexCount);
 
-		StructType.VertexTransformer<D> structVertexTransformer = instancer.type.getVertexTransformer();
+		StructType.VertexTransformer<P> structVertexTransformer = instancer.type.getVertexTransformer();
 
-		for (D d : parts) {
+		for (P p : parts) {
 			mesh.copyTo(vertexList.ptr());
 
-			structVertexTransformer.transform(vertexList, d, level);
+			structVertexTransformer.transform(vertexList, p, level);
 
 			vertexList.ptr(vertexList.ptr() + meshByteSize);
 		}

@@ -5,7 +5,7 @@ import java.util.List;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.struct.StructType;
@@ -24,7 +24,7 @@ public class BatchingEngine implements Engine {
 	private final BatchingDrawTracker drawTracker = new BatchingDrawTracker();
 
 	@Override
-	public <D extends InstancedPart> Instancer<D> instancer(StructType<D> type, Model model, RenderStage stage) {
+	public <P extends InstancePart> Instancer<P> instancer(StructType<P> type, Model model, RenderStage stage) {
 		return transformManager.getInstancer(type, model, stage);
 	}
 

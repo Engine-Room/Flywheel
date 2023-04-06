@@ -15,7 +15,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
@@ -42,9 +42,9 @@ public class BatchingTransformManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <D extends InstancedPart> Instancer<D> getInstancer(StructType<D> type, Model model, RenderStage stage) {
-		InstancerKey<D> key = new InstancerKey<>(type, model, stage);
-		CPUInstancer<D> instancer = (CPUInstancer<D>) instancers.get(key);
+	public <P extends InstancePart> Instancer<P> getInstancer(StructType<P> type, Model model, RenderStage stage) {
+		InstancerKey<P> key = new InstancerKey<>(type, model, stage);
+		CPUInstancer<P> instancer = (CPUInstancer<P>) instancers.get(key);
 		if (instancer == null) {
 			instancer = new CPUInstancer<>(type);
 			instancers.put(key, instancer);
@@ -71,7 +71,6 @@ public class BatchingTransformManager {
 				.forEach(BatchedMeshPool::delete);
 		meshPools.clear();
 
-		initializedInstancers.forEach(CPUInstancer::delete);
 		initializedInstancers.clear();
 	}
 

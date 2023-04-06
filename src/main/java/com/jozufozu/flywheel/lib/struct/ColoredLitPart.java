@@ -1,11 +1,11 @@
 package com.jozufozu.flywheel.lib.struct;
 
-import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.Handle;
 import com.jozufozu.flywheel.api.struct.StructType;
 
 import net.minecraft.client.renderer.LightTexture;
 
-public abstract class ColoredLitPart extends InstancedPart implements FlatLit<ColoredLitPart> {
+public abstract class ColoredLitPart extends AbstractInstancePart implements FlatLit<ColoredLitPart> {
 
 	public byte blockLight;
 	public byte skyLight;
@@ -15,21 +15,21 @@ public abstract class ColoredLitPart extends InstancedPart implements FlatLit<Co
 	public byte b = (byte) 0xFF;
 	public byte a = (byte) 0xFF;
 
-	public ColoredLitPart(StructType<?> type) {
-		super(type);
+	public ColoredLitPart(StructType<?> type, Handle handle) {
+		super(type, handle);
 	}
 
 	@Override
 	public ColoredLitPart setBlockLight(int blockLight) {
 		this.blockLight = (byte) blockLight;
-		markDirty();
+		setChanged();
 		return this;
 	}
 
 	@Override
 	public ColoredLitPart setSkyLight(int skyLight) {
 		this.skyLight = (byte) skyLight;
-		markDirty();
+		setChanged();
 		return this;
 	}
 
@@ -63,7 +63,7 @@ public abstract class ColoredLitPart extends InstancedPart implements FlatLit<Co
 		this.r = r;
 		this.g = g;
 		this.b = b;
-		markDirty();
+		setChanged();
 		return this;
 	}
 
@@ -72,7 +72,7 @@ public abstract class ColoredLitPart extends InstancedPart implements FlatLit<Co
 		this.g = g;
 		this.b = b;
 		this.a = a;
-		markDirty();
+		setChanged();
 		return this;
 	}
 }

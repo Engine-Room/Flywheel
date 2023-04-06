@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.api.instance;
 
-import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
 
 /**
@@ -25,7 +25,7 @@ public interface TickableInstance extends Instance {
 	 * Called every tick, and after initialization.<p>
 	 * <em>DISPATCHED IN PARALLEL</em>, don't attempt to mutate anything outside of this instance
 	 * without proper synchronization.<p>
-	 * {@link Instancer}/{@link InstancedPart} creation/acquisition is safe here.
+	 * {@link Instancer}/{@link InstancePart} creation/acquisition is safe here.
 	 */
 	void tick();
 

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
-import com.jozufozu.flywheel.api.instancer.InstancedPart;
+import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.lib.instance.AbstractBlockEntityInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
@@ -68,7 +68,7 @@ public class BellInstance extends AbstractBlockEntityInstance<BellBlockEntity> i
 	}
 
 	@Override
-	public List<InstancedPart> getCrumblingParts() {
+	public List<InstancePart> getCrumblingParts() {
 		return List.of(bell);
 	}
 

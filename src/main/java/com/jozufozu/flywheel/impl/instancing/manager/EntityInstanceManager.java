@@ -25,21 +25,6 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 		return storage;
 	}
 
-	@Override
-	protected boolean canCreateInstance(Entity entity) {
-		if (!entity.isAlive()) {
-			return false;
-		}
-
-		if (!InstancingControllerHelper.canInstance(entity)) {
-			return false;
-		}
-
-		Level level = entity.level;
-
-		return BackendUtil.isFlywheelLevel(level);
-	}
-
 	private static class EntityStorage extends One2OneStorage<Entity> {
 		public EntityStorage(Engine engine) {
 			super(engine);
@@ -54,6 +39,21 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 			}
 
 			return controller.createInstance(new InstanceContext(engine, engine.renderOrigin()), obj);
+		}
+
+		@Override
+		public boolean willAccept(Entity entity) {
+			if (!entity.isAlive()) {
+				return false;
+			}
+
+			if (!InstancingControllerHelper.canInstance(entity)) {
+				return false;
+			}
+
+			Level level = entity.level;
+
+			return BackendUtil.isFlywheelLevel(level);
 		}
 	}
 }
