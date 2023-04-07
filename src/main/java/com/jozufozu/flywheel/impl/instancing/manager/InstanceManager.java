@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.impl.instancing.manager;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 import org.joml.FrustumIntersection;
@@ -16,10 +16,10 @@ import com.jozufozu.flywheel.impl.instancing.ratelimit.BandedPrimeLimiter;
 import com.jozufozu.flywheel.impl.instancing.ratelimit.DistanceUpdateLimiter;
 import com.jozufozu.flywheel.impl.instancing.ratelimit.NonLimiter;
 import com.jozufozu.flywheel.impl.instancing.storage.Storage;
+import com.jozufozu.flywheel.impl.instancing.storage.Transaction;
 
 public abstract class InstanceManager<T> {
-	private final Set<T> queuedAdditions = new HashSet<>(64);
-	private final Set<T> queuedUpdates = new HashSet<>(64);
+	private final Queue<Transaction<T>> queue = new ConcurrentLinkedQueue<>();
 
 	protected DistanceUpdateLimiter tickLimiter;
 	protected DistanceUpdateLimiter frameLimiter;
@@ -61,9 +61,7 @@ public abstract class InstanceManager<T> {
 			return;
 		}
 
-		synchronized (queuedAdditions) {
-			queuedAdditions.add(obj);
-		}
+		queue.add(Transaction.add(obj));
 	}
 
 	/**
@@ -90,9 +88,7 @@ public abstract class InstanceManager<T> {
 			return;
 		}
 
-		synchronized (queuedUpdates) {
-			queuedUpdates.add(obj);
-		}
+		queue.add(Transaction.update(obj));
 	}
 
 	public void remove(T obj) {
@@ -107,37 +103,11 @@ public abstract class InstanceManager<T> {
 		getStorage().invalidate();
 	}
 
-	protected void processQueuedAdditions() {
-		if (queuedAdditions.isEmpty()) {
-			return;
-		}
-
-		List<T> queued;
-
-		synchronized (queuedAdditions) {
-			queued = List.copyOf(queuedAdditions);
-			queuedAdditions.clear();
-		}
-
-		if (!queued.isEmpty()) {
-			queued.forEach(getStorage()::add);
-		}
-	}
-
-	protected void processQueuedUpdates() {
-		if (queuedUpdates.isEmpty()) {
-			return;
-		}
-
-		List<T> queued;
-
-		synchronized (queuedUpdates) {
-			queued = List.copyOf(queuedUpdates);
-			queuedUpdates.clear();
-		}
-
-		if (!queued.isEmpty()) {
-			queued.forEach(getStorage()::update);
+	protected void processQueue() {
+		var storage = getStorage();
+		Transaction<T> transaction;
+		while ((transaction = queue.poll()) != null) {
+			transaction.apply(storage);
 		}
 	}
 
@@ -152,8 +122,7 @@ public abstract class InstanceManager<T> {
 	 */
 	public void tick(TaskExecutor executor, double cameraX, double cameraY, double cameraZ) {
 		tickLimiter.tick();
-		processQueuedAdditions();
-		processQueuedUpdates();
+		processQueue();
 
 		var instances = getStorage().getTickableInstances();
 		distributeWork(executor, instances, instance -> tickInstance(instance, cameraX, cameraY, cameraZ));
@@ -167,8 +136,7 @@ public abstract class InstanceManager<T> {
 
 	public void beginFrame(TaskExecutor executor, double cameraX, double cameraY, double cameraZ, FrustumIntersection frustum) {
 		frameLimiter.tick();
-		processQueuedAdditions();
-		processQueuedUpdates();
+		processQueue();
 
 		var instances = getStorage().getDynamicInstances();
 		distributeWork(executor, instances, instance -> updateInstance(instance, cameraX, cameraY, cameraZ, frustum));
