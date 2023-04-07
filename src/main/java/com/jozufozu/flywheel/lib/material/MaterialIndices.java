@@ -21,7 +21,7 @@ import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.resources.ResourceLocation;
 
 // TODO: add messages to exceptions
-public class MaterialIndices {
+public final class MaterialIndices {
 	private static Reference2IntMap<Material> materialIndices;
 	private static Object2IntMap<ResourceLocation> vertexShaderIndices;
 	private static Object2IntMap<ResourceLocation> fragmentShaderIndices;

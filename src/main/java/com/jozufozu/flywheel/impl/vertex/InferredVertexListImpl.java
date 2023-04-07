@@ -4,7 +4,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.lib.format.AbstractVertexList;
-import com.jozufozu.flywheel.util.RenderMath;
+import com.jozufozu.flywheel.lib.math.RenderMath;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.renderer.LightTexture;

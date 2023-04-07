@@ -39,9 +39,12 @@ public class InstancedMeshPool {
 	public InstancedMeshPool(VertexType vertexType) {
 		this.vertexType = vertexType;
 		int stride = vertexType.getLayout().getStride();
-		this.vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER);
+		vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER);
+		vbo.setGrowthMargin(stride * 32);
+	}
 
-		this.vbo.setGrowthMargin(stride * 32);
+	public VertexType getVertexType() {
+		return vertexType;
 	}
 
 	/**
@@ -161,10 +164,6 @@ public class InstancedMeshPool {
 		pendingUpload.clear();
 	}
 
-	public VertexType getVertexType() {
-		return vertexType;
-	}
-
 	@Override
 	public String toString() {
 		return "InstancedMeshPool{" + "vertexType=" + vertexType + ", byteSize=" + byteSize + ", meshCount=" + meshes.size() + '}';
@@ -208,10 +207,6 @@ public class InstancedMeshPool {
 			mesh.write(ptr + byteIndex);
 
 			boundTo.clear();
-		}
-
-		public void drawCall(GlVertexArray vao) {
-			drawInstances(vao, 1);
 		}
 
 		public void drawInstances(GlVertexArray vao, int instanceCount) {

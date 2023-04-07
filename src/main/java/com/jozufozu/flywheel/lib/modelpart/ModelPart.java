@@ -5,22 +5,22 @@ import java.util.List;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
-import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.lib.format.Formats;
 import com.jozufozu.flywheel.lib.format.PosTexNormalVertex;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.ModelUtil;
+import com.jozufozu.flywheel.lib.model.QuadMesh;
 
-public class ModelPart implements Mesh {
+public class ModelPart implements QuadMesh {
 	private final int vertexCount;
 	private final MemoryBlock contents;
 	private final ReusableVertexList vertexList;
 	private final Vector4f boundingSphere;
 	private final String name;
 
-	public ModelPart(List<PartBuilder.CuboidBuilder> cuboids, String name) {
+	public ModelPart(List<ModelPartBuilder.CuboidBuilder> cuboids, String name) {
 		this.name = name;
 
 		this.vertexCount = countVertices(cuboids);
@@ -28,7 +28,7 @@ public class ModelPart implements Mesh {
 		contents = MemoryBlock.malloc(size());
 		long ptr = contents.ptr();
 		VertexWriter writer = new VertexWriterImpl(ptr);
-		for (PartBuilder.CuboidBuilder cuboid : cuboids) {
+		for (ModelPartBuilder.CuboidBuilder cuboid : cuboids) {
 			cuboid.write(writer);
 		}
 
@@ -39,8 +39,8 @@ public class ModelPart implements Mesh {
 		boundingSphere = ModelUtil.computeBoundingSphere(vertexList);
 	}
 
-	public static PartBuilder builder(String name, int sizeU, int sizeV) {
-		return new PartBuilder(name, sizeU, sizeV);
+	public static ModelPartBuilder builder(String name, int sizeU, int sizeV) {
+		return new ModelPartBuilder(name, sizeU, sizeV);
 	}
 
 	@Override
@@ -78,9 +78,9 @@ public class ModelPart implements Mesh {
 		return name;
 	}
 
-	private static int countVertices(List<PartBuilder.CuboidBuilder> cuboids) {
+	private static int countVertices(List<ModelPartBuilder.CuboidBuilder> cuboids) {
 		int vertices = 0;
-		for (PartBuilder.CuboidBuilder cuboid : cuboids) {
+		for (ModelPartBuilder.CuboidBuilder cuboid : cuboids) {
 			vertices += cuboid.vertices();
 		}
 		return vertices;

@@ -5,7 +5,6 @@ import com.jozufozu.flywheel.gl.array.VertexAttributeF;
 import com.jozufozu.flywheel.gl.array.VertexAttributeI;
 
 public class CommonItems {
-
 	private static final String VEC2_TYPE = "vec2";
 	private static final String VEC3_TYPE = "vec3";
 	private static final String VEC4_TYPE = "vec4";
@@ -16,6 +15,7 @@ public class CommonItems {
 	private static final String FLOAT_TYPE = "float";
 	private static final String UINT_TYPE = "uint";
 	private static final String LIGHT_COORD_TYPE = "LightCoord";
+
 	public static final VecInput LIGHT_COORD = VecInput.builder()
 			.vertexAttribute(new VertexAttributeI(GlNumericType.USHORT, 2))
 			.typeName(IVEC2_TYPE)
@@ -69,8 +69,4 @@ public class CommonItems {
 
 	public static final MatInput MAT3 = new MatInput(3, 3, "mat3", "Mat3F", "unpackMat3F");
 	public static final MatInput MAT4 = new MatInput(4, 4, "mat4", "Mat4F", "unpackMat4F");
-
-	private static class Unpacking {
-
-	}
 }

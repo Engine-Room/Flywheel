@@ -1,7 +1,6 @@
-package com.jozufozu.flywheel.api.instancer;
+package com.jozufozu.flywheel.api.struct;
 
 public interface Handle {
-
 	void setChanged();
 
 	void setDeleted();

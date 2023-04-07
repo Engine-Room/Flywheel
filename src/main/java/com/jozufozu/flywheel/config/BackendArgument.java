@@ -9,20 +9,19 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 
 public class BackendArgument implements ArgumentType<Backend> {
 	private static final List<String> STRING_IDS = Backend.REGISTRY.getAllIds().stream().map(ResourceLocation::toString).toList();
 
-	private static final Dynamic2CommandExceptionType INVALID = new Dynamic2CommandExceptionType((found, constants) -> {
-		// TODO: don't steal lang
-		return new TranslatableComponent("commands.forge.arguments.enum.invalid", constants, found);
+	public static final DynamicCommandExceptionType ERROR_UNKNOWN_BACKEND = new DynamicCommandExceptionType(arg -> {
+		return new TextComponent("Unknown backend '" + arg + "'");
 	});
 
 	public static final BackendArgument INSTANCE = new BackendArgument();
@@ -33,7 +32,7 @@ public class BackendArgument implements ArgumentType<Backend> {
 		Backend backend = Backend.REGISTRY.get(id);
 
 		if (backend == null) {
-			throw INVALID.createWithContext(reader, id.toString(), STRING_IDS);
+			throw ERROR_UNKNOWN_BACKEND.createWithContext(reader, id.toString());
 		}
 
 		return backend;

@@ -1,9 +1,10 @@
-package com.jozufozu.flywheel.lib.pipeline;
+package com.jozufozu.flywheel.backend;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.engine.indirect.IndirectComponent;
 import com.jozufozu.flywheel.backend.engine.instancing.InstancedArraysComponent;
 import com.jozufozu.flywheel.gl.GLSLVersion;
+import com.jozufozu.flywheel.lib.pipeline.SimplePipeline;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -22,7 +23,6 @@ public class Pipelines {
 			.build();
 
 	public static void init() {
-		// noop
 	}
 
 	public static class Files {

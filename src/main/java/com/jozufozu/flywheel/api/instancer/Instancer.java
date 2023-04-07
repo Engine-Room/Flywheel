@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.api.instancer;
 
+import com.jozufozu.flywheel.api.struct.InstancePart;
+
 /**
  * An instancer is how you interact with an instanced model.
  * <p>

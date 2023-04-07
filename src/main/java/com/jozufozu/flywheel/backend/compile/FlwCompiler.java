@@ -17,6 +17,7 @@ import com.jozufozu.flywheel.api.pipeline.Pipeline;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.Pipelines;
 import com.jozufozu.flywheel.backend.engine.indirect.IndirectComponent;
 import com.jozufozu.flywheel.gl.GLSLVersion;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
@@ -27,7 +28,6 @@ import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
-import com.jozufozu.flywheel.lib.pipeline.Pipelines;
 import com.jozufozu.flywheel.util.StringUtil;
 
 public class FlwCompiler {

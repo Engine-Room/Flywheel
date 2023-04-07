@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.util;
+package com.jozufozu.flywheel.lib.util;
 
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
 
@@ -7,8 +7,7 @@ import net.minecraft.client.Minecraft;
 /**
  * Static access to tick-count and partialTick time, accounting for pausing.
  */
-public class AnimationTickHolder {
-
+public final class AnimationTickHolder {
 	// Wrap around every 24 hours to maintain floating point accuracy.
 	private static final int wrappingInterval = 1_728_000;
 	private static int ticks;

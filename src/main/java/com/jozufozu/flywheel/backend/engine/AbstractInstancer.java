@@ -2,14 +2,12 @@ package com.jozufozu.flywheel.backend.engine;
 
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.List;
 
-import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
+import com.jozufozu.flywheel.api.struct.InstancePart;
 import com.jozufozu.flywheel.api.struct.StructType;
 
 public abstract class AbstractInstancer<P extends InstancePart> implements Instancer<P> {
-
 	public final StructType<P> type;
 
 	// Lock for all instance data, only needs to be used in methods that may run on the TaskExecutor.
@@ -42,30 +40,33 @@ public abstract class AbstractInstancer<P extends InstancePart> implements Insta
 		}
 	}
 
-	/**
-	 * Clear all instance data without freeing resources.
-	 */
-	public void clear() {
-		handles.forEach(HandleImpl::clear);
-		data.clear();
-		handles.clear();
-		changed.clear();
-		deleted.clear();
-	}
-
 	public int getInstanceCount() {
 		return data.size();
 	}
 
-	public List<P> getRange(int start, int end) {
-		return data.subList(start, end);
+	public void notifyDirty(int index) {
+		if (index < 0 || index >= getInstanceCount()) {
+			return;
+		}
+		synchronized (lock) {
+			changed.set(index);
+		}
 	}
 
-	public List<P> getAll() {
-		return data;
+	public void notifyRemoval(int index) {
+		if (index < 0 || index >= getInstanceCount()) {
+			return;
+		}
+		synchronized (lock) {
+			deleted.set(index);
+		}
 	}
 
 	protected void removeDeletedInstances() {
+		if (deleted.isEmpty()) {
+			return;
+		}
+
 		// Figure out which elements are to be removed.
 		final int oldSize = this.data.size();
 		int removeCount = deleted.cardinality();
@@ -95,26 +96,19 @@ public abstract class AbstractInstancer<P extends InstancePart> implements Insta
 				.clear();
 	}
 
+	/**
+	 * Clear all instance data without freeing resources.
+	 */
+	public void clear() {
+		handles.forEach(HandleImpl::clear);
+		data.clear();
+		handles.clear();
+		changed.clear();
+		deleted.clear();
+	}
+
 	@Override
 	public String toString() {
-		return "Instancer[" + getInstanceCount() + ']';
-	}
-
-	public void notifyDirty(int index) {
-		if (index < 0 || index >= getInstanceCount()) {
-			return;
-		}
-		synchronized (lock) {
-			changed.set(index);
-		}
-	}
-
-	public void notifyRemoval(int index) {
-		if (index < 0 || index >= getInstanceCount()) {
-			return;
-		}
-		synchronized (lock) {
-			deleted.set(index);
-		}
+		return "AbstractInstancer[" + getInstanceCount() + ']';
 	}
 }

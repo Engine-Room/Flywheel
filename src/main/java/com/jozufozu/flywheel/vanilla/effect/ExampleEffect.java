@@ -22,7 +22,7 @@ import com.jozufozu.flywheel.lib.instance.AbstractInstance;
 import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.struct.StructTypes;
 import com.jozufozu.flywheel.lib.struct.TransformedPart;
-import com.jozufozu.flywheel.util.AnimationTickHolder;
+import com.jozufozu.flywheel.lib.util.AnimationTickHolder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;

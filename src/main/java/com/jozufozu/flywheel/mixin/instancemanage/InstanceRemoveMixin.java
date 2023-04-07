@@ -7,8 +7,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.impl.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.util.FlwUtil;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.Level;
@@ -22,7 +22,7 @@ public class InstanceRemoveMixin {
 
 	@Inject(at = @At("TAIL"), method = "setRemoved")
 	private void flywheel$removeInstance(CallbackInfo ci) {
-		if (level instanceof ClientLevel && BackendUtil.canUseInstancing(level)) {
+		if (level instanceof ClientLevel && FlwUtil.canUseInstancing(level)) {
 			InstancedRenderDispatcher.getBlockEntities(level)
 					.remove((BlockEntity) (Object) this);
 		}

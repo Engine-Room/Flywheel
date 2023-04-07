@@ -15,7 +15,7 @@ import com.jozufozu.flywheel.lib.modelpart.ModelPart;
 import com.jozufozu.flywheel.lib.struct.StructTypes;
 import com.jozufozu.flywheel.lib.struct.TransformedPart;
 import com.jozufozu.flywheel.lib.transform.TransformStack;
-import com.jozufozu.flywheel.util.AnimationTickHolder;
+import com.jozufozu.flywheel.lib.util.AnimationTickHolder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 

@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.api.event;
 import org.jetbrains.annotations.NotNull;
 import org.joml.FrustumIntersection;
 
-import com.jozufozu.flywheel.util.MatrixUtil;
+import com.jozufozu.flywheel.lib.math.MatrixUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 

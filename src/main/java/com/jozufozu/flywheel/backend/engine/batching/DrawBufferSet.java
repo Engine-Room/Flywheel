@@ -3,8 +3,6 @@ package com.jozufozu.flywheel.backend.engine.batching;
 import java.util.EnumMap;
 import java.util.Map;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.vertex.VertexListProvider;
 import com.jozufozu.flywheel.api.vertex.VertexListProviderRegistry;
@@ -20,7 +18,6 @@ public class DrawBufferSet {
 
 	private final Map<RenderStage, DrawBuffer> buffers = new EnumMap<>(RenderStage.class);
 
-	@ApiStatus.Internal
 	public DrawBufferSet(RenderType renderType) {
 		this.renderType = renderType;
 		format = renderType.format();

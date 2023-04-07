@@ -1,21 +1,20 @@
 package com.jozufozu.flywheel.lib.struct;
 
-import com.jozufozu.flywheel.api.instancer.Handle;
 import com.jozufozu.flywheel.api.layout.BufferLayout;
+import com.jozufozu.flywheel.api.struct.Handle;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.struct.StructVertexTransformer;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.lib.layout.CommonItems;
-import com.jozufozu.flywheel.util.RenderMath;
+import com.jozufozu.flywheel.lib.math.RenderMath;
+import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
 
 import net.minecraft.resources.ResourceLocation;
 
 public class OrientedType implements StructType<OrientedPart> {
-
 	public static final BufferLayout FORMAT = BufferLayout.builder()
 			.addItem(CommonItems.LIGHT_COORD, "light")
 			.addItem(CommonItems.UNORM_4x8, "color")
@@ -26,7 +25,7 @@ public class OrientedType implements StructType<OrientedPart> {
 
 	@Override
 	public OrientedPart create(Handle handle) {
-		return new OrientedPart(handle);
+		return new OrientedPart(this, handle);
 	}
 
 	@Override
@@ -45,11 +44,8 @@ public class OrientedType implements StructType<OrientedPart> {
 	}
 
 	@Override
-	public VertexTransformer<OrientedPart> getVertexTransformer() {
+	public StructVertexTransformer<OrientedPart> getVertexTransformer() {
 		return (vertexList, struct, level) -> {
-			Vector4f pos = new Vector4f();
-			Vector3f normal = new Vector3f();
-
 			Quaternion q = new Quaternion(struct.qX, struct.qY, struct.qZ, struct.qW);
 
 			Matrix4f modelMatrix = new Matrix4f();
@@ -67,27 +63,8 @@ public class OrientedType implements StructType<OrientedPart> {
 			int light = struct.getPackedLight();
 
 			for (int i = 0; i < vertexList.vertexCount(); i++) {
-				pos.set(
-						vertexList.x(i),
-						vertexList.y(i),
-						vertexList.z(i),
-						1f
-				);
-				pos.transform(modelMatrix);
-				vertexList.x(i, pos.x());
-				vertexList.y(i, pos.y());
-				vertexList.z(i, pos.z());
-
-				normal.set(
-						vertexList.normalX(i),
-						vertexList.normalY(i),
-						vertexList.normalZ(i)
-				);
-				normal.transform(normalMatrix);
-				normal.normalize();
-				vertexList.normalX(i, normal.x());
-				vertexList.normalY(i, normal.y());
-				vertexList.normalZ(i, normal.z());
+				VertexTransformations.transformPos(vertexList, i, modelMatrix);
+				VertexTransformations.transformNormal(vertexList, i, normalMatrix);
 
 				vertexList.r(i, r);
 				vertexList.g(i, g);

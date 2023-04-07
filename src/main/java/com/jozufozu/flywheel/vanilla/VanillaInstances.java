@@ -27,7 +27,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
  * </table>
  */
 public class VanillaInstances {
-
 	public static void init() {
 		configure(BlockEntityType.CHEST)
 				.alwaysSkipRender()

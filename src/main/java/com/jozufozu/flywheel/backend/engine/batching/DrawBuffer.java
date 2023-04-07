@@ -32,7 +32,7 @@ public class DrawBuffer {
 	private boolean prepared;
 	private int vertexCount;
 
-	DrawBuffer(RenderType renderType, VertexFormat format, int stride, VertexListProvider provider) {
+	public DrawBuffer(RenderType renderType, VertexFormat format, int stride, VertexListProvider provider) {
 		this.renderType = renderType;
 		this.format = format;
 		this.stride = stride;

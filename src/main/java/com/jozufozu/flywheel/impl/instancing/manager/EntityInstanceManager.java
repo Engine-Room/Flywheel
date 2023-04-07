@@ -5,10 +5,10 @@ import org.jetbrains.annotations.Nullable;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
-import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.impl.instancing.InstancingControllerHelper;
 import com.jozufozu.flywheel.impl.instancing.storage.One2OneStorage;
 import com.jozufozu.flywheel.impl.instancing.storage.Storage;
+import com.jozufozu.flywheel.util.FlwUtil;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -53,7 +53,7 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 
 			Level level = entity.level;
 
-			return BackendUtil.isFlywheelLevel(level);
+			return FlwUtil.isFlywheelLevel(level);
 		}
 	}
 }

@@ -1,9 +1,8 @@
-package com.jozufozu.flywheel.util;
+package com.jozufozu.flywheel.lib.math;
 
 import net.minecraftforge.client.model.pipeline.LightUtil;
 
-public class RenderMath {
-
+public final class RenderMath {
 	/**
 	 * Convert a signed byte into a signed, normalized float.
 	 */

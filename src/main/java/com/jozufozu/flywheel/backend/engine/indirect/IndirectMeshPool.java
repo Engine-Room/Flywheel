@@ -39,6 +39,10 @@ public class IndirectMeshPool {
 		clientStorage = MemoryBlock.malloc(byteCapacity);
 	}
 
+	public VertexType getVertexType() {
+		return vertexType;
+	}
+
 	/**
 	 * Allocate a model in the arena.
 	 *
@@ -60,24 +64,26 @@ public class IndirectMeshPool {
 		return meshes.get(mesh);
 	}
 
-	void uploadAll() {
-		if (!dirty) {
-			return;
+	public void flush() {
+		if (dirty) {
+			uploadAll();
+			dirty = false;
 		}
-		dirty = false;
+	}
 
+	private void uploadAll() {
 		final long ptr = clientStorage.ptr();
 
 		int byteIndex = 0;
 		int baseVertex = 0;
-		for (BufferedMesh model : meshList) {
-			model.byteIndex = byteIndex;
-			model.baseVertex = baseVertex;
+		for (BufferedMesh mesh : meshList) {
+			mesh.byteIndex = byteIndex;
+			mesh.baseVertex = baseVertex;
 
-			model.buffer(ptr);
+			mesh.buffer(ptr);
 
-			byteIndex += model.size();
-			baseVertex += model.mesh.getVertexCount();
+			byteIndex += mesh.size();
+			baseVertex += mesh.mesh.getVertexCount();
 		}
 
 		nglNamedBufferSubData(vbo, 0, byteIndex, ptr);
@@ -90,24 +96,16 @@ public class IndirectMeshPool {
 		meshList.clear();
 	}
 
-	public VertexType getVertexType() {
-		return vertexType;
-	}
-
 	public class BufferedMesh {
-		public final Mesh mesh;
+		private final Mesh mesh;
 		private final int vertexCount;
+
 		private long byteIndex;
 		private int baseVertex;
 
 		private BufferedMesh(Mesh mesh) {
 			this.mesh = mesh;
-
 			vertexCount = mesh.getVertexCount();
-		}
-
-		private void buffer(long ptr) {
-			mesh.write(ptr + byteIndex);
 		}
 
 		public Mesh getMesh() {
@@ -128,6 +126,10 @@ public class IndirectMeshPool {
 
 		public VertexType getVertexType() {
 			return vertexType;
+		}
+
+		private void buffer(long ptr) {
+			mesh.write(ptr + byteIndex);
 		}
 	}
 }

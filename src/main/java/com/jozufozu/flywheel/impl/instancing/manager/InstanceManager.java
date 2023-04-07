@@ -64,6 +64,14 @@ public abstract class InstanceManager<T> {
 		queue.add(Transaction.add(obj));
 	}
 
+	public void remove(T obj) {
+		getStorage().remove(obj);
+	}
+
+	public void queueRemove(T obj) {
+		queue.add(Transaction.remove(obj));
+	}
+
 	/**
 	 * Update the instance associated with an object.
 	 *
@@ -89,10 +97,6 @@ public abstract class InstanceManager<T> {
 		}
 
 		queue.add(Transaction.update(obj));
-	}
-
-	public void remove(T obj) {
-		getStorage().remove(obj);
 	}
 
 	public void recreateAll() {

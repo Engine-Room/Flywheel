@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
-public class WorkGroup {
+public final class WorkGroup {
 	public static void run(Iterator<Runnable> tasks, Executor executor) {
 		tasks.forEachRemaining(executor::execute);
 	}

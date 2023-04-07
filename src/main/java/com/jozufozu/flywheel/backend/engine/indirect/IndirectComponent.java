@@ -8,6 +8,7 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.layout.LayoutItem;
 import com.jozufozu.flywheel.api.pipeline.Pipeline;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.backend.Pipelines;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.SourceFile;
@@ -15,7 +16,6 @@ import com.jozufozu.flywheel.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.glsl.generate.GlslBlock;
 import com.jozufozu.flywheel.glsl.generate.GlslBuilder;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;
-import com.jozufozu.flywheel.lib.pipeline.Pipelines;
 
 import net.minecraft.resources.ResourceLocation;
 

@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
-import com.jozufozu.flywheel.backend.BackendUtil;
+import com.jozufozu.flywheel.backend.task.FlwTaskExecutor;
 import com.jozufozu.flywheel.lib.box.ImmutableBox;
 import com.jozufozu.flywheel.lib.task.WorkGroup;
 import com.jozufozu.flywheel.util.FlwUtil;
@@ -23,7 +23,6 @@ import net.minecraft.world.level.LightLayer;
  *          {@link LightUpdated} for LightUpdater to work with them.
  */
 public class LightUpdater {
-
 	private static final WorldAttached<LightUpdater> LEVELS = new WorldAttached<>(LightUpdater::new);
 
 	private final LevelAccessor level;
@@ -68,7 +67,7 @@ public class LightUpdater {
 					}
 				})
 				.onComplete(() -> listeners.forEach(this::addListener))
-				.execute(BackendUtil.getTaskExecutor());
+				.execute(FlwTaskExecutor.get());
 	}
 
 	/**

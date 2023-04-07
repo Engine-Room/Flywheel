@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.api.instance;
 
-import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
+import com.jozufozu.flywheel.api.struct.InstancePart;
 
 /**
  * An interface giving {@link Instance}s a hook to have a function called at

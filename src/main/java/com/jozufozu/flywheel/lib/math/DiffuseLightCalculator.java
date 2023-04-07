@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.util;
+package com.jozufozu.flywheel.lib.math;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 

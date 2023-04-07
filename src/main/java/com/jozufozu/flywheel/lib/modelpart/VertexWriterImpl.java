@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.lib.modelpart;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.util.RenderMath;
+import com.jozufozu.flywheel.lib.math.RenderMath;
 
 public class VertexWriterImpl implements VertexWriter {
 	private long ptr;

@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.api.instancer;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.api.struct.InstancePart;
 import com.jozufozu.flywheel.api.struct.StructType;
 
 public interface InstancerProvider {

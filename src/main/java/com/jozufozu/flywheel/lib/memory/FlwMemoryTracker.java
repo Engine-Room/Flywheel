@@ -7,7 +7,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.util.StringUtil;
 
-public class FlwMemoryTracker {
+public final class FlwMemoryTracker {
 	public static final boolean DEBUG_MEMORY_SAFETY = System.getProperty("flw.debugMemorySafety") != null;
 
 	static final Cleaner CLEANER = Cleaner.create();

@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.lib.material;
 
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
 
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
@@ -12,9 +13,9 @@ public class SimpleMaterial implements Material {
 	protected final Runnable setup;
 	protected final Runnable clear;
 	protected final RenderType batchingRenderType;
-	protected final VertexTransformer vertexTransformer;
+	protected final MaterialVertexTransformer vertexTransformer;
 
-	public SimpleMaterial(ResourceLocation vertexShader, ResourceLocation fragmentShader, Runnable setup, Runnable clear, RenderType batchingRenderType, VertexTransformer vertexTransformer) {
+	public SimpleMaterial(ResourceLocation vertexShader, ResourceLocation fragmentShader, Runnable setup, Runnable clear, RenderType batchingRenderType, MaterialVertexTransformer vertexTransformer) {
 		this.vertexShader = vertexShader;
 		this.fragmentShader = fragmentShader;
 		this.setup = setup;
@@ -53,7 +54,7 @@ public class SimpleMaterial implements Material {
 	}
 
 	@Override
-	public VertexTransformer getVertexTransformer() {
+	public MaterialVertexTransformer getVertexTransformer() {
 		return vertexTransformer;
 	}
 
@@ -63,8 +64,7 @@ public class SimpleMaterial implements Material {
 		protected Runnable setup = () -> {};
 		protected Runnable clear = () -> {};
 		protected RenderType batchingRenderType = RenderType.solid();
-		protected VertexTransformer vertexTransformer = (vertexList, level) -> {
-		};
+		protected MaterialVertexTransformer vertexTransformer = (vertexList, level) -> {};
 
 		public Builder() {
 		}
@@ -100,7 +100,7 @@ public class SimpleMaterial implements Material {
 			return this;
 		}
 
-		public Builder vertexTransformer(VertexTransformer vertexTransformer) {
+		public Builder vertexTransformer(MaterialVertexTransformer vertexTransformer) {
 			this.vertexTransformer = vertexTransformer;
 			return this;
 		}

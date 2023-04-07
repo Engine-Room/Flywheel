@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import com.jozufozu.flywheel.glsl.ShaderLoadingException;
 import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.glsl.span.Span;
-import com.jozufozu.flywheel.util.FlwUtil;
+import com.jozufozu.flywheel.lib.math.MoreMath;
 import com.jozufozu.flywheel.util.StringUtil;
 import com.mojang.logging.LogUtils;
 
@@ -97,14 +97,14 @@ public class ErrorReporter {
 
 		int size = lines.size();
 
-		int maxWidth = FlwUtil.numDigits(size) + 1;
+		int maxWidth = MoreMath.numDigits(size) + 1;
 
 		StringBuilder builder = new StringBuilder().append('\n');
 
 		for (int i = 0; i < size; i++) {
 
 			builder.append(i)
-					.append(StringUtil.repeatChar(' ', maxWidth - FlwUtil.numDigits(i)))
+					.append(StringUtil.repeatChar(' ', maxWidth - MoreMath.numDigits(i)))
 					.append("| ")
 					.append(lines.get(i))
 					.append('\n');
