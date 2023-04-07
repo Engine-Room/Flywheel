@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.layout.BufferLayout;
+import com.jozufozu.flywheel.api.struct.InstancePart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
@@ -16,17 +16,24 @@ import com.jozufozu.flywheel.gl.buffer.GlBufferUsage;
 import com.jozufozu.flywheel.gl.buffer.MappedBuffer;
 
 public class GPUInstancer<P extends InstancePart> extends AbstractInstancer<P> {
+	private final BufferLayout instanceFormat;
+	private final int instanceStride;
 
-	final BufferLayout instanceFormat;
-	final Set<GlVertexArray> boundTo = new HashSet<>();
-	GlBuffer vbo;
-	int glInstanceCount = 0;
-
-	boolean anyToUpdate;
+	private final Set<GlVertexArray> boundTo = new HashSet<>();
+	private GlBuffer vbo;
 
 	public GPUInstancer(StructType<P> type) {
 		super(type);
-		this.instanceFormat = type.getLayout();
+		instanceFormat = type.getLayout();
+		instanceStride = instanceFormat.getStride();
+	}
+
+	public int getAttributeCount() {
+		return instanceFormat.getAttributeCount();
+	}
+
+	public boolean isInvalid() {
+		return vbo == null;
 	}
 
 	public void init() {
@@ -35,63 +42,59 @@ public class GPUInstancer<P extends InstancePart> extends AbstractInstancer<P> {
 		}
 
 		vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER, GlBufferUsage.DYNAMIC_DRAW);
-		vbo.setGrowthMargin(instanceFormat.getStride() * 16);
+		vbo.setGrowthMargin(instanceStride * 16);
 	}
 
-	public boolean isEmpty() {
-		return deleted.isEmpty() && changed.isEmpty() && glInstanceCount == 0;
+	public void update() {
+		removeDeletedInstances();
+		ensureBufferCapacity();
+		updateBuffer();
 	}
 
-	void update() {
-		if (!deleted.isEmpty()) {
-			removeDeletedInstances();
-		}
-
-		if (checkAndGrowBuffer()) {
-			// The instance vbo has moved, so we need to re-bind attributes
+	private void ensureBufferCapacity() {
+		int count = data.size();
+		int byteSize = instanceStride * count;
+		if (vbo.ensureCapacity(byteSize)) {
+			// The vbo has moved, so we need to re-bind attributes
 			boundTo.clear();
 		}
-
-		if (!changed.isEmpty()) {
-			clearAndUpdateBuffer();
-		}
-
-		glInstanceCount = data.size();
 	}
 
-	private void clearAndUpdateBuffer() {
-		final int size = data.size();
-		final long clearStart = (long) size * instanceFormat.getStride();
-		final long clearLength = vbo.getSize() - clearStart;
+	private void updateBuffer() {
+		if (changed.isEmpty()) {
+			return;
+		}
+
+		int count = data.size();
+		long clearStart = instanceStride * (long) count;
+		long clearLength = vbo.getSize() - clearStart;
 
 		try (MappedBuffer buf = vbo.map()) {
 			buf.clear(clearStart, clearLength);
 
-			if (size > 0) {
-				final long ptr = buf.getPtr();
-				final long stride = type.getLayout()
-						.getStride();
-				final StructWriter<P> writer = type.getWriter();
+			long ptr = buf.getPtr();
+			StructWriter<P> writer = type.getWriter();
 
-				for (int i = changed.nextSetBit(0); i >= 0 && i < size; i = changed.nextSetBit(i + 1)) {
-					writer.write(ptr + i * stride, data.get(i));
-				}
-				changed.clear();
+			for (int i = changed.nextSetBit(0); i >= 0 && i < count; i = changed.nextSetBit(i + 1)) {
+				writer.write(ptr + instanceStride * i, data.get(i));
 			}
+
+			changed.clear();
 		} catch (Exception e) {
 			Flywheel.LOGGER.error("Error updating GPUInstancer:", e);
 		}
 	}
 
-	/**
-	 * @return {@code true} if the buffer moved.
-	 */
-	private boolean checkAndGrowBuffer() {
-		int size = this.data.size();
-		int stride = instanceFormat.getStride();
-		int requiredSize = size * stride;
+	public void bindToVAO(GlVertexArray vao, int attributeOffset) {
+		if (!boundTo.add(vao)) {
+			return;
+		}
 
-		return vbo.ensureCapacity(requiredSize);
+		vao.bindAttributes(vbo, attributeOffset, instanceFormat, 0L);
+
+		for (int i = 0; i < instanceFormat.getAttributeCount(); i++) {
+			vao.setAttributeDivisor(attributeOffset + i, 1);
+		}
 	}
 
 	public void delete() {

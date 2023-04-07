@@ -1,12 +1,11 @@
 package com.jozufozu.flywheel.lib.struct;
 
-import com.jozufozu.flywheel.api.instancer.Handle;
-import com.jozufozu.flywheel.api.instancer.InstancePart;
+import com.jozufozu.flywheel.api.struct.Handle;
+import com.jozufozu.flywheel.api.struct.InstancePart;
 import com.jozufozu.flywheel.api.struct.StructType;
 
 public abstract class AbstractInstancePart implements InstancePart {
-
-	public final StructType<?> type;
+	protected final StructType<?> type;
 	protected final Handle handle;
 
 	protected AbstractInstancePart(StructType<?> type, Handle handle) {

@@ -7,7 +7,6 @@ package com.jozufozu.flywheel.api.vertex;
  *     VertexList assumes nothing about the layout of the vertices. Implementations should feel free to return constants
  *     for values that are unused in their layout.
  * </p>
- * TODO: more flexible elements?
  */
 public interface VertexList {
 	float x(int index);

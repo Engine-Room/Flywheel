@@ -3,10 +3,10 @@ package com.jozufozu.flywheel.handler;
 import java.util.ArrayList;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.impl.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.lib.light.LightUpdater;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
+import com.jozufozu.flywheel.util.FlwUtil;
 import com.jozufozu.flywheel.util.StringUtil;
 import com.jozufozu.flywheel.util.WorldAttached;
 
@@ -33,7 +33,7 @@ public class ForgeEvents {
 	}
 
 	public static void tickLight(TickEvent.ClientTickEvent event) {
-		if (event.phase == TickEvent.Phase.END && BackendUtil.isGameActive()) {
+		if (event.phase == TickEvent.Phase.END && FlwUtil.isGameActive()) {
 			LightUpdater.get(Minecraft.getInstance().level)
 					.tick();
 		}

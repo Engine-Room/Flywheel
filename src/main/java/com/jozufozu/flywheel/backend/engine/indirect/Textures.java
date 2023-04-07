@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.util;
+package com.jozufozu.flywheel.backend.engine.indirect;
 
 import org.lwjgl.opengl.GL32;
 

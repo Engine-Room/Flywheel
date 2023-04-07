@@ -39,6 +39,10 @@ public class BatchedMeshPool {
 		growthMargin = vertexFormat.getVertexSize() * 32;
 	}
 
+	public VertexFormat getVertexFormat() {
+		return vertexFormat;
+	}
+
 	/**
 	 * Allocate a mesh in the arena.
 	 *
@@ -137,10 +141,6 @@ public class BatchedMeshPool {
 		meshes.clear();
 		allBuffered.clear();
 		pendingUpload.clear();
-	}
-
-	public VertexFormat getVertexFormat() {
-		return vertexFormat;
 	}
 
 	@Override

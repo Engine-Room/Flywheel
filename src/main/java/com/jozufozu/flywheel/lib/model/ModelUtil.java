@@ -6,21 +6,21 @@ import java.nio.ByteBuffer;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryUtil;
+import org.slf4j.Logger;
 
 import com.dreizak.miniball.highdim.Miniball;
 import com.dreizak.miniball.model.PointSet;
-import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexListProviderRegistry;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.lib.format.Formats;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.mojang.blaze3d.vertex.BufferBuilder.DrawState;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -28,7 +28,9 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
-public class ModelUtil {
+public final class ModelUtil {
+	private static final Logger LOGGER = LogUtils.getLogger();
+
 	/**
 	 * An alternative BlockRenderDispatcher that circumvents the Forge rendering pipeline to ensure consistency.
 	 * Meant to be used for virtual rendering.
@@ -45,25 +47,24 @@ public class ModelUtil {
 			}
 			ObfuscationReflectionHelper.setPrivateValue(BlockRenderDispatcher.class, dispatcher, new ModelBlockRenderer(Minecraft.getInstance().getBlockColors()), "f_110900_");
 		} catch (Exception e) {
-			Flywheel.LOGGER.error("Failed to initialize vanilla BlockRenderDispatcher!", e);
+			LOGGER.error("Failed to initialize vanilla BlockRenderDispatcher!", e);
 			return defaultDispatcher;
 		}
 		return dispatcher;
 	}
 
-	public static Pair<VertexType, MemoryBlock> convertBlockBuffer(Pair<DrawState, ByteBuffer> pair) {
+	public static MemoryBlock convertVanillaBuffer(Pair<DrawState, ByteBuffer> pair, VertexType vertexType) {
 		DrawState drawState = pair.getFirst();
 		int vertexCount = drawState.vertexCount();
 		VertexFormat srcFormat = drawState.format();
-		VertexType dstVertexType = Formats.BLOCK;
 
 		ByteBuffer src = pair.getSecond();
-		MemoryBlock dst = MemoryBlock.malloc(vertexCount * dstVertexType.getLayout().getStride());
+		MemoryBlock dst = MemoryBlock.malloc(vertexCount * vertexType.getLayout().getStride());
 		long srcPtr = MemoryUtil.memAddress(src);
 		long dstPtr = dst.ptr();
 
 		ReusableVertexList srcList = VertexListProviderRegistry.getProvider(srcFormat).createVertexList();
-		ReusableVertexList dstList = dstVertexType.createVertexList();
+		ReusableVertexList dstList = vertexType.createVertexList();
 		srcList.ptr(srcPtr);
 		dstList.ptr(dstPtr);
 		srcList.vertexCount(vertexCount);
@@ -71,7 +72,7 @@ public class ModelUtil {
 
 		srcList.writeAll(dstList);
 
-		return Pair.of(dstVertexType, dst);
+		return dst;
 	}
 
 	@Nullable

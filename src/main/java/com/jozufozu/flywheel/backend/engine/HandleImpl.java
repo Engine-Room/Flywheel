@@ -1,9 +1,8 @@
 package com.jozufozu.flywheel.backend.engine;
 
-import com.jozufozu.flywheel.api.instancer.Handle;
+import com.jozufozu.flywheel.api.struct.Handle;
 
 public class HandleImpl implements Handle {
-
 	private final AbstractInstancer<?> instancer;
 	private int index;
 

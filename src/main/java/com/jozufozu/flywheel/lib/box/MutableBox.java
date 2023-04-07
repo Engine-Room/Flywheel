@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.lib.box;
 
 import java.util.Collection;
 
-import com.jozufozu.flywheel.util.RenderMath;
+import com.jozufozu.flywheel.lib.math.RenderMath;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,7 +19,6 @@ public class MutableBox implements ImmutableBox {
 	private int maxZ;
 
 	public MutableBox() {
-
 	}
 
 	public MutableBox(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {

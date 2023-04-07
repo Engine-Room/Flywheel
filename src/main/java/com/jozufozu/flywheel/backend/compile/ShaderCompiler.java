@@ -13,7 +13,6 @@ import com.jozufozu.flywheel.gl.GLSLVersion;
 import com.jozufozu.flywheel.gl.shader.GlShader;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.SourceComponent;
-import com.jozufozu.flywheel.util.FlwUtil;
 
 public class ShaderCompiler {
 	private final Map<ShaderKey, CompilationResult> shaderCache = new HashMap<>();
@@ -87,7 +86,7 @@ public class ShaderCompiler {
 	}
 
 	public static class Builder {
-		private Consumer<FailedCompilation> errorConsumer = FlwUtil::noop;
+		private Consumer<FailedCompilation> errorConsumer = error -> {};
 		private CompilationFactory factory = Compilation::new;
 		private Includer includer = RecursiveIncluder.INSTANCE;
 

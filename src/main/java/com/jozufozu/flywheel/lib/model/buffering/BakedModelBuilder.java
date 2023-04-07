@@ -5,7 +5,7 @@ import java.util.function.BiFunction;
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Mesh;
-import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.lib.format.Formats;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.ModelUtil;
 import com.jozufozu.flywheel.lib.model.SimpleMesh;
@@ -20,7 +20,6 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
@@ -106,8 +105,8 @@ public class BakedModelBuilder {
 				buffer.end();
 				Material material = materialFunc.apply(renderType, shaded);
 				if (material != null) {
-					Pair<VertexType, MemoryBlock> pair = ModelUtil.convertBlockBuffer(buffer.popNextBuffer());
-					meshMapBuilder.put(material, new SimpleMesh(pair.getFirst(), pair.getSecond(), "bakedModel=" + bakedModel.toString() + ",renderType=" + renderType.toString() + ",shaded=" + shaded));
+					MemoryBlock data = ModelUtil.convertVanillaBuffer(buffer.popNextBuffer(), Formats.BLOCK);
+					meshMapBuilder.put(material, new SimpleMesh(Formats.BLOCK, data, "bakedModel=" + bakedModel.toString() + ",renderType=" + renderType.toString() + ",shaded=" + shaded));
 				}
 			};
 			ModelBufferingUtil.bufferSingleShadeSeparated(ModelUtil.VANILLA_RENDERER.getModelRenderer(), renderWorld, bakedModel, blockState, poseStack, bufferFactory, objects.shadeSeparatingBufferWrapper, objects.random, modelData, resultConsumer);
@@ -121,8 +120,8 @@ public class BakedModelBuilder {
 				buffer.end();
 				Material material = materialFunc.apply(renderType, false);
 				if (material != null) {
-					Pair<VertexType, MemoryBlock> pair = ModelUtil.convertBlockBuffer(buffer.popNextBuffer());
-					meshMapBuilder.put(material, new SimpleMesh(pair.getFirst(), pair.getSecond(), "bakedModel=" + bakedModel.toString() + ",renderType=" + renderType.toString()));
+					MemoryBlock data = ModelUtil.convertVanillaBuffer(buffer.popNextBuffer(), Formats.BLOCK);
+					meshMapBuilder.put(material, new SimpleMesh(Formats.BLOCK, data, "bakedModel=" + bakedModel.toString() + ",renderType=" + renderType.toString()));
 				}
 			};
 			ModelBufferingUtil.bufferSingle(ModelUtil.VANILLA_RENDERER.getModelRenderer(), renderWorld, bakedModel, blockState, poseStack, bufferFactory, objects.bufferWrapper, objects.random, modelData, resultConsumer);

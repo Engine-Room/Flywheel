@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.backend.Backend;
+import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.pipeline.Pipeline;
 
@@ -66,7 +67,7 @@ public class SimpleBackend implements Backend {
 	public static class Builder {
 		private Component engineMessage;
 		private Function<LevelAccessor, Engine> engineFactory;
-		private Supplier<Backend> fallback;
+		private Supplier<Backend> fallback = BackendManager::getOffBackend;
 		private BooleanSupplier isSupported;
 		private Pipeline pipelineShader;
 

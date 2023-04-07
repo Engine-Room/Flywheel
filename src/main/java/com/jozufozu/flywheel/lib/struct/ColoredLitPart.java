@@ -1,12 +1,11 @@
 package com.jozufozu.flywheel.lib.struct;
 
-import com.jozufozu.flywheel.api.instancer.Handle;
+import com.jozufozu.flywheel.api.struct.Handle;
 import com.jozufozu.flywheel.api.struct.StructType;
 
 import net.minecraft.client.renderer.LightTexture;
 
 public abstract class ColoredLitPart extends AbstractInstancePart implements FlatLit<ColoredLitPart> {
-
 	public byte blockLight;
 	public byte skyLight;
 
@@ -15,7 +14,7 @@ public abstract class ColoredLitPart extends AbstractInstancePart implements Fla
 	public byte b = (byte) 0xFF;
 	public byte a = (byte) 0xFF;
 
-	public ColoredLitPart(StructType<?> type, Handle handle) {
+	public ColoredLitPart(StructType<? extends ColoredLitPart> type, Handle handle) {
 		super(type, handle);
 	}
 
@@ -35,7 +34,7 @@ public abstract class ColoredLitPart extends AbstractInstancePart implements Fla
 
 	@Override
 	public int getPackedLight() {
-		return LightTexture.pack(this.blockLight, this.skyLight);
+		return LightTexture.pack(blockLight, skyLight);
 	}
 
 	public ColoredLitPart setColor(int color) {

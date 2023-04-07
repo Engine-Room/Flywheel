@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.handler;
 
-import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.impl.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.util.FlwUtil;
 
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -14,7 +14,7 @@ public class EntityWorldHandler {
 			return;
 		}
 
-		if (BackendUtil.canUseInstancing(level)) {
+		if (FlwUtil.canUseInstancing(level)) {
 			InstancedRenderDispatcher.getEntities(level)
 					.queueAdd(event.getEntity());
 		}
@@ -26,7 +26,7 @@ public class EntityWorldHandler {
 			return;
 		}
 
-		if (BackendUtil.canUseInstancing(level)) {
+		if (FlwUtil.canUseInstancing(level)) {
 			InstancedRenderDispatcher.getEntities(level)
 					.remove(event.getEntity());
 		}

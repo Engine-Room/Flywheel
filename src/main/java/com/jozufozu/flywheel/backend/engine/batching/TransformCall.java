@@ -2,17 +2,16 @@ package com.jozufozu.flywheel.backend.engine.batching;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.struct.InstancePart;
+import com.jozufozu.flywheel.api.struct.StructVertexTransformer;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
+import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 
@@ -37,11 +36,11 @@ public class TransformCall<P extends InstancePart> {
 		return meshVertexCount * instancer.getInstanceCount();
 	}
 
-	void setup() {
+	public void setup() {
 		instancer.update();
 	}
 
-	void submitTasks(TaskExecutor executor, DrawBuffer buffer, int startVertex, PoseStack.Pose matrices, ClientLevel level) {
+	public void submitTasks(TaskExecutor executor, DrawBuffer buffer, int startVertex, PoseStack.Pose matrices, ClientLevel level) {
 		int instances = instancer.getInstanceCount();
 
 		while (instances > 0) {
@@ -57,21 +56,21 @@ public class TransformCall<P extends InstancePart> {
 		}
 	}
 
-	private void transformRange(ReusableVertexList vertexList, int from, int to, PoseStack.Pose matrices, ClientLevel level) {
+	public void transformRange(ReusableVertexList vertexList, int from, int to, PoseStack.Pose matrices, ClientLevel level) {
 		transformList(vertexList, instancer.getRange(from, to), matrices, level);
 	}
 
-	void transformAll(ReusableVertexList vertexList, PoseStack.Pose matrices, ClientLevel level) {
+	public void transformAll(ReusableVertexList vertexList, PoseStack.Pose matrices, ClientLevel level) {
 		transformList(vertexList, instancer.getAll(), matrices, level);
 	}
 
-	private void transformList(ReusableVertexList vertexList, List<P> parts, PoseStack.Pose matrices, ClientLevel level) {
+	public void transformList(ReusableVertexList vertexList, List<P> parts, PoseStack.Pose matrices, ClientLevel level) {
 		long anchorPtr = vertexList.ptr();
 		int totalVertexCount = vertexList.vertexCount();
 
 		vertexList.vertexCount(meshVertexCount);
 
-		StructType.VertexTransformer<P> structVertexTransformer = instancer.type.getVertexTransformer();
+		StructVertexTransformer<P> structVertexTransformer = instancer.type.getVertexTransformer();
 
 		for (P p : parts) {
 			mesh.copyTo(vertexList.ptr());
@@ -88,34 +87,12 @@ public class TransformCall<P extends InstancePart> {
 	}
 
 	private static void applyMatrices(MutableVertexList vertexList, PoseStack.Pose matrices) {
-		Vector4f pos = new Vector4f();
-		Vector3f normal = new Vector3f();
-
 		Matrix4f modelMatrix = matrices.pose();
 		Matrix3f normalMatrix = matrices.normal();
 
 		for (int i = 0; i < vertexList.vertexCount(); i++) {
-			pos.set(
-					vertexList.x(i),
-					vertexList.y(i),
-					vertexList.z(i),
-					1f
-			);
-			pos.transform(modelMatrix);
-			vertexList.x(i, pos.x());
-			vertexList.y(i, pos.y());
-			vertexList.z(i, pos.z());
-
-			normal.set(
-					vertexList.normalX(i),
-					vertexList.normalY(i),
-					vertexList.normalZ(i)
-			);
-			normal.transform(normalMatrix);
-			normal.normalize();
-			vertexList.normalX(i, normal.x());
-			vertexList.normalY(i, normal.y());
-			vertexList.normalZ(i, normal.z());
+			VertexTransformations.transformPos(vertexList, i, modelMatrix);
+			VertexTransformations.transformNormal(vertexList, i, normalMatrix);
 		}
 	}
 }

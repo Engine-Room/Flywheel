@@ -3,13 +3,12 @@ package com.jozufozu.flywheel.lib.model;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
-import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
-public class SimpleMesh implements Mesh {
+public class SimpleMesh implements QuadMesh {
 	private final VertexType vertexType;
 	private final int vertexCount;
 	private final MemoryBlock contents;

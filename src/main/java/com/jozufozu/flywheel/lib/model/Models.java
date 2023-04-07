@@ -15,7 +15,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class Models {
+public final class Models {
 	private static final Map<BlockState, Model> BLOCK_STATE = new HashMap<>();
 	private static final Map<PartialModel, Model> PARTIAL = new HashMap<>();
 	private static final Map<Pair<PartialModel, Direction>, Model> PARTIAL_DIR = new HashMap<>();

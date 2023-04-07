@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.lib.struct;
 
-import com.jozufozu.flywheel.util.MatrixUtil;
+import com.jozufozu.flywheel.lib.math.MatrixUtil;
 
 public class TransformedWriter extends ColoredLitWriter<TransformedPart> {
 	public static final TransformedWriter INSTANCE = new TransformedWriter();

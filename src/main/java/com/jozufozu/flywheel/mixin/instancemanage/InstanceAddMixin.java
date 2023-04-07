@@ -7,8 +7,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.impl.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.util.FlwUtil;
 
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -23,7 +23,7 @@ public class InstanceAddMixin {
 	@Inject(method = "setBlockEntity",
 			at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))
 	private void flywheel$onBlockEntityAdded(BlockEntity blockEntity, CallbackInfo ci) {
-		if (level.isClientSide && BackendUtil.canUseInstancing(level)) {
+		if (level.isClientSide && FlwUtil.canUseInstancing(level)) {
 			InstancedRenderDispatcher.getBlockEntities(level)
 					.add(blockEntity);
 		}

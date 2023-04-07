@@ -14,16 +14,15 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.api.struct.InstancePart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 
 public class InstancingDrawManager {
-
 	private final Map<InstancerKey<?>, GPUInstancer<?>> instancers = new HashMap<>();
 	private final List<UninitializedInstancer> uninitializedInstancers = new ArrayList<>();
 	private final List<GPUInstancer<?>> initializedInstancers = new ArrayList<>();
@@ -48,9 +47,6 @@ public class InstancingDrawManager {
 
 	public void flush() {
 		for (var instancer : uninitializedInstancers) {
-			instancer.instancer()
-					.init();
-
 			add(instancer.instancer(), instancer.model(), instancer.stage());
 		}
 		uninitializedInstancers.clear();
@@ -80,11 +76,13 @@ public class InstancingDrawManager {
 	}
 
 	private void add(GPUInstancer<?> instancer, Model model, RenderStage stage) {
+		instancer.init();
 		DrawSet drawSet = drawSets.computeIfAbsent(stage, DrawSet::new);
 		var meshes = model.getMeshes();
 		for (var entry : meshes.entrySet()) {
-			DrawCall drawCall = new DrawCall(instancer, entry.getKey(), alloc(entry.getValue()));
-			var shaderState = new ShaderState(drawCall.getMaterial(), drawCall.getVertexType(), drawCall.instancer.type);
+			var mesh = alloc(entry.getValue());
+			ShaderState shaderState = new ShaderState(entry.getKey(), mesh.getVertexType(), instancer.type);
+			DrawCall drawCall = new DrawCall(instancer, mesh);
 			drawSet.put(shaderState, drawCall);
 		}
 		initializedInstancers.add(instancer);
@@ -96,7 +94,6 @@ public class InstancingDrawManager {
 	}
 
 	public static class DrawSet implements Iterable<Map.Entry<ShaderState, Collection<DrawCall>>> {
-
 		public static final DrawSet EMPTY = new DrawSet(ImmutableListMultimap.of());
 
 		private final ListMultimap<ShaderState, DrawCall> drawCalls;

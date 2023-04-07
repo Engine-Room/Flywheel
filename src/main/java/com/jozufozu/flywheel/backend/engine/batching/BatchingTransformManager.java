@@ -15,10 +15,10 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.api.struct.InstancePart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -83,7 +83,7 @@ public class BatchingTransformManager {
 		var meshes = model.getMeshes();
 		for (var entry : meshes.entrySet()) {
 			var material = entry.getKey();
-			var renderType = material.getBatchingRenderType();
+			RenderType renderType = material.getBatchingRenderType();
 			TransformCall<?> transformCall = new TransformCall<>(instancer, material, alloc(entry.getValue(), renderType.format()));
 			transformSet.put(renderType, transformCall);
 		}

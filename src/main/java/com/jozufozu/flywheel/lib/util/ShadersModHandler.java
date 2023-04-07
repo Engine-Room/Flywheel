@@ -6,6 +6,7 @@ import java.util.function.BooleanSupplier;
 
 import javax.annotation.Nullable;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -19,53 +20,53 @@ public final class ShadersModHandler {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
 	public static final String OPTIFINE_ROOT_PACKAGE = "net.optifine";
-	public static final String SHADER_PACKAGE = "net.optifine.shaders";
+	public static final String OPTIFINE_SHADER_PACKAGE = "net.optifine.shaders";
 
-	private static final boolean isOculusLoaded;
-	private static final boolean isOptifineInstalled;
-	private static final InternalHandler internalHandler;
+	private static final boolean IS_OCULUS_LOADED;
+	private static final boolean IS_OPTIFINE_INSTALLED;
+	private static final InternalHandler INTERNAL_HANDLER;
 
 	static {
 		Package optifinePackage = Package.getPackage(OPTIFINE_ROOT_PACKAGE);
-		isOptifineInstalled = optifinePackage != null;
-		isOculusLoaded = ModList.get()
+		IS_OPTIFINE_INSTALLED = optifinePackage != null;
+		IS_OCULUS_LOADED = ModList.get()
 				.isLoaded("oculus");
 
 		// optfine and oculus are assumed to be mutually exclusive
 
-		if (isOptifineInstalled) {
+		if (IS_OPTIFINE_INSTALLED) {
 			LOGGER.info("Optifine detected.");
-			internalHandler = new Optifine();
-		} else if (isOculusLoaded) {
+			INTERNAL_HANDLER = new Optifine();
+		} else if (IS_OCULUS_LOADED) {
 			LOGGER.info("Oculus detected.");
-			internalHandler = new Oculus();
+			INTERNAL_HANDLER = new Oculus();
 		} else {
 			LOGGER.info("No shaders mod detected.");
-			internalHandler = new InternalHandler() {};
+			INTERNAL_HANDLER = new InternalHandler() {};
 		}
 	}
 
-	private ShadersModHandler() {
-	}
-
-	public static void init() {
-		// noop, load statics
+	public static boolean isOculusLoaded() {
+		return IS_OCULUS_LOADED;
 	}
 
 	public static boolean isOptifineInstalled() {
-		return isOptifineInstalled;
-	}
-
-	public static boolean isOculusLoaded() {
-		return isOculusLoaded;
+		return IS_OPTIFINE_INSTALLED;
 	}
 
 	public static boolean isShaderPackInUse() {
-		return internalHandler.isShaderPackInUse();
+		return INTERNAL_HANDLER.isShaderPackInUse();
 	}
 
 	public static boolean isRenderingShadowPass() {
-		return internalHandler.isRenderingShadowPass();
+		return INTERNAL_HANDLER.isRenderingShadowPass();
+	}
+
+	@ApiStatus.Internal
+	public static void init() {
+	}
+
+	private ShadersModHandler() {
 	}
 
 	private interface InternalHandler {

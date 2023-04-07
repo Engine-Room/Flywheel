@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.lib.format;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
-import com.jozufozu.flywheel.util.RenderMath;
+import com.jozufozu.flywheel.lib.math.RenderMath;
 
 import net.minecraft.client.renderer.texture.OverlayTexture;
 

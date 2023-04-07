@@ -8,17 +8,17 @@ import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.api.struct.InstancePart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.backend.Pipelines;
 import com.jozufozu.flywheel.backend.compile.FlwCompiler;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
-import com.jozufozu.flywheel.lib.pipeline.Pipelines;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Camera;
@@ -47,7 +47,7 @@ public class InstancingEngine implements Engine {
 
 	@Override
 	public void beginFrame(TaskExecutor executor, RenderContext context) {
-		try (var restoreState = GlStateTracker.getRestoreState()) {
+		try (var state = GlStateTracker.getRestoreState()) {
 			drawManager.flush();
 		}
 	}
@@ -60,7 +60,7 @@ public class InstancingEngine implements Engine {
 			return;
 		}
 
-		try (var restoreState = GlStateTracker.getRestoreState()) {
+		try (var state = GlStateTracker.getRestoreState()) {
 			setup();
 
 			render(drawSet);
@@ -83,7 +83,7 @@ public class InstancingEngine implements Engine {
 			var shader = entry.getKey();
 			var drawCalls = entry.getValue();
 
-			drawCalls.removeIf(DrawCall::shouldRemove);
+			drawCalls.removeIf(DrawCall::isInvalid);
 
 			if (drawCalls.isEmpty()) {
 				continue;
@@ -102,9 +102,9 @@ public class InstancingEngine implements Engine {
 	}
 
 	private void setup(ShaderState desc) {
-		var vertexType = desc.vertex();
-		var structType = desc.instance();
 		var material = desc.material();
+		var vertexType = desc.vertexType();
+		var structType = desc.instanceType();
 
 		var program = FlwCompiler.INSTANCE.getPipelineProgram(vertexType, structType, context, Pipelines.INSTANCED_ARRAYS);
 		UniformBuffer.syncAndBind(program);

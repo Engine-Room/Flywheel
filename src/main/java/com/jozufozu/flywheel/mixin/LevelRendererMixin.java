@@ -10,7 +10,6 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.event.BeginFrameEvent;
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.api.event.RenderContext;
@@ -56,8 +55,6 @@ public class LevelRendererMixin {
 
 	@Inject(at = @At("TAIL"), method = "allChanged")
 	private void flywheel$refresh(CallbackInfo ci) {
-		BackendManager.refresh();
-
 		MinecraftForge.EVENT_BUS.post(new ReloadRenderersEvent(level));
 	}
 

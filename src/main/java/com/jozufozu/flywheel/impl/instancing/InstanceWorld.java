@@ -11,8 +11,8 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instance.effect.Effect;
-import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.backend.BackendUtil;
+import com.jozufozu.flywheel.backend.task.FlwTaskExecutor;
+import com.jozufozu.flywheel.backend.task.ParallelTaskExecutor;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.impl.instancing.manager.BlockEntityInstanceManager;
@@ -27,9 +27,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 /**
  * A manager class for a single world where instancing is supported.
  */
-public class InstanceWorld {
+// AutoCloseable is implemented to prevent leaking this object from WorldAttached
+public class InstanceWorld implements AutoCloseable {
 	private final Engine engine;
-	private final TaskExecutor taskExecutor;
+	private final ParallelTaskExecutor taskExecutor;
 
 	private final InstanceManager<BlockEntity> blockEntities;
 	private final InstanceManager<Entity> entities;
@@ -37,7 +38,7 @@ public class InstanceWorld {
 
 	public InstanceWorld(LevelAccessor level) {
 		engine = BackendManager.getBackend().createEngine(level);
-		taskExecutor = BackendUtil.getTaskExecutor();
+		taskExecutor = FlwTaskExecutor.get();
 
 		blockEntities = new BlockEntityInstanceManager(engine);
 		entities = new EntityInstanceManager(engine);
@@ -127,9 +128,15 @@ public class InstanceWorld {
 	 * Free all acquired resources and invalidate this instance world.
 	 */
 	public void delete() {
+		taskExecutor.discardAndAwait();
 		blockEntities.invalidate();
 		entities.invalidate();
 		effects.invalidate();
 		engine.delete();
+	}
+
+	@Override
+	public void close() {
+		delete();
 	}
 }

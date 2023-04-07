@@ -11,10 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.api.struct.InstancePart;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
-import com.jozufozu.flywheel.util.Textures;
 
 public class IndirectDrawSet<P extends InstancePart> {
 
@@ -31,7 +30,7 @@ public class IndirectDrawSet<P extends InstancePart> {
 	}
 
 	public void add(IndirectInstancer<P> instancer, Material material, RenderStage stage, IndirectMeshPool.BufferedMesh bufferedMesh) {
-		indirectDraws.add(new IndirectDraw<>(instancer, material, stage, bufferedMesh));
+		indirectDraws.add(new IndirectDraw<>(instancer, material, bufferedMesh, stage));
 		determineMultiDraws();
 	}
 

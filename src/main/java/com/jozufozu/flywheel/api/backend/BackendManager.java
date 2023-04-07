@@ -17,9 +17,8 @@ public final class BackendManager {
 		return BackendManagerImpl.isOn();
 	}
 
-	// TODO: definitively sort existing calls to this method into API (include behavior in javadoc) or default backend code
-	public static void refresh() {
-		BackendManagerImpl.refresh();
+	public static Backend getOffBackend() {
+		return BackendManagerImpl.getOffBackend();
 	}
 
 	public static Backend getDefaultBackend() {

@@ -1,18 +1,17 @@
 package com.jozufozu.flywheel.lib.struct;
 
-import com.jozufozu.flywheel.api.instancer.Handle;
 import com.jozufozu.flywheel.api.layout.BufferLayout;
+import com.jozufozu.flywheel.api.struct.Handle;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.struct.StructVertexTransformer;
 import com.jozufozu.flywheel.api.struct.StructWriter;
 import com.jozufozu.flywheel.lib.layout.CommonItems;
-import com.jozufozu.flywheel.util.RenderMath;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
+import com.jozufozu.flywheel.lib.math.RenderMath;
+import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 
 import net.minecraft.resources.ResourceLocation;
 
 public class TransformedType implements StructType<TransformedPart> {
-
 	public static final BufferLayout FORMAT = BufferLayout.builder()
 			.addItem(CommonItems.LIGHT_COORD, "light")
 			.addItem(CommonItems.UNORM_4x8, "color")
@@ -22,7 +21,7 @@ public class TransformedType implements StructType<TransformedPart> {
 
 	@Override
 	public TransformedPart create(Handle handle) {
-		return new TransformedPart(handle);
+		return new TransformedPart(this, handle);
 	}
 
 	@Override
@@ -41,11 +40,8 @@ public class TransformedType implements StructType<TransformedPart> {
 	}
 
 	@Override
-	public VertexTransformer<TransformedPart> getVertexTransformer() {
+	public StructVertexTransformer<TransformedPart> getVertexTransformer() {
 		return (vertexList, struct, level) -> {
-			Vector4f pos = new Vector4f();
-			Vector3f normal = new Vector3f();
-
 			float r = RenderMath.uf(struct.r);
 			float g = RenderMath.uf(struct.g);
 			float b = RenderMath.uf(struct.b);
@@ -53,27 +49,8 @@ public class TransformedType implements StructType<TransformedPart> {
 			int light = struct.getPackedLight();
 
 			for (int i = 0; i < vertexList.vertexCount(); i++) {
-				pos.set(
-						vertexList.x(i),
-						vertexList.y(i),
-						vertexList.z(i),
-						1f
-				);
-				pos.transform(struct.model);
-				vertexList.x(i, pos.x());
-				vertexList.y(i, pos.y());
-				vertexList.z(i, pos.z());
-
-				normal.set(
-						vertexList.normalX(i),
-						vertexList.normalY(i),
-						vertexList.normalZ(i)
-				);
-				normal.transform(struct.normal);
-				normal.normalize();
-				vertexList.normalX(i, normal.x());
-				vertexList.normalY(i, normal.y());
-				vertexList.normalZ(i, normal.z());
+				VertexTransformations.transformPos(vertexList, i, struct.model);
+				VertexTransformations.transformNormal(vertexList, i, struct.normal);
 
 				vertexList.r(i, r);
 				vertexList.g(i, g);

@@ -1,11 +1,14 @@
 package com.jozufozu.flywheel.lib.material;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial.GlStateShard;
+import com.jozufozu.flywheel.lib.math.DiffuseLightCalculator;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
-import com.jozufozu.flywheel.util.DiffuseLightCalculator;
 import com.jozufozu.flywheel.util.ResourceUtil;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -18,7 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 
 public final class Materials {
-	public static final Material.VertexTransformer SHADING_TRANSFORMER = (vertexList, level) -> {
+	public static final MaterialVertexTransformer SHADING_TRANSFORMER = (vertexList, level) -> {
 		if (ShadersModHandler.isShaderPackInUse()) {
 			return;
 		}
@@ -131,8 +134,8 @@ public final class Materials {
 			.batchingRenderType(RenderType.entitySolid(MINECART_LOCATION))
 			.register();
 
+	@ApiStatus.Internal
 	public static void init() {
-		// noop
 	}
 
 	public static final class Shards {
@@ -173,14 +176,14 @@ public final class Materials {
 		}
 	}
 
-	public static class Files {
+	public static final class Files {
 		public static final ResourceLocation DEFAULT_VERTEX = ResourceUtil.subPath(Names.DEFAULT, ".vert");
 		public static final ResourceLocation SHADED_VERTEX = ResourceUtil.subPath(Names.SHADED, ".vert");
 		public static final ResourceLocation DEFAULT_FRAGMENT = ResourceUtil.subPath(Names.DEFAULT, ".frag");
 		public static final ResourceLocation CUTOUT_FRAGMENT = ResourceUtil.subPath(Names.CUTOUT, ".frag");
 	}
 
-	public static class Names {
+	public static final class Names {
 		public static final ResourceLocation DEFAULT = Flywheel.rl("material/default");
 		public static final ResourceLocation CUTOUT = Flywheel.rl("material/cutout");
 		public static final ResourceLocation SHADED = Flywheel.rl("material/shaded");

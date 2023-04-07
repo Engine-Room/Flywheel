@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.backend;
+package com.jozufozu.flywheel.backend;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.backend.Backend;
@@ -6,30 +6,20 @@ import com.jozufozu.flywheel.backend.engine.batching.BatchingEngine;
 import com.jozufozu.flywheel.backend.engine.indirect.IndirectEngine;
 import com.jozufozu.flywheel.backend.engine.instancing.InstancingEngine;
 import com.jozufozu.flywheel.gl.versioned.GlCompat;
+import com.jozufozu.flywheel.lib.backend.SimpleBackend;
 import com.jozufozu.flywheel.lib.context.Contexts;
-import com.jozufozu.flywheel.lib.pipeline.Pipelines;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TextComponent;
 
 public class Backends {
-	public static final Backend OFF = SimpleBackend.builder()
-			.engineMessage(new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED))
-			.engineFactory(level -> {
-				throw new IllegalStateException("Cannot create engine when backend is off.");
-			})
-			.fallback(() -> Backends.OFF)
-			.supported(() -> true)
-			.register(Flywheel.rl("off"));
-
 	/**
 	 * Use a thread pool to buffer instances in parallel on the CPU.
 	 */
 	public static final Backend BATCHING = SimpleBackend.builder()
 			.engineMessage(new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN))
 			.engineFactory(level -> new BatchingEngine())
-			.fallback(() -> Backends.OFF)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse())
 			.register(Flywheel.rl("batching"));
 

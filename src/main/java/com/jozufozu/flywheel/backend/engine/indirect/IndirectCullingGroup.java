@@ -12,14 +12,14 @@ import static org.lwjgl.opengl.GL45.glVertexArrayElementBuffer;
 import static org.lwjgl.opengl.GL45.glVertexArrayVertexBuffer;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.InstancePart;
+import com.jozufozu.flywheel.api.struct.InstancePart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.Pipelines;
 import com.jozufozu.flywheel.backend.compile.FlwCompiler;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.context.Contexts;
-import com.jozufozu.flywheel.lib.pipeline.Pipelines;
 import com.jozufozu.flywheel.lib.util.QuadConverter;
 
 public class IndirectCullingGroup<P extends InstancePart> {
@@ -109,7 +109,7 @@ public class IndirectCullingGroup<P extends InstancePart> {
 		}
 
 		buffers.updateCounts(instanceCountThisFrame, drawSet.size());
-		meshPool.uploadAll();
+		meshPool.flush();
 		uploadInstanceData();
 		uploadIndirectCommands();
 
@@ -174,7 +174,7 @@ public class IndirectCullingGroup<P extends InstancePart> {
 		int baseInstance = 0;
 		for (var batch : drawSet.indirectDraws) {
 			batch.prepare(baseInstance);
-			baseInstance += batch.instancer().instanceCount;
+			baseInstance += batch.instancer().getInstanceCount();
 		}
 		return baseInstance;
 	}

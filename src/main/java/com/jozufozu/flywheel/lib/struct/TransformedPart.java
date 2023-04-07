@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.lib.struct;
 
-import com.jozufozu.flywheel.api.instancer.Handle;
+import com.jozufozu.flywheel.api.struct.Handle;
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.lib.transform.Transform;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
@@ -16,8 +17,8 @@ public class TransformedPart extends ColoredLitPart implements Transform<Transfo
 	public final Matrix4f model = new Matrix4f();
 	public final Matrix3f normal = new Matrix3f();
 
-	public TransformedPart(Handle handle) {
-		super(StructTypes.TRANSFORMED, handle);
+	public TransformedPart(StructType<? extends TransformedPart> type, Handle handle) {
+		super(type, handle);
 	}
 
 	public TransformedPart setTransform(PoseStack stack) {
@@ -106,7 +107,7 @@ public class TransformedPart extends ColoredLitPart implements Transform<Transfo
 
 	@Override
 	public TransformedPart copy(Handle handle) {
-		var out = new TransformedPart(handle);
+		var out = StructTypes.TRANSFORMED.create(handle);
 		out.model.load(this.model);
 		out.normal.load(this.normal);
 		out.r = this.r;

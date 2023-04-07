@@ -12,8 +12,7 @@ import com.mojang.math.Vector3f;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 
-public class PartBuilder {
-
+public class ModelPartBuilder {
 	private final float sizeU;
 	private final float sizeV;
 
@@ -22,13 +21,13 @@ public class PartBuilder {
 	private final List<CuboidBuilder> cuboids = new ArrayList<>();
 	private final String name;
 
-	public PartBuilder(String name, int sizeU, int sizeV) {
+	public ModelPartBuilder(String name, int sizeU, int sizeV) {
 		this.name = name;
 		this.sizeU = (float) sizeU;
 		this.sizeV = (float) sizeV;
 	}
 
-	public PartBuilder sprite(TextureAtlasSprite sprite) {
+	public ModelPartBuilder sprite(TextureAtlasSprite sprite) {
 		this.sprite = sprite;
 		return this;
 	}
@@ -41,36 +40,35 @@ public class PartBuilder {
 		return new ModelPart(cuboids, name);
 	}
 
-	private PartBuilder addCuboid(CuboidBuilder builder) {
+	private ModelPartBuilder addCuboid(CuboidBuilder builder) {
 		cuboids.add(builder);
 		return this;
 	}
 
 	public static class CuboidBuilder {
+		private TextureAtlasSprite sprite;
 
-		TextureAtlasSprite sprite;
+		private Set<Direction> visibleFaces = EnumSet.allOf(Direction.class);
+		private int textureOffsetU;
+		private int textureOffsetV;
 
-		Set<Direction> visibleFaces = EnumSet.allOf(Direction.class);
-		int textureOffsetU;
-		int textureOffsetV;
+		private float posX1;
+		private float posY1;
+		private float posZ1;
+		private float posX2;
+		private float posY2;
+		private float posZ2;
 
-		float posX1;
-		float posY1;
-		float posZ1;
-		float posX2;
-		float posY2;
-		float posZ2;
+		private boolean invertYZ;
 
-		boolean invertYZ;
+		private boolean useRotation;
+		private float rotationX;
+		private float rotationY;
+		private float rotationZ;
 
-		boolean useRotation;
-		float rotationX;
-		float rotationY;
-		float rotationZ;
+		private final ModelPartBuilder partBuilder;
 
-		final PartBuilder partBuilder;
-
-		CuboidBuilder(PartBuilder partBuilder) {
+		private CuboidBuilder(ModelPartBuilder partBuilder) {
 			this.partBuilder = partBuilder;
 			this.sprite = partBuilder.sprite;
 		}
@@ -151,7 +149,7 @@ public class PartBuilder {
 			return this;
 		}
 
-		public PartBuilder endCuboid() {
+		public ModelPartBuilder endCuboid() {
 			return partBuilder.addCuboid(this);
 		}
 
@@ -254,5 +252,4 @@ public class PartBuilder {
 				return v / partBuilder.sizeV;
 		}
 	}
-
 }

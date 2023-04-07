@@ -6,16 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.api.struct.InstancePart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.util.Pair;
 
 public class IndirectDrawManager {
-
 	private final Map<InstancerKey<?>, IndirectInstancer<?>> instancers = new HashMap<>();
 	private final List<UninitializedInstancer> uninitializedInstancers = new ArrayList<>();
 	private final List<IndirectInstancer<?>> initializedInstancers = new ArrayList<>();

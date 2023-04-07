@@ -146,6 +146,28 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		}
 	}
 
+	public void discardAndAwait() {
+		// Discard everyone else's work...
+		while (taskQueue.pollLast() != null) {
+			synchronized (tasksCompletedNotifier) {
+				if (--incompleteTaskCounter == 0) {
+					tasksCompletedNotifier.notifyAll();
+				}
+			}
+		}
+
+		// and wait for any stragglers.
+		synchronized (tasksCompletedNotifier) {
+			while (incompleteTaskCounter > 0) {
+				try {
+					tasksCompletedNotifier.wait();
+				} catch (InterruptedException e) {
+					//
+				}
+			}
+		}
+	}
+
 	@Nullable
 	private Runnable getNextTask() {
 		Runnable task = taskQueue.pollFirst();

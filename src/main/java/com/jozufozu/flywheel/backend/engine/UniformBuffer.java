@@ -10,9 +10,9 @@ import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
+import com.jozufozu.flywheel.lib.math.MoreMath;
+import com.jozufozu.flywheel.lib.math.RenderMath;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
-import com.jozufozu.flywheel.util.FlwUtil;
-import com.jozufozu.flywheel.util.RenderMath;
 
 public class UniformBuffer {
 
@@ -93,7 +93,7 @@ public class UniformBuffer {
 			var builder = ImmutableList.<LiveProvider>builder();
 			int totalBytes = 0;
 			for (ShaderUniforms provider : providers) {
-				int size = FlwUtil.align16(provider.byteSize());
+				int size = MoreMath.align16(provider.byteSize());
 
 				builder.add(new LiveProvider(provider, totalBytes, size));
 

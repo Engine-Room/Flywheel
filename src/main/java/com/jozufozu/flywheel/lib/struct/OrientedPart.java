@@ -1,13 +1,13 @@
 package com.jozufozu.flywheel.lib.struct;
 
-import com.jozufozu.flywheel.api.instancer.Handle;
+import com.jozufozu.flywheel.api.struct.Handle;
+import com.jozufozu.flywheel.api.struct.StructType;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.core.BlockPos;
 
 public class OrientedPart extends ColoredLitPart {
-
 	public float posX;
 	public float posY;
 	public float posZ;
@@ -19,8 +19,8 @@ public class OrientedPart extends ColoredLitPart {
 	public float qZ;
 	public float qW = 1;
 
-	public OrientedPart(Handle handle) {
-		super(StructTypes.ORIENTED, handle);
+	public OrientedPart(StructType<? extends OrientedPart> type, Handle handle) {
+		super(type, handle);
 	}
 
 	public OrientedPart setPosition(BlockPos pos) {
@@ -87,7 +87,7 @@ public class OrientedPart extends ColoredLitPart {
 
 	@Override
 	public OrientedPart copy(Handle handle) {
-		var out = new OrientedPart(handle);
+		var out = StructTypes.ORIENTED.create(handle);
 		out.posX = this.posX;
 		out.posY = this.posY;
 		out.posZ = this.posZ;

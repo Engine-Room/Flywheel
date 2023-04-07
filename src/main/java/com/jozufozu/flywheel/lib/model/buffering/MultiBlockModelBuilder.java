@@ -8,7 +8,7 @@ import java.util.function.BiFunction;
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Mesh;
-import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.lib.format.Formats;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.ModelUtil;
 import com.jozufozu.flywheel.lib.model.SimpleMesh;
@@ -22,7 +22,6 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
@@ -102,8 +101,8 @@ public class MultiBlockModelBuilder {
 				buffer.end();
 				Material material = materialFunc.apply(renderType, shaded);
 				if (material != null) {
-					Pair<VertexType, MemoryBlock> pair = ModelUtil.convertBlockBuffer(buffer.popNextBuffer());
-					meshMapBuilder.put(material, new SimpleMesh(pair.getFirst(), pair.getSecond(), "renderType=" + renderType.toString() + ",shaded=" + shaded));
+					MemoryBlock data = ModelUtil.convertVanillaBuffer(buffer.popNextBuffer(), Formats.BLOCK);
+					meshMapBuilder.put(material, new SimpleMesh(Formats.BLOCK, data, "renderType=" + renderType.toString() + ",shaded=" + shaded));
 				}
 			};
 			ModelBufferingUtil.bufferMultiBlockShadeSeparated(blocks, ModelUtil.VANILLA_RENDERER, renderWorld, poseStack, bufferFactory, objects.shadeSeparatingBufferWrapper, objects.random, modelDataMap, resultConsumer);
@@ -117,8 +116,8 @@ public class MultiBlockModelBuilder {
 				buffer.end();
 				Material material = materialFunc.apply(renderType, false);
 				if (material != null) {
-					Pair<VertexType, MemoryBlock> pair = ModelUtil.convertBlockBuffer(buffer.popNextBuffer());
-					meshMapBuilder.put(material, new SimpleMesh(pair.getFirst(), pair.getSecond(), "renderType=" + renderType.toString()));
+					MemoryBlock data = ModelUtil.convertVanillaBuffer(buffer.popNextBuffer(), Formats.BLOCK);
+					meshMapBuilder.put(material, new SimpleMesh(Formats.BLOCK, data, "renderType=" + renderType.toString()));
 				}
 			};
 			ModelBufferingUtil.bufferMultiBlock(blocks, ModelUtil.VANILLA_RENDERER, renderWorld, poseStack, bufferFactory, objects.bufferWrapper, objects.random, modelDataMap, resultConsumer);

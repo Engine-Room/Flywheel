@@ -8,10 +8,10 @@ import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.instance.BlockEntityInstance;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
-import com.jozufozu.flywheel.backend.BackendUtil;
 import com.jozufozu.flywheel.impl.instancing.InstancingControllerHelper;
 import com.jozufozu.flywheel.impl.instancing.storage.One2OneStorage;
 import com.jozufozu.flywheel.impl.instancing.storage.Storage;
+import com.jozufozu.flywheel.util.FlwUtil;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -66,7 +66,7 @@ public class BlockEntityInstanceManager extends InstanceManager<BlockEntity> {
 				return false;
 			}
 
-			if (BackendUtil.isFlywheelLevel(level)) {
+			if (FlwUtil.isFlywheelLevel(level)) {
 				BlockPos pos = blockEntity.getBlockPos();
 
 				BlockGetter existingChunk = level.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);

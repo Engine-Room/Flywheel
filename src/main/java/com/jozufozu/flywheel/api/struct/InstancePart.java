@@ -1,6 +1,4 @@
-package com.jozufozu.flywheel.api.instancer;
-
-import com.jozufozu.flywheel.api.struct.StructType;
+package com.jozufozu.flywheel.api.struct;
 
 public interface InstancePart {
 	StructType<?> type();

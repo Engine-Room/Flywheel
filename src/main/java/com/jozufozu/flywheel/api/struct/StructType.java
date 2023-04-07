@@ -1,13 +1,9 @@
 package com.jozufozu.flywheel.api.struct;
 
-import com.jozufozu.flywheel.api.instancer.Handle;
-import com.jozufozu.flywheel.api.instancer.InstancePart;
 import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.api.registry.Registry;
-import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.impl.RegistryImpl;
 
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -33,10 +29,5 @@ public interface StructType<P extends InstancePart> {
 
 	ResourceLocation instanceShader();
 
-	VertexTransformer<P> getVertexTransformer();
-
-	interface VertexTransformer<P extends InstancePart> {
-		void transform(MutableVertexList vertexList, P struct, ClientLevel level);
-	}
-
+	StructVertexTransformer<P> getVertexTransformer();
 }

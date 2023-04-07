@@ -20,7 +20,6 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
  * A class to manage EBOs that index quads as triangles.
  */
 public class QuadConverter {
-
 	private static QuadConverter INSTANCE;
 
 	@NotNull
