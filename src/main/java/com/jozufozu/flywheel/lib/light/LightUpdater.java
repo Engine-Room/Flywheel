@@ -1,13 +1,9 @@
 package com.jozufozu.flywheel.lib.light;
 
-import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
-import com.jozufozu.flywheel.backend.task.FlwTaskExecutor;
 import com.jozufozu.flywheel.lib.box.ImmutableBox;
-import com.jozufozu.flywheel.lib.task.WorkGroup;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.jozufozu.flywheel.util.WorldAttached;
 
@@ -55,19 +51,6 @@ public class LightUpdater {
 				addListener(tickingLightListener);
 			}
 		}
-	}
-
-	private void tickParallel() {
-		Queue<LightListener> listeners = new ConcurrentLinkedQueue<>();
-
-		WorkGroup.builder()
-				.addTasks(tickingListeners.stream(), listener -> {
-					if (listener.tickLightListener()) {
-						listeners.add(listener);
-					}
-				})
-				.onComplete(() -> listeners.forEach(this::addListener))
-				.execute(FlwTaskExecutor.get());
 	}
 
 	/**

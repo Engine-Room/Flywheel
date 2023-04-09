@@ -11,6 +11,7 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.instance.effect.Effect;
+import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.backend.task.FlwTaskExecutor;
 import com.jozufozu.flywheel.backend.task.ParallelTaskExecutor;
 import com.jozufozu.flywheel.config.FlwCommands;
@@ -19,6 +20,7 @@ import com.jozufozu.flywheel.impl.instancing.manager.BlockEntityInstanceManager;
 import com.jozufozu.flywheel.impl.instancing.manager.EffectInstanceManager;
 import com.jozufozu.flywheel.impl.instancing.manager.EntityInstanceManager;
 import com.jozufozu.flywheel.impl.instancing.manager.InstanceManager;
+import com.jozufozu.flywheel.lib.task.PlanUtil;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelAccessor;
@@ -68,9 +70,12 @@ public class InstanceWorld implements AutoCloseable {
 	 * </p>
 	 */
 	public void tick(double cameraX, double cameraY, double cameraZ) {
-		blockEntities.tick(taskExecutor, cameraX, cameraY, cameraZ);
-		entities.tick(taskExecutor, cameraX, cameraY, cameraZ);
-		effects.tick(taskExecutor, cameraX, cameraY, cameraZ);
+		var blockEntityPlan = blockEntities.planThisTick(cameraX, cameraY, cameraZ);
+		var entityPlan = entities.planThisTick(cameraX, cameraY, cameraZ);
+		var effectPlan = effects.planThisTick(cameraX, cameraY, cameraZ);
+
+		PlanUtil.of(blockEntityPlan, entityPlan, effectPlan)
+				.execute(taskExecutor);
 	}
 
 	/**
@@ -82,17 +87,16 @@ public class InstanceWorld implements AutoCloseable {
 	 * </p>
 	 */
 	public void beginFrame(RenderContext context) {
-		boolean originChanged = engine.updateRenderOrigin(context.camera());
-
-		if (originChanged) {
-			blockEntities.recreateAll();
-			entities.recreateAll();
-			effects.recreateAll();
-		}
-
 		taskExecutor.syncPoint();
 
-		if (!originChanged) {
+		getManagerPlan(context).then(engine.planThisFrame(context))
+				.execute(taskExecutor);
+	}
+
+	private Plan getManagerPlan(RenderContext context) {
+		if (engine.updateRenderOrigin(context.camera())) {
+			return PlanUtil.of(blockEntities::recreateAll, entities::recreateAll, effects::recreateAll);
+		} else {
 			var cameraPos = context.camera()
 					.getPosition();
 			double cameraX = cameraPos.x;
@@ -100,12 +104,8 @@ public class InstanceWorld implements AutoCloseable {
 			double cameraZ = cameraPos.z;
 			FrustumIntersection culler = context.culler();
 
-			blockEntities.beginFrame(taskExecutor, cameraX, cameraY, cameraZ, culler);
-			entities.beginFrame(taskExecutor, cameraX, cameraY, cameraZ, culler);
-			effects.beginFrame(taskExecutor, cameraX, cameraY, cameraZ, culler);
+			return PlanUtil.of(blockEntities.planThisFrame(cameraX, cameraY, cameraZ, culler), entities.planThisFrame(cameraX, cameraY, cameraZ, culler), effects.planThisFrame(cameraX, cameraY, cameraZ, culler));
 		}
-
-		engine.beginFrame(taskExecutor, context);
 	}
 
 	/**
