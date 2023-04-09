@@ -10,6 +10,7 @@ import com.jozufozu.flywheel.api.task.TaskExecutor;
 public record RunOnAllPlan<T>(Supplier<List<T>> listSupplier, Consumer<T> action) implements Plan {
 	@Override
 	public void execute(TaskExecutor taskExecutor, Runnable onCompletion) {
+		// TODO: unit tests, fix CME?
 		taskExecutor.execute(() -> {
 			var list = listSupplier.get();
 			final int size = list.size();

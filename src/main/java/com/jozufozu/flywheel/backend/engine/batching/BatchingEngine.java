@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.engine.batching;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.jozufozu.flywheel.api.backend.Engine;
@@ -11,12 +12,11 @@ import com.jozufozu.flywheel.api.struct.InstancePart;
 import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.lib.task.NestedPlan;
 import com.jozufozu.flywheel.lib.task.PlanUtil;
 import com.jozufozu.flywheel.util.FlwUtil;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Camera;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
@@ -31,19 +31,6 @@ public class BatchingEngine implements Engine {
 	}
 
 	@Override
-	public void beginFrame(TaskExecutor executor, RenderContext context) {
-		transformManager.flush();
-
-		Vec3 cameraPos = context.camera()
-				.getPosition();
-		var stack = FlwUtil.copyPoseStack(context.stack());
-		stack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-
-		executor.syncPoint();
-		submitTasks(executor, stack.last(), context.level());
-	}
-
-	@Override
 	public Plan planThisFrame(RenderContext context) {
 		return PlanUtil.of(transformManager::flush)
 				.then(planTransformers(context));
@@ -55,11 +42,11 @@ public class BatchingEngine implements Engine {
 		var stack = FlwUtil.copyPoseStack(context.stack());
 		stack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
-		// TODO: planify batching engine
-		return PlanUtil.of();
-	}
+		var matrices = stack.last();
+		var level = context.level();
 
-	private void submitTasks(TaskExecutor executor, PoseStack.Pose matrices, ClientLevel level) {
+		var plans = new ArrayList<Plan>();
+
 		for (var transformSetEntry : transformManager.getTransformSetsView()
 				.entrySet()) {
 			var stage = transformSetEntry.getKey();
@@ -84,11 +71,13 @@ public class BatchingEngine implements Engine {
 
 				int startVertex = 0;
 				for (var transformCall : transformCalls) {
-					transformCall.submitTasks(executor, buffer, startVertex, matrices, level);
+					plans.add(transformCall.getPlan(buffer, startVertex, matrices, level));
 					startVertex += transformCall.getTotalVertexCount();
 				}
 			}
 		}
+
+		return new NestedPlan(plans);
 	}
 
 	@Override

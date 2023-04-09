@@ -12,7 +12,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.core.Vec3i;
 
 public interface Engine extends InstancerProvider {
-	void beginFrame(TaskExecutor executor, RenderContext context);
 
 	void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage);
 

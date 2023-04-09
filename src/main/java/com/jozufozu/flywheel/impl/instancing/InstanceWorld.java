@@ -75,6 +75,7 @@ public class InstanceWorld implements AutoCloseable {
 		var effectPlan = effects.planThisTick(cameraX, cameraY, cameraZ);
 
 		PlanUtil.of(blockEntityPlan, entityPlan, effectPlan)
+				.maybeSimplify()
 				.execute(taskExecutor);
 	}
 
@@ -90,6 +91,7 @@ public class InstanceWorld implements AutoCloseable {
 		taskExecutor.syncPoint();
 
 		getManagerPlan(context).then(engine.planThisFrame(context))
+				.maybeSimplify()
 				.execute(taskExecutor);
 	}
 
