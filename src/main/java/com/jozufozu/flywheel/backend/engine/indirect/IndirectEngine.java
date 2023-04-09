@@ -41,11 +41,6 @@ public class IndirectEngine implements Engine {
 	}
 
 	@Override
-	public void beginFrame(TaskExecutor executor, RenderContext context) {
-		flushDrawManager();
-	}
-
-	@Override
 	public Plan planThisFrame(RenderContext context) {
 		return PlanUtil.onMainThread(this::flushDrawManager);
 	}
