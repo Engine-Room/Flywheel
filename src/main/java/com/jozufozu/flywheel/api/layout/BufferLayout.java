@@ -7,13 +7,13 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.gl.array.VertexAttribute;
 
 /**
- * Classic Vertex Format struct with a clever name.
+ * Classic Vertex Format with a clever name.
  *
  * <p>
  *     Used for vertices and instances. Describes the layout of a datatype in a buffer object.
  * </p>
  *
- * @see com.jozufozu.flywheel.api.struct.StructType
+ * @see com.jozufozu.flywheel.api.instance.InstanceType
  * @see VertexType
  */
 public class BufferLayout {

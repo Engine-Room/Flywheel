@@ -16,7 +16,7 @@ import net.minecraftforge.client.model.ForgeModelBakery;
  * A helper class for loading and accessing json models.
  * <br>
  * Creating a PartialModel will make the associated modelLocation automatically load.
- * PartialModels must be initialized the mod class constructor.
+ * PartialModels must be initialized in the mod class constructor.
  * <br>
  * Once {@link ModelBakeEvent} finishes, all PartialModels (with valid modelLocations)
  * will have their bakedModel fields populated.

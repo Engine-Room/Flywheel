@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
+import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.pipeline.Pipeline;
-import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.Pipelines;
@@ -45,7 +45,7 @@ public class FlwCompiler {
 
 	final ShaderCompiler shaderCompiler;
 	final Map<PipelineContext, GlProgram> pipelinePrograms = new HashMap<>();
-	final Map<StructType<?>, GlProgram> cullingPrograms = new HashMap<>();
+	final Map<InstanceType<?>, GlProgram> cullingPrograms = new HashMap<>();
 	final List<FailedCompilation> errors = new ArrayList<>();
 
 	public FlwCompiler(ShaderSources sources) {
@@ -101,7 +101,7 @@ public class FlwCompiler {
 
 	private void finish() {
 		long compileEnd = System.nanoTime();
-		int programCount = pipelineContexts.size() + StructType.REGISTRY.getAll().size();
+		int programCount = pipelineContexts.size() + InstanceType.REGISTRY.getAll().size();
 		int shaderCount = shaderCompiler.shaderCount();
 		int errorCount = errors.size();
 		var elapsed = StringUtil.formatTime(compileEnd - compileStart);
@@ -124,12 +124,12 @@ public class FlwCompiler {
 		shaderCompiler.delete();
 	}
 
-	public GlProgram getPipelineProgram(VertexType vertexType, StructType<?> structType, Context contextShader, Pipeline pipelineShader) {
-		return pipelinePrograms.get(new PipelineContext(vertexType, structType, contextShader, pipelineShader));
+	public GlProgram getPipelineProgram(VertexType vertexType, InstanceType<?> instanceType, Context contextShader, Pipeline pipelineShader) {
+		return pipelinePrograms.get(new PipelineContext(vertexType, instanceType, contextShader, pipelineShader));
 	}
 
-	public GlProgram getCullingProgram(StructType<?> structType) {
-		return cullingPrograms.get(structType);
+	public GlProgram getCullingProgram(InstanceType<?> instanceType) {
+		return cullingPrograms.get(instanceType);
 	}
 
 	private void compilePipelineContext(PipelineContext ctx) {
@@ -150,14 +150,14 @@ public class FlwCompiler {
 	}
 
 	private void compileComputeCuller(CullingContext ctx) {
-		var computeComponents = getComputeComponents(ctx.structType());
+		var computeComponents = getComputeComponents(ctx.instanceType());
 		var result = shaderCompiler.compile(GLSLVersion.V460, ShaderType.COMPUTE, computeComponents);
 
 		if (result == null) {
 			return;
 		}
 
-		cullingPrograms.put(ctx.structType(), link(result.handle()));
+		cullingPrograms.put(ctx.instanceType(), link(result.handle()));
 	}
 
 	private GlProgram link(int... shaders) {
@@ -172,11 +172,11 @@ public class FlwCompiler {
 
 	private ImmutableList<SourceComponent> getVertexComponents(PipelineContext ctx) {
 		var instanceAssembly = ctx.pipelineShader()
-				.assemble(new Pipeline.InstanceAssemblerContext(sources, ctx.vertexType(), ctx.structType()));
+				.assemble(new Pipeline.InstanceAssemblerContext(sources, ctx.vertexType(), ctx.instanceType()));
 
 		var layout = sources.find(ctx.vertexType()
 				.layoutShader());
-		var instance = sources.find(ctx.structType()
+		var instance = sources.find(ctx.instanceType()
 				.instanceShader());
 		var context = sources.find(ctx.contextShader()
 				.vertexShader());
@@ -194,9 +194,9 @@ public class FlwCompiler {
 		return ImmutableList.of(uniformComponent, fragmentMaterialComponent, context, pipeline);
 	}
 
-	private ImmutableList<SourceComponent> getComputeComponents(StructType<?> structType) {
-		var instanceAssembly = new IndirectComponent(sources, structType);
-		var instance = sources.find(structType.instanceShader());
+	private ImmutableList<SourceComponent> getComputeComponents(InstanceType<?> instanceType) {
+		var instanceAssembly = new IndirectComponent(sources, instanceType);
+		var instance = sources.find(instanceType.instanceShader());
 		var pipeline = sources.find(Pipelines.Files.INDIRECT_CULL);
 
 		return ImmutableList.of(uniformComponent, instanceAssembly, instance, pipeline);

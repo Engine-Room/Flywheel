@@ -5,10 +5,10 @@ import java.util.List;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.Instancer;
+import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.InstanceType;
+import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.api.struct.InstancePart;
-import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -24,7 +24,7 @@ public class BatchingEngine implements Engine {
 	private final BatchingDrawTracker drawTracker = new BatchingDrawTracker();
 
 	@Override
-	public <P extends InstancePart> Instancer<P> instancer(StructType<P> type, Model model, RenderStage stage) {
+	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, RenderStage stage) {
 		return transformManager.getInstancer(type, model, stage);
 	}
 

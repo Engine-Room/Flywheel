@@ -2,13 +2,13 @@ package com.jozufozu.flywheel.extension;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.instance.controller.BlockEntityInstancingController;
+import com.jozufozu.flywheel.api.visualization.BlockEntityVisualizer;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public interface BlockEntityTypeExtension<T extends BlockEntity> {
 	@Nullable
-	BlockEntityInstancingController<? super T> flywheel$getInstancingController();
+	BlockEntityVisualizer<? super T> flywheel$getVisualizer();
 
-	void flywheel$setInstancingController(@Nullable BlockEntityInstancingController<? super T> instancingController);
+	void flywheel$setVisualizer(@Nullable BlockEntityVisualizer<? super T> visualizer);
 }

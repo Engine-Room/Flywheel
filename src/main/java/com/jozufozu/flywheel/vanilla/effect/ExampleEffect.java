@@ -10,19 +10,19 @@ import org.joml.Vector3f;
 
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instance.DynamicInstance;
-import com.jozufozu.flywheel.api.instance.EffectInstance;
-import com.jozufozu.flywheel.api.instance.TickableInstance;
-import com.jozufozu.flywheel.api.instance.controller.InstanceContext;
-import com.jozufozu.flywheel.api.instance.effect.Effect;
-import com.jozufozu.flywheel.impl.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.api.visual.DynamicVisual;
+import com.jozufozu.flywheel.api.visual.Effect;
+import com.jozufozu.flywheel.api.visual.EffectVisual;
+import com.jozufozu.flywheel.api.visual.TickableVisual;
+import com.jozufozu.flywheel.api.visualization.VisualizationContext;
+import com.jozufozu.flywheel.impl.visualization.VisualizedRenderDispatcher;
 import com.jozufozu.flywheel.lib.box.ImmutableBox;
 import com.jozufozu.flywheel.lib.box.MutableBox;
-import com.jozufozu.flywheel.lib.instance.AbstractInstance;
+import com.jozufozu.flywheel.lib.instance.InstanceTypes;
+import com.jozufozu.flywheel.lib.instance.TransformedInstance;
 import com.jozufozu.flywheel.lib.model.Models;
-import com.jozufozu.flywheel.lib.struct.StructTypes;
-import com.jozufozu.flywheel.lib.struct.TransformedPart;
 import com.jozufozu.flywheel.lib.util.AnimationTickHolder;
+import com.jozufozu.flywheel.lib.visual.AbstractVisual;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -35,17 +35,15 @@ import net.minecraftforge.event.TickEvent;
 
 // http://www.kfish.org/boids/pseudocode.html
 public class ExampleEffect implements Effect {
-
 	private static final List<ExampleEffect> ALL_EFFECTS = new ArrayList<>();
 
-	private static final int INSTANCE_COUNT = 500;
+	private static final int VISUAL_COUNT = 500;
 	private static final float SPAWN_RADIUS = 8.0f;
 	private static final float LIMIT_RANGE = 10.0f;
 	private static final float SPEED_LIMIT = 0.1f;
 	private static final float RENDER_SCALE = 1 / 16f;
 
 	private static final float SIGHT_RANGE = 5;
-
 
 	private static final float COHERENCE = 1f / 60f;
 	private static final float SEPARATION = 0.05f;
@@ -60,7 +58,7 @@ public class ExampleEffect implements Effect {
 	private final BlockPos blockPos;
 	private final ImmutableBox volume;
 
-	private final List<BoidInstance> effects;
+	private final List<BoidVisual> effects;
 
 	private final List<Boid> boids;
 
@@ -69,8 +67,8 @@ public class ExampleEffect implements Effect {
 		this.targetPoint = targetPoint;
 		this.blockPos = new BlockPos(targetPoint.x, targetPoint.y, targetPoint.z);
 		this.volume = MutableBox.from(this.blockPos);
-		this.effects = new ArrayList<>(INSTANCE_COUNT);
-		this.boids = new ArrayList<>(INSTANCE_COUNT);
+		this.effects = new ArrayList<>(VISUAL_COUNT);
+		this.boids = new ArrayList<>(VISUAL_COUNT);
 	}
 
 	public static void tick(TickEvent.ClientTickEvent event) {
@@ -105,22 +103,22 @@ public class ExampleEffect implements Effect {
 
 		ExampleEffect effect = new ExampleEffect(level, new Vector3f(x, y, z));
 		ALL_EFFECTS.add(effect);
-		InstancedRenderDispatcher.getEffects(level)
+		VisualizedRenderDispatcher.getEffects(level)
 				.queueAdd(effect);
 	}
 
 	@Override
-	public Collection<EffectInstance<?>> createInstances(InstanceContext ctx) {
+	public Collection<EffectVisual<?>> createVisuals(VisualizationContext ctx) {
 		effects.clear();
 		boids.clear();
-		for (int i = 0; i < INSTANCE_COUNT; i++) {
+		for (int i = 0; i < VISUAL_COUNT; i++) {
 			var x = targetPoint.x + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
 			var y = targetPoint.y + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
 			var z = targetPoint.z + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
 
 			Boid boid = new Boid(x, y, z);
 			boids.add(boid);
-			effects.add(new BoidInstance(ctx, level, boid));
+			effects.add(new BoidVisual(ctx, level, boid));
 		}
 		return Collections.unmodifiableList(effects);
 	}
@@ -238,19 +236,19 @@ public class ExampleEffect implements Effect {
 		}
 	}
 
-	public class BoidInstance extends AbstractInstance implements EffectInstance<ExampleEffect>, DynamicInstance, TickableInstance {
-
+	public class BoidVisual extends AbstractVisual implements EffectVisual<ExampleEffect>, DynamicVisual, TickableVisual {
 		private final Boid self;
-		private TransformedPart instance;
 
-		public BoidInstance(InstanceContext ctx, Level level, Boid self) {
+		private TransformedInstance instance;
+
+		public BoidVisual(VisualizationContext ctx, Level level, Boid self) {
 			super(ctx, level);
 			this.self = self;
 		}
 
 		@Override
 		public void init() {
-			instance = instancerProvider.instancer(StructTypes.TRANSFORMED, Models.block(Blocks.SHROOMLIGHT.defaultBlockState()), RenderStage.AFTER_PARTICLES)
+			instance = instancerProvider.instancer(InstanceTypes.TRANSFORMED, Models.block(Blocks.SHROOMLIGHT.defaultBlockState()), RenderStage.AFTER_PARTICLES)
 					.createInstance();
 
 			instance.setBlockLight(15)

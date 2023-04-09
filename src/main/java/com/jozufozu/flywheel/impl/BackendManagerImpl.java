@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.backend.Backends;
 import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.impl.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.impl.visualization.VisualizedRenderDispatcher;
 import com.jozufozu.flywheel.lib.backend.SimpleBackend;
 import com.mojang.logging.LogUtils;
 
@@ -63,7 +63,7 @@ public final class BackendManagerImpl {
 		backend = chooseBackend();
 
 		if (level != null) {
-			InstancedRenderDispatcher.resetInstanceWorld(level);
+			VisualizedRenderDispatcher.resetVisualWorld(level);
 		}
 	}
 

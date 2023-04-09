@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.InstancerProvider;
+import com.jozufozu.flywheel.api.instance.InstancerProvider;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 
 import net.minecraft.client.Camera;

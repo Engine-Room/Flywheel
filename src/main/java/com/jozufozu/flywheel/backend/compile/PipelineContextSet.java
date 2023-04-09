@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 
 import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.api.context.Context;
+import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.pipeline.Pipeline;
-import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.lib.context.Contexts;
 
@@ -24,9 +24,9 @@ public class PipelineContextSet {
 	static PipelineContextSet create() {
 		var builder = new PipelineContextSet();
 		for (Pipeline pipelineShader : availablePipelineShaders()) {
-			for (StructType<?> structType : StructType.REGISTRY) {
+			for (InstanceType<?> instanceType : InstanceType.REGISTRY) {
 				for (VertexType vertexType : VertexType.REGISTRY) {
-					builder.add(vertexType, structType, Contexts.WORLD, pipelineShader);
+					builder.add(vertexType, instanceType, Contexts.WORLD, pipelineShader);
 				}
 			}
 		}
@@ -50,8 +50,8 @@ public class PipelineContextSet {
 		return contexts.size();
 	}
 
-	private void add(VertexType vertexType, StructType<?> structType, Context world, Pipeline pipelineShader) {
-		var ctx = new PipelineContext(vertexType, structType, world, pipelineShader);
+	private void add(VertexType vertexType, InstanceType<?> instanceType, Context world, Pipeline pipelineShader) {
+		var ctx = new PipelineContext(vertexType, instanceType, world, pipelineShader);
 
 		contexts.add(ctx);
 	}

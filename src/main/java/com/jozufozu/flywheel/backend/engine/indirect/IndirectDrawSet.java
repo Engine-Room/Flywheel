@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
+import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.struct.InstancePart;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
 
-public class IndirectDrawSet<P extends InstancePart> {
+public class IndirectDrawSet<I extends Instance> {
 
-	final List<IndirectDraw<P>> indirectDraws = new ArrayList<>();
+	final List<IndirectDraw<I>> indirectDraws = new ArrayList<>();
 
 	final Map<RenderStage, List<MultiDraw>> multiDraws = new EnumMap<>(RenderStage.class);
 
@@ -29,7 +29,7 @@ public class IndirectDrawSet<P extends InstancePart> {
 		return indirectDraws.size();
 	}
 
-	public void add(IndirectInstancer<P> instancer, Material material, RenderStage stage, IndirectMeshPool.BufferedMesh bufferedMesh) {
+	public void add(IndirectInstancer<I> instancer, Material material, RenderStage stage, IndirectMeshPool.BufferedMesh bufferedMesh) {
 		indirectDraws.add(new IndirectDraw<>(instancer, material, bufferedMesh, stage));
 		determineMultiDraws();
 	}
@@ -48,7 +48,7 @@ public class IndirectDrawSet<P extends InstancePart> {
 		// TODO: Better material equality. Really we only need to bin by the results of the setup method.
 		multiDraws.clear();
 		// sort by stage, then material
-		indirectDraws.sort(Comparator.comparing(IndirectDraw<P>::stage)
+		indirectDraws.sort(Comparator.comparing(IndirectDraw<I>::stage)
 				.thenComparing(draw -> MaterialIndices.getMaterialIndex(draw.material())));
 
 		for (int start = 0, i = 0; i < indirectDraws.size(); i++) {

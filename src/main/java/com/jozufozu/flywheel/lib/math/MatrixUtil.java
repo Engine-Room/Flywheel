@@ -93,6 +93,19 @@ public final class MatrixUtil {
 		buf.putFloat(m.flywheel$m22());
 	}
 
+	public static void writeUnsafe(Matrix3f matrix, long ptr) {
+		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
+		MemoryUtil.memPutFloat(ptr, m.flywheel$m00());
+		MemoryUtil.memPutFloat(ptr + 4, m.flywheel$m10());
+		MemoryUtil.memPutFloat(ptr + 8, m.flywheel$m20());
+		MemoryUtil.memPutFloat(ptr + 12, m.flywheel$m01());
+		MemoryUtil.memPutFloat(ptr + 16, m.flywheel$m11());
+		MemoryUtil.memPutFloat(ptr + 20, m.flywheel$m21());
+		MemoryUtil.memPutFloat(ptr + 24, m.flywheel$m02());
+		MemoryUtil.memPutFloat(ptr + 28, m.flywheel$m12());
+		MemoryUtil.memPutFloat(ptr + 32, m.flywheel$m22());
+	}
+
 	public static void store(Matrix4f matrix, org.joml.Matrix4f jomlMatrix) {
 		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
 		jomlMatrix.set(
@@ -111,19 +124,6 @@ public final class MatrixUtil {
 				m.flywheel$m02(), m.flywheel$m12(), m.flywheel$m22(), m.flywheel$m32(),
 				m.flywheel$m03(), m.flywheel$m13(), m.flywheel$m23(), m.flywheel$m33()
 		);
-	}
-
-	public static void writeUnsafe(Matrix3f matrix, long ptr) {
-		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
-		MemoryUtil.memPutFloat(ptr, m.flywheel$m00());
-		MemoryUtil.memPutFloat(ptr + 4, m.flywheel$m10());
-		MemoryUtil.memPutFloat(ptr + 8, m.flywheel$m20());
-		MemoryUtil.memPutFloat(ptr + 12, m.flywheel$m01());
-		MemoryUtil.memPutFloat(ptr + 16, m.flywheel$m11());
-		MemoryUtil.memPutFloat(ptr + 20, m.flywheel$m21());
-		MemoryUtil.memPutFloat(ptr + 24, m.flywheel$m02());
-		MemoryUtil.memPutFloat(ptr + 28, m.flywheel$m12());
-		MemoryUtil.memPutFloat(ptr + 32, m.flywheel$m22());
 	}
 
 	public static void store(Matrix3f matrix, org.joml.Matrix3f jomlMatrix) {

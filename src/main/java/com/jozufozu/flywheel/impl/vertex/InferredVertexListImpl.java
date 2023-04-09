@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.impl.vertex;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
-import com.jozufozu.flywheel.lib.format.AbstractVertexList;
 import com.jozufozu.flywheel.lib.math.RenderMath;
+import com.jozufozu.flywheel.lib.vertex.AbstractVertexList;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.renderer.LightTexture;

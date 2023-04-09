@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.instance.InstanceType;
 
 public class CullingContextSet {
 	static CullingContextSet create() {
 		var builder = new CullingContextSet();
-		for (StructType<?> structType : StructType.REGISTRY) {
-			builder.add(structType);
+		for (InstanceType<?> instanceType : InstanceType.REGISTRY) {
+			builder.add(instanceType);
 		}
 		return builder;
 	}
@@ -29,8 +29,8 @@ public class CullingContextSet {
 		return contexts.size();
 	}
 
-	private void add(StructType<?> structType) {
-		var ctx = new CullingContext(structType);
+	private void add(InstanceType<?> instanceType) {
+		var ctx = new CullingContext(instanceType);
 
 		contexts.add(ctx);
 	}

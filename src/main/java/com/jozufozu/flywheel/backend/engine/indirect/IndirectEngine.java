@@ -7,10 +7,10 @@ import org.lwjgl.opengl.GL32;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.Instancer;
+import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.InstanceType;
+import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.api.struct.InstancePart;
-import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
@@ -34,7 +34,7 @@ public class IndirectEngine implements Engine {
 	}
 
 	@Override
-	public <P extends InstancePart> Instancer<P> instancer(StructType<P> type, Model model, RenderStage stage) {
+	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, RenderStage stage) {
 		return drawManager.getInstancer(type, model, stage);
 	}
 

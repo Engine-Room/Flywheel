@@ -23,7 +23,7 @@ public class InstancedArraysComponent implements SourceComponent {
 	private final int baseIndex;
 
 	public InstancedArraysComponent(Pipeline.InstanceAssemblerContext ctx) {
-		this.layoutItems = ctx.structType()
+		this.layoutItems = ctx.instanceType()
 				.getLayout().layoutItems;
 		this.baseIndex = ctx.vertexType()
 				.getLayout()

@@ -5,9 +5,9 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.layout.LayoutItem;
 import com.jozufozu.flywheel.api.pipeline.Pipeline;
-import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.backend.Pipelines;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
@@ -30,11 +30,11 @@ public class IndirectComponent implements SourceComponent {
 	private final ImmutableList<SourceFile> included;
 
 	public IndirectComponent(Pipeline.InstanceAssemblerContext ctx) {
-		this(ctx.sources(), ctx.structType());
+		this(ctx.sources(), ctx.instanceType());
 	}
 
-	public IndirectComponent(ShaderSources sources, StructType<?> structType) {
-		this.layoutItems = structType.getLayout().layoutItems;
+	public IndirectComponent(ShaderSources sources, InstanceType<?> instanceType) {
+		this.layoutItems = instanceType.getLayout().layoutItems;
 		included = ImmutableList.of(sources.find(Pipelines.Files.UTIL_TYPES));
 	}
 

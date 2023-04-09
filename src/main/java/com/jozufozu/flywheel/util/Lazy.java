@@ -8,7 +8,6 @@ import java.util.function.Supplier;
 import org.jetbrains.annotations.NotNull;
 
 public class Lazy<T> implements Supplier<T> {
-
 	private final NonNullSupplier<T> supplier;
 
 	private T value;

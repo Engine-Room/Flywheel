@@ -14,11 +14,11 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.Instancer;
+import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.InstanceType;
+import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.api.struct.InstancePart;
-import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 
@@ -34,9 +34,9 @@ public class InstancingDrawManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <P extends InstancePart> Instancer<P> getInstancer(StructType<P> type, Model model, RenderStage stage) {
-		InstancerKey<P> key = new InstancerKey<>(type, model, stage);
-		GPUInstancer<P> instancer = (GPUInstancer<P>) instancers.get(key);
+	public <I extends Instance> Instancer<I> getInstancer(InstanceType<I> type, Model model, RenderStage stage) {
+		InstancerKey<I> key = new InstancerKey<>(type, model, stage);
+		GPUInstancer<I> instancer = (GPUInstancer<I>) instancers.get(key);
 		if (instancer == null) {
 			instancer = new GPUInstancer<>(type);
 			instancers.put(key, instancer);
