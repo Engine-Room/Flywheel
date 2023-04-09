@@ -3,12 +3,12 @@ package com.jozufozu.flywheel.backend.engine.indirect;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
+import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.struct.InstancePart;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
 
-public class IndirectDraw<P extends InstancePart> {
-	private final IndirectInstancer<P> instancer;
+public class IndirectDraw<I extends Instance> {
+	private final IndirectInstancer<I> instancer;
 	private final IndirectMeshPool.BufferedMesh mesh;
 	private final Material material;
 	private final RenderStage stage;
@@ -19,7 +19,7 @@ public class IndirectDraw<P extends InstancePart> {
 	private int baseInstance = -1;
 	private boolean needsFullWrite = true;
 
-	public IndirectDraw(IndirectInstancer<P> instancer, Material material, IndirectMeshPool.BufferedMesh mesh, RenderStage stage) {
+	public IndirectDraw(IndirectInstancer<I> instancer, Material material, IndirectMeshPool.BufferedMesh mesh, RenderStage stage) {
 		this.instancer = instancer;
 		this.material = material;
 		this.mesh = mesh;
@@ -29,7 +29,7 @@ public class IndirectDraw<P extends InstancePart> {
 		this.fragmentMaterialID = MaterialIndices.getFragmentShaderIndex(material);
 	}
 
-	public IndirectInstancer<P> instancer() {
+	public IndirectInstancer<I> instancer() {
 		return instancer;
 	}
 

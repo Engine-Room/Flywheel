@@ -3,45 +3,42 @@ package com.jozufozu.flywheel.backend.engine;
 import java.util.ArrayList;
 import java.util.BitSet;
 
-import com.jozufozu.flywheel.api.instancer.Instancer;
-import com.jozufozu.flywheel.api.struct.InstancePart;
-import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.InstanceType;
+import com.jozufozu.flywheel.api.instance.Instancer;
 
-public abstract class AbstractInstancer<P extends InstancePart> implements Instancer<P> {
-	public final StructType<P> type;
+public abstract class AbstractInstancer<I extends Instance> implements Instancer<I> {
+	public final InstanceType<I> type;
 
-	// Lock for all instance data, only needs to be used in methods that may run on the TaskExecutor.
+	// Lock for all instances, only needs to be used in methods that may run on the TaskExecutor.
 	protected final Object lock = new Object();
-	protected final ArrayList<P> data = new ArrayList<>();
-	protected final ArrayList<HandleImpl> handles = new ArrayList<>();
+	protected final ArrayList<I> instances = new ArrayList<>();
+	protected final ArrayList<InstanceHandleImpl> handles = new ArrayList<>();
 
 	// TODO: atomic bitset?
 	protected final BitSet changed = new BitSet();
 	protected final BitSet deleted = new BitSet();
 
-	protected AbstractInstancer(StructType<P> type) {
+	protected AbstractInstancer(InstanceType<I> type) {
 		this.type = type;
 	}
 
-	/**
-	 * @return a handle to a new copy of this model.
-	 */
 	@Override
-	public P createInstance() {
+	public I createInstance() {
 		synchronized (lock) {
-			var i = data.size();
-			var handle = new HandleImpl(this, i);
-			P instanceData = type.create(handle);
+			var i = instances.size();
+			var handle = new InstanceHandleImpl(this, i);
+			I instance = type.create(handle);
 
-			data.add(instanceData);
+			instances.add(instance);
 			handles.add(handle);
 			changed.set(i);
-			return instanceData;
+			return instance;
 		}
 	}
 
 	public int getInstanceCount() {
-		return data.size();
+		return instances.size();
 	}
 
 	public void notifyDirty(int index) {
@@ -68,7 +65,7 @@ public abstract class AbstractInstancer<P extends InstancePart> implements Insta
 		}
 
 		// Figure out which elements are to be removed.
-		final int oldSize = this.data.size();
+		final int oldSize = this.instances.size();
 		int removeCount = deleted.cardinality();
 
 		final int newSize = oldSize - removeCount;
@@ -79,10 +76,10 @@ public abstract class AbstractInstancer<P extends InstancePart> implements Insta
 
 			if (i != j) {
 				var handle = handles.get(i);
-				P element = data.get(i);
+				I instance = instances.get(i);
 
 				handles.set(j, handle);
-				data.set(j, element);
+				instances.set(j, instance);
 
 				handle.setIndex(j);
 				changed.set(j);
@@ -90,18 +87,18 @@ public abstract class AbstractInstancer<P extends InstancePart> implements Insta
 		}
 
 		deleted.clear();
-		data.subList(newSize, oldSize)
+		instances.subList(newSize, oldSize)
 				.clear();
 		handles.subList(newSize, oldSize)
 				.clear();
 	}
 
 	/**
-	 * Clear all instance data without freeing resources.
+	 * Clear all instances without freeing resources.
 	 */
 	public void clear() {
-		handles.forEach(HandleImpl::clear);
-		data.clear();
+		handles.forEach(InstanceHandleImpl::clear);
+		instances.clear();
 		handles.clear();
 		changed.clear();
 		deleted.clear();

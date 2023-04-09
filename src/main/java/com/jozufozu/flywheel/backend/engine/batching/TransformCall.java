@@ -2,9 +2,9 @@ package com.jozufozu.flywheel.backend.engine.batching;
 
 import java.util.List;
 
+import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.InstanceVertexTransformer;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.struct.InstancePart;
-import com.jozufozu.flywheel.api.struct.StructVertexTransformer;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
@@ -15,15 +15,15 @@ import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 
-public class TransformCall<P extends InstancePart> {
-	private final CPUInstancer<P> instancer;
+public class TransformCall<I extends Instance> {
+	private final CPUInstancer<I> instancer;
 	private final Material material;
 	private final BatchedMeshPool.BufferedMesh mesh;
 
 	private final int meshVertexCount;
 	private final int meshByteSize;
 
-	public TransformCall(CPUInstancer<P> instancer, Material material, BatchedMeshPool.BufferedMesh mesh) {
+	public TransformCall(CPUInstancer<I> instancer, Material material, BatchedMeshPool.BufferedMesh mesh) {
 		this.instancer = instancer;
 		this.material = material;
 		this.mesh = mesh;
@@ -64,18 +64,18 @@ public class TransformCall<P extends InstancePart> {
 		transformList(vertexList, instancer.getAll(), matrices, level);
 	}
 
-	public void transformList(ReusableVertexList vertexList, List<P> parts, PoseStack.Pose matrices, ClientLevel level) {
+	public void transformList(ReusableVertexList vertexList, List<I> instances, PoseStack.Pose matrices, ClientLevel level) {
 		long anchorPtr = vertexList.ptr();
 		int totalVertexCount = vertexList.vertexCount();
 
 		vertexList.vertexCount(meshVertexCount);
 
-		StructVertexTransformer<P> structVertexTransformer = instancer.type.getVertexTransformer();
+		InstanceVertexTransformer<I> instanceVertexTransformer = instancer.type.getVertexTransformer();
 
-		for (P p : parts) {
+		for (I instance : instances) {
 			mesh.copyTo(vertexList.ptr());
 
-			structVertexTransformer.transform(vertexList, p, level);
+			instanceVertexTransformer.transform(vertexList, instance, level);
 
 			vertexList.ptr(vertexList.ptr() + meshByteSize);
 		}

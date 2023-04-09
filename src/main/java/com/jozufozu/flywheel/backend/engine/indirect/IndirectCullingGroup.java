@@ -12,8 +12,8 @@ import static org.lwjgl.opengl.GL45.glVertexArrayElementBuffer;
 import static org.lwjgl.opengl.GL45.glVertexArrayVertexBuffer;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.struct.InstancePart;
-import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.Pipelines;
 import com.jozufozu.flywheel.backend.compile.FlwCompiler;
@@ -22,14 +22,14 @@ import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.util.QuadConverter;
 
-public class IndirectCullingGroup<P extends InstancePart> {
+public class IndirectCullingGroup<I extends Instance> {
 
 	private static final int BARRIER_BITS = GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT;
 
 	final GlProgram compute;
 	final GlProgram draw;
 	private final VertexType vertexType;
-	private final long objectStride;
+	private final long instanceStride;
 
 	final IndirectBuffers buffers;
 
@@ -38,18 +38,18 @@ public class IndirectCullingGroup<P extends InstancePart> {
 
 	int vertexArray;
 
-	final IndirectDrawSet<P> drawSet = new IndirectDrawSet<>();
+	final IndirectDrawSet<I> drawSet = new IndirectDrawSet<>();
 
 	private boolean hasCulledThisFrame;
 	private boolean needsMemoryBarrier;
 	private int instanceCountThisFrame;
 
-	IndirectCullingGroup(StructType<P> structType, VertexType vertexType) {
+	IndirectCullingGroup(InstanceType<I> instanceType, VertexType vertexType) {
 		this.vertexType = vertexType;
 
-		objectStride = structType.getLayout()
+		instanceStride = instanceType.getLayout()
 				.getStride();
-		buffers = new IndirectBuffers(objectStride);
+		buffers = new IndirectBuffers(instanceStride);
 		buffers.createBuffers();
 		buffers.createObjectStorage(128);
 		buffers.createDrawStorage(2);
@@ -62,8 +62,8 @@ public class IndirectCullingGroup<P extends InstancePart> {
 				.quads2Tris(2048).glBuffer;
 		setupVertexArray();
 
-		compute = FlwCompiler.INSTANCE.getCullingProgram(structType);
-		draw = FlwCompiler.INSTANCE.getPipelineProgram(vertexType, structType, Contexts.WORLD, Pipelines.INDIRECT);
+		compute = FlwCompiler.INSTANCE.getCullingProgram(instanceType);
+		draw = FlwCompiler.INSTANCE.getPipelineProgram(vertexType, instanceType, Contexts.WORLD, Pipelines.INDIRECT);
 	}
 
 	private void setupVertexArray() {
@@ -110,7 +110,7 @@ public class IndirectCullingGroup<P extends InstancePart> {
 
 		buffers.updateCounts(instanceCountThisFrame, drawSet.size());
 		meshPool.flush();
-		uploadInstanceData();
+		uploadInstances();
 		uploadIndirectCommands();
 
 		UniformBuffer.syncAndBind(compute);
@@ -143,7 +143,7 @@ public class IndirectCullingGroup<P extends InstancePart> {
 		}
 	}
 
-	private void uploadInstanceData() {
+	private void uploadInstances() {
 		long objectPtr = buffers.objectPtr;
 		long batchIDPtr = buffers.batchPtr;
 
@@ -153,7 +153,7 @@ public class IndirectCullingGroup<P extends InstancePart> {
 					.getInstanceCount();
 			batch.writeObjects(objectPtr, batchIDPtr, i);
 
-			objectPtr += instanceCount * objectStride;
+			objectPtr += instanceCount * instanceStride;
 			batchIDPtr += instanceCount * IndirectBuffers.INT_SIZE;
 		}
 

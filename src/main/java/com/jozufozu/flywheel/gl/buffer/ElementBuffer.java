@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.gl.buffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 public class ElementBuffer {
-
 	protected final int elementCount;
 	protected final VertexFormat.IndexType eboIndexType;
 	public final int glBuffer;

@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.RenderBuffers;
 
 public record RenderContext(LevelRenderer renderer, ClientLevel level, PoseStack stack, Matrix4f viewProjection,
 							Matrix4f projection, RenderBuffers buffers, Camera camera, FrustumIntersection culler) {
-
 	@NotNull
 	public static Matrix4f createViewProjection(PoseStack view, Matrix4f projection) {
 		var viewProjection = projection.copy();

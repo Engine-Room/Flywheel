@@ -19,13 +19,13 @@
     "PausedPartialTickAccessor",
     "RenderTypeMixin",
     "VertexFormatMixin",
-    "instancemanage.ChunkRebuildHooksMixin",
-    "instancemanage.InstanceAddMixin",
-    "instancemanage.InstanceRemoveMixin",
-    "instancemanage.InstanceUpdateMixin",
     "matrix.Matrix3fAccessor",
     "matrix.Matrix4fAccessor",
-    "matrix.PoseStackMixin"
+    "matrix.PoseStackMixin",
+    "visualmanage.ChunkRebuildHooksMixin",
+    "visualmanage.VisualAddMixin",
+    "visualmanage.VisualRemoveMixin",
+    "visualmanage.VisualUpdateMixin"
   ],
   "injectors": {
     "defaultRequire": 1

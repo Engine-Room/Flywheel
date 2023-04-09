@@ -7,11 +7,11 @@ import org.joml.Vector4fc;
 
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
-import com.jozufozu.flywheel.lib.format.Formats;
-import com.jozufozu.flywheel.lib.format.PosTexNormalVertex;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.ModelUtil;
 import com.jozufozu.flywheel.lib.model.QuadMesh;
+import com.jozufozu.flywheel.lib.vertex.PosTexNormalVertex;
+import com.jozufozu.flywheel.lib.vertex.VertexTypes;
 
 public class ModelPart implements QuadMesh {
 	private final int vertexCount;
@@ -45,7 +45,7 @@ public class ModelPart implements QuadMesh {
 
 	@Override
 	public PosTexNormalVertex getVertexType() {
-		return Formats.POS_TEX_NORMAL;
+		return VertexTypes.POS_TEX_NORMAL;
 	}
 
 	@Override

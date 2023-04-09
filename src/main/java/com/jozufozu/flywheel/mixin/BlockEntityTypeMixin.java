@@ -4,7 +4,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-import com.jozufozu.flywheel.api.instance.controller.BlockEntityInstancingController;
+import com.jozufozu.flywheel.api.visualization.BlockEntityVisualizer;
 import com.jozufozu.flywheel.extension.BlockEntityTypeExtension;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -13,16 +13,16 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 @Mixin(BlockEntityType.class)
 public class BlockEntityTypeMixin<T extends BlockEntity> implements BlockEntityTypeExtension<T> {
 	@Unique
-	private BlockEntityInstancingController<? super T> flywheel$instancingController;
+	private BlockEntityVisualizer<? super T> flywheel$visualizer;
 
 	@Override
 	@Nullable
-	public BlockEntityInstancingController<? super T> flywheel$getInstancingController() {
-		return flywheel$instancingController;
+	public BlockEntityVisualizer<? super T> flywheel$getVisualizer() {
+		return flywheel$visualizer;
 	}
 
 	@Override
-	public void flywheel$setInstancingController(@Nullable BlockEntityInstancingController<? super T> instancingController) {
-		this.flywheel$instancingController = instancingController;
+	public void flywheel$setVisualizer(@Nullable BlockEntityVisualizer<? super T> visualizer) {
+		this.flywheel$visualizer = visualizer;
 	}
 }

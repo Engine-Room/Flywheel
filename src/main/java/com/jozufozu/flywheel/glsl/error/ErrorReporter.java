@@ -112,5 +112,4 @@ public class ErrorReporter {
 
 		LOGGER.error(builder.toString());
 	}
-
 }

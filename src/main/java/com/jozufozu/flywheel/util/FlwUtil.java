@@ -20,7 +20,7 @@ public final class FlwUtil {
 	}
 
 	@Contract("null -> false")
-	public static boolean canUseInstancing(@Nullable LevelAccessor level) {
+	public static boolean canUseVisualization(@Nullable LevelAccessor level) {
 		return BackendManager.isOn() && isFlywheelLevel(level);
 	}
 

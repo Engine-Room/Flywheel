@@ -2,8 +2,6 @@ package com.jozufozu.flywheel.lib.model;
 
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Mesh;
@@ -13,16 +11,11 @@ import com.jozufozu.flywheel.util.NonNullSupplier;
 
 public class SimpleLazyModel implements Model {
 	private final Lazy<Mesh> supplier;
-	private Material material;
+	private final Material material;
 
 	public SimpleLazyModel(NonNullSupplier<Mesh> supplier, Material material) {
 		this.supplier = Lazy.of(supplier);
 		this.material = material;
-	}
-
-	public SimpleLazyModel setMaterial(@NotNull Material material) {
-		this.material = material;
-		return this;
 	}
 
 	@Override

@@ -15,18 +15,18 @@ import com.jozufozu.flywheel.handler.ForgeEvents;
 import com.jozufozu.flywheel.impl.BackendManagerImpl;
 import com.jozufozu.flywheel.impl.IdRegistryImpl;
 import com.jozufozu.flywheel.impl.RegistryImpl;
-import com.jozufozu.flywheel.impl.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.impl.visualization.VisualizedRenderDispatcher;
 import com.jozufozu.flywheel.lib.context.Contexts;
-import com.jozufozu.flywheel.lib.format.Formats;
+import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.model.PartialModel;
-import com.jozufozu.flywheel.lib.struct.StructTypes;
 import com.jozufozu.flywheel.lib.util.QuadConverter;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
+import com.jozufozu.flywheel.lib.vertex.VertexTypes;
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
-import com.jozufozu.flywheel.vanilla.VanillaInstances;
+import com.jozufozu.flywheel.vanilla.VanillaVisuals;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.commands.synchronization.ArgumentTypes;
@@ -82,9 +82,9 @@ public class Flywheel {
 		forgeEventBus.addListener(Models::onReloadRenderers);
 		forgeEventBus.addListener(DrawBuffer::onReloadRenderers);
 
-		forgeEventBus.addListener(InstancedRenderDispatcher::onRenderStage);
-		forgeEventBus.addListener(InstancedRenderDispatcher::onBeginFrame);
-		forgeEventBus.addListener(InstancedRenderDispatcher::tick);
+		forgeEventBus.addListener(VisualizedRenderDispatcher::onRenderStage);
+		forgeEventBus.addListener(VisualizedRenderDispatcher::onBeginFrame);
+		forgeEventBus.addListener(VisualizedRenderDispatcher::tick);
 
 		forgeEventBus.addListener(EntityWorldHandler::onEntityJoinWorld);
 		forgeEventBus.addListener(EntityWorldHandler::onEntityLeaveWorld);
@@ -107,14 +107,14 @@ public class Flywheel {
 
 		ShadersModHandler.init();
 
-		Formats.init();
-		StructTypes.init();
+		VertexTypes.init();
+		InstanceTypes.init();
 		Materials.init();
 		Contexts.init();
 
 		MaterialIndices.init();
 
-		VanillaInstances.init();
+		VanillaVisuals.init();
 
 		// https://github.com/Jozufozu/Flywheel/issues/69
 		// Weird issue with accessor loading.

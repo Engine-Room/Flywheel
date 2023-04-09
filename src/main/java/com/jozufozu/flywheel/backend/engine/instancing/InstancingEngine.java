@@ -8,10 +8,10 @@ import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instancer.Instancer;
+import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.InstanceType;
+import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.api.struct.InstancePart;
-import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.Pipelines;
 import com.jozufozu.flywheel.backend.compile.FlwCompiler;
@@ -41,7 +41,7 @@ public class InstancingEngine implements Engine {
 	}
 
 	@Override
-	public <P extends InstancePart> Instancer<P> instancer(StructType<P> type, Model model, RenderStage stage) {
+	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, RenderStage stage) {
 		return drawManager.getInstancer(type, model, stage);
 	}
 
@@ -104,9 +104,9 @@ public class InstancingEngine implements Engine {
 	private void setup(ShaderState desc) {
 		var material = desc.material();
 		var vertexType = desc.vertexType();
-		var structType = desc.instanceType();
+		var instanceType = desc.instanceType();
 
-		var program = FlwCompiler.INSTANCE.getPipelineProgram(vertexType, structType, context, Pipelines.INSTANCED_ARRAYS);
+		var program = FlwCompiler.INSTANCE.getPipelineProgram(vertexType, instanceType, context, Pipelines.INSTANCED_ARRAYS);
 		UniformBuffer.syncAndBind(program);
 
 		var uniformLocation = program.getUniformLocation("_flw_materialID_instancing");

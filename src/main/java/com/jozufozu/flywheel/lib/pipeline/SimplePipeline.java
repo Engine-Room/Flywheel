@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.lib.pipeline;
 
+import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.pipeline.Pipeline;
-import com.jozufozu.flywheel.api.struct.StructType;
 import com.jozufozu.flywheel.gl.GLSLVersion;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 
@@ -21,9 +21,9 @@ public final class SimplePipeline implements Pipeline {
 	}
 
 	/**
-	 * Generate the source component necessary to convert a packed {@link StructType} into its shader representation.
+	 * Generate the source component necessary to convert a packed {@link InstanceType} into its shader representation.
 	 *
-	 * @return A source component defining functions that unpack a representation of the given struct type.
+	 * @return A source component defining functions that unpack a representation of the given instance type.
 	 */
 	@Override
 	public SourceComponent assemble(InstanceAssemblerContext context) {

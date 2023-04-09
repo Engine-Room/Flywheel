@@ -2,21 +2,21 @@ package com.jozufozu.flywheel.backend.engine.batching;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.api.struct.InstancePart;
-import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 
-public class CPUInstancer<P extends InstancePart> extends AbstractInstancer<P> {
-	public CPUInstancer(StructType<P> type) {
+public class CPUInstancer<I extends Instance> extends AbstractInstancer<I> {
+	public CPUInstancer(InstanceType<I> type) {
 		super(type);
 	}
 
-	public List<P> getRange(int start, int end) {
-		return data.subList(start, end);
+	public List<I> getRange(int start, int end) {
+		return instances.subList(start, end);
 	}
 
-	public List<P> getAll() {
-		return data;
+	public List<I> getAll() {
+		return instances;
 	}
 
 	public void update() {

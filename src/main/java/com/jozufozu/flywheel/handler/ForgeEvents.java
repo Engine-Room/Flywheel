@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.handler;
 import java.util.ArrayList;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.impl.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.impl.visualization.VisualizedRenderDispatcher;
 import com.jozufozu.flywheel.lib.light.LightUpdater;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.util.FlwUtil;
@@ -22,7 +22,7 @@ public class ForgeEvents {
 			debug.add("");
 			debug.add("Flywheel: " + Flywheel.getVersion());
 
-			InstancedRenderDispatcher.addDebugInfo(debug);
+			VisualizedRenderDispatcher.addDebugInfo(debug);
 
 			debug.add("Memory Usage: CPU: " + StringUtil.formatBytes(FlwMemoryTracker.getCPUMemory()) + ", GPU: " + StringUtil.formatBytes(FlwMemoryTracker.getGPUMemory()));
 		}
