@@ -20,7 +20,7 @@ public class PlanUtil {
 	}
 
 	public static Plan of(Runnable... tasks) {
-		return new SimplePlan(List.of(tasks));
+		return SimplePlan.of(tasks);
 	}
 
 	public static Plan onMainThread(Runnable task) {
