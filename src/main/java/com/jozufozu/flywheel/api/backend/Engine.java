@@ -5,6 +5,7 @@ import java.util.List;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instancer.InstancerProvider;
+import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 
 import net.minecraft.client.Camera;
@@ -28,4 +29,6 @@ public interface Engine extends InstancerProvider {
 	void addDebugInfo(List<String> info);
 
 	void delete();
+
+	Plan planThisFrame(RenderContext context);
 }

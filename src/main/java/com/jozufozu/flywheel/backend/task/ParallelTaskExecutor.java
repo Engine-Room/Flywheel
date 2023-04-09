@@ -3,7 +3,9 @@ package com.jozufozu.flywheel.backend.task;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +36,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 
 	private final List<WorkerThread> threads = new ArrayList<>();
 	private final Deque<Runnable> taskQueue = new ConcurrentLinkedDeque<>();
+	private final Queue<Runnable> mainThreadQueue = new ConcurrentLinkedQueue<>();
 
 	private final Object taskNotifier = new Object();
 	private final Object tasksCompletedNotifier = new Object();
@@ -118,8 +121,17 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		}
 
 		synchronized (taskNotifier) {
-			taskNotifier.notify();
+			taskNotifier.notifyAll();
 		}
+	}
+
+	@Override
+	public void scheduleForMainThread(Runnable runnable) {
+		if (!running.get()) {
+			throw new IllegalStateException("Executor is stopped");
+		}
+
+		mainThreadQueue.add(runnable);
 	}
 
 	/**
@@ -130,7 +142,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		Runnable task;
 
 		// Finish everyone else's work...
-		while ((task = taskQueue.pollLast()) != null) {
+		while ((task = pollForSyncPoint()) != null) {
 			processTask(task);
 		}
 
@@ -144,6 +156,15 @@ public class ParallelTaskExecutor implements TaskExecutor {
 				}
 			}
 		}
+	}
+
+	@Nullable
+	private Runnable pollForSyncPoint() {
+		Runnable task = mainThreadQueue.poll();
+		if (task != null) {
+			return task;
+		}
+		return taskQueue.pollLast();
 	}
 
 	public void discardAndAwait() {

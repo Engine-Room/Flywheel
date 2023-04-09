@@ -9,7 +9,9 @@ import com.jozufozu.flywheel.api.instancer.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.struct.InstancePart;
 import com.jozufozu.flywheel.api.struct.StructType;
+import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.lib.task.PlanUtil;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -32,17 +34,34 @@ public class BatchingEngine implements Engine {
 	public void beginFrame(TaskExecutor executor, RenderContext context) {
 		transformManager.flush();
 
-		Vec3 cameraPos = context.camera().getPosition();
+		Vec3 cameraPos = context.camera()
+				.getPosition();
 		var stack = FlwUtil.copyPoseStack(context.stack());
 		stack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
-		// TODO: async task executor barriers
 		executor.syncPoint();
 		submitTasks(executor, stack.last(), context.level());
 	}
 
+	@Override
+	public Plan planThisFrame(RenderContext context) {
+		return PlanUtil.of(transformManager::flush)
+				.then(planTransformers(context));
+	}
+
+	private Plan planTransformers(RenderContext context) {
+		Vec3 cameraPos = context.camera()
+				.getPosition();
+		var stack = FlwUtil.copyPoseStack(context.stack());
+		stack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+
+		// TODO: planify batching engine
+		return PlanUtil.of();
+	}
+
 	private void submitTasks(TaskExecutor executor, PoseStack.Pose matrices, ClientLevel level) {
-		for (var transformSetEntry : transformManager.getTransformSetsView().entrySet()) {
+		for (var transformSetEntry : transformManager.getTransformSetsView()
+				.entrySet()) {
 			var stage = transformSetEntry.getKey();
 			var transformSet = transformSetEntry.getValue();
 
