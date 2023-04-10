@@ -76,7 +76,9 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	 */
 	public Vector3f getVisualPosition() {
 		Vec3 pos = entity.position();
-		return new Vector3f((float) (pos.x - renderOrigin.getX()), (float) (pos.y - renderOrigin.getY()), (float) (pos.z - renderOrigin.getZ()));
+		return new Vector3f((float) (pos.x - renderOrigin.getX()),
+				(float) (pos.y - renderOrigin.getY()),
+				(float) (pos.z - renderOrigin.getZ()));
 	}
 
 	/**
@@ -88,11 +90,22 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	 */
 	public Vector3f getVisualPosition(float partialTicks) {
 		Vec3 pos = entity.position();
-		return new Vector3f((float) (Mth.lerp(partialTicks, entity.xOld, pos.x) - renderOrigin.getX()), (float) (Mth.lerp(partialTicks, entity.yOld, pos.y) - renderOrigin.getY()), (float) (Mth.lerp(partialTicks, entity.zOld, pos.z) - renderOrigin.getZ()));
+		return new Vector3f((float) (Mth.lerp(partialTicks, entity.xOld, pos.x) - renderOrigin.getX()),
+				(float) (Mth.lerp(partialTicks, entity.yOld, pos.y) - renderOrigin.getY()),
+				(float) (Mth.lerp(partialTicks, entity.zOld, pos.z) - renderOrigin.getZ()));
 	}
 
 	public boolean isVisible(FrustumIntersection frustum) {
-		AABB aabb = entity.getBoundingBox();
-		return frustum.testAab((float) aabb.minX, (float) aabb.minY, (float) aabb.minZ, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ);
+		if (entity.noCulling) {
+			return true;
+		}
+
+		AABB aabb = entity.getBoundingBoxForCulling();
+		return frustum.testAab((float) (aabb.minX - renderOrigin.getX()) - 0.5f,
+				(float) (aabb.minY - renderOrigin.getY()) - 0.5f,
+				(float) (aabb.minZ - renderOrigin.getZ()) - 0.5f,
+				(float) (aabb.maxX - renderOrigin.getX()) + 0.5f,
+				(float) (aabb.maxY - renderOrigin.getY()) + 0.5f,
+				(float) (aabb.maxZ - renderOrigin.getZ()) + 0.5f);
 	}
 }

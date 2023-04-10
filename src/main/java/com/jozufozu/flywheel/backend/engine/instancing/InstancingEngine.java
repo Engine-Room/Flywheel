@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL32;
 
-import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
@@ -15,29 +14,22 @@ import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.Pipelines;
 import com.jozufozu.flywheel.backend.compile.FlwCompiler;
+import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.world.phys.Vec3;
 
-public class InstancingEngine implements Engine {
+public class InstancingEngine extends AbstractEngine {
 	private final Context context;
-	private final int sqrMaxOriginDistance;
-
 	private final InstancingDrawManager drawManager = new InstancingDrawManager();
 
-	private BlockPos renderOrigin = BlockPos.ZERO;
-
-	public InstancingEngine(Context context, int maxOriginDistance) {
+	public InstancingEngine(int maxOriginDistance, Context context) {
+		super(maxOriginDistance);
 		this.context = context;
-		this.sqrMaxOriginDistance = maxOriginDistance * maxOriginDistance;
 	}
 
 	@Override
@@ -116,25 +108,8 @@ public class InstancingEngine implements Engine {
 	}
 
 	@Override
-	public boolean updateRenderOrigin(Camera camera) {
-		Vec3 cameraPos = camera.getPosition();
-		double dx = renderOrigin.getX() - cameraPos.x;
-		double dy = renderOrigin.getY() - cameraPos.y;
-		double dz = renderOrigin.getZ() - cameraPos.z;
-		double distanceSqr = dx * dx + dy * dy + dz * dz;
-
-		if (distanceSqr <= sqrMaxOriginDistance) {
-			return false;
-		}
-
-		renderOrigin = new BlockPos(cameraPos);
+	protected void onRenderOriginChanged() {
 		drawManager.clearInstancers();
-		return true;
-	}
-
-	@Override
-	public Vec3i renderOrigin() {
-		return renderOrigin;
 	}
 
 	@Override

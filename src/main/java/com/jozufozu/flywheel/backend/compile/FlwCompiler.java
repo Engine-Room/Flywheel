@@ -112,7 +112,7 @@ public class FlwCompiler {
 			var details = errors.stream()
 					.map(FailedCompilation::getMessage)
 					.collect(Collectors.joining("\n"));
-			throw new ShaderLoadingException("Compilation failed.\n" + details);
+//			throw new ShaderLoadingException("Compilation failed.\n" + details);
 		}
 	}
 

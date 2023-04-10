@@ -72,6 +72,14 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 		super.init();
 	}
 
+	private Direction getDirection() {
+		if (blockState.getBlock() instanceof ShulkerBoxBlock) {
+			return blockState.getValue(ShulkerBoxBlock.FACING);
+		}
+
+		return Direction.UP;
+	}
+
 	@Override
 	public void beginFrame() {
 		float progress = blockEntity.getProgress(AnimationTickHolder.getPartialTicks());
@@ -138,13 +146,5 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 				.invertYZ()
 				.endCuboid()
 				.build();
-	}
-
-	private Direction getDirection() {
-		if (blockState.getBlock() instanceof ShulkerBoxBlock) {
-			return blockState.getValue(ShulkerBoxBlock.FACING);
-		}
-
-		return Direction.UP;
 	}
 }

@@ -19,7 +19,7 @@ public class Backends {
 	 */
 	public static final Backend BATCHING = SimpleBackend.builder()
 			.engineMessage(new TextComponent("Using Batching Engine").withStyle(ChatFormatting.GREEN))
-			.engineFactory(level -> new BatchingEngine())
+			.engineFactory(level -> new BatchingEngine(256))
 			.supported(() -> !ShadersModHandler.isShaderPackInUse())
 			.register(Flywheel.rl("batching"));
 
@@ -28,7 +28,7 @@ public class Backends {
 	 */
 	public static final Backend INSTANCING = SimpleBackend.builder()
 			.engineMessage(new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN))
-			.engineFactory(level -> new InstancingEngine(Contexts.WORLD, 100))
+			.engineFactory(level -> new InstancingEngine(256, Contexts.WORLD))
 			.fallback(() -> Backends.BATCHING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
 					.instancedArraysSupported())
@@ -40,7 +40,7 @@ public class Backends {
 	 */
 	public static final Backend INDIRECT = SimpleBackend.builder()
 			.engineMessage(new TextComponent("Using Indirect Engine").withStyle(ChatFormatting.GREEN))
-			.engineFactory(level -> new IndirectEngine(100))
+			.engineFactory(level -> new IndirectEngine(256))
 			.fallback(() -> Backends.INSTANCING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
 					.supportsIndirect())
