@@ -1,9 +1,5 @@
 package com.jozufozu.flywheel.api.event;
 
-import org.jetbrains.annotations.NotNull;
-import org.joml.FrustumIntersection;
-
-import com.jozufozu.flywheel.lib.math.MatrixUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
@@ -12,20 +8,12 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 
-public record RenderContext(LevelRenderer renderer, ClientLevel level, PoseStack stack, Matrix4f viewProjection,
-							Matrix4f projection, RenderBuffers buffers, Camera camera, FrustumIntersection culler) {
-	@NotNull
-	public static Matrix4f createViewProjection(PoseStack view, Matrix4f projection) {
-		var viewProjection = projection.copy();
-		viewProjection.multiply(view.last().pose());
-		return viewProjection;
-	}
+public record RenderContext(LevelRenderer renderer, ClientLevel level, RenderBuffers buffers, PoseStack stack,
+							Matrix4f projection, Matrix4f viewProjection, Camera camera) {
+	public static RenderContext create(LevelRenderer renderer, ClientLevel level, RenderBuffers buffers, PoseStack stack, Matrix4f projection, Camera camera) {
+		Matrix4f viewProjection = projection.copy();
+		viewProjection.multiply(stack.last().pose());
 
-	public static FrustumIntersection createCuller(Matrix4f viewProjection, float camX, float camY, float camZ) {
-		org.joml.Matrix4f proj = MatrixUtil.toJoml(viewProjection);
-
-		proj.translate(camX, camY, camZ);
-
-		return new FrustumIntersection(proj);
+		return new RenderContext(renderer, level, buffers, stack, projection, viewProjection, camera);
 	}
 }

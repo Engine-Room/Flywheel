@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL32;
 
-import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
@@ -12,25 +11,18 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.world.phys.Vec3;
 
-public class IndirectEngine implements Engine {
-	private final int sqrMaxOriginDistance;
-
+public class IndirectEngine extends AbstractEngine {
 	private final IndirectDrawManager drawManager = new IndirectDrawManager();
 
-	private BlockPos renderOrigin = BlockPos.ZERO;
-
 	public IndirectEngine(int maxOriginDistance) {
-		this.sqrMaxOriginDistance = maxOriginDistance * maxOriginDistance;
+		super(maxOriginDistance);
 	}
 
 	@Override
@@ -68,25 +60,8 @@ public class IndirectEngine implements Engine {
 	}
 
 	@Override
-	public boolean updateRenderOrigin(Camera camera) {
-		Vec3 cameraPos = camera.getPosition();
-		double dx = renderOrigin.getX() - cameraPos.x;
-		double dy = renderOrigin.getY() - cameraPos.y;
-		double dz = renderOrigin.getZ() - cameraPos.z;
-		double distanceSqr = dx * dx + dy * dy + dz * dz;
-
-		if (distanceSqr <= sqrMaxOriginDistance) {
-			return false;
-		}
-
-		renderOrigin = new BlockPos(cameraPos);
+	protected void onRenderOriginChanged() {
 		drawManager.clearInstancers();
-		return true;
-	}
-
-	@Override
-	public Vec3i renderOrigin() {
-		return renderOrigin;
 	}
 
 	@Override

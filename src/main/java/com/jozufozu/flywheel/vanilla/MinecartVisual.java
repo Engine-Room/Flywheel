@@ -24,8 +24,8 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVisual<T> implements DynamicVisual, TickableVisual {
-	private static final SimpleLazyModel BODY_MODEL = new SimpleLazyModel(MinecartVisual::getBodyMesh, Materials.MINECART);
+public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVisual<T> implements TickableVisual, DynamicVisual {
+	private static final SimpleLazyModel BODY_MODEL = new SimpleLazyModel(MinecartVisual::createBodyMesh, Materials.MINECART);
 
 	private final PoseStack stack = new PoseStack();
 
@@ -45,11 +45,6 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		contents = createContentsInstance();
 
 		super.init();
-	}
-
-	@Override
-	public boolean decreaseFramerateWithDistance() {
-		return false;
 	}
 
 	@Override
@@ -140,6 +135,11 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	}
 
 	@Override
+	public boolean decreaseFramerateWithDistance() {
+		return false;
+	}
+
+	@Override
 	public void updateLight() {
 		if (contents == null) {
 			relight(entity.blockPosition(), body);
@@ -154,6 +154,11 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		if (contents != null) {
 			contents.delete();
 		}
+	}
+
+	private TransformedInstance createBodyInstance() {
+		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, BODY_MODEL, RenderStage.AFTER_ENTITIES)
+				.createInstance();
 	}
 
 	private TransformedInstance createContentsInstance() {
@@ -174,13 +179,8 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 				.createInstance();
 	}
 
-	private TransformedInstance createBodyInstance() {
-		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, BODY_MODEL, RenderStage.AFTER_ENTITIES)
-				.createInstance();
-	}
-
 	@NotNull
-	private static ModelPart getBodyMesh() {
+	private static ModelPart createBodyMesh() {
 		int y = -3;
 		return ModelPart.builder("minecart", 64, 32)
 				.cuboid().invertYZ().start(-10, -8, -y).size(20, 16, 2).textureOffset(0, 10).rotateZ((float) Math.PI).rotateX(((float)Math.PI / 2F)).endCuboid()

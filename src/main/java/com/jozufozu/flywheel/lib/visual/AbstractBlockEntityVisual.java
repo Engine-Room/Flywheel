@@ -69,10 +69,11 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	 * represents should be rendered at to appear in the correct location.
 	 */
 	public BlockPos getVisualPosition() {
-		return pos.subtract(renderOrigin);
+		return visualPos;
 	}
 
 	public boolean isVisible(FrustumIntersection frustum) {
-		return frustum.testAab(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
+		return frustum.testAab(visualPos.getX(), visualPos.getY(), visualPos.getZ(),
+				visualPos.getX() + 1, visualPos.getY() + 1, visualPos.getZ() + 1);
 	}
 }

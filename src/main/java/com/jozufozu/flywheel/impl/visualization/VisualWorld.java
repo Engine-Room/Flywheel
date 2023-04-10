@@ -19,7 +19,9 @@ import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityVisualManager
 import com.jozufozu.flywheel.impl.visualization.manager.EffectVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EntityVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.VisualManager;
+import com.jozufozu.flywheel.lib.math.MatrixUtil;
 
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -93,16 +95,20 @@ public class VisualWorld implements AutoCloseable {
 		taskExecutor.syncPoint();
 
 		if (!originChanged) {
+			Vec3i renderOrigin = engine.renderOrigin();
 			var cameraPos = context.camera()
 					.getPosition();
 			double cameraX = cameraPos.x;
 			double cameraY = cameraPos.y;
 			double cameraZ = cameraPos.z;
-			FrustumIntersection culler = context.culler();
 
-			blockEntities.beginFrame(taskExecutor, cameraX, cameraY, cameraZ, culler);
-			entities.beginFrame(taskExecutor, cameraX, cameraY, cameraZ, culler);
-			effects.beginFrame(taskExecutor, cameraX, cameraY, cameraZ, culler);
+			org.joml.Matrix4f proj = MatrixUtil.toJoml(context.viewProjection());
+			proj.translate((float) (renderOrigin.getX() - cameraX), (float) (renderOrigin.getY() - cameraY), (float) (renderOrigin.getZ() - cameraZ));
+			FrustumIntersection frustum = new FrustumIntersection(proj);
+
+			blockEntities.beginFrame(taskExecutor, cameraX, cameraY, cameraZ, frustum);
+			entities.beginFrame(taskExecutor, cameraX, cameraY, cameraZ, frustum);
+			effects.beginFrame(taskExecutor, cameraX, cameraY, cameraZ, frustum);
 		}
 
 		engine.beginFrame(taskExecutor, context);
