@@ -35,6 +35,6 @@ public class InstanceUpdateMixin {
 		}
 
 		InstancedRenderDispatcher.getBlockEntities(level)
-				.update(blockEntity);
+				.queueUpdate(blockEntity);
 	}
 }

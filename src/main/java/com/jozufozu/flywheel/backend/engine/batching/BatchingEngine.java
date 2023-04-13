@@ -82,6 +82,10 @@ public class BatchingEngine implements Engine {
 
 	@Override
 	public void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage) {
+		if (!drawTracker.hasStage(stage)) {
+			return;
+		}
+		executor.syncPoint();
 		drawTracker.draw(stage);
 	}
 

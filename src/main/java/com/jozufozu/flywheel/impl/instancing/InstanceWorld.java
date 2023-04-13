@@ -70,11 +70,11 @@ public class InstanceWorld implements AutoCloseable {
 	 * </p>
 	 */
 	public void tick(double cameraX, double cameraY, double cameraZ) {
-		var blockEntityPlan = blockEntities.planThisTick(cameraX, cameraY, cameraZ);
-		var entityPlan = entities.planThisTick(cameraX, cameraY, cameraZ);
-		var effectPlan = effects.planThisTick(cameraX, cameraY, cameraZ);
+		taskExecutor.syncPoint();
 
-		PlanUtil.of(blockEntityPlan, entityPlan, effectPlan)
+		blockEntities.planThisTick(cameraX, cameraY, cameraZ)
+				.and(entities.planThisTick(cameraX, cameraY, cameraZ))
+				.and(effects.planThisTick(cameraX, cameraY, cameraZ))
 				.maybeSimplify()
 				.execute(taskExecutor);
 	}
@@ -114,7 +114,6 @@ public class InstanceWorld implements AutoCloseable {
 	 * Draw all instances for the given stage.
 	 */
 	public void renderStage(RenderContext context, RenderStage stage) {
-		taskExecutor.syncPoint();
 		engine.renderStage(taskExecutor, context, stage);
 	}
 

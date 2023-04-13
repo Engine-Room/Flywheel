@@ -81,4 +81,9 @@ public class BatchingDrawTracker {
 			buffers.clear();
 		}
 	}
+
+	public boolean hasStage(RenderStage stage) {
+		return !activeBuffers.get(stage)
+				.isEmpty();
+	}
 }

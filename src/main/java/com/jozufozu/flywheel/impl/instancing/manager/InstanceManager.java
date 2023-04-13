@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.joml.FrustumIntersection;
 
 import com.jozufozu.flywheel.api.instance.DynamicInstance;
-import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.TickableInstance;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.config.FlwConfig;
@@ -15,7 +14,8 @@ import com.jozufozu.flywheel.impl.instancing.ratelimit.DistanceUpdateLimiter;
 import com.jozufozu.flywheel.impl.instancing.ratelimit.NonLimiter;
 import com.jozufozu.flywheel.impl.instancing.storage.Storage;
 import com.jozufozu.flywheel.impl.instancing.storage.Transaction;
-import com.jozufozu.flywheel.lib.task.PlanUtil;
+import com.jozufozu.flywheel.lib.task.RunOnAllPlan;
+import com.jozufozu.flywheel.lib.task.SimplePlan;
 
 public abstract class InstanceManager<T> {
 	private final Queue<Transaction<T>> queue = new ConcurrentLinkedQueue<>();
@@ -47,14 +47,6 @@ public abstract class InstanceManager<T> {
 		return getStorage().getAllInstances().size();
 	}
 
-	public void add(T obj) {
-		if (!getStorage().willAccept(obj)) {
-			return;
-		}
-
-		getStorage().add(obj);
-	}
-
 	public void queueAdd(T obj) {
 		if (!getStorage().willAccept(obj)) {
 			return;
@@ -63,31 +55,8 @@ public abstract class InstanceManager<T> {
 		queue.add(Transaction.add(obj));
 	}
 
-	public void remove(T obj) {
-		getStorage().remove(obj);
-	}
-
 	public void queueRemove(T obj) {
 		queue.add(Transaction.remove(obj));
-	}
-
-	/**
-	 * Update the instance associated with an object.
-	 *
-	 * <p>
-	 *     By default this is the only hook an {@link Instance} has to change its internal state. This is the lowest frequency
-	 *     update hook {@link Instance} gets. For more frequent updates, see {@link TickableInstance} and
-	 *     {@link DynamicInstance}.
-	 * </p>
-	 *
-	 * @param obj the object to update.
-	 */
-	public void update(T obj) {
-		if (!getStorage().willAccept(obj)) {
-			return;
-		}
-
-		getStorage().update(obj);
 	}
 
 	public void queueUpdate(T obj) {
@@ -115,9 +84,11 @@ public abstract class InstanceManager<T> {
 	}
 
 	public Plan planThisTick(double cameraX, double cameraY, double cameraZ) {
-		tickLimiter.tick();
-		processQueue();
-		return PlanUtil.runOnAll(getStorage()::getTickableInstances, instance -> tickInstance(instance, cameraX, cameraY, cameraZ));
+		return SimplePlan.of(() -> {
+					tickLimiter.tick();
+					processQueue();
+				})
+				.then(RunOnAllPlan.of(getStorage()::getTickableInstances, instance -> tickInstance(instance, cameraX, cameraY, cameraZ)));
 	}
 
 	protected void tickInstance(TickableInstance instance, double cameraX, double cameraY, double cameraZ) {
@@ -127,9 +98,11 @@ public abstract class InstanceManager<T> {
 	}
 
 	public Plan planThisFrame(double cameraX, double cameraY, double cameraZ, FrustumIntersection frustum) {
-		frameLimiter.tick();
-		processQueue();
-		return PlanUtil.runOnAll(getStorage()::getDynamicInstances, instance -> updateInstance(instance, cameraX, cameraY, cameraZ, frustum));
+		return SimplePlan.of(() -> {
+					frameLimiter.tick();
+					processQueue();
+				})
+				.then(RunOnAllPlan.of(getStorage()::getDynamicInstances, instance -> updateInstance(instance, cameraX, cameraY, cameraZ, frustum)));
 	}
 
 	protected void updateInstance(DynamicInstance instance, double cameraX, double cameraY, double cameraZ, FrustumIntersection frustum) {
