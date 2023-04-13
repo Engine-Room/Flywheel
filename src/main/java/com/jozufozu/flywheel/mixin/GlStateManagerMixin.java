@@ -11,18 +11,18 @@ import com.mojang.blaze3d.platform.GlStateManager;
 
 @Mixin(GlStateManager.class)
 public class GlStateManagerMixin {
-	@Inject(method = "_glBindBuffer", at = @At("TAIL"))
-	private static void flywheel$onBindBuffer(int pTarget, int pBuffer, CallbackInfo ci) {
-		GlStateTracker._setBuffer(GlBufferType.fromTarget(pTarget), pBuffer);
+	@Inject(method = "_glBindBuffer(II)V", at = @At("RETURN"))
+	private static void flywheel$onBindBuffer(int target, int buffer, CallbackInfo ci) {
+		GlStateTracker._setBuffer(GlBufferType.fromTarget(target), buffer);
 	}
 
-	@Inject(method = "_glBindVertexArray", at = @At("TAIL"))
-	private static void flywheel$onBindVertexArray(int pArray, CallbackInfo ci) {
-		GlStateTracker._setVertexArray(pArray);
+	@Inject(method = "_glBindVertexArray(I)V", at = @At("RETURN"))
+	private static void flywheel$onBindVertexArray(int array, CallbackInfo ci) {
+		GlStateTracker._setVertexArray(array);
 	}
 
-	@Inject(method = "_glUseProgram", at = @At("TAIL"))
-	private static void flywheel$onUseProgram(int pProgram, CallbackInfo ci) {
-		GlStateTracker._setProgram(pProgram);
+	@Inject(method = "_glUseProgram(I)V", at = @At("RETURN"))
+	private static void flywheel$onUseProgram(int program, CallbackInfo ci) {
+		GlStateTracker._setProgram(program);
 	}
 }

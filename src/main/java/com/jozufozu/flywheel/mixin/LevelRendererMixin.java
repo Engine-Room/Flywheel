@@ -38,26 +38,27 @@ public class LevelRendererMixin {
 	@Unique
 	private RenderContext flywheel$renderContext;
 
-	@Inject(at = @At("HEAD"), method = "renderLevel")
-	private void flywheel$beginRender(PoseStack pPoseStack, float pPartialTick, long pFinishNanoTime, boolean pRenderBlockOutline, Camera pCamera, GameRenderer pGameRenderer, LightTexture pLightTexture, Matrix4f pProjectionMatrix, CallbackInfo ci) {
-		flywheel$renderContext = RenderContext.create((LevelRenderer) (Object) this, level, renderBuffers, pPoseStack, pProjectionMatrix, pCamera);
+	@Inject(method = "renderLevel", at = @At("HEAD"))
+	private void flywheel$beginRender(PoseStack poseStack, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
+		flywheel$renderContext = RenderContext.create((LevelRenderer) (Object) this, level, renderBuffers, poseStack, projectionMatrix, camera);
 
 		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(flywheel$renderContext));
 	}
 
-	@Inject(at = @At("TAIL"), method = "renderLevel")
-	private void flywheel$endRender(PoseStack pPoseStack, float pPartialTick, long pFinishNanoTime, boolean pRenderBlockOutline, Camera pCamera, GameRenderer pGameRenderer, LightTexture pLightTexture, Matrix4f pProjectionMatrix, CallbackInfo ci) {
+	@Inject(method = "renderLevel", at = @At("RETURN"))
+	private void flywheel$endRender(CallbackInfo ci) {
 		flywheel$renderContext = null;
 	}
 
-	@Inject(at = @At("TAIL"), method = "allChanged")
+	@Inject(method = "allChanged", at = @At("RETURN"))
 	private void flywheel$refresh(CallbackInfo ci) {
 		MinecraftForge.EVENT_BUS.post(new ReloadRenderersEvent(level));
 	}
 
-//	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderBuffers;crumblingBufferSource()Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;", ordinal = 2, shift = Shift.BY, by = 2 // after the game renders the breaking overlay normally
-//	), method = "renderLevel")
-//	private void flywheel$renderCrumbling(PoseStack poseStack, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
+//	// after the game renders the breaking overlay normally
+//	@Inject(method = "renderLevel",
+//			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderBuffers;crumblingBufferSource()Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;", ordinal = 2, shift = Shift.BY, by = 2))
+//	private void flywheel$renderCrumbling(CallbackInfo ci) {
 //		if (flywheel$renderContext != null) {
 //			// TODO: Crumbling
 //		}

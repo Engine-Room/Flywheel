@@ -46,22 +46,22 @@ public abstract class BufferBuilderMixin implements BufferBuilderExtension {
 
 	@Override
 	public void flywheel$freeBuffer() {
-		if (this.buffer != null) {
-			MemoryUtil.memFree(this.buffer);
-			this.buffer = null;
+		if (buffer != null) {
+			MemoryUtil.memFree(buffer);
+			buffer = null;
 		}
 	}
 
 	@Override
 	public void flywheel$injectForRender(@NotNull ByteBuffer buffer, @NotNull VertexFormat format, int vertexCount) {
-		this.building = true;
-		this.mode = VertexFormat.Mode.QUADS;
+		building = true;
+		mode = VertexFormat.Mode.QUADS;
 
 		this.buffer = buffer;
 		this.format = format;
-		this.vertices = vertexCount;
+		vertices = vertexCount;
 
-		this.currentElement = this.format.getElements().get(0);
-		this.elementIndex = 0;
+		currentElement = format.getElements().get(0);
+		elementIndex = 0;
 	}
 }

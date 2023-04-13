@@ -64,24 +64,24 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	}
 
 	@Override
-	public TransformedInstance scale(float pX, float pY, float pZ) {
+	public TransformedInstance scale(float x, float y, float z) {
 		setChanged();
 
-		model.multiply(Matrix4f.createScaleMatrix(pX, pY, pZ));
-		if (pX == pY && pY == pZ) {
-			if (pX > 0.0F) {
-				return this;
+		model.multiply(Matrix4f.createScaleMatrix(x, y, z));
+
+		if (x == y && y == z) {
+			if (x < 0.0f) {
+				normal.mul(-1.0f);
 			}
 
-			normal.mul(-1.0F);
 			return this;
 		}
 
-		float f = 1.0F / pX;
-		float f1 = 1.0F / pY;
-		float f2 = 1.0F / pZ;
-		float f3 = Mth.fastInvCubeRoot(Math.abs(f * f1 * f2));
-		normal.mul(Matrix3f.createScaleMatrix(f3 * f, f3 * f1, f3 * f2));
+		float invX = 1.0f / x;
+		float invY = 1.0f / y;
+		float invZ = 1.0f / z;
+		float f = Mth.fastInvCubeRoot(Math.abs(invX * invY * invZ));
+		normal.mul(Matrix3f.createScaleMatrix(f * invX, f * invY, f * invZ));
 		return this;
 	}
 

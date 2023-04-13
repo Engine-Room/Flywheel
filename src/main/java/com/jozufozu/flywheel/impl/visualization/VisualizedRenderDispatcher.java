@@ -166,7 +166,7 @@ public class VisualizedRenderDispatcher {
 
 	public static <T extends BlockEntity> boolean tryAddBlockEntity(T blockEntity) {
 		Level level = blockEntity.getLevel();
-		if (FlwUtil.canUseVisualization(level)) {
+		if (!FlwUtil.canUseVisualization(level)) {
 			return false;
 		}
 

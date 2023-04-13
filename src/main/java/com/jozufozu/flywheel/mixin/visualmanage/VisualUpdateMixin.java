@@ -23,13 +23,13 @@ public class VisualUpdateMixin {
 	/**
 	 * This gets called when a block is marked for rerender by vanilla.
 	 */
-	@Inject(at = @At("TAIL"), method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;)V")
-	private void flywheel$checkUpdate(BlockPos pos, BlockState lastState, BlockState newState, CallbackInfo ci) {
+	@Inject(method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;)V", at = @At("TAIL"))
+	private void flywheel$checkUpdate(BlockPos pos, BlockState oldState, BlockState newState, CallbackInfo ci) {
 		if (!FlwUtil.canUseVisualization(level)) {
 			return;
 		}
-		BlockEntity blockEntity = level.getBlockEntity(pos);
 
+		BlockEntity blockEntity = level.getBlockEntity(pos);
 		if (blockEntity == null) {
 			return;
 		}

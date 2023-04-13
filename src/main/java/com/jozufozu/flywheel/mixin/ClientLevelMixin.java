@@ -27,15 +27,17 @@ public abstract class ClientLevelMixin implements ClientLevelExtension {
 		return getEntities().getAll();
 	}
 
-	@Inject(method = "entitiesForRendering", at = @At("RETURN"), cancellable = true)
+	@Inject(method = "entitiesForRendering()Ljava/lang/Iterable;", at = @At("RETURN"), cancellable = true)
 	private void flywheel$filterEntities(CallbackInfoReturnable<Iterable<Entity>> cir) {
-		if (FlwUtil.canUseVisualization((ClientLevel) (Object) this)) {
-			Iterable<Entity> entities = cir.getReturnValue();
-			ArrayList<Entity> filtered = Lists.newArrayList(entities);
-
-			filtered.removeIf(VisualizationHelper::shouldSkipRender);
-
-			cir.setReturnValue(filtered);
+		if (!FlwUtil.canUseVisualization((ClientLevel) (Object) this)) {
+			return;
 		}
+
+		Iterable<Entity> entities = cir.getReturnValue();
+		ArrayList<Entity> filtered = Lists.newArrayList(entities);
+
+		filtered.removeIf(VisualizationHelper::shouldSkipRender);
+
+		cir.setReturnValue(filtered);
 	}
 }
