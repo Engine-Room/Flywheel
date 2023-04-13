@@ -53,6 +53,12 @@ public class IndirectEngine implements Engine {
 
 	@Override
 	public void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage) {
+		if (!drawManager.hasStage(stage)) {
+			return;
+		}
+
+		executor.syncPoint();
+
 		try (var restoreState = GlStateTracker.getRestoreState()) {
 			setup();
 

@@ -24,7 +24,7 @@ public class InstanceRemoveMixin {
 	private void flywheel$removeInstance(CallbackInfo ci) {
 		if (level instanceof ClientLevel && FlwUtil.canUseInstancing(level)) {
 			InstancedRenderDispatcher.getBlockEntities(level)
-					.remove((BlockEntity) (Object) this);
+					.queueRemove((BlockEntity) (Object) this);
 		}
 	}
 

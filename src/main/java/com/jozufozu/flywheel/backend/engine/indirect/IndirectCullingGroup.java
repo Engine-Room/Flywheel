@@ -185,4 +185,7 @@ public class IndirectCullingGroup<P extends InstancePart> {
 		meshPool.delete();
 	}
 
+	public boolean hasStage(RenderStage stage) {
+		return drawSet.contains(stage);
+	}
 }

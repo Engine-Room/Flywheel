@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.api.task;
 
 import com.jozufozu.flywheel.lib.task.BarrierPlan;
+import com.jozufozu.flywheel.lib.task.NestedPlan;
 
 public interface Plan {
 	/**
@@ -22,11 +23,21 @@ public interface Plan {
 	 * Create a new plan that executes this plan, then the given plan.
 	 *
 	 * @param plan The plan to execute after this plan.
-	 * @return The new, composed plan.
+	 * @return The composed plan.
 	 */
 	default Plan then(Plan plan) {
 		// TODO: AbstractPlan?
 		return new BarrierPlan(this, plan);
+	}
+
+	/**
+	 * Create a new plan that executes this plan and the given plan in parallel.
+	 *
+	 * @param plan The plan to execute in parallel with this plan.
+	 * @return The composed plan.
+	 */
+	default Plan and(Plan plan) {
+		return NestedPlan.of(this, plan);
 	}
 
 	/**

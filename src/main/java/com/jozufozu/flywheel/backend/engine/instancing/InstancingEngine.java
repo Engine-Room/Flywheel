@@ -66,6 +66,8 @@ public class InstancingEngine implements Engine {
 			return;
 		}
 
+		executor.syncPoint();
+
 		try (var state = GlStateTracker.getRestoreState()) {
 			setup();
 

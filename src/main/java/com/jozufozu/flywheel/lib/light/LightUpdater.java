@@ -1,6 +1,8 @@
 package com.jozufozu.flywheel.lib.light;
 
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.lib.box.ImmutableBox;
@@ -26,6 +28,8 @@ public class LightUpdater {
 	private final WeakContainmentMultiMap<LightListener> listenersBySection = new WeakContainmentMultiMap<>();
 	private final Set<TickingLightListener> tickingListeners = FlwUtil.createWeakHashSet();
 
+	private final Queue<LightListener> queue = new ConcurrentLinkedQueue<>();
+
 	public static LightUpdater get(LevelAccessor level) {
 		if (LightUpdated.receivesLightUpdates(level)) {
 			// The level is valid, add it to the map.
@@ -41,8 +45,8 @@ public class LightUpdater {
 	}
 
 	public void tick() {
+		processQueue();
 		tickSerial();
-		//tickParallel();
 	}
 
 	private void tickSerial() {
@@ -59,8 +63,20 @@ public class LightUpdater {
 	 * @param listener The object that wants to receive light update notifications.
 	 */
 	public void addListener(LightListener listener) {
-		if (listener instanceof TickingLightListener)
+		queue.add(listener);
+	}
+
+	private synchronized void processQueue() {
+		LightListener listener;
+		while ((listener = queue.poll()) != null) {
+			doAdd(listener);
+		}
+	}
+
+	private void doAdd(LightListener listener) {
+		if (listener instanceof TickingLightListener) {
 			tickingListeners.add(((TickingLightListener) listener));
+		}
 
 		ImmutableBox box = listener.getVolume();
 
@@ -94,9 +110,13 @@ public class LightUpdater {
 	 * @param pos  The section position where light changed.
 	 */
 	public void onLightUpdate(LightLayer type, SectionPos pos) {
+		processQueue();
+
 		Set<LightListener> listeners = listenersBySection.get(pos.asLong());
 
-		if (listeners == null || listeners.isEmpty()) return;
+		if (listeners == null || listeners.isEmpty()) {
+			return;
+		}
 
 		listeners.removeIf(LightListener::isInvalid);
 

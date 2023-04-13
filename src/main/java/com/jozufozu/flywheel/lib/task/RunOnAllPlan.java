@@ -8,16 +8,19 @@ import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 
 public record RunOnAllPlan<T>(Supplier<List<T>> listSupplier, Consumer<T> action) implements Plan {
+	public static <T> Plan of(Supplier<List<T>> iterable, Consumer<T> forEach) {
+		return new RunOnAllPlan<>(iterable, forEach);
+	}
+
 	@Override
 	public void execute(TaskExecutor taskExecutor, Runnable onCompletion) {
-		// TODO: unit tests, fix CME?
 		taskExecutor.execute(() -> {
 			var list = listSupplier.get();
 			final int size = list.size();
 
 			if (size == 0) {
 				onCompletion.run();
-			} else if (size <= getChunkingThreshold(taskExecutor)) {
+			} else if (size <= getChunkingThreshold()) {
 				processList(list, onCompletion);
 			} else {
 				dispatchChunks(list, taskExecutor, onCompletion);
@@ -27,12 +30,9 @@ public record RunOnAllPlan<T>(Supplier<List<T>> listSupplier, Consumer<T> action
 
 	private void dispatchChunks(List<T> suppliedList, TaskExecutor taskExecutor, Runnable onCompletion) {
 		final int size = suppliedList.size();
-		final int threadCount = taskExecutor.getThreadCount();
+		final int chunkSize = getChunkSize(taskExecutor, size);
 
-		final int chunkSize = (size + threadCount - 1) / threadCount; // ceiling division
-		final int chunkCount = (size + chunkSize - 1) / chunkSize; // ceiling division
-
-		var synchronizer = new Synchronizer(chunkCount, onCompletion);
+		var synchronizer = new Synchronizer(ceilingDiv(size, chunkSize), onCompletion);
 		int remaining = size;
 
 		while (remaining > 0) {
@@ -45,6 +45,14 @@ public record RunOnAllPlan<T>(Supplier<List<T>> listSupplier, Consumer<T> action
 		}
 	}
 
+	private static int getChunkSize(TaskExecutor taskExecutor, int totalSize) {
+		return ceilingDiv(totalSize, taskExecutor.getThreadCount() * 32);
+	}
+
+	private static int ceilingDiv(int numerator, int denominator) {
+		return (numerator + denominator - 1) / denominator;
+	}
+
 	private void processList(List<T> suppliedList, Runnable onCompletion) {
 		for (T t : suppliedList) {
 			action.accept(t);
@@ -52,7 +60,7 @@ public record RunOnAllPlan<T>(Supplier<List<T>> listSupplier, Consumer<T> action
 		onCompletion.run();
 	}
 
-	private static int getChunkingThreshold(TaskExecutor taskExecutor) {
-		return 512;
+	private static int getChunkingThreshold() {
+		return 256;
 	}
 }

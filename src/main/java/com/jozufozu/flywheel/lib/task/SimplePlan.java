@@ -18,7 +18,7 @@ public record SimplePlan(List<Runnable> parallelTasks) implements Plan {
 		}
 
 		var synchronizer = new Synchronizer(parallelTasks.size(), onCompletion);
-		for (Runnable task : parallelTasks) {
+		for (var task : parallelTasks) {
 			taskExecutor.execute(() -> {
 				task.run();
 				synchronizer.decrementAndEventuallyRun();

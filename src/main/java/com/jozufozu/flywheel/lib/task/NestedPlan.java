@@ -4,12 +4,13 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 
 public record NestedPlan(List<Plan> parallelPlans) implements Plan {
 	public static NestedPlan of(Plan... plans) {
-		return new NestedPlan(List.of(plans));
+		return new NestedPlan(ImmutableList.copyOf(plans));
 	}
 
 	@Override
@@ -31,6 +32,14 @@ public record NestedPlan(List<Plan> parallelPlans) implements Plan {
 		for (Plan plan : parallelPlans) {
 			plan.execute(taskExecutor, wait::decrementAndEventuallyRun);
 		}
+	}
+
+	@Override
+	public Plan and(Plan plan) {
+		return new NestedPlan(ImmutableList.<Plan>builder()
+				.addAll(parallelPlans)
+				.add(plan)
+				.build());
 	}
 
 	@Override

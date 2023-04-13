@@ -28,7 +28,7 @@ public class EntityWorldHandler {
 
 		if (FlwUtil.canUseInstancing(level)) {
 			InstancedRenderDispatcher.getEntities(level)
-					.remove(event.getEntity());
+					.queueRemove(event.getEntity());
 		}
 	}
 }

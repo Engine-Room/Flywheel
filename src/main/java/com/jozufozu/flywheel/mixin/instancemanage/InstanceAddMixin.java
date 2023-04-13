@@ -25,7 +25,7 @@ public class InstanceAddMixin {
 	private void flywheel$onBlockEntityAdded(BlockEntity blockEntity, CallbackInfo ci) {
 		if (level.isClientSide && FlwUtil.canUseInstancing(level)) {
 			InstancedRenderDispatcher.getBlockEntities(level)
-					.add(blockEntity);
+					.queueAdd(blockEntity);
 		}
 	}
 }
