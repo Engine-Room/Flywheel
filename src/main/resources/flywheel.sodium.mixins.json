@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.jozufozu.flywheel.mixin.sodium",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "flywheel.refmap.json",
+  "plugin": "com.jozufozu.flywheel.compat.SodiumMixinConfigPlugin",
+  "client": [
+    "ChunkRenderRebuildTaskMixin",
+    "FlywheelCompatMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

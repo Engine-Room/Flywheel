@@ -6,6 +6,7 @@ import com.jozufozu.flywheel.api.event.BeginFrameEvent;
 import com.jozufozu.flywheel.api.event.RenderStageEvent;
 import com.jozufozu.flywheel.api.visual.Effect;
 import com.jozufozu.flywheel.api.visual.Visual;
+import com.jozufozu.flywheel.api.visualization.BlockEntityVisualizer;
 import com.jozufozu.flywheel.extension.ClientLevelExtension;
 import com.jozufozu.flywheel.impl.visualization.manager.VisualManager;
 import com.jozufozu.flywheel.lib.util.AnimationTickHolder;
@@ -161,6 +162,22 @@ public class VisualizedRenderDispatcher {
 		// Entities are loaded with the level, so when chunks are reloaded they need to be re-added.
 		ClientLevelExtension.getAllLoadedEntities(level)
 				.forEach(world.getEntities()::add);
+	}
+
+	public static <T extends BlockEntity> boolean tryAddBlockEntity(T blockEntity) {
+		Level level = blockEntity.getLevel();
+		if (FlwUtil.canUseVisualization(level)) {
+			return false;
+		}
+
+		BlockEntityVisualizer<? super T> visualizer = VisualizationHelper.getVisualizer(blockEntity);
+		if (visualizer == null) {
+			return false;
+		}
+
+		getBlockEntities(level).queueAdd(blockEntity);
+
+		return visualizer.shouldSkipRender(blockEntity);
 	}
 
 	public static void addDebugInfo(List<String> info) {
