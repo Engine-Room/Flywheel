@@ -10,7 +10,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.jozufozu.flywheel.impl.visualization.VisualizedRenderDispatcher;
 import com.jozufozu.flywheel.util.FlwUtil;
 
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -20,11 +19,13 @@ public class VisualRemoveMixin {
 	@Nullable
 	protected Level level;
 
-	@Inject(at = @At("TAIL"), method = "setRemoved")
+	@Inject(method = "setRemoved()V", at = @At("TAIL"))
 	private void flywheel$removeVisual(CallbackInfo ci) {
-		if (level instanceof ClientLevel && FlwUtil.canUseVisualization(level)) {
-			VisualizedRenderDispatcher.getBlockEntities(level)
-					.remove((BlockEntity) (Object) this);
+		if (!FlwUtil.canUseVisualization(level)) {
+			return;
 		}
+
+		VisualizedRenderDispatcher.getBlockEntities(level)
+				.remove((BlockEntity) (Object) this);
 	}
 }

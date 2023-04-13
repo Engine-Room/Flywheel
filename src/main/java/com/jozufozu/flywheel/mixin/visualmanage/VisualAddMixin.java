@@ -20,12 +20,14 @@ public class VisualAddMixin {
 	@Final
 	Level level;
 
-	@Inject(method = "setBlockEntity",
+	@Inject(method = "setBlockEntity(Lnet/minecraft/world/level/block/entity/BlockEntity;)V",
 			at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))
 	private void flywheel$onBlockEntityAdded(BlockEntity blockEntity, CallbackInfo ci) {
-		if (level.isClientSide && FlwUtil.canUseVisualization(level)) {
-			VisualizedRenderDispatcher.getBlockEntities(level)
-					.add(blockEntity);
+		if (!FlwUtil.canUseVisualization(level)) {
+			return;
 		}
+
+		VisualizedRenderDispatcher.getBlockEntities(level)
+				.add(blockEntity);
 	}
 }
