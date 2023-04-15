@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -99,10 +100,12 @@ public class ParallelTaskExecutor implements TaskExecutor {
 
 		threads.clear();
 		taskQueue.clear();
+		mainThreadQueue.clear();
+		waitGroup._reset();
 	}
 
 	@Override
-	public void execute(Runnable task) {
+	public void execute(@NotNull Runnable task) {
 		if (!running.get()) {
 			throw new IllegalStateException("Executor is stopped");
 		}
@@ -130,29 +133,24 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	@Override
 	public void syncPoint() {
 		Runnable task;
-		// Finish everyone else's work...
 		while (true) {
 			if ((task = mainThreadQueue.poll()) != null) {
+				// Prioritize main thread tasks.
 				processMainThreadTask(task);
 			} else if ((task = taskQueue.pollLast()) != null) {
+				// then work on tasks from the queue.
 				processTask(task);
 			} else {
-				// and wait for any stragglers.
+				// then wait for the other threads to finish.
 				waitGroup.await();
+				// at this point there will be no more tasks in the queue, but
+				// one of the worker threads may have submitted a main thread task.
 				if (mainThreadQueue.isEmpty()) {
+					// if they didn't, we're done.
 					break;
 				}
 			}
 		}
-	}
-
-	@Nullable
-	private Runnable pollForSyncPoint() {
-		Runnable task = mainThreadQueue.poll();
-		if (task != null) {
-			return task;
-		}
-		return taskQueue.pollLast();
 	}
 
 	public void discardAndAwait() {
@@ -161,8 +159,9 @@ public class ParallelTaskExecutor implements TaskExecutor {
 			waitGroup.done();
 		}
 
-		// and wait for any stragglers.
+		// ...wait for any stragglers...
 		waitGroup.await();
+		// ...and clear the main thread queue.
 		mainThreadQueue.clear();
 	}
 
@@ -183,7 +182,6 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		return task;
 	}
 
-	// TODO: task context
 	private void processTask(Runnable task) {
 		try {
 			task.run();
