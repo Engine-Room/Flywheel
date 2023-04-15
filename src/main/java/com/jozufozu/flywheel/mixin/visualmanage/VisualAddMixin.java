@@ -28,6 +28,6 @@ public class VisualAddMixin {
 		}
 
 		VisualizedRenderDispatcher.getBlockEntities(level)
-				.add(blockEntity);
+				.queueAdd(blockEntity);
 	}
 }

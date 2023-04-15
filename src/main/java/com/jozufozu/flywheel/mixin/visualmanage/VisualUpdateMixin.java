@@ -35,6 +35,6 @@ public class VisualUpdateMixin {
 		}
 
 		VisualizedRenderDispatcher.getBlockEntities(level)
-				.update(blockEntity);
+				.queueUpdate(blockEntity);
 	}
 }

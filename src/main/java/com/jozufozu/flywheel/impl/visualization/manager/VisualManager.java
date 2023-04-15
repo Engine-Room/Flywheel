@@ -1,22 +1,21 @@
 package com.jozufozu.flywheel.impl.visualization.manager;
 
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Consumer;
 
 import org.joml.FrustumIntersection;
 
-import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
-import com.jozufozu.flywheel.api.visual.Visual;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.impl.visualization.ratelimit.BandedPrimeLimiter;
 import com.jozufozu.flywheel.impl.visualization.ratelimit.DistanceUpdateLimiter;
 import com.jozufozu.flywheel.impl.visualization.ratelimit.NonLimiter;
 import com.jozufozu.flywheel.impl.visualization.storage.Storage;
 import com.jozufozu.flywheel.impl.visualization.storage.Transaction;
+import com.jozufozu.flywheel.lib.task.RunOnAllPlan;
+import com.jozufozu.flywheel.lib.task.SimplePlan;
 
 public abstract class VisualManager<T> {
 	private final Queue<Transaction<T>> queue = new ConcurrentLinkedQueue<>();
@@ -48,14 +47,6 @@ public abstract class VisualManager<T> {
 		return getStorage().getAllVisuals().size();
 	}
 
-	public void add(T obj) {
-		if (!getStorage().willAccept(obj)) {
-			return;
-		}
-
-		getStorage().add(obj);
-	}
-
 	public void queueAdd(T obj) {
 		if (!getStorage().willAccept(obj)) {
 			return;
@@ -64,31 +55,8 @@ public abstract class VisualManager<T> {
 		queue.add(Transaction.add(obj));
 	}
 
-	public void remove(T obj) {
-		getStorage().remove(obj);
-	}
-
 	public void queueRemove(T obj) {
 		queue.add(Transaction.remove(obj));
-	}
-
-	/**
-	 * Update the visual associated with an object.
-	 *
-	 * <p>
-	 *     By default this is the only hook a {@link Visual} has to change its internal state. This is the lowest frequency
-	 *     update hook {@link Visual} gets. For more frequent updates, see {@link TickableVisual} and
-	 *     {@link DynamicVisual}.
-	 * </p>
-	 *
-	 * @param obj the object whose visual will be updated.
-	 */
-	public void update(T obj) {
-		if (!getStorage().willAccept(obj)) {
-			return;
-		}
-
-		getStorage().update(obj);
 	}
 
 	public void queueUpdate(T obj) {
@@ -115,58 +83,32 @@ public abstract class VisualManager<T> {
 		}
 	}
 
-	/**
-	 * Ticks the VisualManager.
-	 *
-	 * <p>
-	 *     {@link TickableVisual}s get ticked.
-	 *     <br>
-	 *     Queued updates are processed.
-	 * </p>
-	 */
-	public void tick(TaskExecutor executor, double cameraX, double cameraY, double cameraZ) {
-		tickLimiter.tick();
-		processQueue();
-
-		var visuals = getStorage().getTickableVisuals();
-		distributeWork(executor, visuals, visual -> tickVisual(visual, cameraX, cameraY, cameraZ));
+	public Plan planThisTick(double cameraX, double cameraY, double cameraZ) {
+		return SimplePlan.of(() -> {
+					tickLimiter.tick();
+					processQueue();
+				})
+				.then(RunOnAllPlan.of(getStorage()::getTickableVisuals, instance -> tickInstance(instance, cameraX, cameraY, cameraZ)));
 	}
 
-	protected void tickVisual(TickableVisual visual, double cameraX, double cameraY, double cameraZ) {
-		if (!visual.decreaseTickRateWithDistance() || tickLimiter.shouldUpdate(visual.distanceSquared(cameraX, cameraY, cameraZ))) {
-			visual.tick();
+	protected void tickInstance(TickableVisual instance, double cameraX, double cameraY, double cameraZ) {
+		if (!instance.decreaseTickRateWithDistance() || tickLimiter.shouldUpdate(instance.distanceSquared(cameraX, cameraY, cameraZ))) {
+			instance.tick();
 		}
 	}
 
-	public void beginFrame(TaskExecutor executor, double cameraX, double cameraY, double cameraZ, FrustumIntersection frustum) {
-		frameLimiter.tick();
-		processQueue();
-
-		var visuals = getStorage().getDynamicVisuals();
-		distributeWork(executor, visuals, visual -> updateVisual(visual, cameraX, cameraY, cameraZ, frustum));
+	public Plan planThisFrame(double cameraX, double cameraY, double cameraZ, FrustumIntersection frustum) {
+		return SimplePlan.of(() -> {
+					frameLimiter.tick();
+					processQueue();
+				})
+				.then(RunOnAllPlan.of(getStorage()::getDynamicVisuals, instance -> updateInstance(instance, cameraX, cameraY, cameraZ, frustum)));
 	}
 
-	protected void updateVisual(DynamicVisual visual, double cameraX, double cameraY, double cameraZ, FrustumIntersection frustum) {
-		if (!visual.decreaseFramerateWithDistance() || frameLimiter.shouldUpdate(visual.distanceSquared(cameraX, cameraY, cameraZ))) {
-			if (visual.isVisible(frustum)) {
-				visual.beginFrame();
-			}
-		}
-	}
-
-	private static <V> void distributeWork(TaskExecutor executor, List<V> visuals, Consumer<V> action) {
-		final int amount = visuals.size();
-		final int threadCount = executor.getThreadCount();
-
-		if (threadCount == 1) {
-			executor.execute(() -> visuals.forEach(action));
-		} else {
-			final int stride = Math.max(amount / (threadCount * 2), 1);
-			for (int start = 0; start < amount; start += stride) {
-				int end = Math.min(start + stride, amount);
-
-				var sub = visuals.subList(start, end);
-				executor.execute(() -> sub.forEach(action));
+	protected void updateInstance(DynamicVisual instance, double cameraX, double cameraY, double cameraZ, FrustumIntersection frustum) {
+		if (!instance.decreaseFramerateWithDistance() || frameLimiter.shouldUpdate(instance.distanceSquared(cameraX, cameraY, cameraZ))) {
+			if (instance.isVisible(frustum)) {
+				instance.beginFrame();
 			}
 		}
 	}

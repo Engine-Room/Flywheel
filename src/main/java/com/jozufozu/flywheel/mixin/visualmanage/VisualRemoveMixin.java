@@ -26,6 +26,6 @@ public class VisualRemoveMixin {
 		}
 
 		VisualizedRenderDispatcher.getBlockEntities(level)
-				.remove((BlockEntity) (Object) this);
+				.queueRemove((BlockEntity) (Object) this);
 	}
 }

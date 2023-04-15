@@ -10,10 +10,12 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
+import com.jozufozu.flywheel.lib.task.PlanUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
@@ -31,14 +33,24 @@ public class IndirectEngine extends AbstractEngine {
 	}
 
 	@Override
-	public void beginFrame(TaskExecutor executor, RenderContext context) {
-		try (var restoreState = GlStateTracker.getRestoreState()) {
+	public Plan planThisFrame(RenderContext context) {
+		return PlanUtil.onMainThread(this::flushDrawManager);
+	}
+
+	private void flushDrawManager() {
+		try (var state = GlStateTracker.getRestoreState()) {
 			drawManager.flush();
 		}
 	}
 
 	@Override
 	public void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage) {
+		if (!drawManager.hasStage(stage)) {
+			return;
+		}
+
+		executor.syncPoint();
+
 		try (var restoreState = GlStateTracker.getRestoreState()) {
 			setup();
 

@@ -1,8 +1,8 @@
 package com.jozufozu.flywheel.lib.model;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.api.model.Model;
@@ -16,9 +16,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class Models {
-	private static final Map<BlockState, Model> BLOCK_STATE = new HashMap<>();
-	private static final Map<PartialModel, Model> PARTIAL = new HashMap<>();
-	private static final Map<Pair<PartialModel, Direction>, Model> PARTIAL_DIR = new HashMap<>();
+	private static final Map<BlockState, Model> BLOCK_STATE = new ConcurrentHashMap<>();
+	private static final Map<PartialModel, Model> PARTIAL = new ConcurrentHashMap<>();
+	private static final Map<Pair<PartialModel, Direction>, Model> PARTIAL_DIR = new ConcurrentHashMap<>();
 
 	public static Model block(BlockState state) {
 		return BLOCK_STATE.computeIfAbsent(state, it -> new BlockModelBuilder(it).build());

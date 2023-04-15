@@ -28,7 +28,7 @@ public class EntityWorldHandler {
 
 		if (FlwUtil.canUseVisualization(level)) {
 			VisualizedRenderDispatcher.getEntities(level)
-					.remove(event.getEntity());
+					.queueRemove(event.getEntity());
 		}
 	}
 }

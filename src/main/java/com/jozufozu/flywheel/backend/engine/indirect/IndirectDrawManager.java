@@ -73,6 +73,15 @@ public class IndirectDrawManager {
 		initializedInstancers.add(instancer);
 	}
 
+	public boolean hasStage(RenderStage stage) {
+		for (var list : renderLists.values()) {
+			if (list.hasStage(stage)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private record UninitializedInstancer(IndirectInstancer<?> instancer, Model model, RenderStage stage) {
 	}
 }

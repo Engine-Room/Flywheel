@@ -1,13 +1,15 @@
 package com.jozufozu.flywheel.backend.engine.batching;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceVertexTransformer;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
+import com.jozufozu.flywheel.lib.task.SimplePlan;
 import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
@@ -40,8 +42,10 @@ public class TransformCall<I extends Instance> {
 		instancer.update();
 	}
 
-	public void submitTasks(TaskExecutor executor, DrawBuffer buffer, int startVertex, PoseStack.Pose matrices, ClientLevel level) {
+	public Plan getPlan(DrawBuffer buffer, int startVertex, PoseStack.Pose matrices, ClientLevel level) {
 		int instances = instancer.getInstanceCount();
+
+		var out = new ArrayList<Runnable>();
 
 		while (instances > 0) {
 			int end = instances;
@@ -52,8 +56,9 @@ public class TransformCall<I extends Instance> {
 			ReusableVertexList sub = buffer.slice(startVertex, vertexCount);
 			startVertex += vertexCount;
 
-			executor.execute(() -> transformRange(sub, start, end, matrices, level));
+			out.add(() -> transformRange(sub, start, end, matrices, level));
 		}
+		return new SimplePlan(out);
 	}
 
 	public void transformRange(ReusableVertexList vertexList, int from, int to, PoseStack.Pose matrices, ClientLevel level) {

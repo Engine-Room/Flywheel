@@ -9,4 +9,6 @@ public interface TaskExecutor extends Executor {
 	void syncPoint();
 
 	int getThreadCount();
+
+	void scheduleForMainThread(Runnable runnable);
 }

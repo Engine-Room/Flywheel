@@ -8,6 +8,7 @@ import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
+import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.Effect;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
@@ -20,6 +21,7 @@ import com.jozufozu.flywheel.impl.visualization.manager.EffectVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EntityVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.VisualManager;
 import com.jozufozu.flywheel.lib.math.MatrixUtil;
+import com.jozufozu.flywheel.lib.task.PlanUtil;
 
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.Entity;
@@ -70,9 +72,13 @@ public class VisualWorld implements AutoCloseable {
 	 * </p>
 	 */
 	public void tick(double cameraX, double cameraY, double cameraZ) {
-		blockEntities.tick(taskExecutor, cameraX, cameraY, cameraZ);
-		entities.tick(taskExecutor, cameraX, cameraY, cameraZ);
-		effects.tick(taskExecutor, cameraX, cameraY, cameraZ);
+		taskExecutor.syncPoint();
+
+		blockEntities.planThisTick(cameraX, cameraY, cameraZ)
+				.and(entities.planThisTick(cameraX, cameraY, cameraZ))
+				.and(effects.planThisTick(cameraX, cameraY, cameraZ))
+				.maybeSimplify()
+				.execute(taskExecutor);
 	}
 
 	/**
@@ -84,17 +90,17 @@ public class VisualWorld implements AutoCloseable {
 	 * </p>
 	 */
 	public void beginFrame(RenderContext context) {
-		boolean originChanged = engine.updateRenderOrigin(context.camera());
-
-		if (originChanged) {
-			blockEntities.recreateAll();
-			entities.recreateAll();
-			effects.recreateAll();
-		}
-
 		taskExecutor.syncPoint();
 
-		if (!originChanged) {
+		getManagerPlan(context).then(engine.planThisFrame(context))
+				.maybeSimplify()
+				.execute(taskExecutor);
+	}
+
+	private Plan getManagerPlan(RenderContext context) {
+		if (engine.updateRenderOrigin(context.camera())) {
+			return PlanUtil.of(blockEntities::recreateAll, entities::recreateAll, effects::recreateAll);
+		} else {
 			Vec3i renderOrigin = engine.renderOrigin();
 			var cameraPos = context.camera()
 					.getPosition();
@@ -106,19 +112,16 @@ public class VisualWorld implements AutoCloseable {
 			proj.translate((float) (renderOrigin.getX() - cameraX), (float) (renderOrigin.getY() - cameraY), (float) (renderOrigin.getZ() - cameraZ));
 			FrustumIntersection frustum = new FrustumIntersection(proj);
 
-			blockEntities.beginFrame(taskExecutor, cameraX, cameraY, cameraZ, frustum);
-			entities.beginFrame(taskExecutor, cameraX, cameraY, cameraZ, frustum);
-			effects.beginFrame(taskExecutor, cameraX, cameraY, cameraZ, frustum);
+			return blockEntities.planThisFrame(cameraX, cameraY, cameraZ, frustum)
+					.and(entities.planThisFrame(cameraX, cameraY, cameraZ, frustum))
+					.and(effects.planThisFrame(cameraX, cameraY, cameraZ, frustum));
 		}
-
-		engine.beginFrame(taskExecutor, context);
 	}
 
 	/**
 	 * Draw all visuals for the given stage.
 	 */
 	public void renderStage(RenderContext context, RenderStage stage) {
-		taskExecutor.syncPoint();
 		engine.renderStage(taskExecutor, context, stage);
 	}
 

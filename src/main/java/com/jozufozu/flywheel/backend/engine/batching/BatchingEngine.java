@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.engine.batching;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
@@ -8,12 +9,13 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
+import com.jozufozu.flywheel.lib.task.NestedPlan;
+import com.jozufozu.flywheel.lib.task.PlanUtil;
 import com.jozufozu.flywheel.util.FlwUtil;
-import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.phys.Vec3;
 
 public class BatchingEngine extends AbstractEngine {
@@ -30,20 +32,24 @@ public class BatchingEngine extends AbstractEngine {
 	}
 
 	@Override
-	public void beginFrame(TaskExecutor executor, RenderContext context) {
-		transformManager.flush();
-
-		var stack = FlwUtil.copyPoseStack(context.stack());
-		Vec3 cameraPos = context.camera().getPosition();
-		stack.translate(renderOrigin.getX() - cameraPos.x, renderOrigin.getY() - cameraPos.y, renderOrigin.getZ() - cameraPos.z);
-
-		// TODO: async task executor barriers
-		executor.syncPoint();
-		submitTasks(executor, stack.last(), context.level());
+	public Plan planThisFrame(RenderContext context) {
+		return PlanUtil.of(transformManager::flush)
+				.then(planTransformers(context));
 	}
 
-	private void submitTasks(TaskExecutor executor, PoseStack.Pose matrices, ClientLevel level) {
-		for (var transformSetEntry : transformManager.getTransformSetsView().entrySet()) {
+	private Plan planTransformers(RenderContext context) {
+		Vec3 cameraPos = context.camera()
+				.getPosition();
+		var stack = FlwUtil.copyPoseStack(context.stack());
+		stack.translate(renderOrigin.getX() - cameraPos.x, renderOrigin.getY() - cameraPos.y, renderOrigin.getZ() - cameraPos.z);
+
+		var matrices = stack.last();
+		var level = context.level();
+
+		var plans = new ArrayList<Plan>();
+
+		for (var transformSetEntry : transformManager.getTransformSetsView()
+				.entrySet()) {
 			var stage = transformSetEntry.getKey();
 			var transformSet = transformSetEntry.getValue();
 
@@ -66,15 +72,21 @@ public class BatchingEngine extends AbstractEngine {
 
 				int startVertex = 0;
 				for (var transformCall : transformCalls) {
-					transformCall.submitTasks(executor, buffer, startVertex, matrices, level);
+					plans.add(transformCall.getPlan(buffer, startVertex, matrices, level));
 					startVertex += transformCall.getTotalVertexCount();
 				}
 			}
 		}
+
+		return new NestedPlan(plans);
 	}
 
 	@Override
 	public void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage) {
+		if (!drawTracker.hasStage(stage)) {
+			return;
+		}
+		executor.syncPoint();
 		drawTracker.draw(stage);
 	}
 
