@@ -14,6 +14,11 @@ public class SerialTaskExecutor implements TaskExecutor {
 	}
 
 	@Override
+	public void scheduleForMainThread(Runnable runnable) {
+		runnable.run();
+	}
+
+	@Override
 	public void syncPoint() {
 	}
 

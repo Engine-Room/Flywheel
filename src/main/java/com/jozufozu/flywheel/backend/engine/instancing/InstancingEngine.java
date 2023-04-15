@@ -11,6 +11,7 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.Pipelines;
 import com.jozufozu.flywheel.backend.compile.FlwCompiler;
@@ -19,6 +20,7 @@ import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
+import com.jozufozu.flywheel.lib.task.PlanUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
@@ -38,8 +40,12 @@ public class InstancingEngine extends AbstractEngine {
 	}
 
 	@Override
-	public void beginFrame(TaskExecutor executor, RenderContext context) {
-		try (var state = GlStateTracker.getRestoreState()) {
+	public Plan planThisFrame(RenderContext context) {
+		return PlanUtil.onMainThread(this::flushDrawManager);
+	}
+
+	private void flushDrawManager() {
+		try (var restoreState = GlStateTracker.getRestoreState()) {
 			drawManager.flush();
 		}
 	}
@@ -51,6 +57,8 @@ public class InstancingEngine extends AbstractEngine {
 		if (drawSet.isEmpty()) {
 			return;
 		}
+
+		executor.syncPoint();
 
 		try (var state = GlStateTracker.getRestoreState()) {
 			setup();

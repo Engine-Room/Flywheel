@@ -3,14 +3,18 @@ package com.jozufozu.flywheel.backend.task;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.lib.task.WaitGroup;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.util.Mth;
@@ -27,16 +31,13 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	 * If set to false, the executor will shut down.
 	 */
 	private final AtomicBoolean running = new AtomicBoolean(false);
-	/**
-	 * Synchronized via {@link #tasksCompletedNotifier}.
-	 */
-	private int incompleteTaskCounter = 0;
 
 	private final List<WorkerThread> threads = new ArrayList<>();
 	private final Deque<Runnable> taskQueue = new ConcurrentLinkedDeque<>();
+	private final Queue<Runnable> mainThreadQueue = new ConcurrentLinkedQueue<>();
 
 	private final Object taskNotifier = new Object();
-	private final Object tasksCompletedNotifier = new Object();
+	private final WaitGroup waitGroup = new WaitGroup();
 
 	public ParallelTaskExecutor(String name) {
 		this.name = name;
@@ -99,27 +100,31 @@ public class ParallelTaskExecutor implements TaskExecutor {
 
 		threads.clear();
 		taskQueue.clear();
-		synchronized (tasksCompletedNotifier) {
-			incompleteTaskCounter = 0;
-			tasksCompletedNotifier.notifyAll();
-		}
+		mainThreadQueue.clear();
+		waitGroup._reset();
 	}
 
 	@Override
-	public void execute(Runnable task) {
+	public void execute(@NotNull Runnable task) {
 		if (!running.get()) {
 			throw new IllegalStateException("Executor is stopped");
 		}
 
+		waitGroup.add();
 		taskQueue.add(task);
 
-		synchronized (tasksCompletedNotifier) {
-			incompleteTaskCounter++;
+		synchronized (taskNotifier) {
+			taskNotifier.notifyAll();
+		}
+	}
+
+	@Override
+	public void scheduleForMainThread(Runnable runnable) {
+		if (!running.get()) {
+			throw new IllegalStateException("Executor is stopped");
 		}
 
-		synchronized (taskNotifier) {
-			taskNotifier.notify();
-		}
+		mainThreadQueue.add(runnable);
 	}
 
 	/**
@@ -128,19 +133,21 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	@Override
 	public void syncPoint() {
 		Runnable task;
-
-		// Finish everyone else's work...
-		while ((task = taskQueue.pollLast()) != null) {
-			processTask(task);
-		}
-
-		// and wait for any stragglers.
-		synchronized (tasksCompletedNotifier) {
-			while (incompleteTaskCounter > 0) {
-				try {
-					tasksCompletedNotifier.wait();
-				} catch (InterruptedException e) {
-					//
+		while (true) {
+			if ((task = mainThreadQueue.poll()) != null) {
+				// Prioritize main thread tasks.
+				processMainThreadTask(task);
+			} else if ((task = taskQueue.pollLast()) != null) {
+				// then work on tasks from the queue.
+				processTask(task);
+			} else {
+				// then wait for the other threads to finish.
+				waitGroup.await();
+				// at this point there will be no more tasks in the queue, but
+				// one of the worker threads may have submitted a main thread task.
+				if (mainThreadQueue.isEmpty()) {
+					// if they didn't, we're done.
+					break;
 				}
 			}
 		}
@@ -149,23 +156,13 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	public void discardAndAwait() {
 		// Discard everyone else's work...
 		while (taskQueue.pollLast() != null) {
-			synchronized (tasksCompletedNotifier) {
-				if (--incompleteTaskCounter == 0) {
-					tasksCompletedNotifier.notifyAll();
-				}
-			}
+			waitGroup.done();
 		}
 
-		// and wait for any stragglers.
-		synchronized (tasksCompletedNotifier) {
-			while (incompleteTaskCounter > 0) {
-				try {
-					tasksCompletedNotifier.wait();
-				} catch (InterruptedException e) {
-					//
-				}
-			}
-		}
+		// ...wait for any stragglers...
+		waitGroup.await();
+		// ...and clear the main thread queue.
+		mainThreadQueue.clear();
 	}
 
 	@Nullable
@@ -185,18 +182,21 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		return task;
 	}
 
-	// TODO: task context
 	private void processTask(Runnable task) {
 		try {
 			task.run();
 		} catch (Exception e) {
 			Flywheel.LOGGER.error("Error running task", e);
 		} finally {
-			synchronized (tasksCompletedNotifier) {
-				if (--incompleteTaskCounter == 0) {
-					tasksCompletedNotifier.notifyAll();
-				}
-			}
+			waitGroup.done();
+		}
+	}
+
+	private void processMainThreadTask(Runnable task) {
+		try {
+			task.run();
+		} catch (Exception e) {
+			Flywheel.LOGGER.error("Error running main thread task", e);
 		}
 	}
 
@@ -212,7 +212,6 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	}
 
 	private class WorkerThread extends Thread {
-		private final AtomicBoolean running = ParallelTaskExecutor.this.running;
 
 		public WorkerThread(String name) {
 			super(name);
@@ -221,7 +220,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		@Override
 		public void run() {
 			// Run until the executor shuts down
-			while (running.get()) {
+			while (ParallelTaskExecutor.this.running.get()) {
 				Runnable task = getNextTask();
 
 				if (task == null) {

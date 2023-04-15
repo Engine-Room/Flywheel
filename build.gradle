@@ -131,6 +131,7 @@ minecraft.runs.all {
 // ^--------------------------------------------------------------------^
 
 dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     jarJar('org.joml:joml:1.10.5') {
@@ -154,6 +155,10 @@ dependencies {
     if (System.getProperty('idea.sync.active') != 'true') {
         annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
     }
+}
+
+test {
+    useJUnitPlatform()
 }
 
 mixin {
