@@ -2,8 +2,14 @@ package com.jozufozu.flywheel.lib.task;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-// https://stackoverflow.com/questions/29655531
+import org.slf4j.Logger;
+
+import com.jozufozu.flywheel.util.StringUtil;
+import com.mojang.logging.LogUtils;
+
 public class WaitGroup {
+	private static final Logger LOGGER = LogUtils.getLogger();
+
 	private final AtomicInteger counter = new AtomicInteger(0);
 
 	public void add() {
@@ -19,38 +25,25 @@ public class WaitGroup {
 	}
 
 	public void done() {
-		var result = counter.decrementAndGet();
-		if (result == 0) {
-			synchronized (this) {
-				this.notifyAll();
-			}
-		} else if (result < 0) {
+		if (counter.decrementAndGet() < 0) {
 			throw new IllegalStateException("WaitGroup counter is negative!");
 		}
 	}
 
 	public void await() {
-		try {
-			awaitInternal();
-		} catch (InterruptedException ignored) {
-			// noop
-		}
-	}
-
-	private void awaitInternal() throws InterruptedException {
-		//		var start = System.nanoTime();
+		// TODO: comprehensive performance tracking for tasks
+		long start = System.nanoTime();
+		int count = 0;
 		while (counter.get() > 0) {
 			// spin in place to avoid sleeping the main thread
-			//			synchronized (this) {
-			//				this.wait(timeoutMs);
-			//			}
+			count++;
 		}
-		//		var end = System.nanoTime();
-		//		var elapsed = end - start;
-		//
-		//		if (elapsed > 1000000) {
-		//			Flywheel.LOGGER.info("Waited " + StringUtil.formatTime(elapsed));
-		//		}
+		long end = System.nanoTime();
+		long elapsed = end - start;
+
+		if (elapsed > 1000000) { // > 1ms
+			LOGGER.debug("Waited " + StringUtil.formatTime(elapsed) + ", looped " + count + " times");
+		}
 	}
 
 	public void _reset() {
