@@ -75,7 +75,7 @@ public class DrawBuffer {
 		}
 
 		ReusableVertexList vertexList = provider.createVertexList();
-		vertexList.ptr(memory.ptr() + startVertex * stride);
+		vertexList.ptr(memory.ptr() + (long) startVertex * stride);
 		vertexList.vertexCount(vertexCount);
 		return vertexList;
 	}
