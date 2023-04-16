@@ -9,16 +9,16 @@ import net.minecraft.client.Minecraft;
  */
 public final class AnimationTickHolder {
 	// Wrap around every 24 hours to maintain floating point accuracy.
-	private static final int wrappingInterval = 1_728_000;
+	private static final int WRAPPING_INTERVAL = 1_728_000;
 	private static int ticks;
-	private static int paused_ticks;
+	private static int pausedTicks;
 
 	public static void tick() {
 		if (!Minecraft.getInstance()
 				.isPaused()) {
-			ticks = (ticks + 1) % wrappingInterval;
+			ticks = (ticks + 1) % WRAPPING_INTERVAL;
 		} else {
-			paused_ticks = (paused_ticks + 1) % wrappingInterval;
+			pausedTicks = (pausedTicks + 1) % WRAPPING_INTERVAL;
 		}
 	}
 
@@ -27,7 +27,7 @@ public final class AnimationTickHolder {
 	}
 
 	public static int getTicks(boolean includePaused) {
-		return includePaused ? ticks + paused_ticks : ticks;
+		return includePaused ? ticks + pausedTicks : ticks;
 	}
 
 	public static float getRenderTime() {
@@ -42,6 +42,6 @@ public final class AnimationTickHolder {
 	// Unused but might be useful for debugging.
 	public static void _reset() {
 		ticks = 0;
-		paused_ticks = 0;
+		pausedTicks = 0;
 	}
 }

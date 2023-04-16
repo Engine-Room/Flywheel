@@ -13,11 +13,9 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.renderer.RenderType;
 
 public class BatchingDrawTracker {
-	private static final RenderStage[] RENDER_STAGES = RenderStage.values();
-
 	private final Map<RenderStage, Set<DrawBuffer>> activeBuffers = new EnumMap<>(RenderStage.class);
 	{
-		for (RenderStage stage : RENDER_STAGES) {
+		for (RenderStage stage : RenderStage.values()) {
 			activeBuffers.put(stage, new HashSet<>());
 		}
 	}
@@ -30,36 +28,29 @@ public class BatchingDrawTracker {
 		((BufferBuilderExtension) scratch).flywheel$freeBuffer();
 	}
 
-	public DrawBuffer getBuffer(RenderType renderType, RenderStage stage) {
-		DrawBuffer buffer = RenderTypeExtension.getDrawBufferSet(renderType).getBuffer(stage);
-		activeBuffers.get(stage).add(buffer);
-		return buffer;
+	public static DrawBuffer getBuffer(RenderType renderType, RenderStage stage) {
+		return RenderTypeExtension.getDrawBufferSet(renderType)
+				.getBuffer(stage);
+	}
+
+	public void markActive(RenderStage stage, DrawBuffer buffer) {
+		synchronized (activeBuffers) {
+			activeBuffers.get(stage)
+					.add(buffer);
+		}
 	}
 
 	/**
 	 * Draw and reset all DrawBuffers for the given RenderStage.
+	 *
 	 * @param stage The RenderStage to draw.
 	 */
 	public void draw(RenderStage stage) {
 		Set<DrawBuffer> buffers = activeBuffers.get(stage);
 		for (DrawBuffer buffer : buffers) {
 			_draw(buffer);
-			buffer.reset();
 		}
 		buffers.clear();
-	}
-
-	/**
-	 * Draw and reset all active DrawBuffers.
-	 */
-	public void drawAll() {
-		for (Set<DrawBuffer> buffers : activeBuffers.values()) {
-			for (DrawBuffer buffer : buffers) {
-				_draw(buffer);
-				buffer.reset();
-			}
-			buffers.clear();
-		}
 	}
 
 	private void _draw(DrawBuffer buffer) {
@@ -68,6 +59,7 @@ public class BatchingDrawTracker {
 			buffer.inject(scratch);
 			buffer.getRenderType().end(this.scratch, 0, 0, 0);
 		}
+		buffer.reset();
 	}
 
 	/**

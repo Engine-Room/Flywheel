@@ -15,7 +15,6 @@ public class DrawBufferSet {
 	private final VertexFormat format;
 	private final int stride;
 	private final VertexListProvider provider;
-
 	private final Map<RenderStage, DrawBuffer> buffers = new EnumMap<>(RenderStage.class);
 
 	public DrawBufferSet(RenderType renderType) {
