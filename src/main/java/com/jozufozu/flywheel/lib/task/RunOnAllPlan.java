@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.lib.math.MoreMath;
 
 public record RunOnAllPlan<T>(Supplier<List<T>> listSupplier, Consumer<T> action) implements Plan {
 	public static <T> Plan of(Supplier<List<T>> iterable, Consumer<T> forEach) {
@@ -32,7 +33,7 @@ public record RunOnAllPlan<T>(Supplier<List<T>> listSupplier, Consumer<T> action
 		final int size = suppliedList.size();
 		final int chunkSize = getChunkSize(taskExecutor, size);
 
-		var synchronizer = new Synchronizer(ceilingDiv(size, chunkSize), onCompletion);
+		var synchronizer = new Synchronizer(MoreMath.ceilingDiv(size, chunkSize), onCompletion);
 		int remaining = size;
 
 		while (remaining > 0) {
@@ -46,11 +47,7 @@ public record RunOnAllPlan<T>(Supplier<List<T>> listSupplier, Consumer<T> action
 	}
 
 	private static int getChunkSize(TaskExecutor taskExecutor, int totalSize) {
-		return ceilingDiv(totalSize, taskExecutor.getThreadCount() * 32);
-	}
-
-	private static int ceilingDiv(int numerator, int denominator) {
-		return (numerator + denominator - 1) / denominator;
+		return MoreMath.ceilingDiv(totalSize, taskExecutor.getThreadCount() * 32);
 	}
 
 	private void processList(List<T> suppliedList, Runnable onCompletion) {

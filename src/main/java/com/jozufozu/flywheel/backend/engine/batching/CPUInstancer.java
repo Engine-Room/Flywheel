@@ -19,6 +19,10 @@ public class CPUInstancer<I extends Instance> extends AbstractInstancer<I> {
 		return instances;
 	}
 
+	public I get(int index) {
+		return instances.get(index);
+	}
+
 	public void update() {
 		removeDeletedInstances();
 	}

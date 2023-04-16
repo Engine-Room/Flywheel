@@ -9,6 +9,7 @@ import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
+import com.jozufozu.flywheel.lib.math.MoreMath;
 import com.jozufozu.flywheel.lib.task.SimplePlan;
 import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -42,37 +43,32 @@ public class TransformCall<I extends Instance> {
 		instancer.update();
 	}
 
-	public Plan getPlan(DrawBuffer buffer, int startVertex, PoseStack.Pose matrices, ClientLevel level) {
-		int instances = instancer.getInstanceCount();
+	public Plan plan(DrawBuffer buffer, int startVertex, PoseStack.Pose matrices, ClientLevel level) {
+		final int totalCount = instancer.getInstanceCount();
+		final int chunkSize = MoreMath.ceilingDiv(totalCount, 6 * 32);
 
-		var out = new ArrayList<Runnable>();
-
-		while (instances > 0) {
-			int end = instances;
-			instances -= 512;
-			int start = Math.max(instances, 0);
+		final var out = new ArrayList<Runnable>();
+		int remaining = totalCount;
+		while (remaining > 0) {
+			int end = remaining;
+			remaining -= chunkSize;
+			int start = Math.max(remaining, 0);
 
 			int vertexCount = meshVertexCount * (end - start);
 			ReusableVertexList sub = buffer.slice(startVertex, vertexCount);
 			startVertex += vertexCount;
 
-			out.add(() -> transformRange(sub, start, end, matrices, level));
+			out.add(() -> transform(sub, matrices, level, instancer.getRange(start, end)));
 		}
 		return new SimplePlan(out);
 	}
 
-	public void transformRange(ReusableVertexList vertexList, int from, int to, PoseStack.Pose matrices, ClientLevel level) {
-		transformList(vertexList, instancer.getRange(from, to), matrices, level);
-	}
+	private void transform(ReusableVertexList vertexList, PoseStack.Pose matrices, ClientLevel level, List<I> instances) {
+		// save the total size of the slice for later.
+		final long anchorPtr = vertexList.ptr();
+		final int totalVertexCount = vertexList.vertexCount();
 
-	public void transformAll(ReusableVertexList vertexList, PoseStack.Pose matrices, ClientLevel level) {
-		transformList(vertexList, instancer.getAll(), matrices, level);
-	}
-
-	public void transformList(ReusableVertexList vertexList, List<I> instances, PoseStack.Pose matrices, ClientLevel level) {
-		long anchorPtr = vertexList.ptr();
-		int totalVertexCount = vertexList.vertexCount();
-
+		// while working on individual instances, the vertex list should expose just a single copy of the mesh.
 		vertexList.vertexCount(meshVertexCount);
 
 		InstanceVertexTransformer<I> instanceVertexTransformer = instancer.type.getVertexTransformer();
@@ -85,6 +81,7 @@ public class TransformCall<I extends Instance> {
 			vertexList.ptr(vertexList.ptr() + meshByteSize);
 		}
 
+		// restore the original size of the slice to apply per-vertex transformations.
 		vertexList.ptr(anchorPtr);
 		vertexList.vertexCount(totalVertexCount);
 		material.getVertexTransformer().transform(vertexList, level);

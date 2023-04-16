@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 
-import com.jozufozu.flywheel.util.StringUtil;
 import com.mojang.logging.LogUtils;
 
 public class WaitGroup {
@@ -42,7 +41,7 @@ public class WaitGroup {
 		long elapsed = end - start;
 
 		if (elapsed > 1000000) { // > 1ms
-			LOGGER.debug("Waited " + StringUtil.formatTime(elapsed) + ", looped " + count + " times");
+			// LOGGER.debug("Waited " + StringUtil.formatTime(elapsed) + ", looped " + count + " times");
 		}
 	}
 

@@ -1,28 +1,24 @@
 package com.jozufozu.flywheel.backend.engine.batching;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ListMultimap;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
+import com.jozufozu.flywheel.lib.task.NestedPlan;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
 
 public class BatchingTransformManager {
@@ -30,15 +26,17 @@ public class BatchingTransformManager {
 	private final List<UninitializedInstancer> uninitializedInstancers = new ArrayList<>();
 	private final List<CPUInstancer<?>> initializedInstancers = new ArrayList<>();
 	private final Map<RenderStage, TransformSet> transformSets = new EnumMap<>(RenderStage.class);
-	private final Map<RenderStage, TransformSet> transformSetsView = Collections.unmodifiableMap(transformSets);
 	private final Map<VertexFormat, BatchedMeshPool> meshPools = new HashMap<>();
 
-	public TransformSet get(RenderStage stage) {
-		return transformSets.getOrDefault(stage, TransformSet.EMPTY);
-	}
+	public Plan plan(PoseStack.Pose matrices, ClientLevel level, BatchingDrawTracker tracker) {
+		flush();
+		var plans = new ArrayList<Plan>();
 
-	public Map<RenderStage, TransformSet> getTransformSetsView() {
-		return transformSetsView;
+		for (var transformSet : transformSets.values()) {
+			plans.add(transformSet.plan(matrices, level, tracker));
+		}
+
+		return new NestedPlan(plans);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -93,36 +91,6 @@ public class BatchingTransformManager {
 	private BatchedMeshPool.BufferedMesh alloc(Mesh mesh, VertexFormat format) {
 		return meshPools.computeIfAbsent(format, BatchedMeshPool::new)
 				.alloc(mesh);
-	}
-
-	public static class TransformSet implements Iterable<Map.Entry<RenderType, Collection<TransformCall<?>>>> {
-		public static final TransformSet EMPTY = new TransformSet(ImmutableListMultimap.of());
-
-		private final ListMultimap<RenderType, TransformCall<?>> transformCalls;
-
-		public TransformSet(RenderStage renderStage) {
-			transformCalls = ArrayListMultimap.create();
-		}
-
-		public TransformSet(ListMultimap<RenderType, TransformCall<?>> transformCalls) {
-			this.transformCalls = transformCalls;
-		}
-
-		public void put(RenderType shaderState, TransformCall<?> transformCall) {
-			transformCalls.put(shaderState, transformCall);
-		}
-
-		public boolean isEmpty() {
-			return transformCalls.isEmpty();
-		}
-
-		@NotNull
-		@Override
-		public Iterator<Map.Entry<RenderType, Collection<TransformCall<?>>>> iterator() {
-			return transformCalls.asMap()
-					.entrySet()
-					.iterator();
-		}
 	}
 
 	private record UninitializedInstancer(CPUInstancer<?> instancer, Model model, RenderStage stage) {

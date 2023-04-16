@@ -163,4 +163,8 @@ public final class MoreMath {
 		MemoryUtil.memPutFloat(ptr + 88, nzW);
 		MemoryUtil.memPutFloat(ptr + 92, pzW);
 	}
+
+	public static int ceilingDiv(int numerator, int denominator) {
+		return (numerator + denominator - 1) / denominator;
+	}
 }

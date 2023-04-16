@@ -22,7 +22,7 @@ public class BatchedMeshPool {
 
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
 	private final List<BufferedMesh> allBuffered = new ArrayList<>();
-	private final List<BufferedMesh> pendingUpload = new ArrayList<>();
+	private final List<BufferedMesh> pendingBuffer = new ArrayList<>();
 
 	private MemoryBlock memory;
 	private long byteSize;
@@ -54,7 +54,7 @@ public class BatchedMeshPool {
 			BufferedMesh bufferedMesh = new BufferedMesh(m, byteSize);
 			byteSize += bufferedMesh.size();
 			allBuffered.add(bufferedMesh);
-			pendingUpload.add(bufferedMesh);
+			pendingBuffer.add(bufferedMesh);
 
 			dirty = true;
 			return bufferedMesh;
@@ -73,10 +73,10 @@ public class BatchedMeshPool {
 			}
 
 			realloc();
-			uploadPending();
+			bufferPending();
 
 			dirty = false;
-			pendingUpload.clear();
+			pendingBuffer.clear();
 		}
 	}
 
@@ -94,7 +94,7 @@ public class BatchedMeshPool {
 		int byteIndex = 0;
 		for (BufferedMesh mesh : allBuffered) {
 			if (mesh.byteIndex != byteIndex) {
-				pendingUpload.add(mesh);
+				pendingBuffer.add(mesh);
 			}
 
 			mesh.byteIndex = byteIndex;
@@ -122,13 +122,13 @@ public class BatchedMeshPool {
 		}
 	}
 
-	private void uploadPending() {
+	private void bufferPending() {
 		try {
-			for (BufferedMesh mesh : pendingUpload) {
+			for (BufferedMesh mesh : pendingBuffer) {
 				mesh.buffer(vertexList);
 			}
 
-			pendingUpload.clear();
+			pendingBuffer.clear();
 		} catch (Exception e) {
 			Flywheel.LOGGER.error("Error uploading pooled meshes:", e);
 		}
@@ -140,7 +140,7 @@ public class BatchedMeshPool {
 		}
 		meshes.clear();
 		allBuffered.clear();
-		pendingUpload.clear();
+		pendingBuffer.clear();
 	}
 
 	@Override
