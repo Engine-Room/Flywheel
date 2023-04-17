@@ -12,7 +12,7 @@ public class ClientMainMixin {
 	@Inject(method = "main([Ljava/lang/String;)V", at = @At("HEAD"))
 	private static void flywheel$injectRenderDoc(CallbackInfo ci) {
 		// Only try to load RenderDoc if a system property is set to true.
-		if (!Boolean.parseBoolean(System.getProperty("flw.loadRenderDoc"))) {
+		if (!Boolean.getBoolean("flw.loadRenderDoc")) {
 			return;
 		}
 

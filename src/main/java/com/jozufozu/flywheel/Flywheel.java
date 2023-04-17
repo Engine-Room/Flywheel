@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import com.jozufozu.flywheel.backend.Backends;
 import com.jozufozu.flywheel.backend.Loader;
 import com.jozufozu.flywheel.backend.Pipelines;
+import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.backend.engine.batching.DrawBuffer;
 import com.jozufozu.flywheel.config.BackendArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
@@ -81,6 +82,7 @@ public class Flywheel {
 		forgeEventBus.addListener(EventPriority.HIGHEST, QuadConverter::onReloadRenderers);
 		forgeEventBus.addListener(Models::onReloadRenderers);
 		forgeEventBus.addListener(DrawBuffer::onReloadRenderers);
+		forgeEventBus.addListener(UniformBuffer::onReloadRenderers);
 
 		forgeEventBus.addListener(VisualizedRenderDispatcher::onRenderStage);
 		forgeEventBus.addListener(VisualizedRenderDispatcher::onBeginFrame);
