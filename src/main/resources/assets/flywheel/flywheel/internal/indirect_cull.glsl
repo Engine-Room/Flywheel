@@ -1,8 +1,8 @@
 #define FLW_SUBGROUP_SIZE 32
 layout(local_size_x = FLW_SUBGROUP_SIZE) in;
-#use "flywheel:api/cull.glsl"
+
 #use "flywheel:util/types.glsl"
-#use "flywheel:pipeline/indirect_draw_command.glsl"
+#use "flywheel:internal/indirect_draw_command.glsl"
 
 // populated by instancers
 layout(std430, binding = 0) restrict readonly buffer ObjectBuffer {
@@ -21,6 +21,9 @@ layout(std430, binding = 3) restrict buffer DrawCommands {
     MeshDrawCommand drawCommands[];
 };
 
+uint flw_objectID;
+uint flw_batchID;
+
 // 83 - 27 = 56 spirv instruction results
 bool testSphere(vec3 center, float radius) {
     bvec4 xyInside = greaterThanEqual(fma(flywheel.planes.xyX, center.xxxx, fma(flywheel.planes.xyY, center.yyyy, fma(flywheel.planes.xyZ, center.zzzz, flywheel.planes.xyW))), -radius.xxxx);
@@ -36,7 +39,7 @@ bool isVisible() {
     float radius;
     unpackBoundingSphere(sphere, center, radius);
 
-    FlwInstance object = flw_unpackInstance(objects[flw_objectID]);
+    FlwInstance object = _flw_unpackInstance(objects[flw_objectID]);
     flw_transformBoundingSphere(object, center, radius);
 
     return testSphere(center, radius);

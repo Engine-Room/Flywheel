@@ -61,6 +61,8 @@ public class MaterialAdapterComponent implements SourceComponent {
 					.body(body -> generateAdapter(body, adaptedFunction));
 		}
 
+		builder.blankLine();
+
 		return builder.build();
 	}
 

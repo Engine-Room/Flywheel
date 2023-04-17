@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.jozufozu.flywheel.util.Pair;
+import com.jozufozu.flywheel.util.StringUtil;
 
 public class GlslStruct implements GlslBuilder.Declaration {
 
@@ -25,11 +26,11 @@ public class GlslStruct implements GlslBuilder.Declaration {
 				.collect(Collectors.joining("\n"));
 	}
 
+	@Override
 	public String prettyPrint() {
 		return """
 				struct %s {
 				%s
-				};
-				""".formatted(name, buildFields().indent(4));
+				};""".formatted(name, StringUtil.indent(buildFields(), 4));
 	}
 }

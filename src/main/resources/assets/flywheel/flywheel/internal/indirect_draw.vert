@@ -1,5 +1,5 @@
 #use "flywheel:api/vertex.glsl"
-#use "flywheel:pipeline/indirect_draw_command.glsl"
+#use "flywheel:internal/indirect_draw_command.glsl"
 
 layout(std430, binding = 0) restrict readonly buffer ObjectBuffer {
     FlwPackedInstance objects[];
@@ -20,10 +20,10 @@ layout(std430, binding = 3) restrict readonly buffer DrawCommands {
 void main() {
     uint instanceIndex = objectIDs[gl_BaseInstance + gl_InstanceID];
     uint batchID = batchIDs[instanceIndex];
-    FlwInstance i = flw_unpackInstance(objects[instanceIndex]);
+    FlwInstance i = _flw_unpackInstance(objects[instanceIndex]);
 
-    flw_materialVertexID = drawCommands[batchID].vertexMaterialID;
-    flw_materialFragmentID = drawCommands[batchID].fragmentMaterialID;
+    _flw_materialVertexID = drawCommands[batchID].vertexMaterialID;
+    _flw_materialFragmentID = drawCommands[batchID].fragmentMaterialID;
 
     flw_layoutVertex();
     flw_instanceVertex(i);

@@ -40,7 +40,7 @@ public class Compilation {
 
 	public Compilation(GLSLVersion glslVersion, ShaderType shaderType) {
 		this.generatedSource = new StringBuilder();
-		this.fullSource = new StringBuilder(CompileUtil.generateHeader(glslVersion, shaderType));
+		this.fullSource = new StringBuilder(CompileUtil.generateHeader(glslVersion, shaderType)).append('\n');
 		this.glslVersion = glslVersion;
 		this.shaderType = shaderType;
 	}
@@ -71,10 +71,6 @@ public class Compilation {
 				.append(" : enable\n");
 	}
 
-	public void addComponentName(ResourceLocation name) {
-		componentNames.add(name);
-	}
-
 	public void appendComponent(SourceComponent component) {
 		var source = component.source();
 
@@ -85,12 +81,12 @@ public class Compilation {
 					.toString()));
 		}
 
-		fullSource.append(source)
-				.append('\n');
+		fullSource.append(source);
+		componentNames.add(component.name());
 	}
 
 	private String sourceHeader(SourceFile sourceFile) {
-		return "#line " + 0 + ' ' + getOrCreateFileID(sourceFile) + " // " + sourceFile.name + '\n';
+		return '\n' + "#line " + 0 + ' ' + getOrCreateFileID(sourceFile) + " // " + sourceFile.name + '\n';
 	}
 
 	private String generatedHeader(String generatedCode, String comment) {
@@ -98,7 +94,7 @@ public class Compilation {
 		int lines = StringUtil.countLines(generatedCode);
 
 		// all generated code is put in file 0,
-		var out = "#line " + generatedLines + ' ' + 0;
+		var out = '\n' + "#line " + generatedLines + ' ' + 0;
 
 		generatedLines += lines;
 
@@ -123,12 +119,13 @@ public class Compilation {
 
 	@NotNull
 	private String buildShaderName() {
+		// TODO: This name is so long it fails to create the file. Use index and map indices to component sources in separate file?
 		var components = componentNames.stream()
 				.map(ResourceLocation::toString)
 				.map(s -> s.replaceAll("/", "_")
 						.replaceAll(":", "\\$"))
 				.collect(Collectors.joining(";"));
-		return shaderType.name + glslVersion + ';' + components;
+		return shaderType.name + glslVersion + ';' /*+ components*/;
 	}
 
 	private static void dumpSource(String source, String fileName) {

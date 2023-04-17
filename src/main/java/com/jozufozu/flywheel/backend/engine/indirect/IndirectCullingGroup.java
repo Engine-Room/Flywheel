@@ -15,8 +15,8 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.Pipelines;
-import com.jozufozu.flywheel.backend.compile.FlwCompiler;
+import com.jozufozu.flywheel.backend.compile.FlwPrograms;
+import com.jozufozu.flywheel.backend.compile.pipeline.Pipelines;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.context.Contexts;
@@ -62,8 +62,8 @@ public class IndirectCullingGroup<I extends Instance> {
 				.quads2Tris(2048).glBuffer;
 		setupVertexArray();
 
-		compute = FlwCompiler.INSTANCE.getCullingProgram(instanceType);
-		draw = FlwCompiler.INSTANCE.getPipelineProgram(vertexType, instanceType, Contexts.WORLD, Pipelines.INDIRECT);
+		compute = FlwPrograms.get().getCullingProgram(instanceType);
+		draw = FlwPrograms.get().getPipelineProgram(vertexType, instanceType, Contexts.WORLD, Pipelines.INDIRECT);
 	}
 
 	private void setupVertexArray() {

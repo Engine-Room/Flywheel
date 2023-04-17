@@ -93,7 +93,7 @@ public interface GlslExpr {
 		public String prettyPrint() {
 			var args = this.args.stream()
 					.map(GlslExpr::prettyPrint)
-					.collect(Collectors.joining(","));
+					.collect(Collectors.joining(", "));
 			return name + "(" + args + ")";
 		}
 

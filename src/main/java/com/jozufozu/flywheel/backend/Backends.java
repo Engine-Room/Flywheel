@@ -32,7 +32,6 @@ public class Backends {
 			.fallback(() -> Backends.BATCHING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
 					.instancedArraysSupported())
-			.pipelineShader(Pipelines.INSTANCED_ARRAYS)
 			.register(Flywheel.rl("instancing"));
 
 	/**
@@ -44,7 +43,6 @@ public class Backends {
 			.fallback(() -> Backends.INSTANCING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
 					.supportsIndirect())
-			.pipelineShader(Pipelines.INDIRECT)
 			.register(Flywheel.rl("indirect"));
 
 	public static void init() {

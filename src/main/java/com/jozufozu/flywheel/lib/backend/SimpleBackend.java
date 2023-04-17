@@ -4,12 +4,9 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.backend.Engine;
-import com.jozufozu.flywheel.api.pipeline.Pipeline;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -20,14 +17,12 @@ public class SimpleBackend implements Backend {
 	private final Function<LevelAccessor, Engine> engineFactory;
 	private final Supplier<Backend> fallback;
 	private final BooleanSupplier isSupported;
-	private final Pipeline pipelineShader;
 
-	public SimpleBackend(Component engineMessage, Function<LevelAccessor, Engine> engineFactory, Supplier<Backend> fallback, BooleanSupplier isSupported, @Nullable Pipeline pipelineShader) {
+	public SimpleBackend(Component engineMessage, Function<LevelAccessor, Engine> engineFactory, Supplier<Backend> fallback, BooleanSupplier isSupported) {
 		this.engineMessage = engineMessage;
 		this.engineFactory = engineFactory;
 		this.fallback = fallback;
 		this.isSupported = isSupported;
-		this.pipelineShader = pipelineShader;
 	}
 
 	public static Builder builder() {
@@ -59,17 +54,11 @@ public class SimpleBackend implements Backend {
 		return isSupported.getAsBoolean();
 	}
 
-	@Override
-	public @Nullable Pipeline pipelineShader() {
-		return pipelineShader;
-	}
-
 	public static class Builder {
 		private Component engineMessage;
 		private Function<LevelAccessor, Engine> engineFactory;
 		private Supplier<Backend> fallback = BackendManager::getOffBackend;
 		private BooleanSupplier isSupported;
-		private Pipeline pipelineShader;
 
 		public Builder engineMessage(Component engineMessage) {
 			this.engineMessage = engineMessage;
@@ -91,13 +80,8 @@ public class SimpleBackend implements Backend {
 			return this;
 		}
 
-		public Builder pipelineShader(Pipeline pipelineShader) {
-			this.pipelineShader = pipelineShader;
-			return this;
-		}
-
 		public Backend register(ResourceLocation id) {
-			return Backend.REGISTRY.registerAndGet(id, new SimpleBackend(engineMessage, engineFactory, fallback, isSupported, pipelineShader));
+			return Backend.REGISTRY.registerAndGet(id, new SimpleBackend(engineMessage, engineFactory, fallback, isSupported));
 		}
 	}
 }

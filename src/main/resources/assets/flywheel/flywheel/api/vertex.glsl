@@ -1,5 +1,5 @@
 #ifdef VERTEX_SHADER
-uint flw_materialVertexID;
+uint _flw_materialVertexID;
 
 out vec4 flw_vertexPos;
 out vec4 flw_vertexColor;
@@ -14,5 +14,5 @@ out vec4 flw_var0;
 out vec4 flw_var1;
 out vec4 flw_var2;
 out vec4 flw_var3;
-flat out uint flw_materialFragmentID;
+flat out uint _flw_materialFragmentID;
 #endif
