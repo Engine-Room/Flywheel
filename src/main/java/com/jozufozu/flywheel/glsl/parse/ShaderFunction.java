@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.glsl.span.Span;
 
 public class ShaderFunction {
-
 	// https://regexr.com/60n3d
 	public static final Pattern PATTERN = Pattern.compile("(\\w+)\\s+(\\w+)\\s*\\(([\\w,\\s]*)\\)\\s*\\{");
 
@@ -86,11 +85,10 @@ public class ShaderFunction {
 
 	@Override
 	public String toString() {
-
 		String p = parameters.stream()
 				.map(variable -> variable.type)
 				.map(Span::get)
-				.collect(Collectors.joining(","));
+				.collect(Collectors.joining(", "));
 
 		return type + " " + name + "(" + p + ")";
 	}

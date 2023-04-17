@@ -7,8 +7,8 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.layout.LayoutItem;
-import com.jozufozu.flywheel.api.pipeline.Pipeline;
-import com.jozufozu.flywheel.backend.Pipelines;
+import com.jozufozu.flywheel.backend.compile.pipeline.Pipeline;
+import com.jozufozu.flywheel.backend.compile.pipeline.Pipelines;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.SourceFile;
@@ -57,6 +57,7 @@ public class IndirectComponent implements SourceComponent {
 		var builder = new GlslBuilder();
 		builder.define("FlwInstance", STRUCT_NAME);
 		builder.define("FlwPackedInstance", PACKED_STRUCT_NAME);
+		builder.blankLine();
 
 		var packed = builder.struct();
 		builder.blankLine();
@@ -74,10 +75,12 @@ public class IndirectComponent implements SourceComponent {
 		builder.function()
 				.signature(FnSignature.create()
 						.returnType(STRUCT_NAME)
-						.name("flw_unpackInstance")
+						.name("_flw_unpackInstance")
 						.arg(PACKED_STRUCT_NAME, UNPACK_ARG)
 						.build())
 				.body(this::generateUnpackingBody);
+
+		builder.blankLine();
 
 		return builder.build();
 	}

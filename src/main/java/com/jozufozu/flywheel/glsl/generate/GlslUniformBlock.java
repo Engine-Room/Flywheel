@@ -20,8 +20,7 @@ public class GlslUniformBlock implements GlslBuilder.Declaration {
         return """
             layout(%s, binding = %d) uniform %s {
             %s
-            };
-            """.formatted(qualifier, binding, name, StringUtil.indent(formatMembers(), 4));
+            };""".formatted(qualifier, binding, name, StringUtil.indent(formatMembers(), 4));
     }
 
     private String formatMembers() {

@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.layout.LayoutItem;
-import com.jozufozu.flywheel.api.pipeline.Pipeline;
+import com.jozufozu.flywheel.backend.compile.pipeline.Pipeline;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.glsl.generate.GlslBlock;
@@ -16,7 +16,7 @@ import com.jozufozu.flywheel.glsl.generate.GlslExpr;
 import net.minecraft.resources.ResourceLocation;
 
 public class InstancedArraysComponent implements SourceComponent {
-	private static final String ATTRIBUTE_SUFFIX = "_vertex_in";
+	private static final String ATTRIBUTE_PREFIX = "_flw_i_";
 	private static final String STRUCT_NAME = "Instance";
 
 	private final List<LayoutItem> layoutItems;
@@ -45,13 +45,15 @@ public class InstancedArraysComponent implements SourceComponent {
 		var builder = new GlslBuilder();
 		builder.define("FlwInstance", STRUCT_NAME);
 
+		builder.blankLine();
+
 		int i = baseIndex;
 		for (var field : layoutItems) {
 			builder.vertexInput()
 					.binding(i)
 					.type(field.type()
 							.typeName())
-					.name(field.name() + ATTRIBUTE_SUFFIX);
+					.name(ATTRIBUTE_PREFIX + field.name());
 
 			i += field.type()
 					.attributeCount();
@@ -70,15 +72,17 @@ public class InstancedArraysComponent implements SourceComponent {
 
 		// unpacking function
 		builder.function()
-				.signature(FnSignature.of(STRUCT_NAME, "flw_unpackInstance"))
+				.signature(FnSignature.of(STRUCT_NAME, "_flw_unpackInstance"))
 				.body(this::generateUnpackingBody);
+
+		builder.blankLine();
 
 		return builder.build();
 	}
 
 	private void generateUnpackingBody(GlslBlock b) {
 		var fields = layoutItems.stream()
-				.map(it -> new GlslExpr.Variable(it.name() + ATTRIBUTE_SUFFIX))
+				.map(it -> new GlslExpr.Variable(ATTRIBUTE_PREFIX + it.name()))
 				.toList();
 		b.ret(GlslExpr.call(STRUCT_NAME, fields));
 	}

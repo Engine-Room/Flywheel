@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.backend.Backends;
 import com.jozufozu.flywheel.backend.Loader;
-import com.jozufozu.flywheel.backend.Pipelines;
+import com.jozufozu.flywheel.backend.compile.pipeline.Pipelines;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.backend.engine.batching.DrawBuffer;
 import com.jozufozu.flywheel.config.BackendArgument;

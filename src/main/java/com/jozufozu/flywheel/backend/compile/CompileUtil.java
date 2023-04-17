@@ -24,7 +24,7 @@ public class CompileUtil {
 	public static final Pattern matType = Pattern.compile("^mat([234])(?:x([234]))?$");
 
 	public static String generateHeader(GLSLVersion version, ShaderType type) {
-		return version.getVersionLine() + type.getDefineStatement() + '\n';
+		return version.getVersionLine() + type.getDefineStatement();
 	}
 
 	public static int getElementCount(String type) {

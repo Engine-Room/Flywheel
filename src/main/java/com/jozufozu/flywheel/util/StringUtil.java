@@ -24,6 +24,7 @@ public class StringUtil {
 
 	private static final NumberFormat THREE_DECIMAL_PLACES = new DecimalFormat("#0.000");
 
+	// FIXME: this method should count trailing newlines
 	public static int countLines(String s) {
 		return (int) s.lines()
 				.count();

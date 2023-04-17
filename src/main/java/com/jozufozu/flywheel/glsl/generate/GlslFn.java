@@ -22,7 +22,6 @@ public class GlslFn implements GlslBuilder.Declaration {
 		return """
 				%s {
 				%s
-				}
-				""".formatted(signature.fullDeclaration(), StringUtil.indent(body.prettyPrint(), 4));
+				}""".formatted(signature.fullDeclaration(), StringUtil.indent(body.prettyPrint(), 4));
 	}
 }
