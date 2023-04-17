@@ -65,6 +65,10 @@ public class TransformCall<I extends Instance> {
 
 			final int baseVertex = vertexCount.getAndAdd(meshVertexCount);
 
+			if (baseVertex + meshVertexCount > buffer.getVertexCount()) {
+				throw new IndexOutOfBoundsException("Vertex count greater than allocated: " + baseVertex + " + " + meshVertexCount + " > " + buffer.getVertexCount());
+			}
+
 			var sub = buffer.slice(baseVertex, meshVertexCount);
 
 			mesh.copyTo(sub.ptr());

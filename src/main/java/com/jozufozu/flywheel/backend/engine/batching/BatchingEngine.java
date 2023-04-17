@@ -51,15 +51,10 @@ public class BatchingEngine extends AbstractEngine {
 		var stack = FlwUtil.copyPoseStack(context.stack());
 		stack.translate(renderOrigin.getX() - cameraPos.x, renderOrigin.getY() - cameraPos.y, renderOrigin.getZ() - cameraPos.z);
 
-		double cameraX = cameraPos.x;
-		double cameraY = cameraPos.y;
-		double cameraZ = cameraPos.z;
-
 		org.joml.Matrix4f proj = MatrixUtil.toJoml(context.viewProjection());
-		proj.translate((float) (renderOrigin.getX() - cameraX), (float) (renderOrigin.getY() - cameraY), (float) (renderOrigin.getZ() - cameraZ));
-		FrustumIntersection frustum = new FrustumIntersection(proj);
+		proj.translate((float) (renderOrigin.getX() - cameraPos.x), (float) (renderOrigin.getY() - cameraPos.y), (float) (renderOrigin.getZ() - cameraPos.z));
 
-		var ctx = new FrameContext(context.level(), stack.last(), frustum);
+		var ctx = new FrameContext(context.level(), stack.last(), new FrustumIntersection(proj));
 
 		flush();
 

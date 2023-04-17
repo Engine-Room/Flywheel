@@ -40,6 +40,13 @@ public class BatchingDrawTracker {
 		}
 	}
 
+	public void markInactive(RenderStage stage, DrawBuffer buffer) {
+		synchronized (activeBuffers) {
+			activeBuffers.get(stage)
+					.remove(buffer);
+		}
+	}
+
 	/**
 	 * Draw and reset all DrawBuffers for the given RenderStage.
 	 *
@@ -75,7 +82,9 @@ public class BatchingDrawTracker {
 	}
 
 	public boolean hasStage(RenderStage stage) {
-		return !activeBuffers.get(stage)
-				.isEmpty();
+		synchronized (activeBuffers) {
+			return !activeBuffers.get(stage)
+					.isEmpty();
+		}
 	}
 }
