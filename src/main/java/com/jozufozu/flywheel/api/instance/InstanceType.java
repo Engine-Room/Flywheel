@@ -30,4 +30,6 @@ public interface InstanceType<I extends Instance> {
 	ResourceLocation instanceShader();
 
 	InstanceVertexTransformer<I> getVertexTransformer();
+
+	InstanceBoundingSphereTransformer<I> getBoundingSphereTransformer();
 }

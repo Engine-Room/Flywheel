@@ -129,18 +129,25 @@ public final class MatrixUtil {
 	public static void store(Matrix3f matrix, org.joml.Matrix3f jomlMatrix) {
 		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
 		jomlMatrix.set(
-				m.flywheel$m00(), m.flywheel$m10(), m.flywheel$m20(),
-				m.flywheel$m01(), m.flywheel$m11(), m.flywheel$m21(),
-				m.flywheel$m02(), m.flywheel$m12(), m.flywheel$m22()
-		);
+				m.flywheel$m00(), m.flywheel$m10(), m.flywheel$m20(), m.flywheel$m01(), m.flywheel$m11(), m.flywheel$m21(), m.flywheel$m02(), m.flywheel$m12(), m.flywheel$m22());
 	}
 
 	public static org.joml.Matrix3f toJoml(Matrix3f matrix) {
 		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
-		return new org.joml.Matrix3f(
-				m.flywheel$m00(), m.flywheel$m10(), m.flywheel$m20(),
-				m.flywheel$m01(), m.flywheel$m11(), m.flywheel$m21(),
-				m.flywheel$m02(), m.flywheel$m12(), m.flywheel$m22()
-		);
+		return new org.joml.Matrix3f(m.flywheel$m00(), m.flywheel$m10(), m.flywheel$m20(), m.flywheel$m01(), m.flywheel$m11(), m.flywheel$m21(), m.flywheel$m02(), m.flywheel$m12(), m.flywheel$m22());
+	}
+
+	/**
+	 * Extracts the greatest scale factor across all axes from the given matrix.
+	 *
+	 * @param matrix The matrix to extract the scale from.
+	 * @return The greatest scale factor across all axes.
+	 */
+	public static float extractScale(Matrix4f matrix) {
+		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
+		float scaleSqrX = m.flywheel$m00() * m.flywheel$m00() + m.flywheel$m01() * m.flywheel$m01() + m.flywheel$m02() * m.flywheel$m02();
+		float scaleSqrY = m.flywheel$m10() * m.flywheel$m10() + m.flywheel$m11() * m.flywheel$m11() + m.flywheel$m12() * m.flywheel$m12();
+		float scaleSqrZ = m.flywheel$m20() * m.flywheel$m20() + m.flywheel$m21() * m.flywheel$m21() + m.flywheel$m22() * m.flywheel$m22();
+		return (float) Math.sqrt(Math.max(Math.max(scaleSqrX, scaleSqrY), scaleSqrZ));
 	}
 }

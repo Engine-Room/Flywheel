@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.task.Plan;
@@ -11,9 +12,7 @@ import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.lib.task.NestedPlan;
 import com.jozufozu.flywheel.lib.task.Synchronizer;
 import com.jozufozu.flywheel.lib.task.UnitPlan;
-import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
 
 /**
@@ -29,11 +28,11 @@ public class BatchingStage {
 		this.tracker = tracker;
 	}
 
-	public Plan plan(PoseStack.Pose matrices, ClientLevel level) {
+	public Plan plan(FrameContext ctx) {
 		var plans = new ArrayList<Plan>();
 
 		for (var bufferPlan : buffers.values()) {
-			plans.add(bufferPlan.update(matrices, level));
+			plans.add(bufferPlan.update(ctx));
 		}
 
 		return new NestedPlan(plans);
@@ -51,17 +50,15 @@ public class BatchingStage {
 	private class BufferPlan implements Plan {
 		private final DrawBuffer buffer;
 		private final List<TransformCall<?>> transformCalls = new ArrayList<>();
-		private PoseStack.Pose matrices;
-		private ClientLevel level;
+		private FrameContext ctx;
 		private int vertexCount;
 
 		public BufferPlan(DrawBuffer drawBuffer) {
 			buffer = drawBuffer;
 		}
 
-		public Plan update(PoseStack.Pose matrices, ClientLevel level) {
-			this.matrices = matrices;
-			this.level = level;
+		public Plan update(FrameContext ctx) {
+			this.ctx = ctx;
 
 			vertexCount = setupAndCountVertices();
 			if (vertexCount <= 0) {
@@ -81,15 +78,17 @@ public class BatchingStage {
 
 		@Override
 		public void execute(TaskExecutor taskExecutor, Runnable onCompletion) {
+			AtomicInteger vertexCounter = new AtomicInteger(0);
 			buffer.prepare(vertexCount);
 
-			var synchronizer = new Synchronizer(transformCalls.size(), onCompletion);
+			var synchronizer = new Synchronizer(transformCalls.size(), () -> {
+				buffer.vertexCount(vertexCounter.get());
+				onCompletion.run();
+			});
 
-			int startVertex = 0;
 			for (var transformCall : transformCalls) {
-				transformCall.plan(buffer, startVertex, matrices, level)
+				transformCall.plan(ctx, buffer, vertexCounter)
 						.execute(taskExecutor, synchronizer::decrementAndEventuallyRun);
-				startVertex += transformCall.getTotalVertexCount();
 			}
 		}
 
