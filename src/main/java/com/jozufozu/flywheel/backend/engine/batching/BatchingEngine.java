@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.joml.FrustumIntersection;
+
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
@@ -17,6 +19,7 @@ import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
+import com.jozufozu.flywheel.lib.math.MatrixUtil;
 import com.jozufozu.flywheel.lib.task.NestedPlan;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -48,12 +51,22 @@ public class BatchingEngine extends AbstractEngine {
 		var stack = FlwUtil.copyPoseStack(context.stack());
 		stack.translate(renderOrigin.getX() - cameraPos.x, renderOrigin.getY() - cameraPos.y, renderOrigin.getZ() - cameraPos.z);
 
+		double cameraX = cameraPos.x;
+		double cameraY = cameraPos.y;
+		double cameraZ = cameraPos.z;
+
+		org.joml.Matrix4f proj = MatrixUtil.toJoml(context.viewProjection());
+		proj.translate((float) (renderOrigin.getX() - cameraX), (float) (renderOrigin.getY() - cameraY), (float) (renderOrigin.getZ() - cameraZ));
+		FrustumIntersection frustum = new FrustumIntersection(proj);
+
+		var ctx = new FrameContext(context.level(), stack.last(), frustum);
+
 		flush();
 
 		var plans = new ArrayList<Plan>();
 
 		for (var transformSet : stages.values()) {
-			plans.add(transformSet.plan(stack.last(), context.level()));
+			plans.add(transformSet.plan(ctx));
 		}
 
 		return new NestedPlan(plans);

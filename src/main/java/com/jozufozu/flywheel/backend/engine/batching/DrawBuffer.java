@@ -69,19 +69,28 @@ public class DrawBuffer {
 		prepared = true;
 	}
 
+	public void vertexCount(int vertexCount) {
+		this.vertexCount = vertexCount;
+	}
+
 	public ReusableVertexList slice(int startVertex, int vertexCount) {
 		if (!prepared) {
 			throw new IllegalStateException("Cannot slice DrawBuffer that is not prepared!");
 		}
 
 		ReusableVertexList vertexList = provider.createVertexList();
-		vertexList.ptr(memory.ptr() + (long) startVertex * stride);
+		vertexList.ptr(ptrForVertex(startVertex));
 		vertexList.vertexCount(vertexCount);
 		return vertexList;
 	}
 
+	public long ptrForVertex(long startVertex) {
+		return memory.ptr() + startVertex * stride;
+	}
+
 	/**
 	 * Injects the backing buffer into the given builder and prepares it for rendering.
+	 *
 	 * @param bufferBuilder The buffer builder to inject into.
 	 */
 	public void inject(BufferBuilderExtension bufferBuilder) {

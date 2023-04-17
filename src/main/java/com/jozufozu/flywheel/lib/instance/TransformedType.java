@@ -1,11 +1,13 @@
 package com.jozufozu.flywheel.lib.instance;
 
+import com.jozufozu.flywheel.api.instance.InstanceBoundingSphereTransformer;
 import com.jozufozu.flywheel.api.instance.InstanceHandle;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceVertexTransformer;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
 import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.lib.layout.CommonItems;
+import com.jozufozu.flywheel.lib.math.MatrixUtil;
 import com.jozufozu.flywheel.lib.math.RenderMath;
 import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 
@@ -58,6 +60,16 @@ public class TransformedType implements InstanceType<TransformedInstance> {
 				vertexList.a(i, a);
 				vertexList.light(i, light);
 			}
+		};
+	}
+
+	@Override
+	public InstanceBoundingSphereTransformer<TransformedInstance> getBoundingSphereTransformer() {
+		return (boundingSphere, instance) -> {
+			var radius = boundingSphere.w;
+			boundingSphere.w = 1;
+			boundingSphere.mul(MatrixUtil.toJoml(instance.model));
+			boundingSphere.w = radius * MatrixUtil.extractScale(instance.model);
 		};
 	}
 }

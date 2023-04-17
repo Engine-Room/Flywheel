@@ -1,5 +1,8 @@
 package com.jozufozu.flywheel.lib.instance;
 
+import org.joml.Quaternionf;
+
+import com.jozufozu.flywheel.api.instance.InstanceBoundingSphereTransformer;
 import com.jozufozu.flywheel.api.instance.InstanceHandle;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceVertexTransformer;
@@ -72,6 +75,15 @@ public class OrientedType implements InstanceType<OrientedInstance> {
 				vertexList.a(i, a);
 				vertexList.light(i, light);
 			}
+		};
+	}
+
+	@Override
+	public InstanceBoundingSphereTransformer<OrientedInstance> getBoundingSphereTransformer() {
+		return (boundingSphere, instance) -> {
+			boundingSphere.sub(instance.pivotX, instance.pivotY, instance.pivotZ, 0);
+			boundingSphere.rotate(new Quaternionf(instance.qX, instance.qY, instance.qZ, instance.qW));
+			boundingSphere.add(instance.posX + instance.pivotX, instance.posY + instance.pivotY, instance.posZ + instance.pivotZ, 0);
 		};
 	}
 }

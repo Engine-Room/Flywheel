@@ -1,22 +1,22 @@
 package com.jozufozu.flywheel.backend.engine.batching;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.joml.Vector4f;
+import org.joml.Vector4fc;
 
 import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.InstanceBoundingSphereTransformer;
 import com.jozufozu.flywheel.api.instance.InstanceVertexTransformer;
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
-import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
-import com.jozufozu.flywheel.lib.math.MoreMath;
-import com.jozufozu.flywheel.lib.task.SimplePlan;
+import com.jozufozu.flywheel.lib.task.RunOnAllPlan;
 import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
-
-import net.minecraft.client.multiplayer.ClientLevel;
 
 public class TransformCall<I extends Instance> {
 	private final CPUInstancer<I> instancer;
@@ -25,14 +25,23 @@ public class TransformCall<I extends Instance> {
 
 	private final int meshVertexCount;
 	private final int meshByteSize;
+	private final InstanceVertexTransformer<I> instanceVertexTransformer;
+	private final MaterialVertexTransformer materialVertexTransformer;
+	private final InstanceBoundingSphereTransformer<I> boundingSphereTransformer;
+	private final Vector4fc boundingSphere;
 
 	public TransformCall(CPUInstancer<I> instancer, Material material, BatchedMeshPool.BufferedMesh mesh) {
 		this.instancer = instancer;
 		this.material = material;
 		this.mesh = mesh;
 
+		instanceVertexTransformer = instancer.type.getVertexTransformer();
+		boundingSphereTransformer = instancer.type.getBoundingSphereTransformer();
+		materialVertexTransformer = material.getVertexTransformer();
+
 		meshVertexCount = mesh.getVertexCount();
 		meshByteSize = mesh.size();
+		boundingSphere = mesh.mesh.getBoundingSphere();
 	}
 
 	public int getTotalVertexCount() {
@@ -43,49 +52,28 @@ public class TransformCall<I extends Instance> {
 		instancer.update();
 	}
 
-	public Plan plan(DrawBuffer buffer, int startVertex, PoseStack.Pose matrices, ClientLevel level) {
-		final int totalCount = instancer.getInstanceCount();
-		final int chunkSize = MoreMath.ceilingDiv(totalCount, 6 * 32);
+	public Plan plan(FrameContext ctx, DrawBuffer buffer, final AtomicInteger vertexCount) {
+		return RunOnAllPlan.of(instancer::getAll, instance -> {
+			var boundingSphere = new Vector4f(this.boundingSphere);
 
-		final var out = new ArrayList<Runnable>();
-		int remaining = totalCount;
-		while (remaining > 0) {
-			int end = remaining;
-			remaining -= chunkSize;
-			int start = Math.max(remaining, 0);
+			boundingSphereTransformer.transform(boundingSphere, instance);
 
-			int vertexCount = meshVertexCount * (end - start);
-			ReusableVertexList sub = buffer.slice(startVertex, vertexCount);
-			startVertex += vertexCount;
+			if (!ctx.frustum()
+					.testSphere(boundingSphere.x, boundingSphere.y, boundingSphere.z, boundingSphere.w)) {
+				return;
+			}
 
-			out.add(() -> transform(sub, matrices, level, instancer.getRange(start, end)));
-		}
-		return new SimplePlan(out);
-	}
+			final int baseVertex = vertexCount.getAndAdd(meshVertexCount);
 
-	private void transform(ReusableVertexList vertexList, PoseStack.Pose matrices, ClientLevel level, List<I> instances) {
-		// save the total size of the slice for later.
-		final long anchorPtr = vertexList.ptr();
-		final int totalVertexCount = vertexList.vertexCount();
+			var sub = buffer.slice(baseVertex, meshVertexCount);
 
-		// while working on individual instances, the vertex list should expose just a single copy of the mesh.
-		vertexList.vertexCount(meshVertexCount);
+			mesh.copyTo(sub.ptr());
 
-		InstanceVertexTransformer<I> instanceVertexTransformer = instancer.type.getVertexTransformer();
+			instanceVertexTransformer.transform(sub, instance, ctx.level());
 
-		for (I instance : instances) {
-			mesh.copyTo(vertexList.ptr());
-
-			instanceVertexTransformer.transform(vertexList, instance, level);
-
-			vertexList.ptr(vertexList.ptr() + meshByteSize);
-		}
-
-		// restore the original size of the slice to apply per-vertex transformations.
-		vertexList.ptr(anchorPtr);
-		vertexList.vertexCount(totalVertexCount);
-		material.getVertexTransformer().transform(vertexList, level);
-		applyMatrices(vertexList, matrices);
+			materialVertexTransformer.transform(sub, ctx.level());
+			applyMatrices(sub, ctx.matrices());
+		});
 	}
 
 	private static void applyMatrices(MutableVertexList vertexList, PoseStack.Pose matrices) {
