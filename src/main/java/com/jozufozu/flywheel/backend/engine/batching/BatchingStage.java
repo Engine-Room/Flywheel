@@ -11,7 +11,6 @@ import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.lib.task.NestedPlan;
 import com.jozufozu.flywheel.lib.task.Synchronizer;
-import com.jozufozu.flywheel.lib.task.UnitPlan;
 
 import net.minecraft.client.renderer.RenderType;
 
@@ -51,7 +50,6 @@ public class BatchingStage {
 		private final DrawBuffer buffer;
 		private final List<TransformCall<?>> transformCalls = new ArrayList<>();
 		private FrameContext ctx;
-		private int vertexCount;
 
 		public BufferPlan(DrawBuffer drawBuffer) {
 			buffer = drawBuffer;
@@ -60,14 +58,7 @@ public class BatchingStage {
 		public Plan update(FrameContext ctx) {
 			this.ctx = ctx;
 
-			vertexCount = setupAndCountVertices();
-			if (vertexCount <= 0) {
-				return UnitPlan.INSTANCE;
-			}
-
-			// Moving this into execute leads to a race condition that causes things to flash in and out of existence.
-			// Sometimes the main thread decides there's nothing to render in a stage before the worker threads have
-			// marked a stage as active. Then in the next frame #markActive complains because it's already prepared.
+			// Mark the tracker active by default...
 			tracker.markActive(stage, buffer);
 			return this;
 		}
@@ -78,7 +69,18 @@ public class BatchingStage {
 
 		@Override
 		public void execute(TaskExecutor taskExecutor, Runnable onCompletion) {
+			// Count vertices here to account for instances being added during Visual updates.
+			var vertexCount = setupAndCountVertices();
+
+			if (vertexCount <= 0) {
+				// ...then mark it inactive if there's nothing to draw.
+				tracker.markInactive(stage, buffer);
+				onCompletion.run();
+				return;
+			}
+
 			AtomicInteger vertexCounter = new AtomicInteger(0);
+
 			buffer.prepare(vertexCount);
 
 			var synchronizer = new Synchronizer(transformCalls.size(), () -> {
