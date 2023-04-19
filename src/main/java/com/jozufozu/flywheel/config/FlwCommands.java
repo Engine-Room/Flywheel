@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.config;
 import java.util.function.BiConsumer;
 
 import com.jozufozu.flywheel.api.backend.Backend;
+import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.lib.uniform.FlwShaderUniforms;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -60,13 +61,25 @@ public class FlwCommands {
 					.executes(context -> {
 						LocalPlayer player = Minecraft.getInstance().player;
 						if (player != null) {
-							Backend backend = context.getArgument("id", Backend.class);
-							value.set(Backend.REGISTRY.getIdOrThrow(backend).toString());
+							Backend requestedBackend = context.getArgument("id", Backend.class);
+							var requestedId = Backend.REGISTRY.getIdOrThrow(requestedBackend)
+									.toString();
+							value.set(requestedId);
 
-							Component message = backend.engineMessage();
-							player.displayClientMessage(message, false);
-
+							// Reload renderers so we can report the backend that we fell back to.
 							Minecraft.getInstance().levelRenderer.allChanged();
+
+							var actualBackend = BackendManager.getBackend();
+							if (actualBackend == null) {
+								player.displayClientMessage(new TextComponent("Error switching backends, flywheel disabled"), false);
+							} else if (actualBackend != requestedBackend) {
+								player.displayClientMessage(new TextComponent("'" + requestedId + "' not available").withStyle(ChatFormatting.RED), false);
+								var component = actualBackend.engineMessage();
+								player.displayClientMessage(component, false);
+							} else {
+								Component message = requestedBackend.engineMessage();
+								player.displayClientMessage(message, false);
+							}
 						}
 						return Command.SINGLE_SUCCESS;
 					})));

@@ -80,10 +80,10 @@ public class ShaderSources {
 		if (findStack.contains(location)) {
 			generateRecursiveImportException(location);
 		}
-		findStack.add(location);
+		findStack.addLast(location);
 	}
 
 	private void popFindStack() {
-		findStack.pop();
+		findStack.removeLast();
 	}
 }

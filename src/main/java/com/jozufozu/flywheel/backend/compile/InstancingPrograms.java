@@ -23,15 +23,25 @@ public class InstancingPrograms {
 	public static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent) {
 		if (instance != null) {
 			instance.delete();
+			instance = null;
 		}
 		var instancingCompiler = new PipelineCompiler(sources, pipelineKeys, Pipelines.INSTANCED_ARRAYS, uniformComponent);
-		instance = new InstancingPrograms(instancingCompiler.compile());
+		var result = instancingCompiler.compileAndReportErrors();
+
+		if (result != null) {
+			instance = new InstancingPrograms(result);
+		}
+
 		instancingCompiler.delete();
 	}
 
 	@Nullable
 	public static InstancingPrograms get() {
 		return instance;
+	}
+
+	public static boolean allLoaded() {
+		return instance != null;
 	}
 
 	public GlProgram get(VertexType vertexType, InstanceType<?> instanceType, Context contextShader) {
