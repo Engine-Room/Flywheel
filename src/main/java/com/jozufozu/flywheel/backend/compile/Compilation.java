@@ -46,7 +46,7 @@ public class Compilation {
 	}
 
 	@NotNull
-	public CompilationResult compile() {
+	public ShaderResult compile() {
 		int handle = GL20.glCreateShader(shaderType.glEnum);
 		var source = fullSource.toString();
 
@@ -56,13 +56,14 @@ public class Compilation {
 		var shaderName = buildShaderName();
 		dumpSource(source, shaderType.getFileName(shaderName));
 
+		var infoLog = GL20.glGetShaderInfoLog(handle);
+
 		if (compiledSuccessfully(handle)) {
-			return CompilationResult.success(new GlShader(handle, shaderType, shaderName));
+			return ShaderResult.success(new GlShader(handle, shaderType, shaderName), infoLog);
 		}
 
-		var errorLog = GL20.glGetShaderInfoLog(handle);
 		GL20.glDeleteShader(handle);
-		return CompilationResult.failure(new FailedCompilation(shaderName, files, generatedSource.toString(), errorLog));
+		return ShaderResult.failure(new FailedCompilation(shaderName, files, generatedSource.toString(), infoLog));
 	}
 
 	public void enableExtension(String ext) {

@@ -1,11 +1,5 @@
 package com.jozufozu.flywheel.backend.compile;
 
-import static org.lwjgl.opengl.GL11.GL_TRUE;
-import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
-import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
-import static org.lwjgl.opengl.GL20.glGetProgrami;
-import static org.lwjgl.opengl.GL20.glLinkProgram;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -13,7 +7,6 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.gl.GLSLVersion;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.SourceFile;
@@ -63,26 +56,5 @@ public class CompileUtil {
 		return Stream.of(stages)
 				.map(SourceFile::toString)
 				.collect(Collectors.joining(" -> "));
-	}
-
-	/**
-	 * Check the program info log for errors.
-	 *
-	 * @param handle The handle of the program to check.
-	 */
-	public static void checkLinkLog(int handle) {
-		glLinkProgram(handle);
-
-		String log = glGetProgramInfoLog(handle);
-
-		if (!log.isEmpty()) {
-			Flywheel.LOGGER.debug("Program link log: " + log);
-		}
-
-		int result = glGetProgrami(handle, GL_LINK_STATUS);
-
-		if (result != GL_TRUE) {
-			throw new RuntimeException("Shader program linking failed, see log for details");
-		}
 	}
 }

@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.compile;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,13 +14,13 @@ import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 
 public class ShaderCompiler {
-	private final Map<ShaderKey, CompilationResult> shaderCache = new HashMap<>();
-	private final Consumer<FailedCompilation> errorConsumer;
+	private final Map<ShaderKey, ShaderResult> shaderCache = new HashMap<>();
+	private final CompilerStats stats;
 	private final CompilationFactory factory;
 	private final Includer includer;
 
-	public ShaderCompiler(Consumer<FailedCompilation> errorConsumer, CompilationFactory factory, Includer includer) {
-		this.errorConsumer = errorConsumer;
+	public ShaderCompiler(CompilerStats stats, CompilationFactory factory, Includer includer) {
+		this.stats = stats;
 		this.factory = factory;
 		this.includer = includer;
 	}
@@ -38,31 +37,22 @@ public class ShaderCompiler {
 			return cached.unwrap();
 		}
 
-		CompilationResult out = compileUncached(factory.create(glslVersion, shaderType), sourceComponents);
+		ShaderResult out = compileUncached(factory.create(glslVersion, shaderType), sourceComponents);
 		shaderCache.put(key, out);
-		return unwrapAndReportError(out);
+		stats.shaderResult(out);
+		return out.unwrap();
 	}
 
 	public void delete() {
 		shaderCache.values()
 				.stream()
-				.map(CompilationResult::unwrap)
+				.map(ShaderResult::unwrap)
 				.filter(Objects::nonNull)
 				.forEach(GlShader::delete);
 	}
 
-	@Nullable
-	private GlShader unwrapAndReportError(CompilationResult result) {
-		if (result instanceof CompilationResult.Success s) {
-			return s.shader();
-		} else if (result instanceof CompilationResult.Failure f) {
-			errorConsumer.accept(f.failure());
-		}
-		return null;
-	}
-
 	@NotNull
-	private CompilationResult compileUncached(Compilation ctx, ImmutableList<SourceComponent> sourceComponents) {
+	private ShaderResult compileUncached(Compilation ctx, ImmutableList<SourceComponent> sourceComponents) {
 		ctx.enableExtension("GL_ARB_explicit_attrib_location");
 		ctx.enableExtension("GL_ARB_conservative_depth");
 
@@ -86,14 +76,8 @@ public class ShaderCompiler {
 	}
 
 	public static class Builder {
-		private Consumer<FailedCompilation> errorConsumer = error -> {};
 		private CompilationFactory factory = Compilation::new;
 		private Includer includer = RecursiveIncluder.INSTANCE;
-
-		public Builder errorConsumer(Consumer<FailedCompilation> errorConsumer) {
-			this.errorConsumer = errorConsumer;
-			return this;
-		}
 
 		public Builder compilationFactory(CompilationFactory factory) {
 			this.factory = factory;
@@ -105,8 +89,8 @@ public class ShaderCompiler {
 			return this;
 		}
 
-		public ShaderCompiler build() {
-			return new ShaderCompiler(errorConsumer, factory, includer);
+		public ShaderCompiler build(CompilerStats stats) {
+			return new ShaderCompiler(stats, factory, includer);
 		}
 	}
 }
