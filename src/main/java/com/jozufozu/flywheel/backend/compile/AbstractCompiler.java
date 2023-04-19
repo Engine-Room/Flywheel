@@ -6,6 +6,7 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 
@@ -28,7 +29,8 @@ public abstract class AbstractCompiler<K> {
 	@Nullable
 	protected abstract GlProgram compile(K key);
 
-	public Map<K, GlProgram> compile() {
+	@Nullable
+	public Map<K, GlProgram> compileAndReportErrors() {
 		stats.start();
 		Map<K, GlProgram> out = new HashMap<>();
 		for (var key : keys) {
@@ -38,6 +40,12 @@ public abstract class AbstractCompiler<K> {
 			}
 		}
 		stats.finish();
+
+		if (stats.errored()) {
+			Flywheel.LOGGER.error(stats.generateErrorLog());
+			return null;
+		}
+
 		return out;
 	}
 

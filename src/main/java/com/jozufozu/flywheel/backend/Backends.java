@@ -2,6 +2,8 @@ package com.jozufozu.flywheel.backend;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.backend.Backend;
+import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
+import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.batching.BatchingEngine;
 import com.jozufozu.flywheel.backend.engine.indirect.IndirectEngine;
 import com.jozufozu.flywheel.backend.engine.instancing.InstancingEngine;
@@ -31,7 +33,7 @@ public class Backends {
 			.engineFactory(level -> new InstancingEngine(256, Contexts.WORLD))
 			.fallback(() -> Backends.BATCHING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
-					.instancedArraysSupported())
+					.instancedArraysSupported() && InstancingPrograms.allLoaded())
 			.register(Flywheel.rl("instancing"));
 
 	/**
@@ -42,7 +44,7 @@ public class Backends {
 			.engineFactory(level -> new IndirectEngine(256))
 			.fallback(() -> Backends.INSTANCING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
-					.supportsIndirect())
+					.supportsIndirect() && IndirectPrograms.allLoaded())
 			.register(Flywheel.rl("indirect"));
 
 	public static void init() {

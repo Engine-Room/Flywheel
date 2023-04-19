@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.compile;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.gl.shader.GlShader;
@@ -7,13 +8,15 @@ import com.jozufozu.flywheel.gl.shader.GlShader;
 public sealed interface ShaderResult {
 	@Nullable
 	default GlShader unwrap() {
-		if (this instanceof Success s) {
-			return s.shader();
-		}
 		return null;
 	}
 
 	record Success(GlShader shader, String infoLog) implements ShaderResult {
+		@Override
+		@NotNull
+		public GlShader unwrap() {
+			return shader;
+		}
 	}
 
 	record Failure(FailedCompilation failure) implements ShaderResult {

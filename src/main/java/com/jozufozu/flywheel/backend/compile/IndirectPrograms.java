@@ -25,11 +25,18 @@ public class IndirectPrograms {
 	public static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent) {
 		if (instance != null) {
 			instance.delete();
+			instance = null;
 		}
-		var indirectCompiler = new PipelineCompiler(sources, pipelineKeys, Pipelines.INDIRECT, uniformComponent);
+		var pipelineCompiler = new PipelineCompiler(sources, pipelineKeys, Pipelines.INDIRECT, uniformComponent);
 		var cullingCompiler = new CullingCompiler(sources, createCullingKeys(), uniformComponent);
-		instance = new IndirectPrograms(indirectCompiler.compile(), cullingCompiler.compile());
-		indirectCompiler.delete();
+
+		var pipelineResult = pipelineCompiler.compileAndReportErrors();
+		var cullingResult = cullingCompiler.compileAndReportErrors();
+
+		if (pipelineResult != null && cullingResult != null) {
+			instance = new IndirectPrograms(pipelineResult, cullingResult);
+		}
+		pipelineCompiler.delete();
 		cullingCompiler.delete();
 	}
 
@@ -44,6 +51,10 @@ public class IndirectPrograms {
 	@Nullable
 	public static IndirectPrograms get() {
 		return instance;
+	}
+
+	public static boolean allLoaded() {
+		return instance != null;
 	}
 
 	public GlProgram getIndirectProgram(VertexType vertexType, InstanceType<?> instanceType, Context contextShader) {

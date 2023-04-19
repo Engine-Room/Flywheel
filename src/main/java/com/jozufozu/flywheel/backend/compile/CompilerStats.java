@@ -25,15 +25,13 @@ public class CompilerStats {
 		var elapsed = StringUtil.formatTime(compileEnd - compileStart);
 
 		Flywheel.LOGGER.info("Compiled " + shaderCount + " shaders (with " + shaderErrors.size() + " compile errors) " + "and " + programCount + " programs (with " + programErrors.size() + " link errors) in " + elapsed);
-
 	}
 
-	// TODO: use this to turn off backends
 	public boolean errored() {
 		return errored;
 	}
 
-	private String generateLog() {
+	public String generateErrorLog() {
 		return String.join("\n", programErrors) + '\n' + shaderErrors.stream()
 				.map(FailedCompilation::getMessage)
 				.collect(Collectors.joining("\n"));
