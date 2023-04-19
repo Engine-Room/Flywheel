@@ -13,8 +13,7 @@ import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.backend.compile.FlwPrograms;
-import com.jozufozu.flywheel.backend.compile.pipeline.Pipelines;
+import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlStateTracker;
@@ -106,7 +105,8 @@ public class InstancingEngine extends AbstractEngine {
 		var vertexType = desc.vertexType();
 		var instanceType = desc.instanceType();
 
-		var program = FlwPrograms.get().getPipelineProgram(vertexType, instanceType, context, Pipelines.INSTANCED_ARRAYS);
+		var program = InstancingPrograms.get()
+				.get(vertexType, instanceType, context);
 		UniformBuffer.syncAndBind(program);
 
 		var uniformLocation = program.getUniformLocation("_flw_materialID_instancing");
