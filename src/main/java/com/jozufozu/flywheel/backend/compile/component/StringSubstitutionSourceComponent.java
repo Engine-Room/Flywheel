@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.compile;
+package com.jozufozu.flywheel.backend.compile.component;
 
 import java.util.Collection;
 import java.util.Map;

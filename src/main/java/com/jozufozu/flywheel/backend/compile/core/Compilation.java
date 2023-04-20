@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.compile;
+package com.jozufozu.flywheel.backend.compile.core;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -10,10 +10,10 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.gl.GLSLVersion;
 import com.jozufozu.flywheel.gl.shader.GlShader;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.gl.versioned.GlCompat;
+import com.jozufozu.flywheel.glsl.GLSLVersion;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.util.StringUtil;
@@ -39,10 +39,11 @@ public class Compilation {
 	private int generatedLines = 0;
 
 	public Compilation(GLSLVersion glslVersion, ShaderType shaderType) {
-		this.generatedSource = new StringBuilder();
-		this.fullSource = new StringBuilder(CompileUtil.generateHeader(glslVersion, shaderType)).append('\n');
 		this.glslVersion = glslVersion;
 		this.shaderType = shaderType;
+
+		generatedSource = new StringBuilder();
+		fullSource = new StringBuilder(glslVersion.getVersionLine()).append(shaderType.getDefineStatement()).append('\n');
 	}
 
 	@NotNull

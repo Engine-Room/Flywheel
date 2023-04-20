@@ -5,8 +5,8 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.glsl.ShaderSources;
-import com.jozufozu.flywheel.glsl.error.ErrorReporter;
 import com.jozufozu.flywheel.lib.context.Contexts;
 
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -16,9 +16,7 @@ public class FlwPrograms {
 	}
 
 	public static void reload(ResourceManager resourceManager) {
-		var errorReporter = new ErrorReporter();
-
-		var sources = new ShaderSources(errorReporter, resourceManager);
+		var sources = new ShaderSources(resourceManager);
 		var pipelineKeys = createPipelineKeys();
 		var uniformComponent = UniformComponent.builder(Flywheel.rl("uniforms"))
 				.sources(ShaderUniforms.REGISTRY.getAll()

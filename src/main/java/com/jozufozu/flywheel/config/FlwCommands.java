@@ -70,16 +70,12 @@ public class FlwCommands {
 							Minecraft.getInstance().levelRenderer.allChanged();
 
 							var actualBackend = BackendManager.getBackend();
-							if (actualBackend == null) {
-								player.displayClientMessage(new TextComponent("Error switching backends, flywheel disabled"), false);
-							} else if (actualBackend != requestedBackend) {
+							if (actualBackend != requestedBackend) {
 								player.displayClientMessage(new TextComponent("'" + requestedId + "' not available").withStyle(ChatFormatting.RED), false);
-								var component = actualBackend.engineMessage();
-								player.displayClientMessage(component, false);
-							} else {
-								Component message = requestedBackend.engineMessage();
-								player.displayClientMessage(message, false);
 							}
+
+							Component message = actualBackend.engineMessage();
+							player.displayClientMessage(message, false);
 						}
 						return Command.SINGLE_SUCCESS;
 					})));

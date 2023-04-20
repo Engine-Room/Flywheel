@@ -1,11 +1,9 @@
-package com.jozufozu.flywheel.backend.compile.pipeline;
-
-import java.util.List;
+package com.jozufozu.flywheel.backend.compile;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.backend.engine.indirect.IndirectComponent;
-import com.jozufozu.flywheel.backend.engine.instancing.InstancedArraysComponent;
-import com.jozufozu.flywheel.gl.GLSLVersion;
+import com.jozufozu.flywheel.backend.compile.component.IndirectComponent;
+import com.jozufozu.flywheel.backend.compile.component.InstancedArraysComponent;
+import com.jozufozu.flywheel.glsl.GLSLVersion;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -22,8 +20,6 @@ public final class Pipelines {
 			.fragment(Files.DRAW_FRAGMENT)
 			.assembler(IndirectComponent::new)
 			.build();
-
-	public static final List<Pipeline> ALL = List.of(INSTANCED_ARRAYS, INDIRECT);
 
 	public static void init() {
 	}

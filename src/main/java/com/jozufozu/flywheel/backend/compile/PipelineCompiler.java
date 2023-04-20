@@ -4,7 +4,8 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.backend.compile.pipeline.Pipeline;
+import com.jozufozu.flywheel.backend.compile.component.MaterialAdapterComponent;
+import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.ShaderSources;

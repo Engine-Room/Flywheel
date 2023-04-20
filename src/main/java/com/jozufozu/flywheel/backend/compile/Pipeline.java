@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.backend.compile.pipeline;
+package com.jozufozu.flywheel.backend.compile;
 
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.gl.GLSLVersion;
+import com.jozufozu.flywheel.glsl.GLSLVersion;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 

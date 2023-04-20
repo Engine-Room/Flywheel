@@ -27,7 +27,6 @@ import net.minecraft.resources.ResourceLocation;
  * </p>
  */
 public class SourceFile implements SourceComponent {
-
 	public final ResourceLocation name;
 
 	public final ShaderSources parent;

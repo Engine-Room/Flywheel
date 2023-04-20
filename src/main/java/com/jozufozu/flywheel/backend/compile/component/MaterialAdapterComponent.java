@@ -1,16 +1,16 @@
-package com.jozufozu.flywheel.backend.compile;
+package com.jozufozu.flywheel.backend.compile.component;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import javax.annotation.Nonnull;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
@@ -18,12 +18,10 @@ import com.jozufozu.flywheel.glsl.generate.GlslBlock;
 import com.jozufozu.flywheel.glsl.generate.GlslBuilder;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;
 import com.jozufozu.flywheel.glsl.generate.GlslSwitch;
-import com.jozufozu.flywheel.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 
 public class MaterialAdapterComponent implements SourceComponent {
-
 	// TODO: material id handling in pipeline shader
 	private final ResourceLocation name;
 	private final GlslExpr switchArg;
@@ -59,9 +57,9 @@ public class MaterialAdapterComponent implements SourceComponent {
 			builder.function()
 					.signature(adaptedFunction.signature())
 					.body(body -> generateAdapter(body, adaptedFunction));
-		}
 
-		builder.blankLine();
+			builder.blankLine();
+		}
 
 		return builder.build();
 	}
@@ -145,31 +143,28 @@ public class MaterialAdapterComponent implements SourceComponent {
 
 			var transformed = ImmutableList.<StringSubstitutionSourceComponent>builder();
 
+			int index = 0;
 			for (var rl : materialSources) {
 				var sourceFile = sources.find(rl);
-				var adapterMap = createAdapterMap(adaptedFunctions, getSuffix(rl));
+				final int finalIndex = index;
+				var adapterMap = createAdapterMap(adaptedFunctions, fnName -> "_" + fnName + "_" + finalIndex);
 				transformed.add(new StringSubstitutionSourceComponent(sourceFile, adapterMap));
+				index++;
 			}
 
 			return new MaterialAdapterComponent(name, switchArg, adaptedFunctions, transformed.build());
 		}
 	}
 
-	@NotNull
-	private static HashMap<String, String> createAdapterMap(List<AdaptedFn> adaptedFunctions, String suffix) {
-		HashMap<String, String> out = new HashMap<>();
+	private static ImmutableMap<String, String> createAdapterMap(List<AdaptedFn> adaptedFunctions, UnaryOperator<String> nameAdapter) {
+		ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
 
 		for (var adapted : adaptedFunctions) {
 			var fnName = adapted.signature()
 					.name();
-			out.put(fnName, fnName + suffix);
+			builder.put(fnName, nameAdapter.apply(fnName));
 		}
 
-		return out;
-	}
-
-	@NotNull
-	private static String getSuffix(ResourceLocation rl) {
-		return '_' + ResourceUtil.toSafeString(rl);
+		return builder.build();
 	}
 }

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.gl;
+package com.jozufozu.flywheel.glsl;
 
 public enum GLSLVersion {
 	V110(110),
