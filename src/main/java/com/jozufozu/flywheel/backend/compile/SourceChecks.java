@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.glsl;
+package com.jozufozu.flywheel.backend.compile;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -6,14 +6,13 @@ import java.util.function.BiConsumer;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
+import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.glsl.error.ErrorReporter;
 import com.jozufozu.flywheel.glsl.parse.ShaderFunction;
 import com.jozufozu.flywheel.glsl.parse.ShaderVariable;
 
+// TODO: recycle to be invoked by the shader compiler
 public class SourceChecks {
-
-	// TODO: recycle to be invoked by the shader compiler
-
 	public static final BiConsumer<ErrorReporter, SourceFile> LAYOUT_VERTEX = checkFunctionArity("flw_layoutVertex", 0);
 	public static final BiConsumer<ErrorReporter, SourceFile> INSTANCE_VERTEX = checkFunctionParameterTypeExists("flw_instanceVertex", 1, 0);
 	public static final BiConsumer<ErrorReporter, SourceFile> MATERIAL_VERTEX = checkFunctionArity("flw_materialVertex", 0);
@@ -21,7 +20,6 @@ public class SourceChecks {
 	public static final BiConsumer<ErrorReporter, SourceFile> CONTEXT_VERTEX = checkFunctionArity("flw_contextVertex", 0);
 	public static final BiConsumer<ErrorReporter, SourceFile> CONTEXT_FRAGMENT = checkFunctionArity("flw_contextFragment", 0).andThen(checkFunctionArity("flw_initFragment", 0));
 	public static final BiConsumer<ErrorReporter, SourceFile> PIPELINE = checkFunctionArity("main", 0);
-
 
 	public static BiConsumer<ErrorReporter, SourceFile> checkFunctionArity(String name, int arity) {
 		return (errorReporter, file) -> checkFunctionArity(errorReporter, file, name, arity);

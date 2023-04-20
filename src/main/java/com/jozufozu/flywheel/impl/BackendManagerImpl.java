@@ -30,15 +30,14 @@ public final class BackendManagerImpl {
 
 	private static final Backend DEFAULT_BACKEND = findDefaultBackend();
 
-	private static Backend backend;
+	private static Backend backend = OFF_BACKEND;
 
-	@Nullable
 	public static Backend getBackend() {
 		return backend;
 	}
 
 	public static boolean isOn() {
-		return backend != null && backend != OFF_BACKEND;
+		return backend != OFF_BACKEND;
 	}
 
 	public static Backend getOffBackend() {
@@ -80,9 +79,6 @@ public final class BackendManagerImpl {
 
 	public static void init() {
 		CrashReportCallables.registerCrashCallable("Flywheel Backend", () -> {
-			if (backend == null) {
-				return "Uninitialized";
-			}
 			var backendId = Backend.REGISTRY.getId(backend);
 			if (backendId == null) {
 				return "Unregistered";

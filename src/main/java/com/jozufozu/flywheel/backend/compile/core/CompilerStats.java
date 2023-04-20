@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.compile;
+package com.jozufozu.flywheel.backend.compile.core;
 
 import java.util.ArrayList;
 import java.util.List;

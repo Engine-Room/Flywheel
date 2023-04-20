@@ -7,6 +7,9 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.backend.compile.core.CompilerStats;
+import com.jozufozu.flywheel.backend.compile.core.ProgramLinker;
+import com.jozufozu.flywheel.backend.compile.core.ShaderCompiler;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 
@@ -21,8 +24,7 @@ public abstract class AbstractCompiler<K> {
 		this.sources = sources;
 		this.keys = keys;
 
-		shaderCompiler = ShaderCompiler.builder()
-				.build(stats);
+		shaderCompiler = new ShaderCompiler(stats);
 		programLinker = new ProgramLinker(stats);
 	}
 

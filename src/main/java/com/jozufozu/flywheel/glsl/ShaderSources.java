@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.glsl;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,8 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import com.google.common.collect.Lists;
-import com.jozufozu.flywheel.glsl.error.ErrorReporter;
 import com.jozufozu.flywheel.util.ResourceUtil;
 import com.jozufozu.flywheel.util.StringUtil;
 
@@ -23,7 +20,8 @@ import net.minecraft.server.packs.resources.ResourceManager;
  */
 public class ShaderSources {
 	public static final String SHADER_DIR = "flywheel/";
-	public static final ArrayList<String> EXTENSIONS = Lists.newArrayList(".vert", ".vsh", ".frag", ".fsh", ".glsl");
+
+	private final ResourceManager manager;
 
 	private final Map<ResourceLocation, SourceFile> cache = new HashMap<>();
 
@@ -32,11 +30,7 @@ public class ShaderSources {
 	 */
 	private final Deque<ResourceLocation> findStack = new ArrayDeque<>();
 
-	private final ResourceManager manager;
-	private final ErrorReporter errorReporter;
-
-	public ShaderSources(ErrorReporter errorReporter, ResourceManager manager) {
-		this.errorReporter = errorReporter;
+	public ShaderSources(ResourceManager manager) {
 		this.manager = manager;
 	}
 

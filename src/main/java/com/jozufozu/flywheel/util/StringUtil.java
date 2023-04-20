@@ -21,13 +21,23 @@ import org.lwjgl.system.MemoryUtil;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 
 public class StringUtil {
-
 	private static final NumberFormat THREE_DECIMAL_PLACES = new DecimalFormat("#0.000");
 
-	// FIXME: this method should count trailing newlines
 	public static int countLines(String s) {
-		return (int) s.lines()
-				.count();
+		int lines = 1;
+		int length = s.length();
+		for (int i = 0; i < length; i++) {
+			char c = s.charAt(i);
+			if (c == '\n') {
+				lines++;
+			} else if (c == '\r') {
+				lines++;
+				if (i + 1 < length && s.charAt(i + 1) == '\n') {
+					i++;
+				}
+			}
+		}
+		return lines;
 	}
 
 	public static String formatBytes(long bytes) {

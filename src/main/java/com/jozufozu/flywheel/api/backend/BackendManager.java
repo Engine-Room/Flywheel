@@ -1,14 +1,11 @@
 package com.jozufozu.flywheel.api.backend;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.jozufozu.flywheel.impl.BackendManagerImpl;
 
 public final class BackendManager {
 	/**
 	 * Get the current backend.
 	 */
-	@Nullable
 	public static Backend getBackend() {
 		return BackendManagerImpl.getBackend();
 	}

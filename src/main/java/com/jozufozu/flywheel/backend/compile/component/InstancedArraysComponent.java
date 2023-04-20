@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.engine.instancing;
+package com.jozufozu.flywheel.backend.compile.component;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.layout.LayoutItem;
-import com.jozufozu.flywheel.backend.compile.pipeline.Pipeline;
+import com.jozufozu.flywheel.backend.compile.Pipeline;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.glsl.generate.GlslBlock;
@@ -17,7 +17,8 @@ import net.minecraft.resources.ResourceLocation;
 
 public class InstancedArraysComponent implements SourceComponent {
 	private static final String ATTRIBUTE_PREFIX = "_flw_i_";
-	private static final String STRUCT_NAME = "Instance";
+	private static final String STRUCT_NAME = "FlwInstance";
+	private static final String UNPACK_FN_NAME = "_flw_unpackInstance";
 
 	private final List<LayoutItem> layoutItems;
 	private final int baseIndex;
@@ -43,9 +44,6 @@ public class InstancedArraysComponent implements SourceComponent {
 	@Override
 	public String source() {
 		var builder = new GlslBuilder();
-		builder.define("FlwInstance", STRUCT_NAME);
-
-		builder.blankLine();
 
 		int i = baseIndex;
 		for (var field : layoutItems) {
@@ -72,7 +70,7 @@ public class InstancedArraysComponent implements SourceComponent {
 
 		// unpacking function
 		builder.function()
-				.signature(FnSignature.of(STRUCT_NAME, "_flw_unpackInstance"))
+				.signature(FnSignature.of(STRUCT_NAME, UNPACK_FN_NAME))
 				.body(this::generateUnpackingBody);
 
 		builder.blankLine();

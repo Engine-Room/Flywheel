@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.compile.pipeline.Pipelines;
+import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 
