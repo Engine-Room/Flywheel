@@ -9,6 +9,7 @@ import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.task.Plan;
+import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.Effect;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
@@ -16,12 +17,15 @@ import com.jozufozu.flywheel.backend.task.FlwTaskExecutor;
 import com.jozufozu.flywheel.backend.task.ParallelTaskExecutor;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
+import com.jozufozu.flywheel.impl.TickContext;
 import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EffectVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EntityVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.VisualManager;
 import com.jozufozu.flywheel.lib.math.MatrixUtil;
-import com.jozufozu.flywheel.lib.task.PlanUtil;
+import com.jozufozu.flywheel.lib.task.NestedPlan;
+import com.jozufozu.flywheel.lib.task.SimplyComposedPlan;
+import com.jozufozu.flywheel.util.Unit;
 
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.Entity;
@@ -40,13 +44,23 @@ public class VisualWorld implements AutoCloseable {
 	private final VisualManager<Entity> entities;
 	private final VisualManager<Effect> effects;
 
+	private final Plan<TickContext> tickPlan;
+	private final Plan<RenderContext> framePlan;
+
 	public VisualWorld(LevelAccessor level) {
-		engine = BackendManager.getBackend().createEngine(level);
+		engine = BackendManager.getBackend()
+				.createEngine(level);
 		taskExecutor = FlwTaskExecutor.get();
 
 		blockEntities = new BlockEntityVisualManager(engine);
 		entities = new EntityVisualManager(engine);
 		effects = new EffectVisualManager(engine);
+
+		tickPlan = blockEntities.createTickPlan()
+				.and(entities.createTickPlan())
+				.and(effects.createTickPlan())
+				.maybeSimplify();
+		framePlan = new FramePlan();
 	}
 
 	public Engine getEngine() {
@@ -74,11 +88,7 @@ public class VisualWorld implements AutoCloseable {
 	public void tick(double cameraX, double cameraY, double cameraZ) {
 		taskExecutor.syncPoint();
 
-		blockEntities.planThisTick(cameraX, cameraY, cameraZ)
-				.and(entities.planThisTick(cameraX, cameraY, cameraZ))
-				.and(effects.planThisTick(cameraX, cameraY, cameraZ))
-				.maybeSimplify()
-				.execute(taskExecutor);
+		tickPlan.execute(taskExecutor, new TickContext(cameraX, cameraY, cameraZ));
 	}
 
 	/**
@@ -92,30 +102,7 @@ public class VisualWorld implements AutoCloseable {
 	public void beginFrame(RenderContext context) {
 		taskExecutor.syncPoint();
 
-		getManagerPlan(context).then(engine.planThisFrame(context))
-				.maybeSimplify()
-				.execute(taskExecutor);
-	}
-
-	private Plan getManagerPlan(RenderContext context) {
-		if (engine.updateRenderOrigin(context.camera())) {
-			return PlanUtil.of(blockEntities::recreateAll, entities::recreateAll, effects::recreateAll);
-		} else {
-			Vec3i renderOrigin = engine.renderOrigin();
-			var cameraPos = context.camera()
-					.getPosition();
-			double cameraX = cameraPos.x;
-			double cameraY = cameraPos.y;
-			double cameraZ = cameraPos.z;
-
-			org.joml.Matrix4f proj = MatrixUtil.toJoml(context.viewProjection());
-			proj.translate((float) (renderOrigin.getX() - cameraX), (float) (renderOrigin.getY() - cameraY), (float) (renderOrigin.getZ() - cameraZ));
-			FrustumIntersection frustum = new FrustumIntersection(proj);
-
-			return blockEntities.planThisFrame(cameraX, cameraY, cameraZ, frustum)
-					.and(entities.planThisFrame(cameraX, cameraY, cameraZ, frustum))
-					.and(effects.planThisFrame(cameraX, cameraY, cameraZ, frustum));
-		}
+		framePlan.execute(taskExecutor, context);
 	}
 
 	/**
@@ -147,5 +134,38 @@ public class VisualWorld implements AutoCloseable {
 	@Override
 	public void close() {
 		delete();
+	}
+
+	private class FramePlan implements SimplyComposedPlan<RenderContext> {
+		private final Plan<Unit> recreationPlan = NestedPlan.of(blockEntities.createRecreationPlan(), entities.createRecreationPlan(), effects.createRecreationPlan());
+		private final Plan<FrameContext> normalPlan = blockEntities.createFramePlan()
+				.and(entities.createFramePlan())
+				.and(effects.createFramePlan());
+
+		private final Plan<RenderContext> enginePlan = engine.createFramePlan();
+
+		@Override
+		public void execute(TaskExecutor taskExecutor, RenderContext context, Runnable onCompletion) {
+			Runnable then = () -> enginePlan.execute(taskExecutor, context, onCompletion);
+
+			if (engine.updateRenderOrigin(context.camera())) {
+				recreationPlan.execute(taskExecutor, Unit.INSTANCE, then);
+			} else {
+				Vec3i renderOrigin = engine.renderOrigin();
+				var cameraPos = context.camera()
+						.getPosition();
+				double cameraX = cameraPos.x;
+				double cameraY = cameraPos.y;
+				double cameraZ = cameraPos.z;
+
+				org.joml.Matrix4f proj = MatrixUtil.toJoml(context.viewProjection());
+				proj.translate((float) (renderOrigin.getX() - cameraX), (float) (renderOrigin.getY() - cameraY), (float) (renderOrigin.getZ() - cameraZ));
+				FrustumIntersection frustum = new FrustumIntersection(proj);
+
+				var frameContext = new FrameContext(cameraX, cameraY, cameraZ, frustum);
+
+				normalPlan.execute(taskExecutor, frameContext, then);
+			}
+		}
 	}
 }

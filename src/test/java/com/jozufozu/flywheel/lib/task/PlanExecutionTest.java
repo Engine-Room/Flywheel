@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.backend.task.ParallelTaskExecutor;
+import com.jozufozu.flywheel.util.Unit;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
@@ -51,7 +52,7 @@ class PlanExecutionTest {
 		var sequence = new IntArrayList(barriers + 1);
 		var expected = new IntArrayList(barriers + 1);
 
-		var plan = SimplePlan.of(() -> sequence.add(1));
+		var plan = SimplePlan.<Unit>of(() -> sequence.add(1));
 		expected.add(1);
 
 		for (int i = 0; i < barriers; i++) {
@@ -81,7 +82,7 @@ class PlanExecutionTest {
 			}
 		};
 
-		var plan = SimplePlan.of(addOne, addOne, addOne, addOne)
+		var plan = SimplePlan.<Unit>of(addOne, addOne, addOne, addOne)
 				.then(SimplePlan.of(addTwo, addTwo, addTwo, addTwo));
 
 		runAndWait(plan);
@@ -92,7 +93,7 @@ class PlanExecutionTest {
 	@Test
 	void simpleNestedPlan() {
 		var sequence = new IntArrayList(2);
-		var plan = NestedPlan.of(SimplePlan.of(() -> sequence.add(1)));
+		var plan = NestedPlan.of(SimplePlan.<Unit>of(() -> sequence.add(1)));
 		runAndWait(plan);
 		assertExpectedSequence(sequence, 1);
 	}
@@ -100,7 +101,7 @@ class PlanExecutionTest {
 	@Test
 	void manyNestedPlans() {
 		var counter = new AtomicInteger(0);
-		var count4 = NestedPlan.of(SimplePlan.of(counter::incrementAndGet, counter::incrementAndGet), SimplePlan.of(counter::incrementAndGet, counter::incrementAndGet));
+		var count4 = NestedPlan.<Unit>of(SimplePlan.of(counter::incrementAndGet, counter::incrementAndGet), SimplePlan.of(counter::incrementAndGet, counter::incrementAndGet));
 
 		runAndWait(count4);
 		Assertions.assertEquals(4, counter.get());
@@ -116,7 +117,8 @@ class PlanExecutionTest {
 	void unitPlan() {
 		var done = new AtomicBoolean(false);
 
-		UnitPlan.INSTANCE.execute(null, () -> done.set(true));
+		UnitPlan.of()
+				.execute(null, Unit.INSTANCE, () -> done.set(true));
 
 		Assertions.assertTrue(done.get());
 	}
@@ -126,12 +128,12 @@ class PlanExecutionTest {
 		var done = new AtomicBoolean(false);
 
 		SimplePlan.of()
-				.execute(null, () -> done.set(true));
+				.execute(null, Unit.INSTANCE, () -> done.set(true));
 		Assertions.assertTrue(done.get());
 
 		done.set(false);
 		NestedPlan.of()
-				.execute(null, () -> done.set(true));
+				.execute(null, Unit.INSTANCE, () -> done.set(true));
 		Assertions.assertTrue(done.get());
 	}
 
@@ -140,7 +142,7 @@ class PlanExecutionTest {
 		var done = new AtomicBoolean(false);
 		var plan = new OnMainThreadPlan(() -> done.set(true));
 
-		plan.execute(EXECUTOR);
+		plan.execute(EXECUTOR, Unit.INSTANCE);
 
 		Assertions.assertFalse(done.get());
 
@@ -153,20 +155,20 @@ class PlanExecutionTest {
 		Assertions.assertArrayEquals(expected, sequence.toIntArray());
 	}
 
-	public static void runAndWait(Plan plan) {
+	public static void runAndWait(Plan<Unit> plan) {
 		new TestBarrier(plan).runAndWait();
 	}
 
 	private static final class TestBarrier {
-		private final Plan plan;
+		private final Plan<Unit> plan;
 		private boolean done = false;
 
-		private TestBarrier(Plan plan) {
+		private TestBarrier(Plan<Unit> plan) {
 			this.plan = plan;
 		}
 
 		public void runAndWait() {
-			plan.execute(EXECUTOR, this::doneWithPlan);
+			plan.execute(EXECUTOR, Unit.INSTANCE, this::doneWithPlan);
 
 			synchronized (this) {
 				// early exit in case the plan is already done for e.g. UnitPlan

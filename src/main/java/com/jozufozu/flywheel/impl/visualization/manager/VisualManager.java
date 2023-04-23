@@ -3,19 +3,20 @@ package com.jozufozu.flywheel.impl.visualization.manager;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.joml.FrustumIntersection;
-
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.config.FlwConfig;
+import com.jozufozu.flywheel.impl.TickContext;
+import com.jozufozu.flywheel.impl.visualization.FrameContext;
 import com.jozufozu.flywheel.impl.visualization.ratelimit.BandedPrimeLimiter;
 import com.jozufozu.flywheel.impl.visualization.ratelimit.DistanceUpdateLimiter;
 import com.jozufozu.flywheel.impl.visualization.ratelimit.NonLimiter;
 import com.jozufozu.flywheel.impl.visualization.storage.Storage;
 import com.jozufozu.flywheel.impl.visualization.storage.Transaction;
-import com.jozufozu.flywheel.lib.task.RunOnAllPlan;
+import com.jozufozu.flywheel.lib.task.RunOnAllWithContextPlan;
 import com.jozufozu.flywheel.lib.task.SimplePlan;
+import com.jozufozu.flywheel.util.Unit;
 
 public abstract class VisualManager<T> {
 	private final Queue<Transaction<T>> queue = new ConcurrentLinkedQueue<>();
@@ -67,8 +68,9 @@ public abstract class VisualManager<T> {
 		queue.add(Transaction.update(obj));
 	}
 
-	public void recreateAll() {
-		getStorage().recreateAll();
+	public Plan<Unit> createRecreationPlan() {
+		// TODO: parallelize recreation?
+		return SimplePlan.of(getStorage()::recreateAll);
 	}
 
 	public void invalidate() {
@@ -83,31 +85,31 @@ public abstract class VisualManager<T> {
 		}
 	}
 
-	public Plan planThisTick(double cameraX, double cameraY, double cameraZ) {
-		return SimplePlan.of(() -> {
+	public Plan<TickContext> createTickPlan() {
+		return SimplePlan.<TickContext>of(() -> {
 					tickLimiter.tick();
 					processQueue();
 				})
-				.then(RunOnAllPlan.of(getStorage()::getTickableVisuals, instance -> tickInstance(instance, cameraX, cameraY, cameraZ)));
+				.then(RunOnAllWithContextPlan.of(getStorage()::getTickableVisuals, this::tickInstance));
 	}
 
-	protected void tickInstance(TickableVisual instance, double cameraX, double cameraY, double cameraZ) {
-		if (!instance.decreaseTickRateWithDistance() || tickLimiter.shouldUpdate(instance.distanceSquared(cameraX, cameraY, cameraZ))) {
+	protected void tickInstance(TickableVisual instance, TickContext c) {
+		if (!instance.decreaseTickRateWithDistance() || tickLimiter.shouldUpdate(instance.distanceSquared(c.cameraX(), c.cameraY(), c.cameraZ()))) {
 			instance.tick();
 		}
 	}
 
-	public Plan planThisFrame(double cameraX, double cameraY, double cameraZ, FrustumIntersection frustum) {
-		return SimplePlan.of(() -> {
+	public Plan<FrameContext> createFramePlan() {
+		return SimplePlan.<FrameContext>of(() -> {
 					frameLimiter.tick();
 					processQueue();
 				})
-				.then(RunOnAllPlan.of(getStorage()::getDynamicVisuals, instance -> updateInstance(instance, cameraX, cameraY, cameraZ, frustum)));
+				.then(RunOnAllWithContextPlan.of(getStorage()::getDynamicVisuals, this::updateInstance));
 	}
 
-	protected void updateInstance(DynamicVisual instance, double cameraX, double cameraY, double cameraZ, FrustumIntersection frustum) {
-		if (!instance.decreaseFramerateWithDistance() || frameLimiter.shouldUpdate(instance.distanceSquared(cameraX, cameraY, cameraZ))) {
-			if (instance.isVisible(frustum)) {
+	protected void updateInstance(DynamicVisual instance, FrameContext c) {
+		if (!instance.decreaseFramerateWithDistance() || frameLimiter.shouldUpdate(instance.distanceSquared(c.cameraX(), c.cameraY(), c.cameraZ()))) {
+			if (instance.isVisible(c.frustum())) {
 				instance.beginFrame();
 			}
 		}
