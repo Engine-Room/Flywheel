@@ -3,24 +3,24 @@ package com.jozufozu.flywheel.lib.task;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 
-public record BarrierPlan(Plan first, Plan second) implements Plan {
+public record BarrierPlan<C>(Plan<C> first, Plan<C> second) implements SimplyComposedPlan<C> {
 	@Override
-	public void execute(TaskExecutor taskExecutor, Runnable onCompletion) {
-		first.execute(taskExecutor, () -> second.execute(taskExecutor, onCompletion));
+	public void execute(TaskExecutor taskExecutor, C context, Runnable onCompletion) {
+		first.execute(taskExecutor, context, () -> second.execute(taskExecutor, context, onCompletion));
 	}
 
 	@Override
-	public Plan maybeSimplify() {
+	public Plan<C> maybeSimplify() {
 		var first = this.first.maybeSimplify();
 		var second = this.second.maybeSimplify();
 
-		if (first == UnitPlan.INSTANCE) {
+		if (first == UnitPlan.of()) {
 			return second;
 		}
-		if (second == UnitPlan.INSTANCE) {
+		if (second == UnitPlan.of()) {
 			return first;
 		}
 
-		return new BarrierPlan(first, second);
+		return new BarrierPlan<>(first, second);
 	}
 }

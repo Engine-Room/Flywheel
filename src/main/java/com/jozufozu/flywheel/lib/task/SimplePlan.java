@@ -5,9 +5,13 @@ import java.util.List;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 
-public record SimplePlan(List<Runnable> parallelTasks) implements Plan {
-	public static Plan of(Runnable... tasks) {
-		return new SimplePlan(List.of(tasks));
+public record SimplePlan(List<Runnable> parallelTasks) implements ContextAgnosticPlan {
+	public static <C> Plan<C> of(Runnable... tasks) {
+		return new SimplePlan(List.of(tasks)).cast();
+	}
+
+	public static <C> Plan<C> of(List<Runnable> tasks) {
+		return new SimplePlan(tasks).cast();
 	}
 
 	@Override
@@ -27,9 +31,9 @@ public record SimplePlan(List<Runnable> parallelTasks) implements Plan {
 	}
 
 	@Override
-	public Plan maybeSimplify() {
+	public Plan<Object> maybeSimplify() {
 		if (parallelTasks.isEmpty()) {
-			return UnitPlan.INSTANCE;
+			return UnitPlan.of();
 		}
 
 		return this;

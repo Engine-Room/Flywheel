@@ -12,7 +12,7 @@ import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
-import com.jozufozu.flywheel.lib.task.RunOnAllPlan;
+import com.jozufozu.flywheel.lib.task.RunOnAllWithContextPlan;
 import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
@@ -30,6 +30,8 @@ public class TransformCall<I extends Instance> {
 	private final InstanceBoundingSphereTransformer<I> boundingSphereTransformer;
 	private final Vector4fc boundingSphere;
 
+	private final Plan<PlanContext> drawPlan;
+
 	public TransformCall(CPUInstancer<I> instancer, Material material, BatchedMeshPool.BufferedMesh mesh) {
 		this.instancer = instancer;
 		this.material = material;
@@ -42,6 +44,32 @@ public class TransformCall<I extends Instance> {
 		meshVertexCount = mesh.getVertexCount();
 		meshByteSize = mesh.size();
 		boundingSphere = mesh.mesh.getBoundingSphere();
+
+		drawPlan = RunOnAllWithContextPlan.of(instancer::getAll, (instance, ctx) -> {
+			var boundingSphere = new Vector4f(this.boundingSphere);
+
+			boundingSphereTransformer.transform(boundingSphere, instance);
+
+			if (!ctx.ctx.frustum()
+					.testSphere(boundingSphere.x, boundingSphere.y, boundingSphere.z, boundingSphere.w)) {
+				return;
+			}
+
+			final int baseVertex = ctx.vertexCount.getAndAdd(meshVertexCount);
+
+			if (baseVertex + meshVertexCount > ctx.buffer.getVertexCount()) {
+				throw new IndexOutOfBoundsException("Vertex count greater than allocated: " + baseVertex + " + " + meshVertexCount + " > " + ctx.buffer.getVertexCount());
+			}
+
+			var sub = ctx.buffer.slice(baseVertex, meshVertexCount);
+
+			mesh.copyTo(sub.ptr());
+
+			instanceVertexTransformer.transform(sub, instance, ctx.ctx.level());
+
+			materialVertexTransformer.transform(sub, ctx.ctx.level());
+			applyMatrices(sub, ctx.ctx.matrices());
+		});
 	}
 
 	public int getTotalVertexCount() {
@@ -52,32 +80,8 @@ public class TransformCall<I extends Instance> {
 		instancer.update();
 	}
 
-	public Plan plan(FrameContext ctx, DrawBuffer buffer, final AtomicInteger vertexCount) {
-		return RunOnAllPlan.of(instancer::getAll, instance -> {
-			var boundingSphere = new Vector4f(this.boundingSphere);
-
-			boundingSphereTransformer.transform(boundingSphere, instance);
-
-			if (!ctx.frustum()
-					.testSphere(boundingSphere.x, boundingSphere.y, boundingSphere.z, boundingSphere.w)) {
-				return;
-			}
-
-			final int baseVertex = vertexCount.getAndAdd(meshVertexCount);
-
-			if (baseVertex + meshVertexCount > buffer.getVertexCount()) {
-				throw new IndexOutOfBoundsException("Vertex count greater than allocated: " + baseVertex + " + " + meshVertexCount + " > " + buffer.getVertexCount());
-			}
-
-			var sub = buffer.slice(baseVertex, meshVertexCount);
-
-			mesh.copyTo(sub.ptr());
-
-			instanceVertexTransformer.transform(sub, instance, ctx.level());
-
-			materialVertexTransformer.transform(sub, ctx.level());
-			applyMatrices(sub, ctx.matrices());
-		});
+	public Plan<PlanContext> plan() {
+		return drawPlan;
 	}
 
 	private static void applyMatrices(MutableVertexList vertexList, PoseStack.Pose matrices) {
@@ -88,5 +92,8 @@ public class TransformCall<I extends Instance> {
 			VertexTransformations.transformPos(vertexList, i, modelMatrix);
 			VertexTransformations.transformNormal(vertexList, i, normalMatrix);
 		}
+	}
+
+	public record PlanContext(BatchContext ctx, DrawBuffer buffer, AtomicInteger vertexCount) {
 	}
 }

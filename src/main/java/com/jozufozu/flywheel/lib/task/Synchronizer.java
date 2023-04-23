@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.lib.task;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Synchronizer {
+public class Synchronizer implements Runnable {
 	private final AtomicInteger countDown;
 	private final Runnable onCompletion;
 
@@ -15,5 +15,10 @@ public class Synchronizer {
 		if (countDown.decrementAndGet() == 0) {
 			onCompletion.run();
 		}
+	}
+
+	@Override
+	public void run() {
+		decrementAndEventuallyRun();
 	}
 }

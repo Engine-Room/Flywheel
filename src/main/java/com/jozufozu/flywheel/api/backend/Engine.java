@@ -29,5 +29,5 @@ public interface Engine extends InstancerProvider {
 
 	void delete();
 
-	Plan planThisFrame(RenderContext context);
+	Plan<RenderContext> createFramePlan();
 }

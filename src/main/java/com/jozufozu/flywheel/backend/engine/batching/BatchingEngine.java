@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.joml.FrustumIntersection;
-
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
@@ -19,15 +17,13 @@ import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
-import com.jozufozu.flywheel.lib.math.MatrixUtil;
-import com.jozufozu.flywheel.lib.task.NestedPlan;
-import com.jozufozu.flywheel.util.FlwUtil;
+import com.jozufozu.flywheel.lib.task.SimplyComposedPlan;
+import com.jozufozu.flywheel.lib.task.Synchronizer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.phys.Vec3;
 
-public class BatchingEngine extends AbstractEngine {
+public class BatchingEngine extends AbstractEngine implements SimplyComposedPlan<RenderContext> {
 	private final BatchingDrawTracker drawTracker = new BatchingDrawTracker();
 	private final Map<InstancerKey<?>, CPUInstancer<?>> instancers = new HashMap<>();
 	private final List<UninitializedInstancer> uninitializedInstancers = new ArrayList<>();
@@ -45,33 +41,26 @@ public class BatchingEngine extends AbstractEngine {
 	}
 
 	@Override
-	public Plan planThisFrame(RenderContext context) {
-		Vec3 cameraPos = context.camera()
-				.getPosition();
-		var stack = FlwUtil.copyPoseStack(context.stack());
-		stack.translate(renderOrigin.getX() - cameraPos.x, renderOrigin.getY() - cameraPos.y, renderOrigin.getZ() - cameraPos.z);
-
-		org.joml.Matrix4f proj = MatrixUtil.toJoml(context.viewProjection());
-		proj.translate((float) (renderOrigin.getX() - cameraPos.x), (float) (renderOrigin.getY() - cameraPos.y), (float) (renderOrigin.getZ() - cameraPos.z));
-
-		var ctx = new FrameContext(context.level(), stack.last(), new FrustumIntersection(proj));
-
+	public void execute(TaskExecutor taskExecutor, RenderContext context, Runnable onCompletion) {
 		flush();
 
-		var plans = new ArrayList<Plan>();
+		BatchContext ctx = BatchContext.create(context, renderOrigin);
+
+		var sync = new Synchronizer(stages.values()
+				.size(), onCompletion);
 
 		for (var transformSet : stages.values()) {
-			plans.add(transformSet.plan(ctx));
+			transformSet.execute(taskExecutor, ctx, sync);
 		}
+	}
 
-		return new NestedPlan(plans);
+	@Override
+	public Plan<RenderContext> createFramePlan() {
+		return this;
 	}
 
 	@Override
 	public void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage) {
-		if (!drawTracker.hasStage(stage)) {
-			return;
-		}
 		executor.syncPoint();
 		drawTracker.draw(stage);
 	}

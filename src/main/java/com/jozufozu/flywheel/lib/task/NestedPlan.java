@@ -8,13 +8,14 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 
-public record NestedPlan(List<Plan> parallelPlans) implements Plan {
-	public static NestedPlan of(Plan... plans) {
-		return new NestedPlan(ImmutableList.copyOf(plans));
+public record NestedPlan<C>(List<Plan<C>> parallelPlans) implements SimplyComposedPlan<C> {
+	@SafeVarargs
+	public static <C> NestedPlan<C> of(Plan<C>... plans) {
+		return new NestedPlan<>(ImmutableList.copyOf(plans));
 	}
 
 	@Override
-	public void execute(TaskExecutor taskExecutor, Runnable onCompletion) {
+	public void execute(TaskExecutor taskExecutor, C context, Runnable onCompletion) {
 		if (parallelPlans.isEmpty()) {
 			onCompletion.run();
 			return;
@@ -24,28 +25,28 @@ public record NestedPlan(List<Plan> parallelPlans) implements Plan {
 
 		if (size == 1) {
 			parallelPlans.get(0)
-					.execute(taskExecutor, onCompletion);
+					.execute(taskExecutor, context, onCompletion);
 			return;
 		}
 
 		var wait = new Synchronizer(size, onCompletion);
-		for (Plan plan : parallelPlans) {
-			plan.execute(taskExecutor, wait::decrementAndEventuallyRun);
+		for (var plan : parallelPlans) {
+			plan.execute(taskExecutor, context, wait);
 		}
 	}
 
 	@Override
-	public Plan and(Plan plan) {
-		return new NestedPlan(ImmutableList.<Plan>builder()
+	public Plan<C> and(Plan<C> plan) {
+		return new NestedPlan<>(ImmutableList.<Plan<C>>builder()
 				.addAll(parallelPlans)
 				.add(plan)
 				.build());
 	}
 
 	@Override
-	public Plan maybeSimplify() {
+	public Plan<C> maybeSimplify() {
 		if (parallelPlans.isEmpty()) {
-			return UnitPlan.INSTANCE;
+			return UnitPlan.of();
 		}
 
 		if (parallelPlans.size() == 1) {
@@ -54,32 +55,12 @@ public record NestedPlan(List<Plan> parallelPlans) implements Plan {
 		}
 
 		var simplifiedTasks = new ArrayList<Runnable>();
-		var simplifiedPlans = new ArrayList<Plan>();
-
-		var toVisit = new ArrayDeque<>(parallelPlans);
-		while (!toVisit.isEmpty()) {
-			var plan = toVisit.pop()
-					.maybeSimplify();
-
-			if (plan == UnitPlan.INSTANCE) {
-				continue;
-			}
-
-			if (plan instanceof SimplePlan simplePlan) {
-				// merge all simple plans into one
-				simplifiedTasks.addAll(simplePlan.parallelTasks());
-			} else if (plan instanceof NestedPlan nestedPlan) {
-				// inline and re-visit nested plans
-				toVisit.addAll(nestedPlan.parallelPlans());
-			} else {
-				// /shrug
-				simplifiedPlans.add(plan);
-			}
-		}
+		var simplifiedPlans = new ArrayList<Plan<C>>();
+		flattenTasksAndPlans(simplifiedTasks, simplifiedPlans);
 
 		if (simplifiedTasks.isEmpty() && simplifiedPlans.isEmpty()) {
 			// everything got simplified away
-			return UnitPlan.INSTANCE;
+			return UnitPlan.of();
 		}
 
 		if (simplifiedTasks.isEmpty()) {
@@ -88,16 +69,39 @@ public record NestedPlan(List<Plan> parallelPlans) implements Plan {
 				// we only contained one complex plan, so we can just return that
 				return simplifiedPlans.get(0);
 			}
-			return new NestedPlan(simplifiedPlans);
+			return new NestedPlan<>(simplifiedPlans);
 		}
 
 		if (simplifiedPlans.isEmpty()) {
 			// we only contained simple plans, so we can just return one
-			return new SimplePlan(simplifiedTasks);
+			return SimplePlan.of(simplifiedTasks);
 		}
 
 		// we have both simple and complex plans, so we need to create a nested plan
-		simplifiedPlans.add(new SimplePlan(simplifiedTasks));
-		return new NestedPlan(simplifiedPlans);
+		simplifiedPlans.add(SimplePlan.of(simplifiedTasks));
+		return new NestedPlan<>(simplifiedPlans);
+	}
+
+	private void flattenTasksAndPlans(List<Runnable> simplifiedTasks, List<Plan<C>> simplifiedPlans) {
+		var toVisit = new ArrayDeque<>(parallelPlans);
+		while (!toVisit.isEmpty()) {
+			var plan = toVisit.pop()
+					.maybeSimplify();
+
+			if (plan == UnitPlan.of()) {
+				continue;
+			}
+
+			if (plan instanceof SimplePlan simplePlan) {
+				// merge all simple plans into one
+				simplifiedTasks.addAll(simplePlan.parallelTasks());
+			} else if (plan instanceof NestedPlan<C> nestedPlan) {
+				// inline and re-visit nested plans
+				toVisit.addAll(nestedPlan.parallelPlans());
+			} else {
+				// /shrug
+				simplifiedPlans.add(plan);
+			}
+		}
 	}
 }

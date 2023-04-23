@@ -15,7 +15,7 @@ import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
-import com.jozufozu.flywheel.lib.task.PlanUtil;
+import com.jozufozu.flywheel.lib.task.OnMainThreadPlan;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
@@ -33,8 +33,8 @@ public class IndirectEngine extends AbstractEngine {
 	}
 
 	@Override
-	public Plan planThisFrame(RenderContext context) {
-		return PlanUtil.onMainThread(this::flushDrawManager);
+	public Plan<RenderContext> createFramePlan() {
+		return OnMainThreadPlan.of(this::flushDrawManager);
 	}
 
 	private void flushDrawManager() {
