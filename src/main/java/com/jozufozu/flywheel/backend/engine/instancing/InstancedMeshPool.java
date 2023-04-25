@@ -221,11 +221,10 @@ public class InstancedMeshPool {
 
 		private void setup(GlVertexArray vao) {
 			if (boundTo.add(vao)) {
-				vao.enableArrays(getAttributeCount());
-				vao.bindAttributes(InstancedMeshPool.this.vbo, 0, vertexType.getLayout(), byteIndex);
+				vao.bindAttributes(vertexType.getLayout(), InstancedMeshPool.this.vbo.handle(), 0, byteIndex);
+				vao.setElementBuffer(ebo.glBuffer);
 			}
-			vao.bindElementArray(ebo.glBuffer);
-			vao.bind();
+			vao.bindForDraw();
 		}
 
 		private void draw(int instanceCount) {

@@ -16,7 +16,6 @@ public class DrawCall {
 
 		meshAttributes = this.mesh.getAttributeCount();
 		vao = new GlVertexArray();
-		vao.enableArrays(meshAttributes + this.instancer.getAttributeCount());
 	}
 
 	public boolean isInvalid() {

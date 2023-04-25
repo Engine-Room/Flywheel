@@ -1,13 +1,12 @@
 package com.jozufozu.flywheel.gl.array;
 
-import org.lwjgl.opengl.GL20;
+import java.util.List;
+
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.gl.GlObject;
 import com.jozufozu.flywheel.gl.GlStateTracker;
-import com.jozufozu.flywheel.gl.buffer.GlBuffer;
-import com.jozufozu.flywheel.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.gl.versioned.GlCompat;
 import com.mojang.blaze3d.platform.GlStateManager;
 
@@ -24,22 +23,18 @@ public class GlVertexArray extends GlObject {
 	 * Each attribute's divisor.
 	 */
 	private final int[] divisors = new int[MAX_ATTRIBS];
-
-	/**
-	 * The VBO to which each attribute is bound.
-	 */
-	private final int[] targets = new int[MAX_ATTRIBS];
-
 	/**
 	 * Each attribute's data type.
 	 */
 	private final VertexAttribute[] attributes = new VertexAttribute[MAX_ATTRIBS];
-
+	/**
+	 * The VBO to which each attribute is bound.
+	 */
+	private final int[] targets = new int[MAX_ATTRIBS];
 	/**
 	 * Each attribute's offset.
 	 */
 	private final long[] offsets = new long[MAX_ATTRIBS];
-
 	/**
 	 * Each attribute's stride.
 	 */
@@ -49,16 +44,16 @@ public class GlVertexArray extends GlObject {
 
 
 	public GlVertexArray() {
-		setHandle(GlStateManager._glGenVertexArrays());
+		setHandle(GlCompat.vertexArray.create());
 	}
 
-	public void bind() {
+	public void bindForDraw() {
 		if (!isBound()) {
 			GlStateManager._glBindVertexArray(handle());
 		}
 	}
 
-	public boolean isBound() {
+	private boolean isBound() {
 		return handle() == GlStateTracker.getVertexArray();
 	}
 
@@ -66,62 +61,21 @@ public class GlVertexArray extends GlObject {
 		GlStateManager._glBindVertexArray(0);
 	}
 
-	/**
-	 * @param buffer The buffer where the data is stored.
-	 * @param startAttrib The first attribute to be used by the data.
-	 * @param type The format of the attributes.
-	 * @param offset The offset in bytes to the start of the data.
-	 */
-	public void bindAttributes(GlBuffer buffer, int startAttrib, BufferLayout type, long offset) {
-		bind();
-
-		int targetBuffer = buffer.handle();
-
-		GlBufferType.ARRAY_BUFFER.bind(targetBuffer);
-
-		int i = startAttrib;
+	public void bindAttributes(BufferLayout type, int vbo, int startAttrib, long startOffset) {
 		final int stride = type.getStride();
 
-		for (var attribute : type.attributes()) {
-			targets[i] = targetBuffer;
-			attributes[i] = attribute;
-			offsets[i] = offset;
-			strides[i] = stride;
+		List<VertexAttribute> vertexAttributes = type.attributes();
+		for (int i = 0; i < vertexAttributes.size(); i++) {
+			var attribute = vertexAttributes.get(i);
+			int index = i + startAttrib;
+			targets[index] = vbo;
+			attributes[index] = attribute;
+			offsets[index] = startOffset;
+			strides[index] = stride;
 
-			attribute.pointer(offset, i, stride);
+			GlCompat.vertexArray.setupAttrib(handle(), stride, vbo, startOffset, attribute, index);
 
-			i++;
-			offset += attribute.getByteWidth();
-		}
-	}
-
-	public void enableArrays(int count) {
-		bind();
-
-		for (int i = 0; i < count; i++) {
-			enable(i);
-		}
-	}
-
-	public void disableArrays(int count) {
-		bind();
-
-		for (int i = 0; i < count; i++) {
-			disable(i);
-		}
-	}
-
-	private void enable(int i) {
-		if (!enabled[i]) {
-			GL20.glEnableVertexAttribArray(i);
-			enabled[i] = true;
-		}
-	}
-
-	private void disable(int i) {
-		if (enabled[i]) {
-			GL20.glDisableVertexAttribArray(i);
-			enabled[i] = false;
+			startOffset += attribute.getByteWidth();
 		}
 	}
 
@@ -131,16 +85,14 @@ public class GlVertexArray extends GlObject {
 
 	public void setAttributeDivisor(int index, int divisor) {
 		if (divisors[index] != divisor) {
-			bind();
-			GlCompat.getInstance().instancedArrays.vertexAttribDivisor(index, divisor);
+			GlCompat.vertexArray.setAttribDivisor(handle(), index, divisor);
 			divisors[index] = divisor;
 		}
 	}
 
-	public void bindElementArray(int ebo) {
+	public void setElementBuffer(int ebo) {
 		if (elementBufferBinding != ebo) {
-			bind();
-			GlBufferType.ELEMENT_ARRAY_BUFFER.bind(ebo);
+			GlCompat.vertexArray.setElementBuffer(handle(), ebo);
 			elementBufferBinding = ebo;
 		}
 	}

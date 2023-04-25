@@ -50,14 +50,12 @@ public class FullscreenQuad {
 
 			vao = new GlVertexArray();
 
-			vao.enableArrays(1);
-
-            vao.bindAttributes(vbo, 0, LAYOUT, 0L);
+            vao.bindAttributes(LAYOUT, vbo.handle(), 0, 0L);
         }
 	}
 
 	public void draw() {
-		vao.bind();
+		vao.bindForDraw();
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		GlVertexArray.unbind();
 	}

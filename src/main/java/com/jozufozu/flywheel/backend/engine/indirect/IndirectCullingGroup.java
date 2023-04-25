@@ -1,15 +1,10 @@
 package com.jozufozu.flywheel.backend.engine.indirect;
 
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
 import static org.lwjgl.opengl.GL42.GL_COMMAND_BARRIER_BIT;
 import static org.lwjgl.opengl.GL42.glMemoryBarrier;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BARRIER_BIT;
 import static org.lwjgl.opengl.GL43.glDispatchCompute;
-import static org.lwjgl.opengl.GL45.glCreateVertexArrays;
-import static org.lwjgl.opengl.GL45.glEnableVertexArrayAttrib;
-import static org.lwjgl.opengl.GL45.glVertexArrayElementBuffer;
-import static org.lwjgl.opengl.GL45.glVertexArrayVertexBuffer;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
@@ -17,6 +12,7 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
+import com.jozufozu.flywheel.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.util.QuadConverter;
@@ -35,7 +31,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	final IndirectMeshPool meshPool;
 	private final int elementBuffer;
 
-	int vertexArray;
+	GlVertexArray vertexArray;
 
 	final IndirectDrawSet<I> drawSet = new IndirectDrawSet<>();
 
@@ -55,7 +51,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		meshPool = new IndirectMeshPool(vertexType, 1024);
 
-		vertexArray = glCreateVertexArrays();
+		vertexArray = new GlVertexArray();
 
 		elementBuffer = QuadConverter.getInstance()
 				.quads2Tris(2048).glBuffer;
@@ -67,21 +63,8 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	private void setupVertexArray() {
-		glVertexArrayElementBuffer(vertexArray, elementBuffer);
-
-		var meshLayout = vertexType.getLayout();
-		var meshAttribs = meshLayout.getAttributeCount();
-
-		var attributes = meshLayout.attributes();
-
-		long offset = 0;
-		for (int i = 0; i < meshAttribs; i++) {
-			var attribute = attributes.get(i);
-			glEnableVertexArrayAttrib(vertexArray, i);
-			glVertexArrayVertexBuffer(vertexArray, i, meshPool.vbo, offset, meshLayout.getStride());
-			attribute.format(vertexArray, i);
-			offset += attribute.getByteWidth();
-		}
+		vertexArray.setElementBuffer(elementBuffer);
+		vertexArray.bindAttributes(vertexType.getLayout(), meshPool.vbo, 0, 0);
 	}
 
 	void beginFrame() {
@@ -127,7 +110,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 
 		UniformBuffer.syncAndBind(draw);
-		glBindVertexArray(vertexArray);
+		vertexArray.bindForDraw();
 		buffers.bindForDraw();
 
 		memoryBarrier();
@@ -180,7 +163,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	public void delete() {
-		glDeleteVertexArrays(vertexArray);
+		vertexArray.delete();
 		buffers.delete();
 		meshPool.delete();
 	}

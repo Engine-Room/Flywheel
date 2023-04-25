@@ -18,40 +18,35 @@ import net.minecraft.Util;
  * system.
  */
 public class GlCompat {
+	public static final VertexArray vertexArray;
+	public static final BufferStorage bufferStorage;
+	public static final boolean amd;
+	public static final boolean supportsIndirect;
 
-	private static GlCompat instance;
-
-	public static GlCompat getInstance() {
-		if (instance == null) {
-			instance = new GlCompat();
-		}
-		return instance;
-	}
-
-	public final InstancedArrays instancedArrays;
-	public final BufferStorage bufferStorage;
-	public final boolean amd;
-	public final boolean supportsIndirect;
-
-	private GlCompat() {
+	static {
 		GLCapabilities caps = GL.createCapabilities();
-		instancedArrays = getLatest(InstancedArrays.class, caps);
 		bufferStorage = getLatest(BufferStorage.class, caps);
-
-		supportsIndirect = true;
-
+		vertexArray = getLatest(VertexArray.class, caps);
+		supportsIndirect = caps.OpenGL46;
 		amd = _isAmdWindows();
 	}
 
-	public boolean onAMDWindows() {
+	private GlCompat() {
+	}
+
+	public static boolean onAMDWindows() {
 		return amd;
 	}
 
-    public boolean instancedArraysSupported() {
-		return instancedArrays != InstancedArrays.UNSUPPORTED;
+	public static boolean supportsInstancing() {
+		return vertexArray != VertexArray.UNSUPPORTED;
 	}
 
-	public boolean bufferStorageSupported() {
+	public static boolean supportsIndirect() {
+		return supportsIndirect;
+	}
+
+	public static boolean bufferStorageSupported() {
 		return bufferStorage != BufferStorage.UNSUPPORTED;
 	}
 
@@ -63,7 +58,7 @@ public class GlCompat {
 	 * @param <V>   The type of the versioning enum.
 	 * @return The first defined enum variant to return true.
 	 */
-	public static <V extends Enum<V> & GlVersioned> V getLatest(Class<V> clazz, GLCapabilities caps) {
+	private static <V extends Enum<V> & GlVersioned> V getLatest(Class<V> clazz, GLCapabilities caps) {
 		V[] constants = clazz.getEnumConstants();
 		V last = constants[constants.length - 1];
 		if (!last.supported(caps)) {
@@ -110,10 +105,6 @@ public class GlCompat {
 
 		// vendor string I got was "ATI Technologies Inc."
 		return vendor.contains("ATI") || vendor.contains("AMD");
-	}
-
-	public boolean supportsIndirect() {
-		return supportsIndirect;
 	}
 }
 

@@ -5,16 +5,18 @@ public interface VertexAttribute {
 
 	/**
 	 * Apply this vertex attribute to the bound vertex array.
+	 *
 	 * @param offset The byte offset to the first element of the attribute.
-	 * @param i The attribute index.
+	 * @param i      The attribute index.
 	 * @param stride The byte stride between consecutive elements of the attribute.
 	 */
-	void pointer(long offset, int i, int stride);
+	void setup(long offset, int i, int stride);
 
 	/**
 	 * Use DSA to apply this vertex attribute to the given vertex array.
+	 *
 	 * @param vaobj The vertex array object to modify.
-	 * @param i The attribute index.
+	 * @param i     The attribute index.
 	 */
-	void format(int vaobj, int i);
+	void setupDSA(int vaobj, int i);
 }
