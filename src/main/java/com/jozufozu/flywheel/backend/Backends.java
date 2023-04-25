@@ -32,8 +32,7 @@ public class Backends {
 			.engineMessage(new TextComponent("Using Instancing Engine").withStyle(ChatFormatting.GREEN))
 			.engineFactory(level -> new InstancingEngine(256, Contexts.WORLD))
 			.fallback(() -> Backends.BATCHING)
-			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
-					.instancedArraysSupported() && InstancingPrograms.allLoaded())
+			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.supportsInstancing() && InstancingPrograms.allLoaded())
 			.register(Flywheel.rl("instancing"));
 
 	/**
@@ -43,8 +42,7 @@ public class Backends {
 			.engineMessage(new TextComponent("Using Indirect Engine").withStyle(ChatFormatting.GREEN))
 			.engineFactory(level -> new IndirectEngine(256))
 			.fallback(() -> Backends.INSTANCING)
-			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.getInstance()
-					.supportsIndirect() && IndirectPrograms.allLoaded())
+			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.supportsIndirect() && IndirectPrograms.allLoaded())
 			.register(Flywheel.rl("indirect"));
 
 	public static void init() {

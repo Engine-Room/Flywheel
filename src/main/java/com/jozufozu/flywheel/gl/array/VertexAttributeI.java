@@ -19,12 +19,12 @@ public record VertexAttributeI(GlNumericType type, int size) implements VertexAt
 	}
 
 	@Override
-	public void pointer(long offset, int i, int stride) {
+	public void setup(long offset, int i, int stride) {
 		GL32.glVertexAttribIPointer(i, size(), type().getGlEnum(), stride, offset);
 	}
 
 	@Override
-	public void format(int vaobj, int i) {
+	public void setupDSA(int vaobj, int i) {
 		GL45.glVertexArrayAttribIFormat(vaobj, i, size(), type().getGlEnum(), 0);
 	}
 }

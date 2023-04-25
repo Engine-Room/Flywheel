@@ -90,7 +90,7 @@ public class GPUInstancer<I extends Instance> extends AbstractInstancer<I> {
 			return;
 		}
 
-		vao.bindAttributes(vbo, attributeOffset, instanceFormat, 0L);
+		vao.bindAttributes(instanceFormat, vbo.handle(), attributeOffset, 0L);
 
 		for (int i = 0; i < instanceFormat.getAttributeCount(); i++) {
 			vao.setAttributeDivisor(attributeOffset + i, 1);
