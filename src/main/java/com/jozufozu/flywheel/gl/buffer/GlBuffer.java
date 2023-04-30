@@ -4,21 +4,13 @@ import static org.lwjgl.opengl.GL15.glBufferData;
 import static org.lwjgl.opengl.GL15.glDeleteBuffers;
 import static org.lwjgl.opengl.GL15.glGenBuffers;
 import static org.lwjgl.opengl.GL15.nglBufferData;
-import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
-import static org.lwjgl.opengl.GL30.nglMapBufferRange;
 import static org.lwjgl.opengl.GL31.glCopyBufferSubData;
 
-import org.lwjgl.system.MemoryUtil;
-
 import com.jozufozu.flywheel.gl.GlObject;
-import com.jozufozu.flywheel.gl.error.GlError;
-import com.jozufozu.flywheel.gl.error.GlException;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
 public class GlBuffer extends GlObject {
-
-	public final GlBufferType type;
 	protected final GlBufferUsage usage;
 	/**
 	 * The size (in bytes) of the buffer on the GPU.
@@ -29,16 +21,18 @@ public class GlBuffer extends GlObject {
 	 */
 	protected int growthMargin;
 
-	public GlBuffer(GlBufferType type) {
-		this(type, GlBufferUsage.STATIC_DRAW);
+	public GlBuffer() {
+		this(GlBufferUsage.STATIC_DRAW);
 	}
 
-	public GlBuffer(GlBufferType type, GlBufferUsage usage) {
+	public GlBuffer(GlBufferUsage usage) {
 		setHandle(glGenBuffers());
-		this.type = type;
 		this.usage = usage;
 	}
 
+	/**
+	 * @return true if the buffer was recreated.
+	 */
 	public boolean ensureCapacity(long size) {
 		if (size < 0) {
 			throw new IllegalArgumentException("Size " + size + " < 0");
@@ -50,8 +44,8 @@ public class GlBuffer extends GlObject {
 
 		if (this.size == 0) {
 			this.size = size;
-			bind();
-			glBufferData(type.glEnum, size, usage.glEnum);
+			GlBufferType.COPY_WRITE_BUFFER.bind(handle());
+			glBufferData(GlBufferType.COPY_WRITE_BUFFER.glEnum, size, usage.glEnum);
 			FlwMemoryTracker._allocGPUMemory(size);
 
 			return true;
@@ -76,36 +70,25 @@ public class GlBuffer extends GlObject {
 		var newHandle = glGenBuffers();
 
 		GlBufferType.COPY_READ_BUFFER.bind(oldHandle);
-		type.bind(newHandle);
+		GlBufferType.COPY_WRITE_BUFFER.bind(newHandle);
 
-		glBufferData(type.glEnum, newSize, usage.glEnum);
-		glCopyBufferSubData(GlBufferType.COPY_READ_BUFFER.glEnum, type.glEnum, 0, 0, oldSize);
+		glBufferData(GlBufferType.COPY_WRITE_BUFFER.glEnum, newSize, usage.glEnum);
+		glCopyBufferSubData(GlBufferType.COPY_READ_BUFFER.glEnum, GlBufferType.COPY_WRITE_BUFFER.glEnum, 0, 0, oldSize);
 
 		glDeleteBuffers(oldHandle);
 		setHandle(newHandle);
 	}
 
 	public void upload(MemoryBlock directBuffer) {
-		bind();
 		FlwMemoryTracker._freeGPUMemory(size);
-		nglBufferData(type.glEnum, directBuffer.size(), directBuffer.ptr(), usage.glEnum);
+		GlBufferType.COPY_WRITE_BUFFER.bind(handle());
+		nglBufferData(GlBufferType.COPY_WRITE_BUFFER.glEnum, directBuffer.size(), directBuffer.ptr(), usage.glEnum);
 		this.size = directBuffer.size();
 		FlwMemoryTracker._allocGPUMemory(size);
 	}
 
 	public MappedBuffer map() {
-		bind();
-		long ptr = nglMapBufferRange(type.glEnum, 0, size, GL_MAP_WRITE_BIT);
-
-		if (ptr == MemoryUtil.NULL) {
-			throw new GlException(GlError.poll(), "Could not map buffer");
-		}
-
-		return new MappedBuffer(this, ptr, 0, size);
-	}
-
-	public boolean isPersistent() {
-		return false;
+		return new MappedBuffer(handle(), size);
 	}
 
 	public void setGrowthMargin(int growthMargin) {
@@ -114,18 +97,6 @@ public class GlBuffer extends GlObject {
 
 	public long getSize() {
 		return size;
-	}
-
-	public GlBufferType getType() {
-		return type;
-	}
-
-	public void bind() {
-		type.bind(handle());
-	}
-
-	public void unbind() {
-		type.unbind();
 	}
 
 	protected void deleteInternal(int handle) {

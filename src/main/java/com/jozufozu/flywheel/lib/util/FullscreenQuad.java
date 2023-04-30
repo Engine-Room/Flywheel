@@ -10,7 +10,6 @@ import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
-import com.jozufozu.flywheel.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.gl.buffer.MappedBuffer;
 import com.jozufozu.flywheel.lib.layout.CommonItems;
 import com.jozufozu.flywheel.util.Lazy;
@@ -35,10 +34,10 @@ public class FullscreenQuad {
 
 	private FullscreenQuad() {
 		try (var restoreState = GlStateTracker.getRestoreState()) {
-			vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER);
+			vbo = new GlBuffer();
 			vbo.ensureCapacity(bufferSize);
 			try (MappedBuffer buffer = vbo.map()) {
-				var ptr = buffer.getPtr();
+				var ptr = buffer.ptr();
 
 				for (var i = 0; i < vertices.length; i++) {
 					MemoryUtil.memPutFloat(ptr + i * Float.BYTES, vertices[i]);
