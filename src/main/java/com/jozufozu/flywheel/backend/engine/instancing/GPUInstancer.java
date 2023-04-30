@@ -11,7 +11,6 @@ import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
-import com.jozufozu.flywheel.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.gl.buffer.GlBufferUsage;
 import com.jozufozu.flywheel.gl.buffer.MappedBuffer;
 
@@ -41,7 +40,7 @@ public class GPUInstancer<I extends Instance> extends AbstractInstancer<I> {
 			return;
 		}
 
-		vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER, GlBufferUsage.DYNAMIC_DRAW);
+		vbo = new GlBuffer(GlBufferUsage.DYNAMIC_DRAW);
 		vbo.setGrowthMargin(instanceStride * 16);
 	}
 
@@ -65,16 +64,11 @@ public class GPUInstancer<I extends Instance> extends AbstractInstancer<I> {
 			return;
 		}
 
-		int count = instances.size();
-		long clearStart = instanceStride * (long) count;
-		long clearLength = vbo.getSize() - clearStart;
-
 		try (MappedBuffer buf = vbo.map()) {
-			buf.clear(clearStart, clearLength);
-
-			long ptr = buf.getPtr();
+			long ptr = buf.ptr();
 			InstanceWriter<I> writer = type.getWriter();
 
+			int count = instances.size();
 			for (int i = changed.nextSetBit(0); i >= 0 && i < count; i = changed.nextSetBit(i + 1)) {
 				writer.write(ptr + instanceStride * i, instances.get(i));
 			}

@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.gl.versioned;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.Optional;
 
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL;
@@ -18,17 +18,18 @@ import net.minecraft.Util;
  * system.
  */
 public class GlCompat {
+	private static final GLCapabilities caps;
 	public static final VertexArray vertexArray;
 	public static final BufferStorage bufferStorage;
 	public static final boolean amd;
 	public static final boolean supportsIndirect;
 
 	static {
-		GLCapabilities caps = GL.createCapabilities();
-		bufferStorage = getLatest(BufferStorage.class, caps);
-		vertexArray = getLatest(VertexArray.class, caps);
-		supportsIndirect = caps.OpenGL46;
-		amd = _isAmdWindows();
+		caps = GL.createCapabilities();
+		bufferStorage = getLatest(BufferStorage.class);
+		vertexArray = getLatest(VertexArray.class);
+		supportsIndirect = _decideIfWeSupportIndirect();
+		amd = _decideIfWeAreAMDWindows();
 	}
 
 	private GlCompat() {
@@ -46,29 +47,30 @@ public class GlCompat {
 		return supportsIndirect;
 	}
 
-	public static boolean bufferStorageSupported() {
-		return bufferStorage != BufferStorage.UNSUPPORTED;
+	private static boolean _decideIfWeSupportIndirect() {
+		return caps.OpenGL46 || (
+				caps.GL_ARB_compute_shader &&
+				caps.GL_ARB_shader_draw_parameters &&
+				caps.GL_ARB_base_instance &&
+				caps.GL_ARB_multi_draw_indirect &&
+				caps.GL_ARB_direct_state_access);
 	}
 
 	/**
 	 * Get the most compatible version of a specific OpenGL feature by iterating over enum constants in order.
 	 *
-	 * @param clazz The class of the versioning enum.
-	 * @param caps  The current system's supported features.
 	 * @param <V>   The type of the versioning enum.
+	 * @param clazz The class of the versioning enum.
 	 * @return The first defined enum variant to return true.
 	 */
-	private static <V extends Enum<V> & GlVersioned> V getLatest(Class<V> clazz, GLCapabilities caps) {
-		V[] constants = clazz.getEnumConstants();
-		V last = constants[constants.length - 1];
-		if (!last.supported(caps)) {
-			throw new IllegalStateException("");
+	private static <V extends Enum<V> & GlVersioned> V getLatest(Class<V> clazz) {
+		for (V it : clazz.getEnumConstants()) {
+			if (it.supported(GlCompat.caps)) {
+				return Optional.of(it)
+						.get();
+			}
 		}
-
-		return Arrays.stream(constants)
-				.filter(it -> it.supported(caps))
-				.findFirst()
-				.get();
+		throw new IllegalStateException("Invalid versioned enum, must provide at least one supported constant");
 	}
 
 	/**
@@ -92,7 +94,7 @@ public class GlCompat {
 		}
 	}
 
-	private static boolean _isAmdWindows() {
+	private static boolean _decideIfWeAreAMDWindows() {
 		if (Util.getPlatform() != Util.OS.WINDOWS) {
 			return false;
 		}

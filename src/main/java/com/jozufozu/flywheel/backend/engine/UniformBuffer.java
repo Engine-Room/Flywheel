@@ -9,7 +9,6 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
-import com.jozufozu.flywheel.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.math.MoreMath;
 import com.jozufozu.flywheel.lib.math.RenderMath;
@@ -35,7 +34,7 @@ public class UniformBuffer {
 	private final GlBuffer buffer;
 
 	private UniformBuffer() {
-		buffer = new GlBuffer(GlBufferType.UNIFORM_BUFFER);
+		buffer = new GlBuffer();
 		providerSet = new ProviderSet(ShaderUniforms.REGISTRY.getAll());
 	}
 

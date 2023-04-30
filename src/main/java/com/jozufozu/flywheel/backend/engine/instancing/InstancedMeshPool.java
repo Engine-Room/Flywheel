@@ -17,7 +17,6 @@ import com.jozufozu.flywheel.gl.GlPrimitive;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.gl.buffer.ElementBuffer;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
-import com.jozufozu.flywheel.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.gl.buffer.MappedBuffer;
 
 public class InstancedMeshPool {
@@ -39,7 +38,7 @@ public class InstancedMeshPool {
 	public InstancedMeshPool(VertexType vertexType) {
 		this.vertexType = vertexType;
 		int stride = vertexType.getLayout().getStride();
-		vbo = new GlBuffer(GlBufferType.ARRAY_BUFFER);
+		vbo = new GlBuffer();
 		vbo.setGrowthMargin(stride * 32);
 	}
 
@@ -75,20 +74,20 @@ public class InstancedMeshPool {
 	}
 
 	public void flush() {
-		if (dirty) {
-			if (anyToRemove) {
-				processDeletions();
-			}
-
-			if (realloc()) {
-				uploadAll();
-			} else {
-				uploadPending();
-			}
-
-			dirty = false;
-			pendingUpload.clear();
+		if (!dirty) {
+			return;
 		}
+
+		if (anyToRemove) {
+			processDeletions();
+		}
+
+		vbo.ensureCapacity(byteSize);
+
+		uploadPending();
+
+		dirty = false;
+		pendingUpload.clear();
 	}
 
 	private void processDeletions() {
@@ -117,35 +116,9 @@ public class InstancedMeshPool {
 		this.anyToRemove = false;
 	}
 
-	/**
-	 * Assumes vbo is bound.
-	 *
-	 * @return true if the buffer was reallocated
-	 */
-	private boolean realloc() {
-		return vbo.ensureCapacity(byteSize);
-	}
-
-	private void uploadAll() {
-		try (MappedBuffer mapped = vbo.map()) {
-			long ptr = mapped.getPtr();
-
-			int byteIndex = 0;
-			for (BufferedMesh mesh : allBuffered) {
-				mesh.byteIndex = byteIndex;
-
-				mesh.buffer(ptr);
-
-				byteIndex += mesh.size();
-			}
-		} catch (Exception e) {
-			Flywheel.LOGGER.error("Error uploading pooled meshes:", e);
-		}
-	}
-
 	private void uploadPending() {
 		try (MappedBuffer mapped = vbo.map()) {
-			long ptr = mapped.getPtr();
+			long ptr = mapped.ptr();
 
 			for (BufferedMesh mesh : pendingUpload) {
 				mesh.buffer(ptr);
