@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.gl.versioned;
 
 import java.nio.ByteBuffer;
-import java.util.Optional;
 
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL;
@@ -20,14 +19,12 @@ import net.minecraft.Util;
 public class GlCompat {
 	private static final GLCapabilities caps;
 	public static final VertexArray vertexArray;
-	public static final BufferStorage bufferStorage;
 	public static final boolean amd;
 	public static final boolean supportsIndirect;
 
 	static {
 		caps = GL.createCapabilities();
-		bufferStorage = getLatest(BufferStorage.class);
-		vertexArray = getLatest(VertexArray.class);
+		vertexArray = VertexArray.DSA.INSTANCE.fallback(caps);
 		supportsIndirect = _decideIfWeSupportIndirect();
 		amd = _decideIfWeAreAMDWindows();
 	}
@@ -40,7 +37,7 @@ public class GlCompat {
 	}
 
 	public static boolean supportsInstancing() {
-		return vertexArray != VertexArray.UNSUPPORTED;
+		return caps.OpenGL33 || caps.GL_ARB_instanced_arrays;
 	}
 
 	public static boolean supportsIndirect() {
@@ -54,23 +51,6 @@ public class GlCompat {
 				caps.GL_ARB_base_instance &&
 				caps.GL_ARB_multi_draw_indirect &&
 				caps.GL_ARB_direct_state_access);
-	}
-
-	/**
-	 * Get the most compatible version of a specific OpenGL feature by iterating over enum constants in order.
-	 *
-	 * @param <V>   The type of the versioning enum.
-	 * @param clazz The class of the versioning enum.
-	 * @return The first defined enum variant to return true.
-	 */
-	private static <V extends Enum<V> & GlVersioned> V getLatest(Class<V> clazz) {
-		for (V it : clazz.getEnumConstants()) {
-			if (it.supported(GlCompat.caps)) {
-				return Optional.of(it)
-						.get();
-			}
-		}
-		throw new IllegalStateException("Invalid versioned enum, must provide at least one supported constant");
 	}
 
 	/**
