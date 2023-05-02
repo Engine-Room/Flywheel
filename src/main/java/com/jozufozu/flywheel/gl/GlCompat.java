@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.gl.versioned;
+package com.jozufozu.flywheel.gl;
 
 import java.nio.ByteBuffer;
 
@@ -7,6 +7,8 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.system.MemoryStack;
+
+import com.jozufozu.flywheel.gl.array.GlVertexArray;
 
 import net.minecraft.Util;
 
@@ -17,17 +19,9 @@ import net.minecraft.Util;
  * system.
  */
 public class GlCompat {
-	private static final GLCapabilities caps;
-	public static final VertexArray vertexArray;
-	public static final boolean amd;
-	public static final boolean supportsIndirect;
-
-	static {
-		caps = GL.createCapabilities();
-		vertexArray = VertexArray.DSA.INSTANCE.fallback(caps);
-		supportsIndirect = _decideIfWeSupportIndirect();
-		amd = _decideIfWeAreAMDWindows();
-	}
+	public static final GLCapabilities CAPABILITIES = GL.createCapabilities();
+	private static final boolean amd = _decideIfWeAreAMDWindows();
+	private static final boolean supportsIndirect = _decideIfWeSupportIndirect();
 
 	private GlCompat() {
 	}
@@ -37,7 +31,7 @@ public class GlCompat {
 	}
 
 	public static boolean supportsInstancing() {
-		return caps.OpenGL33 || caps.GL_ARB_instanced_arrays;
+		return GlVertexArray.IMPL != null;
 	}
 
 	public static boolean supportsIndirect() {
@@ -45,12 +39,7 @@ public class GlCompat {
 	}
 
 	private static boolean _decideIfWeSupportIndirect() {
-		return caps.OpenGL46 || (
-				caps.GL_ARB_compute_shader &&
-				caps.GL_ARB_shader_draw_parameters &&
-				caps.GL_ARB_base_instance &&
-				caps.GL_ARB_multi_draw_indirect &&
-				caps.GL_ARB_direct_state_access);
+		return CAPABILITIES.OpenGL46 || (CAPABILITIES.GL_ARB_compute_shader && CAPABILITIES.GL_ARB_shader_draw_parameters && CAPABILITIES.GL_ARB_base_instance && CAPABILITIES.GL_ARB_multi_draw_indirect && CAPABILITIES.GL_ARB_direct_state_access);
 	}
 
 	/**

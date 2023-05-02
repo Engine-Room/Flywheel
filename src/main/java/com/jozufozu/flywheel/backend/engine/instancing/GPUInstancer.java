@@ -41,7 +41,7 @@ public class GPUInstancer<I extends Instance> extends AbstractInstancer<I> {
 		}
 
 		vbo = new GlBuffer(GlBufferUsage.DYNAMIC_DRAW);
-		vbo.setGrowthMargin(instanceStride * 16);
+		vbo.growthMargin(instanceStride * 16);
 	}
 
 	public void update() {

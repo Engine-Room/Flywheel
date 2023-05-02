@@ -39,6 +39,12 @@ public class GlStateTracker {
 		return new State(BUFFERS.clone(), vao, program);
 	}
 
+	public static void bindVao(int vao) {
+		if (vao != GlStateTracker.vao) {
+			GlStateManager._glBindVertexArray(vao);
+		}
+	}
+
 	public record State(int[] buffers, int vao, int program) implements AutoCloseable {
 		public void restore() {
 			if (vao != GlStateTracker.vao) {
