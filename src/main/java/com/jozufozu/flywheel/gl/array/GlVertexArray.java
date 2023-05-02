@@ -73,7 +73,7 @@ public class GlVertexArray extends GlObject {
 			offsets[index] = startOffset;
 			strides[index] = stride;
 
-			GlCompat.vertexArray.setupAttrib(handle(), stride, vbo, startOffset, attribute, index);
+			GlCompat.vertexArray.setupAttrib(handle(), index, vbo, stride, startOffset, attribute);
 
 			startOffset += attribute.getByteWidth();
 		}

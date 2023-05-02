@@ -1,23 +1,97 @@
 package com.jozufozu.flywheel.gl.versioned;
 
 import org.lwjgl.opengl.ARBInstancedArrays;
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL33;
+import org.lwjgl.opengl.GL20C;
+import org.lwjgl.opengl.GL30C;
+import org.lwjgl.opengl.GL33C;
 import org.lwjgl.opengl.GL45C;
 import org.lwjgl.opengl.GLCapabilities;
+import org.lwjgl.system.Checks;
 
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.array.VertexAttribute;
 import com.jozufozu.flywheel.gl.buffer.GlBufferType;
 import com.mojang.blaze3d.platform.GlStateManager;
 
-public enum VertexArray implements GlVersioned {
-	DSA {
+public interface VertexArray {
+	int create();
+
+	void setElementBuffer(int vao, int elementBuffer);
+
+	void setupAttrib(int vao, int index, int vbo, int stride, long offset, VertexAttribute attribute);
+
+	void setAttribDivisor(int vao, int attrib, int divisor);
+
+	abstract class GL3 implements VertexArray {
 		@Override
-		public boolean supported(GLCapabilities caps) {
-			// The static methods from GL45 and ARBDirectStateAccess all point to GL45C.
-			return caps.OpenGL45 || caps.GL_ARB_direct_state_access;
+		public int create() {
+			return GL30C.glGenVertexArrays();
 		}
+
+		@Override
+		public void setElementBuffer(int vao, int elementBuffer) {
+			if (vao != GlStateTracker.getVertexArray()) {
+				GlStateManager._glBindVertexArray(vao);
+			}
+			GlBufferType.ELEMENT_ARRAY_BUFFER.bind(elementBuffer);
+		}
+
+		@Override
+		public void setupAttrib(int vao, int index, int vbo, int stride, long offset, VertexAttribute attribute) {
+			if (vao != GlStateTracker.getVertexArray()) {
+				GlStateManager._glBindVertexArray(vao);
+			}
+			GlBufferType.ARRAY_BUFFER.bind(vbo);
+
+			GL20C.glEnableVertexAttribArray(index);
+			attribute.setup(offset, index, stride);
+		}
+
+	}
+
+	class InstancedArraysARB extends GL3 {
+		public static InstancedArraysARB INSTANCE = new InstancedArraysARB();
+
+		@Override
+		public void setAttribDivisor(int vao, int attrib, int divisor) {
+			if (vao != GlStateTracker.getVertexArray()) {
+				GlStateManager._glBindVertexArray(vao);
+			}
+			ARBInstancedArrays.glVertexAttribDivisorARB(attrib, divisor);
+		}
+
+		public VertexArray fallback(GLCapabilities caps) {
+			return isSupported(caps) ? this : null;
+		}
+
+		private boolean isSupported(GLCapabilities caps) {
+			return Checks.checkFunctions(caps.glVertexAttribDivisorARB);
+		}
+	}
+
+	class InstancedArraysCore extends GL3 {
+		public static InstancedArraysCore INSTANCE = new InstancedArraysCore();
+
+		@Override
+		public void setAttribDivisor(int vao, int attrib, int divisor) {
+			if (vao != GlStateTracker.getVertexArray()) {
+				GlStateManager._glBindVertexArray(vao);
+			}
+			GL33C.glVertexAttribDivisor(attrib, divisor);
+		}
+
+		public VertexArray fallback(GLCapabilities caps) {
+			return isSupported(caps) ? this : InstancedArraysARB.INSTANCE.fallback(caps);
+		}
+
+		private static boolean isSupported(GLCapabilities caps) {
+			// We know vertex arrays are supported because minecraft required GL32.
+			return Checks.checkFunctions(caps.glVertexAttribDivisor);
+		}
+	}
+
+	class DSA implements VertexArray {
+		public static final DSA INSTANCE = new DSA();
 
 		@Override
 		public int create() {
@@ -30,7 +104,7 @@ public enum VertexArray implements GlVersioned {
 		}
 
 		@Override
-		public void setupAttrib(int vao, int stride, int vbo, long offset, VertexAttribute attribute, int index) {
+		public void setupAttrib(int vao, int index, int vbo, int stride, long offset, VertexAttribute attribute) {
 			GL45C.glEnableVertexArrayAttrib(vao, index);
 			GL45C.glVertexArrayVertexBuffer(vao, index, vbo, offset, stride);
 			attribute.setupDSA(vao, index);
@@ -40,115 +114,13 @@ public enum VertexArray implements GlVersioned {
 		public void setAttribDivisor(int vao, int attrib, int divisor) {
 			GL45C.glVertexArrayBindingDivisor(vao, attrib, divisor);
 		}
-	},
-	GL_33 {
-		@Override
-		public boolean supported(GLCapabilities caps) {
-			return caps.OpenGL33;
+
+		public VertexArray fallback(GLCapabilities caps) {
+			return isSupported(caps) ? this : InstancedArraysCore.INSTANCE.fallback(caps);
 		}
 
-		@Override
-		public int create() {
-			return GL33.glGenVertexArrays();
+		private static boolean isSupported(GLCapabilities caps) {
+			return Checks.checkFunctions(caps.glCreateVertexArrays, caps.glVertexArrayElementBuffer, caps.glEnableVertexArrayAttrib, caps.glVertexArrayVertexBuffer, caps.glVertexArrayBindingDivisor, caps.glVertexArrayAttribFormat, caps.glVertexArrayAttribIFormat);
 		}
-
-		@Override
-		public void setElementBuffer(int vao, int elementBuffer) {
-			if (vao != GlStateTracker.getVertexArray()) {
-				GlStateManager._glBindVertexArray(vao);
-			}
-			GlBufferType.ELEMENT_ARRAY_BUFFER.bind(elementBuffer);
-		}
-
-		@Override
-		public void setupAttrib(int vao, int stride, int vbo, long offset, VertexAttribute attribute, int index) {
-			if (vao != GlStateTracker.getVertexArray()) {
-				GlStateManager._glBindVertexArray(vao);
-			}
-			GlBufferType.ARRAY_BUFFER.bind(vbo);
-
-			GL33.glEnableVertexAttribArray(index);
-			attribute.setup(offset, index, stride);
-		}
-
-		@Override
-		public void setAttribDivisor(int vao, int attrib, int divisor) {
-			if (vao != GlStateTracker.getVertexArray()) {
-				GlStateManager._glBindVertexArray(vao);
-			}
-			GL33.glVertexAttribDivisor(attrib, divisor);
-		}
-	},
-	ARB_INSTANCED_ARRAYS {
-		@Override
-		public boolean supported(GLCapabilities caps) {
-			return caps.GL_ARB_instanced_arrays;
-		}
-
-		@Override
-		public int create() {
-			return GL30.glGenVertexArrays();
-		}
-
-		@Override
-		public void setElementBuffer(int vao, int elementBuffer) {
-			if (vao != GlStateTracker.getVertexArray()) {
-				GlStateManager._glBindVertexArray(vao);
-			}
-			GlBufferType.ELEMENT_ARRAY_BUFFER.bind(elementBuffer);
-		}
-
-		@Override
-		public void setupAttrib(int vao, int stride, int vbo, long offset, VertexAttribute attribute, int index) {
-			if (vao != GlStateTracker.getVertexArray()) {
-				GlStateManager._glBindVertexArray(vao);
-			}
-			GlBufferType.ARRAY_BUFFER.bind(vbo);
-
-			GL30.glEnableVertexAttribArray(index);
-			attribute.setup(offset, index, stride);
-		}
-
-		@Override
-		public void setAttribDivisor(int vao, int attrib, int divisor) {
-			if (vao != GlStateTracker.getVertexArray()) {
-				GlStateManager._glBindVertexArray(vao);
-			}
-			ARBInstancedArrays.glVertexAttribDivisorARB(attrib, divisor);
-		}
-	},
-	UNSUPPORTED {
-		@Override
-		public boolean supported(GLCapabilities caps) {
-			return true;
-		}
-
-		@Override
-		public int create() {
-			throw new UnsupportedOperationException("Cannot use vertex arrays");
-		}
-
-		@Override
-		public void setElementBuffer(int vao, int elementBuffer) {
-			throw new UnsupportedOperationException("Cannot use vertex arrays");
-		}
-
-		@Override
-		public void setupAttrib(int vao, int stride, int vbo, long offset, VertexAttribute attribute, int index) {
-			throw new UnsupportedOperationException("Cannot use vertex arrays");
-		}
-
-		@Override
-		public void setAttribDivisor(int vao, int attrib, int divisor) {
-			throw new UnsupportedOperationException("Cannot use vertex arrays");
-		}
-	};
-
-	public abstract int create();
-
-	public abstract void setElementBuffer(int vao, int elementBuffer);
-
-	public abstract void setupAttrib(int vao, int stride, int vbo, long offset, VertexAttribute attribute, int index);
-
-	public abstract void setAttribDivisor(int vao, int attrib, int divisor);
+	}
 }
