@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.batching.BatchingEngine;
 import com.jozufozu.flywheel.backend.engine.indirect.IndirectEngine;
 import com.jozufozu.flywheel.backend.engine.instancing.InstancingEngine;
-import com.jozufozu.flywheel.gl.versioned.GlCompat;
+import com.jozufozu.flywheel.gl.GlCompat;
 import com.jozufozu.flywheel.lib.backend.SimpleBackend;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;

@@ -12,7 +12,6 @@ import com.jozufozu.flywheel.gl.GlNumericType;
  * @param size The number of components in the attribute, e.g. 3 for a vec3.
  */
 public record VertexAttributeI(GlNumericType type, int size) implements VertexAttribute {
-
 	@Override
 	public int getByteWidth() {
 		return size * type.getByteWidth();

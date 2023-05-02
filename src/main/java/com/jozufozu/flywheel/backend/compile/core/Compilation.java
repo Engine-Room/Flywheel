@@ -10,9 +10,9 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.gl.GlCompat;
 import com.jozufozu.flywheel.gl.shader.GlShader;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
-import com.jozufozu.flywheel.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.glsl.GLSLVersion;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.SourceFile;

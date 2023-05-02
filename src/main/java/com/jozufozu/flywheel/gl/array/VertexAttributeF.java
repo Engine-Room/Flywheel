@@ -13,7 +13,6 @@ import com.jozufozu.flywheel.gl.GlNumericType;
  * @param normalized Whether the data is normalized.
  */
 public record VertexAttributeF(GlNumericType type, int size, boolean normalized) implements VertexAttribute {
-
 	@Override
 	public int getByteWidth() {
 		return size * type.getByteWidth();

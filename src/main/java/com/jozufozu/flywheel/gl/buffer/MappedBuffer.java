@@ -1,10 +1,8 @@
 package com.jozufozu.flywheel.gl.buffer;
 
 import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
-import static org.lwjgl.opengl.GL30.nglMapBufferRange;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-import org.lwjgl.opengl.GL15;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.gl.error.GlError;
@@ -17,8 +15,7 @@ public class MappedBuffer implements AutoCloseable {
 	public MappedBuffer(int glBuffer, long size) {
 		this.glBuffer = glBuffer;
 
-		GlBufferType.COPY_READ_BUFFER.bind(glBuffer);
-		ptr = nglMapBufferRange(GlBufferType.COPY_READ_BUFFER.glEnum, 0, size, GL_MAP_WRITE_BIT);
+		ptr = GlBuffer.IMPL.mapRange(glBuffer, 0, size, GL_MAP_WRITE_BIT);
 
 		if (ptr == MemoryUtil.NULL) {
 			throw new GlException(GlError.poll(), "Could not map buffer");
@@ -35,8 +32,7 @@ public class MappedBuffer implements AutoCloseable {
 			return;
 		}
 
-		GlBufferType.COPY_READ_BUFFER.bind(glBuffer);
-		GL15.glUnmapBuffer(GlBufferType.COPY_READ_BUFFER.glEnum);
+		GlBuffer.IMPL.unmap(glBuffer);
 		ptr = NULL;
 	}
 }

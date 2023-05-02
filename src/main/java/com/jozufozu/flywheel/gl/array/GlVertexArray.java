@@ -1,18 +1,14 @@
 package com.jozufozu.flywheel.gl.array;
 
-import java.util.List;
-
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.gl.GlObject;
 import com.jozufozu.flywheel.gl.GlStateTracker;
-import com.jozufozu.flywheel.gl.versioned.GlCompat;
 import com.mojang.blaze3d.platform.GlStateManager;
 
-@SuppressWarnings("MismatchedReadAndWriteOfArray")
 public class GlVertexArray extends GlObject {
-
+	public static final VertexArray IMPL = new VertexArray.DSA().fallback();
 	private static final int MAX_ATTRIBS = GL32.glGetInteger(GL32.GL_MAX_VERTEX_ATTRIBS);
 
 	/**
@@ -42,41 +38,45 @@ public class GlVertexArray extends GlObject {
 
 	private int elementBufferBinding = 0;
 
-
 	public GlVertexArray() {
-		setHandle(GlCompat.vertexArray.create());
+		setHandle(IMPL.create());
 	}
 
 	public void bindForDraw() {
-		if (!isBound()) {
-			GlStateManager._glBindVertexArray(handle());
-		}
-	}
-
-	private boolean isBound() {
-		return handle() == GlStateTracker.getVertexArray();
+		GlStateTracker.bindVao(handle());
 	}
 
 	public static void unbind() {
 		GlStateManager._glBindVertexArray(0);
 	}
 
-	public void bindAttributes(BufferLayout type, int vbo, int startAttrib, long startOffset) {
+	public void bindAttributes(BufferLayout type, final int vbo, final int startAttrib, final long startOffset) {
+		final int vao = handle();
 		final int stride = type.getStride();
 
-		List<VertexAttribute> vertexAttributes = type.attributes();
-		for (int i = 0; i < vertexAttributes.size(); i++) {
-			var attribute = vertexAttributes.get(i);
-			int index = i + startAttrib;
-			targets[index] = vbo;
-			attributes[index] = attribute;
-			offsets[index] = startOffset;
-			strides[index] = stride;
+		int index = startAttrib;
+		long offset = startOffset;
+		for (var attribute : type.attributes()) {
+			if (!enabled[index]) {
+				IMPL.enableAttrib(vao, index);
+				enabled[index] = true;
+			}
 
-			GlCompat.vertexArray.setupAttrib(handle(), index, vbo, stride, startOffset, attribute);
+			if (shouldSetupAttrib(index, vbo, stride, offset, attribute)) {
+				IMPL.setupAttrib(vao, index, vbo, stride, offset, attribute);
+				targets[index] = vbo;
+				attributes[index] = attribute;
+				offsets[index] = offset;
+				strides[index] = stride;
+			}
 
-			startOffset += attribute.getByteWidth();
+			index++;
+			offset += attribute.getByteWidth();
 		}
+	}
+
+	private boolean shouldSetupAttrib(int index, int vbo, int stride, long offset, VertexAttribute attribute) {
+		return targets[index] != vbo || offsets[index] != offset || strides[index] != stride || !attribute.equals(attributes[index]);
 	}
 
 	protected void deleteInternal(int handle) {
@@ -85,14 +85,14 @@ public class GlVertexArray extends GlObject {
 
 	public void setAttributeDivisor(int index, int divisor) {
 		if (divisors[index] != divisor) {
-			GlCompat.vertexArray.setAttribDivisor(handle(), index, divisor);
+			IMPL.setAttribDivisor(handle(), index, divisor);
 			divisors[index] = divisor;
 		}
 	}
 
 	public void setElementBuffer(int ebo) {
 		if (elementBufferBinding != ebo) {
-			GlCompat.vertexArray.setElementBuffer(handle(), ebo);
+			IMPL.setElementBuffer(handle(), ebo);
 			elementBufferBinding = ebo;
 		}
 	}

@@ -1,16 +1,16 @@
 package com.jozufozu.flywheel.gl.buffer;
 
-import static org.lwjgl.opengl.GL15.glBufferData;
 import static org.lwjgl.opengl.GL15.glDeleteBuffers;
-import static org.lwjgl.opengl.GL15.glGenBuffers;
-import static org.lwjgl.opengl.GL15.nglBufferData;
-import static org.lwjgl.opengl.GL31.glCopyBufferSubData;
+
+import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.gl.GlObject;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
+import com.mojang.blaze3d.platform.GlStateManager;
 
 public class GlBuffer extends GlObject {
+	public static final Buffer IMPL = new Buffer.DSA().fallback();
 	protected final GlBufferUsage usage;
 	/**
 	 * The size (in bytes) of the buffer on the GPU.
@@ -26,64 +26,67 @@ public class GlBuffer extends GlObject {
 	}
 
 	public GlBuffer(GlBufferUsage usage) {
-		setHandle(glGenBuffers());
+		setHandle(IMPL.create());
 		this.usage = usage;
 	}
 
 	/**
 	 * @return true if the buffer was recreated.
 	 */
-	public boolean ensureCapacity(long size) {
-		if (size < 0) {
-			throw new IllegalArgumentException("Size " + size + " < 0");
+	public boolean ensureCapacity(long capacity) {
+		if (capacity < 0) {
+			throw new IllegalArgumentException("Size " + capacity + " < 0");
 		}
 
-		if (size == 0) {
+		if (capacity == 0) {
 			return false;
 		}
 
-		if (this.size == 0) {
-			this.size = size;
-			GlBufferType.COPY_WRITE_BUFFER.bind(handle());
-			glBufferData(GlBufferType.COPY_WRITE_BUFFER.glEnum, size, usage.glEnum);
-			FlwMemoryTracker._allocGPUMemory(size);
-
+		if (size == 0) {
+			alloc(capacity);
 			return true;
 		}
 
-		if (size > this.size) {
-			var oldSize = this.size;
-			this.size = size + growthMargin;
-
-			realloc(oldSize, this.size);
-
+		if (capacity > size) {
+			realloc(capacity);
 			return true;
 		}
 
 		return false;
 	}
 
-	private void realloc(long oldSize, long newSize) {
-		FlwMemoryTracker._freeGPUMemory(oldSize);
-		FlwMemoryTracker._allocGPUMemory(newSize);
-		var oldHandle = handle();
-		var newHandle = glGenBuffers();
+	private void alloc(long capacity) {
+		increaseSize(capacity);
+		IMPL.data(handle(), size, MemoryUtil.NULL, usage.glEnum);
+		FlwMemoryTracker._allocGPUMemory(size);
+	}
 
-		GlBufferType.COPY_READ_BUFFER.bind(oldHandle);
-		GlBufferType.COPY_WRITE_BUFFER.bind(newHandle);
+	private void realloc(long capacity) {
+		FlwMemoryTracker._freeGPUMemory(size);
+		var oldSize = size;
+		increaseSize(capacity);
 
-		glBufferData(GlBufferType.COPY_WRITE_BUFFER.glEnum, newSize, usage.glEnum);
-		glCopyBufferSubData(GlBufferType.COPY_READ_BUFFER.glEnum, GlBufferType.COPY_WRITE_BUFFER.glEnum, 0, 0, oldSize);
-
+		int oldHandle = handle();
+		int newHandle = IMPL.create();
+		IMPL.data(newHandle, size, MemoryUtil.NULL, usage.glEnum);
+		IMPL.copyData(oldHandle, newHandle, 0, 0, oldSize);
 		glDeleteBuffers(oldHandle);
 		setHandle(newHandle);
+
+		FlwMemoryTracker._allocGPUMemory(size);
+	}
+
+	/**
+	 * Increase the size of the buffer to at least the given capacity.
+	 */
+	private void increaseSize(long capacity) {
+		size = capacity + growthMargin;
 	}
 
 	public void upload(MemoryBlock directBuffer) {
 		FlwMemoryTracker._freeGPUMemory(size);
-		GlBufferType.COPY_WRITE_BUFFER.bind(handle());
-		nglBufferData(GlBufferType.COPY_WRITE_BUFFER.glEnum, directBuffer.size(), directBuffer.ptr(), usage.glEnum);
-		this.size = directBuffer.size();
+		IMPL.data(handle(), directBuffer.size(), directBuffer.ptr(), usage.glEnum);
+		size = directBuffer.size();
 		FlwMemoryTracker._allocGPUMemory(size);
 	}
 
@@ -91,16 +94,16 @@ public class GlBuffer extends GlObject {
 		return new MappedBuffer(handle(), size);
 	}
 
-	public void setGrowthMargin(int growthMargin) {
+	public void growthMargin(int growthMargin) {
 		this.growthMargin = growthMargin;
 	}
 
-	public long getSize() {
+	public long size() {
 		return size;
 	}
 
 	protected void deleteInternal(int handle) {
-		glDeleteBuffers(handle);
+		GlStateManager._glDeleteBuffers(handle);
 		FlwMemoryTracker._freeGPUMemory(size);
 	}
 }
