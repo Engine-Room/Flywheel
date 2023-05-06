@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.backend.engine.indirect;
 
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL42.GL_COMMAND_BARRIER_BIT;
 import static org.lwjgl.opengl.GL42.glMemoryBarrier;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BARRIER_BIT;
@@ -9,6 +8,7 @@ import static org.lwjgl.opengl.GL43.glDispatchCompute;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
+import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
@@ -51,7 +51,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		meshPool = new IndirectMeshPool(vertexType, 1024);
 
-		vertexArray = new GlVertexArray();
+		vertexArray = GlVertexArray.create();
 
 		elementBuffer = QuadConverter.getInstance()
 				.quads2Tris(2048).glBuffer;
@@ -64,7 +64,9 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private void setupVertexArray() {
 		vertexArray.setElementBuffer(elementBuffer);
-		vertexArray.bindAttributes(vertexType.getLayout(), meshPool.vbo, 0, 0);
+		BufferLayout type = vertexType.getLayout();
+		vertexArray.bindVertexBuffer(0, meshPool.vbo, 0, type.getStride());
+		vertexArray.bindAttributes(0, 0, type.attributes());
 	}
 
 	void beginFrame() {
@@ -116,7 +118,6 @@ public class IndirectCullingGroup<I extends Instance> {
 		memoryBarrier();
 
 		drawSet.submit(stage);
-		glBindVertexArray(0);
 	}
 
 	private void memoryBarrier() {

@@ -9,7 +9,6 @@ import org.lwjgl.opengl.GL42;
 import org.lwjgl.opengl.GL43;
 
 import com.jozufozu.flywheel.gl.GlStateTracker;
-import com.mojang.blaze3d.platform.GlStateManager;
 
 public enum GlBufferType {
 	ARRAY_BUFFER(GL15C.GL_ARRAY_BUFFER, GL15C.GL_ARRAY_BUFFER_BINDING),
@@ -55,16 +54,6 @@ public enum GlBufferType {
 	}
 
     public void bind(int buffer) {
-		if (getBoundBuffer() != buffer) {
-			GlStateManager._glBindBuffer(glEnum, buffer);
-		}
-	}
-
-	public void unbind() {
-		bind(0);
-	}
-
-	public int getBoundBuffer() {
-		return GlStateTracker.getBuffer(this);
+		GlStateTracker.bindBuffer(this, buffer);
 	}
 }

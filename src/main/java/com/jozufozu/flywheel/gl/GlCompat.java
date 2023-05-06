@@ -8,8 +8,6 @@ import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.system.MemoryStack;
 
-import com.jozufozu.flywheel.gl.array.GlVertexArray;
-
 import net.minecraft.Util;
 
 /**
@@ -19,6 +17,7 @@ import net.minecraft.Util;
  * system.
  */
 public class GlCompat {
+	public static final boolean ALLOW_DSA = true;
 	public static final GLCapabilities CAPABILITIES = GL.createCapabilities();
 	private static final boolean amd = _decideIfWeAreAMDWindows();
 	private static final boolean supportsIndirect = _decideIfWeSupportIndirect();
@@ -31,7 +30,7 @@ public class GlCompat {
 	}
 
 	public static boolean supportsInstancing() {
-		return GlVertexArray.IMPL != null;
+		return true;
 	}
 
 	public static boolean supportsIndirect() {

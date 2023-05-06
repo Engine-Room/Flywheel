@@ -14,7 +14,7 @@ public class GlProgram extends GlObject {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
 	public GlProgram(int handle) {
-		setHandle(handle);
+		handle(handle);
 	}
 
 	public void bind() {

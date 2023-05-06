@@ -13,10 +13,6 @@ public class ElementBuffer {
 		this.glBuffer = backing;
 	}
 
-	public void bind() {
-		GlBufferType.ELEMENT_ARRAY_BUFFER.bind(glBuffer);
-	}
-
 	public int getElementCount() {
 		return elementCount;
 	}

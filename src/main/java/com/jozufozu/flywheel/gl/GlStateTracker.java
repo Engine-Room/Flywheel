@@ -45,6 +45,12 @@ public class GlStateTracker {
 		}
 	}
 
+	public static void bindBuffer(GlBufferType type, int buffer) {
+		if (BUFFERS[type.ordinal()] != buffer || type == GlBufferType.ELEMENT_ARRAY_BUFFER) {
+			GlStateManager._glBindBuffer(type.glEnum, buffer);
+		}
+	}
+
 	public record State(int[] buffers, int vao, int program) implements AutoCloseable {
 		public void restore() {
 			if (vao != GlStateTracker.vao) {
@@ -54,7 +60,7 @@ public class GlStateTracker {
 			GlBufferType[] values = GlBufferType.values();
 
 			for (int i = 0; i < values.length; i++) {
-				if (buffers[i] != GlStateTracker.BUFFERS[i]) {
+				if (buffers[i] != GlStateTracker.BUFFERS[i] && values[i] != GlBufferType.ELEMENT_ARRAY_BUFFER) {
 					GlStateManager._glBindBuffer(values[i].glEnum, buffers[i]);
 				}
 			}

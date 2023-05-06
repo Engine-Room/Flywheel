@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.util;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -49,8 +50,20 @@ public final class FlwUtil {
 
 	public static PoseStack copyPoseStack(PoseStack stack) {
 		PoseStack copy = new PoseStack();
-		copy.last().pose().load(stack.last().pose());
-		copy.last().normal().load(stack.last().normal());
+		copy.last()
+				.pose()
+				.load(stack.last()
+						.pose());
+		copy.last()
+				.normal()
+				.load(stack.last()
+						.normal());
 		return copy;
+	}
+
+	public static int[] initArray(int size, int fill) {
+		var out = new int[size];
+		Arrays.fill(out, fill);
+		return out;
 	}
 }

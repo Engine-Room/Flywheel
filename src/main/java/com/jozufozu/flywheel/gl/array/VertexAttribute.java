@@ -1,22 +1,34 @@
 package com.jozufozu.flywheel.gl.array;
 
-public interface VertexAttribute {
+import com.jozufozu.flywheel.gl.GlNumericType;
+
+public sealed interface VertexAttribute {
 	int getByteWidth();
 
 	/**
-	 * Apply this vertex attribute to the bound vertex array.
+	 * A bindable attribute in a vertex array.
 	 *
-	 * @param offset The byte offset to the first element of the attribute.
-	 * @param i      The attribute index.
-	 * @param stride The byte stride between consecutive elements of the attribute.
+	 * @param type       The type of the attribute, e.g. GL_FLOAT.
+	 * @param size       The number of components in the attribute, e.g. 3 for a vec3.
+	 * @param normalized Whether the data is normalized.
 	 */
-	void setup(long offset, int i, int stride);
+	record Float(GlNumericType type, int size, boolean normalized) implements VertexAttribute {
+		@Override
+		public int getByteWidth() {
+			return size * type.getByteWidth();
+		}
+	}
 
 	/**
-	 * Use DSA to apply this vertex attribute to the given vertex array.
+	 * A bindable attribute in a vertex array.
 	 *
-	 * @param vaobj The vertex array object to modify.
-	 * @param i     The attribute index.
+	 * @param type The type of the attribute, e.g. GL_INT.
+	 * @param size The number of components in the attribute, e.g. 3 for a vec3.
 	 */
-	void setupDSA(int vaobj, int i);
+	record Int(GlNumericType type, int size) implements VertexAttribute {
+		@Override
+		public int getByteWidth() {
+			return size * type.getByteWidth();
+		}
+	}
 }

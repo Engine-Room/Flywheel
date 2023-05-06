@@ -47,16 +47,20 @@ public class FullscreenQuad {
 				Flywheel.LOGGER.error("Could not create fullscreen quad.", e);
 			}
 
-			vao = new GlVertexArray();
+			vao = GlVertexArray.create();
 
-            vao.bindAttributes(LAYOUT, vbo.handle(), 0, 0L);
-        }
+			vao.bindVertexBuffer(0, vbo.handle(), 0L, LAYOUT.getStride());
+			vao.bindAttributes(0, 0, LAYOUT.attributes());
+		}
 	}
 
+	/**
+	 * Draw the fullscreen quad.<br>
+	 * note: may bind a VAO, but will not restore prior state.
+	 */
 	public void draw() {
 		vao.bindForDraw();
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		GlVertexArray.unbind();
 	}
 
 	public void delete() {

@@ -46,11 +46,15 @@ public interface Buffer {
 		}
 
 		public Buffer fallback() {
-			var c = GlCompat.CAPABILITIES;
-			if (Checks.checkFunctions(c.glCreateBuffers, c.glNamedBufferData, c.glCopyNamedBufferSubData, c.glMapNamedBufferRange, c.glUnmapNamedBuffer)) {
+			if (GlCompat.ALLOW_DSA && dsaMethodsAvailable()) {
 				return this;
 			}
 			return new Core();
+		}
+
+		private static boolean dsaMethodsAvailable() {
+			var c = GlCompat.CAPABILITIES;
+			return Checks.checkFunctions(c.glCreateBuffers, c.glNamedBufferData, c.glCopyNamedBufferSubData, c.glMapNamedBufferRange, c.glUnmapNamedBuffer);
 		}
 	}
 
