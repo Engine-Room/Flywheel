@@ -2,15 +2,14 @@ package com.jozufozu.flywheel.lib.util;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL32;
-import org.lwjgl.opengl.GL32C;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.gl.GlNumericType;
 import com.jozufozu.flywheel.gl.buffer.ElementBuffer;
-import com.jozufozu.flywheel.gl.buffer.GlBufferType;
+import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.gl.buffer.GlBufferUsage;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
@@ -41,7 +40,7 @@ public class QuadConverter {
 	private int quadCapacity;
 
 	public QuadConverter() {
-		this.ebo = GL32.glGenBuffers();
+		this.ebo = GlBuffer.IMPL.create();
 		this.quadCapacity = 0;
 	}
 
@@ -64,11 +63,7 @@ public class QuadConverter {
 
 		fillBuffer(ptr, quads);
 
-		final var bufferType = GlBufferType.ARRAY_BUFFER;
-		final int oldBuffer = bufferType.getBoundBuffer();
-		bufferType.bind(ebo);
-		GL32C.nglBufferData(bufferType.glEnum, byteSize, ptr, GlBufferUsage.STATIC_DRAW.glEnum);
-		bufferType.bind(oldBuffer);
+		GlBuffer.IMPL.data(ebo, byteSize, ptr, GlBufferUsage.STATIC_DRAW.glEnum);
 
 		MemoryUtil.nmemFree(ptr);
 
@@ -76,7 +71,7 @@ public class QuadConverter {
 	}
 
 	public void delete() {
-		GL32.glDeleteBuffers(ebo);
+		GlStateManager._glDeleteBuffers(ebo);
 		this.cache.clear();
 		this.quadCapacity = 0;
 	}

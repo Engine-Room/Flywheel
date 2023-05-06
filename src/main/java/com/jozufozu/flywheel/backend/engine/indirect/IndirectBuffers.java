@@ -1,11 +1,9 @@
 package com.jozufozu.flywheel.backend.engine.indirect;
 
-import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL15.glDeleteBuffers;
 import static org.lwjgl.opengl.GL15.nglDeleteBuffers;
 import static org.lwjgl.opengl.GL30.GL_MAP_FLUSH_EXPLICIT_BIT;
 import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
-import static org.lwjgl.opengl.GL40.GL_DRAW_INDIRECT_BUFFER;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 import static org.lwjgl.opengl.GL44.GL_DYNAMIC_STORAGE_BIT;
 import static org.lwjgl.opengl.GL44.GL_MAP_PERSISTENT_BIT;
@@ -21,6 +19,7 @@ import static org.lwjgl.opengl.GL45.nglNamedBufferSubData;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.Pointer;
 
+import com.jozufozu.flywheel.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
@@ -49,22 +48,22 @@ public class IndirectBuffers {
 	private static final long BATCH_SIZE_OFFSET = TARGET_SIZE_OFFSET + PTR_SIZE;
 	private static final long DRAW_SIZE_OFFSET = BATCH_SIZE_OFFSET + PTR_SIZE;
 
-	final MemoryBlock buffers;
-	final long objectStride;
-	int object;
-	int target;
-	int batch;
-	int draw;
+	private final MemoryBlock buffers;
+	private final long objectStride;
+	private int object;
+	private int target;
+	private int batch;
+	private int draw;
 
 	long objectPtr;
 	long batchPtr;
 	long drawPtr;
 
-	int maxObjectCount = 0;
-	int maxDrawCount = 0;
+	private int maxObjectCount = 0;
+	private int maxDrawCount = 0;
 
-	float objectGrowthFactor = 2f;
-	float drawGrowthFactor = 2f;
+	private static final float OBJECT_GROWTH_FACTOR = 2f;
+	private static final float DRAW_GROWTH_FACTOR = 2f;
 
 	IndirectBuffers(long objectStride) {
 		this.objectStride = objectStride;
@@ -81,20 +80,11 @@ public class IndirectBuffers {
 	}
 
 	void updateCounts(int objectCount, int drawCount) {
-
 		if (objectCount > maxObjectCount) {
-			var newObjectCount = maxObjectCount;
-			while (newObjectCount <= objectCount) {
-				newObjectCount *= objectGrowthFactor;
-			}
-			createObjectStorage(newObjectCount);
+			createObjectStorage((int) (objectCount * OBJECT_GROWTH_FACTOR));
 		}
 		if (drawCount > maxDrawCount) {
-			var newDrawCount = maxDrawCount;
-			while (newDrawCount <= drawCount) {
-				newDrawCount *= drawGrowthFactor;
-			}
-			createDrawStorage(newDrawCount);
+			createDrawStorage((int) (drawCount * DRAW_GROWTH_FACTOR));
 		}
 
 		final long objectSize = objectStride * objectCount;
@@ -114,7 +104,7 @@ public class IndirectBuffers {
 		var targetSize = INT_SIZE * objectCount;
 
 		if (maxObjectCount > 0) {
-			var ptr = buffers.ptr();
+			final long ptr = buffers.ptr();
 			nglCreateBuffers(3, ptr);
 
 			int objectNew = MemoryUtil.memGetInt(ptr);
@@ -181,21 +171,17 @@ public class IndirectBuffers {
 	}
 
 	public void bindForCompute() {
-		multiBind(BUFFER_COUNT);
+		multiBind();
 	}
 
 	public void bindForDraw() {
-		multiBind(BUFFER_COUNT);
-		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, draw);
+		multiBind();
+		GlBufferType.DRAW_INDIRECT_BUFFER.bind(draw);
 	}
 
-	private void multiBind(int bufferCount) {
-		if (bufferCount > BUFFER_COUNT) {
-			throw new IllegalArgumentException("Can't bind more than " + BUFFER_COUNT + " buffers");
-		}
-
+	private void multiBind() {
 		final long ptr = buffers.ptr();
-		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, 0, bufferCount, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
+		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, 0, IndirectBuffers.BUFFER_COUNT, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
 	}
 
 	void flushBatchIDs(long length) {

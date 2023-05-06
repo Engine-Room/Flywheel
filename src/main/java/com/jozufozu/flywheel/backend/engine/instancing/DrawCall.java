@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.backend.engine.instancing;
 
-import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 
 public class DrawCall {
@@ -15,7 +14,7 @@ public class DrawCall {
 		this.mesh = mesh;
 
 		meshAttributes = this.mesh.getAttributeCount();
-		vao = new GlVertexArray();
+		vao = GlVertexArray.create();
 	}
 
 	public boolean isInvalid() {
@@ -27,15 +26,19 @@ public class DrawCall {
 			return;
 		}
 
-		try (var ignored = GlStateTracker.getRestoreState()) {
-			instancer.update();
+		instancer.update();
 
-			instancer.bindToVAO(vao, meshAttributes);
-
-			if (instancer.getInstanceCount() > 0) {
-				mesh.drawInstances(vao, instancer.getInstanceCount());
-			}
+		int instanceCount = instancer.getInstanceCount();
+		if (instanceCount <= 0 || mesh.isEmpty()) {
+			return;
 		}
+
+		instancer.bindToVAO(vao, meshAttributes);
+		mesh.setup(vao);
+
+		vao.bindForDraw();
+
+		mesh.draw(instanceCount);
 	}
 
 	public void delete() {

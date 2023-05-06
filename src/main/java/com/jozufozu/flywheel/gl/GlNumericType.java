@@ -17,6 +17,7 @@ public enum GlNumericType {
 	SHORT(2, "short", GL11.GL_SHORT),
 	UINT(4, "uint", GL11.GL_UNSIGNED_INT),
 	INT(4, "int", GL11.GL_INT),
+	DOUBLE(8, "double", GL11.GL_DOUBLE),
 	;
 
 	private static final GlNumericType[] VALUES = values();

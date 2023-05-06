@@ -79,16 +79,14 @@ public class GPUInstancer<I extends Instance> extends AbstractInstancer<I> {
 		}
 	}
 
-	public void bindToVAO(GlVertexArray vao, int attributeOffset) {
+	public void bindToVAO(GlVertexArray vao, int startAttrib) {
 		if (!boundTo.add(vao)) {
 			return;
 		}
 
-		vao.bindAttributes(instanceFormat, vbo.handle(), attributeOffset, 0L);
-
-		for (int i = 0; i < instanceFormat.getAttributeCount(); i++) {
-			vao.setAttributeDivisor(attributeOffset + i, 1);
-		}
+		vao.bindVertexBuffer(1, vbo.handle(), 0L, instanceStride);
+		vao.setBindingDivisor(1, 1);
+		vao.bindAttributes(1, startAttrib, instanceFormat.attributes());
 	}
 
 	public void delete() {

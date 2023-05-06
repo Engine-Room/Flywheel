@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import com.jozufozu.flywheel.api.layout.InputType;
 import com.jozufozu.flywheel.gl.GlNumericType;
 import com.jozufozu.flywheel.gl.array.VertexAttribute;
-import com.jozufozu.flywheel.gl.array.VertexAttributeF;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;
 
 public record MatInput(int rows, int cols, String typeName, String packedTypeName,
@@ -14,7 +13,7 @@ public record MatInput(int rows, int cols, String typeName, String packedTypeNam
 	@Override
 	public void provideAttributes(Consumer<VertexAttribute> consumer) {
 		for (int i = 0; i < rows; i++) {
-			consumer.accept(new VertexAttributeF(GlNumericType.FLOAT, cols, false));
+			consumer.accept(new VertexAttribute.Float(GlNumericType.FLOAT, cols, false));
 		}
 	}
 

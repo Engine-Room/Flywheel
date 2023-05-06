@@ -26,7 +26,7 @@ public class GlBuffer extends GlObject {
 	}
 
 	public GlBuffer(GlBufferUsage usage) {
-		setHandle(IMPL.create());
+		handle(IMPL.create());
 		this.usage = usage;
 	}
 
@@ -71,7 +71,7 @@ public class GlBuffer extends GlObject {
 		IMPL.data(newHandle, size, MemoryUtil.NULL, usage.glEnum);
 		IMPL.copyData(oldHandle, newHandle, 0, 0, oldSize);
 		glDeleteBuffers(oldHandle);
-		setHandle(newHandle);
+		handle(newHandle);
 
 		FlwMemoryTracker._allocGPUMemory(size);
 	}

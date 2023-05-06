@@ -13,7 +13,7 @@ public class GlShader extends GlObject {
 		this.type = type;
 		this.name = name;
 
-		setHandle(handle);
+		handle(handle);
 	}
 
 	@Override

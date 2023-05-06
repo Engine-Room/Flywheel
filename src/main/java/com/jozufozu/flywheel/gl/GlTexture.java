@@ -7,7 +7,7 @@ public class GlTexture extends GlObject {
 
 	public GlTexture(int textureType) {
 		this.textureType = textureType;
-		setHandle(GL20.glGenTextures());
+		handle(GL20.glGenTextures());
 	}
 
 	@Override

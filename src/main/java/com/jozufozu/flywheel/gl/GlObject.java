@@ -6,18 +6,18 @@ public abstract class GlObject {
 
 	private int handle = INVALID_HANDLE;
 
-	protected final void setHandle(int handle) {
+	protected final void handle(int handle) {
 		this.handle = handle;
 	}
 
 	public final int handle() {
-		this.checkHandle();
+		checkHandle();
 
 		return this.handle;
 	}
 
 	protected final void checkHandle() {
-		if (this.isInvalid()) {
+		if (isInvalid()) {
 			throw new IllegalStateException("handle is not valid.");
 		}
 	}
@@ -31,7 +31,7 @@ public abstract class GlObject {
 	}
 
 	public void delete() {
-		if (this.isInvalid()) {
+		if (isInvalid()) {
 			throw new IllegalStateException("handle already deleted.");
 		}
 

@@ -127,7 +127,7 @@ public class SimpleMaterial implements Material {
 		}
 
 		public static GlStateShard fromVanilla(RenderStateShard vanillaShard) {
-			return new GlStateShard(() -> vanillaShard.setupRenderState(), () -> vanillaShard.clearRenderState());
+			return new GlStateShard(vanillaShard::setupRenderState, vanillaShard::clearRenderState);
 		}
 
 		public Runnable getSetup() {

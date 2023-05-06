@@ -1,8 +1,7 @@
 package com.jozufozu.flywheel.lib.layout;
 
 import com.jozufozu.flywheel.gl.GlNumericType;
-import com.jozufozu.flywheel.gl.array.VertexAttributeF;
-import com.jozufozu.flywheel.gl.array.VertexAttributeI;
+import com.jozufozu.flywheel.gl.array.VertexAttribute;
 
 public class CommonItems {
 	private static final String VEC2_TYPE = "vec2";
@@ -17,51 +16,51 @@ public class CommonItems {
 	private static final String LIGHT_COORD_TYPE = "LightCoord";
 
 	public static final VecInput LIGHT_COORD = VecInput.builder()
-			.vertexAttribute(new VertexAttributeI(GlNumericType.USHORT, 2))
+			.vertexAttribute(new VertexAttribute.Int(GlNumericType.USHORT, 2))
 			.typeName(IVEC2_TYPE)
 			.packedTypeName(LIGHT_COORD_TYPE)
 			.unpackingFunction(expr -> expr.callFunction("unpackLightCoord"))
 			.build();
 
 	public static final VecInput FLOAT = VecInput.builder()
-			.vertexAttribute(new VertexAttributeF(GlNumericType.FLOAT, 1, false))
+			.vertexAttribute(new VertexAttribute.Float(GlNumericType.FLOAT, 1, false))
 			.typeName(FLOAT_TYPE)
 			.packedTypeName(FLOAT_TYPE)
 			.build();
 	public static final VecInput NORM_3x8 = VecInput.builder()
-			.vertexAttribute(new VertexAttributeF(GlNumericType.BYTE, 3, true))
+			.vertexAttribute(new VertexAttribute.Float(GlNumericType.BYTE, 3, true))
 			.typeName(VEC3_TYPE)
 			.packedTypeName(UINT_TYPE)
 			.unpackingFunction(expr -> expr.callFunction("unpackSnorm4x8")
 					.swizzle("xyz"))
 			.build();
 	public static final VecInput UNORM_4x8 = VecInput.builder()
-			.vertexAttribute(new VertexAttributeF(GlNumericType.UBYTE, 4, true))
+			.vertexAttribute(new VertexAttribute.Float(GlNumericType.UBYTE, 4, true))
 			.typeName(VEC4_TYPE)
 			.packedTypeName(UINT_TYPE)
 			.unpackingFunction(expr -> expr.callFunction("unpackUnorm4x8"))
 			.build();
 	public static final VecInput UNORM_3x8 = VecInput.builder()
-			.vertexAttribute(new VertexAttributeF(GlNumericType.UBYTE, 3, true))
+			.vertexAttribute(new VertexAttribute.Float(GlNumericType.UBYTE, 3, true))
 			.typeName(VEC3_TYPE)
 			.packedTypeName(UINT_TYPE)
 			.unpackingFunction(expr -> expr.callFunction("unpackUnorm4x8")
 					.swizzle("xyz"))
 			.build();
 	public static final VecInput VEC4 = VecInput.builder()
-			.vertexAttribute(new VertexAttributeF(GlNumericType.FLOAT, 4, false))
+			.vertexAttribute(new VertexAttribute.Float(GlNumericType.FLOAT, 4, false))
 			.typeName(VEC4_TYPE)
 			.packedTypeName(VEC4F_TYPE)
 			.unpackingFunction(expr -> expr.callFunction("unpackVec4F"))
 			.build();
 	public static final VecInput VEC3 = VecInput.builder()
-			.vertexAttribute(new VertexAttributeF(GlNumericType.FLOAT, 3, false))
+			.vertexAttribute(new VertexAttribute.Float(GlNumericType.FLOAT, 3, false))
 			.typeName(VEC3_TYPE)
 			.packedTypeName(VEC3F_TYPE)
 			.unpackingFunction(expr -> expr.callFunction("unpackVec3F"))
 			.build();
 	public static final VecInput VEC2 = VecInput.builder()
-			.vertexAttribute(new VertexAttributeF(GlNumericType.FLOAT, 2, false))
+			.vertexAttribute(new VertexAttribute.Float(GlNumericType.FLOAT, 2, false))
 			.typeName(VEC2_TYPE)
 			.packedTypeName(VEC2F_TYPE)
 			.unpackingFunction(expr -> expr.callFunction("unpackVec2F"))

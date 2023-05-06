@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.gl.GlPrimitive;
@@ -172,7 +173,7 @@ public class InstancedMeshPool {
 			return deleted;
 		}
 
-		private boolean isEmpty() {
+		public boolean isEmpty() {
 			return mesh.isEmpty() || isDeleted();
 		}
 
@@ -182,25 +183,16 @@ public class InstancedMeshPool {
 			boundTo.clear();
 		}
 
-		public void drawInstances(GlVertexArray vao, int instanceCount) {
-			if (isEmpty()) {
-				return;
-			}
-
-			setup(vao);
-
-			draw(instanceCount);
-		}
-
-		private void setup(GlVertexArray vao) {
+		public void setup(GlVertexArray vao) {
 			if (boundTo.add(vao)) {
-				vao.bindAttributes(vertexType.getLayout(), InstancedMeshPool.this.vbo.handle(), 0, byteIndex);
+				BufferLayout type = vertexType.getLayout();
+				vao.bindVertexBuffer(0, InstancedMeshPool.this.vbo.handle(), byteIndex, type.getStride());
+				vao.bindAttributes(0, 0, type.attributes());
 				vao.setElementBuffer(ebo.glBuffer);
 			}
-			vao.bindForDraw();
 		}
 
-		private void draw(int instanceCount) {
+		public void draw(int instanceCount) {
 			if (instanceCount > 1) {
 				GL32.glDrawElementsInstanced(GlPrimitive.TRIANGLES.glEnum, ebo.getElementCount(), ebo.getEboIndexType().asGLType, 0, instanceCount);
 			} else {
