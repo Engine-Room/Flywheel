@@ -41,7 +41,7 @@ public class GPUInstancer<I extends Instance> extends AbstractInstancer<I> {
 		}
 
 		vbo = new GlBuffer(GlBufferUsage.DYNAMIC_DRAW);
-		vbo.growthMargin(instanceStride * 16);
+		vbo.growthFunction(l -> Math.max(l + (long) instanceStride * 16, (long) (l * 1.6)));
 	}
 
 	public void update() {
@@ -70,7 +70,7 @@ public class GPUInstancer<I extends Instance> extends AbstractInstancer<I> {
 
 			int count = instances.size();
 			for (int i = changed.nextSetBit(0); i >= 0 && i < count; i = changed.nextSetBit(i + 1)) {
-				writer.write(ptr + instanceStride * i, instances.get(i));
+				writer.write(ptr + (long) instanceStride * i, instances.get(i));
 			}
 
 			changed.clear();

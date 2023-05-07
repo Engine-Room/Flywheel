@@ -15,6 +15,8 @@ public abstract class GlVertexArray extends GlObject {
 	public static GlVertexArray create() {
 		if (GlVertexArrayDSA.SUPPORTED) {
 			return new GlVertexArrayDSA();
+		} else if (GlVertexArraySeparateAttributes.SUPPORTED) {
+			return new GlVertexArraySeparateAttributes();
 		} else if (GlVertexArrayGL3.Core33.SUPPORTED) {
 			return new GlVertexArrayGL3.Core33();
 		} else if (GlVertexArrayGL3.ARB.SUPPORTED) {

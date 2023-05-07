@@ -3,13 +3,15 @@ package com.jozufozu.flywheel.gl.array;
 import java.util.BitSet;
 import java.util.List;
 
-import org.lwjgl.opengl.GL45C;
+import org.lwjgl.opengl.GL43C;
 import org.lwjgl.system.Checks;
 
 import com.jozufozu.flywheel.gl.GlCompat;
+import com.jozufozu.flywheel.gl.GlStateTracker;
+import com.jozufozu.flywheel.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.util.FlwUtil;
 
-public class GlVertexArrayDSA extends GlVertexArray {
+public class GlVertexArraySeparateAttributes extends GlVertexArray {
 	public static final boolean SUPPORTED = isSupported();
 	private final BitSet attributeEnabled = new BitSet(MAX_ATTRIBS);
 	private final VertexAttribute[] attributes = new VertexAttribute[MAX_ATTRIBS];
@@ -21,14 +23,15 @@ public class GlVertexArrayDSA extends GlVertexArray {
 
 	private int elementBufferBinding = 0;
 
-	public GlVertexArrayDSA() {
-		handle(GL45C.glCreateVertexArrays());
+	public GlVertexArraySeparateAttributes() {
+		handle(GL43C.glGenVertexArrays());
 	}
 
 	@Override
 	public void bindVertexBuffer(final int bindingIndex, final int vbo, final long offset, final int stride) {
 		if (bindingBuffers[bindingIndex] != vbo || bindingOffsets[bindingIndex] != offset || bindingStrides[bindingIndex] != stride) {
-			GL45C.glVertexArrayVertexBuffer(handle(), bindingIndex, vbo, offset, stride);
+			GlStateTracker.bindVao(handle());
+			GL43C.glBindVertexBuffer(bindingIndex, vbo, offset, stride);
 			bindingBuffers[bindingIndex] = vbo;
 			bindingOffsets[bindingIndex] = offset;
 			bindingStrides[bindingIndex] = stride;
@@ -38,34 +41,34 @@ public class GlVertexArrayDSA extends GlVertexArray {
 	@Override
 	public void setBindingDivisor(final int bindingIndex, final int divisor) {
 		if (bindingDivisors[bindingIndex] != divisor) {
-			GL45C.glVertexArrayBindingDivisor(handle(), bindingIndex, divisor);
+			GL43C.glVertexBindingDivisor(bindingIndex, divisor);
 			bindingDivisors[bindingIndex] = divisor;
 		}
 	}
 
 	@Override
 	public void bindAttributes(final int bindingIndex, final int startAttribIndex, List<VertexAttribute> vertexAttributes) {
-		final int handle = handle();
+		GlStateTracker.bindVao(handle());
 		int attribIndex = startAttribIndex;
 		int offset = 0;
 
 		for (var attribute : vertexAttributes) {
 			if (!attributeEnabled.get(attribIndex)) {
-				GL45C.glEnableVertexArrayAttrib(handle, attribIndex);
+				GL43C.glEnableVertexAttribArray(attribIndex);
 				attributeEnabled.set(attribIndex);
 			}
 
 			if (!attribute.equals(attributes[attribIndex])) {
 				if (attribute instanceof VertexAttribute.Float f) {
-					GL45C.glVertexArrayAttribFormat(handle, attribIndex, f.size(), f.type().glEnum, f.normalized(), offset);
+					GL43C.glVertexAttribFormat(attribIndex, f.size(), f.type().glEnum, f.normalized(), offset);
 				} else if (attribute instanceof VertexAttribute.Int vi) {
-					GL45C.glVertexArrayAttribIFormat(handle, attribIndex, vi.size(), vi.type().glEnum, offset);
+					GL43C.glVertexAttribIFormat(attribIndex, vi.size(), vi.type().glEnum, offset);
 				}
 				attributes[attribIndex] = attribute;
 			}
 
 			if (attributeBindings[attribIndex] != bindingIndex) {
-				GL45C.glVertexArrayAttribBinding(handle, attribIndex, bindingIndex);
+				GL43C.glVertexAttribBinding(attribIndex, bindingIndex);
 				attributeBindings[attribIndex] = bindingIndex;
 			}
 
@@ -77,13 +80,14 @@ public class GlVertexArrayDSA extends GlVertexArray {
 	@Override
 	public void setElementBuffer(int ebo) {
 		if (elementBufferBinding != ebo) {
-			GL45C.glVertexArrayElementBuffer(handle(), ebo);
+			GlStateTracker.bindVao(handle());
+			GlBufferType.ELEMENT_ARRAY_BUFFER.bind(ebo);
 			elementBufferBinding = ebo;
 		}
 	}
 
 	private static boolean isSupported() {
 		var c = GlCompat.CAPABILITIES;
-		return GlCompat.ALLOW_DSA && Checks.checkFunctions(c.glCreateVertexArrays, c.glVertexArrayElementBuffer, c.glVertexArrayVertexBuffer, c.glVertexArrayBindingDivisor, c.glVertexArrayAttribBinding, c.glEnableVertexArrayAttrib, c.glVertexArrayAttribFormat, c.glVertexArrayAttribIFormat);
+		return GlCompat.ALLOW_DSA && Checks.checkFunctions(c.glBindVertexBuffer, c.glVertexBindingDivisor, c.glEnableVertexAttribArray, c.glVertexAttribFormat, c.glVertexAttribIFormat, c.glVertexAttribBinding);
 	}
 }
