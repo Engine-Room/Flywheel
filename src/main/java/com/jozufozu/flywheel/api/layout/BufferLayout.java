@@ -56,7 +56,7 @@ public class BufferLayout {
 	private static int calculateStride(List<VertexAttribute> layoutItems) {
 		int stride = 0;
 		for (var spec : layoutItems) {
-			stride += spec.getByteWidth();
+			stride += spec.byteWidth();
 		}
 		return stride;
 	}

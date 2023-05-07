@@ -58,7 +58,7 @@ public class QuadConverter {
 	}
 
 	private void grow(int quads) {
-		int byteSize = quads * 6 * GlNumericType.UINT.getByteWidth();
+		int byteSize = quads * 6 * GlNumericType.UINT.byteWidth();
 		final long ptr = MemoryUtil.nmemAlloc(byteSize);
 
 		fillBuffer(ptr, quads);

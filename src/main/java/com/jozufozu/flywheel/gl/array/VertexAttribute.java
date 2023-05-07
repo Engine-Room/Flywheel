@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.gl.array;
 import com.jozufozu.flywheel.gl.GlNumericType;
 
 public sealed interface VertexAttribute {
-	int getByteWidth();
+	int byteWidth();
 
 	/**
 	 * A bindable attribute in a vertex array.
@@ -14,8 +14,8 @@ public sealed interface VertexAttribute {
 	 */
 	record Float(GlNumericType type, int size, boolean normalized) implements VertexAttribute {
 		@Override
-		public int getByteWidth() {
-			return size * type.getByteWidth();
+		public int byteWidth() {
+			return size * type.byteWidth();
 		}
 	}
 
@@ -27,8 +27,8 @@ public sealed interface VertexAttribute {
 	 */
 	record Int(GlNumericType type, int size) implements VertexAttribute {
 		@Override
-		public int getByteWidth() {
-			return size * type.getByteWidth();
+		public int byteWidth() {
+			return size * type.byteWidth();
 		}
 	}
 }

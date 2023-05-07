@@ -23,7 +23,8 @@ public abstract class GlVertexArrayGL3 extends GlVertexArray {
 	private final long[] bindingOffsets = new long[MAX_ATTRIB_BINDINGS];
 	private final int[] bindingStrides = new int[MAX_ATTRIB_BINDINGS];
 	private final int[] bindingDivisors = new int[MAX_ATTRIB_BINDINGS];
-	private int elementBufferBinding = 0;
+	private int requestedElementBuffer = 0;
+	private int boundElementBuffer = 0;
 
 	public GlVertexArrayGL3() {
 		handle(GL30.glGenVertexArrays());
@@ -33,41 +34,10 @@ public abstract class GlVertexArrayGL3 extends GlVertexArray {
 	public void bindForDraw() {
 		super.bindForDraw();
 
-		for (int attribIndex = attributeDirty.nextSetBit(0); attribIndex < MAX_ATTRIB_BINDINGS && attribIndex >= 0; attribIndex = attributeDirty.nextSetBit(attribIndex + 1)) {
+		maybeUpdateAttributes();
 
-			int bindingIndex = attributeBindings[attribIndex];
-			var attribute = attributes[attribIndex];
-
-			if (bindingIndex == -1 || attribute == null) {
-				continue;
-			}
-
-			GlBufferType.ARRAY_BUFFER.bind(bindingBuffers[bindingIndex]);
-			GL20C.glEnableVertexAttribArray(attribIndex);
-
-			long offset = bindingOffsets[bindingIndex] + attributeOffsets[attribIndex];
-			int stride = bindingStrides[bindingIndex];
-
-			if (attribute instanceof VertexAttribute.Float f) {
-				GL32.glVertexAttribPointer(attribIndex, f.size(), f.type()
-						.getGlEnum(), f.normalized(), stride, offset);
-			} else if (attribute instanceof VertexAttribute.Int vi) {
-				GL32.glVertexAttribIPointer(attribIndex, vi.size(), vi.type()
-						.getGlEnum(), stride, offset);
-			}
-
-			int divisor = bindingDivisors[bindingIndex];
-			if (divisor != 0) {
-				setDivisor(attribIndex, divisor);
-			}
-		}
-
-		GlBufferType.ELEMENT_ARRAY_BUFFER.bind(elementBufferBinding);
-
-		attributeDirty.clear();
+		maybeUpdateEBOBinding();
 	}
-
-	protected abstract void setDivisor(int attribIndex, int divisor);
 
 	@Override
 	public void bindVertexBuffer(int bindingIndex, int vbo, long offset, int stride) {
@@ -83,7 +53,6 @@ public abstract class GlVertexArrayGL3 extends GlVertexArray {
 			}
 		}
 	}
-
 	@Override
 	public void setBindingDivisor(int bindingIndex, int divisor) {
 		if (bindingDivisors[bindingIndex] != divisor) {
@@ -104,14 +73,58 @@ public abstract class GlVertexArrayGL3 extends GlVertexArray {
 			attributeDirty.set(attribIndex);
 
 			attribIndex++;
-			offset += attribute.getByteWidth();
+			offset += attribute.byteWidth();
 		}
 	}
 
 	@Override
 	public void setElementBuffer(int ebo) {
-		elementBufferBinding = ebo;
+		requestedElementBuffer = ebo;
 	}
+
+	private void maybeUpdateEBOBinding() {
+		if (requestedElementBuffer != boundElementBuffer) {
+			GlBufferType.ELEMENT_ARRAY_BUFFER.bind(requestedElementBuffer);
+			boundElementBuffer = requestedElementBuffer;
+		}
+	}
+
+	private void maybeUpdateAttributes() {
+		for (int attribIndex = attributeDirty.nextSetBit(0); attribIndex < MAX_ATTRIB_BINDINGS && attribIndex >= 0; attribIndex = attributeDirty.nextSetBit(attribIndex + 1)) {
+			updateAttribute(attribIndex);
+		}
+		attributeDirty.clear();
+	}
+
+	private void updateAttribute(int attribIndex) {
+		int bindingIndex = attributeBindings[attribIndex];
+		var attribute = attributes[attribIndex];
+
+		if (bindingIndex == -1 || attribute == null) {
+			return;
+		}
+
+		GlBufferType.ARRAY_BUFFER.bind(bindingBuffers[bindingIndex]);
+		GL20C.glEnableVertexAttribArray(attribIndex);
+
+		long offset = bindingOffsets[bindingIndex] + attributeOffsets[attribIndex];
+		int stride = bindingStrides[bindingIndex];
+
+		if (attribute instanceof VertexAttribute.Float f) {
+			GL32.glVertexAttribPointer(attribIndex, f.size(), f.type()
+					.glEnum(), f.normalized(), stride, offset);
+		} else if (attribute instanceof VertexAttribute.Int vi) {
+			GL32.glVertexAttribIPointer(attribIndex, vi.size(), vi.type()
+					.glEnum(), stride, offset);
+		}
+
+		int divisor = bindingDivisors[bindingIndex];
+		if (divisor != 0) {
+			setDivisor(attribIndex, divisor);
+		}
+	}
+
+	protected abstract void setDivisor(int attribIndex, int divisor);
 
 	public static class Core33 extends GlVertexArrayGL3 {
 		public static final boolean SUPPORTED = isSupported();

@@ -1,13 +1,13 @@
 package com.jozufozu.flywheel.gl.buffer;
 
-import static org.lwjgl.opengl.GL15.glDeleteBuffers;
-
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.gl.GlObject;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.mojang.blaze3d.platform.GlStateManager;
+
+import it.unimi.dsi.fastutil.longs.LongUnaryOperator;
 
 public class GlBuffer extends GlObject {
 	public static final Buffer IMPL = new Buffer.DSA().fallback();
@@ -17,9 +17,9 @@ public class GlBuffer extends GlObject {
 	 */
 	protected long size;
 	/**
-	 * How much extra room to give the buffer when we reallocate.
+	 * A mapping to adjust the size of the buffer when allocating.
 	 */
-	protected int growthMargin;
+	protected LongUnaryOperator growthFunction = LongUnaryOperator.identity();
 
 	public GlBuffer() {
 		this(GlBufferUsage.STATIC_DRAW);
@@ -70,7 +70,7 @@ public class GlBuffer extends GlObject {
 		int newHandle = IMPL.create();
 		IMPL.data(newHandle, size, MemoryUtil.NULL, usage.glEnum);
 		IMPL.copyData(oldHandle, newHandle, 0, 0, oldSize);
-		glDeleteBuffers(oldHandle);
+		GlStateManager._glDeleteBuffers(oldHandle);
 		handle(newHandle);
 
 		FlwMemoryTracker._allocGPUMemory(size);
@@ -80,7 +80,7 @@ public class GlBuffer extends GlObject {
 	 * Increase the size of the buffer to at least the given capacity.
 	 */
 	private void increaseSize(long capacity) {
-		size = capacity + growthMargin;
+		size = growthFunction.apply(capacity);
 	}
 
 	public void upload(MemoryBlock directBuffer) {
@@ -94,8 +94,8 @@ public class GlBuffer extends GlObject {
 		return new MappedBuffer(handle(), size);
 	}
 
-	public void growthMargin(int growthMargin) {
-		this.growthMargin = growthMargin;
+	public void growthFunction(LongUnaryOperator growthFunction) {
+		this.growthFunction = growthFunction;
 	}
 
 	public long size() {

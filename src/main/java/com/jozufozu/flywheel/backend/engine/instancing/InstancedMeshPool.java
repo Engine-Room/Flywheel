@@ -40,7 +40,7 @@ public class InstancedMeshPool {
 		this.vertexType = vertexType;
 		int stride = vertexType.getLayout().getStride();
 		vbo = new GlBuffer();
-		vbo.growthMargin(stride * 32);
+		vbo.growthFunction(l -> Math.max(l + stride * 32L, (long) (l * 1.6)));
 	}
 
 	public VertexType getVertexType() {

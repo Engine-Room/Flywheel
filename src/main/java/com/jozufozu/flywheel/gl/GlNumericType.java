@@ -1,12 +1,5 @@
 package com.jozufozu.flywheel.gl;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 
 public enum GlNumericType {
@@ -20,13 +13,9 @@ public enum GlNumericType {
 	DOUBLE(8, "double", GL11.GL_DOUBLE),
 	;
 
-	private static final GlNumericType[] VALUES = values();
-	private static final Map<String, GlNumericType> NAME_LOOKUP = Arrays.stream(VALUES)
-			.collect(Collectors.toMap(GlNumericType::getTypeName, type -> type));
-
-	private final int byteWidth;
-	private final String typeName;
-	private final int glEnum;
+	public final int byteWidth;
+	public final String typeName;
+	public final int glEnum;
 
 	GlNumericType(int bytes, String name, int glEnum) {
 		this.byteWidth = bytes;
@@ -34,31 +23,16 @@ public enum GlNumericType {
 		this.glEnum = glEnum;
 	}
 
-	public int getByteWidth() {
-		return this.byteWidth;
+	public int byteWidth() {
+		return byteWidth;
 	}
 
-	public String getTypeName() {
-		return this.typeName;
+	public String typeName() {
+		return typeName;
 	}
 
-	public int getGlEnum() {
-		return this.glEnum;
-	}
-
-	public void castAndBuffer(ByteBuffer buf, int val) {
-		if (this == UBYTE || this == BYTE) {
-			buf.put((byte) val);
-		} else if (this == USHORT || this == SHORT) {
-			buf.putShort((short) val);
-		} else if (this == UINT || this == INT) {
-			buf.putInt(val);
-		}
-	}
-
-	@Nullable
-	public static GlNumericType byName(String name) {
-		return name == null ? null : NAME_LOOKUP.get(name.toLowerCase(Locale.ROOT));
+	public int glEnum() {
+		return glEnum;
 	}
 
 	@Override
