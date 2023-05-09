@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.glsl.SourceLines;
 import com.jozufozu.flywheel.glsl.error.ErrorBuilder;
@@ -15,7 +16,10 @@ import com.jozufozu.flywheel.glsl.span.Span;
 import com.jozufozu.flywheel.util.ConsoleColors;
 import com.jozufozu.flywheel.util.StringUtil;
 
+import net.minecraft.resources.ResourceLocation;
+
 public class FailedCompilation {
+	public static final ResourceLocation GENERATED_SOURCE_NAME = Flywheel.rl("generated_source");
 	private static final Pattern ERROR_LINE = Pattern.compile("(\\d+)\\((\\d+)\\) : (.*)");
 	private final List<SourceFile> files;
 	private final SourceLines generatedSource;
@@ -25,7 +29,7 @@ public class FailedCompilation {
 	public FailedCompilation(String shaderName, List<SourceFile> files, String generatedSource, String errorLog) {
 		this.shaderName = shaderName;
 		this.files = files;
-		this.generatedSource = new SourceLines(generatedSource);
+		this.generatedSource = new SourceLines(GENERATED_SOURCE_NAME, generatedSource);
 		this.errorLog = errorLog;
 	}
 

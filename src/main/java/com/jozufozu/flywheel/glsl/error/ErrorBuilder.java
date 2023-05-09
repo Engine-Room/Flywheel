@@ -59,6 +59,10 @@ public class ErrorBuilder {
 		return pointAtFile(file.name.toString());
 	}
 
+	public ErrorBuilder pointAtFile(SourceLines source) {
+		return pointAtFile(source.name.toString());
+	}
+
 	public ErrorBuilder pointAtFile(String file) {
 		lines.add(new FileLine(file));
 		return this;
@@ -69,13 +73,13 @@ public class ErrorBuilder {
 			return this;
 		}
 
-		SourceFile sourceFile = span.getSourceFile();
+		var source = span.source();
 
-		String builder = "add " + sourceFile.importStatement() + ' ' + msg + "\n defined here:";
+		String builder = "add " + "#use " + '"' + source.name + '"' + ' ' + msg + "\n defined here:";
 
 		header(ErrorLevel.HINT, builder);
 
-		return this.pointAtFile(sourceFile)
+		return this.pointAtFile(source)
 				.pointAt(span, 0);
 	}
 
@@ -85,12 +89,12 @@ public class ErrorBuilder {
 
 	public ErrorBuilder pointAt(Span span, int ctxLines) {
 		if (span.lines() == 1) {
-			SourceLines lines = span.getSourceFile().source;
+			SourceLines lines = span.source();
 
 			int spanLine = span.firstLine();
-			int firstCol = span.getStart()
+			int firstCol = span.start()
 					.col();
-			int lastCol = span.getEnd()
+			int lastCol = span.end()
 					.col();
 
 			pointAtLine(lines, spanLine, ctxLines, firstCol, lastCol);

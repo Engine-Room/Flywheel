@@ -1,20 +1,20 @@
 package com.jozufozu.flywheel.glsl.span;
 
-import com.jozufozu.flywheel.glsl.SourceFile;
+import com.jozufozu.flywheel.glsl.SourceLines;
 
 /**
  * Represents a (syntactically) malformed segment of code.
  */
 public class ErrorSpan extends Span {
-	public ErrorSpan(SourceFile in, int loc) {
+	public ErrorSpan(SourceLines in, int loc) {
 		super(in, loc, loc);
 	}
 
-	public ErrorSpan(SourceFile in, int start, int end) {
+	public ErrorSpan(SourceLines in, int start, int end) {
 		super(in, start, end);
 	}
 
-	public ErrorSpan(SourceFile in, CharPos start, CharPos end) {
+	public ErrorSpan(SourceLines in, CharPos start, CharPos end) {
 		super(in, start, end);
 	}
 

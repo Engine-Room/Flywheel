@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.compile.component.MaterialAdapterComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.glsl.ShaderSources;
@@ -20,12 +21,12 @@ public class InstancingPrograms {
 		this.pipeline = pipeline;
 	}
 
-	public static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent) {
+	public static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, MaterialAdapterComponent vertexMaterialComponent, MaterialAdapterComponent fragmentMaterialComponent) {
 		if (instance != null) {
 			instance.delete();
 			instance = null;
 		}
-		var instancingCompiler = new PipelineCompiler(sources, pipelineKeys, Pipelines.INSTANCED_ARRAYS, uniformComponent);
+		var instancingCompiler = new PipelineCompiler(sources, pipelineKeys, Pipelines.INSTANCED_ARRAYS, vertexMaterialComponent, fragmentMaterialComponent, uniformComponent);
 		var result = instancingCompiler.compileAndReportErrors();
 
 		if (result != null) {

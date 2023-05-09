@@ -1,11 +1,16 @@
 package com.jozufozu.flywheel.glsl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
+
+import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -29,8 +34,6 @@ import net.minecraft.resources.ResourceLocation;
 public class SourceFile implements SourceComponent {
 	public final ResourceLocation name;
 
-	public final ShaderSources parent;
-
 	public final SourceLines source;
 
 	/**
@@ -51,30 +54,51 @@ public class SourceFile implements SourceComponent {
 
 	public final List<SourceFile> included;
 
-	public SourceFile(ShaderSources sourceFinder, ResourceLocation name, String source) {
-		this.parent = sourceFinder;
+	public final String finalSource;
+
+	private SourceFile(ResourceLocation name, SourceLines source, ImmutableMap<String, ShaderFunction> functions, ImmutableMap<String, ShaderStruct> structs, ImmutableList<Import> imports, ImmutableMap<String, ShaderField> fields, List<SourceFile> included, String finalSource) {
 		this.name = name;
+		this.source = source;
+		this.functions = functions;
+		this.structs = structs;
+		this.imports = imports;
+		this.fields = fields;
+		this.included = included;
+		this.finalSource = finalSource;
+	}
 
-		this.source = new SourceLines(source);
+	public static LoadResult parse(ShaderSources sourceFinder, ResourceLocation name, String stringSource) {
+		var source = new SourceLines(name, stringSource);
 
-		this.imports = parseImports(source);
-		this.functions = parseFunctions(source);
-		this.structs = parseStructs(source);
-		this.fields = parseFields(source);
+		var imports = parseImports(source);
 
-		this.included = imports.stream()
-				.map(i -> i.file)
-				.map(Span::toString)
-				.distinct()
-				.<SourceFile>mapMulti((file, sink) -> {
-					try {
-						var loc = new ResourceLocation(file);
-						var sourceFile = sourceFinder.find(loc);
-						sink.accept(sourceFile);
-					} catch (Exception ignored) {
-					}
-				})
-				.toList();
+		List<SourceFile> included = new ArrayList<>();
+		List<LoadResult> failures = new ArrayList<>();
+
+		Set<String> seen = new HashSet<>();
+		for (Import i : imports) {
+			var fileSpan = i.file();
+			String string = fileSpan.toString();
+			if (!seen.add(string)) {
+				continue;
+			}
+			var result = sourceFinder.find(new ResourceLocation(string));
+			if (result instanceof LoadResult.Success s) {
+				included.add(s.unwrap());
+			} else {
+				failures.add(result);
+			}
+		}
+		if (!failures.isEmpty()) {
+			return new LoadResult.IncludeError(name, failures);
+		}
+
+		var functions = parseFunctions(source);
+		var structs = parseStructs(source);
+		var fields = parseFields(source);
+
+		var finalSource = generateFinalSource(imports, source);
+		return LoadResult.success(new SourceFile(name, source, functions, structs, imports, fields, included, finalSource));
 	}
 
 	@Override
@@ -84,7 +108,26 @@ public class SourceFile implements SourceComponent {
 
 	@Override
 	public String source() {
-		return this.genFinalSource();
+		return finalSource;
+	}
+
+	@NotNull
+	private static String generateFinalSource(ImmutableList<Import> imports, SourceLines source) {
+		var out = new StringBuilder();
+
+		int lastEnd = 0;
+
+		for (var include : imports) {
+			var loc = include.self();
+
+			out.append(source, lastEnd, loc.startIndex());
+
+			lastEnd = loc.endIndex();
+		}
+
+		out.append(source, lastEnd, source.length());
+
+		return out.toString();
 	}
 
 	@Override
@@ -96,7 +139,7 @@ public class SourceFile implements SourceComponent {
 		int begin = source.lineStartIndex(lineNo);
 		int end = begin + source.lineString(lineNo)
 				.length();
-		return new StringSpan(this, source.getCharPos(begin), source.getCharPos(end));
+		return new StringSpan(source, begin, end);
 	}
 
 	public Span getLineSpanNoWhitespace(int line) {
@@ -108,7 +151,7 @@ public class SourceFile implements SourceComponent {
 			begin++;
 		}
 
-		return new StringSpan(this, source.getCharPos(begin), source.getCharPos(end));
+		return new StringSpan(source, begin, end);
 	}
 
 	/**
@@ -157,32 +200,6 @@ public class SourceFile implements SourceComponent {
 		return Optional.empty();
 	}
 
-	public CharSequence importStatement() {
-		return "#use " + '"' + name + '"';
-	}
-
-	public String printSource() {
-		return "Source for shader '" + name + "':\n" + source.printLinesWithNumbers();
-	}
-
-	private String genFinalSource() {
-		StringBuilder out = new StringBuilder();
-
-		int lastEnd = 0;
-
-		for (var include : imports) {
-			var loc = include.self;
-
-			out.append(this.source, lastEnd, loc.getStartPos());
-
-			lastEnd = loc.getEndPos();
-		}
-
-		out.append(this.source, lastEnd, this.source.length());
-
-		return out.toString();
-	}
-
 	@Override
 	public String toString() {
 		return name.toString();
@@ -199,19 +216,18 @@ public class SourceFile implements SourceComponent {
 		return System.identityHashCode(this);
 	}
 
-
 	/**
 	 * Scan the source for {@code #use "..."} directives.
 	 * Records the contents of the directive into an {@link Import} object, and marks the directive for elision.
 	 */
-	private ImmutableList<Import> parseImports(String source) {
+	private static ImmutableList<Import> parseImports(SourceLines source) {
 		Matcher uses = Import.PATTERN.matcher(source);
 
 		var imports = ImmutableList.<Import>builder();
 
 		while (uses.find()) {
-			Span use = Span.fromMatcher(this, uses);
-			Span file = Span.fromMatcher(this, uses, 1);
+			Span use = Span.fromMatcher(source, uses);
+			Span file = Span.fromMatcher(source, uses, 1);
 
 			imports.add(new Import(use, file));
 		}
@@ -219,19 +235,18 @@ public class SourceFile implements SourceComponent {
 		return imports.build();
 	}
 
-
 	/**
 	 * Scan the source for function definitions and "parse" them into objects that contain properties of the function.
 	 */
-	private ImmutableMap<String, ShaderFunction> parseFunctions(String source) {
+	private static ImmutableMap<String, ShaderFunction> parseFunctions(SourceLines source) {
 		Matcher matcher = ShaderFunction.PATTERN.matcher(source);
 
 		Map<String, ShaderFunction> functions = new HashMap<>();
 
 		while (matcher.find()) {
-			Span type = Span.fromMatcher(this, matcher, 1);
-			Span name = Span.fromMatcher(this, matcher, 2);
-			Span args = Span.fromMatcher(this, matcher, 3);
+			Span type = Span.fromMatcher(source, matcher, 1);
+			Span name = Span.fromMatcher(source, matcher, 2);
+			Span args = Span.fromMatcher(source, matcher, 3);
 
 			int blockStart = matcher.end();
 			int blockEnd = findEndOfBlock(source, blockStart);
@@ -239,11 +254,11 @@ public class SourceFile implements SourceComponent {
 			Span self;
 			Span body;
 			if (blockEnd > blockStart) {
-				self = new StringSpan(this, matcher.start(), blockEnd + 1);
-				body = new StringSpan(this, blockStart, blockEnd);
+				self = new StringSpan(source, matcher.start(), blockEnd + 1);
+				body = new StringSpan(source, blockStart, blockEnd);
 			} else {
-				self = new ErrorSpan(this, matcher.start(), matcher.end());
-				body = new ErrorSpan(this, blockStart);
+				self = new ErrorSpan(source, matcher.start(), matcher.end());
+				body = new ErrorSpan(source, blockStart);
 			}
 
 			ShaderFunction function = new ShaderFunction(self, type, name, args, body);
@@ -257,15 +272,15 @@ public class SourceFile implements SourceComponent {
 	/**
 	 * Scan the source for function definitions and "parse" them into objects that contain properties of the function.
 	 */
-	private ImmutableMap<String, ShaderStruct> parseStructs(String source) {
+	private static ImmutableMap<String, ShaderStruct> parseStructs(SourceLines source) {
 		Matcher matcher = ShaderStruct.PATTERN.matcher(source);
 
 		ImmutableMap.Builder<String, ShaderStruct> structs = ImmutableMap.builder();
 		while (matcher.find()) {
-			Span self = Span.fromMatcher(this, matcher);
-			Span name = Span.fromMatcher(this, matcher, 1);
-			Span body = Span.fromMatcher(this, matcher, 2);
-			Span variableName = Span.fromMatcher(this, matcher, 3);
+			Span self = Span.fromMatcher(source, matcher);
+			Span name = Span.fromMatcher(source, matcher, 1);
+			Span body = Span.fromMatcher(source, matcher, 2);
+			Span variableName = Span.fromMatcher(source, matcher, 3);
 
 			ShaderStruct shaderStruct = new ShaderStruct(self, name, body, variableName);
 
@@ -278,16 +293,16 @@ public class SourceFile implements SourceComponent {
 	/**
 	 * Scan the source for function definitions and "parse" them into objects that contain properties of the function.
 	 */
-	private ImmutableMap<String, ShaderField> parseFields(String source) {
+	private static ImmutableMap<String, ShaderField> parseFields(SourceLines source) {
 		Matcher matcher = ShaderField.PATTERN.matcher(source);
 
 		ImmutableMap.Builder<String, ShaderField> fields = ImmutableMap.builder();
 		while (matcher.find()) {
-			Span self = Span.fromMatcher(this, matcher);
-			Span location = Span.fromMatcher(this, matcher, 1);
-			Span decoration = Span.fromMatcher(this, matcher, 2);
-			Span type = Span.fromMatcher(this, matcher, 3);
-			Span name = Span.fromMatcher(this, matcher, 4);
+			Span self = Span.fromMatcher(source, matcher);
+			Span location = Span.fromMatcher(source, matcher, 1);
+			Span decoration = Span.fromMatcher(source, matcher, 2);
+			Span type = Span.fromMatcher(source, matcher, 3);
+			Span name = Span.fromMatcher(source, matcher, 4);
 
 			fields.put(location.get(), new ShaderField(self, location, decoration, type, name));
 		}
@@ -298,13 +313,16 @@ public class SourceFile implements SourceComponent {
 	/**
 	 * Given the position of an opening brace, scans through the source for a paired closing brace.
 	 */
-	private static int findEndOfBlock(String source, int start) {
+	private static int findEndOfBlock(CharSequence source, int start) {
 		int blockDepth = 0;
 		for (int i = start + 1; i < source.length(); i++) {
 			char ch = source.charAt(i);
 
-			if (ch == '{') blockDepth++;
-			else if (ch == '}') blockDepth--;
+			if (ch == '{') {
+				blockDepth++;
+			} else if (ch == '}') {
+				blockDepth--;
+			}
 
 			if (blockDepth < 0) {
 				return i;

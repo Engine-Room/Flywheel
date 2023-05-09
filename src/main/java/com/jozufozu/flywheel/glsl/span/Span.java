@@ -1,13 +1,11 @@
 package com.jozufozu.flywheel.glsl.span;
 
-import java.util.Optional;
 import java.util.regex.Matcher;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.glsl.SourceFile;
-import com.jozufozu.flywheel.glsl.parse.ShaderFunction;
-import com.jozufozu.flywheel.glsl.parse.ShaderStruct;
+import com.jozufozu.flywheel.glsl.SourceLines;
 
 /**
  * A segment of code in a {@link SourceFile}.
@@ -17,16 +15,15 @@ import com.jozufozu.flywheel.glsl.parse.ShaderStruct;
  * </p>
  */
 public abstract class Span implements CharSequence, Comparable<Span> {
-
-	protected final SourceFile in;
+	protected final SourceLines in;
 	protected final CharPos start;
 	protected final CharPos end;
 
-	public Span(SourceFile in, int start, int end) {
-		this(in, in.source.getCharPos(start), in.source.getCharPos(end));
+	public Span(SourceLines in, int start, int end) {
+		this(in, in.getCharPos(start), in.getCharPos(end));
 	}
 
-	public Span(SourceFile in, CharPos start, CharPos end) {
+	public Span(SourceLines in, CharPos start, CharPos end) {
 		this.in = in;
 		this.start = start;
 		this.end = end;
@@ -35,29 +32,29 @@ public abstract class Span implements CharSequence, Comparable<Span> {
 	/**
 	 * @return The file that contains this code segment.
 	 */
-	public SourceFile getSourceFile() {
+	public SourceLines source() {
 		return in;
 	}
 
-	public CharPos getStart() {
+	public CharPos start() {
 		return start;
 	}
 
-	public CharPos getEnd() {
+	public CharPos end() {
 		return end;
 	}
 
 	/**
 	 * @return the string index at the (inclusive) beginning of this code segment.
 	 */
-	public int getStartPos() {
+	public int startIndex() {
 		return start.pos();
 	}
 
 	/**
 	 * @return the string index at the (exclusive) end of this code segment.
 	 */
-	public int getEndPos() {
+	public int endIndex() {
 		return end.pos();
 	}
 
@@ -93,12 +90,12 @@ public abstract class Span implements CharSequence, Comparable<Span> {
 
 	@Override
 	public int length() {
-		return getEndPos() - getStartPos();
+		return endIndex() - startIndex();
 	}
 
 	@Override
 	public char charAt(int index) {
-		return in.source.charAt(start.pos() + index);
+		return in.charAt(start.pos() + index);
 	}
 
 	@Override
@@ -111,7 +108,7 @@ public abstract class Span implements CharSequence, Comparable<Span> {
 		return get();
 	}
 
-	public static Span fromMatcher(SourceFile src, Matcher m, int group) {
+	public static Span fromMatcher(SourceLines src, Matcher m, int group) {
 		return new StringSpan(src, m.start(group), m.end(group));
 	}
 
@@ -119,7 +116,7 @@ public abstract class Span implements CharSequence, Comparable<Span> {
 		return superSpan.subSpan(m.start(group), m.end(group));
 	}
 
-	public static Span fromMatcher(SourceFile src, Matcher m) {
+	public static Span fromMatcher(SourceLines src, Matcher m) {
 		return new StringSpan(src, m.start(), m.end());
 	}
 
@@ -127,22 +124,8 @@ public abstract class Span implements CharSequence, Comparable<Span> {
 		return superSpan.subSpan(m.start(), m.end());
 	}
 
-	public Optional<ShaderStruct> findStruct() {
-		if (isErr()) {
-			return Optional.empty();
-		}
-		return in.findStructByName(this.toString());
-	}
-
-	public Optional<ShaderFunction> findFunction() {
-		if (isErr()) {
-			return Optional.empty();
-		}
-		return in.findFunction(this.toString());
-	}
-
 	@Override
 	public int compareTo(@NotNull Span o) {
-		return Integer.compareUnsigned(getStartPos(), o.getStartPos());
+		return Integer.compareUnsigned(startIndex(), o.startIndex());
 	}
 }

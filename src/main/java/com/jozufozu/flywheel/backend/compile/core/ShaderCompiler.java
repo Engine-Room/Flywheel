@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.compile.core;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -10,7 +11,6 @@ import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.gl.shader.GlShader;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.GLSLVersion;
@@ -29,7 +29,7 @@ public class ShaderCompiler {
 	}
 
 	@Nullable
-	public GlShader compile(GLSLVersion glslVersion, ShaderType shaderType, ImmutableList<SourceComponent> sourceComponents) {
+	public GlShader compile(GLSLVersion glslVersion, ShaderType shaderType, List<SourceComponent> sourceComponents) {
 		var key = new ShaderKey(glslVersion, shaderType, sourceComponents);
 		var cached = shaderCache.get(key);
 		if (cached != null) {
@@ -51,7 +51,7 @@ public class ShaderCompiler {
 	}
 
 	@NotNull
-	private ShaderResult compileUncached(Compilation ctx, ImmutableList<SourceComponent> sourceComponents) {
+	private ShaderResult compileUncached(Compilation ctx, List<SourceComponent> sourceComponents) {
 		ctx.enableExtension("GL_ARB_explicit_attrib_location");
 		ctx.enableExtension("GL_ARB_conservative_depth");
 
@@ -60,14 +60,14 @@ public class ShaderCompiler {
 		return ctx.compile();
 	}
 
-	private static void expand(ImmutableList<SourceComponent> rootSources, Consumer<SourceComponent> out) {
-        var included = new LinkedHashSet<SourceComponent>(); // use hash set to deduplicate. linked to preserve order
-        for (var component : rootSources) {
-            recursiveDepthFirstInclude(included, component);
-            included.add(component);
-        }
-        included.forEach(out);
-    }
+	private static void expand(List<SourceComponent> rootSources, Consumer<SourceComponent> out) {
+		var included = new LinkedHashSet<SourceComponent>(); // use hash set to deduplicate. linked to preserve order
+		for (var component : rootSources) {
+			recursiveDepthFirstInclude(included, component);
+			included.add(component);
+		}
+		included.forEach(out);
+	}
 
 	private static void recursiveDepthFirstInclude(Set<SourceComponent> included, SourceComponent component) {
 		for (var include : component.included()) {
@@ -76,7 +76,6 @@ public class ShaderCompiler {
 		included.addAll(component.included());
 	}
 
-	private record ShaderKey(GLSLVersion glslVersion, ShaderType shaderType,
-							 ImmutableList<SourceComponent> sourceComponents) {
+	private record ShaderKey(GLSLVersion glslVersion, ShaderType shaderType, List<SourceComponent> sourceComponents) {
 	}
 }

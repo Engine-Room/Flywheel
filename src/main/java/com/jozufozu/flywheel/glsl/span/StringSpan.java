@@ -1,14 +1,10 @@
 package com.jozufozu.flywheel.glsl.span;
 
-import com.jozufozu.flywheel.glsl.SourceFile;
+import com.jozufozu.flywheel.glsl.SourceLines;
 
 public class StringSpan extends Span {
 
-	public StringSpan(SourceFile in, int start, int end) {
-		super(in, start, end);
-	}
-
-	public StringSpan(SourceFile in, CharPos start, CharPos end) {
+	public StringSpan(SourceLines in, int start, int end) {
 		super(in, start, end);
 	}
 
@@ -19,7 +15,7 @@ public class StringSpan extends Span {
 
 	@Override
 	public String get() {
-		return in.source.raw.substring(start.pos(), end.pos());
+		return in.raw.substring(start.pos(), end.pos());
 	}
 
 	@Override

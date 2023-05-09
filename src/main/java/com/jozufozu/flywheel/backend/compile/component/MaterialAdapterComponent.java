@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
+import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.glsl.generate.GlslBlock;
 import com.jozufozu.flywheel.glsl.generate.GlslBuilder;
@@ -145,7 +146,8 @@ public class MaterialAdapterComponent implements SourceComponent {
 
 			int index = 0;
 			for (var rl : materialSources) {
-				var sourceFile = sources.find(rl);
+				SourceFile sourceFile = sources.find(rl)
+						.unwrap();
 				final int finalIndex = index;
 				var adapterMap = createAdapterMap(adaptedFunctions, fnName -> "_" + fnName + "_" + finalIndex);
 				transformed.add(new StringSubstitutionSourceComponent(sourceFile, adapterMap));

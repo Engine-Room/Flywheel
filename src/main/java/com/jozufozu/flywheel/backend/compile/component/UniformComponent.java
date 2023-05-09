@@ -67,7 +67,8 @@ public class UniformComponent implements SourceComponent {
 			var out = ImmutableList.<SourceFile>builder();
 
 			for (var fileResolution : uniformShaders) {
-				out.add(sources.find(fileResolution));
+				out.add(sources.find(fileResolution)
+						.unwrap());
 			}
 
 			return new UniformComponent(name, out.build());
