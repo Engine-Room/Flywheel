@@ -23,7 +23,7 @@ public class ShaderSources {
 
 	private final ResourceManager manager;
 
-	private final Map<ResourceLocation, SourceFile> cache = new HashMap<>();
+	private final Map<ResourceLocation, LoadResult> cache = new HashMap<>();
 
 	/**
 	 * Tracks where we are in the mutual recursion to detect circular imports.
@@ -35,7 +35,7 @@ public class ShaderSources {
 	}
 
 	@Nonnull
-	public SourceFile find(ResourceLocation location) {
+	public LoadResult find(ResourceLocation location) {
 		pushFindStack(location);
 		// Can't use computeIfAbsent because mutual recursion causes ConcurrentModificationExceptions
 		var out = cache.get(location);
@@ -48,15 +48,15 @@ public class ShaderSources {
 	}
 
 	@Nonnull
-	private SourceFile load(ResourceLocation loc) {
+	private LoadResult load(ResourceLocation loc) {
 		try {
 			var resource = manager.getResource(ResourceUtil.prefixed(SHADER_DIR, loc));
 
 			var sourceString = StringUtil.readToString(resource.getInputStream());
 
-			return new SourceFile(this, loc, sourceString);
-		} catch (IOException ioException) {
-			throw new ShaderLoadingException("Could not load shader " + loc, ioException);
+			return SourceFile.parse(this, loc, sourceString);
+		} catch (IOException e) {
+			return new LoadResult.IOError(loc, e);
 		}
 	}
 

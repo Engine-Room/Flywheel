@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.backend.compile;
 
+import java.util.List;
+
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
@@ -24,7 +26,8 @@ public class CullingCompiler extends AbstractCompiler<InstanceType<?>> {
 		super(sources, keys);
 
 		this.uniformComponent = uniformComponent;
-		pipelineCompute = sources.find(Files.INDIRECT_CULL);
+		pipelineCompute = sources.find(Files.INDIRECT_CULL)
+				.unwrap();
 	}
 
 	@Nullable
@@ -40,9 +43,11 @@ public class CullingCompiler extends AbstractCompiler<InstanceType<?>> {
 		return programLinker.link(compute);
 	}
 
-	private ImmutableList<SourceComponent> getComputeComponents(InstanceType<?> instanceType) {
+	private List<SourceComponent> getComputeComponents(InstanceType<?> instanceType) {
 		var instanceAssembly = new IndirectComponent(sources, instanceType);
-		var instance = sources.find(instanceType.instanceShader());
+		ResourceLocation key = instanceType.instanceShader();
+		var instance = sources.find(key)
+				.unwrap();
 
 		return ImmutableList.of(uniformComponent, instanceAssembly, instance, pipelineCompute);
 	}

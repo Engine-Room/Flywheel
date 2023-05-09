@@ -11,11 +11,13 @@ import com.jozufozu.flywheel.glsl.span.CharPos;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntLists;
+import net.minecraft.resources.ResourceLocation;
 
 public class SourceLines implements CharSequence {
 
 	private static final Pattern newLine = Pattern.compile("(\\r\\n|\\r|\\n)");
 
+	public final ResourceLocation name;
 	/**
 	 * 0-indexed line to char pos mapping.
 	 */
@@ -27,7 +29,8 @@ public class SourceLines implements CharSequence {
 	private final ImmutableList<String> lines;
 	public final String raw;
 
-	public SourceLines(String raw) {
+	public SourceLines(ResourceLocation name, String raw) {
+		this.name = name;
 		this.raw = raw;
 		this.lineStarts = createLineLookup(raw);
 		this.lines = getLines(raw, lineStarts);

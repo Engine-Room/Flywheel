@@ -1,9 +1,10 @@
 package com.jozufozu.flywheel.backend.compile;
 
+import java.util.List;
+
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.compile.component.MaterialAdapterComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
@@ -11,9 +12,6 @@ import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.SourceFile;
-import com.jozufozu.flywheel.glsl.generate.FnSignature;
-import com.jozufozu.flywheel.glsl.generate.GlslExpr;
-import com.jozufozu.flywheel.lib.material.MaterialIndices;
 
 public class PipelineCompiler extends AbstractCompiler<PipelineProgramKey> {
 	private final Pipeline pipeline;
@@ -23,34 +21,17 @@ public class PipelineCompiler extends AbstractCompiler<PipelineProgramKey> {
 	private final SourceFile pipelineFragment;
 	private final SourceFile pipelineVertex;
 
-	public PipelineCompiler(ShaderSources sources, ImmutableList<PipelineProgramKey> keys, Pipeline pipeline, UniformComponent uniformComponent) {
+	public PipelineCompiler(ShaderSources sources, ImmutableList<PipelineProgramKey> keys, Pipeline pipeline, MaterialAdapterComponent vertexMaterialComponent, MaterialAdapterComponent fragmentMaterialComponent, UniformComponent uniformComponent) {
 		super(sources, keys);
 		this.pipeline = pipeline;
+		this.vertexMaterialComponent = vertexMaterialComponent;
+		this.fragmentMaterialComponent = fragmentMaterialComponent;
 		this.uniformComponent = uniformComponent;
 
-		vertexMaterialComponent = MaterialAdapterComponent.builder(Flywheel.rl("vertex_material_adapter"))
-				.materialSources(MaterialIndices.getAllVertexShaders())
-				.adapt(FnSignature.ofVoid("flw_materialVertex"))
-				.switchOn(GlslExpr.variable("_flw_materialVertexID"))
-				.build(sources);
-		fragmentMaterialComponent = MaterialAdapterComponent.builder(Flywheel.rl("fragment_material_adapter"))
-				.materialSources(MaterialIndices.getAllFragmentShaders())
-				.adapt(FnSignature.ofVoid("flw_materialFragment"))
-				.adapt(FnSignature.create()
-						.returnType("bool")
-						.name("flw_discardPredicate")
-						.arg("vec4", "color")
-						.build(), GlslExpr.literal(false))
-				.adapt(FnSignature.create()
-						.returnType("vec4")
-						.name("flw_fogFilter")
-						.arg("vec4", "color")
-						.build(), GlslExpr.variable("color"))
-				.switchOn(GlslExpr.variable("_flw_materialFragmentID"))
-				.build(sources);
-
-		pipelineFragment = sources.find(pipeline.fragmentShader());
-		pipelineVertex = sources.find(pipeline.vertexShader());
+		pipelineFragment = this.sources.find(pipeline.fragmentShader())
+				.unwrap();
+		pipelineVertex = this.sources.find(pipeline.vertexShader())
+				.unwrap();
 	}
 
 	@Nullable
@@ -71,23 +52,27 @@ public class PipelineCompiler extends AbstractCompiler<PipelineProgramKey> {
 		return glProgram;
 	}
 
-	private ImmutableList<SourceComponent> getVertexComponents(PipelineProgramKey key) {
+	private List<SourceComponent> getVertexComponents(PipelineProgramKey key) {
 		var instanceAssembly = pipeline.assembler()
 				.assemble(new Pipeline.InstanceAssemblerContext(sources, key.vertexType(), key.instanceType()));
 
 		var layout = sources.find(key.vertexType()
-				.layoutShader());
+						.layoutShader())
+				.unwrap();
 		var instance = sources.find(key.instanceType()
-				.instanceShader());
+						.instanceShader())
+				.unwrap();
 		var context = sources.find(key.contextShader()
-				.vertexShader());
+						.vertexShader())
+				.unwrap();
 
 		return ImmutableList.of(uniformComponent, vertexMaterialComponent, instanceAssembly, layout, instance, context, pipelineVertex);
 	}
 
-	private ImmutableList<SourceComponent> getFragmentComponents(PipelineProgramKey key) {
+	private List<SourceComponent> getFragmentComponents(PipelineProgramKey key) {
 		var context = sources.find(key.contextShader()
-				.fragmentShader());
+						.fragmentShader())
+				.unwrap();
 		return ImmutableList.of(uniformComponent, fragmentMaterialComponent, context, pipelineFragment);
 	}
 }

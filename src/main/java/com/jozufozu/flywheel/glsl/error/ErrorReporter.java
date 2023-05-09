@@ -62,7 +62,7 @@ public class ErrorReporter {
 	}
 
 	public ErrorBuilder generateSpanError(Span span, String message) {
-		SourceFile file = span.getSourceFile();
+		var file = span.source();
 
 		return error(message).pointAtFile(file)
 				.pointAt(span, 2);

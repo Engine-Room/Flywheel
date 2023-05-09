@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.compile.component.MaterialAdapterComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.glsl.ShaderSources;
@@ -22,12 +23,12 @@ public class IndirectPrograms {
 		this.culling = culling;
 	}
 
-	public static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent) {
+	public static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, MaterialAdapterComponent vertexMaterialComponent, MaterialAdapterComponent fragmentMaterialComponent) {
 		if (instance != null) {
 			instance.delete();
 			instance = null;
 		}
-		var pipelineCompiler = new PipelineCompiler(sources, pipelineKeys, Pipelines.INDIRECT, uniformComponent);
+		var pipelineCompiler = new PipelineCompiler(sources, pipelineKeys, Pipelines.INDIRECT, vertexMaterialComponent, fragmentMaterialComponent, uniformComponent);
 		var cullingCompiler = new CullingCompiler(sources, createCullingKeys(), uniformComponent);
 
 		var pipelineResult = pipelineCompiler.compileAndReportErrors();
