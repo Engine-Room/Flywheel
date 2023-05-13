@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.lib.task.WaitGroup;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.util.Mth;
@@ -124,7 +125,11 @@ public class ParallelTaskExecutor implements TaskExecutor {
 			throw new IllegalStateException("Executor is stopped");
 		}
 
-		mainThreadQueue.add(runnable);
+		if (RenderSystem.isOnRenderThread()) {
+			runnable.run();
+		} else {
+			mainThreadQueue.add(runnable);
+		}
 	}
 
 	/**
