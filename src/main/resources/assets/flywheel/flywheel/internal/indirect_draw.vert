@@ -1,5 +1,5 @@
-#use "flywheel:api/vertex.glsl"
-#use "flywheel:internal/indirect_draw_command.glsl"
+#include "flywheel:api/vertex.glsl"
+#include "flywheel:internal/indirect_draw_command.glsl"
 
 layout(std430, binding = 0) restrict readonly buffer ObjectBuffer {
     FlwPackedInstance objects[];

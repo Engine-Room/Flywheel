@@ -2,14 +2,19 @@ package com.jozufozu.flywheel.glsl.error;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.glsl.SourceLines;
 import com.jozufozu.flywheel.glsl.error.lines.ErrorLine;
 import com.jozufozu.flywheel.glsl.error.lines.FileLine;
 import com.jozufozu.flywheel.glsl.error.lines.HeaderLine;
+import com.jozufozu.flywheel.glsl.error.lines.NestedLine;
 import com.jozufozu.flywheel.glsl.error.lines.SourceLine;
 import com.jozufozu.flywheel.glsl.error.lines.SpanHighlightLine;
 import com.jozufozu.flywheel.glsl.error.lines.TextLine;
@@ -17,7 +22,12 @@ import com.jozufozu.flywheel.glsl.span.Span;
 import com.jozufozu.flywheel.util.ConsoleColors;
 import com.jozufozu.flywheel.util.StringUtil;
 
+import net.minecraft.resources.ResourceLocation;
+
 public class ErrorBuilder {
+	// set to false for testing
+	@VisibleForTesting
+	public static boolean CONSOLE_COLORS = true;
 
 	private final List<ErrorLine> lines = new ArrayList<>();
 
@@ -56,11 +66,15 @@ public class ErrorBuilder {
 	}
 
 	public ErrorBuilder pointAtFile(SourceFile file) {
-		return pointAtFile(file.name.toString());
+		return pointAtFile(file.name);
 	}
 
 	public ErrorBuilder pointAtFile(SourceLines source) {
-		return pointAtFile(source.name.toString());
+		return pointAtFile(source.name);
+	}
+
+	public ErrorBuilder pointAtFile(ResourceLocation file) {
+		return pointAtFile(file.toString());
 	}
 
 	public ErrorBuilder pointAtFile(String file) {
@@ -126,6 +140,34 @@ public class ErrorBuilder {
 	}
 
 	public String build() {
+		Stream<String> lineStream = getLineStream();
+
+		if (CONSOLE_COLORS) {
+			lineStream = lineStream.map(line -> line + ConsoleColors.RESET);
+		}
+
+		return lineStream.collect(Collectors.joining("\n"));
+	}
+
+	@NotNull
+	private Stream<String> getLineStream() {
+		int maxMargin = calculateMargin();
+
+		return lines.stream()
+				.map(line -> addPaddingToLine(maxMargin, line));
+	}
+
+	private static String addPaddingToLine(int maxMargin, ErrorLine errorLine) {
+		int neededMargin = errorLine.neededMargin();
+
+		if (neededMargin >= 0) {
+			return StringUtil.repeatChar(' ', maxMargin - neededMargin) + errorLine.build();
+		} else {
+			return errorLine.build();
+		}
+	}
+
+	private int calculateMargin() {
 		int maxMargin = -1;
 		for (ErrorLine line : lines) {
 			int neededMargin = line.neededMargin();
@@ -134,20 +176,12 @@ public class ErrorBuilder {
 				maxMargin = neededMargin;
 			}
 		}
+		return maxMargin;
+	}
 
-		StringBuilder builder = new StringBuilder();
-		for (ErrorLine line : lines) {
-			int neededMargin = line.neededMargin();
-
-			if (neededMargin >= 0) {
-				builder.append(StringUtil.repeatChar(' ', maxMargin - neededMargin));
-			}
-
-			builder.append(line.build())
-					.append(ConsoleColors.RESET)
-					.append('\n');
-		}
-
-		return builder.toString();
+	public void nested(ErrorBuilder err) {
+		err.getLineStream()
+				.map(NestedLine::new)
+				.forEach(lines::add);
 	}
 }

@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import com.jozufozu.flywheel.util.ResourceUtil;
 import com.jozufozu.flywheel.util.StringUtil;
@@ -23,7 +26,8 @@ public class ShaderSources {
 
 	private final ResourceManager manager;
 
-	private final Map<ResourceLocation, LoadResult> cache = new HashMap<>();
+	@VisibleForTesting
+	protected final Map<ResourceLocation, LoadResult> cache = new HashMap<>();
 
 	/**
 	 * Tracks where we are in the mutual recursion to detect circular imports.
@@ -36,19 +40,34 @@ public class ShaderSources {
 
 	@Nonnull
 	public LoadResult find(ResourceLocation location) {
-		pushFindStack(location);
+		if (findStack.contains(location)) {
+			// Make a copy of the find stack with the offending location added on top to show the full path.
+			findStack.addLast(location);
+			var copy = List.copyOf(findStack);
+			findStack.removeLast();
+			return new LoadResult.Failure(new LoadError.CircularDependency(location, copy));
+		}
+		findStack.addLast(location);
+
+		LoadResult out = _find(location);
+
+		findStack.removeLast();
+		return out;
+	}
+
+	@NotNull
+	private LoadResult _find(ResourceLocation location) {
 		// Can't use computeIfAbsent because mutual recursion causes ConcurrentModificationExceptions
 		var out = cache.get(location);
 		if (out == null) {
 			out = load(location);
 			cache.put(location, out);
 		}
-		popFindStack();
 		return out;
 	}
 
 	@Nonnull
-	private LoadResult load(ResourceLocation loc) {
+	protected LoadResult load(ResourceLocation loc) {
 		try {
 			var resource = manager.getResource(ResourceUtil.prefixed(SHADER_DIR, loc));
 
@@ -56,28 +75,7 @@ public class ShaderSources {
 
 			return SourceFile.parse(this, loc, sourceString);
 		} catch (IOException e) {
-			return new LoadResult.IOError(loc, e);
+			return new LoadResult.Failure(new LoadError.IOError(loc, e));
 		}
-	}
-
-	private void generateRecursiveImportException(ResourceLocation location) {
-		findStack.add(location);
-		String path = findStack.stream()
-				.dropWhile(l -> !l.equals(location))
-				.map(ResourceLocation::toString)
-				.collect(Collectors.joining(" -> "));
-		findStack.clear();
-		throw new ShaderLoadingException("recursive import: " + path);
-	}
-
-	private void pushFindStack(ResourceLocation location) {
-		if (findStack.contains(location)) {
-			generateRecursiveImportException(location);
-		}
-		findStack.addLast(location);
-	}
-
-	private void popFindStack() {
-		findStack.removeLast();
 	}
 }

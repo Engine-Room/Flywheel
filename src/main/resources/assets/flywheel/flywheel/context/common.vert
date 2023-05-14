@@ -1,5 +1,5 @@
-#use "flywheel:api/vertex.glsl"
-#use "flywheel:util/fog.glsl"
+#include "flywheel:api/vertex.glsl"
+#include "flywheel:util/fog.glsl"
 
 void flw_contextVertex() {
     flw_distance = fog_distance(flw_vertexPos.xyz, flywheel.cameraPos.xyz, flywheel.fogShape);

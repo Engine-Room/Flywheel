@@ -8,7 +8,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.gl.shader.GlShader;
@@ -24,10 +23,6 @@ public class ShaderCompiler {
 		this.stats = stats;
 	}
 
-	public int shaderCount() {
-		return shaderCache.size();
-	}
-
 	@Nullable
 	public GlShader compile(GLSLVersion glslVersion, ShaderType shaderType, List<SourceComponent> sourceComponents) {
 		var key = new ShaderKey(glslVersion, shaderType, sourceComponents);
@@ -36,7 +31,13 @@ public class ShaderCompiler {
 			return cached.unwrap();
 		}
 
-		ShaderResult out = compileUncached(new Compilation(glslVersion, shaderType), sourceComponents);
+		Compilation ctx = new Compilation(glslVersion, shaderType);
+		ctx.enableExtension("GL_ARB_explicit_attrib_location");
+		ctx.enableExtension("GL_ARB_conservative_depth");
+
+		expand(sourceComponents, ctx::appendComponent);
+
+		ShaderResult out = ctx.compile();
 		shaderCache.put(key, out);
 		stats.shaderResult(out);
 		return out.unwrap();
@@ -48,16 +49,6 @@ public class ShaderCompiler {
 				.map(ShaderResult::unwrap)
 				.filter(Objects::nonNull)
 				.forEach(GlShader::delete);
-	}
-
-	@NotNull
-	private ShaderResult compileUncached(Compilation ctx, List<SourceComponent> sourceComponents) {
-		ctx.enableExtension("GL_ARB_explicit_attrib_location");
-		ctx.enableExtension("GL_ARB_conservative_depth");
-
-		expand(sourceComponents, ctx::appendComponent);
-
-		return ctx.compile();
 	}
 
 	private static void expand(List<SourceComponent> rootSources, Consumer<SourceComponent> out) {

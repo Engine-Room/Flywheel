@@ -1,10 +1,17 @@
 package com.jozufozu.flywheel.backend.compile.core;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.glsl.LoadError;
+import com.jozufozu.flywheel.glsl.LoadResult;
+import com.jozufozu.flywheel.glsl.error.ErrorBuilder;
 import com.jozufozu.flywheel.util.StringUtil;
 
 public class CompilerStats {
@@ -12,6 +19,8 @@ public class CompilerStats {
 
 	private final List<FailedCompilation> shaderErrors = new ArrayList<>();
 	private final List<String> programErrors = new ArrayList<>();
+	private final Set<LoadError> loadErrors = new HashSet<>();
+
 	private boolean errored = false;
 	private int shaderCount = 0;
 	private int programCount = 0;
@@ -32,8 +41,28 @@ public class CompilerStats {
 	}
 
 	public String generateErrorLog() {
-		return String.join("\n", programErrors) + '\n' + shaderErrors.stream()
-				.map(FailedCompilation::getMessage)
+		return """
+				%s
+				%s
+				%s
+				""".formatted(loadErrors(), compileErrors(), linkErrors());
+	}
+
+	private String compileErrors() {
+		return shaderErrors.stream()
+				.map(FailedCompilation::generateMessage)
+				.collect(Collectors.joining("\n"));
+	}
+
+	@NotNull
+	private String linkErrors() {
+		return String.join("\n", programErrors);
+	}
+
+	private String loadErrors() {
+		return loadErrors.stream()
+				.map(LoadError::generateMessage)
+				.map(ErrorBuilder::build)
 				.collect(Collectors.joining("\n"));
 	}
 
@@ -51,5 +80,12 @@ public class CompilerStats {
 			errored = true;
 		}
 		programCount++;
+	}
+
+	public void loadResult(LoadResult loadResult) {
+		if (loadResult instanceof LoadResult.Failure f) {
+			loadErrors.add(f.error());
+			errored = true;
+		}
 	}
 }

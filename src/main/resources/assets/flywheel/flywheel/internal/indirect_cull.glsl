@@ -1,8 +1,8 @@
 #define FLW_SUBGROUP_SIZE 32
 layout(local_size_x = FLW_SUBGROUP_SIZE) in;
 
-#use "flywheel:util/types.glsl"
-#use "flywheel:internal/indirect_draw_command.glsl"
+#include "flywheel:util/types.glsl"
+#include "flywheel:internal/indirect_draw_command.glsl"
 
 // populated by instancers
 layout(std430, binding = 0) restrict readonly buffer ObjectBuffer {

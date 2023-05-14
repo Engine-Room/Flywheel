@@ -1,4 +1,4 @@
-#use "flywheel:api/vertex.glsl"
+#include "flywheel:api/vertex.glsl"
 
 void flw_transformBoundingSphere(in FlwInstance i, inout vec3 center, inout float radius) {
     mat4 pose = i.pose;

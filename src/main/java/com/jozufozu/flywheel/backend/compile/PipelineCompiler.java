@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.compile.component.MaterialAdapterComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
+import com.jozufozu.flywheel.gl.shader.GlShader;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
@@ -37,10 +38,8 @@ public class PipelineCompiler extends AbstractCompiler<PipelineProgramKey> {
 	@Nullable
 	@Override
 	protected GlProgram compile(PipelineProgramKey key) {
-		var glslVersion = pipeline.glslVersion();
-
-		var vertex = shaderCompiler.compile(glslVersion, ShaderType.VERTEX, getVertexComponents(key));
-		var fragment = shaderCompiler.compile(glslVersion, ShaderType.FRAGMENT, getFragmentComponents(key));
+		GlShader vertex = compileVertex(key);
+		GlShader fragment = compileFragment(key);
 
 		if (vertex == null || fragment == null) {
 			return null;
@@ -52,27 +51,54 @@ public class PipelineCompiler extends AbstractCompiler<PipelineProgramKey> {
 		return glProgram;
 	}
 
+	@Nullable
+	private GlShader compileVertex(PipelineProgramKey key) {
+		var vertexComponents = getVertexComponents(key);
+		if (vertexComponents == null) {
+			return null;
+		}
+
+		return shaderCompiler.compile(pipeline.glslVersion(), ShaderType.VERTEX, vertexComponents);
+	}
+
+	@Nullable
+	private GlShader compileFragment(PipelineProgramKey key) {
+		var fragmentComponents = getFragmentComponents(key);
+		if (fragmentComponents == null) {
+			return null;
+		}
+
+		return shaderCompiler.compile(pipeline.glslVersion(), ShaderType.FRAGMENT, fragmentComponents);
+	}
+
+	@Nullable
 	private List<SourceComponent> getVertexComponents(PipelineProgramKey key) {
 		var instanceAssembly = pipeline.assembler()
 				.assemble(new Pipeline.InstanceAssemblerContext(sources, key.vertexType(), key.instanceType()));
 
-		var layout = sources.find(key.vertexType()
-						.layoutShader())
-				.unwrap();
-		var instance = sources.find(key.instanceType()
-						.instanceShader())
-				.unwrap();
-		var context = sources.find(key.contextShader()
-						.vertexShader())
-				.unwrap();
+		var layout = findOrReport(key.vertexType()
+				.layoutShader());
+		var instance = findOrReport(key.instanceType()
+				.instanceShader());
+		var context = findOrReport(key.contextShader()
+				.vertexShader());
+
+		if (instanceAssembly == null || layout == null || instance == null || context == null) {
+			return null;
+		}
 
 		return ImmutableList.of(uniformComponent, vertexMaterialComponent, instanceAssembly, layout, instance, context, pipelineVertex);
 	}
 
+	@Nullable
 	private List<SourceComponent> getFragmentComponents(PipelineProgramKey key) {
-		var context = sources.find(key.contextShader()
-						.fragmentShader())
-				.unwrap();
+		var context = findOrReport(key.contextShader()
+				.fragmentShader());
+
+		if (context == null) {
+			return null;
+		}
+
 		return ImmutableList.of(uniformComponent, fragmentMaterialComponent, context, pipelineFragment);
 	}
 }

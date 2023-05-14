@@ -1,5 +1,5 @@
-#use "flywheel:api/fragment.glsl"
-#use "flywheel:util/fog.glsl"
+#include "flywheel:api/fragment.glsl"
+#include "flywheel:util/fog.glsl"
 
 void flw_materialFragment() {
 }
