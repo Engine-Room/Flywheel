@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.glsl.ShaderSources;
+import com.jozufozu.flywheel.backend.compile.SourceLoader;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.glsl.generate.GlslBuilder;
@@ -63,12 +63,21 @@ public class UniformComponent implements SourceComponent {
 			return this;
 		}
 
-		public UniformComponent build(ShaderSources sources) {
+		public UniformComponent build(SourceLoader sources) {
 			var out = ImmutableList.<SourceFile>builder();
 
-			for (var fileResolution : uniformShaders) {
-				out.add(sources.find(fileResolution)
-						.unwrap());
+			boolean errored = false;
+			for (ResourceLocation uniformShader : uniformShaders) {
+				SourceFile sourceFile = sources.find(uniformShader);
+				if (sourceFile != null) {
+					out.add(sourceFile);
+				} else {
+					errored = true;
+				}
+			}
+
+			if (errored) {
+				return null;
 			}
 
 			return new UniformComponent(name, out.build());

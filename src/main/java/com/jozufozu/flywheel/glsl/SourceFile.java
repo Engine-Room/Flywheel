@@ -18,7 +18,9 @@ import com.jozufozu.flywheel.glsl.parse.ShaderStruct;
 import com.jozufozu.flywheel.glsl.span.Span;
 import com.jozufozu.flywheel.glsl.span.StringSpan;
 import com.jozufozu.flywheel.util.Pair;
+import com.jozufozu.flywheel.util.ResourceUtil;
 
+import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -79,7 +81,17 @@ public class SourceFile implements SourceComponent {
 			if (!seen.add(string)) {
 				continue;
 			}
-			var result = sourceFinder.find(new ResourceLocation(string));
+
+			ResourceLocation location;
+			try {
+				location = ResourceUtil.defaultToFlywheelNamespace(string);
+			} catch (ResourceLocationException e) {
+				failures.add(Pair.of(fileSpan, new LoadError.MalformedInclude(e)));
+				continue;
+			}
+
+			var result = sourceFinder.find(location);
+
 			if (result instanceof LoadResult.Success s) {
 				included.add(s.unwrap());
 			} else if (result instanceof LoadResult.Failure e) {
@@ -212,5 +224,4 @@ public class SourceFile implements SourceComponent {
 
 		return out.toString();
 	}
-
 }

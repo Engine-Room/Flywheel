@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.compile;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.glsl.GLSLVersion;
-import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 
 import net.minecraft.resources.ResourceLocation;
@@ -19,7 +18,8 @@ public record Pipeline(GLSLVersion glslVersion, ResourceLocation vertexShader, R
 		SourceComponent assemble(InstanceAssemblerContext context);
 	}
 
-	public record InstanceAssemblerContext(ShaderSources sources, VertexType vertexType, InstanceType<?> instanceType) {
+	public record InstanceAssemblerContext(SourceLoader sourceLoader, VertexType vertexType,
+										   InstanceType<?> instanceType) {
 	}
 
 	public static Builder builder() {

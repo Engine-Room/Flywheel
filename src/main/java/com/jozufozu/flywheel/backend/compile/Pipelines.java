@@ -18,7 +18,7 @@ public final class Pipelines {
 			.glslVersion(GLSLVersion.V460)
 			.vertex(Files.INDIRECT_DRAW)
 			.fragment(Files.DRAW_FRAGMENT)
-			.assembler(IndirectComponent::new)
+			.assembler(IndirectComponent::create)
 			.build();
 
 	public static void init() {
