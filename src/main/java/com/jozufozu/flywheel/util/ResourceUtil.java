@@ -5,9 +5,21 @@ import java.util.regex.Pattern;
 import net.minecraft.resources.ResourceLocation;
 
 public class ResourceUtil {
-
 	// Match the complement of alphanumeric and underscore.
 	private static final Pattern UNSAFE_CHARS = Pattern.compile("[^a-zA-Z0-9_]");
+
+	public static ResourceLocation defaultToFlywheelNamespace(String location) {
+		String[] astring = new String[]{"flywheel", location};
+		int i = location.indexOf(':');
+		if (i >= 0) {
+			astring[1] = location.substring(i + 1);
+			if (i >= 1) {
+				astring[0] = location.substring(0, i);
+			}
+		}
+
+		return new ResourceLocation(astring[0], astring[1]);
+	}
 
 	public static ResourceLocation subPath(ResourceLocation root, String subPath) {
 		return new ResourceLocation(root.getNamespace(), root.getPath() + subPath);

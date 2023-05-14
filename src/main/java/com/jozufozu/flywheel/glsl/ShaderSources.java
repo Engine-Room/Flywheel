@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -38,7 +36,7 @@ public class ShaderSources {
 		this.manager = manager;
 	}
 
-	@Nonnull
+	@NotNull
 	public LoadResult find(ResourceLocation location) {
 		if (findStack.contains(location)) {
 			// Make a copy of the find stack with the offending location added on top to show the full path.
@@ -66,7 +64,7 @@ public class ShaderSources {
 		return out;
 	}
 
-	@Nonnull
+	@NotNull
 	protected LoadResult load(ResourceLocation loc) {
 		try {
 			var resource = manager.getResource(ResourceUtil.prefixed(SHADER_DIR, loc));

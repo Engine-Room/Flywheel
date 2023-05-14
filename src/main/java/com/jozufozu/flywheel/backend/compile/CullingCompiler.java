@@ -19,21 +19,27 @@ public class CullingCompiler extends AbstractCompiler<InstanceType<?>> {
 	private final UniformComponent uniformComponent;
 	private final SourceFile pipelineCompute;
 
-	public CullingCompiler(ShaderSources sources, ImmutableList<InstanceType<?>> keys, UniformComponent uniformComponent) {
+	public static CullingCompiler create(SourceLoader sourceLoader, ImmutableList<InstanceType<?>> keys, UniformComponent uniformComponent) {
+		var sourceFile = sourceLoader.find(Files.INDIRECT_CULL);
+
+		return new CullingCompiler(sourceLoader.sources, keys, uniformComponent, sourceFile);
+	}
+
+	private CullingCompiler(ShaderSources sources, ImmutableList<InstanceType<?>> keys, UniformComponent uniformComponent, SourceFile pipeline) {
 		super(sources, keys);
 
 		this.uniformComponent = uniformComponent;
-		pipelineCompute = sources.find(Files.INDIRECT_CULL)
-				.unwrap();
+		this.pipelineCompute = pipeline;
 	}
 
 	@Nullable
 	@Override
 	protected GlProgram compile(InstanceType<?> key) {
-		var instanceAssembly = new IndirectComponent(sources, key);
-		var instance = findOrReport(key.instanceShader());
+		var instanceAssembly = IndirectComponent.create(sourceLoader, key);
+		ResourceLocation rl = key.instanceShader();
+		var instance = sourceLoader.find(rl);
 
-		if (instance == null) {
+		if (instanceAssembly == null || instance == null || uniformComponent == null || pipelineCompute == null) {
 			return null;
 		}
 

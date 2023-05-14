@@ -11,10 +11,9 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.compile.component.MaterialAdapterComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
-import com.jozufozu.flywheel.glsl.ShaderSources;
 
 public class IndirectPrograms {
-	private static IndirectPrograms instance;
+	public static IndirectPrograms instance;
 	private final Map<PipelineProgramKey, GlProgram> pipeline;
 	private final Map<InstanceType<?>, GlProgram> culling;
 
@@ -23,13 +22,10 @@ public class IndirectPrograms {
 		this.culling = culling;
 	}
 
-	public static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, MaterialAdapterComponent vertexMaterialComponent, MaterialAdapterComponent fragmentMaterialComponent) {
-		if (instance != null) {
-			instance.delete();
-			instance = null;
-		}
-		var pipelineCompiler = new PipelineCompiler(sources, pipelineKeys, Pipelines.INDIRECT, vertexMaterialComponent, fragmentMaterialComponent, uniformComponent);
-		var cullingCompiler = new CullingCompiler(sources, createCullingKeys(), uniformComponent);
+	static void reload(SourceLoader loadChecker, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, MaterialAdapterComponent vertexMaterialComponent, MaterialAdapterComponent fragmentMaterialComponent) {
+		_delete();
+		var pipelineCompiler = PipelineCompiler.create(loadChecker, Pipelines.INDIRECT, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
+		var cullingCompiler = CullingCompiler.create(loadChecker, createCullingKeys(), uniformComponent);
 
 		var pipelineResult = pipelineCompiler.compileAndReportErrors();
 		var cullingResult = cullingCompiler.compileAndReportErrors();
@@ -56,6 +52,13 @@ public class IndirectPrograms {
 
 	public static boolean allLoaded() {
 		return instance != null;
+	}
+
+	private static void _delete() {
+		if (instance != null) {
+			instance.delete();
+			instance = null;
+		}
 	}
 
 	public GlProgram getIndirectProgram(VertexType vertexType, InstanceType<?> instanceType, Context contextShader) {

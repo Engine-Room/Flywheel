@@ -25,6 +25,21 @@ public class TestShaderSourceLoading extends TestBase {
 		findAndAssertError(LoadError.IOError.class, sources, FLW_A);
 	}
 
+	/**
+	 * #includes should default to the flywheel namespace since minecraft shaders aren't relevant.
+	 */
+	@Test
+	void testNoNamespace() {
+		var sources = new MockShaderSources();
+		sources.add(FLW_A, """
+				#include "b.glsl"
+				""");
+		sources.add(FLW_B, "");
+
+		findAndAssertSuccess(sources, FLW_A);
+		sources.assertLoaded(FLW_B);
+	}
+
 	@Test
 	void testMissingInclude() {
 		var sources = new MockShaderSources();
@@ -36,6 +51,21 @@ public class TestShaderSourceLoading extends TestBase {
 
 		var ioErr = assertSimpleNestedErrorsToDepth(LoadError.IOError.class, aErr, 1);
 		assertEquals(FLW_B, ioErr.location());
+	}
+
+	@Test
+	void testMalformedInclude() {
+		var sources = new MockShaderSources();
+		sources.add(FLW_A, """
+				#include "evil - wow"
+				""");
+
+		var aErr = findAndAssertError(LoadError.IncludeError.class, sources, FLW_A);
+
+		var malformedInclude = assertSimpleNestedErrorsToDepth(LoadError.MalformedInclude.class, aErr, 1);
+		var message = malformedInclude.exception()
+				.getMessage();
+		assertEquals("Non [a-z0-9/._-] character in path of location: flywheel:evil - wow", message);
 	}
 
 	@Test

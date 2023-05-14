@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.glsl;
 
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +26,7 @@ public class MockShaderSources extends ShaderSources {
 	protected LoadResult load(ResourceLocation loc) {
 		var maybeFound = sources.get(loc);
 		if (maybeFound == null) {
-			return new LoadResult.Failure(new LoadError.IOError(loc, new IOException("Mock source not found")));
+			return new LoadResult.Failure(new LoadError.IOError(loc, new FileNotFoundException(loc.toString())));
 		}
 		return SourceFile.parse(this, loc, maybeFound);
 	}

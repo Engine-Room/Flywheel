@@ -12,21 +12,18 @@ import com.jozufozu.flywheel.backend.compile.core.ProgramLinker;
 import com.jozufozu.flywheel.backend.compile.core.ShaderCompiler;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.glsl.ShaderSources;
-import com.jozufozu.flywheel.glsl.SourceFile;
-
-import net.minecraft.resources.ResourceLocation;
 
 public abstract class AbstractCompiler<K> {
-	protected final ShaderSources sources;
+	protected final SourceLoader sourceLoader;
 	protected final ShaderCompiler shaderCompiler;
 	protected final ProgramLinker programLinker;
 	private final ImmutableList<K> keys;
 	private final CompilerStats stats = new CompilerStats();
 
 	public AbstractCompiler(ShaderSources sources, ImmutableList<K> keys) {
-		this.sources = sources;
 		this.keys = keys;
 
+		sourceLoader = new SourceLoader(sources, stats);
 		shaderCompiler = new ShaderCompiler(stats);
 		programLinker = new ProgramLinker(stats);
 	}
@@ -35,20 +32,15 @@ public abstract class AbstractCompiler<K> {
 	protected abstract GlProgram compile(K key);
 
 	@Nullable
-	protected SourceFile findOrReport(ResourceLocation rl) {
-		var out = sources.find(rl);
-		stats.loadResult(out);
-		return out.unwrap();
-	}
-
-	@Nullable
 	public Map<K, GlProgram> compileAndReportErrors() {
 		stats.start();
 		Map<K, GlProgram> out = new HashMap<>();
 		for (var key : keys) {
 			GlProgram glProgram = compile(key);
-			if (glProgram != null) {
+			if (out != null && glProgram != null) {
 				out.put(key, glProgram);
+			} else {
+				out = null; // Return null when a preloading error occurs.
 			}
 		}
 		stats.finish();

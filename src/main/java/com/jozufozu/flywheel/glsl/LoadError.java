@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.glsl;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,6 +9,7 @@ import com.jozufozu.flywheel.glsl.error.ErrorBuilder;
 import com.jozufozu.flywheel.glsl.span.Span;
 import com.jozufozu.flywheel.util.Pair;
 
+import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
 
 sealed public interface LoadError {
@@ -33,7 +35,7 @@ sealed public interface LoadError {
 		@Override
 		public ErrorBuilder generateMessage() {
 			var out = ErrorBuilder.create()
-					.error("could not load shader due to errors in included files")
+					.error("could not load \"" + location + "\"")
 					.pointAtFile(location);
 
 			for (var innerError : innerErrors) {
@@ -50,9 +52,22 @@ sealed public interface LoadError {
 	record IOError(ResourceLocation location, IOException exception) implements LoadError {
 		@Override
 		public ErrorBuilder generateMessage() {
+			if (exception instanceof FileNotFoundException) {
+				return ErrorBuilder.create()
+						.error("\"" + location + "\" was not found");
+			} else {
+				return ErrorBuilder.create()
+						.error("could not load \"" + location + "\" due to an IO error")
+						.note(exception.toString());
+			}
+		}
+	}
+
+	record MalformedInclude(ResourceLocationException exception) implements LoadError {
+		@Override
+		public ErrorBuilder generateMessage() {
 			return ErrorBuilder.create()
-					.error("could not load \"" + location + "\" due to an IO error")
-					.note(exception.getMessage());
+					.error(exception.toString());
 		}
 	}
 }

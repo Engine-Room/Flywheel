@@ -5,13 +5,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
-import javax.annotation.Nonnull;
-
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.jozufozu.flywheel.glsl.ShaderSources;
+import com.jozufozu.flywheel.backend.compile.SourceLoader;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
@@ -127,7 +125,7 @@ public class MaterialAdapterComponent implements SourceComponent {
 			return this;
 		}
 
-		public Builder adapt(FnSignature function, @Nonnull GlslExpr defaultReturn) {
+		public Builder adapt(FnSignature function, GlslExpr defaultReturn) {
 			adaptedFunctions.add(new AdaptedFn(function, defaultReturn));
 			return this;
 		}
@@ -137,21 +135,29 @@ public class MaterialAdapterComponent implements SourceComponent {
 			return this;
 		}
 
-		public MaterialAdapterComponent build(ShaderSources sources) {
+		public MaterialAdapterComponent build(SourceLoader sources) {
 			if (switchArg == null) {
 				throw new NullPointerException("Switch argument must be set");
 			}
 
 			var transformed = ImmutableList.<StringSubstitutionSourceComponent>builder();
 
+			boolean errored = false;
 			int index = 0;
 			for (var rl : materialSources) {
-				SourceFile sourceFile = sources.find(rl)
-						.unwrap();
+				SourceFile sourceFile = sources.find(rl);
 				final int finalIndex = index;
-				var adapterMap = createAdapterMap(adaptedFunctions, fnName -> "_" + fnName + "_" + finalIndex);
-				transformed.add(new StringSubstitutionSourceComponent(sourceFile, adapterMap));
+				if (sourceFile != null) {
+					var adapterMap = createAdapterMap(adaptedFunctions, fnName -> "_" + fnName + "_" + finalIndex);
+					transformed.add(new StringSubstitutionSourceComponent(sourceFile, adapterMap));
+				} else {
+					errored = true;
+				}
 				index++;
+			}
+
+			if (errored) {
+				return null;
 			}
 
 			return new MaterialAdapterComponent(name, switchArg, adaptedFunctions, transformed.build());

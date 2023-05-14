@@ -9,7 +9,6 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.glsl.error.ErrorBuilder;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -28,14 +27,6 @@ public class TestBase {
 		var result = sources.find(loc);
 		var failure = assertInstanceOf(LoadResult.Failure.class, result);
 		return assertInstanceOf(clazz, failure.error());
-	}
-
-	@NotNull
-	public static ErrorBuilder assertErrorAndGetMessage(MockShaderSources sources, ResourceLocation loc) {
-		var result = sources.find(loc);
-		var failure = assertInstanceOf(LoadResult.Failure.class, result);
-		return failure.error()
-				.generateMessage();
 	}
 
 	static <E extends LoadError> E assertSimpleNestedErrorsToDepth(Class<E> finalErrType, LoadError err, int depth) {

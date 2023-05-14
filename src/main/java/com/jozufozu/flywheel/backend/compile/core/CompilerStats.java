@@ -17,9 +17,9 @@ import com.jozufozu.flywheel.util.StringUtil;
 public class CompilerStats {
 	private long compileStart;
 
+	private final Set<LoadError> loadErrors = new HashSet<>();
 	private final List<FailedCompilation> shaderErrors = new ArrayList<>();
 	private final List<String> programErrors = new ArrayList<>();
-	private final Set<LoadError> loadErrors = new HashSet<>();
 
 	private boolean errored = false;
 	private int shaderCount = 0;
@@ -41,11 +41,21 @@ public class CompilerStats {
 	}
 
 	public String generateErrorLog() {
-		return """
-				%s
-				%s
-				%s
-				""".formatted(loadErrors(), compileErrors(), linkErrors());
+		String out = "";
+
+		if (!loadErrors.isEmpty()) {
+			out += "\nErrors loading sources:\n" + loadErrors();
+		}
+
+		if (!shaderErrors.isEmpty()) {
+			out += "\nShader compilation errors:\n" + compileErrors();
+		}
+
+		if (!programErrors.isEmpty()) {
+			out += "\nProgram link errors:\n" + linkErrors();
+		}
+
+		return out;
 	}
 
 	private String compileErrors() {

@@ -11,28 +11,24 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.compile.component.MaterialAdapterComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
-import com.jozufozu.flywheel.glsl.ShaderSources;
 
 public class InstancingPrograms {
-	private static InstancingPrograms instance;
+	static InstancingPrograms instance;
 	private final Map<PipelineProgramKey, GlProgram> pipeline;
 
 	public InstancingPrograms(Map<PipelineProgramKey, GlProgram> pipeline) {
 		this.pipeline = pipeline;
 	}
 
-	public static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, MaterialAdapterComponent vertexMaterialComponent, MaterialAdapterComponent fragmentMaterialComponent) {
-		if (instance != null) {
-			instance.delete();
-			instance = null;
-		}
-		var instancingCompiler = new PipelineCompiler(sources, pipelineKeys, Pipelines.INSTANCED_ARRAYS, vertexMaterialComponent, fragmentMaterialComponent, uniformComponent);
+	static void reload(SourceLoader loadChecker, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, MaterialAdapterComponent vertexMaterialComponent, MaterialAdapterComponent fragmentMaterialComponent) {
+		_delete();
+		var instancingCompiler = PipelineCompiler.create(loadChecker, Pipelines.INSTANCED_ARRAYS, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
+
 		var result = instancingCompiler.compileAndReportErrors();
 
 		if (result != null) {
 			instance = new InstancingPrograms(result);
 		}
-
 		instancingCompiler.delete();
 	}
 
@@ -43,6 +39,13 @@ public class InstancingPrograms {
 
 	public static boolean allLoaded() {
 		return instance != null;
+	}
+
+	static void _delete() {
+		if (instance != null) {
+			instance.delete();
+			instance = null;
+		}
 	}
 
 	public GlProgram get(VertexType vertexType, InstanceType<?> instanceType, Context contextShader) {

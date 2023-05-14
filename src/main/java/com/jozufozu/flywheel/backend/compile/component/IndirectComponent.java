@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.layout.LayoutItem;
 import com.jozufozu.flywheel.backend.compile.Pipeline;
 import com.jozufozu.flywheel.backend.compile.Pipelines;
-import com.jozufozu.flywheel.glsl.ShaderSources;
+import com.jozufozu.flywheel.backend.compile.SourceLoader;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
@@ -29,14 +29,23 @@ public class IndirectComponent implements SourceComponent {
 	private final List<LayoutItem> layoutItems;
 	private final ImmutableList<SourceFile> included;
 
-	public IndirectComponent(Pipeline.InstanceAssemblerContext ctx) {
-		this(ctx.sources(), ctx.instanceType());
+	private IndirectComponent(List<LayoutItem> layoutItems, ImmutableList<SourceFile> included) {
+		this.layoutItems = layoutItems;
+		this.included = included;
 	}
 
-	public IndirectComponent(ShaderSources sources, InstanceType<?> instanceType) {
-		this.layoutItems = instanceType.getLayout().layoutItems;
-		included = ImmutableList.of(sources.find(Pipelines.Files.UTIL_TYPES)
-				.unwrap());
+	public static IndirectComponent create(Pipeline.InstanceAssemblerContext ctx) {
+		return create(ctx.sourceLoader(), ctx.instanceType());
+	}
+
+	public static IndirectComponent create(SourceLoader sourceLoader, InstanceType<?> instanceType) {
+		var util = sourceLoader.find(Pipelines.Files.UTIL_TYPES);
+
+		if (util == null) {
+			return null;
+		}
+
+		return new IndirectComponent(instanceType.getLayout().layoutItems, ImmutableList.of(util));
 	}
 
 	@Override
