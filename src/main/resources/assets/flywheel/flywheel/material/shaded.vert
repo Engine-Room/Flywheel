@@ -1,5 +1,5 @@
-#use "flywheel:api/vertex.glsl"
-#use "flywheel:util/diffuse.glsl"
+#include "flywheel:api/vertex.glsl"
+#include "flywheel:util/diffuse.glsl"
 
 void flw_materialVertex() {
     flw_vertexNormal = normalize(flw_vertexNormal);

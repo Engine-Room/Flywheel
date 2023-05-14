@@ -1,4 +1,4 @@
-#use "flywheel:api/fragment.glsl"
+#include "flywheel:api/fragment.glsl"
 
 // optimize discard usage
 #ifdef ALPHA_DISCARD

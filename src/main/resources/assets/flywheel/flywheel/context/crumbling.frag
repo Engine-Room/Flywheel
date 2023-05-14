@@ -1,4 +1,4 @@
-#use "flywheel:api/fragment.glsl"
+#include "flywheel:api/fragment.glsl"
 
 uniform sampler2D flw_diffuseTex;
 

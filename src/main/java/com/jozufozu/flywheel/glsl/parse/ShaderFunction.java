@@ -1,11 +1,17 @@
 package com.jozufozu.flywheel.glsl.parse;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.jozufozu.flywheel.glsl.SourceLines;
+import com.jozufozu.flywheel.glsl.span.ErrorSpan;
 import com.jozufozu.flywheel.glsl.span.Span;
+import com.jozufozu.flywheel.glsl.span.StringSpan;
 
 public class ShaderFunction {
 	// https://regexr.com/60n3d
@@ -30,6 +36,62 @@ public class ShaderFunction {
 		this.body = body;
 
 		this.parameters = parseArguments();
+	}
+
+	/**
+	 * Scan the source for function definitions and "parse" them into objects that contain properties of the function.
+	 */
+	public static ImmutableMap<String, ShaderFunction> parseFunctions(SourceLines source) {
+		Matcher matcher = PATTERN.matcher(source);
+
+		Map<String, ShaderFunction> functions = new HashMap<>();
+
+		while (matcher.find()) {
+			Span type = Span.fromMatcher(source, matcher, 1);
+			Span name = Span.fromMatcher(source, matcher, 2);
+			Span args = Span.fromMatcher(source, matcher, 3);
+
+			int blockStart = matcher.end();
+			int blockEnd = findEndOfBlock(source, blockStart);
+
+			Span self;
+			Span body;
+			if (blockEnd > blockStart) {
+				self = new StringSpan(source, matcher.start(), blockEnd + 1);
+				body = new StringSpan(source, blockStart, blockEnd);
+			} else {
+				self = new ErrorSpan(source, matcher.start(), matcher.end());
+				body = new ErrorSpan(source, blockStart);
+			}
+
+			ShaderFunction function = new ShaderFunction(self, type, name, args, body);
+
+			functions.put(name.get(), function);
+		}
+
+		return ImmutableMap.copyOf(functions);
+	}
+
+	/**
+	 * Given the position of an opening brace, scans through the source for a paired closing brace.
+	 */
+	private static int findEndOfBlock(CharSequence source, int start) {
+		int blockDepth = 0;
+		for (int i = start + 1; i < source.length(); i++) {
+			char ch = source.charAt(i);
+
+			if (ch == '{') {
+				blockDepth++;
+			} else if (ch == '}') {
+				blockDepth--;
+			}
+
+			if (blockDepth < 0) {
+				return i;
+			}
+		}
+
+		return -1;
 	}
 
 	public Span getType() {

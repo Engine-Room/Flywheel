@@ -12,6 +12,9 @@ import com.jozufozu.flywheel.backend.compile.core.ProgramLinker;
 import com.jozufozu.flywheel.backend.compile.core.ShaderCompiler;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.glsl.ShaderSources;
+import com.jozufozu.flywheel.glsl.SourceFile;
+
+import net.minecraft.resources.ResourceLocation;
 
 public abstract class AbstractCompiler<K> {
 	protected final ShaderSources sources;
@@ -30,6 +33,13 @@ public abstract class AbstractCompiler<K> {
 
 	@Nullable
 	protected abstract GlProgram compile(K key);
+
+	@Nullable
+	protected SourceFile findOrReport(ResourceLocation rl) {
+		var out = sources.find(rl);
+		stats.loadResult(out);
+		return out.unwrap();
+	}
 
 	@Nullable
 	public Map<K, GlProgram> compileAndReportErrors() {

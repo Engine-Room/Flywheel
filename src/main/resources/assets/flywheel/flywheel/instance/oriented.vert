@@ -1,5 +1,5 @@
-#use "flywheel:api/vertex.glsl"
-#use "flywheel:util/quaternion.glsl"
+#include "flywheel:api/vertex.glsl"
+#include "flywheel:util/quaternion.glsl"
 
 void flw_transformBoundingSphere(in FlwInstance i, inout vec3 center, inout float radius) {
     vec4 rotation = i.rotation;
@@ -9,7 +9,7 @@ void flw_transformBoundingSphere(in FlwInstance i, inout vec3 center, inout floa
     center = rotateVertexByQuat(center - pivot, rotation) + pivot + pos;
 }
 
-    #ifdef VERTEX_SHADER
+#ifdef VERTEX_SHADER
 void flw_instanceVertex(in FlwInstance i) {
     flw_vertexPos = vec4(rotateVertexByQuat(flw_vertexPos.xyz - i.pivot, i.rotation) + i.pivot + i.position, 1.0);
     flw_vertexNormal = rotateVertexByQuat(flw_vertexNormal, i.rotation);

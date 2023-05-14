@@ -1,4 +1,4 @@
-#use "flywheel:api/vertex.glsl"
+#include "flywheel:api/vertex.glsl"
 
 uniform uvec2 _flw_materialID_instancing;
 

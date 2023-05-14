@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.backend.compile;
 
-import java.util.List;
-
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
@@ -13,7 +11,6 @@ import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.GLSLVersion;
 import com.jozufozu.flywheel.glsl.ShaderSources;
-import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.SourceFile;
 
 import net.minecraft.resources.ResourceLocation;
@@ -33,7 +30,14 @@ public class CullingCompiler extends AbstractCompiler<InstanceType<?>> {
 	@Nullable
 	@Override
 	protected GlProgram compile(InstanceType<?> key) {
-		var computeComponents = getComputeComponents(key);
+		var instanceAssembly = new IndirectComponent(sources, key);
+		var instance = findOrReport(key.instanceShader());
+
+		if (instance == null) {
+			return null;
+		}
+
+		var computeComponents = ImmutableList.of(uniformComponent, instanceAssembly, instance, pipelineCompute);
 		var compute = shaderCompiler.compile(GLSLVersion.V460, ShaderType.COMPUTE, computeComponents);
 
 		if (compute == null) {
@@ -41,15 +45,6 @@ public class CullingCompiler extends AbstractCompiler<InstanceType<?>> {
 		}
 
 		return programLinker.link(compute);
-	}
-
-	private List<SourceComponent> getComputeComponents(InstanceType<?> instanceType) {
-		var instanceAssembly = new IndirectComponent(sources, instanceType);
-		ResourceLocation key = instanceType.instanceShader();
-		var instance = sources.find(key)
-				.unwrap();
-
-		return ImmutableList.of(uniformComponent, instanceAssembly, instance, pipelineCompute);
 	}
 
 	private static final class Files {

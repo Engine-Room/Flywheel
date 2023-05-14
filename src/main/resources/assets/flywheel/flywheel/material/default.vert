@@ -1,4 +1,4 @@
-#use "flywheel:api/vertex.glsl"
+#include "flywheel:api/vertex.glsl"
 
 void flw_materialVertex() {
 }

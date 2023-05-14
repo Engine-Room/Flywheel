@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.jozufozu.flywheel.glsl.SourceLines;
 import com.jozufozu.flywheel.glsl.span.Span;
 
 public class ShaderStruct {
@@ -27,6 +28,27 @@ public class ShaderStruct {
 		this.variableName = variableName;
 		this.fields = parseFields();
 		this.fields2Types = createTypeLookup();
+	}
+
+	/**
+	 * Scan the source for function definitions and "parse" them into objects that contain properties of the function.
+	 */
+	public static ImmutableMap<String, ShaderStruct> parseStructs(SourceLines source) {
+		Matcher matcher = PATTERN.matcher(source);
+
+		ImmutableMap.Builder<String, ShaderStruct> structs = ImmutableMap.builder();
+		while (matcher.find()) {
+			Span self = Span.fromMatcher(source, matcher);
+			Span name = Span.fromMatcher(source, matcher, 1);
+			Span body = Span.fromMatcher(source, matcher, 2);
+			Span variableName = Span.fromMatcher(source, matcher, 3);
+
+			ShaderStruct shaderStruct = new ShaderStruct(self, name, body, variableName);
+
+			structs.put(name.get(), shaderStruct);
+		}
+
+		return structs.build();
 	}
 
 	public Span getName() {

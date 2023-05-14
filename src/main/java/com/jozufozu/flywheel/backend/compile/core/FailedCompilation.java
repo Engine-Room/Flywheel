@@ -33,7 +33,7 @@ public class FailedCompilation {
 		this.errorLog = errorLog;
 	}
 
-	public String getMessage() {
+	public String generateMessage() {
 		return ConsoleColors.RED_BOLD_BRIGHT + "Failed to compile " + shaderName + ":\n" + errorString();
 	}
 
