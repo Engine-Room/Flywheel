@@ -5,6 +5,7 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
@@ -27,11 +28,15 @@ public class IndirectPrograms {
 		var pipelineCompiler = PipelineCompiler.create(loadChecker, Pipelines.INDIRECT, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
 		var cullingCompiler = CullingCompiler.create(loadChecker, createCullingKeys(), uniformComponent);
 
-		var pipelineResult = pipelineCompiler.compileAndReportErrors();
-		var cullingResult = cullingCompiler.compileAndReportErrors();
+		try {
+			var pipelineResult = pipelineCompiler.compileAndReportErrors();
+			var cullingResult = cullingCompiler.compileAndReportErrors();
 
-		if (pipelineResult != null && cullingResult != null) {
-			instance = new IndirectPrograms(pipelineResult, cullingResult);
+			if (pipelineResult != null && cullingResult != null) {
+				instance = new IndirectPrograms(pipelineResult, cullingResult);
+			}
+		} catch (Throwable e) {
+			Flywheel.LOGGER.error("Failed to compile indirect programs", e);
 		}
 		pipelineCompiler.delete();
 		cullingCompiler.delete();

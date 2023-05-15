@@ -5,6 +5,7 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
@@ -24,10 +25,14 @@ public class InstancingPrograms {
 		_delete();
 		var instancingCompiler = PipelineCompiler.create(loadChecker, Pipelines.INSTANCED_ARRAYS, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
 
-		var result = instancingCompiler.compileAndReportErrors();
+		try {
+			var result = instancingCompiler.compileAndReportErrors();
 
-		if (result != null) {
-			instance = new InstancingPrograms(result);
+			if (result != null) {
+				instance = new InstancingPrograms(result);
+			}
+		} catch (Throwable e) {
+			Flywheel.LOGGER.error("Failed to compile instancing programs", e);
 		}
 		instancingCompiler.delete();
 	}
