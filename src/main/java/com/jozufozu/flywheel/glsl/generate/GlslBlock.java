@@ -36,4 +36,7 @@ public class GlslBlock {
 				.collect(Collectors.joining("\n"));
 	}
 
+	public void raw(String s) {
+		add(GlslStmt.raw(s));
+	}
 }

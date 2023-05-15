@@ -5,4 +5,9 @@ public record NestedLine(String right) implements ErrorLine {
 	public String right() {
 		return right;
 	}
+
+	@Override
+	public Divider divider() {
+		return Divider.EQUALS;
+	}
 }

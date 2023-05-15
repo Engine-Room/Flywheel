@@ -28,7 +28,5 @@ public final class Pipelines {
 		public static final ResourceLocation INSTANCED_ARRAYS_DRAW = Flywheel.rl("internal/instanced_arrays_draw.vert");
 		public static final ResourceLocation INDIRECT_DRAW = Flywheel.rl("internal/indirect_draw.vert");
 		public static final ResourceLocation DRAW_FRAGMENT = Flywheel.rl("internal/draw.frag");
-
-		public static final ResourceLocation UTIL_TYPES = Flywheel.rl("util/types.glsl");
 	}
 }

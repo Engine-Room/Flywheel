@@ -12,12 +12,14 @@ public class GlslStruct implements GlslBuilder.Declaration {
 	private final List<Pair<String, String>> fields = new ArrayList<>();
 	private String name;
 
-	public void setName(String name) {
+	public GlslStruct setName(String name) {
 		this.name = name;
+		return this;
 	}
 
-	public void addField(String type, String name) {
+	public GlslStruct addField(String type, String name) {
 		fields.add(Pair.of(type, name));
+		return this;
 	}
 
 	private String buildFields() {

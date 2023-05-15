@@ -1,7 +1,6 @@
 #define FLW_SUBGROUP_SIZE 32
 layout(local_size_x = FLW_SUBGROUP_SIZE) in;
 
-#include "flywheel:util/types.glsl"
 #include "flywheel:internal/indirect_draw_command.glsl"
 
 // populated by instancers

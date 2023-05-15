@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.glsl.generate;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,10 @@ public interface GlslExpr {
 	 */
 	static Variable variable(String name) {
 		return new Variable(name);
+	}
+
+	static FunctionCall call(String functionName, GlslExpr... args) {
+		return new FunctionCall(functionName, List.of(args));
 	}
 
 	static FunctionCall call(String functionName, Collection<? extends GlslExpr> args) {

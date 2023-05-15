@@ -29,7 +29,7 @@ public class TestErrorMessages extends TestBase {
 				--> flywheel:a.glsl
 				1 | #include "flywheel:b.glsl"
 				  |           ^^^^^^^^^^^^^^^
-				  | error: "flywheel:b.glsl" was not found
+				  = error: "flywheel:b.glsl" was not found
 				""", sources, FLW_A);
 	}
 
@@ -48,11 +48,11 @@ public class TestErrorMessages extends TestBase {
 				--> flywheel:a.glsl
 				1 | #include "flywheel:b.glsl"
 				  |           ^^^^^^^^^^^^^^^
-				  | error: could not load "flywheel:b.glsl"
-				  | --> flywheel:b.glsl
-				  | 1 | #include "flywheel:c.glsl"
-				  |   |           ^^^^^^^^^^^^^^^
-				  |   | error: "flywheel:c.glsl" was not found
+				  = error: could not load "flywheel:b.glsl"
+				  = --> flywheel:b.glsl
+				  = 1 | #include "flywheel:c.glsl"
+				  =   |           ^^^^^^^^^^^^^^^
+				  =   = error: "flywheel:c.glsl" was not found
 				""", sources, FLW_A);
 	}
 
