@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL20;
@@ -19,7 +18,6 @@ import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.util.StringUtil;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
 
 /**
  * Builder style class for compiling shaders.
@@ -31,7 +29,6 @@ public class Compilation {
 	public static final boolean DUMP_SHADER_SOURCE = System.getProperty("flw.dumpShaderSource") != null;
 
 	private final List<SourceFile> files = new ArrayList<>();
-	private final List<ResourceLocation> componentNames = new ArrayList<>();
 	private final StringBuilder generatedSource;
 	private final StringBuilder fullSource;
 	private final GLSLVersion glslVersion;
@@ -54,7 +51,7 @@ public class Compilation {
 		GlCompat.safeShaderSource(handle, source);
 		GL20.glCompileShader(handle);
 
-		var shaderName = buildShaderName();
+		var shaderName = shaderType.name + glslVersion + '_' + Integer.toUnsignedString(source.hashCode());
 		dumpSource(source, shaderType.getFileName(shaderName));
 
 		var infoLog = GL20.glGetShaderInfoLog(handle);
@@ -76,58 +73,35 @@ public class Compilation {
 	public void appendComponent(SourceComponent component) {
 		var source = component.source();
 
-		if (component instanceof SourceFile file) {
-			fullSource.append(sourceHeader(file));
-		} else {
-			fullSource.append(generatedHeader(source, component.name()
-					.toString()));
-		}
+		appendHeader(component, source);
 
 		fullSource.append(source);
-		componentNames.add(component.name());
 	}
 
-	private String sourceHeader(SourceFile sourceFile) {
-		return '\n' + "#line " + 0 + ' ' + getOrCreateFileID(sourceFile) + " // " + sourceFile.name + '\n';
-	}
+	private void appendHeader(SourceComponent component, String source) {
+		if (component instanceof SourceFile file) {
+			int fileID = files.size();
 
-	private String generatedHeader(String generatedCode, String comment) {
-		generatedSource.append(generatedCode);
-		int lines = StringUtil.countLines(generatedCode);
+			files.add(file);
 
-		// all generated code is put in file 0,
-		var out = '\n' + "#line " + generatedLines + ' ' + 0;
+			fullSource.append("\n#line 0 ")
+					.append(fileID)
+					.append(" // ")
+					.append(file.name)
+					.append('\n');
+		} else {
+			// Add extra newline to keep line numbers consistent
+			generatedSource.append(source)
+					.append('\n');
 
-		generatedLines += lines;
+			fullSource.append("\n#line ")
+					.append(generatedLines)
+					.append(" 0 // (generated) ") // all generated code is put in file 0
+					.append(component.name())
+					.append('\n');
 
-		return out + " // (generated) " + comment + '\n';
-	}
-
-	/**
-	 * Returns an arbitrary file ID for use this compilation context, or generates one if missing.
-	 *
-	 * @param sourceFile The file to retrieve the ID for.
-	 * @return A file ID unique to the given sourceFile.
-	 */
-	private int getOrCreateFileID(SourceFile sourceFile) {
-		int i = files.indexOf(sourceFile);
-		if (i != -1) {
-			return i + 1;
+			generatedLines += StringUtil.countLines(source);
 		}
-
-		files.add(sourceFile);
-		return files.size();
-	}
-
-	@NotNull
-	private String buildShaderName() {
-		// TODO: This name is so long it fails to create the file. Use index and map indices to component sources in separate file?
-		var components = componentNames.stream()
-				.map(ResourceLocation::toString)
-				.map(s -> s.replaceAll("/", "_")
-						.replaceAll(":", "\\$"))
-				.collect(Collectors.joining(";"));
-		return shaderType.name + glslVersion + ';' /*+ components*/;
 	}
 
 	private static void dumpSource(String source, String fileName) {
