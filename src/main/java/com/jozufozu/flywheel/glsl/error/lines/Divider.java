@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.glsl.error.lines;
 public enum Divider {
 	BAR(" | "),
 	ARROW("-> "),
+	EQUALS(" = "),
 	;
 
 	private final String s;

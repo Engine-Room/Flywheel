@@ -35,11 +35,11 @@ public class CullingCompiler extends AbstractCompiler<InstanceType<?>> {
 	@Nullable
 	@Override
 	protected GlProgram compile(InstanceType<?> key) {
-		var instanceAssembly = IndirectComponent.create(sourceLoader, key);
+		var instanceAssembly = IndirectComponent.create(key);
 		ResourceLocation rl = key.instanceShader();
 		var instance = sourceLoader.find(rl);
 
-		if (instanceAssembly == null || instance == null || uniformComponent == null || pipelineCompute == null) {
+		if (instance == null || uniformComponent == null || pipelineCompute == null) {
 			return null;
 		}
 

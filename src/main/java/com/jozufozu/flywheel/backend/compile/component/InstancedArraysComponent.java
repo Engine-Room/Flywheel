@@ -63,7 +63,8 @@ public class InstancedArraysComponent implements SourceComponent {
 		structBuilder.setName(STRUCT_NAME);
 
 		for (var field : layoutItems) {
-			field.addToStruct(structBuilder);
+			structBuilder.addField(field.type()
+					.typeName(), field.name());
 		}
 
 		builder.blankLine();

@@ -18,8 +18,7 @@ public record Pipeline(GLSLVersion glslVersion, ResourceLocation vertexShader, R
 		SourceComponent assemble(InstanceAssemblerContext context);
 	}
 
-	public record InstanceAssemblerContext(SourceLoader sourceLoader, VertexType vertexType,
-										   InstanceType<?> instanceType) {
+	public record InstanceAssemblerContext(VertexType vertexType, InstanceType<?> instanceType) {
 	}
 
 	public static Builder builder() {

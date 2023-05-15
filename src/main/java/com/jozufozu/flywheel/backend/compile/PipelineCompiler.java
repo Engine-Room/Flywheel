@@ -105,7 +105,7 @@ public class PipelineCompiler extends AbstractCompiler<PipelineProgramKey> {
 	@Nullable
 	private List<SourceComponent> getVertexComponents(PipelineProgramKey key) {
 		var instanceAssembly = pipeline.assembler()
-				.assemble(new Pipeline.InstanceAssemblerContext(sourceLoader, key.vertexType(), key.instanceType()));
+				.assemble(new Pipeline.InstanceAssemblerContext(key.vertexType(), key.instanceType()));
 
 		var layout = sourceLoader.find(key.vertexType()
 				.layoutShader());

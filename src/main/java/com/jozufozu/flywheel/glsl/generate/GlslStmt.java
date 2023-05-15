@@ -13,6 +13,10 @@ public interface GlslStmt {
 		return new Return(value);
 	}
 
+	static GlslStmt raw(String s) {
+		return new Raw(s);
+	}
+
 	String prettyPrint();
 
 	record Eval(GlslExpr expr) implements GlslStmt {
@@ -26,6 +30,13 @@ public interface GlslStmt {
 		@Override
 		public String prettyPrint() {
 			return "return " + expr.prettyPrint() + ";";
+		}
+	}
+
+	record Raw(String glsl) implements GlslStmt {
+		@Override
+		public String prettyPrint() {
+			return glsl;
 		}
 	}
 }

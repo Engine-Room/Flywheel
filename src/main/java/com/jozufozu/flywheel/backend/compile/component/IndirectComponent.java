@@ -1,17 +1,14 @@
 package com.jozufozu.flywheel.backend.compile.component;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.layout.LayoutItem;
 import com.jozufozu.flywheel.backend.compile.Pipeline;
-import com.jozufozu.flywheel.backend.compile.Pipelines;
-import com.jozufozu.flywheel.backend.compile.SourceLoader;
 import com.jozufozu.flywheel.glsl.SourceComponent;
-import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.glsl.generate.GlslBlock;
 import com.jozufozu.flywheel.glsl.generate.GlslBuilder;
@@ -27,30 +24,22 @@ public class IndirectComponent implements SourceComponent {
 	private static final String UNPACK_FN_NAME = "_flw_unpackInstance";
 
 	private final List<LayoutItem> layoutItems;
-	private final ImmutableList<SourceFile> included;
 
-	private IndirectComponent(List<LayoutItem> layoutItems, ImmutableList<SourceFile> included) {
+	public IndirectComponent(List<LayoutItem> layoutItems) {
 		this.layoutItems = layoutItems;
-		this.included = included;
 	}
 
 	public static IndirectComponent create(Pipeline.InstanceAssemblerContext ctx) {
-		return create(ctx.sourceLoader(), ctx.instanceType());
+		return create(ctx.instanceType());
 	}
 
-	public static IndirectComponent create(SourceLoader sourceLoader, InstanceType<?> instanceType) {
-		var util = sourceLoader.find(Pipelines.Files.UTIL_TYPES);
-
-		if (util == null) {
-			return null;
-		}
-
-		return new IndirectComponent(instanceType.getLayout().layoutItems, ImmutableList.of(util));
+	public static IndirectComponent create(InstanceType<?> instanceType) {
+		return new IndirectComponent(instanceType.getLayout().layoutItems);
 	}
 
 	@Override
 	public Collection<? extends SourceComponent> included() {
-		return included;
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -66,6 +55,11 @@ public class IndirectComponent implements SourceComponent {
 	public String generateIndirect() {
 		var builder = new GlslBuilder();
 
+		layoutItems.stream()
+				.map(LayoutItem::type)
+				.distinct()
+				.forEach(type -> type.declare(builder));
+
 		var instance = builder.struct();
 		instance.setName(STRUCT_NAME);
 		builder.blankLine();
@@ -73,8 +67,10 @@ public class IndirectComponent implements SourceComponent {
 		packed.setName(PACKED_STRUCT_NAME);
 
 		for (var field : layoutItems) {
-			field.addPackedToStruct(packed);
-			field.addToStruct(instance);
+			packed.addField(field.type()
+					.packedTypeName(), field.name());
+			instance.addField(field.type()
+					.typeName(), field.name());
 		}
 
 		builder.blankLine();
@@ -94,7 +90,8 @@ public class IndirectComponent implements SourceComponent {
 
 	private void generateUnpackingBody(GlslBlock b) {
 		var unpackedFields = layoutItems.stream()
-				.map(layoutItem -> layoutItem.unpackField(UNPACKING_VARIABLE))
+				.map(layoutItem -> UNPACKING_VARIABLE.access(layoutItem.name())
+						.transform(layoutItem.type()::unpack))
 				.toList();
 		b.ret(GlslExpr.call(STRUCT_NAME, unpackedFields));
 	}

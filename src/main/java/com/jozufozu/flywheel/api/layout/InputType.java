@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.api.layout;
 import java.util.function.Consumer;
 
 import com.jozufozu.flywheel.gl.array.VertexAttribute;
+import com.jozufozu.flywheel.glsl.generate.GlslBuilder;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;
 
 public interface InputType {
@@ -16,4 +17,6 @@ public interface InputType {
 	int attributeCount();
 
 	GlslExpr unpack(GlslExpr packed);
+
+	void declare(GlslBuilder builder);
 }

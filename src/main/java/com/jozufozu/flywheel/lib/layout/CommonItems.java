@@ -2,6 +2,8 @@ package com.jozufozu.flywheel.lib.layout;
 
 import com.jozufozu.flywheel.gl.GlNumericType;
 import com.jozufozu.flywheel.gl.array.VertexAttribute;
+import com.jozufozu.flywheel.glsl.generate.FnSignature;
+import com.jozufozu.flywheel.glsl.generate.GlslExpr;
 
 public class CommonItems {
 	private static final String VEC2_TYPE = "vec2";
@@ -13,13 +15,20 @@ public class CommonItems {
 	private static final String IVEC2_TYPE = "ivec2";
 	private static final String FLOAT_TYPE = "float";
 	private static final String UINT_TYPE = "uint";
-	private static final String LIGHT_COORD_TYPE = "LightCoord";
+	private static final String LIGHT_COORD_TYPE = "uint";
 
 	public static final VecInput LIGHT_COORD = VecInput.builder()
 			.vertexAttribute(new VertexAttribute.Int(GlNumericType.USHORT, 2))
 			.typeName(IVEC2_TYPE)
 			.packedTypeName(LIGHT_COORD_TYPE)
 			.unpackingFunction(expr -> expr.callFunction("unpackLightCoord"))
+			.declaration(builder -> builder.function()
+					.signature(FnSignature.create()
+							.name("unpackLightCoord")
+							.returnType(IVEC2_TYPE)
+							.arg("uint", "light")
+							.build())
+					.body(block -> block.raw("return ivec2(light & 0xFFFFu, (light >> 16) & 0xFFFFu);")))
 			.build();
 
 	public static final VecInput FLOAT = VecInput.builder()
@@ -52,18 +61,69 @@ public class CommonItems {
 			.typeName(VEC4_TYPE)
 			.packedTypeName(VEC4F_TYPE)
 			.unpackingFunction(expr -> expr.callFunction("unpackVec4F"))
+			.declaration(builder -> {
+				builder.struct()
+						.setName(VEC4F_TYPE)
+						.addField(FLOAT_TYPE, "x")
+						.addField(FLOAT_TYPE, "y")
+						.addField(FLOAT_TYPE, "z")
+						.addField(FLOAT_TYPE, "w");
+				builder.function()
+						.signature(FnSignature.create()
+								.name("unpackVec4F")
+								.returnType(VEC4_TYPE)
+								.arg(VEC4F_TYPE, "v")
+								.build())
+						.body(block -> {
+							var v = GlslExpr.variable("v");
+							block.ret(GlslExpr.call("vec4", v.access("x"), v.access("y"), v.access("z"), v.access("w")));
+						});
+			})
 			.build();
 	public static final VecInput VEC3 = VecInput.builder()
 			.vertexAttribute(new VertexAttribute.Float(GlNumericType.FLOAT, 3, false))
 			.typeName(VEC3_TYPE)
 			.packedTypeName(VEC3F_TYPE)
 			.unpackingFunction(expr -> expr.callFunction("unpackVec3F"))
+			.declaration(builder -> {
+				builder.struct()
+						.setName(VEC3F_TYPE)
+						.addField(FLOAT_TYPE, "x")
+						.addField(FLOAT_TYPE, "y")
+						.addField(FLOAT_TYPE, "z");
+				builder.function()
+						.signature(FnSignature.create()
+								.name("unpackVec3F")
+								.returnType(VEC3_TYPE)
+								.arg(VEC3F_TYPE, "v")
+								.build())
+						.body(block -> {
+							var v = GlslExpr.variable("v");
+							block.ret(GlslExpr.call("vec3", v.access("x"), v.access("y"), v.access("z")));
+						});
+			})
 			.build();
 	public static final VecInput VEC2 = VecInput.builder()
 			.vertexAttribute(new VertexAttribute.Float(GlNumericType.FLOAT, 2, false))
 			.typeName(VEC2_TYPE)
 			.packedTypeName(VEC2F_TYPE)
 			.unpackingFunction(expr -> expr.callFunction("unpackVec2F"))
+			.declaration(builder -> {
+				builder.struct()
+						.setName(VEC2F_TYPE)
+						.addField(FLOAT_TYPE, "x")
+						.addField(FLOAT_TYPE, "y");
+				builder.function()
+						.signature(FnSignature.create()
+								.name("unpackVec2F")
+								.returnType(VEC2_TYPE)
+								.arg(VEC2F_TYPE, "v")
+								.build())
+						.body(block -> {
+							var v = GlslExpr.variable("v");
+							block.ret(GlslExpr.call("vec2", v.access("x"), v.access("y")));
+						});
+			})
 			.build();
 
 	public static final MatInput MAT3 = new MatInput(3, 3, "mat3", "Mat3F", "unpackMat3F");
