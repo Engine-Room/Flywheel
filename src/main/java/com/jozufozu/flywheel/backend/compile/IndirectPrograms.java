@@ -9,9 +9,15 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.compile.component.IndirectComponent;
 import com.jozufozu.flywheel.backend.compile.component.MaterialAdapterComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
+import com.jozufozu.flywheel.gl.shader.ShaderType;
+import com.jozufozu.flywheel.glsl.GLSLVersion;
+import com.jozufozu.flywheel.glsl.ShaderSources;
+
+import net.minecraft.resources.ResourceLocation;
 
 public class IndirectPrograms {
 	public static IndirectPrograms instance;
@@ -23,10 +29,10 @@ public class IndirectPrograms {
 		this.culling = culling;
 	}
 
-	static void reload(SourceLoader loadChecker, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, MaterialAdapterComponent vertexMaterialComponent, MaterialAdapterComponent fragmentMaterialComponent) {
+	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, MaterialAdapterComponent vertexMaterialComponent, MaterialAdapterComponent fragmentMaterialComponent) {
 		_delete();
-		var pipelineCompiler = PipelineCompiler.create(loadChecker, Pipelines.INDIRECT, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
-		var cullingCompiler = CullingCompiler.create(loadChecker, createCullingKeys(), uniformComponent);
+		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
+		var cullingCompiler = createCullingCompiler(uniformComponent, sources);
 
 		try {
 			var pipelineResult = pipelineCompiler.compileAndReportErrors();
@@ -66,6 +72,18 @@ public class IndirectPrograms {
 		}
 	}
 
+	private static CompilationHarness<InstanceType<?>> createCullingCompiler(UniformComponent uniformComponent, ShaderSources sources) {
+		return new CompilationHarness<>(sources, createCullingKeys(), Compile.<InstanceType<?>>program()
+				.link(Compile.<InstanceType<?>>shader(GLSLVersion.V460, ShaderType.COMPUTE)
+						.withComponent(uniformComponent)
+						.withComponent(IndirectComponent::create)
+						.withResource(InstanceType::instanceShader)
+						.withResource(Files.INDIRECT_CULL))
+				.then((InstanceType<?> key, GlProgram program) -> {
+					program.setUniformBlockBinding("FLWUniforms", 0);
+				}));
+	}
+
 	public GlProgram getIndirectProgram(VertexType vertexType, InstanceType<?> instanceType, Context contextShader) {
 		return pipeline.get(new PipelineProgramKey(vertexType, instanceType, contextShader));
 	}
@@ -79,5 +97,9 @@ public class IndirectPrograms {
 				.forEach(GlProgram::delete);
 		culling.values()
 				.forEach(GlProgram::delete);
+	}
+
+	private static final class Files {
+		public static final ResourceLocation INDIRECT_CULL = Flywheel.rl("internal/indirect_cull.glsl");
 	}
 }

@@ -31,8 +31,8 @@ public class FlwPrograms {
 		var vertexMaterialComponent = createVertexMaterialComponent(loadChecker);
 		var fragmentMaterialComponent = createFragmentMaterialComponent(loadChecker);
 
-		InstancingPrograms.reload(loadChecker, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
-		IndirectPrograms.reload(loadChecker, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
+		InstancingPrograms.reload(sources, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
+		IndirectPrograms.reload(sources, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
 
 		if (preLoadStats.errored()) {
 			Flywheel.LOGGER.error(preLoadStats.generateErrorLog());
@@ -47,7 +47,7 @@ public class FlwPrograms {
 						.returnType("bool")
 						.name("flw_discardPredicate")
 						.arg("vec4", "color")
-						.build(), GlslExpr.literal(false))
+						.build(), GlslExpr.boolLiteral(false))
 				.adapt(FnSignature.create()
 						.returnType("vec4")
 						.name("flw_fogFilter")

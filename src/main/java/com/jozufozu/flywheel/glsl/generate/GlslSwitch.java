@@ -25,7 +25,11 @@ public class GlslSwitch implements GlslStmt {
 	}
 
 	public void intCase(int expr, GlslBlock block) {
-		cases.add(Pair.of(GlslExpr.literal(expr), block));
+		cases.add(Pair.of(GlslExpr.intLiteral(expr), block));
+	}
+
+	public void uintCase(int expr, GlslBlock block) {
+		cases.add(Pair.of(GlslExpr.uintLiteral(expr), block));
 	}
 
 	public void defaultCase(GlslBlock block) {
@@ -35,7 +39,7 @@ public class GlslSwitch implements GlslStmt {
 	@Override
 	public String prettyPrint() {
 		return """
-            switch (%s) {
+				switch (%s) {
             %s
             }""".formatted(on.prettyPrint(), formatCases());
 	}

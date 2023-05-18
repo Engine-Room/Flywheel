@@ -1,8 +1,11 @@
 package com.jozufozu.flywheel.gl.shader;
 
-import static org.lwjgl.opengl.GL20.glDeleteProgram;
-import static org.lwjgl.opengl.GL20.glGetUniformLocation;
-import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL31.GL_INVALID_INDEX;
+import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
+import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
+import static org.lwjgl.opengl.GL32.glDeleteProgram;
+import static org.lwjgl.opengl.GL32.glGetUniformLocation;
+import static org.lwjgl.opengl.GL32.glUniform1i;
 
 import org.slf4j.Logger;
 
@@ -53,6 +56,17 @@ public class GlProgram extends GlObject {
 		if (samplerUniform >= 0) {
 			glUniform1i(samplerUniform, binding);
 		}
+	}
+
+	public void setUniformBlockBinding(String name, int binding) {
+		int index = glGetUniformBlockIndex(handle(), name);
+
+		if (index == GL_INVALID_INDEX) {
+			LOGGER.debug("No active uniform block '{}' exists. Could be unused.", name);
+			return;
+		}
+
+		glUniformBlockBinding(handle(), index, binding);
 	}
 
 	@Override

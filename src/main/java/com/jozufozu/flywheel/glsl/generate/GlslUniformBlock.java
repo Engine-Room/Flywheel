@@ -8,19 +8,16 @@ import com.jozufozu.flywheel.util.Pair;
 import com.jozufozu.flywheel.util.StringUtil;
 
 public class GlslUniformBlock implements GlslBuilder.Declaration {
-
-
     private String qualifier;
-    private int binding;
-    private String name;
-    private final List<Pair<String, String>> members = new ArrayList<>();
+	private String name;
+	private final List<Pair<String, String>> members = new ArrayList<>();
 
     @Override
     public String prettyPrint() {
-        return """
-            layout(%s, binding = %d) uniform %s {
-            %s
-            };""".formatted(qualifier, binding, name, StringUtil.indent(formatMembers(), 4));
+		return """
+				layout(%s) uniform %s {
+				%s
+				};""".formatted(qualifier, name, StringUtil.indent(formatMembers(), 4));
     }
 
     private String formatMembers() {
@@ -34,15 +31,10 @@ public class GlslUniformBlock implements GlslBuilder.Declaration {
         return this;
     }
 
-    public GlslUniformBlock binding(int i) {
-        binding = i;
-        return this;
-    }
-
-    public GlslUniformBlock name(String name) {
-        this.name = name;
-        return this;
-    }
+	public GlslUniformBlock name(String name) {
+		this.name = name;
+		return this;
+	}
 
     public GlslUniformBlock member(String typeName, String variableName) {
         members.add(Pair.of(typeName, variableName));

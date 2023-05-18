@@ -31,11 +31,15 @@ public interface GlslExpr {
 		return new FunctionCall0(functionName);
 	}
 
-	static GlslExpr literal(int expr) {
+	static GlslExpr intLiteral(int expr) {
 		return new IntLiteral(expr);
 	}
 
-	static GlslExpr literal(boolean expr) {
+	static GlslExpr uintLiteral(int expr) {
+		return new UIntLiteral(expr);
+	}
+
+	static GlslExpr boolLiteral(boolean expr) {
 		return new BoolLiteral(expr);
 	}
 
@@ -132,6 +136,19 @@ public interface GlslExpr {
 		@Override
 		public String prettyPrint() {
 			return Integer.toString(value);
+		}
+	}
+
+	record UIntLiteral(int value) implements GlslExpr {
+		public UIntLiteral {
+			if (value < 0) {
+				throw new IllegalArgumentException("UIntLiteral must be positive");
+			}
+		}
+
+		@Override
+		public String prettyPrint() {
+			return Integer.toString(value) + 'u';
 		}
 	}
 

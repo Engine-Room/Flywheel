@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public final class Pipelines {
 	public static final Pipeline INSTANCED_ARRAYS = Pipeline.builder()
-			.glslVersion(GLSLVersion.V420)
+			.glslVersion(GLSLVersion.V330)
 			.vertex(Files.INSTANCED_ARRAYS_DRAW)
 			.fragment(Files.DRAW_FRAGMENT)
 			.assembler(InstancedArraysComponent::new)

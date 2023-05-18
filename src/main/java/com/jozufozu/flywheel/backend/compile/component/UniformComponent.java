@@ -36,7 +36,6 @@ public class UniformComponent implements SourceComponent {
 
 		builder.uniformBlock()
 			.layout("std140")
-			.binding(0)
 			.name("FLWUniforms")
 			.member("flywheel_uniforms", "flywheel");
 
