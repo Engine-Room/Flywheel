@@ -12,6 +12,7 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.compile.component.MaterialAdapterComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
+import com.jozufozu.flywheel.glsl.ShaderSources;
 
 public class InstancingPrograms {
 	static InstancingPrograms instance;
@@ -21,9 +22,9 @@ public class InstancingPrograms {
 		this.pipeline = pipeline;
 	}
 
-	static void reload(SourceLoader loadChecker, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, MaterialAdapterComponent vertexMaterialComponent, MaterialAdapterComponent fragmentMaterialComponent) {
+	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, MaterialAdapterComponent vertexMaterialComponent, MaterialAdapterComponent fragmentMaterialComponent) {
 		_delete();
-		var instancingCompiler = PipelineCompiler.create(loadChecker, Pipelines.INSTANCED_ARRAYS, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
+		var instancingCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCED_ARRAYS, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
 
 		try {
 			var result = instancingCompiler.compileAndReportErrors();

@@ -87,7 +87,7 @@ public class MaterialAdapterComponent implements SourceComponent {
 				block.ret(adaptedCall);
 			}
 
-			sw.intCase(i, block);
+			sw.uintCase(i, block);
 		}
 
 		if (!isVoid) {

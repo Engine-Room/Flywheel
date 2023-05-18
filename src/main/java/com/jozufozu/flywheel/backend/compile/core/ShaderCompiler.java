@@ -32,7 +32,6 @@ public class ShaderCompiler {
 		}
 
 		Compilation ctx = new Compilation(glslVersion, shaderType);
-		ctx.enableExtension("GL_ARB_explicit_attrib_location");
 		ctx.enableExtension("GL_ARB_conservative_depth");
 
 		expand(sourceComponents, ctx::appendComponent);
