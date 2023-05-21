@@ -9,11 +9,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.lib.task.ThreadGroupNotifier;
 import com.jozufozu.flywheel.lib.task.WaitGroup;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
@@ -37,7 +37,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	private final Deque<Runnable> taskQueue = new ConcurrentLinkedDeque<>();
 	private final Queue<Runnable> mainThreadQueue = new ConcurrentLinkedQueue<>();
 
-	private final Object taskNotifier = new Object();
+	private final ThreadGroupNotifier taskNotifier = new ThreadGroupNotifier();
 	private final WaitGroup waitGroup = new WaitGroup();
 
 	public ParallelTaskExecutor(String name) {
@@ -114,9 +114,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		waitGroup.add();
 		taskQueue.add(task);
 
-		synchronized (taskNotifier) {
-			taskNotifier.notifyAll();
-		}
+		taskNotifier.postNotification();
 	}
 
 	@Override
@@ -148,8 +146,8 @@ public class ParallelTaskExecutor implements TaskExecutor {
 			} else {
 				// then wait for the other threads to finish.
 				waitGroup.await();
-				// at this point there will be no more tasks in the queue, but
-				// one of the worker threads may have submitted a main thread task.
+				// at this point we know taskQueue is empty,
+				// but one of the worker threads may have submitted a main thread task.
 				if (mainThreadQueue.isEmpty()) {
 					// if they didn't, we're done.
 					break;
@@ -168,23 +166,6 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		waitGroup.await();
 		// ...and clear the main thread queue.
 		mainThreadQueue.clear();
-	}
-
-	@Nullable
-	private Runnable getNextTask() {
-		Runnable task = taskQueue.pollFirst();
-
-		if (task == null) {
-			synchronized (taskNotifier) {
-				try {
-					taskNotifier.wait();
-				} catch (InterruptedException e) {
-					//
-				}
-			}
-		}
-
-		return task;
 	}
 
 	private void processTask(Runnable task) {
@@ -226,9 +207,11 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		public void run() {
 			// Run until the executor shuts down
 			while (ParallelTaskExecutor.this.running.get()) {
-				Runnable task = getNextTask();
+				Runnable task = taskQueue.pollFirst();
 
 				if (task == null) {
+					// Nothing to do, time to sleep.
+					taskNotifier.awaitNotification();
 					continue;
 				}
 

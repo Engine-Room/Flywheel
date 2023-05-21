@@ -20,11 +20,7 @@ import com.mojang.math.Matrix4f;
 
 public class TransformCall<I extends Instance> {
 	private final CPUInstancer<I> instancer;
-	private final Material material;
-	private final BatchedMeshPool.BufferedMesh mesh;
-
 	private final int meshVertexCount;
-	private final int meshByteSize;
 	private final InstanceVertexTransformer<I> instanceVertexTransformer;
 	private final MaterialVertexTransformer materialVertexTransformer;
 	private final InstanceBoundingSphereTransformer<I> boundingSphereTransformer;
@@ -34,15 +30,12 @@ public class TransformCall<I extends Instance> {
 
 	public TransformCall(CPUInstancer<I> instancer, Material material, BatchedMeshPool.BufferedMesh mesh) {
 		this.instancer = instancer;
-		this.material = material;
-		this.mesh = mesh;
 
 		instanceVertexTransformer = instancer.type.getVertexTransformer();
 		boundingSphereTransformer = instancer.type.getBoundingSphereTransformer();
 		materialVertexTransformer = material.getVertexTransformer();
 
 		meshVertexCount = mesh.getVertexCount();
-		meshByteSize = mesh.size();
 		boundingSphere = mesh.mesh.getBoundingSphere();
 
 		drawPlan = RunOnAllWithContextPlan.of(instancer::getAll, (instance, ctx) -> {

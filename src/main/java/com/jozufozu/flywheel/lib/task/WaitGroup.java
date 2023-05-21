@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 
+import com.google.common.base.Preconditions;
 import com.mojang.logging.LogUtils;
 
 public class WaitGroup {
@@ -16,6 +17,7 @@ public class WaitGroup {
 	}
 
 	public void add(int i) {
+		Preconditions.checkArgument(i >= 0, "Cannot add a negative number of tasks to a WaitGroup!");
 		if (i == 0) {
 			return;
 		}
@@ -31,17 +33,9 @@ public class WaitGroup {
 
 	public void await() {
 		// TODO: comprehensive performance tracking for tasks
-		long start = System.nanoTime();
-		int count = 0;
 		while (counter.get() > 0) {
 			// spin in place to avoid sleeping the main thread
-			count++;
-		}
-		long end = System.nanoTime();
-		long elapsed = end - start;
-
-		if (elapsed > 1000000) { // > 1ms
-			// LOGGER.debug("Waited " + StringUtil.formatTime(elapsed) + ", looped " + count + " times");
+			Thread.onSpinWait();
 		}
 	}
 
