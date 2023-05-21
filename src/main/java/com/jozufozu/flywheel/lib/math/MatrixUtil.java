@@ -1,7 +1,10 @@
 package com.jozufozu.flywheel.lib.math;
 
+import static org.joml.Math.fma;
+
 import java.nio.ByteBuffer;
 
+import org.joml.Math;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.mixin.matrix.Matrix3fAccessor;
@@ -12,32 +15,32 @@ import com.mojang.math.Matrix4f;
 public final class MatrixUtil {
 	public static float transformPositionX(Matrix4f matrix, float x, float y, float z) {
 		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
-		return (m.flywheel$m00() * x) + (m.flywheel$m01() * y) + (m.flywheel$m02() * z) + m.flywheel$m03();
+		return fma(m.flywheel$m00(), x, fma(m.flywheel$m01(), y, fma(m.flywheel$m02(), z, m.flywheel$m03())));
 	}
 
 	public static float transformPositionY(Matrix4f matrix, float x, float y, float z) {
 		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
-		return (m.flywheel$m10() * x) + (m.flywheel$m11() * y) + (m.flywheel$m12() * z) + m.flywheel$m13();
+		return fma(m.flywheel$m10(), x, fma(m.flywheel$m11(), y, fma(m.flywheel$m12(), z, m.flywheel$m13())));
 	}
 
 	public static float transformPositionZ(Matrix4f matrix, float x, float y, float z) {
 		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
-		return (m.flywheel$m20() * x) + (m.flywheel$m21() * y) + (m.flywheel$m22() * z) + m.flywheel$m23();
+		return fma(m.flywheel$m20(), x, fma(m.flywheel$m21(), y, fma(m.flywheel$m22(), z, m.flywheel$m23())));
 	}
 
 	public static float transformNormalX(Matrix3f matrix, float x, float y, float z) {
 		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
-		return (m.flywheel$m00() * x) + (m.flywheel$m01() * y) + (m.flywheel$m02() * z);
+		return fma(m.flywheel$m00(), x, fma(m.flywheel$m01(), y, m.flywheel$m02() * z));
 	}
 
 	public static float transformNormalY(Matrix3f matrix, float x, float y, float z) {
 		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
-		return (m.flywheel$m10() * x) + (m.flywheel$m11() * y) + (m.flywheel$m12() * z);
+		return fma(m.flywheel$m10(), x, fma(m.flywheel$m11(), y, m.flywheel$m12() * z));
 	}
 
 	public static float transformNormalZ(Matrix3f matrix, float x, float y, float z) {
 		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
-		return (m.flywheel$m20() * x) + (m.flywheel$m21() * y) + (m.flywheel$m22() * z);
+		return fma(m.flywheel$m20(), x, fma(m.flywheel$m21(), y, m.flywheel$m22() * z));
 	}
 
 	public static void write(Matrix4f matrix, ByteBuffer buf) {

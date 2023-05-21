@@ -1,5 +1,8 @@
 package com.jozufozu.flywheel.lib.vertex;
 
+import static org.joml.Math.fma;
+import static org.joml.Math.invsqrt;
+
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.lib.math.MatrixUtil;
 import com.mojang.math.Matrix3f;
@@ -22,9 +25,9 @@ public final class VertexTransformations {
 		float tnx = MatrixUtil.transformNormalX(matrix, nx, ny, nz);
 		float tny = MatrixUtil.transformNormalY(matrix, nx, ny, nz);
 		float tnz = MatrixUtil.transformNormalZ(matrix, nx, ny, nz);
-		float sqrLength = tnx * tnx + tny * tny + tnz * tnz;
+		float sqrLength = fma(tnx, tnx, fma(tny, tny, tnz * tnz));
 		if (sqrLength != 0) {
-			float f = 1 / (float) Math.sqrt(sqrLength);
+			float f = invsqrt(sqrLength);
 			tnx *= f;
 			tny *= f;
 			tnz *= f;
