@@ -35,11 +35,13 @@ import net.minecraft.world.phys.Vec3;
 public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVisual implements EntityVisual<T>, TickingLightListener {
 	protected final T entity;
 	protected final MutableBox bounds;
+	protected final EntityVisibilityTester boxTracker;
 
 	public AbstractEntityVisual(VisualizationContext ctx, T entity) {
 		super(ctx, entity.level);
 		this.entity = entity;
 		bounds = MutableBox.from(entity.getBoundingBox());
+		boxTracker = new EntityVisibilityTester(entity, ctx.renderOrigin());
 	}
 
 	@Override
@@ -99,13 +101,6 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 		if (entity.noCulling) {
 			return true;
 		}
-
-		AABB aabb = entity.getBoundingBoxForCulling();
-		return frustum.testAab((float) (aabb.minX - renderOrigin.getX()) - 0.5f,
-				(float) (aabb.minY - renderOrigin.getY()) - 0.5f,
-				(float) (aabb.minZ - renderOrigin.getZ()) - 0.5f,
-				(float) (aabb.maxX - renderOrigin.getX()) + 0.5f,
-				(float) (aabb.maxY - renderOrigin.getY()) + 0.5f,
-				(float) (aabb.maxZ - renderOrigin.getZ()) + 0.5f);
+		return boxTracker.isVisible(frustum);
 	}
 }
