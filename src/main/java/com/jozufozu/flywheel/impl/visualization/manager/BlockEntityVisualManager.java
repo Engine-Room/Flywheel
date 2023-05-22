@@ -9,7 +9,6 @@ import com.jozufozu.flywheel.api.visual.BlockEntityVisual;
 import com.jozufozu.flywheel.api.visual.Visual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.impl.visualization.VisualizationHelper;
-import com.jozufozu.flywheel.impl.visualization.storage.One2OneStorage;
 import com.jozufozu.flywheel.impl.visualization.storage.Storage;
 import com.jozufozu.flywheel.util.FlwUtil;
 
@@ -39,7 +38,7 @@ public class BlockEntityVisualManager extends VisualManager<BlockEntity> {
 		}
 	}
 
-	private static class BlockEntityStorage extends One2OneStorage<BlockEntity> {
+	private static class BlockEntityStorage extends Storage<BlockEntity> {
 		private final Long2ObjectMap<BlockEntityVisual<?>> posLookup = new Long2ObjectOpenHashMap<>();
 
 		public BlockEntityStorage(Engine engine) {

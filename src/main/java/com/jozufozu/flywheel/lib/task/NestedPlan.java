@@ -54,9 +54,28 @@ public record NestedPlan<C>(List<Plan<C>> parallelPlans) implements SimplyCompos
 					.maybeSimplify();
 		}
 
-		var simplifiedTasks = new ArrayList<Runnable>();
+		var simplifiedTasks = new ArrayList<ContextConsumer<C>>();
 		var simplifiedPlans = new ArrayList<Plan<C>>();
-		flattenTasksAndPlans(simplifiedTasks, simplifiedPlans);
+		var toVisit = new ArrayDeque<>(parallelPlans);
+		while (!toVisit.isEmpty()) {
+			var plan = toVisit.pop()
+					.maybeSimplify();
+
+			if (plan == UnitPlan.of()) {
+				continue;
+			}
+
+			if (plan instanceof SimplePlan<C> simplePlan) {
+				// merge all simple plans into one
+				simplifiedTasks.addAll(simplePlan.parallelTasks());
+			} else if (plan instanceof NestedPlan<C> nestedPlan) {
+				// inline and re-visit nested plans
+				toVisit.addAll(nestedPlan.parallelPlans());
+			} else {
+				// /shrug
+				simplifiedPlans.add(plan);
+			}
+		}
 
 		if (simplifiedTasks.isEmpty() && simplifiedPlans.isEmpty()) {
 			// everything got simplified away
@@ -80,28 +99,5 @@ public record NestedPlan<C>(List<Plan<C>> parallelPlans) implements SimplyCompos
 		// we have both simple and complex plans, so we need to create a nested plan
 		simplifiedPlans.add(SimplePlan.of(simplifiedTasks));
 		return new NestedPlan<>(simplifiedPlans);
-	}
-
-	private void flattenTasksAndPlans(List<Runnable> simplifiedTasks, List<Plan<C>> simplifiedPlans) {
-		var toVisit = new ArrayDeque<>(parallelPlans);
-		while (!toVisit.isEmpty()) {
-			var plan = toVisit.pop()
-					.maybeSimplify();
-
-			if (plan == UnitPlan.of()) {
-				continue;
-			}
-
-			if (plan instanceof SimplePlan simplePlan) {
-				// merge all simple plans into one
-				simplifiedTasks.addAll(simplePlan.parallelTasks());
-			} else if (plan instanceof NestedPlan<C> nestedPlan) {
-				// inline and re-visit nested plans
-				toVisit.addAll(nestedPlan.parallelPlans());
-			} else {
-				// /shrug
-				simplifiedPlans.add(plan);
-			}
-		}
 	}
 }

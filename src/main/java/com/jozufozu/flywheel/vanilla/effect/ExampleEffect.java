@@ -1,32 +1,28 @@
 package com.jozufozu.flywheel.vanilla.effect;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.joml.Vector3f;
 
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.visual.DynamicVisual;
+import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.visual.Effect;
 import com.jozufozu.flywheel.api.visual.EffectVisual;
-import com.jozufozu.flywheel.api.visual.TickableVisual;
+import com.jozufozu.flywheel.api.visual.PlannedVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.impl.visualization.VisualizedRenderDispatcher;
-import com.jozufozu.flywheel.lib.box.ImmutableBox;
-import com.jozufozu.flywheel.lib.box.MutableBox;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
 import com.jozufozu.flywheel.lib.model.Models;
+import com.jozufozu.flywheel.lib.task.ForEachPlan;
 import com.jozufozu.flywheel.lib.util.AnimationTickHolder;
-import com.jozufozu.flywheel.lib.visual.AbstractVisual;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -42,7 +38,7 @@ public class ExampleEffect implements Effect {
 	private static final float SPAWN_RADIUS = 8.0f;
 	private static final float LIMIT_RANGE = 10.0f;
 	private static final float SPEED_LIMIT = 0.1f;
-	private static final float RENDER_SCALE = 1 / 16f;
+	private static final float RENDER_SCALE = 2 / 16f;
 
 	private static final float SIGHT_RANGE = 5;
 
@@ -56,20 +52,10 @@ public class ExampleEffect implements Effect {
 
 	private final Level level;
 	private final Vector3f targetPoint;
-	private final BlockPos blockPos;
-	private final ImmutableBox volume;
-
-	private final List<BoidVisual> effects;
-
-	private final List<Boid> boids;
 
 	public ExampleEffect(Level level, Vector3f targetPoint) {
 		this.level = level;
 		this.targetPoint = targetPoint;
-		this.blockPos = new BlockPos(targetPoint.x, targetPoint.y, targetPoint.z);
-		this.volume = MutableBox.from(this.blockPos);
-		this.effects = new ArrayList<>(VISUAL_COUNT);
-		this.boids = new ArrayList<>(VISUAL_COUNT);
 	}
 
 	public static void tick(TickEvent.ClientTickEvent event) {
@@ -109,22 +95,62 @@ public class ExampleEffect implements Effect {
 	}
 
 	@Override
-	public Collection<EffectVisual<?>> createVisuals(VisualizationContext ctx) {
-		effects.clear();
-		boids.clear();
-		for (int i = 0; i < VISUAL_COUNT; i++) {
-			var x = targetPoint.x + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
-			var y = targetPoint.y + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
-			var z = targetPoint.z + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
-
-			Boid boid = new Boid(x, y, z);
-			boids.add(boid);
-			effects.add(new BoidVisual(ctx, level, boid));
-		}
-		return Collections.unmodifiableList(effects);
+	public EffectVisual<?> visualize(VisualizationContext ctx) {
+		return new ExampleVisual(ctx);
 	}
 
-	public class Boid {
+	public class ExampleVisual implements EffectVisual<ExampleEffect>, PlannedVisual {
+		private final List<BoidVisual> effects;
+		private final List<Boid> boids;
+
+		public ExampleVisual(VisualizationContext ctx) {
+			this.effects = new ArrayList<>(VISUAL_COUNT);
+			this.boids = new ArrayList<>(VISUAL_COUNT);
+
+			for (int i = 0; i < VISUAL_COUNT; i++) {
+				var x = targetPoint.x + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
+				var y = targetPoint.y + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
+				var z = targetPoint.z + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
+
+				Boid boid = new Boid(x, y, z);
+				boids.add(boid);
+				effects.add(new BoidVisual(ctx, boid));
+			}
+		}
+
+		@Override
+		public Plan<VisualTickContext> planTick() {
+			Plan<VisualTickContext> beginTick = ForEachPlan.of(() -> boids, Boid::beginTick);
+			return beginTick.then(ForEachPlan.of(() -> effects, boid -> boid.self.tick(boids)));
+		}
+
+		@Override
+		public Plan<VisualFrameContext> planFrame() {
+			return ForEachPlan.of(() -> effects, BoidVisual::beginFrame);
+		}
+
+		@Override
+		public void init() {
+
+		}
+
+		@Override
+		public void update() {
+
+		}
+
+		@Override
+		public boolean shouldReset() {
+			return false;
+		}
+
+		@Override
+		public void delete() {
+			effects.forEach(BoidVisual::_delete);
+		}
+	}
+
+	public static class Boid {
 		final Vector3f lastPosition;
 		final Vector3f position;
 		final Vector3f lastVelocity = new Vector3f(0);
@@ -145,13 +171,11 @@ public class ExampleEffect implements Effect {
 			lastPosition.set(position);
 		}
 
-		public void tick() {
-			beginTick();
-
+		public void tick(List<Boid> swarm) {
 			int seen = 0;
 			coherence.set(0);
 			alignment.set(0);
-			for (Boid boid : boids) {
+			for (Boid boid : swarm) {
 				if (boid == this) {
 					continue;
 				}
@@ -237,44 +261,29 @@ public class ExampleEffect implements Effect {
 		}
 	}
 
-	public class BoidVisual extends AbstractVisual implements EffectVisual<ExampleEffect>, DynamicVisual, TickableVisual {
+	public static class BoidVisual {
 		private final Boid self;
+		private final Vec3i renderOrigin;
 
-		private TransformedInstance instance;
+		private final TransformedInstance instance;
 
-		public BoidVisual(VisualizationContext ctx, Level level, Boid self) {
-			super(ctx, level);
+		public BoidVisual(VisualizationContext ctx, Boid self) {
+			renderOrigin = ctx.renderOrigin();
 			this.self = self;
-		}
 
-		@Override
-		public void init() {
-			instance = instancerProvider.instancer(InstanceTypes.TRANSFORMED, Models.block(Blocks.SHROOMLIGHT.defaultBlockState()), RenderStage.AFTER_PARTICLES)
+			instance = ctx.instancerProvider()
+					.instancer(InstanceTypes.TRANSFORMED, Models.block(Blocks.SHROOMLIGHT.defaultBlockState()), RenderStage.AFTER_PARTICLES)
 					.createInstance();
 
 			instance.setBlockLight(15)
 					.setSkyLight(15);
-
-			super.init();
 		}
 
-		@Override
-		protected void _delete() {
+		public void _delete() {
 			instance.delete();
 		}
 
-		@Override
-		public ImmutableBox getVolume() {
-			return volume;
-		}
-
-		@Override
-		public void tick(VisualTickContext c) {
-			self.tick();
-		}
-
-		@Override
-		public void beginFrame(VisualFrameContext context) {
+		public void beginFrame() {
 			float partialTicks = AnimationTickHolder.getPartialTicks();
 
 			var x = Mth.lerp(partialTicks, self.lastPosition.x, self.position.x);

@@ -2,36 +2,50 @@ package com.jozufozu.flywheel.lib.task;
 
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 
-public record SimplePlan(List<Runnable> parallelTasks) implements ContextAgnosticPlan {
-	public static <C> Plan<C> of(Runnable... tasks) {
-		return new SimplePlan(List.of(tasks)).cast();
+public record SimplePlan<C>(List<ContextConsumer<C>> parallelTasks) implements SimplyComposedPlan<C> {
+	@SafeVarargs
+	public static <C> SimplePlan<C> of(ContextRunnable<C>... tasks) {
+		return new SimplePlan<>(List.of(tasks));
 	}
 
-	public static <C> Plan<C> of(List<Runnable> tasks) {
-		return new SimplePlan(tasks).cast();
+	@SafeVarargs
+	public static <C> SimplePlan<C> of(ContextConsumer<C>... tasks) {
+		return new SimplePlan<>(List.of(tasks));
+	}
+
+	public static <C> SimplePlan<C> of(List<ContextConsumer<C>> tasks) {
+		return new SimplePlan<>(tasks);
 	}
 
 	@Override
-	public void execute(TaskExecutor taskExecutor, Runnable onCompletion) {
+	public void execute(TaskExecutor taskExecutor, C context, Runnable onCompletion) {
 		if (parallelTasks.isEmpty()) {
 			onCompletion.run();
 			return;
 		}
 
-		var synchronizer = new Synchronizer(parallelTasks.size(), onCompletion);
-		for (var task : parallelTasks) {
-			taskExecutor.execute(() -> {
-				task.run();
-				synchronizer.decrementAndEventuallyRun();
-			});
-		}
+		taskExecutor.execute(() -> {
+			PlanUtil.distribute(taskExecutor, context, onCompletion, parallelTasks, ContextConsumer::accept);
+		});
 	}
 
 	@Override
-	public Plan<Object> maybeSimplify() {
+	public Plan<C> and(Plan<C> plan) {
+		if (plan instanceof SimplePlan<C> simple) {
+			return of(ImmutableList.<ContextConsumer<C>>builder()
+					.addAll(parallelTasks)
+					.addAll(simple.parallelTasks)
+					.build());
+		}
+		return SimplyComposedPlan.super.and(plan);
+	}
+
+	@Override
+	public Plan<C> maybeSimplify() {
 		if (parallelTasks.isEmpty()) {
 			return UnitPlan.of();
 		}

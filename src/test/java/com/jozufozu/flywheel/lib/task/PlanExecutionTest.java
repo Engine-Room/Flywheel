@@ -52,7 +52,7 @@ class PlanExecutionTest {
 		var sequence = new IntArrayList(barriers + 1);
 		var expected = new IntArrayList(barriers + 1);
 
-		var plan = SimplePlan.<Unit>of(() -> sequence.add(1));
+		Plan<Unit> plan = SimplePlan.of(() -> sequence.add(1));
 		expected.add(1);
 
 		for (int i = 0; i < barriers; i++) {
@@ -71,18 +71,18 @@ class PlanExecutionTest {
 		var lock = new Object();
 		var sequence = new IntArrayList(8);
 
-		Runnable addOne = () -> {
+		ContextRunnable<Unit> addOne = () -> {
 			synchronized (lock) {
 				sequence.add(1);
 			}
 		};
-		Runnable addTwo = () -> {
+		ContextRunnable<Unit> addTwo = () -> {
 			synchronized (lock) {
 				sequence.add(2);
 			}
 		};
 
-		var plan = SimplePlan.<Unit>of(addOne, addOne, addOne, addOne)
+		var plan = SimplePlan.of(addOne, addOne, addOne, addOne)
 				.then(SimplePlan.of(addTwo, addTwo, addTwo, addTwo));
 
 		runAndWait(plan);
@@ -140,7 +140,7 @@ class PlanExecutionTest {
 	@Test
 	void mainThreadPlan() {
 		var done = new AtomicBoolean(false);
-		var plan = new OnMainThreadPlan(() -> done.set(true));
+		var plan = OnMainThreadPlan.of(() -> done.set(true));
 
 		plan.execute(EXECUTOR, Unit.INSTANCE);
 

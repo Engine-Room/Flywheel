@@ -4,7 +4,6 @@ package com.jozufozu.flywheel.lib.task;
  * Thin wrapper around Java's built-in object synchronization primitives.
  */
 public class ThreadGroupNotifier {
-
 	public synchronized void awaitNotification() {
 		try {
 			this.wait();

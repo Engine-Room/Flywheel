@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.util.Unit;
 
 public class PlanSimplificationTest {
 
-	public static final Runnable NOOP = () -> {
+	public static final ContextRunnable<Unit> NOOP = () -> {
 	};
 	public static final Plan<Unit> SIMPLE = SimplePlan.of(NOOP);
 
@@ -36,7 +36,7 @@ public class PlanSimplificationTest {
 
 		Assertions.assertEquals(oneSimple.maybeSimplify(), SIMPLE);
 
-		var mainThreadNoop = new OnMainThreadPlan(NOOP);
+		var mainThreadNoop = new OnMainThreadPlan<>(NOOP);
 		var oneMainThread = NestedPlan.of(mainThreadNoop);
 
 		Assertions.assertEquals(oneMainThread.maybeSimplify(), mainThreadNoop);
@@ -66,7 +66,8 @@ public class PlanSimplificationTest {
 
 	@Test
 	void complexNesting() {
-		var mainThreadNoop = OnMainThreadPlan.<Unit>of(NOOP);
+		var mainThreadNoop = OnMainThreadPlan.<Unit>of(() -> {
+		});
 
 		var nested = NestedPlan.of(mainThreadNoop, SIMPLE);
 		Assertions.assertEquals(nested.maybeSimplify(), nested); // cannot simplify
@@ -78,7 +79,8 @@ public class PlanSimplificationTest {
 
 	@Test
 	void nestedNoSimple() {
-		var mainThreadNoop = OnMainThreadPlan.<Unit>of(NOOP);
+		var mainThreadNoop = OnMainThreadPlan.<Unit>of(() -> {
+		});
 		var barrier = new BarrierPlan<>(SIMPLE, SIMPLE);
 		var oneMainThread = NestedPlan.of(mainThreadNoop, NestedPlan.of(mainThreadNoop, barrier, barrier));
 
