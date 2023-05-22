@@ -2,9 +2,9 @@ package com.jozufozu.flywheel.impl.visualization.ratelimit;
 
 import net.minecraft.util.Mth;
 
-public class BandedPrimeLimiter implements DistanceUpdateLimiter {
+public class BandedPrimeLimiter implements DistanceUpdateLimiterImpl {
 	// 1 followed by the prime numbers
-	private static final int[] DIVISOR_SEQUENCE = new int[] { 1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31 };
+	private static final int[] DIVISOR_SEQUENCE = new int[]{1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31};
 
 	private int tickCount = 0;
 

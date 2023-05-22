@@ -24,7 +24,13 @@ public class EntityVisibilityTester {
 		this.renderOrigin = renderOrigin;
 	}
 
-	public boolean isVisible(FrustumIntersection frustum) {
+	/**
+	 * Check whether the Entity is visible.
+	 *
+	 * @param frustum The frustum to test against.
+	 * @return {@code true} if the Entity is visible, {@code false} otherwise.
+	 */
+	public boolean check(FrustumIntersection frustum) {
 		AABB aabb = entity.getBoundingBoxForCulling();
 
 		boolean visible = adjustAndTestAABB(frustum, aabb);

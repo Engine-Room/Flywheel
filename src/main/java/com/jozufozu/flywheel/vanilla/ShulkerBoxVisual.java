@@ -6,6 +6,7 @@ import java.util.function.Function;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
+import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
@@ -81,10 +82,15 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	}
 
 	@Override
-	public void beginFrame() {
+	public void beginFrame(VisualFrameContext context) {
+		if (doDistanceLimitThisFrame(context) || !visible(context.frustum())) {
+			return;
+		}
 		float progress = blockEntity.getProgress(AnimationTickHolder.getPartialTicks());
 
-		if (progress == lastProgress) return;
+		if (progress == lastProgress) {
+			return;
+		}
 		lastProgress = progress;
 
 		Quaternion spin = Vector3f.YP.rotationDegrees(270.0F * progress);

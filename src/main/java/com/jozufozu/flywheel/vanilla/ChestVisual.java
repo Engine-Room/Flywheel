@@ -7,6 +7,7 @@ import java.util.function.BiFunction;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
+import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.OrientedInstance;
@@ -80,7 +81,11 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 	}
 
 	@Override
-	public void beginFrame() {
+	public void beginFrame(VisualFrameContext context) {
+		if (doDistanceLimitThisFrame(context) || !visible(context.frustum())) {
+			return;
+		}
+
 		float progress = lidProgress.get(AnimationTickHolder.getPartialTicks());
 
 		if (lastProgress == progress) {
@@ -96,7 +101,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 
 		lid.loadIdentity()
 				.translate(getVisualPosition())
-				.translate(0, 9f/16f, 0)
+				.translate(0, 9f / 16f, 0)
 				.centre()
 				.multiply(baseRotation)
 				.unCentre()

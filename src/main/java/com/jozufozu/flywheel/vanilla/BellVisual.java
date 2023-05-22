@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
+import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.OrientedInstance;
@@ -38,11 +39,21 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 		bell = createBellInstance().setPivot(0.5f, 0.75f, 0.5f)
 				.setPosition(getVisualPosition());
 
+		updateRotation();
+
 		super.init();
 	}
 
 	@Override
-	public void beginFrame() {
+	public void beginFrame(VisualFrameContext context) {
+		if (doDistanceLimitThisFrame(context) || !visible(context.frustum())) {
+			return;
+		}
+
+		updateRotation();
+	}
+
+	private void updateRotation() {
 		float ringTime = (float) blockEntity.ticks + AnimationTickHolder.getPartialTicks();
 
 		if (ringTime == lastRingTime) {

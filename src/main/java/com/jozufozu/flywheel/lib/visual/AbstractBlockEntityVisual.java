@@ -5,6 +5,7 @@ import org.joml.FrustumIntersection;
 import com.jozufozu.flywheel.api.visual.BlockEntityVisual;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
+import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityVisualManager;
 import com.jozufozu.flywheel.lib.box.ImmutableBox;
@@ -51,11 +52,6 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	}
 
 	@Override
-	public double distanceSquared(double x, double y, double z) {
-		return pos.distToCenterSqr(x, y, z);
-	}
-
-	@Override
 	public ImmutableBox getVolume() {
 		return MutableBox.from(pos);
 	}
@@ -72,8 +68,24 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 		return visualPos;
 	}
 
-	public boolean isVisible(FrustumIntersection frustum) {
-		return frustum.testAab(visualPos.getX(), visualPos.getY(), visualPos.getZ(),
-				visualPos.getX() + 1, visualPos.getY() + 1, visualPos.getZ() + 1);
+	/**
+	 * @param frustum The current frustum.
+	 * @return {@code true} if this visual within the given frustum.
+	 */
+	public boolean visible(FrustumIntersection frustum) {
+		return frustum.testAab(visualPos.getX(), visualPos.getY(), visualPos.getZ(), visualPos.getX() + 1, visualPos.getY() + 1, visualPos.getZ() + 1);
+	}
+
+	/**
+	 * Limits which frames this visual is updated on based on its distance from the camera.
+	 * <p>
+	 * You may optionally do this check to avoid updating your visual every frame when it is far away.
+	 *
+	 * @param context The current frame context.
+	 * @return {@code true} if this visual shouldn't be updated this frame based on its distance from the camera.
+	 */
+	public boolean doDistanceLimitThisFrame(VisualFrameContext context) {
+		return !context.limiter()
+				.shouldUpdate(pos.distToCenterSqr(context.cameraX(), context.cameraY(), context.cameraZ()));
 	}
 }

@@ -21,23 +21,11 @@ import com.jozufozu.flywheel.api.instance.Instancer;
  */
 public interface TickableVisual extends Visual {
 	/**
-	 * Called every tick, and after initialization.<p>
-	 * <em>DISPATCHED IN PARALLEL</em>, don't attempt to mutate anything outside of this visual
-	 * without proper synchronization.<p>
+	 * Called every tick.
+	 * <p>
+	 * <b>DISPATCHED IN PARALLEL</b>. Ensure proper synchronization if you need to mutate anything outside this visual.
+	 * <p>
 	 * {@link Instancer}/{@link Instance} creation/acquisition is safe here.
 	 */
-	void tick();
-
-	/**
-	 * As a further optimization, tickable visuals that are far away are ticked less often.
-	 * This behavior can be disabled by returning false.
-	 *
-	 * <br> You might want to opt out of this if you want your animations to remain smooth
-	 * even when far away from the camera. It is recommended to keep this as is, however.
-	 *
-	 * @return {@code true} if your visual should be slow ticked.
-	 */
-	default boolean decreaseTickRateWithDistance() {
-		return true;
-	}
+	void tick(VisualTickContext c);
 }

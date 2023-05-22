@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.api.task;
 
+import java.util.function.Function;
+
 public interface Plan<C> {
 	/**
 	 * Submit this plan for execution.
@@ -32,12 +34,32 @@ public interface Plan<C> {
 	Plan<C> then(Plan<C> plan);
 
 	/**
+	 * Create a new plan that executes this plan, then transforms the context to execute the given plan.
+	 *
+	 * @param map  A function that transforms the plan context.
+	 * @param plan The plan to execute after this plan with the transformed context.
+	 * @param <D>  The type of the transformed context.
+	 * @return The composed plan.
+	 */
+	<D> Plan<C> thenMap(Function<C, D> map, Plan<D> plan);
+
+	/**
 	 * Create a new plan that executes this plan and the given plan in parallel.
 	 *
 	 * @param plan The plan to execute in parallel with this plan.
 	 * @return The composed plan.
 	 */
 	Plan<C> and(Plan<C> plan);
+
+	/**
+	 * Create a new plan that executes this plan and the given plan in parallel.
+	 *
+	 * @param map  A function that transforms the plan context.
+	 * @param plan The plan to execute in parallel with this plan than accepts the transformed context.
+	 * @param <D>  The type of the transformed context.
+	 * @return The composed plan.
+	 */
+	<D> Plan<C> andMap(Function<C, D> map, Plan<D> plan);
 
 	/**
 	 * If possible, create a new plan that accomplishes everything

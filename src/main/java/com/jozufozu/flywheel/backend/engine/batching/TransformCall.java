@@ -12,7 +12,7 @@ import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
-import com.jozufozu.flywheel.lib.task.RunOnAllWithContextPlan;
+import com.jozufozu.flywheel.lib.task.RunOnAllPlan;
 import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
@@ -38,7 +38,7 @@ public class TransformCall<I extends Instance> {
 		meshVertexCount = mesh.getVertexCount();
 		boundingSphere = mesh.mesh.getBoundingSphere();
 
-		drawPlan = RunOnAllWithContextPlan.of(instancer::getAll, (instance, ctx) -> {
+		drawPlan = RunOnAllPlan.of(instancer::getAll, (instance, ctx) -> {
 			var boundingSphere = new Vector4f(this.boundingSphere);
 
 			boundingSphereTransformer.transform(boundingSphere, instance);

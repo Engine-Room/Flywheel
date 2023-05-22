@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
+import com.jozufozu.flywheel.api.visual.VisualFrameContext;
+import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
@@ -44,11 +46,13 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		blockState = entity.getDisplayBlockState();
 		contents = createContentsInstance();
 
+		updatePosition();
+
 		super.init();
 	}
 
 	@Override
-	public void tick() {
+	public void tick(VisualTickContext c) {
 		BlockState displayBlockState = entity.getDisplayBlockState();
 
 		if (displayBlockState != blockState) {
@@ -62,12 +66,19 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	}
 
 	@Override
-	public void beginFrame() {
+	public void beginFrame(VisualFrameContext context) {
+		if (visible(context.frustum())) {
+			return;
+		}
 		// TODO: add proper way to temporarily disable rendering a specific instance
 		if (!active) {
 			return;
 		}
 
+		updatePosition();
+	}
+
+	private void updatePosition() {
 		TransformStack tstack = TransformStack.cast(stack);
 		stack.setIdentity();
 		float pt = AnimationTickHolder.getPartialTicks();
@@ -76,7 +87,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 
 		float yaw = Mth.lerp(pt, entity.yRotO, entity.getYRot());
 
-		long i = (long)entity.getId() * 493286711L;
+		long i = (long) entity.getId() * 493286711L;
 		i = i * i * 4392167121L + i * 98761L;
 		float f = (((float)(i >> 16 & 7L) + 0.5F) / 8 - 0.5F) * 0.004F;
 		float f1 = (((float)(i >> 20 & 7L) + 0.5F) / 8 - 0.5F) * 0.004F;
@@ -132,11 +143,6 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		}
 
 		body.setTransform(stack);
-	}
-
-	@Override
-	public boolean decreaseFramerateWithDistance() {
-		return false;
 	}
 
 	@Override

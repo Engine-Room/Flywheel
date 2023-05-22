@@ -2,6 +2,9 @@ package com.jozufozu.flywheel.api.visual;
 
 /**
  * A general interface providing information about any type of thing that could use Flywheel's visualized rendering.
+ *
+ * @see DynamicVisual
+ * @see TickableVisual
  */
 public interface Visual {
 	/**
@@ -29,16 +32,6 @@ public interface Visual {
 	 * @return {@code true} if this visual should be discarded and refreshed.
 	 */
 	boolean shouldReset();
-
-	/**
-	 * Calculate the distance squared between this visual and the given <em>world</em> position.
-	 *
-	 * @param x The x coordinate.
-	 * @param y The y coordinate.
-	 * @param z The z coordinate.
-	 * @return The distance squared between this visual and the given position.
-	 */
-	double distanceSquared(double x, double y, double z);
 
 	/**
 	 * Free any acquired resources.
