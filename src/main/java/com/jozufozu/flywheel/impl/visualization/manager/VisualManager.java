@@ -4,8 +4,6 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.jozufozu.flywheel.api.task.Plan;
-import com.jozufozu.flywheel.api.visual.DynamicVisual;
-import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.config.FlwConfig;
@@ -16,7 +14,6 @@ import com.jozufozu.flywheel.impl.visualization.ratelimit.DistanceUpdateLimiterI
 import com.jozufozu.flywheel.impl.visualization.ratelimit.NonLimiter;
 import com.jozufozu.flywheel.impl.visualization.storage.Storage;
 import com.jozufozu.flywheel.impl.visualization.storage.Transaction;
-import com.jozufozu.flywheel.lib.task.RunOnAllPlan;
 import com.jozufozu.flywheel.lib.task.SimplePlan;
 import com.jozufozu.flywheel.util.Unit;
 
@@ -72,7 +69,6 @@ public abstract class VisualManager<T> {
 	}
 
 	public Plan<Unit> createRecreationPlan() {
-		// TODO: parallelize recreation?
 		return SimplePlan.of(getStorage()::recreateAll);
 	}
 
@@ -93,7 +89,7 @@ public abstract class VisualManager<T> {
 					tickLimiter.tick();
 					processQueue();
 				})
-				.thenMap(this::createVisualTickContext, RunOnAllPlan.of(getStorage()::getTickableVisuals, TickableVisual::tick));
+				.thenMap(this::createVisualTickContext, getStorage().getTickPlan());
 	}
 
 	public Plan<FrameContext> createFramePlan() {
@@ -101,7 +97,7 @@ public abstract class VisualManager<T> {
 					frameLimiter.tick();
 					processQueue();
 				})
-				.thenMap(this::createVisualContext, RunOnAllPlan.of(getStorage()::getDynamicVisuals, DynamicVisual::beginFrame));
+				.thenMap(this::createVisualContext, getStorage().getFramePlan());
 	}
 
 	private VisualFrameContext createVisualContext(FrameContext ctx) {

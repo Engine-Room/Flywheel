@@ -8,9 +8,8 @@ import com.jozufozu.flywheel.util.Unit;
 
 public class PlanCompositionTest {
 
-	public static final Runnable NOOP = () -> {
-	};
-	public static final Plan<Unit> SIMPLE = SimplePlan.of(NOOP);
+	public static final Plan<Unit> SIMPLE = SimplePlan.of(() -> {
+	});
 
 	@Test
 	void nestedPlanAnd() {

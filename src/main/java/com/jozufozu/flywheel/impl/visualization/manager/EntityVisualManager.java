@@ -6,7 +6,6 @@ import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.visual.Visual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.impl.visualization.VisualizationHelper;
-import com.jozufozu.flywheel.impl.visualization.storage.One2OneStorage;
 import com.jozufozu.flywheel.impl.visualization.storage.Storage;
 import com.jozufozu.flywheel.util.FlwUtil;
 
@@ -25,7 +24,7 @@ public class EntityVisualManager extends VisualManager<Entity> {
 		return storage;
 	}
 
-	private static class EntityStorage extends One2OneStorage<Entity> {
+	private static class EntityStorage extends Storage<Entity> {
 		public EntityStorage(Engine engine) {
 			super(engine);
 		}
