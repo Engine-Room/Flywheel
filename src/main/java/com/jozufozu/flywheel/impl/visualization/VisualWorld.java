@@ -82,7 +82,7 @@ public class VisualWorld implements AutoCloseable {
 	/**
 	 * Tick the visuals after the game has ticked:
 	 * <p>
-	 *     Call {@link TickableVisual#tick()} on all visuals in this world.
+	 * Call {@link TickableVisual#tick} on all visuals in this world.
 	 * </p>
 	 */
 	public void tick(double cameraX, double cameraY, double cameraZ) {
@@ -96,7 +96,7 @@ public class VisualWorld implements AutoCloseable {
 	 * <p>
 	 *     Check and update the render origin.
 	 *     <br>
-	 *     Call {@link DynamicVisual#beginFrame()} on all visuals in this world.
+	 *     Call {@link DynamicVisual#beginFrame} on all visuals in this world.
 	 * </p>
 	 */
 	public void beginFrame(RenderContext context) {

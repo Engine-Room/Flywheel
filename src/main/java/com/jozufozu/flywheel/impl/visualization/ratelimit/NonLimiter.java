@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.impl.visualization.ratelimit;
 
-public class NonLimiter implements DistanceUpdateLimiter {
+public class NonLimiter implements DistanceUpdateLimiterImpl {
 	@Override
 	public void tick() {
 	}

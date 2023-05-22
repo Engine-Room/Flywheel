@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.joml.FrustumIntersection;
 import org.joml.Vector3f;
 
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
@@ -14,6 +13,8 @@ import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.Effect;
 import com.jozufozu.flywheel.api.visual.EffectVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
+import com.jozufozu.flywheel.api.visual.VisualFrameContext;
+import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.impl.visualization.VisualizedRenderDispatcher;
 import com.jozufozu.flywheel.lib.box.ImmutableBox;
@@ -268,12 +269,12 @@ public class ExampleEffect implements Effect {
 		}
 
 		@Override
-		public void tick() {
+		public void tick(VisualTickContext c) {
 			self.tick();
 		}
 
 		@Override
-		public void beginFrame() {
+		public void beginFrame(VisualFrameContext context) {
 			float partialTicks = AnimationTickHolder.getPartialTicks();
 
 			var x = Mth.lerp(partialTicks, self.lastPosition.x, self.position.x);
@@ -284,26 +285,6 @@ public class ExampleEffect implements Effect {
 					.translateBack(renderOrigin)
 					.translate(x, y, z)
 					.scale(RENDER_SCALE);
-		}
-
-		@Override
-		public boolean decreaseTickRateWithDistance() {
-			return false;
-		}
-
-		@Override
-		public boolean decreaseFramerateWithDistance() {
-			return false;
-		}
-
-		@Override
-		public boolean isVisible(FrustumIntersection frustum) {
-			return true;
-		}
-
-		@Override
-		public double distanceSquared(double x, double y, double z) {
-			return 0;
 		}
 	}
 }

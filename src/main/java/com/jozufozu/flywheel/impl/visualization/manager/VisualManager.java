@@ -6,23 +6,25 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
+import com.jozufozu.flywheel.api.visual.VisualFrameContext;
+import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.impl.TickContext;
 import com.jozufozu.flywheel.impl.visualization.FrameContext;
 import com.jozufozu.flywheel.impl.visualization.ratelimit.BandedPrimeLimiter;
-import com.jozufozu.flywheel.impl.visualization.ratelimit.DistanceUpdateLimiter;
+import com.jozufozu.flywheel.impl.visualization.ratelimit.DistanceUpdateLimiterImpl;
 import com.jozufozu.flywheel.impl.visualization.ratelimit.NonLimiter;
 import com.jozufozu.flywheel.impl.visualization.storage.Storage;
 import com.jozufozu.flywheel.impl.visualization.storage.Transaction;
-import com.jozufozu.flywheel.lib.task.RunOnAllWithContextPlan;
+import com.jozufozu.flywheel.lib.task.RunOnAllPlan;
 import com.jozufozu.flywheel.lib.task.SimplePlan;
 import com.jozufozu.flywheel.util.Unit;
 
 public abstract class VisualManager<T> {
 	private final Queue<Transaction<T>> queue = new ConcurrentLinkedQueue<>();
 
-	protected DistanceUpdateLimiter tickLimiter;
-	protected DistanceUpdateLimiter frameLimiter;
+	protected DistanceUpdateLimiterImpl tickLimiter;
+	protected DistanceUpdateLimiterImpl frameLimiter;
 
 	public VisualManager() {
 		tickLimiter = createUpdateLimiter();
@@ -31,8 +33,9 @@ public abstract class VisualManager<T> {
 
 	protected abstract Storage<T> getStorage();
 
-	protected DistanceUpdateLimiter createUpdateLimiter() {
-		if (FlwConfig.get().limitUpdates()) {
+	protected DistanceUpdateLimiterImpl createUpdateLimiter() {
+		if (FlwConfig.get()
+				.limitUpdates()) {
 			return new BandedPrimeLimiter();
 		} else {
 			return new NonLimiter();
@@ -90,13 +93,7 @@ public abstract class VisualManager<T> {
 					tickLimiter.tick();
 					processQueue();
 				})
-				.then(RunOnAllWithContextPlan.of(getStorage()::getTickableVisuals, this::tickInstance));
-	}
-
-	protected void tickInstance(TickableVisual instance, TickContext c) {
-		if (!instance.decreaseTickRateWithDistance() || tickLimiter.shouldUpdate(instance.distanceSquared(c.cameraX(), c.cameraY(), c.cameraZ()))) {
-			instance.tick();
-		}
+				.thenMap(this::createVisualTickContext, RunOnAllPlan.of(getStorage()::getTickableVisuals, TickableVisual::tick));
 	}
 
 	public Plan<FrameContext> createFramePlan() {
@@ -104,14 +101,14 @@ public abstract class VisualManager<T> {
 					frameLimiter.tick();
 					processQueue();
 				})
-				.then(RunOnAllWithContextPlan.of(getStorage()::getDynamicVisuals, this::updateInstance));
+				.thenMap(this::createVisualContext, RunOnAllPlan.of(getStorage()::getDynamicVisuals, DynamicVisual::beginFrame));
 	}
 
-	protected void updateInstance(DynamicVisual instance, FrameContext c) {
-		if (!instance.decreaseFramerateWithDistance() || frameLimiter.shouldUpdate(instance.distanceSquared(c.cameraX(), c.cameraY(), c.cameraZ()))) {
-			if (instance.isVisible(c.frustum())) {
-				instance.beginFrame();
-			}
-		}
+	private VisualFrameContext createVisualContext(FrameContext ctx) {
+		return new VisualFrameContext(ctx.cameraX(), ctx.cameraY(), ctx.cameraZ(), ctx.frustum(), frameLimiter);
+	}
+
+	private VisualTickContext createVisualTickContext(TickContext ctx) {
+		return new VisualTickContext(ctx.cameraX(), ctx.cameraY(), ctx.cameraZ(), frameLimiter);
 	}
 }

@@ -35,16 +35,23 @@ import net.minecraft.world.phys.Vec3;
 public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVisual implements EntityVisual<T>, TickingLightListener {
 	protected final T entity;
 	protected final MutableBox bounds;
-	protected final EntityVisibilityTester boxTracker;
+	protected final EntityVisibilityTester visibilityTester;
 
 	public AbstractEntityVisual(VisualizationContext ctx, T entity) {
 		super(ctx, entity.level);
 		this.entity = entity;
 		bounds = MutableBox.from(entity.getBoundingBox());
-		boxTracker = new EntityVisibilityTester(entity, ctx.renderOrigin());
+		visibilityTester = new EntityVisibilityTester(entity, ctx.renderOrigin());
 	}
 
-	@Override
+	/**
+	 * Calculate the distance squared between this visual and the given <em>world</em> position.
+	 *
+	 * @param x The x coordinate.
+	 * @param y The y coordinate.
+	 * @param z The z coordinate.
+	 * @return The distance squared between this visual and the given position.
+	 */
 	public double distanceSquared(double x, double y, double z) {
 		return entity.distanceToSqr(x, y, z);
 	}
@@ -92,15 +99,10 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	 */
 	public Vector3f getVisualPosition(float partialTicks) {
 		Vec3 pos = entity.position();
-		return new Vector3f((float) (Mth.lerp(partialTicks, entity.xOld, pos.x) - renderOrigin.getX()),
-				(float) (Mth.lerp(partialTicks, entity.yOld, pos.y) - renderOrigin.getY()),
-				(float) (Mth.lerp(partialTicks, entity.zOld, pos.z) - renderOrigin.getZ()));
+		return new Vector3f((float) (Mth.lerp(partialTicks, entity.xOld, pos.x) - renderOrigin.getX()), (float) (Mth.lerp(partialTicks, entity.yOld, pos.y) - renderOrigin.getY()), (float) (Mth.lerp(partialTicks, entity.zOld, pos.z) - renderOrigin.getZ()));
 	}
 
-	public boolean isVisible(FrustumIntersection frustum) {
-		if (entity.noCulling) {
-			return true;
-		}
-		return boxTracker.isVisible(frustum);
+	public boolean visible(FrustumIntersection frustum) {
+		return entity.noCulling || visibilityTester.check(frustum);
 	}
 }

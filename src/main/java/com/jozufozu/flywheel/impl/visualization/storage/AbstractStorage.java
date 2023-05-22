@@ -32,12 +32,10 @@ public abstract class AbstractStorage<T> implements Storage<T> {
 
 		if (visual instanceof TickableVisual tickable) {
 			tickableVisuals.add(tickable);
-			tickable.tick();
 		}
 
 		if (visual instanceof DynamicVisual dynamic) {
 			dynamicVisuals.add(dynamic);
-			dynamic.beginFrame();
 		}
 	}
 }
