@@ -198,7 +198,6 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	}
 
 	private class WorkerThread extends Thread {
-
 		public WorkerThread(String name) {
 			super(name);
 		}
@@ -209,14 +208,28 @@ public class ParallelTaskExecutor implements TaskExecutor {
 			while (ParallelTaskExecutor.this.running.get()) {
 				Runnable task = taskQueue.pollFirst();
 
-				if (task == null) {
+				if (task != null) {
+					processTask(task);
+				} else {
 					// Nothing to do, time to sleep.
-					taskNotifier.awaitNotification();
-					continue;
+					spinThenWait();
+				}
+			}
+		}
+
+		private void spinThenWait() {
+			var waitStart = System.nanoTime();
+
+			// Spin for .01ms before waiting to reduce latency in narrow conditions.
+			while (System.nanoTime() - waitStart < 10_000) {
+				if (!taskQueue.isEmpty()) {
+					// Nice! Exit without waiting.
+					return;
 				}
 
-				processTask(task);
+				Thread.onSpinWait();
 			}
+			taskNotifier.awaitNotification();
 		}
 	}
 }
