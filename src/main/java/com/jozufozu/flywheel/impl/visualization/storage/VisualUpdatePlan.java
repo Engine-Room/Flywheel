@@ -38,9 +38,9 @@ public class VisualUpdatePlan<C> implements SimplyComposedPlan<C> {
 	@NotNull
 	private Plan<C> updatePlans() {
 		if (plan == null) {
-			plan = new NestedPlan<>(initializer.get()).maybeSimplify();
+			plan = new NestedPlan<>(initializer.get()).simplify();
 		} else if (needsSimplify) {
-			plan = plan.maybeSimplify();
+			plan = plan.simplify();
 		}
 
 		needsSimplify = false;

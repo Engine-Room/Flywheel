@@ -1,8 +1,7 @@
-package com.jozufozu.flywheel.impl;
+package com.jozufozu.flywheel.impl.vertex;
 
 import com.jozufozu.flywheel.api.vertex.VertexListProvider;
 import com.jozufozu.flywheel.extension.VertexFormatExtension;
-import com.jozufozu.flywheel.impl.vertex.InferredVertexListProviderImpl;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 // TODO: Add freezing

@@ -44,14 +44,14 @@ public record NestedPlan<C>(List<Plan<C>> parallelPlans) implements SimplyCompos
 	}
 
 	@Override
-	public Plan<C> maybeSimplify() {
+	public Plan<C> simplify() {
 		if (parallelPlans.isEmpty()) {
 			return UnitPlan.of();
 		}
 
 		if (parallelPlans.size() == 1) {
 			return parallelPlans.get(0)
-					.maybeSimplify();
+					.simplify();
 		}
 
 		var simplifiedTasks = new ArrayList<ContextConsumer<C>>();
@@ -59,7 +59,7 @@ public record NestedPlan<C>(List<Plan<C>> parallelPlans) implements SimplyCompos
 		var toVisit = new ArrayDeque<>(parallelPlans);
 		while (!toVisit.isEmpty()) {
 			var plan = toVisit.pop()
-					.maybeSimplify();
+					.simplify();
 
 			if (plan == UnitPlan.of()) {
 				continue;

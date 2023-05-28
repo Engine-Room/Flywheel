@@ -27,5 +27,5 @@ public interface TickableVisual extends Visual {
 	 * <p>
 	 * {@link Instancer}/{@link Instance} creation/acquisition is safe here.
 	 */
-	void tick(VisualTickContext c);
+	void tick(VisualTickContext ctx);
 }

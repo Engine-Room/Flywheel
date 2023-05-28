@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.Flywheel;
@@ -149,9 +150,10 @@ public class BatchedMeshPool {
 	}
 
 	public class BufferedMesh {
-		public final Mesh mesh;
+		private final Mesh mesh;
 		private final int byteSize;
 		private final int vertexCount;
+		private final Vector4fc boundingSphere;
 
 		private long byteIndex;
 		private boolean deleted;
@@ -159,6 +161,7 @@ public class BatchedMeshPool {
 		private BufferedMesh(Mesh mesh, long byteIndex) {
 			this.mesh = mesh;
 			vertexCount = mesh.getVertexCount();
+			boundingSphere = mesh.getBoundingSphere();
 			byteSize = vertexCount * vertexFormat.getVertexSize();
 			this.byteIndex = byteIndex;
 		}
@@ -169,6 +172,10 @@ public class BatchedMeshPool {
 
 		public int getVertexCount() {
 			return vertexCount;
+		}
+
+		public Vector4fc getBoundingSphere() {
+			return boundingSphere;
 		}
 
 		public VertexFormat getVertexFormat() {

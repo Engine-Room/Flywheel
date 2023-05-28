@@ -14,14 +14,14 @@ import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.gl.buffer.GlBufferUsage;
 import com.jozufozu.flywheel.gl.buffer.MappedBuffer;
 
-public class GPUInstancer<I extends Instance> extends AbstractInstancer<I> {
+public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I> {
 	private final BufferLayout instanceFormat;
 	private final int instanceStride;
 
 	private final Set<GlVertexArray> boundTo = new HashSet<>();
 	private GlBuffer vbo;
 
-	public GPUInstancer(InstanceType<I> type) {
+	public InstancedInstancer(InstanceType<I> type) {
 		super(type);
 		instanceFormat = type.getLayout();
 		instanceStride = instanceFormat.getStride();

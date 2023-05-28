@@ -13,8 +13,8 @@ public record MapContextPlan<C, D>(Function<C, D> map, Plan<D> plan) implements 
 	}
 
 	@Override
-	public Plan<C> maybeSimplify() {
-		var maybeSimplified = plan.maybeSimplify();
+	public Plan<C> simplify() {
+		var maybeSimplified = plan.simplify();
 
 		if (maybeSimplified instanceof UnitPlan) {
 			return UnitPlan.of();

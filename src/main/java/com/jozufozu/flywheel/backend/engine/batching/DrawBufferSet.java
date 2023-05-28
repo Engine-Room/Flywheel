@@ -25,6 +25,6 @@ public class DrawBufferSet {
 	}
 
 	public DrawBuffer getBuffer(RenderStage stage) {
-		return buffers.computeIfAbsent(stage, $ -> new DrawBuffer(renderType, format, stride, provider));
+		return buffers.computeIfAbsent(stage, renderStage -> new DrawBuffer(renderType, renderStage, format, stride, provider));
 	}
 }

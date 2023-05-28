@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.engine.batching;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.joml.FrustumIntersection;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
@@ -18,59 +19,49 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 
+import net.minecraft.client.multiplayer.ClientLevel;
+
 public class TransformCall<I extends Instance> {
-	private final CPUInstancer<I> instancer;
+	private final BatchedInstancer<I> instancer;
 	private final int meshVertexCount;
-	private final InstanceVertexTransformer<I> instanceVertexTransformer;
-	private final MaterialVertexTransformer materialVertexTransformer;
-	private final InstanceBoundingSphereTransformer<I> boundingSphereTransformer;
-	private final Vector4fc boundingSphere;
 
 	private final Plan<PlanContext> drawPlan;
 
-	public TransformCall(CPUInstancer<I> instancer, Material material, BatchedMeshPool.BufferedMesh mesh) {
+	public TransformCall(BatchedInstancer<I> instancer, Material material, BatchedMeshPool.BufferedMesh mesh) {
 		this.instancer = instancer;
 
-		instanceVertexTransformer = instancer.type.getVertexTransformer();
-		boundingSphereTransformer = instancer.type.getBoundingSphereTransformer();
-		materialVertexTransformer = material.getVertexTransformer();
+		InstanceVertexTransformer<I> instanceVertexTransformer = instancer.type.getVertexTransformer();
+		InstanceBoundingSphereTransformer<I> boundingSphereTransformer = instancer.type.getBoundingSphereTransformer();
+		MaterialVertexTransformer materialVertexTransformer = material.getVertexTransformer();
 
 		meshVertexCount = mesh.getVertexCount();
-		boundingSphere = mesh.mesh.getBoundingSphere();
+		Vector4fc meshBoundingSphere = mesh.getBoundingSphere();
 
 		drawPlan = ForEachPlan.of(instancer::getAll, (instance, ctx) -> {
-			var boundingSphere = new Vector4f(this.boundingSphere);
-
+			var boundingSphere = new Vector4f(meshBoundingSphere);
 			boundingSphereTransformer.transform(boundingSphere, instance);
 
-			if (!ctx.ctx.frustum()
+			if (!ctx.frustum
 					.testSphere(boundingSphere.x, boundingSphere.y, boundingSphere.z, boundingSphere.w)) {
 				return;
 			}
 
-			final int baseVertex = ctx.vertexCount.getAndAdd(meshVertexCount);
-
-			if (baseVertex + meshVertexCount > ctx.buffer.getVertexCount()) {
-				throw new IndexOutOfBoundsException("Vertex count greater than allocated: " + baseVertex + " + " + meshVertexCount + " > " + ctx.buffer.getVertexCount());
-			}
-
+			final int baseVertex = ctx.vertexCounter.getAndAdd(meshVertexCount);
 			var sub = ctx.buffer.slice(baseVertex, meshVertexCount);
 
 			mesh.copyTo(sub.ptr());
-
-			instanceVertexTransformer.transform(sub, instance, ctx.ctx.level());
-
-			materialVertexTransformer.transform(sub, ctx.ctx.level());
-			applyMatrices(sub, ctx.ctx.matrices());
+			instanceVertexTransformer.transform(sub, instance);
+			materialVertexTransformer.transform(sub, ctx.level);
+			applyMatrices(sub, ctx.matrices);
 		});
-	}
-
-	public int getTotalVertexCount() {
-		return meshVertexCount * instancer.getInstanceCount();
 	}
 
 	public void setup() {
 		instancer.update();
+	}
+
+	public int getTotalVertexCount() {
+		return meshVertexCount * instancer.getInstanceCount();
 	}
 
 	public Plan<PlanContext> plan() {
@@ -87,6 +78,6 @@ public class TransformCall<I extends Instance> {
 		}
 	}
 
-	public record PlanContext(BatchContext ctx, DrawBuffer buffer, AtomicInteger vertexCount) {
+	public record PlanContext(FrustumIntersection frustum, AtomicInteger vertexCounter, DrawBuffer buffer, ClientLevel level, PoseStack.Pose matrices) {
 	}
 }

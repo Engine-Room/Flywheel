@@ -15,36 +15,36 @@ public class PlanSimplificationTest {
 	@Test
 	void emptyPlans() {
 		var empty = NestedPlan.of();
-		Assertions.assertEquals(empty.maybeSimplify(), UnitPlan.of());
+		Assertions.assertEquals(empty.simplify(), UnitPlan.of());
 
 		var simpleEmpty = SimplePlan.of();
-		Assertions.assertEquals(simpleEmpty.maybeSimplify(), UnitPlan.of());
+		Assertions.assertEquals(simpleEmpty.simplify(), UnitPlan.of());
 	}
 
 	@Test
 	void nestedSimplePlans() {
 		var twoSimple = NestedPlan.of(SimplePlan.of(NOOP, NOOP, NOOP), SIMPLE);
-		Assertions.assertEquals(twoSimple.maybeSimplify(), SimplePlan.of(NOOP, NOOP, NOOP, NOOP));
+		Assertions.assertEquals(twoSimple.simplify(), SimplePlan.of(NOOP, NOOP, NOOP, NOOP));
 
 		var threeSimple = NestedPlan.of(SIMPLE, SIMPLE, SIMPLE);
-		Assertions.assertEquals(threeSimple.maybeSimplify(), SimplePlan.of(NOOP, NOOP, NOOP));
+		Assertions.assertEquals(threeSimple.simplify(), SimplePlan.of(NOOP, NOOP, NOOP));
 	}
 
 	@Test
 	void oneNestedPlan() {
 		var oneSimple = NestedPlan.of(SIMPLE);
 
-		Assertions.assertEquals(oneSimple.maybeSimplify(), SIMPLE);
+		Assertions.assertEquals(oneSimple.simplify(), SIMPLE);
 
 		var mainThreadNoop = new OnMainThreadPlan<>(NOOP);
 		var oneMainThread = NestedPlan.of(mainThreadNoop);
 
-		Assertions.assertEquals(oneMainThread.maybeSimplify(), mainThreadNoop);
+		Assertions.assertEquals(oneMainThread.simplify(), mainThreadNoop);
 
 		var barrier = new BarrierPlan<>(SIMPLE, SIMPLE);
 		var oneBarrier = NestedPlan.of(barrier);
 
-		Assertions.assertEquals(oneBarrier.maybeSimplify(), barrier);
+		Assertions.assertEquals(oneBarrier.simplify(), barrier);
 	}
 
 	@Test
@@ -52,16 +52,16 @@ public class PlanSimplificationTest {
 		var outer = NestedPlan.of(SIMPLE);
 		var outermost = NestedPlan.of(outer);
 
-		Assertions.assertEquals(outermost.maybeSimplify(), SIMPLE);
+		Assertions.assertEquals(outermost.simplify(), SIMPLE);
 	}
 
 	@Test
 	void nestedUnitPlan() {
 		var onlyUnit = NestedPlan.of(UnitPlan.of(), UnitPlan.of(), UnitPlan.of());
-		Assertions.assertEquals(onlyUnit.maybeSimplify(), UnitPlan.of());
+		Assertions.assertEquals(onlyUnit.simplify(), UnitPlan.of());
 
 		var unitAndSimple = NestedPlan.of(UnitPlan.of(), UnitPlan.of(), SIMPLE);
-		Assertions.assertEquals(unitAndSimple.maybeSimplify(), SIMPLE);
+		Assertions.assertEquals(unitAndSimple.simplify(), SIMPLE);
 	}
 
 	@Test
@@ -70,11 +70,11 @@ public class PlanSimplificationTest {
 		});
 
 		var nested = NestedPlan.of(mainThreadNoop, SIMPLE);
-		Assertions.assertEquals(nested.maybeSimplify(), nested); // cannot simplify
+		Assertions.assertEquals(nested.simplify(), nested); // cannot simplify
 
 		var barrier = new BarrierPlan<>(SIMPLE, SIMPLE);
 		var complex = NestedPlan.of(barrier, nested);
-		Assertions.assertEquals(complex.maybeSimplify(), NestedPlan.of(barrier, mainThreadNoop, SIMPLE));
+		Assertions.assertEquals(complex.simplify(), NestedPlan.of(barrier, mainThreadNoop, SIMPLE));
 	}
 
 	@Test
@@ -84,7 +84,7 @@ public class PlanSimplificationTest {
 		var barrier = new BarrierPlan<>(SIMPLE, SIMPLE);
 		var oneMainThread = NestedPlan.of(mainThreadNoop, NestedPlan.of(mainThreadNoop, barrier, barrier));
 
-		Assertions.assertEquals(oneMainThread.maybeSimplify(), NestedPlan.of(mainThreadNoop, mainThreadNoop, barrier, barrier));
+		Assertions.assertEquals(oneMainThread.simplify(), NestedPlan.of(mainThreadNoop, mainThreadNoop, barrier, barrier));
 	}
 
 	@Test
@@ -92,21 +92,21 @@ public class PlanSimplificationTest {
 		var barrier = new BarrierPlan<>(SIMPLE, SIMPLE);
 		var oneMainThread = NestedPlan.of(barrier, NestedPlan.of(UnitPlan.of(), UnitPlan.of()));
 
-		Assertions.assertEquals(oneMainThread.maybeSimplify(), barrier);
+		Assertions.assertEquals(oneMainThread.simplify(), barrier);
 	}
 
 	@Test
 	void barrierPlan() {
 		var doubleUnit = new BarrierPlan<>(UnitPlan.of(), UnitPlan.of());
-		Assertions.assertEquals(doubleUnit.maybeSimplify(), UnitPlan.of());
+		Assertions.assertEquals(doubleUnit.simplify(), UnitPlan.of());
 
 		var simpleThenUnit = new BarrierPlan<>(SIMPLE, UnitPlan.of());
-		Assertions.assertEquals(simpleThenUnit.maybeSimplify(), SIMPLE);
+		Assertions.assertEquals(simpleThenUnit.simplify(), SIMPLE);
 
 		var unitThenSimple = new BarrierPlan<>(UnitPlan.of(), SIMPLE);
-		Assertions.assertEquals(unitThenSimple.maybeSimplify(), SIMPLE);
+		Assertions.assertEquals(unitThenSimple.simplify(), SIMPLE);
 
 		var simpleThenSimple = new BarrierPlan<>(SIMPLE, SIMPLE);
-		Assertions.assertEquals(simpleThenSimple.maybeSimplify(), new BarrierPlan<>(SIMPLE, SIMPLE));
+		Assertions.assertEquals(simpleThenSimple.simplify(), new BarrierPlan<>(SIMPLE, SIMPLE));
 	}
 }

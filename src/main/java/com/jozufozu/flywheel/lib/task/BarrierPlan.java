@@ -14,9 +14,9 @@ public record BarrierPlan<C>(Plan<C> first, Plan<C> second) implements SimplyCom
 	}
 
 	@Override
-	public Plan<C> maybeSimplify() {
-		var first = this.first.maybeSimplify();
-		var second = this.second.maybeSimplify();
+	public Plan<C> simplify() {
+		var first = this.first.simplify();
+		var second = this.second.simplify();
 
 		if (first == UnitPlan.of()) {
 			return second;

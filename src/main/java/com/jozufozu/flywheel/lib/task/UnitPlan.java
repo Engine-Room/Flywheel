@@ -42,7 +42,7 @@ public class UnitPlan<C> implements Plan<C> {
 	}
 
 	@Override
-	public Plan<C> maybeSimplify() {
+	public Plan<C> simplify() {
 		return this;
 	}
 }

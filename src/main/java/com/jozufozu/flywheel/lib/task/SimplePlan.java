@@ -45,7 +45,7 @@ public record SimplePlan<C>(List<ContextConsumer<C>> parallelTasks) implements S
 	}
 
 	@Override
-	public Plan<C> maybeSimplify() {
+	public Plan<C> simplify() {
 		if (parallelTasks.isEmpty()) {
 			return UnitPlan.of();
 		}
