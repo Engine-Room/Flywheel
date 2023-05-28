@@ -17,7 +17,6 @@ import com.jozufozu.flywheel.backend.task.FlwTaskExecutor;
 import com.jozufozu.flywheel.backend.task.ParallelTaskExecutor;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.impl.TickContext;
 import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EffectVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EntityVisualManager;
@@ -59,7 +58,7 @@ public class VisualWorld implements AutoCloseable {
 		tickPlan = blockEntities.createTickPlan()
 				.and(entities.createTickPlan())
 				.and(effects.createTickPlan())
-				.maybeSimplify();
+				.simplify();
 		framePlan = new FramePlan();
 	}
 

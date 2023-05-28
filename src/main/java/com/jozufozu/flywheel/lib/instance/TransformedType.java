@@ -43,7 +43,7 @@ public class TransformedType implements InstanceType<TransformedInstance> {
 
 	@Override
 	public InstanceVertexTransformer<TransformedInstance> getVertexTransformer() {
-		return (vertexList, instance, level) -> {
+		return (vertexList, instance) -> {
 			float r = RenderMath.uf(instance.r);
 			float g = RenderMath.uf(instance.g);
 			float b = RenderMath.uf(instance.b);

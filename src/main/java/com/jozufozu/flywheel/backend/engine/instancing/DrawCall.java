@@ -3,13 +3,13 @@ package com.jozufozu.flywheel.backend.engine.instancing;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 
 public class DrawCall {
-	private final GPUInstancer<?> instancer;
+	private final InstancedInstancer<?> instancer;
 	private final InstancedMeshPool.BufferedMesh mesh;
 
 	private final int meshAttributes;
 	private GlVertexArray vao;
 
-	public DrawCall(GPUInstancer<?> instancer, InstancedMeshPool.BufferedMesh mesh) {
+	public DrawCall(InstancedInstancer<?> instancer, InstancedMeshPool.BufferedMesh mesh) {
 		this.instancer = instancer;
 		this.mesh = mesh;
 

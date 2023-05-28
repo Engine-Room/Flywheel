@@ -22,10 +22,10 @@ import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 
-public class InstancingDrawManager {
-	private final Map<InstancerKey<?>, GPUInstancer<?>> instancers = new HashMap<>();
+public class InstancedDrawManager {
+	private final Map<InstancerKey<?>, InstancedInstancer<?>> instancers = new HashMap<>();
 	private final List<UninitializedInstancer> uninitializedInstancers = new ArrayList<>();
-	private final List<GPUInstancer<?>> initializedInstancers = new ArrayList<>();
+	private final List<InstancedInstancer<?>> initializedInstancers = new ArrayList<>();
 	private final Map<RenderStage, DrawSet> drawSets = new EnumMap<>(RenderStage.class);
 	private final Map<VertexType, InstancedMeshPool> meshPools = new HashMap<>();
 
@@ -36,9 +36,9 @@ public class InstancingDrawManager {
 	@SuppressWarnings("unchecked")
 	public <I extends Instance> Instancer<I> getInstancer(InstanceType<I> type, Model model, RenderStage stage) {
 		InstancerKey<I> key = new InstancerKey<>(type, model, stage);
-		GPUInstancer<I> instancer = (GPUInstancer<I>) instancers.get(key);
+		InstancedInstancer<I> instancer = (InstancedInstancer<I>) instancers.get(key);
 		if (instancer == null) {
-			instancer = new GPUInstancer<>(type);
+			instancer = new InstancedInstancer<>(type);
 			instancers.put(key, instancer);
 			uninitializedInstancers.add(new UninitializedInstancer(instancer, model, stage));
 		}
@@ -67,15 +67,15 @@ public class InstancingDrawManager {
 				.forEach(DrawSet::delete);
 		drawSets.clear();
 
-		initializedInstancers.forEach(GPUInstancer::delete);
+		initializedInstancers.forEach(InstancedInstancer::delete);
 		initializedInstancers.clear();
 	}
 
 	public void clearInstancers() {
-		initializedInstancers.forEach(GPUInstancer::clear);
+		initializedInstancers.forEach(InstancedInstancer::clear);
 	}
 
-	private void add(GPUInstancer<?> instancer, Model model, RenderStage stage) {
+	private void add(InstancedInstancer<?> instancer, Model model, RenderStage stage) {
 		instancer.init();
 		DrawSet drawSet = drawSets.computeIfAbsent(stage, DrawSet::new);
 		var meshes = model.getMeshes();
@@ -129,6 +129,6 @@ public class InstancingDrawManager {
 		}
 	}
 
-	private record UninitializedInstancer(GPUInstancer<?> instancer, Model model, RenderStage stage) {
+	private record UninitializedInstancer(InstancedInstancer<?> instancer, Model model, RenderStage stage) {
 	}
 }

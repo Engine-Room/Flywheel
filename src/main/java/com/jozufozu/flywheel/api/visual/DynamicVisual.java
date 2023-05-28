@@ -20,5 +20,5 @@ public interface DynamicVisual extends Visual {
 	 * <p>
 	 * {@link Instancer}/{@link Instance} creation/acquisition is safe here.
 	 */
-	void beginFrame(VisualFrameContext context);
+	void beginFrame(VisualFrameContext ctx);
 }

@@ -12,7 +12,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 
-public record BatchContext(ClientLevel level, PoseStack.Pose matrices, FrustumIntersection frustum) {
+public record BatchContext(FrustumIntersection frustum, ClientLevel level, PoseStack.Pose matrices) {
 	@NotNull
 	static BatchContext create(RenderContext context, BlockPos origin) {
 		Vec3 cameraPos = context.camera()
@@ -23,6 +23,6 @@ public record BatchContext(ClientLevel level, PoseStack.Pose matrices, FrustumIn
 		org.joml.Matrix4f proj = MatrixUtil.toJoml(context.viewProjection());
 		proj.translate((float) (origin.getX() - cameraPos.x), (float) (origin.getY() - cameraPos.y), (float) (origin.getZ() - cameraPos.z));
 
-		return new BatchContext(context.level(), stack.last(), new FrustumIntersection(proj));
+		return new BatchContext(new FrustumIntersection(proj), context.level(), stack.last());
 	}
 }

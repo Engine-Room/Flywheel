@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexListProvider;
 import com.jozufozu.flywheel.extension.BufferBuilderExtension;
+import com.jozufozu.flywheel.extension.RenderTypeExtension;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
@@ -22,6 +24,7 @@ public class DrawBuffer {
 	private static final List<DrawBuffer> ALL = new ArrayList<>();
 
 	private final RenderType renderType;
+	private final RenderStage renderStage;
 	private final VertexFormat format;
 	private final int stride;
 	private final VertexListProvider provider;
@@ -31,9 +34,11 @@ public class DrawBuffer {
 
 	private boolean prepared;
 	private int vertexCount;
+	private int verticesToDraw;
 
-	public DrawBuffer(RenderType renderType, VertexFormat format, int stride, VertexListProvider provider) {
+	public DrawBuffer(RenderType renderType, RenderStage renderStage, VertexFormat format, int stride, VertexListProvider provider) {
 		this.renderType = renderType;
+		this.renderStage = renderStage;
 		this.format = format;
 		this.stride = stride;
 		this.provider = provider;
@@ -52,6 +57,7 @@ public class DrawBuffer {
 		}
 
 		this.vertexCount = vertexCount;
+		verticesToDraw = this.vertexCount;
 
 		// Add one extra vertex to uphold the vanilla assumption that BufferBuilders have at least
 		// enough buffer space for one more vertex. Rubidium checks for this extra space when popNextBuffer
@@ -69,13 +75,13 @@ public class DrawBuffer {
 		prepared = true;
 	}
 
-	public void vertexCount(int vertexCount) {
-		this.vertexCount = vertexCount;
-	}
-
 	public ReusableVertexList slice(int startVertex, int vertexCount) {
 		if (!prepared) {
 			throw new IllegalStateException("Cannot slice DrawBuffer that is not prepared!");
+		}
+
+		if (startVertex + vertexCount > this.vertexCount) {
+			throw new IndexOutOfBoundsException("Vertex count greater than allocated: " + startVertex + " + " + vertexCount + " > " + this.vertexCount);
 		}
 
 		ReusableVertexList vertexList = provider.createVertexList();
@@ -86,6 +92,10 @@ public class DrawBuffer {
 
 	public long ptrForVertex(long startVertex) {
 		return memory.ptr() + startVertex * stride;
+	}
+
+	public void verticesToDraw(int verticesToDraw) {
+		this.verticesToDraw = verticesToDraw;
 	}
 
 	/**
@@ -99,11 +109,15 @@ public class DrawBuffer {
 		}
 
 		buffer.clear();
-		bufferBuilder.flywheel$injectForRender(buffer, format, vertexCount);
+		bufferBuilder.flywheel$injectForRender(buffer, format, verticesToDraw);
 	}
 
 	public RenderType getRenderType() {
 		return renderType;
+	}
+
+	public RenderStage getRenderStage() {
+		return renderStage;
 	}
 
 	public VertexFormat getVertexFormat() {
@@ -118,11 +132,15 @@ public class DrawBuffer {
 		return vertexCount;
 	}
 
+	public int getVerticesToDraw() {
+		return verticesToDraw;
+	}
+
 	/**
-	 * @return {@code true} if the buffer has any vertices.
+	 * @return {@code true} if the buffer has any vertices to draw.
 	 */
 	public boolean hasVertices() {
-		return vertexCount > 0;
+		return verticesToDraw > 0;
 	}
 
 	/**
@@ -133,6 +151,7 @@ public class DrawBuffer {
 	public void reset() {
 		prepared = false;
 		vertexCount = 0;
+		verticesToDraw = 0;
 	}
 
 	public void free() {
@@ -149,5 +168,10 @@ public class DrawBuffer {
 
 	public static void onReloadRenderers(ReloadRenderersEvent event) {
 		ALL.forEach(DrawBuffer::free);
+	}
+
+	public static DrawBuffer get(RenderType renderType, RenderStage stage) {
+		return RenderTypeExtension.getDrawBufferSet(renderType)
+				.getBuffer(stage);
 	}
 }

@@ -26,7 +26,7 @@ import net.minecraft.client.Minecraft;
 
 public class InstancingEngine extends AbstractEngine {
 	private final Context context;
-	private final InstancingDrawManager drawManager = new InstancingDrawManager();
+	private final InstancedDrawManager drawManager = new InstancedDrawManager();
 
 	public InstancingEngine(int maxOriginDistance, Context context) {
 		super(maxOriginDistance);
@@ -77,7 +77,7 @@ public class InstancingEngine extends AbstractEngine {
 		RenderSystem.enableCull();
 	}
 
-	private void render(InstancingDrawManager.DrawSet drawSet) {
+	private void render(InstancedDrawManager.DrawSet drawSet) {
 		for (var entry : drawSet) {
 			var shader = entry.getKey();
 			var drawCalls = entry.getValue();

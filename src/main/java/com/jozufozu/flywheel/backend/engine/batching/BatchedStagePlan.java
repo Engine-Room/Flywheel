@@ -16,39 +16,39 @@ import net.minecraft.client.renderer.RenderType;
 /**
  * All the rendering that happens within a render stage.
  */
-public class BatchingStage implements SimplyComposedPlan<BatchContext> {
+public class BatchedStagePlan implements SimplyComposedPlan<BatchContext> {
 	private final RenderStage stage;
-	private final BatchingDrawTracker tracker;
-	private final Map<RenderType, BufferPlan> buffers = new HashMap<>();
+	private final BatchedDrawTracker tracker;
+	private final Map<RenderType, BufferPlan> bufferPlans = new HashMap<>();
 
-	public BatchingStage(RenderStage renderStage, BatchingDrawTracker tracker) {
+	public BatchedStagePlan(RenderStage renderStage, BatchedDrawTracker tracker) {
 		stage = renderStage;
 		this.tracker = tracker;
 	}
 
 	@Override
 	public void execute(TaskExecutor taskExecutor, BatchContext context, Runnable onCompletion) {
-		if (buffers.isEmpty()) {
+		if (isEmpty()) {
 			onCompletion.run();
 			return;
 		}
 
 		taskExecutor.execute(() -> {
-			var sync = new Synchronizer(buffers.size(), onCompletion);
+			var sync = new Synchronizer(bufferPlans.size(), onCompletion);
 
-			for (var buffer : buffers.values()) {
-				buffer.execute(taskExecutor, context, sync);
+			for (var plan : bufferPlans.values()) {
+				plan.execute(taskExecutor, context, sync);
 			}
 		});
 	}
 
 	public void put(RenderType renderType, TransformCall<?> transformCall) {
-		buffers.computeIfAbsent(renderType, type -> new BufferPlan(BatchingDrawTracker.getBuffer(type, stage)))
+		bufferPlans.computeIfAbsent(renderType, type -> new BufferPlan(DrawBuffer.get(type, stage)))
 				.add(transformCall);
 	}
 
 	public boolean isEmpty() {
-		return buffers.isEmpty();
+		return bufferPlans.isEmpty();
 	}
 
 	private class BufferPlan implements SimplyComposedPlan<BatchContext> {
@@ -72,18 +72,16 @@ public class BatchingStage implements SimplyComposedPlan<BatchContext> {
 				return;
 			}
 
-			tracker.markActive(stage, buffer);
-
-			var vertexCounter = new AtomicInteger(0);
-
+			tracker.markActive(buffer);
 			buffer.prepare(vertexCount);
 
+			var vertexCounter = new AtomicInteger(0);
+			var planContext = new TransformCall.PlanContext(ctx.frustum(), vertexCounter, buffer, ctx.level(), ctx.matrices());
+
 			var synchronizer = new Synchronizer(transformCalls.size(), () -> {
-				buffer.vertexCount(vertexCounter.get());
+				buffer.verticesToDraw(vertexCounter.get());
 				onCompletion.run();
 			});
-
-			var planContext = new TransformCall.PlanContext(ctx, buffer, vertexCounter);
 
 			for (var transformCall : transformCalls) {
 				transformCall.plan()

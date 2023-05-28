@@ -6,8 +6,8 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 
-public class CPUInstancer<I extends Instance> extends AbstractInstancer<I> {
-	public CPUInstancer(InstanceType<I> type) {
+public class BatchedInstancer<I extends Instance> extends AbstractInstancer<I> {
+	public BatchedInstancer(InstanceType<I> type) {
 		super(type);
 	}
 

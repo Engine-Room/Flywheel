@@ -26,7 +26,7 @@ public interface SimplyComposedPlan<C> extends Plan<C> {
 	}
 
 	@Override
-	default Plan<C> maybeSimplify() {
+	default Plan<C> simplify() {
 		return this;
 	}
 }

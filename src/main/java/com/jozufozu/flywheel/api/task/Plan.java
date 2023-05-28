@@ -67,5 +67,5 @@ public interface Plan<C> {
 	 *
 	 * @return A simplified plan, or this.
 	 */
-	Plan<C> maybeSimplify();
+	Plan<C> simplify();
 }

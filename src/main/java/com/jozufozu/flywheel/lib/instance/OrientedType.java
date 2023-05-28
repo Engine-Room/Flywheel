@@ -48,7 +48,7 @@ public class OrientedType implements InstanceType<OrientedInstance> {
 
 	@Override
 	public InstanceVertexTransformer<OrientedInstance> getVertexTransformer() {
-		return (vertexList, instance, level) -> {
+		return (vertexList, instance) -> {
 			Quaternion q = new Quaternion(instance.qX, instance.qY, instance.qZ, instance.qW);
 
 			Matrix4f modelMatrix = new Matrix4f();

@@ -12,6 +12,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.core.Vec3i;
 
 public interface Engine extends InstancerProvider {
+	Plan<RenderContext> createFramePlan();
 
 	void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage);
 
@@ -28,6 +29,4 @@ public interface Engine extends InstancerProvider {
 	void addDebugInfo(List<String> info);
 
 	void delete();
-
-	Plan<RenderContext> createFramePlan();
 }
