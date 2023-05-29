@@ -12,7 +12,7 @@ public interface Model {
 	default int getVertexCount() {
 		int size = 0;
 		for (Mesh mesh : getMeshes().values()) {
-			size += mesh.getVertexCount();
+			size += mesh.vertexCount();
 		}
 		return size;
 	}

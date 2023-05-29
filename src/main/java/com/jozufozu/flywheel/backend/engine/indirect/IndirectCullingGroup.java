@@ -8,40 +8,28 @@ import static org.lwjgl.opengl.GL43.glDispatchCompute;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.jozufozu.flywheel.api.layout.BufferLayout;
+import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
-import com.jozufozu.flywheel.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.context.Contexts;
-import com.jozufozu.flywheel.lib.util.QuadConverter;
 
 public class IndirectCullingGroup<I extends Instance> {
-
 	private static final int BARRIER_BITS = GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT;
 
-	final GlProgram compute;
-	final GlProgram draw;
-	private final VertexType vertexType;
+	private final GlProgram compute;
+	private final GlProgram draw;
 	private final long instanceStride;
-
-	final IndirectBuffers buffers;
-
-	final IndirectMeshPool meshPool;
-	private final int elementBuffer;
-
-	GlVertexArray vertexArray;
-
-	final IndirectDrawSet<I> drawSet = new IndirectDrawSet<>();
-
+	private final IndirectBuffers buffers;
+	public final IndirectMeshPool meshPool;
+	public final IndirectDrawSet<I> drawSet = new IndirectDrawSet<>();
 	private boolean hasCulledThisFrame;
 	private boolean needsMemoryBarrier;
 	private int instanceCountThisFrame;
 
 	IndirectCullingGroup(InstanceType<I> instanceType, VertexType vertexType) {
-		this.vertexType = vertexType;
-
 		instanceStride = instanceType.getLayout()
 				.getStride();
 		buffers = new IndirectBuffers(instanceStride);
@@ -49,33 +37,24 @@ public class IndirectCullingGroup<I extends Instance> {
 		buffers.createObjectStorage(128);
 		buffers.createDrawStorage(2);
 
-		meshPool = new IndirectMeshPool(vertexType, 1024);
-
-		vertexArray = GlVertexArray.create();
-
-		elementBuffer = QuadConverter.getInstance()
-				.quads2Tris(2048).glBuffer;
-		setupVertexArray();
+		meshPool = new IndirectMeshPool(vertexType);
 
 		var indirectPrograms = IndirectPrograms.get();
 		compute = indirectPrograms.getCullingProgram(instanceType);
 		draw = indirectPrograms.getIndirectProgram(vertexType, instanceType, Contexts.WORLD);
 	}
 
-	private void setupVertexArray() {
-		vertexArray.setElementBuffer(elementBuffer);
-		BufferLayout type = vertexType.getLayout();
-		vertexArray.bindVertexBuffer(0, meshPool.vbo, 0, type.getStride());
-		vertexArray.bindAttributes(0, 0, type.attributes());
+	public void add(IndirectInstancer<I> instancer, RenderStage stage, Material material, Mesh mesh) {
+		drawSet.add(instancer, material, stage, meshPool.alloc(mesh));
 	}
 
-	void beginFrame() {
+	public void beginFrame() {
 		hasCulledThisFrame = false;
 		needsMemoryBarrier = true;
 		instanceCountThisFrame = calculateTotalInstanceCountAndPrepareBatches();
 	}
 
-	void submit(RenderStage stage) {
+	public void submit(RenderStage stage) {
 		if (drawSet.isEmpty()) {
 			return;
 		}
@@ -112,7 +91,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 
 		UniformBuffer.syncAndBind(draw);
-		vertexArray.bindForDraw();
+		meshPool.bindForDraw();
 		buffers.bindForDraw();
 
 		memoryBarrier();
@@ -164,7 +143,6 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	public void delete() {
-		vertexArray.delete();
 		buffers.delete();
 		meshPool.delete();
 	}

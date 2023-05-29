@@ -23,7 +23,6 @@ import com.jozufozu.flywheel.lib.material.MaterialIndices;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.model.PartialModel;
-import com.jozufozu.flywheel.lib.util.QuadConverter;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 import com.jozufozu.flywheel.lib.vertex.VertexTypes;
 import com.jozufozu.flywheel.mixin.PausedPartialTickAccessor;
@@ -35,7 +34,6 @@ import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.IExtensionPoint;
@@ -79,7 +77,6 @@ public class Flywheel {
 
 		forgeEventBus.addListener(BackendManagerImpl::onReloadRenderers);
 
-		forgeEventBus.addListener(EventPriority.HIGHEST, QuadConverter::onReloadRenderers);
 		forgeEventBus.addListener(Models::onReloadRenderers);
 		forgeEventBus.addListener(DrawBuffer::onReloadRenderers);
 		forgeEventBus.addListener(UniformBuffer::onReloadRenderers);

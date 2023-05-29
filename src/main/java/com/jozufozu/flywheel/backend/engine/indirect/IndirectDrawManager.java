@@ -64,9 +64,9 @@ public class IndirectDrawManager {
 			var material = entry.getKey();
 			var mesh = entry.getValue();
 
-			var indirectList = (IndirectCullingGroup<I>) renderLists.computeIfAbsent(Pair.of(instancer.type, mesh.getVertexType()), p -> new IndirectCullingGroup<>(p.first(), p.second()));
+			var indirectList = (IndirectCullingGroup<I>) renderLists.computeIfAbsent(Pair.of(instancer.type, mesh.vertexType()), p -> new IndirectCullingGroup<>(p.first(), p.second()));
 
-			indirectList.drawSet.add(instancer, material, stage, indirectList.meshPool.alloc(mesh));
+			indirectList.add(instancer, stage, material, mesh);
 
 			break; // TODO: support multiple meshes per model
 		}

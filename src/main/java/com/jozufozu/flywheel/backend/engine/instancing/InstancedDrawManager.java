@@ -28,6 +28,7 @@ public class InstancedDrawManager {
 	private final List<InstancedInstancer<?>> initializedInstancers = new ArrayList<>();
 	private final Map<RenderStage, DrawSet> drawSets = new EnumMap<>(RenderStage.class);
 	private final Map<VertexType, InstancedMeshPool> meshPools = new HashMap<>();
+	private final EBOCache eboCache = new EBOCache();
 
 	public DrawSet get(RenderStage stage) {
 		return drawSets.getOrDefault(stage, DrawSet.EMPTY);
@@ -69,6 +70,8 @@ public class InstancedDrawManager {
 
 		initializedInstancers.forEach(InstancedInstancer::delete);
 		initializedInstancers.clear();
+
+		eboCache.delete();
 	}
 
 	public void clearInstancers() {
@@ -89,8 +92,8 @@ public class InstancedDrawManager {
 	}
 
 	private InstancedMeshPool.BufferedMesh alloc(Mesh mesh) {
-		return meshPools.computeIfAbsent(mesh.getVertexType(), InstancedMeshPool::new)
-				.alloc(mesh);
+		return meshPools.computeIfAbsent(mesh.vertexType(), InstancedMeshPool::new)
+				.alloc(mesh, eboCache);
 	}
 
 	public static class DrawSet implements Iterable<Map.Entry<ShaderState, Collection<DrawCall>>> {

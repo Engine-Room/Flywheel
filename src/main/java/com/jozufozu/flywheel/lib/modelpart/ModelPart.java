@@ -32,7 +32,7 @@ public class ModelPart implements QuadMesh {
 			cuboid.write(writer);
 		}
 
-		vertexList = getVertexType().createVertexList();
+		vertexList = vertexType().createVertexList();
 		vertexList.ptr(ptr);
 		vertexList.vertexCount(vertexCount);
 
@@ -44,12 +44,12 @@ public class ModelPart implements QuadMesh {
 	}
 
 	@Override
-	public PosTexNormalVertex getVertexType() {
+	public PosTexNormalVertex vertexType() {
 		return VertexTypes.POS_TEX_NORMAL;
 	}
 
 	@Override
-	public int getVertexCount() {
+	public int vertexCount() {
 		return vertexCount;
 	}
 
@@ -64,7 +64,7 @@ public class ModelPart implements QuadMesh {
 	}
 
 	@Override
-	public Vector4fc getBoundingSphere() {
+	public Vector4fc boundingSphere() {
 		return boundingSphere;
 	}
 
