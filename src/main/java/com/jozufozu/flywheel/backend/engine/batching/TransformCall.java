@@ -35,7 +35,7 @@ public class TransformCall<I extends Instance> {
 		MaterialVertexTransformer materialVertexTransformer = material.getVertexTransformer();
 
 		meshVertexCount = mesh.getVertexCount();
-		Vector4fc meshBoundingSphere = mesh.getBoundingSphere();
+		Vector4fc meshBoundingSphere = mesh.boundingSphere();
 
 		drawPlan = ForEachPlan.of(instancer::getAll, (instance, ctx) -> {
 			var boundingSphere = new Vector4f(meshBoundingSphere);

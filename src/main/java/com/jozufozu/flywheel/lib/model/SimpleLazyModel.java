@@ -29,7 +29,7 @@ public class SimpleLazyModel implements Model {
 	}
 
 	public int getVertexCount() {
-		return supplier.map(Mesh::getVertexCount)
+		return supplier.map(Mesh::vertexCount)
 				.orElse(0);
 	}
 

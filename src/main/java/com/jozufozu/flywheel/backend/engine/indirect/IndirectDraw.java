@@ -64,12 +64,12 @@ public class IndirectDraw<I extends Instance> {
 	}
 
 	public void writeIndirectCommand(long ptr) {
-		var boundingSphere = mesh.getMesh().getBoundingSphere();
+		var boundingSphere = mesh.boundingSphere();
 
-		MemoryUtil.memPutInt(ptr, mesh.getIndexCount()); // count
+		MemoryUtil.memPutInt(ptr, mesh.indexCount()); // count
 		MemoryUtil.memPutInt(ptr + 4, 0); // instanceCount - to be incremented by the compute shader
-		MemoryUtil.memPutInt(ptr + 8, 0); // firstIndex - all models share the same index buffer
-		MemoryUtil.memPutInt(ptr + 12, mesh.getBaseVertex()); // baseVertex
+		MemoryUtil.memPutInt(ptr + 8, mesh.firstIndex); // firstIndex
+		MemoryUtil.memPutInt(ptr + 12, mesh.baseVertex); // baseVertex
 		MemoryUtil.memPutInt(ptr + 16, baseInstance); // baseInstance
 
 		boundingSphere.getToAddress(ptr + 20); // boundingSphere

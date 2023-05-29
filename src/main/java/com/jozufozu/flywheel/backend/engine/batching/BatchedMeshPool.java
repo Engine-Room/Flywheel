@@ -160,8 +160,8 @@ public class BatchedMeshPool {
 
 		private BufferedMesh(Mesh mesh, long byteIndex) {
 			this.mesh = mesh;
-			vertexCount = mesh.getVertexCount();
-			boundingSphere = mesh.getBoundingSphere();
+			vertexCount = mesh.vertexCount();
+			boundingSphere = mesh.boundingSphere();
 			byteSize = vertexCount * vertexFormat.getVertexSize();
 			this.byteIndex = byteIndex;
 		}
@@ -174,7 +174,7 @@ public class BatchedMeshPool {
 			return vertexCount;
 		}
 
-		public Vector4fc getBoundingSphere() {
+		public Vector4fc boundingSphere() {
 			return boundingSphere;
 		}
 

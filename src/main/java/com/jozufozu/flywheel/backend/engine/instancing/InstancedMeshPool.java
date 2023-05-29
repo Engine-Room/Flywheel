@@ -16,7 +16,6 @@ import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.gl.GlPrimitive;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
-import com.jozufozu.flywheel.gl.buffer.ElementBuffer;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.gl.buffer.MappedBuffer;
 
@@ -50,16 +49,17 @@ public class InstancedMeshPool {
 	/**
 	 * Allocate a mesh in the arena.
 	 *
-	 * @param mesh The mesh to allocate.
+	 * @param mesh     The mesh to allocate.
+	 * @param eboCache The EBO cache to use.
 	 * @return A handle to the allocated mesh.
 	 */
-	public BufferedMesh alloc(Mesh mesh) {
+	public BufferedMesh alloc(Mesh mesh, EBOCache eboCache) {
 		return meshes.computeIfAbsent(mesh, m -> {
-			if (m.getVertexType() != vertexType) {
+			if (m.vertexType() != vertexType) {
 				throw new IllegalArgumentException("Mesh has wrong vertex type");
 			}
 
-			BufferedMesh bufferedMesh = new BufferedMesh(m, byteSize);
+			BufferedMesh bufferedMesh = new BufferedMesh(m, byteSize, eboCache);
 			byteSize += bufferedMesh.size();
 			allBuffered.add(bufferedMesh);
 			pendingUpload.add(bufferedMesh);
@@ -145,16 +145,16 @@ public class InstancedMeshPool {
 
 	public class BufferedMesh {
 		private final Mesh mesh;
-		private final ElementBuffer ebo;
+		private final int ebo;
 		private long byteIndex;
 		private boolean deleted;
 
 		private final Set<GlVertexArray> boundTo = new HashSet<>();
 
-		private BufferedMesh(Mesh mesh, long byteIndex) {
+		private BufferedMesh(Mesh mesh, long byteIndex, EBOCache eboCache) {
 			this.mesh = mesh;
 			this.byteIndex = byteIndex;
-			this.ebo = mesh.createEBO();
+			this.ebo = eboCache.get(mesh.indexSequence(), mesh.indexCount());
 		}
 
 		public int size() {
@@ -188,15 +188,15 @@ public class InstancedMeshPool {
 				BufferLayout type = vertexType.getLayout();
 				vao.bindVertexBuffer(0, InstancedMeshPool.this.vbo.handle(), byteIndex, type.getStride());
 				vao.bindAttributes(0, 0, type.attributes());
-				vao.setElementBuffer(ebo.glBuffer);
+				vao.setElementBuffer(ebo);
 			}
 		}
 
 		public void draw(int instanceCount) {
 			if (instanceCount > 1) {
-				GL32.glDrawElementsInstanced(GlPrimitive.TRIANGLES.glEnum, ebo.getElementCount(), ebo.getEboIndexType().asGLType, 0, instanceCount);
+				GL32.glDrawElementsInstanced(GlPrimitive.TRIANGLES.glEnum, mesh.indexCount(), GL32.GL_UNSIGNED_INT, 0, instanceCount);
 			} else {
-				GL32.glDrawElements(GlPrimitive.TRIANGLES.glEnum, ebo.getElementCount(), ebo.getEboIndexType().asGLType, 0);
+				GL32.glDrawElements(GlPrimitive.TRIANGLES.glEnum, mesh.indexCount(), GL32.GL_UNSIGNED_INT, 0);
 			}
 		}
 

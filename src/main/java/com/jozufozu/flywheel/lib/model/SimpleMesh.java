@@ -28,7 +28,7 @@ public class SimpleMesh implements QuadMesh {
 		}
 		vertexCount = bytes / stride;
 
-		vertexList = getVertexType().createVertexList();
+		vertexList = vertexType().createVertexList();
 		vertexList.ptr(contents.ptr());
 		vertexList.vertexCount(vertexCount);
 
@@ -36,12 +36,12 @@ public class SimpleMesh implements QuadMesh {
 	}
 
 	@Override
-	public VertexType getVertexType() {
+	public VertexType vertexType() {
 		return vertexType;
 	}
 
 	@Override
-	public int getVertexCount() {
+	public int vertexCount() {
 		return vertexCount;
 	}
 
@@ -56,7 +56,7 @@ public class SimpleMesh implements QuadMesh {
 	}
 
 	@Override
-	public Vector4fc getBoundingSphere() {
+	public Vector4fc boundingSphere() {
 		return boundingSphere;
 	}
 
