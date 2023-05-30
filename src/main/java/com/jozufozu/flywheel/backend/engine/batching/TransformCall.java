@@ -13,7 +13,8 @@ import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
-import com.jozufozu.flywheel.lib.task.ForEachPlan;
+import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
+import com.jozufozu.flywheel.lib.task.ForEachSlicePlan;
 import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
@@ -37,22 +38,26 @@ public class TransformCall<I extends Instance> {
 		meshVertexCount = mesh.getVertexCount();
 		Vector4fc meshBoundingSphere = mesh.boundingSphere();
 
-		drawPlan = ForEachPlan.of(instancer::getAll, (instance, ctx) -> {
-			var boundingSphere = new Vector4f(meshBoundingSphere);
-			boundingSphereTransformer.transform(boundingSphere, instance);
+		drawPlan = ForEachSlicePlan.of(instancer::getAll, (subList, ctx) -> {
+			ReusableVertexList vertexList = ctx.buffer.slice(0, meshVertexCount);
+			Vector4f boundingSphere = new Vector4f();
 
-			if (!ctx.frustum
-					.testSphere(boundingSphere.x, boundingSphere.y, boundingSphere.z, boundingSphere.w)) {
-				return;
+			for (I instance : subList) {
+				boundingSphere.set(meshBoundingSphere);
+				boundingSphereTransformer.transform(boundingSphere, instance);
+
+				if (!ctx.frustum.testSphere(boundingSphere.x, boundingSphere.y, boundingSphere.z, boundingSphere.w)) {
+					continue;
+				}
+
+				final int baseVertex = ctx.vertexCounter.getAndAdd(meshVertexCount);
+				vertexList.ptr(ctx.buffer.ptrForVertex(baseVertex));
+
+				mesh.copyTo(vertexList.ptr());
+				instanceVertexTransformer.transform(vertexList, instance);
+				materialVertexTransformer.transform(vertexList, ctx.level);
+				applyMatrices(vertexList, ctx.matrices);
 			}
-
-			final int baseVertex = ctx.vertexCounter.getAndAdd(meshVertexCount);
-			var sub = ctx.buffer.slice(baseVertex, meshVertexCount);
-
-			mesh.copyTo(sub.ptr());
-			instanceVertexTransformer.transform(sub, instance);
-			materialVertexTransformer.transform(sub, ctx.level);
-			applyMatrices(sub, ctx.matrices);
 		});
 	}
 

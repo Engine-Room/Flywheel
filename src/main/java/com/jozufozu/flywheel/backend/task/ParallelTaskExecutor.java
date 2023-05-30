@@ -145,10 +145,9 @@ public class ParallelTaskExecutor implements TaskExecutor {
 				processTask(task);
 			} else {
 				// then wait for the other threads to finish.
-				waitGroup.await();
-				// at this point we know taskQueue is empty,
-				// but one of the worker threads may have submitted a main thread task.
-				if (mainThreadQueue.isEmpty()) {
+				boolean done = waitGroup.await(10_000);
+				// If we timed-out tasks may have been added to the queue, so check again.
+				if (done && mainThreadQueue.isEmpty()) {
 					// if they didn't, we're done.
 					break;
 				}
@@ -157,13 +156,17 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	}
 
 	public void discardAndAwait() {
-		// Discard everyone else's work...
-		while (taskQueue.pollLast() != null) {
-			waitGroup.done();
-		}
+		while (true) {
+			// Discard everyone else's work...
+			while (taskQueue.pollLast() != null) {
+				waitGroup.done();
+			}
 
-		// ...wait for any stragglers...
-		waitGroup.await();
+			// ...wait for any stragglers...
+			if (waitGroup.await(100_000)) {
+				break;
+			}
+		}
 		// ...and clear the main thread queue.
 		mainThreadQueue.clear();
 	}

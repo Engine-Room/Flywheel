@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.lib.task;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -12,38 +13,84 @@ public class PlanUtil {
 
 		if (size == 0) {
 			onCompletion.run();
-		} else if (size <= getChunkSize(taskExecutor, size)) {
-			processList(context, onCompletion, list, action);
+			return;
+		}
+
+		final int sliceSize = sliceSize(taskExecutor, size);
+
+		if (size <= sliceSize) {
+			for (T t : list) {
+				action.accept(t, context);
+			}
+			onCompletion.run();
+		} else if (sliceSize == 1) {
+			var synchronizer = new Synchronizer(size, onCompletion);
+			for (T t : list) {
+				taskExecutor.execute(() -> {
+					action.accept(t, context);
+					synchronizer.decrementAndEventuallyRun();
+				});
+			}
 		} else {
-			dispatchChunks(taskExecutor, context, onCompletion, list, action);
+			var synchronizer = new Synchronizer(MoreMath.ceilingDiv(size, sliceSize), onCompletion);
+			int remaining = size;
+
+			while (remaining > 0) {
+				int end = remaining;
+				remaining -= sliceSize;
+				int start = Math.max(remaining, 0);
+
+				var subList = list.subList(start, end);
+				taskExecutor.execute(() -> {
+					for (T t : subList) {
+						action.accept(t, context);
+					}
+					synchronizer.decrementAndEventuallyRun();
+				});
+			}
 		}
 	}
 
-	public static int getChunkSize(TaskExecutor taskExecutor, int totalSize) {
-		return MoreMath.ceilingDiv(totalSize, taskExecutor.getThreadCount() * 32);
-	}
-
-	static <C, T> void dispatchChunks(TaskExecutor taskExecutor, C context, Runnable onCompletion, List<T> list, BiConsumer<T, C> action) {
+	public static <C, T> void distributeSlices(TaskExecutor taskExecutor, C context, Runnable onCompletion, List<T> list, BiConsumer<List<T>, C> action) {
 		final int size = list.size();
-		final int chunkSize = getChunkSize(taskExecutor, size);
 
-		var synchronizer = new Synchronizer(MoreMath.ceilingDiv(size, chunkSize), onCompletion);
-		int remaining = size;
+		if (size == 0) {
+			onCompletion.run();
+			return;
+		}
 
-		while (remaining > 0) {
-			int end = remaining;
-			remaining -= chunkSize;
-			int start = Math.max(remaining, 0);
+		final int sliceSize = sliceSize(taskExecutor, size);
 
-			var subList = list.subList(start, end);
-			taskExecutor.execute(() -> processList(context, synchronizer, subList, action));
+		if (size <= sliceSize) {
+			action.accept(list, context);
+			onCompletion.run();
+		} else if (sliceSize == 1) {
+			var synchronizer = new Synchronizer(size, onCompletion);
+			for (T t : list) {
+				taskExecutor.execute(() -> {
+					action.accept(Collections.singletonList(t), context);
+					synchronizer.decrementAndEventuallyRun();
+				});
+			}
+		} else {
+			var synchronizer = new Synchronizer(MoreMath.ceilingDiv(size, sliceSize), onCompletion);
+			int remaining = size;
+
+			while (remaining > 0) {
+				int end = remaining;
+				remaining -= sliceSize;
+				int start = Math.max(remaining, 0);
+
+				var subList = list.subList(start, end);
+				taskExecutor.execute(() -> {
+					action.accept(subList, context);
+					synchronizer.decrementAndEventuallyRun();
+				});
+			}
 		}
 	}
 
-	static <C, T> void processList(C context, Runnable onCompletion, List<T> list, BiConsumer<T, C> action) {
-		for (var t : list) {
-			action.accept(t, context);
-		}
-		onCompletion.run();
+	public static int sliceSize(TaskExecutor taskExecutor, int totalSize) {
+		return MoreMath.ceilingDiv(totalSize, taskExecutor.getThreadCount() * 32);
 	}
 }
