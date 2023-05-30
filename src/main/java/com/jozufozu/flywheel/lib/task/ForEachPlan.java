@@ -8,8 +8,17 @@ import java.util.function.Supplier;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 
-public record ForEachPlan<T, C>(Supplier<List<T>> listSupplier,
-								BiConsumer<T, C> action) implements SimplyComposedPlan<C> {
+/**
+ * A plan that executes code on each element of a provided list.
+ * <p>
+ * Operations are dynamically batched based on the number of available threads.
+ *
+ * @param listSupplier A supplier of the list to iterate over.
+ * @param action       The action to perform on each element.
+ * @param <T>          The type of the list elements.
+ * @param <C>          The type of the context object.
+ */
+public record ForEachPlan<T, C>(Supplier<List<T>> listSupplier, BiConsumer<T, C> action) implements SimplyComposedPlan<C> {
 	public static <T, C> Plan<C> of(Supplier<List<T>> iterable, BiConsumer<T, C> forEach) {
 		return new ForEachPlan<>(iterable, forEach);
 	}
