@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.core.virtual;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -16,6 +18,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.DataLayer;
+import net.minecraft.world.level.chunk.LightChunk;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.lighting.LayerLightEventListener;
 import net.minecraft.world.level.lighting.LevelLightEngine;
@@ -73,8 +76,9 @@ public interface VirtualEmptyBlockGetter extends BlockAndTintGetter {
 		public StaticLightImpl(int blockLight, int skyLight) {
 			lightEngine = new LevelLightEngine(new LightChunkGetter() {
 				@Override
-				public BlockGetter getChunkForLighting(int p_63023_, int p_63024_) {
-					return StaticLightImpl.this;
+				@Nullable
+				public LightChunk getChunkForLighting(int p_63023_, int p_63024_) {
+					return null;
 				}
 
 				@Override
@@ -99,17 +103,13 @@ public interface VirtualEmptyBlockGetter extends BlockAndTintGetter {
 				}
 
 				@Override
-				public void onBlockEmissionIncrease(BlockPos pos, int p_164456_) {
-				}
-
-				@Override
 				public boolean hasLightWork() {
 					return false;
 				}
 
 				@Override
-				public int runUpdates(int p_164449_, boolean p_164450_, boolean p_164451_) {
-					return p_164449_;
+				public int runLightUpdates() {
+					return 0;
 				}
 
 				@Override
@@ -117,7 +117,11 @@ public interface VirtualEmptyBlockGetter extends BlockAndTintGetter {
 				}
 
 				@Override
-				public void enableLightSources(ChunkPos pos, boolean p_164453_) {
+				public void setLightEnabled(ChunkPos pos, boolean p_164432_) {
+				}
+
+				@Override
+				public void propagateLightSources(ChunkPos pos) {
 				}
 
 				@Override

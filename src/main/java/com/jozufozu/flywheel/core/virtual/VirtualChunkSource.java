@@ -3,12 +3,12 @@ package com.jozufozu.flywheel.core.virtual;
 import java.util.HashMap;
 import java.util.function.BooleanSupplier;
 
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LightChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
 public class VirtualChunkSource extends ChunkSource {
@@ -21,7 +21,7 @@ public class VirtualChunkSource extends ChunkSource {
 	}
 
 	@Override
-	public BlockGetter getChunkForLighting(int x, int z) {
+	public LightChunk getChunkForLighting(int x, int z) {
 		return getChunk(x, z);
 	}
 

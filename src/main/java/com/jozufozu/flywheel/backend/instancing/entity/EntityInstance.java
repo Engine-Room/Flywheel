@@ -40,7 +40,7 @@ public abstract class EntityInstance<E extends Entity> extends AbstractInstance 
 	protected final GridAlignedBB bounds;
 
 	public EntityInstance(MaterialManager materialManager, E entity) {
-		super(materialManager, entity.level);
+		super(materialManager, entity.level());
 		this.entity = entity;
 		bounds = GridAlignedBB.from(entity.getBoundingBox());
 	}

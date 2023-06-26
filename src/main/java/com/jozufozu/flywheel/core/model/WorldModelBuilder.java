@@ -36,10 +36,10 @@ public final class WorldModelBuilder implements Bufferable {
 	public void bufferInto(ModelBlockRenderer modelRenderer, VertexConsumer consumer, RandomSource random) {
 		ModelBlockRenderer.enableCaching();
 		for (StructureTemplate.StructureBlockInfo info : this.blocks) {
-			BlockState state = info.state;
+			BlockState state = info.state();
 			if (state.getRenderShape() != RenderShape.MODEL) continue;
 
-			BlockPos pos = info.pos;
+			BlockPos pos = info.pos();
 			long randomSeed = state.getSeed(pos);
 			BakedModel model = ModelUtil.VANILLA_RENDERER.getBlockModel(state);
 			ModelData data = this.modelData.getOrDefault(pos, ModelData.EMPTY);

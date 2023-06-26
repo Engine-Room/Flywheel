@@ -32,9 +32,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEvent.Context;
@@ -70,7 +68,7 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	}
 
 	public VirtualRenderWorld(Level level, Vec3i biomeOffset, int height, int minBuildHeight) {
-		super((WritableLevelData) level.getLevelData(), level.dimension(), level.dimensionTypeRegistration(), level::getProfiler,
+		super((WritableLevelData) level.getLevelData(), level.dimension(), level.registryAccess(), level.dimensionTypeRegistration(), level.getProfilerSupplier(),
 				true, false, 0, 0);
 		this.biomeOffset = biomeOffset;
 		this.level = level;
@@ -96,16 +94,7 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	 * Run this after you're done using setBlock().
 	 */
 	public void runLightingEngine() {
-		for (Map.Entry<BlockPos, BlockState> entry : blocksAdded.entrySet()) {
-			BlockPos pos = entry.getKey();
-			BlockState state = entry.getValue();
-			int light = state.getLightEmission(this, pos);
-			if (light > 0) {
-				lighter.onBlockEmissionIncrease(pos, light);
-			}
-		}
-
-		lighter.runUpdates(Integer.MAX_VALUE, false, false);
+		lighter.runLightUpdates();
 	}
 
 	public void setBlockEntities(Collection<BlockEntity> blockEntities) {
@@ -128,9 +117,7 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 			lighter.updateSectionStatus(sectionPos, false);
 		}
 
-		if ((flags & Block.UPDATE_SUPPRESS_LIGHT) == 0) {
-			lighter.checkBlock(pos);
-		}
+		lighter.checkBlock(pos);
 
 		return true;
 	}
@@ -334,16 +321,6 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 
 	@Override
 	public void sendBlockUpdated(BlockPos pos, BlockState oldState, BlockState newState, int flags) {}
-
-	// Override Starlight's ExtendedWorld interface methods:
-
-	public LevelChunk getChunkAtImmediately(final int chunkX, final int chunkZ) {
-		return chunkSource.getChunk(chunkX, chunkZ, false);
-	}
-
-	public ChunkAccess getAnyChunkImmediately(final int chunkX, final int chunkZ) {
-		return chunkSource.getChunk(chunkX, chunkZ);
-	}
 
 	// Intentionally copied from LevelHeightAccessor. Lithium overrides these methods so we need to, too.
 
