@@ -4,7 +4,6 @@ uniform float uTime;
 uniform mat4 uViewProjection;
 uniform vec3 uCameraPos;
 
-uniform vec2 uTextureScale;
 uniform sampler2D uBlockAtlas;
 uniform sampler2D uLightMap;
 
