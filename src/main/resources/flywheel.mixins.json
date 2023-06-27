@@ -20,7 +20,6 @@
     "PausedPartialTickAccessor",
     "RenderTexturesMixin",
     "RenderTypeMixin",
-    "atlas.AtlasDataMixin",
     "instancemanage.ChunkRebuildHooksMixin",
     "instancemanage.ChunkRenderDispatcherAccessor",
     "instancemanage.InstanceAddMixin",
