@@ -70,7 +70,7 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	}
 
 	public VirtualRenderWorld(Level level, Vec3i biomeOffset, int height, int minBuildHeight) {
-		super((WritableLevelData) level.getLevelData(), level.dimension(), level.dimensionTypeRegistration(), level::getProfiler,
+		super((WritableLevelData) level.getLevelData(), level.dimension(), level.registryAccess(), level.dimensionTypeRegistration(), level.getProfilerSupplier(),
 				true, false, 0, 0);
 		this.biomeOffset = biomeOffset;
 		this.level = level;
@@ -334,16 +334,6 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 
 	@Override
 	public void sendBlockUpdated(BlockPos pos, BlockState oldState, BlockState newState, int flags) {}
-
-	// Override Starlight's ExtendedWorld interface methods:
-
-	public LevelChunk getChunkAtImmediately(final int chunkX, final int chunkZ) {
-		return chunkSource.getChunk(chunkX, chunkZ, false);
-	}
-
-	public ChunkAccess getAnyChunkImmediately(final int chunkX, final int chunkZ) {
-		return chunkSource.getChunk(chunkX, chunkZ);
-	}
 
 	// Intentionally copied from LevelHeightAccessor. Lithium overrides these methods so we need to, too.
 

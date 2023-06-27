@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[43,)"
+loaderVersion = "[45,)"
 issueTrackerURL = "https://github.com/Jozufozu/Flywheel/issues"
 license = "MIT"
 
@@ -18,13 +18,13 @@ A modern engine for modded minecraft.'''
 [[dependencies.flywheel]]
 modId = "forge"
 mandatory = true
-versionRange = "[43.0.0,)"
+versionRange = "[45.0.0,)"
 ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.flywheel]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.19.2,1.20)"
+versionRange = "[1.19.4,1.20)"
 ordering = "NONE"
 side = "CLIENT"
