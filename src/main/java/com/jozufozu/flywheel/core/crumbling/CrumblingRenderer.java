@@ -6,17 +6,16 @@ import java.util.SortedSet;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
-import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.instancing.InstanceManager;
 import com.jozufozu.flywheel.backend.instancing.SerialTaskEngine;
 import com.jozufozu.flywheel.backend.instancing.instancing.InstancingEngine;
 import com.jozufozu.flywheel.core.Contexts;
+import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.mixin.LevelRendererAccessor;
 import com.jozufozu.flywheel.util.Lazy;
 import com.jozufozu.flywheel.util.Pair;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
@@ -26,8 +25,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.BlockDestructionProgress;
@@ -67,17 +64,14 @@ public class CrumblingRenderer {
 
 		// XXX Restore state
 		GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
-		CrumblingRenderer.renderBreaking(activeStages, new RenderLayerEvent(level, null, stack, null, cameraPos.x, cameraPos.y, cameraPos.z));
+		renderCrumbling(activeStages, camera, new RenderLayerEvent(level, null, stack, null, cameraPos.x, cameraPos.y, cameraPos.z));
 		restoreState.restore();
 	}
 
-	private static void renderBreaking(Int2ObjectMap<List<BlockEntity>> activeStages, RenderLayerEvent event) {
+	private static void renderCrumbling(Int2ObjectMap<List<BlockEntity>> activeStages, Camera camera, RenderLayerEvent event) {
 		State state = STATE.get();
 		InstanceManager<BlockEntity> instanceManager = state.instanceManager;
-		InstancingEngine<CrumblingProgram> materials = state.materialManager;
-
-		TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-		Camera info = Minecraft.getInstance().gameRenderer.getMainCamera();
+		InstancingEngine<WorldProgram> materials = state.materialManager;
 
 		for (Int2ObjectMap.Entry<List<BlockEntity>> stage : activeStages.int2ObjectEntrySet()) {
 			_currentLayer = ModelBakery.DESTROY_TYPES.get(stage.getIntKey());
@@ -86,22 +80,14 @@ public class CrumblingRenderer {
 			if (_currentLayer != null) {
 				stage.getValue().forEach(instanceManager::add);
 
-				instanceManager.beginFrame(SerialTaskEngine.INSTANCE, info);
+				instanceManager.beginFrame(SerialTaskEngine.INSTANCE, camera);
 
 				// XXX Each call applies another restore state even though we are already inside of a restore state
 				materials.render(SerialTaskEngine.INSTANCE, event);
 
 				instanceManager.invalidate();
 			}
-
 		}
-
-		// XXX Inconsistent GL state cleanup
-		// If texture binding and active unit need to be restored, store them in variables before GL state is changed
-		// instead of guessing that unit 0 and crumbling tex 0 are correct
-		GlTextureUnit.T0.makeActive();
-		AbstractTexture breaking = textureManager.getTexture(ModelBakery.BREAKING_LOCATIONS.get(0));
-		if (breaking != null) RenderSystem.bindTexture(breaking.getId());
 	}
 
 	/**
@@ -145,7 +131,7 @@ public class CrumblingRenderer {
 	}
 
 	private static class State {
-		private final InstancingEngine<CrumblingProgram> materialManager;
+		private final InstancingEngine<WorldProgram> materialManager;
 		private final InstanceManager<BlockEntity> instanceManager;
 
 		private State() {

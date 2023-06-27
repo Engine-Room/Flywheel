@@ -54,6 +54,10 @@ public class BlockModel implements Model {
 	}
 
 	public BlockModel(Pair<RenderedBuffer, Integer> pair, String name) {
+		this(pair, name, true);
+	}
+
+	public BlockModel(Pair<RenderedBuffer, Integer> pair, String name, boolean releaseBuffer) {
 		this.name = name;
 
 		RenderedBuffer renderedBuffer = pair.first();
@@ -65,6 +69,10 @@ public class BlockModel implements Model {
 		} else {
 			eboSupplier = () -> QuadConverter.getInstance()
 					.quads2Tris(vertexCount() / 4);
+		}
+
+		if (releaseBuffer) {
+			renderedBuffer.release();
 		}
 	}
 
