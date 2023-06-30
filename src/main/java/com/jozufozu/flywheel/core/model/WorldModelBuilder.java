@@ -43,6 +43,7 @@ public final class WorldModelBuilder implements Bufferable {
 			long randomSeed = state.getSeed(pos);
 			BakedModel model = ModelUtil.VANILLA_RENDERER.getBlockModel(state);
 			ModelData data = this.modelData.getOrDefault(pos, ModelData.EMPTY);
+			data = model.getModelData(renderWorld, pos, state, data);
 			random.setSeed(randomSeed);
 			if (!model.getRenderTypes(state, random, data).contains(this.layer)) continue;
 
