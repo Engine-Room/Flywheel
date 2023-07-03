@@ -8,12 +8,12 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 
 /**
- * An interface for objects that can "rendered" into a BufferBuilder.
+ * An interface for objects that can buffered into a VertexConsumer.
  */
 public interface Bufferable {
-	void bufferInto(ModelBlockRenderer renderer, VertexConsumer consumer, Random random);
+	void bufferInto(VertexConsumer consumer, ModelBlockRenderer renderer, Random random);
 
-	default ShadeSeparatedBufferBuilder build() {
-		return ModelUtil.getBufferBuilder(this);
+	default ShadeSeparatedBufferedData build() {
+		return ModelUtil.getBufferedData(this);
 	}
 }
