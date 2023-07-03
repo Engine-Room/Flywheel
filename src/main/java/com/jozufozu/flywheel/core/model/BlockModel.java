@@ -14,10 +14,9 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;
 import com.jozufozu.flywheel.backend.model.ElementBuffer;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.QuadConverter;
-import com.jozufozu.flywheel.util.Pair;
 import com.mojang.blaze3d.platform.MemoryTracker;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferBuilder.RenderedBuffer;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat.IndexType;
 
@@ -34,46 +33,69 @@ public class BlockModel implements Model {
 	private final String name;
 	private final EBOSupplier eboSupplier;
 
-	public BlockModel(BlockState state) {
-		this(Minecraft.getInstance()
-				.getBlockRenderer()
-				.getBlockModel(state), state);
-	}
+	public BlockModel(ByteBuffer vertexBuffer, ByteBuffer indexBuffer, BufferBuilder.DrawState drawState, int unshadedStartVertex, String name) {
+		if (drawState.format() != DefaultVertexFormat.BLOCK) {
+			throw new RuntimeException("Cannot use buffered data with non-block format '" + drawState.format() + "'");
+		}
 
-	public BlockModel(BakedModel model, BlockState referenceState) {
-		this(new BakedModelBuilder(model).withReferenceState(referenceState), referenceState.toString());
-	}
+		reader = Formats.BLOCK.createReader(vertexBuffer, drawState.vertexCount(), unshadedStartVertex);
 
-	public BlockModel(BakedModel model, BlockState referenceState, PoseStack ms) {
-		this(new BakedModelBuilder(model).withReferenceState(referenceState)
-				.withPoseStack(ms), referenceState.toString());
-	}
-
-	public BlockModel(Bufferable bufferable, String name) {
-		this(bufferable.build(), name);
-	}
-
-	public BlockModel(Pair<RenderedBuffer, Integer> pair, String name) {
-		this(pair, name, true);
-	}
-
-	public BlockModel(Pair<RenderedBuffer, Integer> pair, String name, boolean releaseBuffer) {
 		this.name = name;
 
-		RenderedBuffer renderedBuffer = pair.first();
-		BufferBuilder.DrawState drawState = renderedBuffer.drawState();
-		reader = Formats.BLOCK.createReader(renderedBuffer, pair.second());
-
 		if (!drawState.sequentialIndex()) {
-			eboSupplier = new BufferEBOSupplier(renderedBuffer.indexBuffer(), drawState.indexCount(), drawState.indexType());
+			eboSupplier = new BufferEBOSupplier(indexBuffer, drawState.indexCount(), drawState.indexType());
 		} else {
 			eboSupplier = () -> QuadConverter.getInstance()
 					.quads2Tris(vertexCount() / 4);
 		}
+	}
 
-		if (releaseBuffer) {
-			renderedBuffer.release();
+	public BlockModel(ByteBuffer vertexBuffer, ByteBuffer indexBuffer, BufferBuilder.DrawState drawState, String name) {
+		if (drawState.format() != DefaultVertexFormat.BLOCK) {
+			throw new RuntimeException("Cannot use buffered data with non-block format '" + drawState.format() + "'");
 		}
+
+		reader = Formats.BLOCK.createReader(vertexBuffer, drawState.vertexCount());
+
+		this.name = name;
+
+		if (!drawState.sequentialIndex()) {
+			eboSupplier = new BufferEBOSupplier(indexBuffer, drawState.indexCount(), drawState.indexType());
+		} else {
+			eboSupplier = () -> QuadConverter.getInstance()
+					.quads2Tris(vertexCount() / 4);
+		}
+	}
+
+	public BlockModel(ShadeSeparatedBufferedData data, String name) {
+		this(data.vertexBuffer(), data.indexBuffer(), data.drawState(), data.unshadedStartVertex(), name);
+	}
+
+	public static BlockModel of(Bufferable bufferable, String name) {
+		ShadeSeparatedBufferedData data = bufferable.build();
+		BlockModel model = new BlockModel(data, name);
+		data.release();
+		return model;
+	}
+
+	public static BlockModel of(BakedModel model, BlockState referenceState) {
+		ShadeSeparatedBufferedData data = ModelUtil.getBufferedData(model, referenceState);
+		BlockModel blockModel = new BlockModel(data, referenceState.toString());
+		data.release();
+		return blockModel;
+	}
+
+	public static BlockModel of(BlockState state) {
+		return of(Minecraft.getInstance()
+				.getBlockRenderer()
+				.getBlockModel(state), state);
+	}
+
+	public static BlockModel of(BakedModel model, BlockState referenceState, PoseStack ms) {
+		ShadeSeparatedBufferedData data = ModelUtil.getBufferedData(model, referenceState, ms);
+		BlockModel blockModel = new BlockModel(data, referenceState.toString());
+		data.release();
+		return blockModel;
 	}
 
 	@Override
@@ -103,13 +125,7 @@ public class BlockModel implements Model {
 
 	@Override
 	public void delete() {
-		if (reader instanceof AutoCloseable closeable) {
-			try {
-				closeable.close();
-			} catch (Exception e) {
-				//
-			}
-		}
+		reader.delete();
 		eboSupplier.delete();
 	}
 

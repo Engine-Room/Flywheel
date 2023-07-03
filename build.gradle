@@ -117,10 +117,10 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     // switch to implementation for debugging
-    compileOnly fg.deobf("maven.modrinth:starlight-forge:1.1.1+1.19")
+    compileOnly fg.deobf('maven.modrinth:starlight-forge:1.1.1+1.19')
 
-    compileOnly fg.deobf("maven.modrinth:rubidium:0.6.2b")
-    compileOnly fg.deobf("maven.modrinth:oculus:1.19.2-1.6.4")
+    compileOnly fg.deobf('maven.modrinth:rubidium:0.6.2b')
+    compileOnly fg.deobf('maven.modrinth:oculus:1.19.2-1.6.4')
 
     // https://discord.com/channels/313125603924639766/725850371834118214/910619168821354497
     // Prevent Mixin annotation processor from getting into IntelliJ's annotation processor settings

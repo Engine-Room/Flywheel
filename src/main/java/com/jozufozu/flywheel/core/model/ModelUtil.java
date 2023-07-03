@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.model.BufferBuilderExtension;
-import com.jozufozu.flywheel.util.Pair;
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferBuilder.RenderedBuffer;
@@ -60,7 +59,7 @@ public class ModelUtil {
 		return data.has(ModelUtil.VIRTUAL_PROPERTY) && data.get(ModelUtil.VIRTUAL_PROPERTY);
 	}
 
-	public static Pair<RenderedBuffer, Integer> endShadeSeparated(BufferBuilder shadedBuilder, BufferBuilder unshadedBuilder) {
+	public static ShadeSeparatedBufferedData endAndCombine(BufferBuilder shadedBuilder, BufferBuilder unshadedBuilder) {
 		int unshadedStartVertex = ((BufferBuilderExtension) shadedBuilder).flywheel$getVertices();
 		RenderedBuffer unshadedBuffer = unshadedBuilder.endOrDiscardIfEmpty();
 		if (unshadedBuffer != null) {
@@ -69,40 +68,45 @@ public class ModelUtil {
 			unshadedBuffer.release();
 		}
 		RenderedBuffer buffer = shadedBuilder.end();
-		return Pair.of(buffer, unshadedStartVertex);
+		return new ShadeSeparatedBufferedData.NativeImpl(buffer.vertexBuffer(), buffer.indexBuffer(), buffer.drawState(), unshadedStartVertex);
 	}
 
-	public static Pair<RenderedBuffer, Integer> getRenderedBuffer(Bufferable bufferable) {
+	public static ShadeSeparatedBufferedData getBufferedData(Bufferable bufferable) {
 		ModelBlockRenderer blockRenderer = VANILLA_RENDERER.getModelRenderer();
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 
 		objects.begin();
 
-		bufferable.bufferInto(blockRenderer, objects.shadeSeparatingWrapper, objects.random);
+		bufferable.bufferInto(objects.shadeSeparatingWrapper, blockRenderer, objects.random);
 
 		return objects.end();
 	}
 
-	public static Pair<RenderedBuffer, Integer> getBufferBuilder(BakedModel model, BlockState referenceState, PoseStack poseStack) {
+	public static ShadeSeparatedBufferedData getBufferedData(BakedModel model, BlockState referenceState) {
+		return new BakedModelBuilder(model).withReferenceState(referenceState)
+				.build();
+	}
+
+	public static ShadeSeparatedBufferedData getBufferedData(BakedModel model, BlockState referenceState, PoseStack poseStack) {
 		return new BakedModelBuilder(model).withReferenceState(referenceState)
 				.withPoseStack(poseStack)
 				.build();
 	}
 
-	public static Pair<RenderedBuffer, Integer> getBufferBuilder(BlockAndTintGetter renderWorld, BakedModel model, BlockState referenceState, PoseStack poseStack) {
+	public static ShadeSeparatedBufferedData getBufferedData(BlockAndTintGetter renderWorld, BakedModel model, BlockState referenceState, PoseStack poseStack) {
 		return new BakedModelBuilder(model).withReferenceState(referenceState)
 				.withPoseStack(poseStack)
 				.withRenderWorld(renderWorld)
 				.build();
 	}
 
-	public static Pair<RenderedBuffer, Integer> getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks) {
+	public static ShadeSeparatedBufferedData getBufferedDataFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks) {
 		return new WorldModelBuilder(layer).withRenderWorld(renderWorld)
 				.withBlocks(blocks)
 				.build();
 	}
 
-	public static Pair<RenderedBuffer, Integer> getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks, PoseStack poseStack) {
+	public static ShadeSeparatedBufferedData getBufferedDataFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks, PoseStack poseStack) {
 		return new WorldModelBuilder(layer).withRenderWorld(renderWorld)
 				.withBlocks(blocks)
 				.withPoseStack(poseStack)
@@ -132,9 +136,9 @@ public class ModelUtil {
 			this.shadeSeparatingWrapper.prepare(this.shadedBuilder, this.unshadedBuilder);
 		}
 
-		private Pair<RenderedBuffer, Integer> end() {
+		private ShadeSeparatedBufferedData end() {
 			this.shadeSeparatingWrapper.clear();
-			return ModelUtil.endShadeSeparated(shadedBuilder, unshadedBuilder);
+			return ModelUtil.endAndCombine(shadedBuilder, unshadedBuilder);
 		}
 	}
 }

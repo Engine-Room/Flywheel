@@ -25,11 +25,11 @@ public interface Material<D extends InstanceData> {
 	Instancer<D> model(Object key, Supplier<Model> modelSupplier);
 
 	default Instancer<D> getModel(PartialModel partial, BlockState referenceState) {
-		return model(partial, () -> new BlockModel(partial.get(), referenceState));
+		return model(partial, () -> BlockModel.of(partial.get(), referenceState));
 	}
 
 	default Instancer<D> getModel(PartialModel partial) {
-		return model(partial, () -> new BlockModel(partial.get(), Blocks.AIR.defaultBlockState()));
+		return model(partial, () -> BlockModel.of(partial.get(), Blocks.AIR.defaultBlockState()));
 	}
 
 	default Instancer<D> getModel(PartialModel partial, BlockState referenceState, Direction dir) {
@@ -37,10 +37,10 @@ public interface Material<D extends InstanceData> {
 	}
 
 	default Instancer<D> getModel(PartialModel partial, BlockState referenceState, Direction dir, Supplier<PoseStack> modelTransform) {
-		return model(Pair.of(dir, partial), () -> new BlockModel(partial.get(), referenceState, modelTransform.get()));
+		return model(Pair.of(dir, partial), () -> BlockModel.of(partial.get(), referenceState, modelTransform.get()));
 	}
 
 	default Instancer<D> getModel(BlockState toRender) {
-		return model(toRender, () -> new BlockModel(toRender));
+		return model(toRender, () -> BlockModel.of(toRender));
 	}
 }
