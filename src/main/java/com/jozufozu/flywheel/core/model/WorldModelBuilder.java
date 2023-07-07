@@ -36,7 +36,7 @@ public final class WorldModelBuilder implements Bufferable {
 	}
 
 	@Override
-	public void bufferInto(ModelBlockRenderer modelRenderer, VertexConsumer consumer, Random random) {
+	public void bufferInto(VertexConsumer consumer, ModelBlockRenderer modelRenderer, Random random) {
 		BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
 
 		ModelBlockRenderer.enableCaching();
@@ -86,7 +86,7 @@ public final class WorldModelBuilder implements Bufferable {
 		return this;
 	}
 
-	public BlockModel intoMesh(String name) {
-		return new BlockModel(this, name);
+	public BlockModel toModel(String name) {
+		return BlockModel.of(this, name);
 	}
 }

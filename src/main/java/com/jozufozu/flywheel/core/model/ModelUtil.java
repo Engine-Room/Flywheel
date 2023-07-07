@@ -1,14 +1,19 @@
 package com.jozufozu.flywheel.core.model;
 
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Random;
 import java.util.function.Supplier;
 
+import com.jozufozu.flywheel.backend.model.BufferBuilderExtension;
+import com.jozufozu.flywheel.fabric.helper.BufferBuilderHelper;
 import com.jozufozu.flywheel.util.transform.TransformStack;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferBuilder.DrawState;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -22,39 +27,53 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 public class ModelUtil {
 	private static final ThreadLocal<ThreadLocalObjects> THREAD_LOCAL_OBJECTS = ThreadLocal.withInitial(ThreadLocalObjects::new);
 
-	public static ShadeSeparatedBufferBuilder getBufferBuilder(Bufferable bufferable) {
+	public static ShadeSeparatedBufferedData endAndCombine(BufferBuilder shadedBuilder, BufferBuilder unshadedBuilder) {
+		int unshadedStartVertex = ((BufferBuilderExtension) shadedBuilder).flywheel$getVertices();
+		unshadedBuilder.end();
+		Pair<DrawState, ByteBuffer> unshadedData = unshadedBuilder.popNextBuffer();
+		BufferBuilderHelper.fixByteOrder(unshadedBuilder, unshadedData.getSecond());
+		((BufferBuilderExtension) shadedBuilder).flywheel$appendBufferUnsafe(unshadedData.getSecond());
+		shadedBuilder.end();
+		Pair<DrawState, ByteBuffer> data = shadedBuilder.popNextBuffer();
+		return new ShadeSeparatedBufferedData.NativeImpl(data.getSecond(), data.getFirst(), unshadedStartVertex);
+	}
+
+	public static ShadeSeparatedBufferedData getBufferedData(Bufferable bufferable) {
 		ModelBlockRenderer blockRenderer = Minecraft.getInstance().getBlockRenderer().getModelRenderer();
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 
 		objects.begin();
 
-		bufferable.bufferInto(blockRenderer, objects.shadeSeparatingWrapper, objects.random);
+		bufferable.bufferInto(objects.shadeSeparatingWrapper, blockRenderer, objects.random);
 
-		objects.end();
-
-		return objects.separatedBufferBuilder;
+		return objects.end();
 	}
 
-	public static ShadeSeparatedBufferBuilder getBufferBuilder(BakedModel model, BlockState referenceState, PoseStack poseStack) {
+	public static ShadeSeparatedBufferedData getBufferedData(BakedModel model, BlockState referenceState) {
+		return new BakedModelBuilder(model).withReferenceState(referenceState)
+				.build();
+	}
+
+	public static ShadeSeparatedBufferedData getBufferedData(BakedModel model, BlockState referenceState, PoseStack poseStack) {
 		return new BakedModelBuilder(model).withReferenceState(referenceState)
 				.withPoseStack(poseStack)
 				.build();
 	}
 
-	public static ShadeSeparatedBufferBuilder getBufferBuilder(BlockAndTintGetter renderWorld, BakedModel model, BlockState referenceState, PoseStack poseStack) {
+	public static ShadeSeparatedBufferedData getBufferedData(BlockAndTintGetter renderWorld, BakedModel model, BlockState referenceState, PoseStack poseStack) {
 		return new BakedModelBuilder(model).withReferenceState(referenceState)
 				.withPoseStack(poseStack)
 				.withRenderWorld(renderWorld)
 				.build();
 	}
 
-	public static ShadeSeparatedBufferBuilder getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks) {
+	public static ShadeSeparatedBufferedData getBufferedDataFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks) {
 		return new WorldModelBuilder(layer).withRenderWorld(renderWorld)
 				.withBlocks(blocks)
 				.build();
 	}
 
-	public static ShadeSeparatedBufferBuilder getBufferBuilderFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks, PoseStack poseStack) {
+	public static ShadeSeparatedBufferedData getBufferedDataFromTemplate(BlockAndTintGetter renderWorld, RenderType layer, Collection<StructureTemplate.StructureBlockInfo> blocks, PoseStack poseStack) {
 		return new WorldModelBuilder(layer).withRenderWorld(renderWorld)
 				.withBlocks(blocks)
 				.withPoseStack(poseStack)
@@ -75,20 +94,18 @@ public class ModelUtil {
 	private static class ThreadLocalObjects {
 		public final Random random = new Random();
 		public final ShadeSeparatingVertexConsumer shadeSeparatingWrapper = new ShadeSeparatingVertexConsumer();
-		public final ShadeSeparatedBufferBuilder separatedBufferBuilder = new ShadeSeparatedBufferBuilder(512);
+		public final BufferBuilder shadedBuilder = new BufferBuilder(512);
 		public final BufferBuilder unshadedBuilder = new BufferBuilder(512);
 
 		private void begin() {
-			this.separatedBufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+			this.shadedBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 			this.unshadedBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-			this.shadeSeparatingWrapper.prepare(this.separatedBufferBuilder, this.unshadedBuilder);
+			this.shadeSeparatingWrapper.prepare(this.shadedBuilder, this.unshadedBuilder);
 		}
 
-		private void end() {
+		private ShadeSeparatedBufferedData end() {
 			this.shadeSeparatingWrapper.clear();
-			this.unshadedBuilder.end();
-			this.separatedBufferBuilder.appendUnshadedVertices(this.unshadedBuilder);
-			this.separatedBufferBuilder.end();
+			return ModelUtil.endAndCombine(shadedBuilder, unshadedBuilder);
 		}
 	}
 }

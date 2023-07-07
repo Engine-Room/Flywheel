@@ -4,15 +4,60 @@ uniform float uTime;
 uniform mat4 uViewProjection;
 uniform vec3 uCameraPos;
 
-uniform vec2 uTextureScale;
 uniform sampler2D uBlockAtlas;
 uniform sampler2D uLightMap;
-uniform sampler2D uCrumbling;
 
 uniform vec2 uWindowSize;
 
 #if defined(VERTEX_SHADER)
+// Replicates the result of SheetedDecalTextureGenerator.java
+vec2 crumblingUV(vec3 pos, vec3 normal) {
+    float maxLen = -2;
+    int face = 2;
+
+    if (-normal.y > maxLen) {
+        maxLen = -normal.y;
+        face = 0;
+    }
+    if (normal.y > maxLen) {
+        maxLen = normal.y;
+        face = 1;
+    }
+    if (-normal.z > maxLen) {
+        maxLen = -normal.z;
+        face = 2;
+    }
+    if (normal.z > maxLen) {
+        maxLen = normal.z;
+        face = 3;
+    }
+    if (-normal.x > maxLen) {
+        maxLen = -normal.x;
+        face = 4;
+    }
+    if (normal.x > maxLen) {
+        maxLen = normal.x;
+        face = 5;
+    }
+
+    if (face == 0) {
+        return vec2(pos.x, -pos.z);
+    } else if (face == 1) {
+        return vec2(pos.x, pos.z);
+    } else if (face == 3) {
+        return vec2(pos.x, -pos.y);
+    } else if (face == 4) {
+        return vec2(-pos.z, -pos.y);
+    } else if (face == 5) {
+        return vec2(pos.z, -pos.y);
+    } else { // face == 2
+        return vec2(-pos.x, -pos.y);
+    }
+}
+
 vec4 FLWVertex(inout Vertex v) {
+    v.texCoords = crumblingUV(v.pos, normalize(v.normal));
+
     FragDistance = cylindrical_distance(v.pos, uCameraPos);
 
     return uViewProjection * vec4(v.pos, 1.);
@@ -23,10 +68,7 @@ vec4 FLWVertex(inout Vertex v) {
 out vec4 fragColor;
 
 vec4 FLWBlockTexture(vec2 texCoords) {
-    vec4 cr = texture(uCrumbling, texCoords * uTextureScale);
-    float diffuseAlpha = texture(uBlockAtlas, texCoords).a;
-    cr.a = cr.a * diffuseAlpha;
-    return cr;
+    return texture(uBlockAtlas, texCoords);
 }
 
 void FLWFinalizeColor(vec4 color) {

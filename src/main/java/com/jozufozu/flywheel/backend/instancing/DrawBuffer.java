@@ -3,10 +3,10 @@ package com.jozufozu.flywheel.backend.instancing;
 import java.nio.ByteBuffer;
 
 import org.jetbrains.annotations.ApiStatus;
+import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.backend.model.BufferBuilderExtension;
 import com.jozufozu.flywheel.backend.model.DirectVertexConsumer;
-import com.mojang.blaze3d.platform.MemoryTracker;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.renderer.RenderType;
@@ -48,10 +48,10 @@ public class DrawBuffer {
 		int byteSize = format.getVertexSize() * (vertexCount + 1);
 
 		if (backingBuffer == null) {
-			backingBuffer = MemoryTracker.create(byteSize);
+			backingBuffer = MemoryUtil.memAlloc(byteSize);
 		}
 		if (byteSize > backingBuffer.capacity()) {
-			backingBuffer = MemoryTracker.resize(backingBuffer, byteSize);
+			backingBuffer = MemoryUtil.memRealloc(backingBuffer, byteSize);
 		}
 
 		return new DirectVertexConsumer(backingBuffer, format, vertexCount);

@@ -2,15 +2,9 @@ package com.jozufozu.flywheel.core.vertex;
 
 import java.nio.ByteBuffer;
 
-import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
-import com.jozufozu.flywheel.core.model.ShadeSeparatedBufferBuilder;
-import com.jozufozu.flywheel.fabric.helper.BufferBuilderHelper;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.datafixers.util.Pair;
 
 public class BlockVertex implements VertexType {
 
@@ -38,6 +32,10 @@ public class BlockVertex implements VertexType {
 		return new BlockVertexListUnsafe(buffer, vertexCount);
 	}
 
+	public BlockVertexListUnsafe.Shaded createReader(ByteBuffer buffer, int vertexCount, int unshadedStartVertex) {
+		return new BlockVertexListUnsafe.Shaded(buffer, vertexCount, unshadedStartVertex);
+	}
+
 	@Override
 	public String getShaderHeader() {
 		return """
@@ -57,27 +55,5 @@ Vertex FLWCreateVertex() {
 	return v;
 }
 				""";
-	}
-
-	public BlockVertexListUnsafe.Shaded createReader(ByteBuffer buffer, int vertexCount, int unshadedStartVertex) {
-		return new BlockVertexListUnsafe.Shaded(buffer, vertexCount, unshadedStartVertex);
-	}
-
-	public VertexList createReader(BufferBuilder bufferBuilder) {
-		// TODO: try to avoid virtual model rendering
-		Pair<BufferBuilder.DrawState, ByteBuffer> pair = bufferBuilder.popNextBuffer();
-		BufferBuilder.DrawState drawState = pair.getFirst();
-
-		if (drawState.format() != DefaultVertexFormat.BLOCK) {
-			throw new RuntimeException("Cannot use BufferBuilder with " + drawState.format());
-		}
-
-		ByteBuffer buffer = pair.getSecond();
-		BufferBuilderHelper.fixByteOrder(bufferBuilder, buffer);
-		if (bufferBuilder instanceof ShadeSeparatedBufferBuilder separated) {
-			return createReader(buffer, drawState.vertexCount(), separated.getUnshadedStartVertex());
-		} else {
-			return createReader(buffer, drawState.vertexCount());
-		}
 	}
 }
