@@ -41,4 +41,7 @@ public interface VertexList {
 	default boolean isEmpty() {
 		return getVertexCount() == 0;
 	}
+
+	default void delete() {
+	}
 }

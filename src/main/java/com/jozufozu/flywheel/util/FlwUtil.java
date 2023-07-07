@@ -1,8 +1,11 @@
 package com.jozufozu.flywheel.util;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
+
+import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.mixin.BlockEntityRenderDispatcherAccessor;
 
@@ -72,5 +75,18 @@ public class FlwUtil {
 
 	public static <R> Stream<R> mapValues(Map<?, R> map) {
 		return map.values().stream();
+	}
+
+	/**
+	 * The returned buffer is backed by native memory and will cause a memory leak if not freed using {@link MemoryUtil#memFree(java.nio.Buffer)}.
+	 */
+	public static ByteBuffer copyBuffer(ByteBuffer buffer) {
+		int pos = buffer.position();
+		ByteBuffer copy = MemoryUtil.memAlloc(buffer.remaining());
+		copy.order(buffer.order());
+		copy.put(buffer);
+		buffer.position(pos);
+		copy.flip();
+		return copy;
 	}
 }

@@ -10,7 +10,6 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.Formats;
 import com.jozufozu.flywheel.core.model.Model;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalWriterUnsafe;
-import com.mojang.blaze3d.platform.MemoryTracker;
 
 public class ModelPart implements Model {
 
@@ -29,7 +28,7 @@ public class ModelPart implements Model {
 			this.vertices = vertices;
 		}
 
-		ByteBuffer buffer = MemoryTracker.create(size());
+		ByteBuffer buffer = MemoryUtil.memAlloc(size());
 		PosTexNormalWriterUnsafe writer = Formats.POS_TEX_NORMAL.createWriter(buffer);
 		for (PartBuilder.CuboidBuilder cuboid : cuboids) {
 			cuboid.buffer(writer);
@@ -65,12 +64,6 @@ public class ModelPart implements Model {
 
 	@Override
 	public void delete() {
-		if (reader instanceof AutoCloseable closeable) {
-			try {
-				closeable.close();
-			} catch (Exception e) {
-				//
-			}
-		}
+		reader.delete();
 	}
 }

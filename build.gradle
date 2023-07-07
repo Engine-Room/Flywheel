@@ -17,7 +17,7 @@ targetCompatibility = JavaVersion.VERSION_17
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + ' (' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 repositories {
     maven {
@@ -52,20 +52,24 @@ repositories {
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${minecraft_version}"
-    mappings loom.layered() {
-        officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
+    if (Boolean.parseBoolean(project.use_parchment)) {
+        mappings loom.layered() {
+            officialMojangMappings()
+            parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
+        }
+    } else {
+        mappings loom.officialMojangMappings()
     }
     modImplementation "net.fabricmc:fabric-loader:${loader_version}"
 
     // Fabric API
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-	// switch to implementation for debugging
+    // switch to implementation for debugging
     modCompileOnly 'maven.modrinth:starlight:1.1.1+1.19'
 
-    modCompileOnly 'maven.modrinth:iris:1.18.x-v1.2.5'
-    modCompileOnly 'maven.modrinth:sodium:mc1.18.2-0.4.1'
+    modCompileOnly 'maven.modrinth:sodium:mc1.19.2-0.4.4'
+    modCompileOnly 'maven.modrinth:iris:1.6.4+1.19.2'
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     modCompileOnly 'maven.modrinth:indium:1.0.6+mc1.18.2'

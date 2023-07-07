@@ -2,12 +2,9 @@ package com.jozufozu.flywheel.core.vertex;
 
 import java.nio.ByteBuffer;
 
-import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 
 public class BlockVertex implements VertexType {
 
@@ -35,6 +32,10 @@ public class BlockVertex implements VertexType {
 		return new BlockVertexListUnsafe(buffer, vertexCount);
 	}
 
+	public BlockVertexListUnsafe.Shaded createReader(ByteBuffer buffer, int vertexCount, int unshadedStartVertex) {
+		return new BlockVertexListUnsafe.Shaded(buffer, vertexCount, unshadedStartVertex);
+	}
+
 	@Override
 	public String getShaderHeader() {
 		return """
@@ -54,27 +55,5 @@ Vertex FLWCreateVertex() {
 	return v;
 }
 				""";
-	}
-
-	public BlockVertexListUnsafe.Shaded createReader(ByteBuffer buffer, int vertexCount, int unshadedStartVertex) {
-		return new BlockVertexListUnsafe.Shaded(buffer, vertexCount, unshadedStartVertex);
-	}
-
-	public VertexList createReader(BufferBuilder.RenderedBuffer renderedBuffer, int unshadedStartVertex) {
-
-		// TODO: try to avoid virtual model rendering
-		BufferBuilder.DrawState drawState = renderedBuffer.drawState();
-
-		if (drawState.format() != DefaultVertexFormat.BLOCK) {
-			throw new RuntimeException("Cannot use BufferBuilder with " + drawState.format());
-		}
-		ByteBuffer vertexBuffer = renderedBuffer.vertexBuffer();
-
-		int vertexCount = drawState.vertexCount();
-		if (unshadedStartVertex >= 0 && unshadedStartVertex < vertexCount) {
-			return createReader(vertexBuffer, vertexCount, unshadedStartVertex);
-		} else {
-			return createReader(vertexBuffer, vertexCount);
-		}
 	}
 }

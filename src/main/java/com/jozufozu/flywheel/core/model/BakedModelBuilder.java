@@ -41,11 +41,19 @@ public final class BakedModelBuilder implements Bufferable {
 	}
 
 	@Override
-	public void bufferInto(ModelBlockRenderer blockRenderer, VertexConsumer consumer, RandomSource random) {
+	public void bufferInto(VertexConsumer consumer, ModelBlockRenderer blockRenderer, RandomSource random) {
 		BakedModel model = DefaultLayerFilteringBakedModel.wrap(this.model);
 		if (consumer instanceof ShadeSeparatingVertexConsumer shadeSeparatingWrapper) {
 			model = shadeSeparatingWrapper.wrapModel(model);
 		}
 		blockRenderer.tesselateBlock(renderWorld, model, referenceState, BlockPos.ZERO, poseStack, consumer, false, random, 42, OverlayTexture.NO_OVERLAY);
+	}
+
+	public BlockModel toModel(String name) {
+		return BlockModel.of(this, name);
+	}
+
+	public BlockModel toModel() {
+		return toModel(referenceState.toString());
 	}
 }
