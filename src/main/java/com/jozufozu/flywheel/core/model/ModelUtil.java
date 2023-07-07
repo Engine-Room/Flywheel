@@ -33,7 +33,9 @@ public class ModelUtil {
 			unshadedBuffer.release();
 		}
 		RenderedBuffer buffer = shadedBuilder.end();
-		return new ShadeSeparatedBufferedData.NativeImpl(buffer.vertexBuffer(), buffer.indexBuffer(), buffer.drawState(), unshadedStartVertex);
+		ShadeSeparatedBufferedData bufferedData = new ShadeSeparatedBufferedData.NativeImpl(buffer.vertexBuffer(), buffer.indexBuffer(), buffer.drawState(), unshadedStartVertex);
+		buffer.release();
+		return bufferedData;
 	}
 
 	public static ShadeSeparatedBufferedData getBufferedData(Bufferable bufferable) {
