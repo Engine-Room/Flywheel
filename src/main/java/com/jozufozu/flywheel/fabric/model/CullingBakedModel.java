@@ -21,7 +21,7 @@ public class CullingBakedModel extends ForwardingBakedModel {
 	protected final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
 	public static BakedModel wrap(BakedModel model) {
-		if (!FabricModelUtil.FREX_LOADED) {
+		if (FabricModelUtil.INDIUM_LOADED) {
 			CullingBakedModel wrapper = THREAD_LOCAL.get();
 			wrapper.wrapped = model;
 			return wrapper;

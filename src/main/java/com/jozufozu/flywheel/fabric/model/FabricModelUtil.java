@@ -25,7 +25,7 @@ public class FabricModelUtil {
 	private static final ShadedPredicate SHADED_PREDICATE = createShadedPredicate();
 
 	private static BlendModeGetter createBlendModeGetter() {
-		if (FabricLoader.getInstance().isModLoaded("frex")) {
+		if (FREX_LOADED) {
 			try {
 				Field frexQuadField = FabricQuadView.class.getDeclaredField("wrapped");
 				frexQuadField.setAccessible(true);
@@ -57,7 +57,7 @@ public class FabricModelUtil {
 			} catch (Exception e) {
 				Flywheel.LOGGER.error("Detected FREX but failed to load quad wrapper field", e);
 			}
-		} else if (FabricLoader.getInstance().isModLoaded("indium")) {
+		} else if (INDIUM_LOADED) {
 			return quad -> ((link.infra.indium.renderer.RenderMaterialImpl) quad.material()).blendMode(0);
 		} else if (RendererAccess.INSTANCE.getRenderer() instanceof IndigoRenderer) {
 			return quad -> ((RenderMaterialImpl) quad.material()).blendMode(0);
