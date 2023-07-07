@@ -3,7 +3,7 @@
 	<h1>Flywheel</h1>
 	<h6>A modern engine for modded Minecraft.</h6>
 	<a href='https://ci.tterrag.com/job/Flywheel/job/Forge/job/1.18/'><img src='https://ci.tterrag.com/job/Flywheel/job/Forge/job/1.18/badge/icon' alt="Jenkins"></a>
-	<a href="https://github.com/Jozufozu/Flywheel/blob/master/LICENSE"><img src="https://img.shields.io/github/license/Jozufozu/Flywheel?style=flat&color=900c3f" alt="License"></a>
+	<a href="https://github.com/Jozufozu/Flywheel/blob/HEAD/LICENSE.md"><img src="https://img.shields.io/github/license/Jozufozu/Flywheel?style=flat&color=900c3f" alt="License"></a>
 	<a href="https://discord.gg/xjD59ThnXy"><img src="https://img.shields.io/discord/841464837406195712?color=5865f2&label=Discord&style=flat" alt="Discord"></a>
 	<a href="https://www.curseforge.com/minecraft/mc-mods/flywheel"><img src="http://cf.way2muchnoise.eu/486392.svg" alt="Curseforge Downloads"></a>
 	<a href="https://modrinth.com/mod/flywheel"><img src="https://img.shields.io/modrinth/dt/flywheel?logo=modrinth&label=&suffix=%20&style=flat&color=242629&labelColor=5ca424&logoColor=1c1c1c" alt="Modrinth"></a>
@@ -18,7 +18,7 @@ graphics programming.
 
 ### Instancing
 
-Flywheel provides an alternate, unified path for entity and tile entity rendering that takes advantage of GPU
+Flywheel provides an alternate, unified path for entity and block entity rendering that takes advantage of GPU
 instancing. In doing so, Flywheel gives the developer the flexibility to define their own vertex and instance formats,
 and write custom shaders to ingest that data.
 
