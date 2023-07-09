@@ -28,8 +28,6 @@
     "instancemanage.SodiumChunkRenderDataMixin",
     "light.LightUpdateMixin",
     "light.NetworkLightUpdateMixin",
-    "matrix.Matrix3fMixin",
-    "matrix.Matrix4fMixin",
     "matrix.PoseStackMixin"
   ],
   "injectors": {

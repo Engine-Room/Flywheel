@@ -9,12 +9,12 @@ import java.nio.FloatBuffer;
 
 import javax.annotation.Nonnull;
 
+import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.gl.GlObject;
 import com.mojang.blaze3d.shaders.ProgramManager;
-import com.mojang.math.Matrix4f;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -72,7 +72,7 @@ public abstract class GlProgram extends GlObject {
 	}
 
 	protected static void uploadMatrixUniform(int uniform, Matrix4f mat) {
-		mat.store(floatBuffer);
+		mat.get(floatBuffer);
 		glUniformMatrix4fv(uniform, false, floatBuffer);
 	}
 

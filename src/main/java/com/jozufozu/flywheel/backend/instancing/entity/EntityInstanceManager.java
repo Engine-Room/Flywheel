@@ -31,7 +31,7 @@ public class EntityInstanceManager extends InstanceManager<Entity> {
 			return false;
 		}
 
-		Level world = entity.level;
+		Level world = entity.level();
 
 		return Backend.isFlywheelWorld(world);
 

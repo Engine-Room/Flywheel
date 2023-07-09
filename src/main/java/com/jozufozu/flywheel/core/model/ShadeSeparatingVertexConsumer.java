@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.core.model;
 
 import java.util.function.Supplier;
 
-import com.jozufozu.flywheel.fabric.model.FabricModelUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -104,7 +103,8 @@ public class ShadeSeparatingVertexConsumer implements VertexConsumer {
 
 	private class ShadeSeparatingBakedModel extends ForwardingBakedModel {
 		private final QuadTransform quadTransform = quad -> {
-			ShadeSeparatingVertexConsumer.this.setActiveConsumer(FabricModelUtil.isShaded(quad));
+			boolean shade = !quad.material().disableDiffuse();
+			ShadeSeparatingVertexConsumer.this.setActiveConsumer(shade);
 			return true;
 		};
 

@@ -23,6 +23,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -31,9 +32,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEvent.Context;
@@ -69,7 +68,7 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	}
 
 	public VirtualRenderWorld(Level level, Vec3i biomeOffset, int height, int minBuildHeight) {
-		super((WritableLevelData) level.getLevelData(), level.dimension(), level.dimensionTypeRegistration(), level::getProfiler,
+		super((WritableLevelData) level.getLevelData(), level.dimension(), level.registryAccess(), level.dimensionTypeRegistration(), level.getProfilerSupplier(),
 				true, false, 0, 0);
 		this.biomeOffset = biomeOffset;
 		this.level = level;
@@ -95,16 +94,7 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	 * Run this after you're done using setBlock().
 	 */
 	public void runLightingEngine() {
-		for (Map.Entry<BlockPos, BlockState> entry : blocksAdded.entrySet()) {
-			BlockPos pos = entry.getKey();
-			BlockState state = entry.getValue();
-			int light = state.getLightEmission();
-			if (light > 0) {
-				lighter.onBlockEmissionIncrease(pos, light);
-			}
-		}
-
-		lighter.runUpdates(Integer.MAX_VALUE, false, false);
+		lighter.runLightUpdates();
 	}
 
 	public void setBlockEntities(Collection<BlockEntity> blockEntities) {
@@ -127,9 +117,7 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 			lighter.updateSectionStatus(sectionPos, false);
 		}
 
-		if ((flags & Block.UPDATE_SUPPRESS_LIGHT) == 0) {
-			lighter.checkBlock(pos);
-		}
+		lighter.checkBlock(pos);
 
 		return true;
 	}
@@ -299,7 +287,11 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 			SoundEvent p_220367_, SoundSource p_220368_, float p_220369_, float p_220370_, long p_220371_) {}
 
 	@Override
-	public void playSeededSound(Player p_220372_, Entity p_220373_, SoundEvent p_220374_, SoundSource p_220375_,
+	public void playSeededSound(Player p_262953_, double p_263004_, double p_263398_, double p_263376_,
+			Holder<SoundEvent> p_263359_, SoundSource p_263020_, float p_263055_, float p_262914_, long p_262991_) {}
+
+	@Override
+	public void playSeededSound(Player p_220372_, Entity p_220373_, Holder<SoundEvent> p_263500_, SoundSource p_220375_,
 			float p_220376_, float p_220377_, long p_220378_) {}
 
 	@Override
@@ -324,16 +316,6 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 
 	@Override
 	public void sendBlockUpdated(BlockPos pos, BlockState oldState, BlockState newState, int flags) {}
-
-	// Override Starlight's ExtendedWorld interface methods:
-
-	public LevelChunk getChunkAtImmediately(final int chunkX, final int chunkZ) {
-		return chunkSource.getChunk(chunkX, chunkZ, false);
-	}
-
-	public ChunkAccess getAnyChunkImmediately(final int chunkX, final int chunkZ) {
-		return chunkSource.getChunk(chunkX, chunkZ);
-	}
 
 	// Intentionally copied from LevelHeightAccessor. Lithium overrides these methods so we need to, too.
 
@@ -380,5 +362,10 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	@Override
 	public int getSectionYFromSectionIndex(int sectionIndex) {
 		return sectionIndex + this.getMinSection();
+	}
+
+	@Override
+	public FeatureFlagSet enabledFeatures() {
+		return FeatureFlagSet.of();
 	}
 }

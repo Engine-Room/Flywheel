@@ -9,11 +9,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.jozufozu.flywheel.event.ForgeEvents;
 
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 
 @Mixin(DebugScreenOverlay.class)
-public abstract class DebugScreenOverlayMixin extends GuiComponent {
+public abstract class DebugScreenOverlayMixin {
 	@Inject(method = "getSystemInformation", at = @At("RETURN"))
 	private void modifyRightText(CallbackInfoReturnable<List<String>> cir) {
 		ForgeEvents.addToDebugScreen(cir.getReturnValue());

@@ -4,14 +4,12 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.jozufozu.flywheel.core.virtual.VirtualEmptyBlockGetter;
-import com.jozufozu.flywheel.fabric.model.CullingBakedModel;
-import com.jozufozu.flywheel.fabric.model.FabricModelUtil;
 import com.jozufozu.flywheel.fabric.model.LayerFilteringBakedModel;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
@@ -41,24 +39,22 @@ public final class WorldModelBuilder implements Bufferable {
 
 		ModelBlockRenderer.enableCaching();
 		for (StructureTemplate.StructureBlockInfo info : this.blocks) {
-			BlockState state = info.state;
-
+			BlockState state = info.state();
 			if (state.getRenderShape() != RenderShape.MODEL) continue;
 
 			BakedModel model = dispatcher.getBlockModel(state);
-			if (((FabricBakedModel) model).isVanillaAdapter()) {
-				if (!FabricModelUtil.doesLayerMatch(state, layer)) {
+			if (model.isVanillaAdapter()) {
+				if (ItemBlockRenderTypes.getChunkRenderType(state) != layer) {
 					continue;
 				}
 			} else {
-				model = CullingBakedModel.wrap(model);
 				model = LayerFilteringBakedModel.wrap(model, layer);
 			}
 			if (consumer instanceof ShadeSeparatingVertexConsumer shadeSeparatingWrapper) {
 				model = shadeSeparatingWrapper.wrapModel(model);
 			}
 
-			BlockPos pos = info.pos;
+			BlockPos pos = info.pos();
 
 			poseStack.pushPose();
 			poseStack.translate(pos.getX(), pos.getY(), pos.getZ());

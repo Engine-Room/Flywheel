@@ -4,19 +4,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-import com.jozufozu.flywheel.util.Mods;
-
-import ca.spottedleaf.starlight.common.chunk.ExtendedChunk;
-import ca.spottedleaf.starlight.common.light.StarLightEngine;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
@@ -46,8 +41,7 @@ public class VirtualChunk extends ChunkAccess {
 
 	public VirtualChunk(VirtualRenderWorld world, int x, int z) {
 		super(new ChunkPos(x, z), UpgradeData.EMPTY, world, world.registryAccess()
-			.registry(Registry.BIOME_REGISTRY)
-			.orElseThrow(), 0L, null, null);
+			.registryOrThrow(Registries.BIOME), 0L, null, null);
 
 		this.world = world;
 		this.needsLight = true;
@@ -60,24 +54,6 @@ public class VirtualChunk extends ChunkAccess {
 		for (int i = 0; i < sectionCount; i++) {
 			sections[i] = new VirtualChunkSection(this, i << 4);
 		}
-
-		Mods.STARLIGHT.executeIfInstalled(() -> () -> {
-			((ExtendedChunk)this).setBlockNibbles(StarLightEngine.getFilledEmptyLight(this));
-			((ExtendedChunk)this).setSkyNibbles(StarLightEngine.getFilledEmptyLight(this));
-		});
-	}
-
-	@Override
-	public Stream<BlockPos> getLights() {
-		return world.blocksAdded.entrySet()
-			.stream()
-			.filter(it -> {
-				BlockPos blockPos = it.getKey();
-				boolean chunkContains = blockPos.getX() >> 4 == x && blockPos.getZ() >> 4 == z;
-				return chunkContains && it.getValue()
-					.getLightEmission() != 0;
-			})
-			.map(Map.Entry::getKey);
 	}
 
 	@Override

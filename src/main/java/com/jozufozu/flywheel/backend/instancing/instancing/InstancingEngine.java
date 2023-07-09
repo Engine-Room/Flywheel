@@ -8,6 +8,8 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import org.joml.Matrix4f;
+
 import com.jozufozu.flywheel.api.MaterialGroup;
 import com.jozufozu.flywheel.backend.RenderLayer;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
@@ -16,10 +18,8 @@ import com.jozufozu.flywheel.backend.instancing.TaskEngine;
 import com.jozufozu.flywheel.core.compile.ProgramCompiler;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
-import com.jozufozu.flywheel.fabric.helper.Matrix4fHelper;
 import com.jozufozu.flywheel.util.FlwUtil;
 import com.jozufozu.flywheel.util.WeakHashSet;
-import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.RenderType;
@@ -87,8 +87,9 @@ public class InstancingEngine<P extends WorldProgram> implements Engine {
 			camY = event.camY - originCoordinate.getY();
 			camZ = event.camZ - originCoordinate.getZ();
 
-			viewProjection = Matrix4f.createTranslateMatrix((float) -camX, (float) -camY, (float) -camZ);
-			Matrix4fHelper.multiplyBackward(viewProjection, event.viewProjection);
+			viewProjection = new Matrix4f();
+			viewProjection.translation((float) -camX, (float) -camY, (float) -camZ);
+			viewProjection.mulLocal(event.viewProjection);
 		} else {
 			camX = event.camX;
 			camY = event.camY;

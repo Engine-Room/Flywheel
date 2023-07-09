@@ -65,15 +65,10 @@ dependencies {
     // Fabric API
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-    // switch to implementation for debugging
-    modCompileOnly 'maven.modrinth:starlight:1.1.1+1.19'
-
-    modCompileOnly 'maven.modrinth:sodium:mc1.19.2-0.4.4'
-    modCompileOnly 'maven.modrinth:iris:1.6.4+1.19.2'
+    modCompileOnly 'maven.modrinth:sodium:mc1.20-0.4.10'
+    modCompileOnly 'maven.modrinth:iris:1.6.4+1.20'
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
-    modCompileOnly 'maven.modrinth:indium:1.0.6+mc1.18.2'
-    modCompileOnly 'io.vram:frex-fabric-mc118:6.0.263'
 }
 
 loom {
@@ -110,7 +105,7 @@ jar {
                 'Specification-Title'     : 'flywheel',
                 //'Specification-Vendor': 'flywheel authors',
                 'Specification-Version'   : '1', // We are version 1 of ourselves
-                'Implementation-Title'    : project.jar.baseName,
+                'Implementation-Title'    : project.jar.archiveBaseName,
                 'Implementation-Version'  : project.jar.archiveVersion,
                 //'Implementation-Vendor': 'flywheel authors',
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
@@ -160,6 +155,6 @@ curseforge {
         changelog = file('changelog.txt')
         releaseType = project.curse_type
         mainArtifact jar
-        addGameVersion '1.19.2'
+        addGameVersion '1.20.1'
     }
 }

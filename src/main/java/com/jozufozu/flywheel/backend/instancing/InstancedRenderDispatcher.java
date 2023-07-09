@@ -40,7 +40,7 @@ public class InstancedRenderDispatcher {
 	 */
 	public static void enqueueUpdate(Entity entity) {
 		if (Backend.isOn()) {
-			instanceWorlds.get(entity.level)
+			instanceWorlds.get(entity.level())
 					.getEntityInstanceManager()
 					.queueUpdate(entity);
 		}

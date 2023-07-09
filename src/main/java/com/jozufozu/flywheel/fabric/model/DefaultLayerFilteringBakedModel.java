@@ -4,7 +4,6 @@ import java.util.function.Supplier;
 
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
-import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.resources.model.BakedModel;
@@ -18,7 +17,7 @@ public class DefaultLayerFilteringBakedModel extends ForwardingBakedModel {
 	private static final ThreadLocal<DefaultLayerFilteringBakedModel> THREAD_LOCAL = ThreadLocal.withInitial(DefaultLayerFilteringBakedModel::new);
 
 	public static BakedModel wrap(BakedModel model) {
-		if (!((FabricBakedModel) model).isVanillaAdapter()) {
+		if (!model.isVanillaAdapter()) {
 			DefaultLayerFilteringBakedModel wrapper = THREAD_LOCAL.get();
 			wrapper.wrapped = model;
 			return wrapper;
@@ -44,6 +43,6 @@ public class DefaultLayerFilteringBakedModel extends ForwardingBakedModel {
 	}
 
 	public static boolean hasDefaultBlendMode(QuadView quad) {
-		return FabricModelUtil.getBlendMode(quad) == BlendMode.DEFAULT;
+		return quad.material().blendMode() == BlendMode.DEFAULT;
 	}
 }

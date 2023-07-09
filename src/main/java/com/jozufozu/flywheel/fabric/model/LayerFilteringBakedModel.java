@@ -41,7 +41,7 @@ public class LayerFilteringBakedModel extends ForwardingBakedModel {
 			}
 		} else {
 			context.pushTransform(quad -> {
-				RenderType quadLayer = FabricModelUtil.getBlendMode(quad).blockRenderLayer;
+				RenderType quadLayer = quad.material().blendMode().blockRenderLayer;
 				if (quadLayer == null) {
 					quadLayer = defaultLayer;
 				}

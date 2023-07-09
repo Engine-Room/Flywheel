@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.core.virtual;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 
@@ -13,9 +13,8 @@ public class VirtualChunkSection extends LevelChunkSection {
 	public final int zStart;
 
 	public VirtualChunkSection(VirtualChunk owner, int yBase) {
-		super(yBase, owner.world.registryAccess()
-			.registry(Registry.BIOME_REGISTRY)
-			.orElseThrow());
+		super(owner.world.registryAccess()
+			.registryOrThrow(Registries.BIOME));
 		this.owner = owner;
 		this.xStart = owner.getPos()
 			.getMinBlockX();

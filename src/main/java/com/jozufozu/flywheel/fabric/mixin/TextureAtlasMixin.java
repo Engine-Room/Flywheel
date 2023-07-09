@@ -7,13 +7,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.core.StitchedSprite;
 
+import net.minecraft.client.renderer.texture.SpriteLoader;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlas.Preparations;
 
 @Mixin(TextureAtlas.class)
 public class TextureAtlasMixin {
-	@Inject(method = "reload(Lnet/minecraft/client/renderer/texture/TextureAtlas$Preparations;)V", at = @At("TAIL"))
-	private void onTailReload(Preparations preparations, CallbackInfo ci) {
+	@Inject(method = "upload(Lnet/minecraft/client/renderer/texture/SpriteLoader$Preparations;)V", at = @At("TAIL"))
+	private void onTailReload(SpriteLoader.Preparations preparations, CallbackInfo ci) {
 		StitchedSprite.onTextureStitchPost((TextureAtlas) (Object) this);
 	}
 }
