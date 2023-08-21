@@ -17,6 +17,7 @@ import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
@@ -36,13 +37,11 @@ import net.minecraft.world.ticks.BlackholeTickAccess;
 import net.minecraft.world.ticks.TickContainerAccess;
 
 public class VirtualChunk extends ChunkAccess {
+	public final VirtualRenderWorld world;
 
-	final VirtualRenderWorld world;
-	boolean needsLight;
-	final int x;
-	final int z;
+	private final VirtualChunkSection[] sections;
 
-	private final LevelChunkSection[] sections;
+	private boolean needsLight;
 
 	public VirtualChunk(VirtualRenderWorld world, int x, int z) {
 		super(new ChunkPos(x, z), UpgradeData.EMPTY, world, world.registryAccess()
@@ -50,34 +49,39 @@ public class VirtualChunk extends ChunkAccess {
 			.orElseThrow(), 0L, null, null);
 
 		this.world = world;
-		this.needsLight = true;
-		this.x = x;
-		this.z = z;
 
 		int sectionCount = world.getSectionsCount();
-		this.sections = new LevelChunkSection[sectionCount];
+		this.sections = new VirtualChunkSection[sectionCount];
 
 		for (int i = 0; i < sectionCount; i++) {
 			sections[i] = new VirtualChunkSection(this, i << 4);
 		}
 
+		this.needsLight = true;
+
 		Mods.STARLIGHT.executeIfInstalled(() -> () -> {
-			((ExtendedChunk)this).setBlockNibbles(StarLightEngine.getFilledEmptyLight(this));
-			((ExtendedChunk)this).setSkyNibbles(StarLightEngine.getFilledEmptyLight(this));
+			((ExtendedChunk) this).setBlockNibbles(StarLightEngine.getFilledEmptyLight(this));
+			((ExtendedChunk) this).setSkyNibbles(StarLightEngine.getFilledEmptyLight(this));
 		});
 	}
 
 	@Override
-	public Stream<BlockPos> getLights() {
-		return world.blocksAdded.entrySet()
-			.stream()
-			.filter(it -> {
-				BlockPos blockPos = it.getKey();
-				boolean chunkContains = blockPos.getX() >> 4 == x && blockPos.getZ() >> 4 == z;
-				return chunkContains && it.getValue()
-					.getLightEmission(world, blockPos) != 0;
-			})
-			.map(Map.Entry::getKey);
+	@Nullable
+	public BlockState setBlockState(BlockPos pos, BlockState state, boolean isMoving) {
+		return null;
+	}
+
+	@Override
+	public void setBlockEntity(BlockEntity blockEntity) {
+	}
+
+	@Override
+	public void addEntity(Entity entity) {
+	}
+
+	@Override
+	public Set<BlockPos> getBlockEntitiesPos() {
+		return Collections.emptySet();
 	}
 
 	@Override
@@ -86,120 +90,32 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public ChunkStatus getStatus() {
-		return ChunkStatus.LIGHT;
-	}
-
-	@Nullable
-	@Override
-	public BlockState setBlockState(BlockPos p_177436_1_, BlockState p_177436_2_, boolean p_177436_3_) {
-		return null;
-	}
-
-	@Override
-	public void setBlockEntity(BlockEntity p_177426_2_) {}
-
-	@Override
-	public void addEntity(Entity p_76612_1_) {}
-
-	@Override
-	public Set<BlockPos> getBlockEntitiesPos() {
-		return null;
-	}
-
-	@Override
 	public Collection<Map.Entry<Heightmap.Types, Heightmap>> getHeightmaps() {
+		return Collections.emptySet();
+	}
+
+	@Override
+	public void setHeightmap(Heightmap.Types type, long[] data) {
+	}
+
+	@Override
+	public Heightmap getOrCreateHeightmapUnprimed(Heightmap.Types type) {
 		return null;
 	}
 
 	@Override
-	public void setHeightmap(Heightmap.Types p_201607_1_, long[] p_201607_2_) {}
-
-	@Override
-	public Heightmap getOrCreateHeightmapUnprimed(Heightmap.Types p_217303_1_) {
-		return null;
-	}
-
-	@Override
-	public int getHeight(Heightmap.Types p_201576_1_, int p_201576_2_, int p_201576_3_) {
+	public int getHeight(Heightmap.Types type, int x, int z) {
 		return 0;
 	}
 
 	@Override
-	public void setUnsaved(boolean p_177427_1_) {}
-
-	@Override
-	public boolean isUnsaved() {
-		return false;
-	}
-
-	@Override
-	public void removeBlockEntity(BlockPos p_177425_1_) {}
-
-	@Override
-	public ShortList[] getPostProcessing() {
-		return new ShortList[0];
-	}
-
 	@Nullable
-	@Override
-	public CompoundTag getBlockEntityNbt(BlockPos p_201579_1_) {
-		return null;
-	}
-
-	@Nullable
-	@Override
-	public CompoundTag getBlockEntityNbtForSaving(BlockPos p_223134_1_) {
+	public StructureStart getStartForFeature(ConfiguredStructureFeature<?, ?> structure) {
 		return null;
 	}
 
 	@Override
-	public UpgradeData getUpgradeData() {
-		return null;
-	}
-
-	@Override
-	public void setInhabitedTime(long p_177415_1_) {}
-
-	@Override
-	public long getInhabitedTime() {
-		return 0;
-	}
-
-	@Override
-	public boolean isLightCorrect() {
-		return needsLight;
-	}
-
-	@Override
-	public void setLightCorrect(boolean needsLight) {
-		this.needsLight = needsLight;
-	}
-
-	@Nullable
-	@Override
-	public BlockEntity getBlockEntity(BlockPos pos) {
-		return null;
-	}
-
-	@Override
-	public BlockState getBlockState(BlockPos pos) {
-		return world.getBlockState(pos);
-	}
-
-	@Override
-	public FluidState getFluidState(BlockPos p_204610_1_) {
-		return null;
-	}
-
-	@Override
-	@Nullable
-	public StructureStart getStartForFeature(ConfiguredStructureFeature<?, ?> pStructure) {
-		return null;
-	}
-
-	@Override
-	public void setStartForFeature(ConfiguredStructureFeature<?, ?> pStructure, StructureStart pStart) {
+	public void setStartForFeature(ConfiguredStructureFeature<?, ?> structure, StructureStart start) {
 	}
 
 	@Override
@@ -208,16 +124,16 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public void setAllStarts(Map<ConfiguredStructureFeature<?, ?>, StructureStart> pStructureStarts) {
+	public void setAllStarts(Map<ConfiguredStructureFeature<?, ?>, StructureStart> structureStarts) {
 	}
 
 	@Override
-	public LongSet getReferencesForFeature(ConfiguredStructureFeature<?, ?> pStructure) {
+	public LongSet getReferencesForFeature(ConfiguredStructureFeature<?, ?> structure) {
 		return LongSets.emptySet();
 	}
 
 	@Override
-	public void addReferenceForFeature(ConfiguredStructureFeature<?, ?> pStructure, long pReference) {
+	public void addReferenceForFeature(ConfiguredStructureFeature<?, ?> structure, long reference) {
 	}
 
 	@Override
@@ -226,17 +142,60 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public void setAllReferences(Map<ConfiguredStructureFeature<?, ?>, LongSet> pStructureReferences) {
+	public void setAllReferences(Map<ConfiguredStructureFeature<?, ?>, LongSet> structureReferences) {
 	}
 
 	@Override
-	public int getHeight() {
-		return world.getHeight();
+	public void setUnsaved(boolean unsaved) {
 	}
 
 	@Override
-	public int getMinBuildHeight() {
-		return world.getMinBuildHeight();
+	public boolean isUnsaved() {
+		return false;
+	}
+
+	@Override
+	public ChunkStatus getStatus() {
+		return ChunkStatus.LIGHT;
+	}
+
+	@Override
+	public void removeBlockEntity(BlockPos pos) {
+	}
+
+	@Override
+	public ShortList[] getPostProcessing() {
+		return new ShortList[0];
+	}
+
+	@Override
+	@Nullable
+	public CompoundTag getBlockEntityNbt(BlockPos pos) {
+		return null;
+	}
+
+	@Override
+	@Nullable
+	public CompoundTag getBlockEntityNbtForSaving(BlockPos pos) {
+		return null;
+	}
+
+	@Override
+	public Stream<BlockPos> getLights() {
+		return world.blockStates.entrySet()
+			.stream()
+			.filter(it -> {
+				BlockPos blockPos = it.getKey();
+				boolean chunkContains = SectionPos.blockToSectionCoord(blockPos.getX()) == chunkPos.x && SectionPos.blockToSectionCoord(blockPos.getZ()) == chunkPos.z;
+				return chunkContains && it.getValue()
+					.getLightEmission(world, blockPos) != 0;
+			})
+			.map(Map.Entry::getKey);
+	}
+
+	@Override
+	public TickContainerAccess<Block> getBlockTicks() {
+		return BlackholeTickAccess.emptyContainer();
 	}
 
 	@Override
@@ -246,12 +205,41 @@ public class VirtualChunk extends ChunkAccess {
 
 	@Override
 	public TicksToSave getTicksForSerialization() {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public TickContainerAccess<Block> getBlockTicks() {
-		return BlackholeTickAccess.emptyContainer();
+	public long getInhabitedTime() {
+		return 0;
 	}
 
+	@Override
+	public void setInhabitedTime(long amount) {
+	}
+
+	@Override
+	public boolean isLightCorrect() {
+		return needsLight;
+	}
+
+	@Override
+	public void setLightCorrect(boolean lightCorrect) {
+		this.needsLight = lightCorrect;
+	}
+
+	@Override
+	@Nullable
+	public BlockEntity getBlockEntity(BlockPos pos) {
+		return world.getBlockEntity(pos);
+	}
+
+	@Override
+	public BlockState getBlockState(BlockPos pos) {
+		return world.getBlockState(pos);
+	}
+
+	@Override
+	public FluidState getFluidState(BlockPos pos) {
+		return world.getFluidState(pos);
+	}
 }
