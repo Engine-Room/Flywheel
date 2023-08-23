@@ -11,7 +11,7 @@ displayName = "Flywheel"
 logoFile = "logo.png"
 displayURL = "https://www.curseforge.com/minecraft/mc-mods/flywheel"
 updateJSONURL = "https://api.modrinth.com/updates/flywheel/forge_updates.json"
-authors = "Jozufozu"
+authors = "Jozufozu, PepperCode1"
 description = '''
 A modern engine for modded minecraft.'''
 

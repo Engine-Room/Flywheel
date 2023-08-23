@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.core.virtual;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -32,6 +34,7 @@ public interface VirtualEmptyBlockGetter extends BlockAndTintGetter {
 	}
 
 	@Override
+	@Nullable
 	default BlockEntity getBlockEntity(BlockPos pos) {
 		return null;
 	}
@@ -99,7 +102,7 @@ public interface VirtualEmptyBlockGetter extends BlockAndTintGetter {
 				}
 
 				@Override
-				public void onBlockEmissionIncrease(BlockPos pos, int p_164456_) {
+				public void onBlockEmissionIncrease(BlockPos pos, int emissionLevel) {
 				}
 
 				@Override
@@ -108,16 +111,16 @@ public interface VirtualEmptyBlockGetter extends BlockAndTintGetter {
 				}
 
 				@Override
-				public int runUpdates(int p_164449_, boolean p_164450_, boolean p_164451_) {
-					return p_164449_;
+				public int runUpdates(int pos, boolean isQueueEmpty, boolean updateBlockLight) {
+					return pos;
 				}
 
 				@Override
-				public void updateSectionStatus(SectionPos pos, boolean p_75838_) {
+				public void updateSectionStatus(SectionPos pos, boolean isQueueEmpty) {
 				}
 
 				@Override
-				public void enableLightSources(ChunkPos pos, boolean p_164453_) {
+				public void enableLightSources(ChunkPos pos, boolean isQueueEmpty) {
 				}
 
 				@Override
