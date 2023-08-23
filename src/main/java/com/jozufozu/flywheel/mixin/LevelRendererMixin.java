@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.backend.Backend;
-import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.core.crumbling.CrumblingRenderer;
 import com.jozufozu.flywheel.event.BeginFrameEvent;
 import com.jozufozu.flywheel.event.ReloadRenderersEvent;
@@ -24,8 +23,6 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -33,7 +30,6 @@ import net.minecraftforge.common.MinecraftForge;
 @OnlyIn(Dist.CLIENT)
 @Mixin(value = LevelRenderer.class, priority = 1001) // Higher priority to go after sodium
 public class LevelRendererMixin {
-
 	@Shadow
 	private ClientLevel level;
 
@@ -62,18 +58,5 @@ public class LevelRendererMixin {
 	), method = "renderLevel")
 	private void renderBlockBreaking(PoseStack stack, float p_228426_2_, long p_228426_3_, boolean p_228426_5_, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f p_228426_9_, CallbackInfo ci) {
 		CrumblingRenderer.render(level, camera, stack);
-	}
-
-	// Instancing
-
-	/**
-	 * This gets called when a block is marked for rerender by vanilla.
-	 */
-	@Inject(at = @At("TAIL"), method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;)V")
-	private void checkUpdate(BlockPos pos, BlockState lastState, BlockState newState, CallbackInfo ci) {
-		if (Backend.isOn()) {
-			InstancedRenderDispatcher.getBlockEntities(level)
-					.update(level.getBlockEntity(pos));
-		}
 	}
 }

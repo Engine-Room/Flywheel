@@ -15,6 +15,7 @@ import com.jozufozu.flywheel.util.WorldAttached;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
@@ -117,6 +118,21 @@ public class InstancedRenderDispatcher {
 	public static void resetInstanceWorld(ClientLevel world) {
 		instanceWorlds.replace(world, InstanceWorld::delete)
 				.loadEntities(world);
+	}
+
+	public static <T extends BlockEntity> boolean tryAddBlockEntity(T blockEntity) {
+		Level level = blockEntity.getLevel();
+		if (!Backend.canUseInstancing(level)) {
+			return false;
+		}
+
+		if (!InstancedRenderRegistry.canInstance(blockEntity.getType())) {
+			return false;
+		}
+
+		getBlockEntities(level).queueAdd(blockEntity);
+
+		return InstancedRenderRegistry.shouldSkipRender(blockEntity);
 	}
 
 	public static void getDebugString(List<String> debug) {

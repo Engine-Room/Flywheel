@@ -52,6 +52,7 @@ minecraft {
             property 'flw.loadRenderDoc', 'true'
 
             arg '-mixin.config=flywheel.mixins.json'
+            arg '-mixin.config=flywheel.sodium.mixins.json'
 
             mods {
                 flywheel {
@@ -67,6 +68,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             arg '-mixin.config=flywheel.mixins.json'
+            arg '-mixin.config=flywheel.sodium.mixins.json'
 
             mods {
                 flywheel {
@@ -119,7 +121,7 @@ dependencies {
     // switch to implementation for debugging
     compileOnly fg.deobf('maven.modrinth:starlight-forge:1.0.2+1.18.2')
 
-    compileOnly fg.deobf('maven.modrinth:rubidium:0.5.2a')
+    compileOnly fg.deobf('maven.modrinth:rubidium:0.5.6')
     compileOnly fg.deobf('maven.modrinth:oculus:1.18.2-1.6.4')
 
     // https://discord.com/channels/313125603924639766/725850371834118214/910619168821354497
@@ -159,7 +161,7 @@ jar {
                 'Implementation-Version'  : project.jar.archiveVersion,
                 //'Implementation-Vendor': 'flywheel authors',
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'MixinConfigs'            : 'flywheel.mixins.json'
+                'MixinConfigs'            : 'flywheel.mixins.json,flywheel.sodium.mixins.json'
         ])
     }
 }
