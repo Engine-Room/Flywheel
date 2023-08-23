@@ -4,7 +4,7 @@
   "package": "com.jozufozu.flywheel.mixin.sodium",
   "compatibilityLevel": "JAVA_17",
   "refmap": "flywheel.refmap.json",
-  "plugin": "com.jozufozu.flywheel.mixin.sodium.SodiumMixinConfigPlugin",
+  "plugin": "com.jozufozu.flywheel.mixin.sodium.SodiumMixinPlugin",
   "client": [
     "ChunkRenderRebuildTaskMixin"
   ],
