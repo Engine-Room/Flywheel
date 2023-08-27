@@ -25,7 +25,7 @@
     "instancemanage.InstanceRemoveMixin",
     "instancemanage.RenderChunkAccessor",
     "instancemanage.RenderChunkMixin",
-    "instancemanage.SodiumChunkRenderDataMixin",
+    "instancemanage.SodiumBuiltSectionInfoMixin",
     "light.LightUpdateMixin",
     "light.NetworkLightUpdateMixin",
     "matrix.PoseStackMixin"
