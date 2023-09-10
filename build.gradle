@@ -69,7 +69,7 @@ dependencies {
     modCompileOnly 'maven.modrinth:starlight:1.0.2+1.18.2'
 
     modCompileOnly 'maven.modrinth:sodium:mc1.18.2-0.4.1'
-    modCompileOnly 'maven.modrinth:iris:1.6.4+1.18.2'
+    modCompileOnly 'maven.modrinth:iris:1.6.6+1.18.2'
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     modCompileOnly 'maven.modrinth:indium:1.0.6+mc1.18.2'
@@ -114,7 +114,7 @@ jar {
                 'Implementation-Version'  : project.jar.archiveVersion,
                 //'Implementation-Vendor': 'flywheel authors',
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'MixinConfigs'            : 'flywheel.mixins.json'
+                'MixinConfigs'            : 'flywheel.mixins.json,flywheel.sodium.mixins.json'
         ])
     }
 }
