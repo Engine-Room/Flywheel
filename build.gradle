@@ -121,7 +121,7 @@ dependencies {
     // switch to implementation for debugging
     compileOnly fg.deobf('maven.modrinth:starlight-forge:1.1.2+1.20')
 
-    compileOnly fg.deobf('maven.modrinth:rubidium:0.6.5')
+    compileOnly fg.deobf('maven.modrinth:rubidium:0.7.0a')
     compileOnly fg.deobf('maven.modrinth:oculus:1.20-1.6.4')
 
     // https://discord.com/channels/313125603924639766/725850371834118214/910619168821354497
