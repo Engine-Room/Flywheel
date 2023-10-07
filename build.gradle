@@ -65,7 +65,7 @@ dependencies {
     // Fabric API
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-    modCompileOnly 'maven.modrinth:sodium:mc1.20-0.4.10'
+    modCompileOnly 'maven.modrinth:sodium:mc1.20.1-0.5.3'
     modCompileOnly 'maven.modrinth:iris:1.6.4+1.20'
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'

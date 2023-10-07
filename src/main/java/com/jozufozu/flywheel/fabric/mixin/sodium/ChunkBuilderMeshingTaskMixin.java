@@ -8,14 +8,14 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
-import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderRebuildTask;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.tasks.ChunkBuilderMeshingTask;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-@Mixin(value = ChunkRenderRebuildTask.class, remap = false)
-public class ChunkRenderRebuildTaskMixin {
-	@Redirect(method = "performBuild", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderDispatcher;getRenderer(Lnet/minecraft/world/level/block/entity/BlockEntity;)Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;", remap = true))
+@Mixin(value = ChunkBuilderMeshingTask.class, remap = false)
+public class ChunkBuilderMeshingTaskMixin {
+	@Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderDispatcher;getRenderer(Lnet/minecraft/world/level/block/entity/BlockEntity;)Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;", remap = true))
 	private BlockEntityRenderer<?> redirectGetRenderer(BlockEntityRenderDispatcher dispatcher, BlockEntity blockEntity) {
 		if (Backend.canUseInstancing(blockEntity.getLevel())) {
 			if (InstancedRenderRegistry.canInstance(blockEntity.getType()))

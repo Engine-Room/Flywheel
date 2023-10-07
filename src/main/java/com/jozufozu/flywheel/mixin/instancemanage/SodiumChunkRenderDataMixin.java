@@ -14,11 +14,11 @@ import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
-import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
+import me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionInfo;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-@Mixin(targets = "me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData$Builder", remap = false)
+@Mixin(targets = "me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionInfo$Builder", remap = false)
 public class SodiumChunkRenderDataMixin {
 
 	@Unique
@@ -51,7 +51,7 @@ public class SodiumChunkRenderDataMixin {
 	}
 
 	@Inject(method = "build", at = @At("HEAD"))
-	private void flywheel$onBuild(CallbackInfoReturnable<ChunkRenderData> cir) {
+	private void flywheel$onBuild(CallbackInfoReturnable<BuiltSectionInfo> cir) {
 		if (flywheel$level == null || flywheel$blockEntities == null || !Backend.canUseInstancing(flywheel$level)) {
 			return;
 		}
