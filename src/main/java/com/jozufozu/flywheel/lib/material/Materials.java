@@ -41,42 +41,42 @@ public final class Materials {
 			.vertexShader(Files.SHADED_VERTEX)
 			.fragmentShader(Files.DEFAULT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
-			.batchingRenderType(RenderType.solid())
+			.fallbackRenderType(RenderType.solid())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.register();
 	public static final Material CHUNK_SOLID_UNSHADED = SimpleMaterial.builder()
 			.vertexShader(Files.DEFAULT_VERTEX)
 			.fragmentShader(Files.DEFAULT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
-			.batchingRenderType(RenderType.solid())
+			.fallbackRenderType(RenderType.solid())
 			.register();
 
 	public static final Material CHUNK_CUTOUT_MIPPED_SHADED = SimpleMaterial.builder()
 			.vertexShader(Files.SHADED_VERTEX)
 			.fragmentShader(Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
-			.batchingRenderType(RenderType.cutoutMipped())
+			.fallbackRenderType(RenderType.cutoutMipped())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.register();
 	public static final Material CHUNK_CUTOUT_MIPPED_UNSHADED = SimpleMaterial.builder()
 			.vertexShader(Files.DEFAULT_VERTEX)
 			.fragmentShader(Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
-			.batchingRenderType(RenderType.cutoutMipped())
+			.fallbackRenderType(RenderType.cutoutMipped())
 			.register();
 
 	public static final Material CHUNK_CUTOUT_SHADED = SimpleMaterial.builder()
 			.vertexShader(Files.SHADED_VERTEX)
 			.fragmentShader(Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, false))
-			.batchingRenderType(RenderType.cutout())
+			.fallbackRenderType(RenderType.cutout())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.register();
 	public static final Material CHUNK_CUTOUT_UNSHADED = SimpleMaterial.builder()
 			.vertexShader(Files.DEFAULT_VERTEX)
 			.fragmentShader(Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, false))
-			.batchingRenderType(RenderType.cutout())
+			.fallbackRenderType(RenderType.cutout())
 			.register();
 
 	public static final Material CHUNK_TRANSLUCENT_SHADED = SimpleMaterial.builder()
@@ -84,7 +84,7 @@ public final class Materials {
 			.fragmentShader(Files.DEFAULT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
 			.addShard(Shards.TRANSLUCENT_TRANSPARENCY)
-			.batchingRenderType(RenderType.translucent())
+			.fallbackRenderType(RenderType.translucent())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.register();
 	public static final Material CHUNK_TRANSLUCENT_UNSHADED = SimpleMaterial.builder()
@@ -92,7 +92,7 @@ public final class Materials {
 			.fragmentShader(Files.DEFAULT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
 			.addShard(Shards.TRANSLUCENT_TRANSPARENCY)
-			.batchingRenderType(RenderType.translucent())
+			.fallbackRenderType(RenderType.translucent())
 			.register();
 
 	public static final Material CHUNK_TRIPWIRE_SHADED = SimpleMaterial.builder()
@@ -100,7 +100,7 @@ public final class Materials {
 			.fragmentShader(Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
 			.addShard(Shards.TRANSLUCENT_TRANSPARENCY)
-			.batchingRenderType(RenderType.tripwire())
+			.fallbackRenderType(RenderType.tripwire())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.register();
 	public static final Material CHUNK_TRIPWIRE_UNSHADED = SimpleMaterial.builder()
@@ -108,30 +108,30 @@ public final class Materials {
 			.fragmentShader(Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
 			.addShard(Shards.TRANSLUCENT_TRANSPARENCY)
-			.batchingRenderType(RenderType.tripwire())
+			.fallbackRenderType(RenderType.tripwire())
 			.register();
 
 	public static final Material CHEST = SimpleMaterial.builder()
 			.vertexShader(Files.SHADED_VERTEX)
 			.addShard(Shards.diffuseTex(Sheets.CHEST_SHEET, false, false))
-			.batchingRenderType(Sheets.chestSheet())
+			.fallbackRenderType(Sheets.chestSheet())
 			.register();
 	public static final Material SHULKER = SimpleMaterial.builder()
 			.vertexShader(Files.SHADED_VERTEX)
 			.fragmentShader(Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(Sheets.SHULKER_SHEET, false, false))
 			.addShard(Shards.DISABLE_CULL)
-			.batchingRenderType(Sheets.shulkerBoxSheet())
+			.fallbackRenderType(Sheets.shulkerBoxSheet())
 			.register();
 	public static final Material BELL = SimpleMaterial.builder()
 			.vertexShader(Files.SHADED_VERTEX)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, false))
-			.batchingRenderType(Sheets.solidBlockSheet())
+			.fallbackRenderType(Sheets.solidBlockSheet())
 			.register();
 	public static final Material MINECART = SimpleMaterial.builder()
 			.vertexShader(Files.SHADED_VERTEX)
 			.addShard(Shards.diffuseTex(MINECART_LOCATION, false, false))
-			.batchingRenderType(RenderType.entitySolid(MINECART_LOCATION))
+			.fallbackRenderType(RenderType.entitySolid(MINECART_LOCATION))
 			.register();
 
 	private Materials() {
