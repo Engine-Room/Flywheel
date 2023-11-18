@@ -21,7 +21,7 @@ public class EBOCache {
 	private final List<Entry> quads = new ArrayList<>();
 	private final Object2ReferenceMap<Key, Entry> others = new Object2ReferenceOpenHashMap<>();
 
-	public void delete() {
+	public void invalidate() {
 		quads.forEach(Entry::delete);
 		others.values()
 				.forEach(Entry::delete);

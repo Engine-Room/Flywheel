@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.backend.engine.instancing;
 
-import java.util.List;
-
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.context.Context;
@@ -122,12 +120,6 @@ public class InstancingEngine extends AbstractEngine {
 
 	@Override
 	public void delete() {
-		drawManager.delete();
-	}
-
-	@Override
-	public void addDebugInfo(List<String> info) {
-		info.add("GL33 Instanced Arrays");
-		info.add("Origin: " + renderOrigin.getX() + ", " + renderOrigin.getY() + ", " + renderOrigin.getZ());
+		drawManager.invalidate();
 	}
 }

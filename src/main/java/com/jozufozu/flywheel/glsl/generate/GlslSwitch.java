@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jozufozu.flywheel.util.Pair;
-import com.jozufozu.flywheel.util.StringUtil;
+import com.jozufozu.flywheel.lib.util.Pair;
+import com.jozufozu.flywheel.lib.util.StringUtil;
 
 public class GlslSwitch implements GlslStmt {
 

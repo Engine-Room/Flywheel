@@ -20,7 +20,6 @@ public class EntityVisibilityTester {
 
 	public EntityVisibilityTester(Entity entity, Vec3i renderOrigin) {
 		this.entity = entity;
-
 		this.renderOrigin = renderOrigin;
 	}
 

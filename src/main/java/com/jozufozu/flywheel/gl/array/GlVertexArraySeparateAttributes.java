@@ -9,7 +9,7 @@ import org.lwjgl.system.Checks;
 import com.jozufozu.flywheel.gl.GlCompat;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.buffer.GlBufferType;
-import com.jozufozu.flywheel.util.FlwUtil;
+import com.jozufozu.flywheel.lib.util.FlwUtil;
 
 public class GlVertexArraySeparateAttributes extends GlVertexArray {
 	public static final boolean SUPPORTED = isSupported();

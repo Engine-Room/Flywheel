@@ -5,8 +5,6 @@ import com.jozufozu.flywheel.lib.task.UnitPlan;
 
 /**
  * An interface giving {@link Visual}s a way to define complex, parallelized update plans.
- * <p>
- * Plans allow for
  */
 public interface PlannedVisual extends Visual {
 	default Plan<VisualFrameContext> planFrame() {

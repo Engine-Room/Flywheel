@@ -6,15 +6,14 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.function.LongConsumer;
 
-import com.jozufozu.flywheel.util.FlwUtil;
+import com.jozufozu.flywheel.lib.util.FlwUtil;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongRBTreeSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 
-public class WeakContainmentMultiMap<T> extends AbstractCollection<T> {
-
+class WeakContainmentMultiMap<T> extends AbstractCollection<T> {
 	private final Long2ObjectMap<Set<T>> forward;
 	private final WeakHashMap<T, LongSet> reverse;
 

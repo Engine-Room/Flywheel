@@ -6,8 +6,8 @@ import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.EntityVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
-import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityVisualManager;
-import com.jozufozu.flywheel.lib.box.ImmutableBox;
+import com.jozufozu.flywheel.api.visualization.VisualizationManager;
+import com.jozufozu.flywheel.lib.box.Box;
 import com.jozufozu.flywheel.lib.box.MutableBox;
 import com.jozufozu.flywheel.lib.light.TickingLightListener;
 import com.mojang.math.Vector3f;
@@ -57,7 +57,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	}
 
 	@Override
-	public ImmutableBox getVolume() {
+	public Box getVolume() {
 		return bounds;
 	}
 
@@ -78,7 +78,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 
 	/**
 	 * In order to accommodate for floating point precision errors at high coordinates,
-	 * {@link BlockEntityVisualManager}s are allowed to arbitrarily adjust the origin, and
+	 * {@link VisualizationManager}s are allowed to arbitrarily adjust the origin, and
 	 * shift the world matrix provided as a shader uniform accordingly.
 	 *
 	 * @return The position this visual should be rendered at to appear in the correct location.
@@ -92,17 +92,19 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 
 	/**
 	 * In order to accommodate for floating point precision errors at high coordinates,
-	 * {@link BlockEntityVisualManager}s are allowed to arbitrarily adjust the origin, and
+	 * {@link VisualizationManager}s are allowed to arbitrarily adjust the origin, and
 	 * shift the world matrix provided as a shader uniform accordingly.
 	 *
 	 * @return The position this visual should be rendered at to appear in the correct location.
 	 */
 	public Vector3f getVisualPosition(float partialTicks) {
 		Vec3 pos = entity.position();
-		return new Vector3f((float) (Mth.lerp(partialTicks, entity.xOld, pos.x) - renderOrigin.getX()), (float) (Mth.lerp(partialTicks, entity.yOld, pos.y) - renderOrigin.getY()), (float) (Mth.lerp(partialTicks, entity.zOld, pos.z) - renderOrigin.getZ()));
+		return new Vector3f((float) (Mth.lerp(partialTicks, entity.xOld, pos.x) - renderOrigin.getX()),
+				(float) (Mth.lerp(partialTicks, entity.yOld, pos.y) - renderOrigin.getY()),
+				(float) (Mth.lerp(partialTicks, entity.zOld, pos.z) - renderOrigin.getZ()));
 	}
 
-	public boolean visible(FrustumIntersection frustum) {
+	public boolean isVisible(FrustumIntersection frustum) {
 		return entity.noCulling || visibilityTester.check(frustum);
 	}
 }

@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL45C;
 import org.lwjgl.system.Checks;
 
 import com.jozufozu.flywheel.gl.GlCompat;
-import com.jozufozu.flywheel.util.FlwUtil;
+import com.jozufozu.flywheel.lib.util.FlwUtil;
 
 public class GlVertexArrayDSA extends GlVertexArray {
 	public static final boolean SUPPORTED = isSupported();

@@ -8,13 +8,14 @@ import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.backend.Backends;
 import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.impl.visualization.VisualizedRenderDispatcher;
+import com.jozufozu.flywheel.impl.visualization.VisualizationManagerImpl;
 import com.jozufozu.flywheel.lib.backend.SimpleBackend;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.CrashReportCallables;
 
 public final class BackendManagerImpl {
@@ -23,7 +24,7 @@ public final class BackendManagerImpl {
 	private static final Backend OFF_BACKEND = SimpleBackend.builder()
 			.engineMessage(new TextComponent("Disabled Flywheel").withStyle(ChatFormatting.RED))
 			.engineFactory(level -> {
-				throw new IllegalStateException("Cannot create engine when backend is off.");
+				throw new UnsupportedOperationException("Cannot create engine when backend is off.");
 			})
 			.supported(() -> true)
 			.register(Flywheel.rl("off"));
@@ -31,6 +32,9 @@ public final class BackendManagerImpl {
 	private static final Backend DEFAULT_BACKEND = findDefaultBackend();
 
 	private static Backend backend = OFF_BACKEND;
+
+	private BackendManagerImpl() {
+	}
 
 	public static Backend getBackend() {
 		return backend;
@@ -62,7 +66,7 @@ public final class BackendManagerImpl {
 		backend = chooseBackend();
 
 		if (level != null) {
-			VisualizedRenderDispatcher.resetVisualWorld(level);
+			VisualizationManagerImpl.reset(level);
 		}
 	}
 
@@ -77,16 +81,15 @@ public final class BackendManagerImpl {
 		return actual;
 	}
 
-	public static void init() {
-		CrashReportCallables.registerCrashCallable("Flywheel Backend", () -> {
-			var backendId = Backend.REGISTRY.getId(backend);
-			if (backendId == null) {
-				return "Unregistered";
-			}
-			return backendId.toString();
-		});
+	public static String getBackendString() {
+		ResourceLocation backendId = Backend.REGISTRY.getId(backend);
+		if (backendId == null) {
+			return "[unregistered]";
+		}
+		return backendId.toString();
 	}
 
-	private BackendManagerImpl() {
+	public static void init() {
+		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManagerImpl::getBackendString);
 	}
 }

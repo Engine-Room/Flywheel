@@ -41,11 +41,11 @@ public abstract class Storage<T> {
 		return visuals.values();
 	}
 
-	public void add(T obj) {
+	public void add(T obj, float partialTick) {
 		Visual visual = visuals.get(obj);
 
 		if (visual == null) {
-			create(obj);
+			create(obj, partialTick);
 		}
 	}
 
@@ -64,7 +64,7 @@ public abstract class Storage<T> {
 		visual.delete();
 	}
 
-	public void update(T obj) {
+	public void update(T obj, float partialTick) {
 		Visual visual = visuals.get(obj);
 
 		if (visual == null) {
@@ -76,13 +76,13 @@ public abstract class Storage<T> {
 			// delete and re-create the visual.
 			// resetting a visual supersedes updating it.
 			remove(obj);
-			create(obj);
+			create(obj, partialTick);
 		} else {
-			visual.update();
+			visual.update(partialTick);
 		}
 	}
 
-	public void recreateAll() {
+	public void recreateAll(float partialTick) {
 		tickableVisuals.clear();
 		dynamicVisuals.clear();
 		plannedVisuals.clear();
@@ -92,7 +92,7 @@ public abstract class Storage<T> {
 			Visual out = createRaw(obj);
 
 			if (out != null) {
-				setup(out);
+				setup(out, partialTick);
 			}
 
 			return out;
@@ -110,11 +110,11 @@ public abstract class Storage<T> {
 		visuals.clear();
 	}
 
-	private void create(T obj) {
+	private void create(T obj, float partialTick) {
 		Visual visual = createRaw(obj);
 
 		if (visual != null) {
-			setup(visual);
+			setup(visual, partialTick);
 			visuals.put(obj, visual);
 		}
 	}
@@ -130,8 +130,8 @@ public abstract class Storage<T> {
 		return tickPlan.and(ForEachPlan.of(() -> tickableVisuals, TickableVisual::tick));
 	}
 
-	private void setup(Visual visual) {
-		visual.init();
+	private void setup(Visual visual, float partialTick) {
+		visual.init(partialTick);
 
 		if (visual instanceof TickableVisual tickable) {
 			tickableVisuals.add(tickable);

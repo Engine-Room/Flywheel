@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.api.visualization;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.impl.VisualizerRegistryImpl;
+import com.jozufozu.flywheel.impl.visualization.VisualizerRegistryImpl;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;

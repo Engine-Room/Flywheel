@@ -15,7 +15,7 @@ import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.GLSLVersion;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.SourceFile;
-import com.jozufozu.flywheel.util.StringUtil;
+import com.jozufozu.flywheel.lib.util.StringUtil;
 
 import net.minecraft.client.Minecraft;
 

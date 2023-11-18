@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import com.jozufozu.flywheel.glsl.error.ErrorBuilder;
 import com.jozufozu.flywheel.glsl.span.Span;
-import com.jozufozu.flywheel.util.Pair;
+import com.jozufozu.flywheel.lib.util.Pair;
 
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;

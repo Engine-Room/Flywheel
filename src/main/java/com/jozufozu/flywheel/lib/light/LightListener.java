@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.lib.light;
 
-import com.jozufozu.flywheel.lib.box.ImmutableBox;
+import com.jozufozu.flywheel.lib.box.Box;
 
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LightLayer;
@@ -12,8 +12,7 @@ import net.minecraft.world.level.LightLayer;
  * It is the responsibility of the implementor to keep a reference to the level an object is contained in.
  */
 public interface LightListener {
-
-	ImmutableBox getVolume();
+	Box getVolume();
 
 	/**
 	 * Check the status of the light listener.
@@ -23,7 +22,7 @@ public interface LightListener {
 	boolean isInvalid();
 
 	/**
-	 * Called when a light updates in a chunk the implementor cares about.
+	 * Called when light updates in a section the implementor cares about.
 	 */
 	void onLightUpdate(LightLayer type, SectionPos pos);
 }

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.jozufozu.flywheel.api.task.Plan;
-import com.jozufozu.flywheel.util.Unit;
+import com.jozufozu.flywheel.lib.util.Unit;
 
 public class PlanCompositionTest {
 

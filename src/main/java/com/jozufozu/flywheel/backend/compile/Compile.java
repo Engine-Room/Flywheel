@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.backend.compile.core.ProgramLinker;
@@ -16,7 +18,6 @@ import com.jozufozu.flywheel.gl.shader.GlShader;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.GLSLVersion;
 import com.jozufozu.flywheel.glsl.SourceComponent;
-import com.jozufozu.flywheel.util.NotNullFunction;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -98,11 +99,11 @@ public class Compile {
 			return withComponent($ -> component);
 		}
 
-		public ShaderCompilerBuilder<K> withComponent(NotNullFunction<K, SourceComponent> sourceFetcher) {
+		public ShaderCompilerBuilder<K> withComponent(Function<K, @NotNull SourceComponent> sourceFetcher) {
 			return with((key, $) -> sourceFetcher.apply(key));
 		}
 
-		public ShaderCompilerBuilder<K> withResource(NotNullFunction<K, ResourceLocation> sourceFetcher) {
+		public ShaderCompilerBuilder<K> withResource(Function<K, @NotNull ResourceLocation> sourceFetcher) {
 			return with((key, loader) -> loader.find(sourceFetcher.apply(key)));
 		}
 

@@ -36,19 +36,6 @@ public final class RenderMath {
 		return (h == a) ? h : (h << 1);
 	}
 
-	public static boolean isPowerOf2(int n) {
-		int b = n & (n - 1);
-		return b == 0 && n != 0;
-	}
-
-	public static double lengthSqr(double x, double y, double z) {
-		return x * x + y * y + z * z;
-	}
-
-	public static double length(double x, double y, double z) {
-		return Math.sqrt(lengthSqr(x, y, z));
-	}
-
 	public static float diffuseLight(float x, float y, float z, boolean shaded) {
 		if (!shaded) {
 			return 1f;

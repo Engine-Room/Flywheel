@@ -4,13 +4,16 @@ import org.jetbrains.annotations.ApiStatus;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
-import com.jozufozu.flywheel.util.ResourceUtil;
+import com.jozufozu.flywheel.lib.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 
 public final class Contexts {
 	public static final SimpleContext WORLD = Context.REGISTRY.registerAndGet(new SimpleContext(Files.WORLD_VERTEX, Files.WORLD_FRAGMENT));
 	public static final SimpleContext CRUMBLING = Context.REGISTRY.registerAndGet(new SimpleContext(Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT));
+
+	private Contexts() {
+	}
 
 	@ApiStatus.Internal
 	public static void init() {

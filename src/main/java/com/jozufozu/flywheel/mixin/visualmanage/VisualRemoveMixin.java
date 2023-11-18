@@ -7,8 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.impl.visualization.VisualizedRenderDispatcher;
-import com.jozufozu.flywheel.util.FlwUtil;
+import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -21,11 +20,11 @@ public class VisualRemoveMixin {
 
 	@Inject(method = "setRemoved()V", at = @At("TAIL"))
 	private void flywheel$removeVisual(CallbackInfo ci) {
-		if (!FlwUtil.canUseVisualization(level)) {
+		VisualizationManager manager = VisualizationManager.get(level);
+		if (manager == null) {
 			return;
 		}
 
-		VisualizedRenderDispatcher.getBlockEntities(level)
-				.queueRemove((BlockEntity) (Object) this);
+		manager.getBlockEntities().queueRemove((BlockEntity) (Object) this);
 	}
 }

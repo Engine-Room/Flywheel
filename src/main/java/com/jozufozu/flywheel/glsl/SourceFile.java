@@ -17,8 +17,8 @@ import com.jozufozu.flywheel.glsl.parse.ShaderFunction;
 import com.jozufozu.flywheel.glsl.parse.ShaderStruct;
 import com.jozufozu.flywheel.glsl.span.Span;
 import com.jozufozu.flywheel.glsl.span.StringSpan;
-import com.jozufozu.flywheel.util.Pair;
-import com.jozufozu.flywheel.util.ResourceUtil;
+import com.jozufozu.flywheel.lib.util.Pair;
+import com.jozufozu.flywheel.lib.util.ResourceUtil;
 
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;

@@ -17,7 +17,7 @@ public interface Material {
 
 	void clear();
 
-	RenderType getBatchingRenderType();
+	RenderType getFallbackRenderType();
 
 	MaterialVertexTransformer getVertexTransformer();
 }

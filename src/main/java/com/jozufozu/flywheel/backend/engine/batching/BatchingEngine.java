@@ -89,12 +89,6 @@ public class BatchingEngine extends AbstractEngine implements SimplyComposedPlan
 		initializedInstancers.clear();
 	}
 
-	@Override
-	public void addDebugInfo(List<String> info) {
-		info.add("Batching");
-		info.add("Origin: " + renderOrigin.getX() + ", " + renderOrigin.getY() + ", " + renderOrigin.getZ());
-	}
-
 	private void flush() {
 		for (var instancer : uninitializedInstancers) {
 			add(instancer.instancer(), instancer.model(), instancer.stage());
@@ -111,7 +105,7 @@ public class BatchingEngine extends AbstractEngine implements SimplyComposedPlan
 		var meshes = model.getMeshes();
 		for (var entry : meshes.entrySet()) {
 			var material = entry.getKey();
-			RenderType renderType = material.getBatchingRenderType();
+			RenderType renderType = material.getFallbackRenderType();
 			var transformCall = new TransformCall<>(instancer, material, alloc(entry.getValue(), renderType.format()));
 			stagePlan.put(renderType, transformCall);
 		}

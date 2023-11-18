@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.glsl.error;
 
-import com.jozufozu.flywheel.util.ConsoleColors;
-
 public enum ErrorLevel {
 	WARN(ConsoleColors.YELLOW, "warn"),
 	ERROR(ConsoleColors.RED, "error"),

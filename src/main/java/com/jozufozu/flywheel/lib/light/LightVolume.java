@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.lib.light;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.lib.box.ImmutableBox;
+import com.jozufozu.flywheel.lib.box.Box;
 import com.jozufozu.flywheel.lib.box.MutableBox;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
@@ -11,13 +11,13 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
 
-public class LightVolume implements ImmutableBox, LightListener {
+public class LightVolume implements Box, LightListener {
 
 	protected final BlockAndTintGetter level;
 	protected final MutableBox box = new MutableBox();
 	protected MemoryBlock lightData;
 
-	public LightVolume(BlockAndTintGetter level, ImmutableBox sampleVolume) {
+	public LightVolume(BlockAndTintGetter level, Box sampleVolume) {
 		this.level = level;
 		this.setBox(sampleVolume);
 
@@ -25,7 +25,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 	}
 
 	@Override
-	public ImmutableBox getVolume() {
+	public Box getVolume() {
 		return box;
 	}
 
@@ -64,7 +64,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 		return lightData == null;
 	}
 
-	protected void setBox(ImmutableBox box) {
+	protected void setBox(Box box) {
 		this.box.assign(box);
 	}
 
@@ -76,7 +76,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 		}
 	}
 
-	public void move(ImmutableBox newSampleVolume) {
+	public void move(Box newSampleVolume) {
 		if (lightData == null) return;
 
 		setBox(newSampleVolume);
@@ -112,7 +112,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 	 *
 	 * @param worldVolume the region in the world to copy data from.
 	 */
-	public void copyLight(ImmutableBox worldVolume) {
+	public void copyLight(Box worldVolume) {
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
 		int xShift = box.getMinX();
@@ -143,7 +143,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 	 *
 	 * @param worldVolume the region in the world to copy data from.
 	 */
-	public void copyBlock(ImmutableBox worldVolume) {
+	public void copyBlock(Box worldVolume) {
 		var pos = new BlockPos.MutableBlockPos();
 
 		int xShift = box.getMinX();
@@ -168,7 +168,7 @@ public class LightVolume implements ImmutableBox, LightListener {
 	 *
 	 * @param worldVolume the region in the world to copy data from.
 	 */
-	public void copySky(ImmutableBox worldVolume) {
+	public void copySky(Box worldVolume) {
 		var pos = new BlockPos.MutableBlockPos();
 
 		int xShift = box.getMinX();

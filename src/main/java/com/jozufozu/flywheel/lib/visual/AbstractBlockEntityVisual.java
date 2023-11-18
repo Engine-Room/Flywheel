@@ -6,9 +6,9 @@ import com.jozufozu.flywheel.api.visual.BlockEntityVisual;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
+import com.jozufozu.flywheel.api.visualization.VisualManager;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
-import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityVisualManager;
-import com.jozufozu.flywheel.lib.box.ImmutableBox;
+import com.jozufozu.flywheel.lib.box.Box;
 import com.jozufozu.flywheel.lib.box.MutableBox;
 
 import net.minecraft.core.BlockPos;
@@ -52,13 +52,13 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	}
 
 	@Override
-	public ImmutableBox getVolume() {
+	public Box getVolume() {
 		return MutableBox.from(pos);
 	}
 
 	/**
 	 * In order to accommodate for floating point precision errors at high coordinates,
-	 * {@link BlockEntityVisualManager}s are allowed to arbitrarily adjust the origin, and
+	 * {@link VisualManager}s are allowed to arbitrarily adjust the origin, and
 	 * shift the world matrix provided as a shader uniform accordingly.
 	 *
 	 * @return The {@link BlockPos position} of the {@link BlockEntity} this visual
@@ -72,7 +72,7 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	 * @param frustum The current frustum.
 	 * @return {@code true} if this visual within the given frustum.
 	 */
-	public boolean visible(FrustumIntersection frustum) {
+	public boolean isVisible(FrustumIntersection frustum) {
 		return frustum.testAab(visualPos.getX(), visualPos.getY(), visualPos.getZ(), visualPos.getX() + 1, visualPos.getY() + 1, visualPos.getZ() + 1);
 	}
 

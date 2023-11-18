@@ -6,9 +6,9 @@ import com.mojang.math.Vector3f;
 import net.minecraft.core.Direction;
 
 public interface Rotate<Self> {
-
 	Self multiply(Quaternion quaternion);
 
+	@SuppressWarnings("unchecked")
 	default Self rotate(Direction axis, float radians) {
 		if (radians == 0)
 			return (Self) this;
@@ -46,18 +46,21 @@ public interface Rotate<Self> {
 		return multiplyRadians(Vector3f.ZP, angle);
 	}
 
+	@SuppressWarnings("unchecked")
 	default Self multiply(Vector3f axis, double angle) {
 		if (angle == 0)
 			return (Self) this;
 		return multiply(axis.rotationDegrees((float) angle));
 	}
 
+	@SuppressWarnings("unchecked")
 	default Self multiplyRadians(Vector3f axis, double angle) {
 		if (angle == 0)
 			return (Self) this;
 		return multiply(axis.rotation((float) angle));
 	}
 
+	@SuppressWarnings("unchecked")
 	default Self rotateToFace(Direction facing) {
 		switch (facing) {
 		case SOUTH -> multiply(Vector3f.YP.rotationDegrees(180));

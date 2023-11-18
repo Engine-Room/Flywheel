@@ -23,7 +23,7 @@ import org.lwjgl.opengl.GL30;
 
 import com.jozufozu.flywheel.gl.GlTexture;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
-import com.jozufozu.flywheel.lib.box.ImmutableBox;
+import com.jozufozu.flywheel.lib.box.Box;
 import com.jozufozu.flywheel.lib.box.MutableBox;
 
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -36,7 +36,7 @@ public class GPULightVolume extends LightVolume {
 	private final GlTextureUnit textureUnit = GlTextureUnit.T4;
 	protected boolean bufferDirty;
 
-	public GPULightVolume(BlockAndTintGetter level, ImmutableBox sampleVolume) {
+	public GPULightVolume(BlockAndTintGetter level, Box sampleVolume) {
 		super(level, sampleVolume);
 		this.sampleVolume.assign(sampleVolume);
 
@@ -64,7 +64,7 @@ public class GPULightVolume extends LightVolume {
 	}
 
 	@Override
-	protected void setBox(ImmutableBox box) {
+	protected void setBox(Box box) {
 		this.box.assign(box);
 		this.box.nextPowerOf2Centered();
 		// called during super ctor
@@ -110,7 +110,7 @@ public class GPULightVolume extends LightVolume {
 		glTexture.delete();
 	}
 
-	public void move(ImmutableBox newSampleVolume) {
+	public void move(Box newSampleVolume) {
 		if (lightData == null) return;
 
 		if (box.contains(newSampleVolume)) {
@@ -122,7 +122,7 @@ public class GPULightVolume extends LightVolume {
 	}
 
 	@Override
-	public ImmutableBox getVolume() {
+	public Box getVolume() {
 		return sampleVolume;
 	}
 

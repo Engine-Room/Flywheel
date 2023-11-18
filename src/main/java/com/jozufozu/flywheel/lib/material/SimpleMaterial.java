@@ -49,7 +49,7 @@ public class SimpleMaterial implements Material {
 	}
 
 	@Override
-	public RenderType getBatchingRenderType() {
+	public RenderType getFallbackRenderType() {
 		return batchingRenderType;
 	}
 

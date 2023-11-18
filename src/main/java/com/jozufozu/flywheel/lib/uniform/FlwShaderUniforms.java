@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.event.BeginFrameEvent;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
-import com.jozufozu.flywheel.impl.visualization.VisualizedRenderDispatcher;
+import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.lib.math.MatrixUtil;
 import com.jozufozu.flywheel.lib.math.MoreMath;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -73,7 +73,8 @@ public class FlwShaderUniforms implements ShaderUniforms {
 			}
 			RenderContext context = event.getContext();
 
-			Vec3i renderOrigin = VisualizedRenderDispatcher.getRenderOrigin(context.level());
+			Vec3i renderOrigin = VisualizationManager.getOrThrow(context.level())
+					.getRenderOrigin();
 			Vec3 camera = context.camera()
 					.getPosition();
 

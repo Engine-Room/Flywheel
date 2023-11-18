@@ -19,9 +19,6 @@ public abstract class BufferBuilderMixin implements BufferBuilderExtension {
 	private ByteBuffer buffer;
 
 	@Shadow
-	private int nextElementByte;
-
-	@Shadow
 	private int vertices;
 
 	@Shadow
@@ -40,14 +37,12 @@ public abstract class BufferBuilderMixin implements BufferBuilderExtension {
 	@Shadow
 	private boolean building;
 
-	@Shadow
-	private void ensureCapacity(int increaseAmount) {
-	}
-
 	@Override
 	public void flywheel$freeBuffer() {
 		if (buffer != null) {
-			MemoryUtil.memFree(buffer);
+			// The buffer is created using MemoryTracker, which uses a non-default allocator.
+			// The same allocator must be used here to free the buffer.
+			MemoryUtil.getAllocator(false).free(MemoryUtil.memAddress0(buffer));
 			buffer = null;
 		}
 	}

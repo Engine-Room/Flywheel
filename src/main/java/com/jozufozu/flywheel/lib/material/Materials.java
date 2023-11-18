@@ -8,8 +8,8 @@ import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial.GlStateShard;
 import com.jozufozu.flywheel.lib.math.DiffuseLightCalculator;
+import com.jozufozu.flywheel.lib.util.ResourceUtil;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
-import com.jozufozu.flywheel.util.ResourceUtil;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -133,6 +133,9 @@ public final class Materials {
 			.addShard(Shards.diffuseTex(MINECART_LOCATION, false, false))
 			.batchingRenderType(RenderType.entitySolid(MINECART_LOCATION))
 			.register();
+
+	private Materials() {
+	}
 
 	@ApiStatus.Internal
 	public static void init() {

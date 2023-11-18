@@ -37,6 +37,9 @@ public final class ModelUtil {
 	 */
 	public static final BlockRenderDispatcher VANILLA_RENDERER = createVanillaRenderer();
 
+	private ModelUtil() {
+	}
+
 	private static BlockRenderDispatcher createVanillaRenderer() {
 		BlockRenderDispatcher defaultDispatcher = Minecraft.getInstance().getBlockRenderer();
 		BlockRenderDispatcher dispatcher = new BlockRenderDispatcher(null, null, null);
@@ -51,6 +54,10 @@ public final class ModelUtil {
 			return defaultDispatcher;
 		}
 		return dispatcher;
+	}
+
+	public static boolean isVanillaBufferEmpty(Pair<DrawState, ByteBuffer> pair) {
+		return pair.getFirst().vertexCount() == 0;
 	}
 
 	public static MemoryBlock convertVanillaBuffer(Pair<DrawState, ByteBuffer> pair, VertexType vertexType) {
@@ -108,12 +115,12 @@ public final class ModelUtil {
 			}
 
 			@Override
-			public double coord(int i, int j) {
-				return switch (j) {
+			public double coord(int i, int dim) {
+				return switch (dim) {
 					case 0 -> vertexList.x(i);
 					case 1 -> vertexList.y(i);
 					case 2 -> vertexList.z(i);
-					default -> throw new IllegalArgumentException("Invalid dimension: " + j);
+					default -> throw new IllegalArgumentException("Invalid dimension: " + dim);
 				};
 			}
 		});

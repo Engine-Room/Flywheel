@@ -7,7 +7,7 @@ import java.util.function.BiConsumer;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.lib.math.MoreMath;
 
-public class PlanUtil {
+public final class PlanUtil {
 	public static <C, T> void distribute(TaskExecutor taskExecutor, C context, Runnable onCompletion, List<T> list, BiConsumer<T, C> action) {
 		final int size = list.size();
 
@@ -92,5 +92,8 @@ public class PlanUtil {
 
 	public static int sliceSize(TaskExecutor taskExecutor, int totalSize) {
 		return MoreMath.ceilingDiv(totalSize, taskExecutor.getThreadCount() * 32);
+	}
+
+	private PlanUtil() {
 	}
 }

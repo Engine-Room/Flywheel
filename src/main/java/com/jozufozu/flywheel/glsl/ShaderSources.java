@@ -1,6 +1,8 @@
 package com.jozufozu.flywheel.glsl;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
@@ -10,10 +12,10 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import com.jozufozu.flywheel.util.ResourceUtil;
-import com.jozufozu.flywheel.util.StringUtil;
+import com.jozufozu.flywheel.lib.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 /**
@@ -66,11 +68,9 @@ public class ShaderSources {
 
 	@NotNull
 	protected LoadResult load(ResourceLocation loc) {
-		try {
-			var resource = manager.getResource(ResourceUtil.prefixed(SHADER_DIR, loc));
-
-			var sourceString = StringUtil.readToString(resource.getInputStream());
-
+		try (Resource resource = manager.getResource(ResourceUtil.prefixed(SHADER_DIR, loc))) {
+			InputStream stream = resource.getInputStream();
+			String sourceString = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
 			return SourceFile.parse(this, loc, sourceString);
 		} catch (IOException e) {
 			return new LoadResult.Failure(new LoadError.IOError(loc, e));

@@ -1,19 +1,22 @@
 package com.jozufozu.flywheel.lib.memory;
 
 import java.lang.ref.Cleaner;
-import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.util.StringUtil;
+import com.jozufozu.flywheel.lib.util.StringUtil;
 
 public final class FlwMemoryTracker {
 	public static final boolean DEBUG_MEMORY_SAFETY = System.getProperty("flw.debugMemorySafety") != null;
 
 	static final Cleaner CLEANER = Cleaner.create();
 
+	// TODO: Should these be volatile?
 	private static long cpuMemory = 0;
 	private static long gpuMemory = 0;
+
+	private FlwMemoryTracker() {
+	}
 
 	public static long malloc(long size) {
 		long ptr = MemoryUtil.nmemAlloc(size);
@@ -21,18 +24,6 @@ public final class FlwMemoryTracker {
 			throw new OutOfMemoryError("Failed to allocate " + size + " bytes");
 		}
 		return ptr;
-	}
-
-	/**
-	 * @deprecated Use {@link MemoryBlock#malloc(long)} or {@link MemoryBlock#mallocTracked(long)} and
-	 * {@link MemoryBlock#asBuffer()} instead. This method should only be used if specifically a {@linkplain ByteBuffer} is needed and it is
-	 * short-lived.
-	 */
-	@Deprecated
-	public static ByteBuffer mallocBuffer(int size) {
-		ByteBuffer buffer = MemoryUtil.memByteBuffer(malloc(size), size);
-		_allocCPUMemory(buffer.capacity());
-		return buffer;
 	}
 
 	public static long calloc(long num, long size) {
@@ -43,18 +34,6 @@ public final class FlwMemoryTracker {
 		return ptr;
 	}
 
-	/**
-	 * @deprecated Use {@link MemoryBlock#calloc(long, long)} or {@link MemoryBlock#callocTracked(long, long)} and
-	 * {@link MemoryBlock#asBuffer()} instead. This method should only be used if specifically a {@linkplain ByteBuffer} is needed and it is
-	 * short-lived.
-	 */
-	@Deprecated
-	public static ByteBuffer callocBuffer(int num, int size) {
-		ByteBuffer buffer = MemoryUtil.memByteBuffer(calloc(num, size), num * size);
-		_allocCPUMemory(buffer.capacity());
-		return buffer;
-	}
-
 	public static long realloc(long ptr, long size) {
 		ptr = MemoryUtil.nmemRealloc(ptr, size);
 		if (ptr == MemoryUtil.NULL) {
@@ -63,30 +42,8 @@ public final class FlwMemoryTracker {
 		return ptr;
 	}
 
-	/**
-	 * @deprecated Use {@link MemoryBlock#realloc(long)} or {@link MemoryBlock#reallocTracked(long)} instead. This method
-	 * should only be used if specifically a {@linkplain ByteBuffer} is needed and it is short-lived.
-	 */
-	@Deprecated
-	public static ByteBuffer reallocBuffer(ByteBuffer buffer, int size) {
-		ByteBuffer newBuffer = MemoryUtil.memByteBuffer(realloc(MemoryUtil.memAddress(buffer), size), size);
-		_freeCPUMemory(buffer.capacity());
-		_allocCPUMemory(newBuffer.capacity());
-		return newBuffer;
-	}
-
 	public static void free(long ptr) {
 		MemoryUtil.nmemFree(ptr);
-	}
-
-	/**
-	 * @deprecated Use {@link MemoryBlock#free} instead. This method should only be used if specifically a {@linkplain ByteBuffer} is needed and
-	 * it is short-lived.
-	 */
-	@Deprecated
-	public static void freeBuffer(ByteBuffer buffer) {
-		free(MemoryUtil.memAddress(buffer));
-		_freeCPUMemory(buffer.capacity());
 	}
 
 	public static void _allocCPUMemory(long size) {

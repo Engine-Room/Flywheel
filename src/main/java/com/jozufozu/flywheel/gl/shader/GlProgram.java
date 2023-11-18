@@ -1,11 +1,11 @@
 package com.jozufozu.flywheel.gl.shader;
 
+import static org.lwjgl.opengl.GL20.glDeleteProgram;
+import static org.lwjgl.opengl.GL20.glGetUniformLocation;
+import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL31.GL_INVALID_INDEX;
 import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
 import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
-import static org.lwjgl.opengl.GL32.glDeleteProgram;
-import static org.lwjgl.opengl.GL32.glGetUniformLocation;
-import static org.lwjgl.opengl.GL32.glUniform1i;
 
 import org.slf4j.Logger;
 

@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.api.backend;
 
-import java.util.List;
-
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.InstancerProvider;
@@ -26,7 +24,7 @@ public interface Engine extends InstancerProvider {
 
 	Vec3i renderOrigin();
 
-	void addDebugInfo(List<String> info);
-
+	// TODO: "delete" implies that the object cannot be used afterwards, but all current implementations
+	// support the "invalidate" contract as well, meaning they can be reused after this call. Rename?
 	void delete();
 }
