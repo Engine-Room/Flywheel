@@ -14,12 +14,11 @@ import com.jozufozu.flywheel.api.visual.PlannedVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
-import com.jozufozu.flywheel.impl.visualization.VisualizedRenderDispatcher;
+import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
 import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.task.ForEachPlan;
-import com.jozufozu.flywheel.lib.util.AnimationTickHolder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
@@ -59,7 +58,7 @@ public class ExampleEffect implements Effect {
 	}
 
 	public static void tick(TickEvent.ClientTickEvent event) {
-		if (event.phase == TickEvent.Phase.END || Minecraft.getInstance().isPaused()) {
+		if (event.phase != TickEvent.Phase.START || Minecraft.getInstance().isPaused()) {
 			return;
 		}
 
@@ -78,6 +77,11 @@ public class ExampleEffect implements Effect {
 			return;
 		}
 
+		VisualizationManager manager = VisualizationManager.get(level);
+		if (manager == null) {
+			return;
+		}
+
 		if (!ALL_EFFECTS.isEmpty() && level.random.nextFloat() > 0.005f) {
 			return;
 		}
@@ -90,8 +94,7 @@ public class ExampleEffect implements Effect {
 
 		ExampleEffect effect = new ExampleEffect(level, new Vector3f(x, y, z));
 		ALL_EFFECTS.add(effect);
-		VisualizedRenderDispatcher.getEffects(level)
-				.queueAdd(effect);
+		manager.getEffects().queueAdd(effect);
 	}
 
 	@Override
@@ -130,13 +133,11 @@ public class ExampleEffect implements Effect {
 		}
 
 		@Override
-		public void init() {
-
+		public void init(float partialTick) {
 		}
 
 		@Override
-		public void update() {
-
+		public void update(float partialTick) {
 		}
 
 		@Override
@@ -283,12 +284,11 @@ public class ExampleEffect implements Effect {
 			instance.delete();
 		}
 
-		public void beginFrame() {
-			float partialTicks = AnimationTickHolder.getPartialTicks();
-
-			var x = Mth.lerp(partialTicks, self.lastPosition.x, self.position.x);
-			var y = Mth.lerp(partialTicks, self.lastPosition.y, self.position.y);
-			var z = Mth.lerp(partialTicks, self.lastPosition.z, self.position.z);
+		public void beginFrame(VisualFrameContext context) {
+			float partialTick = context.partialTick();
+			var x = Mth.lerp(partialTick, self.lastPosition.x, self.position.x);
+			var y = Mth.lerp(partialTick, self.lastPosition.y, self.position.y);
+			var z = Mth.lerp(partialTick, self.lastPosition.z, self.position.z);
 
 			instance.loadIdentity()
 					.translateBack(renderOrigin)

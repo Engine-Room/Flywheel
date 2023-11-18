@@ -7,12 +7,11 @@ import com.jozufozu.flywheel.api.visual.Visual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.impl.visualization.VisualizationHelper;
 import com.jozufozu.flywheel.impl.visualization.storage.Storage;
-import com.jozufozu.flywheel.util.FlwUtil;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 
-public class EntityVisualManager extends VisualManager<Entity> {
+public class EntityVisualManager extends AbstractVisualManager<Entity> {
 	private final EntityStorage storage;
 
 	public EntityVisualManager(Engine engine) {
@@ -51,8 +50,7 @@ public class EntityVisualManager extends VisualManager<Entity> {
 			}
 
 			Level level = entity.level;
-
-			return FlwUtil.isFlywheelLevel(level);
+			return level != null;
 		}
 	}
 }

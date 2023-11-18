@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.impl.visualization.VisualizedRenderDispatcher;
+import com.jozufozu.flywheel.impl.visualization.VisualizationHelper;
 
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public class ChunkRebuildHooksMixin {
 	@Inject(method = "handleBlockEntity(Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$CompiledChunk;Ljava/util/Set;Lnet/minecraft/world/level/block/entity/BlockEntity;)V", at = @At("HEAD"), cancellable = true)
 	private void flywheel$tryAddBlockEntity(ChunkRenderDispatcher.CompiledChunk compiledChunk, Set<BlockEntity> globalBlockEntities, BlockEntity blockEntity, CallbackInfo ci) {
-		if (VisualizedRenderDispatcher.tryAddBlockEntity(blockEntity)) {
+		if (VisualizationHelper.tryAddBlockEntity(blockEntity)) {
 			ci.cancel();
 		}
 	}

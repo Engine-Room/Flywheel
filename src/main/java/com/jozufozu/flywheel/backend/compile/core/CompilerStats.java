@@ -12,7 +12,7 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.glsl.LoadError;
 import com.jozufozu.flywheel.glsl.LoadResult;
 import com.jozufozu.flywheel.glsl.error.ErrorBuilder;
-import com.jozufozu.flywheel.util.StringUtil;
+import com.jozufozu.flywheel.lib.util.StringUtil;
 
 public class CompilerStats {
 	private long compileStart;

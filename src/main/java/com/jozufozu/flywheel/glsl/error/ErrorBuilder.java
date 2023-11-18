@@ -19,8 +19,7 @@ import com.jozufozu.flywheel.glsl.error.lines.SourceLine;
 import com.jozufozu.flywheel.glsl.error.lines.SpanHighlightLine;
 import com.jozufozu.flywheel.glsl.error.lines.TextLine;
 import com.jozufozu.flywheel.glsl.span.Span;
-import com.jozufozu.flywheel.util.ConsoleColors;
-import com.jozufozu.flywheel.util.StringUtil;
+import com.jozufozu.flywheel.lib.util.StringUtil;
 
 import net.minecraft.resources.ResourceLocation;
 

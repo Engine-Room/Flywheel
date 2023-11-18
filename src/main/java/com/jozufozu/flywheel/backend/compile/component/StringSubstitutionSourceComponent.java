@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.jozufozu.flywheel.glsl.SourceComponent;
-import com.jozufozu.flywheel.util.ResourceUtil;
+import com.jozufozu.flywheel.lib.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 

@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
@@ -13,8 +14,7 @@ import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.OrientedInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
-import com.jozufozu.flywheel.lib.modelpart.ModelPart;
-import com.jozufozu.flywheel.lib.util.AnimationTickHolder;
+import com.jozufozu.flywheel.lib.model.part.ModelPartBuilder;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -35,26 +35,26 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	}
 
 	@Override
-	public void init() {
+	public void init(float partialTick) {
 		bell = createBellInstance().setPivot(0.5f, 0.75f, 0.5f)
 				.setPosition(getVisualPosition());
 
-		updateRotation();
+		updateRotation(partialTick);
 
-		super.init();
+		super.init(partialTick);
 	}
 
 	@Override
 	public void beginFrame(VisualFrameContext context) {
-		if (doDistanceLimitThisFrame(context) || !visible(context.frustum())) {
+		if (doDistanceLimitThisFrame(context) || !isVisible(context.frustum())) {
 			return;
 		}
 
-		updateRotation();
+		updateRotation(context.partialTick());
 	}
 
-	private void updateRotation() {
-		float ringTime = (float) blockEntity.ticks + AnimationTickHolder.getPartialTicks();
+	private void updateRotation(float partialTick) {
+		float ringTime = (float) blockEntity.ticks + partialTick;
 
 		if (ringTime == lastRingTime) {
 			return;
@@ -94,8 +94,8 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	}
 
 	@NotNull
-	private static ModelPart createBellMesh() {
-		return ModelPart.builder("bell", 32, 32)
+	private static Mesh createBellMesh() {
+		return new ModelPartBuilder("bell", 32, 32)
 				.sprite(BellRenderer.BELL_RESOURCE_LOCATION.sprite())
 				.cuboid()
 				.start(5.0F, 6.0F, 5.0F)

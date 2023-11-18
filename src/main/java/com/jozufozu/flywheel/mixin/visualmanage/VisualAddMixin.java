@@ -7,8 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.impl.visualization.VisualizedRenderDispatcher;
-import com.jozufozu.flywheel.util.FlwUtil;
+import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -23,11 +22,11 @@ public class VisualAddMixin {
 	@Inject(method = "setBlockEntity(Lnet/minecraft/world/level/block/entity/BlockEntity;)V",
 			at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))
 	private void flywheel$onBlockEntityAdded(BlockEntity blockEntity, CallbackInfo ci) {
-		if (!FlwUtil.canUseVisualization(level)) {
+		VisualizationManager manager = VisualizationManager.get(level);
+		if (manager == null) {
 			return;
 		}
 
-		VisualizedRenderDispatcher.getBlockEntities(level)
-				.queueAdd(blockEntity);
+		manager.getBlockEntities().queueAdd(blockEntity);
 	}
 }

@@ -40,7 +40,7 @@ public class LevelRendererMixin {
 
 	@Inject(method = "renderLevel", at = @At("HEAD"))
 	private void flywheel$beginRender(PoseStack poseStack, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
-		flywheel$renderContext = RenderContext.create((LevelRenderer) (Object) this, level, renderBuffers, poseStack, projectionMatrix, camera);
+		flywheel$renderContext = RenderContext.create((LevelRenderer) (Object) this, level, renderBuffers, poseStack, projectionMatrix, camera, partialTick);
 
 		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(flywheel$renderContext));
 	}

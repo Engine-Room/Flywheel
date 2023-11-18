@@ -6,6 +6,7 @@ import java.util.function.BiFunction;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
@@ -14,8 +15,7 @@ import com.jozufozu.flywheel.lib.instance.OrientedInstance;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
-import com.jozufozu.flywheel.lib.modelpart.ModelPart;
-import com.jozufozu.flywheel.lib.util.AnimationTickHolder;
+import com.jozufozu.flywheel.lib.model.part.ModelPartBuilder;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -52,7 +52,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 	}
 
 	@Override
-	public void init() {
+	public void init(float partialTick) {
 		Block block = blockState.getBlock();
 
 		chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
@@ -77,16 +77,16 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 			lidProgress = $ -> 0f;
 		}
 
-		super.init();
+		super.init(partialTick);
 	}
 
 	@Override
 	public void beginFrame(VisualFrameContext context) {
-		if (doDistanceLimitThisFrame(context) || !visible(context.frustum())) {
+		if (doDistanceLimitThisFrame(context) || !isVisible(context.frustum())) {
 			return;
 		}
 
-		float progress = lidProgress.get(AnimationTickHolder.getPartialTicks());
+		float progress = lidProgress.get(context.partialTick());
 
 		if (lastProgress == progress) {
 			return;
@@ -136,9 +136,9 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 				.createInstance();
 	}
 
-	private static ModelPart createBodyMesh(ChestType type, TextureAtlasSprite sprite) {
+	private static Mesh createBodyMesh(ChestType type, TextureAtlasSprite sprite) {
 		return switch (type) {
-			case LEFT -> ModelPart.builder("chest_base_left", 64, 64)
+			case LEFT -> new ModelPartBuilder("chest_base_left", 64, 64)
 					.sprite(sprite)
 					.cuboid()
 					.textureOffset(0, 19)
@@ -146,7 +146,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 					.size(15, 10, 14)
 					.endCuboid()
 					.build();
-			case RIGHT -> ModelPart.builder("chest_base_right", 64, 64)
+			case RIGHT -> new ModelPartBuilder("chest_base_right", 64, 64)
 					.sprite(sprite)
 					.cuboid()
 					.textureOffset(0, 19)
@@ -154,7 +154,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 					.size(15, 10, 14)
 					.endCuboid()
 					.build();
-			default -> ModelPart.builder("chest_base", 64, 64)
+			default -> new ModelPartBuilder("chest_base", 64, 64)
 					.sprite(sprite)
 					.cuboid()
 					.textureOffset(0, 19)
@@ -165,9 +165,9 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		};
 	}
 
-	private static ModelPart createLidMesh(ChestType type, TextureAtlasSprite sprite) {
+	private static Mesh createLidMesh(ChestType type, TextureAtlasSprite sprite) {
 		return switch (type) {
-			case LEFT -> ModelPart.builder("chest_lid_left", 64, 64)
+			case LEFT -> new ModelPartBuilder("chest_lid_left", 64, 64)
 					.sprite(sprite)
 					.cuboid()
 					.textureOffset(0, 0)
@@ -179,7 +179,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 					.size(1, 4, 1)
 					.endCuboid()
 					.build();
-			case RIGHT -> ModelPart.builder("chest_lid_right", 64, 64)
+			case RIGHT -> new ModelPartBuilder("chest_lid_right", 64, 64)
 					.sprite(sprite)
 					.cuboid()
 					.textureOffset(0, 0)
@@ -191,7 +191,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 					.size(1, 4, 1)
 					.endCuboid()
 					.build();
-			default -> ModelPart.builder("chest_lid", 64, 64)
+			default -> new ModelPartBuilder("chest_lid", 64, 64)
 					.sprite(sprite)
 					.cuboid()
 					.textureOffset(0, 0)

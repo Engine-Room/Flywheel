@@ -15,7 +15,6 @@
     "LevelRendererAccessor",
     "LevelRendererMixin",
     "LightUpdateMixin",
-    "PausedPartialTickAccessor",
     "RenderTypeMixin",
     "VertexFormatMixin",
     "fix.FixFabulousDepthMixin",

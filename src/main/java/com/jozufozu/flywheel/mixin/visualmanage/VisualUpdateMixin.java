@@ -6,8 +6,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.impl.visualization.VisualizedRenderDispatcher;
-import com.jozufozu.flywheel.util.FlwUtil;
+import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -25,7 +24,8 @@ public class VisualUpdateMixin {
 	 */
 	@Inject(method = "setBlockDirty(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;)V", at = @At("TAIL"))
 	private void flywheel$checkUpdate(BlockPos pos, BlockState oldState, BlockState newState, CallbackInfo ci) {
-		if (!FlwUtil.canUseVisualization(level)) {
+		VisualizationManager manager = VisualizationManager.get(level);
+		if (manager == null) {
 			return;
 		}
 
@@ -34,7 +34,6 @@ public class VisualUpdateMixin {
 			return;
 		}
 
-		VisualizedRenderDispatcher.getBlockEntities(level)
-				.queueUpdate(blockEntity);
+		manager.getBlockEntities().queueUpdate(blockEntity);
 	}
 }

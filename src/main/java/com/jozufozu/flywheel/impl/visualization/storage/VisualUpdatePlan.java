@@ -15,6 +15,7 @@ public class VisualUpdatePlan<C> implements SimplyComposedPlan<C> {
 	private final Supplier<List<Plan<C>>> initializer;
 	@Nullable
 	private Plan<C> plan;
+	private boolean initialized = false;
 	private boolean needsSimplify = true;
 
 	public VisualUpdatePlan(Supplier<List<Plan<C>>> initializer) {
@@ -32,13 +33,21 @@ public class VisualUpdatePlan<C> implements SimplyComposedPlan<C> {
 		} else {
 			this.plan = this.plan.and(plan);
 		}
+
 		needsSimplify = true;
 	}
 
 	@NotNull
 	private Plan<C> updatePlans() {
-		if (plan == null) {
-			plan = new NestedPlan<>(initializer.get()).simplify();
+		if (!initialized) {
+			Plan<C> mainPlan = new NestedPlan<>(initializer.get());
+			if (plan != null) {
+				plan = mainPlan.and(plan);
+			} else {
+				plan = mainPlan;
+			}
+			plan = plan.simplify();
+			initialized = true;
 		} else if (needsSimplify) {
 			plan = plan.simplify();
 		}
@@ -49,5 +58,6 @@ public class VisualUpdatePlan<C> implements SimplyComposedPlan<C> {
 
 	public void clear() {
 		plan = null;
+		initialized = false;
 	}
 }

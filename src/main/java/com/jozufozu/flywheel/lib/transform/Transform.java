@@ -22,12 +22,14 @@ public interface Transform<Self extends Transform<Self>> extends Translate<Self>
 		return transform(last.pose(), last.normal());
 	}
 
+	@SuppressWarnings("unchecked")
 	default Self rotateCentered(Direction axis, float radians) {
 		translate(.5f, .5f, .5f).rotate(axis, radians)
 				.translate(-.5f, -.5f, -.5f);
 		return (Self) this;
 	}
 
+	@SuppressWarnings("unchecked")
 	default Self rotateCentered(Quaternion q) {
 		translate(.5f, .5f, .5f).multiply(q)
 				.translate(-.5f, -.5f, -.5f);

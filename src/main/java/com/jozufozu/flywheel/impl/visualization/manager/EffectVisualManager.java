@@ -6,7 +6,7 @@ import com.jozufozu.flywheel.api.visual.EffectVisual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.impl.visualization.storage.Storage;
 
-public class EffectVisualManager extends VisualManager<Effect> {
+public class EffectVisualManager extends AbstractVisualManager<Effect> {
 	private final EffectStorage storage;
 
 	public EffectVisualManager(Engine engine) {

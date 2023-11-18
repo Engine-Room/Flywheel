@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.backend.engine.indirect;
 
-import java.util.List;
-
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
@@ -78,12 +76,6 @@ public class IndirectEngine extends AbstractEngine {
 
 	@Override
 	public void delete() {
-		drawManager.delete();
-	}
-
-	@Override
-	public void addDebugInfo(List<String> info) {
-		info.add("GL46 Indirect");
-		info.add("Origin: " + renderOrigin.getX() + ", " + renderOrigin.getY() + ", " + renderOrigin.getZ());
+		drawManager.invalidate();
 	}
 }

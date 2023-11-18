@@ -10,7 +10,6 @@ import com.jozufozu.flywheel.api.visual.Visual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.impl.visualization.VisualizationHelper;
 import com.jozufozu.flywheel.impl.visualization.storage.Storage;
-import com.jozufozu.flywheel.util.FlwUtil;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -19,7 +18,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-public class BlockEntityVisualManager extends VisualManager<BlockEntity> {
+public class BlockEntityVisualManager extends AbstractVisualManager<BlockEntity> {
 	private final BlockEntityStorage storage;
 
 	public BlockEntityVisualManager(Engine engine) {
@@ -56,7 +55,6 @@ public class BlockEntityVisualManager extends VisualManager<BlockEntity> {
 			}
 
 			Level level = blockEntity.getLevel();
-
 			if (level == null) {
 				return false;
 			}
@@ -65,15 +63,9 @@ public class BlockEntityVisualManager extends VisualManager<BlockEntity> {
 				return false;
 			}
 
-			if (FlwUtil.isFlywheelLevel(level)) {
-				BlockPos pos = blockEntity.getBlockPos();
-
-				BlockGetter existingChunk = level.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
-
-				return existingChunk != null;
-			}
-
-			return false;
+			BlockPos pos = blockEntity.getBlockPos();
+			BlockGetter existingChunk = level.getChunkForCollisions(pos.getX() >> 4, pos.getZ() >> 4);
+			return existingChunk != null;
 		}
 
 		@Override

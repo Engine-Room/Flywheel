@@ -12,7 +12,7 @@ import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
-import com.jozufozu.flywheel.util.Pair;
+import com.jozufozu.flywheel.lib.util.Pair;
 
 public class IndirectDrawManager {
 	private final Map<InstancerKey<?>, IndirectInstancer<?>> instancers = new HashMap<>();
@@ -43,7 +43,7 @@ public class IndirectDrawManager {
 		}
 	}
 
-	public void delete() {
+	public void invalidate() {
 		instancers.clear();
 
 		renderLists.values()

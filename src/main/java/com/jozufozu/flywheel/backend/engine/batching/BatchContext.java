@@ -5,7 +5,7 @@ import org.joml.FrustumIntersection;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.lib.math.MatrixUtil;
-import com.jozufozu.flywheel.util.FlwUtil;
+import com.jozufozu.flywheel.lib.util.FlwUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.multiplayer.ClientLevel;

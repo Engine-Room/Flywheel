@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
@@ -12,9 +13,8 @@ import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
-import com.jozufozu.flywheel.lib.modelpart.ModelPart;
+import com.jozufozu.flywheel.lib.model.part.ModelPartBuilder;
 import com.jozufozu.flywheel.lib.transform.TransformStack;
-import com.jozufozu.flywheel.lib.util.AnimationTickHolder;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
@@ -45,7 +45,7 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	}
 
 	@Override
-	public void init() {
+	public void init(float partialTick) {
 		DyeColor color = blockEntity.getColor();
 		if (color == null) {
 			texture = Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION.sprite();
@@ -70,7 +70,7 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 
 		lid = createLidInstance().setTransform(stack);
 
-		super.init();
+		super.init(partialTick);
 	}
 
 	private Direction getDirection() {
@@ -83,11 +83,11 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 
 	@Override
 	public void beginFrame(VisualFrameContext context) {
-		if (doDistanceLimitThisFrame(context) || !visible(context.frustum())) {
+		if (doDistanceLimitThisFrame(context) || !isVisible(context.frustum())) {
 			return;
 		}
-		float progress = blockEntity.getProgress(AnimationTickHolder.getPartialTicks());
 
+		float progress = blockEntity.getProgress(context.partialTick());
 		if (progress == lastProgress) {
 			return;
 		}
@@ -133,8 +133,8 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 				.createInstance();
 	}
 
-	private static ModelPart createBodyMesh(TextureAtlasSprite texture) {
-		return ModelPart.builder("shulker_base", 64, 64)
+	private static Mesh createBodyMesh(TextureAtlasSprite texture) {
+		return new ModelPartBuilder("shulker_base", 64, 64)
 				.sprite(texture)
 				.cuboid()
 				.textureOffset(0, 28)
@@ -144,8 +144,8 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 				.build();
 	}
 
-	private static ModelPart createLidMesh(TextureAtlasSprite texture) {
-		return ModelPart.builder("shulker_lid", 64, 64)
+	private static Mesh createLidMesh(TextureAtlasSprite texture) {
+		return new ModelPartBuilder("shulker_lid", 64, 64)
 				.sprite(texture)
 				.cuboid()
 				.size(16, 12, 16)

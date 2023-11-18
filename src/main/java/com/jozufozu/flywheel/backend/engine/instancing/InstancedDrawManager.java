@@ -57,7 +57,7 @@ public class InstancedDrawManager {
 		}
 	}
 
-	public void delete() {
+	public void invalidate() {
 		instancers.clear();
 
 		meshPools.values()
@@ -71,7 +71,7 @@ public class InstancedDrawManager {
 		initializedInstancers.forEach(InstancedInstancer::delete);
 		initializedInstancers.clear();
 
-		eboCache.delete();
+		eboCache.invalidate();
 	}
 
 	public void clearInstancers() {

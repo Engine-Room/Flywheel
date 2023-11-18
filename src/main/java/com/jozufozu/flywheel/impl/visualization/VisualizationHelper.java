@@ -4,14 +4,19 @@ import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.visualization.BlockEntityVisualizer;
 import com.jozufozu.flywheel.api.visualization.EntityVisualizer;
+import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.api.visualization.VisualizerRegistry;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public final class VisualizationHelper {
+	private VisualizationHelper() {
+	}
+
 	@SuppressWarnings("unchecked")
 	@Nullable
 	public static <T extends BlockEntity> BlockEntityVisualizer<? super T> getVisualizer(T blockEntity) {
@@ -72,6 +77,20 @@ public final class VisualizationHelper {
 		return visualizer.shouldSkipRender(entity);
 	}
 
-	private VisualizationHelper() {
+	public static <T extends BlockEntity> boolean tryAddBlockEntity(T blockEntity) {
+		Level level = blockEntity.getLevel();
+		VisualizationManager manager = VisualizationManager.get(level);
+		if (manager == null) {
+			return false;
+		}
+
+		BlockEntityVisualizer<? super T> visualizer = getVisualizer(blockEntity);
+		if (visualizer == null) {
+			return false;
+		}
+
+		manager.getBlockEntities().queueAdd(blockEntity);
+
+		return visualizer.shouldSkipRender(blockEntity);
 	}
 }

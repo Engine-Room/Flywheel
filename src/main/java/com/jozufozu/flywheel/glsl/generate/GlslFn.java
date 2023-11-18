@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.glsl.generate;
 
 import java.util.function.Consumer;
 
-import com.jozufozu.flywheel.util.StringUtil;
+import com.jozufozu.flywheel.lib.util.StringUtil;
 
 public class GlslFn implements GlslBuilder.Declaration {
 	private final GlslBlock body = new GlslBlock();

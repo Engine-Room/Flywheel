@@ -12,8 +12,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.jozufozu.flywheel.api.task.Plan;
-import com.jozufozu.flywheel.backend.task.ParallelTaskExecutor;
-import com.jozufozu.flywheel.util.Unit;
+import com.jozufozu.flywheel.impl.task.ParallelTaskExecutor;
+import com.jozufozu.flywheel.lib.util.Unit;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 

@@ -6,6 +6,9 @@ import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 
 public final class VertexTransformations {
+	private VertexTransformations() {
+	}
+
 	public static void transformPos(MutableVertexList vertexList, int index, Matrix4f matrix) {
 		float x = vertexList.x(index);
 		float y = vertexList.y(index);

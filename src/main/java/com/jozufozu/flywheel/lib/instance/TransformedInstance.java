@@ -11,11 +11,16 @@ import com.mojang.math.Quaternion;
 import net.minecraft.util.Mth;
 
 public class TransformedInstance extends ColoredLitInstance implements Transform<TransformedInstance> {
-	private static final Matrix4f EMPTY_MATRIX_4f = new Matrix4f();
-	private static final Matrix3f EMPTY_MATRIX_3f = new Matrix3f();
+	private static final Matrix4f ZERO_MATRIX_4f = new Matrix4f();
+	private static final Matrix3f ZERO_MATRIX_3f = new Matrix3f();
 
 	public final Matrix4f model = new Matrix4f();
 	public final Matrix3f normal = new Matrix3f();
+
+	{
+		model.setIdentity();
+		normal.setIdentity();
+	}
 
 	public TransformedInstance(InstanceType<? extends TransformedInstance> type, InstanceHandle handle) {
 		super(type, handle);
@@ -41,16 +46,16 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	public TransformedInstance setEmptyTransform() {
 		setChanged();
 
-		this.model.load(EMPTY_MATRIX_4f);
-		this.normal.load(EMPTY_MATRIX_3f);
+		model.load(ZERO_MATRIX_4f);
+		normal.load(ZERO_MATRIX_3f);
 		return this;
 	}
 
 	public TransformedInstance loadIdentity() {
 		setChanged();
 
-		this.model.setIdentity();
-		this.normal.setIdentity();
+		model.setIdentity();
+		normal.setIdentity();
 		return this;
 	}
 
@@ -95,13 +100,17 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 
 	@Override
 	public TransformedInstance mulPose(Matrix4f pose) {
-		this.model.multiply(pose);
+		setChanged();
+
+		model.multiply(pose);
 		return this;
 	}
 
 	@Override
 	public TransformedInstance mulNormal(Matrix3f normal) {
-		this.normal.mul(normal);
+		setChanged();
+
+		normal.mul(normal);
 		return this;
 	}
 

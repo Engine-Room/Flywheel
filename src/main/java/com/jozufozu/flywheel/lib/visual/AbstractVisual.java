@@ -29,13 +29,13 @@ public abstract class AbstractVisual implements Visual, LightListener {
 	}
 
 	@Override
-	public void init() {
+	public void init(float partialTick) {
 		LightUpdater.get(level).addListener(this);
 		updateLight();
 	}
 
 	@Override
-	public void update() {
+	public void update(float partialTick) {
 	}
 
 	@Override

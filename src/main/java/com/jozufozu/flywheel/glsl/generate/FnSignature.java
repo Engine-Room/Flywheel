@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.util.Pair;
+import com.jozufozu.flywheel.lib.util.Pair;
 
 public record FnSignature(String returnType, String name, ImmutableList<Pair<String, String>> args) {
 

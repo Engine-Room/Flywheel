@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.vanilla;
 import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
+import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
@@ -13,9 +14,8 @@ import com.jozufozu.flywheel.lib.instance.TransformedInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
-import com.jozufozu.flywheel.lib.modelpart.ModelPart;
+import com.jozufozu.flywheel.lib.model.part.ModelPartBuilder;
 import com.jozufozu.flywheel.lib.transform.TransformStack;
-import com.jozufozu.flywheel.lib.util.AnimationTickHolder;
 import com.jozufozu.flywheel.lib.visual.AbstractEntityVisual;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
@@ -41,14 +41,14 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	}
 
 	@Override
-	public void init() {
+	public void init(float partialTick) {
 		body = createBodyInstance();
 		blockState = entity.getDisplayBlockState();
 		contents = createContentsInstance();
 
-		updatePosition();
+		updatePosition(partialTick);
 
-		super.init();
+		super.init(partialTick);
 	}
 
 	@Override
@@ -67,25 +67,25 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 
 	@Override
 	public void beginFrame(VisualFrameContext context) {
-		if (visible(context.frustum())) {
+		if (isVisible(context.frustum())) {
 			return;
 		}
+
 		// TODO: add proper way to temporarily disable rendering a specific instance
 		if (!active) {
 			return;
 		}
 
-		updatePosition();
+		updatePosition(context.partialTick());
 	}
 
-	private void updatePosition() {
+	private void updatePosition(float partialTick) {
 		TransformStack tstack = TransformStack.cast(stack);
 		stack.setIdentity();
-		float pt = AnimationTickHolder.getPartialTicks();
 
-		tstack.translate(Mth.lerp(pt, entity.xOld, entity.getX()) - renderOrigin.getX(), Mth.lerp(pt, entity.yOld, entity.getY()) - renderOrigin.getY(), Mth.lerp(pt, entity.zOld, entity.getZ()) - renderOrigin.getZ());
+		tstack.translate(Mth.lerp(partialTick, entity.xOld, entity.getX()) - renderOrigin.getX(), Mth.lerp(partialTick, entity.yOld, entity.getY()) - renderOrigin.getY(), Mth.lerp(partialTick, entity.zOld, entity.getZ()) - renderOrigin.getZ());
 
-		float yaw = Mth.lerp(pt, entity.yRotO, entity.getYRot());
+		float yaw = Mth.lerp(partialTick, entity.yRotO, entity.getYRot());
 
 		long i = (long) entity.getId() * 493286711L;
 		i = i * i * 4392167121L + i * 98761L;
@@ -94,11 +94,11 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		float f2 = (((float)(i >> 24 & 7L) + 0.5F) / 8 - 0.5F) * 0.004F;
 		tstack.translate(f, f1, f2);
 		tstack.nudge(entity.getId());
-		double d0 = Mth.lerp(pt, entity.xOld, entity.getX());
-		double d1 = Mth.lerp(pt, entity.yOld, entity.getY());
-		double d2 = Mth.lerp(pt, entity.zOld, entity.getZ());
+		double d0 = Mth.lerp(partialTick, entity.xOld, entity.getX());
+		double d1 = Mth.lerp(partialTick, entity.yOld, entity.getY());
+		double d2 = Mth.lerp(partialTick, entity.zOld, entity.getZ());
 		Vec3 vector3d = entity.getPos(d0, d1, d2);
-		float f3 = Mth.lerp(pt, entity.xRotO, entity.getXRot());
+		float f3 = Mth.lerp(partialTick, entity.xRotO, entity.getXRot());
 		if (vector3d != null) {
 			Vec3 vector3d1 = entity.getPosOffs(d0, d1, d2, 0.3F);
 			Vec3 vector3d2 = entity.getPosOffs(d0, d1, d2, -0.3F);
@@ -122,8 +122,8 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		tstack.translate(0.0D, 0.375D, 0.0D);
 		tstack.multiply(Vector3f.YP.rotationDegrees(180 - yaw));
 		tstack.multiply(Vector3f.ZP.rotationDegrees(-f3));
-		float f5 = (float)entity.getHurtTime() - pt;
-		float f6 = entity.getDamage() - pt;
+		float f5 = (float)entity.getHurtTime() - partialTick;
+		float f6 = entity.getDamage() - partialTick;
 		if (f6 < 0) {
 			f6 = 0;
 		}
@@ -186,14 +186,13 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	}
 
 	@NotNull
-	private static ModelPart createBodyMesh() {
-		int y = -3;
-		return ModelPart.builder("minecart", 64, 32)
-				.cuboid().invertYZ().start(-10, -8, -y).size(20, 16, 2).textureOffset(0, 10).rotateZ((float) Math.PI).rotateX(((float)Math.PI / 2F)).endCuboid()
-				.cuboid().invertYZ().start(-8, y, -10).size(16, 8, 2).rotateY(((float)Math.PI * 1.5F)).endCuboid()
-				.cuboid().invertYZ().start(-8, y, -10).size(16, 8, 2).rotateY(((float)Math.PI / 2F)).endCuboid()
-				.cuboid().invertYZ().start(-8, y, -8).size(16, 8, 2).rotateY((float)Math.PI).endCuboid()
-				.cuboid().invertYZ().start(-8, y, -8).size(16, 8, 2).endCuboid()
+	private static Mesh createBodyMesh() {
+		return new ModelPartBuilder("minecart", 64, 32)
+				.cuboid().invertYZ().start(-10, -8, 3).size(20, 16, 2).textureOffset(0, 10).rotateZ((float) Math.PI).rotateX(((float)Math.PI / 2F)).endCuboid()
+				.cuboid().invertYZ().start(-8, -3, -10).size(16, 8, 2).rotateY(((float)Math.PI * 1.5F)).endCuboid()
+				.cuboid().invertYZ().start(-8, -3, -10).size(16, 8, 2).rotateY(((float)Math.PI / 2F)).endCuboid()
+				.cuboid().invertYZ().start(-8, -3, -8).size(16, 8, 2).rotateY((float)Math.PI).endCuboid()
+				.cuboid().invertYZ().start(-8, -3, -8).size(16, 8, 2).endCuboid()
 				.build();
 	}
 

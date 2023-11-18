@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.lib.memory;
 import java.lang.ref.Cleaner;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.util.StringUtil;
+import com.jozufozu.flywheel.lib.util.StringUtil;
 
 class DebugMemoryBlockImpl extends MemoryBlockImpl {
 	final CleaningAction cleaningAction;

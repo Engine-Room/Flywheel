@@ -12,7 +12,7 @@ import org.lwjgl.system.Checks;
 
 import com.jozufozu.flywheel.gl.GlCompat;
 import com.jozufozu.flywheel.gl.buffer.GlBufferType;
-import com.jozufozu.flywheel.util.FlwUtil;
+import com.jozufozu.flywheel.lib.util.FlwUtil;
 
 public abstract class GlVertexArrayGL3 extends GlVertexArray {
 	private final BitSet attributeDirty = new BitSet(MAX_ATTRIBS);

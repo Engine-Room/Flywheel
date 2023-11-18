@@ -10,14 +10,14 @@ public interface Visual {
 	/**
 	 * Initialize instances here.
 	 */
-	void init();
+	void init(float partialTick);
 
 	/**
 	 * Update instances here. Good for when instances don't change very often and when animations are GPU based.
 	 *
 	 * <br><br> If your animations are complex or more CPU driven, see {@link DynamicVisual} or {@link TickableVisual}.
 	 */
-	void update();
+	void update(float partialTick);
 
 	/**
 	 * When a visual is reset, the visual is deleted and re-created.

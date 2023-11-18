@@ -135,12 +135,12 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     jarJar('org.joml:joml:1.10.5') {
-        jarJar.ranged(it, '[1.10.0,1.11.0)')
+        jarJar.ranged(it, '[1.10.5,1.11.0)')
     }
     library 'org.joml:joml:1.10.5'
 
     jarJar('com.dreizak:miniball:1.0.3') {
-        jarJar.ranged(it, '[1.0,2.0)')
+        jarJar.ranged(it, '[1.0.3,2.0.0)')
     }
     library 'com.dreizak:miniball:1.0.3'
 

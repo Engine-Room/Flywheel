@@ -13,11 +13,11 @@ public record Transaction<T>(T obj, Action action) {
 		return new Transaction<>(obj, Action.UPDATE);
 	}
 
-	public void apply(Storage<T> storage) {
+	public void apply(Storage<T> storage, float partialTick) {
 		switch (action) {
-		case ADD -> storage.add(obj);
+		case ADD -> storage.add(obj, partialTick);
 		case REMOVE -> storage.remove(obj);
-		case UPDATE -> storage.update(obj);
+		case UPDATE -> storage.update(obj, partialTick);
 		}
 	}
 }

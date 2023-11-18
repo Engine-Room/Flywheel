@@ -11,10 +11,10 @@ import org.jetbrains.annotations.NotNull;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.glsl.SourceLines;
+import com.jozufozu.flywheel.glsl.error.ConsoleColors;
 import com.jozufozu.flywheel.glsl.error.ErrorBuilder;
 import com.jozufozu.flywheel.glsl.span.Span;
-import com.jozufozu.flywheel.util.ConsoleColors;
-import com.jozufozu.flywheel.util.StringUtil;
+import com.jozufozu.flywheel.lib.util.StringUtil;
 
 import net.minecraft.resources.ResourceLocation;
 

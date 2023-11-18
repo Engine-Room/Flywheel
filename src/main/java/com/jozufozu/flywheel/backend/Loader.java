@@ -26,6 +26,9 @@ public class Loader implements ResourceManagerReloadListener {
 		FlwPrograms.reload(manager);
 
 		// TODO: Move this to the impl package
+		// TODO: To ensure this runs after all backends are ready, inject into Minecraft after the reload and before levelRenderer.allChanged()
+		// Alternatively, consider adding API 
+		// TODO: This should reset all VisualizationManagerImpls, not just the one for the static client level
 		BackendManagerImpl.refresh(Minecraft.getInstance().level);
 	}
 
