@@ -12,15 +12,15 @@ public class SimpleMaterial implements Material {
 	protected final ResourceLocation fragmentShader;
 	protected final Runnable setup;
 	protected final Runnable clear;
-	protected final RenderType batchingRenderType;
+	protected final RenderType fallbackRenderType;
 	protected final MaterialVertexTransformer vertexTransformer;
 
-	public SimpleMaterial(ResourceLocation vertexShader, ResourceLocation fragmentShader, Runnable setup, Runnable clear, RenderType batchingRenderType, MaterialVertexTransformer vertexTransformer) {
+	public SimpleMaterial(ResourceLocation vertexShader, ResourceLocation fragmentShader, Runnable setup, Runnable clear, RenderType fallbackRenderType, MaterialVertexTransformer vertexTransformer) {
 		this.vertexShader = vertexShader;
 		this.fragmentShader = fragmentShader;
 		this.setup = setup;
 		this.clear = clear;
-		this.batchingRenderType = batchingRenderType;
+		this.fallbackRenderType = fallbackRenderType;
 		this.vertexTransformer = vertexTransformer;
 	}
 
@@ -50,7 +50,7 @@ public class SimpleMaterial implements Material {
 
 	@Override
 	public RenderType getFallbackRenderType() {
-		return batchingRenderType;
+		return fallbackRenderType;
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class SimpleMaterial implements Material {
 		protected ResourceLocation fragmentShader = Materials.Files.DEFAULT_FRAGMENT;
 		protected Runnable setup = () -> {};
 		protected Runnable clear = () -> {};
-		protected RenderType batchingRenderType = RenderType.solid();
+		protected RenderType fallbackRenderType = RenderType.solid();
 		protected MaterialVertexTransformer vertexTransformer = (vertexList, level) -> {};
 
 		public Builder() {
@@ -95,8 +95,8 @@ public class SimpleMaterial implements Material {
 			return this;
 		}
 
-		public Builder batchingRenderType(RenderType type) {
-			this.batchingRenderType = type;
+		public Builder fallbackRenderType(RenderType type) {
+			this.fallbackRenderType = type;
 			return this;
 		}
 
@@ -106,7 +106,7 @@ public class SimpleMaterial implements Material {
 		}
 
 		public SimpleMaterial register() {
-			return Material.REGISTRY.registerAndGet(new SimpleMaterial(vertexShader, fragmentShader, setup, clear, batchingRenderType, vertexTransformer));
+			return Material.REGISTRY.registerAndGet(new SimpleMaterial(vertexShader, fragmentShader, setup, clear, fallbackRenderType, vertexTransformer));
 		}
 
 		private static Runnable chain(Runnable runnable1, Runnable runnable2) {
