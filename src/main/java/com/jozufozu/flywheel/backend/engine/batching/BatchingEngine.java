@@ -13,10 +13,12 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.api.task.Flag;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
+import com.jozufozu.flywheel.lib.task.NamedFlag;
 import com.jozufozu.flywheel.lib.task.SimplyComposedPlan;
 import com.jozufozu.flywheel.lib.task.Synchronizer;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -30,6 +32,8 @@ public class BatchingEngine extends AbstractEngine implements SimplyComposedPlan
 	private final List<BatchedInstancer<?>> initializedInstancers = new ArrayList<>();
 	private final Map<RenderStage, BatchedStagePlan> stagePlans = new EnumMap<>(RenderStage.class);
 	private final Map<VertexFormat, BatchedMeshPool> meshPools = new HashMap<>();
+
+	private final Flag flushFlag = new NamedFlag("flushed");
 
 	public BatchingEngine(int maxOriginDistance) {
 		super(maxOriginDistance);
@@ -52,6 +56,9 @@ public class BatchingEngine extends AbstractEngine implements SimplyComposedPlan
 	public void execute(TaskExecutor taskExecutor, RenderContext context, Runnable onCompletion) {
 		flush();
 
+		// Now it's safe to read stage plans in #renderStage.
+		taskExecutor.raise(flushFlag);
+
 		BatchContext ctx = BatchContext.create(context, renderOrigin);
 
 		var sync = new Synchronizer(stagePlans.values()
@@ -69,7 +76,20 @@ public class BatchingEngine extends AbstractEngine implements SimplyComposedPlan
 
 	@Override
 	public void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage) {
-		executor.syncPoint();
+		executor.syncTo(flushFlag);
+		if (stage.isLast()) {
+			executor.lower(flushFlag);
+		}
+
+		var stagePlan = stagePlans.get(stage);
+
+		if (stagePlan == null) {
+			drawTracker.draw(stage);
+			return;
+		}
+
+		executor.syncTo(stagePlan.flag);
+		executor.lower(stagePlan.flag);
 		drawTracker.draw(stage);
 	}
 

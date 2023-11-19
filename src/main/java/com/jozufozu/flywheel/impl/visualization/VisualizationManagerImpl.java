@@ -7,6 +7,7 @@ import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
+import com.jozufozu.flywheel.api.task.Flag;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
@@ -22,7 +23,9 @@ import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityVisualManager
 import com.jozufozu.flywheel.impl.visualization.manager.EffectVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EntityVisualManager;
 import com.jozufozu.flywheel.lib.math.MatrixUtil;
+import com.jozufozu.flywheel.lib.task.NamedFlag;
 import com.jozufozu.flywheel.lib.task.NestedPlan;
+import com.jozufozu.flywheel.lib.task.RaisePlan;
 import com.jozufozu.flywheel.lib.task.SimplyComposedPlan;
 import com.jozufozu.flywheel.lib.util.LevelAttached;
 
@@ -49,6 +52,9 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	private final Plan<TickContext> tickPlan;
 	private final Plan<RenderContext> framePlan;
 
+	private final Flag tickFlag = new NamedFlag("tick");
+	private final Flag frameFlag = new NamedFlag("frame");
+
 	private VisualizationManagerImpl(LevelAccessor level) {
 		engine = BackendManager.getBackend()
 				.createEngine(level);
@@ -62,8 +68,9 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		tickPlan = blockEntities.createTickPlan()
 				.and(entities.createTickPlan())
 				.and(effects.createTickPlan())
+				.then(RaisePlan.raise(tickFlag))
 				.simplify();
-		framePlan = new FramePlan();
+		framePlan = new FramePlan().then(RaisePlan.raise(frameFlag));
 	}
 
 	public static boolean supportsVisualization(@Nullable LevelAccessor level) {
@@ -145,7 +152,12 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	 * </p>
 	 */
 	public void tick(double cameraX, double cameraY, double cameraZ) {
-		taskExecutor.syncPoint();
+		// Make sure we're done with any prior frame or tick to avoid racing.
+		taskExecutor.syncTo(frameFlag);
+		taskExecutor.lower(frameFlag);
+
+		taskExecutor.syncTo(tickFlag);
+		taskExecutor.lower(tickFlag);
 
 		tickPlan.execute(taskExecutor, new TickContext(cameraX, cameraY, cameraZ));
 	}
@@ -159,7 +171,9 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	 * </p>
 	 */
 	public void beginFrame(RenderContext context) {
-		taskExecutor.syncPoint();
+		// Make sure we're done with the last tick.
+		// Note we don't lower here because many frames may happen per tick.
+		taskExecutor.syncTo(tickFlag);
 
 		framePlan.execute(taskExecutor, context);
 	}
@@ -175,7 +189,10 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	 * Free all acquired resources and delete this manager.
 	 */
 	public void delete() {
-		taskExecutor.discardAndAwait();
+		// Just finish everything. This may include the work of others but that's okay.
+		taskExecutor.syncPoint();
+
+		// Now clean up.
 		blockEntities.invalidate();
 		entities.invalidate();
 		effects.invalidate();

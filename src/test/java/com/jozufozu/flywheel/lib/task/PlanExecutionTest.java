@@ -140,7 +140,7 @@ class PlanExecutionTest {
 	@Test
 	void mainThreadPlan() {
 		var done = new AtomicBoolean(false);
-		var plan = OnMainThreadPlan.of(() -> done.set(true));
+		var plan = SyncedPlan.of(() -> done.set(true));
 
 		plan.execute(EXECUTOR, Unit.INSTANCE);
 
@@ -149,6 +149,95 @@ class PlanExecutionTest {
 		EXECUTOR.syncPoint();
 
 		Assertions.assertTrue(done.get());
+	}
+
+	@Test
+	void flagPlan() {
+		var first = new NamedFlag("ready right away");
+		var second = new NamedFlag("ready after we sync");
+
+		var sync = new Synchronizer(2, () -> EXECUTOR.raise(second));
+
+		RaisePlan.raise(first)
+				.execute(EXECUTOR, Unit.INSTANCE, sync);
+
+		Assertions.assertTrue(EXECUTOR.syncTo(first), "First flag should be raised since we submitted a plan that raises it");
+
+		Assertions.assertFalse(EXECUTOR.syncTo(second), "Second flag should not be raised yet.");
+
+		sync.decrementAndEventuallyRun();
+
+		Assertions.assertTrue(EXECUTOR.syncTo(second), "Second flag should be raised since it was raised in sync.");
+	}
+
+	@Test
+	void longWaitForFlag() {
+		var first = new NamedFlag("ready right away");
+		var second = new NamedFlag("ready after 2s");
+
+		RaisePlan.raise(first)
+				.then(SimplePlan.of(() -> {
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						throw new RuntimeException(e);
+					}
+				}))
+				.then(RaisePlan.raise(second))
+				.execute(EXECUTOR, Unit.INSTANCE);
+
+		Assertions.assertTrue(EXECUTOR.syncTo(first), "First flag should be raised since we submitted a plan that raises it.");
+
+		Assertions.assertFalse(EXECUTOR.isRaised(second), "Second flag should not be raised immediately.");
+
+		Assertions.assertTrue(EXECUTOR.syncTo(second), "Second flag should be raised since we were waiting for it.");
+	}
+
+	@Test
+	void syncToReturnsExpected() {
+		var flag = new NamedFlag("ready right away");
+
+		Assertions.assertFalse(EXECUTOR.syncTo(flag), "Flag should not be raised yet.");
+
+		EXECUTOR.raise(flag);
+
+		Assertions.assertTrue(EXECUTOR.syncTo(flag), "Flag should be raised since we raised it manually.");
+
+		EXECUTOR.lower(flag);
+
+		Assertions.assertFalse(EXECUTOR.syncTo(flag), "Flag should not be raised since we lowered it.");
+	}
+
+	@Test
+	void flagsAreReferenceEqual() {
+		var flagA = new NamedFlag("same");
+		var flagB = new NamedFlag("same");
+
+		Assertions.assertNotSame(flagA, flagB, "Flags should not be the same object.");
+		Assertions.assertEquals(flagA, flagB, "Flags should be equal.");
+
+		Assertions.assertFalse(EXECUTOR.isRaised(flagA), "Flag A should not be raised yet.");
+		Assertions.assertFalse(EXECUTOR.isRaised(flagB), "Flag B should not be raised yet.");
+
+		EXECUTOR.raise(flagA);
+
+		Assertions.assertTrue(EXECUTOR.isRaised(flagA), "Flag A should be raised since we raised it manually.");
+		Assertions.assertFalse(EXECUTOR.isRaised(flagB), "Flag B should not be raised yet.");
+
+		EXECUTOR.raise(flagB);
+
+		Assertions.assertTrue(EXECUTOR.isRaised(flagA), "Flag A should be raised since we raised it manually.");
+		Assertions.assertTrue(EXECUTOR.isRaised(flagB), "Flag B should be raised since we raised it manually.");
+
+		EXECUTOR.lower(flagA);
+
+		Assertions.assertFalse(EXECUTOR.isRaised(flagA), "Flag A should not be raised since we lowered it.");
+		Assertions.assertTrue(EXECUTOR.isRaised(flagB), "Flag B should be raised since we raised it manually.");
+
+		EXECUTOR.lower(flagB);
+
+		Assertions.assertFalse(EXECUTOR.isRaised(flagA), "Flag A should not be raised since we lowered it.");
+		Assertions.assertFalse(EXECUTOR.isRaised(flagB), "Flag B should not be raised since we lowered it.");
 	}
 
 	private static void assertExpectedSequence(IntArrayList sequence, int... expected) {
