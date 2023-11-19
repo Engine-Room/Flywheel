@@ -27,10 +27,6 @@ repositories {
         }
     }
     maven {
-        name 'tterrag maven'
-        url 'https://maven.tterrag.com/'
-    }
-    maven {
         url 'https://maven.parchmentmc.org/'
     }
     maven {
@@ -114,7 +110,7 @@ jar {
                 'Implementation-Version'  : project.jar.archiveVersion,
                 //'Implementation-Vendor': 'flywheel authors',
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'MixinConfigs'            : 'flywheel.mixins.json'
+                'MixinConfigs'            : 'flywheel.mixins.json,flywheel.sodium.mixins.json'
         ])
     }
 }
