@@ -36,7 +36,7 @@ public class PlanSimplificationTest {
 
 		Assertions.assertEquals(oneSimple.simplify(), SIMPLE);
 
-		var mainThreadNoop = new OnMainThreadPlan<>(NOOP);
+		var mainThreadNoop = new SyncedPlan<>(NOOP);
 		var oneMainThread = NestedPlan.of(mainThreadNoop);
 
 		Assertions.assertEquals(oneMainThread.simplify(), mainThreadNoop);
@@ -66,7 +66,7 @@ public class PlanSimplificationTest {
 
 	@Test
 	void complexNesting() {
-		var mainThreadNoop = OnMainThreadPlan.<Unit>of(() -> {
+		var mainThreadNoop = SyncedPlan.<Unit>of(() -> {
 		});
 
 		var nested = NestedPlan.of(mainThreadNoop, SIMPLE);
@@ -79,7 +79,7 @@ public class PlanSimplificationTest {
 
 	@Test
 	void nestedNoSimple() {
-		var mainThreadNoop = OnMainThreadPlan.<Unit>of(() -> {
+		var mainThreadNoop = SyncedPlan.<Unit>of(() -> {
 		});
 		var barrier = new BarrierPlan<>(SIMPLE, SIMPLE);
 		var oneMainThread = NestedPlan.of(mainThreadNoop, NestedPlan.of(mainThreadNoop, barrier, barrier));

@@ -5,6 +5,7 @@ run/
 build/
 gradle-app.setting
 out/
+logs/
 
 ## IntelliJ IDEA
 

@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
+import com.jozufozu.flywheel.api.task.Flag;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.lib.task.SimplyComposedPlan;
+import com.jozufozu.flywheel.lib.task.StageFlag;
 import com.jozufozu.flywheel.lib.task.Synchronizer;
 
 import net.minecraft.client.renderer.RenderType;
@@ -17,24 +19,34 @@ import net.minecraft.client.renderer.RenderType;
  * All the rendering that happens within a render stage.
  */
 public class BatchedStagePlan implements SimplyComposedPlan<BatchContext> {
+	/**
+	 * This flag will be raised when this stage completes execution.
+	 */
+	public final Flag flag;
+
 	private final RenderStage stage;
 	private final BatchedDrawTracker tracker;
 	private final Map<RenderType, BufferPlan> bufferPlans = new HashMap<>();
 
-	public BatchedStagePlan(RenderStage renderStage, BatchedDrawTracker tracker) {
-		stage = renderStage;
+	public BatchedStagePlan(RenderStage stage, BatchedDrawTracker tracker) {
+		this.flag = new StageFlag(stage);
+		this.stage = stage;
 		this.tracker = tracker;
 	}
 
 	@Override
 	public void execute(TaskExecutor taskExecutor, BatchContext context, Runnable onCompletion) {
 		if (isEmpty()) {
+			taskExecutor.raise(flag);
 			onCompletion.run();
 			return;
 		}
 
 		taskExecutor.execute(() -> {
-			var sync = new Synchronizer(bufferPlans.size(), onCompletion);
+			var sync = new Synchronizer(bufferPlans.size(), () -> {
+				taskExecutor.raise(flag);
+				onCompletion.run();
+			});
 
 			for (var plan : bufferPlans.values()) {
 				plan.execute(taskExecutor, context, sync);

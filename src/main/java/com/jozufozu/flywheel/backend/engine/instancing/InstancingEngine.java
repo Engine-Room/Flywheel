@@ -9,6 +9,7 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.api.task.Flag;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
@@ -17,7 +18,9 @@ import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
-import com.jozufozu.flywheel.lib.task.OnMainThreadPlan;
+import com.jozufozu.flywheel.lib.task.NamedFlag;
+import com.jozufozu.flywheel.lib.task.RaisePlan;
+import com.jozufozu.flywheel.lib.task.SyncedPlan;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
@@ -25,6 +28,8 @@ import net.minecraft.client.Minecraft;
 public class InstancingEngine extends AbstractEngine {
 	private final Context context;
 	private final InstancedDrawManager drawManager = new InstancedDrawManager();
+
+	private final Flag flushFlag = new NamedFlag("flushed");
 
 	public InstancingEngine(int maxOriginDistance, Context context) {
 		super(maxOriginDistance);
@@ -38,7 +43,8 @@ public class InstancingEngine extends AbstractEngine {
 
 	@Override
 	public Plan<RenderContext> createFramePlan() {
-		return OnMainThreadPlan.of(this::flushDrawManager);
+		return SyncedPlan.<RenderContext>of(this::flushDrawManager)
+				.then(RaisePlan.raise(flushFlag));
 	}
 
 	private void flushDrawManager() {
@@ -51,16 +57,21 @@ public class InstancingEngine extends AbstractEngine {
 	public void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage) {
 		var drawSet = drawManager.get(stage);
 
-		if (drawSet.isEmpty()) {
-			return;
+		if (!drawSet.isEmpty()) {
+			executor.syncTo(flushFlag);
+
+			try (var state = GlStateTracker.getRestoreState()) {
+				setup();
+
+				render(drawSet);
+			}
 		}
 
-		executor.syncPoint();
-
-		try (var state = GlStateTracker.getRestoreState()) {
-			setup();
-
-			render(drawSet);
+		if (stage.isLast()) {
+			// Need to sync here to ensure this frame has everything executed
+			// in case we didn't have any stages to draw this frame.
+			executor.syncTo(flushFlag);
+			executor.lower(flushFlag);
 		}
 	}
 

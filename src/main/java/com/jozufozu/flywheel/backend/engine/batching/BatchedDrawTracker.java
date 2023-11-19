@@ -52,7 +52,15 @@ public class BatchedDrawTracker {
 	 * @param stage The RenderStage to draw.
 	 */
 	public void draw(RenderStage stage) {
-		Set<DrawBuffer> buffers = activeBuffers.get(stage);
+		// This may appear jank, but flag synchronization in BatchingEngine guarantees that
+		// the mapped-to Set will not be modified here. We don't have the same guarantee for
+		// activeBuffers itself, so we need to synchronize to fetch the Set.
+
+		Set<DrawBuffer> buffers;
+		synchronized (activeBuffers) {
+			buffers = activeBuffers.get(stage);
+		}
+
 		for (DrawBuffer buffer : buffers) {
 			_draw(buffer);
 		}

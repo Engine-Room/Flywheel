@@ -1,9 +1,11 @@
 package com.jozufozu.flywheel.impl.task;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -12,10 +14,12 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.task.Flag;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.util.Mth;
 
 // https://github.com/CaffeineMC/sodium-fabric/blob/5d364ed5ba63f9067fcf72a078ca310bff4db3e9/src/main/java/me/jellysquid/mods/sodium/client/render/chunk/compile/ChunkBuilder.java
@@ -34,6 +38,8 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	private final List<WorkerThread> threads = new ArrayList<>();
 	private final Deque<Runnable> taskQueue = new ConcurrentLinkedDeque<>();
 	private final Queue<Runnable> mainThreadQueue = new ConcurrentLinkedQueue<>();
+
+	private final Set<Flag> flags = Collections.synchronizedSet(new ReferenceOpenHashSet<>());
 
 	private final ThreadGroupNotifier taskNotifier = new ThreadGroupNotifier();
 	private final WaitGroup waitGroup = new WaitGroup();
@@ -116,7 +122,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	}
 
 	@Override
-	public void scheduleForMainThread(Runnable runnable) {
+	public void scheduleForSync(Runnable runnable) {
 		if (!running.get()) {
 			throw new IllegalStateException("Executor is stopped");
 		}
@@ -133,40 +139,67 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	 */
 	@Override
 	public void syncPoint() {
-		Runnable task;
 		while (true) {
-			if ((task = mainThreadQueue.poll()) != null) {
-				// Prioritize main thread tasks.
-				processMainThreadTask(task);
-			} else if ((task = taskQueue.pollLast()) != null) {
-				// then work on tasks from the queue.
-				processTask(task);
-			} else {
-				// then wait for the other threads to finish.
-				boolean done = waitGroup.await(10_000);
-				// If we timed-out tasks may have been added to the queue, so check again.
-				if (done && mainThreadQueue.isEmpty()) {
-					// if they didn't, we're done.
-					break;
-				}
+			if (syncOneTask()) {
+				// Done! Nothing left to do.
+				break;
 			}
 		}
 	}
 
-	public void discardAndAwait() {
+	@Override
+	public boolean syncTo(Flag flag) {
 		while (true) {
-			// Discard everyone else's work...
-			while (taskQueue.pollLast() != null) {
-				waitGroup.done();
+			if (isRaised(flag)) {
+				// The flag is already raised!
+				// Early return with true to indicate.
+				return true;
 			}
 
-			// ...wait for any stragglers...
-			if (waitGroup.await(100_000)) {
-				break;
+			if (syncOneTask()) {
+				// Out of tasks entirely.
+				// The flag may have been raised though so return the result of isRaised.
+				return isRaised(flag);
 			}
 		}
-		// ...and clear the main thread queue.
-		mainThreadQueue.clear();
+	}
+
+	/**
+	 * Attempt to process a single task.
+	 *
+	 * @return {@code true} if the executor has nothing left to do.
+	 */
+	private boolean syncOneTask() {
+		Runnable task;
+		if ((task = mainThreadQueue.poll()) != null) {
+			// Prioritize main thread tasks.
+			processMainThreadTask(task);
+		} else if ((task = taskQueue.pollLast()) != null) {
+			// then work on tasks from the queue.
+			processTask(task);
+		} else {
+			// then wait for the other threads to finish.
+			boolean done = waitGroup.await(10_000);
+			// If we timed-out tasks may have been added to the queue, so check again.
+			// if they didn't, we're done.
+			return done && mainThreadQueue.isEmpty();
+		}
+		return false;
+	}
+
+	@Override
+	public void raise(Flag flag) {
+		flags.add(flag);
+	}
+
+	@Override
+	public void lower(Flag flag) {
+		flags.remove(flag);
+	}
+
+	@Override
+	public boolean isRaised(Flag flag) {
+		return flags.contains(flag);
 	}
 
 	private void processTask(Runnable task) {
