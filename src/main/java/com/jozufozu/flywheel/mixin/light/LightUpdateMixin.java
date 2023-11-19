@@ -1,6 +1,8 @@
 package com.jozufozu.flywheel.mixin.light;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -15,6 +17,9 @@ import net.minecraft.world.level.chunk.ChunkSource;
 
 @Mixin(ClientChunkCache.class)
 public abstract class LightUpdateMixin extends ChunkSource {
+	@Shadow
+	@Final
+	ClientLevel level;
 
 	/**
 	 * JUSTIFICATION: This method is called after a lighting tick once per subchunk where a
@@ -22,12 +27,9 @@ public abstract class LightUpdateMixin extends ChunkSource {
 	 * the rendering system that it needs to redraw a chunk. It does all that work asynchronously,
 	 * and we should too.
 	 */
-	@Inject(at = @At("HEAD"), method = "onLightUpdate")
-	private void onLightUpdate(LightLayer type, SectionPos pos, CallbackInfo ci) {
-		ClientChunkCache thi = ((ClientChunkCache) (Object) this);
-		ClientLevel world = (ClientLevel) thi.getLevel();
-
-		LightUpdater.get(world)
-				.onLightUpdate(type, pos.asLong());
+	@Inject(method = "onLightUpdate(Lnet/minecraft/world/level/LightLayer;Lnet/minecraft/core/SectionPos;)V", at = @At("HEAD"))
+	private void flywheel$onLightUpdate(LightLayer layer, SectionPos pos, CallbackInfo ci) {
+		LightUpdater.get(level)
+				.onLightUpdate(layer, pos.asLong());
 	}
 }
