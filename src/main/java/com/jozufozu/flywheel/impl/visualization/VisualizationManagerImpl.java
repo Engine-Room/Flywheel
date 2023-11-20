@@ -7,7 +7,6 @@ import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.task.Flag;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
@@ -22,6 +21,7 @@ import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityVisualManager
 import com.jozufozu.flywheel.impl.visualization.manager.EffectVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EntityVisualManager;
 import com.jozufozu.flywheel.lib.math.MatrixUtil;
+import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.NamedFlag;
 import com.jozufozu.flywheel.lib.task.NestedPlan;
 import com.jozufozu.flywheel.lib.task.RaisePlan;
@@ -151,11 +151,11 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	 */
 	public void tick(double cameraX, double cameraY, double cameraZ) {
 		// Make sure we're done with any prior frame or tick to avoid racing.
-		taskExecutor.syncTo(frameFlag);
-		taskExecutor.lower(frameFlag);
+		taskExecutor.syncUntil(frameFlag::isRaised);
+		frameFlag.lower();
 
-		taskExecutor.syncTo(tickFlag);
-		taskExecutor.lower(tickFlag);
+		taskExecutor.syncUntil(tickFlag::isRaised);
+		tickFlag.lower();
 
 		tickPlan.execute(taskExecutor, new TickContext(cameraX, cameraY, cameraZ));
 	}
@@ -171,7 +171,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	public void beginFrame(RenderContext context) {
 		// Make sure we're done with the last tick.
 		// Note we don't lower here because many frames may happen per tick.
-		taskExecutor.syncTo(tickFlag);
+		taskExecutor.syncUntil(tickFlag::isRaised);
 
 		framePlan.execute(taskExecutor, context);
 	}

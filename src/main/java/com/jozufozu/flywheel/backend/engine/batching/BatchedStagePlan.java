@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.task.Flag;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.SimplyComposedPlan;
 import com.jozufozu.flywheel.lib.task.StageFlag;
 import com.jozufozu.flywheel.lib.task.Synchronizer;
@@ -37,14 +37,14 @@ public class BatchedStagePlan implements SimplyComposedPlan<BatchContext> {
 	@Override
 	public void execute(TaskExecutor taskExecutor, BatchContext context, Runnable onCompletion) {
 		if (isEmpty()) {
-			taskExecutor.raise(flag);
+			flag.raise();
 			onCompletion.run();
 			return;
 		}
 
 		taskExecutor.execute(() -> {
 			var sync = new Synchronizer(bufferPlans.size(), () -> {
-				taskExecutor.raise(flag);
+				flag.raise();
 				onCompletion.run();
 			});
 

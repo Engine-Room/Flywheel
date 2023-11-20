@@ -156,18 +156,18 @@ class PlanExecutionTest {
 		var first = new NamedFlag("ready right away");
 		var second = new NamedFlag("ready after we sync");
 
-		var sync = new Synchronizer(2, () -> EXECUTOR.raise(second));
+		var sync = new Synchronizer(2, second::raise);
 
 		RaisePlan.raise(first)
 				.execute(EXECUTOR, Unit.INSTANCE, sync);
 
-		Assertions.assertTrue(EXECUTOR.syncTo(first), "First flag should be raised since we submitted a plan that raises it");
+		Assertions.assertTrue(EXECUTOR.syncUntil(first::isRaised), "First flag should be raised since we submitted a plan that raises it");
 
-		Assertions.assertFalse(EXECUTOR.syncTo(second), "Second flag should not be raised yet.");
+		Assertions.assertFalse(EXECUTOR.syncUntil(second::isRaised), "Second flag should not be raised yet.");
 
 		sync.decrementAndEventuallyRun();
 
-		Assertions.assertTrue(EXECUTOR.syncTo(second), "Second flag should be raised since it was raised in sync.");
+		Assertions.assertTrue(EXECUTOR.syncUntil(second::isRaised), "Second flag should be raised since it was raised in sync.");
 	}
 
 	@Test
@@ -186,58 +186,26 @@ class PlanExecutionTest {
 				.then(RaisePlan.raise(second))
 				.execute(EXECUTOR, Unit.INSTANCE);
 
-		Assertions.assertTrue(EXECUTOR.syncTo(first), "First flag should be raised since we submitted a plan that raises it.");
+		Assertions.assertTrue(EXECUTOR.syncUntil(first::isRaised), "First flag should be raised since we submitted a plan that raises it.");
 
-		Assertions.assertFalse(EXECUTOR.isRaised(second), "Second flag should not be raised immediately.");
+		Assertions.assertFalse(second.isRaised(), "Second flag should not be raised immediately.");
 
-		Assertions.assertTrue(EXECUTOR.syncTo(second), "Second flag should be raised since we were waiting for it.");
+		Assertions.assertTrue(EXECUTOR.syncUntil(second::isRaised), "Second flag should be raised since we were waiting for it.");
 	}
 
 	@Test
-	void syncToReturnsExpected() {
+	void syncUntilReturnsFlagValue() {
 		var flag = new NamedFlag("ready right away");
 
-		Assertions.assertFalse(EXECUTOR.syncTo(flag), "Flag should not be raised yet.");
+		Assertions.assertFalse(EXECUTOR.syncUntil(flag::isRaised), "Flag should not be raised yet.");
 
-		EXECUTOR.raise(flag);
+		flag.raise();
 
-		Assertions.assertTrue(EXECUTOR.syncTo(flag), "Flag should be raised since we raised it manually.");
+		Assertions.assertTrue(EXECUTOR.syncUntil(flag::isRaised), "Flag should be raised since we raised it manually.");
 
-		EXECUTOR.lower(flag);
+		flag.lower();
 
-		Assertions.assertFalse(EXECUTOR.syncTo(flag), "Flag should not be raised since we lowered it.");
-	}
-
-	@Test
-	void flagsAreReferenceEqual() {
-		var flagA = new NamedFlag("same");
-		var flagB = new NamedFlag("same");
-
-		Assertions.assertNotSame(flagA, flagB, "Flags should not be the same object.");
-		Assertions.assertEquals(flagA, flagB, "Flags should be equal.");
-
-		Assertions.assertFalse(EXECUTOR.isRaised(flagA), "Flag A should not be raised yet.");
-		Assertions.assertFalse(EXECUTOR.isRaised(flagB), "Flag B should not be raised yet.");
-
-		EXECUTOR.raise(flagA);
-
-		Assertions.assertTrue(EXECUTOR.isRaised(flagA), "Flag A should be raised since we raised it manually.");
-		Assertions.assertFalse(EXECUTOR.isRaised(flagB), "Flag B should not be raised yet.");
-
-		EXECUTOR.raise(flagB);
-
-		Assertions.assertTrue(EXECUTOR.isRaised(flagA), "Flag A should be raised since we raised it manually.");
-		Assertions.assertTrue(EXECUTOR.isRaised(flagB), "Flag B should be raised since we raised it manually.");
-
-		EXECUTOR.lower(flagA);
-
-		Assertions.assertFalse(EXECUTOR.isRaised(flagA), "Flag A should not be raised since we lowered it.");
-		Assertions.assertTrue(EXECUTOR.isRaised(flagB), "Flag B should be raised since we raised it manually.");
-
-		EXECUTOR.lower(flagB);
-
-		Assertions.assertFalse(EXECUTOR.isRaised(flagA), "Flag A should not be raised since we lowered it.");
-		Assertions.assertFalse(EXECUTOR.isRaised(flagB), "Flag B should not be raised since we lowered it.");
+		Assertions.assertFalse(EXECUTOR.syncUntil(flag::isRaised), "Flag should not be raised since we lowered it.");
 	}
 
 	private static void assertExpectedSequence(IntArrayList sequence, int... expected) {

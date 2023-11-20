@@ -1,11 +1,21 @@
 package com.jozufozu.flywheel.lib.task;
 
-import com.jozufozu.flywheel.api.task.Flag;
-
 /**
  * A flag with an arbitrary name.
- *
- * @param name The name of the flag, mainly for debugging purposes.
  */
-public record NamedFlag(String name) implements Flag {
+public final class NamedFlag extends Flag {
+	private final String name;
+
+	/**
+	 * @param name The name of the flag, mainly for debugging purposes.
+	 */
+	public NamedFlag(String name) {
+		this.name = name;
+	}
+
+	@Override
+	public String toString() {
+		return "NamedFlag[" + "name=" + name + ']';
+	}
+
 }

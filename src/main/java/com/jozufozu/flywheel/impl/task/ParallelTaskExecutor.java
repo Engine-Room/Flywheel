@@ -1,25 +1,22 @@
 package com.jozufozu.flywheel.impl.task;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BooleanSupplier;
 
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.task.Flag;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.util.Mth;
 
 // https://github.com/CaffeineMC/sodium-fabric/blob/5d364ed5ba63f9067fcf72a078ca310bff4db3e9/src/main/java/me/jellysquid/mods/sodium/client/render/chunk/compile/ChunkBuilder.java
@@ -38,9 +35,6 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	private final List<WorkerThread> threads = new ArrayList<>();
 	private final Deque<Runnable> taskQueue = new ConcurrentLinkedDeque<>();
 	private final Queue<Runnable> mainThreadQueue = new ConcurrentLinkedQueue<>();
-
-	private final Set<Flag> flags = Collections.synchronizedSet(new ReferenceOpenHashSet<>());
-
 	private final ThreadGroupNotifier taskNotifier = new ThreadGroupNotifier();
 	private final WaitGroup waitGroup = new WaitGroup();
 
@@ -148,18 +142,36 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	}
 
 	@Override
-	public boolean syncTo(Flag flag) {
+	public boolean syncUntil(BooleanSupplier cond) {
 		while (true) {
-			if (isRaised(flag)) {
-				// The flag is already raised!
+			if (cond.getAsBoolean()) {
+				// The condition is already true!
 				// Early return with true to indicate.
 				return true;
 			}
 
 			if (syncOneTask()) {
 				// Out of tasks entirely.
-				// The flag may have been raised though so return the result of isRaised.
-				return isRaised(flag);
+				// The condition may have flipped though so return its result.
+				return cond.getAsBoolean();
+			}
+		}
+	}
+
+
+	@Override
+	public boolean syncWhile(BooleanSupplier cond) {
+		while (true) {
+			if (!cond.getAsBoolean()) {
+				// The condition is already false!
+				// Early return with true to indicate.
+				return true;
+			}
+
+			if (syncOneTask()) {
+				// Out of tasks entirely.
+				// The condition may have flipped though so return its result.
+				return !cond.getAsBoolean();
 			}
 		}
 	}
@@ -185,21 +197,6 @@ public class ParallelTaskExecutor implements TaskExecutor {
 			return done && mainThreadQueue.isEmpty();
 		}
 		return false;
-	}
-
-	@Override
-	public void raise(Flag flag) {
-		flags.add(flag);
-	}
-
-	@Override
-	public void lower(Flag flag) {
-		flags.remove(flag);
-	}
-
-	@Override
-	public boolean isRaised(Flag flag) {
-		return flags.contains(flag);
 	}
 
 	private void processTask(Runnable task) {
