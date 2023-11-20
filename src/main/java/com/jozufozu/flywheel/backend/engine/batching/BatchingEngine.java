@@ -13,11 +13,11 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.api.task.Flag;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
+import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.NamedFlag;
 import com.jozufozu.flywheel.lib.task.SimplyComposedPlan;
 import com.jozufozu.flywheel.lib.task.Synchronizer;
@@ -57,7 +57,7 @@ public class BatchingEngine extends AbstractEngine implements SimplyComposedPlan
 		flush();
 
 		// Now it's safe to read stage plans in #renderStage.
-		taskExecutor.raise(flushFlag);
+		flushFlag.raise();
 
 		BatchContext ctx = BatchContext.create(context, renderOrigin);
 
@@ -76,9 +76,9 @@ public class BatchingEngine extends AbstractEngine implements SimplyComposedPlan
 
 	@Override
 	public void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage) {
-		executor.syncTo(flushFlag);
+		executor.syncUntil(flushFlag::isRaised);
 		if (stage.isLast()) {
-			executor.lower(flushFlag);
+			flushFlag.lower();
 		}
 
 		var stagePlan = stagePlans.get(stage);
@@ -88,8 +88,8 @@ public class BatchingEngine extends AbstractEngine implements SimplyComposedPlan
 			return;
 		}
 
-		executor.syncTo(stagePlan.flag);
-		executor.lower(stagePlan.flag);
+		executor.syncUntil(stagePlan.flag::isRaised);
+		stagePlan.flag.lower();
 		drawTracker.draw(stage);
 	}
 

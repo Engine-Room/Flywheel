@@ -1,16 +1,11 @@
 package com.jozufozu.flywheel.impl.task;
 
-import java.util.Set;
+import java.util.function.BooleanSupplier;
 
-import com.jozufozu.flywheel.api.task.Flag;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
-
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 
 public class SerialTaskExecutor implements TaskExecutor {
 	public static final SerialTaskExecutor INSTANCE = new SerialTaskExecutor();
-
-	private final Set<Flag> flags = new ReferenceOpenHashSet<>();
 
 	private SerialTaskExecutor() {
 	}
@@ -30,23 +25,13 @@ public class SerialTaskExecutor implements TaskExecutor {
 	}
 
 	@Override
-	public boolean syncTo(Flag flag) {
-		return isRaised(flag);
+	public boolean syncUntil(BooleanSupplier cond) {
+		return cond.getAsBoolean();
 	}
 
 	@Override
-	public void raise(Flag flag) {
-		flags.add(flag);
-	}
-
-	@Override
-	public void lower(Flag flag) {
-		flags.remove(flag);
-	}
-
-	@Override
-	public boolean isRaised(Flag flag) {
-		return flags.contains(flag);
+	public boolean syncWhile(BooleanSupplier cond) {
+		return !cond.getAsBoolean();
 	}
 
 	@Override
