@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.lib.model;
 
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
@@ -11,17 +12,18 @@ import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 public class SimpleMesh implements QuadMesh {
 	private final VertexType vertexType;
 	private final int vertexCount;
-	private final MemoryBlock contents;
+	private final MemoryBlock data;
 	private final ReusableVertexList vertexList;
 	private final Vector4f boundingSphere;
-	private final String name;
+	@Nullable
+	private final String descriptor;
 
-	public SimpleMesh(VertexType vertexType, MemoryBlock contents, String name) {
+	public SimpleMesh(VertexType vertexType, MemoryBlock data, @Nullable String descriptor) {
 		this.vertexType = vertexType;
-		this.contents = contents;
-		this.name = name;
+		this.data = data;
+		this.descriptor = descriptor;
 
-		int bytes = (int) contents.size();
+		int bytes = (int) data.size();
 		int stride = vertexType.getLayout().getStride();
 		if (bytes % stride != 0) {
 			throw new IllegalArgumentException("MemoryBlock contains non-whole amount of vertices!");
@@ -29,10 +31,14 @@ public class SimpleMesh implements QuadMesh {
 		vertexCount = bytes / stride;
 
 		vertexList = vertexType().createVertexList();
-		vertexList.ptr(contents.ptr());
+		vertexList.ptr(data.ptr());
 		vertexList.vertexCount(vertexCount);
 
 		boundingSphere = ModelUtil.computeBoundingSphere(vertexList);
+	}
+
+	public SimpleMesh(VertexType vertexType, MemoryBlock data) {
+		this(vertexType, data, null);
 	}
 
 	@Override
@@ -47,7 +53,7 @@ public class SimpleMesh implements QuadMesh {
 
 	@Override
 	public void write(long ptr) {
-		contents.copyTo(ptr);
+		data.copyTo(ptr);
 	}
 
 	@Override
@@ -62,16 +68,11 @@ public class SimpleMesh implements QuadMesh {
 
 	@Override
 	public void delete() {
-		contents.free();
-	}
-
-	@Override
-	public String name() {
-		return name;
+		data.free();
 	}
 
 	@Override
 	public String toString() {
-		return "SimpleMesh{" + "name='" + name + "',vertexType='" + vertexType + "}";
+		return "SimpleMesh{" + "vertexType=" + vertexType + ",vertexCount=" + vertexCount + ",descriptor={" + descriptor + "}" + "}";
 	}
 }

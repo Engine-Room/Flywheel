@@ -84,26 +84,4 @@ public class OrientedInstance extends ColoredLitInstance {
 		setChanged();
 		return this;
 	}
-
-	@Override
-	public OrientedInstance copy(InstanceHandle handle) {
-		var out = InstanceTypes.ORIENTED.create(handle);
-		out.posX = this.posX;
-		out.posY = this.posY;
-		out.posZ = this.posZ;
-		out.pivotX = this.pivotX;
-		out.pivotY = this.pivotY;
-		out.pivotZ = this.pivotZ;
-		out.qX = this.qX;
-		out.qY = this.qY;
-		out.qZ = this.qZ;
-		out.qW = this.qW;
-		out.r = this.r;
-		out.g = this.g;
-		out.b = this.b;
-		out.a = this.a;
-		out.blockLight = this.blockLight;
-		out.skyLight = this.skyLight;
-		return out;
-	}
 }

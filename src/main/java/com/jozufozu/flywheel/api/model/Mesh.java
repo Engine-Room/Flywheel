@@ -63,9 +63,4 @@ public interface Mesh {
 	 * Free this mesh's resources, memory, etc.
 	 */
 	void delete();
-
-	/**
-	 * A name uniquely identifying this mesh.
-	 */
-	String name();
 }

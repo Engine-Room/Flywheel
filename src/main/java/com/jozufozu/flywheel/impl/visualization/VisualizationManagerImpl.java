@@ -18,7 +18,6 @@ import com.jozufozu.flywheel.api.visualization.VisualizationLevel;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.extension.ClientLevelExtension;
 import com.jozufozu.flywheel.impl.task.FlwTaskExecutor;
-import com.jozufozu.flywheel.impl.task.ParallelTaskExecutor;
 import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EffectVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EntityVisualManager;
@@ -43,7 +42,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	private static final LevelAttached<VisualizationManagerImpl> MANAGERS = new LevelAttached<>(VisualizationManagerImpl::new, VisualizationManagerImpl::delete);
 
 	private final Engine engine;
-	private final ParallelTaskExecutor taskExecutor;
+	private final TaskExecutor taskExecutor;
 
 	private final BlockEntityVisualManager blockEntities;
 	private final EntityVisualManager entities;
@@ -58,7 +57,6 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	private VisualizationManagerImpl(LevelAccessor level) {
 		engine = BackendManager.getBackend()
 				.createEngine(level);
-		// FIXME: All VisualizationManagerImpls use the same executor so calls like syncPoint and discardAndAwait could adversely impact other active VisualizationManagerImpls
 		taskExecutor = FlwTaskExecutor.get();
 
 		blockEntities = new BlockEntityVisualManager(engine);

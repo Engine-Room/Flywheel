@@ -1,12 +1,12 @@
 package com.jozufozu.flywheel.vanilla;
 
 import java.util.Calendar;
+import java.util.EnumMap;
 import java.util.List;
-import java.util.function.BiFunction;
+import java.util.Map;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
@@ -14,16 +14,19 @@ import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.OrientedInstance;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
-import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
-import com.jozufozu.flywheel.lib.model.part.ModelPartBuilder;
+import com.jozufozu.flywheel.lib.model.ModelCache;
+import com.jozufozu.flywheel.lib.model.SimpleModel;
+import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
+import com.jozufozu.flywheel.lib.util.Pair;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
-import net.minecraft.Util;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.world.level.block.AbstractChestBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ChestBlock;
@@ -34,16 +37,31 @@ import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends AbstractBlockEntityVisual<T> implements DynamicVisual {
-	private static final BiFunction<ChestType, TextureAtlasSprite, SimpleLazyModel> BODY_MODEL_FUNC = Util.memoize((type, mat) -> new SimpleLazyModel(() -> createBodyMesh(type, mat), Materials.CHEST));
-	private static final BiFunction<ChestType, TextureAtlasSprite, SimpleLazyModel> LID_MODEL_FUNC = Util.memoize((type, mat) -> new SimpleLazyModel(() -> createLidMesh(type, mat), Materials.CHEST));
+	private static final Map<ChestType, ModelLayerLocation> LAYER_LOCATIONS = new EnumMap<>(ChestType.class);
+	static {
+		LAYER_LOCATIONS.put(ChestType.SINGLE, ModelLayers.CHEST);
+		LAYER_LOCATIONS.put(ChestType.LEFT, ModelLayers.DOUBLE_CHEST_LEFT);
+		LAYER_LOCATIONS.put(ChestType.RIGHT, ModelLayers.DOUBLE_CHEST_RIGHT);
+	}
 
-	private OrientedInstance body;
+	private static final ModelCache<Pair<ChestType, Material>> BOTTOM_MODELS = new ModelCache<>(key -> {
+		return new SimpleModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "bottom"), Materials.CHEST);
+	});
+	private static final ModelCache<Pair<ChestType, Material>> LID_MODELS = new ModelCache<>(key -> {
+		return new SimpleModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "lid"), Materials.CHEST);
+	});
+	private static final ModelCache<Pair<ChestType, Material>> LOCK_MODELS = new ModelCache<>(key -> {
+		return new SimpleModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "lock"), Materials.CHEST);
+	});
+
+	private OrientedInstance bottom;
 	private TransformedInstance lid;
+	private TransformedInstance lock;
 
-	private Float2FloatFunction lidProgress;
-	private TextureAtlasSprite sprite;
 	private ChestType chestType;
+	private Material texture;
 	private Quaternion baseRotation;
+	private Float2FloatFunction lidProgress;
 
 	private float lastProgress = Float.NaN;
 
@@ -53,31 +71,47 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 
 	@Override
 	public void init(float partialTick) {
-		Block block = blockState.getBlock();
-
 		chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
-		sprite = Sheets.chooseMaterial(blockEntity, chestType, isChristmas())
-				.sprite();
+		texture = Sheets.chooseMaterial(blockEntity, chestType, isChristmas());
 
-		body = createBodyInstance().setPosition(getVisualPosition());
+		bottom = createBottomInstance().setPosition(getVisualPosition());
 		lid = createLidInstance();
+		lock = createLockInstance();
 
+		Block block = blockState.getBlock();
 		if (block instanceof AbstractChestBlock<?> chestBlock) {
 			float horizontalAngle = blockState.getValue(ChestBlock.FACING).toYRot();
-
 			baseRotation = Vector3f.YP.rotationDegrees(-horizontalAngle);
-
-			body.setRotation(baseRotation);
+			bottom.setRotation(baseRotation);
 
 			DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> wrapper = chestBlock.combine(blockState, level, pos, true);
-
-			this.lidProgress = wrapper.apply(ChestBlock.opennessCombiner(blockEntity));
+			lidProgress = wrapper.apply(ChestBlock.opennessCombiner(blockEntity));
 		} else {
 			baseRotation = Quaternion.ONE;
 			lidProgress = $ -> 0f;
 		}
 
 		super.init(partialTick);
+	}
+
+	private OrientedInstance createBottomInstance() {
+		return instancerProvider.instancer(InstanceTypes.ORIENTED, BOTTOM_MODELS.get(Pair.of(chestType, texture)), RenderStage.AFTER_BLOCK_ENTITIES)
+				.createInstance();
+	}
+
+	private TransformedInstance createLidInstance() {
+		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, LID_MODELS.get(Pair.of(chestType, texture)), RenderStage.AFTER_BLOCK_ENTITIES)
+				.createInstance();
+	}
+
+	private TransformedInstance createLockInstance() {
+		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, LOCK_MODELS.get(Pair.of(chestType, texture)), RenderStage.AFTER_BLOCK_ENTITIES)
+				.createInstance();
+	}
+
+	private static boolean isChristmas() {
+		Calendar calendar = Calendar.getInstance();
+		return calendar.get(Calendar.MONTH) + 1 == 12 && calendar.get(Calendar.DATE) >= 24 && calendar.get(Calendar.DATE) <= 26;
 	}
 
 	@Override
@@ -87,11 +121,9 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		}
 
 		float progress = lidProgress.get(context.partialTick());
-
 		if (lastProgress == progress) {
 			return;
 		}
-
 		lastProgress = progress;
 
 		progress = 1.0F - progress;
@@ -101,113 +133,37 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 
 		lid.loadIdentity()
 				.translate(getVisualPosition())
-				.translate(0, 9f / 16f, 0)
 				.centre()
 				.multiply(baseRotation)
 				.unCentre()
-				.translate(0, 0, 1f / 16f)
-				.multiply(Vector3f.XP.rotation(angleX))
-				.translate(0, 0, -1f / 16f);
+				.translate(0, 9f / 16f, 1f / 16f)
+				.rotateXRadians(angleX)
+				.translate(0, -9f / 16f, -1f / 16f);
+
+		lock.loadIdentity()
+				.translate(getVisualPosition())
+				.centre()
+				.multiply(baseRotation)
+				.unCentre()
+				.translate(0, 8f / 16f, 0)
+				.rotateXRadians(angleX)
+				.translate(0, -8f / 16f, 0);
 	}
 
 	@Override
 	public void updateLight() {
-		relight(pos, body, lid);
+		relight(pos, bottom, lid, lock);
 	}
 
 	@Override
 	public List<Instance> getCrumblingInstances() {
-		return List.of(body, lid);
+		return List.of(bottom, lid, lock);
 	}
 
 	@Override
 	protected void _delete() {
-		body.delete();
+		bottom.delete();
 		lid.delete();
-	}
-
-	private OrientedInstance createBodyInstance() {
-		return instancerProvider.instancer(InstanceTypes.ORIENTED, BODY_MODEL_FUNC.apply(chestType, sprite), RenderStage.AFTER_BLOCK_ENTITIES)
-				.createInstance();
-	}
-
-	private TransformedInstance createLidInstance() {
-		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, LID_MODEL_FUNC.apply(chestType, sprite), RenderStage.AFTER_BLOCK_ENTITIES)
-				.createInstance();
-	}
-
-	private static Mesh createBodyMesh(ChestType type, TextureAtlasSprite sprite) {
-		return switch (type) {
-			case LEFT -> new ModelPartBuilder("chest_base_left", 64, 64)
-					.sprite(sprite)
-					.cuboid()
-					.textureOffset(0, 19)
-					.start(0, 0, 1)
-					.size(15, 10, 14)
-					.endCuboid()
-					.build();
-			case RIGHT -> new ModelPartBuilder("chest_base_right", 64, 64)
-					.sprite(sprite)
-					.cuboid()
-					.textureOffset(0, 19)
-					.start(1, 0, 1)
-					.size(15, 10, 14)
-					.endCuboid()
-					.build();
-			default -> new ModelPartBuilder("chest_base", 64, 64)
-					.sprite(sprite)
-					.cuboid()
-					.textureOffset(0, 19)
-					.start(1, 0, 1)
-					.end(15, 10, 15)
-					.endCuboid()
-					.build();
-		};
-	}
-
-	private static Mesh createLidMesh(ChestType type, TextureAtlasSprite sprite) {
-		return switch (type) {
-			case LEFT -> new ModelPartBuilder("chest_lid_left", 64, 64)
-					.sprite(sprite)
-					.cuboid()
-					.textureOffset(0, 0)
-					.start(0, 0, 1)
-					.size(15, 5, 14)
-					.endCuboid()
-					.cuboid()
-					.start(0, -2, 15)
-					.size(1, 4, 1)
-					.endCuboid()
-					.build();
-			case RIGHT -> new ModelPartBuilder("chest_lid_right", 64, 64)
-					.sprite(sprite)
-					.cuboid()
-					.textureOffset(0, 0)
-					.start(1, 0, 1)
-					.size(15, 5, 14)
-					.endCuboid()
-					.cuboid()
-					.start(15, -2, 15)
-					.size(1, 4, 1)
-					.endCuboid()
-					.build();
-			default -> new ModelPartBuilder("chest_lid", 64, 64)
-					.sprite(sprite)
-					.cuboid()
-					.textureOffset(0, 0)
-					.start(1, 0, 1)
-					.size(14, 5, 14)
-					.endCuboid()
-					.cuboid()
-					.start(7, -2, 15)
-					.size(2, 4, 1)
-					.endCuboid()
-					.build();
-		};
-	}
-
-	public static boolean isChristmas() {
-		Calendar calendar = Calendar.getInstance();
-		return calendar.get(Calendar.MONTH) + 1 == 12 && calendar.get(Calendar.DATE) >= 24 && calendar.get(Calendar.DATE) <= 26;
+		lock.delete();
 	}
 }

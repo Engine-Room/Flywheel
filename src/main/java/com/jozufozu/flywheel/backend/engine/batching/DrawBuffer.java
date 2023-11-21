@@ -29,7 +29,7 @@ public class DrawBuffer {
 	private final int stride;
 	private final VertexListProvider provider;
 
-	private MemoryBlock memory;
+	private MemoryBlock data;
 	private ByteBuffer buffer;
 
 	private boolean prepared;
@@ -64,12 +64,12 @@ public class DrawBuffer {
 		// is called and reallocates the buffer if there is not space for one more vertex.
 		int byteSize = stride * (vertexCount + 1);
 
-		if (memory == null) {
-			memory = MemoryBlock.malloc(byteSize);
-			buffer = memory.asBuffer();
-		} else if (byteSize > memory.size()) {
-			memory = memory.realloc(byteSize);
-			buffer = memory.asBuffer();
+		if (data == null) {
+			data = MemoryBlock.malloc(byteSize);
+			buffer = data.asBuffer();
+		} else if (byteSize > data.size()) {
+			data = data.realloc(byteSize);
+			buffer = data.asBuffer();
 		}
 
 		prepared = true;
@@ -91,7 +91,7 @@ public class DrawBuffer {
 	}
 
 	public long ptrForVertex(long startVertex) {
-		return memory.ptr() + startVertex * stride;
+		return data.ptr() + startVertex * stride;
 	}
 
 	public void verticesToDraw(int verticesToDraw) {
@@ -157,12 +157,12 @@ public class DrawBuffer {
 	public void free() {
 		reset();
 
-		if (memory == null) {
+		if (data == null) {
 			return;
 		}
 
-		memory.free();
-		memory = null;
+		data.free();
+		data = null;
 		buffer = null;
 	}
 

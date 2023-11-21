@@ -29,14 +29,17 @@ import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 
-public final class ModelBufferingUtil {
+public final class BakedModelBufferer {
 	private static final RenderType[] CHUNK_LAYERS = RenderType.chunkBufferLayers().toArray(RenderType[]::new);
 	private static final int CHUNK_LAYER_AMOUNT = CHUNK_LAYERS.length;
 
-	private static final ThreadLocal<ModelBufferingObjects> THREAD_LOCAL_OBJECTS = ThreadLocal.withInitial(ModelBufferingObjects::new);
+	private static final ThreadLocal<ThreadLocalObjects> THREAD_LOCAL_OBJECTS = ThreadLocal.withInitial(ThreadLocalObjects::new);
+
+	private BakedModelBufferer() {
+	}
 
 	public static void bufferSingle(ModelBlockRenderer blockRenderer, BlockAndTintGetter renderWorld, BakedModel model, BlockState state, @Nullable PoseStack poseStack, IModelData modelData, ResultConsumer resultConsumer) {
-		ModelBufferingObjects objects = THREAD_LOCAL_OBJECTS.get();
+		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
@@ -68,7 +71,7 @@ public final class ModelBufferingUtil {
 	}
 
 	public static void bufferSingleShadeSeparated(ModelBlockRenderer blockRenderer, BlockAndTintGetter renderWorld, BakedModel model, BlockState state, @Nullable PoseStack poseStack, IModelData modelData, ShadeSeparatedResultConsumer resultConsumer) {
-		ModelBufferingObjects objects = THREAD_LOCAL_OBJECTS.get();
+		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
@@ -126,7 +129,7 @@ public final class ModelBufferingUtil {
 	}
 
 	public static void bufferMultiBlock(Collection<StructureTemplate.StructureBlockInfo> blocks, BlockRenderDispatcher renderDispatcher, BlockAndTintGetter renderWorld, @Nullable PoseStack poseStack, Map<BlockPos, IModelData> modelDataMap, ResultConsumer resultConsumer) {
-		ModelBufferingObjects objects = THREAD_LOCAL_OBJECTS.get();
+		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
@@ -183,7 +186,7 @@ public final class ModelBufferingUtil {
 	}
 
 	public static void bufferMultiBlockShadeSeparated(Collection<StructureTemplate.StructureBlockInfo> blocks, BlockRenderDispatcher renderDispatcher, BlockAndTintGetter renderWorld, @Nullable PoseStack poseStack, Map<BlockPos, IModelData> modelDataMap, ShadeSeparatedResultConsumer resultConsumer) {
-		ModelBufferingObjects objects = THREAD_LOCAL_OBJECTS.get();
+		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
@@ -258,7 +261,7 @@ public final class ModelBufferingUtil {
 		void accept(RenderType renderType, boolean shaded, Pair<DrawState, ByteBuffer> data);
 	}
 
-	private static class ModelBufferingObjects {
+	private static class ThreadLocalObjects {
 		public final PoseStack identityPoseStack = new PoseStack();
 		public final Random random = new Random();
 

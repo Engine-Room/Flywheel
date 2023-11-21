@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.slf4j.Logger;
 
+import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.backend.Backends;
 import com.jozufozu.flywheel.backend.Loader;
@@ -24,7 +25,8 @@ import com.jozufozu.flywheel.lib.light.LightUpdater;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
-import com.jozufozu.flywheel.lib.model.Models;
+import com.jozufozu.flywheel.lib.model.ModelCache;
+import com.jozufozu.flywheel.lib.model.ModelHolder;
 import com.jozufozu.flywheel.lib.model.baked.PartialModel;
 import com.jozufozu.flywheel.lib.util.LevelAttached;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
@@ -97,7 +99,8 @@ public class Flywheel {
 		forgeEventBus.addListener(UniformBuffer::onReloadRenderers);
 
 		forgeEventBus.addListener(LightUpdater::onClientTick);
-		forgeEventBus.addListener(Models::onReloadRenderers);
+		forgeEventBus.addListener((ReloadRenderersEvent e) -> ModelCache.onReloadRenderers(e));
+		forgeEventBus.addListener(ModelHolder::onReloadRenderers);
 		forgeEventBus.addListener((WorldEvent.Unload e) -> LevelAttached.onUnloadLevel(e));
 
 		modEventBus.addListener(PartialModel::onModelRegistry);
