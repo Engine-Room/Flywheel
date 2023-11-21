@@ -1,12 +1,5 @@
 package com.jozufozu.flywheel.lib.model;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.jetbrains.annotations.ApiStatus;
-
-import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.lib.model.baked.BakedModelBuilder;
 import com.jozufozu.flywheel.lib.model.baked.BlockModelBuilder;
@@ -19,23 +12,23 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class Models {
-	private static final Map<BlockState, Model> BLOCK_STATE = new ConcurrentHashMap<>();
-	private static final Map<PartialModel, Model> PARTIAL = new ConcurrentHashMap<>();
-	private static final Map<Pair<PartialModel, Direction>, Model> PARTIAL_DIR = new ConcurrentHashMap<>();
+	private static final ModelCache<BlockState> BLOCK_STATE = new ModelCache<>(it -> new BlockModelBuilder(it).build());
+	private static final ModelCache<PartialModel> PARTIAL = new ModelCache<>(it -> new BakedModelBuilder(it.get()).build());
+	private static final ModelCache<Pair<PartialModel, Direction>> PARTIAL_DIR = new ModelCache<>(it -> new BakedModelBuilder(it.first().get()).poseStack(createRotation(it.second())).build());
 
 	private Models() {
 	}
 
 	public static Model block(BlockState state) {
-		return BLOCK_STATE.computeIfAbsent(state, it -> new BlockModelBuilder(it).build());
+		return BLOCK_STATE.get(state);
 	}
 
 	public static Model partial(PartialModel partial) {
-		return PARTIAL.computeIfAbsent(partial, it -> new BakedModelBuilder(it.get()).build());
+		return PARTIAL.get(partial);
 	}
 
 	public static Model partial(PartialModel partial, Direction dir) {
-		return PARTIAL_DIR.computeIfAbsent(Pair.of(partial, dir), it -> new BakedModelBuilder(it.first().get()).poseStack(createRotation(it.second())).build());
+		return PARTIAL_DIR.get(Pair.of(partial, dir));
 	}
 
 	private static PoseStack createRotation(Direction facing) {
@@ -45,20 +38,5 @@ public final class Models {
 				.rotateToFace(facing.getOpposite())
 				.unCentre();
 		return stack;
-	}
-
-	@ApiStatus.Internal
-	public static void onReloadRenderers(ReloadRenderersEvent event) {
-		deleteAll(BLOCK_STATE.values());
-		deleteAll(PARTIAL.values());
-		deleteAll(PARTIAL_DIR.values());
-
-		BLOCK_STATE.clear();
-		PARTIAL.clear();
-		PARTIAL_DIR.clear();
-	}
-
-	private static void deleteAll(Collection<Model> values) {
-		values.forEach(Model::delete);
 	}
 }

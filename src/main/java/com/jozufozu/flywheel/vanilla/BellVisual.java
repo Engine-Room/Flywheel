@@ -2,29 +2,30 @@ package com.jozufozu.flywheel.vanilla;
 
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.OrientedInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
-import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
-import com.jozufozu.flywheel.lib.model.part.ModelPartBuilder;
+import com.jozufozu.flywheel.lib.model.ModelHolder;
+import com.jozufozu.flywheel.lib.model.SimpleModel;
+import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.blockentity.BellRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BellBlockEntity;
 
 public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> implements DynamicVisual {
-	private static final SimpleLazyModel BELL_MODEL = new SimpleLazyModel(BellVisual::createBellMesh, Materials.BELL);
+	private static final ModelHolder BELL_MODEL = new ModelHolder(() -> {
+		return new SimpleModel(ModelPartConverter.convert(ModelLayers.BELL, BellRenderer.BELL_RESOURCE_LOCATION.sprite(), "bell_body"), Materials.BELL);
+	});
 
 	private OrientedInstance bell;
 
@@ -42,6 +43,11 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 		updateRotation(partialTick);
 
 		super.init(partialTick);
+	}
+
+	private OrientedInstance createBellInstance() {
+		return instancerProvider.instancer(InstanceTypes.ORIENTED, BELL_MODEL.get(), RenderStage.AFTER_BLOCK_ENTITIES)
+				.createInstance();
 	}
 
 	@Override
@@ -86,26 +92,5 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	@Override
 	protected void _delete() {
 		bell.delete();
-	}
-
-	private OrientedInstance createBellInstance() {
-		return instancerProvider.instancer(InstanceTypes.ORIENTED, BELL_MODEL, RenderStage.AFTER_BLOCK_ENTITIES)
-				.createInstance();
-	}
-
-	@NotNull
-	private static Mesh createBellMesh() {
-		return new ModelPartBuilder("bell", 32, 32)
-				.sprite(BellRenderer.BELL_RESOURCE_LOCATION.sprite())
-				.cuboid()
-				.start(5.0F, 6.0F, 5.0F)
-				.size(6.0F, 7.0F, 6.0F)
-				.endCuboid()
-				.cuboid()
-				.textureOffset(0, 13)
-				.start(4.0F, 4.0F, 4.0F)
-				.size(8.0F, 2.0F, 8.0F)
-				.endCuboid()
-				.build();
 	}
 }

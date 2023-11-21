@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.lib.memory;
 
 import java.lang.ref.Cleaner;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.lwjgl.system.MemoryUtil;
 
@@ -11,9 +12,8 @@ public final class FlwMemoryTracker {
 
 	static final Cleaner CLEANER = Cleaner.create();
 
-	// TODO: Should these be volatile?
-	private static long cpuMemory = 0;
-	private static long gpuMemory = 0;
+	private static final AtomicLong CPU_MEMORY = new AtomicLong(0);
+	private static final AtomicLong GPU_MEMORY = new AtomicLong(0);
 
 	private FlwMemoryTracker() {
 	}
@@ -47,26 +47,26 @@ public final class FlwMemoryTracker {
 	}
 
 	public static void _allocCPUMemory(long size) {
-		cpuMemory += size;
+		CPU_MEMORY.getAndAdd(size);
 	}
 
 	public static void _freeCPUMemory(long size) {
-		cpuMemory -= size;
+		CPU_MEMORY.getAndAdd(-size);
 	}
 
 	public static void _allocGPUMemory(long size) {
-		gpuMemory += size;
+		GPU_MEMORY.getAndAdd(size);
 	}
 
 	public static void _freeGPUMemory(long size) {
-		gpuMemory -= size;
+		GPU_MEMORY.getAndAdd(-size);
 	}
 
 	public static long getCPUMemory() {
-		return cpuMemory;
+		return CPU_MEMORY.get();
 	}
 
 	public static long getGPUMemory() {
-		return gpuMemory;
+		return GPU_MEMORY.get();
 	}
 }

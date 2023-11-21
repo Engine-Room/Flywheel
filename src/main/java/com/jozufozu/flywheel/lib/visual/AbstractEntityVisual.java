@@ -97,11 +97,11 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	 *
 	 * @return The position this visual should be rendered at to appear in the correct location.
 	 */
-	public Vector3f getVisualPosition(float partialTicks) {
+	public Vector3f getVisualPosition(float partialTick) {
 		Vec3 pos = entity.position();
-		return new Vector3f((float) (Mth.lerp(partialTicks, entity.xOld, pos.x) - renderOrigin.getX()),
-				(float) (Mth.lerp(partialTicks, entity.yOld, pos.y) - renderOrigin.getY()),
-				(float) (Mth.lerp(partialTicks, entity.zOld, pos.z) - renderOrigin.getZ()));
+		return new Vector3f((float) (Mth.lerp(partialTick, entity.xOld, pos.x) - renderOrigin.getX()),
+				(float) (Mth.lerp(partialTick, entity.yOld, pos.y) - renderOrigin.getY()),
+				(float) (Mth.lerp(partialTick, entity.zOld, pos.z) - renderOrigin.getZ()));
 	}
 
 	public boolean isVisible(FrustumIntersection frustum) {

@@ -1,41 +1,44 @@
 package com.jozufozu.flywheel.vanilla;
 
 import java.util.List;
-import java.util.function.Function;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
-import com.jozufozu.flywheel.lib.model.SimpleLazyModel;
-import com.jozufozu.flywheel.lib.model.part.ModelPartBuilder;
+import com.jozufozu.flywheel.lib.model.ModelCache;
+import com.jozufozu.flywheel.lib.model.SimpleModel;
+import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.transform.TransformStack;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
-import net.minecraft.Util;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
 public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockEntity> implements DynamicVisual {
-	private static final Function<TextureAtlasSprite, SimpleLazyModel> BODY_MODEL_FUNC = Util.memoize(it -> new SimpleLazyModel(() -> createBodyMesh(it), Materials.SHULKER));
-	private static final Function<TextureAtlasSprite, SimpleLazyModel> LID_MODEL_FUNC = Util.memoize(it -> new SimpleLazyModel(() -> createLidMesh(it), Materials.SHULKER));
+	private static final ModelCache<Material> BASE_MODELS = new ModelCache<>(texture -> {
+		return new SimpleModel(ModelPartConverter.convert(ModelLayers.SHULKER, texture.sprite(), "base"), Materials.SHULKER);
+	});
+	private static final ModelCache<Material> LID_MODELS = new ModelCache<>(texture -> {
+		return new SimpleModel(ModelPartConverter.convert(ModelLayers.SHULKER, texture.sprite(), "lid"), Materials.SHULKER);
+	});
 
-	private TextureAtlasSprite texture;
-
-	private TransformedInstance body;
+	private TransformedInstance base;
 	private TransformedInstance lid;
+
+	private Material texture;
 	private final PoseStack stack = new PoseStack();
 
 	private float lastProgress = Float.NaN;
@@ -48,29 +51,35 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	public void init(float partialTick) {
 		DyeColor color = blockEntity.getColor();
 		if (color == null) {
-			texture = Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION.sprite();
+			texture = Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION;
 		} else {
-			texture = Sheets.SHULKER_TEXTURE_LOCATION.get(color.getId())
-					.sprite();
+			texture = Sheets.SHULKER_TEXTURE_LOCATION.get(color.getId());
 		}
+
 		Quaternion rotation = getDirection().getRotation();
 
 		TransformStack tstack = TransformStack.cast(stack);
-
 		tstack.translate(getVisualPosition())
+				.translateAll(0.5)
 				.scale(0.9995f)
-				.translateAll(0.00025)
-				.centre()
 				.multiply(rotation)
-				.unCentre();
+				.scale(1, -1, -1)
+				.translateY(-1);
 
-		body = createBodyInstance().setTransform(stack);
-
-		tstack.translateY(0.25);
-
+		base = createBaseInstance().setTransform(stack);
 		lid = createLidInstance().setTransform(stack);
 
 		super.init(partialTick);
+	}
+
+	private TransformedInstance createBaseInstance() {
+		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, BASE_MODELS.get(texture), RenderStage.AFTER_BLOCK_ENTITIES)
+				.createInstance();
+	}
+
+	private TransformedInstance createLidInstance() {
+		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, LID_MODELS.get(texture), RenderStage.AFTER_BLOCK_ENTITIES)
+				.createInstance();
 	}
 
 	private Direction getDirection() {
@@ -93,14 +102,12 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 		}
 		lastProgress = progress;
 
-		Quaternion spin = Vector3f.YP.rotationDegrees(270.0F * progress);
+		Quaternion spin = Vector3f.YP.rotationDegrees(270.0f * progress);
 
 		TransformStack.cast(stack)
 				.pushPose()
-				.centre()
-				.multiply(spin)
-				.unCentre()
-				.translateY(progress * 0.5f);
+				.translateY(-progress * 0.5f)
+				.multiply(spin);
 
 		lid.setTransform(stack);
 
@@ -108,49 +115,18 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	}
 
 	@Override
+	public void updateLight() {
+		relight(pos, base, lid);
+	}
+
+	@Override
 	public List<Instance> getCrumblingInstances() {
-		return List.of(body, lid);
+		return List.of(base, lid);
 	}
 
 	@Override
 	protected void _delete() {
-		body.delete();
+		base.delete();
 		lid.delete();
-	}
-
-	@Override
-	public void updateLight() {
-		relight(pos, body, lid);
-	}
-
-	private TransformedInstance createBodyInstance() {
-		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, BODY_MODEL_FUNC.apply(texture), RenderStage.AFTER_BLOCK_ENTITIES)
-				.createInstance();
-	}
-
-	private TransformedInstance createLidInstance() {
-		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, LID_MODEL_FUNC.apply(texture), RenderStage.AFTER_BLOCK_ENTITIES)
-				.createInstance();
-	}
-
-	private static Mesh createBodyMesh(TextureAtlasSprite texture) {
-		return new ModelPartBuilder("shulker_base", 64, 64)
-				.sprite(texture)
-				.cuboid()
-				.textureOffset(0, 28)
-				.size(16, 8, 16)
-				.invertYZ()
-				.endCuboid()
-				.build();
-	}
-
-	private static Mesh createLidMesh(TextureAtlasSprite texture) {
-		return new ModelPartBuilder("shulker_lid", 64, 64)
-				.sprite(texture)
-				.cuboid()
-				.size(16, 12, 16)
-				.invertYZ()
-				.endCuboid()
-				.build();
 	}
 }

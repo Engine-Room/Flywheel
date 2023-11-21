@@ -113,18 +113,4 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 		normal.mul(normal);
 		return this;
 	}
-
-	@Override
-	public TransformedInstance copy(InstanceHandle handle) {
-		var out = InstanceTypes.TRANSFORMED.create(handle);
-		out.model.load(this.model);
-		out.normal.load(this.normal);
-		out.r = this.r;
-		out.g = this.g;
-		out.b = this.b;
-		out.a = this.a;
-		out.blockLight = this.blockLight;
-		out.skyLight = this.skyLight;
-		return out;
-	}
 }

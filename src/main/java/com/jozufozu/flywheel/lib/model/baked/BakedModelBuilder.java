@@ -8,8 +8,8 @@ import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.ModelUtil;
 import com.jozufozu.flywheel.lib.model.SimpleMesh;
-import com.jozufozu.flywheel.lib.model.baked.ModelBufferingUtil.ResultConsumer;
-import com.jozufozu.flywheel.lib.model.baked.ModelBufferingUtil.ShadeSeparatedResultConsumer;
+import com.jozufozu.flywheel.lib.model.baked.BakedModelBufferer.ResultConsumer;
+import com.jozufozu.flywheel.lib.model.baked.BakedModelBufferer.ShadeSeparatedResultConsumer;
 import com.jozufozu.flywheel.lib.vertex.VertexTypes;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -85,22 +85,22 @@ public class BakedModelBuilder {
 					Material material = materialFunc.apply(renderType, shaded);
 					if (material != null) {
 						MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, VertexTypes.BLOCK);
-						meshMapBuilder.put(material, new SimpleMesh(VertexTypes.BLOCK, meshData, "bakedModel=" + bakedModel.toString() + ",renderType=" + renderType.toString() + ",shaded=" + shaded));
+						meshMapBuilder.put(material, new SimpleMesh(VertexTypes.BLOCK, meshData, "source=BakedModelBuilder," + "bakedModel=" + bakedModel + ",renderType=" + renderType + ",shaded=" + shaded));
 					}
 				}
 			};
-			ModelBufferingUtil.bufferSingleShadeSeparated(ModelUtil.VANILLA_RENDERER.getModelRenderer(), renderWorld, bakedModel, blockState, poseStack, modelData, resultConsumer);
+			BakedModelBufferer.bufferSingleShadeSeparated(ModelUtil.VANILLA_RENDERER.getModelRenderer(), renderWorld, bakedModel, blockState, poseStack, modelData, resultConsumer);
 		} else {
 			ResultConsumer resultConsumer = (renderType, data) -> {
 				if (!ModelUtil.isVanillaBufferEmpty(data)) {
 					Material material = materialFunc.apply(renderType, true);
 					if (material != null) {
 						MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, VertexTypes.BLOCK);
-						meshMapBuilder.put(material, new SimpleMesh(VertexTypes.BLOCK, meshData, "bakedModel=" + bakedModel.toString() + ",renderType=" + renderType.toString()));
+						meshMapBuilder.put(material, new SimpleMesh(VertexTypes.BLOCK, meshData, "source=BakedModelBuilder," + "bakedModel=" + bakedModel + ",renderType=" + renderType));
 					}
 				}
 			};
-			ModelBufferingUtil.bufferSingle(ModelUtil.VANILLA_RENDERER.getModelRenderer(), renderWorld, bakedModel, blockState, poseStack, modelData, resultConsumer);
+			BakedModelBufferer.bufferSingle(ModelUtil.VANILLA_RENDERER.getModelRenderer(), renderWorld, bakedModel, blockState, poseStack, modelData, resultConsumer);
 		}
 
 		return new TessellatedModel(meshMapBuilder.build(), shadeSeparated);

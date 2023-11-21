@@ -25,7 +25,7 @@ public class BatchedMeshPool {
 	private final List<BufferedMesh> allBuffered = new ArrayList<>();
 	private final List<BufferedMesh> pendingBuffer = new ArrayList<>();
 
-	private MemoryBlock memory;
+	private MemoryBlock data;
 	private long byteSize;
 
 	private boolean dirty;
@@ -37,7 +37,7 @@ public class BatchedMeshPool {
 	public BatchedMeshPool(VertexFormat vertexFormat) {
 		this.vertexFormat = vertexFormat;
 		vertexList = VertexListProviderRegistry.getProvider(vertexFormat).createVertexList();
-		growthMargin = vertexFormat.getVertexSize() * 32;
+		growthMargin = vertexFormat.getVertexSize() * 128;
 	}
 
 	public VertexFormat getVertexFormat() {
@@ -116,10 +116,10 @@ public class BatchedMeshPool {
 			return;
 		}
 
-		if (memory == null) {
-			memory = MemoryBlock.malloc(byteSize);
-		} else if (byteSize > memory.size()) {
-			memory = memory.realloc(byteSize + growthMargin);
+		if (data == null) {
+			data = MemoryBlock.malloc(byteSize);
+		} else if (byteSize > data.size()) {
+			data = data.realloc(byteSize + growthMargin);
 		}
 	}
 
@@ -136,8 +136,8 @@ public class BatchedMeshPool {
 	}
 
 	public void delete() {
-		if (memory != null) {
-			memory.free();
+		if (data != null) {
+			data.free();
 		}
 		meshes.clear();
 		allBuffered.clear();
@@ -191,7 +191,7 @@ public class BatchedMeshPool {
 		}
 
 		private long ptr() {
-			return BatchedMeshPool.this.memory.ptr() + byteIndex;
+			return BatchedMeshPool.this.data.ptr() + byteIndex;
 		}
 
 		private void buffer(ReusableVertexList vertexList) {

@@ -16,7 +16,6 @@ import com.google.common.cache.LoadingCache;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.event.world.WorldEvent;
 
-// FIXME
 public final class LevelAttached<T> {
 	private static final ConcurrentLinkedDeque<WeakReference<LevelAttached<?>>> ALL = new ConcurrentLinkedDeque<>();
 	private static final Cleaner CLEANER = Cleaner.create();
