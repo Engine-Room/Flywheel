@@ -28,11 +28,9 @@ void flw_contextFragment() {
     color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
     color *= lightColor;
 
-    #ifdef FLW_DISCARD
-      if (flw_discardPredicate(color)) {
+    if (flw_discardPredicate(color)) {
         discard;
     }
-    #endif
 
     fragColor = flw_fogFilter(color);
 }
