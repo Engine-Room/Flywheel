@@ -4,6 +4,10 @@
 void flw_materialFragment() {
 }
 
+bool flw_discardPredicate(vec4 finalColor) {
+    return false;
+}
+
 vec4 flw_fogFilter(vec4 color) {
     return linear_fog(color, flw_distance, flywheel.fogRange.x, flywheel.fogRange.y, flywheel.fogColor);
 }

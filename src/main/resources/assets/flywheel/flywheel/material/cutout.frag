@@ -4,7 +4,6 @@
 void flw_materialFragment() {
 }
 
-#define FLW_DISCARD
 bool flw_discardPredicate(vec4 finalColor) {
     return finalColor.a < 0.1;
 }

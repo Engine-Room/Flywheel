@@ -34,11 +34,9 @@ void flw_initFragment() {
 void flw_contextFragment() {
     vec4 color = flw_fragColor;
 
-    #ifdef FLW_DISCARD
     if (flw_discardPredicate(color)) {
         discard;
     }
-    #endif
 
     fragColor = flw_fogFilter(color);
 }

@@ -21,13 +21,12 @@ import com.jozufozu.flywheel.glsl.generate.GlslSwitch;
 import net.minecraft.resources.ResourceLocation;
 
 public class MaterialAdapterComponent implements SourceComponent {
-	// TODO: material id handling in pipeline shader
 	private final ResourceLocation name;
 	private final GlslExpr switchArg;
 	private final List<AdaptedFn> functionsToAdapt;
 	private final List<StringSubstitutionSourceComponent> adaptedComponents;
 
-	public MaterialAdapterComponent(ResourceLocation name, GlslExpr switchArg, List<AdaptedFn> functionsToAdapt, List<StringSubstitutionSourceComponent> adaptedComponents) {
+	private MaterialAdapterComponent(ResourceLocation name, GlslExpr switchArg, List<AdaptedFn> functionsToAdapt, List<StringSubstitutionSourceComponent> adaptedComponents) {
 		this.name = name;
 		this.switchArg = switchArg;
 		this.functionsToAdapt = functionsToAdapt;
