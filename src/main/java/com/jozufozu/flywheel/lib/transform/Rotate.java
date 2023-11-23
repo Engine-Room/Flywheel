@@ -1,19 +1,19 @@
 package com.jozufozu.flywheel.lib.transform;
 
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
+import org.joml.AxisAngle4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import net.minecraft.core.Direction;
 
 public interface Rotate<Self> {
-	Self multiply(Quaternion quaternion);
+	Self multiply(Quaternionf quaternion);
 
 	@SuppressWarnings("unchecked")
 	default Self rotate(Direction axis, float radians) {
 		if (radians == 0)
 			return (Self) this;
-		return multiply(axis.step()
-				.rotation(radians));
+		return multiplyRadians(axis.step(), radians);
 	}
 
 	default Self rotate(double angle, Direction.Axis axis) {
@@ -57,7 +57,7 @@ public interface Rotate<Self> {
 	default Self multiplyRadians(Vector3f axis, double angle) {
 		if (angle == 0)
 			return (Self) this;
-		return multiply(axis.rotation((float) angle));
+		return multiply(new Quaternionf(new AxisAngle4f((float) angle, axis)));
 	}
 
 	@SuppressWarnings("unchecked")

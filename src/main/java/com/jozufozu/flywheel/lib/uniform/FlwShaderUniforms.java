@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.lib.uniform;
 
 import java.util.function.Consumer;
 
+import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.Flywheel;
@@ -83,9 +84,8 @@ public class FlwShaderUniforms implements ShaderUniforms {
 			var camZ = (float) (camera.z - renderOrigin.getZ());
 
 			// don't want to mutate viewProjection
-			var vp = context.viewProjection()
-					.copy();
-			vp.multiplyWithTranslation(-camX, -camY, -camZ);
+			var vp = new Matrix4f(context.viewProjection());
+			vp.translate(-camX, -camY, -camZ);
 
 			MatrixUtil.writeUnsafe(vp, ptr + 32);
 			MemoryUtil.memPutFloat(ptr + 96, camX);

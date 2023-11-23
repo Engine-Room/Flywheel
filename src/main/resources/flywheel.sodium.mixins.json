@@ -6,8 +6,7 @@
   "refmap": "flywheel.refmap.json",
   "plugin": "com.jozufozu.flywheel.compat.SodiumMixinPlugin",
   "client": [
-    "ChunkRenderRebuildTaskMixin",
-    "FlywheelCompatMixin"
+    "ChunkRenderRebuildTaskMixin"
   ],
   "injectors": {
     "defaultRequire": 1

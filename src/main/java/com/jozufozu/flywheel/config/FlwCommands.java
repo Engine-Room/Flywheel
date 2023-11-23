@@ -19,7 +19,6 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
@@ -42,13 +41,13 @@ public class FlwCommands {
 						try {
 							backendId = new ResourceLocation(backendIdStr);
 						} catch (ResourceLocationException e) {
-							player.displayClientMessage(new TextComponent("Config contains invalid backend ID '" + backendIdStr + "'!"), false);
+							player.displayClientMessage(Component.literal("Config contains invalid backend ID '" + backendIdStr + "'!"), false);
 							return 0;
 						}
 
 						Backend backend = Backend.REGISTRY.get(backendId);
 						if (backend == null) {
-							player.displayClientMessage(new TextComponent("Config contains non-existent backend with ID '" + backendId + "'!"), false);
+							player.displayClientMessage(Component.literal("Config contains non-existent backend with ID '" + backendId + "'!"), false);
 							return 0;
 						}
 
@@ -71,7 +70,8 @@ public class FlwCommands {
 
 							var actualBackend = BackendManager.getBackend();
 							if (actualBackend != requestedBackend) {
-								player.displayClientMessage(new TextComponent("'" + requestedId + "' not available").withStyle(ChatFormatting.RED), false);
+								player.displayClientMessage(Component.literal("'" + requestedId + "' not available")
+										.withStyle(ChatFormatting.RED), false);
 							}
 
 							Component message = actualBackend.engineMessage();
@@ -85,14 +85,16 @@ public class FlwCommands {
 					LocalPlayer player = Minecraft.getInstance().player;
 					if (player == null) return;
 
-					Component text = new TextComponent("Update limiting is currently: ").append(boolToText(bool));
+					Component text = Component.literal("Update limiting is currently: ")
+							.append(boolToText(bool));
 					player.displayClientMessage(text, false);
 				},
 				(source, bool) -> {
 					LocalPlayer player = Minecraft.getInstance().player;
 					if (player == null) return;
 
-					Component text = boolToText(bool).append(new TextComponent(" update limiting.").withStyle(ChatFormatting.WHITE));
+					Component text = boolToText(bool).append(Component.literal(" update limiting.")
+							.withStyle(ChatFormatting.WHITE));
 					player.displayClientMessage(text, false);
 
 					Minecraft.getInstance().levelRenderer.allChanged();
@@ -105,7 +107,7 @@ public class FlwCommands {
 					LocalPlayer player = Minecraft.getInstance().player;
 					if (player == null) return 0;
 
-					player.displayClientMessage(new TextComponent("This command is not yet implemented."), false);
+					player.displayClientMessage(Component.literal("This command is not yet implemented."), false);
 
 					return Command.SINGLE_SUCCESS;
 				});
@@ -124,7 +126,8 @@ public class FlwCommands {
 										return 0;
 									}
 
-									executor.level.destroyBlockProgress(executor.getId(), pos, value);
+									executor.level()
+											.destroyBlockProgress(executor.getId(), pos, value);
 
 									return Command.SINGLE_SUCCESS;
 								}))));
@@ -176,6 +179,8 @@ public class FlwCommands {
 	}
 
 	public static MutableComponent boolToText(boolean b) {
-		return b ? new TextComponent("enabled").withStyle(ChatFormatting.DARK_GREEN) : new TextComponent("disabled").withStyle(ChatFormatting.RED);
+		return b ? Component.literal("enabled")
+				.withStyle(ChatFormatting.DARK_GREEN) : Component.literal("disabled")
+				.withStyle(ChatFormatting.RED);
 	}
 }

@@ -19,8 +19,6 @@
     "VertexFormatMixin",
     "fix.FixFabulousDepthMixin",
     "fix.FixNormalScalingMixin",
-    "matrix.Matrix3fAccessor",
-    "matrix.Matrix4fAccessor",
     "matrix.PoseStackMixin",
     "visualmanage.ChunkRebuildHooksMixin",
     "visualmanage.VisualAddMixin",

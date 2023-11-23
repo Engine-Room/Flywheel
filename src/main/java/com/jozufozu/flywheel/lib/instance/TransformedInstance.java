@@ -1,12 +1,13 @@
 package com.jozufozu.flywheel.lib.instance;
 
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+
 import com.jozufozu.flywheel.api.instance.InstanceHandle;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.lib.transform.Transform;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
 
 import net.minecraft.util.Mth;
 
@@ -17,11 +18,6 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	public final Matrix4f model = new Matrix4f();
 	public final Matrix3f normal = new Matrix3f();
 
-	{
-		model.setIdentity();
-		normal.setIdentity();
-	}
-
 	public TransformedInstance(InstanceType<? extends TransformedInstance> type, InstanceHandle handle) {
 		super(type, handle);
 	}
@@ -29,9 +25,9 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	public TransformedInstance setTransform(PoseStack stack) {
 		setChanged();
 
-		this.model.load(stack.last()
+		this.model.set(stack.last()
 				.pose());
-		this.normal.load(stack.last()
+		this.normal.set(stack.last()
 				.normal());
 		return this;
 	}
@@ -46,25 +42,25 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	public TransformedInstance setEmptyTransform() {
 		setChanged();
 
-		model.load(ZERO_MATRIX_4f);
-		normal.load(ZERO_MATRIX_3f);
+		model.set(ZERO_MATRIX_4f);
+		normal.set(ZERO_MATRIX_3f);
 		return this;
 	}
 
 	public TransformedInstance loadIdentity() {
 		setChanged();
 
-		model.setIdentity();
-		normal.setIdentity();
+		model.identity();
+		normal.identity();
 		return this;
 	}
 
 	@Override
-	public TransformedInstance multiply(Quaternion quaternion) {
+	public TransformedInstance multiply(Quaternionf quaternion) {
 		setChanged();
 
-		model.multiply(quaternion);
-		normal.mul(quaternion);
+		model.rotate(quaternion);
+		normal.rotate(quaternion);
 		return this;
 	}
 
@@ -72,11 +68,11 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	public TransformedInstance scale(float x, float y, float z) {
 		setChanged();
 
-		model.multiply(Matrix4f.createScaleMatrix(x, y, z));
+		model.scale(x, y, z);
 
 		if (x == y && y == z) {
 			if (x < 0.0f) {
-				normal.mul(-1.0f);
+				normal.scale(-1.0f);
 			}
 
 			return this;
@@ -86,7 +82,7 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 		float invY = 1.0f / y;
 		float invZ = 1.0f / z;
 		float f = Mth.fastInvCubeRoot(Math.abs(invX * invY * invZ));
-		normal.mul(Matrix3f.createScaleMatrix(f * invX, f * invY, f * invZ));
+		normal.scale(f * invX, f * invY, f * invZ);
 		return this;
 	}
 
@@ -94,7 +90,7 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	public TransformedInstance translate(double x, double y, double z) {
 		setChanged();
 
-		model.multiplyWithTranslation((float) x, (float) y, (float) z);
+		model.translate((float) x, (float) y, (float) z);
 		return this;
 	}
 
@@ -102,7 +98,7 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	public TransformedInstance mulPose(Matrix4f pose) {
 		setChanged();
 
-		model.multiply(pose);
+		this.model.mul(pose);
 		return this;
 	}
 
@@ -110,7 +106,7 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	public TransformedInstance mulNormal(Matrix3f normal) {
 		setChanged();
 
-		normal.mul(normal);
+		this.normal.mul(normal);
 		return this;
 	}
 }

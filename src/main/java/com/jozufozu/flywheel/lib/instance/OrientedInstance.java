@@ -1,9 +1,10 @@
 package com.jozufozu.flywheel.lib.instance;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import com.jozufozu.flywheel.api.instance.InstanceHandle;
 import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 
 import net.minecraft.core.BlockPos;
 
@@ -63,8 +64,8 @@ public class OrientedInstance extends ColoredLitInstance {
 		return this;
 	}
 
-	public OrientedInstance setRotation(Quaternion q) {
-		return setRotation(q.i(), q.j(), q.k(), q.r());
+	public OrientedInstance setRotation(Quaternionf q) {
+		return setRotation(q.x, q.y, q.z, q.w);
 	}
 
 	public OrientedInstance setRotation(float x, float y, float z, float w) {

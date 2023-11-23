@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.lib.visual;
 
 import org.joml.FrustumIntersection;
+import org.joml.Vector3f;
 
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.EntityVisual;
@@ -10,7 +11,6 @@ import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.lib.box.Box;
 import com.jozufozu.flywheel.lib.box.MutableBox;
 import com.jozufozu.flywheel.lib.light.TickingLightListener;
-import com.mojang.math.Vector3f;
 
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -38,7 +38,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	protected final EntityVisibilityTester visibilityTester;
 
 	public AbstractEntityVisual(VisualizationContext ctx, T entity) {
-		super(ctx, entity.level);
+		super(ctx, entity.level());
 		this.entity = entity;
 		bounds = MutableBox.from(entity.getBoundingBox());
 		visibilityTester = new EntityVisibilityTester(entity, ctx.renderOrigin());

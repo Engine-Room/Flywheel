@@ -14,14 +14,14 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class BackendArgument implements ArgumentType<Backend> {
 	private static final List<String> STRING_IDS = Backend.REGISTRY.getAllIds().stream().map(ResourceLocation::toString).toList();
 
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_BACKEND = new DynamicCommandExceptionType(arg -> {
-		return new TextComponent("Unknown backend '" + arg + "'");
+		return Component.literal("Unknown backend '" + arg + "'");
 	});
 
 	public static final BackendArgument INSTANCE = new BackendArgument();

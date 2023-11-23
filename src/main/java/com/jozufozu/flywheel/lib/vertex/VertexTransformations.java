@@ -1,9 +1,10 @@
 package com.jozufozu.flywheel.lib.vertex;
 
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.lib.math.MatrixUtil;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
 
 public final class VertexTransformations {
 	private VertexTransformations() {
