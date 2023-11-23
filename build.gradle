@@ -1,25 +1,12 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        mavenCentral()
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public' }
-        maven { url = 'https://maven.parchmentmc.org' }
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: "${forgegradle_version}", changing: false
-        classpath "org.spongepowered:mixingradle:${mixingradle_version}"
-        classpath "org.parchmentmc:librarian:${librarian_version}"
-    }
-}
-
 plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version "${forgegradle_version}"
+    id 'org.spongepowered.mixin' version "${mixingradle_version}"
+    id 'org.parchmentmc.librarian.forgegradle' version "${librarian_version}"
     id 'com.matthewprenger.cursegradle' version "${cursegradle_version}"
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply plugin: 'org.spongepowered.mixin'
 
 jarJar.enable()
 
@@ -33,63 +20,37 @@ version = mod_version + (dev && buildNumber != null ? "-${buildNumber}" : '')
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 minecraft {
     mappings channel: 'parchment', version: "${parchment_version}-${minecraft_version}"
 
+    copyIdeResources = true
+
     runs {
-        client {
+        configureEach {
             workingDirectory project.file('run')
 
             property 'forge.logging.markers', ''
             property 'forge.logging.console.level', 'debug'
-            property 'mixin.debug.export', 'true'
+
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            mods {
+                flywheel {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
             property 'flw.dumpShaderSource', 'true'
             property 'flw.loadRenderDoc', 'true'
             property 'flw.debugMemorySafety', 'true'
-
-            arg '-mixin.config=flywheel.mixins.json'
-            arg '-mixin.config=flywheel.sodium.mixins.json'
-
-            mods {
-                flywheel {
-                    source sourceSets.main
-                }
-            }
         }
 
         server {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
-            arg '-mixin.config=flywheel.mixins.json'
-            arg '-mixin.config=flywheel.sodium.mixins.json'
-
-            mods {
-                flywheel {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
-            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'flywheel', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                flywheel {
-                    source sourceSets.main
-                }
-            }
+            args '--nogui'
         }
     }
 }
@@ -115,7 +76,7 @@ repositories {
     mavenCentral()
 }
 
-// Fix for loading non-mod libraries in dev-env, used for JOML and Miniball.
+// Fix for loading non-mod libraries in dev-env, used for Miniball.
 // https://gist.github.com/SizableShrimp/66b22f1b24c255e1491c8d98d3f11f83
 // v--------------------------------------------------------------------v
 configurations {
@@ -123,7 +84,7 @@ configurations {
     implementation.extendsFrom library
 }
 
-minecraft.runs.all {
+minecraft.runs.configureEach {
     lazyToken('minecraft_classpath') {
         configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
     }
@@ -134,20 +95,11 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    jarJar('org.joml:joml:1.10.5') {
-        jarJar.ranged(it, '[1.10.5,1.11.0)')
-    }
-    library 'org.joml:joml:1.10.5'
+    compileOnly fg.deobf("maven.modrinth:rubidium:0.6.5")
+    compileOnly fg.deobf("maven.modrinth:oculus:1.20-1.6.4")
 
-    jarJar('com.dreizak:miniball:1.0.3') {
-        jarJar.ranged(it, '[1.0.3,2.0.0)')
-    }
+    jarJar(group: 'com.dreizak', name: 'miniball', version: '[1.0.3,2.0.0)')
     library 'com.dreizak:miniball:1.0.3'
-
-    // switch to implementation for debugging
-    compileOnly fg.deobf("maven.modrinth:starlight-forge:1.0.2+1.18.2")
-    compileOnly fg.deobf("maven.modrinth:rubidium:0.5.6")
-    compileOnly fg.deobf("maven.modrinth:oculus:1.18.2-1.5.2")
 
     // https://discord.com/channels/313125603924639766/725850371834118214/910619168821354497
     // Prevent Mixin annotation processor from getting into IntelliJ's annotation processor settings
@@ -163,6 +115,12 @@ test {
 
 mixin {
     add sourceSets.main, 'flywheel.refmap.json'
+
+    config 'flywheel.mixins.json'
+    config 'flywheel.sodium.mixins.json'
+
+    debug.verbose = true
+    debug.export = true
 }
 
 // Workaround for SpongePowered/MixinGradle#38
@@ -185,19 +143,33 @@ compileJava {
     options.compilerArgs = ['-Xdiags:verbose']
 }
 
-jar {
+void addLicense(jarTask) {
+    jarTask.from('LICENSE.md') {
+        rename '(.*)\\.(.*)', '$1_' + archivesBaseName + '.$2'
+    }
+}
+
+tasks.named('jar', Jar).configure {
     manifest {
         attributes([
                 'Specification-Title'     : 'flywheel',
                 //'Specification-Vendor': 'flywheel authors',
                 'Specification-Version'   : '1', // We are version 1 of ourselves
-                'Implementation-Title'    : project.jar.baseName,
+                'Implementation-Title': project.jar.archiveBaseName,
                 'Implementation-Version'  : project.jar.archiveVersion,
                 //'Implementation-Vendor': 'flywheel authors',
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                 'MixinConfigs'            : 'flywheel.mixins.json,flywheel.sodium.mixins.json'
         ])
     }
+
+    finalizedBy 'reobfJar'
+    addLicense(it)
+}
+
+tasks.named('jarJar').configure {
+    finalizedBy 'reobfJarJar'
+    addLicense(it)
 }
 
 java {
@@ -205,29 +177,20 @@ java {
     withJavadocJar()
 }
 
-void addLicense(jarTask) {
-    jarTask.from('LICENSE.md') {
-        rename '(.*)\\.(.*)', '$1_' + archivesBaseName + '.$2'
-    }
-}
-
-jar.finalizedBy('reobfJar')
-tasks.jarJar.finalizedBy('reobfJarJar')
-addLicense(jar)
-addLicense(tasks.jarJar)
-
 publishing {
     publications {
-        mavenJava(MavenPublication) {
-            artifactId = archivesBaseName
+        register('mavenJava', MavenPublication) {
+            artifact jar
 
-            from components.java
             fg.component(it)
             jarJar.component(it)
         }
     }
-
     repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+
         if (project.hasProperty('mavendir')) {
             maven { url mavendir }
         }
@@ -246,6 +209,6 @@ curseforge {
         changelog = file('changelog.txt')
         releaseType = project.curse_type
         mainArtifact jar
-        addGameVersion '1.18.2'
+        addGameVersion '1.20.2'
     }
 }
