@@ -20,14 +20,14 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 
 public class MultiBlockModelBuilder {
 	private final Collection<StructureTemplate.StructureBlockInfo> blocks;
 	private boolean shadeSeparated = true;
 	private BlockAndTintGetter renderWorld;
 	private PoseStack poseStack;
-	private Map<BlockPos, IModelData> modelDataMap;
+	private Map<BlockPos, ModelData> modelDataMap;
 	private BiFunction<RenderType, Boolean, Material> materialFunc;
 
 	public MultiBlockModelBuilder(Collection<StructureTemplate.StructureBlockInfo> blocks) {
@@ -49,7 +49,7 @@ public class MultiBlockModelBuilder {
 		return this;
 	}
 
-	public MultiBlockModelBuilder modelDataMap(Map<BlockPos, IModelData> modelDataMap) {
+	public MultiBlockModelBuilder modelDataMap(Map<BlockPos, ModelData> modelDataMap) {
 		this.modelDataMap = modelDataMap;
 		return this;
 	}

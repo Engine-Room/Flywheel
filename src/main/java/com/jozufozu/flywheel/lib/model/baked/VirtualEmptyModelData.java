@@ -2,7 +2,9 @@ package com.jozufozu.flywheel.lib.model.baked;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraftforge.client.model.data.IModelData;
+import com.jozufozu.flywheel.api.model.Model;
+
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
 
 /**
@@ -10,27 +12,11 @@ import net.minecraftforge.client.model.data.ModelProperty;
  * available in-world context. BakedModel#getModelData can react accordingly
  * and avoid looking for model data itself.
  **/
-public enum VirtualEmptyModelData implements IModelData {
-	INSTANCE;
+public class VirtualEmptyModelData {
+	// TODO: Remove? Doesn't seem necessary anymore
+	public static final ModelData INSTANCE = ModelData.EMPTY;
 
-	public static boolean is(IModelData data) {
+	public static boolean is(ModelData data) {
 		return data == INSTANCE;
-	}
-
-	@Override
-	public boolean hasProperty(ModelProperty<?> prop) {
-		return false;
-	}
-
-	@Override
-	@Nullable
-	public <T> T getData(ModelProperty<T> prop) {
-		return null;
-	}
-
-	@Override
-	@Nullable
-	public <T> T setData(ModelProperty<T> prop, T data) {
-		return null;
 	}
 }
