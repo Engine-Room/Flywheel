@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.lib.math;
 
-import net.minecraftforge.client.model.pipeline.LightUtil;
-
 public final class RenderMath {
 	/**
 	 * Convert a signed byte into a signed, normalized float.
@@ -40,7 +38,8 @@ public final class RenderMath {
 		if (!shaded) {
 			return 1f;
 		}
-		return LightUtil.diffuseLight(x, y, z);
+		// FIXME: once we compile make sure this is correct.
+		return Math.min(x * x + y * y * (3f + y) + z, 1f);
 	}
 
 	public static float diffuseLightNether(float x, float y, float z, boolean shaded) {

@@ -9,14 +9,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.impl.visualization.VisualizationHelper;
 
-import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-@Mixin(targets = "net.minecraft.client.renderer.chunk.ChunkRenderDispatcher$RenderChunk$RebuildTask")
+@Mixin(targets = "net.minecraft.client.renderer.chunk.SectionRenderDispatcher$RenderSection$RebuildTask")
 public class ChunkRebuildHooksMixin {
-	@Inject(method = "handleBlockEntity(Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$CompiledChunk;Ljava/util/Set;Lnet/minecraft/world/level/block/entity/BlockEntity;)V", at = @At("HEAD"), cancellable = true)
-	private void flywheel$tryAddBlockEntity(ChunkRenderDispatcher.CompiledChunk compiledChunk, Set<BlockEntity> globalBlockEntities, BlockEntity blockEntity, CallbackInfo ci) {
-		if (VisualizationHelper.tryAddBlockEntity(blockEntity)) {
+	@Inject(method = "handleBlockEntity(Lnet/minecraft/client/renderer/chunk/SectionRenderDispatcher$RenderSection$RebuildTask$CompileResults;Lnet/minecraft/world/level/block/entity/BlockEntity;)V", at = @At("HEAD"), cancellable = true)
+	private <E extends BlockEntity> void flywheel$tryAddBlockEntity(Object pCompileResults, E pBlockEntity, CallbackInfo ci) {
+		if (VisualizationHelper.tryAddBlockEntity(pBlockEntity)) {
 			ci.cancel();
 		}
 	}

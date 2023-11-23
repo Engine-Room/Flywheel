@@ -16,6 +16,7 @@ import com.jozufozu.flywheel.lib.model.ModelCache;
 import com.jozufozu.flywheel.lib.model.SimpleModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.transform.TransformStack;
+import com.jozufozu.flywheel.lib.util.Axes;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -102,7 +103,7 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 		}
 		lastProgress = progress;
 
-		Quaternionf spin = Vector3f.YP.rotationDegrees(270.0f * progress);
+		Quaternionf spin = Axes.YP.rotationDegrees(270.0f * progress);
 
 		TransformStack.cast(stack)
 				.pushPose()

@@ -166,7 +166,7 @@ public final class Materials {
 			return new GlStateShard(
 					() -> {
 						GlTextureUnit.T0.makeActive();
-						RenderSystem.enableTexture();
+						// FIXME: I think it got removed RenderSystem.enableTexture();
 						AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(loc);
 						texture.setFilter(blur, mipmap);
 						RenderSystem.setShaderTexture(0, texture.getId());

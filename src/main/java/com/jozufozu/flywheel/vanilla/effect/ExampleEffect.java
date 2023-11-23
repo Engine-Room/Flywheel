@@ -17,6 +17,7 @@ import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
+import com.jozufozu.flywheel.lib.math.MoreMath;
 import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.task.ForEachPlan;
 
@@ -88,9 +89,9 @@ public class ExampleEffect implements Effect {
 
 		Vec3 playerPos = player.position();
 
-		var x = (float) (playerPos.x + level.random.nextFloat(-20, 20));
-		var y = (float) (playerPos.y + level.random.nextFloat(0, 5));
-		var z = (float) (playerPos.z + level.random.nextFloat(-20, 20));
+		var x = (float) (playerPos.x + MoreMath.nextFloat(level.random, -20, 20));
+		var y = (float) (playerPos.y + MoreMath.nextFloat(level.random, 0, 5));
+		var z = (float) (playerPos.z + MoreMath.nextFloat(level.random, -20, 20));
 
 		ExampleEffect effect = new ExampleEffect(level, new Vector3f(x, y, z));
 		ALL_EFFECTS.add(effect);
@@ -111,9 +112,9 @@ public class ExampleEffect implements Effect {
 			this.boids = new ArrayList<>(VISUAL_COUNT);
 
 			for (int i = 0; i < VISUAL_COUNT; i++) {
-				var x = targetPoint.x + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
-				var y = targetPoint.y + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
-				var z = targetPoint.z + level.random.nextFloat(-SPAWN_RADIUS, SPAWN_RADIUS);
+				var x = targetPoint.x + MoreMath.nextFloat(level.random, -SPAWN_RADIUS, SPAWN_RADIUS);
+				var y = targetPoint.y + MoreMath.nextFloat(level.random, -SPAWN_RADIUS, SPAWN_RADIUS);
+				var z = targetPoint.z + MoreMath.nextFloat(level.random, -SPAWN_RADIUS, SPAWN_RADIUS);
 
 				Boid boid = new Boid(x, y, z);
 				boids.add(boid);

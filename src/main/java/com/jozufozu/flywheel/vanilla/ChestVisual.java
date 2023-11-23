@@ -19,6 +19,7 @@ import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.ModelCache;
 import com.jozufozu.flywheel.lib.model.SimpleModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
+import com.jozufozu.flywheel.lib.util.Axes;
 import com.jozufozu.flywheel.lib.util.Pair;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
 
@@ -60,7 +61,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 
 	private ChestType chestType;
 	private Material texture;
-	private Quaternionf baseRotation;
+	private final Quaternionf baseRotation = new Quaternionf();
 	private Float2FloatFunction lidProgress;
 
 	private float lastProgress = Float.NaN;
@@ -81,13 +82,13 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		Block block = blockState.getBlock();
 		if (block instanceof AbstractChestBlock<?> chestBlock) {
 			float horizontalAngle = blockState.getValue(ChestBlock.FACING).toYRot();
-			baseRotation = Vector3f.YP.rotationDegrees(-horizontalAngle);
+			baseRotation.setAngleAxis(Math.toRadians(-horizontalAngle), 0, 1, 0);
 			bottom.setRotation(baseRotation);
 
 			DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> wrapper = chestBlock.combine(blockState, level, pos, true);
 			lidProgress = wrapper.apply(ChestBlock.opennessCombiner(blockEntity));
 		} else {
-			baseRotation = Quaternion.ONE;
+			baseRotation.identity();
 			lidProgress = $ -> 0f;
 		}
 
