@@ -8,9 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.ModelBakeEvent;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ForgeModelBakery;
+import net.minecraftforge.client.event.ModelEvent;
 
 /**
  * A helper class for loading and accessing json models.
@@ -18,10 +16,10 @@ import net.minecraftforge.client.model.ForgeModelBakery;
  * Creating a PartialModel will make the associated modelLocation automatically load.
  * PartialModels must be initialized in the mod class constructor.
  * <br>
- * Once {@link ModelBakeEvent} finishes, all PartialModels (with valid modelLocations)
+ * Once {@link ModelEvent.RegisterAdditional} finishes, all PartialModels (with valid modelLocations)
  * will have their bakedModel fields populated.
  * <br>
- * Attempting to create a PartialModel after {@link ModelRegistryEvent} will cause an error.
+ * Attempting to create a PartialModel after {@link ModelEvent.RegisterAdditional} will cause an error.
  */
 public class PartialModel {
 	private static final List<PartialModel> ALL = new ArrayList<>();
@@ -37,15 +35,16 @@ public class PartialModel {
 		ALL.add(this);
 	}
 
-	public static void onModelRegistry(ModelRegistryEvent event) {
-		for (PartialModel partial : ALL)
-			ForgeModelBakery.addSpecialModel(partial.getLocation());
+	public static void onModelRegistry(ModelEvent.RegisterAdditional event) {
+		for (PartialModel partial : ALL) {
+			event.register(partial.getLocation());
+		}
 
 		tooLate = true;
 	}
 
-	public static void onModelBake(ModelBakeEvent event) {
-		Map<ResourceLocation, BakedModel> modelRegistry = event.getModelRegistry();
+	public static void onModelBake(ModelEvent.BakingCompleted event) {
+		var modelRegistry = event.getModels();
 		for (PartialModel partial : ALL)
 			partial.set(modelRegistry.get(partial.getLocation()));
 	}
