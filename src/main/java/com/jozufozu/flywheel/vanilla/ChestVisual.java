@@ -5,6 +5,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import org.joml.Quaternionf;
+
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
@@ -19,8 +21,6 @@ import com.jozufozu.flywheel.lib.model.SimpleModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.util.Pair;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -60,7 +60,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 
 	private ChestType chestType;
 	private Material texture;
-	private Quaternion baseRotation;
+	private Quaternionf baseRotation;
 	private Float2FloatFunction lidProgress;
 
 	private float lastProgress = Float.NaN;

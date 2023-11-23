@@ -63,6 +63,14 @@ sealed public interface LoadError {
 		}
 	}
 
+	record ResourceError(ResourceLocation location) implements LoadError {
+		@Override
+		public ErrorBuilder generateMessage() {
+			return ErrorBuilder.create()
+					.error("\"" + location + "\" was not found");
+		}
+	}
+
 	record MalformedInclude(ResourceLocationException exception) implements LoadError {
 		@Override
 		public ErrorBuilder generateMessage() {

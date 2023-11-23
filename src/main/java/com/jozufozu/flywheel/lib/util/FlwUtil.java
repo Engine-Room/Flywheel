@@ -25,11 +25,11 @@ public final class FlwUtil {
 		PoseStack copy = new PoseStack();
 		copy.last()
 				.pose()
-				.load(stack.last()
+				.set(stack.last()
 						.pose());
 		copy.last()
 				.normal()
-				.load(stack.last()
+				.set(stack.last()
 						.normal());
 		return copy;
 	}

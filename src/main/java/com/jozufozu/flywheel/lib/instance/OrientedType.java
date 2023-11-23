@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.lib.instance;
 
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 import com.jozufozu.flywheel.api.instance.InstanceBoundingSphereTransformer;
@@ -11,9 +13,6 @@ import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.lib.layout.CommonItems;
 import com.jozufozu.flywheel.lib.math.RenderMath;
 import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -49,15 +48,15 @@ public class OrientedType implements InstanceType<OrientedInstance> {
 	@Override
 	public InstanceVertexTransformer<OrientedInstance> getVertexTransformer() {
 		return (vertexList, instance) -> {
-			Quaternion q = new Quaternion(instance.qX, instance.qY, instance.qZ, instance.qW);
+			Quaternionf q = new Quaternionf(instance.qX, instance.qY, instance.qZ, instance.qW);
 
 			Matrix4f modelMatrix = new Matrix4f();
-			modelMatrix.setIdentity();
-			modelMatrix.multiplyWithTranslation(instance.posX + instance.pivotX, instance.posY + instance.pivotY, instance.posZ + instance.pivotZ);
-			modelMatrix.multiply(q);
-			modelMatrix.multiplyWithTranslation(-instance.pivotX, -instance.pivotY, -instance.pivotZ);
+			modelMatrix.translate(instance.posX + instance.pivotX, instance.posY + instance.pivotY, instance.posZ + instance.pivotZ);
+			modelMatrix.rotate(q);
+			modelMatrix.translate(-instance.pivotX, -instance.pivotY, -instance.pivotZ);
 
-			Matrix3f normalMatrix = new Matrix3f(q);
+			Matrix3f normalMatrix = new Matrix3f();
+			normalMatrix.set(q);
 
 			float r = RenderMath.uf(instance.r);
 			float g = RenderMath.uf(instance.g);

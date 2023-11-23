@@ -2,6 +2,8 @@ package com.jozufozu.flywheel.vanilla;
 
 import java.util.List;
 
+import org.joml.Quaternionf;
+
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
@@ -16,8 +18,6 @@ import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.transform.TransformStack;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.Sheets;
@@ -56,7 +56,7 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 			texture = Sheets.SHULKER_TEXTURE_LOCATION.get(color.getId());
 		}
 
-		Quaternion rotation = getDirection().getRotation();
+		var rotation = getDirection().getRotation();
 
 		TransformStack tstack = TransformStack.cast(stack);
 		tstack.translate(getVisualPosition())
@@ -102,7 +102,7 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 		}
 		lastProgress = progress;
 
-		Quaternion spin = Vector3f.YP.rotationDegrees(270.0f * progress);
+		Quaternionf spin = Vector3f.YP.rotationDegrees(270.0f * progress);
 
 		TransformStack.cast(stack)
 				.pushPose()

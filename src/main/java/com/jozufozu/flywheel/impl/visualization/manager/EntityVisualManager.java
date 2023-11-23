@@ -49,7 +49,7 @@ public class EntityVisualManager extends AbstractVisualManager<Entity> {
 				return false;
 			}
 
-			Level level = entity.level;
+			Level level = entity.level();
 			return level != null;
 		}
 	}

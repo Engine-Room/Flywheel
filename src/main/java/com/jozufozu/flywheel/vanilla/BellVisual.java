@@ -2,6 +2,10 @@ package com.jozufozu.flywheel.vanilla;
 
 import java.util.List;
 
+import org.joml.AxisAngle4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
@@ -14,8 +18,6 @@ import com.jozufozu.flywheel.lib.model.ModelHolder;
 import com.jozufozu.flywheel.lib.model.SimpleModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.blockentity.BellRenderer;
@@ -73,9 +75,9 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 			Vector3f ringAxis = blockEntity.clickDirection.getCounterClockWise()
 					.step();
 
-			bell.setRotation(ringAxis.rotation(angle));
+			bell.setRotation(new Quaternionf(new AxisAngle4f(angle, ringAxis)));
 		} else {
-			bell.setRotation(Quaternion.ONE);
+			bell.setRotation(new Quaternionf());
 		}
 	}
 

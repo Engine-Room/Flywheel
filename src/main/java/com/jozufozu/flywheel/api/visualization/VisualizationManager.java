@@ -27,7 +27,7 @@ public interface VisualizationManager {
 	}
 
 	/**
-	 * Call this when you want to run {@link Visual#update()}.
+	 * Call this when you want to run {@link Visual#update}.
 	 * @param blockEntity The block entity whose visual you want to update.
 	 */
 	static void queueUpdate(BlockEntity blockEntity) {
@@ -41,11 +41,11 @@ public interface VisualizationManager {
 	}
 
 	/**
-	 * Call this when you want to run {@link Visual#update()}.
+	 * Call this when you want to run {@link Visual#update}.
 	 * @param entity The entity whose visual you want to update.
 	 */
 	static void queueUpdate(Entity entity) {
-		Level level = entity.level;
+		Level level = entity.level();
 		VisualizationManager manager = get(level);
 		if (manager == null) {
 			return;
@@ -55,7 +55,7 @@ public interface VisualizationManager {
 	}
 
 	/**
-	 * Call this when you want to run {@link Visual#update()}.
+	 * Call this when you want to run {@link Visual#update}.
 	 * @param effect The effect whose visual you want to update.
 	 */
 	static void queueUpdate(LevelAccessor level, Effect effect) {

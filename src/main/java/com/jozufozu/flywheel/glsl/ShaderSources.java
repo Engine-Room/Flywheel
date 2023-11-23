@@ -15,7 +15,6 @@ import org.jetbrains.annotations.VisibleForTesting;
 import com.jozufozu.flywheel.lib.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 /**
@@ -68,12 +67,15 @@ public class ShaderSources {
 
 	@NotNull
 	protected LoadResult load(ResourceLocation loc) {
-		try (Resource resource = manager.getResource(ResourceUtil.prefixed(SHADER_DIR, loc))) {
-			InputStream stream = resource.getInputStream();
-			String sourceString = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-			return SourceFile.parse(this, loc, sourceString);
-		} catch (IOException e) {
-			return new LoadResult.Failure(new LoadError.IOError(loc, e));
-		}
+		return manager.getResource(ResourceUtil.prefixed(SHADER_DIR, loc))
+				.map(resource -> {
+					try (InputStream stream = resource.open()) {
+						String sourceString = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+						return SourceFile.parse(this, loc, sourceString);
+					} catch (IOException e) {
+						return new LoadResult.Failure(new LoadError.IOError(loc, e));
+					}
+				})
+				.orElseGet(() -> new LoadResult.Failure(new LoadError.ResourceError(loc)));
 	}
 }

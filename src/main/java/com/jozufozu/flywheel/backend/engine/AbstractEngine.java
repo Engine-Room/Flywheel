@@ -27,7 +27,7 @@ public abstract class AbstractEngine implements Engine {
 			return false;
 		}
 
-		renderOrigin = new BlockPos(cameraPos);
+		renderOrigin = BlockPos.containing(cameraPos);
 		onRenderOriginChanged();
 		return true;
 	}

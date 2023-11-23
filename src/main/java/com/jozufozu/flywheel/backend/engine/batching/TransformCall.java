@@ -3,6 +3,8 @@ package com.jozufozu.flywheel.backend.engine.batching;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.joml.FrustumIntersection;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
@@ -17,8 +19,6 @@ import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.lib.task.ForEachSlicePlan;
 import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 

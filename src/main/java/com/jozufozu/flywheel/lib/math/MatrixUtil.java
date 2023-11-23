@@ -5,139 +5,88 @@ import static org.joml.Math.fma;
 import java.nio.ByteBuffer;
 
 import org.joml.Math;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
-
-import com.jozufozu.flywheel.mixin.matrix.Matrix3fAccessor;
-import com.jozufozu.flywheel.mixin.matrix.Matrix4fAccessor;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
 
 public final class MatrixUtil {
 	public static float transformPositionX(Matrix4f matrix, float x, float y, float z) {
-		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
-		return fma(m.flywheel$m00(), x, fma(m.flywheel$m01(), y, fma(m.flywheel$m02(), z, m.flywheel$m03())));
+		return fma(matrix.m00(), x, fma(matrix.m01(), y, fma(matrix.m02(), z, matrix.m03())));
 	}
 
 	public static float transformPositionY(Matrix4f matrix, float x, float y, float z) {
-		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
-		return fma(m.flywheel$m10(), x, fma(m.flywheel$m11(), y, fma(m.flywheel$m12(), z, m.flywheel$m13())));
+		return fma(matrix.m10(), x, fma(matrix.m11(), y, fma(matrix.m12(), z, matrix.m13())));
 	}
 
 	public static float transformPositionZ(Matrix4f matrix, float x, float y, float z) {
-		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
-		return fma(m.flywheel$m20(), x, fma(m.flywheel$m21(), y, fma(m.flywheel$m22(), z, m.flywheel$m23())));
+		return fma(matrix.m20(), x, fma(matrix.m21(), y, fma(matrix.m22(), z, matrix.m23())));
 	}
 
 	public static float transformNormalX(Matrix3f matrix, float x, float y, float z) {
-		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
-		return fma(m.flywheel$m00(), x, fma(m.flywheel$m01(), y, m.flywheel$m02() * z));
+		return fma(matrix.m00(), x, fma(matrix.m01(), y, matrix.m02() * z));
 	}
 
 	public static float transformNormalY(Matrix3f matrix, float x, float y, float z) {
-		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
-		return fma(m.flywheel$m10(), x, fma(m.flywheel$m11(), y, m.flywheel$m12() * z));
+		return fma(matrix.m10(), x, fma(matrix.m11(), y, matrix.m12() * z));
 	}
 
 	public static float transformNormalZ(Matrix3f matrix, float x, float y, float z) {
-		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
-		return fma(m.flywheel$m20(), x, fma(m.flywheel$m21(), y, m.flywheel$m22() * z));
+		return fma(matrix.m20(), x, fma(matrix.m21(), y, matrix.m22() * z));
 	}
 
 	public static void write(Matrix4f matrix, ByteBuffer buf) {
-		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
-		buf.putFloat(m.flywheel$m00());
-		buf.putFloat(m.flywheel$m10());
-		buf.putFloat(m.flywheel$m20());
-		buf.putFloat(m.flywheel$m30());
-		buf.putFloat(m.flywheel$m01());
-		buf.putFloat(m.flywheel$m11());
-		buf.putFloat(m.flywheel$m21());
-		buf.putFloat(m.flywheel$m31());
-		buf.putFloat(m.flywheel$m02());
-		buf.putFloat(m.flywheel$m12());
-		buf.putFloat(m.flywheel$m22());
-		buf.putFloat(m.flywheel$m32());
-		buf.putFloat(m.flywheel$m03());
-		buf.putFloat(m.flywheel$m13());
-		buf.putFloat(m.flywheel$m23());
-		buf.putFloat(m.flywheel$m33());
+		matrix.get(buf);
 	}
 
 	public static void writeUnsafe(Matrix4f matrix, long ptr) {
-		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
-		MemoryUtil.memPutFloat(ptr, m.flywheel$m00());
-		MemoryUtil.memPutFloat(ptr + 4, m.flywheel$m10());
-		MemoryUtil.memPutFloat(ptr + 8, m.flywheel$m20());
-		MemoryUtil.memPutFloat(ptr + 12, m.flywheel$m30());
-		MemoryUtil.memPutFloat(ptr + 16, m.flywheel$m01());
-		MemoryUtil.memPutFloat(ptr + 20, m.flywheel$m11());
-		MemoryUtil.memPutFloat(ptr + 24, m.flywheel$m21());
-		MemoryUtil.memPutFloat(ptr + 28, m.flywheel$m31());
-		MemoryUtil.memPutFloat(ptr + 32, m.flywheel$m02());
-		MemoryUtil.memPutFloat(ptr + 36, m.flywheel$m12());
-		MemoryUtil.memPutFloat(ptr + 40, m.flywheel$m22());
-		MemoryUtil.memPutFloat(ptr + 44, m.flywheel$m32());
-		MemoryUtil.memPutFloat(ptr + 48, m.flywheel$m03());
-		MemoryUtil.memPutFloat(ptr + 52, m.flywheel$m13());
-		MemoryUtil.memPutFloat(ptr + 56, m.flywheel$m23());
-		MemoryUtil.memPutFloat(ptr + 60, m.flywheel$m33());
+		MemoryUtil.memPutFloat(ptr, matrix.m00());
+		MemoryUtil.memPutFloat(ptr + 4, matrix.m10());
+		MemoryUtil.memPutFloat(ptr + 8, matrix.m20());
+		MemoryUtil.memPutFloat(ptr + 12, matrix.m30());
+		MemoryUtil.memPutFloat(ptr + 16, matrix.m01());
+		MemoryUtil.memPutFloat(ptr + 20, matrix.m11());
+		MemoryUtil.memPutFloat(ptr + 24, matrix.m21());
+		MemoryUtil.memPutFloat(ptr + 28, matrix.m31());
+		MemoryUtil.memPutFloat(ptr + 32, matrix.m02());
+		MemoryUtil.memPutFloat(ptr + 36, matrix.m12());
+		MemoryUtil.memPutFloat(ptr + 40, matrix.m22());
+		MemoryUtil.memPutFloat(ptr + 44, matrix.m32());
+		MemoryUtil.memPutFloat(ptr + 48, matrix.m03());
+		MemoryUtil.memPutFloat(ptr + 52, matrix.m13());
+		MemoryUtil.memPutFloat(ptr + 56, matrix.m23());
+		MemoryUtil.memPutFloat(ptr + 60, matrix.m33());
 	}
 
 	public static void write(Matrix3f matrix, ByteBuffer buf) {
-		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
-		buf.putFloat(m.flywheel$m00());
-		buf.putFloat(m.flywheel$m10());
-		buf.putFloat(m.flywheel$m20());
-		buf.putFloat(m.flywheel$m01());
-		buf.putFloat(m.flywheel$m11());
-		buf.putFloat(m.flywheel$m21());
-		buf.putFloat(m.flywheel$m02());
-		buf.putFloat(m.flywheel$m12());
-		buf.putFloat(m.flywheel$m22());
+		matrix.get(buf);
 	}
 
 	public static void writeUnsafe(Matrix3f matrix, long ptr) {
-		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
-		MemoryUtil.memPutFloat(ptr, m.flywheel$m00());
-		MemoryUtil.memPutFloat(ptr + 4, m.flywheel$m10());
-		MemoryUtil.memPutFloat(ptr + 8, m.flywheel$m20());
-		MemoryUtil.memPutFloat(ptr + 12, m.flywheel$m01());
-		MemoryUtil.memPutFloat(ptr + 16, m.flywheel$m11());
-		MemoryUtil.memPutFloat(ptr + 20, m.flywheel$m21());
-		MemoryUtil.memPutFloat(ptr + 24, m.flywheel$m02());
-		MemoryUtil.memPutFloat(ptr + 28, m.flywheel$m12());
-		MemoryUtil.memPutFloat(ptr + 32, m.flywheel$m22());
+		MemoryUtil.memPutFloat(ptr, matrix.m00());
+		MemoryUtil.memPutFloat(ptr + 4, matrix.m10());
+		MemoryUtil.memPutFloat(ptr + 8, matrix.m20());
+		MemoryUtil.memPutFloat(ptr + 12, matrix.m01());
+		MemoryUtil.memPutFloat(ptr + 16, matrix.m11());
+		MemoryUtil.memPutFloat(ptr + 20, matrix.m21());
+		MemoryUtil.memPutFloat(ptr + 24, matrix.m02());
+		MemoryUtil.memPutFloat(ptr + 28, matrix.m12());
+		MemoryUtil.memPutFloat(ptr + 32, matrix.m22());
 	}
 
-	public static void store(Matrix4f matrix, org.joml.Matrix4f jomlMatrix) {
-		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
-		jomlMatrix.set(
-				m.flywheel$m00(), m.flywheel$m10(), m.flywheel$m20(), m.flywheel$m30(),
-				m.flywheel$m01(), m.flywheel$m11(), m.flywheel$m21(), m.flywheel$m31(),
-				m.flywheel$m02(), m.flywheel$m12(), m.flywheel$m22(), m.flywheel$m32(),
-				m.flywheel$m03(), m.flywheel$m13(), m.flywheel$m23(), m.flywheel$m33()
-		);
+	public static void store(Matrix4f matrix, Matrix4f jomlMatrix) {
+		jomlMatrix.set(matrix);
 	}
 
-	public static org.joml.Matrix4f toJoml(Matrix4f matrix) {
-		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
-		return new org.joml.Matrix4f(
-				m.flywheel$m00(), m.flywheel$m10(), m.flywheel$m20(), m.flywheel$m30(),
-				m.flywheel$m01(), m.flywheel$m11(), m.flywheel$m21(), m.flywheel$m31(),
-				m.flywheel$m02(), m.flywheel$m12(), m.flywheel$m22(), m.flywheel$m32(),
-				m.flywheel$m03(), m.flywheel$m13(), m.flywheel$m23(), m.flywheel$m33()
-		);
+	public static Matrix4f toJoml(Matrix4f matrix) {
+		return new Matrix4f(matrix);
 	}
 
 	public static void store(Matrix3f matrix, org.joml.Matrix3f jomlMatrix) {
-		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
-		jomlMatrix.set(
-				m.flywheel$m00(), m.flywheel$m10(), m.flywheel$m20(), m.flywheel$m01(), m.flywheel$m11(), m.flywheel$m21(), m.flywheel$m02(), m.flywheel$m12(), m.flywheel$m22());
+		jomlMatrix.set(matrix);
 	}
 
-	public static org.joml.Matrix3f toJoml(Matrix3f matrix) {
-		Matrix3fAccessor m = (Matrix3fAccessor) (Object) matrix;
-		return new org.joml.Matrix3f(m.flywheel$m00(), m.flywheel$m10(), m.flywheel$m20(), m.flywheel$m01(), m.flywheel$m11(), m.flywheel$m21(), m.flywheel$m02(), m.flywheel$m12(), m.flywheel$m22());
+	public static Matrix3f toJoml(Matrix3f matrix) {
+		return new Matrix3f(matrix);
 	}
 
 	/**
@@ -147,10 +96,9 @@ public final class MatrixUtil {
 	 * @return The greatest scale factor across all axes.
 	 */
 	public static float extractScale(Matrix4f matrix) {
-		Matrix4fAccessor m = (Matrix4fAccessor) (Object) matrix;
-		float scaleSqrX = m.flywheel$m00() * m.flywheel$m00() + m.flywheel$m01() * m.flywheel$m01() + m.flywheel$m02() * m.flywheel$m02();
-		float scaleSqrY = m.flywheel$m10() * m.flywheel$m10() + m.flywheel$m11() * m.flywheel$m11() + m.flywheel$m12() * m.flywheel$m12();
-		float scaleSqrZ = m.flywheel$m20() * m.flywheel$m20() + m.flywheel$m21() * m.flywheel$m21() + m.flywheel$m22() * m.flywheel$m22();
-		return (float) Math.sqrt(Math.max(Math.max(scaleSqrX, scaleSqrY), scaleSqrZ));
+		float scaleSqrX = matrix.m00() * matrix.m00() + matrix.m01() * matrix.m01() + matrix.m02() * matrix.m02();
+		float scaleSqrY = matrix.m10() * matrix.m10() + matrix.m11() * matrix.m11() + matrix.m12() * matrix.m12();
+		float scaleSqrZ = matrix.m20() * matrix.m20() + matrix.m21() * matrix.m21() + matrix.m22() * matrix.m22();
+		return Math.sqrt(Math.max(Math.max(scaleSqrX, scaleSqrY), scaleSqrZ));
 	}
 }

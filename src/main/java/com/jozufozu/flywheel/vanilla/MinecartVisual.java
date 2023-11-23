@@ -15,7 +15,6 @@ import com.jozufozu.flywheel.lib.model.SimpleModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.visual.AbstractEntityVisual;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
 
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.util.Mth;
@@ -124,7 +123,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		if (pos != null) {
 			Vec3 offset1 = entity.getPosOffs(posX, posY, posZ, 0.3F);
 			Vec3 offset2 = entity.getPosOffs(posX, posY, posZ, -0.3F);
-	
+
 			if (offset1 == null) {
 				offset1 = pos;
 			}

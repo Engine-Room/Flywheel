@@ -10,8 +10,8 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 
 public final class VisualizationEventHandler {
 	private VisualizationEventHandler() {
@@ -32,7 +32,7 @@ public final class VisualizationEventHandler {
 			return;
 		}
 
-		Level level = cameraEntity.level;
+		Level level = cameraEntity.level();
 		VisualizationManagerImpl manager = VisualizationManagerImpl.get(level);
 		if (manager == null) {
 			return;
@@ -65,8 +65,8 @@ public final class VisualizationEventHandler {
 		manager.renderStage(event.getContext(), event.getStage());
 	}
 
-	public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
-		Level level = event.getWorld();
+	public static void onEntityJoinWorld(EntityJoinLevelEvent event) {
+		Level level = event.getLevel();
 		VisualizationManager manager = VisualizationManager.get(level);
 		if (manager == null) {
 			return;
@@ -75,8 +75,8 @@ public final class VisualizationEventHandler {
 		manager.getEntities().queueAdd(event.getEntity());
 	}
 
-	public static void onEntityLeaveWorld(EntityLeaveWorldEvent event) {
-		Level level = event.getWorld();
+	public static void onEntityLeaveWorld(EntityLeaveLevelEvent event) {
+		Level level = event.getLevel();
 		VisualizationManager manager = VisualizationManager.get(level);
 		if (manager == null) {
 			return;

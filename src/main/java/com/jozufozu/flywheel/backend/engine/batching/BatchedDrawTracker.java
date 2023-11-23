@@ -71,7 +71,9 @@ public class BatchedDrawTracker {
 		if (buffer.hasVertices()) {
 			BufferBuilderExtension scratch = (BufferBuilderExtension) this.scratch;
 			buffer.inject(scratch);
-			buffer.getRenderType().end(this.scratch, 0, 0, 0);
+			// FIXME: Maybe we shouldn't pass null.
+			buffer.getRenderType()
+					.end(this.scratch, null);
 		}
 		buffer.reset();
 	}
