@@ -4,6 +4,8 @@ import org.joml.Math;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
 
+import net.minecraft.util.RandomSource;
+
 public final class MoreMath {
 	public static int align16(int numToRound) {
 		return (numToRound + 16 - 1) & -16;
@@ -48,6 +50,10 @@ public final class MoreMath {
 				}
 			}
 		}
+	}
+
+	public static float nextFloat(RandomSource rs, float min, float max) {
+		return rs.nextFloat() * (max - min) + min;
 	}
 
 	/**

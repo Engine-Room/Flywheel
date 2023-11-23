@@ -36,10 +36,12 @@ import com.jozufozu.flywheel.vanilla.VanillaVisuals;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -72,8 +74,8 @@ public class Flywheel {
 		FlwConfig.get().registerSpecs(modLoadingContext);
 
 		modLoadingContext.registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(
-				() -> NetworkConstants.IGNORESERVERONLY,
-				(serverVersion, isNetwork) -> isNetwork
+				() -> "any",
+				(serverVersion, isNetwork) -> true
 		));
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> Flywheel.clientInit(forgeEventBus, modEventBus));
@@ -128,14 +130,15 @@ public class Flywheel {
 		RegistryImpl.freezeAll();
 		IdRegistryImpl.freezeAll();
 
-		ArgumentTypes.register(rl("backend").toString(), BackendArgument.class, new EmptyArgumentSerializer<>(() -> BackendArgument.INSTANCE));
+		ArgumentTypeInfos.registerByClass(BackendArgument.class, SingletonArgumentInfo.contextFree(() -> BackendArgument.INSTANCE));
 	}
 
-	private static void addDebugInfo(RenderGameOverlayEvent.Text event) {
+	private static void addDebugInfo(CustomizeGuiOverlayEvent.DebugText event) {
 		Minecraft mc = Minecraft.getInstance();
-		if (!mc.options.renderDebug) {
-			return;
-		}
+// FIXME: do we need this check anymore?
+//		if (!mc.options.renderDebug) {
+//			return;
+//		}
 
 		ArrayList<String> info = event.getRight();
 		info.add("");
