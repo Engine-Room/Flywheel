@@ -17,6 +17,7 @@ import com.jozufozu.flywheel.api.vertex.VertexListProviderRegistry;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferBuilder.DrawState;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
@@ -56,17 +57,17 @@ public final class ModelUtil {
 		return dispatcher;
 	}
 
-	public static boolean isVanillaBufferEmpty(Pair<DrawState, ByteBuffer> pair) {
-		return pair.getFirst().vertexCount() == 0;
+	public static boolean isVanillaBufferEmpty(BufferBuilder.RenderedBuffer renderedBuffer) {
+		return renderedBuffer.drawState().vertexCount() == 0;
 	}
 
-	public static MemoryBlock convertVanillaBuffer(Pair<DrawState, ByteBuffer> pair, VertexType vertexType) {
-		DrawState drawState = pair.getFirst();
+	public static MemoryBlock convertVanillaBuffer(BufferBuilder.RenderedBuffer renderedBuffer, VertexType vertexType) {
+		DrawState drawState = renderedBuffer.drawState();
 		int vertexCount = drawState.vertexCount();
 		VertexFormat srcFormat = drawState.format();
 
-		ByteBuffer src = pair.getSecond();
-		MemoryBlock dst = MemoryBlock.malloc(vertexCount * vertexType.getLayout().getStride());
+		ByteBuffer src = renderedBuffer.vertexBuffer();
+		MemoryBlock dst = MemoryBlock.malloc((long) vertexCount * vertexType.getLayout().getStride());
 		long srcPtr = MemoryUtil.memAddress(src);
 		long dstPtr = dst.ptr();
 

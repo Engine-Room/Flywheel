@@ -16,14 +16,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 
 public class BlockModelBuilder {
 	private final BlockState state;
 	private boolean shadeSeparated = true;
 	private BlockAndTintGetter renderWorld;
 	private PoseStack poseStack;
-	private IModelData modelData;
+	private ModelData modelData = ModelData.EMPTY;
 	private BiFunction<RenderType, Boolean, Material> materialFunc;
 
 	public BlockModelBuilder(BlockState state) {
@@ -45,7 +45,7 @@ public class BlockModelBuilder {
 		return this;
 	}
 
-	public BlockModelBuilder modelData(IModelData modelData) {
+	public BlockModelBuilder modelData(ModelData modelData) {
 		this.modelData = modelData;
 		return this;
 	}
@@ -60,7 +60,7 @@ public class BlockModelBuilder {
 			renderWorld = VirtualEmptyBlockGetter.INSTANCE;
 		}
 		if (modelData == null) {
-			modelData = VirtualEmptyModelData.INSTANCE;
+			modelData = ModelData.EMPTY;
 		}
 		if (materialFunc == null) {
 			materialFunc = ModelUtil::getMaterial;

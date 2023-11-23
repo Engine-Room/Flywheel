@@ -18,7 +18,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 
 public class BakedModelBuilder {
 	private final BakedModel bakedModel;
@@ -26,7 +26,7 @@ public class BakedModelBuilder {
 	private BlockAndTintGetter renderWorld;
 	private BlockState blockState;
 	private PoseStack poseStack;
-	private IModelData modelData;
+	private ModelData modelData;
 	private BiFunction<RenderType, Boolean, Material> materialFunc;
 
 	public BakedModelBuilder(BakedModel bakedModel) {
@@ -53,7 +53,7 @@ public class BakedModelBuilder {
 		return this;
 	}
 
-	public BakedModelBuilder modelData(IModelData modelData) {
+	public BakedModelBuilder modelData(ModelData modelData) {
 		this.modelData = modelData;
 		return this;
 	}
@@ -71,7 +71,7 @@ public class BakedModelBuilder {
 			blockState = Blocks.AIR.defaultBlockState();
 		}
 		if (modelData == null) {
-			modelData = VirtualEmptyModelData.INSTANCE;
+			modelData = ModelData.EMPTY;
 		}
 		if (materialFunc == null) {
 			materialFunc = ModelUtil::getMaterial;
