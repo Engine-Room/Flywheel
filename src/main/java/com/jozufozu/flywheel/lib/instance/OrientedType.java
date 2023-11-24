@@ -48,15 +48,13 @@ public class OrientedType implements InstanceType<OrientedInstance> {
 	@Override
 	public InstanceVertexTransformer<OrientedInstance> getVertexTransformer() {
 		return (vertexList, instance) -> {
-			Quaternionf q = new Quaternionf(instance.qX, instance.qY, instance.qZ, instance.qW);
-
 			Matrix4f modelMatrix = new Matrix4f();
 			modelMatrix.translate(instance.posX + instance.pivotX, instance.posY + instance.pivotY, instance.posZ + instance.pivotZ);
-			modelMatrix.rotate(q);
+			modelMatrix.rotate(instance.rotation);
 			modelMatrix.translate(-instance.pivotX, -instance.pivotY, -instance.pivotZ);
 
 			Matrix3f normalMatrix = new Matrix3f();
-			normalMatrix.set(q);
+			normalMatrix.set(instance.rotation);
 
 			float r = RenderMath.uf(instance.r);
 			float g = RenderMath.uf(instance.g);
@@ -81,7 +79,7 @@ public class OrientedType implements InstanceType<OrientedInstance> {
 	public InstanceBoundingSphereTransformer<OrientedInstance> getBoundingSphereTransformer() {
 		return (boundingSphere, instance) -> {
 			boundingSphere.sub(instance.pivotX, instance.pivotY, instance.pivotZ, 0);
-			boundingSphere.rotate(new Quaternionf(instance.qX, instance.qY, instance.qZ, instance.qW));
+			boundingSphere.rotate(instance.rotation);
 			boundingSphere.add(instance.posX + instance.pivotX, instance.posY + instance.pivotY, instance.posZ + instance.pivotZ, 0);
 		};
 	}

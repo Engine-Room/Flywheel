@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.impl.visualization;
 
 import org.jetbrains.annotations.Nullable;
-import org.joml.FrustumIntersection;
 
 import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.backend.Engine;
@@ -20,7 +19,6 @@ import com.jozufozu.flywheel.impl.task.FlwTaskExecutor;
 import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EffectVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EntityVisualManager;
-import com.jozufozu.flywheel.lib.math.MatrixUtil;
 import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.NamedFlag;
 import com.jozufozu.flywheel.lib.task.NestedPlan;
@@ -213,18 +211,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 			if (engine.updateRenderOrigin(context.camera())) {
 				recreationPlan.execute(taskExecutor, partialTick, then);
 			} else {
-				Vec3i renderOrigin = engine.renderOrigin();
-				var cameraPos = context.camera()
-						.getPosition();
-				double cameraX = cameraPos.x;
-				double cameraY = cameraPos.y;
-				double cameraZ = cameraPos.z;
-
-				org.joml.Matrix4f proj = MatrixUtil.toJoml(context.viewProjection());
-				proj.translate((float) (renderOrigin.getX() - cameraX), (float) (renderOrigin.getY() - cameraY), (float) (renderOrigin.getZ() - cameraZ));
-				FrustumIntersection frustum = new FrustumIntersection(proj);
-
-				var frameContext = new FrameContext(cameraX, cameraY, cameraZ, frustum, partialTick);
+				var frameContext = FrameContext.create(context, engine.renderOrigin(), partialTick);
 
 				normalPlan.execute(taskExecutor, frameContext, then);
 			}

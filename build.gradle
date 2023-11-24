@@ -45,7 +45,6 @@ minecraft {
 
         client {
             property 'flw.dumpShaderSource', 'true'
-            property 'flw.loadRenderDoc', 'true'
             property 'flw.debugMemorySafety', 'true'
         }
 

@@ -68,7 +68,7 @@ public class TransformedType implements InstanceType<TransformedInstance> {
 		return (boundingSphere, instance) -> {
 			var radius = boundingSphere.w;
 			boundingSphere.w = 1;
-			boundingSphere.mul(MatrixUtil.toJoml(instance.model));
+			boundingSphere.mul(instance.model);
 			boundingSphere.w = radius * MatrixUtil.extractScale(instance.model);
 		};
 	}

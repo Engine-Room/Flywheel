@@ -2,9 +2,9 @@ package com.jozufozu.flywheel.backend.engine.batching;
 
 import org.jetbrains.annotations.NotNull;
 import org.joml.FrustumIntersection;
+import org.joml.Matrix4f;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
-import com.jozufozu.flywheel.lib.math.MatrixUtil;
 import com.jozufozu.flywheel.lib.util.FlwUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -20,9 +20,9 @@ public record BatchContext(FrustumIntersection frustum, ClientLevel level, PoseS
 		var stack = FlwUtil.copyPoseStack(context.stack());
 		stack.translate(origin.getX() - cameraPos.x, origin.getY() - cameraPos.y, origin.getZ() - cameraPos.z);
 
-		org.joml.Matrix4f proj = MatrixUtil.toJoml(context.viewProjection());
-		proj.translate((float) (origin.getX() - cameraPos.x), (float) (origin.getY() - cameraPos.y), (float) (origin.getZ() - cameraPos.z));
+		Matrix4f viewProjection = new Matrix4f(context.viewProjection());
+		viewProjection.translate((float) (origin.getX() - cameraPos.x), (float) (origin.getY() - cameraPos.y), (float) (origin.getZ() - cameraPos.z));
 
-		return new BatchContext(new FrustumIntersection(proj), context.level(), stack.last());
+		return new BatchContext(new FrustumIntersection(viewProjection), context.level(), stack.last());
 	}
 }
