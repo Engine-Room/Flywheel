@@ -26,6 +26,7 @@ public class ModelCache<T> {
 	}
 
 	public void clear() {
+		map.values().forEach(Model::delete);
 		map.clear();
 	}
 
