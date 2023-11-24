@@ -49,6 +49,7 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -116,6 +117,10 @@ public class Flywheel {
 
 		ShadersModHandler.init();
 
+		modEventBus.addListener(Flywheel::lateInit);
+	}
+
+	private static void lateInit(final FMLClientSetupEvent event) {
 		VertexTypes.init();
 		InstanceTypes.init();
 		Materials.init();
@@ -124,12 +129,12 @@ public class Flywheel {
 		MaterialIndices.init();
 
 		VanillaVisuals.init();
+
+		RegistryImpl.freezeAll();
+		IdRegistryImpl.freezeAll();
 	}
 
 	private static void setup(final FMLCommonSetupEvent event) {
-		RegistryImpl.freezeAll();
-		IdRegistryImpl.freezeAll();
-
 		ArgumentTypeInfos.registerByClass(BackendArgument.class, SingletonArgumentInfo.contextFree(() -> BackendArgument.INSTANCE));
 	}
 

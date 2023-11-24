@@ -17,10 +17,10 @@ public class FixNormalScalingMixin {
 	 * applied, which negates the matrix again, resulting in the matrix being the
 	 * same as in the beginning.
 	 */
-	@Inject(method = "scale(FFF)V", at = @At(value = "INVOKE", target = "Lcom/mojang/math/Matrix3f;mul(F)V", shift = Shift.AFTER), cancellable = true)
-	private void flywheel$returnAfterNegate(float x, float y, float z, CallbackInfo ci) {
-		ci.cancel();
-	}
+//	@Inject(method = "scale(FFF)V", at = @At(value = "INVOKE", target = "Lcom/mojang/math/Matrix3f;mul(F)V", shift = Shift.AFTER), cancellable = true)
+//	private void flywheel$returnAfterNegate(float x, float y, float z, CallbackInfo ci) {
+//		ci.cancel();
+//	}
 
 	/**
 	 * Minecraft takes the inverse cube root of the product of all scales to provide a
