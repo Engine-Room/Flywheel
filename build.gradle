@@ -3,8 +3,8 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version "${forgegradle_version}"
-    id 'org.spongepowered.mixin' version "${mixingradle_version}"
     id 'org.parchmentmc.librarian.forgegradle' version "${librarian_version}"
+    id 'org.spongepowered.mixin' version "${mixingradle_version}"
     id 'com.matthewprenger.cursegradle' version "${cursegradle_version}"
 }
 
@@ -104,9 +104,9 @@ dependencies {
     // https://discord.com/channels/313125603924639766/725850371834118214/910619168821354497
     // Prevent Mixin annotation processor from getting into IntelliJ's annotation processor settings
     // This allows 'Settings > Build, Execution, and Deployment > Build Tools > Gradle > Build and run using' set to IntelliJ to work correctly
-    if (System.getProperty('idea.sync.active') != 'true') {
+    // if (System.getProperty('idea.sync.active') != 'true') {
         annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
-    }
+    // }
 }
 
 test {
@@ -159,16 +159,10 @@ tasks.named('jar', Jar).configure {
                 'Implementation-Version'  : project.jar.archiveVersion,
                 //'Implementation-Vendor': 'flywheel authors',
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'MixinConfigs'            : 'flywheel.mixins.json,flywheel.sodium.mixins.json'
         ])
     }
 
     finalizedBy 'reobfJar'
-    addLicense(it)
-}
-
-tasks.named('jarJar').configure {
-    finalizedBy 'reobfJarJar'
     addLicense(it)
 }
 
@@ -209,6 +203,6 @@ curseforge {
         changelog = file('changelog.txt')
         releaseType = project.curse_type
         mainArtifact jar
-        addGameVersion '1.20.2'
+        addGameVersion '1.20.1'
     }
 }
