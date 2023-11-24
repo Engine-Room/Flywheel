@@ -15,10 +15,10 @@ public class OrientedWriter extends ColoredLitWriter<OrientedInstance> {
 		MemoryUtil.memPutFloat(ptr + 20, instance.pivotX);
 		MemoryUtil.memPutFloat(ptr + 24, instance.pivotY);
 		MemoryUtil.memPutFloat(ptr + 28, instance.pivotZ);
-		MemoryUtil.memPutFloat(ptr + 32, instance.qX);
-		MemoryUtil.memPutFloat(ptr + 36, instance.qY);
-		MemoryUtil.memPutFloat(ptr + 40, instance.qZ);
-		MemoryUtil.memPutFloat(ptr + 44, instance.qW);
+		MemoryUtil.memPutFloat(ptr + 32, instance.rotation.x);
+		MemoryUtil.memPutFloat(ptr + 36, instance.rotation.y);
+		MemoryUtil.memPutFloat(ptr + 40, instance.rotation.z);
+		MemoryUtil.memPutFloat(ptr + 44, instance.rotation.w);
 	}
 
 }

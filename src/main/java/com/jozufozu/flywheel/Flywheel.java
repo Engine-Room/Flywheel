@@ -140,10 +140,10 @@ public class Flywheel {
 
 	private static void addDebugInfo(CustomizeGuiOverlayEvent.DebugText event) {
 		Minecraft mc = Minecraft.getInstance();
-// FIXME: do we need this check anymore?
-//		if (!mc.options.renderDebug) {
-//			return;
-//		}
+
+		if (!mc.options.renderDebug) {
+			return;
+		}
 
 		ArrayList<String> info = event.getRight();
 		info.add("");

@@ -8,7 +8,6 @@
     "BlockEntityTypeMixin",
     "BufferBuilderMixin",
     "ClientLevelMixin",
-    "ClientMainMixin",
     "EntityTypeMixin",
     "FogUpdateMixin",
     "GlStateManagerMixin",

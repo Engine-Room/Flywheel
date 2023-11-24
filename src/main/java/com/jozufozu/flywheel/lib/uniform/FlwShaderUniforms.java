@@ -49,6 +49,8 @@ public class FlwShaderUniforms implements ShaderUniforms {
 
 		private boolean dirty;
 
+		private final Matrix4f viewProjection = new Matrix4f();
+
 		public Active(long ptr) {
 			this.ptr = ptr;
 			MinecraftForge.EVENT_BUS.addListener(this);
@@ -83,18 +85,20 @@ public class FlwShaderUniforms implements ShaderUniforms {
 			var camY = (float) (camera.y - renderOrigin.getY());
 			var camZ = (float) (camera.z - renderOrigin.getZ());
 
-			// don't want to mutate viewProjection
-			var vp = new Matrix4f(context.viewProjection());
-			vp.translate(-camX, -camY, -camZ);
+			viewProjection.set(context.viewProjection());
+			viewProjection.translate(-camX, -camY, -camZ);
 
-			MatrixUtil.writeUnsafe(vp, ptr + 32);
+			MatrixUtil.writeUnsafe(viewProjection, ptr + 32);
 			MemoryUtil.memPutFloat(ptr + 96, camX);
 			MemoryUtil.memPutFloat(ptr + 100, camY);
 			MemoryUtil.memPutFloat(ptr + 104, camZ);
 			MemoryUtil.memPutFloat(ptr + 108, 0f); // vec4 alignment
 			MemoryUtil.memPutInt(ptr + 112, getConstantAmbientLightFlag(context));
 
-			updateFrustum(context, camX, camY, camZ);
+			if (!FRUSTUM_PAUSED || FRUSTUM_CAPTURE) {
+				MoreMath.writePackedFrustumPlanes(ptr + 128, viewProjection);
+				FRUSTUM_CAPTURE = false;
+			}
 
 			dirty = true;
 		}
@@ -127,17 +131,5 @@ public class FlwShaderUniforms implements ShaderUniforms {
 			return true;
 		}
 
-		private void updateFrustum(RenderContext context, float camX, float camY, float camZ) {
-			if (FRUSTUM_PAUSED && !FRUSTUM_CAPTURE) {
-				return;
-			}
-
-			var projection = MatrixUtil.toJoml(context.viewProjection());
-			projection.translate(-camX, -camY, -camZ);
-
-			MoreMath.writePackedFrustumPlanes(ptr + 128, projection);
-
-			FRUSTUM_CAPTURE = false;
-		}
 	}
 }

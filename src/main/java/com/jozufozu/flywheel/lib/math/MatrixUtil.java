@@ -73,22 +73,6 @@ public final class MatrixUtil {
 		MemoryUtil.memPutFloat(ptr + 32, matrix.m22());
 	}
 
-	public static void store(Matrix4f matrix, Matrix4f jomlMatrix) {
-		jomlMatrix.set(matrix);
-	}
-
-	public static Matrix4f toJoml(Matrix4f matrix) {
-		return new Matrix4f(matrix);
-	}
-
-	public static void store(Matrix3f matrix, org.joml.Matrix3f jomlMatrix) {
-		jomlMatrix.set(matrix);
-	}
-
-	public static Matrix3f toJoml(Matrix3f matrix) {
-		return new Matrix3f(matrix);
-	}
-
 	/**
 	 * Extracts the greatest scale factor across all axes from the given matrix.
 	 *

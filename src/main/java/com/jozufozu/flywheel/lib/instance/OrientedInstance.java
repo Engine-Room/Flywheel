@@ -7,6 +7,7 @@ import com.jozufozu.flywheel.api.instance.InstanceHandle;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 
 public class OrientedInstance extends ColoredLitInstance {
 	public float posX;
@@ -15,10 +16,7 @@ public class OrientedInstance extends ColoredLitInstance {
 	public float pivotX = 0.5f;
 	public float pivotY = 0.5f;
 	public float pivotZ = 0.5f;
-	public float qX;
-	public float qY;
-	public float qZ;
-	public float qW = 1;
+	public final Quaternionf rotation = new Quaternionf();
 
 	public OrientedInstance(InstanceType<? extends OrientedInstance> type, InstanceHandle handle) {
 		super(type, handle);
@@ -49,11 +47,11 @@ public class OrientedInstance extends ColoredLitInstance {
 	}
 
 	public OrientedInstance setPivot(Vector3f pos) {
-		return setPosition(pos.x(), pos.y(), pos.z());
+		return setPivot(pos.x(), pos.y(), pos.z());
 	}
 
-	public OrientedInstance setPivot(net.minecraft.world.phys.Vec3 pos) {
-		return setPosition((float) pos.x(), (float) pos.y(), (float) pos.z());
+	public OrientedInstance setPivot(Vec3 pos) {
+		return setPivot((float) pos.x(), (float) pos.y(), (float) pos.z());
 	}
 
 	public OrientedInstance setPivot(float x, float y, float z) {
@@ -65,23 +63,19 @@ public class OrientedInstance extends ColoredLitInstance {
 	}
 
 	public OrientedInstance setRotation(Quaternionf q) {
-		return setRotation(q.x, q.y, q.z, q.w);
+		 rotation.set(q);
+		 setChanged();
+		 return this;
 	}
 
 	public OrientedInstance setRotation(float x, float y, float z, float w) {
-		this.qX = x;
-		this.qY = y;
-		this.qZ = z;
-		this.qW = w;
+		rotation.set(x, y, z, w);
 		setChanged();
 		return this;
 	}
 
 	public OrientedInstance resetRotation() {
-		this.qX = 0;
-		this.qY = 0;
-		this.qZ = 0;
-		this.qW = 1;
+		rotation.identity();
 		setChanged();
 		return this;
 	}
