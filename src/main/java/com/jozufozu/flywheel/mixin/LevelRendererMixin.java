@@ -128,7 +128,7 @@ public class LevelRendererMixin {
 		flywheel$dispatch(RenderStage.AFTER_FINAL_END_BATCH);
 	}
 
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V", ordinal = 6, shift = Shift.AFTER))
+	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLorg/joml/Matrix4f;)V", ordinal = 6, shift = Shift.AFTER))
 	private void flywheel$onStage$afterTranslucentTerrain(CallbackInfo ci) {
 		flywheel$dispatch(RenderStage.AFTER_TRANSLUCENT_TERRAIN);
 	}

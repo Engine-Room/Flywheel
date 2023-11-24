@@ -23,6 +23,12 @@ class DebugMemoryBlockImpl extends MemoryBlockImpl {
 	}
 
 	static StackWalker.StackFrame[] getStackTrace() {
+		// skip 4 frames to get to the caller:
+		// - this method
+		// - DebugMemoryBlockImpl::new
+		// - DebugMemoryBlockImpl::malloc/calloc
+		// - MemoryBlock::malloc/calloc
+		// - {caller is here}
 		return StackWalker.getInstance().walk(s -> s.skip(4).toArray(StackWalker.StackFrame[]::new));
 	}
 
