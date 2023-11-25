@@ -90,7 +90,7 @@ public class IndirectEngine extends AbstractEngine {
 	}
 
 	@Override
-	public void invalidate() {
+	public void delete() {
 		drawManager.invalidate();
 	}
 }

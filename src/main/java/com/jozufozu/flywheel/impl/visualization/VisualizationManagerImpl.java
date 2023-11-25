@@ -249,6 +249,6 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		blockEntities.invalidate();
 		entities.invalidate();
 		effects.invalidate();
-		engine.invalidate();
+		engine.delete();
 	}
 }

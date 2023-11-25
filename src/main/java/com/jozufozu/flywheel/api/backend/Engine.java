@@ -11,8 +11,18 @@ import net.minecraft.client.Camera;
 import net.minecraft.core.Vec3i;
 
 public interface Engine extends InstancerProvider {
+	/**
+	 * Create a plan that will be executed every frame.
+	 * @return A new plan.
+	 */
 	Plan<RenderContext> createFramePlan();
 
+	/**
+	 * Render all instances necessary for the given stage.
+	 * @param executor The task executor running the frame plan.
+	 * @param context The render context for this frame.
+	 * @param stage The stage to render.
+	 */
 	void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage);
 
 	void renderCrumblingInstance(TaskExecutor taskExecutor, RenderContext context, Instance instance, int progress);
@@ -25,7 +35,15 @@ public interface Engine extends InstancerProvider {
 	 */
 	boolean updateRenderOrigin(Camera camera);
 
+	/**
+	 * @return The current render origin.
+	 */
 	Vec3i renderOrigin();
 
-	void invalidate();
+	/**
+	 * Free all resources associated with this engine.
+	 * <br>
+	 * This engine will not be used again after this method is called.
+	 */
+	void delete();
 }
