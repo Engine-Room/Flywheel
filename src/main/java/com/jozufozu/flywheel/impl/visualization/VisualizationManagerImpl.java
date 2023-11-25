@@ -1,11 +1,14 @@
 package com.jozufozu.flywheel.impl.visualization;
 
+import java.util.SortedSet;
+
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
+import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
@@ -20,15 +23,17 @@ import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityVisualManager
 import com.jozufozu.flywheel.impl.visualization.manager.EffectVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EntityVisualManager;
 import com.jozufozu.flywheel.lib.task.Flag;
+import com.jozufozu.flywheel.lib.task.MapContextPlan;
 import com.jozufozu.flywheel.lib.task.NamedFlag;
-import com.jozufozu.flywheel.lib.task.NestedPlan;
 import com.jozufozu.flywheel.lib.task.RaisePlan;
-import com.jozufozu.flywheel.lib.task.SimplyComposedPlan;
+import com.jozufozu.flywheel.lib.task.IfElsePlan;
 import com.jozufozu.flywheel.lib.util.LevelAttached;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -50,7 +55,8 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	private final Plan<RenderContext> framePlan;
 
 	private final Flag tickFlag = new NamedFlag("tick");
-	private final Flag frameFlag = new NamedFlag("frame");
+	private final Flag frameVisualsFlag = new NamedFlag("frameVisualUpdates");
+	private final Flag frameFlag = new NamedFlag("frameComplete");
 
 	private VisualizationManagerImpl(LevelAccessor level) {
 		engine = BackendManager.getBackend()
@@ -66,7 +72,21 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				.and(effects.createTickPlan())
 				.then(RaisePlan.raise(tickFlag))
 				.simplify();
-		framePlan = new FramePlan().then(RaisePlan.raise(frameFlag));
+
+		framePlan = IfElsePlan.on((RenderContext ctx) -> engine.updateRenderOrigin(ctx.camera()))
+				.ifTrue(MapContextPlan.map(RenderContext::partialTick)
+						.to(blockEntities.createRecreationPlan()
+								.and(entities.createRecreationPlan())
+								.and(effects.createRecreationPlan())))
+				.ifFalse(MapContextPlan.map((RenderContext ctx) -> FrameContext.create(ctx, engine.renderOrigin()))
+						.to(blockEntities.createFramePlan()
+								.and(entities.createFramePlan())
+								.and(effects.createFramePlan())))
+				.plan()
+				.then(RaisePlan.raise(frameVisualsFlag))
+				.then(engine.createFramePlan())
+				.then(RaisePlan.raise(frameFlag))
+				.simplify();
 	}
 
 	public static boolean supportsVisualization(@Nullable LevelAccessor level) {
@@ -171,6 +191,8 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		// Note we don't lower here because many frames may happen per tick.
 		taskExecutor.syncUntil(tickFlag::isRaised);
 
+		frameVisualsFlag.lower();
+		frameFlag.lower();
 		framePlan.execute(taskExecutor, context);
 	}
 
@@ -179,6 +201,41 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	 */
 	public void renderStage(RenderContext context, RenderStage stage) {
 		engine.renderStage(taskExecutor, context, stage);
+	}
+
+	public void renderCrumbling(RenderContext context, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress) {
+		taskExecutor.syncUntil(frameVisualsFlag::isRaised);
+
+		for (var entry : destructionProgress.long2ObjectEntrySet()) {
+			var set = entry.getValue();
+            if (set == null || set.isEmpty()) {
+				// Nothing to do if there's no crumbling.
+				continue;
+            }
+
+			var visual = blockEntities.visualAtPos(entry.getLongKey());
+
+			if (visual == null) {
+				// The block doesn't have a visual, this is probably the common case.
+				continue;
+			}
+
+			var instanceList = visual.getCrumblingInstances();
+
+			if (instanceList.isEmpty()) {
+				// The visual doesn't want to render anything crumbling.
+				continue;
+			}
+
+			// now for the fun part
+
+			int progress = set.last()
+					.getProgress();
+
+			for (Instance instance : instanceList) {
+				engine.renderCrumblingInstance(taskExecutor, context, instance, progress);
+			}
+        }
 	}
 
 	/**
@@ -192,29 +249,6 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		blockEntities.invalidate();
 		entities.invalidate();
 		effects.invalidate();
-		engine.delete();
-	}
-
-	private class FramePlan implements SimplyComposedPlan<RenderContext> {
-		private final Plan<Float> recreationPlan = NestedPlan.of(blockEntities.createRecreationPlan(), entities.createRecreationPlan(), effects.createRecreationPlan());
-		private final Plan<FrameContext> normalPlan = blockEntities.createFramePlan()
-				.and(entities.createFramePlan())
-				.and(effects.createFramePlan());
-
-		private final Plan<RenderContext> enginePlan = engine.createFramePlan();
-
-		@Override
-		public void execute(TaskExecutor taskExecutor, RenderContext context, Runnable onCompletion) {
-			Runnable then = () -> enginePlan.execute(taskExecutor, context, onCompletion);
-			float partialTick = context.partialTick();
-
-			if (engine.updateRenderOrigin(context.camera())) {
-				recreationPlan.execute(taskExecutor, partialTick, then);
-			} else {
-				var frameContext = FrameContext.create(context, engine.renderOrigin(), partialTick);
-
-				normalPlan.execute(taskExecutor, frameContext, then);
-			}
-		}
+		engine.invalidate();
 	}
 }

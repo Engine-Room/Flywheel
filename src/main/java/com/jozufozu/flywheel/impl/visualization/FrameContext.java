@@ -10,7 +10,7 @@ import net.minecraft.core.Vec3i;
 
 public record FrameContext(double cameraX, double cameraY, double cameraZ, FrustumIntersection frustum, float partialTick) {
 	@NotNull
-	public static FrameContext create(RenderContext context, Vec3i renderOrigin, float partialTick) {
+	public static FrameContext create(RenderContext context, Vec3i renderOrigin) {
 		var cameraPos = context.camera()
 				.getPosition();
 		double cameraX = cameraPos.x;
@@ -21,6 +21,6 @@ public record FrameContext(double cameraX, double cameraY, double cameraZ, Frust
 		viewProjection.translate((float) (renderOrigin.getX() - cameraX), (float) (renderOrigin.getY() - cameraY), (float) (renderOrigin.getZ() - cameraZ));
 		FrustumIntersection frustum = new FrustumIntersection(viewProjection);
 
-		return new FrameContext(cameraX, cameraY, cameraZ, frustum, partialTick);
+		return new FrameContext(cameraX, cameraY, cameraZ, frustum, context.partialTick());
 	}
 }

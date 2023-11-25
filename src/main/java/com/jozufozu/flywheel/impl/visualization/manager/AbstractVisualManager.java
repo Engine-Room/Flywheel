@@ -15,6 +15,7 @@ import com.jozufozu.flywheel.impl.visualization.ratelimit.DistanceUpdateLimiterI
 import com.jozufozu.flywheel.impl.visualization.ratelimit.NonLimiter;
 import com.jozufozu.flywheel.impl.visualization.storage.Storage;
 import com.jozufozu.flywheel.impl.visualization.storage.Transaction;
+import com.jozufozu.flywheel.lib.task.MapContextPlan;
 import com.jozufozu.flywheel.lib.task.SimplePlan;
 
 public abstract class AbstractVisualManager<T> implements VisualManager<T> {
@@ -88,7 +89,8 @@ public abstract class AbstractVisualManager<T> implements VisualManager<T> {
 					tickLimiter.tick();
 					processQueue(0);
 				})
-				.thenMap(this::createVisualTickContext, getStorage().getTickPlan());
+				.then(MapContextPlan.map(this::createVisualTickContext)
+						.to(getStorage().getTickPlan()));
 	}
 
 	public Plan<FrameContext> createFramePlan() {
@@ -96,7 +98,8 @@ public abstract class AbstractVisualManager<T> implements VisualManager<T> {
 					frameLimiter.tick();
 					processQueue(context.partialTick());
 				})
-				.thenMap(this::createVisualContext, getStorage().getFramePlan());
+				.then(MapContextPlan.map(this::createVisualContext)
+						.to(getStorage().getFramePlan()));
 	}
 
 	private VisualFrameContext createVisualContext(FrameContext ctx) {

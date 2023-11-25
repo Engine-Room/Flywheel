@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.api.backend;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
+import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstancerProvider;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
@@ -14,6 +15,8 @@ public interface Engine extends InstancerProvider {
 
 	void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage);
 
+	void renderCrumblingInstance(TaskExecutor taskExecutor, RenderContext context, Instance instance, int progress);
+
 	/**
 	 * Maintain the render origin to be within a certain distance from the camera in all directions,
 	 * preventing floating point precision issues at high coordinates.
@@ -24,7 +27,5 @@ public interface Engine extends InstancerProvider {
 
 	Vec3i renderOrigin();
 
-	// TODO: "delete" implies that the object cannot be used afterwards, but all current implementations
-	// support the "invalidate" contract as well, meaning they can be reused after this call. Rename?
-	void delete();
+	void invalidate();
 }

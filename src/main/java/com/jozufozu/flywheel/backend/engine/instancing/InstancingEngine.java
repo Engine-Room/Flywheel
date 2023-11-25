@@ -75,6 +75,11 @@ public class InstancingEngine extends AbstractEngine {
 		}
 	}
 
+	@Override
+	public void renderCrumblingInstance(TaskExecutor taskExecutor, RenderContext context, Instance instance, int progress) {
+		// TODO: implement
+	}
+
 	private void setup() {
 		GlTextureUnit.T2.makeActive();
 		Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
@@ -97,7 +102,7 @@ public class InstancingEngine extends AbstractEngine {
 				continue;
 			}
 
-			setup(shader);
+			setup(shader, context);
 
 			shader.material().setup();
 
@@ -109,7 +114,7 @@ public class InstancingEngine extends AbstractEngine {
 		}
 	}
 
-	private void setup(ShaderState desc) {
+	private void setup(ShaderState desc, Context context) {
 		var material = desc.material();
 		var vertexType = desc.vertexType();
 		var instanceType = desc.instanceType();
@@ -130,7 +135,7 @@ public class InstancingEngine extends AbstractEngine {
 	}
 
 	@Override
-	public void delete() {
+	public void invalidate() {
 		drawManager.invalidate();
 	}
 }
