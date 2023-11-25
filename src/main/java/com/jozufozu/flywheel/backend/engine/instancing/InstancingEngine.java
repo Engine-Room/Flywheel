@@ -1,7 +1,11 @@
 package com.jozufozu.flywheel.backend.engine.instancing;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.context.Context;
@@ -83,38 +87,68 @@ public class InstancingEngine extends AbstractEngine {
 
 	@Override
 	public void renderCrumblingInstances(TaskExecutor executor, RenderContext context, List<Instance> instances, int progress) {
-		// TODO: optimize
+		if (instances.isEmpty()) {
+			return;
+		}
 
+		if (progress < 0 || progress >= ModelBakery.DESTROY_TYPES.size()) {
+			return;
+		}
+
+		// Need to wait for flush before we can inspect instancer state.
 		executor.syncUntil(flushFlag::isRaised);
 
-		var type = ModelBakery.DESTROY_TYPES.get(progress);
+		// Sort draw calls into buckets, so we don't have to do as many shader binds.
+		var drawMap = getDrawsForInstances(instances);
+
+		if (drawMap.isEmpty()) {
+			return;
+		}
 
 		try (var state = GlStateTracker.getRestoreState()) {
-			type.setupRenderState();
+			ModelBakery.DESTROY_TYPES.get(progress)
+					.setupRenderState();
 
-			Textures.bindActiveTextures();
+			for (var entry : drawMap.entrySet()) {
+				setup(entry.getKey(), Contexts.CRUMBLING);
 
-			for (Instance instance : instances) {
-				if (!(instance.handle() instanceof InstanceHandleImpl impl)) {
-					continue;
-				}
-				if (!(impl.instancer instanceof InstancedInstancer<?> instancer)) {
-					continue;
-				}
-
-				List<DrawCall> draws = drawManager.drawCallsForInstancer(instancer);
-
-				draws.removeIf(DrawCall::isInvalid);
-
-				for (DrawCall draw : draws) {
-					var shader = draw.shaderState;
-
-					setup(shader, Contexts.CRUMBLING);
-
-					draw.renderOne(impl.index);
+				for (Runnable draw : entry.getValue()) {
+					draw.run();
 				}
 			}
 		}
+	}
+
+	/**
+	 * Get all draw calls for the given instances, grouped by shader state.
+	 * @param instances The instances to draw.
+	 * @return A mapping of shader states to many runnable draw calls.
+	 */
+	@NotNull
+	private Map<ShaderState, List<Runnable>> getDrawsForInstances(List<Instance> instances) {
+		Map<ShaderState, List<Runnable>> out = new HashMap<>();
+
+		for (Instance instance : instances) {
+			// Filter out instances that weren't created by this engine.
+			// If all is well, we probably shouldn't take the `continue`
+			// branches but better to do checked casts.
+			if (!(instance.handle() instanceof InstanceHandleImpl impl)) {
+				continue;
+			}
+			if (!(impl.instancer instanceof InstancedInstancer<?> instancer)) {
+				continue;
+			}
+
+			List<DrawCall> draws = drawManager.drawCallsForInstancer(instancer);
+
+			draws.removeIf(DrawCall::isInvalid);
+
+			for (DrawCall draw : draws) {
+				out.computeIfAbsent(draw.shaderState, $ -> new ArrayList<>())
+						.add(() -> draw.renderOne(impl));
+			}
+		}
+		return out;
 	}
 
 	private void setup() {

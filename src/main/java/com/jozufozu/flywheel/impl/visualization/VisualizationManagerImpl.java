@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.impl.visualization;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedSet;
 
 import org.jetbrains.annotations.Nullable;
@@ -8,6 +10,7 @@ import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
+import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
@@ -28,6 +31,8 @@ import com.jozufozu.flywheel.lib.task.NamedFlag;
 import com.jozufozu.flywheel.lib.task.RaisePlan;
 import com.jozufozu.flywheel.lib.util.LevelAttached;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -205,6 +210,8 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	public void renderCrumbling(RenderContext context, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress) {
 		taskExecutor.syncUntil(frameVisualsFlag::isRaised);
 
+		Int2ObjectMap<List<Instance>> progress2instances = new Int2ObjectArrayMap<>();
+
 		for (var entry : destructionProgress.long2ObjectEntrySet()) {
 			var set = entry.getValue();
 			if (set == null || set.isEmpty()) {
@@ -231,7 +238,12 @@ public class VisualizationManagerImpl implements VisualizationManager {
 			int progress = set.last()
 					.getProgress();
 
-			engine.renderCrumblingInstances(taskExecutor, context, instances, progress);
+			progress2instances.computeIfAbsent(progress, $ -> new ArrayList<>())
+					.addAll(instances);
+		}
+
+		for (var entry : progress2instances.int2ObjectEntrySet()) {
+			engine.renderCrumblingInstances(taskExecutor, context, entry.getValue(), entry.getIntKey());
 		}
 	}
 
