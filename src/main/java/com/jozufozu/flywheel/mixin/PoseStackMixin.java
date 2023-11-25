@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.mixin.matrix;
+package com.jozufozu.flywheel.mixin;
 
 import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Mixin;
@@ -9,8 +9,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 @Mixin(PoseStack.class)
 public abstract class PoseStackMixin implements TransformStack {
 	@Override
-	public TransformStack multiply(Quaternionf quaternion) {
-		((PoseStack) (Object) this).mulPose(quaternion);
+	public TransformStack pushPose() {
+		((PoseStack) (Object) this).pushPose();
+		return this;
+	}
+
+	@Override
+	public TransformStack popPose() {
+		((PoseStack) (Object) this).popPose();
 		return this;
 	}
 
@@ -21,14 +27,8 @@ public abstract class PoseStackMixin implements TransformStack {
 	}
 
 	@Override
-	public TransformStack pushPose() {
-		((PoseStack) (Object) this).pushPose();
-		return this;
-	}
-
-	@Override
-	public TransformStack popPose() {
-		((PoseStack) (Object) this).popPose();
+	public TransformStack rotate(Quaternionf quaternion) {
+		((PoseStack) (Object) this).mulPose(quaternion);
 		return this;
 	}
 

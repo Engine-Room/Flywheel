@@ -8,7 +8,6 @@ import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial.GlStateShard;
 import com.jozufozu.flywheel.lib.math.DiffuseLightCalculator;
-import com.jozufozu.flywheel.lib.util.ResourceUtil;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -166,7 +165,6 @@ public final class Materials {
 			return new GlStateShard(
 					() -> {
 						GlTextureUnit.T0.makeActive();
-						// FIXME: I think it got removed RenderSystem.enableTexture();
 						AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(loc);
 						texture.setFilter(blur, mipmap);
 						RenderSystem.setShaderTexture(0, texture.getId());
@@ -180,10 +178,10 @@ public final class Materials {
 	}
 
 	public static final class Files {
-		public static final ResourceLocation DEFAULT_VERTEX = ResourceUtil.subPath(Names.DEFAULT, ".vert");
-		public static final ResourceLocation SHADED_VERTEX = ResourceUtil.subPath(Names.SHADED, ".vert");
-		public static final ResourceLocation DEFAULT_FRAGMENT = ResourceUtil.subPath(Names.DEFAULT, ".frag");
-		public static final ResourceLocation CUTOUT_FRAGMENT = ResourceUtil.subPath(Names.CUTOUT, ".frag");
+		public static final ResourceLocation DEFAULT_VERTEX = Names.DEFAULT.withSuffix(".vert");
+		public static final ResourceLocation SHADED_VERTEX = Names.SHADED.withSuffix(".vert");
+		public static final ResourceLocation DEFAULT_FRAGMENT = Names.DEFAULT.withSuffix(".frag");
+		public static final ResourceLocation CUTOUT_FRAGMENT = Names.CUTOUT.withSuffix(".frag");
 	}
 
 	public static final class Names {

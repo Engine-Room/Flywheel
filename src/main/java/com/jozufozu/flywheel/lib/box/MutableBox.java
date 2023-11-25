@@ -2,12 +2,11 @@ package com.jozufozu.flywheel.lib.box;
 
 import java.util.Collection;
 
-import com.jozufozu.flywheel.lib.math.RenderMath;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 
 public class MutableBox implements Box {
@@ -252,9 +251,9 @@ public class MutableBox implements Box {
 	 * Grow this box to have power of 2 side lengths, scaling from the minimum coords.
 	 */
 	public void nextPowerOf2() {
-		int sizeX = RenderMath.nextPowerOf2(sizeX());
-		int sizeY = RenderMath.nextPowerOf2(sizeY());
-		int sizeZ = RenderMath.nextPowerOf2(sizeZ());
+		int sizeX = Mth.smallestEncompassingPowerOfTwo(sizeX());
+		int sizeY = Mth.smallestEncompassingPowerOfTwo(sizeY());
+		int sizeZ = Mth.smallestEncompassingPowerOfTwo(sizeZ());
 
 		maxX = minX + sizeX;
 		maxY = minY + sizeY;
@@ -269,9 +268,9 @@ public class MutableBox implements Box {
 		int sizeY = sizeY();
 		int sizeZ = sizeZ();
 
-		int newSizeX = RenderMath.nextPowerOf2(sizeX);
-		int newSizeY = RenderMath.nextPowerOf2(sizeY);
-		int newSizeZ = RenderMath.nextPowerOf2(sizeZ);
+		int newSizeX = Mth.smallestEncompassingPowerOfTwo(sizeX);
+		int newSizeY = Mth.smallestEncompassingPowerOfTwo(sizeY);
+		int newSizeZ = Mth.smallestEncompassingPowerOfTwo(sizeZ);
 
 		int diffX = newSizeX - sizeX;
 		int diffY = newSizeY - sizeY;

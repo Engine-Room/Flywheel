@@ -19,7 +19,6 @@ import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.ModelCache;
 import com.jozufozu.flywheel.lib.model.SimpleModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
-import com.jozufozu.flywheel.lib.util.Axes;
 import com.jozufozu.flywheel.lib.util.Pair;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
 
@@ -134,20 +133,16 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 
 		lid.loadIdentity()
 				.translate(getVisualPosition())
-				.centre()
-				.multiply(baseRotation)
-				.unCentre()
+				.rotateCentered(baseRotation)
 				.translate(0, 9f / 16f, 1f / 16f)
-				.rotateXRadians(angleX)
+				.rotateX(angleX)
 				.translate(0, -9f / 16f, -1f / 16f);
 
 		lock.loadIdentity()
 				.translate(getVisualPosition())
-				.centre()
-				.multiply(baseRotation)
-				.unCentre()
+				.rotateCentered(baseRotation)
 				.translate(0, 8f / 16f, 0)
-				.rotateXRadians(angleX)
+				.rotateX(angleX)
 				.translate(0, -8f / 16f, 0);
 	}
 

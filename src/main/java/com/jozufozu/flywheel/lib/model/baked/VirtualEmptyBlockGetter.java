@@ -1,13 +1,11 @@
 package com.jozufozu.flywheel.lib.model.baked;
 
-import java.util.function.BiConsumer;
+import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
@@ -22,13 +20,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LightChunk;
 import net.minecraft.world.level.chunk.LightChunkGetter;
-import net.minecraft.world.level.lighting.ChunkSkyLightSources;
 import net.minecraft.world.level.lighting.LayerLightEventListener;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 
-public interface VirtualEmptyBlockGetter extends BlockAndTintGetter, LightChunk {
+public interface VirtualEmptyBlockGetter extends BlockAndTintGetter {
 	public static final VirtualEmptyBlockGetter INSTANCE = new StaticLightImpl(0, 15);
 	public static final VirtualEmptyBlockGetter FULL_BRIGHT = new StaticLightImpl(15, 15);
 	public static final VirtualEmptyBlockGetter FULL_DARK = new StaticLightImpl(0, 0);
@@ -38,6 +35,7 @@ public interface VirtualEmptyBlockGetter extends BlockAndTintGetter, LightChunk 
 	}
 
 	@Override
+	@Nullable
 	default BlockEntity getBlockEntity(BlockPos pos) {
 		return null;
 	}
@@ -73,21 +71,15 @@ public interface VirtualEmptyBlockGetter extends BlockAndTintGetter, LightChunk 
 		return resolver.getColor(plainsBiome, pos.getX(), pos.getZ());
 	}
 
-	@Override
-	default void findBlockLightSources(BiConsumer<BlockPos, BlockState> pOutput) {
-	}
-
 	public static class StaticLightImpl implements VirtualEmptyBlockGetter {
 		private final LevelLightEngine lightEngine;
-		private final ChunkSkyLightSources lightSources;
 
 		public StaticLightImpl(int blockLight, int skyLight) {
 			lightEngine = new LevelLightEngine(new LightChunkGetter() {
-
-
 				@Override
-				public LightChunk getChunkForLighting(int p_63023_, int p_63024_) {
-					return StaticLightImpl.this;
+				@Nullable
+				public LightChunk getChunkForLighting(int x, int z) {
+					return null;
 				}
 
 				@Override
@@ -103,8 +95,6 @@ public interface VirtualEmptyBlockGetter extends BlockAndTintGetter, LightChunk 
 					return layer == LightLayer.BLOCK ? blockListener : skyListener;
 				}
 			};
-
-			lightSources = new ChunkSkyLightSources(this);
 		}
 
 		private static LayerLightEventListener createStaticListener(int light) {
@@ -114,27 +104,25 @@ public interface VirtualEmptyBlockGetter extends BlockAndTintGetter, LightChunk 
 				}
 
 				@Override
-				public int runLightUpdates() {
-					return 0;
-				}
-
-				@Override
-				public void setLightEnabled(ChunkPos pChunkPos, boolean pLightEnabled) {
-
-				}
-
-				@Override
-				public void propagateLightSources(ChunkPos pChunkPos) {
-
-				}
-
-				@Override
 				public boolean hasLightWork() {
 					return false;
 				}
 
 				@Override
-				public void updateSectionStatus(SectionPos pos, boolean isQueueEmpty) {
+				public int runLightUpdates() {
+					return 0;
+				}
+
+				@Override
+				public void updateSectionStatus(SectionPos pos, boolean isSectionEmpty) {
+				}
+
+				@Override
+				public void setLightEnabled(ChunkPos pos, boolean lightEnabled) {
+				}
+
+				@Override
+				public void propagateLightSources(ChunkPos pos) {
 				}
 
 				@Override
@@ -152,11 +140,6 @@ public interface VirtualEmptyBlockGetter extends BlockAndTintGetter, LightChunk 
 		@Override
 		public LevelLightEngine getLightEngine() {
 			return lightEngine;
-		}
-
-		@Override
-		public ChunkSkyLightSources getSkyLightSources() {
-			return lightSources;
 		}
 	}
 }

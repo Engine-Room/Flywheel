@@ -22,52 +22,22 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 		super(type, handle);
 	}
 
-	public TransformedInstance setTransform(PoseStack stack) {
+	@Override
+	public TransformedInstance mulPose(Matrix4f pose) {
+		this.model.mul(pose);
 		setChanged();
-
-		this.model.set(stack.last()
-				.pose());
-		this.normal.set(stack.last()
-				.normal());
-		return this;
-	}
-
-	/**
-	 * Sets the transform matrices to be all zeros.
-	 *
-	 * <p>
-	 *     This will allow the gpu to quickly discard all geometry for this instance, effectively "turning it off".
-	 * </p>
-	 */
-	public TransformedInstance setEmptyTransform() {
-		setChanged();
-
-		model.set(ZERO_MATRIX_4f);
-		normal.set(ZERO_MATRIX_3f);
-		return this;
-	}
-
-	public TransformedInstance loadIdentity() {
-		setChanged();
-
-		model.identity();
-		normal.identity();
 		return this;
 	}
 
 	@Override
-	public TransformedInstance multiply(Quaternionf quaternion) {
+	public TransformedInstance mulNormal(Matrix3f normal) {
+		this.normal.mul(normal);
 		setChanged();
-
-		model.rotate(quaternion);
-		normal.rotate(quaternion);
 		return this;
 	}
 
 	@Override
 	public TransformedInstance scale(float x, float y, float z) {
-		setChanged();
-
 		model.scale(x, y, z);
 
 		if (x == y && y == z) {
@@ -83,30 +53,52 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 		float invZ = 1.0f / z;
 		float f = Mth.fastInvCubeRoot(Math.abs(invX * invY * invZ));
 		normal.scale(f * invX, f * invY, f * invZ);
+		setChanged();
+		return this;
+	}
+
+	@Override
+	public TransformedInstance rotate(Quaternionf quaternion) {
+		model.rotate(quaternion);
+		normal.rotate(quaternion);
+		setChanged();
 		return this;
 	}
 
 	@Override
 	public TransformedInstance translate(double x, double y, double z) {
-		setChanged();
-
 		model.translate((float) x, (float) y, (float) z);
+		setChanged();
 		return this;
 	}
 
-	@Override
-	public TransformedInstance mulPose(Matrix4f pose) {
+	public TransformedInstance setTransform(PoseStack stack) {
+		this.model.set(stack.last()
+				.pose());
+		this.normal.set(stack.last()
+				.normal());
 		setChanged();
-
-		this.model.mul(pose);
 		return this;
 	}
 
-	@Override
-	public TransformedInstance mulNormal(Matrix3f normal) {
+	/**
+	 * Sets the transform matrices to be all zeros.
+	 *
+	 * <p>
+	 *     This will allow the GPU to quickly discard all geometry for this instance, effectively "turning it off".
+	 * </p>
+	 */
+	public TransformedInstance setEmptyTransform() {
+		model.set(ZERO_MATRIX_4f);
+		normal.set(ZERO_MATRIX_3f);
 		setChanged();
+		return this;
+	}
 
-		this.normal.mul(normal);
+	public TransformedInstance loadIdentity() {
+		model.identity();
+		normal.identity();
+		setChanged();
 		return this;
 	}
 }

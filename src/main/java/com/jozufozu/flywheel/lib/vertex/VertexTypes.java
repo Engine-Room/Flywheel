@@ -4,7 +4,6 @@ import org.jetbrains.annotations.ApiStatus;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.lib.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -20,8 +19,8 @@ public final class VertexTypes {
 	}
 
 	public static final class Files {
-		public static final ResourceLocation BLOCK_LAYOUT = ResourceUtil.subPath(Names.BLOCK, ".vert");
-		public static final ResourceLocation POS_TEX_NORMAL_LAYOUT = ResourceUtil.subPath(Names.POS_TEX_NORMAL, ".vert");
+		public static final ResourceLocation BLOCK_LAYOUT = Names.BLOCK.withSuffix(".vert");
+		public static final ResourceLocation POS_TEX_NORMAL_LAYOUT = Names.POS_TEX_NORMAL.withSuffix(".vert");
 	}
 
 	public static final class Names {

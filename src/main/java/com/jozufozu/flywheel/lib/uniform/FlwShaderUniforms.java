@@ -10,8 +10,7 @@ import com.jozufozu.flywheel.api.event.BeginFrameEvent;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
-import com.jozufozu.flywheel.lib.math.MatrixUtil;
-import com.jozufozu.flywheel.lib.math.MoreMath;
+import com.jozufozu.flywheel.lib.math.MatrixMath;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.core.Vec3i;
@@ -88,7 +87,7 @@ public class FlwShaderUniforms implements ShaderUniforms {
 			viewProjection.set(context.viewProjection());
 			viewProjection.translate(-camX, -camY, -camZ);
 
-			MatrixUtil.writeUnsafe(viewProjection, ptr + 32);
+			MatrixMath.writeUnsafe(viewProjection, ptr + 32);
 			MemoryUtil.memPutFloat(ptr + 96, camX);
 			MemoryUtil.memPutFloat(ptr + 100, camY);
 			MemoryUtil.memPutFloat(ptr + 104, camZ);
@@ -96,7 +95,7 @@ public class FlwShaderUniforms implements ShaderUniforms {
 			MemoryUtil.memPutInt(ptr + 112, getConstantAmbientLightFlag(context));
 
 			if (!FRUSTUM_PAUSED || FRUSTUM_CAPTURE) {
-				MoreMath.writePackedFrustumPlanes(ptr + 128, viewProjection);
+				MatrixMath.writePackedFrustumPlanes(ptr + 128, viewProjection);
 				FRUSTUM_CAPTURE = false;
 			}
 

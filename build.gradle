@@ -94,8 +94,8 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compileOnly fg.deobf("maven.modrinth:rubidium:0.6.5")
-    compileOnly fg.deobf("maven.modrinth:oculus:1.20-1.6.4")
+    compileOnly fg.deobf("maven.modrinth:embeddium:0.2.10+mc1.20.1")
+    compileOnly fg.deobf("maven.modrinth:oculus:1.20.1-1.6.9")
 
     jarJar(group: 'com.dreizak', name: 'miniball', version: '[1.0.3,2.0.0)')
     library 'com.dreizak:miniball:1.0.3'
@@ -104,7 +104,7 @@ dependencies {
     // Prevent Mixin annotation processor from getting into IntelliJ's annotation processor settings
     // This allows 'Settings > Build, Execution, and Deployment > Build Tools > Gradle > Build and run using' set to IntelliJ to work correctly
     // if (System.getProperty('idea.sync.active') != 'true') {
-        annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
+    annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
     // }
 }
 
@@ -151,12 +151,12 @@ void addLicense(jarTask) {
 tasks.named('jar', Jar).configure {
     manifest {
         attributes([
-                'Specification-Title'     : 'flywheel',
-                //'Specification-Vendor': 'flywheel authors',
-                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Specification-Title': 'flywheel',
+                // 'Specification-Vendor': 'flywheel authors',
+                'Specification-Version': '1', // We are version 1 of ourselves
                 'Implementation-Title': project.jar.archiveBaseName,
-                'Implementation-Version'  : project.jar.archiveVersion,
-                //'Implementation-Vendor': 'flywheel authors',
+                'Implementation-Version': project.jar.archiveVersion,
+                // 'Implementation-Vendor': 'flywheel authors',
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
         ])
     }

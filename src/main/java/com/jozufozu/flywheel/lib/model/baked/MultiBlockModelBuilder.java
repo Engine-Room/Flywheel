@@ -74,7 +74,7 @@ public class MultiBlockModelBuilder {
 
 		if (shadeSeparated) {
 			ShadeSeparatedResultConsumer resultConsumer = (renderType, shaded, data) -> {
-				if (!ModelUtil.isVanillaBufferEmpty(data)) {
+				if (!data.isEmpty()) {
 					Material material = materialFunc.apply(renderType, shaded);
 					if (material != null) {
 						MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, VertexTypes.BLOCK);
@@ -85,7 +85,7 @@ public class MultiBlockModelBuilder {
 			BakedModelBufferer.bufferMultiBlockShadeSeparated(blocks, ModelUtil.VANILLA_RENDERER, renderWorld, poseStack, modelDataMap, resultConsumer);
 		} else {
 			ResultConsumer resultConsumer = (renderType, data) -> {
-				if (!ModelUtil.isVanillaBufferEmpty(data)) {
+				if (!data.isEmpty()) {
 					Material material = materialFunc.apply(renderType, true);
 					if (material != null) {
 						MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, VertexTypes.BLOCK);

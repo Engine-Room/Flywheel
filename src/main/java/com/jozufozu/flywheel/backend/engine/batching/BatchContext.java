@@ -5,7 +5,7 @@ import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
-import com.jozufozu.flywheel.lib.util.FlwUtil;
+import com.jozufozu.flywheel.lib.math.MatrixMath;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -17,7 +17,7 @@ public record BatchContext(FrustumIntersection frustum, ClientLevel level, PoseS
 	static BatchContext create(RenderContext context, BlockPos origin) {
 		Vec3 cameraPos = context.camera()
 				.getPosition();
-		var stack = FlwUtil.copyPoseStack(context.stack());
+		var stack = MatrixMath.copyPoseStack(context.stack());
 		stack.translate(origin.getX() - cameraPos.x, origin.getY() - cameraPos.y, origin.getZ() - cameraPos.z);
 
 		Matrix4f viewProjection = new Matrix4f(context.viewProjection());

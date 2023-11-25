@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.lib.task;
 
-import java.util.function.Function;
-
 import com.jozufozu.flywheel.api.task.Plan;
 
 public interface SimplyComposedPlan<C> extends Plan<C> {

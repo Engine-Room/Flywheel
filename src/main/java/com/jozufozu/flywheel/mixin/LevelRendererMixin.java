@@ -64,14 +64,13 @@ public class LevelRendererMixin {
 		MinecraftForge.EVENT_BUS.post(new ReloadRenderersEvent(level));
 	}
 
-//	// after the game renders the breaking overlay normally
-//	@Inject(method = "renderLevel",
-//			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderBuffers;crumblingBufferSource()Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;", ordinal = 2, shift = Shift.BY, by = 2))
-//	private void flywheel$renderCrumbling(CallbackInfo ci) {
-//		if (flywheel$renderContext != null) {
-//			// TODO: Crumbling
-//		}
-//	}
+	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=destroyProgress"))
+	private void flywheel$beforeRenderCrumbling(CallbackInfo ci) {
+		var manager = VisualizationManagerImpl.get(level);
+		if (manager != null) {
+			manager.renderCrumbling(flywheel$renderContext, destructionProgress);
+		}
+	}
 
 	// STAGE DISPATCHING
 
@@ -150,13 +149,5 @@ public class LevelRendererMixin {
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderSnowAndRain(Lnet/minecraft/client/renderer/LightTexture;FDDD)V", shift = Shift.AFTER))
 	private void flywheel$onStage$afterWeather(CallbackInfo ci) {
 		flywheel$dispatch(RenderStage.AFTER_WEATHER);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=destroyProgress"))
-	private void flywheel$crumbling(CallbackInfo ci) {
-		var vm = VisualizationManagerImpl.get(level);
-		if (vm != null) {
-			vm.renderCrumbling(flywheel$renderContext, destructionProgress);
-		}
 	}
 }

@@ -12,7 +12,6 @@ import com.jozufozu.flywheel.backend.compile.core.CompilerStats;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;
-import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
 
 import net.minecraft.server.packs.resources.ResourceManager;

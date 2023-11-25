@@ -20,7 +20,6 @@ import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferBuilder.DrawState;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.client.Minecraft;
@@ -57,16 +56,12 @@ public final class ModelUtil {
 		return dispatcher;
 	}
 
-	public static boolean isVanillaBufferEmpty(BufferBuilder.RenderedBuffer renderedBuffer) {
-		return renderedBuffer.drawState().vertexCount() == 0;
-	}
-
-	public static MemoryBlock convertVanillaBuffer(BufferBuilder.RenderedBuffer renderedBuffer, VertexType vertexType) {
-		DrawState drawState = renderedBuffer.drawState();
+	public static MemoryBlock convertVanillaBuffer(BufferBuilder.RenderedBuffer buffer, VertexType vertexType) {
+		DrawState drawState = buffer.drawState();
 		int vertexCount = drawState.vertexCount();
 		VertexFormat srcFormat = drawState.format();
 
-		ByteBuffer src = renderedBuffer.vertexBuffer();
+		ByteBuffer src = buffer.vertexBuffer();
 		MemoryBlock dst = MemoryBlock.malloc((long) vertexCount * vertexType.getLayout().getStride());
 		long srcPtr = MemoryUtil.memAddress(src);
 		long dstPtr = dst.ptr();

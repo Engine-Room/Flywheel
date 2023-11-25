@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.lib.instance;
 
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 
 import com.jozufozu.flywheel.api.instance.InstanceBoundingSphereTransformer;
 import com.jozufozu.flywheel.api.instance.InstanceHandle;

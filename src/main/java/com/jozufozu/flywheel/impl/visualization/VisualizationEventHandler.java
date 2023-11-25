@@ -65,7 +65,7 @@ public final class VisualizationEventHandler {
 		manager.renderStage(event.getContext(), event.getStage());
 	}
 
-	public static void onEntityJoinWorld(EntityJoinLevelEvent event) {
+	public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
 		Level level = event.getLevel();
 		VisualizationManager manager = VisualizationManager.get(level);
 		if (manager == null) {
@@ -75,7 +75,7 @@ public final class VisualizationEventHandler {
 		manager.getEntities().queueAdd(event.getEntity());
 	}
 
-	public static void onEntityLeaveWorld(EntityLeaveLevelEvent event) {
+	public static void onEntityLeaveLevel(EntityLeaveLevelEvent event) {
 		Level level = event.getLevel();
 		VisualizationManager manager = VisualizationManager.get(level);
 		if (manager == null) {

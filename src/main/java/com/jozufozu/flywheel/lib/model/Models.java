@@ -33,10 +33,10 @@ public final class Models {
 
 	private static PoseStack createRotation(Direction facing) {
 		PoseStack stack = new PoseStack();
-		TransformStack.cast(stack)
-				.centre()
+		TransformStack.of(stack)
+				.center()
 				.rotateToFace(facing.getOpposite())
-				.unCentre();
+				.uncenter();
 		return stack;
 	}
 }

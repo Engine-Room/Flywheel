@@ -23,7 +23,7 @@ public class BlockModelBuilder {
 	private boolean shadeSeparated = true;
 	private BlockAndTintGetter renderWorld;
 	private PoseStack poseStack;
-	private ModelData modelData = ModelData.EMPTY;
+	private ModelData modelData;
 	private BiFunction<RenderType, Boolean, Material> materialFunc;
 
 	public BlockModelBuilder(BlockState state) {
@@ -70,7 +70,7 @@ public class BlockModelBuilder {
 
 		if (shadeSeparated) {
 			ShadeSeparatedResultConsumer resultConsumer = (renderType, shaded, data) -> {
-				if (!ModelUtil.isVanillaBufferEmpty(data)) {
+				if (!data.isEmpty()) {
 					Material material = materialFunc.apply(renderType, shaded);
 					if (material != null) {
 						MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, VertexTypes.BLOCK);
@@ -81,7 +81,7 @@ public class BlockModelBuilder {
 			BakedModelBufferer.bufferBlockShadeSeparated(ModelUtil.VANILLA_RENDERER, renderWorld, state, poseStack, modelData, resultConsumer);
 		} else {
 			ResultConsumer resultConsumer = (renderType, data) -> {
-				if (!ModelUtil.isVanillaBufferEmpty(data)) {
+				if (!data.isEmpty()) {
 					Material material = materialFunc.apply(renderType, true);
 					if (material != null) {
 						MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, VertexTypes.BLOCK);
