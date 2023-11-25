@@ -4,13 +4,26 @@ import org.jetbrains.annotations.ApiStatus;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
+import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 
 public final class Contexts {
-	public static final SimpleContext WORLD = Context.REGISTRY.registerAndGet(new SimpleContext(Files.WORLD_VERTEX, Files.WORLD_FRAGMENT));
-	public static final SimpleContext CRUMBLING = Context.REGISTRY.registerAndGet(new SimpleContext(Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT));
+	public static final SimpleContext WORLD = Context.REGISTRY.registerAndGet(new SimpleContext(Files.WORLD_VERTEX, Files.WORLD_FRAGMENT, program -> {
+		program.bind();
+		program.setSamplerBinding("flw_diffuseTex", 0);
+		program.setSamplerBinding("flw_overlayTex", 1);
+		program.setSamplerBinding("flw_lightTex", 2);
+		GlProgram.unbind();
+	}));
+
+	// TODO: can we make crumbling a fragment material?
+	public static final SimpleContext CRUMBLING = Context.REGISTRY.registerAndGet(new SimpleContext(Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT, program -> {
+		program.bind();
+		program.setSamplerBinding("flw_diffuseTex", 0);
+		GlProgram.unbind();
+	}));
 
 	private Contexts() {
 	}

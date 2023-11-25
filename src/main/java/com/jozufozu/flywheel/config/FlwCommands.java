@@ -116,7 +116,7 @@ public class FlwCommands {
 				.then(Commands.argument("pos", BlockPosArgument.blockPos())
 						.then(Commands.argument("stage", IntegerArgumentType.integer(0, 9))
 								.executes(context -> {
-									BlockPos pos = BlockPosArgument.getLoadedBlockPos(context, "pos");
+									BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
 									int value = IntegerArgumentType.getInteger(context, "stage");
 
 									Entity executor = context.getSource()
@@ -145,6 +145,7 @@ public class FlwCommands {
 						}))
 				.then(Commands.literal("capture")
 						.executes(context -> {
+							FlwShaderUniforms.FRUSTUM_PAUSED = true;
 							FlwShaderUniforms.FRUSTUM_CAPTURE = true;
 							return 1;
 						})));

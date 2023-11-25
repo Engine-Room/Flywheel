@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.backend.engine.instancing;
 
+import java.util.List;
+
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.context.Context;
@@ -13,9 +15,12 @@ import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
+import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
+import com.jozufozu.flywheel.backend.engine.indirect.Textures;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
+import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
 import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.NamedFlag;
@@ -24,6 +29,8 @@ import com.jozufozu.flywheel.lib.task.SyncedPlan;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancingEngine extends AbstractEngine {
 	private final Context context;
@@ -76,8 +83,39 @@ public class InstancingEngine extends AbstractEngine {
 	}
 
 	@Override
-	public void renderCrumblingInstance(TaskExecutor taskExecutor, RenderContext context, Instance instance, int progress) {
-		// TODO: implement
+	public void renderCrumblingInstances(TaskExecutor taskExecutor, RenderContext context, List<Instance> instances, int progress) {
+		// TODO: optimize
+
+		taskExecutor.syncUntil(flushFlag::isRaised);
+
+		var type = ModelBakery.DESTROY_TYPES.get(progress);
+
+		try (var state = GlStateTracker.getRestoreState()) {
+			type.setupRenderState();
+
+			Textures.bindActiveTextures();
+
+			for (Instance instance : instances) {
+				if (!(instance.handle() instanceof InstanceHandleImpl impl)) {
+					continue;
+				}
+				if (!(impl.instancer instanceof InstancedInstancer<?> instancer)) {
+					continue;
+				}
+
+				List<DrawCall> draws = drawManager.drawCallsForInstancer(instancer);
+
+				draws.removeIf(DrawCall::isInvalid);
+
+				for (DrawCall draw : draws) {
+					var shader = draw.shaderState;
+
+					setup(shader, Contexts.CRUMBLING);
+
+					draw.renderOne(impl.index);
+				}
+			}
+		}
 	}
 
 	private void setup() {

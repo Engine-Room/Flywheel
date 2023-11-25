@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.api.backend;
 
+import java.util.List;
+
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
@@ -25,7 +27,14 @@ public interface Engine extends InstancerProvider {
 	 */
 	void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage);
 
-	void renderCrumblingInstance(TaskExecutor taskExecutor, RenderContext context, Instance instance, int progress);
+	/**
+	 * Render the given instances as a crumbling overlay.
+	 * @param taskExecutor The task executor running the frame plan.
+	 * @param context The render context for this frame.
+	 * @param instances The instances to render.
+	 * @param progress The progress of the crumbling animation, i.e. which texture to use.
+	 */
+	void renderCrumblingInstances(TaskExecutor taskExecutor, RenderContext context, List<Instance> instances, int progress);
 
 	/**
 	 * Maintain the render origin to be within a certain distance from the camera in all directions,

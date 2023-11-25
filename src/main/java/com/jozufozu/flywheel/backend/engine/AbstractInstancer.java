@@ -81,7 +81,7 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 				handles.set(j, handle);
 				instances.set(j, instance);
 
-				handle.setIndex(j);
+				handle.index = j;
 				changed.set(j);
 			}
 		}

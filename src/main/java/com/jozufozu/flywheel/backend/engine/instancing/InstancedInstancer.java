@@ -84,7 +84,12 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 			return;
 		}
 
-		vao.bindVertexBuffer(1, vbo.handle(), 0L, instanceStride);
+		bindRaw(vao, startAttrib, 0);
+	}
+
+	public void bindRaw(GlVertexArray vao, int startAttrib, int baseInstance) {
+		long offset = (long) baseInstance * instanceStride;
+		vao.bindVertexBuffer(1, vbo.handle(), offset, instanceStride);
 		vao.setBindingDivisor(1, 1);
 		vao.bindAttributes(1, startAttrib, instanceFormat.attributes());
 	}
