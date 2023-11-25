@@ -79,7 +79,13 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 		}
 	}
 
-	public void bindToVAO(GlVertexArray vao, int startAttrib) {
+	/**
+	 * Bind this instancer's vbo to the given vao if it hasn't already been bound.
+	 * @param vao The vao to bind to.
+	 * @param startAttrib The first attribute to bind. This method will bind attributes in the half open range
+	 * 		{@code [startAttrib, startAttrib + instanceFormat.getAttributeCount())}.
+	 */
+	public void bindIfNeeded(GlVertexArray vao, int startAttrib) {
 		if (!boundTo.add(vao)) {
 			return;
 		}
@@ -87,6 +93,13 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 		bindRaw(vao, startAttrib, 0);
 	}
 
+	/**
+	 * Bind this instancer's vbo to the given vao with the given base instance to calculate the binding offset.
+	 * @param vao The vao to bind to.
+	 * @param startAttrib The first attribute to bind. This method will bind attributes in the half open range
+	 * 		{@code [startAttrib, startAttrib + instanceFormat.getAttributeCount())}.
+	 * @param baseInstance The base instance to calculate the binding offset from.
+	 */
 	public void bindRaw(GlVertexArray vao, int startAttrib, int baseInstance) {
 		long offset = (long) baseInstance * instanceStride;
 		vao.bindVertexBuffer(1, vbo.handle(), offset, instanceStride);

@@ -23,10 +23,40 @@ import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 
 public class InstancedDrawManager {
+	/**
+	 * A map of instancer keys to instancers.
+	 * <br>
+	 * This map is populated as instancers are requested and contains both initialized and uninitialized instancers.
+	 * Write access to this map must be synchronized on {@link #creationLock}.
+	 * <br>
+	 * See {@link #getInstancer} for insertion details.
+	 */
 	private final Map<InstancerKey<?>, InstancedInstancer<?>> instancers = new HashMap<>();
+	/**
+	 * A list of instancers that have not yet been initialized.
+	 * <br>
+	 * All new instancers land here before having resources allocated in {@link #flush}.
+	 * Write access to this list must be synchronized on {@link #creationLock}.
+	 */
 	private final List<UninitializedInstancer> uninitializedInstancers = new ArrayList<>();
-	private final List<InitializedInstancer> initializedInstancers = new ArrayList<>();
+	/**
+	 * Mutex for {@link #instancers} and {@link #uninitializedInstancers}.
+	 */
+	private final Object creationLock = new Object();
+
+	/**
+	 * A map of initialized instancers to their draw calls.
+	 * <br>
+	 * This map is populated in {@link #flush} and contains only initialized instancers.
+	 */
+	private final Map<InstancedInstancer<?>, List<DrawCall>> initializedInstancers = new HashMap<>();
+	/**
+	 * The set of draw calls to make in each {@link RenderStage}.
+	 */
 	private final Map<RenderStage, DrawSet> drawSets = new EnumMap<>(RenderStage.class);
+	/**
+	 * A map of vertex types to their mesh pools.
+	 */
 	private final Map<VertexType, InstancedMeshPool> meshPools = new HashMap<>();
 	private final EBOCache eboCache = new EBOCache();
 
@@ -37,13 +67,27 @@ public class InstancedDrawManager {
 	@SuppressWarnings("unchecked")
 	public <I extends Instance> Instancer<I> getInstancer(InstanceType<I> type, Model model, RenderStage stage) {
 		InstancerKey<I> key = new InstancerKey<>(type, model, stage);
+
 		InstancedInstancer<I> instancer = (InstancedInstancer<I>) instancers.get(key);
-		if (instancer == null) {
-			instancer = new InstancedInstancer<>(type);
-			instancers.put(key, instancer);
-			uninitializedInstancers.add(new UninitializedInstancer(instancer, model, stage));
+		// Happy path: instancer is already initialized.
+        if (instancer != null) {
+            return instancer;
+        }
+
+		// Unhappy path: instancer is not initialized, need to sync to make sure we don't create duplicates.
+        synchronized (creationLock) {
+			// Someone else might have initialized it while we were waiting for the lock.
+            instancer = (InstancedInstancer<I>) instancers.get(key);
+            if (instancer != null) {
+                return instancer;
+            }
+
+			// Create a new instancer and add it to the uninitialized list.
+            instancer = new InstancedInstancer<>(type);
+            instancers.put(key, instancer);
+            uninitializedInstancers.add(new UninitializedInstancer(instancer, model, stage));
+			return instancer;
 		}
-		return instancer;
 	}
 
 	public void flush() {
@@ -68,14 +112,16 @@ public class InstancedDrawManager {
 				.forEach(DrawSet::delete);
 		drawSets.clear();
 
-		initializedInstancers.forEach(InitializedInstancer::deleteInstancer);
+		initializedInstancers.keySet()
+				.forEach(InstancedInstancer::delete);
 		initializedInstancers.clear();
 
 		eboCache.invalidate();
 	}
 
 	public void clearInstancers() {
-		initializedInstancers.forEach(InitializedInstancer::clear);
+		initializedInstancers.keySet()
+				.forEach(InstancedInstancer::clear);
 	}
 
 	private void add(InstancedInstancer<?> instancer, Model model, RenderStage stage) {
@@ -94,7 +140,7 @@ public class InstancedDrawManager {
 			drawSet.put(shaderState, drawCall);
 			drawCalls.add(drawCall);
 		}
-		initializedInstancers.add(new InitializedInstancer(instancer, drawCalls));
+		initializedInstancers.put(instancer, drawCalls);
 	}
 
 	private InstancedMeshPool.BufferedMesh alloc(Mesh mesh) {
@@ -103,13 +149,7 @@ public class InstancedDrawManager {
 	}
 
 	public List<DrawCall> drawCallsForInstancer(InstancedInstancer<?> instancer) {
-		for (InitializedInstancer initializedInstancer : initializedInstancers) {
-			if (initializedInstancer.instancer == instancer) {
-				return initializedInstancer.drawCalls;
-			}
-		}
-
-		return List.of();
+		return initializedInstancers.getOrDefault(instancer, List.of());
 	}
 
 	public static class DrawSet implements Iterable<Map.Entry<ShaderState, Collection<DrawCall>>> {
@@ -149,15 +189,5 @@ public class InstancedDrawManager {
 	}
 
 	private record UninitializedInstancer(InstancedInstancer<?> instancer, Model model, RenderStage stage) {
-	}
-
-	private record InitializedInstancer(InstancedInstancer<?> instancer, List<DrawCall> drawCalls) {
-		public void deleteInstancer() {
-			instancer.delete();
-		}
-
-		public void clear() {
-			instancer.clear();
-		}
 	}
 }

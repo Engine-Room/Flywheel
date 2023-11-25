@@ -23,6 +23,7 @@ public class IndirectDrawManager {
 	@SuppressWarnings("unchecked")
 	public <I extends Instance> Instancer<I> getInstancer(InstanceType<I> type, Model model, RenderStage stage) {
 		InstancerKey<I> key = new InstancerKey<>(type, model, stage);
+		// FIXME: This needs to be synchronized like InstancingEngine
 		IndirectInstancer<I> instancer = (IndirectInstancer<I>) instancers.get(key);
 		if (instancer == null) {
 			instancer = new IndirectInstancer<>(type);

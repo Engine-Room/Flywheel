@@ -44,6 +44,7 @@ public class BatchingEngine extends AbstractEngine implements SimplyComposedPlan
 	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, RenderStage stage) {
 		InstancerKey<I> key = new InstancerKey<>(type, model, stage);
 		BatchedInstancer<I> instancer = (BatchedInstancer<I>) instancers.get(key);
+		// FIXME: This needs to be synchronized like InstancingEngine
 		if (instancer == null) {
 			instancer = new BatchedInstancer<>(type);
 			instancers.put(key, instancer);

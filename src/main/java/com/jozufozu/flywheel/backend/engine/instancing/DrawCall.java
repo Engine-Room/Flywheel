@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.engine.instancing;
 
+import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 
 public class DrawCall {
@@ -36,7 +37,7 @@ public class DrawCall {
 			return;
 		}
 
-		instancer.bindToVAO(vao, meshAttributes);
+		instancer.bindIfNeeded(vao, meshAttributes);
 		mesh.setup(vao);
 
 		vao.bindForDraw();
@@ -44,7 +45,7 @@ public class DrawCall {
 		mesh.draw(instanceCount);
 	}
 
-	public void renderOne(int index) {
+	public void renderOne(InstanceHandleImpl impl) {
 		if (isInvalid() || mesh.isEmpty()) {
 			return;
 		}
@@ -52,13 +53,13 @@ public class DrawCall {
 		instancer.update();
 
 		int instanceCount = instancer.getInstanceCount();
-		if (instanceCount <= 0 || index >= instanceCount) {
+		if (instanceCount <= 0 || impl.index >= instanceCount) {
 			return;
 		}
 
 		var vao = lazyScratchVao();
 
-		instancer.bindRaw(vao, meshAttributes, index);
+		instancer.bindRaw(vao, meshAttributes, impl.index);
 		mesh.setup(vao);
 
 		vao.bindForDraw();
