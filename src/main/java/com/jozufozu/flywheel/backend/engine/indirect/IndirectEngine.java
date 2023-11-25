@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.backend.engine.indirect;
 
+import java.util.List;
+
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
@@ -69,7 +71,7 @@ public class IndirectEngine extends AbstractEngine {
 	}
 
 	@Override
-	public void renderCrumblingInstance(TaskExecutor taskExecutor, RenderContext context, Instance instance, int progress) {
+	public void renderCrumblingInstances(TaskExecutor taskExecutor, RenderContext context, List<Instance> instances, int progress) {
 		// TODO: implement
 	}
 

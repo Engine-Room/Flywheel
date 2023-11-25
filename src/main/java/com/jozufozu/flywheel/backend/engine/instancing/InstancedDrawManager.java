@@ -25,7 +25,7 @@ import com.jozufozu.flywheel.backend.engine.InstancerKey;
 public class InstancedDrawManager {
 	private final Map<InstancerKey<?>, InstancedInstancer<?>> instancers = new HashMap<>();
 	private final List<UninitializedInstancer> uninitializedInstancers = new ArrayList<>();
-	private final List<InstancedInstancer<?>> initializedInstancers = new ArrayList<>();
+	private final List<InitializedInstancer> initializedInstancers = new ArrayList<>();
 	private final Map<RenderStage, DrawSet> drawSets = new EnumMap<>(RenderStage.class);
 	private final Map<VertexType, InstancedMeshPool> meshPools = new HashMap<>();
 	private final EBOCache eboCache = new EBOCache();
@@ -68,32 +68,48 @@ public class InstancedDrawManager {
 				.forEach(DrawSet::delete);
 		drawSets.clear();
 
-		initializedInstancers.forEach(InstancedInstancer::delete);
+		initializedInstancers.forEach(InitializedInstancer::deleteInstancer);
 		initializedInstancers.clear();
 
 		eboCache.invalidate();
 	}
 
 	public void clearInstancers() {
-		initializedInstancers.forEach(InstancedInstancer::clear);
+		initializedInstancers.forEach(InitializedInstancer::clear);
 	}
 
 	private void add(InstancedInstancer<?> instancer, Model model, RenderStage stage) {
 		instancer.init();
+
 		DrawSet drawSet = drawSets.computeIfAbsent(stage, DrawSet::new);
+		List<DrawCall> drawCalls = new ArrayList<>();
+
 		var meshes = model.getMeshes();
 		for (var entry : meshes.entrySet()) {
 			var mesh = alloc(entry.getValue());
+
 			ShaderState shaderState = new ShaderState(entry.getKey(), mesh.getVertexType(), instancer.type);
-			DrawCall drawCall = new DrawCall(instancer, mesh);
+			DrawCall drawCall = new DrawCall(instancer, mesh, shaderState);
+
 			drawSet.put(shaderState, drawCall);
+			drawCalls.add(drawCall);
 		}
-		initializedInstancers.add(instancer);
+		initializedInstancers.add(new InitializedInstancer(instancer, drawCalls));
 	}
 
 	private InstancedMeshPool.BufferedMesh alloc(Mesh mesh) {
 		return meshPools.computeIfAbsent(mesh.vertexType(), InstancedMeshPool::new)
 				.alloc(mesh, eboCache);
+	}
+
+	public List<DrawCall> drawCallsForInstancer(InstancedInstancer<?> instancer) {
+		for (InitializedInstancer initializedInstancer : initializedInstancers) {
+			if (initializedInstancer.instancer == instancer) {
+				return initializedInstancer.drawCalls;
+			}
+		}
+
+		return List.of();
 	}
 
 	public static class DrawSet implements Iterable<Map.Entry<ShaderState, Collection<DrawCall>>> {
@@ -133,5 +149,15 @@ public class InstancedDrawManager {
 	}
 
 	private record UninitializedInstancer(InstancedInstancer<?> instancer, Model model, RenderStage stage) {
+	}
+
+	private record InitializedInstancer(InstancedInstancer<?> instancer, List<DrawCall> drawCalls) {
+		public void deleteInstancer() {
+			instancer.delete();
+		}
+
+		public void clear() {
+			instancer.clear();
+		}
 	}
 }

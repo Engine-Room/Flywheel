@@ -34,7 +34,8 @@ void flw_initFragment() {
 void flw_contextFragment() {
     vec4 color = flw_fragColor;
 
-    if (flw_discardPredicate(color)) {
+    // Ignore the discard predicate since we control the texture.
+    if (color.a < 0.01) {
         discard;
     }
 

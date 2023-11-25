@@ -3,15 +3,18 @@ package com.jozufozu.flywheel.backend.engine.instancing;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 
 public class DrawCall {
+	public final ShaderState shaderState;
 	private final InstancedInstancer<?> instancer;
 	private final InstancedMeshPool.BufferedMesh mesh;
 
 	private final int meshAttributes;
 	private GlVertexArray vao;
+	private GlVertexArray vaoScratch;
 
-	public DrawCall(InstancedInstancer<?> instancer, InstancedMeshPool.BufferedMesh mesh) {
+	public DrawCall(InstancedInstancer<?> instancer, InstancedMeshPool.BufferedMesh mesh, ShaderState shaderState) {
 		this.instancer = instancer;
 		this.mesh = mesh;
+		this.shaderState = shaderState;
 
 		meshAttributes = this.mesh.getAttributeCount();
 		vao = GlVertexArray.create();
@@ -22,14 +25,14 @@ public class DrawCall {
 	}
 
 	public void render() {
-		if (isInvalid()) {
+		if (isInvalid() || mesh.isEmpty()) {
 			return;
 		}
 
 		instancer.update();
 
 		int instanceCount = instancer.getInstanceCount();
-		if (instanceCount <= 0 || mesh.isEmpty()) {
+		if (instanceCount <= 0) {
 			return;
 		}
 
@@ -41,12 +44,44 @@ public class DrawCall {
 		mesh.draw(instanceCount);
 	}
 
-	public void delete() {
-		if (vao == null) {
+	public void renderOne(int index) {
+		if (isInvalid() || mesh.isEmpty()) {
 			return;
 		}
 
-		vao.delete();
-		vao = null;
+		instancer.update();
+
+		int instanceCount = instancer.getInstanceCount();
+		if (instanceCount <= 0 || index >= instanceCount) {
+			return;
+		}
+
+		var vao = lazyScratchVao();
+
+		instancer.bindRaw(vao, meshAttributes, index);
+		mesh.setup(vao);
+
+		vao.bindForDraw();
+
+		mesh.draw(1);
 	}
+
+	private GlVertexArray lazyScratchVao() {
+		if (vaoScratch == null) {
+			vaoScratch = GlVertexArray.create();
+		}
+		return vaoScratch;
+	}
+
+	public void delete() {
+        if (vao != null) {
+            vao.delete();
+            vao = null;
+        }
+
+		if (vaoScratch != null) {
+			vaoScratch.delete();
+			vaoScratch = null;
+		}
+    }
 }

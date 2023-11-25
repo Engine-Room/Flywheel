@@ -8,7 +8,6 @@ import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
@@ -220,9 +219,9 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				continue;
 			}
 
-			var instanceList = visual.getCrumblingInstances();
+			var instances = visual.getCrumblingInstances();
 
-			if (instanceList.isEmpty()) {
+			if (instances.isEmpty()) {
 				// The visual doesn't want to render anything crumbling.
 				continue;
 			}
@@ -232,9 +231,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 			int progress = set.last()
 					.getProgress();
 
-			for (Instance instance : instanceList) {
-				engine.renderCrumblingInstance(taskExecutor, context, instance, progress);
-			}
+			engine.renderCrumblingInstances(taskExecutor, context, instances, progress);
         }
 	}
 

@@ -4,7 +4,7 @@ import com.jozufozu.flywheel.api.instance.InstanceHandle;
 
 public class InstanceHandleImpl implements InstanceHandle {
 	public final AbstractInstancer<?> instancer;
-	private int index;
+	public int index;
 
 	public InstanceHandleImpl(AbstractInstancer<?> instancer, int index) {
 		this.instancer = instancer;
@@ -19,10 +19,6 @@ public class InstanceHandleImpl implements InstanceHandle {
 	@Override
 	public void setDeleted() {
 		instancer.notifyRemoval(index);
-	}
-
-	public void setIndex(int i) {
-		index = i;
 	}
 
 	public void clear() {
