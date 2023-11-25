@@ -5,7 +5,9 @@ import com.jozufozu.flywheel.api.model.Model;
 
 public interface InstancerProvider {
 	/**
-	 * Get an instancer for the given instance type, model, and render stage. Calling this method twice with the same arguments will return the same instancer.
+	 * Get an instancer for the given instance type, model, and render stage.
+	 * <br>
+	 * Calling this method twice with the same arguments will return the same instancer.
 	 *
 	 * @return An instancer for the given instance type, model, and render stage.
 	 */

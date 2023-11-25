@@ -135,7 +135,7 @@ public class InstancingEngine extends AbstractEngine {
 	}
 
 	@Override
-	public void invalidate() {
+	public void delete() {
 		drawManager.invalidate();
 	}
 }

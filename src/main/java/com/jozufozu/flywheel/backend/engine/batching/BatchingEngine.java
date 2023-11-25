@@ -104,7 +104,7 @@ public class BatchingEngine extends AbstractEngine implements SimplyComposedPlan
 	}
 
 	@Override
-	public void invalidate() {
+	public void delete() {
 		instancers.clear();
 
 		meshPools.values()
