@@ -5,7 +5,6 @@ import org.jetbrains.annotations.ApiStatus;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
-import com.jozufozu.flywheel.lib.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -33,10 +32,10 @@ public final class Contexts {
 	}
 
 	public static final class Files {
-		public static final ResourceLocation WORLD_VERTEX = ResourceUtil.subPath(Names.WORLD, ".vert");
-		public static final ResourceLocation WORLD_FRAGMENT = ResourceUtil.subPath(Names.WORLD, ".frag");
-		public static final ResourceLocation CRUMBLING_VERTEX = ResourceUtil.subPath(Names.CRUMBLING, ".vert");
-		public static final ResourceLocation CRUMBLING_FRAGMENT = ResourceUtil.subPath(Names.CRUMBLING, ".frag");
+		public static final ResourceLocation WORLD_VERTEX = Names.WORLD.withSuffix(".vert");
+		public static final ResourceLocation WORLD_FRAGMENT = Names.WORLD.withSuffix(".frag");
+		public static final ResourceLocation CRUMBLING_VERTEX = Names.CRUMBLING.withSuffix(".vert");
+		public static final ResourceLocation CRUMBLING_FRAGMENT = Names.CRUMBLING.withSuffix(".frag");
 	}
 
 	public static final class Names {

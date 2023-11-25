@@ -22,10 +22,10 @@ import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityVisualManager
 import com.jozufozu.flywheel.impl.visualization.manager.EffectVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EntityVisualManager;
 import com.jozufozu.flywheel.lib.task.Flag;
+import com.jozufozu.flywheel.lib.task.IfElsePlan;
 import com.jozufozu.flywheel.lib.task.MapContextPlan;
 import com.jozufozu.flywheel.lib.task.NamedFlag;
 import com.jozufozu.flywheel.lib.task.RaisePlan;
-import com.jozufozu.flywheel.lib.task.IfElsePlan;
 import com.jozufozu.flywheel.lib.util.LevelAttached;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -207,10 +207,10 @@ public class VisualizationManagerImpl implements VisualizationManager {
 
 		for (var entry : destructionProgress.long2ObjectEntrySet()) {
 			var set = entry.getValue();
-            if (set == null || set.isEmpty()) {
+			if (set == null || set.isEmpty()) {
 				// Nothing to do if there's no crumbling.
 				continue;
-            }
+			}
 
 			var visual = blockEntities.visualAtPos(entry.getLongKey());
 
@@ -232,7 +232,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 					.getProgress();
 
 			engine.renderCrumblingInstances(taskExecutor, context, instances, progress);
-        }
+		}
 	}
 
 	/**

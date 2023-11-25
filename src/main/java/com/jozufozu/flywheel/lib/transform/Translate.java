@@ -5,18 +5,10 @@ import org.joml.Vector3f;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 
-public interface Translate<Self> {
+public interface Translate<Self extends Translate<Self>> {
 	Self translate(double x, double y, double z);
 
-	default Self centre() {
-		return translateAll(0.5);
-	}
-
-	default Self unCentre() {
-		return translateAll(-0.5);
-	}
-
-	default Self translateAll(double v) {
+	default Self translate(double v) {
 		return translate(v, v, v);
 	}
 
@@ -36,24 +28,40 @@ public interface Translate<Self> {
 		return translate(vec.getX(), vec.getY(), vec.getZ());
 	}
 
-	default Self translate(Vec3 vec) {
-		return translate(vec.x, vec.y, vec.z);
-	}
-
 	default Self translate(Vector3f vec) {
 		return translate(vec.x(), vec.y(), vec.z());
 	}
 
-	default Self translateBack(Vec3 vec) {
-		return translate(-vec.x, -vec.y, -vec.z);
+	default Self translate(Vec3 vec) {
+		return translate(vec.x, vec.y, vec.z);
 	}
 
 	default Self translateBack(double x, double y, double z) {
 		return translate(-x, -y, -z);
 	}
 
+	default Self translateBack(double v) {
+		return translate(-v);
+	}
+
 	default Self translateBack(Vec3i vec) {
-		return translate(-vec.getX(), -vec.getY(), -vec.getZ());
+		return translateBack(vec.getX(), vec.getY(), vec.getZ());
+	}
+
+	default Self translateBack(Vector3f vec) {
+		return translateBack(vec.x, vec.y, vec.z);
+	}
+
+	default Self translateBack(Vec3 vec) {
+		return translateBack(vec.x, vec.y, vec.z);
+	}
+
+	default Self center() {
+		return translate(0.5);
+	}
+
+	default Self uncenter() {
+		return translate(-0.5);
 	}
 
 	/**

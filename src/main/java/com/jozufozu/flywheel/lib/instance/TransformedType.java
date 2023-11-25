@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.api.instance.InstanceVertexTransformer;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
 import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.lib.layout.CommonItems;
-import com.jozufozu.flywheel.lib.math.MatrixUtil;
+import com.jozufozu.flywheel.lib.math.MatrixMath;
 import com.jozufozu.flywheel.lib.math.RenderMath;
 import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 
@@ -69,7 +69,7 @@ public class TransformedType implements InstanceType<TransformedInstance> {
 			var radius = boundingSphere.w;
 			boundingSphere.w = 1;
 			boundingSphere.mul(instance.model);
-			boundingSphere.w = radius * MatrixUtil.extractScale(instance.model);
+			boundingSphere.w = radius * MatrixMath.extractScale(instance.model);
 		};
 	}
 }

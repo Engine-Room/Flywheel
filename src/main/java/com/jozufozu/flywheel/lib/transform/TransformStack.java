@@ -7,7 +7,7 @@ public interface TransformStack extends Transform<TransformStack> {
 
 	TransformStack popPose();
 
-	static TransformStack cast(PoseStack stack) {
+	static TransformStack of(PoseStack stack) {
 		return (TransformStack) stack;
 	}
 }

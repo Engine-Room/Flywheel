@@ -4,7 +4,6 @@ import org.jetbrains.annotations.ApiStatus;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.jozufozu.flywheel.lib.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -20,8 +19,8 @@ public final class InstanceTypes {
 	}
 
 	public static final class Files {
-		public static final ResourceLocation TRANSFORMED = ResourceUtil.subPath(Names.TRANSFORMED, ".vert");
-		public static final ResourceLocation ORIENTED = ResourceUtil.subPath(Names.ORIENTED, ".vert");
+		public static final ResourceLocation TRANSFORMED = Names.TRANSFORMED.withSuffix(".vert");
+		public static final ResourceLocation ORIENTED = Names.ORIENTED.withSuffix(".vert");
 	}
 
 	public static final class Names {

@@ -4,77 +4,114 @@ import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3fc;
 
-import com.jozufozu.flywheel.lib.util.Axes;
+import com.mojang.math.Axis;
 
 import net.minecraft.core.Direction;
 
-public interface Rotate<Self> {
-	Self multiply(Quaternionf quaternion);
+public interface Rotate<Self extends Rotate<Self>> {
+	Self rotate(Quaternionf quaternion);
 
-	@SuppressWarnings("unchecked")
-	default Self rotate(Direction axis, float radians) {
-		if (radians == 0)
-			return (Self) this;
-		return multiplyRadians(axis.step(), radians);
-	}
-
-	default Self rotate(double angle, Direction.Axis axis) {
-        Axes.Axis vec = switch (axis) {
-            case X -> Axes.XP;
-			case Y -> Axes.YP;
-			case Z -> Axes.ZP;
-        };
-        return multiply(vec.vec(), angle);
-	}
-
-	default Self rotateX(double angle) {
-		return multiply(Axes.XP.vec(), angle);
-	}
-
-	default Self rotateY(double angle) {
-		return multiply(Axes.YP.vec(), angle);
-	}
-
-	default Self rotateZ(double angle) {
-		return multiply(Axes.ZP.vec(), angle);
-	}
-
-	default Self rotateXRadians(double angle) {
-		return multiplyRadians(Axes.XP.vec(), angle);
-	}
-
-	default Self rotateYRadians(double angle) {
-		return multiplyRadians(Axes.YP.vec(), angle);
-	}
-
-	default Self rotateZRadians(double angle) {
-		return multiplyRadians(Axes.ZP.vec(), angle);
+	default Self rotate(AxisAngle4f axisAngle) {
+		return rotate(new Quaternionf(axisAngle));
 	}
 
 	@SuppressWarnings("unchecked")
-	default Self multiply(Vector3fc axis, double angle) {
-		if (angle == 0)
+	default Self rotate(float radians, Vector3fc axis) {
+		if (radians == 0) {
 			return (Self) this;
-		return multiplyRadians(axis, Math.toRadians(angle));
+		}
+		return rotate(new Quaternionf().setAngleAxis(radians, axis.x(), axis.y(), axis.z()));
 	}
 
 	@SuppressWarnings("unchecked")
-	default Self multiplyRadians(Vector3fc axis, double angle) {
-		if (angle == 0)
+	default Self rotate(float radians, Axis axis) {
+		if (radians == 0) {
 			return (Self) this;
-		return multiply(new Quaternionf(new AxisAngle4f((float) angle, axis)));
+		}
+		return rotate(axis.rotation(radians));
+	}
+
+	@SuppressWarnings("unchecked")
+	default Self rotate(float radians, Direction axis) {
+		if (radians == 0) {
+			return (Self) this;
+		}
+		return rotate(radians, axis.step());
+	}
+
+	default Self rotate(float radians, Direction.Axis axis) {
+		return switch (axis) {
+		case X -> rotateX(radians);
+		case Y -> rotateY(radians);
+		case Z -> rotateZ(radians);
+		};
+	}
+
+	@SuppressWarnings("unchecked")
+	default Self rotateDegrees(float degrees, Vector3fc axis) {
+		if (degrees == 0) {
+			return (Self) this;
+		}
+		return rotate((float) Math.toRadians(degrees), axis);
+	}
+
+	@SuppressWarnings("unchecked")
+	default Self rotateDegrees(float degrees, Axis axis) {
+		if (degrees == 0) {
+			return (Self) this;
+		}
+		return rotate(axis.rotationDegrees(degrees));
+	}
+
+	@SuppressWarnings("unchecked")
+	default Self rotateDegrees(float degrees, Direction axis) {
+		if (degrees == 0) {
+			return (Self) this;
+		}
+		return rotate((float) Math.toRadians(degrees), axis);
+	}
+
+	@SuppressWarnings("unchecked")
+	default Self rotateDegrees(float degrees, Direction.Axis axis) {
+		if (degrees == 0) {
+			return (Self) this;
+		}
+		return rotate((float) Math.toRadians(degrees), axis);
+	}
+
+	default Self rotateX(float radians) {
+		return rotate(radians, Axis.XP);
+	}
+
+	default Self rotateY(float radians) {
+		return rotate(radians, Axis.YP);
+	}
+
+	default Self rotateZ(float radians) {
+		return rotate(radians, Axis.ZP);
+	}
+
+	default Self rotateXDegrees(float degrees) {
+		return rotateDegrees(degrees, Axis.XP);
+	}
+
+	default Self rotateYDegrees(float degrees) {
+		return rotateDegrees(degrees, Axis.YP);
+	}
+
+	default Self rotateZDegrees(float degrees) {
+		return rotateDegrees(degrees, Axis.ZP);
 	}
 
 	@SuppressWarnings("unchecked")
 	default Self rotateToFace(Direction facing) {
-		switch (facing) {
-		case SOUTH -> multiply(Axes.YP.rotationDegrees(180));
-		case WEST -> multiply(Axes.YP.rotationDegrees(90));
-		case NORTH -> multiply(Axes.YP.rotationDegrees(0));
-		case EAST -> multiply(Axes.YP.rotationDegrees(270));
-		case UP -> multiply(Axes.XP.rotationDegrees(90));
-		case DOWN -> multiply(Axes.XN.rotationDegrees(90));
-		}
-		return (Self) this;
+		return switch (facing) {
+		case DOWN -> rotateXDegrees(-90);
+		case UP -> rotateXDegrees(90);
+		case NORTH -> (Self) this;
+		case SOUTH -> rotateYDegrees(180);
+		case WEST -> rotateYDegrees(90);
+		case EAST -> rotateYDegrees(270);
+		};
 	}
 }

@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.lib.task;
 
-import java.util.function.Function;
-
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 

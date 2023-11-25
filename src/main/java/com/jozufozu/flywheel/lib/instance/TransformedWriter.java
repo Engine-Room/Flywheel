@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.lib.instance;
 
-import com.jozufozu.flywheel.lib.math.MatrixUtil;
+import com.jozufozu.flywheel.lib.math.MatrixMath;
 
 public class TransformedWriter extends ColoredLitWriter<TransformedInstance> {
 	public static final TransformedWriter INSTANCE = new TransformedWriter();
@@ -8,8 +8,8 @@ public class TransformedWriter extends ColoredLitWriter<TransformedInstance> {
 	@Override
 	public void write(final long ptr, final TransformedInstance instance) {
 		super.write(ptr, instance);
-		MatrixUtil.writeUnsafe(instance.model, ptr + 8);
-		MatrixUtil.writeUnsafe(instance.normal, ptr + 72);
+		MatrixMath.writeUnsafe(instance.model, ptr + 8);
+		MatrixMath.writeUnsafe(instance.normal, ptr + 72);
 	}
 
 }

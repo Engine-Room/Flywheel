@@ -1,6 +1,11 @@
 package com.jozufozu.flywheel.lib.math;
 
+import net.minecraftforge.client.model.lighting.QuadLighter;
+
 public final class RenderMath {
+	private RenderMath() {
+	}
+
 	/**
 	 * Convert a signed byte into a signed, normalized float.
 	 */
@@ -29,23 +34,17 @@ public final class RenderMath {
 		return (byte) (int) (f * 255);
 	}
 
-	public static int nextPowerOf2(int a) {
-		int h = Integer.highestOneBit(a);
-		return (h == a) ? h : (h << 1);
-	}
-
 	public static float diffuseLight(float x, float y, float z, boolean shaded) {
 		if (!shaded) {
 			return 1f;
 		}
-		// FIXME: once we compile make sure this is correct.
-		return Math.min(x * x + y * y * (3f + y) + z, 1f);
+		return QuadLighter.calculateShade(x, y, z, false);
 	}
 
 	public static float diffuseLightNether(float x, float y, float z, boolean shaded) {
 		if (!shaded) {
 			return 0.9f;
 		}
-		return Math.min(x * x * 0.6f + y * y * 0.9f + z * z * 0.8f, 1f);
+		return QuadLighter.calculateShade(x, y, z, true);
 	}
 }

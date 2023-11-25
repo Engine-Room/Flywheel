@@ -71,7 +71,7 @@ public class IndirectEngine extends AbstractEngine {
 	}
 
 	@Override
-	public void renderCrumblingInstances(TaskExecutor taskExecutor, RenderContext context, List<Instance> instances, int progress) {
+	public void renderCrumblingInstances(TaskExecutor executor, RenderContext context, List<Instance> instances, int progress) {
 		// TODO: implement
 	}
 

@@ -29,7 +29,6 @@ import com.jozufozu.flywheel.lib.task.SyncedPlan;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancingEngine extends AbstractEngine {
@@ -83,10 +82,10 @@ public class InstancingEngine extends AbstractEngine {
 	}
 
 	@Override
-	public void renderCrumblingInstances(TaskExecutor taskExecutor, RenderContext context, List<Instance> instances, int progress) {
+	public void renderCrumblingInstances(TaskExecutor executor, RenderContext context, List<Instance> instances, int progress) {
 		// TODO: optimize
 
-		taskExecutor.syncUntil(flushFlag::isRaised);
+		executor.syncUntil(flushFlag::isRaised);
 
 		var type = ModelBakery.DESTROY_TYPES.get(progress);
 

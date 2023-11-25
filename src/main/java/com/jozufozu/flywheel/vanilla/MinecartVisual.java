@@ -13,9 +13,9 @@ import com.jozufozu.flywheel.lib.model.ModelHolder;
 import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.model.SimpleModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
-import com.jozufozu.flywheel.lib.util.Axes;
 import com.jozufozu.flywheel.lib.visual.AbstractEntityVisual;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.util.Mth;
@@ -143,8 +143,8 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		}
 
 		stack.translate(0.0D, 0.375D, 0.0D);
-		stack.mulPose(Axes.YP.rotationDegrees(180 - yaw));
-		stack.mulPose(Axes.ZP.rotationDegrees(-pitch));
+		stack.mulPose(Axis.YP.rotationDegrees(180 - yaw));
+		stack.mulPose(Axis.ZP.rotationDegrees(-pitch));
 
 		float hurtTime = entity.getHurtTime() - partialTick;
 		float damage = entity.getDamage() - partialTick;
@@ -154,7 +154,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		}
 
 		if (hurtTime > 0) {
-			stack.mulPose(Axes.XP.rotationDegrees(Mth.sin(hurtTime) * hurtTime * damage / 10.0F * (float) entity.getHurtDir()));
+			stack.mulPose(Axis.XP.rotationDegrees(Mth.sin(hurtTime) * hurtTime * damage / 10.0F * (float) entity.getHurtDir()));
 		}
 
 		int displayOffset = entity.getDisplayOffset();
@@ -162,7 +162,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 			stack.pushPose();
 			stack.scale(0.75F, 0.75F, 0.75F);
 			stack.translate(-0.5D, (float) (displayOffset - 8) / 16, 0.5D);
-			stack.mulPose(Axes.YP.rotationDegrees(90));
+			stack.mulPose(Axis.YP.rotationDegrees(90));
 			contents.setTransform(stack);
 			stack.popPose();
 		}

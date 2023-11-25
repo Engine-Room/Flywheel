@@ -90,8 +90,8 @@ public class Flywheel {
 		forgeEventBus.addListener(VisualizationEventHandler::onClientTick);
 		forgeEventBus.addListener(VisualizationEventHandler::onBeginFrame);
 		forgeEventBus.addListener(VisualizationEventHandler::onRenderStage);
-		forgeEventBus.addListener(VisualizationEventHandler::onEntityJoinWorld);
-		forgeEventBus.addListener(VisualizationEventHandler::onEntityLeaveWorld);
+		forgeEventBus.addListener(VisualizationEventHandler::onEntityJoinLevel);
+		forgeEventBus.addListener(VisualizationEventHandler::onEntityLeaveLevel);
 
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);
 
@@ -102,6 +102,8 @@ public class Flywheel {
 		forgeEventBus.addListener((ReloadRenderersEvent e) -> ModelCache.onReloadRenderers(e));
 		forgeEventBus.addListener(ModelHolder::onReloadRenderers);
 		forgeEventBus.addListener((LevelEvent.Unload e) -> LevelAttached.onUnloadLevel(e));
+
+		modEventBus.addListener(Flywheel::lateInit);
 
 		modEventBus.addListener(PartialModel::onModelRegistry);
 		modEventBus.addListener(PartialModel::onModelBake);
@@ -116,8 +118,6 @@ public class Flywheel {
 		Loader.init();
 
 		ShadersModHandler.init();
-
-		modEventBus.addListener(Flywheel::lateInit);
 	}
 
 	private static void lateInit(final FMLClientSetupEvent event) {

@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.api.task;
 
-import java.util.function.Function;
-
 public interface Plan<C> {
 	/**
 	 * Submit this plan for execution.

@@ -81,7 +81,7 @@ public class BakedModelBuilder {
 
 		if (shadeSeparated) {
 			ShadeSeparatedResultConsumer resultConsumer = (renderType, shaded, data) -> {
-				if (!ModelUtil.isVanillaBufferEmpty(data)) {
+				if (!data.isEmpty()) {
 					Material material = materialFunc.apply(renderType, shaded);
 					if (material != null) {
 						MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, VertexTypes.BLOCK);
@@ -92,7 +92,7 @@ public class BakedModelBuilder {
 			BakedModelBufferer.bufferSingleShadeSeparated(ModelUtil.VANILLA_RENDERER.getModelRenderer(), renderWorld, bakedModel, blockState, poseStack, modelData, resultConsumer);
 		} else {
 			ResultConsumer resultConsumer = (renderType, data) -> {
-				if (!ModelUtil.isVanillaBufferEmpty(data)) {
+				if (!data.isEmpty()) {
 					Material material = materialFunc.apply(renderType, true);
 					if (material != null) {
 						MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, VertexTypes.BLOCK);

@@ -12,8 +12,6 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import com.jozufozu.flywheel.lib.util.ResourceUtil;
-
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 
@@ -67,7 +65,7 @@ public class ShaderSources {
 
 	@NotNull
 	protected LoadResult load(ResourceLocation loc) {
-		return manager.getResource(ResourceUtil.prefixed(SHADER_DIR, loc))
+		return manager.getResource(loc.withPrefix(SHADER_DIR))
 				.map(resource -> {
 					try (InputStream stream = resource.open()) {
 						String sourceString = new String(stream.readAllBytes(), StandardCharsets.UTF_8);

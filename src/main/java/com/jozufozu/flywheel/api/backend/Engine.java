@@ -29,12 +29,12 @@ public interface Engine extends InstancerProvider {
 
 	/**
 	 * Render the given instances as a crumbling overlay.
-	 * @param taskExecutor The task executor running the frame plan.
+	 * @param executor The task executor running the frame plan.
 	 * @param context The render context for this frame.
 	 * @param instances The instances to render.
 	 * @param progress The progress of the crumbling animation, i.e. which texture to use.
 	 */
-	void renderCrumblingInstances(TaskExecutor taskExecutor, RenderContext context, List<Instance> instances, int progress);
+	void renderCrumblingInstances(TaskExecutor executor, RenderContext context, List<Instance> instances, int progress);
 
 	/**
 	 * Maintain the render origin to be within a certain distance from the camera in all directions,

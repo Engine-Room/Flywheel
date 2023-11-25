@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.jozufozu.flywheel.glsl.SourceComponent;
-import com.jozufozu.flywheel.lib.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -44,7 +43,7 @@ public final class StringSubstitutionSourceComponent implements SourceComponent 
 
 	@Override
 	public ResourceLocation name() {
-		return ResourceUtil.subPath(source.name(), "_string_substitution");
+		return source.name().withSuffix("_string_substitution");
 	}
 
 	@Override

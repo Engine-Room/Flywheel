@@ -5,10 +5,11 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 
 import net.minecraft.core.Direction;
 
-public interface Transform<Self extends Transform<Self>> extends Translate<Self>, Rotate<Self>, Scale<Self> {
+public interface Transform<Self extends Transform<Self>> extends Scale<Self>, Rotate<Self>, Translate<Self> {
 	Self mulPose(Matrix4f pose);
 
 	Self mulNormal(Matrix3f normal);
@@ -24,16 +25,23 @@ public interface Transform<Self extends Transform<Self>> extends Translate<Self>
 	}
 
 	@SuppressWarnings("unchecked")
-	default Self rotateCentered(Direction axis, float radians) {
-		translate(.5f, .5f, .5f).rotate(axis, radians)
-				.translate(-.5f, -.5f, -.5f);
+	default Self rotateCentered(Quaternionf q) {
+		center().rotate(q)
+				.uncenter();
 		return (Self) this;
 	}
 
 	@SuppressWarnings("unchecked")
-	default Self rotateCentered(Quaternionf q) {
-		translate(.5f, .5f, .5f).multiply(q)
-				.translate(-.5f, -.5f, -.5f);
+	default Self rotateCentered(float radians, Axis axis) {
+		center().rotate(radians, axis)
+				.uncenter();
+		return (Self) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	default Self rotateCentered(float radians, Direction axis) {
+		center().rotate(radians, axis)
+				.uncenter();
 		return (Self) this;
 	}
 }

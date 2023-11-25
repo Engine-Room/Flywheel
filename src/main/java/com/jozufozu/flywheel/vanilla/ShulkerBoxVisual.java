@@ -16,9 +16,9 @@ import com.jozufozu.flywheel.lib.model.ModelCache;
 import com.jozufozu.flywheel.lib.model.SimpleModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.transform.TransformStack;
-import com.jozufozu.flywheel.lib.util.Axes;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.Sheets;
@@ -59,11 +59,11 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 
 		var rotation = getDirection().getRotation();
 
-		TransformStack tstack = TransformStack.cast(stack);
+		TransformStack tstack = TransformStack.of(stack);
 		tstack.translate(getVisualPosition())
-				.translateAll(0.5)
+				.translate(0.5)
 				.scale(0.9995f)
-				.multiply(rotation)
+				.rotate(rotation)
 				.scale(1, -1, -1)
 				.translateY(-1);
 
@@ -103,12 +103,12 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 		}
 		lastProgress = progress;
 
-		Quaternionf spin = Axes.YP.rotationDegrees(270.0f * progress);
+		Quaternionf spin = Axis.YP.rotationDegrees(270.0f * progress);
 
-		TransformStack.cast(stack)
+		TransformStack.of(stack)
 				.pushPose()
 				.translateY(-progress * 0.5f)
-				.multiply(spin);
+				.rotate(spin);
 
 		lid.setTransform(stack);
 
