@@ -18,6 +18,11 @@ public abstract class AbstractInstance implements Instance {
 		return type;
 	}
 
+	@Override
+	public InstanceHandle handle() {
+		return handle;
+	}
+
 	public final void setChanged() {
 		handle.setChanged();
 	}

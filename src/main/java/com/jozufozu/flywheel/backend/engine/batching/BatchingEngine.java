@@ -94,12 +94,17 @@ public class BatchingEngine extends AbstractEngine implements SimplyComposedPlan
 	}
 
 	@Override
+	public void renderCrumblingInstance(TaskExecutor taskExecutor, RenderContext context, Instance instance, int progress) {
+		// TODO: implement
+	}
+
+	@Override
 	protected void onRenderOriginChanged() {
 		initializedInstancers.forEach(BatchedInstancer::clear);
 	}
 
 	@Override
-	public void delete() {
+	public void invalidate() {
 		instancers.clear();
 
 		meshPools.values()

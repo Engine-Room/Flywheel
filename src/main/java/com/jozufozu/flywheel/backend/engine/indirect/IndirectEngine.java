@@ -68,6 +68,11 @@ public class IndirectEngine extends AbstractEngine {
 		}
 	}
 
+	@Override
+	public void renderCrumblingInstance(TaskExecutor taskExecutor, RenderContext context, Instance instance, int progress) {
+		// TODO: implement
+	}
+
 	private void setup() {
 		GlTextureUnit.T2.makeActive();
 		Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
@@ -85,7 +90,7 @@ public class IndirectEngine extends AbstractEngine {
 	}
 
 	@Override
-	public void delete() {
+	public void invalidate() {
 		drawManager.invalidate();
 	}
 }

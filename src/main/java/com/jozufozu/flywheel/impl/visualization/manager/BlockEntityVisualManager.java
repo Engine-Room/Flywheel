@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.impl.visualization.manager;
 
-import java.util.List;
-
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.backend.Engine;
@@ -30,11 +28,8 @@ public class BlockEntityVisualManager extends AbstractVisualManager<BlockEntity>
 		return storage;
 	}
 
-	public void getCrumblingVisuals(long pos, List<BlockEntityVisual<?>> visuals) {
-		BlockEntityVisual<?> visual = storage.posLookup.get(pos);
-		if (visual != null) {
-			visuals.add(visual);
-		}
+	public BlockEntityVisual<?> visualAtPos(long pos) {
+		return storage.posLookup.get(pos);
 	}
 
 	private static class BlockEntityStorage extends Storage<BlockEntity> {
