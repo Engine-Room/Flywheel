@@ -121,7 +121,7 @@ public class VirtualRenderWorld extends Level implements FlywheelWorld {
 	 */
 	public void runLightEngine() {
 		blockStates.forEach((pos, state) -> {
-			int light = state.getLightBlock(this, pos);
+			int light = state.getLightEmission();
 			if (light > 0) {
 				lightEngine.onBlockEmissionIncrease(pos, light);
 			}
