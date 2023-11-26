@@ -10,14 +10,13 @@ import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.phys.AABB;
 
 public class VirtualLevelEntityGetter<T extends EntityAccess> implements LevelEntityGetter<T> {
-
 	@Override
-	public T get(int p_156931_) {
+	public T get(int id) {
 		return null;
 	}
 
 	@Override
-	public T get(UUID pUuid) {
+	public T get(UUID uuid) {
 		return null;
 	}
 
@@ -27,15 +26,14 @@ public class VirtualLevelEntityGetter<T extends EntityAccess> implements LevelEn
 	}
 
 	@Override
-	public <U extends T> void get(EntityTypeTest<T, U> p_156935_, Consumer<U> p_156936_) {
+	public <U extends T> void get(EntityTypeTest<T, U> test, Consumer<U> consumer) {
 	}
 
 	@Override
-	public void get(AABB p_156937_, Consumer<T> p_156938_) {
+	public void get(AABB boundingBox, Consumer<T> consumer) {
 	}
 
 	@Override
-	public <U extends T> void get(EntityTypeTest<T, U> p_156932_, AABB p_156933_, Consumer<U> p_156934_) {
+	public <U extends T> void get(EntityTypeTest<T, U> test, AABB bounds, Consumer<U> consumer) {
 	}
-
 }
