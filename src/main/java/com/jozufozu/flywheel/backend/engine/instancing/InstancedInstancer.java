@@ -1,6 +1,8 @@
 package com.jozufozu.flywheel.backend.engine.instancing;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.jozufozu.flywheel.Flywheel;
@@ -20,6 +22,8 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 
 	private final Set<GlVertexArray> boundTo = new HashSet<>();
 	private GlBuffer vbo;
+
+	private final List<DrawCall> drawCalls = new ArrayList<>();
 
 	public InstancedInstancer(InstanceType<I> type) {
 		super(type);
@@ -110,5 +114,13 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 	public void delete() {
 		vbo.delete();
 		vbo = null;
+	}
+
+	public void addDrawCall(DrawCall drawCall) {
+		drawCalls.add(drawCall);
+	}
+
+	public List<DrawCall> drawCalls() {
+		return drawCalls;
 	}
 }

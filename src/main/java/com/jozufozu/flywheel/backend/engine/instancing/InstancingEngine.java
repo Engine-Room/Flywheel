@@ -12,23 +12,20 @@ import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.jozufozu.flywheel.api.instance.Instancer;
-import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
+import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
+import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
-import com.jozufozu.flywheel.backend.engine.indirect.Textures;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
 import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.NamedFlag;
-import com.jozufozu.flywheel.lib.task.RaisePlan;
 import com.jozufozu.flywheel.lib.task.SyncedPlan;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -36,54 +33,45 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancingEngine extends AbstractEngine {
-	private final Context context;
 	private final InstancedDrawManager drawManager = new InstancedDrawManager();
 
 	private final Flag flushFlag = new NamedFlag("flushed");
 
-	public InstancingEngine(int maxOriginDistance, Context context) {
+	public InstancingEngine(int maxOriginDistance) {
 		super(maxOriginDistance);
-		this.context = context;
-	}
-
-	@Override
-	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, RenderStage stage) {
-		return drawManager.getInstancer(type, model, stage);
-	}
+    }
 
 	@Override
 	public Plan<RenderContext> createFramePlan() {
-		return SyncedPlan.<RenderContext>of(this::flushDrawManager)
-				.then(RaisePlan.raise(flushFlag));
+		return SyncedPlan.of(this::flushDrawManager);
 	}
 
 	private void flushDrawManager() {
 		try (var restoreState = GlStateTracker.getRestoreState()) {
 			drawManager.flush();
 		}
+		flushFlag.raise();
 	}
 
 	@Override
 	public void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage) {
-		var drawSet = drawManager.get(stage);
-
-		if (!drawSet.isEmpty()) {
-			executor.syncUntil(flushFlag::isRaised);
-
-			try (var state = GlStateTracker.getRestoreState()) {
-				setup();
-
-				render(drawSet);
-			}
-		}
-
+		executor.syncUntil(flushFlag::isRaised);
 		if (stage.isLast()) {
-			// Need to sync here to ensure this frame has everything executed
-			// in case we didn't have any stages to draw this frame.
-			executor.syncUntil(flushFlag::isRaised);
 			flushFlag.lower();
 		}
-	}
+
+		var drawSet = drawManager.get(stage);
+
+        if (drawSet.isEmpty()) {
+            return;
+        }
+
+        try (var state = GlStateTracker.getRestoreState()) {
+            setup();
+
+            render(drawSet);
+        }
+    }
 
 	@Override
 	public void renderCrumblingInstances(TaskExecutor executor, RenderContext context, List<Instance> instances, int progress) {
@@ -139,7 +127,7 @@ public class InstancingEngine extends AbstractEngine {
 				continue;
 			}
 
-			List<DrawCall> draws = drawManager.drawCallsForInstancer(instancer);
+			List<DrawCall> draws = instancer.drawCalls();
 
 			draws.removeIf(DrawCall::isInvalid);
 
@@ -173,7 +161,7 @@ public class InstancingEngine extends AbstractEngine {
 				continue;
 			}
 
-			setup(shader, context);
+			setup(shader, Contexts.WORLD);
 
 			shader.material().setup();
 
@@ -201,8 +189,8 @@ public class InstancingEngine extends AbstractEngine {
 	}
 
 	@Override
-	protected void onRenderOriginChanged() {
-		drawManager.clearInstancers();
+	protected InstancerStorage<? extends AbstractInstancer<?>> getStorage() {
+		return drawManager;
 	}
 
 	@Override

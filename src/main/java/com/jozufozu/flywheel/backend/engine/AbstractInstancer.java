@@ -108,4 +108,8 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	public String toString() {
 		return "AbstractInstancer[" + getInstanceCount() + ']';
 	}
+
+	public void delete() {
+
+	}
 }
