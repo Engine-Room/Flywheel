@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.lib.task;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -114,27 +116,72 @@ class PlanExecutionTest {
 	}
 
 	@Test
-	void unitPlan() {
+	void emptyPlansDontCallTheExecutor() {
 		var done = new AtomicBoolean(false);
 
 		UnitPlan.of()
 				.execute(null, Unit.INSTANCE, () -> done.set(true));
 
 		Assertions.assertTrue(done.get());
-	}
-
-	@Test
-	void emptyPlan() {
-		var done = new AtomicBoolean(false);
+		done.set(false);
 
 		SimplePlan.of()
 				.execute(null, Unit.INSTANCE, () -> done.set(true));
-		Assertions.assertTrue(done.get());
 
+		Assertions.assertTrue(done.get());
 		done.set(false);
+
 		NestedPlan.of()
 				.execute(null, Unit.INSTANCE, () -> done.set(true));
+
 		Assertions.assertTrue(done.get());
+	}
+
+	@Test
+	void ifElsePlan() {
+		var branch = new AtomicInteger(0);
+
+		var plan = IfElsePlan.<Boolean>on(b -> b)
+				.ifTrue(SimplePlan.of(() -> branch.set(1)))
+				.ifFalse(SimplePlan.of(() -> branch.set(2)))
+				.plan();
+
+		runAndWait(plan, true);
+
+		Assertions.assertEquals(1, branch.get());
+
+		runAndWait(plan, false);
+
+		Assertions.assertEquals(2, branch.get());
+	}
+
+	@Test
+	void dynamicNestedPlan() {
+		var counter = new AtomicInteger(0);
+
+		List<Plan<Unit>> plans = new ArrayList<>();
+
+		// We'll re-use this same plan but append to the list of plans it executes.
+		var plan = DynamicNestedPlan.of(() -> plans);
+
+		runAndWait(plan);
+
+		Assertions.assertEquals(0, counter.get());
+
+		plans.add(SimplePlan.of(counter::incrementAndGet));
+
+		runAndWait(plan);
+
+		Assertions.assertEquals(1, counter.get());
+
+		counter.set(0);
+
+		plans.add(SimplePlan.of(counter::incrementAndGet));
+		plans.add(SimplePlan.of(counter::incrementAndGet));
+
+		runAndWait(plan);
+
+		Assertions.assertEquals(3, counter.get());
 	}
 
 	@Test
@@ -213,19 +260,25 @@ class PlanExecutionTest {
 	}
 
 	public static void runAndWait(Plan<Unit> plan) {
-		new TestBarrier(plan).runAndWait();
+		new TestBarrier<Unit>(plan, Unit.INSTANCE).runAndWait();
 	}
 
-	private static final class TestBarrier {
-		private final Plan<Unit> plan;
+	public static <C> void runAndWait(Plan<C> plan, C ctx) {
+		new TestBarrier<>(plan, ctx).runAndWait();
+	}
+
+	private static final class TestBarrier<C> {
+		private final Plan<C> plan;
+		private final C ctx;
 		private boolean done = false;
 
-		private TestBarrier(Plan<Unit> plan) {
+		private TestBarrier(Plan<C> plan, C ctx) {
 			this.plan = plan;
+			this.ctx = ctx;
 		}
 
 		public void runAndWait() {
-			plan.execute(EXECUTOR, Unit.INSTANCE, this::doneWithPlan);
+			plan.execute(EXECUTOR, ctx, this::doneWithPlan);
 
 			synchronized (this) {
 				// early exit in case the plan is already done for e.g. UnitPlan
