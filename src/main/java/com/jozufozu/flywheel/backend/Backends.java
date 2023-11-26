@@ -10,7 +10,6 @@ import com.jozufozu.flywheel.backend.engine.indirect.IndirectEngine;
 import com.jozufozu.flywheel.backend.engine.instancing.InstancingEngine;
 import com.jozufozu.flywheel.gl.GlCompat;
 import com.jozufozu.flywheel.lib.backend.SimpleBackend;
-import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 
 import net.minecraft.ChatFormatting;
@@ -33,7 +32,7 @@ public class Backends {
 	public static final Backend INSTANCING = SimpleBackend.builder()
 			.engineMessage(Component.literal("Using Instancing Engine")
 					.withStyle(ChatFormatting.GREEN))
-			.engineFactory(level -> new InstancingEngine(256, Contexts.WORLD))
+			.engineFactory(level -> new InstancingEngine(256))
 			.fallback(() -> Backends.BATCHING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.supportsInstancing() && InstancingPrograms.allLoaded())
 			.register(Flywheel.rl("instancing"));

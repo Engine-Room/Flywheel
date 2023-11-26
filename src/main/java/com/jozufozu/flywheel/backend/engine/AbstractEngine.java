@@ -1,6 +1,11 @@
 package com.jozufozu.flywheel.backend.engine;
 
 import com.jozufozu.flywheel.api.backend.Engine;
+import com.jozufozu.flywheel.api.event.RenderStage;
+import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.InstanceType;
+import com.jozufozu.flywheel.api.instance.Instancer;
+import com.jozufozu.flywheel.api.model.Model;
 
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
@@ -16,6 +21,11 @@ public abstract class AbstractEngine implements Engine {
 	}
 
 	@Override
+	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, RenderStage stage) {
+		return getStorage().getInstancer(type, model, stage);
+	}
+
+	@Override
 	public boolean updateRenderOrigin(Camera camera) {
 		Vec3 cameraPos = camera.getPosition();
 		double dx = renderOrigin.getX() - cameraPos.x;
@@ -28,7 +38,7 @@ public abstract class AbstractEngine implements Engine {
 		}
 
 		renderOrigin = BlockPos.containing(cameraPos);
-		onRenderOriginChanged();
+		getStorage().onRenderOriginChanged();
 		return true;
 	}
 
@@ -37,6 +47,5 @@ public abstract class AbstractEngine implements Engine {
 		return renderOrigin;
 	}
 
-	protected void onRenderOriginChanged() {
-	}
+	protected abstract InstancerStorage<? extends AbstractInstancer<?>> getStorage();
 }
