@@ -17,10 +17,10 @@ public final class Contexts {
 		GlProgram.unbind();
 	}));
 
-	// TODO: can we make crumbling a fragment material?
-	public static final SimpleContext CRUMBLING = Context.REGISTRY.registerAndGet(new SimpleContext(Files.WORLD_VERTEX, Files.CRUMBLING_FRAGMENT, program -> {
+	public static final SimpleContext CRUMBLING = Context.REGISTRY.registerAndGet(new SimpleContext(Files.CRUMBLING_VERTEX, Files.CRUMBLING_FRAGMENT, program -> {
 		program.bind();
-		program.setSamplerBinding("flw_diffuseTex", 0);
+		program.setSamplerBinding("flw_crumblingTex", 0);
+		program.setSamplerBinding("flw_diffuseTex", 1);
 		GlProgram.unbind();
 	}));
 

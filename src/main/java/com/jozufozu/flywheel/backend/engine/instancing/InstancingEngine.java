@@ -94,11 +94,24 @@ public class InstancingEngine extends AbstractEngine {
 		}
 
 		try (var state = GlStateTracker.getRestoreState()) {
-			ModelBakery.DESTROY_TYPES.get(progress)
-					.setupRenderState();
+			var crumblingType = ModelBakery.DESTROY_TYPES.get(progress);
 
 			for (var entry : drawMap.entrySet()) {
-				setup(entry.getKey(), Contexts.CRUMBLING);
+				var shader = entry.getKey();
+
+				setup(shader, Contexts.CRUMBLING);
+
+				shader.material().setup();
+
+				int renderTex = RenderSystem.getShaderTexture(0);
+
+				shader.material().clear();
+
+				crumblingType.setupRenderState();
+
+				RenderSystem.setShaderTexture(1, renderTex);
+				GlTextureUnit.T1.makeActive();
+				RenderSystem.bindTexture(renderTex);
 
 				for (Runnable draw : entry.getValue()) {
 					draw.run();
