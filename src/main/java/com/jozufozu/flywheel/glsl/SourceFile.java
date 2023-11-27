@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -140,6 +141,24 @@ public class SourceFile implements SourceComponent {
 		while (begin < end && Character.isWhitespace(source.charAt(begin))) {
 			begin++;
 		}
+
+		return new StringSpan(source, begin, end);
+	}
+
+	public Span getLineSpanMatching(int line, @Nullable String match) {
+		if (match == null) {
+			return getLineSpanNoWhitespace(line);
+		}
+
+		var spanBegin = source.lineString(line)
+				.indexOf(match);
+
+		if (spanBegin == -1) {
+			return getLineSpanNoWhitespace(line);
+		}
+
+		int begin = source.lineStartIndex(line) + spanBegin;
+		int end = begin + match.length();
 
 		return new StringSpan(source, begin, end);
 	}
