@@ -10,6 +10,7 @@ import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 
 import net.minecraft.client.Camera;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 
 public interface Engine extends InstancerProvider {
@@ -29,12 +30,12 @@ public interface Engine extends InstancerProvider {
 
 	/**
 	 * Render the given instances as a crumbling overlay.
-	 * @param executor The task executor running the frame plan.
-	 * @param context The render context for this frame.
-	 * @param instances The instances to render.
-	 * @param progress The progress of the crumbling animation, i.e. which texture to use.
+	 *
+	 * @param executor        The task executor running the frame plan.
+	 * @param context         The render context for this frame.
+	 * @param crumblingBlocks The instances to render.
 	 */
-	void renderCrumblingInstances(TaskExecutor executor, RenderContext context, List<Instance> instances, int progress);
+	void renderCrumblingInstances(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks);
 
 	/**
 	 * Maintain the render origin to be within a certain distance from the camera in all directions,
@@ -55,4 +56,13 @@ public interface Engine extends InstancerProvider {
 	 * This engine will not be used again after this method is called.
 	 */
 	void delete();
+
+	/**
+	 * A block to be rendered as a crumbling overlay.
+	 * @param progress The progress of the crumbling animation in the range [0, 10).
+	 * @param pos The position of the block.
+	 * @param instances The instances associated with the BE at this position.
+	 */
+	record CrumblingBlock(int progress, BlockPos pos, List<Instance> instances) {
+	}
 }

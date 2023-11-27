@@ -1,33 +1,86 @@
 #include "flywheel:api/vertex.glsl"
 #include "flywheel:util/fog.glsl"
 
-out vec2 flw_crumblingTexCoord;
+out vec2 _flw_crumblingFlip;
 
-vec3 tangent(vec3 normal) {
-    float sinYRot = -normal.x;
-    vec2 XZ = normal.xz;
-    float sqLength = dot(XZ, XZ);
-    if (sqLength > 0) {
-        sinYRot *= inversesqrt(sqLength);
-        sinYRot = clamp(sinYRot, -1, 1);
+const int DOWN = 0;
+const int UP = 1;
+const int NORTH = 2;
+const int SOUTH = 3;
+const int WEST = 4;
+const int EAST = 5;
+
+const vec2 FLIPS_BY_FACE[6] = vec2[](
+    vec2(1., -1.),
+    vec2(-1., -1.),
+    vec2(-1., -1.),
+    vec2(-1., -1.),
+    vec2(1., -1.),
+    vec2(1., -1.)
+);
+
+// based on net.minecraftforge.client.ForgeHooksClient.getNearestStable
+int getNearestFacing(vec3 normal) {
+    float maxAlignment = -2;
+    int face = 2;
+
+    vec3 alignment = vec3(
+    dot(normal, vec3(1., 0., 0.)),
+    dot(normal, vec3(0., 1., 0.)),
+    dot(normal, vec3(0., 0., 1.))
+    );
+
+    if (-alignment.y > maxAlignment) {
+        maxAlignment = -alignment.y;
+        face = DOWN;
+    }
+    if (alignment.y > maxAlignment) {
+        maxAlignment = alignment.y;
+        face = UP;
+    }
+    if (-alignment.z > maxAlignment) {
+        maxAlignment = -alignment.z;
+        face = NORTH;
+    }
+    if (alignment.z > maxAlignment) {
+        maxAlignment = alignment.z;
+        face = SOUTH;
+    }
+    if (alignment.x > maxAlignment) {
+        maxAlignment = -alignment.x;
+        face = WEST;
     }
 
-    return vec3(sqrt(1 - sinYRot * sinYRot) * (normal.z < 0 ? -1 : 1), 0, sinYRot);
+    return face;
 }
 
-vec2 flattenedPos(vec3 pos, vec3 normal) {
-    pos -= vec3(0.5);
+vec2 calculateFlip(vec3 normal) {
+    int face = getNearestFacing(normal);
+    return FLIPS_BY_FACE[face];
+}
 
-    vec3 tangent = tangent(normal);
-    vec3 bitangent = cross(tangent, normal);
-    mat3 tbn = mat3(tangent, bitangent, normal);
+// This is disgusting so if an issue comes up just throw this away and fix the branching version above.
+vec2 calculateFlipBranchless(vec3 normal) {
+    vec3 alignment = vec3(
+    dot(normal, vec3(1., 0., 0.)),
+    dot(normal, vec3(0., 1., 0.)),
+    dot(normal, vec3(0., 0., 1.))
+    );
 
-    // transpose is the same as inverse for orthonormal matrices
-    return (transpose(tbn) * pos).xy + vec2(0.5);
+    vec3 absAlignment = abs(alignment);
+
+    // x is the max alignment that would cause U to be -1.
+    // y is the max alignment that would cause U to be 1.
+    vec2 maxNegativeMaxPositive = max(vec2(absAlignment.z, alignment.y), vec2(-alignment.y, absAlignment.x));
+
+    bool flipU = maxNegativeMaxPositive.x > maxNegativeMaxPositive.y;
+
+    return vec2(mix(1., -1., flipU), -1.);
 }
 
 void flw_initVertex() {
-    flw_crumblingTexCoord = flattenedPos(flw_vertexPos.xyz, flw_vertexNormal);
+    // Calculate the flips in model space so that the crumbling effect doesn't have discontinuities.
+    _flw_crumblingFlip = calculateFlipBranchless(flw_vertexNormal);
 }
 
 void flw_contextVertex() {

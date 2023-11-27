@@ -13,8 +13,13 @@ import com.jozufozu.flywheel.gl.GlObject;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.logging.LogUtils;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+
 public class GlProgram extends GlObject {
 	private static final Logger LOGGER = LogUtils.getLogger();
+
+	private final Object2IntMap<String> uniformLocationCache = new Object2IntOpenHashMap<>();
 
 	public GlProgram(int handle) {
 		handle(handle);
@@ -35,13 +40,14 @@ public class GlProgram extends GlObject {
 	 * @return The uniform's index
 	 */
 	public int getUniformLocation(String uniform) {
-		int index = glGetUniformLocation(this.handle(), uniform);
+		return uniformLocationCache.computeIfAbsent(uniform, s -> {
+			int index = glGetUniformLocation(this.handle(), uniform);
 
-		if (index < 0) {
-			LOGGER.debug("No active uniform '{}' exists. Could be unused.", uniform);
-		}
-
-		return index;
+			if (index < 0) {
+				LOGGER.debug("No active uniform '{}' exists. Could be unused.", uniform);
+			}
+			return index;
+		});
 	}
 
 	/**
