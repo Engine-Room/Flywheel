@@ -61,7 +61,7 @@ public class Compilation {
 		}
 
 		GL20.glDeleteShader(handle);
-		return ShaderResult.failure(new FailedCompilation(shaderName, files, generatedSource.toString(), infoLog));
+		return ShaderResult.failure(new FailedCompilation(shaderName, files, generatedSource.toString(), source, infoLog));
 	}
 
 	public void enableExtension(String ext) {
@@ -80,7 +80,7 @@ public class Compilation {
 
 	private void appendHeader(SourceComponent component, String source) {
 		if (component instanceof SourceFile file) {
-			int fileID = files.size();
+			int fileID = files.size() + 1;
 
 			files.add(file);
 
