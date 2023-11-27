@@ -10,7 +10,6 @@ import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
@@ -31,8 +30,6 @@ import com.jozufozu.flywheel.lib.task.NamedFlag;
 import com.jozufozu.flywheel.lib.task.RaisePlan;
 import com.jozufozu.flywheel.lib.util.LevelAttached;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -208,9 +205,13 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	}
 
 	public void renderCrumbling(RenderContext context, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress) {
+		if (destructionProgress.isEmpty()) {
+			return;
+		}
+
 		taskExecutor.syncUntil(frameVisualsFlag::isRaised);
 
-		Int2ObjectMap<List<Instance>> progress2instances = new Int2ObjectArrayMap<>();
+		List<Engine.CrumblingBlock> crumblingBlocks = new ArrayList<>();
 
 		for (var entry : destructionProgress.long2ObjectEntrySet()) {
 			var set = entry.getValue();
@@ -233,18 +234,12 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				continue;
 			}
 
-			// now for the fun part
+			var maxDestruction = set.last();
 
-			int progress = set.last()
-					.getProgress();
-
-			progress2instances.computeIfAbsent(progress, $ -> new ArrayList<>())
-					.addAll(instances);
+			crumblingBlocks.add(new Engine.CrumblingBlock(maxDestruction.getProgress(), maxDestruction.getPos(), instances));
 		}
 
-		for (var entry : progress2instances.int2ObjectEntrySet()) {
-			engine.renderCrumblingInstances(taskExecutor, context, entry.getValue(), entry.getIntKey());
-		}
+		engine.renderCrumblingInstances(taskExecutor, context, crumblingBlocks);
 	}
 
 	/**

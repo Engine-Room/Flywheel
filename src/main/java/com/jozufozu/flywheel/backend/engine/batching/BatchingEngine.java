@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
@@ -45,7 +44,7 @@ public class BatchingEngine extends AbstractEngine {
 	}
 
 	@Override
-	public void renderCrumblingInstances(TaskExecutor executor, RenderContext context, List<Instance> instances, int progress) {
+	public void renderCrumblingInstances(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks) {
 		// TODO: implement
 	}
 
