@@ -110,16 +110,8 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public void setStartForStructure(Structure structure, StructureStart structureStart) {
-	}
-
-	@Override
 	public Map<Structure, StructureStart> getAllStarts() {
 		return Collections.emptyMap();
-	}
-
-	@Override
-	public void setAllStarts(Map<Structure, StructureStart> structureStarts) {
 	}
 
 	@Override
@@ -138,10 +130,6 @@ public class VirtualChunk extends ChunkAccess {
 
 	@Override
 	public void setAllReferences(Map<Structure, LongSet> structureReferencesMap) {
-	}
-
-	@Override
-	public void setUnsaved(boolean unsaved) {
 	}
 
 	@Override
@@ -225,6 +213,11 @@ public class VirtualChunk extends ChunkAccess {
 	@Override
 	public ShortList[] getPostProcessing() {
 		return new ShortList[0];
+	}
+
+	@Override
+	public BlockState getBlockState(BlockPos pos) {
+		return world.getBlockState(pos);
 	}
 
 	@Override

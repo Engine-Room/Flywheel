@@ -4,14 +4,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 import com.google.common.base.Suppliers;
+
+import net.fabricmc.loader.api.FabricLoader;
 
 public class SodiumMixinPlugin implements IMixinConfigPlugin {
 	private static final Supplier<Boolean> IS_SODIUM_LOADED = Suppliers.memoize(() -> FabricLoader.getInstance().isModLoaded("sodium"));
