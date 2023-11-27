@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.instance.Instance;
@@ -22,12 +21,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.resources.model.ModelBakery;
-import net.minecraft.core.BlockPos;
 
-public class InstancingCrumble {
+public class InstancedCrumbling {
 	@NotNull
-	public static Map<ShaderState, Int2ObjectMap<Map<BlockPos, List<Runnable>>>> doCrumblingSort(List<Engine.CrumblingBlock> instances) {
-		Map<ShaderState, Int2ObjectMap<Map<BlockPos, List<Runnable>>>> out = new HashMap<>();
+	public static Map<ShaderState, Int2ObjectMap<List<Runnable>>> doCrumblingSort(List<Engine.CrumblingBlock> instances) {
+		Map<ShaderState, Int2ObjectMap<List<Runnable>>> out = new HashMap<>();
 
 		for (Engine.CrumblingBlock triple : instances) {
 			int progress = triple.progress();
@@ -35,8 +33,6 @@ public class InstancingCrumble {
 			if (progress < 0 || progress >= ModelBakery.DESTROY_TYPES.size()) {
 				continue;
 			}
-
-			BlockPos position = triple.pos();
 
 			for (Instance instance : triple.instances()) {
 				// Filter out instances that weren't created by this engine.
@@ -55,8 +51,7 @@ public class InstancingCrumble {
 
 				for (DrawCall draw : draws) {
 					out.computeIfAbsent(draw.shaderState, $ -> new Int2ObjectArrayMap<>())
-							.computeIfAbsent(progress, $ -> new HashMap<>())
-							.computeIfAbsent(position, $ -> new ArrayList<>())
+							.computeIfAbsent(progress, $ -> new ArrayList<>())
 							.add(() -> draw.renderOne(impl));
 				}
 			}
@@ -64,7 +59,7 @@ public class InstancingCrumble {
 		return out;
 	}
 
-	public static void render(List<Engine.CrumblingBlock> crumblingBlocks, BlockPos renderOrigin) {
+	public static void render(List<Engine.CrumblingBlock> crumblingBlocks) {
 		// Sort draw calls into buckets, so we don't have to do as many shader binds.
 		var byShaderState = doCrumblingSort(crumblingBlocks);
 
@@ -88,16 +83,14 @@ public class InstancingCrumble {
 						.get(shader.vertexType(), shader.instanceType(), Contexts.CRUMBLING);
 				UniformBuffer.syncAndBind(program);
 
-				int crumblingBlockPosUniform = program.getUniformLocation("_flw_crumblingBlockPos");
-
 				InstancingEngine.uploadMaterialIDUniform(program, material);
 
 				int renderTex = getDiffuseTexture(material);
 
-				for (Int2ObjectMap.Entry<Map<BlockPos, List<Runnable>>> progressEntry : byProgress.int2ObjectEntrySet()) {
-					var byPos = progressEntry.getValue();
+				for (Int2ObjectMap.Entry<List<Runnable>> progressEntry : byProgress.int2ObjectEntrySet()) {
+					var drawCalls = progressEntry.getValue();
 
-					if (byPos.isEmpty()) {
+					if (drawCalls.isEmpty()) {
 						continue;
 					}
 
@@ -109,12 +102,7 @@ public class InstancingCrumble {
 					GlTextureUnit.T1.makeActive();
 					RenderSystem.bindTexture(renderTex);
 
-					for (var blockPosEntry : byPos.entrySet()) {
-						var center = blockPosEntry.getKey().getCenter();
-						GL32.glUniform3f(crumblingBlockPosUniform, (float) center.x - renderOrigin.getX(), (float) center.y - renderOrigin.getY(), (float) center.z - renderOrigin.getZ());
-
-						blockPosEntry.getValue().forEach(Runnable::run);
-					}
+					drawCalls.forEach(Runnable::run);
 				}
 			}
 		}

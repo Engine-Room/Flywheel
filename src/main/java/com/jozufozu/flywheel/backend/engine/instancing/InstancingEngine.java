@@ -76,7 +76,7 @@ public class InstancingEngine extends AbstractEngine {
 		// Need to wait for flush before we can inspect instancer state.
 		executor.syncUntil(flushFlag::isRaised);
 
-		InstancingCrumble.render(crumblingBlocks, this.renderOrigin);
+		InstancedCrumbling.render(crumblingBlocks);
 	}
 
 	@Override
