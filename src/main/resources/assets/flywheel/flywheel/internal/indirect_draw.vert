@@ -26,6 +26,7 @@ void main() {
     _flw_materialFragmentID = drawCommands[batchID].fragmentMaterialID;
 
     flw_layoutVertex();
+    flw_initVertex();
     flw_instanceVertex(i);
     flw_materialVertex();
     flw_contextVertex();

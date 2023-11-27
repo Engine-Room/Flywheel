@@ -9,6 +9,7 @@ void main() {
     FlwInstance i = _flw_unpackInstance();
 
     flw_layoutVertex();
+    flw_initVertex();
     flw_instanceVertex(i);
     flw_materialVertex();
     flw_contextVertex();
