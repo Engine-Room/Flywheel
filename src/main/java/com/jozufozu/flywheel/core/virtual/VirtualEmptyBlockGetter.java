@@ -36,6 +36,7 @@ public interface VirtualEmptyBlockGetter extends RenderAttachedBlockView {
 	}
 
 	@Override
+	@Nullable
 	default BlockEntity getBlockEntity(BlockPos pos) {
 		return null;
 	}

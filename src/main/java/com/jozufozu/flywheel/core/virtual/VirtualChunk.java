@@ -145,8 +145,7 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public boolean isUnsaved() {
-		return false;
+	public void setStartForStructure(Structure structure, StructureStart structureStart) {
 	}
 
 	@Override
@@ -159,8 +158,7 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public ShortList[] getPostProcessing() {
-		return new ShortList[0];
+	public void setAllStarts(Map<Structure, StructureStart> structureStarts) {
 	}
 
 	@Override
@@ -201,8 +199,7 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public long getInhabitedTime() {
-		return 0;
+	public void setUnsaved(boolean unsaved) {
 	}
 
 	@Override
@@ -210,8 +207,8 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public boolean isLightCorrect() {
-		return needsLight;
+	public boolean isUnsaved() {
+		return false;
 	}
 
 	@Override
@@ -226,8 +223,8 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public BlockState getBlockState(BlockPos pos) {
-		return world.getBlockState(pos);
+	public ShortList[] getPostProcessing() {
+		return new ShortList[0];
 	}
 
 	@Override
