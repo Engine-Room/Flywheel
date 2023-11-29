@@ -13,18 +13,20 @@ import net.minecraft.client.renderer.RenderType;
 public class DrawBufferSet {
 	private final RenderType renderType;
 	private final VertexFormat format;
+	private final boolean sortOnUpload;
 	private final int stride;
 	private final VertexListProvider provider;
 	private final Map<RenderStage, DrawBuffer> buffers = new EnumMap<>(RenderStage.class);
 
-	public DrawBufferSet(RenderType renderType) {
+	public DrawBufferSet(RenderType renderType, boolean sortOnUpload) {
 		this.renderType = renderType;
+		this.sortOnUpload = sortOnUpload;
 		format = renderType.format();
 		stride = format.getVertexSize();
 		provider = VertexListProviderRegistry.getProvider(format);
 	}
 
 	public DrawBuffer getBuffer(RenderStage stage) {
-		return buffers.computeIfAbsent(stage, renderStage -> new DrawBuffer(renderType, renderStage, format, stride, provider));
+		return buffers.computeIfAbsent(stage, renderStage -> new DrawBuffer(renderType, format, stride, sortOnUpload, provider));
 	}
 }

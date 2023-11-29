@@ -150,7 +150,7 @@ public class BatchedMeshPool {
 	}
 
 	public class BufferedMesh {
-		private final Mesh mesh;
+		public final Mesh mesh;
 		private final int byteSize;
 		private final int vertexCount;
 		private final Vector4fc boundingSphere;

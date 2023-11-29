@@ -1,5 +1,8 @@
 package com.jozufozu.flywheel.api.vertex;
 
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+
 /**
  * A read only view of a vertex buffer.
  *
@@ -72,5 +75,13 @@ public interface VertexList {
 
 	default boolean isEmpty() {
 		return vertexCount() == 0;
+	}
+
+    default Vector3f getNormal(int i, Vector3f dest) {
+		return dest.set(normalX(i), normalY(i), normalZ(i));
+	}
+
+	default Vector4f getPos(int i, Vector4f dest) {
+		return dest.set(x(i), y(i), z(i));
 	}
 }

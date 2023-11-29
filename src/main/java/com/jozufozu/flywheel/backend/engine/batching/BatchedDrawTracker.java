@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.extension.BufferBuilderExtension;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 
 public class BatchedDrawTracker {
@@ -25,16 +26,17 @@ public class BatchedDrawTracker {
 		((BufferBuilderExtension) scratch).flywheel$freeBuffer();
 	}
 
-	public void markActive(DrawBuffer buffer) {
+	public void markActive(RenderStage stage, DrawBuffer buffer) {
 		synchronized (activeBuffers) {
-			activeBuffers.get(buffer.getRenderStage())
+			activeBuffers.get(stage)
 					.add(buffer);
 		}
 	}
 
-	public void markInactive(DrawBuffer buffer) {
+	// TODO: remove?
+	public void markInactive(RenderStage stage, DrawBuffer buffer) {
 		synchronized (activeBuffers) {
-			activeBuffers.get(buffer.getRenderStage())
+			activeBuffers.get(stage)
 					.remove(buffer);
 		}
 	}
@@ -67,12 +69,12 @@ public class BatchedDrawTracker {
 		buffers.clear();
 	}
 
-	private void _draw(DrawBuffer buffer) {
+	public void _draw(DrawBuffer buffer) {
 		if (buffer.hasVertices()) {
 			BufferBuilderExtension scratch = (BufferBuilderExtension) this.scratch;
 			buffer.inject(scratch);
 			buffer.getRenderType()
-					.end(this.scratch, null);
+					.end(this.scratch, RenderSystem.getVertexSorting());
 		}
 		buffer.reset();
 	}

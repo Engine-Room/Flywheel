@@ -37,6 +37,9 @@ public abstract class BufferBuilderMixin implements BufferBuilderExtension {
 	@Shadow
 	private boolean building;
 
+	@Shadow
+	private int nextElementByte;
+
 	@Override
 	public void flywheel$freeBuffer() {
 		if (buffer != null) {
@@ -58,5 +61,6 @@ public abstract class BufferBuilderMixin implements BufferBuilderExtension {
 
 		currentElement = format.getElements().get(0);
 		elementIndex = 0;
+		nextElementByte = vertexCount * format.getVertexSize();
 	}
 }
