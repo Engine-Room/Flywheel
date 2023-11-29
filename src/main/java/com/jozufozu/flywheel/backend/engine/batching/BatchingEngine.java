@@ -45,7 +45,10 @@ public class BatchingEngine extends AbstractEngine {
 
 	@Override
 	public void renderCrumblingInstances(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks) {
-		// TODO: implement
+		executor.syncUntil(flushFlag::isRaised);
+
+		var batchContext = BatchContext.create(context, this.renderOrigin);
+		BatchedCrumbling.renderCrumbling(crumblingBlocks, batchContext, this.drawManager.drawTracker);
 	}
 
 	@Override

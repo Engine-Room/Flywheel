@@ -18,7 +18,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderType;
 
 class BatchedDrawManager extends InstancerStorage<BatchedInstancer<?>> {
-	private final BatchedDrawTracker drawTracker = new BatchedDrawTracker();
+	public final BatchedDrawTracker drawTracker = new BatchedDrawTracker();
 	private final Map<RenderStage, BatchedStagePlan> stagePlans = new EnumMap<>(RenderStage.class);
 	private final Map<VertexFormat, BatchedMeshPool> meshPools = new HashMap<>();
 

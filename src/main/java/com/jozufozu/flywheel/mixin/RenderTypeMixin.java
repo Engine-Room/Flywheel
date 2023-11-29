@@ -1,7 +1,9 @@
 package com.jozufozu.flywheel.mixin;
 
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 import com.jozufozu.flywheel.backend.engine.batching.DrawBufferSet;
@@ -11,6 +13,9 @@ import net.minecraft.client.renderer.RenderType;
 
 @Mixin(RenderType.class)
 public class RenderTypeMixin implements RenderTypeExtension {
+	@Shadow
+	@Final
+	private boolean sortOnUpload;
 	@Unique
 	private DrawBufferSet flywheel$drawBufferSet;
 
@@ -18,7 +23,7 @@ public class RenderTypeMixin implements RenderTypeExtension {
 	@NotNull
 	public DrawBufferSet flywheel$getDrawBufferSet() {
 		if (flywheel$drawBufferSet == null) {
-			flywheel$drawBufferSet = new DrawBufferSet((RenderType) (Object) this);
+			flywheel$drawBufferSet = new DrawBufferSet((RenderType) (Object) this, sortOnUpload);
 		}
 		return flywheel$drawBufferSet;
 	}

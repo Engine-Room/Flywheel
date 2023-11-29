@@ -30,6 +30,8 @@ public interface Engine extends InstancerProvider {
 
 	/**
 	 * Render the given instances as a crumbling overlay.
+	 * <br>
+	 * This is guaranteed to be called between the first and last calls to {@link #renderStage}.
 	 *
 	 * @param executor        The task executor running the frame plan.
 	 * @param context         The render context for this frame.

@@ -84,7 +84,7 @@ public class BatchedStagePlan implements SimplyComposedPlan<BatchContext> {
 				return;
 			}
 
-			tracker.markActive(buffer);
+			tracker.markActive(stage, buffer);
 			buffer.prepare(vertexCount);
 
 			var vertexCounter = new AtomicInteger(0);

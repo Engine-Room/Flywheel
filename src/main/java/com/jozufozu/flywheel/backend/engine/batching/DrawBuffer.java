@@ -14,19 +14,20 @@ import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.Mth;
 
 /**
  * A byte buffer that can be used to draw vertices through multiple {@link ReusableVertexList}s.
- *
- * The number of vertices needs to be known ahead of time.
+ * <br>
+ * Note: The number of vertices needs to be known ahead of time.
  */
 public class DrawBuffer {
 	private static final List<DrawBuffer> ALL = new ArrayList<>();
 
 	private final RenderType renderType;
-	private final RenderStage renderStage;
 	private final VertexFormat format;
 	private final int stride;
+	private final boolean sortOnUpload;
 	private final VertexListProvider provider;
 
 	private MemoryBlock data;
@@ -36,11 +37,11 @@ public class DrawBuffer {
 	private int vertexCount;
 	private int verticesToDraw;
 
-	public DrawBuffer(RenderType renderType, RenderStage renderStage, VertexFormat format, int stride, VertexListProvider provider) {
+	public DrawBuffer(RenderType renderType, VertexFormat format, int stride, boolean sortOnUpload, VertexListProvider provider) {
 		this.renderType = renderType;
-		this.renderStage = renderStage;
 		this.format = format;
 		this.stride = stride;
+		this.sortOnUpload = sortOnUpload;
 		this.provider = provider;
 
 		ALL.add(this);
@@ -63,6 +64,15 @@ public class DrawBuffer {
 		// enough buffer space for one more vertex. Rubidium checks for this extra space when popNextBuffer
 		// is called and reallocates the buffer if there is not space for one more vertex.
 		int byteSize = stride * (vertexCount + 1);
+
+		// We'll need to allocate space for the index buffer if this render type needs sorting.
+		if (sortOnUpload) {
+			int i = renderType.mode()
+					.indexCount(vertexCount);
+			VertexFormat.IndexType indexType = VertexFormat.IndexType.least(i);
+			int extraBytes = Mth.roundToward(i * indexType.bytes, 4);
+			byteSize += extraBytes;
+		}
 
 		if (data == null) {
 			data = MemoryBlock.malloc(byteSize);
@@ -114,10 +124,6 @@ public class DrawBuffer {
 
 	public RenderType getRenderType() {
 		return renderType;
-	}
-
-	public RenderStage getRenderStage() {
-		return renderStage;
 	}
 
 	public VertexFormat getVertexFormat() {
