@@ -9,6 +9,7 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.backend.MaterialShaderIndices;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
@@ -18,7 +19,6 @@ import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.context.Contexts;
-import com.jozufozu.flywheel.lib.material.MaterialIndices;
 import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.NamedFlag;
 import com.jozufozu.flywheel.lib.task.SyncedPlan;
@@ -125,8 +125,8 @@ public class InstancingEngine extends AbstractEngine {
 
 	public static void uploadMaterialIDUniform(GlProgram program, Material material) {
 		int materialIDUniform = program.getUniformLocation("_flw_materialID_instancing");
-		int vertexID = MaterialIndices.getVertexShaderIndex(material);
-		int fragmentID = MaterialIndices.getFragmentShaderIndex(material);
+		int vertexID = MaterialShaderIndices.getVertexShaderIndex(material.shaders());
+		int fragmentID = MaterialShaderIndices.getFragmentShaderIndex(material.shaders());
 		GL32.glUniform2ui(materialIDUniform, vertexID, fragmentID);
 	}
 }

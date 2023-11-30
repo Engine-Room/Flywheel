@@ -20,7 +20,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class BatchedCrumbling {
-	static void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks, BatchContext batchContext, BatchedDrawTracker drawTracker) {
+	public static void render(List<Engine.CrumblingBlock> crumblingBlocks, BatchContext batchContext, BatchedDrawTracker drawTracker) {
 		var instancesPerType = doCrumblingSort(crumblingBlocks);
 
 		for (var entry : instancesPerType.entrySet()) {
@@ -82,7 +82,7 @@ public class BatchedCrumbling {
 		return out;
 	}
 
-	public static <I extends Instance> int bufferOne(BatchedInstancer<I> batchedInstancer, int baseVertex, ReusableVertexList vertexList, DrawBuffer drawBuffer, Instance instance) {
+	private static <I extends Instance> int bufferOne(BatchedInstancer<I> batchedInstancer, int baseVertex, ReusableVertexList vertexList, DrawBuffer drawBuffer, Instance instance) {
 		int totalVertices = 0;
 
 		for (TransformCall<I> transformCall : batchedInstancer.getTransformCalls()) {
@@ -101,9 +101,8 @@ public class BatchedCrumbling {
 		return totalVertices;
 	}
 
-	static final class CrumblingBucket {
+	private static class CrumblingBucket {
 		private int vertexCount;
 		private final List<Pair<Instance, BatchedInstancer<?>>> instances = new ArrayList<>();
-
 	}
 }
