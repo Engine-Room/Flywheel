@@ -10,6 +10,7 @@ import com.jozufozu.flywheel.api.visualization.VisualManager;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.box.Box;
 import com.jozufozu.flywheel.lib.box.MutableBox;
+import com.jozufozu.flywheel.lib.math.MoreMath;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -73,7 +74,10 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	 * @return {@code true} if this visual within the given frustum.
 	 */
 	public boolean isVisible(FrustumIntersection frustum) {
-		return frustum.testAab(visualPos.getX(), visualPos.getY(), visualPos.getZ(), visualPos.getX() + 1, visualPos.getY() + 1, visualPos.getZ() + 1);
+		float x = visualPos.getX() + 0.5f;
+		float y = visualPos.getY() + 0.5f;
+		float z = visualPos.getZ() + 0.5f;
+		return frustum.testSphere(x, y, z, MoreMath.SQRT_3_OVER_2);
 	}
 
 	/**

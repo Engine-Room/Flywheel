@@ -41,7 +41,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 		super(ctx, entity.level());
 		this.entity = entity;
 		bounds = MutableBox.from(entity.getBoundingBox());
-		visibilityTester = new EntityVisibilityTester(entity, ctx.renderOrigin());
+		visibilityTester = new EntityVisibilityTester(entity, ctx.renderOrigin(), 1.5f);
 	}
 
 	/**
