@@ -21,7 +21,6 @@ import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 
 public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>> {
-
 	/**
 	 * The set of draw calls to make in each {@link RenderStage}.
 	 */

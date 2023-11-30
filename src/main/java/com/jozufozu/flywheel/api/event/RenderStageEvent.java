@@ -9,7 +9,10 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraftforge.eventbus.api.Event;
 
-public class RenderStageEvent extends Event {
+/**
+ * This event is posted to the Forge event bus.
+ */
+public final class RenderStageEvent extends Event {
 	private final RenderContext context;
 	private final RenderStage stage;
 

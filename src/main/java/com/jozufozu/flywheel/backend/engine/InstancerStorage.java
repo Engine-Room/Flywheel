@@ -33,7 +33,6 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 	 */
 	private final Object creationLock = new Object();
 
-
 	/**
 	 * A list of initialized instancers.
 	 * <br>

@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.api.event.BeginFrameEvent;
-import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.event.RenderStageEvent;
@@ -32,7 +32,7 @@ import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraftforge.common.MinecraftForge;
 
 @Mixin(value = LevelRenderer.class, priority = 1001) // Higher priority to go after Sodium
-public class LevelRendererMixin {
+abstract class LevelRendererMixin {
 	@Shadow
 	private ClientLevel level;
 
@@ -61,7 +61,7 @@ public class LevelRendererMixin {
 
 	@Inject(method = "allChanged", at = @At("RETURN"))
 	private void flywheel$refresh(CallbackInfo ci) {
-		MinecraftForge.EVENT_BUS.post(new ReloadRenderersEvent(level));
+		MinecraftForge.EVENT_BUS.post(new ReloadLevelRendererEvent(level));
 	}
 
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=destroyProgress"))

@@ -68,11 +68,7 @@ public class InstancingEngine extends AbstractEngine {
     }
 
 	@Override
-	public void renderCrumblingInstances(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks) {
-		if (crumblingBlocks.isEmpty()) {
-			return;
-		}
-
+	public void renderCrumbling(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks) {
 		// Need to wait for flush before we can inspect instancer state.
 		executor.syncUntil(flushFlag::isRaised);
 

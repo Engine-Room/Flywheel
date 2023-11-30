@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.lib.memory;
 
 import java.nio.ByteBuffer;
 
-public sealed interface MemoryBlock permits MemoryBlockImpl {
+public sealed interface MemoryBlock permits AbstractMemoryBlockImpl {
 	long ptr();
 
 	long size();
@@ -10,6 +10,8 @@ public sealed interface MemoryBlock permits MemoryBlockImpl {
 	boolean isFreed();
 
 	boolean isTracked();
+
+	void copyTo(MemoryBlock block);
 
 	void copyTo(long ptr, long bytes);
 
@@ -20,8 +22,6 @@ public sealed interface MemoryBlock permits MemoryBlockImpl {
 	ByteBuffer asBuffer();
 
 	MemoryBlock realloc(long size);
-
-	MemoryBlock reallocTracked(long size);
 
 	void free();
 

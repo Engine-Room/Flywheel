@@ -18,7 +18,7 @@ import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visualization.VisualManager;
 import com.jozufozu.flywheel.api.visualization.VisualizationLevel;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
-import com.jozufozu.flywheel.extension.ClientLevelExtension;
+import com.jozufozu.flywheel.extension.LevelExtension;
 import com.jozufozu.flywheel.impl.task.FlwTaskExecutor;
 import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityVisualManager;
 import com.jozufozu.flywheel.impl.visualization.manager.EffectVisualManager;
@@ -32,10 +32,10 @@ import com.jozufozu.flywheel.lib.util.LevelAttached;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -88,6 +88,11 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				.then(engine.createFramePlan())
 				.then(RaisePlan.raise(frameFlag))
 				.simplify();
+
+		if (level instanceof Level l) {
+			LevelExtension.getAllLoadedEntities(l)
+					.forEach(entities::queueAdd);
+		}
 	}
 
 	public static boolean supportsVisualization(@Nullable LevelAccessor level) {
@@ -127,19 +132,14 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		return MANAGERS.get(level);
 	}
 
-	// TODO: Consider making this reset action reuse the existing added game objects instead of readding them, potentially by keeping the same VisualizationManagerImpl and not fully deleting it
-	// TODO: Consider changing parameter type to Level since it is also possible to get all entities from it
-	public static void reset(ClientLevel level) {
+	// TODO: Consider making these reset actions reuse the existing game objects instead of re-adding them
+	// potentially by keeping the same VisualizationManagerImpl and deleting the engine and visuals but not the game objects
+	public static void reset(LevelAccessor level) {
 		MANAGERS.remove(level);
-		VisualizationManagerImpl manager = get(level);
-		if (manager == null) {
-			return;
-		}
+	}
 
-		// Block entities are loaded while chunks are baked.
-		// Entities are loaded with the level, so when chunks are reloaded they need to be re-added.
-		ClientLevelExtension.getAllLoadedEntities(level)
-				.forEach(manager.getEntities()::queueAdd);
+	public static void resetAll() {
+		MANAGERS.reset();
 	}
 
 	@Override
@@ -239,7 +239,9 @@ public class VisualizationManagerImpl implements VisualizationManager {
 			crumblingBlocks.add(new Engine.CrumblingBlock(maxDestruction.getProgress(), maxDestruction.getPos(), instances));
 		}
 
-		engine.renderCrumblingInstances(taskExecutor, context, crumblingBlocks);
+		if (!crumblingBlocks.isEmpty()) {
+			engine.renderCrumbling(taskExecutor, context, crumblingBlocks);
+		}
 	}
 
 	/**

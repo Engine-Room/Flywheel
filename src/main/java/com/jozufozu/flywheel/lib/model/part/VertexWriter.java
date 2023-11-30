@@ -126,7 +126,7 @@ class VertexWriter implements VertexConsumer {
 
 	public MemoryBlock copyDataAndReset() {
 		MemoryBlock dataCopy = MemoryBlock.malloc(vertexCount * STRIDE);
-		data.copyTo(dataCopy.ptr(), dataCopy.size());
+		data.copyTo(dataCopy);
 
 		vertexCount = 0;
 		filledPosition = false;

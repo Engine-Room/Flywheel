@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 @Mixin(BlockEntityType.class)
-public class BlockEntityTypeMixin<T extends BlockEntity> implements BlockEntityTypeExtension<T> {
+abstract class BlockEntityTypeMixin<T extends BlockEntity> implements BlockEntityTypeExtension<T> {
 	@Unique
 	private BlockEntityVisualizer<? super T> flywheel$visualizer;
 

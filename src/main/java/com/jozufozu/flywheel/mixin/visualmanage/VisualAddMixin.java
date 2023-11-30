@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 @Mixin(LevelChunk.class)
-public class VisualAddMixin {
+abstract class VisualAddMixin {
 	@Shadow
 	@Final
 	Level level;

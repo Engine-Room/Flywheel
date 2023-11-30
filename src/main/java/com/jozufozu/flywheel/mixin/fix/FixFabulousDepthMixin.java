@@ -10,7 +10,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.renderer.LevelRenderer;
 
 @Mixin(LevelRenderer.class)
-public class FixFabulousDepthMixin {
+abstract class FixFabulousDepthMixin {
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;process(F)V", ordinal = 1))
 	private void flywheel$disableTransparencyShaderDepth(CallbackInfo ci) {
 		GlStateManager._depthMask(false);

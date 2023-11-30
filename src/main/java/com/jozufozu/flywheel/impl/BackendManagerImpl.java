@@ -1,11 +1,11 @@
 package com.jozufozu.flywheel.impl;
 
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.backend.Backend;
-import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.api.event.EndClientResourceReloadEvent;
+import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.backend.Backends;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.impl.visualization.VisualizationManagerImpl;
@@ -59,19 +59,7 @@ public final class BackendManagerImpl {
 		return Backends.INDIRECT;
 	}
 
-	public static void onReloadRenderers(ReloadRenderersEvent event) {
-		refresh(event.getLevel());
-	}
-
-	public static void refresh(@Nullable ClientLevel level) {
-		backend = chooseBackend();
-
-		if (level != null) {
-			VisualizationManagerImpl.reset(level);
-		}
-	}
-
-	private static Backend chooseBackend() {
+	private static void chooseBackend() {
 		var preferred = FlwConfig.get().getBackend();
 		var actual = preferred.findFallback();
 
@@ -79,7 +67,7 @@ public final class BackendManagerImpl {
 			LOGGER.warn("Flywheel backend fell back from '{}' to '{}'", Backend.REGISTRY.getIdOrThrow(preferred), Backend.REGISTRY.getIdOrThrow(actual));
 		}
 
-		return actual;
+		backend = actual;
 	}
 
 	public static String getBackendString() {
@@ -92,5 +80,23 @@ public final class BackendManagerImpl {
 
 	public static void init() {
 		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManagerImpl::getBackendString);
+	}
+
+	public static void onEndClientResourceReload(EndClientResourceReloadEvent event) {
+		if (event.getError().isPresent()) {
+			return;
+		}
+
+		chooseBackend();
+		VisualizationManagerImpl.resetAll();
+	}
+
+	public static void onReloadLevelRenderer(ReloadLevelRendererEvent event) {
+		chooseBackend();
+
+		ClientLevel level = event.getLevel();
+		if (level != null) {
+			VisualizationManagerImpl.reset(level);
+		}
 	}
 }

@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexListProvider;
@@ -172,7 +172,7 @@ public class DrawBuffer {
 		buffer = null;
 	}
 
-	public static void onReloadRenderers(ReloadRenderersEvent event) {
+	public static void onReloadRenderers(ReloadLevelRendererEvent event) {
 		ALL.forEach(DrawBuffer::free);
 	}
 

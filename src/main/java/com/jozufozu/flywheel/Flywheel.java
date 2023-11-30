@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.slf4j.Logger;
 
-import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.api.event.EndClientResourceReloadEvent;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.backend.Backends;
-import com.jozufozu.flywheel.backend.Loader;
+import com.jozufozu.flywheel.backend.compile.FlwPrograms;
 import com.jozufozu.flywheel.backend.compile.Pipelines;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.backend.engine.batching.DrawBuffer;
@@ -70,7 +70,7 @@ public class Flywheel {
 		IEventBus forgeEventBus = MinecraftForge.EVENT_BUS;
 		IEventBus modEventBus = FMLJavaModLoadingContext.get()
 				.getModEventBus();
-		modEventBus.addListener(Flywheel::setup);
+		modEventBus.addListener(Flywheel::onCommonSetup);
 
 		FlwConfig.get().registerSpecs(modLoadingContext);
 
@@ -85,7 +85,7 @@ public class Flywheel {
 	private static void clientInit(IEventBus forgeEventBus, IEventBus modEventBus) {
 		forgeEventBus.addListener(Flywheel::addDebugInfo);
 
-		forgeEventBus.addListener(BackendManagerImpl::onReloadRenderers);
+		forgeEventBus.addListener(BackendManagerImpl::onReloadLevelRenderer);
 
 		forgeEventBus.addListener(VisualizationEventHandler::onClientTick);
 		forgeEventBus.addListener(VisualizationEventHandler::onBeginFrame);
@@ -96,14 +96,17 @@ public class Flywheel {
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);
 
 		forgeEventBus.addListener(DrawBuffer::onReloadRenderers);
-		forgeEventBus.addListener(UniformBuffer::onReloadRenderers);
+		forgeEventBus.addListener(UniformBuffer::onReloadLevelRenderer);
 
 		forgeEventBus.addListener(LightUpdater::onClientTick);
-		forgeEventBus.addListener((ReloadRenderersEvent e) -> ModelCache.onReloadRenderers(e));
-		forgeEventBus.addListener(ModelHolder::onReloadRenderers);
 		forgeEventBus.addListener((LevelEvent.Unload e) -> LevelAttached.onUnloadLevel(e));
 
-		modEventBus.addListener(Flywheel::lateInit);
+		modEventBus.addListener(Flywheel::onClientSetup);
+
+		modEventBus.addListener(BackendManagerImpl::onEndClientResourceReload);
+
+		modEventBus.addListener((EndClientResourceReloadEvent e) -> ModelCache.onEndClientResourceReload(e));
+		modEventBus.addListener(ModelHolder::onEndClientResourceReload);
 
 		modEventBus.addListener(PartialModel::onModelRegistry);
 		modEventBus.addListener(PartialModel::onModelBake);
@@ -115,12 +118,12 @@ public class Flywheel {
 
 		Pipelines.init();
 		Backends.init();
-		Loader.init();
+		FlwPrograms.ResourceReloadListener.register();
 
 		ShadersModHandler.init();
 	}
 
-	private static void lateInit(final FMLClientSetupEvent event) {
+	private static void onClientSetup(FMLClientSetupEvent event) {
 		VertexTypes.init();
 		InstanceTypes.init();
 		Materials.init();
@@ -134,7 +137,8 @@ public class Flywheel {
 		IdRegistryImpl.freezeAll();
 	}
 
-	private static void setup(final FMLCommonSetupEvent event) {
+	private static void onCommonSetup(FMLCommonSetupEvent event) {
+		// FIXME: argument types also need to be registered to BuiltInRegistries.COMMAND_ARGUMENT_TYPE
 		ArgumentTypeInfos.registerByClass(BackendArgument.class, SingletonArgumentInfo.contextFree(() -> BackendArgument.INSTANCE));
 	}
 

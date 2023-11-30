@@ -12,10 +12,11 @@ import com.jozufozu.flywheel.extension.RenderTypeExtension;
 import net.minecraft.client.renderer.RenderType;
 
 @Mixin(RenderType.class)
-public class RenderTypeMixin implements RenderTypeExtension {
+abstract class RenderTypeMixin implements RenderTypeExtension {
 	@Shadow
 	@Final
 	private boolean sortOnUpload;
+
 	@Unique
 	private DrawBufferSet flywheel$drawBufferSet;
 

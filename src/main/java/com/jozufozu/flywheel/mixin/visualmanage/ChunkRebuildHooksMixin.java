@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.impl.visualization.VisualizationHelper;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 @Mixin(targets = "net.minecraft.client.renderer.chunk.ChunkRenderDispatcher$RenderChunk$RebuildTask")
-public class ChunkRebuildHooksMixin {
+abstract class ChunkRebuildHooksMixin {
 	@Inject(method = "handleBlockEntity(Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk$RebuildTask$CompileResults;Lnet/minecraft/world/level/block/entity/BlockEntity;)V", at = @At("HEAD"), cancellable = true)
 	private void flywheel$tryAddBlockEntity(@Coerce Object compileResults, BlockEntity blockEntity, CallbackInfo ci) {
 		if (VisualizationHelper.tryAddBlockEntity(blockEntity)) {
