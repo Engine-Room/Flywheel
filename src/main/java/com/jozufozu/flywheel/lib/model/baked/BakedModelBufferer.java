@@ -56,9 +56,11 @@ public final class BakedModelBufferer {
 			blockRenderer.tesselateBlock(renderWorld, model, state, BlockPos.ZERO, poseStack, buffer, false, random, 42L, OverlayTexture.NO_OVERLAY, modelData, renderType);
 			poseStack.popPose();
 
-			RenderedBuffer data = buffer.end();
-			resultConsumer.accept(renderType, data);
-			data.release();
+			RenderedBuffer data = buffer.endOrDiscardIfEmpty();
+			if (data != null) {
+				resultConsumer.accept(renderType, data);
+				data.release();
+			}
 		}
 	}
 
@@ -89,12 +91,16 @@ public final class BakedModelBufferer {
 			blockRenderer.tesselateBlock(renderWorld, model, state, BlockPos.ZERO, poseStack, shadeSeparatingWrapper, false, random, 42L, OverlayTexture.NO_OVERLAY, modelData, renderType);
 			poseStack.popPose();
 
-			RenderedBuffer shadedData = shadedBuffer.end();
-			RenderedBuffer unshadedData = unshadedBuffer.end();
-			resultConsumer.accept(renderType, true, shadedData);
-			shadedData.release();
-			resultConsumer.accept(renderType, false, unshadedData);
-			unshadedData.release();
+			RenderedBuffer shadedData = shadedBuffer.endOrDiscardIfEmpty();
+			if (shadedData != null) {
+				resultConsumer.accept(renderType, true, shadedData);
+				shadedData.release();
+			}
+			RenderedBuffer unshadedData = unshadedBuffer.endOrDiscardIfEmpty();
+			if (unshadedData != null) {
+				resultConsumer.accept(renderType, false, unshadedData);
+				unshadedData.release();
+			}
 		}
 
 		shadeSeparatingWrapper.clear();
@@ -163,9 +169,11 @@ public final class BakedModelBufferer {
 		for (int layerIndex = 0; layerIndex < CHUNK_LAYER_AMOUNT; layerIndex++) {
 			RenderType renderType = CHUNK_LAYERS[layerIndex];
 			BufferBuilder buffer = buffers[layerIndex];
-			RenderedBuffer data = buffer.end();
-			resultConsumer.accept(renderType, data);
-			data.release();
+			RenderedBuffer data = buffer.endOrDiscardIfEmpty();
+			if (data != null) {
+				resultConsumer.accept(renderType, data);
+				data.release();
+			}
 		}
 	}
 
@@ -224,12 +232,16 @@ public final class BakedModelBufferer {
 			RenderType renderType = CHUNK_LAYERS[layerIndex];
 			BufferBuilder shadedBuffer = shadedBuffers[layerIndex];
 			BufferBuilder unshadedBuffer = unshadedBuffers[layerIndex];
-			RenderedBuffer shadedData = shadedBuffer.end();
-			RenderedBuffer unshadedData = unshadedBuffer.end();
-			resultConsumer.accept(renderType, true, shadedData);
-			shadedData.release();
-			resultConsumer.accept(renderType, false, unshadedData);
-			unshadedData.release();
+			RenderedBuffer shadedData = shadedBuffer.endOrDiscardIfEmpty();
+			if (shadedData != null) {
+				resultConsumer.accept(renderType, true, shadedData);
+				shadedData.release();
+			}
+			RenderedBuffer unshadedData = unshadedBuffer.endOrDiscardIfEmpty();
+			if (unshadedBuffer != null) {
+				resultConsumer.accept(renderType, false, unshadedData);
+				unshadedData.release();
+			}
 		}
 	}
 

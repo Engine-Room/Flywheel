@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.lib.memory;
 
-import java.lang.ref.Cleaner;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.lwjgl.system.MemoryUtil;
@@ -9,8 +8,6 @@ import com.jozufozu.flywheel.lib.util.StringUtil;
 
 public final class FlwMemoryTracker {
 	public static final boolean DEBUG_MEMORY_SAFETY = System.getProperty("flw.debugMemorySafety") != null;
-
-	static final Cleaner CLEANER = Cleaner.create();
 
 	private static final AtomicLong CPU_MEMORY = new AtomicLong(0);
 	private static final AtomicLong GPU_MEMORY = new AtomicLong(0);

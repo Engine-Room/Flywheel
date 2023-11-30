@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(LevelRenderer.class)
-public class VisualUpdateMixin {
+abstract class VisualUpdateMixin {
 	@Shadow
 	private ClientLevel level;
 

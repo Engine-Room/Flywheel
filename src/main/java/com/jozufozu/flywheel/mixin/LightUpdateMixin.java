@@ -16,7 +16,7 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkSource;
 
 @Mixin(ClientChunkCache.class)
-public abstract class LightUpdateMixin extends ChunkSource {
+abstract class LightUpdateMixin extends ChunkSource {
 	@Shadow
 	@Final
 	ClientLevel level;

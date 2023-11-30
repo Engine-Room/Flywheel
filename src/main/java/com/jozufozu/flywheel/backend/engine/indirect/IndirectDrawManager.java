@@ -15,31 +15,6 @@ import com.jozufozu.flywheel.lib.util.Pair;
 public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> {
 	public final Map<Pair<InstanceType<?>, VertexType>, IndirectCullingGroup<?>> renderLists = new HashMap<>();
 
-	public void flush() {
-		super.flush();
-
-		for (IndirectCullingGroup<?> value : renderLists.values()) {
-			value.beginFrame();
-		}
-	}
-
-	public void invalidate() {
-		super.invalidate();
-
-		renderLists.values()
-				.forEach(IndirectCullingGroup::delete);
-		renderLists.clear();
-	}
-
-	public boolean hasStage(RenderStage stage) {
-		for (var list : renderLists.values()) {
-			if (list.hasStage(stage)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	@Override
 	protected <I extends Instance> IndirectInstancer<?> create(InstanceType<I> type) {
 		return new IndirectInstancer<>(type);
@@ -58,5 +33,32 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 
 			break; // TODO: support multiple meshes per model
 		}
+	}
+
+	public boolean hasStage(RenderStage stage) {
+		for (var list : renderLists.values()) {
+			if (list.hasStage(stage)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public void flush() {
+		super.flush();
+
+		for (IndirectCullingGroup<?> value : renderLists.values()) {
+			value.beginFrame();
+		}
+	}
+
+	@Override
+	public void invalidate() {
+		super.invalidate();
+
+		renderLists.values()
+				.forEach(IndirectCullingGroup::delete);
+		renderLists.clear();
 	}
 }

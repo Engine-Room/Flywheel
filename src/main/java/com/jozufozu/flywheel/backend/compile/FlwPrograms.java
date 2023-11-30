@@ -14,7 +14,10 @@ import com.jozufozu.flywheel.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;
 import com.jozufozu.flywheel.lib.material.MaterialIndices;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
 public class FlwPrograms {
 	private FlwPrograms() {
@@ -85,5 +88,29 @@ public class FlwPrograms {
 			}
 		}
 		return builder.build();
+	}
+
+	public static class ResourceReloadListener implements ResourceManagerReloadListener {
+		public static final ResourceReloadListener INSTANCE = new ResourceReloadListener();
+
+		private ResourceReloadListener() {
+		}
+
+		@Override
+		public void onResourceManagerReload(ResourceManager manager) {
+			FlwPrograms.reload(manager);
+		}
+
+		public static void register() {
+			// Can be null when running data generators due to the unfortunate time we call this
+			Minecraft minecraft = Minecraft.getInstance();
+			if (minecraft == null) {
+				return;
+			}
+
+			if (minecraft.getResourceManager() instanceof ReloadableResourceManager reloadable) {
+				reloadable.registerReloadListener(INSTANCE);
+			}
+		}
 	}
 }

@@ -2,12 +2,14 @@ package com.jozufozu.flywheel.lib.memory;
 
 import java.lang.ref.Cleaner;
 
-class TrackedMemoryBlockImpl extends MemoryBlockImpl {
+class TrackedMemoryBlockImpl extends AbstractMemoryBlockImpl {
+	final Cleaner cleaner;
 	final CleaningAction cleaningAction;
 	final Cleaner.Cleanable cleanable;
 
 	TrackedMemoryBlockImpl(long ptr, long size, Cleaner cleaner) {
 		super(ptr, size);
+		this.cleaner = cleaner;
 		cleaningAction = new CleaningAction(ptr, size);
 		cleanable = cleaner.register(this, cleaningAction);
 	}
@@ -24,14 +26,22 @@ class TrackedMemoryBlockImpl extends MemoryBlockImpl {
 		cleanable.clean();
 	}
 
+	@Override
+	public MemoryBlock realloc(long size) {
+		MemoryBlock block = new TrackedMemoryBlockImpl(FlwMemoryTracker.realloc(ptr, size), size, cleaner);
+		FlwMemoryTracker._allocCPUMemory(block.size());
+		freeInner();
+		return block;
+	}
+
 	static MemoryBlock malloc(long size) {
-		MemoryBlock block = new TrackedMemoryBlockImpl(FlwMemoryTracker.malloc(size), size, FlwMemoryTracker.CLEANER);
+		MemoryBlock block = new TrackedMemoryBlockImpl(FlwMemoryTracker.malloc(size), size, CLEANER);
 		FlwMemoryTracker._allocCPUMemory(block.size());
 		return block;
 	}
 
 	static MemoryBlock calloc(long num, long size) {
-		MemoryBlock block = new TrackedMemoryBlockImpl(FlwMemoryTracker.calloc(num, size), num * size, FlwMemoryTracker.CLEANER);
+		MemoryBlock block = new TrackedMemoryBlockImpl(FlwMemoryTracker.calloc(num, size), num * size, CLEANER);
 		FlwMemoryTracker._allocCPUMemory(block.size());
 		return block;
 	}

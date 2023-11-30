@@ -104,12 +104,11 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		deleted.clear();
 	}
 
+	public void delete() {
+	}
+
 	@Override
 	public String toString() {
 		return "AbstractInstancer[" + getInstanceCount() + ']';
-	}
-
-	public void delete() {
-
 	}
 }

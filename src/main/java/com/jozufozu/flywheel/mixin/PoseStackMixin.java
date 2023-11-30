@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.lib.transform.TransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 @Mixin(PoseStack.class)
-public abstract class PoseStackMixin implements TransformStack {
+abstract class PoseStackMixin implements TransformStack {
 	@Override
 	public TransformStack pushPose() {
 		((PoseStack) (Object) this).pushPose();

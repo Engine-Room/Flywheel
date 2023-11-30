@@ -85,7 +85,7 @@ public class SourceFile implements SourceComponent {
 
 			ResourceLocation location;
 			try {
-				location = ResourceUtil.defaultToFlywheelNamespace(string);
+				location = ResourceUtil.parseFlywheelDefault(string);
 			} catch (ResourceLocationException e) {
 				failures.add(Pair.of(fileSpan, new LoadError.MalformedInclude(e)));
 				continue;

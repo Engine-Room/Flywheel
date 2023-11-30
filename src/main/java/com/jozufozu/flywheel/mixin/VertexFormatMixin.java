@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.extension.VertexFormatExtension;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 @Mixin(VertexFormat.class)
-public class VertexFormatMixin implements VertexFormatExtension {
+abstract class VertexFormatMixin implements VertexFormatExtension {
 	@Unique
 	private VertexListProvider flywheel$vertexListProvider;
 

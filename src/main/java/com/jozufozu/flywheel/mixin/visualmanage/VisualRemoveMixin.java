@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 @Mixin(BlockEntity.class)
-public class VisualRemoveMixin {
+abstract class VisualRemoveMixin {
 	@Shadow
 	@Nullable
 	protected Level level;

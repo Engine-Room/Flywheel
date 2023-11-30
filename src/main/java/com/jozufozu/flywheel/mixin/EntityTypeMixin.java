@@ -11,7 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
 @Mixin(EntityType.class)
-public class EntityTypeMixin<T extends Entity> implements EntityTypeExtension<T> {
+abstract class EntityTypeMixin<T extends Entity> implements EntityTypeExtension<T> {
 	@Unique
 	private EntityVisualizer<? super T> flywheel$visualizer;
 

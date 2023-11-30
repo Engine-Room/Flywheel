@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.api.event.EndClientResourceReloadEvent;
 import com.jozufozu.flywheel.api.model.Model;
 
 public class ModelCache<T> {
@@ -31,7 +31,7 @@ public class ModelCache<T> {
 	}
 
 	@ApiStatus.Internal
-	public static void onReloadRenderers(ReloadRenderersEvent event) {
+	public static void onEndClientResourceReload(EndClientResourceReloadEvent event) {
 		for (ModelCache<?> cache : ALL) {
 			cache.clear();
 		}

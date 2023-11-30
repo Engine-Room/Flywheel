@@ -5,14 +5,21 @@ import java.lang.ref.Cleaner;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.lib.util.StringUtil;
 
-class DebugMemoryBlockImpl extends MemoryBlockImpl {
+class DebugMemoryBlockImpl extends AbstractMemoryBlockImpl {
+	final Cleaner cleaner;
 	final CleaningAction cleaningAction;
 	final Cleaner.Cleanable cleanable;
 
-	DebugMemoryBlockImpl(long ptr, long size, Cleaner cleaner) {
+	DebugMemoryBlockImpl(long ptr, long size, Cleaner cleaner, int skipFrames) {
 		super(ptr, size);
-		cleaningAction = new CleaningAction(ptr, size, getStackTrace());
+		this.cleaner = cleaner;
+		cleaningAction = new CleaningAction(ptr, size, getStackTrace(skipFrames + 1));
 		cleanable = cleaner.register(this, cleaningAction);
+	}
+
+	@Override
+	public boolean isTracked() {
+		return false;
 	}
 
 	@Override
@@ -22,24 +29,37 @@ class DebugMemoryBlockImpl extends MemoryBlockImpl {
 		cleanable.clean();
 	}
 
-	static StackWalker.StackFrame[] getStackTrace() {
-		// skip 4 frames to get to the caller:
+	@Override
+	public MemoryBlock realloc(long size) {
+		MemoryBlock block = new DebugMemoryBlockImpl(FlwMemoryTracker.realloc(ptr, size), size, cleaner, 1);
+		FlwMemoryTracker._allocCPUMemory(block.size());
+		freeInner();
+		return block;
+	}
+
+	static StackWalker.StackFrame[] getStackTrace(int skipFrames) {
+		// for DebugMemoryBlockImpl::realloc, skip 3 frames to get the allocation site:
+		// - this method
+		// - DebugMemoryBlockImpl::new
+		// - DebugMemoryBlockImpl::realloc
+		// - {caller is here}
+		// for DebugMemoryBlockImpl::malloc/calloc, skip 4 frames to get the allocation site:
 		// - this method
 		// - DebugMemoryBlockImpl::new
 		// - DebugMemoryBlockImpl::malloc/calloc
 		// - MemoryBlock::malloc/calloc
 		// - {caller is here}
-		return StackWalker.getInstance().walk(s -> s.skip(4).toArray(StackWalker.StackFrame[]::new));
+		return StackWalker.getInstance().walk(s -> s.skip(skipFrames + 1).toArray(StackWalker.StackFrame[]::new));
 	}
 
 	static MemoryBlock malloc(long size) {
-		MemoryBlock block = new DebugMemoryBlockImpl(FlwMemoryTracker.malloc(size), size, FlwMemoryTracker.CLEANER);
+		MemoryBlock block = new DebugMemoryBlockImpl(FlwMemoryTracker.malloc(size), size, CLEANER, 2);
 		FlwMemoryTracker._allocCPUMemory(block.size());
 		return block;
 	}
 
 	static MemoryBlock calloc(long num, long size) {
-		MemoryBlock block = new DebugMemoryBlockImpl(FlwMemoryTracker.calloc(num, size), num * size, FlwMemoryTracker.CLEANER);
+		MemoryBlock block = new DebugMemoryBlockImpl(FlwMemoryTracker.calloc(num, size), num * size, CLEANER, 2);
 		FlwMemoryTracker._allocCPUMemory(block.size());
 		return block;
 	}

@@ -23,7 +23,7 @@ public class FlwConfig {
 	public final ClientConfig client;
 	private final ForgeConfigSpec clientSpec;
 
-	public FlwConfig() {
+	private FlwConfig() {
 		Pair<ClientConfig, ForgeConfigSpec> clientPair = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
 		this.client = clientPair.getLeft();
 		clientSpec = clientPair.getRight();
@@ -74,7 +74,7 @@ public class FlwConfig {
 		public final ConfigValue<String> backend;
 		public final BooleanValue limitUpdates;
 
-		public ClientConfig(ForgeConfigSpec.Builder builder) {
+		private ClientConfig(ForgeConfigSpec.Builder builder) {
 			backend = builder.comment("Select the backend to use.")
 					.define("backend", Backend.REGISTRY.getIdOrThrow(BackendManager.getDefaultBackend()).toString());
 

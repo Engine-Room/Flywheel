@@ -14,7 +14,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 
 @Mixin(BufferBuilder.class)
-public abstract class BufferBuilderMixin implements BufferBuilderExtension {
+abstract class BufferBuilderMixin implements BufferBuilderExtension {
 	@Shadow
 	private ByteBuffer buffer;
 

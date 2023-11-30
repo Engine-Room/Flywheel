@@ -79,7 +79,7 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 
 			changed.clear();
 		} catch (Exception e) {
-			Flywheel.LOGGER.error("Error updating GPUInstancer:", e);
+			Flywheel.LOGGER.error("Error updating InstancedInstancer:", e);
 		}
 	}
 
@@ -111,6 +111,7 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 		vao.bindAttributes(1, startAttrib, instanceFormat.attributes());
 	}
 
+	@Override
 	public void delete() {
 		vbo.delete();
 		vbo = null;

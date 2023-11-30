@@ -31,13 +31,13 @@ public interface Engine extends InstancerProvider {
 	/**
 	 * Render the given instances as a crumbling overlay.
 	 * <br>
-	 * This is guaranteed to be called between the first and last calls to {@link #renderStage}.
+	 * This is guaranteed to be called between the first and last calls to {@link #renderStage} for the current frame.
 	 *
 	 * @param executor        The task executor running the frame plan.
 	 * @param context         The render context for this frame.
-	 * @param crumblingBlocks The instances to render.
+	 * @param crumblingBlocks The instances to render. This list is never empty.
 	 */
-	void renderCrumblingInstances(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks);
+	void renderCrumbling(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks);
 
 	/**
 	 * Maintain the render origin to be within a certain distance from the camera in all directions,

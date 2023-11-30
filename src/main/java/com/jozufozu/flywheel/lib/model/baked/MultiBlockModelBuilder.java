@@ -74,23 +74,19 @@ public class MultiBlockModelBuilder {
 
 		if (shadeSeparated) {
 			ShadeSeparatedResultConsumer resultConsumer = (renderType, shaded, data) -> {
-				if (!data.isEmpty()) {
-					Material material = materialFunc.apply(renderType, shaded);
-					if (material != null) {
-						MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, VertexTypes.BLOCK);
-						meshMapBuilder.put(material, new SimpleMesh(VertexTypes.BLOCK, meshData, "source=MultiBlockModelBuilder," + "renderType=" + renderType + ",shaded=" + shaded));
-					}
+				Material material = materialFunc.apply(renderType, shaded);
+				if (material != null) {
+					MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, VertexTypes.BLOCK);
+					meshMapBuilder.put(material, new SimpleMesh(VertexTypes.BLOCK, meshData, "source=MultiBlockModelBuilder," + "renderType=" + renderType + ",shaded=" + shaded));
 				}
 			};
 			BakedModelBufferer.bufferMultiBlockShadeSeparated(blocks, ModelUtil.VANILLA_RENDERER, renderWorld, poseStack, modelDataMap, resultConsumer);
 		} else {
 			ResultConsumer resultConsumer = (renderType, data) -> {
-				if (!data.isEmpty()) {
-					Material material = materialFunc.apply(renderType, true);
-					if (material != null) {
-						MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, VertexTypes.BLOCK);
-						meshMapBuilder.put(material, new SimpleMesh(VertexTypes.BLOCK, meshData, "source=MultiBlockModelBuilder," + "renderType=" + renderType));
-					}
+				Material material = materialFunc.apply(renderType, true);
+				if (material != null) {
+					MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, VertexTypes.BLOCK);
+					meshMapBuilder.put(material, new SimpleMesh(VertexTypes.BLOCK, meshData, "source=MultiBlockModelBuilder," + "renderType=" + renderType));
 				}
 			};
 			BakedModelBufferer.bufferMultiBlock(blocks, ModelUtil.VANILLA_RENDERER, renderWorld, poseStack, modelDataMap, resultConsumer);

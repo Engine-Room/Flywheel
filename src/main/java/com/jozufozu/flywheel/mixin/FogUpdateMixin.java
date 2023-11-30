@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.lib.uniform.FlwShaderUniforms;
 import net.minecraft.client.renderer.FogRenderer;
 
 @Mixin(FogRenderer.class)
-public class FogUpdateMixin {
+abstract class FogUpdateMixin {
 	@Unique
 	private static void flywheel$updateFog() {
 		FlwShaderUniforms.FOG_UPDATE = true;

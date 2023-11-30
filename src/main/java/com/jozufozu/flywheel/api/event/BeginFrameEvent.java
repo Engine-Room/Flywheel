@@ -2,7 +2,10 @@ package com.jozufozu.flywheel.api.event;
 
 import net.minecraftforge.eventbus.api.Event;
 
-public class BeginFrameEvent extends Event {
+/**
+ * This event is posted to the Forge event bus.
+ */
+public final class BeginFrameEvent extends Event {
 	private final RenderContext context;
 
 	public BeginFrameEvent(RenderContext context) {

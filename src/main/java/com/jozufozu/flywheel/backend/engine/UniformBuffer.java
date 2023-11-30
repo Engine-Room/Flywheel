@@ -6,7 +6,7 @@ import java.util.Set;
 import org.lwjgl.opengl.GL32;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
@@ -66,7 +66,7 @@ public class UniformBuffer {
 		buffer.delete();
 	}
 
-	public static void onReloadRenderers(ReloadRenderersEvent event) {
+	public static void onReloadLevelRenderer(ReloadLevelRendererEvent event) {
 		if (instance != null) {
 			instance.delete();
 			instance = null;

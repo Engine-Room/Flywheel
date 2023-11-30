@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.joml.Vector3f;
 
-import com.jozufozu.flywheel.api.event.ReloadRenderersEvent;
+import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.visual.Effect;
@@ -65,7 +65,7 @@ public class ExampleEffect implements Effect {
 		trySpawnNewEffect();
 	}
 
-	public static void onReload(ReloadRenderersEvent event) {
+	public static void onReloadLevelRenderer(ReloadLevelRendererEvent event) {
 		ALL_EFFECTS.clear();
 	}
 
