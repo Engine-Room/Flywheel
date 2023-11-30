@@ -70,6 +70,14 @@ public class Compilation {
 				.append(" : enable\n");
 	}
 
+	public void define(String key, String value) {
+		fullSource.append("#define ")
+				.append(key)
+				.append(' ')
+				.append(value)
+				.append('\n');
+	}
+
 	public void appendComponent(SourceComponent component) {
 		var source = component.source();
 

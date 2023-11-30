@@ -23,6 +23,7 @@ public class PipelineCompiler {
 								.vertexShader())
 						.withResource(pipeline.vertexShader()))
 				.link(Compile.<PipelineProgramKey>shader(pipeline.glslVersion(), ShaderType.FRAGMENT)
+						.enableExtension("GL_ARB_conservative_depth")
 						.withComponent(uniformComponent)
 						.withComponent(fragmentMaterialComponent)
 						.withResource(key -> key.contextShader()

@@ -1,22 +1,22 @@
-#define FLW_SUBGROUP_SIZE 32
 layout(local_size_x = FLW_SUBGROUP_SIZE) in;
 
 #include "flywheel:internal/indirect_draw_command.glsl"
 
+struct Object {
+    uint batchID;
+    FlwPackedInstance instance;
+};
+
 // populated by instancers
 layout(std430, binding = 0) restrict readonly buffer ObjectBuffer {
-    FlwPackedInstance objects[];
+    Object objects[];
 };
 
 layout(std430, binding = 1) restrict writeonly buffer TargetBuffer {
     uint objectIDs[];
 };
 
-layout(std430, binding = 2) restrict readonly buffer BatchBuffer {
-    uint batchIDs[];
-};
-
-layout(std430, binding = 3) restrict buffer DrawCommands {
+layout(std430, binding = 2) restrict buffer DrawCommands {
     MeshDrawCommand drawCommands[];
 };
 
@@ -38,7 +38,7 @@ bool isVisible() {
     float radius;
     unpackBoundingSphere(sphere, center, radius);
 
-    FlwInstance object = _flw_unpackInstance(objects[flw_objectID]);
+    FlwInstance object = _flw_unpackInstance(objects[flw_objectID].instance);
     flw_transformBoundingSphere(object, center, radius);
 
     return testSphere(center, radius);
@@ -51,7 +51,7 @@ void main() {
         return;
     }
 
-    flw_batchID = batchIDs[flw_objectID];
+    flw_batchID = objects[flw_objectID].batchID;
 
     if (isVisible()) {
         uint batchIndex = atomicAdd(drawCommands[flw_batchID].instanceCount, 1);
