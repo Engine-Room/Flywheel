@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,22 +15,26 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.impl.task.ParallelTaskExecutor;
+import com.jozufozu.flywheel.lib.task.functional.RunnableWithContext;
 import com.jozufozu.flywheel.lib.util.Unit;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 class PlanExecutionTest {
 
-	protected static final ParallelTaskExecutor EXECUTOR = new ParallelTaskExecutor("PlanTest");
+	protected static ParallelTaskExecutor EXECUTOR;
 
-	@BeforeAll
-	public static void setUp() {
+	@BeforeEach
+	public void setUp() {
+		var currentThread = Thread.currentThread();
+		EXECUTOR = new ParallelTaskExecutor("PlanTest", () -> currentThread == Thread.currentThread());
 		EXECUTOR.startWorkers();
 	}
 
-	@AfterAll
-	public static void tearDown() {
+	@AfterEach
+	public void tearDown() {
 		EXECUTOR.stopWorkers();
+		EXECUTOR = null;
 	}
 
 	@ParameterizedTest
@@ -73,12 +77,12 @@ class PlanExecutionTest {
 		var lock = new Object();
 		var sequence = new IntArrayList(8);
 
-		ContextRunnable<Unit> addOne = () -> {
+		RunnableWithContext.Ignored<Unit> addOne = () -> {
 			synchronized (lock) {
 				sequence.add(1);
 			}
 		};
-		ContextRunnable<Unit> addTwo = () -> {
+		RunnableWithContext.Ignored<Unit> addTwo = () -> {
 			synchronized (lock) {
 				sequence.add(2);
 			}
@@ -185,11 +189,25 @@ class PlanExecutionTest {
 	}
 
 	@Test
-	void mainThreadPlan() {
+	void mainThreadPlanRunsImmediately() {
 		var done = new AtomicBoolean(false);
 		var plan = SyncedPlan.of(() -> done.set(true));
 
 		plan.execute(EXECUTOR, Unit.INSTANCE);
+
+		Assertions.assertTrue(done.get());
+	}
+
+	@Test
+	void mainThreadPlanIsNotCalledOffThread() {
+		var done = new AtomicBoolean(false);
+
+		var plan = SyncedPlan.of(() -> {
+			done.set(true);
+		});
+
+		// call execute from within a worker thread
+		EXECUTOR.execute(() -> plan.execute(EXECUTOR, Unit.INSTANCE));
 
 		Assertions.assertFalse(done.get());
 
@@ -222,16 +240,18 @@ class PlanExecutionTest {
 		var first = new NamedFlag("ready right away");
 		var second = new NamedFlag("ready after 2s");
 
-		RaisePlan.raise(first)
+		var plan = RaisePlan.raise(first)
 				.then(SimplePlan.of(() -> {
+					// sleep to add delay between raising the first flag and raising the second flag
 					try {
 						Thread.sleep(2000);
 					} catch (InterruptedException e) {
 						throw new RuntimeException(e);
 					}
 				}))
-				.then(RaisePlan.raise(second))
-				.execute(EXECUTOR, Unit.INSTANCE);
+				.then(RaisePlan.raise(second));
+
+		EXECUTOR.execute(() -> plan.execute(EXECUTOR, Unit.INSTANCE));
 
 		Assertions.assertTrue(EXECUTOR.syncUntil(first::isRaised), "First flag should be raised since we submitted a plan that raises it.");
 
@@ -260,7 +280,7 @@ class PlanExecutionTest {
 	}
 
 	public static void runAndWait(Plan<Unit> plan) {
-		new TestBarrier<Unit>(plan, Unit.INSTANCE).runAndWait();
+		new TestBarrier<>(plan, Unit.INSTANCE).runAndWait();
 	}
 
 	public static <C> void runAndWait(Plan<C> plan, C ctx) {

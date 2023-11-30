@@ -7,6 +7,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.lib.task.functional.RunnableWithContext;
 
 public record NestedPlan<C>(List<Plan<C>> parallelPlans) implements SimplyComposedPlan<C> {
 	@SafeVarargs
@@ -54,7 +55,7 @@ public record NestedPlan<C>(List<Plan<C>> parallelPlans) implements SimplyCompos
 					.simplify();
 		}
 
-		var simplifiedTasks = new ArrayList<ContextConsumer<C>>();
+		var simplifiedTasks = new ArrayList<RunnableWithContext<C>>();
 		var simplifiedPlans = new ArrayList<Plan<C>>();
 		var toVisit = new ArrayDeque<>(parallelPlans);
 		while (!toVisit.isEmpty()) {

@@ -5,19 +5,20 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.lib.task.functional.RunnableWithContext;
 
-public record SimplePlan<C>(List<ContextConsumer<C>> parallelTasks) implements SimplyComposedPlan<C> {
+public record SimplePlan<C>(List<RunnableWithContext<C>> parallelTasks) implements SimplyComposedPlan<C> {
 	@SafeVarargs
-	public static <C> SimplePlan<C> of(ContextRunnable<C>... tasks) {
+	public static <C> SimplePlan<C> of(RunnableWithContext.Ignored<C>... tasks) {
 		return new SimplePlan<>(List.of(tasks));
 	}
 
 	@SafeVarargs
-	public static <C> SimplePlan<C> of(ContextConsumer<C>... tasks) {
+	public static <C> SimplePlan<C> of(RunnableWithContext<C>... tasks) {
 		return new SimplePlan<>(List.of(tasks));
 	}
 
-	public static <C> SimplePlan<C> of(List<ContextConsumer<C>> tasks) {
+	public static <C> SimplePlan<C> of(List<RunnableWithContext<C>> tasks) {
 		return new SimplePlan<>(tasks);
 	}
 
@@ -28,15 +29,13 @@ public record SimplePlan<C>(List<ContextConsumer<C>> parallelTasks) implements S
 			return;
 		}
 
-		taskExecutor.execute(() -> {
-			PlanUtil.distribute(taskExecutor, context, onCompletion, parallelTasks, ContextConsumer::accept);
-		});
+		taskExecutor.execute(() -> PlanUtil.distribute(taskExecutor, context, onCompletion, parallelTasks, RunnableWithContext::run));
 	}
 
 	@Override
 	public Plan<C> and(Plan<C> plan) {
 		if (plan instanceof SimplePlan<C> simple) {
-			return of(ImmutableList.<ContextConsumer<C>>builder()
+			return of(ImmutableList.<RunnableWithContext<C>>builder()
 					.addAll(parallelTasks)
 					.addAll(simple.parallelTasks)
 					.build());

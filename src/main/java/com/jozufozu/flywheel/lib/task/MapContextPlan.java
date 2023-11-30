@@ -1,12 +1,15 @@
 package com.jozufozu.flywheel.lib.task;
 
-import java.util.function.Function;
-
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.lib.task.functional.SupplierWithContext;
 
-public record MapContextPlan<C, D>(Function<C, D> map, Plan<D> plan) implements SimplyComposedPlan<C> {
-	public static <C, D> Builder<C, D> map(Function<C, D> map) {
+public record MapContextPlan<C, D>(SupplierWithContext<C, D> map, Plan<D> plan) implements SimplyComposedPlan<C> {
+	public static <C, D> Builder<C, D> map(SupplierWithContext<C, D> map) {
+		return new Builder<>(map);
+	}
+
+	public static <C, D> Builder<C, D> get(SupplierWithContext.Ignored<C, D> map) {
 		return new Builder<>(map);
 	}
 
@@ -28,9 +31,9 @@ public record MapContextPlan<C, D>(Function<C, D> map, Plan<D> plan) implements 
 	}
 
 	public static class Builder<C, D> {
-		private final Function<C, D> map;
+		private final SupplierWithContext<C, D> map;
 
-		public Builder(Function<C, D> map) {
+		public Builder(SupplierWithContext<C, D> map) {
 			this.map = map;
 		}
 

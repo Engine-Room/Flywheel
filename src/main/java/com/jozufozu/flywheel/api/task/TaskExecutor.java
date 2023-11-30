@@ -28,6 +28,8 @@ public interface TaskExecutor extends Executor {
 	 * Wait for running tasks, so long as the given condition is met
 	 * ({@link BooleanSupplier#getAsBoolean()} returns {@code true}).
 	 * <br>
+	 * If this method is called on the
+	 * <br>
 	 * This method is equivalent to {@code syncUntil(() -> !cond.getAsBoolean())}.
 	 *
 	 * @param cond The condition sync on.
@@ -48,10 +50,18 @@ public interface TaskExecutor extends Executor {
 	/**
 	 * Schedule a task to be run on the main thread.
 	 * <br>
-	 * This method may be called from any thread, but the runnable will only
-	 * be executed once somebody calls either {@link #syncPoint()} or
-	 * {@link #syncUntil(BooleanSupplier)}.
+	 * This method may be called from any thread (including the main thread),
+	 * but the runnable will <em>only</em> be executed once somebody calls
+	 * either {@link #syncPoint()} or {@link #syncUntil(BooleanSupplier)}
+	 * on this task executor's main thread.
 	 * @param runnable The task to run.
 	 */
-	void scheduleForSync(Runnable runnable);
+	void scheduleForMainThread(Runnable runnable);
+
+	/**
+	 * Check whether the current thread is this task executor's main thread.
+	 *
+	 * @return {@code true} if the current thread is the main thread.
+	 */
+	boolean isMainThread();
 }
