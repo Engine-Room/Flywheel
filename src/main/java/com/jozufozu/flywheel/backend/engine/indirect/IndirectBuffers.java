@@ -24,7 +24,7 @@ import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
 public class IndirectBuffers {
-	public static final int BUFFER_COUNT = 4;
+	public static final int BUFFER_COUNT = 3;
 	public static final long INT_SIZE = Integer.BYTES;
 	public static final long PTR_SIZE = Pointer.POINTER_SIZE;
 
@@ -45,18 +45,15 @@ public class IndirectBuffers {
 
 	private static final long OBJECT_SIZE_OFFSET = SIZE_OFFSET;
 	private static final long TARGET_SIZE_OFFSET = OBJECT_SIZE_OFFSET + PTR_SIZE;
-	private static final long BATCH_SIZE_OFFSET = TARGET_SIZE_OFFSET + PTR_SIZE;
-	private static final long DRAW_SIZE_OFFSET = BATCH_SIZE_OFFSET + PTR_SIZE;
+	private static final long DRAW_SIZE_OFFSET = TARGET_SIZE_OFFSET + PTR_SIZE;
 
 	private final MemoryBlock buffers;
 	private final long objectStride;
 	private int object;
 	private int target;
-	private int batch;
 	private int draw;
 
 	long objectPtr;
-	long batchPtr;
 	long drawPtr;
 
 	private int maxObjectCount = 0;
@@ -72,11 +69,10 @@ public class IndirectBuffers {
 
 	void createBuffers() {
 		final long ptr = buffers.ptr();
-		nglCreateBuffers(4, ptr);
+		nglCreateBuffers(BUFFER_COUNT, ptr);
 		object = MemoryUtil.memGetInt(ptr);
 		target = MemoryUtil.memGetInt(ptr + 4);
-		batch = MemoryUtil.memGetInt(ptr + 8);
-		draw = MemoryUtil.memGetInt(ptr + 12);
+		draw = MemoryUtil.memGetInt(ptr + 8);
 	}
 
 	void updateCounts(int objectCount, int drawCount) {
@@ -94,7 +90,6 @@ public class IndirectBuffers {
 		final long ptr = buffers.ptr();
 		MemoryUtil.memPutAddress(ptr + OBJECT_SIZE_OFFSET, objectSize);
 		MemoryUtil.memPutAddress(ptr + TARGET_SIZE_OFFSET, targetSize);
-		MemoryUtil.memPutAddress(ptr + BATCH_SIZE_OFFSET, targetSize);
 		MemoryUtil.memPutAddress(ptr + DRAW_SIZE_OFFSET, drawSize);
 	}
 
@@ -105,38 +100,31 @@ public class IndirectBuffers {
 
 		if (maxObjectCount > 0) {
 			final long ptr = buffers.ptr();
-			nglCreateBuffers(3, ptr);
+			nglCreateBuffers(BUFFER_COUNT - 1, ptr);
 
 			int objectNew = MemoryUtil.memGetInt(ptr);
 			int targetNew = MemoryUtil.memGetInt(ptr + 4);
-			int batchNew = MemoryUtil.memGetInt(ptr + 8);
 
 			glNamedBufferStorage(objectNew, objectSize, PERSISTENT_BITS);
 			glNamedBufferStorage(targetNew, targetSize, GPU_ONLY_BITS);
-			glNamedBufferStorage(batchNew, targetSize, PERSISTENT_BITS);
 
 			glCopyNamedBufferSubData(object, objectNew, 0, 0, objectStride * maxObjectCount);
 			glCopyNamedBufferSubData(target, targetNew, 0, 0, INT_SIZE * maxObjectCount);
-			glCopyNamedBufferSubData(batch, batchNew, 0, 0, INT_SIZE * maxObjectCount);
 
 			glDeleteBuffers(object);
 			glDeleteBuffers(target);
-			glDeleteBuffers(batch);
 
 			object = objectNew;
 			target = targetNew;
-			batch = batchNew;
 		} else {
 			glNamedBufferStorage(object, objectSize, PERSISTENT_BITS);
 			glNamedBufferStorage(target, targetSize, GPU_ONLY_BITS);
-			glNamedBufferStorage(batch, targetSize, PERSISTENT_BITS);
 		}
 
 		objectPtr = nglMapNamedBufferRange(object, 0, objectSize, MAP_BITS);
-		batchPtr = nglMapNamedBufferRange(batch, 0, targetSize, MAP_BITS);
 		maxObjectCount = objectCount;
 
-		FlwMemoryTracker._allocGPUMemory(maxObjectCount * objectStride + maxObjectCount * INT_SIZE);
+		FlwMemoryTracker._allocGPUMemory(maxObjectCount * objectStride);
 	}
 
 	void createDrawStorage(int drawCount) {
@@ -150,7 +138,7 @@ public class IndirectBuffers {
 
 			glDeleteBuffers(draw);
 
-			MemoryUtil.memPutInt(buffers.ptr() + INT_SIZE * 3, drawNew);
+			MemoryUtil.memPutInt(buffers.ptr() + INT_SIZE * 2, drawNew);
 			draw = drawNew;
 			drawPtr = MemoryUtil.nmemRealloc(drawPtr, drawSize);
 		} else {
@@ -163,7 +151,7 @@ public class IndirectBuffers {
 	}
 
 	private void freeObjectStogare() {
-		FlwMemoryTracker._freeGPUMemory(maxObjectCount * objectStride + maxObjectCount * INT_SIZE);
+		FlwMemoryTracker._freeGPUMemory(maxObjectCount * objectStride);
 	}
 
 	private void freeDrawStorage() {
@@ -182,10 +170,6 @@ public class IndirectBuffers {
 	private void multiBind() {
 		final long ptr = buffers.ptr();
 		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, 0, IndirectBuffers.BUFFER_COUNT, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
-	}
-
-	void flushBatchIDs(long length) {
-		glFlushMappedNamedBufferRange(batch, 0, length);
 	}
 
 	void flushObjects(long length) {

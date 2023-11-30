@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.jozufozu.flywheel.backend.compile.core.Compilation;
 import com.jozufozu.flywheel.backend.compile.core.ProgramLinker;
 import com.jozufozu.flywheel.backend.compile.core.ShaderCompiler;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
@@ -83,6 +85,8 @@ public class Compile {
 	public static class ShaderCompilerBuilder<K> {
 		private final GLSLVersion glslVersion;
 		private final ShaderType shaderType;
+		private Consumer<Compilation> compilationCallbacks = $ -> {
+		};
 		private final List<BiFunction<K, SourceLoader, SourceComponent>> fetchers = new ArrayList<>();
 
 		public ShaderCompilerBuilder(GLSLVersion glslVersion, ShaderType shaderType) {
@@ -111,6 +115,19 @@ public class Compile {
 			return withResource($ -> resourceLocation);
 		}
 
+		public ShaderCompilerBuilder<K> onCompile(Consumer<Compilation> cb) {
+			compilationCallbacks = compilationCallbacks.andThen(cb);
+			return this;
+		}
+
+		public ShaderCompilerBuilder<K> define(String def, int value) {
+			return onCompile(ctx -> ctx.define(def, String.valueOf(value)));
+		}
+
+		public ShaderCompilerBuilder<K> enableExtension(String extension) {
+			return onCompile(ctx -> ctx.enableExtension(extension));
+		}
+
 		@Nullable
 		private GlShader compile(K key, ShaderCompiler compiler, SourceLoader loader) {
 			var components = new ArrayList<SourceComponent>();
@@ -127,7 +144,7 @@ public class Compile {
 				return null;
 			}
 
-			return compiler.compile(glslVersion, shaderType, components);
+			return compiler.compile(glslVersion, shaderType, compilationCallbacks, components);
 		}
 	}
 }

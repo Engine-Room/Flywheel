@@ -55,11 +55,11 @@ public class IndirectDraw<I extends Instance> {
 		needsFullWrite = true;
 	}
 
-	public void writeObjects(long objectPtr, long batchIDPtr, int batchID) {
+	public void writeObjects(long objectPtr, int batchID) {
 		if (needsFullWrite) {
-			instancer.writeFull(objectPtr, batchIDPtr, batchID);
+			instancer.writeFull(objectPtr, batchID);
 		} else {
-			instancer.writeSparse(objectPtr, batchIDPtr, batchID);
+			instancer.writeSparse(objectPtr, batchID);
 		}
 	}
 

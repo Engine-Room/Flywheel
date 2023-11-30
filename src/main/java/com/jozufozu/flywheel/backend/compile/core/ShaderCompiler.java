@@ -24,7 +24,7 @@ public class ShaderCompiler {
 	}
 
 	@Nullable
-	public GlShader compile(GLSLVersion glslVersion, ShaderType shaderType, List<SourceComponent> sourceComponents) {
+	public GlShader compile(GLSLVersion glslVersion, ShaderType shaderType, Consumer<Compilation> callback, List<SourceComponent> sourceComponents) {
 		var key = new ShaderKey(glslVersion, shaderType, sourceComponents);
 		var cached = shaderCache.get(key);
 		if (cached != null) {
@@ -32,7 +32,8 @@ public class ShaderCompiler {
 		}
 
 		Compilation ctx = new Compilation(glslVersion, shaderType);
-		ctx.enableExtension("GL_ARB_conservative_depth");
+
+		callback.accept(ctx);
 
 		expand(sourceComponents, ctx::appendComponent);
 

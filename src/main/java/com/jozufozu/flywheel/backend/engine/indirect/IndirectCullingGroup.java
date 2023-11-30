@@ -21,7 +21,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private final GlProgram compute;
 	private final GlProgram draw;
-	private final long instanceStride;
+	private final long objectStride;
 	private final IndirectBuffers buffers;
 	public final IndirectMeshPool meshPool;
 	public final IndirectDrawSet<I> drawSet = new IndirectDrawSet<>();
@@ -30,9 +30,10 @@ public class IndirectCullingGroup<I extends Instance> {
 	private int instanceCountThisFrame;
 
 	IndirectCullingGroup(InstanceType<I> instanceType, VertexType vertexType) {
-		instanceStride = instanceType.getLayout()
-				.getStride();
-		buffers = new IndirectBuffers(instanceStride);
+		objectStride = instanceType.getLayout()
+				.getStride() + IndirectBuffers.INT_SIZE;
+
+		buffers = new IndirectBuffers(objectStride);
 		buffers.createBuffers();
 		buffers.createObjectStorage(128);
 		buffers.createDrawStorage(2);
@@ -108,20 +109,17 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private void uploadInstances() {
 		long objectPtr = buffers.objectPtr;
-		long batchIDPtr = buffers.batchPtr;
 
 		for (int i = 0, batchesSize = drawSet.indirectDraws.size(); i < batchesSize; i++) {
 			var batch = drawSet.indirectDraws.get(i);
 			var instanceCount = batch.instancer()
 					.getInstanceCount();
-			batch.writeObjects(objectPtr, batchIDPtr, i);
+			batch.writeObjects(objectPtr, i);
 
-			objectPtr += instanceCount * instanceStride;
-			batchIDPtr += instanceCount * IndirectBuffers.INT_SIZE;
+			objectPtr += instanceCount * objectStride;
 		}
 
 		buffers.flushObjects(objectPtr - buffers.objectPtr);
-		buffers.flushBatchIDs(batchIDPtr - buffers.batchPtr);
 	}
 
 	private void uploadIndirectCommands() {

@@ -5,7 +5,9 @@ import java.nio.ByteBuffer;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL20C;
+import org.lwjgl.opengl.GL31C;
 import org.lwjgl.opengl.GLCapabilities;
+import org.lwjgl.opengl.KHRShaderSubgroup;
 import org.lwjgl.system.MemoryStack;
 
 import net.minecraft.Util;
@@ -19,14 +21,16 @@ import net.minecraft.Util;
 public class GlCompat {
 	public static final boolean ALLOW_DSA = true;
 	public static final GLCapabilities CAPABILITIES = GL.createCapabilities();
-	private static final boolean amd = _decideIfWeAreAMDWindows();
+	private static final boolean amd = _decideIfWeAreAMD();
+	private static final boolean windows = _decideIfWeAreWindows();
 	private static final boolean supportsIndirect = _decideIfWeSupportIndirect();
+	public static final int SUBGROUP_SIZE = _subgroupSize();
 
 	private GlCompat() {
 	}
 
 	public static boolean onAMDWindows() {
-		return amd;
+		return amd && windows;
 	}
 
 	public static boolean supportsInstancing() {
@@ -39,6 +43,14 @@ public class GlCompat {
 
 	private static boolean _decideIfWeSupportIndirect() {
 		return CAPABILITIES.OpenGL46 || (CAPABILITIES.GL_ARB_compute_shader && CAPABILITIES.GL_ARB_shader_draw_parameters && CAPABILITIES.GL_ARB_base_instance && CAPABILITIES.GL_ARB_multi_draw_indirect && CAPABILITIES.GL_ARB_direct_state_access);
+	}
+
+	private static int _subgroupSize() {
+		if (CAPABILITIES.GL_KHR_shader_subgroup) {
+			return GL31C.glGetInteger(KHRShaderSubgroup.GL_SUBGROUP_SIZE_KHR);
+		}
+		// try to guess
+		return amd ? 64 : 32;
 	}
 
 	/**
@@ -62,11 +74,11 @@ public class GlCompat {
 		}
 	}
 
-	private static boolean _decideIfWeAreAMDWindows() {
-		if (Util.getPlatform() != Util.OS.WINDOWS) {
-			return false;
-		}
+	private static boolean _decideIfWeAreWindows() {
+		return Util.getPlatform() == Util.OS.WINDOWS;
+	}
 
+	private static boolean _decideIfWeAreAMD() {
 		String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
 
 		if (vendor == null) {
