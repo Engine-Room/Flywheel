@@ -13,7 +13,6 @@ import java.util.Map;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.lib.material.MaterialIndices;
 
 public class IndirectDrawSet<I extends Instance> {
 
@@ -49,7 +48,7 @@ public class IndirectDrawSet<I extends Instance> {
 		multiDraws.clear();
 		// sort by stage, then material
 		indirectDraws.sort(Comparator.comparing(IndirectDraw<I>::stage)
-				.thenComparing(draw -> MaterialIndices.getMaterialIndex(draw.material())));
+				.thenComparing(draw -> draw.material().hashCode()));
 
 		for (int start = 0, i = 0; i < indirectDraws.size(); i++) {
 			var draw = indirectDraws.get(i);

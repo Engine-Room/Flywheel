@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import com.jozufozu.flywheel.api.event.EndClientResourceReloadEvent;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.backend.Backends;
+import com.jozufozu.flywheel.backend.MaterialShaderIndices;
 import com.jozufozu.flywheel.backend.compile.FlwPrograms;
 import com.jozufozu.flywheel.backend.compile.Pipelines;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
@@ -22,8 +23,7 @@ import com.jozufozu.flywheel.impl.visualization.VisualizationEventHandler;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.light.LightUpdater;
-import com.jozufozu.flywheel.lib.material.MaterialIndices;
-import com.jozufozu.flywheel.lib.material.Materials;
+import com.jozufozu.flywheel.lib.material.StandardMaterialShaders;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.model.ModelCache;
 import com.jozufozu.flywheel.lib.model.ModelHolder;
@@ -42,6 +42,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -101,6 +102,10 @@ public class Flywheel {
 		forgeEventBus.addListener(LightUpdater::onClientTick);
 		forgeEventBus.addListener((LevelEvent.Unload e) -> LevelAttached.onUnloadLevel(e));
 
+//		forgeEventBus.addListener(ExampleEffect::tick);
+//		forgeEventBus.addListener(ExampleEffect::onReload);
+
+		modEventBus.addListener(Flywheel::registerClientReloadListeners);
 		modEventBus.addListener(Flywheel::onClientSetup);
 
 		modEventBus.addListener(BackendManagerImpl::onEndClientResourceReload);
@@ -111,25 +116,25 @@ public class Flywheel {
 		modEventBus.addListener(PartialModel::onModelRegistry);
 		modEventBus.addListener(PartialModel::onModelBake);
 
-//		forgeEventBus.addListener(ExampleEffect::tick);
-//		forgeEventBus.addListener(ExampleEffect::onReload);
-
 		BackendManagerImpl.init();
+
+		ShadersModHandler.init();
 
 		Pipelines.init();
 		Backends.init();
-		FlwPrograms.ResourceReloadListener.register();
+	}
 
-		ShadersModHandler.init();
+	private static void registerClientReloadListeners(RegisterClientReloadListenersEvent event) {
+		event.registerReloadListener(FlwPrograms.ResourceReloadListener.INSTANCE);
 	}
 
 	private static void onClientSetup(FMLClientSetupEvent event) {
 		VertexTypes.init();
 		InstanceTypes.init();
-		Materials.init();
+		StandardMaterialShaders.init();
 		Contexts.init();
 
-		MaterialIndices.init();
+		MaterialShaderIndices.init();
 
 		VanillaVisuals.init();
 

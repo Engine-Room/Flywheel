@@ -23,42 +23,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancedCrumbling {
-	@NotNull
-	public static Map<ShaderState, Int2ObjectMap<List<Runnable>>> doCrumblingSort(List<Engine.CrumblingBlock> instances) {
-		Map<ShaderState, Int2ObjectMap<List<Runnable>>> out = new HashMap<>();
-
-		for (Engine.CrumblingBlock triple : instances) {
-			int progress = triple.progress();
-
-			if (progress < 0 || progress >= ModelBakery.DESTROY_TYPES.size()) {
-				continue;
-			}
-
-			for (Instance instance : triple.instances()) {
-				// Filter out instances that weren't created by this engine.
-				// If all is well, we probably shouldn't take the `continue`
-				// branches but better to do checked casts.
-				if (!(instance.handle() instanceof InstanceHandleImpl impl)) {
-					continue;
-				}
-				if (!(impl.instancer instanceof InstancedInstancer<?> instancer)) {
-					continue;
-				}
-
-				List<DrawCall> draws = instancer.drawCalls();
-
-				draws.removeIf(DrawCall::isInvalid);
-
-				for (DrawCall draw : draws) {
-					out.computeIfAbsent(draw.shaderState, $ -> new Int2ObjectArrayMap<>())
-							.computeIfAbsent(progress, $ -> new ArrayList<>())
-							.add(() -> draw.renderOne(impl));
-				}
-			}
-		}
-		return out;
-	}
-
 	public static void render(List<Engine.CrumblingBlock> crumblingBlocks) {
 		// Sort draw calls into buckets, so we don't have to do as many shader binds.
 		var byShaderState = doCrumblingSort(crumblingBlocks);
@@ -106,6 +70,42 @@ public class InstancedCrumbling {
 				}
 			}
 		}
+	}
+
+	@NotNull
+	private static Map<ShaderState, Int2ObjectMap<List<Runnable>>> doCrumblingSort(List<Engine.CrumblingBlock> instances) {
+		Map<ShaderState, Int2ObjectMap<List<Runnable>>> out = new HashMap<>();
+
+		for (Engine.CrumblingBlock triple : instances) {
+			int progress = triple.progress();
+
+			if (progress < 0 || progress >= ModelBakery.DESTROY_TYPES.size()) {
+				continue;
+			}
+
+			for (Instance instance : triple.instances()) {
+				// Filter out instances that weren't created by this engine.
+				// If all is well, we probably shouldn't take the `continue`
+				// branches but better to do checked casts.
+				if (!(instance.handle() instanceof InstanceHandleImpl impl)) {
+					continue;
+				}
+				if (!(impl.instancer instanceof InstancedInstancer<?> instancer)) {
+					continue;
+				}
+
+				List<DrawCall> draws = instancer.drawCalls();
+
+				draws.removeIf(DrawCall::isInvalid);
+
+				for (DrawCall draw : draws) {
+					out.computeIfAbsent(draw.shaderState, $ -> new Int2ObjectArrayMap<>())
+							.computeIfAbsent(progress, $ -> new ArrayList<>())
+							.add(() -> draw.renderOne(impl));
+				}
+			}
+		}
+		return out;
 	}
 
 	private static int getDiffuseTexture(Material material) {

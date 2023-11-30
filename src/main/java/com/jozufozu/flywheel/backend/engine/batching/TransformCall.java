@@ -30,7 +30,6 @@ public class TransformCall<I extends Instance> {
 		this.instancer = instancer;
 		this.material = material;
 		this.mesh = mesh;
-		instancer.addTransformCall(this);
 
 		InstanceVertexTransformer<I> instanceVertexTransformer = instancer.type.getVertexTransformer();
 		InstanceBoundingSphereTransformer<I> boundingSphereTransformer = instancer.type.getBoundingSphereTransformer();

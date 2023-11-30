@@ -1,8 +1,5 @@
 package com.jozufozu.flywheel.lib.material;
 
-import org.jetbrains.annotations.ApiStatus;
-
-import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
@@ -37,107 +34,90 @@ public final class Materials {
 	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
 
 	public static final Material CHUNK_SOLID_SHADED = SimpleMaterial.builder()
-			.vertexShader(Files.SHADED_VERTEX)
-			.fragmentShader(Files.DEFAULT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
+			.shaders(StandardMaterialShaders.SHADED)
 			.fallbackRenderType(RenderType.solid())
 			.vertexTransformer(SHADING_TRANSFORMER)
-			.register();
+			.build();
 	public static final Material CHUNK_SOLID_UNSHADED = SimpleMaterial.builder()
-			.vertexShader(Files.DEFAULT_VERTEX)
-			.fragmentShader(Files.DEFAULT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
 			.fallbackRenderType(RenderType.solid())
-			.register();
+			.build();
 
 	public static final Material CHUNK_CUTOUT_MIPPED_SHADED = SimpleMaterial.builder()
-			.vertexShader(Files.SHADED_VERTEX)
-			.fragmentShader(Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
+			.shaders(StandardMaterialShaders.SHADED_CUTOUT)
 			.fallbackRenderType(RenderType.cutoutMipped())
 			.vertexTransformer(SHADING_TRANSFORMER)
-			.register();
+			.build();
 	public static final Material CHUNK_CUTOUT_MIPPED_UNSHADED = SimpleMaterial.builder()
-			.vertexShader(Files.DEFAULT_VERTEX)
-			.fragmentShader(Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
+			.shaders(StandardMaterialShaders.CUTOUT)
 			.fallbackRenderType(RenderType.cutoutMipped())
-			.register();
+			.build();
 
 	public static final Material CHUNK_CUTOUT_SHADED = SimpleMaterial.builder()
-			.vertexShader(Files.SHADED_VERTEX)
-			.fragmentShader(Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, false))
+			.shaders(StandardMaterialShaders.SHADED_CUTOUT)
 			.fallbackRenderType(RenderType.cutout())
 			.vertexTransformer(SHADING_TRANSFORMER)
-			.register();
+			.build();
 	public static final Material CHUNK_CUTOUT_UNSHADED = SimpleMaterial.builder()
-			.vertexShader(Files.DEFAULT_VERTEX)
-			.fragmentShader(Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, false))
+			.shaders(StandardMaterialShaders.CUTOUT)
 			.fallbackRenderType(RenderType.cutout())
-			.register();
+			.build();
 
 	public static final Material CHUNK_TRANSLUCENT_SHADED = SimpleMaterial.builder()
-			.vertexShader(Files.SHADED_VERTEX)
-			.fragmentShader(Files.DEFAULT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
 			.addShard(Shards.TRANSLUCENT_TRANSPARENCY)
+			.shaders(StandardMaterialShaders.SHADED)
 			.fallbackRenderType(RenderType.translucent())
 			.vertexTransformer(SHADING_TRANSFORMER)
-			.register();
+			.build();
 	public static final Material CHUNK_TRANSLUCENT_UNSHADED = SimpleMaterial.builder()
-			.vertexShader(Files.DEFAULT_VERTEX)
-			.fragmentShader(Files.DEFAULT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
 			.addShard(Shards.TRANSLUCENT_TRANSPARENCY)
 			.fallbackRenderType(RenderType.translucent())
-			.register();
+			.build();
 
 	public static final Material CHUNK_TRIPWIRE_SHADED = SimpleMaterial.builder()
-			.vertexShader(Files.SHADED_VERTEX)
-			.fragmentShader(Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
 			.addShard(Shards.TRANSLUCENT_TRANSPARENCY)
+			.shaders(StandardMaterialShaders.SHADED_CUTOUT)
 			.fallbackRenderType(RenderType.tripwire())
 			.vertexTransformer(SHADING_TRANSFORMER)
-			.register();
+			.build();
 	public static final Material CHUNK_TRIPWIRE_UNSHADED = SimpleMaterial.builder()
-			.vertexShader(Files.DEFAULT_VERTEX)
-			.fragmentShader(Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, true))
 			.addShard(Shards.TRANSLUCENT_TRANSPARENCY)
+			.shaders(StandardMaterialShaders.CUTOUT)
 			.fallbackRenderType(RenderType.tripwire())
-			.register();
+			.build();
 
 	public static final Material CHEST = SimpleMaterial.builder()
-			.vertexShader(Files.SHADED_VERTEX)
 			.addShard(Shards.diffuseTex(Sheets.CHEST_SHEET, false, false))
+			.shaders(StandardMaterialShaders.SHADED)
 			.fallbackRenderType(Sheets.chestSheet())
-			.register();
+			.build();
 	public static final Material SHULKER = SimpleMaterial.builder()
-			.vertexShader(Files.SHADED_VERTEX)
-			.fragmentShader(Files.CUTOUT_FRAGMENT)
 			.addShard(Shards.diffuseTex(Sheets.SHULKER_SHEET, false, false))
 			.addShard(Shards.DISABLE_CULL)
+			.shaders(StandardMaterialShaders.SHADED_CUTOUT)
 			.fallbackRenderType(Sheets.shulkerBoxSheet())
-			.register();
+			.build();
 	public static final Material BELL = SimpleMaterial.builder()
-			.vertexShader(Files.SHADED_VERTEX)
 			.addShard(Shards.diffuseTex(InventoryMenu.BLOCK_ATLAS, false, false))
+			.shaders(StandardMaterialShaders.SHADED)
 			.fallbackRenderType(Sheets.solidBlockSheet())
-			.register();
+			.build();
 	public static final Material MINECART = SimpleMaterial.builder()
-			.vertexShader(Files.SHADED_VERTEX)
 			.addShard(Shards.diffuseTex(MINECART_LOCATION, false, false))
+			.shaders(StandardMaterialShaders.SHADED)
 			.fallbackRenderType(RenderType.entitySolid(MINECART_LOCATION))
-			.register();
+			.build();
 
 	private Materials() {
-	}
-
-	@ApiStatus.Internal
-	public static void init() {
 	}
 
 	public static final class Shards {
@@ -175,18 +155,5 @@ public final class Materials {
 					}
 			);
 		}
-	}
-
-	public static final class Files {
-		public static final ResourceLocation DEFAULT_VERTEX = Names.DEFAULT.withSuffix(".vert");
-		public static final ResourceLocation SHADED_VERTEX = Names.SHADED.withSuffix(".vert");
-		public static final ResourceLocation DEFAULT_FRAGMENT = Names.DEFAULT.withSuffix(".frag");
-		public static final ResourceLocation CUTOUT_FRAGMENT = Names.CUTOUT.withSuffix(".frag");
-	}
-
-	public static final class Names {
-		public static final ResourceLocation DEFAULT = Flywheel.rl("material/default");
-		public static final ResourceLocation CUTOUT = Flywheel.rl("material/cutout");
-		public static final ResourceLocation SHADED = Flywheel.rl("material/shaded");
 	}
 }

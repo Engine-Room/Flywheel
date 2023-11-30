@@ -44,6 +44,7 @@ class BatchedDrawManager extends InstancerStorage<BatchedInstancer<?>> {
 		return new BatchedInstancer<>(type);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	protected <I extends Instance> void add(InstancerKey<I> key, BatchedInstancer<?> instancer, Model model, RenderStage stage) {
 		var stagePlan = stagePlans.computeIfAbsent(stage, renderStage -> new BatchedStagePlan(renderStage, drawTracker));
@@ -51,8 +52,10 @@ class BatchedDrawManager extends InstancerStorage<BatchedInstancer<?>> {
 		for (var entry : meshes.entrySet()) {
 			var material = entry.getKey();
 			RenderType renderType = material.getFallbackRenderType();
-			var transformCall = new TransformCall<>(instancer, material, alloc(entry.getValue(), renderType.format()));
+			var mesh = alloc(entry.getValue(), renderType.format());
+			var transformCall = new TransformCall<>(instancer, material, mesh);
 			stagePlan.put(renderType, transformCall);
+			instancer.addTransformCall((TransformCall) transformCall);
 		}
 	}
 

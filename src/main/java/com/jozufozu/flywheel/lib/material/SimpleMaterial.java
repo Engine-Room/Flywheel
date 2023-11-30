@@ -1,41 +1,29 @@
 package com.jozufozu.flywheel.lib.material;
 
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.api.material.MaterialShaders;
 import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
 
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
 
 public class SimpleMaterial implements Material {
-	protected final ResourceLocation vertexShader;
-	protected final ResourceLocation fragmentShader;
 	protected final Runnable setup;
 	protected final Runnable clear;
+	protected final MaterialShaders shaders;
 	protected final RenderType fallbackRenderType;
 	protected final MaterialVertexTransformer vertexTransformer;
 
-	public SimpleMaterial(ResourceLocation vertexShader, ResourceLocation fragmentShader, Runnable setup, Runnable clear, RenderType fallbackRenderType, MaterialVertexTransformer vertexTransformer) {
-		this.vertexShader = vertexShader;
-		this.fragmentShader = fragmentShader;
+	public SimpleMaterial(Runnable setup, Runnable clear, MaterialShaders shaders, RenderType fallbackRenderType, MaterialVertexTransformer vertexTransformer) {
 		this.setup = setup;
 		this.clear = clear;
+		this.shaders = shaders;
 		this.fallbackRenderType = fallbackRenderType;
 		this.vertexTransformer = vertexTransformer;
 	}
 
 	public static Builder builder() {
 		return new Builder();
-	}
-
-	@Override
-	public ResourceLocation vertexShader() {
-		return vertexShader;
-	}
-
-	@Override
-	public ResourceLocation fragmentShader() {
-		return fragmentShader;
 	}
 
 	@Override
@@ -49,6 +37,11 @@ public class SimpleMaterial implements Material {
 	}
 
 	@Override
+	public MaterialShaders shaders() {
+		return shaders;
+	}
+
+	@Override
 	public RenderType getFallbackRenderType() {
 		return fallbackRenderType;
 	}
@@ -59,24 +52,13 @@ public class SimpleMaterial implements Material {
 	}
 
 	public static class Builder {
-		protected ResourceLocation vertexShader = Materials.Files.DEFAULT_VERTEX;
-		protected ResourceLocation fragmentShader = Materials.Files.DEFAULT_FRAGMENT;
 		protected Runnable setup = () -> {};
 		protected Runnable clear = () -> {};
+		protected MaterialShaders shaders = StandardMaterialShaders.DEFAULT;
 		protected RenderType fallbackRenderType = RenderType.solid();
 		protected MaterialVertexTransformer vertexTransformer = (vertexList, level) -> {};
 
 		public Builder() {
-		}
-
-		public Builder vertexShader(ResourceLocation vertexShader) {
-			this.vertexShader = vertexShader;
-			return this;
-		}
-
-		public Builder fragmentShader(ResourceLocation fragmentShader) {
-			this.fragmentShader = fragmentShader;
-			return this;
 		}
 
 		public Builder addSetup(Runnable setup) {
@@ -95,6 +77,11 @@ public class SimpleMaterial implements Material {
 			return this;
 		}
 
+		public Builder shaders(MaterialShaders shaders) {
+			this.shaders = shaders;
+			return this;
+		}
+
 		public Builder fallbackRenderType(RenderType type) {
 			this.fallbackRenderType = type;
 			return this;
@@ -105,8 +92,8 @@ public class SimpleMaterial implements Material {
 			return this;
 		}
 
-		public SimpleMaterial register() {
-			return Material.REGISTRY.registerAndGet(new SimpleMaterial(vertexShader, fragmentShader, setup, clear, fallbackRenderType, vertexTransformer));
+		public SimpleMaterial build() {
+			return new SimpleMaterial(setup, clear, shaders, fallbackRenderType, vertexTransformer);
 		}
 
 		private static Runnable chain(Runnable runnable1, Runnable runnable2) {

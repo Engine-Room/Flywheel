@@ -6,16 +6,14 @@ import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.backend.MaterialShaderIndices;
 import com.jozufozu.flywheel.backend.compile.component.MaterialAdapterComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.backend.compile.core.CompilerStats;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;
-import com.jozufozu.flywheel.lib.material.MaterialIndices;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
@@ -44,7 +42,7 @@ public class FlwPrograms {
 
 	private static MaterialAdapterComponent createFragmentMaterialComponent(SourceLoader loadChecker) {
 		return MaterialAdapterComponent.builder(Flywheel.rl("fragment_material_adapter"))
-				.materialSources(MaterialIndices.getAllFragmentShaders())
+				.materialSources(MaterialShaderIndices.getAllFragmentShaders())
 				.adapt(FnSignature.ofVoid("flw_materialFragment"))
 				.adapt(FnSignature.create()
 						.returnType("bool")
@@ -62,7 +60,7 @@ public class FlwPrograms {
 
 	private static MaterialAdapterComponent createVertexMaterialComponent(SourceLoader loadChecker) {
 		return MaterialAdapterComponent.builder(Flywheel.rl("vertex_material_adapter"))
-				.materialSources(MaterialIndices.getAllVertexShaders())
+				.materialSources(MaterialShaderIndices.getAllVertexShaders())
 				.adapt(FnSignature.ofVoid("flw_materialVertex"))
 				.switchOn(GlslExpr.variable("_flw_materialVertexID"))
 				.build(loadChecker);
@@ -99,18 +97,6 @@ public class FlwPrograms {
 		@Override
 		public void onResourceManagerReload(ResourceManager manager) {
 			FlwPrograms.reload(manager);
-		}
-
-		public static void register() {
-			// Can be null when running data generators due to the unfortunate time we call this
-			Minecraft minecraft = Minecraft.getInstance();
-			if (minecraft == null) {
-				return;
-			}
-
-			if (minecraft.getResourceManager() instanceof ReloadableResourceManager reloadable) {
-				reloadable.registerReloadListener(INSTANCE);
-			}
 		}
 	}
 }
