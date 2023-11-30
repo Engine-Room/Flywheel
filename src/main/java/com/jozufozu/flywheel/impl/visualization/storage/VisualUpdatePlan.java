@@ -47,7 +47,7 @@ public class VisualUpdatePlan<C> implements SimplyComposedPlan<C> {
 		return plan;
 	}
 
-	public void clear() {
+	public void triggerReInitialize() {
 		plan = UnitPlan.of();
 		initialized = false;
 	}

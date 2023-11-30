@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.util.Mth;
@@ -27,6 +26,8 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	private final String name;
 	private final int threadCount;
 
+	private final BooleanSupplier mainThreadQuery;
+
 	/**
 	 * If set to false, the executor will shut down.
 	 */
@@ -38,8 +39,9 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	private final ThreadGroupNotifier taskNotifier = new ThreadGroupNotifier();
 	private final WaitGroup waitGroup = new WaitGroup();
 
-	public ParallelTaskExecutor(String name) {
+	public ParallelTaskExecutor(String name, BooleanSupplier mainThreadQuery) {
 		this.name = name;
+		this.mainThreadQuery = mainThreadQuery;
 		threadCount = getOptimalThreadCount();
 	}
 
@@ -116,16 +118,17 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	}
 
 	@Override
-	public void scheduleForSync(Runnable runnable) {
+	public void scheduleForMainThread(Runnable runnable) {
 		if (!running.get()) {
 			throw new IllegalStateException("Executor is stopped");
 		}
 
-		if (RenderSystem.isOnRenderThread()) {
-			runnable.run();
-		} else {
-			mainThreadQueue.add(runnable);
-		}
+		mainThreadQueue.add(runnable);
+	}
+
+	@Override
+	public boolean isMainThread() {
+		return mainThreadQuery.getAsBoolean();
 	}
 
 	/**
@@ -133,16 +136,18 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	 */
 	@Override
 	public void syncPoint() {
+		boolean onMainThread = isMainThread();
 		while (true) {
-			if (syncOneTask()) {
+			if (syncOneTask(onMainThread)) {
 				// Done! Nothing left to do.
-				break;
+				return;
 			}
 		}
 	}
 
 	@Override
 	public boolean syncUntil(BooleanSupplier cond) {
+		boolean onMainThread = isMainThread();
 		while (true) {
 			if (cond.getAsBoolean()) {
 				// The condition is already true!
@@ -150,7 +155,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 				return true;
 			}
 
-			if (syncOneTask()) {
+			if (syncOneTask(onMainThread)) {
 				// Out of tasks entirely.
 				// The condition may have flipped though so return its result.
 				return cond.getAsBoolean();
@@ -161,6 +166,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 
 	@Override
 	public boolean syncWhile(BooleanSupplier cond) {
+		boolean onMainThread = isMainThread();
 		while (true) {
 			if (!cond.getAsBoolean()) {
 				// The condition is already false!
@@ -168,7 +174,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 				return true;
 			}
 
-			if (syncOneTask()) {
+			if (syncOneTask(onMainThread)) {
 				// Out of tasks entirely.
 				// The condition may have flipped though so return its result.
 				return !cond.getAsBoolean();
@@ -179,24 +185,49 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	/**
 	 * Attempt to process a single task.
 	 *
+	 * @param mainThread Whether this is being called from the main thread or not.
 	 * @return {@code true} if the executor has nothing left to do.
 	 */
-	private boolean syncOneTask() {
+	private boolean syncOneTask(boolean mainThread) {
+		return mainThread ? syncOneTaskMainThread() : syncOneTaskOffThread();
+	}
+
+	private boolean syncOneTaskMainThread() {
 		Runnable task;
 		if ((task = mainThreadQueue.poll()) != null) {
 			// Prioritize main thread tasks.
 			processMainThreadTask(task);
+
+			// Check again next loop.
+			return false;
 		} else if ((task = taskQueue.pollLast()) != null) {
-			// then work on tasks from the queue.
+			// Nothing in the mainThreadQueue, work on tasks from the normal queue.
 			processTask(task);
+
+			// Check again next loop.
+			return false;
 		} else {
-			// then wait for the other threads to finish.
+			// Nothing right now, wait for the other threads to finish.
 			boolean done = waitGroup.await(10_000);
 			// If we timed-out tasks may have been added to the queue, so check again.
 			// if they didn't, we're done.
 			return done && mainThreadQueue.isEmpty();
 		}
-		return false;
+	}
+
+	private boolean syncOneTaskOffThread() {
+		Runnable task;
+		if ((task = taskQueue.pollLast()) != null) {
+			// then work on tasks from the queue.
+			processTask(task);
+			// Check again next loop.
+			return false;
+		} else {
+			// Nothing right now, wait for the other threads to finish.
+			// If we timed-out tasks may have been added to the queue, so check again.
+			// if they didn't, we're done.
+			return waitGroup.await(10_000);
+		}
 	}
 
 	private void processTask(Runnable task) {

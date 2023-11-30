@@ -4,6 +4,7 @@ import org.apache.commons.lang3.concurrent.AtomicSafeInitializer;
 import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 public final class FlwTaskExecutor {
 	public static final boolean USE_SERIAL_EXECUTOR = System.getProperty("flw.useSerialExecutor") != null;
@@ -28,7 +29,7 @@ public final class FlwTaskExecutor {
 				return SerialTaskExecutor.INSTANCE;
 			}
 
-			ParallelTaskExecutor executor = new ParallelTaskExecutor("Flywheel");
+			ParallelTaskExecutor executor = new ParallelTaskExecutor("Flywheel", RenderSystem::isOnRenderThread);
 			executor.startWorkers();
 			return executor;
 		}

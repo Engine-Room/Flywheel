@@ -16,7 +16,7 @@ public class SerialTaskExecutor implements TaskExecutor {
 	}
 
 	@Override
-	public void scheduleForSync(Runnable runnable) {
+	public void scheduleForMainThread(Runnable runnable) {
 		runnable.run();
 	}
 
@@ -37,5 +37,10 @@ public class SerialTaskExecutor implements TaskExecutor {
 	@Override
 	public int getThreadCount() {
 		return 1;
+	}
+
+	@Override
+	public boolean isMainThread() {
+		return true;
 	}
 }

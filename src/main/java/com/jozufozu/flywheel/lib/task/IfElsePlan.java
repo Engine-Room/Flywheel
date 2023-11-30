@@ -1,9 +1,8 @@
 package com.jozufozu.flywheel.lib.task;
 
-import java.util.function.Predicate;
-
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.lib.task.functional.BooleanSupplierWithContext;
 
 /**
  * Executes one plan or another, depending on a dynamically evaluated condition.
@@ -12,14 +11,19 @@ import com.jozufozu.flywheel.api.task.TaskExecutor;
  * @param onFalse The plan to execute if the condition is false.
  * @param <C> The type of the context object.
  */
-public record IfElsePlan<C>(Predicate<C> condition, Plan<C> onTrue, Plan<C> onFalse) implements SimplyComposedPlan<C> {
-	public static <C> Builder<C> on(Predicate<C> condition) {
+public record IfElsePlan<C>(BooleanSupplierWithContext<C> condition, Plan<C> onTrue,
+							Plan<C> onFalse) implements SimplyComposedPlan<C> {
+	public static <C> Builder<C> on(BooleanSupplierWithContext<C> condition) {
+		return new Builder<>(condition);
+	}
+
+	public static <C> Builder<C> on(BooleanSupplierWithContext.Ignored<C> condition) {
 		return new Builder<>(condition);
 	}
 
 	@Override
 	public void execute(TaskExecutor taskExecutor, C context, Runnable onCompletion) {
-		if (condition.test(context)) {
+		if (condition.getAsBoolean(context)) {
 			onTrue.execute(taskExecutor, context, onCompletion);
 		} else {
 			onFalse.execute(taskExecutor, context, onCompletion);
@@ -40,11 +44,11 @@ public record IfElsePlan<C>(Predicate<C> condition, Plan<C> onTrue, Plan<C> onFa
 	}
 
 	public static class Builder<C> {
-		private final Predicate<C> condition;
+		private final BooleanSupplierWithContext<C> condition;
 		private Plan<C> onTrue = UnitPlan.of();
 		private Plan<C> onFalse = UnitPlan.of();
 
-		public Builder(Predicate<C> condition) {
+		public Builder(BooleanSupplierWithContext<C> condition) {
 			this.condition = condition;
 		}
 

@@ -1,12 +1,11 @@
 package com.jozufozu.flywheel.lib.task;
 
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.lib.task.functional.ConsumerWithContext;
+import com.jozufozu.flywheel.lib.task.functional.SupplierWithContext;
 
 /**
  * A plan that executes code on each element of a provided list.
@@ -18,17 +17,26 @@ import com.jozufozu.flywheel.api.task.TaskExecutor;
  * @param <T>          The type of the list elements.
  * @param <C>          The type of the context object.
  */
-public record ForEachPlan<T, C>(Supplier<List<T>> listSupplier, BiConsumer<T, C> action) implements SimplyComposedPlan<C> {
-	public static <T, C> Plan<C> of(Supplier<List<T>> iterable, BiConsumer<T, C> forEach) {
+public record ForEachPlan<T, C>(SupplierWithContext<C, List<T>> listSupplier,
+								ConsumerWithContext<T, C> action) implements SimplyComposedPlan<C> {
+	public static <T, C> Plan<C> of(SupplierWithContext<C, List<T>> iterable, ConsumerWithContext<T, C> forEach) {
 		return new ForEachPlan<>(iterable, forEach);
 	}
 
-	public static <T, C> Plan<C> of(Supplier<List<T>> iterable, Consumer<T> forEach) {
-		return of(iterable, (t, c) -> forEach.accept(t));
+	public static <T, C> Plan<C> of(SupplierWithContext<C, List<T>> iterable, ConsumerWithContext.Ignored<T, C> forEach) {
+		return new ForEachPlan<>(iterable, forEach);
+	}
+
+	public static <T, C> Plan<C> of(SupplierWithContext.Ignored<C, List<T>> iterable, ConsumerWithContext<T, C> forEach) {
+		return new ForEachPlan<>(iterable, forEach);
+	}
+
+	public static <T, C> Plan<C> of(SupplierWithContext.Ignored<C, List<T>> iterable, ConsumerWithContext.Ignored<T, C> forEach) {
+		return new ForEachPlan<>(iterable, forEach);
 	}
 
 	@Override
 	public void execute(TaskExecutor taskExecutor, C context, Runnable onCompletion) {
-		taskExecutor.execute(() -> PlanUtil.distribute(taskExecutor, context, onCompletion, listSupplier.get(), action));
+		taskExecutor.execute(() -> PlanUtil.distribute(taskExecutor, context, onCompletion, listSupplier.get(context), action));
 	}
 }

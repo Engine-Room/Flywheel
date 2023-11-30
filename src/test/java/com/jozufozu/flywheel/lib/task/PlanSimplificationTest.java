@@ -4,11 +4,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.jozufozu.flywheel.api.task.Plan;
+import com.jozufozu.flywheel.lib.task.functional.RunnableWithContext;
 import com.jozufozu.flywheel.lib.util.Unit;
 
 public class PlanSimplificationTest {
 
-	public static final ContextRunnable<Unit> NOOP = () -> {
+	public static final RunnableWithContext.Ignored<Unit> NOOP = () -> {
 	};
 	public static final Plan<Unit> SIMPLE = SimplePlan.of(NOOP);
 

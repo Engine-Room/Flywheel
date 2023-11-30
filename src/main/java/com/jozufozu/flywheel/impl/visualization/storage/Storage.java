@@ -59,7 +59,7 @@ public abstract class Storage<T> {
 		tickableVisuals.remove(visual);
 		dynamicVisuals.remove(visual);
 		if (plannedVisuals.remove(visual)) {
-			framePlan.clear();
+			framePlan.triggerReInitialize();
 		}
 		visual.delete();
 	}
@@ -103,8 +103,8 @@ public abstract class Storage<T> {
 		tickableVisuals.clear();
 		dynamicVisuals.clear();
 		plannedVisuals.clear();
-		framePlan.clear();
-		tickPlan.clear();
+		framePlan.triggerReInitialize();
+		tickPlan.triggerReInitialize();
 		visuals.values()
 				.forEach(Visual::delete);
 		visuals.clear();
