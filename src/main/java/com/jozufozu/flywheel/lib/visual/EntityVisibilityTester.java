@@ -3,7 +3,10 @@ package com.jozufozu.flywheel.lib.visual;
 import org.jetbrains.annotations.Nullable;
 import org.joml.FrustumIntersection;
 
+import com.jozufozu.flywheel.lib.math.MoreMath;
+
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 
@@ -15,12 +18,22 @@ import net.minecraft.world.phys.AABB;
 public class EntityVisibilityTester {
 	private final Entity entity;
 	private final Vec3i renderOrigin;
+	private final float scale;
 	@Nullable
 	private AABB lastVisibleAABB;
 
-	public EntityVisibilityTester(Entity entity, Vec3i renderOrigin) {
+	/**
+	 * Create a new EntityVisibilityTester.
+	 *
+	 * @param entity       The Entity to test.
+	 * @param renderOrigin The render origin according to the VisualizationContext.
+	 * @param scale        Multiplier for the Entity's size, can be used to adjust for when
+	 *                     an entity's model is larger than its hitbox.
+	 */
+	public EntityVisibilityTester(Entity entity, Vec3i renderOrigin, float scale) {
 		this.entity = entity;
 		this.renderOrigin = renderOrigin;
+		this.scale = scale;
 	}
 
 	/**
@@ -47,12 +60,10 @@ public class EntityVisibilityTester {
 	}
 
 	private boolean adjustAndTestAABB(FrustumIntersection frustum, AABB aabb) {
-		float minX = (float) (aabb.minX - renderOrigin.getX() - 0.5);
-		float minY = (float) (aabb.minY - renderOrigin.getY() - 0.5);
-		float minZ = (float) (aabb.minZ - renderOrigin.getZ() - 0.5);
-		float maxX = (float) (aabb.maxX - renderOrigin.getX() + 0.5);
-		float maxY = (float) (aabb.maxY - renderOrigin.getY() + 0.5);
-		float maxZ = (float) (aabb.maxZ - renderOrigin.getZ() + 0.5);
-		return frustum.testAab(minX, minY, minZ, maxX, maxY, maxZ);
+		float x = (float) Mth.lerp(0.5D, aabb.minX, aabb.maxX) - renderOrigin.getX();
+		float y = (float) Mth.lerp(0.5D, aabb.minY, aabb.maxY) - renderOrigin.getY();
+		float z = (float) Mth.lerp(0.5D, aabb.minZ, aabb.maxZ) - renderOrigin.getZ();
+		float maxSize = (float) Math.max(aabb.getXsize(), Math.max(aabb.getYsize(), aabb.getZsize()));
+		return frustum.testSphere(x, y, z, maxSize * MoreMath.SQRT_3_OVER_2 * scale);
 	}
 }

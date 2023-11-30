@@ -4,6 +4,11 @@ public final class MoreMath {
 	private MoreMath() {
 	}
 
+	/**
+	 * The circumsphere of a cube has a radius of sqrt(3) / 2 * sideLength.
+	 */
+	public static final float SQRT_3_OVER_2 = (float) (Math.sqrt(3.0) / 2.0);
+
 	public static int align16(int numToRound) {
 		return (numToRound + 16 - 1) & -16;
 	}
