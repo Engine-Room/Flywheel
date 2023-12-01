@@ -82,7 +82,6 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		if (block instanceof AbstractChestBlock<?> chestBlock) {
 			float horizontalAngle = blockState.getValue(ChestBlock.FACING).toYRot();
 			baseRotation.setAngleAxis(Math.toRadians(-horizontalAngle), 0, 1, 0);
-			bottom.setRotation(baseRotation);
 
 			DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> wrapper = chestBlock.combine(blockState, level, pos, true);
 			lidProgress = wrapper.apply(ChestBlock.opennessCombiner(blockEntity));
@@ -90,6 +89,10 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 			baseRotation.identity();
 			lidProgress = $ -> 0f;
 		}
+
+		bottom.setRotation(baseRotation);
+
+		applyLidTransform(lidProgress.get(partialTick));
 
 		super.init(partialTick);
 	}
@@ -126,6 +129,10 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		}
 		lastProgress = progress;
 
+		applyLidTransform(progress);
+	}
+
+	private void applyLidTransform(float progress) {
 		progress = 1.0F - progress;
 		progress = 1.0F - progress * progress * progress;
 
