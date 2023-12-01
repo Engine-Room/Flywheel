@@ -1,5 +1,6 @@
 #include "flywheel:internal/indirect/api/vertex.glsl"
 #include "flywheel:internal/indirect/mesh.glsl"
+#include "flywheel:internal/material.glsl"
 
 flat out uvec2 _flw_material;
 
@@ -27,9 +28,10 @@ void main() {
 
     _flw_materialVertexID = drawCommands[batchID].vertexMaterialID;
     _flw_materialFragmentID = drawCommands[batchID].fragmentMaterialID;
-    _flw_packedMaterialProperties = drawCommands[batchID].packedMaterialProperties;
+    uint p = drawCommands[batchID].packedMaterialProperties;
 
-    _flw_material = uvec2(_flw_materialFragmentID, _flw_packedMaterialProperties);
+    _flw_unpackMaterial(p, flw_material);
+    _flw_material = uvec2(_flw_materialFragmentID, p);
 
     flw_layoutVertex();
     flw_initVertex();

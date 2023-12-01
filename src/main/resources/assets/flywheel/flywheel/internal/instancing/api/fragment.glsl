@@ -1,5 +1,7 @@
 // API
 // -----------------------------------------
+#include "flywheel:api/material.glsl"
+
 in vec4 flw_vertexPos;
 in vec4 flw_vertexColor;
 in vec2 flw_vertexTexCoord;
@@ -20,6 +22,8 @@ vec4 flw_fragColor;
 ivec2 flw_fragOverlay;
 vec2 flw_fragLight;
 
+FlwMaterial flw_material;
+
 vec4 flw_fogFilter(vec4 color);
 
 bool flw_discardPredicate(vec4 finalColor);
@@ -34,7 +38,6 @@ void flw_contextFragment();
 
 uint _flw_materialVertexID;
 uint _flw_materialFragmentID;
-uint _flw_packedMaterialProperties;
 
 uniform uvec3 _flw_material_instancing;
 

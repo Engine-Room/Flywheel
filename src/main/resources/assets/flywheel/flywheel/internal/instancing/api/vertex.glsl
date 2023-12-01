@@ -1,5 +1,7 @@
 // API
 // ------------------------------------
+#include "flywheel:api/material.glsl"
+
 out vec4 flw_vertexPos;
 out vec4 flw_vertexColor;
 out vec2 flw_vertexTexCoord;
@@ -14,6 +16,8 @@ out vec4 flw_var1;
 out vec4 flw_var2;
 out vec4 flw_var3;
 
+FlwMaterial flw_material;
+
 void flw_layoutVertex();
 void flw_initVertex();
 void flw_instanceVertex(FlwInstance i);
@@ -26,7 +30,6 @@ void flw_contextVertex();
 
 uint _flw_materialVertexID;
 uint _flw_materialFragmentID;
-uint _flw_packedMaterialProperties;
 
 FlwInstance _flw_unpackInstance();
 

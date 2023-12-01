@@ -1,9 +1,11 @@
 #include "flywheel:internal/instancing/api/vertex.glsl"
+#include "flywheel:internal/material.glsl"
 
 void main() {
     _flw_materialVertexID = _flw_material_instancing.x;
     _flw_materialFragmentID = _flw_material_instancing.y;
-    _flw_packedMaterialProperties = _flw_material_instancing.z;
+
+    _flw_unpackMaterial(_flw_material_instancing.z, flw_material);
 
     FlwInstance i = _flw_unpackInstance();
 

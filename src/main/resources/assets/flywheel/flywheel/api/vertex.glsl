@@ -1,3 +1,5 @@
+#include "flywheel:api/material.glsl"
+
 vec4 flw_vertexPos;
 vec4 flw_vertexColor;
 vec2 flw_vertexTexCoord;
@@ -11,6 +13,8 @@ vec4 flw_var0;
 vec4 flw_var1;
 vec4 flw_var2;
 vec4 flw_var3;
+
+/*const*/ FlwMaterial flw_material;
 
 // To be implemented by the layout shader.
 void flw_layoutVertex();
