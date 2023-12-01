@@ -2,6 +2,21 @@ layout(local_size_x = FLW_SUBGROUP_SIZE) in;
 
 #include "flywheel:internal/indirect_draw_command.glsl"
 
+// need to add stubs so the instance shader compiles.
+vec4 flw_vertexPos;
+vec4 flw_vertexColor;
+vec2 flw_vertexTexCoord;
+ivec2 flw_vertexOverlay;
+vec2 flw_vertexLight;
+vec3 flw_vertexNormal;
+float flw_distance;
+vec4 flw_var0;
+vec4 flw_var1;
+vec4 flw_var2;
+vec4 flw_var3;
+
+void flw_transformBoundingSphere(in FlwInstance i, inout vec3 center, inout float radius);
+
 struct Object {
     uint batchID;
     FlwPackedInstance instance;

@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.backend.compile;
 
+import java.util.List;
+
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
@@ -22,7 +24,8 @@ public class FlwPrograms {
 	}
 
 	public static void reload(ResourceManager resourceManager) {
-		var sources = new ShaderSources(resourceManager);
+		var empty = List.of(Flywheel.rl("api/fragment.glsl"), Flywheel.rl("api/vertex.glsl"));
+		var sources = new ShaderSources(resourceManager, empty);
 
 		var preLoadStats = new CompilerStats();
 		var loadChecker = new SourceLoader(sources, preLoadStats);

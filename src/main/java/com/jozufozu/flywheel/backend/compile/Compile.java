@@ -19,17 +19,32 @@ import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.gl.shader.GlShader;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.GLSLVersion;
+import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class Compile {
-	public static <K> ShaderCompilerBuilder<K> shader(GLSLVersion glslVersion, ShaderType shaderType) {
+/**
+ * A typed provider for shader compiler builders.
+ * <br>
+ * This could just be a static utility class, but creating an instance of Compile
+ * and calling the functors on it prevents you from having to specify the key type everywhere.
+ * <br>
+ * Consider {@code Compile.<PipelineKey>shader(...)} vs {@code PIPELINE.shader(...)}
+ *
+ * @param <K> The type of the key used to compile shaders.
+ */
+public class Compile<K> {
+	public ShaderCompilerBuilder<K> shader(GLSLVersion glslVersion, ShaderType shaderType) {
 		return new ShaderCompilerBuilder<>(glslVersion, shaderType);
 	}
 
-	public static <K> ProgramLinkBuilder<K> program() {
+	public ProgramLinkBuilder<K> program() {
 		return new ProgramLinkBuilder<>();
+	}
+
+	public CompilationHarness.Builder<K> harness(ShaderSources sources) {
+		return new CompilationHarness.Builder<>(sources);
 	}
 
 	public static class ProgramLinkBuilder<K> implements CompilationHarness.KeyCompiler<K> {

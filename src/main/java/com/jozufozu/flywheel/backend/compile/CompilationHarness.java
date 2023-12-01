@@ -59,4 +59,28 @@ public class CompilationHarness<K> {
 	public interface KeyCompiler<K> {
 		@Nullable GlProgram compile(K key, SourceLoader loader, ShaderCompiler shaderCompiler, ProgramLinker programLinker);
 	}
+
+	public static class Builder<K> {
+		private final ShaderSources sources;
+		private ImmutableList<K> keys;
+		private KeyCompiler<K> compiler;
+
+		public Builder(ShaderSources sources) {
+			this.sources = sources;
+		}
+
+		public Builder<K> keys(ImmutableList<K> keys) {
+			this.keys = keys;
+			return this;
+		}
+
+		public Builder<K> compiler(KeyCompiler<K> compiler) {
+			this.compiler = compiler;
+			return this;
+		}
+
+		public CompilationHarness<K> build() {
+			return new CompilationHarness<>(sources, keys, compiler);
+		}
+	}
 }
