@@ -6,6 +6,7 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.MaterialShaderIndices;
+import com.jozufozu.flywheel.backend.MaterialUtil;
 
 public class IndirectDraw<I extends Instance> {
 	private final IndirectInstancer<I> instancer;
@@ -15,6 +16,7 @@ public class IndirectDraw<I extends Instance> {
 
 	private final int vertexMaterialID;
 	private final int fragmentMaterialID;
+	private final int packedMaterialProperties;
 
 	private int baseInstance = -1;
 	private boolean needsFullWrite = true;
@@ -27,6 +29,7 @@ public class IndirectDraw<I extends Instance> {
 
 		this.vertexMaterialID = MaterialShaderIndices.getVertexShaderIndex(material.shaders());
 		this.fragmentMaterialID = MaterialShaderIndices.getFragmentShaderIndex(material.shaders());
+		this.packedMaterialProperties = MaterialUtil.packProperties(material);
 	}
 
 	public IndirectInstancer<I> instancer() {
@@ -75,5 +78,6 @@ public class IndirectDraw<I extends Instance> {
 		boundingSphere.getToAddress(ptr + 20); // boundingSphere
 		MemoryUtil.memPutInt(ptr + 36, vertexMaterialID); // vertexMaterialID
 		MemoryUtil.memPutInt(ptr + 40, fragmentMaterialID); // fragmentMaterialID
+		MemoryUtil.memPutInt(ptr + 44, packedMaterialProperties); // packedMaterialProperties
 	}
 }

@@ -20,6 +20,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancedCrumbling {
@@ -109,11 +110,9 @@ public class InstancedCrumbling {
 	}
 
 	private static int getDiffuseTexture(Material material) {
-		material.setup();
-
-		int out = RenderSystem.getShaderTexture(0);
-
-		material.clear();
-		return out;
+		return Minecraft.getInstance()
+				.getTextureManager()
+				.getTexture(material.baseTexture())
+				.getId();
 	}
 }

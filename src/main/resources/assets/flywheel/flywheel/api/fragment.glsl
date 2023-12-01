@@ -14,6 +14,7 @@ in vec4 flw_var2;
 in vec4 flw_var3;
 
 flat in uint _flw_materialFragmentID;
+flat in uint _flw_packedMaterialProperties;
 
 //
 
