@@ -1,3 +1,5 @@
+#include "flywheel:api/material.glsl"
+
 /*const*/ vec4 flw_vertexPos;
 /*const*/ vec4 flw_vertexColor;
 /*const*/ vec2 flw_vertexTexCoord;
@@ -13,6 +15,8 @@
 /*const*/ vec4 flw_var3;
 
 /*const*/ vec4 flw_sampleColor;
+
+/*const*/ FlwMaterial flw_material;
 
 vec4 flw_fragColor;
 ivec2 flw_fragOverlay;
