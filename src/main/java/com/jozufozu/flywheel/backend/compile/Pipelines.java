@@ -5,28 +5,21 @@ import com.jozufozu.flywheel.backend.compile.component.IndirectComponent;
 import com.jozufozu.flywheel.backend.compile.component.InstancedArraysComponent;
 import com.jozufozu.flywheel.glsl.GLSLVersion;
 
-import net.minecraft.resources.ResourceLocation;
-
 public final class Pipelines {
 	public static final Pipeline INSTANCED_ARRAYS = Pipeline.builder()
 			.glslVersion(GLSLVersion.V330)
-			.vertex(Files.INSTANCED_ARRAYS_DRAW)
-			.fragment(Files.DRAW_FRAGMENT)
+			.vertex(Flywheel.rl("internal/instancing/draw.vert"))
+			.fragment(Flywheel.rl("internal/instancing/draw.frag"))
+			.vertexAPI(Flywheel.rl("internal/instancing/api/vertex.glsl"))
+			.fragmentAPI(Flywheel.rl("internal/instancing/api/fragment.glsl"))
 			.assembler(InstancedArraysComponent::new)
 			.build();
 	public static final Pipeline INDIRECT = Pipeline.builder()
 			.glslVersion(GLSLVersion.V460)
-			.vertex(Files.INDIRECT_DRAW)
-			.fragment(Files.DRAW_FRAGMENT)
+			.vertex(Flywheel.rl("internal/indirect/draw.vert"))
+			.fragment(Flywheel.rl("internal/indirect/draw.frag"))
+			.vertexAPI(Flywheel.rl("internal/indirect/api/vertex.glsl"))
+			.fragmentAPI(Flywheel.rl("internal/indirect/api/fragment.glsl"))
 			.assembler(IndirectComponent::create)
 			.build();
-
-	public static void init() {
-	}
-
-	public static final class Files {
-		public static final ResourceLocation INSTANCED_ARRAYS_DRAW = Flywheel.rl("internal/instanced_arrays_draw.vert");
-		public static final ResourceLocation INDIRECT_DRAW = Flywheel.rl("internal/indirect_draw.vert");
-		public static final ResourceLocation DRAW_FRAGMENT = Flywheel.rl("internal/draw.frag");
-	}
 }

@@ -1,6 +1,6 @@
 layout(local_size_x = FLW_SUBGROUP_SIZE) in;
 
-#include "flywheel:internal/indirect_draw_command.glsl"
+#include "flywheel:internal/indirect/mesh.glsl"
 
 // need to add stubs so the instance shader compiles.
 vec4 flw_vertexPos;
