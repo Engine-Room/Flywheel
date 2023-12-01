@@ -1,3 +1,6 @@
+// API
+// ------------------------------------------
+
 in vec4 flw_vertexPos;
 in vec4 flw_vertexColor;
 in vec2 flw_vertexTexCoord;
@@ -11,9 +14,6 @@ in vec4 flw_var0;
 in vec4 flw_var1;
 in vec4 flw_var2;
 in vec4 flw_var3;
-
-flat in uint _flw_materialFragmentID;
-flat in uint _flw_packedMaterialProperties;
 
 vec4 flw_sampleColor;
 
@@ -29,8 +29,11 @@ void flw_initFragment();
 void flw_materialFragment();
 void flw_contextFragment();
 
-void main() {
-    flw_initFragment();
-    flw_materialFragment();
-    flw_contextFragment();
-}
+// ------------------------------------------
+// INTERNAL
+// ------------------------------------------
+
+uint _flw_materialFragmentID;
+uint _flw_packedMaterialProperties;
+
+// ------------------------------------------

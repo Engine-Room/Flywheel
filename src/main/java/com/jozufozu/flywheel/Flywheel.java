@@ -10,7 +10,6 @@ import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.backend.Backends;
 import com.jozufozu.flywheel.backend.MaterialShaderIndices;
 import com.jozufozu.flywheel.backend.compile.FlwPrograms;
-import com.jozufozu.flywheel.backend.compile.Pipelines;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.backend.engine.batching.DrawBuffer;
 import com.jozufozu.flywheel.config.BackendArgument;
@@ -120,7 +119,6 @@ public class Flywheel {
 
 		ShadersModHandler.init();
 
-		Pipelines.init();
 		Backends.init();
 	}
 

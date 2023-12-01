@@ -29,7 +29,7 @@ public class IndirectBuffers {
 	public static final long PTR_SIZE = Pointer.POINTER_SIZE;
 
 	// DRAW COMMAND
-	public static final long DRAW_COMMAND_STRIDE = 44;
+	public static final long DRAW_COMMAND_STRIDE = 48;
 	public static final long DRAW_COMMAND_OFFSET = 0;
 
 	// BITS
@@ -39,6 +39,9 @@ public class IndirectBuffers {
 	private static final int GPU_ONLY_BITS = 0;
 
 	// OFFSETS
+	private static final long OBJECT_OFFSET = 0;
+	private static final long TARGET_OFFSET = INT_SIZE;
+	private static final long DRAW_OFFSET = INT_SIZE * 2;
 	private static final long OFFSET_OFFSET = BUFFER_COUNT * INT_SIZE;
 	private static final long SIZE_OFFSET = OFFSET_OFFSET + BUFFER_COUNT * PTR_SIZE;
 	private static final long BUFFERS_SIZE_BYTES = SIZE_OFFSET + BUFFER_COUNT * PTR_SIZE;
@@ -47,6 +50,18 @@ public class IndirectBuffers {
 	private static final long TARGET_SIZE_OFFSET = OBJECT_SIZE_OFFSET + PTR_SIZE;
 	private static final long DRAW_SIZE_OFFSET = TARGET_SIZE_OFFSET + PTR_SIZE;
 
+	/**
+	 * A small block of memory divided into 3 contiguous segments:
+	 * <br>
+	 * {@code buffers}: an array of {@link IndirectBuffers#INT_SIZE} buffer handles.
+	 * <br>
+	 * {@code offsets}: an array of {@link IndirectBuffers#PTR_SIZE} offsets into the buffers, currently just zeroed.
+	 * <br>
+	 * {@code sizes}: an array of {@link IndirectBuffers#PTR_SIZE} byte lengths of the buffers.
+	 * <br>
+	 * Each segment stores {@link IndirectBuffers#BUFFER_COUNT} elements,
+	 * one for the object buffer, one for the target buffer, and one for the draw buffer.
+	 */
 	private final MemoryBlock buffers;
 	private final long objectStride;
 	private int object;
@@ -70,9 +85,9 @@ public class IndirectBuffers {
 	void createBuffers() {
 		final long ptr = buffers.ptr();
 		nglCreateBuffers(BUFFER_COUNT, ptr);
-		object = MemoryUtil.memGetInt(ptr);
-		target = MemoryUtil.memGetInt(ptr + 4);
-		draw = MemoryUtil.memGetInt(ptr + 8);
+		object = MemoryUtil.memGetInt(ptr + OBJECT_OFFSET);
+		target = MemoryUtil.memGetInt(ptr + TARGET_OFFSET);
+		draw = MemoryUtil.memGetInt(ptr + DRAW_OFFSET);
 	}
 
 	void updateCounts(int objectCount, int drawCount) {
@@ -102,8 +117,8 @@ public class IndirectBuffers {
 			final long ptr = buffers.ptr();
 			nglCreateBuffers(BUFFER_COUNT - 1, ptr);
 
-			int objectNew = MemoryUtil.memGetInt(ptr);
-			int targetNew = MemoryUtil.memGetInt(ptr + 4);
+			int objectNew = MemoryUtil.memGetInt(ptr + OBJECT_OFFSET);
+			int targetNew = MemoryUtil.memGetInt(ptr + TARGET_OFFSET);
 
 			glNamedBufferStorage(objectNew, objectSize, PERSISTENT_BITS);
 			glNamedBufferStorage(targetNew, targetSize, GPU_ONLY_BITS);
@@ -138,7 +153,7 @@ public class IndirectBuffers {
 
 			glDeleteBuffers(draw);
 
-			MemoryUtil.memPutInt(buffers.ptr() + INT_SIZE * 2, drawNew);
+			MemoryUtil.memPutInt(buffers.ptr() + DRAW_OFFSET, drawNew);
 			draw = drawNew;
 			drawPtr = MemoryUtil.nmemRealloc(drawPtr, drawSize);
 		} else {

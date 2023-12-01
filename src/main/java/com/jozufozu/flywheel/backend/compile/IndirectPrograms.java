@@ -104,6 +104,6 @@ public class IndirectPrograms {
 	}
 
 	private static final class Files {
-		public static final ResourceLocation INDIRECT_CULL = Flywheel.rl("internal/indirect_cull.glsl");
+		public static final ResourceLocation INDIRECT_CULL = Flywheel.rl("internal/indirect/cull.glsl");
 	}
 }
