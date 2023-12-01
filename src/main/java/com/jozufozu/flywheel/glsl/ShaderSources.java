@@ -35,6 +35,18 @@ public class ShaderSources {
 		this.manager = manager;
 	}
 
+	public ShaderSources(ResourceManager manager, Map<ResourceLocation, LoadResult> preloadCache) {
+		this.manager = manager;
+		cache.putAll(preloadCache);
+	}
+
+	public ShaderSources(ResourceManager manager, List<ResourceLocation> preloadEmpty) {
+		this.manager = manager;
+		for (ResourceLocation rl : preloadEmpty) {
+			cache.put(rl, SourceFile.empty(rl));
+		}
+	}
+
 	@NotNull
 	public LoadResult find(ResourceLocation location) {
 		if (findStack.contains(location)) {

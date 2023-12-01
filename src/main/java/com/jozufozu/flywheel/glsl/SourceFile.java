@@ -67,6 +67,10 @@ public class SourceFile implements SourceComponent {
 		this.finalSource = finalSource;
 	}
 
+	public static LoadResult empty(ResourceLocation name) {
+		return new LoadResult.Success(new SourceFile(name, new SourceLines(name, ""), ImmutableMap.of(), ImmutableMap.of(), ImmutableList.of(), ImmutableMap.of(), ImmutableList.of(), ""));
+	}
+
 	public static LoadResult parse(ShaderSources sourceFinder, ResourceLocation name, String stringSource) {
 		var source = new SourceLines(name, stringSource);
 

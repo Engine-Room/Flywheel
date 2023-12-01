@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class SourceLoader {
 
-	public final ShaderSources sources;
+	private final ShaderSources sources;
 	private final CompilerStats stats;
 
 	public SourceLoader(ShaderSources sources, CompilerStats stats) {

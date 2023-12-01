@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class IndirectPrograms {
 	public static IndirectPrograms instance;
+	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private final Map<PipelineProgramKey, GlProgram> pipeline;
 	private final Map<InstanceType<?>, GlProgram> culling;
 
@@ -74,16 +75,17 @@ public class IndirectPrograms {
 	}
 
 	private static CompilationHarness<InstanceType<?>> createCullingCompiler(UniformComponent uniformComponent, ShaderSources sources) {
-		return new CompilationHarness<>(sources, createCullingKeys(), Compile.<InstanceType<?>>program()
-				.link(Compile.<InstanceType<?>>shader(GLSLVersion.V460, ShaderType.COMPUTE)
-						.define("FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
-						.withComponent(uniformComponent)
-						.withComponent(IndirectComponent::create)
-						.withResource(InstanceType::instanceShader)
-						.withResource(Files.INDIRECT_CULL))
-				.then((InstanceType<?> key, GlProgram program) -> {
-					program.setUniformBlockBinding("FLWUniforms", 0);
-				}));
+		return CULL.harness(sources)
+				.keys(createCullingKeys())
+				.compiler(CULL.program()
+						.link(CULL.shader(GLSLVersion.V460, ShaderType.COMPUTE)
+								.define("FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
+								.withComponent(uniformComponent)
+								.withComponent(IndirectComponent::create)
+								.withResource(Files.INDIRECT_CULL)
+								.withResource(InstanceType::instanceShader))
+						.then((key, program) -> program.setUniformBlockBinding("FLWUniforms", 0)))
+				.build();
 	}
 
 	public GlProgram getIndirectProgram(VertexType vertexType, InstanceType<?> instanceType, Context contextShader) {

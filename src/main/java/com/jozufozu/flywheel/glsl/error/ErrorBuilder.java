@@ -122,7 +122,7 @@ public class ErrorBuilder {
 
 	public ErrorBuilder pointAtLine(SourceLines lines, int spanLine, int ctxLines, int firstCol, int lastCol) {
 		int firstLine = Math.max(0, spanLine - ctxLines);
-		int lastLine = Math.min(lines.count(), spanLine + ctxLines);
+		int lastLine = Math.min(lines.count() - 1, spanLine + ctxLines);
 
 
 		for (int i = firstLine; i <= lastLine; i++) {
