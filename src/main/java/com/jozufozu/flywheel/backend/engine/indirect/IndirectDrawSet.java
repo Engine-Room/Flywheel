@@ -13,6 +13,7 @@ import java.util.Map;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.backend.MaterialUtil;
 
 public class IndirectDrawSet<I extends Instance> {
 
@@ -72,10 +73,10 @@ public class IndirectDrawSet<I extends Instance> {
 
 	private record MultiDraw(Material material, int start, int end) {
 		void submit() {
-			material.setup();
+			MaterialUtil.setup(material);
 			Textures.bindActiveTextures();
 			glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, start * IndirectBuffers.DRAW_COMMAND_STRIDE, end - start, (int) IndirectBuffers.DRAW_COMMAND_STRIDE);
-			material.clear();
+			MaterialUtil.clear(material);
 		}
 	}
 }

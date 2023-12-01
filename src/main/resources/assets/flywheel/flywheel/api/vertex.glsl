@@ -15,4 +15,5 @@ out vec4 flw_var1;
 out vec4 flw_var2;
 out vec4 flw_var3;
 flat out uint _flw_materialFragmentID;
+flat out uint _flw_packedMaterialProperties;
 #endif

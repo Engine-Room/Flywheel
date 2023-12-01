@@ -10,6 +10,7 @@ import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.backend.MaterialShaderIndices;
+import com.jozufozu.flywheel.backend.MaterialUtil;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
@@ -113,20 +114,21 @@ public class InstancingEngine extends AbstractEngine {
 
 			uploadMaterialIDUniform(program, shader.material());
 
-			shader.material().setup();
+			MaterialUtil.setup(shader.material());
 
 			for (var drawCall : drawCalls) {
 				drawCall.render();
 			}
 
-			shader.material().clear();
+			MaterialUtil.clear(shader.material());
 		}
 	}
 
 	public static void uploadMaterialIDUniform(GlProgram program, Material material) {
-		int materialIDUniform = program.getUniformLocation("_flw_materialID_instancing");
+		int materialIDUniform = program.getUniformLocation("_flw_material_instancing");
 		int vertexID = MaterialShaderIndices.getVertexShaderIndex(material.shaders());
 		int fragmentID = MaterialShaderIndices.getFragmentShaderIndex(material.shaders());
-		GL32.glUniform2ui(materialIDUniform, vertexID, fragmentID);
+		int packedMaterialProperties = MaterialUtil.packProperties(material);
+		GL32.glUniform3ui(materialIDUniform, vertexID, fragmentID, packedMaterialProperties);
 	}
 }
