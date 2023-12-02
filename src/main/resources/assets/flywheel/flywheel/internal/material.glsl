@@ -23,3 +23,8 @@ void _flw_unpackMaterial(uint m, out FlwMaterial o) {
     o.writeMask = (m & WRITE_MASK_MASK) >> 6;
     o.transparency = (m & TRANSPARENCY_MASK) >> 8;
 }
+
+void _flw_unpackUint2x16(uint s, out uint hi, out uint lo) {
+    hi = (s >> 16) & 0xFFFFu;
+    lo = s & 0xFFFFu;
+}

@@ -50,6 +50,10 @@ public class SimpleMaterial implements Material {
 		return new Builder();
 	}
 
+	public static Builder from(Material material) {
+		return new Builder(material);
+	}
+
 	@Override
 	public MaterialShaders shaders() {
 		return shaders;
@@ -117,26 +121,58 @@ public class SimpleMaterial implements Material {
 
 	@Override
 	public WriteMask writeMask() {
-		return WriteMask.BOTH;
+		return writeMask;
 	}
 
-	public static class Builder {
-		protected RenderType fallbackRenderType = RenderType.solid();
-		protected MaterialVertexTransformer vertexTransformer = (vertexList, level) -> {};
-		protected MaterialShaders shaders = StandardMaterialShaders.DEFAULT;
-		protected ResourceLocation baseTexture = InventoryMenu.BLOCK_ATLAS;
-		protected boolean diffuse = true;
-		protected boolean lighting = true;
-		protected boolean blur = false;
-		protected boolean backfaceCull = true;
-		protected boolean polygonOffset = false;
-		protected boolean mip = true;
-		protected FogShader fog = StandardMaterialShaders.LINEAR;
-		protected Transparency transparency = Transparency.OPAQUE;
-		protected CutoutShader cutout = StandardMaterialShaders.OFF;
-		protected WriteMask writeMask = WriteMask.BOTH;
+	public static class Builder implements Material {
+		protected RenderType fallbackRenderType;
+		protected MaterialVertexTransformer vertexTransformer;
+		protected MaterialShaders shaders;
+		protected ResourceLocation baseTexture;
+		protected boolean diffuse;
+		protected boolean lighting;
+		protected boolean blur;
+		protected boolean backfaceCull;
+		protected boolean polygonOffset;
+		protected boolean mip;
+		protected FogShader fog;
+		protected Transparency transparency;
+		protected CutoutShader cutout;
+		protected WriteMask writeMask;
 
 		public Builder() {
+			fallbackRenderType = RenderType.solid();
+			vertexTransformer = (vertexList, level) -> {
+			};
+			shaders = StandardMaterialShaders.DEFAULT;
+			baseTexture = InventoryMenu.BLOCK_ATLAS;
+			diffuse = true;
+			lighting = true;
+			blur = false;
+			backfaceCull = true;
+			polygonOffset = false;
+			mip = true;
+			fog = FogShaders.LINEAR;
+			transparency = Transparency.OPAQUE;
+			cutout = CutoutShaders.OFF;
+			writeMask = WriteMask.BOTH;
+		}
+
+		public Builder(Material material) {
+			fallbackRenderType = material.getFallbackRenderType();
+			vertexTransformer = material.getVertexTransformer();
+			shaders = material.shaders();
+			baseTexture = material.baseTexture();
+			diffuse = material.diffuse();
+			lighting = material.lighting();
+			blur = material.blur();
+			backfaceCull = material.backfaceCull();
+			polygonOffset = material.polygonOffset();
+			mip = material.mip();
+			fog = material.fog();
+			transparency = material.transparency();
+			cutout = material.cutout();
+			writeMask = material.writeMask();
 		}
 
 		public Builder fallbackRenderType(RenderType type) {
@@ -207,6 +243,76 @@ public class SimpleMaterial implements Material {
 		public Builder writeMask(WriteMask value) {
 			this.writeMask = value;
 			return this;
+		}
+
+		@Override
+		public MaterialShaders shaders() {
+			return shaders;
+		}
+
+		@Override
+		public RenderType getFallbackRenderType() {
+			return fallbackRenderType;
+		}
+
+		@Override
+		public MaterialVertexTransformer getVertexTransformer() {
+			return vertexTransformer;
+		}
+
+		@Override
+		public ResourceLocation baseTexture() {
+			return baseTexture;
+		}
+
+		@Override
+		public boolean diffuse() {
+			return diffuse;
+		}
+
+		@Override
+		public boolean lighting() {
+			return lighting;
+		}
+
+		@Override
+		public boolean blur() {
+			return blur;
+		}
+
+		@Override
+		public boolean backfaceCull() {
+			return backfaceCull;
+		}
+
+		@Override
+		public boolean polygonOffset() {
+			return polygonOffset;
+		}
+
+		@Override
+		public boolean mip() {
+			return mip;
+		}
+
+		@Override
+		public FogShader fog() {
+			return fog;
+		}
+
+		@Override
+		public Transparency transparency() {
+			return transparency;
+		}
+
+		@Override
+		public CutoutShader cutout() {
+			return cutout;
+		}
+
+		@Override
+		public WriteMask writeMask() {
+			return writeMask;
 		}
 
 		public SimpleMaterial build() {

@@ -37,26 +37,26 @@ public final class Materials {
 			.build();
 
 	public static final Material CHUNK_CUTOUT_MIPPED_SHADED = SimpleMaterial.builder()
-			.cutout(StandardMaterialShaders.EPSILON)
+			.cutout(CutoutShaders.EPSILON)
 			.fallbackRenderType(RenderType.cutoutMipped())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.build();
 	public static final Material CHUNK_CUTOUT_MIPPED_UNSHADED = SimpleMaterial.builder()
 			.diffuse(false)
-			.cutout(StandardMaterialShaders.EPSILON)
+			.cutout(CutoutShaders.EPSILON)
 			.fallbackRenderType(RenderType.cutoutMipped())
 			.build();
 
 	public static final Material CHUNK_CUTOUT_SHADED = SimpleMaterial.builder()
 			.mip(false)
-			.cutout(StandardMaterialShaders.EPSILON)
+			.cutout(CutoutShaders.EPSILON)
 			.fallbackRenderType(RenderType.cutout())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.build();
 	public static final Material CHUNK_CUTOUT_UNSHADED = SimpleMaterial.builder()
 			.diffuse(false)
 			.mip(false)
-			.cutout(StandardMaterialShaders.EPSILON)
+			.cutout(CutoutShaders.EPSILON)
 			.fallbackRenderType(RenderType.cutout())
 			.build();
 
@@ -73,14 +73,14 @@ public final class Materials {
 
 	public static final Material CHUNK_TRIPWIRE_SHADED = SimpleMaterial.builder()
 			.transparency(Transparency.TRANSLUCENT)
-			.cutout(StandardMaterialShaders.EPSILON)
+			.cutout(CutoutShaders.EPSILON)
 			.fallbackRenderType(RenderType.tripwire())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.build();
 	public static final Material CHUNK_TRIPWIRE_UNSHADED = SimpleMaterial.builder()
 			.diffuse(false)
 			.transparency(Transparency.TRANSLUCENT)
-			.cutout(StandardMaterialShaders.EPSILON)
+			.cutout(CutoutShaders.EPSILON)
 			.fallbackRenderType(RenderType.tripwire())
 			.build();
 
@@ -93,7 +93,7 @@ public final class Materials {
 			.baseTexture(Sheets.SHULKER_SHEET)
 			.mip(false)
 			.backfaceCull(false)
-			.cutout(StandardMaterialShaders.EPSILON)
+			.cutout(CutoutShaders.EPSILON)
 			.fallbackRenderType(Sheets.shulkerBoxSheet())
 			.build();
 	public static final Material BELL = SimpleMaterial.builder()

@@ -29,7 +29,7 @@ public class IndirectBuffers {
 	public static final long PTR_SIZE = Pointer.POINTER_SIZE;
 
 	// DRAW COMMAND
-	public static final long DRAW_COMMAND_STRIDE = 48;
+	public static final long DRAW_COMMAND_STRIDE = 52;
 	public static final long DRAW_COMMAND_OFFSET = 0;
 
 	// BITS
@@ -109,7 +109,7 @@ public class IndirectBuffers {
 	}
 
 	void createObjectStorage(int objectCount) {
-		freeObjectStogare();
+		freeObjectStorage();
 		var objectSize = objectStride * objectCount;
 		var targetSize = INT_SIZE * objectCount;
 
@@ -165,7 +165,7 @@ public class IndirectBuffers {
 		FlwMemoryTracker._allocGPUMemory(maxDrawCount * DRAW_COMMAND_STRIDE);
 	}
 
-	private void freeObjectStogare() {
+	private void freeObjectStorage() {
 		FlwMemoryTracker._freeGPUMemory(maxObjectCount * objectStride);
 	}
 
@@ -199,7 +199,7 @@ public class IndirectBuffers {
 	public void delete() {
 		nglDeleteBuffers(BUFFER_COUNT, buffers.ptr());
 		buffers.free();
-		freeObjectStogare();
+		freeObjectStorage();
 		freeDrawStorage();
 	}
 }

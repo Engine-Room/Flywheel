@@ -10,12 +10,17 @@ import org.jetbrains.annotations.NotNull;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.api.material.Transparency;
+import com.jozufozu.flywheel.api.material.WriteMask;
+import com.jozufozu.flywheel.backend.MaterialUtil;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.context.Contexts;
+import com.jozufozu.flywheel.lib.material.CutoutShaders;
+import com.jozufozu.flywheel.lib.material.SimpleMaterial;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
@@ -42,15 +47,20 @@ public class InstancedCrumbling {
 
 				ShaderState shader = shaderStateEntry.getKey();
 
-				var material = shader.material();
+				var baseMaterial = shader.material();
+				int diffuseTexture = getDiffuseTexture(baseMaterial);
+
+				var crumblingMaterial = SimpleMaterial.from(baseMaterial)
+						.transparency(Transparency.CRUMBLING)
+						.writeMask(WriteMask.COLOR)
+						.polygonOffset(true)
+						.cutout(CutoutShaders.OFF);
 
 				var program = InstancingPrograms.get()
 						.get(shader.vertexType(), shader.instanceType(), Contexts.CRUMBLING);
 				UniformBuffer.syncAndBind(program);
 
-				InstancingEngine.uploadMaterialIDUniform(program, material);
-
-				int renderTex = getDiffuseTexture(material);
+				InstancingEngine.uploadMaterialIDUniform(program, crumblingMaterial);
 
 				for (Int2ObjectMap.Entry<List<Runnable>> progressEntry : byProgress.int2ObjectEntrySet()) {
 					var drawCalls = progressEntry.getValue();
@@ -59,17 +69,19 @@ public class InstancedCrumbling {
 						continue;
 					}
 
-					var crumblingType = ModelBakery.DESTROY_TYPES.get(progressEntry.getIntKey());
+					crumblingMaterial.baseTexture(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
 
-					crumblingType.setupRenderState();
+					MaterialUtil.setup(crumblingMaterial);
 
-					RenderSystem.setShaderTexture(1, renderTex);
+					RenderSystem.setShaderTexture(1, diffuseTexture);
 					GlTextureUnit.T1.makeActive();
-					RenderSystem.bindTexture(renderTex);
+					RenderSystem.bindTexture(diffuseTexture);
 
 					drawCalls.forEach(Runnable::run);
 				}
 			}
+
+			MaterialUtil.reset();
 		}
 	}
 
