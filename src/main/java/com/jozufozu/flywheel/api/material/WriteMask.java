@@ -13,4 +13,13 @@ public enum WriteMask {
 	 * Write to the depth buffer only.
 	 */
 	DEPTH,
+	;
+
+	public boolean depth() {
+		return this == BOTH || this == DEPTH;
+	}
+
+	public boolean color() {
+		return this == BOTH || this == COLOR;
+	}
 }

@@ -42,14 +42,14 @@ public class IndirectDrawSet<I extends Instance> {
 		for (var multiDraw : multiDraws.get(stage)) {
 			multiDraw.submit();
 		}
+		MaterialUtil.reset();
 	}
 
 	public void determineMultiDraws() {
-		// TODO: Better material equality. Really we only need to bin by the results of the setup method.
 		multiDraws.clear();
 		// sort by stage, then material
 		indirectDraws.sort(Comparator.comparing(IndirectDraw<I>::stage)
-				.thenComparing(draw -> draw.material().hashCode()));
+				.thenComparing(IndirectDraw::material, MaterialUtil.BY_STATE));
 
 		for (int start = 0, i = 0; i < indirectDraws.size(); i++) {
 			var draw = indirectDraws.get(i);
@@ -75,7 +75,6 @@ public class IndirectDrawSet<I extends Instance> {
 		void submit() {
 			MaterialUtil.setup(material);
 			glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, start * IndirectBuffers.DRAW_COMMAND_STRIDE, end - start, (int) IndirectBuffers.DRAW_COMMAND_STRIDE);
-			MaterialUtil.clear(material);
 		}
 	}
 }

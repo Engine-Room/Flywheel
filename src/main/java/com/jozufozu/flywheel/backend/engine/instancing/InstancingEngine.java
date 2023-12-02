@@ -120,7 +120,7 @@ public class InstancingEngine extends AbstractEngine {
 				drawCall.render();
 			}
 
-			MaterialUtil.clear(shader.material());
+			MaterialUtil.reset();
 		}
 	}
 
