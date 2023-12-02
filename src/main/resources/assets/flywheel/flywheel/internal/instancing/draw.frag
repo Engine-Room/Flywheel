@@ -18,9 +18,8 @@ out vec4 fragColor;
 
 void main() {
     _flw_materialFragmentID = _flw_material_instancing.y;
-    _flw_fogID = _flw_material_instancing.z & 0xFFFFu;
-    _flw_cutoutID = _flw_material_instancing.z >> 16u;
 
+    _flw_unpackUint2x16(_flw_material_instancing.z, _flw_cutoutID, _flw_fogID);
     _flw_unpackMaterial(_flw_material_instancing.w, flw_material);
 
     flw_sampleColor = texture(flw_diffuseTex, flw_vertexTexCoord);

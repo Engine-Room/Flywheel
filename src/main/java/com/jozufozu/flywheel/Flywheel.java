@@ -22,6 +22,8 @@ import com.jozufozu.flywheel.impl.visualization.VisualizationEventHandler;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.light.LightUpdater;
+import com.jozufozu.flywheel.lib.material.CutoutShaders;
+import com.jozufozu.flywheel.lib.material.FogShaders;
 import com.jozufozu.flywheel.lib.material.StandardMaterialShaders;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.model.ModelCache;
@@ -129,6 +131,8 @@ public class Flywheel {
 	private static void onClientSetup(FMLClientSetupEvent event) {
 		VertexTypes.init();
 		InstanceTypes.init();
+		CutoutShaders.init();
+		FogShaders.init();
 		StandardMaterialShaders.init();
 		Contexts.init();
 

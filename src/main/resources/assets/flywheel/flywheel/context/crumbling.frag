@@ -9,6 +9,9 @@ vec4 flw_crumblingSampleColor;
 void flw_beginFragment() {
     flw_crumblingSampleColor = texture(flw_crumblingTex, _flw_crumblingTexCoord);
 
+    // Make the crumbling overlay transparent when the diffuse layer is transparent.
+    flw_crumblingSampleColor.a *= flw_fragColor.a;
+
     if (flw_crumblingSampleColor.a < 0.01) {
         discard;
     }
