@@ -20,5 +20,6 @@ struct MeshDrawCommand {
 	BoundingSphere boundingSphere;
 	uint vertexMaterialID;
     uint fragmentMaterialID;
+    uint packedFogAndCutout;
     uint packedMaterialProperties;
 };

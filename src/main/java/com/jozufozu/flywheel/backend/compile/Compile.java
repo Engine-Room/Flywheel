@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.backend.compile;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -111,6 +112,11 @@ public class Compile<K> {
 
 		public ShaderCompilerBuilder<K> with(BiFunction<K, SourceLoader, SourceComponent> fetch) {
 			fetchers.add(fetch);
+			return this;
+		}
+
+		public ShaderCompilerBuilder<K> withComponents(Collection<SourceComponent> components) {
+			components.forEach(this::withComponent);
 			return this;
 		}
 

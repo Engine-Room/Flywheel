@@ -20,13 +20,13 @@ import com.jozufozu.flywheel.glsl.generate.GlslSwitch;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class MaterialAdapterComponent implements SourceComponent {
+public class UberShaderComponent implements SourceComponent {
 	private final ResourceLocation name;
 	private final GlslExpr switchArg;
 	private final List<AdaptedFn> functionsToAdapt;
 	private final List<StringSubstitutionSourceComponent> adaptedComponents;
 
-	private MaterialAdapterComponent(ResourceLocation name, GlslExpr switchArg, List<AdaptedFn> functionsToAdapt, List<StringSubstitutionSourceComponent> adaptedComponents) {
+	private UberShaderComponent(ResourceLocation name, GlslExpr switchArg, List<AdaptedFn> functionsToAdapt, List<StringSubstitutionSourceComponent> adaptedComponents) {
 		this.name = name;
 		this.switchArg = switchArg;
 		this.functionsToAdapt = functionsToAdapt;
@@ -134,7 +134,7 @@ public class MaterialAdapterComponent implements SourceComponent {
 			return this;
 		}
 
-		public MaterialAdapterComponent build(SourceLoader sources) {
+		public UberShaderComponent build(SourceLoader sources) {
 			if (switchArg == null) {
 				throw new NullPointerException("Switch argument must be set");
 			}
@@ -159,7 +159,7 @@ public class MaterialAdapterComponent implements SourceComponent {
 				return null;
 			}
 
-			return new MaterialAdapterComponent(name, switchArg, adaptedFunctions, transformed.build());
+			return new UberShaderComponent(name, switchArg, adaptedFunctions, transformed.build());
 		}
 	}
 

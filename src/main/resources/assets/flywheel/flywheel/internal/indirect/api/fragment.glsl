@@ -38,5 +38,7 @@ void flw_endFragment();
 // ------------------------------------------
 
 uint _flw_materialFragmentID;
+uint _flw_fogID;
+uint _flw_cutoutID;
 
 // ------------------------------------------

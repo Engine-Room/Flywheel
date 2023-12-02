@@ -12,14 +12,16 @@ uniform sampler2D flw_diffuseTex;
 uniform sampler2D flw_overlayTex;
 uniform sampler2D flw_lightTex;
 
-flat in uvec2 _flw_material;
+flat in uvec3 _flw_material;
 
 out vec4 fragColor;
 
 void main() {
     _flw_materialFragmentID = _flw_material.x;
+    _flw_fogID = _flw_material.y & 0xFFFFu;
+    _flw_cutoutID = _flw_material.y >> 16u;
 
-    _flw_unpackMaterial(_flw_material.y, flw_material);
+    _flw_unpackMaterial(_flw_material.z, flw_material);
 
     flw_sampleColor = texture(flw_diffuseTex, flw_vertexTexCoord);
     flw_fragColor = flw_vertexColor * flw_sampleColor;
@@ -40,23 +42,13 @@ void main() {
         color *= lightColor;
     }
 
-    if (flw_material.cutout == FLW_CUTOUT_EPSILON && color.a < 0.01) {
-        discard;
-    } else if (flw_material.cutout == FLW_CUTOUT_HALF && color.a < 0.5) {
-        discard;
-    } else if (flw_material.cutout == FLW_CUTOUT_CUSTOM) {
-        if (flw_discardPredicate(color)) {
-            discard;
-        }
+    if (flw_material.lighting) {
+        color *= lightColor;
     }
 
-    if (flw_material.fog == FLW_FOG_LINEAR) {
-        color = linear_fog(color, flw_distance, flywheel.fogRange.x, flywheel.fogRange.y, flywheel.fogColor);
-    } else if (flw_material.fog == FLW_FOG_LINEAR_FADE) {
-        color = linear_fog_fade(color, flw_distance, flywheel.fogRange.x, flywheel.fogRange.y);
-    } else if (flw_material.fog == FLW_FOG_CUSTOM) {
-        color = flw_fogFilter(color);
+    if (flw_discardPredicate(color)) {
+        discard;
     }
 
-    fragColor = color;
+    fragColor = flw_fogFilter(color);
 }

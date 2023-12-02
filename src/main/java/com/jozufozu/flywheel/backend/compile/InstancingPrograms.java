@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.compile;
 
+import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
@@ -9,10 +10,10 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.compile.component.MaterialAdapterComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.glsl.ShaderSources;
+import com.jozufozu.flywheel.glsl.SourceComponent;
 
 public class InstancingPrograms {
 	static InstancingPrograms instance;
@@ -22,9 +23,9 @@ public class InstancingPrograms {
 		this.pipeline = pipeline;
 	}
 
-	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, MaterialAdapterComponent vertexMaterialComponent, MaterialAdapterComponent fragmentMaterialComponent) {
+	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
 		_delete();
-		var instancingCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCED_ARRAYS, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
+		var instancingCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCED_ARRAYS, pipelineKeys, uniformComponent, vertexComponents, fragmentComponents);
 
 		try {
 			var result = instancingCompiler.compileAndReportErrors();
