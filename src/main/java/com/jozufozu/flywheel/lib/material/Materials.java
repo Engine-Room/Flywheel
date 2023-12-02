@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.lib.material;
 
+import com.jozufozu.flywheel.api.material.Cutout;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
 import com.jozufozu.flywheel.api.material.Transparency;
@@ -46,6 +47,7 @@ public final class Materials {
 			.baseTexture(InventoryMenu.BLOCK_ATLAS)
 			.mip(true)
 			.shaders(StandardMaterialShaders.SHADED_CUTOUT)
+			.cutout(Cutout.EPSILON)
 			.fallbackRenderType(RenderType.cutoutMipped())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.build();
@@ -54,6 +56,7 @@ public final class Materials {
 			.baseTexture(InventoryMenu.BLOCK_ATLAS)
 			.mip(true)
 			.shaders(StandardMaterialShaders.CUTOUT)
+			.cutout(Cutout.EPSILON)
 			.fallbackRenderType(RenderType.cutoutMipped())
 			.build();
 
@@ -61,6 +64,7 @@ public final class Materials {
 			.baseTexture(InventoryMenu.BLOCK_ATLAS)
 			.mip(false)
 			.shaders(StandardMaterialShaders.SHADED_CUTOUT)
+			.cutout(Cutout.EPSILON)
 			.fallbackRenderType(RenderType.cutout())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.build();
@@ -69,6 +73,7 @@ public final class Materials {
 			.baseTexture(InventoryMenu.BLOCK_ATLAS)
 			.mip(false)
 			.shaders(StandardMaterialShaders.CUTOUT)
+			.cutout(Cutout.EPSILON)
 			.fallbackRenderType(RenderType.cutout())
 			.build();
 
@@ -93,6 +98,7 @@ public final class Materials {
 			.mip(true)
 			.transparency(Transparency.TRANSLUCENT)
 			.shaders(StandardMaterialShaders.SHADED_CUTOUT)
+			.cutout(Cutout.EPSILON)
 			.fallbackRenderType(RenderType.tripwire())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.build();
@@ -102,6 +108,7 @@ public final class Materials {
 			.mip(true)
 			.transparency(Transparency.TRANSLUCENT)
 			.shaders(StandardMaterialShaders.CUTOUT)
+			.cutout(Cutout.EPSILON)
 			.fallbackRenderType(RenderType.tripwire())
 			.build();
 
@@ -116,6 +123,7 @@ public final class Materials {
 			.mip(false)
 			.backfaceCull(false)
 			.shaders(StandardMaterialShaders.SHADED_CUTOUT)
+			.cutout(Cutout.EPSILON)
 			.fallbackRenderType(Sheets.shulkerBoxSheet())
 			.build();
 	public static final Material BELL = SimpleMaterial.builder()

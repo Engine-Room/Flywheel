@@ -27,5 +27,5 @@ void flw_instanceVertex(FlwInstance i);
 void flw_materialVertex();
 
 // To be implemented by the context shader.
-void flw_initVertex();
-void flw_contextVertex();
+void flw_beginVertex();
+void flw_endVertex();

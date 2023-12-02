@@ -20,10 +20,10 @@ out vec4 flw_var3;
 FlwMaterial flw_material;
 
 void flw_layoutVertex();
-void flw_initVertex();
+void flw_beginVertex();
 void flw_instanceVertex(FlwInstance i);
 void flw_materialVertex();
-void flw_contextVertex();
+void flw_endVertex();
 
 // ------------------------------------------
 // INTERNAL
