@@ -3,7 +3,7 @@
 #include "flywheel:internal/material.glsl"
 #include "flywheel:util/diffuse.glsl"
 
-flat out uvec2 _flw_material;
+flat out uvec3 _flw_material;
 
 struct Object {
     uint batchID;
@@ -28,11 +28,10 @@ void main() {
     FlwInstance i = _flw_unpackInstance(objects[instanceIndex].instance);
 
     _flw_materialVertexID = drawCommands[batchID].vertexMaterialID;
-    _flw_materialFragmentID = drawCommands[batchID].fragmentMaterialID;
     uint p = drawCommands[batchID].packedMaterialProperties;
 
     _flw_unpackMaterial(p, flw_material);
-    _flw_material = uvec2(_flw_materialFragmentID, p);
+    _flw_material = uvec3(drawCommands[batchID].fragmentMaterialID, drawCommands[batchID].packedFogAndCutout, p);
 
     flw_layoutVertex();
     flw_beginVertex();

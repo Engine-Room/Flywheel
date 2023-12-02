@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import com.jozufozu.flywheel.api.event.EndClientResourceReloadEvent;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.backend.Backends;
-import com.jozufozu.flywheel.backend.MaterialShaderIndices;
+import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.FlwPrograms;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.backend.engine.batching.DrawBuffer;
@@ -132,7 +132,7 @@ public class Flywheel {
 		StandardMaterialShaders.init();
 		Contexts.init();
 
-		MaterialShaderIndices.init();
+		ShaderIndices.init();
 
 		VanillaVisuals.init();
 

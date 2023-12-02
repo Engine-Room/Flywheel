@@ -8,11 +8,12 @@ import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.backend.MaterialShaderIndices;
-import com.jozufozu.flywheel.backend.compile.component.MaterialAdapterComponent;
+import com.jozufozu.flywheel.backend.ShaderIndices;
+import com.jozufozu.flywheel.backend.compile.component.UberShaderComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.backend.compile.core.CompilerStats;
 import com.jozufozu.flywheel.glsl.ShaderSources;
+import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;
 
@@ -32,38 +33,56 @@ public class FlwPrograms {
 
 		var pipelineKeys = createPipelineKeys();
 		var uniformComponent = createUniformComponent(loadChecker);
-		var vertexMaterialComponent = createVertexMaterialComponent(loadChecker);
-		var fragmentMaterialComponent = createFragmentMaterialComponent(loadChecker);
+		List<SourceComponent> vertexComponents = List.of(createVertexMaterialComponent(loadChecker));
+		List<SourceComponent> fragmentComponents = List.of(createFragmentMaterialComponent(loadChecker), createFogComponent(loadChecker), createCutoutComponent(loadChecker));
 
-		InstancingPrograms.reload(sources, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
-		IndirectPrograms.reload(sources, pipelineKeys, uniformComponent, vertexMaterialComponent, fragmentMaterialComponent);
+		InstancingPrograms.reload(sources, pipelineKeys, uniformComponent, vertexComponents, fragmentComponents);
+		IndirectPrograms.reload(sources, pipelineKeys, uniformComponent, vertexComponents, fragmentComponents);
 
 		if (preLoadStats.errored()) {
 			Flywheel.LOGGER.error(preLoadStats.generateErrorLog());
 		}
 	}
 
-	private static MaterialAdapterComponent createFragmentMaterialComponent(SourceLoader loadChecker) {
-		return MaterialAdapterComponent.builder(Flywheel.rl("fragment_material_adapter"))
-				.materialSources(MaterialShaderIndices.getAllFragmentShaders())
+	private static UberShaderComponent createFragmentMaterialComponent(SourceLoader loadChecker) {
+		return UberShaderComponent.builder(Flywheel.rl("uber_fragment_material"))
+				.materialSources(ShaderIndices.materialFragment()
+						.all())
 				.adapt(FnSignature.ofVoid("flw_materialFragment"))
-				.adapt(FnSignature.create()
-						.returnType("bool")
-						.name("flw_discardPredicate")
-						.arg("vec4", "color")
-						.build(), GlslExpr.boolLiteral(false))
+				.switchOn(GlslExpr.variable("_flw_materialFragmentID"))
+				.build(loadChecker);
+	}
+
+	private static UberShaderComponent createFogComponent(SourceLoader loadChecker) {
+		return UberShaderComponent.builder(Flywheel.rl("uber_fog"))
+				.materialSources(ShaderIndices.fog()
+						.all())
 				.adapt(FnSignature.create()
 						.returnType("vec4")
 						.name("flw_fogFilter")
 						.arg("vec4", "color")
 						.build(), GlslExpr.variable("color"))
-				.switchOn(GlslExpr.variable("_flw_materialFragmentID"))
+				.switchOn(GlslExpr.variable("_flw_fogID"))
 				.build(loadChecker);
 	}
 
-	private static MaterialAdapterComponent createVertexMaterialComponent(SourceLoader loadChecker) {
-		return MaterialAdapterComponent.builder(Flywheel.rl("vertex_material_adapter"))
-				.materialSources(MaterialShaderIndices.getAllVertexShaders())
+	private static UberShaderComponent createCutoutComponent(SourceLoader loadChecker) {
+		return UberShaderComponent.builder(Flywheel.rl("uber_cutout"))
+				.materialSources(ShaderIndices.cutout()
+						.all())
+				.adapt(FnSignature.create()
+						.returnType("bool")
+						.name("flw_discardPredicate")
+						.arg("vec4", "color")
+						.build(), GlslExpr.boolLiteral(false))
+				.switchOn(GlslExpr.variable("_flw_cutoutID"))
+				.build(loadChecker);
+	}
+
+	private static UberShaderComponent createVertexMaterialComponent(SourceLoader loadChecker) {
+		return UberShaderComponent.builder(Flywheel.rl("vertex_material_adapter"))
+				.materialSources(ShaderIndices.materialVertex()
+						.all())
 				.adapt(FnSignature.ofVoid("flw_materialVertex"))
 				.switchOn(GlslExpr.variable("_flw_materialVertexID"))
 				.build(loadChecker);

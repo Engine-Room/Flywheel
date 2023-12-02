@@ -9,8 +9,8 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.backend.MaterialShaderIndices;
 import com.jozufozu.flywheel.backend.MaterialUtil;
+import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
@@ -126,9 +126,10 @@ public class InstancingEngine extends AbstractEngine {
 
 	public static void uploadMaterialIDUniform(GlProgram program, Material material) {
 		int materialIDUniform = program.getUniformLocation("_flw_material_instancing");
-		int vertexID = MaterialShaderIndices.getVertexShaderIndex(material.shaders());
-		int fragmentID = MaterialShaderIndices.getFragmentShaderIndex(material.shaders());
+		int vertexID = ShaderIndices.getVertexShaderIndex(material.shaders());
+		int fragmentID = ShaderIndices.getFragmentShaderIndex(material.shaders());
+		int packedFogAndCutout = MaterialUtil.packFogAndCutout(material);
 		int packedMaterialProperties = MaterialUtil.packProperties(material);
-		GL32.glUniform3ui(materialIDUniform, vertexID, fragmentID, packedMaterialProperties);
+		GL32.glUniform4ui(materialIDUniform, vertexID, fragmentID, packedFogAndCutout, packedMaterialProperties);
 	}
 }

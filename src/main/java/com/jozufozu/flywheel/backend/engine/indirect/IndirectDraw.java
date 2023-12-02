@@ -5,8 +5,8 @@ import org.lwjgl.system.MemoryUtil;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.backend.MaterialShaderIndices;
 import com.jozufozu.flywheel.backend.MaterialUtil;
+import com.jozufozu.flywheel.backend.ShaderIndices;
 
 public class IndirectDraw<I extends Instance> {
 	private final IndirectInstancer<I> instancer;
@@ -16,6 +16,7 @@ public class IndirectDraw<I extends Instance> {
 
 	private final int vertexMaterialID;
 	private final int fragmentMaterialID;
+	private final int packedFogAndCutout;
 	private final int packedMaterialProperties;
 
 	private int baseInstance = -1;
@@ -27,8 +28,9 @@ public class IndirectDraw<I extends Instance> {
 		this.mesh = mesh;
 		this.stage = stage;
 
-		this.vertexMaterialID = MaterialShaderIndices.getVertexShaderIndex(material.shaders());
-		this.fragmentMaterialID = MaterialShaderIndices.getFragmentShaderIndex(material.shaders());
+		this.vertexMaterialID = ShaderIndices.getVertexShaderIndex(material.shaders());
+		this.fragmentMaterialID = ShaderIndices.getFragmentShaderIndex(material.shaders());
+		this.packedFogAndCutout = MaterialUtil.packFogAndCutout(material);
 		this.packedMaterialProperties = MaterialUtil.packProperties(material);
 	}
 
@@ -78,6 +80,7 @@ public class IndirectDraw<I extends Instance> {
 		boundingSphere.getToAddress(ptr + 20); // boundingSphere
 		MemoryUtil.memPutInt(ptr + 36, vertexMaterialID); // vertexMaterialID
 		MemoryUtil.memPutInt(ptr + 40, fragmentMaterialID); // fragmentMaterialID
-		MemoryUtil.memPutInt(ptr + 44, packedMaterialProperties); // packedMaterialProperties
+		MemoryUtil.memPutInt(ptr + 44, packedFogAndCutout); // packedFogAndCutout
+		MemoryUtil.memPutInt(ptr + 48, packedMaterialProperties); // packedMaterialProperties
 	}
 }

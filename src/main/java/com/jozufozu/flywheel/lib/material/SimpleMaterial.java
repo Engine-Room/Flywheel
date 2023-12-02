@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.lib.material;
 
-import com.jozufozu.flywheel.api.material.Cutout;
-import com.jozufozu.flywheel.api.material.Fog;
+import com.jozufozu.flywheel.api.material.CutoutShader;
+import com.jozufozu.flywheel.api.material.FogShader;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.MaterialShaders;
 import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
@@ -24,9 +24,9 @@ public class SimpleMaterial implements Material {
 	protected final boolean backfaceCull;
 	protected final boolean polygonOffset;
 	protected final boolean mip;
-	protected final Fog fog;
+	protected final FogShader fog;
 	protected final Transparency transparency;
-	protected final Cutout cutout;
+	protected final CutoutShader cutout;
 	protected final WriteMask writeMask;
 
 	protected SimpleMaterial(Builder builder) {
@@ -101,7 +101,7 @@ public class SimpleMaterial implements Material {
 	}
 
 	@Override
-	public Fog fog() {
+	public FogShader fog() {
 		return fog;
 	}
 
@@ -111,7 +111,7 @@ public class SimpleMaterial implements Material {
 	}
 
 	@Override
-	public Cutout cutout() {
+	public CutoutShader cutout() {
 		return cutout;
 	}
 
@@ -131,9 +131,9 @@ public class SimpleMaterial implements Material {
 		protected boolean backfaceCull = true;
 		protected boolean polygonOffset = false;
 		protected boolean mip = true;
-		protected Fog fog = Fog.LINEAR;
+		protected FogShader fog = StandardMaterialShaders.LINEAR;
 		protected Transparency transparency = Transparency.OPAQUE;
-		protected Cutout cutout = Cutout.OFF;
+		protected CutoutShader cutout = StandardMaterialShaders.OFF;
 		protected WriteMask writeMask = WriteMask.BOTH;
 
 		public Builder() {
@@ -189,7 +189,7 @@ public class SimpleMaterial implements Material {
 			return this;
 		}
 
-		public Builder fog(Fog value) {
+		public Builder fog(FogShader value) {
 			this.fog = value;
 			return this;
 		}
@@ -199,7 +199,7 @@ public class SimpleMaterial implements Material {
 			return this;
 		}
 
-		public Builder cutout(Cutout value) {
+		public Builder cutout(CutoutShader value) {
 			this.cutout = value;
 			return this;
 		}

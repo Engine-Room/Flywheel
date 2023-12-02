@@ -44,11 +44,11 @@ public interface Material {
 
 	boolean mip();
 
-	Fog fog();
+	FogShader fog();
+
+	CutoutShader cutout();
 
 	Transparency transparency();
-
-	Cutout cutout();
 
 	WriteMask writeMask();
 }

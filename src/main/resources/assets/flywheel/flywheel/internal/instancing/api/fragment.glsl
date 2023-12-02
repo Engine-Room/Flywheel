@@ -36,9 +36,8 @@ void flw_endFragment();
 // INTERNAL
 // -----------------------------------------
 
-uint _flw_materialVertexID;
 uint _flw_materialFragmentID;
-
-uniform uvec3 _flw_material_instancing;
+uint _flw_fogID;
+uint _flw_cutoutID;
 
 // -----------------------------------------

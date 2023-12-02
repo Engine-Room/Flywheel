@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.lib.material;
 
-import com.jozufozu.flywheel.api.material.Cutout;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
 import com.jozufozu.flywheel.api.material.Transparency;
@@ -38,26 +37,26 @@ public final class Materials {
 			.build();
 
 	public static final Material CHUNK_CUTOUT_MIPPED_SHADED = SimpleMaterial.builder()
-			.cutout(Cutout.EPSILON)
+			.cutout(StandardMaterialShaders.EPSILON)
 			.fallbackRenderType(RenderType.cutoutMipped())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.build();
 	public static final Material CHUNK_CUTOUT_MIPPED_UNSHADED = SimpleMaterial.builder()
 			.diffuse(false)
-			.cutout(Cutout.EPSILON)
+			.cutout(StandardMaterialShaders.EPSILON)
 			.fallbackRenderType(RenderType.cutoutMipped())
 			.build();
 
 	public static final Material CHUNK_CUTOUT_SHADED = SimpleMaterial.builder()
 			.mip(false)
-			.cutout(Cutout.EPSILON)
+			.cutout(StandardMaterialShaders.EPSILON)
 			.fallbackRenderType(RenderType.cutout())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.build();
 	public static final Material CHUNK_CUTOUT_UNSHADED = SimpleMaterial.builder()
 			.diffuse(false)
 			.mip(false)
-			.cutout(Cutout.EPSILON)
+			.cutout(StandardMaterialShaders.EPSILON)
 			.fallbackRenderType(RenderType.cutout())
 			.build();
 
@@ -74,14 +73,14 @@ public final class Materials {
 
 	public static final Material CHUNK_TRIPWIRE_SHADED = SimpleMaterial.builder()
 			.transparency(Transparency.TRANSLUCENT)
-			.cutout(Cutout.EPSILON)
+			.cutout(StandardMaterialShaders.EPSILON)
 			.fallbackRenderType(RenderType.tripwire())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.build();
 	public static final Material CHUNK_TRIPWIRE_UNSHADED = SimpleMaterial.builder()
 			.diffuse(false)
 			.transparency(Transparency.TRANSLUCENT)
-			.cutout(Cutout.EPSILON)
+			.cutout(StandardMaterialShaders.EPSILON)
 			.fallbackRenderType(RenderType.tripwire())
 			.build();
 
@@ -94,7 +93,7 @@ public final class Materials {
 			.baseTexture(Sheets.SHULKER_SHEET)
 			.mip(false)
 			.backfaceCull(false)
-			.cutout(Cutout.EPSILON)
+			.cutout(StandardMaterialShaders.EPSILON)
 			.fallbackRenderType(Sheets.shulkerBoxSheet())
 			.build();
 	public static final Material BELL = SimpleMaterial.builder()

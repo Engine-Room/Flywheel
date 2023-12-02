@@ -30,7 +30,6 @@ void flw_endVertex();
 // ------------------------------------------
 
 uint _flw_materialVertexID;
-uint _flw_materialFragmentID;
 
 FlwInstance _flw_unpackInstance(FlwPackedInstance i);
 
