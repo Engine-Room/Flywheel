@@ -1,7 +1,10 @@
 package com.jozufozu.flywheel.backend;
 
+import java.util.Comparator;
+
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.Transparency;
+import com.jozufozu.flywheel.api.material.WriteMask;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -10,7 +13,59 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 
 public class MaterialUtil {
+	public static final Comparator<Material> BY_STATE = Comparator.comparing(Material::baseTexture)
+			.thenComparing(Material::mip)
+			.thenComparing(Material::blur)
+			.thenComparing(Material::backfaceCull)
+			.thenComparing(Material::polygonOffset)
+			.thenComparing(Material::writeMask);
+
 	public static void setup(Material material) {
+		setupTexture(material);
+
+		setupBackfaceCull(material.backfaceCull());
+		setupTransparency(material.transparency());
+		setupWriteMask(material.writeMask());
+		setupPolygonOffset(material.polygonOffset());
+	}
+
+	private static void setupPolygonOffset(boolean polygonOffset) {
+		if (polygonOffset) {
+			RenderSystem.polygonOffset(-1.0F, -10.0F);
+			RenderSystem.enablePolygonOffset();
+		}
+	}
+
+	private static void setupWriteMask(WriteMask mask) {
+		RenderSystem.depthMask(mask.depth());
+		boolean writeColor = mask.color();
+		RenderSystem.colorMask(writeColor, writeColor, writeColor, writeColor);
+	}
+
+	private static void setupTransparency(Transparency transparency) {
+		if (transparency != Transparency.OPAQUE) {
+			RenderSystem.enableBlend();
+		}
+
+		switch (transparency) {
+		case ADDITIVE -> RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+		case LIGHTING -> RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
+		case GLINT ->
+				RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+		case CRUMBLING ->
+				RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.DST_COLOR, GlStateManager.DestFactor.SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+		case TRANSLUCENT ->
+				RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+		}
+	}
+
+	private static void setupBackfaceCull(boolean backfaceCull) {
+		if (!backfaceCull) {
+			RenderSystem.disableCull();
+		}
+	}
+
+	private static void setupTexture(Material material) {
 		GlTextureUnit.T0.makeActive();
 		AbstractTexture texture = Minecraft.getInstance()
 				.getTextureManager()
@@ -19,29 +74,38 @@ public class MaterialUtil {
 		texture.setFilter(material.blur(), material.mip());
 		RenderSystem.setShaderTexture(0, textureId);
 		RenderSystem.bindTexture(textureId);
-
-		if (!material.backfaceCull()) {
-			RenderSystem.disableCull();
-		}
-
-		if (material.transparency() != Transparency.OPAQUE) {
-			RenderSystem.enableBlend();
-			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		}
 	}
 
-	public static void clear(Material material) {
+	public static void reset() {
+		resetDiffuse();
+		resetBackfaceCull();
+		resetTransparency();
+		resetWriteMask();
+		resetPolygonOffset();
+	}
+
+	private static void resetPolygonOffset() {
+		RenderSystem.polygonOffset(0.0F, 0.0F);
+		RenderSystem.disablePolygonOffset();
+	}
+
+	private static void resetWriteMask() {
+		RenderSystem.depthMask(true);
+		RenderSystem.colorMask(true, true, true, true);
+	}
+
+	private static void resetTransparency() {
+		RenderSystem.disableBlend();
+		RenderSystem.defaultBlendFunc();
+	}
+
+	private static void resetBackfaceCull() {
+		RenderSystem.enableCull();
+	}
+
+	private static void resetDiffuse() {
 		GlTextureUnit.T0.makeActive();
 		RenderSystem.setShaderTexture(0, 0);
-
-		if (!material.backfaceCull()) {
-			RenderSystem.enableCull();
-		}
-
-		if (material.transparency() != Transparency.OPAQUE) {
-			RenderSystem.disableBlend();
-			RenderSystem.defaultBlendFunc();
-		}
 	}
 
 	public static final int DIFFUSE_MASK = 1;

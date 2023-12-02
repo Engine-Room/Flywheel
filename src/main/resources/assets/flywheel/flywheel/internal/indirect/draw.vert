@@ -1,6 +1,7 @@
 #include "flywheel:internal/indirect/api/vertex.glsl"
 #include "flywheel:internal/indirect/mesh.glsl"
 #include "flywheel:internal/material.glsl"
+#include "flywheel:util/diffuse.glsl"
 
 flat out uvec2 _flw_material;
 
