@@ -15,8 +15,10 @@ public class MaterialUtil {
 		AbstractTexture texture = Minecraft.getInstance()
 				.getTextureManager()
 				.getTexture(material.baseTexture());
+		var textureId = texture.getId();
 		texture.setFilter(material.blur(), material.mip());
-		RenderSystem.setShaderTexture(0, texture.getId());
+		RenderSystem.setShaderTexture(0, textureId);
+		RenderSystem.bindTexture(textureId);
 
 		if (!material.backfaceCull()) {
 			RenderSystem.disableCull();

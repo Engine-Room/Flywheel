@@ -29,9 +29,9 @@ vec4 flw_fogFilter(vec4 color);
 
 bool flw_discardPredicate(vec4 finalColor);
 
-void flw_initFragment();
+void flw_beginFragment();
 void flw_materialFragment();
-void flw_contextFragment();
+void flw_endFragment();
 
 // ------------------------------------------
 // INTERNAL

@@ -28,5 +28,5 @@ bool flw_discardPredicate(vec4 finalColor);
 void flw_materialFragment();
 
 // To be implemented by the context shader.
-void flw_initFragment();
-void flw_contextFragment();
+void flw_beginFragment();
+void flw_endFragment();

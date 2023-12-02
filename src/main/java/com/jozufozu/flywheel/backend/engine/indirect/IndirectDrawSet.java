@@ -74,7 +74,6 @@ public class IndirectDrawSet<I extends Instance> {
 	private record MultiDraw(Material material, int start, int end) {
 		void submit() {
 			MaterialUtil.setup(material);
-			Textures.bindActiveTextures();
 			glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, start * IndirectBuffers.DRAW_COMMAND_STRIDE, end - start, (int) IndirectBuffers.DRAW_COMMAND_STRIDE);
 			MaterialUtil.clear(material);
 		}
