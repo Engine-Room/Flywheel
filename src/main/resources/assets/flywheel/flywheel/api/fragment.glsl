@@ -14,9 +14,9 @@
 /*const*/ vec4 flw_var2;
 /*const*/ vec4 flw_var3;
 
-/*const*/ vec4 flw_sampleColor;
-
 /*const*/ FlwMaterial flw_material;
+
+/*const*/ vec4 flw_sampleColor;
 
 vec4 flw_fragColor;
 ivec2 flw_fragOverlay;

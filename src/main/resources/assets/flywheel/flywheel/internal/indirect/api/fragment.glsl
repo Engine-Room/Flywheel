@@ -17,13 +17,13 @@ in vec4 flw_var1;
 in vec4 flw_var2;
 in vec4 flw_var3;
 
+FlwMaterial flw_material;
+
 vec4 flw_sampleColor;
 
 vec4 flw_fragColor;
 ivec2 flw_fragOverlay;
 vec2 flw_fragLight;
-
-FlwMaterial flw_material;
 
 vec4 flw_fogFilter(vec4 color);
 

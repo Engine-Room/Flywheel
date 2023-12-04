@@ -1,7 +1,7 @@
 #include "flywheel:api/vertex.glsl"
 #include "flywheel:util/fog.glsl"
 
-out vec2 _flw_crumblingTexCoord;
+out vec2 crumblingTexCoord;
 
 const int DOWN = 0;
 const int UP = 1;
@@ -66,9 +66,8 @@ vec2 getCrumblingTexCoord() {
 }
 
 void flw_beginVertex() {
-    // no-op
 }
 
 void flw_endVertex() {
-    _flw_crumblingTexCoord = getCrumblingTexCoord();
+    crumblingTexCoord = getCrumblingTexCoord();
 }

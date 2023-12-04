@@ -2,27 +2,25 @@
 #include "flywheel:internal/material.glsl"
 
 // optimize discard usage
-#ifdef ALPHA_DISCARD
 #ifdef GL_ARB_conservative_depth
 layout (depth_greater) out float gl_FragDepth;
 #endif
-#endif
 
-uniform sampler2D flw_diffuseTex;
-uniform sampler2D flw_overlayTex;
-uniform sampler2D flw_lightTex;
+uniform sampler2D _flw_diffuseTex;
+uniform sampler2D _flw_overlayTex;
+uniform sampler2D _flw_lightTex;
 
-uniform uvec4 _flw_material_instancing;
+uniform uvec4 _flw_packedMaterial;
 
-out vec4 fragColor;
+out vec4 _flw_fragColor;
 
 void main() {
-    _flw_materialFragmentID = _flw_material_instancing.y;
+    _flw_materialFragmentID = _flw_packedMaterial.y;
 
-    _flw_unpackUint2x16(_flw_material_instancing.z, _flw_cutoutID, _flw_fogID);
-    _flw_unpackMaterial(_flw_material_instancing.w, flw_material);
+    _flw_unpackUint2x16(_flw_packedMaterial.z, _flw_cutoutID, _flw_fogID);
+    _flw_unpackMaterialProperties(_flw_packedMaterial.w, flw_material);
 
-    flw_sampleColor = texture(flw_diffuseTex, flw_vertexTexCoord);
+    flw_sampleColor = texture(_flw_diffuseTex, flw_vertexTexCoord);
     flw_fragColor = flw_vertexColor * flw_sampleColor;
     flw_fragOverlay = flw_vertexOverlay;
     flw_fragLight = flw_vertexLight;
@@ -31,13 +29,15 @@ void main() {
     flw_materialFragment();
     flw_endFragment();
 
-    vec4 overlayColor = texelFetch(flw_overlayTex, flw_fragOverlay, 0);
-    vec4 lightColor = texture(flw_lightTex, (flw_fragLight * 15.0 + 0.5) / 16.0);
-
     vec4 color = flw_fragColor;
-    color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
 
-    if (flw_material.lighting) {
+    if (flw_material.useOverlay) {
+        vec4 overlayColor = texelFetch(_flw_overlayTex, flw_fragOverlay, 0);
+        color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
+    }
+
+    if (flw_material.useLight) {
+        vec4 lightColor = texture(_flw_lightTex, (flw_fragLight * 15.0 + 0.5) / 16.0);
         color *= lightColor;
     }
 
@@ -45,5 +45,5 @@ void main() {
         discard;
     }
 
-    fragColor = flw_fogFilter(color);
+    _flw_fragColor = flw_fogFilter(color);
 }

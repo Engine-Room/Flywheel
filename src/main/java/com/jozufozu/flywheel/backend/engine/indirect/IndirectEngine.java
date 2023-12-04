@@ -2,12 +2,11 @@ package com.jozufozu.flywheel.backend.engine.indirect;
 
 import java.util.List;
 
-import org.lwjgl.opengl.GL32;
-
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.backend.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
@@ -16,6 +15,7 @@ import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.NamedFlag;
 import com.jozufozu.flywheel.lib.task.SyncedPlan;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
@@ -47,33 +47,35 @@ public class IndirectEngine extends AbstractEngine {
 			flushFlag.lower();
 		}
 
-        if (!drawManager.hasStage(stage)) {
-            return;
-        }
+		if (!drawManager.hasStage(stage)) {
+			return;
+		}
 
-        try (var restoreState = GlStateTracker.getRestoreState()) {
-            setup();
+		try (var restoreState = GlStateTracker.getRestoreState()) {
+			int prevActiveTexture = GlStateManager._getActiveTexture();
+			Minecraft.getInstance().gameRenderer.overlayTexture().setupOverlayColor();
+			Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
 
-            for (var list : drawManager.renderLists.values()) {
-                list.submit(stage);
-            }
-        }
-    }
+			GlTextureUnit.T1.makeActive();
+			RenderSystem.bindTexture(RenderSystem.getShaderTexture(1));
+			GlTextureUnit.T2.makeActive();
+			RenderSystem.bindTexture(RenderSystem.getShaderTexture(2));
+
+			for (var list : drawManager.renderLists.values()) {
+				list.submit(stage);
+			}
+
+			MaterialRenderState.reset();
+
+			Minecraft.getInstance().gameRenderer.overlayTexture().teardownOverlayColor();
+			Minecraft.getInstance().gameRenderer.lightTexture().turnOffLightLayer();
+			GlStateManager._activeTexture(prevActiveTexture);
+		}
+	}
 
 	@Override
 	public void renderCrumbling(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks) {
 		// TODO: implement
-	}
-
-	private void setup() {
-		GlTextureUnit.T2.makeActive();
-		Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
-
-		RenderSystem.depthMask(true);
-		RenderSystem.colorMask(true, true, true, true);
-		RenderSystem.enableDepthTest();
-		RenderSystem.depthFunc(GL32.GL_LEQUAL);
-		RenderSystem.enableCull();
 	}
 
 	@Override

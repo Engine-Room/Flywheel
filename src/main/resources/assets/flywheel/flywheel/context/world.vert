@@ -2,9 +2,7 @@
 #include "flywheel:util/fog.glsl"
 
 void flw_beginVertex() {
-    // noop
 }
 
 void flw_endVertex() {
-
 }

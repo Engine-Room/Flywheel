@@ -79,5 +79,4 @@ public class GlProgram extends GlObject {
 	protected void deleteInternal(int handle) {
 		glDeleteProgram(handle);
 	}
-
 }

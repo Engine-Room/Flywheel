@@ -1,22 +1,22 @@
 #include "flywheel:api/fragment.glsl"
 
-uniform sampler2D flw_crumblingTex;
+uniform sampler2D _flw_crumblingTex;
 
-in vec2 _flw_crumblingTexCoord;
+in vec2 crumblingTexCoord;
 
-vec4 flw_crumblingSampleColor;
+vec4 crumblingSampleColor;
 
 void flw_beginFragment() {
-    flw_crumblingSampleColor = texture(flw_crumblingTex, _flw_crumblingTexCoord);
+    crumblingSampleColor = texture(_flw_crumblingTex, crumblingTexCoord);
 
     // Make the crumbling overlay transparent when the diffuse layer is transparent.
-    flw_crumblingSampleColor.a *= flw_fragColor.a;
+    crumblingSampleColor.a *= flw_fragColor.a;
 
-    if (flw_crumblingSampleColor.a < 0.01) {
+    if (crumblingSampleColor.a < 0.01) {
         discard;
     }
 }
 
 void flw_endFragment() {
-    flw_fragColor = flw_crumblingSampleColor;
+    flw_fragColor = crumblingSampleColor;
 }
