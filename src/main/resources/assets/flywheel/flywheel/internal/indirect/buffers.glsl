@@ -1,0 +1,4 @@
+#define OBJECT_BINDING 0
+#define TARGET_BINDING 1
+#define MODEL_BINDING 2
+#define DRAW_BINDING 3

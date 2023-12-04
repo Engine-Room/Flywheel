@@ -24,13 +24,17 @@ import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
 public class IndirectBuffers {
-	public static final int BUFFER_COUNT = 3;
+	// Number of vbos created.
+	public static final int BUFFER_COUNT = 4;
+
 	public static final long INT_SIZE = Integer.BYTES;
 	public static final long PTR_SIZE = Pointer.POINTER_SIZE;
 
-	// DRAW COMMAND
-	public static final long DRAW_COMMAND_STRIDE = 52;
+	// Byte size of a draw command, plus our added mesh data.
+	public static final long DRAW_COMMAND_STRIDE = 40;
 	public static final long DRAW_COMMAND_OFFSET = 0;
+
+	public static final long MODEL_STRIDE = 24;
 
 	// BITS
 	private static final int SUB_DATA_BITS = GL_DYNAMIC_STORAGE_BIT;
@@ -38,17 +42,23 @@ public class IndirectBuffers {
 	private static final int MAP_BITS = PERSISTENT_BITS | GL_MAP_FLUSH_EXPLICIT_BIT;
 	private static final int GPU_ONLY_BITS = 0;
 
-	// OFFSETS
-	private static final long OBJECT_OFFSET = 0;
+	// Offsets to the vbos
+	private static final long VBO_OFFSET = 0;
+	private static final long OBJECT_OFFSET = VBO_OFFSET;
 	private static final long TARGET_OFFSET = INT_SIZE;
-	private static final long DRAW_OFFSET = INT_SIZE * 2;
+	private static final long MODEL_OFFSET = INT_SIZE * 2;
+	private static final long DRAW_OFFSET = INT_SIZE * 3;
+
+	// Offsets to the 3 segments
 	private static final long OFFSET_OFFSET = BUFFER_COUNT * INT_SIZE;
 	private static final long SIZE_OFFSET = OFFSET_OFFSET + BUFFER_COUNT * PTR_SIZE;
+	private static final long OBJECT_SIZE_OFFSET = SIZE_OFFSET;
+	private static final long TARGET_SIZE_OFFSET = SIZE_OFFSET + PTR_SIZE;
+	private static final long MODEL_SIZE_OFFSET = SIZE_OFFSET + PTR_SIZE * 2;
+	private static final long DRAW_SIZE_OFFSET = SIZE_OFFSET + PTR_SIZE * 3;
+	// Total size of the buffer.
 	private static final long BUFFERS_SIZE_BYTES = SIZE_OFFSET + BUFFER_COUNT * PTR_SIZE;
 
-	private static final long OBJECT_SIZE_OFFSET = SIZE_OFFSET;
-	private static final long TARGET_SIZE_OFFSET = OBJECT_SIZE_OFFSET + PTR_SIZE;
-	private static final long DRAW_SIZE_OFFSET = TARGET_SIZE_OFFSET + PTR_SIZE;
 
 	/**
 	 * A small block of memory divided into 3 contiguous segments:
@@ -60,21 +70,25 @@ public class IndirectBuffers {
 	 * {@code sizes}: an array of {@link IndirectBuffers#PTR_SIZE} byte lengths of the buffers.
 	 * <br>
 	 * Each segment stores {@link IndirectBuffers#BUFFER_COUNT} elements,
-	 * one for the object buffer, one for the target buffer, and one for the draw buffer.
+	 * one for the object buffer, target buffer, model buffer, and draw buffer.
 	 */
 	private final MemoryBlock buffers;
 	private final long objectStride;
 	private int object;
 	private int target;
+	private int model;
 	private int draw;
 
 	long objectPtr;
-	long drawPtr;
+	MemoryBlock modelPtr;
+	MemoryBlock drawPtr;
 
 	private int maxObjectCount = 0;
+	private int maxModelCount = 0;
 	private int maxDrawCount = 0;
 
-	private static final float OBJECT_GROWTH_FACTOR = 2f;
+	private static final float OBJECT_GROWTH_FACTOR = 1.25f;
+	private static final float MODEL_GROWTH_FACTOR = 2f;
 	private static final float DRAW_GROWTH_FACTOR = 2f;
 
 	IndirectBuffers(long objectStride) {
@@ -87,25 +101,26 @@ public class IndirectBuffers {
 		nglCreateBuffers(BUFFER_COUNT, ptr);
 		object = MemoryUtil.memGetInt(ptr + OBJECT_OFFSET);
 		target = MemoryUtil.memGetInt(ptr + TARGET_OFFSET);
+		model = MemoryUtil.memGetInt(ptr + MODEL_OFFSET);
 		draw = MemoryUtil.memGetInt(ptr + DRAW_OFFSET);
 	}
 
-	void updateCounts(int objectCount, int drawCount) {
+	void updateCounts(int objectCount, int drawCount, int modelCount) {
 		if (objectCount > maxObjectCount) {
 			createObjectStorage((int) (objectCount * OBJECT_GROWTH_FACTOR));
+		}
+		if (modelCount > maxModelCount) {
+			createModelStorage((int) (modelCount * MODEL_GROWTH_FACTOR));
 		}
 		if (drawCount > maxDrawCount) {
 			createDrawStorage((int) (drawCount * DRAW_GROWTH_FACTOR));
 		}
 
-		final long objectSize = objectStride * objectCount;
-		final long targetSize = INT_SIZE * objectCount;
-		final long drawSize = DRAW_COMMAND_STRIDE * drawCount;
-
 		final long ptr = buffers.ptr();
-		MemoryUtil.memPutAddress(ptr + OBJECT_SIZE_OFFSET, objectSize);
-		MemoryUtil.memPutAddress(ptr + TARGET_SIZE_OFFSET, targetSize);
-		MemoryUtil.memPutAddress(ptr + DRAW_SIZE_OFFSET, drawSize);
+		MemoryUtil.memPutAddress(ptr + OBJECT_SIZE_OFFSET, objectStride * objectCount);
+		MemoryUtil.memPutAddress(ptr + TARGET_SIZE_OFFSET, INT_SIZE * objectCount);
+		MemoryUtil.memPutAddress(ptr + MODEL_SIZE_OFFSET, MODEL_STRIDE * modelCount);
+		MemoryUtil.memPutAddress(ptr + DRAW_SIZE_OFFSET, DRAW_COMMAND_STRIDE * drawCount);
 	}
 
 	void createObjectStorage(int objectCount) {
@@ -115,7 +130,7 @@ public class IndirectBuffers {
 
 		if (maxObjectCount > 0) {
 			final long ptr = buffers.ptr();
-			nglCreateBuffers(BUFFER_COUNT - 1, ptr);
+			nglCreateBuffers(2, ptr);
 
 			int objectNew = MemoryUtil.memGetInt(ptr + OBJECT_OFFSET);
 			int targetNew = MemoryUtil.memGetInt(ptr + TARGET_OFFSET);
@@ -142,6 +157,28 @@ public class IndirectBuffers {
 		FlwMemoryTracker._allocGPUMemory(maxObjectCount * objectStride);
 	}
 
+	void createModelStorage(int modelCount) {
+		freeModelStorage();
+
+		var modelSize = MODEL_STRIDE * modelCount;
+		if (maxModelCount > 0) {
+			int modelNew = glCreateBuffers();
+
+			glNamedBufferStorage(modelNew, modelSize, SUB_DATA_BITS);
+
+			glDeleteBuffers(model);
+
+			MemoryUtil.memPutInt(buffers.ptr() + MODEL_OFFSET, modelNew);
+			model = modelNew;
+			modelPtr = modelPtr.realloc(modelSize);
+		} else {
+			glNamedBufferStorage(model, modelSize, SUB_DATA_BITS);
+			modelPtr = MemoryBlock.malloc(modelSize);
+		}
+		maxModelCount = modelCount;
+		FlwMemoryTracker._allocGPUMemory(maxModelCount * MODEL_STRIDE);
+	}
+
 	void createDrawStorage(int drawCount) {
 		freeDrawStorage();
 
@@ -155,11 +192,10 @@ public class IndirectBuffers {
 
 			MemoryUtil.memPutInt(buffers.ptr() + DRAW_OFFSET, drawNew);
 			draw = drawNew;
-			drawPtr = MemoryUtil.nmemRealloc(drawPtr, drawSize);
+			drawPtr = drawPtr.realloc(drawSize);
 		} else {
-
 			glNamedBufferStorage(draw, drawSize, SUB_DATA_BITS);
-			drawPtr = MemoryUtil.nmemAlloc(drawSize);
+			drawPtr = MemoryBlock.malloc(drawSize);
 		}
 		maxDrawCount = drawCount;
 		FlwMemoryTracker._allocGPUMemory(maxDrawCount * DRAW_COMMAND_STRIDE);
@@ -167,6 +203,10 @@ public class IndirectBuffers {
 
 	private void freeObjectStorage() {
 		FlwMemoryTracker._freeGPUMemory(maxObjectCount * objectStride);
+	}
+
+	private void freeModelStorage() {
+		FlwMemoryTracker._freeGPUMemory(maxModelCount * MODEL_STRIDE);
 	}
 
 	private void freeDrawStorage() {
@@ -191,15 +231,25 @@ public class IndirectBuffers {
 		glFlushMappedNamedBufferRange(object, 0, length);
 	}
 
+	void flushModels(long length) {
+		nglNamedBufferSubData(model, 0, length, modelPtr.ptr());
+	}
+
 	void flushDrawCommands(long length) {
-		nglNamedBufferSubData(draw, 0, length, drawPtr);
-		// glFlushMappedNamedBufferRange(this.draw, 0, length);
+		nglNamedBufferSubData(draw, 0, length, drawPtr.ptr());
 	}
 
 	public void delete() {
 		nglDeleteBuffers(BUFFER_COUNT, buffers.ptr());
 		buffers.free();
+		if (modelPtr != null) {
+			modelPtr.free();
+		}
+		if (drawPtr != null) {
+			drawPtr.free();
+		}
 		freeObjectStorage();
+		freeModelStorage();
 		freeDrawStorage();
 	}
 }

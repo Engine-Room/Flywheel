@@ -1,31 +1,30 @@
 #include "flywheel:internal/indirect/api/vertex.glsl"
-#include "flywheel:internal/indirect/mesh.glsl"
+#include "flywheel:internal/indirect/buffers.glsl"
+#include "flywheel:internal/indirect/draw_command.glsl"
+#include "flywheel:internal/indirect/object.glsl"
 #include "flywheel:internal/material.glsl"
 #include "flywheel:internal/block.vert"
 #include "flywheel:util/diffuse.glsl"
 
 flat out uvec3 _flw_material;
 
-struct Object {
-    uint batchID;
-    FlwPackedInstance instance;
-};
-
-layout(std430, binding = 0) restrict readonly buffer ObjectBuffer {
+layout(std430, binding = OBJECT_BINDING) restrict readonly buffer ObjectBuffer {
     Object objects[];
 };
 
-layout(std430, binding = 1) restrict readonly buffer TargetBuffer {
+layout(std430, binding = TARGET_BINDING) restrict readonly buffer TargetBuffer {
     uint objectIDs[];
 };
 
-layout(std430, binding = 2) restrict readonly buffer DrawCommands {
+layout(std430, binding = DRAW_BINDING) restrict readonly buffer DrawCommands {
     MeshDrawCommand drawCommands[];
 };
 
+uniform uint _flw_baseDraw;
+
 void main() {
     uint instanceIndex = objectIDs[gl_BaseInstance + gl_InstanceID];
-    uint batchID = objects[instanceIndex].batchID;
+    uint batchID = gl_DrawID + _flw_baseDraw;
     FlwInstance i = _flw_unpackInstance(objects[instanceIndex].instance);
 
     _flw_materialVertexID = drawCommands[batchID].vertexMaterialID;

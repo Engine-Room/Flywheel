@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.lib.model;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
@@ -11,12 +12,14 @@ import org.slf4j.Logger;
 import com.dreizak.miniball.highdim.Miniball;
 import com.dreizak.miniball.model.PointSet;
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexListProviderRegistry;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
+import com.jozufozu.flywheel.lib.vertex.PositionOnlyVertexList;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferBuilder.DrawState;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -96,6 +99,31 @@ public final class ModelUtil {
 			return shaded ? Materials.CHUNK_TRIPWIRE_SHADED : Materials.CHUNK_TRIPWIRE_UNSHADED;
 		}
 		return null;
+	}
+
+	public static Vector4f computeBoundingSphere(Collection<Mesh> values) {
+		int totalVertices = 0;
+		for (Mesh value : values) {
+			totalVertices += value.vertexCount();
+		}
+		var block = MemoryBlock.malloc((long) totalVertices * PositionOnlyVertexList.STRIDE);
+
+		var vertexList = new PositionOnlyVertexList();
+
+		int baseVertex = 0;
+		for (Mesh value : values) {
+			vertexList.ptr(block.ptr() + (long) baseVertex * PositionOnlyVertexList.STRIDE);
+			value.write(vertexList);
+			baseVertex += value.vertexCount();
+		}
+
+		vertexList.ptr(block.ptr());
+		vertexList.vertexCount(totalVertices);
+
+		var out = computeBoundingSphere(vertexList);
+
+		block.free();
+		return out;
 	}
 
 	public static Vector4f computeBoundingSphere(VertexList vertexList) {
