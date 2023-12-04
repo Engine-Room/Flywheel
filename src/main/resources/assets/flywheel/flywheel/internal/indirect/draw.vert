@@ -1,6 +1,7 @@
 #include "flywheel:internal/indirect/api/vertex.glsl"
 #include "flywheel:internal/indirect/mesh.glsl"
 #include "flywheel:internal/material.glsl"
+#include "flywheel:internal/block.vert"
 #include "flywheel:util/diffuse.glsl"
 
 flat out uvec3 _flw_material;
@@ -33,7 +34,7 @@ void main() {
     _flw_unpackMaterial(p, flw_material);
     _flw_material = uvec3(drawCommands[batchID].fragmentMaterialID, drawCommands[batchID].packedFogAndCutout, p);
 
-    flw_layoutVertex();
+    _flw_layoutVertex();
     flw_beginVertex();
     flw_instanceVertex(i);
     flw_materialVertex();

@@ -16,9 +16,11 @@ import com.jozufozu.flywheel.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.QuadIndexSequence;
+import com.jozufozu.flywheel.lib.vertex.BlockVertexList;
+import com.jozufozu.flywheel.lib.vertex.VertexTypes;
 
 public class IndirectMeshPool {
-	private final VertexType vertexType;
+	private static final VertexType VERTEX_TYPE = VertexTypes.BLOCK;
 
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
 	private final List<BufferedMesh> meshList = new ArrayList<>();
@@ -32,20 +34,19 @@ public class IndirectMeshPool {
 	/**
 	 * Create a new mesh pool.
 	 */
-	public IndirectMeshPool(VertexType type) {
-		vertexType = type;
+	public IndirectMeshPool() {
 		vbo = new GlBuffer();
 		ebo = new GlBuffer();
 		vertexArray = GlVertexArray.create();
 
 		vertexArray.setElementBuffer(ebo.handle());
-		BufferLayout layout = vertexType.getLayout();
+		BufferLayout layout = VERTEX_TYPE.getLayout();
 		vertexArray.bindVertexBuffer(0, vbo.handle(), 0, layout.getStride());
 		vertexArray.bindAttributes(0, 0, layout.attributes());
 	}
 
 	public VertexType getVertexType() {
-		return vertexType;
+		return VERTEX_TYPE;
 	}
 
 	/**
@@ -98,6 +99,8 @@ public class IndirectMeshPool {
 		final long vertexPtr = vertexBlock.ptr();
 		final long indexPtr = indexBlock.ptr();
 
+		var target = new BlockVertexList();
+
 		int byteIndex = 0;
 		int baseVertex = 0;
 		int firstIndex = maxQuadIndexCount;
@@ -105,7 +108,8 @@ public class IndirectMeshPool {
 			mesh.byteIndex = byteIndex;
 			mesh.baseVertex = baseVertex;
 
-			mesh.buffer(vertexPtr);
+			target.ptr(vertexPtr + mesh.byteIndex);
+			mesh.mesh.write(target);
 
 			byteIndex += mesh.size();
 			baseVertex += mesh.mesh.vertexCount();
@@ -156,15 +160,11 @@ public class IndirectMeshPool {
 		}
 
 		public int size() {
-			return mesh.size();
+			return mesh.vertexCount() * VERTEX_TYPE.getStride();
 		}
 
 		public int indexCount() {
 			return mesh.indexCount();
-		}
-
-		private void buffer(long ptr) {
-			mesh.write(ptr + byteIndex);
 		}
 
 		public Vector4fc boundingSphere() {

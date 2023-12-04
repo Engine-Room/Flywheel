@@ -28,8 +28,7 @@ public interface Mesh {
 	 * The size in bytes that this mesh's data takes up.
 	 */
 	default int size() {
-		return vertexType().getLayout()
-				.getStride() * vertexCount();
+		return vertexType().getStride() * vertexCount();
 	}
 
 	/**

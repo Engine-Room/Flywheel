@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.backend.engine.instancing;
 
 import java.util.Collection;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -16,7 +15,6 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 
@@ -28,7 +26,7 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 	/**
 	 * A map of vertex types to their mesh pools.
 	 */
-	private final Map<VertexType, InstancedMeshPool> meshPools = new HashMap<>();
+	private final InstancedMeshPool meshPool = new InstancedMeshPool();
 	private final EBOCache eboCache = new EBOCache();
 
 	public DrawSet get(RenderStage stage) {
@@ -38,17 +36,13 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 	public void flush() {
 		super.flush();
 
-		for (var pool : meshPools.values()) {
-			pool.flush();
-		}
+		meshPool.flush();
 	}
 
 	public void invalidate() {
 		super.invalidate();
 
-		meshPools.values()
-				.forEach(InstancedMeshPool::delete);
-		meshPools.clear();
+		meshPool.delete();
 
 		drawSets.values()
 				.forEach(DrawSet::delete);
@@ -58,8 +52,7 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 	}
 
 	private InstancedMeshPool.BufferedMesh alloc(Mesh mesh) {
-		return meshPools.computeIfAbsent(mesh.vertexType(), InstancedMeshPool::new)
-				.alloc(mesh, eboCache);
+		return meshPool.alloc(mesh, eboCache);
 	}
 
 	@Override
@@ -77,7 +70,7 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 		for (var entry : meshes.entrySet()) {
 			var mesh = alloc(entry.getValue());
 
-			ShaderState shaderState = new ShaderState(entry.getKey(), mesh.getVertexType(), instancer.type);
+			ShaderState shaderState = new ShaderState(entry.getKey(), instancer.type);
 			DrawCall drawCall = new DrawCall(instancer, mesh, shaderState);
 
 			drawSet.put(shaderState, drawCall);

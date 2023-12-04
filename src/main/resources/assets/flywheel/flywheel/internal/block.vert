@@ -6,7 +6,7 @@ layout(location = 2) in vec2 _flw_v_texCoord;
 layout(location = 3) in ivec2 _flw_v_light;
 layout(location = 4) in vec3 _flw_v_normal;
 
-void flw_layoutVertex() {
+void _flw_layoutVertex() {
     flw_vertexPos = vec4(_flw_v_pos, 1.0);
     flw_vertexColor = _flw_v_color;
     flw_vertexTexCoord = _flw_v_texCoord;

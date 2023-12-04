@@ -7,7 +7,6 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
-import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.component.UberShaderComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
@@ -99,12 +98,9 @@ public class FlwPrograms {
 
 	private static ImmutableList<PipelineProgramKey> createPipelineKeys() {
 		ImmutableList.Builder<PipelineProgramKey> builder = ImmutableList.builder();
-		// TODO: ubershader'd contexts?
 		for (Context context : Context.REGISTRY) {
 			for (InstanceType<?> instanceType : InstanceType.REGISTRY) {
-				for (VertexType vertexType : VertexType.REGISTRY) {
-					builder.add(new PipelineProgramKey(vertexType, instanceType, context));
-				}
+				builder.add(new PipelineProgramKey(instanceType, context));
 			}
 		}
 		return builder.build();

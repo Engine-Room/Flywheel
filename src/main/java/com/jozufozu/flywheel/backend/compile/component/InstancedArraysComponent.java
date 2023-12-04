@@ -26,9 +26,7 @@ public class InstancedArraysComponent implements SourceComponent {
 	public InstancedArraysComponent(Pipeline.InstanceAssemblerContext ctx) {
 		this.layoutItems = ctx.instanceType()
 				.getLayout().layoutItems;
-		this.baseIndex = ctx.vertexType()
-				.getLayout()
-				.getAttributeCount();
+		this.baseIndex = ctx.baseAttribute();
 	}
 
 	@Override

@@ -4,8 +4,6 @@ import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.lib.layout.CommonItems;
 
-import net.minecraft.resources.ResourceLocation;
-
 public class BlockVertex implements VertexType {
 	public static final BufferLayout FORMAT = BufferLayout.builder()
 			.addItem(CommonItems.VEC3, "position")
@@ -19,11 +17,6 @@ public class BlockVertex implements VertexType {
 	@Override
 	public BufferLayout getLayout() {
 		return FORMAT;
-	}
-
-	@Override
-	public ResourceLocation layoutShader() {
-		return VertexTypes.Files.BLOCK_LAYOUT;
 	}
 
 	@Override

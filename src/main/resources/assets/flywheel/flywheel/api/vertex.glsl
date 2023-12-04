@@ -16,9 +16,6 @@ vec4 flw_var3;
 
 /*const*/ FlwMaterial flw_material;
 
-// To be implemented by the layout shader.
-void flw_layoutVertex();
-
 // To be implemented by the instance shader.
 void flw_transformBoundingSphere(in FlwInstance i, inout vec3 center, inout float radius);
 void flw_instanceVertex(FlwInstance i);
