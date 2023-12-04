@@ -11,16 +11,16 @@ import net.minecraft.resources.ResourceLocation;
 public final class Contexts {
 	public static final SimpleContext WORLD = Context.REGISTRY.registerAndGet(new SimpleContext(Files.WORLD_VERTEX, Files.WORLD_FRAGMENT, program -> {
 		program.bind();
-		program.setSamplerBinding("flw_diffuseTex", 0);
-		program.setSamplerBinding("flw_overlayTex", 1);
-		program.setSamplerBinding("flw_lightTex", 2);
+		program.setSamplerBinding("_flw_diffuseTex", 0);
+		program.setSamplerBinding("_flw_overlayTex", 1);
+		program.setSamplerBinding("_flw_lightTex", 2);
 		GlProgram.unbind();
 	}));
 
 	public static final SimpleContext CRUMBLING = Context.REGISTRY.registerAndGet(new SimpleContext(Files.CRUMBLING_VERTEX, Files.CRUMBLING_FRAGMENT, program -> {
 		program.bind();
-		program.setSamplerBinding("flw_crumblingTex", 0);
-		program.setSamplerBinding("flw_diffuseTex", 1);
+		program.setSamplerBinding("_flw_crumblingTex", 0);
+		program.setSamplerBinding("_flw_diffuseTex", 1);
 		GlProgram.unbind();
 	}));
 

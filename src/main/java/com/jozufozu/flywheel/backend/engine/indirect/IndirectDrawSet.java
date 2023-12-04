@@ -13,7 +13,7 @@ import java.util.Map;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.backend.MaterialUtil;
+import com.jozufozu.flywheel.backend.MaterialRenderState;
 
 public class IndirectDrawSet<I extends Instance> {
 
@@ -42,14 +42,13 @@ public class IndirectDrawSet<I extends Instance> {
 		for (var multiDraw : multiDraws.get(stage)) {
 			multiDraw.submit();
 		}
-		MaterialUtil.reset();
 	}
 
 	public void determineMultiDraws() {
 		multiDraws.clear();
 		// sort by stage, then material
 		indirectDraws.sort(Comparator.comparing(IndirectDraw<I>::stage)
-				.thenComparing(IndirectDraw::material, MaterialUtil.BY_STATE));
+				.thenComparing(IndirectDraw::material, MaterialRenderState.COMPARATOR));
 
 		for (int start = 0, i = 0; i < indirectDraws.size(); i++) {
 			var draw = indirectDraws.get(i);
@@ -73,7 +72,7 @@ public class IndirectDrawSet<I extends Instance> {
 
 	private record MultiDraw(Material material, int start, int end) {
 		void submit() {
-			MaterialUtil.setup(material);
+			MaterialRenderState.setup(material);
 			glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, start * IndirectBuffers.DRAW_COMMAND_STRIDE, end - start, (int) IndirectBuffers.DRAW_COMMAND_STRIDE);
 		}
 	}

@@ -12,7 +12,7 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.Transparency;
 import com.jozufozu.flywheel.api.material.WriteMask;
-import com.jozufozu.flywheel.backend.MaterialUtil;
+import com.jozufozu.flywheel.backend.MaterialRenderState;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
@@ -50,17 +50,19 @@ public class InstancedCrumbling {
 				var baseMaterial = shader.material();
 				int diffuseTexture = getDiffuseTexture(baseMaterial);
 
-				var crumblingMaterial = SimpleMaterial.from(baseMaterial)
+				var crumblingMaterial = SimpleMaterial.builderOf(baseMaterial)
+						.cutout(CutoutShaders.OFF)
+						.polygonOffset(true)
 						.transparency(Transparency.CRUMBLING)
 						.writeMask(WriteMask.COLOR)
-						.polygonOffset(true)
-						.cutout(CutoutShaders.OFF);
+						.useOverlay(false)
+						.useLight(false);
 
 				var program = InstancingPrograms.get()
 						.get(shader.vertexType(), shader.instanceType(), Contexts.CRUMBLING);
 				UniformBuffer.syncAndBind(program);
 
-				InstancingEngine.uploadMaterialIDUniform(program, crumblingMaterial);
+				InstancingEngine.uploadMaterialUniform(program, crumblingMaterial);
 
 				for (Int2ObjectMap.Entry<List<Runnable>> progressEntry : byProgress.int2ObjectEntrySet()) {
 					var drawCalls = progressEntry.getValue();
@@ -71,17 +73,17 @@ public class InstancedCrumbling {
 
 					crumblingMaterial.baseTexture(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
 
-					MaterialUtil.setup(crumblingMaterial);
+					MaterialRenderState.setup(crumblingMaterial);
 
-					RenderSystem.setShaderTexture(1, diffuseTexture);
 					GlTextureUnit.T1.makeActive();
+					RenderSystem.setShaderTexture(1, diffuseTexture);
 					RenderSystem.bindTexture(diffuseTexture);
 
 					drawCalls.forEach(Runnable::run);
 				}
 			}
 
-			MaterialUtil.reset();
+			MaterialRenderState.reset();
 		}
 	}
 
