@@ -15,8 +15,8 @@ public class BlockVertex implements VertexType {
 			.build();
 
 	@Override
-	public BufferLayout getLayout() {
-		return FORMAT;
+	public int getStride() {
+		return FORMAT.getStride();
 	}
 
 	@Override

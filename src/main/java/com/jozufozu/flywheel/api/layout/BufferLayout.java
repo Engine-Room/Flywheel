@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.api.layout;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.gl.array.VertexAttribute;
 
 /**
@@ -14,7 +13,6 @@ import com.jozufozu.flywheel.gl.array.VertexAttribute;
  * </p>
  *
  * @see com.jozufozu.flywheel.api.instance.InstanceType
- * @see VertexType
  */
 public class BufferLayout {
 

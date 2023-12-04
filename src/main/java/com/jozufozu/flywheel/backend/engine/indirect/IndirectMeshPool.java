@@ -10,17 +10,16 @@ import org.joml.Vector4fc;
 
 import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.api.model.Mesh;
-import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.gl.GlNumericType;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.QuadIndexSequence;
+import com.jozufozu.flywheel.lib.vertex.BlockVertex;
 import com.jozufozu.flywheel.lib.vertex.BlockVertexList;
-import com.jozufozu.flywheel.lib.vertex.VertexTypes;
 
 public class IndirectMeshPool {
-	private static final VertexType VERTEX_TYPE = VertexTypes.BLOCK;
+	private static final BufferLayout LAYOUT = BlockVertex.FORMAT;
 
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
 	private final List<BufferedMesh> meshList = new ArrayList<>();
@@ -40,13 +39,8 @@ public class IndirectMeshPool {
 		vertexArray = GlVertexArray.create();
 
 		vertexArray.setElementBuffer(ebo.handle());
-		BufferLayout layout = VERTEX_TYPE.getLayout();
-		vertexArray.bindVertexBuffer(0, vbo.handle(), 0, layout.getStride());
-		vertexArray.bindAttributes(0, 0, layout.attributes());
-	}
-
-	public VertexType getVertexType() {
-		return VERTEX_TYPE;
+		vertexArray.bindVertexBuffer(0, vbo.handle(), 0, LAYOUT.getStride());
+		vertexArray.bindAttributes(0, 0, LAYOUT.attributes());
 	}
 
 	/**
@@ -160,7 +154,7 @@ public class IndirectMeshPool {
 		}
 
 		public int size() {
-			return mesh.vertexCount() * VERTEX_TYPE.getStride();
+			return mesh.vertexCount() * LAYOUT.getStride();
 		}
 
 		public int indexCount() {
