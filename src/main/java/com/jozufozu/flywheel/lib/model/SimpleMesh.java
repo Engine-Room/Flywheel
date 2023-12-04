@@ -24,13 +24,13 @@ public class SimpleMesh implements QuadMesh {
 		this.descriptor = descriptor;
 
 		int bytes = (int) data.size();
-		int stride = vertexType.getLayout().getStride();
+		int stride = vertexType.getStride();
 		if (bytes % stride != 0) {
 			throw new IllegalArgumentException("MemoryBlock contains non-whole amount of vertices!");
 		}
 		vertexCount = bytes / stride;
 
-		vertexList = vertexType().createVertexList();
+		vertexList = this.vertexType.createVertexList();
 		vertexList.ptr(data.ptr());
 		vertexList.vertexCount(vertexCount);
 
@@ -42,18 +42,8 @@ public class SimpleMesh implements QuadMesh {
 	}
 
 	@Override
-	public VertexType vertexType() {
-		return vertexType;
-	}
-
-	@Override
 	public int vertexCount() {
 		return vertexCount;
-	}
-
-	@Override
-	public void write(long ptr) {
-		data.copyTo(ptr);
 	}
 
 	@Override

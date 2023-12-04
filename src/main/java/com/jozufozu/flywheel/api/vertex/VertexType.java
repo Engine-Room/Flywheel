@@ -1,19 +1,14 @@
 package com.jozufozu.flywheel.api.vertex;
 
-import com.jozufozu.flywheel.api.layout.BufferLayout;
-
 /**
  * A vertex type containing metadata about a specific vertex layout.
  */
+// TODO: query a bitset of vertex attributes that are used?
 public interface VertexType extends VertexListProvider {
 	/**
-	 * The layout of this type of vertex when buffered.
+	 * The byte size of a single vertex.
 	 */
-	BufferLayout getLayout();
-
-	default int getStride() {
-		return getLayout().getStride();
-	}
+	int getStride();
 
 	default int byteOffset(int vertexIndex) {
 		return getStride() * vertexIndex;

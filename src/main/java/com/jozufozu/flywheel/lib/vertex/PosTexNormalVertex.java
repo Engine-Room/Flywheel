@@ -10,10 +10,9 @@ public class PosTexNormalVertex implements VertexType {
 			.addItem(CommonItems.VEC2, "tex")
 			.addItem(CommonItems.NORM_3x8, "normal")
 			.build();
-
 	@Override
-	public BufferLayout getLayout() {
-		return FORMAT;
+	public int getStride() {
+		return FORMAT.getStride();
 	}
 
 	@Override

@@ -62,7 +62,7 @@ public final class ModelUtil {
 		VertexFormat srcFormat = drawState.format();
 
 		ByteBuffer src = buffer.vertexBuffer();
-		MemoryBlock dst = MemoryBlock.malloc((long) vertexCount * vertexType.getLayout().getStride());
+		MemoryBlock dst = MemoryBlock.malloc((long) vertexCount * vertexType.getStride());
 		long srcPtr = MemoryUtil.memAddress(src);
 		long dstPtr = dst.ptr();
 
