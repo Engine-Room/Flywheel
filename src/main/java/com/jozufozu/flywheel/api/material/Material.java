@@ -10,21 +10,11 @@ public interface Material {
 
 	MaterialShaders shaders();
 
+	FogShader fog();
+
+	CutoutShader cutout();
+
 	ResourceLocation baseTexture();
-
-	/**
-	 * Should this material be rendered with diffuse lighting?
-	 *
-	 * @return {@code true} if this material should be rendered with diffuse lighting.
-	 */
-	boolean diffuse();
-
-	/**
-	 * Should this material be rendered with block/sky lighting?
-	 *
-	 * @return {@code true} if this material should be rendered with block/sky lighting.
-	 */
-	boolean lighting();
 
 	/**
 	 * Should this material have linear filtering applied to the diffuse sampler?
@@ -33,22 +23,36 @@ public interface Material {
 	 */
 	boolean blur();
 
+	boolean mipmap();
+
 	/**
 	 * Should this material be rendered with backface culling?
 	 *
 	 * @return {@code true} if this material should be rendered with backface culling.
 	 */
-	boolean backfaceCull();
+	boolean backfaceCulling();
 
 	boolean polygonOffset();
 
-	boolean mip();
-
-	FogShader fog();
-
-	CutoutShader cutout();
+	DepthTest depthTest();
 
 	Transparency transparency();
 
 	WriteMask writeMask();
+
+	boolean useOverlay();
+
+	/**
+	 * Should this material be rendered with block/sky lighting?
+	 *
+	 * @return {@code true} if this material should be rendered with block/sky lighting.
+	 */
+	boolean useLight();
+
+	/**
+	 * Should this material be rendered with diffuse lighting?
+	 *
+	 * @return {@code true} if this material should be rendered with diffuse lighting.
+	 */
+	boolean diffuse();
 }

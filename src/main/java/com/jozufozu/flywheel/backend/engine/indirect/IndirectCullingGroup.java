@@ -21,7 +21,7 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.backend.MaterialUtil;
+import com.jozufozu.flywheel.backend.MaterialRenderState;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlCompat;
@@ -81,7 +81,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		multiDraws.clear();
 		// sort by stage, then material
 		indirectDraws.sort(Comparator.comparing(IndirectDraw::stage)
-				.thenComparing(IndirectDraw::material, MaterialUtil.BY_STATE));
+				.thenComparing(IndirectDraw::material, MaterialRenderState.COMPARATOR));
 
 		for (int start = 0, i = 0; i < indirectDraws.size(); i++) {
 			var draw1 = indirectDraws.get(i);
@@ -164,7 +164,6 @@ public class IndirectCullingGroup<I extends Instance> {
 			glUniform1ui(flwBaseDraw, multiDraw.start);
 			multiDraw.submit();
 		}
-		MaterialUtil.reset();
 	}
 
 	private void drawBarrier() {
@@ -233,7 +232,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private record MultiDraw(Material material, int start, int end) {
 		void submit() {
-			MaterialUtil.setup(material);
+			MaterialRenderState.setup(material);
 			glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, start * IndirectBuffers.DRAW_COMMAND_STRIDE, end - start, (int) IndirectBuffers.DRAW_COMMAND_STRIDE);
 		}
 	}

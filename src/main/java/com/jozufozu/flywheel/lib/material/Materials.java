@@ -28,81 +28,91 @@ public final class Materials {
 	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
 
 	public static final Material CHUNK_SOLID_SHADED = SimpleMaterial.builder()
+			.useOverlay(false)
 			.fallbackRenderType(RenderType.solid())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.build();
 	public static final Material CHUNK_SOLID_UNSHADED = SimpleMaterial.builder()
+			.useOverlay(false)
 			.diffuse(false)
 			.fallbackRenderType(RenderType.solid())
 			.build();
 
 	public static final Material CHUNK_CUTOUT_MIPPED_SHADED = SimpleMaterial.builder()
 			.cutout(CutoutShaders.EPSILON)
+			.useOverlay(false)
 			.fallbackRenderType(RenderType.cutoutMipped())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.build();
 	public static final Material CHUNK_CUTOUT_MIPPED_UNSHADED = SimpleMaterial.builder()
-			.diffuse(false)
 			.cutout(CutoutShaders.EPSILON)
+			.useOverlay(false)
+			.diffuse(false)
 			.fallbackRenderType(RenderType.cutoutMipped())
 			.build();
 
 	public static final Material CHUNK_CUTOUT_SHADED = SimpleMaterial.builder()
-			.mip(false)
 			.cutout(CutoutShaders.EPSILON)
+			.mipmap(false)
+			.useOverlay(false)
 			.fallbackRenderType(RenderType.cutout())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.build();
 	public static final Material CHUNK_CUTOUT_UNSHADED = SimpleMaterial.builder()
-			.diffuse(false)
-			.mip(false)
 			.cutout(CutoutShaders.EPSILON)
+			.mipmap(false)
+			.useOverlay(false)
+			.diffuse(false)
 			.fallbackRenderType(RenderType.cutout())
 			.build();
 
 	public static final Material CHUNK_TRANSLUCENT_SHADED = SimpleMaterial.builder()
 			.transparency(Transparency.TRANSLUCENT)
+			.useOverlay(false)
 			.fallbackRenderType(RenderType.translucent())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.build();
 	public static final Material CHUNK_TRANSLUCENT_UNSHADED = SimpleMaterial.builder()
-			.diffuse(false)
 			.transparency(Transparency.TRANSLUCENT)
+			.useOverlay(false)
+			.diffuse(false)
 			.fallbackRenderType(RenderType.translucent())
 			.build();
 
 	public static final Material CHUNK_TRIPWIRE_SHADED = SimpleMaterial.builder()
-			.transparency(Transparency.TRANSLUCENT)
 			.cutout(CutoutShaders.EPSILON)
+			.transparency(Transparency.TRANSLUCENT)
+			.useOverlay(false)
 			.fallbackRenderType(RenderType.tripwire())
 			.vertexTransformer(SHADING_TRANSFORMER)
 			.build();
 	public static final Material CHUNK_TRIPWIRE_UNSHADED = SimpleMaterial.builder()
-			.diffuse(false)
-			.transparency(Transparency.TRANSLUCENT)
 			.cutout(CutoutShaders.EPSILON)
+			.transparency(Transparency.TRANSLUCENT)
+			.useOverlay(false)
+			.diffuse(false)
 			.fallbackRenderType(RenderType.tripwire())
 			.build();
 
 	public static final Material CHEST = SimpleMaterial.builder()
 			.baseTexture(Sheets.CHEST_SHEET)
-			.mip(false)
+			.mipmap(false)
 			.fallbackRenderType(Sheets.chestSheet())
 			.build();
 	public static final Material SHULKER = SimpleMaterial.builder()
-			.baseTexture(Sheets.SHULKER_SHEET)
-			.mip(false)
-			.backfaceCull(false)
 			.cutout(CutoutShaders.EPSILON)
+			.baseTexture(Sheets.SHULKER_SHEET)
+			.mipmap(false)
+			.backfaceCulling(false)
 			.fallbackRenderType(Sheets.shulkerBoxSheet())
 			.build();
 	public static final Material BELL = SimpleMaterial.builder()
-			.mip(false)
+			.mipmap(false)
 			.fallbackRenderType(Sheets.solidBlockSheet())
 			.build();
 	public static final Material MINECART = SimpleMaterial.builder()
 			.baseTexture(MINECART_LOCATION)
-			.mip(false)
+			.mipmap(false)
 			.fallbackRenderType(RenderType.entitySolid(MINECART_LOCATION))
 			.build();
 
