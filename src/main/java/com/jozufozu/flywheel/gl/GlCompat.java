@@ -21,9 +21,9 @@ import net.minecraft.Util;
 public class GlCompat {
 	public static final boolean ALLOW_DSA = true;
 	public static final GLCapabilities CAPABILITIES = GL.createCapabilities();
-	private static final boolean amd = _decideIfWeAreAMD();
-	private static final boolean windows = _decideIfWeAreWindows();
-	private static final boolean supportsIndirect = _decideIfWeSupportIndirect();
+	public static final boolean amd = _decideIfWeAreAMD();
+	public static final boolean windows = _decideIfWeAreWindows();
+	public static final boolean supportsIndirect = _decideIfWeSupportIndirect();
 	public static final int SUBGROUP_SIZE = _subgroupSize();
 
 	private GlCompat() {

@@ -17,31 +17,37 @@ import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.GLSLVersion;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
+import com.jozufozu.flywheel.lib.util.Unit;
 
 import net.minecraft.resources.ResourceLocation;
 
 public class IndirectPrograms {
 	public static IndirectPrograms instance;
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
+	private static final Compile<Unit> APPLY = new Compile<>();
 	private final Map<PipelineProgramKey, GlProgram> pipeline;
 	private final Map<InstanceType<?>, GlProgram> culling;
+	private final GlProgram apply;
 
-	public IndirectPrograms(Map<PipelineProgramKey, GlProgram> pipeline, Map<InstanceType<?>, GlProgram> culling) {
+	public IndirectPrograms(Map<PipelineProgramKey, GlProgram> pipeline, Map<InstanceType<?>, GlProgram> culling, GlProgram apply) {
 		this.pipeline = pipeline;
 		this.culling = culling;
+		this.apply = apply;
 	}
 
 	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
 		_delete();
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, pipelineKeys, uniformComponent, vertexComponents, fragmentComponents);
 		var cullingCompiler = createCullingCompiler(uniformComponent, sources);
+		var stage2Compiler = createStage2Compiler(sources);
 
 		try {
 			var pipelineResult = pipelineCompiler.compileAndReportErrors();
 			var cullingResult = cullingCompiler.compileAndReportErrors();
+			var stage2Result = stage2Compiler.compileAndReportErrors();
 
-			if (pipelineResult != null && cullingResult != null) {
-				instance = new IndirectPrograms(pipelineResult, cullingResult);
+			if (pipelineResult != null && cullingResult != null && stage2Result != null) {
+				instance = new IndirectPrograms(pipelineResult, cullingResult, stage2Result.get(Unit.INSTANCE));
 			}
 		} catch (Throwable e) {
 			Flywheel.LOGGER.error("Failed to compile indirect programs", e);
@@ -88,6 +94,16 @@ public class IndirectPrograms {
 				.build();
 	}
 
+	private static CompilationHarness<Unit> createStage2Compiler(ShaderSources sources) {
+		return APPLY.harness(sources)
+				.keys(ImmutableList.of(Unit.INSTANCE))
+				.compiler(APPLY.program()
+						.link(APPLY.shader(GLSLVersion.V460, ShaderType.COMPUTE)
+								.define("FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
+								.withResource(Files.INDIRECT_APPLY)))
+				.build();
+	}
+
 	public GlProgram getIndirectProgram(InstanceType<?> instanceType, Context contextShader) {
 		return pipeline.get(new PipelineProgramKey(instanceType, contextShader));
 	}
@@ -96,14 +112,20 @@ public class IndirectPrograms {
 		return culling.get(instanceType);
 	}
 
+	public GlProgram getApplyProgram() {
+		return apply;
+	}
+
 	public void delete() {
 		pipeline.values()
 				.forEach(GlProgram::delete);
 		culling.values()
 				.forEach(GlProgram::delete);
+		apply.delete();
 	}
 
 	private static final class Files {
 		public static final ResourceLocation INDIRECT_CULL = Flywheel.rl("internal/indirect/cull.glsl");
+		public static final ResourceLocation INDIRECT_APPLY = Flywheel.rl("internal/indirect/apply.glsl");
 	}
 }

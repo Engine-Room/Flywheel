@@ -35,11 +35,11 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		changed.clear();
 	}
 
-	public void writeFull(long objectPtr, int batchID) {
+	public void writeFull(long objectPtr, int modelID) {
 		InstanceWriter<I> writer = type.getWriter();
 		for (I object : instances) {
-			// write batchID
-			MemoryUtil.memPutInt(objectPtr, batchID);
+			// write modelID
+			MemoryUtil.memPutInt(objectPtr, modelID);
 			objectPtr += IndirectBuffers.INT_SIZE;
 
 			// write object

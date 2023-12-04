@@ -20,17 +20,9 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 
 	@Override
 	protected <I extends Instance> void add(InstancerKey<I> key, IndirectInstancer<?> instancer, Model model, RenderStage stage) {
-		var meshes = model.getMeshes();
-		for (var entry : meshes.entrySet()) {
-			var material = entry.getKey();
-			var mesh = entry.getValue();
+		var indirectList = (IndirectCullingGroup<I>) renderLists.computeIfAbsent(key.type(), IndirectCullingGroup::new);
 
-			var indirectList = (IndirectCullingGroup<I>) renderLists.computeIfAbsent(key.type(), IndirectCullingGroup::new);
-
-			indirectList.add((IndirectInstancer<I>) instancer, stage, material, mesh);
-
-			break; // TODO: support multiple meshes per model
-		}
+		indirectList.add((IndirectInstancer<I>) instancer, stage, model);
 	}
 
 	public boolean hasStage(RenderStage stage) {
@@ -46,8 +38,16 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 	public void flush() {
 		super.flush();
 
-		for (IndirectCullingGroup<?> value : renderLists.values()) {
-			value.beginFrame();
+		for (var group : renderLists.values()) {
+			group.flush();
+		}
+
+		for (var group : renderLists.values()) {
+			group.dispatchCull();
+		}
+
+		for (var group : renderLists.values()) {
+			group.dispatchApply();
 		}
 	}
 
