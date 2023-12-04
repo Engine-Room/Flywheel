@@ -30,7 +30,7 @@ void main() {
     _flw_materialVertexID = drawCommands[batchID].vertexMaterialID;
     uint p = drawCommands[batchID].packedMaterialProperties;
 
-    _flw_unpackMaterial(p, flw_material);
+    _flw_unpackMaterialProperties(p, flw_material);
     _flw_material = uvec3(drawCommands[batchID].fragmentMaterialID, drawCommands[batchID].packedFogAndCutout, p);
 
     flw_layoutVertex();

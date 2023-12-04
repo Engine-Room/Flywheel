@@ -9,7 +9,8 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.backend.MaterialUtil;
+import com.jozufozu.flywheel.backend.MaterialEncoder;
+import com.jozufozu.flywheel.backend.MaterialRenderState;
 import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
@@ -23,6 +24,7 @@ import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.NamedFlag;
 import com.jozufozu.flywheel.lib.task.SyncedPlan;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
@@ -34,7 +36,7 @@ public class InstancingEngine extends AbstractEngine {
 
 	public InstancingEngine(int maxOriginDistance) {
 		super(maxOriginDistance);
-    }
+	}
 
 	@Override
 	public Plan<RenderContext> createFramePlan() {
@@ -57,16 +59,27 @@ public class InstancingEngine extends AbstractEngine {
 
 		var drawSet = drawManager.get(stage);
 
-        if (drawSet.isEmpty()) {
-            return;
-        }
+		if (drawSet.isEmpty()) {
+			return;
+		}
 
-        try (var state = GlStateTracker.getRestoreState()) {
-            setup();
+		try (var state = GlStateTracker.getRestoreState()) {
+			int prevActiveTexture = GlStateManager._getActiveTexture();
+			Minecraft.getInstance().gameRenderer.overlayTexture().setupOverlayColor();
+			Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
 
-            render(drawSet);
-        }
-    }
+			GlTextureUnit.T1.makeActive();
+			RenderSystem.bindTexture(RenderSystem.getShaderTexture(1));
+			GlTextureUnit.T2.makeActive();
+			RenderSystem.bindTexture(RenderSystem.getShaderTexture(2));
+
+			render(drawSet);
+
+			Minecraft.getInstance().gameRenderer.overlayTexture().teardownOverlayColor();
+			Minecraft.getInstance().gameRenderer.lightTexture().turnOffLightLayer();
+			GlStateManager._activeTexture(prevActiveTexture);
+		}
+	}
 
 	@Override
 	public void renderCrumbling(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks) {
@@ -86,17 +99,6 @@ public class InstancingEngine extends AbstractEngine {
 		drawManager.invalidate();
 	}
 
-	private void setup() {
-		GlTextureUnit.T2.makeActive();
-		Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
-
-		RenderSystem.depthMask(true);
-		RenderSystem.colorMask(true, true, true, true);
-		RenderSystem.enableDepthTest();
-		RenderSystem.depthFunc(GL32.GL_LEQUAL);
-		RenderSystem.enableCull();
-	}
-
 	private void render(InstancedDrawManager.DrawSet drawSet) {
 		for (var entry : drawSet) {
 			var shader = entry.getKey();
@@ -112,24 +114,24 @@ public class InstancingEngine extends AbstractEngine {
 					.get(shader.vertexType(), shader.instanceType(), Contexts.WORLD);
 			UniformBuffer.syncAndBind(program);
 
-			uploadMaterialIDUniform(program, shader.material());
+			uploadMaterialUniform(program, shader.material());
 
-			MaterialUtil.setup(shader.material());
+			MaterialRenderState.setup(shader.material());
 
 			for (var drawCall : drawCalls) {
 				drawCall.render();
 			}
-
-			MaterialUtil.reset();
 		}
+
+		MaterialRenderState.reset();
 	}
 
-	public static void uploadMaterialIDUniform(GlProgram program, Material material) {
-		int materialIDUniform = program.getUniformLocation("_flw_material_instancing");
-		int vertexID = ShaderIndices.getVertexShaderIndex(material.shaders());
-		int fragmentID = ShaderIndices.getFragmentShaderIndex(material.shaders());
-		int packedFogAndCutout = MaterialUtil.packFogAndCutout(material);
-		int packedMaterialProperties = MaterialUtil.packProperties(material);
-		GL32.glUniform4ui(materialIDUniform, vertexID, fragmentID, packedFogAndCutout, packedMaterialProperties);
+	public static void uploadMaterialUniform(GlProgram program, Material material) {
+		int uniformLocation = program.getUniformLocation("_flw_packedMaterial");
+		int vertexIndex = ShaderIndices.getVertexShaderIndex(material.shaders());
+		int fragmentIndex = ShaderIndices.getFragmentShaderIndex(material.shaders());
+		int packedFogAndCutout = MaterialEncoder.packFogAndCutout(material);
+		int packedMaterialProperties = MaterialEncoder.packProperties(material);
+		GL32.glUniform4ui(uniformLocation, vertexIndex, fragmentIndex, packedFogAndCutout, packedMaterialProperties);
 	}
 }

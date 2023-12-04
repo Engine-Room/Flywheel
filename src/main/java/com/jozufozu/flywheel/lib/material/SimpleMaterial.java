@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.lib.material;
 
 import com.jozufozu.flywheel.api.material.CutoutShader;
+import com.jozufozu.flywheel.api.material.DepthTest;
 import com.jozufozu.flywheel.api.material.FogShader;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.MaterialShaders;
@@ -13,50 +14,52 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 
 public class SimpleMaterial implements Material {
-	protected final MaterialShaders shaders;
 	protected final RenderType fallbackRenderType;
 	protected final MaterialVertexTransformer vertexTransformer;
 
-	protected final ResourceLocation baseTexture;
-	protected final boolean diffuse;
-	protected final boolean lighting;
-	protected final boolean blur;
-	protected final boolean backfaceCull;
-	protected final boolean polygonOffset;
-	protected final boolean mip;
+	protected final MaterialShaders shaders;
 	protected final FogShader fog;
-	protected final Transparency transparency;
 	protected final CutoutShader cutout;
+
+	protected final ResourceLocation baseTexture;
+	protected final boolean blur;
+	protected final boolean mipmap;
+
+	protected final boolean backfaceCulling;
+	protected final boolean polygonOffset;
+	protected final DepthTest depthTest;
+	protected final Transparency transparency;
 	protected final WriteMask writeMask;
 
+	protected final boolean useOverlay;
+	protected final boolean useLight;
+	protected final boolean diffuse;
+
 	protected SimpleMaterial(Builder builder) {
-		this.shaders = builder.shaders;
-		this.fallbackRenderType = builder.fallbackRenderType;
-		this.vertexTransformer = builder.vertexTransformer;
-		this.baseTexture = builder.baseTexture;
-		this.diffuse = builder.diffuse;
-		this.lighting = builder.lighting;
-		this.blur = builder.blur;
-		this.backfaceCull = builder.backfaceCull;
-		this.polygonOffset = builder.polygonOffset;
-		this.mip = builder.mip;
-		this.fog = builder.fog;
-		this.transparency = builder.transparency;
-		this.cutout = builder.cutout;
-		this.writeMask = builder.writeMask;
+		fallbackRenderType = builder.getFallbackRenderType();
+		vertexTransformer = builder.getVertexTransformer();
+		shaders = builder.shaders();
+		fog = builder.fog();
+		cutout = builder.cutout();
+		baseTexture = builder.baseTexture();
+		blur = builder.blur();
+		mipmap = builder.mipmap();
+		backfaceCulling = builder.backfaceCulling();
+		polygonOffset = builder.polygonOffset();
+		depthTest = builder.depthTest();
+		transparency = builder.transparency();
+		writeMask = builder.writeMask();
+		useOverlay = builder.useOverlay();
+		useLight = builder.useLight();
+		diffuse = builder.diffuse();
 	}
 
 	public static Builder builder() {
 		return new Builder();
 	}
 
-	public static Builder from(Material material) {
+	public static Builder builderOf(Material material) {
 		return new Builder(material);
-	}
-
-	@Override
-	public MaterialShaders shaders() {
-		return shaders;
 	}
 
 	@Override
@@ -70,38 +73,8 @@ public class SimpleMaterial implements Material {
 	}
 
 	@Override
-	public ResourceLocation baseTexture() {
-		return baseTexture;
-	}
-
-	@Override
-	public boolean diffuse() {
-		return diffuse;
-	}
-
-	@Override
-	public boolean lighting() {
-		return lighting;
-	}
-
-	@Override
-	public boolean blur() {
-		return blur;
-	}
-
-	@Override
-	public boolean backfaceCull() {
-		return backfaceCull;
-	}
-
-	@Override
-	public boolean polygonOffset() {
-		return polygonOffset;
-	}
-
-	@Override
-	public boolean mip() {
-		return mip;
+	public MaterialShaders shaders() {
+		return shaders;
 	}
 
 	@Override
@@ -110,13 +83,43 @@ public class SimpleMaterial implements Material {
 	}
 
 	@Override
-	public Transparency transparency() {
-		return transparency;
+	public CutoutShader cutout() {
+		return cutout;
 	}
 
 	@Override
-	public CutoutShader cutout() {
-		return cutout;
+	public ResourceLocation baseTexture() {
+		return baseTexture;
+	}
+
+	@Override
+	public boolean blur() {
+		return blur;
+	}
+
+	@Override
+	public boolean mipmap() {
+		return mipmap;
+	}
+
+	@Override
+	public boolean backfaceCulling() {
+		return backfaceCulling;
+	}
+
+	@Override
+	public boolean polygonOffset() {
+		return polygonOffset;
+	}
+
+	@Override
+	public DepthTest depthTest() {
+		return depthTest;
+	}
+
+	@Override
+	public Transparency transparency() {
+		return transparency;
 	}
 
 	@Override
@@ -124,55 +127,85 @@ public class SimpleMaterial implements Material {
 		return writeMask;
 	}
 
+	@Override
+	public boolean useOverlay() {
+		return useOverlay;
+	}
+
+	@Override
+	public boolean useLight() {
+		return useLight;
+	}
+
+	@Override
+	public boolean diffuse() {
+		return diffuse;
+	}
+
 	public static class Builder implements Material {
 		protected RenderType fallbackRenderType;
 		protected MaterialVertexTransformer vertexTransformer;
+
 		protected MaterialShaders shaders;
-		protected ResourceLocation baseTexture;
-		protected boolean diffuse;
-		protected boolean lighting;
-		protected boolean blur;
-		protected boolean backfaceCull;
-		protected boolean polygonOffset;
-		protected boolean mip;
 		protected FogShader fog;
-		protected Transparency transparency;
 		protected CutoutShader cutout;
+
+		protected ResourceLocation baseTexture;
+		protected boolean blur;
+		protected boolean mipmap;
+
+		protected boolean backfaceCulling;
+		protected boolean polygonOffset;
+		protected DepthTest depthTest;
+		protected Transparency transparency;
 		protected WriteMask writeMask;
+
+		protected boolean useOverlay;
+		protected boolean useLight;
+		protected boolean diffuse;
 
 		public Builder() {
 			fallbackRenderType = RenderType.solid();
 			vertexTransformer = (vertexList, level) -> {
 			};
 			shaders = StandardMaterialShaders.DEFAULT;
-			baseTexture = InventoryMenu.BLOCK_ATLAS;
-			diffuse = true;
-			lighting = true;
-			blur = false;
-			backfaceCull = true;
-			polygonOffset = false;
-			mip = true;
 			fog = FogShaders.LINEAR;
-			transparency = Transparency.OPAQUE;
 			cutout = CutoutShaders.OFF;
+			baseTexture = InventoryMenu.BLOCK_ATLAS;
+			blur = false;
+			mipmap = true;
+			backfaceCulling = true;
+			polygonOffset = false;
+			depthTest = DepthTest.LEQUAL;
+			transparency = Transparency.OPAQUE;
 			writeMask = WriteMask.BOTH;
+			useOverlay = true;
+			useLight = true;
+			diffuse = true;
 		}
 
 		public Builder(Material material) {
+			copyFrom(material);
+		}
+
+		public Builder copyFrom(Material material) {
 			fallbackRenderType = material.getFallbackRenderType();
 			vertexTransformer = material.getVertexTransformer();
 			shaders = material.shaders();
-			baseTexture = material.baseTexture();
-			diffuse = material.diffuse();
-			lighting = material.lighting();
-			blur = material.blur();
-			backfaceCull = material.backfaceCull();
-			polygonOffset = material.polygonOffset();
-			mip = material.mip();
 			fog = material.fog();
-			transparency = material.transparency();
 			cutout = material.cutout();
+			baseTexture = material.baseTexture();
+			blur = material.blur();
+			mipmap = material.mipmap();
+			backfaceCulling = material.backfaceCulling();
+			polygonOffset = material.polygonOffset();
+			depthTest = material.depthTest();
+			transparency = material.transparency();
 			writeMask = material.writeMask();
+			useOverlay = material.useOverlay();
+			useLight = material.useLight();
+			diffuse = material.diffuse();
+			return this;
 		}
 
 		public Builder fallbackRenderType(RenderType type) {
@@ -190,48 +223,8 @@ public class SimpleMaterial implements Material {
 			return this;
 		}
 
-		public Builder baseTexture(ResourceLocation value) {
-			this.baseTexture = value;
-			return this;
-		}
-
-		public Builder diffuse(boolean value) {
-			this.diffuse = value;
-			return this;
-		}
-
-		public Builder lighting(boolean value) {
-			this.lighting = value;
-			return this;
-		}
-
-		public Builder blur(boolean value) {
-			this.blur = value;
-			return this;
-		}
-
-		public Builder backfaceCull(boolean value) {
-			this.backfaceCull = value;
-			return this;
-		}
-
-		public Builder polygonOffset(boolean value) {
-			this.polygonOffset = value;
-			return this;
-		}
-
-		public Builder mip(boolean value) {
-			this.mip = value;
-			return this;
-		}
-
 		public Builder fog(FogShader value) {
 			this.fog = value;
-			return this;
-		}
-
-		public Builder transparency(Transparency value) {
-			this.transparency = value;
 			return this;
 		}
 
@@ -240,14 +233,59 @@ public class SimpleMaterial implements Material {
 			return this;
 		}
 
+		public Builder baseTexture(ResourceLocation value) {
+			this.baseTexture = value;
+			return this;
+		}
+
+		public Builder blur(boolean value) {
+			this.blur = value;
+			return this;
+		}
+
+		public Builder mipmap(boolean value) {
+			this.mipmap = value;
+			return this;
+		}
+
+		public Builder backfaceCulling(boolean value) {
+			this.backfaceCulling = value;
+			return this;
+		}
+
+		public Builder polygonOffset(boolean value) {
+			this.polygonOffset = value;
+			return this;
+		}
+
+		public Builder depthTest(DepthTest value) {
+			this.depthTest = value;
+			return this;
+		}
+
+		public Builder transparency(Transparency value) {
+			this.transparency = value;
+			return this;
+		}
+
 		public Builder writeMask(WriteMask value) {
 			this.writeMask = value;
 			return this;
 		}
 
-		@Override
-		public MaterialShaders shaders() {
-			return shaders;
+		public Builder useOverlay(boolean value) {
+			this.useOverlay = value;
+			return this;
+		}
+
+		public Builder useLight(boolean value) {
+			this.useLight = value;
+			return this;
+		}
+
+		public Builder diffuse(boolean value) {
+			this.diffuse = value;
+			return this;
 		}
 
 		@Override
@@ -261,38 +299,8 @@ public class SimpleMaterial implements Material {
 		}
 
 		@Override
-		public ResourceLocation baseTexture() {
-			return baseTexture;
-		}
-
-		@Override
-		public boolean diffuse() {
-			return diffuse;
-		}
-
-		@Override
-		public boolean lighting() {
-			return lighting;
-		}
-
-		@Override
-		public boolean blur() {
-			return blur;
-		}
-
-		@Override
-		public boolean backfaceCull() {
-			return backfaceCull;
-		}
-
-		@Override
-		public boolean polygonOffset() {
-			return polygonOffset;
-		}
-
-		@Override
-		public boolean mip() {
-			return mip;
+		public MaterialShaders shaders() {
+			return shaders;
 		}
 
 		@Override
@@ -301,18 +309,63 @@ public class SimpleMaterial implements Material {
 		}
 
 		@Override
-		public Transparency transparency() {
-			return transparency;
-		}
-
-		@Override
 		public CutoutShader cutout() {
 			return cutout;
 		}
 
 		@Override
+		public ResourceLocation baseTexture() {
+			return baseTexture;
+		}
+
+		@Override
+		public boolean blur() {
+			return blur;
+		}
+
+		@Override
+		public boolean mipmap() {
+			return mipmap;
+		}
+
+		@Override
+		public boolean backfaceCulling() {
+			return backfaceCulling;
+		}
+
+		@Override
+		public boolean polygonOffset() {
+			return polygonOffset;
+		}
+
+		@Override
+		public DepthTest depthTest() {
+			return depthTest;
+		}
+
+		@Override
+		public Transparency transparency() {
+			return transparency;
+		}
+
+		@Override
 		public WriteMask writeMask() {
 			return writeMask;
+		}
+
+		@Override
+		public boolean useOverlay() {
+			return useOverlay;
+		}
+
+		@Override
+		public boolean useLight() {
+			return useLight;
+		}
+
+		@Override
+		public boolean diffuse() {
+			return diffuse;
 		}
 
 		public SimpleMaterial build() {

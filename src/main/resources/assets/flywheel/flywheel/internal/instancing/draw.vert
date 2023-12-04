@@ -2,12 +2,12 @@
 #include "flywheel:internal/material.glsl"
 #include "flywheel:util/diffuse.glsl"
 
-uniform uvec4 _flw_material_instancing;
+uniform uvec4 _flw_packedMaterial;
 
 void main() {
-    _flw_materialVertexID = _flw_material_instancing.x;
+    _flw_materialVertexID = _flw_packedMaterial.x;
 
-    _flw_unpackMaterial(_flw_material_instancing.w, flw_material);
+    _flw_unpackMaterialProperties(_flw_packedMaterial.w, flw_material);
 
     FlwInstance i = _flw_unpackInstance();
 

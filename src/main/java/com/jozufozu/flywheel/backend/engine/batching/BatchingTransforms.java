@@ -6,7 +6,6 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
-import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
 import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
@@ -31,7 +30,7 @@ public class BatchingTransforms {
 	 *
 	 * @param vertexList The vertex list to apply the transformations to.
 	 */
-	public static void applyDecalUVs(ReusableVertexList vertexList) {
+	public static void applyDecalUVs(MutableVertexList vertexList) {
 		Vector3f normal = new Vector3f();
 		Vector4f pos = new Vector4f();
 

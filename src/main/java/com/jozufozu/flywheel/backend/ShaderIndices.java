@@ -19,8 +19,8 @@ import net.minecraft.resources.ResourceLocation;
 public final class ShaderIndices {
 	private static Index vertexShaders;
 	private static Index fragmentShaders;
-	private static Index cutoutShaders;
 	private static Index fogShaders;
+	private static Index cutoutShaders;
 
 	private ShaderIndices() {
 	}
@@ -39,13 +39,6 @@ public final class ShaderIndices {
 		return fragmentShaders;
 	}
 
-	public static Index cutout() {
-		if (cutoutShaders == null) {
-			throw new IllegalStateException("Not initialized!");
-		}
-		return cutoutShaders;
-	}
-
 	public static Index fog() {
 		if (fogShaders == null) {
 			throw new IllegalStateException("Not initialized!");
@@ -53,12 +46,11 @@ public final class ShaderIndices {
 		return fogShaders;
 	}
 
-	public static int getCutoutShaderIndex(CutoutShader cutoutShader) {
-		return cutout().index(cutoutShader.source());
-	}
-
-	public static int getFogShaderIndex(FogShader fogShader) {
-		return fog().index(fogShader.source());
+	public static Index cutout() {
+		if (cutoutShaders == null) {
+			throw new IllegalStateException("Not initialized!");
+		}
+		return cutoutShaders;
 	}
 
 	public static int getVertexShaderIndex(MaterialShaders shaders) {
@@ -67,6 +59,14 @@ public final class ShaderIndices {
 
 	public static int getFragmentShaderIndex(MaterialShaders shaders) {
 		return materialFragment().index(shaders.fragmentShader());
+	}
+
+	public static int getFogShaderIndex(FogShader fogShader) {
+		return fog().index(fogShader.source());
+	}
+
+	public static int getCutoutShaderIndex(CutoutShader cutoutShader) {
+		return cutout().index(cutoutShader.source());
 	}
 
 	private static void initMaterialShaders() {
@@ -85,19 +85,6 @@ public final class ShaderIndices {
 		ShaderIndices.fragmentShaders = fragmentShaders.build();
 	}
 
-	private static void initCutoutShaders() {
-		int amount = CutoutShader.REGISTRY.getAll()
-				.size();
-
-		var cutout = new IndexBuilder(amount);
-
-		for (CutoutShader shaders : CutoutShader.REGISTRY) {
-			cutout.add(shaders.source());
-		}
-
-		ShaderIndices.cutoutShaders = cutout.build();
-	}
-
 	private static void initFogShaders() {
 		int amount = FogShader.REGISTRY.getAll()
 				.size();
@@ -111,10 +98,23 @@ public final class ShaderIndices {
 		ShaderIndices.fogShaders = fog.build();
 	}
 
+	private static void initCutoutShaders() {
+		int amount = CutoutShader.REGISTRY.getAll()
+				.size();
+
+		var cutout = new IndexBuilder(amount);
+
+		for (CutoutShader shaders : CutoutShader.REGISTRY) {
+			cutout.add(shaders.source());
+		}
+
+		ShaderIndices.cutoutShaders = cutout.build();
+	}
+
 	public static void init() {
 		MaterialShaders.REGISTRY.addFreezeCallback(ShaderIndices::initMaterialShaders);
-		CutoutShader.REGISTRY.addFreezeCallback(ShaderIndices::initCutoutShaders);
 		FogShader.REGISTRY.addFreezeCallback(ShaderIndices::initFogShaders);
+		CutoutShader.REGISTRY.addFreezeCallback(ShaderIndices::initCutoutShaders);
 	}
 
 	public static class Index {
@@ -163,21 +163,3 @@ public final class ShaderIndices {
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
