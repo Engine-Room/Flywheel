@@ -18,9 +18,10 @@ import com.jozufozu.flywheel.gl.GlPrimitive;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.gl.buffer.MappedBuffer;
+import com.jozufozu.flywheel.lib.vertex.VertexTypes;
 
 public class InstancedMeshPool {
-	private final VertexType vertexType;
+	private static final VertexType VERTEX_TYPE = VertexTypes.BLOCK;
 
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
 	private final List<BufferedMesh> allBuffered = new ArrayList<>();
@@ -35,15 +36,15 @@ public class InstancedMeshPool {
 	/**
 	 * Create a new mesh pool.
 	 */
-	public InstancedMeshPool(VertexType vertexType) {
-		this.vertexType = vertexType;
-		int stride = vertexType.getLayout().getStride();
+	public InstancedMeshPool() {
+		int stride = VERTEX_TYPE.getLayout()
+				.getStride();
 		vbo = new GlBuffer();
 		vbo.growthFunction(l -> Math.max(l + stride * 128L, (long) (l * 1.6)));
 	}
 
 	public VertexType getVertexType() {
-		return vertexType;
+		return VERTEX_TYPE;
 	}
 
 	/**
@@ -55,10 +56,6 @@ public class InstancedMeshPool {
 	 */
 	public BufferedMesh alloc(Mesh mesh, EBOCache eboCache) {
 		return meshes.computeIfAbsent(mesh, m -> {
-			if (m.vertexType() != vertexType) {
-				throw new IllegalArgumentException("Mesh has wrong vertex type");
-			}
-
 			BufferedMesh bufferedMesh = new BufferedMesh(m, byteSize, eboCache);
 			byteSize += bufferedMesh.size();
 			allBuffered.add(bufferedMesh);
@@ -121,8 +118,12 @@ public class InstancedMeshPool {
 		try (MappedBuffer mapped = vbo.map()) {
 			long ptr = mapped.ptr();
 
+			var vertexList = VERTEX_TYPE.createVertexList();
+
 			for (BufferedMesh mesh : pendingUpload) {
-				mesh.buffer(ptr);
+				vertexList.ptr(ptr + mesh.byteIndex);
+				mesh.mesh.write(vertexList);
+				mesh.boundTo.clear();
 			}
 
 			pendingUpload.clear();
@@ -140,7 +141,7 @@ public class InstancedMeshPool {
 
 	@Override
 	public String toString() {
-		return "InstancedMeshPool{" + "vertexType=" + vertexType + ", byteSize=" + byteSize + ", meshCount=" + meshes.size() + '}';
+		return "InstancedMeshPool{" + "vertexType=" + VERTEX_TYPE + ", byteSize=" + byteSize + ", meshCount=" + meshes.size() + '}';
 	}
 
 	public class BufferedMesh {
@@ -158,15 +159,16 @@ public class InstancedMeshPool {
 		}
 
 		public int size() {
-			return mesh.size();
+			return mesh.vertexCount() * VERTEX_TYPE.getStride();
 		}
 
 		public VertexType getVertexType() {
-			return vertexType;
+			return VERTEX_TYPE;
 		}
 
 		public int getAttributeCount() {
-			return vertexType.getLayout().getAttributeCount();
+			return VERTEX_TYPE.getLayout()
+					.getAttributeCount();
 		}
 
 		public boolean isDeleted() {
@@ -177,15 +179,9 @@ public class InstancedMeshPool {
 			return mesh.isEmpty() || isDeleted();
 		}
 
-		private void buffer(long ptr) {
-			mesh.write(ptr + byteIndex);
-
-			boundTo.clear();
-		}
-
 		public void setup(GlVertexArray vao) {
 			if (boundTo.add(vao)) {
-				BufferLayout type = vertexType.getLayout();
+				BufferLayout type = VERTEX_TYPE.getLayout();
 				vao.bindVertexBuffer(0, InstancedMeshPool.this.vbo.handle(), byteIndex, type.getStride());
 				vao.bindAttributes(0, 0, type.attributes());
 				vao.setElementBuffer(ebo);

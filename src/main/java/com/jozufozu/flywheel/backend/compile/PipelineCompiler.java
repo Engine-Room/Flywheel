@@ -7,6 +7,7 @@ import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
+import com.jozufozu.flywheel.lib.vertex.BlockVertex;
 
 public class PipelineCompiler {
 	private static final Compile<PipelineProgramKey> PIPELINE = new Compile<>();
@@ -18,11 +19,9 @@ public class PipelineCompiler {
 						.link(PIPELINE.shader(pipeline.glslVersion(), ShaderType.VERTEX)
 								.withComponent(uniformComponent)
 								.withComponent(key -> pipeline.assembler()
-										.assemble(new Pipeline.InstanceAssemblerContext(key.vertexType(), key.instanceType())))
+										.assemble(new Pipeline.InstanceAssemblerContext(BlockVertex.FORMAT.getAttributeCount(), key.instanceType())))
 								.withResource(pipeline.vertexAPI())
 								.withComponents(vertexComponents)
-								.withResource(key -> key.vertexType()
-										.layoutShader())
 								.withResource(key -> key.instanceType()
 										.instanceShader())
 								.withResource(key -> key.contextShader()

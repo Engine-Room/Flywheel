@@ -57,7 +57,7 @@ public class InstancedCrumbling {
 						.cutout(CutoutShaders.OFF);
 
 				var program = InstancingPrograms.get()
-						.get(shader.vertexType(), shader.instanceType(), Contexts.CRUMBLING);
+						.get(shader.instanceType(), Contexts.CRUMBLING);
 				UniformBuffer.syncAndBind(program);
 
 				InstancingEngine.uploadMaterialIDUniform(program, crumblingMaterial);

@@ -9,7 +9,6 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.compile.component.IndirectComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.gl.GlCompat;
@@ -89,8 +88,8 @@ public class IndirectPrograms {
 				.build();
 	}
 
-	public GlProgram getIndirectProgram(VertexType vertexType, InstanceType<?> instanceType, Context contextShader) {
-		return pipeline.get(new PipelineProgramKey(vertexType, instanceType, contextShader));
+	public GlProgram getIndirectProgram(InstanceType<?> instanceType, Context contextShader) {
+		return pipeline.get(new PipelineProgramKey(instanceType, contextShader));
 	}
 
 	public GlProgram getCullingProgram(InstanceType<?> instanceType) {

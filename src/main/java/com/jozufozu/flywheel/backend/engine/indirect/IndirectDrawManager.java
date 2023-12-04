@@ -7,13 +7,11 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
-import com.jozufozu.flywheel.lib.util.Pair;
 
 public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> {
-	public final Map<Pair<InstanceType<?>, VertexType>, IndirectCullingGroup<?>> renderLists = new HashMap<>();
+	public final Map<InstanceType<?>, IndirectCullingGroup<?>> renderLists = new HashMap<>();
 
 	@Override
 	protected <I extends Instance> IndirectInstancer<?> create(InstanceType<I> type) {
@@ -27,7 +25,7 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 			var material = entry.getKey();
 			var mesh = entry.getValue();
 
-			var indirectList = (IndirectCullingGroup<I>) renderLists.computeIfAbsent(Pair.of(key.type(), mesh.vertexType()), p -> new IndirectCullingGroup<>(p.first(), p.second()));
+			var indirectList = (IndirectCullingGroup<I>) renderLists.computeIfAbsent(key.type(), IndirectCullingGroup::new);
 
 			indirectList.add((IndirectInstancer<I>) instancer, stage, material, mesh);
 

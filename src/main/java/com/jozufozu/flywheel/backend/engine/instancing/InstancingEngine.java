@@ -109,7 +109,7 @@ public class InstancingEngine extends AbstractEngine {
 			}
 
 			var program = InstancingPrograms.get()
-					.get(shader.vertexType(), shader.instanceType(), Contexts.WORLD);
+					.get(shader.instanceType(), Contexts.WORLD);
 			UniformBuffer.syncAndBind(program);
 
 			uploadMaterialIDUniform(program, shader.material());

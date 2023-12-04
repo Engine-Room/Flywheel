@@ -10,7 +10,6 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Mesh;
-import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
@@ -29,7 +28,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	private boolean needsMemoryBarrier;
 	private int instanceCountThisFrame;
 
-	IndirectCullingGroup(InstanceType<I> instanceType, VertexType vertexType) {
+	IndirectCullingGroup(InstanceType<I> instanceType) {
 		objectStride = instanceType.getLayout()
 				.getStride() + IndirectBuffers.INT_SIZE;
 
@@ -38,11 +37,11 @@ public class IndirectCullingGroup<I extends Instance> {
 		buffers.createObjectStorage(128);
 		buffers.createDrawStorage(2);
 
-		meshPool = new IndirectMeshPool(vertexType);
+		meshPool = new IndirectMeshPool();
 
 		var indirectPrograms = IndirectPrograms.get();
 		compute = indirectPrograms.getCullingProgram(instanceType);
-		draw = indirectPrograms.getIndirectProgram(vertexType, instanceType, Contexts.WORLD);
+		draw = indirectPrograms.getIndirectProgram(instanceType, Contexts.WORLD);
 	}
 
 	public void add(IndirectInstancer<I> instancer, RenderStage stage, Material material, Mesh mesh) {
