@@ -39,8 +39,8 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 		meshPool.flush();
 	}
 
-	public void invalidate() {
-		super.invalidate();
+	public void delete() {
+		super.delete();
 
 		meshPool.delete();
 

@@ -11,7 +11,8 @@ import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 
 public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> {
-	public final Map<InstanceType<?>, IndirectCullingGroup<?>> renderLists = new HashMap<>();
+	private final StagingBuffer stagingBuffer = new StagingBuffer();
+	public final Map<InstanceType<?>, IndirectCullingGroup<?>> cullingGroups = new HashMap<>();
 
 	@Override
 	protected <I extends Instance> IndirectInstancer<?> create(InstanceType<I> type) {
@@ -20,13 +21,13 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 
 	@Override
 	protected <I extends Instance> void add(InstancerKey<I> key, IndirectInstancer<?> instancer, Model model, RenderStage stage) {
-		var indirectList = (IndirectCullingGroup<I>) renderLists.computeIfAbsent(key.type(), IndirectCullingGroup::new);
+		var indirectList = (IndirectCullingGroup<I>) cullingGroups.computeIfAbsent(key.type(), IndirectCullingGroup::new);
 
 		indirectList.add((IndirectInstancer<I>) instancer, stage, model);
 	}
 
 	public boolean hasStage(RenderStage stage) {
-		for (var list : renderLists.values()) {
+		for (var list : cullingGroups.values()) {
 			if (list.hasStage(stage)) {
 				return true;
 			}
@@ -38,25 +39,31 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 	public void flush() {
 		super.flush();
 
-		for (var group : renderLists.values()) {
-			group.flush();
+		stagingBuffer.reclaim();
+
+		for (var group : cullingGroups.values()) {
+			group.flush(stagingBuffer);
 		}
 
-		for (var group : renderLists.values()) {
+		stagingBuffer.flush();
+
+		for (var group : cullingGroups.values()) {
 			group.dispatchCull();
 		}
 
-		for (var group : renderLists.values()) {
+		for (var group : cullingGroups.values()) {
 			group.dispatchApply();
 		}
 	}
 
 	@Override
-	public void invalidate() {
-		super.invalidate();
+	public void delete() {
+		super.delete();
 
-		renderLists.values()
+		cullingGroups.values()
 				.forEach(IndirectCullingGroup::delete);
-		renderLists.clear();
+		cullingGroups.clear();
+
+		stagingBuffer.delete();
 	}
 }

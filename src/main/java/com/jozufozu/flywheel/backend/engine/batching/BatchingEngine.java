@@ -58,6 +58,6 @@ public class BatchingEngine extends AbstractEngine {
 
 	@Override
 	public void delete() {
-		drawManager.invalidate();
+		drawManager.delete();
 	}
 }
