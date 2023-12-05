@@ -8,19 +8,15 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4fc;
 
-import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.api.model.Mesh;
+import com.jozufozu.flywheel.backend.InternalLayout;
 import com.jozufozu.flywheel.gl.GlNumericType;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.QuadIndexSequence;
-import com.jozufozu.flywheel.lib.vertex.BlockVertex;
-import com.jozufozu.flywheel.lib.vertex.BlockVertexList;
 
 public class IndirectMeshPool {
-	private static final BufferLayout LAYOUT = BlockVertex.FORMAT;
-
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
 	private final List<BufferedMesh> meshList = new ArrayList<>();
 
@@ -39,8 +35,8 @@ public class IndirectMeshPool {
 		vertexArray = GlVertexArray.create();
 
 		vertexArray.setElementBuffer(ebo.handle());
-		vertexArray.bindVertexBuffer(0, vbo.handle(), 0, LAYOUT.getStride());
-		vertexArray.bindAttributes(0, 0, LAYOUT.attributes());
+		vertexArray.bindVertexBuffer(0, vbo.handle(), 0, InternalLayout.LAYOUT.getStride());
+		vertexArray.bindAttributes(0, 0, InternalLayout.LAYOUT.attributes());
 	}
 
 	/**
@@ -93,7 +89,7 @@ public class IndirectMeshPool {
 		final long vertexPtr = vertexBlock.ptr();
 		final long indexPtr = indexBlock.ptr();
 
-		var target = new BlockVertexList();
+		var target = InternalLayout.createVertexList();
 
 		int byteIndex = 0;
 		int baseVertex = 0;
@@ -154,7 +150,7 @@ public class IndirectMeshPool {
 		}
 
 		public int size() {
-			return mesh.vertexCount() * LAYOUT.getStride();
+			return mesh.vertexCount() * InternalLayout.LAYOUT.getStride();
 		}
 
 		public int indexCount() {

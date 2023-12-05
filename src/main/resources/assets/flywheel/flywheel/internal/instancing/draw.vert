@@ -1,6 +1,6 @@
 #include "flywheel:internal/instancing/api/vertex.glsl"
 #include "flywheel:internal/material.glsl"
-#include "flywheel:internal/block.vert"
+#include "flywheel:internal/vertex_input.glsl"
 #include "flywheel:util/diffuse.glsl"
 
 uniform uvec4 _flw_packedMaterial;

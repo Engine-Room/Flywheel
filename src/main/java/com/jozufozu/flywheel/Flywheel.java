@@ -32,7 +32,6 @@ import com.jozufozu.flywheel.lib.model.baked.PartialModel;
 import com.jozufozu.flywheel.lib.util.LevelAttached;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 import com.jozufozu.flywheel.lib.util.StringUtil;
-import com.jozufozu.flywheel.lib.vertex.VertexTypes;
 import com.jozufozu.flywheel.vanilla.VanillaVisuals;
 import com.mojang.logging.LogUtils;
 
@@ -129,7 +128,6 @@ public class Flywheel {
 	}
 
 	private static void onClientSetup(FMLClientSetupEvent event) {
-		VertexTypes.init();
 		InstanceTypes.init();
 		CutoutShaders.init();
 		FogShaders.init();

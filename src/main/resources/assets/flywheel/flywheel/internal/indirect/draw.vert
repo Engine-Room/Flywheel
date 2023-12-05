@@ -3,7 +3,7 @@
 #include "flywheel:internal/indirect/draw_command.glsl"
 #include "flywheel:internal/indirect/object.glsl"
 #include "flywheel:internal/material.glsl"
-#include "flywheel:internal/block.vert"
+#include "flywheel:internal/vertex_input.glsl"
 #include "flywheel:util/diffuse.glsl"
 
 flat out uvec3 _flw_material;
