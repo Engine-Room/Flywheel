@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.lib.math.RenderMath;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 
 public class BlockVertexList extends AbstractVertexList {
-	private static final int STRIDE = 32;
+	private static final long STRIDE = 32;
 
 	@Override
 	public float x(int index) {

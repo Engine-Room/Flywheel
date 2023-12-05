@@ -11,18 +11,14 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.api.model.Mesh;
+import com.jozufozu.flywheel.backend.InternalLayout;
 import com.jozufozu.flywheel.gl.GlPrimitive;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.gl.buffer.MappedBuffer;
-import com.jozufozu.flywheel.lib.vertex.BlockVertex;
-import com.jozufozu.flywheel.lib.vertex.BlockVertexList;
 
 public class InstancedMeshPool {
-	private static final BufferLayout LAYOUT = BlockVertex.FORMAT;
-
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
 	private final List<BufferedMesh> allBuffered = new ArrayList<>();
 	private final List<BufferedMesh> pendingUpload = new ArrayList<>();
@@ -37,7 +33,7 @@ public class InstancedMeshPool {
 	 * Create a new mesh pool.
 	 */
 	public InstancedMeshPool() {
-		int stride = LAYOUT.getStride();
+		int stride = InternalLayout.LAYOUT.getStride();
 		vbo = new GlBuffer();
 		vbo.growthFunction(l -> Math.max(l + stride * 128L, (long) (l * 1.6)));
 	}
@@ -113,7 +109,7 @@ public class InstancedMeshPool {
 		try (MappedBuffer mapped = vbo.map()) {
 			long ptr = mapped.ptr();
 
-			var vertexList = new BlockVertexList();
+			var vertexList = InternalLayout.createVertexList();
 
 			for (BufferedMesh mesh : pendingUpload) {
 				vertexList.ptr(ptr + mesh.byteIndex);
@@ -154,11 +150,11 @@ public class InstancedMeshPool {
 		}
 
 		public int size() {
-			return mesh.vertexCount() * LAYOUT.getStride();
+			return mesh.vertexCount() * InternalLayout.LAYOUT.getStride();
 		}
 
 		public int getAttributeCount() {
-			return LAYOUT.getAttributeCount();
+			return InternalLayout.LAYOUT.getAttributeCount();
 		}
 
 		public boolean isDeleted() {
@@ -171,8 +167,8 @@ public class InstancedMeshPool {
 
 		public void setup(GlVertexArray vao) {
 			if (boundTo.add(vao)) {
-				vao.bindVertexBuffer(0, InstancedMeshPool.this.vbo.handle(), byteIndex, LAYOUT.getStride());
-				vao.bindAttributes(0, 0, LAYOUT.attributes());
+				vao.bindVertexBuffer(0, InstancedMeshPool.this.vbo.handle(), byteIndex, InternalLayout.LAYOUT.getStride());
+				vao.bindAttributes(0, 0, InternalLayout.LAYOUT.attributes());
 				vao.setElementBuffer(ebo);
 			}
 		}
