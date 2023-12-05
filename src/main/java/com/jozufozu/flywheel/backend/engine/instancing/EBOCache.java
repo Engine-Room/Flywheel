@@ -8,7 +8,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.model.IndexSequence;
 import com.jozufozu.flywheel.gl.GlNumericType;
-import com.jozufozu.flywheel.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.gl.buffer.Buffer;
 import com.jozufozu.flywheel.gl.buffer.GlBufferUsage;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.model.QuadIndexSequence;
@@ -59,12 +59,12 @@ public class EBOCache {
 		@NotNull
 		private static Entry create(IndexSequence provider, int indexCount) {
 			int byteSize = indexCount * GlNumericType.UINT.byteWidth();
-			var ebo = GlBuffer.IMPL.create();
+			var ebo = Buffer.IMPL.create();
 
 			final long ptr = MemoryUtil.nmemAlloc(byteSize);
 			provider.fill(ptr, indexCount);
 
-			GlBuffer.IMPL.data(ebo, byteSize, ptr, GlBufferUsage.STATIC_DRAW.glEnum);
+			Buffer.IMPL.data(ebo, byteSize, ptr, GlBufferUsage.STATIC_DRAW.glEnum);
 			FlwMemoryTracker._allocGPUMemory(byteSize);
 
 			MemoryUtil.nmemFree(ptr);

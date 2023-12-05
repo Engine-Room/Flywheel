@@ -60,14 +60,15 @@ public class IndirectMeshPool {
 		return meshes.get(mesh);
 	}
 
-	public void flush() {
+	public void flush(StagingBuffer stagingBuffer) {
 		if (dirty) {
-			uploadAll();
+			// TODO: use the staging buffer and be smarter about allocation in general.
+			uploadAll(stagingBuffer);
 			dirty = false;
 		}
 	}
 
-	private void uploadAll() {
+	private void uploadAll(StagingBuffer stagingBuffer) {
 		long neededSize = 0;
 		int maxQuadIndexCount = 0;
 		int nonQuadIndexCount = 0;

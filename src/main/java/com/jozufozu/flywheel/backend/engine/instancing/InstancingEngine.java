@@ -96,7 +96,7 @@ public class InstancingEngine extends AbstractEngine {
 
 	@Override
 	public void delete() {
-		drawManager.invalidate();
+		drawManager.delete();
 	}
 
 	private void render(InstancedDrawManager.DrawSet drawSet) {

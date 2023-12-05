@@ -15,7 +15,7 @@ public class MappedBuffer implements AutoCloseable {
 	public MappedBuffer(int glBuffer, long size) {
 		this.glBuffer = glBuffer;
 
-		ptr = GlBuffer.IMPL.mapRange(glBuffer, 0, size, GL_MAP_WRITE_BIT);
+		ptr = Buffer.IMPL.mapRange(glBuffer, 0, size, GL_MAP_WRITE_BIT);
 
 		if (ptr == MemoryUtil.NULL) {
 			throw new GlException(GlError.poll(), "Could not map buffer");
@@ -32,7 +32,7 @@ public class MappedBuffer implements AutoCloseable {
 			return;
 		}
 
-		GlBuffer.IMPL.unmap(glBuffer);
+		Buffer.IMPL.unmap(glBuffer);
 		ptr = NULL;
 	}
 }

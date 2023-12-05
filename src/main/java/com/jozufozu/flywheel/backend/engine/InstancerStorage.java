@@ -66,7 +66,7 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 		}
 	}
 
-	public void invalidate() {
+	public void delete() {
 		instancers.clear();
 		uninitializedInstancers.clear();
 

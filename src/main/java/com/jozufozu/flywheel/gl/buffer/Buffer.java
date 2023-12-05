@@ -9,6 +9,8 @@ import org.lwjgl.system.Checks;
 import com.jozufozu.flywheel.gl.GlCompat;
 
 public interface Buffer {
+	Buffer IMPL = new DSA().fallback();
+
 	int create();
 
 	void data(int vbo, long size, long ptr, int glEnum);

@@ -15,6 +15,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import org.lwjgl.system.MemoryUtil;
+
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
@@ -27,6 +29,7 @@ import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlCompat;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.context.Contexts;
+import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.ModelUtil;
 
 public class IndirectCullingGroup<I extends Instance> {
@@ -99,7 +102,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 	}
 
-	public void flush() {
+	public void flush(StagingBuffer stagingBuffer) {
 		needsDrawBarrier = true;
 		instanceCountThisFrame = calculateTotalInstanceCountAndPrepareBatches();
 
@@ -114,10 +117,10 @@ public class IndirectCullingGroup<I extends Instance> {
 			needsSortDraws = false;
 		}
 
-		meshPool.flush();
-		uploadInstances();
-		uploadModels();
-		uploadIndirectCommands();
+		meshPool.flush(stagingBuffer);
+		uploadInstances(stagingBuffer);
+		uploadModels(stagingBuffer);
+		uploadIndirectCommands(stagingBuffer);
 	}
 
 	public void dispatchCull() {
@@ -173,35 +176,55 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 	}
 
-	private void uploadInstances() {
-		long objectPtr = buffers.objectPtr;
-
+	private void uploadInstances(StagingBuffer stagingBuffer) {
+		long pos = 0;
 		for (IndirectModel batch : indirectModels) {
 			var instanceCount = batch.instancer.getInstanceCount();
-			batch.writeObjects(objectPtr);
+			batch.writeObjects(stagingBuffer, pos, buffers.object);
 
-			objectPtr += instanceCount * objectStride;
+			pos += instanceCount * objectStride;
 		}
-
-		buffers.flushObjects(objectPtr - buffers.objectPtr);
 	}
 
-	private void uploadModels() {
-		long writePtr = buffers.modelPtr.ptr();
+	private void uploadModels(StagingBuffer stagingBuffer) {
+		var totalSize = indirectModels.size() * IndirectBuffers.MODEL_STRIDE;
+		long writePtr = stagingBuffer.reserveForTransferTo(totalSize, buffers.model, 0);
+
+		if (writePtr == MemoryUtil.NULL) {
+			var block = MemoryBlock.malloc(totalSize);
+			writeModels(block.ptr());
+			stagingBuffer.enqueueCopy(block.ptr(), totalSize, buffers.model, 0);
+			block.free();
+		} else {
+			writeModels(writePtr);
+		}
+	}
+
+	private void writeModels(long writePtr) {
 		for (var batch : indirectModels) {
 			batch.writeModel(writePtr);
 			writePtr += IndirectBuffers.MODEL_STRIDE;
 		}
-		buffers.flushModels(writePtr - buffers.modelPtr.ptr());
 	}
 
-	private void uploadIndirectCommands() {
-		long writePtr = buffers.drawPtr.ptr();
+	private void uploadIndirectCommands(StagingBuffer stagingBuffer) {
+		var totalSize = indirectDraws.size() * IndirectBuffers.DRAW_COMMAND_STRIDE;
+		long writePtr = stagingBuffer.reserveForTransferTo(totalSize, buffers.draw, 0);
+		if (writePtr == MemoryUtil.NULL) {
+			var block = MemoryBlock.malloc(totalSize);
+			writeCommands(block.ptr());
+			stagingBuffer.enqueueCopy(block.ptr(), totalSize, buffers.draw, 0);
+			block.free();
+		} else {
+			writeCommands(writePtr);
+		}
+	}
+
+	private void writeCommands(long writePtr) {
 		for (var batch : indirectDraws) {
 			batch.writeIndirectCommand(writePtr);
 			writePtr += IndirectBuffers.DRAW_COMMAND_STRIDE;
 		}
-		buffers.flushDrawCommands(writePtr - buffers.drawPtr.ptr());
 	}
 
 	private int calculateTotalInstanceCountAndPrepareBatches() {

@@ -69,8 +69,8 @@ class BatchedDrawManager extends InstancerStorage<BatchedInstancer<?>> {
 	}
 
 	@Override
-	public void invalidate() {
-		super.invalidate();
+	public void delete() {
+		super.delete();
 
 		meshPools.values()
 				.forEach(BatchedMeshPool::delete);

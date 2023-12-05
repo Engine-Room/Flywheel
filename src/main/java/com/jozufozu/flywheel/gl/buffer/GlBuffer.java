@@ -10,7 +10,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import it.unimi.dsi.fastutil.longs.LongUnaryOperator;
 
 public class GlBuffer extends GlObject {
-	public static final Buffer IMPL = new Buffer.DSA().fallback();
 	protected final GlBufferUsage usage;
 	/**
 	 * The size (in bytes) of the buffer on the GPU.
@@ -26,7 +25,7 @@ public class GlBuffer extends GlObject {
 	}
 
 	public GlBuffer(GlBufferUsage usage) {
-		handle(IMPL.create());
+		handle(Buffer.IMPL.create());
 		this.usage = usage;
 	}
 
@@ -57,7 +56,7 @@ public class GlBuffer extends GlObject {
 
 	private void alloc(long capacity) {
 		increaseSize(capacity);
-		IMPL.data(handle(), size, MemoryUtil.NULL, usage.glEnum);
+		Buffer.IMPL.data(handle(), size, MemoryUtil.NULL, usage.glEnum);
 		FlwMemoryTracker._allocGPUMemory(size);
 	}
 
@@ -67,9 +66,9 @@ public class GlBuffer extends GlObject {
 		increaseSize(capacity);
 
 		int oldHandle = handle();
-		int newHandle = IMPL.create();
-		IMPL.data(newHandle, size, MemoryUtil.NULL, usage.glEnum);
-		IMPL.copyData(oldHandle, newHandle, 0, 0, oldSize);
+		int newHandle = Buffer.IMPL.create();
+		Buffer.IMPL.data(newHandle, size, MemoryUtil.NULL, usage.glEnum);
+		Buffer.IMPL.copyData(oldHandle, newHandle, 0, 0, oldSize);
 		GlStateManager._glDeleteBuffers(oldHandle);
 		handle(newHandle);
 
@@ -85,7 +84,7 @@ public class GlBuffer extends GlObject {
 
 	public void upload(MemoryBlock directBuffer) {
 		FlwMemoryTracker._freeGPUMemory(size);
-		IMPL.data(handle(), directBuffer.size(), directBuffer.ptr(), usage.glEnum);
+		Buffer.IMPL.data(handle(), directBuffer.size(), directBuffer.ptr(), usage.glEnum);
 		size = directBuffer.size();
 		FlwMemoryTracker._allocGPUMemory(size);
 	}

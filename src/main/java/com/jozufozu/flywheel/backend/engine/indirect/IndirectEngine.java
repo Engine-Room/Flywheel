@@ -61,7 +61,7 @@ public class IndirectEngine extends AbstractEngine {
 			GlTextureUnit.T2.makeActive();
 			RenderSystem.bindTexture(RenderSystem.getShaderTexture(2));
 
-			for (var list : drawManager.renderLists.values()) {
+			for (var list : drawManager.cullingGroups.values()) {
 				list.submit(stage);
 			}
 
@@ -85,6 +85,6 @@ public class IndirectEngine extends AbstractEngine {
 
 	@Override
 	public void delete() {
-		drawManager.invalidate();
+		drawManager.delete();
 	}
 }
