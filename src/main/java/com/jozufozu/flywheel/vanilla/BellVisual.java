@@ -15,7 +15,7 @@ import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.OrientedInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.ModelHolder;
-import com.jozufozu.flywheel.lib.model.SimpleModel;
+import com.jozufozu.flywheel.lib.model.SingleMeshModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
 
@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.entity.BellBlockEntity;
 
 public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> implements DynamicVisual {
 	private static final ModelHolder BELL_MODEL = new ModelHolder(() -> {
-		return new SimpleModel(ModelPartConverter.convert(ModelLayers.BELL, BellRenderer.BELL_RESOURCE_LOCATION.sprite(), "bell_body"), Materials.BELL);
+		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.BELL, BellRenderer.BELL_RESOURCE_LOCATION.sprite(), "bell_body"), Materials.BELL);
 	});
 
 	private OrientedInstance bell;

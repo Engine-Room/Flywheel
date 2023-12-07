@@ -1,5 +1,3 @@
-#include "flywheel:api/vertex.glsl"
-
 void flw_transformBoundingSphere(in FlwInstance i, inout vec3 center, inout float radius) {
     mat4 pose = i.pose;
     center = (pose * vec4(center, 1.0)).xyz;

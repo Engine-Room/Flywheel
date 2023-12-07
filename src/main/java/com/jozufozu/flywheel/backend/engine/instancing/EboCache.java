@@ -17,7 +17,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 
-public class EBOCache {
+public class EboCache {
 	private final List<Entry> quads = new ArrayList<>();
 	private final Object2ReferenceMap<Key, Entry> others = new Object2ReferenceOpenHashMap<>();
 
@@ -37,9 +37,9 @@ public class EBOCache {
 
 	private int getQuads(int indexCount) {
 		// Use an existing quad EBO if there's one big enough.
-		for (Entry quadEBO : quads) {
-			if (quadEBO.gpuSize >= indexCount * GlNumericType.UINT.byteWidth()) {
-				return quadEBO.ebo;
+		for (Entry quadEbo : quads) {
+			if (quadEbo.gpuSize >= indexCount * GlNumericType.UINT.byteWidth()) {
+				return quadEbo.ebo;
 			}
 		}
 		// If not, create a new one.
@@ -55,7 +55,6 @@ public class EBOCache {
 	}
 
 	private record Entry(int ebo, int gpuSize) {
-
 		@NotNull
 		private static Entry create(IndexSequence provider, int indexCount) {
 			int byteSize = indexCount * GlNumericType.UINT.byteWidth();

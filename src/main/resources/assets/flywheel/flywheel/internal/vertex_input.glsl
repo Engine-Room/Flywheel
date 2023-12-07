@@ -1,5 +1,3 @@
-#include "flywheel:api/vertex.glsl"
-
 layout(location = 0) in vec3 _flw_pos;
 layout(location = 1) in vec4 _flw_color;
 layout(location = 2) in vec2 _flw_texCoord;

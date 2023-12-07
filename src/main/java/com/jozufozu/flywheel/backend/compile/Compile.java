@@ -19,7 +19,7 @@ import com.jozufozu.flywheel.backend.compile.core.ShaderCompiler;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.gl.shader.GlShader;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
-import com.jozufozu.flywheel.glsl.GLSLVersion;
+import com.jozufozu.flywheel.glsl.GlslVersion;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 
@@ -36,7 +36,7 @@ import net.minecraft.resources.ResourceLocation;
  * @param <K> The type of the key used to compile shaders.
  */
 public class Compile<K> {
-	public ShaderCompilerBuilder<K> shader(GLSLVersion glslVersion, ShaderType shaderType) {
+	public ShaderCompilerBuilder<K> shader(GlslVersion glslVersion, ShaderType shaderType) {
 		return new ShaderCompilerBuilder<>(glslVersion, shaderType);
 	}
 
@@ -99,13 +99,13 @@ public class Compile<K> {
 	}
 
 	public static class ShaderCompilerBuilder<K> {
-		private final GLSLVersion glslVersion;
+		private final GlslVersion glslVersion;
 		private final ShaderType shaderType;
 		private Consumer<Compilation> compilationCallbacks = $ -> {
 		};
 		private final List<BiFunction<K, SourceLoader, SourceComponent>> fetchers = new ArrayList<>();
 
-		public ShaderCompilerBuilder(GLSLVersion glslVersion, ShaderType shaderType) {
+		public ShaderCompilerBuilder(GlslVersion glslVersion, ShaderType shaderType) {
 			this.glslVersion = glslVersion;
 			this.shaderType = shaderType;
 		}

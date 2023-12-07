@@ -1,5 +1,4 @@
-#include "flywheel:internal/indirect/api/fragment.glsl"
-#include "flywheel:internal/material.glsl"
+#include "flywheel:internal/packed_material.glsl"
 
 // optimize discard usage
 #ifdef GL_ARB_conservative_depth
@@ -10,15 +9,14 @@ uniform sampler2D _flw_diffuseTex;
 uniform sampler2D _flw_overlayTex;
 uniform sampler2D _flw_lightTex;
 
-flat in uvec3 _flw_material;
+flat in uvec3 _flw_packedMaterial;
 
-out vec4 _flw_fragColor;
+out vec4 _flw_outputColor;
 
 void main() {
-    _flw_materialFragmentID = _flw_material.x;
-
-    _flw_unpackUint2x16(_flw_material.y, _flw_cutoutID, _flw_fogID);
-    _flw_unpackMaterialProperties(_flw_material.z, flw_material);
+    _flw_uberMaterialFragmentIndex = _flw_packedMaterial.x;
+    _flw_unpackUint2x16(_flw_packedMaterial.y, _flw_uberCutoutIndex, _flw_uberFogIndex);
+    _flw_unpackMaterialProperties(_flw_packedMaterial.z, flw_material);
 
     flw_sampleColor = texture(_flw_diffuseTex, flw_vertexTexCoord);
     flw_fragColor = flw_vertexColor * flw_sampleColor;
@@ -45,5 +43,5 @@ void main() {
         discard;
     }
 
-    _flw_fragColor = flw_fogFilter(color);
+    _flw_outputColor = flw_fogFilter(color);
 }

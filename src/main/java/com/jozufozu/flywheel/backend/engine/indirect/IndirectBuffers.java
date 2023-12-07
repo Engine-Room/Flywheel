@@ -16,11 +16,11 @@ public class IndirectBuffers {
 	public static final long INT_SIZE = Integer.BYTES;
 	public static final long PTR_SIZE = Pointer.POINTER_SIZE;
 
+	public static final long MODEL_STRIDE = 24;
+
 	// Byte size of a draw command, plus our added mesh data.
 	public static final long DRAW_COMMAND_STRIDE = 40;
 	public static final long DRAW_COMMAND_OFFSET = 0;
-
-	public static final long MODEL_STRIDE = 24;
 
 	// Offsets to the 3 segments
 	private static final long HANDLE_OFFSET = 0;
@@ -41,6 +41,9 @@ public class IndirectBuffers {
 	private static final long MODEL_SIZE_OFFSET = SIZE_OFFSET + PTR_SIZE * 2;
 	private static final long DRAW_SIZE_OFFSET = SIZE_OFFSET + PTR_SIZE * 3;
 
+	private static final float OBJECT_GROWTH_FACTOR = 1.25f;
+	private static final float MODEL_GROWTH_FACTOR = 2f;
+	private static final float DRAW_GROWTH_FACTOR = 2f;
 
 	/**
 	 * A small block of memory divided into 3 contiguous segments:
@@ -65,13 +68,13 @@ public class IndirectBuffers {
 		this.objectStride = objectStride;
 		this.multiBindBlock = MemoryBlock.calloc(BUFFERS_SIZE_BYTES, 1);
 
-		object = new ResizableStorageArray(objectStride, 1.75);
-		target = new ResizableStorageArray(INT_SIZE, 1.75);
-		model = new ResizableStorageArray(MODEL_STRIDE, 2);
-		draw = new ResizableStorageArray(DRAW_COMMAND_STRIDE, 2);
+		object = new ResizableStorageArray(objectStride, OBJECT_GROWTH_FACTOR);
+		target = new ResizableStorageArray(INT_SIZE, OBJECT_GROWTH_FACTOR);
+		model = new ResizableStorageArray(MODEL_STRIDE, MODEL_GROWTH_FACTOR);
+		draw = new ResizableStorageArray(DRAW_COMMAND_STRIDE, DRAW_GROWTH_FACTOR);
 	}
 
-	void updateCounts(int objectCount, int drawCount, int modelCount) {
+	void updateCounts(int objectCount, int modelCount, int drawCount) {
 		object.ensureCapacity(objectCount);
 		target.ensureCapacity(objectCount);
 		model.ensureCapacity(modelCount);

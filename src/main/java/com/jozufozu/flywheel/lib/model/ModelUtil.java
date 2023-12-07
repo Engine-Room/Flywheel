@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.lib.model;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
-import java.util.Collection;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
@@ -101,29 +100,33 @@ public final class ModelUtil {
 		return null;
 	}
 
-	public static Vector4f computeBoundingSphere(Collection<Mesh> values) {
-		int totalVertices = 0;
-		for (Mesh value : values) {
-			totalVertices += value.vertexCount();
+	public static int computeTotalVertexCount(Iterable<Mesh> meshes) {
+		int vertexCount = 0;
+		for (Mesh mesh : meshes) {
+			vertexCount += mesh.vertexCount();
 		}
-		var block = MemoryBlock.malloc((long) totalVertices * PositionOnlyVertexList.STRIDE);
+		return vertexCount;
+	}
 
+	public static Vector4f computeBoundingSphere(Iterable<Mesh> meshes) {
+		int vertexCount = computeTotalVertexCount(meshes);
+		var block = MemoryBlock.malloc((long) vertexCount * PositionOnlyVertexList.STRIDE);
 		var vertexList = new PositionOnlyVertexList();
 
 		int baseVertex = 0;
-		for (Mesh value : values) {
+		for (Mesh mesh : meshes) {
 			vertexList.ptr(block.ptr() + (long) baseVertex * PositionOnlyVertexList.STRIDE);
-			value.write(vertexList);
-			baseVertex += value.vertexCount();
+			mesh.write(vertexList);
+			baseVertex += mesh.vertexCount();
 		}
 
 		vertexList.ptr(block.ptr());
-		vertexList.vertexCount(totalVertices);
-
-		var out = computeBoundingSphere(vertexList);
+		vertexList.vertexCount(vertexCount);
+		var sphere = computeBoundingSphere(vertexList);
 
 		block.free();
-		return out;
+
+		return sphere;
 	}
 
 	public static Vector4f computeBoundingSphere(VertexList vertexList) {

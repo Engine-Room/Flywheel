@@ -10,7 +10,7 @@ import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> {
 	private final long objectStride;
 	private final InstanceWriter<I> writer;
-	private int modelId;
+	private int modelIndex;
 
 	public IndirectInstancer(InstanceType<I> type) {
 		super(type);
@@ -24,7 +24,7 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		removeDeletedInstances();
 	}
 
-	public void writeSparse(StagingBuffer stagingBuffer, long start, int dstVbo) {
+	public void writeChanged(StagingBuffer stagingBuffer, long start, int dstVbo) {
 		int count = instances.size();
 		for (int i = changed.nextSetBit(0); i >= 0 && i < count; i = changed.nextSetBit(i + 1)) {
 			var instance = instances.get(i);
@@ -33,7 +33,7 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		changed.clear();
 	}
 
-	public void writeFull(StagingBuffer stagingBuffer, long start, int dstVbo) {
+	public void writeAll(StagingBuffer stagingBuffer, long start, int dstVbo) {
 		long totalSize = objectStride * instances.size();
 
 		stagingBuffer.enqueueCopy(totalSize, dstVbo, start, this::writeAll);
@@ -50,12 +50,12 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 
 	private void writeOne(long ptr, I instance) {
 		// write modelID
-		MemoryUtil.memPutInt(ptr, modelId);
+		MemoryUtil.memPutInt(ptr, modelIndex);
 		// write object
 		writer.write(ptr + IndirectBuffers.INT_SIZE, instance);
 	}
 
-	public void setModelId(int modelId) {
-		this.modelId = modelId;
+	public void setModelIndex(int modelIndex) {
+		this.modelIndex = modelIndex;
 	}
 }

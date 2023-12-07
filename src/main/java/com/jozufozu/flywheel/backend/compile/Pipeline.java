@@ -3,13 +3,13 @@ package com.jozufozu.flywheel.backend.compile;
 import java.util.Objects;
 
 import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.jozufozu.flywheel.glsl.GLSLVersion;
+import com.jozufozu.flywheel.glsl.GlslVersion;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 
 import net.minecraft.resources.ResourceLocation;
 
-public record Pipeline(GLSLVersion glslVersion, ResourceLocation vertexShader, ResourceLocation fragmentShader,
-					   ResourceLocation vertexAPI, ResourceLocation fragmentAPI, InstanceAssembler assembler) {
+public record Pipeline(GlslVersion glslVersion, ResourceLocation vertexMain, ResourceLocation fragmentMain,
+					   ResourceLocation vertexApiImpl, ResourceLocation fragmentApiImpl, InstanceAssembler assembler) {
 	@FunctionalInterface
 	public interface InstanceAssembler {
 		/**
@@ -28,35 +28,35 @@ public record Pipeline(GLSLVersion glslVersion, ResourceLocation vertexShader, R
 	}
 
 	public static class Builder {
-		private GLSLVersion glslVersion;
-		private ResourceLocation vertex;
-		private ResourceLocation fragment;
-		private ResourceLocation vertexAPI;
-		private ResourceLocation fragmentAPI;
+		private GlslVersion glslVersion;
+		private ResourceLocation vertexMain;
+		private ResourceLocation fragmentMain;
+		private ResourceLocation vertexApiImpl;
+		private ResourceLocation fragmentApiImpl;
 		private InstanceAssembler assembler;
 
-		public Builder glslVersion(GLSLVersion glslVersion) {
+		public Builder glslVersion(GlslVersion glslVersion) {
 			this.glslVersion = glslVersion;
 			return this;
 		}
 
-		public Builder vertex(ResourceLocation vertex) {
-			this.vertex = vertex;
+		public Builder vertexMain(ResourceLocation shader) {
+			this.vertexMain = shader;
 			return this;
 		}
 
-		public Builder fragment(ResourceLocation fragment) {
-			this.fragment = fragment;
+		public Builder fragmentMain(ResourceLocation shader) {
+			this.fragmentMain = shader;
 			return this;
 		}
 
-		public Builder vertexAPI(ResourceLocation vertex) {
-			this.vertexAPI = vertex;
+		public Builder vertexApiImpl(ResourceLocation shader) {
+			this.vertexApiImpl = shader;
 			return this;
 		}
 
-		public Builder fragmentAPI(ResourceLocation fragment) {
-			this.fragmentAPI = fragment;
+		public Builder fragmentApiImpl(ResourceLocation shader) {
+			this.fragmentApiImpl = shader;
 			return this;
 		}
 
@@ -67,12 +67,12 @@ public record Pipeline(GLSLVersion glslVersion, ResourceLocation vertexShader, R
 
 		public Pipeline build() {
 			Objects.requireNonNull(glslVersion);
-			Objects.requireNonNull(vertex);
-			Objects.requireNonNull(fragment);
-			Objects.requireNonNull(vertexAPI);
-			Objects.requireNonNull(fragmentAPI);
+			Objects.requireNonNull(vertexMain);
+			Objects.requireNonNull(fragmentMain);
+			Objects.requireNonNull(vertexApiImpl);
+			Objects.requireNonNull(fragmentApiImpl);
 			Objects.requireNonNull(assembler);
-			return new Pipeline(glslVersion, vertex, fragment, vertexAPI, fragmentAPI, assembler);
+			return new Pipeline(glslVersion, vertexMain, fragmentMain, vertexApiImpl, fragmentApiImpl, assembler);
 		}
 	}
 }
