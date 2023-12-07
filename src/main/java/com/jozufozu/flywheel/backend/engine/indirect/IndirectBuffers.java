@@ -1,22 +1,14 @@
 package com.jozufozu.flywheel.backend.engine.indirect;
 
-import static org.lwjgl.opengl.GL15.glDeleteBuffers;
-import static org.lwjgl.opengl.GL15.nglDeleteBuffers;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 import static org.lwjgl.opengl.GL44.nglBindBuffersRange;
-import static org.lwjgl.opengl.GL45.glCopyNamedBufferSubData;
-import static org.lwjgl.opengl.GL45.glCreateBuffers;
-import static org.lwjgl.opengl.GL45.glNamedBufferStorage;
-import static org.lwjgl.opengl.GL45.nglCreateBuffers;
 
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.Pointer;
 
 import com.jozufozu.flywheel.gl.buffer.GlBufferType;
-import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
-// TODO: better abstractions
 public class IndirectBuffers {
 	// Number of vbos created.
 	public static final int BUFFER_COUNT = 4;
@@ -30,22 +22,24 @@ public class IndirectBuffers {
 
 	public static final long MODEL_STRIDE = 24;
 
-	// Offsets to the vbos
-	private static final long VBO_OFFSET = 0;
-	private static final long OBJECT_OFFSET = VBO_OFFSET;
-	private static final long TARGET_OFFSET = INT_SIZE;
-	private static final long MODEL_OFFSET = INT_SIZE * 2;
-	private static final long DRAW_OFFSET = INT_SIZE * 3;
-
 	// Offsets to the 3 segments
+	private static final long HANDLE_OFFSET = 0;
 	private static final long OFFSET_OFFSET = BUFFER_COUNT * INT_SIZE;
 	private static final long SIZE_OFFSET = OFFSET_OFFSET + BUFFER_COUNT * PTR_SIZE;
+	// Total size of the buffer.
+	private static final long BUFFERS_SIZE_BYTES = SIZE_OFFSET + BUFFER_COUNT * PTR_SIZE;
+
+	// Offsets to the vbos
+	private static final long OBJECT_HANDLE_OFFSET = HANDLE_OFFSET;
+	private static final long TARGET_HANDLE_OFFSET = INT_SIZE;
+	private static final long MODEL_HANDLE_OFFSET = INT_SIZE * 2;
+	private static final long DRAW_HANDLE_OFFSET = INT_SIZE * 3;
+
+	// Offsets to the sizes
 	private static final long OBJECT_SIZE_OFFSET = SIZE_OFFSET;
 	private static final long TARGET_SIZE_OFFSET = SIZE_OFFSET + PTR_SIZE;
 	private static final long MODEL_SIZE_OFFSET = SIZE_OFFSET + PTR_SIZE * 2;
 	private static final long DRAW_SIZE_OFFSET = SIZE_OFFSET + PTR_SIZE * 3;
-	// Total size of the buffer.
-	private static final long BUFFERS_SIZE_BYTES = SIZE_OFFSET + BUFFER_COUNT * PTR_SIZE;
 
 
 	/**
@@ -60,143 +54,39 @@ public class IndirectBuffers {
 	 * Each segment stores {@link IndirectBuffers#BUFFER_COUNT} elements,
 	 * one for the object buffer, target buffer, model buffer, and draw buffer.
 	 */
-	private final MemoryBlock buffers;
+	private final MemoryBlock multiBindBlock;
 	private final long objectStride;
-	public int object;
-	public int target;
-	public int model;
-	public int draw;
-
-	MemoryBlock modelPtr;
-	MemoryBlock drawPtr;
-
-	private int maxObjectCount = 0;
-	private int maxModelCount = 0;
-	private int maxDrawCount = 0;
-
-	private static final float OBJECT_GROWTH_FACTOR = 1.25f;
-	private static final float MODEL_GROWTH_FACTOR = 2f;
-	private static final float DRAW_GROWTH_FACTOR = 2f;
+	public final ResizableStorageArray object;
+	public final ResizableStorageArray target;
+	public final ResizableStorageArray model;
+	public final ResizableStorageArray draw;
 
 	IndirectBuffers(long objectStride) {
 		this.objectStride = objectStride;
-		this.buffers = MemoryBlock.calloc(BUFFERS_SIZE_BYTES, 1);
-	}
+		this.multiBindBlock = MemoryBlock.calloc(BUFFERS_SIZE_BYTES, 1);
 
-	void createBuffers() {
-		final long ptr = buffers.ptr();
-		nglCreateBuffers(BUFFER_COUNT, ptr);
-		object = MemoryUtil.memGetInt(ptr + OBJECT_OFFSET);
-		target = MemoryUtil.memGetInt(ptr + TARGET_OFFSET);
-		model = MemoryUtil.memGetInt(ptr + MODEL_OFFSET);
-		draw = MemoryUtil.memGetInt(ptr + DRAW_OFFSET);
+		object = new ResizableStorageArray(objectStride, 1.75);
+		target = new ResizableStorageArray(INT_SIZE, 1.75);
+		model = new ResizableStorageArray(MODEL_STRIDE, 2);
+		draw = new ResizableStorageArray(DRAW_COMMAND_STRIDE, 2);
 	}
 
 	void updateCounts(int objectCount, int drawCount, int modelCount) {
-		if (objectCount > maxObjectCount) {
-			createObjectStorage((int) (objectCount * OBJECT_GROWTH_FACTOR));
-		}
-		if (modelCount > maxModelCount) {
-			createModelStorage((int) (modelCount * MODEL_GROWTH_FACTOR));
-		}
-		if (drawCount > maxDrawCount) {
-			createDrawStorage((int) (drawCount * DRAW_GROWTH_FACTOR));
-		}
+		object.ensureCapacity(objectCount);
+		target.ensureCapacity(objectCount);
+		model.ensureCapacity(modelCount);
+		draw.ensureCapacity(drawCount);
 
-		final long ptr = buffers.ptr();
+		final long ptr = multiBindBlock.ptr();
+		MemoryUtil.memPutInt(ptr + OBJECT_HANDLE_OFFSET, object.handle());
+		MemoryUtil.memPutInt(ptr + TARGET_HANDLE_OFFSET, target.handle());
+		MemoryUtil.memPutInt(ptr + MODEL_HANDLE_OFFSET, model.handle());
+		MemoryUtil.memPutInt(ptr + DRAW_HANDLE_OFFSET, draw.handle());
+
 		MemoryUtil.memPutAddress(ptr + OBJECT_SIZE_OFFSET, objectStride * objectCount);
 		MemoryUtil.memPutAddress(ptr + TARGET_SIZE_OFFSET, INT_SIZE * objectCount);
 		MemoryUtil.memPutAddress(ptr + MODEL_SIZE_OFFSET, MODEL_STRIDE * modelCount);
 		MemoryUtil.memPutAddress(ptr + DRAW_SIZE_OFFSET, DRAW_COMMAND_STRIDE * drawCount);
-	}
-
-	void createObjectStorage(int objectCount) {
-		freeObjectStorage();
-		var objectSize = objectStride * objectCount;
-		var targetSize = INT_SIZE * objectCount;
-
-		if (maxObjectCount > 0) {
-			final long ptr = buffers.ptr();
-			nglCreateBuffers(2, ptr);
-
-			int objectNew = MemoryUtil.memGetInt(ptr + OBJECT_OFFSET);
-			int targetNew = MemoryUtil.memGetInt(ptr + TARGET_OFFSET);
-
-			glNamedBufferStorage(objectNew, objectSize, 0);
-			glNamedBufferStorage(targetNew, targetSize, 0);
-
-			glCopyNamedBufferSubData(object, objectNew, 0, 0, objectStride * maxObjectCount);
-			glCopyNamedBufferSubData(target, targetNew, 0, 0, INT_SIZE * maxObjectCount);
-
-			glDeleteBuffers(object);
-			glDeleteBuffers(target);
-
-			object = objectNew;
-			target = targetNew;
-		} else {
-			glNamedBufferStorage(object, objectSize, 0);
-			glNamedBufferStorage(target, targetSize, 0);
-		}
-
-		maxObjectCount = objectCount;
-
-		FlwMemoryTracker._allocGPUMemory(maxObjectCount * objectStride);
-	}
-
-	void createModelStorage(int modelCount) {
-		freeModelStorage();
-
-		var modelSize = MODEL_STRIDE * modelCount;
-		if (maxModelCount > 0) {
-			int modelNew = glCreateBuffers();
-
-			glNamedBufferStorage(modelNew, modelSize, 0);
-
-			glDeleteBuffers(model);
-
-			MemoryUtil.memPutInt(buffers.ptr() + MODEL_OFFSET, modelNew);
-			model = modelNew;
-			modelPtr = modelPtr.realloc(modelSize);
-		} else {
-			glNamedBufferStorage(model, modelSize, 0);
-			modelPtr = MemoryBlock.malloc(modelSize);
-		}
-		maxModelCount = modelCount;
-		FlwMemoryTracker._allocGPUMemory(maxModelCount * MODEL_STRIDE);
-	}
-
-	void createDrawStorage(int drawCount) {
-		freeDrawStorage();
-
-		var drawSize = DRAW_COMMAND_STRIDE * drawCount;
-		if (maxDrawCount > 0) {
-			int drawNew = glCreateBuffers();
-
-			glNamedBufferStorage(drawNew, drawSize, 0);
-
-			glDeleteBuffers(draw);
-
-			MemoryUtil.memPutInt(buffers.ptr() + DRAW_OFFSET, drawNew);
-			draw = drawNew;
-			drawPtr = drawPtr.realloc(drawSize);
-		} else {
-			glNamedBufferStorage(draw, drawSize, 0);
-			drawPtr = MemoryBlock.malloc(drawSize);
-		}
-		maxDrawCount = drawCount;
-		FlwMemoryTracker._allocGPUMemory(maxDrawCount * DRAW_COMMAND_STRIDE);
-	}
-
-	private void freeObjectStorage() {
-		FlwMemoryTracker._freeGPUMemory(maxObjectCount * objectStride);
-	}
-
-	private void freeModelStorage() {
-		FlwMemoryTracker._freeGPUMemory(maxModelCount * MODEL_STRIDE);
-	}
-
-	private void freeDrawStorage() {
-		FlwMemoryTracker._freeGPUMemory(maxDrawCount * DRAW_COMMAND_STRIDE);
 	}
 
 	public void bindForCompute() {
@@ -205,25 +95,20 @@ public class IndirectBuffers {
 
 	public void bindForDraw() {
 		multiBind();
-		GlBufferType.DRAW_INDIRECT_BUFFER.bind(draw);
+		GlBufferType.DRAW_INDIRECT_BUFFER.bind(draw.handle());
 	}
 
 	private void multiBind() {
-		final long ptr = buffers.ptr();
+		final long ptr = multiBindBlock.ptr();
 		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, 0, IndirectBuffers.BUFFER_COUNT, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
 	}
 
 	public void delete() {
-		nglDeleteBuffers(BUFFER_COUNT, buffers.ptr());
-		buffers.free();
-		if (modelPtr != null) {
-			modelPtr.free();
-		}
-		if (drawPtr != null) {
-			drawPtr.free();
-		}
-		freeObjectStorage();
-		freeModelStorage();
-		freeDrawStorage();
+		multiBindBlock.free();
+
+		object.delete();
+		target.delete();
+		model.delete();
+		draw.delete();
 	}
 }

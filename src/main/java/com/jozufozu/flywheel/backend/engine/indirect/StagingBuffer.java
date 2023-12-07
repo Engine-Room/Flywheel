@@ -2,19 +2,21 @@ package com.jozufozu.flywheel.backend.engine.indirect;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.LongConsumer;
 
 import org.lwjgl.opengl.GL45C;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.gl.GlFence;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
+import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
 
 // https://github.com/CaffeineMC/sodium-fabric/blob/dev/src/main/java/me/jellysquid/mods/sodium/client/gl/arena/staging/MappedStagingBuffer.java
 public class StagingBuffer {
-	private static final long DEFAULT_CAPACITY = 1024 * 1024 * 8;
+	private static final long DEFAULT_CAPACITY = 1024 * 1024 * 16;
 	private static final int STORAGE_FLAGS = GL45C.GL_MAP_PERSISTENT_BIT | GL45C.GL_MAP_WRITE_BIT | GL45C.GL_CLIENT_STORAGE_BIT;
 	private static final int MAP_FLAGS = GL45C.GL_MAP_PERSISTENT_BIT | GL45C.GL_MAP_WRITE_BIT | GL45C.GL_MAP_FLUSH_EXPLICIT_BIT | GL45C.GL_MAP_INVALIDATE_BUFFER_BIT;
 
@@ -26,6 +28,8 @@ public class StagingBuffer {
 	private long pos = 0;
 
 	private long totalAvailable;
+
+	private MemoryBlock scratch;
 
 	private final OverflowStagingBuffer overflow = new OverflowStagingBuffer();
 	private final PriorityQueue<Transfer> transfers = new ObjectArrayFIFOQueue<>();
@@ -45,6 +49,52 @@ public class StagingBuffer {
 		totalAvailable = capacity;
 
 		FlwMemoryTracker._allocCPUMemory(capacity);
+	}
+
+	/**
+	 * Enqueue a copy of a known size to the given VBO.
+	 * <br>
+	 * The consumer will receive a pointer to a block of memory of the given size, and is expected to write to the
+	 * complete range. The initial contents of the memory block are undefined.
+	 *
+	 * @param size      The size in bytes of the copy.
+	 * @param dstVbo    The VBO to copy to.
+	 * @param dstOffset The offset in the destination VBO.
+	 * @param write     A consumer that will receive a pointer to the memory block.
+	 */
+	public void enqueueCopy(long size, int dstVbo, long dstOffset, LongConsumer write) {
+		// Try to write directly into the staging buffer if there is enough contiguous space.
+		var direct = reserveForTransferTo(size, dstVbo, dstOffset);
+
+		if (direct != MemoryUtil.NULL) {
+			write.accept(direct);
+			return;
+		}
+
+		// Otherwise, write to a scratch buffer and enqueue a copy.
+		var block = getScratch(size);
+		write.accept(block.ptr());
+		enqueueCopy(block.ptr(), size, dstVbo, dstOffset);
+	}
+
+	private MemoryBlock getScratch(long size) {
+		if (scratch == null) {
+			scratch = MemoryBlock.malloc(size);
+		} else if (scratch.size() < size) {
+			scratch = scratch.realloc(size);
+		}
+		return scratch;
+	}
+
+	/**
+	 * Enqueue a copy from the given pointer to the given VBO.
+	 *
+	 * @param block     The block to copy from.
+	 * @param dstVbo    The VBO to copy to.
+	 * @param dstOffset The offset in the destination VBO.
+	 */
+	public void enqueueCopy(MemoryBlock block, int dstVbo, long dstOffset) {
+		enqueueCopy(block.ptr(), block.size(), dstVbo, dstOffset);
 	}
 
 	/**
@@ -92,12 +142,12 @@ public class StagingBuffer {
 	 * <br>
 	 * This will generally be a more efficient way to transfer data as it avoids a copy, however,
 	 * this method does not allow for non-contiguous writes, so you should fall back to
-	 * {@link #enqueueCopy} if this returns {@link MemoryUtil#NULL}.
+	 * {@link #enqueueCopy} if this returns {@code null}.
 	 *
 	 * @param size      The size of the transfer you wish to make.
 	 * @param dstVbo    The VBO you wish to transfer to.
 	 * @param dstOffset The offset in the destination VBO.
-	 * @return A pointer to the reserved space, or {@link MemoryUtil#NULL} if there is not enough contiguous space.
+	 * @return A pointer to the reserved space, or {@code null} if there is not enough contiguous space.
 	 */
 	public long reserveForTransferTo(long size, int dstVbo, long dstOffset) {
 		// Don't need to check totalAvailable here because that's a looser constraint than the bytes remaining.
@@ -186,6 +236,8 @@ public class StagingBuffer {
 		GL45C.glUnmapNamedBuffer(vbo);
 		GL45C.glDeleteBuffers(vbo);
 		overflow.delete();
+
+		scratch.free();
 
 		FlwMemoryTracker._freeCPUMemory(capacity);
 	}
