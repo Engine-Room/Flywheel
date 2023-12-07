@@ -15,8 +15,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import org.lwjgl.system.MemoryUtil;
-
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
@@ -29,7 +27,6 @@ import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlCompat;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.context.Contexts;
-import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.ModelUtil;
 
 public class IndirectCullingGroup<I extends Instance> {
@@ -53,7 +50,6 @@ public class IndirectCullingGroup<I extends Instance> {
 				.getStride() + IndirectBuffers.INT_SIZE;
 
 		buffers = new IndirectBuffers(objectStride);
-		buffers.createBuffers();
 
 		meshPool = new IndirectMeshPool();
 
@@ -68,8 +64,9 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		var boundingSphere = ModelUtil.computeBoundingSphere(meshes.values());
 
-		int modelID = indirectModels.size();
-		var indirectModel = new IndirectModel(instancer, modelID, boundingSphere);
+		int modelId = indirectModels.size();
+		instancer.setModelId(modelId);
+		var indirectModel = new IndirectModel(instancer, modelId, boundingSphere);
 		indirectModels.add(indirectModel);
 
 		for (Map.Entry<Material, Mesh> materialMeshEntry : meshes.entrySet()) {
@@ -180,7 +177,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		long pos = 0;
 		for (IndirectModel batch : indirectModels) {
 			var instanceCount = batch.instancer.getInstanceCount();
-			batch.writeObjects(stagingBuffer, pos, buffers.object);
+			batch.writeObjects(stagingBuffer, pos, buffers.object.handle());
 
 			pos += instanceCount * objectStride;
 		}
@@ -188,35 +185,22 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private void uploadModels(StagingBuffer stagingBuffer) {
 		var totalSize = indirectModels.size() * IndirectBuffers.MODEL_STRIDE;
-		long writePtr = stagingBuffer.reserveForTransferTo(totalSize, buffers.model, 0);
+		var handle = buffers.model.handle();
 
-		if (writePtr == MemoryUtil.NULL) {
-			var block = MemoryBlock.malloc(totalSize);
-			writeModels(block.ptr());
-			stagingBuffer.enqueueCopy(block.ptr(), totalSize, buffers.model, 0);
-			block.free();
-		} else {
-			writeModels(writePtr);
-		}
+		stagingBuffer.enqueueCopy(totalSize, handle, 0, this::writeModels);
+	}
+
+	private void uploadIndirectCommands(StagingBuffer stagingBuffer) {
+		var totalSize = indirectDraws.size() * IndirectBuffers.DRAW_COMMAND_STRIDE;
+		var handle = buffers.draw.handle();
+
+		stagingBuffer.enqueueCopy(totalSize, handle, 0, this::writeCommands);
 	}
 
 	private void writeModels(long writePtr) {
 		for (var batch : indirectModels) {
 			batch.writeModel(writePtr);
 			writePtr += IndirectBuffers.MODEL_STRIDE;
-		}
-	}
-
-	private void uploadIndirectCommands(StagingBuffer stagingBuffer) {
-		var totalSize = indirectDraws.size() * IndirectBuffers.DRAW_COMMAND_STRIDE;
-		long writePtr = stagingBuffer.reserveForTransferTo(totalSize, buffers.draw, 0);
-		if (writePtr == MemoryUtil.NULL) {
-			var block = MemoryBlock.malloc(totalSize);
-			writeCommands(block.ptr());
-			stagingBuffer.enqueueCopy(block.ptr(), totalSize, buffers.draw, 0);
-			block.free();
-		} else {
-			writeCommands(writePtr);
 		}
 	}
 

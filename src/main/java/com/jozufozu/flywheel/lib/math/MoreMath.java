@@ -57,4 +57,12 @@ public final class MoreMath {
 			}
 		}
 	}
+
+	public static long ceilLong(double d) {
+		return (long) Math.ceil(d);
+	}
+
+	public static long ceilLong(float f) {
+		return (long) Math.ceil(f);
+	}
 }

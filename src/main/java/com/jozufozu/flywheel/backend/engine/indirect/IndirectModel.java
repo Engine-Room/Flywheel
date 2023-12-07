@@ -37,9 +37,9 @@ public class IndirectModel {
 
 	public void writeObjects(StagingBuffer stagingBuffer, long start, int dstVbo) {
 		if (needsFullWrite) {
-			instancer.writeFull(stagingBuffer, start, id, dstVbo);
+			instancer.writeFull(stagingBuffer, start, dstVbo);
 		} else {
-			instancer.writeSparse(stagingBuffer, start, id, dstVbo);
+			instancer.writeSparse(stagingBuffer, start, dstVbo);
 		}
 	}
 }
