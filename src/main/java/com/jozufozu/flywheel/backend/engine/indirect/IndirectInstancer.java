@@ -12,6 +12,8 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	private final InstanceWriter<I> writer;
 	private int modelIndex;
 
+	private long lastStartPos = -1;
+
 	public IndirectInstancer(InstanceType<I> type) {
 		super(type);
 		long instanceStride = type.getLayout()
@@ -24,21 +26,38 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		removeDeletedInstances();
 	}
 
-	public void writeChanged(StagingBuffer stagingBuffer, long start, int dstVbo) {
+	public void write(StagingBuffer stagingBuffer, long startPos, int dstVbo) {
+		if (shouldWriteAll(startPos)) {
+			writeAll(stagingBuffer, startPos, dstVbo);
+		} else {
+			writeChanged(stagingBuffer, startPos, dstVbo);
+		}
+
+		changed.clear();
+		lastStartPos = startPos;
+	}
+
+	private boolean shouldWriteAll(long startPos) {
+		// If enough of the buffer has changed, write the whole thing to avoid the overhead of a bunch of small writes.
+		return startPos != lastStartPos || moreThanTwoThirdsChanged();
+	}
+
+	private boolean moreThanTwoThirdsChanged() {
+		return (changed.cardinality() * 3) > (instances.size() * 2);
+	}
+
+	private void writeChanged(StagingBuffer stagingBuffer, long start, int dstVbo) {
 		int count = instances.size();
 		for (int i = changed.nextSetBit(0); i >= 0 && i < count; i = changed.nextSetBit(i + 1)) {
 			var instance = instances.get(i);
 			stagingBuffer.enqueueCopy(objectStride, dstVbo, start + i * objectStride, ptr -> writeOne(ptr, instance));
 		}
-		changed.clear();
 	}
 
-	public void writeAll(StagingBuffer stagingBuffer, long start, int dstVbo) {
+	private void writeAll(StagingBuffer stagingBuffer, long start, int dstVbo) {
 		long totalSize = objectStride * instances.size();
 
 		stagingBuffer.enqueueCopy(totalSize, dstVbo, start, this::writeAll);
-
-		changed.clear();
 	}
 
 	private void writeAll(long ptr) {
@@ -49,9 +68,7 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	}
 
 	private void writeOne(long ptr, I instance) {
-		// write modelID
 		MemoryUtil.memPutInt(ptr, modelIndex);
-		// write object
 		writer.write(ptr + IndirectBuffers.INT_SIZE, instance);
 	}
 

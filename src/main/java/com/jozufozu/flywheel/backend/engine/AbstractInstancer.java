@@ -15,7 +15,6 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	protected final ArrayList<I> instances = new ArrayList<>();
 	protected final ArrayList<InstanceHandleImpl> handles = new ArrayList<>();
 
-	// TODO: atomic bitset?
 	protected final BitSet changed = new BitSet();
 	protected final BitSet deleted = new BitSet();
 
@@ -45,6 +44,7 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		if (index < 0 || index >= getInstanceCount()) {
 			return;
 		}
+		// TODO: Atomic bitset. Synchronizing here blocks the task executor and causes massive overhead.
 		synchronized (lock) {
 			changed.set(index);
 		}

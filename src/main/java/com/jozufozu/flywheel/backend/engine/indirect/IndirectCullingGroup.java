@@ -45,7 +45,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	private final List<IndirectDraw> indirectDraws = new ArrayList<>();
 	private final Map<RenderStage, List<MultiDraw>> multiDraws = new EnumMap<>(RenderStage.class);
 	private boolean needsDrawBarrier;
-	private boolean needsSortDraws;
+	private boolean hasNewDraws;
 	private int instanceCountThisFrame;
 
 	IndirectCullingGroup(InstanceType<I> instanceType) {
@@ -72,15 +72,23 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		buffers.updateCounts(instanceCountThisFrame, indirectModels.size(), indirectDraws.size());
 
-		if (needsSortDraws) {
-			sortDraws();
-			needsSortDraws = false;
-		}
-
+		// Must flush the mesh pool first so everything else has the right baseVertex and baseIndex.
 		meshPool.flush(stagingBuffer);
+
+		// Upload only objects that have changed.
 		uploadObjects(stagingBuffer);
+
+		// We need to upload the models every frame to reset the instance count.
 		uploadModels(stagingBuffer);
-		uploadDraws(stagingBuffer);
+
+		if (hasNewDraws) {
+			sortDraws();
+			// Draws, however, only need to be updated when we get new ones.
+			// The instanceCount and baseInstance will be updated by the applyProgram,
+			// and all other fields are constant to the lifetime of the draw.
+			uploadDraws(stagingBuffer);
+			hasNewDraws = false;
+		}
 	}
 
 	public void dispatchCull() {
@@ -161,7 +169,7 @@ public class IndirectCullingGroup<I extends Instance> {
 			indirectDraws.add(new IndirectDraw(indirectModel, entry.getKey(), bufferedMesh, stage));
 		}
 
-		needsSortDraws = true;
+		hasNewDraws = true;
 	}
 
 	public void submit(RenderStage stage) {
@@ -193,9 +201,9 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private void uploadObjects(StagingBuffer stagingBuffer) {
 		long pos = 0;
-		for (IndirectModel batch : indirectModels) {
-			var instanceCount = batch.instancer.getInstanceCount();
-			batch.writeObjects(stagingBuffer, pos, buffers.object.handle());
+		for (IndirectModel model : indirectModels) {
+			var instanceCount = model.instancer.getInstanceCount();
+			model.writeObjects(stagingBuffer, pos, buffers.object.handle());
 
 			pos += instanceCount * objectStride;
 		}
@@ -216,15 +224,15 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	private void writeModels(long writePtr) {
-		for (var batch : indirectModels) {
-			batch.write(writePtr);
+		for (var model : indirectModels) {
+			model.write(writePtr);
 			writePtr += IndirectBuffers.MODEL_STRIDE;
 		}
 	}
 
 	private void writeCommands(long writePtr) {
-		for (var batch : indirectDraws) {
-			batch.write(writePtr);
+		for (var draw : indirectDraws) {
+			draw.write(writePtr);
 			writePtr += IndirectBuffers.DRAW_COMMAND_STRIDE;
 		}
 	}

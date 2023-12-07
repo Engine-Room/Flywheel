@@ -14,7 +14,8 @@ import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
 
-// https://github.com/CaffeineMC/sodium-fabric/blob/dev/src/main/java/me/jellysquid/mods/sodium/client/gl/arena/staging/MappedStagingBuffer.java
+// Used https://github.com/CaffeineMC/sodium-fabric/blob/dev/src/main/java/me/jellysquid/mods/sodium/client/gl/arena/staging/MappedStagingBuffer.java
+// as a reference for implementation. Modified to be less safe and to allow for writing directly into the staging buffer.
 public class StagingBuffer {
 	private static final long DEFAULT_CAPACITY = 1024 * 1024 * 16;
 	private static final int STORAGE_FLAGS = GL45C.GL_MAP_PERSISTENT_BIT | GL45C.GL_MAP_WRITE_BIT | GL45C.GL_CLIENT_STORAGE_BIT;

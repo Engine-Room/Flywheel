@@ -9,7 +9,6 @@ public class IndirectModel {
 	private final Vector4fc boundingSphere;
 
 	private int baseInstance = -1;
-	private boolean needsFullWrite = true;
 
 	public IndirectModel(IndirectInstancer<?> instancer, int index, Vector4fc boundingSphere) {
 		this.instancer = instancer;
@@ -23,20 +22,11 @@ public class IndirectModel {
 
 	public void prepare(int baseInstance) {
 		instancer.update();
-		if (baseInstance == this.baseInstance) {
-			needsFullWrite = false;
-			return;
-		}
 		this.baseInstance = baseInstance;
-		needsFullWrite = true;
 	}
 
 	public void writeObjects(StagingBuffer stagingBuffer, long start, int dstVbo) {
-		if (needsFullWrite) {
-			instancer.writeAll(stagingBuffer, start, dstVbo);
-		} else {
-			instancer.writeChanged(stagingBuffer, start, dstVbo);
-		}
+		instancer.write(stagingBuffer, start, dstVbo);
 	}
 
 	public void write(long ptr) {

@@ -47,9 +47,9 @@ public class IndirectDraw {
 		MemoryUtil.memPutInt(ptr + 4, 0); // instanceCount - to be set by the apply shader
 		MemoryUtil.memPutInt(ptr + 8, mesh.firstIndex()); // firstIndex
 		MemoryUtil.memPutInt(ptr + 12, mesh.baseVertex()); // baseVertex
-		MemoryUtil.memPutInt(ptr + 16, model.baseInstance()); // baseInstance
+		MemoryUtil.memPutInt(ptr + 16, 0); // baseInstance - to be set by the apply shader
 
-		MemoryUtil.memPutInt(ptr + 20, model.index); // modelIndex
+		MemoryUtil.memPutInt(ptr + 20, model.index); // modelIndex - never changes
 
 		MemoryUtil.memPutInt(ptr + 24, materialVertexIndex); // materialVertexIndex
 		MemoryUtil.memPutInt(ptr + 28, materialFragmentIndex); // materialFragmentIndex
