@@ -1,4 +1,4 @@
-struct FLWPackedPlanes {
+struct FrustumPlanes {
     vec4 xyX; // <nx.x, px.x, ny.x, py.x>
     vec4 xyY; // <nx.y, px.y, ny.y, py.y>
     vec4 xyZ; // <nx.z, px.z, ny.z, py.z>
@@ -9,12 +9,12 @@ struct FLWPackedPlanes {
     vec2 zW; // <nz.w, pz.w>
 };
 
-struct flywheel_uniforms {
+struct FlywheelUniforms {
     vec4 fogColor;
     vec2 fogRange;
     int fogShape;
     mat4 viewProjection;
     vec4 cameraPos;
     int constantAmbientLight;
-    FLWPackedPlanes planes;
+    FrustumPlanes planes;
 };

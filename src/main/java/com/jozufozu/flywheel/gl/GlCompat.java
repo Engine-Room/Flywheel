@@ -10,6 +10,8 @@ import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.KHRShaderSubgroup;
 import org.lwjgl.system.MemoryStack;
 
+import com.jozufozu.flywheel.lib.math.MoreMath;
+
 import net.minecraft.Util;
 
 /**
@@ -18,19 +20,19 @@ import net.minecraft.Util;
  * Each field stores an enum variant that provides access to the most appropriate version of a feature for the current
  * system.
  */
-public class GlCompat {
-	public static final boolean ALLOW_DSA = true;
+public final class GlCompat {
 	public static final GLCapabilities CAPABILITIES = GL.createCapabilities();
-	public static final boolean amd = _decideIfWeAreAMD();
-	public static final boolean windows = _decideIfWeAreWindows();
-	public static final boolean supportsIndirect = _decideIfWeSupportIndirect();
+	public static final boolean AMD = _decideIfWeAreAMD();
+	public static final boolean WINDOWS = _decideIfWeAreWindows();
+	public static final boolean ALLOW_DSA = true;
+	public static final boolean SUPPORTS_INDIRECT = _decideIfWeSupportIndirect();
 	public static final int SUBGROUP_SIZE = _subgroupSize();
 
 	private GlCompat() {
 	}
 
 	public static boolean onAMDWindows() {
-		return amd && windows;
+		return AMD && WINDOWS;
 	}
 
 	public static boolean supportsInstancing() {
@@ -38,7 +40,22 @@ public class GlCompat {
 	}
 
 	public static boolean supportsIndirect() {
-		return supportsIndirect;
+		return SUPPORTS_INDIRECT;
+	}
+
+	private static boolean _decideIfWeAreAMD() {
+		String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
+
+		if (vendor == null) {
+			return false;
+		}
+
+		// vendor string I got was "ATI Technologies Inc."
+		return vendor.contains("ATI") || vendor.contains("AMD");
+	}
+
+	private static boolean _decideIfWeAreWindows() {
+		return Util.getPlatform() == Util.OS.WINDOWS;
 	}
 
 	private static boolean _decideIfWeSupportIndirect() {
@@ -50,7 +67,11 @@ public class GlCompat {
 			return GL31C.glGetInteger(KHRShaderSubgroup.GL_SUBGROUP_SIZE_KHR);
 		}
 		// try to guess
-		return amd ? 64 : 32;
+		return AMD ? 64 : 32;
+	}
+
+	public static int getComputeGroupCount(int invocations) {
+		return MoreMath.ceilingDiv(invocations, SUBGROUP_SIZE);
 	}
 
 	/**
@@ -72,21 +93,6 @@ public class GlCompat {
 			pointers.put(sourceBuffer);
 			GL20C.nglShaderSource(glId, 1, pointers.address0(), 0);
 		}
-	}
-
-	private static boolean _decideIfWeAreWindows() {
-		return Util.getPlatform() == Util.OS.WINDOWS;
-	}
-
-	private static boolean _decideIfWeAreAMD() {
-		String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
-
-		if (vendor == null) {
-			return false;
-		}
-
-		// vendor string I got was "ATI Technologies Inc."
-		return vendor.contains("ATI") || vendor.contains("AMD");
 	}
 }
 

@@ -9,39 +9,30 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
-import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.math.MoreMath;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
-import net.minecraft.util.Mth;
-
 public class UniformBuffer {
-
-	private static final int OFFSET_ALIGNMENT = GL32.glGetInteger(GL32.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT);
-	private static final int MAX_SIZE = GL32.glGetInteger(GL32.GL_MAX_UNIFORM_BLOCK_SIZE);
-	private static final int MAX_BINDINGS = GL32.glGetInteger(GL32.GL_MAX_UNIFORM_BUFFER_BINDINGS);
-	private static final boolean PO2_ALIGNMENT = Mth.isPowerOfTwo(OFFSET_ALIGNMENT);
+//	private static final int OFFSET_ALIGNMENT = GL32.glGetInteger(GL32.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT);
+//	private static final int MAX_SIZE = GL32.glGetInteger(GL32.GL_MAX_UNIFORM_BLOCK_SIZE);
+//	private static final int MAX_BINDINGS = GL32.glGetInteger(GL32.GL_MAX_UNIFORM_BUFFER_BINDINGS);
+//	private static final boolean PO2_ALIGNMENT = Mth.isPowerOfTwo(OFFSET_ALIGNMENT);
 
 	private static UniformBuffer instance;
-	private final ProviderSet providerSet;
-
-	public static UniformBuffer getInstance() {
-		if (instance == null) {
-			instance = new UniformBuffer();
-		}
-		return instance;
-	}
 
 	private final GlBuffer buffer;
+	private final ProviderSet providerSet;
 
 	private UniformBuffer() {
 		buffer = new GlBuffer();
 		providerSet = new ProviderSet(ShaderUniforms.REGISTRY.getAll());
 	}
 
-	public static void syncAndBind(GlProgram program) {
-		getInstance().sync();
-		program.bind();
+	public static UniformBuffer get() {
+		if (instance == null) {
+			instance = new UniformBuffer();
+		}
+		return instance;
 	}
 
 	public void sync() {
@@ -50,15 +41,6 @@ public class UniformBuffer {
 		}
 
 		GL32.glBindBufferRange(GL32.GL_UNIFORM_BUFFER, 0, buffer.handle(), 0, providerSet.data.size());
-	}
-
-	// https://stackoverflow.com/questions/3407012/rounding-up-to-the-nearest-multiple-of-a-number
-	private static int alignUniformBuffer(int numToRound) {
-		if (PO2_ALIGNMENT) {
-			return (numToRound + OFFSET_ALIGNMENT - 1) & -OFFSET_ALIGNMENT;
-		} else {
-			return ((numToRound + OFFSET_ALIGNMENT - 1) / OFFSET_ALIGNMENT) * OFFSET_ALIGNMENT;
-		}
 	}
 
 	private void delete() {
@@ -72,6 +54,15 @@ public class UniformBuffer {
 			instance = null;
 		}
 	}
+
+//	// https://stackoverflow.com/questions/3407012/rounding-up-to-the-nearest-multiple-of-a-number
+//	private static int alignUniformBuffer(int numToRound) {
+//		if (PO2_ALIGNMENT) {
+//			return (numToRound + OFFSET_ALIGNMENT - 1) & -OFFSET_ALIGNMENT;
+//		} else {
+//			return ((numToRound + OFFSET_ALIGNMENT - 1) / OFFSET_ALIGNMENT) * OFFSET_ALIGNMENT;
+//		}
+//	}
 
 	private static class LiveProvider {
 		private final ShaderUniforms shaderUniforms;

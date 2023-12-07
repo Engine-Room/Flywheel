@@ -7,22 +7,17 @@
 /*const*/ vec2 flw_vertexLight;
 /*const*/ vec3 flw_vertexNormal;
 
-/*const*/ float flw_distance;
-
-/*const*/ vec4 flw_var0;
-/*const*/ vec4 flw_var1;
-/*const*/ vec4 flw_var2;
-/*const*/ vec4 flw_var3;
-
 /*const*/ FlwMaterial flw_material;
 
 /*const*/ vec4 flw_sampleColor;
+
+/*const*/ float flw_distance;
 
 vec4 flw_fragColor;
 ivec2 flw_fragOverlay;
 vec2 flw_fragLight;
 
-// To be implemented by material shaders.
+// To be implemented by the material fragment shader.
 vec4 flw_fogFilter(vec4 color);
 bool flw_discardPredicate(vec4 finalColor);
 void flw_materialFragment();

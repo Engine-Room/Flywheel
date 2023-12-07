@@ -1,28 +1,24 @@
 package com.jozufozu.flywheel.backend.engine.indirect;
 
-import org.joml.Vector4f;
 import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryUtil;
 
 public class IndirectModel {
 	public final IndirectInstancer<?> instancer;
-	public final int id;
-
-	public int baseInstance = -1;
-	private boolean needsFullWrite = true;
-
+	public final int index;
 	private final Vector4fc boundingSphere;
 
-	public IndirectModel(IndirectInstancer<?> instancer, int id, Vector4f boundingSphere) {
+	private int baseInstance = -1;
+	private boolean needsFullWrite = true;
+
+	public IndirectModel(IndirectInstancer<?> instancer, int index, Vector4fc boundingSphere) {
 		this.instancer = instancer;
-		this.id = id;
+		this.index = index;
 		this.boundingSphere = boundingSphere;
 	}
 
-	public void writeModel(long ptr) {
-		MemoryUtil.memPutInt(ptr, 0); // instanceCount - to be incremented by the compute shader
-		MemoryUtil.memPutInt(ptr + 4, baseInstance); // baseInstance
-		boundingSphere.getToAddress(ptr + 8); // boundingSphere
+	public int baseInstance() {
+		return baseInstance;
 	}
 
 	public void prepare(int baseInstance) {
@@ -37,9 +33,15 @@ public class IndirectModel {
 
 	public void writeObjects(long objectPtr) {
 		if (needsFullWrite) {
-			instancer.writeFull(objectPtr, id);
+			instancer.writeAll(objectPtr, index);
 		} else {
-			instancer.writeSparse(objectPtr, id);
+			instancer.writeChanged(objectPtr, index);
 		}
+	}
+
+	public void write(long ptr) {
+		MemoryUtil.memPutInt(ptr, 0); // instanceCount - to be incremented by the cull shader
+		MemoryUtil.memPutInt(ptr + 4, baseInstance); // baseInstance
+		boundingSphere.getToAddress(ptr + 8); // boundingSphere
 	}
 }

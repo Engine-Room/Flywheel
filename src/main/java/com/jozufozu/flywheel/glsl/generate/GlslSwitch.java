@@ -39,9 +39,9 @@ public class GlslSwitch implements GlslStmt {
 	@Override
 	public String prettyPrint() {
 		return """
-				switch (%s) {
-            %s
-            }""".formatted(on.prettyPrint(), formatCases());
+			switch (%s) {
+			%s
+			}""".formatted(on.prettyPrint(), formatCases());
 	}
 
     @NotNull

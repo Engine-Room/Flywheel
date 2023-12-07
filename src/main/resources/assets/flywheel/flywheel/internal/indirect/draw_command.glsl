@@ -5,9 +5,10 @@ struct MeshDrawCommand {
     uint vertexOffset;
     uint baseInstance;
 
-    uint modelID;
-    uint vertexMaterialID;
-    uint fragmentMaterialID;
+    uint modelIndex;
+
+    uint materialVertexIndex;
+    uint materialFragmentIndex;
     uint packedFogAndCutout;
     uint packedMaterialProperties;
 };

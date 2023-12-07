@@ -13,7 +13,7 @@ import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.ModelCache;
-import com.jozufozu.flywheel.lib.model.SimpleModel;
+import com.jozufozu.flywheel.lib.model.SingleMeshModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.transform.TransformStack;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
@@ -30,10 +30,10 @@ import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
 public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockEntity> implements DynamicVisual {
 	private static final ModelCache<Material> BASE_MODELS = new ModelCache<>(texture -> {
-		return new SimpleModel(ModelPartConverter.convert(ModelLayers.SHULKER, texture.sprite(), "base"), Materials.SHULKER);
+		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.SHULKER, texture.sprite(), "base"), Materials.SHULKER);
 	});
 	private static final ModelCache<Material> LID_MODELS = new ModelCache<>(texture -> {
-		return new SimpleModel(ModelPartConverter.convert(ModelLayers.SHULKER, texture.sprite(), "lid"), Materials.SHULKER);
+		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.SHULKER, texture.sprite(), "lid"), Materials.SHULKER);
 	});
 
 	private TransformedInstance base;

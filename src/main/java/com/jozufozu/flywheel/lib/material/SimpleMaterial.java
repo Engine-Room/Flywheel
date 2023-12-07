@@ -21,7 +21,7 @@ public class SimpleMaterial implements Material {
 	protected final FogShader fog;
 	protected final CutoutShader cutout;
 
-	protected final ResourceLocation baseTexture;
+	protected final ResourceLocation texture;
 	protected final boolean blur;
 	protected final boolean mipmap;
 
@@ -41,7 +41,7 @@ public class SimpleMaterial implements Material {
 		shaders = builder.shaders();
 		fog = builder.fog();
 		cutout = builder.cutout();
-		baseTexture = builder.baseTexture();
+		texture = builder.texture();
 		blur = builder.blur();
 		mipmap = builder.mipmap();
 		backfaceCulling = builder.backfaceCulling();
@@ -88,8 +88,8 @@ public class SimpleMaterial implements Material {
 	}
 
 	@Override
-	public ResourceLocation baseTexture() {
-		return baseTexture;
+	public ResourceLocation texture() {
+		return texture;
 	}
 
 	@Override
@@ -150,7 +150,7 @@ public class SimpleMaterial implements Material {
 		protected FogShader fog;
 		protected CutoutShader cutout;
 
-		protected ResourceLocation baseTexture;
+		protected ResourceLocation texture;
 		protected boolean blur;
 		protected boolean mipmap;
 
@@ -171,14 +171,14 @@ public class SimpleMaterial implements Material {
 			shaders = StandardMaterialShaders.DEFAULT;
 			fog = FogShaders.LINEAR;
 			cutout = CutoutShaders.OFF;
-			baseTexture = InventoryMenu.BLOCK_ATLAS;
+			texture = InventoryMenu.BLOCK_ATLAS;
 			blur = false;
 			mipmap = true;
 			backfaceCulling = true;
 			polygonOffset = false;
 			depthTest = DepthTest.LEQUAL;
 			transparency = Transparency.OPAQUE;
-			writeMask = WriteMask.BOTH;
+			writeMask = WriteMask.COLOR_DEPTH;
 			useOverlay = true;
 			useLight = true;
 			diffuse = true;
@@ -194,7 +194,7 @@ public class SimpleMaterial implements Material {
 			shaders = material.shaders();
 			fog = material.fog();
 			cutout = material.cutout();
-			baseTexture = material.baseTexture();
+			texture = material.texture();
 			blur = material.blur();
 			mipmap = material.mipmap();
 			backfaceCulling = material.backfaceCulling();
@@ -233,8 +233,8 @@ public class SimpleMaterial implements Material {
 			return this;
 		}
 
-		public Builder baseTexture(ResourceLocation value) {
-			this.baseTexture = value;
+		public Builder texture(ResourceLocation value) {
+			this.texture = value;
 			return this;
 		}
 
@@ -314,8 +314,8 @@ public class SimpleMaterial implements Material {
 		}
 
 		@Override
-		public ResourceLocation baseTexture() {
-			return baseTexture;
+		public ResourceLocation texture() {
+			return texture;
 		}
 
 		@Override

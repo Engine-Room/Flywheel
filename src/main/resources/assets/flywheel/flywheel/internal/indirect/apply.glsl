@@ -2,27 +2,25 @@
 #include "flywheel:internal/indirect/model_descriptor.glsl"
 #include "flywheel:internal/indirect/draw_command.glsl"
 
-layout(local_size_x = FLW_SUBGROUP_SIZE) in;
+layout(local_size_x = _FLW_SUBGROUP_SIZE) in;
 
-layout(std430, binding = MODEL_BINDING) restrict readonly buffer ModelDescriptors {
+layout(std430, binding = _FLW_MODEL_BUFFER_BINDING) restrict readonly buffer ModelBuffer {
     ModelDescriptor models[];
 };
 
-layout(std430, binding = DRAW_BINDING) restrict buffer MeshDrawCommands {
+layout(std430, binding = _FLW_DRAW_BUFFER_BINDING) restrict buffer DrawBuffer {
     MeshDrawCommand drawCommands[];
 };
 
 // Apply the results of culling to the draw commands.
 void main() {
-    uint drawID = gl_GlobalInvocationID.x;
+    uint drawIndex = gl_GlobalInvocationID.x;
 
-    if (drawID >= drawCommands.length()) {
+    if (drawIndex >= drawCommands.length()) {
         return;
     }
 
-    uint modelID = drawCommands[drawID].modelID;
-
-    uint instanceCount = models[modelID].instanceCount;
-
-    drawCommands[drawID].instanceCount = instanceCount;
+    uint modelIndex = drawCommands[drawIndex].modelIndex;
+    uint instanceCount = models[modelIndex].instanceCount;
+    drawCommands[drawIndex].instanceCount = instanceCount;
 }

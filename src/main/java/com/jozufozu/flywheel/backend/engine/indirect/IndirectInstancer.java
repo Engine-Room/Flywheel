@@ -22,28 +22,24 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		removeDeletedInstances();
 	}
 
-	public void writeSparse(long objectPtr, int batchID) {
+	public void writeChanged(long objectPtr, int modelIndex) {
 		int count = instances.size();
 		InstanceWriter<I> writer = type.getWriter();
 		for (int i = changed.nextSetBit(0); i >= 0 && i < count; i = changed.nextSetBit(i + 1)) {
 			long ptr = objectPtr + objectStride * i;
-			// write batchID
-			MemoryUtil.memPutInt(ptr, batchID);
-			// write object
-			writer.write(ptr + IndirectBuffers.INT_SIZE, instances.get(i));
+			MemoryUtil.memPutInt(ptr, modelIndex); // modelIndex
+			writer.write(ptr + IndirectBuffers.INT_SIZE, instances.get(i)); // instance
 		}
 		changed.clear();
 	}
 
-	public void writeFull(long objectPtr, int modelID) {
+	public void writeAll(long objectPtr, int modelIndex) {
 		InstanceWriter<I> writer = type.getWriter();
 		for (I object : instances) {
-			// write modelID
-			MemoryUtil.memPutInt(objectPtr, modelID);
+			MemoryUtil.memPutInt(objectPtr, modelIndex); // modelIndex
 			objectPtr += IndirectBuffers.INT_SIZE;
 
-			// write object
-			writer.write(objectPtr, object);
+			writer.write(objectPtr, object); // instance
 			objectPtr += instanceStride;
 		}
 		changed.clear();

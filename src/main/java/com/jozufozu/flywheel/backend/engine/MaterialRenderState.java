@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend;
+package com.jozufozu.flywheel.backend.engine;
 
 import java.util.Comparator;
 
@@ -16,7 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 
 public final class MaterialRenderState {
-	public static final Comparator<Material> COMPARATOR = Comparator.comparing(Material::baseTexture)
+	public static final Comparator<Material> COMPARATOR = Comparator.comparing(Material::texture)
 			.thenComparing(Material::blur)
 			.thenComparing(Material::mipmap)
 			.thenComparing(Material::backfaceCulling)
@@ -41,7 +41,7 @@ public final class MaterialRenderState {
 		GlTextureUnit.T0.makeActive();
 		AbstractTexture texture = Minecraft.getInstance()
 				.getTextureManager()
-				.getTexture(material.baseTexture());
+				.getTexture(material.texture());
 		texture.setFilter(material.blur(), material.mipmap());
 		var textureId = texture.getId();
 		RenderSystem.setShaderTexture(0, textureId);
@@ -62,7 +62,7 @@ public final class MaterialRenderState {
 			RenderSystem.enablePolygonOffset();
 		} else {
 			RenderSystem.polygonOffset(0.0F, 0.0F);
-			RenderSystem.enablePolygonOffset();
+			RenderSystem.disablePolygonOffset();
 		}
 	}
 
@@ -115,7 +115,7 @@ public final class MaterialRenderState {
 			RenderSystem.enableBlend();
 			RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
 		}
-		case LIGHTING -> {
+		case LIGHTNING -> {
 			RenderSystem.enableBlend();
 			RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
 		}

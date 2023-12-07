@@ -135,18 +135,18 @@ public class FlwCommands {
 		command.then(Commands.literal("debugFrustum")
 				.then(Commands.literal("pause")
 						.executes(context -> {
-							FlwShaderUniforms.FRUSTUM_PAUSED = true;
+							FlwShaderUniforms.frustumPaused = true;
 							return 1;
 						}))
 				.then(Commands.literal("unpause")
 						.executes(context -> {
-							FlwShaderUniforms.FRUSTUM_PAUSED = false;
+							FlwShaderUniforms.frustumPaused = false;
 							return 1;
 						}))
 				.then(Commands.literal("capture")
 						.executes(context -> {
-							FlwShaderUniforms.FRUSTUM_PAUSED = true;
-							FlwShaderUniforms.FRUSTUM_CAPTURE = true;
+							FlwShaderUniforms.frustumPaused = true;
+							FlwShaderUniforms.frustumCapture = true;
 							return 1;
 						})));
 

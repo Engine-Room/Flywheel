@@ -1,20 +1,19 @@
-#include "flywheel:internal/instancing/api/vertex.glsl"
-#include "flywheel:internal/material.glsl"
-#include "flywheel:internal/block.vert"
-#include "flywheel:util/diffuse.glsl"
+#include "flywheel:internal/diffuse.glsl"
+#include "flywheel:internal/fog_distance.glsl"
+#include "flywheel:internal/layout.vert"
+#include "flywheel:internal/packed_material.glsl"
 
 uniform uvec4 _flw_packedMaterial;
 
 void main() {
-    _flw_materialVertexID = _flw_packedMaterial.x;
-
+    _flw_uberMaterialVertexIndex = _flw_packedMaterial.x;
     _flw_unpackMaterialProperties(_flw_packedMaterial.w, flw_material);
 
-    FlwInstance i = _flw_unpackInstance();
+    FlwInstance instance = _flw_unpackInstance();
 
     _flw_layoutVertex();
     flw_beginVertex();
-    flw_instanceVertex(i);
+    flw_instanceVertex(instance);
     flw_materialVertex();
     flw_endVertex();
 
@@ -30,6 +29,6 @@ void main() {
         flw_vertexColor = vec4(flw_vertexColor.rgb * diffuseFactor, flw_vertexColor.a);
     }
 
-    flw_distance = fog_distance(flw_vertexPos.xyz, flywheel.cameraPos.xyz, flywheel.fogShape);
+    flw_distance = fogDistance(flw_vertexPos.xyz, flywheel.cameraPos.xyz, flywheel.fogShape);
     gl_Position = flywheel.viewProjection * flw_vertexPos;
 }

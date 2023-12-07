@@ -3,6 +3,9 @@ package com.jozufozu.flywheel.api.task;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 
+import org.jetbrains.annotations.ApiStatus;
+
+@ApiStatus.NonExtendable
 public interface TaskExecutor extends Executor {
 	/**
 	 * Wait for <em>all</em> running tasks to finish.
@@ -39,15 +42,6 @@ public interface TaskExecutor extends Executor {
 	boolean syncWhile(BooleanSupplier cond);
 
 	/**
-	 * Check for the number of threads this executor uses.
-	 * <br>
-	 * May be helpful when determining how many chunks to divide a task into.
-	 *
-	 * @return The number of threads this executor uses.
-	 */
-	int getThreadCount();
-
-	/**
 	 * Schedule a task to be run on the main thread.
 	 * <br>
 	 * This method may be called from any thread (including the main thread),
@@ -64,4 +58,13 @@ public interface TaskExecutor extends Executor {
 	 * @return {@code true} if the current thread is the main thread.
 	 */
 	boolean isMainThread();
+
+	/**
+	 * Check for the number of threads this executor uses.
+	 * <br>
+	 * May be helpful when determining how many chunks to divide a task into.
+	 *
+	 * @return The number of threads this executor uses.
+	 */
+	int getThreadCount();
 }

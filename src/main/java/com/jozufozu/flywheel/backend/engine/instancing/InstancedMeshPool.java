@@ -49,7 +49,7 @@ public class InstancedMeshPool {
 	 * @param eboCache The EBO cache to use.
 	 * @return A handle to the allocated mesh.
 	 */
-	public BufferedMesh alloc(Mesh mesh, EBOCache eboCache) {
+	public BufferedMesh alloc(Mesh mesh, EboCache eboCache) {
 		return meshes.computeIfAbsent(mesh, m -> {
 			BufferedMesh bufferedMesh = new BufferedMesh(m, byteSize, eboCache);
 			byteSize += bufferedMesh.size();
@@ -147,7 +147,7 @@ public class InstancedMeshPool {
 
 		private final Set<GlVertexArray> boundTo = new HashSet<>();
 
-		private BufferedMesh(Mesh mesh, long byteIndex, EBOCache eboCache) {
+		private BufferedMesh(Mesh mesh, long byteIndex, EboCache eboCache) {
 			this.mesh = mesh;
 			this.byteIndex = byteIndex;
 			this.ebo = eboCache.get(mesh.indexSequence(), mesh.indexCount());

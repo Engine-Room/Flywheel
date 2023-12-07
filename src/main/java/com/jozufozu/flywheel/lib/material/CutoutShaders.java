@@ -15,6 +15,10 @@ public class CutoutShaders {
 	 */
 	public static final CutoutShader EPSILON = CutoutShader.REGISTRY.registerAndGet(new SimpleCutoutShader(Flywheel.rl("cutout/epsilon.glsl")));
 	/**
+	 * Discard fragments with alpha less than to 0.1.
+	 */
+	public static final CutoutShader ONE_TENTH = CutoutShader.REGISTRY.registerAndGet(new SimpleCutoutShader(Flywheel.rl("cutout/one_tenth.glsl")));
+	/**
 	 * Discard fragments with alpha less than to 0.5.
 	 */
 	public static final CutoutShader HALF = CutoutShader.REGISTRY.registerAndGet(new SimpleCutoutShader(Flywheel.rl("cutout/half.glsl")));

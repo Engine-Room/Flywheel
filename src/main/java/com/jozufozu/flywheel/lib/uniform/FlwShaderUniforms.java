@@ -24,9 +24,9 @@ public class FlwShaderUniforms implements ShaderUniforms {
 	public static final ResourceLocation FILE = Flywheel.rl("uniform/flywheel.glsl");
 	public static final int SIZE = 224;
 
-	public static boolean FRUSTUM_PAUSED = false;
-	public static boolean FRUSTUM_CAPTURE = false;
-	public static boolean FOG_UPDATE = true;
+	public static boolean frustumPaused = false;
+	public static boolean frustumCapture = false;
+	public static boolean fogUpdate = true;
 
 	@Override
 	public int byteSize() {
@@ -94,9 +94,9 @@ public class FlwShaderUniforms implements ShaderUniforms {
 			MemoryUtil.memPutFloat(ptr + 108, 0f); // vec4 alignment
 			MemoryUtil.memPutInt(ptr + 112, getConstantAmbientLightFlag(context));
 
-			if (!FRUSTUM_PAUSED || FRUSTUM_CAPTURE) {
+			if (!frustumPaused || frustumCapture) {
 				MatrixMath.writePackedFrustumPlanes(ptr + 128, viewProjection);
-				FRUSTUM_CAPTURE = false;
+				frustumCapture = false;
 			}
 
 			dirty = true;
@@ -110,7 +110,7 @@ public class FlwShaderUniforms implements ShaderUniforms {
 		}
 
 		private boolean maybeUpdateFog() {
-			if (!FOG_UPDATE || ptr == MemoryUtil.NULL) {
+			if (!fogUpdate || ptr == MemoryUtil.NULL) {
 				return false;
 			}
 
@@ -125,7 +125,7 @@ public class FlwShaderUniforms implements ShaderUniforms {
 			MemoryUtil.memPutInt(ptr + 24, RenderSystem.getShaderFogShape()
 					.getIndex());
 
-			FOG_UPDATE = false;
+			fogUpdate = false;
 
 			return true;
 		}

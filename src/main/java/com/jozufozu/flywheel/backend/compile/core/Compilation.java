@@ -12,7 +12,7 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.gl.GlCompat;
 import com.jozufozu.flywheel.gl.shader.GlShader;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
-import com.jozufozu.flywheel.glsl.GLSLVersion;
+import com.jozufozu.flywheel.glsl.GlslVersion;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.SourceFile;
 import com.jozufozu.flywheel.lib.util.StringUtil;
@@ -31,11 +31,11 @@ public class Compilation {
 	private final List<SourceFile> files = new ArrayList<>();
 	private final StringBuilder generatedSource;
 	private final StringBuilder fullSource;
-	private final GLSLVersion glslVersion;
+	private final GlslVersion glslVersion;
 	private final ShaderType shaderType;
 	private int generatedLines = 0;
 
-	public Compilation(GLSLVersion glslVersion, ShaderType shaderType) {
+	public Compilation(GlslVersion glslVersion, ShaderType shaderType) {
 		this.glslVersion = glslVersion;
 		this.shaderType = shaderType;
 
@@ -88,12 +88,12 @@ public class Compilation {
 
 	private void appendHeader(SourceComponent component, String source) {
 		if (component instanceof SourceFile file) {
-			int fileID = files.size() + 1;
+			int fileId = files.size() + 1;
 
 			files.add(file);
 
 			fullSource.append("\n#line 0 ")
-					.append(fileID)
+					.append(fileId)
 					.append(" // ")
 					.append(file.name)
 					.append('\n');

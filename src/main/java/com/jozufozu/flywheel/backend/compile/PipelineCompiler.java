@@ -20,25 +20,25 @@ public class PipelineCompiler {
 								.withComponent(uniformComponent)
 								.withComponent(key -> pipeline.assembler()
 										.assemble(new Pipeline.InstanceAssemblerContext(BlockVertex.FORMAT.getAttributeCount(), key.instanceType())))
-								.withResource(pipeline.vertexAPI())
+								.withResource(pipeline.vertexApiImpl())
 								.withComponents(vertexComponents)
 								.withResource(key -> key.instanceType()
 										.instanceShader())
 								.withResource(key -> key.contextShader()
 										.vertexShader())
-								.withResource(pipeline.vertexShader()))
+								.withResource(pipeline.vertexMain()))
 						.link(PIPELINE.shader(pipeline.glslVersion(), ShaderType.FRAGMENT)
 								.enableExtension("GL_ARB_conservative_depth")
 								.withComponent(uniformComponent)
-								.withResource(pipeline.fragmentAPI())
+								.withResource(pipeline.fragmentApiImpl())
 								.withComponents(fragmentComponents)
 								.withResource(key -> key.contextShader()
 										.fragmentShader())
-								.withResource(pipeline.fragmentShader()))
+								.withResource(pipeline.fragmentMain()))
 						.then((key, program) -> {
 							key.contextShader()
 									.onProgramLink(program);
-							program.setUniformBlockBinding("FLWUniforms", 0);
+							program.setUniformBlockBinding("FlwUniforms", 0);
 						}))
 				.build();
 	}

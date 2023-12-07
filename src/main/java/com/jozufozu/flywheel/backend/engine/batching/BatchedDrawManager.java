@@ -48,7 +48,7 @@ class BatchedDrawManager extends InstancerStorage<BatchedInstancer<?>> {
 	@Override
 	protected <I extends Instance> void add(InstancerKey<I> key, BatchedInstancer<?> instancer, Model model, RenderStage stage) {
 		var stagePlan = stagePlans.computeIfAbsent(stage, renderStage -> new BatchedStagePlan(renderStage, drawTracker));
-		var meshes = model.getMeshes();
+		var meshes = model.meshes();
 		for (var entry : meshes.entrySet()) {
 			var material = entry.getKey();
 			RenderType renderType = material.getFallbackRenderType();
