@@ -12,14 +12,15 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.Transparency;
 import com.jozufozu.flywheel.api.material.WriteMask;
-import com.jozufozu.flywheel.backend.MaterialRenderState;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
+import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.material.CutoutShaders;
+import com.jozufozu.flywheel.lib.material.FogShaders;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -37,6 +38,8 @@ public class InstancedCrumbling {
 			return;
 		}
 
+		var crumblingMaterial = SimpleMaterial.builder();
+
 		try (var state = GlStateTracker.getRestoreState()) {
 			for (var shaderStateEntry : byShaderState.entrySet()) {
 				var byProgress = shaderStateEntry.getValue();
@@ -50,8 +53,9 @@ public class InstancedCrumbling {
 				var baseMaterial = shader.material();
 				int diffuseTexture = getDiffuseTexture(baseMaterial);
 
-				var crumblingMaterial = SimpleMaterial.builderOf(baseMaterial)
-						.cutout(CutoutShaders.OFF)
+				crumblingMaterial.copyFrom(baseMaterial)
+						.fog(FogShaders.NONE)
+						.cutout(CutoutShaders.ONE_TENTH)
 						.polygonOffset(true)
 						.transparency(Transparency.CRUMBLING)
 						.writeMask(WriteMask.COLOR)
@@ -60,8 +64,9 @@ public class InstancedCrumbling {
 
 				var program = InstancingPrograms.get()
 						.get(shader.instanceType(), Contexts.CRUMBLING);
-				UniformBuffer.syncAndBind(program);
+				program.bind();
 
+				UniformBuffer.get().sync();
 				InstancingEngine.uploadMaterialUniform(program, crumblingMaterial);
 
 				for (Int2ObjectMap.Entry<List<Runnable>> progressEntry : byProgress.int2ObjectEntrySet()) {
@@ -71,7 +76,7 @@ public class InstancedCrumbling {
 						continue;
 					}
 
-					crumblingMaterial.baseTexture(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
+					crumblingMaterial.texture(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
 
 					MaterialRenderState.setup(crumblingMaterial);
 
@@ -126,7 +131,7 @@ public class InstancedCrumbling {
 	private static int getDiffuseTexture(Material material) {
 		return Minecraft.getInstance()
 				.getTextureManager()
-				.getTexture(material.baseTexture())
+				.getTexture(material.texture())
 				.getId();
 	}
 }

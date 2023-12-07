@@ -27,7 +27,7 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 	 * A map of vertex types to their mesh pools.
 	 */
 	private final InstancedMeshPool meshPool = new InstancedMeshPool();
-	private final EBOCache eboCache = new EBOCache();
+	private final EboCache eboCache = new EboCache();
 
 	public DrawSet get(RenderStage stage) {
 		return drawSets.getOrDefault(stage, DrawSet.EMPTY);
@@ -66,7 +66,7 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 
 		DrawSet drawSet = drawSets.computeIfAbsent(stage, DrawSet::new);
 
-		var meshes = model.getMeshes();
+		var meshes = model.meshes();
 		for (var entry : meshes.entrySet()) {
 			var mesh = alloc(entry.getValue());
 

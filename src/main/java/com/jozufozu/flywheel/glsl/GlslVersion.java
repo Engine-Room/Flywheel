@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.glsl;
 
-public enum GLSLVersion {
+public enum GlslVersion {
 	V110(110),
 	V120(120),
 	V130(130),
@@ -18,7 +18,7 @@ public enum GLSLVersion {
 
 	public final int version;
 
-	GLSLVersion(int version) {
+	GlslVersion(int version) {
 		this.version = version;
 	}
 

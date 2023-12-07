@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.FogRenderer;
 abstract class FogUpdateMixin {
 	@Unique
 	private static void flywheel$updateFog() {
-		FlwShaderUniforms.FOG_UPDATE = true;
+		FlwShaderUniforms.fogUpdate = true;
 	}
 
 	@Inject(method = "setupNoFog()V", at = @At("RETURN"))

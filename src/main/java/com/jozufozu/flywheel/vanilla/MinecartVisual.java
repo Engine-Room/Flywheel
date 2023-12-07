@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.lib.instance.TransformedInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.ModelHolder;
 import com.jozufozu.flywheel.lib.model.Models;
-import com.jozufozu.flywheel.lib.model.SimpleModel;
+import com.jozufozu.flywheel.lib.model.SingleMeshModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.visual.AbstractEntityVisual;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVisual<T> implements TickableVisual, DynamicVisual {
 	private static final ModelHolder BODY_MODEL = new ModelHolder(() -> {
-		return new SimpleModel(ModelPartConverter.convert(ModelLayers.MINECART), Materials.MINECART);
+		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.MINECART), Materials.MINECART);
 	});
 
 	private TransformedInstance body;

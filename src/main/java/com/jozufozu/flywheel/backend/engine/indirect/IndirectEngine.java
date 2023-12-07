@@ -6,10 +6,10 @@ import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.backend.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
+import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.task.Flag;
@@ -61,9 +61,7 @@ public class IndirectEngine extends AbstractEngine {
 			GlTextureUnit.T2.makeActive();
 			RenderSystem.bindTexture(RenderSystem.getShaderTexture(2));
 
-			for (var list : drawManager.cullingGroups.values()) {
-				list.submit(stage);
-			}
+			drawManager.renderStage(stage);
 
 			MaterialRenderState.reset();
 

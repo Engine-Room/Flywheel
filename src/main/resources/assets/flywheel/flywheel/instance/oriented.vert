@@ -1,4 +1,3 @@
-#include "flywheel:api/vertex.glsl"
 #include "flywheel:util/quaternion.glsl"
 
 void flw_transformBoundingSphere(in FlwInstance i, inout vec3 center, inout float radius) {

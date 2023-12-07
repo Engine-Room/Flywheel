@@ -1,3 +1,3 @@
-bool flw_discardPredicate(vec4 finalColor) {
-    return finalColor.a < 0.5;
+bool flw_discardPredicate(vec4 color) {
+    return color.a < 0.5;
 }

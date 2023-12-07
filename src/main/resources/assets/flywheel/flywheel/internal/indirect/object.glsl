@@ -1,4 +1,4 @@
 struct Object {
-    uint modelID;
+    uint modelIndex;
     FlwPackedInstance instance;
 };
