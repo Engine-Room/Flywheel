@@ -14,7 +14,7 @@ import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.gl.GlCompat;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
-import com.jozufozu.flywheel.glsl.GLSLVersion;
+import com.jozufozu.flywheel.glsl.GlslVersion;
 import com.jozufozu.flywheel.glsl.ShaderSources;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.lib.util.Unit;
@@ -39,21 +39,22 @@ public class IndirectPrograms {
 		_delete();
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, pipelineKeys, uniformComponent, vertexComponents, fragmentComponents);
 		var cullingCompiler = createCullingCompiler(uniformComponent, sources);
-		var stage2Compiler = createStage2Compiler(sources);
+		var applyCompiler = createApplyCompiler(sources);
 
 		try {
 			var pipelineResult = pipelineCompiler.compileAndReportErrors();
 			var cullingResult = cullingCompiler.compileAndReportErrors();
-			var stage2Result = stage2Compiler.compileAndReportErrors();
+			var applyResult = applyCompiler.compileAndReportErrors();
 
-			if (pipelineResult != null && cullingResult != null && stage2Result != null) {
-				instance = new IndirectPrograms(pipelineResult, cullingResult, stage2Result.get(Unit.INSTANCE));
+			if (pipelineResult != null && cullingResult != null && applyResult != null) {
+				instance = new IndirectPrograms(pipelineResult, cullingResult, applyResult.get(Unit.INSTANCE));
 			}
 		} catch (Throwable e) {
 			Flywheel.LOGGER.error("Failed to compile indirect programs", e);
 		}
 		pipelineCompiler.delete();
 		cullingCompiler.delete();
+		applyCompiler.delete();
 	}
 
 	private static ImmutableList<InstanceType<?>> createCullingKeys() {
@@ -84,22 +85,22 @@ public class IndirectPrograms {
 		return CULL.harness(sources)
 				.keys(createCullingKeys())
 				.compiler(CULL.program()
-						.link(CULL.shader(GLSLVersion.V460, ShaderType.COMPUTE)
-								.define("FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
+						.link(CULL.shader(GlslVersion.V460, ShaderType.COMPUTE)
+								.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 								.withComponent(uniformComponent)
 								.withComponent(IndirectComponent::create)
 								.withResource(Files.INDIRECT_CULL)
 								.withResource(InstanceType::instanceShader))
-						.then((key, program) -> program.setUniformBlockBinding("FLWUniforms", 0)))
+						.then((key, program) -> program.setUniformBlockBinding("FlwUniforms", 0)))
 				.build();
 	}
 
-	private static CompilationHarness<Unit> createStage2Compiler(ShaderSources sources) {
+	private static CompilationHarness<Unit> createApplyCompiler(ShaderSources sources) {
 		return APPLY.harness(sources)
 				.keys(ImmutableList.of(Unit.INSTANCE))
 				.compiler(APPLY.program()
-						.link(APPLY.shader(GLSLVersion.V460, ShaderType.COMPUTE)
-								.define("FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
+						.link(APPLY.shader(GlslVersion.V460, ShaderType.COMPUTE)
+								.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 								.withResource(Files.INDIRECT_APPLY)))
 				.build();
 	}

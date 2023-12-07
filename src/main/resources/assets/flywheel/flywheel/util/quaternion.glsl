@@ -1,8 +1,8 @@
-#define PIOVER2 1.5707963268
+#define PI_OVER_2 1.5707963268
 
 vec4 quat(vec3 axis, float angle) {
-    float halfAngle = angle * PIOVER2 / 180.0;
-    vec2 cs = sin(vec2(PIOVER2 - halfAngle, halfAngle)); // compute sin and cos in one instruction
+    float halfAngle = angle * PI_OVER_2 / 180.0;
+    vec2 cs = sin(vec2(PI_OVER_2 - halfAngle, halfAngle)); // compute sin and cos in one instruction
     return vec4(axis.xyz * cs.y,  cs.x);
 }
 

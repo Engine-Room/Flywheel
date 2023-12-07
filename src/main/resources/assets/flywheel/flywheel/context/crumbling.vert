@@ -1,6 +1,3 @@
-#include "flywheel:api/vertex.glsl"
-#include "flywheel:util/fog.glsl"
-
 out vec2 crumblingTexCoord;
 
 const int DOWN = 0;

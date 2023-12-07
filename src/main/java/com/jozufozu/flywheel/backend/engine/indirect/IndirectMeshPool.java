@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector4fc;
 
 import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.api.model.Mesh;
@@ -24,9 +23,9 @@ public class IndirectMeshPool {
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
 	private final List<BufferedMesh> meshList = new ArrayList<>();
 
-	final GlVertexArray vertexArray;
-	final GlBuffer vbo;
-	final GlBuffer ebo;
+	private final GlVertexArray vertexArray;
+	private final GlBuffer vbo;
+	private final GlBuffer ebo;
 
 	private boolean dirty;
 
@@ -145,9 +144,9 @@ public class IndirectMeshPool {
 
 	public static class BufferedMesh {
 		private final Mesh mesh;
-		public long byteIndex;
-		public int firstIndex;
-		public int baseVertex;
+		private long byteIndex;
+		private int baseVertex;
+		private int firstIndex;
 
 		private BufferedMesh(Mesh mesh) {
 			this.mesh = mesh;
@@ -161,8 +160,12 @@ public class IndirectMeshPool {
 			return mesh.indexCount();
 		}
 
-		public Vector4fc boundingSphere() {
-			return mesh.boundingSphere();
+		public int baseVertex() {
+			return baseVertex;
+		}
+
+		public int firstIndex() {
+			return firstIndex;
 		}
 	}
 }

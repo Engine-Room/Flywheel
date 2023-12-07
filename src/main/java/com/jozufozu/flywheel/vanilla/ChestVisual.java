@@ -17,7 +17,7 @@ import com.jozufozu.flywheel.lib.instance.OrientedInstance;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.ModelCache;
-import com.jozufozu.flywheel.lib.model.SimpleModel;
+import com.jozufozu.flywheel.lib.model.SingleMeshModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.util.Pair;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
@@ -45,13 +45,13 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 	}
 
 	private static final ModelCache<Pair<ChestType, Material>> BOTTOM_MODELS = new ModelCache<>(key -> {
-		return new SimpleModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "bottom"), Materials.CHEST);
+		return new SingleMeshModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "bottom"), Materials.CHEST);
 	});
 	private static final ModelCache<Pair<ChestType, Material>> LID_MODELS = new ModelCache<>(key -> {
-		return new SimpleModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "lid"), Materials.CHEST);
+		return new SingleMeshModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "lid"), Materials.CHEST);
 	});
 	private static final ModelCache<Pair<ChestType, Material>> LOCK_MODELS = new ModelCache<>(key -> {
-		return new SimpleModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "lock"), Materials.CHEST);
+		return new SingleMeshModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "lock"), Materials.CHEST);
 	});
 
 	private OrientedInstance bottom;

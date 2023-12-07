@@ -21,31 +21,39 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.backend.MaterialRenderState;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
+import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlCompat;
 import com.jozufozu.flywheel.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.context.Contexts;
-import com.jozufozu.flywheel.lib.model.ModelUtil;
 
 public class IndirectCullingGroup<I extends Instance> {
+	private static final Comparator<IndirectDraw> DRAW_COMPARATOR = Comparator.comparing(IndirectDraw::stage)
+			.thenComparing(IndirectDraw::material, MaterialRenderState.COMPARATOR);
+
 	private static final int DRAW_BARRIER_BITS = GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT;
 
-	private final GlProgram cull;
-	private final GlProgram draw;
+	private final GlProgram cullProgram;
+	private final GlProgram applyProgram;
+	private final GlProgram drawProgram;
+
 	private final long objectStride;
 	private final IndirectBuffers buffers;
-	public final IndirectMeshPool meshPool;
+	private final IndirectMeshPool meshPool;
 	private final List<IndirectModel> indirectModels = new ArrayList<>();
 	private final List<IndirectDraw> indirectDraws = new ArrayList<>();
 	private final Map<RenderStage, List<MultiDraw>> multiDraws = new EnumMap<>(RenderStage.class);
 	private boolean needsDrawBarrier;
 	private boolean needsSortDraws;
 	private int instanceCountThisFrame;
-	private final GlProgram apply;
 
 	IndirectCullingGroup(InstanceType<I> instanceType) {
+		var programs = IndirectPrograms.get();
+		cullProgram = programs.getCullingProgram(instanceType);
+		applyProgram = programs.getApplyProgram();
+		drawProgram = programs.getIndirectProgram(instanceType, Contexts.DEFAULT);
+
 		objectStride = instanceType.getLayout()
 				.getStride() + IndirectBuffers.INT_SIZE;
 
@@ -53,35 +61,75 @@ public class IndirectCullingGroup<I extends Instance> {
 		buffers.createBuffers();
 
 		meshPool = new IndirectMeshPool();
-
-		var indirectPrograms = IndirectPrograms.get();
-		cull = indirectPrograms.getCullingProgram(instanceType);
-		apply = indirectPrograms.getApplyProgram();
-		draw = indirectPrograms.getIndirectProgram(instanceType, Contexts.WORLD);
 	}
 
-	public void add(IndirectInstancer<I> instancer, RenderStage stage, Model model) {
-		var meshes = model.getMeshes();
+	public void flush() {
+		needsDrawBarrier = true;
+		instanceCountThisFrame = prepareModels();
 
-		var boundingSphere = ModelUtil.computeBoundingSphere(meshes.values());
-
-		int modelID = indirectModels.size();
-		var indirectModel = new IndirectModel(instancer, modelID, boundingSphere);
-		indirectModels.add(indirectModel);
-
-		for (Map.Entry<Material, Mesh> materialMeshEntry : meshes.entrySet()) {
-			IndirectMeshPool.BufferedMesh bufferedMesh = meshPool.alloc(materialMeshEntry.getValue());
-			indirectDraws.add(new IndirectDraw(indirectModel, materialMeshEntry.getKey(), bufferedMesh, stage));
+		if (nothingToDo()) {
+			return;
 		}
 
-		needsSortDraws = true;
+		buffers.updateCounts(instanceCountThisFrame, indirectModels.size(), indirectDraws.size());
+
+		if (needsSortDraws) {
+			sortDraws();
+			needsSortDraws = false;
+		}
+
+		meshPool.flush();
+		uploadObjects();
+		uploadModels();
+		uploadDraws();
+	}
+
+	public void dispatchCull() {
+		if (nothingToDo()) {
+			return;
+		}
+
+		UniformBuffer.get().sync();
+		cullProgram.bind();
+		buffers.bindForCompute();
+		glDispatchCompute(GlCompat.getComputeGroupCount(instanceCountThisFrame), 1, 1);
+	}
+
+	public void dispatchApply() {
+		if (nothingToDo()) {
+			return;
+		}
+
+		applyProgram.bind();
+		buffers.bindForCompute();
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+		glDispatchCompute(GlCompat.getComputeGroupCount(indirectDraws.size()), 1, 1);
+	}
+
+	private boolean nothingToDo() {
+		return indirectDraws.isEmpty() || instanceCountThisFrame == 0;
+	}
+
+	private boolean nothingToDo(RenderStage stage) {
+		return nothingToDo() || !multiDraws.containsKey(stage);
+	}
+
+	/**
+	 * @return the total instance count
+	 */
+	private int prepareModels() {
+		int baseInstance = 0;
+		for (var model : indirectModels) {
+			model.prepare(baseInstance);
+			baseInstance += model.instancer.getInstanceCount();
+		}
+		return baseInstance;
 	}
 
 	private void sortDraws() {
 		multiDraws.clear();
 		// sort by stage, then material
-		indirectDraws.sort(Comparator.comparing(IndirectDraw::stage)
-				.thenComparing(IndirectDraw::material, MaterialRenderState.COMPARATOR));
+		indirectDraws.sort(DRAW_COMPARATOR);
 
 		for (int start = 0, i = 0; i < indirectDraws.size(); i++) {
 			var draw1 = indirectDraws.get(i);
@@ -99,52 +147,53 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 	}
 
-	public void flush() {
-		needsDrawBarrier = true;
-		instanceCountThisFrame = calculateTotalInstanceCountAndPrepareBatches();
+	private void uploadObjects() {
+		long objectPtr = buffers.objectPtr;
 
-		if (nothingToDo()) {
-			return;
+		for (IndirectModel model : indirectModels) {
+			var instanceCount = model.instancer.getInstanceCount();
+			model.writeObjects(objectPtr);
+
+			objectPtr += instanceCount * objectStride;
 		}
 
-		buffers.updateCounts(instanceCountThisFrame, indirectDraws.size(), indirectModels.size());
+		buffers.flushObjects(objectPtr - buffers.objectPtr);
+	}
 
-		if (needsSortDraws) {
-			sortDraws();
-			needsSortDraws = false;
+	private void uploadModels() {
+		long writePtr = buffers.modelPtr.ptr();
+		for (var model : indirectModels) {
+			model.write(writePtr);
+			writePtr += IndirectBuffers.MODEL_STRIDE;
+		}
+		buffers.flushModels(writePtr - buffers.modelPtr.ptr());
+	}
+
+	private void uploadDraws() {
+		long writePtr = buffers.drawPtr.ptr();
+		for (var draw : indirectDraws) {
+			draw.write(writePtr);
+			writePtr += IndirectBuffers.DRAW_COMMAND_STRIDE;
+		}
+		buffers.flushDrawCommands(writePtr - buffers.drawPtr.ptr());
+	}
+
+	public boolean hasStage(RenderStage stage) {
+		return multiDraws.containsKey(stage);
+	}
+
+	public void add(IndirectInstancer<I> instancer, Model model, RenderStage stage) {
+		int modelIndex = indirectModels.size();
+		var boundingSphere = model.boundingSphere();
+		var indirectModel = new IndirectModel(instancer, modelIndex, boundingSphere);
+		indirectModels.add(indirectModel);
+
+		for (Map.Entry<Material, Mesh> entry : model.meshes().entrySet()) {
+			IndirectMeshPool.BufferedMesh bufferedMesh = meshPool.alloc(entry.getValue());
+			indirectDraws.add(new IndirectDraw(indirectModel, entry.getKey(), bufferedMesh, stage));
 		}
 
-		meshPool.flush();
-		uploadInstances();
-		uploadModels();
-		uploadIndirectCommands();
-	}
-
-	public void dispatchCull() {
-		if (nothingToDo()) {
-			return;
-		}
-		UniformBuffer.syncAndBind(cull);
-		buffers.bindForCompute();
-		glDispatchCompute(getGroupCount(instanceCountThisFrame), 1, 1);
-	}
-
-	public void dispatchApply() {
-		if (nothingToDo()) {
-			return;
-		}
-		apply.bind();
-		buffers.bindForCompute();
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-		glDispatchCompute(getGroupCount(indirectDraws.size()), 1, 1);
-	}
-
-	private boolean nothingToDo() {
-		return indirectDraws.isEmpty() || instanceCountThisFrame == 0;
-	}
-
-	private boolean nothingToDo(RenderStage stage) {
-		return nothingToDo() || !multiDraws.containsKey(stage);
+		needsSortDraws = true;
 	}
 
 	public void submit(RenderStage stage) {
@@ -152,13 +201,14 @@ public class IndirectCullingGroup<I extends Instance> {
 			return;
 		}
 
-		UniformBuffer.syncAndBind(draw);
+		UniformBuffer.get().sync();
+		drawProgram.bind();
 		meshPool.bindForDraw();
 		buffers.bindForDraw();
 
 		drawBarrier();
 
-		var flwBaseDraw = draw.getUniformLocation("_flw_baseDraw");
+		var flwBaseDraw = drawProgram.getUniformLocation("_flw_baseDraw");
 
 		for (var multiDraw : multiDraws.get(stage)) {
 			glUniform1ui(flwBaseDraw, multiDraw.start);
@@ -173,61 +223,9 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 	}
 
-	private void uploadInstances() {
-		long objectPtr = buffers.objectPtr;
-
-		for (IndirectModel batch : indirectModels) {
-			var instanceCount = batch.instancer.getInstanceCount();
-			batch.writeObjects(objectPtr);
-
-			objectPtr += instanceCount * objectStride;
-		}
-
-		buffers.flushObjects(objectPtr - buffers.objectPtr);
-	}
-
-	private void uploadModels() {
-		long writePtr = buffers.modelPtr.ptr();
-		for (var batch : indirectModels) {
-			batch.writeModel(writePtr);
-			writePtr += IndirectBuffers.MODEL_STRIDE;
-		}
-		buffers.flushModels(writePtr - buffers.modelPtr.ptr());
-	}
-
-	private void uploadIndirectCommands() {
-		long writePtr = buffers.drawPtr.ptr();
-		for (var batch : indirectDraws) {
-			batch.writeIndirectCommand(writePtr);
-			writePtr += IndirectBuffers.DRAW_COMMAND_STRIDE;
-		}
-		buffers.flushDrawCommands(writePtr - buffers.drawPtr.ptr());
-	}
-
-	private int calculateTotalInstanceCountAndPrepareBatches() {
-		int baseInstance = 0;
-		for (var batch : indirectModels) {
-			batch.prepare(baseInstance);
-			baseInstance += batch.instancer.getInstanceCount();
-		}
-		return baseInstance;
-	}
-
 	public void delete() {
 		buffers.delete();
 		meshPool.delete();
-	}
-
-	public boolean hasStage(RenderStage stage) {
-		return multiDraws.containsKey(stage);
-	}
-
-	private static int getGroupCount(int threadCount) {
-		if (GlCompat.amd) {
-			return (threadCount + 63) >> 6; // ceil(threadCount / 64)
-		} else {
-			return (threadCount + 31) >> 5; // ceil(threadCount / 32)
-		}
 	}
 
 	private record MultiDraw(Material material, int start, int end) {

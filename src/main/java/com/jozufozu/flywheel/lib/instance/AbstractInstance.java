@@ -14,12 +14,12 @@ public abstract class AbstractInstance implements Instance {
 	}
 
 	@Override
-	public InstanceType<?> type() {
+	public final InstanceType<?> type() {
 		return type;
 	}
 
 	@Override
-	public InstanceHandle handle() {
+	public final InstanceHandle handle() {
 		return handle;
 	}
 

@@ -1,9 +1,10 @@
-package com.jozufozu.flywheel.backend;
+package com.jozufozu.flywheel.backend.engine;
 
 import com.jozufozu.flywheel.api.material.DepthTest;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.Transparency;
 import com.jozufozu.flywheel.api.material.WriteMask;
+import com.jozufozu.flywheel.backend.ShaderIndices;
 
 import net.minecraft.util.Mth;
 

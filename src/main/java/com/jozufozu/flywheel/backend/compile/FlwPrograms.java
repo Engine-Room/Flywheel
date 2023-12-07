@@ -24,8 +24,7 @@ public class FlwPrograms {
 	}
 
 	public static void reload(ResourceManager resourceManager) {
-		var empty = List.of(Flywheel.rl("api/fragment.glsl"), Flywheel.rl("api/vertex.glsl"));
-		var sources = new ShaderSources(resourceManager, empty);
+		var sources = new ShaderSources(resourceManager);
 
 		var preLoadStats = new CompilerStats();
 		var loadChecker = new SourceLoader(sources, preLoadStats);
@@ -43,12 +42,31 @@ public class FlwPrograms {
 		}
 	}
 
+	private static ImmutableList<PipelineProgramKey> createPipelineKeys() {
+		ImmutableList.Builder<PipelineProgramKey> builder = ImmutableList.builder();
+		for (Context context : Context.REGISTRY) {
+			for (InstanceType<?> instanceType : InstanceType.REGISTRY) {
+				builder.add(new PipelineProgramKey(instanceType, context));
+			}
+		}
+		return builder.build();
+	}
+
+	private static UberShaderComponent createVertexMaterialComponent(SourceLoader loadChecker) {
+		return UberShaderComponent.builder(Flywheel.rl("uber_material_vertex"))
+				.materialSources(ShaderIndices.materialVertex()
+						.all())
+				.adapt(FnSignature.ofVoid("flw_materialVertex"))
+				.switchOn(GlslExpr.variable("_flw_uberMaterialVertexIndex"))
+				.build(loadChecker);
+	}
+
 	private static UberShaderComponent createFragmentMaterialComponent(SourceLoader loadChecker) {
-		return UberShaderComponent.builder(Flywheel.rl("uber_fragment_material"))
+		return UberShaderComponent.builder(Flywheel.rl("uber_material_fragment"))
 				.materialSources(ShaderIndices.materialFragment()
 						.all())
 				.adapt(FnSignature.ofVoid("flw_materialFragment"))
-				.switchOn(GlslExpr.variable("_flw_materialFragmentID"))
+				.switchOn(GlslExpr.variable("_flw_uberMaterialFragmentIndex"))
 				.build(loadChecker);
 	}
 
@@ -61,7 +79,7 @@ public class FlwPrograms {
 						.name("flw_fogFilter")
 						.arg("vec4", "color")
 						.build(), GlslExpr.variable("color"))
-				.switchOn(GlslExpr.variable("_flw_fogID"))
+				.switchOn(GlslExpr.variable("_flw_uberFogIndex"))
 				.build(loadChecker);
 	}
 
@@ -74,16 +92,7 @@ public class FlwPrograms {
 						.name("flw_discardPredicate")
 						.arg("vec4", "color")
 						.build(), GlslExpr.boolLiteral(false))
-				.switchOn(GlslExpr.variable("_flw_cutoutID"))
-				.build(loadChecker);
-	}
-
-	private static UberShaderComponent createVertexMaterialComponent(SourceLoader loadChecker) {
-		return UberShaderComponent.builder(Flywheel.rl("vertex_material_adapter"))
-				.materialSources(ShaderIndices.materialVertex()
-						.all())
-				.adapt(FnSignature.ofVoid("flw_materialVertex"))
-				.switchOn(GlslExpr.variable("_flw_materialVertexID"))
+				.switchOn(GlslExpr.variable("_flw_uberCutoutIndex"))
 				.build(loadChecker);
 	}
 
@@ -94,16 +103,6 @@ public class FlwPrograms {
 						.map(ShaderUniforms::uniformShader)
 						.toList())
 				.build(loadChecker);
-	}
-
-	private static ImmutableList<PipelineProgramKey> createPipelineKeys() {
-		ImmutableList.Builder<PipelineProgramKey> builder = ImmutableList.builder();
-		for (Context context : Context.REGISTRY) {
-			for (InstanceType<?> instanceType : InstanceType.REGISTRY) {
-				builder.add(new PipelineProgramKey(instanceType, context));
-			}
-		}
-		return builder.build();
 	}
 
 	public static class ResourceReloadListener implements ResourceManagerReloadListener {

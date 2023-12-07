@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.gl.shader.GlShader;
 import com.jozufozu.flywheel.gl.shader.ShaderType;
-import com.jozufozu.flywheel.glsl.GLSLVersion;
+import com.jozufozu.flywheel.glsl.GlslVersion;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 
 public class ShaderCompiler {
@@ -24,7 +24,7 @@ public class ShaderCompiler {
 	}
 
 	@Nullable
-	public GlShader compile(GLSLVersion glslVersion, ShaderType shaderType, Consumer<Compilation> callback, List<SourceComponent> sourceComponents) {
+	public GlShader compile(GlslVersion glslVersion, ShaderType shaderType, Consumer<Compilation> callback, List<SourceComponent> sourceComponents) {
 		var key = new ShaderKey(glslVersion, shaderType, sourceComponents);
 		var cached = shaderCache.get(key);
 		if (cached != null) {
@@ -67,6 +67,6 @@ public class ShaderCompiler {
 		included.addAll(component.included());
 	}
 
-	private record ShaderKey(GLSLVersion glslVersion, ShaderType shaderType, List<SourceComponent> sourceComponents) {
+	private record ShaderKey(GlslVersion glslVersion, ShaderType shaderType, List<SourceComponent> sourceComponents) {
 	}
 }

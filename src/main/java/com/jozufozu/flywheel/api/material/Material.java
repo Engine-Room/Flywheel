@@ -14,7 +14,7 @@ public interface Material {
 
 	CutoutShader cutout();
 
-	ResourceLocation baseTexture();
+	ResourceLocation texture();
 
 	/**
 	 * Should this material have linear filtering applied to the diffuse sampler?

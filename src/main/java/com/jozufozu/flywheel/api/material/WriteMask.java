@@ -4,7 +4,7 @@ public enum WriteMask {
 	/**
 	 * Write to both the color and depth buffers.
 	 */
-	BOTH,
+	COLOR_DEPTH,
 	/**
 	 * Write to the color buffer only.
 	 */
@@ -15,11 +15,11 @@ public enum WriteMask {
 	DEPTH,
 	;
 
-	public boolean depth() {
-		return this == BOTH || this == DEPTH;
+	public boolean color() {
+		return this == COLOR_DEPTH || this == COLOR;
 	}
 
-	public boolean color() {
-		return this == BOTH || this == COLOR;
+	public boolean depth() {
+		return this == COLOR_DEPTH || this == DEPTH;
 	}
 }

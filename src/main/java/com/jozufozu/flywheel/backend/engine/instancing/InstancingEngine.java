@@ -9,13 +9,13 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.backend.MaterialEncoder;
-import com.jozufozu.flywheel.backend.MaterialRenderState;
 import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
+import com.jozufozu.flywheel.backend.engine.MaterialEncoder;
+import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlStateTracker;
 import com.jozufozu.flywheel.gl.GlTextureUnit;
@@ -111,9 +111,10 @@ public class InstancingEngine extends AbstractEngine {
 			}
 
 			var program = InstancingPrograms.get()
-					.get(shader.instanceType(), Contexts.WORLD);
-			UniformBuffer.syncAndBind(program);
+					.get(shader.instanceType(), Contexts.DEFAULT);
+			program.bind();
 
+			UniformBuffer.get().sync();
 			uploadMaterialUniform(program, shader.material());
 
 			MaterialRenderState.setup(shader.material());

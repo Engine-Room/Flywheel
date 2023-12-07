@@ -30,11 +30,11 @@ public class IndirectBuffers {
 	public static final long INT_SIZE = Integer.BYTES;
 	public static final long PTR_SIZE = Pointer.POINTER_SIZE;
 
+	public static final long MODEL_STRIDE = 24;
+
 	// Byte size of a draw command, plus our added mesh data.
 	public static final long DRAW_COMMAND_STRIDE = 40;
 	public static final long DRAW_COMMAND_OFFSET = 0;
-
-	public static final long MODEL_STRIDE = 24;
 
 	// BITS
 	private static final int SUB_DATA_BITS = GL_DYNAMIC_STORAGE_BIT;
@@ -43,11 +43,10 @@ public class IndirectBuffers {
 	private static final int GPU_ONLY_BITS = 0;
 
 	// Offsets to the vbos
-	private static final long VBO_OFFSET = 0;
-	private static final long OBJECT_OFFSET = VBO_OFFSET;
-	private static final long TARGET_OFFSET = INT_SIZE;
-	private static final long MODEL_OFFSET = INT_SIZE * 2;
-	private static final long DRAW_OFFSET = INT_SIZE * 3;
+	private static final long OBJECT_OFFSET = 0;
+	private static final long TARGET_OFFSET = OBJECT_OFFSET + INT_SIZE;
+	private static final long MODEL_OFFSET = TARGET_OFFSET + INT_SIZE;
+	private static final long DRAW_OFFSET = MODEL_OFFSET + INT_SIZE;
 
 	// Offsets to the 3 segments
 	private static final long OFFSET_OFFSET = BUFFER_COUNT * INT_SIZE;
@@ -59,6 +58,9 @@ public class IndirectBuffers {
 	// Total size of the buffer.
 	private static final long BUFFERS_SIZE_BYTES = SIZE_OFFSET + BUFFER_COUNT * PTR_SIZE;
 
+	private static final float OBJECT_GROWTH_FACTOR = 1.25f;
+	private static final float MODEL_GROWTH_FACTOR = 2f;
+	private static final float DRAW_GROWTH_FACTOR = 2f;
 
 	/**
 	 * A small block of memory divided into 3 contiguous segments:
@@ -74,6 +76,7 @@ public class IndirectBuffers {
 	 */
 	private final MemoryBlock buffers;
 	private final long objectStride;
+
 	private int object;
 	private int target;
 	private int model;
@@ -86,10 +89,6 @@ public class IndirectBuffers {
 	private int maxObjectCount = 0;
 	private int maxModelCount = 0;
 	private int maxDrawCount = 0;
-
-	private static final float OBJECT_GROWTH_FACTOR = 1.25f;
-	private static final float MODEL_GROWTH_FACTOR = 2f;
-	private static final float DRAW_GROWTH_FACTOR = 2f;
 
 	IndirectBuffers(long objectStride) {
 		this.objectStride = objectStride;
@@ -105,7 +104,7 @@ public class IndirectBuffers {
 		draw = MemoryUtil.memGetInt(ptr + DRAW_OFFSET);
 	}
 
-	void updateCounts(int objectCount, int drawCount, int modelCount) {
+	void updateCounts(int objectCount, int modelCount, int drawCount) {
 		if (objectCount > maxObjectCount) {
 			createObjectStorage((int) (objectCount * OBJECT_GROWTH_FACTOR));
 		}
@@ -123,7 +122,7 @@ public class IndirectBuffers {
 		MemoryUtil.memPutAddress(ptr + DRAW_SIZE_OFFSET, DRAW_COMMAND_STRIDE * drawCount);
 	}
 
-	void createObjectStorage(int objectCount) {
+	private void createObjectStorage(int objectCount) {
 		freeObjectStorage();
 		var objectSize = objectStride * objectCount;
 		var targetSize = INT_SIZE * objectCount;
@@ -157,7 +156,7 @@ public class IndirectBuffers {
 		FlwMemoryTracker._allocGPUMemory(maxObjectCount * objectStride);
 	}
 
-	void createModelStorage(int modelCount) {
+	private void createModelStorage(int modelCount) {
 		freeModelStorage();
 
 		var modelSize = MODEL_STRIDE * modelCount;
@@ -179,7 +178,7 @@ public class IndirectBuffers {
 		FlwMemoryTracker._allocGPUMemory(maxModelCount * MODEL_STRIDE);
 	}
 
-	void createDrawStorage(int drawCount) {
+	private void createDrawStorage(int drawCount) {
 		freeDrawStorage();
 
 		var drawSize = DRAW_COMMAND_STRIDE * drawCount;

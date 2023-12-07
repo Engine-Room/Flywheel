@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.api.material;
 public enum Transparency {
 	OPAQUE,
 	ADDITIVE,
-	LIGHTING,
+	LIGHTNING,
 	GLINT,
 	CRUMBLING,
 	TRANSLUCENT,

@@ -11,27 +11,33 @@ import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 
 public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> {
-	public final Map<InstanceType<?>, IndirectCullingGroup<?>> renderLists = new HashMap<>();
+	private final Map<InstanceType<?>, IndirectCullingGroup<?>> renderLists = new HashMap<>();
 
 	@Override
 	protected <I extends Instance> IndirectInstancer<?> create(InstanceType<I> type) {
 		return new IndirectInstancer<>(type);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected <I extends Instance> void add(InstancerKey<I> key, IndirectInstancer<?> instancer, Model model, RenderStage stage) {
-		var indirectList = (IndirectCullingGroup<I>) renderLists.computeIfAbsent(key.type(), IndirectCullingGroup::new);
-
-		indirectList.add((IndirectInstancer<I>) instancer, stage, model);
+		var group = (IndirectCullingGroup<I>) renderLists.computeIfAbsent(key.type(), IndirectCullingGroup::new);
+		group.add((IndirectInstancer<I>) instancer, model, stage);
 	}
 
 	public boolean hasStage(RenderStage stage) {
-		for (var list : renderLists.values()) {
-			if (list.hasStage(stage)) {
+		for (var group : renderLists.values()) {
+			if (group.hasStage(stage)) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	public void renderStage(RenderStage stage) {
+		for (var group : renderLists.values()) {
+			group.submit(stage);
+		}
 	}
 
 	@Override
