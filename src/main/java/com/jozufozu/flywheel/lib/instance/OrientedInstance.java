@@ -26,25 +26,21 @@ public class OrientedInstance extends ColoredLitInstance implements Rotate<Orien
 	@Override
 	public OrientedInstance rotate(Quaternionf quaternion) {
 		rotation.mul(quaternion);
-		setChanged();
 		return this;
 	}
 
 	public OrientedInstance setRotation(Quaternionf q) {
 		 rotation.set(q);
-		 setChanged();
 		 return this;
 	}
 
 	public OrientedInstance setRotation(float x, float y, float z, float w) {
 		rotation.set(x, y, z, w);
-		setChanged();
 		return this;
 	}
 
 	public OrientedInstance resetRotation() {
 		rotation.identity();
-		setChanged();
 		return this;
 	}
 
@@ -52,7 +48,6 @@ public class OrientedInstance extends ColoredLitInstance implements Rotate<Orien
 		pivotX = x;
 		pivotY = y;
 		pivotZ = z;
-		setChanged();
 		return this;
 	}
 
@@ -68,7 +63,6 @@ public class OrientedInstance extends ColoredLitInstance implements Rotate<Orien
 		posX += x;
 		posY += y;
 		posZ += z;
-		setChanged();
 		return this;
 	}
 
@@ -76,7 +70,6 @@ public class OrientedInstance extends ColoredLitInstance implements Rotate<Orien
 		posX = x;
 		posY = y;
 		posZ = z;
-		setChanged();
 		return this;
 	}
 

@@ -11,29 +11,27 @@ import net.minecraft.world.level.LightLayer;
  * if they wish to make use of Flywheel's provided light update methods.
  * <p>
  * This only covers flat lighting, smooth lighting is still TODO.
- *
- * @param <I> The name of the class that implements this interface.
  */
-public interface FlatLit<I extends Instance & FlatLit<I>> {
+public interface FlatLit extends Instance {
 	/**
 	 * @param blockLight An integer in the range [0, 15] representing the
 	 *                   amount of block light this instance should receive.
 	 * @return {@code this}
 	 */
-	I setBlockLight(int blockLight);
+	FlatLit setBlockLight(int blockLight);
 
 	/**
 	 * @param skyLight An integer in the range [0, 15] representing the
 	 *                 amount of sky light this instance should receive.
 	 * @return {@code this}
 	 */
-	I setSkyLight(int skyLight);
+	FlatLit setSkyLight(int skyLight);
 
-	default I setLight(int blockLight, int skyLight) {
+	default FlatLit setLight(int blockLight, int skyLight) {
 		return setBlockLight(blockLight).setSkyLight(skyLight);
 	}
 
-	default I updateLight(BlockAndTintGetter level, BlockPos pos) {
+	default FlatLit updateLight(BlockAndTintGetter level, BlockPos pos) {
 		return setLight(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos));
 	}
 
