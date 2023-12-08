@@ -1,6 +1,5 @@
 #include "flywheel:internal/diffuse.glsl"
 #include "flywheel:internal/fog_distance.glsl"
-#include "flywheel:internal/vertex_input.glsl"
 #include "flywheel:internal/packed_material.glsl"
 #include "flywheel:internal/indirect/buffers.glsl"
 #include "flywheel:internal/indirect/draw_command.glsl"

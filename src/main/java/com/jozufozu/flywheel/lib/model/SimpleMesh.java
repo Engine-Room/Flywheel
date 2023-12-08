@@ -5,40 +5,37 @@ import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
-import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
-import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.api.vertex.VertexView;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
 public class SimpleMesh implements QuadMesh {
-	private final VertexType vertexType;
 	private final int vertexCount;
-	private final MemoryBlock data;
-	private final ReusableVertexList vertexList;
+	private final VertexView vertexView;
 	private final Vector4f boundingSphere;
+	private final MemoryBlock data;
 	@Nullable
 	private final String descriptor;
 
-	public SimpleMesh(VertexType vertexType, MemoryBlock data, @Nullable String descriptor) {
-		this.vertexType = vertexType;
+	public SimpleMesh(VertexView vertexView, MemoryBlock data, @Nullable String descriptor) {
+		this.vertexView = vertexView;
 		this.data = data;
 		this.descriptor = descriptor;
 
 		int bytes = (int) data.size();
-		int stride = vertexType.getStride();
+		int stride = (int) this.vertexView.stride();
 		if (bytes % stride != 0) {
 			throw new IllegalArgumentException("MemoryBlock contains non-whole amount of vertices!");
 		}
 		vertexCount = bytes / stride;
 
-		vertexList = this.vertexType.createVertexList();
-		vertexList.ptr(data.ptr());
-		vertexList.vertexCount(vertexCount);
+		this.vertexView.ptr(data.ptr());
+		this.vertexView.vertexCount(vertexCount);
 
-		boundingSphere = ModelUtil.computeBoundingSphere(vertexList);
+		boundingSphere = ModelUtil.computeBoundingSphere(vertexView);
 	}
 
-	public SimpleMesh(VertexType vertexType, MemoryBlock data) {
-		this(vertexType, data, null);
+	public SimpleMesh(VertexView vertexView, MemoryBlock data) {
+		this(vertexView, data, null);
 	}
 
 	@Override
@@ -48,7 +45,7 @@ public class SimpleMesh implements QuadMesh {
 
 	@Override
 	public void write(MutableVertexList dst) {
-		vertexList.writeAll(dst);
+		vertexView.writeAll(dst);
 	}
 
 	@Override
@@ -63,6 +60,6 @@ public class SimpleMesh implements QuadMesh {
 
 	@Override
 	public String toString() {
-		return "SimpleMesh{" + "vertexType=" + vertexType + ",vertexCount=" + vertexCount + ",descriptor={" + descriptor + "}" + "}";
+		return "SimpleMesh{" + "vertexCount=" + vertexCount + ",descriptor={" + descriptor + "}" + "}";
 	}
 }

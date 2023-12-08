@@ -2,15 +2,15 @@ package com.jozufozu.flywheel.impl.vertex;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
+import com.jozufozu.flywheel.api.vertex.VertexView;
 import com.jozufozu.flywheel.lib.math.RenderMath;
-import com.jozufozu.flywheel.lib.vertex.AbstractVertexList;
+import com.jozufozu.flywheel.lib.vertex.AbstractVertexView;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 
-public class InferredVertexListImpl extends AbstractVertexList implements ReusableVertexList {
+public class InferredVertexView extends AbstractVertexView implements VertexView {
 	protected final VertexFormat format;
 	protected final int stride;
 
@@ -21,7 +21,7 @@ public class InferredVertexListImpl extends AbstractVertexList implements Reusab
 	protected final int lightOffset;
 	protected final int normalOffset;
 
-	public InferredVertexListImpl(InferredVertexFormatInfo formatInfo) {
+	public InferredVertexView(InferredVertexFormatInfo formatInfo) {
 		format = formatInfo.format;
 		stride = format.getVertexSize();
 		positionOffset = formatInfo.positionOffset;
@@ -30,6 +30,11 @@ public class InferredVertexListImpl extends AbstractVertexList implements Reusab
 		overlayOffset = formatInfo.overlayOffset;
 		lightOffset = formatInfo.lightOffset;
 		normalOffset = formatInfo.normalOffset;
+	}
+
+	@Override
+	public long stride() {
+		return stride;
 	}
 
 	@Override

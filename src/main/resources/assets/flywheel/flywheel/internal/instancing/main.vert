@@ -1,6 +1,5 @@
 #include "flywheel:internal/diffuse.glsl"
 #include "flywheel:internal/fog_distance.glsl"
-#include "flywheel:internal/vertex_input.glsl"
 #include "flywheel:internal/packed_material.glsl"
 
 uniform uvec4 _flw_packedMaterial;

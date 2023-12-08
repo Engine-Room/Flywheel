@@ -2,13 +2,15 @@ package com.jozufozu.flywheel.lib.vertex;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.lib.math.RenderMath;
 
-import net.minecraft.client.renderer.texture.OverlayTexture;
+public class NoOverlayVertexView extends AbstractVertexView implements EmptyVertexList {
+	public static final long STRIDE = 31;
 
-public class BlockVertexList extends AbstractVertexList {
-	private static final long STRIDE = 32;
+	@Override
+	public long stride() {
+		return STRIDE;
+	}
 
 	@Override
 	public float x(int index) {
@@ -56,13 +58,8 @@ public class BlockVertexList extends AbstractVertexList {
 	}
 
 	@Override
-	public int overlay(int index) {
-		return OverlayTexture.NO_OVERLAY;
-	}
-
-	@Override
 	public int light(int index) {
-		return MemoryUtil.memGetInt(ptr + index * STRIDE + 24) << 4;
+		return MemoryUtil.memGetInt(ptr + index * STRIDE + 24);
 	}
 
 	@Override
@@ -126,12 +123,8 @@ public class BlockVertexList extends AbstractVertexList {
 	}
 
 	@Override
-	public void overlay(int index, int overlay) {
-	}
-
-	@Override
 	public void light(int index, int light) {
-		MemoryUtil.memPutInt(ptr + index * STRIDE + 24, light >> 4);
+		MemoryUtil.memPutInt(ptr + index * STRIDE + 24, light);
 	}
 
 	@Override
@@ -147,35 +140,5 @@ public class BlockVertexList extends AbstractVertexList {
 	@Override
 	public void normalZ(int index, float normalZ) {
 		MemoryUtil.memPutByte(ptr + index * STRIDE + 30, RenderMath.nb(normalZ));
-	}
-
-	@Override
-	public void write(MutableVertexList dst, int srcIndex, int dstIndex) {
-		if (getClass() == dst.getClass()) {
-			long dstPtr = ((BlockVertexList) dst).ptr;
-			MemoryUtil.memCopy(ptr + srcIndex * STRIDE, dstPtr + dstIndex * STRIDE, STRIDE);
-		} else {
-			super.write(dst, srcIndex, dstIndex);
-		}
-	}
-
-	@Override
-	public void write(MutableVertexList dst, int srcStartIndex, int dstStartIndex, int vertexCount) {
-		if (getClass() == dst.getClass()) {
-			long dstPtr = ((BlockVertexList) dst).ptr;
-			MemoryUtil.memCopy(ptr + srcStartIndex * STRIDE, dstPtr + dstStartIndex * STRIDE, vertexCount * STRIDE);
-		} else {
-			super.write(dst, srcStartIndex, dstStartIndex, vertexCount);
-		}
-	}
-
-	@Override
-	public void writeAll(MutableVertexList dst) {
-		if (getClass() == dst.getClass()) {
-			long dstPtr = ((BlockVertexList) dst).ptr;
-			MemoryUtil.memCopy(ptr, dstPtr, vertexCount * STRIDE);
-		} else {
-			super.writeAll(dst);
-		}
 	}
 }

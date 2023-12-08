@@ -11,14 +11,14 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.model.Mesh;
-import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
-import com.jozufozu.flywheel.api.vertex.VertexListProviderRegistry;
+import com.jozufozu.flywheel.api.vertex.VertexView;
+import com.jozufozu.flywheel.api.vertex.VertexViewProviderRegistry;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 public class BatchedMeshPool {
 	private final VertexFormat vertexFormat;
-	private final ReusableVertexList vertexList;
+	private final VertexView vertexView;
 	private final int growthMargin;
 
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
@@ -36,7 +36,7 @@ public class BatchedMeshPool {
 	 */
 	public BatchedMeshPool(VertexFormat vertexFormat) {
 		this.vertexFormat = vertexFormat;
-		vertexList = VertexListProviderRegistry.getProvider(vertexFormat).createVertexList();
+		vertexView = VertexViewProviderRegistry.getProvider(vertexFormat).createVertexView();
 		growthMargin = vertexFormat.getVertexSize() * 128;
 	}
 
@@ -126,7 +126,7 @@ public class BatchedMeshPool {
 	private void bufferPending() {
 		try {
 			for (BufferedMesh mesh : pendingBuffer) {
-				mesh.buffer(vertexList);
+				mesh.write(vertexView);
 			}
 
 			pendingBuffer.clear();
@@ -151,8 +151,8 @@ public class BatchedMeshPool {
 
 	public class BufferedMesh {
 		public final Mesh mesh;
-		private final int byteSize;
 		private final int vertexCount;
+		private final int byteSize;
 		private final Vector4fc boundingSphere;
 
 		private long byteIndex;
@@ -161,32 +161,32 @@ public class BatchedMeshPool {
 		private BufferedMesh(Mesh mesh, long byteIndex) {
 			this.mesh = mesh;
 			vertexCount = mesh.vertexCount();
-			boundingSphere = mesh.boundingSphere();
 			byteSize = vertexCount * vertexFormat.getVertexSize();
+			boundingSphere = mesh.boundingSphere();
 			this.byteIndex = byteIndex;
+		}
+
+		public VertexFormat vertexFormat() {
+			return vertexFormat;
+		}
+
+		public int vertexCount() {
+			return vertexCount;
 		}
 
 		public int size() {
 			return byteSize;
 		}
 
-		public int getVertexCount() {
-			return vertexCount;
-		}
-
 		public Vector4fc boundingSphere() {
 			return boundingSphere;
-		}
-
-		public VertexFormat getVertexFormat() {
-			return vertexFormat;
 		}
 
 		public boolean isDeleted() {
 			return deleted;
 		}
 
-		private boolean isEmpty() {
+		public boolean isEmpty() {
 			return mesh.isEmpty() || isDeleted();
 		}
 
@@ -194,15 +194,14 @@ public class BatchedMeshPool {
 			return BatchedMeshPool.this.data.ptr() + byteIndex;
 		}
 
-		private void buffer(ReusableVertexList vertexList) {
+		private void write(VertexView vertexView) {
 			if (isEmpty()) {
 				return;
 			}
 
-			vertexList.ptr(ptr());
-			vertexList.vertexCount(vertexCount);
-
-			mesh.write(vertexList);
+			vertexView.ptr(ptr());
+			vertexView.vertexCount(vertexCount);
+			mesh.write(vertexView);
 		}
 
 		public void copyTo(long ptr) {

@@ -5,12 +5,13 @@ import java.util.function.BiFunction;
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Mesh;
+import com.jozufozu.flywheel.api.vertex.VertexView;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.ModelUtil;
 import com.jozufozu.flywheel.lib.model.SimpleMesh;
 import com.jozufozu.flywheel.lib.model.baked.BakedModelBufferer.ResultConsumer;
 import com.jozufozu.flywheel.lib.model.baked.BakedModelBufferer.ShadeSeparatedResultConsumer;
-import com.jozufozu.flywheel.lib.vertex.VertexTypes;
+import com.jozufozu.flywheel.lib.vertex.NoOverlayVertexView;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.RenderType;
@@ -72,8 +73,9 @@ public class BlockModelBuilder {
 			ShadeSeparatedResultConsumer resultConsumer = (renderType, shaded, data) -> {
 				Material material = materialFunc.apply(renderType, shaded);
 				if (material != null) {
-					MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, VertexTypes.BLOCK);
-					meshMapBuilder.put(material, new SimpleMesh(VertexTypes.BLOCK, meshData, "source=BlockModelBuilder," + "blockState=" + state + ",renderType=" + renderType + ",shaded=" + shaded));
+					VertexView vertexView = new NoOverlayVertexView();
+					MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, vertexView);
+					meshMapBuilder.put(material, new SimpleMesh(vertexView, meshData, "source=BlockModelBuilder," + "blockState=" + state + ",renderType=" + renderType + ",shaded=" + shaded));
 				}
 			};
 			BakedModelBufferer.bufferBlockShadeSeparated(ModelUtil.VANILLA_RENDERER, renderWorld, state, poseStack, modelData, resultConsumer);
@@ -81,8 +83,9 @@ public class BlockModelBuilder {
 			ResultConsumer resultConsumer = (renderType, data) -> {
 				Material material = materialFunc.apply(renderType, true);
 				if (material != null) {
-					MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, VertexTypes.BLOCK);
-					meshMapBuilder.put(material, new SimpleMesh(VertexTypes.BLOCK, meshData, "source=BlockModelBuilder," + "blockState=" + state + ",renderType=" + renderType));
+					VertexView vertexView = new NoOverlayVertexView();
+					MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, vertexView);
+					meshMapBuilder.put(material, new SimpleMesh(vertexView, meshData, "source=BlockModelBuilder," + "blockState=" + state + ",renderType=" + renderType));
 				}
 			};
 			BakedModelBufferer.bufferBlock(ModelUtil.VANILLA_RENDERER, renderWorld, state, poseStack, modelData, resultConsumer);

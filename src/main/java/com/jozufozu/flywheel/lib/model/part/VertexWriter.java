@@ -4,16 +4,14 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.vertex.VertexType;
 import com.jozufozu.flywheel.lib.math.RenderMath;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter.TextureMapper;
-import com.jozufozu.flywheel.lib.vertex.VertexTypes;
+import com.jozufozu.flywheel.lib.vertex.PosTexNormalVertexView;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 class VertexWriter implements VertexConsumer {
-	private static final VertexType VERTEX_TYPE = VertexTypes.POS_TEX_NORMAL;
-	private static final int STRIDE = VERTEX_TYPE.getStride();
+	private static final int STRIDE = (int) PosTexNormalVertexView.STRIDE;
 	private static final int GROWTH_MARGIN = 128 * STRIDE;
 
 	private MemoryBlock data;

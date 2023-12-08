@@ -1,23 +1,23 @@
 package com.jozufozu.flywheel.impl.vertex;
 
-import com.jozufozu.flywheel.api.vertex.VertexListProvider;
+import com.jozufozu.flywheel.api.vertex.VertexViewProvider;
 import com.jozufozu.flywheel.extension.VertexFormatExtension;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 // TODO: Add freezing
 public final class VertexListProviderRegistryImpl {
-	public static VertexListProvider getProvider(VertexFormat format) {
+	public static VertexViewProvider getProvider(VertexFormat format) {
 		VertexFormatExtension extension = (VertexFormatExtension) format;
-		VertexListProvider provider = extension.flywheel$getVertexListProvider();
+		VertexViewProvider provider = extension.flywheel$getVertexViewProvider();
 		if (provider == null) {
-			provider = new InferredVertexListProviderImpl(format);
-			extension.flywheel$setVertexListProvider(provider);
+			provider = new InferredVertexViewProvider(format);
+			extension.flywheel$setVertexViewProvider(provider);
 		}
 		return provider;
 	}
 
-	public static void setProvider(VertexFormat format, VertexListProvider provider) {
-		((VertexFormatExtension) format).flywheel$setVertexListProvider(provider);
+	public static void setProvider(VertexFormat format, VertexViewProvider provider) {
+		((VertexFormatExtension) format).flywheel$setVertexViewProvider(provider);
 	}
 
 	private VertexListProviderRegistryImpl() {

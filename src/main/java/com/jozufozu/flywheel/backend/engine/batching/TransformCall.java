@@ -12,7 +12,7 @@ import com.jozufozu.flywheel.api.instance.InstanceVertexTransformer;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
 import com.jozufozu.flywheel.api.task.Plan;
-import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
+import com.jozufozu.flywheel.api.vertex.VertexView;
 import com.jozufozu.flywheel.lib.task.ForEachSlicePlan;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -35,11 +35,11 @@ public class TransformCall<I extends Instance> {
 		InstanceBoundingSphereTransformer<I> boundingSphereTransformer = instancer.type.getBoundingSphereTransformer();
 		MaterialVertexTransformer materialVertexTransformer = material.getVertexTransformer();
 
-		meshVertexCount = mesh.getVertexCount();
+		meshVertexCount = mesh.vertexCount();
 		Vector4fc meshBoundingSphere = mesh.boundingSphere();
 
 		drawPlan = ForEachSlicePlan.of(instancer::getAll, (subList, ctx) -> {
-			ReusableVertexList vertexList = ctx.buffer.slice(0, meshVertexCount);
+			VertexView vertexView = ctx.buffer.slice(0, meshVertexCount);
 			Vector4f boundingSphere = new Vector4f();
 
 			for (I instance : subList) {
@@ -51,12 +51,12 @@ public class TransformCall<I extends Instance> {
 				}
 
 				final int baseVertex = ctx.vertexCounter.getAndAdd(meshVertexCount);
-				vertexList.ptr(ctx.buffer.ptrForVertex(baseVertex));
+				vertexView.ptr(ctx.buffer.ptrForVertex(baseVertex));
 
-				mesh.copyTo(vertexList.ptr());
-				instanceVertexTransformer.transform(vertexList, instance);
-				materialVertexTransformer.transform(vertexList, ctx.level);
-				BatchingTransforms.applyMatrices(vertexList, ctx.matrices);
+				mesh.copyTo(vertexView.ptr());
+				instanceVertexTransformer.transform(vertexView, instance);
+				materialVertexTransformer.transform(vertexView, ctx.level);
+				BatchingTransforms.applyMatrices(vertexView, ctx.matrices);
 			}
 		});
 	}
