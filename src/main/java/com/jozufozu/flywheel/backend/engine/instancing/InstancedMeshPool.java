@@ -12,13 +12,15 @@ import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.model.Mesh;
-import com.jozufozu.flywheel.backend.InternalLayout;
+import com.jozufozu.flywheel.api.vertex.VertexView;
+import com.jozufozu.flywheel.backend.InternalVertex;
 import com.jozufozu.flywheel.gl.GlPrimitive;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.gl.buffer.MappedBuffer;
 
 public class InstancedMeshPool {
+	private final VertexView vertexView;
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
 	private final List<BufferedMesh> allBuffered = new ArrayList<>();
 	private final List<BufferedMesh> pendingUpload = new ArrayList<>();
@@ -33,7 +35,8 @@ public class InstancedMeshPool {
 	 * Create a new mesh pool.
 	 */
 	public InstancedMeshPool() {
-		int stride = InternalLayout.LAYOUT.getStride();
+		vertexView = InternalVertex.createVertexView();
+		int stride = InternalVertex.LAYOUT.getStride();
 		vbo = new GlBuffer();
 		vbo.growthFunction(l -> Math.max(l + stride * 128L, (long) (l * 1.6)));
 	}
@@ -109,11 +112,8 @@ public class InstancedMeshPool {
 		try (MappedBuffer mapped = vbo.map()) {
 			long ptr = mapped.ptr();
 
-			var vertexList = InternalLayout.createVertexList();
-
 			for (BufferedMesh mesh : pendingUpload) {
-				vertexList.ptr(ptr + mesh.byteIndex);
-				mesh.mesh.write(vertexList);
+				mesh.write(ptr, vertexView);
 				mesh.boundTo.clear();
 			}
 
@@ -137,7 +137,10 @@ public class InstancedMeshPool {
 
 	public class BufferedMesh {
 		private final Mesh mesh;
+		private final int vertexCount;
+		private final int byteSize;
 		private final int ebo;
+
 		private long byteIndex;
 		private boolean deleted;
 
@@ -145,16 +148,18 @@ public class InstancedMeshPool {
 
 		private BufferedMesh(Mesh mesh, long byteIndex, EboCache eboCache) {
 			this.mesh = mesh;
+			vertexCount = mesh.vertexCount();
+			byteSize = vertexCount * InternalVertex.LAYOUT.getStride();
 			this.byteIndex = byteIndex;
 			this.ebo = eboCache.get(mesh.indexSequence(), mesh.indexCount());
 		}
 
-		public int size() {
-			return mesh.vertexCount() * InternalLayout.LAYOUT.getStride();
+		public int vertexCount() {
+			return vertexCount;
 		}
 
-		public int getAttributeCount() {
-			return InternalLayout.LAYOUT.getAttributeCount();
+		public int size() {
+			return byteSize;
 		}
 
 		public boolean isDeleted() {
@@ -165,10 +170,20 @@ public class InstancedMeshPool {
 			return mesh.isEmpty() || isDeleted();
 		}
 
+		private void write(long ptr, VertexView vertexView) {
+			if (isEmpty()) {
+				return;
+			}
+
+			vertexView.ptr(ptr + byteIndex);
+			vertexView.vertexCount(vertexCount);
+			mesh.write(vertexView);
+		}
+
 		public void setup(GlVertexArray vao) {
 			if (boundTo.add(vao)) {
-				vao.bindVertexBuffer(0, InstancedMeshPool.this.vbo.handle(), byteIndex, InternalLayout.LAYOUT.getStride());
-				vao.bindAttributes(0, 0, InternalLayout.LAYOUT.attributes());
+				vao.bindVertexBuffer(0, InstancedMeshPool.this.vbo.handle(), byteIndex, InternalVertex.LAYOUT.getStride());
+				vao.bindAttributes(0, 0, InternalVertex.LAYOUT.attributes());
 				vao.setElementBuffer(ebo);
 			}
 		}

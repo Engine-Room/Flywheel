@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.extension;
 
-import com.jozufozu.flywheel.api.vertex.VertexListProvider;
+import com.jozufozu.flywheel.api.vertex.VertexViewProvider;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 /**
@@ -11,9 +11,9 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 public interface VertexFormatExtension {
 
 	/**
-	 * @return The VertexListProvider associated with this VertexFormat.
+	 * @return The VertexViewProvider associated with this VertexFormat.
 	 */
-	VertexListProvider flywheel$getVertexListProvider();
+	VertexViewProvider flywheel$getVertexViewProvider();
 
-	void flywheel$setVertexListProvider(VertexListProvider provider);
+	void flywheel$setVertexViewProvider(VertexViewProvider provider);
 }

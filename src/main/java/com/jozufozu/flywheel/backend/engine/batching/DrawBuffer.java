@@ -6,8 +6,8 @@ import java.util.List;
 
 import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
-import com.jozufozu.flywheel.api.vertex.VertexListProvider;
+import com.jozufozu.flywheel.api.vertex.VertexView;
+import com.jozufozu.flywheel.api.vertex.VertexViewProvider;
 import com.jozufozu.flywheel.extension.BufferBuilderExtension;
 import com.jozufozu.flywheel.extension.RenderTypeExtension;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
@@ -17,7 +17,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 
 /**
- * A byte buffer that can be used to draw vertices through multiple {@link ReusableVertexList}s.
+ * A byte buffer that can be used to draw vertices through multiple {@link VertexView}s.
  * <br>
  * Note: The number of vertices needs to be known ahead of time.
  */
@@ -28,7 +28,7 @@ public class DrawBuffer {
 	private final VertexFormat format;
 	private final int stride;
 	private final boolean sortOnUpload;
-	private final VertexListProvider provider;
+	private final VertexViewProvider provider;
 
 	private MemoryBlock data;
 	private ByteBuffer buffer;
@@ -37,7 +37,7 @@ public class DrawBuffer {
 	private int vertexCount;
 	private int verticesToDraw;
 
-	public DrawBuffer(RenderType renderType, VertexFormat format, int stride, boolean sortOnUpload, VertexListProvider provider) {
+	public DrawBuffer(RenderType renderType, VertexFormat format, int stride, boolean sortOnUpload, VertexViewProvider provider) {
 		this.renderType = renderType;
 		this.format = format;
 		this.stride = stride;
@@ -85,7 +85,7 @@ public class DrawBuffer {
 		prepared = true;
 	}
 
-	public ReusableVertexList slice(int startVertex, int vertexCount) {
+	public VertexView slice(int startVertex, int vertexCount) {
 		if (!prepared) {
 			throw new IllegalStateException("Cannot slice DrawBuffer that is not prepared!");
 		}
@@ -94,10 +94,10 @@ public class DrawBuffer {
 			throw new IndexOutOfBoundsException("Vertex count greater than allocated: " + startVertex + " + " + vertexCount + " > " + this.vertexCount);
 		}
 
-		ReusableVertexList vertexList = provider.createVertexList();
-		vertexList.ptr(ptrForVertex(startVertex));
-		vertexList.vertexCount(vertexCount);
-		return vertexList;
+		VertexView vertexView = provider.createVertexView();
+		vertexView.ptr(ptrForVertex(startVertex));
+		vertexView.vertexCount(vertexCount);
+		return vertexView;
 	}
 
 	public long ptrForVertex(long startVertex) {

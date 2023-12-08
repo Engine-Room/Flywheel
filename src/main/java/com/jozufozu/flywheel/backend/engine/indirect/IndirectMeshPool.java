@@ -8,7 +8,8 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.model.Mesh;
-import com.jozufozu.flywheel.backend.InternalLayout;
+import com.jozufozu.flywheel.api.vertex.VertexView;
+import com.jozufozu.flywheel.backend.InternalVertex;
 import com.jozufozu.flywheel.gl.GlNumericType;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
@@ -16,6 +17,7 @@ import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.QuadIndexSequence;
 
 public class IndirectMeshPool {
+	private final VertexView vertexView;
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
 	private final List<BufferedMesh> meshList = new ArrayList<>();
 
@@ -29,13 +31,14 @@ public class IndirectMeshPool {
 	 * Create a new mesh pool.
 	 */
 	public IndirectMeshPool() {
+		vertexView = InternalVertex.createVertexView();
 		vbo = new GlBuffer();
 		ebo = new GlBuffer();
 		vertexArray = GlVertexArray.create();
 
 		vertexArray.setElementBuffer(ebo.handle());
-		vertexArray.bindVertexBuffer(0, vbo.handle(), 0, InternalLayout.LAYOUT.getStride());
-		vertexArray.bindAttributes(0, 0, InternalLayout.LAYOUT.attributes());
+		vertexArray.bindVertexBuffer(0, vbo.handle(), 0, InternalVertex.LAYOUT.getStride());
+		vertexArray.bindAttributes(0, 0, InternalVertex.LAYOUT.attributes());
 	}
 
 	/**
@@ -89,8 +92,6 @@ public class IndirectMeshPool {
 		final long vertexPtr = vertexBlock.ptr();
 		final long indexPtr = indexBlock.ptr();
 
-		var target = InternalLayout.createVertexList();
-
 		int byteIndex = 0;
 		int baseVertex = 0;
 		int firstIndex = maxQuadIndexCount;
@@ -98,11 +99,10 @@ public class IndirectMeshPool {
 			mesh.byteIndex = byteIndex;
 			mesh.baseVertex = baseVertex;
 
-			target.ptr(vertexPtr + mesh.byteIndex);
-			mesh.mesh.write(target);
+			mesh.write(vertexPtr, vertexView);
 
 			byteIndex += mesh.size();
-			baseVertex += mesh.mesh.vertexCount();
+			baseVertex += mesh.vertexCount();
 
 			var indexFiller = mesh.mesh.indexSequence();
 			if (indexFiller == QuadIndexSequence.INSTANCE) {
@@ -141,16 +141,25 @@ public class IndirectMeshPool {
 
 	public static class BufferedMesh {
 		private final Mesh mesh;
+		private final int vertexCount;
+		private final int byteSize;
+
 		private long byteIndex;
 		private int baseVertex;
 		private int firstIndex;
 
 		private BufferedMesh(Mesh mesh) {
 			this.mesh = mesh;
+			vertexCount = mesh.vertexCount();
+			byteSize = vertexCount * InternalVertex.LAYOUT.getStride();
+		}
+
+		public int vertexCount() {
+			return vertexCount;
 		}
 
 		public int size() {
-			return mesh.vertexCount() * InternalLayout.LAYOUT.getStride();
+			return byteSize;
 		}
 
 		public int indexCount() {
@@ -163,6 +172,12 @@ public class IndirectMeshPool {
 
 		public int firstIndex() {
 			return firstIndex;
+		}
+
+		private void write(long ptr, VertexView vertexView) {
+			vertexView.ptr(ptr + byteIndex);
+			vertexView.vertexCount(vertexCount);
+			mesh.write(vertexView);
 		}
 	}
 }

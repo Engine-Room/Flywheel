@@ -40,6 +40,14 @@ public interface VertexList {
 
 	float normalZ(int index);
 
+	default Vector4f getPos(int i, Vector4f dest) {
+		return dest.set(x(i), y(i), z(i));
+	}
+
+    default Vector3f getNormal(int i, Vector3f dest) {
+		return dest.set(normalX(i), normalY(i), normalZ(i));
+	}
+
 	default void write(MutableVertexList dst, int srcIndex, int dstIndex) {
 		dst.x(dstIndex, x(srcIndex));
 		dst.y(dstIndex, y(srcIndex));
@@ -68,20 +76,12 @@ public interface VertexList {
 	}
 
 	default void writeAll(MutableVertexList dst) {
-		write(dst, 0, 0, vertexCount());
+		write(dst, 0, 0, Math.min(vertexCount(), dst.vertexCount()));
 	}
 
 	int vertexCount();
 
 	default boolean isEmpty() {
 		return vertexCount() == 0;
-	}
-
-    default Vector3f getNormal(int i, Vector3f dest) {
-		return dest.set(normalX(i), normalY(i), normalZ(i));
-	}
-
-	default Vector4f getPos(int i, Vector4f dest) {
-		return dest.set(x(i), y(i), z(i));
 	}
 }

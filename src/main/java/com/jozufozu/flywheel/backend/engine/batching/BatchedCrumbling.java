@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.model.Mesh;
-import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
+import com.jozufozu.flywheel.api.vertex.VertexView;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.extension.RenderTypeExtension;
 
@@ -32,8 +32,8 @@ public class BatchedCrumbling {
 
 			drawBuffer.prepare(bucket.vertexCount);
 
-			ReusableVertexList vertexList = drawBuffer.slice(0, 0);
-			long basePtr = vertexList.ptr();
+			VertexView vertexView = drawBuffer.slice(0, 0);
+			long basePtr = vertexView.ptr();
 
 			int totalVertices = 0;
 
@@ -41,15 +41,15 @@ public class BatchedCrumbling {
 				var instance = pair.first();
 				var instancer = pair.second();
 
-				totalVertices += bufferOne(instancer, totalVertices, vertexList, drawBuffer, instance);
+				totalVertices += bufferOne(instancer, totalVertices, vertexView, drawBuffer, instance);
 			}
 
-			vertexList.ptr(basePtr);
-			vertexList.vertexCount(totalVertices);
+			vertexView.ptr(basePtr);
+			vertexView.vertexCount(totalVertices);
 
 			// apply these in bulk
-			BatchingTransforms.applyDecalUVs(vertexList);
-			BatchingTransforms.applyMatrices(vertexList, batchContext.matrices());
+			BatchingTransforms.applyDecalUVs(vertexView);
+			BatchingTransforms.applyMatrices(vertexView, batchContext.matrices());
 
 			drawTracker._draw(drawBuffer);
 		}
@@ -75,25 +75,25 @@ public class BatchedCrumbling {
 
 				for (TransformCall<?> transformCall : instancer.getTransformCalls()) {
 					var mesh = transformCall.mesh;
-					bucket.vertexCount += mesh.getVertexCount();
+					bucket.vertexCount += mesh.vertexCount();
 				}
             }
 		}
 		return out;
 	}
 
-	private static <I extends Instance> int bufferOne(BatchedInstancer<I> batchedInstancer, int baseVertex, ReusableVertexList vertexList, DrawBuffer drawBuffer, Instance instance) {
+	private static <I extends Instance> int bufferOne(BatchedInstancer<I> batchedInstancer, int baseVertex, VertexView vertexView, DrawBuffer drawBuffer, Instance instance) {
 		int totalVertices = 0;
 
 		for (TransformCall<I> transformCall : batchedInstancer.getTransformCalls()) {
             Mesh mesh = transformCall.mesh.mesh;
 
-			vertexList.ptr(drawBuffer.ptrForVertex(baseVertex + totalVertices));
-			vertexList.vertexCount(mesh.vertexCount());
+			vertexView.ptr(drawBuffer.ptrForVertex(baseVertex + totalVertices));
+			vertexView.vertexCount(mesh.vertexCount());
 
-			mesh.write(vertexList);
+			mesh.write(vertexView);
 			batchedInstancer.type.getVertexTransformer()
-					.transform(vertexList, (I) instance);
+					.transform(vertexView, (I) instance);
 
 			totalVertices += mesh.vertexCount();
 		}

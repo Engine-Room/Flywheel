@@ -12,13 +12,12 @@ import com.dreizak.miniball.highdim.Miniball;
 import com.dreizak.miniball.model.PointSet;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Mesh;
-import com.jozufozu.flywheel.api.vertex.ReusableVertexList;
+import com.jozufozu.flywheel.api.vertex.VertexView;
 import com.jozufozu.flywheel.api.vertex.VertexList;
-import com.jozufozu.flywheel.api.vertex.VertexListProviderRegistry;
-import com.jozufozu.flywheel.api.vertex.VertexType;
+import com.jozufozu.flywheel.api.vertex.VertexViewProviderRegistry;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
-import com.jozufozu.flywheel.lib.vertex.PositionOnlyVertexList;
+import com.jozufozu.flywheel.lib.vertex.PosVertexView;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferBuilder.DrawState;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -58,24 +57,23 @@ public final class ModelUtil {
 		return dispatcher;
 	}
 
-	public static MemoryBlock convertVanillaBuffer(BufferBuilder.RenderedBuffer buffer, VertexType vertexType) {
+	public static MemoryBlock convertVanillaBuffer(BufferBuilder.RenderedBuffer buffer, VertexView vertexView) {
 		DrawState drawState = buffer.drawState();
 		int vertexCount = drawState.vertexCount();
 		VertexFormat srcFormat = drawState.format();
 
 		ByteBuffer src = buffer.vertexBuffer();
-		MemoryBlock dst = MemoryBlock.malloc((long) vertexCount * vertexType.getStride());
+		MemoryBlock dst = MemoryBlock.malloc((long) vertexCount * vertexView.stride());
 		long srcPtr = MemoryUtil.memAddress(src);
 		long dstPtr = dst.ptr();
 
-		ReusableVertexList srcList = VertexListProviderRegistry.getProvider(srcFormat).createVertexList();
-		ReusableVertexList dstList = vertexType.createVertexList();
-		srcList.ptr(srcPtr);
-		dstList.ptr(dstPtr);
-		srcList.vertexCount(vertexCount);
-		dstList.vertexCount(vertexCount);
+		VertexView srcView = VertexViewProviderRegistry.getProvider(srcFormat).createVertexView();
+		srcView.ptr(srcPtr);
+		vertexView.ptr(dstPtr);
+		srcView.vertexCount(vertexCount);
+		vertexView.vertexCount(vertexCount);
 
-		srcList.writeAll(dstList);
+		srcView.writeAll(vertexView);
 
 		return dst;
 	}
@@ -110,12 +108,12 @@ public final class ModelUtil {
 
 	public static Vector4f computeBoundingSphere(Iterable<Mesh> meshes) {
 		int vertexCount = computeTotalVertexCount(meshes);
-		var block = MemoryBlock.malloc((long) vertexCount * PositionOnlyVertexList.STRIDE);
-		var vertexList = new PositionOnlyVertexList();
+		var block = MemoryBlock.malloc((long) vertexCount * PosVertexView.STRIDE);
+		var vertexList = new PosVertexView();
 
 		int baseVertex = 0;
 		for (Mesh mesh : meshes) {
-			vertexList.ptr(block.ptr() + (long) baseVertex * PositionOnlyVertexList.STRIDE);
+			vertexList.ptr(block.ptr() + (long) baseVertex * PosVertexView.STRIDE);
 			mesh.write(vertexList);
 			baseVertex += mesh.vertexCount();
 		}

@@ -4,8 +4,8 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.vertex.VertexListProvider;
-import com.jozufozu.flywheel.api.vertex.VertexListProviderRegistry;
+import com.jozufozu.flywheel.api.vertex.VertexViewProvider;
+import com.jozufozu.flywheel.api.vertex.VertexViewProviderRegistry;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.renderer.RenderType;
@@ -15,7 +15,7 @@ public class DrawBufferSet {
 	private final VertexFormat format;
 	private final boolean sortOnUpload;
 	private final int stride;
-	private final VertexListProvider provider;
+	private final VertexViewProvider provider;
 	private final Map<RenderStage, DrawBuffer> buffers = new EnumMap<>(RenderStage.class);
 
 	public DrawBufferSet(RenderType renderType, boolean sortOnUpload) {
@@ -23,7 +23,7 @@ public class DrawBufferSet {
 		this.sortOnUpload = sortOnUpload;
 		format = renderType.format();
 		stride = format.getVertexSize();
-		provider = VertexListProviderRegistry.getProvider(format);
+		provider = VertexViewProviderRegistry.getProvider(format);
 	}
 
 	public DrawBuffer getBuffer(RenderStage stage) {

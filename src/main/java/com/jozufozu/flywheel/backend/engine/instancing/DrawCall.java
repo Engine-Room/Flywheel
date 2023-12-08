@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.engine.instancing;
 
+import com.jozufozu.flywheel.backend.InternalVertex;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 
@@ -8,7 +9,6 @@ public class DrawCall {
 	private final InstancedInstancer<?> instancer;
 	private final InstancedMeshPool.BufferedMesh mesh;
 
-	private final int meshAttributes;
 	private GlVertexArray vao;
 	private GlVertexArray vaoScratch;
 
@@ -17,7 +17,6 @@ public class DrawCall {
 		this.mesh = mesh;
 		this.shaderState = shaderState;
 
-		meshAttributes = this.mesh.getAttributeCount();
 		vao = GlVertexArray.create();
 	}
 
@@ -37,7 +36,7 @@ public class DrawCall {
 			return;
 		}
 
-		instancer.bindIfNeeded(vao, meshAttributes);
+		instancer.bindIfNeeded(vao, InternalVertex.LAYOUT.getAttributeCount());
 		mesh.setup(vao);
 
 		vao.bindForDraw();
@@ -59,7 +58,7 @@ public class DrawCall {
 
 		var vao = lazyScratchVao();
 
-		instancer.bindRaw(vao, meshAttributes, impl.index);
+		instancer.bindRaw(vao, InternalVertex.LAYOUT.getAttributeCount(), impl.index);
 		mesh.setup(vao);
 
 		vao.bindForDraw();

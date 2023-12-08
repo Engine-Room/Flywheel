@@ -89,8 +89,8 @@ public class IndirectPrograms {
 								.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 								.withComponent(uniformComponent)
 								.withComponent(IndirectComponent::create)
-								.withResource(Files.INDIRECT_CULL)
-								.withResource(InstanceType::instanceShader))
+								.withResource(InstanceType::instanceShader)
+								.withResource(Files.INDIRECT_CULL))
 						.then((key, program) -> program.setUniformBlockBinding("FlwUniforms", 0)))
 				.build();
 	}

@@ -2,11 +2,15 @@ package com.jozufozu.flywheel.lib.vertex;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.lib.math.RenderMath;
 
-public class FullVertexList extends AbstractVertexList {
-	private static final long STRIDE = 36;
+public class FullVertexView extends AbstractVertexView {
+	public static final long STRIDE = 36;
+
+	@Override
+	public long stride() {
+		return STRIDE;
+	}
 
 	@Override
 	public float x(int index) {
@@ -60,7 +64,7 @@ public class FullVertexList extends AbstractVertexList {
 
 	@Override
 	public int light(int index) {
-		return MemoryUtil.memGetInt(ptr + index * STRIDE + 28) << 4;
+		return MemoryUtil.memGetInt(ptr + index * STRIDE + 28);
 	}
 
 	@Override
@@ -130,7 +134,7 @@ public class FullVertexList extends AbstractVertexList {
 
 	@Override
 	public void light(int index, int light) {
-		MemoryUtil.memPutInt(ptr + index * STRIDE + 28, light >> 4);
+		MemoryUtil.memPutInt(ptr + index * STRIDE + 28, light);
 	}
 
 	@Override
@@ -146,35 +150,5 @@ public class FullVertexList extends AbstractVertexList {
 	@Override
 	public void normalZ(int index, float normalZ) {
 		MemoryUtil.memPutByte(ptr + index * STRIDE + 34, RenderMath.nb(normalZ));
-	}
-
-	@Override
-	public void write(MutableVertexList dst, int srcIndex, int dstIndex) {
-		if (getClass() == dst.getClass()) {
-			long dstPtr = ((FullVertexList) dst).ptr;
-			MemoryUtil.memCopy(ptr + srcIndex * STRIDE, dstPtr + dstIndex * STRIDE, STRIDE);
-		} else {
-			super.write(dst, srcIndex, dstIndex);
-		}
-	}
-
-	@Override
-	public void write(MutableVertexList dst, int srcStartIndex, int dstStartIndex, int vertexCount) {
-		if (getClass() == dst.getClass()) {
-			long dstPtr = ((FullVertexList) dst).ptr;
-			MemoryUtil.memCopy(ptr + srcStartIndex * STRIDE, dstPtr + dstStartIndex * STRIDE, vertexCount * STRIDE);
-		} else {
-			super.write(dst, srcStartIndex, dstStartIndex, vertexCount);
-		}
-	}
-
-	@Override
-	public void writeAll(MutableVertexList dst) {
-		if (getClass() == dst.getClass()) {
-			long dstPtr = ((FullVertexList) dst).ptr;
-			MemoryUtil.memCopy(ptr, dstPtr, vertexCount * STRIDE);
-		} else {
-			super.writeAll(dst);
-		}
 	}
 }

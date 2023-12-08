@@ -6,7 +6,7 @@ import org.joml.Vector2f;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.SimpleMesh;
-import com.jozufozu.flywheel.lib.vertex.VertexTypes;
+import com.jozufozu.flywheel.lib.vertex.PosTexNormalVertexView;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
@@ -32,7 +32,7 @@ public final class ModelPartConverter {
 		vertexWriter.setTextureMapper(textureMapper);
 		modelPart.render(poseStack, vertexWriter, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
 		MemoryBlock data = vertexWriter.copyDataAndReset();
-		return new SimpleMesh(VertexTypes.POS_TEX_NORMAL, data, "source=ModelPartConverter");
+		return new SimpleMesh(new PosTexNormalVertexView(), data, "source=ModelPartConverter");
 	}
 
 	public static Mesh convert(ModelLayerLocation layer, @Nullable TextureAtlasSprite sprite, String... childPath) {
