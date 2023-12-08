@@ -25,14 +25,12 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	@Override
 	public TransformedInstance mulPose(Matrix4f pose) {
 		this.model.mul(pose);
-		setChanged();
 		return this;
 	}
 
 	@Override
 	public TransformedInstance mulNormal(Matrix3f normal) {
 		this.normal.mul(normal);
-		setChanged();
 		return this;
 	}
 
@@ -53,7 +51,6 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 		float invZ = 1.0f / z;
 		float f = Mth.fastInvCubeRoot(Math.abs(invX * invY * invZ));
 		normal.scale(f * invX, f * invY, f * invZ);
-		setChanged();
 		return this;
 	}
 
@@ -61,14 +58,12 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	public TransformedInstance rotate(Quaternionf quaternion) {
 		model.rotate(quaternion);
 		normal.rotate(quaternion);
-		setChanged();
 		return this;
 	}
 
 	@Override
 	public TransformedInstance translate(double x, double y, double z) {
 		model.translate((float) x, (float) y, (float) z);
-		setChanged();
 		return this;
 	}
 
@@ -77,7 +72,6 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 				.pose());
 		this.normal.set(stack.last()
 				.normal());
-		setChanged();
 		return this;
 	}
 
@@ -91,14 +85,12 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	public TransformedInstance setEmptyTransform() {
 		model.set(ZERO_MATRIX_4f);
 		normal.set(ZERO_MATRIX_3f);
-		setChanged();
 		return this;
 	}
 
 	public TransformedInstance loadIdentity() {
 		model.identity();
 		normal.identity();
-		setChanged();
 		return this;
 	}
 }

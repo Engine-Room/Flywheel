@@ -79,6 +79,8 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 		} else {
 			bell.setRotation(new Quaternionf());
 		}
+
+		bell.setChanged();
 	}
 
 	@Override

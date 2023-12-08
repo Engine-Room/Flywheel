@@ -45,8 +45,8 @@ public abstract class AbstractVisual implements Visual, LightListener {
 
 	/**
 	 * Called after initialization and when a light update occurs in the world.
-	 *
-	 * <br> If your instances need it, update light here.
+	 * <br>
+	 * If your instances need it, update light here.
 	 */
 	public void updateLight() {
 	}
@@ -73,21 +73,25 @@ public abstract class AbstractVisual implements Visual, LightListener {
 		return deleted;
 	}
 
-	protected void relight(BlockPos pos, FlatLit<?>... instances) {
+	protected void relight(BlockPos pos, FlatLit... instances) {
 		relight(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos), instances);
 	}
 
-	protected void relight(int block, int sky, FlatLit<?>... instances) {
-		for (FlatLit<?> instance : instances) {
+	protected void relight(int block, int sky, FlatLit... instances) {
+		for (FlatLit instance : instances) {
 			instance.setLight(block, sky);
+			instance.handle()
+					.setChanged();
 		}
 	}
 
-	protected <L extends FlatLit<?>> void relight(BlockPos pos, Stream<L> instances) {
+	protected void relight(BlockPos pos, Stream<? extends FlatLit> instances) {
 		relight(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos), instances);
 	}
 
-	protected <L extends FlatLit<?>> void relight(int block, int sky, Stream<L> instances) {
-		instances.forEach(model -> model.setLight(block, sky));
+	protected void relight(int block, int sky, Stream<? extends FlatLit> instances) {
+		instances.forEach(model -> model.setLight(block, sky)
+				.handle()
+				.setChanged());
 	}
 }

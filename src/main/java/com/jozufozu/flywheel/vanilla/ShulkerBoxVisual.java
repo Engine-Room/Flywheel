@@ -39,7 +39,6 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	private TransformedInstance base;
 	private TransformedInstance lid;
 
-	private Material texture;
 	private final PoseStack stack = new PoseStack();
 
 	private float lastProgress = Float.NaN;
@@ -51,6 +50,7 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	@Override
 	public void init(float partialTick) {
 		DyeColor color = blockEntity.getColor();
+		Material texture;
 		if (color == null) {
 			texture = Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION;
 		} else {
@@ -59,26 +59,27 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 
 		var rotation = getDirection().getRotation();
 
-		TransformStack tstack = TransformStack.of(stack);
-		tstack.translate(getVisualPosition())
+		stack.setIdentity();
+		TransformStack.of(stack)
+				.translate(getVisualPosition())
 				.translate(0.5)
 				.scale(0.9995f)
 				.rotate(rotation)
 				.scale(1, -1, -1)
 				.translateY(-1);
 
-		base = createBaseInstance().setTransform(stack);
-		lid = createLidInstance().setTransform(stack);
+		base = createBaseInstance(texture).setTransform(stack);
+		lid = createLidInstance(texture).setTransform(stack);
 
 		super.init(partialTick);
 	}
 
-	private TransformedInstance createBaseInstance() {
+	private TransformedInstance createBaseInstance(Material texture) {
 		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, BASE_MODELS.get(texture), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 
-	private TransformedInstance createLidInstance() {
+	private TransformedInstance createLidInstance(Material texture) {
 		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, LID_MODELS.get(texture), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
@@ -110,7 +111,8 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 				.translateY(-progress * 0.5f)
 				.rotate(spin);
 
-		lid.setTransform(stack);
+		lid.setTransform(stack)
+				.setChanged();
 
 		stack.popPose();
 	}

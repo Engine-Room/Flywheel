@@ -5,7 +5,7 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 
 import net.minecraft.client.renderer.LightTexture;
 
-public abstract class ColoredLitInstance extends AbstractInstance implements FlatLit<ColoredLitInstance> {
+public abstract class ColoredLitInstance extends AbstractInstance implements FlatLit {
 	public byte blockLight;
 	public byte skyLight;
 
@@ -21,14 +21,12 @@ public abstract class ColoredLitInstance extends AbstractInstance implements Fla
 	@Override
 	public ColoredLitInstance setBlockLight(int blockLight) {
 		this.blockLight = (byte) blockLight;
-		setChanged();
 		return this;
 	}
 
 	@Override
 	public ColoredLitInstance setSkyLight(int skyLight) {
 		this.skyLight = (byte) skyLight;
-		setChanged();
 		return this;
 	}
 
@@ -62,7 +60,6 @@ public abstract class ColoredLitInstance extends AbstractInstance implements Fla
 		this.r = r;
 		this.g = g;
 		this.b = b;
-		setChanged();
 		return this;
 	}
 
@@ -71,7 +68,6 @@ public abstract class ColoredLitInstance extends AbstractInstance implements Fla
 		this.g = g;
 		this.b = b;
 		this.a = a;
-		setChanged();
 		return this;
 	}
 }

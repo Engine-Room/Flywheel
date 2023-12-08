@@ -163,12 +163,14 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 			stack.scale(0.75F, 0.75F, 0.75F);
 			stack.translate(-0.5D, (float) (displayOffset - 8) / 16, 0.5D);
 			stack.mulPose(Axis.YP.rotationDegrees(90));
-			contents.setTransform(stack);
+			contents.setTransform(stack)
+					.setChanged();
 			stack.popPose();
 		}
 
 		stack.scale(-1.0F, -1.0F, 1.0F);
-		body.setTransform(stack);
+		body.setTransform(stack)
+				.setChanged();
 	}
 
 	@Override

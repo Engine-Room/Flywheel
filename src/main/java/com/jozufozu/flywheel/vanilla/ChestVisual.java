@@ -59,7 +59,6 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 	private TransformedInstance lock;
 
 	private ChestType chestType;
-	private Material texture;
 	private final Quaternionf baseRotation = new Quaternionf();
 	private Float2FloatFunction lidProgress;
 
@@ -72,11 +71,11 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 	@Override
 	public void init(float partialTick) {
 		chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
-		texture = Sheets.chooseMaterial(blockEntity, chestType, isChristmas());
+		Material texture = Sheets.chooseMaterial(blockEntity, chestType, isChristmas());
 
-		bottom = createBottomInstance().setPosition(getVisualPosition());
-		lid = createLidInstance();
-		lock = createLockInstance();
+		bottom = createBottomInstance(texture).setPosition(getVisualPosition());
+		lid = createLidInstance(texture);
+		lock = createLockInstance(texture);
 
 		Block block = blockState.getBlock();
 		if (block instanceof AbstractChestBlock<?> chestBlock) {
@@ -97,17 +96,17 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		super.init(partialTick);
 	}
 
-	private OrientedInstance createBottomInstance() {
+	private OrientedInstance createBottomInstance(Material texture) {
 		return instancerProvider.instancer(InstanceTypes.ORIENTED, BOTTOM_MODELS.get(Pair.of(chestType, texture)), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 
-	private TransformedInstance createLidInstance() {
+	private TransformedInstance createLidInstance(Material texture) {
 		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, LID_MODELS.get(Pair.of(chestType, texture)), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
 
-	private TransformedInstance createLockInstance() {
+	private TransformedInstance createLockInstance(Material texture) {
 		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, LOCK_MODELS.get(Pair.of(chestType, texture)), RenderStage.AFTER_BLOCK_ENTITIES)
 				.createInstance();
 	}
@@ -143,14 +142,16 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 				.rotateCentered(baseRotation)
 				.translate(0, 9f / 16f, 1f / 16f)
 				.rotateX(angleX)
-				.translate(0, -9f / 16f, -1f / 16f);
+				.translate(0, -9f / 16f, -1f / 16f)
+				.setChanged();
 
 		lock.loadIdentity()
 				.translate(getVisualPosition())
 				.rotateCentered(baseRotation)
 				.translate(0, 8f / 16f, 0)
 				.rotateX(angleX)
-				.translate(0, -8f / 16f, 0);
+				.translate(0, -8f / 16f, 0)
+				.setChanged();
 	}
 
 	@Override
