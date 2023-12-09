@@ -1,11 +1,11 @@
 package com.jozufozu.flywheel.backend.engine;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
+import com.jozufozu.flywheel.lib.util.AtomicBitset;
 
 public abstract class AbstractInstancer<I extends Instance> implements Instancer<I> {
 	public final InstanceType<I> type;
@@ -15,8 +15,8 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	protected final ArrayList<I> instances = new ArrayList<>();
 	protected final ArrayList<InstanceHandleImpl> handles = new ArrayList<>();
 
-	protected final BitSet changed = new BitSet();
-	protected final BitSet deleted = new BitSet();
+	protected final AtomicBitset changed = new AtomicBitset();
+	protected final AtomicBitset deleted = new AtomicBitset();
 
 	protected AbstractInstancer(InstanceType<I> type) {
 		this.type = type;
@@ -40,23 +40,23 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		return instances.size();
 	}
 
+	protected boolean moreThanTwoThirdsChanged() {
+		return (changed.cardinality() * 3) > (instances.size() * 2);
+	}
+
+
 	public void notifyDirty(int index) {
 		if (index < 0 || index >= getInstanceCount()) {
 			return;
 		}
-		// TODO: Atomic bitset. Synchronizing here blocks the task executor and causes massive overhead.
-		synchronized (lock) {
-			changed.set(index);
-		}
+		changed.set(index);
 	}
 
 	public void notifyRemoval(int index) {
 		if (index < 0 || index >= getInstanceCount()) {
 			return;
 		}
-		synchronized (lock) {
-			deleted.set(index);
-		}
+		deleted.set(index);
 	}
 
 	protected void removeDeletedInstances() {

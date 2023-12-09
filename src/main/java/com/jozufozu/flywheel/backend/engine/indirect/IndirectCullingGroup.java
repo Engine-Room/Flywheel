@@ -203,7 +203,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		long pos = 0;
 		for (IndirectModel model : indirectModels) {
 			var instanceCount = model.instancer.getInstanceCount();
-			model.writeObjects(stagingBuffer, pos, buffers.object.handle());
+			model.uploadObjects(stagingBuffer, pos, buffers.object.handle());
 
 			pos += instanceCount * objectStride;
 		}
