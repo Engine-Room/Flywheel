@@ -21,6 +21,7 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 	private final int instanceStride;
 
 	private final Set<GlVertexArray> boundTo = new HashSet<>();
+	private final InstanceWriter<I> writer;
 	private GlBuffer vbo;
 
 	private final List<DrawCall> drawCalls = new ArrayList<>();
@@ -29,6 +30,7 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 		super(type);
 		instanceFormat = type.getLayout();
 		instanceStride = instanceFormat.getStride();
+		writer = type.getWriter();
 	}
 
 	public int getAttributeCount() {
@@ -70,17 +72,21 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 
 		try (MappedBuffer buf = vbo.map()) {
 			long ptr = buf.ptr();
-			InstanceWriter<I> writer = type.getWriter();
 
-			int count = instances.size();
-			for (int i = changed.nextSetBit(0); i >= 0 && i < count; i = changed.nextSetBit(i + 1)) {
-				writer.write(ptr + (long) instanceStride * i, instances.get(i));
-			}
+			writeChanged(ptr);
 
 			changed.clear();
 		} catch (Exception e) {
 			Flywheel.LOGGER.error("Error updating InstancedInstancer:", e);
 		}
+	}
+
+	private void writeChanged(long ptr) {
+		changed.forEachSetSpan((startInclusive, endInclusive) -> {
+			for (int i = startInclusive; i <= endInclusive; i++) {
+				writer.write(ptr + (long) instanceStride * i, instances.get(i));
+			}
+		});
 	}
 
 	/**

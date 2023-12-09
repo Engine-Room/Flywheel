@@ -26,41 +26,45 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		removeDeletedInstances();
 	}
 
-	public void write(StagingBuffer stagingBuffer, long startPos, int dstVbo) {
-		if (shouldWriteAll(startPos)) {
-			writeAll(stagingBuffer, startPos, dstVbo);
+	public void upload(StagingBuffer stagingBuffer, long startPos, int dstVbo) {
+		if (shouldUploadAll(startPos)) {
+			uploadAll(stagingBuffer, startPos, dstVbo);
 		} else {
-			writeChanged(stagingBuffer, startPos, dstVbo);
+			uploadChanged(stagingBuffer, startPos, dstVbo);
 		}
 
 		changed.clear();
 		lastStartPos = startPos;
 	}
 
-	private boolean shouldWriteAll(long startPos) {
+	private boolean shouldUploadAll(long startPos) {
 		// If enough of the buffer has changed, write the whole thing to avoid the overhead of a bunch of small writes.
+		// TODO: The overhead comes from the driver performing many buffer copies. Using a compute shader to scatter
+		// 		 the data should work much better.
 		return startPos != lastStartPos || moreThanTwoThirdsChanged();
 	}
 
-	private boolean moreThanTwoThirdsChanged() {
-		return (changed.cardinality() * 3) > (instances.size() * 2);
+	private void uploadChanged(StagingBuffer stagingBuffer, long baseByte, int dstVbo) {
+		changed.forEachSetSpan((startInclusive, endInclusive) -> {
+			var totalSize = (endInclusive - startInclusive + 1) * objectStride;
+
+			stagingBuffer.enqueueCopy(totalSize, dstVbo, baseByte + startInclusive * objectStride, ptr -> {
+				for (int i = startInclusive; i <= endInclusive; i++) {
+					var instance = instances.get(i);
+					writeOne(ptr, instance);
+					ptr += objectStride;
+				}
+			});
+		});
 	}
 
-	private void writeChanged(StagingBuffer stagingBuffer, long start, int dstVbo) {
-		int count = instances.size();
-		for (int i = changed.nextSetBit(0); i >= 0 && i < count; i = changed.nextSetBit(i + 1)) {
-			var instance = instances.get(i);
-			stagingBuffer.enqueueCopy(objectStride, dstVbo, start + i * objectStride, ptr -> writeOne(ptr, instance));
-		}
-	}
-
-	private void writeAll(StagingBuffer stagingBuffer, long start, int dstVbo) {
+	private void uploadAll(StagingBuffer stagingBuffer, long start, int dstVbo) {
 		long totalSize = objectStride * instances.size();
 
-		stagingBuffer.enqueueCopy(totalSize, dstVbo, start, this::writeAll);
+		stagingBuffer.enqueueCopy(totalSize, dstVbo, start, this::uploadAll);
 	}
 
-	private void writeAll(long ptr) {
+	private void uploadAll(long ptr) {
 		for (I instance : instances) {
 			writeOne(ptr, instance);
 			ptr += objectStride;

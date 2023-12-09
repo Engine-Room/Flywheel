@@ -25,8 +25,8 @@ public class IndirectModel {
 		this.baseInstance = baseInstance;
 	}
 
-	public void writeObjects(StagingBuffer stagingBuffer, long start, int dstVbo) {
-		instancer.write(stagingBuffer, start, dstVbo);
+	public void uploadObjects(StagingBuffer stagingBuffer, long start, int dstVbo) {
+		instancer.upload(stagingBuffer, start, dstVbo);
 	}
 
 	public void write(long ptr) {
