@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.lib.instance;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceBoundingSphereTransformer;
 import com.jozufozu.flywheel.api.instance.InstanceHandle;
 import com.jozufozu.flywheel.api.instance.InstanceType;
@@ -14,12 +15,15 @@ import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 import net.minecraft.resources.ResourceLocation;
 
 public class TransformedType implements InstanceType<TransformedInstance> {
-	public static final BufferLayout FORMAT = BufferLayout.builder()
+	private static final BufferLayout LAYOUT = BufferLayout.builder()
 			.addItem(CommonItems.LIGHT_COORD, "light")
 			.addItem(CommonItems.UNORM_4x8, "color")
 			.addItem(CommonItems.MAT4, "pose")
 			.addItem(CommonItems.MAT3, "normal")
 			.build();
+
+	private static final ResourceLocation VERTEX_SHADER = Flywheel.rl("instance/transformed.vert");
+	private static final ResourceLocation CULL_SHADER = Flywheel.rl("instance/cull/transformed.glsl");
 
 	@Override
 	public TransformedInstance create(InstanceHandle handle) {
@@ -28,7 +32,7 @@ public class TransformedType implements InstanceType<TransformedInstance> {
 
 	@Override
 	public BufferLayout getLayout() {
-		return FORMAT;
+		return LAYOUT;
 	}
 
 	@Override
@@ -37,8 +41,13 @@ public class TransformedType implements InstanceType<TransformedInstance> {
 	}
 
 	@Override
-	public ResourceLocation instanceShader() {
-		return InstanceTypes.Files.TRANSFORMED;
+	public ResourceLocation vertexShader() {
+		return VERTEX_SHADER;
+	}
+
+	@Override
+	public ResourceLocation cullShader() {
+		return CULL_SHADER;
 	}
 
 	@Override

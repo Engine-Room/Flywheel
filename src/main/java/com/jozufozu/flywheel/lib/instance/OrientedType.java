@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.lib.instance;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceBoundingSphereTransformer;
 import com.jozufozu.flywheel.api.instance.InstanceHandle;
 import com.jozufozu.flywheel.api.instance.InstanceType;
@@ -16,13 +17,16 @@ import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 import net.minecraft.resources.ResourceLocation;
 
 public class OrientedType implements InstanceType<OrientedInstance> {
-	public static final BufferLayout FORMAT = BufferLayout.builder()
+	private static final BufferLayout LAYOUT = BufferLayout.builder()
 			.addItem(CommonItems.LIGHT_COORD, "light")
 			.addItem(CommonItems.UNORM_4x8, "color")
 			.addItem(CommonItems.VEC3, "position")
 			.addItem(CommonItems.VEC3, "pivot")
 			.addItem(CommonItems.VEC4, "rotation")
 			.build();
+
+	private static final ResourceLocation VERTEX_SHADER = Flywheel.rl("instance/oriented.vert");
+	private static final ResourceLocation CULL_SHADER = Flywheel.rl("instance/cull/oriented.glsl");
 
 	@Override
 	public OrientedInstance create(InstanceHandle handle) {
@@ -31,7 +35,7 @@ public class OrientedType implements InstanceType<OrientedInstance> {
 
 	@Override
 	public BufferLayout getLayout() {
-		return FORMAT;
+		return LAYOUT;
 	}
 
 	@Override
@@ -40,8 +44,13 @@ public class OrientedType implements InstanceType<OrientedInstance> {
 	}
 
 	@Override
-	public ResourceLocation instanceShader() {
-		return InstanceTypes.Files.ORIENTED;
+	public ResourceLocation vertexShader() {
+		return VERTEX_SHADER;
+	}
+
+	@Override
+	public ResourceLocation cullShader() {
+		return CULL_SHADER;
 	}
 
 	@Override

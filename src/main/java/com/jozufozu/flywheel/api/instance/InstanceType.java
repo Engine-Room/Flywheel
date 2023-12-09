@@ -27,7 +27,9 @@ public interface InstanceType<I extends Instance> {
 
 	InstanceWriter<I> getWriter();
 
-	ResourceLocation instanceShader();
+	ResourceLocation vertexShader();
+
+	ResourceLocation cullShader();
 
 	InstanceVertexTransformer<I> getVertexTransformer();
 

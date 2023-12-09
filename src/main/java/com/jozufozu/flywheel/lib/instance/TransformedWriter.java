@@ -11,5 +11,4 @@ public class TransformedWriter extends ColoredLitWriter<TransformedInstance> {
 		MatrixMath.writeUnsafe(instance.model, ptr + 8);
 		MatrixMath.writeUnsafe(instance.normal, ptr + 72);
 	}
-
 }
