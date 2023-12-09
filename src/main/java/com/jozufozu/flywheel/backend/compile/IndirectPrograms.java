@@ -22,6 +22,9 @@ import com.jozufozu.flywheel.lib.util.Unit;
 import net.minecraft.resources.ResourceLocation;
 
 public class IndirectPrograms {
+	private static final ResourceLocation CULL_SHADER_MAIN = Flywheel.rl("internal/indirect/cull.glsl");
+	private static final ResourceLocation APPLY_SHADER_MAIN = Flywheel.rl("internal/indirect/apply.glsl");
+
 	public static IndirectPrograms instance;
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private static final Compile<Unit> APPLY = new Compile<>();
@@ -89,8 +92,8 @@ public class IndirectPrograms {
 								.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 								.withComponent(uniformComponent)
 								.withComponent(IndirectComponent::create)
-								.withResource(InstanceType::instanceShader)
-								.withResource(Files.INDIRECT_CULL))
+								.withResource(InstanceType::cullShader)
+								.withResource(CULL_SHADER_MAIN))
 						.then((key, program) -> program.setUniformBlockBinding("FlwUniforms", 0)))
 				.build();
 	}
@@ -101,7 +104,7 @@ public class IndirectPrograms {
 				.compiler(APPLY.program()
 						.link(APPLY.shader(GlslVersion.V460, ShaderType.COMPUTE)
 								.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
-								.withResource(Files.INDIRECT_APPLY)))
+								.withResource(APPLY_SHADER_MAIN)))
 				.build();
 	}
 
@@ -123,10 +126,5 @@ public class IndirectPrograms {
 		culling.values()
 				.forEach(GlProgram::delete);
 		apply.delete();
-	}
-
-	private static final class Files {
-		public static final ResourceLocation INDIRECT_CULL = Flywheel.rl("internal/indirect/cull.glsl");
-		public static final ResourceLocation INDIRECT_APPLY = Flywheel.rl("internal/indirect/apply.glsl");
 	}
 }
