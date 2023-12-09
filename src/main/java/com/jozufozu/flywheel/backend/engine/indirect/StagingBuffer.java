@@ -4,14 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.LongConsumer;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.lwjgl.opengl.GL45;
 import org.lwjgl.opengl.GL45C;
 import org.lwjgl.system.MemoryUtil;
 
+import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
+import com.jozufozu.flywheel.gl.GlCompat;
 import com.jozufozu.flywheel.gl.GlFence;
+import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
 import it.unimi.dsi.fastutil.PriorityQueue;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
 
 // Used https://github.com/CaffeineMC/sodium-fabric/blob/dev/src/main/java/me/jellysquid/mods/sodium/client/gl/arena/staging/MappedStagingBuffer.java
@@ -30,8 +38,10 @@ public class StagingBuffer {
 
 	private long totalAvailable;
 
+	@Nullable
 	private MemoryBlock scratch;
 
+	private final GlBuffer copyBuffer = new GlBuffer();
 	private final OverflowStagingBuffer overflow = new OverflowStagingBuffer();
 	private final PriorityQueue<Transfer> transfers = new ObjectArrayFIFOQueue<>();
 	private final PriorityQueue<FencedRegion> fencedRegions = new ObjectArrayFIFOQueue<>();
@@ -78,6 +88,7 @@ public class StagingBuffer {
 		enqueueCopy(block.ptr(), size, dstVbo, dstOffset);
 	}
 
+	@NotNull
 	private MemoryBlock getScratch(long size) {
 		if (scratch == null) {
 			scratch = MemoryBlock.malloc(size);
@@ -107,8 +118,10 @@ public class StagingBuffer {
 	 * @param dstOffset The offset in the destination VBO.
 	 */
 	public void enqueueCopy(long ptr, long size, int dstVbo, long dstOffset) {
+		assertMultipleOf4(size);
+
 		if (size > totalAvailable) {
-			overflow.enqueueCopy(ptr, size, dstVbo, dstOffset);
+			overflow.upload(ptr, size, dstVbo, dstOffset);
 			return;
 		}
 
@@ -151,6 +164,7 @@ public class StagingBuffer {
 	 * @return A pointer to the reserved space, or {@code null} if there is not enough contiguous space.
 	 */
 	public long reserveForTransferTo(long size, int dstVbo, long dstOffset) {
+		assertMultipleOf4(size);
 		// Don't need to check totalAvailable here because that's a looser constraint than the bytes remaining.
 		long remaining = capacity - pos;
 		if (size > remaining) {
@@ -173,14 +187,69 @@ public class StagingBuffer {
 			return;
 		}
 
-		if (pos < start) {
-			// we rolled around, need to flush 2 ranges.
-			GL45C.glFlushMappedNamedBufferRange(vbo, start, capacity - start);
-			GL45C.glFlushMappedNamedBufferRange(vbo, 0, pos);
-		} else {
-			GL45C.glFlushMappedNamedBufferRange(vbo, start, pos - start);
+		flushUsedRegion();
+
+		var usedCapacity = dispatchComputeCopies();
+
+		fencedRegions.enqueue(new FencedRegion(new GlFence(), usedCapacity));
+
+		start = pos;
+	}
+
+	private long dispatchComputeCopies() {
+		long usedCapacity = 0;
+		Int2ObjectMap<List<Transfer>> copiesPerVbo = new Int2ObjectArrayMap<>();
+
+		long bytesPerCopy = 64;
+
+		for (var transfer : consolidateCopies(transfers)) {
+			usedCapacity += transfer.size;
+
+			var forVbo = copiesPerVbo.computeIfAbsent(transfer.dstVbo, k -> new ArrayList<>());
+
+			long offset = 0;
+			long remaining = transfer.size;
+
+			while (offset < transfer.size) {
+				long copySize = Math.min(remaining, bytesPerCopy);
+				forVbo.add(new Transfer(transfer.srcOffset + offset, transfer.dstVbo, transfer.dstOffset + offset, copySize));
+				offset += copySize;
+				remaining -= copySize;
+			}
 		}
 
+		IndirectPrograms.get()
+				.getScatterProgram()
+				.bind();
+
+		for (var entry : copiesPerVbo.int2ObjectEntrySet()) {
+			var dstVbo = entry.getIntKey();
+			var transfers = entry.getValue();
+			var copyCount = transfers.size();
+
+			var size = copyCount * Integer.BYTES * 3L;
+			var scratch = getScratch(size);
+
+			putTransfers(scratch.ptr(), transfers);
+
+			copyBuffer.upload(scratch.ptr(), size);
+
+			GL45.glBindBufferBase(GL45C.GL_SHADER_STORAGE_BUFFER, 0, copyBuffer.handle());
+			GL45.glBindBufferBase(GL45C.GL_SHADER_STORAGE_BUFFER, 1, vbo);
+			GL45.glBindBufferBase(GL45C.GL_SHADER_STORAGE_BUFFER, 2, dstVbo);
+
+			GL45.glDispatchCompute(GlCompat.getComputeGroupCount(copyCount), 1, 1);
+		}
+		return usedCapacity;
+	}
+
+	private void assertMultipleOf4(long size) {
+		if (size % 4 != 0) {
+			throw new IllegalArgumentException("Size must be a multiple of 4");
+		}
+	}
+
+	private long sendCopyCommands() {
 		long usedCapacity = 0;
 
 		for (Transfer transfer : consolidateCopies(transfers)) {
@@ -188,10 +257,17 @@ public class StagingBuffer {
 
 			GL45C.glCopyNamedBufferSubData(vbo, transfer.dstVbo, transfer.srcOffset, transfer.dstOffset, transfer.size);
 		}
+		return usedCapacity;
+	}
 
-		fencedRegions.enqueue(new FencedRegion(new GlFence(), usedCapacity));
-
-		start = pos;
+	private void flushUsedRegion() {
+		if (pos < start) {
+			// we rolled around, need to flush 2 ranges.
+			GL45C.glFlushMappedNamedBufferRange(vbo, start, capacity - start);
+			GL45C.glFlushMappedNamedBufferRange(vbo, 0, pos);
+		} else {
+			GL45C.glFlushMappedNamedBufferRange(vbo, start, pos - start);
+		}
 	}
 
 	private static List<Transfer> consolidateCopies(PriorityQueue<Transfer> queue) {
@@ -212,6 +288,15 @@ public class StagingBuffer {
 		}
 
 		return merged;
+	}
+
+	private static void putTransfers(long ptr, List<Transfer> transfers) {
+		for (Transfer transfer : transfers) {
+			MemoryUtil.memPutInt(ptr, (int) transfer.srcOffset);
+			MemoryUtil.memPutInt(ptr + Integer.BYTES, (int) transfer.dstOffset);
+			MemoryUtil.memPutInt(ptr + Integer.BYTES * 2, (int) transfer.size);
+			ptr += Integer.BYTES * 3;
+		}
 	}
 
 	private static boolean areContiguous(Transfer last, Transfer transfer) {
@@ -238,7 +323,9 @@ public class StagingBuffer {
 		GL45C.glDeleteBuffers(vbo);
 		overflow.delete();
 
-		scratch.free();
+		if (scratch != null) {
+			scratch.free();
+		}
 
 		FlwMemoryTracker._freeCPUMemory(capacity);
 	}
@@ -271,7 +358,7 @@ public class StagingBuffer {
 			vbo = GL45C.glCreateBuffers();
 		}
 
-		public void enqueueCopy(long ptr, long size, int dstVbo, long dstOffset) {
+		public void upload(long ptr, long size, int dstVbo, long dstOffset) {
 			GL45C.nglNamedBufferData(vbo, size, ptr, GL45C.GL_STREAM_COPY);
 			GL45C.glCopyNamedBufferSubData(vbo, dstVbo, 0, dstOffset, size);
 		}

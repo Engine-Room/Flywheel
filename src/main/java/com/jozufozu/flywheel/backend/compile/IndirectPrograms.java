@@ -24,18 +24,21 @@ import net.minecraft.resources.ResourceLocation;
 public class IndirectPrograms {
 	private static final ResourceLocation CULL_SHADER_MAIN = Flywheel.rl("internal/indirect/cull.glsl");
 	private static final ResourceLocation APPLY_SHADER_MAIN = Flywheel.rl("internal/indirect/apply.glsl");
+	private static final ResourceLocation SCATTER_SHADER_MAIN = Flywheel.rl("internal/indirect/scatter.glsl");
 
 	public static IndirectPrograms instance;
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
-	private static final Compile<Unit> APPLY = new Compile<>();
+	private static final Compile<Unit> UNIT = new Compile<>();
 	private final Map<PipelineProgramKey, GlProgram> pipeline;
 	private final Map<InstanceType<?>, GlProgram> culling;
 	private final GlProgram apply;
+	private final GlProgram scatter;
 
-	public IndirectPrograms(Map<PipelineProgramKey, GlProgram> pipeline, Map<InstanceType<?>, GlProgram> culling, GlProgram apply) {
+	public IndirectPrograms(Map<PipelineProgramKey, GlProgram> pipeline, Map<InstanceType<?>, GlProgram> culling, GlProgram apply, GlProgram scatter) {
 		this.pipeline = pipeline;
 		this.culling = culling;
 		this.apply = apply;
+		this.scatter = scatter;
 	}
 
 	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
@@ -43,14 +46,16 @@ public class IndirectPrograms {
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, pipelineKeys, uniformComponent, vertexComponents, fragmentComponents);
 		var cullingCompiler = createCullingCompiler(uniformComponent, sources);
 		var applyCompiler = createApplyCompiler(sources);
+		var scatterCompiler = createScatterCompiler(sources);
 
 		try {
 			var pipelineResult = pipelineCompiler.compileAndReportErrors();
 			var cullingResult = cullingCompiler.compileAndReportErrors();
 			var applyResult = applyCompiler.compileAndReportErrors();
+			var scatterResult = scatterCompiler.compileAndReportErrors();
 
-			if (pipelineResult != null && cullingResult != null && applyResult != null) {
-				instance = new IndirectPrograms(pipelineResult, cullingResult, applyResult.get(Unit.INSTANCE));
+			if (pipelineResult != null && cullingResult != null && applyResult != null && scatterResult != null) {
+				instance = new IndirectPrograms(pipelineResult, cullingResult, applyResult.get(Unit.INSTANCE), scatterResult.get(Unit.INSTANCE));
 			}
 		} catch (Throwable e) {
 			Flywheel.LOGGER.error("Failed to compile indirect programs", e);
@@ -99,12 +104,22 @@ public class IndirectPrograms {
 	}
 
 	private static CompilationHarness<Unit> createApplyCompiler(ShaderSources sources) {
-		return APPLY.harness(sources)
+		return UNIT.harness(sources)
 				.keys(ImmutableList.of(Unit.INSTANCE))
-				.compiler(APPLY.program()
-						.link(APPLY.shader(GlslVersion.V460, ShaderType.COMPUTE)
+				.compiler(UNIT.program()
+						.link(UNIT.shader(GlslVersion.V460, ShaderType.COMPUTE)
 								.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 								.withResource(APPLY_SHADER_MAIN)))
+				.build();
+	}
+
+	private static CompilationHarness<Unit> createScatterCompiler(ShaderSources sources) {
+		return UNIT.harness(sources)
+				.keys(ImmutableList.of(Unit.INSTANCE))
+				.compiler(UNIT.program()
+						.link(UNIT.shader(GlslVersion.V460, ShaderType.COMPUTE)
+								.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
+								.withResource(SCATTER_SHADER_MAIN)))
 				.build();
 	}
 
@@ -118,6 +133,10 @@ public class IndirectPrograms {
 
 	public GlProgram getApplyProgram() {
 		return apply;
+	}
+
+	public GlProgram getScatterProgram() {
+		return scatter;
 	}
 
 	public void delete() {
