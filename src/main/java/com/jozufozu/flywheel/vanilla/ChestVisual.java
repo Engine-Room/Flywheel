@@ -90,6 +90,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		}
 
 		bottom.setRotation(baseRotation);
+		bottom.setChanged();
 
 		applyLidTransform(lidProgress.get(partialTick));
 
