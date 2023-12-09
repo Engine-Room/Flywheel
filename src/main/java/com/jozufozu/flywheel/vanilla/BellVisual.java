@@ -31,7 +31,7 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 
 	private OrientedInstance bell;
 
-	private float lastRingTime = Float.NaN;
+	private boolean wasShaking = false;
 
 	public BellVisual(VisualizationContext ctx, BellBlockEntity blockEntity) {
 		super(ctx, blockEntity);
@@ -41,6 +41,8 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	public void init(float partialTick) {
 		bell = createBellInstance().setPivot(0.5f, 0.75f, 0.5f)
 				.setPosition(getVisualPosition());
+
+		bell.setChanged();
 
 		updateRotation(partialTick);
 
@@ -62,25 +64,23 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	}
 
 	private void updateRotation(float partialTick) {
-		float ringTime = (float) blockEntity.ticks + partialTick;
-
-		if (ringTime == lastRingTime) {
-			return;
-		}
-		lastRingTime = ringTime;
-
 		if (blockEntity.shaking) {
+			float ringTime = (float) blockEntity.ticks + partialTick;
 			float angle = Mth.sin(ringTime / (float) Math.PI) / (4.0F + ringTime / 3.0F);
 
 			Vector3f ringAxis = blockEntity.clickDirection.getCounterClockWise()
 					.step();
 
-			bell.setRotation(new Quaternionf(new AxisAngle4f(angle, ringAxis)));
-		} else {
-			bell.setRotation(new Quaternionf());
-		}
+			bell.setRotation(new Quaternionf(new AxisAngle4f(angle, ringAxis)))
+					.setChanged();
 
-		bell.setChanged();
+			wasShaking = true;
+		} else if (wasShaking) {
+			bell.setRotation(new Quaternionf())
+					.setChanged();
+
+			wasShaking = false;
+		}
 	}
 
 	@Override
