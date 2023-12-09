@@ -17,6 +17,10 @@ public final class MoreMath {
 		return (numerator + denominator - 1) / denominator;
 	}
 
+	public static long ceilingDiv(long numerator, long denominator) {
+		return (numerator + denominator - 1) / denominator;
+	}
+
 	public static int numDigits(int number) {
 		// cursed but allegedly the fastest algorithm, taken from https://www.baeldung.com/java-number-of-digits-in-int
 		if (number < 100000) {

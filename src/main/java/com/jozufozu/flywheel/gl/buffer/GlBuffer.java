@@ -82,11 +82,15 @@ public class GlBuffer extends GlObject {
 		size = growthFunction.apply(capacity);
 	}
 
-	public void upload(MemoryBlock directBuffer) {
-		FlwMemoryTracker._freeGPUMemory(size);
-		Buffer.IMPL.data(handle(), directBuffer.size(), directBuffer.ptr(), usage.glEnum);
-		size = directBuffer.size();
-		FlwMemoryTracker._allocGPUMemory(size);
+	public void upload(MemoryBlock memoryBlock) {
+		upload(memoryBlock.ptr(), memoryBlock.size());
+	}
+
+	public void upload(long ptr, long size) {
+		FlwMemoryTracker._freeGPUMemory(this.size);
+		Buffer.IMPL.data(handle(), size, ptr, usage.glEnum);
+		this.size = size;
+		FlwMemoryTracker._allocGPUMemory(this.size);
 	}
 
 	public MappedBuffer map() {

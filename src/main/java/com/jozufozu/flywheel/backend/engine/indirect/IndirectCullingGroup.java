@@ -99,6 +99,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		UniformBuffer.get().sync();
 		cullProgram.bind();
 		buffers.bindForCompute();
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		glDispatchCompute(GlCompat.getComputeGroupCount(instanceCountThisFrame), 1, 1);
 	}
 
