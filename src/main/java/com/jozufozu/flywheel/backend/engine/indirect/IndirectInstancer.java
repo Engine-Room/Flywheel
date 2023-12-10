@@ -38,10 +38,7 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	}
 
 	private boolean shouldUploadAll(long startPos) {
-		// If enough of the buffer has changed, write the whole thing to avoid the overhead of a bunch of small writes.
-		// TODO: The overhead comes from the driver performing many buffer copies. Using a compute shader to scatter
-		// 		 the data should work much better.
-		return startPos != lastStartPos || moreThanTwoThirdsChanged();
+		return startPos != lastStartPos;
 	}
 
 	private void uploadChanged(StagingBuffer stagingBuffer, long baseByte, int dstVbo) {
