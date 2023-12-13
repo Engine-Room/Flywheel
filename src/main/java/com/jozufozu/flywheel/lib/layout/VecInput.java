@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.lib.layout;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.jozufozu.flywheel.api.layout.InputType;
 import com.jozufozu.flywheel.gl.array.VertexAttribute;
 import com.jozufozu.flywheel.glsl.generate.GlslBuilder;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;

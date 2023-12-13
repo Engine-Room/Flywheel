@@ -6,8 +6,13 @@ import com.jozufozu.flywheel.api.instance.InstanceHandle;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceVertexTransformer;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
-import com.jozufozu.flywheel.api.layout.BufferLayout;
+import com.jozufozu.flywheel.api.layout.IntegerType;
+import com.jozufozu.flywheel.api.layout.Layout;
+import com.jozufozu.flywheel.api.layout.MatrixSize;
+import com.jozufozu.flywheel.api.layout.VectorSize;
+import com.jozufozu.flywheel.lib.layout.BufferLayout;
 import com.jozufozu.flywheel.lib.layout.CommonItems;
+import com.jozufozu.flywheel.lib.layout.LayoutBuilder;
 import com.jozufozu.flywheel.lib.math.MatrixMath;
 import com.jozufozu.flywheel.lib.math.RenderMath;
 import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
@@ -15,11 +20,18 @@ import com.jozufozu.flywheel.lib.vertex.VertexTransformations;
 import net.minecraft.resources.ResourceLocation;
 
 public class TransformedType implements InstanceType<TransformedInstance> {
-	private static final BufferLayout LAYOUT = BufferLayout.builder()
+	private static final BufferLayout OLD_LAYOUT = BufferLayout.builder()
 			.addItem(CommonItems.LIGHT_COORD, "light")
 			.addItem(CommonItems.UNORM_4x8, "color")
 			.addItem(CommonItems.MAT4, "pose")
 			.addItem(CommonItems.MAT3, "normal")
+			.build();
+
+	public static final Layout LAYOUT = LayoutBuilder.of()
+			.integer("light", IntegerType.SHORT, VectorSize.TWO)
+			.normalized("color", IntegerType.BYTE, VectorSize.FOUR)
+			.mat("pose", MatrixSize.FOUR)
+			.mat("normal", MatrixSize.THREE)
 			.build();
 
 	private static final ResourceLocation VERTEX_SHADER = Flywheel.rl("instance/transformed.vert");
@@ -32,6 +44,11 @@ public class TransformedType implements InstanceType<TransformedInstance> {
 
 	@Override
 	public BufferLayout getLayout() {
+		return OLD_LAYOUT;
+	}
+
+	@Override
+	public Layout layout() {
 		return LAYOUT;
 	}
 
