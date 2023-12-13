@@ -6,13 +6,13 @@ import java.util.List;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.jozufozu.flywheel.api.layout.LayoutItem;
 import com.jozufozu.flywheel.backend.compile.Pipeline;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.glsl.generate.GlslBlock;
 import com.jozufozu.flywheel.glsl.generate.GlslBuilder;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;
+import com.jozufozu.flywheel.lib.layout.LayoutItem;
 
 import net.minecraft.resources.ResourceLocation;
 

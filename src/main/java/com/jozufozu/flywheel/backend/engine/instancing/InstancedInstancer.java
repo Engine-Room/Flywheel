@@ -9,12 +9,12 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
-import com.jozufozu.flywheel.api.layout.BufferLayout;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.gl.buffer.GlBufferUsage;
 import com.jozufozu.flywheel.gl.buffer.MappedBuffer;
+import com.jozufozu.flywheel.lib.layout.BufferLayout;
 
 public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I> {
 	private final BufferLayout instanceFormat;

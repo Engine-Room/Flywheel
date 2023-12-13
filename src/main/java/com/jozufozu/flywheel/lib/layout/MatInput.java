@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.jozufozu.flywheel.api.layout.InputType;
 import com.jozufozu.flywheel.gl.GlNumericType;
 import com.jozufozu.flywheel.gl.array.VertexAttribute;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;

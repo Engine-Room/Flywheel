@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api.layout;
+package com.jozufozu.flywheel.lib.layout;
 
 public record LayoutItem(InputType type, String name) {
 
