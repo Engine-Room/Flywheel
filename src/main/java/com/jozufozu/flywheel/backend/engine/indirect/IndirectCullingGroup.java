@@ -44,11 +44,13 @@ public class IndirectCullingGroup<I extends Instance> {
 	private final List<IndirectModel> indirectModels = new ArrayList<>();
 	private final List<IndirectDraw> indirectDraws = new ArrayList<>();
 	private final Map<RenderStage, List<MultiDraw>> multiDraws = new EnumMap<>(RenderStage.class);
+	private final InstanceType<I> instanceType;
 	private boolean needsDrawBarrier;
 	private boolean hasNewDraws;
 	private int instanceCountThisFrame;
 
 	IndirectCullingGroup(InstanceType<I> instanceType) {
+		this.instanceType = instanceType;
 		var programs = IndirectPrograms.get();
 		cullProgram = programs.getCullingProgram(instanceType);
 		applyProgram = programs.getApplyProgram();
@@ -167,7 +169,9 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		for (Map.Entry<Material, Mesh> entry : model.meshes().entrySet()) {
 			IndirectMeshPool.BufferedMesh bufferedMesh = meshPool.alloc(entry.getValue());
-			indirectDraws.add(new IndirectDraw(indirectModel, entry.getKey(), bufferedMesh, stage));
+			var draw = new IndirectDraw(indirectModel, entry.getKey(), bufferedMesh, stage);
+			indirectDraws.add(draw);
+			instancer.addDraw(draw);
 		}
 
 		hasNewDraws = true;
@@ -191,6 +195,23 @@ public class IndirectCullingGroup<I extends Instance> {
 			glUniform1ui(flwBaseDraw, multiDraw.start);
 			multiDraw.submit();
 		}
+	}
+
+	public void bindForCrumbling() {
+		var program = IndirectPrograms.get()
+				.getIndirectProgram(instanceType, Contexts.CRUMBLING);
+
+		program.bind();
+
+		UniformBuffer.get()
+				.sync();
+		meshPool.bindForDraw();
+		buffers.bindForCrumbling();
+
+		drawBarrier();
+
+		var flwBaseDraw = drawProgram.getUniformLocation("_flw_baseDraw");
+		glUniform1ui(flwBaseDraw, 0);
 	}
 
 	private void drawBarrier() {

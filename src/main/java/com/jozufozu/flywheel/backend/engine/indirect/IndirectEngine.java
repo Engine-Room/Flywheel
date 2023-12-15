@@ -73,7 +73,30 @@ public class IndirectEngine extends AbstractEngine {
 
 	@Override
 	public void renderCrumbling(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks) {
-		// TODO: implement
+		executor.syncUntil(flushFlag::isRaised);
+
+		try (var restoreState = GlStateTracker.getRestoreState()) {
+			int prevActiveTexture = GlStateManager._getActiveTexture();
+			Minecraft.getInstance().gameRenderer.overlayTexture()
+					.setupOverlayColor();
+			Minecraft.getInstance().gameRenderer.lightTexture()
+					.turnOnLightLayer();
+
+			GlTextureUnit.T1.makeActive();
+			RenderSystem.bindTexture(RenderSystem.getShaderTexture(1));
+			GlTextureUnit.T2.makeActive();
+			RenderSystem.bindTexture(RenderSystem.getShaderTexture(2));
+
+			drawManager.renderCrumbling(crumblingBlocks);
+
+			MaterialRenderState.reset();
+
+			Minecraft.getInstance().gameRenderer.overlayTexture()
+					.teardownOverlayColor();
+			Minecraft.getInstance().gameRenderer.lightTexture()
+					.turnOffLightLayer();
+			GlStateManager._activeTexture(prevActiveTexture);
+		}
 	}
 
 	@Override

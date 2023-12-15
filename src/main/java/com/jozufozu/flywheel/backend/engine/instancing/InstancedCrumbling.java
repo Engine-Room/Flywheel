@@ -9,24 +9,17 @@ import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.material.Transparency;
-import com.jozufozu.flywheel.api.material.WriteMask;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
+import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
 import com.jozufozu.flywheel.gl.GlStateTracker;
-import com.jozufozu.flywheel.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.context.Contexts;
-import com.jozufozu.flywheel.lib.material.CutoutShaders;
-import com.jozufozu.flywheel.lib.material.FogShaders;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancedCrumbling {
@@ -51,16 +44,9 @@ public class InstancedCrumbling {
 				ShaderState shader = shaderStateEntry.getKey();
 
 				var baseMaterial = shader.material();
-				int diffuseTexture = getDiffuseTexture(baseMaterial);
+				int diffuseTexture = CommonCrumbling.getDiffuseTexture(baseMaterial);
 
-				crumblingMaterial.copyFrom(baseMaterial)
-						.fog(FogShaders.NONE)
-						.cutout(CutoutShaders.ONE_TENTH)
-						.polygonOffset(true)
-						.transparency(Transparency.CRUMBLING)
-						.writeMask(WriteMask.COLOR)
-						.useOverlay(false)
-						.useLight(false);
+				CommonCrumbling.applyCrumblingProperties(crumblingMaterial, baseMaterial);
 
 				var program = InstancingPrograms.get()
 						.get(shader.instanceType(), Contexts.CRUMBLING);
@@ -79,10 +65,7 @@ public class InstancedCrumbling {
 					crumblingMaterial.texture(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
 
 					MaterialRenderState.setup(crumblingMaterial);
-
-					GlTextureUnit.T1.makeActive();
-					RenderSystem.setShaderTexture(1, diffuseTexture);
-					RenderSystem.bindTexture(diffuseTexture);
+					CommonCrumbling.setActiveAndBindForCrumbling(diffuseTexture);
 
 					drawCalls.forEach(Runnable::run);
 				}
@@ -128,10 +111,4 @@ public class InstancedCrumbling {
 		return out;
 	}
 
-	private static int getDiffuseTexture(Material material) {
-		return Minecraft.getInstance()
-				.getTextureManager()
-				.getTexture(material.texture())
-				.getId();
-	}
 }
