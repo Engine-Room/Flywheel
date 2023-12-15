@@ -1,5 +1,8 @@
 package com.jozufozu.flywheel.backend.engine.indirect;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.instance.Instance;
@@ -10,6 +13,7 @@ import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> {
 	private final long objectStride;
 	private final InstanceWriter<I> writer;
+	private final List<IndirectDraw> associatedDraws = new ArrayList<>();
 	private int modelIndex;
 
 	private long lastStartPos = -1;
@@ -20,6 +24,14 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 				.getStride();
 		this.objectStride = instanceStride + IndirectBuffers.INT_SIZE;
 		writer = this.type.getWriter();
+	}
+
+	public void addDraw(IndirectDraw draw) {
+		associatedDraws.add(draw);
+	}
+
+	public List<IndirectDraw> draws() {
+		return associatedDraws;
 	}
 
 	public void update() {

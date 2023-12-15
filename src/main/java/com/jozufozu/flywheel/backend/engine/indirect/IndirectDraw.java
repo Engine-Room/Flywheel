@@ -56,4 +56,19 @@ public class IndirectDraw {
 		MemoryUtil.memPutInt(ptr + 32, packedFogAndCutout); // packedFogAndCutout
 		MemoryUtil.memPutInt(ptr + 36, packedMaterialProperties); // packedMaterialProperties
 	}
+
+	public void writeWithOverrides(long ptr, int instanceIndex, Material materialOverride) {
+		MemoryUtil.memPutInt(ptr, mesh.indexCount()); // count
+		MemoryUtil.memPutInt(ptr + 4, 1); // instanceCount - only drawing one instance
+		MemoryUtil.memPutInt(ptr + 8, mesh.firstIndex()); // firstIndex
+		MemoryUtil.memPutInt(ptr + 12, mesh.baseVertex()); // baseVertex
+		MemoryUtil.memPutInt(ptr + 16, model.baseInstance() + instanceIndex); // baseInstance
+
+		MemoryUtil.memPutInt(ptr + 20, model.index); // modelIndex
+
+		MemoryUtil.memPutInt(ptr + 24, ShaderIndices.getVertexShaderIndex(materialOverride.shaders())); // materialVertexIndex
+		MemoryUtil.memPutInt(ptr + 28, ShaderIndices.getFragmentShaderIndex(materialOverride.shaders())); // materialFragmentIndex
+		MemoryUtil.memPutInt(ptr + 32, MaterialEncoder.packFogAndCutout(materialOverride)); // packedFogAndCutout
+		MemoryUtil.memPutInt(ptr + 36, MaterialEncoder.packProperties(materialOverride)); // packedMaterialProperties
+	}
 }
