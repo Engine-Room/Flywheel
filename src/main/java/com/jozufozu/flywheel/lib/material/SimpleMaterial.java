@@ -5,18 +5,13 @@ import com.jozufozu.flywheel.api.material.DepthTest;
 import com.jozufozu.flywheel.api.material.FogShader;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.MaterialShaders;
-import com.jozufozu.flywheel.api.material.MaterialVertexTransformer;
 import com.jozufozu.flywheel.api.material.Transparency;
 import com.jozufozu.flywheel.api.material.WriteMask;
 
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 
 public class SimpleMaterial implements Material {
-	protected final RenderType fallbackRenderType;
-	protected final MaterialVertexTransformer vertexTransformer;
-
 	protected final MaterialShaders shaders;
 	protected final FogShader fog;
 	protected final CutoutShader cutout;
@@ -36,8 +31,6 @@ public class SimpleMaterial implements Material {
 	protected final boolean diffuse;
 
 	protected SimpleMaterial(Builder builder) {
-		fallbackRenderType = builder.getFallbackRenderType();
-		vertexTransformer = builder.getVertexTransformer();
 		shaders = builder.shaders();
 		fog = builder.fog();
 		cutout = builder.cutout();
@@ -60,16 +53,6 @@ public class SimpleMaterial implements Material {
 
 	public static Builder builderOf(Material material) {
 		return new Builder(material);
-	}
-
-	@Override
-	public RenderType getFallbackRenderType() {
-		return fallbackRenderType;
-	}
-
-	@Override
-	public MaterialVertexTransformer getVertexTransformer() {
-		return vertexTransformer;
 	}
 
 	@Override
@@ -143,9 +126,6 @@ public class SimpleMaterial implements Material {
 	}
 
 	public static class Builder implements Material {
-		protected RenderType fallbackRenderType;
-		protected MaterialVertexTransformer vertexTransformer;
-
 		protected MaterialShaders shaders;
 		protected FogShader fog;
 		protected CutoutShader cutout;
@@ -165,9 +145,6 @@ public class SimpleMaterial implements Material {
 		protected boolean diffuse;
 
 		public Builder() {
-			fallbackRenderType = RenderType.solid();
-			vertexTransformer = (vertexList, level) -> {
-			};
 			shaders = StandardMaterialShaders.DEFAULT;
 			fog = FogShaders.LINEAR;
 			cutout = CutoutShaders.OFF;
@@ -189,8 +166,6 @@ public class SimpleMaterial implements Material {
 		}
 
 		public Builder copyFrom(Material material) {
-			fallbackRenderType = material.getFallbackRenderType();
-			vertexTransformer = material.getVertexTransformer();
 			shaders = material.shaders();
 			fog = material.fog();
 			cutout = material.cutout();
@@ -205,16 +180,6 @@ public class SimpleMaterial implements Material {
 			useOverlay = material.useOverlay();
 			useLight = material.useLight();
 			diffuse = material.diffuse();
-			return this;
-		}
-
-		public Builder fallbackRenderType(RenderType type) {
-			this.fallbackRenderType = type;
-			return this;
-		}
-
-		public Builder vertexTransformer(MaterialVertexTransformer vertexTransformer) {
-			this.vertexTransformer = vertexTransformer;
 			return this;
 		}
 
@@ -286,16 +251,6 @@ public class SimpleMaterial implements Material {
 		public Builder diffuse(boolean value) {
 			this.diffuse = value;
 			return this;
-		}
-
-		@Override
-		public RenderType getFallbackRenderType() {
-			return fallbackRenderType;
-		}
-
-		@Override
-		public MaterialVertexTransformer getVertexTransformer() {
-			return vertexTransformer;
 		}
 
 		@Override

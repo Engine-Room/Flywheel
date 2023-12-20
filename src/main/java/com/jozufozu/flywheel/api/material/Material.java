@@ -1,13 +1,8 @@
 package com.jozufozu.flywheel.api.material;
 
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 
 public interface Material {
-	RenderType getFallbackRenderType();
-
-	MaterialVertexTransformer getVertexTransformer();
-
 	MaterialShaders shaders();
 
 	FogShader fog();

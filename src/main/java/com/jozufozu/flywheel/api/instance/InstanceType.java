@@ -35,8 +35,4 @@ public interface InstanceType<I extends Instance> {
 	ResourceLocation vertexShader();
 
 	ResourceLocation cullShader();
-
-	InstanceVertexTransformer<I> getVertexTransformer();
-
-	InstanceBoundingSphereTransformer<I> getBoundingSphereTransformer();
 }

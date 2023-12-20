@@ -5,7 +5,6 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
-import com.jozufozu.flywheel.backend.engine.batching.BatchingEngine;
 import com.jozufozu.flywheel.backend.engine.indirect.IndirectEngine;
 import com.jozufozu.flywheel.backend.engine.instancing.InstancingEngine;
 import com.jozufozu.flywheel.gl.GlCompat;
@@ -17,23 +16,12 @@ import net.minecraft.network.chat.Component;
 
 public class Backends {
 	/**
-	 * Use a thread pool to buffer instances in parallel on the CPU.
-	 */
-	public static final Backend BATCHING = SimpleBackend.builder()
-			.engineMessage(Component.literal("Using Batching Engine")
-					.withStyle(ChatFormatting.GREEN))
-			.engineFactory(level -> new BatchingEngine(256))
-			.supported(() -> !ShadersModHandler.isShaderPackInUse())
-			.register(Flywheel.rl("batching"));
-
-	/**
 	 * Use GPU instancing to render everything.
 	 */
 	public static final Backend INSTANCING = SimpleBackend.builder()
 			.engineMessage(Component.literal("Using Instancing Engine")
 					.withStyle(ChatFormatting.GREEN))
 			.engineFactory(level -> new InstancingEngine(256))
-			.fallback(() -> Backends.BATCHING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.supportsInstancing() && InstancingPrograms.allLoaded())
 			.register(Flywheel.rl("instancing"));
 
