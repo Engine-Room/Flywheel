@@ -40,11 +40,6 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		return instances.size();
 	}
 
-	protected boolean moreThanTwoThirdsChanged() {
-		return (changed.cardinality() * 3) > (instances.size() * 2);
-	}
-
-
 	public void notifyDirty(int index) {
 		if (index < 0 || index >= getInstanceCount()) {
 			return;
@@ -68,21 +63,34 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		final int oldSize = this.instances.size();
 		int removeCount = deleted.cardinality();
 
+		if (oldSize == removeCount) {
+			clear();
+			return;
+		}
+
 		final int newSize = oldSize - removeCount;
 
-		// shift surviving elements left over the spaces left by removed elements
-		for (int i = 0, j = 0; (i < oldSize) && (j < newSize); i++, j++) {
-			i = deleted.nextClearBit(i);
+		// Punch out the deleted instances, shifting over surviving instances to fill their place.
+		for (int scanPos = 0, writePos = 0; (scanPos < oldSize) && (writePos < newSize); scanPos++, writePos++) {
+			// Find next non-deleted element.
+			scanPos = deleted.nextClearBit(scanPos);
 
-			if (i != j) {
-				var handle = handles.get(i);
-				I instance = instances.get(i);
+			if (scanPos != writePos) {
+				// Grab the old instance/handle from scanPos...
+				var handle = handles.get(scanPos);
+				I instance = instances.get(scanPos);
 
-				handles.set(j, handle);
-				instances.set(j, instance);
+				// ... and move it to writePos.
+				handles.set(writePos, handle);
+				instances.set(writePos, instance);
 
-				handle.index = j;
-				changed.set(j);
+				// Make sure the handle knows it's been moved...
+				handle.index = writePos;
+				// ...and set it changed to force an upload.
+				changed.set(writePos);
+
+				// Clear the old slot. There's nothing meaningful there that can be considered "changed".
+				changed.clear(scanPos);
 			}
 		}
 
