@@ -168,13 +168,13 @@ public class AtomicBitset {
 			if (++longPosition > segmentMask) {
 				segmentPosition++;
 				if (segmentPosition >= segments.numSegments()) {
-					return segments.numSegments() << log2SegmentSize;
+					return segments.numSegments() << log2SegmentSize + (longPosition << 6);
 				}
 				segment = segments.getSegment(segmentPosition);
 				longPosition = 0;
 			}
 
-			word = segment.get(longPosition);
+			word = ~segment.get(longPosition);
 		}
 	}
 

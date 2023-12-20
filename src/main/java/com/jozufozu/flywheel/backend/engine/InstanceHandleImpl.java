@@ -19,6 +19,8 @@ public class InstanceHandleImpl implements InstanceHandle {
 	@Override
 	public void setDeleted() {
 		instancer.notifyRemoval(index);
+		// invalidate ourselves
+		clear();
 	}
 
 	public void clear() {
