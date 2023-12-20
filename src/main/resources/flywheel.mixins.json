@@ -16,7 +16,6 @@
     "LightUpdateMixin",
     "MinecraftMixin",
     "PoseStackMixin",
-    "RenderTypeMixin",
     "VertexFormatMixin",
     "fix.FixFabulousDepthMixin",
     "fix.FixNormalScalingMixin",

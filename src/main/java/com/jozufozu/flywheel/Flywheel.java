@@ -11,7 +11,6 @@ import com.jozufozu.flywheel.backend.Backends;
 import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.FlwPrograms;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
-import com.jozufozu.flywheel.backend.engine.batching.DrawBuffer;
 import com.jozufozu.flywheel.config.BackendArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
@@ -96,7 +95,6 @@ public class Flywheel {
 
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);
 
-		forgeEventBus.addListener(DrawBuffer::onReloadRenderers);
 		forgeEventBus.addListener(UniformBuffer::onReloadLevelRenderer);
 
 		forgeEventBus.addListener(LightUpdater::onClientTick);
