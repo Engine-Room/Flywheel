@@ -22,17 +22,17 @@ import net.minecraft.Util;
  */
 public final class GlCompat {
 	public static final GLCapabilities CAPABILITIES = GL.createCapabilities();
-	public static final boolean AMD = _decideIfWeAreAMD();
 	public static final boolean WINDOWS = _decideIfWeAreWindows();
 	public static final boolean ALLOW_DSA = true;
 	public static final boolean SUPPORTS_INDIRECT = _decideIfWeSupportIndirect();
 	public static final int SUBGROUP_SIZE = _subgroupSize();
+	public static final Driver DRIVER = _readVendorString();
 
 	private GlCompat() {
 	}
 
 	public static boolean onAMDWindows() {
-		return AMD && WINDOWS;
+		return DRIVER == Driver.AMD && WINDOWS;
 	}
 
 	public static boolean supportsInstancing() {
@@ -43,15 +43,25 @@ public final class GlCompat {
 		return SUPPORTS_INDIRECT;
 	}
 
-	private static boolean _decideIfWeAreAMD() {
+	private static Driver _readVendorString() {
 		String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
 
 		if (vendor == null) {
-			return false;
+			return Driver.UNKNOWN;
 		}
 
 		// vendor string I got was "ATI Technologies Inc."
-		return vendor.contains("ATI") || vendor.contains("AMD");
+		if (vendor.contains("ATI") || vendor.contains("AMD")) {
+			return Driver.AMD;
+		} else if (vendor.contains("NVIDIA")) {
+			return Driver.NVIDIA;
+		} else if (vendor.contains("Intel")) {
+			return Driver.INTEL;
+		} else if (vendor.contains("Mesa")) {
+			return Driver.MESA;
+		}
+
+		return Driver.UNKNOWN;
 	}
 
 	private static boolean _decideIfWeAreWindows() {
@@ -66,8 +76,12 @@ public final class GlCompat {
 		if (CAPABILITIES.GL_KHR_shader_subgroup) {
 			return GL31C.glGetInteger(KHRShaderSubgroup.GL_SUBGROUP_SIZE_KHR);
 		}
-		// try to guess
-		return AMD ? 64 : 32;
+		// Try to guess.
+		// Newer (RDNA) AMD cards have 32 threads in a wavefront, older ones have 64.
+		// I assume the newer drivers will implement the above extension, so 64 is a
+		// reasonable guess for AMD hardware. In the worst case we'll just spread
+		// load across multiple SIMDs
+		return DRIVER == Driver.AMD || DRIVER == Driver.MESA ? 64 : 32;
 	}
 
 	public static int getComputeGroupCount(int invocations) {
