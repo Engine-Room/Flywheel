@@ -6,7 +6,6 @@
   "refmap": "flywheel.refmap.json",
   "client": [
     "BlockEntityTypeMixin",
-    "BufferBuilderMixin",
     "ClientLevelMixin",
     "EntityTypeMixin",
     "FogUpdateMixin",
