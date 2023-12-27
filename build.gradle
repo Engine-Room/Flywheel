@@ -175,6 +175,8 @@ publishing {
         register('mavenJava', MavenPublication) {
             artifact jar
 
+            artifactId = archivesBaseName
+
             fg.component(it)
             jarJar.component(it)
         }
