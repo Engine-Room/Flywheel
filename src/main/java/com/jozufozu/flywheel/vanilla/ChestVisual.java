@@ -2,8 +2,8 @@ package com.jozufozu.flywheel.vanilla;
 
 import java.util.Calendar;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.joml.Quaternionf;
 
@@ -161,8 +161,10 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 	}
 
 	@Override
-	public List<Instance> getCrumblingInstances() {
-		return List.of(bottom, lid, lock);
+	public void collectCrumblingInstances(Consumer<Instance> consumer) {
+		consumer.accept(bottom);
+		consumer.accept(lid);
+		consumer.accept(lock);
 	}
 
 	@Override
