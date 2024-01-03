@@ -1,13 +1,14 @@
 package com.jozufozu.flywheel.lib.transform;
 
+import com.jozufozu.flywheel.extension.PoseStackExtension;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-public interface TransformStack extends Transform<TransformStack> {
-	TransformStack pushPose();
+public interface TransformStack<Self extends TransformStack<Self>> extends Transform<Self> {
+	Self pushPose();
 
-	TransformStack popPose();
+	Self popPose();
 
-	static TransformStack of(PoseStack stack) {
-		return (TransformStack) stack;
+	static PoseTransformStack of(PoseStack stack) {
+		return ((PoseStackExtension) stack).flywheel$transformStack();
 	}
 }

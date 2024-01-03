@@ -1,40 +1,24 @@
 package com.jozufozu.flywheel.mixin;
 
-import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 
-import com.jozufozu.flywheel.lib.transform.TransformStack;
+import com.jozufozu.flywheel.extension.PoseStackExtension;
+import com.jozufozu.flywheel.lib.transform.PoseTransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 @Mixin(PoseStack.class)
-abstract class PoseStackMixin implements TransformStack {
-	@Override
-	public TransformStack pushPose() {
-		((PoseStack) (Object) this).pushPose();
-		return this;
-	}
+abstract class PoseStackMixin implements PoseStackExtension {
+	@Unique
+	private PoseTransformStack flywheel$wrapper;
 
 	@Override
-	public TransformStack popPose() {
-		((PoseStack) (Object) this).popPose();
-		return this;
-	}
-
-	@Override
-	public TransformStack scale(float factorX, float factorY, float factorZ) {
-		((PoseStack) (Object) this).scale(factorX, factorY, factorZ);
-		return this;
-	}
-
-	@Override
-	public TransformStack rotate(Quaternionf quaternion) {
-		((PoseStack) (Object) this).mulPose(quaternion);
-		return this;
-	}
-
-	@Override
-	public TransformStack translate(double x, double y, double z) {
-		((PoseStack) (Object) this).translate(x, y, z);
-		return this;
+	public PoseTransformStack flywheel$transformStack() {
+		if (flywheel$wrapper == null) {
+			// Thread safety: bless you if you're calling this from multiple threads, but as there is no state
+			// associated with the wrapper itself it's fine if we create multiple instances and one wins.
+			flywheel$wrapper = new PoseTransformStack((PoseStack) (Object) this);
+		}
+		return flywheel$wrapper;
 	}
 }

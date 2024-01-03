@@ -8,38 +8,35 @@ import com.mojang.math.Axis;
 
 import net.minecraft.core.Direction;
 
-public interface Rotate<Self extends Rotate<Self>> {
-	Self rotate(Quaternionf quaternion);
+public interface Rotate<S extends Rotate<S>> {
+	S rotate(Quaternionf quaternion);
 
-	default Self rotate(AxisAngle4f axisAngle) {
+	default S rotate(AxisAngle4f axisAngle) {
 		return rotate(new Quaternionf(axisAngle));
 	}
 
-	@SuppressWarnings("unchecked")
-	default Self rotate(float radians, Vector3fc axis) {
+	default S rotate(float radians, Vector3fc axis) {
 		if (radians == 0) {
-			return (Self) this;
+			return self();
 		}
 		return rotate(new Quaternionf().setAngleAxis(radians, axis.x(), axis.y(), axis.z()));
 	}
 
-	@SuppressWarnings("unchecked")
-	default Self rotate(float radians, Axis axis) {
+	default S rotate(float radians, Axis axis) {
 		if (radians == 0) {
-			return (Self) this;
+			return self();
 		}
 		return rotate(axis.rotation(radians));
 	}
 
-	@SuppressWarnings("unchecked")
-	default Self rotate(float radians, Direction axis) {
+	default S rotate(float radians, Direction axis) {
 		if (radians == 0) {
-			return (Self) this;
+			return self();
 		}
 		return rotate(radians, axis.step());
 	}
 
-	default Self rotate(float radians, Direction.Axis axis) {
+	default S rotate(float radians, Direction.Axis axis) {
 		return switch (axis) {
 		case X -> rotateX(radians);
 		case Y -> rotateY(radians);
@@ -47,71 +44,71 @@ public interface Rotate<Self extends Rotate<Self>> {
 		};
 	}
 
-	@SuppressWarnings("unchecked")
-	default Self rotateDegrees(float degrees, Vector3fc axis) {
+	default S rotateDegrees(float degrees, Vector3fc axis) {
 		if (degrees == 0) {
-			return (Self) this;
+			return self();
 		}
 		return rotate((float) Math.toRadians(degrees), axis);
 	}
 
-	@SuppressWarnings("unchecked")
-	default Self rotateDegrees(float degrees, Axis axis) {
+	default S rotateDegrees(float degrees, Axis axis) {
 		if (degrees == 0) {
-			return (Self) this;
+			return self();
 		}
 		return rotate(axis.rotationDegrees(degrees));
 	}
 
-	@SuppressWarnings("unchecked")
-	default Self rotateDegrees(float degrees, Direction axis) {
+	default S rotateDegrees(float degrees, Direction axis) {
 		if (degrees == 0) {
-			return (Self) this;
+			return self();
 		}
 		return rotate((float) Math.toRadians(degrees), axis);
 	}
 
-	@SuppressWarnings("unchecked")
-	default Self rotateDegrees(float degrees, Direction.Axis axis) {
+	default S rotateDegrees(float degrees, Direction.Axis axis) {
 		if (degrees == 0) {
-			return (Self) this;
+			return self();
 		}
 		return rotate((float) Math.toRadians(degrees), axis);
 	}
 
-	default Self rotateX(float radians) {
+	default S rotateX(float radians) {
 		return rotate(radians, Axis.XP);
 	}
 
-	default Self rotateY(float radians) {
+	default S rotateY(float radians) {
 		return rotate(radians, Axis.YP);
 	}
 
-	default Self rotateZ(float radians) {
+	default S rotateZ(float radians) {
 		return rotate(radians, Axis.ZP);
 	}
 
-	default Self rotateXDegrees(float degrees) {
+	default S rotateXDegrees(float degrees) {
 		return rotateDegrees(degrees, Axis.XP);
 	}
 
-	default Self rotateYDegrees(float degrees) {
+	default S rotateYDegrees(float degrees) {
 		return rotateDegrees(degrees, Axis.YP);
 	}
 
-	default Self rotateZDegrees(float degrees) {
+	default S rotateZDegrees(float degrees) {
 		return rotateDegrees(degrees, Axis.ZP);
 	}
 
-	@SuppressWarnings("unchecked")
-	default Self rotateToFace(Direction facing) {
+	default S rotateToFace(Direction facing) {
 		return switch (facing) {
 		case DOWN -> rotateXDegrees(-90);
 		case UP -> rotateXDegrees(90);
-		case NORTH -> (Self) this;
+			case NORTH -> self();
 		case SOUTH -> rotateYDegrees(180);
 		case WEST -> rotateYDegrees(90);
 		case EAST -> rotateYDegrees(270);
 		};
+	}
+
+	@SuppressWarnings("unchecked")
+	default S self() {
+		return (S) this;
 	}
 }
