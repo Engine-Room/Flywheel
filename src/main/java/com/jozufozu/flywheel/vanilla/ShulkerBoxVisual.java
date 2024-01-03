@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.vanilla;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 import org.joml.Quaternionf;
 
@@ -126,8 +126,9 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	}
 
 	@Override
-	public List<Instance> getCrumblingInstances() {
-		return List.of(base, lid);
+	public void collectCrumblingInstances(Consumer<Instance> consumer) {
+		consumer.accept(base);
+		consumer.accept(lid);
 	}
 
 	@Override

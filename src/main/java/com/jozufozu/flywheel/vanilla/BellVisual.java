@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.vanilla;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
@@ -89,8 +89,8 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	}
 
 	@Override
-	public List<Instance> getCrumblingInstances() {
-		return List.of(bell);
+	public void collectCrumblingInstances(Consumer<Instance> consumer) {
+		consumer.accept(bell);
 	}
 
 	@Override
