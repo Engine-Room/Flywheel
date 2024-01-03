@@ -16,6 +16,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 
 public abstract class AbstractVisual implements Visual, LightListener {
+	/**
+	 * The visualization context used to construct this visual.
+	 * <br>
+	 * Useful for passing to child visuals.
+	 */
+	protected final VisualizationContext visualizationContext;
 	protected final InstancerProvider instancerProvider;
 	protected final Vec3i renderOrigin;
 	protected final Level level;
@@ -23,6 +29,7 @@ public abstract class AbstractVisual implements Visual, LightListener {
 	protected boolean deleted = false;
 
 	public AbstractVisual(VisualizationContext ctx, Level level) {
+		this.visualizationContext = ctx;
 		this.instancerProvider = ctx.instancerProvider();
 		this.renderOrigin = ctx.renderOrigin();
 		this.level = level;

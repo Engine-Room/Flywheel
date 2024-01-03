@@ -5,6 +5,7 @@ import org.joml.Vector3f;
 
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.EntityVisual;
+import com.jozufozu.flywheel.api.visual.PlannedVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
@@ -19,11 +20,12 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * The layer between an {@link Entity} and the Flywheel backend.
- * *
- * <br><br> There are a few additional features that overriding classes can opt in to:
+ * <br>
+ * <br> There are a few additional features that overriding classes can opt in to:
  * <ul>
  *     <li>{@link DynamicVisual}</li>
  *     <li>{@link TickableVisual}</li>
+ *     <li>{@link PlannedVisual}</li>
  * </ul>
  * See the interfaces' documentation for more information about each one.
  *

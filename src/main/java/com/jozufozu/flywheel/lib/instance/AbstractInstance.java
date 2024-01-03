@@ -23,11 +23,15 @@ public abstract class AbstractInstance implements Instance {
 		return handle;
 	}
 
+	@Override
 	public final void setChanged() {
+		// Override to mark final.
 		handle.setChanged();
 	}
 
+	@Override
 	public final void delete() {
+		// Override to mark final.
 		handle.setDeleted();
 	}
 }

@@ -28,7 +28,9 @@ public class PartialModel {
 	protected BakedModel bakedModel;
 
 	public PartialModel(ResourceLocation modelLocation) {
-		if (tooLate) throw new RuntimeException("PartialModel '" + modelLocation + "' loaded after ModelRegistryEvent");
+		if (tooLate) {
+			throw new RuntimeException("PartialModel '" + modelLocation + "' loaded after ModelRegistryEvent");
+		}
 
 		this.modelLocation = modelLocation;
 		ALL.add(this);
@@ -44,8 +46,9 @@ public class PartialModel {
 
 	public static void onModelBake(ModelEvent.BakingCompleted event) {
 		var modelRegistry = event.getModels();
-		for (PartialModel partial : ALL)
+		for (PartialModel partial : ALL) {
 			partial.set(modelRegistry.get(partial.getLocation()));
+		}
 	}
 
 	@NotNull

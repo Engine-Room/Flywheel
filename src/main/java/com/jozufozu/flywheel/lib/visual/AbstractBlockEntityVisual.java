@@ -4,6 +4,7 @@ import org.joml.FrustumIntersection;
 
 import com.jozufozu.flywheel.api.visual.BlockEntityVisual;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
+import com.jozufozu.flywheel.api.visual.PlannedVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualManager;
@@ -18,13 +19,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * The layer between a {@link BlockEntity} and the Flywheel backend.
- *
- * <br><br> {@link #updateLight()} is called after initialization.
- *
- * <br><br> There are a few additional features that overriding classes can opt in to:
+ * <br>
+ * <br> There are a few additional features that overriding classes can opt in to:
  * <ul>
  *     <li>{@link DynamicVisual}</li>
  *     <li>{@link TickableVisual}</li>
+ *     <li>{@link PlannedVisual}</li>
  * </ul>
  * See the interfaces' documentation for more information about each one.
  *
@@ -70,13 +70,15 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	}
 
 	/**
+	 * Check if this visual is within the given frustum.
 	 * @param frustum The current frustum.
-	 * @return {@code true} if this visual within the given frustum.
+	 * @return {@code true} if this visual is possibly visible.
 	 */
 	public boolean isVisible(FrustumIntersection frustum) {
 		float x = visualPos.getX() + 0.5f;
 		float y = visualPos.getY() + 0.5f;
 		float z = visualPos.getZ() + 0.5f;
+		// Default to checking a sphere exactly encompassing the block.
 		return frustum.testSphere(x, y, z, MoreMath.SQRT_3_OVER_2);
 	}
 
