@@ -28,9 +28,9 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 
 	public InstancedInstancer(InstanceType<I> type) {
 		super(type);
-		instanceFormat = type.getLayout();
+		instanceFormat = type.oldLayout();
 		instanceStride = instanceFormat.getStride();
-		writer = type.getWriter();
+		writer = type.writer();
 	}
 
 	public int getAttributeCount() {

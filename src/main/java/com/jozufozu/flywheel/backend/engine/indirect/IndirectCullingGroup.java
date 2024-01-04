@@ -58,7 +58,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		applyProgram = programs.getApplyProgram();
 		drawProgram = programs.getIndirectProgram(instanceType, Contexts.DEFAULT);
 
-		objectStride = instanceType.getLayout()
+		objectStride = instanceType.oldLayout()
 				.getStride() + IndirectBuffers.INT_SIZE;
 
 		buffers = new IndirectBuffers(objectStride);

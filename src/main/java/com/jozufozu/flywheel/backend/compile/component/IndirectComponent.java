@@ -34,7 +34,7 @@ public class IndirectComponent implements SourceComponent {
 	}
 
 	public static IndirectComponent create(InstanceType<?> instanceType) {
-		return new IndirectComponent(instanceType.getLayout().layoutItems);
+		return new IndirectComponent(instanceType.oldLayout().layoutItems);
 	}
 
 	@Override

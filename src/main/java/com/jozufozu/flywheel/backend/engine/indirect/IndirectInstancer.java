@@ -20,10 +20,10 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 
 	public IndirectInstancer(InstanceType<I> type) {
 		super(type);
-		long instanceStride = type.getLayout()
+		long instanceStride = type.oldLayout()
 				.getStride();
 		this.objectStride = instanceStride + IndirectBuffers.INT_SIZE;
-		writer = this.type.getWriter();
+		writer = this.type.writer();
 	}
 
 	public void addDraw(IndirectDraw draw) {
