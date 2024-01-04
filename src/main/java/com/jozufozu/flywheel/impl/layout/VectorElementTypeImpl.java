@@ -36,4 +36,28 @@ final class VectorElementTypeImpl implements VectorElementType {
 	public int byteSize() {
 		return byteSize;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + repr.hashCode();
+		result = prime * result + size;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		VectorElementTypeImpl other = (VectorElementTypeImpl) obj;
+		return repr == other.repr && size == other.size;
+	}
 }

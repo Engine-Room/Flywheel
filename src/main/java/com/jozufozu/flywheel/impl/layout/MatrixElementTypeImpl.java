@@ -48,4 +48,29 @@ final class MatrixElementTypeImpl implements MatrixElementType {
 	public int byteSize() {
 		return byteSize;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + repr.hashCode();
+		result = prime * result + rows;
+		result = prime * result + columns;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		MatrixElementTypeImpl other = (MatrixElementTypeImpl) obj;
+		return repr == other.repr && rows == other.rows && columns == other.columns;
+	}
 }
