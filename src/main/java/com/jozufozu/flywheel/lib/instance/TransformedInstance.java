@@ -12,8 +12,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.util.Mth;
 
 public class TransformedInstance extends ColoredLitInstance implements Transform<TransformedInstance> {
-	private static final Matrix4f ZERO_MATRIX_4f = new Matrix4f();
-	private static final Matrix3f ZERO_MATRIX_3f = new Matrix3f();
 
 	public final Matrix4f model = new Matrix4f();
 	public final Matrix3f normal = new Matrix3f();
@@ -83,8 +81,8 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	 * </p>
 	 */
 	public TransformedInstance setEmptyTransform() {
-		model.set(ZERO_MATRIX_4f);
-		normal.set(ZERO_MATRIX_3f);
+		model.zero();
+		normal.zero();
 		return this;
 	}
 
