@@ -25,6 +25,19 @@ public interface Instancer<I extends Instance> {
 	I createInstance();
 
 	/**
+	 * Steal an instance from another instancer.
+	 * <br>
+	 * This has the effect of swapping the instance's model in-place.
+	 * <br><br>
+	 * If the given instance is already owned by this instancer, this method does nothing.
+	 * <br>
+	 * If the given instance was created by a different backend, the behavior of this method is undefined.
+	 *
+	 * @param instance The instance to steal.
+	 */
+	void stealInstance(I instance);
+
+	/**
 	 * Populate arr with new instances of this model.
 	 *
 	 * @param arr An array to fill.
