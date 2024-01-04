@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.backend.engine;
 import com.jozufozu.flywheel.api.instance.InstanceHandle;
 
 public class InstanceHandleImpl implements InstanceHandle {
-	public final AbstractInstancer<?> instancer;
+	public AbstractInstancer<?> instancer;
 	public int index;
 
 	public InstanceHandleImpl(AbstractInstancer<?> instancer, int index) {

@@ -29,11 +29,49 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 			var handle = new InstanceHandleImpl(this, i);
 			I instance = type.create(handle);
 
-			instances.add(instance);
-			handles.add(handle);
-			changed.set(i);
+			addLocked(instance, handle);
 			return instance;
 		}
+	}
+
+	@Override
+	public void stealInstance(I instance) {
+		var instanceHandle = instance.handle();
+
+		if (!(instanceHandle instanceof InstanceHandleImpl handle)) {
+			// UB: do nothing
+			return;
+		}
+
+		if (handle.instancer == this) {
+			return;
+		}
+
+		// FIXME: in theory there could be a race condition here if the instance
+		//  is somehow being stolen by 2 different instancers between threads.
+		//  That seems kinda impossible so I'm fine leaving it as is for now.
+
+		// Remove the instance from its old instancer.
+		// This won't have any unwanted effect when the old instancer
+		// is filtering deleted instances later, so is safe.
+		handle.setDeleted();
+
+		// Only lock now that we'll be mutating our state.
+		synchronized (lock) {
+			// Add the instance to this instancer.
+			handle.instancer = this;
+			handle.index = instances.size();
+			addLocked(instance, handle);
+		}
+	}
+
+	/**
+	 * Calls must be synchronized on {@link #lock}.
+	 */
+	private void addLocked(I instance, InstanceHandleImpl handle) {
+		instances.add(instance);
+		handles.add(handle);
+		changed.set(handle.index);
 	}
 
 	public int getInstanceCount() {
