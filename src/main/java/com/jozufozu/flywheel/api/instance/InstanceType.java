@@ -26,11 +26,11 @@ public interface InstanceType<I extends Instance> {
 	 * @deprecated Use {@link #layout()} instead.
 	 */
 	@Deprecated
-	BufferLayout getLayout();
+	BufferLayout oldLayout();
 
 	Layout layout();
 
-	InstanceWriter<I> getWriter();
+	InstanceWriter<I> writer();
 
 	ResourceLocation vertexShader();
 

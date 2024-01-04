@@ -4,17 +4,17 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceHandle;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
-import com.jozufozu.flywheel.api.layout.IntegerType;
+import com.jozufozu.flywheel.api.layout.FloatRepr;
+import com.jozufozu.flywheel.api.layout.IntegerRepr;
 import com.jozufozu.flywheel.api.layout.Layout;
-import com.jozufozu.flywheel.api.layout.MatrixSize;
-import com.jozufozu.flywheel.api.layout.VectorSize;
+import com.jozufozu.flywheel.api.layout.LayoutBuilder;
 import com.jozufozu.flywheel.lib.layout.BufferLayout;
 import com.jozufozu.flywheel.lib.layout.CommonItems;
-import com.jozufozu.flywheel.lib.layout.LayoutBuilder;
 
 import net.minecraft.resources.ResourceLocation;
 
 public class TransformedType implements InstanceType<TransformedInstance> {
+	@Deprecated
 	private static final BufferLayout OLD_LAYOUT = BufferLayout.builder()
 			.addItem(CommonItems.LIGHT_COORD, "light")
 			.addItem(CommonItems.UNORM_4x8, "color")
@@ -22,11 +22,11 @@ public class TransformedType implements InstanceType<TransformedInstance> {
 			.addItem(CommonItems.MAT3, "normal")
 			.build();
 
-	public static final Layout LAYOUT = LayoutBuilder.of()
-			.integer("light", IntegerType.SHORT, VectorSize.TWO)
-			.normalized("color", IntegerType.BYTE, VectorSize.FOUR)
-			.mat("pose", MatrixSize.FOUR)
-			.mat("normal", MatrixSize.THREE)
+	private static final Layout LAYOUT = LayoutBuilder.create()
+			.vector("light", IntegerRepr.SHORT, 2)
+			.vector("color", FloatRepr.NORMALIZED_UNSIGNED_BYTE, 4)
+			.matrix("pose", FloatRepr.FLOAT, 4)
+			.matrix("normal", FloatRepr.FLOAT, 3)
 			.build();
 
 	private static final ResourceLocation VERTEX_SHADER = Flywheel.rl("instance/transformed.vert");
@@ -38,7 +38,8 @@ public class TransformedType implements InstanceType<TransformedInstance> {
 	}
 
 	@Override
-	public BufferLayout getLayout() {
+	@Deprecated
+	public BufferLayout oldLayout() {
 		return OLD_LAYOUT;
 	}
 
@@ -48,7 +49,7 @@ public class TransformedType implements InstanceType<TransformedInstance> {
 	}
 
 	@Override
-	public InstanceWriter<TransformedInstance> getWriter() {
+	public InstanceWriter<TransformedInstance> writer() {
 		return TransformedWriter.INSTANCE;
 	}
 
@@ -61,5 +62,4 @@ public class TransformedType implements InstanceType<TransformedInstance> {
 	public ResourceLocation cullShader() {
 		return CULL_SHADER;
 	}
-
 }

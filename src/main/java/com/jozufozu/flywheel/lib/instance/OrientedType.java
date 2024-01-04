@@ -4,17 +4,17 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceHandle;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
-import com.jozufozu.flywheel.api.layout.FloatType;
-import com.jozufozu.flywheel.api.layout.IntegerType;
+import com.jozufozu.flywheel.api.layout.FloatRepr;
+import com.jozufozu.flywheel.api.layout.IntegerRepr;
 import com.jozufozu.flywheel.api.layout.Layout;
-import com.jozufozu.flywheel.api.layout.VectorSize;
+import com.jozufozu.flywheel.api.layout.LayoutBuilder;
 import com.jozufozu.flywheel.lib.layout.BufferLayout;
 import com.jozufozu.flywheel.lib.layout.CommonItems;
-import com.jozufozu.flywheel.lib.layout.LayoutBuilder;
 
 import net.minecraft.resources.ResourceLocation;
 
 public class OrientedType implements InstanceType<OrientedInstance> {
+	@Deprecated
 	private static final BufferLayout OLD_LAYOUT = BufferLayout.builder()
 			.addItem(CommonItems.LIGHT_COORD, "light")
 			.addItem(CommonItems.UNORM_4x8, "color")
@@ -23,12 +23,12 @@ public class OrientedType implements InstanceType<OrientedInstance> {
 			.addItem(CommonItems.VEC4, "rotation")
 			.build();
 
-	private static final Layout LAYOUT = LayoutBuilder.of()
-			.integer("light", IntegerType.SHORT, VectorSize.TWO)
-			.normalized("color", IntegerType.BYTE, VectorSize.FOUR)
-			.vector("position", FloatType.FLOAT, VectorSize.THREE)
-			.vector("pivot", FloatType.FLOAT, VectorSize.THREE)
-			.vector("rotation", FloatType.FLOAT, VectorSize.FOUR)
+	private static final Layout LAYOUT = LayoutBuilder.create()
+			.vector("light", IntegerRepr.SHORT, 2)
+			.vector("color", FloatRepr.NORMALIZED_UNSIGNED_BYTE, 4)
+			.vector("position", FloatRepr.FLOAT, 3)
+			.vector("pivot", FloatRepr.FLOAT, 3)
+			.vector("rotation", FloatRepr.FLOAT, 4)
 			.build();
 
 	private static final ResourceLocation VERTEX_SHADER = Flywheel.rl("instance/oriented.vert");
@@ -40,7 +40,8 @@ public class OrientedType implements InstanceType<OrientedInstance> {
 	}
 
 	@Override
-	public BufferLayout getLayout() {
+	@Deprecated
+	public BufferLayout oldLayout() {
 		return OLD_LAYOUT;
 	}
 
@@ -50,7 +51,7 @@ public class OrientedType implements InstanceType<OrientedInstance> {
 	}
 
 	@Override
-	public InstanceWriter<OrientedInstance> getWriter() {
+	public InstanceWriter<OrientedInstance> writer() {
 		return OrientedWriter.INSTANCE;
 	}
 
@@ -63,5 +64,4 @@ public class OrientedType implements InstanceType<OrientedInstance> {
 	public ResourceLocation cullShader() {
 		return CULL_SHADER;
 	}
-
 }
