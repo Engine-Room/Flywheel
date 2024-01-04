@@ -152,8 +152,8 @@ public class LayoutBuilderImpl implements LayoutBuilder {
 			}
 
 			String lowerCaseName = name.toLowerCase(Locale.ROOT);
-			if (lowerCaseName.startsWith("gl") || lowerCaseName.startsWith("flw")) {
-				throw new IllegalStateException("Element at index " + i + " has invalid name '" + name + "'! Names must not start with 'gl' or 'flw' (case-insensitive).");
+			if (lowerCaseName.startsWith("gl_") || lowerCaseName.startsWith("flw_")) {
+				throw new IllegalStateException("Element at index " + i + " has invalid name '" + name + "'! Names must not start with 'gl_' or 'flw_' (case-insensitive).");
 			}
 
 			if (name.length() > Layout.MAX_ELEMENT_NAME_LENGTH) {
