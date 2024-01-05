@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import com.jozufozu.flywheel.lib.util.StringUtil;
 
 public class GlslFn implements GlslBuilder.Declaration {
-	private final GlslBlock body = new GlslBlock();
+	private GlslBlock body = new GlslBlock();
 	private FnSignature signature;
 
 	public GlslFn signature(FnSignature signature) {
@@ -15,6 +15,11 @@ public class GlslFn implements GlslBuilder.Declaration {
 
 	public GlslFn body(Consumer<GlslBlock> f) {
 		f.accept(body);
+		return this;
+	}
+
+	public GlslFn body(GlslBlock block) {
+		body = block;
 		return this;
 	}
 
