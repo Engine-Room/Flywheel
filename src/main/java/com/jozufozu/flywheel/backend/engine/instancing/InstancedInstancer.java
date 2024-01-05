@@ -10,14 +10,15 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
+import com.jozufozu.flywheel.backend.engine.LayoutAttributes;
 import com.jozufozu.flywheel.gl.array.GlVertexArray;
+import com.jozufozu.flywheel.gl.array.VertexAttribute;
 import com.jozufozu.flywheel.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.gl.buffer.GlBufferUsage;
 import com.jozufozu.flywheel.gl.buffer.MappedBuffer;
-import com.jozufozu.flywheel.lib.layout.BufferLayout;
 
 public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I> {
-	private final BufferLayout instanceFormat;
+	private final List<VertexAttribute> instanceAttributes;
 	private final int instanceStride;
 
 	private final Set<GlVertexArray> boundTo = new HashSet<>();
@@ -28,13 +29,14 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 
 	public InstancedInstancer(InstanceType<I> type) {
 		super(type);
-		instanceFormat = type.oldLayout();
-		instanceStride = instanceFormat.getStride();
+		var layout = type.layout();
+		instanceAttributes = LayoutAttributes.attributes(layout);
+		instanceStride = layout.byteSize();
 		writer = type.writer();
 	}
 
 	public int getAttributeCount() {
-		return instanceFormat.getAttributeCount();
+		return instanceAttributes.size();
 	}
 
 	public boolean isInvalid() {
@@ -114,7 +116,7 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 		long offset = (long) baseInstance * instanceStride;
 		vao.bindVertexBuffer(1, vbo.handle(), offset, instanceStride);
 		vao.setBindingDivisor(1, 1);
-		vao.bindAttributes(1, startAttrib, instanceFormat.attributes());
+		vao.bindAttributes(1, startAttrib, instanceAttributes);
 	}
 
 	@Override
