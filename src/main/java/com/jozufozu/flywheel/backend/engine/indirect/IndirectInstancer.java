@@ -20,9 +20,8 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 
 	public IndirectInstancer(InstanceType<I> type) {
 		super(type);
-		long instanceStride = type.oldLayout()
-				.getStride();
-		this.objectStride = instanceStride + IndirectBuffers.INT_SIZE;
+		this.objectStride = type.layout()
+				.byteSize() + IndirectBuffers.INT_SIZE;
 		writer = this.type.writer();
 	}
 

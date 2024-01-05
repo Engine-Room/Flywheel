@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceType;
+import com.jozufozu.flywheel.api.layout.Layout;
 import com.jozufozu.flywheel.backend.compile.Pipeline;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
@@ -23,10 +24,12 @@ public class IndirectComponent implements SourceComponent {
 	private static final String PACKED_STRUCT_NAME = "FlwPackedInstance";
 	private static final String UNPACK_FN_NAME = "_flw_unpackInstance";
 
+	private final Layout layout;
 	private final List<LayoutItem> layoutItems;
 
-	public IndirectComponent(List<LayoutItem> layoutItems) {
-		this.layoutItems = layoutItems;
+	public IndirectComponent(InstanceType<?> type) {
+		this.layoutItems = type.oldLayout().layoutItems;
+		this.layout = type.layout();
 	}
 
 	public static IndirectComponent create(Pipeline.InstanceAssemblerContext ctx) {
@@ -34,7 +37,7 @@ public class IndirectComponent implements SourceComponent {
 	}
 
 	public static IndirectComponent create(InstanceType<?> instanceType) {
-		return new IndirectComponent(instanceType.oldLayout().layoutItems);
+		return new IndirectComponent(instanceType);
 	}
 
 	@Override
