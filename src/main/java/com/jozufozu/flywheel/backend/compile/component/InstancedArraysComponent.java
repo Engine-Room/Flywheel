@@ -2,16 +2,16 @@ package com.jozufozu.flywheel.backend.compile.component;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.layout.Layout;
+import com.jozufozu.flywheel.backend.compile.LayoutInterpreter;
 import com.jozufozu.flywheel.backend.compile.Pipeline;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.glsl.generate.GlslBlock;
 import com.jozufozu.flywheel.glsl.generate.GlslBuilder;
 import com.jozufozu.flywheel.glsl.generate.GlslExpr;
-import com.jozufozu.flywheel.lib.layout.LayoutItem;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -20,12 +20,12 @@ public class InstancedArraysComponent implements SourceComponent {
 	private static final String STRUCT_NAME = "FlwInstance";
 	private static final String UNPACK_FN_NAME = "_flw_unpackInstance";
 
-	private final List<LayoutItem> layoutItems;
+	private final Layout layout;
 	private final int baseIndex;
 
 	public InstancedArraysComponent(Pipeline.InstanceAssemblerContext ctx) {
-		this.layoutItems = ctx.instanceType()
-				.oldLayout().layoutItems;
+		this.layout = ctx.instanceType()
+				.layout();
 		this.baseIndex = ctx.baseAttribute();
 	}
 
@@ -43,26 +43,15 @@ public class InstancedArraysComponent implements SourceComponent {
 	public String source() {
 		var builder = new GlslBuilder();
 
-		int i = baseIndex;
-		for (var field : layoutItems) {
-			builder.vertexInput()
-					.binding(i)
-					.type(field.type()
-							.typeName())
-					.name(ATTRIBUTE_PREFIX + field.name());
-
-			i += field.type()
-					.attributeCount();
-		}
+		generateVertexInput(builder);
 
 		builder.blankLine();
 
 		var structBuilder = builder.struct();
 		structBuilder.setName(STRUCT_NAME);
 
-		for (var field : layoutItems) {
-			structBuilder.addField(field.type()
-					.typeName(), field.name());
+		for (var element : layout.elements()) {
+			structBuilder.addField(LayoutInterpreter.typeName(element.type()), element.name());
 		}
 
 		builder.blankLine();
@@ -77,8 +66,23 @@ public class InstancedArraysComponent implements SourceComponent {
 		return builder.build();
 	}
 
+	private void generateVertexInput(GlslBuilder builder) {
+		int i = baseIndex;
+		for (var element : layout.elements()) {
+			var type = element.type();
+
+			builder.vertexInput()
+					.binding(i)
+					.type(LayoutInterpreter.typeName(type))
+					.name(ATTRIBUTE_PREFIX + element.name());
+
+			i += LayoutInterpreter.attributeCount(type);
+		}
+	}
+
 	private void generateUnpackingBody(GlslBlock b) {
-		var fields = layoutItems.stream()
+		var fields = layout.elements()
+				.stream()
 				.map(it -> new GlslExpr.Variable(ATTRIBUTE_PREFIX + it.name()))
 				.toList();
 		b.ret(GlslExpr.call(STRUCT_NAME, fields));

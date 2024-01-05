@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.compile.component;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.List;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.layout.Layout;
+import com.jozufozu.flywheel.backend.compile.LayoutInterpreter;
 import com.jozufozu.flywheel.backend.compile.Pipeline;
 import com.jozufozu.flywheel.glsl.SourceComponent;
 import com.jozufozu.flywheel.glsl.generate.FnSignature;
@@ -58,44 +60,58 @@ public class IndirectComponent implements SourceComponent {
 	public String generateIndirect() {
 		var builder = new GlslBuilder();
 
-		layoutItems.stream()
-				.map(LayoutItem::type)
-				.distinct()
-				.forEach(type -> type.declare(builder));
+		generateHeader(builder);
 
-		var instance = builder.struct();
-		instance.setName(STRUCT_NAME);
-		builder.blankLine();
-		var packed = builder.struct();
-		packed.setName(PACKED_STRUCT_NAME);
-
-		for (var field : layoutItems) {
-			packed.addField(field.type()
-					.packedTypeName(), field.name());
-			instance.addField(field.type()
-					.typeName(), field.name());
-		}
+		generateInstanceStruct(builder);
 
 		builder.blankLine();
 
-		builder.function()
-				.signature(FnSignature.create()
-						.returnType(STRUCT_NAME)
-						.name(UNPACK_FN_NAME)
-						.arg(PACKED_STRUCT_NAME, UNPACK_ARG)
-						.build())
-				.body(this::generateUnpackingBody);
+		generateUnpacking(builder);
 
 		builder.blankLine();
 
 		return builder.build();
 	}
 
-	private void generateUnpackingBody(GlslBlock b) {
-		var unpackedFields = layoutItems.stream()
-				.map(layoutItem -> UNPACKING_VARIABLE.access(layoutItem.name())
-						.transform(layoutItem.type()::unpack))
-				.toList();
-		b.ret(GlslExpr.call(STRUCT_NAME, unpackedFields));
+	private void generateHeader(GlslBuilder builder) {
+		layoutItems.stream()
+				.map(LayoutItem::type)
+				.distinct()
+				.forEach(type -> type.declare(builder));
+	}
+
+	private void generateInstanceStruct(GlslBuilder builder) {
+		var instance = builder.struct();
+		instance.setName(STRUCT_NAME);
+		for (var element : layout.elements()) {
+			instance.addField(LayoutInterpreter.typeName(element.type()), element.name());
+		}
+	}
+
+	private void generateUnpacking(GlslBuilder builder) {
+		var packed = builder.struct();
+		packed.setName(PACKED_STRUCT_NAME);
+
+		var unpackArgs = new ArrayList<GlslExpr>();
+		for (LayoutItem field : layoutItems) {
+			GlslExpr unpack = UNPACKING_VARIABLE.access(field.name())
+					.transform(field.type()::unpack);
+			unpackArgs.add(unpack);
+
+			packed.addField(field.type()
+					.packedTypeName(), field.name());
+		}
+
+		var block = new GlslBlock();
+		block.ret(GlslExpr.call(STRUCT_NAME, unpackArgs));
+
+		builder.blankLine();
+		builder.function()
+				.signature(FnSignature.create()
+						.returnType(STRUCT_NAME)
+						.name(UNPACK_FN_NAME)
+						.arg(PACKED_STRUCT_NAME, UNPACK_ARG)
+						.build())
+				.body(block);
 	}
 }
