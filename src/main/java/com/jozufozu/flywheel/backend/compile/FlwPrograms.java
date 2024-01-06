@@ -11,10 +11,10 @@ import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.component.UberShaderComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.backend.compile.core.CompilerStats;
-import com.jozufozu.flywheel.glsl.ShaderSources;
-import com.jozufozu.flywheel.glsl.SourceComponent;
-import com.jozufozu.flywheel.glsl.generate.FnSignature;
-import com.jozufozu.flywheel.glsl.generate.GlslExpr;
+import com.jozufozu.flywheel.backend.glsl.ShaderSources;
+import com.jozufozu.flywheel.backend.glsl.SourceComponent;
+import com.jozufozu.flywheel.backend.glsl.generate.FnSignature;
+import com.jozufozu.flywheel.backend.glsl.generate.GlslExpr;
 
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;

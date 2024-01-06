@@ -11,12 +11,12 @@ import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.compile.component.IndirectComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
-import com.jozufozu.flywheel.gl.GlCompat;
-import com.jozufozu.flywheel.gl.shader.GlProgram;
-import com.jozufozu.flywheel.gl.shader.ShaderType;
-import com.jozufozu.flywheel.glsl.GlslVersion;
-import com.jozufozu.flywheel.glsl.ShaderSources;
-import com.jozufozu.flywheel.glsl.SourceComponent;
+import com.jozufozu.flywheel.backend.gl.GlCompat;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
+import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.backend.glsl.GlslVersion;
+import com.jozufozu.flywheel.backend.glsl.ShaderSources;
+import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 import com.jozufozu.flywheel.lib.util.Unit;
 
 import net.minecraft.resources.ResourceLocation;

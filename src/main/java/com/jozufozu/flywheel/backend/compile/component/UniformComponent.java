@@ -6,9 +6,9 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.compile.SourceLoader;
-import com.jozufozu.flywheel.glsl.SourceComponent;
-import com.jozufozu.flywheel.glsl.SourceFile;
-import com.jozufozu.flywheel.glsl.generate.GlslBuilder;
+import com.jozufozu.flywheel.backend.glsl.SourceComponent;
+import com.jozufozu.flywheel.backend.glsl.SourceFile;
+import com.jozufozu.flywheel.backend.glsl.generate.GlslBuilder;
 
 import net.minecraft.resources.ResourceLocation;
 

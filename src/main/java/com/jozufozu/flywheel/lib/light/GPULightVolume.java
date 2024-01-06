@@ -21,8 +21,8 @@ import static org.lwjgl.opengl.GL14.GL_MIRRORED_REPEAT;
 
 import org.lwjgl.opengl.GL30;
 
-import com.jozufozu.flywheel.gl.GlTexture;
-import com.jozufozu.flywheel.gl.GlTextureUnit;
+import com.jozufozu.flywheel.backend.gl.GlTexture;
+import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.box.Box;
 import com.jozufozu.flywheel.lib.box.MutableBox;
 

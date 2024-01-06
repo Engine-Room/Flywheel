@@ -19,12 +19,12 @@ import com.jozufozu.flywheel.api.layout.UnsignedIntegerRepr;
 import com.jozufozu.flywheel.api.layout.VectorElementType;
 import com.jozufozu.flywheel.backend.compile.LayoutInterpreter;
 import com.jozufozu.flywheel.backend.compile.Pipeline;
-import com.jozufozu.flywheel.glsl.SourceComponent;
-import com.jozufozu.flywheel.glsl.generate.FnSignature;
-import com.jozufozu.flywheel.glsl.generate.GlslBlock;
-import com.jozufozu.flywheel.glsl.generate.GlslBuilder;
-import com.jozufozu.flywheel.glsl.generate.GlslExpr;
-import com.jozufozu.flywheel.glsl.generate.GlslStruct;
+import com.jozufozu.flywheel.backend.glsl.SourceComponent;
+import com.jozufozu.flywheel.backend.glsl.generate.FnSignature;
+import com.jozufozu.flywheel.backend.glsl.generate.GlslBlock;
+import com.jozufozu.flywheel.backend.glsl.generate.GlslBuilder;
+import com.jozufozu.flywheel.backend.glsl.generate.GlslExpr;
+import com.jozufozu.flywheel.backend.glsl.generate.GlslStruct;
 
 import net.minecraft.resources.ResourceLocation;
 

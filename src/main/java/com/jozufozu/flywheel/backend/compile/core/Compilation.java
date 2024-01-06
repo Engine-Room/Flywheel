@@ -9,12 +9,12 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.gl.GlCompat;
-import com.jozufozu.flywheel.gl.shader.GlShader;
-import com.jozufozu.flywheel.gl.shader.ShaderType;
-import com.jozufozu.flywheel.glsl.GlslVersion;
-import com.jozufozu.flywheel.glsl.SourceComponent;
-import com.jozufozu.flywheel.glsl.SourceFile;
+import com.jozufozu.flywheel.backend.gl.GlCompat;
+import com.jozufozu.flywheel.backend.gl.shader.GlShader;
+import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.backend.glsl.GlslVersion;
+import com.jozufozu.flywheel.backend.glsl.SourceComponent;
+import com.jozufozu.flywheel.backend.glsl.SourceFile;
 import com.jozufozu.flywheel.lib.util.StringUtil;
 
 import net.minecraft.client.Minecraft;

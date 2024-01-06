@@ -16,12 +16,12 @@ import org.jetbrains.annotations.Nullable;
 import com.jozufozu.flywheel.backend.compile.core.Compilation;
 import com.jozufozu.flywheel.backend.compile.core.ProgramLinker;
 import com.jozufozu.flywheel.backend.compile.core.ShaderCompiler;
-import com.jozufozu.flywheel.gl.shader.GlProgram;
-import com.jozufozu.flywheel.gl.shader.GlShader;
-import com.jozufozu.flywheel.gl.shader.ShaderType;
-import com.jozufozu.flywheel.glsl.GlslVersion;
-import com.jozufozu.flywheel.glsl.ShaderSources;
-import com.jozufozu.flywheel.glsl.SourceComponent;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
+import com.jozufozu.flywheel.backend.gl.shader.GlShader;
+import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.backend.glsl.GlslVersion;
+import com.jozufozu.flywheel.backend.glsl.ShaderSources;
+import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 
 import net.minecraft.resources.ResourceLocation;
 

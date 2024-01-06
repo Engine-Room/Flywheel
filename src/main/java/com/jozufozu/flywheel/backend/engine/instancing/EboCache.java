@@ -7,9 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.model.IndexSequence;
-import com.jozufozu.flywheel.gl.GlNumericType;
-import com.jozufozu.flywheel.gl.buffer.Buffer;
-import com.jozufozu.flywheel.gl.buffer.GlBufferUsage;
+import com.jozufozu.flywheel.backend.gl.GlNumericType;
+import com.jozufozu.flywheel.backend.gl.buffer.Buffer;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.model.QuadIndexSequence;
 import com.mojang.blaze3d.platform.GlStateManager;

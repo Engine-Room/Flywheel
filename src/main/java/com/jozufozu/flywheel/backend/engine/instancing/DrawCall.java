@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.backend.engine.instancing;
 
 import com.jozufozu.flywheel.backend.InternalVertex;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
-import com.jozufozu.flywheel.gl.array.GlVertexArray;
+import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 
 public class DrawCall {
 	public final ShaderState shaderState;

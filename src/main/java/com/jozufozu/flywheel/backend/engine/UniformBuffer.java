@@ -8,7 +8,7 @@ import org.lwjgl.opengl.GL32;
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
-import com.jozufozu.flywheel.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.lib.math.MoreMath;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 

@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.lib.context;
 import java.util.function.Consumer;
 
 import com.jozufozu.flywheel.api.context.Context;
-import com.jozufozu.flywheel.gl.shader.GlProgram;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 
 import net.minecraft.resources.ResourceLocation;
 

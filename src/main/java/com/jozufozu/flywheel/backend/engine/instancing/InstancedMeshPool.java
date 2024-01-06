@@ -14,10 +14,10 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.vertex.VertexView;
 import com.jozufozu.flywheel.backend.InternalVertex;
-import com.jozufozu.flywheel.gl.GlPrimitive;
-import com.jozufozu.flywheel.gl.array.GlVertexArray;
-import com.jozufozu.flywheel.gl.buffer.GlBuffer;
-import com.jozufozu.flywheel.gl.buffer.MappedBuffer;
+import com.jozufozu.flywheel.backend.gl.GlPrimitive;
+import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 
 public class InstancedMeshPool {
 	private final VertexView vertexView;

@@ -6,7 +6,7 @@ import static org.lwjgl.opengl.GL44.nglBindBuffersRange;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.Pointer;
 
-import com.jozufozu.flywheel.gl.buffer.GlBufferType;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
 public class IndirectBuffers {

@@ -9,9 +9,9 @@ import org.lwjgl.opengl.GL45C;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
-import com.jozufozu.flywheel.gl.GlCompat;
-import com.jozufozu.flywheel.gl.GlFence;
-import com.jozufozu.flywheel.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.gl.GlCompat;
+import com.jozufozu.flywheel.backend.gl.GlFence;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 

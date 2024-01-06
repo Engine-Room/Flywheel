@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.backend.compile.core;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.gl.shader.GlShader;
+import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 
 public sealed interface ShaderResult {
 	@Nullable

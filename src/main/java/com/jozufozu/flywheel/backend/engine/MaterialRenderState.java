@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.api.material.DepthTest;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.Transparency;
 import com.jozufozu.flywheel.api.material.WriteMask;
-import com.jozufozu.flywheel.gl.GlTextureUnit;
+import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 

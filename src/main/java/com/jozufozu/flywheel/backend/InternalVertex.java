@@ -2,8 +2,8 @@ package com.jozufozu.flywheel.backend;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.vertex.VertexView;
-import com.jozufozu.flywheel.lib.layout.BufferLayout;
-import com.jozufozu.flywheel.lib.layout.CommonItems;
+import com.jozufozu.flywheel.backend.gl.layout.BufferLayout;
+import com.jozufozu.flywheel.backend.gl.layout.CommonItems;
 import com.jozufozu.flywheel.lib.vertex.FullVertexView;
 
 import net.minecraft.resources.ResourceLocation;

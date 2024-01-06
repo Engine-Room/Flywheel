@@ -11,8 +11,8 @@ import com.jozufozu.flywheel.api.layout.ScalarElementType;
 import com.jozufozu.flywheel.api.layout.UnsignedIntegerRepr;
 import com.jozufozu.flywheel.api.layout.ValueRepr;
 import com.jozufozu.flywheel.api.layout.VectorElementType;
-import com.jozufozu.flywheel.gl.GlNumericType;
-import com.jozufozu.flywheel.gl.array.VertexAttribute;
+import com.jozufozu.flywheel.backend.gl.GlNumericType;
+import com.jozufozu.flywheel.backend.gl.array.VertexAttribute;
 
 public class LayoutAttributes {
 	/**

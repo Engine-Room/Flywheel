@@ -10,8 +10,8 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.compile.core.CompilerStats;
 import com.jozufozu.flywheel.backend.compile.core.ProgramLinker;
 import com.jozufozu.flywheel.backend.compile.core.ShaderCompiler;
-import com.jozufozu.flywheel.gl.shader.GlProgram;
-import com.jozufozu.flywheel.glsl.ShaderSources;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
+import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 
 public class CompilationHarness<K> {
 	private final KeyCompiler<K> compiler;

@@ -4,7 +4,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
-import com.jozufozu.flywheel.gl.shader.GlProgram;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 
 public final class Contexts {
 	public static final SimpleContext DEFAULT = Context.REGISTRY.registerAndGet(new SimpleContext(

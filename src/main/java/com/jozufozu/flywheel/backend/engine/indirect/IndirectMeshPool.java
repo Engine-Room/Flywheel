@@ -10,9 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.vertex.VertexView;
 import com.jozufozu.flywheel.backend.InternalVertex;
-import com.jozufozu.flywheel.gl.GlNumericType;
-import com.jozufozu.flywheel.gl.array.GlVertexArray;
-import com.jozufozu.flywheel.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.gl.GlNumericType;
+import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
+import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.QuadIndexSequence;
 

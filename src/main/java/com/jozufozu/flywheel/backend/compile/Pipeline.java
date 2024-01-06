@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.backend.compile;
 import java.util.Objects;
 
 import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.jozufozu.flywheel.glsl.GlslVersion;
-import com.jozufozu.flywheel.glsl.SourceComponent;
+import com.jozufozu.flywheel.backend.glsl.GlslVersion;
+import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 
 import net.minecraft.resources.ResourceLocation;
 

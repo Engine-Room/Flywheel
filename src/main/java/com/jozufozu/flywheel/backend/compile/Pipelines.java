@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.backend.compile;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.compile.component.IndirectComponent;
 import com.jozufozu.flywheel.backend.compile.component.InstancedArraysComponent;
-import com.jozufozu.flywheel.glsl.GlslVersion;
+import com.jozufozu.flywheel.backend.glsl.GlslVersion;
 
 public final class Pipelines {
 	public static final Pipeline INSTANCED_ARRAYS = Pipeline.builder()

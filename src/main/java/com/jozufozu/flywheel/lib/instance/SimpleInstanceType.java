@@ -7,21 +7,18 @@ import com.jozufozu.flywheel.api.instance.InstanceHandle;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
 import com.jozufozu.flywheel.api.layout.Layout;
-import com.jozufozu.flywheel.lib.layout.BufferLayout;
 
 import net.minecraft.resources.ResourceLocation;
 
 public class SimpleInstanceType<I extends Instance> implements InstanceType<I> {
 	private final Factory<I> factory;
-	private final BufferLayout bufferLayout;
 	private final Layout layout;
 	private final InstanceWriter<I> writer;
 	private final ResourceLocation vertexShader;
 	private final ResourceLocation cullShader;
 
-	public SimpleInstanceType(Factory<I> factory, BufferLayout bufferLayout, Layout layout, InstanceWriter<I> writer, ResourceLocation vertexShader, ResourceLocation cullShader) {
+	public SimpleInstanceType(Factory<I> factory, Layout layout, InstanceWriter<I> writer, ResourceLocation vertexShader, ResourceLocation cullShader) {
 		this.factory = factory;
-		this.bufferLayout = bufferLayout;
 		this.layout = layout;
 		this.writer = writer;
 		this.vertexShader = vertexShader;
@@ -35,11 +32,6 @@ public class SimpleInstanceType<I extends Instance> implements InstanceType<I> {
 	@Override
 	public I create(InstanceHandle handle) {
 		return factory.create(this, handle);
-	}
-
-	@Override
-	public BufferLayout oldLayout() {
-		return bufferLayout;
 	}
 
 	@Override
@@ -69,7 +61,6 @@ public class SimpleInstanceType<I extends Instance> implements InstanceType<I> {
 
 	public static class Builder<I extends Instance> {
 		private final Factory<I> factory;
-		private BufferLayout bufferLayout;
 		private Layout layout;
 		private InstanceWriter<I> writer;
 		private ResourceLocation vertexShader;
@@ -77,11 +68,6 @@ public class SimpleInstanceType<I extends Instance> implements InstanceType<I> {
 
 		public Builder(Factory<I> factory) {
 			this.factory = factory;
-		}
-
-		public Builder<I> bufferLayout(BufferLayout bufferLayout) {
-			this.bufferLayout = bufferLayout;
-			return this;
 		}
 
 		public Builder<I> layout(Layout layout) {
@@ -105,13 +91,12 @@ public class SimpleInstanceType<I extends Instance> implements InstanceType<I> {
 		}
 
 		public SimpleInstanceType<I> register() {
-			Objects.requireNonNull(bufferLayout);
 			Objects.requireNonNull(layout);
 			Objects.requireNonNull(writer);
 			Objects.requireNonNull(vertexShader);
 			Objects.requireNonNull(cullShader);
 
-			var out = new SimpleInstanceType<>(factory, bufferLayout, layout, writer, vertexShader, cullShader);
+			var out = new SimpleInstanceType<>(factory, layout, writer, vertexShader, cullShader);
 			return InstanceType.REGISTRY.registerAndGet(out);
 		}
 	}
