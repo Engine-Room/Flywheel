@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.glsl.LoadError;
-import com.jozufozu.flywheel.glsl.LoadResult;
-import com.jozufozu.flywheel.glsl.error.ErrorBuilder;
+import com.jozufozu.flywheel.backend.glsl.LoadError;
+import com.jozufozu.flywheel.backend.glsl.LoadResult;
+import com.jozufozu.flywheel.backend.glsl.error.ErrorBuilder;
 import com.jozufozu.flywheel.lib.util.StringUtil;
 
 public class CompilerStats {

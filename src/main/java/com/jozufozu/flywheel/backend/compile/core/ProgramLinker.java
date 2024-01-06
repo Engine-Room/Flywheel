@@ -12,8 +12,8 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.gl.shader.GlProgram;
-import com.jozufozu.flywheel.gl.shader.GlShader;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
+import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 
 public class ProgramLinker {
 	private final CompilerStats stats;

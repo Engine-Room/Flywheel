@@ -25,9 +25,9 @@ import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
-import com.jozufozu.flywheel.gl.Driver;
-import com.jozufozu.flywheel.gl.GlCompat;
-import com.jozufozu.flywheel.gl.shader.GlProgram;
+import com.jozufozu.flywheel.backend.gl.Driver;
+import com.jozufozu.flywheel.backend.gl.GlCompat;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.context.Contexts;
 
 public class IndirectCullingGroup<I extends Instance> {

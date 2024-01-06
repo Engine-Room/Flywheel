@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.backend.compile.component;
 import java.util.Collection;
 import java.util.Map;
 
-import com.jozufozu.flywheel.glsl.SourceComponent;
+import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 
 import net.minecraft.resources.ResourceLocation;
 

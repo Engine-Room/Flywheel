@@ -11,12 +11,12 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.glsl.SourceFile;
-import com.jozufozu.flywheel.glsl.SourceLines;
-import com.jozufozu.flywheel.glsl.error.ConsoleColors;
-import com.jozufozu.flywheel.glsl.error.ErrorBuilder;
-import com.jozufozu.flywheel.glsl.error.ErrorLevel;
-import com.jozufozu.flywheel.glsl.span.Span;
+import com.jozufozu.flywheel.backend.glsl.SourceFile;
+import com.jozufozu.flywheel.backend.glsl.SourceLines;
+import com.jozufozu.flywheel.backend.glsl.error.ConsoleColors;
+import com.jozufozu.flywheel.backend.glsl.error.ErrorBuilder;
+import com.jozufozu.flywheel.backend.glsl.error.ErrorLevel;
+import com.jozufozu.flywheel.backend.glsl.span.Span;
 import com.jozufozu.flywheel.lib.util.StringUtil;
 
 import net.minecraft.resources.ResourceLocation;

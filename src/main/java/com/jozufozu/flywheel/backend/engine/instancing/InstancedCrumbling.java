@@ -14,7 +14,7 @@ import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.UniformBuffer;
-import com.jozufozu.flywheel.gl.GlStateTracker;
+import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial;
 

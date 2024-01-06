@@ -10,13 +10,13 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.backend.compile.SourceLoader;
-import com.jozufozu.flywheel.glsl.SourceComponent;
-import com.jozufozu.flywheel.glsl.SourceFile;
-import com.jozufozu.flywheel.glsl.generate.FnSignature;
-import com.jozufozu.flywheel.glsl.generate.GlslBlock;
-import com.jozufozu.flywheel.glsl.generate.GlslBuilder;
-import com.jozufozu.flywheel.glsl.generate.GlslExpr;
-import com.jozufozu.flywheel.glsl.generate.GlslSwitch;
+import com.jozufozu.flywheel.backend.glsl.SourceComponent;
+import com.jozufozu.flywheel.backend.glsl.SourceFile;
+import com.jozufozu.flywheel.backend.glsl.generate.FnSignature;
+import com.jozufozu.flywheel.backend.glsl.generate.GlslBlock;
+import com.jozufozu.flywheel.backend.glsl.generate.GlslBuilder;
+import com.jozufozu.flywheel.backend.glsl.generate.GlslExpr;
+import com.jozufozu.flywheel.backend.glsl.generate.GlslSwitch;
 
 import net.minecraft.resources.ResourceLocation;
 

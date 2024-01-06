@@ -5,7 +5,7 @@ import static org.lwjgl.opengl.GL45.glCopyNamedBufferSubData;
 import static org.lwjgl.opengl.GL45.glCreateBuffers;
 import static org.lwjgl.opengl.GL45.glNamedBufferStorage;
 
-import com.jozufozu.flywheel.gl.GlObject;
+import com.jozufozu.flywheel.backend.gl.GlObject;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 
 /**

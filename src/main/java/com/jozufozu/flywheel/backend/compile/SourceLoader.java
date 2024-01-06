@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.backend.compile;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.backend.compile.core.CompilerStats;
-import com.jozufozu.flywheel.glsl.ShaderSources;
-import com.jozufozu.flywheel.glsl.SourceFile;
+import com.jozufozu.flywheel.backend.glsl.ShaderSources;
+import com.jozufozu.flywheel.backend.glsl.SourceFile;
 
 import net.minecraft.resources.ResourceLocation;
 

@@ -5,9 +5,9 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.InternalVertex;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
-import com.jozufozu.flywheel.gl.shader.ShaderType;
-import com.jozufozu.flywheel.glsl.ShaderSources;
-import com.jozufozu.flywheel.glsl.SourceComponent;
+import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.backend.glsl.ShaderSources;
+import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 
 public class PipelineCompiler {
 	private static final Compile<PipelineProgramKey> PIPELINE = new Compile<>();

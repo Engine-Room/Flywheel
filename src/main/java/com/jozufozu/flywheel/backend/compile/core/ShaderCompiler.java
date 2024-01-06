@@ -10,10 +10,10 @@ import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.gl.shader.GlShader;
-import com.jozufozu.flywheel.gl.shader.ShaderType;
-import com.jozufozu.flywheel.glsl.GlslVersion;
-import com.jozufozu.flywheel.glsl.SourceComponent;
+import com.jozufozu.flywheel.backend.gl.shader.GlShader;
+import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
+import com.jozufozu.flywheel.backend.glsl.GlslVersion;
+import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 
 public class ShaderCompiler {
 	private final Map<ShaderKey, ShaderResult> shaderCache = new HashMap<>();
