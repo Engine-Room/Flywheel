@@ -21,7 +21,7 @@ public class PipelineCompiler {
 								.withResource(pipeline.vertexApiImpl())
 								.withResource(InternalVertex.LAYOUT_SHADER)
 								.withComponent(key -> pipeline.assembler()
-										.assemble(new Pipeline.InstanceAssemblerContext(InternalVertex.LAYOUT.getAttributeCount(), key.instanceType())))
+										.assemble(new Pipeline.InstanceAssemblerContext(InternalVertex.ATTRIBUTE_COUNT, key.instanceType())))
 								.withComponents(vertexComponents)
 								.withResource(key -> key.instanceType()
 										.vertexShader())

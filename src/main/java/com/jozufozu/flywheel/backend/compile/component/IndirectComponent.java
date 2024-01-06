@@ -113,13 +113,14 @@ public class IndirectComponent implements SourceComponent {
 		// FIXME: I don't think we're unpacking signed byte/short values correctly
 		// FIXME: we definitely don't consider endianness. this all assumes little endian which works on my machine.
 		var type = element.type();
+		var name = "_" + element.name();
 
 		if (type instanceof ScalarElementType scalar) {
-			return unpackScalar(element.name(), packed, scalar);
+			return unpackScalar(name, packed, scalar);
 		} else if (type instanceof VectorElementType vector) {
-			return unpackVector(element.name(), packed, vector);
+			return unpackVector(name, packed, vector);
 		} else if (type instanceof MatrixElementType matrix) {
-			return unpackMatrix(element.name(), packed, matrix);
+			return unpackMatrix(name, packed, matrix);
 		}
 
 		throw new IllegalArgumentException("Unknown type " + type);
@@ -217,7 +218,7 @@ public class IndirectComponent implements SourceComponent {
 	private static GlslExpr unpack(String fieldName, GlslStruct packed, int size, String backingType, String outType, Function<GlslExpr, GlslExpr> perElement) {
 		List<GlslExpr> args = new ArrayList<>();
 		for (int i = 0; i < size; i++) {
-			var name = "_" + fieldName + "_" + i;
+			var name = fieldName + "_" + i;
 			packed.addField(backingType, name);
 			args.add(UNPACKING_VARIABLE.access(name)
 					.transform(perElement));
@@ -258,7 +259,7 @@ public class IndirectComponent implements SourceComponent {
 		for (int i = 0; i < size; i++) {
 			int unpackField = i / 2;
 			int bitPos = (i % 2) * 16;
-			var name = "_" + fieldName + "_" + unpackField;
+			var name = fieldName + "_" + unpackField;
 			if (bitPos == 0) {
 				// First time we're seeing this field, add it to the struct.
 				packed.addField("uint", name);

@@ -126,7 +126,7 @@ public class LayoutBuilderImpl implements LayoutBuilder {
 	}
 
 	private LayoutBuilder element(String name, ElementType type) {
-		elements.add(new ElementImpl(name, type, offset));
+		elements.add(new ElementImpl(name, type, offset, MoreMath.align4(type.byteSize())));
 		offset += type.byteSize();
 		offset = MoreMath.align4(offset);
 		return this;
@@ -173,7 +173,7 @@ public class LayoutBuilderImpl implements LayoutBuilder {
 			}
 		}
 
-		return new LayoutImpl(List.copyOf(elements));
+		return new LayoutImpl(List.copyOf(elements), offset);
 	}
 
 	private static boolean isValidNameCharacter(char c) {

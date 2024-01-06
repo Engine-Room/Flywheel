@@ -36,7 +36,7 @@ public class InstancedMeshPool {
 	 */
 	public InstancedMeshPool() {
 		vertexView = InternalVertex.createVertexView();
-		int stride = InternalVertex.LAYOUT.getStride();
+		int stride = InternalVertex.STRIDE;
 		vbo = new GlBuffer();
 		vbo.growthFunction(l -> Math.max(l + stride * 128L, (long) (l * 1.6)));
 	}
@@ -149,7 +149,7 @@ public class InstancedMeshPool {
 		private BufferedMesh(Mesh mesh, long byteIndex, EboCache eboCache) {
 			this.mesh = mesh;
 			vertexCount = mesh.vertexCount();
-			byteSize = vertexCount * InternalVertex.LAYOUT.getStride();
+			byteSize = vertexCount * InternalVertex.STRIDE;
 			this.byteIndex = byteIndex;
 			this.ebo = eboCache.get(mesh.indexSequence(), mesh.indexCount());
 		}
@@ -182,8 +182,8 @@ public class InstancedMeshPool {
 
 		public void setup(GlVertexArray vao) {
 			if (boundTo.add(vao)) {
-				vao.bindVertexBuffer(0, InstancedMeshPool.this.vbo.handle(), byteIndex, InternalVertex.LAYOUT.getStride());
-				vao.bindAttributes(0, 0, InternalVertex.LAYOUT.attributes());
+				vao.bindVertexBuffer(0, InstancedMeshPool.this.vbo.handle(), byteIndex, InternalVertex.STRIDE);
+				vao.bindAttributes(0, 0, InternalVertex.ATTRIBUTES);
 				vao.setElementBuffer(ebo);
 			}
 		}
