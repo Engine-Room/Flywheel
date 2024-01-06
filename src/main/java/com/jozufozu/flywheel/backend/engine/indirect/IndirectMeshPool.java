@@ -37,8 +37,8 @@ public class IndirectMeshPool {
 		vertexArray = GlVertexArray.create();
 
 		vertexArray.setElementBuffer(ebo.handle());
-		vertexArray.bindVertexBuffer(0, vbo.handle(), 0, InternalVertex.LAYOUT.getStride());
-		vertexArray.bindAttributes(0, 0, InternalVertex.LAYOUT.attributes());
+		vertexArray.bindVertexBuffer(0, vbo.handle(), 0, InternalVertex.STRIDE);
+		vertexArray.bindAttributes(0, 0, InternalVertex.ATTRIBUTES);
 	}
 
 	/**
@@ -151,7 +151,7 @@ public class IndirectMeshPool {
 		private BufferedMesh(Mesh mesh) {
 			this.mesh = mesh;
 			vertexCount = mesh.vertexCount();
-			byteSize = vertexCount * InternalVertex.LAYOUT.getStride();
+			byteSize = vertexCount * InternalVertex.STRIDE;
 		}
 
 		public int vertexCount() {

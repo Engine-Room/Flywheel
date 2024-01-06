@@ -36,7 +36,7 @@ public class DrawCall {
 			return;
 		}
 
-		instancer.bindIfNeeded(vao, InternalVertex.LAYOUT.getAttributeCount());
+		instancer.bindIfNeeded(vao, InternalVertex.ATTRIBUTE_COUNT);
 		mesh.setup(vao);
 
 		vao.bindForDraw();
@@ -58,7 +58,7 @@ public class DrawCall {
 
 		var vao = lazyScratchVao();
 
-		instancer.bindRaw(vao, InternalVertex.LAYOUT.getAttributeCount(), impl.index);
+		instancer.bindRaw(vao, InternalVertex.ATTRIBUTE_COUNT, impl.index);
 		mesh.setup(vao);
 
 		vao.bindForDraw();
