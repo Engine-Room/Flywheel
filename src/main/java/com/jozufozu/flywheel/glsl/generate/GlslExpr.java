@@ -32,15 +32,23 @@ public interface GlslExpr {
 	}
 
 	static GlslExpr intLiteral(int expr) {
-		return new IntLiteral(expr);
+		return new RawLiteral(Integer.toString(expr));
 	}
 
 	static GlslExpr uintLiteral(int expr) {
-		return new UIntLiteral(expr);
+		return new RawLiteral(Integer.toUnsignedString(expr) + 'u');
+	}
+
+	static GlslExpr uintHexLiteral(int expr) {
+		return new RawLiteral("0x" + Integer.toHexString(expr) + 'u');
 	}
 
 	static GlslExpr boolLiteral(boolean expr) {
-		return new BoolLiteral(expr);
+		return new RawLiteral(Boolean.toString(expr));
+	}
+
+	static GlslExpr floatLiteral(float expr) {
+		return new RawLiteral(Float.toString(expr));
 	}
 
 	/**
@@ -50,6 +58,10 @@ public interface GlslExpr {
 	 * @return A new glsl function call expression.
 	 */
 	default FunctionCall callFunction(String name) {
+		return new FunctionCall(name, this);
+	}
+
+	default FunctionCall cast(String name) {
 		return new FunctionCall(name, this);
 	}
 
@@ -81,6 +93,25 @@ public interface GlslExpr {
 	 */
 	default GlslExpr transform(Function<GlslExpr, GlslExpr> f) {
 		return f.apply(this);
+	}
+
+	default GlslExpr and(int mask) {
+		return new Binary(this, uintHexLiteral(mask), BinOp.BITWISE_AND);
+	}
+
+	default GlslExpr rsh(int by) {
+		if (by == 0) {
+			return this;
+		}
+		return new Binary(this, uintLiteral(by), BinOp.RIGHT_SHIFT);
+	}
+
+	default GlslExpr div(float v) {
+		return new Binary(this, floatLiteral(v), BinOp.DIVIDE);
+	}
+
+	default GlslExpr clamp(float from, float to) {
+		return new Clamp(this, floatLiteral(from), floatLiteral(to));
 	}
 
 	String prettyPrint();
@@ -132,30 +163,24 @@ public interface GlslExpr {
 
 	}
 
-	record IntLiteral(int value) implements GlslExpr {
+	record Clamp(GlslExpr value, GlslExpr from, GlslExpr to) implements GlslExpr {
 		@Override
 		public String prettyPrint() {
-			return Integer.toString(value);
+			return "clamp(" + value.prettyPrint() + ", " + from.prettyPrint() + ", " + to.prettyPrint() + ")";
 		}
 	}
 
-	record UIntLiteral(int value) implements GlslExpr {
-		public UIntLiteral {
-			if (value < 0) {
-				throw new IllegalArgumentException("UIntLiteral must be positive");
-			}
-		}
-
+	record Binary(GlslExpr lhs, GlslExpr rhs, BinOp op) implements GlslExpr {
 		@Override
 		public String prettyPrint() {
-			return Integer.toString(value) + 'u';
+			return "(" + lhs.prettyPrint() + " " + op.op + " " + rhs.prettyPrint() + ")";
 		}
 	}
 
-	record BoolLiteral(boolean value) implements GlslExpr {
+	record RawLiteral(String value) implements GlslExpr {
 		@Override
 		public String prettyPrint() {
-			return Boolean.toString(value);
+			return value;
 		}
 	}
 }

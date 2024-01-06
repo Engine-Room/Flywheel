@@ -15,16 +15,16 @@ final class LayoutImpl implements Layout {
 	@Unmodifiable
 	private final List<Element> elements;
 	@Unmodifiable
-	private final Map<String, ElementType> map;
+	private final Map<String, Element> map;
 	private final int byteSize;
 
 	LayoutImpl(@Unmodifiable List<Element> elements) {
 		this.elements = elements;
 
-		Object2ObjectOpenHashMap<String, ElementType> map = new Object2ObjectOpenHashMap<>();
+		Object2ObjectOpenHashMap<String, Element> map = new Object2ObjectOpenHashMap<>();
 		int byteSize = 0;
 		for (Element element : this.elements) {
-			map.put(element.name(), element.type());
+			map.put(element.name(), element);
 			byteSize += element.type().byteSize();
 		}
 		map.trim();
@@ -41,7 +41,7 @@ final class LayoutImpl implements Layout {
 
 	@Override
 	@Unmodifiable
-	public Map<String, ElementType> asMap() {
+	public Map<String, Element> asMap() {
 		return map;
 	}
 
@@ -73,29 +73,6 @@ final class LayoutImpl implements Layout {
 		return elements.equals(other.elements);
 	}
 
-	record ElementImpl(String name, ElementType type) implements Element {
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + name.hashCode();
-			result = prime * result + type.hashCode();
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
-				return false;
-			}
-			ElementImpl other = (ElementImpl) obj;
-			return name.equals(other.name) && type.equals(other.type);
-		}
+	record ElementImpl(String name, ElementType type, int offset) implements Element {
 	}
 }

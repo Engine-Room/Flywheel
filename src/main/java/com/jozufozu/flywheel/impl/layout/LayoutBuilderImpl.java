@@ -7,12 +7,14 @@ import java.util.Set;
 
 import org.jetbrains.annotations.Range;
 
+import com.jozufozu.flywheel.api.layout.ElementType;
 import com.jozufozu.flywheel.api.layout.FloatRepr;
 import com.jozufozu.flywheel.api.layout.Layout;
 import com.jozufozu.flywheel.api.layout.Layout.Element;
 import com.jozufozu.flywheel.api.layout.LayoutBuilder;
 import com.jozufozu.flywheel.api.layout.ValueRepr;
 import com.jozufozu.flywheel.impl.layout.LayoutImpl.ElementImpl;
+import com.jozufozu.flywheel.lib.math.MoreMath;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -101,28 +103,33 @@ public class LayoutBuilderImpl implements LayoutBuilder {
 	);
 
 	private final List<Element> elements = new ArrayList<>();
+	private int offset = 0;
 
 	@Override
 	public LayoutBuilder scalar(String name, ValueRepr repr) {
-		elements.add(new ElementImpl(name, new ScalarElementTypeImpl(repr)));
-		return this;
+		return element(name, ScalarElementTypeImpl.create(repr));
 	}
 
 	@Override
 	public LayoutBuilder vector(String name, ValueRepr repr, @Range(from = 2, to = 4) int size) {
-		elements.add(new ElementImpl(name, new VectorElementTypeImpl(repr, size)));
-		return this;
+		return element(name, VectorElementTypeImpl.create(repr, size));
 	}
 
 	@Override
 	public LayoutBuilder matrix(String name, FloatRepr repr, @Range(from = 2, to = 4) int rows, @Range(from = 2, to = 4) int columns) {
-		elements.add(new ElementImpl(name, new MatrixElementTypeImpl(repr, rows, columns)));
-		return this;
+		return element(name, MatrixElementTypeImpl.create(repr, rows, columns));
 	}
 
 	@Override
 	public LayoutBuilder matrix(String name, FloatRepr repr, @Range(from = 2, to = 4) int size) {
 		return matrix(name, repr, size, size);
+	}
+
+	private LayoutBuilder element(String name, ElementType type) {
+		elements.add(new ElementImpl(name, type, offset));
+		offset += type.byteSize();
+		offset = MoreMath.align4(offset);
+		return this;
 	}
 
 	@Override

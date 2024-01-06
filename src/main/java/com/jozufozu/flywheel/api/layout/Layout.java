@@ -13,8 +13,7 @@ public interface Layout {
 	@Unmodifiable
 	List<Element> elements();
 
-	@Unmodifiable
-	Map<String, ElementType> asMap();
+	@Unmodifiable Map<String, Element> asMap();
 
 	int byteSize();
 
@@ -23,5 +22,7 @@ public interface Layout {
 		String name();
 
 		ElementType type();
+
+		int offset();
 	}
 }

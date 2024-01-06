@@ -10,7 +10,11 @@ public final class MoreMath {
 	public static final float SQRT_3_OVER_2 = (float) (Math.sqrt(3.0) / 2.0);
 
 	public static int align16(int numToRound) {
-		return (numToRound + 16 - 1) & -16;
+		return (numToRound + 15) & ~15;
+	}
+
+	public static int align4(int offset1) {
+		return (offset1 + 3) & ~3;
 	}
 
 	public static int ceilingDiv(int numerator, int denominator) {
