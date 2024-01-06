@@ -8,8 +8,8 @@ public record FileLine(String fileName) implements ErrorLine {
 	}
 
 	@Override
-	public com.jozufozu.flywheel.glsl.error.lines.Divider divider() {
-		return com.jozufozu.flywheel.glsl.error.lines.Divider.ARROW;
+	public Divider divider() {
+		return Divider.ARROW;
 	}
 
 	@Override

@@ -6,8 +6,8 @@ public interface ErrorLine {
 		return left().length();
 	}
 
-	default com.jozufozu.flywheel.glsl.error.lines.Divider divider() {
-		return com.jozufozu.flywheel.glsl.error.lines.Divider.BAR;
+	default Divider divider() {
+		return Divider.BAR;
 	}
 
 	default String build() {
