@@ -113,7 +113,7 @@ public class IndirectComponent implements SourceComponent {
 		// FIXME: I don't think we're unpacking signed byte/short values correctly
 		// FIXME: we definitely don't consider endianness. this all assumes little endian which works on my machine.
 		var type = element.type();
-		var name = "_" + element.name();
+		var name = element.name();
 
 		if (type instanceof ScalarElementType scalar) {
 			return unpackScalar(name, packed, scalar);

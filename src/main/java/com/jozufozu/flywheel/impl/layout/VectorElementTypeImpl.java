@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Range;
 
 import com.jozufozu.flywheel.api.layout.ValueRepr;
 import com.jozufozu.flywheel.api.layout.VectorElementType;
+import com.jozufozu.flywheel.lib.math.MoreMath;
 
 record VectorElementTypeImpl(ValueRepr repr, @Range(from = 2, to = 4) int size,
 							 int byteSize) implements VectorElementType {
@@ -13,7 +14,7 @@ record VectorElementTypeImpl(ValueRepr repr, @Range(from = 2, to = 4) int size,
 			throw new IllegalArgumentException("Vector element size must be in range [2, 4]!");
 		}
 
-		int byteSize = repr.byteSize() * size;
+		int byteSize = MoreMath.align4(repr.byteSize() * size);
 		return new VectorElementTypeImpl(repr, size, byteSize);
 	}
 }

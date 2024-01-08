@@ -44,14 +44,14 @@ public class Compile<K> {
 		return new ProgramLinkBuilder<>();
 	}
 
-	public CompilationHarness.Builder<K> harness(ShaderSources sources) {
-		return new CompilationHarness.Builder<>(sources);
-	}
-
 	public static class ProgramLinkBuilder<K> implements CompilationHarness.KeyCompiler<K> {
 		private final Map<ShaderType, ShaderCompilerBuilder<K>> compilers = new EnumMap<>(ShaderType.class);
 		private BiConsumer<K, GlProgram> onLink = (k, p) -> {
 		};
+
+		public CompilationHarness<K> harness(ShaderSources sources) {
+			return new CompilationHarness<>(sources, this);
+		}
 
 		public ProgramLinkBuilder<K> link(ShaderCompilerBuilder<K> compilerBuilder) {
 			if (compilers.containsKey(compilerBuilder.shaderType)) {

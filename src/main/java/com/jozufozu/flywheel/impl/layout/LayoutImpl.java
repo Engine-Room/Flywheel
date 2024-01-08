@@ -71,6 +71,6 @@ final class LayoutImpl implements Layout {
 		return elements.equals(other.elements);
 	}
 
-	record ElementImpl(String name, ElementType type, int offset, int byteSize) implements Element {
+	record ElementImpl(String name, ElementType type, int offset) implements Element {
 	}
 }

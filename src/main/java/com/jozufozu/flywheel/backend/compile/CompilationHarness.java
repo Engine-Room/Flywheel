@@ -1,11 +1,11 @@
 package com.jozufozu.flywheel.backend.compile;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.compile.core.CompilerStats;
 import com.jozufozu.flywheel.backend.compile.core.ProgramLinker;
@@ -18,12 +18,9 @@ public class CompilationHarness<K> {
 	private final SourceLoader sourceLoader;
 	private final ShaderCompiler shaderCompiler;
 	private final ProgramLinker programLinker;
-	private final ImmutableList<K> keys;
 	private final CompilerStats stats = new CompilerStats();
 
-	public CompilationHarness(ShaderSources sources, ImmutableList<K> keys, KeyCompiler<K> compiler) {
-		this.keys = keys;
-
+	public CompilationHarness(ShaderSources sources, KeyCompiler<K> compiler) {
 		this.compiler = compiler;
 		sourceLoader = new SourceLoader(sources, stats);
 		shaderCompiler = new ShaderCompiler(stats);
@@ -31,7 +28,7 @@ public class CompilationHarness<K> {
 	}
 
 	@Nullable
-	public Map<K, GlProgram> compileAndReportErrors() {
+	public Map<K, GlProgram> compileAndReportErrors(Collection<K> keys) {
 		stats.start();
 		Map<K, GlProgram> out = new HashMap<>();
 		for (var key : keys) {
@@ -58,29 +55,5 @@ public class CompilationHarness<K> {
 
 	public interface KeyCompiler<K> {
 		@Nullable GlProgram compile(K key, SourceLoader loader, ShaderCompiler shaderCompiler, ProgramLinker programLinker);
-	}
-
-	public static class Builder<K> {
-		private final ShaderSources sources;
-		private ImmutableList<K> keys;
-		private KeyCompiler<K> compiler;
-
-		public Builder(ShaderSources sources) {
-			this.sources = sources;
-		}
-
-		public Builder<K> keys(ImmutableList<K> keys) {
-			this.keys = keys;
-			return this;
-		}
-
-		public Builder<K> compiler(KeyCompiler<K> compiler) {
-			this.compiler = compiler;
-			return this;
-		}
-
-		public CompilationHarness<K> build() {
-			return new CompilationHarness<>(sources, keys, compiler);
-		}
 	}
 }

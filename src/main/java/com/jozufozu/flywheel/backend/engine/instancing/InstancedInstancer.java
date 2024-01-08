@@ -119,7 +119,6 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 		vao.bindAttributes(1, startAttrib, instanceAttributes);
 	}
 
-	@Override
 	public void delete() {
 		vbo.delete();
 		vbo = null;

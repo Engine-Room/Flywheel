@@ -24,10 +24,10 @@ public class InstancingPrograms {
 
 	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
 		_delete();
-		var instancingCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCED_ARRAYS, pipelineKeys, uniformComponent, vertexComponents, fragmentComponents);
+		var instancingCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCED_ARRAYS, uniformComponent, vertexComponents, fragmentComponents);
 
 		try {
-			var result = instancingCompiler.compileAndReportErrors();
+			var result = instancingCompiler.compileAndReportErrors(pipelineKeys);
 
 			if (result != null) {
 				instance = new InstancingPrograms(result);
