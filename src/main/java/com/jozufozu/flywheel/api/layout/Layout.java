@@ -24,7 +24,5 @@ public interface Layout {
 		ElementType type();
 
 		int offset();
-
-		int byteSize();
 	}
 }

@@ -14,7 +14,6 @@ import com.jozufozu.flywheel.api.layout.Layout.Element;
 import com.jozufozu.flywheel.api.layout.LayoutBuilder;
 import com.jozufozu.flywheel.api.layout.ValueRepr;
 import com.jozufozu.flywheel.impl.layout.LayoutImpl.ElementImpl;
-import com.jozufozu.flywheel.lib.math.MoreMath;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -126,9 +125,9 @@ public class LayoutBuilderImpl implements LayoutBuilder {
 	}
 
 	private LayoutBuilder element(String name, ElementType type) {
-		elements.add(new ElementImpl(name, type, offset, MoreMath.align4(type.byteSize())));
+		elements.add(new ElementImpl(name, type, offset));
+		// type.byteSize() is guaranteed to be 4-aligned.
 		offset += type.byteSize();
-		offset = MoreMath.align4(offset);
 		return this;
 	}
 

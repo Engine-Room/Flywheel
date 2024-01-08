@@ -20,25 +20,18 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 	 * <br>
 	 * See {@link #getInstancer} for insertion details.
 	 */
-	private final Map<InstancerKey<?>, N> instancers = new HashMap<>();
+	protected final Map<InstancerKey<?>, N> instancers = new HashMap<>();
 	/**
 	 * A list of instancers that have not yet been initialized.
 	 * <br>
 	 * All new instancers land here before having resources allocated in {@link #flush}.
 	 * Write access to this list must be synchronized on {@link #creationLock}.
 	 */
-	private final List<UninitializedInstancer<N, ?>> uninitializedInstancers = new ArrayList<>();
+	protected final List<UninitializedInstancer<N, ?>> uninitializedInstancers = new ArrayList<>();
 	/**
 	 * Mutex for {@link #instancers} and {@link #uninitializedInstancers}.
 	 */
-	private final Object creationLock = new Object();
-
-	/**
-	 * A list of initialized instancers.
-	 * <br>
-	 * These are instancers that may need to be cleared or deleted.
-	 */
-	private final List<N> initializedInstancers = new ArrayList<>();
+	protected final Object creationLock = new Object();
 
 	@SuppressWarnings("unchecked")
 	public <I extends Instance> Instancer<I> getInstancer(InstanceType<I> type, Model model, RenderStage stage) {
@@ -69,21 +62,18 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 	public void delete() {
 		instancers.clear();
 		uninitializedInstancers.clear();
-
-		initializedInstancers.forEach(AbstractInstancer::delete);
-		initializedInstancers.clear();
 	}
 
 	public void flush() {
 		for (var instancer : uninitializedInstancers) {
 			add(instancer.key(), instancer.instancer(), instancer.model(), instancer.stage());
-			initializedInstancers.add(instancer.instancer());
 		}
 		uninitializedInstancers.clear();
 	}
 
 	public void onRenderOriginChanged() {
-		initializedInstancers.forEach(AbstractInstancer::clear);
+		instancers.values()
+				.forEach(AbstractInstancer::clear);
 	}
 
 	protected abstract <I extends Instance> N create(InstanceType<I> type);

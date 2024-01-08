@@ -40,6 +40,9 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 	}
 
 	public void delete() {
+		instancers.values()
+				.forEach(InstancedInstancer::delete);
+
 		super.delete();
 
 		meshPool.delete();
