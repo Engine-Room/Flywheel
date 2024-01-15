@@ -122,6 +122,14 @@ mixin {
     debug.export = true
 }
 
+idea {
+    // Tell IDEA to always download sources/javadoc artifacts from maven.
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
 // Workaround for SpongePowered/MixinGradle#38
 afterEvaluate {
     tasks.configureReobfTaskForReobfJar.mustRunAfter(tasks.compileJava)

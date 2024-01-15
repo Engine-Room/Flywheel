@@ -13,14 +13,19 @@
 
 /*const*/ float flw_distance;
 
+/*const*/ bool flw_vertexDiffuse;
+
+bool flw_fragDiffuse;
 vec4 flw_fragColor;
 ivec2 flw_fragOverlay;
 vec2 flw_fragLight;
 
 // To be implemented by the material fragment shader.
-vec4 flw_fogFilter(vec4 color);
-bool flw_discardPredicate(vec4 finalColor);
 void flw_materialFragment();
+// To be implement by fog shaders.
+vec4 flw_fogFilter(vec4 color);
+// To be implemented by discard shaders.
+bool flw_discardPredicate(vec4 finalColor);
 
 // To be implemented by the context shader.
 void flw_beginFragment();
