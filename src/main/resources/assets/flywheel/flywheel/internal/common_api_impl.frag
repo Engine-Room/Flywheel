@@ -9,10 +9,13 @@ in vec3 flw_vertexNormal;
 
 in float flw_distance;
 
+bool flw_vertexDiffuse;
+
 vec4 flw_sampleColor;
 
 FlwMaterial flw_material;
 
+bool flw_fragDiffuse;
 vec4 flw_fragColor;
 ivec2 flw_fragOverlay;
 vec2 flw_fragLight;
