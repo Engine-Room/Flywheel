@@ -150,26 +150,56 @@ compileJava {
     options.compilerArgs = ['-Xdiags:verbose']
 }
 
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            forge_version          : forge_version,
+            forge_version_range    : forge_version_range,
+            loader_version_range   : loader_version_range,
+            mod_version            : mod_version,
+            embeddium_version_range: embeddium_version_range
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
 void addLicense(jarTask) {
     jarTask.from('LICENSE.md') {
         rename '(.*)\\.(.*)', '$1_' + archivesBaseName + '.$2'
     }
 }
 
-tasks.named('jar', Jar).configure {
-    manifest {
+void addManifest(jarTask) {
+    jarTask.manifest {
         attributes([
-                'Specification-Title': 'flywheel',
+                'Specification-Title'     : 'flywheel',
                 // 'Specification-Vendor': 'flywheel authors',
-                'Specification-Version': '1', // We are version 1 of ourselves
-                'Implementation-Title': project.jar.archiveBaseName,
-                'Implementation-Version': project.jar.archiveVersion,
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : project.jar.archiveBaseName,
+                'Implementation-Version'  : project.jar.archiveVersion,
                 // 'Implementation-Vendor': 'flywheel authors',
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
         ])
     }
+}
+
+tasks.named('jar', Jar).configure {
+    archiveClassifier = 'slim'
 
     finalizedBy 'reobfJar'
+    addManifest(it)
+    addLicense(it)
+}
+
+tasks.named('jarJar', Jar).configure {
+    archiveClassifier = ''
+
+    finalizedBy 'reobfJarJar'
+    addManifest(it)
     addLicense(it)
 }
 
