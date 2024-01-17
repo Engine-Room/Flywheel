@@ -14,7 +14,6 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.model.Mesh;
-import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 
@@ -64,18 +63,13 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 	}
 
 	@Override
-	protected <I extends Instance> void add(InstancerKey<I> key, InstancedInstancer<?> instancer, Model model, RenderStage stage) {
-		if (model.meshes()
-				.isEmpty()) {
-			// Don't bother allocating resources for models with no meshes.
-			return;
-		}
-
+	protected <I extends Instance> void initialize(InstancerKey<I> key, InstancedInstancer<?> instancer) {
 		instancer.init();
 
-		DrawSet drawSet = drawSets.computeIfAbsent(stage, DrawSet::new);
+		DrawSet drawSet = drawSets.computeIfAbsent(key.stage(), DrawSet::new);
 
-		var meshes = model.meshes();
+		var meshes = key.model()
+				.meshes();
 		for (var entry : meshes.entrySet()) {
 			var mesh = alloc(entry.getValue());
 
