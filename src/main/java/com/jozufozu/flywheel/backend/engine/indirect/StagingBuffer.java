@@ -72,9 +72,6 @@ public class StagingBuffer {
 	}
 
 	public StagingBuffer(long capacity, IndirectPrograms programs) {
-		scatterProgram = IndirectPrograms.get()
-				.getScatterProgram();
-
 		this.capacity = capacity;
 		vbo = GL45C.glCreateBuffers();
 
@@ -84,6 +81,8 @@ public class StagingBuffer {
 		totalAvailable = capacity;
 
 		FlwMemoryTracker._allocCPUMemory(capacity);
+
+		scatterProgram = programs.getScatterProgram();
 	}
 
 	/**
