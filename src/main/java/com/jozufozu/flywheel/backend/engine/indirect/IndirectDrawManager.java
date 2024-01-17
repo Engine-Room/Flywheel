@@ -17,7 +17,6 @@ import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
@@ -52,15 +51,9 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected <I extends Instance> void add(InstancerKey<I> key, IndirectInstancer<?> instancer, Model model, RenderStage stage) {
-		if (model.meshes()
-				.isEmpty()) {
-			// Don't bother allocating resources for models with no meshes.
-			return;
-		}
-
+	protected <I extends Instance> void initialize(InstancerKey<I> key, IndirectInstancer<?> instancer) {
 		var group = (IndirectCullingGroup<I>) cullingGroups.computeIfAbsent(key.type(), t -> new IndirectCullingGroup<>(t, programs));
-		group.add((IndirectInstancer<I>) instancer, model, stage);
+		group.add((IndirectInstancer<I>) instancer, key.model(), key.stage());
 	}
 
 	public boolean hasStage(RenderStage stage) {
