@@ -11,6 +11,7 @@ import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.component.UberShaderComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.backend.compile.core.CompilerStats;
+import com.jozufozu.flywheel.backend.compile.core.SourceLoader;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 import com.jozufozu.flywheel.backend.glsl.generate.FnSignature;
@@ -19,13 +20,12 @@ import com.jozufozu.flywheel.backend.glsl.generate.GlslExpr;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
-public class FlwPrograms {
+public final class FlwPrograms {
 	private FlwPrograms() {
 	}
 
-	public static void reload(ResourceManager resourceManager) {
+	private static void reload(ResourceManager resourceManager) {
 		var sources = new ShaderSources(resourceManager);
-
 		var preLoadStats = new CompilerStats();
 		var loadChecker = new SourceLoader(sources, preLoadStats);
 

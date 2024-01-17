@@ -35,7 +35,7 @@ const uint _FLW_USE_LIGHT_MASK = ((1u << _FLW_USE_LIGHT_LENGTH) - 1u) << _FLW_US
 const uint _FLW_DIFFUSE_MASK = ((1u << _FLW_DIFFUSE_LENGTH) - 1u) << _FLW_DIFFUSE_OFFSET;
 
 // Packed format:
-// diffuse[1] | useOverlay[1] | useLight[1] | writeMask[2] | transparency[3] | depthTest[4] | polygonOffset[1] | backfaceCulling[1] | mipmap[1] | blur[1]
+// diffuse[1] | useLight[1] | useOverlay[1] | writeMask[2] | transparency[3] | depthTest[4] | polygonOffset[1] | backfaceCulling[1] | mipmap[1] | blur[1]
 void _flw_unpackMaterialProperties(uint p, out FlwMaterial m) {
     m.blur = (p & _FLW_BLUR_MASK) != 0u;
     m.mipmap = (p & _FLW_MIPMAP_MASK) != 0u;

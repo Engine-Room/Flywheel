@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.compile;
+package com.jozufozu.flywheel.backend.compile.core;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,9 +7,6 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.backend.compile.core.CompilerStats;
-import com.jozufozu.flywheel.backend.compile.core.ProgramLinker;
-import com.jozufozu.flywheel.backend.compile.core.ShaderCompiler;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 

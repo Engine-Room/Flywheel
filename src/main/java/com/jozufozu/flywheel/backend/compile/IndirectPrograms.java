@@ -11,6 +11,8 @@ import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.compile.component.IndirectComponent;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
+import com.jozufozu.flywheel.backend.compile.core.CompilationHarness;
+import com.jozufozu.flywheel.backend.compile.core.Compile;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
@@ -20,20 +22,23 @@ import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class IndirectPrograms {
+public class IndirectPrograms extends AbstractPrograms {
 	private static final ResourceLocation CULL_SHADER_MAIN = Flywheel.rl("internal/indirect/cull.glsl");
 	private static final ResourceLocation APPLY_SHADER_MAIN = Flywheel.rl("internal/indirect/apply.glsl");
 	private static final ResourceLocation SCATTER_SHADER_MAIN = Flywheel.rl("internal/indirect/scatter.glsl");
 
-	public static IndirectPrograms instance;
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private static final Compile<ResourceLocation> UTIL = new Compile<>();
+
+	@Nullable
+	private static IndirectPrograms instance;
+
 	private final Map<PipelineProgramKey, GlProgram> pipeline;
 	private final Map<InstanceType<?>, GlProgram> culling;
 	private final GlProgram apply;
 	private final GlProgram scatter;
 
-	public IndirectPrograms(Map<PipelineProgramKey, GlProgram> pipeline, Map<InstanceType<?>, GlProgram> culling, GlProgram apply, GlProgram scatter) {
+	private IndirectPrograms(Map<PipelineProgramKey, GlProgram> pipeline, Map<InstanceType<?>, GlProgram> culling, GlProgram apply, GlProgram scatter) {
 		this.pipeline = pipeline;
 		this.culling = culling;
 		this.apply = apply;
@@ -41,7 +46,8 @@ public class IndirectPrograms {
 	}
 
 	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
-		_delete();
+		IndirectPrograms newInstance = null;
+
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, uniformComponent, vertexComponents, fragmentComponents);
 		var cullingCompiler = createCullingCompiler(uniformComponent, sources);
 		var applyCompiler = createUtilCompiler(sources);
@@ -52,38 +58,17 @@ public class IndirectPrograms {
 			var utils = applyCompiler.compileAndReportErrors(List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN));
 
 			if (pipelineResult != null && cullingResult != null && utils != null) {
-				instance = new IndirectPrograms(pipelineResult, cullingResult, utils.get(APPLY_SHADER_MAIN), utils.get(SCATTER_SHADER_MAIN));
+				newInstance = new IndirectPrograms(pipelineResult, cullingResult, utils.get(APPLY_SHADER_MAIN), utils.get(SCATTER_SHADER_MAIN));
 			}
-		} catch (Throwable e) {
-			Flywheel.LOGGER.error("Failed to compile indirect programs", e);
+		} catch (Throwable t) {
+			Flywheel.LOGGER.error("Failed to compile indirect programs", t);
 		}
+
 		pipelineCompiler.delete();
 		cullingCompiler.delete();
 		applyCompiler.delete();
-	}
 
-	private static ImmutableList<InstanceType<?>> createCullingKeys() {
-		ImmutableList.Builder<InstanceType<?>> builder = ImmutableList.builder();
-		for (InstanceType<?> instanceType : InstanceType.REGISTRY) {
-			builder.add(instanceType);
-		}
-		return builder.build();
-	}
-
-	@Nullable
-	public static IndirectPrograms get() {
-		return instance;
-	}
-
-	public static boolean allLoaded() {
-		return instance != null;
-	}
-
-	private static void _delete() {
-		if (instance != null) {
-			instance.delete();
-			instance = null;
-		}
+		setInstance(newInstance);
 	}
 
 	private static CompilationHarness<InstanceType<?>> createCullingCompiler(UniformComponent uniformComponent, ShaderSources sources) {
@@ -106,6 +91,33 @@ public class IndirectPrograms {
 				.harness(sources);
 	}
 
+	private static ImmutableList<InstanceType<?>> createCullingKeys() {
+		ImmutableList.Builder<InstanceType<?>> builder = ImmutableList.builder();
+		for (InstanceType<?> instanceType : InstanceType.REGISTRY) {
+			builder.add(instanceType);
+		}
+		return builder.build();
+	}
+
+	private static void setInstance(@Nullable IndirectPrograms newInstance) {
+		if (instance != null) {
+			instance.release();
+		}
+		if (newInstance != null) {
+			newInstance.acquire();
+		}
+		instance = newInstance;
+	}
+
+	@Nullable
+	public static IndirectPrograms get() {
+		return instance;
+	}
+
+	public static boolean allLoaded() {
+		return instance != null;
+	}
+
 	public GlProgram getIndirectProgram(InstanceType<?> instanceType, Context contextShader) {
 		return pipeline.get(new PipelineProgramKey(instanceType, contextShader));
 	}
@@ -122,7 +134,8 @@ public class IndirectPrograms {
 		return scatter;
 	}
 
-	public void delete() {
+	@Override
+	protected void delete() {
 		pipeline.values()
 				.forEach(GlProgram::delete);
 		culling.values()

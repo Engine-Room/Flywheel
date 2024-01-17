@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.jozufozu.flywheel.backend.InternalVertex;
 import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
+import com.jozufozu.flywheel.backend.compile.core.CompilationHarness;
+import com.jozufozu.flywheel.backend.compile.core.Compile;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;

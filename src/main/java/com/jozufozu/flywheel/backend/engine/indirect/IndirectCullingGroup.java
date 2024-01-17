@@ -36,34 +36,34 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private static final int DRAW_BARRIER_BITS = GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT;
 
-	private final GlProgram cullProgram;
-	private final GlProgram applyProgram;
-	private final GlProgram drawProgram;
-
+	private final InstanceType<I> instanceType;
 	private final long objectStride;
 	private final IndirectBuffers buffers;
 	private final IndirectMeshPool meshPool;
 	private final List<IndirectModel> indirectModels = new ArrayList<>();
 	private final List<IndirectDraw> indirectDraws = new ArrayList<>();
 	private final Map<RenderStage, List<MultiDraw>> multiDraws = new EnumMap<>(RenderStage.class);
-	private final InstanceType<I> instanceType;
+
+	private final IndirectPrograms programs;
+	private final GlProgram cullProgram;
+	private final GlProgram applyProgram;
+	private final GlProgram drawProgram;
+
 	private boolean needsDrawBarrier;
 	private boolean hasNewDraws;
 	private int instanceCountThisFrame;
 
-	IndirectCullingGroup(InstanceType<I> instanceType) {
+	IndirectCullingGroup(InstanceType<I> instanceType, IndirectPrograms programs) {
 		this.instanceType = instanceType;
-		var programs = IndirectPrograms.get();
+		objectStride = instanceType.layout()
+				.byteSize() + IndirectBuffers.INT_SIZE;
+		buffers = new IndirectBuffers(objectStride);
+		meshPool = new IndirectMeshPool();
+
+		this.programs = programs;
 		cullProgram = programs.getCullingProgram(instanceType);
 		applyProgram = programs.getApplyProgram();
 		drawProgram = programs.getIndirectProgram(instanceType, Contexts.DEFAULT);
-
-		objectStride = instanceType.layout()
-				.byteSize() + IndirectBuffers.INT_SIZE;
-
-		buffers = new IndirectBuffers(objectStride);
-
-		meshPool = new IndirectMeshPool();
 	}
 
 	public void flush(StagingBuffer stagingBuffer) {
@@ -200,8 +200,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	public void bindForCrumbling() {
-		var program = IndirectPrograms.get()
-				.getIndirectProgram(instanceType, Contexts.CRUMBLING);
+		var program = programs.getIndirectProgram(instanceType, Contexts.CRUMBLING);
 
 		program.bind();
 

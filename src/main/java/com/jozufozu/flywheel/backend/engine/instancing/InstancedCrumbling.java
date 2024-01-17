@@ -23,7 +23,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancedCrumbling {
-	public static void render(List<Engine.CrumblingBlock> crumblingBlocks) {
+	public static void render(List<Engine.CrumblingBlock> crumblingBlocks, InstancingPrograms programs) {
 		// Sort draw calls into buckets, so we don't have to do as many shader binds.
 		var byShaderState = doCrumblingSort(crumblingBlocks);
 
@@ -48,8 +48,7 @@ public class InstancedCrumbling {
 
 				CommonCrumbling.applyCrumblingProperties(crumblingMaterial, baseMaterial);
 
-				var program = InstancingPrograms.get()
-						.get(shader.instanceType(), Contexts.CRUMBLING);
+				var program = programs.get(shader.instanceType(), Contexts.CRUMBLING);
 				program.bind();
 
 				UniformBuffer.get().sync();
@@ -108,7 +107,7 @@ public class InstancedCrumbling {
 				}
 			}
 		}
+
 		return out;
 	}
-
 }

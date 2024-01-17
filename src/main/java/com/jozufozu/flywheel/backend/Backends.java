@@ -21,7 +21,7 @@ public class Backends {
 	public static final Backend INSTANCING = SimpleBackend.builder()
 			.engineMessage(Component.literal("Using Instancing Engine")
 					.withStyle(ChatFormatting.GREEN))
-			.engineFactory(level -> new InstancingEngine(256))
+			.engineFactory(level -> new InstancingEngine(InstancingPrograms.get(), 256))
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.supportsInstancing() && InstancingPrograms.allLoaded())
 			.register(Flywheel.rl("instancing"));
 
@@ -31,7 +31,7 @@ public class Backends {
 	public static final Backend INDIRECT = SimpleBackend.builder()
 			.engineMessage(Component.literal("Using Indirect Engine")
 					.withStyle(ChatFormatting.GREEN))
-			.engineFactory(level -> new IndirectEngine(256))
+			.engineFactory(level -> new IndirectEngine(IndirectPrograms.get(), 256))
 			.fallback(() -> Backends.INSTANCING)
 			.supported(() -> !ShadersModHandler.isShaderPackInUse() && GlCompat.supportsIndirect() && IndirectPrograms.allLoaded())
 			.register(Flywheel.rl("indirect"));

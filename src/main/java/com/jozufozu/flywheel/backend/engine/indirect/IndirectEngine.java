@@ -6,6 +6,7 @@ import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
@@ -19,13 +20,18 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 
 public class IndirectEngine extends AbstractEngine {
-	private final IndirectDrawManager drawManager = new IndirectDrawManager();
+	private final IndirectPrograms programs;
+	private final IndirectDrawManager drawManager;
 	private final Flag flushFlag = new NamedFlag("flushed");
 
-	public IndirectEngine(int maxOriginDistance) {
+	public IndirectEngine(IndirectPrograms programs, int maxOriginDistance) {
 		super(maxOriginDistance);
+		programs.acquire();
+		this.programs = programs;
+		drawManager = new IndirectDrawManager(this.programs);
 	}
 
 	@Override
@@ -52,9 +58,10 @@ public class IndirectEngine extends AbstractEngine {
 		}
 
 		try (var restoreState = GlStateTracker.getRestoreState()) {
+			GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
 			int prevActiveTexture = GlStateManager._getActiveTexture();
-			Minecraft.getInstance().gameRenderer.overlayTexture().setupOverlayColor();
-			Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
+			gameRenderer.overlayTexture().setupOverlayColor();
+			gameRenderer.lightTexture().turnOnLightLayer();
 
 			GlTextureUnit.T1.makeActive();
 			RenderSystem.bindTexture(RenderSystem.getShaderTexture(1));
@@ -65,8 +72,8 @@ public class IndirectEngine extends AbstractEngine {
 
 			MaterialRenderState.reset();
 
-			Minecraft.getInstance().gameRenderer.overlayTexture().teardownOverlayColor();
-			Minecraft.getInstance().gameRenderer.lightTexture().turnOffLightLayer();
+			gameRenderer.overlayTexture().teardownOverlayColor();
+			gameRenderer.lightTexture().turnOffLightLayer();
 			GlStateManager._activeTexture(prevActiveTexture);
 		}
 	}
@@ -90,5 +97,6 @@ public class IndirectEngine extends AbstractEngine {
 	@Override
 	public void delete() {
 		drawManager.delete();
+		programs.release();
 	}
 }

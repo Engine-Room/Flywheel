@@ -14,28 +14,44 @@ import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 
-public class InstancingPrograms {
-	static InstancingPrograms instance;
+public class InstancingPrograms extends AbstractPrograms {
+	@Nullable
+	private static InstancingPrograms instance;
+
 	private final Map<PipelineProgramKey, GlProgram> pipeline;
 
-	public InstancingPrograms(Map<PipelineProgramKey, GlProgram> pipeline) {
+	private InstancingPrograms(Map<PipelineProgramKey, GlProgram> pipeline) {
 		this.pipeline = pipeline;
 	}
 
 	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
-		_delete();
-		var instancingCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCED_ARRAYS, uniformComponent, vertexComponents, fragmentComponents);
+		InstancingPrograms newInstance = null;
+
+		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCED_ARRAYS, uniformComponent, vertexComponents, fragmentComponents);
 
 		try {
-			var result = instancingCompiler.compileAndReportErrors(pipelineKeys);
+			var pipelineResult = pipelineCompiler.compileAndReportErrors(pipelineKeys);
 
-			if (result != null) {
-				instance = new InstancingPrograms(result);
+			if (pipelineResult != null) {
+				newInstance = new InstancingPrograms(pipelineResult);
 			}
-		} catch (Throwable e) {
-			Flywheel.LOGGER.error("Failed to compile instancing programs", e);
+		} catch (Throwable t) {
+			Flywheel.LOGGER.error("Failed to compile instancing programs", t);
 		}
-		instancingCompiler.delete();
+
+		pipelineCompiler.delete();
+
+		setInstance(newInstance);
+	}
+
+	private static void setInstance(@Nullable InstancingPrograms newInstance) {
+		if (instance != null) {
+			instance.release();
+		}
+		if (newInstance != null) {
+			newInstance.acquire();
+		}
+		instance = newInstance;
 	}
 
 	@Nullable
@@ -47,18 +63,12 @@ public class InstancingPrograms {
 		return instance != null;
 	}
 
-	static void _delete() {
-		if (instance != null) {
-			instance.delete();
-			instance = null;
-		}
-	}
-
 	public GlProgram get(InstanceType<?> instanceType, Context contextShader) {
 		return pipeline.get(new PipelineProgramKey(instanceType, contextShader));
 	}
 
-	public void delete() {
+	@Override
+	protected void delete() {
 		pipeline.values()
 				.forEach(GlProgram::delete);
 	}

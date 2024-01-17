@@ -157,8 +157,7 @@ tasks.named('processResources', ProcessResources).configure {
             forge_version          : forge_version,
             forge_version_range    : forge_version_range,
             loader_version_range   : loader_version_range,
-            mod_version            : mod_version,
-            embeddium_version_range: embeddium_version_range
+            mod_version            : mod_version
     ]
     inputs.properties replaceProperties
 

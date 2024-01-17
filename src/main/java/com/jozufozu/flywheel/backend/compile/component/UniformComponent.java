@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.backend.compile.SourceLoader;
+import com.jozufozu.flywheel.backend.compile.core.SourceLoader;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 import com.jozufozu.flywheel.backend.glsl.SourceFile;
 import com.jozufozu.flywheel.backend.glsl.generate.GlslBuilder;
