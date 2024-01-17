@@ -46,6 +46,12 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 	@SuppressWarnings("unchecked")
 	@Override
 	protected <I extends Instance> void add(InstancerKey<I> key, IndirectInstancer<?> instancer, Model model, RenderStage stage) {
+		if (model.meshes()
+				.isEmpty()) {
+			// Don't bother allocating resources for models with no meshes.
+			return;
+		}
+
 		var group = (IndirectCullingGroup<I>) cullingGroups.computeIfAbsent(key.type(), IndirectCullingGroup::new);
 		group.add((IndirectInstancer<I>) instancer, model, stage);
 	}
