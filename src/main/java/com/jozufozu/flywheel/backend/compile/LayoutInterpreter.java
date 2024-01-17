@@ -9,7 +9,10 @@ import com.jozufozu.flywheel.api.layout.UnsignedIntegerRepr;
 import com.jozufozu.flywheel.api.layout.ValueRepr;
 import com.jozufozu.flywheel.api.layout.VectorElementType;
 
-public class LayoutInterpreter {
+public final class LayoutInterpreter {
+	private LayoutInterpreter() {
+	}
+
 	public static int attributeCount(ElementType type) {
 		if (type instanceof ScalarElementType) {
 			return 1;
@@ -34,8 +37,15 @@ public class LayoutInterpreter {
 		throw new IllegalArgumentException("Unknown type " + type);
 	}
 
-	public static String matrixTypeName(MatrixElementType matrix) {
-		return "mat" + matrix.columns() + "x" + matrix.rows();
+	public static String scalarTypeName(ValueRepr repr) {
+		if (repr instanceof IntegerRepr) {
+			return "int";
+		} else if (repr instanceof UnsignedIntegerRepr) {
+			return "uint";
+		} else if (repr instanceof FloatRepr) {
+			return "float";
+		}
+		throw new IllegalArgumentException("Unknown repr " + repr);
 	}
 
 	public static String vectorTypeName(ValueRepr repr, int size) {
@@ -49,14 +59,7 @@ public class LayoutInterpreter {
 		throw new IllegalArgumentException("Unknown repr " + repr);
 	}
 
-	public static String scalarTypeName(ValueRepr repr) {
-		if (repr instanceof IntegerRepr) {
-			return "int";
-		} else if (repr instanceof UnsignedIntegerRepr) {
-			return "uint";
-		} else if (repr instanceof FloatRepr) {
-			return "float";
-		}
-		throw new IllegalArgumentException("Unknown repr " + repr);
+	public static String matrixTypeName(MatrixElementType matrix) {
+		return "mat" + matrix.columns() + "x" + matrix.rows();
 	}
 }

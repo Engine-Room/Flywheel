@@ -12,6 +12,7 @@ import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
 import com.jozufozu.flywheel.backend.gl.GlFence;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
@@ -28,6 +29,14 @@ public class StagingBuffer {
 	private final int vbo;
 	private final long map;
 	private final long capacity;
+
+	private final OverflowStagingBuffer overflow = new OverflowStagingBuffer();
+	private final TransferList transfers = new TransferList();
+	private final PriorityQueue<FencedRegion> fencedRegions = new ObjectArrayFIFOQueue<>();
+	private final GlBuffer scatterBuffer = new GlBuffer();
+	private final ScatterList scatterList = new ScatterList();
+
+	private final GlProgram scatterProgram;
 
 	/**
 	 * The position in the buffer at the time of the last flush.
@@ -58,17 +67,14 @@ public class StagingBuffer {
 	@Nullable
 	private MemoryBlock scratch;
 
-	private final OverflowStagingBuffer overflow = new OverflowStagingBuffer();
-	private final TransferList transfers = new TransferList();
-	private final PriorityQueue<FencedRegion> fencedRegions = new ObjectArrayFIFOQueue<>();
-	private final GlBuffer scatterBuffer = new GlBuffer();
-	private final ScatterList scatterList = new ScatterList();
-
-	public StagingBuffer() {
-		this(DEFAULT_CAPACITY);
+	public StagingBuffer(IndirectPrograms programs) {
+		this(DEFAULT_CAPACITY, programs);
 	}
 
-	public StagingBuffer(long capacity) {
+	public StagingBuffer(long capacity, IndirectPrograms programs) {
+		scatterProgram = IndirectPrograms.get()
+				.getScatterProgram();
+
 		this.capacity = capacity;
 		vbo = GL45C.glCreateBuffers();
 
@@ -247,9 +253,7 @@ public class StagingBuffer {
 	 * <a href=https://on-demand.gputechconf.com/gtc/2016/presentation/s6138-christoph-kubisch-pierre-boudier-gpu-driven-rendering.pdf>this presentation</a>
 	 */
 	private void dispatchComputeCopies() {
-		IndirectPrograms.get()
-				.getScatterProgram()
-				.bind();
+		scatterProgram.bind();
 
 		// These bindings don't change between dstVbos.
 		GL45.glBindBufferBase(GL45C.GL_SHADER_STORAGE_BUFFER, 0, scatterBuffer.handle());

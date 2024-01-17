@@ -31,9 +31,9 @@ side = "CLIENT"
 
 [[dependencies.flywheel]]
 modId = "rubidium"
+# This replicates a "breaks" dependency.
+# There's a mixin crash with Rubidium <0.7.0.
 mandatory = false
-# This should be a "breaks" dependency.
-# There's a mixin crash with Rubidum < 0.7.0
 versionRange = "[0.7.0,)"
 ordering = "NONE"
 side = "CLIENT"

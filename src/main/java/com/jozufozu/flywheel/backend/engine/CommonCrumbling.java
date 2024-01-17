@@ -20,7 +20,8 @@ public class CommonCrumbling {
 				.transparency(Transparency.CRUMBLING)
 				.writeMask(WriteMask.COLOR)
 				.useOverlay(false)
-				.useLight(false);
+				.useLight(false)
+				.diffuse(false);
 	}
 
 	public static int getDiffuseTexture(Material material) {

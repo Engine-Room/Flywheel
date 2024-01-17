@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.backend.ShaderIndices;
 
 import net.minecraft.util.Mth;
 
-// Materials are unpacked in "flywheel:flywheel/internal/material.glsl"
+// Materials are unpacked in "flywheel:flywheel/internal/packed_material.glsl"
 public final class MaterialEncoder {
 	// The number of bits each property takes up
 	private static final int BLUR_LENGTH = 1;
@@ -65,7 +65,7 @@ public final class MaterialEncoder {
 	}
 
 	// Packed format:
-	// diffuse[1] | useOverlay[1] | useLight[1] | writeMask[2] | transparency[3] | depthTest[4] | polygonOffset[1] | backfaceCulling[1] | mipmap[1] | blur[1]
+	// diffuse[1] | useLight[1] | useOverlay[1] | writeMask[2] | transparency[3] | depthTest[4] | polygonOffset[1] | backfaceCulling[1] | mipmap[1] | blur[1]
 	public static int packProperties(Material material) {
 		int bits = 0;
 

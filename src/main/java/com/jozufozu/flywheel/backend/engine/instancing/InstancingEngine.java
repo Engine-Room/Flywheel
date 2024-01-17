@@ -28,14 +28,17 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 
 public class InstancingEngine extends AbstractEngine {
+	private final InstancingPrograms programs;
 	private final InstancedDrawManager drawManager = new InstancedDrawManager();
-
 	private final Flag flushFlag = new NamedFlag("flushed");
 
-	public InstancingEngine(int maxOriginDistance) {
+	public InstancingEngine(InstancingPrograms programs, int maxOriginDistance) {
 		super(maxOriginDistance);
+		programs.acquire();
+		this.programs = programs;
 	}
 
 	@Override
@@ -64,9 +67,10 @@ public class InstancingEngine extends AbstractEngine {
 		}
 
 		try (var state = GlStateTracker.getRestoreState()) {
+			GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
 			int prevActiveTexture = GlStateManager._getActiveTexture();
-			Minecraft.getInstance().gameRenderer.overlayTexture().setupOverlayColor();
-			Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
+			gameRenderer.overlayTexture().setupOverlayColor();
+			gameRenderer.lightTexture().turnOnLightLayer();
 
 			GlTextureUnit.T1.makeActive();
 			RenderSystem.bindTexture(RenderSystem.getShaderTexture(1));
@@ -75,8 +79,8 @@ public class InstancingEngine extends AbstractEngine {
 
 			render(drawSet);
 
-			Minecraft.getInstance().gameRenderer.overlayTexture().teardownOverlayColor();
-			Minecraft.getInstance().gameRenderer.lightTexture().turnOffLightLayer();
+			gameRenderer.overlayTexture().teardownOverlayColor();
+			gameRenderer.lightTexture().turnOffLightLayer();
 			GlStateManager._activeTexture(prevActiveTexture);
 		}
 	}
@@ -86,7 +90,7 @@ public class InstancingEngine extends AbstractEngine {
 		// Need to wait for flush before we can inspect instancer state.
 		executor.syncUntil(flushFlag::isRaised);
 
-		InstancedCrumbling.render(crumblingBlocks);
+		InstancedCrumbling.render(crumblingBlocks, programs);
 	}
 
 	@Override
@@ -97,6 +101,7 @@ public class InstancingEngine extends AbstractEngine {
 	@Override
 	public void delete() {
 		drawManager.delete();
+		programs.release();
 	}
 
 	private void render(InstancedDrawManager.DrawSet drawSet) {
@@ -110,8 +115,7 @@ public class InstancingEngine extends AbstractEngine {
 				continue;
 			}
 
-			var program = InstancingPrograms.get()
-					.get(shader.instanceType(), Contexts.DEFAULT);
+			var program = programs.get(shader.instanceType(), Contexts.DEFAULT);
 			program.bind();
 
 			UniformBuffer.get().sync();

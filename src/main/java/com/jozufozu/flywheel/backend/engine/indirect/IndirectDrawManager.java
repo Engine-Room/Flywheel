@@ -18,6 +18,7 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
@@ -34,9 +35,15 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> {
-	private final StagingBuffer stagingBuffer = new StagingBuffer();
+	private final IndirectPrograms programs;
+	private final StagingBuffer stagingBuffer;
 	private final Map<InstanceType<?>, IndirectCullingGroup<?>> cullingGroups = new HashMap<>();
 	private final GlBuffer crumblingDrawBuffer = new GlBuffer();
+
+	public IndirectDrawManager(IndirectPrograms programs) {
+		this.programs = programs;
+		stagingBuffer = new StagingBuffer(this.programs);
+	}
 
 	@Override
 	protected <I extends Instance> IndirectInstancer<?> create(InstanceType<I> type) {
@@ -52,7 +59,7 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 			return;
 		}
 
-		var group = (IndirectCullingGroup<I>) cullingGroups.computeIfAbsent(key.type(), IndirectCullingGroup::new);
+		var group = (IndirectCullingGroup<I>) cullingGroups.computeIfAbsent(key.type(), t -> new IndirectCullingGroup<>(t, programs));
 		group.add((IndirectInstancer<I>) instancer, model, stage);
 	}
 
