@@ -65,6 +65,12 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 
 	@Override
 	protected <I extends Instance> void add(InstancerKey<I> key, InstancedInstancer<?> instancer, Model model, RenderStage stage) {
+		if (model.meshes()
+				.isEmpty()) {
+			// Don't bother allocating resources for models with no meshes.
+			return;
+		}
+
 		instancer.init();
 
 		DrawSet drawSet = drawSets.computeIfAbsent(stage, DrawSet::new);

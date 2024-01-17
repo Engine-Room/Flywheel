@@ -30,8 +30,10 @@ ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.flywheel]]
-modId = "embeddium"
+modId = "rubidium"
 mandatory = false
-versionRange = "${embeddium_version_range}"
+# This should be a "breaks" dependency.
+# There's a mixin crash with Rubidum < 0.7.0
+versionRange = "[0.7.0,)"
 ordering = "NONE"
 side = "CLIENT"

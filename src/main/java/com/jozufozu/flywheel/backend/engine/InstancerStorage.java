@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
@@ -51,12 +52,31 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 				return (Instancer<I>) instancer;
 			}
 
+			maybeWarnEmptyModel(model);
+
 			// Create a new instancer and add it to the uninitialized list.
 			instancer = create(type);
 			instancers.put(key, instancer);
 			uninitializedInstancers.add(new UninitializedInstancer<>(key, instancer, model, stage));
 			return (Instancer<I>) instancer;
 		}
+	}
+
+	private static void maybeWarnEmptyModel(Model model) {
+		if (!model.meshes()
+				.isEmpty()) {
+			// All is good.
+			return;
+		}
+
+		StringBuilder builder = new StringBuilder();
+		builder.append("Creating an instancer for a model with no meshes! Stack trace:");
+		StackWalker.getInstance()
+				.walk(s -> s.skip(3)) // skip 3 to get back to the caller of InstancerProvider#instancer
+				.forEach(f -> builder.append("\n\t")
+						.append(f.toString()));
+
+		Flywheel.LOGGER.warn(builder.toString());
 	}
 
 	public void delete() {
