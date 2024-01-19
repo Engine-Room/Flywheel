@@ -12,7 +12,7 @@ import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 public class CompilationHarness<K> {
 	private final KeyCompiler<K> compiler;
 	private final SourceLoader sourceLoader;
-	private final ShaderCompiler shaderCompiler;
+	private final ShaderCache shaderCache;
 	private final ProgramLinker programLinker;
 	private final CompilerStats stats;
 
@@ -20,7 +20,7 @@ public class CompilationHarness<K> {
 		this.compiler = compiler;
 		stats = new CompilerStats(marker);
 		sourceLoader = new SourceLoader(sources, stats);
-		shaderCompiler = new ShaderCompiler(stats);
+		shaderCache = new ShaderCache(stats);
 		programLinker = new ProgramLinker(stats);
 	}
 
@@ -29,7 +29,7 @@ public class CompilationHarness<K> {
 		stats.start();
 		Map<K, GlProgram> out = new HashMap<>();
 		for (var key : keys) {
-			GlProgram glProgram = compiler.compile(key, sourceLoader, shaderCompiler, programLinker);
+			GlProgram glProgram = compiler.compile(key, sourceLoader, shaderCache, programLinker);
 			if (out != null && glProgram != null) {
 				out.put(key, glProgram);
 			} else {
@@ -47,10 +47,10 @@ public class CompilationHarness<K> {
 	}
 
 	public void delete() {
-		shaderCompiler.delete();
+		shaderCache.delete();
 	}
 
 	public interface KeyCompiler<K> {
-		@Nullable GlProgram compile(K key, SourceLoader loader, ShaderCompiler shaderCompiler, ProgramLinker programLinker);
+		@Nullable GlProgram compile(K key, SourceLoader loader, ShaderCache shaderCache, ProgramLinker programLinker);
 	}
 }

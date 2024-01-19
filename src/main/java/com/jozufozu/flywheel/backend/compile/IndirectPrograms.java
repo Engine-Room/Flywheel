@@ -18,6 +18,7 @@ import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.glsl.GlslVersion;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
+import com.jozufozu.flywheel.lib.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -74,6 +75,7 @@ public class IndirectPrograms extends AbstractPrograms {
 	private static CompilationHarness<InstanceType<?>> createCullingCompiler(ShaderSources sources) {
 		return CULL.program()
 				.link(CULL.shader(GlslVersion.V460, ShaderType.COMPUTE)
+						.nameMapper(instanceType -> "culling/" + ResourceUtil.toDebugFileNameNoExtension(instanceType.cullShader()))
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(CULL_SHADER_HEADER)
 						.withComponent(IndirectComponent::create)
@@ -86,6 +88,7 @@ public class IndirectPrograms extends AbstractPrograms {
 	private static CompilationHarness<ResourceLocation> createUtilCompiler(ShaderSources sources) {
 		return UTIL.program()
 				.link(UTIL.shader(GlslVersion.V460, ShaderType.COMPUTE)
+						.nameMapper(resourceLocation -> "utilities/" + ResourceUtil.toDebugFileNameNoExtension(resourceLocation))
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(s -> s))
 				.harness("utilities", sources);

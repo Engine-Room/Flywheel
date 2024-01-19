@@ -20,12 +20,4 @@ public enum ShaderType {
 		this.extension = extension;
 		this.glEnum = glEnum;
 	}
-
-	public String getDefineStatement() {
-		return "#define " + define + "\n";
-	}
-
-	public String getFileName(String baseName) {
-		return baseName + "." + extension;
-	}
 }

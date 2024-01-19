@@ -33,16 +33,16 @@ import net.minecraft.resources.ResourceLocation;
  * @param <K> The type of the key used to compile shaders.
  */
 public class Compile<K> {
-	public ShaderCompilerBuilder<K> shader(GlslVersion glslVersion, ShaderType shaderType) {
-		return new ShaderCompilerBuilder<>(glslVersion, shaderType);
+	public ShaderCompiler<K> shader(GlslVersion glslVersion, ShaderType shaderType) {
+		return new ShaderCompiler<>(glslVersion, shaderType);
 	}
 
-	public ProgramLinkBuilder<K> program() {
-		return new ProgramLinkBuilder<>();
+	public ProgramStitcher<K> program() {
+		return new ProgramStitcher<>();
 	}
 
-	public static class ProgramLinkBuilder<K> implements CompilationHarness.KeyCompiler<K> {
-		private final Map<ShaderType, ShaderCompilerBuilder<K>> compilers = new EnumMap<>(ShaderType.class);
+	public static class ProgramStitcher<K> implements CompilationHarness.KeyCompiler<K> {
+		private final Map<ShaderType, ShaderCompiler<K>> compilers = new EnumMap<>(ShaderType.class);
 		private BiConsumer<K, GlProgram> onLink = (k, p) -> {
 		};
 
@@ -50,7 +50,7 @@ public class Compile<K> {
 			return new CompilationHarness<>(marker, sources, this);
 		}
 
-		public ProgramLinkBuilder<K> link(ShaderCompilerBuilder<K> compilerBuilder) {
+		public ProgramStitcher<K> link(ShaderCompiler<K> compilerBuilder) {
 			if (compilers.containsKey(compilerBuilder.shaderType)) {
 				throw new IllegalArgumentException("Duplicate shader type: " + compilerBuilder.shaderType);
 			}
@@ -58,14 +58,14 @@ public class Compile<K> {
 			return this;
 		}
 
-		public ProgramLinkBuilder<K> then(BiConsumer<K, GlProgram> onLink) {
+		public ProgramStitcher<K> then(BiConsumer<K, GlProgram> onLink) {
 			this.onLink = onLink;
 			return this;
 		}
 
 		@Override
 		@Nullable
-		public GlProgram compile(K key, SourceLoader loader, ShaderCompiler shaderCompiler, ProgramLinker programLinker) {
+		public GlProgram compile(K key, SourceLoader loader, ShaderCache shaderCache, ProgramLinker programLinker) {
 			if (compilers.isEmpty()) {
 				throw new IllegalStateException("No shader compilers were added!");
 			}
@@ -73,8 +73,8 @@ public class Compile<K> {
 			List<GlShader> shaders = new ArrayList<>();
 
 			boolean ok = true;
-			for (ShaderCompilerBuilder<K> compiler : compilers.values()) {
-				var shader = compiler.compile(key, shaderCompiler, loader);
+			for (ShaderCompiler<K> compiler : compilers.values()) {
+				var shader = compiler.compile(key, shaderCache, loader);
 				if (shader == null) {
 					ok = false;
 				}
@@ -95,59 +95,65 @@ public class Compile<K> {
 		}
 	}
 
-	public static class ShaderCompilerBuilder<K> {
+	public static class ShaderCompiler<K> {
 		private final GlslVersion glslVersion;
 		private final ShaderType shaderType;
+		private final List<BiFunction<K, SourceLoader, SourceComponent>> fetchers = new ArrayList<>();
 		private Consumer<Compilation> compilationCallbacks = $ -> {
 		};
-		private final List<BiFunction<K, SourceLoader, SourceComponent>> fetchers = new ArrayList<>();
+		private Function<K, String> nameMapper = Object::toString;
 
-		public ShaderCompilerBuilder(GlslVersion glslVersion, ShaderType shaderType) {
+		public ShaderCompiler(GlslVersion glslVersion, ShaderType shaderType) {
 			this.glslVersion = glslVersion;
 			this.shaderType = shaderType;
 		}
 
-		public ShaderCompilerBuilder<K> with(BiFunction<K, SourceLoader, SourceComponent> fetch) {
+		public ShaderCompiler<K> nameMapper(Function<K, String> nameMapper) {
+			this.nameMapper = nameMapper;
+			return this;
+		}
+
+		public ShaderCompiler<K> with(BiFunction<K, SourceLoader, SourceComponent> fetch) {
 			fetchers.add(fetch);
 			return this;
 		}
 
-		public ShaderCompilerBuilder<K> withComponents(Collection<SourceComponent> components) {
+		public ShaderCompiler<K> withComponents(Collection<SourceComponent> components) {
 			components.forEach(this::withComponent);
 			return this;
 		}
 
-		public ShaderCompilerBuilder<K> withComponent(SourceComponent component) {
+		public ShaderCompiler<K> withComponent(SourceComponent component) {
 			return withComponent($ -> component);
 		}
 
-		public ShaderCompilerBuilder<K> withComponent(Function<K, @NotNull SourceComponent> sourceFetcher) {
+		public ShaderCompiler<K> withComponent(Function<K, @NotNull SourceComponent> sourceFetcher) {
 			return with((key, $) -> sourceFetcher.apply(key));
 		}
 
-		public ShaderCompilerBuilder<K> withResource(Function<K, @NotNull ResourceLocation> sourceFetcher) {
+		public ShaderCompiler<K> withResource(Function<K, @NotNull ResourceLocation> sourceFetcher) {
 			return with((key, loader) -> loader.find(sourceFetcher.apply(key)));
 		}
 
-		public ShaderCompilerBuilder<K> withResource(ResourceLocation resourceLocation) {
+		public ShaderCompiler<K> withResource(ResourceLocation resourceLocation) {
 			return withResource($ -> resourceLocation);
 		}
 
-		public ShaderCompilerBuilder<K> onCompile(Consumer<Compilation> cb) {
+		public ShaderCompiler<K> onCompile(Consumer<Compilation> cb) {
 			compilationCallbacks = compilationCallbacks.andThen(cb);
 			return this;
 		}
 
-		public ShaderCompilerBuilder<K> define(String def, int value) {
+		public ShaderCompiler<K> define(String def, int value) {
 			return onCompile(ctx -> ctx.define(def, String.valueOf(value)));
 		}
 
-		public ShaderCompilerBuilder<K> enableExtension(String extension) {
+		public ShaderCompiler<K> enableExtension(String extension) {
 			return onCompile(ctx -> ctx.enableExtension(extension));
 		}
 
 		@Nullable
-		private GlShader compile(K key, ShaderCompiler compiler, SourceLoader loader) {
+		private GlShader compile(K key, ShaderCache compiler, SourceLoader loader) {
 			var components = new ArrayList<SourceComponent>();
 			boolean ok = true;
 			for (var fetcher : fetchers) {
@@ -162,7 +168,7 @@ public class Compile<K> {
 				return null;
 			}
 
-			return compiler.compile(glslVersion, shaderType, compilationCallbacks, components);
+			return compiler.compile(glslVersion, shaderType, nameMapper.apply(key), compilationCallbacks, components);
 		}
 	}
 }

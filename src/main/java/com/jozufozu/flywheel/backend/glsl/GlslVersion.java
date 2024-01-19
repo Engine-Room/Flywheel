@@ -27,7 +27,4 @@ public enum GlslVersion {
 		return Integer.toString(version);
 	}
 
-	public String getVersionLine() {
-		return "#version " + version + '\n';
-	}
 }

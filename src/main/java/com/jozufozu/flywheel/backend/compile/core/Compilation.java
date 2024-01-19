@@ -29,30 +29,20 @@ public class Compilation {
 	public static final boolean DUMP_SHADER_SOURCE = System.getProperty("flw.dumpShaderSource") != null;
 
 	private final List<SourceFile> files = new ArrayList<>();
-	private final StringBuilder generatedSource;
-	private final StringBuilder fullSource;
-	private final GlslVersion glslVersion;
-	private final ShaderType shaderType;
+	private final StringBuilder generatedSource = new StringBuilder();
+	private final StringBuilder fullSource = new StringBuilder();
 	private int generatedLines = 0;
 
-	public Compilation(GlslVersion glslVersion, ShaderType shaderType) {
-		this.glslVersion = glslVersion;
-		this.shaderType = shaderType;
-
-		generatedSource = new StringBuilder();
-		fullSource = new StringBuilder(glslVersion.getVersionLine()).append(shaderType.getDefineStatement()).append('\n');
-	}
-
 	@NotNull
-	public ShaderResult compile() {
+	public ShaderResult compile(ShaderType shaderType, String name) {
 		int handle = GL20.glCreateShader(shaderType.glEnum);
 		var source = fullSource.toString();
 
 		GlCompat.safeShaderSource(handle, source);
 		GL20.glCompileShader(handle);
 
-		var shaderName = shaderType.name + glslVersion + '_' + Integer.toUnsignedString(source.hashCode());
-		dumpSource(source, shaderType.getFileName(shaderName));
+		var shaderName = name + "." + shaderType.extension;
+		dumpSource(source, shaderName);
 
 		var infoLog = GL20.glGetShaderInfoLog(handle);
 
@@ -62,6 +52,12 @@ public class Compilation {
 
 		GL20.glDeleteShader(handle);
 		return ShaderResult.failure(new FailedCompilation(shaderName, files, generatedSource.toString(), source, infoLog));
+	}
+
+	public void version(GlslVersion version) {
+		fullSource.append("#version ")
+				.append(version.version)
+				.append('\n');
 	}
 
 	public void enableExtension(String ext) {
@@ -75,6 +71,12 @@ public class Compilation {
 				.append(key)
 				.append(' ')
 				.append(value)
+				.append('\n');
+	}
+
+	public void define(String key) {
+		fullSource.append("#define ")
+				.append(key)
 				.append('\n');
 	}
 
@@ -117,9 +119,10 @@ public class Compilation {
 			return;
 		}
 
-		File dir = new File(Minecraft.getInstance().gameDirectory, "flywheel_sources");
-		dir.mkdirs();
-		File file = new File(dir, fileName);
+		File file = new File(new File(Minecraft.getInstance().gameDirectory, "flywheel_sources"), fileName);
+		// mkdirs of the parent so we don't create a directory named by the leaf file we want to write
+		file.getParentFile()
+				.mkdirs();
 		try (FileWriter writer = new FileWriter(file)) {
 			writer.write(source);
 		} catch (Exception e) {
