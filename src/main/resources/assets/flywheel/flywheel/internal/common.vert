@@ -15,6 +15,6 @@ void _flw_main(in FlwInstance instance) {
 
     _flw_vertexDiffuse = uint(flw_vertexDiffuse);
 
-    flw_distance = fogDistance(flw_vertexPos.xyz, flywheel.cameraPos.xyz, flywheel.fogShape);
-    gl_Position = flywheel.viewProjection * flw_vertexPos;
+    flw_distance = fogDistance(flw_vertexPos.xyz, flw_cameraPos.xyz, flw_fogShape);
+    gl_Position = flw_viewProjection * flw_vertexPos;
 }

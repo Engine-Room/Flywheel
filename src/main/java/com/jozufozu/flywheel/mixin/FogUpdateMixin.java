@@ -6,7 +6,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.lib.uniform.FlwShaderUniforms;
+import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
+import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 
 import net.minecraft.client.renderer.FogRenderer;
 
@@ -14,7 +15,10 @@ import net.minecraft.client.renderer.FogRenderer;
 abstract class FogUpdateMixin {
 	@Unique
 	private static void flywheel$updateFog() {
-		FlwShaderUniforms.fogUpdate = true;
+		try (var restoreState = GlStateTracker.getRestoreState()) {
+			Uniforms.fog()
+					.update();
+		}
 	}
 
 	@Inject(method = "setupNoFog()V", at = @At("RETURN"))

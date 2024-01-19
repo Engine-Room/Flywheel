@@ -24,7 +24,7 @@ import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
-import com.jozufozu.flywheel.backend.engine.UniformBuffer;
+import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.Driver;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
@@ -100,7 +100,7 @@ public class IndirectCullingGroup<I extends Instance> {
 			return;
 		}
 
-		UniformBuffer.get().sync();
+		Uniforms.bindFrame();
 		cullProgram.bind();
 		buffers.bindForCompute();
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -184,7 +184,7 @@ public class IndirectCullingGroup<I extends Instance> {
 			return;
 		}
 
-		UniformBuffer.get().sync();
+		Uniforms.bindForDraw();
 		drawProgram.bind();
 		meshPool.bindForDraw();
 		buffers.bindForDraw();
@@ -204,8 +204,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		program.bind();
 
-		UniformBuffer.get()
-				.sync();
+		Uniforms.bindForDraw();
 		meshPool.bindForDraw();
 		buffers.bindForCrumbling();
 

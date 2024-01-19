@@ -6,14 +6,12 @@ import java.util.Set;
 import org.jetbrains.annotations.Unmodifiable;
 
 import com.jozufozu.flywheel.api.registry.Registry;
-import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import it.unimi.dsi.fastutil.objects.ObjectSets;
-import net.minecraft.resources.ResourceLocation;
 
 public class RegistryImpl<T> implements Registry<T> {
 	private static final ObjectList<RegistryImpl<?>> ALL = new ObjectArrayList<>();
@@ -29,20 +27,6 @@ public class RegistryImpl<T> implements Registry<T> {
 
 	public static <T> Registry<T> create() {
 		return new RegistryImpl<>();
-	}
-
-	public static <T extends ShaderUniforms> Registry<T> createForShaderUniforms() {
-		return new RegistryImpl<>() {
-			private final ObjectSet<ResourceLocation> files = new ObjectOpenHashSet<>();
-
-			@Override
-			public void register(T object) {
-				if (!files.add(object.uniformShader())) {
-					throw new IllegalArgumentException();
-				}
-				super.register(object);
-			}
-		};
 	}
 
 	@Override

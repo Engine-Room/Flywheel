@@ -10,7 +10,6 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.compile.component.IndirectComponent;
-import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.backend.compile.core.CompilationHarness;
 import com.jozufozu.flywheel.backend.compile.core.Compile;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
@@ -45,11 +44,11 @@ public class IndirectPrograms extends AbstractPrograms {
 		this.scatter = scatter;
 	}
 
-	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
+	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
 		IndirectPrograms newInstance = null;
 
-		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, uniformComponent, vertexComponents, fragmentComponents);
-		var cullingCompiler = createCullingCompiler(uniformComponent, sources);
+		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, vertexComponents, fragmentComponents);
+		var cullingCompiler = createCullingCompiler(sources);
 		var applyCompiler = createUtilCompiler(sources);
 
 		try {
@@ -71,15 +70,14 @@ public class IndirectPrograms extends AbstractPrograms {
 		setInstance(newInstance);
 	}
 
-	private static CompilationHarness<InstanceType<?>> createCullingCompiler(UniformComponent uniformComponent, ShaderSources sources) {
+	private static CompilationHarness<InstanceType<?>> createCullingCompiler(ShaderSources sources) {
 		return CULL.program()
 				.link(CULL.shader(GlslVersion.V460, ShaderType.COMPUTE)
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
-						.withComponent(uniformComponent)
 						.withComponent(IndirectComponent::create)
 						.withResource(InstanceType::cullShader)
 						.withResource(CULL_SHADER_MAIN))
-				.then((key, program) -> program.setUniformBlockBinding("FlwUniforms", 0))
+				.then((key, program) -> program.setUniformBlockBinding("_FlwFrameUniforms", 0))
 				.harness(sources);
 	}
 

@@ -4,7 +4,7 @@ import java.util.function.BiConsumer;
 
 import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.api.backend.BackendManager;
-import com.jozufozu.flywheel.lib.uniform.FlwShaderUniforms;
+import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -135,18 +135,18 @@ public class FlwCommands {
 		command.then(Commands.literal("debugFrustum")
 				.then(Commands.literal("pause")
 						.executes(context -> {
-							FlwShaderUniforms.frustumPaused = true;
+							Uniforms.frustumPaused = true;
 							return 1;
 						}))
 				.then(Commands.literal("unpause")
 						.executes(context -> {
-							FlwShaderUniforms.frustumPaused = false;
+							Uniforms.frustumPaused = false;
 							return 1;
 						}))
 				.then(Commands.literal("capture")
 						.executes(context -> {
-							FlwShaderUniforms.frustumPaused = true;
-							FlwShaderUniforms.frustumCapture = true;
+							Uniforms.frustumPaused = true;
+							Uniforms.frustumCapture = true;
 							return 1;
 						})));
 

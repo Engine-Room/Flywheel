@@ -9,7 +9,6 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
@@ -24,10 +23,10 @@ public class InstancingPrograms extends AbstractPrograms {
 		this.pipeline = pipeline;
 	}
 
-	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, UniformComponent uniformComponent, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
+	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
 		InstancingPrograms newInstance = null;
 
-		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCED_ARRAYS, uniformComponent, vertexComponents, fragmentComponents);
+		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCED_ARRAYS, vertexComponents, fragmentComponents);
 
 		try {
 			var pipelineResult = pipelineCompiler.compileAndReportErrors(pipelineKeys);
