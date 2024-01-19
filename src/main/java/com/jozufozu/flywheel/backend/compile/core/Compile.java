@@ -46,8 +46,8 @@ public class Compile<K> {
 		private BiConsumer<K, GlProgram> onLink = (k, p) -> {
 		};
 
-		public CompilationHarness<K> harness(ShaderSources sources) {
-			return new CompilationHarness<>(sources, this);
+		public CompilationHarness<K> harness(String marker, ShaderSources sources) {
+			return new CompilationHarness<>(marker, sources, this);
 		}
 
 		public ProgramLinkBuilder<K> link(ShaderCompilerBuilder<K> compilerBuilder) {

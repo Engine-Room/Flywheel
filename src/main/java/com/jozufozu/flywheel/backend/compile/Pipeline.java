@@ -9,7 +9,8 @@ import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 import net.minecraft.resources.ResourceLocation;
 
 public record Pipeline(GlslVersion glslVersion, ResourceLocation vertexMain, ResourceLocation fragmentMain,
-					   ResourceLocation vertexApiImpl, ResourceLocation fragmentApiImpl, InstanceAssembler assembler) {
+					   ResourceLocation vertexApiImpl, ResourceLocation fragmentApiImpl, InstanceAssembler assembler,
+					   String compilerMarker) {
 	@FunctionalInterface
 	public interface InstanceAssembler {
 		/**
@@ -34,6 +35,7 @@ public record Pipeline(GlslVersion glslVersion, ResourceLocation vertexMain, Res
 		private ResourceLocation vertexApiImpl;
 		private ResourceLocation fragmentApiImpl;
 		private InstanceAssembler assembler;
+		private String compilerMarker;
 
 		public Builder glslVersion(GlslVersion glslVersion) {
 			this.glslVersion = glslVersion;
@@ -65,6 +67,11 @@ public record Pipeline(GlslVersion glslVersion, ResourceLocation vertexMain, Res
 			return this;
 		}
 
+		public Builder compilerMarker(String compilerMarker) {
+			this.compilerMarker = compilerMarker;
+			return this;
+		}
+
 		public Pipeline build() {
 			Objects.requireNonNull(glslVersion);
 			Objects.requireNonNull(vertexMain);
@@ -72,7 +79,8 @@ public record Pipeline(GlslVersion glslVersion, ResourceLocation vertexMain, Res
 			Objects.requireNonNull(vertexApiImpl);
 			Objects.requireNonNull(fragmentApiImpl);
 			Objects.requireNonNull(assembler);
-			return new Pipeline(glslVersion, vertexMain, fragmentMain, vertexApiImpl, fragmentApiImpl, assembler);
+			Objects.requireNonNull(compilerMarker);
+			return new Pipeline(glslVersion, vertexMain, fragmentMain, vertexApiImpl, fragmentApiImpl, assembler, compilerMarker);
 		}
 	}
 }

@@ -7,6 +7,7 @@ import com.jozufozu.flywheel.backend.glsl.GlslVersion;
 
 public final class Pipelines {
 	public static final Pipeline INSTANCED_ARRAYS = Pipeline.builder()
+			.compilerMarker("instancing")
 			.glslVersion(GlslVersion.V330)
 			.vertexMain(Flywheel.rl("internal/instancing/main.vert"))
 			.fragmentMain(Flywheel.rl("internal/instancing/main.frag"))
@@ -15,6 +16,7 @@ public final class Pipelines {
 			.assembler(InstancedArraysComponent::new)
 			.build();
 	public static final Pipeline INDIRECT = Pipeline.builder()
+			.compilerMarker("indirect")
 			.glslVersion(GlslVersion.V460)
 			.vertexMain(Flywheel.rl("internal/indirect/main.vert"))
 			.fragmentMain(Flywheel.rl("internal/indirect/main.frag"))

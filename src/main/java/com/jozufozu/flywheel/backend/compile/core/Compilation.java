@@ -8,7 +8,7 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL20;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.backend.compile.FlwPrograms;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
 import com.jozufozu.flywheel.backend.gl.shader.GlShader;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
@@ -123,7 +123,7 @@ public class Compilation {
 		try (FileWriter writer = new FileWriter(file)) {
 			writer.write(source);
 		} catch (Exception e) {
-			Flywheel.LOGGER.error("Could not dump source.", e);
+			FlwPrograms.LOGGER.error("Could not dump source.", e);
 		}
 	}
 

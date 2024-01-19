@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jozufozu.flywheel.api.event.EndClientResourceReloadEvent;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
@@ -32,7 +33,6 @@ import com.jozufozu.flywheel.lib.util.LevelAttached;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 import com.jozufozu.flywheel.lib.util.StringUtil;
 import com.jozufozu.flywheel.vanilla.VanillaVisuals;
-import com.mojang.logging.LogUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
@@ -56,7 +56,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 @Mod(Flywheel.ID)
 public class Flywheel {
 	public static final String ID = "flywheel";
-	public static final Logger LOGGER = LogUtils.getLogger();
+	public static final Logger LOGGER = LoggerFactory.getLogger(ID);
 	private static ArtifactVersion version;
 
 	public Flywheel() {

@@ -38,6 +38,6 @@ public class PipelineCompiler {
 					program.setUniformBlockBinding("_FlwFrameUniforms", 0);
 					program.setUniformBlockBinding("_FlwFogUniforms", 1);
 				})
-				.harness(sources);
+				.harness(pipeline.compilerMarker(), sources);
 	}
 }
