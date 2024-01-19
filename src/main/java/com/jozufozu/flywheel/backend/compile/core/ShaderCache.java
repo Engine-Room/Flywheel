@@ -15,36 +15,38 @@ import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.glsl.GlslVersion;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 
-public class ShaderCompiler {
-	private final Map<ShaderKey, ShaderResult> shaderCache = new HashMap<>();
+public class ShaderCache {
+	private final Map<ShaderKey, ShaderResult> inner = new HashMap<>();
 	private final CompilerStats stats;
 
-	public ShaderCompiler(CompilerStats stats) {
+	public ShaderCache(CompilerStats stats) {
 		this.stats = stats;
 	}
 
 	@Nullable
-	public GlShader compile(GlslVersion glslVersion, ShaderType shaderType, Consumer<Compilation> callback, List<SourceComponent> sourceComponents) {
+	public GlShader compile(GlslVersion glslVersion, ShaderType shaderType, String name, Consumer<Compilation> callback, List<SourceComponent> sourceComponents) {
 		var key = new ShaderKey(glslVersion, shaderType, sourceComponents);
-		var cached = shaderCache.get(key);
+		var cached = inner.get(key);
 		if (cached != null) {
 			return cached.unwrap();
 		}
 
-		Compilation ctx = new Compilation(glslVersion, shaderType);
+		Compilation ctx = new Compilation();
+		ctx.version(glslVersion);
+		ctx.define(shaderType.define);
 
 		callback.accept(ctx);
 
 		expand(sourceComponents, ctx::appendComponent);
 
-		ShaderResult out = ctx.compile();
-		shaderCache.put(key, out);
+		ShaderResult out = ctx.compile(shaderType, name);
+		inner.put(key, out);
 		stats.shaderResult(out);
 		return out.unwrap();
 	}
 
 	public void delete() {
-		shaderCache.values()
+		inner.values()
 				.stream()
 				.map(ShaderResult::unwrap)
 				.filter(Objects::nonNull)
