@@ -7,14 +7,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.backend.compile.FlwPrograms;
 import com.jozufozu.flywheel.backend.glsl.LoadError;
 import com.jozufozu.flywheel.backend.glsl.LoadResult;
 import com.jozufozu.flywheel.backend.glsl.error.ErrorBuilder;
 import com.jozufozu.flywheel.lib.util.StringUtil;
 
 public class CompilerStats {
+	private final Marker marker;
 	private long compileStart;
 
 	private final Set<LoadError> loadErrors = new HashSet<>();
@@ -25,6 +28,10 @@ public class CompilerStats {
 	private int shaderCount = 0;
 	private int programCount = 0;
 
+	public CompilerStats(String marker) {
+		this.marker = MarkerFactory.getMarker(marker);
+	}
+
 	public void start() {
 		compileStart = System.nanoTime();
 	}
@@ -33,14 +40,14 @@ public class CompilerStats {
 		long compileEnd = System.nanoTime();
 		var elapsed = StringUtil.formatTime(compileEnd - compileStart);
 
-		Flywheel.LOGGER.info("Compiled " + shaderCount + " shaders (with " + shaderErrors.size() + " compile errors) " + "and " + programCount + " programs (with " + programErrors.size() + " link errors) in " + elapsed);
+		FlwPrograms.LOGGER.info(marker, "Compiled %d programs (with %d link errors) and %d shaders (with %d compile errors) in %s".formatted(programCount, programErrors.size(), shaderCount, shaderErrors.size(), elapsed));
 	}
 
 	public boolean errored() {
 		return errored;
 	}
 
-	public String generateErrorLog() {
+	public void emitErrorLog() {
 		String out = "";
 
 		if (!loadErrors.isEmpty()) {
@@ -55,7 +62,7 @@ public class CompilerStats {
 			out += "\nProgram link errors:\n" + linkErrors();
 		}
 
-		return out;
+		FlwPrograms.LOGGER.error(marker, out);
 	}
 
 	private String compileErrors() {

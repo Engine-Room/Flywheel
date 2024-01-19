@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 
@@ -15,10 +14,11 @@ public class CompilationHarness<K> {
 	private final SourceLoader sourceLoader;
 	private final ShaderCompiler shaderCompiler;
 	private final ProgramLinker programLinker;
-	private final CompilerStats stats = new CompilerStats();
+	private final CompilerStats stats;
 
-	public CompilationHarness(ShaderSources sources, KeyCompiler<K> compiler) {
+	public CompilationHarness(String marker, ShaderSources sources, KeyCompiler<K> compiler) {
 		this.compiler = compiler;
+		stats = new CompilerStats(marker);
 		sourceLoader = new SourceLoader(sources, stats);
 		shaderCompiler = new ShaderCompiler(stats);
 		programLinker = new ProgramLinker(stats);
@@ -39,7 +39,7 @@ public class CompilationHarness<K> {
 		stats.finish();
 
 		if (stats.errored()) {
-			Flywheel.LOGGER.error(stats.generateErrorLog());
+			stats.emitErrorLog();
 			return null;
 		}
 

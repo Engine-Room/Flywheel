@@ -6,7 +6,6 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
@@ -35,7 +34,7 @@ public class InstancingPrograms extends AbstractPrograms {
 				newInstance = new InstancingPrograms(pipelineResult);
 			}
 		} catch (Throwable t) {
-			Flywheel.LOGGER.error("Failed to compile instancing programs", t);
+			FlwPrograms.LOGGER.error("Failed to compile instancing programs", t);
 		}
 
 		pipelineCompiler.delete();

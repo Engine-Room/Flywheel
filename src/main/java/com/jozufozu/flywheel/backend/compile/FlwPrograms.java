@@ -2,6 +2,9 @@ package com.jozufozu.flywheel.backend.compile;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
@@ -19,12 +22,14 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
 public final class FlwPrograms {
+	public static final Logger LOGGER = LoggerFactory.getLogger(Flywheel.ID + "/compile");
+
 	private FlwPrograms() {
 	}
 
 	private static void reload(ResourceManager resourceManager) {
 		var sources = new ShaderSources(resourceManager);
-		var preLoadStats = new CompilerStats();
+		var preLoadStats = new CompilerStats("Preload");
 		var loadChecker = new SourceLoader(sources, preLoadStats);
 
 		var pipelineKeys = createPipelineKeys();
@@ -35,7 +40,7 @@ public final class FlwPrograms {
 		IndirectPrograms.reload(sources, pipelineKeys, vertexComponents, fragmentComponents);
 
 		if (preLoadStats.errored()) {
-			Flywheel.LOGGER.error(preLoadStats.generateErrorLog());
+			preLoadStats.emitErrorLog();
 		}
 	}
 

@@ -61,7 +61,7 @@ public class IndirectPrograms extends AbstractPrograms {
 				newInstance = new IndirectPrograms(pipelineResult, cullingResult, utils.get(APPLY_SHADER_MAIN), utils.get(SCATTER_SHADER_MAIN));
 			}
 		} catch (Throwable t) {
-			Flywheel.LOGGER.error("Failed to compile indirect programs", t);
+			FlwPrograms.LOGGER.error("Failed to compile indirect programs", t);
 		}
 
 		pipelineCompiler.delete();
@@ -80,7 +80,7 @@ public class IndirectPrograms extends AbstractPrograms {
 						.withResource(InstanceType::cullShader)
 						.withResource(CULL_SHADER_MAIN))
 				.then((key, program) -> program.setUniformBlockBinding("_FlwFrameUniforms", 0))
-				.harness(sources);
+				.harness("culling", sources);
 	}
 
 	private static CompilationHarness<ResourceLocation> createUtilCompiler(ShaderSources sources) {
@@ -88,7 +88,7 @@ public class IndirectPrograms extends AbstractPrograms {
 				.link(UTIL.shader(GlslVersion.V460, ShaderType.COMPUTE)
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(s -> s))
-				.harness(sources);
+				.harness("utilities", sources);
 	}
 
 	private static ImmutableList<InstanceType<?>> createCullingKeys() {
