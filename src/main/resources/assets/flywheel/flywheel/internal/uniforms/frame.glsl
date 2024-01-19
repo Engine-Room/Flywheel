@@ -10,8 +10,14 @@ struct FrustumPlanes {
 };
 
 layout(std140) uniform _FlwFrameUniforms {
+    FrustumPlanes flw_frustumPlanes;
     mat4 flw_viewProjection;
     vec4 flw_cameraPos;
-    int flw_constantAmbientLight;
-    FrustumPlanes flw_frustumPlanes;
+    uint flw_constantAmbientLight;
+
+    uint flw_ticks;
+    float flw_partialTick;
+
+    float flw_renderTicks;
+    float flw_renderSeconds;
 };

@@ -11,15 +11,15 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 
 public class FrameUniforms implements UniformProvider {
-	public static final int SIZE = 192;
+	public static final int SIZE = 194;
 
 	private RenderContext context;
+
+	private final Matrix4f viewProjection = new Matrix4f();
 
 	public int byteSize() {
 		return SIZE;
 	}
-
-	private final Matrix4f viewProjection = new Matrix4f();
 
 	public void setContext(RenderContext context) {
 		this.context = context;
@@ -39,17 +39,29 @@ public class FrameUniforms implements UniformProvider {
 		viewProjection.set(context.viewProjection());
 		viewProjection.translate(-camX, -camY, -camZ);
 
-		MatrixMath.writeUnsafe(viewProjection, ptr);
-		MemoryUtil.memPutFloat(ptr + 64, camX);
-		MemoryUtil.memPutFloat(ptr + 68, camY);
-		MemoryUtil.memPutFloat(ptr + 72, camZ);
-		MemoryUtil.memPutFloat(ptr + 76, 0f); // vec4 alignment
-		MemoryUtil.memPutInt(ptr + 80, getConstantAmbientLightFlag(context));
-
 		if (!Uniforms.frustumPaused || Uniforms.frustumCapture) {
-			MatrixMath.writePackedFrustumPlanes(ptr + 96, viewProjection);
+			MatrixMath.writePackedFrustumPlanes(ptr, viewProjection);
 			Uniforms.frustumCapture = false;
 		}
+
+		MatrixMath.writeUnsafe(viewProjection, ptr + 96);
+		MemoryUtil.memPutFloat(ptr + 160, camX);
+		MemoryUtil.memPutFloat(ptr + 164, camY);
+		MemoryUtil.memPutFloat(ptr + 168, camZ);
+		MemoryUtil.memPutFloat(ptr + 172, 0f); // empty component of vec4 because we don't trust std140
+		MemoryUtil.memPutInt(ptr + 176, getConstantAmbientLightFlag(context));
+
+		int ticks = context.renderer()
+				.getTicks();
+		float partialTick = context.partialTick();
+		float renderTicks = ticks + partialTick;
+		float renderSeconds = renderTicks / 20f;
+
+		MemoryUtil.memPutInt(ptr + 180, ticks);
+		MemoryUtil.memPutFloat(ptr + 184, partialTick);
+		MemoryUtil.memPutFloat(ptr + 188, renderTicks);
+		MemoryUtil.memPutFloat(ptr + 192, renderSeconds);
+
 	}
 
 	private static int getConstantAmbientLightFlag(RenderContext context) {
