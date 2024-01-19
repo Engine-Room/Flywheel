@@ -31,7 +31,7 @@ void _flw_main() {
 
     if (flw_fragDiffuse) {
         float diffuseFactor;
-        if (flywheel.constantAmbientLight == 1) {
+        if (flw_constantAmbientLight == 1) {
             diffuseFactor = diffuseNether(flw_vertexNormal);
         } else {
             diffuseFactor = diffuse(flw_vertexNormal);

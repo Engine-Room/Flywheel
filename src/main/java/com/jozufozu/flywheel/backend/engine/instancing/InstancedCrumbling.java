@@ -13,7 +13,7 @@ import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
-import com.jozufozu.flywheel.backend.engine.UniformBuffer;
+import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial;
@@ -51,7 +51,7 @@ public class InstancedCrumbling {
 				var program = programs.get(shader.instanceType(), Contexts.CRUMBLING);
 				program.bind();
 
-				UniformBuffer.get().sync();
+				Uniforms.bindForDraw();
 				InstancingEngine.uploadMaterialUniform(program, crumblingMaterial);
 
 				for (Int2ObjectMap.Entry<List<Runnable>> progressEntry : byProgress.int2ObjectEntrySet()) {

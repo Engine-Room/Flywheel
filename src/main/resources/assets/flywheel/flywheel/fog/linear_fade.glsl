@@ -9,5 +9,5 @@ vec4 linearFogFade(vec4 color, float distance, float fogStart, float fogEnd) {
 }
 
 vec4 flw_fogFilter(vec4 color) {
-    return linearFogFade(color, flw_distance, flywheel.fogRange.x, flywheel.fogRange.y);
+    return linearFogFade(color, flw_distance, flw_fogRange.x, flw_fogRange.y);
 }

@@ -1,6 +1,7 @@
 #include "flywheel:internal/indirect/buffers.glsl"
 #include "flywheel:internal/indirect/model_descriptor.glsl"
 #include "flywheel:internal/indirect/object.glsl"
+#include "flywheel:internal/uniforms/frame.glsl"
 
 layout(local_size_x = _FLW_SUBGROUP_SIZE) in;
 
@@ -23,8 +24,8 @@ layout(std430, binding = _FLW_MODEL_BUFFER_BINDING) restrict buffer ModelBuffer 
 // com.jozufozu.flywheel.lib.math.MatrixMath.writePackedFrustumPlanes
 // org.joml.FrustumIntersection.testSphere
 bool _flw_testSphere(vec3 center, float radius) {
-    bvec4 xyInside = greaterThanEqual(fma(flywheel.planes.xyX, center.xxxx, fma(flywheel.planes.xyY, center.yyyy, fma(flywheel.planes.xyZ, center.zzzz, flywheel.planes.xyW))), -radius.xxxx);
-    bvec2 zInside = greaterThanEqual(fma(flywheel.planes.zX, center.xx, fma(flywheel.planes.zY, center.yy, fma(flywheel.planes.zZ, center.zz, flywheel.planes.zW))), -radius.xx);
+    bvec4 xyInside = greaterThanEqual(fma(flw_frustumPlanes.xyX, center.xxxx, fma(flw_frustumPlanes.xyY, center.yyyy, fma(flw_frustumPlanes.xyZ, center.zzzz, flw_frustumPlanes.xyW))), -radius.xxxx);
+    bvec2 zInside = greaterThanEqual(fma(flw_frustumPlanes.zX, center.xx, fma(flw_frustumPlanes.zY, center.yy, fma(flw_frustumPlanes.zZ, center.zz, flw_frustumPlanes.zW))), -radius.xx);
 
     return all(xyInside) && all(zInside);
 }

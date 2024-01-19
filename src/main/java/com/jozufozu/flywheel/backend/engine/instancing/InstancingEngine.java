@@ -16,7 +16,7 @@ import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialEncoder;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
-import com.jozufozu.flywheel.backend.engine.UniformBuffer;
+import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
@@ -46,8 +46,9 @@ public class InstancingEngine extends AbstractEngine {
 		return SyncedPlan.of(this::flushDrawManager);
 	}
 
-	private void flushDrawManager() {
+	private void flushDrawManager(RenderContext ctx) {
 		try (var restoreState = GlStateTracker.getRestoreState()) {
+			Uniforms.updateContext(ctx);
 			drawManager.flush();
 		}
 		flushFlag.raise();
@@ -118,7 +119,7 @@ public class InstancingEngine extends AbstractEngine {
 			var program = programs.get(shader.instanceType(), Contexts.DEFAULT);
 			program.bind();
 
-			UniformBuffer.get().sync();
+			Uniforms.bindForDraw();
 			uploadMaterialUniform(program, shader.material());
 
 			MaterialRenderState.setup(shader.material());

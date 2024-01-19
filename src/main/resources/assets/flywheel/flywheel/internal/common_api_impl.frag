@@ -1,4 +1,6 @@
 #include "flywheel:internal/material.glsl"
+#include "flywheel:internal/uniforms/frame.glsl"
+#include "flywheel:internal/uniforms/fog.glsl"
 
 in vec4 flw_vertexPos;
 in vec4 flw_vertexColor;

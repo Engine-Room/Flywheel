@@ -10,7 +10,7 @@ import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.backend.Backends;
 import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.FlwPrograms;
-import com.jozufozu.flywheel.backend.engine.UniformBuffer;
+import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.config.BackendArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
@@ -95,7 +95,7 @@ public class Flywheel {
 
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);
 
-		forgeEventBus.addListener(UniformBuffer::onReloadLevelRenderer);
+		forgeEventBus.addListener(Uniforms::onReloadLevelRenderer);
 
 		forgeEventBus.addListener(LightUpdater::onClientTick);
 		forgeEventBus.addListener((LevelEvent.Unload e) -> LevelAttached.onUnloadLevel(e));

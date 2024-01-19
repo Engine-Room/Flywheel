@@ -11,6 +11,7 @@ import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
+import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.task.Flag;
@@ -39,8 +40,9 @@ public class IndirectEngine extends AbstractEngine {
 		return SyncedPlan.of(this::flushDrawManager);
 	}
 
-	private void flushDrawManager() {
+	private void flushDrawManager(RenderContext ctx) {
 		try (var state = GlStateTracker.getRestoreState()) {
+			Uniforms.updateContext(ctx);
 			drawManager.flush();
 		}
 		flushFlag.raise();

@@ -6,10 +6,8 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.jozufozu.flywheel.api.uniform.ShaderUniforms;
 import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.component.UberShaderComponent;
-import com.jozufozu.flywheel.backend.compile.component.UniformComponent;
 import com.jozufozu.flywheel.backend.compile.core.CompilerStats;
 import com.jozufozu.flywheel.backend.compile.core.SourceLoader;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
@@ -30,12 +28,11 @@ public final class FlwPrograms {
 		var loadChecker = new SourceLoader(sources, preLoadStats);
 
 		var pipelineKeys = createPipelineKeys();
-		var uniformComponent = createUniformComponent(loadChecker);
 		List<SourceComponent> vertexComponents = List.of(createVertexMaterialComponent(loadChecker));
 		List<SourceComponent> fragmentComponents = List.of(createFragmentMaterialComponent(loadChecker), createFogComponent(loadChecker), createCutoutComponent(loadChecker));
 
-		InstancingPrograms.reload(sources, pipelineKeys, uniformComponent, vertexComponents, fragmentComponents);
-		IndirectPrograms.reload(sources, pipelineKeys, uniformComponent, vertexComponents, fragmentComponents);
+		InstancingPrograms.reload(sources, pipelineKeys, vertexComponents, fragmentComponents);
+		IndirectPrograms.reload(sources, pipelineKeys, vertexComponents, fragmentComponents);
 
 		if (preLoadStats.errored()) {
 			Flywheel.LOGGER.error(preLoadStats.generateErrorLog());
@@ -93,15 +90,6 @@ public final class FlwPrograms {
 						.arg("vec4", "color")
 						.build(), GlslExpr.boolLiteral(false))
 				.switchOn(GlslExpr.variable("_flw_uberCutoutIndex"))
-				.build(loadChecker);
-	}
-
-	private static UniformComponent createUniformComponent(SourceLoader loadChecker) {
-		return UniformComponent.builder(Flywheel.rl("uniforms"))
-				.sources(ShaderUniforms.REGISTRY.getAll()
-						.stream()
-						.map(ShaderUniforms::uniformShader)
-						.toList())
 				.build(loadChecker);
 	}
 
