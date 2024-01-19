@@ -5,5 +5,5 @@ void flw_transformBoundingSphere(in FlwInstance i, inout vec3 center, inout floa
     vec3 pivot = i.pivot;
     vec3 pos = i.position;
 
-    center = rotateVertexByQuat(center - pivot, rotation) + pivot + pos;
+    center = rotateByQuaternion(center - pivot, rotation) + pivot + pos;
 }
