@@ -22,6 +22,7 @@ import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 import net.minecraft.resources.ResourceLocation;
 
 public class IndirectPrograms extends AbstractPrograms {
+	private static final ResourceLocation CULL_SHADER_HEADER = Flywheel.rl("internal/indirect/cull_header.glsl");
 	private static final ResourceLocation CULL_SHADER_MAIN = Flywheel.rl("internal/indirect/cull.glsl");
 	private static final ResourceLocation APPLY_SHADER_MAIN = Flywheel.rl("internal/indirect/apply.glsl");
 	private static final ResourceLocation SCATTER_SHADER_MAIN = Flywheel.rl("internal/indirect/scatter.glsl");
@@ -74,6 +75,7 @@ public class IndirectPrograms extends AbstractPrograms {
 		return CULL.program()
 				.link(CULL.shader(GlslVersion.V460, ShaderType.COMPUTE)
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
+						.withResource(CULL_SHADER_HEADER)
 						.withComponent(IndirectComponent::create)
 						.withResource(InstanceType::cullShader)
 						.withResource(CULL_SHADER_MAIN))
