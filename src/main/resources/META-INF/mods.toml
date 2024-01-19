@@ -9,8 +9,7 @@ modId = "flywheel"
 version = "${mod_version}"
 displayName = "Flywheel"
 logoFile = "logo.png"
-displayURL = "https://modrinth.com/mod/flywheel"
-updateJSONURL = "https://api.modrinth.com/updates/flywheel/forge_updates.json"
+displayURL = "https://github.com/Jozufozu/Flywheel"
 authors = "Jozufozu, PepperCode1"
 description = '''
 A modern engine for modded minecraft.'''
