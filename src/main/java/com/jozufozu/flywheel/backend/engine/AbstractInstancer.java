@@ -36,6 +36,10 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 
 	@Override
 	public void stealInstance(I instance) {
+		if (instance == null) {
+			return;
+		}
+
 		var instanceHandle = instance.handle();
 
 		if (!(instanceHandle instanceof InstanceHandleImpl handle)) {
