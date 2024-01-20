@@ -18,18 +18,23 @@ import com.jozufozu.flywheel.impl.visualization.storage.Transaction;
 import com.jozufozu.flywheel.lib.task.MapContextPlan;
 import com.jozufozu.flywheel.lib.task.SimplePlan;
 
-public abstract class AbstractVisualManager<T> implements VisualManager<T> {
+public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager<T> {
 	private final Queue<Transaction<T>> queue = new ConcurrentLinkedQueue<>();
 
 	protected DistanceUpdateLimiterImpl tickLimiter;
 	protected DistanceUpdateLimiterImpl frameLimiter;
 
-	public AbstractVisualManager() {
+	protected final S storage;
+
+	public VisualManagerImpl(S storage) {
 		tickLimiter = createUpdateLimiter();
 		frameLimiter = createUpdateLimiter();
+		this.storage = storage;
 	}
 
-	protected abstract Storage<T> getStorage();
+	public S getStorage() {
+		return storage;
+	}
 
 	protected DistanceUpdateLimiterImpl createUpdateLimiter() {
 		if (FlwConfig.get()

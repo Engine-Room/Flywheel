@@ -21,9 +21,10 @@ import com.jozufozu.flywheel.api.visualization.VisualizationLevel;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.extension.LevelExtension;
 import com.jozufozu.flywheel.impl.task.FlwTaskExecutor;
-import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityVisualManager;
-import com.jozufozu.flywheel.impl.visualization.manager.EffectVisualManager;
-import com.jozufozu.flywheel.impl.visualization.manager.EntityVisualManager;
+import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityStorage;
+import com.jozufozu.flywheel.impl.visualization.manager.EffectStorage;
+import com.jozufozu.flywheel.impl.visualization.manager.EntityStorage;
+import com.jozufozu.flywheel.impl.visualization.manager.VisualManagerImpl;
 import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.IfElsePlan;
 import com.jozufozu.flywheel.lib.task.MapContextPlan;
@@ -49,9 +50,9 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	private final Engine engine;
 	private final TaskExecutor taskExecutor;
 
-	private final BlockEntityVisualManager blockEntities;
-	private final EntityVisualManager entities;
-	private final EffectVisualManager effects;
+	private final VisualManagerImpl<BlockEntity, BlockEntityStorage> blockEntities;
+	private final VisualManagerImpl<Entity, EntityStorage> entities;
+	private final VisualManagerImpl<Effect, EffectStorage> effects;
 
 	private final Plan<TickContext> tickPlan;
 	private final Plan<RenderContext> framePlan;
@@ -65,9 +66,9 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				.createEngine(level);
 		taskExecutor = FlwTaskExecutor.get();
 
-		blockEntities = new BlockEntityVisualManager(engine);
-		entities = new EntityVisualManager(engine);
-		effects = new EffectVisualManager(engine);
+		blockEntities = new VisualManagerImpl<>(new BlockEntityStorage(engine));
+		entities = new VisualManagerImpl<>(new EntityStorage(engine));
+		effects = new VisualManagerImpl<>(new EffectStorage(engine));
 
 		tickPlan = blockEntities.createTickPlan()
 				.and(entities.createTickPlan())
@@ -221,7 +222,8 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				continue;
 			}
 
-			var visual = blockEntities.visualAtPos(entry.getLongKey());
+			var visual = blockEntities.getStorage()
+					.visualAtPos(entry.getLongKey());
 
 			if (visual == null) {
 				// The block doesn't have a visual, this is probably the common case.
