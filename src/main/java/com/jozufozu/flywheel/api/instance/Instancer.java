@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.api.instance;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * An instancer is how you interact with an instanced model.
  * <p>
@@ -31,11 +33,13 @@ public interface Instancer<I extends Instance> {
 	 * <br><br>
 	 * If the given instance is already owned by this instancer, this method does nothing.
 	 * <br>
+	 * If the given instance is {@code null}, this method does nothing.
+	 * <br>
 	 * If the given instance was created by a different backend, the behavior of this method is undefined.
 	 *
 	 * @param instance The instance to steal.
 	 */
-	void stealInstance(I instance);
+	void stealInstance(@Nullable I instance);
 
 	/**
 	 * Populate arr with new instances of this model.

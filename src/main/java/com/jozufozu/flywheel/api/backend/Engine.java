@@ -2,6 +2,8 @@ package com.jozufozu.flywheel.api.backend;
 
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
@@ -65,6 +67,6 @@ public interface Engine extends InstancerProvider {
 	 * @param pos The position of the block.
 	 * @param instances The instances associated with the BE at this position.
 	 */
-	record CrumblingBlock(int progress, BlockPos pos, List<Instance> instances) {
+	record CrumblingBlock(int progress, BlockPos pos, List<@NotNull Instance> instances) {
 	}
 }

@@ -230,7 +230,11 @@ public class VisualizationManagerImpl implements VisualizationManager {
 
 			List<Instance> instances = new ArrayList<>();
 
-			visual.collectCrumblingInstances(instances::add);
+			visual.collectCrumblingInstances(instance -> {
+				if (instance != null) {
+					instances.add(instance);
+				}
+			});
 
 			if (instances.isEmpty()) {
 				// The visual doesn't want to render anything crumbling.
