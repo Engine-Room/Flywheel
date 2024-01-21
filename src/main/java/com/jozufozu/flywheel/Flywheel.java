@@ -21,7 +21,6 @@ import com.jozufozu.flywheel.impl.RegistryImpl;
 import com.jozufozu.flywheel.impl.visualization.VisualizationEventHandler;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
-import com.jozufozu.flywheel.lib.light.LightUpdater;
 import com.jozufozu.flywheel.lib.material.CutoutShaders;
 import com.jozufozu.flywheel.lib.material.FogShaders;
 import com.jozufozu.flywheel.lib.material.StandardMaterialShaders;
@@ -97,7 +96,6 @@ public class Flywheel {
 
 		forgeEventBus.addListener(Uniforms::onReloadLevelRenderer);
 
-		forgeEventBus.addListener(LightUpdater::onClientTick);
 		forgeEventBus.addListener((LevelEvent.Unload e) -> LevelAttached.onUnloadLevel(e));
 
 //		forgeEventBus.addListener(ExampleEffect::tick);

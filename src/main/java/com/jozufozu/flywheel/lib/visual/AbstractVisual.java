@@ -7,7 +7,6 @@ import com.jozufozu.flywheel.api.visual.Visual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.instance.FlatLit;
 import com.jozufozu.flywheel.lib.light.LightListener;
-import com.jozufozu.flywheel.lib.light.LightUpdater;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -37,7 +36,8 @@ public abstract class AbstractVisual implements Visual, LightListener {
 
 	@Override
 	public void init(float partialTick) {
-		LightUpdater.get(level).addListener(this);
+		visualizationContext.lightUpdater()
+				.addListener(this);
 		updateLight();
 	}
 
@@ -67,6 +67,8 @@ public abstract class AbstractVisual implements Visual, LightListener {
 		}
 
 		_delete();
+		visualizationContext.lightUpdater()
+				.removeListener(this);
 		deleted = true;
 	}
 
