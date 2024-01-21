@@ -7,7 +7,7 @@ import net.minecraft.world.level.LightLayer;
 
 /**
  * Implementors of this interface may choose to subscribe to light updates by calling
- * {@link LightUpdater#addListener(LightListener)}.<p>
+ * {@link LightUpdaterImpl#addListener(LightListener)}.<p>
  *
  * It is the responsibility of the implementor to keep a reference to the level an object is contained in.
  */

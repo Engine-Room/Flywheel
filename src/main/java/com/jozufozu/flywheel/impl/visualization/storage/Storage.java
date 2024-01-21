@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.PlannedVisual;
@@ -15,12 +15,13 @@ import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visual.Visual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visual.VisualTickContext;
+import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.task.ForEachPlan;
 
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 public abstract class Storage<T> {
-	protected final Engine engine;
+	protected final Supplier<VisualizationContext> visualizationContextSupplier;
 	protected final List<TickableVisual> tickableVisuals = new ArrayList<>();
 	protected final List<DynamicVisual> dynamicVisuals = new ArrayList<>();
 	protected final List<PlannedVisual> plannedVisuals = new ArrayList<>();
@@ -33,8 +34,8 @@ public abstract class Storage<T> {
 
 	private final Map<T, Visual> visuals = new Reference2ObjectOpenHashMap<>();
 
-	public Storage(Engine engine) {
-		this.engine = engine;
+	public Storage(Supplier<VisualizationContext> visualizationContextSupplier) {
+		this.visualizationContextSupplier = visualizationContextSupplier;
 	}
 
 	public Collection<Visual> getAllVisuals() {

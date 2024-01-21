@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.impl.visualization;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -16,20 +17,30 @@ import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.Effect;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
+import com.jozufozu.flywheel.api.visual.VisualFrameContext;
+import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualManager;
+import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationLevel;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
+import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.extension.LevelExtension;
 import com.jozufozu.flywheel.impl.task.FlwTaskExecutor;
 import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityStorage;
 import com.jozufozu.flywheel.impl.visualization.manager.EffectStorage;
 import com.jozufozu.flywheel.impl.visualization.manager.EntityStorage;
 import com.jozufozu.flywheel.impl.visualization.manager.VisualManagerImpl;
+import com.jozufozu.flywheel.impl.visualization.ratelimit.BandedPrimeLimiter;
+import com.jozufozu.flywheel.impl.visualization.ratelimit.DistanceUpdateLimiterImpl;
+import com.jozufozu.flywheel.impl.visualization.ratelimit.NonLimiter;
+import com.jozufozu.flywheel.lib.light.LightUpdaterImpl;
 import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.IfElsePlan;
 import com.jozufozu.flywheel.lib.task.MapContextPlan;
 import com.jozufozu.flywheel.lib.task.NamedFlag;
+import com.jozufozu.flywheel.lib.task.NestedPlan;
 import com.jozufozu.flywheel.lib.task.RaisePlan;
+import com.jozufozu.flywheel.lib.task.SimplePlan;
 import com.jozufozu.flywheel.lib.util.LevelAttached;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -44,11 +55,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 /**
  * A manager class for a single world where visualization is supported.
  */
-public class VisualizationManagerImpl implements VisualizationManager {
+public class VisualizationManagerImpl implements VisualizationManager, Supplier<VisualizationContext> {
 	private static final LevelAttached<VisualizationManagerImpl> MANAGERS = new LevelAttached<>(VisualizationManagerImpl::new, VisualizationManagerImpl::delete);
 
 	private final Engine engine;
 	private final TaskExecutor taskExecutor;
+	private final LightUpdaterImpl lightUpdater;
 
 	private final VisualManagerImpl<BlockEntity, BlockEntityStorage> blockEntities;
 	private final VisualManagerImpl<Entity, EntityStorage> entities;
@@ -61,18 +73,30 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	private final Flag frameVisualsFlag = new NamedFlag("frameVisualUpdates");
 	private final Flag frameFlag = new NamedFlag("frameComplete");
 
+	protected DistanceUpdateLimiterImpl tickLimiter;
+	protected DistanceUpdateLimiterImpl frameLimiter;
+
 	private VisualizationManagerImpl(LevelAccessor level) {
+		tickLimiter = createUpdateLimiter();
+		frameLimiter = createUpdateLimiter();
+
 		engine = BackendManager.getBackend()
 				.createEngine(level);
 		taskExecutor = FlwTaskExecutor.get();
+		lightUpdater = new LightUpdaterImpl();
 
-		blockEntities = new VisualManagerImpl<>(new BlockEntityStorage(engine));
-		entities = new VisualManagerImpl<>(new EntityStorage(engine));
-		effects = new VisualManagerImpl<>(new EffectStorage(engine));
+		blockEntities = new VisualManagerImpl<>(new BlockEntityStorage(this));
+		entities = new VisualManagerImpl<>(new EntityStorage(this));
+		effects = new VisualManagerImpl<>(new EffectStorage(this));
 
-		tickPlan = blockEntities.createTickPlan()
-				.and(entities.createTickPlan())
-				.and(effects.createTickPlan())
+		tickPlan = MapContextPlan.map(this::createVisualTickContext)
+				.to(NestedPlan.of(SimplePlan.<VisualTickContext>of(context -> blockEntities.processQueue(0))
+						.then(blockEntities.getStorage()
+								.getTickPlan()), SimplePlan.<VisualTickContext>of(context -> entities.processQueue(0))
+						.then(entities.getStorage()
+								.getTickPlan()), SimplePlan.<VisualTickContext>of(context -> effects.processQueue(0))
+						.then(effects.getStorage()
+								.getTickPlan())))
 				.then(RaisePlan.raise(tickFlag))
 				.simplify();
 
@@ -81,11 +105,16 @@ public class VisualizationManagerImpl implements VisualizationManager {
 						.to(blockEntities.createRecreationPlan()
 								.and(entities.createRecreationPlan())
 								.and(effects.createRecreationPlan())))
-				.ifFalse(MapContextPlan.map((RenderContext ctx) -> FrameContext.create(ctx, engine.renderOrigin()))
-						.to(blockEntities.createFramePlan()
-								.and(entities.createFramePlan())
-								.and(effects.createFramePlan())))
+				.ifFalse(MapContextPlan.map((RenderContext ctx) -> createVisualContext(FrameContext.create(ctx, engine.renderOrigin())))
+						.to(NestedPlan.of(SimplePlan.<VisualFrameContext>of(context -> blockEntities.processQueue(context.partialTick()))
+								.then(blockEntities.getStorage()
+										.getFramePlan()), SimplePlan.<VisualFrameContext>of(context -> entities.processQueue(context.partialTick()))
+								.then(entities.getStorage()
+										.getFramePlan()), SimplePlan.<VisualFrameContext>of(context -> effects.processQueue(context.partialTick()))
+								.then(effects.getStorage()
+										.getFramePlan()))))
 				.plan()
+				.then(lightUpdater.plan())
 				.then(RaisePlan.raise(frameVisualsFlag))
 				.then(engine.createFramePlan())
 				.then(RaisePlan.raise(frameFlag))
@@ -94,6 +123,23 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		if (level instanceof Level l) {
 			LevelExtension.getAllLoadedEntities(l)
 					.forEach(entities::queueAdd);
+		}
+	}
+
+	private VisualFrameContext createVisualContext(FrameContext ctx) {
+		return new VisualFrameContext(ctx.cameraX(), ctx.cameraY(), ctx.cameraZ(), ctx.frustum(), ctx.partialTick(), frameLimiter);
+	}
+
+	private VisualTickContext createVisualTickContext(TickContext ctx) {
+		return new VisualTickContext(ctx.cameraX(), ctx.cameraY(), ctx.cameraZ(), frameLimiter);
+	}
+
+	protected DistanceUpdateLimiterImpl createUpdateLimiter() {
+		if (FlwConfig.get()
+				.limitUpdates()) {
+			return new BandedPrimeLimiter();
+		} else {
+			return new NonLimiter();
 		}
 	}
 
@@ -136,12 +182,17 @@ public class VisualizationManagerImpl implements VisualizationManager {
 
 	// TODO: Consider making these reset actions reuse the existing game objects instead of re-adding them
 	// potentially by keeping the same VisualizationManagerImpl and deleting the engine and visuals but not the game objects
+
 	public static void reset(LevelAccessor level) {
 		MANAGERS.remove(level);
 	}
-
 	public static void resetAll() {
 		MANAGERS.reset();
+	}
+
+	@Override
+	public VisualizationContext get() {
+		return new VisualizationContext(engine, lightUpdater, engine.renderOrigin());
 	}
 
 	@Override
@@ -164,6 +215,10 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		return effects;
 	}
 
+	public LightUpdaterImpl getLightUpdater() {
+		return lightUpdater;
+	}
+
 	/**
 	 * Tick the visuals after the game has ticked:
 	 * <p>
@@ -177,6 +232,10 @@ public class VisualizationManagerImpl implements VisualizationManager {
 
 		taskExecutor.syncUntil(tickFlag::isRaised);
 		tickFlag.lower();
+
+		tickLimiter.tick();
+
+		lightUpdater.tick();
 
 		tickPlan.execute(taskExecutor, new TickContext(cameraX, cameraY, cameraZ));
 	}
@@ -196,6 +255,8 @@ public class VisualizationManagerImpl implements VisualizationManager {
 
 		frameVisualsFlag.lower();
 		frameFlag.lower();
+
+		frameLimiter.tick();
 		framePlan.execute(taskExecutor, context);
 	}
 

@@ -1,8 +1,9 @@
 package com.jozufozu.flywheel.impl.visualization.manager;
 
+import java.util.function.Supplier;
+
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.visual.BlockEntityVisual;
 import com.jozufozu.flywheel.api.visual.Visual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
@@ -19,8 +20,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public class BlockEntityStorage extends Storage<BlockEntity> {
 	private final Long2ObjectMap<BlockEntityVisual<?>> posLookup = new Long2ObjectOpenHashMap<>();
 
-	public BlockEntityStorage(Engine engine) {
-		super(engine);
+	public BlockEntityStorage(Supplier<VisualizationContext> visualizationContextSupplier) {
+		super(visualizationContextSupplier);
 	}
 
 	public BlockEntityVisual<?> visualAtPos(long pos) {
@@ -59,7 +60,7 @@ public class BlockEntityStorage extends Storage<BlockEntity> {
 			return null;
 		}
 
-		var visual = visualizer.createVisual(new VisualizationContext(engine, engine.renderOrigin()), obj);
+		var visual = visualizer.createVisual(visualizationContextSupplier.get(), obj);
 
 		BlockPos blockPos = obj.getBlockPos();
 		posLookup.put(blockPos.asLong(), visual);

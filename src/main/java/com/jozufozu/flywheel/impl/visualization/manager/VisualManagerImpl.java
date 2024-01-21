@@ -4,45 +4,22 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.jozufozu.flywheel.api.task.Plan;
-import com.jozufozu.flywheel.api.visual.VisualFrameContext;
-import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualManager;
-import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.impl.visualization.FrameContext;
-import com.jozufozu.flywheel.impl.visualization.TickContext;
-import com.jozufozu.flywheel.impl.visualization.ratelimit.BandedPrimeLimiter;
-import com.jozufozu.flywheel.impl.visualization.ratelimit.DistanceUpdateLimiterImpl;
-import com.jozufozu.flywheel.impl.visualization.ratelimit.NonLimiter;
 import com.jozufozu.flywheel.impl.visualization.storage.Storage;
 import com.jozufozu.flywheel.impl.visualization.storage.Transaction;
-import com.jozufozu.flywheel.lib.task.MapContextPlan;
 import com.jozufozu.flywheel.lib.task.SimplePlan;
 
 public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager<T> {
 	private final Queue<Transaction<T>> queue = new ConcurrentLinkedQueue<>();
 
-	protected DistanceUpdateLimiterImpl tickLimiter;
-	protected DistanceUpdateLimiterImpl frameLimiter;
-
 	protected final S storage;
 
 	public VisualManagerImpl(S storage) {
-		tickLimiter = createUpdateLimiter();
-		frameLimiter = createUpdateLimiter();
 		this.storage = storage;
 	}
 
 	public S getStorage() {
 		return storage;
-	}
-
-	protected DistanceUpdateLimiterImpl createUpdateLimiter() {
-		if (FlwConfig.get()
-				.limitUpdates()) {
-			return new BandedPrimeLimiter();
-		} else {
-			return new NonLimiter();
-		}
 	}
 
 	@Override
@@ -81,7 +58,7 @@ public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager
 		getStorage().invalidate();
 	}
 
-	protected void processQueue(float partialTick) {
+	public void processQueue(float partialTick) {
 		var storage = getStorage();
 		Transaction<T> transaction;
 		while ((transaction = queue.poll()) != null) {
@@ -89,29 +66,4 @@ public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager
 		}
 	}
 
-	public Plan<TickContext> createTickPlan() {
-		return SimplePlan.<TickContext>of(() -> {
-					tickLimiter.tick();
-					processQueue(0);
-				})
-				.then(MapContextPlan.map(this::createVisualTickContext)
-						.to(getStorage().getTickPlan()));
-	}
-
-	public Plan<FrameContext> createFramePlan() {
-		return SimplePlan.<FrameContext>of(context -> {
-					frameLimiter.tick();
-					processQueue(context.partialTick());
-				})
-				.then(MapContextPlan.map(this::createVisualContext)
-						.to(getStorage().getFramePlan()));
-	}
-
-	private VisualFrameContext createVisualContext(FrameContext ctx) {
-		return new VisualFrameContext(ctx.cameraX(), ctx.cameraY(), ctx.cameraZ(), ctx.frustum(), ctx.partialTick(), frameLimiter);
-	}
-
-	private VisualTickContext createVisualTickContext(TickContext ctx) {
-		return new VisualTickContext(ctx.cameraX(), ctx.cameraY(), ctx.cameraZ(), frameLimiter);
-	}
 }

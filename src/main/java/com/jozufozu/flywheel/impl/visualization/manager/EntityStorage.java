@@ -1,8 +1,9 @@
 package com.jozufozu.flywheel.impl.visualization.manager;
 
+import java.util.function.Supplier;
+
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.visual.Visual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.impl.visualization.VisualizationHelper;
@@ -12,8 +13,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 
 public class EntityStorage extends Storage<Entity> {
-	public EntityStorage(Engine engine) {
-		super(engine);
+	public EntityStorage(Supplier<VisualizationContext> visualizationContextSupplier) {
+		super(visualizationContextSupplier);
 	}
 
 	@Override
@@ -24,7 +25,7 @@ public class EntityStorage extends Storage<Entity> {
 			return null;
 		}
 
-		return visualizer.createVisual(new VisualizationContext(engine, engine.renderOrigin()), obj);
+		return visualizer.createVisual(visualizationContextSupplier.get(), obj);
 	}
 
 	@Override

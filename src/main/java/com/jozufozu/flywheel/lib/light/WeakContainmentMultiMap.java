@@ -39,7 +39,9 @@ class WeakContainmentMultiMap<T> extends AbstractCollection<T> {
 		containmentSet.forEach((LongConsumer) l -> {
 			Set<T> listeners = forward.get(l);
 
-			if (listeners != null) listeners.remove(listener);
+			if (listeners != null) {
+				listeners.remove(listener);
+			}
 		});
 
 		containmentSet.clear();
@@ -63,7 +65,9 @@ class WeakContainmentMultiMap<T> extends AbstractCollection<T> {
 			containmentSet.forEach((LongConsumer) l -> {
 				Set<T> listeners = forward.get(l);
 
-				if (listeners != null) listeners.remove(o);
+				if (listeners != null) {
+					listeners.remove(o);
+				}
 			});
 
 			containmentSet.clear();

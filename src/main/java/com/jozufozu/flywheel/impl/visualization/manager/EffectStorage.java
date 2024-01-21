@@ -1,19 +1,20 @@
 package com.jozufozu.flywheel.impl.visualization.manager;
 
-import com.jozufozu.flywheel.api.backend.Engine;
+import java.util.function.Supplier;
+
 import com.jozufozu.flywheel.api.visual.Effect;
 import com.jozufozu.flywheel.api.visual.EffectVisual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.impl.visualization.storage.Storage;
 
 public class EffectStorage extends Storage<Effect> {
-	public EffectStorage(Engine engine) {
-		super(engine);
+	public EffectStorage(Supplier<VisualizationContext> visualizationContextSupplier) {
+		super(visualizationContextSupplier);
 	}
 
 	@Override
 	protected EffectVisual<?> createRaw(Effect obj) {
-		return obj.visualize(new VisualizationContext(engine, engine.renderOrigin()));
+		return obj.visualize(visualizationContextSupplier.get());
 	}
 
 	@Override
