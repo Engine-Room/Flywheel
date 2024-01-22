@@ -1,21 +1,24 @@
 package com.jozufozu.flywheel.lib.light;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.task.Plan;
+import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.visualization.LightUpdater;
 import com.jozufozu.flywheel.lib.box.Box;
-import com.jozufozu.flywheel.lib.task.ForEachPlan;
-import com.jozufozu.flywheel.lib.task.IfElsePlan;
-import com.jozufozu.flywheel.lib.task.SimplePlan;
-import com.jozufozu.flywheel.lib.util.FlwUtil;
+import com.jozufozu.flywheel.lib.task.PlanUtil;
+import com.jozufozu.flywheel.lib.task.SimplyComposedPlan;
+import com.jozufozu.flywheel.lib.task.Synchronizer;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -24,13 +27,10 @@ import net.minecraft.world.level.LightLayer;
 
 /**
  * Keeps track of what chunks/sections each listener is in, so we can update exactly what needs to be updated.
- *
- * @apiNote Custom/fake levels (that are {@code != Minecraft.getInstance.level}) need to implement
- *          {@link LightUpdatedLevel} for LightUpdater to work with them.
  */
 public class LightUpdaterImpl implements LightUpdater {
-	private final WeakHashMap<LightListener, LongSet> listenersAndTheirSections = new WeakHashMap<>();
-	private final Set<TickingLightListener> tickingListeners = FlwUtil.createWeakHashSet();
+	private final Map<LightListener, LongSet> listenersAndTheirSections = new WeakHashMap<>();
+	private final Long2ObjectMap<List<LightListener>> listenersBySection = new Long2ObjectOpenHashMap<>();
 
 	private final Queue<LightListener> additionQueue = new ConcurrentLinkedQueue<>();
 	private final LongSet sectionsQueue = new LongOpenHashSet();
@@ -49,30 +49,32 @@ public class LightUpdaterImpl implements LightUpdater {
 	}
 
 	public Plan<RenderContext> plan() {
-		// Assume we'll have more listeners than sections updated
-		// TODO: this is slow, maybe launch a task for each changed section and distribute from there?
-		return SimplePlan.<RenderContext>of(this::processQueue)
-				.then(IfElsePlan.<RenderContext>on(() -> !sectionsQueue.isEmpty())
-						.ifTrue(ForEachPlan.of(() -> listenersAndTheirSections.entrySet()
-								.stream()
-								.toList(), this::updateOneEntry))
-						.plan())
-				.then(SimplePlan.of(() -> sectionsQueue.clear()));
-	}
+		return (SimplyComposedPlan<RenderContext>) (TaskExecutor taskExecutor, RenderContext context, Runnable onCompletion) -> {
+			processQueue();
 
-	private void updateOneEntry(Map.Entry<LightListener, LongSet> entry) {
-
-		updateOne(entry.getKey(), entry.getValue());
-
-	}
-
-	private void updateOne(LightListener listener, LongSet containedSections) {
-		for (long l : containedSections.toLongArray()) {
-			if (sectionsQueue.contains(l)) {
-				listener.onLightUpdate(LightLayer.BLOCK, SectionPos.of(l));
-				break;
+			if (sectionsQueue.isEmpty()) {
+				onCompletion.run();
+				return;
 			}
-		}
+
+			var sync = new Synchronizer(sectionsQueue.size(), () -> {
+				sectionsQueue.clear();
+				onCompletion.run();
+			});
+
+			sectionsQueue.forEach((long section) -> {
+				List<LightListener> listeners = listenersBySection.get(section);
+				if (listeners != null && !listeners.isEmpty()) {
+					taskExecutor.execute(() -> {
+						PlanUtil.distribute(taskExecutor, SectionPos.of(section), sync, listeners, (listener, pos) -> {
+							listener.onLightUpdate(LightLayer.BLOCK, pos);
+						});
+					});
+				} else {
+					sync.decrementAndEventuallyRun();
+				}
+			});
+		};
 	}
 
 	public Stream<Box> getAllBoxes() {
@@ -85,16 +87,6 @@ public class LightUpdaterImpl implements LightUpdater {
 		return listenersAndTheirSections.isEmpty();
 	}
 
-	public void tick() {
-		processQueue();
-
-		for (TickingLightListener tickingListener : tickingListeners) {
-			if (tickingListener.tickLightListener()) {
-				addListener(tickingListener);
-			}
-		}
-	}
-
 	private synchronized void processQueue() {
 		LightListener listener;
 		while ((listener = additionQueue.poll()) != null) {
@@ -103,10 +95,6 @@ public class LightUpdaterImpl implements LightUpdater {
 	}
 
 	private void doAdd(LightListener listener) {
-		if (listener instanceof TickingLightListener ticking) {
-			tickingListeners.add(ticking);
-		}
-
 		Box box = listener.getVolume();
 
 		LongSet sections = new LongArraySet();
@@ -121,7 +109,10 @@ public class LightUpdaterImpl implements LightUpdater {
 		for (int x = minX; x <= maxX; x++) {
 			for (int y = minY; y <= maxY; y++) {
 				for (int z = minZ; z <= maxZ; z++) {
-					sections.add(SectionPos.asLong(x, y, z));
+					var longPos = SectionPos.asLong(x, y, z);
+					sections.add(longPos);
+					listenersBySection.computeIfAbsent(longPos, $ -> new ArrayList<>())
+							.add(listener);
 				}
 			}
 		}
