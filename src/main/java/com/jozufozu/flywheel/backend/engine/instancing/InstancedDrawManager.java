@@ -5,8 +5,6 @@ import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -108,7 +106,6 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 			return drawCalls.isEmpty();
 		}
 
-		@NotNull
 		@Override
 		public Iterator<Map.Entry<ShaderState, Collection<DrawCall>>> iterator() {
 			return drawCalls.asMap()

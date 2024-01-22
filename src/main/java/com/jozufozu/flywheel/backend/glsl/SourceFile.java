@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
@@ -229,7 +228,6 @@ public class SourceFile implements SourceComponent {
 		return System.identityHashCode(this);
 	}
 
-	@NotNull
 	private static String generateFinalSource(ImmutableList<Import> imports, SourceLines source) {
 		var out = new StringBuilder();
 

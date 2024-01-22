@@ -8,8 +8,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.glsl.SourceFile;
 import com.jozufozu.flywheel.backend.glsl.SourceLines;
@@ -49,7 +47,6 @@ public class FailedCompilation {
 				.collect(Collectors.joining("\n"));
 	}
 
-	@NotNull
 	private Stream<ErrorBuilder> errorStream() {
 		return errorLog.lines()
 				.mapMulti(this::interpretLine);
@@ -142,7 +139,6 @@ public class FailedCompilation {
 				.note("This generally indicates a bug in Flywheel, not your shader code.");
 	}
 
-	@NotNull
 	private static ErrorLevel parseErrorLevel(String level) {
 		return switch (level.toLowerCase(Locale.ROOT)) {
 			case "error" -> ErrorLevel.ERROR;

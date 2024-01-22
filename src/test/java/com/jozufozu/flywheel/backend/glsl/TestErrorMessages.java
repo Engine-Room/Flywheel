@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.glsl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -62,7 +61,6 @@ public class TestErrorMessages extends TestBase {
 		assertEquals(expected.trim(), message.trim());
 	}
 
-	@NotNull
 	public static ErrorBuilder assertErrorAndGetMessage(MockShaderSources sources, ResourceLocation loc) {
 		var result = sources.find(loc);
 		var failure = assertInstanceOf(LoadResult.Failure.class, result);

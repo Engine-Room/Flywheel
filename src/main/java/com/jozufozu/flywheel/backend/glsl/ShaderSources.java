@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import net.minecraft.resources.ResourceLocation;
@@ -40,7 +39,6 @@ public class ShaderSources {
 		cache.putAll(preloadCache);
 	}
 
-	@NotNull
 	public LoadResult find(ResourceLocation location) {
 		if (findStack.contains(location)) {
 			// Make a copy of the find stack with the offending location added on top to show the full path.
@@ -57,7 +55,6 @@ public class ShaderSources {
 		return out;
 	}
 
-	@NotNull
 	private LoadResult _find(ResourceLocation location) {
 		// Can't use computeIfAbsent because mutual recursion causes ConcurrentModificationExceptions
 		var out = cache.get(location);
@@ -68,7 +65,7 @@ public class ShaderSources {
 		return out;
 	}
 
-	@NotNull
+	@VisibleForTesting
 	protected LoadResult load(ResourceLocation loc) {
 		return manager.getResource(loc.withPrefix(SHADER_DIR))
 				.map(resource -> {

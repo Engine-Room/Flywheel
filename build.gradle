@@ -5,7 +5,6 @@ plugins {
     id 'net.minecraftforge.gradle' version "${forgegradle_version}"
     id 'org.parchmentmc.librarian.forgegradle' version "${librarian_version}"
     id 'org.spongepowered.mixin' version "${mixingradle_version}"
-    id 'com.matthewprenger.cursegradle' version "${cursegradle_version}"
 }
 
 jarJar.enable()
@@ -166,6 +165,8 @@ tasks.named('processResources', ProcessResources).configure {
     }
 }
 
+apply from: rootProject.file('gradle/package-infos.gradle')
+
 void addLicense(jarTask) {
     jarTask.from('LICENSE.md') {
         rename '(.*)\\.(.*)', '$1_' + archivesBaseName + '.$2'
@@ -228,21 +229,5 @@ publishing {
         if (project.hasProperty('mavendir')) {
             maven { url mavendir }
         }
-    }
-}
-
-tasks.curseforge.enabled = !dev && project.hasProperty('jozu_curseforge_key')
-
-curseforge {
-    if (project.hasProperty('jozu_curseforge_key')) {
-        apiKey = project.jozu_curseforge_key
-    }
-
-    project {
-        id = project.projectId
-        changelog = file('changelog.txt')
-        releaseType = project.curse_type
-        mainArtifact jar
-        addGameVersion '1.20.1'
     }
 }

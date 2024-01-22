@@ -205,7 +205,7 @@ public class MutableBox implements Box {
 		maxZ = Math.min(this.maxZ, other.getMaxZ());
 	}
 
-    public void fixMinMax() {
+	public void fixMinMax() {
 		int minX = Math.min(this.minX, this.maxX);
 		int minY = Math.min(this.minY, this.maxY);
 		int minZ = Math.min(this.minZ, this.maxZ);

@@ -9,7 +9,6 @@ import com.jozufozu.flywheel.backend.glsl.SourceLines;
 import com.jozufozu.flywheel.backend.glsl.span.Span;
 
 public class ShaderStruct {
-
 	// https://regexr.com/61rpe
 	public static final Pattern PATTERN = Pattern.compile("struct\\s+([\\w_]*)\\s*\\{(.*?)}\\s*([\\w_]*)?\\s*;\\s", Pattern.DOTALL);
 

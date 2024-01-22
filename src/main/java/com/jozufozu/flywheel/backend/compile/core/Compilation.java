@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.backend.compile.FlwPrograms;
@@ -33,7 +32,6 @@ public class Compilation {
 	private final StringBuilder fullSource = new StringBuilder();
 	private int generatedLines = 0;
 
-	@NotNull
 	public ShaderResult compile(ShaderType shaderType, String name) {
 		int handle = GL20.glCreateShader(shaderType.glEnum);
 		var source = fullSource.toString();

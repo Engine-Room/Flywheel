@@ -2,8 +2,6 @@ package com.jozufozu.flywheel.backend.glsl.span;
 
 import java.util.regex.Matcher;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.jozufozu.flywheel.backend.glsl.SourceFile;
 import com.jozufozu.flywheel.backend.glsl.SourceLines;
 
@@ -125,7 +123,7 @@ public abstract class Span implements CharSequence, Comparable<Span> {
 	}
 
 	@Override
-	public int compareTo(@NotNull Span o) {
+	public int compareTo(Span o) {
 		return Integer.compareUnsigned(startIndex(), o.startIndex());
 	}
 }

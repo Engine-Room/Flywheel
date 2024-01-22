@@ -3,8 +3,6 @@ package com.jozufozu.flywheel.lib.visual;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.jozufozu.flywheel.api.visual.BlockEntityVisual;
 import com.jozufozu.flywheel.api.visualization.BlockEntityVisualizer;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
@@ -45,7 +43,7 @@ public class SimpleBlockEntityVisualizer<T extends BlockEntity> implements Block
 
 	@FunctionalInterface
 	public interface Factory<T extends BlockEntity> {
-		@NotNull BlockEntityVisual<? super T> create(VisualizationContext ctx, T blockEntity);
+		BlockEntityVisual<? super T> create(VisualizationContext ctx, T blockEntity);
 	}
 
 	/**

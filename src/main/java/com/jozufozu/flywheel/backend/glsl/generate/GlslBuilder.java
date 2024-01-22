@@ -17,28 +17,28 @@ public class GlslBuilder {
 
 	public GlslStruct struct() {
 		return add(new GlslStruct());
-    }
+	}
 
-    public GlslFn function() {
-        return add(new GlslFn());
-    }
+	public GlslFn function() {
+		return add(new GlslFn());
+	}
 
-    public GlslVertexInput vertexInput() {
-        return add(new GlslVertexInput());
-    }
+	public GlslVertexInput vertexInput() {
+		return add(new GlslVertexInput());
+	}
 
-    public GlslUniformBlock uniformBlock() {
-        return add(new GlslUniformBlock());
-    }
+	public GlslUniformBlock uniformBlock() {
+		return add(new GlslUniformBlock());
+	}
 
-    public <T extends Declaration> T add(T element) {
-        elements.add(element);
-        return element;
-    }
+	public <T extends Declaration> T add(T element) {
+		elements.add(element);
+		return element;
+	}
 
-    public void blankLine() {
-        elements.add(Separators.BLANK_LINE);
-    }
+	public void blankLine() {
+		elements.add(Separators.BLANK_LINE);
+	}
 
 	public void _addRaw(String sourceString) {
 		elements.add(() -> sourceString);

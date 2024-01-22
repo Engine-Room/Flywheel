@@ -5,7 +5,6 @@ license = "MIT"
 
 [[mods]]
 modId = "flywheel"
-# The Implementation-Version property in the jar's MANIFEST.MF file will be used as the mod version at runtime
 version = "${mod_version}"
 displayName = "Flywheel"
 logoFile = "logo.png"

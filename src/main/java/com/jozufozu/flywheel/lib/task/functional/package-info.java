@@ -5,4 +5,12 @@
  * interface, but do not need to create additional closure objects to translate when the consumer wishes to ignore
  * the context object.
  */
+@ParametersAreNonnullByDefault
+@FieldsAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 package com.jozufozu.flywheel.lib.task.functional;
+
+import javax.annotation.ParametersAreNonnullByDefault;
+
+import net.minecraft.FieldsAreNonnullByDefault;
+import net.minecraft.MethodsReturnNonnullByDefault;

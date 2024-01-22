@@ -3,8 +3,6 @@ package com.jozufozu.flywheel.impl.visualization.storage;
 import java.util.List;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.lib.task.NestedPlan;
@@ -13,7 +11,6 @@ import com.jozufozu.flywheel.lib.task.UnitPlan;
 
 public class VisualUpdatePlan<C> implements SimplyComposedPlan<C> {
 	private final Supplier<List<Plan<C>>> initializer;
-	@NotNull
 	private Plan<C> plan = UnitPlan.of();
 	private boolean initialized = false;
 	private boolean needsSimplify = true;

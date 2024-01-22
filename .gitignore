@@ -43,4 +43,6 @@ local.properties
 # PDT-specific
 .buildpath
 
+# Other
 mcmodsrepo
+src/*/generatedPackageInfos/

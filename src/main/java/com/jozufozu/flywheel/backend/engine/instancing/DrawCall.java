@@ -74,14 +74,14 @@ public class DrawCall {
 	}
 
 	public void delete() {
-        if (vao != null) {
-            vao.delete();
-            vao = null;
-        }
+		if (vao != null) {
+			vao.delete();
+			vao = null;
+		}
 
 		if (vaoScratch != null) {
 			vaoScratch.delete();
 			vaoScratch = null;
 		}
-    }
+	}
 }
