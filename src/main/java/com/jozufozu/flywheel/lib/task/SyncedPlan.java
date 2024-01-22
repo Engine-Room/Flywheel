@@ -15,11 +15,6 @@ public record SyncedPlan<C>(RunnableWithContext<C> task) implements SimplyCompos
 
 	@Override
 	public void execute(TaskExecutor taskExecutor, C context, Runnable onCompletion) {
-		if (taskExecutor.isMainThread()) {
-			task.run(context);
-			onCompletion.run();
-			return;
-		}
 		taskExecutor.scheduleForMainThread(() -> {
 			task.run(context);
 			onCompletion.run();

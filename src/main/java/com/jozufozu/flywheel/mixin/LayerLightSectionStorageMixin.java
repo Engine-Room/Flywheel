@@ -34,8 +34,7 @@ public abstract class LayerLightSectionStorageMixin {
 		var manager = VisualizationManagerImpl.get((LevelAccessor) this.chunkSource.getLevel());
 
 		if (manager != null) {
-			manager.getLightUpdater()
-					.notifySectionUpdates(this.sectionsAffectedByLightUpdates);
+			manager.enqueueLightUpdateSections(this.sectionsAffectedByLightUpdates);
 		}
 	}
 }

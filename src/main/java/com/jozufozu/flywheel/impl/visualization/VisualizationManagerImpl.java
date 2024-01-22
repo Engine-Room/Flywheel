@@ -35,7 +35,6 @@ import com.jozufozu.flywheel.impl.visualization.manager.VisualManagerImpl;
 import com.jozufozu.flywheel.impl.visualization.ratelimit.BandedPrimeLimiter;
 import com.jozufozu.flywheel.impl.visualization.ratelimit.DistanceUpdateLimiterImpl;
 import com.jozufozu.flywheel.impl.visualization.ratelimit.NonLimiter;
-import com.jozufozu.flywheel.lib.light.LightUpdaterImpl;
 import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.IfElsePlan;
 import com.jozufozu.flywheel.lib.task.MapContextPlan;
@@ -46,6 +45,7 @@ import com.jozufozu.flywheel.lib.task.SimplePlan;
 import com.jozufozu.flywheel.lib.util.LevelAttached;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.BlockDestructionProgress;
@@ -62,7 +62,6 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 
 	private final Engine engine;
 	private final TaskExecutor taskExecutor;
-	private final LightUpdaterImpl lightUpdater;
 
 	private final VisualManagerImpl<BlockEntity, BlockEntityStorage> blockEntities;
 	private final VisualManagerImpl<Entity, EntityStorage> entities;
@@ -85,37 +84,29 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 		engine = BackendManager.getBackend()
 				.createEngine(level);
 		taskExecutor = FlwTaskExecutor.get();
-		lightUpdater = new LightUpdaterImpl();
 
 		blockEntities = new VisualManagerImpl<>(new BlockEntityStorage(this));
 		entities = new VisualManagerImpl<>(new EntityStorage(this));
 		effects = new VisualManagerImpl<>(new EffectStorage(this));
 
+		var blockEntitiesStorage = blockEntities.getStorage();
+		var entitiesStorage = entities.getStorage();
+		var effectsStorage = effects.getStorage();
 		tickPlan = MapContextPlan.map(this::createVisualTickContext)
 				.to(NestedPlan.of(SimplePlan.<VisualTickContext>of(context -> blockEntities.processQueue(0))
-						.then(blockEntities.getStorage()
-								.getTickPlan()), SimplePlan.<VisualTickContext>of(context -> entities.processQueue(0))
-						.then(entities.getStorage()
-								.getTickPlan()), SimplePlan.<VisualTickContext>of(context -> effects.processQueue(0))
-						.then(effects.getStorage()
-								.getTickPlan())))
+						.then(blockEntitiesStorage.getTickPlan()), SimplePlan.<VisualTickContext>of(context -> entities.processQueue(0))
+						.then(entitiesStorage.getTickPlan()), SimplePlan.<VisualTickContext>of(context -> effects.processQueue(0))
+						.then(effectsStorage.getTickPlan())))
 				.then(RaisePlan.raise(tickFlag))
 				.simplify();
 
-		var lightUpdatePlan = lightUpdater.plan();
+		var recreate = SimplePlan.<RenderContext>of(context -> blockEntitiesStorage.recreateAll(context.partialTick()), context -> entitiesStorage.recreateAll(context.partialTick()), context -> effectsStorage.recreateAll(context.partialTick()));
 
-		var recreate = SimplePlan.<RenderContext>of(context -> blockEntities.getStorage()
-						.recreateAll(context.partialTick()), context -> entities.getStorage()
-						.recreateAll(context.partialTick()), context -> effects.getStorage()
-						.recreateAll(context.partialTick()))
-				.then(lightUpdatePlan);
-
-		var update = SimplePlan.<RenderContext>of(context -> blockEntities.processQueue(context.partialTick()), context -> entities.processQueue(context.partialTick()), context -> effects.processQueue(context.partialTick()))
-				.then(lightUpdatePlan.and(MapContextPlan.map(this::createVisualContext)
-						.to(NestedPlan.of(blockEntities.getStorage()
-								.getFramePlan(), entities.getStorage()
-								.getFramePlan(), effects.getStorage()
-								.getFramePlan()))));
+		var update = MapContextPlan.map(this::createVisualFrameContext)
+				.to(NestedPlan.of(SimplePlan.<VisualFrameContext>of(context -> blockEntities.processQueue(0))
+						.then(blockEntitiesStorage.getFramePlan()), SimplePlan.<VisualFrameContext>of(context -> entities.processQueue(0))
+						.then(entitiesStorage.getFramePlan()), SimplePlan.<VisualFrameContext>of(context -> effects.processQueue(0))
+						.then(effectsStorage.getFramePlan())));
 
 		framePlan = IfElsePlan.on((RenderContext ctx) -> engine.updateRenderOrigin(ctx.camera()))
 				.ifTrue(recreate)
@@ -132,7 +123,7 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 		}
 	}
 
-	private VisualFrameContext createVisualContext(RenderContext ctx) {
+	private VisualFrameContext createVisualFrameContext(RenderContext ctx) {
 		Vec3i renderOrigin = engine.renderOrigin();
 		var cameraPos = ctx.camera()
 				.getPosition();
@@ -209,7 +200,7 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 
 	@Override
 	public VisualizationContext get() {
-		return new VisualizationContext(engine, lightUpdater, engine.renderOrigin());
+		return new VisualizationContext(engine, engine.renderOrigin());
 	}
 
 	@Override
@@ -230,10 +221,6 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 	@Override
 	public VisualManager<Effect> getEffects() {
 		return effects;
-	}
-
-	public LightUpdaterImpl getLightUpdater() {
-		return lightUpdater;
 	}
 
 	/**
@@ -342,5 +329,14 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 		entities.invalidate();
 		effects.invalidate();
 		engine.delete();
+	}
+
+	public void enqueueLightUpdateSections(LongSet sections) {
+		blockEntities.getStorage()
+				.enqueueLightUpdateSections(sections);
+		entities.getStorage()
+				.enqueueLightUpdateSections(sections);
+		effects.getStorage()
+				.enqueueLightUpdateSections(sections);
 	}
 }

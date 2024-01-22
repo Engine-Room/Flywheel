@@ -82,10 +82,9 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 			blockState = displayBlockState;
 			contents.delete();
 			contents = createContentsInstance();
-			if (contents != null) {
-				relight(entity.blockPosition(), contents);
-			}
 		}
+
+		updateLight();
 	}
 
 	@Override
@@ -173,13 +172,8 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 				.setChanged();
 	}
 
-	@Override
 	public void updateLight() {
-		if (contents == null) {
-			relight(entity.blockPosition(), body);
-		} else {
-			relight(entity.blockPosition(), body, contents);
-		}
+		relight(entity.blockPosition(), body, contents);
 	}
 
 	@Override

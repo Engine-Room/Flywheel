@@ -9,13 +9,9 @@ import com.jozufozu.flywheel.api.visual.PlannedVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
-import com.jozufozu.flywheel.lib.box.Box;
-import com.jozufozu.flywheel.lib.box.MutableBox;
-import com.jozufozu.flywheel.lib.light.TickingLightListener;
 
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -34,16 +30,18 @@ import net.minecraft.world.phys.Vec3;
  *
  * @param <T> The type of {@link Entity}.
  */
-public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVisual implements EntityVisual<T>, TickingLightListener {
+public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVisual implements EntityVisual<T> {
 	protected final T entity;
-	protected final MutableBox bounds;
 	protected final EntityVisibilityTester visibilityTester;
 
 	public AbstractEntityVisual(VisualizationContext ctx, T entity) {
 		super(ctx, entity.level());
 		this.entity = entity;
-		bounds = MutableBox.from(entity.getBoundingBox());
 		visibilityTester = new EntityVisibilityTester(entity, ctx.renderOrigin(), 1.5f);
+	}
+
+	@Override
+	public void init(float partialTick) {
 	}
 
 	/**
@@ -56,26 +54,6 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	 */
 	public double distanceSquared(double x, double y, double z) {
 		return entity.distanceToSqr(x, y, z);
-	}
-
-	@Override
-	public Box getVolume() {
-		return bounds;
-	}
-
-	@Override
-	public boolean tickLightListener() {
-		AABB boundsNow = entity.getBoundingBox();
-
-		if (bounds.sameAs(boundsNow)) {
-			return false;
-		}
-
-		bounds.assign(boundsNow);
-
-		updateLight();
-
-		return true;
 	}
 
 	/**
