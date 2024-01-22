@@ -189,17 +189,21 @@ class PlanExecutionTest {
 	}
 
 	@Test
-	void mainThreadPlanRunsImmediately() {
+	void syncedPlanDefersOnMainThread() {
 		var done = new AtomicBoolean(false);
 		var plan = SyncedPlan.of(() -> done.set(true));
 
 		plan.execute(EXECUTOR, Unit.INSTANCE);
 
+		Assertions.assertFalse(done.get());
+
+		EXECUTOR.syncPoint();
+
 		Assertions.assertTrue(done.get());
 	}
 
 	@Test
-	void mainThreadPlanIsNotCalledOffThread() {
+	void syncedPlanDefersOffThread() {
 		var done = new AtomicBoolean(false);
 
 		var plan = SyncedPlan.of(() -> {
