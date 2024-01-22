@@ -6,10 +6,17 @@ import net.minecraft.core.Vec3i;
 
 /**
  * A context object passed on visual creation.
- *
- * @param instancerProvider The {@link InstancerProvider} that the visual can use to get instancers to render models.
- * @param renderOrigin      The origin of the renderer as a world position.
- *                          All models render as if this position is (0, 0, 0).
  */
-public record VisualizationContext(InstancerProvider instancerProvider, Vec3i renderOrigin) {
+public interface VisualizationContext {
+	/**
+	 * @return The {@link InstancerProvider} that the visual can use to get instancers to render models.
+	 */
+	InstancerProvider instancerProvider();
+
+	/**
+	 * All models render as if this position is (0, 0, 0).
+	 *
+	 * @return The origin of the renderer as a world position.
+	 */
+	Vec3i renderOrigin();
 }

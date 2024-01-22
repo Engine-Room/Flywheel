@@ -22,9 +22,12 @@ import com.jozufozu.flywheel.api.instance.Instancer;
 public interface TickableVisual extends Visual {
 	/**
 	 * Called every tick.
-	 * <p>
-	 * <b>DISPATCHED IN PARALLEL</b>. Ensure proper synchronization if you need to mutate anything outside this visual.
-	 * <p>
+	 * <br>
+	 * The implementation is free to parallelize calls to this method.
+	 * You must ensure proper synchronization if you need to mutate anything outside this visual.
+	 * <br>
+	 * This method and {@link DynamicVisual#beginFrame} will never be called simultaneously.
+	 * <br>
 	 * {@link Instancer}/{@link Instance} creation/acquisition is safe here.
 	 */
 	void tick(VisualTickContext ctx);

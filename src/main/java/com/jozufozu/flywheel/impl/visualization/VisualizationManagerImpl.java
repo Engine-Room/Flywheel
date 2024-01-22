@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
@@ -28,6 +29,8 @@ import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.extension.LevelExtension;
 import com.jozufozu.flywheel.impl.task.FlwTaskExecutor;
+import com.jozufozu.flywheel.impl.visual.VisualFrameContextImpl;
+import com.jozufozu.flywheel.impl.visual.VisualTickContextImpl;
 import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityStorage;
 import com.jozufozu.flywheel.impl.visualization.manager.EffectStorage;
 import com.jozufozu.flywheel.impl.visualization.manager.EntityStorage;
@@ -57,7 +60,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 /**
  * A manager class for a single world where visualization is supported.
  */
-public class VisualizationManagerImpl implements VisualizationManager, Supplier<VisualizationContext> {
+public class VisualizationManagerImpl implements VisualizationManager {
 	private static final LevelAttached<VisualizationManagerImpl> MANAGERS = new LevelAttached<>(VisualizationManagerImpl::new, VisualizationManagerImpl::delete);
 
 	private final Engine engine;
@@ -67,7 +70,7 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 	private final VisualManagerImpl<Entity, EntityStorage> entities;
 	private final VisualManagerImpl<Effect, EffectStorage> effects;
 
-	private final Plan<TickContext> tickPlan;
+	private final Plan<VisualTickContext> tickPlan;
 	private final Plan<RenderContext> framePlan;
 
 	private final Flag tickFlag = new NamedFlag("tick");
@@ -85,18 +88,20 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 				.createEngine(level);
 		taskExecutor = FlwTaskExecutor.get();
 
-		blockEntities = new VisualManagerImpl<>(new BlockEntityStorage(this));
-		entities = new VisualManagerImpl<>(new EntityStorage(this));
-		effects = new VisualManagerImpl<>(new EffectStorage(this));
+		Supplier<VisualizationContext> contextSupplier = () -> new VisualizationContextImpl(engine, engine.renderOrigin());
 
-		var blockEntitiesStorage = blockEntities.getStorage();
-		var entitiesStorage = entities.getStorage();
-		var effectsStorage = effects.getStorage();
-		tickPlan = MapContextPlan.map(this::createVisualTickContext)
-				.to(NestedPlan.of(SimplePlan.<VisualTickContext>of(context -> blockEntities.processQueue(0))
+		var blockEntitiesStorage = new BlockEntityStorage(contextSupplier);
+		var entitiesStorage = new EntityStorage(contextSupplier);
+		var effectsStorage = new EffectStorage(contextSupplier);
+
+		blockEntities = new VisualManagerImpl<>(blockEntitiesStorage);
+		entities = new VisualManagerImpl<>(entitiesStorage);
+		effects = new VisualManagerImpl<>(effectsStorage);
+
+		tickPlan = NestedPlan.of(SimplePlan.<VisualTickContext>of(context -> blockEntities.processQueue(0))
 						.then(blockEntitiesStorage.getTickPlan()), SimplePlan.<VisualTickContext>of(context -> entities.processQueue(0))
 						.then(entitiesStorage.getTickPlan()), SimplePlan.<VisualTickContext>of(context -> effects.processQueue(0))
-						.then(effectsStorage.getTickPlan())))
+						.then(effectsStorage.getTickPlan()))
 				.then(RaisePlan.raise(tickFlag))
 				.simplify();
 
@@ -135,11 +140,7 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 		viewProjection.translate((float) (renderOrigin.getX() - cameraX), (float) (renderOrigin.getY() - cameraY), (float) (renderOrigin.getZ() - cameraZ));
 		FrustumIntersection frustum = new FrustumIntersection(viewProjection);
 
-		return new VisualFrameContext(cameraX, cameraY, cameraZ, frustum, ctx.partialTick(), frameLimiter);
-	}
-
-	private VisualTickContext createVisualTickContext(TickContext ctx) {
-		return new VisualTickContext(ctx.cameraX(), ctx.cameraY(), ctx.cameraZ(), frameLimiter);
+		return new VisualFrameContextImpl(cameraX, cameraY, cameraZ, frustum, ctx.partialTick(), frameLimiter);
 	}
 
 	protected DistanceUpdateLimiterImpl createUpdateLimiter() {
@@ -151,6 +152,7 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 		}
 	}
 
+	@Contract("null -> false")
 	public static boolean supportsVisualization(@Nullable LevelAccessor level) {
 		if (!BackendManager.isOn()) {
 			return false;
@@ -199,11 +201,6 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 	}
 
 	@Override
-	public VisualizationContext get() {
-		return new VisualizationContext(engine, engine.renderOrigin());
-	}
-
-	@Override
 	public Vec3i getRenderOrigin() {
 		return engine.renderOrigin();
 	}
@@ -239,7 +236,7 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 
 		tickLimiter.tick();
 
-		tickPlan.execute(taskExecutor, new TickContext(cameraX, cameraY, cameraZ));
+		tickPlan.execute(taskExecutor, new VisualTickContextImpl(cameraX, cameraY, cameraZ, frameLimiter));
 	}
 
 	/**
