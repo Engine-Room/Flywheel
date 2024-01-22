@@ -1,19 +1,21 @@
 package com.jozufozu.flywheel.lib.visual;
 
+import java.util.function.LongConsumer;
+
 import org.joml.FrustumIntersection;
 
 import com.jozufozu.flywheel.api.visual.BlockEntityVisual;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
+import com.jozufozu.flywheel.api.visual.LitVisual;
 import com.jozufozu.flywheel.api.visual.PlannedVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualManager;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
-import com.jozufozu.flywheel.lib.box.Box;
-import com.jozufozu.flywheel.lib.box.MutableBox;
 import com.jozufozu.flywheel.lib.math.MoreMath;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -33,7 +35,7 @@ import net.minecraft.world.level.block.state.BlockState;
  *
  * @param <T> The type of {@link BlockEntity}.
  */
-public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends AbstractVisual implements BlockEntityVisual<T> {
+public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends AbstractVisual implements BlockEntityVisual<T>, LitVisual {
 	protected final T blockEntity;
 	protected final BlockPos pos;
 	protected final BlockPos visualPos;
@@ -48,13 +50,18 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	}
 
 	@Override
-	public boolean shouldReset() {
-		return blockEntity.getBlockState() != blockState;
+	public void init(float partialTick) {
+		updateLight();
 	}
 
 	@Override
-	public Box getVolume() {
-		return MutableBox.from(pos);
+	public void collectLightSections(LongConsumer consumer) {
+		consumer.accept(SectionPos.asLong(pos));
+	}
+
+	@Override
+	public boolean shouldReset() {
+		return blockEntity.getBlockState() != blockState;
 	}
 
 	/**

@@ -3,19 +3,19 @@ package com.jozufozu.flywheel.lib.visual;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.jozufozu.flywheel.api.instance.InstancerProvider;
 import com.jozufozu.flywheel.api.visual.Visual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.instance.FlatLit;
-import com.jozufozu.flywheel.lib.light.LightListener;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 
-public abstract class AbstractVisual implements Visual, LightListener {
+public abstract class AbstractVisual implements Visual {
 	/**
 	 * The visualization context used to construct this visual.
 	 * <br>
@@ -36,27 +36,12 @@ public abstract class AbstractVisual implements Visual, LightListener {
 	}
 
 	@Override
-	public void init(float partialTick) {
-		visualizationContext.lightUpdater()
-				.addListener(this);
-		updateLight();
-	}
-
-	@Override
 	public void update(float partialTick) {
 	}
 
 	@Override
 	public boolean shouldReset() {
 		return false;
-	}
-
-	/**
-	 * Called after initialization and when a light update occurs in the world.
-	 * <br>
-	 * If your instances need it, update light here.
-	 */
-	public void updateLight() {
 	}
 
 	protected abstract void _delete();
@@ -68,26 +53,14 @@ public abstract class AbstractVisual implements Visual, LightListener {
 		}
 
 		_delete();
-		visualizationContext.lightUpdater()
-				.removeListener(this);
 		deleted = true;
 	}
 
-	@Override
-	public void onLightUpdate(LightLayer type, SectionPos pos) {
-		updateLight();
-	}
-
-	@Override
-	public boolean isInvalid() {
-		return deleted;
-	}
-
-	protected void relight(BlockPos pos, FlatLit... instances) {
+	protected void relight(BlockPos pos, @Nullable FlatLit... instances) {
 		relight(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos), instances);
 	}
 
-	protected void relight(int block, int sky, FlatLit... instances) {
+	protected void relight(int block, int sky, @Nullable FlatLit... instances) {
 		for (FlatLit instance : instances) {
 			if (instance == null) {
 				continue;
@@ -99,22 +72,22 @@ public abstract class AbstractVisual implements Visual, LightListener {
 		}
 	}
 
-	protected void relight(BlockPos pos, Stream<? extends FlatLit> instances) {
+	protected void relight(BlockPos pos, Stream<? extends @Nullable FlatLit> instances) {
 		relight(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos), instances);
 	}
 
-	protected void relight(int block, int sky, Stream<? extends FlatLit> instances) {
+	protected void relight(int block, int sky, Stream<? extends @Nullable FlatLit> instances) {
 		instances.filter(Objects::nonNull)
 				.forEach(instance -> instance.setLight(block, sky)
 				.handle()
 				.setChanged());
 	}
 
-	protected void relight(BlockPos pos, Iterable<? extends FlatLit> instances) {
+	protected void relight(BlockPos pos, Iterable<? extends @Nullable FlatLit> instances) {
 		relight(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos), instances);
 	}
 
-	protected void relight(int block, int sky, Iterable<? extends FlatLit> instances) {
+	protected void relight(int block, int sky, Iterable<? extends @Nullable FlatLit> instances) {
 		for (FlatLit instance : instances) {
 			if (instance == null) {
 				continue;

@@ -11,7 +11,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
 
-public class LightVolume implements Box, LightListener {
+public class LightVolume implements Box {
 
 	protected final BlockAndTintGetter level;
 	protected final MutableBox box = new MutableBox();
@@ -24,7 +24,6 @@ public class LightVolume implements Box, LightListener {
 		this.lightData = MemoryBlock.malloc(this.box.volume() * 2);
 	}
 
-	@Override
 	public Box getVolume() {
 		return box;
 	}
@@ -59,7 +58,6 @@ public class LightVolume implements Box, LightListener {
 		return box.getMaxZ();
 	}
 
-	@Override
 	public boolean isInvalid() {
 		return lightData == null;
 	}
@@ -207,7 +205,6 @@ public class LightVolume implements Box, LightListener {
 		return (x + box.sizeX() * (y + z * box.sizeY())) * 2;
 	}
 
-	@Override
 	public void onLightUpdate(LightLayer type, SectionPos pos) {
 		if (lightData == null) return;
 
