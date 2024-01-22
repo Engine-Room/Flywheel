@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.lib.visual;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import com.jozufozu.flywheel.api.instance.InstancerProvider;
@@ -88,6 +89,10 @@ public abstract class AbstractVisual implements Visual, LightListener {
 
 	protected void relight(int block, int sky, FlatLit... instances) {
 		for (FlatLit instance : instances) {
+			if (instance == null) {
+				continue;
+			}
+
 			instance.setLight(block, sky);
 			instance.handle()
 					.setChanged();
@@ -99,8 +104,24 @@ public abstract class AbstractVisual implements Visual, LightListener {
 	}
 
 	protected void relight(int block, int sky, Stream<? extends FlatLit> instances) {
-		instances.forEach(model -> model.setLight(block, sky)
+		instances.filter(Objects::nonNull)
+				.forEach(instance -> instance.setLight(block, sky)
 				.handle()
 				.setChanged());
+	}
+
+	protected void relight(BlockPos pos, Iterable<? extends FlatLit> instances) {
+		relight(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos), instances);
+	}
+
+	protected void relight(int block, int sky, Iterable<? extends FlatLit> instances) {
+		for (FlatLit instance : instances) {
+			if (instance == null) {
+				continue;
+			}
+			instance.setLight(block, sky)
+					.handle()
+					.setChanged();
+		}
 	}
 }

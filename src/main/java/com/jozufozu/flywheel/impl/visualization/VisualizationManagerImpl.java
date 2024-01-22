@@ -6,6 +6,8 @@ import java.util.SortedSet;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
+import org.joml.FrustumIntersection;
+import org.joml.Matrix4f;
 
 import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.backend.Engine;
@@ -100,21 +102,25 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 				.then(RaisePlan.raise(tickFlag))
 				.simplify();
 
+		var lightUpdatePlan = lightUpdater.plan();
+
+		var recreate = SimplePlan.<RenderContext>of(context -> blockEntities.getStorage()
+						.recreateAll(context.partialTick()), context -> entities.getStorage()
+						.recreateAll(context.partialTick()), context -> effects.getStorage()
+						.recreateAll(context.partialTick()))
+				.then(lightUpdatePlan);
+
+		var update = SimplePlan.<RenderContext>of(context -> blockEntities.processQueue(context.partialTick()), context -> entities.processQueue(context.partialTick()), context -> effects.processQueue(context.partialTick()))
+				.then(lightUpdatePlan.and(MapContextPlan.map(this::createVisualContext)
+						.to(NestedPlan.of(blockEntities.getStorage()
+								.getFramePlan(), entities.getStorage()
+								.getFramePlan(), effects.getStorage()
+								.getFramePlan()))));
+
 		framePlan = IfElsePlan.on((RenderContext ctx) -> engine.updateRenderOrigin(ctx.camera()))
-				.ifTrue(MapContextPlan.map(RenderContext::partialTick)
-						.to(blockEntities.createRecreationPlan()
-								.and(entities.createRecreationPlan())
-								.and(effects.createRecreationPlan())))
-				.ifFalse(MapContextPlan.map((RenderContext ctx) -> createVisualContext(FrameContext.create(ctx, engine.renderOrigin())))
-						.to(NestedPlan.of(SimplePlan.<VisualFrameContext>of(context -> blockEntities.processQueue(context.partialTick()))
-								.then(blockEntities.getStorage()
-										.getFramePlan()), SimplePlan.<VisualFrameContext>of(context -> entities.processQueue(context.partialTick()))
-								.then(entities.getStorage()
-										.getFramePlan()), SimplePlan.<VisualFrameContext>of(context -> effects.processQueue(context.partialTick()))
-								.then(effects.getStorage()
-										.getFramePlan()))))
+				.ifTrue(recreate)
+				.ifFalse(update)
 				.plan()
-				.then(lightUpdater.plan())
 				.then(RaisePlan.raise(frameVisualsFlag))
 				.then(engine.createFramePlan())
 				.then(RaisePlan.raise(frameFlag))
@@ -126,8 +132,19 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 		}
 	}
 
-	private VisualFrameContext createVisualContext(FrameContext ctx) {
-		return new VisualFrameContext(ctx.cameraX(), ctx.cameraY(), ctx.cameraZ(), ctx.frustum(), ctx.partialTick(), frameLimiter);
+	private VisualFrameContext createVisualContext(RenderContext ctx) {
+		Vec3i renderOrigin = engine.renderOrigin();
+		var cameraPos = ctx.camera()
+				.getPosition();
+		double cameraX = cameraPos.x;
+		double cameraY = cameraPos.y;
+		double cameraZ = cameraPos.z;
+
+		Matrix4f viewProjection = new Matrix4f(ctx.viewProjection());
+		viewProjection.translate((float) (renderOrigin.getX() - cameraX), (float) (renderOrigin.getY() - cameraY), (float) (renderOrigin.getZ() - cameraZ));
+		FrustumIntersection frustum = new FrustumIntersection(viewProjection);
+
+		return new VisualFrameContext(cameraX, cameraY, cameraZ, frustum, ctx.partialTick(), frameLimiter);
 	}
 
 	private VisualTickContext createVisualTickContext(TickContext ctx) {
@@ -235,8 +252,6 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 
 		tickLimiter.tick();
 
-		lightUpdater.tick();
-
 		tickPlan.execute(taskExecutor, new TickContext(cameraX, cameraY, cameraZ));
 	}
 
@@ -257,6 +272,7 @@ public class VisualizationManagerImpl implements VisualizationManager, Supplier<
 		frameFlag.lower();
 
 		frameLimiter.tick();
+
 		framePlan.execute(taskExecutor, context);
 	}
 
