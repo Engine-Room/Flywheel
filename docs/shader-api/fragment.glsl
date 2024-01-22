@@ -13,9 +13,6 @@
 
 /*const*/ float flw_distance;
 
-/*const*/ bool flw_vertexDiffuse;
-
-bool flw_fragDiffuse;
 vec4 flw_fragColor;
 ivec2 flw_fragOverlay;
 vec2 flw_fragLight;

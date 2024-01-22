@@ -12,6 +12,4 @@ out vec3 flw_vertexNormal;
 
 out float flw_distance;
 
-bool flw_vertexDiffuse;
-
 FlwMaterial flw_material;

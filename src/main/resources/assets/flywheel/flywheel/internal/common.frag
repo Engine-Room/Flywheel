@@ -10,8 +10,6 @@ uniform sampler2D _flw_diffuseTex;
 uniform sampler2D _flw_overlayTex;
 uniform sampler2D _flw_lightTex;
 
-flat in uint _flw_vertexDiffuse;
-
 out vec4 _flw_outputColor;
 
 void _flw_main() {
@@ -20,16 +18,13 @@ void _flw_main() {
     flw_fragOverlay = flw_vertexOverlay;
     flw_fragLight = flw_vertexLight;
 
-    flw_vertexDiffuse = bool(_flw_vertexDiffuse);
-    flw_fragDiffuse = flw_vertexDiffuse;
-
     flw_beginFragment();
     flw_materialFragment();
     flw_endFragment();
 
     vec4 color = flw_fragColor;
 
-    if (flw_fragDiffuse) {
+    if (flw_material.diffuse) {
         float diffuseFactor;
         if (flw_constantAmbientLight == 1u) {
             diffuseFactor = diffuseNether(flw_vertexNormal);
