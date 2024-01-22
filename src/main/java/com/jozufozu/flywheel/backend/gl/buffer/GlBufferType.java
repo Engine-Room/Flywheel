@@ -53,7 +53,7 @@ public enum GlBufferType {
 		};
 	}
 
-    public void bind(int buffer) {
+	public void bind(int buffer) {
 		GlStateTracker.bindBuffer(this, buffer);
 	}
 }

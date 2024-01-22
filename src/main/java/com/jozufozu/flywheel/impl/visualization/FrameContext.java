@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.impl.visualization;
 
-import org.jetbrains.annotations.NotNull;
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
 
@@ -9,7 +8,6 @@ import com.jozufozu.flywheel.api.event.RenderContext;
 import net.minecraft.core.Vec3i;
 
 public record FrameContext(double cameraX, double cameraY, double cameraZ, FrustumIntersection frustum, float partialTick) {
-	@NotNull
 	public static FrameContext create(RenderContext context, Vec3i renderOrigin) {
 		var cameraPos = context.camera()
 				.getPosition();

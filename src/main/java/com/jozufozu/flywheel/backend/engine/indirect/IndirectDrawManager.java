@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
@@ -158,7 +156,6 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 		block.free();
 	}
 
-	@NotNull
 	private static Map<InstanceType<?>, Int2ObjectMap<List<Pair<IndirectInstancer<?>, InstanceHandleImpl>>>> doCrumblingSort(List<Engine.CrumblingBlock> crumblingBlocks) {
 		Map<InstanceType<?>, Int2ObjectMap<List<Pair<IndirectInstancer<?>, InstanceHandleImpl>>>> byType = new HashMap<>();
 		for (Engine.CrumblingBlock block : crumblingBlocks) {

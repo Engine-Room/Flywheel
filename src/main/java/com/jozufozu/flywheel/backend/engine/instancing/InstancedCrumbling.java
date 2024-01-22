@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
@@ -74,7 +72,6 @@ public class InstancedCrumbling {
 		}
 	}
 
-	@NotNull
 	private static Map<ShaderState, Int2ObjectMap<List<Runnable>>> doCrumblingSort(List<Engine.CrumblingBlock> instances) {
 		Map<ShaderState, Int2ObjectMap<List<Runnable>>> out = new HashMap<>();
 

@@ -10,7 +10,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
@@ -98,7 +97,7 @@ public class Compile<K> {
 	public static class ShaderCompiler<K> {
 		private final GlslVersion glslVersion;
 		private final ShaderType shaderType;
-		private final List<BiFunction<K, SourceLoader, SourceComponent>> fetchers = new ArrayList<>();
+		private final List<BiFunction<K, SourceLoader, @Nullable SourceComponent>> fetchers = new ArrayList<>();
 		private Consumer<Compilation> compilationCallbacks = $ -> {
 		};
 		private Function<K, String> nameMapper = Object::toString;
@@ -113,25 +112,25 @@ public class Compile<K> {
 			return this;
 		}
 
-		public ShaderCompiler<K> with(BiFunction<K, SourceLoader, SourceComponent> fetch) {
+		public ShaderCompiler<K> with(BiFunction<K, SourceLoader, @Nullable SourceComponent> fetch) {
 			fetchers.add(fetch);
 			return this;
 		}
 
-		public ShaderCompiler<K> withComponents(Collection<SourceComponent> components) {
+		public ShaderCompiler<K> withComponents(Collection<@Nullable SourceComponent> components) {
 			components.forEach(this::withComponent);
 			return this;
 		}
 
-		public ShaderCompiler<K> withComponent(SourceComponent component) {
+		public ShaderCompiler<K> withComponent(@Nullable SourceComponent component) {
 			return withComponent($ -> component);
 		}
 
-		public ShaderCompiler<K> withComponent(Function<K, @NotNull SourceComponent> sourceFetcher) {
+		public ShaderCompiler<K> withComponent(Function<K, @Nullable SourceComponent> sourceFetcher) {
 			return with((key, $) -> sourceFetcher.apply(key));
 		}
 
-		public ShaderCompiler<K> withResource(Function<K, @NotNull ResourceLocation> sourceFetcher) {
+		public ShaderCompiler<K> withResource(Function<K, ResourceLocation> sourceFetcher) {
 			return with((key, loader) -> loader.find(sourceFetcher.apply(key)));
 		}
 

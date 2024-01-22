@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
@@ -71,7 +70,6 @@ public class CompilerStats {
 				.collect(Collectors.joining("\n"));
 	}
 
-	@NotNull
 	private String linkErrors() {
 		return String.join("\n", programErrors);
 	}

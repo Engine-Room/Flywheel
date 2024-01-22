@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.backend.engine.indirect;
 
 import java.util.function.LongConsumer;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL45;
 import org.lwjgl.opengl.GL45C;
@@ -227,7 +226,6 @@ public class StagingBuffer {
 		FlwMemoryTracker._freeCPUMemory(capacity);
 	}
 
-	@NotNull
 	private MemoryBlock getScratch(long size) {
 		if (scratch == null) {
 			scratch = MemoryBlock.malloc(size);

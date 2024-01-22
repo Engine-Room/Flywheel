@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.lib.util;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.jozufozu.flywheel.Flywheel;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -55,7 +53,6 @@ public final class ResourceUtil {
 		}
 	}
 
-	@NotNull
 	public static String toDebugFileNameNoExtension(ResourceLocation resourceLocation) {
 		var stringLoc = resourceLocation.toString();
 		return stringLoc.substring(0, stringLoc.lastIndexOf('.'))

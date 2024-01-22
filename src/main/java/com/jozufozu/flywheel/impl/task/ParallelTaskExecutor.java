@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.Flywheel;
@@ -106,7 +105,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	}
 
 	@Override
-	public void execute(@NotNull Runnable task) {
+	public void execute(Runnable task) {
 		if (!running.get()) {
 			throw new IllegalStateException("Executor is stopped");
 		}

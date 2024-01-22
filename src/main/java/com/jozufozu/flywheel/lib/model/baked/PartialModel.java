@@ -3,8 +3,6 @@ package com.jozufozu.flywheel.lib.model.baked;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
-
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.ModelEvent;
@@ -51,7 +49,6 @@ public class PartialModel {
 		}
 	}
 
-	@NotNull
 	public String getName() {
 		return getLocation()
 				.toString();

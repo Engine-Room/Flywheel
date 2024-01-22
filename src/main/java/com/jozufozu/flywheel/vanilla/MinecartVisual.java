@@ -70,7 +70,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 			return null;
 		}
 
-        return instancerProvider.instancer(InstanceTypes.TRANSFORMED, Models.block(blockState), RenderStage.AFTER_ENTITIES)
+		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, Models.block(blockState), RenderStage.AFTER_ENTITIES)
 				.createInstance();
 	}
 

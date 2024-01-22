@@ -10,7 +10,7 @@ public class StringSpan extends Span {
 
 	@Override
 	public Span subSpan(int from, int to) {
-        return new StringSpan(in, start.pos() + from, start.pos() + to);
+		return new StringSpan(in, start.pos() + from, start.pos() + to);
 	}
 
 	@Override

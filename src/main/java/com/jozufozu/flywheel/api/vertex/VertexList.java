@@ -44,7 +44,7 @@ public interface VertexList {
 		return dest.set(x(i), y(i), z(i));
 	}
 
-    default Vector3f getNormal(int i, Vector3f dest) {
+	default Vector3f getNormal(int i, Vector3f dest) {
 		return dest.set(normalX(i), normalY(i), normalZ(i));
 	}
 

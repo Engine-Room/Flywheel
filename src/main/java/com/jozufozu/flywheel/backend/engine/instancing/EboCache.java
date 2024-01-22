@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.engine.instancing;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.model.IndexSequence;
@@ -55,7 +54,6 @@ public class EboCache {
 	}
 
 	private record Entry(int ebo, int gpuSize) {
-		@NotNull
 		private static Entry create(IndexSequence provider, int indexCount) {
 			int byteSize = indexCount * GlNumericType.UINT.byteWidth();
 			var ebo = Buffer.IMPL.create();

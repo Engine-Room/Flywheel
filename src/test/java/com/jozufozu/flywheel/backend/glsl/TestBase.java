@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.jozufozu.flywheel.Flywheel;
 
 import net.minecraft.resources.ResourceLocation;
@@ -22,7 +20,6 @@ public class TestBase {
 		return list.get(0);
 	}
 
-	@NotNull
 	public static <E extends LoadError> E findAndAssertError(Class<E> clazz, MockShaderSources sources, ResourceLocation loc) {
 		var result = sources.find(loc);
 		var failure = assertInstanceOf(LoadResult.Failure.class, result);
@@ -40,13 +37,11 @@ public class TestBase {
 		return assertInstanceOf(finalErrType, pair.second());
 	}
 
-	@NotNull
 	public static SourceFile findAndAssertSuccess(MockShaderSources sources, ResourceLocation loc) {
 		var result = sources.find(loc);
 		return assertSuccessAndUnwrap(loc, result);
 	}
 
-	@NotNull
 	public static SourceFile assertSuccessAndUnwrap(ResourceLocation expectedName, LoadResult result) {
 		assertInstanceOf(LoadResult.Success.class, result);
 

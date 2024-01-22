@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 
 import net.minecraft.resources.ResourceLocation;
@@ -21,7 +20,6 @@ public class MockShaderSources extends ShaderSources {
 		sources.put(loc, source);
 	}
 
-	@NotNull
 	@Override
 	protected LoadResult load(ResourceLocation loc) {
 		var maybeFound = sources.get(loc);

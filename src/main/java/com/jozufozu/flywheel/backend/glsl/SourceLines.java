@@ -3,8 +3,6 @@ package com.jozufozu.flywheel.backend.glsl;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.glsl.span.CharPos;
 
@@ -14,8 +12,7 @@ import it.unimi.dsi.fastutil.ints.IntLists;
 import net.minecraft.resources.ResourceLocation;
 
 public class SourceLines implements CharSequence {
-
-	private static final Pattern newLine = Pattern.compile("(\\r\\n|\\r|\\n)");
+	private static final Pattern NEW_LINE = Pattern.compile("(\\r\\n|\\r|\\n)");
 
 	public final ResourceLocation name;
 	/**
@@ -88,7 +85,7 @@ public class SourceLines implements CharSequence {
 		IntList l = new IntArrayList();
 		l.add(0); // first line is always at position 0
 
-		Matcher matcher = newLine.matcher(source);
+		Matcher matcher = NEW_LINE.matcher(source);
 
 		while (matcher.find()) {
 			l.add(matcher.end());
@@ -116,16 +113,17 @@ public class SourceLines implements CharSequence {
 		return raw;
 	}
 
-	@NotNull
 	@Override
 	public CharSequence subSequence(int start, int end) {
 		return raw.subSequence(start, end);
 	}
 
+	@Override
 	public char charAt(int i) {
 		return raw.charAt(i);
 	}
 
+	@Override
 	public int length() {
 		return raw.length();
 	}

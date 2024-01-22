@@ -3,8 +3,6 @@ package com.jozufozu.flywheel.lib.visual;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.jozufozu.flywheel.api.visual.EntityVisual;
 import com.jozufozu.flywheel.api.visualization.EntityVisualizer;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
@@ -45,7 +43,7 @@ public class SimpleEntityVisualizer<T extends Entity> implements EntityVisualize
 
 	@FunctionalInterface
 	public interface Factory<T extends Entity> {
-		@NotNull EntityVisual<? super T> create(VisualizationContext ctx, T entity);
+		EntityVisual<? super T> create(VisualizationContext ctx, T entity);
 	}
 
 	/**

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -148,7 +147,6 @@ public class ErrorBuilder {
 		return lineStream.collect(Collectors.joining("\n"));
 	}
 
-	@NotNull
 	private Stream<String> getLineStream() {
 		int maxMargin = calculateMargin();
 
