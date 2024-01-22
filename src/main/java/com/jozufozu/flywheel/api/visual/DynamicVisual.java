@@ -15,9 +15,12 @@ import com.jozufozu.flywheel.api.instance.Instancer;
 public interface DynamicVisual extends Visual {
 	/**
 	 * Called every frame.
-	 * <p>
-	 * <b>DISPATCHED IN PARALLEL</b>. Ensure proper synchronization if you need to mutate anything outside this visual.
-	 * <p>
+	 * <br>
+	 * The implementation is free to parallelize calls to this method.
+	 * You must ensure proper synchronization if you need to mutate anything outside this visual.
+	 * <br>
+	 * This method and {@link TickableVisual#tick} will never be called simultaneously.
+	 * <br>
 	 * {@link Instancer}/{@link Instance} creation/acquisition is safe here.
 	 */
 	void beginFrame(VisualFrameContext ctx);

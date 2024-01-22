@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.mixin;
 
 import java.util.SortedSet;
 
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -15,9 +16,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.api.event.BeginFrameEvent;
 import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
-import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.event.RenderStageEvent;
+import com.jozufozu.flywheel.impl.event.RenderContextImpl;
 import com.jozufozu.flywheel.impl.visualization.VisualizationManagerImpl;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -45,12 +46,13 @@ abstract class LevelRendererMixin {
 	private Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress;
 
 	@Unique
-	private RenderContext flywheel$renderContext;
+	@Nullable
+	private RenderContextImpl flywheel$renderContext;
 
 	//	@Inject(method = "renderLevel", at = @At("HEAD"))
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runLightUpdates()I"))
 	private void flywheel$beginRender(PoseStack poseStack, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
-		flywheel$renderContext = RenderContext.create((LevelRenderer) (Object) this, level, renderBuffers, poseStack, projectionMatrix, camera, partialTick);
+		flywheel$renderContext = RenderContextImpl.create((LevelRenderer) (Object) this, level, renderBuffers, poseStack, projectionMatrix, camera, partialTick);
 
 		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(flywheel$renderContext));
 	}
@@ -67,6 +69,10 @@ abstract class LevelRendererMixin {
 
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=destroyProgress"))
 	private void flywheel$beforeRenderCrumbling(CallbackInfo ci) {
+		if (flywheel$renderContext == null) {
+			return;
+		}
+
 		var manager = VisualizationManagerImpl.get(level);
 		if (manager != null) {
 			manager.renderCrumbling(flywheel$renderContext, destructionProgress);
