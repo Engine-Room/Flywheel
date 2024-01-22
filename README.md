@@ -2,7 +2,7 @@
 	<img src="https://i.imgur.com/yVFgPpr.png" alt="Logo by @voxel_dani on Twitter" width="250">
 	<h1>Flywheel</h1>
 	<h6>A modern engine for modded Minecraft.</h6>
-	<a href='https://ci.tterrag.com/job/Flywheel/job/Forge/job/1.18/'><img src='https://ci.tterrag.com/job/Flywheel/job/Forge/job/1.18/badge/icon' alt="Jenkins"></a>
+	<a href='https://ci.tterrag.com/job/Flywheel/job/Fabric/job/1.18/'><img src='https://ci.tterrag.com/job/Flywheel/job/Fabric/job/1.18/badge/icon' alt="Jenkins"></a>
 	<a href="https://github.com/Jozufozu/Flywheel/blob/HEAD/LICENSE.md"><img src="https://img.shields.io/github/license/Jozufozu/Flywheel?style=flat&color=900c3f" alt="License"></a>
 	<a href="https://discord.gg/xjD59ThnXy"><img src="https://img.shields.io/discord/841464837406195712?color=5865f2&label=Discord&style=flat" alt="Discord"></a>
 	<a href="https://www.curseforge.com/minecraft/mc-mods/flywheel"><img src="http://cf.way2muchnoise.eu/486392.svg" alt="Curseforge Downloads"></a>
@@ -48,17 +48,10 @@ repositories {
 }
 
 dependencies {
-    implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
+    modImplementation "com.jozufozu.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_version}"
 }
 ```
 `${flywheel_version}` gets replaced by the version of Flywheel you want to use, eg. `0.6.9`.
 `${flywheel_minecraft_version}` gets replaced by the version of Minecraft, eg. `1.18.2`.
 
 For a list of available Flywheel versions, you can check [the maven](https://maven.tterrag.com/com/jozufozu/flywheel/).
-
-If you aren't using Mojang mappings (or just want to be safe), add the following properties to your run configurations:
-```groovy
-property 'mixin.env.remapRefMap', 'true'
-property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-```
-This ensures that Flywheel's mixins get properly loaded in your dev env.

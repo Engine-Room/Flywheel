@@ -6,19 +6,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
-import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
 import com.jozufozu.flywheel.util.Mods;
 
+import ca.spottedleaf.starlight.common.chunk.ExtendedChunk;
+import ca.spottedleaf.starlight.common.light.StarLightEngine;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
@@ -59,8 +59,13 @@ public class VirtualChunk extends ChunkAccess {
 
 		this.needsLight = true;
 
+		Mods.STARLIGHT.executeIfInstalled(() -> () -> {
+			((ExtendedChunk) this).setBlockNibbles(StarLightEngine.getFilledEmptyLight(this));
+			((ExtendedChunk) this).setSkyNibbles(StarLightEngine.getFilledEmptyLight(this));
+		});
 	}
 
+	@Override
 	@Nullable
 	public BlockState setBlockState(BlockPos pos, BlockState state, boolean isMoving) {
 		return null;
@@ -110,8 +115,16 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
+	public void setStartForStructure(Structure structure, StructureStart structureStart) {
+	}
+
+	@Override
 	public Map<Structure, StructureStart> getAllStarts() {
 		return Collections.emptyMap();
+	}
+
+	@Override
+	public void setAllStarts(Map<Structure, StructureStart> structureStarts) {
 	}
 
 	@Override
@@ -133,7 +146,12 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public void setStartForStructure(Structure structure, StructureStart structureStart) {
+	public void setUnsaved(boolean unsaved) {
+	}
+
+	@Override
+	public boolean isUnsaved() {
+		return false;
 	}
 
 	@Override
@@ -146,7 +164,8 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public void setAllStarts(Map<Structure, StructureStart> structureStarts) {
+	public ShortList[] getPostProcessing() {
+		return new ShortList[0];
 	}
 
 	@Override
@@ -187,7 +206,8 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public void setUnsaved(boolean unsaved) {
+	public long getInhabitedTime() {
+		return 0;
 	}
 
 	@Override
@@ -195,8 +215,8 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public boolean isUnsaved() {
-		return false;
+	public boolean isLightCorrect() {
+		return needsLight;
 	}
 
 	@Override
@@ -208,11 +228,6 @@ public class VirtualChunk extends ChunkAccess {
 	@Nullable
 	public BlockEntity getBlockEntity(BlockPos pos) {
 		return world.getBlockEntity(pos);
-	}
-
-	@Override
-	public ShortList[] getPostProcessing() {
-		return new ShortList[0];
 	}
 
 	@Override

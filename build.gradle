@@ -1,6 +1,7 @@
 plugins {
     id 'fabric-loom' version "${loom_version}"
     id 'maven-publish'
+    id 'com.matthewprenger.cursegradle' version "${cursegradle_version}"
 }
 
 boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
@@ -24,6 +25,10 @@ repositories {
         content {
             includeGroup "curse.maven"
         }
+    }
+    maven {
+        name 'tterrag maven'
+        url 'https://maven.tterrag.com/'
     }
     maven {
         url 'https://maven.parchmentmc.org/'
@@ -59,6 +64,9 @@ dependencies {
 
     // Fabric API
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+
+    // switch to implementation for debugging
+    modCompileOnly 'maven.modrinth:starlight:1.1.2+1.20'
 
     modCompileOnly 'maven.modrinth:sodium:mc1.20.1-0.5.3'
     modCompileOnly 'maven.modrinth:iris:1.6.10+1.20.1'
@@ -138,3 +146,18 @@ publishing {
     }
 }
 
+tasks.curseforge.enabled = !dev && project.hasProperty('jozu_curseforge_key')
+
+curseforge {
+    if (project.hasProperty('jozu_curseforge_key')) {
+        apiKey = project.jozu_curseforge_key
+    }
+
+    project {
+        id = project.projectId
+        changelog = file('changelog.txt')
+        releaseType = project.curse_type
+        mainArtifact jar
+        addGameVersion '1.20.1'
+    }
+}
