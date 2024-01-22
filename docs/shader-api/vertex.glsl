@@ -7,8 +7,6 @@ ivec2 flw_vertexOverlay;
 vec2 flw_vertexLight;
 vec3 flw_vertexNormal;
 
-bool flw_vertexDiffuse;
-
 /*const*/ FlwMaterial flw_material;
 
 // To be implemented by the instance shader.
