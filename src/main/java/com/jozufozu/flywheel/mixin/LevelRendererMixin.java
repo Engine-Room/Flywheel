@@ -88,31 +88,6 @@ abstract class LevelRendererMixin {
 		}
 	}
 
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=sky"))
-	private void flywheel$onStage$beforeSky(CallbackInfo ci) {
-		flywheel$dispatch(RenderStage.BEFORE_SKY);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=fog"))
-	private void flywheel$onStage$afterSky(CallbackInfo ci) {
-		flywheel$dispatch(RenderStage.AFTER_SKY);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=terrain"))
-	private void flywheel$onStage$beforeTerrain(CallbackInfo ci) {
-		flywheel$dispatch(RenderStage.BEFORE_TERRAIN);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=entities"))
-	private void flywheel$onStage$afterSolidTerrain(CallbackInfo ci) {
-		flywheel$dispatch(RenderStage.AFTER_SOLID_TERRAIN);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderBuffers;bufferSource()Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;", ordinal = 0))
-	private void flywheel$onStage$beforeEntities(CallbackInfo ci) {
-		flywheel$dispatch(RenderStage.BEFORE_ENTITIES);
-	}
-
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=blockentities"))
 	private void flywheel$onStage$beforeBlockEntities(CallbackInfo ci) {
 		flywheel$dispatch(RenderStage.AFTER_ENTITIES);
@@ -123,24 +98,9 @@ abstract class LevelRendererMixin {
 		flywheel$dispatch(RenderStage.AFTER_BLOCK_ENTITIES);
 	}
 
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 0))
-	private void flywheel$onStage$beforeCrumbling(CallbackInfo ci) {
-		flywheel$dispatch(RenderStage.BEFORE_CRUMBLING);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;translucentTarget:Lcom/mojang/blaze3d/pipeline/RenderTarget;", opcode = Opcodes.GETFIELD, ordinal = 0))
-	private void flywheel$onStage$afterFinalEndBatch$fabulous(CallbackInfo ci) {
-		flywheel$dispatch(RenderStage.AFTER_FINAL_END_BATCH);
-	}
-
 	@Inject(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;particlesTarget:Lcom/mojang/blaze3d/pipeline/RenderTarget;", opcode = Opcodes.GETFIELD, ordinal = 0))
 	private void flywheel$onStage$afterTranslucentTerrain$fabulous(CallbackInfo ci) {
 		flywheel$dispatch(RenderStage.AFTER_TRANSLUCENT_TERRAIN);
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 2, shift = Shift.AFTER))
-	private void flywheel$onStage$afterFinalEndBatch(CallbackInfo ci) {
-		flywheel$dispatch(RenderStage.AFTER_FINAL_END_BATCH);
 	}
 
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLorg/joml/Matrix4f;)V", ordinal = 6, shift = Shift.AFTER))
