@@ -1,8 +1,10 @@
 package com.jozufozu.flywheel.api.instance;
 
+import com.jozufozu.flywheel.api.BackendImplemented;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.model.Model;
 
+@BackendImplemented
 public interface InstancerProvider {
 	/**
 	 * Get an instancer for the given instance type, model, and render stage.
