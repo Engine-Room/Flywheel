@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.api.backend;
 
 import java.util.List;
 
+import com.jozufozu.flywheel.api.BackendImplemented;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
@@ -13,6 +14,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 
+@BackendImplemented
 public interface Engine extends InstancerProvider {
 	/**
 	 * Create a plan that will be executed every frame.

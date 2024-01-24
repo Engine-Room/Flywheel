@@ -2,6 +2,8 @@ package com.jozufozu.flywheel.api.instance;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.jozufozu.flywheel.api.BackendImplemented;
+
 /**
  * An instancer is how you interact with an instanced model.
  * <p>
@@ -20,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @param <I> the data that represents a copy of the instanced model.
  */
+@BackendImplemented
 public interface Instancer<I extends Instance> {
 	/**
 	 * @return a handle to a new copy of this model.
