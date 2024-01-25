@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.api.visualization;
 
 import com.jozufozu.flywheel.api.visual.EntityVisual;
 
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.Entity;
 
 /**
@@ -19,9 +20,9 @@ public interface EntityVisualizer<T extends Entity> {
 	EntityVisual<? super T> createVisual(VisualizationContext ctx, T entity);
 
 	/**
-	 * Checks if the given entity should not render normally.
+	 * Checks if the given entity should not render with the vanilla {@link EntityRenderer}.
 	 * @param entity The entity to check.
-	 * @return {@code true} if the entity should not render normally, {@code false} if it should.
+	 * @return {@code true} if the entity should not render with the vanilla {@link EntityRenderer}, {@code false} if it should.
 	 */
-	boolean shouldSkipRender(T entity);
+	boolean skipVanillaRender(T entity);
 }

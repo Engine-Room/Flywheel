@@ -4,35 +4,21 @@ import com.jozufozu.flywheel.api.instance.InstanceHandle;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 
 public abstract class ColoredLitInstance extends AbstractInstance implements FlatLit {
-	public byte blockLight;
-	public byte skyLight;
-
 	public byte r = (byte) 0xFF;
 	public byte g = (byte) 0xFF;
 	public byte b = (byte) 0xFF;
 	public byte a = (byte) 0xFF;
 
+	public byte blockLight;
+	public byte skyLight;
+
+	public int overlay = OverlayTexture.NO_OVERLAY;
+
 	public ColoredLitInstance(InstanceType<? extends ColoredLitInstance> type, InstanceHandle handle) {
 		super(type, handle);
-	}
-
-	@Override
-	public ColoredLitInstance setBlockLight(int blockLight) {
-		this.blockLight = (byte) blockLight;
-		return this;
-	}
-
-	@Override
-	public ColoredLitInstance setSkyLight(int skyLight) {
-		this.skyLight = (byte) skyLight;
-		return this;
-	}
-
-	@Override
-	public int getPackedLight() {
-		return LightTexture.pack(blockLight, skyLight);
 	}
 
 	public ColoredLitInstance setColor(int color) {
@@ -68,6 +54,28 @@ public abstract class ColoredLitInstance extends AbstractInstance implements Fla
 		this.g = g;
 		this.b = b;
 		this.a = a;
+		return this;
+	}
+
+	@Override
+	public ColoredLitInstance setBlockLight(int blockLight) {
+		this.blockLight = (byte) blockLight;
+		return this;
+	}
+
+	@Override
+	public ColoredLitInstance setSkyLight(int skyLight) {
+		this.skyLight = (byte) skyLight;
+		return this;
+	}
+
+	@Override
+	public int getPackedLight() {
+		return LightTexture.pack(blockLight, skyLight);
+	}
+
+	public ColoredLitInstance setOverlay(int overlay) {
+		this.overlay = overlay;
 		return this;
 	}
 }

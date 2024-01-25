@@ -60,7 +60,7 @@ public final class VisualizationHelper {
 		if (visualizer == null) {
 			return false;
 		}
-		return visualizer.shouldSkipRender(blockEntity);
+		return visualizer.skipVanillaRender(blockEntity);
 	}
 
 	/**
@@ -74,7 +74,7 @@ public final class VisualizationHelper {
 		if (visualizer == null) {
 			return false;
 		}
-		return visualizer.shouldSkipRender(entity);
+		return visualizer.skipVanillaRender(entity);
 	}
 
 	public static <T extends BlockEntity> boolean tryAddBlockEntity(T blockEntity) {
@@ -91,6 +91,6 @@ public final class VisualizationHelper {
 
 		manager.getBlockEntities().queueAdd(blockEntity);
 
-		return visualizer.shouldSkipRender(blockEntity);
+		return visualizer.skipVanillaRender(blockEntity);
 	}
 }

@@ -8,16 +8,17 @@ import com.jozufozu.flywheel.api.visualization.BlockEntityVisualizer;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.api.visualization.VisualizerRegistry;
 
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class SimpleBlockEntityVisualizer<T extends BlockEntity> implements BlockEntityVisualizer<T> {
 	protected Factory<T> visualFactory;
-	protected Predicate<T> skipRender;
+	protected Predicate<T> skipVanillaRender;
 
-	public SimpleBlockEntityVisualizer(Factory<T> visualFactory, Predicate<T> skipRender) {
+	public SimpleBlockEntityVisualizer(Factory<T> visualFactory, Predicate<T> skipVanillaRender) {
 		this.visualFactory = visualFactory;
-		this.skipRender = skipRender;
+		this.skipVanillaRender = skipVanillaRender;
 	}
 
 	@Override
@@ -26,8 +27,8 @@ public class SimpleBlockEntityVisualizer<T extends BlockEntity> implements Block
 	}
 
 	@Override
-	public boolean shouldSkipRender(T blockEntity) {
-		return skipRender.test(blockEntity);
+	public boolean skipVanillaRender(T blockEntity) {
+		return skipVanillaRender.test(blockEntity);
 	}
 
 	/**
@@ -37,8 +38,8 @@ public class SimpleBlockEntityVisualizer<T extends BlockEntity> implements Block
 	 * @param <T>  The type of the block entity.
 	 * @return The configuration object.
 	 */
-	public static <T extends BlockEntity> BlockEntityConfig<T> configure(BlockEntityType<T> type) {
-		return new BlockEntityConfig<>(type);
+	public static <T extends BlockEntity> Builder<T> builder(BlockEntityType<T> type) {
+		return new Builder<>(type);
 	}
 
 	@FunctionalInterface
@@ -51,12 +52,12 @@ public class SimpleBlockEntityVisualizer<T extends BlockEntity> implements Block
 	 *
 	 * @param <T> The type of the block entity.
 	 */
-	public static class BlockEntityConfig<T extends BlockEntity> {
+	public static class Builder<T extends BlockEntity> {
 		protected BlockEntityType<T> type;
 		protected Factory<T> visualFactory;
-		protected Predicate<T> skipRender;
+		protected Predicate<T> skipVanillaRender;
 
-		public BlockEntityConfig(BlockEntityType<T> type) {
+		public Builder(BlockEntityType<T> type) {
 			this.type = type;
 		}
 
@@ -66,40 +67,44 @@ public class SimpleBlockEntityVisualizer<T extends BlockEntity> implements Block
 		 * @param visualFactory The visual factory.
 		 * @return {@code this}
 		 */
-		public BlockEntityConfig<T> factory(Factory<T> visualFactory) {
+		public Builder<T> factory(Factory<T> visualFactory) {
 			this.visualFactory = visualFactory;
 			return this;
 		}
 
 		/**
-		 * Sets a predicate to determine whether to skip rendering a block entity.
-		 * @param skipRender The predicate.
+		 * Sets a predicate to determine whether to skip rendering with the vanilla {@link BlockEntityRenderer}.
+		 *
+		 * @param skipVanillaRender The predicate.
 		 * @return {@code this}
 		 */
-		public BlockEntityConfig<T> skipRender(Predicate<T> skipRender) {
-			this.skipRender = skipRender;
+		public Builder<T> skipVanillaRender(Predicate<T> skipVanillaRender) {
+			this.skipVanillaRender = skipVanillaRender;
 			return this;
 		}
 
 		/**
-		 * Sets a predicate to always skip rendering for block entities of this type.
+		 * Sets a predicate to never skip rendering with the vanilla {@link BlockEntityRenderer}.
+		 *
 		 * @return {@code this}
 		 */
-		public BlockEntityConfig<T> alwaysSkipRender() {
-			this.skipRender = be -> true;
+		public Builder<T> neverSkipVanillaRender() {
+			this.skipVanillaRender = blockEntity -> false;
 			return this;
 		}
 
 		/**
-		 * Constructs the block entity visualizer, and sets it for the block entity type.
+		 * Constructs the block entity visualizer and sets it for the block entity type.
+		 *
 		 * @return The block entity visualizer.
 		 */
 		public SimpleBlockEntityVisualizer<T> apply() {
 			Objects.requireNonNull(visualFactory, "Visual factory cannot be null!");
-			if (skipRender == null) {
-				skipRender = be -> false;
+			if (skipVanillaRender == null) {
+				skipVanillaRender = blockEntity -> true;
 			}
-			SimpleBlockEntityVisualizer<T> visualizer = new SimpleBlockEntityVisualizer<>(visualFactory, skipRender);
+
+			SimpleBlockEntityVisualizer<T> visualizer = new SimpleBlockEntityVisualizer<>(visualFactory, skipVanillaRender);
 			VisualizerRegistry.setVisualizer(type, visualizer);
 			return visualizer;
 		}

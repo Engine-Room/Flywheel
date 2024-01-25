@@ -17,6 +17,7 @@ import com.jozufozu.flywheel.lib.visual.AbstractEntityVisual;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -25,9 +26,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVisual<T> implements TickableVisual, DynamicVisual {
-	private static final ModelHolder BODY_MODEL = new ModelHolder(() -> {
-		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.MINECART), Materials.MINECART);
-	});
+	public static final ModelHolder CHEST_BODY_MODEL = createBodyModelHolder(ModelLayers.CHEST_MINECART);
+	public static final ModelHolder COMMAND_BLOCK_BODY_MODEL = createBodyModelHolder(ModelLayers.COMMAND_BLOCK_MINECART);
+	public static final ModelHolder FURNACE_BODY_MODEL = createBodyModelHolder(ModelLayers.FURNACE_MINECART);
+	public static final ModelHolder HOPPER_BODY_MODEL = createBodyModelHolder(ModelLayers.HOPPER_MINECART);
+	public static final ModelHolder STANDARD_BODY_MODEL = createBodyModelHolder(ModelLayers.MINECART);
+	public static final ModelHolder SPAWNER_BODY_MODEL = createBodyModelHolder(ModelLayers.SPAWNER_MINECART);
+	public static final ModelHolder TNT_BODY_MODEL = createBodyModelHolder(ModelLayers.TNT_MINECART);
+
+	private final ModelHolder bodyModel;
 
 	private TransformedInstance body;
 	private TransformedInstance contents;
@@ -36,8 +43,15 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 
 	private final PoseStack stack = new PoseStack();
 
-	public MinecartVisual(VisualizationContext ctx, T entity) {
+	public MinecartVisual(VisualizationContext ctx, T entity, ModelHolder bodyModel) {
 		super(ctx, entity);
+		this.bodyModel = bodyModel;
+	}
+
+	private static ModelHolder createBodyModelHolder(ModelLayerLocation layer) {
+		return new ModelHolder(() -> {
+			return new SingleMeshModel(ModelPartConverter.convert(layer), Materials.MINECART);
+		});
 	}
 
 	@Override
@@ -46,13 +60,13 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		blockState = entity.getDisplayBlockState();
 		contents = createContentsInstance();
 
-		updatePosition(partialTick);
+		updateInstances(partialTick);
 
 		super.init(partialTick);
 	}
 
 	private TransformedInstance createBodyInstance() {
-		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, BODY_MODEL.get(), RenderStage.AFTER_ENTITIES)
+		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, bodyModel.get(), RenderStage.AFTER_ENTITIES)
 				.createInstance();
 	}
 
@@ -75,7 +89,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	}
 
 	@Override
-	public void tick(VisualTickContext c) {
+	public void tick(VisualTickContext context) {
 		BlockState displayBlockState = entity.getDisplayBlockState();
 
 		if (displayBlockState != blockState) {
@@ -98,10 +112,10 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 			return;
 		}
 
-		updatePosition(context.partialTick());
+		updateInstances(context.partialTick());
 	}
 
-	private void updatePosition(float partialTick) {
+	private void updateInstances(float partialTick) {
 		stack.setIdentity();
 
 		double posX = Mth.lerp(partialTick, entity.xOld, entity.getX());
@@ -160,15 +174,19 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		if (contents != null) {
 			stack.pushPose();
 			stack.scale(0.75F, 0.75F, 0.75F);
-			stack.translate(-0.5D, (float) (displayOffset - 8) / 16, 0.5D);
+			stack.translate(-0.5F, (float) (displayOffset - 8) / 16, 0.5F);
 			stack.mulPose(Axis.YP.rotationDegrees(90));
-			contents.setTransform(stack)
-					.setChanged();
+			updateContents(contents, stack, partialTick);
 			stack.popPose();
 		}
 
 		stack.scale(-1.0F, -1.0F, 1.0F);
 		body.setTransform(stack)
+				.setChanged();
+	}
+
+	protected void updateContents(TransformedInstance contents, PoseStack stack, float partialTick) {
+		contents.setTransform(stack)
 				.setChanged();
 	}
 
