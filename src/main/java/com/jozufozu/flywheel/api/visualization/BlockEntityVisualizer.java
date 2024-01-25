@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.api.visualization;
 
 import com.jozufozu.flywheel.api.visual.BlockEntityVisual;
 
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
@@ -19,9 +20,9 @@ public interface BlockEntityVisualizer<T extends BlockEntity> {
 	BlockEntityVisual<? super T> createVisual(VisualizationContext ctx, T blockEntity);
 
 	/**
-	 * Checks if the given block entity should not be rendered normally.
+	 * Checks if the given block entity should not be rendered with the vanilla {@link BlockEntityRenderer}.
 	 * @param blockEntity The block entity to check.
-	 * @return {@code true} if the block entity should not be rendered normally, {@code false} if it should.
+	 * @return {@code true} if the block entity should not be rendered with the vanilla {@link BlockEntityRenderer}, {@code false} if it should.
 	 */
-	boolean shouldSkipRender(T blockEntity);
+	boolean skipVanillaRender(T blockEntity);
 }

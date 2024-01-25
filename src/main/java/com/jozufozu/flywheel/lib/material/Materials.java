@@ -10,54 +10,44 @@ public final class Materials {
 	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
 
 	public static final Material CHUNK_SOLID_SHADED = SimpleMaterial.builder()
-			.useOverlay(false)
 			.build();
 	public static final Material CHUNK_SOLID_UNSHADED = SimpleMaterial.builder()
-			.useOverlay(false)
 			.diffuse(false)
 			.build();
 
 	public static final Material CHUNK_CUTOUT_MIPPED_SHADED = SimpleMaterial.builder()
 			.cutout(CutoutShaders.HALF)
-			.useOverlay(false)
 			.build();
 	public static final Material CHUNK_CUTOUT_MIPPED_UNSHADED = SimpleMaterial.builder()
 			.cutout(CutoutShaders.HALF)
-			.useOverlay(false)
 			.diffuse(false)
 			.build();
 
 	public static final Material CHUNK_CUTOUT_SHADED = SimpleMaterial.builder()
 			.cutout(CutoutShaders.ONE_TENTH)
 			.mipmap(false)
-			.useOverlay(false)
 			.build();
 	public static final Material CHUNK_CUTOUT_UNSHADED = SimpleMaterial.builder()
 			.cutout(CutoutShaders.ONE_TENTH)
 			.mipmap(false)
-			.useOverlay(false)
 			.diffuse(false)
 			.build();
 
 	public static final Material CHUNK_TRANSLUCENT_SHADED = SimpleMaterial.builder()
 			.transparency(Transparency.TRANSLUCENT)
-			.useOverlay(false)
 			.build();
 	public static final Material CHUNK_TRANSLUCENT_UNSHADED = SimpleMaterial.builder()
 			.transparency(Transparency.TRANSLUCENT)
-			.useOverlay(false)
 			.diffuse(false)
 			.build();
 
 	public static final Material CHUNK_TRIPWIRE_SHADED = SimpleMaterial.builder()
 			.cutout(CutoutShaders.ONE_TENTH)
 			.transparency(Transparency.TRANSLUCENT)
-			.useOverlay(false)
 			.build();
 	public static final Material CHUNK_TRIPWIRE_UNSHADED = SimpleMaterial.builder()
 			.cutout(CutoutShaders.ONE_TENTH)
 			.transparency(Transparency.TRANSLUCENT)
-			.useOverlay(false)
 			.diffuse(false)
 			.build();
 

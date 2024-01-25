@@ -8,16 +8,17 @@ import com.jozufozu.flywheel.api.visualization.EntityVisualizer;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.api.visualization.VisualizerRegistry;
 
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
 public class SimpleEntityVisualizer<T extends Entity> implements EntityVisualizer<T> {
 	protected Factory<T> visualFactory;
-	protected Predicate<T> skipRender;
+	protected Predicate<T> skipVanillaRender;
 
-	public SimpleEntityVisualizer(Factory<T> visualFactory, Predicate<T> skipRender) {
+	public SimpleEntityVisualizer(Factory<T> visualFactory, Predicate<T> skipVanillaRender) {
 		this.visualFactory = visualFactory;
-		this.skipRender = skipRender;
+		this.skipVanillaRender = skipVanillaRender;
 	}
 
 	@Override
@@ -26,8 +27,8 @@ public class SimpleEntityVisualizer<T extends Entity> implements EntityVisualize
 	}
 
 	@Override
-	public boolean shouldSkipRender(T entity) {
-		return skipRender.test(entity);
+	public boolean skipVanillaRender(T entity) {
+		return skipVanillaRender.test(entity);
 	}
 
 	/**
@@ -37,8 +38,8 @@ public class SimpleEntityVisualizer<T extends Entity> implements EntityVisualize
 	 * @param <T>  The type of the entity.
 	 * @return The configuration object.
 	 */
-	public static <T extends Entity> EntityConfig<T> configure(EntityType<T> type) {
-		return new EntityConfig<>(type);
+	public static <T extends Entity> Builder<T> builder(EntityType<T> type) {
+		return new Builder<>(type);
 	}
 
 	@FunctionalInterface
@@ -51,12 +52,12 @@ public class SimpleEntityVisualizer<T extends Entity> implements EntityVisualize
 	 *
 	 * @param <T> The type of the entity.
 	 */
-	public static class EntityConfig<T extends Entity> {
+	public static class Builder<T extends Entity> {
 		protected EntityType<T> type;
 		protected Factory<T> visualFactory;
-		protected Predicate<T> skipRender;
+		protected Predicate<T> skipVanillaRender;
 
-		public EntityConfig(EntityType<T> type) {
+		public Builder(EntityType<T> type) {
 			this.type = type;
 		}
 
@@ -66,40 +67,44 @@ public class SimpleEntityVisualizer<T extends Entity> implements EntityVisualize
 		 * @param visualFactory The visual factory.
 		 * @return {@code this}
 		 */
-		public EntityConfig<T> factory(Factory<T> visualFactory) {
+		public Builder<T> factory(Factory<T> visualFactory) {
 			this.visualFactory = visualFactory;
 			return this;
 		}
 
 		/**
-		 * Sets a predicate to determine whether to skip rendering an entity.
-		 * @param skipRender The predicate.
+		 * Sets a predicate to determine whether to skip rendering with the vanilla {@link EntityRenderer}.
+		 *
+		 * @param skipVanillaRender The predicate.
 		 * @return {@code this}
 		 */
-		public EntityConfig<T> skipRender(Predicate<T> skipRender) {
-			this.skipRender = skipRender;
+		public Builder<T> skipVanillaRender(Predicate<T> skipVanillaRender) {
+			this.skipVanillaRender = skipVanillaRender;
 			return this;
 		}
 
 		/**
-		 * Sets a predicate to always skip rendering for entities of this type.
+		 * Sets a predicate to always skip rendering with the vanilla {@link EntityRenderer}.
+		 *
 		 * @return {@code this}
 		 */
-		public EntityConfig<T> alwaysSkipRender() {
-			this.skipRender = entity -> true;
+		public Builder<T> neverSkipVanillaRender() {
+			this.skipVanillaRender = entity -> false;
 			return this;
 		}
 
 		/**
-		 * Constructs the entity visualizer, and sets it for the entity type.
+		 * Constructs the entity visualizer and sets it for the entity type.
+		 *
 		 * @return The entity visualizer.
 		 */
 		public SimpleEntityVisualizer<T> apply() {
 			Objects.requireNonNull(visualFactory, "Visual factory cannot be null!");
-			if (skipRender == null) {
-				skipRender = entity -> false;
+			if (skipVanillaRender == null) {
+				skipVanillaRender = entity -> true;
 			}
-			SimpleEntityVisualizer<T> visualizer = new SimpleEntityVisualizer<>(visualFactory, skipRender);
+
+			SimpleEntityVisualizer<T> visualizer = new SimpleEntityVisualizer<>(visualFactory, skipVanillaRender);
 			VisualizerRegistry.setVisualizer(type, visualizer);
 			return visualizer;
 		}

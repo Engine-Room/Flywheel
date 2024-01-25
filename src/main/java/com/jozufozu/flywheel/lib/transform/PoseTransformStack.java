@@ -12,10 +12,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
  * <br>
  * Only one instance of this class should exist per {@link PoseStack}.
  */
+@ApiStatus.Internal
 public class PoseTransformStack implements TransformStack<PoseTransformStack> {
 	private final PoseStack stack;
 
-	@ApiStatus.Internal
 	public PoseTransformStack(PoseStack stack) {
 		this.stack = stack;
 	}

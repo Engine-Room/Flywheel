@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.vanilla;
 
-import static com.jozufozu.flywheel.lib.visual.SimpleBlockEntityVisualizer.configure;
-import static com.jozufozu.flywheel.lib.visual.SimpleEntityVisualizer.configure;
+import static com.jozufozu.flywheel.lib.visual.SimpleBlockEntityVisualizer.builder;
+import static com.jozufozu.flywheel.lib.visual.SimpleEntityVisualizer.builder;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -28,48 +28,51 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
  */
 public class VanillaVisuals {
 	public static void init() {
-		configure(BlockEntityType.CHEST)
-				.alwaysSkipRender()
+		builder(BlockEntityType.CHEST)
 				.factory(ChestVisual::new)
 				.apply();
-		configure(BlockEntityType.ENDER_CHEST)
-				.alwaysSkipRender()
+		builder(BlockEntityType.ENDER_CHEST)
 				.factory(ChestVisual::new)
 				.apply();
-		configure(BlockEntityType.TRAPPED_CHEST)
-				.alwaysSkipRender()
+		builder(BlockEntityType.TRAPPED_CHEST)
 				.factory(ChestVisual::new)
 				.apply();
 
-		configure(BlockEntityType.BELL)
-				.alwaysSkipRender()
+		builder(BlockEntityType.BELL)
 				.factory(BellVisual::new)
 				.apply();
 
-		configure(BlockEntityType.SHULKER_BOX)
-				.alwaysSkipRender()
+		builder(BlockEntityType.SHULKER_BOX)
 				.factory(ShulkerBoxVisual::new)
 				.apply();
 
-		configure(EntityType.MINECART)
-				.skipRender(MinecartVisual::shouldSkipRender)
-				.factory(MinecartVisual::new)
+		builder(EntityType.CHEST_MINECART)
+				.factory((ctx, entity) -> new MinecartVisual<>(ctx, entity, MinecartVisual.CHEST_BODY_MODEL))
+				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply();
-		configure(EntityType.COMMAND_BLOCK_MINECART)
-				.skipRender(MinecartVisual::shouldSkipRender)
-				.factory(MinecartVisual::new)
+		builder(EntityType.COMMAND_BLOCK_MINECART)
+				.factory((ctx, entity) -> new MinecartVisual<>(ctx, entity, MinecartVisual.COMMAND_BLOCK_BODY_MODEL))
+				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply();
-		configure(EntityType.FURNACE_MINECART)
-				.skipRender(MinecartVisual::shouldSkipRender)
-				.factory(MinecartVisual::new)
+		builder(EntityType.FURNACE_MINECART)
+				.factory((ctx, entity) -> new MinecartVisual<>(ctx, entity, MinecartVisual.FURNACE_BODY_MODEL))
+				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply();
-		configure(EntityType.HOPPER_MINECART)
-				.skipRender(MinecartVisual::shouldSkipRender)
-				.factory(MinecartVisual::new)
+		builder(EntityType.HOPPER_MINECART)
+				.factory((ctx, entity) -> new MinecartVisual<>(ctx, entity, MinecartVisual.HOPPER_BODY_MODEL))
+				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply();
-		configure(EntityType.TNT_MINECART)
-				.skipRender(MinecartVisual::shouldSkipRender)
-				.factory(MinecartVisual::new)
+		builder(EntityType.MINECART)
+				.factory((ctx, entity) -> new MinecartVisual<>(ctx, entity, MinecartVisual.STANDARD_BODY_MODEL))
+				.skipVanillaRender(MinecartVisual::shouldSkipRender)
+				.apply();
+		builder(EntityType.SPAWNER_MINECART)
+				.factory((ctx, entity) -> new MinecartVisual<>(ctx, entity, MinecartVisual.SPAWNER_BODY_MODEL))
+				.skipVanillaRender(MinecartVisual::shouldSkipRender)
+				.apply();
+		builder(EntityType.TNT_MINECART)
+				.factory(TntMinecartVisual::new)
+				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply();
 	}
 }
