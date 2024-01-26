@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.lib.visual;
 
 import java.util.function.LongConsumer;
 
+import org.jetbrains.annotations.Nullable;
 import org.joml.FrustumIntersection;
 
 import com.jozufozu.flywheel.api.visual.BlockEntityVisual;
@@ -40,6 +41,8 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	protected final BlockPos pos;
 	protected final BlockPos visualPos;
 	protected final BlockState blockState;
+	@Nullable
+	protected LitVisual.Notifier notifier;
 
 	public AbstractBlockEntityVisual(VisualizationContext ctx, T blockEntity) {
 		super(ctx, blockEntity.getLevel());
@@ -57,6 +60,11 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	@Override
 	public void collectLightSections(LongConsumer consumer) {
 		consumer.accept(SectionPos.asLong(pos));
+	}
+
+	@Override
+	public void initLightSectionNotifier(Notifier notifier) {
+		this.notifier = notifier;
 	}
 
 	@Override

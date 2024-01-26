@@ -98,20 +98,14 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		entities = new VisualManagerImpl<>(entitiesStorage);
 		effects = new VisualManagerImpl<>(effectsStorage);
 
-		tickPlan = NestedPlan.of(SimplePlan.<VisualTickContext>of(context -> blockEntities.processQueue(0))
-						.then(blockEntitiesStorage.getTickPlan()), SimplePlan.<VisualTickContext>of(context -> entities.processQueue(0))
-						.then(entitiesStorage.getTickPlan()), SimplePlan.<VisualTickContext>of(context -> effects.processQueue(0))
-						.then(effectsStorage.getTickPlan()))
+		tickPlan = NestedPlan.of(blockEntities.tickPlan(), entities.tickPlan(), effects.tickPlan())
 				.then(RaisePlan.raise(tickFlag))
 				.simplify();
 
 		var recreate = SimplePlan.<RenderContext>of(context -> blockEntitiesStorage.recreateAll(context.partialTick()), context -> entitiesStorage.recreateAll(context.partialTick()), context -> effectsStorage.recreateAll(context.partialTick()));
 
 		var update = MapContextPlan.map(this::createVisualFrameContext)
-				.to(NestedPlan.of(SimplePlan.<VisualFrameContext>of(context -> blockEntities.processQueue(0))
-						.then(blockEntitiesStorage.getFramePlan()), SimplePlan.<VisualFrameContext>of(context -> entities.processQueue(0))
-						.then(entitiesStorage.getFramePlan()), SimplePlan.<VisualFrameContext>of(context -> effects.processQueue(0))
-						.then(effectsStorage.getFramePlan())));
+				.to(NestedPlan.of(blockEntities.framePlan(), entities.framePlan(), effects.framePlan()));
 
 		framePlan = IfElsePlan.on((RenderContext ctx) -> engine.updateRenderOrigin(ctx.camera()))
 				.ifTrue(recreate)

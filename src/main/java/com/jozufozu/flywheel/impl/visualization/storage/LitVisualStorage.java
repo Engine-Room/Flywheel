@@ -2,8 +2,12 @@ package com.jozufozu.flywheel.impl.visualization.storage;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.jetbrains.annotations.NotNull;
 
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
@@ -30,25 +34,28 @@ public class LitVisualStorage {
 	private final Map<LitVisual, LongSet> visuals2Sections = new WeakHashMap<>();
 	private final Long2ObjectMap<List<Updater>> sections2Visuals = new Long2ObjectOpenHashMap<>();
 
-	private final LongSet sectionsQueue = new LongOpenHashSet();
+	private final Queue<LitVisual> movedVisuals = new ConcurrentLinkedQueue<>();
+	private final LongSet sectionsUpdatedThisFrame = new LongOpenHashSet();
 
 	private long updateId = INITIAL_UPDATE_ID;
 
 	public Plan<VisualFrameContext> plan() {
 		return (SimplyComposedPlan<VisualFrameContext>) (TaskExecutor taskExecutor, VisualFrameContext context, Runnable onCompletion) -> {
-			if (sectionsQueue.isEmpty()) {
+			processMoved();
+
+			if (sectionsUpdatedThisFrame.isEmpty()) {
 				onCompletion.run();
 				return;
 			}
 
-			var sync = new Synchronizer(sectionsQueue.size(), () -> {
-				sectionsQueue.clear();
+			var sync = new Synchronizer(sectionsUpdatedThisFrame.size(), () -> {
+				sectionsUpdatedThisFrame.clear();
 				onCompletion.run();
 			});
 
 			long updateId = getNextUpdateId();
 
-			for (long section : sectionsQueue) {
+			for (long section : sectionsUpdatedThisFrame) {
 				var visuals = sections2Visuals.get(section);
 				if (visuals != null && !visuals.isEmpty()) {
 					taskExecutor.execute(() -> PlanUtil.distribute(taskExecutor, updateId, sync, visuals, Updater::updateLight));
@@ -57,6 +64,16 @@ public class LitVisualStorage {
 				}
 			}
 		};
+	}
+
+	private void processMoved() {
+		LitVisual visual;
+		while ((visual = movedVisuals.poll()) != null) {
+			// If the visual isn't there when we try to remove it that means it was deleted before we got to it.
+			if (remove(visual)) {
+				add(visual);
+			}
+		}
 	}
 
 	private long getNextUpdateId() {
@@ -75,37 +92,47 @@ public class LitVisualStorage {
 		return visuals2Sections.isEmpty();
 	}
 
-	public void add(LitVisual visual) {
+	public void addAndInitNotifier(LitVisual visual) {
+		visual.initLightSectionNotifier(new LitVisualNotifierImpl(visual));
+		add(visual);
+	}
+
+	private void add(LitVisual visual) {
 		LongSet sections = new LongArraySet();
 
 		visual.collectLightSections(sections::add);
 
-		Updater updater;
+		// Add the visual to the map even if sections is empty, this way we can distinguish from deleted visuals
+		visuals2Sections.put(visual, sections);
+
+		// Don't bother creating an updater if the visual isn't in any sections.
 		if (sections.isEmpty()) {
 			return;
-		} else if (sections.size() == 1) {
-			updater = new Updater.Simple(visual);
-		} else {
-			updater = new Updater.Synced(visual, new AtomicLong(NEVER_UPDATED));
 		}
+
+		var updater = createUpdater(visual, sections.size());
 
 		for (long section : sections) {
 			sections2Visuals.computeIfAbsent(section, $ -> new ObjectArrayList<>())
 					.add(updater);
 		}
-
-		visuals2Sections.put(visual, sections);
 	}
 
 	public void enqueueLightUpdateSections(LongSet sections) {
-		sectionsQueue.addAll(sections);
+		sectionsUpdatedThisFrame.addAll(sections);
 	}
 
-	public void remove(LitVisual visual) {
+	/**
+	 * Remove the visual from this storage.
+	 *
+	 * @param visual The visual to remove.
+	 * @return {@code true} if the visual was removed, {@code false} otherwise.
+	 */
+	public boolean remove(LitVisual visual) {
 		var sections = visuals2Sections.remove(visual);
 
 		if (sections == null) {
-			return;
+			return false;
 		}
 
 		for (long section : sections) {
@@ -114,12 +141,14 @@ public class LitVisualStorage {
 				listeners.remove(indexOfUpdater(listeners, visual));
 			}
 		}
+
+		return true;
 	}
 
 	public void clear() {
 		visuals2Sections.clear();
 		sections2Visuals.clear();
-		sectionsQueue.clear();
+		sectionsUpdatedThisFrame.clear();
 	}
 
 	private static int indexOfUpdater(List<Updater> listeners, LitVisual visual) {
@@ -130,6 +159,15 @@ public class LitVisualStorage {
 			}
 		}
 		return -1;
+	}
+
+	@NotNull
+	private static Updater createUpdater(LitVisual visual, int sectionCount) {
+		if (sectionCount == 1) {
+			return new Updater.Simple(visual);
+		} else {
+			return new Updater.Synced(visual, new AtomicLong(NEVER_UPDATED));
+		}
 	}
 
 	// Breaking this into 2 separate cases allows us to avoid the sync overhead in the common case.
@@ -160,4 +198,17 @@ public class LitVisualStorage {
 			}
 		}
 	}
+
+	private final class LitVisualNotifierImpl implements LitVisual.Notifier {
+		private final LitVisual litVisual;
+
+		private LitVisualNotifierImpl(LitVisual litVisual) {
+			this.litVisual = litVisual;
+		}
+
+		@Override
+		public void notifySectionsChanged() {
+			movedVisuals.add(litVisual);
+        }
+    }
 }

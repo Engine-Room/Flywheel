@@ -26,10 +26,33 @@ public interface LitVisual extends Visual {
 	/**
 	 * Collect the sections that this visual is contained in.
 	 * <br>
-	 * This method is only called upon visual creation.
+	 * This method is called upon visual creation, and the frame after {@link Notifier#notifySectionsChanged} is called.
 	 *
 	 * @param consumer The consumer to provide the sections to.
 	 * @see SectionPos#asLong
 	 */
 	void collectLightSections(LongConsumer consumer);
+
+	/**
+	 * Set the notifier object.
+	 * <br>
+	 * This method is only called once, upon visual creation,
+	 * after {@link #init} and before {@link #collectLightSections}.
+	 *
+	 * @param notifier The notifier.
+	 */
+	void initLightSectionNotifier(Notifier notifier);
+
+	/**
+	 * A notifier object that can be used to indicate to the impl
+	 * that the sections a visual is contained in have changed.
+	 */
+	interface Notifier {
+		/**
+		 * Invoke this to indicate to the impl that your visual has moved to a different set of sections.
+		 * <br>
+		 * The next frame, the impl will call {@link LitVisual#collectLightSections} again.
+		 */
+		void notifySectionsChanged();
+	}
 }
