@@ -98,12 +98,12 @@ public interface Rotate<S extends Rotate<S>> {
 
 	default S rotateToFace(Direction facing) {
 		return switch (facing) {
-		case DOWN -> rotateXDegrees(-90);
-		case UP -> rotateXDegrees(90);
+			case DOWN -> rotateXDegrees(-90);
+			case UP -> rotateXDegrees(90);
 			case NORTH -> self();
-		case SOUTH -> rotateYDegrees(180);
-		case WEST -> rotateYDegrees(90);
-		case EAST -> rotateYDegrees(270);
+			case SOUTH -> rotateYDegrees(180);
+			case WEST -> rotateYDegrees(90);
+			case EAST -> rotateYDegrees(270);
 		};
 	}
 
