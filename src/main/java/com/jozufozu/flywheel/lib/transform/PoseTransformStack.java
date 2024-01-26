@@ -12,10 +12,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
  * <br>
  * Only one instance of this class should exist per {@link PoseStack}.
  */
-@ApiStatus.Internal
 public class PoseTransformStack implements TransformStack<PoseTransformStack> {
-	private final PoseStack stack;
+	public final PoseStack stack;
 
+	@ApiStatus.Internal
 	public PoseTransformStack(PoseStack stack) {
 		this.stack = stack;
 	}
@@ -23,6 +23,12 @@ public class PoseTransformStack implements TransformStack<PoseTransformStack> {
 	@Override
 	public PoseTransformStack rotate(Quaternionf quaternion) {
 		stack.mulPose(quaternion);
+		return this;
+	}
+
+	@Override
+	public PoseTransformStack rotateAround(Quaternionf quaternion, float x, float y, float z) {
+		stack.rotateAround(quaternion, x, y, z);
 		return this;
 	}
 

@@ -33,6 +33,13 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	}
 
 	@Override
+	public TransformedInstance rotateAround(Quaternionf quaternion, float x, float y, float z) {
+		this.model.rotateAround(quaternion, x, y, z);
+		this.normal.rotate(quaternion);
+		return this;
+	}
+
+	@Override
 	public TransformedInstance scale(float x, float y, float z) {
 		model.scale(x, y, z);
 

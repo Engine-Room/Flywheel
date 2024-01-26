@@ -6,6 +6,8 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 
 public interface Translate<Self extends Translate<Self>> {
+	float CENTER = 0.5f;
+
 	Self translate(double x, double y, double z);
 
 	default Self translate(double v) {
@@ -57,11 +59,11 @@ public interface Translate<Self extends Translate<Self>> {
 	}
 
 	default Self center() {
-		return translate(0.5);
+		return translate(CENTER);
 	}
 
 	default Self uncenter() {
-		return translate(-0.5);
+		return translate(-CENTER);
 	}
 
 	/**
