@@ -169,7 +169,7 @@ public abstract class Storage<T> {
 		}
 
 		if (visual instanceof LitVisual lit) {
-			litVisuals.add(lit);
+			litVisuals.addAndInitNotifier(lit);
 		}
 	}
 
