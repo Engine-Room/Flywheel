@@ -4,12 +4,11 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
 
-import com.dreizak.miniball.highdim.Miniball;
-import com.dreizak.miniball.model.PointSet;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.vertex.VertexList;
@@ -37,6 +36,7 @@ public final class ModelUtil {
 	 * Meant to be used for virtual rendering.
 	 */
 	public static final BlockRenderDispatcher VANILLA_RENDERER = createVanillaRenderer();
+	private static final float BOUNDING_SPHERE_EPSILON = 1e-4f;
 
 	private ModelUtil() {
 	}
@@ -128,33 +128,47 @@ public final class ModelUtil {
 	}
 
 	public static Vector4f computeBoundingSphere(VertexList vertexList) {
-		return computeBoundingSphere(new PointSet() {
-			@Override
-			public int size() {
-				return vertexList.vertexCount();
-			}
+		var center = computeCenterOfAABBContaining(vertexList);
 
-			@Override
-			public int dimension() {
-				return 3;
-			}
+		var radius = computeMaxDistanceTo(vertexList, center) + BOUNDING_SPHERE_EPSILON;
 
-			@Override
-			public double coord(int i, int dim) {
-				return switch (dim) {
-					case 0 -> vertexList.x(i);
-					case 1 -> vertexList.y(i);
-					case 2 -> vertexList.z(i);
-					default -> throw new IllegalArgumentException("Invalid dimension: " + dim);
-				};
-			}
-		});
+		return new Vector4f(center, radius);
 	}
 
-	public static Vector4f computeBoundingSphere(PointSet points) {
-		var miniball = new Miniball(points);
-		double[] center = miniball.center();
-		double radius = miniball.radius();
-		return new Vector4f((float) center[0], (float) center[1], (float) center[2], (float) radius);
+	private static float computeMaxDistanceTo(VertexList vertexList, Vector3f pos) {
+		float farthestDistanceSquared = -1;
+
+		for (int i = 0; i < vertexList.vertexCount(); i++) {
+			var distanceSquared = pos.distanceSquared(vertexList.x(i), vertexList.y(i), vertexList.z(i));
+
+			if (distanceSquared > farthestDistanceSquared) {
+				farthestDistanceSquared = distanceSquared;
+			}
+		}
+
+		return (float) Math.sqrt(farthestDistanceSquared);
+	}
+
+	private static Vector3f computeCenterOfAABBContaining(VertexList vertexList) {
+		var min = new Vector3f(Float.MAX_VALUE);
+		var max = new Vector3f(Float.MIN_VALUE);
+
+		for (int i = 0; i < vertexList.vertexCount(); i++) {
+			float x = vertexList.x(i);
+			float y = vertexList.y(i);
+			float z = vertexList.z(i);
+
+			// JOML's min/max methods don't accept floats :whywheel:
+			min.x = Math.min(min.x, x);
+			min.y = Math.min(min.y, y);
+			min.z = Math.min(min.z, z);
+
+			max.x = Math.max(max.x, x);
+			max.y = Math.max(max.y, y);
+			max.z = Math.max(max.z, z);
+		}
+
+		return min.add(max)
+				.mul(0.5f);
 	}
 }

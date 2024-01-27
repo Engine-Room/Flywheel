@@ -74,30 +74,12 @@ repositories {
     mavenCentral()
 }
 
-// Fix for loading non-mod libraries in dev-env, used for Miniball.
-// https://gist.github.com/SizableShrimp/66b22f1b24c255e1491c8d98d3f11f83
-// v--------------------------------------------------------------------v
-configurations {
-    library
-    implementation.extendsFrom library
-}
-
-minecraft.runs.configureEach {
-    lazyToken('minecraft_classpath') {
-        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
-    }
-}
-// ^--------------------------------------------------------------------^
-
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     compileOnly fg.deobf("maven.modrinth:embeddium:0.2.10+mc1.20.1")
     compileOnly fg.deobf("maven.modrinth:oculus:1.20.1-1.6.9")
-
-    jarJar(group: 'com.dreizak', name: 'miniball', version: '[1.0.3,2.0.0)')
-    library 'com.dreizak:miniball:1.0.3'
 
     // https://discord.com/channels/313125603924639766/725850371834118214/910619168821354497
     // Prevent Mixin annotation processor from getting into IntelliJ's annotation processor settings
