@@ -7,8 +7,6 @@ plugins {
     id 'org.spongepowered.mixin' version "${mixingradle_version}"
 }
 
-jarJar.enable()
-
 boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
 
 ext.buildNumber = System.getenv('BUILD_NUMBER')
@@ -114,7 +112,6 @@ idea {
 // Workaround for SpongePowered/MixinGradle#38
 afterEvaluate {
     tasks.configureReobfTaskForReobfJar.mustRunAfter(tasks.compileJava)
-    tasks.configureReobfTaskForReobfJarJar.mustRunAfter(tasks.compileJava)
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -170,17 +167,9 @@ void addManifest(jarTask) {
 }
 
 tasks.named('jar', Jar).configure {
-    archiveClassifier = 'slim'
-
-    finalizedBy 'reobfJar'
-    addManifest(it)
-    addLicense(it)
-}
-
-tasks.named('jarJar', Jar).configure {
     archiveClassifier = ''
 
-    finalizedBy 'reobfJarJar'
+    finalizedBy 'reobfJar'
     addManifest(it)
     addLicense(it)
 }
@@ -200,7 +189,6 @@ publishing {
             artifactId = archivesBaseName
 
             fg.component(it)
-            jarJar.component(it)
         }
     }
     repositories {
