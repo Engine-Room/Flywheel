@@ -66,6 +66,29 @@ public final class InstanceTypes {
 			.cullShader(Flywheel.rl("instance/cull/oriented.glsl"))
 			.register();
 
+	public static final InstanceType<ShadowInstance> SHADOW = SimpleInstanceType.builder(ShadowInstance::new)
+			.layout(LayoutBuilder.create()
+					.vector("pos", FloatRepr.FLOAT, 3)
+					.vector("entityPosXZ", FloatRepr.FLOAT, 2)
+					.vector("size", FloatRepr.FLOAT, 2)
+					.scalar("alpha", FloatRepr.FLOAT)
+					.scalar("radius", FloatRepr.FLOAT)
+					.build())
+			.writer((ptr, instance) -> {
+				MemoryUtil.memPutFloat(ptr, instance.x);
+				MemoryUtil.memPutFloat(ptr + 4, instance.y);
+				MemoryUtil.memPutFloat(ptr + 8, instance.z);
+				MemoryUtil.memPutFloat(ptr + 12, instance.entityX);
+				MemoryUtil.memPutFloat(ptr + 16, instance.entityZ);
+				MemoryUtil.memPutFloat(ptr + 20, instance.sizeX);
+				MemoryUtil.memPutFloat(ptr + 24, instance.sizeZ);
+				MemoryUtil.memPutFloat(ptr + 28, instance.alpha);
+				MemoryUtil.memPutFloat(ptr + 32, instance.radius);
+			})
+			.vertexShader(Flywheel.rl("instance/shadow.vert"))
+			.cullShader(Flywheel.rl("instance/cull/shadow.glsl"))
+			.register();
+
 	private InstanceTypes() {
 	}
 

@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.vanilla;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
@@ -37,6 +39,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	private final ModelHolder bodyModel;
 
 	private TransformedInstance body;
+	@Nullable
 	private TransformedInstance contents;
 	private BlockState blockState;
 	private boolean active;
@@ -46,6 +49,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	public MinecartVisual(VisualizationContext ctx, T entity, ModelHolder bodyModel) {
 		super(ctx, entity);
 		this.bodyModel = bodyModel;
+		shadow.radius(0.7f);
 	}
 
 	private static ModelHolder createBodyModelHolder(ModelLayerLocation layer) {
@@ -70,6 +74,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 				.createInstance();
 	}
 
+	@Nullable
 	private TransformedInstance createContentsInstance() {
 		RenderShape shape = blockState.getRenderShape();
 
@@ -94,7 +99,9 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 
 		if (displayBlockState != blockState) {
 			blockState = displayBlockState;
-			contents.delete();
+			if (contents != null) {
+				contents.delete();
+			}
 			contents = createContentsInstance();
 		}
 
@@ -103,6 +110,8 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 
 	@Override
 	public void beginFrame(VisualFrameContext context) {
+		shadow.beginFrame(context);
+
 		if (!isVisible(context.frustum())) {
 			return;
 		}
@@ -200,6 +209,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		if (contents != null) {
 			contents.delete();
 		}
+		super._delete();
 	}
 
 	public static boolean shouldSkipRender(AbstractMinecart minecart) {

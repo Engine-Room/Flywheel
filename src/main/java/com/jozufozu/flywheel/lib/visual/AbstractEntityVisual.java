@@ -33,11 +33,13 @@ import net.minecraft.world.phys.Vec3;
 public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVisual implements EntityVisual<T> {
 	protected final T entity;
 	protected final EntityVisibilityTester visibilityTester;
+	protected final ShadowComponent shadow;
 
 	public AbstractEntityVisual(VisualizationContext ctx, T entity) {
 		super(ctx, entity.level());
 		this.entity = entity;
 		visibilityTester = new EntityVisibilityTester(entity, ctx.renderOrigin(), 1.5f);
+		shadow = new ShadowComponent(ctx, entity);
 	}
 
 	@Override
@@ -86,5 +88,10 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 
 	public boolean isVisible(FrustumIntersection frustum) {
 		return entity.noCulling || visibilityTester.check(frustum);
+	}
+
+	@Override
+	protected void _delete() {
+		shadow.delete();
 	}
 }
