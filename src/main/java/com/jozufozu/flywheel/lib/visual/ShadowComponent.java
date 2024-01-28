@@ -21,6 +21,7 @@ import com.jozufozu.flywheel.lib.instance.ShadowInstance;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial;
 import com.jozufozu.flywheel.lib.model.QuadMesh;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -33,6 +34,15 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+/**
+ * A component that uses instances to render an entity's shadow.
+ *
+ * <p>Use {@link #radius(float)} to set the radius of the shadow, in blocks.
+ * <br>
+ * Use {@link #strength(float)} to set the strength of the shadow.
+ * <br>
+ * The shadow will be cast on blocks at most {@code min(radius, 2 * strength)} blocks below the entity.</p>
+ */
 public class ShadowComponent {
 
 	private final VisualizationContext context;
@@ -41,9 +51,9 @@ public class ShadowComponent {
 	private final InstanceRecycler<ShadowInstance> instances = new InstanceRecycler<>(this::instance);
 	private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
-	private float radius = 0.5F;
+	// Defaults taken from EntityRenderer.
+	private float radius = 0;
 	private float strength = 1.0F;
-	private boolean enabled = true;
 
 	public ShadowComponent(VisualizationContext context, Entity entity) {
 		this.context = context;
@@ -51,33 +61,49 @@ public class ShadowComponent {
 		this.entity = entity;
 	}
 
+	/**
+	 * Set the radius of the shadow, in blocks, clamped to a maximum of 32.
+	 *
+	 * <p>Setting this to {@code <= 0} will disable the shadow.</p>
+	 *
+	 * @param radius The radius of the shadow, in blocks.
+	 */
 	public void radius(float radius) {
-		this.radius = radius;
+		this.radius = Math.min(radius, 32);
 	}
 
-	public void strength(float weight) {
-		this.strength = weight;
+	/**
+	 * Set the strength of the shadow.
+	 *
+	 * @param strength The strength of the shadow.
+	 */
+	public void strength(float strength) {
+		this.strength = strength;
 	}
 
-	public void enabled(boolean enabled) {
-		this.enabled = enabled;
-
-		if (!enabled) {
-			instances.delete();
-		}
-	}
-
+	/**
+	 * Update the shadow instances. You'd typically call this in your visual's
+	 * {@link com.jozufozu.flywheel.api.visual.DynamicVisual#beginFrame(VisualFrameContext) beginFrame} method.
+	 *
+	 * @param context The frame context.
+	 */
 	public void beginFrame(VisualFrameContext context) {
-		if (!enabled) {
-			return;
-		}
-
 		instances.resetCount();
 
+		boolean shadowsEnabled = Minecraft.getInstance().options.entityShadows()
+				.get();
+		if (shadowsEnabled && radius > 0 && !entity.isInvisible()) {
+			setupInstances(context);
+		}
+
+		instances.discardExtra();
+	}
+
+	private void setupInstances(VisualFrameContext context) {
 		double entityX = Mth.lerp(context.partialTick(), entity.xOld, entity.getX());
 		double entityY = Mth.lerp(context.partialTick(), entity.yOld, entity.getY());
 		double entityZ = Mth.lerp(context.partialTick(), entity.zOld, entity.getZ());
-		float castDistance = Math.min(strength / 0.5F, radius);
+		float castDistance = Math.min(strength * 2, radius);
 		int minXPos = Mth.floor(entityX - (double) radius);
 		int maxXPos = Mth.floor(entityX + (double) radius);
 		int minYPos = Mth.floor(entityY - (double) castDistance);
@@ -92,16 +118,14 @@ public class ShadowComponent {
 
 				for (int y = minYPos; y <= maxYPos; ++y) {
 					pos.setY(y);
-					float actualWeight = strength - (float) (entityY - pos.getY()) * 0.5F;
-					maybeSetupShadowInstance(chunkaccess, (float) entityX, (float) entityZ, actualWeight);
+					float strengthGivenYFalloff = strength - (float) (entityY - pos.getY()) * 0.5F;
+					maybeSetupShadowInstance(chunkaccess, (float) entityX, (float) entityZ, strengthGivenYFalloff);
 				}
 			}
 		}
-
-		instances.discardExtra();
 	}
 
-	private void maybeSetupShadowInstance(ChunkAccess pChunk, float entityX, float entityZ, float weight) {
+	private void maybeSetupShadowInstance(ChunkAccess pChunk, float entityX, float entityZ, float strength) {
 		// TODO: cache this?
 		var maxLocalRawBrightness = level.getMaxLocalRawBrightness(pos);
 		if (maxLocalRawBrightness <= 3) {
@@ -109,7 +133,7 @@ public class ShadowComponent {
 			return;
 		}
 		float blockBrightness = LightTexture.getBrightness(level.dimensionType(), maxLocalRawBrightness);
-		float alpha = weight * 0.5F * blockBrightness;
+		float alpha = strength * 0.5F * blockBrightness;
 		if (!(alpha >= 0.0F)) {
 			// Too far away/too weak to render.
 			return;
