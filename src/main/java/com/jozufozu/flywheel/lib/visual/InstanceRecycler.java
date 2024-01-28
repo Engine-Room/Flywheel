@@ -59,12 +59,15 @@ public class InstanceRecycler<I extends Instance> {
 	 * Call this after your last call to {@link #get()} each frame.
 	 */
 	public void discardExtra() {
-		for (int i = count; i < instances.size(); i++) {
-			instances.get(i)
-					.delete();
+		var size = instances.size();
+		if (count == size) {
+			// No extra instances, early exit to avoid creating the sublist.
+			return;
 		}
-		instances.subList(count, instances.size())
-				.clear();
+
+		var extra = instances.subList(count, size);
+		extra.forEach(Instance::delete);
+		extra.clear();
 	}
 
 	public void delete() {
