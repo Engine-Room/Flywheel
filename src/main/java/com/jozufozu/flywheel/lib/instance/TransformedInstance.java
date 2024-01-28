@@ -73,10 +73,12 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	}
 
 	public TransformedInstance setTransform(PoseStack stack) {
-		this.model.set(stack.last()
-				.pose());
-		this.normal.set(stack.last()
-				.normal());
+		return setTransform(stack.last());
+	}
+
+	public TransformedInstance setTransform(PoseStack.Pose pose) {
+		this.model.set(pose.pose());
+		this.normal.set(pose.normal());
 		return this;
 	}
 

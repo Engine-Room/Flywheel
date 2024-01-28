@@ -134,7 +134,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		viewProjection.translate((float) (renderOrigin.getX() - cameraX), (float) (renderOrigin.getY() - cameraY), (float) (renderOrigin.getZ() - cameraZ));
 		FrustumIntersection frustum = new FrustumIntersection(viewProjection);
 
-		return new VisualFrameContextImpl(cameraX, cameraY, cameraZ, frustum, ctx.partialTick(), frameLimiter);
+		return new VisualFrameContextImpl(cameraX, cameraY, cameraZ, frustum, ctx.partialTick(), frameLimiter, ctx.camera());
 	}
 
 	protected DistanceUpdateLimiterImpl createUpdateLimiter() {
