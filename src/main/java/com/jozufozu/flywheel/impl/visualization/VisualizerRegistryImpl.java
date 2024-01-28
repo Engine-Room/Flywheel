@@ -4,8 +4,8 @@ import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.visualization.BlockEntityVisualizer;
 import com.jozufozu.flywheel.api.visualization.EntityVisualizer;
-import com.jozufozu.flywheel.extension.BlockEntityTypeExtension;
-import com.jozufozu.flywheel.extension.EntityTypeExtension;
+import com.jozufozu.flywheel.impl.extension.BlockEntityTypeExtension;
+import com.jozufozu.flywheel.impl.extension.EntityTypeExtension;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;

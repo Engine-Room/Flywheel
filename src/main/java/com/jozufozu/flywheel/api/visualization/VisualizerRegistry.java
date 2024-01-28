@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.api.visualization;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.impl.visualization.VisualizerRegistryImpl;
+import com.jozufozu.flywheel.api.internal.InternalFlywheelApi;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -10,9 +10,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 /**
- * A utility class for registering and retrieving {@code Visualizer}s.
+ * The registry for {@code Visualizer}s.
  */
 public final class VisualizerRegistry {
+	private VisualizerRegistry() {
+	}
+
 	/**
 	 * Gets the visualizer for the given block entity type, if one exists.
 	 * @param type The block entity type to get the visualizer for.
@@ -21,7 +24,7 @@ public final class VisualizerRegistry {
 	 */
 	@Nullable
 	public static <T extends BlockEntity> BlockEntityVisualizer<? super T> getVisualizer(BlockEntityType<T> type) {
-		return VisualizerRegistryImpl.getVisualizer(type);
+		return InternalFlywheelApi.INSTANCE.getVisualizer(type);
 	}
 
 	/**
@@ -32,7 +35,7 @@ public final class VisualizerRegistry {
 	 */
 	@Nullable
 	public static <T extends Entity> EntityVisualizer<? super T> getVisualizer(EntityType<T> type) {
-		return VisualizerRegistryImpl.getVisualizer(type);
+		return InternalFlywheelApi.INSTANCE.getVisualizer(type);
 	}
 
 	/**
@@ -42,7 +45,7 @@ public final class VisualizerRegistry {
 	 * @param <T> The type of the block entity.
 	 */
 	public static <T extends BlockEntity> void setVisualizer(BlockEntityType<T> type, BlockEntityVisualizer<? super T> visualizer) {
-		VisualizerRegistryImpl.setVisualizer(type, visualizer);
+		InternalFlywheelApi.INSTANCE.setVisualizer(type, visualizer);
 	}
 
 	/**
@@ -52,9 +55,6 @@ public final class VisualizerRegistry {
 	 * @param <T> The type of the entity.
 	 */
 	public static <T extends Entity> void setVisualizer(EntityType<T> type, EntityVisualizer<? super T> visualizer) {
-		VisualizerRegistryImpl.setVisualizer(type, visualizer);
-	}
-
-	private VisualizerRegistry() {
+		InternalFlywheelApi.INSTANCE.setVisualizer(type, visualizer);
 	}
 }

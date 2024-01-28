@@ -15,7 +15,6 @@ import com.jozufozu.flywheel.api.instance.Instance;
  * @param <I> The type of instance to recycle.
  */
 public class InstanceRecycler<I extends Instance> {
-
 	private final Supplier<I> factory;
 
 	private final List<I> instances = new ArrayList<>();

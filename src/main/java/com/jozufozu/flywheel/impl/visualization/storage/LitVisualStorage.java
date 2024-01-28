@@ -7,8 +7,6 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.visual.LitVisual;
@@ -161,7 +159,6 @@ public class LitVisualStorage {
 		return -1;
 	}
 
-	@NotNull
 	private static Updater createUpdater(LitVisual visual, int sectionCount) {
 		if (sectionCount == 1) {
 			return new Updater.Simple(visual);

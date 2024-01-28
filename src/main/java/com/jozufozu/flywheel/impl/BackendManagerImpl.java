@@ -21,7 +21,7 @@ import net.minecraftforge.fml.CrashReportCallables;
 public final class BackendManagerImpl {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
-	private static final Backend OFF_BACKEND = SimpleBackend.builder()
+	public static final Backend OFF_BACKEND = SimpleBackend.builder()
 			.engineMessage(Component.literal("Disabled Flywheel")
 					.withStyle(ChatFormatting.RED))
 			.engineFactory(level -> {
@@ -30,7 +30,7 @@ public final class BackendManagerImpl {
 			.supported(() -> true)
 			.register(Flywheel.rl("off"));
 
-	private static final Backend DEFAULT_BACKEND = findDefaultBackend();
+	public static final Backend DEFAULT_BACKEND = findDefaultBackend();
 
 	private static Backend backend = OFF_BACKEND;
 
@@ -41,16 +41,8 @@ public final class BackendManagerImpl {
 		return backend;
 	}
 
-	public static boolean isOn() {
+	public static boolean isBackendOn() {
 		return backend != OFF_BACKEND;
-	}
-
-	public static Backend getOffBackend() {
-		return OFF_BACKEND;
-	}
-
-	public static Backend getDefaultBackend() {
-		return DEFAULT_BACKEND;
 	}
 
 	private static Backend findDefaultBackend() {

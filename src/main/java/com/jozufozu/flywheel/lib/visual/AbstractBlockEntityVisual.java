@@ -107,6 +107,6 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	 */
 	public boolean doDistanceLimitThisFrame(VisualFrameContext context) {
 		return !context.limiter()
-				.shouldUpdate(pos.distToCenterSqr(context.cameraX(), context.cameraY(), context.cameraZ()));
+				.shouldUpdate(pos.distToCenterSqr(context.camera().getPosition()));
 	}
 }

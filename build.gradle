@@ -94,8 +94,9 @@ test {
 mixin {
     add sourceSets.main, 'flywheel.refmap.json'
 
-    config 'flywheel.mixins.json'
-    config 'flywheel.sodium.mixins.json'
+    config 'flywheel.backend.mixins.json'
+    config 'flywheel.impl.mixins.json'
+    config 'flywheel.impl.sodium.mixins.json'
 
     debug.verbose = true
     debug.export = true

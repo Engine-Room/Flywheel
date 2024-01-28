@@ -1,27 +1,27 @@
 package com.jozufozu.flywheel.api.backend;
 
-import com.jozufozu.flywheel.impl.BackendManagerImpl;
+import com.jozufozu.flywheel.api.internal.InternalFlywheelApi;
 
 public final class BackendManager {
+	private BackendManager() {
+	}
+
 	/**
 	 * Get the current backend.
 	 */
 	public static Backend getBackend() {
-		return BackendManagerImpl.getBackend();
+		return InternalFlywheelApi.INSTANCE.getBackend();
 	}
 
-	public static boolean isOn() {
-		return BackendManagerImpl.isOn();
+	public static boolean isBackendOn() {
+		return InternalFlywheelApi.INSTANCE.isBackendOn();
 	}
 
 	public static Backend getOffBackend() {
-		return BackendManagerImpl.getOffBackend();
+		return InternalFlywheelApi.INSTANCE.getOffBackend();
 	}
 
 	public static Backend getDefaultBackend() {
-		return BackendManagerImpl.getDefaultBackend();
-	}
-
-	private BackendManager() {
+		return InternalFlywheelApi.INSTANCE.getDefaultBackend();
 	}
 }
