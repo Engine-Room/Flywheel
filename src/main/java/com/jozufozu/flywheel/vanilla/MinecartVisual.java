@@ -111,6 +111,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	@Override
 	public void beginFrame(VisualFrameContext context) {
 		shadow.beginFrame(context);
+		fire.beginFrame(context);
 
 		if (!isVisible(context.frustum())) {
 			return;

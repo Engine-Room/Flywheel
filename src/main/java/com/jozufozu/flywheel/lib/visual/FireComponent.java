@@ -1,0 +1,204 @@
+package com.jozufozu.flywheel.lib.visual;
+
+import java.util.Map;
+
+import org.joml.Vector4f;
+import org.joml.Vector4fc;
+
+import com.google.common.collect.ImmutableMap;
+import com.jozufozu.flywheel.api.event.RenderStage;
+import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.api.model.Mesh;
+import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.api.vertex.MutableVertexList;
+import com.jozufozu.flywheel.api.visual.VisualFrameContext;
+import com.jozufozu.flywheel.api.visualization.VisualizationContext;
+import com.jozufozu.flywheel.lib.instance.InstanceTypes;
+import com.jozufozu.flywheel.lib.instance.TransformedInstance;
+import com.jozufozu.flywheel.lib.material.Materials;
+import com.jozufozu.flywheel.lib.material.SimpleMaterial;
+import com.jozufozu.flywheel.lib.model.ModelCache;
+import com.jozufozu.flywheel.lib.model.QuadMesh;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+
+/**
+ * A component that uses instances to render the fire animation on an entity.
+ */
+public class FireComponent {
+	private final VisualizationContext context;
+	private final Entity entity;
+	private final PoseStack stack = new PoseStack();
+
+	private final InstanceRecycler<TransformedInstance> fire0;
+	private final InstanceRecycler<TransformedInstance> fire1;
+
+	public FireComponent(VisualizationContext context, Entity entity) {
+		this.context = context;
+		this.entity = entity;
+
+		fire0 = new InstanceRecycler<>(() -> context.instancerProvider()
+				.instancer(InstanceTypes.TRANSFORMED, FireModel.CACHE.get(ModelBakery.FIRE_0), RenderStage.AFTER_BLOCK_ENTITIES)
+				.createInstance());
+		fire1 = new InstanceRecycler<>(() -> context.instancerProvider()
+				.instancer(InstanceTypes.TRANSFORMED, FireModel.CACHE.get(ModelBakery.FIRE_1), RenderStage.AFTER_BLOCK_ENTITIES)
+				.createInstance());
+	}
+
+	/**
+	 * Update the fire instances. You'd typically call this in your visual's
+	 * {@link com.jozufozu.flywheel.api.visual.DynamicVisual#beginFrame(VisualFrameContext) beginFrame} method.
+	 *
+	 * @param context The frame context.
+	 */
+	public void beginFrame(VisualFrameContext context) {
+		fire0.resetCount();
+		fire1.resetCount();
+
+		if (entity.displayFireAnimation()) {
+			setupInstances(context);
+		}
+
+		fire0.discardExtra();
+		fire1.discardExtra();
+	}
+
+	private void setupInstances(VisualFrameContext context) {
+		double entityX = Mth.lerp(context.partialTick(), entity.xOld, entity.getX());
+		double entityY = Mth.lerp(context.partialTick(), entity.yOld, entity.getY());
+		double entityZ = Mth.lerp(context.partialTick(), entity.zOld, entity.getZ());
+		var renderOrigin = this.context.renderOrigin();
+
+		final float scale = entity.getBbWidth() * 1.4F;
+		final float maxHeight = entity.getBbHeight() / scale;
+		float width = 1;
+		float y = 0;
+		float z = 0;
+
+		stack.setIdentity();
+		stack.translate(entityX - renderOrigin.getX(), entityY - renderOrigin.getY(), entityZ - renderOrigin.getZ());
+		stack.scale(scale, scale, scale);
+		stack.mulPose(Axis.YP.rotationDegrees(-context.camera()
+				.getYRot()));
+		stack.translate(0.0F, 0.0F, -0.3F + (float) ((int) maxHeight) * 0.02F);
+
+		for (int i = 0; y < maxHeight; ++i) {
+			var instance = (i % 2 == 0 ? this.fire0 : this.fire1).get()
+					.setTransform(stack)
+					.scaleX(width)
+					.translate(0, y, z);
+
+			if (i / 2 % 2 == 0) {
+				// Vanilla flips the uv directly, but it's easier for us to flip the whole model.
+				instance.scaleX(-1);
+			}
+
+			instance.setBlockLight(LightTexture.block(240));
+
+			instance.setChanged();
+
+			y += 0.45F;
+			// Get narrower as we go up.
+			width *= 0.9F;
+			// Offset each one so they don't z-fight.
+			z += 0.03F;
+		}
+	}
+
+	public void delete() {
+		fire0.delete();
+		fire1.delete();
+	}
+
+	private static class FireModel implements Model {
+		// Parameterize by the material instead of the sprite
+		// because Material#sprite is a surprisingly heavy operation.
+		public static final ModelCache<net.minecraft.client.resources.model.Material> CACHE = new ModelCache<>(mat -> new FireModel(mat.sprite()));
+
+		public static final Material MATERIAL = SimpleMaterial.builderOf(Materials.CHUNK_CUTOUT_UNSHADED)
+				.backfaceCulling(false) // Disable backface because we want to be able to flip the model.
+				.build();
+		private static final Vector4fc BOUNDING_SPHERE = new Vector4f(0, 0.5f, 0, (float) (Math.sqrt(2) * 0.5));
+
+		private final ImmutableMap<Material, Mesh> meshes;
+
+		private FireModel(TextureAtlasSprite sprite) {
+			meshes = ImmutableMap.of(MATERIAL, new FireMesh(sprite));
+		}
+
+		@Override
+		public Map<Material, Mesh> meshes() {
+			return meshes;
+		}
+
+		@Override
+		public Vector4fc boundingSphere() {
+			return BOUNDING_SPHERE;
+		}
+
+		@Override
+		public int vertexCount() {
+			return 4;
+		}
+
+		@Override
+		public void delete() {
+
+		}
+
+		private record FireMesh(TextureAtlasSprite sprite) implements QuadMesh {
+			@Override
+			public int vertexCount() {
+				return 4;
+			}
+
+			@Override
+			public void write(MutableVertexList vertexList) {
+				float u0 = sprite.getU0();
+				float v0 = sprite.getV0();
+				float u1 = sprite.getU1();
+				float v1 = sprite.getV1();
+				writeVertex(vertexList, 0, 0.5f, 0, u1, v1);
+				writeVertex(vertexList, 1, -0.5f, 0, u0, v1);
+				writeVertex(vertexList, 2, -0.5f, 1.4f, u0, v0);
+				writeVertex(vertexList, 3, 0.5f, 1.4f, u1, v0);
+			}
+
+			@Override
+			public Vector4fc boundingSphere() {
+				return BOUNDING_SPHERE;
+			}
+
+			@Override
+			public void delete() {
+
+			}
+
+			// Magic numbers taken from:
+			// net.minecraft.client.renderer.entity.EntityRenderDispatcher#fireVertex
+			private static void writeVertex(MutableVertexList vertexList, int i, float x, float y, float u, float v) {
+				vertexList.x(i, x);
+				vertexList.y(i, y);
+				vertexList.z(i, 0);
+				vertexList.r(i, 1);
+				vertexList.g(i, 1);
+				vertexList.b(i, 1);
+				vertexList.u(i, u);
+				vertexList.v(i, v);
+				vertexList.overlay(i, OverlayTexture.NO_OVERLAY);
+				vertexList.light(i, 240);
+				vertexList.normalX(i, 0);
+				vertexList.normalY(i, 1);
+				vertexList.normalZ(i, 0);
+
+			}
+		}
+	}
+}

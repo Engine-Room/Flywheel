@@ -11,7 +11,7 @@ public class ShadowInstance extends AbstractInstance {
 	public float alpha;
 	public float radius;
 
-	protected ShadowInstance(InstanceType<?> type, InstanceHandle handle) {
+	public ShadowInstance(InstanceType<?> type, InstanceHandle handle) {
 		super(type, handle);
 	}
 }

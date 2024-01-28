@@ -34,12 +34,14 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	protected final T entity;
 	protected final EntityVisibilityTester visibilityTester;
 	protected final ShadowComponent shadow;
+	protected final FireComponent fire;
 
 	public AbstractEntityVisual(VisualizationContext ctx, T entity) {
 		super(ctx, entity.level());
 		this.entity = entity;
 		visibilityTester = new EntityVisibilityTester(entity, ctx.renderOrigin(), 1.5f);
 		shadow = new ShadowComponent(ctx, entity);
+		fire = new FireComponent(ctx, entity);
 	}
 
 	@Override
@@ -93,5 +95,6 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	@Override
 	protected void _delete() {
 		shadow.delete();
+		fire.delete();
 	}
 }

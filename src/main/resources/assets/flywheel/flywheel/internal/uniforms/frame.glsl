@@ -13,6 +13,8 @@ layout(std140) uniform _FlwFrameUniforms {
     FrustumPlanes flw_frustumPlanes;
     mat4 flw_viewProjection;
     vec4 flw_cameraPos;
+    vec4 flw_cameraLook;
+    vec2 flw_cameraRot;
     uint flw_constantAmbientLight;
 
     uint flw_ticks;
