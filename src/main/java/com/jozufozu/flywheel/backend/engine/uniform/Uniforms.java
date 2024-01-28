@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.engine.uniform;
 
 import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.event.RenderContext;
+import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 
 public class Uniforms {
 	public static boolean frustumPaused = false;
@@ -28,15 +29,21 @@ public class Uniforms {
 		bindFog();
 	}
 
+	public static void bindFrame() {
+		if (frame != null) {
+			frame.bind();
+		}
+	}
+
 	public static void bindFog() {
 		if (fog != null) {
 			fog.bind();
 		}
 	}
 
-	public static void bindFrame() {
-		if (frame != null) {
-			frame.bind();
+	public static void onFogUpdate() {
+		try (var restoreState = GlStateTracker.getRestoreState()) {
+			fog().update();
 		}
 	}
 

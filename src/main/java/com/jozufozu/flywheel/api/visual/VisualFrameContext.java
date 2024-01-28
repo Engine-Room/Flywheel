@@ -7,17 +7,11 @@ import net.minecraft.client.Camera;
 
 @ApiStatus.NonExtendable
 public interface VisualFrameContext {
-	double cameraX();
-
-	double cameraY();
-
-	double cameraZ();
+	Camera camera();
 
 	FrustumIntersection frustum();
 
 	float partialTick();
 
 	DistanceUpdateLimiter limiter();
-
-	Camera camera();
 }

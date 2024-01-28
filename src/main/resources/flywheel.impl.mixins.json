@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.jozufozu.flywheel.impl.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "flywheel.refmap.json",
+  "client": [
+    "BlockEntityTypeMixin",
+    "ClientLevelMixin",
+    "EntityTypeMixin",
+    "LayerLightSectionStorageMixin",
+    "LevelMixin",
+    "LevelRendererMixin",
+    "MinecraftMixin",
+    "PoseStackMixin",
+    "VertexFormatMixin",
+    "fix.FixFabulousDepthMixin",
+    "fix.FixNormalScalingMixin",
+    "visualmanage.BlockEntityMixin",
+    "visualmanage.LevelChunkMixin",
+    "visualmanage.LevelRendererMixin",
+    "visualmanage.RebuildTaskMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

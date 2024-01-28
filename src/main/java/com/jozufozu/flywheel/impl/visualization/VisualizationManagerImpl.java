@@ -27,7 +27,7 @@ import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationLevel;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.config.FlwConfig;
-import com.jozufozu.flywheel.extension.LevelExtension;
+import com.jozufozu.flywheel.impl.extension.LevelExtension;
 import com.jozufozu.flywheel.impl.task.FlwTaskExecutor;
 import com.jozufozu.flywheel.impl.visual.VisualFrameContextImpl;
 import com.jozufozu.flywheel.impl.visual.VisualTickContextImpl;
@@ -102,7 +102,9 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				.then(RaisePlan.raise(tickFlag))
 				.simplify();
 
-		var recreate = SimplePlan.<RenderContext>of(context -> blockEntitiesStorage.recreateAll(context.partialTick()), context -> entitiesStorage.recreateAll(context.partialTick()), context -> effectsStorage.recreateAll(context.partialTick()));
+		var recreate = SimplePlan.<RenderContext>of(context -> blockEntitiesStorage.recreateAll(context.partialTick()),
+				context -> entitiesStorage.recreateAll(context.partialTick()),
+				context -> effectsStorage.recreateAll(context.partialTick()));
 
 		var update = MapContextPlan.map(this::createVisualFrameContext)
 				.to(NestedPlan.of(blockEntities.framePlan(), entities.framePlan(), effects.framePlan()));
@@ -126,15 +128,12 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		Vec3i renderOrigin = engine.renderOrigin();
 		var cameraPos = ctx.camera()
 				.getPosition();
-		double cameraX = cameraPos.x;
-		double cameraY = cameraPos.y;
-		double cameraZ = cameraPos.z;
 
 		Matrix4f viewProjection = new Matrix4f(ctx.viewProjection());
-		viewProjection.translate((float) (renderOrigin.getX() - cameraX), (float) (renderOrigin.getY() - cameraY), (float) (renderOrigin.getZ() - cameraZ));
+		viewProjection.translate((float) (renderOrigin.getX() - cameraPos.x), (float) (renderOrigin.getY() - cameraPos.y), (float) (renderOrigin.getZ() - cameraPos.z));
 		FrustumIntersection frustum = new FrustumIntersection(viewProjection);
 
-		return new VisualFrameContextImpl(cameraX, cameraY, cameraZ, frustum, ctx.partialTick(), frameLimiter, ctx.camera());
+		return new VisualFrameContextImpl(ctx.camera(), frustum, ctx.partialTick(), frameLimiter);
 	}
 
 	protected DistanceUpdateLimiterImpl createUpdateLimiter() {
@@ -148,7 +147,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 
 	@Contract("null -> false")
 	public static boolean supportsVisualization(@Nullable LevelAccessor level) {
-		if (!BackendManager.isOn()) {
+		if (!BackendManager.isBackendOn()) {
 			return false;
 		}
 
@@ -186,10 +185,10 @@ public class VisualizationManagerImpl implements VisualizationManager {
 
 	// TODO: Consider making these reset actions reuse the existing game objects instead of re-adding them
 	// potentially by keeping the same VisualizationManagerImpl and deleting the engine and visuals but not the game objects
-
 	public static void reset(LevelAccessor level) {
 		MANAGERS.remove(level);
 	}
+
 	public static void resetAll() {
 		MANAGERS.reset();
 	}

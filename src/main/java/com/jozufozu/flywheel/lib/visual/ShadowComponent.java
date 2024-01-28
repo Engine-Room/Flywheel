@@ -1,17 +1,13 @@
 package com.jozufozu.flywheel.lib.visual;
 
-import java.util.Map;
-
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
-import com.google.common.collect.ImmutableMap;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.Transparency;
 import com.jozufozu.flywheel.api.material.WriteMask;
-import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
@@ -20,18 +16,20 @@ import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.ShadowInstance;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial;
 import com.jozufozu.flywheel.lib.model.QuadMesh;
+import com.jozufozu.flywheel.lib.model.SingleMeshModel;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.BlockPos.MutableBlockPos;
+import net.minecraft.core.Direction.Axis;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
@@ -44,12 +42,21 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * The shadow will be cast on blocks at most {@code min(radius, 2 * strength)} blocks below the entity.</p>
  */
 public class ShadowComponent {
+	private static final Material SHADOW_MATERIAL = SimpleMaterial.builder()
+			.texture(new ResourceLocation("textures/misc/shadow.png"))
+			.mipmap(false)
+			.polygonOffset(true) // vanilla shadows use "view offset" but this seems to work fine
+			.transparency(Transparency.TRANSLUCENT)
+			.writeMask(WriteMask.COLOR)
+			.build();
+	private static final Model SHADOW_MODEL = new SingleMeshModel(ShadowMesh.INSTANCE, SHADOW_MATERIAL);
 
 	private final VisualizationContext context;
-	private final LevelReader level;
 	private final Entity entity;
-	private final InstanceRecycler<ShadowInstance> instances = new InstanceRecycler<>(this::instance);
+	private final Level level;
 	private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+
+	private final InstanceRecycler<ShadowInstance> instances = new InstanceRecycler<>(this::createInstance);
 
 	// Defaults taken from EntityRenderer.
 	private float radius = 0;
@@ -57,8 +64,22 @@ public class ShadowComponent {
 
 	public ShadowComponent(VisualizationContext context, Entity entity) {
 		this.context = context;
-		this.level = entity.level();
 		this.entity = entity;
+		this.level = entity.level();
+	}
+
+	private ShadowInstance createInstance() {
+		return context.instancerProvider()
+				.instancer(InstanceTypes.SHADOW, SHADOW_MODEL, RenderStage.AFTER_ENTITIES)
+				.createInstance();
+	}
+
+	public float radius() {
+		return radius;
+	}
+
+	public float strength() {
+		return strength;
 	}
 
 	/**
@@ -114,18 +135,18 @@ public class ShadowComponent {
 		for (int z = minZPos; z <= maxZPos; ++z) {
 			for (int x = minXPos; x <= maxXPos; ++x) {
 				pos.set(x, 0, z);
-				ChunkAccess chunkaccess = level.getChunk(pos);
+				ChunkAccess chunk = level.getChunk(pos);
 
 				for (int y = minYPos; y <= maxYPos; ++y) {
 					pos.setY(y);
 					float strengthGivenYFalloff = strength - (float) (entityY - pos.getY()) * 0.5F;
-					maybeSetupShadowInstance(chunkaccess, (float) entityX, (float) entityZ, strengthGivenYFalloff);
+					setupInstance(chunk, pos, (float) entityX, (float) entityZ, strengthGivenYFalloff);
 				}
 			}
 		}
 	}
 
-	private void maybeSetupShadowInstance(ChunkAccess pChunk, float entityX, float entityZ, float strength) {
+	private void setupInstance(ChunkAccess chunk, MutableBlockPos pos, float entityX, float entityZ, float strength) {
 		// TODO: cache this?
 		var maxLocalRawBrightness = level.getMaxLocalRawBrightness(pos);
 		if (maxLocalRawBrightness <= 3) {
@@ -134,7 +155,7 @@ public class ShadowComponent {
 		}
 		float blockBrightness = LightTexture.getBrightness(level.dimensionType(), maxLocalRawBrightness);
 		float alpha = strength * 0.5F * blockBrightness;
-		if (!(alpha >= 0.0F)) {
+		if (alpha < 0.0F) {
 			// Too far away/too weak to render.
 			return;
 		}
@@ -144,9 +165,9 @@ public class ShadowComponent {
 
 		// Grab the AABB for the block below the current position.
 		pos.setY(pos.getY() - 1);
-		var aabb = getAabbForPos(pChunk, pos);
-		if (aabb == null) {
-			// No aabb means the block shouldn't receive a shadow.
+		var shape = getShapeAt(chunk, pos);
+		if (shape == null) {
+			// No shape means the block shouldn't receive a shadow.
 			return;
 		}
 
@@ -155,11 +176,11 @@ public class ShadowComponent {
 		int y = pos.getY() - renderOrigin.getY() + 1; // +1 since we moved the pos down.
 		int z = pos.getZ() - renderOrigin.getZ();
 
-		double minX = x + aabb.minX;
-		double minY = y + aabb.minY;
-		double minZ = z + aabb.minZ;
-		double maxX = x + aabb.maxX;
-		double maxZ = z + aabb.maxZ;
+		double minX = x + shape.min(Axis.X);
+		double minY = y + shape.min(Axis.Y);
+		double minZ = z + shape.min(Axis.Z);
+		double maxX = x + shape.max(Axis.X);
+		double maxZ = z + shape.max(Axis.Z);
 
 		var instance = instances.get();
 		instance.x = (float) minX;
@@ -175,48 +196,48 @@ public class ShadowComponent {
 	}
 
 	@Nullable
-	private AABB getAabbForPos(ChunkAccess pChunk, BlockPos pos) {
-		BlockState blockstate = pChunk.getBlockState(pos);
-		if (blockstate.getRenderShape() == RenderShape.INVISIBLE) {
+	private VoxelShape getShapeAt(ChunkAccess chunk, BlockPos pos) {
+		BlockState state = chunk.getBlockState(pos);
+		if (state.getRenderShape() == RenderShape.INVISIBLE) {
 			return null;
 		}
-		if (!blockstate.isCollisionShapeFullBlock(pChunk, pos)) {
+		if (!state.isCollisionShapeFullBlock(chunk, pos)) {
 			return null;
 		}
-		VoxelShape voxelshape = blockstate.getShape(pChunk, pos);
-		if (voxelshape.isEmpty()) {
+		VoxelShape shape = state.getShape(chunk, pos);
+		if (shape.isEmpty()) {
 			return null;
 		}
-		return voxelshape.bounds();
-	}
-
-	private ShadowInstance instance() {
-		return context.instancerProvider()
-				.instancer(InstanceTypes.SHADOW, ShadowModel.INSTANCE, RenderStage.AFTER_ENTITIES)
-				.createInstance();
+		return shape;
 	}
 
 	public void delete() {
 		instances.delete();
 	}
 
-	private static class ShadowModel implements Model {
-		public static final ShadowModel INSTANCE = new ShadowModel();
-		public static final Material MATERIAL = SimpleMaterial.builder()
-				.transparency(Transparency.TRANSLUCENT)
-				.writeMask(WriteMask.COLOR)
-				.polygonOffset(true) // vanilla shadows use "view offset" but this seems to work fine
-				.texture(new ResourceLocation("minecraft", "textures/misc/shadow.png"))
-				.build();
+	/**
+	 * A single quad extending from the origin to (1, 0, 1).
+	 * <br>
+	 * To be scaled and translated to the correct position and size.
+	 */
+	private static class ShadowMesh implements QuadMesh {
 		private static final Vector4fc BOUNDING_SPHERE = new Vector4f(0.5f, 0, 0.5f, (float) (Math.sqrt(2) * 0.5));
-		private static final ImmutableMap<Material, Mesh> meshes = ImmutableMap.of(MATERIAL, ShadowMesh.INSTANCE);
+		private static final ShadowMesh INSTANCE = new ShadowMesh();
 
-		private ShadowModel() {
+		private ShadowMesh() {
 		}
 
 		@Override
-		public Map<Material, Mesh> meshes() {
-			return meshes;
+		public int vertexCount() {
+			return 4;
+		}
+
+		@Override
+		public void write(MutableVertexList vertexList) {
+			writeVertex(vertexList, 0, 0, 0);
+			writeVertex(vertexList, 1, 0, 1);
+			writeVertex(vertexList, 2, 1, 1);
+			writeVertex(vertexList, 3, 1, 0);
 		}
 
 		@Override
@@ -225,67 +246,24 @@ public class ShadowComponent {
 		}
 
 		@Override
-		public int vertexCount() {
-			return ShadowMesh.INSTANCE.vertexCount();
-		}
-
-		@Override
 		public void delete() {
-
 		}
 
-		/**
-		 * A single quad extending from the origin to (1, 0, 1).
-		 * <br>
-		 * To be scaled and translated to the correct position and size.
-		 */
-		private static class ShadowMesh implements QuadMesh {
-			public static final ShadowMesh INSTANCE = new ShadowMesh();
-
-			private ShadowMesh() {
-			}
-
-			@Override
-			public int vertexCount() {
-				return 4;
-			}
-
-			@Override
-			public void write(MutableVertexList vertexList) {
-				writeVertex(vertexList, 0, 0, 0);
-				writeVertex(vertexList, 1, 0, 1);
-				writeVertex(vertexList, 2, 1, 1);
-				writeVertex(vertexList, 3, 1, 0);
-			}
-
-			@Override
-			public Vector4fc boundingSphere() {
-				return BOUNDING_SPHERE;
-			}
-
-			@Override
-			public void delete() {
-
-			}
-
-			// Magic numbers taken from:
-			// net.minecraft.client.renderer.entity.EntityRenderDispatcher#shadowVertex
-			private static void writeVertex(MutableVertexList vertexList, int i, float x, float z) {
-				vertexList.x(i, x);
-				vertexList.y(i, 0);
-				vertexList.z(i, z);
-				vertexList.r(i, 1);
-				vertexList.g(i, 1);
-				vertexList.b(i, 1);
-				vertexList.u(i, 0);
-				vertexList.v(i, 0);
-				vertexList.light(i, 15728880);
-				vertexList.normalX(i, 0);
-				vertexList.normalY(i, 1);
-				vertexList.normalZ(i, 0);
-
-			}
+		// Magic numbers taken from:
+		// net.minecraft.client.renderer.entity.EntityRenderDispatcher#shadowVertex
+		private static void writeVertex(MutableVertexList vertexList, int i, float x, float z) {
+			vertexList.x(i, x);
+			vertexList.y(i, 0);
+			vertexList.z(i, z);
+			vertexList.r(i, 1);
+			vertexList.g(i, 1);
+			vertexList.b(i, 1);
+			vertexList.u(i, 0);
+			vertexList.v(i, 0);
+			vertexList.light(i, LightTexture.FULL_BRIGHT);
+			vertexList.normalX(i, 0);
+			vertexList.normalY(i, 1);
+			vertexList.normalZ(i, 0);
 		}
 	}
-
 }
