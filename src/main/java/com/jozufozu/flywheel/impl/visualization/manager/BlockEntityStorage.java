@@ -24,6 +24,7 @@ public class BlockEntityStorage extends Storage<BlockEntity> {
 		super(visualizationContextSupplier);
 	}
 
+	@Nullable
 	public BlockEntityVisual<?> visualAtPos(long pos) {
 		return posLookup.get(pos);
 	}

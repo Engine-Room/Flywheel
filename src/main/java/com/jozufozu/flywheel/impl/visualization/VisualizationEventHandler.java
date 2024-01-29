@@ -3,46 +3,36 @@ package com.jozufozu.flywheel.impl.visualization;
 import com.jozufozu.flywheel.api.event.BeginFrameEvent;
 import com.jozufozu.flywheel.api.event.RenderStageEvent;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
-import com.jozufozu.flywheel.lib.util.FlwUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.fml.LogicalSide;
 
 public final class VisualizationEventHandler {
 	private VisualizationEventHandler() {
 	}
 
-	public static void onClientTick(TickEvent.ClientTickEvent event) {
-		if (event.phase != TickEvent.Phase.END || !FlwUtil.isGameActive()) {
+	public static void onClientTick(TickEvent.LevelTickEvent event) {
+		// Make sure we don't tick on the server somehow.
+		if (event.phase != TickEvent.Phase.END || event.side != LogicalSide.CLIENT) {
 			return;
 		}
 
-		Minecraft mc = Minecraft.getInstance();
-		if (mc.isPaused()) {
+		// The game won't be paused in the tick event, but let's make sure there's a player.
+		if (Minecraft.getInstance().player == null) {
 			return;
 		}
 
-		Entity cameraEntity = mc.getCameraEntity() == null ? mc.player : mc.getCameraEntity();
-		if (cameraEntity == null) {
-			return;
-		}
-
-		Level level = cameraEntity.level();
-		VisualizationManagerImpl manager = VisualizationManagerImpl.get(level);
+		VisualizationManagerImpl manager = VisualizationManagerImpl.get(event.level);
 		if (manager == null) {
 			return;
 		}
 
-		double cameraX = cameraEntity.getX();
-		double cameraY = cameraEntity.getEyeY();
-		double cameraZ = cameraEntity.getZ();
-
-		manager.tick(cameraX, cameraY, cameraZ);
+		manager.tick();
 	}
 
 	public static void onBeginFrame(BeginFrameEvent event) {

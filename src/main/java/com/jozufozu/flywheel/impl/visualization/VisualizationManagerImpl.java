@@ -77,11 +77,9 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	private final Flag frameVisualsFlag = new NamedFlag("frameVisualUpdates");
 	private final Flag frameFlag = new NamedFlag("frameComplete");
 
-	protected DistanceUpdateLimiterImpl tickLimiter;
 	protected DistanceUpdateLimiterImpl frameLimiter;
 
 	private VisualizationManagerImpl(LevelAccessor level) {
-		tickLimiter = createUpdateLimiter();
 		frameLimiter = createUpdateLimiter();
 
 		engine = BackendManager.getBackend()
@@ -219,7 +217,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	 * Call {@link TickableVisual#tick} on all visuals in this world.
 	 * </p>
 	 */
-	public void tick(double cameraX, double cameraY, double cameraZ) {
+	public void tick() {
 		// Make sure we're done with any prior frame or tick to avoid racing.
 		taskExecutor.syncUntil(frameFlag::isRaised);
 		frameFlag.lower();
@@ -227,18 +225,15 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		taskExecutor.syncUntil(tickFlag::isRaised);
 		tickFlag.lower();
 
-		tickLimiter.tick();
-
-		tickPlan.execute(taskExecutor, new VisualTickContextImpl(cameraX, cameraY, cameraZ, frameLimiter));
+		tickPlan.execute(taskExecutor, new VisualTickContextImpl());
 	}
 
 	/**
 	 * Get ready to render a frame.
-	 * <p>
-	 *     Check and update the render origin.
-	 *     <br>
-	 *     Call {@link DynamicVisual#beginFrame} on all visuals in this world.
-	 * </p>
+	 *
+	 * <p>Check and update the render origin.
+	 * <br>
+	 * Call {@link DynamicVisual#beginFrame} on all visuals in this world.</p>
 	 */
 	public void beginFrame(RenderContext context) {
 		// Make sure we're done with the last tick.
