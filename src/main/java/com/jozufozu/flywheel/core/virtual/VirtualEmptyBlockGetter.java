@@ -36,6 +36,7 @@ public interface VirtualEmptyBlockGetter extends RenderAttachedBlockView {
 	}
 
 	@Override
+	@Nullable
 	default BlockEntity getBlockEntity(BlockPos pos) {
 		return null;
 	}
@@ -120,11 +121,11 @@ public interface VirtualEmptyBlockGetter extends RenderAttachedBlockView {
 				}
 
 				@Override
-				public void updateSectionStatus(SectionPos pos, boolean p_75838_) {
+				public void updateSectionStatus(SectionPos pos, boolean isSectionEmpty) {
 				}
 
 				@Override
-				public void setLightEnabled(ChunkPos pos, boolean p_164432_) {
+				public void setLightEnabled(ChunkPos pos, boolean lightEnabled) {
 				}
 
 				@Override

@@ -7,7 +7,7 @@
   "description": "A modern engine for modded minecraft.",
   "authors": [
     "Jozufozu",
-    "Pepper_Bell"
+    "PepperCode1"
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/flywheel",
@@ -26,8 +26,8 @@
   },
   "mixins": [
     "flywheel.mixins.json",
-    "flywheel.fabric.mixins.json",
-    "flywheel.sodium.mixins.json"
+    "flywheel.sodium.mixins.json",
+    "flywheel.fabric.mixins.json"
   ],
 
   "depends": {
@@ -35,5 +35,8 @@
     "fabric": ">=0.84.0",
     "minecraft": ">=1.20.1",
     "java": ">=17"
+  },
+  "breaks": {
+    "sodium": "<0.5.0"
   }
 }

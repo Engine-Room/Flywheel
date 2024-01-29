@@ -3,10 +3,10 @@ package com.jozufozu.flywheel.core.virtual;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.material.FluidState;
 
 public class VirtualChunkSection extends LevelChunkSection {
-
-	public VirtualChunk owner;
+	public final VirtualChunk owner;
 
 	public final int xStart;
 	public final int yStart;
@@ -31,8 +31,12 @@ public class VirtualChunkSection extends LevelChunkSection {
 	}
 
 	@Override
-	public BlockState setBlockState(int p_177484_1_, int p_177484_2_, int p_177484_3_, BlockState p_177484_4_,
-		boolean p_177484_5_) {
-		throw new IllegalStateException("Chunk sections should not be mutated in a fake world.");
+	public FluidState getFluidState(int x, int y, int z) {
+		return getBlockState(x, y, z).getFluidState();
+	}
+
+	@Override
+	public BlockState setBlockState(int x, int y, int z, BlockState state, boolean useLocks) {
+		throw new UnsupportedOperationException("Chunk sections cannot be mutated in a fake world.");
 	}
 }
