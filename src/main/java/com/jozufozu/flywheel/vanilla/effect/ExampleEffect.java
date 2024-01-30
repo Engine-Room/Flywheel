@@ -6,7 +6,6 @@ import java.util.List;
 import org.joml.Vector3f;
 
 import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
-import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.visual.Effect;
 import com.jozufozu.flywheel.api.visual.EffectVisual;
@@ -273,7 +272,7 @@ public class ExampleEffect implements Effect {
 			this.self = self;
 
 			instance = ctx.instancerProvider()
-					.instancer(InstanceTypes.TRANSFORMED, Models.block(Blocks.SHROOMLIGHT.defaultBlockState()), RenderStage.AFTER_PARTICLES)
+					.instancer(InstanceTypes.TRANSFORMED, Models.block(Blocks.SHROOMLIGHT.defaultBlockState()))
 					.createInstance();
 
 			instance.setBlockLight(15)

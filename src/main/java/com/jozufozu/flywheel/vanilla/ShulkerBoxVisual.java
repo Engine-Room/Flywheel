@@ -4,7 +4,6 @@ import java.util.function.Consumer;
 
 import org.joml.Quaternionf;
 
-import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
@@ -78,12 +77,12 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	}
 
 	private TransformedInstance createBaseInstance(Material texture) {
-		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, BASE_MODELS.get(texture), RenderStage.AFTER_BLOCK_ENTITIES)
+		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, BASE_MODELS.get(texture))
 				.createInstance();
 	}
 
 	private TransformedInstance createLidInstance(Material texture) {
-		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, LID_MODELS.get(texture), RenderStage.AFTER_BLOCK_ENTITIES)
+		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, LID_MODELS.get(texture))
 				.createInstance();
 	}
 

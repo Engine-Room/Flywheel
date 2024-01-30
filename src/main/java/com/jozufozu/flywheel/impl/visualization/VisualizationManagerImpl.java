@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.impl.visualization;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
-import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +22,6 @@ import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualManager;
-import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationLevel;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.config.FlwConfig;
@@ -86,11 +84,9 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				.createEngine(level);
 		taskExecutor = FlwTaskExecutor.get();
 
-		Supplier<VisualizationContext> contextSupplier = () -> new VisualizationContextImpl(engine, engine.renderOrigin());
-
-		var blockEntitiesStorage = new BlockEntityStorage(contextSupplier);
-		var entitiesStorage = new EntityStorage(contextSupplier);
-		var effectsStorage = new EffectStorage(contextSupplier);
+		var blockEntitiesStorage = new BlockEntityStorage(new InstancerProviderImpl(engine, RenderStage.AFTER_BLOCK_ENTITIES));
+		var entitiesStorage = new EntityStorage(new InstancerProviderImpl(engine, RenderStage.AFTER_ENTITIES));
+		var effectsStorage = new EffectStorage(new InstancerProviderImpl(engine, RenderStage.AFTER_PARTICLES));
 
 		blockEntities = new VisualManagerImpl<>(blockEntitiesStorage);
 		entities = new VisualManagerImpl<>(entitiesStorage);

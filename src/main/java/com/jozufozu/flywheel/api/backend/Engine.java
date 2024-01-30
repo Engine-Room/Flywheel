@@ -6,7 +6,10 @@ import com.jozufozu.flywheel.api.BackendImplemented;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.api.instance.InstanceType;
+import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.instance.InstancerProvider;
+import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 
@@ -15,7 +18,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 
 @BackendImplemented
-public interface Engine extends InstancerProvider {
+public interface Engine {
+	/**
+	 * Get an instancer for the given instance type, model, and render stage.
+	 *
+	 * <p>Calling this method twice with the same arguments will return the same instancer.</p>
+	 *
+	 * <p>If you are writing a visual you should probably be using
+	 * {@link InstancerProvider#instancer(InstanceType, Model)}, which will decide the {@code RenderStage}
+	 * based on what type of visual is getting the instancer.</p>
+	 *
+	 * @return An instancer for the given instance type, model, and render stage.
+	 * @see InstancerProvider
+	 */
+	<I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, RenderStage stage);
+
 	/**
 	 * Create a plan that will be executed every frame.
 	 * @return A new plan.

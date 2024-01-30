@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.lib.visual;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
-import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
@@ -54,7 +53,7 @@ public class FireComponent {
 
 	private TransformedInstance createInstance(net.minecraft.client.resources.model.Material texture) {
 		TransformedInstance instance = context.instancerProvider()
-				.instancer(InstanceTypes.TRANSFORMED, FIRE_MODELS.get(texture), RenderStage.AFTER_ENTITIES)
+				.instancer(InstanceTypes.TRANSFORMED, FIRE_MODELS.get(texture))
 				.createInstance();
 		instance.setBlockLight(LightTexture.block(LightTexture.FULL_BLOCK));
 		instance.setChanged();
