@@ -4,7 +4,6 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
-import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.Transparency;
 import com.jozufozu.flywheel.api.material.WriteMask;
@@ -70,7 +69,7 @@ public class ShadowComponent {
 
 	private ShadowInstance createInstance() {
 		return context.instancerProvider()
-				.instancer(InstanceTypes.SHADOW, SHADOW_MODEL, RenderStage.AFTER_ENTITIES)
+				.instancer(InstanceTypes.SHADOW, SHADOW_MODEL)
 				.createInstance();
 	}
 

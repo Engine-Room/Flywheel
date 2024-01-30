@@ -1,17 +1,14 @@
 package com.jozufozu.flywheel.api.instance;
 
-import com.jozufozu.flywheel.api.BackendImplemented;
-import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.model.Model;
 
-@BackendImplemented
 public interface InstancerProvider {
 	/**
-	 * Get an instancer for the given instance type, model, and render stage.
-	 * <br>
-	 * Calling this method twice with the same arguments will return the same instancer.
+	 * Get an instancer for the given instance type rendering the given model.
 	 *
-	 * @return An instancer for the given instance type, model, and render stage.
+	 * <p>Calling this method twice with the same arguments will return the same instancer.</p>
+	 *
+	 * @return An instancer for the given instance type rendering the given model.
 	 */
-	<I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, RenderStage stage);
+	<I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model);
 }

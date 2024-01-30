@@ -6,7 +6,6 @@ import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
@@ -50,7 +49,7 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	}
 
 	private OrientedInstance createBellInstance() {
-		return instancerProvider.instancer(InstanceTypes.ORIENTED, BELL_MODEL.get(), RenderStage.AFTER_BLOCK_ENTITIES)
+		return instancerProvider.instancer(InstanceTypes.ORIENTED, BELL_MODEL.get())
 				.createInstance();
 	}
 

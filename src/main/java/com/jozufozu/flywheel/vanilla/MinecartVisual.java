@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.vanilla;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
@@ -70,7 +69,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	}
 
 	private TransformedInstance createBodyInstance() {
-		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, bodyModel.get(), RenderStage.AFTER_ENTITIES)
+		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, bodyModel.get())
 				.createInstance();
 	}
 
@@ -89,7 +88,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 			return null;
 		}
 
-		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, Models.block(blockState), RenderStage.AFTER_ENTITIES)
+		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, Models.block(blockState))
 				.createInstance();
 	}
 
