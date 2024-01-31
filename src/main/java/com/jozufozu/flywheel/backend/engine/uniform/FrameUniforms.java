@@ -11,7 +11,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 
 public class FrameUniforms implements UniformProvider {
-	public static final int SIZE = 228;
+	public static final int SIZE = 220;
 
 	private RenderContext context;
 
@@ -52,9 +52,9 @@ public class FrameUniforms implements UniformProvider {
 
 		writeVec2(ptr + 192, camera.getXRot(), camera.getYRot());
 
-		MemoryUtil.memPutInt(ptr + 208, getConstantAmbientLightFlag(context));
+		MemoryUtil.memPutInt(ptr + 200, getConstantAmbientLightFlag(context));
 
-		writeTime(ptr + 212);
+		writeTime(ptr + 204);
 	}
 
 	private void writeTime(long ptr) {

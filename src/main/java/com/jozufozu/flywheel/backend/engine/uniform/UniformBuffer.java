@@ -4,14 +4,10 @@ import org.lwjgl.opengl.GL32;
 
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;
+import com.jozufozu.flywheel.lib.math.MoreMath;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
-import net.minecraft.util.Mth;
-
 public class UniformBuffer<T extends UniformProvider> {
-	private static final int OFFSET_ALIGNMENT = GL32.glGetInteger(GL32.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT);
-	private static final boolean PO2_ALIGNMENT = Mth.isPowerOfTwo(OFFSET_ALIGNMENT);
-
 	private final int index;
 	private final GlBuffer buffer;
 	public final T provider;
@@ -22,8 +18,9 @@ public class UniformBuffer<T extends UniformProvider> {
 		this.buffer = new GlBuffer(GlBufferUsage.DYNAMIC_DRAW);
 		this.provider = provider;
 
-		// renderdoc complains if the size of the buffer does not have the offset alignment
-		var actualBytes = align(provider.byteSize());
+		// renderdoc complains if the size of the buffer is not 16-byte aligned,
+		// though things work fine on my machine if we're short a few bytes
+		var actualBytes = MoreMath.align16(provider.byteSize());
 		this.data = MemoryBlock.mallocTracked(actualBytes);
 		this.data.clear();
 	}
@@ -40,14 +37,5 @@ public class UniformBuffer<T extends UniformProvider> {
 	public void delete() {
 		data.free();
 		buffer.delete();
-	}
-
-	// https://stackoverflow.com/questions/3407012/rounding-up-to-the-nearest-multiple-of-a-number
-	private static int align(int numToRound) {
-		if (PO2_ALIGNMENT) {
-			return (numToRound + OFFSET_ALIGNMENT - 1) & -OFFSET_ALIGNMENT;
-		} else {
-			return ((numToRound + OFFSET_ALIGNMENT - 1) / OFFSET_ALIGNMENT) * OFFSET_ALIGNMENT;
-		}
 	}
 }
