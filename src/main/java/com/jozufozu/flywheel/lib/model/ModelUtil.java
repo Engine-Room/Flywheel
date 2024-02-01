@@ -114,6 +114,7 @@ public final class ModelUtil {
 		int baseVertex = 0;
 		for (Mesh mesh : meshes) {
 			vertexList.ptr(block.ptr() + (long) baseVertex * PosVertexView.STRIDE);
+			vertexList.vertexCount(mesh.vertexCount());
 			mesh.write(vertexList);
 			baseVertex += mesh.vertexCount();
 		}
