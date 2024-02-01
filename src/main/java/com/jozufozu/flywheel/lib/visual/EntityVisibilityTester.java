@@ -45,9 +45,16 @@ public class EntityVisibilityTester {
 	public boolean check(FrustumIntersection frustum) {
 		AABB aabb = entity.getBoundingBoxForCulling();
 
-		boolean visible = adjustAndTestAABB(frustum, aabb);
+		// If we've never seen the entity before assume its visible.
+		// Fixes entities freezing when they first spawn.
+		// There might be a more sound solution to that, but this works.
+		boolean visible = lastVisibleAABB == null;
 
-		if (!visible && lastVisibleAABB != null && lastVisibleAABB != aabb) {
+		if (!visible) {
+			visible = adjustAndTestAABB(frustum, aabb);
+		}
+
+		if (!visible && lastVisibleAABB != aabb) {
 			// If the entity isn't visible, check the last visible AABB as well.
 			// This is to avoid Entities freezing when the go offscreen.
 			visible = adjustAndTestAABB(frustum, lastVisibleAABB);
