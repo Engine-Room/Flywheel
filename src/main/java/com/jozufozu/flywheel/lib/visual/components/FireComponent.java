@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.visual;
+package com.jozufozu.flywheel.lib.visual.components;
 
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
@@ -14,6 +14,8 @@ import com.jozufozu.flywheel.lib.material.SimpleMaterial;
 import com.jozufozu.flywheel.lib.model.ModelCache;
 import com.jozufozu.flywheel.lib.model.QuadMesh;
 import com.jozufozu.flywheel.lib.model.SingleMeshModel;
+import com.jozufozu.flywheel.lib.visual.EntityComponent;
+import com.jozufozu.flywheel.lib.visual.InstanceRecycler;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
@@ -26,7 +28,7 @@ import net.minecraft.world.entity.Entity;
 /**
  * A component that uses instances to render the fire animation on an entity.
  */
-public class FireComponent {
+public class FireComponent implements EntityComponent {
 	private static final Material FIRE_MATERIAL = SimpleMaterial.builderOf(Materials.CHUNK_CUTOUT_UNSHADED)
 			.backfaceCulling(false) // Disable backface because we want to be able to flip the model.
 			.build();
@@ -66,6 +68,7 @@ public class FireComponent {
 	 *
 	 * @param context The frame context.
 	 */
+	@Override
 	public void beginFrame(VisualFrameContext context) {
 		fire0.resetCount();
 		fire1.resetCount();
@@ -118,6 +121,7 @@ public class FireComponent {
 		}
 	}
 
+	@Override
 	public void delete() {
 		fire0.delete();
 		fire1.delete();

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.visual;
+package com.jozufozu.flywheel.lib.visual.components;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
@@ -16,6 +16,8 @@ import com.jozufozu.flywheel.lib.instance.ShadowInstance;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial;
 import com.jozufozu.flywheel.lib.model.QuadMesh;
 import com.jozufozu.flywheel.lib.model.SingleMeshModel;
+import com.jozufozu.flywheel.lib.visual.EntityComponent;
+import com.jozufozu.flywheel.lib.visual.InstanceRecycler;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
@@ -40,7 +42,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * <br>
  * The shadow will be cast on blocks at most {@code min(radius, 2 * strength)} blocks below the entity.</p>
  */
-public class ShadowComponent {
+public class ShadowComponent implements EntityComponent {
 	private static final Material SHADOW_MATERIAL = SimpleMaterial.builder()
 			.texture(new ResourceLocation("textures/misc/shadow.png"))
 			.mipmap(false)
@@ -88,8 +90,9 @@ public class ShadowComponent {
 	 *
 	 * @param radius The radius of the shadow, in blocks.
 	 */
-	public void radius(float radius) {
+	public ShadowComponent radius(float radius) {
 		this.radius = Math.min(radius, 32);
+		return this;
 	}
 
 	/**
@@ -97,8 +100,9 @@ public class ShadowComponent {
 	 *
 	 * @param strength The strength of the shadow.
 	 */
-	public void strength(float strength) {
+	public ShadowComponent strength(float strength) {
 		this.strength = strength;
+		return this;
 	}
 
 	/**
@@ -107,6 +111,7 @@ public class ShadowComponent {
 	 *
 	 * @param context The frame context.
 	 */
+	@Override
 	public void beginFrame(VisualFrameContext context) {
 		instances.resetCount();
 
@@ -210,6 +215,7 @@ public class ShadowComponent {
 		return shape;
 	}
 
+	@Override
 	public void delete() {
 		instances.delete();
 	}

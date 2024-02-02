@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.visual;
+package com.jozufozu.flywheel.lib.visual.components;
 
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
@@ -15,6 +15,8 @@ import com.jozufozu.flywheel.lib.material.StandardMaterialShaders;
 import com.jozufozu.flywheel.lib.math.MoreMath;
 import com.jozufozu.flywheel.lib.model.QuadMesh;
 import com.jozufozu.flywheel.lib.model.SingleMeshModel;
+import com.jozufozu.flywheel.lib.visual.EntityComponent;
+import com.jozufozu.flywheel.lib.visual.InstanceRecycler;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
@@ -22,7 +24,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
-public class BoundingBoxComponent {
+public class BoundingBoxComponent implements EntityComponent {
 	private static final Material MATERIAL = SimpleMaterial.builder()
 			.shaders(StandardMaterialShaders.WIREFRAME)
 			.backfaceCulling(false)
@@ -53,10 +55,12 @@ public class BoundingBoxComponent {
 		return instance;
 	}
 
-	public void showEyeBox(boolean renderEyeBox) {
+	public BoundingBoxComponent showEyeBox(boolean renderEyeBox) {
 		this.showEyeBox = renderEyeBox;
+		return this;
 	}
 
+	@Override
 	public void beginFrame(VisualFrameContext context) {
 		recycler.resetCount();
 
@@ -93,6 +97,7 @@ public class BoundingBoxComponent {
 		recycler.discardExtra();
 	}
 
+	@Override
 	public void delete() {
 		recycler.delete();
 	}

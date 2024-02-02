@@ -11,13 +11,17 @@ package com.jozufozu.flywheel.api.visual;
 public interface Visual {
 	/**
 	 * Initialize instances here.
+	 *
+	 * <p>This method will be called exactly once upon visual creation.</p>
 	 */
 	void init(float partialTick);
 
 	/**
-	 * Update instances here. Good for when instances don't change very often and when animations are GPU based.
-	 * <br>
-	 * <br> If your animations are complex or more CPU driven, see {@link DynamicVisual} or {@link TickableVisual}.
+	 * Update instances here.
+	 *
+	 * <p>Good for when instances don't change very often and when animations are GPU based.
+	 *
+	 * <br>If your animations are complex or more CPU driven, see {@link DynamicVisual} or {@link TickableVisual}.</p>
 	 */
 	void update(float partialTick);
 
