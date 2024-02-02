@@ -35,6 +35,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	protected final EntityVisibilityTester visibilityTester;
 	protected final ShadowComponent shadow;
 	protected final FireComponent fire;
+	protected final BoundingBoxComponent boundingBox;
 
 	public AbstractEntityVisual(VisualizationContext ctx, T entity) {
 		super(ctx, entity.level());
@@ -42,6 +43,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 		visibilityTester = new EntityVisibilityTester(entity, ctx.renderOrigin(), 1.5f);
 		shadow = new ShadowComponent(ctx, entity);
 		fire = new FireComponent(ctx, entity);
+		boundingBox = new BoundingBoxComponent(ctx, entity);
 	}
 
 	@Override
@@ -96,5 +98,6 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	protected void _delete() {
 		shadow.delete();
 		fire.delete();
+		boundingBox.delete();
 	}
 }

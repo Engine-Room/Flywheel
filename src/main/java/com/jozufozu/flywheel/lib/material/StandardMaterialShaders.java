@@ -10,6 +10,8 @@ public final class StandardMaterialShaders {
 			Flywheel.rl("material/default.vert"),
 			Flywheel.rl("material/default.frag")));
 
+	public static final MaterialShaders WIREFRAME = MaterialShaders.REGISTRY.registerAndGet(new SimpleMaterialShaders(Flywheel.rl("material/wireframe.vert"), Flywheel.rl("material/wireframe.frag")));
+
 	private StandardMaterialShaders() {
 	}
 

@@ -7,11 +7,12 @@ import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.lib.math.MatrixMath;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 
 public class FrameUniforms implements UniformProvider {
-	public static final int SIZE = 220;
+	public static final int SIZE = 232;
 
 	private RenderContext context;
 
@@ -51,10 +52,17 @@ public class FrameUniforms implements UniformProvider {
 		writeVec3(ptr + 176, lookVector.x, lookVector.y, lookVector.z);
 
 		writeVec2(ptr + 192, camera.getXRot(), camera.getYRot());
+		var window = Minecraft.getInstance()
+				.getWindow();
 
-		MemoryUtil.memPutInt(ptr + 200, getConstantAmbientLightFlag(context));
+		writeVec2(ptr + 200, window.getWidth(), window.getHeight());
 
-		writeTime(ptr + 204);
+		// default line width: net.minecraft.client.renderer.RenderStateShard.LineStateShard
+		MemoryUtil.memPutFloat(ptr + 208, Math.max(2.5F, (float) window.getWidth() / 1920.0F * 2.5F));
+
+		MemoryUtil.memPutInt(ptr + 212, getConstantAmbientLightFlag(context));
+
+		writeTime(ptr + 216);
 	}
 
 	private void writeTime(long ptr) {
