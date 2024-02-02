@@ -15,6 +15,10 @@ layout(std140) uniform _FlwFrameUniforms {
     vec4 flw_cameraPos;
     vec4 flw_cameraLook;
     vec2 flw_cameraRot;
+
+    vec2 flw_viewportSize;
+    float flw_defaultLineWidth;
+
     uint flw_constantAmbientLight;
 
     uint flw_ticks;
