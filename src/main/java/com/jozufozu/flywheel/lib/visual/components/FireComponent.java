@@ -4,6 +4,7 @@ import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
@@ -15,7 +16,7 @@ import com.jozufozu.flywheel.lib.model.ModelCache;
 import com.jozufozu.flywheel.lib.model.QuadMesh;
 import com.jozufozu.flywheel.lib.model.SingleMeshModel;
 import com.jozufozu.flywheel.lib.visual.EntityComponent;
-import com.jozufozu.flywheel.lib.visual.InstanceRecycler;
+import com.jozufozu.flywheel.lib.visual.SmartRecycler;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
@@ -42,20 +43,18 @@ public class FireComponent implements EntityComponent {
 	private final Entity entity;
 	private final PoseStack stack = new PoseStack();
 
-	private final InstanceRecycler<TransformedInstance> fire0;
-	private final InstanceRecycler<TransformedInstance> fire1;
+	private final SmartRecycler<Model, TransformedInstance> recycler;
 
 	public FireComponent(VisualizationContext context, Entity entity) {
 		this.context = context;
 		this.entity = entity;
 
-		fire0 = new InstanceRecycler<>(() -> createInstance(ModelBakery.FIRE_0));
-		fire1 = new InstanceRecycler<>(() -> createInstance(ModelBakery.FIRE_1));
+		recycler = new SmartRecycler<>(this::createInstance);
 	}
 
-	private TransformedInstance createInstance(net.minecraft.client.resources.model.Material texture) {
+	private TransformedInstance createInstance(Model model) {
 		TransformedInstance instance = context.instancerProvider()
-				.instancer(InstanceTypes.TRANSFORMED, FIRE_MODELS.get(texture))
+				.instancer(InstanceTypes.TRANSFORMED, model)
 				.createInstance();
 		instance.setBlockLight(LightTexture.block(LightTexture.FULL_BLOCK));
 		instance.setChanged();
@@ -70,15 +69,13 @@ public class FireComponent implements EntityComponent {
 	 */
 	@Override
 	public void beginFrame(VisualFrameContext context) {
-		fire0.resetCount();
-		fire1.resetCount();
+		recycler.resetCount();
 
 		if (entity.displayFireAnimation()) {
 			setupInstances(context);
 		}
 
-		fire0.discardExtra();
-		fire1.discardExtra();
+		recycler.discardExtra();
 	}
 
 	private void setupInstances(VisualFrameContext context) {
@@ -101,7 +98,7 @@ public class FireComponent implements EntityComponent {
 		stack.translate(0.0F, 0.0F, -0.3F + (float) ((int) maxHeight) * 0.02F);
 
 		for (int i = 0; y < maxHeight; ++i) {
-			var instance = (i % 2 == 0 ? this.fire0 : this.fire1).get()
+			var instance = recycler.get(FIRE_MODELS.get(i % 2 == 0 ? ModelBakery.FIRE_0 : ModelBakery.FIRE_1))
 					.setTransform(stack)
 					.scaleX(width)
 					.translate(0, y, z);
@@ -123,8 +120,7 @@ public class FireComponent implements EntityComponent {
 
 	@Override
 	public void delete() {
-		fire0.delete();
-		fire1.delete();
+		recycler.delete();
 	}
 
 	private record FireMesh(TextureAtlasSprite sprite) implements QuadMesh {
