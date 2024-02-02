@@ -14,7 +14,10 @@ import com.jozufozu.flywheel.lib.model.ModelHolder;
 import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.model.SingleMeshModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
-import com.jozufozu.flywheel.lib.visual.AbstractEntityVisual;
+import com.jozufozu.flywheel.lib.visual.SimpleEntityVisual;
+import com.jozufozu.flywheel.lib.visual.components.BoundingBoxComponent;
+import com.jozufozu.flywheel.lib.visual.components.FireComponent;
+import com.jozufozu.flywheel.lib.visual.components.ShadowComponent;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
@@ -26,7 +29,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVisual<T> implements TickableVisual, DynamicVisual {
+public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisual<T> implements TickableVisual, DynamicVisual {
 	public static final ModelHolder CHEST_BODY_MODEL = createBodyModelHolder(ModelLayers.CHEST_MINECART);
 	public static final ModelHolder COMMAND_BLOCK_BODY_MODEL = createBodyModelHolder(ModelLayers.COMMAND_BLOCK_MINECART);
 	public static final ModelHolder FURNACE_BODY_MODEL = createBodyModelHolder(ModelLayers.FURNACE_MINECART);
@@ -48,7 +51,6 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	public MinecartVisual(VisualizationContext ctx, T entity, ModelHolder bodyModel) {
 		super(ctx, entity);
 		this.bodyModel = bodyModel;
-		shadow.radius(0.7f);
 	}
 
 	private static ModelHolder createBodyModelHolder(ModelLayerLocation layer) {
@@ -59,6 +61,10 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 
 	@Override
 	public void init(float partialTick) {
+		addComponent(new ShadowComponent(visualizationContext, entity).radius(0.7f));
+		addComponent(new FireComponent(visualizationContext, entity));
+		addComponent(new BoundingBoxComponent(visualizationContext, entity));
+
 		body = createBodyInstance();
 		blockState = entity.getDisplayBlockState();
 		contents = createContentsInstance();
@@ -109,9 +115,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 
 	@Override
 	public void beginFrame(VisualFrameContext context) {
-		shadow.beginFrame(context);
-		fire.beginFrame(context);
-		boundingBox.beginFrame(context);
+		super.beginFrame(context);
 
 		if (!isVisible(context.frustum())) {
 			return;
@@ -210,7 +214,6 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		if (contents != null) {
 			contents.delete();
 		}
-		super._delete();
 	}
 
 	public static boolean shouldSkipRender(AbstractMinecart minecart) {
