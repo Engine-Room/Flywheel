@@ -15,8 +15,8 @@ import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.model.SingleMeshModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.visual.SimpleEntityVisual;
-import com.jozufozu.flywheel.lib.visual.components.BoundingBoxComponent;
 import com.jozufozu.flywheel.lib.visual.components.FireComponent;
+import com.jozufozu.flywheel.lib.visual.components.HitboxComponent;
 import com.jozufozu.flywheel.lib.visual.components.ShadowComponent;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -63,7 +63,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisu
 	public void init(float partialTick) {
 		addComponent(new ShadowComponent(visualizationContext, entity).radius(0.7f));
 		addComponent(new FireComponent(visualizationContext, entity));
-		addComponent(new BoundingBoxComponent(visualizationContext, entity));
+		addComponent(new HitboxComponent(visualizationContext, entity));
 
 		body = createBodyInstance();
 		blockState = entity.getDisplayBlockState();
@@ -210,6 +210,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisu
 
 	@Override
 	protected void _delete() {
+		super._delete();
 		body.delete();
 		if (contents != null) {
 			contents.delete();

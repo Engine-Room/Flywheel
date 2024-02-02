@@ -12,7 +12,7 @@ public final class StandardMaterialShaders {
 
 	public static final MaterialShaders WIREFRAME = MaterialShaders.REGISTRY.registerAndGet(new SimpleMaterialShaders(Flywheel.rl("material/wireframe.vert"), Flywheel.rl("material/wireframe.frag")));
 
-	public static final MaterialShaders CENTERLINE = MaterialShaders.REGISTRY.registerAndGet(new SimpleMaterialShaders(Flywheel.rl("material/centerline.vert"), Flywheel.rl("material/centerline.frag")));
+	public static final MaterialShaders LINE = MaterialShaders.REGISTRY.registerAndGet(new SimpleMaterialShaders(Flywheel.rl("material/lines.vert"), Flywheel.rl("material/lines.frag")));
 
 	private StandardMaterialShaders() {
 	}
