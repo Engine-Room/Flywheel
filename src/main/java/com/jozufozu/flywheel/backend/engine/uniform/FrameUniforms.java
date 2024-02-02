@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.engine.uniform;
 
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
 
@@ -7,16 +8,19 @@ import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.lib.math.MatrixMath;
 
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 
 public class FrameUniforms implements UniformProvider {
-	public static final int SIZE = 232;
+	public static final int SIZE = 304;
 
+	@Nullable
 	private RenderContext context;
 
 	private final Matrix4f viewProjection = new Matrix4f();
+	private final Matrix4f viewProjectionInverse = new Matrix4f();
 
 	public int byteSize() {
 		return SIZE;
@@ -28,6 +32,10 @@ public class FrameUniforms implements UniformProvider {
 
 	@Override
 	public void write(long ptr) {
+		if (context == null) {
+			return;
+		}
+
 		Vec3i renderOrigin = VisualizationManager.getOrThrow(context.level())
 				.getRenderOrigin();
 		var camera = context.camera();
@@ -45,27 +53,43 @@ public class FrameUniforms implements UniformProvider {
 			Uniforms.frustumCapture = false;
 		}
 
-		MatrixMath.writeUnsafe(viewProjection, ptr + 96);
-		writeVec3(ptr + 160, camX, camY, camZ);
+		ptr += 96;
 
-		var lookVector = camera.getLookVector();
-		writeVec3(ptr + 176, lookVector.x, lookVector.y, lookVector.z);
+		ptr = writeMatrices(ptr);
 
-		writeVec2(ptr + 192, camera.getXRot(), camera.getYRot());
+		ptr = writeCamera(ptr, camX, camY, camZ, camera);
+
 		var window = Minecraft.getInstance()
 				.getWindow();
-
-		writeVec2(ptr + 200, window.getWidth(), window.getHeight());
+		ptr = writeVec2(ptr, window.getWidth(), window.getHeight());
 
 		// default line width: net.minecraft.client.renderer.RenderStateShard.LineStateShard
-		MemoryUtil.memPutFloat(ptr + 208, Math.max(2.5F, (float) window.getWidth() / 1920.0F * 2.5F));
+		MemoryUtil.memPutFloat(ptr, Math.max(2.5F, (float) window.getWidth() / 1920.0F * 2.5F));
+		ptr += 4;
 
-		MemoryUtil.memPutInt(ptr + 212, getConstantAmbientLightFlag(context));
+		MemoryUtil.memPutInt(ptr, getConstantAmbientLightFlag(context));
+		ptr += 4;
 
-		writeTime(ptr + 216);
+		writeTime(ptr);
 	}
 
-	private void writeTime(long ptr) {
+	private long writeMatrices(long ptr) {
+		MatrixMath.writeUnsafe(viewProjection, ptr);
+		MatrixMath.writeUnsafe(viewProjection.invert(viewProjectionInverse), ptr + 64);
+		return ptr + 128;
+	}
+
+	private static long writeCamera(long ptr, float camX, float camY, float camZ, Camera camera) {
+		ptr = writeVec3(ptr, camX, camY, camZ);
+
+		var lookVector = camera.getLookVector();
+		ptr = writeVec3(ptr, lookVector.x, lookVector.y, lookVector.z);
+
+		ptr = writeVec2(ptr, camera.getXRot(), camera.getYRot());
+		return ptr;
+	}
+
+	private long writeTime(long ptr) {
 		int ticks = context.renderer()
 				.getTicks();
 		float partialTick = context.partialTick();
@@ -76,18 +100,21 @@ public class FrameUniforms implements UniformProvider {
 		MemoryUtil.memPutFloat(ptr + 4, partialTick);
 		MemoryUtil.memPutFloat(ptr + 8, renderTicks);
 		MemoryUtil.memPutFloat(ptr + 12, renderSeconds);
+		return ptr + 16;
 	}
 
-	private static void writeVec3(long ptr, float camX, float camY, float camZ) {
+	private static long writeVec3(long ptr, float camX, float camY, float camZ) {
 		MemoryUtil.memPutFloat(ptr, camX);
 		MemoryUtil.memPutFloat(ptr + 4, camY);
 		MemoryUtil.memPutFloat(ptr + 8, camZ);
 		MemoryUtil.memPutFloat(ptr + 12, 0f); // empty component of vec4 because we don't trust std140
+		return ptr + 16;
 	}
 
-	private static void writeVec2(long ptr, float camX, float camY) {
+	private static long writeVec2(long ptr, float camX, float camY) {
 		MemoryUtil.memPutFloat(ptr, camX);
 		MemoryUtil.memPutFloat(ptr + 4, camY);
+		return ptr + 8;
 	}
 
 	private static int getConstantAmbientLightFlag(RenderContext context) {

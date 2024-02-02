@@ -11,9 +11,12 @@ struct FrustumPlanes {
 
 layout(std140) uniform _FlwFrameUniforms {
     FrustumPlanes flw_frustumPlanes;
+
     mat4 flw_viewProjection;
-    vec4 flw_cameraPos;
-    vec4 flw_cameraLook;
+    mat4 flw_viewProjectionInverse;
+
+    vec4 _flw_cameraPos;
+    vec4 _flw_cameraLook;
     vec2 flw_cameraRot;
 
     vec2 flw_viewportSize;
@@ -27,3 +30,6 @@ layout(std140) uniform _FlwFrameUniforms {
     float flw_renderTicks;
     float flw_renderSeconds;
 };
+
+#define flw_cameraPos _flw_cameraPos.xyz
+#define flw_cameraLook _flw_cameraLook.xyz
