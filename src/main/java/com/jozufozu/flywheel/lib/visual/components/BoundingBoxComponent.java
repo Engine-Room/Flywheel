@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.lib.visual.components;
 
+import org.joml.Quaternionf;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
@@ -16,7 +17,7 @@ import com.jozufozu.flywheel.lib.math.MoreMath;
 import com.jozufozu.flywheel.lib.model.QuadMesh;
 import com.jozufozu.flywheel.lib.model.SingleMeshModel;
 import com.jozufozu.flywheel.lib.visual.EntityComponent;
-import com.jozufozu.flywheel.lib.visual.InstanceRecycler;
+import com.jozufozu.flywheel.lib.visual.SmartRecycler;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
@@ -25,30 +26,38 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 public class BoundingBoxComponent implements EntityComponent {
-	private static final Material MATERIAL = SimpleMaterial.builder()
+	private static final Material WIREFRAME = SimpleMaterial.builder()
 			.shaders(StandardMaterialShaders.WIREFRAME)
 			.backfaceCulling(false)
 			.build();
-	private static final Model MODEL = new SingleMeshModel(BoundingBoxMesh.INSTANCE, MATERIAL);
+
+	private static final Material CENTERLINE = SimpleMaterial.builder()
+			.shaders(StandardMaterialShaders.CENTERLINE)
+			.backfaceCulling(false)
+			.build();
+	private static final Model BOX = new SingleMeshModel(BoundingBoxMesh.INSTANCE, WIREFRAME);
+
+	// Should we try a single quad oriented to face the camera instead?
+	private static final Model LINE = new SingleMeshModel(BoundingBoxMesh.INSTANCE, CENTERLINE);
 
 	private final VisualizationContext context;
 	private final Entity entity;
 
 	private boolean showEyeBox;
 
-	private final InstanceRecycler<TransformedInstance> recycler;
+	private final SmartRecycler<Model, TransformedInstance> recycler;
 
 	public BoundingBoxComponent(VisualizationContext context, Entity entity) {
 		this.context = context;
 		this.entity = entity;
 		this.showEyeBox = entity instanceof LivingEntity;
 
-		this.recycler = new InstanceRecycler<>(this::createInstance);
+		this.recycler = new SmartRecycler<>(this::createInstance);
 	}
 
-	private TransformedInstance createInstance() {
+	private TransformedInstance createInstance(Model model) {
 		TransformedInstance instance = context.instancerProvider()
-				.instancer(InstanceTypes.TRANSFORMED, MODEL)
+				.instancer(InstanceTypes.TRANSFORMED, model)
 				.createInstance();
 		instance.setBlockLight(LightTexture.block(LightTexture.FULL_BLOCK));
 		instance.setChanged();
@@ -76,22 +85,33 @@ public class BoundingBoxComponent implements EntityComponent {
 			var bbWidth = entity.getBbWidth();
 			var bbHeight = entity.getBbHeight();
 			var bbWidthHalf = bbWidth * 0.5;
-			recycler.get()
+			recycler.get(BOX)
 					.loadIdentity()
 					.translate(entityX - bbWidthHalf, entityY, entityZ - bbWidthHalf)
 					.scale(bbWidth, bbHeight, bbWidth)
 					.setChanged();
 
-			// TODO: multipart entities and view vectors
+			// TODO: multipart entities, but forge seems to have an
+			//  injection for them so we'll need platform specific code.
 
 			if (showEyeBox) {
-				recycler.get()
+				recycler.get(BOX)
 						.loadIdentity()
 						.translate(entityX - bbWidthHalf, entityY + entity.getEyeHeight() - 0.01, entityZ - bbWidthHalf)
 						.scale(bbWidth, 0.02f, bbWidth)
 						.setColor(255, 0, 0)
 						.setChanged();
 			}
+
+			var viewVector = entity.getViewVector(context.partialTick());
+
+			recycler.get(LINE)
+					.loadIdentity()
+					.translate(entityX, entityY + entity.getEyeHeight(), entityZ)
+					.rotate(new Quaternionf().rotateTo(0, 1, 0, (float) viewVector.x, (float) viewVector.y, (float) viewVector.z))
+					.scale(0.02f, 2f, 0.02f)
+					.setColor(0, 0, 255)
+					.setChanged();
 		}
 
 		recycler.discardExtra();
