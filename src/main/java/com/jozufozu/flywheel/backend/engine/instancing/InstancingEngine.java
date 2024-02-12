@@ -16,22 +16,18 @@ import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialEncoder;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
+import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
+import com.jozufozu.flywheel.backend.engine.textures.TexturesImpl;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
-import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.NamedFlag;
 import com.jozufozu.flywheel.lib.task.SyncedPlan;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 
 public class InstancingEngine extends AbstractEngine {
 	private final InstancingPrograms programs;
+	private final TexturesImpl textures = new TexturesImpl();
 	private final InstancedDrawManager drawManager = new InstancedDrawManager();
 	private final Flag flushFlag = new NamedFlag("flushed");
 
@@ -68,21 +64,7 @@ public class InstancingEngine extends AbstractEngine {
 		}
 
 		try (var state = GlStateTracker.getRestoreState()) {
-			GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
-			int prevActiveTexture = GlStateManager._getActiveTexture();
-			gameRenderer.overlayTexture().setupOverlayColor();
-			gameRenderer.lightTexture().turnOnLightLayer();
-
-			GlTextureUnit.T1.makeActive();
-			RenderSystem.bindTexture(RenderSystem.getShaderTexture(1));
-			GlTextureUnit.T2.makeActive();
-			RenderSystem.bindTexture(RenderSystem.getShaderTexture(2));
-
 			render(drawSet);
-
-			gameRenderer.overlayTexture().teardownOverlayColor();
-			gameRenderer.lightTexture().turnOffLightLayer();
-			GlStateManager._activeTexture(prevActiveTexture);
 		}
 	}
 
@@ -116,17 +98,21 @@ public class InstancingEngine extends AbstractEngine {
 				continue;
 			}
 
-			var program = programs.get(shader.instanceType(), Contexts.DEFAULT);
+			var program = programs.get(shader.instanceType(), shader.context()
+					.contextShader());
 			program.bind();
 
 			Uniforms.bindForDraw();
 			uploadMaterialUniform(program, shader.material());
 
+			shader.context()
+					.prepare(shader.material(), program, textures);
 			MaterialRenderState.setup(shader.material());
 
 			for (var drawCall : drawCalls) {
 				drawCall.render();
 			}
+			TextureBinder.resetTextureBindings();
 		}
 
 		MaterialRenderState.reset();

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
@@ -27,8 +28,8 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 	protected final List<UninitializedInstancer<N, ?>> initializationQueue = new ArrayList<>();
 
 	@SuppressWarnings("unchecked")
-	public <I extends Instance> Instancer<I> getInstancer(InstanceType<I> type, Model model, RenderStage stage) {
-		return (Instancer<I>) instancers.computeIfAbsent(new InstancerKey<>(type, model, stage), this::createAndDeferInit);
+	public <I extends Instance> Instancer<I> getInstancer(InstanceType<I> type, Context context, Model model, RenderStage stage) {
+		return (Instancer<I>) instancers.computeIfAbsent(new InstancerKey<>(type, context, model, stage), this::createAndDeferInit);
 	}
 
 	public void delete() {
@@ -50,12 +51,12 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 				.forEach(AbstractInstancer::clear);
 	}
 
-	protected abstract <I extends Instance> N create(InstanceType<I> type);
+	protected abstract <I extends Instance> N create(InstancerKey<I> type);
 
 	protected abstract <I extends Instance> void initialize(InstancerKey<I> key, N instancer);
 
 	private N createAndDeferInit(InstancerKey<?> key) {
-		var out = create(key.type());
+		var out = create(key);
 
 		// Only queue the instancer for initialization if it has anything to render.
 		if (key.model()

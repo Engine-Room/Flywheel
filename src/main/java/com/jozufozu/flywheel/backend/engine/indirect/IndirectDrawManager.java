@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.jozufozu.flywheel.api.backend.Engine;
+import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
@@ -21,8 +22,10 @@ import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
+import com.jozufozu.flywheel.backend.engine.textures.TexturesImpl;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
+import com.jozufozu.flywheel.lib.context.ContextShaders;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.util.Pair;
@@ -34,7 +37,8 @@ import net.minecraft.client.resources.model.ModelBakery;
 public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> {
 	private final IndirectPrograms programs;
 	private final StagingBuffer stagingBuffer;
-	private final Map<InstanceType<?>, IndirectCullingGroup<?>> cullingGroups = new HashMap<>();
+	private final TexturesImpl textures = new TexturesImpl();
+	private final Map<GroupKey<?>, IndirectCullingGroup<?>> cullingGroups = new HashMap<>();
 	private final GlBuffer crumblingDrawBuffer = new GlBuffer();
 
 	public IndirectDrawManager(IndirectPrograms programs) {
@@ -43,14 +47,15 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 	}
 
 	@Override
-	protected <I extends Instance> IndirectInstancer<?> create(InstanceType<I> type) {
-		return new IndirectInstancer<>(type);
+	protected <I extends Instance> IndirectInstancer<?> create(InstancerKey<I> key) {
+		return new IndirectInstancer<>(key.type(), key.context());
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	protected <I extends Instance> void initialize(InstancerKey<I> key, IndirectInstancer<?> instancer) {
-		var group = (IndirectCullingGroup<I>) cullingGroups.computeIfAbsent(key.type(), t -> new IndirectCullingGroup<>(t, programs));
+		var groupKey = new GroupKey<>(key.type(), key.context());
+		var group = (IndirectCullingGroup<I>) cullingGroups.computeIfAbsent(groupKey, t -> new IndirectCullingGroup<>(t.type, t.context, programs));
 		group.add((IndirectInstancer<I>) instancer, key.model(), key.stage());
 	}
 
@@ -65,7 +70,7 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 
 	public void renderStage(RenderStage stage) {
 		for (var group : cullingGroups.values()) {
-			group.submit(stage);
+			group.submit(stage, textures);
 		}
 	}
 
@@ -123,7 +128,7 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 
 			// Set up the crumbling program buffers. Nothing changes here between draws.
 			cullingGroups.get(instanceTypeEntry.getKey())
-					.bindForCrumbling();
+					.bindWithContextShader(ContextShaders.CRUMBLING);
 
 			for (var progressEntry : byProgress.int2ObjectEntrySet()) {
 				for (var instanceHandlePair : progressEntry.getValue()) {
@@ -156,8 +161,8 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 		block.free();
 	}
 
-	private static Map<InstanceType<?>, Int2ObjectMap<List<Pair<IndirectInstancer<?>, InstanceHandleImpl>>>> doCrumblingSort(List<Engine.CrumblingBlock> crumblingBlocks) {
-		Map<InstanceType<?>, Int2ObjectMap<List<Pair<IndirectInstancer<?>, InstanceHandleImpl>>>> byType = new HashMap<>();
+	private static Map<GroupKey<?>, Int2ObjectMap<List<Pair<IndirectInstancer<?>, InstanceHandleImpl>>>> doCrumblingSort(List<Engine.CrumblingBlock> crumblingBlocks) {
+		Map<GroupKey<?>, Int2ObjectMap<List<Pair<IndirectInstancer<?>, InstanceHandleImpl>>>> byType = new HashMap<>();
 		for (Engine.CrumblingBlock block : crumblingBlocks) {
 			int progress = block.progress();
 
@@ -176,11 +181,14 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 					continue;
 				}
 
-				byType.computeIfAbsent(instancer.type, $ -> new Int2ObjectArrayMap<>())
+				byType.computeIfAbsent(new GroupKey<>(instancer.type, instancer.context), $ -> new Int2ObjectArrayMap<>())
 						.computeIfAbsent(progress, $ -> new ArrayList<>())
 						.add(Pair.of(instancer, impl));
 			}
 		}
 		return byType;
+	}
+
+	public record GroupKey<I extends Instance>(InstanceType<I> type, Context context) {
 	}
 }

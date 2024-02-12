@@ -6,7 +6,7 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.api.context.Context;
+import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
@@ -61,7 +61,7 @@ public class InstancingPrograms extends AbstractPrograms {
 		return instance != null;
 	}
 
-	public GlProgram get(InstanceType<?> instanceType, Context contextShader) {
+	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader) {
 		return pipeline.get(new PipelineProgramKey(instanceType, contextShader));
 	}
 

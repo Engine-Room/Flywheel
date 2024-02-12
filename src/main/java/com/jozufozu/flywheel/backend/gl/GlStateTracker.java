@@ -36,7 +36,7 @@ public class GlStateTracker {
 	}
 
 	public static State getRestoreState() {
-		return new State(BUFFERS.clone(), vao, program);
+		return new State(BUFFERS.clone(), vao, program, GlStateManager._getActiveTexture());
 	}
 
 	public static void bindVao(int vao) {
@@ -51,7 +51,7 @@ public class GlStateTracker {
 		}
 	}
 
-	public record State(int[] buffers, int vao, int program) implements AutoCloseable {
+	public record State(int[] buffers, int vao, int program, int activeTexture) implements AutoCloseable {
 		public void restore() {
 			if (vao != GlStateTracker.vao) {
 				GlStateManager._glBindVertexArray(vao);
@@ -68,6 +68,8 @@ public class GlStateTracker {
 			if (program != GlStateTracker.program) {
 				GlStateManager._glUseProgram(program);
 			}
+
+			GlStateManager._activeTexture(activeTexture);
 		}
 
 		@Override

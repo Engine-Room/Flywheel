@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.context.Context;
+import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.component.UberShaderComponent;
@@ -46,9 +46,9 @@ public final class FlwPrograms {
 
 	private static ImmutableList<PipelineProgramKey> createPipelineKeys() {
 		ImmutableList.Builder<PipelineProgramKey> builder = ImmutableList.builder();
-		for (Context context : Context.REGISTRY) {
+		for (ContextShader contextShader : ContextShader.REGISTRY) {
 			for (InstanceType<?> instanceType : InstanceType.REGISTRY) {
-				builder.add(new PipelineProgramKey(instanceType, context));
+				builder.add(new PipelineProgramKey(instanceType, contextShader));
 			}
 		}
 		return builder.build();

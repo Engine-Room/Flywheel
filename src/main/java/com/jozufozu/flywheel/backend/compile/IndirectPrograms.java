@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.context.Context;
+import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.compile.component.IndirectComponent;
 import com.jozufozu.flywheel.backend.compile.core.CompilationHarness;
@@ -121,7 +121,7 @@ public class IndirectPrograms extends AbstractPrograms {
 		return instance != null;
 	}
 
-	public GlProgram getIndirectProgram(InstanceType<?> instanceType, Context contextShader) {
+	public GlProgram getIndirectProgram(InstanceType<?> instanceType, ContextShader contextShader) {
 		return pipeline.get(new PipelineProgramKey(instanceType, contextShader));
 	}
 

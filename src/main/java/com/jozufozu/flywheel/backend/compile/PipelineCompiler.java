@@ -50,8 +50,6 @@ public class PipelineCompiler {
 								.fragmentShader())
 						.withResource(pipeline.fragmentMain()))
 				.then((key, program) -> {
-					key.contextShader()
-							.onProgramLink(program);
 					program.setUniformBlockBinding("_FlwFrameUniforms", 0);
 					program.setUniformBlockBinding("_FlwFogUniforms", 1);
 				})
