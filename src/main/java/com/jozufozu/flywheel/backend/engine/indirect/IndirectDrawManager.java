@@ -22,10 +22,12 @@ import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
+import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
 import com.jozufozu.flywheel.backend.engine.textures.TexturesImpl;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.lib.context.ContextShaders;
+import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.util.Pair;
@@ -127,7 +129,7 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 			var byProgress = instanceTypeEntry.getValue();
 
 			// Set up the crumbling program buffers. Nothing changes here between draws.
-			cullingGroups.get(instanceTypeEntry.getKey())
+			var program = cullingGroups.get(instanceTypeEntry.getKey())
 					.bindWithContextShader(ContextShaders.CRUMBLING);
 
 			for (var progressEntry : byProgress.int2ObjectEntrySet()) {
@@ -136,16 +138,14 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 					int instanceIndex = instanceHandlePair.second().index;
 
 					for (IndirectDraw draw : instancer.draws()) {
-						var baseMaterial = draw.material();
-						int diffuseTexture = CommonCrumbling.getDiffuseTexture(baseMaterial);
 
 						// Transform the material to be suited for crumbling.
-						CommonCrumbling.applyCrumblingProperties(crumblingMaterial, baseMaterial);
-						crumblingMaterial.texture(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
+						CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
+						Contexts.CRUMBLING.get(progressEntry.getIntKey())
+								.prepare(crumblingMaterial, program, textures);
 
 						// Set up gl state for the draw.
 						MaterialRenderState.setup(crumblingMaterial);
-						CommonCrumbling.setActiveAndBindForCrumbling(diffuseTexture);
 
 						// Upload the draw command.
 						draw.writeWithOverrides(block.ptr(), instanceIndex, crumblingMaterial);
@@ -153,6 +153,8 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 
 						// Submit! Everything is already bound by here.
 						glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0);
+
+						TextureBinder.resetTextureBindings();
 					}
 				}
 			}
