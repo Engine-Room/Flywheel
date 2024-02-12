@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.engine;
 
 import java.util.ArrayList;
 
+import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
@@ -9,6 +10,7 @@ import com.jozufozu.flywheel.lib.util.AtomicBitset;
 
 public abstract class AbstractInstancer<I extends Instance> implements Instancer<I> {
 	public final InstanceType<I> type;
+	public final Context context;
 
 	// Lock for all instances, only needs to be used in methods that may run on the TaskExecutor.
 	protected final Object lock = new Object();
@@ -18,8 +20,9 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	protected final AtomicBitset changed = new AtomicBitset();
 	protected final AtomicBitset deleted = new AtomicBitset();
 
-	protected AbstractInstancer(InstanceType<I> type) {
+	protected AbstractInstancer(InstanceType<I> type, Context context) {
 		this.type = type;
+		this.context = context;
 	}
 
 	@Override

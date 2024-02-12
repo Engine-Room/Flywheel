@@ -9,6 +9,10 @@ import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
 
 import org.slf4j.Logger;
 
+import com.jozufozu.flywheel.api.context.Shader;
+import com.jozufozu.flywheel.api.context.Texture;
+import com.jozufozu.flywheel.backend.engine.textures.IdentifiedTexture;
+import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
 import com.jozufozu.flywheel.backend.gl.GlObject;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.logging.LogUtils;
@@ -16,7 +20,7 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
-public class GlProgram extends GlObject {
+public class GlProgram extends GlObject implements Shader {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
 	private final Object2IntMap<String> uniformLocationCache = new Object2IntOpenHashMap<>();
@@ -31,6 +35,24 @@ public class GlProgram extends GlObject {
 
 	public static void unbind() {
 		ProgramManager.glUseProgram(0);
+	}
+
+	@Override
+	public void setTexture(String glslName, Texture texture) {
+		if (!(texture instanceof IdentifiedTexture identified)) {
+			return;
+		}
+		int uniform = getUniformLocation(glslName);
+
+		if (uniform < 0) {
+			return;
+		}
+
+		int id = identified.id();
+
+		int binding = TextureBinder.bindTexture(id);
+
+		glUniform1i(uniform, binding);
 	}
 
 	/**

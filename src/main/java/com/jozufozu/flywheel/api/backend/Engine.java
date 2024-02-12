@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.api.backend;
 import java.util.List;
 
 import com.jozufozu.flywheel.api.BackendImplemented;
+import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
@@ -31,7 +32,7 @@ public interface Engine {
 	 * @return An instancer for the given instance type, model, and render stage.
 	 * @see InstancerProvider
 	 */
-	<I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, RenderStage stage);
+	<I extends Instance> Instancer<I> instancer(InstanceType<I> type, Context context, Model model, RenderStage stage);
 
 	/**
 	 * Create a plan that will be executed every frame.

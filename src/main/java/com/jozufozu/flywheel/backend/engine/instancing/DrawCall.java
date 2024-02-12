@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.backend.engine.instancing;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.jozufozu.flywheel.backend.InternalVertex;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
@@ -9,7 +11,9 @@ public class DrawCall {
 	private final InstancedInstancer<?> instancer;
 	private final InstancedMeshPool.BufferedMesh mesh;
 
+	@Nullable
 	private GlVertexArray vao;
+	@Nullable
 	private GlVertexArray vaoScratch;
 
 	public DrawCall(InstancedInstancer<?> instancer, InstancedMeshPool.BufferedMesh mesh, ShaderState shaderState) {

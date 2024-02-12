@@ -19,7 +19,7 @@ import com.jozufozu.flywheel.impl.BackendManagerImpl;
 import com.jozufozu.flywheel.impl.registry.IdRegistryImpl;
 import com.jozufozu.flywheel.impl.registry.RegistryImpl;
 import com.jozufozu.flywheel.impl.visualization.VisualizationEventHandler;
-import com.jozufozu.flywheel.lib.context.Contexts;
+import com.jozufozu.flywheel.lib.context.ContextShaders;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.material.CutoutShaders;
 import com.jozufozu.flywheel.lib.material.FogShaders;
@@ -128,7 +128,7 @@ public class Flywheel {
 		CutoutShaders.init();
 		FogShaders.init();
 		StandardMaterialShaders.init();
-		Contexts.init();
+		ContextShaders.init();
 
 		ShaderIndices.init();
 

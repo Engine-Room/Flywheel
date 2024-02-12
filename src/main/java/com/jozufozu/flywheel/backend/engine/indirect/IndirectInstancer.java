@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.lwjgl.system.MemoryUtil;
 
+import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
@@ -18,8 +19,8 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 
 	private long lastStartPos = -1;
 
-	public IndirectInstancer(InstanceType<I> type) {
-		super(type);
+	public IndirectInstancer(InstanceType<I> type, Context context) {
+		super(type, context);
 		this.objectStride = type.layout()
 				.byteSize() + IndirectBuffers.INT_SIZE;
 		writer = this.type.writer();

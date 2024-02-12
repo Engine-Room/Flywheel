@@ -5,7 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
@@ -23,12 +26,13 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 
 	private final Set<GlVertexArray> boundTo = new HashSet<>();
 	private final InstanceWriter<I> writer;
+	@Nullable
 	private GlBuffer vbo;
 
 	private final List<DrawCall> drawCalls = new ArrayList<>();
 
-	public InstancedInstancer(InstanceType<I> type) {
-		super(type);
+	public InstancedInstancer(InstanceType<I> type, Context context) {
+		super(type, context);
 		var layout = type.layout();
 		instanceAttributes = LayoutAttributes.attributes(layout);
 		instanceStride = layout.byteSize();
@@ -68,7 +72,7 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 	}
 
 	private void updateBuffer() {
-		if (changed.isEmpty()) {
+		if (changed.isEmpty() || vbo == null) {
 			return;
 		}
 
@@ -120,6 +124,9 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 	}
 
 	public void delete() {
+		if (vbo == null) {
+			return;
+		}
 		vbo.delete();
 		vbo = null;
 	}

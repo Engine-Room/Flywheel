@@ -10,7 +10,6 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
@@ -56,8 +55,8 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 	}
 
 	@Override
-	protected <I extends Instance> InstancedInstancer<I> create(InstanceType<I> type) {
-		return new InstancedInstancer<>(type);
+	protected <I extends Instance> InstancedInstancer<I> create(InstancerKey<I> key) {
+		return new InstancedInstancer<>(key.type(), key.context());
 	}
 
 	@Override
@@ -71,7 +70,7 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 		for (var entry : meshes.entrySet()) {
 			var mesh = alloc(entry.getValue());
 
-			ShaderState shaderState = new ShaderState(entry.getKey(), instancer.type);
+			ShaderState shaderState = new ShaderState(entry.getKey(), key.type(), key.context());
 			DrawCall drawCall = new DrawCall(instancer, mesh, shaderState);
 
 			drawSet.put(shaderState, drawCall);

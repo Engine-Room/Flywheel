@@ -1,17 +1,16 @@
 package com.jozufozu.flywheel.api.context;
 
-import com.jozufozu.flywheel.api.internal.InternalFlywheelApi;
-import com.jozufozu.flywheel.api.registry.Registry;
-import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-
-import net.minecraft.resources.ResourceLocation;
+import com.jozufozu.flywheel.api.material.Material;
 
 public interface Context {
-	static Registry<Context> REGISTRY = InternalFlywheelApi.INSTANCE.createRegistry();
+	ContextShader contextShader();
 
-	void onProgramLink(GlProgram program);
-
-	ResourceLocation vertexShader();
-
-	ResourceLocation fragmentShader();
+	/**
+	 * Prepare the shader for rendering with the given material and textures.
+	 *
+	 * @param material The material about to be rendered.
+	 * @param shader   The shader to prepare.
+	 * @param textures Source of the textures to use.
+	 */
+	void prepare(Material material, Shader shader, Textures textures);
 }

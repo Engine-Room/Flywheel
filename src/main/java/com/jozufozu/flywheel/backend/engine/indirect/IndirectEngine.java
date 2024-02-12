@@ -13,15 +13,9 @@ import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
-import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.NamedFlag;
 import com.jozufozu.flywheel.lib.task.SyncedPlan;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 
 public class IndirectEngine extends AbstractEngine {
 	private final IndirectPrograms programs;
@@ -60,23 +54,9 @@ public class IndirectEngine extends AbstractEngine {
 		}
 
 		try (var restoreState = GlStateTracker.getRestoreState()) {
-			GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
-			int prevActiveTexture = GlStateManager._getActiveTexture();
-			gameRenderer.overlayTexture().setupOverlayColor();
-			gameRenderer.lightTexture().turnOnLightLayer();
-
-			GlTextureUnit.T1.makeActive();
-			RenderSystem.bindTexture(RenderSystem.getShaderTexture(1));
-			GlTextureUnit.T2.makeActive();
-			RenderSystem.bindTexture(RenderSystem.getShaderTexture(2));
-
 			drawManager.renderStage(stage);
 
 			MaterialRenderState.reset();
-
-			gameRenderer.overlayTexture().teardownOverlayColor();
-			gameRenderer.lightTexture().turnOffLightLayer();
-			GlStateManager._activeTexture(prevActiveTexture);
 		}
 	}
 

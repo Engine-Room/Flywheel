@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.backend.engine;
 
 import com.jozufozu.flywheel.api.backend.Engine;
+import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
@@ -21,8 +22,8 @@ public abstract class AbstractEngine implements Engine {
 	}
 
 	@Override
-	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, RenderStage stage) {
-		return getStorage().getInstancer(type, model, stage);
+	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Context context, Model model, RenderStage stage) {
+		return getStorage().getInstancer(type, context, model, stage);
 	}
 
 	@Override

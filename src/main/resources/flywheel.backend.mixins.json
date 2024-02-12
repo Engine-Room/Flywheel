@@ -6,6 +6,8 @@
   "refmap": "flywheel.refmap.json",
   "client": [
     "GlStateManagerMixin",
+    "LightTextureAccessor",
+    "OverlayTextureAccessor",
     "RenderSystemMixin"
   ],
   "injectors": {

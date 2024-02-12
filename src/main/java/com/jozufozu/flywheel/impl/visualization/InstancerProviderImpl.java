@@ -10,12 +10,13 @@ import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.instance.InstancerProvider;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
+import com.jozufozu.flywheel.lib.context.Contexts;
 
 public record InstancerProviderImpl(Engine engine,
 									RenderStage renderStage) implements InstancerProvider, Supplier<VisualizationContext> {
 	@Override
 	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model) {
-		return engine.instancer(type, model, renderStage);
+		return engine.instancer(type, Contexts.DEFAULT, model, renderStage);
 	}
 
 	@Override
