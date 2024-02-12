@@ -6,14 +6,17 @@ import java.util.List;
 import java.util.Map;
 
 import com.jozufozu.flywheel.api.backend.Engine;
+import com.jozufozu.flywheel.api.context.Textures;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
+import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.lib.context.ContextShaders;
+import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
@@ -21,7 +24,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancedCrumbling {
-	public static void render(List<Engine.CrumblingBlock> crumblingBlocks, InstancingPrograms programs) {
+	public static void render(List<Engine.CrumblingBlock> crumblingBlocks, InstancingPrograms programs, Textures textures) {
 		// Sort draw calls into buckets, so we don't have to do as many shader binds.
 		var byShaderState = doCrumblingSort(crumblingBlocks);
 
@@ -41,16 +44,15 @@ public class InstancedCrumbling {
 
 				ShaderState shader = shaderStateEntry.getKey();
 
-				var baseMaterial = shader.material();
-				int diffuseTexture = CommonCrumbling.getDiffuseTexture(baseMaterial);
-
-				CommonCrumbling.applyCrumblingProperties(crumblingMaterial, baseMaterial);
+				CommonCrumbling.applyCrumblingProperties(crumblingMaterial, shader.material());
 
 				var program = programs.get(shader.instanceType(), ContextShaders.CRUMBLING);
 				program.bind();
 
 				Uniforms.bindForDraw();
 				InstancingEngine.uploadMaterialUniform(program, crumblingMaterial);
+
+				MaterialRenderState.setup(crumblingMaterial);
 
 				for (Int2ObjectMap.Entry<List<Runnable>> progressEntry : byProgress.int2ObjectEntrySet()) {
 					var drawCalls = progressEntry.getValue();
@@ -59,12 +61,12 @@ public class InstancedCrumbling {
 						continue;
 					}
 
-					crumblingMaterial.texture(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
-
-					MaterialRenderState.setup(crumblingMaterial);
-					CommonCrumbling.setActiveAndBindForCrumbling(diffuseTexture);
+					Contexts.CRUMBLING.get(progressEntry.getIntKey())
+							.prepare(crumblingMaterial, program, textures);
 
 					drawCalls.forEach(Runnable::run);
+
+					TextureBinder.resetTextureBindings();
 				}
 			}
 

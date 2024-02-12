@@ -210,7 +210,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 	}
 
-	public void bindWithContextShader(SimpleContextShader override) {
+	public GlProgram bindWithContextShader(SimpleContextShader override) {
 		var program = programs.getIndirectProgram(instanceType, override);
 
 		program.bind();
@@ -223,6 +223,8 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		var flwBaseDraw = drawProgram.getUniformLocation("_flw_baseDraw");
 		glUniform1ui(flwBaseDraw, 0);
+
+		return program;
 	}
 
 	private void drawBarrier() {
