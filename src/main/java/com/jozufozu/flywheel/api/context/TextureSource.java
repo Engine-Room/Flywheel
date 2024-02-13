@@ -5,7 +5,7 @@ import com.jozufozu.flywheel.api.BackendImplemented;
 import net.minecraft.resources.ResourceLocation;
 
 @BackendImplemented
-public interface Textures {
+public interface TextureSource {
 	/**
 	 * Get a built-in texture by its resource location.
 	 *

@@ -1,4 +1,4 @@
-uniform sampler2D _flw_crumblingTex;
+uniform sampler2D crumblingTex;
 
 in vec2 crumblingTexCoord;
 
@@ -8,7 +8,7 @@ void flw_beginFragment() {
 }
 
 void flw_endFragment() {
-    crumblingSampleColor = texture(_flw_crumblingTex, crumblingTexCoord);
+    crumblingSampleColor = texture(crumblingTex, crumblingTexCoord);
 
     // Make the crumbling overlay transparent when the fragment color after the material shader is transparent.
     flw_fragColor.rgb = crumblingSampleColor.rgb;

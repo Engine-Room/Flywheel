@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.jozufozu.flywheel.api.backend.Engine;
-import com.jozufozu.flywheel.api.context.Textures;
+import com.jozufozu.flywheel.api.context.TextureSource;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
@@ -24,7 +24,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancedCrumbling {
-	public static void render(List<Engine.CrumblingBlock> crumblingBlocks, InstancingPrograms programs, Textures textures) {
+	public static void render(List<Engine.CrumblingBlock> crumblingBlocks, InstancingPrograms programs, TextureSource textureSource) {
 		// Sort draw calls into buckets, so we don't have to do as many shader binds.
 		var byShaderState = doCrumblingSort(crumblingBlocks);
 
@@ -35,6 +35,8 @@ public class InstancedCrumbling {
 		var crumblingMaterial = SimpleMaterial.builder();
 
 		try (var state = GlStateTracker.getRestoreState()) {
+			TextureBinder.bindLightAndOverlay();
+
 			for (var shaderStateEntry : byShaderState.entrySet()) {
 				var byProgress = shaderStateEntry.getValue();
 
@@ -61,8 +63,8 @@ public class InstancedCrumbling {
 						continue;
 					}
 
-					Contexts.CRUMBLING.get(progressEntry.getIntKey())
-							.prepare(crumblingMaterial, program, textures);
+					var context = Contexts.CRUMBLING.get(progressEntry.getIntKey());
+					context.prepare(crumblingMaterial, program, textureSource);
 
 					drawCalls.forEach(Runnable::run);
 
@@ -71,6 +73,7 @@ public class InstancedCrumbling {
 			}
 
 			MaterialRenderState.reset();
+			TextureBinder.resetLightAndOverlay();
 		}
 	}
 

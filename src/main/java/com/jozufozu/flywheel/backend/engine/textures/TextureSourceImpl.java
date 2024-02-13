@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.jozufozu.flywheel.api.context.Texture;
-import com.jozufozu.flywheel.api.context.Textures;
+import com.jozufozu.flywheel.api.context.TextureSource;
 import com.jozufozu.flywheel.backend.mixin.LightTextureAccessor;
 import com.jozufozu.flywheel.backend.mixin.OverlayTextureAccessor;
 
@@ -12,13 +12,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 
-public class TexturesImpl implements Textures {
+public class TextureSourceImpl implements TextureSource {
 
 	private final DirectTexture lightTexture;
 	private final DirectTexture overlayTexture;
 	private final Map<ResourceLocation, WrappedTexture> wrappers = new HashMap<>();
 
-	public TexturesImpl() {
+	public TextureSourceImpl() {
 		var gameRenderer = Minecraft.getInstance().gameRenderer;
 
 		this.lightTexture = new DirectTexture(((LightTextureAccessor) gameRenderer.lightTexture()).flywheel$texture()
