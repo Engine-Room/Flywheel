@@ -5,6 +5,7 @@ import java.util.List;
 import com.jozufozu.flywheel.backend.InternalVertex;
 import com.jozufozu.flywheel.backend.compile.core.CompilationHarness;
 import com.jozufozu.flywheel.backend.compile.core.Compile;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
@@ -52,6 +53,14 @@ public class PipelineCompiler {
 				.then((key, program) -> {
 					program.setUniformBlockBinding("_FlwFrameUniforms", 0);
 					program.setUniformBlockBinding("_FlwFogUniforms", 1);
+
+					program.bind();
+
+					program.setSamplerBinding("_flw_diffuseTex", 0);
+					program.setSamplerBinding("_flw_overlayTex", 1);
+					program.setSamplerBinding("_flw_lightTex", 2);
+
+					GlProgram.unbind();
 				})
 				.harness(pipeline.compilerMarker(), sources);
 	}

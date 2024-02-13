@@ -8,8 +8,12 @@ import com.jozufozu.flywheel.api.material.DepthTest;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.Transparency;
 import com.jozufozu.flywheel.api.material.WriteMask;
+import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 
 public final class MaterialRenderState {
 	public static final Comparator<Material> COMPARATOR = Comparator.comparing(Material::texture)
@@ -25,11 +29,23 @@ public final class MaterialRenderState {
 	}
 
 	public static void setup(Material material) {
+		setupTexture(material);
 		setupBackfaceCulling(material.backfaceCulling());
 		setupPolygonOffset(material.polygonOffset());
 		setupDepthTest(material.depthTest());
 		setupTransparency(material.transparency());
 		setupWriteMask(material.writeMask());
+	}
+
+	private static void setupTexture(Material material) {
+		GlTextureUnit.T0.makeActive();
+		AbstractTexture texture = Minecraft.getInstance()
+				.getTextureManager()
+				.getTexture(material.texture());
+		texture.setFilter(material.blur(), material.mipmap());
+		var textureId = texture.getId();
+		RenderSystem.setShaderTexture(0, textureId);
+		RenderSystem.bindTexture(textureId);
 	}
 
 	private static void setupBackfaceCulling(boolean backfaceCulling) {
@@ -125,11 +141,17 @@ public final class MaterialRenderState {
 	}
 
 	public static void reset() {
+		resetTexture();
 		resetBackfaceCulling();
 		resetPolygonOffset();
 		resetDepthTest();
 		resetTransparency();
 		resetWriteMask();
+	}
+
+	private static void resetTexture() {
+		GlTextureUnit.T0.makeActive();
+		RenderSystem.setShaderTexture(0, 0);
 	}
 
 	private static void resetBackfaceCulling() {

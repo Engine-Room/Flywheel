@@ -26,7 +26,7 @@ import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
-import com.jozufozu.flywheel.backend.engine.textures.TexturesImpl;
+import com.jozufozu.flywheel.backend.engine.textures.TextureSourceImpl;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.Driver;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
@@ -185,7 +185,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		hasNewDraws = true;
 	}
 
-	public void submit(RenderStage stage, TexturesImpl textures) {
+	public void submit(RenderStage stage, TextureSourceImpl textures) {
 		if (nothingToDo(stage)) {
 			return;
 		}

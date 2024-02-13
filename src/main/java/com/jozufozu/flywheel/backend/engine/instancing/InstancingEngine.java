@@ -17,7 +17,7 @@ import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialEncoder;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
-import com.jozufozu.flywheel.backend.engine.textures.TexturesImpl;
+import com.jozufozu.flywheel.backend.engine.textures.TextureSourceImpl;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
@@ -27,7 +27,7 @@ import com.jozufozu.flywheel.lib.task.SyncedPlan;
 
 public class InstancingEngine extends AbstractEngine {
 	private final InstancingPrograms programs;
-	private final TexturesImpl textures = new TexturesImpl();
+	private final TextureSourceImpl textures = new TextureSourceImpl();
 	private final InstancedDrawManager drawManager = new InstancedDrawManager();
 	private final Flag flushFlag = new NamedFlag("flushed");
 
@@ -88,6 +88,8 @@ public class InstancingEngine extends AbstractEngine {
 	}
 
 	private void render(InstancedDrawManager.DrawSet drawSet) {
+		TextureBinder.bindLightAndOverlay();
+
 		for (var entry : drawSet) {
 			var shader = entry.getKey();
 			var drawCalls = entry.getValue();
@@ -98,16 +100,17 @@ public class InstancingEngine extends AbstractEngine {
 				continue;
 			}
 
-			var program = programs.get(shader.instanceType(), shader.context()
-					.contextShader());
+			var context = shader.context();
+			var material = shader.material();
+
+			var program = programs.get(shader.instanceType(), context.contextShader());
 			program.bind();
 
 			Uniforms.bindForDraw();
-			uploadMaterialUniform(program, shader.material());
+			uploadMaterialUniform(program, material);
 
-			shader.context()
-					.prepare(shader.material(), program, textures);
-			MaterialRenderState.setup(shader.material());
+			context.prepare(material, program, textures);
+			MaterialRenderState.setup(material);
 
 			for (var drawCall : drawCalls) {
 				drawCall.render();
@@ -116,6 +119,7 @@ public class InstancingEngine extends AbstractEngine {
 		}
 
 		MaterialRenderState.reset();
+		TextureBinder.resetLightAndOverlay();
 	}
 
 	public static void uploadMaterialUniform(GlProgram program, Material material) {

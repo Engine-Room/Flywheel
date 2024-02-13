@@ -10,7 +10,6 @@ import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.AbstractEngine;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
-import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.lib.task.Flag;
@@ -55,8 +54,6 @@ public class IndirectEngine extends AbstractEngine {
 
 		try (var restoreState = GlStateTracker.getRestoreState()) {
 			drawManager.renderStage(stage);
-
-			MaterialRenderState.reset();
 		}
 	}
 
@@ -64,11 +61,7 @@ public class IndirectEngine extends AbstractEngine {
 	public void renderCrumbling(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks) {
 		executor.syncUntil(flushFlag::isRaised);
 
-		try (var restoreState = GlStateTracker.getRestoreState()) {
-			drawManager.renderCrumbling(crumblingBlocks);
-
-			MaterialRenderState.reset();
-		}
+		drawManager.renderCrumbling(crumblingBlocks);
 	}
 
 	@Override

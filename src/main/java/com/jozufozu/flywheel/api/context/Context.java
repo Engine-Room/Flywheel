@@ -10,7 +10,7 @@ public interface Context {
 	 *
 	 * @param material The material about to be rendered.
 	 * @param shader   The shader to prepare.
-	 * @param textures Source of the textures to use.
+	 * @param textureSource Source of the textures to use.
 	 */
-	void prepare(Material material, Shader shader, Textures textures);
+	void prepare(Material material, Shader shader, TextureSource textureSource);
 }
