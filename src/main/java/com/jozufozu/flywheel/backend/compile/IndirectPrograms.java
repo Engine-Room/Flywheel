@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.backend.compile;
 import java.util.List;
 import java.util.Map;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
@@ -102,7 +103,8 @@ public class IndirectPrograms extends AbstractPrograms {
 		return builder.build();
 	}
 
-	private static void setInstance(@Nullable IndirectPrograms newInstance) {
+	@ApiStatus.Internal
+	public static void setInstance(@Nullable IndirectPrograms newInstance) {
 		if (instance != null) {
 			instance.release();
 		}
