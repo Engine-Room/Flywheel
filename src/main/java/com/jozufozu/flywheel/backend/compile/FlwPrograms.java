@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.compile;
 
 import java.util.List;
 
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,26 +23,37 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
 public final class FlwPrograms {
-	public static final Logger LOGGER = LoggerFactory.getLogger(Flywheel.ID + "/compile");
+	public static final Logger LOGGER = LoggerFactory.getLogger(Flywheel.ID + "/shaders");
 
 	private FlwPrograms() {
 	}
 
 	private static void reload(ResourceManager resourceManager) {
+		// Reset the programs in case the ubershader load fails.
+		InstancingPrograms.setInstance(null);
+		IndirectPrograms.setInstance(null);
+
 		var sources = new ShaderSources(resourceManager);
-		var preLoadStats = new CompilerStats("Preload");
-		var loadChecker = new SourceLoader(sources, preLoadStats);
+		var stats = new CompilerStats("ubershaders");
+		var loadChecker = new SourceLoader(sources, stats);
+
+		var vertexMaterialComponent = createVertexMaterialComponent(loadChecker);
+		var fragmentMaterialComponent = createFragmentMaterialComponent(loadChecker);
+		var fogComponent = createFogComponent(loadChecker);
+		var cutoutComponent = createCutoutComponent(loadChecker);
+
+		if (stats.errored() || vertexMaterialComponent == null || fragmentMaterialComponent == null || fogComponent == null || cutoutComponent == null) {
+			// Probably means the shader sources are missing.
+			stats.emitErrorLog();
+			return;
+		}
+
+		List<SourceComponent> vertexComponents = List.of(vertexMaterialComponent);
+		List<SourceComponent> fragmentComponents = List.of(fragmentMaterialComponent, fogComponent, cutoutComponent);
 
 		var pipelineKeys = createPipelineKeys();
-		List<SourceComponent> vertexComponents = List.of(createVertexMaterialComponent(loadChecker));
-		List<SourceComponent> fragmentComponents = List.of(createFragmentMaterialComponent(loadChecker), createFogComponent(loadChecker), createCutoutComponent(loadChecker));
-
 		InstancingPrograms.reload(sources, pipelineKeys, vertexComponents, fragmentComponents);
 		IndirectPrograms.reload(sources, pipelineKeys, vertexComponents, fragmentComponents);
-
-		if (preLoadStats.errored()) {
-			preLoadStats.emitErrorLog();
-		}
 	}
 
 	private static ImmutableList<PipelineProgramKey> createPipelineKeys() {
@@ -54,6 +66,7 @@ public final class FlwPrograms {
 		return builder.build();
 	}
 
+	@Nullable
 	private static UberShaderComponent createVertexMaterialComponent(SourceLoader loadChecker) {
 		return UberShaderComponent.builder(Flywheel.rl("uber_material_vertex"))
 				.materialSources(ShaderIndices.materialVertex()
@@ -63,6 +76,7 @@ public final class FlwPrograms {
 				.build(loadChecker);
 	}
 
+	@Nullable
 	private static UberShaderComponent createFragmentMaterialComponent(SourceLoader loadChecker) {
 		return UberShaderComponent.builder(Flywheel.rl("uber_material_fragment"))
 				.materialSources(ShaderIndices.materialFragment()
@@ -72,6 +86,7 @@ public final class FlwPrograms {
 				.build(loadChecker);
 	}
 
+	@Nullable
 	private static UberShaderComponent createFogComponent(SourceLoader loadChecker) {
 		return UberShaderComponent.builder(Flywheel.rl("uber_fog"))
 				.materialSources(ShaderIndices.fog()
@@ -85,6 +100,7 @@ public final class FlwPrograms {
 				.build(loadChecker);
 	}
 
+	@Nullable
 	private static UberShaderComponent createCutoutComponent(SourceLoader loadChecker) {
 		return UberShaderComponent.builder(Flywheel.rl("uber_cutout"))
 				.materialSources(ShaderIndices.cutout()

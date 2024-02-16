@@ -108,6 +108,7 @@ public class UberShaderComponent implements SourceComponent {
 		private final ResourceLocation name;
 		private final List<ResourceLocation> materialSources = new ArrayList<>();
 		private final List<AdaptedFn> adaptedFunctions = new ArrayList<>();
+		@Nullable
 		private GlslExpr switchArg;
 
 		public Builder(ResourceLocation name) {
@@ -134,6 +135,7 @@ public class UberShaderComponent implements SourceComponent {
 			return this;
 		}
 
+		@Nullable
 		public UberShaderComponent build(SourceLoader sources) {
 			if (switchArg == null) {
 				throw new NullPointerException("Switch argument must be set");
