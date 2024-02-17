@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.impl.visualization;
 
 import java.util.function.Supplier;
 
+import com.jozufozu.flywheel.api.backend.DirectInstancerProvider;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
@@ -17,6 +18,11 @@ public record InstancerProviderImpl(Engine engine,
 	@Override
 	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model) {
 		return engine.instancer(type, Contexts.DEFAULT, model, renderStage);
+	}
+
+	@Override
+	public DirectInstancerProvider _directProvider() {
+		return engine;
 	}
 
 	@Override
