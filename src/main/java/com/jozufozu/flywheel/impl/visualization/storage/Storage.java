@@ -1,8 +1,6 @@
 package com.jozufozu.flywheel.impl.visualization.storage;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -11,29 +9,25 @@ import org.jetbrains.annotations.Nullable;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.LitVisual;
-import com.jozufozu.flywheel.api.visual.PlannedVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visual.Visual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
-import com.jozufozu.flywheel.lib.task.ForEachPlan;
+import com.jozufozu.flywheel.lib.task.NestedPlan;
+import com.jozufozu.flywheel.lib.visual.SimpleDynamicVisual;
+import com.jozufozu.flywheel.lib.visual.SimpleTickableVisual;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 public abstract class Storage<T> {
 	protected final Supplier<VisualizationContext> visualizationContextSupplier;
-	protected final List<TickableVisual> tickableVisuals = new ArrayList<>();
-	protected final List<DynamicVisual> dynamicVisuals = new ArrayList<>();
-	protected final List<PlannedVisual> plannedVisuals = new ArrayList<>();
+	protected final PlanStorage<DynamicVisual, VisualFrameContext> dynamicVisuals = new PlanStorage<>();
+	protected final FastPlanStorage<SimpleDynamicVisual, VisualFrameContext> fastDynamicVisuals = new FastPlanStorage<>(SimpleDynamicVisual::beginFrame);
+	protected final PlanStorage<TickableVisual, VisualTickContext> tickableVisuals = new PlanStorage<>();
+	protected final FastPlanStorage<SimpleTickableVisual, VisualTickContext> fastTickableVisuals = new FastPlanStorage<>(SimpleTickableVisual::tick);
 	protected final LitVisualStorage litVisuals = new LitVisualStorage();
-	protected final VisualUpdatePlan<VisualFrameContext> framePlan = new VisualUpdatePlan<>(() -> plannedVisuals.stream()
-			.map(PlannedVisual::planFrame)
-			.toList());
-	protected final VisualUpdatePlan<VisualTickContext> tickPlan = new VisualUpdatePlan<>(() -> plannedVisuals.stream()
-			.map(PlannedVisual::planTick)
-			.toList());
 
 	private final Map<T, Visual> visuals = new Reference2ObjectOpenHashMap<>();
 
@@ -61,15 +55,17 @@ public abstract class Storage<T> {
 		}
 
 		if (visual instanceof TickableVisual tickable) {
-			tickableVisuals.remove(tickable);
+			if (visual instanceof SimpleTickableVisual simpleTickable) {
+				fastTickableVisuals.remove(simpleTickable);
+			} else {
+				tickableVisuals.remove(tickable);
+			}
 		}
 		if (visual instanceof DynamicVisual dynamic) {
-			dynamicVisuals.remove(dynamic);
-		}
-		if (visual instanceof PlannedVisual planned) {
-			if (plannedVisuals.remove(planned)) {
-				framePlan.triggerReInitialize();
-				tickPlan.triggerReInitialize();
+			if (visual instanceof SimpleDynamicVisual simpleDynamic) {
+				fastDynamicVisuals.remove(simpleDynamic);
+			} else {
+				dynamicVisuals.remove(dynamic);
 			}
 		}
 		if (visual instanceof LitVisual lit) {
@@ -98,8 +94,9 @@ public abstract class Storage<T> {
 
 	public void recreateAll(float partialTick) {
 		tickableVisuals.clear();
+		fastTickableVisuals.clear();
 		dynamicVisuals.clear();
-		plannedVisuals.clear();
+		fastDynamicVisuals.clear();
 		litVisuals.clear();
 		visuals.replaceAll((obj, visual) -> {
 			visual.delete();
@@ -117,10 +114,7 @@ public abstract class Storage<T> {
 	public void invalidate() {
 		tickableVisuals.clear();
 		dynamicVisuals.clear();
-		plannedVisuals.clear();
 		litVisuals.clear();
-		framePlan.triggerReInitialize();
-		tickPlan.triggerReInitialize();
 		visuals.values()
 				.forEach(Visual::delete);
 		visuals.clear();
@@ -138,13 +132,12 @@ public abstract class Storage<T> {
 	@Nullable
 	protected abstract Visual createRaw(T obj);
 
-	public Plan<VisualFrameContext> getFramePlan() {
-		return framePlan.and(ForEachPlan.of(() -> dynamicVisuals, DynamicVisual::beginFrame))
-				.and(litVisuals.plan());
+	public Plan<VisualFrameContext> framePlan() {
+		return NestedPlan.of(dynamicVisuals, fastDynamicVisuals, litVisuals.plan());
 	}
 
-	public Plan<VisualTickContext> getTickPlan() {
-		return tickPlan.and(ForEachPlan.of(() -> tickableVisuals, TickableVisual::tick));
+	public Plan<VisualTickContext> tickPlan() {
+		return NestedPlan.of(tickableVisuals, fastTickableVisuals);
 	}
 
 	public void enqueueLightUpdateSections(LongSet sections) {
@@ -155,17 +148,19 @@ public abstract class Storage<T> {
 		visual.init(partialTick);
 
 		if (visual instanceof TickableVisual tickable) {
-			tickableVisuals.add(tickable);
+			if (visual instanceof SimpleTickableVisual simpleTickable) {
+				fastTickableVisuals.add(simpleTickable);
+			} else {
+				tickableVisuals.add(tickable, tickable.planTick());
+			}
 		}
 
 		if (visual instanceof DynamicVisual dynamic) {
-			dynamicVisuals.add(dynamic);
-		}
-
-		if (visual instanceof PlannedVisual planned) {
-			plannedVisuals.add(planned);
-			framePlan.add(planned.planFrame());
-			tickPlan.add(planned.planTick());
+			if (visual instanceof SimpleDynamicVisual simpleDynamic) {
+				fastDynamicVisuals.add(simpleDynamic);
+			} else {
+				dynamicVisuals.add(dynamic, dynamic.planFrame());
+			}
 		}
 
 		if (visual instanceof LitVisual lit) {

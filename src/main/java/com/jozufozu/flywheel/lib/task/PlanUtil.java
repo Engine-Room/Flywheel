@@ -91,7 +91,11 @@ public final class PlanUtil {
 	}
 
 	public static int sliceSize(TaskExecutor taskExecutor, int totalSize) {
-		return MoreMath.ceilingDiv(totalSize, taskExecutor.getThreadCount() * 32);
+		return sliceSize(taskExecutor, totalSize, 32);
+	}
+
+	public static int sliceSize(TaskExecutor taskExecutor, int totalSize, int denominator) {
+		return MoreMath.ceilingDiv(totalSize, taskExecutor.getThreadCount() * denominator);
 	}
 
 	private PlanUtil() {

@@ -2,8 +2,6 @@ package com.jozufozu.flywheel.vanilla;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.visual.DynamicVisual;
-import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
@@ -14,7 +12,9 @@ import com.jozufozu.flywheel.lib.model.ModelHolder;
 import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.model.SingleMeshModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
+import com.jozufozu.flywheel.lib.visual.SimpleDynamicVisual;
 import com.jozufozu.flywheel.lib.visual.SimpleEntityVisual;
+import com.jozufozu.flywheel.lib.visual.SimpleTickableVisual;
 import com.jozufozu.flywheel.lib.visual.components.FireComponent;
 import com.jozufozu.flywheel.lib.visual.components.HitboxComponent;
 import com.jozufozu.flywheel.lib.visual.components.ShadowComponent;
@@ -29,7 +29,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisual<T> implements TickableVisual, DynamicVisual {
+public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisual<T> implements SimpleTickableVisual, SimpleDynamicVisual {
 	public static final ModelHolder CHEST_BODY_MODEL = createBodyModelHolder(ModelLayers.CHEST_MINECART);
 	public static final ModelHolder COMMAND_BLOCK_BODY_MODEL = createBodyModelHolder(ModelLayers.COMMAND_BLOCK_MINECART);
 	public static final ModelHolder FURNACE_BODY_MODEL = createBodyModelHolder(ModelLayers.FURNACE_MINECART);

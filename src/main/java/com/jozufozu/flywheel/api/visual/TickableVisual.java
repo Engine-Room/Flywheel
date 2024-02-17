@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.api.visual;
 
-import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.instance.Instancer;
+import com.jozufozu.flywheel.api.task.Plan;
 
 /**
  * An interface giving {@link Visual}s a hook to have a function called at
@@ -20,15 +19,5 @@ import com.jozufozu.flywheel.api.instance.Instancer;
  * </ul>
  */
 public interface TickableVisual extends Visual {
-	/**
-	 * Called every tick.
-	 * <br>
-	 * The implementation is free to parallelize calls to this method.
-	 * You must ensure proper synchronization if you need to mutate anything outside this visual.
-	 * <br>
-	 * This method and {@link DynamicVisual#beginFrame} will never be called simultaneously.
-	 * <br>
-	 * {@link Instancer}/{@link Instance} creation/acquisition is safe here.
-	 */
-	void tick(VisualTickContext ctx);
+	Plan<VisualTickContext> planTick();
 }
