@@ -7,9 +7,10 @@ import org.joml.Vector3f;
 
 import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.task.Plan;
+import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.Effect;
 import com.jozufozu.flywheel.api.visual.EffectVisual;
-import com.jozufozu.flywheel.api.visual.PlannedVisual;
+import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
@@ -101,7 +102,7 @@ public class ExampleEffect implements Effect {
 		return new ExampleVisual(ctx);
 	}
 
-	public class ExampleVisual implements EffectVisual<ExampleEffect>, PlannedVisual {
+	public class ExampleVisual implements EffectVisual<ExampleEffect>, TickableVisual, DynamicVisual {
 		private final List<BoidVisual> effects;
 		private final List<Boid> boids;
 

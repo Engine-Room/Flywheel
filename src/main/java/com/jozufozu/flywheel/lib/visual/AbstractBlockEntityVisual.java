@@ -8,7 +8,6 @@ import org.joml.FrustumIntersection;
 import com.jozufozu.flywheel.api.visual.BlockEntityVisual;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.LitVisual;
-import com.jozufozu.flywheel.api.visual.PlannedVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualManager;
@@ -27,7 +26,6 @@ import net.minecraft.world.level.block.state.BlockState;
  * <ul>
  *     <li>{@link DynamicVisual}</li>
  *     <li>{@link TickableVisual}</li>
- *     <li>{@link PlannedVisual}</li>
  * </ul>
  * See the interfaces' documentation for more information about each one.
  *

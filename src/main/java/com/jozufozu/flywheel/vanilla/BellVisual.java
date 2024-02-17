@@ -7,7 +7,6 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
@@ -17,13 +16,14 @@ import com.jozufozu.flywheel.lib.model.ModelHolder;
 import com.jozufozu.flywheel.lib.model.SingleMeshModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
+import com.jozufozu.flywheel.lib.visual.SimpleDynamicVisual;
 
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.blockentity.BellRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BellBlockEntity;
 
-public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> implements DynamicVisual {
+public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> implements SimpleDynamicVisual {
 	private static final ModelHolder BELL_MODEL = new ModelHolder(() -> {
 		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.BELL, BellRenderer.BELL_RESOURCE_LOCATION.sprite(), "bell_body"), Materials.BELL);
 	});

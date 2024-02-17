@@ -66,11 +66,11 @@ public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager
 
 	public Plan<VisualFrameContext> framePlan() {
 		return SimplePlan.<VisualFrameContext>of(context -> processQueue(context.partialTick()))
-				.then(storage.getFramePlan());
+				.then(storage.framePlan());
 	}
 
 	public Plan<VisualTickContext> tickPlan() {
 		return SimplePlan.<VisualTickContext>of(context -> processQueue(0))
-				.then(storage.getTickPlan());
+				.then(storage.tickPlan());
 	}
 }

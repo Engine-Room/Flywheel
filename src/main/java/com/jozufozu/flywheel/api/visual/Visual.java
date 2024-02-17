@@ -5,7 +5,6 @@ package com.jozufozu.flywheel.api.visual;
  *
  * @see DynamicVisual
  * @see TickableVisual
- * @see PlannedVisual
  * @see LitVisual
  */
 public interface Visual {

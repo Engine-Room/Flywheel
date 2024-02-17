@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import org.joml.Quaternionf;
 
 import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
@@ -16,6 +15,7 @@ import com.jozufozu.flywheel.lib.model.SingleMeshModel;
 import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.transform.TransformStack;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
+import com.jozufozu.flywheel.lib.visual.SimpleDynamicVisual;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
@@ -27,7 +27,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
-public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockEntity> implements DynamicVisual {
+public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockEntity> implements SimpleDynamicVisual {
 	private static final ModelCache<Material> BASE_MODELS = new ModelCache<>(texture -> {
 		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.SHULKER, texture.sprite(), "base"), Materials.SHULKER);
 	});
