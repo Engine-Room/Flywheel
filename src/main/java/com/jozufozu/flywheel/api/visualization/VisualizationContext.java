@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.api.visualization;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import com.jozufozu.flywheel.api.instance.InstancerProvider;
 
 import net.minecraft.core.Vec3i;
@@ -9,7 +7,6 @@ import net.minecraft.core.Vec3i;
 /**
  * A context object passed on visual creation.
  */
-@ApiStatus.NonExtendable
 public interface VisualizationContext {
 	/**
 	 * @return The {@link InstancerProvider} that the visual can use to get instancers to render models.
