@@ -29,7 +29,7 @@ public record SimplePlan<C>(List<RunnableWithContext<C>> parallelTasks) implemen
 			return;
 		}
 
-		taskExecutor.execute(() -> PlanUtil.distribute(taskExecutor, context, onCompletion, parallelTasks, RunnableWithContext::run));
+		taskExecutor.execute(() -> Distribute.tasks(taskExecutor, context, onCompletion, parallelTasks, RunnableWithContext::run));
 	}
 
 	@Override

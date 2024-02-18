@@ -37,6 +37,6 @@ public record ForEachSlicePlan<T, C>(SupplierWithContext<C, List<T>> listSupplie
 
 	@Override
 	public void execute(TaskExecutor taskExecutor, C context, Runnable onCompletion) {
-		taskExecutor.execute(() -> PlanUtil.distributeSlices(taskExecutor, context, onCompletion, listSupplier.get(context), action));
+		taskExecutor.execute(() -> Distribute.slices(taskExecutor, context, onCompletion, listSupplier.get(context), action));
 	}
 }

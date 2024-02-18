@@ -1,6 +1,8 @@
 package com.jozufozu.flywheel.impl.visualization.storage;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -14,7 +16,9 @@ import com.jozufozu.flywheel.api.visual.Visual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
+import com.jozufozu.flywheel.lib.task.ForEachPlan;
 import com.jozufozu.flywheel.lib.task.NestedPlan;
+import com.jozufozu.flywheel.lib.task.PlanMap;
 import com.jozufozu.flywheel.lib.visual.SimpleDynamicVisual;
 import com.jozufozu.flywheel.lib.visual.SimpleTickableVisual;
 
@@ -23,10 +27,10 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 public abstract class Storage<T> {
 	protected final Supplier<VisualizationContext> visualizationContextSupplier;
-	protected final PlanStorage<DynamicVisual, VisualFrameContext> dynamicVisuals = new PlanStorage<>();
-	protected final FastPlanStorage<SimpleDynamicVisual, VisualFrameContext> fastDynamicVisuals = new FastPlanStorage<>(SimpleDynamicVisual::beginFrame);
-	protected final PlanStorage<TickableVisual, VisualTickContext> tickableVisuals = new PlanStorage<>();
-	protected final FastPlanStorage<SimpleTickableVisual, VisualTickContext> fastTickableVisuals = new FastPlanStorage<>(SimpleTickableVisual::tick);
+	protected final PlanMap<DynamicVisual, VisualFrameContext> dynamicVisuals = new PlanMap<>();
+	protected final PlanMap<TickableVisual, VisualTickContext> tickableVisuals = new PlanMap<>();
+	protected final List<SimpleDynamicVisual> simpleDynamicVisuals = new ArrayList<>();
+	protected final List<SimpleTickableVisual> simpleTickableVisuals = new ArrayList<>();
 	protected final LitVisualStorage litVisuals = new LitVisualStorage();
 
 	private final Map<T, Visual> visuals = new Reference2ObjectOpenHashMap<>();
@@ -56,14 +60,14 @@ public abstract class Storage<T> {
 
 		if (visual instanceof TickableVisual tickable) {
 			if (visual instanceof SimpleTickableVisual simpleTickable) {
-				fastTickableVisuals.remove(simpleTickable);
+				simpleTickableVisuals.remove(simpleTickable);
 			} else {
 				tickableVisuals.remove(tickable);
 			}
 		}
 		if (visual instanceof DynamicVisual dynamic) {
 			if (visual instanceof SimpleDynamicVisual simpleDynamic) {
-				fastDynamicVisuals.remove(simpleDynamic);
+				simpleDynamicVisuals.remove(simpleDynamic);
 			} else {
 				dynamicVisuals.remove(dynamic);
 			}
@@ -94,9 +98,9 @@ public abstract class Storage<T> {
 
 	public void recreateAll(float partialTick) {
 		tickableVisuals.clear();
-		fastTickableVisuals.clear();
 		dynamicVisuals.clear();
-		fastDynamicVisuals.clear();
+		simpleTickableVisuals.clear();
+		simpleDynamicVisuals.clear();
 		litVisuals.clear();
 		visuals.replaceAll((obj, visual) -> {
 			visual.delete();
@@ -133,11 +137,11 @@ public abstract class Storage<T> {
 	protected abstract Visual createRaw(T obj);
 
 	public Plan<VisualFrameContext> framePlan() {
-		return NestedPlan.of(dynamicVisuals, fastDynamicVisuals, litVisuals.plan());
+		return NestedPlan.of(dynamicVisuals, litVisuals.plan(), ForEachPlan.of(() -> simpleDynamicVisuals, SimpleDynamicVisual::beginFrame));
 	}
 
 	public Plan<VisualTickContext> tickPlan() {
-		return NestedPlan.of(tickableVisuals, fastTickableVisuals);
+		return NestedPlan.of(tickableVisuals, ForEachPlan.of(() -> simpleTickableVisuals, SimpleTickableVisual::tick));
 	}
 
 	public void enqueueLightUpdateSections(LongSet sections) {
@@ -149,7 +153,7 @@ public abstract class Storage<T> {
 
 		if (visual instanceof TickableVisual tickable) {
 			if (visual instanceof SimpleTickableVisual simpleTickable) {
-				fastTickableVisuals.add(simpleTickable);
+				simpleTickableVisuals.add(simpleTickable);
 			} else {
 				tickableVisuals.add(tickable, tickable.planTick());
 			}
@@ -157,7 +161,7 @@ public abstract class Storage<T> {
 
 		if (visual instanceof DynamicVisual dynamic) {
 			if (visual instanceof SimpleDynamicVisual simpleDynamic) {
-				fastDynamicVisuals.add(simpleDynamic);
+				simpleDynamicVisuals.add(simpleDynamic);
 			} else {
 				dynamicVisuals.add(dynamic, dynamic.planFrame());
 			}
