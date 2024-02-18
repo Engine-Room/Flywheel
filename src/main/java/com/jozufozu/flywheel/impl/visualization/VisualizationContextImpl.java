@@ -12,6 +12,6 @@ import net.minecraft.core.Vec3i;
  * @param renderOrigin      The origin of the renderer as a world position.
  *                          All models render as if this position is (0, 0, 0).
  */
-public record VisualizationContextImpl(InstancerProviderImpl instancerProvider,
+public record VisualizationContextImpl(InstancerProvider instancerProvider,
 									   Vec3i renderOrigin) implements VisualizationContext {
 }
