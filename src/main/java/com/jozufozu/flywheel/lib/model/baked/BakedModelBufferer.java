@@ -238,7 +238,7 @@ public final class BakedModelBufferer {
 				shadedData.release();
 			}
 			RenderedBuffer unshadedData = unshadedBuffer.endOrDiscardIfEmpty();
-			if (unshadedBuffer != null) {
+			if (unshadedData != null) {
 				resultConsumer.accept(renderType, false, unshadedData);
 				unshadedData.release();
 			}
