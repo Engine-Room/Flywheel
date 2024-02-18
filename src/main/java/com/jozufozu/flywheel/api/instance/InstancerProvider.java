@@ -1,7 +1,10 @@
 package com.jozufozu.flywheel.api.instance;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import com.jozufozu.flywheel.api.model.Model;
 
+@ApiStatus.NonExtendable
 public interface InstancerProvider {
 	/**
 	 * Get an instancer for the given instance type rendering the given model.
