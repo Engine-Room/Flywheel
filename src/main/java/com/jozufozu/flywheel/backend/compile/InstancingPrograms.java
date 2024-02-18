@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.compile;
 import java.util.List;
 import java.util.Map;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
@@ -43,8 +42,7 @@ public class InstancingPrograms extends AbstractPrograms {
 		setInstance(newInstance);
 	}
 
-	@ApiStatus.Internal
-	public static void setInstance(@Nullable InstancingPrograms newInstance) {
+	static void setInstance(@Nullable InstancingPrograms newInstance) {
 		if (instance != null) {
 			instance.release();
 		}
