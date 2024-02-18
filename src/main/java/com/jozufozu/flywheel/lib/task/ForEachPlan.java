@@ -37,6 +37,6 @@ public record ForEachPlan<T, C>(SupplierWithContext<C, List<T>> listSupplier,
 
 	@Override
 	public void execute(TaskExecutor taskExecutor, C context, Runnable onCompletion) {
-		taskExecutor.execute(() -> PlanUtil.distribute(taskExecutor, context, onCompletion, listSupplier.get(context), action));
+		taskExecutor.execute(() -> Distribute.tasks(taskExecutor, context, onCompletion, listSupplier.get(context), action));
 	}
 }

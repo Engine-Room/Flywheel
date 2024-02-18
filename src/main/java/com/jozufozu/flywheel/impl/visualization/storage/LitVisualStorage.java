@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.visual.LitVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
-import com.jozufozu.flywheel.lib.task.PlanUtil;
+import com.jozufozu.flywheel.lib.task.Distribute;
 import com.jozufozu.flywheel.lib.task.SimplyComposedPlan;
 import com.jozufozu.flywheel.lib.task.Synchronizer;
 
@@ -56,7 +56,7 @@ public class LitVisualStorage {
 			for (long section : sectionsUpdatedThisFrame) {
 				var visuals = sections2Visuals.get(section);
 				if (visuals != null && !visuals.isEmpty()) {
-					taskExecutor.execute(() -> PlanUtil.distribute(taskExecutor, updateId, sync, visuals, Updater::updateLight));
+					taskExecutor.execute(() -> Distribute.tasks(taskExecutor, updateId, sync, visuals, Updater::updateLight));
 				} else {
 					sync.decrementAndEventuallyRun();
 				}
