@@ -12,17 +12,17 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
+import com.jozufozu.flywheel.backend.engine.MeshPool;
 
 public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>> {
 	/**
 	 * The set of draw calls to make in each {@link RenderStage}.
 	 */
 	private final Map<RenderStage, DrawSet> drawSets = new EnumMap<>(RenderStage.class);
-	private final EboCache eboCache = new EboCache();
 	/**
 	 * A map of vertex types to their mesh pools.
 	 */
-	private final InstancedMeshPool meshPool = new InstancedMeshPool(eboCache);
+	private final MeshPool meshPool = new MeshPool();
 
 	public DrawSet get(RenderStage stage) {
 		return drawSets.getOrDefault(stage, DrawSet.EMPTY);
@@ -36,7 +36,7 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 			// Update the instancers and remove any that are empty.
 			instancer.update();
 
-			if (instancer.getInstanceCount() == 0) {
+			if (instancer.instanceCount() == 0) {
 				instancer.delete();
 				return true;
 			} else {
@@ -63,8 +63,6 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 		drawSets.values()
 				.forEach(DrawSet::delete);
 		drawSets.clear();
-
-		eboCache.invalidate();
 	}
 
 	@Override

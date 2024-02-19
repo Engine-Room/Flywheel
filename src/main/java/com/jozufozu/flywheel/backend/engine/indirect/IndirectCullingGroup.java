@@ -25,6 +25,7 @@ import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
+import com.jozufozu.flywheel.backend.engine.MeshPool;
 import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
 import com.jozufozu.flywheel.backend.engine.textures.TextureSourceImpl;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
@@ -43,8 +44,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	private final Context context;
 	private final long objectStride;
 	private final IndirectBuffers buffers;
-	private final IndirectMeshPool meshPool;
-	private final List<IndirectModel> indirectModels = new ArrayList<>();
+	private final List<IndirectInstancer<?>> instancers = new ArrayList<>();
 	private final List<IndirectDraw> indirectDraws = new ArrayList<>();
 	private final Map<RenderStage, List<MultiDraw>> multiDraws = new EnumMap<>(RenderStage.class);
 
@@ -54,7 +54,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	private final GlProgram drawProgram;
 
 	private boolean needsDrawBarrier;
-	private boolean hasNewDraws;
+	private boolean needsDrawSort;
 	private int instanceCountThisFrame;
 
 	IndirectCullingGroup(InstanceType<I> instanceType, Context context, IndirectPrograms programs) {
@@ -63,7 +63,6 @@ public class IndirectCullingGroup<I extends Instance> {
 		objectStride = instanceType.layout()
 				.byteSize() + IndirectBuffers.INT_SIZE;
 		buffers = new IndirectBuffers(objectStride);
-		meshPool = new IndirectMeshPool();
 
 		this.programs = programs;
 		// TODO: Culling programs need to be context aware.
@@ -72,18 +71,40 @@ public class IndirectCullingGroup<I extends Instance> {
 		drawProgram = programs.getIndirectProgram(instanceType, context.contextShader());
 	}
 
-	public void flush(StagingBuffer stagingBuffer) {
-		needsDrawBarrier = true;
-		instanceCountThisFrame = prepareModels();
+	public void flushInstancers() {
+		instanceCountThisFrame = 0;
+		int modelIndex = 0;
+        for (var iterator = instancers.iterator(); iterator.hasNext(); ) {
+            var instancer = iterator.next();
+            instancer.update();
+			var instanceCount = instancer.instanceCount();
 
+			if (instanceCount == 0) {
+				iterator.remove();
+				for (IndirectDraw draw : instancer.draws()) {
+					draw.delete();
+				}
+				continue;
+			}
+
+			instancer.index = modelIndex;
+			instancer.baseInstance = instanceCountThisFrame;
+			instanceCountThisFrame += instanceCount;
+
+			modelIndex++;
+        }
+
+        if (indirectDraws.removeIf(IndirectDraw::deleted)) {
+			needsDrawSort = true;
+		}
+	}
+
+	public void upload(StagingBuffer stagingBuffer) {
 		if (nothingToDo()) {
 			return;
 		}
 
-		buffers.updateCounts(instanceCountThisFrame, indirectModels.size(), indirectDraws.size());
-
-		// Must flush the mesh pool first so everything else has the right baseVertex and baseIndex.
-		meshPool.flush();
+		buffers.updateCounts(instanceCountThisFrame, instancers.size(), indirectDraws.size());
 
 		// Upload only objects that have changed.
 		uploadObjects(stagingBuffer);
@@ -91,14 +112,14 @@ public class IndirectCullingGroup<I extends Instance> {
 		// We need to upload the models every frame to reset the instance count.
 		uploadModels(stagingBuffer);
 
-		if (hasNewDraws) {
+		if (needsDrawSort) {
 			sortDraws();
-			// Draws, however, only need to be updated when we get new ones.
-			// The instanceCount and baseInstance will be updated by the applyProgram,
-			// and all other fields are constant to the lifetime of the draw.
-			uploadDraws(stagingBuffer);
-			hasNewDraws = false;
+			needsDrawSort = false;
 		}
+
+		uploadDraws(stagingBuffer);
+
+		needsDrawBarrier = true;
 	}
 
 	public void dispatchCull() {
@@ -132,18 +153,6 @@ public class IndirectCullingGroup<I extends Instance> {
 		return nothingToDo() || !multiDraws.containsKey(stage);
 	}
 
-	/**
-	 * @return the total instance count
-	 */
-	private int prepareModels() {
-		int baseInstance = 0;
-		for (var model : indirectModels) {
-			model.prepare(baseInstance);
-			baseInstance += model.instancer.getInstanceCount();
-		}
-		return baseInstance;
-	}
-
 	private void sortDraws() {
 		multiDraws.clear();
 		// sort by stage, then material
@@ -169,20 +178,18 @@ public class IndirectCullingGroup<I extends Instance> {
 		return multiDraws.containsKey(stage);
 	}
 
-	public void add(IndirectInstancer<I> instancer, Model model, RenderStage stage) {
-		int modelIndex = indirectModels.size();
-		instancer.setModelIndex(modelIndex);
-		var indirectModel = new IndirectModel(instancer, modelIndex, model.boundingSphere());
-		indirectModels.add(indirectModel);
+	public void add(IndirectInstancer<I> instancer, Model model, RenderStage stage, MeshPool meshPool) {
+        instancer.index = instancers.size();
+		instancers.add(instancer);
 
 		for (Map.Entry<Material, Mesh> entry : model.meshes().entrySet()) {
-			IndirectMeshPool.BufferedMesh bufferedMesh = meshPool.alloc(entry.getValue());
-			var draw = new IndirectDraw(indirectModel, entry.getKey(), bufferedMesh, stage);
+			MeshPool.BufferedMesh bufferedMesh = meshPool.alloc(entry.getValue());
+			var draw = new IndirectDraw(instancer, entry.getKey(), bufferedMesh, stage);
 			indirectDraws.add(draw);
 			instancer.addDraw(draw);
 		}
 
-		hasNewDraws = true;
+		needsDrawSort = true;
 	}
 
 	public void submit(RenderStage stage, TextureSourceImpl textures) {
@@ -190,9 +197,7 @@ public class IndirectCullingGroup<I extends Instance> {
 			return;
 		}
 
-		Uniforms.bindForDraw();
 		drawProgram.bind();
-		meshPool.bindForDraw();
 		buffers.bindForDraw();
 
 		drawBarrier();
@@ -215,8 +220,6 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		program.bind();
 
-		Uniforms.bindForDraw();
-		meshPool.bindForDraw();
 		buffers.bindForCrumbling();
 
 		drawBarrier();
@@ -236,8 +239,8 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private void uploadObjects(StagingBuffer stagingBuffer) {
 		long pos = 0;
-		for (IndirectModel model : indirectModels) {
-			var instanceCount = model.instancer.getInstanceCount();
+		for (var model : instancers) {
+			var instanceCount = model.instanceCount();
 			model.uploadObjects(stagingBuffer, pos, buffers.object.handle());
 
 			pos += instanceCount * objectStride;
@@ -245,7 +248,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	private void uploadModels(StagingBuffer stagingBuffer) {
-		var totalSize = indirectModels.size() * IndirectBuffers.MODEL_STRIDE;
+		var totalSize = instancers.size() * IndirectBuffers.MODEL_STRIDE;
 		var handle = buffers.model.handle();
 
 		stagingBuffer.enqueueCopy(totalSize, handle, 0, this::writeModels);
@@ -259,8 +262,8 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	private void writeModels(long writePtr) {
-		for (var model : indirectModels) {
-			model.write(writePtr);
+		for (var model : instancers) {
+			model.writeModel(writePtr);
 			writePtr += IndirectBuffers.MODEL_STRIDE;
 		}
 	}
@@ -274,7 +277,6 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	public void delete() {
 		buffers.delete();
-		meshPool.delete();
 	}
 
 	private record MultiDraw(Material material, int start, int end) {
