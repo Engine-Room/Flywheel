@@ -22,5 +22,4 @@ void main() {
 
     uint modelIndex = drawCommands[drawIndex].modelIndex;
     drawCommands[drawIndex].instanceCount = models[modelIndex].instanceCount;
-    drawCommands[drawIndex].baseInstance = models[modelIndex].baseInstance;
 }

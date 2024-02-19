@@ -22,9 +22,12 @@ import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
+import com.jozufozu.flywheel.backend.engine.MeshPool;
 import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
 import com.jozufozu.flywheel.backend.engine.textures.TextureSourceImpl;
+import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
+import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.lib.context.ContextShaders;
@@ -40,6 +43,8 @@ import net.minecraft.client.resources.model.ModelBakery;
 public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> {
 	private final IndirectPrograms programs;
 	private final StagingBuffer stagingBuffer;
+	private final MeshPool meshPool;
+	private final GlVertexArray vertexArray;
 	private final TextureSourceImpl textures = new TextureSourceImpl();
 	private final Map<GroupKey<?>, IndirectCullingGroup<?>> cullingGroups = new HashMap<>();
 	private final GlBuffer crumblingDrawBuffer = new GlBuffer();
@@ -47,11 +52,17 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 	public IndirectDrawManager(IndirectPrograms programs) {
 		this.programs = programs;
 		stagingBuffer = new StagingBuffer(this.programs);
+
+		meshPool = new MeshPool();
+
+		vertexArray = GlVertexArray.create();
+
+		meshPool.bind(vertexArray);
 	}
 
 	@Override
 	protected <I extends Instance> IndirectInstancer<?> create(InstancerKey<I> key) {
-		return new IndirectInstancer<>(key.type(), key.context());
+		return new IndirectInstancer<>(key.type(), key.context(), key.model());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -59,7 +70,7 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 	protected <I extends Instance> void initialize(InstancerKey<I> key, IndirectInstancer<?> instancer) {
 		var groupKey = new GroupKey<>(key.type(), key.context());
 		var group = (IndirectCullingGroup<I>) cullingGroups.computeIfAbsent(groupKey, t -> new IndirectCullingGroup<>(t.type, t.context, programs));
-		group.add((IndirectInstancer<I>) instancer, key.model(), key.stage());
+		group.add((IndirectInstancer<I>) instancer, key.model(), key.stage(), meshPool);
 	}
 
 	public boolean hasStage(RenderStage stage) {
@@ -74,6 +85,9 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 	public void renderStage(RenderStage stage) {
 		TextureBinder.bindLightAndOverlay();
 
+		vertexArray.bindForDraw();
+		Uniforms.bindForDraw();
+
 		for (var group : cullingGroups.values()) {
 			group.submit(stage, textures);
 		}
@@ -86,10 +100,18 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 	public void flush() {
 		super.flush();
 
+		for (var group : cullingGroups.values()) {
+			group.flushInstancers();
+		}
+
+		instancers.values().removeIf(instancer -> instancer.instanceCount() == 0);
+
+		meshPool.flush();
+
 		stagingBuffer.reclaim();
 
 		for (var group : cullingGroups.values()) {
-			group.flush(stagingBuffer);
+			group.upload(stagingBuffer);
 		}
 
 		stagingBuffer.flush();
@@ -113,6 +135,8 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 
 		stagingBuffer.delete();
 
+		meshPool.delete();
+
 		crumblingDrawBuffer.delete();
 	}
 
@@ -125,6 +149,9 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 
 		try (var state = GlStateTracker.getRestoreState()) {
 			TextureBinder.bindLightAndOverlay();
+
+			vertexArray.bindForDraw();
+			Uniforms.bindForDraw();
 
 			var crumblingMaterial = SimpleMaterial.builder();
 

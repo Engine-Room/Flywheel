@@ -81,19 +81,19 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		changed.set(handle.index);
 	}
 
-	public int getInstanceCount() {
+	public int instanceCount() {
 		return instances.size();
 	}
 
 	public void notifyDirty(int index) {
-		if (index < 0 || index >= getInstanceCount()) {
+		if (index < 0 || index >= instanceCount()) {
 			return;
 		}
 		changed.set(index);
 	}
 
 	public void notifyRemoval(int index) {
-		if (index < 0 || index >= getInstanceCount()) {
+		if (index < 0 || index >= instanceCount()) {
 			return;
 		}
 		deleted.set(index);
@@ -159,6 +159,6 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 
 	@Override
 	public String toString() {
-		return "AbstractInstancer[" + getInstanceCount() + ']';
+		return "AbstractInstancer[" + instanceCount() + ']';
 	}
 }

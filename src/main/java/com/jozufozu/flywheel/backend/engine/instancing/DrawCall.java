@@ -4,19 +4,20 @@ import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.backend.InternalVertex;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
+import com.jozufozu.flywheel.backend.engine.MeshPool;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 
 public class DrawCall {
 	public final ShaderState shaderState;
 	private final InstancedInstancer<?> instancer;
-	private final InstancedMeshPool.BufferedMesh mesh;
+	private final MeshPool.BufferedMesh mesh;
 
 	private final GlVertexArray vao;
 	@Nullable
 	private GlVertexArray vaoScratch;
 	private boolean deleted;
 
-	public DrawCall(InstancedInstancer<?> instancer, InstancedMeshPool.BufferedMesh mesh, ShaderState shaderState) {
+	public DrawCall(InstancedInstancer<?> instancer, MeshPool.BufferedMesh mesh, ShaderState shaderState) {
 		this.instancer = instancer;
 		this.mesh = mesh;
 		this.shaderState = shaderState;
@@ -40,7 +41,7 @@ public class DrawCall {
 
 		vao.bindForDraw();
 
-		mesh.draw(instancer.getInstanceCount());
+		mesh.draw(instancer.instanceCount());
 	}
 
 	public void renderOne(InstanceHandleImpl impl) {
@@ -48,7 +49,7 @@ public class DrawCall {
 			return;
 		}
 
-		int instanceCount = instancer.getInstanceCount();
+		int instanceCount = instancer.instanceCount();
 		if (instanceCount <= 0 || impl.index >= instanceCount) {
 			return;
 		}
