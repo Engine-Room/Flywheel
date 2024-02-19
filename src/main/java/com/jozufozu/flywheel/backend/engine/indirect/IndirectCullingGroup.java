@@ -83,7 +83,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		buffers.updateCounts(instanceCountThisFrame, indirectModels.size(), indirectDraws.size());
 
 		// Must flush the mesh pool first so everything else has the right baseVertex and baseIndex.
-		meshPool.flush(stagingBuffer);
+		meshPool.flush();
 
 		// Upload only objects that have changed.
 		uploadObjects(stagingBuffer);

@@ -98,11 +98,7 @@ public class InstancedCrumbling {
 					continue;
 				}
 
-				List<DrawCall> draws = instancer.drawCalls();
-
-				draws.removeIf(DrawCall::isInvalid);
-
-				for (DrawCall draw : draws) {
+                for (DrawCall draw : instancer.drawCalls()) {
 					out.computeIfAbsent(draw.shaderState, $ -> new Int2ObjectArrayMap<>())
 							.computeIfAbsent(progress, $ -> new ArrayList<>())
 							.add(() -> draw.renderOne(impl));

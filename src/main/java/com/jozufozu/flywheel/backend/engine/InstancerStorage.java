@@ -59,23 +59,23 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 		var out = create(key);
 
 		// Only queue the instancer for initialization if it has anything to render.
-		if (key.model()
-				.meshes()
-				.isEmpty()) {
-			warnEmptyModel();
-		} else {
+        if (checkAndWarnEmptyModel(key.model())) {
 			// Thread safety: this method is called atomically from within computeIfAbsent,
 			// so we don't need extra synchronization to protect the queue.
 			initializationQueue.add(new UninitializedInstancer<>(key, out));
 		}
-		return out;
+        return out;
 	}
 
 	protected record UninitializedInstancer<N, I extends Instance>(InstancerKey<I> key, N instancer) {
 
 	}
 
-	private static void warnEmptyModel() {
+	private static boolean checkAndWarnEmptyModel(Model model) {
+		if (!model.meshes().isEmpty()) {
+			return true;
+		}
+
 		StringBuilder builder = new StringBuilder();
 		builder.append("Creating an instancer for a model with no meshes! Stack trace:");
 
@@ -85,5 +85,7 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 						.append(f.toString()));
 
 		Flywheel.LOGGER.warn(builder.toString());
+
+		return false;
 	}
 }

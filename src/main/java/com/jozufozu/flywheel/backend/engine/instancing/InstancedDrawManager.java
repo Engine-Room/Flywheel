@@ -10,7 +10,6 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 
@@ -19,11 +18,11 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 	 * The set of draw calls to make in each {@link RenderStage}.
 	 */
 	private final Map<RenderStage, DrawSet> drawSets = new EnumMap<>(RenderStage.class);
+	private final EboCache eboCache = new EboCache();
 	/**
 	 * A map of vertex types to their mesh pools.
 	 */
-	private final InstancedMeshPool meshPool = new InstancedMeshPool();
-	private final EboCache eboCache = new EboCache();
+	private final InstancedMeshPool meshPool = new InstancedMeshPool(eboCache);
 
 	public DrawSet get(RenderStage stage) {
 		return drawSets.getOrDefault(stage, DrawSet.EMPTY);
@@ -31,6 +30,24 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 
 	public void flush() {
 		super.flush();
+
+		var instancers = this.instancers.values();
+		instancers.removeIf(instancer -> {
+			// Update the instancers and remove any that are empty.
+			instancer.update();
+
+			if (instancer.getInstanceCount() == 0) {
+				instancer.delete();
+				return true;
+			} else {
+				return false;
+			}
+		});
+
+		for (DrawSet drawSet : drawSets.values()) {
+			// Remove the draw calls for any instancers we deleted.
+			drawSet.prune();
+		}
 
 		meshPool.flush();
 	}
@@ -50,10 +67,6 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 		eboCache.invalidate();
 	}
 
-	private InstancedMeshPool.BufferedMesh alloc(Mesh mesh) {
-		return meshPool.alloc(mesh, eboCache);
-	}
-
 	@Override
 	protected <I extends Instance> InstancedInstancer<I> create(InstancerKey<I> key) {
 		return new InstancedInstancer<>(key.type(), key.context());
@@ -68,7 +81,7 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 		var meshes = key.model()
 				.meshes();
 		for (var entry : meshes.entrySet()) {
-			var mesh = alloc(entry.getValue());
+			var mesh = meshPool.alloc(entry.getValue());
 
 			ShaderState shaderState = new ShaderState(entry.getKey(), key.type(), key.context());
 			DrawCall drawCall = new DrawCall(instancer, mesh, shaderState);
@@ -110,6 +123,11 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 			return drawCalls.asMap()
 					.entrySet()
 					.iterator();
+		}
+
+		public void prune() {
+            drawCalls.values()
+                    .removeIf(DrawCall::deleted);
 		}
 	}
 }
