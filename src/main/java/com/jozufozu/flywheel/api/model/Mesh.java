@@ -14,14 +14,6 @@ public interface Mesh {
 	int vertexCount();
 
 	/**
-	 * Is there nothing to render?
-	 * @return true if there are no vertices.
-	 */
-	default boolean isEmpty() {
-		return vertexCount() == 0;
-	}
-
-	/**
 	 * Write this mesh into a vertex list. Vertices with index {@literal <}0 or {@literal >=}{@link #vertexCount()} will not be
 	 * read or modified.
 	 *

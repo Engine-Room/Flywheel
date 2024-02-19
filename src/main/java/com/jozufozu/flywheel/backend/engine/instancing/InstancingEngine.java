@@ -94,8 +94,6 @@ public class InstancingEngine extends AbstractEngine {
 			var shader = entry.getKey();
 			var drawCalls = entry.getValue();
 
-			drawCalls.removeIf(DrawCall::isInvalid);
-
 			if (drawCalls.isEmpty()) {
 				continue;
 			}

@@ -21,11 +21,11 @@ import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
 
 public class InstancedMeshPool {
 	private final VertexView vertexView;
-	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
-	private final List<BufferedMesh> allBuffered = new ArrayList<>();
-	private final List<BufferedMesh> pendingUpload = new ArrayList<>();
+	private final Map<Mesh, BufferedMesh> byMesh = new HashMap<>();
+	private final List<BufferedMesh> ordered = new ArrayList<>();
 
 	private final GlBuffer vbo;
+	private final EboCache eboCache;
 	private long byteSize;
 
 	private boolean dirty;
@@ -34,35 +34,34 @@ public class InstancedMeshPool {
 	/**
 	 * Create a new mesh pool.
 	 */
-	public InstancedMeshPool() {
+	public InstancedMeshPool(EboCache eboCache) {
+		this.eboCache = eboCache;
 		vertexView = InternalVertex.createVertexView();
-		int stride = InternalVertex.STRIDE;
-		vbo = new GlBuffer();
-		vbo.growthFunction(l -> Math.max(l + stride * 128L, (long) (l * 1.6)));
+        vbo = new GlBuffer();
+		vbo.growthFunction(l -> Math.max(l + InternalVertex.STRIDE * 128L, (long) (l * 1.6)));
 	}
 
 	/**
 	 * Allocate a mesh in the arena.
 	 *
 	 * @param mesh     The mesh to allocate.
-	 * @param eboCache The EBO cache to use.
 	 * @return A handle to the allocated mesh.
 	 */
-	public BufferedMesh alloc(Mesh mesh, EboCache eboCache) {
-		return meshes.computeIfAbsent(mesh, m -> {
-			BufferedMesh bufferedMesh = new BufferedMesh(m, byteSize, eboCache);
-			byteSize += bufferedMesh.size();
-			allBuffered.add(bufferedMesh);
-			pendingUpload.add(bufferedMesh);
+	public BufferedMesh alloc(Mesh mesh) {
+		return byMesh.computeIfAbsent(mesh, this::_alloc);
+	}
 
-			dirty = true;
-			return bufferedMesh;
-		});
+	private BufferedMesh _alloc(Mesh m) {
+		BufferedMesh bufferedMesh = new BufferedMesh(m, this.eboCache);
+		ordered.add(bufferedMesh);
+
+		dirty = true;
+		return bufferedMesh;
 	}
 
 	@Nullable
 	public BufferedMesh get(Mesh mesh) {
-		return meshes.get(mesh);
+		return byMesh.get(mesh);
 	}
 
 	public void flush() {
@@ -71,53 +70,59 @@ public class InstancedMeshPool {
 		}
 
 		if (anyToRemove) {
+			anyToRemove = false;
 			processDeletions();
 		}
 
-		vbo.ensureCapacity(byteSize);
+		var forUpload = calculateByteSizeAndGetMeshesForUpload();
 
-		uploadPending();
+		if (!forUpload.isEmpty()) {
+			vbo.ensureCapacity(byteSize);
+
+			upload(forUpload);
+		}
 
 		dirty = false;
-		pendingUpload.clear();
 	}
 
 	private void processDeletions() {
 		// remove deleted meshes
-		allBuffered.removeIf(bufferedMesh -> {
-			boolean deleted = bufferedMesh.isDeleted();
+		ordered.removeIf(bufferedMesh -> {
+			boolean deleted = bufferedMesh.deleted();
 			if (deleted) {
-				meshes.remove(bufferedMesh.mesh);
+				byMesh.remove(bufferedMesh.mesh);
 			}
 			return deleted;
 		});
+	}
 
-		// re-evaluate first vertex for each mesh
-		int byteIndex = 0;
-		for (BufferedMesh mesh : allBuffered) {
+	private List<BufferedMesh> calculateByteSizeAndGetMeshesForUpload() {
+		List<BufferedMesh> out = new ArrayList<>();
+
+		long byteIndex = 0;
+		for (BufferedMesh mesh : ordered) {
 			if (mesh.byteIndex != byteIndex) {
-				pendingUpload.add(mesh);
+				out.add(mesh);
 			}
 
 			mesh.byteIndex = byteIndex;
 
-			byteIndex += mesh.size();
+			byteIndex += mesh.byteSize;
 		}
 
 		this.byteSize = byteIndex;
-		this.anyToRemove = false;
+
+		return out;
 	}
 
-	private void uploadPending() {
+	private void upload(List<BufferedMesh> meshes) {
 		try (MappedBuffer mapped = vbo.map()) {
 			long ptr = mapped.ptr();
 
-			for (BufferedMesh mesh : pendingUpload) {
+			for (BufferedMesh mesh : meshes) {
 				mesh.write(ptr, vertexView);
 				mesh.boundTo.clear();
 			}
-
-			pendingUpload.clear();
 		} catch (Exception e) {
 			Flywheel.LOGGER.error("Error uploading pooled meshes:", e);
 		}
@@ -125,14 +130,13 @@ public class InstancedMeshPool {
 
 	public void delete() {
 		vbo.delete();
-		meshes.clear();
-		allBuffered.clear();
-		pendingUpload.clear();
+		byMesh.clear();
+		ordered.clear();
 	}
 
 	@Override
 	public String toString() {
-		return "InstancedMeshPool{" + "byteSize=" + byteSize + ", meshCount=" + meshes.size() + '}';
+		return "InstancedMeshPool{" + "byteSize=" + byteSize + ", meshCount=" + byMesh.size() + '}';
 	}
 
 	public class BufferedMesh {
@@ -141,37 +145,28 @@ public class InstancedMeshPool {
 		private final int byteSize;
 		private final int ebo;
 
-		private long byteIndex;
-		private boolean deleted;
+		private long byteIndex = -1;
+		private int referenceCount = 0;
 
 		private final Set<GlVertexArray> boundTo = new HashSet<>();
 
-		private BufferedMesh(Mesh mesh, long byteIndex, EboCache eboCache) {
+		private BufferedMesh(Mesh mesh, EboCache eboCache) {
 			this.mesh = mesh;
 			vertexCount = mesh.vertexCount();
 			byteSize = vertexCount * InternalVertex.STRIDE;
-			this.byteIndex = byteIndex;
 			this.ebo = eboCache.get(mesh.indexSequence(), mesh.indexCount());
 		}
 
-		public int vertexCount() {
-			return vertexCount;
+		public boolean deleted() {
+			return referenceCount <= 0;
 		}
 
-		public int size() {
-			return byteSize;
-		}
-
-		public boolean isDeleted() {
-			return deleted;
-		}
-
-		public boolean isEmpty() {
-			return mesh.isEmpty() || isDeleted();
+		public boolean invalid() {
+			return mesh.vertexCount() == 0 || deleted() || byteIndex == -1;
 		}
 
 		private void write(long ptr, VertexView vertexView) {
-			if (isEmpty()) {
+			if (invalid()) {
 				return;
 			}
 
@@ -196,10 +191,15 @@ public class InstancedMeshPool {
 			}
 		}
 
-		public void delete() {
-			deleted = true;
-			InstancedMeshPool.this.dirty = true;
-			InstancedMeshPool.this.anyToRemove = true;
+		public void acquire() {
+			referenceCount++;
+		}
+
+		public void drop() {
+			if (--referenceCount == 0) {
+				InstancedMeshPool.this.dirty = true;
+				InstancedMeshPool.this.anyToRemove = true;
+			}
 		}
 	}
 }

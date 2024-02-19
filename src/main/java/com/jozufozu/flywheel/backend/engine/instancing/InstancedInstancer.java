@@ -39,14 +39,6 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 		writer = type.writer();
 	}
 
-	public int getAttributeCount() {
-		return instanceAttributes.size();
-	}
-
-	public boolean isInvalid() {
-		return vbo == null;
-	}
-
 	public void init() {
 		if (vbo != null) {
 			return;
@@ -58,17 +50,7 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 
 	public void update() {
 		removeDeletedInstances();
-		ensureBufferCapacity();
 		updateBuffer();
-	}
-
-	private void ensureBufferCapacity() {
-		int count = instances.size();
-		int byteSize = instanceStride * count;
-		if (vbo.ensureCapacity(byteSize)) {
-			// The vbo has moved, so we need to re-bind attributes
-			boundTo.clear();
-		}
 	}
 
 	private void updateBuffer() {
@@ -76,10 +58,14 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 			return;
 		}
 
-		try (MappedBuffer buf = vbo.map()) {
-			long ptr = buf.ptr();
+		int byteSize = instanceStride * instances.size();
+		if (vbo.ensureCapacity(byteSize)) {
+			// The vbo has moved, so we need to re-bind attributes
+			boundTo.clear();
+		}
 
-			writeChanged(ptr);
+		try (MappedBuffer buf = vbo.map()) {
+            writeChanged(buf.ptr());
 
 			changed.clear();
 		} catch (Exception e) {
@@ -129,6 +115,10 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 		}
 		vbo.delete();
 		vbo = null;
+
+		for (DrawCall drawCall : drawCalls) {
+			drawCall.delete();
+		}
 	}
 
 	public void addDrawCall(DrawCall drawCall) {

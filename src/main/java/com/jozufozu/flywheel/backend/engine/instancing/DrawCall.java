@@ -11,32 +11,27 @@ public class DrawCall {
 	private final InstancedInstancer<?> instancer;
 	private final InstancedMeshPool.BufferedMesh mesh;
 
-	@Nullable
-	private GlVertexArray vao;
+	private final GlVertexArray vao;
 	@Nullable
 	private GlVertexArray vaoScratch;
+	private boolean deleted;
 
 	public DrawCall(InstancedInstancer<?> instancer, InstancedMeshPool.BufferedMesh mesh, ShaderState shaderState) {
 		this.instancer = instancer;
 		this.mesh = mesh;
 		this.shaderState = shaderState;
 
+		mesh.acquire();
+
 		vao = GlVertexArray.create();
 	}
 
-	public boolean isInvalid() {
-		return instancer.isInvalid() || vao == null;
+	public boolean deleted() {
+		return deleted;
 	}
 
 	public void render() {
-		if (isInvalid() || mesh.isEmpty()) {
-			return;
-		}
-
-		instancer.update();
-
-		int instanceCount = instancer.getInstanceCount();
-		if (instanceCount <= 0) {
+		if (mesh.invalid()) {
 			return;
 		}
 
@@ -45,15 +40,13 @@ public class DrawCall {
 
 		vao.bindForDraw();
 
-		mesh.draw(instanceCount);
+		mesh.draw(instancer.getInstanceCount());
 	}
 
 	public void renderOne(InstanceHandleImpl impl) {
-		if (isInvalid() || mesh.isEmpty()) {
+		if (mesh.invalid()) {
 			return;
 		}
-
-		instancer.update();
 
 		int instanceCount = instancer.getInstanceCount();
 		if (instanceCount <= 0 || impl.index >= instanceCount) {
@@ -78,14 +71,19 @@ public class DrawCall {
 	}
 
 	public void delete() {
-		if (vao != null) {
-			vao.delete();
-			vao = null;
+		if (deleted) {
+			return;
 		}
+
+		vao.delete();
 
 		if (vaoScratch != null) {
 			vaoScratch.delete();
 			vaoScratch = null;
 		}
+
+		mesh.drop();
+
+		deleted = true;
 	}
 }
