@@ -23,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
+import net.minecraftforge.server.command.EnumArgument;
 
 public class FlwCommands {
 	public static void registerClientCommands(RegisterClientCommandsEvent event) {
@@ -101,18 +102,32 @@ public class FlwCommands {
 				}
 			));
 
-		// TODO
-		command.then(Commands.literal("debugNormals"))
-				.executes(context -> {
-					LocalPlayer player = Minecraft.getInstance().player;
-					if (player == null) return 0;
+		command.then(Commands.literal("debug")
+				.then(Commands.argument("mode", EnumArgument.enumArgument(DebugMode.class))
+						.executes(context -> {
+							LocalPlayer player = Minecraft.getInstance().player;
+							if (player == null) return 0;
 
-					player.displayClientMessage(Component.literal("This command is not yet implemented."), false);
+							DebugMode mode = context.getArgument("mode", DebugMode.class);
 
-					return Command.SINGLE_SUCCESS;
-				});
+							Uniforms.setDebugMode(mode, DebugOverlay.OVERRIDE);
 
-		command.then(Commands.literal("debugCrumbling")
+							return Command.SINGLE_SUCCESS;
+						})
+						.then(Commands.argument("overlay", EnumArgument.enumArgument(DebugOverlay.class))
+								.executes(context -> {
+									LocalPlayer player = Minecraft.getInstance().player;
+									if (player == null) return 0;
+
+									DebugMode mode = context.getArgument("mode", DebugMode.class);
+									DebugOverlay visual = context.getArgument("overlay", DebugOverlay.class);
+
+									Uniforms.setDebugMode(mode, visual);
+
+									return Command.SINGLE_SUCCESS;
+								}))));
+
+		command.then(Commands.literal("crumbling")
 				.then(Commands.argument("pos", BlockPosArgument.blockPos())
 						.then(Commands.argument("stage", IntegerArgumentType.integer(0, 9))
 								.executes(context -> {
@@ -132,12 +147,7 @@ public class FlwCommands {
 									return Command.SINGLE_SUCCESS;
 								}))));
 
-		command.then(Commands.literal("debugFrustum")
-				.then(Commands.literal("pause")
-						.executes(context -> {
-							Uniforms.frustumPaused = true;
-							return 1;
-						}))
+		command.then(Commands.literal("frustum")
 				.then(Commands.literal("unpause")
 						.executes(context -> {
 							Uniforms.frustumPaused = false;

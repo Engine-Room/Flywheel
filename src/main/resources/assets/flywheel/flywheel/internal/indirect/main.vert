@@ -32,5 +32,5 @@ void main() {
     uint objectIndex = objectIndices[gl_BaseInstance + gl_InstanceID];
     FlwInstance instance = _flw_unpackInstance(objects[objectIndex].instance);
 
-    _flw_main(instance);
+    _flw_main(instance, objectIndex);
 }
