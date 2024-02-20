@@ -9,5 +9,5 @@ void main() {
 
     FlwInstance instance = _flw_unpackInstance();
 
-    _flw_main(instance);
+    _flw_main(instance, uint(gl_InstanceID));
 }

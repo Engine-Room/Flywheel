@@ -12,6 +12,8 @@ uniform sampler2D _flw_lightTex;
 
 out vec4 _flw_outputColor;
 
+in vec4 _flw_debugColor;
+
 void _flw_main() {
     flw_sampleColor = texture(_flw_diffuseTex, flw_vertexTexCoord);
     flw_fragColor = flw_vertexColor * flw_sampleColor;
@@ -46,6 +48,15 @@ void _flw_main() {
 
     if (flw_discardPredicate(color)) {
         discard;
+    }
+
+    switch (_flw_debugOverlay) {
+        case 1u:
+            color *= _flw_debugColor;
+            break;
+        case 2u:
+            color = _flw_debugColor;
+            break;
     }
 
     _flw_outputColor = flw_fogFilter(color);

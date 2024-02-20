@@ -3,6 +3,8 @@ package com.jozufozu.flywheel.backend.engine.uniform;
 import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
+import com.jozufozu.flywheel.config.DebugMode;
+import com.jozufozu.flywheel.config.DebugOverlay;
 
 public class Uniforms {
 	public static boolean frustumPaused = false;
@@ -51,6 +53,11 @@ public class Uniforms {
 		var ubo = frame();
 		ubo.provider.setContext(ctx);
 		ubo.update();
+	}
+
+	public static void setDebugMode(DebugMode mode, DebugOverlay visual) {
+		frame().provider.debugMode = mode.ordinal();
+		frame().provider.debugOverlay = visual.ordinal();
 	}
 
 	public static void onReloadLevelRenderer(ReloadLevelRendererEvent event) {
