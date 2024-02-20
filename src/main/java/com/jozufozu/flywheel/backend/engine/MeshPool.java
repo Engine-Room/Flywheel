@@ -9,27 +9,24 @@ import java.util.Set;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL32;
 
-import com.jozufozu.flywheel.api.model.IndexSequence;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.vertex.VertexView;
 import com.jozufozu.flywheel.backend.InternalVertex;
-import com.jozufozu.flywheel.backend.gl.GlNumericType;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 
 public class MeshPool {
 	private final VertexView vertexView;
 	private final Map<Mesh, BufferedMesh> meshes = new HashMap<>();
 	private final List<BufferedMesh> meshList = new ArrayList<>();
+	private final List<BufferedMesh> recentlyAllocated = new ArrayList<>();
 
 	private final GlBuffer vbo;
-	private final GlBuffer ebo;
+	private final IndexPool indexPool;
 
 	private boolean dirty;
 	private boolean anyToRemove;
@@ -40,7 +37,7 @@ public class MeshPool {
 	public MeshPool() {
 		vertexView = InternalVertex.createVertexView();
 		vbo = new GlBuffer();
-		ebo = new GlBuffer();
+		indexPool = new IndexPool();
 	}
 
 	/**
@@ -56,6 +53,7 @@ public class MeshPool {
 	private BufferedMesh _alloc(Mesh m) {
 		BufferedMesh bufferedModel = new BufferedMesh(m);
 		meshList.add(bufferedModel);
+		recentlyAllocated.add(bufferedModel);
 
 		dirty = true;
 		return bufferedModel;
@@ -74,9 +72,23 @@ public class MeshPool {
 		if (anyToRemove) {
 			anyToRemove = false;
 			processDeletions();
+
+			// Might want to shrink the index pool if something was removed.
+			indexPool.reset();
+			for (BufferedMesh mesh : meshList) {
+				indexPool.updateCount(mesh.mesh.indexSequence(), mesh.indexCount());
+			}
+		} else {
+			// Otherwise, just update the index with the new counts.
+			for (BufferedMesh mesh : recentlyAllocated) {
+				indexPool.updateCount(mesh.mesh.indexSequence(), mesh.indexCount());
+			}
 		}
 
-        uploadAll();
+		// Always need to flush the index pool.
+		indexPool.flush();
+
+		uploadAll();
         dirty = false;
     }
 
@@ -93,41 +105,8 @@ public class MeshPool {
 
 	private void uploadAll() {
 		long neededSize = 0;
-		Reference2IntMap<IndexSequence> indexCounts = new Reference2IntOpenHashMap<>();
-		indexCounts.defaultReturnValue(0);
-
 		for (BufferedMesh mesh : meshList) {
 			neededSize += mesh.byteSize();
-
-			int count = indexCounts.getInt(mesh.mesh.indexSequence());
-			int newCount = Math.max(count, mesh.indexCount());
-
-			if (newCount > count) {
-				indexCounts.put(mesh.mesh.indexSequence(), newCount);
-			}
-		}
-
-		long totalIndexCount = 0;
-
-		for (int count : indexCounts.values()) {
-			totalIndexCount += count;
-		}
-
-		final var indexBlock = MemoryBlock.malloc(totalIndexCount * GlNumericType.UINT.byteWidth());
-		final long indexPtr = indexBlock.ptr();
-
-		Reference2IntMap<IndexSequence> firstIndices = new Reference2IntOpenHashMap<>();
-
-		int firstIndex = 0;
-		for (Reference2IntMap.Entry<IndexSequence> entries : indexCounts.reference2IntEntrySet()) {
-			var indexSequence = entries.getKey();
-			var indexCount = entries.getIntValue();
-
-			firstIndices.put(indexSequence, firstIndex);
-
-			indexSequence.fill(indexPtr + (long) firstIndex * GlNumericType.UINT.byteWidth(), indexCount);
-
-			firstIndex += indexCount;
 		}
 
 		final var vertexBlock = MemoryBlock.malloc(neededSize);
@@ -144,27 +123,25 @@ public class MeshPool {
 			byteIndex += mesh.byteSize();
 			baseVertex += mesh.vertexCount();
 
-			mesh.firstIndex = firstIndices.getInt(mesh.mesh.indexSequence());
+			mesh.firstIndex = indexPool.firstIndex(mesh.mesh.indexSequence());
 
 			mesh.boundTo.clear();
 		}
 
 		vbo.upload(vertexBlock);
-		ebo.upload(indexBlock);
 
 		vertexBlock.free();
-		indexBlock.free();
 	}
 
 	public void bind(GlVertexArray vertexArray) {
-		vertexArray.setElementBuffer(ebo.handle());
+		indexPool.bind(vertexArray);
 		vertexArray.bindVertexBuffer(0, vbo.handle(), 0, InternalVertex.STRIDE);
 		vertexArray.bindAttributes(0, 0, InternalVertex.ATTRIBUTES);
 	}
 
 	public void delete() {
 		vbo.delete();
-		ebo.delete();
+		indexPool.delete();
 		meshes.clear();
 		meshList.clear();
 	}
@@ -231,7 +208,7 @@ public class MeshPool {
 
 		public void setup(GlVertexArray vao) {
 			if (boundTo.add(vao)) {
-				vao.setElementBuffer(MeshPool.this.ebo.handle());
+				MeshPool.this.indexPool.bind(vao);
 				vao.bindVertexBuffer(0, MeshPool.this.vbo.handle(), byteIndex, InternalVertex.STRIDE);
 				vao.bindAttributes(0, 0, InternalVertex.ATTRIBUTES);
 			}
