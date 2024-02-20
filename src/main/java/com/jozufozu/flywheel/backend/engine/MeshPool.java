@@ -145,6 +145,8 @@ public class MeshPool {
 			baseVertex += mesh.vertexCount();
 
 			mesh.firstIndex = firstIndices.getInt(mesh.mesh.indexSequence());
+
+			mesh.boundTo.clear();
 		}
 
 		vbo.upload(vertexBlock);
