@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
@@ -18,7 +17,7 @@ import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.array.VertexAttribute;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;
-import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
+import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
 public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I> {
 	private final List<VertexAttribute> instanceAttributes;
@@ -45,7 +44,6 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 		}
 
 		vbo = new GlBuffer(GlBufferUsage.DYNAMIC_DRAW);
-		vbo.growthFunction(l -> Math.max(l + (long) instanceStride * 16, (long) (l * 1.6)));
 	}
 
 	public void update() {
@@ -59,27 +57,60 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 		}
 
 		int byteSize = instanceStride * instances.size();
-		if (vbo.ensureCapacity(byteSize)) {
-			// The vbo has moved, so we need to re-bind attributes
-			boundTo.clear();
+		if (needsToGrow(byteSize)) {
+			// TODO: Should this memory block be persistent?
+			var temp = MemoryBlock.malloc(increaseSize(byteSize));
+
+			writeAll(temp.ptr());
+
+			vbo.upload(temp);
+
+			temp.free();
+		} else {
+			writeChanged();
 		}
 
-		try (MappedBuffer buf = vbo.map()) {
-            writeChanged(buf.ptr());
-
-			changed.clear();
-		} catch (Exception e) {
-			Flywheel.LOGGER.error("Error updating InstancedInstancer:", e);
-		}
+		changed.clear();
 	}
 
-	private void writeChanged(long ptr) {
+	private void writeChanged() {
 		changed.forEachSetSpan((startInclusive, endInclusive) -> {
+			var temp = MemoryBlock.malloc((long) instanceStride * (endInclusive - startInclusive + 1));
+			long ptr = temp.ptr();
 			for (int i = startInclusive; i <= endInclusive; i++) {
-				writer.write(ptr + (long) instanceStride * i, instances.get(i));
+				writer.write(ptr, instances.get(i));
+				ptr += instanceStride;
 			}
+
+			vbo.uploadSpan((long) startInclusive * instanceStride, temp);
+
+			temp.free();
 		});
 	}
+
+	private void writeAll(long ptr) {
+		for (I instance : instances) {
+			writer.write(ptr, instance);
+			ptr += instanceStride;
+		}
+	}
+
+	private long increaseSize(long capacity) {
+		return Math.max(capacity + (long) instanceStride * 16, (long) (capacity * 1.6));
+	}
+
+	public boolean needsToGrow(long capacity) {
+		if (capacity < 0) {
+			throw new IllegalArgumentException("Size " + capacity + " < 0");
+		}
+
+		if (capacity == 0) {
+			return false;
+		}
+
+        return capacity > vbo.size();
+    }
+
 
 	/**
 	 * Bind this instancer's vbo to the given vao if it hasn't already been bound.
