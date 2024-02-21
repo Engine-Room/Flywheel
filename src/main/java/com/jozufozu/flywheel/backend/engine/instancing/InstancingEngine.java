@@ -64,6 +64,7 @@ public class InstancingEngine extends AbstractEngine {
 		}
 
 		try (var state = GlStateTracker.getRestoreState()) {
+			Uniforms.bindForDraw();
 			render(drawSet);
 		}
 	}
@@ -104,7 +105,6 @@ public class InstancingEngine extends AbstractEngine {
 			var program = programs.get(shader.instanceType(), context.contextShader());
 			program.bind();
 
-			Uniforms.bindForDraw();
 			uploadMaterialUniform(program, material);
 
 			context.prepare(material, program, textures);

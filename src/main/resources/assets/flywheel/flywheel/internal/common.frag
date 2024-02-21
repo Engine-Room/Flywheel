@@ -37,7 +37,14 @@ void _flw_main() {
     }
 
     if (flw_material.useOverlay) {
-        vec4 overlayColor = texelFetch(_flw_overlayTex, flw_fragOverlay, 0);
+        // Need to clamp the overlay texture coords to sane coordinates because integer vertex attributes explode on
+        // some drivers for some draw calls.
+        // This can be removed once instancing uses sampler buffers, though
+        // we may need a solution for the internal vertex format. Perhaps
+        // pass as floats and convert to integers in the shader?
+        ivec2 actualCoord = clamp(flw_fragOverlay, ivec2(3), ivec2(10));
+
+        vec4 overlayColor = texelFetch(_flw_overlayTex, actualCoord, 0);
         color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
     }
 

@@ -48,14 +48,15 @@ public class TextureBinder {
 
 	public static void bindLightAndOverlay() {
 		var gameRenderer = Minecraft.getInstance().gameRenderer;
-		gameRenderer.overlayTexture()
-				.setupOverlayColor();
-		gameRenderer.lightTexture()
-				.turnOnLightLayer();
 
 		GlTextureUnit.T1.makeActive();
+		gameRenderer.overlayTexture()
+				.setupOverlayColor();
 		RenderSystem.bindTexture(RenderSystem.getShaderTexture(1));
+
 		GlTextureUnit.T2.makeActive();
+		gameRenderer.lightTexture()
+				.turnOnLightLayer();
 		RenderSystem.bindTexture(RenderSystem.getShaderTexture(2));
 	}
 
