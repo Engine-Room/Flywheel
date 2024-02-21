@@ -207,12 +207,13 @@ public class MeshPool {
 		}
 
 		public void setup(GlVertexArray vao) {
-			if (boundTo.add(vao)) {
-				MeshPool.this.indexPool.bind(vao);
-				vao.bindVertexBuffer(0, MeshPool.this.vbo.handle(), byteIndex, InternalVertex.STRIDE);
-				vao.bindAttributes(0, 0, InternalVertex.ATTRIBUTES);
-			}
-		}
+            if (!boundTo.add(vao)) {
+                return;
+            }
+            MeshPool.this.indexPool.bind(vao);
+            vao.bindVertexBuffer(0, MeshPool.this.vbo.handle(), byteIndex, InternalVertex.STRIDE);
+            vao.bindAttributes(0, 0, InternalVertex.ATTRIBUTES);
+        }
 
 		public void acquire() {
 			referenceCount++;
