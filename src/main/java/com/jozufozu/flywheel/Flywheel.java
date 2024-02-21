@@ -146,7 +146,7 @@ public class Flywheel {
 	private static void addDebugInfo(CustomizeGuiOverlayEvent.DebugText event) {
 		Minecraft mc = Minecraft.getInstance();
 
-		if (!mc.options.renderDebug) {
+		if (!mc.getDebugOverlay().showDebugScreen()) {
 			return;
 		}
 

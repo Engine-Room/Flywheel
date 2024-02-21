@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.impl.mixin;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,11 +10,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.api.event.EndClientResourceReloadEvent;
-import com.mojang.realmsclient.client.RealmsClient;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.main.GameConfig;
-import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraftforge.fml.ModLoader;
 
@@ -26,12 +22,12 @@ abstract class MinecraftMixin {
 	private ReloadableResourceManager resourceManager;
 
 	@Inject(method = "lambda$new$5", at = @At("HEAD"))
-	private void flywheel$onEndInitialResourceReload(RealmsClient realmsClient, ReloadInstance reloadInstance, GameConfig gameConfig, Optional<Throwable> error, CallbackInfo ci) {
-		ModLoader.get().postEvent(new EndClientResourceReloadEvent((Minecraft) (Object) this, resourceManager, true, error));
+	private void flywheel$onEndInitialResourceReload(Minecraft.GameLoadCookie minecraft$gameloadcookie, Throwable error, CallbackInfo ci) {
+		ModLoader.get().postEvent(new EndClientResourceReloadEvent((Minecraft) (Object) this, resourceManager, true, Optional.ofNullable(error)));
 	}
 
-	@Inject(method = "lambda$reloadResourcePacks$28", at = @At("HEAD"))
-	private void flywheel$onEndManualResourceReload(boolean recovery, CompletableFuture<Void> future, Optional<Throwable> error, CallbackInfo ci) {
-		ModLoader.get().postEvent(new EndClientResourceReloadEvent((Minecraft) (Object) this, resourceManager, false, error));
+	@Inject(method = "lambda$reloadResourcePacks$34", at = @At("HEAD"))
+	private void flywheel$onEndManualResourceReload(boolean p_168020_, Minecraft.GameLoadCookie p_300647_, Throwable error, CallbackInfo ci) {
+		ModLoader.get().postEvent(new EndClientResourceReloadEvent((Minecraft) (Object) this, resourceManager, false, Optional.ofNullable(error)));
 	}
 }
