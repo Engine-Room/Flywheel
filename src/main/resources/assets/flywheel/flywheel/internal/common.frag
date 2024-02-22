@@ -42,7 +42,7 @@ void _flw_main() {
         // This can be removed once instancing uses sampler buffers, though
         // we may need a solution for the internal vertex format. Perhaps
         // pass as floats and convert to integers in the shader?
-        ivec2 actualCoord = clamp(flw_fragOverlay, ivec2(3), ivec2(10));
+        ivec2 actualCoord = clamp(flw_fragOverlay, 0, 10);
 
         vec4 overlayColor = texelFetch(_flw_overlayTex, actualCoord, 0);
         color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
