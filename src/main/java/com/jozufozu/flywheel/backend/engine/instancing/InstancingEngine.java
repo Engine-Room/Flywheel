@@ -20,6 +20,8 @@ import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
 import com.jozufozu.flywheel.backend.engine.textures.TextureSourceImpl;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
+import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
+import com.jozufozu.flywheel.backend.gl.TextureBuffer;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.NamedFlag;
@@ -28,6 +30,7 @@ import com.jozufozu.flywheel.lib.task.SyncedPlan;
 public class InstancingEngine extends AbstractEngine {
 	private final InstancingPrograms programs;
 	private final TextureSourceImpl textures = new TextureSourceImpl();
+	private final TextureBuffer instanceTexture = new TextureBuffer();
 	private final InstancedDrawManager drawManager = new InstancedDrawManager();
 	private final Flag flushFlag = new NamedFlag("flushed");
 
@@ -74,7 +77,7 @@ public class InstancingEngine extends AbstractEngine {
 		// Need to wait for flush before we can inspect instancer state.
 		executor.syncUntil(flushFlag::isRaised);
 
-		InstancedCrumbling.render(crumblingBlocks, programs, textures);
+		InstancedCrumbling.render(crumblingBlocks, programs, textures, instanceTexture);
 	}
 
 	@Override
@@ -86,6 +89,7 @@ public class InstancingEngine extends AbstractEngine {
 	public void delete() {
 		drawManager.delete();
 		programs.release();
+		instanceTexture.delete();
 	}
 
 	private void render(InstancedDrawManager.DrawSet drawSet) {
@@ -110,8 +114,12 @@ public class InstancingEngine extends AbstractEngine {
 			context.prepare(material, program, textures);
 			MaterialRenderState.setup(material);
 
+			GlTextureUnit.T3.makeActive();
+
+			program.setSamplerBinding("_flw_instances", 3);
+
 			for (var drawCall : drawCalls) {
-				drawCall.render();
+				drawCall.render(instanceTexture);
 			}
 			TextureBinder.resetTextureBindings();
 		}

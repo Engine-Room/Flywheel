@@ -2,9 +2,9 @@ package com.jozufozu.flywheel.backend.engine.instancing;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.backend.InternalVertex;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
+import com.jozufozu.flywheel.backend.gl.TextureBuffer;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 
 public class DrawCall {
@@ -31,12 +31,12 @@ public class DrawCall {
 		return deleted;
 	}
 
-	public void render() {
+	public void render(TextureBuffer buffer) {
 		if (mesh.invalid()) {
 			return;
 		}
 
-		instancer.bindIfNeeded(vao, InternalVertex.ATTRIBUTE_COUNT);
+		instancer.bind(buffer);
 		mesh.setup(vao);
 
 		vao.bindForDraw();
@@ -44,7 +44,7 @@ public class DrawCall {
 		mesh.draw(instancer.instanceCount());
 	}
 
-	public void renderOne(InstanceHandleImpl impl) {
+	public void renderOne(TextureBuffer buffer, InstanceHandleImpl impl) {
 		if (mesh.invalid()) {
 			return;
 		}
@@ -56,7 +56,7 @@ public class DrawCall {
 
 		var vao = lazyScratchVao();
 
-		instancer.bindRaw(vao, InternalVertex.ATTRIBUTE_COUNT, impl.index);
+		instancer.bind(buffer);
 		mesh.setup(vao);
 
 		vao.bindForDraw();

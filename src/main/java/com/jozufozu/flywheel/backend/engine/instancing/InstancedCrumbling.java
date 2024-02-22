@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.context.TextureSource;
@@ -15,6 +16,8 @@ import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
+import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
+import com.jozufozu.flywheel.backend.gl.TextureBuffer;
 import com.jozufozu.flywheel.lib.context.ContextShaders;
 import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial;
@@ -24,7 +27,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancedCrumbling {
-	public static void render(List<Engine.CrumblingBlock> crumblingBlocks, InstancingPrograms programs, TextureSource textureSource) {
+	public static void render(List<Engine.CrumblingBlock> crumblingBlocks, InstancingPrograms programs, TextureSource textureSource, TextureBuffer instanceTexture) {
 		// Sort draw calls into buckets, so we don't have to do as many shader binds.
 		var byShaderState = doCrumblingSort(crumblingBlocks);
 
@@ -56,7 +59,7 @@ public class InstancedCrumbling {
 
 				MaterialRenderState.setup(crumblingMaterial);
 
-				for (Int2ObjectMap.Entry<List<Runnable>> progressEntry : byProgress.int2ObjectEntrySet()) {
+				for (var progressEntry : byProgress.int2ObjectEntrySet()) {
 					var drawCalls = progressEntry.getValue();
 
 					if (drawCalls.isEmpty()) {
@@ -66,9 +69,14 @@ public class InstancedCrumbling {
 					var context = Contexts.CRUMBLING.get(progressEntry.getIntKey());
 					context.prepare(crumblingMaterial, program, textureSource);
 
-					drawCalls.forEach(Runnable::run);
+					GlTextureUnit.T3.makeActive();
+					program.setSamplerBinding("_flw_instances", 3);
 
-					TextureBinder.resetTextureBindings();
+					for (Consumer<TextureBuffer> drawCall : drawCalls) {
+                        drawCall.accept(instanceTexture);
+                    }
+
+                    TextureBinder.resetTextureBindings();
 				}
 			}
 
@@ -77,8 +85,8 @@ public class InstancedCrumbling {
 		}
 	}
 
-	private static Map<ShaderState, Int2ObjectMap<List<Runnable>>> doCrumblingSort(List<Engine.CrumblingBlock> instances) {
-		Map<ShaderState, Int2ObjectMap<List<Runnable>>> out = new HashMap<>();
+	private static Map<ShaderState, Int2ObjectMap<List<Consumer<TextureBuffer>>>> doCrumblingSort(List<Engine.CrumblingBlock> instances) {
+		Map<ShaderState, Int2ObjectMap<List<Consumer<TextureBuffer>>>> out = new HashMap<>();
 
 		for (Engine.CrumblingBlock triple : instances) {
 			int progress = triple.progress();
@@ -101,7 +109,7 @@ public class InstancedCrumbling {
                 for (DrawCall draw : instancer.drawCalls()) {
 					out.computeIfAbsent(draw.shaderState, $ -> new Int2ObjectArrayMap<>())
 							.computeIfAbsent(progress, $ -> new ArrayList<>())
-							.add(() -> draw.renderOne(impl));
+							.add(buf -> draw.renderOne(buf, impl));
 				}
 			}
 		}
