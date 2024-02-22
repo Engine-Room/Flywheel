@@ -16,8 +16,9 @@ public class TextureBinder {
 	// 0 is reserved for diffuse
 	// 1 is overlay
 	// 2 is light
-	// 3..n are for whatever else the context needs
-	private static final int baseSamplerUnit = 3;
+	// 3 is the instance buffer
+	// 4..n are for whatever else the context needs
+	private static final int baseSamplerUnit = 4;
 	private static int nextSamplerUnit = baseSamplerUnit;
 
 	/**

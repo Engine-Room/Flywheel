@@ -1,9 +1,7 @@
 package com.jozufozu.flywheel.backend.engine.instancing;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -12,18 +10,15 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
-import com.jozufozu.flywheel.backend.engine.LayoutAttributes;
-import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
-import com.jozufozu.flywheel.backend.gl.array.VertexAttribute;
+import com.jozufozu.flywheel.backend.gl.TextureBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;
+import com.jozufozu.flywheel.lib.math.MoreMath;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
 public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I> {
-	private final List<VertexAttribute> instanceAttributes;
 	private final int instanceStride;
 
-	private final Set<GlVertexArray> boundTo = new HashSet<>();
 	private final InstanceWriter<I> writer;
 	@Nullable
 	private GlBuffer vbo;
@@ -33,8 +28,8 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 	public InstancedInstancer(InstanceType<I> type, Context context) {
 		super(type, context);
 		var layout = type.layout();
-		instanceAttributes = LayoutAttributes.attributes(layout);
-		instanceStride = layout.byteSize();
+		// Align to one texel in the texture buffer
+		instanceStride = MoreMath.align16(layout.byteSize());
 		writer = type.writer();
 	}
 
@@ -111,35 +106,6 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
         return capacity > vbo.size();
     }
 
-
-	/**
-	 * Bind this instancer's vbo to the given vao if it hasn't already been bound.
-	 * @param vao The vao to bind to.
-	 * @param startAttrib The first attribute to bind. This method will bind attributes in the half open range
-	 * 		{@code [startAttrib, startAttrib + instanceFormat.getAttributeCount())}.
-	 */
-	public void bindIfNeeded(GlVertexArray vao, int startAttrib) {
-		if (!boundTo.add(vao)) {
-			return;
-		}
-
-		bindRaw(vao, startAttrib, 0);
-	}
-
-	/**
-	 * Bind this instancer's vbo to the given vao with the given base instance to calculate the binding offset.
-	 * @param vao The vao to bind to.
-	 * @param startAttrib The first attribute to bind. This method will bind attributes in the half open range
-	 * 		{@code [startAttrib, startAttrib + instanceFormat.getAttributeCount())}.
-	 * @param baseInstance The base instance to calculate the binding offset from.
-	 */
-	public void bindRaw(GlVertexArray vao, int startAttrib, int baseInstance) {
-		long offset = (long) baseInstance * instanceStride;
-		vao.bindVertexBuffer(1, vbo.handle(), offset, instanceStride);
-		vao.setBindingDivisor(1, 1);
-		vao.bindAttributes(1, startAttrib, instanceAttributes);
-	}
-
 	public void delete() {
 		if (vbo == null) {
 			return;
@@ -158,5 +124,13 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 
 	public List<DrawCall> drawCalls() {
 		return drawCalls;
+	}
+
+	public void bind(TextureBuffer buffer) {
+		if (vbo == null) {
+			return;
+		}
+
+		buffer.bind(vbo.handle());
 	}
 }
