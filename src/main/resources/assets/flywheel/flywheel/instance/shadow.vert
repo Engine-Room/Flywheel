@@ -7,4 +7,5 @@ void flw_instanceVertex(in FlwInstance i) {
     flw_vertexTexCoord = (flw_vertexPos.xz - i.entityPosXZ) * 0.5 / i.radius + 0.5;
 
     flw_vertexColor.a = i.alpha;
+    flw_vertexOverlay = ivec2(0, 10);
 }

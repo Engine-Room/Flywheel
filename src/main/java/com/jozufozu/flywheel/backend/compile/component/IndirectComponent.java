@@ -207,7 +207,7 @@ public class IndirectComponent implements SourceComponent {
 			return unpackUnsignedVector(fieldName, unsignedIntegerRepr, packed, size);
 		} else if (repr instanceof FloatRepr floatRepr) {
 			return unpackFloatVector(fieldName, floatRepr, packed, size);
-		} 
+		}
 
 		throw new IllegalArgumentException("Unknown repr " + repr);
 	}
@@ -230,10 +230,10 @@ public class IndirectComponent implements SourceComponent {
 
 	private static GlslExpr unpackFloatVector(String fieldName, FloatRepr floatRepr, GlslStruct packed, int size) {
 		return switch (floatRepr) {
-			case NORMALIZED_BYTE -> unpackBuiltin(fieldName, packed, size, "unpackSnorm4x8");
-			case NORMALIZED_UNSIGNED_BYTE -> unpackBuiltin(fieldName, packed, size, "unpackUnorm4x8");
-			case NORMALIZED_SHORT -> unpackBuiltin(fieldName, packed, size, "unpackSnorm2x16");
-			case NORMALIZED_UNSIGNED_SHORT -> unpackBuiltin(fieldName, packed, size, "unpackUnorm2x16");
+			case NORMALIZED_BYTE -> unpackByteBuiltin(fieldName, packed, size, "unpackSnorm4x8");
+			case NORMALIZED_UNSIGNED_BYTE -> unpackByteBuiltin(fieldName, packed, size, "unpackUnorm4x8");
+			case NORMALIZED_SHORT -> unpackShortBuiltin(fieldName, packed, size, "unpackSnorm2x16");
+			case NORMALIZED_UNSIGNED_SHORT -> unpackShortBuiltin(fieldName, packed, size, "unpackUnorm2x16");
 			case NORMALIZED_INT -> unpack(fieldName, packed, size, "int", "vec" + size, e -> e.div(2147483647f)
 					.clamp(-1, 1));
 			case NORMALIZED_UNSIGNED_INT ->
@@ -260,7 +260,7 @@ public class IndirectComponent implements SourceComponent {
 					.rsh(bitPos);
 			args.add(perElement.apply(element));
 		}
-		return GlslExpr.call(outType + size, args);
+		return GlslExpr.call(outType, args);
 	}
 
 	private static GlslExpr unpackShortBacked(String fieldName, GlslStruct packed, int size, String outType, Function<GlslExpr, GlslExpr> perElement) {
@@ -296,7 +296,7 @@ public class IndirectComponent implements SourceComponent {
 		return GlslExpr.call(outType, args);
 	}
 
-	private static GlslExpr unpackBuiltin(String fieldName, GlslStruct packed, int size, String func) {
+	private static GlslExpr unpackByteBuiltin(String fieldName, GlslStruct packed, int size, String func) {
 		packed.addField("uint", fieldName);
 		GlslExpr expr = UNPACKING_VARIABLE.access(fieldName)
 				.callFunction(func);
@@ -306,6 +306,30 @@ public class IndirectComponent implements SourceComponent {
 			case 4 -> expr;
 			default -> throw new IllegalArgumentException("Invalid vector size " + size);
 		};
+	}
+
+	private static GlslExpr unpackShortBuiltin(String fieldName, GlslStruct packed, int size, String func) {
+		if (size == 2) {
+			packed.addField("uint", fieldName);
+			return UNPACKING_VARIABLE.access(fieldName)
+					.callFunction(func);
+		} else {
+			var name0 = fieldName + "_" + 0;
+			var name1 = fieldName + "_" + 1;
+			packed.addField("uint", name0);
+			packed.addField("uint", name1);
+			GlslExpr xy = UNPACKING_VARIABLE.access(name0)
+					.callFunction(func);
+
+			GlslExpr zw = UNPACKING_VARIABLE.access(name1)
+					.callFunction(func);
+
+			if (size == 3) {
+				return GlslExpr.call("vec3", List.of(xy.swizzle("xy"), zw.swizzle("x")));
+			} else {
+				return GlslExpr.call("vec4", List.of(xy, zw));
+			}
+		}
 	}
 
 	private static GlslExpr unpackMatrix(String name, GlslStruct packed, MatrixElementType matrix) {
