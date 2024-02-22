@@ -42,7 +42,10 @@ public class Compile<K> {
 
 	public static class ProgramStitcher<K> implements CompilationHarness.KeyCompiler<K> {
 		private final Map<ShaderType, ShaderCompiler<K>> compilers = new EnumMap<>(ShaderType.class);
-		private BiConsumer<K, GlProgram> onLink = (k, p) -> {
+		private BiConsumer<K, GlProgram> postLink = (k, p) -> {
+
+		};
+		private BiConsumer<K, GlProgram> preLink = (k, p) -> {
 		};
 
 		public CompilationHarness<K> harness(String marker, ShaderSources sources) {
@@ -57,8 +60,13 @@ public class Compile<K> {
 			return this;
 		}
 
-		public ProgramStitcher<K> then(BiConsumer<K, GlProgram> onLink) {
-			this.onLink = onLink;
+		public ProgramStitcher<K> postLink(BiConsumer<K, GlProgram> postLink) {
+			this.postLink = postLink;
+			return this;
+		}
+
+		public ProgramStitcher<K> preLink(BiConsumer<K, GlProgram> preLink) {
+			this.preLink = preLink;
 			return this;
 		}
 
@@ -84,10 +92,10 @@ public class Compile<K> {
 				return null;
 			}
 
-			var out = programLinker.link(shaders);
+			var out = programLinker.link(shaders, p -> preLink.accept(key, p));
 
 			if (out != null) {
-				onLink.accept(key, out);
+				postLink.accept(key, out);
 			}
 
 			return out;

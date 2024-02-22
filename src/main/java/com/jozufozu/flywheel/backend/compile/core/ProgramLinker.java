@@ -9,6 +9,7 @@ import static org.lwjgl.opengl.GL20.glGetProgrami;
 import static org.lwjgl.opengl.GL20.glLinkProgram;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -23,26 +24,30 @@ public class ProgramLinker {
 	}
 
 	@Nullable
-	public GlProgram link(List<GlShader> shaders) {
+	public GlProgram link(List<GlShader> shaders, Consumer<GlProgram> preLink) {
 		// this probably doesn't need caching
-		var linkResult = linkInternal(shaders);
+		var linkResult = linkInternal(shaders, preLink);
 		stats.linkResult(linkResult);
 		return linkResult.unwrap();
 	}
 
-	private LinkResult linkInternal(List<GlShader> shaders) {
+	private LinkResult linkInternal(List<GlShader> shaders, Consumer<GlProgram> preLink) {
 		int handle = glCreateProgram();
+		var out = new GlProgram(handle);
 
 		for (GlShader shader : shaders) {
 			glAttachShader(handle, shader.handle());
 		}
 
+		preLink.accept(out);
+
 		glLinkProgram(handle);
 		String log = glGetProgramInfoLog(handle);
 
 		if (linkSuccessful(handle)) {
-			return LinkResult.success(new GlProgram(handle), log);
+			return LinkResult.success(out, log);
 		} else {
+			out.delete();
 			return LinkResult.failure(log);
 		}
 	}

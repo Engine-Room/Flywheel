@@ -81,7 +81,7 @@ public class IndirectPrograms extends AbstractPrograms {
 						.withComponent(IndirectComponent::create)
 						.withResource(InstanceType::cullShader)
 						.withResource(CULL_SHADER_MAIN))
-				.then((key, program) -> program.setUniformBlockBinding("_FlwFrameUniforms", 0))
+				.postLink((key, program) -> program.setUniformBlockBinding("_FlwFrameUniforms", 0))
 				.harness("culling", sources);
 	}
 
