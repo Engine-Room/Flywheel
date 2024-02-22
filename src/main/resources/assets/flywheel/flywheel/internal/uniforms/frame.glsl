@@ -31,7 +31,6 @@ layout(std140) uniform _FlwFrameUniforms {
     float flw_renderSeconds;
 
     uint _flw_debugMode;
-    uint _flw_debugOverlay;
 };
 
 #define flw_cameraPos _flw_cameraPos.xyz

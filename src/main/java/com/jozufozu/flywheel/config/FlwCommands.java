@@ -110,22 +110,10 @@ public class FlwCommands {
 
 							DebugMode mode = context.getArgument("mode", DebugMode.class);
 
-							Uniforms.setDebugMode(mode, DebugOverlay.OVERRIDE);
+							Uniforms.setDebugMode(mode);
 
 							return Command.SINGLE_SUCCESS;
-						})
-						.then(Commands.argument("overlay", EnumArgument.enumArgument(DebugOverlay.class))
-								.executes(context -> {
-									LocalPlayer player = Minecraft.getInstance().player;
-									if (player == null) return 0;
-
-									DebugMode mode = context.getArgument("mode", DebugMode.class);
-									DebugOverlay visual = context.getArgument("overlay", DebugOverlay.class);
-
-									Uniforms.setDebugMode(mode, visual);
-
-									return Command.SINGLE_SUCCESS;
-								}))));
+						})));
 
 		command.then(Commands.literal("crumbling")
 				.then(Commands.argument("pos", BlockPosArgument.blockPos())

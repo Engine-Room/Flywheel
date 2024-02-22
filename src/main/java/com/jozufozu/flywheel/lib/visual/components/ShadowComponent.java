@@ -21,6 +21,7 @@ import com.jozufozu.flywheel.lib.visual.InstanceRecycler;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction.Axis;
@@ -266,6 +267,7 @@ public class ShadowComponent implements EntityComponent {
 			vertexList.u(i, 0);
 			vertexList.v(i, 0);
 			vertexList.light(i, LightTexture.FULL_BRIGHT);
+			vertexList.overlay(i, OverlayTexture.NO_OVERLAY);
 			vertexList.normalX(i, 0);
 			vertexList.normalY(i, 1);
 			vertexList.normalZ(i, 0);

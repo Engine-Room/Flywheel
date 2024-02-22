@@ -1,8 +1,9 @@
 package com.jozufozu.flywheel.config;
 
 public enum DebugMode {
-	NONE,
+	OFF,
 	NORMALS,
 	INSTANCE_ID,
 	LIGHT,
+	OVERLAY,
 }

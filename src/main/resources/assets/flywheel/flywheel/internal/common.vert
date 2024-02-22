@@ -49,5 +49,8 @@ void _flw_main(in FlwInstance instance, in uint stableInstanceID) {
     case 3u:
         _flw_debugColor = vec4(vec2((flw_vertexLight * 15.0 + 0.5) / 16.), 0., 1.);
         break;
+    case 4u:
+        _flw_debugColor = vec4(flw_vertexOverlay / 16., 0., 1.);
+        break;
     }
 }

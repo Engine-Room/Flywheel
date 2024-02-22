@@ -19,7 +19,8 @@ public final class InternalVertex {
 			.vector("position", FloatRepr.FLOAT, 3)
 			.vector("color", FloatRepr.NORMALIZED_UNSIGNED_BYTE, 4)
 			.vector("tex", FloatRepr.FLOAT, 2)
-			.vector("overlay_light", IntegerRepr.SHORT, 4)
+			.vector("overlay", IntegerRepr.SHORT, 2)
+			.vector("light", FloatRepr.UNSIGNED_SHORT, 2)
 			.vector("normal", FloatRepr.NORMALIZED_BYTE, 3)
 			.build();
 

@@ -16,7 +16,6 @@ import net.minecraft.world.phys.Vec3;
 public class FrameUniforms implements UniformProvider {
 	public static final int SIZE = 304;
 	public int debugMode;
-	public int debugOverlay;
 
     @Nullable
 	private RenderContext context;
@@ -75,7 +74,6 @@ public class FrameUniforms implements UniformProvider {
 		ptr = writeTime(ptr);
 
 		MemoryUtil.memPutInt(ptr, debugMode);
-		MemoryUtil.memPutInt(ptr + 4, debugOverlay);
 	}
 
 	private long writeMatrices(long ptr) {
