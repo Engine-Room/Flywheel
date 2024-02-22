@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.gl.shader;
 
+import static org.lwjgl.opengl.GL20.glBindAttribLocation;
 import static org.lwjgl.opengl.GL20.glDeleteProgram;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform1f;
@@ -168,6 +169,10 @@ public class GlProgram extends GlObject implements Shader {
 		}
 
 		glUniformBlockBinding(handle(), index, binding);
+	}
+
+	public void bindAttribLocation(String attribute, int binding) {
+		glBindAttribLocation(handle(), binding, attribute);
 	}
 
 	@Override

@@ -50,7 +50,14 @@ public class PipelineCompiler {
 						.withResource(key -> key.contextShader()
 								.fragmentShader())
 						.withResource(pipeline.fragmentMain()))
-				.then((key, program) -> {
+				.preLink((key, program) -> {
+					program.bindAttribLocation("_flw_a_pos", 0);
+					program.bindAttribLocation("_flw_a_color", 1);
+					program.bindAttribLocation("_flw_a_texCoord", 2);
+					program.bindAttribLocation("_flw_a_overlay_light", 3);
+					program.bindAttribLocation("_flw_a_normal", 4);
+				})
+				.postLink((key, program) -> {
 					program.setUniformBlockBinding("_FlwFrameUniforms", 0);
 					program.setUniformBlockBinding("_FlwFogUniforms", 1);
 
