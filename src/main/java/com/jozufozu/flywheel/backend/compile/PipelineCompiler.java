@@ -54,8 +54,9 @@ public class PipelineCompiler {
 					program.bindAttribLocation("_flw_a_pos", 0);
 					program.bindAttribLocation("_flw_a_color", 1);
 					program.bindAttribLocation("_flw_a_texCoord", 2);
-					program.bindAttribLocation("_flw_a_overlay_light", 3);
-					program.bindAttribLocation("_flw_a_normal", 4);
+					program.bindAttribLocation("_flw_a_overlay", 3);
+					program.bindAttribLocation("_flw_a_light", 4);
+					program.bindAttribLocation("_flw_a_normal", 5);
 				})
 				.postLink((key, program) -> {
 					program.setUniformBlockBinding("_FlwFrameUniforms", 0);

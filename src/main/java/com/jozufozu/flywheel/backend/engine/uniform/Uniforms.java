@@ -4,7 +4,6 @@ import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.config.DebugMode;
-import com.jozufozu.flywheel.config.DebugOverlay;
 
 public class Uniforms {
 	public static boolean frustumPaused = false;
@@ -55,9 +54,8 @@ public class Uniforms {
 		ubo.update();
 	}
 
-	public static void setDebugMode(DebugMode mode, DebugOverlay visual) {
+	public static void setDebugMode(DebugMode mode) {
 		frame().provider.debugMode = mode.ordinal();
-		frame().provider.debugOverlay = visual.ordinal();
 	}
 
 	public static void onReloadLevelRenderer(ReloadLevelRendererEvent event) {
