@@ -1,13 +1,13 @@
 package com.jozufozu.flywheel.api.model;
 
-import java.util.Map;
+import java.util.List;
 
 import org.joml.Vector4fc;
 
 import com.jozufozu.flywheel.api.material.Material;
 
 public interface Model {
-	Map<Material, Mesh> meshes();
+	List<ConfiguredMesh> meshes();
 
 	/**
 	 * Get a vec4 representing this model's bounding sphere in the format (x, y, z, radius).
@@ -17,9 +17,8 @@ public interface Model {
 	 */
 	Vector4fc boundingSphere();
 
-	// TODO: unused. remove?
-	@Deprecated
-	int vertexCount();
-
 	void delete();
+
+	record ConfiguredMesh(Material material, Mesh mesh) {
+	}
 }

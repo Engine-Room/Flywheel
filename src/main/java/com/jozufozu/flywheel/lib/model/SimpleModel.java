@@ -1,27 +1,23 @@
 package com.jozufozu.flywheel.lib.model;
 
-import java.util.Map;
+import java.util.List;
 
 import org.joml.Vector4fc;
 
-import com.google.common.collect.ImmutableMap;
-import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.model.Mesh;
+import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.model.Model;
 
 public class SimpleModel implements Model {
-	private final ImmutableMap<Material, Mesh> meshes;
+	private final ImmutableList<ConfiguredMesh> meshes;
 	private final Vector4fc boundingSphere;
-	private final int vertexCount;
 
-	public SimpleModel(ImmutableMap<Material, Mesh> meshes) {
+	public SimpleModel(ImmutableList<ConfiguredMesh> meshes) {
 		this.meshes = meshes;
-		this.boundingSphere = ModelUtil.computeBoundingSphere(meshes.values());
-		this.vertexCount = ModelUtil.computeTotalVertexCount(meshes.values());
+		this.boundingSphere = ModelUtil.computeBoundingSphere(meshes);
 	}
 
 	@Override
-	public Map<Material, Mesh> meshes() {
+	public List<ConfiguredMesh> meshes() {
 		return meshes;
 	}
 
@@ -31,13 +27,9 @@ public class SimpleModel implements Model {
 	}
 
 	@Override
-	public int vertexCount() {
-		return vertexCount;
-	}
-
-	@Override
 	public void delete() {
-		meshes.values()
-				.forEach(Mesh::delete);
-	}
+        for (ConfiguredMesh mesh : meshes) {
+            mesh.mesh().delete();
+        }
+    }
 }
