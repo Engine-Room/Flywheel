@@ -21,7 +21,6 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
@@ -182,9 +181,9 @@ public class IndirectCullingGroup<I extends Instance> {
         instancer.index = instancers.size();
 		instancers.add(instancer);
 
-		for (Map.Entry<Material, Mesh> entry : model.meshes().entrySet()) {
-			MeshPool.BufferedMesh bufferedMesh = meshPool.alloc(entry.getValue());
-			var draw = new IndirectDraw(instancer, entry.getKey(), bufferedMesh, stage);
+		for (var entry : model.meshes()) {
+			MeshPool.BufferedMesh bufferedMesh = meshPool.alloc(entry.mesh());
+			var draw = new IndirectDraw(instancer, entry.material(), bufferedMesh, stage);
 			indirectDraws.add(draw);
 			instancer.addDraw(draw);
 		}

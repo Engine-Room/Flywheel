@@ -118,12 +118,12 @@ public class MeshPool {
 			mesh.byteIndex = byteIndex;
 			mesh.baseVertex = baseVertex;
 
-			mesh.write(vertexPtr, vertexView);
+			vertexView.ptr(vertexPtr + mesh.byteIndex);
+			vertexView.vertexCount(mesh.vertexCount);
+			mesh.mesh.write(vertexView);
 
 			byteIndex += mesh.byteSize();
 			baseVertex += mesh.vertexCount();
-
-			mesh.firstIndex = indexPool.firstIndex(mesh.mesh.indexSequence());
 
 			mesh.boundTo.clear();
 		}
@@ -153,7 +153,6 @@ public class MeshPool {
 
 		private long byteIndex;
 		private int baseVertex;
-		private int firstIndex;
 
 		private int referenceCount = 0;
 		private final Set<GlVertexArray> boundTo = new ReferenceArraySet<>();
@@ -181,7 +180,7 @@ public class MeshPool {
 		}
 
 		public int firstIndex() {
-			return firstIndex;
+			return indexPool.firstIndex(mesh.indexSequence());
 		}
 
 		public boolean deleted() {
@@ -192,17 +191,11 @@ public class MeshPool {
 			return mesh.vertexCount() == 0 || deleted() || byteIndex == -1;
 		}
 
-		private void write(long ptr, VertexView vertexView) {
-			vertexView.ptr(ptr + byteIndex);
-			vertexView.vertexCount(vertexCount);
-			mesh.write(vertexView);
-		}
-
 		public void draw(int instanceCount) {
 			if (instanceCount > 1) {
-				GL32.glDrawElementsInstanced(GlPrimitive.TRIANGLES.glEnum, mesh.indexCount(), GL32.GL_UNSIGNED_INT, firstIndex, instanceCount);
+				GL32.glDrawElementsInstanced(GlPrimitive.TRIANGLES.glEnum, mesh.indexCount(), GL32.GL_UNSIGNED_INT, firstIndex(), instanceCount);
 			} else {
-				GL32.glDrawElements(GlPrimitive.TRIANGLES.glEnum, mesh.indexCount(), GL32.GL_UNSIGNED_INT, firstIndex);
+				GL32.glDrawElements(GlPrimitive.TRIANGLES.glEnum, mesh.indexCount(), GL32.GL_UNSIGNED_INT, firstIndex());
 			}
 		}
 

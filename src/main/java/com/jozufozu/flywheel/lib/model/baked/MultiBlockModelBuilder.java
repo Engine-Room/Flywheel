@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.model.Mesh;
+import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.vertex.VertexView;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.ModelUtil;
@@ -71,7 +71,7 @@ public class MultiBlockModelBuilder {
 			materialFunc = ModelUtil::getMaterial;
 		}
 
-		ImmutableMap.Builder<Material, Mesh> meshMapBuilder = ImmutableMap.builder();
+		var out = ImmutableList.<Model.ConfiguredMesh>builder();
 
 		if (shadeSeparated) {
 			ShadeSeparatedResultConsumer resultConsumer = (renderType, shaded, data) -> {
@@ -79,7 +79,8 @@ public class MultiBlockModelBuilder {
 				if (material != null) {
 					VertexView vertexView = new NoOverlayVertexView();
 					MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, vertexView);
-					meshMapBuilder.put(material, new SimpleMesh(vertexView, meshData, "source=MultiBlockModelBuilder," + "renderType=" + renderType + ",shaded=" + shaded));
+					var mesh = new SimpleMesh(vertexView, meshData, "source=MultiBlockModelBuilder," + "renderType=" + renderType + ",shaded=" + shaded);
+					out.add(new Model.ConfiguredMesh(material, mesh));
 				}
 			};
 			BakedModelBufferer.bufferMultiBlockShadeSeparated(blocks, ModelUtil.VANILLA_RENDERER, renderWorld, poseStack, modelDataMap, resultConsumer);
@@ -89,12 +90,13 @@ public class MultiBlockModelBuilder {
 				if (material != null) {
 					VertexView vertexView = new NoOverlayVertexView();
 					MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, vertexView);
-					meshMapBuilder.put(material, new SimpleMesh(vertexView, meshData, "source=MultiBlockModelBuilder," + "renderType=" + renderType));
+					var mesh = new SimpleMesh(vertexView, meshData, "source=MultiBlockModelBuilder," + "renderType=" + renderType);
+					out.add(new Model.ConfiguredMesh(material, mesh));
 				}
 			};
 			BakedModelBufferer.bufferMultiBlock(blocks, ModelUtil.VANILLA_RENDERER, renderWorld, poseStack, modelDataMap, resultConsumer);
 		}
 
-		return new TessellatedModel(meshMapBuilder.build(), shadeSeparated);
+		return new TessellatedModel(out.build(), shadeSeparated);
 	}
 }

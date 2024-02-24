@@ -78,10 +78,10 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 
 		var meshes = key.model()
 				.meshes();
-		for (var entry : meshes.entrySet()) {
-			var mesh = meshPool.alloc(entry.getValue());
+		for (var entry : meshes) {
+			var mesh = meshPool.alloc(entry.mesh());
 
-			ShaderState shaderState = new ShaderState(entry.getKey(), key.type(), key.context());
+			ShaderState shaderState = new ShaderState(entry.material(), key.type(), key.context());
 			DrawCall drawCall = new DrawCall(instancer, mesh, shaderState);
 
 			drawSet.put(shaderState, drawCall);

@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.lib.model;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Mesh;
+import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.api.vertex.VertexView;
 import com.jozufozu.flywheel.api.vertex.VertexViewProviderRegistry;
@@ -104,6 +106,10 @@ public final class ModelUtil {
 			vertexCount += mesh.vertexCount();
 		}
 		return vertexCount;
+	}
+
+	public static Vector4f computeBoundingSphere(Collection<Model.ConfiguredMesh> meshes) {
+		return computeBoundingSphere(meshes.stream().map(Model.ConfiguredMesh::mesh).toList());
 	}
 
 	public static Vector4f computeBoundingSphere(Iterable<Mesh> meshes) {

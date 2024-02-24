@@ -2,9 +2,9 @@ package com.jozufozu.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.model.Mesh;
+import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.vertex.VertexView;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.ModelUtil;
@@ -78,7 +78,7 @@ public class BakedModelBuilder {
 			materialFunc = ModelUtil::getMaterial;
 		}
 
-		ImmutableMap.Builder<Material, Mesh> meshMapBuilder = ImmutableMap.builder();
+		var out = ImmutableList.<Model.ConfiguredMesh>builder();
 
 		if (shadeSeparated) {
 			ShadeSeparatedResultConsumer resultConsumer = (renderType, shaded, data) -> {
@@ -86,7 +86,8 @@ public class BakedModelBuilder {
 				if (material != null) {
 					VertexView vertexView = new NoOverlayVertexView();
 					MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, vertexView);
-					meshMapBuilder.put(material, new SimpleMesh(vertexView, meshData, "source=BakedModelBuilder," + "bakedModel=" + bakedModel + ",renderType=" + renderType + ",shaded=" + shaded));
+					var mesh = new SimpleMesh(vertexView, meshData, "source=BakedModelBuilder," + "bakedModel=" + bakedModel + ",renderType=" + renderType + ",shaded=" + shaded);
+					out.add(new Model.ConfiguredMesh(material, mesh));
 				}
 			};
 			BakedModelBufferer.bufferSingleShadeSeparated(ModelUtil.VANILLA_RENDERER.getModelRenderer(), renderWorld, bakedModel, blockState, poseStack, modelData, resultConsumer);
@@ -96,12 +97,13 @@ public class BakedModelBuilder {
 				if (material != null) {
 					VertexView vertexView = new NoOverlayVertexView();
 					MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, vertexView);
-					meshMapBuilder.put(material, new SimpleMesh(vertexView, meshData, "source=BakedModelBuilder," + "bakedModel=" + bakedModel + ",renderType=" + renderType));
+					var mesh = new SimpleMesh(vertexView, meshData, "source=BakedModelBuilder," + "bakedModel=" + bakedModel + ",renderType=" + renderType);
+					out.add(new Model.ConfiguredMesh(material, mesh));
 				}
 			};
 			BakedModelBufferer.bufferSingle(ModelUtil.VANILLA_RENDERER.getModelRenderer(), renderWorld, bakedModel, blockState, poseStack, modelData, resultConsumer);
 		}
 
-		return new TessellatedModel(meshMapBuilder.build(), shadeSeparated);
+		return new TessellatedModel(out.build(), shadeSeparated);
 	}
 }
