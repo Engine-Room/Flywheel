@@ -36,7 +36,6 @@ import com.jozufozu.flywheel.impl.visualization.manager.VisualManagerImpl;
 import com.jozufozu.flywheel.impl.visualization.ratelimit.BandedPrimeLimiter;
 import com.jozufozu.flywheel.impl.visualization.ratelimit.DistanceUpdateLimiterImpl;
 import com.jozufozu.flywheel.impl.visualization.ratelimit.NonLimiter;
-import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.task.Flag;
 import com.jozufozu.flywheel.lib.task.IfElsePlan;
 import com.jozufozu.flywheel.lib.task.MapContextPlan;
@@ -85,9 +84,9 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				.createEngine(level);
 		taskExecutor = FlwTaskExecutor.get();
 
-		var blockEntitiesStorage = new BlockEntityStorage(new InstancerProviderImpl(engine, Contexts.DEFAULT, RenderStage.AFTER_BLOCK_ENTITIES));
-		var entitiesStorage = new EntityStorage(new InstancerProviderImpl(engine, Contexts.DEFAULT, RenderStage.AFTER_ENTITIES));
-		var effectsStorage = new EffectStorage(new InstancerProviderImpl(engine, Contexts.DEFAULT, RenderStage.AFTER_PARTICLES));
+		var blockEntitiesStorage = new BlockEntityStorage(new InstancerProviderImpl(engine, RenderStage.AFTER_BLOCK_ENTITIES));
+		var entitiesStorage = new EntityStorage(new InstancerProviderImpl(engine, RenderStage.AFTER_ENTITIES));
+		var effectsStorage = new EffectStorage(new InstancerProviderImpl(engine, RenderStage.AFTER_PARTICLES));
 
 		blockEntities = new VisualManagerImpl<>(blockEntitiesStorage);
 		entities = new VisualManagerImpl<>(entitiesStorage);

@@ -6,11 +6,11 @@ import java.util.List;
 import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.backend.context.Context;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 
 public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> {

@@ -6,8 +6,8 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.instance.InstanceType;
+import com.jozufozu.flywheel.backend.context.ContextShader;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;

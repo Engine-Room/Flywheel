@@ -2,10 +2,10 @@ package com.jozufozu.flywheel.backend.engine;
 
 import java.util.ArrayList;
 
-import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
+import com.jozufozu.flywheel.backend.context.Context;
 import com.jozufozu.flywheel.lib.util.AtomicBitset;
 
 public abstract class AbstractInstancer<I extends Instance> implements Instancer<I> {

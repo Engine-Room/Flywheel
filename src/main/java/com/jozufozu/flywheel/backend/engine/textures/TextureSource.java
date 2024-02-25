@@ -3,8 +3,7 @@ package com.jozufozu.flywheel.backend.engine.textures;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jozufozu.flywheel.api.context.Texture;
-import com.jozufozu.flywheel.api.context.TextureSource;
+import com.jozufozu.flywheel.backend.context.Texture;
 import com.jozufozu.flywheel.backend.mixin.LightTextureAccessor;
 import com.jozufozu.flywheel.backend.mixin.OverlayTextureAccessor;
 
@@ -12,13 +11,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 
-public class TextureSourceImpl implements TextureSource {
+public class TextureSource {
 
 	private final DirectTexture lightTexture;
 	private final DirectTexture overlayTexture;
 	private final Map<ResourceLocation, WrappedTexture> wrappers = new HashMap<>();
 
-	public TextureSourceImpl() {
+	public TextureSource() {
 		var gameRenderer = Minecraft.getInstance().gameRenderer;
 
 		this.lightTexture = new DirectTexture(((LightTextureAccessor) gameRenderer.lightTexture()).flywheel$texture()
@@ -28,19 +27,32 @@ public class TextureSourceImpl implements TextureSource {
 	}
 
 
-	@Override
+	/**
+	 * Get a built-in texture by its resource location.
+	 *
+	 * @param texture The texture's resource location.
+	 * @return The texture.
+	 */
 	public Texture byName(ResourceLocation texture) {
 		return wrappers.computeIfAbsent(texture, key -> new WrappedTexture(Minecraft.getInstance()
 				.getTextureManager()
 				.getTexture(key)));
 	}
 
-	@Override
+	/**
+	 * Get the overlay texture.
+	 *
+	 * @return The overlay texture.
+	 */
 	public Texture overlay() {
 		return overlayTexture;
 	}
 
-	@Override
+	/**
+	 * Get the light texture.
+	 *
+	 * @return The light texture.
+	 */
 	public Texture light() {
 		return lightTexture;
 	}

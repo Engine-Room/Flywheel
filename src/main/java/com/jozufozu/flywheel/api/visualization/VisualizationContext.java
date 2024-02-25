@@ -2,8 +2,8 @@ package com.jozufozu.flywheel.api.visualization;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstancerProvider;
+import com.jozufozu.flywheel.backend.context.Context;
 
 import net.minecraft.core.Vec3i;
 
@@ -32,5 +32,5 @@ public interface VisualizationContext {
 	 * @return A new {@link VisualizationContext} for use with child visuals.
 	 */
 	@ApiStatus.Experimental
-	VisualizationContext withContext(Context context, Vec3i renderOrigin);
+	VisualizationContext embed(EmbeddedLevel world);
 }

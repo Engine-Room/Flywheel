@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.impl.visualization;
 
-import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.InstancerProvider;
+import com.jozufozu.flywheel.api.visualization.EmbeddedLevel;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 
 import net.minecraft.core.Vec3i;
@@ -15,8 +15,7 @@ import net.minecraft.core.Vec3i;
  */
 public record VisualizationContextImpl(InstancerProviderImpl instancerProvider, Vec3i renderOrigin) implements VisualizationContext {
 	@Override
-	public VisualizationContext withContext(Context context, Vec3i renderOrigin) {
-		var provider = new InstancerProviderImpl(instancerProvider.engine(), context, instancerProvider.renderStage());
-		return new VisualizationContextImpl(provider, renderOrigin);
+	public VisualizationContext embed(EmbeddedLevel world) {
+		return new VisualizationContextImpl(instancerProvider.embed(world), renderOrigin);
 	}
 }

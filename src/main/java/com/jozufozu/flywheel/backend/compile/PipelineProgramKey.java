@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.backend.compile;
 
-import com.jozufozu.flywheel.api.context.ContextShader;
 import com.jozufozu.flywheel.api.instance.InstanceType;
+import com.jozufozu.flywheel.backend.context.ContextShader;
 
 /**
  * Represents the entire context of a program's usage.

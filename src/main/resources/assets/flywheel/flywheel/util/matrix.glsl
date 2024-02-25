@@ -41,3 +41,17 @@ mat3 modelToNormal(mat4 mat) {
     m[2] = mat[2].xyz;
     return m;
 }
+
+void transformBoundingSphere(in mat4 mat, inout vec3 center, inout float radius) {
+    center = (mat * vec4(center, 1.)).xyz;
+
+    vec3 c0 = mat[0].xyz;
+    vec3 c1 = mat[1].xyz;
+    vec3 c2 = mat[2].xyz;
+
+    // Comute the squared maximum to avoid 2 unnecessary sqrts.
+    // I don't think this makes it any faster but why not /shrug
+    float scaleSqr = max(dot(c0, c0), max(dot(c1, c1), dot(c2, c2)));
+    float scale = sqrt(scaleSqr);
+    radius *= scale;
+}

@@ -6,12 +6,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.jozufozu.flywheel.Flywheel;
-import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.backend.context.Context;
 
 public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 	/**
