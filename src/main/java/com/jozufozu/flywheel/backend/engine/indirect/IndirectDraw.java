@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.backend.engine.MeshPool;
 public class IndirectDraw {
 	private final IndirectInstancer<?> model;
 	private final Material material;
-	private final MeshPool.BufferedMesh mesh;
+	private final MeshPool.PooledMesh mesh;
 	private final RenderStage stage;
 
 	private final int materialVertexIndex;
@@ -20,7 +20,7 @@ public class IndirectDraw {
 	private final int packedMaterialProperties;
 	private boolean deleted;
 
-	public IndirectDraw(IndirectInstancer<?> model, Material material, MeshPool.BufferedMesh mesh, RenderStage stage) {
+	public IndirectDraw(IndirectInstancer<?> model, Material material, MeshPool.PooledMesh mesh, RenderStage stage) {
 		this.model = model;
 		this.material = material;
 		this.mesh = mesh;
@@ -42,7 +42,7 @@ public class IndirectDraw {
 		return material;
 	}
 
-	public MeshPool.BufferedMesh mesh() {
+	public MeshPool.PooledMesh mesh() {
 		return mesh;
 	}
 
@@ -85,7 +85,7 @@ public class IndirectDraw {
 			return;
 		}
 
-		mesh.drop();
+		mesh.release();
 
 		deleted = true;
 	}

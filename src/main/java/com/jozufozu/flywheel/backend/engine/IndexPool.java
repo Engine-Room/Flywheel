@@ -1,7 +1,6 @@
 package com.jozufozu.flywheel.backend.engine;
 
 import com.jozufozu.flywheel.api.model.IndexSequence;
-import com.jozufozu.flywheel.backend.gl.GlNumericType;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
@@ -60,7 +59,7 @@ public class IndexPool {
 			totalIndexCount += count;
 		}
 
-		final var indexBlock = MemoryBlock.malloc(totalIndexCount * GlNumericType.UINT.byteWidth());
+		final var indexBlock = MemoryBlock.malloc(totalIndexCount * Integer.BYTES);
 		final long indexPtr = indexBlock.ptr();
 
 		int firstIndex = 0;
@@ -70,7 +69,7 @@ public class IndexPool {
 
 			firstIndices.put(indexSequence, firstIndex);
 
-			indexSequence.fill(indexPtr + (long) firstIndex * GlNumericType.UINT.byteWidth(), indexCount);
+			indexSequence.fill(indexPtr + (long) firstIndex * Integer.BYTES, indexCount);
 
 			firstIndex += indexCount;
 		}

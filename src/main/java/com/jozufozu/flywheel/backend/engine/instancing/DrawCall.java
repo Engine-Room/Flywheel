@@ -1,30 +1,22 @@
 package com.jozufozu.flywheel.backend.engine.instancing;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
 import com.jozufozu.flywheel.backend.gl.TextureBuffer;
-import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 
 public class DrawCall {
 	public final ShaderState shaderState;
 	private final InstancedInstancer<?> instancer;
-	private final MeshPool.BufferedMesh mesh;
+	private final MeshPool.PooledMesh mesh;
 
-	private final GlVertexArray vao;
-	@Nullable
-	private GlVertexArray vaoScratch;
 	private boolean deleted;
 
-	public DrawCall(InstancedInstancer<?> instancer, MeshPool.BufferedMesh mesh, ShaderState shaderState) {
+	public DrawCall(InstancedInstancer<?> instancer, MeshPool.PooledMesh mesh, ShaderState shaderState) {
 		this.instancer = instancer;
 		this.mesh = mesh;
 		this.shaderState = shaderState;
 
 		mesh.acquire();
-
-		vao = GlVertexArray.create();
 	}
 
 	public boolean deleted() {
@@ -37,9 +29,6 @@ public class DrawCall {
 		}
 
 		instancer.bind(buffer);
-		mesh.setup(vao);
-
-		vao.bindForDraw();
 
 		mesh.draw(instancer.instanceCount());
 	}
@@ -54,21 +43,9 @@ public class DrawCall {
 			return;
 		}
 
-		var vao = lazyScratchVao();
-
 		instancer.bind(buffer);
-		mesh.setup(vao);
-
-		vao.bindForDraw();
 
 		mesh.draw(1);
-	}
-
-	private GlVertexArray lazyScratchVao() {
-		if (vaoScratch == null) {
-			vaoScratch = GlVertexArray.create();
-		}
-		return vaoScratch;
 	}
 
 	public void delete() {
@@ -76,14 +53,7 @@ public class DrawCall {
 			return;
 		}
 
-		vao.delete();
-
-		if (vaoScratch != null) {
-			vaoScratch.delete();
-			vaoScratch = null;
-		}
-
-		mesh.drop();
+		mesh.release();
 
 		deleted = true;
 	}
