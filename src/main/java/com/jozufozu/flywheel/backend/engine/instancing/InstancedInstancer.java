@@ -5,10 +5,10 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
+import com.jozufozu.flywheel.backend.context.Context;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 import com.jozufozu.flywheel.backend.gl.TextureBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;

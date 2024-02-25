@@ -16,22 +16,22 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
+import com.jozufozu.flywheel.backend.context.Context;
+import com.jozufozu.flywheel.backend.context.SimpleContextShader;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
 import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
-import com.jozufozu.flywheel.backend.engine.textures.TextureSourceImpl;
+import com.jozufozu.flywheel.backend.engine.textures.TextureSource;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.Driver;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.lib.context.SimpleContextShader;
 
 public class IndirectCullingGroup<I extends Instance> {
 	private static final Comparator<IndirectDraw> DRAW_COMPARATOR = Comparator.comparing(IndirectDraw::stage)
@@ -191,7 +191,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		needsDrawSort = true;
 	}
 
-	public void submit(RenderStage stage, TextureSourceImpl textures) {
+	public void submit(RenderStage stage, TextureSource textures) {
 		if (nothingToDo(stage)) {
 			return;
 		}

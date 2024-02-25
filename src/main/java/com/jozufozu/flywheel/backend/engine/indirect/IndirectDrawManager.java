@@ -12,11 +12,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.jozufozu.flywheel.api.backend.Engine;
-import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
+import com.jozufozu.flywheel.backend.context.Context;
+import com.jozufozu.flywheel.backend.context.ContextShaders;
 import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
@@ -24,14 +25,12 @@ import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
 import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
-import com.jozufozu.flywheel.backend.engine.textures.TextureSourceImpl;
+import com.jozufozu.flywheel.backend.engine.textures.TextureSource;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
-import com.jozufozu.flywheel.lib.context.ContextShaders;
-import com.jozufozu.flywheel.lib.context.Contexts;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.util.Pair;
@@ -45,7 +44,7 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 	private final StagingBuffer stagingBuffer;
 	private final MeshPool meshPool;
 	private final GlVertexArray vertexArray;
-	private final TextureSourceImpl textures = new TextureSourceImpl();
+	private final TextureSource textures = new TextureSource();
 	private final Map<GroupKey<?>, IndirectCullingGroup<?>> cullingGroups = new HashMap<>();
 	private final GlBuffer crumblingDrawBuffer = new GlBuffer();
 
@@ -169,6 +168,8 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 						.bindWithContextShader(ContextShaders.CRUMBLING);
 
 				for (var progressEntry : byProgress.int2ObjectEntrySet()) {
+					program.setTexture("crumblingTex", textures.byName(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey())));
+
 					for (var instanceHandlePair : progressEntry.getValue()) {
 						IndirectInstancer<?> instancer = instanceHandlePair.first();
 						int instanceIndex = instanceHandlePair.second().index;
@@ -177,9 +178,7 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 
 							// Transform the material to be suited for crumbling.
 							CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
-							var context = Contexts.CRUMBLING.get(progressEntry.getIntKey());
 
-							context.prepare(crumblingMaterial, program, textures);
 							MaterialRenderState.setup(crumblingMaterial);
 
 							// Upload the draw command.
@@ -188,10 +187,10 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 
 							// Submit! Everything is already bound by here.
 							glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0);
-
-							TextureBinder.resetTextureBindings();
 						}
 					}
+
+					TextureBinder.resetTextureBindings();
 				}
 			}
 

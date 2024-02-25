@@ -1,12 +1,10 @@
-package com.jozufozu.flywheel.lib.context;
+package com.jozufozu.flywheel.backend.context;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.context.Context;
-import com.jozufozu.flywheel.api.context.ContextShader;
-import com.jozufozu.flywheel.api.context.Shader;
-import com.jozufozu.flywheel.api.context.TextureSource;
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.backend.engine.textures.TextureSource;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 
 public class SimpleContext implements Context {
 	private final ContextShader contextShader;
@@ -27,13 +25,13 @@ public class SimpleContext implements Context {
 	}
 
 	@Override
-	public void prepare(Material material, Shader shader, TextureSource textureSource) {
+	public void prepare(Material material, GlProgram shader, TextureSource textureSource) {
 		preparation.prepare(material, shader, textureSource);
 	}
 
 	@FunctionalInterface
 	public interface Preparation {
-		void prepare(Material material, Shader shader, TextureSource textureSource);
+		void prepare(Material material, GlProgram shader, TextureSource textureSource);
 	}
 
 	public static class Builder {

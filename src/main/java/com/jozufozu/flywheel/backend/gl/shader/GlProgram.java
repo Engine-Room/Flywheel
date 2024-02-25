@@ -8,16 +8,17 @@ import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL20.glUniform2f;
 import static org.lwjgl.opengl.GL20.glUniform3f;
 import static org.lwjgl.opengl.GL20.glUniform4f;
+import static org.lwjgl.opengl.GL20.glUniformMatrix3fv;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL31.GL_INVALID_INDEX;
 import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
 import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
 
+import org.joml.Matrix3fc;
 import org.joml.Matrix4fc;
 import org.slf4j.Logger;
 
-import com.jozufozu.flywheel.api.context.Shader;
-import com.jozufozu.flywheel.api.context.Texture;
+import com.jozufozu.flywheel.backend.context.Texture;
 import com.jozufozu.flywheel.backend.engine.textures.IdentifiedTexture;
 import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
 import com.jozufozu.flywheel.backend.gl.GlObject;
@@ -27,7 +28,7 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
-public class GlProgram extends GlObject implements Shader {
+public class GlProgram extends GlObject {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
 	private final Object2IntMap<String> uniformLocationCache = new Object2IntOpenHashMap<>();
@@ -44,10 +45,7 @@ public class GlProgram extends GlObject implements Shader {
 		ProgramManager.glUseProgram(0);
 	}
 
-	@Override
 	public void setTexture(String glslName, Texture texture) {
-		throwIfReserved(glslName);
-
 		if (!(texture instanceof IdentifiedTexture identified)) {
 			return;
 		}
@@ -64,10 +62,7 @@ public class GlProgram extends GlObject implements Shader {
 		glUniform1i(uniform, binding);
 	}
 
-	@Override
 	public void setFloat(String glslName, float value) {
-		throwIfReserved(glslName);
-
 		int uniform = getUniformLocation(glslName);
 
 		if (uniform < 0) {
@@ -77,10 +72,7 @@ public class GlProgram extends GlObject implements Shader {
 		glUniform1f(uniform, value);
 	}
 
-	@Override
 	public void setVec2(String glslName, float x, float y) {
-		throwIfReserved(glslName);
-
 		int uniform = getUniformLocation(glslName);
 
 		if (uniform < 0) {
@@ -90,10 +82,7 @@ public class GlProgram extends GlObject implements Shader {
 		glUniform2f(uniform, x, y);
 	}
 
-	@Override
 	public void setVec3(String glslName, float x, float y, float z) {
-		throwIfReserved(glslName);
-
 		int uniform = getUniformLocation(glslName);
 
 		if (uniform < 0) {
@@ -103,10 +92,7 @@ public class GlProgram extends GlObject implements Shader {
 		glUniform3f(uniform, x, y, z);
 	}
 
-	@Override
 	public void setVec4(String glslName, float x, float y, float z, float w) {
-		throwIfReserved(glslName);
-
 		int uniform = getUniformLocation(glslName);
 
 		if (uniform < 0) {
@@ -116,10 +102,7 @@ public class GlProgram extends GlObject implements Shader {
 		glUniform4f(uniform, x, y, z, w);
 	}
 
-	@Override
 	public void setMat4(String glslName, Matrix4fc matrix) {
-		throwIfReserved(glslName);
-
 		int uniform = getUniformLocation(glslName);
 
 		if (uniform < 0) {
@@ -127,6 +110,16 @@ public class GlProgram extends GlObject implements Shader {
 		}
 
 		glUniformMatrix4fv(uniform, false, matrix.get(new float[16]));
+	}
+
+	public void setMat3(String glslName, Matrix3fc matrix) {
+		int uniform = getUniformLocation(glslName);
+
+		if (uniform < 0) {
+			return;
+		}
+
+		glUniformMatrix3fv(uniform, false, matrix.get(new float[9]));
 	}
 
 	/**
@@ -178,19 +171,5 @@ public class GlProgram extends GlObject implements Shader {
 	@Override
 	protected void deleteInternal(int handle) {
 		glDeleteProgram(handle);
-	}
-
-	public static void throwIfReserved(String glslName) {
-		if (glslName.startsWith("flw_")) {
-			throw new IllegalArgumentException("Uniform names starting with flw_are reserved");
-		}
-
-		if (glslName.startsWith("_flw_")) {
-			throw new IllegalArgumentException("Uniform names starting with _flw_ are reserved for internal use");
-		}
-
-		if (glslName.startsWith("gl_")) {
-			throw new IllegalArgumentException("Uniform names cannot start with gl_");
-		}
 	}
 }

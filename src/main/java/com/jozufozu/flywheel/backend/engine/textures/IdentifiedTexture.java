@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.engine.textures;
 
-import com.jozufozu.flywheel.api.context.Texture;
+import com.jozufozu.flywheel.backend.context.Texture;
 
 /**
  * Internal base interface that {@link com.jozufozu.flywheel.backend.gl.shader.GlProgram GlProgram} expects.

@@ -1,12 +1,14 @@
 package com.jozufozu.flywheel.backend.engine;
 
 import com.jozufozu.flywheel.api.backend.Engine;
-import com.jozufozu.flywheel.api.context.Context;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.api.visualization.EmbeddedLevel;
+import com.jozufozu.flywheel.backend.context.Contexts;
+import com.jozufozu.flywheel.backend.context.EmbeddedContext;
 
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
@@ -22,8 +24,13 @@ public abstract class AbstractEngine implements Engine {
 	}
 
 	@Override
-	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Context context, Model model, RenderStage stage) {
-		return getStorage().getInstancer(type, context, model, stage);
+	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, RenderStage stage) {
+		return getStorage().getInstancer(type, Contexts.DEFAULT, model, stage);
+	}
+
+	@Override
+	public <I extends Instance> Instancer<I> instancer(EmbeddedLevel world, InstanceType<I> type, Model model, RenderStage stage) {
+		return getStorage().getInstancer(type, new EmbeddedContext(world), model, stage);
 	}
 
 	@Override

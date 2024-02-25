@@ -1,6 +1,4 @@
-package com.jozufozu.flywheel.lib.context;
-
-import com.jozufozu.flywheel.api.context.ContextShader;
+package com.jozufozu.flywheel.backend.context;
 
 import net.minecraft.resources.ResourceLocation;
 

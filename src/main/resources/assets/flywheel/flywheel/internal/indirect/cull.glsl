@@ -2,6 +2,7 @@
 #include "flywheel:internal/indirect/model_descriptor.glsl"
 #include "flywheel:internal/indirect/object.glsl"
 #include "flywheel:internal/uniforms/frame.glsl"
+#include "flywheel:util/matrix.glsl"
 
 layout(local_size_x = _FLW_SUBGROUP_SIZE) in;
 
@@ -16,6 +17,9 @@ layout(std430, binding = _FLW_TARGET_BUFFER_BINDING) restrict writeonly buffer T
 layout(std430, binding = _FLW_MODEL_BUFFER_BINDING) restrict buffer ModelBuffer {
     ModelDescriptor models[];
 };
+
+uniform mat4 _flw_embeddedModel;
+uniform bool _flw_useEmbeddedModel = false;
 
 // Disgustingly vectorized sphere frustum intersection taking advantage of ahead of time packing.
 // Only uses 6 fmas and some boolean ops.
@@ -40,6 +44,10 @@ bool _flw_isVisible(uint objectIndex, uint modelIndex) {
     FlwInstance instance = _flw_unpackInstance(objects[objectIndex].instance);
 
     flw_transformBoundingSphere(instance, center, radius);
+
+    if (_flw_useEmbeddedModel) {
+        transformBoundingSphere(_flw_embeddedModel, center, radius);
+    }
 
     return _flw_testSphere(center, radius);
 }
