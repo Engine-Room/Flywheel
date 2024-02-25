@@ -98,7 +98,7 @@ public class LineModelBuilder {
 
 	public static class LineMesh implements Mesh {
 		public static final IndexSequence INDEX_SEQUENCE = (ptr, count) -> {
-			int numVertices = 4 * (count / 6);
+			int numVertices = 2 * count / 3;
 			int baseVertex = 0;
 			while (baseVertex < numVertices) {
 				// triangle a

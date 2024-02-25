@@ -182,8 +182,8 @@ public class IndirectCullingGroup<I extends Instance> {
 		instancers.add(instancer);
 
 		for (var entry : model.meshes()) {
-			MeshPool.BufferedMesh bufferedMesh = meshPool.alloc(entry.mesh());
-			var draw = new IndirectDraw(instancer, entry.material(), bufferedMesh, stage);
+			MeshPool.PooledMesh pooledMesh = meshPool.alloc(entry.mesh());
+			var draw = new IndirectDraw(instancer, entry.material(), pooledMesh, stage);
 			indirectDraws.add(draw);
 			instancer.addDraw(draw);
 		}
