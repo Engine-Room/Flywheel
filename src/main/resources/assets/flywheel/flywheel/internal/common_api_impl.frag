@@ -19,3 +19,7 @@ bool flw_fragDiffuse;
 vec4 flw_fragColor;
 ivec2 flw_fragOverlay;
 vec2 flw_fragLight;
+
+uniform sampler2D flw_diffuseTex;
+uniform sampler2D flw_overlayTex;
+uniform sampler2D flw_lightTex;

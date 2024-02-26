@@ -18,8 +18,8 @@ import org.joml.Matrix3fc;
 import org.joml.Matrix4fc;
 import org.slf4j.Logger;
 
-import com.jozufozu.flywheel.backend.engine.TextureBinder;
 import com.jozufozu.flywheel.backend.gl.GlObject;
+import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.logging.LogUtils;
 
@@ -41,18 +41,6 @@ public class GlProgram extends GlObject {
 
 	public static void unbind() {
 		ProgramManager.glUseProgram(0);
-	}
-
-	public void setTexture(String glslName, int texture) {
-		int uniform = getUniformLocation(glslName);
-
-		if (uniform < 0) {
-			return;
-		}
-
-		int binding = TextureBinder.bindTexture(texture);
-
-		glUniform1i(uniform, binding);
 	}
 
 	public void setFloat(String glslName, float value) {
@@ -148,6 +136,10 @@ public class GlProgram extends GlObject {
 	 * @param name    The name of the sampler uniform.
 	 * @param binding The index of the texture unit.
 	 */
+	public void setSamplerBinding(String name, GlTextureUnit binding) {
+		setSamplerBinding(name, binding.number);
+	}
+
 	public void setSamplerBinding(String name, int binding) {
 		int samplerUniform = getUniformLocation(name);
 

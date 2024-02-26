@@ -5,6 +5,7 @@ import java.util.List;
 import com.jozufozu.flywheel.backend.InternalVertex;
 import com.jozufozu.flywheel.backend.compile.core.CompilationHarness;
 import com.jozufozu.flywheel.backend.compile.core.Compile;
+import com.jozufozu.flywheel.backend.engine.Samplers;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
@@ -64,9 +65,14 @@ public class PipelineCompiler {
 
 					program.bind();
 
-					program.setSamplerBinding("_flw_diffuseTex", 0);
-					program.setSamplerBinding("_flw_overlayTex", 1);
-					program.setSamplerBinding("_flw_lightTex", 2);
+					program.setSamplerBinding("flw_diffuseTex", Samplers.DIFFUSE);
+					program.setSamplerBinding("flw_overlayTex", Samplers.OVERLAY);
+					program.setSamplerBinding("flw_lightTex", Samplers.LIGHT);
+					pipeline.onLink()
+							.accept(program);
+					key.contextShader()
+							.onLink()
+							.accept(program);
 
 					GlProgram.unbind();
 				})

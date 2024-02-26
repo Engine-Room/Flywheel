@@ -53,7 +53,7 @@ public class SamplerBufferComponent implements SourceComponent {
 
 	@Override
 	public ResourceLocation name() {
-		return Flywheel.rl("generated_indirect");
+		return Flywheel.rl("generated_instancing");
 	}
 
 	@Override

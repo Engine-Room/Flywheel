@@ -6,12 +6,27 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.internal.InternalFlywheelApi;
 import com.jozufozu.flywheel.api.registry.Registry;
 import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
+import com.jozufozu.flywheel.backend.engine.Samplers;
 
 public class ContextShaders {
 	public static final Registry<ContextShader> REGISTRY = InternalFlywheelApi.INSTANCE.createRegistry();
-	public static final ContextShader DEFAULT = REGISTRY.registerAndGet(new ContextShader(Flywheel.rl("internal/context/default.vert"), Flywheel.rl("internal/context/default.frag")));
-	public static final ContextShader CRUMBLING = REGISTRY.registerAndGet(new ContextShader(Flywheel.rl("internal/context/crumbling.vert"), Flywheel.rl("internal/context/crumbling.frag")));
-	public static final ContextShader EMBEDDED = REGISTRY.registerAndGet(new ContextShader(Flywheel.rl("internal/context/embedded.vert"), Flywheel.rl("internal/context/embedded.frag")));
+	public static final ContextShader DEFAULT = REGISTRY.registerAndGet(ContextShader.builder()
+			.vertexShader(Flywheel.rl("internal/context/default.vert"))
+			.fragmentShader(Flywheel.rl("internal/context/default.frag"))
+			.onLink($ -> {
+			})
+			.build());
+	public static final ContextShader CRUMBLING = REGISTRY.registerAndGet(ContextShader.builder()
+			.vertexShader(Flywheel.rl("internal/context/crumbling.vert"))
+			.fragmentShader(Flywheel.rl("internal/context/crumbling.frag"))
+			.onLink(program -> program.setSamplerBinding("_flw_crumblingTex", Samplers.CRUMBLING))
+			.build());
+	public static final ContextShader EMBEDDED = REGISTRY.registerAndGet(ContextShader.builder()
+			.vertexShader(Flywheel.rl("internal/context/embedded.vert"))
+			.fragmentShader(Flywheel.rl("internal/context/embedded.frag"))
+			.onLink($ -> {
+			})
+			.build());
 
 	public static ContextShader forEmbedding(@Nullable VisualEmbedding level) {
 		if (level == null) {
