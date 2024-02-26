@@ -11,21 +11,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
+import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
+import com.jozufozu.flywheel.backend.compile.ContextShaders;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
-import com.jozufozu.flywheel.backend.context.Context;
-import com.jozufozu.flywheel.backend.context.ContextShaders;
 import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
-import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
-import com.jozufozu.flywheel.backend.engine.textures.TextureSource;
+import com.jozufozu.flywheel.backend.engine.TextureBinder;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
@@ -44,7 +45,6 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 	private final StagingBuffer stagingBuffer;
 	private final MeshPool meshPool;
 	private final GlVertexArray vertexArray;
-	private final TextureSource textures = new TextureSource();
 	private final Map<GroupKey<?>, IndirectCullingGroup<?>> cullingGroups = new HashMap<>();
 	private final GlBuffer crumblingDrawBuffer = new GlBuffer();
 
@@ -61,13 +61,13 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 
 	@Override
 	protected <I extends Instance> IndirectInstancer<?> create(InstancerKey<I> key) {
-		return new IndirectInstancer<>(key.type(), key.context(), key.model());
+		return new IndirectInstancer<>(key.type(), key.embedding(), key.model());
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	protected <I extends Instance> void initialize(InstancerKey<I> key, IndirectInstancer<?> instancer) {
-		var groupKey = new GroupKey<>(key.type(), key.context());
+		var groupKey = new GroupKey<>(key.type(), key.embedding());
 		var group = (IndirectCullingGroup<I>) cullingGroups.computeIfAbsent(groupKey, t -> new IndirectCullingGroup<>(t.type, t.context, programs));
 		group.add((IndirectInstancer<I>) instancer, key.model(), key.stage(), meshPool);
 	}
@@ -88,7 +88,7 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 		Uniforms.bindForDraw();
 
 		for (var group : cullingGroups.values()) {
-			group.submit(stage, textures);
+			group.submit(stage);
 		}
 
 		MaterialRenderState.reset();
@@ -168,7 +168,7 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 						.bindWithContextShader(ContextShaders.CRUMBLING);
 
 				for (var progressEntry : byProgress.int2ObjectEntrySet()) {
-					program.setTexture("crumblingTex", textures.byName(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey())));
+					program.setTexture("crumblingTex", TextureBinder.byName(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey())));
 
 					for (var instanceHandlePair : progressEntry.getValue()) {
 						IndirectInstancer<?> instancer = instanceHandlePair.first();
@@ -221,7 +221,7 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 					continue;
 				}
 
-				byType.computeIfAbsent(new GroupKey<>(instancer.type, instancer.context), $ -> new Int2ObjectArrayMap<>())
+				byType.computeIfAbsent(new GroupKey<>(instancer.type, instancer.embedding), $ -> new Int2ObjectArrayMap<>())
 						.computeIfAbsent(progress, $ -> new ArrayList<>())
 						.add(Pair.of(instancer, impl));
 			}
@@ -229,6 +229,6 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 		return byType;
 	}
 
-	public record GroupKey<I extends Instance>(InstanceType<I> type, Context context) {
+	public record GroupKey<I extends Instance>(InstanceType<I> type, @Nullable VisualEmbedding context) {
 	}
 }

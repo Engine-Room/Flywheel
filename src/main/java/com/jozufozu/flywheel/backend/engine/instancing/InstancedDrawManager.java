@@ -19,8 +19,8 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.ShaderIndices;
+import com.jozufozu.flywheel.backend.compile.ContextShaders;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
-import com.jozufozu.flywheel.backend.context.ContextShaders;
 import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
@@ -28,8 +28,7 @@ import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialEncoder;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
-import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
-import com.jozufozu.flywheel.backend.engine.textures.TextureSource;
+import com.jozufozu.flywheel.backend.engine.TextureBinder;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
@@ -53,7 +52,6 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 	 */
 	private final MeshPool meshPool;
 	private final GlVertexArray vao;
-	private final TextureSource textures;
 	private final TextureBuffer instanceTexture;
 
 	public InstancedDrawManager(InstancingPrograms programs) {
@@ -62,7 +60,6 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 
 		meshPool = new MeshPool();
 		vao = GlVertexArray.create();
-		textures = new TextureSource();
 		instanceTexture = new TextureBuffer();
 
 		meshPool.bind(vao);
@@ -133,15 +130,14 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 				continue;
 			}
 
-			var context = shader.context();
+			var embedding = shader.embedding();
 			var material = shader.material();
 
-			var program = programs.get(shader.instanceType(), context.contextShader());
+			var program = programs.get(shader.instanceType(), ContextShaders.forEmbedding(embedding));
 			program.bind();
 
 			uploadMaterialUniform(program, material);
 
-			context.prepare(material, program, textures);
 			MaterialRenderState.setup(material);
 
 			GlTextureUnit.T3.makeActive();
@@ -160,7 +156,7 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 
 	@Override
 	protected <I extends Instance> InstancedInstancer<I> create(InstancerKey<I> key) {
-		return new InstancedInstancer<>(key.type(), key.context());
+		return new InstancedInstancer<>(key.type(), key.embedding());
 	}
 
 	@Override
@@ -174,7 +170,7 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 		for (var entry : meshes) {
 			var mesh = meshPool.alloc(entry.mesh());
 
-			ShaderState shaderState = new ShaderState(entry.material(), key.type(), key.context());
+			ShaderState shaderState = new ShaderState(entry.material(), key.type(), key.embedding());
 			DrawCall drawCall = new DrawCall(instancer, mesh, shaderState);
 
 			drawSet.put(shaderState, drawCall);
@@ -222,7 +218,7 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 						continue;
 					}
 
-					program.setTexture("crumblingTex", textures.byName(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey())));
+					program.setTexture("crumblingTex", TextureBinder.byName(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey())));
 
 					GlTextureUnit.T3.makeActive();
 					program.setSamplerBinding("_flw_instances", 3);

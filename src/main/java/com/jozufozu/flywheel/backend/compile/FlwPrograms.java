@@ -13,7 +13,6 @@ import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.component.UberShaderComponent;
 import com.jozufozu.flywheel.backend.compile.core.CompilerStats;
 import com.jozufozu.flywheel.backend.compile.core.SourceLoader;
-import com.jozufozu.flywheel.backend.context.ContextShader;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 import com.jozufozu.flywheel.backend.glsl.generate.FnSignature;
@@ -58,7 +57,7 @@ public final class FlwPrograms {
 
 	private static ImmutableList<PipelineProgramKey> createPipelineKeys() {
 		ImmutableList.Builder<PipelineProgramKey> builder = ImmutableList.builder();
-		for (ContextShader contextShader : ContextShader.REGISTRY) {
+		for (ContextShader contextShader : ContextShaders.REGISTRY) {
 			for (InstanceType<?> instanceType : InstanceType.REGISTRY) {
 				builder.add(new PipelineProgramKey(instanceType, contextShader));
 			}

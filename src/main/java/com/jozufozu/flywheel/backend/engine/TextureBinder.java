@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.engine.textures;
+package com.jozufozu.flywheel.backend.engine;
 
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 
@@ -8,6 +8,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 
 public class TextureBinder {
 	// TODO: some kind of cache eviction when the program changes
@@ -68,5 +69,18 @@ public class TextureBinder {
 				.teardownOverlayColor();
 		gameRenderer.lightTexture()
 				.turnOffLightLayer();
+	}
+
+	/**
+	 * Get a built-in texture by its resource location.
+	 *
+	 * @param texture The texture's resource location.
+	 * @return The texture.
+	 */
+	public static int byName(ResourceLocation texture) {
+		return Minecraft.getInstance()
+				.getTextureManager()
+				.getTexture(texture)
+				.getId();
 	}
 }

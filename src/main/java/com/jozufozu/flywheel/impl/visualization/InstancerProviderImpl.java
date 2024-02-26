@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.instance.InstancerProvider;
 import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.api.visualization.EmbeddedLevel;
+import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 
 public class InstancerProviderImpl implements InstancerProvider, Supplier<VisualizationContext> {
@@ -31,7 +31,7 @@ public class InstancerProviderImpl implements InstancerProvider, Supplier<Visual
 		return new VisualizationContextImpl(this, engine.renderOrigin());
 	}
 
-	public Embedded embed(EmbeddedLevel world) {
+	public Embedded embed(VisualEmbedding world) {
 		return new Embedded(engine, world, renderStage);
 	}
 
@@ -41,9 +41,9 @@ public class InstancerProviderImpl implements InstancerProvider, Supplier<Visual
 	}
 
 	public static final class Embedded extends InstancerProviderImpl {
-		private final EmbeddedLevel world;
+		private final VisualEmbedding world;
 
-		public Embedded(Engine engine, EmbeddedLevel world, RenderStage renderStage) {
+		public Embedded(Engine engine, VisualEmbedding world, RenderStage renderStage) {
 			super(engine, renderStage);
 			this.world = world;
 		}
@@ -53,7 +53,7 @@ public class InstancerProviderImpl implements InstancerProvider, Supplier<Visual
 			return engine.instancer(world, type, model, renderStage);
 		}
 
-		public EmbeddedLevel world() {
+		public VisualEmbedding world() {
 			return world;
 		}
 
