@@ -11,7 +11,6 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.compile.component.IndirectComponent;
 import com.jozufozu.flywheel.backend.compile.core.CompilationHarness;
 import com.jozufozu.flywheel.backend.compile.core.Compile;
-import com.jozufozu.flywheel.backend.context.ContextShader;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;

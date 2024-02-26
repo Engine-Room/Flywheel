@@ -2,15 +2,18 @@ package com.jozufozu.flywheel.backend.engine;
 
 import java.util.ArrayList;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
-import com.jozufozu.flywheel.backend.context.Context;
+import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
 import com.jozufozu.flywheel.lib.util.AtomicBitset;
 
 public abstract class AbstractInstancer<I extends Instance> implements Instancer<I> {
 	public final InstanceType<I> type;
-	public final Context context;
+	@Nullable
+	public final VisualEmbedding embedding;
 
 	// Lock for all instances, only needs to be used in methods that may run on the TaskExecutor.
 	protected final Object lock = new Object();
@@ -20,9 +23,9 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	protected final AtomicBitset changed = new AtomicBitset();
 	protected final AtomicBitset deleted = new AtomicBitset();
 
-	protected AbstractInstancer(InstanceType<I> type, Context context) {
+	protected AbstractInstancer(InstanceType<I> type, @Nullable VisualEmbedding embedding) {
 		this.type = type;
-		this.context = context;
+		this.embedding = embedding;
 	}
 
 	@Override
@@ -38,7 +41,7 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	}
 
 	@Override
-	public void stealInstance(I instance) {
+	public void stealInstance(@Nullable I instance) {
 		if (instance == null) {
 			return;
 		}

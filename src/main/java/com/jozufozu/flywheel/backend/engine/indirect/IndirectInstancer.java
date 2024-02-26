@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.backend.engine.indirect;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryUtil;
 
@@ -10,7 +11,7 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
 import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.backend.context.Context;
+import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 
 public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> {
@@ -25,7 +26,7 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	private int lastModelIndex = -1;
 	private long lastStartPos = -1;
 
-	public IndirectInstancer(InstanceType<I> type, Context context, Model model) {
+	public IndirectInstancer(InstanceType<I> type, @Nullable VisualEmbedding context, Model model) {
 		super(type, context);
 		this.objectStride = type.layout()
 				.byteSize() + IndirectBuffers.INT_SIZE;

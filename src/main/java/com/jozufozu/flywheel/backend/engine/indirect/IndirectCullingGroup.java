@@ -16,18 +16,20 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
+import com.jozufozu.flywheel.backend.compile.ContextShader;
+import com.jozufozu.flywheel.backend.compile.ContextShaders;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
-import com.jozufozu.flywheel.backend.context.Context;
-import com.jozufozu.flywheel.backend.context.SimpleContextShader;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
-import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
-import com.jozufozu.flywheel.backend.engine.textures.TextureSource;
+import com.jozufozu.flywheel.backend.engine.TextureBinder;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.Driver;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
@@ -40,7 +42,8 @@ public class IndirectCullingGroup<I extends Instance> {
 	private static final int DRAW_BARRIER_BITS = GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT;
 
 	private final InstanceType<I> instanceType;
-	private final Context context;
+	@Nullable
+	private final VisualEmbedding embedding;
 	private final long objectStride;
 	private final IndirectBuffers buffers;
 	private final List<IndirectInstancer<?>> instancers = new ArrayList<>();
@@ -56,18 +59,17 @@ public class IndirectCullingGroup<I extends Instance> {
 	private boolean needsDrawSort;
 	private int instanceCountThisFrame;
 
-	IndirectCullingGroup(InstanceType<I> instanceType, Context context, IndirectPrograms programs) {
+	IndirectCullingGroup(InstanceType<I> instanceType, @Nullable VisualEmbedding embedding, IndirectPrograms programs) {
 		this.instanceType = instanceType;
-		this.context = context;
+		this.embedding = embedding;
 		objectStride = instanceType.layout()
 				.byteSize() + IndirectBuffers.INT_SIZE;
 		buffers = new IndirectBuffers(objectStride);
 
 		this.programs = programs;
-		// TODO: Culling programs need to be context aware.
 		cullProgram = programs.getCullingProgram(instanceType);
 		applyProgram = programs.getApplyProgram();
-		drawProgram = programs.getIndirectProgram(instanceType, context.contextShader());
+		drawProgram = programs.getIndirectProgram(instanceType, ContextShaders.forEmbedding(embedding));
 	}
 
 	public void flushInstancers() {
@@ -128,6 +130,14 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		Uniforms.bindFrame();
 		cullProgram.bind();
+
+		if (embedding != null) {
+			cullProgram.setBool("_flw_useEmbeddedModel", true);
+			cullProgram.setMat4("_flw_embeddedModel", embedding.pose());
+		} else {
+			cullProgram.setBool("_flw_useEmbeddedModel", false);
+		}
+
 		buffers.bindForCompute();
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		glDispatchCompute(GlCompat.getComputeGroupCount(instanceCountThisFrame), 1, 1);
@@ -191,13 +201,20 @@ public class IndirectCullingGroup<I extends Instance> {
 		needsDrawSort = true;
 	}
 
-	public void submit(RenderStage stage, TextureSource textures) {
+	public void submit(RenderStage stage) {
 		if (nothingToDo(stage)) {
 			return;
 		}
 
 		drawProgram.bind();
 		buffers.bindForDraw();
+
+		if (embedding != null) {
+			drawProgram.setVec3("_flw_oneOverLightBoxSize", 1, 1, 1);
+			drawProgram.setVec3("_flw_lightVolumeMin", 0, 0, 0);
+			drawProgram.setMat4("_flw_model", embedding.pose());
+			drawProgram.setMat3("_flw_normal", embedding.normal());
+		}
 
 		drawBarrier();
 
@@ -206,7 +223,6 @@ public class IndirectCullingGroup<I extends Instance> {
 		for (var multiDraw : multiDraws.get(stage)) {
 			glUniform1ui(flwBaseDraw, multiDraw.start);
 
-			context.prepare(multiDraw.material, drawProgram, textures);
 			MaterialRenderState.setup(multiDraw.material);
 
 			multiDraw.submit();
@@ -214,7 +230,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 	}
 
-	public GlProgram bindWithContextShader(SimpleContextShader override) {
+	public GlProgram bindWithContextShader(ContextShader override) {
 		var program = programs.getIndirectProgram(instanceType, override);
 
 		program.bind();

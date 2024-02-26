@@ -11,7 +11,6 @@ import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.backend.Backends;
 import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.FlwPrograms;
-import com.jozufozu.flywheel.backend.context.ContextShaders;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.config.BackendArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
@@ -128,7 +127,6 @@ public class Flywheel {
 		CutoutShaders.init();
 		FogShaders.init();
 		StandardMaterialShaders.init();
-		ContextShaders.init();
 
 		ShaderIndices.init();
 

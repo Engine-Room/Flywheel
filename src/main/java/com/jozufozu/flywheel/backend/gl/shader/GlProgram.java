@@ -18,9 +18,7 @@ import org.joml.Matrix3fc;
 import org.joml.Matrix4fc;
 import org.slf4j.Logger;
 
-import com.jozufozu.flywheel.backend.context.Texture;
-import com.jozufozu.flywheel.backend.engine.textures.IdentifiedTexture;
-import com.jozufozu.flywheel.backend.engine.textures.TextureBinder;
+import com.jozufozu.flywheel.backend.engine.TextureBinder;
 import com.jozufozu.flywheel.backend.gl.GlObject;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.logging.LogUtils;
@@ -45,19 +43,14 @@ public class GlProgram extends GlObject {
 		ProgramManager.glUseProgram(0);
 	}
 
-	public void setTexture(String glslName, Texture texture) {
-		if (!(texture instanceof IdentifiedTexture identified)) {
-			return;
-		}
+	public void setTexture(String glslName, int texture) {
 		int uniform = getUniformLocation(glslName);
 
 		if (uniform < 0) {
 			return;
 		}
 
-		int id = identified.id();
-
-		int binding = TextureBinder.bindTexture(id);
+		int binding = TextureBinder.bindTexture(texture);
 
 		glUniform1i(uniform, binding);
 	}
@@ -120,6 +113,16 @@ public class GlProgram extends GlObject {
 		}
 
 		glUniformMatrix3fv(uniform, false, matrix.get(new float[9]));
+	}
+
+	public void setBool(String glslName, boolean bool) {
+		int uniform = getUniformLocation(glslName);
+
+		if (uniform < 0) {
+			return;
+		}
+
+		glUniform1i(uniform, bool ? 1 : 0);
 	}
 
 	/**

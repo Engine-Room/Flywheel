@@ -12,7 +12,7 @@ import com.jozufozu.flywheel.api.instance.InstancerProvider;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.api.visualization.EmbeddedLevel;
+import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
 
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
@@ -34,7 +34,7 @@ public interface Engine {
 	 */
 	<I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, RenderStage stage);
 
-	<I extends Instance> Instancer<I> instancer(EmbeddedLevel world, InstanceType<I> type, Model model, RenderStage stage);
+	<I extends Instance> Instancer<I> instancer(VisualEmbedding world, InstanceType<I> type, Model model, RenderStage stage);
 
 	/**
 	 * Create a plan that will be executed every frame.
