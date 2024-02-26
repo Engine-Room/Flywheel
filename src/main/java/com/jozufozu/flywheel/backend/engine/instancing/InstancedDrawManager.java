@@ -28,10 +28,10 @@ import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialEncoder;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
+import com.jozufozu.flywheel.backend.engine.Samplers;
 import com.jozufozu.flywheel.backend.engine.TextureBinder;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
-import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.jozufozu.flywheel.backend.gl.TextureBuffer;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
@@ -140,14 +140,11 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 
 			MaterialRenderState.setup(material);
 
-			GlTextureUnit.T3.makeActive();
-
-			program.setSamplerBinding("_flw_instances", 3);
+			Samplers.INSTANCE_BUFFER.makeActive();
 
 			for (var drawCall : drawCalls) {
 				drawCall.render(instanceTexture);
 			}
-			TextureBinder.resetTextureBindings();
 		}
 
 		MaterialRenderState.reset();
@@ -218,16 +215,14 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 						continue;
 					}
 
-					program.setTexture("crumblingTex", TextureBinder.byName(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey())));
+					Samplers.CRUMBLING.makeActive();
+					TextureBinder.bind(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
 
-					GlTextureUnit.T3.makeActive();
-					program.setSamplerBinding("_flw_instances", 3);
+					Samplers.INSTANCE_BUFFER.makeActive();
 
 					for (Consumer<TextureBuffer> drawCall : drawCalls) {
 						drawCall.accept(instanceTexture);
 					}
-
-					TextureBinder.resetTextureBindings();
 				}
 			}
 

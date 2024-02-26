@@ -27,3 +27,7 @@ bool flw_discardPredicate(vec4 finalColor);
 // To be implemented by the context shader.
 void flw_beginFragment();
 void flw_endFragment();
+
+sampler2D flw_diffuseTex;
+sampler2D flw_overlayTex;
+sampler2D flw_lightTex;

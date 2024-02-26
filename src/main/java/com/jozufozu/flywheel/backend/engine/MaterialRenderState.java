@@ -8,7 +8,6 @@ import com.jozufozu.flywheel.api.material.DepthTest;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.material.Transparency;
 import com.jozufozu.flywheel.api.material.WriteMask;
-import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -38,7 +37,7 @@ public final class MaterialRenderState {
 	}
 
 	private static void setupTexture(Material material) {
-		GlTextureUnit.T0.makeActive();
+		Samplers.DIFFUSE.makeActive();
 		AbstractTexture texture = Minecraft.getInstance()
 				.getTextureManager()
 				.getTexture(material.texture());
@@ -150,7 +149,7 @@ public final class MaterialRenderState {
 	}
 
 	private static void resetTexture() {
-		GlTextureUnit.T0.makeActive();
+		Samplers.DIFFUSE.makeActive();
 		RenderSystem.setShaderTexture(0, 0);
 	}
 

@@ -26,6 +26,7 @@ import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
+import com.jozufozu.flywheel.backend.engine.Samplers;
 import com.jozufozu.flywheel.backend.engine.TextureBinder;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
@@ -167,8 +168,11 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 				var program = cullingGroups.get(instanceTypeEntry.getKey())
 						.bindWithContextShader(ContextShaders.CRUMBLING);
 
+				program.setSamplerBinding("crumblingTex", Samplers.CRUMBLING);
+
 				for (var progressEntry : byProgress.int2ObjectEntrySet()) {
-					program.setTexture("crumblingTex", TextureBinder.byName(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey())));
+					Samplers.CRUMBLING.makeActive();
+					TextureBinder.bind(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
 
 					for (var instanceHandlePair : progressEntry.getValue()) {
 						IndirectInstancer<?> instancer = instanceHandlePair.first();
@@ -190,7 +194,6 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 						}
 					}
 
-					TextureBinder.resetTextureBindings();
 				}
 			}
 

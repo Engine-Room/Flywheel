@@ -29,7 +29,6 @@ import com.jozufozu.flywheel.backend.compile.ContextShaders;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
-import com.jozufozu.flywheel.backend.engine.TextureBinder;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.Driver;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
@@ -226,7 +225,6 @@ public class IndirectCullingGroup<I extends Instance> {
 			MaterialRenderState.setup(multiDraw.material);
 
 			multiDraw.submit();
-			TextureBinder.resetTextureBindings();
 		}
 	}
 

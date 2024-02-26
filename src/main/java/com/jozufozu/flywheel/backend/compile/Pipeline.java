@@ -1,8 +1,12 @@
 package com.jozufozu.flywheel.backend.compile;
 
 import java.util.Objects;
+import java.util.function.Consumer;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.instance.InstanceType;
+import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.glsl.GlslVersion;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 
@@ -10,7 +14,8 @@ import net.minecraft.resources.ResourceLocation;
 
 public record Pipeline(GlslVersion glslVersion, ResourceLocation vertexMain, ResourceLocation fragmentMain,
 					   ResourceLocation vertexApiImpl, ResourceLocation fragmentApiImpl, InstanceAssembler assembler,
-					   String compilerMarker) {
+					   String compilerMarker, Consumer<GlProgram> onLink) {
+
 	@FunctionalInterface
 	public interface InstanceAssembler {
 		/**
@@ -29,13 +34,22 @@ public record Pipeline(GlslVersion glslVersion, ResourceLocation vertexMain, Res
 	}
 
 	public static class Builder {
+		@Nullable
 		private GlslVersion glslVersion;
+		@Nullable
 		private ResourceLocation vertexMain;
+		@Nullable
 		private ResourceLocation fragmentMain;
+		@Nullable
 		private ResourceLocation vertexApiImpl;
+		@Nullable
 		private ResourceLocation fragmentApiImpl;
+		@Nullable
 		private InstanceAssembler assembler;
+		@Nullable
 		private String compilerMarker;
+		@Nullable
+		private Consumer<GlProgram> onLink;
 
 		public Builder glslVersion(GlslVersion glslVersion) {
 			this.glslVersion = glslVersion;
@@ -72,6 +86,11 @@ public record Pipeline(GlslVersion glslVersion, ResourceLocation vertexMain, Res
 			return this;
 		}
 
+		public Builder onLink(Consumer<GlProgram> onLink) {
+			this.onLink = onLink;
+			return this;
+		}
+
 		public Pipeline build() {
 			Objects.requireNonNull(glslVersion);
 			Objects.requireNonNull(vertexMain);
@@ -80,7 +99,8 @@ public record Pipeline(GlslVersion glslVersion, ResourceLocation vertexMain, Res
 			Objects.requireNonNull(fragmentApiImpl);
 			Objects.requireNonNull(assembler);
 			Objects.requireNonNull(compilerMarker);
-			return new Pipeline(glslVersion, vertexMain, fragmentMain, vertexApiImpl, fragmentApiImpl, assembler, compilerMarker);
+			Objects.requireNonNull(onLink);
+			return new Pipeline(glslVersion, vertexMain, fragmentMain, vertexApiImpl, fragmentApiImpl, assembler, compilerMarker, onLink);
 		}
 	}
 }
