@@ -5,15 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
 
 public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 	/**
@@ -30,8 +27,8 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 	protected final List<UninitializedInstancer<N, ?>> initializationQueue = new ArrayList<>();
 
 	@SuppressWarnings("unchecked")
-	public <I extends Instance> Instancer<I> getInstancer(@Nullable VisualEmbedding level, InstanceType<I> type, Model model, RenderStage stage) {
-		return (Instancer<I>) instancers.computeIfAbsent(new InstancerKey<>(level, type, model, stage), this::createAndDeferInit);
+	public <I extends Instance> Instancer<I> getInstancer(Environment environment, InstanceType<I> type, Model model, RenderStage stage) {
+		return (Instancer<I>) instancers.computeIfAbsent(new InstancerKey<>(environment, type, model, stage), this::createAndDeferInit);
 	}
 
 	public void delete() {

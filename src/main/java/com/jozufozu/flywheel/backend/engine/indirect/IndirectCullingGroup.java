@@ -16,17 +16,14 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
 import com.jozufozu.flywheel.backend.compile.ContextShader;
-import com.jozufozu.flywheel.backend.compile.ContextShaders;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
+import com.jozufozu.flywheel.backend.engine.Environment;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
@@ -41,8 +38,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	private static final int DRAW_BARRIER_BITS = GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT;
 
 	private final InstanceType<I> instanceType;
-	@Nullable
-	private final VisualEmbedding embedding;
+	private final Environment environment;
 	private final long objectStride;
 	private final IndirectBuffers buffers;
 	private final List<IndirectInstancer<?>> instancers = new ArrayList<>();
@@ -58,9 +54,9 @@ public class IndirectCullingGroup<I extends Instance> {
 	private boolean needsDrawSort;
 	private int instanceCountThisFrame;
 
-	IndirectCullingGroup(InstanceType<I> instanceType, @Nullable VisualEmbedding embedding, IndirectPrograms programs) {
+	IndirectCullingGroup(InstanceType<I> instanceType, Environment environment, IndirectPrograms programs) {
 		this.instanceType = instanceType;
-		this.embedding = embedding;
+		this.environment = environment;
 		objectStride = instanceType.layout()
 				.byteSize() + IndirectBuffers.INT_SIZE;
 		buffers = new IndirectBuffers(objectStride);
@@ -68,7 +64,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		this.programs = programs;
 		cullProgram = programs.getCullingProgram(instanceType);
 		applyProgram = programs.getApplyProgram();
-		drawProgram = programs.getIndirectProgram(instanceType, ContextShaders.forEmbedding(embedding));
+		drawProgram = programs.getIndirectProgram(instanceType, environment.contextShader());
 	}
 
 	public void flushInstancers() {
@@ -130,12 +126,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		Uniforms.bindFrame();
 		cullProgram.bind();
 
-		if (embedding != null) {
-			cullProgram.setBool("_flw_useEmbeddedModel", true);
-			cullProgram.setMat4("_flw_embeddedModel", embedding.pose());
-		} else {
-			cullProgram.setBool("_flw_useEmbeddedModel", false);
-		}
+		environment.setupCull(cullProgram);
 
 		buffers.bindForCompute();
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -208,12 +199,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		drawProgram.bind();
 		buffers.bindForDraw();
 
-		if (embedding != null) {
-			drawProgram.setVec3("_flw_oneOverLightBoxSize", 1, 1, 1);
-			drawProgram.setVec3("_flw_lightVolumeMin", 0, 0, 0);
-			drawProgram.setMat4("_flw_model", embedding.pose());
-			drawProgram.setMat3("_flw_normal", embedding.normal());
-		}
+		environment.setupDraw(drawProgram);
 
 		drawBarrier();
 

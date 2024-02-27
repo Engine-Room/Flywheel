@@ -5,8 +5,10 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
+import com.jozufozu.flywheel.api.instance.InstancerProvider;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
+import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
@@ -21,14 +23,13 @@ public abstract class AbstractEngine implements Engine {
 		sqrMaxOriginDistance = maxOriginDistance * maxOriginDistance;
 	}
 
-	@Override
-	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, RenderStage stage) {
-		return getStorage().getInstancer(null, type, model, stage);
+	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, RenderStage stage) {
+		return getStorage().getInstancer(environment, type, model, stage);
 	}
 
 	@Override
-	public <I extends Instance> Instancer<I> instancer(VisualEmbedding world, InstanceType<I> type, Model model, RenderStage stage) {
-		return getStorage().getInstancer(world, type, model, stage);
+	public VisualizationContext createVisualizationContext(RenderStage stage) {
+		return new VisualizationContextImpl(stage);
 	}
 
 	@Override
@@ -54,4 +55,29 @@ public abstract class AbstractEngine implements Engine {
 	}
 
 	protected abstract InstancerStorage<? extends AbstractInstancer<?>> getStorage();
+
+	private class VisualizationContextImpl implements VisualizationContext {
+		private final InstancerProviderImpl instancerProvider;
+		private final RenderStage stage;
+
+		public VisualizationContextImpl(RenderStage stage) {
+			instancerProvider = new InstancerProviderImpl(AbstractEngine.this, stage);
+			this.stage = stage;
+		}
+
+		@Override
+		public InstancerProvider instancerProvider() {
+			return instancerProvider;
+		}
+
+		@Override
+		public Vec3i renderOrigin() {
+			return AbstractEngine.this.renderOrigin();
+		}
+
+		@Override
+		public VisualEmbedding createEmbedding() {
+			return new EmbeddedEnvironment(AbstractEngine.this, stage);
+		}
+	}
 }

@@ -130,11 +130,13 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 				continue;
 			}
 
-			var embedding = shader.embedding();
+			var environment = shader.environment();
 			var material = shader.material();
 
-			var program = programs.get(shader.instanceType(), ContextShaders.forEmbedding(embedding));
+			var program = programs.get(shader.instanceType(), environment.contextShader());
 			program.bind();
+
+			environment.setupDraw(program);
 
 			uploadMaterialUniform(program, material);
 
@@ -153,7 +155,7 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 
 	@Override
 	protected <I extends Instance> InstancedInstancer<I> create(InstancerKey<I> key) {
-		return new InstancedInstancer<>(key.type(), key.embedding());
+		return new InstancedInstancer<>(key.type(), key.environment());
 	}
 
 	@Override
@@ -167,7 +169,7 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 		for (var entry : meshes) {
 			var mesh = meshPool.alloc(entry.mesh());
 
-			ShaderState shaderState = new ShaderState(entry.material(), key.type(), key.embedding());
+			ShaderState shaderState = new ShaderState(entry.material(), key.type(), key.environment());
 			DrawCall drawCall = new DrawCall(instancer, mesh, shaderState);
 
 			drawSet.put(shaderState, drawCall);
