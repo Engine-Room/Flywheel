@@ -8,8 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
-import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
+import com.jozufozu.flywheel.backend.engine.Environment;
 import com.jozufozu.flywheel.backend.gl.TextureBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;
@@ -25,8 +25,8 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 
 	private final List<DrawCall> drawCalls = new ArrayList<>();
 
-	public InstancedInstancer(InstanceType<I> type, @Nullable VisualEmbedding context) {
-		super(type, context);
+	public InstancedInstancer(InstanceType<I> type, Environment environment) {
+		super(type, environment);
 		var layout = type.layout();
 		// Align to one texel in the texture buffer
 		instanceStride = MoreMath.align16(layout.byteSize());

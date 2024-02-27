@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.impl.visualization;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +23,7 @@ import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualManager;
+import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationLevel;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.config.FlwConfig;
@@ -84,9 +86,9 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				.createEngine(level);
 		taskExecutor = FlwTaskExecutor.get();
 
-		var blockEntitiesStorage = new BlockEntityStorage(new InstancerProviderImpl(engine, RenderStage.AFTER_BLOCK_ENTITIES));
-		var entitiesStorage = new EntityStorage(new InstancerProviderImpl(engine, RenderStage.AFTER_ENTITIES));
-		var effectsStorage = new EffectStorage(new InstancerProviderImpl(engine, RenderStage.AFTER_PARTICLES));
+		var blockEntitiesStorage = new BlockEntityStorage(provider(engine, RenderStage.AFTER_BLOCK_ENTITIES));
+		var entitiesStorage = new EntityStorage(provider(engine, RenderStage.AFTER_ENTITIES));
+		var effectsStorage = new EffectStorage(provider(engine, RenderStage.AFTER_PARTICLES));
 
 		blockEntities = new VisualManagerImpl<>(blockEntitiesStorage);
 		entities = new VisualManagerImpl<>(entitiesStorage);
@@ -116,6 +118,11 @@ public class VisualizationManagerImpl implements VisualizationManager {
 			LevelExtension.getAllLoadedEntities(l)
 					.forEach(entities::queueAdd);
 		}
+	}
+
+	public static Supplier<VisualizationContext> provider(Engine engine, RenderStage stage) {
+		var context = engine.createVisualizationContext(stage);
+		return () -> context;
 	}
 
 	private VisualFrameContext createVisualFrameContext(RenderContext ctx) {
