@@ -24,7 +24,7 @@ public class DrawCall {
 	}
 
 	public void render(TextureBuffer buffer) {
-		if (mesh.invalid()) {
+		if (mesh.isInvalid()) {
 			return;
 		}
 
@@ -34,7 +34,7 @@ public class DrawCall {
 	}
 
 	public void renderOne(TextureBuffer buffer, InstanceHandleImpl impl) {
-		if (mesh.invalid()) {
+		if (mesh.isInvalid()) {
 			return;
 		}
 

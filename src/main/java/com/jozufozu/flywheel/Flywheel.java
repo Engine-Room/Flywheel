@@ -152,7 +152,7 @@ public class Flywheel {
 		info.add("");
 		info.add("Flywheel: " + getVersion());
 		info.add("Backend: " + BackendManagerImpl.getBackendString());
-		info.add("Update limiting: " + FlwCommands.boolToText(FlwConfig.get().limitUpdates()).getString());
+		info.add("Update limiting: " + (FlwConfig.get().limitUpdates() ? "on" : "off"));
 
 		VisualizationManager manager = VisualizationManager.get(mc.level);
 		if (manager != null) {

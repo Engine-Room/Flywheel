@@ -12,9 +12,7 @@ import com.jozufozu.flywheel.impl.visualization.VisualizationManagerImpl;
 import com.jozufozu.flywheel.lib.backend.SimpleBackend;
 import com.mojang.logging.LogUtils;
 
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.CrashReportCallables;
 
@@ -22,8 +20,6 @@ public final class BackendManagerImpl {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
 	public static final Backend OFF_BACKEND = SimpleBackend.builder()
-			.engineMessage(Component.literal("Disabled Flywheel")
-					.withStyle(ChatFormatting.RED))
 			.engineFactory(level -> {
 				throw new UnsupportedOperationException("Cannot create engine when backend is off.");
 			})

@@ -10,8 +10,9 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
+import com.jozufozu.flywheel.backend.util.AtomicReferenceCounted;
 
-public class InstancingPrograms extends AbstractPrograms {
+public class InstancingPrograms extends AtomicReferenceCounted {
 	@Nullable
 	private static InstancingPrograms instance;
 
@@ -24,7 +25,7 @@ public class InstancingPrograms extends AbstractPrograms {
 	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
 		InstancingPrograms newInstance = null;
 
-		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCED_ARRAYS, vertexComponents, fragmentComponents);
+		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCING, vertexComponents, fragmentComponents);
 
 		try {
 			var pipelineResult = pipelineCompiler.compileAndReportErrors(pipelineKeys);

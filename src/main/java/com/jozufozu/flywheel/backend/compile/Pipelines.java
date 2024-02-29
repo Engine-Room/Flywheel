@@ -1,13 +1,13 @@
 package com.jozufozu.flywheel.backend.compile;
 
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.backend.Samplers;
 import com.jozufozu.flywheel.backend.compile.component.IndirectComponent;
 import com.jozufozu.flywheel.backend.compile.component.SamplerBufferComponent;
-import com.jozufozu.flywheel.backend.engine.Samplers;
 import com.jozufozu.flywheel.backend.glsl.GlslVersion;
 
 public final class Pipelines {
-	public static final Pipeline INSTANCED_ARRAYS = Pipeline.builder()
+	public static final Pipeline INSTANCING = Pipeline.builder()
 			.compilerMarker("instancing")
 			.glslVersion(GlslVersion.V330)
 			.vertexMain(Flywheel.rl("internal/instancing/main.vert"))

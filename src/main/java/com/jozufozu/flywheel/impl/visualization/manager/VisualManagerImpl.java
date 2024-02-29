@@ -70,7 +70,7 @@ public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager
 	}
 
 	public Plan<VisualTickContext> tickPlan() {
-		return SimplePlan.<VisualTickContext>of(context -> processQueue(0))
+		return SimplePlan.<VisualTickContext>of(context -> processQueue(1))
 				.then(storage.tickPlan());
 	}
 }

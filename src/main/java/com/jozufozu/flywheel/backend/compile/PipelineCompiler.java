@@ -3,9 +3,9 @@ package com.jozufozu.flywheel.backend.compile;
 import java.util.List;
 
 import com.jozufozu.flywheel.backend.InternalVertex;
+import com.jozufozu.flywheel.backend.Samplers;
 import com.jozufozu.flywheel.backend.compile.core.CompilationHarness;
 import com.jozufozu.flywheel.backend.compile.core.Compile;
-import com.jozufozu.flywheel.backend.engine.Samplers;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;

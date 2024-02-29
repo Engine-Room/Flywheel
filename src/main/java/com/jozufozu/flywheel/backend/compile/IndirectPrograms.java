@@ -17,11 +17,12 @@ import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.glsl.GlslVersion;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
+import com.jozufozu.flywheel.backend.util.AtomicReferenceCounted;
 import com.jozufozu.flywheel.lib.util.ResourceUtil;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class IndirectPrograms extends AbstractPrograms {
+public class IndirectPrograms extends AtomicReferenceCounted {
 	private static final ResourceLocation CULL_SHADER_HEADER = Flywheel.rl("internal/indirect/cull_header.glsl");
 	private static final ResourceLocation CULL_SHADER_MAIN = Flywheel.rl("internal/indirect/cull.glsl");
 	private static final ResourceLocation APPLY_SHADER_MAIN = Flywheel.rl("internal/indirect/apply.glsl");

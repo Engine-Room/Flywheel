@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.engine;
 
+import com.jozufozu.flywheel.backend.Samplers;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
