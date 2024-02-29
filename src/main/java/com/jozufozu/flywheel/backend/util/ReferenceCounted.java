@@ -1,24 +1,31 @@
-package com.jozufozu.flywheel.backend.compile;
+package com.jozufozu.flywheel.backend.util;
 
-import java.util.concurrent.atomic.AtomicInteger;
+public abstract class ReferenceCounted {
+	private int referenceCount = 0;
+	private boolean isDeleted = false;
 
-public abstract class AbstractPrograms {
-	private final AtomicInteger refCount = new AtomicInteger();
-	private volatile boolean isDeleted;
+	public int referenceCount() {
+		return referenceCount;
+	}
 
-	public int refCount() {
-		return refCount.get();
+	public boolean isDeleted() {
+		return isDeleted;
 	}
 
 	public void acquire() {
 		if (isDeleted) {
 			throw new IllegalStateException("Tried to acquire deleted instance of '" + getClass().getName()  + "'!");
 		}
-		refCount.getAndIncrement();
+
+		referenceCount++;
 	}
 
 	public void release() {
-		int newCount = refCount.decrementAndGet();
+		if (isDeleted) {
+			throw new IllegalStateException("Tried to release deleted instance of '" + getClass().getName()  + "'!");
+		}
+
+		int newCount = --referenceCount;
 		if (newCount == 0) {
 			isDeleted = true;
 			delete();

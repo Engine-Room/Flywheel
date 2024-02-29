@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.engine;
+package com.jozufozu.flywheel.backend;
 
 import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 

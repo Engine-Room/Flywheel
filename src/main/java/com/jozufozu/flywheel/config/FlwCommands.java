@@ -9,94 +9,70 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.ResourceLocationException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.server.command.EnumArgument;
 
-public class FlwCommands {
+public final class FlwCommands {
+	private FlwCommands() {
+	}
+
 	public static void registerClientCommands(RegisterClientCommandsEvent event) {
 		FlwConfig config = FlwConfig.get();
 
 		LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("flywheel");
 
-		addValue(command, config.client.backend, "backend", (builder, value) ->
-			builder
+		ConfigValue<String> backendValue = config.client.backend;
+		command.then(Commands.literal("backend")
 				.executes(context -> {
-					LocalPlayer player = Minecraft.getInstance().player;
-					if (player != null) {
-						String backendIdStr = value.get();
-
-						ResourceLocation backendId;
-						try {
-							backendId = new ResourceLocation(backendIdStr);
-						} catch (ResourceLocationException e) {
-							player.displayClientMessage(Component.literal("Config contains invalid backend ID '" + backendIdStr + "'!"), false);
-							return 0;
-						}
-
-						Backend backend = Backend.REGISTRY.get(backendId);
-						if (backend == null) {
-							player.displayClientMessage(Component.literal("Config contains non-existent backend with ID '" + backendId + "'!"), false);
-							return 0;
-						}
-
-						Component message = backend.engineMessage();
-						player.displayClientMessage(message, false);
-					}
+					Backend backend = BackendManager.getBackend();
+					String idStr = Backend.REGISTRY.getIdOrThrow(backend)
+							.toString();
+					sendMessage(context.getSource(), Component.translatable("command.flywheel.backend.get", idStr));
 					return Command.SINGLE_SUCCESS;
 				})
 				.then(Commands.argument("id", BackendArgument.INSTANCE)
 					.executes(context -> {
-						LocalPlayer player = Minecraft.getInstance().player;
-						if (player != null) {
-							Backend requestedBackend = context.getArgument("id", Backend.class);
-							var requestedId = Backend.REGISTRY.getIdOrThrow(requestedBackend)
-									.toString();
-							value.set(requestedId);
+						Backend requestedBackend = context.getArgument("id", Backend.class);
+						String requestedIdStr = Backend.REGISTRY.getIdOrThrow(requestedBackend)
+								.toString();
+						backendValue.set(requestedIdStr);
 
-							// Reload renderers so we can report the backend that we fell back to.
-							Minecraft.getInstance().levelRenderer.allChanged();
+						// Reload renderers so we can report the actual backend.
+						Minecraft.getInstance().levelRenderer.allChanged();
 
-							var actualBackend = BackendManager.getBackend();
-							if (actualBackend != requestedBackend) {
-								player.displayClientMessage(Component.literal("'" + requestedId + "' not available")
-										.withStyle(ChatFormatting.RED), false);
-							}
-
-							Component message = actualBackend.engineMessage();
-							player.displayClientMessage(message, false);
+						Backend actualBackend = BackendManager.getBackend();
+						if (actualBackend != requestedBackend) {
+							sendFailure(context.getSource(), Component.translatable("command.flywheel.backend.set.unavailable", requestedIdStr));
 						}
+
+						String actualIdStr = Backend.REGISTRY.getIdOrThrow(actualBackend)
+								.toString();
+						sendMessage(context.getSource(), Component.translatable("command.flywheel.backend.set", actualIdStr));
 						return Command.SINGLE_SUCCESS;
 					})));
 
-		addValue(command, config.client.limitUpdates, "limitUpdates", (builder, value) -> booleanValueCommand(builder, value,
+		command.then(booleanValueCommand(Commands.literal("limitUpdates"), config.client.limitUpdates,
 				(source, bool) -> {
-					LocalPlayer player = Minecraft.getInstance().player;
-					if (player == null) return;
-
-					Component text = Component.literal("Update limiting is currently: ")
-							.append(boolToText(bool));
-					player.displayClientMessage(text, false);
+					if (bool) {
+						sendMessage(source, Component.translatable("command.flywheel.limit_updates.get.on"));
+					} else {
+						sendMessage(source, Component.translatable("command.flywheel.limit_updates.get.off"));
+					}
 				},
 				(source, bool) -> {
-					LocalPlayer player = Minecraft.getInstance().player;
-					if (player == null) return;
-
-					Component text = boolToText(bool).append(Component.literal(" update limiting.")
-							.withStyle(ChatFormatting.WHITE));
-					player.displayClientMessage(text, false);
+					if (bool) {
+						sendMessage(source, Component.translatable("command.flywheel.limit_updates.set.on"));
+					} else {
+						sendMessage(source, Component.translatable("command.flywheel.limit_updates.set.off"));
+					}
 
 					Minecraft.getInstance().levelRenderer.allChanged();
 				}
@@ -105,13 +81,21 @@ public class FlwCommands {
 		command.then(Commands.literal("debug")
 				.then(Commands.argument("mode", EnumArgument.enumArgument(DebugMode.class))
 						.executes(context -> {
-							LocalPlayer player = Minecraft.getInstance().player;
-							if (player == null) return 0;
-
 							DebugMode mode = context.getArgument("mode", DebugMode.class);
-
 							Uniforms.setDebugMode(mode);
+							return Command.SINGLE_SUCCESS;
+						})));
 
+		command.then(Commands.literal("frustum")
+				.then(Commands.literal("unpause")
+						.executes(context -> {
+							Uniforms.frustumPaused = false;
+							return Command.SINGLE_SUCCESS;
+						}))
+				.then(Commands.literal("capture")
+						.executes(context -> {
+							Uniforms.frustumPaused = true;
+							Uniforms.frustumCapture = true;
 							return Command.SINGLE_SUCCESS;
 						})));
 
@@ -119,9 +103,6 @@ public class FlwCommands {
 				.then(Commands.argument("pos", BlockPosArgument.blockPos())
 						.then(Commands.argument("stage", IntegerArgumentType.integer(0, 9))
 								.executes(context -> {
-									BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
-									int value = IntegerArgumentType.getInteger(context, "stage");
-
 									Entity executor = context.getSource()
 											.getEntity();
 
@@ -129,36 +110,20 @@ public class FlwCommands {
 										return 0;
 									}
 
+									BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
+									int value = IntegerArgumentType.getInteger(context, "stage");
+
 									executor.level()
 											.destroyBlockProgress(executor.getId(), pos, value);
 
 									return Command.SINGLE_SUCCESS;
 								}))));
 
-		command.then(Commands.literal("frustum")
-				.then(Commands.literal("unpause")
-						.executes(context -> {
-							Uniforms.frustumPaused = false;
-							return 1;
-						}))
-				.then(Commands.literal("capture")
-						.executes(context -> {
-							Uniforms.frustumPaused = true;
-							Uniforms.frustumCapture = true;
-							return 1;
-						})));
-
 		event.getDispatcher().register(command);
 	}
 
-	private static <T extends ConfigValue<?>> void addValue(LiteralArgumentBuilder<CommandSourceStack> command, T value, String subcommand, BiConsumer<LiteralArgumentBuilder<CommandSourceStack>, T> consumer) {
-		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(subcommand);
-		consumer.accept(builder, value);
-		command.then(builder);
-	}
-
-	private static void booleanValueCommand(LiteralArgumentBuilder<CommandSourceStack> builder, ConfigValue<Boolean> value, BiConsumer<CommandSourceStack, Boolean> displayAction, BiConsumer<CommandSourceStack, Boolean> setAction) {
-		builder
+	private static LiteralArgumentBuilder<CommandSourceStack> booleanValueCommand(LiteralArgumentBuilder<CommandSourceStack> builder, ConfigValue<Boolean> value, BiConsumer<CommandSourceStack, Boolean> displayAction, BiConsumer<CommandSourceStack, Boolean> setAction) {
+		return builder
 			.executes(context -> {
 				displayAction.accept(context.getSource(), value.get());
 				return Command.SINGLE_SUCCESS;
@@ -177,9 +142,11 @@ public class FlwCommands {
 				}));
 	}
 
-	public static MutableComponent boolToText(boolean b) {
-		return b ? Component.literal("enabled")
-				.withStyle(ChatFormatting.DARK_GREEN) : Component.literal("disabled")
-				.withStyle(ChatFormatting.RED);
+	private static void sendMessage(CommandSourceStack source, Component message) {
+		source.sendSuccess(() -> message, true);
+	}
+
+	private static void sendFailure(CommandSourceStack source, Component message) {
+		source.sendFailure(message);
 	}
 }

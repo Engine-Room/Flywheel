@@ -8,18 +8,15 @@ import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.api.backend.BackendManager;
 import com.jozufozu.flywheel.api.backend.Engine;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
 
 public class SimpleBackend implements Backend {
-	private final Component engineMessage;
 	private final Function<LevelAccessor, Engine> engineFactory;
 	private final Supplier<Backend> fallback;
 	private final BooleanSupplier isSupported;
 
-	public SimpleBackend(Component engineMessage, Function<LevelAccessor, Engine> engineFactory, Supplier<Backend> fallback, BooleanSupplier isSupported) {
-		this.engineMessage = engineMessage;
+	public SimpleBackend(Function<LevelAccessor, Engine> engineFactory, Supplier<Backend> fallback, BooleanSupplier isSupported) {
 		this.engineFactory = engineFactory;
 		this.fallback = fallback;
 		this.isSupported = isSupported;
@@ -30,18 +27,13 @@ public class SimpleBackend implements Backend {
 	}
 
 	@Override
-	public Component engineMessage() {
-		return engineMessage;
-	}
-
-	@Override
 	public Engine createEngine(LevelAccessor level) {
 		return engineFactory.apply(level);
 	}
 
 	@Override
 	public Backend findFallback() {
-		if (this.isSupported()) {
+		if (isSupported()) {
 			return this;
 		} else {
 			return fallback.get()
@@ -55,15 +47,9 @@ public class SimpleBackend implements Backend {
 	}
 
 	public static class Builder {
-		private Component engineMessage;
 		private Function<LevelAccessor, Engine> engineFactory;
 		private Supplier<Backend> fallback = BackendManager::getOffBackend;
 		private BooleanSupplier isSupported;
-
-		public Builder engineMessage(Component engineMessage) {
-			this.engineMessage = engineMessage;
-			return this;
-		}
 
 		public Builder engineFactory(Function<LevelAccessor, Engine> engineFactory) {
 			this.engineFactory = engineFactory;
@@ -81,7 +67,7 @@ public class SimpleBackend implements Backend {
 		}
 
 		public Backend register(ResourceLocation id) {
-			return Backend.REGISTRY.registerAndGet(id, new SimpleBackend(engineMessage, engineFactory, fallback, isSupported));
+			return Backend.REGISTRY.registerAndGet(id, new SimpleBackend(engineFactory, fallback, isSupported));
 		}
 	}
 }

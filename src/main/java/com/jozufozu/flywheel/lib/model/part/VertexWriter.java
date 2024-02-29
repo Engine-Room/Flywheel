@@ -12,7 +12,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 class VertexWriter implements VertexConsumer {
 	private static final int STRIDE = (int) PosTexNormalVertexView.STRIDE;
-	private static final int GROWTH_MARGIN = 128 * STRIDE;
 
 	private MemoryBlock data;
 
@@ -26,7 +25,7 @@ class VertexWriter implements VertexConsumer {
 	private boolean filledNormal;
 
 	public VertexWriter() {
-		data = MemoryBlock.malloc(GROWTH_MARGIN);
+		data = MemoryBlock.malloc(128 * STRIDE);
 	}
 
 	public void setTextureMapper(@Nullable TextureMapper mapper) {
@@ -105,8 +104,9 @@ class VertexWriter implements VertexConsumer {
 		vertexCount++;
 
 		long byteSize = (vertexCount + 1) * STRIDE;
-		if (byteSize > data.size()) {
-			data = data.realloc(byteSize + GROWTH_MARGIN);
+		long capacity = data.size();
+		if (byteSize > capacity) {
+			data = data.realloc(capacity * 2);
 		}
 	}
 

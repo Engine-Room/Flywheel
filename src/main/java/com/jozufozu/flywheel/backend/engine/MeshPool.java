@@ -14,6 +14,7 @@ import com.jozufozu.flywheel.backend.InternalVertex;
 import com.jozufozu.flywheel.backend.gl.GlPrimitive;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
+import com.jozufozu.flywheel.backend.util.ReferenceCounted;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
 public class MeshPool {
@@ -93,7 +94,7 @@ public class MeshPool {
 	private void processDeletions() {
 		// remove deleted meshes
 		meshList.removeIf(pooledMesh -> {
-			boolean deleted = pooledMesh.deleted();
+			boolean deleted = pooledMesh.isDeleted();
 			if (deleted) {
 				meshes.remove(pooledMesh.mesh);
 			}
@@ -141,13 +142,11 @@ public class MeshPool {
 		meshList.clear();
 	}
 
-	public class PooledMesh {
+	public class PooledMesh extends ReferenceCounted {
 		public static final int INVALID_BASE_VERTEX = -1;
+
 		private final Mesh mesh;
-
 		private int baseVertex = INVALID_BASE_VERTEX;
-
-		private int referenceCount = 0;
 
 		private PooledMesh(Mesh mesh) {
 			this.mesh = mesh;
@@ -177,12 +176,8 @@ public class MeshPool {
 			return (long) firstIndex() * Integer.BYTES;
 		}
 
-		public boolean deleted() {
-			return referenceCount <= 0;
-		}
-
-		public boolean invalid() {
-			return mesh.vertexCount() == 0 || baseVertex == INVALID_BASE_VERTEX || deleted();
+		public boolean isInvalid() {
+			return mesh.vertexCount() == 0 || baseVertex == INVALID_BASE_VERTEX || isDeleted();
 		}
 
 		public void draw(int instanceCount) {
@@ -193,15 +188,10 @@ public class MeshPool {
 			}
 		}
 
-		public void acquire() {
-			referenceCount++;
-		}
-
-		public void release() {
-			if (--referenceCount == 0) {
-				MeshPool.this.dirty = true;
-				MeshPool.this.anyToRemove = true;
-			}
+		@Override
+		protected void delete() {
+			MeshPool.this.dirty = true;
+			MeshPool.this.anyToRemove = true;
 		}
 	}
 }

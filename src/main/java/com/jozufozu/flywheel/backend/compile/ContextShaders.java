@@ -6,7 +6,7 @@ import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.internal.InternalFlywheelApi;
 import com.jozufozu.flywheel.api.registry.Registry;
 import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
-import com.jozufozu.flywheel.backend.engine.Samplers;
+import com.jozufozu.flywheel.backend.Samplers;
 
 public class ContextShaders {
 	public static final Registry<ContextShader> REGISTRY = InternalFlywheelApi.INSTANCE.createRegistry();
