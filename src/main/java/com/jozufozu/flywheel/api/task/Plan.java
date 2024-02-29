@@ -38,12 +38,4 @@ public interface Plan<C> {
 	 * @return The composed plan.
 	 */
 	Plan<C> and(Plan<C> plan);
-
-	/**
-	 * If possible, create a new plan that accomplishes everything
-	 * this plan does but with a simpler execution schedule.
-	 *
-	 * @return A simplified plan, or this.
-	 */
-	Plan<C> simplify();
 }

@@ -30,19 +30,6 @@ public record IfElsePlan<C>(BooleanSupplierWithContext<C> condition, Plan<C> onT
 		}
 	}
 
-	@Override
-	public Plan<C> simplify() {
-		var maybeSimplifiedTrue = onTrue.simplify();
-		var maybeSimplifiedFalse = onFalse.simplify();
-
-		if (maybeSimplifiedTrue instanceof UnitPlan && maybeSimplifiedFalse instanceof UnitPlan) {
-			// The condition may have side effects that still need to be evaluated.
-			return SimplePlan.of(condition::test);
-		}
-
-		return new IfElsePlan<>(condition, maybeSimplifiedTrue, maybeSimplifiedFalse);
-	}
-
 	public static class Builder<C> {
 		private final BooleanSupplierWithContext<C> condition;
 		private Plan<C> onTrue = UnitPlan.of();
