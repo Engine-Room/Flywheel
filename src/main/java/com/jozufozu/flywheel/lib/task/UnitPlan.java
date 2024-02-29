@@ -29,8 +29,4 @@ public class UnitPlan<C> implements Plan<C> {
 		return plan;
 	}
 
-	@Override
-	public Plan<C> simplify() {
-		return this;
-	}
 }

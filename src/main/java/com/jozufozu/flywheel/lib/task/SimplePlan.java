@@ -43,12 +43,4 @@ public record SimplePlan<C>(List<RunnableWithContext<C>> parallelTasks) implemen
 		return SimplyComposedPlan.super.and(plan);
 	}
 
-	@Override
-	public Plan<C> simplify() {
-		if (parallelTasks.isEmpty()) {
-			return UnitPlan.of();
-		}
-
-		return this;
-	}
 }

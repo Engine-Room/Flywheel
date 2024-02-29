@@ -95,8 +95,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		effects = new VisualManagerImpl<>(effectsStorage);
 
 		tickPlan = NestedPlan.of(blockEntities.tickPlan(), entities.tickPlan(), effects.tickPlan())
-				.then(RaisePlan.raise(tickFlag))
-				.simplify();
+				.then(RaisePlan.raise(tickFlag));
 
 		var recreate = SimplePlan.<RenderContext>of(context -> blockEntitiesStorage.recreateAll(context.partialTick()),
 				context -> entitiesStorage.recreateAll(context.partialTick()),
@@ -111,8 +110,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				.plan()
 				.then(RaisePlan.raise(frameVisualsFlag))
 				.then(engine.createFramePlan())
-				.then(RaisePlan.raise(frameFlag))
-				.simplify();
+				.then(RaisePlan.raise(frameFlag));
 
 		if (level instanceof Level l) {
 			LevelExtension.getAllLoadedEntities(l)

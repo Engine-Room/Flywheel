@@ -13,8 +13,4 @@ public interface SimplyComposedPlan<C> extends Plan<C> {
 		return NestedPlan.of(this, plan);
 	}
 
-	@Override
-	default Plan<C> simplify() {
-		return this;
-	}
 }

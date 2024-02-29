@@ -19,17 +19,6 @@ public record MapContextPlan<C, D>(SupplierWithContext<C, D> map, Plan<D> plan) 
 		plan.execute(taskExecutor, newContext, onCompletion);
 	}
 
-	@Override
-	public Plan<C> simplify() {
-		var maybeSimplified = plan.simplify();
-
-		if (maybeSimplified instanceof UnitPlan) {
-			return UnitPlan.of();
-		}
-
-		return new MapContextPlan<>(map, maybeSimplified);
-	}
-
 	public static class Builder<C, D> {
 		private final SupplierWithContext<C, D> map;
 
