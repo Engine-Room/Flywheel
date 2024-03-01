@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.api.visualization;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import com.jozufozu.flywheel.api.BackendImplemented;
 import com.jozufozu.flywheel.api.instance.InstancerProvider;
 
@@ -24,6 +22,5 @@ public interface VisualizationContext {
 	 */
 	Vec3i renderOrigin();
 
-	@ApiStatus.Experimental
 	VisualEmbedding createEmbedding();
 }

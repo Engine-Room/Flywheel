@@ -23,20 +23,15 @@ import net.minecraftforge.client.model.data.ModelData;
 
 public class BakedModelBuilder {
 	private final BakedModel bakedModel;
-	private boolean shadeSeparated = true;
 	private BlockAndTintGetter renderWorld;
 	private BlockState blockState;
 	private PoseStack poseStack;
 	private ModelData modelData;
+	private boolean shadeSeparated = true;
 	private BiFunction<RenderType, Boolean, Material> materialFunc;
 
 	public BakedModelBuilder(BakedModel bakedModel) {
 		this.bakedModel = bakedModel;
-	}
-
-	public BakedModelBuilder disableShadeSeparation() {
-		shadeSeparated = false;
-		return this;
 	}
 
 	public BakedModelBuilder renderWorld(BlockAndTintGetter renderWorld) {
@@ -56,6 +51,11 @@ public class BakedModelBuilder {
 
 	public BakedModelBuilder modelData(ModelData modelData) {
 		this.modelData = modelData;
+		return this;
+	}
+
+	public BakedModelBuilder disableShadeSeparation() {
+		shadeSeparated = false;
 		return this;
 	}
 
