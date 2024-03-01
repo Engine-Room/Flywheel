@@ -14,14 +14,20 @@ layout(std140) uniform _FlwFrameUniforms {
 
     mat4 flw_view;
     mat4 flw_viewInverse;
+    mat4 flw_lastView;
     mat4 flw_projection;
     mat4 flw_projectionInverse;
+    mat4 flw_lastProjection;
     mat4 flw_viewProjection;
     mat4 flw_viewProjectionInverse;
+    mat4 flw_lastViewProjection;
 
     vec4 _flw_cameraPos;
     vec4 _flw_cameraLook;
     vec2 flw_cameraRot;
+    vec4 _flw_lastCameraPos;
+    vec4 _flw_lastCameraLook;
+    vec2 flw_lastCameraRot;
 
     vec2 flw_viewportSize;
     float flw_defaultLineWidth;
@@ -39,3 +45,5 @@ layout(std140) uniform _FlwFrameUniforms {
 
 #define flw_cameraPos _flw_cameraPos.xyz
 #define flw_cameraLook _flw_cameraLook.xyz
+#define flw_lastCameraPos _flw_lastCameraPos.xyz
+#define flw_lastCameraLook _flw_lastCameraLook.xyz
