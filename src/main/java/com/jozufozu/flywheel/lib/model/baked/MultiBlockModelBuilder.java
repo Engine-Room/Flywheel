@@ -1,9 +1,7 @@
 package com.jozufozu.flywheel.lib.model.baked;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.material.Material;
@@ -20,29 +18,20 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.client.model.data.ModelData;
 
 public class MultiBlockModelBuilder {
-	private final Collection<StructureTemplate.StructureBlockInfo> blocks;
-	private boolean shadeSeparated = true;
-	private BlockAndTintGetter renderWorld;
+	private final BlockAndTintGetter renderWorld;
+	private final Iterable<BlockPos> positions;
 	private PoseStack poseStack;
-	private Map<BlockPos, ModelData> modelDataMap;
+	private Function<BlockPos, ModelData> modelDataLookup;
+	private boolean renderFluids = false;
+	private boolean shadeSeparated = true;
 	private BiFunction<RenderType, Boolean, Material> materialFunc;
 
-	public MultiBlockModelBuilder(Collection<StructureTemplate.StructureBlockInfo> blocks) {
-		this.blocks = blocks;
-	}
-
-	public MultiBlockModelBuilder disableShadeSeparation() {
-		shadeSeparated = false;
-		return this;
-	}
-
-	public MultiBlockModelBuilder renderWorld(BlockAndTintGetter renderWorld) {
+	public MultiBlockModelBuilder(BlockAndTintGetter renderWorld, Iterable<BlockPos> positions) {
 		this.renderWorld = renderWorld;
-		return this;
+		this.positions = positions;
 	}
 
 	public MultiBlockModelBuilder poseStack(PoseStack poseStack) {
@@ -50,8 +39,18 @@ public class MultiBlockModelBuilder {
 		return this;
 	}
 
-	public MultiBlockModelBuilder modelDataMap(Map<BlockPos, ModelData> modelDataMap) {
-		this.modelDataMap = modelDataMap;
+	public MultiBlockModelBuilder modelDataLookup(Function<BlockPos, ModelData> modelDataLookup) {
+		this.modelDataLookup = modelDataLookup;
+		return this;
+	}
+
+	public MultiBlockModelBuilder enableFluidRendering() {
+		renderFluids = true;
+		return this;
+	}
+
+	public MultiBlockModelBuilder disableShadeSeparation() {
+		shadeSeparated = false;
 		return this;
 	}
 
@@ -61,11 +60,8 @@ public class MultiBlockModelBuilder {
 	}
 
 	public TessellatedModel build() {
-		if (renderWorld == null) {
-			renderWorld = VirtualEmptyBlockGetter.INSTANCE;
-		}
-		if (modelDataMap == null) {
-			modelDataMap = Collections.emptyMap();
+		if (modelDataLookup == null) {
+			modelDataLookup = pos -> ModelData.EMPTY;
 		}
 		if (materialFunc == null) {
 			materialFunc = ModelUtil::getMaterial;
@@ -83,7 +79,7 @@ public class MultiBlockModelBuilder {
 					out.add(new Model.ConfiguredMesh(material, mesh));
 				}
 			};
-			BakedModelBufferer.bufferMultiBlockShadeSeparated(blocks, ModelUtil.VANILLA_RENDERER, renderWorld, poseStack, modelDataMap, resultConsumer);
+			BakedModelBufferer.bufferMultiBlockShadeSeparated(ModelUtil.VANILLA_RENDERER, positions.iterator(), renderWorld, poseStack, modelDataLookup, renderFluids, resultConsumer);
 		} else {
 			ResultConsumer resultConsumer = (renderType, data) -> {
 				Material material = materialFunc.apply(renderType, true);
@@ -94,7 +90,7 @@ public class MultiBlockModelBuilder {
 					out.add(new Model.ConfiguredMesh(material, mesh));
 				}
 			};
-			BakedModelBufferer.bufferMultiBlock(blocks, ModelUtil.VANILLA_RENDERER, renderWorld, poseStack, modelDataMap, resultConsumer);
+			BakedModelBufferer.bufferMultiBlock(ModelUtil.VANILLA_RENDERER, positions.iterator(), renderWorld, poseStack, modelDataLookup, renderFluids, resultConsumer);
 		}
 
 		return new TessellatedModel(out.build(), shadeSeparated);

@@ -11,16 +11,16 @@ import com.jozufozu.flywheel.api.model.Model;
 
 public class SingleMeshModel implements Model {
 	private final Mesh mesh;
-	private final Material material;
+	private final ImmutableList<ConfiguredMesh> meshList;
 
 	public SingleMeshModel(Mesh mesh, Material material) {
 		this.mesh = mesh;
-		this.material = material;
+		meshList = ImmutableList.of(new ConfiguredMesh(material, mesh));
 	}
 
 	@Override
 	public List<ConfiguredMesh> meshes() {
-		return ImmutableList.of(new ConfiguredMesh(material, mesh));
+		return meshList;
 	}
 
 	@Override

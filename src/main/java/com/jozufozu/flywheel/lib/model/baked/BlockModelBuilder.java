@@ -21,19 +21,14 @@ import net.minecraftforge.client.model.data.ModelData;
 
 public class BlockModelBuilder {
 	private final BlockState state;
-	private boolean shadeSeparated = true;
 	private BlockAndTintGetter renderWorld;
 	private PoseStack poseStack;
 	private ModelData modelData;
+	private boolean shadeSeparated = true;
 	private BiFunction<RenderType, Boolean, Material> materialFunc;
 
 	public BlockModelBuilder(BlockState state) {
 		this.state = state;
-	}
-
-	public BlockModelBuilder disableShadeSeparation() {
-		shadeSeparated = false;
-		return this;
 	}
 
 	public BlockModelBuilder renderWorld(BlockAndTintGetter renderWorld) {
@@ -48,6 +43,11 @@ public class BlockModelBuilder {
 
 	public BlockModelBuilder modelData(ModelData modelData) {
 		this.modelData = modelData;
+		return this;
+	}
+
+	public BlockModelBuilder disableShadeSeparation() {
+		shadeSeparated = false;
 		return this;
 	}
 

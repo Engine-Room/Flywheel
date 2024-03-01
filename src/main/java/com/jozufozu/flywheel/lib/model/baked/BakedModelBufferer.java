@@ -1,7 +1,7 @@
 package com.jozufozu.flywheel.lib.model.baked;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.Iterator;
+import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -11,6 +11,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
@@ -21,11 +22,11 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.client.ChunkRenderTypeSet;
 import net.minecraftforge.client.model.data.ModelData;
 
-public final class BakedModelBufferer {
+final class BakedModelBufferer {
 	private static final RenderType[] CHUNK_LAYERS = RenderType.chunkBufferLayers().toArray(RenderType[]::new);
 	private static final int CHUNK_LAYER_AMOUNT = CHUNK_LAYERS.length;
 
@@ -122,12 +123,13 @@ public final class BakedModelBufferer {
 		bufferSingleShadeSeparated(renderDispatcher.getModelRenderer(), renderWorld, renderDispatcher.getBlockModel(state), state, poseStack, modelData, resultConsumer);
 	}
 
-	public static void bufferMultiBlock(Collection<StructureTemplate.StructureBlockInfo> blocks, BlockRenderDispatcher renderDispatcher, BlockAndTintGetter renderWorld, @Nullable PoseStack poseStack, Map<BlockPos, ModelData> modelDataMap, ResultConsumer resultConsumer) {
+	public static void bufferMultiBlock(BlockRenderDispatcher renderDispatcher, Iterator<BlockPos> posIterator, BlockAndTintGetter renderWorld, @Nullable PoseStack poseStack, Function<BlockPos, ModelData> modelDataLookup, boolean renderFluids, ResultConsumer resultConsumer) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
 		RandomSource random = objects.random;
+		TransformingVertexConsumer transformingWrapper = objects.transformingWrapper;
 
 		BufferBuilder[] buffers = objects.shadedBuffers;
 		for (BufferBuilder buffer : buffers) {
@@ -137,34 +139,50 @@ public final class BakedModelBufferer {
 		ModelBlockRenderer blockRenderer = renderDispatcher.getModelRenderer();
 		ModelBlockRenderer.enableCaching();
 
-		for (StructureTemplate.StructureBlockInfo blockInfo : blocks) {
-			BlockState state = blockInfo.state();
+		while (posIterator.hasNext()) {
+			BlockPos pos = posIterator.next();
+			BlockState state = renderWorld.getBlockState(pos);
 
-			if (state.getRenderShape() != RenderShape.MODEL) {
-				continue;
+			if (renderFluids) {
+				FluidState fluidState = state.getFluidState();
+	
+				if (!fluidState.isEmpty()) {
+					RenderType layer = ItemBlockRenderTypes.getRenderLayer(fluidState);
+					int layerIndex = layer.getChunkLayerId();
+					
+					transformingWrapper.prepare(buffers[layerIndex], poseStack);
+
+					poseStack.pushPose();
+					poseStack.translate(pos.getX() - (pos.getX() & 0xF), pos.getY() - (pos.getY() & 0xF), pos.getZ() - (pos.getZ() & 0xF));
+					renderDispatcher.renderLiquid(pos, renderWorld, transformingWrapper, state, fluidState);
+					poseStack.popPose();
+				}
 			}
 
-			BlockPos pos = blockInfo.pos();
-			long seed = state.getSeed(pos);
-			BakedModel model = renderDispatcher.getBlockModel(state);
-			ModelData modelData = modelDataMap.getOrDefault(pos, ModelData.EMPTY);
-			modelData = model.getModelData(renderWorld, pos, state, modelData);
-			random.setSeed(seed);
-			ChunkRenderTypeSet renderTypes = model.getRenderTypes(state, random, modelData);
+			if (state.getRenderShape() == RenderShape.MODEL) {
+				long seed = state.getSeed(pos);
+				BakedModel model = renderDispatcher.getBlockModel(state);
+				ModelData modelData = modelDataLookup.apply(pos);
+				modelData = model.getModelData(renderWorld, pos, state, modelData);
+				random.setSeed(seed);
+				ChunkRenderTypeSet renderTypes = model.getRenderTypes(state, random, modelData);
 
-			for (RenderType renderType : renderTypes) {
-				int layerIndex = renderType.getChunkLayerId();
-
-				BufferBuilder buffer = buffers[layerIndex];
-
-				poseStack.pushPose();
-				poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
-				blockRenderer.tesselateBlock(renderWorld, model, state, pos, poseStack, buffer, true, random, seed, OverlayTexture.NO_OVERLAY, modelData, renderType);
-				poseStack.popPose();
+				for (RenderType renderType : renderTypes) {
+					int layerIndex = renderType.getChunkLayerId();
+	
+					BufferBuilder buffer = buffers[layerIndex];
+	
+					poseStack.pushPose();
+					poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
+					blockRenderer.tesselateBlock(renderWorld, model, state, pos, poseStack, buffer, true, random, seed, OverlayTexture.NO_OVERLAY, modelData, renderType);
+					poseStack.popPose();
+				}
 			}
 		}
 
 		ModelBlockRenderer.clearCache();
+
+		transformingWrapper.clear();
 
 		for (int layerIndex = 0; layerIndex < CHUNK_LAYER_AMOUNT; layerIndex++) {
 			RenderType renderType = CHUNK_LAYERS[layerIndex];
@@ -177,13 +195,14 @@ public final class BakedModelBufferer {
 		}
 	}
 
-	public static void bufferMultiBlockShadeSeparated(Collection<StructureTemplate.StructureBlockInfo> blocks, BlockRenderDispatcher renderDispatcher, BlockAndTintGetter renderWorld, @Nullable PoseStack poseStack, Map<BlockPos, ModelData> modelDataMap, ShadeSeparatedResultConsumer resultConsumer) {
+	public static void bufferMultiBlockShadeSeparated(BlockRenderDispatcher renderDispatcher, Iterator<BlockPos> posIterator, BlockAndTintGetter renderWorld, @Nullable PoseStack poseStack, Function<BlockPos, ModelData> modelDataLookup, boolean renderFluids, ShadeSeparatedResultConsumer resultConsumer) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
 		RandomSource random = objects.random;
 		ShadeSeparatingVertexConsumer shadeSeparatingWrapper = objects.shadeSeparatingWrapper;
+		TransformingVertexConsumer transformingWrapper = objects.transformingWrapper;
 
 		BufferBuilder[] shadedBuffers = objects.shadedBuffers;
 		BufferBuilder[] unshadedBuffers = objects.unshadedBuffers;
@@ -197,36 +216,51 @@ public final class BakedModelBufferer {
 		ModelBlockRenderer blockRenderer = renderDispatcher.getModelRenderer();
 		ModelBlockRenderer.enableCaching();
 
-		for (StructureTemplate.StructureBlockInfo blockInfo : blocks) {
-			BlockState state = blockInfo.state();
+		while (posIterator.hasNext()) {
+			BlockPos pos = posIterator.next();
+			BlockState state = renderWorld.getBlockState(pos);
 
-			if (state.getRenderShape() != RenderShape.MODEL) {
-				continue;
+			if (renderFluids) {
+				FluidState fluidState = state.getFluidState();
+	
+				if (!fluidState.isEmpty()) {
+					RenderType layer = ItemBlockRenderTypes.getRenderLayer(fluidState);
+					int layerIndex = layer.getChunkLayerId();
+					
+					transformingWrapper.prepare(shadedBuffers[layerIndex], poseStack);
+
+					poseStack.pushPose();
+					poseStack.translate(pos.getX() - (pos.getX() & 0xF), pos.getY() - (pos.getY() & 0xF), pos.getZ() - (pos.getZ() & 0xF));
+					renderDispatcher.renderLiquid(pos, renderWorld, transformingWrapper, state, fluidState);
+					poseStack.popPose();
+				}
 			}
 
-			BlockPos pos = blockInfo.pos();
-			long seed = state.getSeed(pos);
-			BakedModel model = renderDispatcher.getBlockModel(state);
-			ModelData modelData = modelDataMap.getOrDefault(pos, ModelData.EMPTY);
-			modelData = model.getModelData(renderWorld, pos, state, modelData);
-			random.setSeed(seed);
-			ChunkRenderTypeSet renderTypes = model.getRenderTypes(state, random, modelData);
+			if (state.getRenderShape() == RenderShape.MODEL) {
+				long seed = state.getSeed(pos);
+				BakedModel model = renderDispatcher.getBlockModel(state);
+				ModelData modelData = modelDataLookup.apply(pos);
+				modelData = model.getModelData(renderWorld, pos, state, modelData);
+				random.setSeed(seed);
+				ChunkRenderTypeSet renderTypes = model.getRenderTypes(state, random, modelData);
 
-			for (RenderType renderType : renderTypes) {
-				int layerIndex = renderType.getChunkLayerId();
+				for (RenderType renderType : renderTypes) {
+					int layerIndex = renderType.getChunkLayerId();
 
-				shadeSeparatingWrapper.prepare(shadedBuffers[layerIndex], unshadedBuffers[layerIndex]);
+					shadeSeparatingWrapper.prepare(shadedBuffers[layerIndex], unshadedBuffers[layerIndex]);
 
-				poseStack.pushPose();
-				poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
-				blockRenderer.tesselateBlock(renderWorld, model, state, pos, poseStack, shadeSeparatingWrapper, true, random, seed, OverlayTexture.NO_OVERLAY, modelData, renderType);
-				poseStack.popPose();
+					poseStack.pushPose();
+					poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
+					blockRenderer.tesselateBlock(renderWorld, model, state, pos, poseStack, shadeSeparatingWrapper, true, random, seed, OverlayTexture.NO_OVERLAY, modelData, renderType);
+					poseStack.popPose();
+				}
 			}
 		}
 
 		ModelBlockRenderer.clearCache();
 
 		shadeSeparatingWrapper.clear();
+		transformingWrapper.clear();
 
 		for (int layerIndex = 0; layerIndex < CHUNK_LAYER_AMOUNT; layerIndex++) {
 			RenderType renderType = CHUNK_LAYERS[layerIndex];
@@ -258,6 +292,7 @@ public final class BakedModelBufferer {
 		public final RandomSource random = RandomSource.createNewThreadLocalInstance();
 
 		public final ShadeSeparatingVertexConsumer shadeSeparatingWrapper = new ShadeSeparatingVertexConsumer();
+		public final TransformingVertexConsumer transformingWrapper = new TransformingVertexConsumer();
 
 		public final BufferBuilder[] shadedBuffers = new BufferBuilder[CHUNK_LAYER_AMOUNT];
 		public final BufferBuilder[] unshadedBuffers = new BufferBuilder[CHUNK_LAYER_AMOUNT];
