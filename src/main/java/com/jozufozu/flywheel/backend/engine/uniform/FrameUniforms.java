@@ -20,6 +20,10 @@ public class FrameUniforms implements UniformProvider {
     @Nullable
 	private RenderContext context;
 
+	private final Matrix4f view = new Matrix4f();
+	private final Matrix4f viewInverse = new Matrix4f();
+	private final Matrix4f projection = new Matrix4f();
+	private final Matrix4f projectionInverse = new Matrix4f();
 	private final Matrix4f viewProjection = new Matrix4f();
 	private final Matrix4f viewProjectionInverse = new Matrix4f();
 
@@ -46,6 +50,9 @@ public class FrameUniforms implements UniformProvider {
 		var camY = (float) (cameraPos.y - renderOrigin.getY());
 		var camZ = (float) (cameraPos.z - renderOrigin.getZ());
 
+		view.set(context.stack().last().pose());
+		view.translate(-camX, -camY, -camZ);
+		projection.set(context.projection());
 		viewProjection.set(context.viewProjection());
 		viewProjection.translate(-camX, -camY, -camZ);
 
@@ -77,9 +84,13 @@ public class FrameUniforms implements UniformProvider {
 	}
 
 	private long writeMatrices(long ptr) {
-		MatrixMath.writeUnsafe(viewProjection, ptr);
-		MatrixMath.writeUnsafe(viewProjection.invert(viewProjectionInverse), ptr + 64);
-		return ptr + 128;
+		MatrixMath.writeUnsafe(view, ptr);
+		MatrixMath.writeUnsafe(view.invert(viewInverse), ptr + 64);
+		MatrixMath.writeUnsafe(projection, ptr + 64 * 2);
+		MatrixMath.writeUnsafe(projection.invert(projectionInverse), ptr + 64 * 3);
+		MatrixMath.writeUnsafe(viewProjection, ptr + 64 * 4);
+		MatrixMath.writeUnsafe(viewProjection.invert(viewProjectionInverse), ptr + 64 * 5);
+		return ptr + 64 * 6;
 	}
 
 	private static long writeCamera(long ptr, float camX, float camY, float camZ, Camera camera) {

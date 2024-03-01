@@ -12,6 +12,10 @@ struct FrustumPlanes {
 layout(std140) uniform _FlwFrameUniforms {
     FrustumPlanes flw_frustumPlanes;
 
+    mat4 flw_view;
+    mat4 flw_viewInverse;
+    mat4 flw_projection;
+    mat4 flw_projectionInverse;
     mat4 flw_viewProjection;
     mat4 flw_viewProjectionInverse;
 
