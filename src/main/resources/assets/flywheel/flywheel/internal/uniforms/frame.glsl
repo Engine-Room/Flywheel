@@ -49,7 +49,9 @@ layout(std140) uniform _FlwFrameUniforms {
     float flw_renderTicks;
     float flw_renderSeconds;
 
+    /** Contains 1 for water, 2 for lava, max-value for any other fluid, 0 for no fluid. */
     uint flw_cameraInFluid;
+    /** Contains 1 for powder snow, max-value for any other block, 0 for no block. */
     uint flw_cameraInBlock;
 
     uint _flw_debugMode;
