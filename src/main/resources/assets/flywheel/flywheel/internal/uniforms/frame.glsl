@@ -38,6 +38,8 @@ layout(std140) uniform _FlwFrameUniforms {
 
     vec2 flw_viewportSize;
     float flw_defaultLineWidth;
+    float flw_aspectRatio;
+    float flw_viewDistance;
 
     uint flw_constantAmbientLight;
 
@@ -46,6 +48,9 @@ layout(std140) uniform _FlwFrameUniforms {
 
     float flw_renderTicks;
     float flw_renderSeconds;
+
+    uint flw_cameraInFluid;
+    uint flw_cameraInBlock;
 
     uint _flw_debugMode;
 };

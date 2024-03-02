@@ -16,11 +16,17 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 
 public class FrameUniforms implements UniformProvider {
-	public static final int SIZE = 304;
+	public static final int SIZE = 1188;
 	public int debugMode;
 
 	@Nullable
@@ -123,10 +129,18 @@ public class FrameUniforms implements UniformProvider {
 		MemoryUtil.memPutFloat(ptr, Math.max(2.5F, (float) window.getWidth() / 1920.0F * 2.5F));
 		ptr += 4;
 
+		MemoryUtil.memPutFloat(ptr, (float) window.getWidth() / (float) window.getHeight());
+		ptr += 4;
+
+		MemoryUtil.memPutFloat(ptr, Minecraft.getInstance().gameRenderer.getDepthFar());
+		ptr += 4;
+
 		MemoryUtil.memPutInt(ptr, getConstantAmbientLightFlag(context));
 		ptr += 4;
 
 		ptr = writeTime(ptr);
+
+		ptr = writeCameraIn(ptr);
 
 		MemoryUtil.memPutInt(ptr, debugMode);
 
@@ -193,6 +207,45 @@ public class FrameUniforms implements UniformProvider {
 		MemoryUtil.memPutFloat(ptr + 8, renderTicks);
 		MemoryUtil.memPutFloat(ptr + 12, renderSeconds);
 		return ptr + 16;
+	}
+
+	private long writeCameraIn(long ptr) {
+		Camera camera = context.camera();
+		if (!camera.isInitialized()) {
+			MemoryUtil.memPutInt(ptr, 0);
+			MemoryUtil.memPutInt(ptr + 4, 0);
+            return ptr + 8;
+        }
+		Level level = camera.getEntity().level();
+		BlockPos blockPos = camera.getBlockPosition();
+		Vec3 cameraPos = camera.getPosition();
+		FluidState fState = level.getFluidState(blockPos);
+		BlockState bState = level.getBlockState(blockPos);
+		float height = fState.getHeight(level, blockPos);
+
+		if (fState.isEmpty()) {
+			MemoryUtil.memPutInt(ptr, 0);
+		} else if (cameraPos.y < blockPos.getY() + height) {
+			if (fState.is(FluidTags.WATER)) {
+				MemoryUtil.memPutInt(ptr, 1);
+			} else if (fState.is(FluidTags.LAVA)) {
+				MemoryUtil.memPutInt(ptr, 2);
+			} else {
+				MemoryUtil.memPutInt(ptr, -1);
+			}
+		}
+
+		if (bState.isAir()) {
+			MemoryUtil.memPutInt(ptr + 4, 0);
+		} else {
+			if (bState.is(Blocks.POWDER_SNOW)) {
+				MemoryUtil.memPutInt(ptr + 4, 0);
+			} else {
+				MemoryUtil.memPutInt(ptr + 4, -1);
+			}
+		}
+
+		return ptr + 8;
 	}
 
 	private static long writeVec3(long ptr, float camX, float camY, float camZ) {
