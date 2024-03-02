@@ -8,9 +8,14 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
+import com.jozufozu.flywheel.backend.mixin.GameRendererAccessor;
 import com.jozufozu.flywheel.lib.math.MatrixMath;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 
@@ -23,17 +28,24 @@ public class FrameUniforms implements UniformProvider {
 
 	private final Matrix4f view = new Matrix4f();
 	private final Matrix4f viewInverse = new Matrix4f();
-	private final Matrix4f lastView = new Matrix4f();
+	private final Matrix4f viewPrev = new Matrix4f();
 	private final Matrix4f projection = new Matrix4f();
 	private final Matrix4f projectionInverse = new Matrix4f();
-	private final Matrix4f lastProjection = new Matrix4f();
+	private final Matrix4f projectionPrev = new Matrix4f();
 	private final Matrix4f viewProjection = new Matrix4f();
 	private final Matrix4f viewProjectionInverse = new Matrix4f();
-	private final Matrix4f lastViewProjection = new Matrix4f();
+	private final Matrix4f viewProjectionPrev = new Matrix4f();
 
-	private final Vector3f lastCameraPosition = new Vector3f();
-	private final Vector3f lastCameraLook = new Vector3f();
-	private final Vector2f lastCameraRot = new Vector2f();
+	private final Matrix4f cleanProjection = new Matrix4f();
+	private final Matrix4f cleanProjectionInverse = new Matrix4f();
+	private final Matrix4f cleanProjectionPrev = new Matrix4f();
+	private final Matrix4f cleanViewProjection = new Matrix4f();
+	private final Matrix4f cleanViewProjectionInverse = new Matrix4f();
+	private final Matrix4f cleanViewProjectionPrev = new Matrix4f();
+
+	private final Vector3f cameraPositionPrev = new Vector3f();
+	private final Vector3f cameraLookPrev = new Vector3f();
+	private final Vector2f cameraRotPrev = new Vector2f();
 
 	private boolean lastInit = false;
 
@@ -65,6 +77,7 @@ public class FrameUniforms implements UniformProvider {
 		projection.set(context.projection());
 		viewProjection.set(context.viewProjection());
 		viewProjection.translate(-camX, -camY, -camZ);
+		setupCleanMatrices(context.stack(), camera, context.partialTick());
 
 		if (!Uniforms.frustumPaused || Uniforms.frustumCapture) {
 			MatrixMath.writePackedFrustumPlanes(ptr, viewProjection);
@@ -75,28 +88,32 @@ public class FrameUniforms implements UniformProvider {
 
 		// manage last values of matrices
 		if (!lastInit) {
-			lastView.set(view);
-			lastProjection.set(projection);
-			lastViewProjection.set(lastViewProjection);
+			viewPrev.set(view);
+			projectionPrev.set(projection);
+			viewProjectionPrev.set(viewProjectionPrev);
+			cleanProjectionPrev.set(cleanProjection);
+			cleanViewProjectionPrev.set(cleanViewProjection);
 		}
 		ptr = writeMatrices(ptr);
-		lastView.set(view);
-		lastProjection.set(projection);
-		lastViewProjection.set(viewProjection);
+		viewPrev.set(view);
+		projectionPrev.set(projection);
+		viewProjectionPrev.set(viewProjection);
+		cleanProjectionPrev.set(cleanProjection);
+		cleanViewProjectionPrev.set(cleanViewProjection);
 
 		ptr = writeCamera(ptr, camX, camY, camZ, camera.getLookVector(), camera.getXRot(), camera.getYRot());
 
 		// last values for camera
 		if (!lastInit) {
-			lastCameraPosition.set(camX, camY, camZ);
-			lastCameraLook.set(camera.getLookVector());
-			lastCameraRot.set(camera.getXRot(), camera.getYRot());
+			cameraPositionPrev.set(camX, camY, camZ);
+			cameraLookPrev.set(camera.getLookVector());
+			cameraRotPrev.set(camera.getXRot(), camera.getYRot());
 		}
-		ptr = writeCamera(ptr, lastCameraPosition.x, lastCameraPosition.y, lastCameraPosition.z, lastCameraLook,
-				lastCameraRot.x, lastCameraRot.y);
-		lastCameraPosition.set(camX, camY, camZ);
-		lastCameraLook.set(camera.getLookVector());
-		lastCameraRot.set(camera.getXRot(), camera.getYRot());
+		ptr = writeCamera(ptr, cameraPositionPrev.x, cameraPositionPrev.y, cameraPositionPrev.z, cameraLookPrev,
+				cameraRotPrev.x, cameraRotPrev.y);
+		cameraPositionPrev.set(camX, camY, camZ);
+		cameraLookPrev.set(camera.getLookVector());
+		cameraRotPrev.set(camera.getXRot(), camera.getYRot());
 
 		var window = Minecraft.getInstance()
 				.getWindow();
@@ -119,14 +136,39 @@ public class FrameUniforms implements UniformProvider {
 	private long writeMatrices(long ptr) {
 		MatrixMath.writeUnsafe(view, ptr);
 		MatrixMath.writeUnsafe(view.invert(viewInverse), ptr + 64);
-		MatrixMath.writeUnsafe(lastView, ptr + 64 * 2);
+		MatrixMath.writeUnsafe(viewPrev, ptr + 64 * 2);
 		MatrixMath.writeUnsafe(projection, ptr + 64 * 3);
 		MatrixMath.writeUnsafe(projection.invert(projectionInverse), ptr + 64 * 4);
-		MatrixMath.writeUnsafe(lastProjection, ptr + 64 * 5);
+		MatrixMath.writeUnsafe(projectionPrev, ptr + 64 * 5);
 		MatrixMath.writeUnsafe(viewProjection, ptr + 64 * 6);
 		MatrixMath.writeUnsafe(viewProjection.invert(viewProjectionInverse), ptr + 64 * 7);
-		MatrixMath.writeUnsafe(lastViewProjection, ptr + 64 * 8);
-		return ptr + 64 * 9;
+		MatrixMath.writeUnsafe(viewProjectionPrev, ptr + 64 * 8);
+		MatrixMath.writeUnsafe(cleanProjection, ptr + 64 * 9);
+		MatrixMath.writeUnsafe(cleanProjection.invert(cleanProjectionInverse), ptr + 64 * 10);
+		MatrixMath.writeUnsafe(cleanProjectionPrev, ptr + 64 * 11);
+		MatrixMath.writeUnsafe(cleanViewProjection, ptr + 64 * 12);
+		MatrixMath.writeUnsafe(cleanViewProjection.invert(cleanViewProjectionInverse), ptr + 64 * 13);
+		MatrixMath.writeUnsafe(cleanViewProjectionPrev, ptr + 64 * 14);
+		return ptr + 64 * 15;
+	}
+
+	private void setupCleanMatrices(PoseStack stack, Camera camera, float partialTicks) {
+		Minecraft mc = Minecraft.getInstance();
+		GameRenderer gr = mc.gameRenderer;
+		GameRendererAccessor gra = (GameRendererAccessor) gr;
+
+		float fov = (float) gra.flywheel$getFov(camera, partialTicks, true);
+
+		cleanProjection.identity();
+
+		if (gra.flywheel$getZoom() != 1.0F) {
+			cleanProjection.translate(gra.flywheel$getZoomX(), -gra.flywheel$getZoomY(), 0.0F);
+			cleanProjection.scale(gra.flywheel$getZoom(), gra.flywheel$getZoom(), 1.0F);
+		}
+
+		cleanProjection.mul(new Matrix4f().setPerspective(fov * ((float) Math.PI / 180F), (float) mc.getWindow().getWidth() / (float) mc.getWindow().getHeight(), 0.05F, gr.getDepthFar()));
+
+		cleanViewProjection.set(cleanProjection).mul(stack.last().pose());
 	}
 
 	private static long writeCamera(long ptr, float camX, float camY, float camZ, Vector3f lookVector, float xRot,
