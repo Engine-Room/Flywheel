@@ -10,5 +10,7 @@ public interface Environment {
 
 	void setupCull(GlProgram cullProgram);
 
-	void delete();
+	void acquire();
+
+	void release();
 }

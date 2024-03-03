@@ -138,7 +138,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	}
 
 	@Override
-	protected void delete() {
+	protected void _delete() {
 		pipeline.values()
 				.forEach(GlProgram::delete);
 		culling.values()

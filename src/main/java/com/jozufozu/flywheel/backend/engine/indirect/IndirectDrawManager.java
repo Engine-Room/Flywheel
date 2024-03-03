@@ -19,9 +19,9 @@ import com.jozufozu.flywheel.backend.Samplers;
 import com.jozufozu.flywheel.backend.compile.ContextShader;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
+import com.jozufozu.flywheel.backend.engine.DrawManager;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
-import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
 import com.jozufozu.flywheel.backend.engine.TextureBinder;
@@ -39,7 +39,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.resources.model.ModelBakery;
 
-public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> {
+public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	private final IndirectPrograms programs;
 	private final StagingBuffer stagingBuffer;
 	private final MeshPool meshPool;
@@ -49,6 +49,7 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 
 	public IndirectDrawManager(IndirectPrograms programs) {
 		this.programs = programs;
+		programs.acquire();
 		stagingBuffer = new StagingBuffer(this.programs);
 
 		meshPool = new MeshPool();
@@ -81,17 +82,23 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 	}
 
 	public void renderStage(RenderStage stage) {
-		TextureBinder.bindLightAndOverlay();
-
-		vertexArray.bindForDraw();
-		Uniforms.bindForDraw();
-
-		for (var group : cullingGroups.values()) {
-			group.submit(stage);
+		if (!hasStage(stage)) {
+			return;
 		}
 
-		MaterialRenderState.reset();
-		TextureBinder.resetLightAndOverlay();
+		try (var restoreState = GlStateTracker.getRestoreState()) {
+			TextureBinder.bindLightAndOverlay();
+
+			vertexArray.bindForDraw();
+			Uniforms.bindForDraw();
+
+			for (var group : cullingGroups.values()) {
+				group.submit(stage);
+			}
+
+			MaterialRenderState.reset();
+			TextureBinder.resetLightAndOverlay();
+		}
 	}
 
 	@Override
@@ -136,6 +143,8 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 		meshPool.delete();
 
 		crumblingDrawBuffer.delete();
+
+		programs.release();
 	}
 
 	public void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks) {

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
@@ -13,17 +14,13 @@ import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.backend.engine.embed.Environment;
 
-import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
-import it.unimi.dsi.fastutil.objects.ReferenceSet;
-
-public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
+public abstract class DrawManager<N extends AbstractInstancer<?>> {
 	/**
 	 * A map of instancer keys to instancers.
 	 * <br>
 	 * This map is populated as instancers are requested and contains both initialized and uninitialized instancers.
 	 */
 	protected final Map<InstancerKey<?>, N> instancers = new ConcurrentHashMap<>();
-	protected final ReferenceSet<Environment> environments = new ReferenceLinkedOpenHashSet<>();
 	/**
 	 * A list of instancers that have not yet been initialized.
 	 * <br>
@@ -37,12 +34,6 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 	}
 
 	public void delete() {
-		// FIXME: The ownership of environments is a bit weird. Their resources are created and destroyed by the engine,
-		//   but the engine doesn't own the things themselves. This makes it hard for the engine to know when to delete
-		//   environments. For now, we just delete all environments when the engine is deleted, but this is not ideal.
-		environments.forEach(Environment::delete);
-		environments.clear();
-
 		instancers.clear();
 		initializationQueue.clear();
 	}
@@ -61,6 +52,10 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 				.forEach(AbstractInstancer::clear);
 	}
 
+	public abstract void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks);
+
+	public abstract void renderStage(RenderStage stage);
+
 	protected abstract <I extends Instance> N create(InstancerKey<I> type);
 
 	protected abstract <I extends Instance> void initialize(InstancerKey<I> key, N instancer);
@@ -68,15 +63,13 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 	private N createAndDeferInit(InstancerKey<?> key) {
 		var out = create(key);
 
-		environments.add(key.environment());
-
 		// Only queue the instancer for initialization if it has anything to render.
-        if (checkAndWarnEmptyModel(key.model())) {
+		if (checkAndWarnEmptyModel(key.model())) {
 			// Thread safety: this method is called atomically from within computeIfAbsent,
 			// so we don't need extra synchronization to protect the queue.
 			initializationQueue.add(new UninitializedInstancer<>(key, out));
 		}
-        return out;
+		return out;
 	}
 
 	protected record UninitializedInstancer<N, I extends Instance>(InstancerKey<I> key, N instancer) {

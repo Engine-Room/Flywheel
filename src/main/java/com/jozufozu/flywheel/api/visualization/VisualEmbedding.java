@@ -48,4 +48,13 @@ public interface VisualEmbedding extends VisualizationContext {
 	 * @param sizeZ The size of the box in the z direction.
 	 */
 	void invalidateLight(int minX, int minY, int minZ, int sizeX, int sizeY, int sizeZ);
+
+	/**
+	 * Delete this embedding.
+	 *
+	 * <p>After this method exits, the embedding will continue to function in the state it was in before
+	 * this method was called. Once all child instancers are deleted, the resources owned by this embedding
+	 * will be freed. Creating new instancers after calling this method will throw an error.</p>
+	 */
+	void delete();
 }

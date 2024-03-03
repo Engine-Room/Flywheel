@@ -77,9 +77,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 			if (instanceCount == 0) {
 				iterator.remove();
-				for (IndirectDraw draw : instancer.draws()) {
-					draw.delete();
-				}
+				instancer.delete();
 				continue;
 			}
 

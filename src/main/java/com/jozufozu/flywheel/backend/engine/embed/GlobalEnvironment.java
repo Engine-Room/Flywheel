@@ -25,7 +25,12 @@ public class GlobalEnvironment implements Environment {
 	}
 
 	@Override
-	public void delete() {
+	public void acquire() {
+
+	}
+
+	@Override
+	public void release() {
 
 	}
 }
