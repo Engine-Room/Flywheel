@@ -1,9 +1,11 @@
 package com.jozufozu.flywheel.backend.glsl.generate;
 
 public enum BinOp {
-	BITWISE_AND("&"),
-	RIGHT_SHIFT(">>"),
 	DIVIDE("/"),
+	SUBTRACT("-"),
+	RIGHT_SHIFT(">>"),
+	BITWISE_AND("&"),
+	BITWISE_XOR("^"),
 	// TODO: add more as we need them
 	;
 

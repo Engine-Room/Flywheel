@@ -33,15 +33,12 @@ void _flw_main() {
     }
 
     if (flw_material.useOverlay) {
-        // Need to clamp the overlay texture coords to sane coordinates because integer vertex attributes explode on
-        // some drivers for some draw calls. This should only effect instances that don't write to overlay, but
-        // the internal vertex format is unfortunately subject to these issues.
-        vec4 overlayColor = texelFetch(flw_overlayTex, clamp(flw_fragOverlay, 0, 10), 0);
+        vec4 overlayColor = texelFetch(flw_overlayTex, flw_fragOverlay, 0);
         color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
     }
 
     if (flw_material.useLight) {
-        vec4 lightColor = texture(flw_lightTex, (flw_fragLight * 15.0 + 0.5) / 16.0);
+        vec4 lightColor = texture(flw_lightTex, clamp(flw_fragLight, 0.5 / 16.0, 15.5 / 16.0));
         color *= lightColor;
     }
 

@@ -95,7 +95,7 @@ public class Compilation {
 			fullSource.append("\n#line 0 ")
 					.append(fileId)
 					.append(" // ")
-					.append(file.name)
+					.append(file.name())
 					.append('\n');
 		} else {
 			// Add extra newline to keep line numbers consistent

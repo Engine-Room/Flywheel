@@ -125,8 +125,8 @@ public class SourceFile implements SourceComponent {
 	}
 
 	@Override
-	public ResourceLocation name() {
-		return name;
+	public String name() {
+		return name.toString();
 	}
 
 	public Span getLineSpan(int lineNo) {
