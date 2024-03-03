@@ -3,20 +3,19 @@ package com.jozufozu.flywheel.backend.compile.component;
 import java.util.Collection;
 import java.util.Map;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 
-import net.minecraft.resources.ResourceLocation;
-
-public final class StringSubstitutionSourceComponent implements SourceComponent {
+public final class StringSubstitutionComponent implements SourceComponent {
 	private final SourceComponent source;
 	private final Map<String, String> replacements;
 	private final String sourceString;
 
-	public StringSubstitutionSourceComponent(SourceComponent source, String find, String replace) {
+	public StringSubstitutionComponent(SourceComponent source, String find, String replace) {
 		this(source, Map.of(find, replace));
 	}
 
-	public StringSubstitutionSourceComponent(SourceComponent source, Map<String, String> replacements) {
+	public StringSubstitutionComponent(SourceComponent source, Map<String, String> replacements) {
 		this.source = source;
 		this.replacements = replacements;
 		this.sourceString = source.source();
@@ -42,8 +41,8 @@ public final class StringSubstitutionSourceComponent implements SourceComponent 
 	}
 
 	@Override
-	public ResourceLocation name() {
-		return source.name().withSuffix("_string_substitution");
+	public String name() {
+		return Flywheel.rl("string_substitution").toString() + " / " + source.name();
 	}
 
 	@Override

@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.compile.core.SourceLoader;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 import com.jozufozu.flywheel.backend.glsl.SourceFile;
@@ -24,9 +25,9 @@ public class UberShaderComponent implements SourceComponent {
 	private final ResourceLocation name;
 	private final GlslExpr switchArg;
 	private final List<AdaptedFn> functionsToAdapt;
-	private final List<StringSubstitutionSourceComponent> adaptedComponents;
+	private final List<StringSubstitutionComponent> adaptedComponents;
 
-	private UberShaderComponent(ResourceLocation name, GlslExpr switchArg, List<AdaptedFn> functionsToAdapt, List<StringSubstitutionSourceComponent> adaptedComponents) {
+	private UberShaderComponent(ResourceLocation name, GlslExpr switchArg, List<AdaptedFn> functionsToAdapt, List<StringSubstitutionComponent> adaptedComponents) {
 		this.name = name;
 		this.switchArg = switchArg;
 		this.functionsToAdapt = functionsToAdapt;
@@ -38,8 +39,8 @@ public class UberShaderComponent implements SourceComponent {
 	}
 
 	@Override
-	public ResourceLocation name() {
-		return name;
+	public String name() {
+		return Flywheel.rl("uber_shader").toString() + " / " + name;
 	}
 
 	@Override
@@ -141,7 +142,7 @@ public class UberShaderComponent implements SourceComponent {
 				throw new NullPointerException("Switch argument must be set");
 			}
 
-			var transformed = ImmutableList.<StringSubstitutionSourceComponent>builder();
+			var transformed = ImmutableList.<StringSubstitutionComponent>builder();
 
 			boolean errored = false;
 			int index = 0;
@@ -150,7 +151,7 @@ public class UberShaderComponent implements SourceComponent {
 				final int finalIndex = index;
 				if (sourceFile != null) {
 					var adapterMap = createAdapterMap(adaptedFunctions, fnName -> "_" + fnName + "_" + finalIndex);
-					transformed.add(new StringSubstitutionSourceComponent(sourceFile, adapterMap));
+					transformed.add(new StringSubstitutionComponent(sourceFile, adapterMap));
 				} else {
 					errored = true;
 				}
@@ -163,17 +164,17 @@ public class UberShaderComponent implements SourceComponent {
 
 			return new UberShaderComponent(name, switchArg, adaptedFunctions, transformed.build());
 		}
-	}
 
-	private static ImmutableMap<String, String> createAdapterMap(List<AdaptedFn> adaptedFunctions, UnaryOperator<String> nameAdapter) {
-		ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+		private static ImmutableMap<String, String> createAdapterMap(List<AdaptedFn> adaptedFunctions, UnaryOperator<String> nameAdapter) {
+			ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
 
-		for (var adapted : adaptedFunctions) {
-			var fnName = adapted.signature()
-					.name();
-			builder.put(fnName, nameAdapter.apply(fnName));
+			for (var adapted : adaptedFunctions) {
+				var fnName = adapted.signature()
+						.name();
+				builder.put(fnName, nameAdapter.apply(fnName));
+			}
+
+			return builder.build();
 		}
-
-		return builder.build();
 	}
 }

@@ -67,7 +67,7 @@ public final class FlwPrograms {
 
 	@Nullable
 	private static UberShaderComponent createVertexMaterialComponent(SourceLoader loadChecker) {
-		return UberShaderComponent.builder(Flywheel.rl("uber_material_vertex"))
+		return UberShaderComponent.builder(Flywheel.rl("material_vertex"))
 				.materialSources(ShaderIndices.materialVertex()
 						.all())
 				.adapt(FnSignature.ofVoid("flw_materialVertex"))
@@ -77,7 +77,7 @@ public final class FlwPrograms {
 
 	@Nullable
 	private static UberShaderComponent createFragmentMaterialComponent(SourceLoader loadChecker) {
-		return UberShaderComponent.builder(Flywheel.rl("uber_material_fragment"))
+		return UberShaderComponent.builder(Flywheel.rl("material_fragment"))
 				.materialSources(ShaderIndices.materialFragment()
 						.all())
 				.adapt(FnSignature.ofVoid("flw_materialFragment"))
@@ -87,7 +87,7 @@ public final class FlwPrograms {
 
 	@Nullable
 	private static UberShaderComponent createFogComponent(SourceLoader loadChecker) {
-		return UberShaderComponent.builder(Flywheel.rl("uber_fog"))
+		return UberShaderComponent.builder(Flywheel.rl("fog"))
 				.materialSources(ShaderIndices.fog()
 						.all())
 				.adapt(FnSignature.create()
@@ -101,7 +101,7 @@ public final class FlwPrograms {
 
 	@Nullable
 	private static UberShaderComponent createCutoutComponent(SourceLoader loadChecker) {
-		return UberShaderComponent.builder(Flywheel.rl("uber_cutout"))
+		return UberShaderComponent.builder(Flywheel.rl("cutout"))
 				.materialSources(ShaderIndices.cutout()
 						.all())
 				.adapt(FnSignature.create()

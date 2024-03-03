@@ -9,7 +9,10 @@ void _flw_layoutVertex() {
     flw_vertexPos = vec4(_flw_a_pos, 1.0);
     flw_vertexColor = _flw_a_color;
     flw_vertexTexCoord = _flw_a_texCoord;
-    flw_vertexOverlay = _flw_a_overlay;
+    // Need to clamp the overlay texture coords to sane coordinates because integer vertex attributes explode on
+    // some drivers for some draw calls. This should only effect instances that don't write to overlay, but
+    // the internal vertex format is unfortunately subject to these issues.
+    flw_vertexOverlay = clamp(_flw_a_overlay, 0, 15);
     flw_vertexLight = _flw_a_light / 256.0;
     flw_vertexNormal = _flw_a_normal;
 }

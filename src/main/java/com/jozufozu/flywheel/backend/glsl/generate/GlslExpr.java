@@ -95,8 +95,12 @@ public interface GlslExpr {
 		return f.apply(this);
 	}
 
-	default GlslExpr and(int mask) {
-		return new Binary(this, uintHexLiteral(mask), BinOp.BITWISE_AND);
+	default GlslExpr div(float v) {
+		return new Binary(this, floatLiteral(v), BinOp.DIVIDE);
+	}
+
+	default GlslExpr sub(int v) {
+		return new Binary(this, uintLiteral(v), BinOp.SUBTRACT);
 	}
 
 	default GlslExpr rsh(int by) {
@@ -106,8 +110,12 @@ public interface GlslExpr {
 		return new Binary(this, uintLiteral(by), BinOp.RIGHT_SHIFT);
 	}
 
-	default GlslExpr div(float v) {
-		return new Binary(this, floatLiteral(v), BinOp.DIVIDE);
+	default GlslExpr and(int mask) {
+		return new Binary(this, uintHexLiteral(mask), BinOp.BITWISE_AND);
+	}
+
+	default GlslExpr xor(int mask) {
+		return new Binary(this, uintHexLiteral(mask), BinOp.BITWISE_XOR);
 	}
 
 	default GlslExpr clamp(float from, float to) {

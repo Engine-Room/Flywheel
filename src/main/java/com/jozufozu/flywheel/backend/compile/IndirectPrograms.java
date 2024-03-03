@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.jozufozu.flywheel.backend.compile.component.IndirectComponent;
+import com.jozufozu.flywheel.backend.compile.component.StructInstanceComponent;
 import com.jozufozu.flywheel.backend.compile.core.CompilationHarness;
 import com.jozufozu.flywheel.backend.compile.core.Compile;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
@@ -78,7 +78,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 						.nameMapper(instanceType -> "culling/" + ResourceUtil.toDebugFileNameNoExtension(instanceType.cullShader()))
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(CULL_SHADER_HEADER)
-						.withComponent(IndirectComponent::create)
+						.withComponent(StructInstanceComponent::create)
 						.withResource(InstanceType::cullShader)
 						.withResource(CULL_SHADER_MAIN))
 				.postLink((key, program) -> program.setUniformBlockBinding("_FlwFrameUniforms", 0))
