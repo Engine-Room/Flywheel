@@ -2,11 +2,11 @@ package com.jozufozu.flywheel.backend.engine.indirect;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.lib.memory.MemoryBlock;
+import com.jozufozu.flywheel.backend.util.MemoryBuffer;
 
 public class TransferList {
 	private static final long STRIDE = Long.BYTES * 4;
-	private MemoryBlock block;
+	private final MemoryBuffer block = new MemoryBuffer(STRIDE);
 	private int length;
 
 	/**
@@ -24,7 +24,7 @@ public class TransferList {
 			return;
 		}
 
-		reallocIfNeeded(length);
+		block.reallocIfNeeded(length);
 
 		vbo(length, vbo);
 		srcOffset(length, srcOffset);
@@ -56,25 +56,23 @@ public class TransferList {
 	}
 
 	public int vbo(int index) {
-		return MemoryUtil.memGetInt(ptrForIndex(index));
+		return MemoryUtil.memGetInt(block.ptrForIndex(index));
 	}
 
 	public long srcOffset(int index) {
-		return MemoryUtil.memGetLong(ptrForIndex(index) + Long.BYTES);
+		return MemoryUtil.memGetLong(block.ptrForIndex(index) + Long.BYTES);
 	}
 
 	public long dstOffset(int index) {
-		return MemoryUtil.memGetLong(ptrForIndex(index) + Long.BYTES * 2);
+		return MemoryUtil.memGetLong(block.ptrForIndex(index) + Long.BYTES * 2);
 	}
 
 	public long size(int index) {
-		return MemoryUtil.memGetLong(ptrForIndex(index) + Long.BYTES * 3);
+		return MemoryUtil.memGetLong(block.ptrForIndex(index) + Long.BYTES * 3);
 	}
 
 	public void delete() {
-		if (block != null) {
-			block.free();
-		}
+		block.delete();
 	}
 
 	private boolean continuesLast(int vbo, long srcOffset, long dstOffset) {
@@ -87,38 +85,18 @@ public class TransferList {
 	}
 
 	private void vbo(int index, int vbo) {
-		MemoryUtil.memPutInt(ptrForIndex(index), vbo);
+		MemoryUtil.memPutInt(block.ptrForIndex(index), vbo);
 	}
 
 	private void srcOffset(int index, long srcOffset) {
-		MemoryUtil.memPutLong(ptrForIndex(index) + Long.BYTES, srcOffset);
+		MemoryUtil.memPutLong(block.ptrForIndex(index) + Long.BYTES, srcOffset);
 	}
 
 	private void dstOffset(int index, long dstOffset) {
-		MemoryUtil.memPutLong(ptrForIndex(index) + Long.BYTES * 2, dstOffset);
+		MemoryUtil.memPutLong(block.ptrForIndex(index) + Long.BYTES * 2, dstOffset);
 	}
 
 	private void size(int index, long size) {
-		MemoryUtil.memPutLong(ptrForIndex(index) + Long.BYTES * 3, size);
-	}
-
-	private void reallocIfNeeded(int index) {
-		if (block == null) {
-			block = MemoryBlock.malloc(neededCapacityForIndex(index + 8));
-		} else if (block.size() < neededCapacityForIndex(index)) {
-			block = block.realloc(neededCapacityForIndex(index + 8));
-		}
-	}
-
-	private long ptrForIndex(int index) {
-		return block.ptr() + bytePosForIndex(index);
-	}
-
-	private static long bytePosForIndex(int index) {
-		return index * STRIDE;
-	}
-
-	private static long neededCapacityForIndex(int index) {
-		return (index + 1) * STRIDE;
+		MemoryUtil.memPutLong(block.ptrForIndex(index) + Long.BYTES * 3, size);
 	}
 }

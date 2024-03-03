@@ -2,12 +2,12 @@ package com.jozufozu.flywheel.backend.engine.indirect;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.lib.memory.MemoryBlock;
+import com.jozufozu.flywheel.backend.util.MemoryBuffer;
 
 public class ScatterList {
 	public static final long STRIDE = Integer.BYTES * 2;
 	public final long maxBytesPerScatter;
-	private MemoryBlock block;
+	private final MemoryBuffer block = new MemoryBuffer(STRIDE);
 	private int length;
 	private long usedBytes;
 
@@ -46,9 +46,9 @@ public class ScatterList {
 	}
 
 	public void push(long sizeBytes, long srcOffsetBytes, long dstOffsetBytes) {
-		reallocIfNeeded(length);
+		block.reallocIfNeeded(length);
 
-		long ptr = block.ptr() + length * STRIDE;
+		long ptr = block.ptrForIndex(length);
 		MemoryUtil.memPutInt(ptr, packSizeAndSrcOffset(sizeBytes, srcOffsetBytes));
 		MemoryUtil.memPutInt(ptr + Integer.BYTES, (int) (dstOffsetBytes >> 2));
 
@@ -78,21 +78,7 @@ public class ScatterList {
 	}
 
 	public void delete() {
-		if (block != null) {
-			block.free();
-		}
-	}
-
-	private void reallocIfNeeded(int index) {
-		if (block == null) {
-			block = MemoryBlock.malloc(neededCapacityForIndex(index + 8));
-		} else if (block.size() < neededCapacityForIndex(index)) {
-			block = block.realloc(neededCapacityForIndex(index + 8));
-		}
-	}
-
-	private static long neededCapacityForIndex(int index) {
-		return (index + 1) * STRIDE;
+		block.delete();
 	}
 
 	private static int packSizeAndSrcOffset(long sizeBytes, long srcOffsetBytes) {
