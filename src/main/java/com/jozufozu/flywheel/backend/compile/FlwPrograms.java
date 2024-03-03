@@ -57,7 +57,7 @@ public final class FlwPrograms {
 
 	private static ImmutableList<PipelineProgramKey> createPipelineKeys() {
 		ImmutableList.Builder<PipelineProgramKey> builder = ImmutableList.builder();
-		for (ContextShader contextShader : ContextShaders.REGISTRY) {
+		for (ContextShader contextShader : ContextShader.values()) {
 			for (InstanceType<?> instanceType : InstanceType.REGISTRY) {
 				builder.add(new PipelineProgramKey(instanceType, contextShader));
 			}

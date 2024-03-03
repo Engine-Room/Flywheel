@@ -20,7 +20,7 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.Samplers;
 import com.jozufozu.flywheel.backend.ShaderIndices;
-import com.jozufozu.flywheel.backend.compile.ContextShaders;
+import com.jozufozu.flywheel.backend.compile.ContextShader;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
@@ -203,7 +203,7 @@ public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>
 
 				CommonCrumbling.applyCrumblingProperties(crumblingMaterial, shader.material());
 
-				var program = programs.get(shader.instanceType(), ContextShaders.CRUMBLING);
+				var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING);
 				program.bind();
 
 				uploadMaterialUniform(program, crumblingMaterial);

@@ -9,6 +9,8 @@ import com.jozufozu.flywheel.api.instance.InstancerProvider;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
+import com.jozufozu.flywheel.backend.engine.embed.EmbeddedEnvironment;
+import com.jozufozu.flywheel.backend.engine.embed.Environment;
 
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;

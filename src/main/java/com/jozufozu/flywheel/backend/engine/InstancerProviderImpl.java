@@ -6,6 +6,7 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.instance.InstancerProvider;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.backend.engine.embed.GlobalEnvironment;
 
 public record InstancerProviderImpl(AbstractEngine engine, RenderStage renderStage) implements InstancerProvider {
 	@Override

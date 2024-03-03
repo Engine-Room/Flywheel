@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
-import com.jozufozu.flywheel.backend.engine.Environment;
+import com.jozufozu.flywheel.backend.engine.embed.Environment;
 
 public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> {
 	private final long objectStride;

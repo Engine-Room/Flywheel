@@ -1,7 +1,6 @@
-package com.jozufozu.flywheel.backend.engine;
+package com.jozufozu.flywheel.backend.engine.embed;
 
 import com.jozufozu.flywheel.backend.compile.ContextShader;
-import com.jozufozu.flywheel.backend.compile.ContextShaders;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 
 public class GlobalEnvironment implements Environment {
@@ -12,7 +11,7 @@ public class GlobalEnvironment implements Environment {
 
 	@Override
 	public ContextShader contextShader() {
-		return ContextShaders.DEFAULT;
+		return ContextShader.DEFAULT;
 	}
 
 	@Override
@@ -23,5 +22,10 @@ public class GlobalEnvironment implements Environment {
 	@Override
 	public void setupCull(GlProgram cullProgram) {
 		cullProgram.setBool("_flw_useEmbeddedModel", false);
+	}
+
+	@Override
+	public void delete() {
+
 	}
 }

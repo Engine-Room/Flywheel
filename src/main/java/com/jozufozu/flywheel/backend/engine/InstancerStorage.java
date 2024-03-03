@@ -11,6 +11,10 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.backend.engine.embed.Environment;
+
+import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ReferenceSet;
 
 public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 	/**
@@ -19,6 +23,7 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 	 * This map is populated as instancers are requested and contains both initialized and uninitialized instancers.
 	 */
 	protected final Map<InstancerKey<?>, N> instancers = new ConcurrentHashMap<>();
+	protected final ReferenceSet<Environment> environments = new ReferenceLinkedOpenHashSet<>();
 	/**
 	 * A list of instancers that have not yet been initialized.
 	 * <br>
@@ -32,6 +37,12 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 	}
 
 	public void delete() {
+		// FIXME: The ownership of environments is a bit weird. Their resources are created and destroyed by the engine,
+		//   but the engine doesn't own the things themselves. This makes it hard for the engine to know when to delete
+		//   environments. For now, we just delete all environments when the engine is deleted, but this is not ideal.
+		environments.forEach(Environment::delete);
+		environments.clear();
+
 		instancers.clear();
 		initializationQueue.clear();
 	}
@@ -56,6 +67,8 @@ public abstract class InstancerStorage<N extends AbstractInstancer<?>> {
 
 	private N createAndDeferInit(InstancerKey<?> key) {
 		var out = create(key);
+
+		environments.add(key.environment());
 
 		// Only queue the instancer for initialization if it has anything to render.
         if (checkAndWarnEmptyModel(key.model())) {

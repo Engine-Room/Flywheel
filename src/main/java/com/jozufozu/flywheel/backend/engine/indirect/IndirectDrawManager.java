@@ -16,16 +16,16 @@ import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.Samplers;
-import com.jozufozu.flywheel.backend.compile.ContextShaders;
+import com.jozufozu.flywheel.backend.compile.ContextShader;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
-import com.jozufozu.flywheel.backend.engine.Environment;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
 import com.jozufozu.flywheel.backend.engine.TextureBinder;
+import com.jozufozu.flywheel.backend.engine.embed.Environment;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
@@ -164,7 +164,7 @@ public class IndirectDrawManager extends InstancerStorage<IndirectInstancer<?>> 
 
 				// Set up the crumbling program buffers. Nothing changes here between draws.
 				var program = cullingGroups.get(instanceTypeEntry.getKey())
-						.bindWithContextShader(ContextShaders.CRUMBLING);
+						.bindWithContextShader(ContextShader.CRUMBLING);
 
 				program.setSamplerBinding("crumblingTex", Samplers.CRUMBLING);
 
