@@ -23,9 +23,9 @@ import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.ContextShader;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
+import com.jozufozu.flywheel.backend.engine.DrawManager;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
-import com.jozufozu.flywheel.backend.engine.InstancerStorage;
 import com.jozufozu.flywheel.backend.engine.MaterialEncoder;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
@@ -41,7 +41,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.resources.model.ModelBakery;
 
-public class InstancedDrawManager extends InstancerStorage<InstancedInstancer<?>> {
+public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	/**
 	 * The set of draw calls to make in each {@link RenderStage}.
 	 */

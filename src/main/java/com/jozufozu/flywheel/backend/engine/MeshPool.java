@@ -189,7 +189,7 @@ public class MeshPool {
 		}
 
 		@Override
-		protected void delete() {
+		protected void _delete() {
 			MeshPool.this.dirty = true;
 			MeshPool.this.anyToRemove = true;
 		}

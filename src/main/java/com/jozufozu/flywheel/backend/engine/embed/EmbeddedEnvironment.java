@@ -14,13 +14,14 @@ import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
 import com.jozufozu.flywheel.backend.Samplers;
 import com.jozufozu.flywheel.backend.compile.ContextShader;
-import com.jozufozu.flywheel.backend.engine.AbstractEngine;
+import com.jozufozu.flywheel.backend.engine.EngineImpl;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
+import com.jozufozu.flywheel.backend.util.AtomicReferenceCounted;
 
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.BlockAndTintGetter;
 
-public class EmbeddedEnvironment implements Environment, VisualEmbedding {
+public class EmbeddedEnvironment extends AtomicReferenceCounted implements Environment, VisualEmbedding {
 	private final Matrix4f pose = new Matrix4f();
 	private final Matrix3f normal = new Matrix3f();
 
@@ -28,10 +29,10 @@ public class EmbeddedEnvironment implements Environment, VisualEmbedding {
 	private final EmbeddedLightTexture lightTexture = new EmbeddedLightTexture();
 
 	private final InstancerProvider instancerProvider;
-	private final AbstractEngine engine;
+	private final EngineImpl engine;
 	private final RenderStage renderStage;
 
-	public EmbeddedEnvironment(AbstractEngine engine, RenderStage renderStage) {
+	public EmbeddedEnvironment(EngineImpl engine, RenderStage renderStage) {
 		this.engine = engine;
 		this.renderStage = renderStage;
 
@@ -42,6 +43,22 @@ public class EmbeddedEnvironment implements Environment, VisualEmbedding {
 				return engine.instancer(EmbeddedEnvironment.this, type, model, renderStage);
 			}
 		};
+
+		// Acquire the reference owned by the visual that created this.
+		acquire();
+	}
+
+	public void flush() {
+		if (lightVolume.empty()) {
+			return;
+		}
+		Samplers.EMBEDDED_LIGHT.makeActive();
+
+		lightTexture.bind();
+
+		lightTexture.ensureCapacity(lightVolume.sizeX, lightVolume.sizeY, lightVolume.sizeZ);
+
+		lightTexture.upload(lightVolume.ptr(), lightVolume.sizeX, lightVolume.sizeY, lightVolume.sizeZ);
 	}
 
 	@Override
@@ -72,10 +89,6 @@ public class EmbeddedEnvironment implements Environment, VisualEmbedding {
 
 			lightTexture.bind();
 
-			lightTexture.ensureCapacity(lightVolume.sizeX, lightVolume.sizeY, lightVolume.sizeZ);
-
-			lightTexture.upload(lightVolume.ptr(), lightVolume.sizeX, lightVolume.sizeY, lightVolume.sizeZ);
-
 			float oneOverSizeX = 1f / (float) lightTexture.sizeX;
 			float oneOverSizeY = 1f / (float) lightTexture.sizeY;
 			float oneOverSizeZ = 1f / (float) lightTexture.sizeZ;
@@ -105,11 +118,35 @@ public class EmbeddedEnvironment implements Environment, VisualEmbedding {
 
 	@Override
 	public VisualEmbedding createEmbedding() {
-		return new EmbeddedEnvironment(engine, renderStage);
+		return engine.createEmbedding(renderStage);
 	}
 
+	/**
+	 * Called by visuals
+	 */
 	@Override
 	public void delete() {
+		// Release the reference owned by the visual that created this.
+		// Note that visuals don't explicitly call acquire, instead the
+		// storage acquired a reference when this was constructed.
+		release();
+	}
+
+	/**
+	 * Called when referenceCount goes to 0
+	 */
+	@Override
+	public void _delete() {
+		engine.freeEmbedding(this);
+	}
+
+	/**
+	 * Called in EnvironmentStorage#flush
+	 */
+	public void actuallyDelete() {
+		// We could technically free the light volume right away in _delete, but
+		// the control flow here is so convoluted that it's probably best to do
+		// everything in one place.
 		lightVolume.delete();
 		lightTexture.delete();
 	}

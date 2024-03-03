@@ -30,11 +30,11 @@ public abstract class AtomicReferenceCounted {
 		int newCount = referenceCount.decrementAndGet();
 		if (newCount == 0) {
 			isDeleted = true;
-			delete();
+			_delete();
 		} else if (newCount < 0) {
 			throw new IllegalStateException("Tried to delete instance of '" + getClass().getName()  + "' more times than it was acquired!");
 		}
 	}
 
-	protected abstract void delete();
+	protected abstract void _delete();
 }

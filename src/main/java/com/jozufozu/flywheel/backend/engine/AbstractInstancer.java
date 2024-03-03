@@ -25,6 +25,8 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	protected AbstractInstancer(InstanceType<I> type, Environment environment) {
 		this.type = type;
 		this.environment = environment;
+
+		environment.acquire();
 	}
 
 	@Override
@@ -157,6 +159,10 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		handles.clear();
 		changed.clear();
 		deleted.clear();
+	}
+
+	public void delete() {
+		environment.release();
 	}
 
 	@Override

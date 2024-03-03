@@ -101,4 +101,13 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		MemoryUtil.memPutInt(ptr, index);
 		writer.write(ptr + IndirectBuffers.INT_SIZE, instance);
 	}
+
+	@Override
+	public void delete() {
+		super.delete();
+
+		for (IndirectDraw draw : draws()) {
+			draw.delete();
+		}
+	}
 }

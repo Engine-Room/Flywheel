@@ -107,6 +107,8 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
     }
 
 	public void delete() {
+		super.delete();
+
 		if (vbo == null) {
 			return;
 		}
