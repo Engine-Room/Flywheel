@@ -22,10 +22,12 @@ public class PipelineCompiler {
 							var instance = ResourceUtil.toDebugFileNameNoExtension(key.instanceType()
 									.vertexShader());
 
-							var context = ResourceUtil.toDebugFileNameNoExtension(key.contextShader()
-									.vertexShader());
+							var context = key.contextShader()
+									.nameLowerCase();
 							return "pipeline/" + pipeline.compilerMarker() + "/" + instance + "_" + context;
 						})
+						.onCompile((key, comp) -> key.contextShader()
+								.onCompile(comp))
 						.withResource(pipeline.vertexApiImpl())
 						.withResource(InternalVertex.LAYOUT_SHADER)
 						.withComponent(key -> pipeline.assembler()
@@ -33,23 +35,18 @@ public class PipelineCompiler {
 						.withComponents(vertexComponents)
 						.withResource(key -> key.instanceType()
 								.vertexShader())
-						.withResource(key -> key.contextShader()
-								.vertexShader())
 						.withResource(pipeline.vertexMain()))
 				.link(PIPELINE.shader(pipeline.glslVersion(), ShaderType.FRAGMENT)
 						.nameMapper(key -> {
-							var instance = ResourceUtil.toDebugFileNameNoExtension(key.instanceType()
-									.vertexShader());
-
-							var context = ResourceUtil.toDebugFileNameNoExtension(key.contextShader()
-									.fragmentShader());
-							return "pipeline/" + pipeline.compilerMarker() + "/" + instance + "_" + context;
+							var context = key.contextShader()
+									.nameLowerCase();
+							return "pipeline/" + pipeline.compilerMarker() + "/" + context;
 						})
 						.enableExtension("GL_ARB_conservative_depth")
+						.onCompile((key, comp) -> key.contextShader()
+								.onCompile(comp))
 						.withResource(pipeline.fragmentApiImpl())
 						.withComponents(fragmentComponents)
-						.withResource(key -> key.contextShader()
-								.fragmentShader())
 						.withResource(pipeline.fragmentMain()))
 				.preLink((key, program) -> {
 					program.bindAttribLocation("_flw_a_pos", 0);
@@ -71,8 +68,7 @@ public class PipelineCompiler {
 					pipeline.onLink()
 							.accept(program);
 					key.contextShader()
-							.onLink()
-							.accept(program);
+							.onLink(program);
 
 					GlProgram.unbind();
 				})

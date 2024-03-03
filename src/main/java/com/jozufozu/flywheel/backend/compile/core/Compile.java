@@ -106,7 +106,7 @@ public class Compile<K> {
 		private final GlslVersion glslVersion;
 		private final ShaderType shaderType;
 		private final List<BiFunction<K, SourceLoader, @Nullable SourceComponent>> fetchers = new ArrayList<>();
-		private Consumer<Compilation> compilationCallbacks = $ -> {
+		private BiConsumer<K, Compilation> compilationCallbacks = ($, $$) -> {
 		};
 		private Function<K, String> nameMapper = Object::toString;
 
@@ -146,17 +146,17 @@ public class Compile<K> {
 			return withResource($ -> resourceLocation);
 		}
 
-		public ShaderCompiler<K> onCompile(Consumer<Compilation> cb) {
+		public ShaderCompiler<K> onCompile(BiConsumer<K, Compilation> cb) {
 			compilationCallbacks = compilationCallbacks.andThen(cb);
 			return this;
 		}
 
 		public ShaderCompiler<K> define(String def, int value) {
-			return onCompile(ctx -> ctx.define(def, String.valueOf(value)));
+			return onCompile(($, ctx) -> ctx.define(def, String.valueOf(value)));
 		}
 
 		public ShaderCompiler<K> enableExtension(String extension) {
-			return onCompile(ctx -> ctx.enableExtension(extension));
+			return onCompile(($, ctx) -> ctx.enableExtension(extension));
 		}
 
 		@Nullable
@@ -175,7 +175,8 @@ public class Compile<K> {
 				return null;
 			}
 
-			return compiler.compile(glslVersion, shaderType, nameMapper.apply(key), compilationCallbacks, components);
+			Consumer<Compilation> cb = ctx -> compilationCallbacks.accept(key, ctx);
+			return compiler.compile(glslVersion, shaderType, nameMapper.apply(key), cb, components);
 		}
 	}
 }

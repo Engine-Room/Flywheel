@@ -6,9 +6,22 @@
 layout (depth_greater) out float gl_FragDepth;
 #endif
 
-out vec4 _flw_outputColor;
+#ifdef _FLW_CRUMBLING
+uniform sampler2D _flw_crumblingTex;
+
+in vec2 _flw_crumblingTexCoord;
+#endif
+
+#ifdef _FLW_EMBEDDED
+uniform sampler3D _flw_lightVolume;
+
+in vec3 _flw_lightVolumeCoord;
+
+#endif
 
 in vec4 _flw_debugColor;
+
+out vec4 _flw_outputColor;
 
 void _flw_main() {
     flw_sampleColor = texture(flw_diffuseTex, flw_vertexTexCoord);
@@ -16,9 +29,19 @@ void _flw_main() {
     flw_fragOverlay = flw_vertexOverlay;
     flw_fragLight = flw_vertexLight;
 
-    flw_beginFragment();
+    #ifdef _FLW_EMBEDDED
+    flw_fragLight = max(flw_fragLight, texture(_flw_lightVolume, _flw_lightVolumeCoord).rg);
+    #endif
+
     flw_materialFragment();
-    flw_endFragment();
+
+    #ifdef _FLW_CRUMBLING
+    vec4 crumblingSampleColor = texture(_flw_crumblingTex, _flw_crumblingTexCoord);
+
+    // Make the crumbling overlay transparent when the fragment color after the material shader is transparent.
+    flw_fragColor.rgb = crumblingSampleColor.rgb;
+    flw_fragColor.a *= crumblingSampleColor.a;
+    #endif
 
     vec4 color = flw_fragColor;
 

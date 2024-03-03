@@ -6,4 +6,5 @@ public enum DebugMode {
 	INSTANCE_ID,
 	LIGHT,
 	OVERLAY,
+	LIGHT_VOLUME,
 }

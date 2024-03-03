@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.InstanceWriter;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
-import com.jozufozu.flywheel.backend.engine.Environment;
+import com.jozufozu.flywheel.backend.engine.embed.Environment;
 import com.jozufozu.flywheel.backend.gl.TextureBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;

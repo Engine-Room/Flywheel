@@ -25,7 +25,7 @@ public class ShaderCache {
 
 	@Nullable
 	public GlShader compile(GlslVersion glslVersion, ShaderType shaderType, String name, Consumer<Compilation> callback, List<SourceComponent> sourceComponents) {
-		var key = new ShaderKey(glslVersion, shaderType, sourceComponents);
+		var key = new ShaderKey(glslVersion, shaderType, name);
 		var cached = inner.get(key);
 		if (cached != null) {
 			return cached.unwrap();
@@ -69,6 +69,6 @@ public class ShaderCache {
 		included.addAll(component.included());
 	}
 
-	private record ShaderKey(GlslVersion glslVersion, ShaderType shaderType, List<SourceComponent> sourceComponents) {
+	private record ShaderKey(GlslVersion glslVersion, ShaderType shaderType, String name) {
 	}
 }

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
+import com.jozufozu.flywheel.backend.engine.embed.Environment;
 import com.jozufozu.flywheel.lib.util.AtomicBitset;
 
 public abstract class AbstractInstancer<I extends Instance> implements Instancer<I> {
