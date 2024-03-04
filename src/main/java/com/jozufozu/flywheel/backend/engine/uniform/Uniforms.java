@@ -17,6 +17,11 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 
 public class Uniforms {
+	public static final int FRAME_INDEX = 0;
+	public static final int FOG_INDEX = 1;
+	public static final int OPTIONS_INDEX = 2;
+	public static final int PLAYER_INDEX = 3;
+	public static final int LEVEL_INDEX = 4;
 	public static boolean frustumPaused = false;
 	public static boolean frustumCapture = false;
 	private static @Nullable UniformBuffer<FrameUniforms> frame;
@@ -27,35 +32,35 @@ public class Uniforms {
 
 	public static UniformBuffer<FrameUniforms> frame() {
 		if (frame == null) {
-			frame = new UniformBuffer<>(0, new FrameUniforms());
+			frame = new UniformBuffer<>(FRAME_INDEX, new FrameUniforms());
 		}
 		return frame;
 	}
 
 	public static UniformBuffer<FogUniforms> fog() {
 		if (fog == null) {
-			fog = new UniformBuffer<>(1, new FogUniforms());
+			fog = new UniformBuffer<>(FOG_INDEX, new FogUniforms());
 		}
 		return fog;
 	}
 
 	public static UniformBuffer<OptionsUniforms> options() {
 		if (options == null) {
-			options = new UniformBuffer<>(2, new OptionsUniforms());
+			options = new UniformBuffer<>(OPTIONS_INDEX, new OptionsUniforms());
 		}
 		return options;
 	}
 
 	public static UniformBuffer<PlayerUniforms> player() {
 		if (player == null) {
-			player = new UniformBuffer<>(3, new PlayerUniforms());
+			player = new UniformBuffer<>(PLAYER_INDEX, new PlayerUniforms());
 		}
 		return player;
 	}
 
 	public static UniformBuffer<LevelUniforms> level() {
 		if (level == null) {
-			level = new UniformBuffer<>(4, new LevelUniforms());
+			level = new UniformBuffer<>(LEVEL_INDEX, new LevelUniforms());
 		}
 		return level;
 	}

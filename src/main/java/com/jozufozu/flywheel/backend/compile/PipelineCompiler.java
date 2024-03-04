@@ -6,6 +6,7 @@ import com.jozufozu.flywheel.backend.InternalVertex;
 import com.jozufozu.flywheel.backend.Samplers;
 import com.jozufozu.flywheel.backend.compile.core.CompilationHarness;
 import com.jozufozu.flywheel.backend.compile.core.Compile;
+import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
@@ -60,8 +61,11 @@ public class PipelineCompiler {
 					program.bindAttribLocation("_flw_a_normal", 5);
 				})
 				.postLink((key, program) -> {
-					program.setUniformBlockBinding("_FlwFrameUniforms", 0);
-					program.setUniformBlockBinding("_FlwFogUniforms", 1);
+					program.setUniformBlockBinding("_FlwFrameUniforms", Uniforms.FRAME_INDEX);
+					program.setUniformBlockBinding("_FlwFogUniforms", Uniforms.FOG_INDEX);
+					program.setUniformBlockBinding("_FlwOptionsUniforms", Uniforms.OPTIONS_INDEX);
+					program.setUniformBlockBinding("_FlwPlayerUniforms", Uniforms.PLAYER_INDEX);
+					program.setUniformBlockBinding("_FlwLevelUniforms", Uniforms.LEVEL_INDEX);
 
 					program.bind();
 
