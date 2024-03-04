@@ -18,11 +18,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 
 public class FrameUniforms implements UniformProvider {
@@ -180,7 +176,8 @@ public class FrameUniforms implements UniformProvider {
 			cleanProjection.scale(gra.flywheel$getZoom(), gra.flywheel$getZoom(), 1.0F);
 		}
 
-		cleanProjection.mul(new Matrix4f().setPerspective(fov * ((float) Math.PI / 180F), (float) mc.getWindow().getWidth() / (float) mc.getWindow().getHeight(), 0.05F, gr.getDepthFar()));
+		cleanProjection.mul(new Matrix4f().setPerspective(fov * ((float) Math.PI / 180F),
+				(float) mc.getWindow().getWidth() / (float) mc.getWindow().getHeight(), 0.05F, gr.getDepthFar()));
 
 		cleanViewProjection.set(cleanProjection).mul(stack.last().pose());
 	}
@@ -214,38 +211,12 @@ public class FrameUniforms implements UniformProvider {
 		if (!camera.isInitialized()) {
 			MemoryUtil.memPutInt(ptr, 0);
 			MemoryUtil.memPutInt(ptr + 4, 0);
-            return ptr + 8;
-        }
+			return ptr + 8;
+		}
 		Level level = camera.getEntity().level();
 		BlockPos blockPos = camera.getBlockPosition();
 		Vec3 cameraPos = camera.getPosition();
-		FluidState fState = level.getFluidState(blockPos);
-		BlockState bState = level.getBlockState(blockPos);
-		float height = fState.getHeight(level, blockPos);
-
-		if (fState.isEmpty()) {
-			MemoryUtil.memPutInt(ptr, 0);
-		} else if (cameraPos.y < blockPos.getY() + height) {
-			if (fState.is(FluidTags.WATER)) {
-				MemoryUtil.memPutInt(ptr, 1);
-			} else if (fState.is(FluidTags.LAVA)) {
-				MemoryUtil.memPutInt(ptr, 2);
-			} else {
-				MemoryUtil.memPutInt(ptr, -1);
-			}
-		}
-
-		if (bState.isAir()) {
-			MemoryUtil.memPutInt(ptr + 4, 0);
-		} else {
-			if (bState.is(Blocks.POWDER_SNOW)) {
-				MemoryUtil.memPutInt(ptr + 4, 0);
-			} else {
-				MemoryUtil.memPutInt(ptr + 4, -1);
-			}
-		}
-
-		return ptr + 8;
+		return Uniforms.writeInFluidAndBlock(ptr, level, blockPos, cameraPos);
 	}
 
 	private static int getConstantAmbientLightFlag(RenderContext context) {

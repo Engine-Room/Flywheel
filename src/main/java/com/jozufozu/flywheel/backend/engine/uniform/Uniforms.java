@@ -8,6 +8,14 @@ import com.jozufozu.flywheel.config.DebugMode;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.Vec3;
+
 public class Uniforms {
 	public static boolean frustumPaused = false;
 	public static boolean frustumCapture = false;
@@ -119,6 +127,14 @@ public class Uniforms {
 		}
 	}
 
+	static long writeVec4(long ptr, float x, float y, float z, float w) {
+		MemoryUtil.memPutFloat(ptr, x);
+		MemoryUtil.memPutFloat(ptr + 4, y);
+		MemoryUtil.memPutFloat(ptr + 8, z);
+		MemoryUtil.memPutFloat(ptr + 12, w);
+		return ptr + 16;
+	}
+
 	static long writeVec3(long ptr, float camX, float camY, float camZ) {
 		MemoryUtil.memPutFloat(ptr, camX);
 		MemoryUtil.memPutFloat(ptr + 4, camY);
@@ -130,6 +146,38 @@ public class Uniforms {
 	static long writeVec2(long ptr, float camX, float camY) {
 		MemoryUtil.memPutFloat(ptr, camX);
 		MemoryUtil.memPutFloat(ptr + 4, camY);
+		return ptr + 8;
+	}
+
+	static long writeInFluidAndBlock(long ptr, Level level, BlockPos blockPos, Vec3 pos) {
+		FluidState fState = level.getFluidState(blockPos);
+		BlockState bState = level.getBlockState(blockPos);
+		float height = fState.getHeight(level, blockPos);
+
+		if (fState.isEmpty()) {
+			MemoryUtil.memPutInt(ptr, 0);
+		} else if (pos.y < blockPos.getY() + height) {
+			// TODO: handle custom fluids via defines
+			if (fState.is(FluidTags.WATER)) {
+				MemoryUtil.memPutInt(ptr, 1);
+			} else if (fState.is(FluidTags.LAVA)) {
+				MemoryUtil.memPutInt(ptr, 2);
+			} else {
+				MemoryUtil.memPutInt(ptr, -1);
+			}
+		}
+
+		if (bState.isAir()) {
+			MemoryUtil.memPutInt(ptr + 4, 0);
+		} else {
+			// TODO: handle custom blocks via defines
+			if (bState.is(Blocks.POWDER_SNOW)) {
+				MemoryUtil.memPutInt(ptr + 4, 0);
+			} else {
+				MemoryUtil.memPutInt(ptr + 4, -1);
+			}
+		}
+
 		return ptr + 8;
 	}
 }
