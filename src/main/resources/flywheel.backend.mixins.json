@@ -9,6 +9,7 @@
     "GameRendererAccessor",
     "GlStateManagerMixin",
     "LightTextureAccessor",
+    "OptionsMixin",
     "OverlayTextureAccessor",
     "RenderSystemMixin"
   ],

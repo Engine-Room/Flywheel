@@ -29,6 +29,7 @@ public class Uniforms {
 	private static @Nullable UniformBuffer<OptionsUniforms> options;
 	private static @Nullable UniformBuffer<PlayerUniforms> player;
 	private static @Nullable UniformBuffer<LevelUniforms> level;
+	private static boolean optionsRequiresUpdate = false;
 
 	public static UniformBuffer<FrameUniforms> frame() {
 		if (frame == null) {
@@ -109,12 +110,20 @@ public class Uniforms {
 		}
 	}
 
+	public static void onOptionsUpdate() {
+		// this is sometimes called too early to do an actual update
+		optionsRequiresUpdate = true;
+	}
+
 	public static void updateContext(RenderContext ctx) {
 		var ubo = frame();
 		ubo.provider.setContext(ctx);
 		ubo.update();
 
-		options();
+		if (optionsRequiresUpdate) {
+			options().update();
+			optionsRequiresUpdate = false;
+		}
 
 		var player = player();
 		player.provider.setContext(ctx);
