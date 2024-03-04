@@ -23,6 +23,7 @@ public class Uniforms {
 	private static @Nullable UniformBuffer<FogUniforms> fog;
 	private static @Nullable UniformBuffer<OptionsUniforms> options;
 	private static @Nullable UniformBuffer<PlayerUniforms> player;
+	private static @Nullable UniformBuffer<LevelUniforms> level;
 
 	public static UniformBuffer<FrameUniforms> frame() {
 		if (frame == null) {
@@ -47,9 +48,16 @@ public class Uniforms {
 
 	public static UniformBuffer<PlayerUniforms> player() {
 		if (player == null) {
-			player = new UniformBuffer<>(2, new PlayerUniforms());
+			player = new UniformBuffer<>(3, new PlayerUniforms());
 		}
 		return player;
+	}
+
+	public static UniformBuffer<LevelUniforms> level() {
+		if (level == null) {
+			level = new UniformBuffer<>(4, new LevelUniforms());
+		}
+		return level;
 	}
 
 	public static void bindForDraw() {
@@ -57,6 +65,7 @@ public class Uniforms {
 		bindFog();
 		bindOptions();
 		bindPlayer();
+		bindLevel();
 	}
 
 	public static void bindFrame() {
@@ -83,6 +92,12 @@ public class Uniforms {
 		}
 	}
 
+	public static void bindLevel() {
+		if (level != null) {
+			level.bind();
+		}
+	}
+
 	public static void onFogUpdate() {
 		try (var restoreState = GlStateTracker.getRestoreState()) {
 			fog().update();
@@ -99,6 +114,10 @@ public class Uniforms {
 		var player = player();
 		player.provider.setContext(ctx);
 		player.update();
+
+		var level = level();
+		level.provider.setContext(ctx);
+		level.update();
 	}
 
 	public static void setDebugMode(DebugMode mode) {
@@ -124,6 +143,11 @@ public class Uniforms {
 		if (player != null) {
 			player.delete();
 			player = null;
+		}
+
+		if (level != null) {
+			level.delete();
+			level = null;
 		}
 	}
 

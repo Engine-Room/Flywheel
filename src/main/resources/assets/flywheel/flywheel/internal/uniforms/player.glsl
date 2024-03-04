@@ -6,9 +6,9 @@ layout (std140) uniform _FlwPlayerUniforms {
     vec4 _flw_eyePos;
     /** The brightness at the player's eye position. */
     vec2 flw_eyeBrightness;
-    /** Contains 1 for water, 2 for lava, max-value for any other fluid, 0 for no fluid. */
+    /** 0 means no fluid. Use FLW_PLAYER_EYE_IN_FLUID_* defines to detect fluid type. */
     uint flw_playerEyeInFluid;
-    /** Contains 1 for powder snow, max-value for any other block, 0 for no block. */
+    /** 0 means no block. Use FLW_PLAYER_EYE_IN_BLOCK_* defines to detect block type. */
     uint flw_playerEyeInBlock;
 
     uint flw_playerCrouching;
@@ -26,3 +26,10 @@ layout (std140) uniform _FlwPlayerUniforms {
 };
 
 #define flw_eyePos _flw_eyePos.xyz
+
+#define FLW_PLAYER_EYE_IN_FLUID_WATER 1
+#define FLW_PLAYER_EYE_IN_FLUID_LAVA 2
+#define FLW_PLAYER_EYE_IN_FLUID_UNKNOWN 0xFFFFFFFFu
+
+#define FLW_PLAYER_EYE_IN_BLOCK_POWDER_SNOW 1
+#define FLW_PLAYER_EYE_IN_BLOCK_UNKNOWN 0xFFFFFFFFu
