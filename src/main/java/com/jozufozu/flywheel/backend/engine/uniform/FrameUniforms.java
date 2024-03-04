@@ -123,7 +123,7 @@ public class FrameUniforms implements UniformProvider {
 
 		var window = Minecraft.getInstance()
 				.getWindow();
-		ptr = writeVec2(ptr, window.getWidth(), window.getHeight());
+		ptr = Uniforms.writeVec2(ptr, window.getWidth(), window.getHeight());
 
 		// default line width: net.minecraft.client.renderer.RenderStateShard.LineStateShard
 		MemoryUtil.memPutFloat(ptr, Math.max(2.5F, (float) window.getWidth() / 1920.0F * 2.5F));
@@ -187,11 +187,11 @@ public class FrameUniforms implements UniformProvider {
 
 	private static long writeCamera(long ptr, float camX, float camY, float camZ, Vector3f lookVector, float xRot,
 									float yRot) {
-		ptr = writeVec3(ptr, camX, camY, camZ);
+		ptr = Uniforms.writeVec3(ptr, camX, camY, camZ);
 
-		ptr = writeVec3(ptr, lookVector.x, lookVector.y, lookVector.z);
+		ptr = Uniforms.writeVec3(ptr, lookVector.x, lookVector.y, lookVector.z);
 
-		ptr = writeVec2(ptr, xRot, yRot);
+		ptr = Uniforms.writeVec2(ptr, xRot, yRot);
 		return ptr;
 	}
 
@@ -245,20 +245,6 @@ public class FrameUniforms implements UniformProvider {
 			}
 		}
 
-		return ptr + 8;
-	}
-
-	private static long writeVec3(long ptr, float camX, float camY, float camZ) {
-		MemoryUtil.memPutFloat(ptr, camX);
-		MemoryUtil.memPutFloat(ptr + 4, camY);
-		MemoryUtil.memPutFloat(ptr + 8, camZ);
-		MemoryUtil.memPutFloat(ptr + 12, 0f); // empty component of vec4 because we don't trust std140
-		return ptr + 16;
-	}
-
-	private static long writeVec2(long ptr, float camX, float camY) {
-		MemoryUtil.memPutFloat(ptr, camX);
-		MemoryUtil.memPutFloat(ptr + 4, camY);
 		return ptr + 8;
 	}
 

@@ -6,6 +6,7 @@ import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.config.DebugMode;
 
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.system.MemoryUtil;
 
 public class Uniforms {
 	public static boolean frustumPaused = false;
@@ -13,6 +14,7 @@ public class Uniforms {
 	private static @Nullable UniformBuffer<FrameUniforms> frame;
 	private static @Nullable UniformBuffer<FogUniforms> fog;
 	private static @Nullable UniformBuffer<OptionsUniforms> options;
+	private static @Nullable UniformBuffer<PlayerUniforms> player;
 
 	public static UniformBuffer<FrameUniforms> frame() {
 		if (frame == null) {
@@ -35,10 +37,18 @@ public class Uniforms {
 		return options;
 	}
 
+	public static UniformBuffer<PlayerUniforms> player() {
+		if (player == null) {
+			player = new UniformBuffer<>(2, new PlayerUniforms());
+		}
+		return player;
+	}
+
 	public static void bindForDraw() {
 		bindFrame();
 		bindFog();
 		bindOptions();
+		bindPlayer();
 	}
 
 	public static void bindFrame() {
@@ -59,6 +69,12 @@ public class Uniforms {
 		}
 	}
 
+	public static void bindPlayer() {
+		if (player != null) {
+			player.bind();
+		}
+	}
+
 	public static void onFogUpdate() {
 		try (var restoreState = GlStateTracker.getRestoreState()) {
 			fog().update();
@@ -71,6 +87,10 @@ public class Uniforms {
 		ubo.update();
 
 		options();
+
+		var player = player();
+		player.provider.setContext(ctx);
+		player.update();
 	}
 
 	public static void setDebugMode(DebugMode mode) {
@@ -92,5 +112,24 @@ public class Uniforms {
 			options.delete();
 			options = null;
 		}
+
+		if (player != null) {
+			player.delete();
+			player = null;
+		}
+	}
+
+	static long writeVec3(long ptr, float camX, float camY, float camZ) {
+		MemoryUtil.memPutFloat(ptr, camX);
+		MemoryUtil.memPutFloat(ptr + 4, camY);
+		MemoryUtil.memPutFloat(ptr + 8, camZ);
+		MemoryUtil.memPutFloat(ptr + 12, 0f); // empty component of vec4 because we don't trust std140
+		return ptr + 16;
+	}
+
+	static long writeVec2(long ptr, float camX, float camY) {
+		MemoryUtil.memPutFloat(ptr, camX);
+		MemoryUtil.memPutFloat(ptr + 4, camY);
+		return ptr + 8;
 	}
 }
