@@ -1,4 +1,7 @@
 layout(std140) uniform _FlwLevelUniforms {
+    vec4 flw_skyColor;
+    vec4 flw_cloudColor;
+
     /** The current day number of the level. */
     uint flw_levelDay;
     /** The current fraction of the current day that has elapsed. */
@@ -18,8 +21,6 @@ layout(std140) uniform _FlwLevelUniforms {
     float flw_thunderLevel;
 
     float flw_skyDarken;
-    vec4 flw_skyColor;
-    vec4 flw_cloudColor;
 
     /** Use FLW_DIMENSION_* ids to determine the dimension. May eventually be implemented for custom dimensions. */
     uint flw_dimension;

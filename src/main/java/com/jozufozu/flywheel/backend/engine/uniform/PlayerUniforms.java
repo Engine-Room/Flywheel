@@ -44,30 +44,16 @@ public class PlayerUniforms implements UniformProvider {
 			return;
 		}
 
-		int luminance = 0;
-		for (InteractionHand hand : InteractionHand.values()) {
-			Item handItem = player.getItemInHand(hand).getItem();
-			if (handItem instanceof BlockItem bitem) {
-				Block block = bitem.getBlock();
-				int blockLight = block.defaultBlockState().getLightEmission(player.clientLevel, BlockPos.ZERO);
-				if (luminance < blockLight) {
-					luminance = blockLight;
-				}
-			}
-		}
-
-		MemoryUtil.memPutFloat(ptr, (float) luminance / 15);
-		ptr += 4;
+		PlayerInfo info = ((AbstractClientPlayerAccessor) player).flywheel$getPlayerInfo();
 
 		Vec3 eyePos = player.getEyePosition(context.partialTick());
 		ptr = Uniforms.writeVec3(ptr, (float) eyePos.x, (float) eyePos.y, (float) eyePos.z);
 
-		int blockBrightness = player.clientLevel.getBrightness(LightLayer.BLOCK, player.blockPosition());
-		int skyBrightness = player.clientLevel.getBrightness(LightLayer.SKY, player.blockPosition());
-		int maxBrightness = player.clientLevel.getMaxLightLevel();
+		ptr = writeTeamColor(ptr, info);
 
-		ptr = Uniforms.writeVec2(ptr, (float) blockBrightness / (float) maxBrightness,
-				(float) skyBrightness / (float) maxBrightness);
+		ptr = writeEyeBrightness(ptr, player);
+
+		ptr = writeHeldLight(ptr, player);
 
 		ptr = writeEyeIn(ptr, player);
 
@@ -83,10 +69,11 @@ public class PlayerUniforms implements UniformProvider {
 		MemoryUtil.memPutInt(ptr, player.isShiftKeyDown() ? 1 : 0);
 		ptr += 4;
 
-		PlayerInfo info = ((AbstractClientPlayerAccessor) player).flywheel$getPlayerInfo();
 		MemoryUtil.memPutInt(ptr, info.getGameMode().getId());
 		ptr += 4;
+	}
 
+	private static long writeTeamColor(long ptr, PlayerInfo info) {
 		int red = 0, green = 0, blue = 0, alpha = 0;
 		PlayerTeam team = info.getTeam();
 		if (team != null) {
@@ -100,8 +87,35 @@ public class PlayerUniforms implements UniformProvider {
 			}
 		}
 
-		ptr = Uniforms.writeVec4(ptr, (float) red / 255f, (float) blue / 255f, (float) green / 255f,
+		return Uniforms.writeVec4(ptr, (float) red / 255f, (float) blue / 255f, (float) green / 255f,
 				(float) alpha / 255f);
+	}
+
+	private static long writeEyeBrightness(long ptr, LocalPlayer player) {
+		int blockBrightness = player.clientLevel.getBrightness(LightLayer.BLOCK, player.blockPosition());
+		int skyBrightness = player.clientLevel.getBrightness(LightLayer.SKY, player.blockPosition());
+		int maxBrightness = player.clientLevel.getMaxLightLevel();
+
+		ptr = Uniforms.writeVec2(ptr, (float) blockBrightness / (float) maxBrightness,
+				(float) skyBrightness / (float) maxBrightness);
+		return ptr;
+	}
+
+	private static long writeHeldLight(long ptr, LocalPlayer player) {
+		int luminance = 0;
+		for (InteractionHand hand : InteractionHand.values()) {
+			Item handItem = player.getItemInHand(hand).getItem();
+			if (handItem instanceof BlockItem bitem) {
+				Block block = bitem.getBlock();
+				int blockLight = block.defaultBlockState().getLightEmission(player.clientLevel, BlockPos.ZERO);
+				if (luminance < blockLight) {
+					luminance = blockLight;
+				}
+			}
+		}
+
+		MemoryUtil.memPutFloat(ptr, (float) luminance / 15);
+		return ptr + 4;
 	}
 
 	private long writeEyeIn(long ptr, LocalPlayer player) {

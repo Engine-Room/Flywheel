@@ -103,16 +103,13 @@ public class FrameUniforms implements UniformProvider {
 		cleanProjectionPrev.set(cleanProjection);
 		cleanViewProjectionPrev.set(cleanViewProjection);
 
-		ptr = writeCamera(ptr, camX, camY, camZ, camera.getLookVector(), camera.getXRot(), camera.getYRot());
-
 		// last values for camera
 		if (!lastInit) {
 			cameraPositionPrev.set(camX, camY, camZ);
 			cameraLookPrev.set(camera.getLookVector());
 			cameraRotPrev.set(camera.getXRot(), camera.getYRot());
 		}
-		ptr = writeCamera(ptr, cameraPositionPrev.x, cameraPositionPrev.y, cameraPositionPrev.z, cameraLookPrev,
-				cameraRotPrev.x, cameraRotPrev.y);
+		ptr = writeCamera(ptr, camX, camY, camZ);
 		cameraPositionPrev.set(camX, camY, camZ);
 		cameraLookPrev.set(camera.getLookVector());
 		cameraRotPrev.set(camera.getXRot(), camera.getYRot());
@@ -182,13 +179,18 @@ public class FrameUniforms implements UniformProvider {
 		cleanViewProjection.set(cleanProjection).mul(stack.last().pose());
 	}
 
-	private static long writeCamera(long ptr, float camX, float camY, float camZ, Vector3f lookVector, float xRot,
-									float yRot) {
+	private long writeCamera(long ptr, float camX, float camY, float camZ) {
+		Camera camera = context.camera();
+		Vector3f lookVector = camera.getLookVector();
+
 		ptr = Uniforms.writeVec3(ptr, camX, camY, camZ);
+		ptr = Uniforms.writeVec3(ptr, cameraPositionPrev.x, cameraPositionPrev.y, cameraPositionPrev.z);
 
 		ptr = Uniforms.writeVec3(ptr, lookVector.x, lookVector.y, lookVector.z);
+		ptr = Uniforms.writeVec3(ptr, cameraLookPrev.x, cameraLookPrev.y, cameraLookPrev.z);
 
-		ptr = Uniforms.writeVec2(ptr, xRot, yRot);
+		ptr = Uniforms.writeVec2(ptr, camera.getXRot(), camera.getYRot());
+		ptr = Uniforms.writeVec2(ptr, cameraRotPrev.x, cameraRotPrev.y);
 		return ptr;
 	}
 

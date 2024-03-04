@@ -30,10 +30,10 @@ layout(std140) uniform _FlwFrameUniforms {
     mat4 flw_cleanViewProjectionPrev;
 
     vec4 _flw_cameraPos;
-    vec4 _flw_cameraLook;
-    vec2 flw_cameraRot;
     vec4 _flw_cameraPosPrev;
+    vec4 _flw_cameraLook;
     vec4 _flw_cameraLookPrev;
+    vec2 flw_cameraRot;
     vec2 flw_cameraRotPrev;
 
     vec2 flw_viewportSize;

@@ -37,6 +37,12 @@ public class LevelUniforms implements UniformProvider {
 
 		float ptick = context.partialTick();
 
+		Vec3 skyColor = level.getSkyColor(mc.gameRenderer.getMainCamera().getPosition(), ptick);
+		ptr = Uniforms.writeVec4(ptr, (float) skyColor.x, (float) skyColor.y, (float) skyColor.z, 1f);
+
+		Vec3 cloudColor = level.getCloudColor(ptick);
+		ptr = Uniforms.writeVec4(ptr, (float) cloudColor.x, (float) cloudColor.y, (float) cloudColor.z, 1f);
+
 		long dayTime = level.getDayTime();
 		long levelDay = dayTime / 24000L;
 		long timeOfDay = dayTime - levelDay * 24000L;
@@ -69,12 +75,6 @@ public class LevelUniforms implements UniformProvider {
 
 		MemoryUtil.memPutFloat(ptr, level.getSkyDarken(ptick));
 		ptr += 4;
-
-		Vec3 skyColor = level.getSkyColor(mc.gameRenderer.getMainCamera().getPosition(), ptick);
-		ptr = Uniforms.writeVec4(ptr, (float) skyColor.x, (float) skyColor.y, (float) skyColor.z, 1f);
-
-		Vec3 cloudColor = level.getCloudColor(ptick);
-		ptr = Uniforms.writeVec4(ptr, (float) cloudColor.x, (float) cloudColor.y, (float) cloudColor.z, 1f);
 
 		// TODO: use defines for custom dimension ids
         int dimensionId;
