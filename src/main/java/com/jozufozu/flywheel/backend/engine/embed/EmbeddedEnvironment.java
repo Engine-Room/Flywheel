@@ -56,9 +56,9 @@ public class EmbeddedEnvironment extends AtomicReferenceCounted implements Envir
 
 		lightTexture.bind();
 
-		lightTexture.ensureCapacity(lightVolume.sizeX, lightVolume.sizeY, lightVolume.sizeZ);
+		lightTexture.ensureCapacity(lightVolume.sizeX(), lightVolume.sizeY(), lightVolume.sizeZ());
 
-		lightTexture.upload(lightVolume.ptr(), lightVolume.sizeX, lightVolume.sizeY, lightVolume.sizeZ);
+		lightTexture.upload(lightVolume.ptr(), lightVolume.sizeX(), lightVolume.sizeY(), lightVolume.sizeZ());
 	}
 
 	@Override
@@ -94,7 +94,7 @@ public class EmbeddedEnvironment extends AtomicReferenceCounted implements Envir
 			float oneOverSizeZ = 1f / (float) lightTexture.sizeZ;
 
 			drawProgram.setVec3("_flw_oneOverLightBoxSize", oneOverSizeX, oneOverSizeY, oneOverSizeZ);
-			drawProgram.setVec3("_flw_lightVolumeMin", lightVolume.minX, lightVolume.minY, lightVolume.minZ);
+			drawProgram.setVec3("_flw_lightVolumeMin", lightVolume.x(), lightVolume.y(), lightVolume.z());
 		}
 		drawProgram.setMat4("_flw_model", pose);
 		drawProgram.setMat3("_flw_normal", normal);
