@@ -74,7 +74,7 @@ public class PlayerUniforms implements UniformProvider {
 	}
 
 	private static long writeTeamColor(long ptr, PlayerInfo info) {
-		int red = 0, green = 0, blue = 0, alpha = 0;
+		int red = 255, green = 255, blue = 255, alpha = 0;
 		PlayerTeam team = info.getTeam();
 		if (team != null) {
 			Integer color = team.getColor().getColor();
@@ -118,7 +118,7 @@ public class PlayerUniforms implements UniformProvider {
 		return ptr + 4;
 	}
 
-	private long writeEyeIn(long ptr, LocalPlayer player) {
+	private static long writeEyeIn(long ptr, LocalPlayer player) {
 		ClientLevel level = player.clientLevel;
 		Vec3 eyePos = player.getEyePosition();
 		BlockPos blockPos = BlockPos.containing(eyePos);
