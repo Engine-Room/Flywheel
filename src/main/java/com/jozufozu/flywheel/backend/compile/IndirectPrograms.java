@@ -84,6 +84,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 						.withResource(CULL_SHADER_MAIN))
 				.postLink((key, program) -> {
                     program.setUniformBlockBinding("_FlwFrameUniforms", Uniforms.FRAME_INDEX);
+					program.setUniformBlockBinding("_FlwFogUniforms", Uniforms.FOG_INDEX);
 					program.setUniformBlockBinding("_FlwOptionsUniforms", Uniforms.OPTIONS_INDEX);
 					program.setUniformBlockBinding("_FlwPlayerUniforms", Uniforms.PLAYER_INDEX);
 					program.setUniformBlockBinding("_FlwLevelUniforms", Uniforms.LEVEL_INDEX);

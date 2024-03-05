@@ -1,10 +1,7 @@
 #include "flywheel:internal/indirect/buffers.glsl"
 #include "flywheel:internal/indirect/model_descriptor.glsl"
 #include "flywheel:internal/indirect/object.glsl"
-#include "flywheel:internal/uniforms/frame.glsl"
-#include "flywheel:internal/uniforms/options.glsl"
-#include "flywheel:internal/uniforms/player.glsl"
-#include "flywheel:internal/uniforms/level.glsl"
+#include "flywheel:internal/uniforms/uniforms.glsl"
 #include "flywheel:util/matrix.glsl"
 
 layout(local_size_x = _FLW_SUBGROUP_SIZE) in;
