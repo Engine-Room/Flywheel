@@ -76,6 +76,9 @@ public class LevelUniforms implements UniformProvider {
 		MemoryUtil.memPutFloat(ptr, level.getSkyDarken(ptick));
 		ptr += 4;
 
+		MemoryUtil.memPutInt(ptr, getConstantAmbientLightFlag(context));
+		ptr += 4;
+
 		// TODO: use defines for custom dimension ids
         int dimensionId;
         ResourceKey<Level> dimension = level.dimension();
@@ -90,4 +93,11 @@ public class LevelUniforms implements UniformProvider {
         }
 		MemoryUtil.memPutInt(ptr, dimensionId);
     }
+
+	private static int getConstantAmbientLightFlag(RenderContext context) {
+		var constantAmbientLight = context.level()
+				.effects()
+				.constantAmbientLight();
+		return constantAmbientLight ? 1 : 0;
+	}
 }

@@ -128,9 +128,6 @@ public class FrameUniforms implements UniformProvider {
 		MemoryUtil.memPutFloat(ptr, Minecraft.getInstance().gameRenderer.getDepthFar());
 		ptr += 4;
 
-		MemoryUtil.memPutInt(ptr, getConstantAmbientLightFlag(context));
-		ptr += 4;
-
 		ptr = writeTime(ptr);
 
 		ptr = writeCameraIn(ptr);
@@ -219,12 +216,5 @@ public class FrameUniforms implements UniformProvider {
 		BlockPos blockPos = camera.getBlockPosition();
 		Vec3 cameraPos = camera.getPosition();
 		return Uniforms.writeInFluidAndBlock(ptr, level, blockPos, cameraPos);
-	}
-
-	private static int getConstantAmbientLightFlag(RenderContext context) {
-		var constantAmbientLight = context.level()
-				.effects()
-				.constantAmbientLight();
-		return constantAmbientLight ? 1 : 0;
 	}
 }
