@@ -77,13 +77,13 @@ public class PlayerUniforms implements UniformProvider {
 		int red = 255, green = 255, blue = 255, alpha = 0;
 		PlayerTeam team = info.getTeam();
 		if (team != null) {
+			alpha = 255;
 			Integer color = team.getColor().getColor();
 			if (color != null) {
 				int icolor = color;
 				red = FastColor.ARGB32.red(icolor);
 				green = FastColor.ARGB32.green(icolor);
 				blue = FastColor.ARGB32.blue(icolor);
-				alpha = 255;
 			}
 		}
 
