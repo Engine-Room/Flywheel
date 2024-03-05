@@ -22,13 +22,6 @@ layout(std140) uniform _FlwFrameUniforms {
     mat4 flw_viewProjectionInverse;
     mat4 flw_viewProjectionPrev;
 
-    mat4 flw_cleanProjection;
-    mat4 flw_cleanProjectionInverse;
-    mat4 flw_cleanProjectionPrev;
-    mat4 flw_cleanViewProjection;
-    mat4 flw_cleanViewProjectionInverse;
-    mat4 flw_cleanViewProjectionPrev;
-
     vec4 _flw_cameraPos;
     vec4 _flw_cameraPosPrev;
     vec4 _flw_cameraLook;

@@ -38,13 +38,6 @@ public class FrameUniforms implements UniformProvider {
 	private final Matrix4f viewProjectionInverse = new Matrix4f();
 	private final Matrix4f viewProjectionPrev = new Matrix4f();
 
-	private final Matrix4f cleanProjection = new Matrix4f();
-	private final Matrix4f cleanProjectionInverse = new Matrix4f();
-	private final Matrix4f cleanProjectionPrev = new Matrix4f();
-	private final Matrix4f cleanViewProjection = new Matrix4f();
-	private final Matrix4f cleanViewProjectionInverse = new Matrix4f();
-	private final Matrix4f cleanViewProjectionPrev = new Matrix4f();
-
 	private final Vector3f cameraPositionPrev = new Vector3f();
 	private final Vector3f cameraLookPrev = new Vector3f();
 	private final Vector2f cameraRotPrev = new Vector2f();
@@ -79,7 +72,6 @@ public class FrameUniforms implements UniformProvider {
 		projection.set(context.projection());
 		viewProjection.set(context.viewProjection());
 		viewProjection.translate(-camX, -camY, -camZ);
-		setupCleanMatrices(context.stack(), camera, context.partialTick());
 
 		if (!Uniforms.frustumPaused || Uniforms.frustumCapture) {
 			MatrixMath.writePackedFrustumPlanes(ptr, viewProjection);
@@ -93,15 +85,11 @@ public class FrameUniforms implements UniformProvider {
 			viewPrev.set(view);
 			projectionPrev.set(projection);
 			viewProjectionPrev.set(viewProjectionPrev);
-			cleanProjectionPrev.set(cleanProjection);
-			cleanViewProjectionPrev.set(cleanViewProjection);
 		}
 		ptr = writeMatrices(ptr);
 		viewPrev.set(view);
 		projectionPrev.set(projection);
 		viewProjectionPrev.set(viewProjection);
-		cleanProjectionPrev.set(cleanProjection);
-		cleanViewProjectionPrev.set(cleanViewProjection);
 
 		// last values for camera
 		if (!lastInit) {
@@ -147,33 +135,7 @@ public class FrameUniforms implements UniformProvider {
 		MatrixMath.writeUnsafe(viewProjection, ptr + 64 * 6);
 		MatrixMath.writeUnsafe(viewProjection.invert(viewProjectionInverse), ptr + 64 * 7);
 		MatrixMath.writeUnsafe(viewProjectionPrev, ptr + 64 * 8);
-		MatrixMath.writeUnsafe(cleanProjection, ptr + 64 * 9);
-		MatrixMath.writeUnsafe(cleanProjection.invert(cleanProjectionInverse), ptr + 64 * 10);
-		MatrixMath.writeUnsafe(cleanProjectionPrev, ptr + 64 * 11);
-		MatrixMath.writeUnsafe(cleanViewProjection, ptr + 64 * 12);
-		MatrixMath.writeUnsafe(cleanViewProjection.invert(cleanViewProjectionInverse), ptr + 64 * 13);
-		MatrixMath.writeUnsafe(cleanViewProjectionPrev, ptr + 64 * 14);
 		return ptr + 64 * 15;
-	}
-
-	private void setupCleanMatrices(PoseStack stack, Camera camera, float partialTicks) {
-		Minecraft mc = Minecraft.getInstance();
-		GameRenderer gr = mc.gameRenderer;
-		GameRendererAccessor gra = (GameRendererAccessor) gr;
-
-		float fov = (float) gra.flywheel$getFov(camera, partialTicks, true);
-
-		cleanProjection.identity();
-
-		if (gra.flywheel$getZoom() != 1.0F) {
-			cleanProjection.translate(gra.flywheel$getZoomX(), -gra.flywheel$getZoomY(), 0.0F);
-			cleanProjection.scale(gra.flywheel$getZoom(), gra.flywheel$getZoom(), 1.0F);
-		}
-
-		cleanProjection.mul(new Matrix4f().setPerspective(fov * ((float) Math.PI / 180F),
-				(float) mc.getWindow().getWidth() / (float) mc.getWindow().getHeight(), 0.05F, gr.getDepthFar()));
-
-		cleanViewProjection.set(cleanProjection).mul(stack.last().pose());
 	}
 
 	private long writeCamera(long ptr, float camX, float camY, float camZ) {
