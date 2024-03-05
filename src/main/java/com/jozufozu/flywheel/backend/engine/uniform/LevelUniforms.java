@@ -28,16 +28,15 @@ public class LevelUniforms implements UniformProvider {
 
 	@Override
 	public void write(long ptr) {
-		Minecraft mc = Minecraft.getInstance();
-		ClientLevel level = mc.level;
-		if (level == null || context == null) {
+		if (context == null) {
 			MemoryUtil.memSet(ptr, 0, SIZE);
 			return;
 		}
 
+		ClientLevel level = context.level();
 		float ptick = context.partialTick();
 
-		Vec3 skyColor = level.getSkyColor(mc.gameRenderer.getMainCamera().getPosition(), ptick);
+		Vec3 skyColor = level.getSkyColor(context.camera().getPosition(), ptick);
 		ptr = Uniforms.writeVec4(ptr, (float) skyColor.x, (float) skyColor.y, (float) skyColor.z, 1f);
 
 		Vec3 cloudColor = level.getCloudColor(ptick);
