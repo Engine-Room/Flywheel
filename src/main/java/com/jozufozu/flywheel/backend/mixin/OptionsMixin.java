@@ -12,12 +12,12 @@ import net.minecraft.client.Options;
 @Mixin(Options.class)
 public class OptionsMixin {
 	@Inject(method = "load()V", at = @At("RETURN"))
-	private void onLoad(CallbackInfo ci) {
+	private void flywheel$onLoad(CallbackInfo ci) {
 		Uniforms.onOptionsUpdate();
 	}
 
 	@Inject(method = "save", at = @At("HEAD"))
-	private void onSave(CallbackInfo ci) {
+	private void flywheel$onSave(CallbackInfo ci) {
 		Uniforms.onOptionsUpdate();
 	}
 }
