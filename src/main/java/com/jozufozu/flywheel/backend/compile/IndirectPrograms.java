@@ -11,6 +11,7 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.compile.component.StructInstanceComponent;
 import com.jozufozu.flywheel.backend.compile.core.CompilationHarness;
 import com.jozufozu.flywheel.backend.compile.core.Compile;
+import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
@@ -81,7 +82,13 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 						.withComponent(StructInstanceComponent::create)
 						.withResource(InstanceType::cullShader)
 						.withResource(CULL_SHADER_MAIN))
-				.postLink((key, program) -> program.setUniformBlockBinding("_FlwFrameUniforms", 0))
+				.postLink((key, program) -> {
+                    program.setUniformBlockBinding("_FlwFrameUniforms", Uniforms.FRAME_INDEX);
+					program.setUniformBlockBinding("_FlwFogUniforms", Uniforms.FOG_INDEX);
+					program.setUniformBlockBinding("_FlwOptionsUniforms", Uniforms.OPTIONS_INDEX);
+					program.setUniformBlockBinding("_FlwPlayerUniforms", Uniforms.PLAYER_INDEX);
+					program.setUniformBlockBinding("_FlwLevelUniforms", Uniforms.LEVEL_INDEX);
+                })
 				.harness("culling", sources);
 	}
 
