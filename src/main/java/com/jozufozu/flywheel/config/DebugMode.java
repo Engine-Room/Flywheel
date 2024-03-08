@@ -4,7 +4,8 @@ public enum DebugMode {
 	OFF,
 	NORMALS,
 	INSTANCE_ID,
-	LIGHT,
+	LIGHT_LEVEL,
+	LIGHT_COLOR,
 	OVERLAY,
 	LIGHT_VOLUME,
 }

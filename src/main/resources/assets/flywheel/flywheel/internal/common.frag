@@ -1,5 +1,6 @@
 #include "flywheel:internal/packed_material.glsl"
 #include "flywheel:internal/diffuse.glsl"
+#include "flywheel:internal/colorizer.glsl"
 
 // optimize discard usage
 #ifdef GL_ARB_conservative_depth
@@ -15,11 +16,12 @@ in vec2 _flw_crumblingTexCoord;
 #ifdef _FLW_EMBEDDED
 uniform sampler3D _flw_lightVolume;
 
-in vec3 _flw_lightVolumeCoord;
+uniform bool _flw_useLightVolume;
 
+in vec3 _flw_lightVolumeCoord;
 #endif
 
-in vec4 _flw_debugColor;
+flat in uint _flw_instanceID;
 
 out vec4 _flw_outputColor;
 
@@ -30,7 +32,9 @@ void _flw_main() {
     flw_fragLight = flw_vertexLight;
 
     #ifdef _FLW_EMBEDDED
-    flw_fragLight = max(flw_fragLight, texture(_flw_lightVolume, _flw_lightVolumeCoord).rg);
+    if (_flw_useLightVolume) {
+        flw_fragLight = max(flw_fragLight, texture(_flw_lightVolume, _flw_lightVolumeCoord).rg);
+    }
     #endif
 
     flw_materialFragment();
@@ -60,8 +64,9 @@ void _flw_main() {
         color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
     }
 
+    vec4 lightColor = vec4(1.);
     if (flw_material.useLight) {
-        vec4 lightColor = texture(flw_lightTex, clamp(flw_fragLight, 0.5 / 16.0, 15.5 / 16.0));
+        lightColor = texture(flw_lightTex, clamp(flw_fragLight, 0.5 / 16.0, 15.5 / 16.0));
         color *= lightColor;
     }
 
@@ -69,8 +74,27 @@ void _flw_main() {
         discard;
     }
 
-    if (_flw_debugMode != 0u) {
-        color = _flw_debugColor;
+    switch (_flw_debugMode) {
+        case 1u:
+        color = vec4(flw_vertexNormal * .5 + .5, 1.);
+        break;
+        case 2u:
+        color = _flw_id2Color(_flw_instanceID);
+        break;
+        case 3u:
+        color = vec4(vec2((flw_fragLight * 15.0 + 0.5) / 16.), 0., 1.);
+        break;
+        case 4u:
+        color = lightColor;
+        break;
+        case 5u:
+        color = vec4(flw_fragOverlay / 16., 0., 1.);
+        break;
+        #ifdef _FLW_EMBEDDED
+        case 6u:
+        color = vec4(_flw_lightVolumeCoord, 1.);
+        break;
+        #endif
     }
 
     _flw_outputColor = flw_fogFilter(color);

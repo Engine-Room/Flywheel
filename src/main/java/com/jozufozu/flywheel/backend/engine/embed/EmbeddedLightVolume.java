@@ -36,37 +36,6 @@ public class EmbeddedLightVolume {
 		}
 	}
 
-	public void invalidate(int minX, int minY, int minZ, int sizeX, int sizeY, int sizeZ) {
-		if (memoryBlock == null) {
-			return;
-		}
-
-		int oldMinX = wantedCoords.minX();
-		int oldMinY = wantedCoords.minY();
-		int oldMinZ = wantedCoords.minZ();
-		int oldSizeX = wantedCoords.sizeX();
-		int oldSizeY = wantedCoords.sizeY();
-
-		var shrank = wantedCoords.clear(minX, minY, minZ, sizeX, sizeY, sizeZ);
-
-		if (!shrank) {
-			return;
-		}
-
-		int newVolume = wantedCoords.volume();
-
-		MemoryBlock newBlock = MemoryBlock.malloc(newVolume * STRIDE);
-
-		int xOff = wantedCoords.minX() - oldMinX;
-		int yOff = wantedCoords.minY() - oldMinY;
-		int zOff = wantedCoords.minZ() - oldMinZ;
-
-		blit(memoryBlock, xOff, yOff, zOff, oldSizeX, oldSizeY, newBlock, 0, 0, 0, wantedCoords.sizeX(), wantedCoords.sizeY(), wantedCoords.sizeX(), wantedCoords.sizeY(), wantedCoords.sizeZ());
-
-		memoryBlock.free();
-		memoryBlock = newBlock;
-	}
-
 	private void paintLight(BlockAndTintGetter level, int x, int y, int z) {
 		scratchPos.set(x, y, z);
 

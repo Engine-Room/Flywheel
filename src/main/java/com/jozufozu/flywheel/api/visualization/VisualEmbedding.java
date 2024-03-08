@@ -35,19 +35,12 @@ public interface VisualEmbedding extends VisualizationContext {
 	 * @param sizeY The size of the box in the y direction.
 	 * @param sizeZ The size of the box in the z direction.
 	 */
-	void light(BlockAndTintGetter level, int minX, int minY, int minZ, int sizeX, int sizeY, int sizeZ);
+	void collectLight(BlockAndTintGetter level, int minX, int minY, int minZ, int sizeX, int sizeY, int sizeZ);
 
 	/**
-	 * Reset any collected lighting information for the given box.
-	 *
-	 * @param minX  The minimum x coordinate of the box.
-	 * @param minY  The minimum y coordinate of the box.
-	 * @param minZ  The minimum z coordinate of the box.
-	 * @param sizeX The size of the box in the x direction.
-	 * @param sizeY The size of the box in the y direction.
-	 * @param sizeZ The size of the box in the z direction.
+	 * Reset any collected lighting information.
 	 */
-	void invalidateLight(int minX, int minY, int minZ, int sizeX, int sizeY, int sizeZ);
+	void invalidateLight();
 
 	/**
 	 * Delete this embedding.

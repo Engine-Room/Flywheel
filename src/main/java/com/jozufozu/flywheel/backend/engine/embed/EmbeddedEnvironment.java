@@ -68,13 +68,13 @@ public class EmbeddedEnvironment extends AtomicReferenceCounted implements Envir
 	}
 
 	@Override
-	public void light(BlockAndTintGetter level, int minX, int minY, int minZ, int sizeX, int sizeY, int sizeZ) {
+	public void collectLight(BlockAndTintGetter level, int minX, int minY, int minZ, int sizeX, int sizeY, int sizeZ) {
 		lightVolume.collect(level, minX, minY, minZ, sizeX, sizeY, sizeZ);
 	}
 
 	@Override
-	public void invalidateLight(int minX, int minY, int minZ, int sizeX, int sizeY, int sizeZ) {
-		lightVolume.invalidate(minX, minY, minZ, sizeX, sizeY, sizeZ);
+	public void invalidateLight() {
+		lightVolume.delete();
 	}
 
 	@Override
@@ -95,6 +95,9 @@ public class EmbeddedEnvironment extends AtomicReferenceCounted implements Envir
 
 			drawProgram.setVec3("_flw_oneOverLightBoxSize", oneOverSizeX, oneOverSizeY, oneOverSizeZ);
 			drawProgram.setVec3("_flw_lightVolumeMin", lightVolume.x(), lightVolume.y(), lightVolume.z());
+			drawProgram.setBool("_flw_useLightVolume", true);
+		} else {
+			drawProgram.setBool("_flw_useLightVolume", false);
 		}
 		drawProgram.setMat4("_flw_model", pose);
 		drawProgram.setMat3("_flw_normal", normal);
