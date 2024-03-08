@@ -34,8 +34,6 @@ layout(std140) uniform _FlwFrameUniforms {
     float flw_aspectRatio;
     float flw_viewDistance;
 
-    uint flw_constantAmbientLight;
-
     uint flw_ticks;
     float flw_partialTick;
 

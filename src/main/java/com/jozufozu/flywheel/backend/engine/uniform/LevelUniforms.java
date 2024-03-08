@@ -5,14 +5,13 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public class LevelUniforms implements UniformProvider {
-	public static final int SIZE = 12 * 4 + 2 * 16;
+	public static final int SIZE = 13 * 4 + 2 * 16;
 
 	@Nullable
 	private RenderContext context;

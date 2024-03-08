@@ -22,6 +22,8 @@ layout(std140) uniform _FlwLevelUniforms {
 
     float flw_skyDarken;
 
+    uint flw_constantAmbientLight;
+
     /** Use FLW_DIMENSION_* ids to determine the dimension. May eventually be implemented for custom dimensions. */
     uint flw_dimension;
 };

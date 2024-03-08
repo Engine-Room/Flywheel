@@ -8,21 +8,17 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
-import com.jozufozu.flywheel.backend.mixin.GameRendererAccessor;
 import com.jozufozu.flywheel.lib.math.MatrixMath;
-
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class FrameUniforms implements UniformProvider {
-	public static final int SIZE = 1188;
+	public static final int SIZE = 800;
 	public int debugMode;
 
 	@Nullable
@@ -135,7 +131,7 @@ public class FrameUniforms implements UniformProvider {
 		MatrixMath.writeUnsafe(viewProjection, ptr + 64 * 6);
 		MatrixMath.writeUnsafe(viewProjection.invert(viewProjectionInverse), ptr + 64 * 7);
 		MatrixMath.writeUnsafe(viewProjectionPrev, ptr + 64 * 8);
-		return ptr + 64 * 15;
+		return ptr + 64 * 9;
 	}
 
 	private long writeCamera(long ptr, float camX, float camY, float camZ) {
