@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.layout.FloatRepr;
-import com.jozufozu.flywheel.api.layout.IntegerRepr;
 import com.jozufozu.flywheel.api.layout.Layout;
 import com.jozufozu.flywheel.api.layout.LayoutBuilder;
 import com.jozufozu.flywheel.api.vertex.VertexView;
@@ -19,7 +18,7 @@ public final class InternalVertex {
 			.vector("position", FloatRepr.FLOAT, 3)
 			.vector("color", FloatRepr.NORMALIZED_UNSIGNED_BYTE, 4)
 			.vector("tex", FloatRepr.FLOAT, 2)
-			.vector("overlay", IntegerRepr.SHORT, 2)
+			.vector("overlay", FloatRepr.SHORT, 2)
 			.vector("light", FloatRepr.UNSIGNED_SHORT, 2)
 			.vector("normal", FloatRepr.NORMALIZED_BYTE, 3)
 			.build();
