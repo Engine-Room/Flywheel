@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.backend.engine.embed;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.backend.util.BoxSet;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
 import net.minecraft.core.BlockPos;
@@ -13,19 +12,27 @@ import net.minecraft.world.level.LightLayer;
 public class EmbeddedLightVolume {
 	public static final long STRIDE = Short.BYTES;
 
-	private final BoxSet wantedCoords = new BoxSet();
+	private int minX;
+	private int minY;
+	private int minZ;
+	private int maxX;
+	private int maxY;
+	private int maxZ;
 
 	private final BlockPos.MutableBlockPos scratchPos = new BlockPos.MutableBlockPos();
 
 	@Nullable
 	protected MemoryBlock memoryBlock;
+	protected boolean empty = true;
 
 	public boolean empty() {
-		return memoryBlock == null;
+		return empty;
 	}
 
 	public void collect(BlockAndTintGetter level, int minX, int minY, int minZ, int sizeX, int sizeY, int sizeZ) {
 		maybeExpandForBox(minX, minY, minZ, sizeX, sizeY, sizeZ);
+
+		empty = false;
 
 		for (int z = minZ; z < minZ + sizeZ; z++) {
 			for (int y = minY; y < minY + sizeY; y++) {
@@ -46,47 +53,85 @@ public class EmbeddedLightVolume {
 		MemoryUtil.memPutShort(ptr, (short) ((block << 4) | sky << 12));
 	}
 
-	private void maybeExpandForBox(int minX, int minY, int minZ, int sizeX, int sizeY, int sizeZ) {
-		int oldMinX = wantedCoords.minX();
-		int oldMinY = wantedCoords.minY();
-		int oldMinZ = wantedCoords.minZ();
-		int oldSizeX = wantedCoords.sizeX();
-		int oldSizeY = wantedCoords.sizeY();
-		int oldSizeZ = wantedCoords.sizeZ();
+	private void maybeExpandForBox(int x, int y, int z, int sizeX, int sizeY, int sizeZ) {
+		if (empty || memoryBlock == null) {
+			// We're either brand new or recently #clear'd,
+			// so none of the previous min/max values have any meaning.
+			this.minX = x;
+			this.minY = y;
+			this.minZ = z;
+			this.maxX = x + sizeX;
+			this.maxY = y + sizeY;
+			this.maxZ = z + sizeZ;
 
-		var grew = wantedCoords.add(minX, minY, minZ, sizeX, sizeY, sizeZ);
-
-		if (memoryBlock == null) {
 			int volume = sizeX * sizeY * sizeZ;
+			long neededSize = volume * STRIDE;
 
-			memoryBlock = MemoryBlock.malloc(volume * STRIDE);
+			if (memoryBlock == null) {
+				memoryBlock = MemoryBlock.malloc(neededSize);
+			} else if (memoryBlock.size() < neededSize) {
+				// There's some memory left over from before the last #clear,
+				// but not enough to hold this initial box. Need to grow the block.
+				memoryBlock.realloc(neededSize);
+			}
+			// else: we have enough memory left over to hold this box, nothing to do!
 			return;
 		}
 
-		if (!grew) {
+		int oldMinX = this.minX;
+		int oldMinY = this.minY;
+		int oldMinZ = this.minZ;
+		int oldSizeX = this.sizeX();
+		int oldSizeY = this.sizeY();
+		int oldSizeZ = this.sizeZ();
+		boolean changed = false;
+
+		if (x < this.minX) {
+			this.minX = x;
+			changed = true;
+		}
+		if (y < this.minY) {
+			this.minY = y;
+			changed = true;
+		}
+		if (z < this.minZ) {
+			this.minZ = z;
+			changed = true;
+		}
+		if (x + sizeX > this.maxX) {
+			this.maxX = x + sizeX;
+			changed = true;
+		}
+		if (y + sizeY > this.maxY) {
+			this.maxY = y + sizeY;
+			changed = true;
+		}
+		if (z + sizeZ > this.maxZ) {
+			this.maxZ = z + sizeZ;
+			changed = true;
+		}
+
+		if (!changed) {
 			return;
 		}
 
-		int newVolume = wantedCoords.volume();
+		int volume = volume();
 
-		MemoryBlock newBlock = MemoryBlock.malloc(newVolume * STRIDE);
+		memoryBlock = memoryBlock.realloc(volume * STRIDE);
 
-		int xOff = oldMinX - wantedCoords.minX();
-		int yOff = oldMinY - wantedCoords.minY();
-		int zOff = oldMinZ - wantedCoords.minZ();
+		int xOff = oldMinX - minX;
+		int yOff = oldMinY - minY;
+		int zOff = oldMinZ - minZ;
 
-		blit(memoryBlock, 0, 0, 0, oldSizeX, oldSizeY, newBlock, xOff, yOff, zOff, wantedCoords.sizeX(), wantedCoords.sizeY(), oldSizeX, oldSizeY, oldSizeZ);
-
-		memoryBlock.free();
-		memoryBlock = newBlock;
+		blit(memoryBlock.ptr(), 0, 0, 0, oldSizeX, oldSizeY, memoryBlock.ptr(), xOff, yOff, zOff, sizeX(), sizeY(), oldSizeX, oldSizeY, oldSizeZ);
 	}
 
-	public static void blit(MemoryBlock src, int srcX, int srcY, int srcZ, int srcSizeX, int srcSizeY, MemoryBlock dst, int dstX, int dstY, int dstZ, int dstSizeX, int dstSizeY, int sizeX, int sizeY, int sizeZ) {
+	public static void blit(long src, int srcX, int srcY, int srcZ, int srcSizeX, int srcSizeY, long dst, int dstX, int dstY, int dstZ, int dstSizeX, int dstSizeY, int sizeX, int sizeY, int sizeZ) {
 		for (int z = 0; z < sizeZ; z++) {
 			for (int y = 0; y < sizeY; y++) {
 				for (int x = 0; x < sizeX; x++) {
-					long srcPtr = src.ptr() + offset(x + srcX, y + srcY, z + srcZ, srcSizeX, srcSizeY);
-					long dstPtr = dst.ptr() + offset(x + dstX, y + dstY, z + dstZ, dstSizeX, dstSizeY);
+					long srcPtr = src + offset(x + srcX, y + srcY, z + srcZ, srcSizeX, srcSizeY);
+					long dstPtr = dst + offset(x + dstX, y + dstY, z + dstZ, dstSizeX, dstSizeY);
 
 					MemoryUtil.memPutShort(dstPtr, MemoryUtil.memGetShort(srcPtr));
 				}
@@ -95,7 +140,11 @@ public class EmbeddedLightVolume {
 	}
 
 	public static long offset(int x, int y, int z, int sizeX, int sizeY) {
-		return (x + sizeX * (y + z * sizeY)) * STRIDE;
+		return (x + sizeX * (y + sizeY * z)) * STRIDE;
+	}
+
+	public void clear() {
+		empty = true;
 	}
 
 	public void delete() {
@@ -110,26 +159,30 @@ public class EmbeddedLightVolume {
 	}
 
 	public int x() {
-		return wantedCoords.minX();
+		return minX;
 	}
 
 	public int y() {
-		return wantedCoords.minY();
+		return minY;
 	}
 
 	public int z() {
-		return wantedCoords.minZ();
+		return minZ;
 	}
 
 	public int sizeX() {
-		return wantedCoords.sizeX();
+		return maxX - minX;
 	}
 
 	public int sizeY() {
-		return wantedCoords.sizeY();
+		return maxY - minY;
 	}
 
 	public int sizeZ() {
-		return wantedCoords.sizeZ();
+		return maxZ - minZ;
+	}
+
+	public int volume() {
+		return sizeX() * sizeY() * sizeZ();
 	}
 }

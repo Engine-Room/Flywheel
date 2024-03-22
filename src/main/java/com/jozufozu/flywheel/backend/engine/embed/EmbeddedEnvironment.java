@@ -74,7 +74,7 @@ public class EmbeddedEnvironment extends AtomicReferenceCounted implements Envir
 
 	@Override
 	public void invalidateLight() {
-		lightVolume.delete();
+		lightVolume.clear();
 	}
 
 	@Override
