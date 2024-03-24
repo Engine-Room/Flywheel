@@ -14,8 +14,8 @@ import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.visualization.VisualEmbedding;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
-import com.jozufozu.flywheel.backend.engine.embed.EmbeddedEnvironment;
 import com.jozufozu.flywheel.backend.engine.embed.Environment;
+import com.jozufozu.flywheel.backend.engine.embed.TopLevelEmbeddedEnvironment;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.lib.task.Flag;
@@ -30,7 +30,7 @@ import net.minecraft.world.phys.Vec3;
 public class EngineImpl implements Engine {
 	private final int sqrMaxOriginDistance;
 	private final DrawManager<? extends AbstractInstancer<?>> drawManager;
-	private final EnvironmentStorage environmentStorage = new EnvironmentStorage(this);
+	private final EnvironmentStorage environmentStorage = new EnvironmentStorage();
 	private final Flag flushFlag = new NamedFlag("flushed");
 
 	private BlockPos renderOrigin = BlockPos.ZERO;
@@ -110,12 +110,8 @@ public class EngineImpl implements Engine {
 		flushFlag.raise();
 	}
 
-	public VisualEmbedding createEmbedding(RenderStage renderStage) {
-		return environmentStorage.create(renderStage);
-	}
-
-	public void freeEmbedding(EmbeddedEnvironment embeddedEnvironment) {
-		environmentStorage.enqueueDeletion(embeddedEnvironment);
+	public EnvironmentStorage environmentStorage() {
+		return environmentStorage;
 	}
 
 	private class VisualizationContextImpl implements VisualizationContext {
@@ -139,7 +135,9 @@ public class EngineImpl implements Engine {
 
 		@Override
 		public VisualEmbedding createEmbedding() {
-			return EngineImpl.this.createEmbedding(stage);
+			var out = new TopLevelEmbeddedEnvironment(EngineImpl.this, stage);
+			environmentStorage.track(out);
+			return out;
 		}
 	}
 }

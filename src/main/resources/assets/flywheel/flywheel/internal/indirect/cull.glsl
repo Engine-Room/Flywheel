@@ -17,8 +17,8 @@ layout(std430, binding = _FLW_MODEL_BUFFER_BINDING) restrict buffer ModelBuffer 
     ModelDescriptor _flw_models[];
 };
 
-uniform mat4 _flw_embeddedModel;
-uniform bool _flw_useEmbeddedModel = false;
+uniform mat4 _flw_modelMatrix;
+uniform bool _flw_useModelMatrix = false;
 
 // Disgustingly vectorized sphere frustum intersection taking advantage of ahead of time packing.
 // Only uses 6 fmas and some boolean ops.
@@ -44,8 +44,8 @@ bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
 
     flw_transformBoundingSphere(instance, center, radius);
 
-    if (_flw_useEmbeddedModel) {
-        transformBoundingSphere(_flw_embeddedModel, center, radius);
+    if (_flw_useModelMatrix) {
+        transformBoundingSphere(_flw_modelMatrix, center, radius);
     }
 
     return _flw_testSphere(center, radius);
