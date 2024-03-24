@@ -235,8 +235,16 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	private void uploadInstances(StagingBuffer stagingBuffer) {
-		for (var model : instancers) {
-			model.uploadInstances(stagingBuffer, buffers.instance.handle(), buffers.modelIndex.handle());
+		for (var instancer : instancers) {
+			instancer.uploadInstances(stagingBuffer, buffers.instance.handle());
+		}
+
+		for (var instancer : instancers) {
+			instancer.uploadModelIndices(stagingBuffer, buffers.modelIndex.handle());
+		}
+
+		for (var instancer : instancers) {
+			instancer.resetChanged();
 		}
 	}
 

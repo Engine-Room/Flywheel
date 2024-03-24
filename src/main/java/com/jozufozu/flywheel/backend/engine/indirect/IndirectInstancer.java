@@ -53,30 +53,36 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		MemoryUtil.memPutFloat(ptr + 20, boundingSphere.w());
 	}
 
-	public void uploadInstances(StagingBuffer stagingBuffer, int instanceVbo, int modelIndexVbo) {
+	public void uploadInstances(StagingBuffer stagingBuffer, int instanceVbo) {
 		long baseByte = baseInstance * instanceStride;
+
+		if (baseInstance != lastBaseInstance) {
+			uploadAllInstances(stagingBuffer, baseByte, instanceVbo);
+		} else {
+			uploadChangedInstances(stagingBuffer, baseByte, instanceVbo);
+		}
+	}
+
+	public void uploadModelIndices(StagingBuffer stagingBuffer, int modelIndexVbo) {
 		long modelIndexBaseByte = baseInstance * IndirectBuffers.INT_SIZE;
 
-        if (shouldUploadAll()) {
-			uploadAll(stagingBuffer, baseByte, modelIndexBaseByte, instanceVbo, modelIndexVbo);
+		if (baseInstance != lastBaseInstance || index != lastModelIndex) {
+			uploadAllModelIndices(stagingBuffer, modelIndexBaseByte, modelIndexVbo);
 		} else {
-			uploadChanged(stagingBuffer, baseByte, modelIndexBaseByte, instanceVbo, modelIndexVbo);
+			uploadChangedModelIndices(stagingBuffer, modelIndexBaseByte, modelIndexVbo);
 		}
+	}
 
-		changed.clear();
+	public void resetChanged() {
 		lastModelIndex = index;
 		lastBaseInstance = baseInstance;
+		changed.clear();
 	}
 
-	private boolean shouldUploadAll() {
-		return baseInstance != lastBaseInstance || index != lastModelIndex;
-	}
-
-	private void uploadChanged(StagingBuffer stagingBuffer, long baseByte, long modelIndexBaseByte, int instanceVbo, int modelIndexVbo) {
+	private void uploadChangedInstances(StagingBuffer stagingBuffer, long baseByte, int instanceVbo) {
 		changed.forEachSetSpan((startInclusive, endInclusive) -> {
 			int instanceCount = endInclusive - startInclusive + 1;
 			long totalSize = instanceCount * instanceStride;
-			long modelIndexTotalSize = instanceCount * IndirectBuffers.INT_SIZE;
 
 			stagingBuffer.enqueueCopy(totalSize, instanceVbo, baseByte + startInclusive * instanceStride, ptr -> {
 				for (int i = startInclusive; i <= endInclusive; i++) {
@@ -85,6 +91,13 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 					ptr += instanceStride;
 				}
 			});
+		});
+	}
+
+	private void uploadChangedModelIndices(StagingBuffer stagingBuffer, long modelIndexBaseByte, int modelIndexVbo) {
+		changed.forEachSetSpan((startInclusive, endInclusive) -> {
+			int instanceCount = endInclusive - startInclusive + 1;
+			long modelIndexTotalSize = instanceCount * IndirectBuffers.INT_SIZE;
 
 			stagingBuffer.enqueueCopy(modelIndexTotalSize, modelIndexVbo, modelIndexBaseByte + startInclusive * IndirectBuffers.INT_SIZE, ptr -> {
 				for (int i = startInclusive; i <= endInclusive; i++) {
@@ -95,9 +108,8 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		});
 	}
 
-	private void uploadAll(StagingBuffer stagingBuffer, long baseByte, long modelIndexBaseByte, int instanceVbo, int modelIndexVbo) {
+	private void uploadAllInstances(StagingBuffer stagingBuffer, long baseByte, int instanceVbo) {
 		long totalSize = instances.size() * instanceStride;
-		long modelIndexTotalSize = instances.size() * IndirectBuffers.INT_SIZE;
 
 		stagingBuffer.enqueueCopy(totalSize, instanceVbo, baseByte, ptr -> {
 			for (I instance : instances) {
@@ -105,6 +117,10 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 				ptr += instanceStride;
 			}
 		});
+	}
+
+	private void uploadAllModelIndices(StagingBuffer stagingBuffer, long modelIndexBaseByte, int modelIndexVbo) {
+		long modelIndexTotalSize = instances.size() * IndirectBuffers.INT_SIZE;
 
 		stagingBuffer.enqueueCopy(modelIndexTotalSize, modelIndexVbo, modelIndexBaseByte, ptr -> {
 			for (int i = 0; i < instances.size(); i++) {
