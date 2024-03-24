@@ -1,6 +1,6 @@
-#include "flywheel:internal/indirect/buffers.glsl"
-#include "flywheel:internal/indirect/model_descriptor.glsl"
+#include "flywheel:internal/indirect/buffer_bindings.glsl"
 #include "flywheel:internal/indirect/draw_command.glsl"
+#include "flywheel:internal/indirect/model_descriptor.glsl"
 
 layout(local_size_x = _FLW_SUBGROUP_SIZE) in;
 

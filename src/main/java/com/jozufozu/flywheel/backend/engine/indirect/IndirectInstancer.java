@@ -14,21 +14,20 @@ import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 import com.jozufozu.flywheel.backend.engine.embed.Environment;
 
 public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> {
-	private final long objectStride;
+	private final long instanceStride;
 	private final InstanceWriter<I> writer;
 	private final List<IndirectDraw> associatedDraws = new ArrayList<>();
 	private final Vector4fc boundingSphere;
 
-
-	public int index;
+	public int index = -1;
 	public int baseInstance = -1;
 	private int lastModelIndex = -1;
-	private long lastStartPos = -1;
+	private int lastBaseInstance = -1;
 
 	public IndirectInstancer(InstanceType<I> type, Environment environment, Model model) {
 		super(type, environment);
-		this.objectStride = type.layout()
-				.byteSize() + IndirectBuffers.INT_SIZE;
+		instanceStride = type.layout()
+				.byteSize();
 		writer = this.type.writer();
 		boundingSphere = model.boundingSphere();
 	}
@@ -54,52 +53,65 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		MemoryUtil.memPutFloat(ptr + 20, boundingSphere.w());
 	}
 
-	public void uploadObjects(StagingBuffer stagingBuffer, long startPos, int dstVbo) {
-        if (shouldUploadAll(startPos)) {
-			uploadAll(stagingBuffer, startPos, dstVbo);
+	public void uploadInstances(StagingBuffer stagingBuffer, int instanceVbo, int modelIndexVbo) {
+		long baseByte = baseInstance * instanceStride;
+		long modelIndexBaseByte = baseInstance * IndirectBuffers.INT_SIZE;
+
+        if (shouldUploadAll()) {
+			uploadAll(stagingBuffer, baseByte, modelIndexBaseByte, instanceVbo, modelIndexVbo);
 		} else {
-			uploadChanged(stagingBuffer, startPos, dstVbo);
+			uploadChanged(stagingBuffer, baseByte, modelIndexBaseByte, instanceVbo, modelIndexVbo);
 		}
 
 		changed.clear();
-		lastStartPos = startPos;
 		lastModelIndex = index;
+		lastBaseInstance = baseInstance;
 	}
 
-	private boolean shouldUploadAll(long startPos) {
-		return startPos != lastStartPos || index != lastModelIndex;
+	private boolean shouldUploadAll() {
+		return baseInstance != lastBaseInstance || index != lastModelIndex;
 	}
 
-	private void uploadChanged(StagingBuffer stagingBuffer, long baseByte, int dstVbo) {
+	private void uploadChanged(StagingBuffer stagingBuffer, long baseByte, long modelIndexBaseByte, int instanceVbo, int modelIndexVbo) {
 		changed.forEachSetSpan((startInclusive, endInclusive) -> {
-			var totalSize = (endInclusive - startInclusive + 1) * objectStride;
+			int instanceCount = endInclusive - startInclusive + 1;
+			long totalSize = instanceCount * instanceStride;
+			long modelIndexTotalSize = instanceCount * IndirectBuffers.INT_SIZE;
 
-			stagingBuffer.enqueueCopy(totalSize, dstVbo, baseByte + startInclusive * objectStride, ptr -> {
+			stagingBuffer.enqueueCopy(totalSize, instanceVbo, baseByte + startInclusive * instanceStride, ptr -> {
 				for (int i = startInclusive; i <= endInclusive; i++) {
 					var instance = instances.get(i);
-					writeOne(ptr, instance);
-					ptr += objectStride;
+					writer.write(ptr, instance);
+					ptr += instanceStride;
+				}
+			});
+
+			stagingBuffer.enqueueCopy(modelIndexTotalSize, modelIndexVbo, modelIndexBaseByte + startInclusive * IndirectBuffers.INT_SIZE, ptr -> {
+				for (int i = startInclusive; i <= endInclusive; i++) {
+					MemoryUtil.memPutInt(ptr, index);
+					ptr += IndirectBuffers.INT_SIZE;
 				}
 			});
 		});
 	}
 
-	private void uploadAll(StagingBuffer stagingBuffer, long start, int dstVbo) {
-		long totalSize = objectStride * instances.size();
+	private void uploadAll(StagingBuffer stagingBuffer, long baseByte, long modelIndexBaseByte, int instanceVbo, int modelIndexVbo) {
+		long totalSize = instances.size() * instanceStride;
+		long modelIndexTotalSize = instances.size() * IndirectBuffers.INT_SIZE;
 
-		stagingBuffer.enqueueCopy(totalSize, dstVbo, start, this::uploadAll);
-	}
+		stagingBuffer.enqueueCopy(totalSize, instanceVbo, baseByte, ptr -> {
+			for (I instance : instances) {
+				writer.write(ptr, instance);
+				ptr += instanceStride;
+			}
+		});
 
-	private void uploadAll(long ptr) {
-		for (I instance : instances) {
-			writeOne(ptr, instance);
-			ptr += objectStride;
-		}
-	}
-
-	private void writeOne(long ptr, I instance) {
-		MemoryUtil.memPutInt(ptr, index);
-		writer.write(ptr + IndirectBuffers.INT_SIZE, instance);
+		stagingBuffer.enqueueCopy(modelIndexTotalSize, modelIndexVbo, modelIndexBaseByte, ptr -> {
+			for (int i = 0; i < instances.size(); i++) {
+				MemoryUtil.memPutInt(ptr, index);
+				ptr += IndirectBuffers.INT_SIZE;
+			}
+		});
 	}
 
 	@Override

@@ -1,12 +1,12 @@
 package com.jozufozu.flywheel.backend.engine.uniform;
 
+import org.jetbrains.annotations.Nullable;
+import org.lwjgl.system.MemoryUtil;
+
 import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.config.DebugMode;
-
-import org.jetbrains.annotations.Nullable;
-import org.lwjgl.system.MemoryUtil;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;

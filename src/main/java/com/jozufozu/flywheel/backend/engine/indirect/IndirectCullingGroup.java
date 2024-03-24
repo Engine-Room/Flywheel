@@ -39,7 +39,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private final InstanceType<I> instanceType;
 	private final Environment environment;
-	private final long objectStride;
+	private final long instanceStride;
 	private final IndirectBuffers buffers;
 	private final List<IndirectInstancer<?>> instancers = new ArrayList<>();
 	private final List<IndirectDraw> indirectDraws = new ArrayList<>();
@@ -57,9 +57,9 @@ public class IndirectCullingGroup<I extends Instance> {
 	IndirectCullingGroup(InstanceType<I> instanceType, Environment environment, IndirectPrograms programs) {
 		this.instanceType = instanceType;
 		this.environment = environment;
-		objectStride = instanceType.layout()
-				.byteSize() + IndirectBuffers.INT_SIZE;
-		buffers = new IndirectBuffers(objectStride);
+		instanceStride = instanceType.layout()
+				.byteSize();
+		buffers = new IndirectBuffers(instanceStride);
 
 		this.programs = programs;
 		cullProgram = programs.getCullingProgram(instanceType);
@@ -100,8 +100,8 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		buffers.updateCounts(instanceCountThisFrame, instancers.size(), indirectDraws.size());
 
-		// Upload only objects that have changed.
-		uploadObjects(stagingBuffer);
+		// Upload only instances that have changed.
+		uploadInstances(stagingBuffer);
 
 		// We need to upload the models every frame to reset the instance count.
 		uploadModels(stagingBuffer);
@@ -234,13 +234,9 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 	}
 
-	private void uploadObjects(StagingBuffer stagingBuffer) {
-		long pos = 0;
+	private void uploadInstances(StagingBuffer stagingBuffer) {
 		for (var model : instancers) {
-			var instanceCount = model.instanceCount();
-			model.uploadObjects(stagingBuffer, pos, buffers.object.handle());
-
-			pos += instanceCount * objectStride;
+			model.uploadInstances(stagingBuffer, buffers.instance.handle(), buffers.modelIndex.handle());
 		}
 	}
 

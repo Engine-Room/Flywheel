@@ -11,7 +11,7 @@ import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 
 public class IndirectBuffers {
 	// Number of vbos created.
-	public static final int BUFFER_COUNT = 4;
+	public static final int BUFFER_COUNT = 5;
 
 	public static final long INT_SIZE = Integer.BYTES;
 	public static final long PTR_SIZE = Pointer.POINTER_SIZE;
@@ -22,10 +22,11 @@ public class IndirectBuffers {
 	public static final long DRAW_COMMAND_STRIDE = 40;
 	public static final long DRAW_COMMAND_OFFSET = 0;
 
-	public static final int OBJECT_INDEX = 0;
+	public static final int INSTANCE_INDEX = 0;
 	public static final int TARGET_INDEX = 1;
-	public static final int MODEL_INDEX = 2;
-	public static final int DRAW_INDEX = 3;
+	public static final int MODEL_INDEX_INDEX = 2;
+	public static final int MODEL_INDEX = 3;
+	public static final int DRAW_INDEX = 4;
 
 
 	// Offsets to the 3 segments
@@ -36,18 +37,20 @@ public class IndirectBuffers {
 	private static final long BUFFERS_SIZE_BYTES = SIZE_OFFSET + BUFFER_COUNT * PTR_SIZE;
 
 	// Offsets to the vbos
-	private static final long OBJECT_HANDLE_OFFSET = HANDLE_OFFSET;
+	private static final long INSTANCE_HANDLE_OFFSET = HANDLE_OFFSET;
 	private static final long TARGET_HANDLE_OFFSET = INT_SIZE;
-	private static final long MODEL_HANDLE_OFFSET = INT_SIZE * 2;
-	private static final long DRAW_HANDLE_OFFSET = INT_SIZE * 3;
+	private static final long MODEL_INDEX_HANDLE_OFFSET = INT_SIZE * 2;
+	private static final long MODEL_HANDLE_OFFSET = INT_SIZE * 3;
+	private static final long DRAW_HANDLE_OFFSET = INT_SIZE * 4;
 
 	// Offsets to the sizes
-	private static final long OBJECT_SIZE_OFFSET = SIZE_OFFSET;
+	private static final long INSTANCE_SIZE_OFFSET = SIZE_OFFSET;
 	private static final long TARGET_SIZE_OFFSET = SIZE_OFFSET + PTR_SIZE;
-	private static final long MODEL_SIZE_OFFSET = SIZE_OFFSET + PTR_SIZE * 2;
-	private static final long DRAW_SIZE_OFFSET = SIZE_OFFSET + PTR_SIZE * 3;
+	private static final long MODEL_INDEX_SIZE_OFFSET = SIZE_OFFSET + PTR_SIZE * 2;
+	private static final long MODEL_SIZE_OFFSET = SIZE_OFFSET + PTR_SIZE * 3;
+	private static final long DRAW_SIZE_OFFSET = SIZE_OFFSET + PTR_SIZE * 4;
 
-	private static final float OBJECT_GROWTH_FACTOR = 1.25f;
+	private static final float INSTANCE_GROWTH_FACTOR = 1.25f;
 	private static final float MODEL_GROWTH_FACTOR = 2f;
 	private static final float DRAW_GROWTH_FACTOR = 2f;
 
@@ -61,39 +64,44 @@ public class IndirectBuffers {
 	 * {@code sizes}: an array of {@link IndirectBuffers#PTR_SIZE} byte lengths of the buffers.
 	 * <br>
 	 * Each segment stores {@link IndirectBuffers#BUFFER_COUNT} elements,
-	 * one for the object buffer, target buffer, model buffer, and draw buffer.
+	 * one for the instance buffer, target buffer, model index buffer, model buffer, and draw buffer.
 	 */
 	private final MemoryBlock multiBindBlock;
-	private final long objectStride;
-	public final ResizableStorageArray object;
+	private final long instanceStride;
+	public final ResizableStorageArray instance;
 	public final ResizableStorageArray target;
+	public final ResizableStorageArray modelIndex;
 	public final ResizableStorageArray model;
 	public final ResizableStorageArray draw;
 
-	IndirectBuffers(long objectStride) {
-		this.objectStride = objectStride;
+	IndirectBuffers(long instanceStride) {
+		this.instanceStride = instanceStride;
 		this.multiBindBlock = MemoryBlock.calloc(BUFFERS_SIZE_BYTES, 1);
 
-		object = new ResizableStorageArray(objectStride, OBJECT_GROWTH_FACTOR);
-		target = new ResizableStorageArray(INT_SIZE, OBJECT_GROWTH_FACTOR);
+		instance = new ResizableStorageArray(instanceStride, INSTANCE_GROWTH_FACTOR);
+		target = new ResizableStorageArray(INT_SIZE, INSTANCE_GROWTH_FACTOR);
+		modelIndex = new ResizableStorageArray(INT_SIZE, INSTANCE_GROWTH_FACTOR);
 		model = new ResizableStorageArray(MODEL_STRIDE, MODEL_GROWTH_FACTOR);
 		draw = new ResizableStorageArray(DRAW_COMMAND_STRIDE, DRAW_GROWTH_FACTOR);
 	}
 
-	void updateCounts(int objectCount, int modelCount, int drawCount) {
-		object.ensureCapacity(objectCount);
-		target.ensureCapacity(objectCount);
+	void updateCounts(int instanceCount, int modelCount, int drawCount) {
+		instance.ensureCapacity(instanceCount);
+		target.ensureCapacity(instanceCount);
+		modelIndex.ensureCapacity(instanceCount);
 		model.ensureCapacity(modelCount);
 		draw.ensureCapacity(drawCount);
 
 		final long ptr = multiBindBlock.ptr();
-		MemoryUtil.memPutInt(ptr + OBJECT_HANDLE_OFFSET, object.handle());
+		MemoryUtil.memPutInt(ptr + INSTANCE_HANDLE_OFFSET, instance.handle());
 		MemoryUtil.memPutInt(ptr + TARGET_HANDLE_OFFSET, target.handle());
+		MemoryUtil.memPutInt(ptr + MODEL_INDEX_HANDLE_OFFSET, modelIndex.handle());
 		MemoryUtil.memPutInt(ptr + MODEL_HANDLE_OFFSET, model.handle());
 		MemoryUtil.memPutInt(ptr + DRAW_HANDLE_OFFSET, draw.handle());
 
-		MemoryUtil.memPutAddress(ptr + OBJECT_SIZE_OFFSET, objectStride * objectCount);
-		MemoryUtil.memPutAddress(ptr + TARGET_SIZE_OFFSET, INT_SIZE * objectCount);
+		MemoryUtil.memPutAddress(ptr + INSTANCE_SIZE_OFFSET, instanceStride * instanceCount);
+		MemoryUtil.memPutAddress(ptr + TARGET_SIZE_OFFSET, INT_SIZE * instanceCount);
+		MemoryUtil.memPutAddress(ptr + MODEL_INDEX_SIZE_OFFSET, INT_SIZE * instanceCount);
 		MemoryUtil.memPutAddress(ptr + MODEL_SIZE_OFFSET, MODEL_STRIDE * modelCount);
 		MemoryUtil.memPutAddress(ptr + DRAW_SIZE_OFFSET, DRAW_COMMAND_STRIDE * drawCount);
 	}
@@ -112,16 +120,20 @@ public class IndirectBuffers {
 		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, 0, IndirectBuffers.BUFFER_COUNT, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
 	}
 
+	/**
+	 * Bind all buffers except the draw command buffer.
+	 */
 	public void bindForCrumbling() {
 		final long ptr = multiBindBlock.ptr();
-		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, 0, 3, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
+		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, 0, 4, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
 	}
 
 	public void delete() {
 		multiBindBlock.free();
 
-		object.delete();
+		instance.delete();
 		target.delete();
+		modelIndex.delete();
 		model.delete();
 		draw.delete();
 	}

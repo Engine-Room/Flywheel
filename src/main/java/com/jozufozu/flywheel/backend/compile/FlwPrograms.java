@@ -18,11 +18,15 @@ import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 import com.jozufozu.flywheel.backend.glsl.generate.FnSignature;
 import com.jozufozu.flywheel.backend.glsl.generate.GlslExpr;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
 public final class FlwPrograms {
 	public static final Logger LOGGER = LoggerFactory.getLogger(Flywheel.ID + "/shaders");
+
+	private static final ResourceLocation COMPONENTS_HEADER_VERT = Flywheel.rl("internal/components_header.vert");
+	private static final ResourceLocation COMPONENTS_HEADER_FRAG = Flywheel.rl("internal/components_header.frag");
 
 	private FlwPrograms() {
 	}
@@ -34,21 +38,24 @@ public final class FlwPrograms {
 
 		var sources = new ShaderSources(resourceManager);
 		var stats = new CompilerStats("ubershaders");
-		var loadChecker = new SourceLoader(sources, stats);
+		var loader = new SourceLoader(sources, stats);
 
-		var vertexMaterialComponent = createVertexMaterialComponent(loadChecker);
-		var fragmentMaterialComponent = createFragmentMaterialComponent(loadChecker);
-		var fogComponent = createFogComponent(loadChecker);
-		var cutoutComponent = createCutoutComponent(loadChecker);
+		var vertexComponentsHeader = loader.find(COMPONENTS_HEADER_VERT);
+		var fragmentComponentsHeader = loader.find(COMPONENTS_HEADER_FRAG);
 
-		if (stats.errored() || vertexMaterialComponent == null || fragmentMaterialComponent == null || fogComponent == null || cutoutComponent == null) {
+		var vertexMaterialComponent = createVertexMaterialComponent(loader);
+		var fragmentMaterialComponent = createFragmentMaterialComponent(loader);
+		var fogComponent = createFogComponent(loader);
+		var cutoutComponent = createCutoutComponent(loader);
+
+		if (stats.errored() || vertexComponentsHeader == null || fragmentComponentsHeader == null || vertexMaterialComponent == null || fragmentMaterialComponent == null || fogComponent == null || cutoutComponent == null) {
 			// Probably means the shader sources are missing.
 			stats.emitErrorLog();
 			return;
 		}
 
-		List<SourceComponent> vertexComponents = List.of(vertexMaterialComponent);
-		List<SourceComponent> fragmentComponents = List.of(fragmentMaterialComponent, fogComponent, cutoutComponent);
+		List<SourceComponent> vertexComponents = List.of(vertexComponentsHeader, vertexMaterialComponent);
+		List<SourceComponent> fragmentComponents = List.of(fragmentComponentsHeader, fragmentMaterialComponent, fogComponent, cutoutComponent);
 
 		var pipelineKeys = createPipelineKeys();
 		InstancingPrograms.reload(sources, pipelineKeys, vertexComponents, fragmentComponents);
@@ -66,27 +73,27 @@ public final class FlwPrograms {
 	}
 
 	@Nullable
-	private static UberShaderComponent createVertexMaterialComponent(SourceLoader loadChecker) {
+	private static UberShaderComponent createVertexMaterialComponent(SourceLoader loader) {
 		return UberShaderComponent.builder(Flywheel.rl("material_vertex"))
 				.materialSources(ShaderIndices.materialVertex()
 						.all())
 				.adapt(FnSignature.ofVoid("flw_materialVertex"))
 				.switchOn(GlslExpr.variable("_flw_uberMaterialVertexIndex"))
-				.build(loadChecker);
+				.build(loader);
 	}
 
 	@Nullable
-	private static UberShaderComponent createFragmentMaterialComponent(SourceLoader loadChecker) {
+	private static UberShaderComponent createFragmentMaterialComponent(SourceLoader loader) {
 		return UberShaderComponent.builder(Flywheel.rl("material_fragment"))
 				.materialSources(ShaderIndices.materialFragment()
 						.all())
 				.adapt(FnSignature.ofVoid("flw_materialFragment"))
 				.switchOn(GlslExpr.variable("_flw_uberMaterialFragmentIndex"))
-				.build(loadChecker);
+				.build(loader);
 	}
 
 	@Nullable
-	private static UberShaderComponent createFogComponent(SourceLoader loadChecker) {
+	private static UberShaderComponent createFogComponent(SourceLoader loader) {
 		return UberShaderComponent.builder(Flywheel.rl("fog"))
 				.materialSources(ShaderIndices.fog()
 						.all())
@@ -96,11 +103,11 @@ public final class FlwPrograms {
 						.arg("vec4", "color")
 						.build(), GlslExpr.variable("color"))
 				.switchOn(GlslExpr.variable("_flw_uberFogIndex"))
-				.build(loadChecker);
+				.build(loader);
 	}
 
 	@Nullable
-	private static UberShaderComponent createCutoutComponent(SourceLoader loadChecker) {
+	private static UberShaderComponent createCutoutComponent(SourceLoader loader) {
 		return UberShaderComponent.builder(Flywheel.rl("cutout"))
 				.materialSources(ShaderIndices.cutout()
 						.all())
@@ -110,7 +117,7 @@ public final class FlwPrograms {
 						.arg("vec4", "color")
 						.build(), GlslExpr.boolLiteral(false))
 				.switchOn(GlslExpr.variable("_flw_uberCutoutIndex"))
-				.build(loadChecker);
+				.build(loader);
 	}
 
 	public static class ResourceReloadListener implements ResourceManagerReloadListener {

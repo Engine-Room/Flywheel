@@ -1,21 +1,20 @@
-#include "flywheel:internal/indirect/buffers.glsl"
+#include "flywheel:internal/indirect/buffer_bindings.glsl"
 #include "flywheel:internal/indirect/model_descriptor.glsl"
-#include "flywheel:internal/indirect/object.glsl"
 #include "flywheel:internal/uniforms/uniforms.glsl"
 #include "flywheel:util/matrix.glsl"
 
 layout(local_size_x = _FLW_SUBGROUP_SIZE) in;
 
-layout(std430, binding = _FLW_OBJECT_BUFFER_BINDING) restrict readonly buffer ObjectBuffer {
-    Object objects[];
+layout(std430, binding = _FLW_TARGET_BUFFER_BINDING) restrict writeonly buffer TargetBuffer {
+    uint _flw_instanceIndices[];
 };
 
-layout(std430, binding = _FLW_TARGET_BUFFER_BINDING) restrict writeonly buffer TargetBuffer {
-    uint objectIndices[];
+layout(std430, binding = _FLW_MODEL_INDEX_BUFFER_BINDING) restrict readonly buffer ModelIndexBuffer {
+    uint _flw_modelIndices[];
 };
 
 layout(std430, binding = _FLW_MODEL_BUFFER_BINDING) restrict buffer ModelBuffer {
-    ModelDescriptor models[];
+    ModelDescriptor _flw_models[];
 };
 
 uniform mat4 _flw_embeddedModel;
@@ -34,14 +33,14 @@ bool _flw_testSphere(vec3 center, float radius) {
     return all(xyInside) && all(zInside);
 }
 
-bool _flw_isVisible(uint objectIndex, uint modelIndex) {
-    BoundingSphere sphere = models[modelIndex].boundingSphere;
+bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
+    BoundingSphere sphere = _flw_models[modelIndex].boundingSphere;
 
     vec3 center;
     float radius;
     _flw_unpackBoundingSphere(sphere, center, radius);
 
-    FlwInstance instance = _flw_unpackInstance(objects[objectIndex].instance);
+    FlwInstance instance = _flw_unpackInstance(instanceIndex);
 
     flw_transformBoundingSphere(instance, center, radius);
 
@@ -53,17 +52,17 @@ bool _flw_isVisible(uint objectIndex, uint modelIndex) {
 }
 
 void main() {
-    uint objectIndex = gl_GlobalInvocationID.x;
+    uint instanceIndex = gl_GlobalInvocationID.x;
 
-    if (objectIndex >= objects.length()) {
+    if (instanceIndex >= _flw_modelIndices.length()) {
         return;
     }
 
-    uint modelIndex = objects[objectIndex].modelIndex;
+    uint modelIndex = _flw_modelIndices[instanceIndex];
 
-    if (_flw_isVisible(objectIndex, modelIndex)) {
-        uint localIndex = atomicAdd(models[modelIndex].instanceCount, 1);
-        uint targetIndex = models[modelIndex].baseInstance + localIndex;
-        objectIndices[targetIndex] = objectIndex;
+    if (_flw_isVisible(instanceIndex, modelIndex)) {
+        uint localIndex = atomicAdd(_flw_models[modelIndex].instanceCount, 1);
+        uint targetIndex = _flw_models[modelIndex].baseInstance + localIndex;
+        _flw_instanceIndices[targetIndex] = instanceIndex;
     }
 }

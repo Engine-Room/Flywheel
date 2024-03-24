@@ -8,7 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.jozufozu.flywheel.backend.compile.component.StructInstanceComponent;
+import com.jozufozu.flywheel.backend.compile.component.InstanceStructComponent;
+import com.jozufozu.flywheel.backend.compile.component.SsboInstanceComponent;
 import com.jozufozu.flywheel.backend.compile.core.CompilationHarness;
 import com.jozufozu.flywheel.backend.compile.core.Compile;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
@@ -24,7 +25,7 @@ import com.jozufozu.flywheel.lib.util.ResourceUtil;
 import net.minecraft.resources.ResourceLocation;
 
 public class IndirectPrograms extends AtomicReferenceCounted {
-	private static final ResourceLocation CULL_SHADER_HEADER = Flywheel.rl("internal/indirect/cull_header.glsl");
+	private static final ResourceLocation CULL_SHADER_API_IMPL = Flywheel.rl("internal/indirect/cull_api_impl.glsl");
 	private static final ResourceLocation CULL_SHADER_MAIN = Flywheel.rl("internal/indirect/cull.glsl");
 	private static final ResourceLocation APPLY_SHADER_MAIN = Flywheel.rl("internal/indirect/apply.glsl");
 	private static final ResourceLocation SCATTER_SHADER_MAIN = Flywheel.rl("internal/indirect/scatter.glsl");
@@ -78,9 +79,10 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 				.link(CULL.shader(GlslVersion.V460, ShaderType.COMPUTE)
 						.nameMapper(instanceType -> "culling/" + ResourceUtil.toDebugFileNameNoExtension(instanceType.cullShader()))
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
-						.withResource(CULL_SHADER_HEADER)
-						.withComponent(StructInstanceComponent::create)
+						.withResource(CULL_SHADER_API_IMPL)
+						.withComponent(InstanceStructComponent::new)
 						.withResource(InstanceType::cullShader)
+						.withComponent(SsboInstanceComponent::new)
 						.withResource(CULL_SHADER_MAIN))
 				.postLink((key, program) -> {
                     program.setUniformBlockBinding("_FlwFrameUniforms", Uniforms.FRAME_INDEX);

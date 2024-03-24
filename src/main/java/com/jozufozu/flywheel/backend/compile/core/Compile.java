@@ -43,7 +43,6 @@ public class Compile<K> {
 	public static class ProgramStitcher<K> implements CompilationHarness.KeyCompiler<K> {
 		private final Map<ShaderType, ShaderCompiler<K>> compilers = new EnumMap<>(ShaderType.class);
 		private BiConsumer<K, GlProgram> postLink = (k, p) -> {
-
 		};
 		private BiConsumer<K, GlProgram> preLink = (k, p) -> {
 		};

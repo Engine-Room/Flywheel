@@ -148,8 +148,8 @@ public class UberShaderComponent implements SourceComponent {
 			int index = 0;
 			for (var rl : materialSources) {
 				SourceFile sourceFile = sources.find(rl);
-				final int finalIndex = index;
 				if (sourceFile != null) {
+					final int finalIndex = index;
 					var adapterMap = createAdapterMap(adaptedFunctions, fnName -> "_" + fnName + "_" + finalIndex);
 					transformed.add(new StringSubstitutionComponent(sourceFile, adapterMap));
 				} else {

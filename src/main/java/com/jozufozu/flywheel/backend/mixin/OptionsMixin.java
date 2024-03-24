@@ -1,11 +1,11 @@
 package com.jozufozu.flywheel.backend.mixin;
 
-import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 
 import net.minecraft.client.Options;
 
