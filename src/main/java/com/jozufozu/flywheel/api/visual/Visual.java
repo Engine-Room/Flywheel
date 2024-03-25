@@ -25,18 +25,6 @@ public interface Visual {
 	void update(float partialTick);
 
 	/**
-	 * When a visual is reset, the visual is deleted and re-created.
-	 * <br>
-	 * Just before {@link #update)} would be called, {@code shouldReset} is checked.
-	 * If this function returns {@code true}, then this visual will be {@link #delete deleted},
-	 * and another visual will be constructed to replace it. This allows for more sane resource
-	 * acquisition compared to trying to update everything within the lifetime of a visual.
-	 *
-	 * @return {@code true} if this visual should be discarded and refreshed.
-	 */
-	boolean shouldReset();
-
-	/**
 	 * Free any acquired resources.
 	 */
 	void delete();

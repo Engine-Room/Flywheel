@@ -65,11 +65,6 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 		this.notifier = notifier;
 	}
 
-	@Override
-	public boolean shouldReset() {
-		return blockEntity.getBlockState() != blockState;
-	}
-
 	/**
 	 * In order to accommodate for floating point precision errors at high coordinates,
 	 * {@link VisualManager}s are allowed to arbitrarily adjust the origin, and

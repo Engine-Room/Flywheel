@@ -39,12 +39,7 @@ public abstract class AbstractVisual implements Visual {
 	public void update(float partialTick) {
 	}
 
-	@Override
-	public boolean shouldReset() {
-		return false;
-	}
-
-	protected abstract void _delete();
+    protected abstract void _delete();
 
 	@Override
 	public final void delete() {

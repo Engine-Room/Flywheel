@@ -140,12 +140,7 @@ public class ExampleEffect implements Effect {
 		public void update(float partialTick) {
 		}
 
-		@Override
-		public boolean shouldReset() {
-			return false;
-		}
-
-		@Override
+        @Override
 		public void delete() {
 			effects.forEach(BoidVisual::_delete);
 		}

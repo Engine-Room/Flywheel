@@ -84,15 +84,7 @@ public abstract class Storage<T> {
 			return;
 		}
 
-		// resetting visuals is by default used to handle block state changes.
-		if (visual.shouldReset()) {
-			// delete and re-create the visual.
-			// resetting a visual supersedes updating it.
-			remove(obj);
-			create(obj, partialTick);
-		} else {
-			visual.update(partialTick);
-		}
+		visual.update(partialTick);
 	}
 
 	public void recreateAll(float partialTick) {

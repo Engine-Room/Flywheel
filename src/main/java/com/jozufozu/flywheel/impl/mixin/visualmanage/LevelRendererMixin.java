@@ -34,6 +34,13 @@ abstract class LevelRendererMixin {
 			return;
 		}
 
-		manager.getBlockEntities().queueUpdate(blockEntity);
+		var blockEntities = manager.getBlockEntities();
+		if (oldState != newState) {
+			blockEntities.queueRemove(blockEntity);
+			blockEntities.queueAdd(blockEntity);
+		} else {
+			// I don't think this is possible to reach in vanilla
+			blockEntities.queueUpdate(blockEntity);
+		}
 	}
 }
