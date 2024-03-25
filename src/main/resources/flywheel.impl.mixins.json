@@ -6,9 +6,9 @@
   "refmap": "flywheel.refmap.json",
   "client": [
     "BlockEntityTypeMixin",
+    "ClientChunkCacheMixin",
     "ClientLevelMixin",
     "EntityTypeMixin",
-    "LayerLightSectionStorageMixin",
     "LevelMixin",
     "LevelRendererMixin",
     "MinecraftMixin",

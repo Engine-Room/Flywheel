@@ -22,7 +22,6 @@ import com.jozufozu.flywheel.lib.task.PlanMap;
 import com.jozufozu.flywheel.lib.visual.SimpleDynamicVisual;
 import com.jozufozu.flywheel.lib.visual.SimpleTickableVisual;
 
-import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 public abstract class Storage<T> {
@@ -144,8 +143,8 @@ public abstract class Storage<T> {
 		return NestedPlan.of(tickableVisuals, ForEachPlan.of(() -> simpleTickableVisuals, SimpleTickableVisual::tick));
 	}
 
-	public void enqueueLightUpdateSections(LongSet sections) {
-		litVisuals.enqueueLightUpdateSections(sections);
+	public void enqueueLightUpdateSection(long section) {
+		litVisuals.enqueueLightUpdateSection(section);
 	}
 
 	private void setup(Visual visual, float partialTick) {

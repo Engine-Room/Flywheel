@@ -61,15 +61,15 @@ public abstract class AbstractEmbeddedEnvironment extends AtomicReferenceCounted
 	public void setupDraw(GlProgram program) {
 		setupLight(program);
 
-		program.setMat4("_flw_modelMatrix", poseComposed);
-		program.setMat3("_flw_normalMatrix", normalComposed);
+		program.setMat4(EmbeddingUniforms.MODEL_MATRIX, poseComposed);
+		program.setMat3(EmbeddingUniforms.NORMAL_MATRIX, normalComposed);
 	}
 
 	@Override
 	public void setupCull(GlProgram program) {
-		program.setBool("_flw_useModelMatrix", true);
+		program.setBool(EmbeddingUniforms.USE_MODEL_MATRIX, true);
 
-		program.setMat4("_flw_modelMatrix", poseComposed);
+		program.setMat4(EmbeddingUniforms.MODEL_MATRIX1, poseComposed);
 	}
 
 	@Override

@@ -76,8 +76,9 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compileOnly fg.deobf("maven.modrinth:embeddium:0.2.10+mc1.20.1")
-    compileOnly fg.deobf("maven.modrinth:oculus:1.20.1-1.6.9")
+    compileOnly fg.deobf("maven.modrinth:embeddium:0.3.9+mc1.20.1")
+    compileOnly fg.deobf("maven.modrinth:oculus:1.20.1-1.6.15a")
+    // implementation fg.deobf("maven.modrinth:starlight-forge:1.1.2+1.20")
 
     // https://discord.com/channels/313125603924639766/725850371834118214/910619168821354497
     // Prevent Mixin annotation processor from getting into IntelliJ's annotation processor settings

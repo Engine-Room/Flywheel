@@ -34,7 +34,6 @@ public class TopLevelEmbeddedEnvironment extends AbstractEmbeddedEnvironment {
 		lightTexture.upload(lightVolume.ptr(), lightVolume.sizeX(), lightVolume.sizeY(), lightVolume.sizeZ());
 	}
 
-
 	@Override
 	public void collectLight(BlockAndTintGetter level, int minX, int minY, int minZ, int sizeX, int sizeY, int sizeZ) {
 		lightVolume.collect(level, minX, minY, minZ, sizeX, sizeY, sizeZ);
@@ -56,11 +55,11 @@ public class TopLevelEmbeddedEnvironment extends AbstractEmbeddedEnvironment {
 			float oneOverSizeY = 1f / (float) lightTexture.sizeY;
 			float oneOverSizeZ = 1f / (float) lightTexture.sizeZ;
 
-			program.setVec3("_flw_oneOverLightBoxSize", oneOverSizeX, oneOverSizeY, oneOverSizeZ);
-			program.setVec3("_flw_lightVolumeMin", lightVolume.x(), lightVolume.y(), lightVolume.z());
-			program.setBool("_flw_useLightVolume", true);
+			program.setVec3(EmbeddingUniforms.ONE_OVER_LIGHT_BOX_SIZE, oneOverSizeX, oneOverSizeY, oneOverSizeZ);
+			program.setVec3(EmbeddingUniforms.LIGHT_VOLUME_MIN, lightVolume.x(), lightVolume.y(), lightVolume.z());
+			program.setBool(EmbeddingUniforms.USE_LIGHT_VOLUME, true);
 		} else {
-			program.setBool("_flw_useLightVolume", false);
+			program.setBool(EmbeddingUniforms.USE_LIGHT_VOLUME, false);
 		}
 	}
 

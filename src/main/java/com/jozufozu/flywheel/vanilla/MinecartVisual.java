@@ -70,6 +70,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisu
 		contents = createContentsInstance();
 
 		updateInstances(partialTick);
+		updateLight();
 
 		super.init(partialTick);
 	}

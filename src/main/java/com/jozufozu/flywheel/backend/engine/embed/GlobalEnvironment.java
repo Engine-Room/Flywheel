@@ -21,7 +21,7 @@ public class GlobalEnvironment implements Environment {
 
 	@Override
 	public void setupCull(GlProgram cullProgram) {
-		cullProgram.setBool("_flw_useEmbeddedModel", false);
+		cullProgram.setBool(EmbeddingUniforms.USE_MODEL_MATRIX, false);
 	}
 
 	@Override

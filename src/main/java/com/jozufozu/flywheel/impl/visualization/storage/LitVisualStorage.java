@@ -116,8 +116,8 @@ public class LitVisualStorage {
 		}
 	}
 
-	public void enqueueLightUpdateSections(LongSet sections) {
-		sectionsUpdatedThisFrame.addAll(sections);
+	public void enqueueLightUpdateSection(long section) {
+		sectionsUpdatedThisFrame.add(section);
 	}
 
 	/**

@@ -48,7 +48,6 @@ import com.jozufozu.flywheel.lib.task.SimplePlan;
 import com.jozufozu.flywheel.lib.util.LevelAttached;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.BlockDestructionProgress;
@@ -317,12 +316,12 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		engine.delete();
 	}
 
-	public void enqueueLightUpdateSections(LongSet sections) {
+	public void enqueueLightUpdateSection(long section) {
 		blockEntities.getStorage()
-				.enqueueLightUpdateSections(sections);
+				.enqueueLightUpdateSection(section);
 		entities.getStorage()
-				.enqueueLightUpdateSections(sections);
+				.enqueueLightUpdateSection(section);
 		effects.getStorage()
-				.enqueueLightUpdateSections(sections);
+				.enqueueLightUpdateSection(section);
 	}
 }
