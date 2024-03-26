@@ -13,6 +13,7 @@ public class IndirectDraw {
 	private final Material material;
 	private final MeshPool.PooledMesh mesh;
 	private final RenderStage stage;
+	private final int indexOfMeshInModel;
 
 	private final int materialVertexIndex;
 	private final int materialFragmentIndex;
@@ -20,11 +21,12 @@ public class IndirectDraw {
 	private final int packedMaterialProperties;
 	private boolean deleted;
 
-	public IndirectDraw(IndirectInstancer<?> model, Material material, MeshPool.PooledMesh mesh, RenderStage stage) {
+	public IndirectDraw(IndirectInstancer<?> model, Material material, MeshPool.PooledMesh mesh, RenderStage stage, int indexOfMeshInModel) {
 		this.model = model;
 		this.material = material;
 		this.mesh = mesh;
 		this.stage = stage;
+		this.indexOfMeshInModel = indexOfMeshInModel;
 
 		mesh.acquire();
 
@@ -48,6 +50,10 @@ public class IndirectDraw {
 
 	public RenderStage stage() {
 		return stage;
+	}
+
+	public int indexOfMeshInModel() {
+		return indexOfMeshInModel;
 	}
 
 	public void write(long ptr) {

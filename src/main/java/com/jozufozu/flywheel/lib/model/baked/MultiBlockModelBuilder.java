@@ -3,6 +3,8 @@ package com.jozufozu.flywheel.lib.model.baked;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Model;
@@ -10,8 +12,8 @@ import com.jozufozu.flywheel.api.vertex.VertexView;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.ModelUtil;
 import com.jozufozu.flywheel.lib.model.SimpleMesh;
+import com.jozufozu.flywheel.lib.model.SimpleModel;
 import com.jozufozu.flywheel.lib.model.baked.BakedModelBufferer.ResultConsumer;
-import com.jozufozu.flywheel.lib.model.baked.BakedModelBufferer.ShadeSeparatedResultConsumer;
 import com.jozufozu.flywheel.lib.vertex.NoOverlayVertexView;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -23,10 +25,12 @@ import net.minecraftforge.client.model.data.ModelData;
 public class MultiBlockModelBuilder {
 	private final BlockAndTintGetter renderWorld;
 	private final Iterable<BlockPos> positions;
+	@Nullable
 	private PoseStack poseStack;
+	@Nullable
 	private Function<BlockPos, ModelData> modelDataLookup;
 	private boolean renderFluids = false;
-	private boolean shadeSeparated = true;
+	@Nullable
 	private BiFunction<RenderType, Boolean, Material> materialFunc;
 
 	public MultiBlockModelBuilder(BlockAndTintGetter renderWorld, Iterable<BlockPos> positions) {
@@ -49,17 +53,12 @@ public class MultiBlockModelBuilder {
 		return this;
 	}
 
-	public MultiBlockModelBuilder disableShadeSeparation() {
-		shadeSeparated = false;
-		return this;
-	}
-
 	public MultiBlockModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
 		this.materialFunc = materialFunc;
 		return this;
 	}
 
-	public TessellatedModel build() {
+	public SimpleModel build() {
 		if (modelDataLookup == null) {
 			modelDataLookup = pos -> ModelData.EMPTY;
 		}
@@ -69,30 +68,17 @@ public class MultiBlockModelBuilder {
 
 		var out = ImmutableList.<Model.ConfiguredMesh>builder();
 
-		if (shadeSeparated) {
-			ShadeSeparatedResultConsumer resultConsumer = (renderType, shaded, data) -> {
-				Material material = materialFunc.apply(renderType, shaded);
-				if (material != null) {
-					VertexView vertexView = new NoOverlayVertexView();
-					MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, vertexView);
-					var mesh = new SimpleMesh(vertexView, meshData, "source=MultiBlockModelBuilder," + "renderType=" + renderType + ",shaded=" + shaded);
-					out.add(new Model.ConfiguredMesh(material, mesh));
-				}
-			};
-			BakedModelBufferer.bufferMultiBlockShadeSeparated(ModelUtil.VANILLA_RENDERER, positions.iterator(), renderWorld, poseStack, modelDataLookup, renderFluids, resultConsumer);
-		} else {
-			ResultConsumer resultConsumer = (renderType, data) -> {
-				Material material = materialFunc.apply(renderType, true);
-				if (material != null) {
-					VertexView vertexView = new NoOverlayVertexView();
-					MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, vertexView);
-					var mesh = new SimpleMesh(vertexView, meshData, "source=MultiBlockModelBuilder," + "renderType=" + renderType);
-					out.add(new Model.ConfiguredMesh(material, mesh));
-				}
-			};
-			BakedModelBufferer.bufferMultiBlock(ModelUtil.VANILLA_RENDERER, positions.iterator(), renderWorld, poseStack, modelDataLookup, renderFluids, resultConsumer);
-		}
+		ResultConsumer resultConsumer = (renderType, shaded, data) -> {
+			Material material = materialFunc.apply(renderType, shaded);
+			if (material != null) {
+				VertexView vertexView = new NoOverlayVertexView();
+				MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, vertexView);
+				var mesh = new SimpleMesh(vertexView, meshData, "source=MultiBlockModelBuilder," + "renderType=" + renderType + ",shaded=" + shaded);
+				out.add(new Model.ConfiguredMesh(material, mesh));
+			}
+		};
+		BakedModelBufferer.bufferMultiBlock(ModelUtil.VANILLA_RENDERER, positions.iterator(), renderWorld, poseStack, modelDataLookup, renderFluids, resultConsumer);
 
-		return new TessellatedModel(out.build(), shadeSeparated);
+		return new SimpleModel(out.build());
 	}
 }

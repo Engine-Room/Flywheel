@@ -33,6 +33,7 @@ import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 
 public class IndirectCullingGroup<I extends Instance> {
 	private static final Comparator<IndirectDraw> DRAW_COMPARATOR = Comparator.comparing(IndirectDraw::stage)
+			.thenComparing(IndirectDraw::indexOfMeshInModel)
 			.thenComparing(IndirectDraw::material, MaterialRenderState.COMPARATOR);
 
 	private static final int DRAW_BARRIER_BITS = GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT;
@@ -179,12 +180,15 @@ public class IndirectCullingGroup<I extends Instance> {
         instancer.index = instancers.size();
 		instancers.add(instancer);
 
-		for (var entry : model.meshes()) {
-			MeshPool.PooledMesh mesh = meshPool.alloc(entry.mesh());
-			var draw = new IndirectDraw(instancer, entry.material(), mesh, stage);
-			indirectDraws.add(draw);
-			instancer.addDraw(draw);
-		}
+        List<Model.ConfiguredMesh> meshes = model.meshes();
+        for (int i = 0; i < meshes.size(); i++) {
+            var entry = meshes.get(i);
+
+            MeshPool.PooledMesh mesh = meshPool.alloc(entry.mesh());
+            var draw = new IndirectDraw(instancer, entry.material(), mesh, stage, i);
+            indirectDraws.add(draw);
+            instancer.addDraw(draw);
+        }
 
 		needsDrawSort = true;
 	}

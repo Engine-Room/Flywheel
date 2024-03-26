@@ -2,6 +2,8 @@ package com.jozufozu.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Model;
@@ -9,8 +11,8 @@ import com.jozufozu.flywheel.api.vertex.VertexView;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.model.ModelUtil;
 import com.jozufozu.flywheel.lib.model.SimpleMesh;
+import com.jozufozu.flywheel.lib.model.SimpleModel;
 import com.jozufozu.flywheel.lib.model.baked.BakedModelBufferer.ResultConsumer;
-import com.jozufozu.flywheel.lib.model.baked.BakedModelBufferer.ShadeSeparatedResultConsumer;
 import com.jozufozu.flywheel.lib.vertex.NoOverlayVertexView;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -23,11 +25,15 @@ import net.minecraftforge.client.model.data.ModelData;
 
 public class BakedModelBuilder {
 	private final BakedModel bakedModel;
+	@Nullable
 	private BlockAndTintGetter renderWorld;
+	@Nullable
 	private BlockState blockState;
+	@Nullable
 	private PoseStack poseStack;
+	@Nullable
 	private ModelData modelData;
-	private boolean shadeSeparated = true;
+	@Nullable
 	private BiFunction<RenderType, Boolean, Material> materialFunc;
 
 	public BakedModelBuilder(BakedModel bakedModel) {
@@ -54,17 +60,12 @@ public class BakedModelBuilder {
 		return this;
 	}
 
-	public BakedModelBuilder disableShadeSeparation() {
-		shadeSeparated = false;
-		return this;
-	}
-
 	public BakedModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
 		this.materialFunc = materialFunc;
 		return this;
 	}
 
-	public TessellatedModel build() {
+	public SimpleModel build() {
 		if (renderWorld == null) {
 			renderWorld = VirtualEmptyBlockGetter.INSTANCE;
 		}
@@ -80,30 +81,17 @@ public class BakedModelBuilder {
 
 		var out = ImmutableList.<Model.ConfiguredMesh>builder();
 
-		if (shadeSeparated) {
-			ShadeSeparatedResultConsumer resultConsumer = (renderType, shaded, data) -> {
-				Material material = materialFunc.apply(renderType, shaded);
-				if (material != null) {
-					VertexView vertexView = new NoOverlayVertexView();
-					MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, vertexView);
-					var mesh = new SimpleMesh(vertexView, meshData, "source=BakedModelBuilder," + "bakedModel=" + bakedModel + ",renderType=" + renderType + ",shaded=" + shaded);
-					out.add(new Model.ConfiguredMesh(material, mesh));
-				}
-			};
-			BakedModelBufferer.bufferSingleShadeSeparated(ModelUtil.VANILLA_RENDERER.getModelRenderer(), renderWorld, bakedModel, blockState, poseStack, modelData, resultConsumer);
-		} else {
-			ResultConsumer resultConsumer = (renderType, data) -> {
-				Material material = materialFunc.apply(renderType, true);
-				if (material != null) {
-					VertexView vertexView = new NoOverlayVertexView();
-					MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, vertexView);
-					var mesh = new SimpleMesh(vertexView, meshData, "source=BakedModelBuilder," + "bakedModel=" + bakedModel + ",renderType=" + renderType);
-					out.add(new Model.ConfiguredMesh(material, mesh));
-				}
-			};
-			BakedModelBufferer.bufferSingle(ModelUtil.VANILLA_RENDERER.getModelRenderer(), renderWorld, bakedModel, blockState, poseStack, modelData, resultConsumer);
-		}
+		ResultConsumer resultConsumer = (renderType, shaded, data) -> {
+			Material material = materialFunc.apply(renderType, shaded);
+			if (material != null) {
+				VertexView vertexView = new NoOverlayVertexView();
+				MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, vertexView);
+				var mesh = new SimpleMesh(vertexView, meshData, "source=BakedModelBuilder," + "bakedModel=" + bakedModel + ",renderType=" + renderType + ",shaded=" + shaded);
+				out.add(new Model.ConfiguredMesh(material, mesh));
+			}
+		};
+		BakedModelBufferer.bufferSingle(ModelUtil.VANILLA_RENDERER.getModelRenderer(), renderWorld, bakedModel, blockState, poseStack, modelData, resultConsumer);
 
-		return new TessellatedModel(out.build(), shadeSeparated);
+		return new SimpleModel(out.build());
 	}
 }

@@ -7,6 +7,16 @@ import org.joml.Vector4fc;
 import com.jozufozu.flywheel.api.material.Material;
 
 public interface Model {
+	/**
+	 * Get a list of all meshes in this model.
+	 *
+	 * <p>The contents of the returned list will be queried, but never modified.</p>
+	 *
+	 * <p>Meshes will be rendered in the order they appear in this list, though
+	 * no render order guarantees are made for meshes between different models.</p>
+	 *
+	 * @return A list of meshes.
+	 */
 	List<ConfiguredMesh> meshes();
 
 	/**

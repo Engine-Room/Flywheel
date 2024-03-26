@@ -7,5 +7,6 @@ public enum DebugMode {
 	LIGHT_LEVEL,
 	LIGHT_COLOR,
 	OVERLAY,
+	DIFFUSE,
 	LIGHT_VOLUME,
 }

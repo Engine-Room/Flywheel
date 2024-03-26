@@ -25,6 +25,18 @@ flat in uint _flw_instanceID;
 
 out vec4 _flw_outputColor;
 
+float _flw_diffuseFactor() {
+    if (flw_material.diffuse) {
+        if (flw_constantAmbientLight == 1u) {
+            return diffuseNether(flw_vertexNormal);
+        } else {
+            return diffuse(flw_vertexNormal);
+        }
+    } else {
+        return 1.;
+    }
+}
+
 void _flw_main() {
     flw_sampleColor = texture(flw_diffuseTex, flw_vertexTexCoord);
     flw_fragColor = flw_vertexColor * flw_sampleColor;
@@ -49,15 +61,8 @@ void _flw_main() {
 
     vec4 color = flw_fragColor;
 
-    if (flw_material.diffuse) {
-        float diffuseFactor;
-        if (flw_constantAmbientLight == 1u) {
-            diffuseFactor = diffuseNether(flw_vertexNormal);
-        } else {
-            diffuseFactor = diffuse(flw_vertexNormal);
-        }
-        color.rgb *= diffuseFactor;
-    }
+    float diffuseFactor = _flw_diffuseFactor();
+    color.rgb *= diffuseFactor;
 
     if (flw_material.useOverlay) {
         vec4 overlayColor = texelFetch(flw_overlayTex, flw_fragOverlay, 0);
@@ -90,8 +95,11 @@ void _flw_main() {
         case 5u:
         color = vec4(flw_fragOverlay / 16., 0., 1.);
         break;
-        #ifdef _FLW_EMBEDDED
         case 6u:
+        color = vec4(vec3(diffuseFactor), 1.);
+        break;
+        #ifdef _FLW_EMBEDDED
+        case 7u:
         color = vec4(_flw_lightVolumeCoord, 1.);
         break;
         #endif
