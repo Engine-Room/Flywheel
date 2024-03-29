@@ -42,7 +42,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	private final Environment environment;
 	private final long instanceStride;
 	private final IndirectBuffers buffers;
-	private final List<IndirectInstancer<?>> instancers = new ArrayList<>();
+	private final List<IndirectInstancer<I>> instancers = new ArrayList<>();
 	private final List<IndirectDraw> indirectDraws = new ArrayList<>();
 	private final Map<RenderStage, List<MultiDraw>> multiDraws = new EnumMap<>(RenderStage.class);
 
@@ -216,7 +216,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 	}
 
-	public GlProgram bindWithContextShader(ContextShader override) {
+	public void bindWithContextShader(ContextShader override) {
 		var program = programs.getIndirectProgram(instanceType, override);
 
 		program.bind();
@@ -227,8 +227,6 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		var flwBaseDraw = drawProgram.getUniformLocation("_flw_baseDraw");
 		glUniform1ui(flwBaseDraw, 0);
-
-		return program;
 	}
 
 	private void drawBarrier() {

@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.backend.engine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +14,11 @@ import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.backend.engine.embed.Environment;
+import com.jozufozu.flywheel.lib.util.Pair;
+
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.minecraft.client.resources.model.ModelBakery;
 
 public abstract class DrawManager<N extends AbstractInstancer<?>> {
 	/**
@@ -92,5 +98,37 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 		Flywheel.LOGGER.warn(builder.toString());
 
 		return false;
+	}
+
+	protected static <I extends AbstractInstancer<?>> Map<GroupKey<?>, Int2ObjectMap<List<Pair<I, InstanceHandleImpl>>>> doCrumblingSort(Class<I> clazz, List<Engine.CrumblingBlock> crumblingBlocks) {
+		Map<GroupKey<?>, Int2ObjectMap<List<Pair<I, InstanceHandleImpl>>>> byType = new HashMap<>();
+		for (Engine.CrumblingBlock block : crumblingBlocks) {
+			int progress = block.progress();
+
+			if (progress < 0 || progress >= ModelBakery.DESTROY_TYPES.size()) {
+				continue;
+			}
+
+			for (Instance instance : block.instances()) {
+				// Filter out instances that weren't created by this engine.
+				// If all is well, we probably shouldn't take the `continue`
+				// branches but better to do checked casts.
+				if (!(instance.handle() instanceof InstanceHandleImpl impl)) {
+					continue;
+				}
+
+				AbstractInstancer<?> abstractInstancer = impl.instancer;
+				if (!clazz.isInstance(abstractInstancer)) {
+					continue;
+				}
+
+				var instancer = clazz.cast(abstractInstancer);
+
+				byType.computeIfAbsent(new GroupKey<>(instancer.type, instancer.environment), $ -> new Int2ObjectArrayMap<>())
+						.computeIfAbsent(progress, $ -> new ArrayList<>())
+						.add(Pair.of(instancer, impl));
+			}
+		}
+		return byType;
 	}
 }

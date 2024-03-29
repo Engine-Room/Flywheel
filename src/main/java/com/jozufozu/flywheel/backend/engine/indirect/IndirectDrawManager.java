@@ -6,7 +6,6 @@ import static org.lwjgl.opengl.GL30.glBindBufferRange;
 import static org.lwjgl.opengl.GL40.glDrawElementsIndirect;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,18 +13,16 @@ import java.util.Map;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.Samplers;
 import com.jozufozu.flywheel.backend.compile.ContextShader;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
 import com.jozufozu.flywheel.backend.engine.DrawManager;
-import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
+import com.jozufozu.flywheel.backend.engine.GroupKey;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
 import com.jozufozu.flywheel.backend.engine.TextureBinder;
-import com.jozufozu.flywheel.backend.engine.embed.Environment;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
@@ -33,10 +30,7 @@ import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
-import com.jozufozu.flywheel.lib.util.Pair;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
@@ -68,7 +62,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	@Override
 	protected <I extends Instance> void initialize(InstancerKey<I> key, IndirectInstancer<?> instancer) {
 		var groupKey = new GroupKey<>(key.type(), key.environment());
-		var group = (IndirectCullingGroup<I>) cullingGroups.computeIfAbsent(groupKey, t -> new IndirectCullingGroup<>(t.type, t.environment, programs));
+		var group = (IndirectCullingGroup<I>) cullingGroups.computeIfAbsent(groupKey, t -> new IndirectCullingGroup<>(t.instanceType(), t.environment(), programs));
 		group.add((IndirectInstancer<I>) instancer, key.model(), key.stage(), meshPool);
 	}
 
@@ -148,7 +142,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	}
 
 	public void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks) {
-		var byType = doCrumblingSort(crumblingBlocks);
+		var byType = doCrumblingSort(IndirectInstancer.class, crumblingBlocks);
 
 		if (byType.isEmpty()) {
 			return;
@@ -168,14 +162,12 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			GlBufferType.DRAW_INDIRECT_BUFFER.bind(crumblingDrawBuffer.handle());
 			glBindBufferRange(GL_SHADER_STORAGE_BUFFER, IndirectBuffers.DRAW_INDEX, crumblingDrawBuffer.handle(), 0, IndirectBuffers.DRAW_COMMAND_STRIDE);
 
-			for (var instanceTypeEntry : byType.entrySet()) {
-				var byProgress = instanceTypeEntry.getValue();
+			for (var groupEntry : byType.entrySet()) {
+				var byProgress = groupEntry.getValue();
 
 				// Set up the crumbling program buffers. Nothing changes here between draws.
-				var program = cullingGroups.get(instanceTypeEntry.getKey())
+				cullingGroups.get(groupEntry.getKey())
 						.bindWithContextShader(ContextShader.CRUMBLING);
-
-				program.setSamplerBinding("crumblingTex", Samplers.CRUMBLING);
 
 				for (var progressEntry : byProgress.int2ObjectEntrySet()) {
 					Samplers.CRUMBLING.makeActive();
@@ -186,7 +178,6 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 						int instanceIndex = instanceHandlePair.second().index;
 
 						for (IndirectDraw draw : instancer.draws()) {
-
 							// Transform the material to be suited for crumbling.
 							CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
 
@@ -209,36 +200,5 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 			block.free();
 		}
-	}
-
-	private static Map<GroupKey<?>, Int2ObjectMap<List<Pair<IndirectInstancer<?>, InstanceHandleImpl>>>> doCrumblingSort(List<Engine.CrumblingBlock> crumblingBlocks) {
-		Map<GroupKey<?>, Int2ObjectMap<List<Pair<IndirectInstancer<?>, InstanceHandleImpl>>>> byType = new HashMap<>();
-		for (Engine.CrumblingBlock block : crumblingBlocks) {
-			int progress = block.progress();
-
-			if (progress < 0 || progress >= ModelBakery.DESTROY_TYPES.size()) {
-				continue;
-			}
-
-			for (Instance instance : block.instances()) {
-				// Filter out instances that weren't created by this engine.
-				// If all is well, we probably shouldn't take the `continue`
-				// branches but better to do checked casts.
-				if (!(instance.handle() instanceof InstanceHandleImpl impl)) {
-					continue;
-				}
-				if (!(impl.instancer instanceof IndirectInstancer<?> instancer)) {
-					continue;
-				}
-
-				byType.computeIfAbsent(new GroupKey<>(instancer.type, instancer.environment), $ -> new Int2ObjectArrayMap<>())
-						.computeIfAbsent(progress, $ -> new ArrayList<>())
-						.add(Pair.of(instancer, impl));
-			}
-		}
-		return byType;
-	}
-
-	public record GroupKey<I extends Instance>(InstanceType<I> type, Environment environment) {
 	}
 }

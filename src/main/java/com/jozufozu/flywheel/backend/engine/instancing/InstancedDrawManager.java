@@ -1,19 +1,11 @@
 package com.jozufozu.flywheel.backend.engine.instancing;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import org.lwjgl.opengl.GL32;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ListMultimap;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
@@ -24,7 +16,7 @@ import com.jozufozu.flywheel.backend.compile.ContextShader;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;
 import com.jozufozu.flywheel.backend.engine.CommonCrumbling;
 import com.jozufozu.flywheel.backend.engine.DrawManager;
-import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
+import com.jozufozu.flywheel.backend.engine.GroupKey;
 import com.jozufozu.flywheel.backend.engine.InstancerKey;
 import com.jozufozu.flywheel.backend.engine.MaterialEncoder;
 import com.jozufozu.flywheel.backend.engine.MaterialRenderState;
@@ -37,15 +29,13 @@ import com.jozufozu.flywheel.backend.gl.array.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.lib.material.SimpleMaterial;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	/**
 	 * The set of draw calls to make in each {@link RenderStage}.
 	 */
-	private final Map<RenderStage, DrawSet> drawSets = new EnumMap<>(RenderStage.class);
+	private final Map<RenderStage, InstancedRenderStage> stages = new EnumMap<>(RenderStage.class);
 	private final InstancingPrograms programs;
 	/**
 	 * A map of vertex types to their mesh pools.
@@ -65,6 +55,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		meshPool.bind(vao);
 	}
 
+	@Override
 	public void flush() {
 		super.flush();
 
@@ -81,33 +72,42 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 			}
 		});
 
-		for (DrawSet drawSet : drawSets.values()) {
+		for (InstancedRenderStage instancedRenderStage : stages.values()) {
 			// Remove the draw calls for any instancers we deleted.
-			drawSet.prune();
+			instancedRenderStage.flush();
 		}
 
 		meshPool.flush();
 	}
 
+	@Override
 	public void renderStage(RenderStage stage) {
-		var drawSet = drawSets.getOrDefault(stage, DrawSet.EMPTY);
+		var drawSet = stages.get(stage);
 
-		if (drawSet.isEmpty()) {
+		if (drawSet == null || drawSet.isEmpty()) {
 			return;
 		}
 
 		try (var state = GlStateTracker.getRestoreState()) {
-			render(drawSet);
+			Uniforms.bindForDraw();
+			vao.bindForDraw();
+			TextureBinder.bindLightAndOverlay();
+
+			drawSet.draw(instanceTexture, programs);
+
+			MaterialRenderState.reset();
+			TextureBinder.resetLightAndOverlay();
 		}
 	}
 
+	@Override
 	public void delete() {
 		instancers.values()
 				.forEach(InstancedInstancer::delete);
 
-		drawSets.values()
-				.forEach(DrawSet::delete);
-		drawSets.clear();
+		stages.values()
+				.forEach(InstancedRenderStage::delete);
+		stages.clear();
 
 		meshPool.delete();
 		instanceTexture.delete();
@@ -115,42 +115,6 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		vao.delete();
 
 		super.delete();
-	}
-
-	private void render(InstancedDrawManager.DrawSet drawSet) {
-		Uniforms.bindForDraw();
-		vao.bindForDraw();
-		TextureBinder.bindLightAndOverlay();
-
-		for (var entry : drawSet) {
-			var shader = entry.getKey();
-			var drawCalls = entry.getValue();
-
-			if (drawCalls.isEmpty()) {
-				continue;
-			}
-
-			var environment = shader.environment();
-			var material = shader.material();
-
-			var program = programs.get(shader.instanceType(), environment.contextShader());
-			program.bind();
-
-			environment.setupDraw(program);
-
-			uploadMaterialUniform(program, material);
-
-			MaterialRenderState.setup(material);
-
-			Samplers.INSTANCE_BUFFER.makeActive();
-
-			for (var drawCall : drawCalls) {
-				drawCall.render(instanceTexture);
-			}
-		}
-
-		MaterialRenderState.reset();
-		TextureBinder.resetLightAndOverlay();
 	}
 
 	@Override
@@ -162,26 +126,28 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	protected <I extends Instance> void initialize(InstancerKey<I> key, InstancedInstancer<?> instancer) {
 		instancer.init();
 
-		DrawSet drawSet = drawSets.computeIfAbsent(key.stage(), DrawSet::new);
+		InstancedRenderStage instancedRenderStage = stages.computeIfAbsent(key.stage(), $ -> new InstancedRenderStage());
 
 		var meshes = key.model()
 				.meshes();
-		for (var entry : meshes) {
+		for (int i = 0; i < meshes.size(); i++) {
+			var entry = meshes.get(i);
 			var mesh = meshPool.alloc(entry.mesh());
 
-			ShaderState shaderState = new ShaderState(entry.material(), key.type(), key.environment());
-			DrawCall drawCall = new DrawCall(instancer, mesh, shaderState);
+			GroupKey<?> groupKey = new GroupKey<>(key.type(), key.environment());
+			InstancedDraw instancedDraw = new InstancedDraw(instancer, mesh, groupKey, entry.material(), i);
 
-			drawSet.put(shaderState, drawCall);
-			instancer.addDrawCall(drawCall);
+			instancedRenderStage.put(groupKey, instancedDraw);
+			instancer.addDrawCall(instancedDraw);
 		}
 	}
 
+	@Override
 	public void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks) {
 		// Sort draw calls into buckets, so we don't have to do as many shader binds.
-		var byShaderState = doCrumblingSort(crumblingBlocks);
+		var byType = doCrumblingSort(InstancedInstancer.class, crumblingBlocks);
 
-		if (byShaderState.isEmpty()) {
+		if (byType.isEmpty()) {
 			return;
 		}
 
@@ -192,38 +158,32 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 			vao.bindForDraw();
 			TextureBinder.bindLightAndOverlay();
 
-			for (var shaderStateEntry : byShaderState.entrySet()) {
-				var byProgress = shaderStateEntry.getValue();
+			for (var groupEntry : byType.entrySet()) {
+				var byProgress = groupEntry.getValue();
 
-				if (byProgress.isEmpty()) {
-					continue;
-				}
-
-				ShaderState shader = shaderStateEntry.getKey();
-
-				CommonCrumbling.applyCrumblingProperties(crumblingMaterial, shader.material());
+				GroupKey<?> shader = groupEntry.getKey();
 
 				var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING);
 				program.bind();
 
-				uploadMaterialUniform(program, crumblingMaterial);
-
-				MaterialRenderState.setup(crumblingMaterial);
-
 				for (var progressEntry : byProgress.int2ObjectEntrySet()) {
-					var drawCalls = progressEntry.getValue();
-
-					if (drawCalls.isEmpty()) {
-						continue;
-					}
-
 					Samplers.CRUMBLING.makeActive();
 					TextureBinder.bind(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
 
-					Samplers.INSTANCE_BUFFER.makeActive();
+					for (var instanceHandlePair : progressEntry.getValue()) {
+						InstancedInstancer<?> instancer = instanceHandlePair.first();
+						var handle = instanceHandlePair.second();
 
-					for (Consumer<TextureBuffer> drawCall : drawCalls) {
-						drawCall.accept(instanceTexture);
+						for (InstancedDraw draw : instancer.draws()) {
+							CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
+							uploadMaterialUniform(program, crumblingMaterial);
+
+							MaterialRenderState.setup(crumblingMaterial);
+
+							Samplers.INSTANCE_BUFFER.makeActive();
+
+							draw.renderOne(instanceTexture, handle);
+						}
 					}
 				}
 			}
@@ -233,38 +193,6 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		}
 	}
 
-	private static Map<ShaderState, Int2ObjectMap<List<Consumer<TextureBuffer>>>> doCrumblingSort(List<Engine.CrumblingBlock> instances) {
-		Map<ShaderState, Int2ObjectMap<List<Consumer<TextureBuffer>>>> out = new HashMap<>();
-
-		for (Engine.CrumblingBlock triple : instances) {
-			int progress = triple.progress();
-
-			if (progress < 0 || progress >= ModelBakery.DESTROY_TYPES.size()) {
-				continue;
-			}
-
-			for (Instance instance : triple.instances()) {
-				// Filter out instances that weren't created by this engine.
-				// If all is well, we probably shouldn't take the `continue`
-				// branches but better to do checked casts.
-				if (!(instance.handle() instanceof InstanceHandleImpl impl)) {
-					continue;
-				}
-				if (!(impl.instancer instanceof InstancedInstancer<?> instancer)) {
-					continue;
-				}
-
-				for (DrawCall draw : instancer.drawCalls()) {
-					out.computeIfAbsent(draw.shaderState, $ -> new Int2ObjectArrayMap<>())
-							.computeIfAbsent(progress, $ -> new ArrayList<>())
-							.add(buf -> draw.renderOne(buf, impl));
-				}
-			}
-		}
-
-		return out;
-	}
-
 	public static void uploadMaterialUniform(GlProgram program, Material material) {
 		int uniformLocation = program.getUniformLocation("_flw_packedMaterial");
 		int vertexIndex = ShaderIndices.getVertexShaderIndex(material.shaders());
@@ -272,45 +200,5 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		int packedFogAndCutout = MaterialEncoder.packFogAndCutout(material);
 		int packedMaterialProperties = MaterialEncoder.packProperties(material);
 		GL32.glUniform4ui(uniformLocation, vertexIndex, fragmentIndex, packedFogAndCutout, packedMaterialProperties);
-	}
-
-	public static class DrawSet implements Iterable<Map.Entry<ShaderState, Collection<DrawCall>>> {
-		public static final DrawSet EMPTY = new DrawSet(ImmutableListMultimap.of());
-
-		private final ListMultimap<ShaderState, DrawCall> drawCalls;
-
-		public DrawSet(RenderStage renderStage) {
-			drawCalls = ArrayListMultimap.create();
-		}
-
-		public DrawSet(ListMultimap<ShaderState, DrawCall> drawCalls) {
-			this.drawCalls = drawCalls;
-		}
-
-		private void delete() {
-			drawCalls.values()
-					.forEach(DrawCall::delete);
-			drawCalls.clear();
-		}
-
-		public void put(ShaderState shaderState, DrawCall drawCall) {
-			drawCalls.put(shaderState, drawCall);
-		}
-
-		public boolean isEmpty() {
-			return drawCalls.isEmpty();
-		}
-
-		@Override
-		public Iterator<Map.Entry<ShaderState, Collection<DrawCall>>> iterator() {
-			return drawCalls.asMap()
-					.entrySet()
-					.iterator();
-		}
-
-		public void prune() {
-            drawCalls.values()
-                    .removeIf(DrawCall::deleted);
-		}
 	}
 }

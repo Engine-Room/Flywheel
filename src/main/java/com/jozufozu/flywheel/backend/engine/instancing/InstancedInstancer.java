@@ -23,7 +23,7 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 	@Nullable
 	private GlBuffer vbo;
 
-	private final List<DrawCall> drawCalls = new ArrayList<>();
+	private final List<InstancedDraw> draws = new ArrayList<>();
 
 	public InstancedInstancer(InstanceType<I> type, Environment environment) {
 		super(type, environment);
@@ -31,6 +31,10 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 		// Align to one texel in the texture buffer
 		instanceStride = MoreMath.align16(layout.byteSize());
 		writer = type.writer();
+	}
+
+	public List<InstancedDraw> draws() {
+		return draws;
 	}
 
 	public void init() {
@@ -115,17 +119,13 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 		vbo.delete();
 		vbo = null;
 
-		for (DrawCall drawCall : drawCalls) {
-			drawCall.delete();
+		for (InstancedDraw instancedDraw : draws) {
+			instancedDraw.delete();
 		}
 	}
 
-	public void addDrawCall(DrawCall drawCall) {
-		drawCalls.add(drawCall);
-	}
-
-	public List<DrawCall> drawCalls() {
-		return drawCalls;
+	public void addDrawCall(InstancedDraw instancedDraw) {
+		draws.add(instancedDraw);
 	}
 
 	public void bind(TextureBuffer buffer) {

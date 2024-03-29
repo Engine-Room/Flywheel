@@ -1,22 +1,36 @@
 package com.jozufozu.flywheel.backend.engine.instancing;
 
+import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.backend.engine.GroupKey;
 import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
 import com.jozufozu.flywheel.backend.gl.TextureBuffer;
 
-public class DrawCall {
-	public final ShaderState shaderState;
+public class InstancedDraw {
+	public final GroupKey<?> groupKey;
 	private final InstancedInstancer<?> instancer;
 	private final MeshPool.PooledMesh mesh;
+	private final Material material;
+	private final int indexOfMeshInModel;
 
 	private boolean deleted;
 
-	public DrawCall(InstancedInstancer<?> instancer, MeshPool.PooledMesh mesh, ShaderState shaderState) {
+	public InstancedDraw(InstancedInstancer<?> instancer, MeshPool.PooledMesh mesh, GroupKey<?> groupKey, Material material, int indexOfMeshInModel) {
 		this.instancer = instancer;
 		this.mesh = mesh;
-		this.shaderState = shaderState;
+		this.groupKey = groupKey;
+		this.material = material;
+		this.indexOfMeshInModel = indexOfMeshInModel;
 
 		mesh.acquire();
+	}
+
+	public int indexOfMeshInModel() {
+		return indexOfMeshInModel;
+	}
+
+	public Material material() {
+		return material;
 	}
 
 	public boolean deleted() {
