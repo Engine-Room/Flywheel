@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.backend.engine.instancing;
 
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.backend.engine.GroupKey;
-import com.jozufozu.flywheel.backend.engine.InstanceHandleImpl;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
 import com.jozufozu.flywheel.backend.gl.TextureBuffer;
 
@@ -47,13 +46,8 @@ public class InstancedDraw {
 		mesh.draw(instancer.instanceCount());
 	}
 
-	public void renderOne(TextureBuffer buffer, InstanceHandleImpl impl) {
+	public void renderOne(TextureBuffer buffer) {
 		if (mesh.isInvalid()) {
-			return;
-		}
-
-		int instanceCount = instancer.instanceCount();
-		if (instanceCount <= 0 || impl.index >= instanceCount) {
 			return;
 		}
 

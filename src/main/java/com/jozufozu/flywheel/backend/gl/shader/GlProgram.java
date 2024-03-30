@@ -10,6 +10,7 @@ import static org.lwjgl.opengl.GL20.glUniform3f;
 import static org.lwjgl.opengl.GL20.glUniform4f;
 import static org.lwjgl.opengl.GL20.glUniformMatrix3fv;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
+import static org.lwjgl.opengl.GL30.glUniform1ui;
 import static org.lwjgl.opengl.GL31.GL_INVALID_INDEX;
 import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
 import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
@@ -104,13 +105,27 @@ public class GlProgram extends GlObject {
 	}
 
 	public void setBool(String glslName, boolean bool) {
+		setInt(glslName, bool ? 1 : 0);
+	}
+
+	public void setUInt(String glslName, int value) {
 		int uniform = getUniformLocation(glslName);
 
 		if (uniform < 0) {
 			return;
 		}
 
-		glUniform1i(uniform, bool ? 1 : 0);
+		glUniform1ui(uniform, value);
+	}
+
+	public void setInt(String glslName, int value) {
+		int uniform = getUniformLocation(glslName);
+
+		if (uniform < 0) {
+			return;
+		}
+
+		glUniform1i(uniform, value);
 	}
 
 	/**

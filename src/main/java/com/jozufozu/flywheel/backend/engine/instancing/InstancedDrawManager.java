@@ -172,7 +172,9 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 					for (var instanceHandlePair : progressEntry.getValue()) {
 						InstancedInstancer<?> instancer = instanceHandlePair.first();
-						var handle = instanceHandlePair.second();
+						var index = instanceHandlePair.second().index;
+
+						program.setInt("_flw_baseInstance", index);
 
 						for (InstancedDraw draw : instancer.draws()) {
 							CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
@@ -182,7 +184,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 							Samplers.INSTANCE_BUFFER.makeActive();
 
-							draw.renderOne(instanceTexture, handle);
+							draw.renderOne(instanceTexture);
 						}
 					}
 				}
