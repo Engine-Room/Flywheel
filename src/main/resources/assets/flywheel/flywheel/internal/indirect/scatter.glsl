@@ -1,4 +1,4 @@
-layout(local_size_x = _FLW_SUBGROUP_SIZE) in;
+layout(local_size_x = 64) in;
 
 const uint SRC_OFFSET_MASK = 0xFFFFFF;
 
@@ -24,19 +24,27 @@ layout(std430, binding = 2) restrict writeonly buffer Dst {
 };
 
 void main() {
-    uint copy = gl_GlobalInvocationID.x;
+    // Each work group is responsible for one of the copies in the buffer.
+    // We dispatch exactly as many work groups as there are copies, so no need to check bounds.
+    uint copy = gl_WorkGroupID.x;
 
-    if (copy >= copies.length()) {
-        return;
-    }
+    // Each invocation in the work group is responsible for one uint in the copy.
+    uint i = gl_LocalInvocationID.x;
 
+    // Unpack the copy.
     uint sizeAndSrcOffset = copies[copy].sizeAndSrcOffset;
+    uint dstOffset = copies[copy].dstOffset;
     uint srcOffset = sizeAndSrcOffset & SRC_OFFSET_MASK;
     uint size = sizeAndSrcOffset >> 24;
 
-    uint dstOffset = copies[copy].dstOffset;
+    // Fetch the uint to copy before exiting to make instruction reordering happy.
+    // With 20mb going through a 24mb staging buffer, this made a 1ms/frame difference.
+    // Should properly test with nsight at some point.
+    uint toCopy = src[srcOffset + i];
 
-    for (uint i = 0; i < size; i++) {
-        dst[dstOffset + i] = src[srcOffset + i];
+    if (i >= size) {
+        return;
     }
+
+    dst[dstOffset + i] = toCopy;
 }

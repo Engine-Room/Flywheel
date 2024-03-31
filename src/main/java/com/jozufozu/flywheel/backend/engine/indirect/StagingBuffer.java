@@ -8,7 +8,6 @@ import org.lwjgl.opengl.GL45C;
 import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
-import com.jozufozu.flywheel.backend.gl.GlCompat;
 import com.jozufozu.flywheel.backend.gl.GlFence;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
@@ -282,7 +281,7 @@ public class StagingBuffer {
 
 		GL45.glBindBufferBase(GL45C.GL_SHADER_STORAGE_BUFFER, 2, dstVbo);
 
-		GL45.glDispatchCompute(GlCompat.getComputeGroupCount(scatterList.copyCount()), 1, 1);
+		GL45.glDispatchCompute(scatterList.copyCount(), 1, 1);
 
 		scatterList.reset();
 	}

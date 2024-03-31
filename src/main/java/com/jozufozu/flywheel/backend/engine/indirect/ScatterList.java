@@ -12,10 +12,11 @@ public class ScatterList {
 	private long usedBytes;
 
 	public ScatterList() {
-		this(64);
+		// Should be the same as the local_size_x of the scatter shader
+		this(64 * 4);
 	}
 
-	public ScatterList(long maxBytesPerScatter) {
+	private ScatterList(long maxBytesPerScatter) {
 		if ((maxBytesPerScatter & 0b1111111100L) != maxBytesPerScatter) {
 			throw new IllegalArgumentException("Max bytes per scatter must be a multiple of 4 and less than 1024");
 		}
