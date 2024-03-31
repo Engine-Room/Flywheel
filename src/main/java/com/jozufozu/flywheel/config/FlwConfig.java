@@ -66,6 +66,10 @@ public class FlwConfig {
 		return client.limitUpdates.get();
 	}
 
+	public int workerThreads() {
+		return client.workerThreads.get();
+	}
+
 	public void registerSpecs(ModLoadingContext context) {
 		context.registerConfig(ModConfig.Type.CLIENT, clientSpec);
 	}
@@ -73,6 +77,7 @@ public class FlwConfig {
 	public static class ClientConfig {
 		public final ConfigValue<String> backend;
 		public final BooleanValue limitUpdates;
+		public final ForgeConfigSpec.IntValue workerThreads;
 
 		private ClientConfig(ForgeConfigSpec.Builder builder) {
 			backend = builder.comment("Select the backend to use.")
@@ -80,6 +85,10 @@ public class FlwConfig {
 
 			limitUpdates = builder.comment("Enable or disable instance update limiting with distance.")
 					.define("limitUpdates", true);
+
+			workerThreads = builder.comment("The number of worker threads to use. Set to -1 to let Flywheel decide. Set to 0 to disable parallelism. Requires a game restart to take effect.")
+					.defineInRange("workerThreads", -1, -1, Runtime.getRuntime()
+							.availableProcessors());
 		}
 	}
 }

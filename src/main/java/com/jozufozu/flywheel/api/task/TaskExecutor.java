@@ -66,5 +66,5 @@ public interface TaskExecutor extends Executor {
 	 *
 	 * @return The number of threads this executor uses.
 	 */
-	int getThreadCount();
+	int threadCount();
 }

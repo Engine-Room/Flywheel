@@ -38,14 +38,14 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	private final ThreadGroupNotifier taskNotifier = new ThreadGroupNotifier();
 	private final WaitGroup waitGroup = new WaitGroup();
 
-	public ParallelTaskExecutor(String name, BooleanSupplier mainThreadQuery) {
+	public ParallelTaskExecutor(String name, int threadCount, BooleanSupplier mainThreadQuery) {
 		this.name = name;
 		this.mainThreadQuery = mainThreadQuery;
-		threadCount = getOptimalThreadCount();
+		this.threadCount = threadCount;
 	}
 
 	@Override
-	public int getThreadCount() {
+	public int threadCount() {
 		return threadCount;
 	}
 
@@ -245,17 +245,6 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		} catch (Exception e) {
 			Flywheel.LOGGER.error("Error running main thread task", e);
 		}
-	}
-
-	/**
-	 * Returns the "optimal" number of threads to be used for tasks. This will always return at least one thread.
-	 */
-	private static int getOptimalThreadCount() {
-		return Mth.clamp(Math.max(getMaxThreadCount() / 3, getMaxThreadCount() - 6), 1, 10);
-	}
-
-	private static int getMaxThreadCount() {
-		return Runtime.getRuntime().availableProcessors();
 	}
 
 	private class WorkerThread extends Thread {

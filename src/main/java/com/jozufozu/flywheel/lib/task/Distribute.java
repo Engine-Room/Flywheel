@@ -182,7 +182,7 @@ public final class Distribute {
 	}
 
 	public static int sliceSize(TaskExecutor taskExecutor, int totalSize, int denominator) {
-		return MoreMath.ceilingDiv(totalSize, taskExecutor.getThreadCount() * denominator);
+		return MoreMath.ceilingDiv(totalSize, taskExecutor.threadCount() * denominator);
 	}
 
 	private Distribute() {

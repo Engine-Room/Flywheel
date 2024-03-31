@@ -27,7 +27,7 @@ class PlanExecutionTest {
 	@BeforeEach
 	public void setUp() {
 		var currentThread = Thread.currentThread();
-		EXECUTOR = new ParallelTaskExecutor("PlanTest", () -> currentThread == Thread.currentThread());
+		EXECUTOR = new ParallelTaskExecutor("PlanTest", 2, () -> currentThread == Thread.currentThread());
 		EXECUTOR.startWorkers();
 	}
 

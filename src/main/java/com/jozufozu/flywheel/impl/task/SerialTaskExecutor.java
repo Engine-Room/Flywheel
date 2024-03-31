@@ -35,7 +35,7 @@ public class SerialTaskExecutor implements TaskExecutor {
 	}
 
 	@Override
-	public int getThreadCount() {
+	public int threadCount() {
 		return 1;
 	}
 
