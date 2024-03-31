@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.backend.compile;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.jozufozu.flywheel.Flywheel;
@@ -9,6 +11,7 @@ import com.jozufozu.flywheel.backend.compile.component.InstanceStructComponent;
 import com.jozufozu.flywheel.backend.compile.core.CompilationHarness;
 import com.jozufozu.flywheel.backend.compile.core.Compile;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
+import com.jozufozu.flywheel.backend.gl.GlCompat;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
@@ -23,9 +26,9 @@ public final class PipelineCompiler {
 	private static final ResourceLocation API_IMPL_VERT = Flywheel.rl("internal/api_impl.vert");
 	private static final ResourceLocation API_IMPL_FRAG = Flywheel.rl("internal/api_impl.frag");
 
-	static CompilationHarness<PipelineProgramKey> create(ShaderSources sources, Pipeline pipeline, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
+	static CompilationHarness<PipelineProgramKey> create(ShaderSources sources, Pipeline pipeline, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents, Collection<String> extensions) {
 		return PIPELINE.program()
-				.link(PIPELINE.shader(pipeline.glslVersion(), ShaderType.VERTEX)
+				.link(PIPELINE.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.VERTEX)
 						.nameMapper(key -> {
 							var instance = ResourceUtil.toDebugFileNameNoExtension(key.instanceType()
 									.vertexShader());
@@ -34,6 +37,7 @@ public final class PipelineCompiler {
 									.nameLowerCase();
 							return "pipeline/" + pipeline.compilerMarker() + "/" + instance + "_" + context;
 						})
+						.enableExtensions(extensions)
 						.onCompile((key, comp) -> key.contextShader()
 								.onCompile(comp))
 						.withResource(API_IMPL_VERT)
@@ -45,12 +49,13 @@ public final class PipelineCompiler {
 						.withComponent(key -> pipeline.assembler()
 								.assemble(key.instanceType()))
 						.withResource(pipeline.vertexMain()))
-				.link(PIPELINE.shader(pipeline.glslVersion(), ShaderType.FRAGMENT)
+				.link(PIPELINE.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.FRAGMENT)
 						.nameMapper(key -> {
 							var context = key.contextShader()
 									.nameLowerCase();
 							return "pipeline/" + pipeline.compilerMarker() + "/" + context;
 						})
+						.enableExtensions(extensions)
 						.enableExtension("GL_ARB_conservative_depth")
 						.onCompile((key, comp) -> key.contextShader()
 								.onCompile(comp))
@@ -85,5 +90,9 @@ public final class PipelineCompiler {
 					GlProgram.unbind();
 				})
 				.harness(pipeline.compilerMarker(), sources);
+	}
+
+	static CompilationHarness<PipelineProgramKey> create(ShaderSources sources, Pipeline pipeline, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
+		return create(sources, pipeline, vertexComponents, fragmentComponents, Collections.emptyList());
 	}
 }

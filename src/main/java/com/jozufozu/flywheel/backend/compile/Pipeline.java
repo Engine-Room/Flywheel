@@ -8,12 +8,11 @@ import org.jetbrains.annotations.Nullable;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.backend.glsl.GlslVersion;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 
 import net.minecraft.resources.ResourceLocation;
 
-public record Pipeline(GlslVersion glslVersion, ResourceLocation vertexMain, ResourceLocation fragmentMain,
+public record Pipeline(ResourceLocation vertexMain, ResourceLocation fragmentMain,
 					   InstanceAssembler assembler, String compilerMarker, Consumer<GlProgram> onLink) {
 
 	@FunctionalInterface
@@ -32,8 +31,6 @@ public record Pipeline(GlslVersion glslVersion, ResourceLocation vertexMain, Res
 
 	public static class Builder {
 		@Nullable
-		private GlslVersion glslVersion;
-		@Nullable
 		private ResourceLocation vertexMain;
 		@Nullable
 		private ResourceLocation fragmentMain;
@@ -43,11 +40,6 @@ public record Pipeline(GlslVersion glslVersion, ResourceLocation vertexMain, Res
 		private String compilerMarker;
 		@Nullable
 		private Consumer<GlProgram> onLink;
-
-		public Builder glslVersion(GlslVersion glslVersion) {
-			this.glslVersion = glslVersion;
-			return this;
-		}
 
 		public Builder vertexMain(ResourceLocation shader) {
 			this.vertexMain = shader;
@@ -75,13 +67,12 @@ public record Pipeline(GlslVersion glslVersion, ResourceLocation vertexMain, Res
 		}
 
 		public Pipeline build() {
-			Objects.requireNonNull(glslVersion);
 			Objects.requireNonNull(vertexMain);
 			Objects.requireNonNull(fragmentMain);
 			Objects.requireNonNull(assembler);
 			Objects.requireNonNull(compilerMarker);
 			Objects.requireNonNull(onLink);
-			return new Pipeline(glslVersion, vertexMain, fragmentMain, assembler, compilerMarker, onLink);
+			return new Pipeline(vertexMain, fragmentMain, assembler, compilerMarker, onLink);
 		}
 	}
 }

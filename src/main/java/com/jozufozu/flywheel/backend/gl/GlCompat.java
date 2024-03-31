@@ -10,78 +10,23 @@ import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.KHRShaderSubgroup;
 import org.lwjgl.system.MemoryStack;
 
+import com.jozufozu.flywheel.backend.glsl.GlslVersion;
 import com.jozufozu.flywheel.lib.math.MoreMath;
 
-import net.minecraft.Util;
-
-/**
- * An instance of this class stores information about what OpenGL features are available.
- * <br>
- * Each field stores an enum variant that provides access to the most appropriate version of a feature for the current
- * system.
- */
 public final class GlCompat {
-	public static final GLCapabilities CAPABILITIES = GL.createCapabilities();
-	public static final boolean WINDOWS = _decideIfWeAreWindows();
+	public static final GLCapabilities CAPABILITIES = GL.getCapabilities();
+	public static final Driver DRIVER = readVendorString();
+	public static final int SUBGROUP_SIZE = subgroupSize();
 	public static final boolean ALLOW_DSA = true;
-	public static final boolean SUPPORTS_INDIRECT = _decideIfWeSupportIndirect();
-	public static final int SUBGROUP_SIZE = _subgroupSize();
-	public static final Driver DRIVER = _readVendorString();
+	public static final GlslVersion MAX_GLSL_VERSION = maxGlslVersion();
+
+	public static final boolean SUPPORTS_INSTANCING = isInstancingSupported();
+	public static final boolean SUPPORTS_INDIRECT = isIndirectSupported();
 
 	private GlCompat() {
 	}
 
-	public static boolean onAMDWindows() {
-		return DRIVER == Driver.AMD && WINDOWS;
-	}
-
-	public static boolean supportsInstancing() {
-		return true;
-	}
-
-	public static boolean supportsIndirect() {
-		return SUPPORTS_INDIRECT;
-	}
-
-	private static Driver _readVendorString() {
-		String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
-
-		if (vendor == null) {
-			return Driver.UNKNOWN;
-		}
-
-		// vendor string I got was "ATI Technologies Inc."
-		if (vendor.contains("ATI") || vendor.contains("AMD")) {
-			return Driver.AMD;
-		} else if (vendor.contains("NVIDIA")) {
-			return Driver.NVIDIA;
-		} else if (vendor.contains("Intel")) {
-			return Driver.INTEL;
-		} else if (vendor.contains("Mesa")) {
-			return Driver.MESA;
-		}
-
-		return Driver.UNKNOWN;
-	}
-
-	private static boolean _decideIfWeAreWindows() {
-		return Util.getPlatform() == Util.OS.WINDOWS;
-	}
-
-	private static boolean _decideIfWeSupportIndirect() {
-		return CAPABILITIES.OpenGL46 || (CAPABILITIES.GL_ARB_compute_shader && CAPABILITIES.GL_ARB_shader_draw_parameters && CAPABILITIES.GL_ARB_base_instance && CAPABILITIES.GL_ARB_multi_draw_indirect && CAPABILITIES.GL_ARB_direct_state_access);
-	}
-
-	private static int _subgroupSize() {
-		if (CAPABILITIES.GL_KHR_shader_subgroup) {
-			return GL31C.glGetInteger(KHRShaderSubgroup.GL_SUBGROUP_SIZE_KHR);
-		}
-		// Try to guess.
-		// Newer (RDNA) AMD cards have 32 threads in a wavefront, older ones have 64.
-		// I assume the newer drivers will implement the above extension, so 64 is a
-		// reasonable guess for AMD hardware. In the worst case we'll just spread
-		// load across multiple SIMDs
-		return DRIVER == Driver.AMD || DRIVER == Driver.MESA ? 64 : 32;
+	public static void init() {
 	}
 
 	public static int getComputeGroupCount(int invocations) {
@@ -108,5 +53,83 @@ public final class GlCompat {
 			GL20C.nglShaderSource(glId, 1, pointers.address0(), 0);
 		}
 	}
-}
 
+	private static Driver readVendorString() {
+		String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
+
+		if (vendor == null) {
+			return Driver.UNKNOWN;
+		}
+
+		// vendor string I got was "ATI Technologies Inc."
+		if (vendor.contains("ATI") || vendor.contains("AMD")) {
+			return Driver.AMD;
+		} else if (vendor.contains("NVIDIA")) {
+			return Driver.NVIDIA;
+		} else if (vendor.contains("Intel")) {
+			return Driver.INTEL;
+		} else if (vendor.contains("Mesa")) {
+			return Driver.MESA;
+		}
+
+		return Driver.UNKNOWN;
+	}
+
+	private static int subgroupSize() {
+		if (CAPABILITIES.GL_KHR_shader_subgroup) {
+			return GL31C.glGetInteger(KHRShaderSubgroup.GL_SUBGROUP_SIZE_KHR);
+		}
+
+		// Try to guess.
+		// Newer (RDNA) AMD cards have 32 threads in a wavefront, older ones have 64.
+		// I assume the newer drivers will implement the above extension, so 64 is a
+		// reasonable guess for AMD hardware. In the worst case we'll just spread
+		// load across multiple SIMDs
+		return DRIVER == Driver.AMD || DRIVER == Driver.MESA ? 64 : 32;
+	}
+
+	private static GlslVersion maxGlslVersion() {
+		if (CAPABILITIES.OpenGL46) {
+			return GlslVersion.V460;
+		} else if (CAPABILITIES.OpenGL45) {
+			return GlslVersion.V450;
+		} else if (CAPABILITIES.OpenGL44) {
+			return GlslVersion.V440;
+		} else if (CAPABILITIES.OpenGL43) {
+			return GlslVersion.V430;
+		} else if (CAPABILITIES.OpenGL42) {
+			return GlslVersion.V420;
+		} else if (CAPABILITIES.OpenGL41) {
+			return GlslVersion.V410;
+		} else if (CAPABILITIES.OpenGL40) {
+			return GlslVersion.V400;
+		} else if (CAPABILITIES.OpenGL33) {
+			return GlslVersion.V330;
+		} else {
+			return GlslVersion.V150;
+		}
+	}
+
+	private static boolean isInstancingSupported() {
+		if (!CAPABILITIES.OpenGL33) {
+			return false;
+		}
+		return true;
+	}
+
+	private static boolean isIndirectSupported() {
+		// The GL requirement cannot be lower because GL_ARB_compute_shader requires at least GL 4.2.
+		if (!CAPABILITIES.OpenGL42) {
+			return false;
+		}
+		if (CAPABILITIES.OpenGL46) {
+			return true;
+		}
+		return CAPABILITIES.GL_ARB_compute_shader
+				&& CAPABILITIES.GL_ARB_direct_state_access
+				&& CAPABILITIES.GL_ARB_multi_bind
+				&& CAPABILITIES.GL_ARB_multi_draw_indirect
+				&& CAPABILITIES.GL_ARB_shader_draw_parameters
+				&& CAPABILITIES.GL_ARB_shader_storage_buffer_object;
+	}
+}

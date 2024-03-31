@@ -6,10 +6,16 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
+import com.jozufozu.flywheel.backend.gl.GlCompat;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 @Mixin(RenderSystem.class)
 abstract class RenderSystemMixin {
+	@Inject(method = "initRenderer(IZ)V", at = @At("RETURN"))
+	private static void flywheel$onInitRenderer(CallbackInfo ci) {
+		GlCompat.init();
+	}
+
 	@Inject(method = "setShaderFogStart(F)V", at = @At("RETURN"))
 	private static void flywheel$onSetFogStart(CallbackInfo ci) {
 		Uniforms.onFogUpdate();

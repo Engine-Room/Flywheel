@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.compile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,9 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private static final Compile<ResourceLocation> UTIL = new Compile<>();
 
+	private static final List<String> EXTENSIONS = getExtensions(GlCompat.MAX_GLSL_VERSION);
+	private static final List<String> COMPUTE_EXTENSIONS = getComputeExtensions(GlCompat.MAX_GLSL_VERSION);
+
 	@Nullable
 	private static IndirectPrograms instance;
 
@@ -48,10 +52,33 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		this.scatter = scatter;
 	}
 
+	private static List<String> getExtensions(GlslVersion glslVersion) {
+		List<String> extensions = new ArrayList<>();
+		if (glslVersion.compareTo(GlslVersion.V430) < 0) {
+			extensions.add("GL_ARB_shader_storage_buffer_object");
+		}
+		if (glslVersion.compareTo(GlslVersion.V460) < 0) {
+			extensions.add("GL_ARB_shader_draw_parameters");
+		}
+		return extensions;
+	}
+
+	private static List<String> getComputeExtensions(GlslVersion glslVersion) {
+		List<String> extensions = new ArrayList<>();
+		if (glslVersion.compareTo(GlslVersion.V430) < 0) {
+			extensions.add("GL_ARB_compute_shader");
+		}
+		return extensions;
+	}
+
 	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
+		if (!GlCompat.SUPPORTS_INDIRECT) {
+			return;
+		}
+
 		IndirectPrograms newInstance = null;
 
-		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, vertexComponents, fragmentComponents);
+		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, vertexComponents, fragmentComponents, EXTENSIONS);
 		var cullingCompiler = createCullingCompiler(sources);
 		var applyCompiler = createUtilCompiler(sources);
 
@@ -76,8 +103,10 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 	private static CompilationHarness<InstanceType<?>> createCullingCompiler(ShaderSources sources) {
 		return CULL.program()
-				.link(CULL.shader(GlslVersion.V460, ShaderType.COMPUTE)
+				.link(CULL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.COMPUTE)
 						.nameMapper(instanceType -> "culling/" + ResourceUtil.toDebugFileNameNoExtension(instanceType.cullShader()))
+						.enableExtensions(EXTENSIONS)
+						.enableExtensions(COMPUTE_EXTENSIONS)
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(CULL_SHADER_API_IMPL)
 						.withComponent(InstanceStructComponent::new)
@@ -96,8 +125,10 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 	private static CompilationHarness<ResourceLocation> createUtilCompiler(ShaderSources sources) {
 		return UTIL.program()
-				.link(UTIL.shader(GlslVersion.V460, ShaderType.COMPUTE)
+				.link(UTIL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.COMPUTE)
 						.nameMapper(resourceLocation -> "utilities/" + ResourceUtil.toDebugFileNameNoExtension(resourceLocation))
+						.enableExtensions(EXTENSIONS)
+						.enableExtensions(COMPUTE_EXTENSIONS)
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(s -> s))
 				.harness("utilities", sources);

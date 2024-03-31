@@ -40,6 +40,100 @@ public class Compile<K> {
 		return new ProgramStitcher<>();
 	}
 
+	public static class ShaderCompiler<K> {
+		private final GlslVersion glslVersion;
+		private final ShaderType shaderType;
+		private final List<BiFunction<K, SourceLoader, @Nullable SourceComponent>> fetchers = new ArrayList<>();
+		private BiConsumer<K, Compilation> compilationCallbacks = ($, $$) -> {
+		};
+		private Function<K, String> nameMapper = Object::toString;
+
+		public ShaderCompiler(GlslVersion glslVersion, ShaderType shaderType) {
+			this.glslVersion = glslVersion;
+			this.shaderType = shaderType;
+		}
+
+		public ShaderCompiler<K> nameMapper(Function<K, String> nameMapper) {
+			this.nameMapper = nameMapper;
+			return this;
+		}
+
+		public ShaderCompiler<K> with(BiFunction<K, SourceLoader, @Nullable SourceComponent> fetch) {
+			fetchers.add(fetch);
+			return this;
+		}
+
+		public ShaderCompiler<K> withComponents(Collection<@Nullable SourceComponent> components) {
+			components.forEach(this::withComponent);
+			return this;
+		}
+
+		public ShaderCompiler<K> withComponent(@Nullable SourceComponent component) {
+			return withComponent($ -> component);
+		}
+
+		public ShaderCompiler<K> withComponent(Function<K, @Nullable SourceComponent> sourceFetcher) {
+			return with((key, $) -> sourceFetcher.apply(key));
+		}
+
+		public ShaderCompiler<K> withResource(Function<K, ResourceLocation> sourceFetcher) {
+			return with((key, loader) -> loader.find(sourceFetcher.apply(key)));
+		}
+
+		public ShaderCompiler<K> withResource(ResourceLocation resourceLocation) {
+			return withResource($ -> resourceLocation);
+		}
+
+		public ShaderCompiler<K> onCompile(BiConsumer<K, Compilation> cb) {
+			compilationCallbacks = compilationCallbacks.andThen(cb);
+			return this;
+		}
+
+		public ShaderCompiler<K> define(String def, int value) {
+			return onCompile(($, ctx) -> ctx.define(def, String.valueOf(value)));
+		}
+
+		public ShaderCompiler<K> enableExtension(String extension) {
+			return onCompile(($, ctx) -> ctx.enableExtension(extension));
+		}
+
+		public ShaderCompiler<K> enableExtensions(String... extensions) {
+			return onCompile(($, ctx) -> {
+				for (String extension : extensions) {
+					ctx.enableExtension(extension);
+				}
+			});
+		}
+
+		public ShaderCompiler<K> enableExtensions(Collection<String> extensions) {
+			return onCompile(($, ctx) -> {
+				for (String extension : extensions) {
+					ctx.enableExtension(extension);
+				}
+			});
+		}
+
+		@Nullable
+		private GlShader compile(K key, ShaderCache compiler, SourceLoader loader) {
+			var components = new ArrayList<SourceComponent>();
+			boolean ok = true;
+			for (var fetcher : fetchers) {
+				SourceComponent apply = fetcher.apply(key, loader);
+				if (apply == null) {
+					ok = false;
+				}
+				components.add(apply);
+			}
+
+			if (!ok) {
+				return null;
+			}
+
+			Consumer<Compilation> cb = ctx -> compilationCallbacks.accept(key, ctx);
+			return compiler.compile(glslVersion, shaderType, nameMapper.apply(key), cb, components);
+		}
+	}
+
 	public static class ProgramStitcher<K> implements CompilationHarness.KeyCompiler<K> {
 		private final Map<ShaderType, ShaderCompiler<K>> compilers = new EnumMap<>(ShaderType.class);
 		private BiConsumer<K, GlProgram> postLink = (k, p) -> {
@@ -98,84 +192,6 @@ public class Compile<K> {
 			}
 
 			return out;
-		}
-	}
-
-	public static class ShaderCompiler<K> {
-		private final GlslVersion glslVersion;
-		private final ShaderType shaderType;
-		private final List<BiFunction<K, SourceLoader, @Nullable SourceComponent>> fetchers = new ArrayList<>();
-		private BiConsumer<K, Compilation> compilationCallbacks = ($, $$) -> {
-		};
-		private Function<K, String> nameMapper = Object::toString;
-
-		public ShaderCompiler(GlslVersion glslVersion, ShaderType shaderType) {
-			this.glslVersion = glslVersion;
-			this.shaderType = shaderType;
-		}
-
-		public ShaderCompiler<K> nameMapper(Function<K, String> nameMapper) {
-			this.nameMapper = nameMapper;
-			return this;
-		}
-
-		public ShaderCompiler<K> with(BiFunction<K, SourceLoader, @Nullable SourceComponent> fetch) {
-			fetchers.add(fetch);
-			return this;
-		}
-
-		public ShaderCompiler<K> withComponents(Collection<@Nullable SourceComponent> components) {
-			components.forEach(this::withComponent);
-			return this;
-		}
-
-		public ShaderCompiler<K> withComponent(@Nullable SourceComponent component) {
-			return withComponent($ -> component);
-		}
-
-		public ShaderCompiler<K> withComponent(Function<K, @Nullable SourceComponent> sourceFetcher) {
-			return with((key, $) -> sourceFetcher.apply(key));
-		}
-
-		public ShaderCompiler<K> withResource(Function<K, ResourceLocation> sourceFetcher) {
-			return with((key, loader) -> loader.find(sourceFetcher.apply(key)));
-		}
-
-		public ShaderCompiler<K> withResource(ResourceLocation resourceLocation) {
-			return withResource($ -> resourceLocation);
-		}
-
-		public ShaderCompiler<K> onCompile(BiConsumer<K, Compilation> cb) {
-			compilationCallbacks = compilationCallbacks.andThen(cb);
-			return this;
-		}
-
-		public ShaderCompiler<K> define(String def, int value) {
-			return onCompile(($, ctx) -> ctx.define(def, String.valueOf(value)));
-		}
-
-		public ShaderCompiler<K> enableExtension(String extension) {
-			return onCompile(($, ctx) -> ctx.enableExtension(extension));
-		}
-
-		@Nullable
-		private GlShader compile(K key, ShaderCache compiler, SourceLoader loader) {
-			var components = new ArrayList<SourceComponent>();
-			boolean ok = true;
-			for (var fetcher : fetchers) {
-				SourceComponent apply = fetcher.apply(key, loader);
-				if (apply == null) {
-					ok = false;
-				}
-				components.add(apply);
-			}
-
-			if (!ok) {
-				return null;
-			}
-
-			Consumer<Compilation> cb = ctx -> compilationCallbacks.accept(key, ctx);
-			return compiler.compile(glslVersion, shaderType, nameMapper.apply(key), cb, components);
 		}
 	}
 }
