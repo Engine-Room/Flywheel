@@ -5,11 +5,15 @@ import java.util.BitSet;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jetbrains.annotations.NotNull;
+
 // https://github.com/Netflix/hollow/blob/master/hollow/src/main/java/com/netflix/hollow/core/memory/ThreadSafeBitSet.java
 // Refactored to remove unused methods, deduplicate some code segments, and add extra functionality with #forEachSetSpan
 public class AtomicBitset {
 	// 1024 bits, 128 bytes, 16 longs per segment
 	public static final int DEFAULT_LOG2_SEGMENT_SIZE_IN_BITS = 10;
+
+	private static final long WORD_MASK = 0xffffffffffffffffL;
 
 	private final int numLongsPerSegment;
 	private final int log2SegmentSize;
@@ -44,19 +48,7 @@ public class AtomicBitset {
 
 		AtomicLongArray segment = getSegmentForPosition(position);
 
-		long mask = maskForPosition(position);
-
-		// Thread safety: we need to loop until we win the race to set the long value.
-		while (true) {
-			// determine what the new long value will be after we set the appropriate bit.
-			long currentLongValue = segment.get(longPosition);
-			long newLongValue = currentLongValue | mask;
-
-			// if no other thread has modified the value since we read it, we won the race and we are done.
-			if (segment.compareAndSet(longPosition, currentLongValue, newLongValue)) {
-				break;
-			}
-		}
+		setOr(segment, longPosition, maskForPosition(position));
 	}
 
 	public void clear(int position) {
@@ -64,16 +56,184 @@ public class AtomicBitset {
 
 		AtomicLongArray segment = getSegmentForPosition(position);
 
-		long mask = ~maskForPosition(position);
+		setAnd(segment, longPosition, ~maskForPosition(position));
+	}
 
+	public void set(int fromIndex, int toIndex) {
+		if (fromIndex == toIndex) {
+			return;
+		}
+
+		int firstSegmentIndex = segmentIndexForPosition(fromIndex);
+		int toSegmentIndex = segmentIndexForPosition(toIndex);
+
+		var segments = expandToFit(toSegmentIndex);
+
+		int fromLongIndex = longIndexInSegmentForPosition(fromIndex);
+		int toLongIndex = longIndexInSegmentForPosition(toIndex);
+
+		long fromLongMask = WORD_MASK << fromIndex;
+		long toLongMask = WORD_MASK >>> -toIndex;
+
+		var segment = segments.getSegment(firstSegmentIndex);
+
+		if (firstSegmentIndex == toSegmentIndex) {
+			// Case 1: One segment
+
+			if (fromLongIndex == toLongIndex) {
+				// Case 1A: One Long
+				setOr(segment, fromLongIndex, (fromLongMask & toLongMask));
+			} else {
+				// Case 1B: Multiple Longs
+				// Handle first word
+				setOr(segment, fromLongIndex, fromLongMask);
+
+				// Handle intermediate words, if any
+				for (int i = fromLongIndex + 1; i < toLongIndex; i++) {
+					segment.set(i, WORD_MASK);
+				}
+
+				// Handle last word
+				setOr(segment, toLongIndex, toLongMask);
+			}
+		} else {
+			// Case 2: Multiple Segments
+			// Handle first segment
+
+			// Handle first word
+			setOr(segment, fromLongIndex, fromLongMask);
+
+			// Handle trailing words, if any
+			for (int i = fromLongIndex + 1; i < numLongsPerSegment; i++) {
+				segment.set(i, WORD_MASK);
+			}
+
+			// Nuke intermediate segments, if any
+			for (int i = firstSegmentIndex + 1; i < toSegmentIndex; i++) {
+				segment = segments.getSegment(i);
+
+				for (int j = 0; j < segment.length(); j++) {
+					segment.set(j, WORD_MASK);
+				}
+			}
+
+			// Handle last segment
+			segment = segments.getSegment(toSegmentIndex);
+
+			// Handle leading words, if any
+			for (int i = 0; i < toLongIndex; i++) {
+				segment.set(i, WORD_MASK);
+			}
+
+			// Handle last word
+			setOr(segment, toLongIndex, toLongMask);
+		}
+	}
+
+	public void clear(int fromIndex, int toIndex) {
+		if (fromIndex == toIndex) {
+			return;
+		}
+
+		var segments = this.segments.get();
+		int numSegments = segments.numSegments();
+
+		int firstSegmentIndex = segmentIndexForPosition(fromIndex);
+
+		if (firstSegmentIndex >= numSegments) {
+			return;
+		}
+
+		int toSegmentIndex = segmentIndexForPosition(toIndex);
+
+		if (toSegmentIndex >= numSegments) {
+			toSegmentIndex = numSegments - 1;
+		}
+
+		int fromLongIndex = longIndexInSegmentForPosition(fromIndex);
+		int toLongIndex = longIndexInSegmentForPosition(toIndex);
+
+		long fromLongMask = WORD_MASK << fromIndex;
+		long toLongMask = WORD_MASK >>> -toIndex;
+
+		var segment = segments.getSegment(firstSegmentIndex);
+
+		if (firstSegmentIndex == toSegmentIndex) {
+			// Case 1: One segment
+
+			if (fromLongIndex == toLongIndex) {
+				// Case 1A: One Long
+				setAnd(segment, fromLongIndex, ~(fromLongMask & toLongMask));
+			} else {
+				// Case 1B: Multiple Longs
+				// Handle first word
+				setAnd(segment, fromLongIndex, ~fromLongMask);
+
+				// Handle intermediate words, if any
+				for (int i = fromLongIndex + 1; i < toLongIndex; i++) {
+					segment.set(i, 0);
+				}
+
+				// Handle last word
+				setAnd(segment, toLongIndex, ~toLongMask);
+			}
+		} else {
+			// Case 2: Multiple Segments
+			// Handle first segment
+
+			// Handle first word
+			setAnd(segment, fromLongIndex, ~fromLongMask);
+
+			// Handle trailing words, if any
+			for (int i = fromLongIndex + 1; i < numLongsPerSegment; i++) {
+				segment.set(i, 0);
+			}
+
+			// Nuke intermediate segments, if any
+			for (int i = firstSegmentIndex + 1; i < toSegmentIndex; i++) {
+				segment = segments.getSegment(i);
+
+				for (int j = 0; j < segment.length(); j++) {
+					segment.set(j, 0);
+				}
+			}
+
+			// Handle last segment
+			segment = segments.getSegment(toSegmentIndex);
+
+			// Handle leading words, if any
+			for (int i = 0; i < toLongIndex; i++) {
+				segment.set(i, 0);
+			}
+
+			// Handle last word
+			setAnd(segment, toLongIndex, ~toLongMask);
+		}
+	}
+
+	private void setOr(AtomicLongArray segment, int indexInSegment, long mask) {
 		// Thread safety: we need to loop until we win the race to set the long value.
 		while (true) {
 			// determine what the new long value will be after we set the appropriate bit.
-			long currentLongValue = segment.get(longPosition);
+			long currentLongValue = segment.get(indexInSegment);
+			long newLongValue = currentLongValue | mask;
+
+			// if no other thread has modified the value since we read it, we won the race and we are done.
+			if (segment.compareAndSet(indexInSegment, currentLongValue, newLongValue)) {
+				break;
+			}
+		}
+	}
+
+	private void setAnd(AtomicLongArray segment, int indexInSegment, long mask) {
+		// Thread safety: we need to loop until we win the race to set the long value.
+		while (true) {
+			// determine what the new long value will be after we set the appropriate bit.
+			long currentLongValue = segment.get(indexInSegment);
 			long newLongValue = currentLongValue & mask;
 
 			// if no other thread has modified the value since we read it, we won the race and we are done.
-			if (segment.compareAndSet(longPosition, currentLongValue, newLongValue)) {
+			if (segment.compareAndSet(indexInSegment, currentLongValue, newLongValue)) {
 				break;
 			}
 		}
@@ -112,7 +272,6 @@ public class AtomicBitset {
 		if (fromIndex < 0) {
 			throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
 		}
-
 
 		AtomicBitsetSegments segments = this.segments.get();
 
@@ -315,6 +474,11 @@ public class AtomicBitset {
 	 * @return the segment
 	 */
 	private AtomicLongArray segmentForPosition(int segmentIndex) {
+		return expandToFit(segmentIndex).getSegment(segmentIndex);
+	}
+
+	@NotNull
+	private AtomicBitsetSegments expandToFit(int segmentIndex) {
 		AtomicBitsetSegments visibleSegments = segments.get();
 
 		while (visibleSegments.numSegments() <= segmentIndex) {
@@ -333,8 +497,7 @@ public class AtomicBitset {
 				visibleSegments = segments.get();
 			}
 		}
-
-		return visibleSegments.getSegment(segmentIndex);
+		return visibleSegments;
 	}
 
 	private static class AtomicBitsetSegments {

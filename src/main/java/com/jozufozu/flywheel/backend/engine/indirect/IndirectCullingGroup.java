@@ -82,7 +82,7 @@ public class IndirectCullingGroup<I extends Instance> {
 				continue;
 			}
 
-			instancer.index = modelIndex;
+			instancer.modelIndex = modelIndex;
 			instancer.baseInstance = instanceCountThisFrame;
 			instanceCountThisFrame += instanceCount;
 
@@ -177,7 +177,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	public void add(IndirectInstancer<I> instancer, Model model, RenderStage stage, MeshPool meshPool) {
-        instancer.index = instancers.size();
+		instancer.modelIndex = instancers.size();
 		instancers.add(instancer);
 
         List<Model.ConfiguredMesh> meshes = model.meshes();
@@ -243,9 +243,6 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		for (var instancer : instancers) {
 			instancer.uploadModelIndices(stagingBuffer, buffers.modelIndex.handle());
-		}
-
-		for (var instancer : instancers) {
 			instancer.resetChanged();
 		}
 	}

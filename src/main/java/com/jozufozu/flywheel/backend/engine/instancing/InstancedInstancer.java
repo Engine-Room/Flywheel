@@ -74,9 +74,14 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 
 	private void writeChanged() {
 		changed.forEachSetSpan((startInclusive, endInclusive) -> {
-			var temp = MemoryBlock.malloc((long) instanceStride * (endInclusive - startInclusive + 1));
+			// Generally we're good about ensuring we don't have changed bits set out of bounds, but check just in case
+			if (startInclusive >= instances.size()) {
+				return;
+			}
+			int actualEnd = Math.min(endInclusive, instances.size() - 1);
+			var temp = MemoryBlock.malloc((long) instanceStride * (actualEnd - startInclusive + 1));
 			long ptr = temp.ptr();
-			for (int i = startInclusive; i <= endInclusive; i++) {
+			for (int i = startInclusive; i <= actualEnd; i++) {
 				writer.write(ptr, instances.get(i));
 				ptr += instanceStride;
 			}

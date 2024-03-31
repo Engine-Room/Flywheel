@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.backend.engine.MaterialEncoder;
 import com.jozufozu.flywheel.backend.engine.MeshPool;
 
 public class IndirectDraw {
-	private final IndirectInstancer<?> model;
+	private final IndirectInstancer<?> instancer;
 	private final Material material;
 	private final MeshPool.PooledMesh mesh;
 	private final RenderStage stage;
@@ -21,8 +21,8 @@ public class IndirectDraw {
 	private final int packedMaterialProperties;
 	private boolean deleted;
 
-	public IndirectDraw(IndirectInstancer<?> model, Material material, MeshPool.PooledMesh mesh, RenderStage stage, int indexOfMeshInModel) {
-		this.model = model;
+	public IndirectDraw(IndirectInstancer<?> instancer, Material material, MeshPool.PooledMesh mesh, RenderStage stage, int indexOfMeshInModel) {
+		this.instancer = instancer;
 		this.material = material;
 		this.mesh = mesh;
 		this.stage = stage;
@@ -61,9 +61,9 @@ public class IndirectDraw {
 		MemoryUtil.memPutInt(ptr + 4, 0); // instanceCount - to be set by the apply shader
 		MemoryUtil.memPutInt(ptr + 8, mesh.firstIndex()); // firstIndex
 		MemoryUtil.memPutInt(ptr + 12, mesh.baseVertex()); // baseVertex
-		MemoryUtil.memPutInt(ptr + 16, model.baseInstance); // baseInstance
+		MemoryUtil.memPutInt(ptr + 16, instancer.baseInstance); // baseInstance
 
-		MemoryUtil.memPutInt(ptr + 20, model.index); // modelIndex
+		MemoryUtil.memPutInt(ptr + 20, instancer.modelIndex); // modelIndex
 
 		MemoryUtil.memPutInt(ptr + 24, materialVertexIndex); // materialVertexIndex
 		MemoryUtil.memPutInt(ptr + 28, materialFragmentIndex); // materialFragmentIndex
@@ -76,9 +76,9 @@ public class IndirectDraw {
 		MemoryUtil.memPutInt(ptr + 4, 1); // instanceCount - only drawing one instance
 		MemoryUtil.memPutInt(ptr + 8, mesh.firstIndex()); // firstIndex
 		MemoryUtil.memPutInt(ptr + 12, mesh.baseVertex()); // baseVertex
-		MemoryUtil.memPutInt(ptr + 16, model.baseInstance + instanceIndex); // baseInstance
+		MemoryUtil.memPutInt(ptr + 16, instancer.baseInstance + instanceIndex); // baseInstance
 
-		MemoryUtil.memPutInt(ptr + 20, model.index); // modelIndex
+		MemoryUtil.memPutInt(ptr + 20, instancer.modelIndex); // modelIndex
 
 		MemoryUtil.memPutInt(ptr + 24, ShaderIndices.getVertexShaderIndex(materialOverride.shaders())); // materialVertexIndex
 		MemoryUtil.memPutInt(ptr + 28, ShaderIndices.getFragmentShaderIndex(materialOverride.shaders())); // materialFragmentIndex

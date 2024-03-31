@@ -19,10 +19,11 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	private final List<IndirectDraw> associatedDraws = new ArrayList<>();
 	private final Vector4fc boundingSphere;
 
-	public int index = -1;
+	public int modelIndex = -1;
 	public int baseInstance = -1;
 	private int lastModelIndex = -1;
 	private int lastBaseInstance = -1;
+	private int lastInstanceCount = -1;
 
 	public IndirectInstancer(InstanceType<I> type, Environment environment, Model model) {
 		super(type, environment);
@@ -66,43 +67,34 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	public void uploadModelIndices(StagingBuffer stagingBuffer, int modelIndexVbo) {
 		long modelIndexBaseByte = baseInstance * IndirectBuffers.INT_SIZE;
 
-		if (baseInstance != lastBaseInstance || index != lastModelIndex) {
+		if (baseInstance != lastBaseInstance || modelIndex != lastModelIndex || instances.size() > lastInstanceCount) {
 			uploadAllModelIndices(stagingBuffer, modelIndexBaseByte, modelIndexVbo);
-		} else {
-			uploadChangedModelIndices(stagingBuffer, modelIndexBaseByte, modelIndexVbo);
 		}
 	}
 
 	public void resetChanged() {
-		lastModelIndex = index;
+		lastModelIndex = modelIndex;
 		lastBaseInstance = baseInstance;
+		lastInstanceCount = instances.size();
 		changed.clear();
 	}
 
 	private void uploadChangedInstances(StagingBuffer stagingBuffer, long baseByte, int instanceVbo) {
 		changed.forEachSetSpan((startInclusive, endInclusive) -> {
-			int instanceCount = endInclusive - startInclusive + 1;
+			// Generally we're good about ensuring we don't have changed bits set out of bounds, but check just in case
+			if (startInclusive >= instances.size()) {
+				return;
+			}
+			int actualEnd = Math.min(endInclusive, instances.size() - 1);
+
+			int instanceCount = actualEnd - startInclusive + 1;
 			long totalSize = instanceCount * instanceStride;
 
 			stagingBuffer.enqueueCopy(totalSize, instanceVbo, baseByte + startInclusive * instanceStride, ptr -> {
-				for (int i = startInclusive; i <= endInclusive; i++) {
+				for (int i = startInclusive; i <= actualEnd; i++) {
 					var instance = instances.get(i);
 					writer.write(ptr, instance);
 					ptr += instanceStride;
-				}
-			});
-		});
-	}
-
-	private void uploadChangedModelIndices(StagingBuffer stagingBuffer, long modelIndexBaseByte, int modelIndexVbo) {
-		changed.forEachSetSpan((startInclusive, endInclusive) -> {
-			int instanceCount = endInclusive - startInclusive + 1;
-			long modelIndexTotalSize = instanceCount * IndirectBuffers.INT_SIZE;
-
-			stagingBuffer.enqueueCopy(modelIndexTotalSize, modelIndexVbo, modelIndexBaseByte + startInclusive * IndirectBuffers.INT_SIZE, ptr -> {
-				for (int i = startInclusive; i <= endInclusive; i++) {
-					MemoryUtil.memPutInt(ptr, index);
-					ptr += IndirectBuffers.INT_SIZE;
 				}
 			});
 		});
@@ -124,7 +116,7 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 
 		stagingBuffer.enqueueCopy(modelIndexTotalSize, modelIndexVbo, modelIndexBaseByte, ptr -> {
 			for (int i = 0; i < instances.size(); i++) {
-				MemoryUtil.memPutInt(ptr, index);
+				MemoryUtil.memPutInt(ptr, modelIndex);
 				ptr += IndirectBuffers.INT_SIZE;
 			}
 		});

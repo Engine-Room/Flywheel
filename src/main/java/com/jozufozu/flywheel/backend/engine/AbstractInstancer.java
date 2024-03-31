@@ -119,8 +119,20 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 
 		final int newSize = oldSize - removeCount;
 
+		// Start from the first deleted index.
+		int writePos = deleted.nextSetBit(0);
+
+		if (writePos < newSize) {
+			// Since we'll be shifting everything into this space we can consider it all changed.
+			changed.set(writePos, newSize);
+		}
+
+		// We definitely shouldn't consider the deleted instances as changed though,
+		// else we might try some out of bounds accesses later.
+		changed.clear(newSize, oldSize);
+
 		// Punch out the deleted instances, shifting over surviving instances to fill their place.
-		for (int scanPos = 0, writePos = 0; (scanPos < oldSize) && (writePos < newSize); scanPos++, writePos++) {
+		for (int scanPos = writePos; (scanPos < oldSize) && (writePos < newSize); scanPos++, writePos++) {
 			// Find next non-deleted element.
 			scanPos = deleted.nextClearBit(scanPos);
 
@@ -133,13 +145,8 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 				handles.set(writePos, handle);
 				instances.set(writePos, instance);
 
-				// Make sure the handle knows it's been moved...
+				// Make sure the handle knows it's been moved
 				handle.index = writePos;
-				// ...and set it changed to force an upload.
-				changed.set(writePos);
-
-				// Clear the old slot. There's nothing meaningful there that can be considered "changed".
-				changed.clear(scanPos);
 			}
 		}
 
