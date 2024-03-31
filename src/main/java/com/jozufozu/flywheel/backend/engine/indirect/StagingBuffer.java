@@ -164,9 +164,8 @@ public class StagingBuffer {
 	 */
 	public long reserveForCopy(long size, int dstVbo, long dstOffset) {
 		assertMultipleOf4(size);
-		// Don't need to check totalAvailable here because that's a looser constraint than the bytes remaining.
 		long remaining = capacity - pos;
-		if (size > remaining) {
+		if (size > remaining || size > totalAvailable) {
 			return MemoryUtil.NULL;
 		}
 
@@ -236,6 +235,10 @@ public class StagingBuffer {
 	}
 
 	private void pushTransfer(int dstVbo, long srcOffset, long dstOffset, long size) {
+		if (totalAvailable < size) {
+			throw new IllegalStateException("Not enough available space to transfer");
+		}
+
 		transfers.push(dstVbo, srcOffset, dstOffset, size);
 		usedCapacity += size;
 		totalAvailable -= size;
