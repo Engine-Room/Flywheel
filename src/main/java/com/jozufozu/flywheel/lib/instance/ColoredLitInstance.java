@@ -12,8 +12,7 @@ public abstract class ColoredLitInstance extends AbstractInstance implements Fla
 	public byte b = (byte) 0xFF;
 	public byte a = (byte) 0xFF;
 
-	public byte blockLight;
-	public byte skyLight;
+	public int packedLight;
 
 	public int overlay = OverlayTexture.NO_OVERLAY;
 
@@ -58,20 +57,14 @@ public abstract class ColoredLitInstance extends AbstractInstance implements Fla
 	}
 
 	@Override
-	public ColoredLitInstance setBlockLight(int blockLight) {
-		this.blockLight = (byte) blockLight;
-		return this;
+	public ColoredLitInstance light(int blockLight, int skyLight) {
+		return light(LightTexture.pack(blockLight, skyLight));
 	}
 
 	@Override
-	public ColoredLitInstance setSkyLight(int skyLight) {
-		this.skyLight = (byte) skyLight;
+	public ColoredLitInstance light(int packedLight) {
+		this.packedLight = packedLight;
 		return this;
-	}
-
-	@Override
-	public int getPackedLight() {
-		return LightTexture.pack(blockLight, skyLight);
 	}
 
 	public ColoredLitInstance setOverlay(int overlay) {

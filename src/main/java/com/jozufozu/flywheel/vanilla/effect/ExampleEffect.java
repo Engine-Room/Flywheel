@@ -21,6 +21,7 @@ import com.jozufozu.flywheel.lib.model.Models;
 import com.jozufozu.flywheel.lib.task.ForEachPlan;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -271,8 +272,7 @@ public class ExampleEffect implements Effect {
 					.instancer(InstanceTypes.TRANSFORMED, Models.block(Blocks.SHROOMLIGHT.defaultBlockState()))
 					.createInstance();
 
-			instance.setBlockLight(15)
-					.setSkyLight(15);
+			instance.light(LightTexture.FULL_BRIGHT);
 		}
 
 		public void _delete() {

@@ -147,7 +147,6 @@ final class BakedModelBufferer {
 		{
 			for (int layerIndex = 0; layerIndex < CHUNK_LAYER_AMOUNT; layerIndex++) {
 				var renderType = CHUNK_LAYERS[layerIndex];
-				// FIXME: We leak the memory owned by the BufferBuilder here.
 				var buffer = new BufferBuilder(renderType.bufferSize());
 				emitters[layerIndex] = new MeshEmitter(buffer, renderType);
 			}

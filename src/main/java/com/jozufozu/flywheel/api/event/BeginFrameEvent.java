@@ -12,7 +12,7 @@ public final class BeginFrameEvent extends Event {
 		this.context = context;
 	}
 
-	public RenderContext getContext() {
+	public RenderContext context() {
 		return context;
 	}
 }

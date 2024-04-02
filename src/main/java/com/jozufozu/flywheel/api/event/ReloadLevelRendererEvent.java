@@ -17,7 +17,7 @@ public final class ReloadLevelRendererEvent extends Event {
 	}
 
 	@Nullable
-	public ClientLevel getLevel() {
+	public ClientLevel level() {
 		return level;
 	}
 }

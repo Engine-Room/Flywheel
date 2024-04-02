@@ -21,31 +21,31 @@ public final class RenderStageEvent extends Event {
 		this.stage = stage;
 	}
 
-	public RenderContext getContext() {
+	public RenderContext context() {
 		return context;
 	}
 
-	public RenderStage getStage() {
+	public RenderStage stage() {
 		return stage;
 	}
 
-	public ClientLevel getLevel() {
+	public ClientLevel level() {
 		return context.level();
 	}
 
-	public PoseStack getStack() {
+	public PoseStack stack() {
 		return context.stack();
 	}
 
-	public Matrix4f getViewProjection() {
+	public Matrix4f viewProjection() {
 		return context.viewProjection();
 	}
 
-	public RenderBuffers getBuffers() {
+	public RenderBuffers buffers() {
 		return context.buffers();
 	}
 
-	public Camera getCamera() {
+	public Camera camera() {
 		return context.camera();
 	}
 

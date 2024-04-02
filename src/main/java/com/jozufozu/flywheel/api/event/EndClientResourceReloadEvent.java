@@ -24,11 +24,11 @@ public final class EndClientResourceReloadEvent extends Event implements IModBus
 		this.error = error;
 	}
 
-	public Minecraft getMinecraft() {
+	public Minecraft minecraft() {
 		return minecraft;
 	}
 
-	public ResourceManager getResourceManager() {
+	public ResourceManager resourceManager() {
 		return resourceManager;
 	}
 
@@ -36,7 +36,7 @@ public final class EndClientResourceReloadEvent extends Event implements IModBus
 		return initialReload;
 	}
 
-	public Optional<Throwable> getError() {
+	public Optional<Throwable> error() {
 		return error;
 	}
 }

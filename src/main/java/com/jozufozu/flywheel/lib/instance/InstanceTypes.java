@@ -26,8 +26,8 @@ public final class InstanceTypes {
 				MemoryUtil.memPutByte(ptr + 3, instance.a);
 				MemoryUtil.memPutShort(ptr + 4, (short) (instance.overlay & 0xFFFF));
 				MemoryUtil.memPutShort(ptr + 6, (short) (instance.overlay >> 16 & 0xFFFF));
-				MemoryUtil.memPutShort(ptr + 8, (short) (Byte.toUnsignedInt(instance.blockLight) << 4));
-				MemoryUtil.memPutShort(ptr + 10, (short) (Byte.toUnsignedInt(instance.skyLight) << 4));
+				MemoryUtil.memPutShort(ptr + 8, (short) (instance.packedLight & 0xFFFF));
+				MemoryUtil.memPutShort(ptr + 10, (short) (instance.packedLight >> 16 & 0xFFFF));
 				MatrixMath.writeUnsafe(instance.model, ptr + 12);
 				MatrixMath.writeUnsafe(instance.normal, ptr + 76);
 			})
@@ -51,8 +51,8 @@ public final class InstanceTypes {
 				MemoryUtil.memPutByte(ptr + 3, instance.a);
 				MemoryUtil.memPutShort(ptr + 4, (short) (instance.overlay & 0xFFFF));
 				MemoryUtil.memPutShort(ptr + 6, (short) (instance.overlay >> 16 & 0xFFFF));
-				MemoryUtil.memPutShort(ptr + 8, (short) (Byte.toUnsignedInt(instance.blockLight) << 4));
-				MemoryUtil.memPutShort(ptr + 10, (short) (Byte.toUnsignedInt(instance.skyLight) << 4));
+				MemoryUtil.memPutShort(ptr + 8, (short) (instance.packedLight & 0xFFFF));
+				MemoryUtil.memPutShort(ptr + 10, (short) (instance.packedLight >> 16 & 0xFFFF));
 				MemoryUtil.memPutFloat(ptr + 12, instance.posX);
 				MemoryUtil.memPutFloat(ptr + 16, instance.posY);
 				MemoryUtil.memPutFloat(ptr + 20, instance.posZ);

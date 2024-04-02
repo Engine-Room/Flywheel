@@ -36,23 +36,25 @@ public final class VisualizationEventHandler {
 	}
 
 	public static void onBeginFrame(BeginFrameEvent event) {
-		ClientLevel level = event.getContext().level();
+		ClientLevel level = event.context()
+				.level();
 		VisualizationManagerImpl manager = VisualizationManagerImpl.get(level);
 		if (manager == null) {
 			return;
 		}
 
-		manager.beginFrame(event.getContext());
+		manager.beginFrame(event.context());
 	}
 
 	public static void onRenderStage(RenderStageEvent event) {
-		ClientLevel level = event.getContext().level();
+		ClientLevel level = event.context()
+				.level();
 		VisualizationManagerImpl manager = VisualizationManagerImpl.get(level);
 		if (manager == null) {
 			return;
 		}
 
-		manager.renderStage(event.getContext(), event.getStage());
+		manager.renderStage(event.context(), event.stage());
 	}
 
 	public static void onEntityJoinLevel(EntityJoinLevelEvent event) {

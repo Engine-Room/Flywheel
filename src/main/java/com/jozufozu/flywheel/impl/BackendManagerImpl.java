@@ -71,7 +71,8 @@ public final class BackendManagerImpl {
 	}
 
 	public static void onEndClientResourceReload(EndClientResourceReloadEvent event) {
-		if (event.getError().isPresent()) {
+		if (event.error()
+				.isPresent()) {
 			return;
 		}
 
@@ -82,7 +83,7 @@ public final class BackendManagerImpl {
 	public static void onReloadLevelRenderer(ReloadLevelRendererEvent event) {
 		chooseBackend();
 
-		ClientLevel level = event.getLevel();
+		ClientLevel level = event.level();
 		if (level != null) {
 			VisualizationManagerImpl.reset(level);
 		}

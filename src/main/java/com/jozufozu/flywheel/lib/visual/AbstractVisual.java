@@ -61,8 +61,8 @@ public abstract class AbstractVisual implements Visual {
 				continue;
 			}
 
-			instance.setLight(block, sky);
-			instance.handle()
+			instance.light(block, sky)
+					.handle()
 					.setChanged();
 		}
 	}
@@ -73,7 +73,7 @@ public abstract class AbstractVisual implements Visual {
 
 	protected void relight(int block, int sky, Stream<? extends @Nullable FlatLit> instances) {
 		instances.filter(Objects::nonNull)
-				.forEach(instance -> instance.setLight(block, sky)
+				.forEach(instance -> instance.light(block, sky)
 				.handle()
 				.setChanged());
 	}
@@ -87,7 +87,7 @@ public abstract class AbstractVisual implements Visual {
 			if (instance == null) {
 				continue;
 			}
-			instance.setLight(block, sky)
+			instance.light(block, sky)
 					.handle()
 					.setChanged();
 		}

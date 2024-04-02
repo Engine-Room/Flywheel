@@ -70,7 +70,7 @@ public class HitboxComponent implements EntityComponent {
 		TransformedInstance instance = context.instancerProvider()
 				.instancer(InstanceTypes.TRANSFORMED, model)
 				.createInstance();
-		instance.setBlockLight(LightTexture.block(LightTexture.FULL_BLOCK));
+		instance.light(LightTexture.FULL_BLOCK);
 		instance.setChanged();
 		return instance;
 	}

@@ -167,8 +167,7 @@ public class LitVisualStorage {
 		}
 	}
 
-	// Breaking this into 2 separate cases allows us to avoid the sync overhead in the common case.
-	// TODO: is it faster to only use the synced variant to avoid virtual dispatches?
+	// Breaking this into 2 separate cases allows us to avoid the overhead of atomics in the common case.
 	sealed interface Updater {
 		void updateLight(long updateId);
 
