@@ -5,7 +5,6 @@ import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
-import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.lib.task.RunnablePlan;
 
 public interface SimpleDynamicVisual extends DynamicVisual {
@@ -19,10 +18,10 @@ public interface SimpleDynamicVisual extends DynamicVisual {
 	 * <br>
 	 * {@link Instancer}/{@link Instance} creation/acquisition is safe here.
 	 */
-	void beginFrame(VisualFrameContext ctx);
+	void beginFrame(Context ctx);
 
 	@Override
-	default Plan<VisualFrameContext> planFrame() {
+	default Plan<Context> planFrame() {
 		return RunnablePlan.of(this::beginFrame);
 	}
 }

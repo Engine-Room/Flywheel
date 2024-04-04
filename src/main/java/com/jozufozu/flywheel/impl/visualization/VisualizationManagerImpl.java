@@ -20,8 +20,6 @@ import com.jozufozu.flywheel.api.task.TaskExecutor;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.Effect;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
-import com.jozufozu.flywheel.api.visual.VisualFrameContext;
-import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualManager;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationLevel;
@@ -29,8 +27,8 @@ import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.impl.extension.LevelExtension;
 import com.jozufozu.flywheel.impl.task.FlwTaskExecutor;
-import com.jozufozu.flywheel.impl.visual.VisualFrameContextImpl;
-import com.jozufozu.flywheel.impl.visual.VisualTickContextImpl;
+import com.jozufozu.flywheel.impl.visual.DynamicVisualContextImpl;
+import com.jozufozu.flywheel.impl.visual.TickableVisualContextImpl;
 import com.jozufozu.flywheel.impl.visualization.manager.BlockEntityStorage;
 import com.jozufozu.flywheel.impl.visualization.manager.EffectStorage;
 import com.jozufozu.flywheel.impl.visualization.manager.EntityStorage;
@@ -69,7 +67,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	private final VisualManagerImpl<Entity, EntityStorage> entities;
 	private final VisualManagerImpl<Effect, EffectStorage> effects;
 
-	private final Plan<VisualTickContext> tickPlan;
+	private final Plan<TickableVisual.Context> tickPlan;
 	private final Plan<RenderContext> framePlan;
 
 	private final Flag tickFlag = new NamedFlag("tick");
@@ -122,7 +120,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		return () -> context;
 	}
 
-	private VisualFrameContext createVisualFrameContext(RenderContext ctx) {
+	private DynamicVisual.Context createVisualFrameContext(RenderContext ctx) {
 		Vec3i renderOrigin = engine.renderOrigin();
 		var cameraPos = ctx.camera()
 				.getPosition();
@@ -131,7 +129,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		viewProjection.translate((float) (renderOrigin.getX() - cameraPos.x), (float) (renderOrigin.getY() - cameraPos.y), (float) (renderOrigin.getZ() - cameraPos.z));
 		FrustumIntersection frustum = new FrustumIntersection(viewProjection);
 
-		return new VisualFrameContextImpl(ctx.camera(), frustum, ctx.partialTick(), frameLimiter);
+		return new DynamicVisualContextImpl(ctx.camera(), frustum, ctx.partialTick(), frameLimiter);
 	}
 
 	protected DistanceUpdateLimiterImpl createUpdateLimiter() {
@@ -225,7 +223,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		taskExecutor.syncUntil(tickFlag::isRaised);
 		tickFlag.lower();
 
-		tickPlan.execute(taskExecutor, new VisualTickContextImpl());
+		tickPlan.execute(taskExecutor, TickableVisualContextImpl.INSTANCE);
 	}
 
 	/**

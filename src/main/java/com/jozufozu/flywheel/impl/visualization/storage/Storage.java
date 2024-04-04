@@ -13,8 +13,6 @@ import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.LitVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visual.Visual;
-import com.jozufozu.flywheel.api.visual.VisualFrameContext;
-import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.task.ForEachPlan;
 import com.jozufozu.flywheel.lib.task.NestedPlan;
@@ -26,8 +24,8 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 public abstract class Storage<T> {
 	protected final Supplier<VisualizationContext> visualizationContextSupplier;
-	protected final PlanMap<DynamicVisual, VisualFrameContext> dynamicVisuals = new PlanMap<>();
-	protected final PlanMap<TickableVisual, VisualTickContext> tickableVisuals = new PlanMap<>();
+	protected final PlanMap<DynamicVisual, DynamicVisual.Context> dynamicVisuals = new PlanMap<>();
+	protected final PlanMap<TickableVisual, TickableVisual.Context> tickableVisuals = new PlanMap<>();
 	protected final List<SimpleDynamicVisual> simpleDynamicVisuals = new ArrayList<>();
 	protected final List<SimpleTickableVisual> simpleTickableVisuals = new ArrayList<>();
 	protected final LitVisualStorage litVisuals = new LitVisualStorage();
@@ -127,11 +125,11 @@ public abstract class Storage<T> {
 	@Nullable
 	protected abstract Visual createRaw(T obj);
 
-	public Plan<VisualFrameContext> framePlan() {
+	public Plan<DynamicVisual.Context> framePlan() {
 		return NestedPlan.of(dynamicVisuals, litVisuals.plan(), ForEachPlan.of(() -> simpleDynamicVisuals, SimpleDynamicVisual::beginFrame));
 	}
 
-	public Plan<VisualTickContext> tickPlan() {
+	public Plan<TickableVisual.Context> tickPlan() {
 		return NestedPlan.of(tickableVisuals, ForEachPlan.of(() -> simpleTickableVisuals, SimpleTickableVisual::tick));
 	}
 

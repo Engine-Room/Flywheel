@@ -11,8 +11,6 @@ import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.Effect;
 import com.jozufozu.flywheel.api.visual.EffectVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
-import com.jozufozu.flywheel.api.visual.VisualFrameContext;
-import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
@@ -123,13 +121,13 @@ public class ExampleEffect implements Effect {
 		}
 
 		@Override
-		public Plan<VisualTickContext> planTick() {
-			Plan<VisualTickContext> beginTick = ForEachPlan.of(() -> boids, Boid::beginTick);
+		public Plan<TickableVisual.Context> planTick() {
+			Plan<TickableVisual.Context> beginTick = ForEachPlan.of(() -> boids, Boid::beginTick);
 			return beginTick.then(ForEachPlan.of(() -> effects, boid -> boid.self.tick(boids)));
 		}
 
 		@Override
-		public Plan<VisualFrameContext> planFrame() {
+		public Plan<DynamicVisual.Context> planFrame() {
 			return ForEachPlan.of(() -> effects, BoidVisual::beginFrame);
 		}
 
@@ -279,7 +277,7 @@ public class ExampleEffect implements Effect {
 			instance.delete();
 		}
 
-		public void beginFrame(VisualFrameContext context) {
+		public void beginFrame(DynamicVisual.Context context) {
 			float partialTick = context.partialTick();
 			var x = Mth.lerp(partialTick, self.lastPosition.x, self.position.x);
 			var y = Mth.lerp(partialTick, self.lastPosition.y, self.position.y);

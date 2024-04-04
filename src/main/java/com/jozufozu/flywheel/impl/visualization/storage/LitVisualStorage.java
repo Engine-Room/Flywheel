@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
+import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.LitVisual;
-import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.lib.task.Distribute;
 import com.jozufozu.flywheel.lib.task.SimplyComposedPlan;
 import com.jozufozu.flywheel.lib.task.Synchronizer;
@@ -37,8 +37,8 @@ public class LitVisualStorage {
 
 	private long updateId = INITIAL_UPDATE_ID;
 
-	public Plan<VisualFrameContext> plan() {
-		return (SimplyComposedPlan<VisualFrameContext>) (TaskExecutor taskExecutor, VisualFrameContext context, Runnable onCompletion) -> {
+	public Plan<DynamicVisual.Context> plan() {
+		return (SimplyComposedPlan<DynamicVisual.Context>) (TaskExecutor taskExecutor, DynamicVisual.Context context, Runnable onCompletion) -> {
 			processMoved();
 
 			if (sectionsUpdatedThisFrame.isEmpty()) {

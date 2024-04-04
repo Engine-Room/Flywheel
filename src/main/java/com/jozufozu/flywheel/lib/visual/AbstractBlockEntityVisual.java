@@ -9,7 +9,6 @@ import com.jozufozu.flywheel.api.visual.BlockEntityVisual;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.LitVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
-import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualManager;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.math.MoreMath;
@@ -98,7 +97,7 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	 * @param context The current frame context.
 	 * @return {@code true} if this visual shouldn't be updated this frame based on its distance from the camera.
 	 */
-	public boolean doDistanceLimitThisFrame(VisualFrameContext context) {
+	public boolean doDistanceLimitThisFrame(DynamicVisual.Context context) {
 		return !context.limiter()
 				.shouldUpdate(pos.distToCenterSqr(context.camera().getPosition()));
 	}

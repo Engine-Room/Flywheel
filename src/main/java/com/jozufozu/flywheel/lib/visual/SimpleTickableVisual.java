@@ -5,7 +5,6 @@ import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.task.Plan;
 import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visual.TickableVisual;
-import com.jozufozu.flywheel.api.visual.VisualTickContext;
 import com.jozufozu.flywheel.lib.task.RunnablePlan;
 
 public interface SimpleTickableVisual extends TickableVisual {
@@ -20,10 +19,10 @@ public interface SimpleTickableVisual extends TickableVisual {
 	 * <br>
 	 * {@link Instancer}/{@link Instance} creation/acquisition is safe here.
 	 */
-	void tick(VisualTickContext ctx);
+	void tick();
 
 	@Override
-	default Plan<VisualTickContext> planTick() {
+	default Plan<Context> planTick() {
 		return RunnablePlan.of(this::tick);
 	}
 }

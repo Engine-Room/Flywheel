@@ -1,9 +1,9 @@
 package com.jozufozu.flywheel.lib.visual;
 
-import com.jozufozu.flywheel.api.visual.VisualFrameContext;
+import com.jozufozu.flywheel.api.visual.DynamicVisual;
 
 public interface EntityComponent {
-	void beginFrame(VisualFrameContext context);
+	void beginFrame(DynamicVisual.Context context);
 
 	void delete();
 }

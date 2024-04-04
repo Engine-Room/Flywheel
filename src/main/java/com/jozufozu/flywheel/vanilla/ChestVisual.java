@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 import org.joml.Quaternionf;
 
 import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.visual.VisualFrameContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.OrientedInstance;
@@ -117,7 +116,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 	}
 
 	@Override
-	public void beginFrame(VisualFrameContext context) {
+	public void beginFrame(Context context) {
 		if (doDistanceLimitThisFrame(context) || !isVisible(context.frustum())) {
 			return;
 		}

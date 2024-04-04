@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.lib.visual.components;
 import org.joml.Quaternionf;
 
 import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.api.visual.VisualFrameContext;
+import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
@@ -81,7 +81,7 @@ public class HitboxComponent implements EntityComponent {
 	}
 
 	@Override
-	public void beginFrame(VisualFrameContext context) {
+	public void beginFrame(DynamicVisual.Context context) {
 		recycler.resetCount();
 
 		var shouldRenderHitBoxes = Minecraft.getInstance()

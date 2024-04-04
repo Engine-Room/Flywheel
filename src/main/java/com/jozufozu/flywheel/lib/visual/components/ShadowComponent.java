@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.api.material.Transparency;
 import com.jozufozu.flywheel.api.material.WriteMask;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
-import com.jozufozu.flywheel.api.visual.VisualFrameContext;
+import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.ShadowInstance;
@@ -108,12 +108,12 @@ public class ShadowComponent implements EntityComponent {
 
 	/**
 	 * Update the shadow instances. You'd typically call this in your visual's
-	 * {@link com.jozufozu.flywheel.api.visual.DynamicVisual#beginFrame(VisualFrameContext) beginFrame} method.
+	 * {@link com.jozufozu.flywheel.api.visual.DynamicVisual#beginFrame(DynamicVisual.Context) beginFrame} method.
 	 *
 	 * @param context The frame context.
 	 */
 	@Override
-	public void beginFrame(VisualFrameContext context) {
+	public void beginFrame(DynamicVisual.Context context) {
 		instances.resetCount();
 
 		boolean shadowsEnabled = Minecraft.getInstance().options.entityShadows()
@@ -125,7 +125,7 @@ public class ShadowComponent implements EntityComponent {
 		instances.discardExtra();
 	}
 
-	private void setupInstances(VisualFrameContext context) {
+	private void setupInstances(DynamicVisual.Context context) {
 		double entityX = Mth.lerp(context.partialTick(), entity.xOld, entity.getX());
 		double entityY = Mth.lerp(context.partialTick(), entity.yOld, entity.getY());
 		double entityZ = Mth.lerp(context.partialTick(), entity.zOld, entity.getZ());

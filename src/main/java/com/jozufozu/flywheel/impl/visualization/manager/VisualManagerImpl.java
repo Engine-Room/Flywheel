@@ -4,8 +4,8 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.jozufozu.flywheel.api.task.Plan;
-import com.jozufozu.flywheel.api.visual.VisualFrameContext;
-import com.jozufozu.flywheel.api.visual.VisualTickContext;
+import com.jozufozu.flywheel.api.visual.DynamicVisual;
+import com.jozufozu.flywheel.api.visual.TickableVisual;
 import com.jozufozu.flywheel.api.visualization.VisualManager;
 import com.jozufozu.flywheel.impl.visualization.storage.Storage;
 import com.jozufozu.flywheel.impl.visualization.storage.Transaction;
@@ -64,13 +64,13 @@ public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager
 		}
 	}
 
-	public Plan<VisualFrameContext> framePlan() {
-		return SimplePlan.<VisualFrameContext>of(context -> processQueue(context.partialTick()))
+	public Plan<DynamicVisual.Context> framePlan() {
+		return SimplePlan.<DynamicVisual.Context>of(context -> processQueue(context.partialTick()))
 				.then(storage.framePlan());
 	}
 
-	public Plan<VisualTickContext> tickPlan() {
-		return SimplePlan.<VisualTickContext>of(context -> processQueue(1))
+	public Plan<TickableVisual.Context> tickPlan() {
+		return SimplePlan.<TickableVisual.Context>of(context -> processQueue(1))
 				.then(storage.tickPlan());
 	}
 }

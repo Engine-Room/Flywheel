@@ -2,8 +2,7 @@ package com.jozufozu.flywheel.vanilla;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.visual.VisualFrameContext;
-import com.jozufozu.flywheel.api.visual.VisualTickContext;
+import com.jozufozu.flywheel.api.visual.DynamicVisual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
@@ -100,7 +99,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisu
 	}
 
 	@Override
-	public void tick(VisualTickContext context) {
+	public void tick() {
 		BlockState displayBlockState = entity.getDisplayBlockState();
 
 		if (displayBlockState != blockState) {
@@ -115,7 +114,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisu
 	}
 
 	@Override
-	public void beginFrame(VisualFrameContext context) {
+	public void beginFrame(DynamicVisual.Context context) {
 		super.beginFrame(context);
 
 		if (!isVisible(context.frustum())) {
