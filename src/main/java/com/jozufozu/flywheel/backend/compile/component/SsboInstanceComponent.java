@@ -11,6 +11,7 @@ import com.jozufozu.flywheel.backend.glsl.generate.GlslBlock;
 import com.jozufozu.flywheel.backend.glsl.generate.GlslBuilder;
 import com.jozufozu.flywheel.backend.glsl.generate.GlslExpr;
 import com.jozufozu.flywheel.backend.glsl.generate.GlslStmt;
+import com.jozufozu.flywheel.lib.math.MoreMath;
 
 public class SsboInstanceComponent extends InstanceAssemblerComponent {
 	public SsboInstanceComponent(InstanceType<?> type) {
@@ -26,7 +27,7 @@ public class SsboInstanceComponent extends InstanceAssemblerComponent {
 	protected void generateUnpacking(GlslBuilder builder) {
 		var fnBody = new GlslBlock();
 
-		var uintCount = layout.byteSize() / 4;
+		int uintCount = MoreMath.ceilingDiv(layout.byteSize(), 4);
 
 		fnBody.add(GlslStmt.raw("uint base = " + UNPACK_ARG + " * " + uintCount + "u;"));
 
@@ -36,11 +37,8 @@ public class SsboInstanceComponent extends InstanceAssemblerComponent {
 		}
 
 		var unpackArgs = new ArrayList<GlslExpr>();
-		int uintOffset = 0;
 		for (Layout.Element element : layout.elements()) {
-			unpackArgs.add(unpackElement(element, uintOffset));
-			// Element byte size is always a multiple of 4
-			uintOffset += element.type().byteSize() / 4;
+			unpackArgs.add(unpackElement(element));
 		}
 
 		fnBody.ret(GlslExpr.call(STRUCT_NAME, unpackArgs));

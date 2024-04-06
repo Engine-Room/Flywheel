@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.visual.components;
+package com.jozufozu.flywheel.lib.visual.component;
 
 import org.joml.Vector4f;
 import org.joml.Vector4fc;

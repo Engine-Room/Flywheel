@@ -28,7 +28,7 @@ public class BufferTextureInstanceComponent extends InstanceAssemblerComponent {
 	protected void generateUnpacking(GlslBuilder builder) {
 		var fnBody = new GlslBlock();
 
-		var texels = MoreMath.ceilingDiv(layout.byteSize(), 16);
+		int texels = MoreMath.ceilingDiv(layout.byteSize(), 16);
 
 		fnBody.add(GlslStmt.raw("int base = " + UNPACK_ARG + " * " + texels + ";"));
 
@@ -38,11 +38,8 @@ public class BufferTextureInstanceComponent extends InstanceAssemblerComponent {
 		}
 
 		var unpackArgs = new ArrayList<GlslExpr>();
-		int uintOffset = 0;
 		for (Layout.Element element : layout.elements()) {
-			unpackArgs.add(unpackElement(element, uintOffset));
-			// Element byte size is always a multiple of 4
-			uintOffset += element.type().byteSize() / 4;
+			unpackArgs.add(unpackElement(element));
 		}
 
 		fnBody.ret(GlslExpr.call(STRUCT_NAME, unpackArgs));

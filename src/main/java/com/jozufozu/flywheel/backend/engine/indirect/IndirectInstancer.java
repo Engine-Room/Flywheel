@@ -12,6 +12,7 @@ import com.jozufozu.flywheel.api.instance.InstanceWriter;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.backend.engine.AbstractInstancer;
 import com.jozufozu.flywheel.backend.engine.embed.Environment;
+import com.jozufozu.flywheel.lib.math.MoreMath;
 
 public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> {
 	private final long instanceStride;
@@ -27,8 +28,8 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 
 	public IndirectInstancer(InstanceType<I> type, Environment environment, Model model) {
 		super(type, environment);
-		instanceStride = type.layout()
-				.byteSize();
+		instanceStride = MoreMath.align4(type.layout()
+				.byteSize());
 		writer = this.type.writer();
 		boundingSphere = model.boundingSphere();
 	}

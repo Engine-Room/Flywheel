@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import com.jozufozu.flywheel.api.layout.ElementType;
@@ -14,6 +15,7 @@ import com.jozufozu.flywheel.api.layout.Layout.Element;
 import com.jozufozu.flywheel.api.layout.LayoutBuilder;
 import com.jozufozu.flywheel.api.layout.ValueRepr;
 import com.jozufozu.flywheel.impl.layout.LayoutImpl.ElementImpl;
+import com.jozufozu.flywheel.lib.math.MoreMath;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -102,7 +104,9 @@ public class LayoutBuilderImpl implements LayoutBuilder {
 	);
 
 	private final List<Element> elements = new ArrayList<>();
-	private int offset = 0;
+	@Nullable
+	private UnpaddedElement lastElement;
+	private int maxByteAlignment;
 
 	@Override
 	public LayoutBuilder scalar(String name, ValueRepr repr) {
@@ -124,15 +128,57 @@ public class LayoutBuilderImpl implements LayoutBuilder {
 		return matrix(name, repr, size, size);
 	}
 
+	@Override
+	public LayoutBuilder scalarArray(String name, ValueRepr repr, @Range(from = 1, to = 256) int length) {
+		return element(name, ArrayElementTypeImpl.create(ScalarElementTypeImpl.create(repr), length));
+	}
+
+	@Override
+	public LayoutBuilder vectorArray(String name, ValueRepr repr, @Range(from = 2, to = 4) int size, @Range(from = 1, to = 256) int length) {
+		return element(name, ArrayElementTypeImpl.create(VectorElementTypeImpl.create(repr, size), length));
+	}
+
+	@Override
+	public LayoutBuilder matrixArray(String name, FloatRepr repr, @Range(from = 2, to = 4) int rows, @Range(from = 2, to = 4) int columns, @Range(from = 1, to = 256) int length) {
+		return element(name, ArrayElementTypeImpl.create(MatrixElementTypeImpl.create(repr, rows, columns), length));
+	}
+
+	@Override
+	public LayoutBuilder matrixArray(String name, FloatRepr repr, @Range(from = 2, to = 4) int size, @Range(from = 1, to = 256) int length) {
+		return matrixArray(name, repr, size, size, length);
+	}
+
 	private LayoutBuilder element(String name, ElementType type) {
-		elements.add(new ElementImpl(name, type, offset));
-		// type.byteSize() is guaranteed to be 4-aligned.
-		offset += type.byteSize();
+		UnpaddedElement newElement;
+
+		if (lastElement != null) {
+			int byteOffset = padLastElement(type.byteAlignment());
+			newElement = new UnpaddedElement(name, type, byteOffset);
+		} else {
+			newElement = new UnpaddedElement(name, type, 0);
+		}
+
+		lastElement = newElement;
+		maxByteAlignment = Math.max(lastElement.type.byteAlignment(), maxByteAlignment);
 		return this;
+	}
+
+	private int padLastElement(int byteAlignment) {
+		int nextByte = lastElement.byteOffset + lastElement.type.byteSize();
+		int byteOffset = MoreMath.alignPot(nextByte, byteAlignment);
+		elements.add(lastElement.complete(byteOffset - nextByte));
+		return byteOffset;
 	}
 
 	@Override
 	public Layout build() {
+		int byteSize;
+		if (lastElement != null) {
+			byteSize = padLastElement(maxByteAlignment);
+		} else {
+			byteSize = 0;
+		}
+
 		Object2IntMap<String> name2IndexMap = new Object2IntOpenHashMap<>();
 		name2IndexMap.defaultReturnValue(-1);
 
@@ -172,7 +218,17 @@ public class LayoutBuilderImpl implements LayoutBuilder {
 			}
 		}
 
-		return new LayoutImpl(List.copyOf(elements), offset);
+		List<Element> elements = List.copyOf(this.elements);
+		int maxByteAlignment = this.maxByteAlignment;
+		clear();
+
+		return new LayoutImpl(elements, byteSize, maxByteAlignment);
+	}
+
+	private void clear() {
+		elements.clear();
+		lastElement = null;
+		maxByteAlignment = 0;
 	}
 
 	private static boolean isValidNameCharacter(char c) {
@@ -181,5 +237,11 @@ public class LayoutBuilderImpl implements LayoutBuilder {
 
 	private static boolean isLetter(char c) {
 		return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
+	}
+
+	private static record UnpaddedElement(String name, ElementType type, int byteOffset) {
+		private ElementImpl complete(int paddingByteSize) {
+			return new ElementImpl(name, type, byteOffset, type.byteSize() + paddingByteSize, paddingByteSize);
+		}
 	}
 }

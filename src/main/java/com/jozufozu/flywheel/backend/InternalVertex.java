@@ -7,7 +7,6 @@ import com.jozufozu.flywheel.api.layout.FloatRepr;
 import com.jozufozu.flywheel.api.layout.Layout;
 import com.jozufozu.flywheel.api.layout.LayoutBuilder;
 import com.jozufozu.flywheel.api.vertex.VertexView;
-import com.jozufozu.flywheel.backend.engine.LayoutAttributes;
 import com.jozufozu.flywheel.backend.gl.array.VertexAttribute;
 import com.jozufozu.flywheel.lib.vertex.FullVertexView;
 
@@ -24,7 +23,6 @@ public final class InternalVertex {
 			.build();
 
 	public static final List<VertexAttribute> ATTRIBUTES = LayoutAttributes.attributes(LAYOUT);
-	public static final int ATTRIBUTE_COUNT = ATTRIBUTES.size();
 	public static final int STRIDE = LAYOUT.byteSize();
 
 	public static final ResourceLocation LAYOUT_SHADER = Flywheel.rl("internal/vertex_input.vert");

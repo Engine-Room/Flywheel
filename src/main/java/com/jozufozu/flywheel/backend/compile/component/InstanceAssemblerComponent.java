@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.jozufozu.flywheel.api.instance.InstanceType;
+import com.jozufozu.flywheel.api.layout.ArrayElementType;
+import com.jozufozu.flywheel.api.layout.ElementType;
 import com.jozufozu.flywheel.api.layout.FloatRepr;
 import com.jozufozu.flywheel.api.layout.IntegerRepr;
 import com.jozufozu.flywheel.api.layout.Layout;
@@ -20,6 +22,7 @@ import com.jozufozu.flywheel.api.layout.VectorElementType;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 import com.jozufozu.flywheel.backend.glsl.generate.GlslBuilder;
 import com.jozufozu.flywheel.backend.glsl.generate.GlslExpr;
+import com.jozufozu.flywheel.impl.layout.LayoutInterpreter;
 
 public abstract class InstanceAssemblerComponent implements SourceComponent {
 	protected static final String STRUCT_NAME = "FlwInstance";
@@ -95,164 +98,146 @@ public abstract class InstanceAssemblerComponent implements SourceComponent {
 
 	protected abstract GlslExpr access(int uintOffset);
 
-	protected GlslExpr unpackElement(Layout.Element element, int uintOffset) {
-		var type = element.type();
+	protected GlslExpr unpackElement(Layout.Element element) {
+		return unpackElement(element.type(), element.byteOffset());
+	}
 
+	private GlslExpr unpackElement(ElementType type, int byteOffset) {
 		if (type instanceof ScalarElementType scalar) {
-			return unpackScalar(scalar, uintOffset);
+			return unpackScalar(scalar, byteOffset);
 		} else if (type instanceof VectorElementType vector) {
-			return unpackVector(vector, uintOffset);
+			return unpackVector(vector, byteOffset);
 		} else if (type instanceof MatrixElementType matrix) {
-			return unpackMatrix(matrix, uintOffset);
+			return unpackMatrix(matrix, byteOffset);
+		} else if (type instanceof ArrayElementType array) {
+			return unpackArray(array, byteOffset);
 		}
 
 		throw new IllegalArgumentException("Unknown type " + type);
 	}
 
-	private GlslExpr unpackScalar(ScalarElementType type, int uintOffset) {
+	private GlslExpr unpackScalar(ScalarElementType type, int byteOffset) {
 		var repr = type.repr();
-		Function<GlslExpr, GlslExpr> unpackingFunc;
-
-		if (repr instanceof IntegerRepr intRepr) {
-			unpackingFunc = INT_UNPACKING_FUNCS.get(intRepr);
-		} else if (repr instanceof UnsignedIntegerRepr uintRepr) {
-			unpackingFunc = UINT_UNPACKING_FUNCS.get(uintRepr);
-		} else if (repr instanceof FloatRepr floatRepr) {
-			unpackingFunc = FLOAT_UNPACKING_FUNCS.get(floatRepr);
-		} else {
-			throw new IllegalArgumentException("Unknown repr " + repr);
-		}
-
-		if (isByteBacked(repr)) {
-			return unpackByteBackedScalar(uintOffset, unpackingFunc);
-		} else if (isShortBacked(repr)) {
-			return unpackShortBackedScalar(uintOffset, unpackingFunc);
-		} else {
-			return unpackIntBackedScalar(uintOffset, unpackingFunc);
-		}
+		Function<GlslExpr, GlslExpr> unpackingFunc = getUnpackingFunc(repr);
+		return unpackScalar(byteOffset, repr.byteSize(), unpackingFunc);
 	}
 
-	private GlslExpr unpackVector(VectorElementType type, int uintOffset) {
+	private GlslExpr unpackVector(VectorElementType type, int byteOffset) {
 		var repr = type.repr();
 		int size = type.size();
-		Function<GlslExpr, GlslExpr> unpackingFunc;
-		String outType;
-
-		if (repr instanceof IntegerRepr intRepr) {
-			unpackingFunc = INT_UNPACKING_FUNCS.get(intRepr);
-			outType = "ivec" + size;
-		} else if (repr instanceof UnsignedIntegerRepr uintRepr) {
-			unpackingFunc = UINT_UNPACKING_FUNCS.get(uintRepr);
-			outType = "uvec" + size;
-		} else if (repr instanceof FloatRepr floatRepr) {
-			unpackingFunc = FLOAT_UNPACKING_FUNCS.get(floatRepr);
-			outType = "vec" + size;
-		} else {
-			throw new IllegalArgumentException("Unknown repr " + repr);
-		}
-
-		if (isByteBacked(repr)) {
-			return unpackByteBackedVector(outType, size, uintOffset, unpackingFunc);
-		} else if (isShortBacked(repr)) {
-			return unpackShortBackedVector(outType, size, uintOffset, unpackingFunc);
-		} else {
-			return unpackIntBackedVector(outType, size, uintOffset, unpackingFunc);
-		}
+		Function<GlslExpr, GlslExpr> unpackingFunc = getUnpackingFunc(repr);
+		String outType = LayoutInterpreter.vectorTypeName(type);
+		return unpackVector(outType, size, byteOffset, repr.byteSize(), unpackingFunc);
 	}
 
-	private GlslExpr unpackMatrix(MatrixElementType type, int uintOffset) {
+	private GlslExpr unpackMatrix(MatrixElementType type, int byteOffset) {
 		var repr = type.repr();
 		int rows = type.rows();
 		int columns = type.columns();
 		Function<GlslExpr, GlslExpr> unpackingFunc = FLOAT_UNPACKING_FUNCS.get(repr);
-		String outType = "mat" + columns + "x" + rows;
+		String outType = LayoutInterpreter.matrixTypeName(type);
 		int size = rows * columns;
+		return unpackVector(outType, size, byteOffset, repr.byteSize(), unpackingFunc);
+	}
 
-		if (isByteBacked(repr)) {
-			return unpackByteBackedVector(outType, size, uintOffset, unpackingFunc);
-		} else if (isShortBacked(repr)) {
-			return unpackShortBackedVector(outType, size, uintOffset, unpackingFunc);
+	private GlslExpr unpackArray(ArrayElementType type, int byteOffset) {
+		ElementType innerType = type.innerType();
+		int innerByteSize = innerType.byteSize();
+		int length = type.length();
+		String outType = LayoutInterpreter.arrayTypeName(type);
+
+		List<GlslExpr> args = new ArrayList<>();
+		for (int i = 0; i < length; i++) {
+			args.add(unpackElement(innerType, byteOffset + i * innerByteSize));
+		}
+		return GlslExpr.call(outType, args);
+	}
+
+	private GlslExpr unpackScalar(int byteOffset, int byteSize, Function<GlslExpr, GlslExpr> unpackingFunc) {
+		int offset = byteOffset / byteSize;
+
+		if (byteSize == Byte.BYTES) {
+			return unpackByteBackedScalar(offset, unpackingFunc);
+		} else if (byteSize == Short.BYTES) {
+			return unpackShortBackedScalar(offset, unpackingFunc);
 		} else {
-			return unpackIntBackedVector(outType, size, uintOffset, unpackingFunc);
+			return unpackIntBackedScalar(offset, unpackingFunc);
 		}
 	}
 
-	private boolean isByteBacked(ValueRepr repr) {
-		return repr.byteSize() == Byte.BYTES;
-	}
-
-	private boolean isShortBacked(ValueRepr repr) {
-		return repr.byteSize() == Short.BYTES;
-	}
-
-	private GlslExpr unpackByteBackedScalar(int uintOffset, Function<GlslExpr, GlslExpr> perElement) {
-		GlslExpr e;
+	private GlslExpr unpackByteBackedScalar(int byteOffset, Function<GlslExpr, GlslExpr> unpackingFunc) {
+		int bitPos = (byteOffset % 4) * 8;
 		if (BIG_ENDIAN) {
-			e = access(uintOffset)
-					.rsh(24)
-					.and(0xFF);
-		} else {
-			e = access(uintOffset)
-					.and(0xFF);
+			bitPos = 24 - bitPos;
 		}
-		return perElement.apply(e);
+		int wordOffset = byteOffset / 4;
+		GlslExpr prepared = access(wordOffset)
+				.rsh(bitPos)
+				.and(0xFF);
+		return unpackingFunc.apply(prepared);
 	}
 
-	private GlslExpr unpackShortBackedScalar(int uintOffset, Function<GlslExpr, GlslExpr> perElement) {
-		GlslExpr e;
+	private GlslExpr unpackShortBackedScalar(int shortOffset, Function<GlslExpr, GlslExpr> unpackingFunc) {
+		int bitPos = (shortOffset % 2) * 16;
 		if (BIG_ENDIAN) {
-			e = access(uintOffset)
-					.rsh(16)
-					.and(0xFFFF);
+			bitPos = 16 - bitPos;
+		}
+		int wordOffset = shortOffset / 2;
+		GlslExpr prepared = access(wordOffset)
+				.rsh(bitPos)
+				.and(0xFFFF);
+		return unpackingFunc.apply(prepared);
+	}
+
+	private GlslExpr unpackIntBackedScalar(int intOffset, Function<GlslExpr, GlslExpr> unpackingFunc) {
+		return unpackingFunc.apply(access(intOffset));
+	}
+
+	private GlslExpr unpackVector(String outType, int size, int byteOffset, int byteSize, Function<GlslExpr, GlslExpr> unpackingFunc) {
+		int offset = byteOffset / byteSize;
+
+		if (byteSize == Byte.BYTES) {
+			return unpackByteBackedVector(outType, size, offset, unpackingFunc);
+		} else if (byteSize == Short.BYTES) {
+			return unpackShortBackedVector(outType, size, offset, unpackingFunc);
 		} else {
-			e = access(uintOffset)
-					.and(0xFFFF);
+			return unpackIntBackedVector(outType, size, offset, unpackingFunc);
 		}
-		return perElement.apply(e);
 	}
 
-	private GlslExpr unpackIntBackedScalar(int uintOffset, Function<GlslExpr, GlslExpr> perElement) {
-		return perElement.apply(access(uintOffset));
-	}
-
-	private GlslExpr unpackByteBackedVector(String outType, int size, int uintOffset, Function<GlslExpr, GlslExpr> perElement) {
+	private GlslExpr unpackByteBackedVector(String outType, int size, int byteOffset, Function<GlslExpr, GlslExpr> unpackingFunc) {
 		List<GlslExpr> args = new ArrayList<>();
 		for (int i = 0; i < size; i++) {
-			// Vectors cannot contain more than 4 elements, but matrix unpacking treats the matrix as a long vector, which for mat4x4 would be the equivalent of a vec16.
-			int bitPos = (i % 4) * 8;
-			if (BIG_ENDIAN) {
-				bitPos = 24 - bitPos;
-			}
-			int wordOffset = i / 4;
-			var element = access(uintOffset + wordOffset)
-					.rsh(bitPos)
-					.and(0xFF);
-			args.add(perElement.apply(element));
+			args.add(unpackByteBackedScalar(byteOffset + i, unpackingFunc));
 		}
 		return GlslExpr.call(outType, args);
 	}
 
-	private GlslExpr unpackShortBackedVector(String outType, int size, int uintOffset, Function<GlslExpr, GlslExpr> perElement) {
+	private GlslExpr unpackShortBackedVector(String outType, int size, int shortOffset, Function<GlslExpr, GlslExpr> unpackingFunc) {
 		List<GlslExpr> args = new ArrayList<>();
 		for (int i = 0; i < size; i++) {
-			int bitPos = (i % 2) * 16;
-			if (BIG_ENDIAN) {
-				bitPos = 16 - bitPos;
-			}
-			int wordOffset = i / 2;
-			var element = access(uintOffset + wordOffset)
-					.rsh(bitPos)
-					.and(0xFFFF);
-			args.add(perElement.apply(element));
+			args.add(unpackShortBackedScalar(shortOffset + i, unpackingFunc));
 		}
 		return GlslExpr.call(outType, args);
 	}
 
-	private GlslExpr unpackIntBackedVector(String outType, int size, int uintOffset, Function<GlslExpr, GlslExpr> perElement) {
+	private GlslExpr unpackIntBackedVector(String outType, int size, int intOffset, Function<GlslExpr, GlslExpr> unpackingFunc) {
 		List<GlslExpr> args = new ArrayList<>();
 		for (int i = 0; i < size; i++) {
-			args.add(perElement.apply(access(uintOffset + i)));
+			args.add(unpackIntBackedScalar(intOffset + i, unpackingFunc));
 		}
 		return GlslExpr.call(outType, args);
+	}
+
+	private static Function<GlslExpr, GlslExpr> getUnpackingFunc(ValueRepr repr) {
+		if (repr instanceof IntegerRepr intRepr) {
+			return INT_UNPACKING_FUNCS.get(intRepr);
+		} else if (repr instanceof UnsignedIntegerRepr uintRepr) {
+			return UINT_UNPACKING_FUNCS.get(uintRepr);
+		} else if (repr instanceof FloatRepr floatRepr) {
+			return FLOAT_UNPACKING_FUNCS.get(floatRepr);
+		}
+
+		throw new IllegalArgumentException("Unknown repr " + repr);
 	}
 }

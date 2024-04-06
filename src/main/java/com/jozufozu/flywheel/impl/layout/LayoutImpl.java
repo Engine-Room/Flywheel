@@ -17,8 +17,9 @@ final class LayoutImpl implements Layout {
 	@Unmodifiable
 	private final Map<String, Element> map;
 	private final int byteSize;
+	private final int byteAlignment;
 
-	LayoutImpl(@Unmodifiable List<Element> elements, int byteSize) {
+	LayoutImpl(@Unmodifiable List<Element> elements, int byteSize, int byteAlignment) {
 		this.elements = elements;
 
 		Object2ObjectOpenHashMap<String, Element> map = new Object2ObjectOpenHashMap<>();
@@ -29,6 +30,7 @@ final class LayoutImpl implements Layout {
 
 		this.map = Collections.unmodifiableMap(map);
 		this.byteSize = byteSize;
+		this.byteAlignment = byteAlignment;
 	}
 
 	@Override
@@ -46,6 +48,11 @@ final class LayoutImpl implements Layout {
 	@Override
 	public int byteSize() {
 		return byteSize;
+	}
+
+	@Override
+	public int byteAlignment() {
+		return byteAlignment;
 	}
 
 	@Override
@@ -71,6 +78,6 @@ final class LayoutImpl implements Layout {
 		return elements.equals(other.elements);
 	}
 
-	record ElementImpl(String name, ElementType type, int offset) implements Element {
+	record ElementImpl(String name, ElementType type, int byteOffset, int paddedByteSize, int paddingByteSize) implements Element {
 	}
 }

@@ -17,12 +17,18 @@ public interface Layout {
 
 	int byteSize();
 
+	int byteAlignment();
+
 	@ApiStatus.NonExtendable
 	interface Element {
 		String name();
 
 		ElementType type();
 
-		int offset();
+		int byteOffset();
+
+		int paddedByteSize();
+
+		int paddingByteSize();
 	}
 }

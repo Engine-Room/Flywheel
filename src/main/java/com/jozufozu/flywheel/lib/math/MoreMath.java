@@ -17,6 +17,10 @@ public final class MoreMath {
 		return (size + 3) & ~3;
 	}
 
+	public static int alignPot(int size, int to) {
+		return (size + (to - 1)) & ~(to - 1);
+	}
+
 	public static int ceilingDiv(int numerator, int denominator) {
 		return (numerator + denominator - 1) / denominator;
 	}

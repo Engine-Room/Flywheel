@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.visual.components;
+package com.jozufozu.flywheel.lib.visual.component;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;

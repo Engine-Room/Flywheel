@@ -30,6 +30,7 @@ import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.backend.gl.Driver;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
+import com.jozufozu.flywheel.lib.math.MoreMath;
 
 public class IndirectCullingGroup<I extends Instance> {
 	private static final Comparator<IndirectDraw> DRAW_COMPARATOR = Comparator.comparing(IndirectDraw::stage)
@@ -58,8 +59,8 @@ public class IndirectCullingGroup<I extends Instance> {
 	IndirectCullingGroup(InstanceType<I> instanceType, Environment environment, IndirectPrograms programs) {
 		this.instanceType = instanceType;
 		this.environment = environment;
-		instanceStride = instanceType.layout()
-				.byteSize();
+		instanceStride = MoreMath.align4(instanceType.layout()
+				.byteSize());
 		buffers = new IndirectBuffers(instanceStride);
 
 		this.programs = programs;

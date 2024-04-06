@@ -1,8 +1,10 @@
-package com.jozufozu.flywheel.backend.engine;
+package com.jozufozu.flywheel.backend;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jozufozu.flywheel.api.layout.ArrayElementType;
+import com.jozufozu.flywheel.api.layout.ElementType;
 import com.jozufozu.flywheel.api.layout.FloatRepr;
 import com.jozufozu.flywheel.api.layout.IntegerRepr;
 import com.jozufozu.flywheel.api.layout.Layout;
@@ -25,28 +27,23 @@ public class LayoutAttributes {
 		List<VertexAttribute> out = new ArrayList<>();
 
 		for (Layout.Element element : layout.elements()) {
-			var type = element.type();
-
-			if (type instanceof ScalarElementType scalar) {
-				vector(out, scalar.repr(), 1);
-			} else if (type instanceof VectorElementType vector) {
-				vector(out, vector.repr(), vector.size());
-			} else if (type instanceof MatrixElementType matrix) {
-				matrix(out, matrix);
-			}
+			element(out, element.type());
 		}
 
 		return out;
 	}
 
-	private static void matrix(List<VertexAttribute> out, MatrixElementType matrix) {
-		int size = matrix.columns();
-		var repr = matrix.repr();
-		var glType = toGlType(repr);
-		boolean normalized = normalized(repr);
-
-		for (int i = 0; i < matrix.rows(); i++) {
-			out.add(new VertexAttribute.Float(glType, size, normalized));
+	private static void element(List<VertexAttribute> out, ElementType type) {
+		if (type instanceof ScalarElementType scalar) {
+			vector(out, scalar.repr(), 1);
+		} else if (type instanceof VectorElementType vector) {
+			vector(out, vector.repr(), vector.size());
+		} else if (type instanceof MatrixElementType matrix) {
+			matrix(out, matrix);
+		} else if (type instanceof ArrayElementType array) {
+			array(out, array);
+		} else {
+			throw new IllegalArgumentException("Unknown type " + type);
 		}
 	}
 
@@ -56,7 +53,29 @@ public class LayoutAttributes {
 		} else if (repr instanceof UnsignedIntegerRepr integer) {
 			out.add(new VertexAttribute.Int(toGlType(integer), size));
 		} else if (repr instanceof FloatRepr floatRepr) {
-			out.add(new VertexAttribute.Float(toGlType(floatRepr), size, normalized(floatRepr)));
+			out.add(new VertexAttribute.Float(toGlType(floatRepr), size, isNormalized(floatRepr)));
+		} else {
+			throw new IllegalArgumentException("Unknown repr " + repr);
+		}
+	}
+
+	private static void matrix(List<VertexAttribute> out, MatrixElementType matrix) {
+		int size = matrix.columns();
+		var repr = matrix.repr();
+		var glType = toGlType(repr);
+		boolean normalized = isNormalized(repr);
+
+		for (int i = 0; i < matrix.rows(); i++) {
+			out.add(new VertexAttribute.Float(glType, size, normalized));
+		}
+	}
+
+	private static void array(List<VertexAttribute> out, ArrayElementType array) {
+		ElementType innerType = array.innerType();
+		int length = array.length();
+
+		for (int i = 0; i < length; i++) {
+			element(out, innerType);
 		}
 	}
 
@@ -88,7 +107,7 @@ public class LayoutAttributes {
 		};
 	}
 
-	private static boolean normalized(FloatRepr repr) {
+	private static boolean isNormalized(FloatRepr repr) {
 		return switch (repr) {
 			case NORMALIZED_BYTE, NORMALIZED_UNSIGNED_BYTE, NORMALIZED_SHORT, NORMALIZED_UNSIGNED_SHORT, NORMALIZED_INT, NORMALIZED_UNSIGNED_INT ->
 					true;

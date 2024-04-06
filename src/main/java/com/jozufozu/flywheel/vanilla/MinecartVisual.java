@@ -14,9 +14,9 @@ import com.jozufozu.flywheel.lib.model.part.ModelPartConverter;
 import com.jozufozu.flywheel.lib.visual.SimpleDynamicVisual;
 import com.jozufozu.flywheel.lib.visual.SimpleEntityVisual;
 import com.jozufozu.flywheel.lib.visual.SimpleTickableVisual;
-import com.jozufozu.flywheel.lib.visual.components.FireComponent;
-import com.jozufozu.flywheel.lib.visual.components.HitboxComponent;
-import com.jozufozu.flywheel.lib.visual.components.ShadowComponent;
+import com.jozufozu.flywheel.lib.visual.component.FireComponent;
+import com.jozufozu.flywheel.lib.visual.component.HitboxComponent;
+import com.jozufozu.flywheel.lib.visual.component.ShadowComponent;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
