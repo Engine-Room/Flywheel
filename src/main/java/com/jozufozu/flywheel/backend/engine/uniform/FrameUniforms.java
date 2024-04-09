@@ -10,6 +10,7 @@ import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.lib.math.MatrixMath;
 
+import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -155,12 +156,15 @@ public class FrameUniforms implements UniformProvider {
 		float partialTick = context.partialTick();
 		float renderTicks = ticks + partialTick;
 		float renderSeconds = renderTicks / 20f;
+		float systemSeconds = Util.getMillis() / 1000f;
 
 		MemoryUtil.memPutInt(ptr, ticks);
 		MemoryUtil.memPutFloat(ptr + 4, partialTick);
 		MemoryUtil.memPutFloat(ptr + 8, renderTicks);
 		MemoryUtil.memPutFloat(ptr + 12, renderSeconds);
-		return ptr + 16;
+		MemoryUtil.memPutFloat(ptr + 16, systemSeconds);
+		MemoryUtil.memPutInt(ptr + 20, (int) (Util.getMillis() % Integer.MAX_VALUE));
+		return ptr + 24;
 	}
 
 	private long writeCameraIn(long ptr) {

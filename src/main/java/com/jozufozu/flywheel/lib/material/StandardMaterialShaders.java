@@ -14,6 +14,8 @@ public final class StandardMaterialShaders {
 
 	public static final MaterialShaders LINE = MaterialShaders.REGISTRY.registerAndGet(new SimpleMaterialShaders(Flywheel.rl("material/lines.vert"), Flywheel.rl("material/lines.frag")));
 
+	public static final MaterialShaders GLINT = MaterialShaders.REGISTRY.registerAndGet(new SimpleMaterialShaders(Flywheel.rl("material/glint.vert"), Flywheel.rl("material/default.frag")));
+
 	private StandardMaterialShaders() {
 	}
 

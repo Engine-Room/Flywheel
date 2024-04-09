@@ -163,6 +163,8 @@ public class Uniforms {
 			level.delete();
 			level = null;
 		}
+
+		optionsRequiresUpdate = true;
 	}
 
 	static long writeVec4(long ptr, float x, float y, float z, float w) {
