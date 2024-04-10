@@ -79,6 +79,7 @@ public class VanillaVisuals {
 				.apply();
 
 		builder(EntityType.ITEM).factory(ItemVisual::new)
+				.skipVanillaRender(ItemVisual::isSupported)
 				.apply();
 	}
 }

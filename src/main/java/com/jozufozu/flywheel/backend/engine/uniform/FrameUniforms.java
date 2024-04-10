@@ -19,7 +19,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class FrameUniforms implements UniformProvider {
-	public static final int SIZE = 800;
+	public static final int SIZE = 808;
 	public int debugMode;
 
 	@Nullable

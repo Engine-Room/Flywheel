@@ -19,6 +19,9 @@ import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.MultiPartBakedModel;
+import net.minecraft.client.resources.model.SimpleBakedModel;
+import net.minecraft.client.resources.model.WeightedBakedModel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -32,23 +35,56 @@ public class ItemVisual extends SimpleEntityVisual<ItemEntity> {
 	private static final ThreadLocal<RandomSource> RANDOM = ThreadLocal.withInitial(RandomSource::createNewThreadLocalInstance);
 
 	public static final ModelCache<ItemKey> MODEL_CACHE = new ModelCache<>(stack -> {
-		return new ItemModelBuilder(stack.stack()).build();
+		return new ItemModelBuilder(stack.stack(), stack.model()).build();
 	});
 
 	private final PoseStack pPoseStack = new PoseStack();
 	private final BakedModel model;
+	private final boolean isSupported;
 
 	private final InstanceRecycler<TransformedInstance> instances;
 
 	public ItemVisual(VisualizationContext ctx, ItemEntity entity) {
 		super(ctx, entity);
 
+		var item = entity.getItem();
 		model = Minecraft.getInstance()
+				.getItemRenderer()
+				.getModel(item, entity.level(), null, entity.getId());
+
+		isSupported = isSupported(model);
+
+		var key = new ItemKey(item.copy(), model);
+
+		instances = new InstanceRecycler<>(() -> instancerProvider.instancer(InstanceTypes.TRANSFORMED, MODEL_CACHE.get(key))
+				.createInstance());
+	}
+
+	public static boolean isSupported(ItemEntity entity) {
+		var model = Minecraft.getInstance()
 				.getItemRenderer()
 				.getModel(entity.getItem(), entity.level(), null, entity.getId());
 
-		instances = new InstanceRecycler<>(() -> instancerProvider.instancer(InstanceTypes.TRANSFORMED, MODEL_CACHE.get(new ItemKey(entity.getItem())))
-				.createInstance());
+		return isSupported(model);
+	}
+
+	public static boolean isSupported(BakedModel model) {
+		if (model.isCustomRenderer()) {
+			return false;
+		}
+
+		if (!model.getOverrides()
+				.getOverrides()
+				.isEmpty()) {
+			return false;
+		}
+
+		Class<? extends BakedModel> c = model.getClass();
+		if (!(c == SimpleBakedModel.class || c == MultiPartBakedModel.class || c == WeightedBakedModel.class)) {
+			return false;
+		}
+
+		return true;
 	}
 
 	@Override
@@ -63,7 +99,7 @@ public class ItemVisual extends SimpleEntityVisual<ItemEntity> {
 
 	@Override
 	public void beginFrame(Context ctx) {
-		if (!isVisible(ctx.frustum())) {
+		if (!isSupported || !isVisible(ctx.frustum())) {
 			return;
 		}
 
@@ -162,11 +198,7 @@ public class ItemVisual extends SimpleEntityVisual<ItemEntity> {
 		instances.delete();
 	}
 
-	public record ItemKey(ItemStack stack) {
-		public ItemKey(ItemStack stack) {
-			this.stack = stack.copy();
-		}
-
+	public record ItemKey(ItemStack stack, BakedModel model) {
 
 		@Override
 		public boolean equals(Object o) {
@@ -177,20 +209,14 @@ public class ItemVisual extends SimpleEntityVisual<ItemEntity> {
 				return false;
 			}
 
-			ItemKey itemKey = (ItemKey) o;
-			if (stack.isEmpty()) {
-				return itemKey.stack.isEmpty();
-			} else {
-				return !itemKey.stack.isEmpty() && stack.getItem() == itemKey.stack.getItem() && Objects.equals(stack.getTag(), itemKey.stack.getTag());
-			}
+			var o1 = (ItemKey) o;
+			return Objects.equals(model, o1.model) && stack.hasFoil() == o1.stack.hasFoil();
 		}
 
 		@Override
 		public int hashCode() {
-			int out = stack.getItem()
-					.hashCode();
-			out = 31 * out + (stack.getTag() != null ? stack.getTag()
-					.hashCode() : 0);
+			int out = model.hashCode();
+			out = 31 * out + Boolean.hashCode(stack.hasFoil());
 			return out;
 		}
 	}

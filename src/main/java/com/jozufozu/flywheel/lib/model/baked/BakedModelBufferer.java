@@ -1,8 +1,6 @@
 package com.jozufozu.flywheel.lib.model.baked;
 
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -14,6 +12,8 @@ import com.mojang.blaze3d.vertex.BufferBuilder.RenderedBuffer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -150,10 +150,9 @@ final class BakedModelBufferer {
 		var emitterSource = objects.emitterSource;
 		emitterSource.resultConsumer(consumer);
 
-		var itemRenderer = Minecraft.getInstance()
-				.getItemRenderer();
-
-		itemRenderer.render(stack, displayContext, leftHand, poseStack, emitterSource, 0, OverlayTexture.NO_OVERLAY, model);
+		Minecraft.getInstance()
+				.getItemRenderer()
+				.render(stack, displayContext, leftHand, poseStack, emitterSource, 0, OverlayTexture.NO_OVERLAY, model);
 
 		emitterSource.end();
 	}
@@ -182,11 +181,8 @@ final class BakedModelBufferer {
 	}
 
 	private static class MeshEmitterSource implements MultiBufferSource {
-		private final Map<RenderType, MeshEmitter> emitters = new HashMap<>();
-
-		private final Set<MeshEmitter> active = new LinkedHashSet<>();
-		// Hack: we want glint to render after everything else so track it separately here
-		private final Set<MeshEmitter> activeGlint = new LinkedHashSet<>();
+		private final Map<RenderType, MeshEmitter> emitters = new Reference2ReferenceOpenHashMap<>();
+		private final Set<MeshEmitter> active = new ReferenceArraySet<>();
 
 		@Nullable
 		private ResultConsumer resultConsumer;
@@ -194,13 +190,6 @@ final class BakedModelBufferer {
 		@Override
 		public VertexConsumer getBuffer(RenderType renderType) {
 			var out = emitters.computeIfAbsent(renderType, type -> new MeshEmitter(new BufferBuilder(type.bufferSize()), type));
-
-			Set<MeshEmitter> active;
-			if (renderType == RenderType.glint() || renderType == RenderType.glintDirect() || renderType == RenderType.entityGlint() || renderType == RenderType.entityGlintDirect()) {
-				active = this.activeGlint;
-			} else {
-				active = this.active;
-			}
 
 			if (active.add(out)) {
 				out.begin(resultConsumer);
@@ -214,12 +203,7 @@ final class BakedModelBufferer {
 				emitter.end();
 			}
 
-			for (var emitter : activeGlint) {
-				emitter.end();
-			}
-
 			active.clear();
-			activeGlint.clear();
 
 			resultConsumer = null;
 		}
