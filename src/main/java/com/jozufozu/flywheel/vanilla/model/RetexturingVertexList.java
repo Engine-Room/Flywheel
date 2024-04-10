@@ -19,11 +19,11 @@ public class RetexturingVertexList extends WrappedVertexList {
 
 	@Override
 	public void u(int index, float u) {
-		super.u(index, sprite.getU(u));
+		super.u(index, sprite.getU(u * 16));
 	}
 
 	@Override
 	public void v(int index, float v) {
-		super.v(index, sprite.getV(v));
+		super.v(index, sprite.getV(v * 16));
 	}
 }
