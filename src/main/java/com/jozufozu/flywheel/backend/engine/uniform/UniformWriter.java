@@ -47,7 +47,7 @@ class UniformWriter {
 	}
 
 	static long writeMat4(long ptr, Matrix4f mat) {
-		MatrixMath.writeUnsafe(mat, ptr);
+		MatrixMath.writeUnsafe(ptr, mat);
 		return ptr + 64;
 	}
 

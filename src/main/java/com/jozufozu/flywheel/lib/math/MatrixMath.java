@@ -50,7 +50,7 @@ public final class MatrixMath {
 		return fma(matrix.m02(), x, fma(matrix.m12(), y, matrix.m22() * z));
 	}
 
-	public static void writeUnsafe(Matrix4f matrix, long ptr) {
+	public static void writeUnsafe(long ptr, Matrix4f matrix) {
 		MemoryUtil.memPutFloat(ptr, matrix.m00());
 		MemoryUtil.memPutFloat(ptr + 4, matrix.m01());
 		MemoryUtil.memPutFloat(ptr + 8, matrix.m02());
@@ -69,7 +69,7 @@ public final class MatrixMath {
 		MemoryUtil.memPutFloat(ptr + 60, matrix.m33());
 	}
 
-	public static void writeUnsafe(Matrix3f matrix, long ptr) {
+	public static void writeUnsafe(long ptr, Matrix3f matrix) {
 		MemoryUtil.memPutFloat(ptr, matrix.m00());
 		MemoryUtil.memPutFloat(ptr + 4, matrix.m01());
 		MemoryUtil.memPutFloat(ptr + 8, matrix.m02());

@@ -28,8 +28,8 @@ public final class InstanceTypes {
 				MemoryUtil.memPutShort(ptr + 6, (short) (instance.overlay >> 16 & 0xFFFF));
 				MemoryUtil.memPutShort(ptr + 8, (short) (instance.packedLight & 0xFFFF));
 				MemoryUtil.memPutShort(ptr + 10, (short) (instance.packedLight >> 16 & 0xFFFF));
-				MatrixMath.writeUnsafe(instance.model, ptr + 12);
-				MatrixMath.writeUnsafe(instance.normal, ptr + 76);
+				MatrixMath.writeUnsafe(ptr + 12, instance.model);
+				MatrixMath.writeUnsafe(ptr + 76, instance.normal);
 			})
 			.vertexShader(Flywheel.rl("instance/transformed.vert"))
 			.cullShader(Flywheel.rl("instance/cull/transformed.glsl"))
