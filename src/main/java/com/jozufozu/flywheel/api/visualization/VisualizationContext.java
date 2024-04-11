@@ -18,7 +18,7 @@ public interface VisualizationContext {
 	/**
 	 * All models render as if this position is (0, 0, 0).
 	 *
-	 * @return The origin of the renderer as a world position.
+	 * @return The origin of the renderer as a level position.
 	 */
 	Vec3i renderOrigin();
 

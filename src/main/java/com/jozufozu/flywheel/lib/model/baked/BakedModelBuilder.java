@@ -26,7 +26,7 @@ import net.minecraftforge.client.model.data.ModelData;
 public class BakedModelBuilder {
 	private final BakedModel bakedModel;
 	@Nullable
-	private BlockAndTintGetter renderWorld;
+	private BlockAndTintGetter level;
 	@Nullable
 	private BlockState blockState;
 	@Nullable
@@ -40,8 +40,8 @@ public class BakedModelBuilder {
 		this.bakedModel = bakedModel;
 	}
 
-	public BakedModelBuilder renderWorld(BlockAndTintGetter renderWorld) {
-		this.renderWorld = renderWorld;
+	public BakedModelBuilder level(BlockAndTintGetter level) {
+		this.level = level;
 		return this;
 	}
 
@@ -66,8 +66,8 @@ public class BakedModelBuilder {
 	}
 
 	public SimpleModel build() {
-		if (renderWorld == null) {
-			renderWorld = VirtualEmptyBlockGetter.INSTANCE;
+		if (level == null) {
+			level = VirtualEmptyBlockGetter.INSTANCE;
 		}
 		if (blockState == null) {
 			blockState = Blocks.AIR.defaultBlockState();
@@ -90,7 +90,7 @@ public class BakedModelBuilder {
 				out.add(new Model.ConfiguredMesh(material, mesh));
 			}
 		};
-		BakedModelBufferer.bufferSingle(ModelUtil.VANILLA_RENDERER.getModelRenderer(), renderWorld, bakedModel, blockState, poseStack, modelData, resultConsumer);
+		BakedModelBufferer.bufferSingle(ModelUtil.VANILLA_RENDERER.getModelRenderer(), level, bakedModel, blockState, poseStack, modelData, resultConsumer);
 
 		return new SimpleModel(out.build());
 	}

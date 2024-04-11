@@ -16,6 +16,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -27,6 +28,7 @@ public class BackendArgument implements ArgumentType<Backend> {
 	});
 
 	public static final BackendArgument INSTANCE = new BackendArgument();
+	public static final SingletonArgumentInfo<BackendArgument> INFO = SingletonArgumentInfo.contextFree(() -> INSTANCE);
 
 	@Override
 	public Backend parse(StringReader reader) throws CommandSyntaxException {

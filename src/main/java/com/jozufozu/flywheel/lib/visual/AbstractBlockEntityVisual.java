@@ -67,7 +67,7 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	/**
 	 * In order to accommodate for floating point precision errors at high coordinates,
 	 * {@link VisualManager}s are allowed to arbitrarily adjust the origin, and
-	 * shift the world matrix provided as a shader uniform accordingly.
+	 * shift the level matrix provided as a shader uniform accordingly.
 	 *
 	 * @return The {@link BlockPos position} of the {@link BlockEntity} this visual
 	 * represents should be rendered at to appear in the correct location.

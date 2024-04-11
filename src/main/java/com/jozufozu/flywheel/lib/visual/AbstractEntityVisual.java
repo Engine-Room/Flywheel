@@ -43,7 +43,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	}
 
 	/**
-	 * Calculate the distance squared between this visual and the given <em>world</em> position.
+	 * Calculate the distance squared between this visual and the given <em>level</em> position.
 	 *
 	 * @param x The x coordinate.
 	 * @param y The y coordinate.
@@ -57,7 +57,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	/**
 	 * In order to accommodate for floating point precision errors at high coordinates,
 	 * {@link VisualizationManager}s are allowed to arbitrarily adjust the origin, and
-	 * shift the world matrix provided as a shader uniform accordingly.
+	 * shift the level matrix provided as a shader uniform accordingly.
 	 *
 	 * @return The position this visual should be rendered at to appear in the correct location.
 	 */
@@ -71,7 +71,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	/**
 	 * In order to accommodate for floating point precision errors at high coordinates,
 	 * {@link VisualizationManager}s are allowed to arbitrarily adjust the origin, and
-	 * shift the world matrix provided as a shader uniform accordingly.
+	 * shift the level matrix provided as a shader uniform accordingly.
 	 *
 	 * @return The position this visual should be rendered at to appear in the correct location.
 	 */

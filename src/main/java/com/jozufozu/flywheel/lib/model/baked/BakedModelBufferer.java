@@ -33,7 +33,7 @@ final class BakedModelBufferer {
 	private BakedModelBufferer() {
 	}
 
-	public static void bufferSingle(ModelBlockRenderer blockRenderer, BlockAndTintGetter renderWorld, BakedModel model, BlockState state, @Nullable PoseStack poseStack, ModelData modelData, ResultConsumer resultConsumer) {
+	public static void bufferSingle(ModelBlockRenderer blockRenderer, BlockAndTintGetter level, BakedModel model, BlockState state, @Nullable PoseStack poseStack, ModelData modelData, ResultConsumer resultConsumer) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
@@ -41,7 +41,7 @@ final class BakedModelBufferer {
 		RandomSource random = objects.random;
 		var consumers = objects.emitters;
 
-		modelData = model.getModelData(renderWorld, BlockPos.ZERO, state, modelData);
+		modelData = model.getModelData(level, BlockPos.ZERO, state, modelData);
 		random.setSeed(42L);
 		ChunkRenderTypeSet renderTypes = model.getRenderTypes(state, random, modelData);
 
@@ -52,22 +52,22 @@ final class BakedModelBufferer {
 			consumer.begin(resultConsumer);
 
 			poseStack.pushPose();
-			blockRenderer.tesselateBlock(renderWorld, model, state, BlockPos.ZERO, poseStack, consumer, false, random, 42L, OverlayTexture.NO_OVERLAY, modelData, renderType);
+			blockRenderer.tesselateBlock(level, model, state, BlockPos.ZERO, poseStack, consumer, false, random, 42L, OverlayTexture.NO_OVERLAY, modelData, renderType);
 			poseStack.popPose();
 
 			consumer.end();
 		}
 	}
 
-	public static void bufferBlock(BlockRenderDispatcher renderDispatcher, BlockAndTintGetter renderWorld, BlockState state, @Nullable PoseStack poseStack, ModelData modelData, ResultConsumer resultConsumer) {
+	public static void bufferBlock(BlockRenderDispatcher renderDispatcher, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, ModelData modelData, ResultConsumer resultConsumer) {
 		if (state.getRenderShape() != RenderShape.MODEL) {
 			return;
 		}
 
-		bufferSingle(renderDispatcher.getModelRenderer(), renderWorld, renderDispatcher.getBlockModel(state), state, poseStack, modelData, resultConsumer);
+		bufferSingle(renderDispatcher.getModelRenderer(), level, renderDispatcher.getBlockModel(state), state, poseStack, modelData, resultConsumer);
 	}
 
-	public static void bufferMultiBlock(BlockRenderDispatcher renderDispatcher, Iterator<BlockPos> posIterator, BlockAndTintGetter renderWorld, @Nullable PoseStack poseStack, Function<BlockPos, ModelData> modelDataLookup, boolean renderFluids, ResultConsumer resultConsumer) {
+	public static void bufferMultiBlock(BlockRenderDispatcher renderDispatcher, Iterator<BlockPos> posIterator, BlockAndTintGetter level, @Nullable PoseStack poseStack, Function<BlockPos, ModelData> modelDataLookup, boolean renderFluids, ResultConsumer resultConsumer) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
@@ -86,7 +86,7 @@ final class BakedModelBufferer {
 
 		while (posIterator.hasNext()) {
 			BlockPos pos = posIterator.next();
-			BlockState state = renderWorld.getBlockState(pos);
+			BlockState state = level.getBlockState(pos);
 
 			if (renderFluids) {
 				FluidState fluidState = state.getFluidState();
@@ -99,7 +99,7 @@ final class BakedModelBufferer {
 
 					poseStack.pushPose();
 					poseStack.translate(pos.getX() - (pos.getX() & 0xF), pos.getY() - (pos.getY() & 0xF), pos.getZ() - (pos.getZ() & 0xF));
-					renderDispatcher.renderLiquid(pos, renderWorld, transformingWrapper, state, fluidState);
+					renderDispatcher.renderLiquid(pos, level, transformingWrapper, state, fluidState);
 					poseStack.popPose();
 				}
 			}
@@ -108,7 +108,7 @@ final class BakedModelBufferer {
 				long seed = state.getSeed(pos);
 				BakedModel model = renderDispatcher.getBlockModel(state);
 				ModelData modelData = modelDataLookup.apply(pos);
-				modelData = model.getModelData(renderWorld, pos, state, modelData);
+				modelData = model.getModelData(level, pos, state, modelData);
 				random.setSeed(seed);
 				ChunkRenderTypeSet renderTypes = model.getRenderTypes(state, random, modelData);
 
@@ -117,7 +117,7 @@ final class BakedModelBufferer {
 
 					poseStack.pushPose();
 					poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
-					blockRenderer.tesselateBlock(renderWorld, model, state, pos, poseStack, emitters[layerIndex], true, random, seed, OverlayTexture.NO_OVERLAY, modelData, renderType);
+					blockRenderer.tesselateBlock(level, model, state, pos, poseStack, emitters[layerIndex], true, random, seed, OverlayTexture.NO_OVERLAY, modelData, renderType);
 					poseStack.popPose();
 				}
 			}

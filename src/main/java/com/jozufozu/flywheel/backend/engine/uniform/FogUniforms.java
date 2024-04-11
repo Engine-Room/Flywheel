@@ -1,27 +1,25 @@
 package com.jozufozu.flywheel.backend.engine.uniform;
 
-import org.lwjgl.system.MemoryUtil;
-
 import com.mojang.blaze3d.systems.RenderSystem;
 
-public class FogUniforms implements UniformProvider {
-	public static final int SIZE = 28;
+public final class FogUniforms extends UniformWriter {
+	private static final int SIZE = 4 * 7;
+	static final UniformBuffer BUFFER = new UniformBuffer(Uniforms.FOG_INDEX, SIZE);
 
-	public int byteSize() {
-		return SIZE;
-	}
+	public static void update() {
+		long ptr = BUFFER.ptr();
 
-	@Override
-	public void write(long ptr) {
 		var color = RenderSystem.getShaderFogColor();
 
-		MemoryUtil.memPutFloat(ptr, color[0]);
-		MemoryUtil.memPutFloat(ptr + 4, color[1]);
-		MemoryUtil.memPutFloat(ptr + 8, color[2]);
-		MemoryUtil.memPutFloat(ptr + 12, color[3]);
-		MemoryUtil.memPutFloat(ptr + 16, RenderSystem.getShaderFogStart());
-		MemoryUtil.memPutFloat(ptr + 20, RenderSystem.getShaderFogEnd());
-		MemoryUtil.memPutInt(ptr + 24, RenderSystem.getShaderFogShape()
+		ptr = writeFloat(ptr, color[0]);
+		ptr = writeFloat(ptr + 4, color[1]);
+		ptr = writeFloat(ptr + 8, color[2]);
+		ptr = writeFloat(ptr + 12, color[3]);
+		ptr = writeFloat(ptr + 16, RenderSystem.getShaderFogStart());
+		ptr = writeFloat(ptr + 20, RenderSystem.getShaderFogEnd());
+		ptr = writeInt(ptr + 24, RenderSystem.getShaderFogShape()
 				.getIndex());
+
+		BUFFER.markDirty();
 	}
 }

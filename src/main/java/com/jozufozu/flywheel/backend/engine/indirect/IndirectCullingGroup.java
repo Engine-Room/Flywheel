@@ -123,7 +123,7 @@ public class IndirectCullingGroup<I extends Instance> {
 			return;
 		}
 
-		Uniforms.bindFrame();
+		Uniforms.bindAll();
 		cullProgram.bind();
 
 		environment.setupCull(cullProgram);

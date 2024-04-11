@@ -27,10 +27,10 @@ public final class Models {
 	}
 
 	/**
-	 * Get a usable model for a given blockstate.
+	 * Get a usable model for a given block state.
 	 *
-	 * @param state The blockstate you wish to render.
-	 * @return A model corresponding to how the given blockstate would appear in the world.
+	 * @param state The block state you wish to render.
+	 * @return A model corresponding to how the given block state would appear in the level.
 	 */
 	public static Model block(BlockState state) {
 		return BLOCK_STATE.get(state);

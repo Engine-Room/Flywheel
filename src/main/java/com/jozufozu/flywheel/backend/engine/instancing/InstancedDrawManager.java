@@ -89,7 +89,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		}
 
 		try (var state = GlStateTracker.getRestoreState()) {
-			Uniforms.bindForDraw();
+			Uniforms.bindAll();
 			vao.bindForDraw();
 			TextureBinder.bindLightAndOverlay();
 
@@ -154,7 +154,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		var crumblingMaterial = SimpleMaterial.builder();
 
 		try (var state = GlStateTracker.getRestoreState()) {
-			Uniforms.bindForDraw();
+			Uniforms.bindAll();
 			vao.bindForDraw();
 			TextureBinder.bindLightAndOverlay();
 

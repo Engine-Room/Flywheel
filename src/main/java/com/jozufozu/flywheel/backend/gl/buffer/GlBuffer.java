@@ -24,6 +24,7 @@ public class GlBuffer extends GlObject {
 	public void upload(MemoryBlock memoryBlock) {
 		upload(memoryBlock.ptr(), memoryBlock.size());
 	}
+
 	public void upload(long ptr, long size) {
 		FlwMemoryTracker._freeGPUMemory(this.size);
 		Buffer.IMPL.data(handle(), size, ptr, usage.glEnum);

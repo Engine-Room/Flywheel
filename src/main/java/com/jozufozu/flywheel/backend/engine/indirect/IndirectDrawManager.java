@@ -84,7 +84,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			TextureBinder.bindLightAndOverlay();
 
 			vertexArray.bindForDraw();
-			Uniforms.bindForDraw();
+			Uniforms.bindAll();
 
 			for (var group : cullingGroups.values()) {
 				group.submit(stage);
@@ -152,7 +152,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			TextureBinder.bindLightAndOverlay();
 
 			vertexArray.bindForDraw();
-			Uniforms.bindForDraw();
+			Uniforms.bindAll();
 
 			var crumblingMaterial = SimpleMaterial.builder();
 

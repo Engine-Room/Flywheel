@@ -1,12 +1,13 @@
 package com.jozufozu.flywheel.lib.instance;
 
 import com.jozufozu.flywheel.api.instance.Instance;
+import com.jozufozu.flywheel.lib.visual.AbstractVisual;
 
 import net.minecraft.client.renderer.LightTexture;
 
 /**
  * An interface that implementors of {@link Instance} should also implement
- * if they wish to make use of Flywheel's provided light update methods.
+ * if they wish to make use of the relighting utilities in {@link AbstractVisual}.
  */
 public interface FlatLit extends Instance {
 	/**

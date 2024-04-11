@@ -23,7 +23,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraftforge.client.model.data.ModelData;
 
 public class MultiBlockModelBuilder {
-	private final BlockAndTintGetter renderWorld;
+	private final BlockAndTintGetter level;
 	private final Iterable<BlockPos> positions;
 	@Nullable
 	private PoseStack poseStack;
@@ -33,8 +33,8 @@ public class MultiBlockModelBuilder {
 	@Nullable
 	private BiFunction<RenderType, Boolean, Material> materialFunc;
 
-	public MultiBlockModelBuilder(BlockAndTintGetter renderWorld, Iterable<BlockPos> positions) {
-		this.renderWorld = renderWorld;
+	public MultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
+		this.level = level;
 		this.positions = positions;
 	}
 
@@ -77,7 +77,7 @@ public class MultiBlockModelBuilder {
 				out.add(new Model.ConfiguredMesh(material, mesh));
 			}
 		};
-		BakedModelBufferer.bufferMultiBlock(ModelUtil.VANILLA_RENDERER, positions.iterator(), renderWorld, poseStack, modelDataLookup, renderFluids, resultConsumer);
+		BakedModelBufferer.bufferMultiBlock(ModelUtil.VANILLA_RENDERER, positions.iterator(), level, poseStack, modelDataLookup, renderFluids, resultConsumer);
 
 		return new SimpleModel(out.build());
 	}

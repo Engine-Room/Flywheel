@@ -12,7 +12,6 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
 
 public class LightVolume implements Box {
-
 	protected final BlockAndTintGetter level;
 	protected final MutableBox box = new MutableBox();
 	protected MemoryBlock lightData;
@@ -68,7 +67,7 @@ public class LightVolume implements Box {
 
 	public short getPackedLight(int x, int y, int z) {
 		if (box.contains(x, y, z)) {
-			return MemoryUtil.memGetShort(worldPosToPtr(x, y, z));
+			return MemoryUtil.memGetShort(levelPosToPtr(x, y, z));
 		} else {
 			return 0;
 		}
@@ -106,18 +105,18 @@ public class LightVolume implements Box {
 	}
 
 	/**
-	 * Copy all light from the world into this volume.
+	 * Copy all light from the level into this volume.
 	 *
-	 * @param worldVolume the region in the world to copy data from.
+	 * @param levelVolume the region in the level to copy data from.
 	 */
-	public void copyLight(Box worldVolume) {
+	public void copyLight(Box levelVolume) {
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
 		int xShift = box.getMinX();
 		int yShift = box.getMinY();
 		int zShift = box.getMinZ();
 
-		worldVolume.forEachContained((x, y, z) -> {
+		levelVolume.forEachContained((x, y, z) -> {
 			pos.set(x, y, z);
 
 			int block = this.level.getBrightness(LightLayer.BLOCK, pos);
@@ -137,18 +136,18 @@ public class LightVolume implements Box {
 	}
 
 	/**
-	 * Copy block light from the world into this volume.
+	 * Copy block light from the level into this volume.
 	 *
-	 * @param worldVolume the region in the world to copy data from.
+	 * @param levelVolume the region in the level to copy data from.
 	 */
-	public void copyBlock(Box worldVolume) {
+	public void copyBlock(Box levelVolume) {
 		var pos = new BlockPos.MutableBlockPos();
 
 		int xShift = box.getMinX();
 		int yShift = box.getMinY();
 		int zShift = box.getMinZ();
 
-		worldVolume.forEachContained((x, y, z) -> {
+		levelVolume.forEachContained((x, y, z) -> {
 			int light = this.level.getBrightness(LightLayer.BLOCK, pos.set(x, y, z));
 
 			writeBlock(x - xShift, y - yShift, z - zShift, light);
@@ -162,18 +161,18 @@ public class LightVolume implements Box {
 	}
 
 	/**
-	 * Copy sky light from the world into this volume.
+	 * Copy sky light from the level into this volume.
 	 *
-	 * @param worldVolume the region in the world to copy data from.
+	 * @param levelVolume the region in the level to copy data from.
 	 */
-	public void copySky(Box worldVolume) {
+	public void copySky(Box levelVolume) {
 		var pos = new BlockPos.MutableBlockPos();
 
 		int xShift = box.getMinX();
 		int yShift = box.getMinY();
 		int zShift = box.getMinZ();
 
-		worldVolume.forEachContained((x, y, z) -> {
+		levelVolume.forEachContained((x, y, z) -> {
 			int light = this.level.getBrightness(LightLayer.SKY, pos.set(x, y, z));
 
 			writeSky(x - xShift, y - yShift, z - zShift, light);
@@ -186,15 +185,15 @@ public class LightVolume implements Box {
 		MemoryUtil.memPutByte(boxPosToPtr(x, y, z) + 1, s);
 	}
 
-	protected long worldPosToPtr(int x, int y, int z) {
-		return lightData.ptr() + worldPosToPtrOffset(x, y, z);
+	protected long levelPosToPtr(int x, int y, int z) {
+		return lightData.ptr() + levelPosToPtrOffset(x, y, z);
 	}
 
 	protected long boxPosToPtr(int x, int y, int z) {
 		return lightData.ptr() + boxPosToPtrOffset(x, y, z);
 	}
 
-	protected int worldPosToPtrOffset(int x, int y, int z) {
+	protected int levelPosToPtrOffset(int x, int y, int z) {
 		x -= box.getMinX();
 		y -= box.getMinY();
 		z -= box.getMinZ();
@@ -216,5 +215,4 @@ public class LightVolume implements Box {
 		else if (type == LightLayer.SKY) copySky(vol);
 		markDirty();
 	}
-
 }

@@ -102,7 +102,7 @@ public class EngineImpl implements Engine {
 
 	private void flush(RenderContext ctx) {
 		try (var state = GlStateTracker.getRestoreState()) {
-			Uniforms.updateContext(ctx);
+			Uniforms.update(ctx);
 			drawManager.flush();
 			environmentStorage.flush();
 		}

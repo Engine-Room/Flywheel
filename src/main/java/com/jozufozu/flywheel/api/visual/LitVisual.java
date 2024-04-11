@@ -7,7 +7,7 @@ import net.minecraft.core.SectionPos;
 /**
  * A visual that listens to light updates.
  *
- * <p>If your visual moves around in the world at all, you should use {@link TickableVisual} or {@link DynamicVisual},
+ * <p>If your visual moves around in the level at all, you should use {@link TickableVisual} or {@link DynamicVisual},
  * and poll for light yourself along with listening for updates. When your visual moves to a different section, call
  * {@link Notifier#notifySectionsChanged}.</p>
  */

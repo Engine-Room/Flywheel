@@ -55,7 +55,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
- * A manager class for a single world where visualization is supported.
+ * A manager class for a single level where visualization is supported.
  */
 public class VisualizationManagerImpl implements VisualizationManager {
 	private static final LevelAttached<VisualizationManagerImpl> MANAGERS = new LevelAttached<>(VisualizationManagerImpl::new, VisualizationManagerImpl::delete);
@@ -212,7 +212,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	/**
 	 * Tick the visuals after the game has ticked:
 	 * <p>
-	 * Call {@link TickableVisual#tick} on all visuals in this world.
+	 * Call {@link TickableVisual#tick} on all visuals in this level.
 	 * </p>
 	 */
 	public void tick() {
@@ -231,7 +231,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	 *
 	 * <p>Check and update the render origin.
 	 * <br>
-	 * Call {@link DynamicVisual#beginFrame} on all visuals in this world.</p>
+	 * Call {@link DynamicVisual#beginFrame} on all visuals in this level.</p>
 	 */
 	public void beginFrame(RenderContext context) {
 		// Make sure we're done with the last tick.

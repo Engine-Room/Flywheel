@@ -1,8 +1,5 @@
 package com.jozufozu.flywheel.backend.engine.uniform;
 
-import org.jetbrains.annotations.Nullable;
-import org.lwjgl.system.MemoryUtil;
-
 import com.jozufozu.flywheel.api.event.RenderContext;
 
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -10,72 +7,45 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public class LevelUniforms implements UniformProvider {
-	public static final int SIZE = 13 * 4 + 2 * 16;
+public final class LevelUniforms extends UniformWriter {
+	private static final int SIZE = 16 * 2 + 4 * 13;
+	static final UniformBuffer BUFFER = new UniformBuffer(Uniforms.LEVEL_INDEX, SIZE);
 
-	@Nullable
-	private RenderContext context;
-
-	@Override
-	public int byteSize() {
-		return SIZE;
+	private LevelUniforms() {
 	}
 
-	public void setContext(RenderContext context) {
-		this.context = context;
-	}
-
-	@Override
-	public void write(long ptr) {
-		if (context == null) {
-			MemoryUtil.memSet(ptr, 0, SIZE);
-			return;
-		}
+	public static void update(RenderContext context) {
+		long ptr = BUFFER.ptr();
 
 		ClientLevel level = context.level();
-		float ptick = context.partialTick();
+		float partialTick = context.partialTick();
 
-		Vec3 skyColor = level.getSkyColor(context.camera().getPosition(), ptick);
-		ptr = Uniforms.writeVec4(ptr, (float) skyColor.x, (float) skyColor.y, (float) skyColor.z, 1f);
-
-		Vec3 cloudColor = level.getCloudColor(ptick);
-		ptr = Uniforms.writeVec4(ptr, (float) cloudColor.x, (float) cloudColor.y, (float) cloudColor.z, 1f);
+		Vec3 skyColor = level.getSkyColor(context.camera().getPosition(), partialTick);
+		Vec3 cloudColor = level.getCloudColor(partialTick);
+		ptr = writeVec4(ptr, (float) skyColor.x, (float) skyColor.y, (float) skyColor.z, 1f);
+		ptr = writeVec4(ptr, (float) cloudColor.x, (float) cloudColor.y, (float) cloudColor.z, 1f);
 
 		long dayTime = level.getDayTime();
 		long levelDay = dayTime / 24000L;
-		long timeOfDay = dayTime - levelDay * 24000L;
-		MemoryUtil.memPutInt(ptr, (int) (levelDay % 0x7FFFFFFFL));
-		ptr += 4;
-		MemoryUtil.memPutFloat(ptr, (float) timeOfDay / 24000f);
-		ptr += 4;
+		float timeOfDay = (float) (dayTime - levelDay * 24000L) / 24000f;
+		ptr = writeInt(ptr, (int) (levelDay % 0x7FFFFFFFL));
+		ptr = writeFloat(ptr, timeOfDay);
 
-		MemoryUtil.memPutInt(ptr, level.dimensionType().hasSkyLight() ? 1 : 0);
-		ptr += 4;
+		ptr = writeInt(ptr, level.dimensionType().hasSkyLight() ? 1 : 0);
 
-		float sunAngle = level.getSunAngle(ptick);
-		MemoryUtil.memPutFloat(ptr, sunAngle);
-		ptr += 4;
+		ptr = writeFloat(ptr, level.getSunAngle(partialTick));
 
-		MemoryUtil.memPutFloat(ptr, level.getMoonBrightness());
-		ptr += 4;
-		MemoryUtil.memPutInt(ptr, level.getMoonPhase());
-		ptr += 4;
+		ptr = writeFloat(ptr, level.getMoonBrightness());
+		ptr = writeInt(ptr, level.getMoonPhase());
 
-		MemoryUtil.memPutInt(ptr, level.isRaining() ? 1 : 0);
-		ptr += 4;
-		MemoryUtil.memPutFloat(ptr, level.getRainLevel(ptick));
-		ptr += 4;
+		ptr = writeInt(ptr, level.isRaining() ? 1 : 0);
+		ptr = writeFloat(ptr, level.getRainLevel(partialTick));
+		ptr = writeInt(ptr, level.isThundering() ? 1 : 0);
+		ptr = writeFloat(ptr, level.getThunderLevel(partialTick));
 
-		MemoryUtil.memPutInt(ptr, level.isThundering() ? 1 : 0);
-		ptr += 4;
-		MemoryUtil.memPutFloat(ptr, level.getThunderLevel(ptick));
-		ptr += 4;
+		ptr = writeFloat(ptr, level.getSkyDarken(partialTick));
 
-		MemoryUtil.memPutFloat(ptr, level.getSkyDarken(ptick));
-		ptr += 4;
-
-		MemoryUtil.memPutInt(ptr, getConstantAmbientLightFlag(context));
-		ptr += 4;
+		ptr = writeInt(ptr, level.effects().constantAmbientLight() ? 1 : 0);
 
 		// TODO: use defines for custom dimension ids
         int dimensionId;
@@ -89,13 +59,8 @@ public class LevelUniforms implements UniformProvider {
         } else {
             dimensionId = -1;
         }
-		MemoryUtil.memPutInt(ptr, dimensionId);
-    }
+        ptr = writeInt(ptr, dimensionId);
 
-	private static int getConstantAmbientLightFlag(RenderContext context) {
-		var constantAmbientLight = context.level()
-				.effects()
-				.constantAmbientLight();
-		return constantAmbientLight ? 1 : 0;
-	}
+		BUFFER.markDirty();
+    }
 }

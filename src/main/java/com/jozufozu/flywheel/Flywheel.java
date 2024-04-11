@@ -34,7 +34,6 @@ import com.jozufozu.flywheel.vanilla.VanillaVisuals;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
-import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -50,6 +49,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 
 @Mod(Flywheel.ID)
 public class Flywheel {
@@ -69,6 +70,7 @@ public class Flywheel {
 		IEventBus modEventBus = FMLJavaModLoadingContext.get()
 				.getModEventBus();
 		modEventBus.addListener(Flywheel::onCommonSetup);
+		modEventBus.addListener(Flywheel::onRegister);
 
 		FlwConfig.get().registerSpecs(modLoadingContext);
 
@@ -137,8 +139,11 @@ public class Flywheel {
 	}
 
 	private static void onCommonSetup(FMLCommonSetupEvent event) {
-		// FIXME: argument types also need to be registered to BuiltInRegistries.COMMAND_ARGUMENT_TYPE
-		ArgumentTypeInfos.registerByClass(BackendArgument.class, SingletonArgumentInfo.contextFree(() -> BackendArgument.INSTANCE));
+		ArgumentTypeInfos.registerByClass(BackendArgument.class, BackendArgument.INFO);
+	}
+
+	private static void onRegister(RegisterEvent event) {
+		event.register(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, rl("backend"), () -> BackendArgument.INFO);
 	}
 
 	private static void addDebugInfo(CustomizeGuiOverlayEvent.DebugText event) {

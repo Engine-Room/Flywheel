@@ -15,8 +15,8 @@ import com.jozufozu.flywheel.api.BackendImplemented;
  *     When you call {@link #createInstance()} you are given an Instance object that you can manipulate however
  *     you want. The changes you make to the Instance object are automatically made visible, and persistent.
  *     Changing the position of your Instance object every frame means that that copy of the model will be in a
- *     different position in the world each frame. Setting the position of your Instance once and not touching it
- *     again means that your model will be in the same position in the world every frame. This persistence is useful
+ *     different position in the level each frame. Setting the position of your Instance once and not touching it
+ *     again means that your model will be in the same position in the level every frame. This persistence is useful
  *     because it means the properties of your model don't have to be re-evaluated every frame.
  * </p>
  *

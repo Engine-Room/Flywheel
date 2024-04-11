@@ -1,13 +1,12 @@
 package com.jozufozu.flywheel.backend.engine.uniform;
 
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.lwjgl.system.MemoryUtil;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
+import com.jozufozu.flywheel.config.DebugMode;
 import com.jozufozu.flywheel.lib.math.MatrixMath;
 
 import net.minecraft.client.Camera;
@@ -17,162 +16,160 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public class FrameUniforms implements UniformProvider {
-	public static final int SIZE = 800;
-	public int debugMode;
+public final class FrameUniforms extends UniformWriter {
+	private static final int SIZE = 96 + 64 * 9 + 16 * 4 + 8 * 2 + 8 + 4 * 10;
+	static final UniformBuffer BUFFER = new UniformBuffer(Uniforms.FRAME_INDEX, SIZE);
 
-	@Nullable
-	private RenderContext context;
+	private static final Matrix4f VIEW = new Matrix4f();
+	private static final Matrix4f VIEW_INVERSE = new Matrix4f();
+	private static final Matrix4f VIEW_PREV = new Matrix4f();
+	private static final Matrix4f PROJECTION = new Matrix4f();
+	private static final Matrix4f PROJECTION_INVERSE = new Matrix4f();
+	private static final Matrix4f PROJECTION_PREV = new Matrix4f();
+	private static final Matrix4f VIEW_PROJECTION = new Matrix4f();
+	private static final Matrix4f VIEW_PROJECTION_INVERSE = new Matrix4f();
+	private static final Matrix4f VIEW_PROJECTION_PREV = new Matrix4f();
 
-	private final Matrix4f view = new Matrix4f();
-	private final Matrix4f viewInverse = new Matrix4f();
-	private final Matrix4f viewPrev = new Matrix4f();
-	private final Matrix4f projection = new Matrix4f();
-	private final Matrix4f projectionInverse = new Matrix4f();
-	private final Matrix4f projectionPrev = new Matrix4f();
-	private final Matrix4f viewProjection = new Matrix4f();
-	private final Matrix4f viewProjectionInverse = new Matrix4f();
-	private final Matrix4f viewProjectionPrev = new Matrix4f();
+	private static final Vector3f CAMERA_POS = new Vector3f();
+	private static final Vector3f CAMERA_POS_PREV = new Vector3f();
+	private static final Vector3f CAMERA_LOOK = new Vector3f();
+	private static final Vector3f CAMERA_LOOK_PREV = new Vector3f();
+	private static final Vector2f CAMERA_ROT = new Vector2f();
+	private static final Vector2f CAMERA_ROT_PREV = new Vector2f();
 
-	private final Vector3f cameraPositionPrev = new Vector3f();
-	private final Vector3f cameraLookPrev = new Vector3f();
-	private final Vector2f cameraRotPrev = new Vector2f();
+	private static boolean firstWrite = true;
 
-	private boolean lastInit = false;
+	private static int debugMode = DebugMode.OFF.ordinal();
+	private static boolean frustumPaused = false;
+	private static boolean frustumCapture = false;
 
-	public int byteSize() {
-		return SIZE;
+	private FrameUniforms() {
 	}
 
-	public void setContext(RenderContext context) {
-		this.context = context;
+	public static void debugMode(DebugMode mode) {
+		debugMode = mode.ordinal();
 	}
 
-	@Override
-	public void write(long ptr) {
-		if (context == null) {
-			return;
-		}
+	public static void captureFrustum() {
+		frustumPaused = true;
+		frustumCapture = true;
+	}
+
+	public static void unpauseFrustum() {
+		frustumPaused = false;
+	}
+
+	public static void update(RenderContext context) {
+		long ptr = BUFFER.ptr();
+		setPrev();
 
 		Vec3i renderOrigin = VisualizationManager.getOrThrow(context.level())
 				.getRenderOrigin();
 		var camera = context.camera();
-
 		Vec3 cameraPos = camera.getPosition();
 		var camX = (float) (cameraPos.x - renderOrigin.getX());
 		var camY = (float) (cameraPos.y - renderOrigin.getY());
 		var camZ = (float) (cameraPos.z - renderOrigin.getZ());
 
-		view.set(context.stack().last().pose());
-		view.translate(-camX, -camY, -camZ);
-		projection.set(context.projection());
-		viewProjection.set(context.viewProjection());
-		viewProjection.translate(-camX, -camY, -camZ);
+		VIEW.set(context.stack().last().pose());
+		VIEW.translate(-camX, -camY, -camZ);
+		PROJECTION.set(context.projection());
+		VIEW_PROJECTION.set(context.viewProjection());
+		VIEW_PROJECTION.translate(-camX, -camY, -camZ);
 
-		if (!Uniforms.frustumPaused || Uniforms.frustumCapture) {
-			MatrixMath.writePackedFrustumPlanes(ptr, viewProjection);
-			Uniforms.frustumCapture = false;
+		CAMERA_POS.set(camX, camY, camZ);
+		CAMERA_LOOK.set(camera.getLookVector());
+		CAMERA_ROT.set(camera.getXRot(), camera.getYRot());
+
+		if (firstWrite) {
+			setPrev();
+		}
+
+		if (firstWrite || !frustumPaused || frustumCapture) {
+			MatrixMath.writePackedFrustumPlanes(ptr, VIEW_PROJECTION);
+			frustumCapture = false;
 		}
 
 		ptr += 96;
 
-		// manage last values of matrices
-		if (!lastInit) {
-			viewPrev.set(view);
-			projectionPrev.set(projection);
-			viewProjectionPrev.set(viewProjectionPrev);
-		}
 		ptr = writeMatrices(ptr);
-		viewPrev.set(view);
-		projectionPrev.set(projection);
-		viewProjectionPrev.set(viewProjection);
 
-		// last values for camera
-		if (!lastInit) {
-			cameraPositionPrev.set(camX, camY, camZ);
-			cameraLookPrev.set(camera.getLookVector());
-			cameraRotPrev.set(camera.getXRot(), camera.getYRot());
-		}
-		ptr = writeCamera(ptr, camX, camY, camZ);
-		cameraPositionPrev.set(camX, camY, camZ);
-		cameraLookPrev.set(camera.getLookVector());
-		cameraRotPrev.set(camera.getXRot(), camera.getYRot());
+		ptr = writeCamera(ptr);
 
 		var window = Minecraft.getInstance()
 				.getWindow();
-		ptr = Uniforms.writeVec2(ptr, window.getWidth(), window.getHeight());
-
+		ptr = writeVec2(ptr, window.getWidth(), window.getHeight());
+		ptr = writeFloat(ptr, (float) window.getWidth() / (float) window.getHeight());
 		// default line width: net.minecraft.client.renderer.RenderStateShard.LineStateShard
-		MemoryUtil.memPutFloat(ptr, Math.max(2.5F, (float) window.getWidth() / 1920.0F * 2.5F));
-		ptr += 4;
+		ptr = writeFloat(ptr, Math.max(2.5F, (float) window.getWidth() / 1920.0F * 2.5F));
+		ptr = writeFloat(ptr, Minecraft.getInstance().gameRenderer.getDepthFar());
 
-		MemoryUtil.memPutFloat(ptr, (float) window.getWidth() / (float) window.getHeight());
-		ptr += 4;
+		ptr = writeTime(ptr, context);
 
-		MemoryUtil.memPutFloat(ptr, Minecraft.getInstance().gameRenderer.getDepthFar());
-		ptr += 4;
+		ptr = writeCameraIn(ptr, camera);
 
-		ptr = writeTime(ptr);
+		ptr = writeInt(ptr, debugMode);
 
-		ptr = writeCameraIn(ptr);
-
-		MemoryUtil.memPutInt(ptr, debugMode);
-
-		lastInit = true;
+		firstWrite = false;
+		BUFFER.markDirty();
 	}
 
-	private long writeMatrices(long ptr) {
-		MatrixMath.writeUnsafe(view, ptr);
-		MatrixMath.writeUnsafe(view.invert(viewInverse), ptr + 64);
-		MatrixMath.writeUnsafe(viewPrev, ptr + 64 * 2);
-		MatrixMath.writeUnsafe(projection, ptr + 64 * 3);
-		MatrixMath.writeUnsafe(projection.invert(projectionInverse), ptr + 64 * 4);
-		MatrixMath.writeUnsafe(projectionPrev, ptr + 64 * 5);
-		MatrixMath.writeUnsafe(viewProjection, ptr + 64 * 6);
-		MatrixMath.writeUnsafe(viewProjection.invert(viewProjectionInverse), ptr + 64 * 7);
-		MatrixMath.writeUnsafe(viewProjectionPrev, ptr + 64 * 8);
-		return ptr + 64 * 9;
+	private static void setPrev() {
+		VIEW_PREV.set(VIEW);
+		PROJECTION_PREV.set(PROJECTION);
+		VIEW_PROJECTION_PREV.set(VIEW_PROJECTION);
+		CAMERA_POS_PREV.set(CAMERA_POS);
+		CAMERA_LOOK_PREV.set(CAMERA_LOOK);
+		CAMERA_ROT_PREV.set(CAMERA_ROT);
 	}
 
-	private long writeCamera(long ptr, float camX, float camY, float camZ) {
-		Camera camera = context.camera();
-		Vector3f lookVector = camera.getLookVector();
-
-		ptr = Uniforms.writeVec3(ptr, camX, camY, camZ);
-		ptr = Uniforms.writeVec3(ptr, cameraPositionPrev.x, cameraPositionPrev.y, cameraPositionPrev.z);
-
-		ptr = Uniforms.writeVec3(ptr, lookVector.x, lookVector.y, lookVector.z);
-		ptr = Uniforms.writeVec3(ptr, cameraLookPrev.x, cameraLookPrev.y, cameraLookPrev.z);
-
-		ptr = Uniforms.writeVec2(ptr, camera.getXRot(), camera.getYRot());
-		ptr = Uniforms.writeVec2(ptr, cameraRotPrev.x, cameraRotPrev.y);
+	private static long writeMatrices(long ptr) {
+		ptr = writeMat4(ptr, VIEW);
+		ptr = writeMat4(ptr, VIEW.invert(VIEW_INVERSE));
+		ptr = writeMat4(ptr, VIEW_PREV);
+		ptr = writeMat4(ptr, PROJECTION);
+		ptr = writeMat4(ptr, PROJECTION.invert(PROJECTION_INVERSE));
+		ptr = writeMat4(ptr, PROJECTION_PREV);
+		ptr = writeMat4(ptr, VIEW_PROJECTION);
+		ptr = writeMat4(ptr, VIEW_PROJECTION.invert(VIEW_PROJECTION_INVERSE));
+		ptr = writeMat4(ptr, VIEW_PROJECTION_PREV);
 		return ptr;
 	}
 
-	private long writeTime(long ptr) {
+	private static long writeCamera(long ptr) {
+		ptr = writeVec3(ptr, CAMERA_POS.x, CAMERA_POS.y, CAMERA_POS.z);
+		ptr = writeVec3(ptr, CAMERA_POS_PREV.x, CAMERA_POS_PREV.y, CAMERA_POS_PREV.z);
+		ptr = writeVec3(ptr, CAMERA_LOOK.x, CAMERA_LOOK.y, CAMERA_LOOK.z);
+		ptr = writeVec3(ptr, CAMERA_LOOK_PREV.x, CAMERA_LOOK_PREV.y, CAMERA_LOOK_PREV.z);
+		ptr = writeVec2(ptr, CAMERA_ROT.x, CAMERA_ROT.y);
+		ptr = writeVec2(ptr, CAMERA_ROT_PREV.x, CAMERA_ROT_PREV.y);
+		return ptr;
+	}
+
+	private static long writeTime(long ptr, RenderContext context) {
 		int ticks = context.renderer()
 				.getTicks();
 		float partialTick = context.partialTick();
 		float renderTicks = ticks + partialTick;
 		float renderSeconds = renderTicks / 20f;
 
-		MemoryUtil.memPutInt(ptr, ticks);
-		MemoryUtil.memPutFloat(ptr + 4, partialTick);
-		MemoryUtil.memPutFloat(ptr + 8, renderTicks);
-		MemoryUtil.memPutFloat(ptr + 12, renderSeconds);
-		return ptr + 16;
+		ptr = writeInt(ptr, ticks);
+		ptr = writeFloat(ptr, partialTick);
+		ptr = writeFloat(ptr, renderTicks);
+		ptr = writeFloat(ptr, renderSeconds);
+		return ptr;
 	}
 
-	private long writeCameraIn(long ptr) {
-		Camera camera = context.camera();
+	private static long writeCameraIn(long ptr, Camera camera) {
 		if (!camera.isInitialized()) {
-			MemoryUtil.memPutInt(ptr, 0);
-			MemoryUtil.memPutInt(ptr + 4, 0);
-			return ptr + 8;
+			ptr = writeInt(ptr, 0);
+			ptr = writeInt(ptr, 0);
+			return ptr;
 		}
+
 		Level level = camera.getEntity().level();
 		BlockPos blockPos = camera.getBlockPosition();
 		Vec3 cameraPos = camera.getPosition();
-		return Uniforms.writeInFluidAndBlock(ptr, level, blockPos, cameraPos);
+		return writeInFluidAndBlock(ptr, level, blockPos, cameraPos);
 	}
 }

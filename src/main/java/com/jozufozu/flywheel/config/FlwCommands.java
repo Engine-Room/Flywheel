@@ -4,7 +4,7 @@ import java.util.function.BiConsumer;
 
 import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.api.backend.BackendManager;
-import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
+import com.jozufozu.flywheel.backend.engine.uniform.FrameUniforms;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -78,27 +78,6 @@ public final class FlwCommands {
 				}
 			));
 
-		command.then(Commands.literal("debug")
-				.then(Commands.argument("mode", EnumArgument.enumArgument(DebugMode.class))
-						.executes(context -> {
-							DebugMode mode = context.getArgument("mode", DebugMode.class);
-							Uniforms.setDebugMode(mode);
-							return Command.SINGLE_SUCCESS;
-						})));
-
-		command.then(Commands.literal("frustum")
-				.then(Commands.literal("unpause")
-						.executes(context -> {
-							Uniforms.frustumPaused = false;
-							return Command.SINGLE_SUCCESS;
-						}))
-				.then(Commands.literal("capture")
-						.executes(context -> {
-							Uniforms.frustumPaused = true;
-							Uniforms.frustumCapture = true;
-							return Command.SINGLE_SUCCESS;
-						})));
-
 		command.then(Commands.literal("crumbling")
 				.then(Commands.argument("pos", BlockPosArgument.blockPos())
 						.then(Commands.argument("stage", IntegerArgumentType.integer(0, 9))
@@ -118,6 +97,26 @@ public final class FlwCommands {
 
 									return Command.SINGLE_SUCCESS;
 								}))));
+
+		command.then(Commands.literal("debug")
+				.then(Commands.argument("mode", EnumArgument.enumArgument(DebugMode.class))
+						.executes(context -> {
+							DebugMode mode = context.getArgument("mode", DebugMode.class);
+							FrameUniforms.debugMode(mode);
+							return Command.SINGLE_SUCCESS;
+						})));
+
+		command.then(Commands.literal("frustum")
+				.then(Commands.literal("capture")
+						.executes(context -> {
+							FrameUniforms.captureFrustum();
+							return Command.SINGLE_SUCCESS;
+						}))
+				.then(Commands.literal("unpause")
+						.executes(context -> {
+							FrameUniforms.unpauseFrustum();
+							return Command.SINGLE_SUCCESS;
+						})));
 
 		event.getDispatcher().register(command);
 	}
