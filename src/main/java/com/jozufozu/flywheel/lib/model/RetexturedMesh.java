@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.vanilla.model;
+package com.jozufozu.flywheel.lib.model;
 
 import org.joml.Vector4fc;
 

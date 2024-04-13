@@ -1,0 +1,14 @@
+{
+  "required" : true,
+  "minVersion" : "0.8",
+  "package" : "com.jozufozu.flywheel.lib.mixin",
+  "compatibilityLevel" : "JAVA_17",
+  "refmap" : "flywheel.refmap.json",
+  "client" : [
+    "ModelPartAccessor",
+    "VertexMultiConsumerDoubleMixin"
+  ],
+  "injectors" : {
+    "defaultRequire" : 1
+  }
+}

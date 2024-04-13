@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.vanilla;
 
-import com.jozufozu.flywheel.vanilla.model.InstanceTree;
+import com.jozufozu.flywheel.lib.model.part.InstanceTree;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public abstract class AgeableListComponent {

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.vanilla.mixin;
+package com.jozufozu.flywheel.lib.mixin;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

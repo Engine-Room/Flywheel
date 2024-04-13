@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.vanilla.model;
+package com.jozufozu.flywheel.lib.model.part;
 
 import java.util.HashMap;
 import java.util.Map;

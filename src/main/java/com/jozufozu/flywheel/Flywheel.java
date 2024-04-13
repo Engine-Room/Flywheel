@@ -27,11 +27,11 @@ import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.model.ModelCache;
 import com.jozufozu.flywheel.lib.model.ModelHolder;
 import com.jozufozu.flywheel.lib.model.baked.PartialModel;
+import com.jozufozu.flywheel.lib.model.part.MeshTree;
 import com.jozufozu.flywheel.lib.util.LevelAttached;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 import com.jozufozu.flywheel.lib.util.StringUtil;
 import com.jozufozu.flywheel.vanilla.VanillaVisuals;
-import com.jozufozu.flywheel.vanilla.model.MeshTreeCache;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
@@ -107,7 +107,7 @@ public class Flywheel {
 		modEventBus.addListener(BackendManagerImpl::onEndClientResourceReload);
 
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> ModelCache.onEndClientResourceReload(e));
-		modEventBus.addListener(MeshTreeCache::onEndClientResourceReload);
+		modEventBus.addListener(MeshTree::onEndClientResourceReload);
 		modEventBus.addListener(ModelHolder::onEndClientResourceReload);
 
 		modEventBus.addListener(PartialModel::onModelRegistry);

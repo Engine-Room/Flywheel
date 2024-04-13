@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.vanilla.model;
+package com.jozufozu.flywheel.lib.model;
 
 import com.jozufozu.flywheel.api.vertex.MutableVertexList;
 import com.jozufozu.flywheel.lib.vertex.WrappedVertexList;

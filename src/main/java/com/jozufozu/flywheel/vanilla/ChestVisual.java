@@ -15,12 +15,12 @@ import com.jozufozu.flywheel.lib.instance.OrientedInstance;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.ModelCache;
+import com.jozufozu.flywheel.lib.model.RetexturedMesh;
 import com.jozufozu.flywheel.lib.model.SingleMeshModel;
+import com.jozufozu.flywheel.lib.model.part.MeshTree;
 import com.jozufozu.flywheel.lib.util.Pair;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
 import com.jozufozu.flywheel.lib.visual.SimpleDynamicVisual;
-import com.jozufozu.flywheel.vanilla.model.MeshTreeCache;
-import com.jozufozu.flywheel.vanilla.model.RetexturedMesh;
 
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -173,7 +173,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 	}
 
 	public static Model chestModel(Pair<ChestType, Material> key, String child) {
-		var mesh = MeshTreeCache.get(LAYER_LOCATIONS.get(key.first()))
+		var mesh = MeshTree.get(LAYER_LOCATIONS.get(key.first()))
 				.child(child)
 				.mesh();
 		var sprite = key.second()

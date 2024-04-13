@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.jozufozu.flywheel.api.instance.InstancerProvider;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.vanilla.model.InstanceTree;
-import com.jozufozu.flywheel.vanilla.model.MeshTreeCache;
+import com.jozufozu.flywheel.lib.model.part.InstanceTree;
+import com.jozufozu.flywheel.lib.model.part.MeshTree;
 
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.util.Mth;
@@ -23,7 +23,7 @@ public class QuadrupedComponent extends AgeableListComponent {
 	public QuadrupedComponent(InstancerProvider instancerProvider, ModelLayerLocation layer, Material material, Config config) {
 		super(config);
 
-		var meshTree = MeshTreeCache.get(layer);
+		var meshTree = MeshTree.get(layer);
 
 		this.root = InstanceTree.create(instancerProvider, meshTree, material);
 

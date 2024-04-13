@@ -11,12 +11,12 @@ import com.jozufozu.flywheel.lib.instance.InstanceTypes;
 import com.jozufozu.flywheel.lib.instance.TransformedInstance;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.model.ModelCache;
+import com.jozufozu.flywheel.lib.model.RetexturedMesh;
 import com.jozufozu.flywheel.lib.model.SingleMeshModel;
+import com.jozufozu.flywheel.lib.model.part.MeshTree;
 import com.jozufozu.flywheel.lib.transform.TransformStack;
 import com.jozufozu.flywheel.lib.visual.AbstractBlockEntityVisual;
 import com.jozufozu.flywheel.lib.visual.SimpleDynamicVisual;
-import com.jozufozu.flywheel.vanilla.model.MeshTreeCache;
-import com.jozufozu.flywheel.vanilla.model.RetexturedMesh;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
@@ -138,7 +138,7 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	}
 
 	private static Model shulkerModel(Material texture, String child) {
-		var mesh = MeshTreeCache.get(ModelLayers.SHULKER)
+		var mesh = MeshTree.get(ModelLayers.SHULKER)
 				.child(child)
 				.mesh();
 		return new SingleMeshModel(new RetexturedMesh(mesh, texture.sprite()), Materials.SHULKER);
