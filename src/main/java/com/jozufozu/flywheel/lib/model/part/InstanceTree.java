@@ -39,6 +39,7 @@ public class InstanceTree {
 	@Nullable
 	public TransformedInstance instance;
 
+	private final Quaternionf rotation = new Quaternionf();
 	private final Entry entry;
 	private final PartPose initialPose;
 
@@ -136,7 +137,7 @@ public class InstanceTree {
 		void accept(T t, int i, int j);
 	}
 
-	public void render(PoseStack pPoseStack) {
+	public void updateInstances(PoseStack pPoseStack) {
 		if (this.visible) {
 			pPoseStack.pushPose();
 			this.translateAndRotate(pPoseStack);
@@ -146,7 +147,7 @@ public class InstanceTree {
 			}
 
 			for (InstanceTree modelpart : this.children.values()) {
-				modelpart.render(pPoseStack);
+				modelpart.updateInstances(pPoseStack);
 			}
 
 			pPoseStack.popPose();
@@ -156,7 +157,7 @@ public class InstanceTree {
 	public void translateAndRotate(PoseStack pPoseStack) {
 		pPoseStack.translate(this.x / 16.0F, this.y / 16.0F, this.z / 16.0F);
 		if (this.xRot != 0.0F || this.yRot != 0.0F || this.zRot != 0.0F) {
-			pPoseStack.mulPose((new Quaternionf()).rotationZYX(this.zRot, this.yRot, this.xRot));
+			pPoseStack.mulPose(rotation.rotationZYX(this.zRot, this.yRot, this.xRot));
 		}
 
 		if (this.xScale != 1.0F || this.yScale != 1.0F || this.zScale != 1.0F) {

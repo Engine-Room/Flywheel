@@ -65,7 +65,7 @@ public class CowVisual extends SimpleEntityVisual<Cow> {
 		cowQuadrupedComponent.root.walkInstances(overlay, light, (i, o, l) -> {
 			i.setOverlay(o);
 			i.light(l);
-			i.setChanged();
+			// We'll #setChanged in the
 		});
 
 		stack.setIdentity();

@@ -18,6 +18,7 @@ import com.mojang.math.Axis;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.MultiPartBakedModel;
 import net.minecraft.client.resources.model.SimpleBakedModel;
@@ -48,9 +49,7 @@ public class ItemVisual extends SimpleEntityVisual<ItemEntity> {
 		super(ctx, entity);
 
 		var item = entity.getItem();
-		model = Minecraft.getInstance()
-				.getItemRenderer()
-				.getModel(item, entity.level(), null, entity.getId());
+		model = getModel(item);
 
 		isSupported = isSupported(model);
 
@@ -61,11 +60,14 @@ public class ItemVisual extends SimpleEntityVisual<ItemEntity> {
 	}
 
 	public static boolean isSupported(ItemEntity entity) {
-		var model = Minecraft.getInstance()
-				.getItemRenderer()
-				.getModel(entity.getItem(), entity.level(), null, entity.getId());
+		return isSupported(getModel(entity.getItem()));
+	}
 
-		return isSupported(model);
+	public static BakedModel getModel(ItemStack stack) {
+		return Minecraft.getInstance()
+				.getItemRenderer()
+				.getItemModelShaper()
+				.getItemModel(stack);
 	}
 
 	public static boolean isSupported(BakedModel model) {
@@ -73,9 +75,7 @@ public class ItemVisual extends SimpleEntityVisual<ItemEntity> {
 			return false;
 		}
 
-		if (!model.getOverrides()
-				.getOverrides()
-				.isEmpty()) {
+		if (model.getOverrides() != ItemOverrides.EMPTY) {
 			return false;
 		}
 
@@ -110,7 +110,6 @@ public class ItemVisual extends SimpleEntityVisual<ItemEntity> {
 				.translate(getVisualPosition(ctx.partialTick()));
 
 		instances.resetCount();
-		pPoseStack.pushPose();
 		ItemStack itemstack = entity.getItem();
 		int i = itemstack.isEmpty() ? 187 : Item.getId(itemstack.getItem()) + itemstack.getDamageValue();
 		var random = RANDOM.get();
@@ -158,7 +157,6 @@ public class ItemVisual extends SimpleEntityVisual<ItemEntity> {
 			}
 		}
 
-		pPoseStack.popPose();
 		instances.discardExtra();
 	}
 
@@ -199,7 +197,6 @@ public class ItemVisual extends SimpleEntityVisual<ItemEntity> {
 	}
 
 	public record ItemKey(ItemStack stack, BakedModel model) {
-
 		@Override
 		public boolean equals(Object o) {
 			if (this == o) {

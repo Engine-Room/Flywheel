@@ -22,24 +22,24 @@ public abstract class AgeableListComponent {
 			}
 
 			pPoseStack.translate(0.0F, this.config.babyYHeadOffset / 16.0F, this.config.babyZHeadOffset / 16.0F);
-			for (InstanceTree p_102081_ : this.headParts()) {
-				p_102081_.render(pPoseStack);
+			for (InstanceTree headPart : this.headParts()) {
+				headPart.updateInstances(pPoseStack);
 			}
 			pPoseStack.popPose();
 			pPoseStack.pushPose();
 			float f1 = 1.0F / this.config.babyBodyScale;
 			pPoseStack.scale(f1, f1, f1);
 			pPoseStack.translate(0.0F, this.config.bodyYOffset / 16.0F, 0.0F);
-			for (InstanceTree p_102071_ : this.bodyParts()) {
-				p_102071_.render(pPoseStack);
+			for (InstanceTree bodyPart : this.bodyParts()) {
+				bodyPart.updateInstances(pPoseStack);
 			}
 			pPoseStack.popPose();
 		} else {
-			for (InstanceTree p_102061_ : this.headParts()) {
-				p_102061_.render(pPoseStack);
+			for (InstanceTree headPart : this.headParts()) {
+				headPart.updateInstances(pPoseStack);
 			}
-			for (InstanceTree p_102051_ : this.bodyParts()) {
-				p_102051_.render(pPoseStack);
+			for (InstanceTree bodyPart : this.bodyParts()) {
+				bodyPart.updateInstances(pPoseStack);
 			}
 		}
 
