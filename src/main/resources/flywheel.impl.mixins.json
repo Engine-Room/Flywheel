@@ -18,6 +18,8 @@
     "VertexMultiConsumerMultipleMixin",
     "fix.FixFabulousDepthMixin",
     "fix.FixNormalScalingMixin",
+    "optimize.PoseStackMixin",
+    "optimize.PoseStackPoseInvoker",
     "visualmanage.BlockEntityMixin",
     "visualmanage.LevelChunkMixin",
     "visualmanage.LevelRendererMixin",
