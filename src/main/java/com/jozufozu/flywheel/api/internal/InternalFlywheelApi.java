@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.api.internal;
 
 import java.lang.reflect.Constructor;
+import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -14,8 +15,10 @@ import com.jozufozu.flywheel.api.visualization.EntityVisualizer;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.lib.transform.PoseTransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.LevelAccessor;
@@ -96,4 +99,8 @@ public interface InternalFlywheelApi {
 	<T extends Entity> void setVisualizer(EntityType<T> type, EntityVisualizer<? super T> visualizer);
 
 	PoseTransformStack getPoseTransformStackOf(PoseStack stack);
+
+	Map<String, ModelPart> getModelPartChildren(ModelPart part);
+
+	void compileModelPart(ModelPart part, PoseStack.Pose pose, VertexConsumer consumer, int light, int overlay, float red, float green, float blue, float alpha);
 }

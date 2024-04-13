@@ -98,7 +98,6 @@ mixin {
     config 'flywheel.backend.mixins.json'
     config 'flywheel.impl.mixins.json'
     config 'flywheel.impl.sodium.mixins.json'
-    config 'flywheel.lib.mixins.json'
 
     debug.verbose = true
     debug.export = true

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.mixin;
+package com.jozufozu.flywheel.impl.mixin;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
  */
 @Mixin(targets = "com.mojang.blaze3d.vertex.VertexMultiConsumer$Double")
 public abstract class VertexMultiConsumerDoubleMixin implements VertexConsumer {
-
 	@Shadow
 	@Final
 	private VertexConsumer first;

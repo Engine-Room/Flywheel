@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.mixin;
+package com.jozufozu.flywheel.impl.mixin;
 
 import java.util.Map;
 

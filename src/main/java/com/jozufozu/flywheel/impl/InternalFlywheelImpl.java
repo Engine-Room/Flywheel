@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.impl;
 
+import java.util.Map;
+
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.backend.Backend;
@@ -13,6 +15,7 @@ import com.jozufozu.flywheel.api.visualization.EntityVisualizer;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.impl.extension.PoseStackExtension;
 import com.jozufozu.flywheel.impl.layout.LayoutBuilderImpl;
+import com.jozufozu.flywheel.impl.mixin.ModelPartAccessor;
 import com.jozufozu.flywheel.impl.registry.IdRegistryImpl;
 import com.jozufozu.flywheel.impl.registry.RegistryImpl;
 import com.jozufozu.flywheel.impl.vertex.VertexViewProviderRegistryImpl;
@@ -20,8 +23,10 @@ import com.jozufozu.flywheel.impl.visualization.VisualizationManagerImpl;
 import com.jozufozu.flywheel.impl.visualization.VisualizerRegistryImpl;
 import com.jozufozu.flywheel.lib.transform.PoseTransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.LevelAccessor;
@@ -115,5 +120,15 @@ public final class InternalFlywheelImpl implements InternalFlywheelApi {
 	@Override
 	public PoseTransformStack getPoseTransformStackOf(PoseStack stack) {
 		return ((PoseStackExtension) stack).flywheel$transformStack();
+	}
+
+	@Override
+	public Map<String, ModelPart> getModelPartChildren(ModelPart part) {
+		return ((ModelPartAccessor) (Object) part).flywheel$children();
+	}
+
+	@Override
+	public void compileModelPart(ModelPart part, PoseStack.Pose pose, VertexConsumer consumer, int light, int overlay, float red, float green, float blue, float alpha) {
+		((ModelPartAccessor) (Object) part).flywheel$compile(pose, consumer, light, overlay, red, green, blue, alpha);
 	}
 }

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.event.EndClientResourceReloadEvent;
 import com.jozufozu.flywheel.api.model.Mesh;
-import com.jozufozu.flywheel.lib.mixin.ModelPartAccessor;
+import com.jozufozu.flywheel.impl.InternalFlywheelImpl;
 import com.jozufozu.flywheel.lib.model.SimpleMesh;
 import com.jozufozu.flywheel.lib.vertex.PosTexNormalVertexView;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -82,8 +82,7 @@ public class MeshTree {
 	}
 
 	private static MeshTree convert(ModelPart modelPart, ThreadLocalObjects objects) {
-		var accessor = cast(modelPart);
-		var childModelParts = accessor.flywheel$children();
+		var childModelParts = InternalFlywheelImpl.INSTANCE.getModelPartChildren(modelPart);
 
 		Map<String, MeshTree> children = new HashMap<>();
 
@@ -91,21 +90,17 @@ public class MeshTree {
 			children.put(entry.getKey(), convert(entry.getValue(), objects));
 		}
 
-		return new MeshTree(modelPart.getInitialPose(), compile(accessor, objects), children);
+		return new MeshTree(modelPart.getInitialPose(), compile(modelPart, objects), children);
 	}
 
-	private static Mesh compile(ModelPartAccessor accessor, ThreadLocalObjects objects) {
+	private static Mesh compile(ModelPart modelPart, ThreadLocalObjects objects) {
 		var vertexWriter = objects.vertexWriter;
 
-		accessor.flywheel$compile(IDENTITY, vertexWriter, 0, 0, 1.0F, 1.0F, 1.0F, 1.0F);
+		InternalFlywheelImpl.INSTANCE.compileModelPart(modelPart, IDENTITY, vertexWriter, 0, 0, 1.0F, 1.0F, 1.0F, 1.0F);
 
 		var data = vertexWriter.copyDataAndReset();
 
 		return new SimpleMesh(new PosTexNormalVertexView(), data, "source=ModelPartConverter");
-	}
-
-	private static ModelPartAccessor cast(ModelPart cube) {
-		return (ModelPartAccessor) (Object) cube;
 	}
 
 	private static class ThreadLocalObjects {
