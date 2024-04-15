@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.api.registry;
 
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Unmodifiable;
@@ -14,7 +15,7 @@ public interface Registry<T> extends Iterable<T> {
 	@Unmodifiable
 	Set<T> getAll();
 
-	void addFreezeCallback(Runnable callback);
+	void addFreezeCallback(Consumer<Registry<T>> callback);
 
 	boolean isFrozen();
 }

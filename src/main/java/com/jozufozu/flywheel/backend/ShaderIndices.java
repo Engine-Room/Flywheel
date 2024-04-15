@@ -2,11 +2,13 @@ package com.jozufozu.flywheel.backend;
 
 import java.util.List;
 
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import com.jozufozu.flywheel.api.material.CutoutShader;
 import com.jozufozu.flywheel.api.material.FogShader;
 import com.jozufozu.flywheel.api.material.MaterialShaders;
+import com.jozufozu.flywheel.api.registry.Registry;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
@@ -17,9 +19,13 @@ import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.resources.ResourceLocation;
 
 public final class ShaderIndices {
+	@Nullable
 	private static Index vertexShaders;
+	@Nullable
 	private static Index fragmentShaders;
+	@Nullable
 	private static Index fogShaders;
+	@Nullable
 	private static Index cutoutShaders;
 
 	private ShaderIndices() {
@@ -69,14 +75,14 @@ public final class ShaderIndices {
 		return cutout().index(cutoutShader.source());
 	}
 
-	private static void initMaterialShaders() {
-		int amount = MaterialShaders.REGISTRY.getAll()
+	private static void initMaterialShaders(Registry<MaterialShaders> registry) {
+		int amount = registry.getAll()
 				.size();
 
 		var vertexShaders = new IndexBuilder(amount);
 		var fragmentShaders = new IndexBuilder(amount);
 
-		for (MaterialShaders shaders : MaterialShaders.REGISTRY) {
+		for (MaterialShaders shaders : registry) {
 			vertexShaders.add(shaders.vertexShader());
 			fragmentShaders.add(shaders.fragmentShader());
 		}
@@ -85,26 +91,26 @@ public final class ShaderIndices {
 		ShaderIndices.fragmentShaders = fragmentShaders.build();
 	}
 
-	private static void initFogShaders() {
-		int amount = FogShader.REGISTRY.getAll()
+	private static void initFogShaders(Registry<FogShader> registry) {
+		int amount = registry.getAll()
 				.size();
 
 		var fog = new IndexBuilder(amount);
 
-		for (FogShader shaders : FogShader.REGISTRY) {
+		for (FogShader shaders : registry) {
 			fog.add(shaders.source());
 		}
 
 		ShaderIndices.fogShaders = fog.build();
 	}
 
-	private static void initCutoutShaders() {
-		int amount = CutoutShader.REGISTRY.getAll()
+	private static void initCutoutShaders(Registry<CutoutShader> registry) {
+		int amount = registry.getAll()
 				.size();
 
 		var cutout = new IndexBuilder(amount);
 
-		for (CutoutShader shaders : CutoutShader.REGISTRY) {
+		for (CutoutShader shaders : registry) {
 			cutout.add(shaders.source());
 		}
 

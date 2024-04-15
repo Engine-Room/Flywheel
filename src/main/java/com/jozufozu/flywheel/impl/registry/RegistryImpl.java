@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.impl.registry;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -9,6 +10,7 @@ import com.jozufozu.flywheel.api.registry.Registry;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import it.unimi.dsi.fastutil.objects.ObjectSets;
@@ -16,9 +18,9 @@ import it.unimi.dsi.fastutil.objects.ObjectSets;
 public class RegistryImpl<T> implements Registry<T> {
 	private static final ObjectList<RegistryImpl<?>> ALL = new ObjectArrayList<>();
 
-	private final ObjectSet<T> set = new ObjectOpenHashSet<>();
+	private final ObjectSet<T> set = ObjectSets.synchronize(new ObjectOpenHashSet<>());
 	private final ObjectSet<T> setView = ObjectSets.unmodifiable(set);
-	private final ObjectList<Runnable> freezeCallbacks = new ObjectArrayList<>();
+	private final ObjectList<Consumer<Registry<T>>> freezeCallbacks = ObjectLists.synchronize(new ObjectArrayList<>());
 	private boolean frozen;
 
 	public RegistryImpl() {
@@ -49,7 +51,7 @@ public class RegistryImpl<T> implements Registry<T> {
 	}
 
 	@Override
-	public void addFreezeCallback(Runnable callback) {
+	public void addFreezeCallback(Consumer<Registry<T>> callback) {
 		if (frozen) {
 			throw new IllegalStateException("Cannot add freeze callback to frozen registry!");
 		}
@@ -68,8 +70,8 @@ public class RegistryImpl<T> implements Registry<T> {
 
 	public void freeze() {
 		frozen = true;
-		for (Runnable runnable : freezeCallbacks) {
-			runnable.run();
+		for (var callback : freezeCallbacks) {
+			callback.accept(this);
 		}
 		freezeCallbacks.clear();
 	}

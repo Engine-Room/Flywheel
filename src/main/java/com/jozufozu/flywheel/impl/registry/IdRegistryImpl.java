@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.impl.registry;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -10,12 +11,15 @@ import org.jetbrains.annotations.Unmodifiable;
 import com.jozufozu.flywheel.api.registry.IdRegistry;
 
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceMaps;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import it.unimi.dsi.fastutil.objects.ObjectSets;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceCollection;
 import it.unimi.dsi.fastutil.objects.ReferenceCollections;
@@ -24,11 +28,11 @@ import net.minecraft.resources.ResourceLocation;
 public class IdRegistryImpl<T> implements IdRegistry<T> {
 	private static final ObjectList<IdRegistryImpl<?>> ALL = new ObjectArrayList<>();
 
-	private final Object2ReferenceMap<ResourceLocation, T> map = new Object2ReferenceOpenHashMap<>();
-	private final Reference2ObjectMap<T, ResourceLocation> reverseMap = new Reference2ObjectOpenHashMap<>();
+	private final Object2ReferenceMap<ResourceLocation, T> map = Object2ReferenceMaps.synchronize(new Object2ReferenceOpenHashMap<>());
+	private final Reference2ObjectMap<T, ResourceLocation> reverseMap = Reference2ObjectMaps.synchronize(new Reference2ObjectOpenHashMap<>());
 	private final ObjectSet<ResourceLocation> keysView = ObjectSets.unmodifiable(map.keySet());
 	private final ReferenceCollection<T> valuesView = ReferenceCollections.unmodifiable(map.values());
-	private final ObjectList<Runnable> freezeCallbacks = new ObjectArrayList<>();
+	private final ObjectList<Consumer<IdRegistry<T>>> freezeCallbacks = ObjectLists.synchronize(new ObjectArrayList<>());
 	private boolean frozen;
 
 	public IdRegistryImpl() {
@@ -99,7 +103,7 @@ public class IdRegistryImpl<T> implements IdRegistry<T> {
 	}
 
 	@Override
-	public void addFreezeCallback(Runnable callback) {
+	public void addFreezeCallback(Consumer<IdRegistry<T>> callback) {
 		if (frozen) {
 			throw new IllegalStateException("Cannot add freeze callback to frozen registry!");
 		}
@@ -118,8 +122,8 @@ public class IdRegistryImpl<T> implements IdRegistry<T> {
 
 	public void freeze() {
 		frozen = true;
-		for (Runnable runnable : freezeCallbacks) {
-			runnable.run();
+		for (var callback : freezeCallbacks) {
+			callback.accept(this);
 		}
 		freezeCallbacks.clear();
 	}

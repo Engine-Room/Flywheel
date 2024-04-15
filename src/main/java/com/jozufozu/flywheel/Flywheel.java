@@ -48,6 +48,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
@@ -104,6 +105,7 @@ public class Flywheel {
 
 		modEventBus.addListener(Flywheel::registerClientReloadListeners);
 		modEventBus.addListener(Flywheel::onClientSetup);
+		modEventBus.addListener(Flywheel::onLoadComplete);
 
 		modEventBus.addListener(BackendManagerImpl::onEndClientResourceReload);
 
@@ -133,7 +135,9 @@ public class Flywheel {
 		ShaderIndices.init();
 
 		VanillaVisuals.init();
+	}
 
+	private static void onLoadComplete(FMLLoadCompleteEvent event) {
 		RegistryImpl.freezeAll();
 		IdRegistryImpl.freezeAll();
 	}
