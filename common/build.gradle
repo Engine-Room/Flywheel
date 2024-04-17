@@ -1,0 +1,124 @@
+plugins {
+    id 'maven-publish'
+    id 'dev.architectury.loom'
+}
+
+base {
+    archivesName = "flywheel-${project.name}-${artifact_minecraft_version}"
+}
+
+repositories {
+    maven {
+        name = 'ParchmentMC'
+        url = 'https://maven.parchmentmc.org'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:$minecraft_version"
+    mappings(loom.layered() {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
+    })
+
+    modCompileOnly "net.fabricmc:fabric-loader:$fabric_loader_version"
+}
+
+java {
+    JavaVersion javaVersion = JavaVersion.toVersion(java_version)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+
+    withSourcesJar()
+    withJavadocJar()
+}
+
+processResources.configure {
+    from(project(':common').sourceSets.main.resources)
+
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            forge_version          : forge_version,
+            forge_version_range    : forge_version_range,
+            loader_version_range   : loader_version_range,
+            mod_version            : mod_version
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'META-INF/neoforge.mods.toml', 'pack.mcmeta', 'fabric.mod.json']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = Integer.parseInt(java_version)
+    options.compilerArgs = ['-Xdiags:verbose']
+}
+
+jar.configure {
+    archiveClassifier = ''
+    addManifest(it)
+    addLicense(it)
+}
+
+sourcesJar.configure {
+    addManifest(it)
+    addLicense(it)
+}
+
+javadoc.configure {
+    // prevent java 8's strict doclint for javadocs from failing builds
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+test.configure {
+    useJUnitPlatform()
+}
+
+void addLicense(jarTask) {
+    jarTask.from('LICENSE.md') {
+        rename '(.*)\\.(.*)', '$1_' + archivesBaseName + '.$2'
+    }
+}
+
+void addManifest(jarTask) {
+    jarTask.manifest {
+        attributes([
+                'Specification-Title'     : 'flywheel',
+                // 'Specification-Vendor': 'flywheel authors',
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : project.jar.archiveBaseName,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                // 'Implementation-Vendor': 'flywheel authors',
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+        ])
+    }
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from(components["java"])
+            artifactId = "flywheel-${project.name}-intermediary-${artifact_minecraft_version}"
+        }
+        register('mojmapJava', MavenPublication) {
+            artifact jar
+            artifact sourcesJar
+            artifactId = "flywheel-${project.name}-mojmap-${artifact_minecraft_version}"
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+
+        if (project.hasProperty('mavendir')) {
+            maven { url rootProject.file(property('mavendir')) }
+        }
+    }
+}
