@@ -75,6 +75,8 @@ dependencies {
 
     modCompileOnly "maven.modrinth:sodium:$sodium_version"
     modCompileOnly "maven.modrinth:iris:$iris_version"
+
+    compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 }
 
 java {
