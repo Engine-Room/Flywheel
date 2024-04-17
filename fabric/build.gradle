@@ -35,6 +35,23 @@ repositories {
         name = 'ParchmentMC'
         url = 'https://maven.parchmentmc.org'
     }
+    maven {
+        url 'https://www.cursemaven.com'
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    maven {
+        name 'tterrag maven'
+        url 'https://maven.tterrag.com/'
+    }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
     mavenCentral()
 }
 
@@ -52,6 +69,12 @@ dependencies {
     modLocalRuntime "net.fabricmc.fabric-api:fabric-api:$fabric_api_version"
 
     compileOnly project(path: ':common', configuration: 'namedElements')
+
+    // switch to implementation for debugging
+    modCompileOnly "maven.modrinth:starlight:$starlight_version"
+
+    modCompileOnly "maven.modrinth:sodium:$sodium_version"
+    modCompileOnly "maven.modrinth:iris:$iris_version"
 }
 
 java {
