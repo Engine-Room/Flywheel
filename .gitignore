@@ -6,7 +6,6 @@ build/
 gradle-app.setting
 out/
 logs/
-dist/
 
 ## IntelliJ IDEA
 
@@ -47,3 +46,4 @@ local.properties
 # Other
 mcmodsrepo
 src/*/generatedPackageInfos/
+*/src/*/generatedPackageInfos/

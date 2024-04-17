@@ -132,6 +132,8 @@ void addManifest(jarTask) {
     }
 }
 
+apply from: rootProject.file('gradle/package-infos.gradle')
+
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
@@ -141,7 +143,7 @@ publishing {
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/mcmodsrepo"
+            url "file://${rootProject.projectDir}/mcmodsrepo"
         }
 
         if (project.hasProperty('mavendir')) {
