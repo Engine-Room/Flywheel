@@ -12,6 +12,23 @@ repositories {
         name = 'ParchmentMC'
         url = 'https://maven.parchmentmc.org'
     }
+    maven {
+        url 'https://www.cursemaven.com'
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    maven {
+        name 'tterrag maven'
+        url 'https://maven.tterrag.com/'
+    }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
     mavenCentral()
 }
 

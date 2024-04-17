@@ -35,6 +35,23 @@ repositories {
         name = 'ParchmentMC'
         url = 'https://maven.parchmentmc.org'
     }
+    maven {
+        url 'https://www.cursemaven.com'
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    maven {
+        name 'tterrag maven'
+        url 'https://maven.tterrag.com/'
+    }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
     mavenCentral()
 }
 
@@ -48,6 +65,9 @@ dependencies {
     forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     compileOnly project(path: ':common', configuration: 'namedElements')
+
+    modCompileOnly "maven.modrinth:embeddium:$embeddium_version"
+    modCompileOnly "maven.modrinth:oculus:$oculus_version"
 }
 
 java {
