@@ -1,0 +1,205 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version "${forgegradle_version}"
+    id 'org.parchmentmc.librarian.forgegradle' version "${librarian_version}"
+    id 'org.spongepowered.mixin' version "${mixingradle_version}"
+}
+
+boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
+
+ext.buildNumber = System.getenv('BUILD_NUMBER')
+
+group = 'com.jozufozu.flywheel'
+archivesBaseName = "flywheel-forge-${artifact_minecraft_version}"
+version = mod_version + (dev && buildNumber != null ? "-${buildNumber}" : '')
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+minecraft {
+    mappings channel: 'parchment', version: "${parchment_version}-${minecraft_version}"
+
+    copyIdeResources = true
+
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', ''
+            property 'forge.logging.console.level', 'debug'
+
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            mods {
+                flywheel {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
+            property 'flw.dumpShaderSource', 'true'
+            property 'flw.debugMemorySafety', 'true'
+        }
+
+        server {
+            args '--nogui'
+        }
+    }
+}
+
+repositories {
+    maven {
+        url 'https://www.cursemaven.com'
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    maven {
+        name 'tterrag maven'
+        url 'https://maven.tterrag.com/'
+    }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    compileOnly fg.deobf("maven.modrinth:embeddium:0.3.9+mc1.20.1")
+    compileOnly fg.deobf("maven.modrinth:oculus:1.20.1-1.6.15a")
+    // implementation fg.deobf("maven.modrinth:starlight-forge:1.1.2+1.20")
+
+    // https://discord.com/channels/313125603924639766/725850371834118214/910619168821354497
+    // Prevent Mixin annotation processor from getting into IntelliJ's annotation processor settings
+    // This allows 'Settings > Build, Execution, and Deployment > Build Tools > Gradle > Build and run using' set to IntelliJ to work correctly
+    // if (System.getProperty('idea.sync.active') != 'true') {
+    annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
+    // }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+mixin {
+    add sourceSets.main, 'flywheel.refmap.json'
+
+    config 'flywheel.backend.mixins.json'
+    config 'flywheel.impl.mixins.json'
+    config 'flywheel.impl.sodium.mixins.json'
+
+    debug.verbose = true
+    debug.export = true
+}
+
+idea {
+    // Tell IDEA to always download sources/javadoc artifacts from maven.
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+// Workaround for SpongePowered/MixinGradle#38
+afterEvaluate {
+    tasks.configureReobfTaskForReobfJar.mustRunAfter(tasks.compileJava)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+javadoc {
+    source = [sourceSets.main.allJava]
+    // prevent java 8's strict doclint for javadocs from failing builds
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+compileJava {
+    options.compilerArgs = ['-Xdiags:verbose']
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            forge_version          : forge_version,
+            forge_version_range    : forge_version_range,
+            loader_version_range   : loader_version_range,
+            mod_version            : mod_version
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+apply from: rootProject.file('gradle/package-infos.gradle')
+
+void addLicense(jarTask) {
+    jarTask.from('LICENSE.md') {
+        rename '(.*)\\.(.*)', '$1_' + archivesBaseName + '.$2'
+    }
+}
+
+void addManifest(jarTask) {
+    jarTask.manifest {
+        attributes([
+                'Specification-Title'     : 'flywheel',
+                // 'Specification-Vendor': 'flywheel authors',
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : project.jar.archiveBaseName,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                // 'Implementation-Vendor': 'flywheel authors',
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+        ])
+    }
+}
+
+tasks.named('jar', Jar).configure {
+    archiveClassifier = ''
+
+    finalizedBy 'reobfJar'
+    addManifest(it)
+    addLicense(it)
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifact jar
+            artifact sourcesJar
+            artifact javadocJar
+
+            artifactId = archivesBaseName
+
+            fg.component(it)
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+
+        if (project.hasProperty('mavendir')) {
+            maven { url mavendir }
+        }
+    }
+}

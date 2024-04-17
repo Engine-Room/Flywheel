@@ -6,6 +6,7 @@ build/
 gradle-app.setting
 out/
 logs/
+dist/
 
 ## IntelliJ IDEA
 
