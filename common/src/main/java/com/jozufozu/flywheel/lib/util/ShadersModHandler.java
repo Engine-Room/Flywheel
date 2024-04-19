@@ -6,34 +6,34 @@ import java.util.function.BooleanSupplier;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 
+import com.jozufozu.flywheel.platform.ClientPlatform;
 import com.mojang.logging.LogUtils;
-
-import net.irisshaders.iris.api.v0.IrisApi;
-import net.minecraftforge.fml.ModList;
 
 public final class ShadersModHandler {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
 	private static final String OPTIFINE_ROOT_PACKAGE = "net.optifine";
 
-	private static final boolean IS_OCULUS_LOADED;
+	private static final boolean IS_IRIS_LOADED;
 	private static final boolean IS_OPTIFINE_INSTALLED;
 	private static final InternalHandler INTERNAL_HANDLER;
 
 	static {
 		Package optifinePackage = Package.getPackage(OPTIFINE_ROOT_PACKAGE);
 		IS_OPTIFINE_INSTALLED = optifinePackage != null;
-		IS_OCULUS_LOADED = ModList.get()
-				.isLoaded("oculus");
 
-		// OptiFine and Oculus are assumed to be mutually exclusive
+		var irisOculusHandler = ClientPlatform.getInstance()
+				.createIrisOculusHandlerIfPresent();
+		IS_IRIS_LOADED = irisOculusHandler != null;
+
+		// OptiFine and Iris/Oculus are assumed to be mutually exclusive
 
 		if (IS_OPTIFINE_INSTALLED) {
 			LOGGER.info("Optifine detected.");
 			INTERNAL_HANDLER = new Optifine();
-		} else if (IS_OCULUS_LOADED) {
-			LOGGER.info("Oculus detected.");
-			INTERNAL_HANDLER = new Oculus();
+		} else if (IS_IRIS_LOADED) {
+			LOGGER.info("Iris detected.");
+			INTERNAL_HANDLER = irisOculusHandler;
 		} else {
 			LOGGER.info("No shaders mod detected.");
 			INTERNAL_HANDLER = new InternalHandler() {};
@@ -43,8 +43,8 @@ public final class ShadersModHandler {
 	private ShadersModHandler() {
 	}
 
-	public static boolean isOculusLoaded() {
-		return IS_OCULUS_LOADED;
+	public static boolean isIrisLoaded() {
+		return IS_IRIS_LOADED;
 	}
 
 	public static boolean isOptifineInstalled() {
@@ -63,7 +63,8 @@ public final class ShadersModHandler {
 	public static void init() {
 	}
 
-	private interface InternalHandler {
+	@ApiStatus.Internal
+	public interface InternalHandler {
 		default boolean isShaderPackInUse() {
 			return false;
 		};
@@ -71,21 +72,6 @@ public final class ShadersModHandler {
 		default boolean isRenderingShadowPass() {
 			return false;
 		};
-	}
-
-	// simple, lovely api calls
-	private static class Oculus implements InternalHandler {
-		@Override
-		public boolean isShaderPackInUse() {
-			return IrisApi.getInstance()
-					.isShaderPackInUse();
-		}
-
-		@Override
-		public boolean isRenderingShadowPass() {
-			return IrisApi.getInstance()
-					.isRenderingShadowPass();
-		}
 	}
 
 	// evil reflection

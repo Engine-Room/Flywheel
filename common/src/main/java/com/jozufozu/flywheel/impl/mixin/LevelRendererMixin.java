@@ -14,12 +14,10 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.api.event.BeginFrameEvent;
-import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.event.RenderStageEvent;
 import com.jozufozu.flywheel.impl.event.RenderContextImpl;
 import com.jozufozu.flywheel.impl.visualization.VisualizationManagerImpl;
+import com.jozufozu.flywheel.platform.ClientPlatform;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -30,7 +28,6 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.server.level.BlockDestructionProgress;
-import net.minecraftforge.common.MinecraftForge;
 
 @Mixin(value = LevelRenderer.class, priority = 1001) // Higher priority to go after Sodium
 abstract class LevelRendererMixin {
@@ -54,7 +51,7 @@ abstract class LevelRendererMixin {
 	private void flywheel$beginRender(PoseStack poseStack, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
 		flywheel$renderContext = RenderContextImpl.create((LevelRenderer) (Object) this, level, renderBuffers, poseStack, projectionMatrix, camera, partialTick);
 
-		MinecraftForge.EVENT_BUS.post(new BeginFrameEvent(flywheel$renderContext));
+		ClientPlatform.getInstance().dispatchBeginFrame(flywheel$renderContext);
 	}
 
 	@Inject(method = "renderLevel", at = @At("RETURN"))
@@ -64,7 +61,7 @@ abstract class LevelRendererMixin {
 
 	@Inject(method = "allChanged", at = @At("RETURN"))
 	private void flywheel$refresh(CallbackInfo ci) {
-		MinecraftForge.EVENT_BUS.post(new ReloadLevelRendererEvent(level));
+		ClientPlatform.getInstance().dispatchReloadLevelRenderer(level);
 	}
 
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=destroyProgress"))
@@ -84,7 +81,7 @@ abstract class LevelRendererMixin {
 	@Unique
 	private void flywheel$dispatch(RenderStage stage) {
 		if (flywheel$renderContext != null) {
-			MinecraftForge.EVENT_BUS.post(new RenderStageEvent(flywheel$renderContext, stage));
+			ClientPlatform.getInstance().dispatchRenderStage(flywheel$renderContext, stage);
 		}
 	}
 
