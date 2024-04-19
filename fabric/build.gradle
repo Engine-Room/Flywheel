@@ -1,8 +1,3 @@
-plugins {
-    id 'maven-publish'
-    id 'dev.architectury.loom'
-}
-
 evaluationDependsOn(':common')
 
 base {
@@ -30,38 +25,7 @@ loom {
     }
 }
 
-repositories {
-    maven {
-        name = 'ParchmentMC'
-        url = 'https://maven.parchmentmc.org'
-    }
-    maven {
-        url 'https://www.cursemaven.com'
-        content {
-            includeGroup "curse.maven"
-        }
-    }
-    maven {
-        name 'tterrag maven'
-        url 'https://maven.tterrag.com/'
-    }
-    maven {
-        name = "Modrinth"
-        url = "https://api.modrinth.com/maven"
-        content {
-            includeGroup "maven.modrinth"
-        }
-    }
-    mavenCentral()
-}
-
 dependencies {
-    minecraft "com.mojang:minecraft:$minecraft_version"
-    mappings(loom.layered() {
-        officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
-    })
-
     modCompileOnly "net.fabricmc:fabric-loader:$fabric_loader_version"
     modLocalRuntime "net.fabricmc:fabric-loader:$fabric_loader_version"
 
@@ -79,85 +43,17 @@ dependencies {
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 }
 
-java {
-    JavaVersion javaVersion = JavaVersion.toVersion(java_version)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-
-    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
-
-    withSourcesJar()
-    withJavadocJar()
-}
-
-processResources.configure {
-    from(project(':common').sourceSets.main.resources)
-
-    var replaceProperties = [
-            minecraft_version      : minecraft_version,
-            minecraft_version_range: minecraft_version_range,
-            forge_version          : forge_version,
-            forge_version_range    : forge_version_range,
-            loader_version_range   : loader_version_range,
-            mod_version            : mod_version
-    ]
-    inputs.properties replaceProperties
-
-    filesMatching(['META-INF/mods.toml', 'META-INF/neoforge.mods.toml', 'pack.mcmeta', 'fabric.mod.json']) {
-        expand replaceProperties + [project: project]
-    }
-}
-
 tasks.withType(JavaCompile).configureEach {
     source(project(':common').sourceSets.main.allSource)
-    options.encoding = 'UTF-8'
-    options.release = Integer.parseInt(java_version)
-    options.compilerArgs = ['-Xdiags:verbose']
-}
-
-jar.configure {
-    archiveClassifier = ''
-    addManifest(it)
-    addLicense(it)
 }
 
 sourcesJar.configure {
     from(project(':common').sourceSets.main.allSource)
-    addManifest(it)
-    addLicense(it)
 }
 
 javadoc.configure {
     source(project(':common').sourceSets.main.allJava)
-    // prevent java 8's strict doclint for javadocs from failing builds
-    options.addStringOption('Xdoclint:none', '-quiet')
 }
-
-test.configure {
-    useJUnitPlatform()
-}
-
-void addLicense(jarTask) {
-    jarTask.from('LICENSE.md') {
-        rename '(.*)\\.(.*)', '$1_' + archivesBaseName + '.$2'
-    }
-}
-
-void addManifest(jarTask) {
-    jarTask.manifest {
-        attributes([
-                'Specification-Title'     : 'flywheel',
-                // 'Specification-Vendor': 'flywheel authors',
-                'Specification-Version'   : '1', // We are version 1 of ourselves
-                'Implementation-Title'    : project.jar.archiveBaseName,
-                'Implementation-Version'  : project.jar.archiveVersion,
-                // 'Implementation-Vendor': 'flywheel authors',
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-        ])
-    }
-}
-
-apply from: rootProject.file('gradle/package-infos.gradle')
 
 publishing {
     publications {
