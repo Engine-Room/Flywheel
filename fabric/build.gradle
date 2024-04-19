@@ -4,27 +4,6 @@ base {
     archivesName = "flywheel-${project.name}-${artifact_minecraft_version}"
 }
 
-loom {
-    runs {
-        configureEach {
-            property 'forge.logging.markers', ''
-            property 'forge.logging.console.level', 'debug'
-        }
-
-        client {
-            ideConfigGenerated true
-            property 'flw.dumpShaderSource', 'true'
-            property 'flw.debugMemorySafety', 'true'
-            programArgs '--width', '1280', '--height', '720'
-        }
-
-        server {
-            ideConfigGenerated true
-            programArgs '--nogui'
-        }
-    }
-}
-
 dependencies {
     modCompileOnly "net.fabricmc:fabric-loader:$fabric_loader_version"
     modLocalRuntime "net.fabricmc:fabric-loader:$fabric_loader_version"
@@ -41,18 +20,6 @@ dependencies {
     modCompileOnly "maven.modrinth:iris:$iris_version"
 
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
-}
-
-tasks.withType(JavaCompile).configureEach {
-    source(project(':common').sourceSets.main.allSource)
-}
-
-sourcesJar.configure {
-    from(project(':common').sourceSets.main.allSource)
-}
-
-javadoc.configure {
-    source(project(':common').sourceSets.main.allJava)
 }
 
 publishing {
