@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.backend.engine.uniform;
 
-import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.event.RenderContext;
 
 public final class Uniforms {
@@ -33,7 +32,7 @@ public final class Uniforms {
 		}
 	}
 
-	public static void onReloadLevelRenderer(ReloadLevelRendererEvent event) {
+	public static void onReloadLevelRenderer() {
 		deleteAll();
 	}
 }

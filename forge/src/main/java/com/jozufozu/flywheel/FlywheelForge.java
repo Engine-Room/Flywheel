@@ -5,12 +5,15 @@ import java.util.ArrayList;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 import com.jozufozu.flywheel.api.event.EndClientResourceReloadEvent;
+import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.backend.compile.FlwPrograms;
 import com.jozufozu.flywheel.backend.engine.uniform.Uniforms;
 import com.jozufozu.flywheel.config.BackendArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
+import com.jozufozu.flywheel.config.FlwForgeConfig;
+import com.jozufozu.flywheel.impl.BackendEventHandler;
 import com.jozufozu.flywheel.impl.BackendManagerImpl;
 import com.jozufozu.flywheel.impl.visualization.VisualizationEventHandler;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
@@ -29,6 +32,7 @@ import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.CrashReportCallables;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -58,7 +62,7 @@ public class FlywheelForge {
 		modEventBus.addListener(FlywheelForge::onCommonSetup);
 		modEventBus.addListener(FlywheelForge::onRegister);
 
-		FlwConfig.get().registerSpecs(modLoadingContext);
+		FlwForgeConfig.INSTANCE.registerSpecs(modLoadingContext);
 
 		modLoadingContext.registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(
 				() -> "any",
@@ -71,7 +75,7 @@ public class FlywheelForge {
 	private static void clientInit(IEventBus forgeEventBus, IEventBus modEventBus) {
 		forgeEventBus.addListener(FlywheelForge::addDebugInfo);
 
-		forgeEventBus.addListener(BackendManagerImpl::onReloadLevelRenderer);
+		forgeEventBus.addListener(BackendEventHandler::onReloadLevelRenderer);
 
 		forgeEventBus.addListener(VisualizationEventHandler::onClientTick);
 		forgeEventBus.addListener(VisualizationEventHandler::onBeginFrame);
@@ -81,26 +85,24 @@ public class FlywheelForge {
 
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);
 
-		forgeEventBus.addListener(Uniforms::onReloadLevelRenderer);
+		forgeEventBus.<ReloadLevelRendererEvent>addListener($ -> Uniforms.onReloadLevelRenderer());
 
-		forgeEventBus.addListener((LevelEvent.Unload e) -> LevelAttached.onUnloadLevel(e));
-
-//		forgeEventBus.addListener(ExampleEffect::tick);
-//		forgeEventBus.addListener(ExampleEffect::onReload);
+		forgeEventBus.addListener((LevelEvent.Unload e) -> LevelAttached.invalidateLevel(e.getLevel()));
 
 		modEventBus.addListener(FlywheelForge::registerClientReloadListeners);
 		modEventBus.addListener(FlywheelForge::onClientSetup);
 		modEventBus.addListener(FlywheelForge::onLoadComplete);
 
-		modEventBus.addListener(BackendManagerImpl::onEndClientResourceReload);
+		modEventBus.addListener(BackendEventHandler::onEndClientResourceReload);
 
-		modEventBus.addListener((EndClientResourceReloadEvent e) -> ModelCache.onEndClientResourceReload(e));
-		modEventBus.addListener(ModelHolder::onEndClientResourceReload);
+		modEventBus.<EndClientResourceReloadEvent>addListener($ -> ModelCache.onEndClientResourceReload());
+		modEventBus.<EndClientResourceReloadEvent>addListener($ -> ModelHolder.onEndClientResourceReload());
 
 		modEventBus.addListener(PartialModel::onModelRegistry);
 		modEventBus.addListener(PartialModel::onModelBake);
 
 		Flywheel.earlyInit();
+		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManagerImpl::getBackendString);
 	}
 
 	private static void registerClientReloadListeners(RegisterClientReloadListenersEvent event) {

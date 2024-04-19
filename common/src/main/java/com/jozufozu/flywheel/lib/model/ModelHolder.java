@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.event.EndClientResourceReloadEvent;
 import com.jozufozu.flywheel.api.model.Model;
 
 public class ModelHolder {
@@ -51,7 +50,7 @@ public class ModelHolder {
 	}
 
 	@ApiStatus.Internal
-	public static void onEndClientResourceReload(EndClientResourceReloadEvent event) {
+	public static void onEndClientResourceReload() {
 		for (ModelHolder holder : ALL) {
 			holder.clear();
 		}
