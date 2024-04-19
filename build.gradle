@@ -7,13 +7,23 @@ plugins {
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
+boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
+
+ext.buildNumber = System.getenv('BUILD_NUMBER')
+
 subprojects {
-    boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
-
-    ext.buildNumber = System.getenv('BUILD_NUMBER')
-
     group = 'com.jozufozu.flywheel'
     version = mod_version + (dev && buildNumber != null ? "-${buildNumber}" : '')
+
+    apply plugin: "maven-publish"
+    apply plugin: "dev.architectury.loom"
+    apply from: rootProject.file('gradle/package-infos.gradle')
+
+    loom {
+        silentMojangMappingsLicense()
+    }
+
+    ideaSyncTask.finalizedBy(generatePackageInfos)
 
     tasks {
         // make builds reproducible
@@ -26,6 +36,110 @@ subprojects {
         withType(GenerateModuleMetadata).configureEach {
             enabled = false
         }
+    }
+
+    processResources.configure {
+        from(project(':common').sourceSets.main.resources)
+
+        var replaceProperties = [
+                minecraft_version      : minecraft_version,
+                minecraft_version_range: minecraft_version_range,
+                forge_version          : forge_version,
+                forge_version_range    : forge_version_range,
+                loader_version_range   : loader_version_range,
+                mod_version            : mod_version
+        ]
+        inputs.properties replaceProperties
+
+        filesMatching(['META-INF/mods.toml', 'META-INF/neoforge.mods.toml', 'pack.mcmeta', 'fabric.mod.json']) {
+            expand replaceProperties + [project: project]
+        }
+    }
+
+    repositories {
+        maven {
+            name = 'ParchmentMC'
+            url = 'https://maven.parchmentmc.org'
+        }
+        maven {
+            url 'https://www.cursemaven.com'
+            content {
+                includeGroup "curse.maven"
+            }
+        }
+        maven {
+            name 'tterrag maven'
+            url 'https://maven.tterrag.com/'
+        }
+        maven {
+            name = "Modrinth"
+            url = "https://api.modrinth.com/maven"
+            content {
+                includeGroup "maven.modrinth"
+            }
+        }
+        mavenCentral()
+    }
+
+    dependencies {
+        minecraft "com.mojang:minecraft:$minecraft_version"
+        mappings(loom.layered() {
+            officialMojangMappings()
+            parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
+        })
+    }
+
+    java {
+        JavaVersion javaVersion = JavaVersion.toVersion(java_version)
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
+
+        toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+
+        withSourcesJar()
+        withJavadocJar()
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = Integer.parseInt(java_version)
+        options.compilerArgs = ['-Xdiags:verbose']
+    }
+
+    jar.configure {
+        archiveClassifier = ''
+        addManifest(it)
+        addLicense(it)
+    }
+
+    sourcesJar.configure {
+        addManifest(it)
+        addLicense(it)
+    }
+
+    javadoc.configure {
+        // prevent java 8's strict doclint for javadocs from failing builds
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+}
+
+void addLicense(jarTask) {
+    jarTask.from('LICENSE.md') {
+        rename '(.*)\\.(.*)', '$1_' + jarTask.archiveBaseName + '.$2'
+    }
+}
+
+void addManifest(jarTask) {
+    jarTask.manifest {
+        attributes([
+                'Specification-Title'     : 'flywheel',
+                // 'Specification-Vendor': 'flywheel authors',
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : jarTask.archiveBaseName,
+                'Implementation-Version'  : jarTask.archiveVersion,
+                // 'Implementation-Vendor': 'flywheel authors',
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+        ])
     }
 }
 

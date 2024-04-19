@@ -9,7 +9,7 @@ import com.jozufozu.flywheel.backend.engine.uniform.FogUniforms;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-@Mixin(RenderSystem.class)
+@Mixin(value = RenderSystem.class, remap = false)
 abstract class RenderSystemMixin {
 	@Inject(method = "initRenderer(IZ)V", at = @At("RETURN"))
 	private static void flywheel$onInitRenderer(CallbackInfo ci) {

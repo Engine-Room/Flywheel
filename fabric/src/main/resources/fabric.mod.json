@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "flywheel",
+  "version": "${version}",
+  "name": "Flywheel",
+  "description": "A modern engine for modded minecraft.",
+  "authors": [
+    "Jozufozu",
+    "PepperCode1"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+  "license": "MIT",
+  "icon": "assets/flywheel/logo.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.jozufozu.flywheel.FlywheelFabric"
+    ]
+  },
+  "mixins": [
+    "flywheel.backend.mixins.json",
+    "flywheel.impl.mixins.json",
+    "flywheel.impl.sodium.mixins.json"
+  ],
+  "depends": {
+    "fabric": "*",
+    "minecraft": ">=1.20.1"
+  }
+}
