@@ -12,6 +12,7 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.fml.LogicalSide;
 
+// TODO: fabric event handler
 public final class VisualizationEventHandler {
 	private VisualizationEventHandler() {
 	}
