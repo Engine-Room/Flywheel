@@ -7,23 +7,39 @@ plugins {
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
-boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
-
-ext.buildNumber = System.getenv('BUILD_NUMBER')
-
 subprojects {
+    boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
+
+    ext.buildNumber = System.getenv('BUILD_NUMBER')
+
     group = 'com.jozufozu.flywheel'
     version = mod_version + (dev && buildNumber != null ? "-${buildNumber}" : '')
 
+    apply plugin: "java"
     apply plugin: "maven-publish"
     apply plugin: "dev.architectury.loom"
-    apply from: rootProject.file('gradle/package-infos.gradle')
 
     loom {
         silentMojangMappingsLicense()
     }
 
-    ideaSyncTask.finalizedBy(generatePackageInfos)
+    if (it != project(':common')) {
+        loom {
+            runs {
+                client {
+                    ideConfigGenerated true
+                    property 'flw.dumpShaderSource', 'true'
+                    property 'flw.debugMemorySafety', 'true'
+                    programArgs '--width', '1280', '--height', '720'
+                }
+
+                server {
+                    ideConfigGenerated true
+                    programArgs '--nogui'
+                }
+            }
+        }
+    }
 
     tasks {
         // make builds reproducible
@@ -101,6 +117,8 @@ subprojects {
     }
 
     tasks.withType(JavaCompile).configureEach {
+        source(project(':common').sourceSets.main.allSource)
+
         options.encoding = 'UTF-8'
         options.release = Integer.parseInt(java_version)
         options.compilerArgs = ['-Xdiags:verbose']
@@ -113,14 +131,22 @@ subprojects {
     }
 
     sourcesJar.configure {
+        from(project(':common').sourceSets.main.allSource)
+
         addManifest(it)
         addLicense(it)
     }
 
     javadoc.configure {
+        source(project(':common').sourceSets.main.allJava)
+
         // prevent java 8's strict doclint for javadocs from failing builds
         options.addStringOption('Xdoclint:none', '-quiet')
     }
+
+    apply from: rootProject.file('gradle/package-infos.gradle')
+
+    ideaSyncTask.finalizedBy(generatePackageInfos)
 }
 
 void addLicense(jarTask) {
