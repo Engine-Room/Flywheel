@@ -14,7 +14,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraftforge.event.level.LevelEvent;
 
 public final class LevelAttached<T> {
 	private static final ConcurrentLinkedDeque<WeakReference<LevelAttached<?>>> ALL = new ConcurrentLinkedDeque<>();
@@ -40,11 +39,6 @@ public final class LevelAttached<T> {
 
 	public LevelAttached(Function<LevelAccessor, T> factory) {
 		this(factory, t -> {});
-	}
-
-	@ApiStatus.Internal
-	public static void onUnloadLevel(LevelEvent.Unload event) {
-		invalidateLevel(event.getLevel());
 	}
 
 	public static void invalidateLevel(LevelAccessor level) {

@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 
 class MeshEmitter implements VertexConsumer {
-	private final BufferBuilder bufferBuilder;
+	protected final BufferBuilder bufferBuilder;
 	private final RenderType renderType;
 	private boolean lastQuadWasShaded;
 	private boolean seenFirstQuad;
@@ -51,7 +51,7 @@ class MeshEmitter implements VertexConsumer {
 		}
 	}
 
-	private void observeQuadAndEmitIfNecessary(BakedQuad quad) {
+	protected void observeQuadAndEmitIfNecessary(BakedQuad quad) {
 		if (seenFirstQuad && lastQuadWasShaded != quad.isShade()) {
 			emit();
 			begin();
@@ -66,13 +66,6 @@ class MeshEmitter implements VertexConsumer {
 		observeQuadAndEmitIfNecessary(quad);
 
 		bufferBuilder.putBulkData(poseEntry, quad, colorMuls, red, green, blue, combinedLights, combinedOverlay, mulColor);
-	}
-
-	@Override
-	public void putBulkData(PoseStack.Pose matrixEntry, BakedQuad quad, float[] baseBrightness, float red, float green, float blue, float alpha, int[] lightmapCoords, int overlayCoords, boolean readExistingColor) {
-		observeQuadAndEmitIfNecessary(quad);
-
-		bufferBuilder.putBulkData(matrixEntry, quad, baseBrightness, red, green, blue, alpha, lightmapCoords, overlayCoords, readExistingColor);
 	}
 
 	@Override

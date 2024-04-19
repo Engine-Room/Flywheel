@@ -4,8 +4,6 @@ import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.backend.Backend;
-import com.jozufozu.flywheel.api.event.EndClientResourceReloadEvent;
-import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.backend.Backends;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.impl.visualization.VisualizationManagerImpl;
@@ -14,7 +12,6 @@ import com.mojang.logging.LogUtils;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fml.CrashReportCallables;
 
 public final class BackendManagerImpl {
 	private static final Logger LOGGER = LogUtils.getLogger();
@@ -47,7 +44,7 @@ public final class BackendManagerImpl {
 		return Backends.INDIRECT;
 	}
 
-	private static void chooseBackend() {
+	public static void chooseBackend() {
 		var preferred = FlwConfig.get().getBackend();
 		var actual = preferred.findFallback();
 
@@ -67,25 +64,5 @@ public final class BackendManagerImpl {
 	}
 
 	public static void init() {
-		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManagerImpl::getBackendString);
-	}
-
-	public static void onEndClientResourceReload(EndClientResourceReloadEvent event) {
-		if (event.error()
-				.isPresent()) {
-			return;
-		}
-
-		chooseBackend();
-		VisualizationManagerImpl.resetAll();
-	}
-
-	public static void onReloadLevelRenderer(ReloadLevelRendererEvent event) {
-		chooseBackend();
-
-		ClientLevel level = event.level();
-		if (level != null) {
-			VisualizationManagerImpl.reset(level);
-		}
 	}
 }

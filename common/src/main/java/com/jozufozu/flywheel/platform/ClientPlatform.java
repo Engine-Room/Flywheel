@@ -6,9 +6,12 @@ import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
+import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class ClientPlatform {
 	private static final ClientPlatform INSTANCE;
@@ -38,4 +41,8 @@ public abstract class ClientPlatform {
 
 	@Nullable
 	public abstract ShadersModHandler.InternalHandler createIrisOculusHandlerIfPresent();
+
+	public abstract int getLightEmission(BlockState state, ClientLevel level, BlockPos pos);
+
+	public abstract FlwConfig getConfigInstance();
 }

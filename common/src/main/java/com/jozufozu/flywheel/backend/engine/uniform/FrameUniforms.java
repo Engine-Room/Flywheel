@@ -6,6 +6,7 @@ import org.joml.Vector3f;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
+import com.jozufozu.flywheel.backend.mixin.LevelRendererAccessor;
 import com.jozufozu.flywheel.config.DebugMode;
 import com.jozufozu.flywheel.lib.math.MatrixMath;
 
@@ -147,8 +148,7 @@ public final class FrameUniforms extends UniformWriter {
 	}
 
 	private static long writeTime(long ptr, RenderContext context) {
-		int ticks = context.renderer()
-				.getTicks();
+		int ticks = ((LevelRendererAccessor) context.renderer()).flywheel$ticks();
 		float partialTick = context.partialTick();
 		float renderTicks = ticks + partialTick;
 		float renderSeconds = renderTicks / 20f;

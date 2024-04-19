@@ -7,11 +7,14 @@ import com.jozufozu.flywheel.api.event.ReloadLevelRendererCallback;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.event.RenderStageCallback;
+import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class ClientPlatformImpl extends ClientPlatform {
 	@Override
@@ -55,5 +58,16 @@ public class ClientPlatformImpl extends ClientPlatform {
 		} else {
 			return null;
 		}
+	}
+
+	@Override
+	public int getLightEmission(BlockState state, ClientLevel level, BlockPos pos) {
+		return state.getLightEmission();
+	}
+
+	@Override
+	public FlwConfig getConfigInstance() {
+		// TODO: fabric config
+		return null;
 	}
 }

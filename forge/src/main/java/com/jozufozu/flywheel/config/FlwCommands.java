@@ -25,7 +25,7 @@ public final class FlwCommands {
 	}
 
 	public static void registerClientCommands(RegisterClientCommandsEvent event) {
-		FlwConfig config = FlwConfig.get();
+		var config = FlwForgeConfig.INSTANCE;
 
 		LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("flywheel");
 
