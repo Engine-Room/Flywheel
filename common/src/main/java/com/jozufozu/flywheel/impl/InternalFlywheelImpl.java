@@ -111,9 +111,4 @@ public final class InternalFlywheelImpl implements InternalFlywheelApi {
 	public <T extends Entity> void setVisualizer(EntityType<T> type, EntityVisualizer<? super T> visualizer) {
 		VisualizerRegistryImpl.setVisualizer(type, visualizer);
 	}
-
-	@Override
-	public PoseTransformStack getPoseTransformStackOf(PoseStack stack) {
-		return ((PoseStackExtension) stack).flywheel$transformStack();
-	}
 }

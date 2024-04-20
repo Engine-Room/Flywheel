@@ -19,7 +19,7 @@ import com.jozufozu.flywheel.impl.visualization.VisualizationEventHandler;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.model.ModelCache;
 import com.jozufozu.flywheel.lib.model.ModelHolder;
-import com.jozufozu.flywheel.lib.model.baked.PartialModel;
+import com.jozufozu.flywheel.lib.model.baked.PartialModelEventHandler;
 import com.jozufozu.flywheel.lib.util.LevelAttached;
 import com.jozufozu.flywheel.lib.util.StringUtil;
 
@@ -98,8 +98,8 @@ public class FlywheelForge {
 		modEventBus.<EndClientResourceReloadEvent>addListener($ -> ModelCache.onEndClientResourceReload());
 		modEventBus.<EndClientResourceReloadEvent>addListener($ -> ModelHolder.onEndClientResourceReload());
 
-		modEventBus.addListener(PartialModel::onModelRegistry);
-		modEventBus.addListener(PartialModel::onModelBake);
+		modEventBus.addListener(PartialModelEventHandler::onModelRegistry);
+		modEventBus.addListener(PartialModelEventHandler::onModelBake);
 
 		Flywheel.earlyInit();
 		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManagerImpl::getBackendString);

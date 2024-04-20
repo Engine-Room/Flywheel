@@ -1,6 +1,5 @@
 package com.jozufozu.flywheel.lib.model;
 
-import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 
@@ -8,8 +7,8 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryUtil;
-import org.slf4j.Logger;
 
+import com.jozufozu.flywheel.lib.internal.FlywheelLibPlatform;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
@@ -22,41 +21,19 @@ import com.jozufozu.flywheel.lib.vertex.PosVertexView;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferBuilder.DrawState;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.logging.LogUtils;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 public final class ModelUtil {
-	private static final Logger LOGGER = LogUtils.getLogger();
-
 	/**
 	 * An alternative BlockRenderDispatcher that circumvents the Forge rendering pipeline to ensure consistency.
 	 * Meant to be used for virtual rendering.
 	 */
-	public static final BlockRenderDispatcher VANILLA_RENDERER = createVanillaRenderer();
+	public static final BlockRenderDispatcher VANILLA_RENDERER = FlywheelLibPlatform.INSTANCE.createVanillaRenderer();
 	private static final float BOUNDING_SPHERE_EPSILON = 1e-4f;
 
 	private ModelUtil() {
-	}
-
-	private static BlockRenderDispatcher createVanillaRenderer() {
-		BlockRenderDispatcher defaultDispatcher = Minecraft.getInstance().getBlockRenderer();
-		BlockRenderDispatcher dispatcher = new BlockRenderDispatcher(null, null, null);
-		try {
-			for (Field field : BlockRenderDispatcher.class.getDeclaredFields()) {
-				field.setAccessible(true);
-				field.set(dispatcher, field.get(defaultDispatcher));
-			}
-			ObfuscationReflectionHelper.setPrivateValue(BlockRenderDispatcher.class, dispatcher, new ModelBlockRenderer(Minecraft.getInstance().getBlockColors()), "f_110900_");
-		} catch (Exception e) {
-			LOGGER.error("Failed to initialize vanilla BlockRenderDispatcher!", e);
-			return defaultDispatcher;
-		}
-		return dispatcher;
 	}
 
 	public static MemoryBlock convertVanillaBuffer(BufferBuilder.RenderedBuffer buffer, VertexView vertexView) {

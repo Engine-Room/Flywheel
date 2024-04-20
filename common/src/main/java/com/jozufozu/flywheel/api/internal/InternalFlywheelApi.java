@@ -12,8 +12,6 @@ import com.jozufozu.flywheel.api.vertex.VertexViewProvider;
 import com.jozufozu.flywheel.api.visualization.BlockEntityVisualizer;
 import com.jozufozu.flywheel.api.visualization.EntityVisualizer;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
-import com.jozufozu.flywheel.lib.transform.PoseTransformStack;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.world.entity.Entity;
@@ -94,6 +92,4 @@ public interface InternalFlywheelApi {
 	<T extends BlockEntity> void setVisualizer(BlockEntityType<T> type, BlockEntityVisualizer<? super T> visualizer);
 
 	<T extends Entity> void setVisualizer(EntityType<T> type, EntityVisualizer<? super T> visualizer);
-
-	PoseTransformStack getPoseTransformStackOf(PoseStack stack);
 }

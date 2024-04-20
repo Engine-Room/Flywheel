@@ -5,7 +5,6 @@ import java.util.List;
 
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.ModelEvent;
 
 /**
  * A helper class for loading and accessing json models.
@@ -19,8 +18,8 @@ import net.minecraftforge.client.event.ModelEvent;
  * Attempting to create a PartialModel after {@link ModelEvent.RegisterAdditional} will cause an error.
  */
 public class PartialModel {
-	private static final List<PartialModel> ALL = new ArrayList<>();
-	private static boolean tooLate = false;
+	static final List<PartialModel> ALL = new ArrayList<>();
+	static boolean tooLate = false;
 
 	protected final ResourceLocation modelLocation;
 	protected BakedModel bakedModel;
@@ -34,28 +33,9 @@ public class PartialModel {
 		ALL.add(this);
 	}
 
-	public static void onModelRegistry(ModelEvent.RegisterAdditional event) {
-		for (PartialModel partial : ALL) {
-			event.register(partial.getLocation());
-		}
-
-		tooLate = true;
-	}
-
-	public static void onModelBake(ModelEvent.BakingCompleted event) {
-		var modelRegistry = event.getModels();
-		for (PartialModel partial : ALL) {
-			partial.set(modelRegistry.get(partial.getLocation()));
-		}
-	}
-
 	public String getName() {
 		return getLocation()
 				.toString();
-	}
-
-	protected void set(BakedModel bakedModel) {
-		this.bakedModel = bakedModel;
 	}
 
 	public ResourceLocation getLocation() {
@@ -64,5 +44,9 @@ public class PartialModel {
 
 	public BakedModel get() {
 		return bakedModel;
+	}
+
+	void set(BakedModel bakedModel) {
+		this.bakedModel = bakedModel;
 	}
 }
