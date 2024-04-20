@@ -17,14 +17,14 @@ class MeshEmitter implements VertexConsumer {
 	private boolean lastQuadWasShaded;
 	private boolean seenFirstQuad;
 	@Nullable
-	private BakedModelBufferer.ResultConsumer resultConsumer;
+	private MeshEmitter.ResultConsumer resultConsumer;
 
     MeshEmitter(BufferBuilder bufferBuilder, RenderType renderType) {
         this.bufferBuilder = bufferBuilder;
         this.renderType = renderType;
     }
 
-	public void begin(BakedModelBufferer.ResultConsumer resultConsumer) {
+	public void begin(ResultConsumer resultConsumer) {
 		this.resultConsumer = resultConsumer;
 
 		begin();
@@ -111,5 +111,9 @@ class MeshEmitter implements VertexConsumer {
 	@Override
 	public void unsetDefaultColor() {
 		throw new UnsupportedOperationException("ShadeSeparatingVertexConsumer only supports putBulkData!");
+	}
+
+	public interface ResultConsumer {
+		void accept(RenderType renderType, boolean shaded, BufferBuilder.RenderedBuffer data);
 	}
 }

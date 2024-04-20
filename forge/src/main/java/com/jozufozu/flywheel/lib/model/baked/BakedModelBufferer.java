@@ -33,7 +33,7 @@ final class BakedModelBufferer {
 	private BakedModelBufferer() {
 	}
 
-	public static void bufferSingle(ModelBlockRenderer blockRenderer, BlockAndTintGetter level, BakedModel model, BlockState state, @Nullable PoseStack poseStack, ModelData modelData, ResultConsumer resultConsumer) {
+	public static void bufferSingle(ModelBlockRenderer blockRenderer, BlockAndTintGetter level, BakedModel model, BlockState state, @Nullable PoseStack poseStack, ModelData modelData, MeshEmitter.ResultConsumer resultConsumer) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
@@ -59,7 +59,7 @@ final class BakedModelBufferer {
 		}
 	}
 
-	public static void bufferBlock(BlockRenderDispatcher renderDispatcher, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, ModelData modelData, ResultConsumer resultConsumer) {
+	public static void bufferBlock(BlockRenderDispatcher renderDispatcher, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, ModelData modelData, MeshEmitter.ResultConsumer resultConsumer) {
 		if (state.getRenderShape() != RenderShape.MODEL) {
 			return;
 		}
@@ -67,7 +67,7 @@ final class BakedModelBufferer {
 		bufferSingle(renderDispatcher.getModelRenderer(), level, renderDispatcher.getBlockModel(state), state, poseStack, modelData, resultConsumer);
 	}
 
-	public static void bufferMultiBlock(BlockRenderDispatcher renderDispatcher, Iterator<BlockPos> posIterator, BlockAndTintGetter level, @Nullable PoseStack poseStack, Function<BlockPos, ModelData> modelDataLookup, boolean renderFluids, ResultConsumer resultConsumer) {
+	public static void bufferMultiBlock(BlockRenderDispatcher renderDispatcher, Iterator<BlockPos> posIterator, BlockAndTintGetter level, @Nullable PoseStack poseStack, Function<BlockPos, ModelData> modelDataLookup, boolean renderFluids, MeshEmitter.ResultConsumer resultConsumer) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
@@ -142,13 +142,13 @@ final class BakedModelBufferer {
 
 		public final TransformingVertexConsumer transformingWrapper = new TransformingVertexConsumer();
 
-		public final MeshEmitter[] emitters = new MeshEmitter[CHUNK_LAYER_AMOUNT];
+		public final ForgeMeshEmitter[] emitters = new ForgeMeshEmitter[CHUNK_LAYER_AMOUNT];
 
 		{
 			for (int layerIndex = 0; layerIndex < CHUNK_LAYER_AMOUNT; layerIndex++) {
 				var renderType = CHUNK_LAYERS[layerIndex];
 				var buffer = new BufferBuilder(renderType.bufferSize());
-				emitters[layerIndex] = new MeshEmitter(buffer, renderType);
+				emitters[layerIndex] = new ForgeMeshEmitter(buffer, renderType);
 			}
 		}
 	}
