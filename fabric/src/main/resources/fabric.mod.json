@@ -1,19 +1,20 @@
 {
   "schemaVersion": 1,
-  "id": "flywheel",
-  "version": "${version}",
-  "name": "Flywheel",
-  "description": "A modern engine for modded minecraft.",
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
   "authors": [
     "Jozufozu",
     "PepperCode1"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "${mod_homepage}",
+    "sources": "${mod_sources}",
+    "issues": "${mod_issues}"
   },
-  "license": "MIT",
-  "icon": "assets/flywheel/logo.png",
+  "license": "${mod_license}",
+  "icon": "logo.png",
   "environment": "*",
   "entrypoints": {
     "client": [
@@ -27,6 +28,6 @@
   ],
   "depends": {
     "fabric": "*",
-    "minecraft": ">=1.20.1"
+    "minecraft": "${minecraft_version_range}"
   }
 }

@@ -1,6 +1,6 @@
 {
   "pack": {
-    "description": "Flywheel resources",
+    "description": "${mod_name} resources",
     "pack_format": 15
   }
 }
