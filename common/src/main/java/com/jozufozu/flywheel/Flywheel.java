@@ -13,6 +13,7 @@ import com.jozufozu.flywheel.lib.material.CutoutShaders;
 import com.jozufozu.flywheel.lib.material.FogShaders;
 import com.jozufozu.flywheel.lib.material.StandardMaterialShaders;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
+import com.jozufozu.flywheel.vanilla.VanillaVisuals;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -39,6 +40,8 @@ public class Flywheel {
 		StandardMaterialShaders.init();
 
 		ShaderIndices.init();
+
+		VanillaVisuals.init();
 	}
 
 	public static void freeze() {
