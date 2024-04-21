@@ -1,9 +1,4 @@
-evaluationDependsOn(':common')
-
-base {
-    archivesName = "flywheel-${project.name}-${artifact_minecraft_version}"
-}
-
+// Add some forge specific configurations
 loom {
     forge {
         mixinConfig "flywheel.backend.mixins.json"
@@ -26,8 +21,6 @@ dependencies {
 
     modCompileOnly "maven.modrinth:embeddium:$embeddium_version"
     modCompileOnly "maven.modrinth:oculus:$oculus_version"
-
-    compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 }
 
 publishing {

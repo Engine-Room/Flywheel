@@ -1,11 +1,5 @@
-base {
-    archivesName = "flywheel-${project.name}-${artifact_minecraft_version}"
-}
-
 dependencies {
     modCompileOnly "net.fabricmc:fabric-loader:$fabric_loader_version"
-
-    compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
 }

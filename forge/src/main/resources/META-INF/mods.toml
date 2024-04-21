@@ -1,33 +1,32 @@
 modLoader = "javafml"
 loaderVersion = "${loader_version_range}"
-issueTrackerURL = "https://github.com/Jozufozu/Flywheel/issues"
-license = "MIT"
+issueTrackerURL = "${mod_issues}"
+license = "${mod_license}"
 
 [[mods]]
-modId = "flywheel"
+modId = "${mod_id}"
 version = "${mod_version}"
-displayName = "Flywheel"
+displayName = "${mod_name}"
 logoFile = "logo.png"
-displayURL = "https://github.com/Jozufozu/Flywheel"
+displayURL = "${mod_homepage}"
 authors = "Jozufozu, PepperCode1"
-description = '''
-A modern engine for modded minecraft.'''
+description = "${mod_description}"
 
-[[dependencies.flywheel]]
+[[dependencies.${mod_id}]]
 modId = "forge"
 mandatory = true
 versionRange = "${forge_version_range}"
 ordering = "NONE"
 side = "CLIENT"
 
-[[dependencies.flywheel]]
+[[dependencies.${mod_id}]]
 modId = "minecraft"
 mandatory = true
 versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "CLIENT"
 
-[[dependencies.flywheel]]
+[[dependencies.${mod_id}]]
 modId = "rubidium"
 # This replicates a "breaks" dependency.
 # There's a mixin crash with Rubidium <0.7.0.
