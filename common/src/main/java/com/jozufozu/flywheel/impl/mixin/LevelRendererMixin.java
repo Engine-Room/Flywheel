@@ -51,7 +51,7 @@ abstract class LevelRendererMixin {
 	private void flywheel$beginRender(PoseStack poseStack, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
 		flywheel$renderContext = RenderContextImpl.create((LevelRenderer) (Object) this, level, renderBuffers, poseStack, projectionMatrix, camera, partialTick);
 
-		ClientPlatform.getInstance().dispatchBeginFrame(flywheel$renderContext);
+		ClientPlatform.INSTANCE.dispatchBeginFrame(flywheel$renderContext);
 	}
 
 	@Inject(method = "renderLevel", at = @At("RETURN"))
@@ -61,7 +61,7 @@ abstract class LevelRendererMixin {
 
 	@Inject(method = "allChanged", at = @At("RETURN"))
 	private void flywheel$refresh(CallbackInfo ci) {
-		ClientPlatform.getInstance().dispatchReloadLevelRenderer(level);
+		ClientPlatform.INSTANCE.dispatchReloadLevelRenderer(level);
 	}
 
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=destroyProgress"))
@@ -81,7 +81,7 @@ abstract class LevelRendererMixin {
 	@Unique
 	private void flywheel$dispatch(RenderStage stage) {
 		if (flywheel$renderContext != null) {
-			ClientPlatform.getInstance().dispatchRenderStage(flywheel$renderContext, stage);
+			ClientPlatform.INSTANCE.dispatchRenderStage(flywheel$renderContext, stage);
 		}
 	}
 

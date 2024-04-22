@@ -4,17 +4,9 @@ import java.util.function.BiFunction;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.model.Model;
-import com.jozufozu.flywheel.api.vertex.VertexView;
-import com.jozufozu.flywheel.lib.internal.FlywheelLibPlatform;
-import com.jozufozu.flywheel.lib.memory.MemoryBlock;
-import com.jozufozu.flywheel.lib.model.ModelUtil;
-import com.jozufozu.flywheel.lib.model.SimpleMesh;
 import com.jozufozu.flywheel.lib.model.SimpleModel;
-import com.jozufozu.flywheel.lib.model.baked.MeshEmitter.ResultConsumer;
-import com.jozufozu.flywheel.lib.vertex.NoOverlayVertexView;
+import com.jozufozu.flywheel.platform.ClientPlatform;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.RenderType;
@@ -31,7 +23,7 @@ public abstract class BlockModelBuilder {
 	protected BiFunction<RenderType, Boolean, Material> materialFunc;
 
 	public static BlockModelBuilder create(BlockState state) {
-		return FlywheelLibPlatform.INSTANCE.blockModelBuilder(state);
+		return ClientPlatform.INSTANCE.blockModelBuilder(state);
 	}
 
 	protected BlockModelBuilder(BlockState state) {

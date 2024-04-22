@@ -1,7 +1,5 @@
 package com.jozufozu.flywheel.api.internal;
 
-import java.lang.reflect.Constructor;
-
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.backend.Backend;
@@ -12,6 +10,8 @@ import com.jozufozu.flywheel.api.vertex.VertexViewProvider;
 import com.jozufozu.flywheel.api.visualization.BlockEntityVisualizer;
 import com.jozufozu.flywheel.api.visualization.EntityVisualizer;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
+import com.jozufozu.flywheel.lib.transform.PoseTransformStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.world.entity.Entity;
@@ -21,42 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public interface InternalFlywheelApi {
-	InternalFlywheelApi INSTANCE = load();
-
-	// Adapted from https://github.com/CaffeineMC/sodium-fabric/blob/bf4fc9dab16e1cca07b2f23a1201c9bf237c8044/src/api/java/net/caffeinemc/mods/sodium/api/internal/DependencyInjection.java
-	private static InternalFlywheelApi load() {
-		Class<InternalFlywheelApi> apiClass = InternalFlywheelApi.class;
-		Class<?> implClass;
-
-		try {
-			implClass = Class.forName("com.jozufozu.flywheel.impl.InternalFlywheelImpl");
-		} catch (ReflectiveOperationException e) {
-			throw new RuntimeException("Could not find implementation", e);
-		}
-
-		if (!apiClass.isAssignableFrom(implClass)) {
-			throw new RuntimeException("Class %s does not implement interface %s"
-					.formatted(implClass.getName(), apiClass.getName()));
-		}
-
-		Constructor<?> implConstructor;
-
-		try {
-			implConstructor = implClass.getConstructor();
-		} catch (ReflectiveOperationException e) {
-			throw new RuntimeException("Could not find default constructor", e);
-		}
-
-		Object implInstance;
-
-		try {
-			implInstance = implConstructor.newInstance();
-		} catch (ReflectiveOperationException e) {
-			throw new RuntimeException("Could not instantiate implementation", e);
-		}
-
-		return apiClass.cast(implInstance);
-	}
+	InternalFlywheelApi INSTANCE = DependencyInjection.load(InternalFlywheelApi.class, "com.jozufozu.flywheel.impl.InternalFlywheelImpl");
 
 	<T> Registry<T> createRegistry();
 
@@ -92,4 +57,6 @@ public interface InternalFlywheelApi {
 	<T extends BlockEntity> void setVisualizer(BlockEntityType<T> type, BlockEntityVisualizer<? super T> visualizer);
 
 	<T extends Entity> void setVisualizer(EntityType<T> type, EntityVisualizer<? super T> visualizer);
+
+	PoseTransformStack getPoseTransformStackOf(PoseStack stack);
 }

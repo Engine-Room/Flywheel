@@ -8,15 +8,23 @@ import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.event.RenderStageCallback;
 import com.jozufozu.flywheel.config.FlwConfig;
+import com.jozufozu.flywheel.lib.model.baked.BakedModelBuilder;
+import com.jozufozu.flywheel.lib.model.baked.BlockModelBuilder;
+import com.jozufozu.flywheel.lib.model.baked.MultiBlockModelBuilder;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.irisshaders.iris.api.v0.IrisApi;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class ClientPlatformImpl extends ClientPlatform {
+public class ClientPlatformImpl implements ClientPlatform {
 	@Override
 	public void dispatchReloadLevelRenderer(ClientLevel level) {
 		ReloadLevelRendererCallback.EVENT.invoker().onReloadLevelRenderer(level);
@@ -61,13 +69,33 @@ public class ClientPlatformImpl extends ClientPlatform {
 	}
 
 	@Override
-	public int getLightEmission(BlockState state, ClientLevel level, BlockPos pos) {
+	public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
 		return state.getLightEmission();
 	}
 
 	@Override
 	public FlwConfig getConfigInstance() {
 		// TODO: fabric config
+		return null;
+	}
+
+	@Override
+	public BlockRenderDispatcher createVanillaRenderer() {
+		return Minecraft.getInstance().getBlockRenderer();
+	}
+
+	@Override
+	public BakedModelBuilder bakedModelBuilder(BakedModel bakedModel) {
+		return null;
+	}
+
+	@Override
+	public BlockModelBuilder blockModelBuilder(BlockState state) {
+		return null;
+	}
+
+	@Override
+	public MultiBlockModelBuilder multiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
 		return null;
 	}
 }

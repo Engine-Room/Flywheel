@@ -1,33 +1,18 @@
 dependencies {
-    modCompileOnly "net.fabricmc:fabric-loader:$fabric_loader_version"
-    modLocalRuntime "net.fabricmc:fabric-loader:$fabric_loader_version"
-
-    modCompileOnly "net.fabricmc.fabric-api:fabric-api:$fabric_api_version"
-    modLocalRuntime "net.fabricmc.fabric-api:fabric-api:$fabric_api_version"
-
     compileOnly project(path: ':common', configuration: 'namedElements')
 
-    // switch to implementation for debugging
-    modCompileOnly "maven.modrinth:starlight:$starlight_version"
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
 
-    modCompileOnly "maven.modrinth:sodium:$sodium_version"
-    modCompileOnly "maven.modrinth:iris:$iris_version"
+    modCompileOnly "maven.modrinth:sodium:${sodium_version}"
+    modCompileOnly "maven.modrinth:iris:${iris_version}"
 }
 
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
-            from(components["java"])
+            from(components['java'])
             artifactId = "flywheel-${project.name}-intermediary-${artifact_minecraft_version}"
-        }
-    }
-    repositories {
-        maven {
-            url "file://${rootProject.projectDir}/mcmodsrepo"
-        }
-
-        if (project.hasProperty('mavendir')) {
-            maven { url rootProject.file(property('mavendir')) }
         }
     }
 }

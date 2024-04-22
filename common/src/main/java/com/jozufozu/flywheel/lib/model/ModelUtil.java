@@ -8,7 +8,6 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.lib.internal.FlywheelLibPlatform;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Mesh;
 import com.jozufozu.flywheel.api.model.Model;
@@ -18,6 +17,7 @@ import com.jozufozu.flywheel.api.vertex.VertexViewProviderRegistry;
 import com.jozufozu.flywheel.lib.material.Materials;
 import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.jozufozu.flywheel.lib.vertex.PosVertexView;
+import com.jozufozu.flywheel.platform.ClientPlatform;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferBuilder.DrawState;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -30,7 +30,7 @@ public final class ModelUtil {
 	 * An alternative BlockRenderDispatcher that circumvents the Forge rendering pipeline to ensure consistency.
 	 * Meant to be used for virtual rendering.
 	 */
-	public static final BlockRenderDispatcher VANILLA_RENDERER = FlywheelLibPlatform.INSTANCE.createVanillaRenderer();
+	public static final BlockRenderDispatcher VANILLA_RENDERER = ClientPlatform.INSTANCE.createVanillaRenderer();
 	private static final float BOUNDING_SPHERE_EPSILON = 1e-4f;
 
 	private ModelUtil() {

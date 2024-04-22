@@ -1,97 +1,25 @@
 plugins {
-    id 'eclipse'
     id 'idea'
     // make sure gradle loads the same arch plugin across all subprojects
     id 'dev.architectury.loom' apply false
 }
 
-println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+println("Java: ${System.getProperty('java.version')}, JVM: ${System.getProperty('java.vm.version')} (${System.getProperty('java.vendor')}), Arch: ${System.getProperty('os.arch')}")
 
-subprojects {
-    apply plugin: "dev.architectury.loom"
+allprojects {
+    // Need to setup the java plugin for all projects so that our subprojects can find an output directory
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
 
-    base {
-        archivesName = "flywheel-${name}-${artifact_minecraft_version}"
-    }
-
-    boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false');
-
-    ext.buildNumber = System.getenv('BUILD_NUMBER')
+    boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false')
+    String buildNumber = System.getenv('BUILD_NUMBER')
 
     group = 'com.jozufozu.flywheel'
     version = mod_version + (dev && buildNumber != null ? "-${buildNumber}" : '')
 
-    loom {
-        silentMojangMappingsLicense()
+    base {
+        archivesName = "flywheel-${name}-${artifact_minecraft_version}"
     }
-
-    repositories {
-        maven {
-            name = 'ParchmentMC'
-            url = 'https://maven.parchmentmc.org'
-        }
-        maven {
-            url 'https://www.cursemaven.com'
-            content {
-                includeGroup "curse.maven"
-            }
-        }
-        maven {
-            name 'tterrag maven'
-            url 'https://maven.tterrag.com/'
-        }
-        maven {
-            name = "Modrinth"
-            url = "https://api.modrinth.com/maven"
-            content {
-                includeGroup "maven.modrinth"
-            }
-        }
-        mavenCentral()
-    }
-
-    dependencies {
-        minecraft "com.mojang:minecraft:$minecraft_version"
-        mappings(loom.layered() {
-            officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
-        })
-
-        implementation "com.google.code.findbugs:jsr305:3.0.2"
-    }
-
-    processResources {
-        var replaceProperties = [
-                minecraft_version      : minecraft_version,
-                minecraft_version_range: minecraft_version_range,
-                forge_version          : forge_version,
-                forge_version_range    : forge_version_range,
-                loader_version_range   : loader_version_range,
-                mod_version            : mod_version,
-                mod_id                 : mod_id,
-                mod_name               : mod_name,
-                mod_description        : mod_description,
-                mod_license            : mod_license,
-                mod_sources            : mod_sources,
-                mod_issues             : mod_issues,
-                mod_homepage           : mod_homepage,
-        ]
-        inputs.properties replaceProperties
-
-        filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml']) {
-            expand replaceProperties + [project: project]
-        }
-    }
-
-    apply from: rootProject.file('gradle/package-infos.gradle')
-
-    ideaSyncTask.finalizedBy(generatePackageInfos)
-}
-
-// Need to setup the java plugin for all projects so that our subprojects can find an output directory
-allprojects {
-    apply plugin: "java"
-    apply plugin: "maven-publish"
 
     java {
         JavaVersion javaVersion = JavaVersion.toVersion(java_version)
@@ -123,12 +51,10 @@ allprojects {
 
     tasks.named('jar', Jar).configure { Jar jar ->
         archiveClassifier = ''
-        addManifest(jar)
         addLicense(jar)
     }
 
     tasks.named('sourcesJar', Jar).configure { Jar jar ->
-        addManifest(jar)
         addLicense(jar)
     }
 
@@ -139,8 +65,89 @@ allprojects {
     }
 }
 
+subprojects {
+    apply plugin: 'dev.architectury.loom'
+
+    loom {
+        silentMojangMappingsLicense()
+    }
+
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'ParchmentMC'
+            url = 'https://maven.parchmentmc.org'
+        }
+        maven {
+            name 'tterrag maven'
+            url 'https://maven.tterrag.com/'
+        }
+        maven {
+            url 'https://www.cursemaven.com'
+            content {
+                includeGroup "curse.maven"
+            }
+        }
+        maven {
+            name = "Modrinth"
+            url = "https://api.modrinth.com/maven"
+            content {
+                includeGroup "maven.modrinth"
+            }
+        }
+    }
+
+    dependencies {
+        minecraft "com.mojang:minecraft:${minecraft_version}"
+        mappings(loom.layered() {
+            officialMojangMappings()
+            parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
+        })
+
+        api 'com.google.code.findbugs:jsr305:3.0.2'
+    }
+
+    processResources {
+        var replaceProperties = [
+                mod_id                        : mod_id,
+                mod_name                      : mod_name,
+                mod_description               : mod_description,
+                mod_license                   : mod_license,
+                mod_sources                   : mod_sources,
+                mod_issues                    : mod_issues,
+                mod_homepage                  : mod_homepage,
+                mod_version                   : mod_version,
+                minecraft_semver_version_range: minecraft_semver_version_range,
+                minecraft_maven_version_range : minecraft_maven_version_range,
+                fabric_api_version_range      : fabric_api_version_range,
+                forge_version_range           : forge_version_range,
+        ]
+        inputs.properties replaceProperties
+
+        filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml']) {
+            expand replaceProperties
+        }
+    }
+
+    publishing {
+        repositories {
+            maven {
+                url "file://${rootProject.projectDir}/mcmodsrepo"
+            }
+
+            if (project.hasProperty('mavendir')) {
+                maven { url rootProject.file(property('mavendir')) }
+            }
+        }
+    }
+
+    apply from: rootProject.file('gradle/package-infos.gradle')
+
+    ideaSyncTask.finalizedBy(generatePackageInfos)
+}
+
 // Common configuration for platform dependent subprojects.
-for (final def subprojectName in [":fabric", ":forge"]) {
+for (final String subprojectName in [':fabric', ':forge']) {
     project(subprojectName) {
         evaluationDependsOn(':common')
 
@@ -148,6 +155,7 @@ for (final def subprojectName in [":fabric", ":forge"]) {
             runs {
                 client {
                     ideConfigGenerated true
+
                     // Turn on our own debug flags
                     property 'flw.dumpShaderSource', 'true'
                     property 'flw.debugMemorySafety', 'true'
@@ -187,7 +195,7 @@ for (final def subprojectName in [":fabric", ":forge"]) {
         }
 
         tasks.named('sourcesJar', Jar).configure { Jar jar ->
-            def commonSources = project(":common").tasks.named('sourcesJar', Jar)
+            def commonSources = project(':common').tasks.named('sourcesJar', Jar)
             dependsOn commonSources
             jar.from zipTree(commonSources.flatMap { it.archiveFile })
 
@@ -199,20 +207,6 @@ for (final def subprojectName in [":fabric", ":forge"]) {
 static void addLicense(Jar jarTask) {
     jarTask.from('LICENSE.md') {
         rename '(.*)\\.(.*)', '$1_' + jarTask.archiveBaseName + '.$2'
-    }
-}
-
-static void addManifest(Jar jarTask) {
-    jarTask.manifest {
-        attributes([
-                'Specification-Title'     : 'flywheel',
-                // 'Specification-Vendor': 'flywheel authors',
-                'Specification-Version'   : '1', // We are version 1 of ourselves
-                'Implementation-Title'    : jarTask.archiveBaseName,
-                'Implementation-Version'  : jarTask.archiveVersion,
-                // 'Implementation-Vendor': 'flywheel authors',
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-        ])
     }
 }
 

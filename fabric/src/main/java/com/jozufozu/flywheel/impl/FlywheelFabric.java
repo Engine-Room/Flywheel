@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel;
+package com.jozufozu.flywheel.impl;
 
 import net.fabricmc.api.ClientModInitializer;
 
