@@ -20,6 +20,10 @@ def setupGeneratePackageInfos(SourceSet sourceSet) {
 	}
 	sourceSet.java.srcDir task
 
+    tasks.named('ideaSyncTask').configure {
+        finalizedBy task
+    }
+
 	def cleanTask = tasks.register(sourceSet.getTaskName('clean', 'PackageInfos'), Delete) {
 		group = 'flywheel'
 		delete file("src/$sourceSetName/generatedPackageInfos")
