@@ -1,5 +1,5 @@
 dependencies {
-    modCompileOnly "net.fabricmc:fabric-loader:$fabric_loader_version"
+    modCompileOnly "net.fabricmc:fabric-loader:${fabric_loader_version}"
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
 }
@@ -11,22 +11,13 @@ test {
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
-            from(components["java"])
+            from(components['java'])
             artifactId = "flywheel-${project.name}-intermediary-${artifact_minecraft_version}"
         }
         register('mojmapJava', MavenPublication) {
             artifact jar
             artifact sourcesJar
             artifactId = "flywheel-${project.name}-mojmap-${artifact_minecraft_version}"
-        }
-    }
-    repositories {
-        maven {
-            url "file://${rootProject.projectDir}/mcmodsrepo"
-        }
-
-        if (project.hasProperty('mavendir')) {
-            maven { url rootProject.file(property('mavendir')) }
         }
     }
 }

@@ -92,9 +92,9 @@ public final class PlayerUniforms extends UniformWriter {
 
 		for (InteractionHand hand : InteractionHand.values()) {
 			Item handItem = player.getItemInHand(hand).getItem();
-			if (handItem instanceof BlockItem bitem) {
-				Block block = bitem.getBlock();
-				int blockLight = ClientPlatform.getInstance()
+			if (handItem instanceof BlockItem blockItem) {
+				Block block = blockItem.getBlock();
+				int blockLight = ClientPlatform.INSTANCE
 						.getLightEmission(block.defaultBlockState(), player.clientLevel, player.blockPosition());
 				if (heldLight < blockLight) {
 					heldLight = blockLight;

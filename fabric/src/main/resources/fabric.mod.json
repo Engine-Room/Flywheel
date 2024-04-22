@@ -15,10 +15,10 @@
   },
   "license": "${mod_license}",
   "icon": "logo.png",
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
     "client": [
-      "com.jozufozu.flywheel.FlywheelFabric"
+      "com.jozufozu.flywheel.impl.FlywheelFabric"
     ]
   },
   "mixins": [
@@ -27,7 +27,10 @@
     "flywheel.impl.sodium.mixins.json"
   ],
   "depends": {
-    "fabric": "*",
-    "minecraft": "${minecraft_version_range}"
+    "minecraft": "${minecraft_semver_version_range}",
+    "fabric-api": "${fabric_api_version_range}"
+  },
+  "breaks": {
+    "sodium": "<0.5.0"
   }
 }

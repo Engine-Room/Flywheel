@@ -1,9 +1,10 @@
-package com.jozufozu.flywheel;
+package com.jozufozu.flywheel.impl;
 
 import java.util.ArrayList;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.event.EndClientResourceReloadEvent;
 import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
@@ -13,8 +14,6 @@ import com.jozufozu.flywheel.config.BackendArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.config.FlwForgeConfig;
-import com.jozufozu.flywheel.impl.BackendEventHandler;
-import com.jozufozu.flywheel.impl.BackendManagerImpl;
 import com.jozufozu.flywheel.impl.visualization.VisualizationEventHandler;
 import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
 import com.jozufozu.flywheel.lib.model.ModelCache;
@@ -34,7 +33,6 @@ import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.CrashReportCallables;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -64,18 +62,13 @@ public class FlywheelForge {
 
 		FlwForgeConfig.INSTANCE.registerSpecs(modLoadingContext);
 
-		modLoadingContext.registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(
-				() -> "any",
-				(serverVersion, isNetwork) -> true
-		));
-
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FlywheelForge.clientInit(forgeEventBus, modEventBus));
 	}
 
 	private static void clientInit(IEventBus forgeEventBus, IEventBus modEventBus) {
 		forgeEventBus.addListener(FlywheelForge::addDebugInfo);
 
-		forgeEventBus.addListener(BackendEventHandler::onReloadLevelRenderer);
+		forgeEventBus.addListener((ReloadLevelRendererEvent e) -> BackendManagerImpl.onReloadLevelRenderer(e.level()));
 
 		forgeEventBus.addListener(VisualizationEventHandler::onClientTick);
 		forgeEventBus.addListener(VisualizationEventHandler::onBeginFrame);
@@ -85,7 +78,7 @@ public class FlywheelForge {
 
 		forgeEventBus.addListener(FlwCommands::registerClientCommands);
 
-		forgeEventBus.<ReloadLevelRendererEvent>addListener($ -> Uniforms.onReloadLevelRenderer());
+		forgeEventBus.addListener((EndClientResourceReloadEvent e) -> Uniforms.onReloadLevelRenderer());
 
 		forgeEventBus.addListener((LevelEvent.Unload e) -> LevelAttached.invalidateLevel(e.getLevel()));
 
@@ -93,10 +86,10 @@ public class FlywheelForge {
 		modEventBus.addListener(FlywheelForge::onClientSetup);
 		modEventBus.addListener(FlywheelForge::onLoadComplete);
 
-		modEventBus.addListener(BackendEventHandler::onEndClientResourceReload);
+		modEventBus.addListener((EndClientResourceReloadEvent e) -> BackendManagerImpl.onEndClientResourceReload(e.error().isPresent()));
 
-		modEventBus.<EndClientResourceReloadEvent>addListener($ -> ModelCache.onEndClientResourceReload());
-		modEventBus.<EndClientResourceReloadEvent>addListener($ -> ModelHolder.onEndClientResourceReload());
+		modEventBus.addListener((EndClientResourceReloadEvent e) -> ModelCache.onEndClientResourceReload());
+		modEventBus.addListener((EndClientResourceReloadEvent e) -> ModelHolder.onEndClientResourceReload());
 
 		modEventBus.addListener(PartialModelEventHandler::onModelRegistry);
 		modEventBus.addListener(PartialModelEventHandler::onModelBake);
@@ -134,7 +127,7 @@ public class FlywheelForge {
 
 		ArrayList<String> info = event.getRight();
 		info.add("");
-		info.add("Flywheel: " + getVersion());
+		info.add("Flywheel: " + version);
 		info.add("Backend: " + BackendManagerImpl.getBackendString());
 		info.add("Update limiting: " + (FlwConfig.get().limitUpdates() ? "on" : "off"));
 
@@ -148,9 +141,5 @@ public class FlywheelForge {
 		}
 
 		info.add("Memory Usage: CPU: " + StringUtil.formatBytes(FlwMemoryTracker.getCPUMemory()) + ", GPU: " + StringUtil.formatBytes(FlwMemoryTracker.getGPUMemory()));
-	}
-
-	public static ArtifactVersion getVersion() {
-		return version;
 	}
 }

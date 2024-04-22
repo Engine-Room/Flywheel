@@ -4,12 +4,12 @@ import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.platform.ClientPlatform;
 
 public interface FlwConfig {
-	FlwConfig INSTANCE = ClientPlatform.getInstance().getConfigInstance();
+	FlwConfig INSTANCE = ClientPlatform.INSTANCE.getConfigInstance();
 	static FlwConfig get() {
 		return INSTANCE;
 	}
 
-	Backend getBackend();
+	Backend backend();
 
 	boolean limitUpdates();
 

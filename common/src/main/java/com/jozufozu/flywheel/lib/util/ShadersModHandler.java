@@ -22,7 +22,7 @@ public final class ShadersModHandler {
 		Package optifinePackage = Package.getPackage(OPTIFINE_ROOT_PACKAGE);
 		IS_OPTIFINE_INSTALLED = optifinePackage != null;
 
-		var irisOculusHandler = ClientPlatform.getInstance()
+		var irisOculusHandler = ClientPlatform.INSTANCE
 				.createIrisOculusHandlerIfPresent();
 		IS_IRIS_LOADED = irisOculusHandler != null;
 

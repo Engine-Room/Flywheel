@@ -1,48 +1,47 @@
 package com.jozufozu.flywheel.platform;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.event.RenderStage;
+import com.jozufozu.flywheel.api.internal.DependencyInjection;
 import com.jozufozu.flywheel.config.FlwConfig;
+import com.jozufozu.flywheel.lib.model.baked.BakedModelBuilder;
+import com.jozufozu.flywheel.lib.model.baked.BlockModelBuilder;
+import com.jozufozu.flywheel.lib.model.baked.MultiBlockModelBuilder;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
-public abstract class ClientPlatform {
-	private static final ClientPlatform INSTANCE;
+public interface ClientPlatform {
+	ClientPlatform INSTANCE = DependencyInjection.load(ClientPlatform.class, "com.jozufozu.flywheel.platform.ClientPlatformImpl");
 
-	static {
-		try {
-			INSTANCE =
-					(ClientPlatform) Class.forName("com.jozufozu.flywheel.platform.ClientPlatformImpl").getConstructor()
-							.newInstance();
-		} catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException |
-				 NoSuchMethodException e) {
-			throw new RuntimeException(e);
-		}
-	}
+	void dispatchReloadLevelRenderer(ClientLevel level);
 
-	public static ClientPlatform getInstance() {
-		return INSTANCE;
-	}
+	void dispatchBeginFrame(RenderContext context);
 
-	public abstract void dispatchReloadLevelRenderer(ClientLevel level);
+	void dispatchRenderStage(RenderContext context, RenderStage stage);
 
-	public abstract void dispatchBeginFrame(RenderContext context);
-
-	public abstract void dispatchRenderStage(RenderContext context, RenderStage stage);
-
-	public abstract boolean isModLoaded(String modid);
+	boolean isModLoaded(String modid);
 
 	@Nullable
-	public abstract ShadersModHandler.InternalHandler createIrisOculusHandlerIfPresent();
+	ShadersModHandler.InternalHandler createIrisOculusHandlerIfPresent();
 
-	public abstract int getLightEmission(BlockState state, ClientLevel level, BlockPos pos);
+	int getLightEmission(BlockState state, BlockGetter level, BlockPos pos);
 
-	public abstract FlwConfig getConfigInstance();
+	FlwConfig getConfigInstance();
+
+	BlockRenderDispatcher createVanillaRenderer();
+
+	BakedModelBuilder bakedModelBuilder(BakedModel bakedModel);
+
+	BlockModelBuilder blockModelBuilder(BlockState state);
+
+	MultiBlockModelBuilder multiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions);
 }

@@ -1,9 +1,8 @@
-// Add some forge specific configurations
 loom {
     forge {
-        mixinConfig "flywheel.backend.mixins.json"
-        mixinConfig "flywheel.impl.mixins.json"
-        mixinConfig "flywheel.impl.sodium.mixins.json"
+        mixinConfig 'flywheel.backend.mixins.json'
+        mixinConfig 'flywheel.impl.mixins.json'
+        mixinConfig 'flywheel.impl.sodium.mixins.json'
     }
 
     runs {
@@ -19,24 +18,15 @@ dependencies {
 
     compileOnly project(path: ':common', configuration: 'namedElements')
 
-    modCompileOnly "maven.modrinth:embeddium:$embeddium_version"
-    modCompileOnly "maven.modrinth:oculus:$oculus_version"
+    modCompileOnly "maven.modrinth:embeddium:${embeddium_version}"
+    modCompileOnly "maven.modrinth:oculus:${oculus_version}"
 }
 
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
-            from(components["java"])
+            from(components['java'])
             artifactId = "flywheel-${project.name}-intermediary-${artifact_minecraft_version}"
-        }
-    }
-    repositories {
-        maven {
-            url "file://${rootProject.projectDir}/mcmodsrepo"
-        }
-
-        if (project.hasProperty('mavendir')) {
-            maven { url rootProject.file(property('mavendir')) }
         }
     }
 }

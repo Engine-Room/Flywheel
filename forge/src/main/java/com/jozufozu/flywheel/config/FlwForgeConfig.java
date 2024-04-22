@@ -27,7 +27,7 @@ public class FlwForgeConfig implements FlwConfig {
 		clientSpec = clientPair.getRight();
 	}
 
-	public Backend getBackend() {
+	public Backend backend() {
 		Backend backend = parseBackend(client.backend.get());
 		if (backend == null) {
 			backend = BackendManager.getDefaultBackend();

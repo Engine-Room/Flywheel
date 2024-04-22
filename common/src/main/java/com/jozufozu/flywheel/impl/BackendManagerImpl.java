@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.impl;
 
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.Flywheel;
@@ -44,8 +45,8 @@ public final class BackendManagerImpl {
 		return Backends.INDIRECT;
 	}
 
-	public static void chooseBackend() {
-		var preferred = FlwConfig.get().getBackend();
+	private static void chooseBackend() {
+		var preferred = FlwConfig.get().backend();
 		var actual = preferred.findFallback();
 
 		if (preferred != actual) {
@@ -64,5 +65,22 @@ public final class BackendManagerImpl {
 	}
 
 	public static void init() {
+	}
+
+	public static void onEndClientResourceReload(boolean didError) {
+		if (didError) {
+			return;
+		}
+
+		chooseBackend();
+		VisualizationManagerImpl.resetAll();
+	}
+
+	public static void onReloadLevelRenderer(@Nullable ClientLevel level) {
+		chooseBackend();
+
+		if (level != null) {
+			VisualizationManagerImpl.reset(level);
+		}
 	}
 }
