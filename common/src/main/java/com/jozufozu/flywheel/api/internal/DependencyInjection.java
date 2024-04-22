@@ -39,38 +39,4 @@ public final class DependencyInjection {
 
 		return apiClass.cast(implInstance);
 	}
-
-	private static FlwApiLink load() {
-		Class<FlwApiLink> apiClass = FlwApiLink.class;
-		Class<?> implClass;
-
-		try {
-			implClass = Class.forName("com.jozufozu.flywheel.impl.FlwApiLinkImpl");
-		} catch (ReflectiveOperationException e) {
-			throw new RuntimeException("Could not find implementation", e);
-		}
-
-		if (!apiClass.isAssignableFrom(implClass)) {
-			throw new RuntimeException("Class %s does not implement interface %s"
-					.formatted(implClass.getName(), apiClass.getName()));
-		}
-
-		Constructor<?> implConstructor;
-
-		try {
-			implConstructor = implClass.getConstructor();
-		} catch (ReflectiveOperationException e) {
-			throw new RuntimeException("Could not find default constructor", e);
-		}
-
-		Object implInstance;
-
-		try {
-			implInstance = implConstructor.newInstance();
-		} catch (ReflectiveOperationException e) {
-			throw new RuntimeException("Could not instantiate implementation", e);
-		}
-
-		return apiClass.cast(implInstance);
-	}
 }
