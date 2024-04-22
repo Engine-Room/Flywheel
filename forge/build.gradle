@@ -1,3 +1,15 @@
+plugins {
+    id 'idea'
+    id 'java'
+    id 'maven-publish'
+    id 'dev.architectury.loom'
+}
+
+apply from: rootProject.file('buildSrc/simple-java.gradle')
+apply from: rootProject.file('buildSrc/subprojects.gradle')
+apply from: rootProject.file('buildSrc/platforms.gradle')
+apply from: rootProject.file('buildSrc/package-infos.gradle')
+
 loom {
     forge {
         mixinConfig 'flywheel.backend.mixins.json'
