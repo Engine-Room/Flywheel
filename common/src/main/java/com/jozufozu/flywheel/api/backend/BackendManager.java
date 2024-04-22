@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.api.backend;
 
-import com.jozufozu.flywheel.api.internal.InternalFlywheelApi;
+import com.jozufozu.flywheel.api.internal.FlwApiLink;
 
 public final class BackendManager {
 	private BackendManager() {
@@ -10,18 +10,18 @@ public final class BackendManager {
 	 * Get the current backend.
 	 */
 	public static Backend getBackend() {
-		return InternalFlywheelApi.INSTANCE.getBackend();
+		return FlwApiLink.INSTANCE.getBackend();
 	}
 
 	public static boolean isBackendOn() {
-		return InternalFlywheelApi.INSTANCE.isBackendOn();
+		return FlwApiLink.INSTANCE.isBackendOn();
 	}
 
 	public static Backend getOffBackend() {
-		return InternalFlywheelApi.INSTANCE.getOffBackend();
+		return FlwApiLink.INSTANCE.getOffBackend();
 	}
 
 	public static Backend getDefaultBackend() {
-		return InternalFlywheelApi.INSTANCE.getDefaultBackend();
+		return FlwApiLink.INSTANCE.getDefaultBackend();
 	}
 }

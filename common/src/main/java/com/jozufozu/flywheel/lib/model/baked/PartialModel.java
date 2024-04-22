@@ -7,15 +7,13 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * A helper class for loading and accessing json models.
+ * A helper class for loading and accessing JSON models not directly used by any blocks or items.
  * <br>
- * Creating a PartialModel will make the associated modelLocation automatically load.
- * PartialModels must be initialized in the mod class constructor.
+ * Creating a PartialModel will make Minecraft automatically load the associated modelLocation.
+ * PartialModels must be initialized before the initial resource reload, otherwise an error will be thrown.
+ * It is recommended to do this in the client mod initializer on Fabric and the mod class constructor on Forge.
  * <br>
- * Once {@link ModelEvent.RegisterAdditional} finishes, all PartialModels (with valid modelLocations)
- * will have their bakedModel fields populated.
- * <br>
- * Attempting to create a PartialModel after {@link ModelEvent.RegisterAdditional} will cause an error.
+ * Once Minecraft has finished baking all models, all PartialModels will have their bakedModel fields populated.
  */
 public class PartialModel {
 	static final List<PartialModel> ALL = new ArrayList<>();
@@ -26,11 +24,18 @@ public class PartialModel {
 
 	public PartialModel(ResourceLocation modelLocation) {
 		if (tooLate) {
-			throw new RuntimeException("PartialModel '" + modelLocation + "' loaded after ModelRegistryEvent");
+			throw new RuntimeException("Attempted to create PartialModel with location '" + modelLocation + "' after start of initial resource reload!");
 		}
 
 		this.modelLocation = modelLocation;
-		ALL.add(this);
+
+		synchronized (ALL) {
+			ALL.add(this);
+		}
+	}
+
+	public ResourceLocation getLocation() {
+		return modelLocation;
 	}
 
 	public String getName() {
@@ -38,15 +43,11 @@ public class PartialModel {
 				.toString();
 	}
 
-	public ResourceLocation getLocation() {
-		return modelLocation;
-	}
-
 	public BakedModel get() {
 		return bakedModel;
 	}
 
-	void set(BakedModel bakedModel) {
+	protected void set(BakedModel bakedModel) {
 		this.bakedModel = bakedModel;
 	}
 }

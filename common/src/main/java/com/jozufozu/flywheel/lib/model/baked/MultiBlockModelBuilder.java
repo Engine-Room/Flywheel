@@ -5,8 +5,8 @@ import java.util.function.BiFunction;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.lib.internal.FlwLibXplat;
 import com.jozufozu.flywheel.lib.model.SimpleModel;
-import com.jozufozu.flywheel.platform.ClientPlatform;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.RenderType;
@@ -23,7 +23,7 @@ public abstract class MultiBlockModelBuilder {
 	protected BiFunction<RenderType, Boolean, Material> materialFunc;
 
 	public static MultiBlockModelBuilder create(BlockAndTintGetter level, Iterable<BlockPos> positions) {
-		return ClientPlatform.INSTANCE.multiBlockModelBuilder(level, positions);
+		return FlwLibXplat.INSTANCE.createMultiBlockModelBuilder(level, positions);
 	}
 
 	protected MultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {

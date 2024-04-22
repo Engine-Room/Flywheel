@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.backend.Backends;
-import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.impl.visualization.VisualizationManagerImpl;
 import com.jozufozu.flywheel.lib.backend.SimpleBackend;
 import com.mojang.logging.LogUtils;
@@ -46,7 +45,7 @@ public final class BackendManagerImpl {
 	}
 
 	private static void chooseBackend() {
-		var preferred = FlwConfig.get().backend();
+		var preferred = FlwConfig.INSTANCE.backend();
 		var actual = preferred.findFallback();
 
 		if (preferred != actual) {

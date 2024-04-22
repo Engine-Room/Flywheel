@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.jozufozu.flywheel.impl.mixin.fabric",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "flywheel.refmap.json",
+  "client": [
+    "DebugScreenOverlayMixin",
+    "MinecraftMixin",
+    "SystemReportMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

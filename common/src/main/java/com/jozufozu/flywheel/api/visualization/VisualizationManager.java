@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.api.visualization;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.internal.InternalFlywheelApi;
+import com.jozufozu.flywheel.api.internal.FlwApiLink;
 import com.jozufozu.flywheel.api.visual.Effect;
 import com.jozufozu.flywheel.api.visual.Visual;
 
@@ -16,16 +16,16 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 @ApiStatus.NonExtendable
 public interface VisualizationManager {
 	static boolean supportsVisualization(@Nullable LevelAccessor level) {
-		return InternalFlywheelApi.INSTANCE.supportsVisualization(level);
+		return FlwApiLink.INSTANCE.supportsVisualization(level);
 	}
 
 	@Nullable
 	static VisualizationManager get(@Nullable LevelAccessor level) {
-		return InternalFlywheelApi.INSTANCE.getVisualizationManager(level);
+		return FlwApiLink.INSTANCE.getVisualizationManager(level);
 	}
 
 	static VisualizationManager getOrThrow(@Nullable LevelAccessor level) {
-		return InternalFlywheelApi.INSTANCE.getVisualizationManagerOrThrow(level);
+		return FlwApiLink.INSTANCE.getVisualizationManagerOrThrow(level);
 	}
 
 	/**

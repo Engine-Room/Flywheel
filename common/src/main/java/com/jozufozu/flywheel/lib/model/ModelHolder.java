@@ -17,7 +17,10 @@ public class ModelHolder {
 
 	public ModelHolder(Supplier<Model> factory) {
 		this.factory = factory;
-		ALL.add(this);
+
+		synchronized (ALL) {
+			ALL.add(this);
+		}
 	}
 
 	public Model get() {

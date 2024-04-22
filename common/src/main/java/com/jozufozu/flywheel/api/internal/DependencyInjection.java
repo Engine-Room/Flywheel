@@ -40,12 +40,12 @@ public final class DependencyInjection {
 		return apiClass.cast(implInstance);
 	}
 
-	private static InternalFlywheelApi load() {
-		Class<InternalFlywheelApi> apiClass = InternalFlywheelApi.class;
+	private static FlwApiLink load() {
+		Class<FlwApiLink> apiClass = FlwApiLink.class;
 		Class<?> implClass;
 
 		try {
-			implClass = Class.forName("com.jozufozu.flywheel.impl.InternalFlywheelImpl");
+			implClass = Class.forName("com.jozufozu.flywheel.impl.FlwApiLinkImpl");
 		} catch (ReflectiveOperationException e) {
 			throw new RuntimeException("Could not find implementation", e);
 		}

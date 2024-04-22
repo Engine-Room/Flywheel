@@ -1,9 +1,10 @@
-package com.jozufozu.flywheel.config;
+package com.jozufozu.flywheel.impl;
 
 import java.util.function.BiConsumer;
 
 import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.api.backend.BackendManager;
+import com.jozufozu.flywheel.backend.engine.uniform.DebugMode;
 import com.jozufozu.flywheel.backend.engine.uniform.FrameUniforms;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -25,7 +26,7 @@ public final class FlwCommands {
 	}
 
 	public static void registerClientCommands(RegisterClientCommandsEvent event) {
-		var config = FlwForgeConfig.INSTANCE;
+		var config = ForgeFlwConfig.INSTANCE;
 
 		LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("flywheel");
 

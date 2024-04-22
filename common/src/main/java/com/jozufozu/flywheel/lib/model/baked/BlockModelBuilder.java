@@ -5,8 +5,8 @@ import java.util.function.BiFunction;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.lib.internal.FlwLibXplat;
 import com.jozufozu.flywheel.lib.model.SimpleModel;
-import com.jozufozu.flywheel.platform.ClientPlatform;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.RenderType;
@@ -23,7 +23,7 @@ public abstract class BlockModelBuilder {
 	protected BiFunction<RenderType, Boolean, Material> materialFunc;
 
 	public static BlockModelBuilder create(BlockState state) {
-		return ClientPlatform.INSTANCE.blockModelBuilder(state);
+		return FlwLibXplat.INSTANCE.createBlockModelBuilder(state);
 	}
 
 	protected BlockModelBuilder(BlockState state) {
