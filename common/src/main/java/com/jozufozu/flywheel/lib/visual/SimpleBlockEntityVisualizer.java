@@ -3,6 +3,8 @@ package com.jozufozu.flywheel.lib.visual;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.jozufozu.flywheel.api.visual.BlockEntityVisual;
 import com.jozufozu.flywheel.api.visualization.BlockEntityVisualizer;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
@@ -54,7 +56,9 @@ public class SimpleBlockEntityVisualizer<T extends BlockEntity> implements Block
 	 */
 	public static class Builder<T extends BlockEntity> {
 		protected BlockEntityType<T> type;
+		@Nullable
 		protected Factory<T> visualFactory;
+		@Nullable
 		protected Predicate<T> skipVanillaRender;
 
 		public Builder(BlockEntityType<T> type) {

@@ -6,7 +6,7 @@ import java.util.function.BooleanSupplier;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 
-import com.jozufozu.flywheel.platform.ClientPlatform;
+import com.jozufozu.flywheel.lib.internal.FlwLibXplat;
 import com.mojang.logging.LogUtils;
 
 public final class ShadersModHandler {
@@ -19,23 +19,23 @@ public final class ShadersModHandler {
 	private static final InternalHandler INTERNAL_HANDLER;
 
 	static {
+		InternalHandler irisHandler = FlwLibXplat.INSTANCE
+				.createIrisHandler();
+		IS_IRIS_LOADED = irisHandler != null;
+
 		Package optifinePackage = Package.getPackage(OPTIFINE_ROOT_PACKAGE);
 		IS_OPTIFINE_INSTALLED = optifinePackage != null;
 
-		var irisOculusHandler = ClientPlatform.INSTANCE
-				.createIrisOculusHandlerIfPresent();
-		IS_IRIS_LOADED = irisOculusHandler != null;
-
 		// OptiFine and Iris/Oculus are assumed to be mutually exclusive
 
-		if (IS_OPTIFINE_INSTALLED) {
-			LOGGER.info("Optifine detected.");
-			INTERNAL_HANDLER = new Optifine();
-		} else if (IS_IRIS_LOADED) {
-			LOGGER.info("Iris detected.");
-			INTERNAL_HANDLER = irisOculusHandler;
+		if (IS_IRIS_LOADED) {
+			LOGGER.debug("Iris detected.");
+			INTERNAL_HANDLER = irisHandler;
+		} else if (IS_OPTIFINE_INSTALLED) {
+			LOGGER.debug("OptiFine detected.");
+			INTERNAL_HANDLER = new OptifineHandler();
 		} else {
-			LOGGER.info("No shaders mod detected.");
+			LOGGER.debug("No shaders mod detected.");
 			INTERNAL_HANDLER = new InternalHandler() {};
 		}
 	}
@@ -67,19 +67,19 @@ public final class ShadersModHandler {
 	public interface InternalHandler {
 		default boolean isShaderPackInUse() {
 			return false;
-		};
+		}
 
 		default boolean isRenderingShadowPass() {
 			return false;
-		};
+		}
 	}
 
 	// evil reflection
-	private static class Optifine implements InternalHandler {
+	private static class OptifineHandler implements InternalHandler {
 		private final BooleanSupplier shadersEnabledSupplier;
 		private final BooleanSupplier shadowPassSupplier;
 
-		Optifine() {
+		private OptifineHandler() {
 			shadersEnabledSupplier = createShadersEnabledSupplier();
 			shadowPassSupplier = createShadowPassSupplier();
 		}
@@ -102,11 +102,11 @@ public final class ShadersModHandler {
 				return () -> {
 					try {
 						return field.getBoolean(null);
-					} catch (IllegalAccessException ignored) {
+					} catch (IllegalAccessException e) {
 						return false;
 					}
 				};
-			} catch (Exception ignored) {
+			} catch (Exception e) {
 				return () -> false;
 			}
 		}
@@ -119,11 +119,11 @@ public final class ShadersModHandler {
 				return () -> {
 					try {
 						return field.getBoolean(null);
-					} catch (IllegalAccessException ignored) {
+					} catch (IllegalAccessException e) {
 						return false;
 					}
 				};
-			} catch (Exception ignored) {
+			} catch (Exception e) {
 				return () -> false;
 			}
 		}

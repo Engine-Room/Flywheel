@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.api.event;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -13,5 +15,5 @@ public interface ReloadLevelRendererCallback {
 				}
 			});
 
-	void onReloadLevelRenderer(ClientLevel level);
+	void onReloadLevelRenderer(@Nullable ClientLevel level);
 }

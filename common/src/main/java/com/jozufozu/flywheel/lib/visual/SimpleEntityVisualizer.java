@@ -3,6 +3,8 @@ package com.jozufozu.flywheel.lib.visual;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.jozufozu.flywheel.api.visual.EntityVisual;
 import com.jozufozu.flywheel.api.visualization.EntityVisualizer;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
@@ -54,7 +56,9 @@ public class SimpleEntityVisualizer<T extends Entity> implements EntityVisualize
 	 */
 	public static class Builder<T extends Entity> {
 		protected EntityType<T> type;
+		@Nullable
 		protected Factory<T> visualFactory;
+		@Nullable
 		protected Predicate<T> skipVanillaRender;
 
 		public Builder(EntityType<T> type) {

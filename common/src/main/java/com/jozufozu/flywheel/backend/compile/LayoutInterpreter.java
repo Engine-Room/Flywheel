@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.layout;
+package com.jozufozu.flywheel.backend.compile;
 
 import com.jozufozu.flywheel.api.layout.ArrayElementType;
 import com.jozufozu.flywheel.api.layout.ElementType;

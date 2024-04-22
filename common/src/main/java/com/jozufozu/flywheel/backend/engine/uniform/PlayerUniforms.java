@@ -3,8 +3,8 @@ package com.jozufozu.flywheel.backend.engine.uniform;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.event.RenderContext;
+import com.jozufozu.flywheel.backend.FlwBackendXplat;
 import com.jozufozu.flywheel.backend.mixin.AbstractClientPlayerAccessor;
-import com.jozufozu.flywheel.platform.ClientPlatform;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -94,7 +94,7 @@ public final class PlayerUniforms extends UniformWriter {
 			Item handItem = player.getItemInHand(hand).getItem();
 			if (handItem instanceof BlockItem blockItem) {
 				Block block = blockItem.getBlock();
-				int blockLight = ClientPlatform.INSTANCE
+				int blockLight = FlwBackendXplat.INSTANCE
 						.getLightEmission(block.defaultBlockState(), player.clientLevel, player.blockPosition());
 				if (heldLight < blockLight) {
 					heldLight = blockLight;

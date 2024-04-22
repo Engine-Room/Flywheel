@@ -24,7 +24,7 @@ import com.jozufozu.flywheel.api.visualization.VisualManager;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationLevel;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
-import com.jozufozu.flywheel.config.FlwConfig;
+import com.jozufozu.flywheel.impl.FlwConfig;
 import com.jozufozu.flywheel.impl.extension.LevelExtension;
 import com.jozufozu.flywheel.impl.task.FlwTaskExecutor;
 import com.jozufozu.flywheel.impl.visual.DynamicVisualContextImpl;
@@ -133,7 +133,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	}
 
 	protected DistanceUpdateLimiterImpl createUpdateLimiter() {
-		if (FlwConfig.get()
+		if (FlwConfig.INSTANCE
 				.limitUpdates()) {
 			return new BandedPrimeLimiter();
 		} else {

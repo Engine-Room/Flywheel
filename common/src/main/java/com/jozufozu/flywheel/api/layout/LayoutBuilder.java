@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.api.layout;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Range;
 
-import com.jozufozu.flywheel.api.internal.InternalFlywheelApi;
+import com.jozufozu.flywheel.api.internal.FlwApiLink;
 
 @ApiStatus.NonExtendable
 public interface LayoutBuilder {
@@ -26,6 +26,6 @@ public interface LayoutBuilder {
 	Layout build();
 
 	static LayoutBuilder create() {
-		return InternalFlywheelApi.INSTANCE.createLayoutBuilder();
+		return FlwApiLink.INSTANCE.createLayoutBuilder();
 	}
 }

@@ -19,10 +19,10 @@ import com.jozufozu.flywheel.api.layout.ScalarElementType;
 import com.jozufozu.flywheel.api.layout.UnsignedIntegerRepr;
 import com.jozufozu.flywheel.api.layout.ValueRepr;
 import com.jozufozu.flywheel.api.layout.VectorElementType;
+import com.jozufozu.flywheel.backend.compile.LayoutInterpreter;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 import com.jozufozu.flywheel.backend.glsl.generate.GlslBuilder;
 import com.jozufozu.flywheel.backend.glsl.generate.GlslExpr;
-import com.jozufozu.flywheel.impl.layout.LayoutInterpreter;
 
 public abstract class InstanceAssemblerComponent implements SourceComponent {
 	protected static final String STRUCT_NAME = "FlwInstance";

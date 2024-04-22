@@ -7,7 +7,6 @@ import org.joml.Vector3f;
 import com.jozufozu.flywheel.api.event.RenderContext;
 import com.jozufozu.flywheel.api.visualization.VisualizationManager;
 import com.jozufozu.flywheel.backend.mixin.LevelRendererAccessor;
-import com.jozufozu.flywheel.config.DebugMode;
 import com.jozufozu.flywheel.lib.math.MatrixMath;
 
 import net.minecraft.client.Camera;

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.config;
+package com.jozufozu.flywheel.impl;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -14,19 +14,20 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 
-public class FlwForgeConfig implements FlwConfig {
+public class ForgeFlwConfig implements FlwConfig {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final FlwForgeConfig INSTANCE = new FlwForgeConfig();
+	public static final ForgeFlwConfig INSTANCE = new ForgeFlwConfig();
 
 	public final ClientConfig client;
 	private final ForgeConfigSpec clientSpec;
 
-	private FlwForgeConfig() {
+	private ForgeFlwConfig() {
 		Pair<ClientConfig, ForgeConfigSpec> clientPair = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
 		this.client = clientPair.getLeft();
 		clientSpec = clientPair.getRight();
 	}
 
+	@Override
 	public Backend backend() {
 		Backend backend = parseBackend(client.backend.get());
 		if (backend == null) {
@@ -56,10 +57,12 @@ public class FlwForgeConfig implements FlwConfig {
 		return backend;
 	}
 
+	@Override
 	public boolean limitUpdates() {
 		return client.limitUpdates.get();
 	}
 
+	@Override
 	public int workerThreads() {
 		return client.workerThreads.get();
 	}

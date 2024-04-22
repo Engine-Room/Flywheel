@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.api.visualization;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.internal.InternalFlywheelApi;
+import com.jozufozu.flywheel.api.internal.FlwApiLink;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -24,7 +24,7 @@ public final class VisualizerRegistry {
 	 */
 	@Nullable
 	public static <T extends BlockEntity> BlockEntityVisualizer<? super T> getVisualizer(BlockEntityType<T> type) {
-		return InternalFlywheelApi.INSTANCE.getVisualizer(type);
+		return FlwApiLink.INSTANCE.getVisualizer(type);
 	}
 
 	/**
@@ -35,7 +35,7 @@ public final class VisualizerRegistry {
 	 */
 	@Nullable
 	public static <T extends Entity> EntityVisualizer<? super T> getVisualizer(EntityType<T> type) {
-		return InternalFlywheelApi.INSTANCE.getVisualizer(type);
+		return FlwApiLink.INSTANCE.getVisualizer(type);
 	}
 
 	/**
@@ -45,7 +45,7 @@ public final class VisualizerRegistry {
 	 * @param <T> The type of the block entity.
 	 */
 	public static <T extends BlockEntity> void setVisualizer(BlockEntityType<T> type, BlockEntityVisualizer<? super T> visualizer) {
-		InternalFlywheelApi.INSTANCE.setVisualizer(type, visualizer);
+		FlwApiLink.INSTANCE.setVisualizer(type, visualizer);
 	}
 
 	/**
@@ -55,6 +55,6 @@ public final class VisualizerRegistry {
 	 * @param <T> The type of the entity.
 	 */
 	public static <T extends Entity> void setVisualizer(EntityType<T> type, EntityVisualizer<? super T> visualizer) {
-		InternalFlywheelApi.INSTANCE.setVisualizer(type, visualizer);
+		FlwApiLink.INSTANCE.setVisualizer(type, visualizer);
 	}
 }

@@ -17,7 +17,10 @@ public class ModelCache<T> {
 
 	public ModelCache(Function<T, Model> factory) {
 		this.factory = factory;
-		ALL.add(this);
+
+		synchronized (ALL) {
+			ALL.add(this);
+		}
 	}
 
 	public Model get(T key) {

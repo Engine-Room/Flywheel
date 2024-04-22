@@ -6,9 +6,9 @@ import java.util.Collections;
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.layout.Layout;
+import com.jozufozu.flywheel.backend.compile.LayoutInterpreter;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 import com.jozufozu.flywheel.backend.glsl.generate.GlslBuilder;
-import com.jozufozu.flywheel.impl.layout.LayoutInterpreter;
 
 public class InstanceStructComponent implements SourceComponent {
 	private static final String STRUCT_NAME = "FlwInstance";

@@ -20,7 +20,6 @@ import com.jozufozu.flywheel.backend.glsl.generate.GlslExpr;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
 public final class FlwPrograms {
 	public static final Logger LOGGER = LoggerFactory.getLogger(Flywheel.ID + "/shaders");
@@ -31,7 +30,7 @@ public final class FlwPrograms {
 	private FlwPrograms() {
 	}
 
-	private static void reload(ResourceManager resourceManager) {
+	static void reload(ResourceManager resourceManager) {
 		// Reset the programs in case the ubershader load fails.
 		InstancingPrograms.setInstance(null);
 		IndirectPrograms.setInstance(null);
@@ -118,17 +117,5 @@ public final class FlwPrograms {
 						.build(), GlslExpr.boolLiteral(false))
 				.switchOn(GlslExpr.variable("_flw_uberCutoutIndex"))
 				.build(loader);
-	}
-
-	public static class ResourceReloadListener implements ResourceManagerReloadListener {
-		public static final ResourceReloadListener INSTANCE = new ResourceReloadListener();
-
-		private ResourceReloadListener() {
-		}
-
-		@Override
-		public void onResourceManagerReload(ResourceManager manager) {
-			FlwPrograms.reload(manager);
-		}
 	}
 }

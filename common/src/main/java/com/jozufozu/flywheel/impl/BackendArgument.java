@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.config;
+package com.jozufozu.flywheel.impl;
 
 import java.util.Collection;
 import java.util.List;

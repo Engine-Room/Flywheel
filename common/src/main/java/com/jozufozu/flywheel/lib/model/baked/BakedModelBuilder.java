@@ -5,8 +5,8 @@ import java.util.function.BiFunction;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.material.Material;
+import com.jozufozu.flywheel.lib.internal.FlwLibXplat;
 import com.jozufozu.flywheel.lib.model.SimpleModel;
-import com.jozufozu.flywheel.platform.ClientPlatform;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.RenderType;
@@ -26,7 +26,7 @@ public abstract class BakedModelBuilder {
 	protected BiFunction<RenderType, Boolean, Material> materialFunc;
 
 	public static BakedModelBuilder create(BakedModel bakedModel) {
-		return ClientPlatform.INSTANCE.bakedModelBuilder(bakedModel);
+		return FlwLibXplat.INSTANCE.createBakedModelBuilder(bakedModel);
 	}
 
 	protected BakedModelBuilder(BakedModel bakedModel) {

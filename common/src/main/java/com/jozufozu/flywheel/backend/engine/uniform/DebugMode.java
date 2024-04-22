@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.config;
+package com.jozufozu.flywheel.backend.engine.uniform;
 
 public enum DebugMode {
 	OFF,

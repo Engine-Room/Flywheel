@@ -4,7 +4,7 @@ import org.apache.commons.lang3.concurrent.AtomicSafeInitializer;
 import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 
 import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.config.FlwConfig;
+import com.jozufozu.flywheel.impl.FlwConfig;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.util.Mth;
@@ -39,7 +39,7 @@ public final class FlwTaskExecutor {
 	private static class Initializer extends AtomicSafeInitializer<TaskExecutor> {
 		@Override
 		protected TaskExecutor initialize() {
-			int threadCount = FlwConfig.get()
+			int threadCount = FlwConfig.INSTANCE
 					.workerThreads();
 
 			if (threadCount == 0) {
