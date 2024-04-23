@@ -21,11 +21,11 @@ test {
 
 publishing {
     publications {
-        register('mavenJava', MavenPublication) {
+        register('mavenIntermediary', MavenPublication) {
             from(components['java'])
             artifactId = "flywheel-${project.name}-intermediary-${artifact_minecraft_version}"
         }
-        register('mojmapJava', MavenPublication) {
+        register('mavenMojmap', MavenPublication) {
             artifact jar
             artifact sourcesJar
             artifactId = "flywheel-${project.name}-mojmap-${artifact_minecraft_version}"
