@@ -49,6 +49,7 @@ tasks.named('javadoc', Javadoc).configure { Javadoc javadoc ->
     javadoc.source sourceSets.main.allJava
     // prevent java 8's strict doclint for javadocs from failing builds
     javadoc.options.addStringOption('Xdoclint:none', '-quiet')
+    javadoc.options.encoding = 'UTF-8'
 }
 
 static void addLicense(Jar jarTask) {
