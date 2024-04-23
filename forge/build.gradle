@@ -38,7 +38,7 @@ publishing {
     publications {
         register('mavenJava', MavenPublication) {
             from(components['java'])
-            artifactId = "flywheel-${project.name}-intermediary-${artifact_minecraft_version}"
+            artifactId = "flywheel-${project.name}-${artifact_minecraft_version}"
         }
     }
 }
