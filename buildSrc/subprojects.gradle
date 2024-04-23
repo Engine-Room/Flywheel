@@ -1,5 +1,9 @@
 loom {
     silentMojangMappingsLicense()
+
+    mixin {
+        defaultRefmapName = "flywheel.refmap.json"
+    }
 }
 
 repositories {
