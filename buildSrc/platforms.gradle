@@ -25,17 +25,37 @@ loom {
     }
 }
 
+dependencies {
+    compileOnly project(path: ':common', configuration: 'commonApi')
+    compileOnly project(path: ':common', configuration: 'commonLib')
+    compileOnly project(path: ':common', configuration: 'commonBackend')
+    compileOnly project(path: ':common', configuration: 'commonImpl')
+}
+
+SourceSet commonApiSource = project(':common').sourceSets.api
+SourceSet commonLibSource = project(':common').sourceSets.lib
+SourceSet commonBackendSource = project(':common').sourceSets.backend
+SourceSet commonMainSource = project(':common').sourceSets.main
+
+def commonSources = [commonApiSource, commonLibSource, commonBackendSource, commonMainSource]
+
 tasks.named('processResources', ProcessResources).configure { ProcessResources processResources ->
-    processResources.from project(':common').tasks.named('processResources', ProcessResources).get().source
+    // No resources in API
+    processResources.from commonLibSource.resources
+    processResources.from commonBackendSource.resources
+    processResources.from commonMainSource.resources
 }
 
 tasks.named('compileJava', JavaCompile).configure { JavaCompile compileJava ->
-    compileJava.source project(':common').tasks.named('compileJava', JavaCompile).get().source
+    // TODO: Can we avoid this duplication? Would be nice to repackage the 4 common jars without having to re compile
+    commonSources.forEach { compileJava.source it.allJava }
+
     excludeDuplicatePackageInfos(compileJava)
 }
 
 tasks.named('javadoc', Javadoc).configure { Javadoc javadoc ->
-    javadoc.source project(':common').tasks.named('javadoc', Javadoc).get().source
+    commonSources.forEach { javadoc.source it.allJava }
+
     excludeDuplicatePackageInfos(javadoc)
 }
 
@@ -44,9 +64,7 @@ tasks.named('jar', Jar).configure { Jar jar ->
 }
 
 tasks.named('sourcesJar', Jar).configure { Jar jar ->
-    def commonSources = project(':common').tasks.named('sourcesJar', Jar)
-    dependsOn commonSources
-    jar.from zipTree(commonSources.flatMap { it.archiveFile })
+    commonSources.forEach { jar.from it.allJava }
 
     excludeDuplicatePackageInfos(jar)
 }
