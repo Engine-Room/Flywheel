@@ -28,8 +28,6 @@ loom {
 dependencies {
     forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compileOnly project(path: ':common', configuration: 'namedElements')
-
     modCompileOnly "maven.modrinth:embeddium:${embeddium_version}"
     modCompileOnly "maven.modrinth:oculus:${oculus_version}"
 }
