@@ -1,3 +1,11 @@
+plugins {
+    id 'idea'
+    id 'flywheel.java'
+    id 'maven-publish'
+    id 'dev.architectury.loom'
+    id 'flywheel.package-infos'
+}
+
 loom {
     silentMojangMappingsLicense()
 
