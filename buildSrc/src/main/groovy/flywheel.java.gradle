@@ -1,3 +1,7 @@
+plugins {
+    id 'java'
+}
+
 boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false')
 String buildNumber = System.getenv('BUILD_NUMBER')
 

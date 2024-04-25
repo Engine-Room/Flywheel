@@ -1,14 +1,6 @@
 plugins {
-    id 'idea'
-    id 'java'
-    id 'maven-publish'
-    id 'dev.architectury.loom'
+    id 'flywheel.platform'
 }
-
-apply from: rootProject.file('buildSrc/simple-java.gradle')
-apply from: rootProject.file('buildSrc/subprojects.gradle')
-apply from: rootProject.file('buildSrc/platforms.gradle')
-apply from: rootProject.file('buildSrc/package-infos.gradle')
 
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"

@@ -5,8 +5,6 @@ plugins {
     id 'dev.architectury.loom' apply false
 }
 
-apply from: rootProject.file('buildSrc/simple-java.gradle')
-
 println("Java: ${System.getProperty('java.version')}, JVM: ${System.getProperty('java.vm.version')} (${System.getProperty('java.vendor')}), Arch: ${System.getProperty('os.arch')}")
 
 idea {

@@ -1,14 +1,6 @@
 plugins {
-    id 'idea'
-    id 'java'
-    id 'maven-publish'
-    id 'dev.architectury.loom'
+    id 'flywheel.subproject'
 }
-
-apply from: rootProject.file('buildSrc/simple-java.gradle')
-apply from: rootProject.file('buildSrc/subprojects.gradle')
-// TODO: package-infos specifically targets the main source set
-// apply from: rootProject.file('buildSrc/package-infos.gradle')
 
 sourceSets {
     // Loom only populates mc stuff to the main source set,
