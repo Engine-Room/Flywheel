@@ -53,7 +53,7 @@ dependencies {
     modCompileOnly "maven.modrinth:embeddium:${embeddium_version}"
     modCompileOnly "maven.modrinth:oculus:${oculus_version}"
 
-    forApi project(path: ':common', configuration: 'commonApi')
+    forApi project(path: ':common', configuration: 'commonApiOnly')
     forLib project(path: ':common', configuration: 'commonLib')
     forBackend project(path: ':common', configuration: 'commonBackend')
     forImpl project(path: ':common', configuration: 'commonImpl')

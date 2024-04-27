@@ -6,6 +6,7 @@ plugins {
     id 'flywheel.java'
     id 'flywheel.package-infos'
     id 'flywheel.subproject'
+    id 'flywheel.outgoing-configuration'
 }
 
 sourceSets {
@@ -39,30 +40,31 @@ sourceSets {
     }
 }
 
-TaskProvider<Jar> createJarAndOutgoingConfiguration(String name) {
-    return createJarAndOutgoingConfiguration(name, sourceSets.named(name).get())
+jar {
+    from sourceSets.api.output
+    from sourceSets.lib.output
+    from sourceSets.backend.output
+    archiveClassifier.set('')
 }
 
-TaskProvider<Jar> createJarAndOutgoingConfiguration(String name, SourceSet sourceSet) {
-    def config = configurations.register("common${name.capitalize()}") {
-        canBeConsumed = true
-        canBeResolved = false
-    }
-    def jarTask = tasks.register("${name}Jar", Jar) {
-        archiveClassifier.set(name)
-        from sourceSet.output
-    }
+sourcesJar {
+    from sourceSets.api.allSource
+    from sourceSets.lib.allSource
+    from sourceSets.backend.allSource
+}
 
-    artifacts.add(config.name, jarTask)
-
-    return jarTask
+javadoc {
+    source sourceSets.api.allJava
+    source sourceSets.lib.allJava
+    source sourceSets.backend.allJava
 }
 
 // TODO: repackage these for maven publication
-def apiJar = createJarAndOutgoingConfiguration("api")
-def libJar = createJarAndOutgoingConfiguration("lib")
-def backendJar = createJarAndOutgoingConfiguration("backend")
-def implJar = createJarAndOutgoingConfiguration("impl", sourceSets.main)
+outgoing.createJarAndOutgoingConfiguration("apiOnly", sourceSets.api)
+outgoing.createJarAndOutgoingConfiguration("lib")
+def apiLibJar = outgoing.createJarAndOutgoingConfiguration("api", sourceSets.api, sourceSets.lib)
+def backendJar = outgoing.createJarAndOutgoingConfiguration("backend")
+def implJar = outgoing.createJarAndOutgoingConfiguration("impl", sourceSets.main)
 
 dependencies {
     modCompileOnly "net.fabricmc:fabric-loader:${fabric_loader_version}"
@@ -78,11 +80,30 @@ publishing {
     publications {
         register('mavenIntermediary', MavenPublication) {
             from(components['java'])
+            artifact apiLibJar.remapJar
+            artifact apiLibJar.remapSources
+            artifact apiLibJar.javadocJar
+            artifact backendJar.remapJar
+            artifact backendJar.remapSources
+            artifact backendJar.javadocJar
+            artifact implJar.remapJar
+            artifact implJar.remapSources
+            artifact implJar.javadocJar
             artifactId = "flywheel-${project.name}-intermediary-${artifact_minecraft_version}"
         }
         register('mavenMojmap', MavenPublication) {
             artifact jar
             artifact sourcesJar
+            artifact javadocJar
+            artifact apiLibJar.jar
+            artifact apiLibJar.sources
+            artifact apiLibJar.javadocJar
+            artifact backendJar.jar
+            artifact backendJar.sources
+            artifact backendJar.javadocJar
+            artifact implJar.jar
+            artifact implJar.sources
+            artifact implJar.javadocJar
             artifactId = "flywheel-${project.name}-mojmap-${artifact_minecraft_version}"
         }
     }

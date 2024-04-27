@@ -19,9 +19,13 @@ repositories {
 
 gradlePlugin {
     plugins {
-        simplePlugin {
+        platformPlugin {
             id = 'flywheel.platform'
             implementationClass = 'com.jozufozu.gradle.PlatformPlugin'
+        }
+        outgoingConfigurationPlugin {
+            id = 'flywheel.outgoing-configuration'
+            implementationClass = 'com.jozufozu.gradle.OutgoingConfigurationPlugin'
         }
     }
 }
