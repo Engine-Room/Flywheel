@@ -1,6 +1,15 @@
 plugins {
+    id 'idea'
+    id 'java'
+    id 'maven-publish'
+    id 'dev.architectury.loom'
+    id 'flywheel.java'
+    id 'flywheel.package-infos'
+    id 'flywheel.subproject'
     id 'flywheel.platform'
 }
+
+evaluationDependsOn(':common')
 
 loom {
     forge {
@@ -14,6 +23,27 @@ loom {
             property 'forge.logging.markers', ''
             property 'forge.logging.console.level', 'debug'
         }
+
+        client {
+            ideConfigGenerated true
+
+            // Turn on our own debug flags
+            property 'flw.dumpShaderSource', 'true'
+            property 'flw.debugMemorySafety', 'true'
+
+            // Turn on mixin debug flags
+            property 'mixin.debug.export', 'true'
+            property 'mixin.debug.verbose', 'true'
+
+            // 720p baby!
+            programArgs '--width', '1280', '--height', '720'
+        }
+
+        // We're a client mod, but we need to make sure we correctly render when playing on a server.
+        server {
+            ideConfigGenerated true
+            programArgs '--nogui'
+        }
     }
 }
 
@@ -22,13 +52,9 @@ dependencies {
 
     modCompileOnly "maven.modrinth:embeddium:${embeddium_version}"
     modCompileOnly "maven.modrinth:oculus:${oculus_version}"
-}
 
-publishing {
-    publications {
-        register('mavenJava', MavenPublication) {
-            from(components['java'])
-            artifactId = "flywheel-${project.name}-${artifact_minecraft_version}"
-        }
-    }
+    forApi project(path: ':common', configuration: 'commonApi')
+    forLib project(path: ':common', configuration: 'commonLib')
+    forBackend project(path: ':common', configuration: 'commonBackend')
+    forImpl project(path: ':common', configuration: 'commonImpl')
 }

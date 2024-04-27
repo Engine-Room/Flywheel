@@ -1,11 +1,3 @@
-plugins {
-    id 'idea'
-    id 'flywheel.java'
-    id 'maven-publish'
-    id 'dev.architectury.loom'
-    id 'flywheel.package-infos'
-}
-
 loom {
     silentMojangMappingsLicense()
 
@@ -49,7 +41,7 @@ dependencies {
     api 'com.google.code.findbugs:jsr305:3.0.2'
 }
 
-processResources {
+tasks.withType(ProcessResources).configureEach {
     var replaceProperties = [
         mod_id                        : mod_id,
         mod_name                      : mod_name,

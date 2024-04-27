@@ -1,4 +1,10 @@
 plugins {
+    id 'idea'
+    id 'java'
+    id 'maven-publish'
+    id 'dev.architectury.loom'
+    id 'flywheel.java'
+    id 'flywheel.package-infos'
     id 'flywheel.subproject'
 }
 

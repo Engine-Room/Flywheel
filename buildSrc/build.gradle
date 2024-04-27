@@ -1,3 +1,31 @@
 plugins {
     id 'groovy-gradle-plugin'
 }
+
+repositories {
+    gradlePluginPortal()
+    mavenCentral()
+    maven {
+        name = 'MinecraftForge'
+        url = 'https://maven.minecraftforge.net/'
+    }
+    maven {
+        name = 'Architectury'
+        url = 'https://maven.architectury.dev/'
+    }
+    maven { url = 'https://repo.spongepowered.org/repository/maven-public' }
+    maven { url = 'https://maven.parchmentmc.org' }
+}
+
+gradlePlugin {
+    plugins {
+        simplePlugin {
+            id = 'flywheel.platform'
+            implementationClass = 'com.jozufozu.gradle.PlatformPlugin'
+        }
+    }
+}
+
+dependencies {
+    implementation 'dev.architectury.loom:dev.architectury.loom.gradle.plugin:1.6-SNAPSHOT'
+}
