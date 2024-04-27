@@ -43,7 +43,7 @@ tasks.withType(Jar).configureEach { Jar jar ->
 tasks.named('javadoc', Javadoc).configure { Javadoc javadoc ->
     javadoc.source sourceSets.main.allJava
     // prevent java 8's strict doclint for javadocs from failing builds
-    javadoc.options.addStringOption('Xdoclint:none', '-quiet')
+    javadoc.options.optionFiles(rootProject.file('javadoc-options.txt'))
     javadoc.options.encoding = 'UTF-8'
 }
 

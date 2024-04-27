@@ -74,6 +74,7 @@ class OutgoingConfigurationPlugin implements Plugin<Project> {
                 group = 'Build'
                 destinationDir = project.layout.buildDirectory.dir("docs/${name}-javadoc").get().asFile
                 options.encoding = 'UTF-8'
+                options.optionFiles(project.rootProject.file('javadoc-options.txt'))
                 for (SourceSet set in sourceSetSet) {
                     source set.allJava
                     classpath += set.compileClasspath
