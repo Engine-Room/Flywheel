@@ -9,7 +9,7 @@ jobs:
         java: [
           17     # Current Java LTS & minimum supported by Minecraft
         ]
-        os: [ ubuntu-20.04, windows-2022 ]
+        os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
