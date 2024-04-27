@@ -2,19 +2,14 @@ package com.jozufozu.gradle
 
 import groovy.transform.CompileStatic
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
-import net.fabricmc.loom.task.RemapJarTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileCollection
-import org.gradle.api.file.FileCopyDetails
 import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.tasks.AbstractCopyTask
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
@@ -87,23 +82,14 @@ class PlatformPlugin implements Plugin<Project> {
         def tasks = project.tasks
 
         tasks.withType(JavaCompile).configureEach { JavaCompile compileJava ->
-            excludeDuplicatePackageInfos(compileJava)
-        }
-
-        def apiJar = tasks.register('apiJar', Jar) { Jar jar ->
-            jar.archiveClassifier.set('api-dev')
-            jar.from platformApi.output, platformLib.output
-
-            jar.destinationDirectory.set(project.layout.buildDirectory.dir('devlibs'))
-
-            excludeDuplicatePackageInfos(jar)
+            JarTaskUtils.excludeDuplicatePackageInfos(compileJava)
         }
 
         tasks.named('jar', Jar).configure { Jar jar ->
             jar.archiveClassifier.set('dev')
             jar.from platformApi.output, platformLib.output, platformBackend.output
 
-            excludeDuplicatePackageInfos(jar)
+            JarTaskUtils.excludeDuplicatePackageInfos(jar)
         }
 
         tasks.named('javadoc', Javadoc).configure { Javadoc javadoc ->
@@ -111,7 +97,7 @@ class PlatformPlugin implements Plugin<Project> {
 
             javadoc.source platformApi.allJava, platformLib.allJava, platformBackend.allJava
 
-            excludeDuplicatePackageInfos(javadoc)
+            JarTaskUtils.excludeDuplicatePackageInfos(javadoc)
         }
 
         tasks.named('sourcesJar', Jar).configure { Jar jar ->
@@ -119,33 +105,33 @@ class PlatformPlugin implements Plugin<Project> {
 
             jar.from platformApi.allJava, platformLib.allJava, platformBackend.allJava
 
-            excludeDuplicatePackageInfos(jar)
+            JarTaskUtils.excludeDuplicatePackageInfos(jar)
         }
 
-        def remapApiJar = tasks.register('remapApiJar', RemapJarTask) { RemapJarTask remapJar ->
-            remapJar.dependsOn(apiJar)
-            remapJar.inputFile.set(apiJar.flatMap { it.archiveFile })
-            remapJar.archiveClassifier.set('api')
+        // for if we decide to have Vanillin be another subproject, we can just use the exported configurations
+        JarTaskUtils.createJarAndOutgoingConfiguration(project, 'apiOnly', platformApi)
+        JarTaskUtils.createJarAndOutgoingConfiguration(project, 'lib', platformLib)
+
+        JarTaskSet apiSet = JarTaskUtils.createJarAndOutgoingConfiguration(project, 'api', platformApi, platformLib)
+        JarTaskSet backendSet = JarTaskUtils.createJarAndOutgoingConfiguration(project, 'backend', platformBackend)
+        JarTaskSet implSet = JarTaskUtils.createJarAndOutgoingConfiguration(project, 'impl', platformImpl)
+
+        publishing.publications {
+            // we should be using remapped on both Fabric and Forge because Forge needs to put things in srg
+            it.register('mavenIntermediary', MavenPublication) { MavenPublication pub ->
+                pub.from(project.components.named('java').get())
+                pub.artifact(apiSet.remapJar)
+                pub.artifact(apiSet.remapSources)
+                pub.artifact(apiSet.javadocJar)
+                pub.artifact(backendSet.remapJar)
+                pub.artifact(backendSet.remapSources)
+                pub.artifact(backendSet.javadocJar)
+                pub.artifact(implSet.remapJar)
+                pub.artifact(implSet.remapSources)
+                pub.artifact(implSet.javadocJar)
+                pub.artifactId = "flywheel-${project.name}-${project.property('artifact_minecraft_version')}"
+            }
         }
-
-        def remapJar = tasks.named('remapJar', RemapJarTask)
-
-        tasks.named('build').configure { Task build ->
-            build.dependsOn(remapApiJar)
-        }
-    }
-
-    // We have duplicate packages between the common and platform dependent subprojects.
-    // In theory the package-info.java files should be identical, so just take the first one we find.
-    static void excludeDuplicatePackageInfos(AbstractCopyTask copyTask) {
-        copyTask.filesMatching('**/package-info.java') { FileCopyDetails details ->
-            details.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        }
-    }
-
-    // The compile/javadoc tasks have a different base type that isn't so smart about exclusion handling.
-    static void excludeDuplicatePackageInfos(SourceTask sourceTask) {
-        sourceTask.exclude('**/package-info.java')
     }
 
     static Configuration newConfiguration(Project project, String name) {
@@ -156,9 +142,9 @@ class PlatformPlugin implements Plugin<Project> {
     }
 
     static void extendsFrom(Project project, String name, Configuration... configurations) {
-       project.configurations.named(name).configure {
-           it.extendsFrom(configurations)
-       }
+        project.configurations.named(name).configure {
+            it.extendsFrom(configurations)
+        }
     }
 
     static void includeFromCommon(Project project, SourceSet sourceSet, SourceSet commonSourceSet) {
