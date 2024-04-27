@@ -43,7 +43,7 @@ dependencies {
     modCompileOnly "maven.modrinth:sodium:${sodium_version}"
     modCompileOnly "maven.modrinth:iris:${iris_version}"
 
-    forApi project(path: ':common', configuration: 'commonApi')
+    forApi project(path: ':common', configuration: 'commonApiOnly')
     forLib project(path: ':common', configuration: 'commonLib')
     forBackend project(path: ':common', configuration: 'commonBackend')
     forImpl project(path: ':common', configuration: 'commonImpl')
