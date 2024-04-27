@@ -3,6 +3,7 @@ package com.jozufozu.flywheel.api.event;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
+@FunctionalInterface
 public interface RenderStageCallback {
 	Event<RenderStageCallback> EVENT =
 			EventFactory.createArrayBacked(RenderStageCallback.class, callbacks -> (context, stage) -> {
