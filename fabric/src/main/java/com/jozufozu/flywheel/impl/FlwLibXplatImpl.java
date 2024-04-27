@@ -5,6 +5,9 @@ import org.jetbrains.annotations.Nullable;
 import com.jozufozu.flywheel.lib.internal.FlwLibXplat;
 import com.jozufozu.flywheel.lib.model.baked.BakedModelBuilder;
 import com.jozufozu.flywheel.lib.model.baked.BlockModelBuilder;
+import com.jozufozu.flywheel.lib.model.baked.FabricBakedModelBuilder;
+import com.jozufozu.flywheel.lib.model.baked.FabricBlockModelBuilder;
+import com.jozufozu.flywheel.lib.model.baked.FabricMultiBlockModelBuilder;
 import com.jozufozu.flywheel.lib.model.baked.MultiBlockModelBuilder;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 
@@ -25,17 +28,17 @@ public class FlwLibXplatImpl implements FlwLibXplat {
 
 	@Override
 	public BakedModelBuilder createBakedModelBuilder(BakedModel bakedModel) {
-		return null;
+		return new FabricBakedModelBuilder(bakedModel);
 	}
 
 	@Override
 	public BlockModelBuilder createBlockModelBuilder(BlockState state) {
-		return null;
+		return new FabricBlockModelBuilder(state);
 	}
 
 	@Override
 	public MultiBlockModelBuilder createMultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
-		return null;
+		return new FabricMultiBlockModelBuilder(level, positions);
 	}
 
 	@Override

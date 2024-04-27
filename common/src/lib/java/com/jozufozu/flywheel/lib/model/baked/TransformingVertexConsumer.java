@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.lib.model.baked;
 
+import org.jetbrains.annotations.UnknownNullability;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
@@ -8,7 +9,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 class TransformingVertexConsumer implements VertexConsumer {
+	@UnknownNullability
 	private VertexConsumer delegate;
+	@UnknownNullability
 	private PoseStack poseStack;
 
 	public void prepare(VertexConsumer delegate, PoseStack poseStack) {

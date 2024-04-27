@@ -15,7 +15,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LightLayer;
 
 @Mixin(ClientChunkCache.class)
-public class ClientChunkCacheMixin {
+abstract class ClientChunkCacheMixin {
 	@Shadow
 	@Final
 	ClientLevel level;
