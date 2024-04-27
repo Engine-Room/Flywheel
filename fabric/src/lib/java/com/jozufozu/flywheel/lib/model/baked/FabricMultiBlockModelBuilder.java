@@ -1,9 +1,6 @@
 package com.jozufozu.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
-
-import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.material.Material;
@@ -19,36 +16,27 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraftforge.client.model.data.ModelData;
 
-public final class ForgeMultiBlockModelBuilder extends MultiBlockModelBuilder {
-	@Nullable
-	private Function<BlockPos, ModelData> modelDataLookup;
-
-	public ForgeMultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
+public final class FabricMultiBlockModelBuilder extends MultiBlockModelBuilder {
+	public FabricMultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
 		super(level, positions);
 	}
 
 	@Override
-	public ForgeMultiBlockModelBuilder poseStack(PoseStack poseStack) {
+	public FabricMultiBlockModelBuilder poseStack(PoseStack poseStack) {
 		super.poseStack(poseStack);
 		return this;
 	}
 
 	@Override
-	public ForgeMultiBlockModelBuilder enableFluidRendering() {
+	public FabricMultiBlockModelBuilder enableFluidRendering() {
 		super.enableFluidRendering();
 		return this;
 	}
 
 	@Override
-	public ForgeMultiBlockModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public FabricMultiBlockModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
 		super.materialFunc(materialFunc);
-		return this;
-	}
-
-	public ForgeMultiBlockModelBuilder modelDataLookup(Function<BlockPos, ModelData> modelDataLookup) {
-		this.modelDataLookup = modelDataLookup;
 		return this;
 	}
 
@@ -57,13 +45,10 @@ public final class ForgeMultiBlockModelBuilder extends MultiBlockModelBuilder {
 		if (materialFunc == null) {
 			materialFunc = ModelUtil::getMaterial;
 		}
-		if (modelDataLookup == null) {
-			modelDataLookup = pos -> ModelData.EMPTY;
-		}
 
 		var out = ImmutableList.<Model.ConfiguredMesh>builder();
 
-		BakedModelBufferer.bufferMultiBlock(ModelUtil.VANILLA_RENDERER, positions.iterator(), level, poseStack, modelDataLookup, renderFluids, (renderType, shaded, data) -> {
+		BakedModelBufferer.bufferMultiBlock(ModelUtil.VANILLA_RENDERER, positions.iterator(), level, poseStack, renderFluids, (renderType, shaded, data) -> {
 			Material material = materialFunc.apply(renderType, shaded);
 			if (material != null) {
 				VertexView vertexView = new NoOverlayVertexView();

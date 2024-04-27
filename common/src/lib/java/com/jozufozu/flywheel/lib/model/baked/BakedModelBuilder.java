@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.material.Material;
@@ -14,23 +15,24 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
+@ApiStatus.NonExtendable
 public abstract class BakedModelBuilder {
-	protected final BakedModel bakedModel;
+	final BakedModel bakedModel;
 	@Nullable
-	protected BlockAndTintGetter level;
+	BlockAndTintGetter level;
 	@Nullable
-	protected BlockState blockState;
+	BlockState blockState;
 	@Nullable
-	protected PoseStack poseStack;
+	PoseStack poseStack;
 	@Nullable
-	protected BiFunction<RenderType, Boolean, Material> materialFunc;
+	BiFunction<RenderType, Boolean, Material> materialFunc;
+
+	BakedModelBuilder(BakedModel bakedModel) {
+		this.bakedModel = bakedModel;
+	}
 
 	public static BakedModelBuilder create(BakedModel bakedModel) {
 		return FlwLibXplat.INSTANCE.createBakedModelBuilder(bakedModel);
-	}
-
-	protected BakedModelBuilder(BakedModel bakedModel) {
-		this.bakedModel = bakedModel;
 	}
 
 	public BakedModelBuilder level(BlockAndTintGetter level) {

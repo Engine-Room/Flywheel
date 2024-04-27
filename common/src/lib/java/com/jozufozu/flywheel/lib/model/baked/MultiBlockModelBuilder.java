@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import com.jozufozu.flywheel.api.material.Material;
@@ -13,22 +14,23 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 
+@ApiStatus.NonExtendable
 public abstract class MultiBlockModelBuilder {
-	protected final BlockAndTintGetter level;
-	protected final Iterable<BlockPos> positions;
+	final BlockAndTintGetter level;
+	final Iterable<BlockPos> positions;
 	@Nullable
-	protected PoseStack poseStack;
-	protected boolean renderFluids = false;
+	PoseStack poseStack;
+	boolean renderFluids = false;
 	@Nullable
-	protected BiFunction<RenderType, Boolean, Material> materialFunc;
+	BiFunction<RenderType, Boolean, Material> materialFunc;
+
+	MultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
+		this.level = level;
+		this.positions = positions;
+	}
 
 	public static MultiBlockModelBuilder create(BlockAndTintGetter level, Iterable<BlockPos> positions) {
 		return FlwLibXplat.INSTANCE.createMultiBlockModelBuilder(level, positions);
-	}
-
-	protected MultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
-		this.level = level;
-		this.positions = positions;
 	}
 
 	public MultiBlockModelBuilder poseStack(PoseStack poseStack) {
