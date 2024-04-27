@@ -1,7 +1,3 @@
-plugins {
-    id 'java'
-}
-
 boolean dev = System.getenv('RELEASE') == null || System.getenv('RELEASE').equalsIgnoreCase('false')
 String buildNumber = System.getenv('BUILD_NUMBER')
 
@@ -40,12 +36,7 @@ tasks.withType(JavaCompile).configureEach { JavaCompile javaCompile ->
     javaCompile.options.compilerArgs = ['-Xdiags:verbose']
 }
 
-tasks.named('jar', Jar).configure { Jar jar ->
-    archiveClassifier = ''
-    addLicense(jar)
-}
-
-tasks.named('sourcesJar', Jar).configure { Jar jar ->
+tasks.withType(Jar).configureEach { Jar jar ->
     addLicense(jar)
 }
 
