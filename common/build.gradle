@@ -6,7 +6,7 @@ plugins {
     id 'flywheel.java'
     id 'flywheel.package-infos'
     id 'flywheel.subproject'
-    id 'flywheel.outgoing-configuration'
+    id 'flywheel.jar-sets'
 }
 
 sourceSets {
@@ -40,30 +40,24 @@ sourceSets {
     }
 }
 
-jar {
-    from sourceSets.api.output
-    from sourceSets.lib.output
-    from sourceSets.backend.output
-    archiveClassifier.set('')
+// For sharing with other subprojects.
+jarSets {
+    createJars('apiOnly', sourceSets.api).configure {
+        it.createOutgoingConfiguration('common')
+    }
+    createJars('lib').configure {
+        it.createOutgoingConfiguration('common')
+    }
+    createJars('backend').configure {
+        it.createOutgoingConfiguration('common')
+    }
+    createJars('impl', sourceSets.main).configure {
+        it.createOutgoingConfiguration('common')
+    }
 }
 
-sourcesJar {
-    from sourceSets.api.allSource
-    from sourceSets.lib.allSource
-    from sourceSets.backend.allSource
-}
-
-javadoc {
-    source sourceSets.api.allJava
-    source sourceSets.lib.allJava
-    source sourceSets.backend.allJava
-}
-
-outgoing.createJarAndOutgoingConfiguration("apiOnly", sourceSets.api)
-outgoing.createJarAndOutgoingConfiguration("lib")
-def apiLibJar = outgoing.createJarAndOutgoingConfiguration("api", sourceSets.api, sourceSets.lib)
-def backendJar = outgoing.createJarAndOutgoingConfiguration("backend")
-def implJar = outgoing.createJarAndOutgoingConfiguration("impl", sourceSets.main)
+// For publishing
+def apiLibJar = jarSets.createJars('api', sourceSets.api, sourceSets.lib)
 
 dependencies {
     modCompileOnly "net.fabricmc:fabric-loader:${fabric_loader_version}"
@@ -78,32 +72,16 @@ test {
 publishing {
     publications {
         register('mavenIntermediary', MavenPublication) {
-            from(components['java'])
             artifact apiLibJar.remapJar
             artifact apiLibJar.remapSources
             artifact apiLibJar.javadocJar
-            artifact backendJar.remapJar
-            artifact backendJar.remapSources
-            artifact backendJar.javadocJar
-            artifact implJar.remapJar
-            artifact implJar.remapSources
-            artifact implJar.javadocJar
-            artifactId = "flywheel-${project.name}-intermediary-${artifact_minecraft_version}"
+            artifactId = "flywheel-common-intermediary-api-${artifact_minecraft_version}"
         }
         register('mavenMojmap', MavenPublication) {
-            artifact jar
-            artifact sourcesJar
-            artifact javadocJar
             artifact apiLibJar.jar
             artifact apiLibJar.sources
             artifact apiLibJar.javadocJar
-            artifact backendJar.jar
-            artifact backendJar.sources
-            artifact backendJar.javadocJar
-            artifact implJar.jar
-            artifact implJar.sources
-            artifact implJar.javadocJar
-            artifactId = "flywheel-${project.name}-mojmap-${artifact_minecraft_version}"
+            artifactId = "flywheel-common-mojmap-api-${artifact_minecraft_version}"
         }
     }
 }

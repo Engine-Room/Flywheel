@@ -2,6 +2,9 @@ package com.jozufozu.gradle
 
 import groovy.transform.CompileStatic
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
+import net.fabricmc.loom.task.RemapJarTask
+import net.fabricmc.loom.task.RemapSourcesJarTask
+import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -56,10 +59,10 @@ class PlatformPlugin implements Plugin<Project> {
         mainMod.sourceSet(platformBackend)
         mainMod.sourceSet(platformImpl)
 
-        def forApi = newConfiguration(project, 'forApi')
-        def forLib = newConfiguration(project, 'forLib')
-        def forBackend = newConfiguration(project, 'forBackend')
-        def forImpl = newConfiguration(project, 'forImpl')
+        def forApi = newConfiguration(project, 'forApi').get()
+        def forLib = newConfiguration(project, 'forLib').get()
+        def forBackend = newConfiguration(project, 'forBackend').get()
+        def forImpl = newConfiguration(project, 'forImpl').get()
 
         extendsFrom(project, platformApi.compileOnlyConfigurationName, forApi)
         extendsFrom(project, platformLib.compileOnlyConfigurationName, forApi, forLib)
@@ -86,7 +89,6 @@ class PlatformPlugin implements Plugin<Project> {
         }
 
         tasks.named('jar', Jar).configure { Jar jar ->
-            jar.archiveClassifier.set('dev')
             jar.from platformApi.output, platformLib.output, platformBackend.output
 
             JarTaskUtils.excludeDuplicatePackageInfos(jar)
@@ -108,34 +110,34 @@ class PlatformPlugin implements Plugin<Project> {
             JarTaskUtils.excludeDuplicatePackageInfos(jar)
         }
 
-        // for if we decide to have Vanillin be another subproject, we can just use the exported configurations
-        JarTaskUtils.createJarAndOutgoingConfiguration(project, 'apiOnly', platformApi)
-        JarTaskUtils.createJarAndOutgoingConfiguration(project, 'lib', platformLib)
+        def remapJar = tasks.named('remapJar', RemapJarTask)
+        def remapSourcesJar = tasks.named('remapSourcesJar', RemapSourcesJarTask)
+        def javadocJar = tasks.named('javadocJar', Jar)
 
-        JarTaskSet apiSet = JarTaskUtils.createJarAndOutgoingConfiguration(project, 'api', platformApi, platformLib)
-        JarTaskSet backendSet = JarTaskUtils.createJarAndOutgoingConfiguration(project, 'backend', platformBackend)
-        JarTaskSet implSet = JarTaskUtils.createJarAndOutgoingConfiguration(project, 'impl', platformImpl)
+        JarTaskSet apiSet = JarTaskSet.create(project, 'api', platformApi, platformLib)
+
+        def mcVersion = project.property('artifact_minecraft_version')
 
         publishing.publications {
             // we should be using remapped on both Fabric and Forge because Forge needs to put things in srg
-            it.register('mavenIntermediary', MavenPublication) { MavenPublication pub ->
-                pub.from(project.components.named('java').get())
+            it.register('mavenApi', MavenPublication) { MavenPublication pub ->
                 pub.artifact(apiSet.remapJar)
                 pub.artifact(apiSet.remapSources)
                 pub.artifact(apiSet.javadocJar)
-                pub.artifact(backendSet.remapJar)
-                pub.artifact(backendSet.remapSources)
-                pub.artifact(backendSet.javadocJar)
-                pub.artifact(implSet.remapJar)
-                pub.artifact(implSet.remapSources)
-                pub.artifact(implSet.javadocJar)
-                pub.artifactId = "flywheel-${project.name}-${project.property('artifact_minecraft_version')}"
+
+                pub.artifactId = "flywheel-${project.name}-api-${mcVersion}"
+            }
+            it.register('mavenImpl', MavenPublication) { MavenPublication pub ->
+                pub.artifact(remapJar)
+                pub.artifact(remapSourcesJar)
+                pub.artifact(javadocJar)
+                pub.artifactId = "flywheel-${project.name}-${mcVersion}"
             }
         }
     }
 
-    static Configuration newConfiguration(Project project, String name) {
-        return project.configurations.create(name) { Configuration it ->
+    static NamedDomainObjectProvider<Configuration> newConfiguration(Project project, String name) {
+        return project.configurations.register(name) { Configuration it ->
             it.canBeConsumed = true
             it.canBeResolved = false
         }
