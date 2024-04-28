@@ -11,6 +11,10 @@ plugins {
 
 evaluationDependsOn(':common')
 
+defaultPackageInfos {
+    forSourceSets sourceSets.api, sourceSets.lib, sourceSets.backend, sourceSets.main
+}
+
 loom {
     forge {
         mixinConfig 'flywheel.backend.mixins.json'

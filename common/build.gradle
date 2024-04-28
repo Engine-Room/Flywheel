@@ -40,6 +40,10 @@ sourceSets {
     }
 }
 
+defaultPackageInfos {
+    forSourceSets sourceSets.api, sourceSets.lib, sourceSets.backend, sourceSets.main
+}
+
 // For sharing with other subprojects.
 jarSets {
     createJars('apiOnly', sourceSets.api).configure {

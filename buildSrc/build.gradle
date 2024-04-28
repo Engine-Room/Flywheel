@@ -27,6 +27,10 @@ gradlePlugin {
             plugin.id = 'flywheel.jar-sets'
             plugin.implementationClass = 'com.jozufozu.gradle.JarSetPlugin'
         }
+        packageInfosPlugin { PluginDeclaration plugin ->
+            plugin.id = 'flywheel.package-infos'
+            plugin.implementationClass = 'com.jozufozu.gradle.PackageInfosPlugin'
+        }
     }
 }
 
