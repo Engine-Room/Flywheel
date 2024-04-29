@@ -7,9 +7,31 @@ plugins {
     id 'flywheel.package-infos'
     id 'flywheel.subproject'
     id 'flywheel.platform'
+    id 'flywheel.transitive-source-sets'
 }
 
 evaluationDependsOn(':common')
+
+transitiveSourceSets {
+    compileClasspath = sourceSets.main.compileClasspath
+
+    create('api') {
+        rootCompile()
+    }
+    create('lib') {
+        rootCompile()
+        compile sourceSets.api
+    }
+    create('backend') {
+        rootCompile()
+        compile sourceSets.api, sourceSets.lib
+    }
+    sourceSet(sourceSets.main) {
+        implementation sourceSets.api, sourceSets.lib, sourceSets.backend
+    }
+
+    createCompileConfigurations()
+}
 
 defaultPackageInfos {
     forSourceSets sourceSets.api, sourceSets.lib, sourceSets.backend, sourceSets.main
@@ -50,5 +72,5 @@ dependencies {
     forApi project(path: ':common', configuration: 'commonApiOnly')
     forLib project(path: ':common', configuration: 'commonLib')
     forBackend project(path: ':common', configuration: 'commonBackend')
-    forImpl project(path: ':common', configuration: 'commonImpl')
+    forMain project(path: ':common', configuration: 'commonImpl')
 }

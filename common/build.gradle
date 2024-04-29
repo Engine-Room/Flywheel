@@ -7,36 +7,28 @@ plugins {
     id 'flywheel.package-infos'
     id 'flywheel.subproject'
     id 'flywheel.jar-sets'
+    id 'flywheel.transitive-source-sets'
 }
 
-sourceSets {
-    // Loom only populates mc stuff to the main source set,
-    // so grab that here and use it for the others.
-    // Note that the `+` operator does NOT perform a deep copy
-    // of a FileCollection, so this object is shared between
-    // the source sets and we should avoid mutating it.
-    FileCollection mcCompileClassPath = main.compileClasspath
+transitiveSourceSets {
+    compileClasspath = sourceSets.main.compileClasspath
 
-    SourceSet api = api {
-        compileClasspath = mcCompileClassPath
+    create('api') {
+        rootCompile()
     }
-    SourceSet lib = lib {
-        compileClasspath = mcCompileClassPath + api.output
+    create('lib') {
+        rootCompile()
+        compile sourceSets.api
     }
-    SourceSet backend = backend {
-        compileClasspath = mcCompileClassPath + api.output + lib.output
+    create('backend') {
+        rootCompile()
+        compile sourceSets.api, sourceSets.lib
     }
-
-    main {
-        // Assign here rather than concatenate to avoid modifying the mcCompileClassPath FileCollection
-        compileClasspath = mcCompileClassPath + api.output + lib.output + backend.output
+    sourceSet(sourceSets.main) {
+        compile sourceSets.api, sourceSets.lib, sourceSets.backend
     }
-
-    test {
-        // Only test needs runtimeClasspath filled since the game shouldn't run from common alone.
-        // Fine to concatenate here.
-        compileClasspath += api.output + lib.output + backend.output
-        runtimeClasspath += api.output + lib.output + backend.output
+    sourceSet(sourceSets.test) {
+        implementation sourceSets.api, sourceSets.lib, sourceSets.backend
     }
 }
 

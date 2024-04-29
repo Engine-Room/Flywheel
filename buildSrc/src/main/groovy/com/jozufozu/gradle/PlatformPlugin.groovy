@@ -30,27 +30,10 @@ class PlatformPlugin implements Plugin<Project> {
         def loom = project.getExtensions().getByType(LoomGradleExtensionAPI)
         def publishing = project.getExtensions().getByType(PublishingExtension)
 
-        // Loom only populates mc stuff to the main source set,
-        // so grab that here and use it for the others.
-        // Note that the `+` operator does NOT perform a deep copy
-        // of a FileCollection, so this object is shared between
-        // the source sets and we should avoid mutating it.
         SourceSet platformImpl = sourceSets.named('main').get()
-        FileCollection mcCompileClassPath = platformImpl.compileClasspath
-
         SourceSet platformApi = sourceSets.create('api')
-        platformApi.compileClasspath = mcCompileClassPath
-
         SourceSet platformLib = sourceSets.create('lib')
-        platformLib.compileClasspath = mcCompileClassPath + platformApi.output
-
         SourceSet platformBackend = sourceSets.create('backend')
-        platformBackend.compileClasspath = mcCompileClassPath + platformApi.output + platformLib.output
-
-        // Assign here rather than concatenate to avoid modifying the mcCompileClassPath FileCollection
-        platformImpl.compileClasspath = mcCompileClassPath + platformApi.output + platformLib.output + platformBackend.output
-        // This isn't necessary for forge but fabric needs to recognize each classpath entry from ModSettings.
-        platformImpl.runtimeClasspath += platformApi.output + platformLib.output + platformBackend.output
 
         // This is needed for both platforms.
         def mainMod = loom.mods.maybeCreate('main')
@@ -58,16 +41,6 @@ class PlatformPlugin implements Plugin<Project> {
         mainMod.sourceSet(platformLib)
         mainMod.sourceSet(platformBackend)
         mainMod.sourceSet(platformImpl)
-
-        def forApi = newConfiguration(project, 'forApi').get()
-        def forLib = newConfiguration(project, 'forLib').get()
-        def forBackend = newConfiguration(project, 'forBackend').get()
-        def forImpl = newConfiguration(project, 'forImpl').get()
-
-        extendsFrom(project, platformApi.compileOnlyConfigurationName, forApi)
-        extendsFrom(project, platformLib.compileOnlyConfigurationName, forApi, forLib)
-        extendsFrom(project, platformBackend.compileOnlyConfigurationName, forApi, forLib, forBackend)
-        extendsFrom(project, platformImpl.compileOnlyConfigurationName, forApi, forLib, forBackend, forImpl)
 
         SourceSet commonApi = commonSourceSets.named('api').get()
         SourceSet commonLib = commonSourceSets.named('lib').get()
