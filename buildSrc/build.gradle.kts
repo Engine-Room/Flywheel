@@ -26,15 +26,15 @@ gradlePlugin {
         }
         create("jarSetPlugin") {
             id = "flywheel.jar-sets"
-            implementationClass = "com.jozufozu.gradle.JarSetPlugin"
+            implementationClass = "com.jozufozu.gradle.jarset.JarSetPlugin"
         }
         create("packageInfosPlugin") {
             id = "flywheel.package-infos"
-            implementationClass = "com.jozufozu.gradle.PackageInfosPlugin"
+            implementationClass = "com.jozufozu.gradle.nullability.PackageInfosPlugin"
         }
         create("transitiveSourceSetsPlugin") {
             id = "flywheel.transitive-source-sets"
-            implementationClass = "com.jozufozu.gradle.TransitiveSourceSetsPlugin"
+            implementationClass = "com.jozufozu.gradle.transitive.TransitiveSourceSetsPlugin"
         }
     }
 }

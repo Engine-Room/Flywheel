@@ -1,4 +1,4 @@
-package com.jozufozu.gradle
+package com.jozufozu.gradle.transitive
 
 import org.gradle.api.Action
 import org.gradle.api.Project

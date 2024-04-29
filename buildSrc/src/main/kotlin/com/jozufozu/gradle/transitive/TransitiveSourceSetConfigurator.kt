@@ -1,4 +1,4 @@
-package com.jozufozu.gradle
+package com.jozufozu.gradle.transitive
 
 import org.gradle.api.tasks.SourceSet
 
