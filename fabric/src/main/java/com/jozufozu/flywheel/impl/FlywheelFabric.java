@@ -1,5 +1,7 @@
 package com.jozufozu.flywheel.impl;
 
+import org.jetbrains.annotations.UnknownNullability;
+
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.event.BeginFrameCallback;
 import com.jozufozu.flywheel.api.event.EndClientResourceReloadCallback;
@@ -26,6 +28,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.server.packs.PackType;
 
 public final class FlywheelFabric implements ClientModInitializer {
+	@UnknownNullability
 	private static Version version;
 
 	@Override
@@ -60,14 +63,13 @@ public final class FlywheelFabric implements ClientModInitializer {
 		ClientEntityEvents.ENTITY_LOAD.register((entity, level) -> VisualizationEventHandler.onEntityJoinLevel(level, entity));
 		ClientEntityEvents.ENTITY_UNLOAD.register((entity, level) -> VisualizationEventHandler.onEntityLeaveLevel(level, entity));
 
-		ClientCommandRegistrationCallback.EVENT.register((dispatcher, ctx) -> {
-			// TODO: Fabric client commands
-		});
+		ClientCommandRegistrationCallback.EVENT.register(FlwCommands::registerClientCommands);
 
 		EndClientResourceReloadCallback.EVENT.register((minecraft, resourceManager, initialReload, error) ->
 				BackendManagerImpl.onEndClientResourceReload(error.isPresent()));
 
 		ArgumentTypeRegistry.registerArgumentType(Flywheel.rl("backend"), BackendArgument.class, BackendArgument.INFO);
+		ArgumentTypeRegistry.registerArgumentType(Flywheel.rl("debug_mode"), DebugModeArgument.class, DebugModeArgument.INFO);
 	}
 
 	private static void setupLib() {

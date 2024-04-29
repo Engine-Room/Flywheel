@@ -1,6 +1,7 @@
 package com.jozufozu.flywheel.impl;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.jetbrains.annotations.UnknownNullability;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.event.BeginFrameEvent;
@@ -39,6 +40,7 @@ import net.minecraftforge.registries.RegisterEvent;
 
 @Mod(Flywheel.ID)
 public final class FlywheelForge {
+	@UnknownNullability
 	private static ArtifactVersion version;
 
 	public FlywheelForge() {
@@ -99,10 +101,12 @@ public final class FlywheelForge {
 
 		modEventBus.addListener((FMLCommonSetupEvent e) -> {
 			ArgumentTypeInfos.registerByClass(BackendArgument.class, BackendArgument.INFO);
+			ArgumentTypeInfos.registerByClass(DebugModeArgument.class, DebugModeArgument.INFO);
 		});
 		modEventBus.addListener((RegisterEvent e) -> {
 			if (e.getRegistryKey().equals(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES)) {
 				e.register(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, Flywheel.rl("backend"), () -> BackendArgument.INFO);
+				e.register(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, Flywheel.rl("debug_mode"), () -> DebugModeArgument.INFO);
 			}
 		});
 	}
