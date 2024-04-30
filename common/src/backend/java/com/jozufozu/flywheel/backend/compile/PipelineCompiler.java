@@ -37,7 +37,7 @@ public final class PipelineCompiler {
 									.nameLowerCase();
 							return "pipeline/" + pipeline.compilerMarker() + "/" + instance + "_" + context;
 						})
-						.enableExtensions(extensions)
+						.requireExtensions(extensions)
 						.onCompile((key, comp) -> key.contextShader()
 								.onCompile(comp))
 						.withResource(API_IMPL_VERT)
@@ -55,7 +55,7 @@ public final class PipelineCompiler {
 									.nameLowerCase();
 							return "pipeline/" + pipeline.compilerMarker() + "/" + context;
 						})
-						.enableExtensions(extensions)
+						.requireExtensions(extensions)
 						.enableExtension("GL_ARB_conservative_depth")
 						.onCompile((key, comp) -> key.contextShader()
 								.onCompile(comp))
@@ -90,9 +90,5 @@ public final class PipelineCompiler {
 					GlProgram.unbind();
 				})
 				.harness(pipeline.compilerMarker(), sources);
-	}
-
-	static CompilationHarness<PipelineProgramKey> create(ShaderSources sources, Pipeline pipeline, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
-		return create(sources, pipeline, vertexComponents, fragmentComponents, Collections.emptyList());
 	}
 }

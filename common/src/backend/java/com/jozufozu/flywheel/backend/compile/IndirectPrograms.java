@@ -54,6 +54,12 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 	private static List<String> getExtensions(GlslVersion glslVersion) {
 		List<String> extensions = new ArrayList<>();
+		if (glslVersion.compareTo(GlslVersion.V400) < 0) {
+			extensions.add("GL_ARB_gpu_shader5");
+		}
+		if (glslVersion.compareTo(GlslVersion.V420) < 0) {
+			extensions.add("GL_ARB_shading_language_420pack");
+		}
 		if (glslVersion.compareTo(GlslVersion.V430) < 0) {
 			extensions.add("GL_ARB_shader_storage_buffer_object");
 		}
@@ -105,8 +111,8 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		return CULL.program()
 				.link(CULL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.COMPUTE)
 						.nameMapper(instanceType -> "culling/" + ResourceUtil.toDebugFileNameNoExtension(instanceType.cullShader()))
-						.enableExtensions(EXTENSIONS)
-						.enableExtensions(COMPUTE_EXTENSIONS)
+						.requireExtensions(EXTENSIONS)
+						.requireExtensions(COMPUTE_EXTENSIONS)
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(CULL_SHADER_API_IMPL)
 						.withComponent(InstanceStructComponent::new)
@@ -127,8 +133,8 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		return UTIL.program()
 				.link(UTIL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.COMPUTE)
 						.nameMapper(resourceLocation -> "utilities/" + ResourceUtil.toDebugFileNameNoExtension(resourceLocation))
-						.enableExtensions(EXTENSIONS)
-						.enableExtensions(COMPUTE_EXTENSIONS)
+						.requireExtensions(EXTENSIONS)
+						.requireExtensions(COMPUTE_EXTENSIONS)
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(s -> s))
 				.harness("utilities", sources);

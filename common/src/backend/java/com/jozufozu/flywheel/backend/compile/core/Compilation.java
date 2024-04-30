@@ -64,6 +64,12 @@ public class Compilation {
 				.append(" : enable\n");
 	}
 
+	public void requireExtension(String ext) {
+		fullSource.append("#extension ")
+				.append(ext)
+				.append(" : require\n");
+	}
+
 	public void define(String key, String value) {
 		fullSource.append("#define ")
 				.append(key)
