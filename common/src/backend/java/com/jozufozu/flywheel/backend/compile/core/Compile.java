@@ -113,6 +113,14 @@ public class Compile<K> {
 			});
 		}
 
+		public ShaderCompiler<K> requireExtensions(Collection<String> extensions) {
+			return onCompile(($, ctx) -> {
+				for (String extension : extensions) {
+					ctx.requireExtension(extension);
+				}
+			});
+		}
+
 		@Nullable
 		private GlShader compile(K key, ShaderCache compiler, SourceLoader loader) {
 			var components = new ArrayList<SourceComponent>();

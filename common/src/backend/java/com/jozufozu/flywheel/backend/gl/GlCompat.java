@@ -111,25 +111,24 @@ public final class GlCompat {
 	}
 
 	private static boolean isInstancingSupported() {
-		if (!CAPABILITIES.OpenGL33) {
-			return false;
+		if (CAPABILITIES.OpenGL33) {
+			return true;
 		}
-		return true;
+		return CAPABILITIES.GL_ARB_shader_bit_encoding;
 	}
 
 	private static boolean isIndirectSupported() {
-		// The GL requirement cannot be lower because GL_ARB_compute_shader requires at least GL 4.2.
-		if (!CAPABILITIES.OpenGL42) {
-			return false;
-		}
 		if (CAPABILITIES.OpenGL46) {
 			return true;
 		}
 		return CAPABILITIES.GL_ARB_compute_shader
 				&& CAPABILITIES.GL_ARB_direct_state_access
+				&& CAPABILITIES.GL_ARB_gpu_shader5
 				&& CAPABILITIES.GL_ARB_multi_bind
 				&& CAPABILITIES.GL_ARB_multi_draw_indirect
 				&& CAPABILITIES.GL_ARB_shader_draw_parameters
-				&& CAPABILITIES.GL_ARB_shader_storage_buffer_object;
+				&& CAPABILITIES.GL_ARB_shader_storage_buffer_object
+				&& CAPABILITIES.GL_ARB_shading_language_420pack
+				&& CAPABILITIES.GL_ARB_vertex_attrib_binding;
 	}
 }

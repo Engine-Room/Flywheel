@@ -1,5 +1,6 @@
 package com.jozufozu.flywheel.backend.compile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -9,11 +10,14 @@ import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.gl.GlCompat;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
+import com.jozufozu.flywheel.backend.glsl.GlslVersion;
 import com.jozufozu.flywheel.backend.glsl.ShaderSources;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 import com.jozufozu.flywheel.backend.util.AtomicReferenceCounted;
 
 public class InstancingPrograms extends AtomicReferenceCounted {
+	private static final List<String> EXTENSIONS = getExtensions(GlCompat.MAX_GLSL_VERSION);
+
 	@Nullable
 	private static InstancingPrograms instance;
 
@@ -23,6 +27,14 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 		this.pipeline = pipeline;
 	}
 
+	private static List<String> getExtensions(GlslVersion glslVersion) {
+		List<String> extensions = new ArrayList<>();
+		if (glslVersion.compareTo(GlslVersion.V330) < 0) {
+			extensions.add("GL_ARB_shader_bit_encoding");
+		}
+		return extensions;
+	}
+
 	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
 		if (!GlCompat.SUPPORTS_INSTANCING) {
 			return;
@@ -30,7 +42,7 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 
 		InstancingPrograms newInstance = null;
 
-		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCING, vertexComponents, fragmentComponents);
+		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCING, vertexComponents, fragmentComponents, EXTENSIONS);
 
 		try {
 			var pipelineResult = pipelineCompiler.compileAndReportErrors(pipelineKeys);
