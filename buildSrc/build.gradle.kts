@@ -22,7 +22,7 @@ gradlePlugin {
     plugins {
         create("platformPlugin") {
             id = "flywheel.platform"
-            implementationClass = "com.jozufozu.gradle.PlatformPlugin"
+            implementationClass = "com.jozufozu.gradle.platform.PlatformPlugin"
         }
         create("jarSetPlugin") {
             id = "flywheel.jar-sets"

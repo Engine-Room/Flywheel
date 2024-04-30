@@ -5,7 +5,7 @@ import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.SourceSet
 
 open class PackageInfosExtension(private val project: Project) {
-    fun forSourceSets(vararg sourceSets: SourceSet) {
+    fun sources(vararg sourceSets: SourceSet) {
         for (sourceSet in sourceSets) {
             forSourceSet(sourceSet)
         }
