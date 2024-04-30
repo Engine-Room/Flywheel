@@ -7,10 +7,9 @@ plugins {
     id 'flywheel.package-infos'
     id 'flywheel.subproject'
     id 'flywheel.platform'
+    id 'flywheel.jar-sets'
     id 'flywheel.transitive-source-sets'
 }
-
-evaluationDependsOn(':common')
 
 transitiveSourceSets {
     compileClasspath = sourceSets.main.compileClasspath
@@ -33,8 +32,19 @@ transitiveSourceSets {
     createCompileConfigurations()
 }
 
+platform {
+    commonProject = project(':common')
+    sources sourceSets.api, sourceSets.lib, sourceSets.backend, sourceSets.main
+    compileWithCommonSourceSets()
+    setupLoomMod()
+    setupLoomRuns()
+    setupFatJar()
+    publishMod()
+    publishRemap(apiArtifactId, jarSets.createJars('api', sourceSets.api, sourceSets.lib))
+}
+
 defaultPackageInfos {
-    forSourceSets sourceSets.api, sourceSets.lib, sourceSets.backend, sourceSets.main
+    sources sourceSets.api, sourceSets.lib, sourceSets.backend, sourceSets.main
 }
 
 loom {
@@ -48,27 +58,6 @@ loom {
         configureEach {
             property 'forge.logging.markers', ''
             property 'forge.logging.console.level', 'debug'
-        }
-
-        client {
-            ideConfigGenerated true
-
-            // Turn on our own debug flags
-            property 'flw.dumpShaderSource', 'true'
-            property 'flw.debugMemorySafety', 'true'
-
-            // Turn on mixin debug flags
-            property 'mixin.debug.export', 'true'
-            property 'mixin.debug.verbose', 'true'
-
-            // 720p baby!
-            programArgs '--width', '1280', '--height', '720'
-        }
-
-        // We're a client mod, but we need to make sure we correctly render when playing on a server.
-        server {
-            ideConfigGenerated true
-            programArgs '--nogui'
         }
     }
 }

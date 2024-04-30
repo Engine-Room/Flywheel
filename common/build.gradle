@@ -33,23 +33,15 @@ transitiveSourceSets {
 }
 
 defaultPackageInfos {
-    forSourceSets sourceSets.api, sourceSets.lib, sourceSets.backend, sourceSets.main
+    sources sourceSets.api, sourceSets.lib, sourceSets.backend, sourceSets.main
 }
 
 // For sharing with other subprojects.
 jarSets {
-    createJars('apiOnly', sourceSets.api).configure {
-        it.createOutgoingConfiguration('common')
-    }
-    createJars('lib').configure {
-        it.createOutgoingConfiguration('common')
-    }
-    createJars('backend').configure {
-        it.createOutgoingConfiguration('common')
-    }
-    createJars('impl', sourceSets.main).configure {
-        it.createOutgoingConfiguration('common')
-    }
+    createJars('apiOnly', sourceSets.api).createOutgoingConfiguration('common')
+    createJars('lib').createOutgoingConfiguration('common')
+    createJars('backend').createOutgoingConfiguration('common')
+    createJars('impl', sourceSets.main).createOutgoingConfiguration('common')
 }
 
 // For publishing
