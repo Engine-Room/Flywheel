@@ -4,12 +4,14 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL31C;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.KHRShaderSubgroup;
 import org.lwjgl.system.MemoryStack;
 
+import com.jozufozu.flywheel.backend.compile.core.Compilation;
 import com.jozufozu.flywheel.backend.glsl.GlslVersion;
 import com.jozufozu.flywheel.lib.math.MoreMath;
 
@@ -88,28 +90,6 @@ public final class GlCompat {
 		return DRIVER == Driver.AMD || DRIVER == Driver.MESA ? 64 : 32;
 	}
 
-	private static GlslVersion maxGlslVersion() {
-		if (CAPABILITIES.OpenGL46) {
-			return GlslVersion.V460;
-		} else if (CAPABILITIES.OpenGL45) {
-			return GlslVersion.V450;
-		} else if (CAPABILITIES.OpenGL44) {
-			return GlslVersion.V440;
-		} else if (CAPABILITIES.OpenGL43) {
-			return GlslVersion.V430;
-		} else if (CAPABILITIES.OpenGL42) {
-			return GlslVersion.V420;
-		} else if (CAPABILITIES.OpenGL41) {
-			return GlslVersion.V410;
-		} else if (CAPABILITIES.OpenGL40) {
-			return GlslVersion.V400;
-		} else if (CAPABILITIES.OpenGL33) {
-			return GlslVersion.V330;
-		} else {
-			return GlslVersion.V150;
-		}
-	}
-
 	private static boolean isInstancingSupported() {
 		if (CAPABILITIES.OpenGL33) {
 			return true;
@@ -130,5 +110,43 @@ public final class GlCompat {
 				&& CAPABILITIES.GL_ARB_shader_storage_buffer_object
 				&& CAPABILITIES.GL_ARB_shading_language_420pack
 				&& CAPABILITIES.GL_ARB_vertex_attrib_binding;
+	}
+
+	/**
+	 * Try to compile a shader with progressively lower glsl versions.
+	 * The first version to compile successfully is returned.
+	 * @return The highest glsl version that could be compiled.
+	 */
+	private static GlslVersion maxGlslVersion() {
+		var glslVersions = GlslVersion.values();
+		// No need to test glsl 150 as that is guaranteed to be supported by MC.
+		for (int i = glslVersions.length - 1; i > 0; i--) {
+			var version = glslVersions[i];
+
+			if (canCompileVersion(version)) {
+				return version;
+			}
+		}
+
+		return GlslVersion.V150;
+	}
+
+	private static boolean canCompileVersion(GlslVersion version) {
+		int handle = GL20.glCreateShader(GL20.GL_VERTEX_SHADER);
+
+		// Compile the simplest possible shader.
+		var source = """
+				#version %d
+				void main() {}
+				""".formatted(version.version);
+
+		safeShaderSource(handle, source);
+		GL20.glCompileShader(handle);
+
+		boolean success = Compilation.compiledSuccessfully(handle);
+
+		GL20.glDeleteShader(handle);
+
+		return success;
 	}
 }

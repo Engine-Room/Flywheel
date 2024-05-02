@@ -1,10 +1,6 @@
 package com.jozufozu.flywheel.backend.glsl;
 
 public enum GlslVersion {
-	V110(110),
-	V120(120),
-	V130(130),
-	V140(140),
 	V150(150),
 	V330(330),
 	V400(400),
