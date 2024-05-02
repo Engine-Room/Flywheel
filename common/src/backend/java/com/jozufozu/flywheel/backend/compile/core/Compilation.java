@@ -134,7 +134,7 @@ public class Compilation {
 		}
 	}
 
-	private static boolean compiledSuccessfully(int handle) {
+	public static boolean compiledSuccessfully(int handle) {
 		return GL20.glGetShaderi(handle, GL20.GL_COMPILE_STATUS) == GL20.GL_TRUE;
 	}
 }
