@@ -161,7 +161,16 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	 * Clear all instances without freeing resources.
 	 */
 	public void clear() {
-		handles.forEach(InstanceHandleImpl::clear);
+		for (InstanceHandleImpl handle : handles) {
+			// Only clear instances that belong to this instancer.
+			// If one of these handles was stolen by another instancer,
+			// clearing it here would cause significant visual artifacts and instance leaks.
+			// At the same time, we need to clear handles we own to prevent
+			// instances from changing/deleting positions in this instancer that no longer exist.
+			if (handle.instancer == this) {
+				handle.clear();
+			}
+		}
 		instances.clear();
 		handles.clear();
 		changed.clear();

@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.backend.Engine;
@@ -32,7 +34,7 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 	 * <br>
 	 * All new instancers land here before having resources allocated in {@link #flush}.
 	 */
-	protected final List<UninitializedInstancer<N, ?>> initializationQueue = new ArrayList<>();
+	protected final Queue<UninitializedInstancer<N, ?>> initializationQueue = new ConcurrentLinkedQueue<>();
 
 	@SuppressWarnings("unchecked")
 	public <I extends Instance> Instancer<I> getInstancer(Environment environment, InstanceType<I> type, Model model, RenderStage stage) {
@@ -72,7 +74,8 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 		// Only queue the instancer for initialization if it has anything to render.
 		if (checkAndWarnEmptyModel(key.model())) {
 			// Thread safety: this method is called atomically from within computeIfAbsent,
-			// so we don't need extra synchronization to protect the queue.
+			// so you'd think we don't need extra synchronization to protect the queue, but
+			// somehow threads can race here and wind up never initializing an instancer.
 			initializationQueue.add(new UninitializedInstancer<>(key, out));
 		}
 		return out;
