@@ -1,5 +1,4 @@
 plugins {
-    id("groovy-gradle-plugin")
     id("java-gradle-plugin")
     kotlin("jvm") version "1.9.20"
     `kotlin-dsl`
@@ -35,6 +34,10 @@ gradlePlugin {
         create("transitiveSourceSetsPlugin") {
             id = "flywheel.transitive-source-sets"
             implementationClass = "com.jozufozu.gradle.transitive.TransitiveSourceSetsPlugin"
+        }
+        create("subprojectPlugin") {
+            id = "flywheel.subproject"
+            implementationClass = "com.jozufozu.gradle.subproject.SubprojectPlugin"
         }
     }
 }
