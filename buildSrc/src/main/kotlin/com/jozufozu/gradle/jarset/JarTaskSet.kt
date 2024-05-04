@@ -18,16 +18,16 @@ import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.the
 
 class JarTaskSet(
-    val project: Project,
-    val name: String,
-    val jar: TaskProvider<Jar>,
-    val remapJar: TaskProvider<RemapJarTask>,
-    val sources: TaskProvider<Jar>,
-    val remapSources: TaskProvider<RemapSourcesJarTask>,
-    val javadocJar: TaskProvider<Jar>
+    private val project: Project,
+    private val name: String,
+    private val jar: TaskProvider<Jar>,
+    private val sources: TaskProvider<Jar>,
+    private val javadocJar: TaskProvider<Jar>,
+    private val remapJar: TaskProvider<RemapJarTask>,
+    private val remapSources: TaskProvider<RemapSourcesJarTask>
 ) {
 
-    fun publishRemap(artifactId: String) {
+    fun publish(artifactId: String) {
         project.the<PublishingExtension>().publications {
             register<MavenPublication>("${name}RemapMaven") {
                 artifact(remapJar)
@@ -38,17 +38,9 @@ class JarTaskSet(
         }
     }
 
-    fun publish(artifactId: String) {
-        project.the<PublishingExtension>().publications {
-            register<MavenPublication>("${name}Maven") {
-                artifact(jar)
-                artifact(sources)
-                artifact(javadocJar)
-                this.artifactId = artifactId
-            }
-        }
-    }
-
+    /**
+     * Create a new configuration that can be consumed by other projects, and export the base jar.
+     */
     fun createOutgoingConfiguration() {
         val config = project.configurations.register(name) {
             isCanBeConsumed = true
@@ -58,24 +50,31 @@ class JarTaskSet(
         project.artifacts.add(config.name, jar)
     }
 
-    fun assembleRemaps() {
+    /**
+     * Configure the assemble task to depend on the remap tasks and javadoc jar.
+     */
+    fun addToAssemble() {
         project.tasks.named("assemble").configure {
             dependsOn(remapJar, remapSources, javadocJar)
         }
     }
 
-    fun configureEach(action: Action<Jar>) {
-        jar.configure(action)
-        sources.configure(action)
-        javadocJar.configure(action)
-
+    /**
+     * Configure the remap tasks with the given action.
+     */
+    fun configureRemap(action: Action<AbstractRemapJarTask>) {
         remapJar.configure(action)
         remapSources.configure(action)
     }
 
-    fun configureRemap(action: Action<AbstractRemapJarTask>) {
-        remapJar.configure(action)
-        remapSources.configure(action)
+    /**
+     * Create a new JarTaskSet with the same base jars but new tasks for remapping.
+     */
+    fun forkRemap(newName: String): JarTaskSet {
+        val remapJarTask = createRemapJar(project, newName, jar)
+        val remapSourcesTask = createRemapSourcesJar(project, newName, sources)
+
+        return JarTaskSet(project, newName, jar, sources, javadocJar, remapJarTask, remapSourcesTask)
     }
 
     companion object {
@@ -103,29 +102,40 @@ class JarTaskSet(
         }
 
         fun create(project: Project, name: String, vararg sourceSetSet: SourceSet): JarTaskSet {
-            val buildDirectory = project.layout.buildDirectory
-            val devlibs = buildDirectory.dir("devlibs/${name}")
-            val libs = buildDirectory.dir("libs/${name}")
+            val jarTask = createJar(project, name, sourceSetSet)
+            val sourcesTask = createSourcesJar(project, name, sourceSetSet)
+            val javadocJarTask = createJavadocJar(project, name, sourceSetSet)
 
-            val jarTask = project.tasks.register<Jar>("${name}Jar") {
+            val remapJarTask = createRemapJar(project, name, jarTask)
+            val remapSourcesTask = createRemapSourcesJar(project, name, sourcesTask)
+
+            return JarTaskSet(project, name, jarTask, sourcesTask, javadocJarTask, remapJarTask, remapSourcesTask)
+        }
+
+        private fun createJar(
+            project: Project,
+            name: String,
+            sourceSetSet: Array<out SourceSet>
+        ): TaskProvider<Jar> {
+            return project.tasks.register<Jar>("${name}Jar") {
                 group = BUILD_GROUP
-                destinationDirectory.set(devlibs)
+                destinationDirectory.set(project.layout.buildDirectory.dir("devlibs/${name}"))
 
                 for (set in sourceSetSet) {
                     from(set.output)
                 }
                 excludeDuplicatePackageInfos(this)
             }
-            val remapJarTask = project.tasks.register<RemapJarTask>("${name}RemapJar") {
-                dependsOn(jarTask)
-                group = LOOM_GROUP
-                destinationDirectory.set(libs)
+        }
 
-                inputFile.set(jarTask.flatMap { it.archiveFile })
-            }
-            val sourcesTask = project.tasks.register<Jar>("${name}SourcesJar") {
+        private fun createSourcesJar(
+            project: Project,
+            name: String,
+            sourceSetSet: Array<out SourceSet>
+        ): TaskProvider<Jar> {
+            return project.tasks.register<Jar>("${name}SourcesJar") {
                 group = BUILD_GROUP
-                destinationDirectory.set(devlibs)
+                destinationDirectory.set(project.layout.buildDirectory.dir("devlibs/${name}"))
                 archiveClassifier.set(SOURCES_CLASSIFIER)
 
                 for (set in sourceSetSet) {
@@ -133,17 +143,16 @@ class JarTaskSet(
                 }
                 excludeDuplicatePackageInfos(this)
             }
-            val remapSourcesTask = project.tasks.register<RemapSourcesJarTask>("${name}RemapSourcesJar") {
-                dependsOn(sourcesTask)
-                group = LOOM_GROUP
-                destinationDirectory.set(libs)
-                archiveClassifier.set(SOURCES_CLASSIFIER)
+        }
 
-                inputFile.set(sourcesTask.flatMap { it.archiveFile })
-            }
+        private fun createJavadocJar(
+            project: Project,
+            name: String,
+            sourceSetSet: Array<out SourceSet>
+        ): TaskProvider<Jar> {
             val javadocTask = project.tasks.register<Javadoc>("${name}Javadoc") {
                 group = BUILD_GROUP
-                setDestinationDir(buildDirectory.dir("docs/${name}-javadoc").get().asFile)
+                setDestinationDir(project.layout.buildDirectory.dir("docs/${name}-javadoc").get().asFile)
 
                 for (set in sourceSetSet) {
                     source(set.allJava)
@@ -151,16 +160,43 @@ class JarTaskSet(
                 }
                 excludeDuplicatePackageInfos(this)
             }
-            val javadocJarTask = project.tasks.register<Jar>("${name}JavadocJar") {
+            return project.tasks.register<Jar>("${name}JavadocJar") {
                 dependsOn(javadocTask)
                 group = BUILD_GROUP
-                destinationDirectory.set(libs)
+                destinationDirectory.set(project.layout.buildDirectory.dir("libs/${name}"))
                 archiveClassifier.set(JAVADOC_CLASSIFIER)
 
                 from(javadocTask.map { it.outputs })
             }
+        }
 
-            return JarTaskSet(project, name, jarTask, remapJarTask, sourcesTask, remapSourcesTask, javadocJarTask)
+        private fun createRemapJar(
+            project: Project,
+            name: String,
+            jar: TaskProvider<Jar>
+        ): TaskProvider<RemapJarTask> {
+            return project.tasks.register<RemapJarTask>("${name}RemapJar") {
+                dependsOn(jar)
+                group = LOOM_GROUP
+                destinationDirectory.set(project.layout.buildDirectory.dir("libs/${name}"))
+
+                inputFile.set(jar.flatMap { it.archiveFile })
+            }
+        }
+
+        private fun createRemapSourcesJar(
+            project: Project,
+            name: String,
+            jar: TaskProvider<Jar>
+        ): TaskProvider<RemapSourcesJarTask> {
+            return project.tasks.register<RemapSourcesJarTask>("${name}RemapSourcesJar") {
+                dependsOn(jar)
+                group = LOOM_GROUP
+                destinationDirectory.set(project.layout.buildDirectory.dir("libs/${name}"))
+                archiveClassifier.set(SOURCES_CLASSIFIER)
+
+                inputFile.set(jar.flatMap { it.archiveFile })
+            }
         }
     }
 }

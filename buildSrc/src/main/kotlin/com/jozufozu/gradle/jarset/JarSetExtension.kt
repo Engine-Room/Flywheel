@@ -24,6 +24,6 @@ open class JarSetExtension(private val project: Project) {
         val remapSourcesJarTask = project.tasks.named<RemapSourcesJarTask>("remapSourcesJar")
         val javadocJarTask = project.tasks.named<Jar>("javadocJar")
 
-        JarTaskSet(project, "main", jarTask, remapJarTask, sourcesJarTask, remapSourcesJarTask, javadocJarTask)
+        JarTaskSet(project, "main", jarTask, sourcesJarTask, javadocJarTask, remapJarTask, remapSourcesJarTask)
     }
 }
