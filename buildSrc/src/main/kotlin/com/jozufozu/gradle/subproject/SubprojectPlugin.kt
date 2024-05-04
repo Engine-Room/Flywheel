@@ -1,5 +1,8 @@
 package com.jozufozu.gradle.subproject
 
+import com.jozufozu.gradle.jarset.JarSetExtension
+import com.jozufozu.gradle.nullability.PackageInfosExtension
+import com.jozufozu.gradle.transitive.TransitiveSourceSetsExtension
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
@@ -19,6 +22,10 @@ import org.gradle.language.jvm.tasks.ProcessResources
 
 class SubprojectPlugin: Plugin<Project> {
     override fun apply(project: Project) {
+        project.extensions.create("defaultPackageInfos", PackageInfosExtension::class.java, project)
+        project.extensions.create("transitiveSourceSets", TransitiveSourceSetsExtension::class.java, project)
+        project.extensions.create("jarSets", JarSetExtension::class.java, project)
+
         setBaseProperties(project)
         setupJava(project)
         addRepositories(project)

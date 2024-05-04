@@ -1,10 +1,13 @@
 package com.jozufozu.gradle.jarset
 
+import net.fabricmc.loom.task.AbstractRemapJarTask
 import net.fabricmc.loom.task.RemapJarTask
 import net.fabricmc.loom.task.RemapSourcesJarTask
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceTask
@@ -12,6 +15,7 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.the
 
 class JarTaskSet(
     val project: Project,
@@ -23,8 +27,30 @@ class JarTaskSet(
     val javadocJar: TaskProvider<Jar>
 ) {
 
-    fun createOutgoingConfiguration(prefix: String) {
-        val config = project.configurations.register("${prefix}${name.capitalize()}") {
+    fun publishRemap(artifactId: String) {
+        project.the<PublishingExtension>().publications {
+            register<MavenPublication>("${name}RemapMaven") {
+                artifact(remapJar)
+                artifact(remapSources)
+                artifact(javadocJar)
+                this.artifactId = artifactId
+            }
+        }
+    }
+
+    fun publish(artifactId: String) {
+        project.the<PublishingExtension>().publications {
+            register<MavenPublication>("${name}Maven") {
+                artifact(jar)
+                artifact(sources)
+                artifact(javadocJar)
+                this.artifactId = artifactId
+            }
+        }
+    }
+
+    fun createOutgoingConfiguration() {
+        val config = project.configurations.register(name) {
             isCanBeConsumed = true
             isCanBeResolved = false
         }
@@ -32,8 +58,10 @@ class JarTaskSet(
         project.artifacts.add(config.name, jar)
     }
 
-    fun configure(action: Action<JarTaskSet>) {
-        action.execute(this)
+    fun assembleRemaps() {
+        project.tasks.named("assemble").configure {
+            dependsOn(remapJar, remapSources, javadocJar)
+        }
     }
 
     fun configureEach(action: Action<Jar>) {
@@ -41,6 +69,11 @@ class JarTaskSet(
         sources.configure(action)
         javadocJar.configure(action)
 
+        remapJar.configure(action)
+        remapSources.configure(action)
+    }
+
+    fun configureRemap(action: Action<AbstractRemapJarTask>) {
         remapJar.configure(action)
         remapSources.configure(action)
     }
@@ -125,10 +158,6 @@ class JarTaskSet(
                 archiveClassifier.set(JAVADOC_CLASSIFIER)
 
                 from(javadocTask.map { it.outputs })
-            }
-
-            project.tasks.named("assemble").configure {
-                dependsOn(remapJarTask, remapSourcesTask, javadocJarTask)
             }
 
             return JarTaskSet(project, name, jarTask, remapJarTask, sourcesTask, remapSourcesTask, javadocJarTask)
