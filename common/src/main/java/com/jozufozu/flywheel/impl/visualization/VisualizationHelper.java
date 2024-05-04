@@ -31,8 +31,8 @@ public final class VisualizationHelper {
 
 	/**
 	 * Checks if the given block entity can be visualized.
-	 * @param type The block entity to check.
-	 * @param <T> The block entity.
+	 * @param blockEntity The block entity to check.
+	 * @param <T> The type of the block entity.
 	 * @return {@code true} if the block entity can be visualized.
 	 */
 	public static <T extends BlockEntity> boolean canVisualize(T blockEntity) {
@@ -41,8 +41,8 @@ public final class VisualizationHelper {
 
 	/**
 	 * Checks if the given entity can be visualized.
-	 * @param type The entity to check.
-	 * @param <T> The entity.
+	 * @param entity The entity to check.
+	 * @param <T> The type of the entity.
 	 * @return {@code true} if the entity can be visualized.
 	 */
 	public static <T extends Entity> boolean canVisualize(T entity) {

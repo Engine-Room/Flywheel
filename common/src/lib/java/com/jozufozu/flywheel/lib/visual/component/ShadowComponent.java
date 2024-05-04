@@ -108,7 +108,7 @@ public class ShadowComponent implements EntityComponent {
 
 	/**
 	 * Update the shadow instances. You'd typically call this in your visual's
-	 * {@link com.jozufozu.flywheel.api.visual.DynamicVisual#beginFrame(DynamicVisual.Context) beginFrame} method.
+	 * {@link com.jozufozu.flywheel.lib.visual.SimpleDynamicVisual#beginFrame(DynamicVisual.Context) beginFrame} method.
 	 *
 	 * @param context The frame context.
 	 */

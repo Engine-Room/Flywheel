@@ -17,10 +17,10 @@ public interface LitVisual extends Visual {
 	 *
 	 * <p>Even if multiple sections are updated at the same time, this method will only be called once.</p>
 	 *
-	 * <p>The implementation is free to parallelize calls to this method, as well as call into
-	 * {@link DynamicVisual#beginFrame} simultaneously. It is safe to query/update light here,
-	 * but you must ensure proper synchronization if you want to mutate anything outside this
-	 * visual or anything that is also mutated by {@link DynamicVisual#beginFrame}.</p>
+	 * <p>The implementation is free to parallelize calls to this method, as well as execute the plan
+	 * returned by {@link DynamicVisual#planFrame} simultaneously. It is safe to query/update light here,
+	 * but you must ensure proper synchronization if you want to mutate anything outside this visual or
+	 * anything that is also mutated within {@link DynamicVisual#planFrame}.</p>
 	 */
 	void updateLight();
 

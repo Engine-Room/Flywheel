@@ -14,7 +14,7 @@ public interface SimpleDynamicVisual extends DynamicVisual {
 	 * The implementation is free to parallelize calls to this method.
 	 * You must ensure proper synchronization if you need to mutate anything outside this visual.
 	 * <br>
-	 * This method and {@link TickableVisual#tick} will never be called simultaneously.
+	 * This method and {@link SimpleTickableVisual#tick} will never be called simultaneously.
 	 * <br>
 	 * {@link Instancer}/{@link Instance} creation/acquisition is safe here.
 	 */
