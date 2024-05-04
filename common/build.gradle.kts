@@ -46,8 +46,20 @@ jarSets {
 
     // For publishing.
     create("api", api, lib).apply {
-        publish("flywheel-common-mojmap-api-${property("artifact_minecraft_version")}")
-        publishRemap("flywheel-common-intermediary-api-${property("artifact_minecraft_version")}")
+        addToAssemble()
+        publish("flywheel-common-intermediary-api-${property("artifact_minecraft_version")}")
+
+        // Don't publish the un-remapped jars because they don't have the correct manifest populated by Loom.
+        forkRemap("apiMojmap").apply {
+            addToAssemble()
+            configureRemap {
+                // "named" == mojmap
+                // We're probably remapping from named to named so Loom should noop this.
+                targetNamespace = "named"
+            }
+
+            publish("flywheel-common-mojmap-api-${property("artifact_minecraft_version")}")
+        }
     }
 }
 

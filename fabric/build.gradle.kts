@@ -43,8 +43,11 @@ platform {
 }
 
 jarSets {
-    mainSet.publishRemap(platform.modArtifactId)
-    create("api", api, lib).publishRemap(platform.apiArtifactId)
+    mainSet.publish(platform.modArtifactId)
+    create("api", api, lib).apply {
+        addToAssemble()
+        publish(platform.apiArtifactId)
+    }
 }
 
 defaultPackageInfos {
