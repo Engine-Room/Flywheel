@@ -3,6 +3,7 @@ package com.jozufozu.gradle.nullability
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.SourceSet
+import org.gradle.kotlin.dsl.register
 
 open class PackageInfosExtension(private val project: Project) {
     fun sources(vararg sourceSets: SourceSet) {
@@ -16,7 +17,7 @@ open class PackageInfosExtension(private val project: Project) {
         // otherwise it'll just be whatever the last source set is in the list.
         val sourceSetName = sourceSet.name
         val taskName = sourceSet.getTaskName("generate", "PackageInfos")
-        val task = project.tasks.register(taskName, GeneratePackageInfosTask::class.java) {
+        val task = project.tasks.register<GeneratePackageInfosTask>(taskName) {
             group = "flywheel"
             description = "Generates package-info files for $sourceSetName packages."
 
@@ -31,7 +32,7 @@ open class PackageInfosExtension(private val project: Project) {
             finalizedBy(task)
         }
 
-        val cleanTask = project.tasks.register(sourceSet.getTaskName("clean", "PackageInfos"), Delete::class.java) {
+        val cleanTask = project.tasks.register<Delete>(sourceSet.getTaskName("clean", "PackageInfos")) {
             group = "flywheel"
             delete(project.file("src/$sourceSetName/generatedPackageInfos"))
         }

@@ -11,6 +11,7 @@ import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.register
 
 class JarTaskSet(
     val project: Project,
@@ -73,7 +74,7 @@ class JarTaskSet(
             val devlibs = buildDirectory.dir("devlibs/${name}")
             val libs = buildDirectory.dir("libs/${name}")
 
-            val jarTask = project.tasks.register("${name}Jar", Jar::class.java) {
+            val jarTask = project.tasks.register<Jar>("${name}Jar") {
                 group = BUILD_GROUP
                 destinationDirectory.set(devlibs)
 
@@ -82,14 +83,14 @@ class JarTaskSet(
                 }
                 excludeDuplicatePackageInfos(this)
             }
-            val remapJarTask = project.tasks.register("${name}RemapJar", RemapJarTask::class.java) {
+            val remapJarTask = project.tasks.register<RemapJarTask>("${name}RemapJar") {
                 dependsOn(jarTask)
                 group = LOOM_GROUP
                 destinationDirectory.set(libs)
 
                 inputFile.set(jarTask.flatMap { it.archiveFile })
             }
-            val sourcesTask = project.tasks.register("${name}SourcesJar", Jar::class.java) {
+            val sourcesTask = project.tasks.register<Jar>("${name}SourcesJar") {
                 group = BUILD_GROUP
                 destinationDirectory.set(devlibs)
                 archiveClassifier.set(SOURCES_CLASSIFIER)
@@ -99,7 +100,7 @@ class JarTaskSet(
                 }
                 excludeDuplicatePackageInfos(this)
             }
-            val remapSourcesTask = project.tasks.register("${name}RemapSourcesJar", RemapSourcesJarTask::class.java) {
+            val remapSourcesTask = project.tasks.register<RemapSourcesJarTask>("${name}RemapSourcesJar") {
                 dependsOn(sourcesTask)
                 group = LOOM_GROUP
                 destinationDirectory.set(libs)
@@ -107,11 +108,9 @@ class JarTaskSet(
 
                 inputFile.set(sourcesTask.flatMap { it.archiveFile })
             }
-            val javadocTask = project.tasks.register("${name}Javadoc", Javadoc::class.java) {
+            val javadocTask = project.tasks.register<Javadoc>("${name}Javadoc") {
                 group = BUILD_GROUP
                 setDestinationDir(buildDirectory.dir("docs/${name}-javadoc").get().asFile)
-                options.encoding = "UTF-8"
-                options.optionFiles(project.rootProject.file("javadoc-options.txt"))
 
                 for (set in sourceSetSet) {
                     source(set.allJava)
@@ -119,7 +118,7 @@ class JarTaskSet(
                 }
                 excludeDuplicatePackageInfos(this)
             }
-            val javadocJarTask = project.tasks.register("${name}JavadocJar", Jar::class.java) {
+            val javadocJarTask = project.tasks.register<Jar>("${name}JavadocJar") {
                 dependsOn(javadocTask)
                 group = BUILD_GROUP
                 destinationDirectory.set(libs)

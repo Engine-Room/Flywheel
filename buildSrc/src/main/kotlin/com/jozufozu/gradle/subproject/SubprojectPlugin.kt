@@ -13,10 +13,7 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.jvm.tasks.Jar
 import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.gradle.kotlin.dsl.assign
-import org.gradle.kotlin.dsl.maven
-import org.gradle.kotlin.dsl.provideDelegate
-import org.gradle.kotlin.dsl.the
+import org.gradle.kotlin.dsl.*
 import org.gradle.language.jvm.tasks.ProcessResources
 
 
@@ -113,36 +110,36 @@ class SubprojectPlugin: Plugin<Project> {
 
         project.tasks.apply {
             // make builds reproducible
-            withType(AbstractArchiveTask::class.java).configureEach {
+            withType<AbstractArchiveTask>().configureEach {
                 isPreserveFileTimestamps = false
                 isReproducibleFileOrder = true
             }
 
             // module metadata is often broken on multi-platform projects
-            withType(GenerateModuleMetadata::class.java).configureEach {
+            withType<GenerateModuleMetadata>().configureEach {
                 enabled = false
             }
 
-            withType(JavaCompile::class.java).configureEach {
+            withType<JavaCompile>().configureEach {
                 options.encoding = "UTF-8"
                 options.release = Integer.parseInt(java_version)
                 options.compilerArgs.add("-Xdiags:verbose")
             }
 
-            withType(Jar::class.java).configureEach {
+            withType<Jar>().configureEach {
                 from("${project.rootDir}/LICENSE.md") {
                     into("META-INF")
                 }
             }
 
-            withType(Javadoc::class.java).configureEach {
+            withType<Javadoc>().configureEach {
                 options.optionFiles(project.rootProject.file("javadoc-options.txt"))
                 options.encoding = "UTF-8"
             }
 
             val replaceProperties = processResourcesExpandProperties.associateWith { project.property(it) as String }
 
-            withType(ProcessResources::class.java).configureEach {
+            withType<ProcessResources>().configureEach {
                 inputs.properties(replaceProperties)
 
                 filesMatching(processResourcesExpandFiles) {
