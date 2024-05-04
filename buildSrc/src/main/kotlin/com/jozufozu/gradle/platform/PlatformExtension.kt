@@ -12,8 +12,7 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.jvm.tasks.Jar
-import org.gradle.kotlin.dsl.provideDelegate
-import org.gradle.kotlin.dsl.the
+import org.gradle.kotlin.dsl.*
 import org.gradle.language.jvm.tasks.ProcessResources
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -65,17 +64,17 @@ open class PlatformExtension(val project: Project) {
 
     fun compileWithCommonSourceSets() {
         project.tasks.apply {
-            withType(JavaCompile::class.java).configureEach {
+            withType<JavaCompile>().configureEach {
                 JarTaskSet.excludeDuplicatePackageInfos(this)
             }
 
             sources.forEach {
                 val commonSourceSet = commonSourceSets.named(it.name).get()
 
-                named(it.compileJavaTaskName, JavaCompile::class.java).configure {
+                named<JavaCompile>(it.compileJavaTaskName).configure {
                     source(commonSourceSet.allJava)
                 }
-                named(it.processResourcesTaskName, ProcessResources::class.java).configure {
+                named<ProcessResources>(it.processResourcesTaskName).configure {
                     from(commonSourceSet.resources)
                 }
             }
@@ -87,20 +86,20 @@ open class PlatformExtension(val project: Project) {
             val extraSourceSets = sources.filter { it.name != "main" }.toList()
             val commonSources = sources.map { commonSourceSets.named(it.name).get() }
 
-            named("jar", Jar::class.java).configure {
+            named<Jar>("jar").configure {
                 extraSourceSets.forEach { from(it.output) }
 
                 JarTaskSet.excludeDuplicatePackageInfos(this)
             }
 
-            named("javadoc", Javadoc::class.java).configure {
+            named<Javadoc>("javadoc").configure {
                 commonSources.forEach { source(it.allJava) }
                 extraSourceSets.forEach { source(it.allJava) }
 
                 JarTaskSet.excludeDuplicatePackageInfos(this)
             }
 
-            named("sourcesJar", Jar::class.java).configure {
+            named<Jar>("sourcesJar").configure {
                 commonSources.forEach { from(it.allJava) }
                 extraSourceSets.forEach { from(it.allJava) }
 
@@ -110,12 +109,12 @@ open class PlatformExtension(val project: Project) {
     }
 
     fun publishMod() {
-        val remapJar = project.tasks.named("remapJar", RemapJarTask::class.java)
-        val remapSourcesJar = project.tasks.named("remapSourcesJar", RemapSourcesJarTask::class.java)
-        val javadocJar = project.tasks.named("javadocJar", Jar::class.java)
+        val remapJar = project.tasks.named<RemapJarTask>("remapJar")
+        val remapSourcesJar = project.tasks.named<RemapSourcesJarTask>("remapSourcesJar")
+        val javadocJar = project.tasks.named<Jar>("javadocJar")
 
         project.the<PublishingExtension>().publications {
-            register("modMaven", MavenPublication::class.java) {
+            register<MavenPublication>("modMaven") {
                 artifact(remapJar)
                 artifact(remapSourcesJar)
                 artifact(javadocJar)
@@ -126,7 +125,7 @@ open class PlatformExtension(val project: Project) {
 
     fun publishRemap(artifactId: String, jarSet: JarTaskSet) {
         project.the<PublishingExtension>().publications {
-            register("${jarSet.name}RemapMaven", MavenPublication::class.java) {
+            register<MavenPublication>("${jarSet.name}RemapMaven") {
                 artifact(jarSet.remapJar)
                 artifact(jarSet.remapSources)
                 artifact(jarSet.javadocJar)
@@ -137,7 +136,7 @@ open class PlatformExtension(val project: Project) {
 
     fun publish(artifactId: String, jarSet: JarTaskSet) {
         project.the<PublishingExtension>().publications {
-            register("${jarSet.name}Maven", MavenPublication::class.java) {
+            register<MavenPublication>("${jarSet.name}Maven") {
                 artifact(jarSet.jar)
                 artifact(jarSet.sources)
                 artifact(jarSet.javadocJar)
