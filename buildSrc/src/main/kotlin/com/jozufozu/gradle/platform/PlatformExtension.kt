@@ -108,43 +108,6 @@ open class PlatformExtension(val project: Project) {
         }
     }
 
-    fun publishMod() {
-        val remapJar = project.tasks.named<RemapJarTask>("remapJar")
-        val remapSourcesJar = project.tasks.named<RemapSourcesJarTask>("remapSourcesJar")
-        val javadocJar = project.tasks.named<Jar>("javadocJar")
-
-        project.the<PublishingExtension>().publications {
-            register<MavenPublication>("modMaven") {
-                artifact(remapJar)
-                artifact(remapSourcesJar)
-                artifact(javadocJar)
-                artifactId = modArtifactId
-            }
-        }
-    }
-
-    fun publishRemap(artifactId: String, jarSet: JarTaskSet) {
-        project.the<PublishingExtension>().publications {
-            register<MavenPublication>("${jarSet.name}RemapMaven") {
-                artifact(jarSet.remapJar)
-                artifact(jarSet.remapSources)
-                artifact(jarSet.javadocJar)
-                this.artifactId = artifactId
-            }
-        }
-    }
-
-    fun publish(artifactId: String, jarSet: JarTaskSet) {
-        project.the<PublishingExtension>().publications {
-            register<MavenPublication>("${jarSet.name}Maven") {
-                artifact(jarSet.jar)
-                artifact(jarSet.sources)
-                artifact(jarSet.javadocJar)
-                this.artifactId = artifactId
-            }
-        }
-    }
-
     private class DependentProject(private val thisProject: Project) : ReadWriteProperty<Any?, Project> {
         private var value: Project? = null
 

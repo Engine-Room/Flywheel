@@ -13,22 +13,6 @@ open class TransitiveSourceSetsExtension(private val project: Project) {
 
     private val transitives = mutableMapOf<SourceSet, TransitiveSourceSetConfigurator>()
 
-    fun create(name: String) {
-        sourceSet(project.the<SourceSetContainer>().maybeCreate(name))
-    }
-
-    fun create(name: String, action: Action<TransitiveSourceSetConfigurator>) {
-        sourceSet(project.the<SourceSetContainer>().maybeCreate(name), action)
-    }
-
-    fun sourceSet(name: String) {
-        sourceSet(project.the<SourceSetContainer>().getByName(name))
-    }
-
-    fun sourceSet(name: String, action: Action<TransitiveSourceSetConfigurator>) {
-        sourceSet(project.the<SourceSetContainer>().getByName(name), action)
-    }
-
     fun sourceSet(sourceSet: SourceSet) {
         registerSourceSet(sourceSet)
     }

@@ -3,11 +3,8 @@ plugins {
     java
     `maven-publish`
     id("dev.architectury.loom")
-    id("flywheel.package-infos")
     id("flywheel.subproject")
     id("flywheel.platform")
-    id("flywheel.jar-sets")
-    id("flywheel.transitive-source-sets")
 }
 
 val api = sourceSets.create("api")
@@ -43,8 +40,11 @@ platform {
     setupLoomMod()
     setupLoomRuns()
     setupFatJar()
-    publishMod()
-    publishRemap(apiArtifactId, jarSets.createJars("api", api, lib))
+}
+
+jarSets {
+    mainSet.publishRemap(platform.modArtifactId)
+    create("api", api, lib).publishRemap(platform.apiArtifactId)
 }
 
 defaultPackageInfos {

@@ -3,10 +3,7 @@ plugins {
     java
     `maven-publish`
     id("dev.architectury.loom")
-    id("flywheel.package-infos")
     id("flywheel.subproject")
-    id("flywheel.jar-sets")
-    id("flywheel.transitive-source-sets")
 }
 
 val api = sourceSets.create("api")
@@ -40,16 +37,19 @@ defaultPackageInfos {
     sources(api, lib, backend, main)
 }
 
-// For sharing with other subprojects.
 jarSets {
-    createJars("apiOnly", api).createOutgoingConfiguration("common")
-    createJars("lib").createOutgoingConfiguration("common")
-    createJars("backend").createOutgoingConfiguration("common")
-    createJars("impl", main).createOutgoingConfiguration("common")
-}
+    // For sharing with other subprojects.
+    outgoing("commonApiOnly", api)
+    outgoing("commonLib", lib)
+    outgoing("commonBackend", backend)
+    outgoing("commonImpl", main)
 
-// For publishing
-val apiLibJar = jarSets.createJars("api", api, lib)
+    // For publishing.
+    create("api", api, lib).apply {
+        publish("flywheel-common-mojmap-api-${property("artifact_minecraft_version")}")
+        publishRemap("flywheel-common-intermediary-api-${property("artifact_minecraft_version")}")
+    }
+}
 
 dependencies {
     modCompileOnly("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
@@ -59,21 +59,4 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-}
-
-publishing {
-    publications {
-        register<MavenPublication>("mavenIntermediary") {
-            artifact(apiLibJar.remapJar)
-            artifact(apiLibJar.remapSources)
-            artifact(apiLibJar.javadocJar)
-            artifactId = "flywheel-common-intermediary-api-${property("artifact_minecraft_version")}"
-        }
-        register<MavenPublication>("mavenMojmap") {
-            artifact(apiLibJar.jar)
-            artifact(apiLibJar.sources)
-            artifact(apiLibJar.javadocJar)
-            artifactId = "flywheel-common-mojmap-api-${property("artifact_minecraft_version")}"
-        }
-    }
 }
