@@ -210,10 +210,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	}
 
 	/**
-	 * Tick the visuals after the game has ticked:
-	 * <p>
-	 * Call {@link TickableVisual#tick} on all visuals in this level.
-	 * </p>
+	 * Begin execution of the tick plan.
 	 */
 	public void tick() {
 		// Make sure we're done with any prior frame or tick to avoid racing.
@@ -227,11 +224,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	}
 
 	/**
-	 * Get ready to render a frame.
-	 *
-	 * <p>Check and update the render origin.
-	 * <br>
-	 * Call {@link DynamicVisual#beginFrame} on all visuals in this level.</p>
+	 * Begin execution of the frame plan.
 	 */
 	public void beginFrame(RenderContext context) {
 		// Make sure we're done with the last tick.
