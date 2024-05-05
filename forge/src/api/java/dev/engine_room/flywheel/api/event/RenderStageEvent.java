@@ -1,5 +1,7 @@
 package dev.engine_room.flywheel.api.event;
 
+import net.neoforged.bus.api.Event;
+
 import org.joml.Matrix4f;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -7,7 +9,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderBuffers;
-import net.minecraftforge.eventbus.api.Event;
 
 /**
  * This event is posted to the Forge event bus.

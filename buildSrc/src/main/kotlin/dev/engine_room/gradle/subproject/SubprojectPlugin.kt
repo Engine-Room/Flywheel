@@ -53,6 +53,8 @@ class SubprojectPlugin: Plugin<Project> {
         val loom = project.the<LoomGradleExtensionAPI>()
         loom.silentMojangMappingsLicense()
 
+        // FIXME y tho? :(
+        loom.mixin.useLegacyMixinAp = true
         loom.mixin.defaultRefmapName = "flywheel.refmap.json"
     }
 
@@ -182,6 +184,6 @@ val processResourcesExpandProperties = listOf(
     "minecraft_semver_version_range",
     "minecraft_maven_version_range",
     "fabric_api_version_range",
-    "forge_version_range",
+    "neoforge_version_range",
 )
 

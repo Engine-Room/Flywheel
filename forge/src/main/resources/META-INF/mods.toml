@@ -14,22 +14,29 @@ authors = "Jozufozu, PepperCode1"
 displayURL = "${mod_homepage}"
 displayTest = "IGNORE_ALL_VERSION"
 
+[[mixins]]
+config = "flywheel.backend.mixins.json"
+[[mixins]]
+config = "flywheel.impl.mixins.json"
+[[mixins]]
+config = "flywheel.impl.sodium.mixins.json"
+
 [[dependencies.${mod_id}]]
 modId = "minecraft"
-mandatory = true
+type = "required"
 versionRange = "${minecraft_maven_version_range}"
 side = "CLIENT"
 
 [[dependencies.${mod_id}]]
-modId = "forge"
-mandatory = true
-versionRange = "${forge_version_range}"
+modId = "neoforge"
+type = "required"
+versionRange = "${neoforge_version_range}"
 side = "CLIENT"
 
+# Breaks dependency
 [[dependencies.${mod_id}]]
-# This replicates a "breaks" dependency.
-# There's a mixin crash with Rubidium <0.7.0.
 modId = "rubidium"
-mandatory = false
+type = "incompatible"
+reason = "mixin crash with any version of rubidium under 0.7.0"
 versionRange = "[0.7.0,)"
 side = "CLIENT"

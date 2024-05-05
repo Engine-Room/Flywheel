@@ -1,5 +1,9 @@
 package dev.engine_room.flywheel.impl;
 
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
@@ -7,18 +11,15 @@ import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.backend.BackendManager;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
 
 public class ForgeFlwConfig implements FlwConfig {
 	public static final ForgeFlwConfig INSTANCE = new ForgeFlwConfig();
 
 	public final ClientConfig client;
-	private final ForgeConfigSpec clientSpec;
+	private final ModConfigSpec clientSpec;
 
 	private ForgeFlwConfig() {
-		Pair<ClientConfig, ForgeConfigSpec> clientPair = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
+		Pair<ClientConfig, ModConfigSpec> clientPair = new ModConfigSpec.Builder().configure(ClientConfig::new);
 		this.client = clientPair.getLeft();
 		clientSpec = clientPair.getRight();
 	}
@@ -68,11 +69,11 @@ public class ForgeFlwConfig implements FlwConfig {
 	}
 
 	public static class ClientConfig {
-		public final ForgeConfigSpec.ConfigValue<String> backend;
-		public final ForgeConfigSpec.BooleanValue limitUpdates;
-		public final ForgeConfigSpec.IntValue workerThreads;
+		public final ModConfigSpec.ConfigValue<String> backend;
+		public final ModConfigSpec.BooleanValue limitUpdates;
+		public final ModConfigSpec.IntValue workerThreads;
 
-		private ClientConfig(ForgeConfigSpec.Builder builder) {
+		private ClientConfig(ModConfigSpec.Builder builder) {
 			backend = builder.comment("Select the backend to use.")
 					.define("backend", Backend.REGISTRY.getIdOrThrow(BackendManager.getDefaultBackend()).toString());
 
