@@ -53,7 +53,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	}
 
 	private static List<String> getExtensions(GlslVersion glslVersion) {
-		List<String> extensions = new ArrayList<>();
+		var extensions = ImmutableList.<String>builder();
 		if (glslVersion.compareTo(GlslVersion.V400) < 0) {
 			extensions.add("GL_ARB_gpu_shader5");
 		}
@@ -66,15 +66,18 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		if (glslVersion.compareTo(GlslVersion.V460) < 0) {
 			extensions.add("GL_ARB_shader_draw_parameters");
 		}
-		return extensions;
+		return extensions.build();
 	}
 
 	private static List<String> getComputeExtensions(GlslVersion glslVersion) {
-		List<String> extensions = new ArrayList<>();
+		var extensions = ImmutableList.<String>builder();
+
+		extensions.addAll(EXTENSIONS);
+
 		if (glslVersion.compareTo(GlslVersion.V430) < 0) {
 			extensions.add("GL_ARB_compute_shader");
 		}
-		return extensions;
+		return extensions.build();
 	}
 
 	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
@@ -86,12 +89,12 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, vertexComponents, fragmentComponents, EXTENSIONS);
 		var cullingCompiler = createCullingCompiler(sources);
-		var applyCompiler = createUtilCompiler(sources);
+		var utilCompiler = createUtilCompiler(sources);
 
 		try {
 			var pipelineResult = pipelineCompiler.compileAndReportErrors(pipelineKeys);
 			var cullingResult = cullingCompiler.compileAndReportErrors(createCullingKeys());
-			var utils = applyCompiler.compileAndReportErrors(List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN));
+			var utils = utilCompiler.compileAndReportErrors(List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN));
 
 			if (pipelineResult != null && cullingResult != null && utils != null) {
 				newInstance = new IndirectPrograms(pipelineResult, cullingResult, utils.get(APPLY_SHADER_MAIN), utils.get(SCATTER_SHADER_MAIN));
@@ -102,16 +105,18 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 		pipelineCompiler.delete();
 		cullingCompiler.delete();
-		applyCompiler.delete();
+		utilCompiler.delete();
 
 		setInstance(newInstance);
 	}
 
+	/**
+	 * A compiler for cull shaders, parameterized by the instance type.
+	 */
 	private static CompilationHarness<InstanceType<?>> createCullingCompiler(ShaderSources sources) {
 		return CULL.program()
 				.link(CULL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.COMPUTE)
 						.nameMapper(instanceType -> "culling/" + ResourceUtil.toDebugFileNameNoExtension(instanceType.cullShader()))
-						.requireExtensions(EXTENSIONS)
 						.requireExtensions(COMPUTE_EXTENSIONS)
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(CULL_SHADER_API_IMPL)
@@ -119,21 +124,17 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 						.withResource(InstanceType::cullShader)
 						.withComponent(SsboInstanceComponent::new)
 						.withResource(CULL_SHADER_MAIN))
-				.postLink((key, program) -> {
-                    program.setUniformBlockBinding("_FlwFrameUniforms", Uniforms.FRAME_INDEX);
-					program.setUniformBlockBinding("_FlwFogUniforms", Uniforms.FOG_INDEX);
-					program.setUniformBlockBinding("_FlwOptionsUniforms", Uniforms.OPTIONS_INDEX);
-					program.setUniformBlockBinding("_FlwPlayerUniforms", Uniforms.PLAYER_INDEX);
-					program.setUniformBlockBinding("_FlwLevelUniforms", Uniforms.LEVEL_INDEX);
-                })
+				.postLink((key, program) -> Uniforms.setUniformBlockBindings(program))
 				.harness("culling", sources);
 	}
 
+	/**
+	 * A compiler for utility shaders, directly compiles the shader at the resource location specified by the parameter.
+	 */
 	private static CompilationHarness<ResourceLocation> createUtilCompiler(ShaderSources sources) {
 		return UTIL.program()
 				.link(UTIL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.COMPUTE)
 						.nameMapper(resourceLocation -> "utilities/" + ResourceUtil.toDebugFileNameNoExtension(resourceLocation))
-						.requireExtensions(EXTENSIONS)
 						.requireExtensions(COMPUTE_EXTENSIONS)
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(s -> s))
