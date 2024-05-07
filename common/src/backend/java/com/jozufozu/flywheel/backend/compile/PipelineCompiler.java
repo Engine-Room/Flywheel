@@ -71,11 +71,7 @@ public final class PipelineCompiler {
 					program.bindAttribLocation("_flw_aNormal", 5);
 				})
 				.postLink((key, program) -> {
-					program.setUniformBlockBinding("_FlwFrameUniforms", Uniforms.FRAME_INDEX);
-					program.setUniformBlockBinding("_FlwFogUniforms", Uniforms.FOG_INDEX);
-					program.setUniformBlockBinding("_FlwOptionsUniforms", Uniforms.OPTIONS_INDEX);
-					program.setUniformBlockBinding("_FlwPlayerUniforms", Uniforms.PLAYER_INDEX);
-					program.setUniformBlockBinding("_FlwLevelUniforms", Uniforms.LEVEL_INDEX);
+					Uniforms.setUniformBlockBindings(program);
 
 					program.bind();
 

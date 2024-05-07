@@ -28,11 +28,11 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 	}
 
 	private static List<String> getExtensions(GlslVersion glslVersion) {
-		List<String> extensions = new ArrayList<>();
+		var extensions = ImmutableList.<String>builder();
 		if (glslVersion.compareTo(GlslVersion.V330) < 0) {
 			extensions.add("GL_ARB_shader_bit_encoding");
 		}
-		return extensions;
+		return extensions.build();
 	}
 
 	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
