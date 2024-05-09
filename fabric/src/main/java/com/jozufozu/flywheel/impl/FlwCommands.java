@@ -25,8 +25,6 @@ public final class FlwCommands {
 	}
 
 	public static void registerClientCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext buildContext) {
-		FabricFlwConfig config = FabricFlwConfig.INSTANCE;
-
 		LiteralArgumentBuilder<FabricClientCommandSource> command = ClientCommandManager.literal("flywheel");
 
 		command.then(ClientCommandManager.literal("backend")
@@ -40,7 +38,8 @@ public final class FlwCommands {
 				.then(ClientCommandManager.argument("id", BackendArgument.INSTANCE)
 					.executes(context -> {
 						Backend requestedBackend = context.getArgument("id", Backend.class);
-						config.backend = requestedBackend;
+						FabricFlwConfig.INSTANCE.backend = requestedBackend;
+						FabricFlwConfig.INSTANCE.save();
 
 						// Reload renderers so we can report the actual backend.
 						Minecraft.getInstance().levelRenderer.allChanged();
@@ -60,7 +59,7 @@ public final class FlwCommands {
 
 		command.then(ClientCommandManager.literal("limitUpdates")
 				.executes(context -> {
-					if (config.limitUpdates) {
+					if (FabricFlwConfig.INSTANCE.limitUpdates) {
 						context.getSource().sendFeedback(Component.translatable("command.flywheel.limit_updates.get.on"));
 					} else {
 						context.getSource().sendFeedback(Component.translatable("command.flywheel.limit_updates.get.off"));
@@ -69,14 +68,16 @@ public final class FlwCommands {
 				})
 				.then(ClientCommandManager.literal("on")
 						.executes(context -> {
-							config.limitUpdates = true;
+							FabricFlwConfig.INSTANCE.limitUpdates = true;
+							FabricFlwConfig.INSTANCE.save();
 							context.getSource().sendFeedback(Component.translatable("command.flywheel.limit_updates.set.on"));
 							Minecraft.getInstance().levelRenderer.allChanged();
 							return Command.SINGLE_SUCCESS;
 						}))
 				.then(ClientCommandManager.literal("off")
 						.executes(context -> {
-							config.limitUpdates = false;
+							FabricFlwConfig.INSTANCE.limitUpdates = false;
+							FabricFlwConfig.INSTANCE.save();
 							context.getSource().sendFeedback(Component.translatable("command.flywheel.limit_updates.set.off"));
 							Minecraft.getInstance().levelRenderer.allChanged();
 							return Command.SINGLE_SUCCESS;

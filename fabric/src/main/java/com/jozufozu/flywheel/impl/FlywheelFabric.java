@@ -44,6 +44,9 @@ public final class FlywheelFabric implements ClientModInitializer {
 
 		// FIXME: Registries cannot be frozen this early.
 		FlywheelInit.freezeRegistries();
+		// Have to load the config after we freeze registries,
+		// so we can find third party backends.
+		FabricFlwConfig.INSTANCE.load();
 	}
 
 	private static void setupImpl() {
