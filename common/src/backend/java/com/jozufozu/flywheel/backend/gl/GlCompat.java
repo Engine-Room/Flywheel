@@ -2,6 +2,7 @@ package com.jozufozu.flywheel.backend.gl;
 
 import java.nio.ByteBuffer;
 
+import org.jetbrains.annotations.UnknownNullability;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL20;
@@ -11,12 +12,26 @@ import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.KHRShaderSubgroup;
 import org.lwjgl.system.MemoryStack;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.backend.compile.core.Compilation;
 import com.jozufozu.flywheel.backend.glsl.GlslVersion;
 import com.jozufozu.flywheel.lib.math.MoreMath;
 
 public final class GlCompat {
-	public static final GLCapabilities CAPABILITIES = GL.getCapabilities();
+	@UnknownNullability
+	public static final GLCapabilities CAPABILITIES;
+	static {
+		GLCapabilities caps;
+		try {
+			caps = GL.getCapabilities();
+		} catch (IllegalStateException e) {
+			// This happens with vulkanmod installed.
+			Flywheel.LOGGER.warn("Failed to get GL capabilities, all flywheel backends will be disabled.");
+			caps = null;
+		}
+		CAPABILITIES = caps;
+	}
+
 	public static final Driver DRIVER = readVendorString();
 	public static final int SUBGROUP_SIZE = subgroupSize();
 	public static final boolean ALLOW_DSA = true;
@@ -57,6 +72,10 @@ public final class GlCompat {
 	}
 
 	private static Driver readVendorString() {
+		if (CAPABILITIES == null) {
+			return Driver.UNKNOWN;
+		}
+
 		String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
 
 		if (vendor == null) {
@@ -78,6 +97,9 @@ public final class GlCompat {
 	}
 
 	private static int subgroupSize() {
+		if (CAPABILITIES == null) {
+			return 32;
+		}
 		if (CAPABILITIES.GL_KHR_shader_subgroup) {
 			return GL31C.glGetInteger(KHRShaderSubgroup.GL_SUBGROUP_SIZE_KHR);
 		}
@@ -91,6 +113,9 @@ public final class GlCompat {
 	}
 
 	private static boolean isInstancingSupported() {
+		if (CAPABILITIES == null) {
+			return false;
+		}
 		if (CAPABILITIES.OpenGL33) {
 			return true;
 		}
@@ -98,6 +123,9 @@ public final class GlCompat {
 	}
 
 	private static boolean isIndirectSupported() {
+		if (CAPABILITIES == null) {
+			return false;
+		}
 		if (CAPABILITIES.OpenGL46) {
 			return true;
 		}
@@ -118,6 +146,10 @@ public final class GlCompat {
 	 * @return The highest glsl version that could be compiled.
 	 */
 	private static GlslVersion maxGlslVersion() {
+		if (CAPABILITIES == null) {
+			return GlslVersion.V150;
+		}
+
 		var glslVersions = GlslVersion.values();
 		// No need to test glsl 150 as that is guaranteed to be supported by MC.
 		for (int i = glslVersions.length - 1; i > 0; i--) {
