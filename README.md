@@ -46,10 +46,12 @@ repositories {
 }
 
 dependencies {
-    implementation fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:${flywheel_version}")
+    compileOnly fg.deobf("com.jozufozu.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}")
+    runtimeOnly fg.deobf("com.jozufozu.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}")
 }
 ```
-`${flywheel_version}` gets replaced by the version of Flywheel you want to use, eg. `1.18-0.3.0.3`
+`${flywheel_version}` gets replaced by the version of Flywheel you want to use, eg. `1.0.0-beta`
+`${minecraft_version}` gets replaced by the version of Minecraft you're on, eg. `1.20.1`
 
 For a list of available Flywheel versions, you can check [the maven](https://maven.tterrag.com/com/jozufozu/flywheel/Flywheel-Forge/).
 
