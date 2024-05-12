@@ -75,9 +75,7 @@ open class PlatformExtension(val project: Project) {
                     source(commonSourceSet.allJava)
                 }
                 named<ProcessResources>(it.processResourcesTaskName).configure {
-                    from(commonSourceSet.resources) {
-                        exclude("fabric.mod.json")
-                    }
+                    from(commonSourceSet.resources)
                 }
             }
         }

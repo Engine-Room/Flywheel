@@ -68,6 +68,14 @@ class JarTaskSet(
     }
 
     /**
+     * Configure the jar tasks with the given action.
+     */
+    fun configureJar(action: Action<Jar>) {
+        jar.configure(action)
+        sources.configure(action)
+    }
+
+    /**
      * Create a new JarTaskSet with the same base jars but new tasks for remapping.
      */
     fun forkRemap(newName: String): JarTaskSet {

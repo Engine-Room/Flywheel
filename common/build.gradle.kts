@@ -49,6 +49,12 @@ jarSets {
         addToAssemble()
         publish("flywheel-common-intermediary-api-${property("artifact_minecraft_version")}")
 
+        configureJar {
+            manifest {
+                attributes("Fabric-Loom-Remap" to "true")
+            }
+        }
+
         // Don't publish the un-remapped jars because they don't have the correct manifest populated by Loom.
         forkRemap("apiMojmap").apply {
             addToAssemble()
