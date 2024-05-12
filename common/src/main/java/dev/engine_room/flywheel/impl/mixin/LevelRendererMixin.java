@@ -113,7 +113,6 @@ abstract class LevelRendererMixin {
 		flywheel$dispatch(RenderStage.AFTER_PARTICLES);
 	}
 
-	//fixme take a look over if this is still needed
 	@Group(name = "onStage$afterParticles")
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;)V", shift = Shift.AFTER))
 	private void flywheel$onStage$afterParticles$forge(CallbackInfo ci) {
