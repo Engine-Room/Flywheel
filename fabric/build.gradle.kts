@@ -47,6 +47,12 @@ jarSets {
     create("api", api, lib).apply {
         addToAssemble()
         publish(platform.apiArtifactId)
+
+        configureJar {
+            manifest {
+                attributes("Fabric-Loom-Remap" to "true")
+            }
+        }
     }
 }
 
