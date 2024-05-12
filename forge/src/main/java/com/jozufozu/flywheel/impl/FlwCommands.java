@@ -24,11 +24,9 @@ public final class FlwCommands {
 	}
 
 	public static void registerClientCommands(RegisterClientCommandsEvent event) {
-		ForgeFlwConfig config = ForgeFlwConfig.INSTANCE;
-
 		LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("flywheel");
 
-		ConfigValue<String> backendValue = config.client.backend;
+		ConfigValue<String> backendValue = ForgeFlwConfig.INSTANCE.client.backend;
 		command.then(Commands.literal("backend")
 				.executes(context -> {
 					Backend backend = BackendManager.getBackend();
@@ -58,7 +56,7 @@ public final class FlwCommands {
 						return Command.SINGLE_SUCCESS;
 					})));
 
-		BooleanValue limitUpdatesValue = config.client.limitUpdates;
+		BooleanValue limitUpdatesValue = ForgeFlwConfig.INSTANCE.client.limitUpdates;
 		command.then(Commands.literal("limitUpdates")
 				.executes(context -> {
 					if (limitUpdatesValue.get()) {

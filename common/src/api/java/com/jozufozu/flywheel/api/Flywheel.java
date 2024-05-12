@@ -1,13 +1,9 @@
-package com.jozufozu.flywheel;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.jozufozu.flywheel.api;
 
 import net.minecraft.resources.ResourceLocation;
 
 public final class Flywheel {
 	public static final String ID = "flywheel";
-	public static final Logger LOGGER = LoggerFactory.getLogger(ID);
 
 	private Flywheel() {
 	}

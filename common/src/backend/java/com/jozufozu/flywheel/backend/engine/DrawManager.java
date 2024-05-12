@@ -8,13 +8,13 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.backend.Engine;
 import com.jozufozu.flywheel.api.event.RenderStage;
 import com.jozufozu.flywheel.api.instance.Instance;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.instance.Instancer;
 import com.jozufozu.flywheel.api.model.Model;
+import com.jozufozu.flywheel.backend.FlwBackend;
 import com.jozufozu.flywheel.backend.engine.embed.Environment;
 import com.jozufozu.flywheel.lib.util.Pair;
 
@@ -98,7 +98,7 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 				.forEach(f -> builder.append("\n\t")
 						.append(f.toString()));
 
-		Flywheel.LOGGER.warn(builder.toString());
+		FlwBackend.LOGGER.warn(builder.toString());
 
 		return false;
 	}

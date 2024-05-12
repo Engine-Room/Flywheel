@@ -9,19 +9,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 
-import org.slf4j.Logger;
-
-import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.mojang.logging.LogUtils;
+import com.jozufozu.flywheel.impl.FlwImpl;
 
 import net.minecraft.util.Mth;
 
 // https://github.com/CaffeineMC/sodium-fabric/blob/5d364ed5ba63f9067fcf72a078ca310bff4db3e9/src/main/java/me/jellysquid/mods/sodium/client/render/chunk/compile/ChunkBuilder.java
 // https://stackoverflow.com/questions/29655531
 public class ParallelTaskExecutor implements TaskExecutor {
-	private static final Logger LOGGER = LogUtils.getLogger();
-
 	private final String name;
 	private final int threadCount;
 
@@ -70,7 +65,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 			threads.add(thread);
 		}
 
-		LOGGER.info("Started {} worker threads", threads.size());
+		FlwImpl.LOGGER.info("Started {} worker threads", threads.size());
 	}
 
 	public void stopWorkers() {
@@ -82,7 +77,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 			throw new IllegalStateException("No threads are alive but the executor is in the RUNNING state");
 		}
 
-		LOGGER.info("Stopping worker threads");
+		FlwImpl.LOGGER.info("Stopping worker threads");
 
 		// Notify all worker threads to wake up, where they will then terminate
 		synchronized (taskNotifier) {
@@ -233,7 +228,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		try {
 			task.run();
 		} catch (Exception e) {
-			Flywheel.LOGGER.error("Error running task", e);
+			FlwImpl.LOGGER.error("Error running task", e);
 		} finally {
 			waitGroup.done();
 		}
@@ -243,7 +238,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		try {
 			task.run();
 		} catch (Exception e) {
-			Flywheel.LOGGER.error("Error running main thread task", e);
+			FlwImpl.LOGGER.error("Error running main thread task", e);
 		}
 	}
 

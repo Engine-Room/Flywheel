@@ -4,14 +4,11 @@ import java.lang.reflect.Field;
 import java.util.function.BooleanSupplier;
 
 import org.jetbrains.annotations.ApiStatus;
-import org.slf4j.Logger;
 
+import com.jozufozu.flywheel.lib.internal.FlwLibLink;
 import com.jozufozu.flywheel.lib.internal.FlwLibXplat;
-import com.mojang.logging.LogUtils;
 
 public final class ShadersModHandler {
-	private static final Logger LOGGER = LogUtils.getLogger();
-
 	private static final String OPTIFINE_ROOT_PACKAGE = "net.optifine";
 
 	private static final boolean IS_IRIS_LOADED;
@@ -29,13 +26,13 @@ public final class ShadersModHandler {
 		// OptiFine and Iris/Oculus are assumed to be mutually exclusive
 
 		if (IS_IRIS_LOADED) {
-			LOGGER.debug("Iris detected.");
+			FlwLibLink.INSTANCE.getLogger().debug("Iris detected.");
 			INTERNAL_HANDLER = irisHandler;
 		} else if (IS_OPTIFINE_INSTALLED) {
-			LOGGER.debug("OptiFine detected.");
+			FlwLibLink.INSTANCE.getLogger().debug("OptiFine detected.");
 			INTERNAL_HANDLER = new OptifineHandler();
 		} else {
-			LOGGER.debug("No shaders mod detected.");
+			FlwLibLink.INSTANCE.getLogger().debug("No shaders mod detected.");
 			INTERNAL_HANDLER = new InternalHandler() {};
 		}
 	}

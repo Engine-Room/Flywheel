@@ -1,10 +1,9 @@
 package com.jozufozu.flywheel.backend.compile;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.Flywheel;
 import com.jozufozu.flywheel.backend.InternalVertex;
 import com.jozufozu.flywheel.backend.Samplers;
 import com.jozufozu.flywheel.backend.compile.component.InstanceStructComponent;

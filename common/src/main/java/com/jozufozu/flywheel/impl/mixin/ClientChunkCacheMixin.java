@@ -20,12 +20,12 @@ abstract class ClientChunkCacheMixin {
 	@Final
 	ClientLevel level;
 
-	@Inject(at = @At("HEAD"), method = "onLightUpdate")
-	private void flywheel$onLightUpdate(LightLayer pType, SectionPos pPos, CallbackInfo ci) {
+	@Inject(method = "onLightUpdate", at = @At("HEAD"))
+	private void flywheel$onLightUpdate(LightLayer layer, SectionPos pos, CallbackInfo ci) {
 		var manager = VisualizationManagerImpl.get(level);
 
 		if (manager != null) {
-			manager.enqueueLightUpdateSection(pPos.asLong());
+			manager.enqueueLightUpdateSection(pos.asLong());
 		}
 	}
 }

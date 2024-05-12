@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.lib.instance;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.layout.FloatRepr;
 import com.jozufozu.flywheel.api.layout.IntegerRepr;

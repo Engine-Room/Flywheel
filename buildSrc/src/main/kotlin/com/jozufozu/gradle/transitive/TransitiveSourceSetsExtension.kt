@@ -4,8 +4,6 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.SourceSet
-import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.kotlin.dsl.the
 
 open class TransitiveSourceSetsExtension(private val project: Project) {
     var compileClasspath: FileCollection? = null

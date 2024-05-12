@@ -11,7 +11,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.api.backend.BackendManager;
 
@@ -25,20 +24,20 @@ public class FabricFlwConfig implements FlwConfig {
 			.getConfigDir()
 			.resolve("flywheel.json");
 
-	public static final FabricFlwConfig INSTANCE = new FabricFlwConfig(PATH.toFile());
+	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-	protected static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-
+	public static final boolean LIMIT_UPDATES_DEFAULT = true;
 	public static final int WORKER_THREADS_DEFAULT = -1;
 	public static final int WORKER_THREADS_MAX = Runtime.getRuntime()
 			.availableProcessors();
-	public static final boolean LIMIT_UPDATES_DEFAULT = true;
+
+	public static final FabricFlwConfig INSTANCE = new FabricFlwConfig(PATH.toFile());
+
+	private final File file;
 
 	public Backend backend = BackendManager.getDefaultBackend();
 	public boolean limitUpdates = LIMIT_UPDATES_DEFAULT;
 	public int workerThreads = WORKER_THREADS_DEFAULT;
-
-	private final File file;
 
 	public FabricFlwConfig(File file) {
 		this.file = file;
@@ -64,7 +63,7 @@ public class FabricFlwConfig implements FlwConfig {
 			try (FileReader reader = new FileReader(file)) {
 				fromJson(JsonParser.parseReader(reader));
 			} catch (Exception e) {
-				Flywheel.LOGGER.error("Could not load config from file '{}'", file.getAbsolutePath(), e);
+				FlwImpl.CONFIG_LOGGER.warn("Could not load config from file '{}'", file.getAbsolutePath(), e);
 			}
 		}
 		// In case we found an error in the config file, immediately save to fix it.
@@ -75,12 +74,13 @@ public class FabricFlwConfig implements FlwConfig {
 		try (FileWriter writer = new FileWriter(file)) {
 			GSON.toJson(toJson(), writer);
 		} catch (Exception e) {
-			Flywheel.LOGGER.error("Could not save config to file '{}'", file.getAbsolutePath(), e);
+			FlwImpl.CONFIG_LOGGER.warn("Could not save config to file '{}'", file.getAbsolutePath(), e);
 		}
 	}
 
 	public void fromJson(JsonElement json) {
 		if (!(json instanceof JsonObject object)) {
+			FlwImpl.CONFIG_LOGGER.warn("Config JSON must be an object");
 			backend = BackendManager.getDefaultBackend();
 			limitUpdates = LIMIT_UPDATES_DEFAULT;
 			workerThreads = WORKER_THREADS_DEFAULT;
@@ -94,41 +94,42 @@ public class FabricFlwConfig implements FlwConfig {
 
 	private void readBackend(JsonObject object) {
 		var backendJson = object.get("backend");
-
-		String err = null;
+		String msg = null;
 
 		if (backendJson instanceof JsonPrimitive primitive && primitive.isString()) {
-			var backendString = primitive.getAsString();
+			var value = primitive.getAsString();
 			try {
-				this.backend = Backend.REGISTRY.getOrThrow(new ResourceLocation(backendString));
+				this.backend = Backend.REGISTRY.getOrThrow(new ResourceLocation(value));
 				return;
-			} catch (IllegalArgumentException e) {
-				err = "backend ID '" + backendString + "' is not registered";
 			} catch (ResourceLocationException e) {
-				err = "backend '" + backendString + "' is not a valid resource location";
+				msg = "'backend' value '" + value + "' is not a valid resource location";
+			} catch (IllegalArgumentException e) {
+				msg = "Backend with ID '" + value + "' is not registered";
 			} catch (Exception e) {
 				// Something else went wrong? This should be dead code.
-				err = "backend '" + backendString + "' is invalid";
+				msg = "'backend' value '" + value + "' is invalid";
 			}
 		} else if (backendJson != null) {
-			err = "backend must be a string";
+			msg = "'backend' value must be a string";
 		}
 
 		// Don't log an error if the field is missing.
-		if (err != null) {
-			Flywheel.LOGGER.warn(err);
+		if (msg != null) {
+			FlwImpl.CONFIG_LOGGER.warn(msg);
 		}
 		backend = BackendManager.getDefaultBackend();
 	}
 
 	private void readLimitUpdates(JsonObject object) {
 		var limitUpdatesJson = object.get("limitUpdates");
+
 		if (limitUpdatesJson instanceof JsonPrimitive primitive && primitive.isBoolean()) {
 			limitUpdates = primitive.getAsBoolean();
 			return;
 		} else if (limitUpdatesJson != null) {
-			Flywheel.LOGGER.warn("limitUpdates must be a boolean");
+			FlwImpl.CONFIG_LOGGER.warn("'limitUpdates' value must be a boolean");
 		}
+
 		limitUpdates = LIMIT_UPDATES_DEFAULT;
 	}
 
@@ -136,18 +137,17 @@ public class FabricFlwConfig implements FlwConfig {
 		var workerThreadsJson = object.get("workerThreads");
 
 		if (workerThreadsJson instanceof JsonPrimitive primitive && primitive.isNumber()) {
-			int configuredValue = primitive.getAsInt();
+			int value = primitive.getAsInt();
+			int clamped = Mth.clamp(value, WORKER_THREADS_DEFAULT, WORKER_THREADS_MAX);
 
-			int clamped = Mth.clamp(configuredValue, WORKER_THREADS_DEFAULT, WORKER_THREADS_MAX);
-
-			if (clamped != configuredValue) {
-				Flywheel.LOGGER.warn("workerThreads value of {} is out of range, clamping to {}", configuredValue, clamped);
+			if (clamped != value) {
+				FlwImpl.CONFIG_LOGGER.warn("'workerThreads' value of {} is out of range, clamping to {}", value, clamped);
 			}
 
 			workerThreads = clamped;
 			return;
 		} else if (workerThreadsJson != null) {
-			Flywheel.LOGGER.warn("workerThreads must be an integer");
+			FlwImpl.CONFIG_LOGGER.warn("'workerThreads' value must be an integer");
 		}
 
 		workerThreads = WORKER_THREADS_DEFAULT;
@@ -155,9 +155,9 @@ public class FabricFlwConfig implements FlwConfig {
 
 	public JsonObject toJson() {
 		JsonObject object = new JsonObject();
+		object.addProperty("backend", Backend.REGISTRY.getIdOrThrow(backend).toString());
 		object.addProperty("limitUpdates", limitUpdates);
 		object.addProperty("workerThreads", workerThreads);
-		object.addProperty("backend", Backend.REGISTRY.getIdOrThrow(backend).toString());
 		return object;
 	}
 }

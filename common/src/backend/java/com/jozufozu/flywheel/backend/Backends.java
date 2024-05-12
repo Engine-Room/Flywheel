@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.Flywheel;
 import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.backend.compile.IndirectPrograms;
 import com.jozufozu.flywheel.backend.compile.InstancingPrograms;

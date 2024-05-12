@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.impl;
 
 import org.jetbrains.annotations.UnknownNullability;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.Flywheel;
 import com.jozufozu.flywheel.api.event.BeginFrameCallback;
 import com.jozufozu.flywheel.api.event.EndClientResourceReloadCallback;
 import com.jozufozu.flywheel.api.event.ReloadLevelRendererCallback;
@@ -40,13 +40,7 @@ public final class FlywheelFabric implements ClientModInitializer {
 		setupLib();
 		setupBackend();
 
-		FlywheelInit.init();
-
-		// FIXME: Registries cannot be frozen this early.
-		FlywheelInit.freezeRegistries();
-		// Have to load the config after we freeze registries,
-		// so we can find third party backends.
-		FabricFlwConfig.INSTANCE.load();
+		FlwImpl.init();
 	}
 
 	private static void setupImpl() {

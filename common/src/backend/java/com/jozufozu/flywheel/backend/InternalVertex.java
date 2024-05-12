@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.backend;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.Flywheel;
 import com.jozufozu.flywheel.api.layout.FloatRepr;
 import com.jozufozu.flywheel.api.layout.Layout;
 import com.jozufozu.flywheel.api.layout.LayoutBuilder;

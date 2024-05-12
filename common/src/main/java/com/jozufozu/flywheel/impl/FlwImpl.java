@@ -1,7 +1,10 @@
 package com.jozufozu.flywheel.impl;
 
-import com.jozufozu.flywheel.backend.Backends;
-import com.jozufozu.flywheel.backend.ShaderIndices;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.jozufozu.flywheel.api.Flywheel;
+import com.jozufozu.flywheel.backend.FlwBackend;
 import com.jozufozu.flywheel.impl.registry.IdRegistryImpl;
 import com.jozufozu.flywheel.impl.registry.RegistryImpl;
 import com.jozufozu.flywheel.lib.instance.InstanceTypes;
@@ -11,8 +14,11 @@ import com.jozufozu.flywheel.lib.material.StandardMaterialShaders;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
 import com.jozufozu.flywheel.vanilla.VanillaVisuals;
 
-public final class FlywheelInit {
-	private FlywheelInit() {
+public final class FlwImpl {
+	public static final Logger LOGGER = LoggerFactory.getLogger(Flywheel.ID);
+	public static final Logger CONFIG_LOGGER = LoggerFactory.getLogger(Flywheel.ID + "/config");
+
+	private FlwImpl() {
 	}
 
 	public static void init() {
@@ -27,8 +33,7 @@ public final class FlywheelInit {
 		StandardMaterialShaders.init();
 
 		// backend
-		ShaderIndices.init();
-		Backends.init();
+		FlwBackend.init();
 
 		// vanilla
 		VanillaVisuals.init();

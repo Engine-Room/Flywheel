@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.Flywheel;
 import com.jozufozu.flywheel.backend.glsl.SourceFile;
 import com.jozufozu.flywheel.backend.glsl.SourceLines;
 import com.jozufozu.flywheel.backend.glsl.error.ConsoleColors;

@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.backend.compile.component;
 import java.util.Collection;
 import java.util.Map;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.Flywheel;
 import com.jozufozu.flywheel.backend.glsl.SourceComponent;
 
 public final class StringSubstitutionComponent implements SourceComponent {

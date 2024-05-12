@@ -1,13 +1,12 @@
 package com.jozufozu.flywheel.backend.compile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.compile.component.InstanceStructComponent;
 import com.jozufozu.flywheel.backend.compile.component.SsboInstanceComponent;
