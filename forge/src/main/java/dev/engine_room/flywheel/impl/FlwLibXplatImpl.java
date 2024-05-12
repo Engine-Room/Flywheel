@@ -34,8 +34,7 @@ public class FlwLibXplatImpl implements FlwLibXplat {
 				field.setAccessible(true);
 				field.set(dispatcher, field.get(defaultDispatcher));
 			}
-			// fixme ~ is this still needed? neoforge uses mojmap at runtime
-			ObfuscationReflectionHelper.setPrivateValue(BlockRenderDispatcher.class, dispatcher, new ModelBlockRenderer(Minecraft.getInstance().getBlockColors()), "f_110900_");
+			ObfuscationReflectionHelper.setPrivateValue(BlockRenderDispatcher.class, dispatcher, new ModelBlockRenderer(Minecraft.getInstance().getBlockColors()), "modelRenderer");
 		} catch (Exception e) {
 			FlwImpl.LOGGER.error("Failed to initialize vanilla BlockRenderDispatcher!", e);
 			return defaultDispatcher;
