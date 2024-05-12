@@ -6,12 +6,9 @@
   "refmap": "backend-flywheel.refmap.json",
   "client": [
     "AbstractClientPlayerAccessor",
-    "GameRendererAccessor",
     "GlStateManagerMixin",
     "LevelRendererAccessor",
-    "LightTextureAccessor",
     "OptionsMixin",
-    "OverlayTextureAccessor",
     "RenderSystemMixin"
   ],
   "injectors": {

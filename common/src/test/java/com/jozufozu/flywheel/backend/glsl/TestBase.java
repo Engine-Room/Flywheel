@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.Flywheel;
 
 import net.minecraft.resources.ResourceLocation;
 

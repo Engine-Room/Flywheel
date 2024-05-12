@@ -19,7 +19,6 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.*
 import org.gradle.language.jvm.tasks.ProcessResources
 
-
 class SubprojectPlugin: Plugin<Project> {
     override fun apply(project: Project) {
         project.extensions.create("defaultPackageInfos", PackageInfosExtension::class.java, project)

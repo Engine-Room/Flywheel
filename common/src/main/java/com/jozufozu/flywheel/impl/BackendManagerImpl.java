@@ -1,21 +1,17 @@
 package com.jozufozu.flywheel.impl;
 
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.Flywheel;
 import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.backend.Backends;
 import com.jozufozu.flywheel.impl.visualization.VisualizationManagerImpl;
 import com.jozufozu.flywheel.lib.backend.SimpleBackend;
-import com.mojang.logging.LogUtils;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
 
 public final class BackendManagerImpl {
-	private static final Logger LOGGER = LogUtils.getLogger();
-
 	public static final Backend OFF_BACKEND = SimpleBackend.builder()
 			.engineFactory(level -> {
 				throw new UnsupportedOperationException("Cannot create engine when backend is off.");
@@ -49,7 +45,7 @@ public final class BackendManagerImpl {
 		var actual = preferred.findFallback();
 
 		if (preferred != actual) {
-			LOGGER.warn("Flywheel backend fell back from '{}' to '{}'", Backend.REGISTRY.getIdOrThrow(preferred), Backend.REGISTRY.getIdOrThrow(actual));
+			FlwImpl.LOGGER.warn("Flywheel backend fell back from '{}' to '{}'", Backend.REGISTRY.getIdOrThrow(preferred), Backend.REGISTRY.getIdOrThrow(actual));
 		}
 
 		backend = actual;

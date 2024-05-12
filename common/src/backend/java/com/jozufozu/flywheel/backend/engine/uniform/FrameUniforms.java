@@ -147,7 +147,7 @@ public final class FrameUniforms extends UniformWriter {
 	}
 
 	private static long writeTime(long ptr, RenderContext context) {
-		int ticks = ((LevelRendererAccessor) context.renderer()).flywheel$ticks();
+		int ticks = ((LevelRendererAccessor) context.renderer()).flywheel$getTicks();
 		float partialTick = context.partialTick();
 		float renderTicks = ticks + partialTick;
 		float renderSeconds = renderTicks / 20f;

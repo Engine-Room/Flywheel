@@ -2,11 +2,9 @@ package com.jozufozu.flywheel.impl;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.api.backend.Backend;
 import com.jozufozu.flywheel.api.backend.BackendManager;
-import com.mojang.logging.LogUtils;
 
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
@@ -15,7 +13,6 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 
 public class ForgeFlwConfig implements FlwConfig {
-	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final ForgeFlwConfig INSTANCE = new ForgeFlwConfig();
 
 	public final ClientConfig client;
@@ -44,13 +41,13 @@ public class ForgeFlwConfig implements FlwConfig {
 		try {
 			backendId = new ResourceLocation(idStr);
 		} catch (ResourceLocationException e) {
-			LOGGER.warn("Config contains invalid backend ID '" + idStr + "'!");
+			FlwImpl.CONFIG_LOGGER.warn("'backend' value '{}' is not a valid resource location", idStr);
 			return null;
 		}
 
 		Backend backend = Backend.REGISTRY.get(backendId);
 		if (backend == null) {
-			LOGGER.warn("Config contains non-existent backend with ID '" + backendId + "'!");
+			FlwImpl.CONFIG_LOGGER.warn("Backend with ID '{}' is not registered", backendId);
 			return null;
 		}
 

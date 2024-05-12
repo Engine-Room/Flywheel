@@ -8,5 +8,5 @@ import net.minecraft.client.renderer.LevelRenderer;
 @Mixin(LevelRenderer.class)
 public interface LevelRendererAccessor {
 	@Accessor("ticks")
-	int flywheel$ticks();
+	int flywheel$getTicks();
 }

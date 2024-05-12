@@ -3,7 +3,7 @@ package com.jozufozu.flywheel.impl;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jetbrains.annotations.UnknownNullability;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.Flywheel;
 import com.jozufozu.flywheel.api.event.BeginFrameEvent;
 import com.jozufozu.flywheel.api.event.EndClientResourceReloadEvent;
 import com.jozufozu.flywheel.api.event.ReloadLevelRendererEvent;
@@ -33,7 +33,6 @@ import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
@@ -66,7 +65,7 @@ public final class FlywheelForge {
 		registerBackendEventListeners(forgeEventBus, modEventBus);
 
 		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManagerImpl::getBackendString);
-		FlywheelInit.init();
+		FlwImpl.init();
 	}
 
 	private static void registerImplEventListeners(IEventBus forgeEventBus, IEventBus modEventBus) {
@@ -94,8 +93,6 @@ public final class FlywheelForge {
 
 			FlwDebugInfo.addDebugInfo(minecraft, e.getRight());
 		});
-
-		modEventBus.addListener((FMLLoadCompleteEvent e) -> FlywheelInit.freezeRegistries());
 
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> BackendManagerImpl.onEndClientResourceReload(e.error().isPresent()));
 

@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.lib.memory;
 
 import java.lang.ref.Cleaner;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.lib.internal.FlwLibLink;
 import com.jozufozu.flywheel.lib.util.StringUtil;
 
 class DebugMemoryBlockImpl extends AbstractMemoryBlockImpl {
@@ -91,7 +91,7 @@ class DebugMemoryBlockImpl extends AbstractMemoryBlockImpl {
 					builder.append("\n\t");
 					builder.append(frame);
 				}
-				Flywheel.LOGGER.warn(builder.toString());
+				FlwLibLink.INSTANCE.getLogger().warn(builder.toString());
 
 				FlwMemoryTracker.free(ptr);
 				FlwMemoryTracker._freeCPUMemory(size);

@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.backend.ShaderIndices;
 import com.jozufozu.flywheel.backend.compile.component.UberShaderComponent;
@@ -22,7 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 public final class FlwPrograms {
-	public static final Logger LOGGER = LoggerFactory.getLogger(Flywheel.ID + "/shaders");
+	public static final Logger LOGGER = LoggerFactory.getLogger(Flywheel.ID + "/backend/shaders");
 
 	private static final ResourceLocation COMPONENTS_HEADER_VERT = Flywheel.rl("internal/components_header.vert");
 	private static final ResourceLocation COMPONENTS_HEADER_FRAG = Flywheel.rl("internal/components_header.frag");

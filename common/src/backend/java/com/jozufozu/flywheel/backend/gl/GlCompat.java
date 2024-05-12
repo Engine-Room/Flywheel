@@ -12,7 +12,7 @@ import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.KHRShaderSubgroup;
 import org.lwjgl.system.MemoryStack;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.backend.FlwBackend;
 import com.jozufozu.flywheel.backend.compile.core.Compilation;
 import com.jozufozu.flywheel.backend.glsl.GlslVersion;
 import com.jozufozu.flywheel.lib.math.MoreMath;
@@ -26,7 +26,7 @@ public final class GlCompat {
 			caps = GL.getCapabilities();
 		} catch (IllegalStateException e) {
 			// This happens with vulkanmod installed.
-			Flywheel.LOGGER.warn("Failed to get GL capabilities, all flywheel backends will be disabled.");
+			FlwBackend.LOGGER.warn("Failed to get GL capabilities; default Flywheel backends will be disabled.");
 			caps = null;
 		}
 		CAPABILITIES = caps;

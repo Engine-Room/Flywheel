@@ -2,7 +2,7 @@ package com.jozufozu.flywheel.backend.compile.component;
 
 import java.util.ArrayList;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.Flywheel;
 import com.jozufozu.flywheel.api.instance.InstanceType;
 import com.jozufozu.flywheel.api.layout.Layout;
 import com.jozufozu.flywheel.backend.glsl.generate.FnSignature;

@@ -3,7 +3,6 @@ package com.jozufozu.flywheel.impl;
 import java.lang.reflect.Field;
 
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.lib.internal.FlwLibXplat;
 import com.jozufozu.flywheel.lib.model.baked.BakedModelBuilder;
@@ -13,7 +12,6 @@ import com.jozufozu.flywheel.lib.model.baked.ForgeBlockModelBuilder;
 import com.jozufozu.flywheel.lib.model.baked.ForgeMultiBlockModelBuilder;
 import com.jozufozu.flywheel.lib.model.baked.MultiBlockModelBuilder;
 import com.jozufozu.flywheel.lib.util.ShadersModHandler;
-import com.mojang.logging.LogUtils;
 
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.Minecraft;
@@ -27,8 +25,6 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 public class FlwLibXplatImpl implements FlwLibXplat {
-	private static final Logger LOGGER = LogUtils.getLogger();
-
 	@Override
 	public BlockRenderDispatcher createVanillaBlockRenderDispatcher() {
 		BlockRenderDispatcher defaultDispatcher = Minecraft.getInstance().getBlockRenderer();
@@ -40,7 +36,7 @@ public class FlwLibXplatImpl implements FlwLibXplat {
 			}
 			ObfuscationReflectionHelper.setPrivateValue(BlockRenderDispatcher.class, dispatcher, new ModelBlockRenderer(Minecraft.getInstance().getBlockColors()), "f_110900_");
 		} catch (Exception e) {
-			LOGGER.error("Failed to initialize vanilla BlockRenderDispatcher!", e);
+			FlwImpl.LOGGER.error("Failed to initialize vanilla BlockRenderDispatcher!", e);
 			return defaultDispatcher;
 		}
 		return dispatcher;

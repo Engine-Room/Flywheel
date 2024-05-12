@@ -1,6 +1,6 @@
 package com.jozufozu.flywheel.backend.compile;
 
-import com.jozufozu.flywheel.Flywheel;
+import com.jozufozu.flywheel.api.Flywheel;
 import com.jozufozu.flywheel.backend.Samplers;
 import com.jozufozu.flywheel.backend.compile.component.BufferTextureInstanceComponent;
 import com.jozufozu.flywheel.backend.compile.component.SsboInstanceComponent;

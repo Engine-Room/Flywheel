@@ -10,7 +10,7 @@ import com.jozufozu.flywheel.backend.engine.uniform.OptionsUniforms;
 import net.minecraft.client.Options;
 
 @Mixin(Options.class)
-public class OptionsMixin {
+abstract class OptionsMixin {
 	@Inject(method = "load()V", at = @At("RETURN"))
 	private void flywheel$onLoad(CallbackInfo ci) {
 		OptionsUniforms.update((Options) (Object) this);
