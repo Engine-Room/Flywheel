@@ -11,7 +11,6 @@ import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -42,24 +41,6 @@ import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
 import dev.engine_room.flywheel.lib.util.LevelAttached;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.CrashReportCallables;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
 
 @Mod(Flywheel.ID)
 public final class FlywheelForge {
