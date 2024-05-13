@@ -4,14 +4,13 @@ import java.util.List;
 
 import org.joml.Vector4fc;
 
-import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.model.Model;
 
 public class SimpleModel implements Model {
-	private final ImmutableList<ConfiguredMesh> meshes;
+	private final List<ConfiguredMesh> meshes;
 	private final Vector4fc boundingSphere;
 
-	public SimpleModel(ImmutableList<ConfiguredMesh> meshes) {
+	public SimpleModel(List<ConfiguredMesh> meshes) {
 		this.meshes = meshes;
 		this.boundingSphere = ModelUtil.computeBoundingSphere(meshes);
 	}

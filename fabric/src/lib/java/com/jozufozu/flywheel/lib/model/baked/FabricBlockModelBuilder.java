@@ -2,7 +2,6 @@ package com.jozufozu.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
 
-import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.vertex.VertexView;
@@ -49,7 +48,7 @@ public final class FabricBlockModelBuilder extends BlockModelBuilder {
 			materialFunc = ModelUtil::getMaterial;
 		}
 
-		var out = ImmutableList.<Model.ConfiguredMesh>builder();
+		var builder = ChunkLayerSortedListBuilder.<Model.ConfiguredMesh>getThreadLocal();
 
 		BakedModelBufferer.bufferBlock(ModelUtil.VANILLA_RENDERER, level, state, poseStack, (renderType, shaded, data) -> {
 			Material material = materialFunc.apply(renderType, shaded);
@@ -57,10 +56,10 @@ public final class FabricBlockModelBuilder extends BlockModelBuilder {
 				VertexView vertexView = new NoOverlayVertexView();
 				MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, vertexView);
 				var mesh = new SimpleMesh(vertexView, meshData, "source=BlockModelBuilder," + "blockState=" + state + ",renderType=" + renderType + ",shaded=" + shaded);
-				out.add(new Model.ConfiguredMesh(material, mesh));
+				builder.add(renderType, new Model.ConfiguredMesh(material, mesh));
 			}
 		});
 
-		return new SimpleModel(out.build());
+		return new SimpleModel(builder.build());
 	}
 }

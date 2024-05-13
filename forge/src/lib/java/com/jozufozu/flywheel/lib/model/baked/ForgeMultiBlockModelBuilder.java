@@ -5,7 +5,6 @@ import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.api.material.Material;
 import com.jozufozu.flywheel.api.model.Model;
 import com.jozufozu.flywheel.api.vertex.VertexView;
@@ -61,7 +60,7 @@ public final class ForgeMultiBlockModelBuilder extends MultiBlockModelBuilder {
 			modelDataLookup = pos -> ModelData.EMPTY;
 		}
 
-		var out = ImmutableList.<Model.ConfiguredMesh>builder();
+		var builder = ChunkLayerSortedListBuilder.<Model.ConfiguredMesh>getThreadLocal();
 
 		BakedModelBufferer.bufferMultiBlock(ModelUtil.VANILLA_RENDERER, positions.iterator(), level, poseStack, modelDataLookup, renderFluids, (renderType, shaded, data) -> {
 			Material material = materialFunc.apply(renderType, shaded);
@@ -69,10 +68,10 @@ public final class ForgeMultiBlockModelBuilder extends MultiBlockModelBuilder {
 				VertexView vertexView = new NoOverlayVertexView();
 				MemoryBlock meshData = ModelUtil.convertVanillaBuffer(data, vertexView);
 				var mesh = new SimpleMesh(vertexView, meshData, "source=MultiBlockModelBuilder," + "renderType=" + renderType + ",shaded=" + shaded);
-				out.add(new Model.ConfiguredMesh(material, mesh));
+				builder.add(renderType, new Model.ConfiguredMesh(material, mesh));
 			}
 		});
 
-		return new SimpleModel(out.build());
+		return new SimpleModel(builder.build());
 	}
 }

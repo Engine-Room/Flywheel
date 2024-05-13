@@ -24,8 +24,8 @@ import net.minecraftforge.client.ChunkRenderTypeSet;
 import net.minecraftforge.client.model.data.ModelData;
 
 final class BakedModelBufferer {
-	private static final RenderType[] CHUNK_LAYERS = RenderType.chunkBufferLayers().toArray(RenderType[]::new);
-	private static final int CHUNK_LAYER_AMOUNT = CHUNK_LAYERS.length;
+	static final RenderType[] CHUNK_LAYERS = RenderType.chunkBufferLayers().toArray(RenderType[]::new);
+	static final int CHUNK_LAYER_AMOUNT = CHUNK_LAYERS.length;
 
 	private static final ThreadLocal<ThreadLocalObjects> THREAD_LOCAL_OBJECTS = ThreadLocal.withInitial(ThreadLocalObjects::new);
 
