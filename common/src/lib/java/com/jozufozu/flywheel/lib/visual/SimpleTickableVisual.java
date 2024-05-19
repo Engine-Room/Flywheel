@@ -18,7 +18,7 @@ public interface SimpleTickableVisual extends TickableVisual {
 	 * <br>
 	 * {@link Instancer}/{@link Instance} creation/acquisition is safe here.
 	 */
-	void tick();
+	void tick(Context context);
 
 	@Override
 	default Plan<Context> planTick() {
