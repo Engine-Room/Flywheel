@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import com.jozufozu.flywheel.api.visual.BlockEntityVisual;
 import com.jozufozu.flywheel.api.visual.Visual;
 import com.jozufozu.flywheel.api.visualization.VisualizationContext;
-import com.jozufozu.flywheel.impl.visualization.VisualizationHelper;
+import com.jozufozu.flywheel.lib.visual.VisualizationHelper;
 import com.jozufozu.flywheel.impl.visualization.storage.Storage;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;

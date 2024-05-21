@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.visualization;
+package com.jozufozu.flywheel.lib.visual;
 
 import org.jetbrains.annotations.Nullable;
 

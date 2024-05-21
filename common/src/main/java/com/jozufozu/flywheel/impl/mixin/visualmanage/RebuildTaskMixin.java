@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.impl.visualization.VisualizationHelper;
+import com.jozufozu.flywheel.lib.visual.VisualizationHelper;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 
