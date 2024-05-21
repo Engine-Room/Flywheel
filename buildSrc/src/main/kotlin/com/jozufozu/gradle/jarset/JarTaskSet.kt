@@ -12,10 +12,13 @@ import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.the
+import org.gradle.language.jvm.tasks.ProcessResources
 
 class JarTaskSet(
     private val project: Project,
@@ -147,7 +150,11 @@ class JarTaskSet(
                 archiveClassifier.set(SOURCES_CLASSIFIER)
 
                 for (set in sourceSetSet) {
-                    from(set.allSource)
+                    // In the platform projects we inject common sources into these tasks to avoid polluting the
+                    // source set itself, but that bites us here, and we need to roll in all the sources in this kinda
+                    // ugly way. There's probably a better way to do this but JarTaskSet can't easily accommodate it.
+                    from(project.tasks.named<ProcessResources>(set.processResourcesTaskName).map { it.source })
+                    from(project.tasks.named<JavaCompile>(set.compileJavaTaskName).map { it.source })
                 }
                 excludeDuplicatePackageInfos(this)
             }
@@ -163,7 +170,8 @@ class JarTaskSet(
                 setDestinationDir(project.layout.buildDirectory.dir("docs/${name}-javadoc").get().asFile)
 
                 for (set in sourceSetSet) {
-                    source(set.allJava)
+                    // See comment in #createSourcesJar.
+                    source(project.tasks.named<JavaCompile>(set.compileJavaTaskName).map { it.source })
                     classpath += set.compileClasspath
                 }
                 excludeDuplicatePackageInfos(this)
