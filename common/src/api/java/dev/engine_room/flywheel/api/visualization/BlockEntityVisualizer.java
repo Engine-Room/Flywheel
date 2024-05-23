@@ -1,7 +1,6 @@
-package com.jozufozu.flywheel.api.visualization;
+package dev.engine_room.flywheel.api.visualization;
 
-import com.jozufozu.flywheel.api.visual.BlockEntityVisual;
-
+import dev.engine_room.flywheel.api.visual.BlockEntityVisual;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 

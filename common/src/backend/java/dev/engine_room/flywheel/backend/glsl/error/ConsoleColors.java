@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.glsl.error;
+package dev.engine_room.flywheel.backend.glsl.error;
 
 // https://stackoverflow.com/a/45444716
 public final class ConsoleColors {

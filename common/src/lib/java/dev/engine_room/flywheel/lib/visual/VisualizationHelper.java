@@ -1,11 +1,11 @@
-package com.jozufozu.flywheel.lib.visual;
+package dev.engine_room.flywheel.lib.visual;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.visualization.BlockEntityVisualizer;
-import com.jozufozu.flywheel.api.visualization.EntityVisualizer;
-import com.jozufozu.flywheel.api.visualization.VisualizationManager;
-import com.jozufozu.flywheel.api.visualization.VisualizerRegistry;
+import dev.engine_room.flywheel.api.visualization.BlockEntityVisualizer;
+import dev.engine_room.flywheel.api.visualization.EntityVisualizer;
+import dev.engine_room.flywheel.api.visualization.VisualizationManager;
+import dev.engine_room.flywheel.api.visualization.VisualizerRegistry;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;

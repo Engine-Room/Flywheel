@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.lib.model;
+package dev.engine_room.flywheel.lib.model;
 
 import java.util.List;
 
 import org.joml.Vector4fc;
 
-import com.jozufozu.flywheel.api.model.Model;
+import dev.engine_room.flywheel.api.model.Model;
 
 public class SimpleModel implements Model {
 	private final List<ConfiguredMesh> meshes;

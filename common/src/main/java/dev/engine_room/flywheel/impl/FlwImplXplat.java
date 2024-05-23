@@ -1,15 +1,14 @@
-package com.jozufozu.flywheel.impl;
+package dev.engine_room.flywheel.impl;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.event.RenderContext;
-import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.internal.DependencyInjection;
-
+import dev.engine_room.flywheel.api.event.RenderContext;
+import dev.engine_room.flywheel.api.event.RenderStage;
+import dev.engine_room.flywheel.api.internal.DependencyInjection;
 import net.minecraft.client.multiplayer.ClientLevel;
 
 public interface FlwImplXplat {
-	FlwImplXplat INSTANCE = DependencyInjection.load(FlwImplXplat.class, "com.jozufozu.flywheel.impl.FlwImplXplatImpl");
+	FlwImplXplat INSTANCE = DependencyInjection.load(FlwImplXplat.class, "dev.engine_room.flywheel.impl.FlwImplXplatImpl");
 
 	void dispatchBeginFrameEvent(RenderContext context);
 

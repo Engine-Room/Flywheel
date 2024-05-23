@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.compile.core;
+package dev.engine_room.flywheel.backend.compile.core;
 
 import java.util.List;
 import java.util.Locale;
@@ -8,15 +8,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.jozufozu.flywheel.api.Flywheel;
-import com.jozufozu.flywheel.backend.glsl.SourceFile;
-import com.jozufozu.flywheel.backend.glsl.SourceLines;
-import com.jozufozu.flywheel.backend.glsl.error.ConsoleColors;
-import com.jozufozu.flywheel.backend.glsl.error.ErrorBuilder;
-import com.jozufozu.flywheel.backend.glsl.error.ErrorLevel;
-import com.jozufozu.flywheel.backend.glsl.span.Span;
-import com.jozufozu.flywheel.lib.util.StringUtil;
-
+import dev.engine_room.flywheel.api.Flywheel;
+import dev.engine_room.flywheel.backend.glsl.SourceFile;
+import dev.engine_room.flywheel.backend.glsl.SourceLines;
+import dev.engine_room.flywheel.backend.glsl.error.ConsoleColors;
+import dev.engine_room.flywheel.backend.glsl.error.ErrorBuilder;
+import dev.engine_room.flywheel.backend.glsl.error.ErrorLevel;
+import dev.engine_room.flywheel.backend.glsl.span.Span;
+import dev.engine_room.flywheel.lib.util.StringUtil;
 import net.minecraft.resources.ResourceLocation;
 
 public class FailedCompilation {

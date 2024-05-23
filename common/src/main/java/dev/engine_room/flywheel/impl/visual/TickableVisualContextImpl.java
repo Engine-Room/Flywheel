@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.impl.visual;
+package dev.engine_room.flywheel.impl.visual;
 
-import com.jozufozu.flywheel.api.visual.TickableVisual;
+import dev.engine_room.flywheel.api.visual.TickableVisual;
 
 public enum TickableVisualContextImpl implements TickableVisual.Context {
 	INSTANCE

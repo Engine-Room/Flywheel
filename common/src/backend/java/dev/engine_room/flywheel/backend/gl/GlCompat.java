@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.gl;
+package dev.engine_room.flywheel.backend.gl;
 
 import java.nio.ByteBuffer;
 
@@ -12,10 +12,10 @@ import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.KHRShaderSubgroup;
 import org.lwjgl.system.MemoryStack;
 
-import com.jozufozu.flywheel.backend.FlwBackend;
-import com.jozufozu.flywheel.backend.compile.core.Compilation;
-import com.jozufozu.flywheel.backend.glsl.GlslVersion;
-import com.jozufozu.flywheel.lib.math.MoreMath;
+import dev.engine_room.flywheel.backend.FlwBackend;
+import dev.engine_room.flywheel.backend.compile.core.Compilation;
+import dev.engine_room.flywheel.backend.glsl.GlslVersion;
+import dev.engine_room.flywheel.lib.math.MoreMath;
 
 public final class GlCompat {
 	@UnknownNullability

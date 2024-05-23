@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.lib.task;
+package dev.engine_room.flywheel.lib.task;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.jozufozu.flywheel.api.task.Plan;
-import com.jozufozu.flywheel.lib.util.Unit;
+import dev.engine_room.flywheel.api.task.Plan;
+import dev.engine_room.flywheel.lib.util.Unit;
 
 public class PlanCompositionTest {
 

@@ -1,8 +1,7 @@
-package com.jozufozu.flywheel.lib.material;
+package dev.engine_room.flywheel.lib.material;
 
-import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.material.Transparency;
-
+import dev.engine_room.flywheel.api.material.Material;
+import dev.engine_room.flywheel.api.material.Transparency;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.resources.ResourceLocation;
 

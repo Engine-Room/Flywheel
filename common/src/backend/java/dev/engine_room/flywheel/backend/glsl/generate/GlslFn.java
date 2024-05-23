@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.backend.glsl.generate;
+package dev.engine_room.flywheel.backend.glsl.generate;
 
 import java.util.function.Consumer;
 
-import com.jozufozu.flywheel.lib.util.StringUtil;
+import dev.engine_room.flywheel.lib.util.StringUtil;
 
 public class GlslFn implements GlslBuilder.Declaration {
 	private GlslBlock body = new GlslBlock();

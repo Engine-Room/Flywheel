@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.backend.engine;
+package dev.engine_room.flywheel.backend.engine;
 
-import com.jozufozu.flywheel.api.instance.InstanceHandle;
+import dev.engine_room.flywheel.api.instance.InstanceHandle;
 
 public class InstanceHandleImpl implements InstanceHandle {
 	public AbstractInstancer<?> instancer;

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.compile.core;
+package dev.engine_room.flywheel.backend.compile.core;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.backend.glsl.ShaderSources;
+import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
+import dev.engine_room.flywheel.backend.glsl.ShaderSources;
 
 public class CompilationHarness<K> {
 	private final KeyCompiler<K> compiler;

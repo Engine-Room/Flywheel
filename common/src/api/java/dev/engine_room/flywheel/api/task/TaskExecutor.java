@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api.task;
+package dev.engine_room.flywheel.api.task;
 
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;

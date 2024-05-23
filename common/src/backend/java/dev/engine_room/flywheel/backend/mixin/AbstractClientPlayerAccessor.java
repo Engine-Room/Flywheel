@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.mixin;
+package dev.engine_room.flywheel.backend.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;

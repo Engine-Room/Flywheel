@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.backend.glsl.span;
+package dev.engine_room.flywheel.backend.glsl.span;
 
-import com.jozufozu.flywheel.backend.glsl.SourceLines;
+import dev.engine_room.flywheel.backend.glsl.SourceLines;
 
 /**
  * Represents a (syntactically) malformed segment of code.

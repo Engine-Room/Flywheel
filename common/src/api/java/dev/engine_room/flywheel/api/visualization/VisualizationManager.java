@@ -1,12 +1,11 @@
-package com.jozufozu.flywheel.api.visualization;
+package dev.engine_room.flywheel.api.visualization;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.internal.FlwApiLink;
-import com.jozufozu.flywheel.api.visual.Effect;
-import com.jozufozu.flywheel.api.visual.Visual;
-
+import dev.engine_room.flywheel.api.internal.FlwApiLink;
+import dev.engine_room.flywheel.api.visual.Effect;
+import dev.engine_room.flywheel.api.visual.Visual;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;

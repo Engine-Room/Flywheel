@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.lib.util;
+package dev.engine_room.flywheel.lib.util;
 
-import com.jozufozu.flywheel.api.Flywheel;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
+import dev.engine_room.flywheel.api.Flywheel;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;

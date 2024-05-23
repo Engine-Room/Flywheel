@@ -1,10 +1,9 @@
-package com.jozufozu.flywheel.lib.visual;
+package dev.engine_room.flywheel.lib.visual;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.FrustumIntersection;
 
-import com.jozufozu.flywheel.lib.math.MoreMath;
-
+import dev.engine_room.flywheel.lib.math.MoreMath;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;

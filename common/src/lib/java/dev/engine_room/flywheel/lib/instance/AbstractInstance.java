@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.lib.instance;
+package dev.engine_room.flywheel.lib.instance;
 
-import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.instance.InstanceHandle;
-import com.jozufozu.flywheel.api.instance.InstanceType;
+import dev.engine_room.flywheel.api.instance.Instance;
+import dev.engine_room.flywheel.api.instance.InstanceHandle;
+import dev.engine_room.flywheel.api.instance.InstanceType;
 
 public abstract class AbstractInstance implements Instance {
 	protected final InstanceType<?> type;

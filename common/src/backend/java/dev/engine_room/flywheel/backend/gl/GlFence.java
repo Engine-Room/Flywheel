@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.gl;
+package dev.engine_room.flywheel.backend.gl;
 
 import static org.lwjgl.opengl.GL32.GL_SIGNALED;
 import static org.lwjgl.opengl.GL32.GL_SYNC_GPU_COMMANDS_COMPLETE;

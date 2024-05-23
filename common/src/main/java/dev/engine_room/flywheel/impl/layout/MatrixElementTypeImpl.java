@@ -1,9 +1,9 @@
-package com.jozufozu.flywheel.impl.layout;
+package dev.engine_room.flywheel.impl.layout;
 
 import org.jetbrains.annotations.Range;
 
-import com.jozufozu.flywheel.api.layout.FloatRepr;
-import com.jozufozu.flywheel.api.layout.MatrixElementType;
+import dev.engine_room.flywheel.api.layout.FloatRepr;
+import dev.engine_room.flywheel.api.layout.MatrixElementType;
 
 record MatrixElementTypeImpl(FloatRepr repr, @Range(from = 2, to = 4) int rows, @Range(from = 2, to = 4) int columns,
 							 int byteSize, int byteAlignment) implements MatrixElementType {

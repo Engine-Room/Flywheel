@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.glsl;
+package dev.engine_room.flywheel.backend.glsl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -6,8 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.api.Flywheel;
-
+import dev.engine_room.flywheel.api.Flywheel;
 import net.minecraft.resources.ResourceLocation;
 
 public class TestBase {

@@ -1,11 +1,11 @@
-package com.jozufozu.flywheel.lib.task;
+package dev.engine_room.flywheel.lib.task;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.api.task.Plan;
-import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.lib.task.functional.ConsumerWithContext;
-import com.jozufozu.flywheel.lib.task.functional.SupplierWithContext;
+import dev.engine_room.flywheel.api.task.Plan;
+import dev.engine_room.flywheel.api.task.TaskExecutor;
+import dev.engine_room.flywheel.lib.task.functional.ConsumerWithContext;
+import dev.engine_room.flywheel.lib.task.functional.SupplierWithContext;
 
 /**
  * A plan that executes code on each element of a provided list.

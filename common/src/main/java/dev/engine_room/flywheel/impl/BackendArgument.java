@@ -1,12 +1,10 @@
-package com.jozufozu.flywheel.impl;
+package dev.engine_room.flywheel.impl;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
-import com.jozufozu.flywheel.api.backend.Backend;
-import com.jozufozu.flywheel.lib.util.ResourceUtil;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -15,6 +13,8 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
+import dev.engine_room.flywheel.api.backend.Backend;
+import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.network.chat.Component;

@@ -1,11 +1,10 @@
-package com.jozufozu.flywheel.api.visual;
+package dev.engine_room.flywheel.api.visual;
 
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.instance.Instance;
-
+import dev.engine_room.flywheel.api.instance.Instance;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**

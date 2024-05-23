@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.lib.visual;
+package dev.engine_room.flywheel.lib.visual;
 
-import com.jozufozu.flywheel.api.visual.DynamicVisual;
+import dev.engine_room.flywheel.api.visual.DynamicVisual;
 
 public interface EntityComponent {
 	void beginFrame(DynamicVisual.Context context);

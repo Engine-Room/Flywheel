@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.glsl.generate;
+package dev.engine_room.flywheel.backend.glsl.generate;
 
 public interface GlslStmt {
 	GlslStmt BREAK = () -> "break;";

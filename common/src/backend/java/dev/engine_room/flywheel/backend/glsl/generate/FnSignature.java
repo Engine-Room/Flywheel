@@ -1,10 +1,11 @@
-package com.jozufozu.flywheel.backend.glsl.generate;
+package dev.engine_room.flywheel.backend.glsl.generate;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.lib.util.Pair;
+
+import dev.engine_room.flywheel.lib.util.Pair;
 
 public record FnSignature(String returnType, String name, ImmutableList<Pair<String, String>> args) {
 

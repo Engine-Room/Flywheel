@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl;
+package dev.engine_room.flywheel.impl;
 
 import java.io.File;
 import java.io.FileReader;
@@ -11,9 +11,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import com.jozufozu.flywheel.api.backend.Backend;
-import com.jozufozu.flywheel.api.backend.BackendManager;
 
+import dev.engine_room.flywheel.api.backend.Backend;
+import dev.engine_room.flywheel.api.backend.BackendManager;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;

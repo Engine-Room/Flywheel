@@ -1,7 +1,7 @@
-package com.jozufozu.flywheel.lib.model;
+package dev.engine_room.flywheel.lib.model;
 
-import com.jozufozu.flywheel.api.model.IndexSequence;
-import com.jozufozu.flywheel.api.model.Mesh;
+import dev.engine_room.flywheel.api.model.IndexSequence;
+import dev.engine_room.flywheel.api.model.Mesh;
 
 public interface QuadMesh extends Mesh {
 	@Override

@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.impl.extension;
+package dev.engine_room.flywheel.impl.extension;
 
-import com.jozufozu.flywheel.api.vertex.VertexViewProvider;
+import dev.engine_room.flywheel.api.vertex.VertexViewProvider;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 /**

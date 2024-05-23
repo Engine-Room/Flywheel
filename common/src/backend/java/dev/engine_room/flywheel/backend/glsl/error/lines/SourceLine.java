@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.glsl.error.lines;
+package dev.engine_room.flywheel.backend.glsl.error.lines;
 
 public record SourceLine(String number, String line) implements ErrorLine {
 

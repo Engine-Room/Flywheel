@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.task;
+package dev.engine_room.flywheel.impl.task;
 
 /**
  * Thin wrapper around Java's built-in object synchronization primitives.

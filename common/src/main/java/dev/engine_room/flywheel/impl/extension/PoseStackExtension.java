@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.impl.extension;
+package dev.engine_room.flywheel.impl.extension;
 
-import com.jozufozu.flywheel.lib.transform.PoseTransformStack;
+import dev.engine_room.flywheel.lib.transform.PoseTransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 /**

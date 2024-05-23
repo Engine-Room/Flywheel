@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api.model;
+package dev.engine_room.flywheel.api.model;
 
 /**
  * Represents a sequence of unsigned integer vertex indices.

@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.lib.visual;
+package dev.engine_room.flywheel.lib.visual;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.jozufozu.flywheel.api.instance.Instance;
+import dev.engine_room.flywheel.api.instance.Instance;
 
 public class SmartRecycler<K, I extends Instance> {
 	private final Function<K, I> factory;

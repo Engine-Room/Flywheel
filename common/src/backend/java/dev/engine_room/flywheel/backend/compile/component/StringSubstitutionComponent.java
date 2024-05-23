@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.backend.compile.component;
+package dev.engine_room.flywheel.backend.compile.component;
 
 import java.util.Collection;
 import java.util.Map;
 
-import com.jozufozu.flywheel.api.Flywheel;
-import com.jozufozu.flywheel.backend.glsl.SourceComponent;
+import dev.engine_room.flywheel.api.Flywheel;
+import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 
 public final class StringSubstitutionComponent implements SourceComponent {
 	private final SourceComponent source;

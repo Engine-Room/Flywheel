@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.gl;
+package dev.engine_room.flywheel.backend.gl;
 
 // Utility class for safely dealing with gl object handles.
 public abstract class GlObject {

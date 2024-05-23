@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.task;
+package dev.engine_room.flywheel.impl.task;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

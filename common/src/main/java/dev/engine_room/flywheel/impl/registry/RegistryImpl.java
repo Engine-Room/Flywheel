@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.registry;
+package dev.engine_room.flywheel.impl.registry;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -6,8 +6,7 @@ import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Unmodifiable;
 
-import com.jozufozu.flywheel.api.registry.Registry;
-
+import dev.engine_room.flywheel.api.registry.Registry;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;

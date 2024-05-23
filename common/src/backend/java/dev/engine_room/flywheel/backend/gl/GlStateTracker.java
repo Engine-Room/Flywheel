@@ -1,7 +1,8 @@
-package com.jozufozu.flywheel.backend.gl;
+package dev.engine_room.flywheel.backend.gl;
 
-import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.mojang.blaze3d.platform.GlStateManager;
+
+import dev.engine_room.flywheel.backend.gl.buffer.GlBufferType;
 
 /**
  * Tracks bound buffers/vbos because GlStateManager doesn't do that for us.

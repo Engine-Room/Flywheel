@@ -1,9 +1,9 @@
-package com.jozufozu.flywheel.impl.layout;
+package dev.engine_room.flywheel.impl.layout;
 
 import org.jetbrains.annotations.Range;
 
-import com.jozufozu.flywheel.api.layout.ArrayElementType;
-import com.jozufozu.flywheel.api.layout.ElementType;
+import dev.engine_room.flywheel.api.layout.ArrayElementType;
+import dev.engine_room.flywheel.api.layout.ElementType;
 
 record ArrayElementTypeImpl(ElementType innerType, @Range(from = 1, to = 256) int length, int byteSize, int byteAlignment) implements ArrayElementType {
 	static ArrayElementTypeImpl create(ElementType innerType, @Range(from = 1, to = 256) int length) {

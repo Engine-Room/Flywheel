@@ -1,8 +1,7 @@
-package com.jozufozu.flywheel.lib.instance;
+package dev.engine_room.flywheel.lib.instance;
 
-import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.lib.visual.AbstractVisual;
-
+import dev.engine_room.flywheel.api.instance.Instance;
+import dev.engine_room.flywheel.lib.visual.AbstractVisual;
 import net.minecraft.client.renderer.LightTexture;
 
 /**

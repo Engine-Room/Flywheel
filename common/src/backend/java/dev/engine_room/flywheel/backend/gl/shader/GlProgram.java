@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.gl.shader;
+package dev.engine_room.flywheel.backend.gl.shader;
 
 import static org.lwjgl.opengl.GL20.glBindAttribLocation;
 import static org.lwjgl.opengl.GL20.glDeleteProgram;
@@ -19,11 +19,11 @@ import org.joml.Matrix3fc;
 import org.joml.Matrix4fc;
 import org.slf4j.Logger;
 
-import com.jozufozu.flywheel.backend.gl.GlObject;
-import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.logging.LogUtils;
 
+import dev.engine_room.flywheel.backend.gl.GlObject;
+import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 

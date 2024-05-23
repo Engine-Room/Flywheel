@@ -1,7 +1,6 @@
-package com.jozufozu.flywheel.lib.material;
+package dev.engine_room.flywheel.lib.material;
 
-import com.jozufozu.flywheel.api.material.MaterialShaders;
-
+import dev.engine_room.flywheel.api.material.MaterialShaders;
 import net.minecraft.resources.ResourceLocation;
 
 public record SimpleMaterialShaders(ResourceLocation vertexShader, ResourceLocation fragmentShader) implements MaterialShaders {

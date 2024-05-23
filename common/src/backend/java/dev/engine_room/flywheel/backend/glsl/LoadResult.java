@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.glsl;
+package dev.engine_room.flywheel.backend.glsl;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

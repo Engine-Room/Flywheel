@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.util;
+package dev.engine_room.flywheel.lib.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

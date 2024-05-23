@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.lib.task;
+package dev.engine_room.flywheel.lib.task;
 
-import com.jozufozu.flywheel.api.task.Plan;
-import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.lib.task.functional.RunnableWithContext;
+import dev.engine_room.flywheel.api.task.Plan;
+import dev.engine_room.flywheel.api.task.TaskExecutor;
+import dev.engine_room.flywheel.lib.task.functional.RunnableWithContext;
 
 public record SyncedPlan<C>(RunnableWithContext<C> task) implements SimplyComposedPlan<C> {
 	public static <C> Plan<C> of(RunnableWithContext<C> task) {

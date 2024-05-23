@@ -1,13 +1,14 @@
-package com.jozufozu.flywheel.backend.mixin;
+package dev.engine_room.flywheel.backend.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.backend.engine.uniform.FogUniforms;
-import com.jozufozu.flywheel.backend.gl.GlCompat;
 import com.mojang.blaze3d.systems.RenderSystem;
+
+import dev.engine_room.flywheel.backend.engine.uniform.FogUniforms;
+import dev.engine_room.flywheel.backend.gl.GlCompat;
 
 @Mixin(value = RenderSystem.class, remap = false)
 abstract class RenderSystemMixin {

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.glsl.parse;
+package dev.engine_room.flywheel.backend.glsl.parse;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -6,8 +6,9 @@ import java.util.regex.Pattern;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableMap;
-import com.jozufozu.flywheel.backend.glsl.SourceLines;
-import com.jozufozu.flywheel.backend.glsl.span.Span;
+
+import dev.engine_room.flywheel.backend.glsl.SourceLines;
+import dev.engine_room.flywheel.backend.glsl.span.Span;
 
 public class ShaderField {
 	public static final Pattern PATTERN = Pattern.compile("layout\\s*\\(location\\s*=\\s*(\\d+)\\)\\s+(in|out)\\s+([\\w\\d]+)\\s+" + "([\\w\\d]+)");

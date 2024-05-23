@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.gl.array;
+package dev.engine_room.flywheel.backend.gl.array;
 
 import java.util.BitSet;
 import java.util.List;
@@ -6,10 +6,10 @@ import java.util.List;
 import org.lwjgl.opengl.GL43C;
 import org.lwjgl.system.Checks;
 
-import com.jozufozu.flywheel.backend.gl.GlCompat;
-import com.jozufozu.flywheel.backend.gl.GlStateTracker;
-import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
-import com.jozufozu.flywheel.lib.util.FlwUtil;
+import dev.engine_room.flywheel.backend.gl.GlCompat;
+import dev.engine_room.flywheel.backend.gl.GlStateTracker;
+import dev.engine_room.flywheel.backend.gl.buffer.GlBufferType;
+import dev.engine_room.flywheel.lib.util.FlwUtil;
 
 public class GlVertexArraySeparateAttributes extends GlVertexArray {
 	public static final boolean SUPPORTED = isSupported();

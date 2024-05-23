@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.glsl;
+package dev.engine_room.flywheel.backend.glsl;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.util;
+package dev.engine_room.flywheel.lib.util;
 
 import java.lang.ref.Cleaner;
 import java.lang.ref.WeakReference;

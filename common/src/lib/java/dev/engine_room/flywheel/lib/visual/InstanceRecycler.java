@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.lib.visual;
+package dev.engine_room.flywheel.lib.visual;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import com.jozufozu.flywheel.api.instance.Instance;
+import dev.engine_room.flywheel.api.instance.Instance;
 
 /**
  * A utility for recycling instances.

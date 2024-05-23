@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.mixin.fix;
+package dev.engine_room.flywheel.impl.mixin.fix;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

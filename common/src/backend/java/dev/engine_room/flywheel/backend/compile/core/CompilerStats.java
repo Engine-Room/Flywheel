@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.compile.core;
+package dev.engine_room.flywheel.backend.compile.core;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,11 +9,11 @@ import java.util.stream.Collectors;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-import com.jozufozu.flywheel.backend.compile.FlwPrograms;
-import com.jozufozu.flywheel.backend.glsl.LoadError;
-import com.jozufozu.flywheel.backend.glsl.LoadResult;
-import com.jozufozu.flywheel.backend.glsl.error.ErrorBuilder;
-import com.jozufozu.flywheel.lib.util.StringUtil;
+import dev.engine_room.flywheel.backend.compile.FlwPrograms;
+import dev.engine_room.flywheel.backend.glsl.LoadError;
+import dev.engine_room.flywheel.backend.glsl.LoadResult;
+import dev.engine_room.flywheel.backend.glsl.error.ErrorBuilder;
+import dev.engine_room.flywheel.lib.util.StringUtil;
 
 public class CompilerStats {
 	private final Marker marker;

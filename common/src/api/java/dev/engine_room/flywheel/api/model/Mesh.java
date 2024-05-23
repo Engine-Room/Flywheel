@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.api.model;
+package dev.engine_room.flywheel.api.model;
 
 import org.joml.Vector4fc;
 
-import com.jozufozu.flywheel.api.vertex.MutableVertexList;
+import dev.engine_room.flywheel.api.vertex.MutableVertexList;
 
 /**
  * A holder for arbitrary vertex data that can be written to memory or a vertex list.

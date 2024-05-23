@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.compile.component;
+package dev.engine_room.flywheel.backend.compile.component;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,16 +9,16 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.jozufozu.flywheel.api.Flywheel;
-import com.jozufozu.flywheel.backend.compile.core.SourceLoader;
-import com.jozufozu.flywheel.backend.glsl.SourceComponent;
-import com.jozufozu.flywheel.backend.glsl.SourceFile;
-import com.jozufozu.flywheel.backend.glsl.generate.FnSignature;
-import com.jozufozu.flywheel.backend.glsl.generate.GlslBlock;
-import com.jozufozu.flywheel.backend.glsl.generate.GlslBuilder;
-import com.jozufozu.flywheel.backend.glsl.generate.GlslExpr;
-import com.jozufozu.flywheel.backend.glsl.generate.GlslSwitch;
 
+import dev.engine_room.flywheel.api.Flywheel;
+import dev.engine_room.flywheel.backend.compile.core.SourceLoader;
+import dev.engine_room.flywheel.backend.glsl.SourceComponent;
+import dev.engine_room.flywheel.backend.glsl.SourceFile;
+import dev.engine_room.flywheel.backend.glsl.generate.FnSignature;
+import dev.engine_room.flywheel.backend.glsl.generate.GlslBlock;
+import dev.engine_room.flywheel.backend.glsl.generate.GlslBuilder;
+import dev.engine_room.flywheel.backend.glsl.generate.GlslExpr;
+import dev.engine_room.flywheel.backend.glsl.generate.GlslSwitch;
 import net.minecraft.resources.ResourceLocation;
 
 public class UberShaderComponent implements SourceComponent {

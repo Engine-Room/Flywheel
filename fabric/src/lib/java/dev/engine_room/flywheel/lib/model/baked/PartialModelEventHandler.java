@@ -1,11 +1,10 @@
-package com.jozufozu.flywheel.lib.model.baked;
+package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.List;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import com.jozufozu.flywheel.api.Flywheel;
-
+import dev.engine_room.flywheel.api.Flywheel;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.Minecraft;

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api.event;
+package dev.engine_room.flywheel.api.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;

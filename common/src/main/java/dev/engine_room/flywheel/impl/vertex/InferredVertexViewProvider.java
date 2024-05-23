@@ -1,8 +1,9 @@
-package com.jozufozu.flywheel.impl.vertex;
+package dev.engine_room.flywheel.impl.vertex;
 
-import com.jozufozu.flywheel.api.vertex.VertexView;
-import com.jozufozu.flywheel.api.vertex.VertexViewProvider;
 import com.mojang.blaze3d.vertex.VertexFormat;
+
+import dev.engine_room.flywheel.api.vertex.VertexView;
+import dev.engine_room.flywheel.api.vertex.VertexViewProvider;
 
 public class InferredVertexViewProvider implements VertexViewProvider {
 	private final InferredVertexFormatInfo formatInfo;

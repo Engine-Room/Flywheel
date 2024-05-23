@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.memory;
+package dev.engine_room.flywheel.lib.memory;
 
 import java.lang.ref.Cleaner;
 import java.nio.ByteBuffer;

@@ -1,7 +1,6 @@
-package com.jozufozu.flywheel.backend.compile;
+package dev.engine_room.flywheel.backend.compile;
 
-import com.jozufozu.flywheel.api.Flywheel;
-
+import dev.engine_room.flywheel.api.Flywheel;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;

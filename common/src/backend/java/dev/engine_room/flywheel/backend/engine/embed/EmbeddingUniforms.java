@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.engine.embed;
+package dev.engine_room.flywheel.backend.engine.embed;
 
 public class EmbeddingUniforms {
 	public static final String MODEL_MATRIX = "_flw_modelMatrix";

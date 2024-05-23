@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.mixin.visualmanage;
+package dev.engine_room.flywheel.impl.mixin.visualmanage;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.lib.visual.VisualizationHelper;
+import dev.engine_room.flywheel.lib.visual.VisualizationHelper;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 

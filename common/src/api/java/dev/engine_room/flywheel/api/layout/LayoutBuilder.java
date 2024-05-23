@@ -1,9 +1,9 @@
-package com.jozufozu.flywheel.api.layout;
+package dev.engine_room.flywheel.api.layout;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Range;
 
-import com.jozufozu.flywheel.api.internal.FlwApiLink;
+import dev.engine_room.flywheel.api.internal.FlwApiLink;
 
 @ApiStatus.NonExtendable
 public interface LayoutBuilder {

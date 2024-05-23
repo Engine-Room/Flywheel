@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.compile.core;
+package dev.engine_room.flywheel.backend.compile.core;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -10,10 +10,10 @@ import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.backend.gl.shader.GlShader;
-import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
-import com.jozufozu.flywheel.backend.glsl.GlslVersion;
-import com.jozufozu.flywheel.backend.glsl.SourceComponent;
+import dev.engine_room.flywheel.backend.gl.shader.GlShader;
+import dev.engine_room.flywheel.backend.gl.shader.ShaderType;
+import dev.engine_room.flywheel.backend.glsl.GlslVersion;
+import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 
 public class ShaderCache {
 	private final Map<ShaderKey, ShaderResult> inner = new HashMap<>();

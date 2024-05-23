@@ -1,7 +1,6 @@
-package com.jozufozu.flywheel.lib.vertex;
+package dev.engine_room.flywheel.lib.vertex;
 
-import com.jozufozu.flywheel.api.vertex.MutableVertexList;
-
+import dev.engine_room.flywheel.api.vertex.MutableVertexList;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 

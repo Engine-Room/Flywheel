@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.lib.task;
+package dev.engine_room.flywheel.lib.task;
 
 import java.util.Collection;
 
-import com.jozufozu.flywheel.api.task.Plan;
-import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.lib.task.functional.SupplierWithContext;
+import dev.engine_room.flywheel.api.task.Plan;
+import dev.engine_room.flywheel.api.task.TaskExecutor;
+import dev.engine_room.flywheel.lib.task.functional.SupplierWithContext;
 
 /**
  * A plan that executes many other plans provided dynamically.

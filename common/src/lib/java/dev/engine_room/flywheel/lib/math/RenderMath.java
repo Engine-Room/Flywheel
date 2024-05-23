@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.math;
+package dev.engine_room.flywheel.lib.math;
 
 public final class RenderMath {
 	private RenderMath() {

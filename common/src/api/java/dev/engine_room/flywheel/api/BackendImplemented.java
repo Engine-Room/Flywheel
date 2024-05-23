@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api;
+package dev.engine_room.flywheel.api;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

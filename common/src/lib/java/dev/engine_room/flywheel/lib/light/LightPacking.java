@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.light;
+package dev.engine_room.flywheel.lib.light;
 
 /**
  * Utility class for bit-twiddling light.

@@ -1,7 +1,6 @@
-package com.jozufozu.flywheel.backend.engine.uniform;
+package dev.engine_room.flywheel.backend.engine.uniform;
 
-import com.jozufozu.flywheel.api.event.RenderContext;
-
+import dev.engine_room.flywheel.api.event.RenderContext;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;

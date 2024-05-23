@@ -1,13 +1,13 @@
-package com.jozufozu.flywheel.backend.compile;
+package dev.engine_room.flywheel.backend.compile;
 
 import java.util.Locale;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.backend.Samplers;
-import com.jozufozu.flywheel.backend.compile.core.Compilation;
-import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
+import dev.engine_room.flywheel.backend.Samplers;
+import dev.engine_room.flywheel.backend.compile.core.Compilation;
+import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 
 public enum ContextShader {
 	DEFAULT(null, $ -> {

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.mixin.sodium;
+package dev.engine_room.flywheel.impl.mixin.sodium;
 
 import java.util.List;
 import java.util.Set;

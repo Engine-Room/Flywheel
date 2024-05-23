@@ -1,14 +1,14 @@
-package com.jozufozu.flywheel.lib.visual;
+package dev.engine_room.flywheel.lib.visual;
 
 import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.visual.EntityVisual;
-import com.jozufozu.flywheel.api.visualization.EntityVisualizer;
-import com.jozufozu.flywheel.api.visualization.VisualizationContext;
-import com.jozufozu.flywheel.api.visualization.VisualizerRegistry;
+import dev.engine_room.flywheel.api.visual.EntityVisual;
+import dev.engine_room.flywheel.api.visualization.EntityVisualizer;
+import dev.engine_room.flywheel.api.visualization.VisualizationContext;
+import dev.engine_room.flywheel.api.visualization.VisualizerRegistry;
 
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.Entity;

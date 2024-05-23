@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.engine.indirect;
+package dev.engine_room.flywheel.backend.engine.indirect;
 
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 import static org.lwjgl.opengl.GL44.nglBindBuffersRange;
@@ -6,8 +6,8 @@ import static org.lwjgl.opengl.GL44.nglBindBuffersRange;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.Pointer;
 
-import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
-import com.jozufozu.flywheel.lib.memory.MemoryBlock;
+import dev.engine_room.flywheel.backend.gl.buffer.GlBufferType;
+import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 
 public class IndirectBuffers {
 	// Number of vbos created.

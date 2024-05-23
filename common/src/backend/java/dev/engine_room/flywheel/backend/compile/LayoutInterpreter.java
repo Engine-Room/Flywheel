@@ -1,14 +1,14 @@
-package com.jozufozu.flywheel.backend.compile;
+package dev.engine_room.flywheel.backend.compile;
 
-import com.jozufozu.flywheel.api.layout.ArrayElementType;
-import com.jozufozu.flywheel.api.layout.ElementType;
-import com.jozufozu.flywheel.api.layout.FloatRepr;
-import com.jozufozu.flywheel.api.layout.IntegerRepr;
-import com.jozufozu.flywheel.api.layout.MatrixElementType;
-import com.jozufozu.flywheel.api.layout.ScalarElementType;
-import com.jozufozu.flywheel.api.layout.UnsignedIntegerRepr;
-import com.jozufozu.flywheel.api.layout.ValueRepr;
-import com.jozufozu.flywheel.api.layout.VectorElementType;
+import dev.engine_room.flywheel.api.layout.ArrayElementType;
+import dev.engine_room.flywheel.api.layout.ElementType;
+import dev.engine_room.flywheel.api.layout.FloatRepr;
+import dev.engine_room.flywheel.api.layout.IntegerRepr;
+import dev.engine_room.flywheel.api.layout.MatrixElementType;
+import dev.engine_room.flywheel.api.layout.ScalarElementType;
+import dev.engine_room.flywheel.api.layout.UnsignedIntegerRepr;
+import dev.engine_room.flywheel.api.layout.ValueRepr;
+import dev.engine_room.flywheel.api.layout.VectorElementType;
 
 public class LayoutInterpreter {
 	public static String typeName(ElementType type) {

@@ -1,7 +1,7 @@
-package com.jozufozu.flywheel.api.instance;
+package dev.engine_room.flywheel.api.instance;
 
-import com.jozufozu.flywheel.api.BackendImplemented;
-import com.jozufozu.flywheel.api.model.Model;
+import dev.engine_room.flywheel.api.BackendImplemented;
+import dev.engine_room.flywheel.api.model.Model;
 
 @BackendImplemented
 public interface InstancerProvider {

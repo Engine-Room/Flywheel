@@ -1,14 +1,13 @@
-package com.jozufozu.flywheel.backend.glsl;
+package dev.engine_room.flywheel.backend.glsl;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.jozufozu.flywheel.backend.glsl.error.ErrorBuilder;
-import com.jozufozu.flywheel.backend.glsl.span.Span;
-import com.jozufozu.flywheel.lib.util.Pair;
-
+import dev.engine_room.flywheel.backend.glsl.error.ErrorBuilder;
+import dev.engine_room.flywheel.backend.glsl.span.Span;
+import dev.engine_room.flywheel.lib.util.Pair;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
 

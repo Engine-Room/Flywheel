@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.model;
+package dev.engine_room.flywheel.lib.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.model.Model;
+import dev.engine_room.flywheel.api.model.Model;
 
 public class ModelHolder {
 	private static final List<ModelHolder> ALL = new ArrayList<>();

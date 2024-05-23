@@ -1,8 +1,9 @@
-package com.jozufozu.flywheel.impl.vertex;
+package dev.engine_room.flywheel.impl.vertex;
 
-import com.jozufozu.flywheel.api.vertex.VertexViewProvider;
-import com.jozufozu.flywheel.impl.extension.VertexFormatExtension;
 import com.mojang.blaze3d.vertex.VertexFormat;
+
+import dev.engine_room.flywheel.api.vertex.VertexViewProvider;
+import dev.engine_room.flywheel.impl.extension.VertexFormatExtension;
 
 // TODO: Add freezing
 public final class VertexViewProviderRegistryImpl {

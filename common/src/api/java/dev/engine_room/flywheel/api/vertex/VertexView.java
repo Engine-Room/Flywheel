@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api.vertex;
+package dev.engine_room.flywheel.api.vertex;
 
 public interface VertexView extends MutableVertexList {
 	long ptr();

@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.lib.model;
+package dev.engine_room.flywheel.lib.model;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.model.IndexSequence;
+import dev.engine_room.flywheel.api.model.IndexSequence;
 
 public class QuadIndexSequence implements IndexSequence {
 	public static final QuadIndexSequence INSTANCE = new QuadIndexSequence();

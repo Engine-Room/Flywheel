@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.impl;
+package dev.engine_room.flywheel.impl;
 
-import com.jozufozu.flywheel.api.backend.Backend;
+import dev.engine_room.flywheel.api.backend.Backend;
 
 public interface FlwConfig {
 	FlwConfig INSTANCE = FlwImplXplat.INSTANCE.getConfig();

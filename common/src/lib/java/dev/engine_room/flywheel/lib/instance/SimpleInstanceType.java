@@ -1,13 +1,12 @@
-package com.jozufozu.flywheel.lib.instance;
+package dev.engine_room.flywheel.lib.instance;
 
 import java.util.Objects;
 
-import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.instance.InstanceHandle;
-import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.jozufozu.flywheel.api.instance.InstanceWriter;
-import com.jozufozu.flywheel.api.layout.Layout;
-
+import dev.engine_room.flywheel.api.instance.Instance;
+import dev.engine_room.flywheel.api.instance.InstanceHandle;
+import dev.engine_room.flywheel.api.instance.InstanceType;
+import dev.engine_room.flywheel.api.instance.InstanceWriter;
+import dev.engine_room.flywheel.api.layout.Layout;
 import net.minecraft.resources.ResourceLocation;
 
 public class SimpleInstanceType<I extends Instance> implements InstanceType<I> {

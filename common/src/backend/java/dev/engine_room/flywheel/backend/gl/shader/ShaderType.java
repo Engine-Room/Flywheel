@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.gl.shader;
+package dev.engine_room.flywheel.backend.gl.shader;
 
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL43;

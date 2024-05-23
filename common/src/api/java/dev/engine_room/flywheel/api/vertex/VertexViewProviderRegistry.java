@@ -1,7 +1,8 @@
-package com.jozufozu.flywheel.api.vertex;
+package dev.engine_room.flywheel.api.vertex;
 
-import com.jozufozu.flywheel.api.internal.FlwApiLink;
 import com.mojang.blaze3d.vertex.VertexFormat;
+
+import dev.engine_room.flywheel.api.internal.FlwApiLink;
 
 public final class VertexViewProviderRegistry {
 	private VertexViewProviderRegistry() {

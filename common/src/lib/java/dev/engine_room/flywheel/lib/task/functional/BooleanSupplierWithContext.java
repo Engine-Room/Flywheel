@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.lib.task.functional;
+package dev.engine_room.flywheel.lib.task.functional;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
 /**
- * A boolean supplier like interface for use with {@link com.jozufozu.flywheel.api.task.Plan Plans} and their contexts.
+ * A boolean supplier like interface for use with {@link dev.engine_room.flywheel.api.task.Plan Plans} and their contexts.
  *
  * @param <C> The context type.
  */

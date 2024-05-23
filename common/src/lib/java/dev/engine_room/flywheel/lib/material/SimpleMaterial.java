@@ -1,13 +1,12 @@
-package com.jozufozu.flywheel.lib.material;
+package dev.engine_room.flywheel.lib.material;
 
-import com.jozufozu.flywheel.api.material.CutoutShader;
-import com.jozufozu.flywheel.api.material.DepthTest;
-import com.jozufozu.flywheel.api.material.FogShader;
-import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.material.MaterialShaders;
-import com.jozufozu.flywheel.api.material.Transparency;
-import com.jozufozu.flywheel.api.material.WriteMask;
-
+import dev.engine_room.flywheel.api.material.CutoutShader;
+import dev.engine_room.flywheel.api.material.DepthTest;
+import dev.engine_room.flywheel.api.material.FogShader;
+import dev.engine_room.flywheel.api.material.Material;
+import dev.engine_room.flywheel.api.material.MaterialShaders;
+import dev.engine_room.flywheel.api.material.Transparency;
+import dev.engine_room.flywheel.api.material.WriteMask;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 

@@ -1,9 +1,9 @@
-package com.jozufozu.flywheel.lib.visual;
+package dev.engine_room.flywheel.lib.visual;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jozufozu.flywheel.api.visualization.VisualizationContext;
+import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 
 import net.minecraft.world.entity.Entity;
 

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api.registry;
+package dev.engine_room.flywheel.api.registry;
 
 import java.util.Set;
 import java.util.function.Consumer;

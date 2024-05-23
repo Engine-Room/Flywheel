@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api.layout;
+package dev.engine_room.flywheel.api.layout;
 
 public enum UnsignedIntegerRepr implements ValueRepr {
 	UNSIGNED_BYTE(Byte.BYTES),

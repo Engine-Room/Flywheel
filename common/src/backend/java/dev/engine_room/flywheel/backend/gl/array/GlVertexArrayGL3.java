@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.gl.array;
+package dev.engine_room.flywheel.backend.gl.array;
 
 import java.util.BitSet;
 import java.util.List;
@@ -10,9 +10,9 @@ import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL33C;
 import org.lwjgl.system.Checks;
 
-import com.jozufozu.flywheel.backend.gl.GlCompat;
-import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
-import com.jozufozu.flywheel.lib.util.FlwUtil;
+import dev.engine_room.flywheel.backend.gl.GlCompat;
+import dev.engine_room.flywheel.backend.gl.buffer.GlBufferType;
+import dev.engine_room.flywheel.lib.util.FlwUtil;
 
 public abstract class GlVertexArrayGL3 extends GlVertexArray {
 	private final BitSet attributeDirty = new BitSet(MAX_ATTRIBS);

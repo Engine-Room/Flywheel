@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.mixin;
+package dev.engine_room.flywheel.impl.mixin;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -10,10 +10,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.api.event.EndClientResourceReloadCallback;
-import com.jozufozu.flywheel.impl.FabricFlwConfig;
-import com.jozufozu.flywheel.impl.FlwImpl;
-
+import dev.engine_room.flywheel.api.event.EndClientResourceReloadCallback;
+import dev.engine_room.flywheel.impl.FabricFlwConfig;
+import dev.engine_room.flywheel.impl.FlwImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 

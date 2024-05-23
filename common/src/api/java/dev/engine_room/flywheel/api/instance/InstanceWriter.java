@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api.instance;
+package dev.engine_room.flywheel.api.instance;
 
 /**
  * InstanceWriters can quickly consume many instances and write them to some memory address.

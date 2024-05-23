@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.layout;
+package dev.engine_room.flywheel.impl.layout;
 
 import java.util.Collections;
 import java.util.List;
@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.jetbrains.annotations.Unmodifiable;
 
-import com.jozufozu.flywheel.api.layout.ElementType;
-import com.jozufozu.flywheel.api.layout.Layout;
+import dev.engine_room.flywheel.api.layout.ElementType;
+import dev.engine_room.flywheel.api.layout.Layout;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 

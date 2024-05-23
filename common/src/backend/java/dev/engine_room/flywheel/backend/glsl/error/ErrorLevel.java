@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.glsl.error;
+package dev.engine_room.flywheel.backend.glsl.error;
 
 public enum ErrorLevel {
 	WARN(ConsoleColors.YELLOW, "warn"),

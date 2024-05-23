@@ -1,9 +1,9 @@
-package com.jozufozu.flywheel.lib.material;
+package dev.engine_room.flywheel.lib.material;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import com.jozufozu.flywheel.api.Flywheel;
-import com.jozufozu.flywheel.api.material.CutoutShader;
+import dev.engine_room.flywheel.api.Flywheel;
+import dev.engine_room.flywheel.api.material.CutoutShader;
 
 public class CutoutShaders {
 	/**

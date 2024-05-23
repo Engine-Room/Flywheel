@@ -1,16 +1,16 @@
-package com.jozufozu.flywheel.backend.compile.component;
+package dev.engine_room.flywheel.backend.compile.component;
 
 import java.util.ArrayList;
 
-import com.jozufozu.flywheel.api.Flywheel;
-import com.jozufozu.flywheel.api.instance.InstanceType;
-import com.jozufozu.flywheel.api.layout.Layout;
-import com.jozufozu.flywheel.backend.glsl.generate.FnSignature;
-import com.jozufozu.flywheel.backend.glsl.generate.GlslBlock;
-import com.jozufozu.flywheel.backend.glsl.generate.GlslBuilder;
-import com.jozufozu.flywheel.backend.glsl.generate.GlslExpr;
-import com.jozufozu.flywheel.backend.glsl.generate.GlslStmt;
-import com.jozufozu.flywheel.lib.math.MoreMath;
+import dev.engine_room.flywheel.api.Flywheel;
+import dev.engine_room.flywheel.api.instance.InstanceType;
+import dev.engine_room.flywheel.api.layout.Layout;
+import dev.engine_room.flywheel.backend.glsl.generate.FnSignature;
+import dev.engine_room.flywheel.backend.glsl.generate.GlslBlock;
+import dev.engine_room.flywheel.backend.glsl.generate.GlslBuilder;
+import dev.engine_room.flywheel.backend.glsl.generate.GlslExpr;
+import dev.engine_room.flywheel.backend.glsl.generate.GlslStmt;
+import dev.engine_room.flywheel.lib.math.MoreMath;
 
 public class BufferTextureInstanceComponent extends InstanceAssemblerComponent {
 	private static final String[] SWIZZLE_SELECTORS = { "x", "y", "z", "w" };

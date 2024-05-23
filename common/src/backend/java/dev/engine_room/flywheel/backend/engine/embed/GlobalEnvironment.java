@@ -1,7 +1,7 @@
-package com.jozufozu.flywheel.backend.engine.embed;
+package dev.engine_room.flywheel.backend.engine.embed;
 
-import com.jozufozu.flywheel.backend.compile.ContextShader;
-import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
+import dev.engine_room.flywheel.backend.compile.ContextShader;
+import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 
 public class GlobalEnvironment implements Environment {
 	public static final GlobalEnvironment INSTANCE = new GlobalEnvironment();

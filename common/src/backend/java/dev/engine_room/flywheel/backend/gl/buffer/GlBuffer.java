@@ -1,9 +1,10 @@
-package com.jozufozu.flywheel.backend.gl.buffer;
+package dev.engine_room.flywheel.backend.gl.buffer;
 
-import com.jozufozu.flywheel.backend.gl.GlObject;
-import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
-import com.jozufozu.flywheel.lib.memory.MemoryBlock;
 import com.mojang.blaze3d.platform.GlStateManager;
+
+import dev.engine_room.flywheel.backend.gl.GlObject;
+import dev.engine_room.flywheel.lib.memory.FlwMemoryTracker;
+import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 
 public class GlBuffer extends GlObject {
 	protected final GlBufferUsage usage;

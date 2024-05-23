@@ -1,9 +1,8 @@
-package com.jozufozu.flywheel.impl.visualization;
+package dev.engine_room.flywheel.impl.visualization;
 
-import com.jozufozu.flywheel.api.event.RenderContext;
-import com.jozufozu.flywheel.api.event.RenderStage;
-import com.jozufozu.flywheel.api.visualization.VisualizationManager;
-
+import dev.engine_room.flywheel.api.event.RenderContext;
+import dev.engine_room.flywheel.api.event.RenderStage;
+import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;

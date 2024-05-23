@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.gl.error;
+package dev.engine_room.flywheel.backend.gl.error;
 
 import java.util.function.Supplier;
 

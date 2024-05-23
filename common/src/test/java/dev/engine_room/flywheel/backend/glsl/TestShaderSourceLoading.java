@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.glsl;
+package dev.engine_room.flywheel.backend.glsl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -6,7 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.backend.glsl.parse.Import;
+
+import dev.engine_room.flywheel.backend.glsl.parse.Import;
 
 public class TestShaderSourceLoading extends TestBase {
 	@Test

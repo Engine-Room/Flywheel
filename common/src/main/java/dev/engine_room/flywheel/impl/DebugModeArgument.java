@@ -1,7 +1,6 @@
-package com.jozufozu.flywheel.impl;
+package dev.engine_room.flywheel.impl;
 
-import com.jozufozu.flywheel.backend.engine.uniform.DebugMode;
-
+import dev.engine_room.flywheel.backend.engine.uniform.DebugMode;
 import net.minecraft.commands.arguments.StringRepresentableArgument;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 

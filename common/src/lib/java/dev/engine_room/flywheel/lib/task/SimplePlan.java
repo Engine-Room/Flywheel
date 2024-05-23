@@ -1,11 +1,12 @@
-package com.jozufozu.flywheel.lib.task;
+package dev.engine_room.flywheel.lib.task;
 
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.api.task.Plan;
-import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.lib.task.functional.RunnableWithContext;
+
+import dev.engine_room.flywheel.api.task.Plan;
+import dev.engine_room.flywheel.api.task.TaskExecutor;
+import dev.engine_room.flywheel.lib.task.functional.RunnableWithContext;
 
 public record SimplePlan<C>(List<RunnableWithContext<C>> parallelTasks) implements SimplyComposedPlan<C> {
 	@SafeVarargs

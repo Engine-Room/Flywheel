@@ -1,7 +1,7 @@
-package com.jozufozu.flywheel.lib.task;
+package dev.engine_room.flywheel.lib.task;
 
-import com.jozufozu.flywheel.api.task.Plan;
-import com.jozufozu.flywheel.api.task.TaskExecutor;
+import dev.engine_room.flywheel.api.task.Plan;
+import dev.engine_room.flywheel.api.task.TaskExecutor;
 
 public record BarrierPlan<C>(Plan<C> first, Plan<C> second) implements SimplyComposedPlan<C> {
 	public static <C> Plan<C> of(Plan<C> first, Plan<C> second) {

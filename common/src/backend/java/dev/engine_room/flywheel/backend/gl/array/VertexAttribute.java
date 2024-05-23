@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.backend.gl.array;
+package dev.engine_room.flywheel.backend.gl.array;
 
-import com.jozufozu.flywheel.backend.gl.GlNumericType;
+import dev.engine_room.flywheel.backend.gl.GlNumericType;
 
 public sealed interface VertexAttribute {
 	int byteWidth();

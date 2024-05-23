@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.lib.visual;
+package dev.engine_room.flywheel.lib.visual;
 
-import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.instance.Instancer;
-import com.jozufozu.flywheel.api.task.Plan;
-import com.jozufozu.flywheel.api.visual.TickableVisual;
-import com.jozufozu.flywheel.lib.task.RunnablePlan;
+import dev.engine_room.flywheel.api.instance.Instance;
+import dev.engine_room.flywheel.api.instance.Instancer;
+import dev.engine_room.flywheel.api.task.Plan;
+import dev.engine_room.flywheel.api.visual.TickableVisual;
+import dev.engine_room.flywheel.lib.task.RunnablePlan;
 
 public interface SimpleTickableVisual extends TickableVisual {
 

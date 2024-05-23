@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.compile.core;
+package dev.engine_room.flywheel.backend.compile.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,13 +12,12 @@ import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.backend.gl.shader.GlShader;
-import com.jozufozu.flywheel.backend.gl.shader.ShaderType;
-import com.jozufozu.flywheel.backend.glsl.GlslVersion;
-import com.jozufozu.flywheel.backend.glsl.ShaderSources;
-import com.jozufozu.flywheel.backend.glsl.SourceComponent;
-
+import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
+import dev.engine_room.flywheel.backend.gl.shader.GlShader;
+import dev.engine_room.flywheel.backend.gl.shader.ShaderType;
+import dev.engine_room.flywheel.backend.glsl.GlslVersion;
+import dev.engine_room.flywheel.backend.glsl.ShaderSources;
+import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 import net.minecraft.resources.ResourceLocation;
 
 /**

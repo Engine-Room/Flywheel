@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.engine.embed;
+package dev.engine_room.flywheel.backend.engine.embed;
 
 import static org.lwjgl.opengl.GL11.GL_LINEAR;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
@@ -23,8 +23,7 @@ import static org.lwjgl.opengl.GL14.GL_MIRRORED_REPEAT;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL30;
 
-import com.jozufozu.flywheel.backend.gl.GlTexture;
-
+import dev.engine_room.flywheel.backend.gl.GlTexture;
 import net.minecraft.util.Mth;
 
 public class EmbeddedLightTexture {

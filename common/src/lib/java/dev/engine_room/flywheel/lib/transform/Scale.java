@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.transform;
+package dev.engine_room.flywheel.lib.transform;
 
 public interface Scale<Self extends Scale<Self>> {
 	Self scale(float factorX, float factorY, float factorZ);

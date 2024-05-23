@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.api.model;
+package dev.engine_room.flywheel.api.model;
 
 import java.util.List;
 
 import org.joml.Vector4fc;
 
-import com.jozufozu.flywheel.api.material.Material;
+import dev.engine_room.flywheel.api.material.Material;
 
 public interface Model {
 	/**

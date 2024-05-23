@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.backend.gl.buffer;
+package dev.engine_room.flywheel.backend.gl.buffer;
 
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL45C;
 import org.lwjgl.system.Checks;
 
-import com.jozufozu.flywheel.backend.gl.GlCompat;
+import dev.engine_room.flywheel.backend.gl.GlCompat;
 
 public interface Buffer {
 	Buffer IMPL = new DSA().fallback();

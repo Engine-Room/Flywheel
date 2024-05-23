@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api.visual;
+package dev.engine_room.flywheel.api.visual;
 
 /**
  * A general interface providing information about any type of thing that could use Flywheel's visualized rendering.

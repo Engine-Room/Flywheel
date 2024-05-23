@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.lib.task;
+package dev.engine_room.flywheel.lib.task;
 
-import com.jozufozu.flywheel.api.task.TaskExecutor;
+import dev.engine_room.flywheel.api.task.TaskExecutor;
 
 public record RaisePlan<C>(Flag flag) implements SimplyComposedPlan<C> {
 	public static <C> RaisePlan<C> raise(Flag flag) {

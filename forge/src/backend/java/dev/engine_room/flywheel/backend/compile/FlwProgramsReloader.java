@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.compile;
+package dev.engine_room.flywheel.backend.compile;
 
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;

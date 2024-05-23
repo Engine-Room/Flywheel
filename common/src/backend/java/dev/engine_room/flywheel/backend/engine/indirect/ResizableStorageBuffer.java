@@ -1,12 +1,12 @@
-package com.jozufozu.flywheel.backend.engine.indirect;
+package dev.engine_room.flywheel.backend.engine.indirect;
 
 import static org.lwjgl.opengl.GL15.glDeleteBuffers;
 import static org.lwjgl.opengl.GL45.glCopyNamedBufferSubData;
 import static org.lwjgl.opengl.GL45.glCreateBuffers;
 import static org.lwjgl.opengl.GL45.glNamedBufferStorage;
 
-import com.jozufozu.flywheel.backend.gl.GlObject;
-import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
+import dev.engine_room.flywheel.backend.gl.GlObject;
+import dev.engine_room.flywheel.lib.memory.FlwMemoryTracker;
 
 /**
  * A buffer for storing data on the GPU that can be resized.

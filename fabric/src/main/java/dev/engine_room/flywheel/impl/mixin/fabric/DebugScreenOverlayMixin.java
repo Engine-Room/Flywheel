@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.mixin.fabric;
+package dev.engine_room.flywheel.impl.mixin.fabric;
 
 import java.util.List;
 
@@ -9,8 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.jozufozu.flywheel.impl.FlwDebugInfo;
-
+import dev.engine_room.flywheel.impl.FlwDebugInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 

@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.api.visual;
+package dev.engine_room.flywheel.api.visual;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import com.jozufozu.flywheel.api.instance.Instance;
-import com.jozufozu.flywheel.api.instance.Instancer;
-import com.jozufozu.flywheel.api.task.Plan;
+import dev.engine_room.flywheel.api.instance.Instance;
+import dev.engine_room.flywheel.api.instance.Instancer;
+import dev.engine_room.flywheel.api.task.Plan;
 
 /**
  * An interface giving {@link Visual}s a hook to have a function called at

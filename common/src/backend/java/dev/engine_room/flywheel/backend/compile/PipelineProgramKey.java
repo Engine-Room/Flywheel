@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.backend.compile;
+package dev.engine_room.flywheel.backend.compile;
 
-import com.jozufozu.flywheel.api.instance.InstanceType;
+import dev.engine_room.flywheel.api.instance.InstanceType;
 
 /**
  * Represents the entire context of a program's usage.

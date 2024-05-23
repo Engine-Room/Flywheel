@@ -1,9 +1,9 @@
-package com.jozufozu.flywheel.lib.task.functional;
+package dev.engine_room.flywheel.lib.task.functional;
 
 import java.util.function.Consumer;
 
 /**
- * A runnable like interface for use with {@link com.jozufozu.flywheel.api.task.Plan Plans} and their contexts.
+ * A runnable like interface for use with {@link dev.engine_room.flywheel.api.task.Plan Plans} and their contexts.
  * <br>
  * The subinterface {@link Ignored} is provided for runnables that do not need the context object.
  * @param <C> The context type.

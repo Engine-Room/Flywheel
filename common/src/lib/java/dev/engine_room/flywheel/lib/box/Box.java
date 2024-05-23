@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.box;
+package dev.engine_room.flywheel.lib.box;
 
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;

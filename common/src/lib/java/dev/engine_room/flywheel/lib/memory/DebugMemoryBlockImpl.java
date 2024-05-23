@@ -1,9 +1,9 @@
-package com.jozufozu.flywheel.lib.memory;
+package dev.engine_room.flywheel.lib.memory;
 
 import java.lang.ref.Cleaner;
 
-import com.jozufozu.flywheel.lib.internal.FlwLibLink;
-import com.jozufozu.flywheel.lib.util.StringUtil;
+import dev.engine_room.flywheel.lib.internal.FlwLibLink;
+import dev.engine_room.flywheel.lib.util.StringUtil;
 
 class DebugMemoryBlockImpl extends AbstractMemoryBlockImpl {
 	final Cleaner cleaner;

@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.backend.util;
+package dev.engine_room.flywheel.backend.util;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.lib.memory.MemoryBlock;
+import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 
 public class MemoryBuffer {
 	private final long stride;

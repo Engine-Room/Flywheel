@@ -1,13 +1,14 @@
-package com.jozufozu.flywheel.lib.model;
+package dev.engine_room.flywheel.lib.model;
 
 import java.util.List;
 
 import org.joml.Vector4fc;
 
 import com.google.common.collect.ImmutableList;
-import com.jozufozu.flywheel.api.material.Material;
-import com.jozufozu.flywheel.api.model.Mesh;
-import com.jozufozu.flywheel.api.model.Model;
+
+import dev.engine_room.flywheel.api.material.Material;
+import dev.engine_room.flywheel.api.model.Mesh;
+import dev.engine_room.flywheel.api.model.Model;
 
 public class SingleMeshModel implements Model {
 	private final Mesh mesh;

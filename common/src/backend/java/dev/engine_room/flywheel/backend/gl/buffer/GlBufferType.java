@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.gl.buffer;
+package dev.engine_room.flywheel.backend.gl.buffer;
 
 import org.lwjgl.opengl.GL15C;
 import org.lwjgl.opengl.GL21;
@@ -8,7 +8,7 @@ import org.lwjgl.opengl.GL40;
 import org.lwjgl.opengl.GL42;
 import org.lwjgl.opengl.GL43;
 
-import com.jozufozu.flywheel.backend.gl.GlStateTracker;
+import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 
 public enum GlBufferType {
 	ARRAY_BUFFER(GL15C.GL_ARRAY_BUFFER, GL15C.GL_ARRAY_BUFFER_BINDING),

@@ -1,11 +1,11 @@
-package com.jozufozu.flywheel.impl.mixin;
+package dev.engine_room.flywheel.impl.mixin;
 
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-import com.jozufozu.flywheel.api.visualization.BlockEntityVisualizer;
-import com.jozufozu.flywheel.impl.extension.BlockEntityTypeExtension;
+import dev.engine_room.flywheel.api.visualization.BlockEntityVisualizer;
+import dev.engine_room.flywheel.impl.extension.BlockEntityTypeExtension;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;

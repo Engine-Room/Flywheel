@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api.internal;
+package dev.engine_room.flywheel.api.internal;
 
 import java.lang.reflect.Constructor;
 

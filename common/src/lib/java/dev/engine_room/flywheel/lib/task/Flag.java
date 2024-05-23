@@ -1,11 +1,11 @@
-package com.jozufozu.flywheel.lib.task;
+package dev.engine_room.flywheel.lib.task;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A flag that can be raised and lowered in a thread-safe fashion.
  * <br>
- * Useful when combined with {@link RaisePlan} and {@link com.jozufozu.flywheel.api.task.TaskExecutor#syncUntil TaskExecutor.syncUntil}.
+ * Useful when combined with {@link RaisePlan} and {@link dev.engine_room.flywheel.api.task.TaskExecutor#syncUntil TaskExecutor.syncUntil}.
  */
 public class Flag {
 

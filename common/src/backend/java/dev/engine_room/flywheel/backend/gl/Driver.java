@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.gl;
+package dev.engine_room.flywheel.backend.gl;
 
 public enum Driver {
 	NVIDIA,

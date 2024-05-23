@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.api.instance;
+package dev.engine_room.flywheel.api.instance;
 
-import com.jozufozu.flywheel.api.BackendImplemented;
+import dev.engine_room.flywheel.api.BackendImplemented;
 
 @BackendImplemented
 public interface InstanceHandle {

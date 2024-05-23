@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.mixin;
+package dev.engine_room.flywheel.impl.mixin;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -12,10 +12,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.jozufozu.flywheel.api.event.EndClientResourceReloadEvent;
-import com.jozufozu.flywheel.impl.FlwImpl;
 import com.mojang.realmsclient.client.RealmsClient;
 
+import dev.engine_room.flywheel.api.event.EndClientResourceReloadEvent;
+import dev.engine_room.flywheel.impl.FlwImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.server.packs.resources.ReloadInstance;

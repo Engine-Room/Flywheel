@@ -1,12 +1,12 @@
-package com.jozufozu.flywheel.lib.util;
+package dev.engine_room.flywheel.lib.util;
 
 import java.lang.reflect.Field;
 import java.util.function.BooleanSupplier;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import com.jozufozu.flywheel.lib.internal.FlwLibLink;
-import com.jozufozu.flywheel.lib.internal.FlwLibXplat;
+import dev.engine_room.flywheel.lib.internal.FlwLibLink;
+import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 
 public final class ShadersModHandler {
 	private static final String OPTIFINE_ROOT_PACKAGE = "net.optifine";

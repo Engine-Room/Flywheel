@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.memory;
+package dev.engine_room.flywheel.lib.memory;
 
 class MemoryBlockImpl extends AbstractMemoryBlockImpl {
 	MemoryBlockImpl(long ptr, long size) {

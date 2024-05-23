@@ -1,7 +1,7 @@
-package com.jozufozu.flywheel.impl.layout;
+package dev.engine_room.flywheel.impl.layout;
 
-import com.jozufozu.flywheel.api.layout.ScalarElementType;
-import com.jozufozu.flywheel.api.layout.ValueRepr;
+import dev.engine_room.flywheel.api.layout.ScalarElementType;
+import dev.engine_room.flywheel.api.layout.ValueRepr;
 
 record ScalarElementTypeImpl(ValueRepr repr, int byteSize, int byteAlignment) implements ScalarElementType {
 	static ScalarElementTypeImpl create(ValueRepr repr) {

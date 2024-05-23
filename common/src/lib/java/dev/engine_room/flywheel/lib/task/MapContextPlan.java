@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.lib.task;
+package dev.engine_room.flywheel.lib.task;
 
-import com.jozufozu.flywheel.api.task.Plan;
-import com.jozufozu.flywheel.api.task.TaskExecutor;
-import com.jozufozu.flywheel.lib.task.functional.SupplierWithContext;
+import dev.engine_room.flywheel.api.task.Plan;
+import dev.engine_room.flywheel.api.task.TaskExecutor;
+import dev.engine_room.flywheel.lib.task.functional.SupplierWithContext;
 
 public record MapContextPlan<C, D>(SupplierWithContext<C, D> map, Plan<D> plan) implements SimplyComposedPlan<C> {
 	public static <C, D> Builder<C, D> map(SupplierWithContext<C, D> map) {

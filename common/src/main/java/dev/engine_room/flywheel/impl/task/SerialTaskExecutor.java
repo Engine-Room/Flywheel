@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.impl.task;
+package dev.engine_room.flywheel.impl.task;
 
 import java.util.function.BooleanSupplier;
 
-import com.jozufozu.flywheel.api.task.TaskExecutor;
+import dev.engine_room.flywheel.api.task.TaskExecutor;
 
 public class SerialTaskExecutor implements TaskExecutor {
 	public static final SerialTaskExecutor INSTANCE = new SerialTaskExecutor();

@@ -1,13 +1,14 @@
-package com.jozufozu.flywheel.lib.internal;
+package dev.engine_room.flywheel.lib.internal;
 
 import org.slf4j.Logger;
 
-import com.jozufozu.flywheel.api.internal.DependencyInjection;
-import com.jozufozu.flywheel.lib.transform.PoseTransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import dev.engine_room.flywheel.api.internal.DependencyInjection;
+import dev.engine_room.flywheel.lib.transform.PoseTransformStack;
+
 public interface FlwLibLink {
-	FlwLibLink INSTANCE = DependencyInjection.load(FlwLibLink.class, "com.jozufozu.flywheel.impl.FlwLibLinkImpl");
+	FlwLibLink INSTANCE = DependencyInjection.load(FlwLibLink.class, "dev.engine_room.flywheel.impl.FlwLibLinkImpl");
 
 	Logger getLogger();
 

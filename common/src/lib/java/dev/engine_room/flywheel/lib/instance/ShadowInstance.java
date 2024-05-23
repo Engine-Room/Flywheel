@@ -1,7 +1,7 @@
-package com.jozufozu.flywheel.lib.instance;
+package dev.engine_room.flywheel.lib.instance;
 
-import com.jozufozu.flywheel.api.instance.InstanceHandle;
-import com.jozufozu.flywheel.api.instance.InstanceType;
+import dev.engine_room.flywheel.api.instance.InstanceHandle;
+import dev.engine_room.flywheel.api.instance.InstanceType;
 
 public class ShadowInstance extends AbstractInstance {
 

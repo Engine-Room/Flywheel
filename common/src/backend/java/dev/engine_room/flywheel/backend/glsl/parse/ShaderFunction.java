@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.glsl.parse;
+package dev.engine_room.flywheel.backend.glsl.parse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,10 +8,11 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.jozufozu.flywheel.backend.glsl.SourceLines;
-import com.jozufozu.flywheel.backend.glsl.span.ErrorSpan;
-import com.jozufozu.flywheel.backend.glsl.span.Span;
-import com.jozufozu.flywheel.backend.glsl.span.StringSpan;
+
+import dev.engine_room.flywheel.backend.glsl.SourceLines;
+import dev.engine_room.flywheel.backend.glsl.span.ErrorSpan;
+import dev.engine_room.flywheel.backend.glsl.span.Span;
+import dev.engine_room.flywheel.backend.glsl.span.StringSpan;
 
 public class ShaderFunction {
 	// https://regexr.com/60n3d

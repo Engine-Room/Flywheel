@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.backend.glsl.parse;
+package dev.engine_room.flywheel.backend.glsl.parse;
 
-import com.jozufozu.flywheel.backend.glsl.span.Span;
+import dev.engine_room.flywheel.backend.glsl.span.Span;
 
 public class ShaderVariable {
 

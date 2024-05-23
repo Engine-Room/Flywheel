@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.gl.buffer;
+package dev.engine_room.flywheel.backend.gl.buffer;
 
 import org.lwjgl.opengl.GL15;
 

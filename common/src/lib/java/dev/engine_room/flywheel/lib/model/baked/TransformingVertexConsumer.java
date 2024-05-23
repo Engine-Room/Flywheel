@@ -1,12 +1,13 @@
-package com.jozufozu.flywheel.lib.model.baked;
+package dev.engine_room.flywheel.lib.model.baked;
 
 import org.jetbrains.annotations.UnknownNullability;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
-import com.jozufozu.flywheel.lib.math.MatrixMath;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+
+import dev.engine_room.flywheel.lib.math.MatrixMath;
 
 class TransformingVertexConsumer implements VertexConsumer {
 	@UnknownNullability

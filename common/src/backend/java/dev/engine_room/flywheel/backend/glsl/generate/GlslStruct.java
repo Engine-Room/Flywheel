@@ -1,11 +1,11 @@
-package com.jozufozu.flywheel.backend.glsl.generate;
+package dev.engine_room.flywheel.backend.glsl.generate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.jozufozu.flywheel.lib.util.Pair;
-import com.jozufozu.flywheel.lib.util.StringUtil;
+import dev.engine_room.flywheel.lib.util.Pair;
+import dev.engine_room.flywheel.lib.util.StringUtil;
 
 public class GlslStruct implements GlslBuilder.Declaration {
 

@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.impl.extension;
+package dev.engine_room.flywheel.impl.extension;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.visualization.BlockEntityVisualizer;
+import dev.engine_room.flywheel.api.visualization.BlockEntityVisualizer;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 

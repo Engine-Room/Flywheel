@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.backend.engine.indirect;
+package dev.engine_room.flywheel.backend.engine.indirect;
 
-import com.jozufozu.flywheel.lib.math.MoreMath;
+import dev.engine_room.flywheel.lib.math.MoreMath;
 
 /**
  * A buffer that is aware of its content's stride with some control over how it grows.

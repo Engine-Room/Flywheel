@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.lib.vertex;
+package dev.engine_room.flywheel.lib.vertex;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.lib.math.RenderMath;
+import dev.engine_room.flywheel.lib.math.RenderMath;
 
 public class FullVertexView extends AbstractVertexView {
 	public static final long STRIDE = 36;

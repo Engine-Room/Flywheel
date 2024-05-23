@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.glsl.span;
+package dev.engine_room.flywheel.backend.glsl.span;
 
 /**
  * A position in a file.

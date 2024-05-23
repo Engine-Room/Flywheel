@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api.visualization;
+package dev.engine_room.flywheel.api.visualization;
 
 import net.minecraft.world.level.LevelAccessor;
 

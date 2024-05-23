@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.visualization.storage;
+package dev.engine_room.flywheel.impl.visualization.storage;
 
 public record Transaction<T>(T obj, Action action) {
 	public static <T> Transaction<T> add(T obj) {

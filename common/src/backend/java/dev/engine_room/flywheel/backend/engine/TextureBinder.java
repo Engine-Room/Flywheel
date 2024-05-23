@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.backend.engine;
+package dev.engine_room.flywheel.backend.engine;
 
-import com.jozufozu.flywheel.backend.Samplers;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import dev.engine_room.flywheel.backend.Samplers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 

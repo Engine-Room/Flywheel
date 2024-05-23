@@ -1,9 +1,9 @@
-package com.jozufozu.flywheel.backend.compile;
+package dev.engine_room.flywheel.backend.compile;
 
-import com.jozufozu.flywheel.api.Flywheel;
-import com.jozufozu.flywheel.backend.Samplers;
-import com.jozufozu.flywheel.backend.compile.component.BufferTextureInstanceComponent;
-import com.jozufozu.flywheel.backend.compile.component.SsboInstanceComponent;
+import dev.engine_room.flywheel.api.Flywheel;
+import dev.engine_room.flywheel.backend.Samplers;
+import dev.engine_room.flywheel.backend.compile.component.BufferTextureInstanceComponent;
+import dev.engine_room.flywheel.backend.compile.component.SsboInstanceComponent;
 
 public final class Pipelines {
 	public static final Pipeline INSTANCING = Pipeline.builder()

@@ -1,12 +1,12 @@
-package com.jozufozu.flywheel.backend.engine.uniform;
+package dev.engine_room.flywheel.backend.engine.uniform;
 
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL32;
 
-import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
-import com.jozufozu.flywheel.backend.gl.buffer.GlBufferUsage;
-import com.jozufozu.flywheel.lib.math.MoreMath;
-import com.jozufozu.flywheel.lib.memory.MemoryBlock;
+import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
+import dev.engine_room.flywheel.backend.gl.buffer.GlBufferUsage;
+import dev.engine_room.flywheel.lib.math.MoreMath;
+import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 
 public class UniformBuffer {
 	private final int index;

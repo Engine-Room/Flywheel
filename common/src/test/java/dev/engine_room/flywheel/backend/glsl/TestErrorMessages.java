@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.glsl;
+package dev.engine_room.flywheel.backend.glsl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -6,8 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.jozufozu.flywheel.backend.glsl.error.ErrorBuilder;
-
+import dev.engine_room.flywheel.backend.glsl.error.ErrorBuilder;
 import net.minecraft.resources.ResourceLocation;
 
 public class TestErrorMessages extends TestBase {

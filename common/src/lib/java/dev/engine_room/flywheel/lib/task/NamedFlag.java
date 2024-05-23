@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.lib.task;
+package dev.engine_room.flywheel.lib.task;
 
 /**
  * A flag with an arbitrary name.

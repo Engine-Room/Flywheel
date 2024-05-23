@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.backend;
+package dev.engine_room.flywheel.backend;
 
-import com.jozufozu.flywheel.backend.gl.GlTextureUnit;
+import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
 
 public class Samplers {
 	public static final GlTextureUnit DIFFUSE = GlTextureUnit.T0;

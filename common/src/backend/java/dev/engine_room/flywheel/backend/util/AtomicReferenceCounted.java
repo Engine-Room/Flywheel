@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.util;
+package dev.engine_room.flywheel.backend.util;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

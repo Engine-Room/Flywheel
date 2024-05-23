@@ -1,9 +1,9 @@
-package com.jozufozu.flywheel.lib.material;
+package dev.engine_room.flywheel.lib.material;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import com.jozufozu.flywheel.api.Flywheel;
-import com.jozufozu.flywheel.api.material.MaterialShaders;
+import dev.engine_room.flywheel.api.Flywheel;
+import dev.engine_room.flywheel.api.material.MaterialShaders;
 
 public final class StandardMaterialShaders {
 	public static final MaterialShaders DEFAULT = MaterialShaders.REGISTRY.registerAndGet(new SimpleMaterialShaders(

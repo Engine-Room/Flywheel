@@ -1,9 +1,9 @@
-package com.jozufozu.flywheel.impl.layout;
+package dev.engine_room.flywheel.impl.layout;
 
 import org.jetbrains.annotations.Range;
 
-import com.jozufozu.flywheel.api.layout.ValueRepr;
-import com.jozufozu.flywheel.api.layout.VectorElementType;
+import dev.engine_room.flywheel.api.layout.ValueRepr;
+import dev.engine_room.flywheel.api.layout.VectorElementType;
 
 record VectorElementTypeImpl(ValueRepr repr, @Range(from = 2, to = 4) int size,
 							 int byteSize, int byteAlignment) implements VectorElementType {

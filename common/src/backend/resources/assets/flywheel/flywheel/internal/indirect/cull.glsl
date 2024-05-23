@@ -24,7 +24,7 @@ uniform bool _flw_useModelMatrix = false;
 // Only uses 6 fmas and some boolean ops.
 // See also:
 // flywheel:uniform/flywheel.glsl
-// com.jozufozu.flywheel.lib.math.MatrixMath.writePackedFrustumPlanes
+// dev.engine_room.flywheel.lib.math.MatrixMath.writePackedFrustumPlanes
 // org.joml.FrustumIntersection.testSphere
 bool _flw_testSphere(vec3 center, float radius) {
     bvec4 xyInside = greaterThanEqual(fma(flw_frustumPlanes.xyX, center.xxxx, fma(flw_frustumPlanes.xyY, center.yyyy, fma(flw_frustumPlanes.xyZ, center.zzzz, flw_frustumPlanes.xyW))), -radius.xxxx);

@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.lib.task;
+package dev.engine_room.flywheel.lib.task;
 
-import com.jozufozu.flywheel.api.task.Plan;
+import dev.engine_room.flywheel.api.task.Plan;
 
 public interface SimplyComposedPlan<C> extends Plan<C> {
 	@Override

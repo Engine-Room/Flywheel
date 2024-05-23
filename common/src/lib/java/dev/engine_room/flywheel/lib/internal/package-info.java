@@ -2,7 +2,7 @@
 @ParametersAreNonnullByDefault
 @FieldsAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-package com.jozufozu.flywheel.lib.internal;
+package dev.engine_room.flywheel.lib.internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

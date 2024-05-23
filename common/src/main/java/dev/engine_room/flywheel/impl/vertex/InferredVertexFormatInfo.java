@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.vertex;
+package dev.engine_room.flywheel.impl.vertex;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;

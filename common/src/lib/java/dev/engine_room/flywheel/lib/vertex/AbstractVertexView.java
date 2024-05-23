@@ -1,9 +1,9 @@
-package com.jozufozu.flywheel.lib.vertex;
+package dev.engine_room.flywheel.lib.vertex;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.api.vertex.MutableVertexList;
-import com.jozufozu.flywheel.api.vertex.VertexView;
+import dev.engine_room.flywheel.api.vertex.MutableVertexList;
+import dev.engine_room.flywheel.api.vertex.VertexView;
 
 public abstract class AbstractVertexView implements VertexView {
 	protected long ptr;

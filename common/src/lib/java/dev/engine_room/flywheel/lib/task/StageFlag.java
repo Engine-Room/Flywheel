@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.lib.task;
+package dev.engine_room.flywheel.lib.task;
 
-import com.jozufozu.flywheel.api.event.RenderStage;
+import dev.engine_room.flywheel.api.event.RenderStage;
 
 /**
  * A flag that is associated with a render stage.

@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.impl.visualization.storage;
+package dev.engine_room.flywheel.impl.visualization.storage;
 
 public enum Action {
 	ADD,

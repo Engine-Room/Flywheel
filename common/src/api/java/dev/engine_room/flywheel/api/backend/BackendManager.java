@@ -1,6 +1,6 @@
-package com.jozufozu.flywheel.api.backend;
+package dev.engine_room.flywheel.api.backend;
 
-import com.jozufozu.flywheel.api.internal.FlwApiLink;
+import dev.engine_room.flywheel.api.internal.FlwApiLink;
 
 public final class BackendManager {
 	private BackendManager() {

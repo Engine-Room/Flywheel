@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.engine.uniform;
+package dev.engine_room.flywheel.backend.engine.uniform;
 
 import java.util.Locale;
 

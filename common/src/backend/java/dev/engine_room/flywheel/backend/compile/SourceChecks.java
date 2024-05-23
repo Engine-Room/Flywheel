@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.compile;
+package dev.engine_room.flywheel.backend.compile;
 
 // TODO: recycle to be invoked by the shader compiler
 public class SourceChecks {

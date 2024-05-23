@@ -1,14 +1,15 @@
-package com.jozufozu.flywheel.lib.model.part;
+package dev.engine_room.flywheel.lib.model.part;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.lib.math.RenderMath;
-import com.jozufozu.flywheel.lib.memory.MemoryBlock;
-import com.jozufozu.flywheel.lib.model.part.ModelPartConverter.TextureMapper;
-import com.jozufozu.flywheel.lib.vertex.PosTexNormalVertexView;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+
+import dev.engine_room.flywheel.lib.math.RenderMath;
+import dev.engine_room.flywheel.lib.memory.MemoryBlock;
+import dev.engine_room.flywheel.lib.model.part.ModelPartConverter.TextureMapper;
+import dev.engine_room.flywheel.lib.vertex.PosTexNormalVertexView;
 
 class VertexWriter implements VertexConsumer {
 	private static final int STRIDE = (int) PosTexNormalVertexView.STRIDE;

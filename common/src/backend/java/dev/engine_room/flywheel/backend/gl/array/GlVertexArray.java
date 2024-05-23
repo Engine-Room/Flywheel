@@ -1,12 +1,13 @@
-package com.jozufozu.flywheel.backend.gl.array;
+package dev.engine_room.flywheel.backend.gl.array;
 
 import java.util.List;
 
 import org.lwjgl.opengl.GL32;
 
-import com.jozufozu.flywheel.backend.gl.GlObject;
-import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.mojang.blaze3d.platform.GlStateManager;
+
+import dev.engine_room.flywheel.backend.gl.GlObject;
+import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 
 public abstract class GlVertexArray extends GlObject {
 	protected static final int MAX_ATTRIBS = GL32.glGetInteger(GL32.GL_MAX_VERTEX_ATTRIBS);

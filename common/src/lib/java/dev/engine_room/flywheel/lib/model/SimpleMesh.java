@@ -1,12 +1,12 @@
-package com.jozufozu.flywheel.lib.model;
+package dev.engine_room.flywheel.lib.model;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
-import com.jozufozu.flywheel.api.vertex.MutableVertexList;
-import com.jozufozu.flywheel.api.vertex.VertexView;
-import com.jozufozu.flywheel.lib.memory.MemoryBlock;
+import dev.engine_room.flywheel.api.vertex.MutableVertexList;
+import dev.engine_room.flywheel.api.vertex.VertexView;
+import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 
 public class SimpleMesh implements QuadMesh {
 	private final int vertexCount;

@@ -1,18 +1,18 @@
-package com.jozufozu.flywheel.impl;
+package dev.engine_room.flywheel.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jozufozu.flywheel.api.Flywheel;
-import com.jozufozu.flywheel.backend.FlwBackend;
-import com.jozufozu.flywheel.impl.registry.IdRegistryImpl;
-import com.jozufozu.flywheel.impl.registry.RegistryImpl;
-import com.jozufozu.flywheel.lib.instance.InstanceTypes;
-import com.jozufozu.flywheel.lib.material.CutoutShaders;
-import com.jozufozu.flywheel.lib.material.FogShaders;
-import com.jozufozu.flywheel.lib.material.StandardMaterialShaders;
-import com.jozufozu.flywheel.lib.util.ShadersModHandler;
-import com.jozufozu.flywheel.vanilla.VanillaVisuals;
+import dev.engine_room.flywheel.api.Flywheel;
+import dev.engine_room.flywheel.backend.FlwBackend;
+import dev.engine_room.flywheel.impl.registry.IdRegistryImpl;
+import dev.engine_room.flywheel.impl.registry.RegistryImpl;
+import dev.engine_room.flywheel.lib.instance.InstanceTypes;
+import dev.engine_room.flywheel.lib.material.CutoutShaders;
+import dev.engine_room.flywheel.lib.material.FogShaders;
+import dev.engine_room.flywheel.lib.material.StandardMaterialShaders;
+import dev.engine_room.flywheel.lib.util.ShadersModHandler;
+import dev.engine_room.flywheel.vanilla.VanillaVisuals;
 
 public final class FlwImpl {
 	public static final Logger LOGGER = LoggerFactory.getLogger(Flywheel.ID);

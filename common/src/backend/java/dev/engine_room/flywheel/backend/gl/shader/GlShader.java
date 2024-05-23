@@ -1,8 +1,8 @@
-package com.jozufozu.flywheel.backend.gl.shader;
+package dev.engine_room.flywheel.backend.gl.shader;
 
 import org.lwjgl.opengl.GL20;
 
-import com.jozufozu.flywheel.backend.gl.GlObject;
+import dev.engine_room.flywheel.backend.gl.GlObject;
 
 public class GlShader extends GlObject {
 

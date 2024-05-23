@@ -1,11 +1,10 @@
-package com.jozufozu.flywheel.impl;
+package dev.engine_room.flywheel.impl;
 
 import java.util.List;
 
-import com.jozufozu.flywheel.api.visualization.VisualizationManager;
-import com.jozufozu.flywheel.lib.memory.FlwMemoryTracker;
-import com.jozufozu.flywheel.lib.util.StringUtil;
-
+import dev.engine_room.flywheel.api.visualization.VisualizationManager;
+import dev.engine_room.flywheel.lib.memory.FlwMemoryTracker;
+import dev.engine_room.flywheel.lib.util.StringUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
 

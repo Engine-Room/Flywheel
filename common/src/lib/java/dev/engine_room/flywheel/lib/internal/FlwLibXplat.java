@@ -1,13 +1,12 @@
-package com.jozufozu.flywheel.lib.internal;
+package dev.engine_room.flywheel.lib.internal;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.jozufozu.flywheel.api.internal.DependencyInjection;
-import com.jozufozu.flywheel.lib.model.baked.BakedModelBuilder;
-import com.jozufozu.flywheel.lib.model.baked.BlockModelBuilder;
-import com.jozufozu.flywheel.lib.model.baked.MultiBlockModelBuilder;
-import com.jozufozu.flywheel.lib.util.ShadersModHandler;
-
+import dev.engine_room.flywheel.api.internal.DependencyInjection;
+import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.MultiBlockModelBuilder;
+import dev.engine_room.flywheel.lib.util.ShadersModHandler;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -15,7 +14,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface FlwLibXplat {
-	FlwLibXplat INSTANCE = DependencyInjection.load(FlwLibXplat.class, "com.jozufozu.flywheel.impl.FlwLibXplatImpl");
+	FlwLibXplat INSTANCE = DependencyInjection.load(FlwLibXplat.class, "dev.engine_room.flywheel.impl.FlwLibXplatImpl");
 
 	BlockRenderDispatcher createVanillaBlockRenderDispatcher();
 

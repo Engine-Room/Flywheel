@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api.layout;
+package dev.engine_room.flywheel.api.layout;
 
 import java.util.List;
 import java.util.Map;

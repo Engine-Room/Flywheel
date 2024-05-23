@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.api.layout;
+package dev.engine_room.flywheel.api.layout;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Range;

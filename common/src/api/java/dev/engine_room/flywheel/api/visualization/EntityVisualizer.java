@@ -1,7 +1,6 @@
-package com.jozufozu.flywheel.api.visualization;
+package dev.engine_room.flywheel.api.visualization;
 
-import com.jozufozu.flywheel.api.visual.EntityVisual;
-
+import dev.engine_room.flywheel.api.visual.EntityVisual;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.Entity;
 

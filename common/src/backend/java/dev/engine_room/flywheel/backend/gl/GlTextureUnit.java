@@ -1,4 +1,4 @@
-package com.jozufozu.flywheel.backend.gl;
+package dev.engine_room.flywheel.backend.gl;
 
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 

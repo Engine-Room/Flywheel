@@ -1,10 +1,10 @@
-package com.jozufozu.flywheel.lib.memory;
+package dev.engine_room.flywheel.lib.memory;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.lwjgl.system.MemoryUtil;
 
-import com.jozufozu.flywheel.lib.util.StringUtil;
+import dev.engine_room.flywheel.lib.util.StringUtil;
 
 public final class FlwMemoryTracker {
 	public static final boolean DEBUG_MEMORY_SAFETY = System.getProperty("flw.debugMemorySafety") != null;
