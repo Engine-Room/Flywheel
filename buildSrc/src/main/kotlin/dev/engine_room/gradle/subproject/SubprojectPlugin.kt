@@ -1,8 +1,8 @@
-package com.jozufozu.gradle.subproject
+package dev.engine_room.gradle.subproject
 
-import com.jozufozu.gradle.jarset.JarSetExtension
-import com.jozufozu.gradle.nullability.PackageInfosExtension
-import com.jozufozu.gradle.transitive.TransitiveSourceSetsExtension
+import dev.engine_room.gradle.jarset.JarSetExtension
+import dev.engine_room.gradle.nullability.PackageInfosExtension
+import dev.engine_room.gradle.transitive.TransitiveSourceSetsExtension
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
@@ -38,12 +38,14 @@ class SubprojectPlugin: Plugin<Project> {
         val dev = System.getenv("RELEASE")?.contentEquals("false", true) ?: true
         val buildNumber = System.getenv("BUILD_NUMBER")
 
-        val mod_version: String by project
-        project.group = "com.jozufozu.flywheel"
-        project.version = mod_version + if (dev && buildNumber != null) "-${buildNumber}" else ""
+        val versionSuffix = if (dev && buildNumber != null) "-${buildNumber}" else ""
 
-        val artifact_minecraft_version: String by project
-        project.the<BasePluginExtension>().archivesName = "flywheel-${project.name}-${artifact_minecraft_version}"
+        project.group = project.property("group") as String
+        project.version = "${project.property("mod_version")}${versionSuffix}"
+
+        project.the<BasePluginExtension>().apply {
+            archivesName = "flywheel-${project.name}-${project.property("artifact_minecraft_version")}"
+        }
     }
 
     @Suppress("UnstableApiUsage")

@@ -1,4 +1,4 @@
-package com.jozufozu.gradle.platform
+package dev.engine_room.gradle.platform
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project

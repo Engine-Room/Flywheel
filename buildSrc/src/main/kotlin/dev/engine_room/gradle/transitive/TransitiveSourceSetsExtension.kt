@@ -1,4 +1,4 @@
-package com.jozufozu.gradle.transitive
+package dev.engine_room.gradle.transitive
 
 import org.gradle.api.Action
 import org.gradle.api.Project

@@ -1,4 +1,4 @@
-package com.jozufozu.gradle.nullability
+package dev.engine_room.gradle.nullability
 
 import org.apache.groovy.nio.extensions.NioExtensions
 import org.codehaus.groovy.runtime.StringGroovyMethods

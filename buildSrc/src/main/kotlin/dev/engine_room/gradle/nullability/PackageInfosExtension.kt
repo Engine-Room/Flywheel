@@ -1,4 +1,4 @@
-package com.jozufozu.gradle.nullability
+package dev.engine_room.gradle.nullability
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete

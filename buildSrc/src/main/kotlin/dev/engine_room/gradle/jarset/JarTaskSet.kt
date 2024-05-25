@@ -1,4 +1,4 @@
-package com.jozufozu.gradle.jarset
+package dev.engine_room.gradle.jarset
 
 import net.fabricmc.loom.task.AbstractRemapJarTask
 import net.fabricmc.loom.task.RemapJarTask

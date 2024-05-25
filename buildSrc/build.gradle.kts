@@ -21,11 +21,11 @@ gradlePlugin {
     plugins {
         create("platformPlugin") {
             id = "flywheel.platform"
-            implementationClass = "com.jozufozu.gradle.platform.PlatformPlugin"
+            implementationClass = "dev.engine_room.gradle.platform.PlatformPlugin"
         }
         create("subprojectPlugin") {
             id = "flywheel.subproject"
-            implementationClass = "com.jozufozu.gradle.subproject.SubprojectPlugin"
+            implementationClass = "dev.engine_room.gradle.subproject.SubprojectPlugin"
         }
     }
 }

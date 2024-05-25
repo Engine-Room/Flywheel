@@ -1,6 +1,6 @@
-package com.jozufozu.gradle.platform
+package dev.engine_room.gradle.platform
 
-import com.jozufozu.gradle.jarset.JarTaskSet
+import dev.engine_room.gradle.jarset.JarTaskSet
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
 import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSet
