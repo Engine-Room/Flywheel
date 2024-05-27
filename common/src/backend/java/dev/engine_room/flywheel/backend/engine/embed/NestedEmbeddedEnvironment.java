@@ -6,7 +6,7 @@ import org.joml.Matrix4f;
 import dev.engine_room.flywheel.api.event.RenderStage;
 import dev.engine_room.flywheel.backend.engine.EngineImpl;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
-import net.minecraft.world.level.BlockAndTintGetter;
+import it.unimi.dsi.fastutil.longs.LongSet;
 
 public class NestedEmbeddedEnvironment extends AbstractEmbeddedEnvironment {
 	private final AbstractEmbeddedEnvironment parent;
@@ -18,11 +18,8 @@ public class NestedEmbeddedEnvironment extends AbstractEmbeddedEnvironment {
 	}
 
 	@Override
-	public void collectLight(BlockAndTintGetter level, int minX, int minY, int minZ, int sizeX, int sizeY, int sizeZ) {
-	}
-
-	@Override
-	public void invalidateLight() {
+	public void lightChunks(LongSet chunks) {
+		// noop
 	}
 
 	@Override
@@ -38,7 +35,7 @@ public class NestedEmbeddedEnvironment extends AbstractEmbeddedEnvironment {
 	}
 
 	@Override
-	public void actuallyDelete() {
+	public void _delete() {
 		parent.release();
 	}
 }

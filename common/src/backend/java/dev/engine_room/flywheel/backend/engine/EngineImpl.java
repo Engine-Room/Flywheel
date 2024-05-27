@@ -15,6 +15,7 @@ import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.api.visualization.VisualEmbedding;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
+import dev.engine_room.flywheel.backend.engine.embed.LightStorage;
 import dev.engine_room.flywheel.backend.engine.embed.TopLevelEmbeddedEnvironment;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
@@ -24,19 +25,22 @@ import dev.engine_room.flywheel.lib.task.SyncedPlan;
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
 public class EngineImpl implements Engine {
 	private final int sqrMaxOriginDistance;
 	private final DrawManager<? extends AbstractInstancer<?>> drawManager;
 	private final EnvironmentStorage environmentStorage = new EnvironmentStorage();
+	private final LightStorage lightStorage;
 	private final Flag flushFlag = new NamedFlag("flushed");
 
 	private BlockPos renderOrigin = BlockPos.ZERO;
 
-	public EngineImpl(DrawManager<? extends AbstractInstancer<?>> drawManager, int maxOriginDistance) {
+	public EngineImpl(LevelAccessor level, DrawManager<? extends AbstractInstancer<?>> drawManager, int maxOriginDistance) {
 		this.drawManager = drawManager;
 		sqrMaxOriginDistance = maxOriginDistance * maxOriginDistance;
+		lightStorage = new LightStorage(level);
 	}
 
 	@Override
@@ -93,6 +97,7 @@ public class EngineImpl implements Engine {
 	public void delete() {
 		drawManager.delete();
 		environmentStorage.delete();
+		lightStorage.delete();
 	}
 
 	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, RenderStage stage) {
@@ -111,6 +116,10 @@ public class EngineImpl implements Engine {
 
 	public EnvironmentStorage environmentStorage() {
 		return environmentStorage;
+	}
+
+	public LightStorage lightStorage() {
+		return lightStorage;
 	}
 
 	private class VisualizationContextImpl implements VisualizationContext {

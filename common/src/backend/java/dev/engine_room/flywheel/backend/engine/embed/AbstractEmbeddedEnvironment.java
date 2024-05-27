@@ -24,7 +24,7 @@ public abstract class AbstractEmbeddedEnvironment extends AtomicReferenceCounted
 	private final Matrix4f poseComposed = new Matrix4f();
 	private final Matrix3f normalComposed = new Matrix3f();
 	private final InstancerProvider instancerProvider;
-	private final EngineImpl engine;
+	protected final EngineImpl engine;
 	private final RenderStage renderStage;
 
 	public AbstractEmbeddedEnvironment(EngineImpl engine, RenderStage renderStage) {
@@ -105,20 +105,7 @@ public abstract class AbstractEmbeddedEnvironment extends AtomicReferenceCounted
 		release();
 	}
 
-	/**
-	 * Called when referenceCount goes to 0
-	 */
-	@Override
-	public void _delete() {
-		engine.environmentStorage().enqueueDeletion(this);
-	}
-
 	public abstract void setupLight(GlProgram program);
 
 	public abstract void composeMatrices(Matrix4f pose, Matrix3f normal);
-
-	/**
-	 * Called in EnvironmentStorage#flush
-	 */
-	public abstract void actuallyDelete();
 }
