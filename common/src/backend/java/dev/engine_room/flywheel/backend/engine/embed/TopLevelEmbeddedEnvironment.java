@@ -4,14 +4,13 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 import dev.engine_room.flywheel.api.event.RenderStage;
-import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.engine.EngineImpl;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
-import net.minecraft.world.level.BlockAndTintGetter;
+import it.unimi.dsi.fastutil.longs.LongArraySet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 
 public class TopLevelEmbeddedEnvironment extends AbstractEmbeddedEnvironment {
-	private final EmbeddedLightVolume lightVolume = new EmbeddedLightVolume();
-	private final EmbeddedLightTexture lightTexture = new EmbeddedLightTexture();
+	private final LongSet lightSections = new LongArraySet();
 
 	public TopLevelEmbeddedEnvironment(EngineImpl engine, RenderStage renderStage) {
 		super(engine, renderStage);
@@ -21,45 +20,18 @@ public class TopLevelEmbeddedEnvironment extends AbstractEmbeddedEnvironment {
 	public void flush() {
 		super.flush();
 
-		if (lightVolume.empty()) {
-			return;
-		}
-		Samplers.EMBEDDED_LIGHT.makeActive();
-
-		lightTexture.bind();
-
-		lightTexture.ensureCapacity(lightVolume.sizeX(), lightVolume.sizeY(), lightVolume.sizeZ());
-
-		lightTexture.upload(lightVolume.ptr(), lightVolume.sizeX(), lightVolume.sizeY(), lightVolume.sizeZ());
+		lightSections.forEach(engine.lightStorage()::addSection);
 	}
 
 	@Override
-	public void collectLight(BlockAndTintGetter level, int minX, int minY, int minZ, int sizeX, int sizeY, int sizeZ) {
-		lightVolume.collect(level, minX, minY, minZ, sizeX, sizeY, sizeZ);
-	}
-
-	@Override
-	public void invalidateLight() {
-		lightVolume.clear();
+	public void lightChunks(LongSet chunks) {
+		lightSections.clear();
+		lightSections.addAll(chunks);
 	}
 
 	@Override
 	public void setupLight(GlProgram program) {
-		if (!lightVolume.empty()) {
-			Samplers.EMBEDDED_LIGHT.makeActive();
-
-			lightTexture.bind();
-
-			float oneOverSizeX = 1f / (float) lightTexture.sizeX;
-			float oneOverSizeY = 1f / (float) lightTexture.sizeY;
-			float oneOverSizeZ = 1f / (float) lightTexture.sizeZ;
-
-			program.setVec3(EmbeddingUniforms.ONE_OVER_LIGHT_BOX_SIZE, oneOverSizeX, oneOverSizeY, oneOverSizeZ);
-			program.setVec3(EmbeddingUniforms.LIGHT_VOLUME_MIN, lightVolume.x(), lightVolume.y(), lightVolume.z());
-			program.setBool(EmbeddingUniforms.USE_LIGHT_VOLUME, true);
-		} else {
-			program.setBool(EmbeddingUniforms.USE_LIGHT_VOLUME, false);
-		}
+		program.setBool(EmbeddingUniforms.USE_LIGHT_VOLUME, !lightSections.isEmpty());
 	}
 
 	@Override
@@ -69,11 +41,7 @@ public class TopLevelEmbeddedEnvironment extends AbstractEmbeddedEnvironment {
 	}
 
 	@Override
-	public void actuallyDelete() {
-		// We could technically free the light volume right away in _delete, but
-		// the control flow here is so convoluted that it's probably best to do
-		// everything in one place.
-		lightVolume.delete();
-		lightTexture.delete();
+	protected void _delete() {
+
 	}
 }
