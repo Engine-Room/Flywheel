@@ -1,7 +1,8 @@
 package dev.engine_room.flywheel.impl.extension;
 
-import dev.engine_room.flywheel.lib.transform.PoseTransformStack;
 import com.mojang.blaze3d.vertex.PoseStack;
+
+import dev.engine_room.flywheel.lib.transform.PoseTransformStack;
 
 /**
  * An extension interface for {@link PoseStack} that provides a {@link PoseTransformStack} wrapper.

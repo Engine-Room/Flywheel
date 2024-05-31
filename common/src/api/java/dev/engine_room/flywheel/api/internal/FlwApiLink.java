@@ -2,13 +2,10 @@ package dev.engine_room.flywheel.api.internal;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.blaze3d.vertex.VertexFormat;
-
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.layout.LayoutBuilder;
 import dev.engine_room.flywheel.api.registry.IdRegistry;
 import dev.engine_room.flywheel.api.registry.Registry;
-import dev.engine_room.flywheel.api.vertex.VertexViewProvider;
 import dev.engine_room.flywheel.api.visualization.BlockEntityVisualizer;
 import dev.engine_room.flywheel.api.visualization.EntityVisualizer;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
@@ -34,10 +31,6 @@ public interface FlwApiLink {
 	Backend getDefaultBackend();
 
 	LayoutBuilder createLayoutBuilder();
-
-	VertexViewProvider getVertexViewProvider(VertexFormat format);
-
-	void setVertexViewProvider(VertexFormat format, VertexViewProvider provider);
 
 	boolean supportsVisualization(@Nullable LevelAccessor level);
 

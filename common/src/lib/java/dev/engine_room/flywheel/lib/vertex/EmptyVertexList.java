@@ -11,12 +11,12 @@ public interface EmptyVertexList extends MutableVertexList {
 	}
 
 	@Override
-	default float y(int index){
+	default float y(int index) {
 		return 0.0f;
 	}
 
 	@Override
-	default float z(int index){
+	default float z(int index) {
 		return 0.0f;
 	}
 

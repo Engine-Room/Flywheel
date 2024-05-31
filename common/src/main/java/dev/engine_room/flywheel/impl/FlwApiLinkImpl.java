@@ -2,21 +2,17 @@ package dev.engine_room.flywheel.impl;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.blaze3d.vertex.VertexFormat;
-
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.internal.FlwApiLink;
 import dev.engine_room.flywheel.api.layout.LayoutBuilder;
 import dev.engine_room.flywheel.api.registry.IdRegistry;
 import dev.engine_room.flywheel.api.registry.Registry;
-import dev.engine_room.flywheel.api.vertex.VertexViewProvider;
 import dev.engine_room.flywheel.api.visualization.BlockEntityVisualizer;
 import dev.engine_room.flywheel.api.visualization.EntityVisualizer;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.impl.layout.LayoutBuilderImpl;
 import dev.engine_room.flywheel.impl.registry.IdRegistryImpl;
 import dev.engine_room.flywheel.impl.registry.RegistryImpl;
-import dev.engine_room.flywheel.impl.vertex.VertexViewProviderRegistryImpl;
 import dev.engine_room.flywheel.impl.visualization.VisualizationManagerImpl;
 import dev.engine_room.flywheel.impl.visualization.VisualizerRegistryImpl;
 import net.minecraft.world.entity.Entity;
@@ -59,16 +55,6 @@ public class FlwApiLinkImpl implements FlwApiLink {
 	@Override
 	public LayoutBuilder createLayoutBuilder() {
 		return new LayoutBuilderImpl();
-	}
-
-	@Override
-	public VertexViewProvider getVertexViewProvider(VertexFormat format) {
-		return VertexViewProviderRegistryImpl.getProvider(format);
-	}
-
-	@Override
-	public void setVertexViewProvider(VertexFormat format, VertexViewProvider provider) {
-		VertexViewProviderRegistryImpl.setProvider(format, provider);
 	}
 
 	@Override

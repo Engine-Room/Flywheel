@@ -16,7 +16,6 @@ import dev.engine_room.flywheel.api.layout.LayoutBuilder;
 import dev.engine_room.flywheel.api.layout.ValueRepr;
 import dev.engine_room.flywheel.impl.layout.LayoutImpl.ElementImpl;
 import dev.engine_room.flywheel.lib.math.MoreMath;
-
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 

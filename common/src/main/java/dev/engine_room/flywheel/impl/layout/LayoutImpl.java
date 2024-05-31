@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import dev.engine_room.flywheel.api.layout.ElementType;
 import dev.engine_room.flywheel.api.layout.Layout;
-
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 final class LayoutImpl implements Layout {

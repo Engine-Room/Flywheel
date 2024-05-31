@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
-
 import net.minecraft.world.entity.Entity;
 
 public class SimpleEntityVisual<T extends Entity> extends AbstractEntityVisual<T> implements SimpleDynamicVisual {

@@ -1,23 +1,15 @@
 package dev.engine_room.flywheel.lib.model;
 
-import java.nio.ByteBuffer;
 import java.util.Collection;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import org.lwjgl.system.MemoryUtil;
-
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferBuilder.DrawState;
-import com.mojang.blaze3d.vertex.VertexFormat;
 
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.vertex.VertexList;
-import dev.engine_room.flywheel.api.vertex.VertexView;
-import dev.engine_room.flywheel.api.vertex.VertexViewProviderRegistry;
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 import dev.engine_room.flywheel.lib.material.Materials;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
@@ -34,27 +26,6 @@ public final class ModelUtil {
 	private static final float BOUNDING_SPHERE_EPSILON = 1e-4f;
 
 	private ModelUtil() {
-	}
-
-	public static MemoryBlock convertVanillaBuffer(BufferBuilder.RenderedBuffer buffer, VertexView vertexView) {
-		DrawState drawState = buffer.drawState();
-		int vertexCount = drawState.vertexCount();
-		VertexFormat srcFormat = drawState.format();
-
-		ByteBuffer src = buffer.vertexBuffer();
-		MemoryBlock dst = MemoryBlock.malloc((long) vertexCount * vertexView.stride());
-		long srcPtr = MemoryUtil.memAddress(src);
-		long dstPtr = dst.ptr();
-
-		VertexView srcView = VertexViewProviderRegistry.getProvider(srcFormat).createVertexView();
-		srcView.ptr(srcPtr);
-		vertexView.ptr(dstPtr);
-		srcView.vertexCount(vertexCount);
-		vertexView.vertexCount(vertexCount);
-
-		srcView.writeAll(vertexView);
-
-		return dst;
 	}
 
 	@Nullable

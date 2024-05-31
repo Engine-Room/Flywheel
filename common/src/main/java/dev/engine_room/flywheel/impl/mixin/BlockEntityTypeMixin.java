@@ -6,7 +6,6 @@ import org.spongepowered.asm.mixin.Unique;
 
 import dev.engine_room.flywheel.api.visualization.BlockEntityVisualizer;
 import dev.engine_room.flywheel.impl.extension.BlockEntityTypeExtension;
-
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 

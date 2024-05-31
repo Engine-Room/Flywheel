@@ -13,7 +13,6 @@
     "LevelRendererMixin",
     "MinecraftMixin",
     "PoseStackMixin",
-    "VertexFormatMixin",
     "fix.FixFabulousDepthMixin",
     "fix.FixNormalScalingMixin",
     "visualmanage.BlockEntityMixin",
