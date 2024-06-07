@@ -53,7 +53,7 @@ public final class ModelPartConverter {
 		void map(Vector2f uv);
 
 		static TextureMapper toSprite(TextureAtlasSprite sprite) {
-			return uv -> uv.set(sprite.getU(uv.x * 16), sprite.getV(uv.y * 16));
+			return uv -> uv.set(sprite.getU(uv.x), sprite.getV(uv.y));
 		}
 	}
 
