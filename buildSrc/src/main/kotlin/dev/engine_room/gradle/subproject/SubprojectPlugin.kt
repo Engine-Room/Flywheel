@@ -48,14 +48,12 @@ class SubprojectPlugin: Plugin<Project> {
         }
     }
 
-    @Suppress("UnstableApiUsage")
     private fun setupLoom(project: Project) {
         val loom = project.the<LoomGradleExtensionAPI>()
         loom.silentMojangMappingsLicense()
 
-        // FIXME y tho? :(
-        loom.mixin.useLegacyMixinAp = true
-        loom.mixin.defaultRefmapName = "flywheel.refmap.json"
+        //fixme is this still needed?
+//        loom.mixin.defaultRefmapName = "flywheel.refmap.json"
     }
 
     private fun setupJava(project: Project) {

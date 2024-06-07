@@ -22,7 +22,7 @@ import dev.engine_room.flywheel.impl.FlwImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 
-@Mixin(value = Minecraft.class, remap = false)
+@Mixin(Minecraft.class)
 abstract class MinecraftMixin {
 	@Shadow
 	@Final

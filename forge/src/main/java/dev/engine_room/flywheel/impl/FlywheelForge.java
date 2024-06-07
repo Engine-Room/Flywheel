@@ -6,6 +6,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.CrashReportCallables;
 import net.neoforged.fml.DistExecutor;
 import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModLoadingContext;
 
 import net.neoforged.fml.common.Mod;
@@ -47,11 +48,10 @@ public final class FlywheelForge {
 	@UnknownNullability
 	private static ArtifactVersion version;
 
-	public FlywheelForge(IEventBus modEventBus) {
+	public FlywheelForge(IEventBus modEventBus, ModContainer modContainer) {
 		ModLoadingContext modLoadingContext = ModLoadingContext.get();
 
-		version = modLoadingContext
-				.getActiveContainer()
+		version = modContainer
 				.getModInfo()
 				.getVersion();
 
@@ -97,7 +97,7 @@ public final class FlywheelForge {
 			FlwDebugInfo.addDebugInfo(minecraft, e.getRight());
 		});
 
-		modEventBus.addListener((EndClientResourceReloadEvent e) -> BackendManagerImpl.onEndClientResourceReload(e.error() != null));
+		modEventBus.addListener((EndClientResourceReloadEvent e) -> BackendManagerImpl.onEndClientResourceReload(e.error().isPresent()));
 
 		modEventBus.addListener((FMLCommonSetupEvent e) -> {
 			ArgumentTypeInfos.registerByClass(BackendArgument.class, BackendArgument.INFO);

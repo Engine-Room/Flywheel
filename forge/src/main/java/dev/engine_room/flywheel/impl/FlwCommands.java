@@ -17,6 +17,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.BooleanValue;
+import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 
 public final class FlwCommands {
 	private FlwCommands() {
@@ -25,7 +27,7 @@ public final class FlwCommands {
 	public static void registerClientCommands(RegisterClientCommandsEvent event) {
 		LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("flywheel");
 
-		ModConfigSpec.ConfigValue<String> backendValue = ForgeFlwConfig.INSTANCE.client.backend;
+		ConfigValue<String> backendValue = ForgeFlwConfig.INSTANCE.client.backend;
 		command.then(Commands.literal("backend")
 				.executes(context -> {
 					Backend backend = BackendManager.getBackend();
@@ -55,7 +57,7 @@ public final class FlwCommands {
 						return Command.SINGLE_SUCCESS;
 					})));
 
-		ModConfigSpec.BooleanValue limitUpdatesValue = ForgeFlwConfig.INSTANCE.client.limitUpdates;
+		BooleanValue limitUpdatesValue = ForgeFlwConfig.INSTANCE.client.limitUpdates;
 		command.then(Commands.literal("limitUpdates")
 				.executes(context -> {
 					if (limitUpdatesValue.get()) {

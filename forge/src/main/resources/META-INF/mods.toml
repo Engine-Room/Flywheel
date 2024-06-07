@@ -32,11 +32,3 @@ modId = "neoforge"
 type = "required"
 versionRange = "${neoforge_version_range}"
 side = "CLIENT"
-
-# Breaks dependency
-[[dependencies.${mod_id}]]
-modId = "rubidium"
-type = "incompatible"
-reason = "mixin crash with any version of rubidium under 0.7.0"
-versionRange = "[0.7.0,)"
-side = "CLIENT"

@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import com.google.common.base.Suppliers;
 
 public class SodiumMixinPlugin implements IMixinConfigPlugin {
-	private static final Supplier<Boolean> IS_SODIUM_LOADED = Suppliers.memoize(() -> LoadingModList.get().getModFileById("rubidium") != null);
+	private static final Supplier<Boolean> IS_SODIUM_LOADED = Suppliers.memoize(() -> LoadingModList.get().getModFileById("embeddium") != null);
 
 	@Override
 	public void onLoad(String mixinPackage) {
