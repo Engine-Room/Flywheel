@@ -38,7 +38,7 @@ abstract class MinecraftMixin {
 	}
 
 	@Inject(method = "lambda$reloadResourcePacks$39", at = @At("HEAD"))
-	private void flywheel$onEndManualResourceReload(boolean bl, @Coerce Object gameLoadCookie, CompletableFuture<Void> completablefuture, Optional<Throwable> error, CallbackInfo ci) {
+	private void flywheel$onEndManualResourceReload(boolean recovery, @Coerce Object gameLoadCookie, CompletableFuture<Void> completablefuture, Optional<Throwable> error, CallbackInfo ci) {
 		ModLoader.get().postEvent(new EndClientResourceReloadEvent((Minecraft) (Object) this, resourceManager, false, error));
 	}
 }
