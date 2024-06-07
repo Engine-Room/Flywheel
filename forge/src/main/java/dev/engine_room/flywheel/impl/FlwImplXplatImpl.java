@@ -1,7 +1,5 @@
 package dev.engine_room.flywheel.impl;
 
-import net.neoforged.neoforge.common.NeoForge;
-
 import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.event.BeginFrameEvent;
@@ -10,6 +8,7 @@ import dev.engine_room.flywheel.api.event.RenderContext;
 import dev.engine_room.flywheel.api.event.RenderStage;
 import dev.engine_room.flywheel.api.event.RenderStageEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.neoforged.neoforge.common.NeoForge;
 
 public class FlwImplXplatImpl implements FlwImplXplat {
 	@Override

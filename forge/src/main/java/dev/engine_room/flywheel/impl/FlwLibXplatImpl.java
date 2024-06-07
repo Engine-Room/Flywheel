@@ -2,9 +2,6 @@ package dev.engine_room.flywheel.impl;
 
 import java.lang.reflect.Field;
 
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.util.ObfuscationReflectionHelper;
-
 import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
@@ -23,6 +20,8 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
 
 public class FlwLibXplatImpl implements FlwLibXplat {
 	@Override
