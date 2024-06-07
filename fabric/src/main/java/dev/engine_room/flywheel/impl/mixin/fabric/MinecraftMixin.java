@@ -22,8 +22,8 @@ abstract class MinecraftMixin {
 		}
 	}
 
-	@Inject(method = "clearClientLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("HEAD"))
-	private void flywheel$onClearLevel(CallbackInfo ci) {
+	@Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("HEAD"))
+	private void flywheel$onDisconnect(CallbackInfo ci) {
 		if (level != null) {
 			LevelAttached.invalidateLevel(level);
 		}
