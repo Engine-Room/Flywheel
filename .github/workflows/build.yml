@@ -1,47 +1,44 @@
 name: build
 
-on: [ pull_request, push ]
+on: [ workflow_dispatch, pull_request, push ]
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        java: [
-          17     # Current Java LTS & minimum supported by Minecraft
-        ]
-        os: [ ubuntu-latest ]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@v3
-      - name: Gradle Cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            .gradle/loom-cache
-            build/
-          key: ${{ runner.os }}-jdk${{ matrix.java }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle.properties', '**/gradle-wrapper.properties', '.github/workflows/build.yml') }}
-      - name: Setup JDK ${{ matrix.java }}
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: ${{ matrix.java }}
-      - name: Make Gradle Wrapper Executable
-        if: ${{ runner.os != 'Windows' }}
-        run: chmod +x ./gradlew
-      - name: Build
-        # doesn't actually publish, as no secrets are passed in, just makes sure that publishing works
-        run: ./gradlew publish --no-daemon
-      - name: Capture Build Artifacts
-        if: ${{ runner.os == 'Linux' && matrix.java == '17' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: Artifacts
-          path: |
-              common/build/libs/
-              fabric/build/libs/
-              forge/build/libs/
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
+            - name: Setup Java
+              run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
+
+            - name: Loom Cache
+              uses: actions/cache@v4
+              if: ${{ !endsWith(github.ref, '/dev') }}
+              with:
+                  path: "**/.gradle/loom-cache"
+                  key: "${{ runner.os }}-gradle-${{ hashFiles('**/libs.versions.*', '**/*.gradle*', '**/gradle-wrapper.properties') }}"
+                  restore-keys: "${{ runner.os }}-gradle-"
+
+            - name: Setup Gradle
+              uses: gradle/actions/setup-gradle@v3
+              with:
+                  gradle-home-cache-cleanup: true
+                  cache-read-only: ${{ !endsWith(github.ref, '/dev') }}
+
+            - name: Validate Gradle Wrapper Integrity
+              uses: gradle/wrapper-validation-action@v3
+
+            - name: Build & Publish to Maven
+              # doesn't actually publish, as no secrets are passed in, just makes sure that publishing works
+              run: ./gradlew publish --no-daemon
+
+            - name: Capture Build Artifacts
+              if: ${{ runner.os == 'Linux' && matrix.java == '17' }}
+              uses: actions/upload-artifact@v4
+              with:
+                name: Artifacts
+                path: |
+                  common/build/libs/
+                  fabric/build/libs/
+                  forge/build/libs/
