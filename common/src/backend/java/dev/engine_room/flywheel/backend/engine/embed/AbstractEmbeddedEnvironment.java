@@ -15,10 +15,10 @@ import dev.engine_room.flywheel.api.visualization.VisualEmbedding;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.engine.EngineImpl;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
-import dev.engine_room.flywheel.backend.util.AtomicReferenceCounted;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.Vec3i;
 
-public abstract class AbstractEmbeddedEnvironment extends AtomicReferenceCounted implements Environment, VisualEmbedding {
+public abstract class AbstractEmbeddedEnvironment implements Environment, VisualEmbedding {
 	protected final Matrix4f pose = new Matrix4f();
 	protected final Matrix3f normal = new Matrix3f();
 	private final Matrix4f poseComposed = new Matrix4f();
@@ -26,6 +26,8 @@ public abstract class AbstractEmbeddedEnvironment extends AtomicReferenceCounted
 	private final InstancerProvider instancerProvider;
 	protected final EngineImpl engine;
 	private final RenderStage renderStage;
+
+	private boolean deleted = false;
 
 	public AbstractEmbeddedEnvironment(EngineImpl engine, RenderStage renderStage) {
 		this.engine = engine;
@@ -38,9 +40,6 @@ public abstract class AbstractEmbeddedEnvironment extends AtomicReferenceCounted
 				return engine.instancer(AbstractEmbeddedEnvironment.this, type, model, renderStage);
 			}
 		};
-
-		// Acquire the reference owned by the visual that created this.
-		acquire();
 	}
 
 	@Override
@@ -94,15 +93,20 @@ public abstract class AbstractEmbeddedEnvironment extends AtomicReferenceCounted
 		return out;
 	}
 
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	public void addLightSections(LongSet out) {
+
+	}
+
 	/**
 	 * Called by visuals
 	 */
 	@Override
 	public void delete() {
-		// Release the reference owned by the visual that created this.
-		// Note that visuals don't explicitly call acquire, instead the
-		// storage acquired a reference when this was constructed.
-		release();
+		deleted = true;
 	}
 
 	public abstract void setupLight(GlProgram program);

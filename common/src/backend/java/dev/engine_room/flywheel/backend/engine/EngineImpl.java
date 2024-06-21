@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
 public class EngineImpl implements Engine {
 	private final int sqrMaxOriginDistance;
 	private final DrawManager<? extends AbstractInstancer<?>> drawManager;
-	private final EnvironmentStorage environmentStorage = new EnvironmentStorage();
+	private final EnvironmentStorage environmentStorage;
 	private final LightStorage lightStorage;
 	private final Flag flushFlag = new NamedFlag("flushed");
 
@@ -40,12 +40,13 @@ public class EngineImpl implements Engine {
 	public EngineImpl(LevelAccessor level, DrawManager<? extends AbstractInstancer<?>> drawManager, int maxOriginDistance) {
 		this.drawManager = drawManager;
 		sqrMaxOriginDistance = maxOriginDistance * maxOriginDistance;
-		lightStorage = new LightStorage(level);
+		environmentStorage = new EnvironmentStorage();
+		lightStorage = new LightStorage(level, environmentStorage);
 	}
 
 	@Override
 	public Plan<RenderContext> createFramePlan() {
-		return SyncedPlan.of(this::flush);
+		return lightStorage.createFramePlan().then(SyncedPlan.of(this::flush));
 	}
 
 	@Override
@@ -96,7 +97,6 @@ public class EngineImpl implements Engine {
 	@Override
 	public void delete() {
 		drawManager.delete();
-		environmentStorage.delete();
 		lightStorage.delete();
 	}
 
@@ -107,8 +107,8 @@ public class EngineImpl implements Engine {
 	private void flush(RenderContext ctx) {
 		try (var state = GlStateTracker.getRestoreState()) {
 			Uniforms.update(ctx);
-			drawManager.flush();
 			environmentStorage.flush();
+			drawManager.flush(lightStorage);
 		}
 
 		flushFlag.raise();

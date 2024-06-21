@@ -25,8 +25,6 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	protected AbstractInstancer(InstanceType<I> type, Environment environment) {
 		this.type = type;
 		this.environment = environment;
-
-		environment.acquire();
 	}
 
 	@Override
@@ -177,9 +175,7 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		deleted.clear();
 	}
 
-	public void delete() {
-		environment.release();
-	}
+	public abstract void delete();
 
 	@Override
 	public String toString() {

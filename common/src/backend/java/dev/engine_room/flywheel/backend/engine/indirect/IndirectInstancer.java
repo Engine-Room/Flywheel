@@ -125,8 +125,6 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 
 	@Override
 	public void delete() {
-		super.delete();
-
 		for (IndirectDraw draw : draws()) {
 			draw.delete();
 		}

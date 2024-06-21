@@ -13,14 +13,6 @@ uniform sampler2D _flw_crumblingTex;
 in vec2 _flw_crumblingTexCoord;
 #endif
 
-#ifdef _FLW_EMBEDDED
-uniform sampler3D _flw_lightVolume;
-
-uniform bool _flw_useLightVolume;
-
-in vec3 _flw_lightVolumeCoord;
-#endif
-
 flat in uint _flw_instanceID;
 
 out vec4 _flw_outputColor;
@@ -42,12 +34,6 @@ void _flw_main() {
     flw_fragColor = flw_vertexColor * flw_sampleColor;
     flw_fragOverlay = flw_vertexOverlay;
     flw_fragLight = flw_vertexLight;
-
-    #ifdef _FLW_EMBEDDED
-    if (_flw_useLightVolume) {
-        flw_fragLight = max(flw_fragLight, texture(_flw_lightVolume, _flw_lightVolumeCoord).rg);
-    }
-    #endif
 
     flw_materialFragment();
 
@@ -98,11 +84,6 @@ void _flw_main() {
         case 6u:
         color = vec4(vec3(diffuseFactor), 1.);
         break;
-        #ifdef _FLW_EMBEDDED
-        case 7u:
-        color = vec4(_flw_lightVolumeCoord, 1.);
-        break;
-        #endif
     }
 
     _flw_outputColor = flw_fogFilter(color);

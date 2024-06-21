@@ -23,14 +23,4 @@ public class GlobalEnvironment implements Environment {
 	public void setupCull(GlProgram cullProgram) {
 		cullProgram.setBool(EmbeddingUniforms.USE_MODEL_MATRIX, false);
 	}
-
-	@Override
-	public void acquire() {
-
-	}
-
-	@Override
-	public void release() {
-
-	}
 }

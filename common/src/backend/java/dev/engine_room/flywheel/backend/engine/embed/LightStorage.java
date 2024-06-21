@@ -4,7 +4,11 @@ import java.util.BitSet;
 
 import org.lwjgl.system.MemoryUtil;
 
+import dev.engine_room.flywheel.api.event.RenderContext;
+import dev.engine_room.flywheel.api.task.Plan;
+import dev.engine_room.flywheel.backend.engine.EnvironmentStorage;
 import dev.engine_room.flywheel.backend.engine.indirect.StagingBuffer;
+import dev.engine_room.flywheel.lib.task.SimplePlan;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
@@ -29,11 +33,12 @@ import net.minecraft.world.level.LightLayer;
  * <p>Thus, each section occupies 5832 bytes.
  */
 public class LightStorage {
-	private final long SECTION_SIZE_BYTES = 9 * 9 * 9 * 8;
-	private final int DEFAULT_ARENA_CAPACITY_SECTIONS = 64;
-	private final int INVALID_SECTION = -1;
+	public static final long SECTION_SIZE_BYTES = 9 * 9 * 9 * 8;
+	private static final int DEFAULT_ARENA_CAPACITY_SECTIONS = 64;
+	private static final int INVALID_SECTION = -1;
 
 	private final LevelAccessor level;
+	private final EnvironmentStorage environmentStorage;
 
 	private final Arena arena;
 	private final Long2IntMap section2ArenaIndex = new Long2IntOpenHashMap();
@@ -44,10 +49,22 @@ public class LightStorage {
 	private final BitSet changed = new BitSet();
 	private boolean newSections = false;
 
-	public LightStorage(LevelAccessor level) {
+	public LightStorage(LevelAccessor level, EnvironmentStorage environmentStorage) {
 		this.level = level;
+		this.environmentStorage = environmentStorage;
 
 		arena = new Arena(SECTION_SIZE_BYTES, DEFAULT_ARENA_CAPACITY_SECTIONS);
+	}
+
+	public Plan<RenderContext> createFramePlan() {
+		return SimplePlan.of(() -> {
+			var longs = environmentStorage.allLightSections();
+			longs.forEach(this::addSection);
+		});
+	}
+
+	public int capacity() {
+		return arena.capacity();
 	}
 
 	public void addSection(long section) {
@@ -187,6 +204,7 @@ public class LightStorage {
 		for (int i = changed.nextSetBit(0); i >= 0; i = changed.nextSetBit(i + 1)) {
 			staging.enqueueCopy(arena.indexToPointer(i), SECTION_SIZE_BYTES, dstVbo, i * SECTION_SIZE_BYTES);
 		}
+		changed.clear();
 	}
 
 	public IntArrayList createLut() {

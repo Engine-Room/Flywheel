@@ -14,7 +14,6 @@ public class NestedEmbeddedEnvironment extends AbstractEmbeddedEnvironment {
 	public NestedEmbeddedEnvironment(AbstractEmbeddedEnvironment parent, EngineImpl engine, RenderStage renderStage) {
 		super(engine, renderStage);
 		this.parent = parent;
-		parent.acquire();
 	}
 
 	@Override
@@ -32,10 +31,5 @@ public class NestedEmbeddedEnvironment extends AbstractEmbeddedEnvironment {
 		parent.composeMatrices(pose, normal);
 		pose.mul(this.pose);
 		normal.mul(this.normal);
-	}
-
-	@Override
-	public void _delete() {
-		parent.release();
 	}
 }
