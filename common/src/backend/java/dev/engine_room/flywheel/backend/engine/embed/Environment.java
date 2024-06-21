@@ -9,8 +9,4 @@ public interface Environment {
 	void setupDraw(GlProgram drawProgram);
 
 	void setupCull(GlProgram cullProgram);
-
-	void acquire();
-
-	void release();
 }

@@ -23,6 +23,7 @@ import dev.engine_room.flywheel.backend.engine.InstancerKey;
 import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
 import dev.engine_room.flywheel.backend.engine.TextureBinder;
+import dev.engine_room.flywheel.backend.engine.embed.LightStorage;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
@@ -40,6 +41,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	private final Map<GroupKey<?>, IndirectCullingGroup<?>> cullingGroups = new HashMap<>();
 	private final GlBuffer crumblingDrawBuffer = new GlBuffer();
 
+	private final LightBuffers lightBuffers;
+
 	public IndirectDrawManager(IndirectPrograms programs) {
 		this.programs = programs;
 		programs.acquire();
@@ -50,6 +53,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		vertexArray = GlVertexArray.create();
 
 		meshPool.bind(vertexArray);
+		lightBuffers = new LightBuffers();
 	}
 
 	@Override
@@ -83,6 +87,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			TextureBinder.bindLightAndOverlay();
 
 			vertexArray.bindForDraw();
+			lightBuffers.bind();
 			Uniforms.bindAll();
 
 			for (var group : cullingGroups.values()) {
@@ -95,8 +100,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	}
 
 	@Override
-	public void flush() {
-		super.flush();
+	public void flush(LightStorage lightStorage) {
+		super.flush(lightStorage);
 
 		for (var group : cullingGroups.values()) {
 			group.flushInstancers();
@@ -107,6 +112,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		meshPool.flush();
 
 		stagingBuffer.reclaim();
+
+		lightBuffers.flush(stagingBuffer, lightStorage);
 
 		for (var group : cullingGroups.values()) {
 			group.upload(stagingBuffer);
@@ -159,7 +166,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			var block = MemoryBlock.malloc(IndirectBuffers.DRAW_COMMAND_STRIDE);
 
 			GlBufferType.DRAW_INDIRECT_BUFFER.bind(crumblingDrawBuffer.handle());
-			glBindBufferRange(GL_SHADER_STORAGE_BUFFER, IndirectBuffers.DRAW_INDEX, crumblingDrawBuffer.handle(), 0, IndirectBuffers.DRAW_COMMAND_STRIDE);
+			glBindBufferRange(GL_SHADER_STORAGE_BUFFER, BufferBindings.DRAW_BUFFER_BINDING, crumblingDrawBuffer.handle(), 0, IndirectBuffers.DRAW_COMMAND_STRIDE);
 
 			for (var groupEntry : byType.entrySet()) {
 				var byProgress = groupEntry.getValue();

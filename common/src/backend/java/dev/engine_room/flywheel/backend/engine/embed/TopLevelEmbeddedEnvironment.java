@@ -17,16 +17,14 @@ public class TopLevelEmbeddedEnvironment extends AbstractEmbeddedEnvironment {
 	}
 
 	@Override
-	public void flush() {
-		super.flush();
-
-		lightSections.forEach(engine.lightStorage()::addSection);
-	}
-
-	@Override
 	public void lightChunks(LongSet chunks) {
 		lightSections.clear();
 		lightSections.addAll(chunks);
+	}
+
+	@Override
+	public void addLightSections(LongSet out) {
+		out.addAll(lightSections);
 	}
 
 	@Override
@@ -38,10 +36,5 @@ public class TopLevelEmbeddedEnvironment extends AbstractEmbeddedEnvironment {
 	public void composeMatrices(Matrix4f pose, Matrix3f normal) {
 		pose.set(this.pose);
 		normal.set(this.normal);
-	}
-
-	@Override
-	protected void _delete() {
-
 	}
 }

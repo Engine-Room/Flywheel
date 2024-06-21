@@ -47,4 +47,8 @@ public class Arena {
 	public void delete() {
 		memoryBlock.free();
 	}
+
+	public int capacity() {
+		return top;
+	}
 }

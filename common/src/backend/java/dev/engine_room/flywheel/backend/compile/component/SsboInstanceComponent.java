@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.layout.Layout;
-import dev.engine_room.flywheel.backend.engine.indirect.IndirectBuffers;
+import dev.engine_room.flywheel.backend.engine.indirect.BufferBindings;
 import dev.engine_room.flywheel.backend.glsl.generate.FnSignature;
 import dev.engine_room.flywheel.backend.glsl.generate.GlslBlock;
 import dev.engine_room.flywheel.backend.glsl.generate.GlslBuilder;
@@ -43,7 +43,7 @@ public class SsboInstanceComponent extends InstanceAssemblerComponent {
 
 		fnBody.ret(GlslExpr.call(STRUCT_NAME, unpackArgs));
 
-		builder._addRaw("layout(std430, binding = " + IndirectBuffers.INSTANCE_INDEX + ") restrict readonly buffer InstanceBuffer {\n"
+		builder._addRaw("layout(std430, binding = " + BufferBindings.INSTANCE_BUFFER_BINDING + ") restrict readonly buffer InstanceBuffer {\n"
 				+ "    uint _flw_instances[];\n"
 				+ "};");
 		builder.blankLine();

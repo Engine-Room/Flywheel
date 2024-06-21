@@ -22,6 +22,7 @@ import dev.engine_room.flywheel.backend.engine.MaterialEncoder;
 import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
 import dev.engine_room.flywheel.backend.engine.TextureBinder;
+import dev.engine_room.flywheel.backend.engine.embed.LightStorage;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.backend.gl.TextureBuffer;
@@ -55,8 +56,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	}
 
 	@Override
-	public void flush() {
-		super.flush();
+	public void flush(LightStorage lightStorage) {
+		super.flush(lightStorage);
 
 		var instancers = this.instancers.values();
 		instancers.removeIf(instancer -> {

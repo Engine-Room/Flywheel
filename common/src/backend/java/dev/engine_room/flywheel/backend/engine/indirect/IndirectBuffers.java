@@ -22,13 +22,6 @@ public class IndirectBuffers {
 	public static final long DRAW_COMMAND_STRIDE = 40;
 	public static final long DRAW_COMMAND_OFFSET = 0;
 
-	public static final int INSTANCE_INDEX = 0;
-	public static final int TARGET_INDEX = 1;
-	public static final int MODEL_INDEX_INDEX = 2;
-	public static final int MODEL_INDEX = 3;
-	public static final int DRAW_INDEX = 4;
-
-
 	// Offsets to the 3 segments
 	private static final long HANDLE_OFFSET = 0;
 	private static final long OFFSET_OFFSET = BUFFER_COUNT * INT_SIZE;
@@ -117,7 +110,7 @@ public class IndirectBuffers {
 
 	private void multiBind() {
 		final long ptr = multiBindBlock.ptr();
-		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, 0, IndirectBuffers.BUFFER_COUNT, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
+		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, BufferBindings.INSTANCE_BUFFER_BINDING, IndirectBuffers.BUFFER_COUNT, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
 	}
 
 	/**
@@ -125,7 +118,7 @@ public class IndirectBuffers {
 	 */
 	public void bindForCrumbling() {
 		final long ptr = multiBindBlock.ptr();
-		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, 0, 4, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
+		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, BufferBindings.INSTANCE_BUFFER_BINDING, 4, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
 	}
 
 	public void delete() {
