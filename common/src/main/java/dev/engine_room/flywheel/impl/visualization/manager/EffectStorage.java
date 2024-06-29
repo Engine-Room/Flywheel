@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.impl.visualization.manager;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 import dev.engine_room.flywheel.api.visual.Effect;
@@ -13,7 +14,7 @@ public class EffectStorage extends Storage<Effect> {
 	}
 
 	@Override
-	protected EffectVisual<?> createRaw(Effect obj) {
+	protected List<? extends EffectVisual<?>> createRaw(Effect obj) {
 		return obj.visualize(visualizationContextSupplier.get());
 	}
 

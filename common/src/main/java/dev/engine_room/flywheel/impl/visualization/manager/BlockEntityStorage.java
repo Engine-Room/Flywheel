@@ -1,11 +1,11 @@
 package dev.engine_room.flywheel.impl.visualization.manager;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.visual.BlockEntityVisual;
-import dev.engine_room.flywheel.api.visual.Visual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.impl.visualization.storage.Storage;
 import dev.engine_room.flywheel.lib.visual.VisualizationHelper;
@@ -17,14 +17,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class BlockEntityStorage extends Storage<BlockEntity> {
-	private final Long2ObjectMap<BlockEntityVisual<?>> posLookup = new Long2ObjectOpenHashMap<>();
+	private final Long2ObjectMap<List<? extends BlockEntityVisual<?>>> posLookup = new Long2ObjectOpenHashMap<>();
 
 	public BlockEntityStorage(Supplier<VisualizationContext> visualizationContextSupplier) {
 		super(visualizationContextSupplier);
 	}
 
 	@Nullable
-	public BlockEntityVisual<?> visualAtPos(long pos) {
+	public List<? extends BlockEntityVisual<?>> visualAtPos(long pos) {
 		return posLookup.get(pos);
 	}
 
@@ -53,19 +53,18 @@ public class BlockEntityStorage extends Storage<BlockEntity> {
 	}
 
 	@Override
-	@Nullable
-	protected Visual createRaw(BlockEntity obj) {
+	protected List<? extends BlockEntityVisual<?>> createRaw(BlockEntity obj) {
 		var visualizer = VisualizationHelper.getVisualizer(obj);
 		if (visualizer == null) {
-			return null;
+			return List.of();
 		}
 
-		var visual = visualizer.createVisual(visualizationContextSupplier.get(), obj);
+		var visualList = visualizer.createVisual(visualizationContextSupplier.get(), obj);
 
 		BlockPos blockPos = obj.getBlockPos();
-		posLookup.put(blockPos.asLong(), visual);
+		posLookup.put(blockPos.asLong(), visualList);
 
-		return visual;
+		return visualList;
 	}
 
 	@Override

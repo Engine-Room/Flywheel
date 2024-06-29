@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.lib.visual;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -23,8 +24,8 @@ public class SimpleEntityVisualizer<T extends Entity> implements EntityVisualize
 	}
 
 	@Override
-	public EntityVisual<? super T> createVisual(VisualizationContext ctx, T entity) {
-		return visualFactory.create(ctx, entity);
+	public List<EntityVisual<? super T>> createVisual(VisualizationContext ctx, T entity) {
+		return List.of(visualFactory.create(ctx, entity));
 	}
 
 	@Override

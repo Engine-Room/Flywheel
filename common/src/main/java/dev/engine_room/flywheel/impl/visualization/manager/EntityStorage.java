@@ -1,10 +1,9 @@
 package dev.engine_room.flywheel.impl.visualization.manager;
 
+import java.util.List;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.Nullable;
-
-import dev.engine_room.flywheel.api.visual.Visual;
+import dev.engine_room.flywheel.api.visual.EntityVisual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.impl.visualization.storage.Storage;
 import dev.engine_room.flywheel.lib.visual.VisualizationHelper;
@@ -17,11 +16,10 @@ public class EntityStorage extends Storage<Entity> {
 	}
 
 	@Override
-	@Nullable
-	protected Visual createRaw(Entity obj) {
+    protected List<? extends EntityVisual<?>> createRaw(Entity obj) {
 		var visualizer = VisualizationHelper.getVisualizer(obj);
 		if (visualizer == null) {
-			return null;
+			return List.of();
 		}
 
 		return visualizer.createVisual(visualizationContextSupplier.get(), obj);

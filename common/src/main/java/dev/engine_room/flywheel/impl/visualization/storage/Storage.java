@@ -1,12 +1,9 @@
 package dev.engine_room.flywheel.impl.visualization.storage;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
-
-import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
@@ -29,59 +26,50 @@ public abstract class Storage<T> {
 	protected final List<SimpleTickableVisual> simpleTickableVisuals = new ArrayList<>();
 	protected final LitVisualStorage litVisuals = new LitVisualStorage();
 
-	private final Map<T, Visual> visuals = new Reference2ObjectOpenHashMap<>();
+	private final Map<T, List<? extends Visual>> visuals = new Reference2ObjectOpenHashMap<>();
 
 	public Storage(Supplier<VisualizationContext> visualizationContextSupplier) {
 		this.visualizationContextSupplier = visualizationContextSupplier;
 	}
 
-	public Collection<Visual> getAllVisuals() {
-		return visuals.values();
+	public int visualCount() {
+		int out = 0;
+		for (var visualList : visuals.values()) {
+			out += visualList.size();
+		}
+		return out;
 	}
 
 	public void add(T obj, float partialTick) {
-		Visual visual = visuals.get(obj);
+		var visualList = this.visuals.get(obj);
 
-		if (visual == null) {
+		if (visualList == null) {
 			create(obj, partialTick);
 		}
 	}
 
 	public void remove(T obj) {
-		Visual visual = visuals.remove(obj);
+		var visualList = this.visuals.remove(obj);
 
-		if (visual == null) {
+		if (visualList == null || visualList.isEmpty()) {
 			return;
 		}
 
-		if (visual instanceof TickableVisual tickable) {
-			if (visual instanceof SimpleTickableVisual simpleTickable) {
-				simpleTickableVisuals.remove(simpleTickable);
-			} else {
-				tickableVisuals.remove(tickable);
-			}
+		for (Visual visual : visualList) {
+			remove(visual);
 		}
-		if (visual instanceof DynamicVisual dynamic) {
-			if (visual instanceof SimpleDynamicVisual simpleDynamic) {
-				simpleDynamicVisuals.remove(simpleDynamic);
-			} else {
-				dynamicVisuals.remove(dynamic);
-			}
-		}
-		if (visual instanceof LitVisual lit) {
-			litVisuals.remove(lit);
-		}
-		visual.delete();
 	}
 
 	public void update(T obj, float partialTick) {
-		Visual visual = visuals.get(obj);
+		var visualList = visuals.get(obj);
 
-		if (visual == null) {
+		if (visualList == null || visualList.isEmpty()) {
 			return;
 		}
 
-		visual.update(partialTick);
+		for (Visual visual : visualList) {
+			visual.update(partialTick);
+		}
 	}
 
 	public void recreateAll(float partialTick) {
@@ -90,13 +78,17 @@ public abstract class Storage<T> {
 		simpleTickableVisuals.clear();
 		simpleDynamicVisuals.clear();
 		litVisuals.clear();
-		visuals.replaceAll((obj, visual) -> {
-			visual.delete();
+		visuals.replaceAll((obj, visuals) -> {
+			visuals.forEach(Visual::delete);
 
-			Visual out = createRaw(obj);
+			var out = createRaw(obj);
 
-			if (out != null) {
-				setup(out, partialTick);
+			if (out.isEmpty()) {
+				return null;
+			}
+
+			for (Visual visual : out) {
+				setup(visual, partialTick);
 			}
 
 			return out;
@@ -107,22 +99,28 @@ public abstract class Storage<T> {
 		tickableVisuals.clear();
 		dynamicVisuals.clear();
 		litVisuals.clear();
-		visuals.values()
-				.forEach(Visual::delete);
+		for (var visualList : visuals.values()) {
+			for (Visual visual : visualList) {
+				visual.delete();
+			}
+		}
 		visuals.clear();
 	}
 
 	private void create(T obj, float partialTick) {
-		Visual visual = createRaw(obj);
+		var visuals = createRaw(obj);
 
-		if (visual != null) {
+		if (visuals.isEmpty()) {
+			return;
+		}
+		this.visuals.put(obj, visuals);
+
+		for (Visual visual : visuals) {
 			setup(visual, partialTick);
-			visuals.put(obj, visual);
 		}
 	}
 
-	@Nullable
-	protected abstract Visual createRaw(T obj);
+	protected abstract List<? extends Visual> createRaw(T obj);
 
 	public Plan<DynamicVisual.Context> framePlan() {
 		return NestedPlan.of(dynamicVisuals, litVisuals.plan(), ForEachPlan.of(() -> simpleDynamicVisuals, SimpleDynamicVisual::beginFrame));
@@ -158,6 +156,27 @@ public abstract class Storage<T> {
 		if (visual instanceof LitVisual lit) {
 			litVisuals.addAndInitNotifier(lit);
 		}
+	}
+
+	private void remove(Visual visual) {
+		if (visual instanceof TickableVisual tickable) {
+			if (visual instanceof SimpleTickableVisual simpleTickable) {
+				simpleTickableVisuals.remove(simpleTickable);
+			} else {
+				tickableVisuals.remove(tickable);
+			}
+		}
+		if (visual instanceof DynamicVisual dynamic) {
+			if (visual instanceof SimpleDynamicVisual simpleDynamic) {
+				simpleDynamicVisuals.remove(simpleDynamic);
+			} else {
+				dynamicVisuals.remove(dynamic);
+			}
+		}
+		if (visual instanceof LitVisual lit) {
+			litVisuals.remove(lit);
+		}
+		visual.delete();
 	}
 
 	/**
