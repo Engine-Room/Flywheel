@@ -69,8 +69,6 @@ vec2 getCrumblingTexCoord() {
 #ifdef _FLW_EMBEDDED
 uniform mat4 _flw_modelMatrix;
 uniform mat3 _flw_normalMatrix;
-
-bool _flw_embeddedLight(vec3 worldPos, out vec2 lightCoord);
 #endif
 
 flat out uint _flw_instanceID;
@@ -87,11 +85,6 @@ void _flw_main(in FlwInstance instance, in uint stableInstanceID) {
     #ifdef _FLW_EMBEDDED
     flw_vertexPos = _flw_modelMatrix * flw_vertexPos;
     flw_vertexNormal = _flw_normalMatrix * flw_vertexNormal;
-
-    vec2 embeddedLight;
-    if (_flw_embeddedLight(flw_vertexPos.xyz, embeddedLight)) {
-        flw_vertexLight = max(flw_vertexLight, embeddedLight);
-    }
     #endif
 
     flw_vertexNormal = normalize(flw_vertexNormal);
