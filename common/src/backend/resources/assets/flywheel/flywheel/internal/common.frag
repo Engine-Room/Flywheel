@@ -13,6 +13,10 @@ uniform sampler2D _flw_crumblingTex;
 in vec2 _flw_crumblingTexCoord;
 #endif
 
+#ifdef _FLW_EMBEDDED
+bool _flw_embeddedLight(vec3 worldPos, out vec2 lightCoord);
+#endif
+
 flat in uint _flw_instanceID;
 
 out vec4 _flw_outputColor;
@@ -34,6 +38,13 @@ void _flw_main() {
     flw_fragColor = flw_vertexColor * flw_sampleColor;
     flw_fragOverlay = flw_vertexOverlay;
     flw_fragLight = flw_vertexLight;
+
+    #ifdef _FLW_EMBEDDED
+    vec2 embeddedLight;
+    if (_flw_embeddedLight(flw_vertexPos.xyz, embeddedLight)) {
+        flw_fragLight = max(flw_fragLight, embeddedLight);
+    }
+    #endif
 
     flw_materialFragment();
 
