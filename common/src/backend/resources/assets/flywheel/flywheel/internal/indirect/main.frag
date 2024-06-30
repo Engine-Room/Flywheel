@@ -63,17 +63,15 @@ vec2 _flw_lightAt(uint sectionOffset, uvec3 blockInSectionPos) {
     uint block = (raw >> bitOffset) & 0xFu;
     uint sky = (raw >> (bitOffset + 4u)) & 0xFu;
 
-    return vec2(block / 15., sky / 15.);
+    return vec2(block, sky);
 }
 
 bool _flw_embeddedLight(vec3 worldPos, out vec2 lightCoord) {
-    ivec3 blockPos = ivec3(floor(worldPos));
-
-    ivec3 sectionPos = blockPos >> 4;
-    uvec3 blockInSectionPos = (blockPos & 0xF) + 1;
+    // The lowest corner of the 2x2x2 area we'll be trilinear interpolating.
+    ivec3 basePosition = ivec3(round(worldPos)) - 1;
 
     uint lightSectionIndex;
-    if (_flw_chunkCoordToSectionIndex(sectionPos, lightSectionIndex)) {
+    if (_flw_chunkCoordToSectionIndex(basePosition >> 4, lightSectionIndex)) {
         // TODO: useful debug mode for this.
         // flw_fragOverlay = ivec2(0, 3);
         return false;
@@ -81,7 +79,33 @@ bool _flw_embeddedLight(vec3 worldPos, out vec2 lightCoord) {
 
     uint sectionOffset = lightSectionIndex * _FLW_LIGHT_SECTION_SIZE_INTS;
 
-    lightCoord = _flw_lightAt(sectionOffset, blockInSectionPos);
+    // Adjusted into 18x18x18 space
+    uvec3 blockInSectionPos = (basePosition & 0xF) + 1;
+
+    // Fetch everything for trilinear interpolation
+    // Hypothetically we could re-order these and do some calculations in-between fetches
+    // to help with latency hiding, but the compiler should be able to do that for us.
+    vec2 light000 = _flw_lightAt(sectionOffset, blockInSectionPos);
+    vec2 light001 = _flw_lightAt(sectionOffset, blockInSectionPos + uvec3(0, 0, 1));
+    vec2 light010 = _flw_lightAt(sectionOffset, blockInSectionPos + uvec3(0, 1, 0));
+    vec2 light011 = _flw_lightAt(sectionOffset, blockInSectionPos + uvec3(0, 1, 1));
+    vec2 light100 = _flw_lightAt(sectionOffset, blockInSectionPos + uvec3(1, 0, 0));
+    vec2 light101 = _flw_lightAt(sectionOffset, blockInSectionPos + uvec3(1, 0, 1));
+    vec2 light110 = _flw_lightAt(sectionOffset, blockInSectionPos + uvec3(1, 1, 0));
+    vec2 light111 = _flw_lightAt(sectionOffset, blockInSectionPos + uvec3(1, 1, 1));
+
+    // The distance our fragment is from the center of the lowest corner.
+    vec3 interpolant = worldPos - vec3(basePosition) - 0.5;
+
+    vec2 light00 = mix(light000, light001, interpolant.z);
+    vec2 light01 = mix(light010, light011, interpolant.z);
+    vec2 light10 = mix(light100, light101, interpolant.z);
+    vec2 light11 = mix(light110, light111, interpolant.z);
+
+    vec2 light0 = mix(light00, light01, interpolant.y);
+    vec2 light1 = mix(light10, light11, interpolant.y);
+
+    lightCoord = mix(light0, light1, interpolant.x) / 15.;
     return true;
 }
 
