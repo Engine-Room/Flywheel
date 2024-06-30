@@ -35,7 +35,7 @@ public class TntMinecartVisual<T extends MinecartTNT> extends MinecartVisual<T> 
 		}
 
 		contents.setTransform(stack)
-				.setOverlay(overlay)
+				.overlay(overlay)
 				.setChanged();
 	}
 }

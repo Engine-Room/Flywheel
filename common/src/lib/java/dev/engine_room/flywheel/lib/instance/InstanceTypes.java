@@ -8,7 +8,7 @@ import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.layout.FloatRepr;
 import dev.engine_room.flywheel.api.layout.IntegerRepr;
 import dev.engine_room.flywheel.api.layout.LayoutBuilder;
-import dev.engine_room.flywheel.lib.math.MatrixMath;
+import dev.engine_room.flywheel.lib.util.ExtraMemoryOps;
 
 public final class InstanceTypes {
 	public static final InstanceType<TransformedInstance> TRANSFORMED = SimpleInstanceType.builder(TransformedInstance::new)
@@ -24,12 +24,10 @@ public final class InstanceTypes {
 				MemoryUtil.memPutByte(ptr + 1, instance.g);
 				MemoryUtil.memPutByte(ptr + 2, instance.b);
 				MemoryUtil.memPutByte(ptr + 3, instance.a);
-				MemoryUtil.memPutShort(ptr + 4, (short) (instance.overlay & 0xFFFF));
-				MemoryUtil.memPutShort(ptr + 6, (short) (instance.overlay >> 16 & 0xFFFF));
-				MemoryUtil.memPutShort(ptr + 8, (short) (instance.packedLight & 0xFFFF));
-				MemoryUtil.memPutShort(ptr + 10, (short) (instance.packedLight >> 16 & 0xFFFF));
-				MatrixMath.writeUnsafe(ptr + 12, instance.model);
-				MatrixMath.writeUnsafe(ptr + 76, instance.normal);
+				ExtraMemoryOps.put2x16(ptr + 4, instance.overlay);
+				ExtraMemoryOps.put2x16(ptr + 8, instance.light);
+				ExtraMemoryOps.putMatrix4f(ptr + 12, instance.model);
+				ExtraMemoryOps.putMatrix3f(ptr + 76, instance.normal);
 			})
 			.vertexShader(Flywheel.rl("instance/transformed.vert"))
 			.cullShader(Flywheel.rl("instance/cull/transformed.glsl"))
@@ -49,20 +47,15 @@ public final class InstanceTypes {
 				MemoryUtil.memPutByte(ptr + 1, instance.g);
 				MemoryUtil.memPutByte(ptr + 2, instance.b);
 				MemoryUtil.memPutByte(ptr + 3, instance.a);
-				MemoryUtil.memPutShort(ptr + 4, (short) (instance.overlay & 0xFFFF));
-				MemoryUtil.memPutShort(ptr + 6, (short) (instance.overlay >> 16 & 0xFFFF));
-				MemoryUtil.memPutShort(ptr + 8, (short) (instance.packedLight & 0xFFFF));
-				MemoryUtil.memPutShort(ptr + 10, (short) (instance.packedLight >> 16 & 0xFFFF));
+				ExtraMemoryOps.put2x16(ptr + 4, instance.overlay);
+				ExtraMemoryOps.put2x16(ptr + 8, instance.light);
 				MemoryUtil.memPutFloat(ptr + 12, instance.posX);
 				MemoryUtil.memPutFloat(ptr + 16, instance.posY);
 				MemoryUtil.memPutFloat(ptr + 20, instance.posZ);
 				MemoryUtil.memPutFloat(ptr + 24, instance.pivotX);
 				MemoryUtil.memPutFloat(ptr + 28, instance.pivotY);
 				MemoryUtil.memPutFloat(ptr + 32, instance.pivotZ);
-				MemoryUtil.memPutFloat(ptr + 36, instance.rotation.x);
-				MemoryUtil.memPutFloat(ptr + 40, instance.rotation.y);
-				MemoryUtil.memPutFloat(ptr + 44, instance.rotation.z);
-				MemoryUtil.memPutFloat(ptr + 48, instance.rotation.w);
+				ExtraMemoryOps.putQuaternionf(ptr + 36, instance.rotation);
 			})
 			.vertexShader(Flywheel.rl("instance/oriented.vert"))
 			.cullShader(Flywheel.rl("instance/cull/oriented.glsl"))

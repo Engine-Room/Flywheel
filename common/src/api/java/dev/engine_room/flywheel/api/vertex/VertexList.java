@@ -1,8 +1,5 @@
 package dev.engine_room.flywheel.api.vertex;
 
-import org.joml.Vector3f;
-import org.joml.Vector4f;
-
 /**
  * A read only view of a vertex buffer.
  *
@@ -39,14 +36,6 @@ public interface VertexList {
 	float normalY(int index);
 
 	float normalZ(int index);
-
-	default Vector4f getPos(int i, Vector4f dest) {
-		return dest.set(x(i), y(i), z(i));
-	}
-
-	default Vector3f getNormal(int i, Vector3f dest) {
-		return dest.set(normalX(i), normalY(i), normalZ(i));
-	}
 
 	default void write(MutableVertexList dst, int srcIndex, int dstIndex) {
 		dst.x(dstIndex, x(srcIndex));

@@ -3,7 +3,7 @@ package dev.engine_room.flywheel.backend.engine.uniform;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
 
-import dev.engine_room.flywheel.lib.math.MatrixMath;
+import dev.engine_room.flywheel.lib.util.ExtraMemoryOps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
@@ -46,7 +46,7 @@ class UniformWriter {
 	}
 
 	static long writeMat4(long ptr, Matrix4f mat) {
-		MatrixMath.writeUnsafe(ptr, mat);
+		ExtraMemoryOps.putMatrix4f(ptr, mat);
 		return ptr + 64;
 	}
 

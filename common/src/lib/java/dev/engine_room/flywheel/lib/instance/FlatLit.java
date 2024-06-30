@@ -10,17 +10,19 @@ import net.minecraft.client.renderer.LightTexture;
  */
 public interface FlatLit extends Instance {
 	/**
-	 * Set the block and sky light values for this instance.
-	 * @param blockLight Block light value
-	 * @param skyLight Sky light value
-	 * @return {@code this} for chaining
-	 */
-	FlatLit light(int blockLight, int skyLight);
-
-	/**
 	 * Set the packed light value for this instance.
 	 * @param packedLight Packed block and sky light per {@link LightTexture#pack(int, int)}
 	 * @return {@code this} for chaining
 	 */
 	FlatLit light(int packedLight);
+
+	/**
+	 * Set the block and sky light values for this instance.
+	 * @param blockLight Block light value
+	 * @param skyLight Sky light value
+	 * @return {@code this} for chaining
+	 */
+	default FlatLit light(int blockLight, int skyLight) {
+		return light(LightTexture.pack(blockLight, skyLight));
+	}
 }
