@@ -42,15 +42,24 @@ bool _flw_nextLut(uint base, int coord, out uint next) {
 
 bool _flw_chunkCoordToSectionIndex(ivec3 sectionPos, out uint index) {
     uint y;
-    if (_flw_nextLut(0, sectionPos.x, y)) {
+    if (_flw_nextLut(0, sectionPos.x, y) || y == 0) {
         return true;
     }
 
     uint z;
-    if (_flw_nextLut(y, sectionPos.y, z)) {
+    if (_flw_nextLut(y, sectionPos.y, z) || z == 0) {
         return true;
     }
-    return _flw_nextLut(z, sectionPos.z, index);
+
+    uint sectionIndex;
+    if (_flw_nextLut(z, sectionPos.z, index) || index == 0) {
+        return true;
+    }
+
+    // The index is written as 1-based so we can properly detect missing sections.
+    index = sectionIndex - 1;
+
+    return false;
 }
 
 vec2 _flw_lightAt(uint sectionOffset, uvec3 blockInSectionPos) {

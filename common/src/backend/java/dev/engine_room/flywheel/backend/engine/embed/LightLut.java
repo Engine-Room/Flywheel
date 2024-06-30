@@ -80,7 +80,8 @@ public class LightLut {
 				zLookup.ensureCapacity(zIndex + 3);
 				zLookup.size(zIndex + 3);
 			}
-			zLookup.set(zIndex + 2, sectionIndicesMaps.get(position));
+			// Add 1 to the actual index so that 0 indicates a missing section.
+			zLookup.set(zIndex + 2, sectionIndicesMaps.get(position) + 1);
 		}
 		return indices;
 	}

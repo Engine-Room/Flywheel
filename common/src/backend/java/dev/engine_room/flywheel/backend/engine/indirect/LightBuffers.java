@@ -22,7 +22,7 @@ public class LightBuffers {
 		lightArena.ensureCapacity(capacity);
 		light.uploadChangedSections(staging, lightArena.handle());
 
-		if (light.hasNewSections()) {
+		if (light.checkNeedsLutRebuildAndClear()) {
 			var lut = light.createLut();
 
 			this.lut.ensureCapacity(lut.size());
