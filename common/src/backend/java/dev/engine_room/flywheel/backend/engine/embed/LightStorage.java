@@ -12,6 +12,7 @@ import dev.engine_room.flywheel.lib.task.SimplePlan;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LevelAccessor;
@@ -47,7 +48,7 @@ public class LightStorage {
 	}
 
 	private final BitSet changed = new BitSet();
-	private boolean newSections = false;
+	private boolean needsLutRebuild = false;
 
 	public LightStorage(LevelAccessor level, EnvironmentStorage environmentStorage) {
 		this.level = level;
@@ -58,9 +59,32 @@ public class LightStorage {
 
 	public Plan<RenderContext> createFramePlan() {
 		return SimplePlan.of(() -> {
-			var longs = environmentStorage.allLightSections();
-			longs.forEach(this::addSection);
+			var allLightSections = environmentStorage.allLightSections();
+
+			removeUnusedSections(allLightSections);
+
+			// Only add the new sections.
+			allLightSections.removeAll(section2ArenaIndex.keySet());
+
+			for (var section : allLightSections) {
+				addSection(section);
+			}
 		});
+	}
+
+	private void removeUnusedSections(LongSet allLightSections) {
+		var entries = section2ArenaIndex.long2IntEntrySet();
+		var it = entries.iterator();
+		while (it.hasNext()) {
+			var entry = it.next();
+			var section = entry.getLongKey();
+
+			if (!allLightSections.contains(section)) {
+				arena.free(entry.getIntValue());
+				needsLutRebuild = true;
+				it.remove();
+			}
+		}
 	}
 
 	public int capacity() {
@@ -179,13 +203,9 @@ public class LightStorage {
 		if (out == INVALID_SECTION) {
 			out = arena.alloc();
 			section2ArenaIndex.put(section, out);
-			newSections = true;
+			needsLutRebuild = true;
 		}
 		return out;
-	}
-
-	public void removeSection(long section) {
-
 	}
 
 	public void delete() {
@@ -196,8 +216,10 @@ public class LightStorage {
 		return !changed.isEmpty();
 	}
 
-	public boolean hasNewSections() {
-		return newSections;
+	public boolean checkNeedsLutRebuildAndClear() {
+		var out = needsLutRebuild;
+		needsLutRebuild = false;
+		return out;
 	}
 
 	public void uploadChangedSections(StagingBuffer staging, int dstVbo) {
@@ -208,6 +230,7 @@ public class LightStorage {
 	}
 
 	public IntArrayList createLut() {
+		// TODO: incremental lut updates
 		return LightLut.buildLut(section2ArenaIndex);
 	}
 }

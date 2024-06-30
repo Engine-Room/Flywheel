@@ -46,7 +46,8 @@ public class EngineImpl implements Engine {
 
 	@Override
 	public Plan<RenderContext> createFramePlan() {
-		return lightStorage.createFramePlan().then(SyncedPlan.of(this::flush));
+		return lightStorage.createFramePlan()
+				.then(SyncedPlan.of(this::flush));
 	}
 
 	@Override
