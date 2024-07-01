@@ -53,13 +53,13 @@ public class BlockEntityStorage extends Storage<BlockEntity> {
 	}
 
 	@Override
-	protected List<? extends BlockEntityVisual<?>> createRaw(BlockEntity obj) {
+	protected List<? extends BlockEntityVisual<?>> createRaw(BlockEntity obj, float partialTick) {
 		var visualizer = VisualizationHelper.getVisualizer(obj);
 		if (visualizer == null) {
 			return List.of();
 		}
 
-		var visualList = visualizer.createVisual(visualizationContextSupplier.get(), obj);
+		var visualList = visualizer.createVisual(visualizationContextSupplier.get(), obj, partialTick);
 
 		BlockPos blockPos = obj.getBlockPos();
 		posLookup.put(blockPos.asLong(), visualList);

@@ -16,5 +16,5 @@ public interface Effect {
 	 * @param ctx The visualization context.
 	 * @return An arbitrary EffectVisual.
 	 */
-	List<EffectVisual<?>> visualize(VisualizationContext ctx);
+	List<EffectVisual<?>> visualize(VisualizationContext ctx, float partialTick);
 }

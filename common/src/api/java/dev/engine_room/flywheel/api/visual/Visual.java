@@ -9,13 +9,6 @@ package dev.engine_room.flywheel.api.visual;
  */
 public interface Visual {
 	/**
-	 * Initialize instances here.
-	 *
-	 * <p>This method will be called exactly once upon visual creation.</p>
-	 */
-	void init(float partialTick);
-
-	/**
 	 * Update instances here.
 	 *
 	 * <p>Good for when instances don't change very often and when animations are GPU based.

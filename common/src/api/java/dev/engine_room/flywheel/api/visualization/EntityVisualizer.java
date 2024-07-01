@@ -18,7 +18,7 @@ public interface EntityVisualizer<T extends Entity> {
 	 * @param entity The entity to construct a visual for.
 	 * @return The visual.
 	 */
-	List<EntityVisual<? super T>> createVisual(VisualizationContext ctx, T entity);
+	List<EntityVisual<? super T>> createVisual(VisualizationContext ctx, T entity, float partialTick);
 
 	/**
 	 * Checks if the given entity should not render with the vanilla {@link EntityRenderer}.

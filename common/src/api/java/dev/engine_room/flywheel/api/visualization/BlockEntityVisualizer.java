@@ -18,7 +18,7 @@ public interface BlockEntityVisualizer<T extends BlockEntity> {
 	 * @param blockEntity The block entity to construct a visual for.
 	 * @return The visual.
 	 */
-	List<BlockEntityVisual<? super T>> createVisual(VisualizationContext ctx, T blockEntity);
+	List<BlockEntityVisual<? super T>> createVisual(VisualizationContext ctx, T blockEntity, float partialTick);
 
 	/**
 	 * Checks if the given block entity should not be rendered with the vanilla {@link BlockEntityRenderer}.

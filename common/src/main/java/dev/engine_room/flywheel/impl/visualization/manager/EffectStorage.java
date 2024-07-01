@@ -14,8 +14,8 @@ public class EffectStorage extends Storage<Effect> {
 	}
 
 	@Override
-	protected List<? extends EffectVisual<?>> createRaw(Effect obj) {
-		return obj.visualize(visualizationContextSupplier.get());
+	protected List<? extends EffectVisual<?>> createRaw(Effect obj, float partialTick) {
+		return obj.visualize(visualizationContextSupplier.get(), partialTick);
 	}
 
 	@Override

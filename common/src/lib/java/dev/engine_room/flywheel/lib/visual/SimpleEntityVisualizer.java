@@ -24,8 +24,8 @@ public class SimpleEntityVisualizer<T extends Entity> implements EntityVisualize
 	}
 
 	@Override
-	public List<EntityVisual<? super T>> createVisual(VisualizationContext ctx, T entity) {
-		return List.of(visualFactory.create(ctx, entity));
+	public List<EntityVisual<? super T>> createVisual(VisualizationContext ctx, T entity, float partialTick) {
+		return List.of(visualFactory.create(ctx, entity, partialTick));
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class SimpleEntityVisualizer<T extends Entity> implements EntityVisualize
 
 	@FunctionalInterface
 	public interface Factory<T extends Entity> {
-		EntityVisual<? super T> create(VisualizationContext ctx, T entity);
+		EntityVisual<? super T> create(VisualizationContext ctx, T entity, float partialTick);
 	}
 
 	/**

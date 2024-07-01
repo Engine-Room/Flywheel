@@ -11,7 +11,9 @@ import dev.engine_room.flywheel.api.visual.LitVisual;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visualization.VisualManager;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
+import dev.engine_room.flywheel.lib.instance.FlatLit;
 import dev.engine_room.flywheel.lib.math.MoreMath;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -40,8 +42,8 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	@Nullable
 	protected LitVisual.Notifier notifier;
 
-	public AbstractBlockEntityVisual(VisualizationContext ctx, T blockEntity) {
-		super(ctx, blockEntity.getLevel());
+	public AbstractBlockEntityVisual(VisualizationContext ctx, T blockEntity, float partialTick) {
+		super(ctx, blockEntity.getLevel(), partialTick);
 		this.blockEntity = blockEntity;
 		this.pos = blockEntity.getBlockPos();
 		this.blockState = blockEntity.getBlockState();
@@ -49,18 +51,13 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	}
 
 	@Override
-	public void init(float partialTick) {
-		updateLight();
+	public void setLightSectionNotifier(Notifier notifier) {
+		this.notifier = notifier;
 	}
 
 	@Override
 	public void collectLightSections(LongConsumer consumer) {
 		consumer.accept(SectionPos.asLong(pos));
-	}
-
-	@Override
-	public void initLightSectionNotifier(Notifier notifier) {
-		this.notifier = notifier;
 	}
 
 	/**
@@ -99,5 +96,13 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	public boolean doDistanceLimitThisFrame(DynamicVisual.Context context) {
 		return !context.limiter()
 				.shouldUpdate(pos.distToCenterSqr(context.camera().getPosition()));
+	}
+
+	protected void relight(BlockPos pos, @Nullable FlatLit... instances) {
+		FlatLit.relight(LevelRenderer.getLightColor(level, pos), instances);
+	}
+
+	protected void relight(@Nullable FlatLit... instances) {
+		relight(pos, instances);
 	}
 }

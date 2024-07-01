@@ -24,8 +24,8 @@ public class SimpleBlockEntityVisualizer<T extends BlockEntity> implements Block
 	}
 
 	@Override
-	public List<BlockEntityVisual<? super T>> createVisual(VisualizationContext ctx, T blockEntity) {
-		return List.of(visualFactory.create(ctx, blockEntity));
+	public List<BlockEntityVisual<? super T>> createVisual(VisualizationContext ctx, T blockEntity, float partialTick) {
+		return List.of(visualFactory.create(ctx, blockEntity, partialTick));
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class SimpleBlockEntityVisualizer<T extends BlockEntity> implements Block
 
 	@FunctionalInterface
 	public interface Factory<T extends BlockEntity> {
-		BlockEntityVisual<? super T> create(VisualizationContext ctx, T blockEntity);
+		BlockEntityVisual<? super T> create(VisualizationContext ctx, T blockEntity, float partialTick);
 	}
 
 	/**

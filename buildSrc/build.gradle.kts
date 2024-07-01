@@ -31,5 +31,6 @@ gradlePlugin {
 }
 
 dependencies {
-    implementation("dev.architectury.loom:dev.architectury.loom.gradle.plugin:1.6-SNAPSHOT")
+    // FIXME: This should not hard-code the Loom version.
+    implementation("dev.architectury.loom:dev.architectury.loom.gradle.plugin:1.6.397")
 }

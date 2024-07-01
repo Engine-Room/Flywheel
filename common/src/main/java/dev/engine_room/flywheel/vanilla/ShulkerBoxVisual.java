@@ -34,19 +34,16 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.SHULKER, texture.sprite(), "lid"), Materials.SHULKER);
 	});
 
-	private TransformedInstance base;
-	private TransformedInstance lid;
+	private final TransformedInstance base;
+	private final TransformedInstance lid;
 
 	private final PoseStack stack = new PoseStack();
 
 	private float lastProgress = Float.NaN;
 
-	public ShulkerBoxVisual(VisualizationContext ctx, ShulkerBoxBlockEntity blockEntity) {
-		super(ctx, blockEntity);
-	}
+	public ShulkerBoxVisual(VisualizationContext ctx, ShulkerBoxBlockEntity blockEntity, float partialTick) {
+		super(ctx, blockEntity, partialTick);
 
-	@Override
-	public void init(float partialTick) {
 		DyeColor color = blockEntity.getColor();
 		Material texture;
 		if (color == null) {
@@ -67,12 +64,11 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 				.translateY(-1);
 
 		base = createBaseInstance(texture).setTransform(stack);
-		lid = createLidInstance(texture).setTransform(stack);
-
 		base.setChanged();
+		lid = createLidInstance(texture).setTransform(stack);
 		lid.setChanged();
 
-		super.init(partialTick);
+		updateLight(partialTick);
 	}
 
 	private TransformedInstance createBaseInstance(Material texture) {
@@ -119,8 +115,8 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	}
 
 	@Override
-	public void updateLight() {
-		relight(pos, base, lid);
+	public void updateLight(float partialTick) {
+		relight(base, lid);
 	}
 
 	@Override

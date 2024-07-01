@@ -26,24 +26,19 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.BELL, BellRenderer.BELL_RESOURCE_LOCATION.sprite(), "bell_body"), Materials.BELL);
 	});
 
-	private OrientedInstance bell;
+	private final OrientedInstance bell;
 
 	private boolean wasShaking = false;
 
-	public BellVisual(VisualizationContext ctx, BellBlockEntity blockEntity) {
-		super(ctx, blockEntity);
-	}
+	public BellVisual(VisualizationContext ctx, BellBlockEntity blockEntity, float partialTick) {
+		super(ctx, blockEntity, partialTick);
 
-	@Override
-	public void init(float partialTick) {
 		bell = createBellInstance().setPivot(0.5f, 0.75f, 0.5f)
 				.setPosition(getVisualPosition());
-
 		bell.setChanged();
 
 		updateRotation(partialTick);
-
-		super.init(partialTick);
+		updateLight(partialTick);
 	}
 
 	private OrientedInstance createBellInstance() {
@@ -81,8 +76,8 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	}
 
 	@Override
-	public void updateLight() {
-		relight(pos, bell);
+	public void updateLight(float partialTick) {
+		relight(bell);
 	}
 
 	@Override

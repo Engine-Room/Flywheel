@@ -51,22 +51,20 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		return new SingleMeshModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "lock"), Materials.CHEST);
 	});
 
-	private OrientedInstance bottom;
-	private TransformedInstance lid;
-	private TransformedInstance lock;
+	private final OrientedInstance bottom;
+	private final TransformedInstance lid;
+	private final TransformedInstance lock;
 
-	private ChestType chestType;
+	private final ChestType chestType;
+	private final Float2FloatFunction lidProgress;
+
 	private final Quaternionf baseRotation = new Quaternionf();
-	private Float2FloatFunction lidProgress;
 
 	private float lastProgress = Float.NaN;
 
-	public ChestVisual(VisualizationContext ctx, T blockEntity) {
-		super(ctx, blockEntity);
-	}
+	public ChestVisual(VisualizationContext ctx, T blockEntity, float partialTick) {
+		super(ctx, blockEntity, partialTick);
 
-	@Override
-	public void init(float partialTick) {
 		chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
 		Material texture = Sheets.chooseMaterial(blockEntity, chestType, isChristmas());
 
@@ -90,8 +88,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		bottom.setChanged();
 
 		applyLidTransform(lidProgress.get(partialTick));
-
-		super.init(partialTick);
+		updateLight(partialTick);
 	}
 
 	private OrientedInstance createBottomInstance(Material texture) {
@@ -153,8 +150,8 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 	}
 
 	@Override
-	public void updateLight() {
-		relight(pos, bottom, lid, lock);
+	public void updateLight(float partialTick) {
+		relight(bottom, lid, lock);
 	}
 
 	@Override

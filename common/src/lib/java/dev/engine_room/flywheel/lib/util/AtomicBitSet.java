@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 // https://github.com/Netflix/hollow/blob/master/hollow/src/main/java/com/netflix/hollow/core/memory/ThreadSafeBitSet.java
 // Refactored to remove unused methods, deduplicate some code segments, and add extra functionality with #forEachSetSpan
-public class AtomicBitset {
+public class AtomicBitSet {
 	// 1024 bits, 128 bytes, 16 longs per segment
 	public static final int DEFAULT_LOG2_SEGMENT_SIZE_IN_BITS = 10;
 
@@ -18,17 +18,17 @@ public class AtomicBitset {
 	private final int numLongsPerSegment;
 	private final int log2SegmentSize;
 	private final int segmentMask;
-	private final AtomicReference<AtomicBitsetSegments> segments;
+	private final AtomicReference<AtomicBitSetSegments> segments;
 
-	public AtomicBitset() {
+	public AtomicBitSet() {
 		this(DEFAULT_LOG2_SEGMENT_SIZE_IN_BITS);
 	}
 
-	public AtomicBitset(int log2SegmentSizeInBits) {
+	public AtomicBitSet(int log2SegmentSizeInBits) {
 		this(log2SegmentSizeInBits, 0);
 	}
 
-	public AtomicBitset(int log2SegmentSizeInBits, int numBitsToPreallocate) {
+	public AtomicBitSet(int log2SegmentSizeInBits, int numBitsToPreallocate) {
 		if (log2SegmentSizeInBits < 6) {
 			throw new IllegalArgumentException("Cannot specify fewer than 64 bits in each segment!");
 		}
@@ -40,7 +40,7 @@ public class AtomicBitset {
 		long numBitsPerSegment = numLongsPerSegment * 64L;
 		int numSegmentsToPreallocate = numBitsToPreallocate == 0 ? 1 : (int) (((numBitsToPreallocate - 1) / numBitsPerSegment) + 1);
 
-		segments = new AtomicReference<>(new AtomicBitsetSegments(numSegmentsToPreallocate, numLongsPerSegment));
+		segments = new AtomicReference<>(new AtomicBitSetSegments(numSegmentsToPreallocate, numLongsPerSegment));
 	}
 
 	public void set(int position) {
@@ -251,7 +251,7 @@ public class AtomicBitset {
 	}
 
 	public long maxSetBit() {
-		AtomicBitsetSegments segments = this.segments.get();
+		AtomicBitSetSegments segments = this.segments.get();
 
 		int segmentIdx = segments.numSegments() - 1;
 
@@ -273,7 +273,7 @@ public class AtomicBitset {
 			throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
 		}
 
-		AtomicBitsetSegments segments = this.segments.get();
+		AtomicBitSetSegments segments = this.segments.get();
 
 		int segmentPosition = segmentIndexForPosition(fromIndex);
 		if (segmentPosition >= segments.numSegments()) {
@@ -309,7 +309,7 @@ public class AtomicBitset {
 
 		int segmentPosition = segmentIndexForPosition(fromIndex);
 
-		AtomicBitsetSegments segments = this.segments.get();
+		AtomicBitSetSegments segments = this.segments.get();
 
 		if (segmentPosition >= segments.numSegments()) {
 			return fromIndex;
@@ -352,7 +352,7 @@ public class AtomicBitset {
 	 * @param consumer The consumer to accept each span.
 	 */
 	public void forEachSetSpan(BitSpanConsumer consumer) {
-		AtomicBitsetSegments segments = this.segments.get();
+		AtomicBitSetSegments segments = this.segments.get();
 
 		if (segments.cardinality() == 0) {
 			return;
@@ -415,7 +415,7 @@ public class AtomicBitset {
 	 * Clear all bits to 0.
 	 */
 	public void clear() {
-		AtomicBitsetSegments segments = this.segments.get();
+		AtomicBitSetSegments segments = this.segments.get();
 
 		for (int i = 0; i < segments.numSegments(); i++) {
 			AtomicLongArray segment = segments.getSegment(i);
@@ -478,13 +478,13 @@ public class AtomicBitset {
 	}
 
 	@NotNull
-	private AtomicBitsetSegments expandToFit(int segmentIndex) {
-		AtomicBitsetSegments visibleSegments = segments.get();
+	private AtomicBitSet.AtomicBitSetSegments expandToFit(int segmentIndex) {
+		AtomicBitSetSegments visibleSegments = segments.get();
 
 		while (visibleSegments.numSegments() <= segmentIndex) {
 			// Thread safety:  newVisibleSegments contains all of the segments from the currently visible segments, plus extra.
 			// all of the segments in the currently visible segments are canonical and will not change.
-			AtomicBitsetSegments newVisibleSegments = new AtomicBitsetSegments(visibleSegments, segmentIndex + 1, numLongsPerSegment);
+			AtomicBitSetSegments newVisibleSegments = new AtomicBitSetSegments(visibleSegments, segmentIndex + 1, numLongsPerSegment);
 
 			// because we are using a compareAndSet, if this thread "wins the race" and successfully sets this variable, then the segments
 			// which are newly defined in newVisibleSegments become canonical.
@@ -500,10 +500,10 @@ public class AtomicBitset {
 		return visibleSegments;
 	}
 
-	private static class AtomicBitsetSegments {
+	private static class AtomicBitSetSegments {
 		private final AtomicLongArray[] segments;
 
-		private AtomicBitsetSegments(int numSegments, int segmentLength) {
+		private AtomicBitSetSegments(int numSegments, int segmentLength) {
 			AtomicLongArray[] segments = new AtomicLongArray[numSegments];
 
 			for (int i = 0; i < numSegments; i++) {
@@ -515,7 +515,7 @@ public class AtomicBitset {
 			this.segments = segments;
 		}
 
-		private AtomicBitsetSegments(AtomicBitsetSegments copyFrom, int numSegments, int segmentLength) {
+		private AtomicBitSetSegments(AtomicBitSetSegments copyFrom, int numSegments, int segmentLength) {
 			AtomicLongArray[] segments = new AtomicLongArray[numSegments];
 
 			for (int i = 0; i < numSegments; i++) {
@@ -550,7 +550,7 @@ public class AtomicBitset {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof AtomicBitset other)) {
+		if (!(obj instanceof AtomicBitSet other)) {
 			return false;
 		}
 
@@ -558,8 +558,8 @@ public class AtomicBitset {
 			throw new IllegalArgumentException("Segment sizes must be the same");
 		}
 
-		AtomicBitsetSegments thisSegments = this.segments.get();
-		AtomicBitsetSegments otherSegments = other.segments.get();
+		AtomicBitSetSegments thisSegments = this.segments.get();
+		AtomicBitSetSegments otherSegments = other.segments.get();
 
 		for (int i = 0; i < thisSegments.numSegments(); i++) {
 			AtomicLongArray thisArray = thisSegments.getSegment(i);

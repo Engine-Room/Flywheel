@@ -81,14 +81,14 @@ public abstract class Storage<T> {
 		visuals.replaceAll((obj, visuals) -> {
 			visuals.forEach(Visual::delete);
 
-			var out = createRaw(obj);
+			var out = createRaw(obj, partialTick);
 
 			if (out.isEmpty()) {
 				return null;
 			}
 
 			for (Visual visual : out) {
-				setup(visual, partialTick);
+				setup(visual);
 			}
 
 			return out;
@@ -108,7 +108,7 @@ public abstract class Storage<T> {
 	}
 
 	private void create(T obj, float partialTick) {
-		var visuals = createRaw(obj);
+		var visuals = createRaw(obj, partialTick);
 
 		if (visuals.isEmpty()) {
 			return;
@@ -116,11 +116,11 @@ public abstract class Storage<T> {
 		this.visuals.put(obj, visuals);
 
 		for (Visual visual : visuals) {
-			setup(visual, partialTick);
+			setup(visual);
 		}
 	}
 
-	protected abstract List<? extends Visual> createRaw(T obj);
+	protected abstract List<? extends Visual> createRaw(T obj, float partialTick);
 
 	public Plan<DynamicVisual.Context> framePlan() {
 		return NestedPlan.of(dynamicVisuals, litVisuals.plan(), ForEachPlan.of(() -> simpleDynamicVisuals, SimpleDynamicVisual::beginFrame));
@@ -134,9 +134,7 @@ public abstract class Storage<T> {
 		litVisuals.enqueueLightUpdateSection(section);
 	}
 
-	private void setup(Visual visual, float partialTick) {
-		visual.init(partialTick);
-
+	private void setup(Visual visual) {
 		if (visual instanceof TickableVisual tickable) {
 			if (visual instanceof SimpleTickableVisual simpleTickable) {
 				simpleTickableVisuals.add(simpleTickable);
@@ -154,7 +152,7 @@ public abstract class Storage<T> {
 		}
 
 		if (visual instanceof LitVisual lit) {
-			litVisuals.addAndInitNotifier(lit);
+			litVisuals.setNotifierAndAdd(lit);
 		}
 	}
 

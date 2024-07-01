@@ -13,16 +13,14 @@ import net.minecraft.core.SectionPos;
  */
 public interface LitVisual extends Visual {
 	/**
-	 * Called when a section this visual is contained in receives a light update.
+	 * Set the notifier object.
 	 *
-	 * <p>Even if multiple sections are updated at the same time, this method will only be called once.</p>
+	 * <p>This method is only called once right after the visual
+	 * is created and before {@link #collectLightSections}.</p>
 	 *
-	 * <p>The implementation is free to parallelize calls to this method, as well as execute the plan
-	 * returned by {@link DynamicVisual#planFrame} simultaneously. It is safe to query/update light here,
-	 * but you must ensure proper synchronization if you want to mutate anything outside this visual or
-	 * anything that is also mutated within {@link DynamicVisual#planFrame}.</p>
+	 * @param notifier The notifier.
 	 */
-	void updateLight();
+	void setLightSectionNotifier(Notifier notifier);
 
 	/**
 	 * Collect the sections that this visual is contained in.
@@ -36,14 +34,18 @@ public interface LitVisual extends Visual {
 	void collectLightSections(LongConsumer consumer);
 
 	/**
-	 * Set the notifier object.
+	 * Called when a section this visual is contained in receives a light update.
 	 *
-	 * <p>This method is only called once, upon visual creation,
-	 * after {@link #init} and before {@link #collectLightSections}.</p>
+	 * <p>Even if multiple sections are updated at the same time, this method will only be called once.</p>
 	 *
-	 * @param notifier The notifier.
+	 * <p>The implementation is free to parallelize calls to this method, as well as execute the plan
+	 * returned by {@link DynamicVisual#planFrame} simultaneously. It is safe to query/update light here,
+	 * but you must ensure proper synchronization if you want to mutate anything outside this visual or
+	 * anything that is also mutated within {@link DynamicVisual#planFrame}.</p>
+	 *
+	 * <p>This method not is invoked automatically after visual creation.</p>
 	 */
-	void initLightSectionNotifier(Notifier notifier);
+	void updateLight(float partialTick);
 
 	/**
 	 * A notifier object that can be used to indicate to the impl

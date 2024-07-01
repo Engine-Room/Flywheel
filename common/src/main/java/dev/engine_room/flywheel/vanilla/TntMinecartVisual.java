@@ -11,8 +11,8 @@ import net.minecraft.world.entity.vehicle.MinecartTNT;
 public class TntMinecartVisual<T extends MinecartTNT> extends MinecartVisual<T> {
 	private static final int WHITE_OVERLAY = OverlayTexture.pack(OverlayTexture.u(1.0F), 10);
 
-	public TntMinecartVisual(VisualizationContext ctx, T entity) {
-		super(ctx, entity, TNT_BODY_MODEL);
+	public TntMinecartVisual(VisualizationContext ctx, T entity, float partialTick) {
+		super(ctx, entity, partialTick, TNT_BODY_MODEL);
 	}
 
 	@Override

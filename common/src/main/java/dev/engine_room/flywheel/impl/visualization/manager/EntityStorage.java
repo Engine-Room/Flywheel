@@ -16,13 +16,13 @@ public class EntityStorage extends Storage<Entity> {
 	}
 
 	@Override
-    protected List<? extends EntityVisual<?>> createRaw(Entity obj) {
+    protected List<? extends EntityVisual<?>> createRaw(Entity obj, float partialTick) {
 		var visualizer = VisualizationHelper.getVisualizer(obj);
 		if (visualizer == null) {
 			return List.of();
 		}
 
-		return visualizer.createVisual(visualizationContextSupplier.get(), obj);
+		return visualizer.createVisual(visualizationContextSupplier.get(), obj, partialTick);
 	}
 
 	@Override

@@ -7,9 +7,9 @@ public class TestAtomicBitset {
 
 	@Test
 	void testNextClearBit() {
-		var segmentLength = 1 << AtomicBitset.DEFAULT_LOG2_SEGMENT_SIZE_IN_BITS;
-		var bitLength = 2 << AtomicBitset.DEFAULT_LOG2_SEGMENT_SIZE_IN_BITS;
-		var bs = new AtomicBitset(AtomicBitset.DEFAULT_LOG2_SEGMENT_SIZE_IN_BITS, bitLength);
+		var segmentLength = 1 << AtomicBitSet.DEFAULT_LOG2_SEGMENT_SIZE_IN_BITS;
+		var bitLength = 2 << AtomicBitSet.DEFAULT_LOG2_SEGMENT_SIZE_IN_BITS;
+		var bs = new AtomicBitSet(AtomicBitSet.DEFAULT_LOG2_SEGMENT_SIZE_IN_BITS, bitLength);
 
 		Assertions.assertEquals(0, bs.nextClearBit(0));
 		Assertions.assertEquals(1, bs.nextClearBit(1));

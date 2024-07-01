@@ -38,41 +38,38 @@ public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisu
 	public static final ModelHolder SPAWNER_BODY_MODEL = createBodyModelHolder(ModelLayers.SPAWNER_MINECART);
 	public static final ModelHolder TNT_BODY_MODEL = createBodyModelHolder(ModelLayers.TNT_MINECART);
 
-	private final ModelHolder bodyModel;
-
-	private TransformedInstance body;
+	private final TransformedInstance body;
 	@Nullable
 	private TransformedInstance contents;
-	private BlockState blockState;
-	private boolean active;
+
+	private final ModelHolder bodyModel;
 
 	private final PoseStack stack = new PoseStack();
 
-	public MinecartVisual(VisualizationContext ctx, T entity, ModelHolder bodyModel) {
-		super(ctx, entity);
+	private BlockState blockState;
+	private boolean active;
+
+	public MinecartVisual(VisualizationContext ctx, T entity, float partialTick, ModelHolder bodyModel) {
+		super(ctx, entity, partialTick);
+
 		this.bodyModel = bodyModel;
+
+		body = createBodyInstance();
+		blockState = entity.getDisplayBlockState();
+		contents = createContentsInstance();
+
+		addComponent(new ShadowComponent(visualizationContext, entity).radius(0.7f));
+		addComponent(new FireComponent(visualizationContext, entity));
+		addComponent(new HitboxComponent(visualizationContext, entity));
+
+		updateInstances(partialTick);
+		updateLight(partialTick);
 	}
 
 	private static ModelHolder createBodyModelHolder(ModelLayerLocation layer) {
 		return new ModelHolder(() -> {
 			return new SingleMeshModel(ModelPartConverter.convert(layer), Materials.MINECART);
 		});
-	}
-
-	@Override
-	public void init(float partialTick) {
-		addComponent(new ShadowComponent(visualizationContext, entity).radius(0.7f));
-		addComponent(new FireComponent(visualizationContext, entity));
-		addComponent(new HitboxComponent(visualizationContext, entity));
-
-		body = createBodyInstance();
-		blockState = entity.getDisplayBlockState();
-		contents = createContentsInstance();
-
-		updateInstances(partialTick);
-		updateLight();
-
-		super.init(partialTick);
 	}
 
 	private TransformedInstance createBodyInstance() {
@@ -110,8 +107,6 @@ public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisu
 			}
 			contents = createContentsInstance();
 		}
-
-		updateLight();
 	}
 
 	@Override
@@ -198,6 +193,9 @@ public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisu
 		stack.scale(-1.0F, -1.0F, 1.0F);
 		body.setTransform(stack)
 				.setChanged();
+
+		// TODO: Use LitVisual if possible.
+		updateLight(partialTick);
 	}
 
 	protected void updateContents(TransformedInstance contents, PoseStack stack, float partialTick) {
@@ -205,8 +203,8 @@ public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisu
 				.setChanged();
 	}
 
-	public void updateLight() {
-		relight(entity.blockPosition(), body, contents);
+	public void updateLight(float partialTick) {
+		relight(partialTick, body, contents);
 	}
 
 	@Override
