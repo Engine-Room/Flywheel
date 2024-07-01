@@ -63,10 +63,28 @@ public class LightStorage {
 
 			removeUnusedSections(allLightSections);
 
-			// Only add the new sections.
-			allLightSections.removeAll(section2ArenaIndex.keySet());
+			var knownSections = section2ArenaIndex.keySet();
 
-			for (var section : allLightSections) {
+			var updatedSections = LightUpdateHolder.get(level)
+					.getUpdatedSections();
+
+			// Only add the new sections.
+			allLightSections.removeAll(knownSections);
+
+			for (long updatedSection : updatedSections) {
+				for (int x = -1; x <= 1; x++) {
+					for (int y = -1; y <= 1; y++) {
+						for (int z = -1; z <= 1; z++) {
+							long section = SectionPos.offset(updatedSection, x, y, z);
+							if (knownSections.contains(section)) {
+								allLightSections.add(section);
+							}
+						}
+					}
+				}
+			}
+
+			for (long section : allLightSections) {
 				addSection(section);
 			}
 		});
@@ -103,50 +121,38 @@ public class LightStorage {
 		int yMin = SectionPos.sectionToBlockCoord(SectionPos.y(section));
 		int zMin = SectionPos.sectionToBlockCoord(SectionPos.z(section));
 
+		var sectionPos = SectionPos.of(section);
+		var blockData = blockLight.getDataLayerData(sectionPos);
+		var skyData = skyLight.getDataLayerData(sectionPos);
+
 		int index = indexForSection(section);
 
 		changed.set(index);
 
 		long ptr = arena.indexToPointer(index);
 
+		// Not sure of a way to iterate over the surface of a cube, so branch in the inner loop to take the fast path.
+		// Adding the fast path is about 8x faster than having only the slow path.
+		// There's still room for optimization, as the slow path takes about 3x the cpu time as the fast path despite
+		// being called an order of magnitude less.
 		for (int y = -1; y < 17; y++) {
 			for (int z = -1; z < 17; z++) {
 				for (int x = -1; x < 17; x++) {
-					blockPos.set(xMin + x, yMin + y, zMin + z);
-					var block = blockLight.getLightValue(blockPos);
-					var sky = skyLight.getLightValue(blockPos);
+					if (x == -1 || y == -1 || z == -1 || x == 16 || y == 16 || z == 16) {
+						// Slow path, collect the surface of our section.
+						blockPos.set(xMin + x, yMin + y, zMin + z);
+						var block = blockLight.getLightValue(blockPos);
+						var sky = skyLight.getLightValue(blockPos);
 
-					write(ptr, x, y, z, block, sky);
-				}
-			}
-		}
-	}
+						write(ptr, x, y, z, block, sky);
+					} else {
+						// Fast path, read directly from the data layer for the main section.
+						// Would be nice to move the null check elsewhere.
+						var block = blockData == null ? 0 : blockData.get(x, y, z);
+						var sky = skyData == null ? 0 : skyData.get(x, y, z);
 
-	void addSectionFast(long section) {
-		// TODO: get this to work. it should be MUCH faster to read directly from the data layer
-		//  though it's more complicated to manage which section datas we fetch
-		var lightEngine = level.getLightEngine();
-
-		var blockLight = lightEngine.getLayerListener(LightLayer.BLOCK);
-		var skyLight = lightEngine.getLayerListener(LightLayer.SKY);
-
-		var sectionPos = SectionPos.of(section);
-		var blockData = blockLight.getDataLayerData(sectionPos);
-		var skyData = skyLight.getDataLayerData(sectionPos);
-
-		if (blockData == null || skyData == null) {
-			return;
-		}
-
-		long ptr = ptrForSection(section);
-
-		for (int y = 0; y < 16; y++) {
-			for (int z = 0; z < 16; z++) {
-				for (int x = 0; x < 16; x++) {
-					var block = blockData.get(x, y, z);
-					var sky = skyData.get(x, y, z);
-
-					write(ptr, x, y, z, block, sky);
+						write(ptr, x, y, z, block, sky);
+					}
 				}
 			}
 		}
@@ -171,19 +177,6 @@ public class LightStorage {
 		long packedByte = (block & 0xF) | ((sky & 0xF) << 4);
 
 		MemoryUtil.memPutByte(ptr + offset, (byte) packedByte);
-	}
-
-	private void writeFor2Cubed(long ptr, int x, int y, int z, int block, int sky) {
-		int x1 = x + 1;
-		int y1 = y + 1;
-		int z1 = z + 1;
-
-		int longIndex = (x1 >> 1) + (z1 >> 1) * 9 + (y1 >> 1) * 9 * 9;
-		int byteIndexInLong = (x1 & 1) + ((z1 & 1) << 1) + ((y1 & 1) << 2);
-
-		long packedByte = (block & 0xF) | ((sky & 0xF) << 4);
-
-		MemoryUtil.memPutByte(ptr + longIndex * 8L + byteIndexInLong, (byte) packedByte);
 	}
 
 	/**
