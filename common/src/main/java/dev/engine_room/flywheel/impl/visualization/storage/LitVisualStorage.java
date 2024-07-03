@@ -51,11 +51,12 @@ public class LitVisualStorage {
 			});
 
 			long updateId = getNextUpdateId();
+			Updater.Context updaterContext = new Updater.Context(updateId, context.partialTick());
 
 			for (long section : sectionsUpdatedThisFrame) {
 				var visuals = sections2Visuals.get(section);
 				if (visuals != null && !visuals.isEmpty()) {
-					taskExecutor.execute(() -> Distribute.tasks(taskExecutor, updateId, sync, visuals, Updater::updateLight));
+					taskExecutor.execute(() -> Distribute.tasks(taskExecutor, updaterContext, sync, visuals, Updater::updateLight));
 				} else {
 					sync.decrementAndEventuallyRun();
 				}
@@ -89,8 +90,8 @@ public class LitVisualStorage {
 		return visuals2Sections.isEmpty();
 	}
 
-	public void addAndInitNotifier(LitVisual visual) {
-		visual.initLightSectionNotifier(new LitVisualNotifierImpl(visual));
+	public void setNotifierAndAdd(LitVisual visual) {
+		visual.setLightSectionNotifier(new LitVisualNotifierImpl(visual));
 		add(visual);
 	}
 
@@ -168,15 +169,15 @@ public class LitVisualStorage {
 
 	// Breaking this into 2 separate cases allows us to avoid the overhead of atomics in the common case.
 	sealed interface Updater {
-		void updateLight(long updateId);
+		void updateLight(Context ctx);
 
 		LitVisual visual();
 
 		// The visual is only in one section. In this case, we can just update the visual directly.
 		record Simple(LitVisual visual) implements Updater {
 			@Override
-			public void updateLight(long updateId) {
-				visual.updateLight();
+			public void updateLight(Context ctx) {
+				visual.updateLight(ctx.partialTick);
 			}
 		}
 
@@ -184,13 +185,16 @@ public class LitVisualStorage {
 		// even when multiple sections it was contained in are updated at the same time.
 		record Synced(LitVisual visual, AtomicLong updateId) implements Updater {
 			@Override
-			public void updateLight(long updateId) {
+			public void updateLight(Context ctx) {
 				// Different update ID means we won, so we can update the visual.
 				// Same update ID means another thread beat us to the update.
-				if (this.updateId.getAndSet(updateId) != updateId) {
-					visual.updateLight();
+				if (this.updateId.getAndSet(ctx.updateId) != ctx.updateId) {
+					visual.updateLight(ctx.partialTick);
 				}
 			}
+		}
+
+		record Context(long updateId, float partialTick) {
 		}
 	}
 

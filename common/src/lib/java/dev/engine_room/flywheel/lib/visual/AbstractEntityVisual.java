@@ -8,8 +8,12 @@ import dev.engine_room.flywheel.api.visual.EntityVisual;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
+import dev.engine_room.flywheel.lib.instance.FlatLit;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -31,14 +35,10 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	protected final T entity;
 	protected final EntityVisibilityTester visibilityTester;
 
-	public AbstractEntityVisual(VisualizationContext ctx, T entity) {
-		super(ctx, entity.level());
+	public AbstractEntityVisual(VisualizationContext ctx, T entity, float partialTick) {
+		super(ctx, entity.level(), partialTick);
 		this.entity = entity;
 		visibilityTester = new EntityVisibilityTester(entity, ctx.renderOrigin(), 1.5f);
-	}
-
-	@Override
-	public void init(float partialTick) {
 	}
 
 	/**
@@ -83,5 +83,13 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 
 	public boolean isVisible(FrustumIntersection frustum) {
 		return entity.noCulling || visibilityTester.check(frustum);
+	}
+
+	protected void relight(float partialTick, FlatLit... instances) {
+		BlockPos pos = BlockPos.containing(entity.getLightProbePosition(partialTick));
+		int blockLight = entity.isOnFire() ? 15 : level.getBrightness(LightLayer.BLOCK, pos);
+		int skyLight = level.getBrightness(LightLayer.SKY, pos);
+		int light = LightTexture.pack(blockLight, skyLight);
+		FlatLit.relight(light, instances);
 	}
 }

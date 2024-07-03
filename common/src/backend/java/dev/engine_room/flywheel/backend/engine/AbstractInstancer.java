@@ -8,7 +8,7 @@ import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.instance.Instancer;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
-import dev.engine_room.flywheel.lib.util.AtomicBitset;
+import dev.engine_room.flywheel.lib.util.AtomicBitSet;
 
 public abstract class AbstractInstancer<I extends Instance> implements Instancer<I> {
 	public final InstanceType<I> type;
@@ -19,8 +19,8 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	protected final ArrayList<I> instances = new ArrayList<>();
 	protected final ArrayList<InstanceHandleImpl> handles = new ArrayList<>();
 
-	protected final AtomicBitset changed = new AtomicBitset();
-	protected final AtomicBitset deleted = new AtomicBitset();
+	protected final AtomicBitSet changed = new AtomicBitSet();
+	protected final AtomicBitSet deleted = new AtomicBitSet();
 
 	protected AbstractInstancer(InstanceType<I> type, Environment environment) {
 		this.type = type;

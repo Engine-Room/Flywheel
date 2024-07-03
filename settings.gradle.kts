@@ -12,10 +12,11 @@ pluginManagement {
         maven("https://maven.parchmentmc.org")
     }
 
-    plugins {
-        val arch_loom_version: String by settings
-        id("dev.architectury.loom") version arch_loom_version
-    }
+    // FIXME: This doesn't do anything. The actual version is always the one defined in buildSrc/build.gradle.kts.
+//    plugins {
+//        val arch_loom_version: String by settings
+//        id("dev.architectury.loom") version arch_loom_version
+//    }
 }
 
 rootProject.name = "Flywheel"

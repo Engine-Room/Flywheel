@@ -9,8 +9,8 @@ import net.minecraft.world.entity.Entity;
 public class SimpleEntityVisual<T extends Entity> extends AbstractEntityVisual<T> implements SimpleDynamicVisual {
 	protected final List<EntityComponent> components = new ArrayList<>();
 
-	public SimpleEntityVisual(VisualizationContext ctx, T entity) {
-		super(ctx, entity);
+	public SimpleEntityVisual(VisualizationContext ctx, T entity, float partialTick) {
+		super(ctx, entity, partialTick);
 	}
 
 	public void addComponent(EntityComponent component) {

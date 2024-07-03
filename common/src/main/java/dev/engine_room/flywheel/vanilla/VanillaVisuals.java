@@ -47,27 +47,27 @@ public class VanillaVisuals {
 				.apply();
 
 		builder(EntityType.CHEST_MINECART)
-				.factory((ctx, entity) -> new MinecartVisual<>(ctx, entity, MinecartVisual.CHEST_BODY_MODEL))
+				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, MinecartVisual.CHEST_BODY_MODEL))
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply();
 		builder(EntityType.COMMAND_BLOCK_MINECART)
-				.factory((ctx, entity) -> new MinecartVisual<>(ctx, entity, MinecartVisual.COMMAND_BLOCK_BODY_MODEL))
+				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, MinecartVisual.COMMAND_BLOCK_BODY_MODEL))
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply();
 		builder(EntityType.FURNACE_MINECART)
-				.factory((ctx, entity) -> new MinecartVisual<>(ctx, entity, MinecartVisual.FURNACE_BODY_MODEL))
+				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, MinecartVisual.FURNACE_BODY_MODEL))
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply();
 		builder(EntityType.HOPPER_MINECART)
-				.factory((ctx, entity) -> new MinecartVisual<>(ctx, entity, MinecartVisual.HOPPER_BODY_MODEL))
+				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, MinecartVisual.HOPPER_BODY_MODEL))
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply();
 		builder(EntityType.MINECART)
-				.factory((ctx, entity) -> new MinecartVisual<>(ctx, entity, MinecartVisual.STANDARD_BODY_MODEL))
+				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, MinecartVisual.STANDARD_BODY_MODEL))
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply();
 		builder(EntityType.SPAWNER_MINECART)
-				.factory((ctx, entity) -> new MinecartVisual<>(ctx, entity, MinecartVisual.SPAWNER_BODY_MODEL))
+				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, MinecartVisual.SPAWNER_BODY_MODEL))
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply();
 		builder(EntityType.TNT_MINECART)

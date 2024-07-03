@@ -1,5 +1,7 @@
 package dev.engine_room.flywheel.api.visualization;
 
+import java.util.List;
+
 import dev.engine_room.flywheel.api.visual.EntityVisual;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.Entity;
@@ -16,7 +18,7 @@ public interface EntityVisualizer<T extends Entity> {
 	 * @param entity The entity to construct a visual for.
 	 * @return The visual.
 	 */
-	EntityVisual<? super T> createVisual(VisualizationContext ctx, T entity);
+	List<EntityVisual<? super T>> createVisual(VisualizationContext ctx, T entity, float partialTick);
 
 	/**
 	 * Checks if the given entity should not render with the vanilla {@link EntityRenderer}.

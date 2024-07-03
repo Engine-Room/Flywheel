@@ -109,7 +109,7 @@ public class HitboxComponent implements EntityComponent {
 						.loadIdentity()
 						.translate(entityX - bbWidthHalf, entityY + entity.getEyeHeight() - 0.01, entityZ - bbWidthHalf)
 						.scale(bbWidth, 0.02f, bbWidth)
-						.setColor(255, 0, 0)
+						.color(255, 0, 0)
 						.setChanged();
 			}
 
@@ -119,7 +119,7 @@ public class HitboxComponent implements EntityComponent {
 					.loadIdentity()
 					.translate(entityX, entityY + entity.getEyeHeight(), entityZ)
 					.rotate(new Quaternionf().rotateTo(0, 1, 0, (float) viewVector.x, (float) viewVector.y, (float) viewVector.z))
-					.setColor(0, 0, 255)
+					.color(0, 0, 255)
 					.setChanged();
 		}
 

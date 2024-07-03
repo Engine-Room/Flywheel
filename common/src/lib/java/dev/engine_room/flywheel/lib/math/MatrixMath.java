@@ -7,23 +7,8 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 public final class MatrixMath {
 	private MatrixMath() {
-	}
-
-	public static PoseStack copyPoseStack(PoseStack stack) {
-		PoseStack copy = new PoseStack();
-		copy.last()
-				.pose()
-				.set(stack.last()
-						.pose());
-		copy.last()
-				.normal()
-				.set(stack.last()
-						.normal());
-		return copy;
 	}
 
 	public static float transformPositionX(Matrix4f matrix, float x, float y, float z) {
@@ -48,37 +33,6 @@ public final class MatrixMath {
 
 	public static float transformNormalZ(Matrix3f matrix, float x, float y, float z) {
 		return fma(matrix.m02(), x, fma(matrix.m12(), y, matrix.m22() * z));
-	}
-
-	public static void writeUnsafe(long ptr, Matrix4f matrix) {
-		MemoryUtil.memPutFloat(ptr, matrix.m00());
-		MemoryUtil.memPutFloat(ptr + 4, matrix.m01());
-		MemoryUtil.memPutFloat(ptr + 8, matrix.m02());
-		MemoryUtil.memPutFloat(ptr + 12, matrix.m03());
-		MemoryUtil.memPutFloat(ptr + 16, matrix.m10());
-		MemoryUtil.memPutFloat(ptr + 20, matrix.m11());
-		MemoryUtil.memPutFloat(ptr + 24, matrix.m12());
-		MemoryUtil.memPutFloat(ptr + 28, matrix.m13());
-		MemoryUtil.memPutFloat(ptr + 32, matrix.m20());
-		MemoryUtil.memPutFloat(ptr + 36, matrix.m21());
-		MemoryUtil.memPutFloat(ptr + 40, matrix.m22());
-		MemoryUtil.memPutFloat(ptr + 44, matrix.m23());
-		MemoryUtil.memPutFloat(ptr + 48, matrix.m30());
-		MemoryUtil.memPutFloat(ptr + 52, matrix.m31());
-		MemoryUtil.memPutFloat(ptr + 56, matrix.m32());
-		MemoryUtil.memPutFloat(ptr + 60, matrix.m33());
-	}
-
-	public static void writeUnsafe(long ptr, Matrix3f matrix) {
-		MemoryUtil.memPutFloat(ptr, matrix.m00());
-		MemoryUtil.memPutFloat(ptr + 4, matrix.m01());
-		MemoryUtil.memPutFloat(ptr + 8, matrix.m02());
-		MemoryUtil.memPutFloat(ptr + 12, matrix.m10());
-		MemoryUtil.memPutFloat(ptr + 16, matrix.m11());
-		MemoryUtil.memPutFloat(ptr + 20, matrix.m12());
-		MemoryUtil.memPutFloat(ptr + 24, matrix.m20());
-		MemoryUtil.memPutFloat(ptr + 28, matrix.m21());
-		MemoryUtil.memPutFloat(ptr + 32, matrix.m22());
 	}
 
 	/**
