@@ -47,6 +47,9 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+    flatDir {
+        dirs "libs"
+    }
 }
 
 dependencies {
@@ -68,7 +71,7 @@ dependencies {
     // switch to implementation for debugging
     modCompileOnly 'maven.modrinth:starlight:1.1.2+1.20'
 
-    modCompileOnly 'maven.modrinth:sodium:mc1.20.1-0.5.3'
+    modCompileOnly ':sodium-fabric-1.20.1-0.6.0-alpha.1'
     modCompileOnly 'maven.modrinth:iris:1.6.10+1.20.1'
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
