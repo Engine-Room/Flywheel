@@ -1,6 +1,5 @@
 package dev.engine_room.flywheel.impl.visualization.manager;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 import dev.engine_room.flywheel.api.visual.Effect;
@@ -14,7 +13,7 @@ public class EffectStorage extends Storage<Effect> {
 	}
 
 	@Override
-	protected List<? extends EffectVisual<?>> createRaw(Effect obj, float partialTick) {
+	protected EffectVisual<?> createRaw(Effect obj, float partialTick) {
 		return obj.visualize(visualizationContextSupplier.get(), partialTick);
 	}
 

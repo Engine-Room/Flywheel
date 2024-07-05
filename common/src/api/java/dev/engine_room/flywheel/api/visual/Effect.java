@@ -1,7 +1,5 @@
 package dev.engine_room.flywheel.api.visual;
 
-import java.util.List;
-
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 
 /**
@@ -16,5 +14,5 @@ public interface Effect {
 	 * @param ctx The visualization context.
 	 * @return An arbitrary EffectVisual.
 	 */
-	List<EffectVisual<?>> visualize(VisualizationContext ctx, float partialTick);
+	EffectVisual<?> visualize(VisualizationContext ctx, float partialTick);
 }

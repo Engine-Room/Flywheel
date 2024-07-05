@@ -1,6 +1,5 @@
 package dev.engine_room.flywheel.impl.visualization.manager;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
@@ -17,14 +16,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class BlockEntityStorage extends Storage<BlockEntity> {
-	private final Long2ObjectMap<List<? extends BlockEntityVisual<?>>> posLookup = new Long2ObjectOpenHashMap<>();
+	private final Long2ObjectMap<BlockEntityVisual<?>> posLookup = new Long2ObjectOpenHashMap<>();
 
 	public BlockEntityStorage(Supplier<VisualizationContext> visualizationContextSupplier) {
 		super(visualizationContextSupplier);
 	}
 
 	@Nullable
-	public List<? extends BlockEntityVisual<?>> visualAtPos(long pos) {
+	public BlockEntityVisual<?> visualAtPos(long pos) {
 		return posLookup.get(pos);
 	}
 
@@ -53,18 +52,19 @@ public class BlockEntityStorage extends Storage<BlockEntity> {
 	}
 
 	@Override
-	protected List<? extends BlockEntityVisual<?>> createRaw(BlockEntity obj, float partialTick) {
+	@Nullable
+	protected BlockEntityVisual<?> createRaw(BlockEntity obj, float partialTick) {
 		var visualizer = VisualizationHelper.getVisualizer(obj);
 		if (visualizer == null) {
-			return List.of();
+			return null;
 		}
 
-		var visualList = visualizer.createVisual(visualizationContextSupplier.get(), obj, partialTick);
+		var visual = visualizer.createVisual(visualizationContextSupplier.get(), obj, partialTick);
 
 		BlockPos blockPos = obj.getBlockPos();
-		posLookup.put(blockPos.asLong(), visualList);
+		posLookup.put(blockPos.asLong(), visual);
 
-		return visualList;
+		return visual;
 	}
 
 	@Override

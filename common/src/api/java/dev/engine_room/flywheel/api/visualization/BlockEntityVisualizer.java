@@ -1,7 +1,5 @@
 package dev.engine_room.flywheel.api.visualization;
 
-import java.util.List;
-
 import dev.engine_room.flywheel.api.visual.BlockEntityVisual;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -18,7 +16,7 @@ public interface BlockEntityVisualizer<T extends BlockEntity> {
 	 * @param blockEntity The block entity to construct a visual for.
 	 * @return The visual.
 	 */
-	List<BlockEntityVisual<? super T>> createVisual(VisualizationContext ctx, T blockEntity, float partialTick);
+	BlockEntityVisual<? super T> createVisual(VisualizationContext ctx, T blockEntity, float partialTick);
 
 	/**
 	 * Checks if the given block entity should not be rendered with the vanilla {@link BlockEntityRenderer}.

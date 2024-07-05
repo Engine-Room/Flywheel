@@ -17,7 +17,6 @@ import dev.engine_room.flywheel.api.event.RenderStage;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.task.TaskExecutor;
-import dev.engine_room.flywheel.api.visual.BlockEntityVisual;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
 import dev.engine_room.flywheel.api.visual.Effect;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
@@ -262,23 +261,21 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				continue;
 			}
 
-			var visualList = blockEntities.getStorage()
+			var visual = blockEntities.getStorage()
 					.visualAtPos(entry.getLongKey());
 
-			if (visualList == null || visualList.isEmpty()) {
+			if (visual == null) {
 				// The block doesn't have a visual, this is probably the common case.
 				continue;
 			}
 
 			List<Instance> instances = new ArrayList<>();
 
-			for (BlockEntityVisual<?> visual : visualList) {
-				visual.collectCrumblingInstances(instance -> {
-					if (instance != null) {
-						instances.add(instance);
-					}
-				});
-			}
+			visual.collectCrumblingInstances(instance -> {
+				if (instance != null) {
+					instances.add(instance);
+				}
+			});
 
 			if (instances.isEmpty()) {
 				// The visual doesn't want to render anything crumbling.
