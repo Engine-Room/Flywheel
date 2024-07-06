@@ -8,6 +8,7 @@ import dev.engine_room.flywheel.api.event.RenderContext;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.backend.engine.EnvironmentStorage;
 import dev.engine_room.flywheel.backend.engine.indirect.StagingBuffer;
+import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
 import dev.engine_room.flywheel.lib.task.SimplePlan;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
@@ -205,10 +206,6 @@ public class LightStorage {
 		arena.delete();
 	}
 
-	public boolean hasChanges() {
-		return !changed.isEmpty();
-	}
-
 	public boolean checkNeedsLutRebuildAndClear() {
 		var out = needsLutRebuild;
 		needsLutRebuild = false;
@@ -219,6 +216,15 @@ public class LightStorage {
 		for (int i = changed.nextSetBit(0); i >= 0; i = changed.nextSetBit(i + 1)) {
 			staging.enqueueCopy(arena.indexToPointer(i), SECTION_SIZE_BYTES, dstVbo, i * SECTION_SIZE_BYTES);
 		}
+		changed.clear();
+	}
+
+	public void upload(GlBuffer buffer) {
+		if (changed.isEmpty()) {
+			return;
+		}
+
+		buffer.upload(arena.indexToPointer(0), arena.capacity() * SECTION_SIZE_BYTES);
 		changed.clear();
 	}
 

@@ -1,12 +1,18 @@
 #include "flywheel:internal/common.frag"
+#include "flywheel:internal/light_lut.glsl"
 
 uniform uvec4 _flw_packedMaterial;
 
-#ifdef _FLW_EMBEDDED
-bool _flw_embeddedLight(vec3 worldPos, out vec2 lightCoord) {
-    return true;
+uniform usamplerBuffer _flw_lightLut;
+uniform usamplerBuffer _flw_lightSections;
+
+uint _flw_indexLut(uint index) {
+    return texelFetch(_flw_lightLut, int(index)).r;
 }
-#endif
+
+uint _flw_indexLight(uint index) {
+    return texelFetch(_flw_lightSections, int(index)).r;
+}
 
 void main() {
     _flw_uberMaterialFragmentIndex = _flw_packedMaterial.y;

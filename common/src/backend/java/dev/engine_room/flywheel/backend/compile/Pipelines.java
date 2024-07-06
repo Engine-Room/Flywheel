@@ -11,7 +11,11 @@ public final class Pipelines {
 			.vertexMain(Flywheel.rl("internal/instancing/main.vert"))
 			.fragmentMain(Flywheel.rl("internal/instancing/main.frag"))
 			.assembler(BufferTextureInstanceComponent::new)
-			.onLink(program -> program.setSamplerBinding("_flw_instances", Samplers.INSTANCE_BUFFER))
+			.onLink(program -> {
+				program.setSamplerBinding("_flw_instances", Samplers.INSTANCE_BUFFER);
+				program.setSamplerBinding("_flw_lightLut", Samplers.LIGHT_LUT);
+				program.setSamplerBinding("_flw_lightSections", Samplers.LIGHT_SECTIONS);
+			})
 			.build();
 
 	public static final Pipeline INDIRECT = Pipeline.builder()

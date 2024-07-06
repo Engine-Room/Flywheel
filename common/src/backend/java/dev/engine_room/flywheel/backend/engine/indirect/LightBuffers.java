@@ -6,7 +6,7 @@ import org.lwjgl.system.MemoryUtil;
 import dev.engine_room.flywheel.backend.engine.embed.LightStorage;
 
 public class LightBuffers {
-	private final ResizableStorageArray lightArena = new ResizableStorageArray(LightStorage.SECTION_SIZE_BYTES);
+	private final ResizableStorageArray sections = new ResizableStorageArray(LightStorage.SECTION_SIZE_BYTES);
 	private final ResizableStorageArray lut = new ResizableStorageArray(4);
 
 	public LightBuffers() {
@@ -19,8 +19,8 @@ public class LightBuffers {
 			return;
 		}
 
-		lightArena.ensureCapacity(capacity);
-		light.uploadChangedSections(staging, lightArena.handle());
+		sections.ensureCapacity(capacity);
+		light.uploadChangedSections(staging, sections.handle());
 
 		if (light.checkNeedsLutRebuildAndClear()) {
 			var lut = light.createLut();
@@ -36,11 +36,11 @@ public class LightBuffers {
 	}
 
 	public void bind() {
-		if (lightArena.capacity() == 0) {
+		if (sections.capacity() == 0) {
 			return;
 		}
 
-		GL46.glBindBufferRange(GL46.GL_SHADER_STORAGE_BUFFER, BufferBindings.EMBEDDING_LUT_BINDING, lut.handle(), 0, lut.byteCapacity());
-		GL46.glBindBufferRange(GL46.GL_SHADER_STORAGE_BUFFER, BufferBindings.EMBEDDING_LIGHT_BINDING, lightArena.handle(), 0, lightArena.byteCapacity());
+		GL46.glBindBufferRange(GL46.GL_SHADER_STORAGE_BUFFER, BufferBindings.LIGHT_LUT_BINDING, lut.handle(), 0, lut.byteCapacity());
+		GL46.glBindBufferRange(GL46.GL_SHADER_STORAGE_BUFFER, BufferBindings.LIGHT_SECTION_BINDING, sections.handle(), 0, sections.byteCapacity());
 	}
 }
