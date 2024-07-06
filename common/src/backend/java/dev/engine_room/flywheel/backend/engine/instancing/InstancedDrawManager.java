@@ -43,6 +43,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	private final MeshPool meshPool;
 	private final GlVertexArray vao;
 	private final TextureBuffer instanceTexture;
+	private final InstancedLight light;
 
 	public InstancedDrawManager(InstancingPrograms programs) {
 		programs.acquire();
@@ -51,6 +52,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		meshPool = new MeshPool();
 		vao = GlVertexArray.create();
 		instanceTexture = new TextureBuffer();
+		light = new InstancedLight();
 
 		meshPool.bind(vao);
 	}
@@ -78,6 +80,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		}
 
 		meshPool.flush();
+
+		light.flush(lightStorage);
 	}
 
 	@Override
@@ -92,6 +96,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 			Uniforms.bindAll();
 			vao.bindForDraw();
 			TextureBinder.bindLightAndOverlay();
+			light.bind();
 
 			drawSet.draw(instanceTexture, programs);
 
@@ -113,6 +118,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		instanceTexture.delete();
 		programs.release();
 		vao.delete();
+
+		light.delete();
 
 		super.delete();
 	}

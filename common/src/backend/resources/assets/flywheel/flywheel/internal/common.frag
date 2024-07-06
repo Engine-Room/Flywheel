@@ -13,9 +13,7 @@ uniform sampler2D _flw_crumblingTex;
 in vec2 _flw_crumblingTexCoord;
 #endif
 
-#ifdef _FLW_EMBEDDED
 bool _flw_embeddedLight(vec3 worldPos, out vec2 lightCoord);
-#endif
 
 flat in uint _flw_instanceID;
 
