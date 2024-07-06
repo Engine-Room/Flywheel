@@ -1,4 +1,5 @@
 #include "flywheel:api/material.glsl"
+#include "flywheel:api/common.glsl"
 
 vec4 flw_vertexPos;
 vec4 flw_vertexColor;
@@ -17,7 +18,3 @@ void flw_transformBoundingSphere(in FlwInstance i, inout vec3 center, inout floa
 
 // To be implemented by the material vertex shader.
 void flw_materialVertex();
-
-// To be implemented by the context shader.
-void flw_beginVertex();
-void flw_endVertex();

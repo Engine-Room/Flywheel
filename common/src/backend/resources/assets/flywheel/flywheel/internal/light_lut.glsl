@@ -64,7 +64,21 @@ vec2 _flw_lightAt(uint sectionOffset, uvec3 blockInSectionPos) {
     return vec2(block, sky);
 }
 
-bool _flw_embeddedLight(vec3 worldPos, out vec2 lightCoord) {
+bool flw_lightFetch(ivec3 blockPos, out vec2 lightCoord) {
+    uint lightSectionIndex;
+    if (_flw_chunkCoordToSectionIndex(blockPos >> 4, lightSectionIndex)) {
+        return false;
+    }
+    // The offset of the section in the light buffer.
+    uint sectionOffset = lightSectionIndex * _FLW_LIGHT_SECTION_SIZE_INTS;
+
+    uvec3 blockInSectionPos = (blockPos & 0xF) + 1;
+
+    lightCoord = _flw_lightAt(sectionOffset, blockInSectionPos) / 15.;
+    return true;
+}
+
+bool flw_light(vec3 worldPos, out vec2 lightCoord) {
     // Always use the section of the block we are contained in to ensure accuracy.
     // We don't want to interpolate between sections, but also we might not be able
     // to rely on the existence neighboring sections, so don't do any extra rounding here.
@@ -72,8 +86,6 @@ bool _flw_embeddedLight(vec3 worldPos, out vec2 lightCoord) {
 
     uint lightSectionIndex;
     if (_flw_chunkCoordToSectionIndex(blockPos >> 4, lightSectionIndex)) {
-        // TODO: useful debug mode for this.
-        // flw_fragOverlay = ivec2(0, 3);
         return false;
     }
     // The offset of the section in the light buffer.

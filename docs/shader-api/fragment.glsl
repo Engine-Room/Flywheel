@@ -1,4 +1,5 @@
 #include "flywheel:api/material.glsl"
+#include "flywheel:api/common.glsl"
 
 /*const*/ vec4 flw_vertexPos;
 /*const*/ vec4 flw_vertexColor;
@@ -23,10 +24,6 @@ void flw_materialFragment();
 vec4 flw_fogFilter(vec4 color);
 // To be implemented by discard shaders.
 bool flw_discardPredicate(vec4 finalColor);
-
-// To be implemented by the context shader.
-void flw_beginFragment();
-void flw_endFragment();
 
 sampler2D flw_diffuseTex;
 sampler2D flw_overlayTex;
