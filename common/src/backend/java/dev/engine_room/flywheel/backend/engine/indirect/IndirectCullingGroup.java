@@ -277,6 +277,16 @@ public class IndirectCullingGroup<I extends Instance> {
 		buffers.delete();
 	}
 
+	public boolean checkEmptyAndDelete() {
+		var out = indirectDraws.isEmpty();
+
+		if (out) {
+			delete();
+		}
+
+		return out;
+	}
+
 	private record MultiDraw(Material material, int start, int end) {
 		private void submit() {
 			GlCompat.safeMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, this.start * IndirectBuffers.DRAW_COMMAND_STRIDE, this.end - this.start, (int) IndirectBuffers.DRAW_COMMAND_STRIDE);

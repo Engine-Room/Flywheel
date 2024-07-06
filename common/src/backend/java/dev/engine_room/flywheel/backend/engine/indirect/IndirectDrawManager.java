@@ -107,7 +107,11 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.flushInstancers();
 		}
 
-		instancers.values().removeIf(instancer -> instancer.instanceCount() == 0);
+		cullingGroups.values()
+				.removeIf(IndirectCullingGroup::checkEmptyAndDelete);
+
+		instancers.values()
+				.removeIf(instancer -> instancer.instanceCount() == 0);
 
 		meshPool.flush();
 
