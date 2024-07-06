@@ -280,6 +280,16 @@ public class IndirectCullingGroup<I extends Instance> {
 		buffers.delete();
 	}
 
+	public boolean checkEmptyAndDelete() {
+		var out = indirectDraws.isEmpty();
+
+		if (out) {
+			delete();
+		}
+
+		return out;
+	}
+
 	private record MultiDraw(Material material, int start, int end) {
 		private void submit() {
 			if (GlCompat.DRIVER == Driver.INTEL) {

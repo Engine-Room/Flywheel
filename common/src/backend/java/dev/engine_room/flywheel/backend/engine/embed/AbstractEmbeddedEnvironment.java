@@ -57,8 +57,6 @@ public abstract class AbstractEmbeddedEnvironment implements Environment, Visual
 
 	@Override
 	public void setupDraw(GlProgram program) {
-		setupLight(program);
-
 		program.setMat4(EmbeddingUniforms.MODEL_MATRIX, poseComposed);
 		program.setMat3(EmbeddingUniforms.NORMAL_MATRIX, normalComposed);
 	}
@@ -108,8 +106,6 @@ public abstract class AbstractEmbeddedEnvironment implements Environment, Visual
 	public void delete() {
 		deleted = true;
 	}
-
-	public abstract void setupLight(GlProgram program);
 
 	public abstract void composeMatrices(Matrix4f pose, Matrix3f normal);
 }

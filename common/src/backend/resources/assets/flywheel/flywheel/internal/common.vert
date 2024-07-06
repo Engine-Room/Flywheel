@@ -66,7 +66,7 @@ vec2 getCrumblingTexCoord() {
 }
 #endif
 
-#ifdef _FLW_EMBEDDED
+#ifdef FLW_EMBEDDED
 uniform mat4 _flw_modelMatrix;
 uniform mat3 _flw_normalMatrix;
 #endif
@@ -82,7 +82,7 @@ void _flw_main(in FlwInstance instance, in uint stableInstanceID) {
     _flw_crumblingTexCoord = getCrumblingTexCoord();
     #endif
 
-    #ifdef _FLW_EMBEDDED
+    #ifdef FLW_EMBEDDED
     flw_vertexPos = _flw_modelMatrix * flw_vertexPos;
     flw_vertexNormal = _flw_normalMatrix * flw_vertexNormal;
     #endif

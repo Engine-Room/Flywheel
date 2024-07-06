@@ -61,8 +61,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	public void flush(LightStorage lightStorage) {
 		super.flush(lightStorage);
 
-		var instancers = this.instancers.values();
-		instancers.removeIf(instancer -> {
+		this.instancers.values()
+				.removeIf(instancer -> {
 			// Update the instancers and remove any that are empty.
 			instancer.update();
 
