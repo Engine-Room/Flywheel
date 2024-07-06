@@ -13,7 +13,8 @@ public enum ContextShader {
 	DEFAULT(null, $ -> {
 	}),
 	CRUMBLING("_FLW_CRUMBLING", program -> program.setSamplerBinding("_flw_crumblingTex", Samplers.CRUMBLING)),
-	EMBEDDED("_FLW_EMBEDDED", $ -> {});
+	EMBEDDED("FLW_EMBEDDED", $ -> {
+	});
 
 	@Nullable
 	private final String define;

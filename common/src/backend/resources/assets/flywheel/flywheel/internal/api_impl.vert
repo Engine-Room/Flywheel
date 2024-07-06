@@ -1,4 +1,5 @@
 #include "flywheel:internal/material.glsl"
+#include "flywheel:internal/api_impl.glsl"
 #include "flywheel:internal/uniforms/uniforms.glsl"
 
 out vec4 flw_vertexPos;
