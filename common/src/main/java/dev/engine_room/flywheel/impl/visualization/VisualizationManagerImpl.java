@@ -45,6 +45,7 @@ import dev.engine_room.flywheel.lib.task.RaisePlan;
 import dev.engine_room.flywheel.lib.task.SimplePlan;
 import dev.engine_room.flywheel.lib.util.LevelAttached;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.BlockDestructionProgress;
@@ -104,6 +105,14 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				.ifTrue(recreate)
 				.ifFalse(update)
 				.plan()
+				.then(SimplePlan.of(() -> {
+					// TODO: Lazily re-evaluate the union'd set
+					var out = new LongOpenHashSet();
+					out.addAll(blockEntities.lightSections());
+					out.addAll(entities.lightSections());
+					out.addAll(effects.lightSections());
+					engine.lightSections(out);
+				}))
 				.then(RaisePlan.raise(frameVisualsFlag))
 				.then(engine.createFramePlan())
 				.then(RaisePlan.raise(frameFlag));

@@ -2,11 +2,11 @@ package dev.engine_room.flywheel.backend.engine.embed;
 
 import java.util.BitSet;
 
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.api.event.RenderContext;
 import dev.engine_room.flywheel.api.task.Plan;
-import dev.engine_room.flywheel.backend.engine.EnvironmentStorage;
 import dev.engine_room.flywheel.backend.engine.indirect.StagingBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
 import dev.engine_room.flywheel.lib.task.SimplePlan;
@@ -40,7 +40,6 @@ public class LightStorage {
 	private static final int INVALID_SECTION = -1;
 
 	private final LevelAccessor level;
-	private final EnvironmentStorage environmentStorage;
 
 	private final Arena arena;
 	private final Long2IntMap section2ArenaIndex = new Long2IntOpenHashMap();
@@ -51,18 +50,26 @@ public class LightStorage {
 	private final BitSet changed = new BitSet();
 	private boolean needsLutRebuild = false;
 
-	public LightStorage(LevelAccessor level, EnvironmentStorage environmentStorage) {
+	@Nullable
+	private LongSet requestedSections;
+
+	public LightStorage(LevelAccessor level) {
 		this.level = level;
-		this.environmentStorage = environmentStorage;
 
 		arena = new Arena(SECTION_SIZE_BYTES, DEFAULT_ARENA_CAPACITY_SECTIONS);
 	}
 
+	public void sections(LongSet sections) {
+		requestedSections = sections;
+	}
+
 	public Plan<RenderContext> createFramePlan() {
 		return SimplePlan.of(() -> {
-			var allLightSections = environmentStorage.allLightSections();
+			if (requestedSections == null) {
+				return;
+			}
 
-			removeUnusedSections(allLightSections);
+			removeUnusedSections(requestedSections);
 
 			var knownSections = section2ArenaIndex.keySet();
 
@@ -70,7 +77,7 @@ public class LightStorage {
 					.getUpdatedSections();
 
 			// Only add the new sections.
-			allLightSections.removeAll(knownSections);
+			requestedSections.removeAll(knownSections);
 
 			for (long updatedSection : updatedSections) {
 				for (int x = -1; x <= 1; x++) {
@@ -78,14 +85,14 @@ public class LightStorage {
 						for (int z = -1; z <= 1; z++) {
 							long section = SectionPos.offset(updatedSection, x, y, z);
 							if (knownSections.contains(section)) {
-								allLightSections.add(section);
+								requestedSections.add(section);
 							}
 						}
 					}
 				}
 			}
 
-			for (long section : allLightSections) {
+			for (long section : requestedSections) {
 				addSection(section);
 			}
 		});

@@ -2,6 +2,8 @@ package dev.engine_room.flywheel.api.visual;
 
 import java.util.function.LongConsumer;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import net.minecraft.core.SectionPos;
 
 /**
@@ -51,6 +53,7 @@ public interface LitVisual extends Visual {
 	 * A notifier object that can be used to indicate to the impl
 	 * that the sections a visual is contained in have changed.
 	 */
+	@ApiStatus.NonExtendable
 	interface Notifier {
 		/**
 		 * Invoke this to indicate to the impl that your visual has moved to a different set of sections.
