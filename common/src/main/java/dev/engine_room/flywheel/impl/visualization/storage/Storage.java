@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
 import dev.engine_room.flywheel.api.visual.LitVisual;
+import dev.engine_room.flywheel.api.visual.SmoothLitVisual;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visual.Visual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
@@ -19,6 +20,7 @@ import dev.engine_room.flywheel.lib.task.NestedPlan;
 import dev.engine_room.flywheel.lib.task.PlanMap;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 public abstract class Storage<T> {
@@ -28,6 +30,7 @@ public abstract class Storage<T> {
 	protected final List<SimpleDynamicVisual> simpleDynamicVisuals = new ArrayList<>();
 	protected final List<SimpleTickableVisual> simpleTickableVisuals = new ArrayList<>();
 	protected final LitVisualStorage litVisuals = new LitVisualStorage();
+	protected final SmoothLitVisualStorage smoothLitVisuals = new SmoothLitVisualStorage();
 
 	private final Map<T, Visual> visuals = new Reference2ObjectOpenHashMap<>();
 
@@ -71,6 +74,9 @@ public abstract class Storage<T> {
 		if (visual instanceof LitVisual lit) {
 			litVisuals.remove(lit);
 		}
+		if (visual instanceof SmoothLitVisual smoothLit) {
+			smoothLitVisuals.remove(smoothLit);
+		}
 		visual.delete();
 	}
 
@@ -90,6 +96,7 @@ public abstract class Storage<T> {
 		simpleTickableVisuals.clear();
 		simpleDynamicVisuals.clear();
 		litVisuals.clear();
+		smoothLitVisuals.clear();
 		visuals.replaceAll((obj, visual) -> {
 			visual.delete();
 
@@ -156,6 +163,10 @@ public abstract class Storage<T> {
 		if (visual instanceof LitVisual lit) {
 			litVisuals.setNotifierAndAdd(lit);
 		}
+
+		if (visual instanceof SmoothLitVisual smoothLit) {
+			smoothLitVisuals.add(smoothLit);
+		}
 	}
 
 	/**
@@ -164,4 +175,8 @@ public abstract class Storage<T> {
 	 * @return true if the object is currently capable of being visualized.
 	 */
 	public abstract boolean willAccept(T obj);
+
+	public LongSet lightSections() {
+		return smoothLitVisuals.sections();
+	}
 }

@@ -9,6 +9,7 @@ import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -67,6 +68,13 @@ public interface Engine {
 	 * This engine will not be used again after this method is called.
 	 */
 	void delete();
+
+	/**
+	 * Assign the set of sections that visuals have requested GPU light for.
+	 *
+	 * @param sections The set of sections.
+	 */
+	void lightSections(LongSet sections);
 
 	/**
 	 * A block to be rendered as a crumbling overlay.

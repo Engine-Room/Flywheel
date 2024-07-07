@@ -4,7 +4,6 @@ import org.joml.Matrix3fc;
 import org.joml.Matrix4fc;
 
 import dev.engine_room.flywheel.api.BackendImplemented;
-import it.unimi.dsi.fastutil.longs.LongSet;
 
 @BackendImplemented
 public interface VisualEmbedding extends VisualizationContext {
@@ -15,8 +14,6 @@ public interface VisualEmbedding extends VisualizationContext {
 	 * @param normal The normal matrix.
 	 */
 	void transforms(Matrix4fc pose, Matrix3fc normal);
-
-	void lightChunks(LongSet chunks);
 
 	/**
 	 * Delete this embedding.

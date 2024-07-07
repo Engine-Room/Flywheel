@@ -10,6 +10,7 @@ import dev.engine_room.flywheel.api.visualization.VisualManager;
 import dev.engine_room.flywheel.impl.visualization.storage.Storage;
 import dev.engine_room.flywheel.impl.visualization.storage.Transaction;
 import dev.engine_room.flywheel.lib.task.SimplePlan;
+import it.unimi.dsi.fastutil.longs.LongSet;
 
 public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager<T> {
 	private final Queue<Transaction<T>> queue = new ConcurrentLinkedQueue<>();
@@ -73,5 +74,9 @@ public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager
 	public Plan<TickableVisual.Context> tickPlan() {
 		return SimplePlan.<TickableVisual.Context>of(context -> processQueue(1))
 				.then(storage.tickPlan());
+	}
+
+	public LongSet lightSections() {
+		return getStorage().lightSections();
 	}
 }

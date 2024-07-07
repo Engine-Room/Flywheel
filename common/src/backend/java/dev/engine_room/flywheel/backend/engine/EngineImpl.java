@@ -22,6 +22,7 @@ import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.lib.task.Flag;
 import dev.engine_room.flywheel.lib.task.NamedFlag;
 import dev.engine_room.flywheel.lib.task.SyncedPlan;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -41,7 +42,7 @@ public class EngineImpl implements Engine {
 		this.drawManager = drawManager;
 		sqrMaxOriginDistance = maxOriginDistance * maxOriginDistance;
 		environmentStorage = new EnvironmentStorage();
-		lightStorage = new LightStorage(level, environmentStorage);
+		lightStorage = new LightStorage(level);
 	}
 
 	@Override
@@ -99,6 +100,11 @@ public class EngineImpl implements Engine {
 	public void delete() {
 		drawManager.delete();
 		lightStorage.delete();
+	}
+
+	@Override
+	public void lightSections(LongSet sections) {
+		lightStorage.sections(sections);
 	}
 
 	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, RenderStage stage) {
