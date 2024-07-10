@@ -13,8 +13,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.engine_room.flywheel.api.event.RenderStage;
@@ -23,6 +26,7 @@ import dev.engine_room.flywheel.impl.event.RenderContextImpl;
 import dev.engine_room.flywheel.impl.visualization.VisualizationManagerImpl;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -50,10 +54,16 @@ abstract class LevelRendererMixin {
 
 	//	@Inject(method = "renderLevel", at = @At("HEAD"))
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runLightUpdates()I"))
-	private void flywheel$beginRender(PoseStack poseStack, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
-		flywheel$renderContext = RenderContextImpl.create((LevelRenderer) (Object) this, level, renderBuffers, poseStack, projectionMatrix, camera, partialTick);
+	private void flywheel$beginRender(DeltaTracker deltaTracker, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f frustumMatrix, Matrix4f projectionMatrix, CallbackInfo ci, @Share("flywheel$poseStack") LocalRef<PoseStack> poseStack) {
+		PoseStack flywheel$poseStack = new PoseStack();
+		flywheel$renderContext = RenderContextImpl.create((LevelRenderer) (Object) this, level, renderBuffers, flywheel$poseStack, projectionMatrix, camera, deltaTracker.getGameTimeDeltaTicks());
 
 		FlwImplXplat.INSTANCE.dispatchBeginFrameEvent(flywheel$renderContext);
+	}
+
+	@Redirect(method = "renderLevel", at = @At(value = "NEW", target = "()Lcom/mojang/blaze3d/vertex/PoseStack;"))
+	private PoseStack flywheel$fixPoseStack(@Share("flywheel$poseStack") LocalRef<PoseStack> poseStack) {
+		return poseStack.get();
 	}
 
 	@Inject(method = "renderLevel", at = @At("RETURN"))
@@ -102,19 +112,19 @@ abstract class LevelRendererMixin {
 		flywheel$dispatch(RenderStage.AFTER_TRANSLUCENT_TERRAIN);
 	}
 
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderSectionLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLorg/joml/Matrix4f;)V", ordinal = 6, shift = Shift.AFTER))
+	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderSectionLayer(Lnet/minecraft/client/renderer/RenderType;DDDLorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V", ordinal = 6, shift = Shift.AFTER))
 	private void flywheel$onStage$afterTranslucentTerrain(CallbackInfo ci) {
 		flywheel$dispatch(RenderStage.AFTER_TRANSLUCENT_TERRAIN);
 	}
 
 	@Group(name = "onStage$afterParticles", min = 2, max = 2)
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V", shift = Shift.AFTER))
+	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V", shift = Shift.AFTER))
 	private void flywheel$onStage$afterParticles$fabric(CallbackInfo ci) {
 		flywheel$dispatch(RenderStage.AFTER_PARTICLES);
 	}
 
 	@Group(name = "onStage$afterParticles")
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;)V", shift = Shift.AFTER))
+	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V", shift = Shift.AFTER))
 	private void flywheel$onStage$afterParticles$forge(CallbackInfo ci) {
 		flywheel$dispatch(RenderStage.AFTER_PARTICLES);
 	}
