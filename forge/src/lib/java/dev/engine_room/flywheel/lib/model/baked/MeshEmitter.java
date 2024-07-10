@@ -3,32 +3,36 @@ package dev.engine_room.flywheel.lib.model.baked;
 import org.jetbrains.annotations.UnknownNullability;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import dev.engine_room.flywheel.impl.mixin.BufferBuilderAccessor;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 
 class MeshEmitter implements VertexConsumer {
 	private final RenderType renderType;
-	private final BufferBuilder bufferBuilder;
+	private final ByteBufferBuilder byteBufferBuilder;
+	private BufferBuilder bufferBuilder;
 
 	private BakedModelBufferer.@UnknownNullability ResultConsumer resultConsumer;
 	private boolean currentShade;
 
-    MeshEmitter(RenderType renderType) {
-        this.renderType = renderType;
-		this.bufferBuilder = new BufferBuilder(renderType.bufferSize());
-    }
+	MeshEmitter(RenderType renderType) {
+		this.renderType = renderType;
+		this.byteBufferBuilder = new ByteBufferBuilder(renderType.bufferSize());
+		this.bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+	}
 
 	public void prepare(BakedModelBufferer.ResultConsumer resultConsumer) {
 		this.resultConsumer = resultConsumer;
 	}
 
 	public void end() {
-		if (bufferBuilder.building()) {
+		if (((BufferBuilderAccessor) bufferBuilder).flywheel$getBuilding()) {
 			emit();
 		}
 		resultConsumer = null;
@@ -39,12 +43,12 @@ class MeshEmitter implements VertexConsumer {
 		return bufferBuilder;
 	}
 
-	private void prepareForGeometry(boolean shade) {
-		if (!bufferBuilder.building()) {
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+	void prepareForGeometry(boolean shade) {
+		if (!((BufferBuilderAccessor) bufferBuilder).flywheel$getBuilding()) {
+			bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 		} else if (shade != currentShade) {
 			emit();
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+			bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 		}
 
 		currentShade = shade;
@@ -55,11 +59,11 @@ class MeshEmitter implements VertexConsumer {
 	}
 
 	private void emit() {
-		var renderedBuffer = bufferBuilder.endOrDiscardIfEmpty();
+		var renderedBuffer = bufferBuilder.build();
 
 		if (renderedBuffer != null) {
 			resultConsumer.accept(renderType, currentShade, renderedBuffer);
-			renderedBuffer.release();
+			renderedBuffer.close();
 		}
 	}
 
