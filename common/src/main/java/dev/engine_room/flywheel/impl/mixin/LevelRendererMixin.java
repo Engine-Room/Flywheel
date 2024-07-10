@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.llamalad7.mixinextras.sugar.Share;
@@ -59,11 +58,6 @@ abstract class LevelRendererMixin {
 		flywheel$renderContext = RenderContextImpl.create((LevelRenderer) (Object) this, level, renderBuffers, flywheel$poseStack, projectionMatrix, camera, deltaTracker.getGameTimeDeltaTicks());
 
 		FlwImplXplat.INSTANCE.dispatchBeginFrameEvent(flywheel$renderContext);
-	}
-
-	@Redirect(method = "renderLevel", at = @At(value = "NEW", target = "()Lcom/mojang/blaze3d/vertex/PoseStack;"))
-	private PoseStack flywheel$fixPoseStack(@Share("flywheel$poseStack") LocalRef<PoseStack> poseStack) {
-		return poseStack.get();
 	}
 
 	@Inject(method = "renderLevel", at = @At("RETURN"))
