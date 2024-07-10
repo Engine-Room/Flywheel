@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 
 /**
  * A helper class for loading and accessing JSON models not directly used by any blocks or items.
@@ -19,10 +19,10 @@ public class PartialModel {
 	static final List<PartialModel> ALL = new ArrayList<>();
 	static boolean tooLate = false;
 
-	protected final ResourceLocation modelLocation;
+	protected final ModelResourceLocation modelLocation;
 	protected BakedModel bakedModel;
 
-	public PartialModel(ResourceLocation modelLocation) {
+	public PartialModel(ModelResourceLocation modelLocation) {
 		if (tooLate) {
 			throw new RuntimeException("Attempted to create PartialModel with location '" + modelLocation + "' after start of initial resource reload!");
 		}
@@ -34,7 +34,7 @@ public class PartialModel {
 		}
 	}
 
-	public ResourceLocation getLocation() {
+	public ModelResourceLocation getLocation() {
 		return modelLocation;
 	}
 

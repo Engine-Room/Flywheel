@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.MeshData;
 
 import dev.engine_room.flywheel.api.vertex.VertexView;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
@@ -16,15 +16,15 @@ final class MeshHelper {
 	private MeshHelper() {
 	}
 
-	public static SimpleMesh blockVerticesToMesh(BufferBuilder.RenderedBuffer buffer, @Nullable String meshDescriptor) {
-		BufferBuilder.DrawState drawState = buffer.drawState();
+	public static SimpleMesh blockVerticesToMesh(MeshData data, @Nullable String meshDescriptor) {
+		MeshData.DrawState drawState = data.drawState();
 		int vertexCount = drawState.vertexCount();
 		long srcStride = drawState.format().getVertexSize();
 
 		VertexView vertexView = new NoOverlayVertexView();
 		long dstStride = vertexView.stride();
 
-		ByteBuffer src = buffer.vertexBuffer();
+		ByteBuffer src = data.vertexBuffer();
 		MemoryBlock dst = MemoryBlock.malloc((long) vertexCount * dstStride);
 		long srcPtr = MemoryUtil.memAddress(src);
 		long dstPtr = dst.ptr();

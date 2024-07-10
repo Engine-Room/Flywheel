@@ -7,7 +7,7 @@ import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.backend.BackendManager;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
@@ -38,7 +38,7 @@ public class ForgeFlwConfig implements FlwConfig {
 	private static Backend parseBackend(String idStr) {
 		ResourceLocation backendId;
 		try {
-			backendId = new ResourceLocation(idStr);
+			backendId = ResourceLocation.parse(idStr);
 		} catch (ResourceLocationException e) {
 			FlwImpl.CONFIG_LOGGER.warn("'backend' value '{}' is not a valid resource location", idStr);
 			return null;
@@ -63,7 +63,7 @@ public class ForgeFlwConfig implements FlwConfig {
 		return client.workerThreads.get();
 	}
 
-	public void registerSpecs(ModLoadingContext context) {
+	public void registerSpecs(ModContainer context) {
 		context.registerConfig(ModConfig.Type.CLIENT, clientSpec);
 	}
 

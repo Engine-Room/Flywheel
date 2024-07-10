@@ -64,21 +64,15 @@ class MeshEmitter implements VertexConsumer {
 	}
 
 	@Override
-	public void putBulkData(PoseStack.Pose pose, BakedQuad quad, float red, float green, float blue, int light, int overlay) {
-		prepareForGeometry(quad);
-		bufferBuilder.putBulkData(pose, quad, red, green, blue, light, overlay);
-	}
-
-	@Override
 	public void putBulkData(PoseStack.Pose pose, BakedQuad quad, float red, float green, float blue, float alpha, int light, int overlay, boolean readExistingColor) {
 		prepareForGeometry(quad);
 		bufferBuilder.putBulkData(pose, quad, red, green, blue, alpha, light, overlay, readExistingColor);
 	}
 
 	@Override
-	public void putBulkData(PoseStack.Pose pose, BakedQuad quad, float[] brightnesses, float red, float green, float blue, int[] lights, int overlay, boolean readExistingColor) {
+	public void putBulkData(PoseStack.Pose pose, BakedQuad quad, float red, float green, float blue, float alpha, int packedLight, int packedOverlay) {
 		prepareForGeometry(quad);
-		bufferBuilder.putBulkData(pose, quad, brightnesses, red, green, blue, lights, overlay, readExistingColor);
+		bufferBuilder.putBulkData(pose, quad, red, green, blue, alpha, packedLight, packedOverlay);
 	}
 
 	@Override
@@ -88,47 +82,32 @@ class MeshEmitter implements VertexConsumer {
 	}
 
 	@Override
-	public VertexConsumer vertex(double x, double y, double z) {
+	public VertexConsumer addVertex(float x, float y, float z) {
 		throw new UnsupportedOperationException("MeshEmitter only supports putBulkData!");
 	}
 
 	@Override
-	public VertexConsumer color(int red, int green, int blue, int alpha) {
+	public VertexConsumer setColor(int red, int green, int blue, int alpha) {
 		throw new UnsupportedOperationException("MeshEmitter only supports putBulkData!");
 	}
 
 	@Override
-	public VertexConsumer uv(float u, float v) {
+	public VertexConsumer setUv(float u, float v) {
 		throw new UnsupportedOperationException("MeshEmitter only supports putBulkData!");
 	}
 
 	@Override
-	public VertexConsumer overlayCoords(int u, int v) {
+	public VertexConsumer setUv1(int u, int v) {
 		throw new UnsupportedOperationException("MeshEmitter only supports putBulkData!");
 	}
 
 	@Override
-	public VertexConsumer uv2(int u, int v) {
+	public VertexConsumer setUv2(int u, int v) {
 		throw new UnsupportedOperationException("MeshEmitter only supports putBulkData!");
 	}
 
 	@Override
-	public VertexConsumer normal(float x, float y, float z) {
-		throw new UnsupportedOperationException("MeshEmitter only supports putBulkData!");
-	}
-
-	@Override
-	public void endVertex() {
-		throw new UnsupportedOperationException("MeshEmitter only supports putBulkData!");
-	}
-
-	@Override
-	public void defaultColor(int red, int green, int blue, int alpha) {
-		throw new UnsupportedOperationException("MeshEmitter only supports putBulkData!");
-	}
-
-	@Override
-	public void unsetDefaultColor() {
+	public VertexConsumer setNormal(float normalX, float normalY, float normalZ) {
 		throw new UnsupportedOperationException("MeshEmitter only supports putBulkData!");
 	}
 }

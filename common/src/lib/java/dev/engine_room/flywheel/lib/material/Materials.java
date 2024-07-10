@@ -6,7 +6,7 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.resources.ResourceLocation;
 
 public final class Materials {
-	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
+	private static final ResourceLocation MINECART_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/minecart.png");
 
 	public static final Material CHUNK_SOLID_SHADED = SimpleMaterial.builder()
 			.build();

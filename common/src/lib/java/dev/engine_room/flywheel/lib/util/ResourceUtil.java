@@ -30,7 +30,7 @@ public final class ResourceUtil {
 			}
 		}
 
-		return new ResourceLocation(namespace, path);
+		return ResourceLocation.fromNamespaceAndPath(namespace, path);
 	}
 
 	/**

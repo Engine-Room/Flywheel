@@ -44,7 +44,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  */
 public class ShadowComponent implements EntityComponent {
 	private static final Material SHADOW_MATERIAL = SimpleMaterial.builder()
-			.texture(new ResourceLocation("textures/misc/shadow.png"))
+			.texture(ResourceLocation.withDefaultNamespace("textures/misc/shadow.png"))
 			.mipmap(false)
 			.polygonOffset(true) // vanilla shadows use "view offset" but this seems to work fine
 			.transparency(Transparency.TRANSLUCENT)

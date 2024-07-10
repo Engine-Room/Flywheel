@@ -5,7 +5,7 @@ import java.util.Map;
 import org.jetbrains.annotations.ApiStatus;
 
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.neoforged.neoforge.client.event.ModelEvent;
 
 @ApiStatus.Internal
@@ -22,7 +22,7 @@ public final class PartialModelEventHandler {
 	}
 
 	public static void onBakingCompleted(ModelEvent.BakingCompleted event) {
-		Map<ResourceLocation, BakedModel> models = event.getModels();
+		Map<ModelResourceLocation, BakedModel> models = event.getModels();
 
 		for (PartialModel partial : PartialModel.ALL) {
 			partial.set(models.get(partial.getLocation()));

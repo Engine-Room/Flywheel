@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.blaze3d.vertex.BufferBuilder.RenderedBuffer;
+import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -130,7 +130,7 @@ final class BakedModelBufferer {
 	}
 
 	public interface ResultConsumer {
-		void accept(RenderType renderType, boolean shaded, RenderedBuffer data);
+		void accept(RenderType renderType, boolean shaded, MeshData data);
 	}
 
 	private static class ThreadLocalObjects {

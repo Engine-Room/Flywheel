@@ -99,7 +99,7 @@ public class FabricFlwConfig implements FlwConfig {
 		if (backendJson instanceof JsonPrimitive primitive && primitive.isString()) {
 			var value = primitive.getAsString();
 			try {
-				this.backend = Backend.REGISTRY.getOrThrow(new ResourceLocation(value));
+				this.backend = Backend.REGISTRY.getOrThrow(ResourceLocation.parse(value));
 				return;
 			} catch (ResourceLocationException e) {
 				msg = "'backend' value '" + value + "' is not a valid resource location";
