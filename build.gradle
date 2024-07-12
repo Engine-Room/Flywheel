@@ -74,7 +74,7 @@ dependencies {
     modCompileOnly ':sodium-fabric-1.20.1-0.6.0-alpha.1'
     modCompileOnly 'maven.modrinth:iris:1.6.10+1.20.1'
 
-    modCompileOnly 'maven.modrinth:embeddium:0.3.25+mc1.20.1'
+    modCompileOnly 'maven.modrinth:embeddium:kJkE9dfS'
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
 }
