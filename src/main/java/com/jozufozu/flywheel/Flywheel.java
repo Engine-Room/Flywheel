@@ -7,6 +7,7 @@ import com.jozufozu.flywheel.backend.Loader;
 import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.compat.EmbeddiumCompat;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
 import com.jozufozu.flywheel.core.Contexts;
@@ -75,6 +76,10 @@ public class Flywheel implements ClientModInitializer {
 		ClientEntityEvents.ENTITY_LOAD.register(EntityWorldHandler::onEntityJoinWorld);
 		ClientEntityEvents.ENTITY_UNLOAD.register(EntityWorldHandler::onEntityLeaveWorld);
 		ClientTickEvents.END_CLIENT_TICK.register(ForgeEvents::tickLight);
+
+		if (FabricLoader.getInstance().isModLoaded("embeddium")) {
+			EmbeddiumCompat.init();
+		}
 
 		VanillaInstances.init();
 

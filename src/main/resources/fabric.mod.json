@@ -37,6 +37,7 @@
     "java": ">=17"
   },
   "breaks": {
-    "sodium": "<0.6.0"
+    "sodium": "<0.6.0",
+    "embeddium": "<0.3.25"
   }
 }
