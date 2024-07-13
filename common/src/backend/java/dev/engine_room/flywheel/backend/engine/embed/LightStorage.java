@@ -13,6 +13,7 @@ import dev.engine_room.flywheel.lib.task.SimplePlan;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -59,53 +60,77 @@ public class LightStorage {
 		arena = new Arena(SECTION_SIZE_BYTES, DEFAULT_ARENA_CAPACITY_SECTIONS);
 	}
 
+	/**
+	 * Set the set of requested sections.
+	 * <p> When set, this will be processed in the next frame plan. It may not be set every frame.
+	 *
+	 * @param sections The set of sections requested by the impl.
+	 */
 	public void sections(LongSet sections) {
 		requestedSections = sections;
 	}
 
 	public Plan<RenderContext> createFramePlan() {
 		return SimplePlan.of(() -> {
-			if (requestedSections == null) {
+			var updatedSections = LightUpdateHolder.get(level)
+					.getAndClearUpdatedSections();
+
+			if (updatedSections.isEmpty() && requestedSections == null) {
 				return;
 			}
 
-			removeUnusedSections(requestedSections);
+			removeUnusedSections();
 
-			var knownSections = section2ArenaIndex.keySet();
+			// Start building the set of sections we need to collect this frame.
+			LongSet sectionsToCollect;
+			if (requestedSections == null) {
+				// If none were requested, then we need to collect all sections that received updates.
+				sectionsToCollect = new LongArraySet();
+			} else {
+				// If we did receive a new set of requested sections, we only
+				// need to collect the sections that weren't yet tracked.
+				sectionsToCollect = requestedSections;
+				sectionsToCollect.removeAll(section2ArenaIndex.keySet());
+			}
 
-			var updatedSections = LightUpdateHolder.get(level)
-					.getUpdatedSections();
-
-			// Only add the new sections.
-			requestedSections.removeAll(knownSections);
-
+			// updatedSections contains all sections than received light updates,
+			// but we only care about its intersection with our tracked sections.
 			for (long updatedSection : updatedSections) {
+				// Since sections contain the border light of their neighbors, we need to collect the neighbors as well.
 				for (int x = -1; x <= 1; x++) {
 					for (int y = -1; y <= 1; y++) {
 						for (int z = -1; z <= 1; z++) {
 							long section = SectionPos.offset(updatedSection, x, y, z);
-							if (knownSections.contains(section)) {
-								requestedSections.add(section);
+							if (section2ArenaIndex.containsKey(section)) {
+								sectionsToCollect.add(section);
 							}
 						}
 					}
 				}
 			}
 
-			for (long section : requestedSections) {
-				addSection(section);
+			// Now actually do the collection.
+			// TODO: Can this be done in parallel?
+			for (long section : sectionsToCollect) {
+				collectSection(section);
 			}
+
+			requestedSections = null;
 		});
 	}
 
-	private void removeUnusedSections(LongSet allLightSections) {
+	private void removeUnusedSections() {
+		if (requestedSections == null) {
+			return;
+		}
+
 		var entries = section2ArenaIndex.long2IntEntrySet();
 		var it = entries.iterator();
 		while (it.hasNext()) {
 			var entry = it.next();
 			var section = entry.getLongKey();
 
-			if (!allLightSections.contains(section)) {
+			if (!this.requestedSections.contains(section)) {
 				arena.free(entry.getIntValue());
 				needsLutRebuild = true;
 				it.remove();
@@ -117,7 +142,7 @@ public class LightStorage {
 		return arena.capacity();
 	}
 
-	public void addSection(long section) {
+	public void collectSection(long section) {
 		var lightEngine = level.getLightEngine();
 
 		var blockLight = lightEngine.getLayerListener(LightLayer.BLOCK);

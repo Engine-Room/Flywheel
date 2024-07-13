@@ -72,6 +72,8 @@ public interface Engine {
 	/**
 	 * Assign the set of sections that visuals have requested GPU light for.
 	 *
+	 * <p> This will be called at most once per frame, and not necessarily every frame.
+	 *
 	 * @param sections The set of sections.
 	 */
 	void lightSections(LongSet sections);

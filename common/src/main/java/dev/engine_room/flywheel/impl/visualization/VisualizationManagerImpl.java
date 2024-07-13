@@ -106,12 +106,13 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				.ifFalse(update)
 				.plan()
 				.then(SimplePlan.of(() -> {
-					// TODO: Lazily re-evaluate the union'd set
-					var out = new LongOpenHashSet();
-					out.addAll(blockEntities.lightSections());
-					out.addAll(entities.lightSections());
-					out.addAll(effects.lightSections());
-					engine.lightSections(out);
+					if (blockEntities.lightSectionsDirty() || entities.lightSectionsDirty() || effects.lightSectionsDirty()) {
+						var out = new LongOpenHashSet();
+						out.addAll(blockEntities.lightSections());
+						out.addAll(entities.lightSections());
+						out.addAll(effects.lightSections());
+						engine.lightSections(out);
+					}
 				}))
 				.then(RaisePlan.raise(frameVisualsFlag))
 				.then(engine.createFramePlan())

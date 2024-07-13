@@ -175,7 +175,7 @@ vec2 _flw_lightForDirection(in vec2[27] lights, in vec3 interpolant, in uvec3 c0
     vec2 light1 = mix(light10, light11, interpolant.y);
 
     // Divide by 60 (15 * 4) to normalize.
-    return mix(light0, light1, interpolant.x) / 60.;
+    return mix(light0, light1, interpolant.x) / 63.;
 }
 
 bool flw_light(vec3 worldPos, vec3 normal, out vec2 lightCoord) {
@@ -227,7 +227,8 @@ bool flw_light(vec3 worldPos, vec3 normal, out vec2 lightCoord) {
         lightY = vec2(0.);
     }
 
-    lightCoord = (lightX * abs(normal.x) + lightY * abs(normal.y) + lightZ * abs(normal.z));
+    vec3 n2 = normal * normal;
+    lightCoord = lightX * n2.x + lightY * n2.y + lightZ * n2.z;
 
     return true;
 }
