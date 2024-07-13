@@ -113,6 +113,9 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+    flatDir {
+        dirs "libs"
+    }
 }
 
 dependencies {
@@ -121,8 +124,10 @@ dependencies {
     // switch to implementation for debugging
     compileOnly fg.deobf('maven.modrinth:starlight-forge:1.1.2+1.20')
 
-    compileOnly fg.deobf('maven.modrinth:rubidium:0.7.0a')
-    compileOnly fg.deobf('maven.modrinth:oculus:1.20-1.6.4')
+    compileOnly fg.deobf('libs:sodium-forge:1.20.1-0.6.0-alpha.2')
+
+    compileOnly fg.deobf('maven.modrinth:embeddium:FI3Xe9Px')
+    compileOnly fg.deobf('maven.modrinth:oculus:1.20.1-1.7.0')
 
     // https://discord.com/channels/313125603924639766/725850371834118214/910619168821354497
     // Prevent Mixin annotation processor from getting into IntelliJ's annotation processor settings
