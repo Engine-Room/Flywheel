@@ -19,6 +19,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.lighting.LayerLightEventListener;
 
 /**
  * TODO: AO data
@@ -110,10 +111,8 @@ public class LightStorage {
 			}
 
 			// Now actually do the collection.
-			// TODO: Can this be done in parallel?
-			for (long section : sectionsToCollect) {
-				collectSection(section);
-			}
+			// TODO: Should this be done in parallel?
+			sectionsToCollect.forEach(this::collectSection);
 
 			requestedSections = null;
 		});
@@ -148,44 +147,137 @@ public class LightStorage {
 		var blockLight = lightEngine.getLayerListener(LightLayer.BLOCK);
 		var skyLight = lightEngine.getLayerListener(LightLayer.SKY);
 
-		var blockPos = new BlockPos.MutableBlockPos();
-
-		int xMin = SectionPos.sectionToBlockCoord(SectionPos.x(section));
-		int yMin = SectionPos.sectionToBlockCoord(SectionPos.y(section));
-		int zMin = SectionPos.sectionToBlockCoord(SectionPos.z(section));
-
-		var sectionPos = SectionPos.of(section);
-		var blockData = blockLight.getDataLayerData(sectionPos);
-		var skyData = skyLight.getDataLayerData(sectionPos);
-
 		int index = indexForSection(section);
 
 		changed.set(index);
 
 		long ptr = arena.indexToPointer(index);
 
-		// Not sure of a way to iterate over the surface of a cube, so branch in the inner loop to take the fast path.
-		// Adding the fast path is about 8x faster than having only the slow path.
-		// There's still room for optimization, as the slow path takes about 3x the cpu time as the fast path despite
-		// being called an order of magnitude less.
-		for (int y = -1; y < 17; y++) {
-			for (int z = -1; z < 17; z++) {
-				for (int x = -1; x < 17; x++) {
-					if (x == -1 || y == -1 || z == -1 || x == 16 || y == 16 || z == 16) {
-						// Slow path, collect the surface of our section.
-						blockPos.set(xMin + x, yMin + y, zMin + z);
-						var block = blockLight.getLightValue(blockPos);
-						var sky = skyLight.getLightValue(blockPos);
+		// Zero it out first. This is basically free and makes it easier to handle missing sections later.
+		MemoryUtil.memSet(ptr, 0, SECTION_SIZE_BYTES);
 
-						write(ptr, x, y, z, block, sky);
-					} else {
-						// Fast path, read directly from the data layer for the main section.
-						// Would be nice to move the null check elsewhere.
-						var block = blockData == null ? 0 : blockData.get(x, y, z);
-						var sky = skyData == null ? 0 : skyData.get(x, y, z);
+		collectCenter(blockLight, skyLight, ptr, section);
 
-						write(ptr, x, y, z, block, sky);
-					}
+		for (SectionEdge i : SectionEdge.values()) {
+			collectYZPlane(blockLight, skyLight, ptr, SectionPos.offset(section, i.sectionOffset, 0, 0), i);
+			collectXZPlane(blockLight, skyLight, ptr, SectionPos.offset(section, 0, i.sectionOffset, 0), i);
+			collectXYPlane(blockLight, skyLight, ptr, SectionPos.offset(section, 0, 0, i.sectionOffset), i);
+
+			for (SectionEdge j : SectionEdge.values()) {
+				collectXStrip(blockLight, skyLight, ptr, SectionPos.offset(section, 0, i.sectionOffset, j.sectionOffset), i, j);
+				collectYStrip(blockLight, skyLight, ptr, SectionPos.offset(section, i.sectionOffset, 0, j.sectionOffset), i, j);
+				collectZStrip(blockLight, skyLight, ptr, SectionPos.offset(section, i.sectionOffset, j.sectionOffset, 0), i, j);
+			}
+		}
+
+		collectCorners(blockLight, skyLight, ptr, section);
+	}
+
+	private void collectXStrip(LayerLightEventListener blockLight, LayerLightEventListener skyLight, long ptr, long section, SectionEdge y, SectionEdge z) {
+		var pos = SectionPos.of(section);
+		var blockData = blockLight.getDataLayerData(pos);
+		var skyData = skyLight.getDataLayerData(pos);
+		if (blockData == null || skyData == null) {
+			return;
+		}
+		for (int x = 0; x < 16; x++) {
+			write(ptr, x, y.relative, z.relative, blockData.get(x, y.pos, z.pos), skyData.get(x, y.pos, z.pos));
+		}
+	}
+
+	private void collectYStrip(LayerLightEventListener blockLight, LayerLightEventListener skyLight, long ptr, long section, SectionEdge x, SectionEdge z) {
+		var pos = SectionPos.of(section);
+		var blockData = blockLight.getDataLayerData(pos);
+		var skyData = skyLight.getDataLayerData(pos);
+		if (blockData == null || skyData == null) {
+			return;
+		}
+		for (int y = 0; y < 16; y++) {
+			write(ptr, x.relative, y, z.relative, blockData.get(x.pos, y, z.pos), skyData.get(x.pos, y, z.pos));
+		}
+	}
+
+	private void collectZStrip(LayerLightEventListener blockLight, LayerLightEventListener skyLight, long ptr, long section, SectionEdge x, SectionEdge y) {
+		var pos = SectionPos.of(section);
+		var blockData = blockLight.getDataLayerData(pos);
+		var skyData = skyLight.getDataLayerData(pos);
+		if (blockData == null || skyData == null) {
+			return;
+		}
+		for (int z = 0; z < 16; z++) {
+			write(ptr, x.relative, y.relative, z, blockData.get(x.pos, y.pos, z), skyData.get(x.pos, y.pos, z));
+		}
+	}
+
+	private void collectYZPlane(LayerLightEventListener blockLight, LayerLightEventListener skyLight, long ptr, long section, SectionEdge x) {
+		var pos = SectionPos.of(section);
+		var blockData = blockLight.getDataLayerData(pos);
+		var skyData = skyLight.getDataLayerData(pos);
+		if (blockData == null || skyData == null) {
+			return;
+		}
+		for (int y = 0; y < 16; y++) {
+			for (int z = 0; z < 16; z++) {
+				write(ptr, x.relative, y, z, blockData.get(x.pos, y, z), skyData.get(x.pos, y, z));
+			}
+		}
+	}
+
+	private void collectXZPlane(LayerLightEventListener blockLight, LayerLightEventListener skyLight, long ptr, long section, SectionEdge y) {
+		var pos = SectionPos.of(section);
+		var blockData = blockLight.getDataLayerData(pos);
+		var skyData = skyLight.getDataLayerData(pos);
+		if (blockData == null || skyData == null) {
+			return;
+		}
+		for (int z = 0; z < 16; z++) {
+			for (int x = 0; x < 16; x++) {
+				write(ptr, x, y.relative, z, blockData.get(x, y.pos, z), skyData.get(x, y.pos, z));
+			}
+		}
+	}
+
+	private void collectXYPlane(LayerLightEventListener blockLight, LayerLightEventListener skyLight, long ptr, long section, SectionEdge z) {
+		var pos = SectionPos.of(section);
+		var blockData = blockLight.getDataLayerData(pos);
+		var skyData = skyLight.getDataLayerData(pos);
+		if (blockData == null || skyData == null) {
+			return;
+		}
+		for (int y = 0; y < 16; y++) {
+			for (int x = 0; x < 16; x++) {
+				write(ptr, x, y, z.relative, blockData.get(x, y, z.pos), skyData.get(x, y, z.pos));
+			}
+		}
+	}
+
+	private void collectCenter(LayerLightEventListener blockLight, LayerLightEventListener skyLight, long ptr, long section) {
+		var pos = SectionPos.of(section);
+		var blockData = blockLight.getDataLayerData(pos);
+		var skyData = skyLight.getDataLayerData(pos);
+		if (blockData == null || skyData == null) {
+			return;
+		}
+		for (int y = 0; y < 16; y++) {
+			for (int z = 0; z < 16; z++) {
+				for (int x = 0; x < 16; x++) {
+					write(ptr, x, y, z, blockData.get(x, y, z), skyData.get(x, y, z));
+				}
+			}
+		}
+	}
+
+	private void collectCorners(LayerLightEventListener blockLight, LayerLightEventListener skyLight, long ptr, long section) {
+		var blockPos = new BlockPos.MutableBlockPos();
+		int xMin = SectionPos.sectionToBlockCoord(SectionPos.x(section));
+		int yMin = SectionPos.sectionToBlockCoord(SectionPos.y(section));
+		int zMin = SectionPos.sectionToBlockCoord(SectionPos.z(section));
+
+		for (SectionEdge x : SectionEdge.values()) {
+			for (SectionEdge y : SectionEdge.values()) {
+				for (SectionEdge z : SectionEdge.values()) {
+					blockPos.set(x.relative + xMin, y.relative + yMin, z.relative + zMin);
+					write(ptr, x.relative, y.relative, z.relative, blockLight.getLightValue(blockPos), skyLight.getLightValue(blockPos));
 				}
 			}
 		}
@@ -263,5 +355,30 @@ public class LightStorage {
 	public IntArrayList createLut() {
 		// TODO: incremental lut updates
 		return LightLut.buildLut(section2ArenaIndex);
+	}
+
+	private enum SectionEdge {
+		LOW(15, -1, -1),
+		HIGH(0, 16, 1),
+		;
+
+		/**
+		 * The position in the section to collect.
+		 */
+		private final int pos;
+		/**
+		 * The position relative to the main section.
+		 */
+		private final int relative;
+		/**
+		 * The offset to the neighboring section.
+		 */
+		private final int sectionOffset;
+
+		SectionEdge(int pos, int relative, int sectionOffset) {
+			this.pos = pos;
+			this.relative = relative;
+			this.sectionOffset = sectionOffset;
+		}
 	}
 }
