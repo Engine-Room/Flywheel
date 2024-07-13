@@ -76,7 +76,13 @@ public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager
 				.then(storage.tickPlan());
 	}
 
+	public boolean lightSectionsDirty() {
+		return getStorage().smoothLitStorage()
+				.sectionsDirty();
+	}
+
 	public LongSet lightSections() {
-		return getStorage().lightSections();
+		return getStorage().smoothLitStorage()
+				.sections();
 	}
 }

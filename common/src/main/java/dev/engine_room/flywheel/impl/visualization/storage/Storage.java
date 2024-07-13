@@ -20,7 +20,6 @@ import dev.engine_room.flywheel.lib.task.NestedPlan;
 import dev.engine_room.flywheel.lib.task.PlanMap;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 public abstract class Storage<T> {
@@ -176,7 +175,7 @@ public abstract class Storage<T> {
 	 */
 	public abstract boolean willAccept(T obj);
 
-	public LongSet lightSections() {
-		return smoothLitVisuals.sections();
+	public SmoothLitVisualStorage smoothLitStorage() {
+		return smoothLitVisuals;
 	}
 }

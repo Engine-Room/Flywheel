@@ -14,7 +14,6 @@ public enum DebugMode implements StringRepresentable {
 	LIGHT_COLOR,
 	OVERLAY,
 	DIFFUSE,
-	LIGHT_VOLUME,
 	;
 
 	public static final Codec<DebugMode> CODEC = StringRepresentable.fromEnum(DebugMode::values);

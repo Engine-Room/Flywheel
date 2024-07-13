@@ -17,7 +17,11 @@ public class LightUpdateHolder {
 
 	private final LongSet updatedSections = new LongArraySet();
 
-	public LongSet getUpdatedSections() {
+	public LongSet getAndClearUpdatedSections() {
+		if (updatedSections.isEmpty()) {
+			return LongSet.of();
+		}
+
 		var out = new LongArraySet(updatedSections);
 		updatedSections.clear();
 		return out;
