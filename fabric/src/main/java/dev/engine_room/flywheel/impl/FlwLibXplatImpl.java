@@ -7,7 +7,9 @@ import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.FabricBakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.FabricBlockModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.FabricItemModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.FabricMultiBlockModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.ItemModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.MultiBlockModelBuilder;
 import dev.engine_room.flywheel.lib.util.ShadersModHandler;
 import net.fabricmc.loader.api.FabricLoader;
@@ -16,6 +18,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -61,5 +64,10 @@ public class FlwLibXplatImpl implements FlwLibXplat {
 						.isRenderingShadowPass();
 			}
 		};
+	}
+
+	@Override
+	public ItemModelBuilder createItemModelBuilder(ItemStack stack, BakedModel model) {
+		return new FabricItemModelBuilder(stack, model);
 	}
 }

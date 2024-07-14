@@ -8,13 +8,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
 import dev.engine_room.flywheel.api.instance.Instance;
+import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.material.Materials;
 import dev.engine_room.flywheel.lib.model.ModelCache;
+import dev.engine_room.flywheel.lib.model.RetexturedMesh;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
-import dev.engine_room.flywheel.lib.model.part.ModelPartConverter;
+import dev.engine_room.flywheel.lib.model.part.MeshTree;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
@@ -28,10 +30,10 @@ import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
 public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockEntity> implements SimpleDynamicVisual {
 	private static final ModelCache<Material> BASE_MODELS = new ModelCache<>(texture -> {
-		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.SHULKER, texture.sprite(), "base"), Materials.SHULKER);
+		return shulkerModel(texture, "base");
 	});
 	private static final ModelCache<Material> LID_MODELS = new ModelCache<>(texture -> {
-		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.SHULKER, texture.sprite(), "lid"), Materials.SHULKER);
+		return shulkerModel(texture, "lid");
 	});
 
 	private final TransformedInstance base;
@@ -58,10 +60,10 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 		TransformStack.of(stack)
 				.translate(getVisualPosition())
 				.translate(0.5)
-				.scale(0.9995f)
 				.rotate(rotation)
-				.scale(1, -1, -1)
-				.translateY(-1);
+				.scale(0.9995f)
+				.translate(0, -0.5, 0)
+				.scale(1, -1, -1);
 
 		base = createBaseInstance(texture).setTransform(stack);
 		base.setChanged();
@@ -129,5 +131,12 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	protected void _delete() {
 		base.delete();
 		lid.delete();
+	}
+
+	private static Model shulkerModel(Material texture, String child) {
+		var mesh = MeshTree.get(ModelLayers.SHULKER)
+				.child(child)
+				.mesh();
+		return new SingleMeshModel(new RetexturedMesh(mesh, texture.sprite()), Materials.SHULKER);
 	}
 }
