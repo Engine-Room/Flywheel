@@ -31,7 +31,7 @@ public class LitVisualStorage {
 	private final Map<LitVisual, LongSet> visuals2Sections = new WeakHashMap<>();
 	private final Long2ObjectMap<List<Updater>> sections2Visuals = new Long2ObjectOpenHashMap<>();
 
-	private final Queue<LitVisual> movedVisuals = new ConcurrentLinkedQueue<>();
+	private final Queue<MovedVisual> movedVisuals = new ConcurrentLinkedQueue<>();
 	private final LongSet sectionsUpdatedThisFrame = new LongOpenHashSet();
 
 	private long updateId = INITIAL_UPDATE_ID;
@@ -65,11 +65,11 @@ public class LitVisualStorage {
 	}
 
 	private void processMoved() {
-		LitVisual visual;
-		while ((visual = movedVisuals.poll()) != null) {
+		MovedVisual moved;
+		while ((moved = movedVisuals.poll()) != null) {
 			// If the visual isn't there when we try to remove it that means it was deleted before we got to it.
-			if (remove(visual)) {
-				add(visual);
+			if (remove(moved.visual)) {
+				updateTracking(moved.tracker, moved.visual);
 			}
 		}
 	}
@@ -90,23 +90,26 @@ public class LitVisualStorage {
 		return visuals2Sections.isEmpty();
 	}
 
-	public void setNotifierAndAdd(LitVisual visual) {
-		visual.setLightSectionNotifier(new LitVisualNotifierImpl(visual));
-		add(visual);
+	public void add(SectionPropertyImpl tracker, LitVisual visual) {
+		var moved = new MovedVisual(tracker, visual);
+		tracker.addListener(() -> movedVisuals.add(moved));
+
+		updateTracking(tracker, visual);
 	}
 
-	private void add(LitVisual visual) {
-		LongSet sections = new LongArraySet();
+	public void updateTracking(SectionPropertyImpl tracker, LitVisual visual) {
+		if (tracker.sections.isEmpty()) {
+			// Add the visual to the map even if sections is empty, this way we can distinguish from deleted visuals
+			visuals2Sections.put(visual, LongSet.of());
 
-		visual.collectLightSections(sections::add);
-
-		// Add the visual to the map even if sections is empty, this way we can distinguish from deleted visuals
-		visuals2Sections.put(visual, sections);
-
-		// Don't bother creating an updater if the visual isn't in any sections.
-		if (sections.isEmpty()) {
+			// Don't bother creating an updater if the visual isn't in any sections.
 			return;
 		}
+
+		// Create a copy of the array, so we know what section to remove the visual from later.
+		var sections = new LongArraySet(tracker.sections);
+
+		visuals2Sections.put(visual, sections);
 
 		var updater = createUpdater(visual, sections.size());
 
@@ -198,16 +201,6 @@ public class LitVisualStorage {
 		}
 	}
 
-	private final class LitVisualNotifierImpl implements LitVisual.Notifier {
-		private final LitVisual litVisual;
-
-		private LitVisualNotifierImpl(LitVisual litVisual) {
-			this.litVisual = litVisual;
-		}
-
-		@Override
-		public void notifySectionsChanged() {
-			movedVisuals.add(litVisual);
-        }
-    }
+	private record MovedVisual(SectionPropertyImpl tracker, LitVisual visual) {
+	}
 }

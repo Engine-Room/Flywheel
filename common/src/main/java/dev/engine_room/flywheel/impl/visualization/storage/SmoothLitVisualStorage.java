@@ -5,13 +5,12 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.visual.SmoothLitVisual;
-import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 public class SmoothLitVisualStorage {
-	private final Map<SmoothLitVisual, SectionProperty> visuals = new Reference2ObjectOpenHashMap<>();
+	private final Map<SmoothLitVisual, SectionPropertyImpl> visuals = new Reference2ObjectOpenHashMap<>();
 
 	@Nullable
 	private LongSet cachedSections;
@@ -20,9 +19,13 @@ public class SmoothLitVisualStorage {
 		return cachedSections == null;
 	}
 
+	public void markDirty() {
+		cachedSections = null;
+	}
+
 	public LongSet sections() {
 		cachedSections = new LongOpenHashSet();
-		for (SectionProperty value : visuals.values()) {
+		for (var value : visuals.values()) {
 			cachedSections.addAll(value.sections);
 		}
 		return cachedSections;
@@ -32,25 +35,18 @@ public class SmoothLitVisualStorage {
 		visuals.remove(smoothLit);
 	}
 
-	public void add(SmoothLitVisual smoothLit) {
-		var sections = new SectionProperty();
-		visuals.put(smoothLit, sections);
-		smoothLit.setSectionProperty(sections);
+	public void add(SectionPropertyImpl tracker, SmoothLitVisual smoothLit) {
+		visuals.put(smoothLit, tracker);
+
+		tracker.addListener(this::markDirty);
+
+		if (!tracker.sections.isEmpty()) {
+			markDirty();
+		}
 	}
 
 	public void clear() {
 		visuals.clear();
 	}
 
-	private final class SectionProperty implements SmoothLitVisual.SectionProperty {
-		private final LongSet sections = new LongArraySet();
-
-		@Override
-		public void lightSections(LongSet sections) {
-			this.sections.clear();
-			this.sections.addAll(sections);
-
-			SmoothLitVisualStorage.this.cachedSections = null;
-		}
-	}
 }

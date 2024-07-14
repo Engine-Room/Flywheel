@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
 import dev.engine_room.flywheel.api.visual.LitVisual;
+import dev.engine_room.flywheel.api.visual.SectionTrackedVisual;
 import dev.engine_room.flywheel.api.visual.SmoothLitVisual;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visual.Visual;
@@ -159,12 +160,19 @@ public abstract class Storage<T> {
 			}
 		}
 
-		if (visual instanceof LitVisual lit) {
-			litVisuals.setNotifierAndAdd(lit);
-		}
+		if (visual instanceof SectionTrackedVisual tracked) {
+			SectionPropertyImpl sectionProperty = new SectionPropertyImpl();
 
-		if (visual instanceof SmoothLitVisual smoothLit) {
-			smoothLitVisuals.add(smoothLit);
+			// Give the visual a chance to fill in the property.
+			tracked.setSectionProperty(sectionProperty);
+
+			if (visual instanceof LitVisual lit) {
+				litVisuals.add(sectionProperty, lit);
+			}
+
+			if (visual instanceof SmoothLitVisual smoothLit) {
+				smoothLitVisuals.add(sectionProperty, smoothLit);
+			}
 		}
 	}
 
