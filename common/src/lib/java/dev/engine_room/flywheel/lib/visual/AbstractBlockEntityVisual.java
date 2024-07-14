@@ -1,7 +1,5 @@
 package dev.engine_room.flywheel.lib.visual;
 
-import java.util.function.LongConsumer;
-
 import org.jetbrains.annotations.Nullable;
 import org.joml.FrustumIntersection;
 
@@ -13,6 +11,7 @@ import dev.engine_room.flywheel.api.visualization.VisualManager;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.instance.FlatLit;
 import dev.engine_room.flywheel.lib.math.MoreMath;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -40,7 +39,7 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	protected final BlockPos visualPos;
 	protected final BlockState blockState;
 	@Nullable
-	protected LitVisual.Notifier notifier;
+	protected SectionProperty lightSections;
 
 	public AbstractBlockEntityVisual(VisualizationContext ctx, T blockEntity, float partialTick) {
 		super(ctx, blockEntity.getLevel(), partialTick);
@@ -51,13 +50,9 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	}
 
 	@Override
-	public void setLightSectionNotifier(Notifier notifier) {
-		this.notifier = notifier;
-	}
-
-	@Override
-	public void collectLightSections(LongConsumer consumer) {
-		consumer.accept(SectionPos.asLong(pos));
+	public void setSectionProperty(SectionProperty property) {
+		this.lightSections = property;
+		lightSections.lightSections(LongSet.of(SectionPos.asLong(pos)));
 	}
 
 	/**
