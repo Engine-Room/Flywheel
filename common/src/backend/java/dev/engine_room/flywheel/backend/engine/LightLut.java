@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.backend.engine.embed;
+package dev.engine_room.flywheel.backend.engine;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -11,8 +11,8 @@ import it.unimi.dsi.fastutil.longs.LongComparator;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.core.SectionPos;
 
-public class LightLut {
-	public static final LongComparator SECTION_X_THEN_Y_THEN_Z = (long a, long b) -> {
+public final class LightLut {
+	private static final LongComparator SECTION_X_THEN_Y_THEN_Z = (long a, long b) -> {
 		final var xComp = Integer.compare(SectionPos.x(a), SectionPos.x(b));
 		if (xComp != 0) {
 			return xComp;
@@ -24,6 +24,8 @@ public class LightLut {
 		return Integer.compare(SectionPos.z(a), SectionPos.z(b));
 	};
 
+	private LightLut() {
+	}
 
 	// Massive kudos to RogueLogix for figuring out this LUT scheme.
 	// TODO: switch to y x z or x z y ordering

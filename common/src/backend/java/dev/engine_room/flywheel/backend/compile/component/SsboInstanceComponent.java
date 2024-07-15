@@ -43,7 +43,7 @@ public class SsboInstanceComponent extends InstanceAssemblerComponent {
 
 		fnBody.ret(GlslExpr.call(STRUCT_NAME, unpackArgs));
 
-		builder._addRaw("layout(std430, binding = " + BufferBindings.INSTANCE_BUFFER_BINDING + ") restrict readonly buffer InstanceBuffer {\n"
+		builder._addRaw("layout(std430, binding = " + BufferBindings.INSTANCE + ") restrict readonly buffer InstanceBuffer {\n"
 				+ "    uint _flw_instances[];\n"
 				+ "};");
 		builder.blankLine();

@@ -16,7 +16,6 @@ import dev.engine_room.flywheel.lib.task.SimplyComposedPlan;
 import dev.engine_room.flywheel.lib.task.Synchronizer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -24,15 +23,15 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 /**
  * Keeps track of what chunks/sections each listener is in, so we can update exactly what needs to be updated.
  */
-public class LightUpdatedStorage {
+public class LightUpdatedVisualStorage {
 	private static final long NEVER_UPDATED = Long.MIN_VALUE;
 	private static final long INITIAL_UPDATE_ID = NEVER_UPDATED + 1;
 
-	private final Map<LightUpdatedVisual, LongSet> visuals2Sections = new WeakHashMap<>();
-	private final Long2ObjectMap<List<Updater>> sections2Visuals = new Long2ObjectOpenHashMap<>();
+	private final Map<LightUpdatedVisual, LongSet> visual2Sections = new WeakHashMap<>();
+	private final Long2ObjectMap<List<Updater>> section2Updaters = new Long2ObjectOpenHashMap<>();
 
-	private final Queue<MovedVisual> movedVisuals = new ConcurrentLinkedQueue<>();
 	private final LongSet sectionsUpdatedThisFrame = new LongOpenHashSet();
+	private final Queue<MovedVisual> movedVisuals = new ConcurrentLinkedQueue<>();
 
 	private long updateId = INITIAL_UPDATE_ID;
 
@@ -54,9 +53,9 @@ public class LightUpdatedStorage {
 			Updater.Context updaterContext = new Updater.Context(updateId, context.partialTick());
 
 			for (long section : sectionsUpdatedThisFrame) {
-				var visuals = sections2Visuals.get(section);
-				if (visuals != null && !visuals.isEmpty()) {
-					taskExecutor.execute(() -> Distribute.tasks(taskExecutor, updaterContext, sync, visuals, Updater::updateLight));
+				var updaters = section2Updaters.get(section);
+				if (updaters != null && !updaters.isEmpty()) {
+					taskExecutor.execute(() -> Distribute.tasks(taskExecutor, updaterContext, sync, updaters, Updater::updateLight));
 				} else {
 					sync.decrementAndEventuallyRun();
 				}
@@ -69,7 +68,7 @@ public class LightUpdatedStorage {
 		while ((moved = movedVisuals.poll()) != null) {
 			// If the visual isn't there when we try to remove it that means it was deleted before we got to it.
 			if (remove(moved.visual)) {
-				updateTracking(moved.tracker, moved.visual);
+				addInner(moved.visual, moved.tracker);
 			}
 		}
 	}
@@ -86,41 +85,30 @@ public class LightUpdatedStorage {
 		return out;
 	}
 
-	public boolean isEmpty() {
-		return visuals2Sections.isEmpty();
-	}
-
-	public void add(SectionCollectorImpl tracker, LightUpdatedVisual visual) {
-		var moved = new MovedVisual(tracker, visual);
+	public void add(LightUpdatedVisual visual, SectionTracker tracker) {
+		var moved = new MovedVisual(visual, tracker);
 		tracker.addListener(() -> movedVisuals.add(moved));
 
-		updateTracking(tracker, visual);
+		addInner(visual, tracker);
 	}
 
-	public void updateTracking(SectionCollectorImpl tracker, LightUpdatedVisual visual) {
-		if (tracker.sections.isEmpty()) {
+	private void addInner(LightUpdatedVisual visual, SectionTracker tracker) {
+		if (tracker.sections().isEmpty()) {
 			// Add the visual to the map even if sections is empty, this way we can distinguish from deleted visuals
-			visuals2Sections.put(visual, LongSet.of());
+			visual2Sections.put(visual, LongSet.of());
 
 			// Don't bother creating an updater if the visual isn't in any sections.
 			return;
 		}
 
-		// Create a copy of the array, so we know what section to remove the visual from later.
-		var sections = new LongArraySet(tracker.sections);
-
-		visuals2Sections.put(visual, sections);
-
+		var sections = tracker.sections();
+		visual2Sections.put(visual, sections);
 		var updater = createUpdater(visual, sections.size());
 
 		for (long section : sections) {
-			sections2Visuals.computeIfAbsent(section, $ -> new ObjectArrayList<>())
+			section2Updaters.computeIfAbsent(section, $ -> new ObjectArrayList<>())
 					.add(updater);
 		}
-	}
-
-	public void enqueueLightUpdateSection(long section) {
-		sectionsUpdatedThisFrame.add(section);
 	}
 
 	/**
@@ -130,31 +118,36 @@ public class LightUpdatedStorage {
 	 * @return {@code true} if the visual was removed, {@code false} otherwise.
 	 */
 	public boolean remove(LightUpdatedVisual visual) {
-		var sections = visuals2Sections.remove(visual);
+		var sections = visual2Sections.remove(visual);
 
 		if (sections == null) {
 			return false;
 		}
 
 		for (long section : sections) {
-			List<Updater> listeners = sections2Visuals.get(section);
-			if (listeners != null) {
-				listeners.remove(indexOfUpdater(listeners, visual));
+			List<Updater> updaters = section2Updaters.get(section);
+			if (updaters != null) {
+				updaters.remove(indexOfUpdater(updaters, visual));
 			}
 		}
 
 		return true;
 	}
 
-	public void clear() {
-		visuals2Sections.clear();
-		sections2Visuals.clear();
-		sectionsUpdatedThisFrame.clear();
+	public void onLightUpdate(long section) {
+		sectionsUpdatedThisFrame.add(section);
 	}
 
-	private static int indexOfUpdater(List<Updater> listeners, LightUpdatedVisual visual) {
-		for (int i = 0; i < listeners.size(); i++) {
-			if (listeners.get(i)
+	public void clear() {
+		visual2Sections.clear();
+		section2Updaters.clear();
+		sectionsUpdatedThisFrame.clear();
+		movedVisuals.clear();
+	}
+
+	private static int indexOfUpdater(List<Updater> updaters, LightUpdatedVisual visual) {
+		for (int i = 0; i < updaters.size(); i++) {
+			if (updaters.get(i)
 					.visual() == visual) {
 				return i;
 			}
@@ -171,7 +164,7 @@ public class LightUpdatedStorage {
 	}
 
 	// Breaking this into 2 separate cases allows us to avoid the overhead of atomics in the common case.
-	sealed interface Updater {
+	private sealed interface Updater {
 		void updateLight(Context ctx);
 
 		LightUpdatedVisual visual();
@@ -201,6 +194,6 @@ public class LightUpdatedStorage {
 		}
 	}
 
-	private record MovedVisual(SectionCollectorImpl tracker, LightUpdatedVisual visual) {
+	private record MovedVisual(LightUpdatedVisual visual, SectionTracker tracker) {
 	}
 }

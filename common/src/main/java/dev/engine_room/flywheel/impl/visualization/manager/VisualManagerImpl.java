@@ -54,10 +54,6 @@ public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager
 		queue.add(Transaction.update(obj));
 	}
 
-	public void invalidate() {
-		getStorage().invalidate();
-	}
-
 	public void processQueue(float partialTick) {
 		var storage = getStorage();
 		Transaction<T> transaction;
@@ -76,13 +72,22 @@ public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager
 				.then(storage.tickPlan());
 	}
 
-	public boolean lightSectionsDirty() {
-		return getStorage().smoothLitStorage()
-				.sectionsDirty();
+	public void onLightUpdate(long section) {
+		getStorage().lightUpdatedVisuals()
+				.onLightUpdate(section);
 	}
 
-	public LongSet lightSections() {
-		return getStorage().smoothLitStorage()
+	public boolean areGpuLightSectionsDirty() {
+		return getStorage().shaderLightVisuals()
+				.isDirty();
+	}
+
+	public LongSet gpuLightSections() {
+		return getStorage().shaderLightVisuals()
 				.sections();
+	}
+
+	public void invalidate() {
+		getStorage().invalidate();
 	}
 }

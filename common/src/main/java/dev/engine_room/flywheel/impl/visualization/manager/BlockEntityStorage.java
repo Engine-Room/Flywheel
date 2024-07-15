@@ -69,8 +69,20 @@ public class BlockEntityStorage extends Storage<BlockEntity> {
 
 	@Override
 	public void remove(BlockEntity obj) {
-		super.remove(obj);
 		posLookup.remove(obj.getBlockPos()
 				.asLong());
+		super.remove(obj);
+	}
+
+	@Override
+	public void recreateAll(float partialTick) {
+		posLookup.clear();
+		super.recreateAll(partialTick);
+	}
+
+	@Override
+	public void invalidate() {
+		posLookup.clear();
+		super.invalidate();
 	}
 }

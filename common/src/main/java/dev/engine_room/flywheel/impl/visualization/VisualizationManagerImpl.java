@@ -106,11 +106,11 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				.ifFalse(update)
 				.plan()
 				.then(SimplePlan.of(() -> {
-					if (blockEntities.lightSectionsDirty() || entities.lightSectionsDirty() || effects.lightSectionsDirty()) {
+					if (blockEntities.areGpuLightSectionsDirty() || entities.areGpuLightSectionsDirty() || effects.areGpuLightSectionsDirty()) {
 						var out = new LongOpenHashSet();
-						out.addAll(blockEntities.lightSections());
-						out.addAll(entities.lightSections());
-						out.addAll(effects.lightSections());
+						out.addAll(blockEntities.gpuLightSections());
+						out.addAll(entities.gpuLightSections());
+						out.addAll(effects.gpuLightSections());
 						engine.lightSections(out);
 					}
 				}))
@@ -302,6 +302,12 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		}
 	}
 
+	public void onLightUpdate(long section) {
+		blockEntities.onLightUpdate(section);
+		entities.onLightUpdate(section);
+		effects.onLightUpdate(section);
+	}
+
 	/**
 	 * Free all acquired resources and delete this manager.
 	 */
@@ -314,14 +320,5 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		entities.invalidate();
 		effects.invalidate();
 		engine.delete();
-	}
-
-	public void enqueueLightUpdateSection(long section) {
-		blockEntities.getStorage()
-				.enqueueLightUpdateSection(section);
-		entities.getStorage()
-				.enqueueLightUpdateSection(section);
-		effects.getStorage()
-				.enqueueLightUpdateSection(section);
 	}
 }

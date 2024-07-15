@@ -110,7 +110,7 @@ public class IndirectBuffers {
 
 	private void multiBind() {
 		final long ptr = multiBindBlock.ptr();
-		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, BufferBindings.INSTANCE_BUFFER_BINDING, IndirectBuffers.BUFFER_COUNT, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
+		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, BufferBindings.INSTANCE, IndirectBuffers.BUFFER_COUNT, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
 	}
 
 	/**
@@ -118,7 +118,7 @@ public class IndirectBuffers {
 	 */
 	public void bindForCrumbling() {
 		final long ptr = multiBindBlock.ptr();
-		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, BufferBindings.INSTANCE_BUFFER_BINDING, 4, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
+		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, BufferBindings.INSTANCE, 4, ptr, ptr + OFFSET_OFFSET, ptr + SIZE_OFFSET);
 	}
 
 	public void delete() {

@@ -63,13 +63,6 @@ public interface Engine {
 	Vec3i renderOrigin();
 
 	/**
-	 * Free all resources associated with this engine.
-	 * <br>
-	 * This engine will not be used again after this method is called.
-	 */
-	void delete();
-
-	/**
 	 * Assign the set of sections that visuals have requested GPU light for.
 	 *
 	 * <p> This will be called at most once per frame, and not necessarily every frame.
@@ -77,6 +70,13 @@ public interface Engine {
 	 * @param sections The set of sections.
 	 */
 	void lightSections(LongSet sections);
+
+	/**
+	 * Free all resources associated with this engine.
+	 * <br>
+	 * This engine will not be used again after this method is called.
+	 */
+	void delete();
 
 	/**
 	 * A block to be rendered as a crumbling overlay.

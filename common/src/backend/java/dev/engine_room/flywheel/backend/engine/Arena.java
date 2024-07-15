@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.backend.engine.embed;
+package dev.engine_room.flywheel.backend.engine;
 
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 import it.unimi.dsi.fastutil.ints.IntArrayList;

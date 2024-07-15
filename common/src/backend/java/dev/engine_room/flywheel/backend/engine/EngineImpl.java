@@ -14,9 +14,9 @@ import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.api.visualization.VisualEmbedding;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
+import dev.engine_room.flywheel.backend.engine.embed.EmbeddedEnvironment;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
-import dev.engine_room.flywheel.backend.engine.embed.LightStorage;
-import dev.engine_room.flywheel.backend.engine.embed.TopLevelEmbeddedEnvironment;
+import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.lib.task.Flag;
@@ -30,11 +30,11 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
 public class EngineImpl implements Engine {
-	private final int sqrMaxOriginDistance;
 	private final DrawManager<? extends AbstractInstancer<?>> drawManager;
+	private final int sqrMaxOriginDistance;
+	private final Flag flushFlag = new NamedFlag("flushed");
 	private final EnvironmentStorage environmentStorage;
 	private final LightStorage lightStorage;
-	private final Flag flushFlag = new NamedFlag("flushed");
 
 	private BlockPos renderOrigin = BlockPos.ZERO;
 
@@ -43,6 +43,11 @@ public class EngineImpl implements Engine {
 		sqrMaxOriginDistance = maxOriginDistance * maxOriginDistance;
 		environmentStorage = new EnvironmentStorage();
 		lightStorage = new LightStorage(level);
+	}
+
+	@Override
+	public VisualizationContext createVisualizationContext(RenderStage stage) {
+		return new VisualizationContextImpl(stage);
 	}
 
 	@Override
@@ -70,11 +75,6 @@ public class EngineImpl implements Engine {
 	}
 
 	@Override
-	public VisualizationContext createVisualizationContext(RenderStage stage) {
-		return new VisualizationContextImpl(stage);
-	}
-
-	@Override
 	public boolean updateRenderOrigin(Camera camera) {
 		Vec3 cameraPos = camera.getPosition();
 		double dx = renderOrigin.getX() - cameraPos.x;
@@ -97,14 +97,14 @@ public class EngineImpl implements Engine {
 	}
 
 	@Override
-	public void delete() {
-		drawManager.delete();
-		lightStorage.delete();
+	public void lightSections(LongSet sections) {
+		lightStorage.sections(sections);
 	}
 
 	@Override
-	public void lightSections(LongSet sections) {
-		lightStorage.sections(sections);
+	public void delete() {
+		drawManager.delete();
+		lightStorage.delete();
 	}
 
 	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, RenderStage stage) {
@@ -150,7 +150,7 @@ public class EngineImpl implements Engine {
 
 		@Override
 		public VisualEmbedding createEmbedding() {
-			var out = new TopLevelEmbeddedEnvironment(EngineImpl.this, stage);
+			var out = new EmbeddedEnvironment(EngineImpl.this, stage);
 			environmentStorage.track(out);
 			return out;
 		}

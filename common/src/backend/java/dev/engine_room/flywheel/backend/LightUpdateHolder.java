@@ -1,7 +1,8 @@
-package dev.engine_room.flywheel.backend.engine.embed;
+package dev.engine_room.flywheel.backend;
 
 import dev.engine_room.flywheel.lib.util.LevelAttached;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.world.level.LevelAccessor;
 
@@ -11,11 +12,14 @@ import net.minecraft.world.level.LevelAccessor;
 public class LightUpdateHolder {
 	private static final LevelAttached<LightUpdateHolder> HOLDERS = new LevelAttached<>(level -> new LightUpdateHolder());
 
+	private final LongSet updatedSections = new LongOpenHashSet();
+
+	private LightUpdateHolder() {
+	}
+
 	public static LightUpdateHolder get(LevelAccessor level) {
 		return HOLDERS.get(level);
 	}
-
-	private final LongSet updatedSections = new LongArraySet();
 
 	public LongSet getAndClearUpdatedSections() {
 		if (updatedSections.isEmpty()) {
@@ -29,8 +33,5 @@ public class LightUpdateHolder {
 
 	public void add(long section) {
 		updatedSections.add(section);
-	}
-
-	private LightUpdateHolder() {
 	}
 }

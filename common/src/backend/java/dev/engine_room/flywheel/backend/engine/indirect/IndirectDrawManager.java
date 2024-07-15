@@ -20,10 +20,10 @@ import dev.engine_room.flywheel.backend.engine.CommonCrumbling;
 import dev.engine_room.flywheel.backend.engine.DrawManager;
 import dev.engine_room.flywheel.backend.engine.GroupKey;
 import dev.engine_room.flywheel.backend.engine.InstancerKey;
+import dev.engine_room.flywheel.backend.engine.LightStorage;
 import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
 import dev.engine_room.flywheel.backend.engine.TextureBinder;
-import dev.engine_room.flywheel.backend.engine.embed.LightStorage;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
@@ -40,18 +40,15 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	private final GlVertexArray vertexArray;
 	private final Map<GroupKey<?>, IndirectCullingGroup<?>> cullingGroups = new HashMap<>();
 	private final GlBuffer crumblingDrawBuffer = new GlBuffer();
-
 	private final LightBuffers lightBuffers;
 
 	public IndirectDrawManager(IndirectPrograms programs) {
 		this.programs = programs;
 		programs.acquire();
+
 		stagingBuffer = new StagingBuffer(this.programs);
-
 		meshPool = new MeshPool();
-
 		vertexArray = GlVertexArray.create();
-
 		meshPool.bind(vertexArray);
 		lightBuffers = new LightBuffers();
 	}
@@ -170,7 +167,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			var block = MemoryBlock.malloc(IndirectBuffers.DRAW_COMMAND_STRIDE);
 
 			GlBufferType.DRAW_INDIRECT_BUFFER.bind(crumblingDrawBuffer.handle());
-			glBindBufferRange(GL_SHADER_STORAGE_BUFFER, BufferBindings.DRAW_BUFFER_BINDING, crumblingDrawBuffer.handle(), 0, IndirectBuffers.DRAW_COMMAND_STRIDE);
+			glBindBufferRange(GL_SHADER_STORAGE_BUFFER, BufferBindings.DRAW, crumblingDrawBuffer.handle(), 0, IndirectBuffers.DRAW_COMMAND_STRIDE);
 
 			for (var groupEntry : byType.entrySet()) {
 				var byProgress = groupEntry.getValue();

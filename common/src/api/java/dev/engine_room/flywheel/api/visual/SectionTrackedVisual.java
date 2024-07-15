@@ -6,15 +6,15 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 
 public sealed interface SectionTrackedVisual extends Visual permits ShaderLightVisual, LightUpdatedVisual {
 	/**
-	 * Set the section property object.
+	 * Set the section collector object.
 	 *
 	 * <p>This method is only called once, upon visual creation.
-	 * <br>If the property is assigned to in this method, the
+	 * <br>If the collector is invoked in this method, the
 	 * visual will immediately be tracked in the given sections.
 	 *
-	 * @param property The property.
+	 * @param collector The collector.
 	 */
-	void setSectionCollector(SectionCollector property);
+	void setSectionCollector(SectionCollector collector);
 
 	@ApiStatus.NonExtendable
 	interface SectionCollector {
