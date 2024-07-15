@@ -4,13 +4,13 @@ import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
-import dev.engine_room.flywheel.api.visual.SmoothLitVisual;
+import dev.engine_room.flywheel.api.visual.ShaderLightVisual;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
-public class SmoothLitVisualStorage {
-	private final Map<SmoothLitVisual, SectionPropertyImpl> visuals = new Reference2ObjectOpenHashMap<>();
+public class ShaderLightStorage {
+	private final Map<ShaderLightVisual, SectionCollectorImpl> visuals = new Reference2ObjectOpenHashMap<>();
 
 	@Nullable
 	private LongSet cachedSections;
@@ -31,12 +31,12 @@ public class SmoothLitVisualStorage {
 		return cachedSections;
 	}
 
-	public void remove(SmoothLitVisual smoothLit) {
-		visuals.remove(smoothLit);
+	public void remove(ShaderLightVisual visual) {
+		visuals.remove(visual);
 	}
 
-	public void add(SectionPropertyImpl tracker, SmoothLitVisual smoothLit) {
-		visuals.put(smoothLit, tracker);
+	public void add(SectionCollectorImpl tracker, ShaderLightVisual visual) {
+		visuals.put(visual, tracker);
 
 		tracker.addListener(this::markDirty);
 

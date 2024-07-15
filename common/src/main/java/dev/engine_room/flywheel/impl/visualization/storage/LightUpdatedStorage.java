@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
-import dev.engine_room.flywheel.api.visual.LitVisual;
+import dev.engine_room.flywheel.api.visual.LightUpdatedVisual;
 import dev.engine_room.flywheel.lib.task.Distribute;
 import dev.engine_room.flywheel.lib.task.SimplyComposedPlan;
 import dev.engine_room.flywheel.lib.task.Synchronizer;
@@ -24,11 +24,11 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 /**
  * Keeps track of what chunks/sections each listener is in, so we can update exactly what needs to be updated.
  */
-public class LitVisualStorage {
+public class LightUpdatedStorage {
 	private static final long NEVER_UPDATED = Long.MIN_VALUE;
 	private static final long INITIAL_UPDATE_ID = NEVER_UPDATED + 1;
 
-	private final Map<LitVisual, LongSet> visuals2Sections = new WeakHashMap<>();
+	private final Map<LightUpdatedVisual, LongSet> visuals2Sections = new WeakHashMap<>();
 	private final Long2ObjectMap<List<Updater>> sections2Visuals = new Long2ObjectOpenHashMap<>();
 
 	private final Queue<MovedVisual> movedVisuals = new ConcurrentLinkedQueue<>();
@@ -90,14 +90,14 @@ public class LitVisualStorage {
 		return visuals2Sections.isEmpty();
 	}
 
-	public void add(SectionPropertyImpl tracker, LitVisual visual) {
+	public void add(SectionCollectorImpl tracker, LightUpdatedVisual visual) {
 		var moved = new MovedVisual(tracker, visual);
 		tracker.addListener(() -> movedVisuals.add(moved));
 
 		updateTracking(tracker, visual);
 	}
 
-	public void updateTracking(SectionPropertyImpl tracker, LitVisual visual) {
+	public void updateTracking(SectionCollectorImpl tracker, LightUpdatedVisual visual) {
 		if (tracker.sections.isEmpty()) {
 			// Add the visual to the map even if sections is empty, this way we can distinguish from deleted visuals
 			visuals2Sections.put(visual, LongSet.of());
@@ -129,7 +129,7 @@ public class LitVisualStorage {
 	 * @param visual The visual to remove.
 	 * @return {@code true} if the visual was removed, {@code false} otherwise.
 	 */
-	public boolean remove(LitVisual visual) {
+	public boolean remove(LightUpdatedVisual visual) {
 		var sections = visuals2Sections.remove(visual);
 
 		if (sections == null) {
@@ -152,7 +152,7 @@ public class LitVisualStorage {
 		sectionsUpdatedThisFrame.clear();
 	}
 
-	private static int indexOfUpdater(List<Updater> listeners, LitVisual visual) {
+	private static int indexOfUpdater(List<Updater> listeners, LightUpdatedVisual visual) {
 		for (int i = 0; i < listeners.size(); i++) {
 			if (listeners.get(i)
 					.visual() == visual) {
@@ -162,7 +162,7 @@ public class LitVisualStorage {
 		return -1;
 	}
 
-	private static Updater createUpdater(LitVisual visual, int sectionCount) {
+	private static Updater createUpdater(LightUpdatedVisual visual, int sectionCount) {
 		if (sectionCount == 1) {
 			return new Updater.Simple(visual);
 		} else {
@@ -174,10 +174,10 @@ public class LitVisualStorage {
 	sealed interface Updater {
 		void updateLight(Context ctx);
 
-		LitVisual visual();
+		LightUpdatedVisual visual();
 
 		// The visual is only in one section. In this case, we can just update the visual directly.
-		record Simple(LitVisual visual) implements Updater {
+		record Simple(LightUpdatedVisual visual) implements Updater {
 			@Override
 			public void updateLight(Context ctx) {
 				visual.updateLight(ctx.partialTick);
@@ -186,7 +186,7 @@ public class LitVisualStorage {
 
 		// The visual is in multiple sections. Here we need to make sure that the visual only gets updated once,
 		// even when multiple sections it was contained in are updated at the same time.
-		record Synced(LitVisual visual, AtomicLong updateId) implements Updater {
+		record Synced(LightUpdatedVisual visual, AtomicLong updateId) implements Updater {
 			@Override
 			public void updateLight(Context ctx) {
 				// Different update ID means we won, so we can update the visual.
@@ -201,6 +201,6 @@ public class LitVisualStorage {
 		}
 	}
 
-	private record MovedVisual(SectionPropertyImpl tracker, LitVisual visual) {
+	private record MovedVisual(SectionCollectorImpl tracker, LightUpdatedVisual visual) {
 	}
 }
