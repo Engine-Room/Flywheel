@@ -15,7 +15,7 @@ public final class PartialModelEventHandler {
 
 	public static void onRegisterAdditional(ModelEvent.RegisterAdditional event) {
 		for (PartialModel partial : PartialModel.ALL) {
-			event.register(partial.getLocation());
+			event.register(ModelResourceLocation.standalone(partial.getLocation()));
 		}
 
 		PartialModel.tooLate = true;
@@ -25,7 +25,7 @@ public final class PartialModelEventHandler {
 		Map<ModelResourceLocation, BakedModel> models = event.getModels();
 
 		for (PartialModel partial : PartialModel.ALL) {
-			partial.set(models.get(partial.getLocation()));
+			partial.set(models.get(ModelResourceLocation.standalone(partial.getLocation())));
 		}
 	}
 }
