@@ -5,7 +5,8 @@ import org.joml.FrustumIntersection;
 
 import dev.engine_room.flywheel.api.visual.BlockEntityVisual;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
-import dev.engine_room.flywheel.api.visual.LitVisual;
+import dev.engine_room.flywheel.api.visual.LightUpdatedVisual;
+import dev.engine_room.flywheel.api.visual.ShaderLightVisual;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visualization.VisualManager;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
@@ -25,6 +26,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * <ul>
  *     <li>{@link DynamicVisual}</li>
  *     <li>{@link TickableVisual}</li>
+ *     <li>{@link LightUpdatedVisual}</li>
+ *     <li>{@link ShaderLightVisual}</li>
  * </ul>
  * See the interfaces' documentation for more information about each one.
  *
@@ -33,13 +36,13 @@ import net.minecraft.world.level.block.state.BlockState;
  *
  * @param <T> The type of {@link BlockEntity}.
  */
-public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends AbstractVisual implements BlockEntityVisual<T>, LitVisual {
+public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends AbstractVisual implements BlockEntityVisual<T>, LightUpdatedVisual {
 	protected final T blockEntity;
 	protected final BlockPos pos;
 	protected final BlockPos visualPos;
 	protected final BlockState blockState;
 	@Nullable
-	protected SectionProperty lightSections;
+	protected SectionCollector lightSections;
 
 	public AbstractBlockEntityVisual(VisualizationContext ctx, T blockEntity, float partialTick) {
 		super(ctx, blockEntity.getLevel(), partialTick);
@@ -50,9 +53,9 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	}
 
 	@Override
-	public void setSectionProperty(SectionProperty property) {
-		this.lightSections = property;
-		lightSections.lightSections(LongSet.of(SectionPos.asLong(pos)));
+	public void setSectionCollector(SectionCollector sectionCollector) {
+		this.lightSections = sectionCollector;
+		lightSections.sections(LongSet.of(SectionPos.asLong(pos)));
 	}
 
 	/**

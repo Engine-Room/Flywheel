@@ -5,9 +5,9 @@ package dev.engine_room.flywheel.api.visual;
  *
  * <p>If your visual moves around in the level at all, you should use {@link TickableVisual} or {@link DynamicVisual},
  * and poll for light yourself along with listening for updates. When your visual moves to a different section, call
- * {@link SectionProperty#lightSections}.</p>
+ * {@link SectionCollector#sections}.</p>
  */
-public non-sealed interface LitVisual extends SectionTrackedVisual {
+public non-sealed interface LightUpdatedVisual extends SectionTrackedVisual {
 	/**
 	 * Called when a section this visual is contained in receives a light update.
 	 *

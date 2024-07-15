@@ -10,9 +10,9 @@ import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
-import dev.engine_room.flywheel.api.visual.LitVisual;
+import dev.engine_room.flywheel.api.visual.LightUpdatedVisual;
 import dev.engine_room.flywheel.api.visual.SectionTrackedVisual;
-import dev.engine_room.flywheel.api.visual.SmoothLitVisual;
+import dev.engine_room.flywheel.api.visual.ShaderLightVisual;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visual.Visual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
@@ -29,8 +29,8 @@ public abstract class Storage<T> {
 	protected final PlanMap<TickableVisual, TickableVisual.Context> tickableVisuals = new PlanMap<>();
 	protected final List<SimpleDynamicVisual> simpleDynamicVisuals = new ArrayList<>();
 	protected final List<SimpleTickableVisual> simpleTickableVisuals = new ArrayList<>();
-	protected final LitVisualStorage litVisuals = new LitVisualStorage();
-	protected final SmoothLitVisualStorage smoothLitVisuals = new SmoothLitVisualStorage();
+	protected final LightUpdatedStorage litVisuals = new LightUpdatedStorage();
+	protected final ShaderLightStorage smoothLitVisuals = new ShaderLightStorage();
 
 	private final Map<T, Visual> visuals = new Reference2ObjectOpenHashMap<>();
 
@@ -71,10 +71,10 @@ public abstract class Storage<T> {
 				dynamicVisuals.remove(dynamic);
 			}
 		}
-		if (visual instanceof LitVisual lit) {
+		if (visual instanceof LightUpdatedVisual lit) {
 			litVisuals.remove(lit);
 		}
-		if (visual instanceof SmoothLitVisual smoothLit) {
+		if (visual instanceof ShaderLightVisual smoothLit) {
 			smoothLitVisuals.remove(smoothLit);
 		}
 		visual.delete();
@@ -161,17 +161,17 @@ public abstract class Storage<T> {
 		}
 
 		if (visual instanceof SectionTrackedVisual tracked) {
-			SectionPropertyImpl sectionProperty = new SectionPropertyImpl();
+			SectionCollectorImpl sectionProperty = new SectionCollectorImpl();
 
 			// Give the visual a chance to fill in the property.
-			tracked.setSectionProperty(sectionProperty);
+			tracked.setSectionCollector(sectionProperty);
 
-			if (visual instanceof LitVisual lit) {
-				litVisuals.add(sectionProperty, lit);
+			if (visual instanceof LightUpdatedVisual lightUpdated) {
+				litVisuals.add(sectionProperty, lightUpdated);
 			}
 
-			if (visual instanceof SmoothLitVisual smoothLit) {
-				smoothLitVisuals.add(sectionProperty, smoothLit);
+			if (visual instanceof ShaderLightVisual shaderLight) {
+				smoothLitVisuals.add(sectionProperty, shaderLight);
 			}
 		}
 	}
@@ -183,7 +183,7 @@ public abstract class Storage<T> {
 	 */
 	public abstract boolean willAccept(T obj);
 
-	public SmoothLitVisualStorage smoothLitStorage() {
+	public ShaderLightStorage smoothLitStorage() {
 		return smoothLitVisuals;
 	}
 }

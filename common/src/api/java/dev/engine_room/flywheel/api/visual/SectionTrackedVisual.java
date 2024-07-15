@@ -4,7 +4,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
 
-public sealed interface SectionTrackedVisual extends Visual permits SmoothLitVisual, LitVisual {
+public sealed interface SectionTrackedVisual extends Visual permits ShaderLightVisual, LightUpdatedVisual {
 	/**
 	 * Set the section property object.
 	 *
@@ -14,13 +14,13 @@ public sealed interface SectionTrackedVisual extends Visual permits SmoothLitVis
 	 *
 	 * @param property The property.
 	 */
-	void setSectionProperty(SectionProperty property);
+	void setSectionCollector(SectionCollector property);
 
 	@ApiStatus.NonExtendable
-	interface SectionProperty {
+	interface SectionCollector {
 		/**
 		 * Assign the set of sections this visual wants to track itself in.
 		 */
-		void lightSections(LongSet sections);
+		void sections(LongSet sections);
 	}
 }
