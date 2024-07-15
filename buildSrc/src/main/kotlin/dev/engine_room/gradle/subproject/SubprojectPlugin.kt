@@ -168,7 +168,7 @@ class SubprojectPlugin: Plugin<Project> {
     }
 }
 
-val processResourcesExpandFiles = listOf("pack.mcmeta", "fabric.mod.json", "META-INF/mods.toml")
+val processResourcesExpandFiles = listOf("pack.mcmeta", "fabric.mod.json", "META-INF/neoforge.mods.toml")
 
 val processResourcesExpandProperties = listOf(
     "mod_id",
