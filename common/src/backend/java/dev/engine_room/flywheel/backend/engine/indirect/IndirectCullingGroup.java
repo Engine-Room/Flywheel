@@ -3,12 +3,10 @@ package dev.engine_room.flywheel.backend.engine.indirect;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
 import static org.lwjgl.opengl.GL30.glUniform1ui;
-import static org.lwjgl.opengl.GL40.glDrawElementsIndirect;
 import static org.lwjgl.opengl.GL42.GL_COMMAND_BARRIER_BIT;
 import static org.lwjgl.opengl.GL42.glMemoryBarrier;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BARRIER_BIT;
 import static org.lwjgl.opengl.GL43.glDispatchCompute;
-import static org.lwjgl.opengl.GL43.glMultiDrawElementsIndirect;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,7 +25,6 @@ import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
-import dev.engine_room.flywheel.backend.gl.Driver;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.lib.math.MoreMath;
@@ -282,14 +279,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private record MultiDraw(Material material, int start, int end) {
 		private void submit() {
-			if (GlCompat.DRIVER == Driver.INTEL) {
-				// Intel renders garbage with MDI, but Consecutive Normal Draws works fine.
-				for (int i = this.start; i < this.end; i++) {
-					glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, i * IndirectBuffers.DRAW_COMMAND_STRIDE);
-				}
-			} else {
-				glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, this.start * IndirectBuffers.DRAW_COMMAND_STRIDE, this.end - this.start, (int) IndirectBuffers.DRAW_COMMAND_STRIDE);
-			}
+			GlCompat.safeMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, this.start * IndirectBuffers.DRAW_COMMAND_STRIDE, this.end - this.start, (int) IndirectBuffers.DRAW_COMMAND_STRIDE);
 		}
 	}
 }
