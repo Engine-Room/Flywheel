@@ -24,7 +24,7 @@ abstract class ClientChunkCacheMixin {
 		var manager = VisualizationManagerImpl.get(level);
 
 		if (manager != null) {
-			manager.enqueueLightUpdateSection(pos.asLong());
+			manager.onLightUpdate(pos.asLong());
 		}
 	}
 }

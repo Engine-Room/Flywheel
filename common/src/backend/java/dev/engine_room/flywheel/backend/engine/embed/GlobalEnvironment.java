@@ -15,12 +15,11 @@ public class GlobalEnvironment implements Environment {
 	}
 
 	@Override
-	public void setupDraw(GlProgram drawProgram) {
-
+	public void setupCull(GlProgram cullProgram) {
+		cullProgram.setBool(EmbeddingUniforms.USE_MODEL_MATRIX, false);
 	}
 
 	@Override
-	public void setupCull(GlProgram cullProgram) {
-		cullProgram.setBool(EmbeddingUniforms.USE_MODEL_MATRIX, false);
+	public void setupDraw(GlProgram drawProgram) {
 	}
 }

@@ -194,7 +194,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisu
 		body.setTransform(stack)
 				.setChanged();
 
-		// TODO: Use LitVisual if possible.
+		// TODO: Use LightUpdatedVisual/ShaderLightVisual if possible.
 		updateLight(partialTick);
 	}
 

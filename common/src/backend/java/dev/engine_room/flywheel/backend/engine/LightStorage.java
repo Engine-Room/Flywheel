@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.backend.engine.embed;
+package dev.engine_room.flywheel.backend.engine;
 
 import java.util.BitSet;
 
@@ -7,6 +7,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.api.event.RenderContext;
 import dev.engine_room.flywheel.api.task.Plan;
+import dev.engine_room.flywheel.backend.LightUpdateHolder;
 import dev.engine_room.flywheel.backend.engine.indirect.StagingBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
 import dev.engine_room.flywheel.lib.task.SimplePlan;

@@ -3,14 +3,11 @@ package dev.engine_room.flywheel.backend.engine.indirect;
 import org.lwjgl.opengl.GL46;
 import org.lwjgl.system.MemoryUtil;
 
-import dev.engine_room.flywheel.backend.engine.embed.LightStorage;
+import dev.engine_room.flywheel.backend.engine.LightStorage;
 
 public class LightBuffers {
-	private final ResizableStorageArray sections = new ResizableStorageArray(LightStorage.SECTION_SIZE_BYTES);
 	private final ResizableStorageArray lut = new ResizableStorageArray(4);
-
-	public LightBuffers() {
-	}
+	private final ResizableStorageArray sections = new ResizableStorageArray(LightStorage.SECTION_SIZE_BYTES);
 
 	public void flush(StagingBuffer staging, LightStorage light) {
 		var capacity = light.capacity();
@@ -40,7 +37,7 @@ public class LightBuffers {
 			return;
 		}
 
-		GL46.glBindBufferRange(GL46.GL_SHADER_STORAGE_BUFFER, BufferBindings.LIGHT_LUT_BINDING, lut.handle(), 0, lut.byteCapacity());
-		GL46.glBindBufferRange(GL46.GL_SHADER_STORAGE_BUFFER, BufferBindings.LIGHT_SECTION_BINDING, sections.handle(), 0, sections.byteCapacity());
+		GL46.glBindBufferRange(GL46.GL_SHADER_STORAGE_BUFFER, BufferBindings.LIGHT_LUT, lut.handle(), 0, lut.byteCapacity());
+		GL46.glBindBufferRange(GL46.GL_SHADER_STORAGE_BUFFER, BufferBindings.LIGHT_SECTION, sections.handle(), 0, sections.byteCapacity());
 	}
 }

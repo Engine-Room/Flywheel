@@ -25,14 +25,14 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 public abstract class Storage<T> {
 	protected final Supplier<VisualizationContext> visualizationContextSupplier;
+
+	private final Map<T, Visual> visuals = new Reference2ObjectOpenHashMap<>();
 	protected final PlanMap<DynamicVisual, DynamicVisual.Context> dynamicVisuals = new PlanMap<>();
 	protected final PlanMap<TickableVisual, TickableVisual.Context> tickableVisuals = new PlanMap<>();
 	protected final List<SimpleDynamicVisual> simpleDynamicVisuals = new ArrayList<>();
 	protected final List<SimpleTickableVisual> simpleTickableVisuals = new ArrayList<>();
-	protected final LightUpdatedStorage litVisuals = new LightUpdatedStorage();
-	protected final ShaderLightStorage smoothLitVisuals = new ShaderLightStorage();
-
-	private final Map<T, Visual> visuals = new Reference2ObjectOpenHashMap<>();
+	protected final LightUpdatedVisualStorage lightUpdatedVisuals = new LightUpdatedVisualStorage();
+	protected final ShaderLightVisualStorage shaderLightVisuals = new ShaderLightVisualStorage();
 
 	public Storage(Supplier<VisualizationContext> visualizationContextSupplier) {
 		this.visualizationContextSupplier = visualizationContextSupplier;
@@ -41,6 +41,29 @@ public abstract class Storage<T> {
 	public Collection<Visual> getAllVisuals() {
 		return visuals.values();
 	}
+
+	public Plan<DynamicVisual.Context> framePlan() {
+		return NestedPlan.of(dynamicVisuals, lightUpdatedVisuals.plan(), ForEachPlan.of(() -> simpleDynamicVisuals, SimpleDynamicVisual::beginFrame));
+	}
+
+	public Plan<TickableVisual.Context> tickPlan() {
+		return NestedPlan.of(tickableVisuals, ForEachPlan.of(() -> simpleTickableVisuals, SimpleTickableVisual::tick));
+	}
+
+	public LightUpdatedVisualStorage lightUpdatedVisuals() {
+		return lightUpdatedVisuals;
+	}
+
+	public ShaderLightVisualStorage shaderLightVisuals() {
+		return shaderLightVisuals;
+	}
+
+	/**
+	 * Is the given object currently capable of being added?
+	 *
+	 * @return true if the object is currently capable of being visualized.
+	 */
+	public abstract boolean willAccept(T obj);
 
 	public void add(T obj, float partialTick) {
 		Visual visual = visuals.get(obj);
@@ -57,13 +80,6 @@ public abstract class Storage<T> {
 			return;
 		}
 
-		if (visual instanceof TickableVisual tickable) {
-			if (visual instanceof SimpleTickableVisual simpleTickable) {
-				simpleTickableVisuals.remove(simpleTickable);
-			} else {
-				tickableVisuals.remove(tickable);
-			}
-		}
 		if (visual instanceof DynamicVisual dynamic) {
 			if (visual instanceof SimpleDynamicVisual simpleDynamic) {
 				simpleDynamicVisuals.remove(simpleDynamic);
@@ -71,12 +87,20 @@ public abstract class Storage<T> {
 				dynamicVisuals.remove(dynamic);
 			}
 		}
-		if (visual instanceof LightUpdatedVisual lit) {
-			litVisuals.remove(lit);
+		if (visual instanceof TickableVisual tickable) {
+			if (visual instanceof SimpleTickableVisual simpleTickable) {
+				simpleTickableVisuals.remove(simpleTickable);
+			} else {
+				tickableVisuals.remove(tickable);
+			}
 		}
-		if (visual instanceof ShaderLightVisual smoothLit) {
-			smoothLitVisuals.remove(smoothLit);
+		if (visual instanceof LightUpdatedVisual lightUpdated) {
+			lightUpdatedVisuals.remove(lightUpdated);
 		}
+		if (visual instanceof ShaderLightVisual shaderLight) {
+			shaderLightVisuals.remove(shaderLight);
+		}
+
 		visual.delete();
 	}
 
@@ -91,12 +115,13 @@ public abstract class Storage<T> {
 	}
 
 	public void recreateAll(float partialTick) {
-		tickableVisuals.clear();
 		dynamicVisuals.clear();
-		simpleTickableVisuals.clear();
+		tickableVisuals.clear();
 		simpleDynamicVisuals.clear();
-		litVisuals.clear();
-		smoothLitVisuals.clear();
+		simpleTickableVisuals.clear();
+		lightUpdatedVisuals.clear();
+		shaderLightVisuals.clear();
+
 		visuals.replaceAll((obj, visual) -> {
 			visual.delete();
 
@@ -108,15 +133,6 @@ public abstract class Storage<T> {
 
 			return out;
 		});
-	}
-
-	public void invalidate() {
-		tickableVisuals.clear();
-		dynamicVisuals.clear();
-		litVisuals.clear();
-		visuals.values()
-				.forEach(Visual::delete);
-		visuals.clear();
 	}
 
 	private void create(T obj, float partialTick) {
@@ -131,27 +147,7 @@ public abstract class Storage<T> {
 	@Nullable
 	protected abstract Visual createRaw(T obj, float partialTick);
 
-	public Plan<DynamicVisual.Context> framePlan() {
-		return NestedPlan.of(dynamicVisuals, litVisuals.plan(), ForEachPlan.of(() -> simpleDynamicVisuals, SimpleDynamicVisual::beginFrame));
-	}
-
-	public Plan<TickableVisual.Context> tickPlan() {
-		return NestedPlan.of(tickableVisuals, ForEachPlan.of(() -> simpleTickableVisuals, SimpleTickableVisual::tick));
-	}
-
-	public void enqueueLightUpdateSection(long section) {
-		litVisuals.enqueueLightUpdateSection(section);
-	}
-
 	private void setup(Visual visual) {
-		if (visual instanceof TickableVisual tickable) {
-			if (visual instanceof SimpleTickableVisual simpleTickable) {
-				simpleTickableVisuals.add(simpleTickable);
-			} else {
-				tickableVisuals.add(tickable, tickable.planTick());
-			}
-		}
-
 		if (visual instanceof DynamicVisual dynamic) {
 			if (visual instanceof SimpleDynamicVisual simpleDynamic) {
 				simpleDynamicVisuals.add(simpleDynamic);
@@ -160,30 +156,39 @@ public abstract class Storage<T> {
 			}
 		}
 
-		if (visual instanceof SectionTrackedVisual tracked) {
-			SectionCollectorImpl sectionProperty = new SectionCollectorImpl();
+		if (visual instanceof TickableVisual tickable) {
+			if (visual instanceof SimpleTickableVisual simpleTickable) {
+				simpleTickableVisuals.add(simpleTickable);
+			} else {
+				tickableVisuals.add(tickable, tickable.planTick());
+			}
+		}
 
-			// Give the visual a chance to fill in the property.
-			tracked.setSectionCollector(sectionProperty);
+		if (visual instanceof SectionTrackedVisual tracked) {
+			SectionTracker tracker = new SectionTracker();
+
+			// Give the visual a chance to invoke the collector.
+			tracked.setSectionCollector(tracker);
 
 			if (visual instanceof LightUpdatedVisual lightUpdated) {
-				litVisuals.add(sectionProperty, lightUpdated);
+				lightUpdatedVisuals.add(lightUpdated, tracker);
 			}
 
 			if (visual instanceof ShaderLightVisual shaderLight) {
-				smoothLitVisuals.add(sectionProperty, shaderLight);
+				shaderLightVisuals.add(shaderLight, tracker);
 			}
 		}
 	}
 
-	/**
-	 * Is the given object currently capable of being added?
-	 *
-	 * @return true if the object is currently capable of being visualized.
-	 */
-	public abstract boolean willAccept(T obj);
-
-	public ShaderLightStorage smoothLitStorage() {
-		return smoothLitVisuals;
+	public void invalidate() {
+		dynamicVisuals.clear();
+		tickableVisuals.clear();
+		simpleDynamicVisuals.clear();
+		simpleTickableVisuals.clear();
+		lightUpdatedVisuals.clear();
+		shaderLightVisuals.clear();
+		visuals.values()
+				.forEach(Visual::delete);
+		visuals.clear();
 	}
 }
