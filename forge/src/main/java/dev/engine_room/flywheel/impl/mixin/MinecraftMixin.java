@@ -32,12 +32,12 @@ abstract class MinecraftMixin {
 		return arg0;
 	}
 
-	@Inject(method = "lambda$new$7", at = @At("HEAD"))
+	@Inject(method = "lambda$new$8", at = @At("HEAD"))
 	private void flywheel$onEndInitialResourceReload(@Coerce Object gameLoadCookie, Optional<Throwable> error, CallbackInfo ci) {
 		NeoForge.EVENT_BUS.post(new EndClientResourceReloadEvent((Minecraft) (Object) this, resourceManager, true, error));
 	}
 
-	@Inject(method = "lambda$reloadResourcePacks$39", at = @At("HEAD"))
+	@Inject(method = "lambda$reloadResourcePacks$22", at = @At("HEAD"))
 	private void flywheel$onEndManualResourceReload(boolean recovery, @Coerce Object gameLoadCookie, CompletableFuture<Void> completablefuture, Optional<Throwable> error, CallbackInfo ci) {
 		NeoForge.EVENT_BUS.post(new EndClientResourceReloadEvent((Minecraft) (Object) this, resourceManager, false, error));
 	}

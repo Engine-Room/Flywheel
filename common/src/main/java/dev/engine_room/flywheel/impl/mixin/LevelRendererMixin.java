@@ -111,7 +111,7 @@ abstract class LevelRendererMixin {
 		flywheel$dispatch(RenderStage.AFTER_TRANSLUCENT_TERRAIN);
 	}
 
-	@Group(name = "onStage$afterParticles", min = 2, max = 2)
+	@Group(name = "onStage$afterParticles", min = 2, max = 3)
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V", shift = Shift.AFTER))
 	private void flywheel$onStage$afterParticles$fabric(CallbackInfo ci) {
 		flywheel$dispatch(RenderStage.AFTER_PARTICLES);
