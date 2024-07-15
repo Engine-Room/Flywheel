@@ -16,7 +16,7 @@ public final class ResourceUtil {
 	}
 
 	/**
-	 * Same as {@link ResourceLocation#ResourceLocation(String)}, but defaults to Flywheel namespace.
+	 * Same as {@link ResourceLocation#parse(String)}, but defaults to Flywheel namespace.
 	 */
 	public static ResourceLocation parseFlywheelDefault(String location) {
 		String namespace = Flywheel.ID;
