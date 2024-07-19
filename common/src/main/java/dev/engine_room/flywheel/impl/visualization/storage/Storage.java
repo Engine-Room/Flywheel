@@ -128,7 +128,7 @@ public abstract class Storage<T> {
 			var out = createRaw(obj, partialTick);
 
 			if (out != null) {
-				setup(out);
+				setup(out, partialTick);
 			}
 
 			return out;
@@ -139,7 +139,7 @@ public abstract class Storage<T> {
 		var visual = createRaw(obj, partialTick);
 
 		if (visual != null) {
-			setup(visual);
+			setup(visual, partialTick);
 			visuals.put(obj, visual);
 		}
 	}
@@ -147,7 +147,7 @@ public abstract class Storage<T> {
 	@Nullable
 	protected abstract Visual createRaw(T obj, float partialTick);
 
-	private void setup(Visual visual) {
+	private void setup(Visual visual, float partialTick) {
 		if (visual instanceof DynamicVisual dynamic) {
 			if (visual instanceof SimpleDynamicVisual simpleDynamic) {
 				simpleDynamicVisuals.add(simpleDynamic);
@@ -172,6 +172,7 @@ public abstract class Storage<T> {
 
 			if (visual instanceof LightUpdatedVisual lightUpdated) {
 				lightUpdatedVisuals.add(lightUpdated, tracker);
+				lightUpdated.updateLight(partialTick);
 			}
 
 			if (visual instanceof ShaderLightVisual shaderLight) {

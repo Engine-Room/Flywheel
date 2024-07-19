@@ -9,8 +9,7 @@ package dev.engine_room.flywheel.api.visual;
  */
 public non-sealed interface LightUpdatedVisual extends SectionTrackedVisual {
 	/**
-	 * Called when a section this visual is contained in receives a light update. It is not called
-	 * unconditionally after visual creation or {@link SectionCollector#sections}.
+	 * Called after visual construction and when a section this visual is contained in receives a light update.
 	 *
 	 * <p>Even if multiple sections are updated at the same time, this method will only be called once.</p>
 	 *
