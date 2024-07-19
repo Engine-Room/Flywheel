@@ -2,6 +2,7 @@
 #include "flywheel:internal/packed_material.glsl"
 #include "flywheel:internal/indirect/buffer_bindings.glsl"
 #include "flywheel:internal/indirect/draw_command.glsl"
+#include "flywheel:internal/indirect/light.glsl"
 
 layout(std430, binding = _FLW_TARGET_BUFFER_BINDING) restrict readonly buffer TargetBuffer {
     uint _flw_instanceIndices[];

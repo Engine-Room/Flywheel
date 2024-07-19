@@ -5,7 +5,8 @@ package dev.engine_room.flywheel.api.visual;
  *
  * @see DynamicVisual
  * @see TickableVisual
- * @see LitVisual
+ * @see LightUpdatedVisual
+ * @see ShaderLightVisual
  */
 public interface Visual {
 	/**

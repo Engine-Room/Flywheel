@@ -1,4 +1,6 @@
 #include "flywheel:internal/common.frag"
+#include "flywheel:internal/indirect/buffer_bindings.glsl"
+#include "flywheel:internal/indirect/light.glsl"
 
 flat in uvec3 _flw_packedMaterial;
 

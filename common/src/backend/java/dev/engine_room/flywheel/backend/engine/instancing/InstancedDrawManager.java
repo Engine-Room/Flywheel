@@ -18,6 +18,7 @@ import dev.engine_room.flywheel.backend.engine.CommonCrumbling;
 import dev.engine_room.flywheel.backend.engine.DrawManager;
 import dev.engine_room.flywheel.backend.engine.GroupKey;
 import dev.engine_room.flywheel.backend.engine.InstancerKey;
+import dev.engine_room.flywheel.backend.engine.LightStorage;
 import dev.engine_room.flywheel.backend.engine.MaterialEncoder;
 import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
@@ -42,6 +43,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	private final MeshPool meshPool;
 	private final GlVertexArray vao;
 	private final TextureBuffer instanceTexture;
+	private final InstancedLight light;
 
 	public InstancedDrawManager(InstancingPrograms programs) {
 		programs.acquire();
@@ -50,16 +52,17 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		meshPool = new MeshPool();
 		vao = GlVertexArray.create();
 		instanceTexture = new TextureBuffer();
+		light = new InstancedLight();
 
 		meshPool.bind(vao);
 	}
 
 	@Override
-	public void flush() {
-		super.flush();
+	public void flush(LightStorage lightStorage) {
+		super.flush(lightStorage);
 
-		var instancers = this.instancers.values();
-		instancers.removeIf(instancer -> {
+		this.instancers.values()
+				.removeIf(instancer -> {
 			// Update the instancers and remove any that are empty.
 			instancer.update();
 
@@ -77,6 +80,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		}
 
 		meshPool.flush();
+
+		light.flush(lightStorage);
 	}
 
 	@Override
@@ -91,6 +96,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 			Uniforms.bindAll();
 			vao.bindForDraw();
 			TextureBinder.bindLightAndOverlay();
+			light.bind();
 
 			drawSet.draw(instanceTexture, programs);
 
@@ -112,6 +118,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		instanceTexture.delete();
 		programs.release();
 		vao.delete();
+
+		light.delete();
 
 		super.delete();
 	}

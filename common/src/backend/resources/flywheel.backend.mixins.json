@@ -6,6 +6,7 @@
   "refmap": "backend-flywheel.refmap.json",
   "client": [
     "AbstractClientPlayerAccessor",
+    "ClientChunkCacheMixin",
     "GlStateManagerMixin",
     "LevelRendererAccessor",
     "OptionsMixin",

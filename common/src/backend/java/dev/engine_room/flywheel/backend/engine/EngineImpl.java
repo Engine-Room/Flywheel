@@ -14,34 +14,46 @@ import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.api.visualization.VisualEmbedding;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
+import dev.engine_room.flywheel.backend.engine.embed.EmbeddedEnvironment;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
-import dev.engine_room.flywheel.backend.engine.embed.TopLevelEmbeddedEnvironment;
+import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.lib.task.Flag;
 import dev.engine_room.flywheel.lib.task.NamedFlag;
 import dev.engine_room.flywheel.lib.task.SyncedPlan;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
 public class EngineImpl implements Engine {
-	private final int sqrMaxOriginDistance;
 	private final DrawManager<? extends AbstractInstancer<?>> drawManager;
-	private final EnvironmentStorage environmentStorage = new EnvironmentStorage();
+	private final int sqrMaxOriginDistance;
 	private final Flag flushFlag = new NamedFlag("flushed");
+	private final EnvironmentStorage environmentStorage;
+	private final LightStorage lightStorage;
 
 	private BlockPos renderOrigin = BlockPos.ZERO;
 
-	public EngineImpl(DrawManager<? extends AbstractInstancer<?>> drawManager, int maxOriginDistance) {
+	public EngineImpl(LevelAccessor level, DrawManager<? extends AbstractInstancer<?>> drawManager, int maxOriginDistance) {
 		this.drawManager = drawManager;
 		sqrMaxOriginDistance = maxOriginDistance * maxOriginDistance;
+		environmentStorage = new EnvironmentStorage();
+		lightStorage = new LightStorage(level);
+	}
+
+	@Override
+	public VisualizationContext createVisualizationContext(RenderStage stage) {
+		return new VisualizationContextImpl(stage);
 	}
 
 	@Override
 	public Plan<RenderContext> createFramePlan() {
-		return SyncedPlan.of(this::flush);
+		return lightStorage.createFramePlan()
+				.then(SyncedPlan.of(this::flush));
 	}
 
 	@Override
@@ -60,11 +72,6 @@ public class EngineImpl implements Engine {
 		executor.syncUntil(flushFlag::isRaised);
 
 		drawManager.renderCrumbling(crumblingBlocks);
-	}
-
-	@Override
-	public VisualizationContext createVisualizationContext(RenderStage stage) {
-		return new VisualizationContextImpl(stage);
 	}
 
 	@Override
@@ -90,9 +97,14 @@ public class EngineImpl implements Engine {
 	}
 
 	@Override
+	public void lightSections(LongSet sections) {
+		lightStorage.sections(sections);
+	}
+
+	@Override
 	public void delete() {
 		drawManager.delete();
-		environmentStorage.delete();
+		lightStorage.delete();
 	}
 
 	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, RenderStage stage) {
@@ -102,8 +114,8 @@ public class EngineImpl implements Engine {
 	private void flush(RenderContext ctx) {
 		try (var state = GlStateTracker.getRestoreState()) {
 			Uniforms.update(ctx);
-			drawManager.flush();
 			environmentStorage.flush();
+			drawManager.flush(lightStorage);
 		}
 
 		flushFlag.raise();
@@ -111,6 +123,10 @@ public class EngineImpl implements Engine {
 
 	public EnvironmentStorage environmentStorage() {
 		return environmentStorage;
+	}
+
+	public LightStorage lightStorage() {
+		return lightStorage;
 	}
 
 	private class VisualizationContextImpl implements VisualizationContext {
@@ -134,7 +150,7 @@ public class EngineImpl implements Engine {
 
 		@Override
 		public VisualEmbedding createEmbedding() {
-			var out = new TopLevelEmbeddedEnvironment(EngineImpl.this, stage);
+			var out = new EmbeddedEnvironment(EngineImpl.this, stage);
 			environmentStorage.track(out);
 			return out;
 		}

@@ -88,7 +88,6 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		bottom.setChanged();
 
 		applyLidTransform(lidProgress.get(partialTick));
-		updateLight(partialTick);
 	}
 
 	private OrientedInstance createBottomInstance(Material texture) {

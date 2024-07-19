@@ -38,7 +38,6 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 		bell.setChanged();
 
 		updateRotation(partialTick);
-		updateLight(partialTick);
 	}
 
 	private OrientedInstance createBellInstance() {

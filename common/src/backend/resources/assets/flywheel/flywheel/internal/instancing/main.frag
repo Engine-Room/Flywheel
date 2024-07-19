@@ -1,4 +1,5 @@
 #include "flywheel:internal/common.frag"
+#include "flywheel:internal/instancing/light.glsl"
 
 uniform uvec4 _flw_packedMaterial;
 

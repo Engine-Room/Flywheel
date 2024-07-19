@@ -10,6 +10,7 @@ import dev.engine_room.flywheel.api.visualization.VisualManager;
 import dev.engine_room.flywheel.impl.visualization.storage.Storage;
 import dev.engine_room.flywheel.impl.visualization.storage.Transaction;
 import dev.engine_room.flywheel.lib.task.SimplePlan;
+import it.unimi.dsi.fastutil.longs.LongSet;
 
 public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager<T> {
 	private final Queue<Transaction<T>> queue = new ConcurrentLinkedQueue<>();
@@ -26,7 +27,8 @@ public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager
 
 	@Override
 	public int getVisualCount() {
-		return getStorage().visualCount();
+		return getStorage().getAllVisuals()
+				.size();
 	}
 
 	@Override
@@ -52,10 +54,6 @@ public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager
 		queue.add(Transaction.update(obj));
 	}
 
-	public void invalidate() {
-		getStorage().invalidate();
-	}
-
 	public void processQueue(float partialTick) {
 		var storage = getStorage();
 		Transaction<T> transaction;
@@ -72,5 +70,24 @@ public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager
 	public Plan<TickableVisual.Context> tickPlan() {
 		return SimplePlan.<TickableVisual.Context>of(context -> processQueue(1))
 				.then(storage.tickPlan());
+	}
+
+	public void onLightUpdate(long section) {
+		getStorage().lightUpdatedVisuals()
+				.onLightUpdate(section);
+	}
+
+	public boolean areGpuLightSectionsDirty() {
+		return getStorage().shaderLightVisuals()
+				.isDirty();
+	}
+
+	public LongSet gpuLightSections() {
+		return getStorage().shaderLightVisuals()
+				.sections();
+	}
+
+	public void invalidate() {
+		getStorage().invalidate();
 	}
 }

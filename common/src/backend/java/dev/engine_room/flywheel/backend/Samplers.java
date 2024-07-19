@@ -8,5 +8,6 @@ public class Samplers {
 	public static final GlTextureUnit LIGHT = GlTextureUnit.T2;
 	public static final GlTextureUnit CRUMBLING = GlTextureUnit.T3;
 	public static final GlTextureUnit INSTANCE_BUFFER = GlTextureUnit.T4;
-	public static final GlTextureUnit EMBEDDED_LIGHT = GlTextureUnit.T5;
+	public static final GlTextureUnit LIGHT_LUT = GlTextureUnit.T5;
+	public static final GlTextureUnit LIGHT_SECTIONS = GlTextureUnit.T6;
 }

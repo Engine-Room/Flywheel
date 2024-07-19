@@ -1,6 +1,5 @@
 package dev.engine_room.flywheel.impl.visualization.manager;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 import dev.engine_room.flywheel.api.visual.EntityVisual;
@@ -16,10 +15,10 @@ public class EntityStorage extends Storage<Entity> {
 	}
 
 	@Override
-    protected List<? extends EntityVisual<?>> createRaw(Entity obj, float partialTick) {
+	protected EntityVisual<?> createRaw(Entity obj, float partialTick) {
 		var visualizer = VisualizationHelper.getVisualizer(obj);
 		if (visualizer == null) {
-			return List.of();
+			return null;
 		}
 
 		return visualizer.createVisual(visualizationContextSupplier.get(), obj, partialTick);

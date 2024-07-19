@@ -8,6 +8,8 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL31C;
+import org.lwjgl.opengl.GL40;
+import org.lwjgl.opengl.GL43;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.KHRShaderSubgroup;
 import org.lwjgl.system.MemoryStack;
@@ -68,6 +70,23 @@ public final class GlCompat {
 			final PointerBuffer pointers = stack.mallocPointer(1);
 			pointers.put(sourceBuffer);
 			GL20C.nglShaderSource(glId, 1, pointers.address0(), 0);
+		}
+	}
+
+	/**
+	 * Similar in function to {@link GL43#glMultiDrawElementsIndirect(int, int, long, int, int)},
+	 * but uses consecutive DI instead of MDI if MDI is known to not work well with the current driver.
+	 * Unlike the original function, stride cannot be equal to 0.
+	 */
+	public static void safeMultiDrawElementsIndirect(int mode, int type, long indirect, int drawcount, int stride) {
+		if (GlCompat.DRIVER == Driver.INTEL) {
+			// Intel renders garbage with MDI, but consecutive DI works fine.
+			for (int i = 0; i < drawcount; i++) {
+				GL40.glDrawElementsIndirect(mode, type, indirect);
+				indirect += stride;
+			}
+		} else {
+			GL43.glMultiDrawElementsIndirect(mode, type, indirect, drawcount, stride);
 		}
 	}
 

@@ -17,7 +17,6 @@ import dev.engine_room.flywheel.api.event.RenderStage;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.task.TaskExecutor;
-import dev.engine_room.flywheel.api.visual.BlockEntityVisual;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
 import dev.engine_room.flywheel.api.visual.Effect;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
@@ -46,6 +45,7 @@ import dev.engine_room.flywheel.lib.task.RaisePlan;
 import dev.engine_room.flywheel.lib.task.SimplePlan;
 import dev.engine_room.flywheel.lib.util.LevelAttached;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.BlockDestructionProgress;
@@ -105,6 +105,15 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				.ifTrue(recreate)
 				.ifFalse(update)
 				.plan()
+				.then(SimplePlan.of(() -> {
+					if (blockEntities.areGpuLightSectionsDirty() || entities.areGpuLightSectionsDirty() || effects.areGpuLightSectionsDirty()) {
+						var out = new LongOpenHashSet();
+						out.addAll(blockEntities.gpuLightSections());
+						out.addAll(entities.gpuLightSections());
+						out.addAll(effects.gpuLightSections());
+						engine.lightSections(out);
+					}
+				}))
 				.then(RaisePlan.raise(frameVisualsFlag))
 				.then(engine.createFramePlan())
 				.then(RaisePlan.raise(frameFlag));
@@ -262,23 +271,21 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				continue;
 			}
 
-			var visualList = blockEntities.getStorage()
+			var visual = blockEntities.getStorage()
 					.visualAtPos(entry.getLongKey());
 
-			if (visualList == null || visualList.isEmpty()) {
+			if (visual == null) {
 				// The block doesn't have a visual, this is probably the common case.
 				continue;
 			}
 
 			List<Instance> instances = new ArrayList<>();
 
-			for (BlockEntityVisual<?> visual : visualList) {
-				visual.collectCrumblingInstances(instance -> {
-					if (instance != null) {
-						instances.add(instance);
-					}
-				});
-			}
+			visual.collectCrumblingInstances(instance -> {
+				if (instance != null) {
+					instances.add(instance);
+				}
+			});
 
 			if (instances.isEmpty()) {
 				// The visual doesn't want to render anything crumbling.
@@ -295,6 +302,12 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		}
 	}
 
+	public void onLightUpdate(long section) {
+		blockEntities.onLightUpdate(section);
+		entities.onLightUpdate(section);
+		effects.onLightUpdate(section);
+	}
+
 	/**
 	 * Free all acquired resources and delete this manager.
 	 */
@@ -307,14 +320,5 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		entities.invalidate();
 		effects.invalidate();
 		engine.delete();
-	}
-
-	public void enqueueLightUpdateSection(long section) {
-		blockEntities.getStorage()
-				.enqueueLightUpdateSection(section);
-		entities.getStorage()
-				.enqueueLightUpdateSection(section);
-		effects.getStorage()
-				.enqueueLightUpdateSection(section);
 	}
 }

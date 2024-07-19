@@ -9,6 +9,7 @@ import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -60,6 +61,15 @@ public interface Engine {
 	 * @return The current render origin.
 	 */
 	Vec3i renderOrigin();
+
+	/**
+	 * Assign the set of sections that visuals have requested GPU light for.
+	 *
+	 * <p> This will be called at most once per frame, and not necessarily every frame.
+	 *
+	 * @param sections The set of sections.
+	 */
+	void lightSections(LongSet sections);
 
 	/**
 	 * Free all resources associated with this engine.

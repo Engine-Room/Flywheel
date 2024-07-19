@@ -67,8 +67,6 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 		base.setChanged();
 		lid = createLidInstance(texture).setTransform(stack);
 		lid.setChanged();
-
-		updateLight(partialTick);
 	}
 
 	private TransformedInstance createBaseInstance(Material texture) {
