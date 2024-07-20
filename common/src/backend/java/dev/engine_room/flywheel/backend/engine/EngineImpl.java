@@ -2,9 +2,8 @@ package dev.engine_room.flywheel.backend.engine;
 
 import java.util.List;
 
+import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.api.backend.Engine;
-import dev.engine_room.flywheel.api.event.RenderContext;
-import dev.engine_room.flywheel.api.event.RenderStage;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.instance.Instancer;
@@ -13,6 +12,7 @@ import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.api.visualization.VisualEmbedding;
+import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.backend.engine.embed.EmbeddedEnvironment;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
@@ -20,7 +20,6 @@ import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.lib.task.Flag;
-import dev.engine_room.flywheel.lib.task.NamedFlag;
 import dev.engine_room.flywheel.lib.task.SyncedPlan;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.Camera;
@@ -32,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
 public class EngineImpl implements Engine {
 	private final DrawManager<? extends AbstractInstancer<?>> drawManager;
 	private final int sqrMaxOriginDistance;
-	private final Flag flushFlag = new NamedFlag("flushed");
+	private final Flag flushFlag = new Flag("flushed");
 	private final EnvironmentStorage environmentStorage;
 	private final LightStorage lightStorage;
 
@@ -46,8 +45,8 @@ public class EngineImpl implements Engine {
 	}
 
 	@Override
-	public VisualizationContext createVisualizationContext(RenderStage stage) {
-		return new VisualizationContextImpl(stage);
+	public VisualizationContext createVisualizationContext(VisualType visualType) {
+		return new VisualizationContextImpl(visualType);
 	}
 
 	@Override
@@ -57,13 +56,13 @@ public class EngineImpl implements Engine {
 	}
 
 	@Override
-	public void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage) {
+	public void render(TaskExecutor executor, RenderContext context, VisualType visualType) {
 		executor.syncUntil(flushFlag::isRaised);
-		if (stage.isLast()) {
+		if (visualType == VisualType.EFFECT) {
 			flushFlag.lower();
 		}
 
-		drawManager.renderStage(stage);
+		drawManager.render(visualType);
 	}
 
 	@Override
@@ -107,8 +106,8 @@ public class EngineImpl implements Engine {
 		lightStorage.delete();
 	}
 
-	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, RenderStage stage) {
-		return drawManager.getInstancer(environment, type, model, stage);
+	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType) {
+		return drawManager.getInstancer(environment, type, model, visualType);
 	}
 
 	private void flush(RenderContext ctx) {
@@ -131,11 +130,11 @@ public class EngineImpl implements Engine {
 
 	private class VisualizationContextImpl implements VisualizationContext {
 		private final InstancerProviderImpl instancerProvider;
-		private final RenderStage stage;
+		private final VisualType visualType;
 
-		public VisualizationContextImpl(RenderStage stage) {
-			instancerProvider = new InstancerProviderImpl(EngineImpl.this, stage);
-			this.stage = stage;
+		public VisualizationContextImpl(VisualType visualType) {
+			instancerProvider = new InstancerProviderImpl(EngineImpl.this, visualType);
+			this.visualType = visualType;
 		}
 
 		@Override
@@ -150,7 +149,7 @@ public class EngineImpl implements Engine {
 
 		@Override
 		public VisualEmbedding createEmbedding() {
-			var out = new EmbeddedEnvironment(EngineImpl.this, stage);
+			var out = new EmbeddedEnvironment(EngineImpl.this, visualType);
 			environmentStorage.track(out);
 			return out;
 		}

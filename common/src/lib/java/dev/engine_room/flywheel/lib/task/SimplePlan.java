@@ -43,5 +43,4 @@ public record SimplePlan<C>(List<RunnableWithContext<C>> parallelTasks) implemen
 		}
 		return SimplyComposedPlan.super.and(plan);
 	}
-
 }

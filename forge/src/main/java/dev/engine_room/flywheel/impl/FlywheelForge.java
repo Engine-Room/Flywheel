@@ -4,10 +4,8 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jetbrains.annotations.UnknownNullability;
 
 import dev.engine_room.flywheel.api.Flywheel;
-import dev.engine_room.flywheel.api.event.BeginFrameEvent;
 import dev.engine_room.flywheel.api.event.EndClientResourceReloadEvent;
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererEvent;
-import dev.engine_room.flywheel.api.event.RenderStageEvent;
 import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
@@ -76,8 +74,6 @@ public final class FlywheelForge {
 				VisualizationEventHandler.onClientTick(Minecraft.getInstance(), e.level);
 			}
 		});
-		forgeEventBus.addListener((BeginFrameEvent e) -> VisualizationEventHandler.onBeginFrame(e.context()));
-		forgeEventBus.addListener((RenderStageEvent e) -> VisualizationEventHandler.onRenderStage(e.context(), e.stage()));
 		forgeEventBus.addListener((EntityJoinLevelEvent e) -> VisualizationEventHandler.onEntityJoinLevel(e.getLevel(), e.getEntity()));
 		forgeEventBus.addListener((EntityLeaveLevelEvent e) -> VisualizationEventHandler.onEntityLeaveLevel(e.getLevel(), e.getEntity()));
 

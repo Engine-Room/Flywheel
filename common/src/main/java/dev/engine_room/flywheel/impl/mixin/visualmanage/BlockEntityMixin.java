@@ -24,6 +24,6 @@ abstract class BlockEntityMixin {
 			return;
 		}
 
-		manager.getBlockEntities().queueRemove((BlockEntity) (Object) this);
+		manager.blockEntities().queueRemove((BlockEntity) (Object) this);
 	}
 }

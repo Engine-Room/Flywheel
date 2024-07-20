@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.lib.visual;
+package dev.engine_room.flywheel.lib.visualization;
 
 import java.util.Objects;
 import java.util.function.Predicate;

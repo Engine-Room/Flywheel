@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.lib.backend;
 
+import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -10,7 +11,7 @@ import dev.engine_room.flywheel.api.backend.Engine;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
 
-public class SimpleBackend implements Backend {
+public final class SimpleBackend implements Backend {
 	private final Function<LevelAccessor, Engine> engineFactory;
 	private final Supplier<Backend> fallback;
 	private final BooleanSupplier isSupported;
@@ -45,9 +46,9 @@ public class SimpleBackend implements Backend {
 		return isSupported.getAsBoolean();
 	}
 
-	public static class Builder {
+	public static final class Builder {
 		private Function<LevelAccessor, Engine> engineFactory;
-		private Supplier<Backend> fallback = BackendManager::getOffBackend;
+		private Supplier<Backend> fallback = BackendManager::offBackend;
 		private BooleanSupplier isSupported;
 
 		public Builder engineFactory(Function<LevelAccessor, Engine> engineFactory) {
@@ -66,6 +67,10 @@ public class SimpleBackend implements Backend {
 		}
 
 		public Backend register(ResourceLocation id) {
+			Objects.requireNonNull(engineFactory);
+			Objects.requireNonNull(fallback);
+			Objects.requireNonNull(isSupported);
+
 			return Backend.REGISTRY.registerAndGet(id, new SimpleBackend(engineFactory, fallback, isSupported));
 		}
 	}

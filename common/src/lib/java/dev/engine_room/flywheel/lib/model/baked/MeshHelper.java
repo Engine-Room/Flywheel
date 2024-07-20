@@ -7,16 +7,16 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 
-import dev.engine_room.flywheel.api.vertex.VertexView;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
-import dev.engine_room.flywheel.lib.model.SimpleMesh;
+import dev.engine_room.flywheel.lib.model.SimpleQuadMesh;
 import dev.engine_room.flywheel.lib.vertex.NoOverlayVertexView;
+import dev.engine_room.flywheel.lib.vertex.VertexView;
 
 final class MeshHelper {
 	private MeshHelper() {
 	}
 
-	public static SimpleMesh blockVerticesToMesh(BufferBuilder.RenderedBuffer buffer, @Nullable String meshDescriptor) {
+	public static SimpleQuadMesh blockVerticesToMesh(BufferBuilder.RenderedBuffer buffer, @Nullable String meshDescriptor) {
 		BufferBuilder.DrawState drawState = buffer.drawState();
 		int vertexCount = drawState.vertexCount();
 		long srcStride = drawState.format().getVertexSize();
@@ -25,7 +25,7 @@ final class MeshHelper {
 		long dstStride = vertexView.stride();
 
 		ByteBuffer src = buffer.vertexBuffer();
-		MemoryBlock dst = MemoryBlock.malloc((long) vertexCount * dstStride);
+		MemoryBlock dst = MemoryBlock.mallocTracked((long) vertexCount * dstStride);
 		long srcPtr = MemoryUtil.memAddress(src);
 		long dstPtr = dst.ptr();
 		// The first 31 bytes of each vertex in a block vertex buffer are guaranteed to contain the same data in the
@@ -42,6 +42,6 @@ final class MeshHelper {
 		vertexView.ptr(dstPtr);
 		vertexView.vertexCount(vertexCount);
 
-		return new SimpleMesh(vertexView, dst, meshDescriptor);
+		return new SimpleQuadMesh(vertexView, meshDescriptor);
 	}
 }

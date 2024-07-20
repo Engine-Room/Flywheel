@@ -1,6 +1,7 @@
 package dev.engine_room.flywheel.lib.visual;
 
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import org.joml.FrustumIntersection;
 
 import dev.engine_room.flywheel.api.visual.BlockEntityVisual;
@@ -41,7 +42,7 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	protected final BlockPos pos;
 	protected final BlockPos visualPos;
 	protected final BlockState blockState;
-	@Nullable
+	@UnknownNullability
 	protected SectionCollector lightSections;
 
 	public AbstractBlockEntityVisual(VisualizationContext ctx, T blockEntity, float partialTick) {

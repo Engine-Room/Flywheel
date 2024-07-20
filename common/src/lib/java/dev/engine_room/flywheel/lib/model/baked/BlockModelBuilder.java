@@ -21,6 +21,7 @@ public abstract class BlockModelBuilder {
 	BlockAndTintGetter level;
 	@Nullable
 	PoseStack poseStack;
+	boolean renderFluids = false;
 	@Nullable
 	BiFunction<RenderType, Boolean, Material> materialFunc;
 

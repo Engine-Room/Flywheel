@@ -22,16 +22,6 @@ public interface FlatLit extends Instance {
 	 */
 	FlatLit light(int packedLight);
 
-	/**
-	 * Set the block and sky light values for this instance.
-	 * @param blockLight Block light value
-	 * @param skyLight Sky light value
-	 * @return {@code this} for chaining
-	 */
-	default FlatLit light(int blockLight, int skyLight) {
-		return light(LightTexture.pack(blockLight, skyLight));
-	}
-
 	static void relight(int packedLight, @Nullable FlatLit... instances) {
 		for (FlatLit instance : instances) {
 			if (instance != null) {

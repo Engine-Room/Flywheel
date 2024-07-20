@@ -31,8 +31,9 @@ class DebugMemoryBlockImpl extends AbstractMemoryBlockImpl {
 
 	@Override
 	public MemoryBlock realloc(long size) {
+		assertAllocated();
 		MemoryBlock block = new DebugMemoryBlockImpl(FlwMemoryTracker.realloc(ptr, size), size, cleaner, 1);
-		FlwMemoryTracker._allocCPUMemory(block.size());
+		FlwMemoryTracker._allocCpuMemory(block.size());
 		freeInner();
 		return block;
 	}
@@ -54,13 +55,13 @@ class DebugMemoryBlockImpl extends AbstractMemoryBlockImpl {
 
 	static MemoryBlock malloc(long size) {
 		MemoryBlock block = new DebugMemoryBlockImpl(FlwMemoryTracker.malloc(size), size, CLEANER, 2);
-		FlwMemoryTracker._allocCPUMemory(block.size());
+		FlwMemoryTracker._allocCpuMemory(block.size());
 		return block;
 	}
 
 	static MemoryBlock calloc(long num, long size) {
 		MemoryBlock block = new DebugMemoryBlockImpl(FlwMemoryTracker.calloc(num, size), num * size, CLEANER, 2);
-		FlwMemoryTracker._allocCPUMemory(block.size());
+		FlwMemoryTracker._allocCpuMemory(block.size());
 		return block;
 	}
 
@@ -94,7 +95,7 @@ class DebugMemoryBlockImpl extends AbstractMemoryBlockImpl {
 				FlwLibLink.INSTANCE.getLogger().warn(builder.toString());
 
 				FlwMemoryTracker.free(ptr);
-				FlwMemoryTracker._freeCPUMemory(size);
+				FlwMemoryTracker._freeCpuMemory(size);
 			}
 		}
 	}

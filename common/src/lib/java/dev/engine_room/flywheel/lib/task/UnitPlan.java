@@ -3,7 +3,7 @@ package dev.engine_room.flywheel.lib.task;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.task.TaskExecutor;
 
-public class UnitPlan<C> implements Plan<C> {
+public final class UnitPlan<C> implements Plan<C> {
 	private static final UnitPlan<?> INSTANCE = new UnitPlan<>();
 
 	private UnitPlan() {
@@ -28,5 +28,4 @@ public class UnitPlan<C> implements Plan<C> {
 	public Plan<C> and(Plan<C> plan) {
 		return plan;
 	}
-
 }

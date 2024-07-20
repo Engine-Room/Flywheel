@@ -3,30 +3,28 @@ package dev.engine_room.flywheel.impl.visualization;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
-import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
 
+import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.api.backend.BackendManager;
 import dev.engine_room.flywheel.api.backend.Engine;
-import dev.engine_room.flywheel.api.event.RenderContext;
-import dev.engine_room.flywheel.api.event.RenderStage;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.task.Plan;
-import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
 import dev.engine_room.flywheel.api.visual.Effect;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visualization.VisualManager;
-import dev.engine_room.flywheel.api.visualization.VisualizationContext;
+import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.api.visualization.VisualizationLevel;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.impl.FlwConfig;
 import dev.engine_room.flywheel.impl.extension.LevelExtension;
 import dev.engine_room.flywheel.impl.task.FlwTaskExecutor;
+import dev.engine_room.flywheel.impl.task.InternalTaskExecutor;
 import dev.engine_room.flywheel.impl.visual.DynamicVisualContextImpl;
 import dev.engine_room.flywheel.impl.visual.TickableVisualContextImpl;
 import dev.engine_room.flywheel.impl.visualization.manager.BlockEntityStorage;
@@ -39,7 +37,6 @@ import dev.engine_room.flywheel.impl.visualization.ratelimit.NonLimiter;
 import dev.engine_room.flywheel.lib.task.Flag;
 import dev.engine_room.flywheel.lib.task.IfElsePlan;
 import dev.engine_room.flywheel.lib.task.MapContextPlan;
-import dev.engine_room.flywheel.lib.task.NamedFlag;
 import dev.engine_room.flywheel.lib.task.NestedPlan;
 import dev.engine_room.flywheel.lib.task.RaisePlan;
 import dev.engine_room.flywheel.lib.task.SimplePlan;
@@ -60,32 +57,31 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public class VisualizationManagerImpl implements VisualizationManager {
 	private static final LevelAttached<VisualizationManagerImpl> MANAGERS = new LevelAttached<>(VisualizationManagerImpl::new, VisualizationManagerImpl::delete);
 
+	private final InternalTaskExecutor taskExecutor;
 	private final Engine engine;
-	private final TaskExecutor taskExecutor;
+	private final DistanceUpdateLimiterImpl frameLimiter;
+	private final RenderDispatcherImpl renderDispatcher = new RenderDispatcherImpl();
 
 	private final VisualManagerImpl<BlockEntity, BlockEntityStorage> blockEntities;
 	private final VisualManagerImpl<Entity, EntityStorage> entities;
 	private final VisualManagerImpl<Effect, EffectStorage> effects;
 
+	private final Flag tickFlag = new Flag("tick");
+	private final Flag frameVisualsFlag = new Flag("frameVisualUpdates");
+	private final Flag frameFlag = new Flag("frameComplete");
+
 	private final Plan<TickableVisual.Context> tickPlan;
 	private final Plan<RenderContext> framePlan;
 
-	private final Flag tickFlag = new NamedFlag("tick");
-	private final Flag frameVisualsFlag = new NamedFlag("frameVisualUpdates");
-	private final Flag frameFlag = new NamedFlag("frameComplete");
-
-	protected DistanceUpdateLimiterImpl frameLimiter;
-
 	private VisualizationManagerImpl(LevelAccessor level) {
+		taskExecutor = FlwTaskExecutor.get();
+		engine = BackendManager.currentBackend()
+				.createEngine(level);
 		frameLimiter = createUpdateLimiter();
 
-		engine = BackendManager.getBackend()
-				.createEngine(level);
-		taskExecutor = FlwTaskExecutor.get();
-
-		var blockEntitiesStorage = new BlockEntityStorage(provider(engine, RenderStage.AFTER_BLOCK_ENTITIES));
-		var entitiesStorage = new EntityStorage(provider(engine, RenderStage.AFTER_ENTITIES));
-		var effectsStorage = new EffectStorage(provider(engine, RenderStage.AFTER_PARTICLES));
+		var blockEntitiesStorage = new BlockEntityStorage(engine.createVisualizationContext(VisualType.BLOCK_ENTITY));
+		var entitiesStorage = new EntityStorage(engine.createVisualizationContext(VisualType.ENTITY));
+		var effectsStorage = new EffectStorage(engine.createVisualizationContext(VisualType.EFFECT));
 
 		blockEntities = new VisualManagerImpl<>(blockEntitiesStorage);
 		entities = new VisualManagerImpl<>(entitiesStorage);
@@ -124,11 +120,6 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		}
 	}
 
-	public static Supplier<VisualizationContext> provider(Engine engine, RenderStage stage) {
-		var context = engine.createVisualizationContext(stage);
-		return () -> context;
-	}
-
 	private DynamicVisual.Context createVisualFrameContext(RenderContext ctx) {
 		Vec3i renderOrigin = engine.renderOrigin();
 		var cameraPos = ctx.camera()
@@ -141,7 +132,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		return new DynamicVisualContextImpl(ctx.camera(), frustum, ctx.partialTick(), frameLimiter);
 	}
 
-	protected DistanceUpdateLimiterImpl createUpdateLimiter() {
+	private DistanceUpdateLimiterImpl createUpdateLimiter() {
 		if (FlwConfig.INSTANCE
 				.limitUpdates()) {
 			return new BandedPrimeLimiter();
@@ -199,23 +190,28 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	}
 
 	@Override
-	public Vec3i getRenderOrigin() {
+	public Vec3i renderOrigin() {
 		return engine.renderOrigin();
 	}
 
 	@Override
-	public VisualManager<BlockEntity> getBlockEntities() {
+	public VisualManager<BlockEntity> blockEntities() {
 		return blockEntities;
 	}
 
 	@Override
-	public VisualManager<Entity> getEntities() {
+	public VisualManager<Entity> entities() {
 		return entities;
 	}
 
 	@Override
-	public VisualManager<Effect> getEffects() {
+	public VisualManager<Effect> effects() {
 		return effects;
+	}
+
+	@Override
+	public RenderDispatcher renderDispatcher() {
+		return renderDispatcher;
 	}
 
 	/**
@@ -235,7 +231,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	/**
 	 * Begin execution of the frame plan.
 	 */
-	public void beginFrame(RenderContext context) {
+	private void beginFrame(RenderContext context) {
 		// Make sure we're done with the last tick.
 		// Note we don't lower here because many frames may happen per tick.
 		taskExecutor.syncUntil(tickFlag::isRaised);
@@ -249,13 +245,13 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	}
 
 	/**
-	 * Draw all visuals for the given stage.
+	 * Draw all visuals of the given type.
 	 */
-	public void renderStage(RenderContext context, RenderStage stage) {
-		engine.renderStage(taskExecutor, context, stage);
+	private void render(RenderContext context, VisualType visualType) {
+		engine.render(taskExecutor, context, visualType);
 	}
 
-	public void renderCrumbling(RenderContext context, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress) {
+	private void renderCrumbling(RenderContext context, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress) {
 		if (destructionProgress.isEmpty()) {
 			return;
 		}
@@ -311,7 +307,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	/**
 	 * Free all acquired resources and delete this manager.
 	 */
-	public void delete() {
+	private void delete() {
 		// Just finish everything. This may include the work of others but that's okay.
 		taskExecutor.syncPoint();
 
@@ -320,5 +316,36 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		entities.invalidate();
 		effects.invalidate();
 		engine.delete();
+	}
+
+	private class RenderDispatcherImpl implements RenderDispatcher {
+		@Override
+		public void onStartLevelRender(RenderContext ctx) {
+			beginFrame(ctx);
+		}
+
+		@Override
+		public void afterBlockEntities(RenderContext ctx) {
+			render(ctx, VisualType.BLOCK_ENTITY);
+		}
+
+		@Override
+		public void afterEntities(RenderContext ctx) {
+			render(ctx, VisualType.ENTITY);
+		}
+
+		@Override
+		public void beforeCrumbling(RenderContext ctx, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress) {
+			renderCrumbling(ctx, destructionProgress);
+		}
+
+		@Override
+		public void afterParticles(RenderContext ctx) {
+			render(ctx, VisualType.EFFECT);
+		}
+
+		@Override
+		public void onEndLevelRender(RenderContext ctx) {
+		}
 	}
 }

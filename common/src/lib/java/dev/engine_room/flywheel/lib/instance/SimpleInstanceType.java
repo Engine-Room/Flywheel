@@ -9,7 +9,7 @@ import dev.engine_room.flywheel.api.instance.InstanceWriter;
 import dev.engine_room.flywheel.api.layout.Layout;
 import net.minecraft.resources.ResourceLocation;
 
-public class SimpleInstanceType<I extends Instance> implements InstanceType<I> {
+public final class SimpleInstanceType<I extends Instance> implements InstanceType<I> {
 	private final Factory<I> factory;
 	private final Layout layout;
 	private final InstanceWriter<I> writer;
@@ -58,7 +58,7 @@ public class SimpleInstanceType<I extends Instance> implements InstanceType<I> {
 		I create(InstanceType<I> type, InstanceHandle handle);
 	}
 
-	public static class Builder<I extends Instance> {
+	public static final class Builder<I extends Instance> {
 		private final Factory<I> factory;
 		private Layout layout;
 		private InstanceWriter<I> writer;

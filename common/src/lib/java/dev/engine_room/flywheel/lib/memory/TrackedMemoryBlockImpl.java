@@ -28,21 +28,22 @@ class TrackedMemoryBlockImpl extends AbstractMemoryBlockImpl {
 
 	@Override
 	public MemoryBlock realloc(long size) {
+		assertAllocated();
 		MemoryBlock block = new TrackedMemoryBlockImpl(FlwMemoryTracker.realloc(ptr, size), size, cleaner);
-		FlwMemoryTracker._allocCPUMemory(block.size());
+		FlwMemoryTracker._allocCpuMemory(block.size());
 		freeInner();
 		return block;
 	}
 
 	static MemoryBlock malloc(long size) {
 		MemoryBlock block = new TrackedMemoryBlockImpl(FlwMemoryTracker.malloc(size), size, CLEANER);
-		FlwMemoryTracker._allocCPUMemory(block.size());
+		FlwMemoryTracker._allocCpuMemory(block.size());
 		return block;
 	}
 
 	static MemoryBlock calloc(long num, long size) {
 		MemoryBlock block = new TrackedMemoryBlockImpl(FlwMemoryTracker.calloc(num, size), num * size, CLEANER);
-		FlwMemoryTracker._allocCPUMemory(block.size());
+		FlwMemoryTracker._allocCpuMemory(block.size());
 		return block;
 	}
 
@@ -61,7 +62,7 @@ class TrackedMemoryBlockImpl extends AbstractMemoryBlockImpl {
 		public void run() {
 			if (!freed) {
 				FlwMemoryTracker.free(ptr);
-				FlwMemoryTracker._freeCPUMemory(size);
+				FlwMemoryTracker._freeCpuMemory(size);
 			}
 		}
 	}

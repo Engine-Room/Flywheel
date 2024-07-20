@@ -6,13 +6,13 @@ import org.joml.Matrix3fc;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 
-import dev.engine_room.flywheel.api.event.RenderStage;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.instance.Instancer;
 import dev.engine_room.flywheel.api.instance.InstancerProvider;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.visualization.VisualEmbedding;
+import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.engine.EngineImpl;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
@@ -20,7 +20,7 @@ import net.minecraft.core.Vec3i;
 
 public class EmbeddedEnvironment implements VisualEmbedding, Environment {
 	private final EngineImpl engine;
-	private final RenderStage renderStage;
+	private final VisualType visualType;
 	@Nullable
 	private final EmbeddedEnvironment parent;
 	private final InstancerProvider instancerProvider;
@@ -32,22 +32,22 @@ public class EmbeddedEnvironment implements VisualEmbedding, Environment {
 
 	private boolean deleted = false;
 
-	public EmbeddedEnvironment(EngineImpl engine, RenderStage renderStage, @Nullable EmbeddedEnvironment parent) {
+	public EmbeddedEnvironment(EngineImpl engine, VisualType visualType, @Nullable EmbeddedEnvironment parent) {
 		this.engine = engine;
-		this.renderStage = renderStage;
+		this.visualType = visualType;
 		this.parent = parent;
 
 		instancerProvider = new InstancerProvider() {
 			@Override
 			public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model) {
 				// Kinda cursed usage of anonymous classes here, but it does the job.
-				return engine.instancer(EmbeddedEnvironment.this, type, model, renderStage);
+				return engine.instancer(EmbeddedEnvironment.this, type, model, visualType);
 			}
 		};
 	}
 
-	public EmbeddedEnvironment(EngineImpl engine, RenderStage renderStage) {
-		this(engine, renderStage, null);
+	public EmbeddedEnvironment(EngineImpl engine, VisualType visualType) {
+		this(engine, visualType, null);
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public class EmbeddedEnvironment implements VisualEmbedding, Environment {
 
 	@Override
 	public VisualEmbedding createEmbedding() {
-		var out = new EmbeddedEnvironment(engine, renderStage, this);
+		var out = new EmbeddedEnvironment(engine, visualType, this);
 		engine.environmentStorage()
 				.track(out);
 		return out;

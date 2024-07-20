@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.lib.visual;
+package dev.engine_room.flywheel.lib.visual.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 
-public class SmartRecycler<K, I extends Instance> {
+public final class SmartRecycler<K, I extends Instance> {
 	private final Function<K, I> factory;
 	private final Map<K, InstanceRecycler<I>> recyclers = new HashMap<>();
 

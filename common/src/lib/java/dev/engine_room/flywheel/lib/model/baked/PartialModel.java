@@ -1,8 +1,11 @@
 package dev.engine_room.flywheel.lib.model.baked;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.WeakHashMap;
 
+import org.jetbrains.annotations.UnknownNullability;
+
+import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 
@@ -10,44 +13,37 @@ import net.minecraft.resources.ResourceLocation;
  * A helper class for loading and accessing JSON models not directly used by any blocks or items.
  * <br>
  * Creating a PartialModel will make Minecraft automatically load the associated modelLocation.
- * PartialModels must be initialized before the initial resource reload, otherwise an error will be thrown.
- * It is recommended to do this in the client mod initializer on Fabric and the mod class constructor on Forge.
  * <br>
  * Once Minecraft has finished baking all models, all PartialModels will have their bakedModel fields populated.
  */
-public class PartialModel {
-	static final List<PartialModel> ALL = new ArrayList<>();
-	static boolean tooLate = false;
+public final class PartialModel {
+	static final WeakHashMap<ResourceLocation, PartialModel> ALL = new WeakHashMap<>();
+	static boolean populateOnInit = false;
 
-	protected final ResourceLocation modelLocation;
-	protected BakedModel bakedModel;
+	private final ResourceLocation modelLocation;
+	@UnknownNullability
+	BakedModel bakedModel;
 
-	public PartialModel(ResourceLocation modelLocation) {
-		if (tooLate) {
-			throw new RuntimeException("Attempted to create PartialModel with location '" + modelLocation + "' after start of initial resource reload!");
-		}
-
+	private PartialModel(ResourceLocation modelLocation) {
 		this.modelLocation = modelLocation;
 
-		synchronized (ALL) {
-			ALL.add(this);
+		if (populateOnInit) {
+			FlwLibXplat.INSTANCE.getBakedModel(Minecraft.getInstance().getModelManager(), modelLocation);
 		}
 	}
 
-	public ResourceLocation getLocation() {
-		return modelLocation;
+	public static PartialModel of(ResourceLocation modelLocation) {
+		synchronized (ALL) {
+			return ALL.computeIfAbsent(modelLocation, PartialModel::new);
+		}
 	}
 
-	public String getName() {
-		return getLocation()
-				.toString();
-	}
-
+	@UnknownNullability
 	public BakedModel get() {
 		return bakedModel;
 	}
 
-	protected void set(BakedModel bakedModel) {
-		this.bakedModel = bakedModel;
+	public ResourceLocation modelLocation() {
+		return modelLocation;
 	}
 }

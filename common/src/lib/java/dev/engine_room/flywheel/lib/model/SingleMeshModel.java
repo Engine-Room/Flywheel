@@ -28,9 +28,4 @@ public class SingleMeshModel implements Model {
 	public Vector4fc boundingSphere() {
 		return mesh.boundingSphere();
 	}
-
-	@Override
-	public void delete() {
-		mesh.delete();
-	}
 }

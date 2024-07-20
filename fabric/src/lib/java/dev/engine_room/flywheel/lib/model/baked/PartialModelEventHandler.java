@@ -18,13 +18,14 @@ public final class PartialModelEventHandler {
 	}
 
 	public static ResourceLocation[] onRegisterAdditional() {
-		PartialModel.tooLate = true;
-		return PartialModel.ALL.stream().map(PartialModel::getLocation).toArray(ResourceLocation[]::new);
+		return PartialModel.ALL.keySet().toArray(ResourceLocation[]::new);
 	}
 
 	public static void onBakingCompleted(ModelManager manager) {
-		for (PartialModel partial : PartialModel.ALL) {
-			partial.set(manager.getModel(partial.getLocation()));
+		PartialModel.populateOnInit = true;
+
+		for (PartialModel partial : PartialModel.ALL.values()) {
+			partial.bakedModel = manager.getModel(partial.modelLocation());
 		}
 	}
 

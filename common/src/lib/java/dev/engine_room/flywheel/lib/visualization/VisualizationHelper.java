@@ -1,7 +1,9 @@
-package dev.engine_room.flywheel.lib.visual;
+package dev.engine_room.flywheel.lib.visualization;
 
 import org.jetbrains.annotations.Nullable;
 
+import dev.engine_room.flywheel.api.visual.Effect;
+import dev.engine_room.flywheel.api.visual.Visual;
 import dev.engine_room.flywheel.api.visualization.BlockEntityVisualizer;
 import dev.engine_room.flywheel.api.visualization.EntityVisualizer;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
@@ -9,11 +11,53 @@ import dev.engine_room.flywheel.api.visualization.VisualizerRegistry;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public final class VisualizationHelper {
 	private VisualizationHelper() {
+	}
+
+	/**
+	 * Call this when you want to run {@link Visual#update}.
+	 * @param blockEntity The block entity whose visual you want to update.
+	 */
+	public static void queueUpdate(BlockEntity blockEntity) {
+		Level level = blockEntity.getLevel();
+		VisualizationManager manager = VisualizationManager.get(level);
+		if (manager == null) {
+			return;
+		}
+
+		manager.blockEntities().queueUpdate(blockEntity);
+	}
+
+	/**
+	 * Call this when you want to run {@link Visual#update}.
+	 * @param entity The entity whose visual you want to update.
+	 */
+	public static void queueUpdate(Entity entity) {
+		Level level = entity.level();
+		VisualizationManager manager = VisualizationManager.get(level);
+		if (manager == null) {
+			return;
+		}
+
+		manager.entities().queueUpdate(entity);
+	}
+
+	/**
+	 * Call this when you want to run {@link Visual#update}.
+	 * @param effect The effect whose visual you want to update.
+	 */
+	public static void queueUpdate(LevelAccessor level, Effect effect) {
+		VisualizationManager manager = VisualizationManager.get(level);
+		if (manager == null) {
+			return;
+		}
+
+		manager.effects().queueUpdate(effect);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -88,7 +132,7 @@ public final class VisualizationHelper {
 			return false;
 		}
 
-		manager.getBlockEntities().queueAdd(blockEntity);
+		manager.blockEntities().queueAdd(blockEntity);
 
 		return visualizer.skipVanillaRender(blockEntity);
 	}

@@ -2,8 +2,8 @@ package dev.engine_room.flywheel.backend.engine.indirect;
 
 import org.lwjgl.system.MemoryUtil;
 
-import dev.engine_room.flywheel.api.event.RenderStage;
 import dev.engine_room.flywheel.api.material.Material;
+import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.ShaderIndices;
 import dev.engine_room.flywheel.backend.engine.MaterialEncoder;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
@@ -12,7 +12,7 @@ public class IndirectDraw {
 	private final IndirectInstancer<?> instancer;
 	private final Material material;
 	private final MeshPool.PooledMesh mesh;
-	private final RenderStage stage;
+	private final VisualType visualType;
 	private final int indexOfMeshInModel;
 
 	private final int materialVertexIndex;
@@ -21,11 +21,11 @@ public class IndirectDraw {
 	private final int packedMaterialProperties;
 	private boolean deleted;
 
-	public IndirectDraw(IndirectInstancer<?> instancer, Material material, MeshPool.PooledMesh mesh, RenderStage stage, int indexOfMeshInModel) {
+	public IndirectDraw(IndirectInstancer<?> instancer, Material material, MeshPool.PooledMesh mesh, VisualType visualType, int indexOfMeshInModel) {
 		this.instancer = instancer;
 		this.material = material;
 		this.mesh = mesh;
-		this.stage = stage;
+		this.visualType = visualType;
 		this.indexOfMeshInModel = indexOfMeshInModel;
 
 		mesh.acquire();
@@ -48,8 +48,8 @@ public class IndirectDraw {
 		return mesh;
 	}
 
-	public RenderStage stage() {
-		return stage;
+	public VisualType visualType() {
+		return visualType;
 	}
 
 	public int indexOfMeshInModel() {

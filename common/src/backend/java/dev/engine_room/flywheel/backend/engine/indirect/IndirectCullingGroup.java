@@ -14,11 +14,11 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import dev.engine_room.flywheel.api.event.RenderStage;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.model.Model;
+import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
 import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
@@ -30,7 +30,7 @@ import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 
 public class IndirectCullingGroup<I extends Instance> {
-	private static final Comparator<IndirectDraw> DRAW_COMPARATOR = Comparator.comparing(IndirectDraw::stage)
+	private static final Comparator<IndirectDraw> DRAW_COMPARATOR = Comparator.comparing(IndirectDraw::visualType)
 			.thenComparing(IndirectDraw::indexOfMeshInModel)
 			.thenComparing(IndirectDraw::material, MaterialRenderState.COMPARATOR);
 
@@ -42,7 +42,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	private final IndirectBuffers buffers;
 	private final List<IndirectInstancer<I>> instancers = new ArrayList<>();
 	private final List<IndirectDraw> indirectDraws = new ArrayList<>();
-	private final Map<RenderStage, List<MultiDraw>> multiDraws = new EnumMap<>(RenderStage.class);
+	private final Map<VisualType, List<MultiDraw>> multiDraws = new EnumMap<>(VisualType.class);
 
 	private final IndirectPrograms programs;
 	private final GlProgram cullProgram;
@@ -145,36 +145,36 @@ public class IndirectCullingGroup<I extends Instance> {
 		return indirectDraws.isEmpty() || instanceCountThisFrame == 0;
 	}
 
-	private boolean nothingToDo(RenderStage stage) {
-		return nothingToDo() || !multiDraws.containsKey(stage);
+	private boolean nothingToDo(VisualType visualType) {
+		return nothingToDo() || !multiDraws.containsKey(visualType);
 	}
 
 	private void sortDraws() {
 		multiDraws.clear();
-		// sort by stage, then material
+		// sort by visual type, then material
 		indirectDraws.sort(DRAW_COMPARATOR);
 
 		for (int start = 0, i = 0; i < indirectDraws.size(); i++) {
 			var draw1 = indirectDraws.get(i);
 			var material1 = draw1.material();
-			var stage1 = draw1.stage();
+			var visualType1 = draw1.visualType();
 
-			// if the next draw call has a different RenderStage or Material, start a new MultiDraw
-			if (i == indirectDraws.size() - 1 || stage1 != indirectDraws.get(i + 1)
-					.stage() || !material1.equals(indirectDraws.get(i + 1)
+			// if the next draw call has a different VisualType or Material, start a new MultiDraw
+			if (i == indirectDraws.size() - 1 || visualType1 != indirectDraws.get(i + 1)
+					.visualType() || !material1.equals(indirectDraws.get(i + 1)
 					.material())) {
-				multiDraws.computeIfAbsent(stage1, s -> new ArrayList<>())
+				multiDraws.computeIfAbsent(visualType1, s -> new ArrayList<>())
 						.add(new MultiDraw(material1, start, i + 1));
 				start = i + 1;
 			}
 		}
 	}
 
-	public boolean hasStage(RenderStage stage) {
-		return multiDraws.containsKey(stage);
+	public boolean hasVisualType(VisualType visualType) {
+		return multiDraws.containsKey(visualType);
 	}
 
-	public void add(IndirectInstancer<I> instancer, Model model, RenderStage stage, MeshPool meshPool) {
+	public void add(IndirectInstancer<I> instancer, Model model, VisualType visualType, MeshPool meshPool) {
 		instancer.modelIndex = instancers.size();
 		instancers.add(instancer);
 
@@ -183,7 +183,7 @@ public class IndirectCullingGroup<I extends Instance> {
             var entry = meshes.get(i);
 
             MeshPool.PooledMesh mesh = meshPool.alloc(entry.mesh());
-            var draw = new IndirectDraw(instancer, entry.material(), mesh, stage, i);
+            var draw = new IndirectDraw(instancer, entry.material(), mesh, visualType, i);
             indirectDraws.add(draw);
             instancer.addDraw(draw);
         }
@@ -191,8 +191,8 @@ public class IndirectCullingGroup<I extends Instance> {
 		needsDrawSort = true;
 	}
 
-	public void submit(RenderStage stage) {
-		if (nothingToDo(stage)) {
+	public void submit(VisualType visualType) {
+		if (nothingToDo(visualType)) {
 			return;
 		}
 
@@ -205,7 +205,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		var flwBaseDraw = drawProgram.getUniformLocation("_flw_baseDraw");
 
-		for (var multiDraw : multiDraws.get(stage)) {
+		for (var multiDraw : multiDraws.get(visualType)) {
 			glUniform1ui(flwBaseDraw, multiDraw.start);
 
 			MaterialRenderState.setup(multiDraw.material);

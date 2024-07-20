@@ -14,7 +14,7 @@ import dev.engine_room.flywheel.api.task.TaskExecutor;
  * @param <K> The key type
  * @param <C> The context type
  */
-public class PlanMap<K, C> implements SimplyComposedPlan<C> {
+public final class PlanMap<K, C> implements SimplyComposedPlan<C> {
 	private final List<K> keys = new ArrayList<>();
 	private final List<Plan<C>> values = new ArrayList<>();
 

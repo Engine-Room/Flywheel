@@ -3,12 +3,13 @@ package dev.engine_room.flywheel.lib.instance;
 import dev.engine_room.flywheel.api.instance.InstanceHandle;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.FastColor;
 
 public abstract class ColoredLitInstance extends AbstractInstance implements FlatLit {
-	public byte r = (byte) 0xFF;
-	public byte g = (byte) 0xFF;
-	public byte b = (byte) 0xFF;
-	public byte a = (byte) 0xFF;
+	public byte red = (byte) 0xFF;
+	public byte green = (byte) 0xFF;
+	public byte blue = (byte) 0xFF;
+	public byte alpha = (byte) 0xFF;
 
 	public int overlay = OverlayTexture.NO_OVERLAY;
 	public int light = 0;
@@ -17,39 +18,34 @@ public abstract class ColoredLitInstance extends AbstractInstance implements Fla
 		super(type, handle);
 	}
 
-	public ColoredLitInstance color(int color) {
-		return color(color, false);
+	public ColoredLitInstance colorArgb(int argb) {
+		return color(FastColor.ARGB32.red(argb), FastColor.ARGB32.green(argb), FastColor.ARGB32.blue(argb), FastColor.ARGB32.alpha(argb));
 	}
 
-	public ColoredLitInstance color(int color, boolean alpha) {
-		byte r = (byte) ((color >> 16) & 0xFF);
-		byte g = (byte) ((color >> 8) & 0xFF);
-		byte b = (byte) (color & 0xFF);
-
-		if (alpha) {
-			byte a = (byte) ((color >> 24) & 0xFF);
-			return color(r, g, b, a);
-		} else {
-			return color(r, g, b);
-		}
+	public ColoredLitInstance colorRgb(int rgb) {
+		return color(FastColor.ARGB32.red(rgb), FastColor.ARGB32.green(rgb), FastColor.ARGB32.blue(rgb));
 	}
 
-	public ColoredLitInstance color(int r, int g, int b) {
-		return color((byte) r, (byte) g, (byte) b);
+	public ColoredLitInstance color(int red, int green, int blue, int alpha) {
+		return color((byte) red, (byte) green, (byte) blue, (byte) alpha);
 	}
 
-	public ColoredLitInstance color(byte r, byte g, byte b) {
-		this.r = r;
-		this.g = g;
-		this.b = b;
+	public ColoredLitInstance color(int red, int green, int blue) {
+		return color((byte) red, (byte) green, (byte) blue);
+	}
+
+	public ColoredLitInstance color(byte red, byte green, byte blue, byte alpha) {
+		this.red = red;
+		this.green = green;
+		this.blue = blue;
+		this.alpha = alpha;
 		return this;
 	}
 
-	public ColoredLitInstance color(byte r, byte g, byte b, byte a) {
-		this.r = r;
-		this.g = g;
-		this.b = b;
-		this.a = a;
+	public ColoredLitInstance color(byte red, byte green, byte blue) {
+		this.red = red;
+		this.green = green;
+		this.blue = blue;
 		return this;
 	}
 

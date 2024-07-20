@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.lib.visual;
+package dev.engine_room.flywheel.lib.visual.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,11 +14,9 @@ import dev.engine_room.flywheel.api.instance.Instance;
  *
  * @param <I> The type of instance to recycle.
  */
-public class InstanceRecycler<I extends Instance> {
+public final class InstanceRecycler<I extends Instance> {
 	private final Supplier<I> factory;
-
 	private final List<I> instances = new ArrayList<>();
-
 	private int count;
 
 	public InstanceRecycler(Supplier<I> factory) {

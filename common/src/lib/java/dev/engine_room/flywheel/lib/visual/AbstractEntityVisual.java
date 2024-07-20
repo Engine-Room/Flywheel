@@ -5,6 +5,8 @@ import org.joml.Vector3f;
 
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
 import dev.engine_room.flywheel.api.visual.EntityVisual;
+import dev.engine_room.flywheel.api.visual.LightUpdatedVisual;
+import dev.engine_room.flywheel.api.visual.ShaderLightVisual;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
@@ -23,6 +25,8 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  *     <li>{@link DynamicVisual}</li>
  *     <li>{@link TickableVisual}</li>
+ *     <li>{@link LightUpdatedVisual}</li>
+ *     <li>{@link ShaderLightVisual}</li>
  * </ul>
  * See the interfaces' documentation for more information about each one.
  *

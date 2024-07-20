@@ -31,9 +31,4 @@ public interface Mesh {
 	 * @return A vec4 view.
 	 */
 	Vector4fc boundingSphere();
-
-	/**
-	 * Free this mesh's resources, memory, etc.
-	 */
-	void delete();
 }

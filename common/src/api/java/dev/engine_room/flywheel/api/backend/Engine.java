@@ -3,11 +3,11 @@ package dev.engine_room.flywheel.api.backend;
 import java.util.List;
 
 import dev.engine_room.flywheel.api.BackendImplemented;
-import dev.engine_room.flywheel.api.event.RenderContext;
-import dev.engine_room.flywheel.api.event.RenderStage;
+import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.task.TaskExecutor;
+import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.Camera;
@@ -17,12 +17,13 @@ import net.minecraft.core.Vec3i;
 @BackendImplemented
 public interface Engine {
 	/**
-	 * Create a visualization context that will render to the given stage.
+	 * Create a visualization context that will be used to create visuals of the given type.
+	 * This method may only be called once per visual type.
 	 *
-	 * @param stage The stage to render to.
+	 * @param visualType The type of visual.
 	 * @return A new visualization context.
 	 */
-	VisualizationContext createVisualizationContext(RenderStage stage);
+	VisualizationContext createVisualizationContext(VisualType visualType);
 
 	/**
 	 * Create a plan that will be executed every frame.
@@ -31,17 +32,17 @@ public interface Engine {
 	Plan<RenderContext> createFramePlan();
 
 	/**
-	 * Render all instances necessary for the given stage.
+	 * Render all instances necessary for the given visual type.
 	 * @param executor The task executor running the frame plan.
 	 * @param context The render context for this frame.
-	 * @param stage The stage to render.
+	 * @param visualType The type of visual.
 	 */
-	void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage);
+	void render(TaskExecutor executor, RenderContext context, VisualType visualType);
 
 	/**
 	 * Render the given instances as a crumbling overlay.
 	 * <br>
-	 * This is guaranteed to be called between the first and last calls to {@link #renderStage} for the current frame.
+	 * This is guaranteed to be called between the first and last calls to {@link #render} for the current frame.
 	 *
 	 * @param executor        The task executor running the frame plan.
 	 * @param context         The render context for this frame.

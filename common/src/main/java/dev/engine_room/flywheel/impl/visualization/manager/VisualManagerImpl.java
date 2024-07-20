@@ -26,7 +26,7 @@ public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager
 	}
 
 	@Override
-	public int getVisualCount() {
+	public int visualCount() {
 		return getStorage().getAllVisuals()
 				.size();
 	}

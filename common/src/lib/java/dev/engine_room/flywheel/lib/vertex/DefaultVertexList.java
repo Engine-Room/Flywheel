@@ -4,7 +4,7 @@ import dev.engine_room.flywheel.api.vertex.MutableVertexList;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 
-public interface EmptyVertexList extends MutableVertexList {
+public interface DefaultVertexList extends MutableVertexList {
 	@Override
 	default float x(int index) {
 		return 0.0f;

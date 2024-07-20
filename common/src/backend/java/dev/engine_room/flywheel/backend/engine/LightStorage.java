@@ -5,7 +5,7 @@ import java.util.BitSet;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
-import dev.engine_room.flywheel.api.event.RenderContext;
+import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.backend.LightUpdateHolder;
 import dev.engine_room.flywheel.backend.engine.indirect.StagingBuffer;

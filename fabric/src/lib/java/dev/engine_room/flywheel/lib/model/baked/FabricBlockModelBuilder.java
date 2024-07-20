@@ -38,9 +38,6 @@ public final class FabricBlockModelBuilder extends BlockModelBuilder {
 
 	@Override
 	public SimpleModel build() {
-		if (level == null) {
-			level = VirtualEmptyBlockGetter.INSTANCE;
-		}
 		if (materialFunc == null) {
 			materialFunc = ModelUtil::getMaterial;
 		}

@@ -20,10 +20,10 @@ public final class InstanceTypes {
 					.matrix("normal", FloatRepr.FLOAT, 3)
 					.build())
 			.writer((ptr, instance) -> {
-				MemoryUtil.memPutByte(ptr, instance.r);
-				MemoryUtil.memPutByte(ptr + 1, instance.g);
-				MemoryUtil.memPutByte(ptr + 2, instance.b);
-				MemoryUtil.memPutByte(ptr + 3, instance.a);
+				MemoryUtil.memPutByte(ptr, instance.red);
+				MemoryUtil.memPutByte(ptr + 1, instance.green);
+				MemoryUtil.memPutByte(ptr + 2, instance.blue);
+				MemoryUtil.memPutByte(ptr + 3, instance.alpha);
 				ExtraMemoryOps.put2x16(ptr + 4, instance.overlay);
 				ExtraMemoryOps.put2x16(ptr + 8, instance.light);
 				ExtraMemoryOps.putMatrix4f(ptr + 12, instance.model);
@@ -43,10 +43,10 @@ public final class InstanceTypes {
 					.vector("rotation", FloatRepr.FLOAT, 4)
 					.build())
 			.writer((ptr, instance) -> {
-				MemoryUtil.memPutByte(ptr, instance.r);
-				MemoryUtil.memPutByte(ptr + 1, instance.g);
-				MemoryUtil.memPutByte(ptr + 2, instance.b);
-				MemoryUtil.memPutByte(ptr + 3, instance.a);
+				MemoryUtil.memPutByte(ptr, instance.red);
+				MemoryUtil.memPutByte(ptr + 1, instance.green);
+				MemoryUtil.memPutByte(ptr + 2, instance.blue);
+				MemoryUtil.memPutByte(ptr + 3, instance.alpha);
 				ExtraMemoryOps.put2x16(ptr + 4, instance.overlay);
 				ExtraMemoryOps.put2x16(ptr + 8, instance.light);
 				MemoryUtil.memPutFloat(ptr + 12, instance.posX);

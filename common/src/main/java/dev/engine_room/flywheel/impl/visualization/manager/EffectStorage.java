@@ -1,20 +1,18 @@
 package dev.engine_room.flywheel.impl.visualization.manager;
 
-import java.util.function.Supplier;
-
 import dev.engine_room.flywheel.api.visual.Effect;
 import dev.engine_room.flywheel.api.visual.EffectVisual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.impl.visualization.storage.Storage;
 
 public class EffectStorage extends Storage<Effect> {
-	public EffectStorage(Supplier<VisualizationContext> visualizationContextSupplier) {
-		super(visualizationContextSupplier);
+	public EffectStorage(VisualizationContext visualizationContext) {
+		super(visualizationContext);
 	}
 
 	@Override
 	protected EffectVisual<?> createRaw(Effect obj, float partialTick) {
-		return obj.visualize(visualizationContextSupplier.get(), partialTick);
+		return obj.visualize(visualizationContext, partialTick);
 	}
 
 	@Override

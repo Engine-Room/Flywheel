@@ -1,10 +1,9 @@
-package dev.engine_room.flywheel.lib.util;
+package dev.engine_room.flywheel.backend.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class TestAtomicBitset {
-
 	@Test
 	void testNextClearBit() {
 		var segmentLength = 1 << AtomicBitSet.DEFAULT_LOG2_SEGMENT_SIZE_IN_BITS;

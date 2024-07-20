@@ -20,7 +20,6 @@ import dev.engine_room.flywheel.lib.util.Unit;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 class PlanExecutionTest {
-
 	protected static ParallelTaskExecutor EXECUTOR;
 
 	@BeforeEach
@@ -221,8 +220,8 @@ class PlanExecutionTest {
 
 	@Test
 	void flagPlan() {
-		var first = new NamedFlag("ready right away");
-		var second = new NamedFlag("ready after we sync");
+		var first = new Flag("ready right away");
+		var second = new Flag("ready after we sync");
 
 		var sync = new Synchronizer(2, second::raise);
 
@@ -240,8 +239,8 @@ class PlanExecutionTest {
 
 	@Test
 	void longWaitForFlag() {
-		var first = new NamedFlag("ready right away");
-		var second = new NamedFlag("ready after 2s");
+		var first = new Flag("ready right away");
+		var second = new Flag("ready after 2s");
 
 		var plan = RaisePlan.raise(first)
 				.then(SimplePlan.of(() -> {
@@ -265,7 +264,7 @@ class PlanExecutionTest {
 
 	@Test
 	void syncUntilReturnsFlagValue() {
-		var flag = new NamedFlag("ready right away");
+		var flag = new Flag("ready right away");
 
 		Assertions.assertFalse(EXECUTOR.syncUntil(flag::isRaised), "Flag should not be raised yet.");
 

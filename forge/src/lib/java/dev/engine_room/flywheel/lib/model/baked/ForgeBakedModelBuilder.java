@@ -13,8 +13,8 @@ import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelData;
 
@@ -57,12 +57,6 @@ public final class ForgeBakedModelBuilder extends BakedModelBuilder {
 
 	@Override
 	public SimpleModel build() {
-		if (level == null) {
-			level = VirtualEmptyBlockGetter.INSTANCE;
-		}
-		if (blockState == null) {
-			blockState = Blocks.AIR.defaultBlockState();
-		}
 		if (materialFunc == null) {
 			materialFunc = ModelUtil::getMaterial;
 		}

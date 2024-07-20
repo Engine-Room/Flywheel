@@ -1,17 +1,15 @@
 package dev.engine_room.flywheel.impl.visualization.manager;
 
-import java.util.function.Supplier;
-
 import dev.engine_room.flywheel.api.visual.EntityVisual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.impl.visualization.storage.Storage;
-import dev.engine_room.flywheel.lib.visual.VisualizationHelper;
+import dev.engine_room.flywheel.lib.visualization.VisualizationHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 
 public class EntityStorage extends Storage<Entity> {
-	public EntityStorage(Supplier<VisualizationContext> visualizationContextSupplier) {
-		super(visualizationContextSupplier);
+	public EntityStorage(VisualizationContext visualizationContext) {
+		super(visualizationContext);
 	}
 
 	@Override
@@ -21,7 +19,7 @@ public class EntityStorage extends Storage<Entity> {
 			return null;
 		}
 
-		return visualizer.createVisual(visualizationContextSupplier.get(), obj, partialTick);
+		return visualizer.createVisual(visualizationContext, obj, partialTick);
 	}
 
 	@Override

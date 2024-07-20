@@ -9,13 +9,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 
-import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.impl.FlwImpl;
 import net.minecraft.util.Mth;
 
 // https://github.com/CaffeineMC/sodium-fabric/blob/5d364ed5ba63f9067fcf72a078ca310bff4db3e9/src/main/java/me/jellysquid/mods/sodium/client/render/chunk/compile/ChunkBuilder.java
 // https://stackoverflow.com/questions/29655531
-public class ParallelTaskExecutor implements TaskExecutor {
+public class ParallelTaskExecutor implements InternalTaskExecutor {
 	private final String name;
 	private final int threadCount;
 
@@ -124,20 +123,6 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		return mainThreadQuery.getAsBoolean();
 	}
 
-	/**
-	 * Wait for all running tasks to finish.
-	 */
-	@Override
-	public void syncPoint() {
-		boolean onMainThread = isMainThread();
-		while (true) {
-			if (syncOneTask(onMainThread)) {
-				// Done! Nothing left to do.
-				return;
-			}
-		}
-	}
-
 	@Override
 	public boolean syncUntil(BooleanSupplier cond) {
 		boolean onMainThread = isMainThread();
@@ -171,6 +156,20 @@ public class ParallelTaskExecutor implements TaskExecutor {
 				// Out of tasks entirely.
 				// The condition may have flipped though so return its result.
 				return !cond.getAsBoolean();
+			}
+		}
+	}
+
+	/**
+	 * Wait for all running tasks to finish.
+	 */
+	@Override
+	public void syncPoint() {
+		boolean onMainThread = isMainThread();
+		while (true) {
+			if (syncOneTask(onMainThread)) {
+				// Done! Nothing left to do.
+				return;
 			}
 		}
 	}

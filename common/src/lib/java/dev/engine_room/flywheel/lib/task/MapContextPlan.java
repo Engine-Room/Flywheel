@@ -19,7 +19,7 @@ public record MapContextPlan<C, D>(SupplierWithContext<C, D> map, Plan<D> plan) 
 		plan.execute(taskExecutor, newContext, onCompletion);
 	}
 
-	public static class Builder<C, D> {
+	public static final class Builder<C, D> {
 		private final SupplierWithContext<C, D> map;
 
 		public Builder(SupplierWithContext<C, D> map) {

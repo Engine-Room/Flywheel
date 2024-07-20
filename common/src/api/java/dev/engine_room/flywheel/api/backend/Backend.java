@@ -7,7 +7,7 @@ import net.minecraft.world.level.LevelAccessor;
 
 @BackendImplemented
 public interface Backend {
-	static IdRegistry<Backend> REGISTRY = FlwApiLink.INSTANCE.createIdRegistry();
+	IdRegistry<Backend> REGISTRY = FlwApiLink.INSTANCE.createIdRegistry();
 
 	/**
 	 * Create a new engine instance.

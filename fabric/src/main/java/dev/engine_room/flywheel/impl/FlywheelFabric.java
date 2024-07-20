@@ -3,10 +3,8 @@ package dev.engine_room.flywheel.impl;
 import org.jetbrains.annotations.UnknownNullability;
 
 import dev.engine_room.flywheel.api.Flywheel;
-import dev.engine_room.flywheel.api.event.BeginFrameCallback;
 import dev.engine_room.flywheel.api.event.EndClientResourceReloadCallback;
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererCallback;
-import dev.engine_room.flywheel.api.event.RenderStageCallback;
 import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
@@ -54,8 +52,6 @@ public final class FlywheelFabric implements ClientModInitializer {
 				}
 			}
 		});
-		BeginFrameCallback.EVENT.register(VisualizationEventHandler::onBeginFrame);
-		RenderStageCallback.EVENT.register(VisualizationEventHandler::onRenderStage);
 		ClientEntityEvents.ENTITY_LOAD.register((entity, level) -> VisualizationEventHandler.onEntityJoinLevel(level, entity));
 		ClientEntityEvents.ENTITY_UNLOAD.register((entity, level) -> VisualizationEventHandler.onEntityLeaveLevel(level, entity));
 

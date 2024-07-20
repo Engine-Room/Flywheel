@@ -29,7 +29,7 @@ public final class FlwCommands {
 		ConfigValue<String> backendValue = ForgeFlwConfig.INSTANCE.client.backend;
 		command.then(Commands.literal("backend")
 				.executes(context -> {
-					Backend backend = BackendManager.getBackend();
+					Backend backend = BackendManager.currentBackend();
 					String idStr = Backend.REGISTRY.getIdOrThrow(backend)
 							.toString();
 					sendMessage(context.getSource(), Component.translatable("command.flywheel.backend.get", idStr));
@@ -45,7 +45,7 @@ public final class FlwCommands {
 						// Reload renderers so we can report the actual backend.
 						Minecraft.getInstance().levelRenderer.allChanged();
 
-						Backend actualBackend = BackendManager.getBackend();
+						Backend actualBackend = BackendManager.currentBackend();
 						if (actualBackend != requestedBackend) {
 							sendFailure(context.getSource(), Component.translatable("command.flywheel.backend.set.unavailable", requestedIdStr));
 						}

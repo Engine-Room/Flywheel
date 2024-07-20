@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
+import dev.engine_room.flywheel.lib.visual.component.EntityComponent;
 import net.minecraft.world.entity.Entity;
 
-public class SimpleEntityVisual<T extends Entity> extends AbstractEntityVisual<T> implements SimpleDynamicVisual {
+public class ComponentEntityVisual<T extends Entity> extends AbstractEntityVisual<T> implements SimpleDynamicVisual {
 	protected final List<EntityComponent> components = new ArrayList<>();
 
-	public SimpleEntityVisual(VisualizationContext ctx, T entity, float partialTick) {
+	public ComponentEntityVisual(VisualizationContext ctx, T entity, float partialTick) {
 		super(ctx, entity, partialTick);
 	}
 
