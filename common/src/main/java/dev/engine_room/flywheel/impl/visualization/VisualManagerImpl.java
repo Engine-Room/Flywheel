@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.impl.visualization.manager;
+package dev.engine_room.flywheel.impl.visualization;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;

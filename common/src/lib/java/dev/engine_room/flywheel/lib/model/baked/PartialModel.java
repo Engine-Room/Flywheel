@@ -1,8 +1,10 @@
 package dev.engine_room.flywheel.lib.model.baked;
 
-import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.jetbrains.annotations.UnknownNullability;
+
+import com.google.common.collect.MapMaker;
 
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 import net.minecraft.client.Minecraft;
@@ -17,7 +19,7 @@ import net.minecraft.resources.ResourceLocation;
  * Once Minecraft has finished baking all models, all PartialModels will have their bakedModel fields populated.
  */
 public final class PartialModel {
-	static final WeakHashMap<ResourceLocation, PartialModel> ALL = new WeakHashMap<>();
+	static final ConcurrentMap<ResourceLocation, PartialModel> ALL = new MapMaker().weakValues().makeMap();
 	static boolean populateOnInit = false;
 
 	private final ResourceLocation modelLocation;
@@ -28,14 +30,12 @@ public final class PartialModel {
 		this.modelLocation = modelLocation;
 
 		if (populateOnInit) {
-			FlwLibXplat.INSTANCE.getBakedModel(Minecraft.getInstance().getModelManager(), modelLocation);
+			bakedModel = FlwLibXplat.INSTANCE.getBakedModel(Minecraft.getInstance().getModelManager(), modelLocation);
 		}
 	}
 
 	public static PartialModel of(ResourceLocation modelLocation) {
-		synchronized (ALL) {
-			return ALL.computeIfAbsent(modelLocation, PartialModel::new);
-		}
+		return ALL.computeIfAbsent(modelLocation, PartialModel::new);
 	}
 
 	@UnknownNullability

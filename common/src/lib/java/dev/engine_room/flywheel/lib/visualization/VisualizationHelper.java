@@ -11,12 +11,29 @@ import dev.engine_room.flywheel.api.visualization.VisualizerRegistry;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public final class VisualizationHelper {
 	private VisualizationHelper() {
+	}
+
+	public static void queueAdd(Effect effect) {
+		VisualizationManager manager = VisualizationManager.get(effect.level());
+		if (manager == null) {
+			return;
+		}
+
+		manager.effects().queueAdd(effect);
+	}
+
+	public static void queueRemove(Effect effect) {
+		VisualizationManager manager = VisualizationManager.get(effect.level());
+		if (manager == null) {
+			return;
+		}
+
+		manager.effects().queueRemove(effect);
 	}
 
 	/**
@@ -51,8 +68,8 @@ public final class VisualizationHelper {
 	 * Call this when you want to run {@link Visual#update}.
 	 * @param effect The effect whose visual you want to update.
 	 */
-	public static void queueUpdate(LevelAccessor level, Effect effect) {
-		VisualizationManager manager = VisualizationManager.get(level);
+	public static void queueUpdate(Effect effect) {
+		VisualizationManager manager = VisualizationManager.get(effect.level());
 		if (manager == null) {
 			return;
 		}
@@ -98,7 +115,7 @@ public final class VisualizationHelper {
 	 * @param <T> The type of the block entity.
 	 * @return {@code true} if the block entity is visualized and should not be rendered normally.
 	 */
-	public static <T extends BlockEntity> boolean shouldSkipRender(T blockEntity) {
+	public static <T extends BlockEntity> boolean skipVanillaRender(T blockEntity) {
 		BlockEntityVisualizer<? super T> visualizer = getVisualizer(blockEntity);
 		if (visualizer == null) {
 			return false;
@@ -112,7 +129,7 @@ public final class VisualizationHelper {
 	 * @param <T> The type of the entity.
 	 * @return {@code true} if the entity is visualized and should not be rendered normally.
 	 */
-	public static <T extends Entity> boolean shouldSkipRender(T entity) {
+	public static <T extends Entity> boolean skipVanillaRender(T entity) {
 		EntityVisualizer<? super T> visualizer = getVisualizer(entity);
 		if (visualizer == null) {
 			return false;
@@ -133,7 +150,6 @@ public final class VisualizationHelper {
 		}
 
 		manager.blockEntities().queueAdd(blockEntity);
-
 		return visualizer.skipVanillaRender(blockEntity);
 	}
 }

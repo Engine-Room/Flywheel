@@ -14,7 +14,7 @@ import net.minecraft.util.Mth;
 
 // https://github.com/CaffeineMC/sodium-fabric/blob/5d364ed5ba63f9067fcf72a078ca310bff4db3e9/src/main/java/me/jellysquid/mods/sodium/client/render/chunk/compile/ChunkBuilder.java
 // https://stackoverflow.com/questions/29655531
-public class ParallelTaskExecutor implements InternalTaskExecutor {
+public class ParallelTaskExecutor implements TaskExecutorImpl {
 	private final String name;
 	private final int threadCount;
 

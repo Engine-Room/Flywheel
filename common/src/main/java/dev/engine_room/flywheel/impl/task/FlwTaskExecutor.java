@@ -18,7 +18,7 @@ public final class FlwTaskExecutor {
 	 * Get a thread pool for running Flywheel related work in parallel.
 	 * @return A global Flywheel thread pool.
 	 */
-	public static InternalTaskExecutor get() {
+	public static TaskExecutorImpl get() {
 		return ConcurrentUtils.initializeUnchecked(INITIALIZER);
 	}
 
@@ -34,9 +34,9 @@ public final class FlwTaskExecutor {
 				.availableProcessors();
 	}
 
-	private static class Initializer extends AtomicSafeInitializer<InternalTaskExecutor> {
+	private static class Initializer extends AtomicSafeInitializer<TaskExecutorImpl> {
 		@Override
-		protected InternalTaskExecutor initialize() {
+		protected TaskExecutorImpl initialize() {
 			int threadCount = FlwConfig.INSTANCE
 					.workerThreads();
 

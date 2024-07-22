@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.impl.task;
 
 import java.util.function.BooleanSupplier;
 
-public class SerialTaskExecutor implements InternalTaskExecutor {
+public class SerialTaskExecutor implements TaskExecutorImpl {
 	public static final SerialTaskExecutor INSTANCE = new SerialTaskExecutor();
 
 	private SerialTaskExecutor() {

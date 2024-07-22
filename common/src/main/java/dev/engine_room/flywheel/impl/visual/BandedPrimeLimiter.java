@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.impl.visualization.ratelimit;
+package dev.engine_room.flywheel.impl.visual;
 
 import net.minecraft.util.Mth;
 

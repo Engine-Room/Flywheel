@@ -13,9 +13,9 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
-public class SimpleBlockEntityVisualizer<T extends BlockEntity> implements BlockEntityVisualizer<T> {
-	protected Factory<T> visualFactory;
-	protected Predicate<T> skipVanillaRender;
+public final class SimpleBlockEntityVisualizer<T extends BlockEntity> implements BlockEntityVisualizer<T> {
+	private final Factory<T> visualFactory;
+	private final Predicate<T> skipVanillaRender;
 
 	public SimpleBlockEntityVisualizer(Factory<T> visualFactory, Predicate<T> skipVanillaRender) {
 		this.visualFactory = visualFactory;
@@ -53,12 +53,12 @@ public class SimpleBlockEntityVisualizer<T extends BlockEntity> implements Block
 	 *
 	 * @param <T> The type of the block entity.
 	 */
-	public static class Builder<T extends BlockEntity> {
-		protected BlockEntityType<T> type;
+	public static final class Builder<T extends BlockEntity> {
+		private final BlockEntityType<T> type;
 		@Nullable
-		protected Factory<T> visualFactory;
+		private Factory<T> visualFactory;
 		@Nullable
-		protected Predicate<T> skipVanillaRender;
+		private Predicate<T> skipVanillaRender;
 
 		public Builder(BlockEntityType<T> type) {
 			this.type = type;

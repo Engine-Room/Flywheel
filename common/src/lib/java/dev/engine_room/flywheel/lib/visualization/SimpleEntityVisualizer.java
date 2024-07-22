@@ -13,9 +13,9 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
-public class SimpleEntityVisualizer<T extends Entity> implements EntityVisualizer<T> {
-	protected Factory<T> visualFactory;
-	protected Predicate<T> skipVanillaRender;
+public final class SimpleEntityVisualizer<T extends Entity> implements EntityVisualizer<T> {
+	private final Factory<T> visualFactory;
+	private final Predicate<T> skipVanillaRender;
 
 	public SimpleEntityVisualizer(Factory<T> visualFactory, Predicate<T> skipVanillaRender) {
 		this.visualFactory = visualFactory;
@@ -53,12 +53,12 @@ public class SimpleEntityVisualizer<T extends Entity> implements EntityVisualize
 	 *
 	 * @param <T> The type of the entity.
 	 */
-	public static class Builder<T extends Entity> {
-		protected EntityType<T> type;
+	public static final class Builder<T extends Entity> {
+		private final EntityType<T> type;
 		@Nullable
-		protected Factory<T> visualFactory;
+		private Factory<T> visualFactory;
 		@Nullable
-		protected Predicate<T> skipVanillaRender;
+		private Predicate<T> skipVanillaRender;
 
 		public Builder(EntityType<T> type) {
 			this.type = type;

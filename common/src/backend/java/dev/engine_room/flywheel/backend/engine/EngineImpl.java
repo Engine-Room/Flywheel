@@ -24,8 +24,10 @@ import dev.engine_room.flywheel.lib.task.SyncedPlan;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 
 public class EngineImpl implements Engine {
@@ -56,21 +58,8 @@ public class EngineImpl implements Engine {
 	}
 
 	@Override
-	public void render(TaskExecutor executor, RenderContext context, VisualType visualType) {
-		executor.syncUntil(flushFlag::isRaised);
-		if (visualType == VisualType.EFFECT) {
-			flushFlag.lower();
-		}
-
-		drawManager.render(visualType);
-	}
-
-	@Override
-	public void renderCrumbling(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks) {
-		// Need to wait for flush before we can inspect instancer state.
-		executor.syncUntil(flushFlag::isRaised);
-
-		drawManager.renderCrumbling(crumblingBlocks);
+	public Vec3i renderOrigin() {
+		return renderOrigin;
 	}
 
 	@Override
@@ -91,13 +80,31 @@ public class EngineImpl implements Engine {
 	}
 
 	@Override
-	public Vec3i renderOrigin() {
-		return renderOrigin;
+	public void lightSections(LongSet sections) {
+		lightStorage.sections(sections);
 	}
 
 	@Override
-	public void lightSections(LongSet sections) {
-		lightStorage.sections(sections);
+	public void onLightUpdate(SectionPos sectionPos, LightLayer layer) {
+		lightStorage.onLightUpdate(sectionPos.asLong());
+	}
+
+	@Override
+	public void render(TaskExecutor executor, RenderContext context, VisualType visualType) {
+		executor.syncUntil(flushFlag::isRaised);
+		if (visualType == VisualType.EFFECT) {
+			flushFlag.lower();
+		}
+
+		drawManager.render(visualType);
+	}
+
+	@Override
+	public void renderCrumbling(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks) {
+		// Need to wait for flush before we can inspect instancer state.
+		executor.syncUntil(flushFlag::isRaised);
+
+		drawManager.renderCrumbling(crumblingBlocks);
 	}
 
 	@Override

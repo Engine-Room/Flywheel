@@ -1,10 +1,9 @@
-package dev.engine_room.flywheel.impl.visualization.manager;
+package dev.engine_room.flywheel.impl.visualization.storage;
 
 import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.visual.BlockEntityVisual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
-import dev.engine_room.flywheel.impl.visualization.storage.Storage;
 import dev.engine_room.flywheel.lib.visualization.VisualizationHelper;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;

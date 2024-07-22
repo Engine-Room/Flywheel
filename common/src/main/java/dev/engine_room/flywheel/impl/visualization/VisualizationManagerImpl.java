@@ -24,16 +24,15 @@ import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.impl.FlwConfig;
 import dev.engine_room.flywheel.impl.extension.LevelExtension;
 import dev.engine_room.flywheel.impl.task.FlwTaskExecutor;
-import dev.engine_room.flywheel.impl.task.InternalTaskExecutor;
+import dev.engine_room.flywheel.impl.task.TaskExecutorImpl;
+import dev.engine_room.flywheel.impl.visual.BandedPrimeLimiter;
+import dev.engine_room.flywheel.impl.visual.DistanceUpdateLimiterImpl;
 import dev.engine_room.flywheel.impl.visual.DynamicVisualContextImpl;
+import dev.engine_room.flywheel.impl.visual.NonLimiter;
 import dev.engine_room.flywheel.impl.visual.TickableVisualContextImpl;
-import dev.engine_room.flywheel.impl.visualization.manager.BlockEntityStorage;
-import dev.engine_room.flywheel.impl.visualization.manager.EffectStorage;
-import dev.engine_room.flywheel.impl.visualization.manager.EntityStorage;
-import dev.engine_room.flywheel.impl.visualization.manager.VisualManagerImpl;
-import dev.engine_room.flywheel.impl.visualization.ratelimit.BandedPrimeLimiter;
-import dev.engine_room.flywheel.impl.visualization.ratelimit.DistanceUpdateLimiterImpl;
-import dev.engine_room.flywheel.impl.visualization.ratelimit.NonLimiter;
+import dev.engine_room.flywheel.impl.visualization.storage.BlockEntityStorage;
+import dev.engine_room.flywheel.impl.visualization.storage.EffectStorage;
+import dev.engine_room.flywheel.impl.visualization.storage.EntityStorage;
 import dev.engine_room.flywheel.lib.task.Flag;
 import dev.engine_room.flywheel.lib.task.IfElsePlan;
 import dev.engine_room.flywheel.lib.task.MapContextPlan;
@@ -44,11 +43,13 @@ import dev.engine_room.flywheel.lib.util.LevelAttached;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
@@ -57,7 +58,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public class VisualizationManagerImpl implements VisualizationManager {
 	private static final LevelAttached<VisualizationManagerImpl> MANAGERS = new LevelAttached<>(VisualizationManagerImpl::new, VisualizationManagerImpl::delete);
 
-	private final InternalTaskExecutor taskExecutor;
+	private final TaskExecutorImpl taskExecutor;
 	private final Engine engine;
 	private final DistanceUpdateLimiterImpl frameLimiter;
 	private final RenderDispatcherImpl renderDispatcher = new RenderDispatcherImpl();
@@ -298,10 +299,12 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		}
 	}
 
-	public void onLightUpdate(long section) {
-		blockEntities.onLightUpdate(section);
-		entities.onLightUpdate(section);
-		effects.onLightUpdate(section);
+	public void onLightUpdate(SectionPos sectionPos, LightLayer layer) {
+		engine.onLightUpdate(sectionPos, layer);
+		long longPos = sectionPos.asLong();
+		blockEntities.onLightUpdate(longPos);
+		entities.onLightUpdate(longPos);
+		effects.onLightUpdate(longPos);
 	}
 
 	/**

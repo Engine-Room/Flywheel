@@ -12,7 +12,9 @@ import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.LightLayer;
 
 @BackendImplemented
 public interface Engine {
@@ -32,6 +34,30 @@ public interface Engine {
 	Plan<RenderContext> createFramePlan();
 
 	/**
+	 * @return The current render origin.
+	 */
+	Vec3i renderOrigin();
+
+	/**
+	 * Maintain the render origin to be within a certain distance from the camera in all directions,
+	 * preventing floating point precision issues at high coordinates.
+	 *
+	 * @return {@code true} if the render origin changed, {@code false} otherwise.
+	 */
+	boolean updateRenderOrigin(Camera camera);
+
+	/**
+	 * Assign the set of sections that visuals have requested GPU light for.
+	 *
+	 * <p> This will be called at most once per frame, and not necessarily every frame.
+	 *
+	 * @param sections The set of sections.
+	 */
+	void lightSections(LongSet sections);
+
+	void onLightUpdate(SectionPos sectionPos, LightLayer layer);
+
+	/**
 	 * Render all instances necessary for the given visual type.
 	 * @param executor The task executor running the frame plan.
 	 * @param context The render context for this frame.
@@ -49,28 +75,6 @@ public interface Engine {
 	 * @param crumblingBlocks The instances to render. This list is never empty.
 	 */
 	void renderCrumbling(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks);
-
-	/**
-	 * Maintain the render origin to be within a certain distance from the camera in all directions,
-	 * preventing floating point precision issues at high coordinates.
-	 *
-	 * @return {@code true} if the render origin changed, {@code false} otherwise.
-	 */
-	boolean updateRenderOrigin(Camera camera);
-
-	/**
-	 * @return The current render origin.
-	 */
-	Vec3i renderOrigin();
-
-	/**
-	 * Assign the set of sections that visuals have requested GPU light for.
-	 *
-	 * <p> This will be called at most once per frame, and not necessarily every frame.
-	 *
-	 * @param sections The set of sections.
-	 */
-	void lightSections(LongSet sections);
 
 	/**
 	 * Free all resources associated with this engine.

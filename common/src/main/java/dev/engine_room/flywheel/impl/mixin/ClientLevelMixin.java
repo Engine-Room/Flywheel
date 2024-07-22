@@ -25,7 +25,7 @@ abstract class ClientLevelMixin  {
 		Iterable<Entity> entities = cir.getReturnValue();
 		ArrayList<Entity> filtered = Lists.newArrayList(entities);
 
-		filtered.removeIf(VisualizationHelper::shouldSkipRender);
+		filtered.removeIf(VisualizationHelper::skipVanillaRender);
 
 		cir.setReturnValue(filtered);
 	}

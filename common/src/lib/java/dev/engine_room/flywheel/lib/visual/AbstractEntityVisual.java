@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.lib.visual;
 
+import org.jetbrains.annotations.Nullable;
 import org.joml.FrustumIntersection;
 import org.joml.Vector3f;
 
@@ -89,7 +90,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 		return entity.noCulling || visibilityTester.check(frustum);
 	}
 
-	protected void relight(float partialTick, FlatLit... instances) {
+	protected void relight(float partialTick, @Nullable FlatLit... instances) {
 		BlockPos pos = BlockPos.containing(entity.getLightProbePosition(partialTick));
 		int blockLight = entity.isOnFire() ? 15 : level.getBrightness(LightLayer.BLOCK, pos);
 		int skyLight = level.getBrightness(LightLayer.SKY, pos);

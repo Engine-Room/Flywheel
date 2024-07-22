@@ -4,7 +4,7 @@ import java.util.function.BooleanSupplier;
 
 import dev.engine_room.flywheel.api.task.TaskExecutor;
 
-public interface InternalTaskExecutor extends TaskExecutor {
+public interface TaskExecutorImpl extends TaskExecutor {
 	/**
 	 * Wait for <em>all</em> running tasks to finish.
 	 * <br>

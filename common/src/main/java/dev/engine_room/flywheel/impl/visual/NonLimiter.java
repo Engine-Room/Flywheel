@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.impl.visualization.ratelimit;
+package dev.engine_room.flywheel.impl.visual;
 
 public class NonLimiter implements DistanceUpdateLimiterImpl {
 	@Override

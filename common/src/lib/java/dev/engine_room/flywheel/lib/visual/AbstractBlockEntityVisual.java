@@ -1,5 +1,7 @@
 package dev.engine_room.flywheel.lib.visual;
 
+import java.util.Iterator;
+
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.joml.FrustumIntersection;
@@ -102,6 +104,22 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	}
 
 	protected void relight(@Nullable FlatLit... instances) {
+		relight(pos, instances);
+	}
+
+	protected void relight(BlockPos pos, Iterator<@Nullable FlatLit> instances) {
+		FlatLit.relight(LevelRenderer.getLightColor(level, pos), instances);
+	}
+
+	protected void relight(Iterator<@Nullable FlatLit> instances) {
+		relight(pos, instances);
+	}
+
+	protected void relight(BlockPos pos, Iterable<@Nullable FlatLit> instances) {
+		FlatLit.relight(LevelRenderer.getLightColor(level, pos), instances);
+	}
+
+	protected void relight(Iterable<@Nullable FlatLit> instances) {
 		relight(pos, instances);
 	}
 }
