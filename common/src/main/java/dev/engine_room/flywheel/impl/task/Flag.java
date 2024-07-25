@@ -1,15 +1,13 @@
-package dev.engine_room.flywheel.lib.task;
+package dev.engine_room.flywheel.impl.task;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jetbrains.annotations.Nullable;
 
-import dev.engine_room.flywheel.api.task.TaskExecutor;
-
 /**
  * A flag that can be raised and lowered in a thread-safe fashion.
  * <br>
- * Useful when combined with {@link RaisePlan} and {@link TaskExecutor#syncUntil}.
+ * Useful when combined with {@link RaisePlan}.
  */
 public final class Flag {
 	private final AtomicBoolean raised = new AtomicBoolean(false);

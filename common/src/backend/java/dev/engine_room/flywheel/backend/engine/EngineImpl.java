@@ -10,7 +10,6 @@ import dev.engine_room.flywheel.api.instance.Instancer;
 import dev.engine_room.flywheel.api.instance.InstancerProvider;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.task.Plan;
-import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.api.visualization.VisualEmbedding;
 import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
@@ -19,8 +18,6 @@ import dev.engine_room.flywheel.backend.engine.embed.Environment;
 import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
-import dev.engine_room.flywheel.lib.task.Flag;
-import dev.engine_room.flywheel.lib.task.SyncedPlan;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
@@ -33,7 +30,6 @@ import net.minecraft.world.phys.Vec3;
 public class EngineImpl implements Engine {
 	private final DrawManager<? extends AbstractInstancer<?>> drawManager;
 	private final int sqrMaxOriginDistance;
-	private final Flag flushFlag = new Flag("flushed");
 	private final EnvironmentStorage environmentStorage;
 	private final LightStorage lightStorage;
 
@@ -53,8 +49,7 @@ public class EngineImpl implements Engine {
 
 	@Override
 	public Plan<RenderContext> createFramePlan() {
-		return lightStorage.createFramePlan()
-				.then(SyncedPlan.of(this::flush));
+		return lightStorage.createFramePlan();
 	}
 
 	@Override
@@ -90,20 +85,21 @@ public class EngineImpl implements Engine {
 	}
 
 	@Override
-	public void render(TaskExecutor executor, RenderContext context, VisualType visualType) {
-		executor.syncUntil(flushFlag::isRaised);
-		if (visualType == VisualType.EFFECT) {
-			flushFlag.lower();
+	public void setupRender(RenderContext context) {
+		try (var state = GlStateTracker.getRestoreState()) {
+			Uniforms.update(context);
+			environmentStorage.flush();
+			drawManager.flush(lightStorage);
 		}
+	}
 
+	@Override
+	public void render(RenderContext context, VisualType visualType) {
 		drawManager.render(visualType);
 	}
 
 	@Override
-	public void renderCrumbling(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks) {
-		// Need to wait for flush before we can inspect instancer state.
-		executor.syncUntil(flushFlag::isRaised);
-
+	public void renderCrumbling(RenderContext context, List<CrumblingBlock> crumblingBlocks) {
 		drawManager.renderCrumbling(crumblingBlocks);
 	}
 
@@ -115,16 +111,6 @@ public class EngineImpl implements Engine {
 
 	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType) {
 		return drawManager.getInstancer(environment, type, model, visualType);
-	}
-
-	private void flush(RenderContext ctx) {
-		try (var state = GlStateTracker.getRestoreState()) {
-			Uniforms.update(ctx);
-			environmentStorage.flush();
-			drawManager.flush(lightStorage);
-		}
-
-		flushFlag.raise();
 	}
 
 	public EnvironmentStorage environmentStorage() {

@@ -56,7 +56,5 @@ public interface VisualizationManager {
 		void beforeCrumbling(RenderContext ctx, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress);
 
 		void afterParticles(RenderContext ctx);
-
-		void onEndLevelRender(RenderContext ctx);
 	}
 }

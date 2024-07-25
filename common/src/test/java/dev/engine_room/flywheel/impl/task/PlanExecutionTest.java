@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.lib.task;
+package dev.engine_room.flywheel.impl.task;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import dev.engine_room.flywheel.api.task.Plan;
-import dev.engine_room.flywheel.impl.task.ParallelTaskExecutor;
+import dev.engine_room.flywheel.lib.task.DynamicNestedPlan;
+import dev.engine_room.flywheel.lib.task.IfElsePlan;
+import dev.engine_room.flywheel.lib.task.NestedPlan;
+import dev.engine_room.flywheel.lib.task.SimplePlan;
+import dev.engine_room.flywheel.lib.task.Synchronizer;
+import dev.engine_room.flywheel.lib.task.UnitPlan;
 import dev.engine_room.flywheel.lib.task.functional.RunnableWithContext;
 import dev.engine_room.flywheel.lib.util.Unit;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -24,8 +29,7 @@ class PlanExecutionTest {
 
 	@BeforeEach
 	public void setUp() {
-		var currentThread = Thread.currentThread();
-		EXECUTOR = new ParallelTaskExecutor("PlanTest", 2, () -> currentThread == Thread.currentThread());
+		EXECUTOR = new ParallelTaskExecutor("PlanTest", 2);
 		EXECUTOR.startWorkers();
 	}
 
@@ -184,38 +188,6 @@ class PlanExecutionTest {
 		runAndWait(plan);
 
 		Assertions.assertEquals(3, counter.get());
-	}
-
-	@Test
-	void syncedPlanDefersOnMainThread() {
-		var done = new AtomicBoolean(false);
-		var plan = SyncedPlan.of(() -> done.set(true));
-
-		plan.execute(EXECUTOR, Unit.INSTANCE);
-
-		Assertions.assertFalse(done.get());
-
-		EXECUTOR.syncPoint();
-
-		Assertions.assertTrue(done.get());
-	}
-
-	@Test
-	void syncedPlanDefersOffThread() {
-		var done = new AtomicBoolean(false);
-
-		var plan = SyncedPlan.of(() -> {
-			done.set(true);
-		});
-
-		// call execute from within a worker thread
-		EXECUTOR.execute(() -> plan.execute(EXECUTOR, Unit.INSTANCE));
-
-		Assertions.assertFalse(done.get());
-
-		EXECUTOR.syncPoint();
-
-		Assertions.assertTrue(done.get());
 	}
 
 	@Test

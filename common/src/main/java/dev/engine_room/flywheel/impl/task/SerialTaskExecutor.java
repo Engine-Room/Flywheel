@@ -14,16 +14,6 @@ public class SerialTaskExecutor implements TaskExecutorImpl {
 	}
 
 	@Override
-	public void scheduleForMainThread(Runnable runnable) {
-		runnable.run();
-	}
-
-	@Override
-	public boolean isMainThread() {
-		return true;
-	}
-
-	@Override
 	public int threadCount() {
 		return 1;
 	}

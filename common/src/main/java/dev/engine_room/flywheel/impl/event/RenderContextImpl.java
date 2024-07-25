@@ -1,6 +1,7 @@
 package dev.engine_room.flywheel.impl.event;
 
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -11,7 +12,7 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 
 public record RenderContextImpl(LevelRenderer renderer, ClientLevel level, RenderBuffers buffers, PoseStack stack,
-								Matrix4f projection, Matrix4f viewProjection, Camera camera,
+								Matrix4fc projection, Matrix4fc viewProjection, Camera camera,
 								float partialTick) implements RenderContext {
 	public static RenderContextImpl create(LevelRenderer renderer, ClientLevel level, RenderBuffers buffers, PoseStack stack, Matrix4f projection, Camera camera, float partialTick) {
 		Matrix4f viewProjection = new Matrix4f(projection);

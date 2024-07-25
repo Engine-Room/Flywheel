@@ -59,13 +59,6 @@ abstract class LevelRendererMixin {
 
 	@Inject(method = "renderLevel", at = @At("RETURN"))
 	private void flywheel$endRender(CallbackInfo ci) {
-		if (flywheel$renderContext != null) {
-			VisualizationManager manager = VisualizationManager.get(level);
-			if (manager != null) {
-				manager.renderDispatcher().onEndLevelRender(flywheel$renderContext);
-			}
-		}
-
 		flywheel$renderContext = null;
 	}
 

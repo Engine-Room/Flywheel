@@ -5,7 +5,6 @@ import java.util.BitSet;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
-import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.backend.engine.indirect.StagingBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
@@ -76,7 +75,7 @@ public class LightStorage {
 		updatedSections.add(section);
 	}
 
-	public Plan<RenderContext> createFramePlan() {
+	public <C> Plan<C> createFramePlan() {
 		return SimplePlan.of(() -> {
 			if (updatedSections.isEmpty() && requestedSections == null) {
 				return;

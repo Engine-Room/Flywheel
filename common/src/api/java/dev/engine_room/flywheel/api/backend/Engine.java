@@ -2,11 +2,13 @@ package dev.engine_room.flywheel.api.backend;
 
 import java.util.List;
 
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Range;
+
 import dev.engine_room.flywheel.api.BackendImplemented;
 import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.task.Plan;
-import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -20,7 +22,6 @@ import net.minecraft.world.level.LightLayer;
 public interface Engine {
 	/**
 	 * Create a visualization context that will be used to create visuals of the given type.
-	 * This method may only be called once per visual type.
 	 *
 	 * @param visualType The type of visual.
 	 * @return A new visualization context.
@@ -28,7 +29,9 @@ public interface Engine {
 	VisualizationContext createVisualizationContext(VisualType visualType);
 
 	/**
-	 * Create a plan that will be executed every frame.
+	 * Create a plan that will start execution after the start of the level render and
+	 * finish execution before {@link #setupRender} is called.
+	 *
 	 * @return A new plan.
 	 */
 	Plan<RenderContext> createFramePlan();
@@ -58,37 +61,67 @@ public interface Engine {
 	void onLightUpdate(SectionPos sectionPos, LightLayer layer);
 
 	/**
+	 * Set up rendering for the current level render.
+	 *
+	 * <p>This method is guaranteed to be called after
+	 * {@linkplain #createFramePlan() the frame plan} has finished execution and before
+	 * {@link #render} and {@link #renderCrumbling} are called. This method is guaranteed to
+	 * be called on the render thread.
+	 *
+	 * @param context The context for the current level render.
+	 */
+	void setupRender(RenderContext context);
+
+	/**
 	 * Render all instances necessary for the given visual type.
-	 * @param executor The task executor running the frame plan.
-	 * @param context The render context for this frame.
+	 *
+	 * <p>This method is guaranteed to be called after {@link #setupRender} for the current
+	 * level render. This method is guaranteed to be called on the render thread.
+	 *
+	 * @param context The context for the current level render.
 	 * @param visualType The type of visual.
 	 */
-	void render(TaskExecutor executor, RenderContext context, VisualType visualType);
+	void render(RenderContext context, VisualType visualType);
 
 	/**
 	 * Render the given instances as a crumbling overlay.
-	 * <br>
-	 * This is guaranteed to be called between the first and last calls to {@link #render} for the current frame.
 	 *
-	 * @param executor        The task executor running the frame plan.
-	 * @param context         The render context for this frame.
+	 * <p>This method is guaranteed to be called after {@link #setupRender} for the current
+	 * level render. This method is guaranteed to be called on the render thread.
+	 *
+	 * @param context The context for the current level render.
 	 * @param crumblingBlocks The instances to render. This list is never empty.
 	 */
-	void renderCrumbling(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks);
+	void renderCrumbling(RenderContext context, List<CrumblingBlock> crumblingBlocks);
 
 	/**
 	 * Free all resources associated with this engine.
-	 * <br>
-	 * This engine will not be used again after this method is called.
+	 *
+	 * <p>This engine will not be used again after this method is called.
+	 *
+	 * <p>This method is guaranteed to be called on the render thread.
 	 */
 	void delete();
 
 	/**
 	 * A block to be rendered as a crumbling overlay.
-	 * @param progress The progress of the crumbling animation in the range [0, 10).
-	 * @param pos The position of the block.
-	 * @param instances The instances associated with the BE at this position.
 	 */
-	record CrumblingBlock(int progress, BlockPos pos, List<Instance> instances) {
+	@ApiStatus.NonExtendable
+	interface CrumblingBlock {
+		/**
+		 * The position of the block.
+		 */
+		BlockPos pos();
+
+		/**
+		 * The progress of the crumbling animation in the range [0, 10).
+		 */
+		@Range(from = 0, to = 9)
+		int progress();
+
+		/**
+		 * The instances associated with the block entity visual at this position.
+		 */
+		List<Instance> instances();
 	}
 }

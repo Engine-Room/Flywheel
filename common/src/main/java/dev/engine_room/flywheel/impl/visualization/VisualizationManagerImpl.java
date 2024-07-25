@@ -23,7 +23,9 @@ import dev.engine_room.flywheel.api.visualization.VisualizationLevel;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.impl.FlwConfig;
 import dev.engine_room.flywheel.impl.extension.LevelExtension;
+import dev.engine_room.flywheel.impl.task.Flag;
 import dev.engine_room.flywheel.impl.task.FlwTaskExecutor;
+import dev.engine_room.flywheel.impl.task.RaisePlan;
 import dev.engine_room.flywheel.impl.task.TaskExecutorImpl;
 import dev.engine_room.flywheel.impl.visual.BandedPrimeLimiter;
 import dev.engine_room.flywheel.impl.visual.DistanceUpdateLimiterImpl;
@@ -33,16 +35,15 @@ import dev.engine_room.flywheel.impl.visual.TickableVisualContextImpl;
 import dev.engine_room.flywheel.impl.visualization.storage.BlockEntityStorage;
 import dev.engine_room.flywheel.impl.visualization.storage.EffectStorage;
 import dev.engine_room.flywheel.impl.visualization.storage.EntityStorage;
-import dev.engine_room.flywheel.lib.task.Flag;
 import dev.engine_room.flywheel.lib.task.IfElsePlan;
 import dev.engine_room.flywheel.lib.task.MapContextPlan;
 import dev.engine_room.flywheel.lib.task.NestedPlan;
-import dev.engine_room.flywheel.lib.task.RaisePlan;
 import dev.engine_room.flywheel.lib.task.SimplePlan;
 import dev.engine_room.flywheel.lib.util.LevelAttached;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.BlockDestructionProgress;
@@ -67,12 +68,13 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	private final VisualManagerImpl<Entity, EntityStorage> entities;
 	private final VisualManagerImpl<Effect, EffectStorage> effects;
 
+	private final Flag frameFlag = new Flag("frame");
 	private final Flag tickFlag = new Flag("tick");
-	private final Flag frameVisualsFlag = new Flag("frameVisualUpdates");
-	private final Flag frameFlag = new Flag("frameComplete");
 
-	private final Plan<TickableVisual.Context> tickPlan;
 	private final Plan<RenderContext> framePlan;
+	private final Plan<TickableVisual.Context> tickPlan;
+
+	private boolean canEngineRender;
 
 	private VisualizationManagerImpl(LevelAccessor level) {
 		taskExecutor = FlwTaskExecutor.get();
@@ -87,9 +89,6 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		blockEntities = new VisualManagerImpl<>(blockEntitiesStorage);
 		entities = new VisualManagerImpl<>(entitiesStorage);
 		effects = new VisualManagerImpl<>(effectsStorage);
-
-		tickPlan = NestedPlan.of(blockEntities.tickPlan(), entities.tickPlan(), effects.tickPlan())
-				.then(RaisePlan.raise(tickFlag));
 
 		var recreate = SimplePlan.<RenderContext>of(context -> blockEntitiesStorage.recreateAll(context.partialTick()),
 				context -> entitiesStorage.recreateAll(context.partialTick()),
@@ -111,9 +110,11 @@ public class VisualizationManagerImpl implements VisualizationManager {
 						engine.lightSections(out);
 					}
 				}))
-				.then(RaisePlan.raise(frameVisualsFlag))
 				.then(engine.createFramePlan())
 				.then(RaisePlan.raise(frameFlag));
+
+		tickPlan = NestedPlan.of(blockEntities.tickPlan(), entities.tickPlan(), effects.tickPlan())
+				.then(RaisePlan.raise(tickFlag));
 
 		if (level instanceof Level l) {
 			LevelExtension.getAllLoadedEntities(l)
@@ -181,7 +182,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	}
 
 	// TODO: Consider making these reset actions reuse the existing game objects instead of re-adding them
-	// potentially by keeping the same VisualizationManagerImpl and deleting the engine and visuals but not the game objects
+	//  potentially by keeping the same VisualizationManagerImpl and deleting the engine and visuals but not the game objects
 	public static void reset(LevelAccessor level) {
 		MANAGERS.remove(level);
 	}
@@ -237,19 +238,28 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		// Note we don't lower here because many frames may happen per tick.
 		taskExecutor.syncUntil(tickFlag::isRaised);
 
-		frameVisualsFlag.lower();
 		frameFlag.lower();
 
 		frameLimiter.tick();
+		canEngineRender = false;
 
 		framePlan.execute(taskExecutor, context);
+	}
+
+	private void ensureCanRender(RenderContext context) {
+		taskExecutor.syncUntil(frameFlag::isRaised);
+		if (!canEngineRender) {
+			engine.setupRender(context);
+			canEngineRender = true;
+		}
 	}
 
 	/**
 	 * Draw all visuals of the given type.
 	 */
 	private void render(RenderContext context, VisualType visualType) {
-		engine.render(taskExecutor, context, visualType);
+		ensureCanRender(context);
+		engine.render(context, visualType);
 	}
 
 	private void renderCrumbling(RenderContext context, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress) {
@@ -257,7 +267,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 			return;
 		}
 
-		taskExecutor.syncUntil(frameVisualsFlag::isRaised);
+		ensureCanRender(context);
 
 		List<Engine.CrumblingBlock> crumblingBlocks = new ArrayList<>();
 
@@ -291,11 +301,11 @@ public class VisualizationManagerImpl implements VisualizationManager {
 
 			var maxDestruction = set.last();
 
-			crumblingBlocks.add(new Engine.CrumblingBlock(maxDestruction.getProgress(), maxDestruction.getPos(), instances));
+			crumblingBlocks.add(new CrumblingBlockImpl(maxDestruction.getPos(), maxDestruction.getProgress(), instances));
 		}
 
 		if (!crumblingBlocks.isEmpty()) {
-			engine.renderCrumbling(taskExecutor, context, crumblingBlocks);
+			engine.renderCrumbling(context, crumblingBlocks);
 		}
 	}
 
@@ -346,9 +356,8 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		public void afterParticles(RenderContext ctx) {
 			render(ctx, VisualType.EFFECT);
 		}
+	}
 
-		@Override
-		public void onEndLevelRender(RenderContext ctx) {
-		}
+	private record CrumblingBlockImpl(BlockPos pos, int progress, List<Instance> instances) implements Engine.CrumblingBlock {
 	}
 }

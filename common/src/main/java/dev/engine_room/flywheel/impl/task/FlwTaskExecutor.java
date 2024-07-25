@@ -3,8 +3,6 @@ package dev.engine_room.flywheel.impl.task;
 import org.apache.commons.lang3.concurrent.AtomicSafeInitializer;
 import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import dev.engine_room.flywheel.impl.FlwConfig;
 import net.minecraft.util.Mth;
 
@@ -48,7 +46,7 @@ public final class FlwTaskExecutor {
 				threadCount = Mth.clamp(threadCount, 1, getMaxThreadCount());
 			}
 
-			ParallelTaskExecutor executor = new ParallelTaskExecutor("Flywheel", threadCount, RenderSystem::isOnRenderThread);
+			ParallelTaskExecutor executor = new ParallelTaskExecutor("Flywheel", threadCount);
 			executor.startWorkers();
 			return executor;
 		}
