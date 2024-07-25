@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 public interface MaterialShaders {
 	Registry<MaterialShaders> REGISTRY = FlwApiLink.INSTANCE.createRegistry();
 
-	ResourceLocation vertexShader();
+	ResourceLocation vertexSource();
 
-	ResourceLocation fragmentShader();
+	ResourceLocation fragmentSource();
 }

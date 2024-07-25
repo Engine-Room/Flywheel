@@ -10,8 +10,8 @@ import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.visualization.VisualType;
+import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.Samplers;
-import dev.engine_room.flywheel.backend.ShaderIndices;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.InstancingPrograms;
 import dev.engine_room.flywheel.backend.engine.CommonCrumbling;
@@ -204,8 +204,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 	public static void uploadMaterialUniform(GlProgram program, Material material) {
 		int uniformLocation = program.getUniformLocation("_flw_packedMaterial");
-		int vertexIndex = ShaderIndices.getVertexShaderIndex(material.shaders());
-		int fragmentIndex = ShaderIndices.getFragmentShaderIndex(material.shaders());
+		int vertexIndex = MaterialShaderIndices.vertexIndex(material.shaders());
+		int fragmentIndex = MaterialShaderIndices.fragmentIndex(material.shaders());
 		int packedFogAndCutout = MaterialEncoder.packFogAndCutout(material);
 		int packedMaterialProperties = MaterialEncoder.packProperties(material);
 		GL32.glUniform4ui(uniformLocation, vertexIndex, fragmentIndex, packedFogAndCutout, packedMaterialProperties);

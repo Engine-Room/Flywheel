@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.api.instance;
 
 import org.jetbrains.annotations.Nullable;
 
-import dev.engine_room.flywheel.api.BackendImplemented;
+import dev.engine_room.flywheel.api.backend.BackendImplemented;
 
 /**
  * An instancer is how you interact with an instanced model.

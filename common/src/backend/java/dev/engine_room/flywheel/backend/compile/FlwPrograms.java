@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableList;
 
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.instance.InstanceType;
-import dev.engine_room.flywheel.backend.ShaderIndices;
+import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.compile.component.UberShaderComponent;
 import dev.engine_room.flywheel.backend.compile.core.CompilerStats;
 import dev.engine_room.flywheel.backend.compile.core.SourceLoader;
@@ -74,7 +74,7 @@ public final class FlwPrograms {
 	@Nullable
 	private static UberShaderComponent createVertexMaterialComponent(SourceLoader loader) {
 		return UberShaderComponent.builder(Flywheel.rl("material_vertex"))
-				.materialSources(ShaderIndices.materialVertex()
+				.materialSources(MaterialShaderIndices.vertexSources()
 						.all())
 				.adapt(FnSignature.ofVoid("flw_materialVertex"))
 				.switchOn(GlslExpr.variable("_flw_uberMaterialVertexIndex"))
@@ -84,7 +84,7 @@ public final class FlwPrograms {
 	@Nullable
 	private static UberShaderComponent createFragmentMaterialComponent(SourceLoader loader) {
 		return UberShaderComponent.builder(Flywheel.rl("material_fragment"))
-				.materialSources(ShaderIndices.materialFragment()
+				.materialSources(MaterialShaderIndices.fragmentSources()
 						.all())
 				.adapt(FnSignature.ofVoid("flw_materialFragment"))
 				.switchOn(GlslExpr.variable("_flw_uberMaterialFragmentIndex"))
@@ -94,7 +94,7 @@ public final class FlwPrograms {
 	@Nullable
 	private static UberShaderComponent createFogComponent(SourceLoader loader) {
 		return UberShaderComponent.builder(Flywheel.rl("fog"))
-				.materialSources(ShaderIndices.fog()
+				.materialSources(MaterialShaderIndices.fogSources()
 						.all())
 				.adapt(FnSignature.create()
 						.returnType("vec4")
@@ -108,7 +108,7 @@ public final class FlwPrograms {
 	@Nullable
 	private static UberShaderComponent createCutoutComponent(SourceLoader loader) {
 		return UberShaderComponent.builder(Flywheel.rl("cutout"))
-				.materialSources(ShaderIndices.cutout()
+				.materialSources(MaterialShaderIndices.cutoutSources()
 						.all())
 				.adapt(FnSignature.create()
 						.returnType("bool")

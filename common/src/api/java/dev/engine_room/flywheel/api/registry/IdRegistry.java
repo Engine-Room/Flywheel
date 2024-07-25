@@ -2,11 +2,10 @@ package dev.engine_room.flywheel.api.registry;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -26,13 +25,11 @@ public interface IdRegistry<T> extends Iterable<T>  {
 
 	ResourceLocation getIdOrThrow(T object);
 
-	@Unmodifiable
+	@UnmodifiableView
 	Set<ResourceLocation> getAllIds();
 
-	@Unmodifiable
+	@UnmodifiableView
 	Collection<T> getAll();
-
-	void addFreezeCallback(Consumer<IdRegistry<T>> callback);
 
 	boolean isFrozen();
 }
