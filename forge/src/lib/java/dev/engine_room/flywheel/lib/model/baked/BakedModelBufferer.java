@@ -1,14 +1,22 @@
 package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import com.mojang.blaze3d.vertex.BufferBuilder.RenderedBuffer;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
@@ -16,6 +24,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -129,6 +139,22 @@ final class BakedModelBufferer {
 		}
 	}
 
+	public static void bufferItem(BakedModel model, ItemStack stack, ItemDisplayContext displayContext, boolean leftHand, @Nullable PoseStack poseStack, ResultConsumer consumer) {
+		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
+		if (poseStack == null) {
+			poseStack = objects.identityPoseStack;
+		}
+
+		var emitterSource = objects.emitterSource;
+		emitterSource.resultConsumer(consumer);
+
+		Minecraft.getInstance()
+				.getItemRenderer()
+				.render(stack, displayContext, leftHand, poseStack, emitterSource, 0, OverlayTexture.NO_OVERLAY, model);
+
+		emitterSource.end();
+	}
+
 	public interface ResultConsumer {
 		void accept(RenderType renderType, boolean shaded, RenderedBuffer data);
 	}
@@ -140,11 +166,46 @@ final class BakedModelBufferer {
 		public final MeshEmitter[] emitters = new MeshEmitter[CHUNK_LAYER_AMOUNT];
 		public final TransformingVertexConsumer transformingWrapper = new TransformingVertexConsumer();
 
+		public final MeshEmitterSource emitterSource = new MeshEmitterSource();
+
 		{
 			for (int layerIndex = 0; layerIndex < CHUNK_LAYER_AMOUNT; layerIndex++) {
 				RenderType renderType = CHUNK_LAYERS[layerIndex];
 				emitters[layerIndex] = new MeshEmitter(renderType);
 			}
+		}
+	}
+
+	private static class MeshEmitterSource implements MultiBufferSource {
+		private final Map<RenderType, MeshEmitter> emitters = new Reference2ReferenceOpenHashMap<>();
+		private final Set<MeshEmitter> active = new ReferenceArraySet<>();
+
+		@UnknownNullability
+		private ResultConsumer resultConsumer;
+
+		@Override
+		public VertexConsumer getBuffer(RenderType renderType) {
+			var out = emitters.computeIfAbsent(renderType, MeshEmitter::new);
+
+			if (active.add(out)) {
+				out.prepare(resultConsumer);
+			}
+
+			return out;
+		}
+
+		public void end() {
+			for (var emitter : active) {
+				emitter.end();
+			}
+
+			active.clear();
+
+			resultConsumer = null;
+		}
+
+		public void resultConsumer(ResultConsumer resultConsumer) {
+			this.resultConsumer = resultConsumer;
 		}
 	}
 }

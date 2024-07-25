@@ -74,5 +74,12 @@ public class VanillaVisuals {
 				.factory(TntMinecartVisual::new)
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply();
+
+		builder(EntityType.COW).factory(CowVisual::new)
+				.apply();
+
+		builder(EntityType.ITEM).factory(ItemVisual::new)
+				.skipVanillaRender(ItemVisual::isSupported)
+				.apply();
 	}
 }

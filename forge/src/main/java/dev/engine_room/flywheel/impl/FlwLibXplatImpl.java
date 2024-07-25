@@ -9,7 +9,9 @@ import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.ForgeBakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.ForgeBlockModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.ForgeItemModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.ForgeMultiBlockModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.ItemModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.MultiBlockModelBuilder;
 import dev.engine_room.flywheel.lib.util.ShadersModHandler;
 import net.irisshaders.iris.api.v0.IrisApi;
@@ -18,6 +20,7 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fml.ModList;
@@ -77,5 +80,10 @@ public class FlwLibXplatImpl implements FlwLibXplat {
 						.isRenderingShadowPass();
 			}
 		};
+	}
+
+	@Override
+	public ItemModelBuilder createItemModelBuilder(ItemStack stack, BakedModel model) {
+		return new ForgeItemModelBuilder(stack, model);
 	}
 }

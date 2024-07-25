@@ -124,6 +124,38 @@ public class SimpleMaterial implements Material {
 		return diffuse;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		SimpleMaterial that = (SimpleMaterial) o;
+		return blur == that.blur && mipmap == that.mipmap && backfaceCulling == that.backfaceCulling && polygonOffset == that.polygonOffset && useOverlay == that.useOverlay && useLight == that.useLight && diffuse == that.diffuse && shaders.equals(that.shaders) && fog.equals(that.fog) && cutout.equals(that.cutout) && texture.equals(that.texture) && depthTest == that.depthTest && transparency == that.transparency && writeMask == that.writeMask;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = shaders.hashCode();
+		result = 31 * result + fog.hashCode();
+		result = 31 * result + cutout.hashCode();
+		result = 31 * result + texture.hashCode();
+		result = 31 * result + Boolean.hashCode(blur);
+		result = 31 * result + Boolean.hashCode(mipmap);
+		result = 31 * result + Boolean.hashCode(backfaceCulling);
+		result = 31 * result + Boolean.hashCode(polygonOffset);
+		result = 31 * result + depthTest.hashCode();
+		result = 31 * result + transparency.hashCode();
+		result = 31 * result + writeMask.hashCode();
+		result = 31 * result + Boolean.hashCode(useOverlay);
+		result = 31 * result + Boolean.hashCode(useLight);
+		result = 31 * result + Boolean.hashCode(diffuse);
+		return result;
+	}
+
 	public static class Builder implements Material {
 		protected MaterialShaders shaders;
 		protected FogShader fog;

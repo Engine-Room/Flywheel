@@ -1,8 +1,11 @@
 package dev.engine_room.flywheel.lib.material;
 
+import dev.engine_room.flywheel.api.material.DepthTest;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.material.Transparency;
+import dev.engine_room.flywheel.api.material.WriteMask;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.resources.ResourceLocation;
 
 public final class Materials {
@@ -67,6 +70,21 @@ public final class Materials {
 	public static final Material MINECART = SimpleMaterial.builder()
 			.texture(MINECART_LOCATION)
 			.mipmap(false)
+			.build();
+
+	public static final Material GLINT = SimpleMaterial.builder()
+			.texture(ItemRenderer.ENCHANTED_GLINT_ITEM)
+			.shaders(StandardMaterialShaders.GLINT)
+			.transparency(Transparency.GLINT)
+			.writeMask(WriteMask.COLOR)
+			.depthTest(DepthTest.EQUAL)
+			.backfaceCulling(false)
+			.blur(true)
+			.mipmap(false)
+			.build();
+
+	public static final Material GLINT_ENTITY = SimpleMaterial.builderOf(GLINT)
+			.texture(ItemRenderer.ENCHANTED_GLINT_ENTITY)
 			.build();
 
 	private Materials() {

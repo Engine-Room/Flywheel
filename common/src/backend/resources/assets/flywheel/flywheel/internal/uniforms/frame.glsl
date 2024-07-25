@@ -38,6 +38,8 @@ layout(std140) uniform _FlwFrameUniforms {
     float flw_partialTick;
     float flw_renderTicks;
     float flw_renderSeconds;
+    float flw_systemSeconds;
+    uint flw_systemMillis;
 
     /** 0 means no fluid. Use FLW_CAMERA_IN_FLUID_* defines to detect fluid type. */
     uint flw_cameraInFluid;
