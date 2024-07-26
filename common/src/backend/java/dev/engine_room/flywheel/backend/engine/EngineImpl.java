@@ -109,8 +109,8 @@ public class EngineImpl implements Engine {
 		lightStorage.delete();
 	}
 
-	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType) {
-		return drawManager.getInstancer(environment, type, model, visualType);
+	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType, int bias) {
+		return drawManager.getInstancer(environment, type, model, visualType, bias);
 	}
 
 	public EnvironmentStorage environmentStorage() {

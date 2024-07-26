@@ -15,7 +15,8 @@ import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
 import dev.engine_room.flywheel.backend.gl.TextureBuffer;
 
 public class InstancedRenderStage {
-	private static final Comparator<InstancedDraw> DRAW_COMPARATOR = Comparator.comparing(InstancedDraw::indexOfMeshInModel)
+	private static final Comparator<InstancedDraw> DRAW_COMPARATOR = Comparator.comparing(InstancedDraw::bias)
+			.thenComparing(InstancedDraw::indexOfMeshInModel)
 			.thenComparing(InstancedDraw::material, MaterialRenderState.COMPARATOR);
 
 	private final Map<GroupKey<?>, DrawGroup> groups = new HashMap<>();

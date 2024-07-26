@@ -39,9 +39,9 @@ public class EmbeddedEnvironment implements VisualEmbedding, Environment {
 
 		instancerProvider = new InstancerProvider() {
 			@Override
-			public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model) {
+			public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, int bias) {
 				// Kinda cursed usage of anonymous classes here, but it does the job.
-				return engine.instancer(EmbeddedEnvironment.this, type, model, visualType);
+				return engine.instancer(EmbeddedEnvironment.this, type, model, visualType, bias);
 			}
 		};
 	}

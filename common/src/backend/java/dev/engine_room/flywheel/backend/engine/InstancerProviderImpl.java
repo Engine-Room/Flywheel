@@ -10,7 +10,7 @@ import dev.engine_room.flywheel.backend.engine.embed.GlobalEnvironment;
 
 public record InstancerProviderImpl(EngineImpl engine, VisualType visualType) implements InstancerProvider {
 	@Override
-	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model) {
-		return engine.instancer(GlobalEnvironment.INSTANCE, type, model, visualType);
+	public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, int bias) {
+		return engine.instancer(GlobalEnvironment.INSTANCE, type, model, visualType, bias);
 	}
 }

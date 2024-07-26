@@ -142,7 +142,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 			var mesh = meshPool.alloc(entry.mesh());
 
 			GroupKey<?> groupKey = new GroupKey<>(key.type(), key.environment());
-			InstancedDraw instancedDraw = new InstancedDraw(instancer, mesh, groupKey, entry.material(), i);
+			InstancedDraw instancedDraw = new InstancedDraw(instancer, mesh, groupKey, entry.material(), key.bias(), i);
 
 			stage.put(groupKey, instancedDraw);
 			instancer.addDrawCall(instancedDraw);

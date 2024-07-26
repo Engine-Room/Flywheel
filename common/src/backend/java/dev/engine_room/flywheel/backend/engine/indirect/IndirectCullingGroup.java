@@ -21,6 +21,7 @@ import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
+import dev.engine_room.flywheel.backend.engine.InstancerKey;
 import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
@@ -31,6 +32,7 @@ import dev.engine_room.flywheel.lib.math.MoreMath;
 
 public class IndirectCullingGroup<I extends Instance> {
 	private static final Comparator<IndirectDraw> DRAW_COMPARATOR = Comparator.comparing(IndirectDraw::visualType)
+			.thenComparing(IndirectDraw::bias)
 			.thenComparing(IndirectDraw::indexOfMeshInModel)
 			.thenComparing(IndirectDraw::material, MaterialRenderState.COMPARATOR);
 
@@ -174,16 +176,17 @@ public class IndirectCullingGroup<I extends Instance> {
 		return multiDraws.containsKey(visualType);
 	}
 
-	public void add(IndirectInstancer<I> instancer, Model model, VisualType visualType, MeshPool meshPool) {
+	public void add(IndirectInstancer<I> instancer, InstancerKey<I> key, MeshPool meshPool) {
 		instancer.modelIndex = instancers.size();
 		instancers.add(instancer);
 
-        List<Model.ConfiguredMesh> meshes = model.meshes();
+        List<Model.ConfiguredMesh> meshes = key.model()
+				.meshes();
         for (int i = 0; i < meshes.size(); i++) {
             var entry = meshes.get(i);
 
             MeshPool.PooledMesh mesh = meshPool.alloc(entry.mesh());
-            var draw = new IndirectDraw(instancer, entry.material(), mesh, visualType, i);
+            var draw = new IndirectDraw(instancer, entry.material(), mesh, key.visualType(), key.bias(), i);
             indirectDraws.add(draw);
             instancer.addDraw(draw);
         }

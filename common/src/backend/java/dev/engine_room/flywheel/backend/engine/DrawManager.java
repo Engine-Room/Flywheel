@@ -36,8 +36,8 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 	protected final Queue<UninitializedInstancer<N, ?>> initializationQueue = new ConcurrentLinkedQueue<>();
 
 	@SuppressWarnings("unchecked")
-	public <I extends Instance> Instancer<I> getInstancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType) {
-		return (Instancer<I>) instancers.computeIfAbsent(new InstancerKey<>(environment, type, model, visualType), this::createAndDeferInit);
+	public <I extends Instance> Instancer<I> getInstancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType, int bias) {
+		return (Instancer<I>) instancers.computeIfAbsent(new InstancerKey<>(environment, type, model, visualType, bias), this::createAndDeferInit);
 	}
 
 	public void flush(LightStorage lightStorage) {

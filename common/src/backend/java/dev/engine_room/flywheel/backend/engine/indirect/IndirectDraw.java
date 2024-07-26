@@ -13,6 +13,7 @@ public class IndirectDraw {
 	private final Material material;
 	private final MeshPool.PooledMesh mesh;
 	private final VisualType visualType;
+	private final int bias;
 	private final int indexOfMeshInModel;
 
 	private final int materialVertexIndex;
@@ -21,11 +22,12 @@ public class IndirectDraw {
 	private final int packedMaterialProperties;
 	private boolean deleted;
 
-	public IndirectDraw(IndirectInstancer<?> instancer, Material material, MeshPool.PooledMesh mesh, VisualType visualType, int indexOfMeshInModel) {
+	public IndirectDraw(IndirectInstancer<?> instancer, Material material, MeshPool.PooledMesh mesh, VisualType visualType, int bias, int indexOfMeshInModel) {
 		this.instancer = instancer;
 		this.material = material;
 		this.mesh = mesh;
 		this.visualType = visualType;
+		this.bias = bias;
 		this.indexOfMeshInModel = indexOfMeshInModel;
 
 		mesh.acquire();
@@ -50,6 +52,10 @@ public class IndirectDraw {
 
 	public VisualType visualType() {
 		return visualType;
+	}
+
+	public int bias() {
+		return bias;
 	}
 
 	public int indexOfMeshInModel() {

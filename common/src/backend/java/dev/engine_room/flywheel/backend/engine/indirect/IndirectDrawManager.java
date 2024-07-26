@@ -63,7 +63,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	protected <I extends Instance> void initialize(InstancerKey<I> key, IndirectInstancer<?> instancer) {
 		var groupKey = new GroupKey<>(key.type(), key.environment());
 		var group = (IndirectCullingGroup<I>) cullingGroups.computeIfAbsent(groupKey, t -> new IndirectCullingGroup<>(t.instanceType(), t.environment(), programs));
-		group.add((IndirectInstancer<I>) instancer, key.model(), key.visualType(), meshPool);
+		group.add((IndirectInstancer<I>) instancer, key, meshPool);
 	}
 
 	public boolean hasVisualType(VisualType visualType) {
