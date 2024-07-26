@@ -6,7 +6,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import dev.engine_room.flywheel.lib.math.RenderMath;
+import dev.engine_room.flywheel.lib.math.DataPacker;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 import dev.engine_room.flywheel.lib.model.part.ModelPartConverter.TextureMapper;
 import dev.engine_room.flywheel.lib.vertex.PosTexNormalVertexView;
@@ -85,9 +85,9 @@ class VertexWriter implements VertexConsumer {
 	public VertexConsumer normal(float x, float y, float z) {
 		if (!filledNormal) {
 			long ptr = vertexPtr();
-			MemoryUtil.memPutByte(ptr + 20, RenderMath.nb(x));
-			MemoryUtil.memPutByte(ptr + 21, RenderMath.nb(y));
-			MemoryUtil.memPutByte(ptr + 22, RenderMath.nb(z));
+			MemoryUtil.memPutByte(ptr + 20, DataPacker.packNormI8(x));
+			MemoryUtil.memPutByte(ptr + 21, DataPacker.packNormI8(y));
+			MemoryUtil.memPutByte(ptr + 22, DataPacker.packNormI8(z));
 			filledNormal = true;
 		}
 		return this;
@@ -124,7 +124,7 @@ class VertexWriter implements VertexConsumer {
 	}
 
 	public MemoryBlock copyDataAndReset() {
-		MemoryBlock dataCopy = MemoryBlock.malloc(vertexCount * STRIDE);
+		MemoryBlock dataCopy = MemoryBlock.mallocTracked(vertexCount * STRIDE);
 		data.copyTo(dataCopy);
 
 		vertexCount = 0;

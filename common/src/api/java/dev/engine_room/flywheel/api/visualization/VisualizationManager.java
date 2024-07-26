@@ -1,14 +1,17 @@
 package dev.engine_room.flywheel.api.visualization;
 
+import java.util.SortedSet;
+
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.api.internal.FlwApiLink;
 import dev.engine_room.flywheel.api.visual.Effect;
-import dev.engine_room.flywheel.api.visual.Visual;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -27,52 +30,31 @@ public interface VisualizationManager {
 		return FlwApiLink.INSTANCE.getVisualizationManagerOrThrow(level);
 	}
 
-	/**
-	 * Call this when you want to run {@link Visual#update}.
-	 * @param blockEntity The block entity whose visual you want to update.
-	 */
-	static void queueUpdate(BlockEntity blockEntity) {
-		Level level = blockEntity.getLevel();
-		VisualizationManager manager = get(level);
-		if (manager == null) {
-			return;
-		}
+	Vec3i renderOrigin();
 
-		manager.getBlockEntities().queueUpdate(blockEntity);
-	}
+	VisualManager<BlockEntity> blockEntities();
+
+	VisualManager<Entity> entities();
+
+	VisualManager<Effect> effects();
 
 	/**
-	 * Call this when you want to run {@link Visual#update}.
-	 * @param entity The entity whose visual you want to update.
+	 * Get the render dispatcher, which can be used to invoke rendering.
+	 * <b>This should only be used by mods which heavily rewrite rendering to restore compatibility with Flywheel
+	 * without mixins.</b>
 	 */
-	static void queueUpdate(Entity entity) {
-		Level level = entity.level();
-		VisualizationManager manager = get(level);
-		if (manager == null) {
-			return;
-		}
+	RenderDispatcher renderDispatcher();
 
-		manager.getEntities().queueUpdate(entity);
+	@ApiStatus.NonExtendable
+	interface RenderDispatcher {
+		void onStartLevelRender(RenderContext ctx);
+
+		void afterBlockEntities(RenderContext ctx);
+
+		void afterEntities(RenderContext ctx);
+
+		void beforeCrumbling(RenderContext ctx, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress);
+
+		void afterParticles(RenderContext ctx);
 	}
-
-	/**
-	 * Call this when you want to run {@link Visual#update}.
-	 * @param effect The effect whose visual you want to update.
-	 */
-	static void queueUpdate(LevelAccessor level, Effect effect) {
-		VisualizationManager manager = get(level);
-		if (manager == null) {
-			return;
-		}
-
-		manager.getEffects().queueUpdate(effect);
-	}
-
-	Vec3i getRenderOrigin();
-
-	VisualManager<BlockEntity> getBlockEntities();
-
-	VisualManager<Entity> getEntities();
-
-	VisualManager<Effect> getEffects();
 }

@@ -2,9 +2,9 @@ package dev.engine_room.flywheel.backend.engine.indirect;
 
 import org.lwjgl.system.MemoryUtil;
 
-import dev.engine_room.flywheel.api.event.RenderStage;
 import dev.engine_room.flywheel.api.material.Material;
-import dev.engine_room.flywheel.backend.ShaderIndices;
+import dev.engine_room.flywheel.api.visualization.VisualType;
+import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.engine.MaterialEncoder;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
 
@@ -12,7 +12,7 @@ public class IndirectDraw {
 	private final IndirectInstancer<?> instancer;
 	private final Material material;
 	private final MeshPool.PooledMesh mesh;
-	private final RenderStage stage;
+	private final VisualType visualType;
 	private final int indexOfMeshInModel;
 
 	private final int materialVertexIndex;
@@ -21,17 +21,17 @@ public class IndirectDraw {
 	private final int packedMaterialProperties;
 	private boolean deleted;
 
-	public IndirectDraw(IndirectInstancer<?> instancer, Material material, MeshPool.PooledMesh mesh, RenderStage stage, int indexOfMeshInModel) {
+	public IndirectDraw(IndirectInstancer<?> instancer, Material material, MeshPool.PooledMesh mesh, VisualType visualType, int indexOfMeshInModel) {
 		this.instancer = instancer;
 		this.material = material;
 		this.mesh = mesh;
-		this.stage = stage;
+		this.visualType = visualType;
 		this.indexOfMeshInModel = indexOfMeshInModel;
 
 		mesh.acquire();
 
-		this.materialVertexIndex = ShaderIndices.getVertexShaderIndex(material.shaders());
-		this.materialFragmentIndex = ShaderIndices.getFragmentShaderIndex(material.shaders());
+		this.materialVertexIndex = MaterialShaderIndices.vertexIndex(material.shaders());
+		this.materialFragmentIndex = MaterialShaderIndices.fragmentIndex(material.shaders());
 		this.packedFogAndCutout = MaterialEncoder.packFogAndCutout(material);
 		this.packedMaterialProperties = MaterialEncoder.packProperties(material);
 	}
@@ -48,8 +48,8 @@ public class IndirectDraw {
 		return mesh;
 	}
 
-	public RenderStage stage() {
-		return stage;
+	public VisualType visualType() {
+		return visualType;
 	}
 
 	public int indexOfMeshInModel() {
@@ -80,8 +80,8 @@ public class IndirectDraw {
 
 		MemoryUtil.memPutInt(ptr + 20, instancer.modelIndex); // modelIndex
 
-		MemoryUtil.memPutInt(ptr + 24, ShaderIndices.getVertexShaderIndex(materialOverride.shaders())); // materialVertexIndex
-		MemoryUtil.memPutInt(ptr + 28, ShaderIndices.getFragmentShaderIndex(materialOverride.shaders())); // materialFragmentIndex
+		MemoryUtil.memPutInt(ptr + 24, MaterialShaderIndices.vertexIndex(materialOverride.shaders())); // materialVertexIndex
+		MemoryUtil.memPutInt(ptr + 28, MaterialShaderIndices.fragmentIndex(materialOverride.shaders())); // materialFragmentIndex
 		MemoryUtil.memPutInt(ptr + 32, MaterialEncoder.packFogAndCutout(materialOverride)); // packedFogAndCutout
 		MemoryUtil.memPutInt(ptr + 36, MaterialEncoder.packProperties(materialOverride)); // packedMaterialProperties
 	}

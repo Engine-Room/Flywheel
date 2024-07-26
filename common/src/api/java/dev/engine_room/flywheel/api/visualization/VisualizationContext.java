@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.api.visualization;
 
-import dev.engine_room.flywheel.api.BackendImplemented;
+import dev.engine_room.flywheel.api.backend.BackendImplemented;
 import dev.engine_room.flywheel.api.instance.InstancerProvider;
 import net.minecraft.core.Vec3i;
 

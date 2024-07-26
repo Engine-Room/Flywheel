@@ -12,7 +12,6 @@ public final class FlwBackend {
 	}
 
 	public static void init() {
-		ShaderIndices.init();
 		Backends.init();
 	}
 }

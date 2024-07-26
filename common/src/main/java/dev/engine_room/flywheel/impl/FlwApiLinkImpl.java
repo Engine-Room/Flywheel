@@ -33,8 +33,8 @@ public class FlwApiLinkImpl implements FlwApiLink {
 	}
 
 	@Override
-	public Backend getBackend() {
-		return BackendManagerImpl.getBackend();
+	public Backend getCurrentBackend() {
+		return BackendManagerImpl.currentBackend();
 	}
 
 	@Override

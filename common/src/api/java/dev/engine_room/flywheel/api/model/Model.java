@@ -27,8 +27,6 @@ public interface Model {
 	 */
 	Vector4fc boundingSphere();
 
-	void delete();
-
 	record ConfiguredMesh(Material material, Mesh mesh) {
 	}
 }

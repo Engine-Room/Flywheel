@@ -16,8 +16,7 @@ import dev.engine_room.flywheel.lib.instance.ShadowInstance;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.model.QuadMesh;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
-import dev.engine_room.flywheel.lib.visual.EntityComponent;
-import dev.engine_room.flywheel.lib.visual.InstanceRecycler;
+import dev.engine_room.flywheel.lib.visual.util.InstanceRecycler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -42,9 +41,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * <br>
  * The shadow will be cast on blocks at most {@code min(radius, 2 * strength)} blocks below the entity.</p>
  */
-public class ShadowComponent implements EntityComponent {
+public final class ShadowComponent implements EntityComponent {
+	private static final ResourceLocation SHADOW_TEXTURE = new ResourceLocation("textures/misc/shadow.png");
 	private static final Material SHADOW_MATERIAL = SimpleMaterial.builder()
-			.texture(new ResourceLocation("textures/misc/shadow.png"))
+			.texture(SHADOW_TEXTURE)
 			.mipmap(false)
 			.polygonOffset(true) // vanilla shadows use "view offset" but this seems to work fine
 			.transparency(Transparency.TRANSLUCENT)
@@ -245,15 +245,6 @@ public class ShadowComponent implements EntityComponent {
 			writeVertex(vertexList, 3, 1, 0);
 		}
 
-		@Override
-		public Vector4fc boundingSphere() {
-			return BOUNDING_SPHERE;
-		}
-
-		@Override
-		public void delete() {
-		}
-
 		// Magic numbers taken from:
 		// net.minecraft.client.renderer.entity.EntityRenderDispatcher#shadowVertex
 		private static void writeVertex(MutableVertexList vertexList, int i, float x, float z) {
@@ -270,6 +261,11 @@ public class ShadowComponent implements EntityComponent {
 			vertexList.normalX(i, 0);
 			vertexList.normalY(i, 1);
 			vertexList.normalZ(i, 0);
+		}
+
+		@Override
+		public Vector4fc boundingSphere() {
+			return BOUNDING_SPHERE;
 		}
 	}
 }

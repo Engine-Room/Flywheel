@@ -9,7 +9,7 @@ public interface VisualManager<T> {
 	 *
 	 * @return The visual count.
 	 */
-	int getVisualCount();
+	int visualCount();
 
 	void queueAdd(T obj);
 

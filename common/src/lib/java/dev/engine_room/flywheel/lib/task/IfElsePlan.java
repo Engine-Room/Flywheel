@@ -30,7 +30,7 @@ public record IfElsePlan<C>(BooleanSupplierWithContext<C> condition, Plan<C> onT
 		}
 	}
 
-	public static class Builder<C> {
+	public static final class Builder<C> {
 		private final BooleanSupplierWithContext<C> condition;
 		private Plan<C> onTrue = UnitPlan.of();
 		private Plan<C> onFalse = UnitPlan.of();

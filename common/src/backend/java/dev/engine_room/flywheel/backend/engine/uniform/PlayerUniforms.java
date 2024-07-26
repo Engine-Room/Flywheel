@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.backend.engine.uniform;
 
 import org.jetbrains.annotations.Nullable;
 
-import dev.engine_room.flywheel.api.event.RenderContext;
+import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.backend.FlwBackendXplat;
 import dev.engine_room.flywheel.backend.mixin.AbstractClientPlayerAccessor;
 import net.minecraft.client.Minecraft;

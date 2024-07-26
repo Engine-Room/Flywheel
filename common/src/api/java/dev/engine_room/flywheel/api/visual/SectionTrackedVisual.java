@@ -4,7 +4,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
 
-public sealed interface SectionTrackedVisual extends Visual permits ShaderLightVisual, LightUpdatedVisual {
+public sealed interface SectionTrackedVisual extends Visual permits LightUpdatedVisual, ShaderLightVisual {
 	/**
 	 * Set the section collector object.
 	 *

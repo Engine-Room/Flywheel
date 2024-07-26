@@ -27,10 +27,10 @@ public class GlBuffer extends GlObject {
 	}
 
 	public void upload(long ptr, long size) {
-		FlwMemoryTracker._freeGPUMemory(this.size);
+		FlwMemoryTracker._freeGpuMemory(this.size);
 		Buffer.IMPL.data(handle(), size, ptr, usage.glEnum);
 		this.size = size;
-		FlwMemoryTracker._allocGPUMemory(this.size);
+		FlwMemoryTracker._allocGpuMemory(this.size);
 	}
 
 	public void uploadSpan(long offset, MemoryBlock memoryBlock) {
@@ -47,6 +47,6 @@ public class GlBuffer extends GlObject {
 
 	protected void deleteInternal(int handle) {
 		GlStateManager._glDeleteBuffers(handle);
-		FlwMemoryTracker._freeGPUMemory(size);
+		FlwMemoryTracker._freeGpuMemory(size);
 	}
 }

@@ -7,8 +7,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
-import dev.engine_room.flywheel.lib.model.SimpleMesh;
+import dev.engine_room.flywheel.lib.model.SimpleQuadMesh;
 import dev.engine_room.flywheel.lib.vertex.PosTexNormalVertexView;
+import dev.engine_room.flywheel.lib.vertex.VertexView;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -29,10 +30,14 @@ public final class ModelPartConverter {
 			poseStack = objects.identityPoseStack;
 		}
 		VertexWriter vertexWriter = objects.vertexWriter;
+
 		vertexWriter.setTextureMapper(textureMapper);
 		modelPart.render(poseStack, vertexWriter, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
 		MemoryBlock data = vertexWriter.copyDataAndReset();
-		return new SimpleMesh(new PosTexNormalVertexView(), data, "source=ModelPartConverter");
+
+		VertexView vertexView = new PosTexNormalVertexView();
+		vertexView.load(data);
+		return new SimpleQuadMesh(vertexView, "source=ModelPartConverter");
 	}
 
 	public static Mesh convert(ModelLayerLocation layer, @Nullable TextureAtlasSprite sprite, String... childPath) {

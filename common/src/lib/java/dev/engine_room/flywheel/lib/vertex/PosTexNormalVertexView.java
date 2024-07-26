@@ -2,9 +2,9 @@ package dev.engine_room.flywheel.lib.vertex;
 
 import org.lwjgl.system.MemoryUtil;
 
-import dev.engine_room.flywheel.lib.math.RenderMath;
+import dev.engine_room.flywheel.lib.math.DataPacker;
 
-public class PosTexNormalVertexView extends AbstractVertexView implements EmptyVertexList {
+public class PosTexNormalVertexView extends AbstractVertexView implements DefaultVertexList {
 	public static final long STRIDE = 23;
 
 	@Override
@@ -39,17 +39,17 @@ public class PosTexNormalVertexView extends AbstractVertexView implements EmptyV
 
 	@Override
 	public float normalX(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(ptr + index * STRIDE + 20));
+		return DataPacker.unpackNormI8(MemoryUtil.memGetByte(ptr + index * STRIDE + 20));
 	}
 
 	@Override
 	public float normalY(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(ptr + index * STRIDE + 21));
+		return DataPacker.unpackNormI8(MemoryUtil.memGetByte(ptr + index * STRIDE + 21));
 	}
 
 	@Override
 	public float normalZ(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(ptr + index * STRIDE + 22));
+		return DataPacker.unpackNormI8(MemoryUtil.memGetByte(ptr + index * STRIDE + 22));
 	}
 
 	@Override
@@ -79,16 +79,16 @@ public class PosTexNormalVertexView extends AbstractVertexView implements EmptyV
 
 	@Override
 	public void normalX(int index, float normalX) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 20, RenderMath.nb(normalX));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 20, DataPacker.packNormI8(normalX));
 	}
 
 	@Override
 	public void normalY(int index, float normalY) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 21, RenderMath.nb(normalY));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 21, DataPacker.packNormI8(normalY));
 	}
 
 	@Override
 	public void normalZ(int index, float normalZ) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 22, RenderMath.nb(normalZ));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 22, DataPacker.packNormI8(normalZ));
 	}
 }

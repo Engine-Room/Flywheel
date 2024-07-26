@@ -1,10 +1,13 @@
 package dev.engine_room.flywheel.lib.visual;
 
+import org.jetbrains.annotations.Nullable;
 import org.joml.FrustumIntersection;
 import org.joml.Vector3f;
 
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
 import dev.engine_room.flywheel.api.visual.EntityVisual;
+import dev.engine_room.flywheel.api.visual.LightUpdatedVisual;
+import dev.engine_room.flywheel.api.visual.ShaderLightVisual;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
@@ -23,6 +26,8 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  *     <li>{@link DynamicVisual}</li>
  *     <li>{@link TickableVisual}</li>
+ *     <li>{@link LightUpdatedVisual}</li>
+ *     <li>{@link ShaderLightVisual}</li>
  * </ul>
  * See the interfaces' documentation for more information about each one.
  *
@@ -85,7 +90,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 		return entity.noCulling || visibilityTester.check(frustum);
 	}
 
-	protected void relight(float partialTick, FlatLit... instances) {
+	protected void relight(float partialTick, @Nullable FlatLit... instances) {
 		BlockPos pos = BlockPos.containing(entity.getLightProbePosition(partialTick));
 		int blockLight = entity.isOnFire() ? 15 : level.getBrightness(LightLayer.BLOCK, pos);
 		int skyLight = level.getBrightness(LightLayer.SKY, pos);

@@ -5,16 +5,14 @@ import java.util.BitSet;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
-import dev.engine_room.flywheel.api.event.RenderContext;
 import dev.engine_room.flywheel.api.task.Plan;
-import dev.engine_room.flywheel.backend.LightUpdateHolder;
 import dev.engine_room.flywheel.backend.engine.indirect.StagingBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
 import dev.engine_room.flywheel.lib.task.SimplePlan;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
-import it.unimi.dsi.fastutil.longs.LongArraySet;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -53,6 +51,7 @@ public class LightStorage {
 	private final BitSet changed = new BitSet();
 	private boolean needsLutRebuild = false;
 
+	private final LongSet updatedSections = new LongOpenHashSet();
 	@Nullable
 	private LongSet requestedSections;
 
@@ -72,11 +71,12 @@ public class LightStorage {
 		requestedSections = sections;
 	}
 
-	public Plan<RenderContext> createFramePlan() {
-		return SimplePlan.of(() -> {
-			var updatedSections = LightUpdateHolder.get(level)
-					.getAndClearUpdatedSections();
+	public void onLightUpdate(long section) {
+		updatedSections.add(section);
+	}
 
+	public <C> Plan<C> createFramePlan() {
+		return SimplePlan.of(() -> {
 			if (updatedSections.isEmpty() && requestedSections == null) {
 				return;
 			}
@@ -87,15 +87,15 @@ public class LightStorage {
 			LongSet sectionsToCollect;
 			if (requestedSections == null) {
 				// If none were requested, then we need to collect all sections that received updates.
-				sectionsToCollect = new LongArraySet();
+				sectionsToCollect = new LongOpenHashSet();
 			} else {
 				// If we did receive a new set of requested sections, we only
 				// need to collect the sections that weren't yet tracked.
-				sectionsToCollect = requestedSections;
+				sectionsToCollect = new LongOpenHashSet(requestedSections);
 				sectionsToCollect.removeAll(section2ArenaIndex.keySet());
 			}
 
-			// updatedSections contains all sections than received light updates,
+			// updatedSections contains all sections that received light updates,
 			// but we only care about its intersection with our tracked sections.
 			for (long updatedSection : updatedSections) {
 				// Since sections contain the border light of their neighbors, we need to collect the neighbors as well.
@@ -115,6 +115,7 @@ public class LightStorage {
 			// TODO: Should this be done in parallel?
 			sectionsToCollect.forEach(this::collectSection);
 
+			updatedSections.clear();
 			requestedSections = null;
 		});
 	}
@@ -130,7 +131,7 @@ public class LightStorage {
 			var entry = it.next();
 			var section = entry.getLongKey();
 
-			if (!this.requestedSections.contains(section)) {
+			if (!requestedSections.contains(section)) {
 				arena.free(entry.getIntValue());
 				needsLutRebuild = true;
 				it.remove();

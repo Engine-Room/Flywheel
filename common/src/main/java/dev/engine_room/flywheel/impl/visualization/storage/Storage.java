@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +23,7 @@ import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 public abstract class Storage<T> {
-	protected final Supplier<VisualizationContext> visualizationContextSupplier;
+	protected final VisualizationContext visualizationContext;
 
 	private final Map<T, Visual> visuals = new Reference2ObjectOpenHashMap<>();
 	protected final PlanMap<DynamicVisual, DynamicVisual.Context> dynamicVisuals = new PlanMap<>();
@@ -34,8 +33,8 @@ public abstract class Storage<T> {
 	protected final LightUpdatedVisualStorage lightUpdatedVisuals = new LightUpdatedVisualStorage();
 	protected final ShaderLightVisualStorage shaderLightVisuals = new ShaderLightVisualStorage();
 
-	public Storage(Supplier<VisualizationContext> visualizationContextSupplier) {
-		this.visualizationContextSupplier = visualizationContextSupplier;
+	public Storage(VisualizationContext visualizationContext) {
+		this.visualizationContext = visualizationContext;
 	}
 
 	public Collection<Visual> getAllVisuals() {

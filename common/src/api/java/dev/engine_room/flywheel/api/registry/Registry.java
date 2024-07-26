@@ -1,10 +1,9 @@
 package dev.engine_room.flywheel.api.registry;
 
 import java.util.Set;
-import java.util.function.Consumer;
 
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.UnmodifiableView;
 
 @ApiStatus.NonExtendable
 public interface Registry<T> extends Iterable<T> {
@@ -12,10 +11,8 @@ public interface Registry<T> extends Iterable<T> {
 
 	<S extends T> S registerAndGet(S object);
 
-	@Unmodifiable
+	@UnmodifiableView
 	Set<T> getAll();
-
-	void addFreezeCallback(Consumer<Registry<T>> callback);
 
 	boolean isFrozen();
 }

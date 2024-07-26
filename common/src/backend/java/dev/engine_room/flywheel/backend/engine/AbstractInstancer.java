@@ -8,7 +8,7 @@ import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.instance.Instancer;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
-import dev.engine_room.flywheel.lib.util.AtomicBitSet;
+import dev.engine_room.flywheel.backend.util.AtomicBitSet;
 
 public abstract class AbstractInstancer<I extends Instance> implements Instancer<I> {
 	public final InstanceType<I> type;

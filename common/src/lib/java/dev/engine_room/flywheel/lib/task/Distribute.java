@@ -9,6 +9,9 @@ import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 
 public final class Distribute {
+	private Distribute() {
+	}
+
 	/**
 	 * Distribute the given list of tasks across the threads of the task executor.
 	 *
@@ -183,8 +186,5 @@ public final class Distribute {
 
 	public static int sliceSize(TaskExecutor taskExecutor, int totalSize, int denominator) {
 		return MoreMath.ceilingDiv(totalSize, taskExecutor.threadCount() * denominator);
-	}
-
-	private Distribute() {
 	}
 }

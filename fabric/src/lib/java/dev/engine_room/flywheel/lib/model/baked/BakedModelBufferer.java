@@ -18,6 +18,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -31,8 +32,18 @@ final class BakedModelBufferer {
 	private BakedModelBufferer() {
 	}
 
-	public static void bufferSingle(ModelBlockRenderer blockRenderer, BlockAndTintGetter level, BakedModel model, BlockState state, @Nullable PoseStack poseStack, ResultConsumer resultConsumer) {
+	public static void bufferSingle(ModelBlockRenderer blockRenderer, @Nullable BlockAndTintGetter level, BakedModel model, @Nullable BlockState state, @Nullable PoseStack poseStack, ResultConsumer resultConsumer) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
+		if (level == null) {
+			if (state == null) {
+				state = Blocks.AIR.defaultBlockState();
+			}
+			FabricOriginBlockAndTintGetter originLevel = objects.level;
+			originLevel.originBlockState(state);
+			level = originLevel;
+		} else if (state == null) {
+			state = level.getBlockState(BlockPos.ZERO);
+		}
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
@@ -59,7 +70,7 @@ final class BakedModelBufferer {
 		}
 	}
 
-	public static void bufferBlock(BlockRenderDispatcher renderDispatcher, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, ResultConsumer resultConsumer) {
+	public static void bufferBlock(BlockRenderDispatcher renderDispatcher, @Nullable BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, ResultConsumer resultConsumer) {
 		if (state.getRenderShape() != RenderShape.MODEL) {
 			return;
 		}
@@ -133,6 +144,7 @@ final class BakedModelBufferer {
 	}
 
 	private static class ThreadLocalObjects {
+		public final FabricOriginBlockAndTintGetter level = new FabricOriginBlockAndTintGetter(p -> 0, p -> 15);
 		public final PoseStack identityPoseStack = new PoseStack();
 		public final RandomSource random = RandomSource.createNewThreadLocalInstance();
 

@@ -1,8 +1,10 @@
 package dev.engine_room.flywheel.lib.instance;
 
 import org.joml.Matrix3f;
+import org.joml.Matrix3fc;
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
+import org.joml.Matrix4fc;
+import org.joml.Quaternionfc;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -12,7 +14,6 @@ import dev.engine_room.flywheel.lib.transform.Transform;
 import net.minecraft.util.Mth;
 
 public class TransformedInstance extends ColoredLitInstance implements Transform<TransformedInstance> {
-
 	public final Matrix4f model = new Matrix4f();
 	public final Matrix3f normal = new Matrix3f();
 
@@ -21,21 +22,34 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	}
 
 	@Override
-	public TransformedInstance mulPose(Matrix4f pose) {
+	public TransformedInstance mulPose(Matrix4fc pose) {
 		this.model.mul(pose);
 		return this;
 	}
 
 	@Override
-	public TransformedInstance mulNormal(Matrix3f normal) {
+	public TransformedInstance mulNormal(Matrix3fc normal) {
 		this.normal.mul(normal);
 		return this;
 	}
 
 	@Override
-	public TransformedInstance rotateAround(Quaternionf quaternion, float x, float y, float z) {
-		this.model.rotateAround(quaternion, x, y, z);
-		this.normal.rotate(quaternion);
+	public TransformedInstance rotateAround(Quaternionfc quaternion, float x, float y, float z) {
+		model.rotateAround(quaternion, x, y, z);
+		normal.rotate(quaternion);
+		return this;
+	}
+
+	@Override
+	public TransformedInstance translate(float x, float y, float z) {
+		model.translate(x, y, z);
+		return this;
+	}
+
+	@Override
+	public TransformedInstance rotate(Quaternionfc quaternion) {
+		model.rotate(quaternion);
+		normal.rotate(quaternion);
 		return this;
 	}
 
@@ -59,16 +73,9 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 		return this;
 	}
 
-	@Override
-	public TransformedInstance rotate(Quaternionf quaternion) {
-		model.rotate(quaternion);
-		normal.rotate(quaternion);
-		return this;
-	}
-
-	@Override
-	public TransformedInstance translate(double x, double y, double z) {
-		model.translate((float) x, (float) y, (float) z);
+	public TransformedInstance setTransform(PoseStack.Pose pose) {
+		model.set(pose.pose());
+		normal.set(pose.normal());
 		return this;
 	}
 
@@ -76,9 +83,9 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 		return setTransform(stack.last());
 	}
 
-	public TransformedInstance setTransform(PoseStack.Pose pose) {
-		this.model.set(pose.pose());
-		this.normal.set(pose.normal());
+	public TransformedInstance setIdentityTransform() {
+		model.identity();
+		normal.identity();
 		return this;
 	}
 
@@ -89,15 +96,9 @@ public class TransformedInstance extends ColoredLitInstance implements Transform
 	 *     This will allow the GPU to quickly discard all geometry for this instance, effectively "turning it off".
 	 * </p>
 	 */
-	public TransformedInstance setEmptyTransform() {
+	public TransformedInstance setZeroTransform() {
 		model.zero();
 		normal.zero();
-		return this;
-	}
-
-	public TransformedInstance loadIdentity() {
-		model.identity();
-		normal.identity();
 		return this;
 	}
 }

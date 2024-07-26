@@ -5,7 +5,7 @@ import org.jetbrains.annotations.ApiStatus;
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.material.CutoutShader;
 
-public class CutoutShaders {
+public final class CutoutShaders {
 	/**
 	 * Do not discard any fragments based on alpha.
 	 */

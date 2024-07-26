@@ -7,7 +7,6 @@ import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.lib.util.Unit;
 
 public class PlanCompositionTest {
-
 	public static final Plan<Unit> SIMPLE = SimplePlan.of(() -> {
 	});
 

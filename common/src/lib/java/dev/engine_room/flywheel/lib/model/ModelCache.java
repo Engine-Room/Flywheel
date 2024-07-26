@@ -1,17 +1,17 @@
 package dev.engine_room.flywheel.lib.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import org.jetbrains.annotations.ApiStatus;
 
 import dev.engine_room.flywheel.api.model.Model;
+import dev.engine_room.flywheel.lib.util.FlwUtil;
 
-public class ModelCache<T> {
-	private static final List<ModelCache<?>> ALL = new ArrayList<>();
+public final class ModelCache<T> {
+	private static final Set<ModelCache<?>> ALL = FlwUtil.createWeakHashSet();
 	private final Function<T, Model> factory;
 	private final Map<T, Model> map = new ConcurrentHashMap<>();
 
@@ -28,7 +28,6 @@ public class ModelCache<T> {
 	}
 
 	public void clear() {
-		map.values().forEach(Model::delete);
 		map.clear();
 	}
 

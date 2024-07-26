@@ -5,11 +5,11 @@ public interface Instance {
 
 	InstanceHandle handle();
 
-	default void delete() {
-		handle().setDeleted();
-	}
-
 	default void setChanged() {
 		handle().setChanged();
+	}
+
+	default void delete() {
+		handle().setDeleted();
 	}
 }

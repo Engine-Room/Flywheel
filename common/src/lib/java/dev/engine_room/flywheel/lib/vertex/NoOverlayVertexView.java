@@ -2,9 +2,9 @@ package dev.engine_room.flywheel.lib.vertex;
 
 import org.lwjgl.system.MemoryUtil;
 
-import dev.engine_room.flywheel.lib.math.RenderMath;
+import dev.engine_room.flywheel.lib.math.DataPacker;
 
-public class NoOverlayVertexView extends AbstractVertexView implements EmptyVertexList {
+public class NoOverlayVertexView extends AbstractVertexView implements DefaultVertexList {
 	public static final long STRIDE = 31;
 
 	@Override
@@ -29,22 +29,22 @@ public class NoOverlayVertexView extends AbstractVertexView implements EmptyVert
 
 	@Override
 	public float r(int index) {
-		return RenderMath.uf(MemoryUtil.memGetByte(ptr + index * STRIDE + 12));
+		return DataPacker.unpackNormU8(MemoryUtil.memGetByte(ptr + index * STRIDE + 12));
 	}
 
 	@Override
 	public float g(int index) {
-		return RenderMath.uf(MemoryUtil.memGetByte(ptr + index * STRIDE + 13));
+		return DataPacker.unpackNormU8(MemoryUtil.memGetByte(ptr + index * STRIDE + 13));
 	}
 
 	@Override
 	public float b(int index) {
-		return RenderMath.uf(MemoryUtil.memGetByte(ptr + index * STRIDE + 14));
+		return DataPacker.unpackNormU8(MemoryUtil.memGetByte(ptr + index * STRIDE + 14));
 	}
 
 	@Override
 	public float a(int index) {
-		return RenderMath.uf(MemoryUtil.memGetByte(ptr + index * STRIDE + 15));
+		return DataPacker.unpackNormU8(MemoryUtil.memGetByte(ptr + index * STRIDE + 15));
 	}
 
 	@Override
@@ -64,17 +64,17 @@ public class NoOverlayVertexView extends AbstractVertexView implements EmptyVert
 
 	@Override
 	public float normalX(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(ptr + index * STRIDE + 28));
+		return DataPacker.unpackNormI8(MemoryUtil.memGetByte(ptr + index * STRIDE + 28));
 	}
 
 	@Override
 	public float normalY(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(ptr + index * STRIDE + 29));
+		return DataPacker.unpackNormI8(MemoryUtil.memGetByte(ptr + index * STRIDE + 29));
 	}
 
 	@Override
 	public float normalZ(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(ptr + index * STRIDE + 30));
+		return DataPacker.unpackNormI8(MemoryUtil.memGetByte(ptr + index * STRIDE + 30));
 	}
 
 	@Override
@@ -94,22 +94,22 @@ public class NoOverlayVertexView extends AbstractVertexView implements EmptyVert
 
 	@Override
 	public void r(int index, float r) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 12, RenderMath.unb(r));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 12, DataPacker.packNormU8(r));
 	}
 
 	@Override
 	public void g(int index, float g) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 13, RenderMath.unb(g));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 13, DataPacker.packNormU8(g));
 	}
 
 	@Override
 	public void b(int index, float b) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 14, RenderMath.unb(b));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 14, DataPacker.packNormU8(b));
 	}
 
 	@Override
 	public void a(int index, float a) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 15, RenderMath.unb(a));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 15, DataPacker.packNormU8(a));
 	}
 
 	@Override
@@ -129,16 +129,16 @@ public class NoOverlayVertexView extends AbstractVertexView implements EmptyVert
 
 	@Override
 	public void normalX(int index, float normalX) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 28, RenderMath.nb(normalX));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 28, DataPacker.packNormI8(normalX));
 	}
 
 	@Override
 	public void normalY(int index, float normalY) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 29, RenderMath.nb(normalY));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 29, DataPacker.packNormI8(normalY));
 	}
 
 	@Override
 	public void normalZ(int index, float normalZ) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 30, RenderMath.nb(normalZ));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 30, DataPacker.packNormI8(normalZ));
 	}
 }

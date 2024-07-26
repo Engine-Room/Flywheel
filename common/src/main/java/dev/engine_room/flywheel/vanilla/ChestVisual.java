@@ -12,7 +12,8 @@ import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.OrientedInstance;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
-import dev.engine_room.flywheel.lib.material.Materials;
+import dev.engine_room.flywheel.lib.material.CutoutShaders;
+import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.model.ModelCache;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
 import dev.engine_room.flywheel.lib.model.part.ModelPartConverter;
@@ -34,6 +35,12 @@ import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends AbstractBlockEntityVisual<T> implements SimpleDynamicVisual {
+	public static final dev.engine_room.flywheel.api.material.Material MATERIAL = SimpleMaterial.builder()
+			.cutout(CutoutShaders.ONE_TENTH)
+			.texture(Sheets.CHEST_SHEET)
+			.mipmap(false)
+			.build();
+
 	private static final Map<ChestType, ModelLayerLocation> LAYER_LOCATIONS = new EnumMap<>(ChestType.class);
 	static {
 		LAYER_LOCATIONS.put(ChestType.SINGLE, ModelLayers.CHEST);
@@ -42,13 +49,13 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 	}
 
 	private static final ModelCache<Pair<ChestType, Material>> BOTTOM_MODELS = new ModelCache<>(key -> {
-		return new SingleMeshModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "bottom"), Materials.CHEST);
+		return new SingleMeshModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "bottom"), MATERIAL);
 	});
 	private static final ModelCache<Pair<ChestType, Material>> LID_MODELS = new ModelCache<>(key -> {
-		return new SingleMeshModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "lid"), Materials.CHEST);
+		return new SingleMeshModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "lid"), MATERIAL);
 	});
 	private static final ModelCache<Pair<ChestType, Material>> LOCK_MODELS = new ModelCache<>(key -> {
-		return new SingleMeshModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "lock"), Materials.CHEST);
+		return new SingleMeshModel(ModelPartConverter.convert(LAYER_LOCATIONS.get(key.first()), key.second().sprite(), "lock"), MATERIAL);
 	});
 
 	private final OrientedInstance bottom;
@@ -68,7 +75,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
 		Material texture = Sheets.chooseMaterial(blockEntity, chestType, isChristmas());
 
-		bottom = createBottomInstance(texture).setPosition(getVisualPosition());
+		bottom = createBottomInstance(texture).position(getVisualPosition());
 		lid = createLidInstance(texture);
 		lock = createLockInstance(texture);
 
@@ -84,7 +91,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 			lidProgress = $ -> 0f;
 		}
 
-		bottom.setRotation(baseRotation);
+		bottom.rotation(baseRotation);
 		bottom.setChanged();
 
 		applyLidTransform(lidProgress.get(partialTick));
@@ -131,7 +138,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 
 		float angleX = -(progress * ((float) Math.PI / 2F));
 
-		lid.loadIdentity()
+		lid.setIdentityTransform()
 				.translate(getVisualPosition())
 				.rotateCentered(baseRotation)
 				.translate(0, 9f / 16f, 1f / 16f)
@@ -139,7 +146,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 				.translate(0, -9f / 16f, -1f / 16f)
 				.setChanged();
 
-		lock.loadIdentity()
+		lock.setIdentityTransform()
 				.translate(getVisualPosition())
 				.rotateCentered(baseRotation)
 				.translate(0, 8f / 16f, 0)

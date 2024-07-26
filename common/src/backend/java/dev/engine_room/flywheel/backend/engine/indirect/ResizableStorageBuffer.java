@@ -25,7 +25,7 @@ public class ResizableStorageBuffer extends GlObject {
 	}
 
 	public void ensureCapacity(long capacity) {
-		FlwMemoryTracker._freeGPUMemory(this.capacity);
+		FlwMemoryTracker._freeGpuMemory(this.capacity);
 
 		if (this.capacity > 0) {
 			int oldHandle = handle();
@@ -42,7 +42,7 @@ public class ResizableStorageBuffer extends GlObject {
 			glNamedBufferStorage(handle(), capacity, 0);
 		}
 		this.capacity = capacity;
-		FlwMemoryTracker._allocGPUMemory(this.capacity);
+		FlwMemoryTracker._allocGpuMemory(this.capacity);
 	}
 
 	@Override
@@ -53,6 +53,6 @@ public class ResizableStorageBuffer extends GlObject {
 	@Override
 	public void delete() {
 		super.delete();
-		FlwMemoryTracker._freeGPUMemory(capacity);
+		FlwMemoryTracker._freeGpuMemory(capacity);
 	}
 }

@@ -1,5 +1,7 @@
 package dev.engine_room.flywheel.lib.transform;
 
+import org.joml.Vector3fc;
+
 public interface Scale<Self extends Scale<Self>> {
 	Self scale(float factorX, float factorY, float factorZ);
 
@@ -17,5 +19,9 @@ public interface Scale<Self extends Scale<Self>> {
 
 	default Self scaleZ(float factor) {
 		return scale(1, 1, factor);
+	}
+
+	default Self scale(Vector3fc factors) {
+		return scale(factors.x(), factors.y(), factors.z());
 	}
 }

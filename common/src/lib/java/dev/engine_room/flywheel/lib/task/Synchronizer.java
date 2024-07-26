@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.lib.task;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Synchronizer implements Runnable {
+public final class Synchronizer implements Runnable {
 	private final AtomicInteger countDown;
 	private final Runnable onCompletion;
 

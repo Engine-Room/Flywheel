@@ -77,7 +77,7 @@ public class StagingBuffer {
 
 		totalAvailable = capacity;
 
-		FlwMemoryTracker._allocCPUMemory(capacity);
+		FlwMemoryTracker._allocCpuMemory(capacity);
 
 		scatterProgram = programs.getScatterProgram();
 	}
@@ -220,7 +220,7 @@ public class StagingBuffer {
 		transfers.delete();
 		scatterList.delete();
 
-		FlwMemoryTracker._freeCPUMemory(capacity);
+		FlwMemoryTracker._freeCpuMemory(capacity);
 	}
 
 	private MemoryBlock getScratch(long size) {

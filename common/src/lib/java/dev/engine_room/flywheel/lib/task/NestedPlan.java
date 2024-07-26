@@ -41,5 +41,4 @@ public record NestedPlan<C>(List<Plan<C>> parallelPlans) implements SimplyCompos
 				.add(plan)
 				.build());
 	}
-
 }

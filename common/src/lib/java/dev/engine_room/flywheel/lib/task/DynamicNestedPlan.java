@@ -14,11 +14,11 @@ import dev.engine_room.flywheel.lib.task.functional.SupplierWithContext;
  */
 public record DynamicNestedPlan<C>(
 		SupplierWithContext<C, Collection<? extends Plan<C>>> plans) implements SimplyComposedPlan<C> {
-	public static <C> Plan<C> of(SupplierWithContext.Ignored<C, Collection<? extends Plan<C>>> supplier) {
+	public static <C> DynamicNestedPlan<C> of(SupplierWithContext.Ignored<C, Collection<? extends Plan<C>>> supplier) {
 		return new DynamicNestedPlan<>(supplier);
 	}
 
-	public static <C> Plan<C> of(SupplierWithContext<C, Collection<? extends Plan<C>>> supplier) {
+	public static <C> DynamicNestedPlan<C> of(SupplierWithContext<C, Collection<? extends Plan<C>>> supplier) {
 		return new DynamicNestedPlan<>(supplier);
 	}
 

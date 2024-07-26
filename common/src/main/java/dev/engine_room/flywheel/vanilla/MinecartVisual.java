@@ -5,31 +5,39 @@ import org.jetbrains.annotations.Nullable;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
+import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
-import dev.engine_room.flywheel.lib.material.Materials;
+import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.model.ModelHolder;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
 import dev.engine_room.flywheel.lib.model.part.ModelPartConverter;
+import dev.engine_room.flywheel.lib.visual.ComponentEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
-import dev.engine_room.flywheel.lib.visual.SimpleEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
 import dev.engine_room.flywheel.lib.visual.component.FireComponent;
 import dev.engine_room.flywheel.lib.visual.component.HitboxComponent;
 import dev.engine_room.flywheel.lib.visual.component.ShadowComponent;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisual<T> implements SimpleTickableVisual, SimpleDynamicVisual {
+public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityVisual<T> implements SimpleTickableVisual, SimpleDynamicVisual {
+	private static final ResourceLocation TEXTURE = new ResourceLocation("textures/entity/minecart.png");
+	private static final Material MATERIAL = SimpleMaterial.builder()
+			.texture(TEXTURE)
+			.mipmap(false)
+			.build();
+
 	public static final ModelHolder CHEST_BODY_MODEL = createBodyModelHolder(ModelLayers.CHEST_MINECART);
 	public static final ModelHolder COMMAND_BLOCK_BODY_MODEL = createBodyModelHolder(ModelLayers.COMMAND_BLOCK_MINECART);
 	public static final ModelHolder FURNACE_BODY_MODEL = createBodyModelHolder(ModelLayers.FURNACE_MINECART);
@@ -68,7 +76,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisu
 
 	private static ModelHolder createBodyModelHolder(ModelLayerLocation layer) {
 		return new ModelHolder(() -> {
-			return new SingleMeshModel(ModelPartConverter.convert(layer), Materials.MINECART);
+			return new SingleMeshModel(ModelPartConverter.convert(layer), MATERIAL);
 		});
 	}
 
@@ -82,7 +90,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends SimpleEntityVisu
 		RenderShape shape = blockState.getRenderShape();
 
 		if (shape == RenderShape.ENTITYBLOCK_ANIMATED) {
-			body.setEmptyTransform();
+			body.setZeroTransform();
 			active = false;
 			return null;
 		}

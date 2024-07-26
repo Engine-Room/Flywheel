@@ -8,16 +8,14 @@ import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.LineModelBuilder;
-import dev.engine_room.flywheel.lib.model.ModelHolder;
-import dev.engine_room.flywheel.lib.visual.EntityComponent;
-import dev.engine_room.flywheel.lib.visual.SmartRecycler;
+import dev.engine_room.flywheel.lib.visual.util.SmartRecycler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
-public class HitboxComponent implements EntityComponent {
+public final class HitboxComponent implements EntityComponent {
 	//    010------110
 	//    /|       /|
 	//   / |      / |
@@ -27,7 +25,7 @@ public class HitboxComponent implements EntityComponent {
 	//  | /      | /
 	//  |/       |/
 	// 001------101
-	private static final ModelHolder BOX = new ModelHolder(() -> LineModelBuilder.withCapacity(12)
+	private static final Model BOX_MODEL = new LineModelBuilder(12)
 			// Starting from 0, 0, 0
 			.line(0, 0, 0, 0, 0, 1)
 			.line(0, 0, 0, 0, 1, 0)
@@ -44,18 +42,18 @@ public class HitboxComponent implements EntityComponent {
 			.line(1, 1, 0, 1, 1, 1)
 			.line(1, 1, 0, 1, 0, 0)
 			.line(1, 1, 0, 0, 1, 0)
-			.build());
+			.build();
 
-	private static final ModelHolder LINE = new ModelHolder(() -> LineModelBuilder.withCapacity(1)
+	private static final Model LINE_MODEL = new LineModelBuilder(1)
 			.line(0, 0, 0, 0, 2, 0)
-			.build());
+			.build();
 
 	private final VisualizationContext context;
 	private final Entity entity;
 
-	private boolean showEyeBox;
-
 	private final SmartRecycler<Model, TransformedInstance> recycler;
+
+	private boolean showEyeBox;
 
 	public HitboxComponent(VisualizationContext context, Entity entity) {
 		this.context = context;
@@ -74,8 +72,12 @@ public class HitboxComponent implements EntityComponent {
 		return instance;
 	}
 
-	public HitboxComponent showEyeBox(boolean renderEyeBox) {
-		this.showEyeBox = renderEyeBox;
+	public boolean doesShowEyeBox() {
+		return showEyeBox;
+	}
+
+	public HitboxComponent showEyeBox(boolean showEyeBox) {
+		this.showEyeBox = showEyeBox;
 		return this;
 	}
 
@@ -95,8 +97,8 @@ public class HitboxComponent implements EntityComponent {
 			var bbWidth = entity.getBbWidth();
 			var bbHeight = entity.getBbHeight();
 			var bbWidthHalf = bbWidth * 0.5;
-			recycler.get(BOX.get())
-					.loadIdentity()
+			recycler.get(BOX_MODEL)
+					.setIdentityTransform()
 					.translate(entityX - bbWidthHalf, entityY, entityZ - bbWidthHalf)
 					.scale(bbWidth, bbHeight, bbWidth)
 					.setChanged();
@@ -105,8 +107,8 @@ public class HitboxComponent implements EntityComponent {
 			//  injection for them so we'll need platform specific code.
 
 			if (showEyeBox) {
-				recycler.get(BOX.get())
-						.loadIdentity()
+				recycler.get(BOX_MODEL)
+						.setIdentityTransform()
 						.translate(entityX - bbWidthHalf, entityY + entity.getEyeHeight() - 0.01, entityZ - bbWidthHalf)
 						.scale(bbWidth, 0.02f, bbWidth)
 						.color(255, 0, 0)
@@ -115,8 +117,8 @@ public class HitboxComponent implements EntityComponent {
 
 			var viewVector = entity.getViewVector(context.partialTick());
 
-			recycler.get(LINE.get())
-					.loadIdentity()
+			recycler.get(LINE_MODEL)
+					.setIdentityTransform()
 					.translate(entityX, entityY + entity.getEyeHeight(), entityZ)
 					.rotate(new Quaternionf().rotateTo(0, 1, 0, (float) viewVector.x, (float) viewVector.y, (float) viewVector.z))
 					.color(0, 0, 255)
