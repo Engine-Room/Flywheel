@@ -21,6 +21,7 @@ import net.minecraft.core.Vec3i;
 public class EmbeddedEnvironment implements VisualEmbedding, Environment {
 	private final EngineImpl engine;
 	private final VisualType visualType;
+	private final Vec3i renderOrigin;
 	@Nullable
 	private final EmbeddedEnvironment parent;
 	private final InstancerProvider instancerProvider;
@@ -32,9 +33,10 @@ public class EmbeddedEnvironment implements VisualEmbedding, Environment {
 
 	private boolean deleted = false;
 
-	public EmbeddedEnvironment(EngineImpl engine, VisualType visualType, @Nullable EmbeddedEnvironment parent) {
+	public EmbeddedEnvironment(EngineImpl engine, VisualType visualType, Vec3i renderOrigin, @Nullable EmbeddedEnvironment parent) {
 		this.engine = engine;
 		this.visualType = visualType;
+		this.renderOrigin = renderOrigin;
 		this.parent = parent;
 
 		instancerProvider = new InstancerProvider() {
@@ -46,8 +48,8 @@ public class EmbeddedEnvironment implements VisualEmbedding, Environment {
 		};
 	}
 
-	public EmbeddedEnvironment(EngineImpl engine, VisualType visualType) {
-		this(engine, visualType, null);
+	public EmbeddedEnvironment(EngineImpl engine, VisualType visualType, Vec3i renderOrigin) {
+		this(engine, visualType, renderOrigin, null);
 	}
 
 	@Override
@@ -63,12 +65,12 @@ public class EmbeddedEnvironment implements VisualEmbedding, Environment {
 
 	@Override
 	public Vec3i renderOrigin() {
-		return Vec3i.ZERO;
+		return renderOrigin;
 	}
 
 	@Override
-	public VisualEmbedding createEmbedding() {
-		var out = new EmbeddedEnvironment(engine, visualType, this);
+	public VisualEmbedding createEmbedding(Vec3i renderOrigin) {
+		var out = new EmbeddedEnvironment(engine, visualType, renderOrigin, this);
 		engine.environmentStorage()
 				.track(out);
 		return out;

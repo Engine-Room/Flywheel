@@ -141,8 +141,8 @@ public class EngineImpl implements Engine {
 		}
 
 		@Override
-		public VisualEmbedding createEmbedding() {
-			var out = new EmbeddedEnvironment(EngineImpl.this, visualType);
+		public VisualEmbedding createEmbedding(Vec3i renderOrigin) {
+			var out = new EmbeddedEnvironment(EngineImpl.this, visualType, renderOrigin);
 			environmentStorage.track(out);
 			return out;
 		}
