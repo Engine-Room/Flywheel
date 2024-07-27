@@ -206,7 +206,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		int uniformLocation = program.getUniformLocation("_flw_packedMaterial");
 		int vertexIndex = MaterialShaderIndices.vertexIndex(material.shaders());
 		int fragmentIndex = MaterialShaderIndices.fragmentIndex(material.shaders());
-		int packedFogAndCutout = MaterialEncoder.packFogAndCutout(material);
+		int packedFogAndCutout = MaterialEncoder.packUberShader(material);
 		int packedMaterialProperties = MaterialEncoder.packProperties(material);
 		GL32.glUniform4ui(uniformLocation, vertexIndex, fragmentIndex, packedFogAndCutout, packedMaterialProperties);
 	}

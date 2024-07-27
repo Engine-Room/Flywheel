@@ -34,7 +34,7 @@ public class IndirectDraw {
 
 		this.materialVertexIndex = MaterialShaderIndices.vertexIndex(material.shaders());
 		this.materialFragmentIndex = MaterialShaderIndices.fragmentIndex(material.shaders());
-		this.packedFogAndCutout = MaterialEncoder.packFogAndCutout(material);
+		this.packedFogAndCutout = MaterialEncoder.packUberShader(material);
 		this.packedMaterialProperties = MaterialEncoder.packProperties(material);
 	}
 
@@ -88,7 +88,7 @@ public class IndirectDraw {
 
 		MemoryUtil.memPutInt(ptr + 24, MaterialShaderIndices.vertexIndex(materialOverride.shaders())); // materialVertexIndex
 		MemoryUtil.memPutInt(ptr + 28, MaterialShaderIndices.fragmentIndex(materialOverride.shaders())); // materialFragmentIndex
-		MemoryUtil.memPutInt(ptr + 32, MaterialEncoder.packFogAndCutout(materialOverride)); // packedFogAndCutout
+		MemoryUtil.memPutInt(ptr + 32, MaterialEncoder.packUberShader(materialOverride)); // packedFogAndCutout
 		MemoryUtil.memPutInt(ptr + 36, MaterialEncoder.packProperties(materialOverride)); // packedMaterialProperties
 	}
 

@@ -52,10 +52,11 @@ public final class MaterialEncoder {
 		return ((1 << bitLength) - 1) << bitOffset;
 	}
 
-	public static int packFogAndCutout(Material material) {
+	public static int packUberShader(Material material) {
 		var fog = MaterialShaderIndices.fogIndex(material.fog());
 		var cutout = MaterialShaderIndices.cutoutIndex(material.cutout());
-		return fog & 0xFFFF | (cutout & 0xFFFF) << 16;
+		var light = MaterialShaderIndices.lightIndex(material.light());
+		return (light & 0x3FF) | (cutout & 0x3FF) << 10 | (fog & 0x3FF) << 20;
 	}
 
 	// Packed format:

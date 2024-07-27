@@ -9,6 +9,8 @@ public interface Material {
 
 	CutoutShader cutout();
 
+	LightShader light();
+
 	ResourceLocation texture();
 
 	/**

@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import dev.engine_room.flywheel.api.material.CutoutShader;
 import dev.engine_room.flywheel.api.material.FogShader;
+import dev.engine_room.flywheel.api.material.LightShader;
 import dev.engine_room.flywheel.api.material.MaterialShaders;
 import dev.engine_room.flywheel.api.registry.Registry;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -25,6 +26,8 @@ public final class MaterialShaderIndices {
 	private static Index fogSources;
 	@Nullable
 	private static Index cutoutSources;
+	@Nullable
+	private static Index lightSources;
 
 	private MaterialShaderIndices() {
 	}
@@ -57,6 +60,13 @@ public final class MaterialShaderIndices {
 		return cutoutSources;
 	}
 
+	public static Index lightSources() {
+		if (lightSources == null) {
+			lightSources = indexFromRegistry(LightShader.REGISTRY, LightShader::source);
+		}
+		return lightSources;
+	}
+
 	public static int vertexIndex(MaterialShaders shaders) {
 		return vertexSources().index(shaders.vertexSource());
 	}
@@ -71,6 +81,10 @@ public final class MaterialShaderIndices {
 
 	public static int cutoutIndex(CutoutShader cutoutShader) {
 		return cutoutSources().index(cutoutShader.source());
+	}
+
+	public static int lightIndex(LightShader lightShader) {
+		return lightSources().index(lightShader.source());
 	}
 
 	private static <T> Index indexFromRegistry(Registry<T> registry, Function<T, ResourceLocation> sourceFunc) {
