@@ -22,6 +22,8 @@ layout(std140) uniform _FlwFrameUniforms {
     mat4 flw_viewProjectionInverse;
     mat4 flw_viewProjectionPrev;
 
+    ivec4 _flw_renderOrigin;
+
     vec4 _flw_cameraPos;
     vec4 _flw_cameraPosPrev;
     vec4 _flw_cameraLook;
@@ -47,10 +49,11 @@ layout(std140) uniform _FlwFrameUniforms {
     uint _flw_debugMode;
 };
 
-#define flw_cameraPos _flw_cameraPos.xyz
-#define flw_cameraLook _flw_cameraLook.xyz
-#define flw_cameraPosPrev _flw_cameraPosPrev.xyz
-#define flw_cameraLookPrev _flw_cameraLookPrev.xyz
+#define flw_renderOrigin (_flw_renderOrigin.xyz)
+#define flw_cameraPos (_flw_cameraPos.xyz)
+#define flw_cameraLook (_flw_cameraLook.xyz)
+#define flw_cameraPosPrev (_flw_cameraPosPrev.xyz)
+#define flw_cameraLookPrev (_flw_cameraLookPrev.xyz)
 
 #define FLW_CAMERA_IN_FLUID_WATER 1
 #define FLW_CAMERA_IN_FLUID_LAVA 2

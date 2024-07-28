@@ -8,6 +8,7 @@ import org.lwjgl.system.MemoryUtil;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.backend.engine.indirect.StagingBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
+import dev.engine_room.flywheel.lib.math.MoreMath;
 import dev.engine_room.flywheel.lib.task.SimplePlan;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
@@ -36,7 +37,10 @@ import net.minecraft.world.level.lighting.LayerLightEventListener;
  * <p>Thus, each section occupies 5832 bytes.
  */
 public class LightStorage {
-	public static final long SECTION_SIZE_BYTES = 9 * 9 * 9 * 8;
+	public static final int BLOCKS_PER_SECTION = 18 * 18 * 18;
+	public static final int LIGHT_SIZE_BYTES = BLOCKS_PER_SECTION;
+	public static final int SOLID_SIZE_BYTES = MoreMath.ceilingDiv(BLOCKS_PER_SECTION, Integer.SIZE) * Integer.BYTES;
+	public static final int SECTION_SIZE_BYTES = SOLID_SIZE_BYTES + LIGHT_SIZE_BYTES;
 	private static final int DEFAULT_ARENA_CAPACITY_SECTIONS = 64;
 	private static final int INVALID_SECTION = -1;
 
@@ -158,6 +162,8 @@ public class LightStorage {
 		// Zero it out first. This is basically free and makes it easier to handle missing sections later.
 		MemoryUtil.memSet(ptr, 0, SECTION_SIZE_BYTES);
 
+		collectSolidData(ptr, section);
+
 		collectCenter(blockLight, skyLight, ptr, section);
 
 		for (SectionEdge i : SectionEdge.values()) {
@@ -173,6 +179,53 @@ public class LightStorage {
 		}
 
 		collectCorners(blockLight, skyLight, ptr, section);
+	}
+
+	private void collectSolidData(long ptr, long section) {
+		var blockPos = new BlockPos.MutableBlockPos();
+		int xMin = SectionPos.sectionToBlockCoord(SectionPos.x(section));
+		int yMin = SectionPos.sectionToBlockCoord(SectionPos.y(section));
+		int zMin = SectionPos.sectionToBlockCoord(SectionPos.z(section));
+
+		var bitSet = new BitSet(BLOCKS_PER_SECTION);
+		int index = 0;
+		for (int y = -1; y < 17; y++) {
+			for (int z = -1; z < 17; z++) {
+				for (int x = -1; x < 17; x++) {
+					blockPos.set(xMin + x, yMin + y, zMin + z);
+
+					boolean isFullBlock = level.getBlockState(blockPos)
+							.isCollisionShapeFullBlock(level, blockPos);
+
+					if (isFullBlock) {
+						bitSet.set(index);
+					}
+
+					index++;
+				}
+			}
+		}
+
+		var longArray = bitSet.toLongArray();
+		for (long l : longArray) {
+			MemoryUtil.memPutLong(ptr, l);
+			ptr += Long.BYTES;
+		}
+	}
+
+	private void writeSolid(long ptr, int index, boolean blockValid) {
+		if (!blockValid) {
+			return;
+		}
+		int intIndex = index / Integer.SIZE;
+		int bitIndex = index % Integer.SIZE;
+
+		long offset = intIndex * Integer.BYTES;
+
+		int bitField = MemoryUtil.memGetInt(ptr + offset);
+		bitField |= 1 << bitIndex;
+
+		MemoryUtil.memPutInt(ptr + offset, bitField);
 	}
 
 	private void collectXStrip(LayerLightEventListener blockLight, LayerLightEventListener skyLight, long ptr, long section, SectionEdge y, SectionEdge z) {
@@ -303,7 +356,7 @@ public class LightStorage {
 
 		long packedByte = (block & 0xF) | ((sky & 0xF) << 4);
 
-		MemoryUtil.memPutByte(ptr + offset, (byte) packedByte);
+		MemoryUtil.memPutByte(ptr + SOLID_SIZE_BYTES + offset, (byte) packedByte);
 	}
 
 	/**

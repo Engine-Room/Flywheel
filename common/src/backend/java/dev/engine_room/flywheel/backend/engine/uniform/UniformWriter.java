@@ -45,6 +45,28 @@ class UniformWriter {
 		return ptr + 16;
 	}
 
+	static long writeIVec2(long ptr, int x, int y) {
+		MemoryUtil.memPutInt(ptr, x);
+		MemoryUtil.memPutInt(ptr + 4, y);
+		return ptr + 8;
+	}
+
+	static long writeIVec3(long ptr, int x, int y, int z) {
+		MemoryUtil.memPutInt(ptr, x);
+		MemoryUtil.memPutInt(ptr + 4, y);
+		MemoryUtil.memPutInt(ptr + 8, z);
+		MemoryUtil.memPutInt(ptr + 12, 0); // empty component of vec4 because we don't trust std140
+		return ptr + 16;
+	}
+
+	static long writeIVec4(long ptr, int x, int y, int z, int w) {
+		MemoryUtil.memPutInt(ptr, x);
+		MemoryUtil.memPutInt(ptr + 4, y);
+		MemoryUtil.memPutInt(ptr + 8, z);
+		MemoryUtil.memPutInt(ptr + 12, w);
+		return ptr + 16;
+	}
+
 	static long writeMat4(long ptr, Matrix4f mat) {
 		ExtraMemoryOps.putMatrix4f(ptr, mat);
 		return ptr + 64;
