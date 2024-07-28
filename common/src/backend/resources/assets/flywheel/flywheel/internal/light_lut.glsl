@@ -82,7 +82,7 @@ bool flw_light(vec3 worldPos, out vec2 lightCoord) {
     // Always use the section of the block we are contained in to ensure accuracy.
     // We don't want to interpolate between sections, but also we might not be able
     // to rely on the existence neighboring sections, so don't do any extra rounding here.
-    ivec3 blockPos = ivec3(floor(worldPos));
+    ivec3 blockPos = ivec3(floor(worldPos)) + flw_renderOrigin;
 
     uint lightSectionIndex;
     if (_flw_chunkCoordToSectionIndex(blockPos >> 4, lightSectionIndex)) {
@@ -182,7 +182,7 @@ bool flw_light(vec3 worldPos, vec3 normal, out vec2 lightCoord) {
     // Always use the section of the block we are contained in to ensure accuracy.
     // We don't want to interpolate between sections, but also we might not be able
     // to rely on the existence neighboring sections, so don't do any extra rounding here.
-    ivec3 blockPos = ivec3(floor(worldPos));
+    ivec3 blockPos = ivec3(floor(worldPos)) + flw_renderOrigin;
 
     uint lightSectionIndex;
     if (_flw_chunkCoordToSectionIndex(blockPos >> 4, lightSectionIndex)) {

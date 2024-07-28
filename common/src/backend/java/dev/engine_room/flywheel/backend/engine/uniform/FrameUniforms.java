@@ -17,7 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public final class FrameUniforms extends UniformWriter {
-	private static final int SIZE = 96 + 64 * 9 + 16 * 4 + 8 * 2 + 8 + 4 * 10;
+	private static final int SIZE = 96 + 64 * 9 + 16 * 5 + 8 * 2 + 8 + 4 * 10;
 	static final UniformBuffer BUFFER = new UniformBuffer(Uniforms.FRAME_INDEX, SIZE);
 
 	private static final Matrix4f VIEW = new Matrix4f();
@@ -94,6 +94,8 @@ public final class FrameUniforms extends UniformWriter {
 
 		ptr = writeMatrices(ptr);
 
+		ptr = writeRenderOrigin(ptr, renderOrigin);
+
 		ptr = writeCamera(ptr);
 
 		var window = Minecraft.getInstance()
@@ -112,6 +114,11 @@ public final class FrameUniforms extends UniformWriter {
 
 		firstWrite = false;
 		BUFFER.markDirty();
+	}
+
+	private static long writeRenderOrigin(long ptr, Vec3i renderOrigin) {
+		ptr = writeIVec3(ptr, renderOrigin.getX(), renderOrigin.getY(), renderOrigin.getZ());
+		return ptr;
 	}
 
 	private static void setPrev() {
