@@ -9,6 +9,10 @@ public final class MoreMath {
 	 */
 	public static final float SQRT_3_OVER_2 = (float) (Math.sqrt(3.0) / 2.0);
 
+	public static int align32(int size) {
+		return (size + 31) & ~31;
+	}
+
 	public static int align16(int size) {
 		return (size + 15) & ~15;
 	}
