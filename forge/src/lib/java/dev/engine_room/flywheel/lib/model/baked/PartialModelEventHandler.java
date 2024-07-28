@@ -14,18 +14,17 @@ public final class PartialModelEventHandler {
 	}
 
 	public static void onRegisterAdditional(ModelEvent.RegisterAdditional event) {
-		for (PartialModel partial : PartialModel.ALL) {
-			event.register(ModelResourceLocation.standalone(partial.getLocation()));
+		for (ResourceLocation modelLocation : PartialModel.ALL.keySet()) {
+			event.register(modelLocation);
 		}
-
-		PartialModel.tooLate = true;
 	}
 
 	public static void onBakingCompleted(ModelEvent.BakingCompleted event) {
+		PartialModel.populateOnInit = true;
 		Map<ModelResourceLocation, BakedModel> models = event.getModels();
 
-		for (PartialModel partial : PartialModel.ALL) {
-			partial.set(models.get(ModelResourceLocation.standalone(partial.getLocation())));
+		for (PartialModel partial : PartialModel.ALL.values()) {
+			partial.bakedModel = models.get(partial.modelLocation());
 		}
 	}
 }

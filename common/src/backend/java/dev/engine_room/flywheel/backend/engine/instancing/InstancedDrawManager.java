@@ -7,11 +7,11 @@ import java.util.Map;
 import org.lwjgl.opengl.GL32;
 
 import dev.engine_room.flywheel.api.backend.Engine;
-import dev.engine_room.flywheel.api.event.RenderStage;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.material.Material;
+import dev.engine_room.flywheel.api.visualization.VisualType;
+import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.Samplers;
-import dev.engine_room.flywheel.backend.ShaderIndices;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.InstancingPrograms;
 import dev.engine_room.flywheel.backend.engine.CommonCrumbling;
@@ -33,9 +33,9 @@ import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	/**
-	 * The set of draw calls to make in each {@link RenderStage}.
+	 * The set of draw calls to make for each {@link VisualType}.
 	 */
-	private final Map<RenderStage, InstancedRenderStage> stages = new EnumMap<>(RenderStage.class);
+	private final Map<VisualType, InstancedRenderStage> stages = new EnumMap<>(VisualType.class);
 	private final InstancingPrograms programs;
 	/**
 	 * A map of vertex types to their mesh pools.
@@ -74,9 +74,9 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 			}
 		});
 
-		for (InstancedRenderStage instancedRenderStage : stages.values()) {
+		for (InstancedRenderStage stage : stages.values()) {
 			// Remove the draw calls for any instancers we deleted.
-			instancedRenderStage.flush();
+			stage.flush();
 		}
 
 		meshPool.flush();
@@ -85,10 +85,10 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	}
 
 	@Override
-	public void renderStage(RenderStage stage) {
-		var drawSet = stages.get(stage);
+	public void render(VisualType visualType) {
+		var stage = stages.get(visualType);
 
-		if (drawSet == null || drawSet.isEmpty()) {
+		if (stage == null || stage.isEmpty()) {
 			return;
 		}
 
@@ -98,7 +98,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 			TextureBinder.bindLightAndOverlay();
 			light.bind();
 
-			drawSet.draw(instanceTexture, programs);
+			stage.draw(instanceTexture, programs);
 
 			MaterialRenderState.reset();
 			TextureBinder.resetLightAndOverlay();
@@ -133,7 +133,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	protected <I extends Instance> void initialize(InstancerKey<I> key, InstancedInstancer<?> instancer) {
 		instancer.init();
 
-		InstancedRenderStage instancedRenderStage = stages.computeIfAbsent(key.stage(), $ -> new InstancedRenderStage());
+		InstancedRenderStage stage = stages.computeIfAbsent(key.visualType(), $ -> new InstancedRenderStage());
 
 		var meshes = key.model()
 				.meshes();
@@ -142,9 +142,9 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 			var mesh = meshPool.alloc(entry.mesh());
 
 			GroupKey<?> groupKey = new GroupKey<>(key.type(), key.environment());
-			InstancedDraw instancedDraw = new InstancedDraw(instancer, mesh, groupKey, entry.material(), i);
+			InstancedDraw instancedDraw = new InstancedDraw(instancer, mesh, groupKey, entry.material(), key.bias(), i);
 
-			instancedRenderStage.put(groupKey, instancedDraw);
+			stage.put(groupKey, instancedDraw);
 			instancer.addDrawCall(instancedDraw);
 		}
 	}
@@ -204,9 +204,9 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 	public static void uploadMaterialUniform(GlProgram program, Material material) {
 		int uniformLocation = program.getUniformLocation("_flw_packedMaterial");
-		int vertexIndex = ShaderIndices.getVertexShaderIndex(material.shaders());
-		int fragmentIndex = ShaderIndices.getFragmentShaderIndex(material.shaders());
-		int packedFogAndCutout = MaterialEncoder.packFogAndCutout(material);
+		int vertexIndex = MaterialShaderIndices.vertexIndex(material.shaders());
+		int fragmentIndex = MaterialShaderIndices.fragmentIndex(material.shaders());
+		int packedFogAndCutout = MaterialEncoder.packUberShader(material);
 		int packedMaterialProperties = MaterialEncoder.packProperties(material);
 		GL32.glUniform4ui(uniformLocation, vertexIndex, fragmentIndex, packedFogAndCutout, packedMaterialProperties);
 	}

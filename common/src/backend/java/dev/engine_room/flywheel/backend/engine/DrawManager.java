@@ -9,11 +9,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import dev.engine_room.flywheel.api.backend.Engine;
-import dev.engine_room.flywheel.api.event.RenderStage;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.instance.Instancer;
 import dev.engine_room.flywheel.api.model.Model;
+import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.FlwBackend;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
 import dev.engine_room.flywheel.lib.util.Pair;
@@ -36,13 +36,8 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 	protected final Queue<UninitializedInstancer<N, ?>> initializationQueue = new ConcurrentLinkedQueue<>();
 
 	@SuppressWarnings("unchecked")
-	public <I extends Instance> Instancer<I> getInstancer(Environment environment, InstanceType<I> type, Model model, RenderStage stage) {
-		return (Instancer<I>) instancers.computeIfAbsent(new InstancerKey<>(environment, type, model, stage), this::createAndDeferInit);
-	}
-
-	public void delete() {
-		instancers.clear();
-		initializationQueue.clear();
+	public <I extends Instance> Instancer<I> getInstancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType, int bias) {
+		return (Instancer<I>) instancers.computeIfAbsent(new InstancerKey<>(environment, type, model, visualType, bias), this::createAndDeferInit);
 	}
 
 	public void flush(LightStorage lightStorage) {
@@ -59,9 +54,9 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 				.forEach(AbstractInstancer::clear);
 	}
 
-	public abstract void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks);
+	public abstract void render(VisualType visualType);
 
-	public abstract void renderStage(RenderStage stage);
+	public abstract void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks);
 
 	protected abstract <I extends Instance> N create(InstancerKey<I> type);
 
@@ -78,10 +73,6 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 			initializationQueue.add(new UninitializedInstancer<>(key, out));
 		}
 		return out;
-	}
-
-	protected record UninitializedInstancer<N, I extends Instance>(InstancerKey<I> key, N instancer) {
-
 	}
 
 	private static boolean checkAndWarnEmptyModel(Model model) {
@@ -132,5 +123,13 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 			}
 		}
 		return byType;
+	}
+
+	public void delete() {
+		instancers.clear();
+		initializationQueue.clear();
+	}
+
+	protected record UninitializedInstancer<N, I extends Instance>(InstancerKey<I> key, N instancer) {
 	}
 }

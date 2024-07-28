@@ -10,18 +10,24 @@ public class InstancedDraw {
 	private final InstancedInstancer<?> instancer;
 	private final MeshPool.PooledMesh mesh;
 	private final Material material;
+	private final int bias;
 	private final int indexOfMeshInModel;
 
 	private boolean deleted;
 
-	public InstancedDraw(InstancedInstancer<?> instancer, MeshPool.PooledMesh mesh, GroupKey<?> groupKey, Material material, int indexOfMeshInModel) {
+	public InstancedDraw(InstancedInstancer<?> instancer, MeshPool.PooledMesh mesh, GroupKey<?> groupKey, Material material, int bias, int indexOfMeshInModel) {
 		this.instancer = instancer;
 		this.mesh = mesh;
 		this.groupKey = groupKey;
 		this.material = material;
+		this.bias = bias;
 		this.indexOfMeshInModel = indexOfMeshInModel;
 
 		mesh.acquire();
+	}
+
+	public int bias() {
+		return bias;
 	}
 
 	public int indexOfMeshInModel() {

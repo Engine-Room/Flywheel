@@ -7,8 +7,6 @@ import org.lwjgl.system.MemoryUtil;
 import dev.engine_room.flywheel.lib.util.StringUtil;
 
 public final class FlwMemoryTracker {
-	public static final boolean DEBUG_MEMORY_SAFETY = System.getProperty("flw.debugMemorySafety") != null;
-
 	private static final AtomicLong CPU_MEMORY = new AtomicLong(0);
 	private static final AtomicLong GPU_MEMORY = new AtomicLong(0);
 
@@ -32,38 +30,38 @@ public final class FlwMemoryTracker {
 	}
 
 	public static long realloc(long ptr, long size) {
-		ptr = MemoryUtil.nmemRealloc(ptr, size);
-		if (ptr == MemoryUtil.NULL) {
+		long newPtr = MemoryUtil.nmemRealloc(ptr, size);
+		if (newPtr == MemoryUtil.NULL) {
 			throw new OutOfMemoryError("Failed to reallocate " + size + " bytes for address " + StringUtil.formatAddress(ptr));
 		}
-		return ptr;
+		return newPtr;
 	}
 
 	public static void free(long ptr) {
 		MemoryUtil.nmemFree(ptr);
 	}
 
-	public static void _allocCPUMemory(long size) {
+	public static void _allocCpuMemory(long size) {
 		CPU_MEMORY.getAndAdd(size);
 	}
 
-	public static void _freeCPUMemory(long size) {
+	public static void _freeCpuMemory(long size) {
 		CPU_MEMORY.getAndAdd(-size);
 	}
 
-	public static void _allocGPUMemory(long size) {
+	public static void _allocGpuMemory(long size) {
 		GPU_MEMORY.getAndAdd(size);
 	}
 
-	public static void _freeGPUMemory(long size) {
+	public static void _freeGpuMemory(long size) {
 		GPU_MEMORY.getAndAdd(-size);
 	}
 
-	public static long getCPUMemory() {
+	public static long getCpuMemory() {
 		return CPU_MEMORY.get();
 	}
 
-	public static long getGPUMemory() {
+	public static long getGpuMemory() {
 		return GPU_MEMORY.get();
 	}
 }

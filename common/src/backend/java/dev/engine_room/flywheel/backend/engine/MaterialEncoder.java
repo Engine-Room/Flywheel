@@ -4,7 +4,7 @@ import dev.engine_room.flywheel.api.material.DepthTest;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.material.Transparency;
 import dev.engine_room.flywheel.api.material.WriteMask;
-import dev.engine_room.flywheel.backend.ShaderIndices;
+import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import net.minecraft.util.Mth;
 
 // Materials are unpacked in "flywheel:flywheel/internal/packed_material.glsl"
@@ -52,15 +52,11 @@ public final class MaterialEncoder {
 		return ((1 << bitLength) - 1) << bitOffset;
 	}
 
-	public static int packFogAndCutout(Material material) {
-		var fog = ShaderIndices.fog()
-				.index(material.fog()
-						.source());
-		var cutout = ShaderIndices.cutout()
-				.index(material.cutout()
-						.source());
-
-		return fog & 0xFFFF | (cutout & 0xFFFF) << 16;
+	public static int packUberShader(Material material) {
+		var fog = MaterialShaderIndices.fogIndex(material.fog());
+		var cutout = MaterialShaderIndices.cutoutIndex(material.cutout());
+		var light = MaterialShaderIndices.lightIndex(material.light());
+		return (light & 0x3FF) | (cutout & 0x3FF) << 10 | (fog & 0x3FF) << 20;
 	}
 
 	// Packed format:

@@ -3,8 +3,17 @@ package dev.engine_room.flywheel.api.visualization;
 import org.joml.Matrix3fc;
 import org.joml.Matrix4fc;
 
-import dev.engine_room.flywheel.api.BackendImplemented;
+import dev.engine_room.flywheel.api.backend.BackendImplemented;
 
+/**
+ * A visualization context that can apply a transformation to instances created through its instancer provider.
+ *
+ * <p>This is intended to be used for large meta-visuals that may be composed of many block entities or entities.
+ * Invoking a visualizer with a VisualEmbedding will create a "subvisual". The parent visual is responsible for managing
+ * the lifecycle of subvisuals: deleting them, and optionally invoking their frame and tick plans. Subvisuals exist in
+ * the real world from their perspective, and in general visuals should not care if they are within a VisualEmbedding.
+ * However, if a visual wants to check it can use {@code instanceof VisualEmbedding} on its VisualizationContext.</p>
+ */
 @BackendImplemented
 public interface VisualEmbedding extends VisualizationContext {
 	/**

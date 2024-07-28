@@ -22,7 +22,7 @@ public interface FlwApiLink {
 
 	<T> IdRegistry<T> createIdRegistry();
 
-	Backend getBackend();
+	Backend getCurrentBackend();
 
 	boolean isBackendOn();
 

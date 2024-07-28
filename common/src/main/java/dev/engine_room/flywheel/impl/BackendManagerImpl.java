@@ -1,7 +1,5 @@
 package dev.engine_room.flywheel.impl;
 
-import org.jetbrains.annotations.Nullable;
-
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.backend.Backends;
@@ -25,7 +23,7 @@ public final class BackendManagerImpl {
 	private BackendManagerImpl() {
 	}
 
-	public static Backend getBackend() {
+	public static Backend currentBackend() {
 		return backend;
 	}
 
@@ -70,11 +68,8 @@ public final class BackendManagerImpl {
 		VisualizationManagerImpl.resetAll();
 	}
 
-	public static void onReloadLevelRenderer(@Nullable ClientLevel level) {
+	public static void onReloadLevelRenderer(ClientLevel level) {
 		chooseBackend();
-
-		if (level != null) {
-			VisualizationManagerImpl.reset(level);
-		}
+		VisualizationManagerImpl.reset(level);
 	}
 }

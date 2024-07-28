@@ -7,10 +7,11 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import dev.engine_room.flywheel.api.instance.Instance;
+import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.OrientedInstance;
-import dev.engine_room.flywheel.lib.material.Materials;
+import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.model.ModelHolder;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
 import dev.engine_room.flywheel.lib.model.part.ModelPartConverter;
@@ -22,8 +23,12 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BellBlockEntity;
 
 public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> implements SimpleDynamicVisual {
+	private static final Material MATERIAL = SimpleMaterial.builder()
+			.mipmap(false)
+			.build();
+
 	private static final ModelHolder BELL_MODEL = new ModelHolder(() -> {
-		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.BELL, BellRenderer.BELL_RESOURCE_LOCATION.sprite(), "bell_body"), Materials.BELL);
+		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.BELL, BellRenderer.BELL_RESOURCE_LOCATION.sprite(), "bell_body"), MATERIAL);
 	});
 
 	private final OrientedInstance bell;
@@ -33,8 +38,8 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	public BellVisual(VisualizationContext ctx, BellBlockEntity blockEntity, float partialTick) {
 		super(ctx, blockEntity, partialTick);
 
-		bell = createBellInstance().setPivot(0.5f, 0.75f, 0.5f)
-				.setPosition(getVisualPosition());
+		bell = createBellInstance().pivot(0.5f, 0.75f, 0.5f)
+				.position(getVisualPosition());
 		bell.setChanged();
 
 		updateRotation(partialTick);
@@ -62,12 +67,12 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 			Vector3f ringAxis = blockEntity.clickDirection.getCounterClockWise()
 					.step();
 
-			bell.setRotation(new Quaternionf(new AxisAngle4f(angle, ringAxis)))
+			bell.rotation(new Quaternionf(new AxisAngle4f(angle, ringAxis)))
 					.setChanged();
 
 			wasShaking = true;
 		} else if (wasShaking) {
-			bell.setRotation(new Quaternionf())
+			bell.rotation(new Quaternionf())
 					.setChanged();
 
 			wasShaking = false;

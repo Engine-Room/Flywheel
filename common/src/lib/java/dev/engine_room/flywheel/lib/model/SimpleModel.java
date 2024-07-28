@@ -24,11 +24,4 @@ public class SimpleModel implements Model {
 	public Vector4fc boundingSphere() {
 		return boundingSphere;
 	}
-
-	@Override
-	public void delete() {
-        for (ConfiguredMesh mesh : meshes) {
-            mesh.mesh().delete();
-        }
-    }
 }

@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.google.common.collect.Lists;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
-import dev.engine_room.flywheel.lib.visual.VisualizationHelper;
+import dev.engine_room.flywheel.lib.visualization.VisualizationHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
 
@@ -25,7 +25,7 @@ abstract class ClientLevelMixin  {
 		Iterable<Entity> entities = cir.getReturnValue();
 		ArrayList<Entity> filtered = Lists.newArrayList(entities);
 
-		filtered.removeIf(VisualizationHelper::shouldSkipRender);
+		filtered.removeIf(VisualizationHelper::skipVanillaRender);
 
 		cir.setReturnValue(filtered);
 	}

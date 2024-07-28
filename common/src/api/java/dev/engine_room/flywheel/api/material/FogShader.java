@@ -5,7 +5,7 @@ import dev.engine_room.flywheel.api.registry.Registry;
 import net.minecraft.resources.ResourceLocation;
 
 public interface FogShader {
-	static Registry<FogShader> REGISTRY = FlwApiLink.INSTANCE.createRegistry();
+	Registry<FogShader> REGISTRY = FlwApiLink.INSTANCE.createRegistry();
 
 	ResourceLocation source();
 }

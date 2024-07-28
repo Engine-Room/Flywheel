@@ -5,7 +5,7 @@ import dev.engine_room.flywheel.api.registry.Registry;
 import net.minecraft.resources.ResourceLocation;
 
 public interface CutoutShader {
-	static Registry<CutoutShader> REGISTRY = FlwApiLink.INSTANCE.createRegistry();
+	Registry<CutoutShader> REGISTRY = FlwApiLink.INSTANCE.createRegistry();
 
 	ResourceLocation source();
 }

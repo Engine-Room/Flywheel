@@ -53,3 +53,9 @@ void _flw_unpackUint2x16(uint s, out uint hi, out uint lo) {
     hi = (s >> 16) & 0xFFFFu;
     lo = s & 0xFFFFu;
 }
+
+void _flw_unpackUint3x10(uint s, out uint hi, out uint mi, out uint lo) {
+    hi = (s >> 20) & 0x3FFu;
+    mi = (s >> 10) & 0x3FFu;
+    lo = s & 0x3FFu;
+}

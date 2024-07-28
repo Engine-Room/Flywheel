@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableList;
 
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.instance.InstanceType;
-import dev.engine_room.flywheel.backend.ShaderIndices;
+import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.compile.component.UberShaderComponent;
 import dev.engine_room.flywheel.backend.compile.core.CompilerStats;
 import dev.engine_room.flywheel.backend.compile.core.SourceLoader;
@@ -46,15 +46,16 @@ public final class FlwPrograms {
 		var fragmentMaterialComponent = createFragmentMaterialComponent(loader);
 		var fogComponent = createFogComponent(loader);
 		var cutoutComponent = createCutoutComponent(loader);
+		var lightComponent = createLightComponent(loader);
 
-		if (stats.errored() || vertexComponentsHeader == null || fragmentComponentsHeader == null || vertexMaterialComponent == null || fragmentMaterialComponent == null || fogComponent == null || cutoutComponent == null) {
+		if (stats.errored() || vertexComponentsHeader == null || fragmentComponentsHeader == null || vertexMaterialComponent == null || fragmentMaterialComponent == null || fogComponent == null || cutoutComponent == null || lightComponent == null) {
 			// Probably means the shader sources are missing.
 			stats.emitErrorLog();
 			return;
 		}
 
 		List<SourceComponent> vertexComponents = List.of(vertexComponentsHeader, vertexMaterialComponent);
-		List<SourceComponent> fragmentComponents = List.of(fragmentComponentsHeader, fragmentMaterialComponent, fogComponent, cutoutComponent);
+		List<SourceComponent> fragmentComponents = List.of(fragmentComponentsHeader, fragmentMaterialComponent, fogComponent, cutoutComponent, lightComponent);
 
 		var pipelineKeys = createPipelineKeys();
 		InstancingPrograms.reload(sources, pipelineKeys, vertexComponents, fragmentComponents);
@@ -74,7 +75,7 @@ public final class FlwPrograms {
 	@Nullable
 	private static UberShaderComponent createVertexMaterialComponent(SourceLoader loader) {
 		return UberShaderComponent.builder(Flywheel.rl("material_vertex"))
-				.materialSources(ShaderIndices.materialVertex()
+				.materialSources(MaterialShaderIndices.vertexSources()
 						.all())
 				.adapt(FnSignature.ofVoid("flw_materialVertex"))
 				.switchOn(GlslExpr.variable("_flw_uberMaterialVertexIndex"))
@@ -84,7 +85,7 @@ public final class FlwPrograms {
 	@Nullable
 	private static UberShaderComponent createFragmentMaterialComponent(SourceLoader loader) {
 		return UberShaderComponent.builder(Flywheel.rl("material_fragment"))
-				.materialSources(ShaderIndices.materialFragment()
+				.materialSources(MaterialShaderIndices.fragmentSources()
 						.all())
 				.adapt(FnSignature.ofVoid("flw_materialFragment"))
 				.switchOn(GlslExpr.variable("_flw_uberMaterialFragmentIndex"))
@@ -94,7 +95,7 @@ public final class FlwPrograms {
 	@Nullable
 	private static UberShaderComponent createFogComponent(SourceLoader loader) {
 		return UberShaderComponent.builder(Flywheel.rl("fog"))
-				.materialSources(ShaderIndices.fog()
+				.materialSources(MaterialShaderIndices.fogSources()
 						.all())
 				.adapt(FnSignature.create()
 						.returnType("vec4")
@@ -108,7 +109,7 @@ public final class FlwPrograms {
 	@Nullable
 	private static UberShaderComponent createCutoutComponent(SourceLoader loader) {
 		return UberShaderComponent.builder(Flywheel.rl("cutout"))
-				.materialSources(ShaderIndices.cutout()
+				.materialSources(MaterialShaderIndices.cutoutSources()
 						.all())
 				.adapt(FnSignature.create()
 						.returnType("bool")
@@ -116,6 +117,19 @@ public final class FlwPrograms {
 						.arg("vec4", "color")
 						.build(), GlslExpr.boolLiteral(false))
 				.switchOn(GlslExpr.variable("_flw_uberCutoutIndex"))
+				.build(loader);
+	}
+
+	@Nullable
+	private static UberShaderComponent createLightComponent(SourceLoader loader) {
+		return UberShaderComponent.builder(Flywheel.rl("light"))
+				.materialSources(MaterialShaderIndices.lightSources()
+						.all())
+				.adapt(FnSignature.create()
+						.returnType("void")
+						.name("flw_shaderLight")
+						.build())
+				.switchOn(GlslExpr.variable("_flw_uberLightIndex"))
 				.build(loader);
 	}
 }

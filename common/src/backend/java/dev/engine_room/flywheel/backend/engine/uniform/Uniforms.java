@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.backend.engine.uniform;
 
-import dev.engine_room.flywheel.api.event.RenderContext;
+import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 
 public final class Uniforms {

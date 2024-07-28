@@ -18,8 +18,7 @@ import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.model.ModelCache;
 import dev.engine_room.flywheel.lib.model.QuadMesh;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
-import dev.engine_room.flywheel.lib.visual.EntityComponent;
-import dev.engine_room.flywheel.lib.visual.SmartRecycler;
+import dev.engine_room.flywheel.lib.visual.util.SmartRecycler;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -29,12 +28,14 @@ import net.minecraft.world.entity.Entity;
 /**
  * A component that uses instances to render the fire animation on an entity.
  */
-public class FireComponent implements EntityComponent {
-	private static final Material FIRE_MATERIAL = SimpleMaterial.builderOf(Materials.CHUNK_CUTOUT_UNSHADED)
+public final class FireComponent implements EntityComponent {
+	private static final Material FIRE_MATERIAL = SimpleMaterial.builderOf(Materials.CUTOUT_UNSHADED_BLOCK)
 			.backfaceCulling(false) // Disable backface because we want to be able to flip the model.
 			.build();
+
 	// Parameterize by the material instead of the sprite
-	// because Material#sprite is a surprisingly heavy operation.
+	// because Material#sprite is a surprisingly heavy operation
+	// and because sprites are invalidated after a resource reload.
 	private static final ModelCache<net.minecraft.client.resources.model.Material> FIRE_MODELS = new ModelCache<>(texture -> {
 		return new SingleMeshModel(new FireMesh(texture.sprite()), FIRE_MATERIAL);
 	});
@@ -143,15 +144,6 @@ public class FireComponent implements EntityComponent {
 			writeVertex(vertexList, 3, 0.5f, 1.4f, u1, v0);
 		}
 
-		@Override
-		public Vector4fc boundingSphere() {
-			return BOUNDING_SPHERE;
-		}
-
-		@Override
-		public void delete() {
-		}
-
 		// Magic numbers taken from:
 		// net.minecraft.client.renderer.entity.EntityRenderDispatcher#fireVertex
 		private static void writeVertex(MutableVertexList vertexList, int i, float x, float y, float u, float v) {
@@ -167,6 +159,11 @@ public class FireComponent implements EntityComponent {
 			vertexList.normalX(i, 0);
 			vertexList.normalY(i, 1);
 			vertexList.normalZ(i, 0);
+		}
+
+		@Override
+		public Vector4fc boundingSphere() {
+			return BOUNDING_SPHERE;
 		}
 	}
 }

@@ -11,7 +11,8 @@ import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
-import dev.engine_room.flywheel.lib.material.Materials;
+import dev.engine_room.flywheel.lib.material.CutoutShaders;
+import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.model.ModelCache;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
 import dev.engine_room.flywheel.lib.model.part.ModelPartConverter;
@@ -27,11 +28,18 @@ import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
 public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockEntity> implements SimpleDynamicVisual {
+	private static final dev.engine_room.flywheel.api.material.Material MATERIAL = SimpleMaterial.builder()
+			.cutout(CutoutShaders.ONE_TENTH)
+			.texture(Sheets.SHULKER_SHEET)
+			.mipmap(false)
+			.backfaceCulling(false)
+			.build();
+
 	private static final ModelCache<Material> BASE_MODELS = new ModelCache<>(texture -> {
-		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.SHULKER, texture.sprite(), "base"), Materials.SHULKER);
+		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.SHULKER, texture.sprite(), "base"), MATERIAL);
 	});
 	private static final ModelCache<Material> LID_MODELS = new ModelCache<>(texture -> {
-		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.SHULKER, texture.sprite(), "lid"), Materials.SHULKER);
+		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.SHULKER, texture.sprite(), "lid"), MATERIAL);
 	});
 
 	private final TransformedInstance base;
@@ -57,7 +65,7 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 		stack.setIdentity();
 		TransformStack.of(stack)
 				.translate(getVisualPosition())
-				.translate(0.5)
+				.translate(0.5f)
 				.scale(0.9995f)
 				.rotate(rotation)
 				.scale(1, -1, -1)

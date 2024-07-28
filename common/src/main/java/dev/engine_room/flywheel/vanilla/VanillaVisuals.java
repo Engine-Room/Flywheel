@@ -1,7 +1,7 @@
 package dev.engine_room.flywheel.vanilla;
 
-import static dev.engine_room.flywheel.lib.visual.SimpleBlockEntityVisualizer.builder;
-import static dev.engine_room.flywheel.lib.visual.SimpleEntityVisualizer.builder;
+import static dev.engine_room.flywheel.lib.visualization.SimpleBlockEntityVisualizer.builder;
+import static dev.engine_room.flywheel.lib.visualization.SimpleEntityVisualizer.builder;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.entity.BlockEntityType;

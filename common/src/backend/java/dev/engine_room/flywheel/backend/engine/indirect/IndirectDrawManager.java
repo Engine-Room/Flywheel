@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import dev.engine_room.flywheel.api.backend.Engine;
-import dev.engine_room.flywheel.api.event.RenderStage;
 import dev.engine_room.flywheel.api.instance.Instance;
+import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
@@ -63,24 +63,24 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	protected <I extends Instance> void initialize(InstancerKey<I> key, IndirectInstancer<?> instancer) {
 		var groupKey = new GroupKey<>(key.type(), key.environment());
 		var group = (IndirectCullingGroup<I>) cullingGroups.computeIfAbsent(groupKey, t -> new IndirectCullingGroup<>(t.instanceType(), t.environment(), programs));
-		group.add((IndirectInstancer<I>) instancer, key.model(), key.stage(), meshPool);
+		group.add((IndirectInstancer<I>) instancer, key, meshPool);
 	}
 
-	public boolean hasStage(RenderStage stage) {
+	public boolean hasVisualType(VisualType visualType) {
 		for (var group : cullingGroups.values()) {
-			if (group.hasStage(stage)) {
+			if (group.hasVisualType(visualType)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public void renderStage(RenderStage stage) {
-		if (!hasStage(stage)) {
+	public void render(VisualType visualType) {
+		if (!hasVisualType(visualType)) {
 			return;
 		}
 
-		try (var restoreState = GlStateTracker.getRestoreState()) {
+		try (var state = GlStateTracker.getRestoreState()) {
 			TextureBinder.bindLightAndOverlay();
 
 			vertexArray.bindForDraw();
@@ -88,7 +88,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			Uniforms.bindAll();
 
 			for (var group : cullingGroups.values()) {
-				group.submit(stage);
+				group.submit(visualType);
 			}
 
 			MaterialRenderState.reset();

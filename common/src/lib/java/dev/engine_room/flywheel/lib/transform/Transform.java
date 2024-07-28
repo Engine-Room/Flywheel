@@ -1,16 +1,16 @@
 package dev.engine_room.flywheel.lib.transform;
 
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
+import org.joml.Matrix3fc;
+import org.joml.Matrix4fc;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public interface Transform<Self extends Transform<Self>> extends Affine<Self> {
-	Self mulPose(Matrix4f pose);
+	Self mulPose(Matrix4fc pose);
 
-	Self mulNormal(Matrix3f normal);
+	Self mulNormal(Matrix3fc normal);
 
-	default Self transform(Matrix4f pose, Matrix3f normal) {
+	default Self transform(Matrix4fc pose, Matrix3fc normal) {
 		return mulPose(pose).mulNormal(normal);
 	}
 

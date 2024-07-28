@@ -2,37 +2,34 @@ package dev.engine_room.flywheel.backend.engine;
 
 import java.util.List;
 
+import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.api.backend.Engine;
-import dev.engine_room.flywheel.api.event.RenderContext;
-import dev.engine_room.flywheel.api.event.RenderStage;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.instance.Instancer;
 import dev.engine_room.flywheel.api.instance.InstancerProvider;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.task.Plan;
-import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.api.visualization.VisualEmbedding;
+import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.backend.engine.embed.EmbeddedEnvironment;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
 import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
-import dev.engine_room.flywheel.lib.task.Flag;
-import dev.engine_room.flywheel.lib.task.NamedFlag;
-import dev.engine_room.flywheel.lib.task.SyncedPlan;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 
 public class EngineImpl implements Engine {
 	private final DrawManager<? extends AbstractInstancer<?>> drawManager;
 	private final int sqrMaxOriginDistance;
-	private final Flag flushFlag = new NamedFlag("flushed");
 	private final EnvironmentStorage environmentStorage;
 	private final LightStorage lightStorage;
 
@@ -46,32 +43,18 @@ public class EngineImpl implements Engine {
 	}
 
 	@Override
-	public VisualizationContext createVisualizationContext(RenderStage stage) {
-		return new VisualizationContextImpl(stage);
+	public VisualizationContext createVisualizationContext(VisualType visualType) {
+		return new VisualizationContextImpl(visualType);
 	}
 
 	@Override
 	public Plan<RenderContext> createFramePlan() {
-		return lightStorage.createFramePlan()
-				.then(SyncedPlan.of(this::flush));
+		return lightStorage.createFramePlan();
 	}
 
 	@Override
-	public void renderStage(TaskExecutor executor, RenderContext context, RenderStage stage) {
-		executor.syncUntil(flushFlag::isRaised);
-		if (stage.isLast()) {
-			flushFlag.lower();
-		}
-
-		drawManager.renderStage(stage);
-	}
-
-	@Override
-	public void renderCrumbling(TaskExecutor executor, RenderContext context, List<CrumblingBlock> crumblingBlocks) {
-		// Need to wait for flush before we can inspect instancer state.
-		executor.syncUntil(flushFlag::isRaised);
-
-		drawManager.renderCrumbling(crumblingBlocks);
+	public Vec3i renderOrigin() {
+		return renderOrigin;
 	}
 
 	@Override
@@ -92,13 +75,32 @@ public class EngineImpl implements Engine {
 	}
 
 	@Override
-	public Vec3i renderOrigin() {
-		return renderOrigin;
+	public void lightSections(LongSet sections) {
+		lightStorage.sections(sections);
 	}
 
 	@Override
-	public void lightSections(LongSet sections) {
-		lightStorage.sections(sections);
+	public void onLightUpdate(SectionPos sectionPos, LightLayer layer) {
+		lightStorage.onLightUpdate(sectionPos.asLong());
+	}
+
+	@Override
+	public void setupRender(RenderContext context) {
+		try (var state = GlStateTracker.getRestoreState()) {
+			Uniforms.update(context);
+			environmentStorage.flush();
+			drawManager.flush(lightStorage);
+		}
+	}
+
+	@Override
+	public void render(RenderContext context, VisualType visualType) {
+		drawManager.render(visualType);
+	}
+
+	@Override
+	public void renderCrumbling(RenderContext context, List<CrumblingBlock> crumblingBlocks) {
+		drawManager.renderCrumbling(crumblingBlocks);
 	}
 
 	@Override
@@ -107,18 +109,8 @@ public class EngineImpl implements Engine {
 		lightStorage.delete();
 	}
 
-	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, RenderStage stage) {
-		return drawManager.getInstancer(environment, type, model, stage);
-	}
-
-	private void flush(RenderContext ctx) {
-		try (var state = GlStateTracker.getRestoreState()) {
-			Uniforms.update(ctx);
-			environmentStorage.flush();
-			drawManager.flush(lightStorage);
-		}
-
-		flushFlag.raise();
+	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType, int bias) {
+		return drawManager.getInstancer(environment, type, model, visualType, bias);
 	}
 
 	public EnvironmentStorage environmentStorage() {
@@ -131,11 +123,11 @@ public class EngineImpl implements Engine {
 
 	private class VisualizationContextImpl implements VisualizationContext {
 		private final InstancerProviderImpl instancerProvider;
-		private final RenderStage stage;
+		private final VisualType visualType;
 
-		public VisualizationContextImpl(RenderStage stage) {
-			instancerProvider = new InstancerProviderImpl(EngineImpl.this, stage);
-			this.stage = stage;
+		public VisualizationContextImpl(VisualType visualType) {
+			instancerProvider = new InstancerProviderImpl(EngineImpl.this, visualType);
+			this.visualType = visualType;
 		}
 
 		@Override
@@ -149,8 +141,8 @@ public class EngineImpl implements Engine {
 		}
 
 		@Override
-		public VisualEmbedding createEmbedding() {
-			var out = new EmbeddedEnvironment(EngineImpl.this, stage);
+		public VisualEmbedding createEmbedding(Vec3i renderOrigin) {
+			var out = new EmbeddedEnvironment(EngineImpl.this, visualType, renderOrigin);
 			environmentStorage.track(out);
 			return out;
 		}

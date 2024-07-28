@@ -24,13 +24,13 @@ public final class FlwDebugInfo {
 
 		VisualizationManager manager = VisualizationManager.get(minecraft.level);
 		if (manager != null) {
-			systemInfo.add("B: " + manager.getBlockEntities().getVisualCount()
-					+ ", E: " + manager.getEntities().getVisualCount()
-					+ ", F: " + manager.getEffects().getVisualCount());
-			Vec3i renderOrigin = manager.getRenderOrigin();
+			systemInfo.add("B: " + manager.blockEntities().visualCount()
+					+ ", E: " + manager.entities().visualCount()
+					+ ", F: " + manager.effects().visualCount());
+			Vec3i renderOrigin = manager.renderOrigin();
 			systemInfo.add("Origin: " + renderOrigin.getX() + ", " + renderOrigin.getY() + ", " + renderOrigin.getZ());
 		}
 
-		systemInfo.add("Memory Usage: CPU: " + StringUtil.formatBytes(FlwMemoryTracker.getCPUMemory()) + ", GPU: " + StringUtil.formatBytes(FlwMemoryTracker.getGPUMemory()));
+		systemInfo.add("Memory Usage: CPU: " + StringUtil.formatBytes(FlwMemoryTracker.getCpuMemory()) + ", GPU: " + StringUtil.formatBytes(FlwMemoryTracker.getGpuMemory()));
 	}
 }

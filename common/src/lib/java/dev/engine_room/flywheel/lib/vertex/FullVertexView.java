@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.lib.vertex;
 
 import org.lwjgl.system.MemoryUtil;
 
-import dev.engine_room.flywheel.lib.math.RenderMath;
+import dev.engine_room.flywheel.lib.math.DataPacker;
 
 public class FullVertexView extends AbstractVertexView {
 	public static final long STRIDE = 36;
@@ -29,22 +29,22 @@ public class FullVertexView extends AbstractVertexView {
 
 	@Override
 	public float r(int index) {
-		return RenderMath.uf(MemoryUtil.memGetByte(ptr + index * STRIDE + 12));
+		return DataPacker.unpackNormU8(MemoryUtil.memGetByte(ptr + index * STRIDE + 12));
 	}
 
 	@Override
 	public float g(int index) {
-		return RenderMath.uf(MemoryUtil.memGetByte(ptr + index * STRIDE + 13));
+		return DataPacker.unpackNormU8(MemoryUtil.memGetByte(ptr + index * STRIDE + 13));
 	}
 
 	@Override
 	public float b(int index) {
-		return RenderMath.uf(MemoryUtil.memGetByte(ptr + index * STRIDE + 14));
+		return DataPacker.unpackNormU8(MemoryUtil.memGetByte(ptr + index * STRIDE + 14));
 	}
 
 	@Override
 	public float a(int index) {
-		return RenderMath.uf(MemoryUtil.memGetByte(ptr + index * STRIDE + 15));
+		return DataPacker.unpackNormU8(MemoryUtil.memGetByte(ptr + index * STRIDE + 15));
 	}
 
 	@Override
@@ -69,17 +69,17 @@ public class FullVertexView extends AbstractVertexView {
 
 	@Override
 	public float normalX(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(ptr + index * STRIDE + 32));
+		return DataPacker.unpackNormI8(MemoryUtil.memGetByte(ptr + index * STRIDE + 32));
 	}
 
 	@Override
 	public float normalY(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(ptr + index * STRIDE + 33));
+		return DataPacker.unpackNormI8(MemoryUtil.memGetByte(ptr + index * STRIDE + 33));
 	}
 
 	@Override
 	public float normalZ(int index) {
-		return RenderMath.f(MemoryUtil.memGetByte(ptr + index * STRIDE + 34));
+		return DataPacker.unpackNormI8(MemoryUtil.memGetByte(ptr + index * STRIDE + 34));
 	}
 
 	@Override
@@ -99,22 +99,22 @@ public class FullVertexView extends AbstractVertexView {
 
 	@Override
 	public void r(int index, float r) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 12, RenderMath.unb(r));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 12, DataPacker.packNormU8(r));
 	}
 
 	@Override
 	public void g(int index, float g) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 13, RenderMath.unb(g));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 13, DataPacker.packNormU8(g));
 	}
 
 	@Override
 	public void b(int index, float b) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 14, RenderMath.unb(b));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 14, DataPacker.packNormU8(b));
 	}
 
 	@Override
 	public void a(int index, float a) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 15, RenderMath.unb(a));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 15, DataPacker.packNormU8(a));
 	}
 
 	@Override
@@ -139,16 +139,16 @@ public class FullVertexView extends AbstractVertexView {
 
 	@Override
 	public void normalX(int index, float normalX) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 32, RenderMath.nb(normalX));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 32, DataPacker.packNormI8(normalX));
 	}
 
 	@Override
 	public void normalY(int index, float normalY) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 33, RenderMath.nb(normalY));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 33, DataPacker.packNormI8(normalY));
 	}
 
 	@Override
 	public void normalZ(int index, float normalZ) {
-		MemoryUtil.memPutByte(ptr + index * STRIDE + 34, RenderMath.nb(normalZ));
+		MemoryUtil.memPutByte(ptr + index * STRIDE + 34, DataPacker.packNormI8(normalZ));
 	}
 }

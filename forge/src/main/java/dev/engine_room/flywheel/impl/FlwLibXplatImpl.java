@@ -3,6 +3,7 @@ package dev.engine_room.flywheel.impl;
 import java.lang.reflect.Field;
 
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
@@ -17,13 +18,21 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 
 public class FlwLibXplatImpl implements FlwLibXplat {
+	@Override
+	@UnknownNullability
+	public BakedModel getBakedModel(ModelManager modelManager, ResourceLocation location) {
+		return modelManager.getModel(location);
+	}
+
 	@Override
 	public BlockRenderDispatcher createVanillaBlockRenderDispatcher() {
 		BlockRenderDispatcher defaultDispatcher = Minecraft.getInstance().getBlockRenderer();

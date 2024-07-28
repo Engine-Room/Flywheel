@@ -35,7 +35,7 @@ public class FabricFlwConfig implements FlwConfig {
 
 	private final File file;
 
-	public Backend backend = BackendManager.getDefaultBackend();
+	public Backend backend = BackendManager.defaultBackend();
 	public boolean limitUpdates = LIMIT_UPDATES_DEFAULT;
 	public int workerThreads = WORKER_THREADS_DEFAULT;
 
@@ -81,7 +81,7 @@ public class FabricFlwConfig implements FlwConfig {
 	public void fromJson(JsonElement json) {
 		if (!(json instanceof JsonObject object)) {
 			FlwImpl.CONFIG_LOGGER.warn("Config JSON must be an object");
-			backend = BackendManager.getDefaultBackend();
+			backend = BackendManager.defaultBackend();
 			limitUpdates = LIMIT_UPDATES_DEFAULT;
 			workerThreads = WORKER_THREADS_DEFAULT;
 			return;
@@ -117,7 +117,7 @@ public class FabricFlwConfig implements FlwConfig {
 		if (msg != null) {
 			FlwImpl.CONFIG_LOGGER.warn(msg);
 		}
-		backend = BackendManager.getDefaultBackend();
+		backend = BackendManager.defaultBackend();
 	}
 
 	private void readLimitUpdates(JsonObject object) {

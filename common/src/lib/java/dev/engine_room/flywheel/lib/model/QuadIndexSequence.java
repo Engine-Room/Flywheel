@@ -4,7 +4,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.api.model.IndexSequence;
 
-public class QuadIndexSequence implements IndexSequence {
+public final class QuadIndexSequence implements IndexSequence {
 	public static final QuadIndexSequence INSTANCE = new QuadIndexSequence();
 
 	private QuadIndexSequence() {

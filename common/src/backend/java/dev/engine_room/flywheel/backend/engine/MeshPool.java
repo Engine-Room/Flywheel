@@ -9,13 +9,13 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL32;
 
 import dev.engine_room.flywheel.api.model.Mesh;
-import dev.engine_room.flywheel.api.vertex.VertexView;
 import dev.engine_room.flywheel.backend.InternalVertex;
 import dev.engine_room.flywheel.backend.gl.GlPrimitive;
 import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
 import dev.engine_room.flywheel.backend.util.ReferenceCounted;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
+import dev.engine_room.flywheel.lib.vertex.VertexView;
 
 public class MeshPool {
 	private final VertexView vertexView;

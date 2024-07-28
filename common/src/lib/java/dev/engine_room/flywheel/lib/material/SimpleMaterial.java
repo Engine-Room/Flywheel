@@ -3,6 +3,7 @@ package dev.engine_room.flywheel.lib.material;
 import dev.engine_room.flywheel.api.material.CutoutShader;
 import dev.engine_room.flywheel.api.material.DepthTest;
 import dev.engine_room.flywheel.api.material.FogShader;
+import dev.engine_room.flywheel.api.material.LightShader;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.material.MaterialShaders;
 import dev.engine_room.flywheel.api.material.Transparency;
@@ -14,6 +15,7 @@ public class SimpleMaterial implements Material {
 	protected final MaterialShaders shaders;
 	protected final FogShader fog;
 	protected final CutoutShader cutout;
+	protected final LightShader light;
 
 	protected final ResourceLocation texture;
 	protected final boolean blur;
@@ -33,6 +35,7 @@ public class SimpleMaterial implements Material {
 		shaders = builder.shaders();
 		fog = builder.fog();
 		cutout = builder.cutout();
+		light = builder.light();
 		texture = builder.texture();
 		blur = builder.blur();
 		mipmap = builder.mipmap();
@@ -67,6 +70,11 @@ public class SimpleMaterial implements Material {
 	@Override
 	public CutoutShader cutout() {
 		return cutout;
+	}
+
+	@Override
+	public LightShader light() {
+		return light;
 	}
 
 	@Override
@@ -128,6 +136,7 @@ public class SimpleMaterial implements Material {
 		protected MaterialShaders shaders;
 		protected FogShader fog;
 		protected CutoutShader cutout;
+		protected LightShader light;
 
 		protected ResourceLocation texture;
 		protected boolean blur;
@@ -147,6 +156,7 @@ public class SimpleMaterial implements Material {
 			shaders = StandardMaterialShaders.DEFAULT;
 			fog = FogShaders.LINEAR;
 			cutout = CutoutShaders.OFF;
+			light = LightShaders.SMOOTH_WHEN_EMBEDDED;
 			texture = InventoryMenu.BLOCK_ATLAS;
 			blur = false;
 			mipmap = true;
@@ -194,6 +204,11 @@ public class SimpleMaterial implements Material {
 
 		public Builder cutout(CutoutShader value) {
 			this.cutout = value;
+			return this;
+		}
+
+		public Builder light(LightShader value) {
+			this.light = value;
 			return this;
 		}
 
@@ -265,6 +280,11 @@ public class SimpleMaterial implements Material {
 		@Override
 		public CutoutShader cutout() {
 			return cutout;
+		}
+
+		@Override
+		public LightShader light() {
+			return light;
 		}
 
 		@Override

@@ -3,10 +3,9 @@ package dev.engine_room.flywheel.impl.registry;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import dev.engine_room.flywheel.api.registry.IdRegistry;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
@@ -14,7 +13,6 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceMaps;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import it.unimi.dsi.fastutil.objects.ObjectSets;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
@@ -31,7 +29,6 @@ public class IdRegistryImpl<T> implements IdRegistry<T> {
 	private final Reference2ObjectMap<T, ResourceLocation> reverseMap = Reference2ObjectMaps.synchronize(new Reference2ObjectOpenHashMap<>());
 	private final ObjectSet<ResourceLocation> keysView = ObjectSets.unmodifiable(map.keySet());
 	private final ReferenceCollection<T> valuesView = ReferenceCollections.unmodifiable(map.values());
-	private final ObjectList<Consumer<IdRegistry<T>>> freezeCallbacks = ObjectLists.synchronize(new ObjectArrayList<>());
 	private boolean frozen;
 
 	public IdRegistryImpl() {
@@ -90,23 +87,15 @@ public class IdRegistryImpl<T> implements IdRegistry<T> {
 	}
 
 	@Override
-	@Unmodifiable
+	@UnmodifiableView
 	public Set<ResourceLocation> getAllIds() {
 		return keysView;
 	}
 
 	@Override
-	@Unmodifiable
+	@UnmodifiableView
 	public Collection<T> getAll() {
 		return valuesView;
-	}
-
-	@Override
-	public void addFreezeCallback(Consumer<IdRegistry<T>> callback) {
-		if (frozen) {
-			throw new IllegalStateException("Cannot add freeze callback to frozen registry!");
-		}
-		freezeCallbacks.add(callback);
 	}
 
 	@Override
@@ -119,12 +108,8 @@ public class IdRegistryImpl<T> implements IdRegistry<T> {
 		return getAll().iterator();
 	}
 
-	public void freeze() {
+	private void freeze() {
 		frozen = true;
-		for (var callback : freezeCallbacks) {
-			callback.accept(this);
-		}
-		freezeCallbacks.clear();
 	}
 
 	public static void freezeAll() {

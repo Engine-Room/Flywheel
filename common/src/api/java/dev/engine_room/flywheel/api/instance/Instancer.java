@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.api.instance;
 
 import org.jetbrains.annotations.Nullable;
 
-import dev.engine_room.flywheel.api.BackendImplemented;
+import dev.engine_room.flywheel.api.backend.BackendImplemented;
 
 /**
  * An instancer is how you interact with an instanced model.
@@ -30,6 +30,17 @@ public interface Instancer<I extends Instance> {
 	I createInstance();
 
 	/**
+	 * Populate arr with new instances of this model.
+	 *
+	 * @param arr An array to fill.
+	 */
+	default void createInstances(I[] arr) {
+		for (int i = 0; i < arr.length; i++) {
+			arr[i] = createInstance();
+		}
+	}
+
+	/**
 	 * Steal an instance from another instancer.
 	 * <br>
 	 * This has the effect of swapping the instance's model in-place.
@@ -43,15 +54,4 @@ public interface Instancer<I extends Instance> {
 	 * @param instance The instance to steal.
 	 */
 	void stealInstance(@Nullable I instance);
-
-	/**
-	 * Populate arr with new instances of this model.
-	 *
-	 * @param arr An array to fill.
-	 */
-	default void createInstances(I[] arr) {
-		for (int i = 0; i < arr.length; i++) {
-			arr[i] = createInstance();
-		}
-	}
 }

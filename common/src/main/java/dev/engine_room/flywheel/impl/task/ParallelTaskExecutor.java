@@ -3,23 +3,18 @@ package dev.engine_room.flywheel.impl.task;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 
-import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.impl.FlwImpl;
 import net.minecraft.util.Mth;
 
 // https://github.com/CaffeineMC/sodium-fabric/blob/5d364ed5ba63f9067fcf72a078ca310bff4db3e9/src/main/java/me/jellysquid/mods/sodium/client/render/chunk/compile/ChunkBuilder.java
 // https://stackoverflow.com/questions/29655531
-public class ParallelTaskExecutor implements TaskExecutor {
+public class ParallelTaskExecutor implements TaskExecutorImpl {
 	private final String name;
 	private final int threadCount;
-
-	private final BooleanSupplier mainThreadQuery;
 
 	/**
 	 * If set to false, the executor will shut down.
@@ -28,13 +23,11 @@ public class ParallelTaskExecutor implements TaskExecutor {
 
 	private final List<WorkerThread> threads = new ArrayList<>();
 	private final Deque<Runnable> taskQueue = new ConcurrentLinkedDeque<>();
-	private final Queue<Runnable> mainThreadQueue = new ConcurrentLinkedQueue<>();
 	private final ThreadGroupNotifier taskNotifier = new ThreadGroupNotifier();
 	private final WaitGroup waitGroup = new WaitGroup();
 
-	public ParallelTaskExecutor(String name, int threadCount, BooleanSupplier mainThreadQuery) {
+	public ParallelTaskExecutor(String name, int threadCount) {
 		this.name = name;
-		this.mainThreadQuery = mainThreadQuery;
 		this.threadCount = threadCount;
 	}
 
@@ -94,7 +87,6 @@ public class ParallelTaskExecutor implements TaskExecutor {
 
 		threads.clear();
 		taskQueue.clear();
-		mainThreadQueue.clear();
 		waitGroup._reset();
 	}
 
@@ -111,36 +103,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 	}
 
 	@Override
-	public void scheduleForMainThread(Runnable runnable) {
-		if (!running.get()) {
-			throw new IllegalStateException("Executor is stopped");
-		}
-
-		mainThreadQueue.add(runnable);
-	}
-
-	@Override
-	public boolean isMainThread() {
-		return mainThreadQuery.getAsBoolean();
-	}
-
-	/**
-	 * Wait for all running tasks to finish.
-	 */
-	@Override
-	public void syncPoint() {
-		boolean onMainThread = isMainThread();
-		while (true) {
-			if (syncOneTask(onMainThread)) {
-				// Done! Nothing left to do.
-				return;
-			}
-		}
-	}
-
-	@Override
 	public boolean syncUntil(BooleanSupplier cond) {
-		boolean onMainThread = isMainThread();
 		while (true) {
 			if (cond.getAsBoolean()) {
 				// The condition is already true!
@@ -148,7 +111,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 				return true;
 			}
 
-			if (syncOneTask(onMainThread)) {
+			if (syncOneTask()) {
 				// Out of tasks entirely.
 				// The condition may have flipped though so return its result.
 				return cond.getAsBoolean();
@@ -156,10 +119,8 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		}
 	}
 
-
 	@Override
 	public boolean syncWhile(BooleanSupplier cond) {
-		boolean onMainThread = isMainThread();
 		while (true) {
 			if (!cond.getAsBoolean()) {
 				// The condition is already false!
@@ -167,7 +128,7 @@ public class ParallelTaskExecutor implements TaskExecutor {
 				return true;
 			}
 
-			if (syncOneTask(onMainThread)) {
+			if (syncOneTask()) {
 				// Out of tasks entirely.
 				// The condition may have flipped though so return its result.
 				return !cond.getAsBoolean();
@@ -175,40 +136,22 @@ public class ParallelTaskExecutor implements TaskExecutor {
 		}
 	}
 
-	/**
-	 * Attempt to process a single task.
-	 *
-	 * @param mainThread Whether this is being called from the main thread or not.
-	 * @return {@code true} if the executor has nothing left to do.
-	 */
-	private boolean syncOneTask(boolean mainThread) {
-		return mainThread ? syncOneTaskMainThread() : syncOneTaskOffThread();
-	}
-
-	private boolean syncOneTaskMainThread() {
-		Runnable task;
-		if ((task = mainThreadQueue.poll()) != null) {
-			// Prioritize main thread tasks.
-			processMainThreadTask(task);
-
-			// Check again next loop.
-			return false;
-		} else if ((task = taskQueue.pollLast()) != null) {
-			// Nothing in the mainThreadQueue, work on tasks from the normal queue.
-			processTask(task);
-
-			// Check again next loop.
-			return false;
-		} else {
-			// Nothing right now, wait for the other threads to finish.
-			boolean done = waitGroup.await(10_000);
-			// If we timed-out tasks may have been added to the queue, so check again.
-			// if they didn't, we're done.
-			return done && mainThreadQueue.isEmpty();
+	@Override
+	public void syncPoint() {
+		while (true) {
+			if (syncOneTask()) {
+				// Done! Nothing left to do.
+				return;
+			}
 		}
 	}
 
-	private boolean syncOneTaskOffThread() {
+	/**
+	 * Attempt to process a single task.
+	 *
+	 * @return {@code true} if the executor has nothing left to do.
+	 */
+	private boolean syncOneTask() {
 		Runnable task;
 		if ((task = taskQueue.pollLast()) != null) {
 			// then work on tasks from the queue.
@@ -230,14 +173,6 @@ public class ParallelTaskExecutor implements TaskExecutor {
 			FlwImpl.LOGGER.error("Error running task", e);
 		} finally {
 			waitGroup.done();
-		}
-	}
-
-	private void processMainThreadTask(Runnable task) {
-		try {
-			task.run();
-		} catch (Exception e) {
-			FlwImpl.LOGGER.error("Error running main thread task", e);
 		}
 	}
 

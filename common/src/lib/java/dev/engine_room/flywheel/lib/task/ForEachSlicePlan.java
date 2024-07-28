@@ -2,7 +2,6 @@ package dev.engine_room.flywheel.lib.task;
 
 import java.util.List;
 
-import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.task.TaskExecutor;
 import dev.engine_room.flywheel.lib.task.functional.ConsumerWithContext;
 import dev.engine_room.flywheel.lib.task.functional.SupplierWithContext;
@@ -19,19 +18,19 @@ import dev.engine_room.flywheel.lib.task.functional.SupplierWithContext;
  */
 public record ForEachSlicePlan<T, C>(SupplierWithContext<C, List<T>> listSupplier,
 									 ConsumerWithContext<List<T>, C> action) implements SimplyComposedPlan<C> {
-	public static <T, C> Plan<C> of(SupplierWithContext<C, List<T>> iterable, ConsumerWithContext<List<T>, C> forEach) {
+	public static <T, C> ForEachSlicePlan<T, C> of(SupplierWithContext<C, List<T>> iterable, ConsumerWithContext<List<T>, C> forEach) {
 		return new ForEachSlicePlan<>(iterable, forEach);
 	}
 
-	public static <T, C> Plan<C> of(SupplierWithContext<C, List<T>> iterable, ConsumerWithContext.Ignored<List<T>, C> forEach) {
+	public static <T, C> ForEachSlicePlan<T, C> of(SupplierWithContext<C, List<T>> iterable, ConsumerWithContext.Ignored<List<T>, C> forEach) {
 		return new ForEachSlicePlan<>(iterable, forEach);
 	}
 
-	public static <T, C> Plan<C> of(SupplierWithContext.Ignored<C, List<T>> iterable, ConsumerWithContext<List<T>, C> forEach) {
+	public static <T, C> ForEachSlicePlan<T, C> of(SupplierWithContext.Ignored<C, List<T>> iterable, ConsumerWithContext<List<T>, C> forEach) {
 		return new ForEachSlicePlan<>(iterable, forEach);
 	}
 
-	public static <T, C> Plan<C> of(SupplierWithContext.Ignored<C, List<T>> iterable, ConsumerWithContext.Ignored<List<T>, C> forEach) {
+	public static <T, C> ForEachSlicePlan<T, C> of(SupplierWithContext.Ignored<C, List<T>> iterable, ConsumerWithContext.Ignored<List<T>, C> forEach) {
 		return new ForEachSlicePlan<>(iterable, forEach);
 	}
 

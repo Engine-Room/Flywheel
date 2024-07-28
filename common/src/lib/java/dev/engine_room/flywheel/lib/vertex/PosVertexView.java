@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.lib.vertex;
 
 import org.lwjgl.system.MemoryUtil;
 
-public class PosVertexView extends AbstractVertexView implements EmptyVertexList {
+public class PosVertexView extends AbstractVertexView implements DefaultVertexList {
 	public static final long STRIDE = 12;
 
 	@Override

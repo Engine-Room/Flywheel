@@ -1,16 +1,16 @@
 package dev.engine_room.flywheel.lib.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.model.Model;
+import dev.engine_room.flywheel.lib.util.FlwUtil;
 
-public class ModelHolder {
-	private static final List<ModelHolder> ALL = new ArrayList<>();
+public final class ModelHolder {
+	private static final Set<ModelHolder> ALL = FlwUtil.createWeakHashSet();
 	private final Supplier<Model> factory;
 	@Nullable
 	private volatile Model model;
@@ -45,7 +45,6 @@ public class ModelHolder {
 			synchronized (this) {
 				model = this.model;
 				if (model != null) {
-					model.delete();
 					this.model = null;
 				}
 			}

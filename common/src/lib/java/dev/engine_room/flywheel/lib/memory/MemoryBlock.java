@@ -26,7 +26,7 @@ public sealed interface MemoryBlock permits AbstractMemoryBlockImpl {
 	void free();
 
 	static MemoryBlock malloc(long size) {
-		if (FlwMemoryTracker.DEBUG_MEMORY_SAFETY) {
+		if (MemoryBlockImpl.DEBUG_MEMORY_SAFETY) {
 			return DebugMemoryBlockImpl.malloc(size);
 		} else {
 			return MemoryBlockImpl.malloc(size);
@@ -38,7 +38,7 @@ public sealed interface MemoryBlock permits AbstractMemoryBlockImpl {
 	}
 
 	static MemoryBlock calloc(long num, long size) {
-		if (FlwMemoryTracker.DEBUG_MEMORY_SAFETY) {
+		if (MemoryBlockImpl.DEBUG_MEMORY_SAFETY) {
 			return DebugMemoryBlockImpl.calloc(num, size);
 		} else {
 			return MemoryBlockImpl.calloc(num, size);

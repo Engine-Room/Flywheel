@@ -2,26 +2,20 @@ package dev.engine_room.flywheel.impl.task;
 
 import java.util.function.BooleanSupplier;
 
-import dev.engine_room.flywheel.api.task.TaskExecutor;
-
-public class SerialTaskExecutor implements TaskExecutor {
+public class SerialTaskExecutor implements TaskExecutorImpl {
 	public static final SerialTaskExecutor INSTANCE = new SerialTaskExecutor();
 
 	private SerialTaskExecutor() {
 	}
 
 	@Override
-	public void execute(Runnable task) {
-		task.run();
-	}
-
-	@Override
-	public void scheduleForMainThread(Runnable runnable) {
+	public void execute(Runnable runnable) {
 		runnable.run();
 	}
 
 	@Override
-	public void syncPoint() {
+	public int threadCount() {
+		return 1;
 	}
 
 	@Override
@@ -35,12 +29,6 @@ public class SerialTaskExecutor implements TaskExecutor {
 	}
 
 	@Override
-	public int threadCount() {
-		return 1;
-	}
-
-	@Override
-	public boolean isMainThread() {
-		return true;
+	public void syncPoint() {
 	}
 }

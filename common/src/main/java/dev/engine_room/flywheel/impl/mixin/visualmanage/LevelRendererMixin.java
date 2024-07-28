@@ -33,7 +33,7 @@ abstract class LevelRendererMixin {
 			return;
 		}
 
-		var blockEntities = manager.getBlockEntities();
+		var blockEntities = manager.blockEntities();
 		if (oldState != newState) {
 			blockEntities.queueRemove(blockEntity);
 			blockEntities.queueAdd(blockEntity);

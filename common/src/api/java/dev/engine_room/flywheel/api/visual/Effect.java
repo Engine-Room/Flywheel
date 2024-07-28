@@ -1,6 +1,7 @@
 package dev.engine_room.flywheel.api.visual;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
+import net.minecraft.world.level.LevelAccessor;
 
 /**
  * An effect is not attached to any formal game object, but allows you to hook into
@@ -8,6 +9,8 @@ import dev.engine_room.flywheel.api.visualization.VisualizationContext;
  * without any built in support for networking.
  */
 public interface Effect {
+	LevelAccessor level();
+
 	/**
 	 * Create a visual that will be keyed by this effect object.
 	 *
