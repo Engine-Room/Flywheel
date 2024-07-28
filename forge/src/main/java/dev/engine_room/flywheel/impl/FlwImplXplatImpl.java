@@ -7,7 +7,7 @@ import net.neoforged.neoforge.common.NeoForge;
 public class FlwImplXplatImpl implements FlwImplXplat {
 	@Override
 	public void dispatchReloadLevelRendererEvent(ClientLevel level) {
-		MinecraftForge.EVENT_BUS.post(new ReloadLevelRendererEvent(level));
+		NeoForge.EVENT_BUS.post(new ReloadLevelRendererEvent(level));
 	}
 
 	@Override
