@@ -15,6 +15,10 @@ uint _flw_indexLut(uint index);
 
 uint _flw_indexLight(uint index);
 
+// Adding this option takes my test world from ~800 to ~1250 FPS on my 3060ti.
+// I have not taken it to a profiler otherwise.
+#pragma optionNV (unroll all)
+
 /// Find the index for the next step in the LUT.
 /// @param base The base index in the LUT, should point to the start of a coordinate span.
 /// @param coord The coordinate to look for.
@@ -77,8 +81,8 @@ uvec2 _flw_lightAt(uint sectionOffset, uvec3 blockInSectionPos) {
 bool _flw_isSolid(uint sectionOffset, uvec3 blockInSectionPos) {
     uint bitOffset = blockInSectionPos.x + blockInSectionPos.z * 18u + blockInSectionPos.y * 18u * 18u;
 
-    uint uintOffset = bitOffset / 32u;
-    uint bitInWordOffset = bitOffset % 32u;
+    uint uintOffset = bitOffset >> 5u;
+    uint bitInWordOffset = bitOffset & 31u;
 
     uint word = _flw_indexLight(sectionOffset + _FLW_SOLID_START_INTS + uintOffset);
 
@@ -99,61 +103,14 @@ bool flw_lightFetch(ivec3 blockPos, out vec2 lightCoord) {
     return true;
 }
 
-bool flw_light(vec3 worldPos, out vec2 lightCoord) {
-    // Always use the section of the block we are contained in to ensure accuracy.
-    // We don't want to interpolate between sections, but also we might not be able
-    // to rely on the existence neighboring sections, so don't do any extra rounding here.
-    ivec3 blockPos = ivec3(floor(worldPos)) + flw_renderOrigin;
-
-    uint lightSectionIndex;
-    if (_flw_chunkCoordToSectionIndex(blockPos >> 4, lightSectionIndex)) {
-        return false;
-    }
-    // The offset of the section in the light buffer.
-    uint sectionOffset = lightSectionIndex * _FLW_LIGHT_SECTION_SIZE_INTS;
-
-    // The block's position in the section adjusted into 18x18x18 space
-    uvec3 blockInSectionPos = (blockPos & 0xF) + 1;
-
-    // The lowest corner of the 2x2x2 area we'll be trilinear interpolating.
-    // The ugly bit on the end evaluates to -1 or 0 depending on which side of 0.5 we are.
-    uvec3 lowestCorner = blockInSectionPos + ivec3(floor(fract(worldPos) - 0.5));
-
-    // The distance our fragment is from the center of the lowest corner.
-    vec3 interpolant = fract(worldPos - 0.5);
-
-    // Fetch everything for trilinear interpolation
-    // Hypothetically we could re-order these and do some calculations in-between fetches
-    // to help with latency hiding, but the compiler should be able to do that for us.
-    vec2 light000 = vec2(_flw_lightAt(sectionOffset, lowestCorner));
-    vec2 light001 = vec2(_flw_lightAt(sectionOffset, lowestCorner + uvec3(0, 0, 1)));
-    vec2 light010 = vec2(_flw_lightAt(sectionOffset, lowestCorner + uvec3(0, 1, 0)));
-    vec2 light011 = vec2(_flw_lightAt(sectionOffset, lowestCorner + uvec3(0, 1, 1)));
-    vec2 light100 = vec2(_flw_lightAt(sectionOffset, lowestCorner + uvec3(1, 0, 0)));
-    vec2 light101 = vec2(_flw_lightAt(sectionOffset, lowestCorner + uvec3(1, 0, 1)));
-    vec2 light110 = vec2(_flw_lightAt(sectionOffset, lowestCorner + uvec3(1, 1, 0)));
-    vec2 light111 = vec2(_flw_lightAt(sectionOffset, lowestCorner + uvec3(1, 1, 1)));
-
-    vec2 light00 = mix(light000, light001, interpolant.z);
-    vec2 light01 = mix(light010, light011, interpolant.z);
-    vec2 light10 = mix(light100, light101, interpolant.z);
-    vec2 light11 = mix(light110, light111, interpolant.z);
-
-    vec2 light0 = mix(light00, light01, interpolant.y);
-    vec2 light1 = mix(light10, light11, interpolant.y);
-
-    lightCoord = mix(light0, light1, interpolant.x) / 15.;
-    return true;
-}
-
-uint _flw_lightIndex(in uvec3 p) {
-    return p.x + p.z * 3u + p.y * 9u;
-}
-
 /// Premtively collect all light in a 3x3x3 area centered on our block.
 /// Depending on the normal, we won't use all the data, but fetching on demand will have many duplicated fetches.
-uvec3[27] _flw_fetchLight3x3x3(uint sectionOffset, ivec3 blockInSectionPos, uint solid) {
-    uvec3[27] lights;
+///
+/// The output is a 3-component vector <blockLight, skyLight, valid ? 1 : 0> packed into a single uint to save
+/// memory and ALU ops later on. 10 bits are used for each component. This allows 4 such packed ints to be added
+/// together with room to spare before overflowing into the next component.
+uint[27] _flw_fetchLight3x3x3(uint sectionOffset, ivec3 blockInSectionPos, uint solid) {
+    uint[27] lights;
 
     uint index = 0u;
     uint mask = 1u;
@@ -161,8 +118,13 @@ uvec3[27] _flw_fetchLight3x3x3(uint sectionOffset, ivec3 blockInSectionPos, uint
         for (int z = -1; z <= 1; z++) {
             for (int x = -1; x <= 1; x++) {
                 // 0 if the block is solid, 1 if it's not.
-                uint flag = uint((solid & mask) == 0u);
-                lights[index] = uvec3(_flw_lightAt(sectionOffset, uvec3(blockInSectionPos + ivec3(x, y, z))), flag);
+                uint notSolid = uint((solid & mask) == 0u);
+                uvec2 light = _flw_lightAt(sectionOffset, uvec3(blockInSectionPos + ivec3(x, y, z)));
+
+                lights[index] = light.x;
+                lights[index] |= (light.y) << 10;
+                lights[index] |= (notSolid) << 20;
+
                 index++;
                 mask <<= 1;
             }
@@ -190,6 +152,10 @@ uint _flw_fetchSolid3x3x3(uint sectionOffset, ivec3 blockInSectionPos) {
     return ret;
 }
 
+#define _flw_index3x3x3(x, y, z) ((x) + (z) * 3u + (y) * 9u)
+#define _flw_index3x3x3v(p) _flw_index3x3x3((p.x), (p.y), (p.z))
+#define _flw_validCountToAO(validCount) (1. - (4. - (validCount)) * 0.2)
+
 /// Calculate the light for a direction by averaging the light at the corners of the block.
 ///
 /// To make this reusable across directions, c00..c11 choose what values relative to each corner to use.
@@ -200,39 +166,75 @@ uint _flw_fetchSolid3x3x3(uint sectionOffset, ivec3 blockInSectionPos) {
 /// @param lights The light data for the 3x3x3 area.
 /// @param interpolant The position within the center block.
 /// @param c00..c11 4 offsets to determine which "direction" we are averaging.
-vec2 _flw_lightForDirection(in uvec3[27] lights, in vec3 interpolant, in uvec3 c00, in uvec3 c01, in uvec3 c10, in uvec3 c11) {
+/// @param oppositeMask A bitmask telling this function which bit to flip to get the opposite index for a given corner
+vec3 _flw_lightForDirection(uint[27] lights, vec3 interpolant, uvec3 c00, uvec3 c01, uvec3 c10, uvec3 c11, uint oppositeMask) {
+    // Constant propatation should inline all of these index calculations,
+    // but since they're distributive we can lay them out more nicely.
+    uint ic00 = _flw_index3x3x3v(c00);
+    uint ic01 = _flw_index3x3x3v(c01);
+    uint ic10 = _flw_index3x3x3v(c10);
+    uint ic11 = _flw_index3x3x3v(c11);
 
-    uvec3 i000 = lights[_flw_lightIndex(c00 + uvec3(0u, 0u, 0u))] + lights[_flw_lightIndex(c01 + uvec3(0u, 0u, 0u))] + lights[_flw_lightIndex(c10 + uvec3(0u, 0u, 0u))] + lights[_flw_lightIndex(c11 + uvec3(0u, 0u, 0u))];
-    uvec3 i001 = lights[_flw_lightIndex(c00 + uvec3(0u, 0u, 1u))] + lights[_flw_lightIndex(c01 + uvec3(0u, 0u, 1u))] + lights[_flw_lightIndex(c10 + uvec3(0u, 0u, 1u))] + lights[_flw_lightIndex(c11 + uvec3(0u, 0u, 1u))];
-    uvec3 i010 = lights[_flw_lightIndex(c00 + uvec3(0u, 1u, 0u))] + lights[_flw_lightIndex(c01 + uvec3(0u, 1u, 0u))] + lights[_flw_lightIndex(c10 + uvec3(0u, 1u, 0u))] + lights[_flw_lightIndex(c11 + uvec3(0u, 1u, 0u))];
-    uvec3 i011 = lights[_flw_lightIndex(c00 + uvec3(0u, 1u, 1u))] + lights[_flw_lightIndex(c01 + uvec3(0u, 1u, 1u))] + lights[_flw_lightIndex(c10 + uvec3(0u, 1u, 1u))] + lights[_flw_lightIndex(c11 + uvec3(0u, 1u, 1u))];
-    uvec3 i100 = lights[_flw_lightIndex(c00 + uvec3(1u, 0u, 0u))] + lights[_flw_lightIndex(c01 + uvec3(1u, 0u, 0u))] + lights[_flw_lightIndex(c10 + uvec3(1u, 0u, 0u))] + lights[_flw_lightIndex(c11 + uvec3(1u, 0u, 0u))];
-    uvec3 i101 = lights[_flw_lightIndex(c00 + uvec3(1u, 0u, 1u))] + lights[_flw_lightIndex(c01 + uvec3(1u, 0u, 1u))] + lights[_flw_lightIndex(c10 + uvec3(1u, 0u, 1u))] + lights[_flw_lightIndex(c11 + uvec3(1u, 0u, 1u))];
-    uvec3 i110 = lights[_flw_lightIndex(c00 + uvec3(1u, 1u, 0u))] + lights[_flw_lightIndex(c01 + uvec3(1u, 1u, 0u))] + lights[_flw_lightIndex(c10 + uvec3(1u, 1u, 0u))] + lights[_flw_lightIndex(c11 + uvec3(1u, 1u, 0u))];
-    uvec3 i111 = lights[_flw_lightIndex(c00 + uvec3(1u, 1u, 1u))] + lights[_flw_lightIndex(c01 + uvec3(1u, 1u, 1u))] + lights[_flw_lightIndex(c10 + uvec3(1u, 1u, 1u))] + lights[_flw_lightIndex(c11 + uvec3(1u, 1u, 1u))];
+    const uint[8] corners = uint[](
+    _flw_index3x3x3(0u, 0u, 0u),
+    _flw_index3x3x3(0u, 0u, 1u),
+    _flw_index3x3x3(0u, 1u, 0u),
+    _flw_index3x3x3(0u, 1u, 1u),
+    _flw_index3x3x3(1u, 0u, 0u),
+    _flw_index3x3x3(1u, 0u, 1u),
+    _flw_index3x3x3(1u, 1u, 0u),
+    _flw_index3x3x3(1u, 1u, 1u)
+    );
 
-    // Divide by the number of light transmitting blocks to get the average.
-    vec2 light000 = i000.z == 0 ? vec2(0) : vec2(i000.xy) / float(i000.z);
-    vec2 light001 = i001.z == 0 ? vec2(0) : vec2(i001.xy) / float(i001.z);
-    vec2 light010 = i010.z == 0 ? vec2(0) : vec2(i010.xy) / float(i010.z);
-    vec2 light011 = i011.z == 0 ? vec2(0) : vec2(i011.xy) / float(i011.z);
-    vec2 light100 = i100.z == 0 ? vec2(0) : vec2(i100.xy) / float(i100.z);
-    vec2 light101 = i101.z == 0 ? vec2(0) : vec2(i101.xy) / float(i101.z);
-    vec2 light110 = i110.z == 0 ? vec2(0) : vec2(i110.xy) / float(i110.z);
-    vec2 light111 = i111.z == 0 ? vec2(0) : vec2(i111.xy) / float(i111.z);
+    // Division and branching are both kinda expensive, so use this table for the valid block normalization
+    const float[5] normalizers = float[](0., 1., 1. / 2., 1. / 3., 1. / 4.);
 
-    vec2 light00 = mix(light000, light001, interpolant.z);
-    vec2 light01 = mix(light010, light011, interpolant.z);
-    vec2 light10 = mix(light100, light101, interpolant.z);
-    vec2 light11 = mix(light110, light111, interpolant.z);
+    // Sum up the light and number of valid blocks in each corner for this direction
+    uint[8] summed;
+    for (uint i = 0; i < 8; i++) {
+        uint corner = corners[i];
+        summed[i] = lights[ic00 + corner] + lights[ic01 + corner] + lights[ic10 + corner] + lights[ic11 + corner];
+    }
 
-    vec2 light0 = mix(light00, light01, interpolant.y);
-    vec2 light1 = mix(light10, light11, interpolant.y);
+    // The final light and AO value for each corner.
+    vec3[8] adjusted;
+    for (uint i = 0; i < 8; i++) {
+        uint validCount = (summed[i] >> 20u) & 0x3FFu;
+        // Always use the AO from the actual corner
+        adjusted[i].z = float(validCount);
 
-    return mix(light0, light1, interpolant.x) / 15.;
+        // If the current corner has no valid blocks, use the opposite
+        // corner's light based on which direction we're evaluating.
+        // Because of how our corners are indexed, moving along one axis is the same as flipping a bit.
+        uint corner = summed[(validCount == 0 ? i ^ oppositeMask : i)];
+
+        // Still need to unpack all 3 fields of the maybe opposite corner so we can...
+        uvec3 unpacked = uvec3(corner, corner >> 10u, corner >> 20u) & 0x3FFu;
+
+        // ...normalize by the number of valid blocks.
+        adjusted[i].xy = vec2(unpacked.xy) * normalizers[unpacked.z];
+    }
+
+    // Trilinear interpolation, including valid count
+    vec3 light00 = mix(adjusted[0], adjusted[1], interpolant.z);
+    vec3 light01 = mix(adjusted[2], adjusted[3], interpolant.z);
+    vec3 light10 = mix(adjusted[4], adjusted[5], interpolant.z);
+    vec3 light11 = mix(adjusted[6], adjusted[7], interpolant.z);
+
+    vec3 light0 = mix(light00, light01, interpolant.y);
+    vec3 light1 = mix(light10, light11, interpolant.y);
+
+    vec3 light = mix(light0, light1, interpolant.x);
+
+    // Normalize the light coords
+    light.xy *= 1. / 15.;
+    // Calculate the AO multiplier from the number of valid blocks
+    light.z = _flw_validCountToAO(light.z);
+
+    return light;
 }
 
-bool flw_light(vec3 worldPos, vec3 normal, out vec2 lightCoord) {
+bool flw_light(vec3 worldPos, vec3 normal, out vec3 light) {
     // Always use the section of the block we are contained in to ensure accuracy.
     // We don't want to interpolate between sections, but also we might not be able
     // to rely on the existence neighboring sections, so don't do any extra rounding here.
@@ -251,45 +253,48 @@ bool flw_light(vec3 worldPos, vec3 normal, out vec2 lightCoord) {
     uint solid = _flw_fetchSolid3x3x3(sectionOffset, blockInSectionPos);
 
     if (solid == _FLW_COMPLETELY_SOLID) {
-        lightCoord = vec2(0.);
+        // No point in doing any work if the entire 3x3x3 volume around us is filled.
+        // Kinda rare but this may happen if our fragment is in the middle of a lot of tinted glass
+        light = vec3(0., 0., _flw_validCountToAO(0.));
         return true;
     }
 
     // Fetch everything in a 3x3x3 area centered around the block.
-    uvec3[27] lights = _flw_fetchLight3x3x3(sectionOffset, blockInSectionPos, solid);
+    uint[27] lights = _flw_fetchLight3x3x3(sectionOffset, blockInSectionPos, solid);
 
     vec3 interpolant = fract(worldPos);
 
-    vec2 lightX;
+    // Average the light in relevant directions at each corner, skipping directions that would have no influence
+
+    vec3 lightX;
     if (normal.x > _FLW_EPSILON) {
-        lightX = _flw_lightForDirection(lights, interpolant, uvec3(1u, 0u, 0u), uvec3(1u, 0u, 1u), uvec3(1u, 1u, 0u), uvec3(1u, 1u, 1u));
+        lightX = _flw_lightForDirection(lights, interpolant, uvec3(1u, 0u, 0u), uvec3(1u, 0u, 1u), uvec3(1u, 1u, 0u), uvec3(1u, 1u, 1u), 4u);
     } else if (normal.x < -_FLW_EPSILON) {
-        lightX = _flw_lightForDirection(lights, interpolant, uvec3(0u, 0u, 0u), uvec3(0u, 0u, 1u), uvec3(0u, 1u, 0u), uvec3(0u, 1u, 1u));
+        lightX = _flw_lightForDirection(lights, interpolant, uvec3(0u, 0u, 0u), uvec3(0u, 0u, 1u), uvec3(0u, 1u, 0u), uvec3(0u, 1u, 1u), 4u);
     } else {
-        lightX = vec2(0.);
+        lightX = vec3(0.);
     }
 
-    vec2 lightZ;
+    vec3 lightZ;
     if (normal.z > _FLW_EPSILON) {
-        lightZ = _flw_lightForDirection(lights, interpolant, uvec3(0u, 0u, 1u), uvec3(0u, 1u, 1u), uvec3(1u, 0u, 1u), uvec3(1u, 1u, 1u));
+        lightZ = _flw_lightForDirection(lights, interpolant, uvec3(0u, 0u, 1u), uvec3(0u, 1u, 1u), uvec3(1u, 0u, 1u), uvec3(1u, 1u, 1u), 1u);
     } else if (normal.z < -_FLW_EPSILON) {
-        lightZ = _flw_lightForDirection(lights, interpolant, uvec3(0u, 0u, 0u), uvec3(0u, 1u, 0u), uvec3(1u, 0u, 0u), uvec3(1u, 1u, 0u));
+        lightZ = _flw_lightForDirection(lights, interpolant, uvec3(0u, 0u, 0u), uvec3(0u, 1u, 0u), uvec3(1u, 0u, 0u), uvec3(1u, 1u, 0u), 1u);
     } else {
-        lightZ = vec2(0.);
+        lightZ = vec3(0.);
     }
 
-    vec2 lightY;
-    // Average the light in relevant directions at each corner.
+    vec3 lightY;
     if (normal.y > _FLW_EPSILON) {
-        lightY = _flw_lightForDirection(lights, interpolant, uvec3(0u, 1u, 0u), uvec3(0u, 1u, 1u), uvec3(1u, 1u, 0u), uvec3(1u, 1u, 1u));
+        lightY = _flw_lightForDirection(lights, interpolant, uvec3(0u, 1u, 0u), uvec3(0u, 1u, 1u), uvec3(1u, 1u, 0u), uvec3(1u, 1u, 1u), 2u);
     } else if (normal.y < -_FLW_EPSILON) {
-        lightY = _flw_lightForDirection(lights, interpolant, uvec3(0u, 0u, 0u), uvec3(0u, 0u, 1u), uvec3(1u, 0u, 0u), uvec3(1u, 0u, 1u));
+        lightY = _flw_lightForDirection(lights, interpolant, uvec3(0u, 0u, 0u), uvec3(0u, 0u, 1u), uvec3(1u, 0u, 0u), uvec3(1u, 0u, 1u), 2u);
     } else {
-        lightY = vec2(0.);
+        lightY = vec3(0.);
     }
 
     vec3 n2 = normal * normal;
-    lightCoord = lightX * n2.x + lightY * n2.y + lightZ * n2.z;
+    light = lightX * n2.x + lightY * n2.y + lightZ * n2.z;
 
     return true;
 }

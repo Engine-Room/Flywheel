@@ -45,6 +45,8 @@ void _flw_main() {
     flw_fragColor.a *= crumblingSampleColor.a;
     #endif
 
+    flw_shaderLight();
+
     vec4 color = flw_fragColor;
 
     if (flw_discardPredicate(color)) {
@@ -61,8 +63,6 @@ void _flw_main() {
 
     vec4 lightColor = vec4(1.);
     if (flw_material.useLight) {
-        flw_shaderLight();
-
         lightColor = texture(flw_lightTex, clamp(flw_fragLight, 0.5 / 16.0, 15.5 / 16.0));
         color *= lightColor;
     }
