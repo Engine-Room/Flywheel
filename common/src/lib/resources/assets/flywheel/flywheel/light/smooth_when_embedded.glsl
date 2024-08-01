@@ -1,10 +1,10 @@
 void flw_shaderLight() {
     #ifdef FLW_EMBEDDED
-    vec3 light;
+    FlwLightAo light;
     if (flw_light(flw_vertexPos.xyz, flw_vertexNormal, light)) {
-        flw_fragLight = max(flw_fragLight, light.xy);
+        flw_fragLight = max(flw_fragLight, light.light);
 
-        flw_fragColor *= light.z;
+        flw_fragColor.rgb *= light.ao;
     }
     #endif
 }

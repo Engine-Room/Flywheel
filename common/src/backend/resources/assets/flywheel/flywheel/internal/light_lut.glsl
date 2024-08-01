@@ -154,7 +154,7 @@ uint _flw_fetchSolid3x3x3(uint sectionOffset, ivec3 blockInSectionPos) {
 
 #define _flw_index3x3x3(x, y, z) ((x) + (z) * 3u + (y) * 9u)
 #define _flw_index3x3x3v(p) _flw_index3x3x3((p.x), (p.y), (p.z))
-#define _flw_validCountToAO(validCount) (1. - (4. - (validCount)) * 0.2)
+#define _flw_validCountToAo(validCount) (1. - (4. - (validCount)) * 0.2)
 
 /// Calculate the light for a direction by averaging the light at the corners of the block.
 ///
@@ -229,12 +229,13 @@ vec3 _flw_lightForDirection(uint[27] lights, vec3 interpolant, uvec3 c00, uvec3 
     // Normalize the light coords
     light.xy *= 1. / 15.;
     // Calculate the AO multiplier from the number of valid blocks
-    light.z = _flw_validCountToAO(light.z);
+    light.z = _flw_validCountToAo(light.z);
 
     return light;
 }
 
-bool flw_light(vec3 worldPos, vec3 normal, out vec3 light) {
+// TODO: Add config for light smoothness. Should work at a compile flag level
+bool flw_light(vec3 worldPos, vec3 normal, out FlwLightAo light) {
     // Always use the section of the block we are contained in to ensure accuracy.
     // We don't want to interpolate between sections, but also we might not be able
     // to rely on the existence neighboring sections, so don't do any extra rounding here.
@@ -255,7 +256,8 @@ bool flw_light(vec3 worldPos, vec3 normal, out vec3 light) {
     if (solid == _FLW_COMPLETELY_SOLID) {
         // No point in doing any work if the entire 3x3x3 volume around us is filled.
         // Kinda rare but this may happen if our fragment is in the middle of a lot of tinted glass
-        light = vec3(0., 0., _flw_validCountToAO(0.));
+        light.light = vec2(0.);
+        light.ao = _flw_validCountToAo(0.);
         return true;
     }
 
@@ -294,7 +296,10 @@ bool flw_light(vec3 worldPos, vec3 normal, out vec3 light) {
     }
 
     vec3 n2 = normal * normal;
-    light = lightX * n2.x + lightY * n2.y + lightZ * n2.z;
+    vec3 lightAo = lightX * n2.x + lightY * n2.y + lightZ * n2.z;
+
+    light.light = lightAo.xy;
+    light.ao = lightAo.z;
 
     return true;
 }
