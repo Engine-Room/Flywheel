@@ -1,9 +1,8 @@
 import java.util.Properties
 
 plugins {
-    id("java-gradle-plugin")
-    kotlin("jvm") version "1.9.23"
     `kotlin-dsl`
+    idea
 }
 
 repositories {
@@ -17,6 +16,11 @@ repositories {
     }
     maven("https://repo.spongepowered.org/repository/maven-public")
     maven("https://maven.parchmentmc.org")
+}
+
+idea.module {
+    isDownloadJavadoc = true
+    isDownloadSources = true
 }
 
 gradlePlugin {
