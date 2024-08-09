@@ -153,7 +153,7 @@ uint _flw_fetchSolid3x3x3(uint sectionOffset, ivec3 blockInSectionPos) {
 }
 
 #define _flw_index3x3x3(x, y, z) ((x) + (z) * 3u + (y) * 9u)
-#define _flw_index3x3x3v(p) _flw_index3x3x3((p.x), (p.y), (p.z))
+#define _flw_index3x3x3v(p) _flw_index3x3x3((p).x, (p).y, (p).z)
 #define _flw_validCountToAo(validCount) (1. - (4. - (validCount)) * 0.2)
 
 /// Calculate the light for a direction by averaging the light at the corners of the block.
@@ -196,23 +196,24 @@ vec3 _flw_lightForDirection(uint[27] lights, vec3 interpolant, uvec3 c00, uvec3 
         summed[i] = lights[ic00 + corner] + lights[ic01 + corner] + lights[ic10 + corner] + lights[ic11 + corner];
     }
 
-    // The final light and AO value for each corner.
+    // The final light and number of valid blocks for each corner.
     vec3[8] adjusted;
     for (uint i = 0; i < 8; i++) {
-        uint validCount = (summed[i] >> 20u) & 0x3FFu;
-        // Always use the AO from the actual corner
-        adjusted[i].z = float(validCount);
-
+        #ifdef _FLW_INNER_FACE_CORRECTION
         // If the current corner has no valid blocks, use the opposite
         // corner's light based on which direction we're evaluating.
         // Because of how our corners are indexed, moving along one axis is the same as flipping a bit.
-        uint corner = summed[(validCount == 0 ? i ^ oppositeMask : i)];
+        uint cornerIndex = (summed[i] & 0xFFF00000u) == 0u ? i ^ oppositeMask : i;
+        #else
+        uint cornerIndex = i;
+        #endif
+        uint corner = summed[cornerIndex];
 
-        // Still need to unpack all 3 fields of the maybe opposite corner so we can...
-        uvec3 unpacked = uvec3(corner, corner >> 10u, corner >> 20u) & 0x3FFu;
+        uvec3 unpacked = uvec3(corner & 0x3FFu, (corner >> 10u) & 0x3FFu, corner >> 20u);
 
-        // ...normalize by the number of valid blocks.
+        // Normalize by the number of valid blocks.
         adjusted[i].xy = vec2(unpacked.xy) * normalizers[unpacked.z];
+        adjusted[i].z = float(unpacked.z);
     }
 
     // Trilinear interpolation, including valid count
@@ -234,7 +235,6 @@ vec3 _flw_lightForDirection(uint[27] lights, vec3 interpolant, uvec3 c00, uvec3 
     return light;
 }
 
-// TODO: Add config for light smoothness. Should work at a compile flag level
 bool flw_light(vec3 worldPos, vec3 normal, out FlwLightAo light) {
     // Always use the section of the block we are contained in to ensure accuracy.
     // We don't want to interpolate between sections, but also we might not be able
@@ -250,6 +250,40 @@ bool flw_light(vec3 worldPos, vec3 normal, out FlwLightAo light) {
 
     // The block's position in the section adjusted into 18x18x18 space
     ivec3 blockInSectionPos = (blockPos & 0xF) + 1;
+
+    #if _FLW_LIGHT_SMOOTHNESS == 1// Directly trilerp as if sampling a texture
+
+    // The lowest corner of the 2x2x2 area we'll be trilinear interpolating.
+    // The ugly bit on the end evaluates to -1 or 0 depending on which side of 0.5 we are.
+    uvec3 lowestCorner = blockInSectionPos + ivec3(floor(fract(worldPos) - 0.5));
+
+    // The distance our fragment is from the center of the lowest corner.
+    vec3 interpolant = fract(worldPos - 0.5);
+
+    // Fetch everything for trilinear interpolation
+    // Hypothetically we could re-order these and do some calculations in-between fetches
+    // to help with latency hiding, but the compiler should be able to do that for us.
+    vec2 light000 = vec2(_flw_lightAt(sectionOffset, lowestCorner));
+    vec2 light100 = vec2(_flw_lightAt(sectionOffset, lowestCorner + uvec3(1, 0, 0)));
+    vec2 light001 = vec2(_flw_lightAt(sectionOffset, lowestCorner + uvec3(0, 0, 1)));
+    vec2 light101 = vec2(_flw_lightAt(sectionOffset, lowestCorner + uvec3(1, 0, 1)));
+    vec2 light010 = vec2(_flw_lightAt(sectionOffset, lowestCorner + uvec3(0, 1, 0)));
+    vec2 light110 = vec2(_flw_lightAt(sectionOffset, lowestCorner + uvec3(1, 1, 0)));
+    vec2 light011 = vec2(_flw_lightAt(sectionOffset, lowestCorner + uvec3(0, 1, 1)));
+    vec2 light111 = vec2(_flw_lightAt(sectionOffset, lowestCorner + uvec3(1, 1, 1)));
+
+    vec2 light00 = mix(light000, light001, interpolant.z);
+    vec2 light01 = mix(light010, light011, interpolant.z);
+    vec2 light10 = mix(light100, light101, interpolant.z);
+    vec2 light11 = mix(light110, light111, interpolant.z);
+
+    vec2 light0 = mix(light00, light01, interpolant.y);
+    vec2 light1 = mix(light10, light11, interpolant.y);
+
+    light.light = mix(light0, light1, interpolant.x) / 15.;
+    light.ao = 1.;
+
+    #elif _FLW_LIGHT_SMOOTHNESS == 2// Lighting and AO accurate to chunk baking
 
     uint solid = _flw_fetchSolid3x3x3(sectionOffset, blockInSectionPos);
 
@@ -300,6 +334,13 @@ bool flw_light(vec3 worldPos, vec3 normal, out FlwLightAo light) {
 
     light.light = lightAo.xy;
     light.ao = lightAo.z;
+
+    #else// Entirely flat lighting, the lowest setting and a fallback in case an invalid option is set
+
+    light.light = vec2(_flw_lightAt(sectionOffset, blockInSectionPos)) / 15.;
+    light.ao = 1.;
+
+    #endif
 
     return true;
 }

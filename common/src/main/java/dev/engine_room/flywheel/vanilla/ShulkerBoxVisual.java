@@ -8,10 +8,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
 import dev.engine_room.flywheel.api.instance.Instance;
+import dev.engine_room.flywheel.api.visual.ShaderLightVisual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.material.CutoutShaders;
+import dev.engine_room.flywheel.lib.material.LightShaders;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.model.ModelCache;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
@@ -19,17 +21,20 @@ import dev.engine_room.flywheel.lib.model.part.ModelPartConverter;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
+import it.unimi.dsi.fastutil.longs.LongArraySet;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
-public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockEntity> implements SimpleDynamicVisual {
+public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockEntity> implements SimpleDynamicVisual, ShaderLightVisual {
 	private static final dev.engine_room.flywheel.api.material.Material MATERIAL = SimpleMaterial.builder()
 			.cutout(CutoutShaders.ONE_TENTH)
+			.light(LightShaders.SMOOTH)
 			.texture(Sheets.SHULKER_SHEET)
 			.mipmap(false)
 			.backfaceCulling(false)
@@ -67,6 +72,7 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 				.translate(getVisualPosition())
 				.translate(0.5f)
 				.scale(0.9995f)
+				.scale(11f)
 				.rotate(rotation)
 				.scale(1, -1, -1)
 				.translateY(-1);
@@ -121,8 +127,25 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	}
 
 	@Override
+	public void setSectionCollector(SectionCollector sectionCollector) {
+
+		var center = SectionPos.asLong(pos);
+		var out = new LongArraySet();
+
+		for (int x = -1; x <= 1; x++) {
+			for (int y = -1; y <= 1; y++) {
+				for (int z = -1; z <= 1; z++) {
+					out.add(SectionPos.offset(center, x, y, z));
+				}
+			}
+		}
+
+		sectionCollector.sections(out);
+	}
+
+	@Override
 	public void updateLight(float partialTick) {
-		relight(base, lid);
+		// relight(base, lid);
 	}
 
 	@Override

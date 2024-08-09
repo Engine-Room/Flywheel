@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import dev.engine_room.flywheel.api.event.EndClientResourceReloadCallback;
+import dev.engine_room.flywheel.backend.FabricBackendConfig;
 import dev.engine_room.flywheel.impl.FabricFlwConfig;
 import dev.engine_room.flywheel.impl.FlwImpl;
 import net.minecraft.client.Minecraft;
@@ -28,6 +29,7 @@ abstract class MinecraftMixin {
 		// Load the config after we freeze registries,
 		// so we can find third party backends.
 		FabricFlwConfig.INSTANCE.load();
+		FabricBackendConfig.INSTANCE.load();
 	}
 
 	@Inject(method = "method_24040", at = @At("HEAD"))

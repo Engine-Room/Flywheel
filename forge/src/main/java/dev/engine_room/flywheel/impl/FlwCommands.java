@@ -6,6 +6,9 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.backend.BackendManager;
+import dev.engine_room.flywheel.backend.ForgeBackendConfig;
+import dev.engine_room.flywheel.backend.LightSmoothnessArgument;
+import dev.engine_room.flywheel.backend.compile.LightSmoothness;
 import dev.engine_room.flywheel.backend.engine.uniform.DebugMode;
 import dev.engine_room.flywheel.backend.engine.uniform.FrameUniforms;
 import net.minecraft.client.Minecraft;
@@ -118,6 +121,21 @@ public final class FlwCommands {
 				.then(Commands.literal("unpause")
 						.executes(context -> {
 							FrameUniforms.unpauseFrustum();
+							return Command.SINGLE_SUCCESS;
+						})));
+
+		var lightSmoothnessValue = ForgeBackendConfig.INSTANCE.client.lightSmoothness;
+		command.then(Commands.literal("lightSmoothness")
+				.then(Commands.argument("mode", LightSmoothnessArgument.INSTANCE)
+						.executes(context -> {
+							var oldValue = lightSmoothnessValue.get();
+							var newValue = context.getArgument("mode", LightSmoothness.class);
+
+							if (oldValue != newValue) {
+								lightSmoothnessValue.set(newValue);
+								Minecraft.getInstance()
+										.reloadResourcePacks();
+							}
 							return Command.SINGLE_SUCCESS;
 						})));
 
