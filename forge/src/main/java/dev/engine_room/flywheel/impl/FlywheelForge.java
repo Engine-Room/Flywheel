@@ -6,7 +6,6 @@ import org.jetbrains.annotations.UnknownNullability;
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.event.EndClientResourceReloadEvent;
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererEvent;
-import dev.engine_room.flywheel.backend.ForgeBackendConfig;
 import dev.engine_room.flywheel.backend.LightSmoothnessArgument;
 import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
@@ -54,7 +53,6 @@ public final class FlywheelForge {
 				.getModEventBus();
 
 		ForgeFlwConfig.INSTANCE.registerSpecs(modLoadingContext);
-		ForgeBackendConfig.INSTANCE.registerSpecs(modLoadingContext);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FlywheelForge.clientInit(forgeEventBus, modEventBus));
 	}

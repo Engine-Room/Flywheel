@@ -6,7 +6,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.backend.BackendManager;
-import dev.engine_room.flywheel.backend.ForgeBackendConfig;
 import dev.engine_room.flywheel.backend.LightSmoothnessArgument;
 import dev.engine_room.flywheel.backend.compile.LightSmoothness;
 import dev.engine_room.flywheel.backend.engine.uniform.DebugMode;
@@ -124,7 +123,7 @@ public final class FlwCommands {
 							return Command.SINGLE_SUCCESS;
 						})));
 
-		var lightSmoothnessValue = ForgeBackendConfig.INSTANCE.client.lightSmoothness;
+		var lightSmoothnessValue = ForgeFlwConfig.INSTANCE.client.backendConfig.lightSmoothness;
 		command.then(Commands.literal("lightSmoothness")
 				.then(Commands.argument("mode", LightSmoothnessArgument.INSTANCE)
 						.executes(context -> {

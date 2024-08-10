@@ -5,6 +5,9 @@ import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.backend.BackendManager;
+import dev.engine_room.flywheel.backend.BackendConfig;
+import dev.engine_room.flywheel.backend.FlwBackendXplatImpl;
+import dev.engine_room.flywheel.backend.compile.LightSmoothness;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -21,6 +24,8 @@ public class ForgeFlwConfig implements FlwConfig {
 		Pair<ClientConfig, ForgeConfigSpec> clientPair = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
 		this.client = clientPair.getLeft();
 		clientSpec = clientPair.getRight();
+
+		FlwBackendXplatImpl.CONFIG = client.backendConfig;
 	}
 
 	@Override
@@ -72,6 +77,8 @@ public class ForgeFlwConfig implements FlwConfig {
 		public final ForgeConfigSpec.BooleanValue limitUpdates;
 		public final ForgeConfigSpec.IntValue workerThreads;
 
+		public final ForgeBackendConfig backendConfig;
+
 		private ClientConfig(ForgeConfigSpec.Builder builder) {
 			backend = builder.comment("Select the backend to use.")
 					.define("backend", Backend.REGISTRY.getIdOrThrow(BackendManager.defaultBackend()).toString());
@@ -82,6 +89,25 @@ public class ForgeFlwConfig implements FlwConfig {
 			workerThreads = builder.comment("The number of worker threads to use. Set to -1 to let Flywheel decide. Set to 0 to disable parallelism. Requires a game restart to take effect.")
 					.defineInRange("workerThreads", -1, -1, Runtime.getRuntime()
 							.availableProcessors());
+
+			builder.comment("Config options for flywheel's build-in backends.")
+					.push("flw_backends");
+
+			backendConfig = new ForgeBackendConfig(builder);
+		}
+	}
+
+	public static class ForgeBackendConfig implements BackendConfig {
+		public final ForgeConfigSpec.EnumValue<LightSmoothness> lightSmoothness;
+
+		public ForgeBackendConfig(ForgeConfigSpec.Builder builder) {
+			lightSmoothness = builder.comment("How smooth flywheel's shader-based lighting should be. May have a large performance impact.")
+					.defineEnum("lightSmoothness", LightSmoothness.SMOOTH);
+		}
+
+		@Override
+		public LightSmoothness lightSmoothness() {
+			return lightSmoothness.get();
 		}
 	}
 }
