@@ -51,9 +51,8 @@ abstract class LevelRendererMixin {
 
 	//	@Inject(method = "renderLevel", at = @At("HEAD"))
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runLightUpdates()I"))
-	private void flywheel$beginRender(DeltaTracker deltaTracker, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f frustumMatrix, Matrix4f projectionMatrix, CallbackInfo ci, @Share("flywheel$poseStack") LocalRef<PoseStack> poseStack) {
-		PoseStack flywheel$poseStack = new PoseStack();
-		flywheel$renderContext = RenderContextImpl.create((LevelRenderer) (Object) this, level, renderBuffers, flywheel$poseStack, projectionMatrix, camera, deltaTracker.getGameTimeDeltaTicks());
+	private void flywheel$beginRender(DeltaTracker deltaTracker, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f modelMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
+		flywheel$renderContext = RenderContextImpl.create((LevelRenderer) (Object) this, level, renderBuffers, modelMatrix, projectionMatrix, camera, deltaTracker.getGameTimeDeltaTicks());
 
 		VisualizationManager manager = VisualizationManager.get(level);
 		if (manager != null) {
@@ -114,8 +113,8 @@ abstract class LevelRendererMixin {
 		}
 	}
 
-	@Group(name = "afterParticles")
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V", shift = Shift.AFTER))
+	//@Group(name = "afterParticles")
+	//@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V", shift = Shift.AFTER))
 	private void flywheel$afterParticles$forge(CallbackInfo ci) {
 		if (flywheel$renderContext != null) {
 			VisualizationManager manager = VisualizationManager.get(level);

@@ -16,7 +16,7 @@ public interface RenderContext {
 
 	RenderBuffers buffers();
 
-	PoseStack stack();
+	Matrix4fc modelView();
 
 	Matrix4fc projection();
 
