@@ -5,29 +5,8 @@ import java.nio.ByteBuffer;
 import org.lwjgl.opengl.GL20;
 
 import com.jozufozu.flywheel.backend.gl.GlObject;
-import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 
 public abstract class GlBuffer extends GlObject {
-
-	/**
-	 * Request a Persistent mapped buffer.
-	 *
-	 * <p>
-	 *     If Persistent buffers are supported, this will provide one. Otherwise it will fall back to a classic mapped
-	 *     buffer.
-	 * </p>
-	 *
-	 * @param type The type of buffer you want.
-	 * @return A buffer that will be persistent if the driver supports it.
-	 */
-	public static GlBuffer requestPersistent(GlBufferType type) {
-		if (GlCompat.getInstance()
-                .bufferStorageSupported()) {
-			return new PersistentGlBuffer(type);
-		} else {
-			return new MappedGlBuffer(type);
-		}
-	}
 
 	protected final GlBufferType type;
 
