@@ -10,6 +10,7 @@ import com.jozufozu.flywheel.backend.gl.GlVertexArray;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBuffer;
 import com.jozufozu.flywheel.backend.gl.buffer.GlBufferType;
 import com.jozufozu.flywheel.backend.gl.buffer.MappedBuffer;
+import com.jozufozu.flywheel.backend.gl.buffer.MappedGlBuffer;
 import com.jozufozu.flywheel.backend.gl.versioned.GlCompat;
 import com.jozufozu.flywheel.backend.instancing.AbstractInstancer;
 import com.jozufozu.flywheel.backend.model.BufferedModel;
@@ -80,7 +81,7 @@ public class GPUInstancer<D extends InstanceData> extends AbstractInstancer<D> {
 		vao.bind();
 		vao.enableArrays(model.getAttributeCount() + instanceFormat.getAttributeCount());
 
-		instanceVBO = GlBuffer.requestPersistent(GlBufferType.ARRAY_BUFFER);
+		instanceVBO = new MappedGlBuffer(GlBufferType.ARRAY_BUFFER);
 		instanceVBO.setGrowthMargin(instanceFormat.getStride() * 16);
 	}
 
