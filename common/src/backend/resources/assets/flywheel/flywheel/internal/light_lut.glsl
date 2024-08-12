@@ -11,13 +11,12 @@ const uint _FLW_LIGHT_SECTION_SIZE_INTS = _FLW_LIGHT_SECTION_SIZE_BYTES / 4;
 const uint _FLW_COMPLETELY_SOLID = 0x7FFFFFFu;
 const float _FLW_EPSILON = 1e-5;
 
+const uint _FLW_LOWER_10_BITS = 0x3FFu;
+const uint _FLW_UPPER_10_BITS = 0xFFF00000u;
+
 uint _flw_indexLut(uint index);
 
 uint _flw_indexLight(uint index);
-
-// Adding this option takes my test world from ~800 to ~1250 FPS on my 3060ti.
-// I have not taken it to a profiler otherwise.
-#pragma optionNV (unroll all)
 
 /// Find the index for the next step in the LUT.
 /// @param base The base index in the LUT, should point to the start of a coordinate span.
@@ -103,57 +102,120 @@ bool flw_lightFetch(ivec3 blockPos, out vec2 lightCoord) {
     return true;
 }
 
-/// Premtively collect all light in a 3x3x3 area centered on our block.
-/// Depending on the normal, we won't use all the data, but fetching on demand will have many duplicated fetches.
-///
-/// The output is a 3-component vector <blockLight, skyLight, valid ? 1 : 0> packed into a single uint to save
-/// memory and ALU ops later on. 10 bits are used for each component. This allows 4 such packed ints to be added
-/// together with room to spare before overflowing into the next component.
-uint[27] _flw_fetchLight3x3x3(uint sectionOffset, ivec3 blockInSectionPos, uint solid) {
-    uint[27] lights;
-
-    uint index = 0u;
-    uint mask = 1u;
-    for (int y = -1; y <= 1; y++) {
-        for (int z = -1; z <= 1; z++) {
-            for (int x = -1; x <= 1; x++) {
-                // 0 if the block is solid, 1 if it's not.
-                uint notSolid = uint((solid & mask) == 0u);
-                uvec2 light = _flw_lightAt(sectionOffset, uvec3(blockInSectionPos + ivec3(x, y, z)));
-
-                lights[index] = light.x;
-                lights[index] |= (light.y) << 10;
-                lights[index] |= (notSolid) << 20;
-
-                index++;
-                mask <<= 1;
-            }
-        }
-    }
-
-    return lights;
-}
 
 uint _flw_fetchSolid3x3x3(uint sectionOffset, ivec3 blockInSectionPos) {
     uint ret = 0;
 
-    uint index = 0;
-    for (int y = -1; y <= 1; y++) {
-        for (int z = -1; z <= 1; z++) {
-            for (int x = -1; x <= 1; x++) {
-                bool flag = _flw_isSolid(sectionOffset, uvec3(blockInSectionPos + ivec3(x, y, z)));
-                ret |= uint(flag) << index;
+    // The formatter does NOT like these macros
+    // @formatter:off
 
-                index++;
-            }
-        }
+    #define _FLW_FETCH_SOLID(x, y, z, i) { \
+        bool flag = _flw_isSolid(sectionOffset, uvec3(blockInSectionPos + ivec3(x, y, z))); \
+        ret |= uint(flag) << i; \
     }
+
+    /// fori y, z, x: unrolled
+    _FLW_FETCH_SOLID(-1, -1, -1, 0)
+    _FLW_FETCH_SOLID(0, -1, -1, 1)
+    _FLW_FETCH_SOLID(1, -1, -1, 2)
+
+    _FLW_FETCH_SOLID(-1, -1, 0, 3)
+    _FLW_FETCH_SOLID(0, -1, 0, 4)
+    _FLW_FETCH_SOLID(1, -1, 0, 5)
+
+    _FLW_FETCH_SOLID(-1, -1, 1, 6)
+    _FLW_FETCH_SOLID(0, -1, 1, 7)
+    _FLW_FETCH_SOLID(1, -1, 1, 8)
+
+    _FLW_FETCH_SOLID(-1, 0, -1, 9)
+    _FLW_FETCH_SOLID(0, 0, -1, 10)
+    _FLW_FETCH_SOLID(1, 0, -1, 11)
+
+    _FLW_FETCH_SOLID(-1, 0, 0, 12)
+    _FLW_FETCH_SOLID(0, 0, 0, 13)
+    _FLW_FETCH_SOLID(1, 0, 0, 14)
+
+    _FLW_FETCH_SOLID(-1, 0, 1, 15)
+    _FLW_FETCH_SOLID(0, 0, 1, 16)
+    _FLW_FETCH_SOLID(1, 0, 1, 17)
+
+    _FLW_FETCH_SOLID(-1, 1, -1, 18)
+    _FLW_FETCH_SOLID(0, 1, -1, 19)
+    _FLW_FETCH_SOLID(1, 1, -1, 20)
+
+    _FLW_FETCH_SOLID(-1, 1, 0, 21)
+    _FLW_FETCH_SOLID(0, 1, 0, 22)
+    _FLW_FETCH_SOLID(1, 1, 0, 23)
+
+    _FLW_FETCH_SOLID(-1, 1, 1, 24)
+    _FLW_FETCH_SOLID(0, 1, 1, 25)
+    _FLW_FETCH_SOLID(1, 1, 1, 26)
+
+    // @formatter:on
 
     return ret;
 }
 
+/// Premtively collect all light in a 3x3x3 area centered on our block.
+/// Depending on the normal, we won't use all the data, but fetching on demand will have many duplicated fetches.
+/// Only fetching what we'll actually use using a bitmask turned out significantly slower, but perhaps a less
+/// granular approach could see wins.
+///
+/// The output is a 3-component vector <blockLight, skyLight, valid ? 1 : 0> packed into a single uint to save
+/// memory and ALU ops later on. 10 bits are used for each component. This allows 4 such packed ints to be added
+/// together with room to spare before overflowing into the next component.
+uint[27] _flw_fetchLight3x3x3(uint sectionOffset, ivec3 blockInSectionPos, uint solidMask) {
+    uint[27] lights;
+
+    // @formatter:off
+    #define _FLW_FETCH_LIGHT(_x, _y, _z, i) { \
+        uvec2 light = _flw_lightAt(sectionOffset, uvec3(blockInSectionPos + ivec3(_x, _y, _z))); \
+        lights[i] = (light.x) | ((light.y) << 10) | (uint((solidMask & (1u << i)) == 0u) << 20); \
+    }
+
+    /// fori y, z, x: unrolled
+    _FLW_FETCH_LIGHT(-1, -1, -1, 0)
+    _FLW_FETCH_LIGHT(0, -1, -1, 1)
+    _FLW_FETCH_LIGHT(1, -1, -1, 2)
+
+    _FLW_FETCH_LIGHT(-1, -1, 0, 3)
+    _FLW_FETCH_LIGHT(0, -1, 0, 4)
+    _FLW_FETCH_LIGHT(1, -1, 0, 5)
+
+    _FLW_FETCH_LIGHT(-1, -1, 1, 6)
+    _FLW_FETCH_LIGHT(0, -1, 1, 7)
+    _FLW_FETCH_LIGHT(1, -1, 1, 8)
+
+    _FLW_FETCH_LIGHT(-1, 0, -1, 9)
+    _FLW_FETCH_LIGHT(0, 0, -1, 10)
+    _FLW_FETCH_LIGHT(1, 0, -1, 11)
+
+    _FLW_FETCH_LIGHT(-1, 0, 0, 12)
+    _FLW_FETCH_LIGHT(0, 0, 0, 13)
+    _FLW_FETCH_LIGHT(1, 0, 0, 14)
+
+    _FLW_FETCH_LIGHT(-1, 0, 1, 15)
+    _FLW_FETCH_LIGHT(0, 0, 1, 16)
+    _FLW_FETCH_LIGHT(1, 0, 1, 17)
+
+    _FLW_FETCH_LIGHT(-1, 1, -1, 18)
+    _FLW_FETCH_LIGHT(0, 1, -1, 19)
+    _FLW_FETCH_LIGHT(1, 1, -1, 20)
+
+    _FLW_FETCH_LIGHT(-1, 1, 0, 21)
+    _FLW_FETCH_LIGHT(0, 1, 0, 22)
+    _FLW_FETCH_LIGHT(1, 1, 0, 23)
+
+    _FLW_FETCH_LIGHT(-1, 1, 1, 24)
+    _FLW_FETCH_LIGHT(0, 1, 1, 25)
+    _FLW_FETCH_LIGHT(1, 1, 1, 26)
+
+    // @formatter:on
+
+    return lights;
+}
+
 #define _flw_index3x3x3(x, y, z) ((x) + (z) * 3u + (y) * 9u)
-#define _flw_index3x3x3v(p) _flw_index3x3x3((p).x, (p).y, (p).z)
 #define _flw_validCountToAo(validCount) (1. - (4. - (validCount)) * 0.2)
 
 /// Calculate the light for a direction by averaging the light at the corners of the block.
@@ -167,65 +229,73 @@ uint _flw_fetchSolid3x3x3(uint sectionOffset, ivec3 blockInSectionPos) {
 /// @param interpolant The position within the center block.
 /// @param c00..c11 4 offsets to determine which "direction" we are averaging.
 /// @param oppositeMask A bitmask telling this function which bit to flip to get the opposite index for a given corner
-vec3 _flw_lightForDirection(uint[27] lights, vec3 interpolant, uvec3 c00, uvec3 c01, uvec3 c10, uvec3 c11, uint oppositeMask) {
-    // Constant propatation should inline all of these index calculations,
-    // but since they're distributive we can lay them out more nicely.
-    uint ic00 = _flw_index3x3x3v(c00);
-    uint ic01 = _flw_index3x3x3v(c01);
-    uint ic10 = _flw_index3x3x3v(c10);
-    uint ic11 = _flw_index3x3x3v(c11);
-
-    const uint[8] corners = uint[](
-    _flw_index3x3x3(0u, 0u, 0u),
-    _flw_index3x3x3(0u, 0u, 1u),
-    _flw_index3x3x3(0u, 1u, 0u),
-    _flw_index3x3x3(0u, 1u, 1u),
-    _flw_index3x3x3(1u, 0u, 0u),
-    _flw_index3x3x3(1u, 0u, 1u),
-    _flw_index3x3x3(1u, 1u, 0u),
-    _flw_index3x3x3(1u, 1u, 1u)
-    );
-
-    // Division and branching are both kinda expensive, so use this table for the valid block normalization
-    const float[5] normalizers = float[](0., 1., 1. / 2., 1. / 3., 1. / 4.);
-
+vec3 _flw_lightForDirection(uint[27] lights, vec3 interpolant, uint c00, uint c01, uint c10, uint c11, uint oppositeMask) {
     // Sum up the light and number of valid blocks in each corner for this direction
     uint[8] summed;
-    for (uint i = 0; i < 8; i++) {
-        uint corner = corners[i];
-        summed[i] = lights[ic00 + corner] + lights[ic01 + corner] + lights[ic10 + corner] + lights[ic11 + corner];
+
+    // @formatter:off
+
+    #define _FLW_SUM_CORNER(_x, _y, _z, i) { \
+        const uint corner = _flw_index3x3x3(_x, _y, _z); \
+        summed[i] = lights[c00 + corner] + lights[c01 + corner] + lights[c10 + corner] + lights[c11 + corner]; \
     }
+
+    _FLW_SUM_CORNER(0u, 0u, 0u, 0)
+    _FLW_SUM_CORNER(1u, 0u, 0u, 1)
+    _FLW_SUM_CORNER(0u, 0u, 1u, 2)
+    _FLW_SUM_CORNER(1u, 0u, 1u, 3)
+    _FLW_SUM_CORNER(0u, 1u, 0u, 4)
+    _FLW_SUM_CORNER(1u, 1u, 0u, 5)
+    _FLW_SUM_CORNER(0u, 1u, 1u, 6)
+    _FLW_SUM_CORNER(1u, 1u, 1u, 7)
+
+    // @formatter:on
 
     // The final light and number of valid blocks for each corner.
     vec3[8] adjusted;
-    for (uint i = 0; i < 8; i++) {
-        #ifdef _FLW_INNER_FACE_CORRECTION
-        // If the current corner has no valid blocks, use the opposite
-        // corner's light based on which direction we're evaluating.
-        // Because of how our corners are indexed, moving along one axis is the same as flipping a bit.
-        uint cornerIndex = (summed[i] & 0xFFF00000u) == 0u ? i ^ oppositeMask : i;
-        #else
-        uint cornerIndex = i;
-        #endif
-        uint corner = summed[cornerIndex];
 
-        uvec3 unpacked = uvec3(corner & 0x3FFu, (corner >> 10u) & 0x3FFu, corner >> 20u);
+    #ifdef _FLW_INNER_FACE_CORRECTION
+    // If the current corner has no valid blocks, use the opposite
+    // corner's light based on which direction we're evaluating.
+    // Because of how our corners are indexed, moving along one axis is the same as flipping a bit.
+    #define _FLW_CORNER_INDEX(i) ((summed[i] & _FLW_UPPER_10_BITS) == 0u ? i ^ oppositeMask : i)
+    #else
+    #define _FLW_CORNER_INDEX(i) i
+    #endif
 
-        // Normalize by the number of valid blocks.
-        adjusted[i].xy = vec2(unpacked.xy) * normalizers[unpacked.z];
-        adjusted[i].z = float(unpacked.z);
+    // Division and branching (to avoid dividing by zero) are both kinda expensive, so use this table for the valid block normalization
+    const float[5] normalizers = float[](0., 1., 1. / 2., 1. / 3., 1. / 4.);
+
+    // @formatter:off
+
+    #define _FLW_ADJUST_CORNER(i) { \
+        uint corner = summed[_FLW_CORNER_INDEX(i)]; \
+        uint validCount = corner >> 20u; \
+        adjusted[i].xy = vec2(corner & _FLW_LOWER_10_BITS, (corner >> 10u) & _FLW_LOWER_10_BITS) * normalizers[validCount]; \
+        adjusted[i].z = float(validCount); \
     }
 
+    _FLW_ADJUST_CORNER(0)
+    _FLW_ADJUST_CORNER(1)
+    _FLW_ADJUST_CORNER(2)
+    _FLW_ADJUST_CORNER(3)
+    _FLW_ADJUST_CORNER(4)
+    _FLW_ADJUST_CORNER(5)
+    _FLW_ADJUST_CORNER(6)
+    _FLW_ADJUST_CORNER(7)
+
+    // @formatter:on
+
     // Trilinear interpolation, including valid count
-    vec3 light00 = mix(adjusted[0], adjusted[1], interpolant.z);
-    vec3 light01 = mix(adjusted[2], adjusted[3], interpolant.z);
-    vec3 light10 = mix(adjusted[4], adjusted[5], interpolant.z);
-    vec3 light11 = mix(adjusted[6], adjusted[7], interpolant.z);
+    vec3 light00 = mix(adjusted[0], adjusted[1], interpolant.x);
+    vec3 light01 = mix(adjusted[2], adjusted[3], interpolant.x);
+    vec3 light10 = mix(adjusted[4], adjusted[5], interpolant.x);
+    vec3 light11 = mix(adjusted[6], adjusted[7], interpolant.x);
 
-    vec3 light0 = mix(light00, light01, interpolant.y);
-    vec3 light1 = mix(light10, light11, interpolant.y);
+    vec3 light0 = mix(light00, light01, interpolant.z);
+    vec3 light1 = mix(light10, light11, interpolant.z);
 
-    vec3 light = mix(light0, light1, interpolant.x);
+    vec3 light = mix(light0, light1, interpolant.y);
 
     // Normalize the light coords
     light.xy *= 1. / 15.;
@@ -251,7 +321,8 @@ bool flw_light(vec3 worldPos, vec3 normal, out FlwLightAo light) {
     // The block's position in the section adjusted into 18x18x18 space
     ivec3 blockInSectionPos = (blockPos & 0xF) + 1;
 
-    #if _FLW_LIGHT_SMOOTHNESS == 1// Directly trilerp as if sampling a texture
+    // Directly trilerp as if sampling a texture
+    #if _FLW_LIGHT_SMOOTHNESS == 1
 
     // The lowest corner of the 2x2x2 area we'll be trilinear interpolating.
     // The ugly bit on the end evaluates to -1 or 0 depending on which side of 0.5 we are.
@@ -283,7 +354,8 @@ bool flw_light(vec3 worldPos, vec3 normal, out FlwLightAo light) {
     light.light = mix(light0, light1, interpolant.x) / 15.;
     light.ao = 1.;
 
-    #elif _FLW_LIGHT_SMOOTHNESS == 2// Lighting and AO accurate to chunk baking
+    // Lighting and AO accurate to chunk baking
+    #elif _FLW_LIGHT_SMOOTHNESS == 2
 
     uint solid = _flw_fetchSolid3x3x3(sectionOffset, blockInSectionPos);
 
@@ -304,27 +376,27 @@ bool flw_light(vec3 worldPos, vec3 normal, out FlwLightAo light) {
 
     vec3 lightX;
     if (normal.x > _FLW_EPSILON) {
-        lightX = _flw_lightForDirection(lights, interpolant, uvec3(1u, 0u, 0u), uvec3(1u, 0u, 1u), uvec3(1u, 1u, 0u), uvec3(1u, 1u, 1u), 4u);
+        lightX = _flw_lightForDirection(lights, interpolant, _flw_index3x3x3(1u, 0u, 0u), _flw_index3x3x3(1u, 0u, 1u), _flw_index3x3x3(1u, 1u, 0u), _flw_index3x3x3(1u, 1u, 1u), 1u);
     } else if (normal.x < -_FLW_EPSILON) {
-        lightX = _flw_lightForDirection(lights, interpolant, uvec3(0u, 0u, 0u), uvec3(0u, 0u, 1u), uvec3(0u, 1u, 0u), uvec3(0u, 1u, 1u), 4u);
+        lightX = _flw_lightForDirection(lights, interpolant, _flw_index3x3x3(0u, 0u, 0u), _flw_index3x3x3(0u, 0u, 1u), _flw_index3x3x3(0u, 1u, 0u), _flw_index3x3x3(0u, 1u, 1u), 1u);
     } else {
         lightX = vec3(0.);
     }
 
     vec3 lightZ;
     if (normal.z > _FLW_EPSILON) {
-        lightZ = _flw_lightForDirection(lights, interpolant, uvec3(0u, 0u, 1u), uvec3(0u, 1u, 1u), uvec3(1u, 0u, 1u), uvec3(1u, 1u, 1u), 1u);
+        lightZ = _flw_lightForDirection(lights, interpolant, _flw_index3x3x3(0u, 0u, 1u), _flw_index3x3x3(0u, 1u, 1u), _flw_index3x3x3(1u, 0u, 1u), _flw_index3x3x3(1u, 1u, 1u), 2u);
     } else if (normal.z < -_FLW_EPSILON) {
-        lightZ = _flw_lightForDirection(lights, interpolant, uvec3(0u, 0u, 0u), uvec3(0u, 1u, 0u), uvec3(1u, 0u, 0u), uvec3(1u, 1u, 0u), 1u);
+        lightZ = _flw_lightForDirection(lights, interpolant, _flw_index3x3x3(0u, 0u, 0u), _flw_index3x3x3(0u, 1u, 0u), _flw_index3x3x3(1u, 0u, 0u), _flw_index3x3x3(1u, 1u, 0u), 2u);
     } else {
         lightZ = vec3(0.);
     }
 
     vec3 lightY;
     if (normal.y > _FLW_EPSILON) {
-        lightY = _flw_lightForDirection(lights, interpolant, uvec3(0u, 1u, 0u), uvec3(0u, 1u, 1u), uvec3(1u, 1u, 0u), uvec3(1u, 1u, 1u), 2u);
+        lightY = _flw_lightForDirection(lights, interpolant, _flw_index3x3x3(0u, 1u, 0u), _flw_index3x3x3(0u, 1u, 1u), _flw_index3x3x3(1u, 1u, 0u), _flw_index3x3x3(1u, 1u, 1u), 4u);
     } else if (normal.y < -_FLW_EPSILON) {
-        lightY = _flw_lightForDirection(lights, interpolant, uvec3(0u, 0u, 0u), uvec3(0u, 0u, 1u), uvec3(1u, 0u, 0u), uvec3(1u, 0u, 1u), 2u);
+        lightY = _flw_lightForDirection(lights, interpolant, _flw_index3x3x3(0u, 0u, 0u), _flw_index3x3x3(0u, 0u, 1u), _flw_index3x3x3(1u, 0u, 0u), _flw_index3x3x3(1u, 0u, 1u), 4u);
     } else {
         lightY = vec3(0.);
     }
@@ -335,7 +407,8 @@ bool flw_light(vec3 worldPos, vec3 normal, out FlwLightAo light) {
     light.light = lightAo.xy;
     light.ao = lightAo.z;
 
-    #else// Entirely flat lighting, the lowest setting and a fallback in case an invalid option is set
+    // Entirely flat lighting, the lowest setting and a fallback in case an invalid option is set
+    #else
 
     light.light = vec2(_flw_lightAt(sectionOffset, blockInSectionPos)) / 15.;
     light.ao = 1.;
