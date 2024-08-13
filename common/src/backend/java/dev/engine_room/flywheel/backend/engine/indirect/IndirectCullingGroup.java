@@ -28,6 +28,7 @@ import dev.engine_room.flywheel.backend.engine.embed.Environment;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
+import dev.engine_room.flywheel.lib.material.LightShaders;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 
 public class IndirectCullingGroup<I extends Instance> {
@@ -49,7 +50,6 @@ public class IndirectCullingGroup<I extends Instance> {
 	private final IndirectPrograms programs;
 	private final GlProgram cullProgram;
 	private final GlProgram applyProgram;
-	private final GlProgram drawProgram;
 
 	private boolean needsDrawBarrier;
 	private boolean needsDrawSort;
@@ -65,7 +65,6 @@ public class IndirectCullingGroup<I extends Instance> {
 		this.programs = programs;
 		cullProgram = programs.getCullingProgram(instanceType);
 		applyProgram = programs.getApplyProgram();
-		drawProgram = programs.getIndirectProgram(instanceType, environment.contextShader());
 	}
 
 	public void flushInstancers() {
@@ -158,18 +157,21 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		for (int start = 0, i = 0; i < indirectDraws.size(); i++) {
 			var draw1 = indirectDraws.get(i);
-			var material1 = draw1.material();
-			var visualType1 = draw1.visualType();
 
 			// if the next draw call has a different VisualType or Material, start a new MultiDraw
-			if (i == indirectDraws.size() - 1 || visualType1 != indirectDraws.get(i + 1)
-					.visualType() || !material1.equals(indirectDraws.get(i + 1)
-					.material())) {
-				multiDraws.computeIfAbsent(visualType1, s -> new ArrayList<>())
-						.add(new MultiDraw(material1, start, i + 1));
+			if (i == indirectDraws.size() - 1 || incompatibleDraws(draw1, indirectDraws.get(i + 1))) {
+				multiDraws.computeIfAbsent(draw1.visualType(), s -> new ArrayList<>())
+						.add(new MultiDraw(draw1.material(), start, i + 1));
 				start = i + 1;
 			}
 		}
+	}
+
+	private boolean incompatibleDraws(IndirectDraw draw1, IndirectDraw draw2) {
+		if (draw1.visualType() != draw2.visualType()) {
+			return true;
+		}
+		return !MaterialRenderState.materialEquals(draw1.material(), draw2.material());
 	}
 
 	public boolean hasVisualType(VisualType visualType) {
@@ -199,17 +201,25 @@ public class IndirectCullingGroup<I extends Instance> {
 			return;
 		}
 
-		drawProgram.bind();
 		buffers.bindForDraw();
-
-		environment.setupDraw(drawProgram);
 
 		drawBarrier();
 
-		var flwBaseDraw = drawProgram.getUniformLocation("_flw_baseDraw");
+		GlProgram lastProgram = null;
+		int baseDrawUniformLoc = -1;
 
 		for (var multiDraw : multiDraws.get(visualType)) {
-			glUniform1ui(flwBaseDraw, multiDraw.start);
+			var drawProgram = programs.getIndirectProgram(instanceType, environment.contextShader(), multiDraw.material.light());
+			if (drawProgram != lastProgram) {
+				lastProgram = drawProgram;
+
+				// Don't need to do this unless the program changes.
+				drawProgram.bind();
+				environment.setupDraw(drawProgram);
+				baseDrawUniformLoc = drawProgram.getUniformLocation("_flw_baseDraw");
+			}
+
+			glUniform1ui(baseDrawUniformLoc, multiDraw.start);
 
 			MaterialRenderState.setup(multiDraw.material);
 
@@ -218,7 +228,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	public void bindWithContextShader(ContextShader override) {
-		var program = programs.getIndirectProgram(instanceType, override);
+		var program = programs.getIndirectProgram(instanceType, override, LightShaders.SMOOTH_WHEN_EMBEDDED);
 
 		program.bind();
 
@@ -226,7 +236,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		drawBarrier();
 
-		var flwBaseDraw = drawProgram.getUniformLocation("_flw_baseDraw");
+		var flwBaseDraw = program.getUniformLocation("_flw_baseDraw");
 		glUniform1ui(flwBaseDraw, 0);
 	}
 

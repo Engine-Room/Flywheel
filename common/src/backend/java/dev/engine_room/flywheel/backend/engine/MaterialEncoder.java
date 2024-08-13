@@ -55,8 +55,7 @@ public final class MaterialEncoder {
 	public static int packUberShader(Material material) {
 		var fog = MaterialShaderIndices.fogIndex(material.fog());
 		var cutout = MaterialShaderIndices.cutoutIndex(material.cutout());
-		var light = MaterialShaderIndices.lightIndex(material.light());
-		return (light & 0x3FF) | (cutout & 0x3FF) << 10 | (fog & 0x3FF) << 20;
+		return (cutout & 0xFFFF) | (fog & 0xFFFF) << 16;
 	}
 
 	// Packed format:

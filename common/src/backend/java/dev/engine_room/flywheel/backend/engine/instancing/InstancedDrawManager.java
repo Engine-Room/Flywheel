@@ -28,6 +28,7 @@ import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.backend.gl.TextureBuffer;
 import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
+import dev.engine_room.flywheel.lib.material.LightShaders;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import net.minecraft.client.resources.model.ModelBakery;
 
@@ -170,7 +171,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 				GroupKey<?> shader = groupEntry.getKey();
 
-				var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING);
+				var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, LightShaders.SMOOTH_WHEN_EMBEDDED);
 				program.bind();
 
 				for (var progressEntry : byProgress.int2ObjectEntrySet()) {

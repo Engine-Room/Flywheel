@@ -54,12 +54,13 @@ public class InstancedRenderStage {
 
 			var environment = shader.environment();
 
-			var program = programs.get(shader.instanceType(), environment.contextShader());
-			program.bind();
-
-			environment.setupDraw(program);
-
 			for (var drawCall : drawCalls.draws) {
+				var program = programs.get(shader.instanceType(), environment.contextShader(), drawCall.material()
+						.light());
+				program.bind();
+
+				environment.setupDraw(program);
+
 				var material = drawCall.material();
 
 				uploadMaterialUniform(program, material);
