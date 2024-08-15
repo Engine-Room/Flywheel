@@ -3,6 +3,7 @@
 #include "flywheel:internal/indirect/buffer_bindings.glsl"
 #include "flywheel:internal/indirect/draw_command.glsl"
 #include "flywheel:internal/indirect/light.glsl"
+#include "flywheel:internal/indirect/matrices.glsl"
 
 layout(std430, binding = _FLW_TARGET_BUFFER_BINDING) restrict readonly buffer TargetBuffer {
     uint _flw_instanceIndices[];
@@ -11,6 +12,12 @@ layout(std430, binding = _FLW_TARGET_BUFFER_BINDING) restrict readonly buffer Ta
 layout(std430, binding = _FLW_DRAW_BUFFER_BINDING) restrict readonly buffer DrawBuffer {
     MeshDrawCommand _flw_drawCommands[];
 };
+
+#ifdef FLW_EMBEDDED
+layout(std430, binding = _FLW_MATRIX_BUFFER_BINDING) restrict buffer MatrixBuffer {
+    Matrices _flw_matrices[];
+};
+#endif
 
 uniform uint _flw_baseDraw;
 
@@ -29,7 +36,13 @@ void main() {
     _flw_unpackMaterialProperties(packedMaterialProperties, flw_material);
     _flw_packedMaterial = uvec3(draw.materialFragmentIndex, draw.packedFogAndCutout, packedMaterialProperties);
 
-#if __VERSION__ < 460
+    #ifdef FLW_EMBEDDED
+    _flw_unpackMatrices(_flw_matrices[draw.matrixIndex], _flw_modelMatrix, _flw_normalMatrix);
+    //    _flw_modelMatrix = mat4(1.);
+    //    _flw_normalMatrix = mat3(1.);
+    #endif
+
+    #if __VERSION__ < 460
     uint instanceIndex = _flw_instanceIndices[gl_BaseInstanceARB + gl_InstanceID];
 #else
     uint instanceIndex = _flw_instanceIndices[gl_BaseInstance + gl_InstanceID];

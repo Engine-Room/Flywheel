@@ -16,6 +16,7 @@ import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.FlwBackend;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
+import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
 import dev.engine_room.flywheel.lib.util.Pair;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -40,7 +41,7 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 		return (Instancer<I>) instancers.computeIfAbsent(new InstancerKey<>(environment, type, model, visualType, bias), this::createAndDeferInit);
 	}
 
-	public void flush(LightStorage lightStorage) {
+	public void flush(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
 		// Thread safety: flush is called from the render thread after all visual updates have been made,
 		// so there are no:tm: threads we could be racing with.
 		for (var instancer : initializationQueue) {

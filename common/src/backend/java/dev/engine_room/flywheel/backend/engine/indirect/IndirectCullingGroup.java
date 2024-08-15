@@ -24,7 +24,6 @@ import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
 import dev.engine_room.flywheel.backend.engine.InstancerKey;
 import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
-import dev.engine_room.flywheel.backend.engine.embed.Environment;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
@@ -33,6 +32,7 @@ import dev.engine_room.flywheel.lib.math.MoreMath;
 
 public class IndirectCullingGroup<I extends Instance> {
 	private static final Comparator<IndirectDraw> DRAW_COMPARATOR = Comparator.comparing(IndirectDraw::visualType)
+			.thenComparing(IndirectDraw::isEmbedded)
 			.thenComparing(IndirectDraw::bias)
 			.thenComparing(IndirectDraw::indexOfMeshInModel)
 			.thenComparing(IndirectDraw::material, MaterialRenderState.COMPARATOR);
@@ -40,7 +40,6 @@ public class IndirectCullingGroup<I extends Instance> {
 	private static final int DRAW_BARRIER_BITS = GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT;
 
 	private final InstanceType<I> instanceType;
-	private final Environment environment;
 	private final long instanceStride;
 	private final IndirectBuffers buffers;
 	private final List<IndirectInstancer<I>> instancers = new ArrayList<>();
@@ -55,9 +54,8 @@ public class IndirectCullingGroup<I extends Instance> {
 	private boolean needsDrawSort;
 	private int instanceCountThisFrame;
 
-	IndirectCullingGroup(InstanceType<I> instanceType, Environment environment, IndirectPrograms programs) {
+	IndirectCullingGroup(InstanceType<I> instanceType, IndirectPrograms programs) {
 		this.instanceType = instanceType;
-		this.environment = environment;
 		instanceStride = MoreMath.align4(instanceType.layout()
 				.byteSize());
 		buffers = new IndirectBuffers(instanceStride);
@@ -124,8 +122,6 @@ public class IndirectCullingGroup<I extends Instance> {
 		Uniforms.bindAll();
 		cullProgram.bind();
 
-		environment.setupCull(cullProgram);
-
 		buffers.bindForCompute();
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		glDispatchCompute(GlCompat.getComputeGroupCount(instanceCountThisFrame), 1, 1);
@@ -161,7 +157,7 @@ public class IndirectCullingGroup<I extends Instance> {
 			// if the next draw call has a different VisualType or Material, start a new MultiDraw
 			if (i == indirectDraws.size() - 1 || incompatibleDraws(draw1, indirectDraws.get(i + 1))) {
 				multiDraws.computeIfAbsent(draw1.visualType(), s -> new ArrayList<>())
-						.add(new MultiDraw(draw1.material(), start, i + 1));
+						.add(new MultiDraw(draw1.material(), draw1.isEmbedded(), start, i + 1));
 				start = i + 1;
 			}
 		}
@@ -169,6 +165,10 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private boolean incompatibleDraws(IndirectDraw draw1, IndirectDraw draw2) {
 		if (draw1.visualType() != draw2.visualType()) {
+			return true;
+		}
+
+		if (draw1.isEmbedded() != draw2.isEmbedded()) {
 			return true;
 		}
 		return !MaterialRenderState.materialEquals(draw1.material(), draw2.material());
@@ -209,13 +209,12 @@ public class IndirectCullingGroup<I extends Instance> {
 		int baseDrawUniformLoc = -1;
 
 		for (var multiDraw : multiDraws.get(visualType)) {
-			var drawProgram = programs.getIndirectProgram(instanceType, environment.contextShader(), multiDraw.material.light());
+			var drawProgram = programs.getIndirectProgram(instanceType, multiDraw.embedded ? ContextShader.EMBEDDED : ContextShader.DEFAULT, multiDraw.material.light());
 			if (drawProgram != lastProgram) {
 				lastProgram = drawProgram;
 
 				// Don't need to do this unless the program changes.
 				drawProgram.bind();
-				environment.setupDraw(drawProgram);
 				baseDrawUniformLoc = drawProgram.getUniformLocation("_flw_baseDraw");
 			}
 
@@ -300,7 +299,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		return out;
 	}
 
-	private record MultiDraw(Material material, int start, int end) {
+	private record MultiDraw(Material material, boolean embedded, int start, int end) {
 		private void submit() {
 			GlCompat.safeMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, this.start * IndirectBuffers.DRAW_COMMAND_STRIDE, this.end - this.start, (int) IndirectBuffers.DRAW_COMMAND_STRIDE);
 		}

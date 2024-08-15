@@ -23,6 +23,7 @@ import dev.engine_room.flywheel.backend.engine.MaterialEncoder;
 import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
 import dev.engine_room.flywheel.backend.engine.TextureBinder;
+import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.backend.gl.TextureBuffer;
@@ -59,8 +60,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	}
 
 	@Override
-	public void flush(LightStorage lightStorage) {
-		super.flush(lightStorage);
+	public void flush(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
+		super.flush(lightStorage, environmentStorage);
 
 		this.instancers.values()
 				.removeIf(instancer -> {

@@ -7,6 +7,7 @@ import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.engine.MaterialEncoder;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
+import dev.engine_room.flywheel.backend.engine.embed.EmbeddedEnvironment;
 
 public class IndirectDraw {
 	private final IndirectInstancer<?> instancer;
@@ -46,6 +47,10 @@ public class IndirectDraw {
 		return material;
 	}
 
+	public boolean isEmbedded() {
+		return instancer.environment instanceof EmbeddedEnvironment;
+	}
+
 	public MeshPool.PooledMesh mesh() {
 		return mesh;
 	}
@@ -71,10 +76,12 @@ public class IndirectDraw {
 
 		MemoryUtil.memPutInt(ptr + 20, instancer.modelIndex); // modelIndex
 
-		MemoryUtil.memPutInt(ptr + 24, materialVertexIndex); // materialVertexIndex
-		MemoryUtil.memPutInt(ptr + 28, materialFragmentIndex); // materialFragmentIndex
-		MemoryUtil.memPutInt(ptr + 32, packedFogAndCutout); // packedFogAndCutout
-		MemoryUtil.memPutInt(ptr + 36, packedMaterialProperties); // packedMaterialProperties
+		MemoryUtil.memPutInt(ptr + 24, instancer.environment.matrixIndex()); // matrixIndex
+
+		MemoryUtil.memPutInt(ptr + 28, materialVertexIndex); // materialVertexIndex
+		MemoryUtil.memPutInt(ptr + 32, materialFragmentIndex); // materialFragmentIndex
+		MemoryUtil.memPutInt(ptr + 36, packedFogAndCutout); // packedFogAndCutout
+		MemoryUtil.memPutInt(ptr + 40, packedMaterialProperties); // packedMaterialProperties
 	}
 
 	public void writeWithOverrides(long ptr, int instanceIndex, Material materialOverride) {
@@ -86,10 +93,12 @@ public class IndirectDraw {
 
 		MemoryUtil.memPutInt(ptr + 20, instancer.modelIndex); // modelIndex
 
-		MemoryUtil.memPutInt(ptr + 24, MaterialShaderIndices.vertexIndex(materialOverride.shaders())); // materialVertexIndex
-		MemoryUtil.memPutInt(ptr + 28, MaterialShaderIndices.fragmentIndex(materialOverride.shaders())); // materialFragmentIndex
-		MemoryUtil.memPutInt(ptr + 32, MaterialEncoder.packUberShader(materialOverride)); // packedFogAndCutout
-		MemoryUtil.memPutInt(ptr + 36, MaterialEncoder.packProperties(materialOverride)); // packedMaterialProperties
+		MemoryUtil.memPutInt(ptr + 24, instancer.environment.matrixIndex()); // matrixIndex
+
+		MemoryUtil.memPutInt(ptr + 28, MaterialShaderIndices.vertexIndex(materialOverride.shaders())); // materialVertexIndex
+		MemoryUtil.memPutInt(ptr + 32, MaterialShaderIndices.fragmentIndex(materialOverride.shaders())); // materialFragmentIndex
+		MemoryUtil.memPutInt(ptr + 36, MaterialEncoder.packUberShader(materialOverride)); // packedFogAndCutout
+		MemoryUtil.memPutInt(ptr + 40, MaterialEncoder.packProperties(materialOverride)); // packedMaterialProperties
 	}
 
 	public void delete() {

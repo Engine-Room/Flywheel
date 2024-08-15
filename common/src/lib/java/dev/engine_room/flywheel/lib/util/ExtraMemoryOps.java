@@ -61,6 +61,21 @@ public final class ExtraMemoryOps {
 		MemoryUtil.memPutFloat(ptr + 32, matrix.m22());
 	}
 
+	public static void putMatrix3fPadded(long ptr, Matrix3fc matrix) {
+		MemoryUtil.memPutFloat(ptr, matrix.m00());
+		MemoryUtil.memPutFloat(ptr + 4, matrix.m01());
+		MemoryUtil.memPutFloat(ptr + 8, matrix.m02());
+		MemoryUtil.memPutFloat(ptr + 12, 0.0f);
+		MemoryUtil.memPutFloat(ptr + 16, matrix.m10());
+		MemoryUtil.memPutFloat(ptr + 20, matrix.m11());
+		MemoryUtil.memPutFloat(ptr + 24, matrix.m12());
+		MemoryUtil.memPutFloat(ptr + 28, 0.0f);
+		MemoryUtil.memPutFloat(ptr + 32, matrix.m20());
+		MemoryUtil.memPutFloat(ptr + 36, matrix.m21());
+		MemoryUtil.memPutFloat(ptr + 40, matrix.m22());
+		MemoryUtil.memPutFloat(ptr + 44, 0.0f);
+	}
+
 	public static void putMatrix4f(long ptr, Matrix4fc matrix) {
 		MemoryUtil.memPutFloat(ptr, matrix.m00());
 		MemoryUtil.memPutFloat(ptr + 4, matrix.m01());

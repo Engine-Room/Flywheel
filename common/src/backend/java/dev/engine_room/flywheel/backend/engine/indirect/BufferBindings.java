@@ -8,6 +8,7 @@ public final class BufferBindings {
 	public static final int DRAW = 4;
 	public static final int LIGHT_LUT = 5;
 	public static final int LIGHT_SECTION = 6;
+	public static final int MATRICES = 7;
 
 	private BufferBindings() {
 	}

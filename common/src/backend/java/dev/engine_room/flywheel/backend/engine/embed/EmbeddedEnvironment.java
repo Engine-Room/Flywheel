@@ -16,6 +16,7 @@ import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.engine.EngineImpl;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
+import dev.engine_room.flywheel.lib.util.ExtraMemoryOps;
 import net.minecraft.core.Vec3i;
 
 public class EmbeddedEnvironment implements VisualEmbedding, Environment {
@@ -30,6 +31,8 @@ public class EmbeddedEnvironment implements VisualEmbedding, Environment {
 	private final Matrix3f normal = new Matrix3f();
 	private final Matrix4f poseComposed = new Matrix4f();
 	private final Matrix3f normalComposed = new Matrix3f();
+
+	public int matrixIndex = 0;
 
 	private boolean deleted = false;
 
@@ -82,22 +85,24 @@ public class EmbeddedEnvironment implements VisualEmbedding, Environment {
 	}
 
 	@Override
-	public void setupCull(GlProgram program) {
-		program.setBool(EmbeddingUniforms.USE_MODEL_MATRIX, true);
-		program.setMat4(EmbeddingUniforms.MODEL_MATRIX, poseComposed);
-	}
-
-	@Override
 	public void setupDraw(GlProgram program) {
 		program.setMat4(EmbeddingUniforms.MODEL_MATRIX, poseComposed);
 		program.setMat3(EmbeddingUniforms.NORMAL_MATRIX, normalComposed);
 	}
 
-	public void flush() {
+	@Override
+	public int matrixIndex() {
+		return matrixIndex;
+	}
+
+	public void flush(long ptr) {
 		poseComposed.identity();
 		normalComposed.identity();
 
 		composeMatrices(poseComposed, normalComposed);
+
+		ExtraMemoryOps.putMatrix4f(ptr, poseComposed);
+		ExtraMemoryOps.putMatrix3fPadded(ptr + 16 * Float.BYTES, normalComposed);
 	}
 
 	private void composeMatrices(Matrix4f pose, Matrix3f normal) {

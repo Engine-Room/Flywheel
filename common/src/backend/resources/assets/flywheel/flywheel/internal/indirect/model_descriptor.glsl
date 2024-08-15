@@ -8,6 +8,7 @@ struct BoundingSphere {
 struct ModelDescriptor {
     uint instanceCount;
     uint baseInstance;
+    uint matrixIndex;
     BoundingSphere boundingSphere;
 };
 

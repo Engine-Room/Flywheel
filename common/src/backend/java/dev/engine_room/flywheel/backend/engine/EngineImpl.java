@@ -89,7 +89,7 @@ public class EngineImpl implements Engine {
 		try (var state = GlStateTracker.getRestoreState()) {
 			Uniforms.update(context);
 			environmentStorage.flush();
-			drawManager.flush(lightStorage);
+			drawManager.flush(lightStorage, environmentStorage);
 		}
 	}
 
@@ -107,6 +107,7 @@ public class EngineImpl implements Engine {
 	public void delete() {
 		drawManager.delete();
 		lightStorage.delete();
+		environmentStorage.delete();
 	}
 
 	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType, int bias) {
