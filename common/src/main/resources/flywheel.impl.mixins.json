@@ -15,7 +15,6 @@
     "MinecraftMixin",
     "PoseStackMixin",
     "fix.FixFabulousDepthMixin",
-    "fix.FixNormalScalingMixin",
     "visualmanage.BlockEntityMixin",
     "visualmanage.LevelChunkMixin",
     "visualmanage.LevelRendererMixin",
