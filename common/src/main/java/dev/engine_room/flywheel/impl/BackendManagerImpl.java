@@ -1,8 +1,9 @@
 package dev.engine_room.flywheel.impl;
 
+import java.util.ArrayList;
+
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.backend.Backend;
-import dev.engine_room.flywheel.backend.Backends;
 import dev.engine_room.flywheel.impl.visualization.VisualizationManagerImpl;
 import dev.engine_room.flywheel.lib.backend.SimpleBackend;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -31,21 +32,48 @@ public final class BackendManagerImpl {
 		return backend != OFF_BACKEND;
 	}
 
+	// Don't store this statically because backends can theoretically change their priorities at runtime.
+	private static ArrayList<Backend> backendsByPriority() {
+		var backends = new ArrayList<>(Backend.REGISTRY.getAll());
+
+		// Sort with keys backwards so that the highest priority is first.
+		backends.sort((a, b) -> Integer.compare(b.priority(), a.priority()));
+		return backends;
+	}
+
 	private static Backend findDefaultBackend() {
-		// TODO: Automatically select the best default config based on the user's driver
-		// TODO: Figure out how this will work if custom backends are registered and without hardcoding the default backends
-		return Backends.INDIRECT;
+		var backendsByPriority = backendsByPriority();
+		if (backendsByPriority.isEmpty()) {
+			// This probably shouldn't happen, but fail gracefully.
+			FlwImpl.LOGGER.warn("No backends registered, defaulting to 'flywheel:off'");
+			return OFF_BACKEND;
+		}
+
+		return backendsByPriority.get(0);
 	}
 
 	private static void chooseBackend() {
 		var preferred = FlwConfig.INSTANCE.backend();
-		var actual = preferred.findFallback();
-
-		if (preferred != actual) {
-			FlwImpl.LOGGER.warn("Flywheel backend fell back from '{}' to '{}'", Backend.REGISTRY.getIdOrThrow(preferred), Backend.REGISTRY.getIdOrThrow(actual));
+		if (preferred.isSupported()) {
+			backend = preferred;
+			return;
 		}
 
-		backend = actual;
+		var backendsByPriority = backendsByPriority();
+
+		var startIndex = backendsByPriority.indexOf(preferred) + 1;
+
+		// For safety in case we don't find anything
+		backend = OFF_BACKEND;
+		for (int i = startIndex; i < backendsByPriority.size(); i++) {
+			var candidate = backendsByPriority.get(i);
+			if (candidate.isSupported()) {
+				backend = candidate;
+				break;
+			}
+		}
+
+		FlwImpl.LOGGER.warn("Flywheel backend fell back from '{}' to '{}'", Backend.REGISTRY.getIdOrThrow(preferred), Backend.REGISTRY.getIdOrThrow(backend));
 	}
 
 	public static String getBackendString() {

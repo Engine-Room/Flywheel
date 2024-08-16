@@ -14,9 +14,15 @@ public interface Backend {
 	Engine createEngine(LevelAccessor level);
 
 	/**
-	 * Get a fallback backend in case this backend is not supported.
+	 * The priority of this backend.
+	 * <p>The backend with the highest priority upon first launch will be chosen as the default backend.
+	 *
+	 * <p>If the selected backend becomes unavailable for whatever reason, the next supported backend
+	 * with a LOWER priority than the selected one will be chosen.
+	 *
+	 * @return The priority of this backend.
 	 */
-	Backend findFallback();
+	int priority();
 
 	/**
 	 * Check if this backend is supported.
