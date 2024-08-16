@@ -4,6 +4,8 @@ import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
 import static org.lwjgl.opengl.GL30.glBindBufferRange;
 import static org.lwjgl.opengl.GL40.glDrawElementsIndirect;
+import static org.lwjgl.opengl.GL42.glMemoryBarrier;
+import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BARRIER_BIT;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 
 import java.util.HashMap;
@@ -43,6 +45,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	private final GlBuffer crumblingDrawBuffer = new GlBuffer();
 	private final LightBuffers lightBuffers;
 	private final MatrixBuffer matrixBuffer;
+
+	private boolean needsBarrier = false;
 
 	public IndirectDrawManager(IndirectPrograms programs) {
 		this.programs = programs;
@@ -90,6 +94,11 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			matrixBuffer.bind();
 			Uniforms.bindAll();
 
+			if (needsBarrier) {
+				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+				needsBarrier = false;
+			}
+
 			for (var group : cullingGroups.values()) {
 				group.submit(visualType);
 			}
@@ -127,13 +136,27 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		stagingBuffer.flush();
 
+		// We could probably save some driver calls here when there are
+		// actually zero instances, but that feels like a very rare case
+
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+		matrixBuffer.bind();
+
 		for (var group : cullingGroups.values()) {
 			group.dispatchCull();
 		}
 
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+		programs.getApplyProgram()
+				.bind();
+
 		for (var group : cullingGroups.values()) {
 			group.dispatchApply();
 		}
+
+		needsBarrier = true;
 	}
 
 	@Override

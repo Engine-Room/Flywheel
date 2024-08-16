@@ -16,7 +16,8 @@ public class EnvironmentStorage {
 	public final Arena arena = new Arena(MATRIX_SIZE_BYTES, 32);
 
 	{
-		arena.alloc(); // Reserve the identity matrix.
+		// Reserve the identity matrix. Burns a few bytes but oh well.
+		arena.alloc();
 	}
 
 	public void track(EmbeddedEnvironment environment) {

@@ -51,4 +51,8 @@ public class Arena {
 	public int capacity() {
 		return top;
 	}
+
+	public long byteCapacity() {
+		return memoryBlock.size();
+	}
 }

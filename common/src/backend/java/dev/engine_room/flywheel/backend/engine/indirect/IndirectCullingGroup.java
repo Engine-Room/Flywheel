@@ -5,7 +5,6 @@ import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
 import static org.lwjgl.opengl.GL30.glUniform1ui;
 import static org.lwjgl.opengl.GL42.GL_COMMAND_BARRIER_BIT;
 import static org.lwjgl.opengl.GL42.glMemoryBarrier;
-import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BARRIER_BIT;
 import static org.lwjgl.opengl.GL43.glDispatchCompute;
 
 import java.util.ArrayList;
@@ -37,8 +36,6 @@ public class IndirectCullingGroup<I extends Instance> {
 			.thenComparing(IndirectDraw::indexOfMeshInModel)
 			.thenComparing(IndirectDraw::material, MaterialRenderState.COMPARATOR);
 
-	private static final int DRAW_BARRIER_BITS = GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT;
-
 	private final InstanceType<I> instanceType;
 	private final long instanceStride;
 	private final IndirectBuffers buffers;
@@ -48,7 +45,6 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private final IndirectPrograms programs;
 	private final GlProgram cullProgram;
-	private final GlProgram applyProgram;
 
 	private boolean needsDrawBarrier;
 	private boolean needsDrawSort;
@@ -62,7 +58,6 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		this.programs = programs;
 		cullProgram = programs.getCullingProgram(instanceType);
-		applyProgram = programs.getApplyProgram();
 	}
 
 	public void flushInstancers() {
@@ -123,7 +118,6 @@ public class IndirectCullingGroup<I extends Instance> {
 		cullProgram.bind();
 
 		buffers.bindForCompute();
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		glDispatchCompute(GlCompat.getComputeGroupCount(instanceCountThisFrame), 1, 1);
 	}
 
@@ -132,9 +126,7 @@ public class IndirectCullingGroup<I extends Instance> {
 			return;
 		}
 
-		applyProgram.bind();
 		buffers.bindForCompute();
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		glDispatchCompute(GlCompat.getComputeGroupCount(indirectDraws.size()), 1, 1);
 	}
 
@@ -241,7 +233,9 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private void drawBarrier() {
 		if (needsDrawBarrier) {
-			glMemoryBarrier(DRAW_BARRIER_BITS);
+			// In theory all command buffer writes will be protected by
+			// the shader storage barrier bit, but better safe than sorry.
+			glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
 			needsDrawBarrier = false;
 		}
 	}

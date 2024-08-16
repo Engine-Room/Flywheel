@@ -18,8 +18,8 @@ public class MatrixBuffer {
 
 		matrices.ensureCapacity(capacity);
 
-		stagingBuffer.enqueueCopy((long) arena.capacity() * EnvironmentStorage.MATRIX_SIZE_BYTES, matrices.handle(), 0, ptr -> {
-			MemoryUtil.memCopy(arena.indexToPointer(0), ptr, (long) arena.capacity() * EnvironmentStorage.MATRIX_SIZE_BYTES);
+		stagingBuffer.enqueueCopy(arena.byteCapacity(), matrices.handle(), 0, ptr -> {
+			MemoryUtil.memCopy(arena.indexToPointer(0), ptr, arena.byteCapacity());
 		});
 	}
 

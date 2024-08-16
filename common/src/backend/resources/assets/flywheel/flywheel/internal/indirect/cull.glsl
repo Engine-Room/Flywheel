@@ -36,8 +36,8 @@ bool _flw_testSphere(vec3 center, float radius) {
 }
 
 bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
-    BoundingSphere sphere = _flw_models[modelIndex].boundingSphere;
     uint matrixIndex = _flw_models[modelIndex].matrixIndex;
+    BoundingSphere sphere = _flw_models[modelIndex].boundingSphere;
 
     vec3 center;
     float radius;
