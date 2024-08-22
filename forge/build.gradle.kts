@@ -76,8 +76,11 @@ repositories {
 dependencies {
     neoForge("net.neoforged:neoforge:${property("neoforge_version")}")
 
-    modCompileOnly("maven.modrinth:embeddium:${property("embeddium_version")}")
-    modCompileOnly("maven.modrinth:oculus:${property("oculus_version")}")
+    modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-neoforge")
+    modCompileOnly("maven.modrinth:iris:${property("iris_version")}-neoforge")
+
+    //modCompileOnly("maven.modrinth:embeddium:${property("embeddium_version")}")
+    //modCompileOnly("maven.modrinth:oculus:${property("oculus_version")}")
 
     "forApi"(project(path = ":common", configuration = "commonApiOnly"))
     "forLib"(project(path = ":common", configuration = "commonLib"))
