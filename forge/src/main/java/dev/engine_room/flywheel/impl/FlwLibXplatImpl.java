@@ -70,7 +70,7 @@ public class FlwLibXplatImpl implements FlwLibXplat {
 	@Nullable
 	public ShadersModHandler.InternalHandler createIrisHandler() {
 		if (!ModList.get()
-				.isLoaded("oculus")) {
+				.isLoaded("iris")) {
 			return null;
 		}
 
