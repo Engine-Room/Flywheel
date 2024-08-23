@@ -6,6 +6,7 @@ struct MeshDrawCommand {
     uint baseInstance;
 
     uint modelIndex;
+    uint matrixIndex;
 
     uint materialVertexIndex;
     uint materialFragmentIndex;

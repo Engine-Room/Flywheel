@@ -14,6 +14,10 @@ import com.google.gson.JsonPrimitive;
 
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.backend.BackendManager;
+import dev.engine_room.flywheel.backend.BackendConfig;
+import dev.engine_room.flywheel.backend.FlwBackend;
+import dev.engine_room.flywheel.backend.FlwBackendXplatImpl;
+import dev.engine_room.flywheel.backend.compile.LightSmoothness;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
@@ -35,12 +39,16 @@ public class FabricFlwConfig implements FlwConfig {
 
 	private final File file;
 
+	public final FabricBackendConfig backendConfig = new FabricBackendConfig();
+
 	public Backend backend = BackendManager.defaultBackend();
 	public boolean limitUpdates = LIMIT_UPDATES_DEFAULT;
 	public int workerThreads = WORKER_THREADS_DEFAULT;
 
 	public FabricFlwConfig(File file) {
 		this.file = file;
+
+		FlwBackendXplatImpl.CONFIG = backendConfig;
 	}
 
 	@Override
@@ -90,6 +98,17 @@ public class FabricFlwConfig implements FlwConfig {
 		readBackend(object);
 		readLimitUpdates(object);
 		readWorkerThreads(object);
+		readFlwBackend(object);
+	}
+
+	private void readFlwBackend(JsonObject object) {
+		var flwBackendJson = object.get("flw_backend");
+
+		if (flwBackendJson instanceof JsonObject flwBackendObject) {
+			backendConfig.fromJson(flwBackendObject);
+		} else {
+			FlwImpl.CONFIG_LOGGER.warn("'flw_backend' value must be an object");
+		}
 	}
 
 	private void readBackend(JsonObject object) {
@@ -158,6 +177,55 @@ public class FabricFlwConfig implements FlwConfig {
 		object.addProperty("backend", Backend.REGISTRY.getIdOrThrow(backend).toString());
 		object.addProperty("limitUpdates", limitUpdates);
 		object.addProperty("workerThreads", workerThreads);
+		object.add("flw_backend", backendConfig.toJson());
 		return object;
+	}
+
+	public static class FabricBackendConfig implements BackendConfig {
+		public static final LightSmoothness LIGHT_SMOOTHNESS_DEFAULT = LightSmoothness.SMOOTH;
+
+		public LightSmoothness lightSmoothness = LIGHT_SMOOTHNESS_DEFAULT;
+
+		@Override
+		public LightSmoothness lightSmoothness() {
+			return lightSmoothness;
+		}
+
+		public void fromJson(JsonObject object) {
+			readLightSmoothness(object);
+		}
+
+		private void readLightSmoothness(JsonObject object) {
+			var backendJson = object.get("lightSmoothness");
+			String msg = null;
+
+			if (backendJson instanceof JsonPrimitive primitive && primitive.isString()) {
+				var value = primitive.getAsString();
+
+				for (var item : LightSmoothness.values()) {
+					if (item.name()
+							.equalsIgnoreCase(value)) {
+						lightSmoothness = item;
+						return;
+					}
+				}
+
+				msg = "Unknown 'lightSmoothness' value: " + value;
+			} else if (backendJson != null) {
+				msg = "'lightSmoothness' value must be a string";
+			}
+
+			// Don't log an error if the field is missing.
+			if (msg != null) {
+				FlwBackend.LOGGER.warn(msg);
+			}
+			lightSmoothness = LIGHT_SMOOTHNESS_DEFAULT;
+		}
+
+		public JsonObject toJson() {
+			JsonObject object = new JsonObject();
+			object.addProperty("lightSmoothness", lightSmoothness.getSerializedName());
+			return object;
+		}
 	}
 }

@@ -16,7 +16,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 
 public final class MaterialRenderState {
-	public static final Comparator<Material> COMPARATOR = Comparator.comparing(Material::texture)
+	public static final Comparator<Material> COMPARATOR = Comparator.comparing((Material m) -> m.light()
+					.source())
+			.thenComparing(Material::texture)
 			.thenComparing(Material::blur)
 			.thenComparing(Material::mipmap)
 			.thenComparing(Material::backfaceCulling)
@@ -176,5 +178,19 @@ public final class MaterialRenderState {
 	private static void resetWriteMask() {
 		RenderSystem.depthMask(true);
 		RenderSystem.colorMask(true, true, true, true);
+	}
+
+	public static boolean materialEquals(Material lhs, Material rhs) {
+		if (lhs == rhs) {
+			return true;
+		}
+
+		// Not here because ubershader: useLight, useOverlay, diffuse, shaders, fog shader, and cutout shader
+		// Everything in the comparator should be here.
+		return lhs.blur() == rhs.blur() && lhs.mipmap() == rhs.mipmap() && lhs.backfaceCulling() == rhs.backfaceCulling() && lhs.polygonOffset() == rhs.polygonOffset() && lhs.light()
+				.source()
+				.equals(rhs.light()
+						.source()) && lhs.texture()
+				.equals(rhs.texture()) && lhs.depthTest() == rhs.depthTest() && lhs.transparency() == rhs.transparency() && lhs.writeMask() == rhs.writeMask();
 	}
 }

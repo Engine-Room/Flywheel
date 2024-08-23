@@ -16,10 +16,10 @@ public class IndirectBuffers {
 	public static final long INT_SIZE = Integer.BYTES;
 	public static final long PTR_SIZE = Pointer.POINTER_SIZE;
 
-	public static final long MODEL_STRIDE = 24;
+	public static final long MODEL_STRIDE = 28;
 
 	// Byte size of a draw command, plus our added mesh data.
-	public static final long DRAW_COMMAND_STRIDE = 40;
+	public static final long DRAW_COMMAND_STRIDE = 44;
 	public static final long DRAW_COMMAND_OFFSET = 0;
 
 	// Offsets to the 3 segments

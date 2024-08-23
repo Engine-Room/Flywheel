@@ -56,7 +56,8 @@ public final class PipelineCompiler {
 						.nameMapper(key -> {
 							var context = key.contextShader()
 									.nameLowerCase();
-							return "pipeline/" + pipeline.compilerMarker() + "/" + context;
+							return "pipeline/" + pipeline.compilerMarker() + "/" + ResourceUtil.toDebugFileNameNoExtension(key.light()
+									.source()) + "_" + context;
 						})
 						.requireExtensions(extensions)
 						.enableExtension("GL_ARB_conservative_depth")
@@ -65,6 +66,8 @@ public final class PipelineCompiler {
 						.onCompile((key, comp) -> lightSmoothness.onCompile(comp))
 						.withResource(API_IMPL_FRAG)
 						.withComponents(fragmentComponents)
+						.withResource(key -> key.light()
+								.source())
 						.withResource(pipeline.fragmentMain()))
 				.preLink((key, program) -> {
 					program.bindAttribLocation("_flw_aPos", 0);

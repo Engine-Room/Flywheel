@@ -3,22 +3,20 @@ package dev.engine_room.flywheel.lib.backend;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import dev.engine_room.flywheel.api.backend.Backend;
-import dev.engine_room.flywheel.api.backend.BackendManager;
 import dev.engine_room.flywheel.api.backend.Engine;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
 
 public final class SimpleBackend implements Backend {
 	private final Function<LevelAccessor, Engine> engineFactory;
-	private final Supplier<Backend> fallback;
+	private final int priority;
 	private final BooleanSupplier isSupported;
 
-	public SimpleBackend(Function<LevelAccessor, Engine> engineFactory, Supplier<Backend> fallback, BooleanSupplier isSupported) {
+	public SimpleBackend(int priority, Function<LevelAccessor, Engine> engineFactory, BooleanSupplier isSupported) {
+		this.priority = priority;
 		this.engineFactory = engineFactory;
-		this.fallback = fallback;
 		this.isSupported = isSupported;
 	}
 
@@ -32,13 +30,8 @@ public final class SimpleBackend implements Backend {
 	}
 
 	@Override
-	public Backend findFallback() {
-		if (isSupported()) {
-			return this;
-		} else {
-			return fallback.get()
-					.findFallback();
-		}
+	public int priority() {
+		return priority;
 	}
 
 	@Override
@@ -48,7 +41,7 @@ public final class SimpleBackend implements Backend {
 
 	public static final class Builder {
 		private Function<LevelAccessor, Engine> engineFactory;
-		private Supplier<Backend> fallback = BackendManager::offBackend;
+		private int priority = 0;
 		private BooleanSupplier isSupported;
 
 		public Builder engineFactory(Function<LevelAccessor, Engine> engineFactory) {
@@ -56,8 +49,8 @@ public final class SimpleBackend implements Backend {
 			return this;
 		}
 
-		public Builder fallback(Supplier<Backend> fallback) {
-			this.fallback = fallback;
+		public Builder priority(int priority) {
+			this.priority = priority;
 			return this;
 		}
 
@@ -68,10 +61,9 @@ public final class SimpleBackend implements Backend {
 
 		public Backend register(ResourceLocation id) {
 			Objects.requireNonNull(engineFactory);
-			Objects.requireNonNull(fallback);
 			Objects.requireNonNull(isSupported);
 
-			return Backend.REGISTRY.registerAndGet(id, new SimpleBackend(engineFactory, fallback, isSupported));
+			return Backend.REGISTRY.registerAndGet(id, new SimpleBackend(priority, engineFactory, isSupported));
 		}
 	}
 }

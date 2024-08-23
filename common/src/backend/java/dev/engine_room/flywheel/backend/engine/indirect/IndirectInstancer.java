@@ -49,10 +49,11 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	public void writeModel(long ptr) {
 		MemoryUtil.memPutInt(ptr, 0); // instanceCount - to be incremented by the cull shader
 		MemoryUtil.memPutInt(ptr + 4, baseInstance); // baseInstance
-		MemoryUtil.memPutFloat(ptr + 8, boundingSphere.x()); // boundingSphere
-		MemoryUtil.memPutFloat(ptr + 12, boundingSphere.y());
-		MemoryUtil.memPutFloat(ptr + 16, boundingSphere.z());
-		MemoryUtil.memPutFloat(ptr + 20, boundingSphere.w());
+		MemoryUtil.memPutInt(ptr + 8, environment.matrixIndex()); // matrixIndex
+		MemoryUtil.memPutFloat(ptr + 12, boundingSphere.x()); // boundingSphere
+		MemoryUtil.memPutFloat(ptr + 16, boundingSphere.y());
+		MemoryUtil.memPutFloat(ptr + 20, boundingSphere.z());
+		MemoryUtil.memPutFloat(ptr + 24, boundingSphere.w());
 	}
 
 	public void uploadInstances(StagingBuffer stagingBuffer, int instanceVbo) {

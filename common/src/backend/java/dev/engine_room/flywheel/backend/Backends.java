@@ -17,6 +17,7 @@ public final class Backends {
 	 */
 	public static final Backend INSTANCING = SimpleBackend.builder()
 			.engineFactory(level -> new EngineImpl(level, new InstancedDrawManager(InstancingPrograms.get()), 256))
+			.priority(500)
 			.supported(() -> GlCompat.SUPPORTS_INSTANCING && InstancingPrograms.allLoaded() && !ShadersModHandler.isShaderPackInUse())
 			.register(Flywheel.rl("instancing"));
 
@@ -25,7 +26,7 @@ public final class Backends {
 	 */
 	public static final Backend INDIRECT = SimpleBackend.builder()
 			.engineFactory(level -> new EngineImpl(level, new IndirectDrawManager(IndirectPrograms.get()), 256))
-			.fallback(() -> Backends.INSTANCING)
+			.priority(1000)
 			.supported(() -> GlCompat.SUPPORTS_INDIRECT && IndirectPrograms.allLoaded() && !ShadersModHandler.isShaderPackInUse())
 			.register(Flywheel.rl("indirect"));
 

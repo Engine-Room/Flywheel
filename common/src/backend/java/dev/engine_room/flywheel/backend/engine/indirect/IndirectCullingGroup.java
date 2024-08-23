@@ -5,7 +5,6 @@ import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
 import static org.lwjgl.opengl.GL30.glUniform1ui;
 import static org.lwjgl.opengl.GL42.GL_COMMAND_BARRIER_BIT;
 import static org.lwjgl.opengl.GL42.glMemoryBarrier;
-import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BARRIER_BIT;
 import static org.lwjgl.opengl.GL43.glDispatchCompute;
 
 import java.util.ArrayList;
@@ -24,22 +23,20 @@ import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
 import dev.engine_room.flywheel.backend.engine.InstancerKey;
 import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
-import dev.engine_room.flywheel.backend.engine.embed.Environment;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
+import dev.engine_room.flywheel.lib.material.LightShaders;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 
 public class IndirectCullingGroup<I extends Instance> {
 	private static final Comparator<IndirectDraw> DRAW_COMPARATOR = Comparator.comparing(IndirectDraw::visualType)
+			.thenComparing(IndirectDraw::isEmbedded)
 			.thenComparing(IndirectDraw::bias)
 			.thenComparing(IndirectDraw::indexOfMeshInModel)
 			.thenComparing(IndirectDraw::material, MaterialRenderState.COMPARATOR);
 
-	private static final int DRAW_BARRIER_BITS = GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT;
-
 	private final InstanceType<I> instanceType;
-	private final Environment environment;
 	private final long instanceStride;
 	private final IndirectBuffers buffers;
 	private final List<IndirectInstancer<I>> instancers = new ArrayList<>();
@@ -48,24 +45,19 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private final IndirectPrograms programs;
 	private final GlProgram cullProgram;
-	private final GlProgram applyProgram;
-	private final GlProgram drawProgram;
 
 	private boolean needsDrawBarrier;
 	private boolean needsDrawSort;
 	private int instanceCountThisFrame;
 
-	IndirectCullingGroup(InstanceType<I> instanceType, Environment environment, IndirectPrograms programs) {
+	IndirectCullingGroup(InstanceType<I> instanceType, IndirectPrograms programs) {
 		this.instanceType = instanceType;
-		this.environment = environment;
 		instanceStride = MoreMath.align4(instanceType.layout()
 				.byteSize());
 		buffers = new IndirectBuffers(instanceStride);
 
 		this.programs = programs;
 		cullProgram = programs.getCullingProgram(instanceType);
-		applyProgram = programs.getApplyProgram();
-		drawProgram = programs.getIndirectProgram(instanceType, environment.contextShader());
 	}
 
 	public void flushInstancers() {
@@ -125,10 +117,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		Uniforms.bindAll();
 		cullProgram.bind();
 
-		environment.setupCull(cullProgram);
-
 		buffers.bindForCompute();
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		glDispatchCompute(GlCompat.getComputeGroupCount(instanceCountThisFrame), 1, 1);
 	}
 
@@ -137,9 +126,7 @@ public class IndirectCullingGroup<I extends Instance> {
 			return;
 		}
 
-		applyProgram.bind();
 		buffers.bindForCompute();
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		glDispatchCompute(GlCompat.getComputeGroupCount(indirectDraws.size()), 1, 1);
 	}
 
@@ -158,18 +145,25 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		for (int start = 0, i = 0; i < indirectDraws.size(); i++) {
 			var draw1 = indirectDraws.get(i);
-			var material1 = draw1.material();
-			var visualType1 = draw1.visualType();
 
 			// if the next draw call has a different VisualType or Material, start a new MultiDraw
-			if (i == indirectDraws.size() - 1 || visualType1 != indirectDraws.get(i + 1)
-					.visualType() || !material1.equals(indirectDraws.get(i + 1)
-					.material())) {
-				multiDraws.computeIfAbsent(visualType1, s -> new ArrayList<>())
-						.add(new MultiDraw(material1, start, i + 1));
+			if (i == indirectDraws.size() - 1 || incompatibleDraws(draw1, indirectDraws.get(i + 1))) {
+				multiDraws.computeIfAbsent(draw1.visualType(), s -> new ArrayList<>())
+						.add(new MultiDraw(draw1.material(), draw1.isEmbedded(), start, i + 1));
 				start = i + 1;
 			}
 		}
+	}
+
+	private boolean incompatibleDraws(IndirectDraw draw1, IndirectDraw draw2) {
+		if (draw1.visualType() != draw2.visualType()) {
+			return true;
+		}
+
+		if (draw1.isEmbedded() != draw2.isEmbedded()) {
+			return true;
+		}
+		return !MaterialRenderState.materialEquals(draw1.material(), draw2.material());
 	}
 
 	public boolean hasVisualType(VisualType visualType) {
@@ -199,17 +193,24 @@ public class IndirectCullingGroup<I extends Instance> {
 			return;
 		}
 
-		drawProgram.bind();
 		buffers.bindForDraw();
-
-		environment.setupDraw(drawProgram);
 
 		drawBarrier();
 
-		var flwBaseDraw = drawProgram.getUniformLocation("_flw_baseDraw");
+		GlProgram lastProgram = null;
+		int baseDrawUniformLoc = -1;
 
 		for (var multiDraw : multiDraws.get(visualType)) {
-			glUniform1ui(flwBaseDraw, multiDraw.start);
+			var drawProgram = programs.getIndirectProgram(instanceType, multiDraw.embedded ? ContextShader.EMBEDDED : ContextShader.DEFAULT, multiDraw.material.light());
+			if (drawProgram != lastProgram) {
+				lastProgram = drawProgram;
+
+				// Don't need to do this unless the program changes.
+				drawProgram.bind();
+				baseDrawUniformLoc = drawProgram.getUniformLocation("_flw_baseDraw");
+			}
+
+			glUniform1ui(baseDrawUniformLoc, multiDraw.start);
 
 			MaterialRenderState.setup(multiDraw.material);
 
@@ -218,7 +219,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	public void bindWithContextShader(ContextShader override) {
-		var program = programs.getIndirectProgram(instanceType, override);
+		var program = programs.getIndirectProgram(instanceType, override, LightShaders.SMOOTH_WHEN_EMBEDDED);
 
 		program.bind();
 
@@ -226,13 +227,15 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		drawBarrier();
 
-		var flwBaseDraw = drawProgram.getUniformLocation("_flw_baseDraw");
+		var flwBaseDraw = program.getUniformLocation("_flw_baseDraw");
 		glUniform1ui(flwBaseDraw, 0);
 	}
 
 	private void drawBarrier() {
 		if (needsDrawBarrier) {
-			glMemoryBarrier(DRAW_BARRIER_BITS);
+			// In theory all command buffer writes will be protected by
+			// the shader storage barrier bit, but better safe than sorry.
+			glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
 			needsDrawBarrier = false;
 		}
 	}
@@ -290,7 +293,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		return out;
 	}
 
-	private record MultiDraw(Material material, int start, int end) {
+	private record MultiDraw(Material material, boolean embedded, int start, int end) {
 		private void submit() {
 			GlCompat.safeMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, this.start * IndirectBuffers.DRAW_COMMAND_STRIDE, this.end - this.start, (int) IndirectBuffers.DRAW_COMMAND_STRIDE);
 		}

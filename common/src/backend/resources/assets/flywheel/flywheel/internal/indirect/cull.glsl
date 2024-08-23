@@ -2,6 +2,7 @@
 #include "flywheel:internal/indirect/model_descriptor.glsl"
 #include "flywheel:internal/uniforms/uniforms.glsl"
 #include "flywheel:util/matrix.glsl"
+#include "flywheel:internal/indirect/matrices.glsl"
 
 layout(local_size_x = _FLW_SUBGROUP_SIZE) in;
 
@@ -17,8 +18,9 @@ layout(std430, binding = _FLW_MODEL_BUFFER_BINDING) restrict buffer ModelBuffer 
     ModelDescriptor _flw_models[];
 };
 
-uniform mat4 _flw_modelMatrix;
-uniform bool _flw_useModelMatrix = false;
+layout(std430, binding = _FLW_MATRIX_BUFFER_BINDING) restrict buffer MatrixBuffer {
+    Matrices _flw_matrices[];
+};
 
 // Disgustingly vectorized sphere frustum intersection taking advantage of ahead of time packing.
 // Only uses 6 fmas and some boolean ops.
@@ -34,6 +36,7 @@ bool _flw_testSphere(vec3 center, float radius) {
 }
 
 bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
+    uint matrixIndex = _flw_models[modelIndex].matrixIndex;
     BoundingSphere sphere = _flw_models[modelIndex].boundingSphere;
 
     vec3 center;
@@ -44,8 +47,8 @@ bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
 
     flw_transformBoundingSphere(instance, center, radius);
 
-    if (_flw_useModelMatrix) {
-        transformBoundingSphere(_flw_modelMatrix, center, radius);
+    if (matrixIndex > 0) {
+        transformBoundingSphere(_flw_matrices[matrixIndex].pose, center, radius);
     }
 
     return _flw_testSphere(center, radius);

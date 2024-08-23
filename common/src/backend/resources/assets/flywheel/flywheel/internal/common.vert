@@ -67,8 +67,8 @@ vec2 getCrumblingTexCoord() {
 #endif
 
 #ifdef FLW_EMBEDDED
-uniform mat4 _flw_modelMatrix;
-uniform mat3 _flw_normalMatrix;
+mat4 _flw_modelMatrix;
+mat3 _flw_normalMatrix;
 #endif
 
 flat out uint _flw_instanceID;
