@@ -8,6 +8,8 @@ import org.jetbrains.annotations.UnknownNullability;
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.event.EndClientResourceReloadEvent;
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererEvent;
+import dev.engine_room.flywheel.backend.ForgeBackendConfig;
+import dev.engine_room.flywheel.backend.LightSmoothnessArgument;
 import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
@@ -49,6 +51,7 @@ public final class FlywheelForge {
 		IEventBus forgeEventBus = NeoForge.EVENT_BUS;
 
 		ForgeFlwConfig.INSTANCE.registerSpecs(modContainer);
+		ForgeBackendConfig.INSTANCE.registerSpecs(modLoadingContext);
 
 		if (FMLLoader.getDist().isClient()) {
 			Supplier<Runnable> toRun = () -> () -> FlywheelForge.clientInit(forgeEventBus, modEventBus);
@@ -94,11 +97,13 @@ public final class FlywheelForge {
 		modEventBus.addListener((FMLCommonSetupEvent e) -> {
 			ArgumentTypeInfos.registerByClass(BackendArgument.class, BackendArgument.INFO);
 			ArgumentTypeInfos.registerByClass(DebugModeArgument.class, DebugModeArgument.INFO);
+			ArgumentTypeInfos.registerByClass(LightSmoothnessArgument.class, LightSmoothnessArgument.INFO);
 		});
 		modEventBus.addListener((RegisterEvent e) -> {
 			if (e.getRegistryKey().equals(Registries.COMMAND_ARGUMENT_TYPE)) {
 				e.register(Registries.COMMAND_ARGUMENT_TYPE, Flywheel.rl("backend"), () -> BackendArgument.INFO);
 				e.register(Registries.COMMAND_ARGUMENT_TYPE, Flywheel.rl("debug_mode"), () -> DebugModeArgument.INFO);
+				e.register(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, Flywheel.rl("light_smoothness"), () -> LightSmoothnessArgument.INFO);
 			}
 		});
 	}

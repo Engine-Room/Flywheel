@@ -9,4 +9,9 @@ public class FlwBackendXplatImpl implements FlwBackendXplat {
 	public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
 		return state.getLightEmission(level, pos);
 	}
+
+	@Override
+	public BackendConfig getConfig() {
+		return ForgeBackendConfig.INSTANCE;
+	}
 }

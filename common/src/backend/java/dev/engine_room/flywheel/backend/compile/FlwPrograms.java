@@ -120,6 +120,7 @@ public final class FlwPrograms {
 				.build(loader);
 	}
 
+	// TODO: Do not uber this component. Shader compile times are very high now
 	@Nullable
 	private static UberShaderComponent createLightComponent(SourceLoader loader) {
 		return UberShaderComponent.builder(Flywheel.rl("light"))

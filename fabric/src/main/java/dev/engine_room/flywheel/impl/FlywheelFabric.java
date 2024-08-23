@@ -5,6 +5,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.event.EndClientResourceReloadCallback;
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererCallback;
+import dev.engine_room.flywheel.backend.LightSmoothnessArgument;
 import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
@@ -62,6 +63,7 @@ public final class FlywheelFabric implements ClientModInitializer {
 
 		ArgumentTypeRegistry.registerArgumentType(Flywheel.rl("backend"), BackendArgument.class, BackendArgument.INFO);
 		ArgumentTypeRegistry.registerArgumentType(Flywheel.rl("debug_mode"), DebugModeArgument.class, DebugModeArgument.INFO);
+		ArgumentTypeRegistry.registerArgumentType(Flywheel.rl("light_smoothness"), LightSmoothnessArgument.class, LightSmoothnessArgument.INFO);
 	}
 
 	private static void setupLib() {

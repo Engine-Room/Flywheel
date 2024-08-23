@@ -17,13 +17,13 @@ public interface InstancerProvider {
 	 * <h2>Render Order</h2>
 	 * <p>In general, you can assume all instances in the same instancer will be rendered in a single draw call.
 	 * Backends are free to optimize the ordering of draw calls to a certain extent, but utilities are provided to let
-	 * you control the order of draw calls
+	 * you exert control over the ordering.</p>
 	 * <h4>Mesh Order</h4>
-	 * <br>For one, Meshes within a Model are guaranteed to render in the order they appear in their containing list.
+	 * <p>For one, Meshes within a Model are guaranteed to render in the order they appear in their containing list.
 	 * This lets you e.g. preserve (or break!) vanilla's chunk RenderType order guarantees or control which Meshes of
-	 * your Model render over others.
+	 * your Model render over others.</p>
 	 * <h4>Bias Order</h4>
-	 * <br>The other method is via the {@code bias} parameter to this method. An instancer with a lower bias will have
+	 * <p>The other method is via the {@code bias} parameter to this method. An instancer with a lower bias will have
 	 * its instances draw BEFORE an instancer with a higher bias. This allows you to control the render order between
 	 * your instances to e.g. create an "overlay" instance to selectively color or apply decals to another instance.</p>
 	 *
