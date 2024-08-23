@@ -101,7 +101,7 @@ public final class FlywheelForge {
 			if (e.getRegistryKey().equals(Registries.COMMAND_ARGUMENT_TYPE)) {
 				e.register(Registries.COMMAND_ARGUMENT_TYPE, Flywheel.rl("backend"), () -> BackendArgument.INFO);
 				e.register(Registries.COMMAND_ARGUMENT_TYPE, Flywheel.rl("debug_mode"), () -> DebugModeArgument.INFO);
-				e.register(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, Flywheel.rl("light_smoothness"), () -> LightSmoothnessArgument.INFO);
+				e.register(Registries.COMMAND_ARGUMENT_TYPE, Flywheel.rl("light_smoothness"), () -> LightSmoothnessArgument.INFO);
 			}
 		});
 	}

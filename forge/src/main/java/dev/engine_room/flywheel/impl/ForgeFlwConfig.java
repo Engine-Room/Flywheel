@@ -98,9 +98,9 @@ public class ForgeFlwConfig implements FlwConfig {
 	}
 
 	public static class ForgeBackendConfig implements BackendConfig {
-		public final ForgeConfigSpec.EnumValue<LightSmoothness> lightSmoothness;
+		public final ModConfigSpec.EnumValue<LightSmoothness> lightSmoothness;
 
-		public ForgeBackendConfig(ForgeConfigSpec.Builder builder) {
+		public ForgeBackendConfig(ModConfigSpec.Builder builder) {
 			lightSmoothness = builder.comment("How smooth flywheel's shader-based lighting should be. May have a large performance impact.")
 					.defineEnum("lightSmoothness", LightSmoothness.SMOOTH);
 		}
