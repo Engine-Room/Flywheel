@@ -30,13 +30,6 @@ ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.flywheel]]
-modId = "rubidium"
-mandatory = false
-versionRange = "[0.7.0,)"
-ordering = "NONE"
-side = "CLIENT"
-
-[[dependencies.flywheel]]
 modId = "embeddium"
 mandatory = false
 versionRange = "[0.3.25,)"
