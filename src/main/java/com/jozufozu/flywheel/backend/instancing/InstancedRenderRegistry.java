@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.jozufozu.flywheel.Flywheel;
 import com.jozufozu.flywheel.api.MaterialManager;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstance;
 import com.jozufozu.flywheel.backend.instancing.blockentity.BlockEntityInstancingController;
@@ -15,6 +16,7 @@ import com.jozufozu.flywheel.backend.instancing.entity.EntityInstance;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityInstancingController;
 import com.jozufozu.flywheel.backend.instancing.entity.EntityTypeExtension;
 import com.jozufozu.flywheel.backend.instancing.entity.SimpleEntityInstancingController;
+import com.jozufozu.flywheel.compat.SodiumCompat;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -241,6 +243,8 @@ public class InstancedRenderRegistry {
 			}
 			SimpleBlockEntityInstancingController<T> controller = new SimpleBlockEntityInstancingController<>(instanceFactory, skipRender);
 			setController(type, controller);
+			if (Flywheel.IS_SODIUM_LOADED.get())
+				SodiumCompat.forBlockEntityType(type);
 			return controller;
 		}
 	}

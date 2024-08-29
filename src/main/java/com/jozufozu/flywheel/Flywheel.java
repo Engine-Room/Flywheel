@@ -1,7 +1,10 @@
 package com.jozufozu.flywheel;
 
+import java.util.function.Supplier;
+
 import org.slf4j.Logger;
 
+import com.google.common.base.Suppliers;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.Loader;
 import com.jozufozu.flywheel.backend.RenderWork;
@@ -39,6 +42,8 @@ public class Flywheel implements ClientModInitializer {
 	public static final String ID = "flywheel";
 	public static final Logger LOGGER = LogUtils.getLogger();
 	private static Version version;
+
+	public static final Supplier<Boolean> IS_SODIUM_LOADED = Suppliers.memoize(() -> FabricLoader.getInstance().isModLoaded("sodium"));
 
 	@Override
 	public void onInitializeClient() {

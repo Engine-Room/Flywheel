@@ -71,7 +71,7 @@ dependencies {
     // switch to implementation for debugging
     modCompileOnly 'maven.modrinth:starlight:1.1.2+1.20'
 
-    modCompileOnly ':sodium-fabric-1.20.1-0.6.0-alpha.2'
+    modCompileOnly ':sodium-fabric-0.6.0-snapshot+mc1.21-build.320'
     modCompileOnly 'maven.modrinth:iris:1.6.10+1.20.1'
 
     modCompileOnly 'maven.modrinth:embeddium:kJkE9dfS'

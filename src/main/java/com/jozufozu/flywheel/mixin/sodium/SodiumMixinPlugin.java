@@ -9,11 +9,12 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 import com.google.common.base.Suppliers;
+import com.jozufozu.flywheel.Flywheel;
 
 import net.fabricmc.loader.api.FabricLoader;
 
 public class SodiumMixinPlugin implements IMixinConfigPlugin {
-	private static final Supplier<Boolean> IS_SODIUM_LOADED = Suppliers.memoize(() -> FabricLoader.getInstance().isModLoaded("sodium"));
+	private static final Supplier<Boolean> IS_EMBEDDIUM_LOADED = Suppliers.memoize(() -> FabricLoader.getInstance().isModLoaded("embeddium"));
 
 	@Override
 	public void onLoad(String mixinPackage) {
@@ -26,7 +27,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		return IS_SODIUM_LOADED.get();
+		return Flywheel.IS_SODIUM_LOADED.get() && !IS_EMBEDDIUM_LOADED.get();
 	}
 
 	@Override
