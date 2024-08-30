@@ -243,7 +243,7 @@ public class InstancedRenderRegistry {
 			}
 			SimpleBlockEntityInstancingController<T> controller = new SimpleBlockEntityInstancingController<>(instanceFactory, skipRender);
 			setController(type, controller);
-			if (Flywheel.IS_SODIUM_LOADED.get())
+			if (Flywheel.IS_SODIUM_LOADED.get() && Flywheel.isSodium0_6)
 				SodiumCompat.forBlockEntityType(type);
 			return controller;
 		}

@@ -34,6 +34,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
+import net.fabricmc.loader.api.metadata.version.VersionPredicate;
+import net.fabricmc.loader.impl.util.version.VersionPredicateParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 
@@ -44,6 +46,8 @@ public class Flywheel implements ClientModInitializer {
 	private static Version version;
 
 	public static final Supplier<Boolean> IS_SODIUM_LOADED = Suppliers.memoize(() -> FabricLoader.getInstance().isModLoaded("sodium"));
+	public static boolean isSodium0_5 = false;
+	public static boolean isSodium0_6 = false;
 
 	@Override
 	public void onInitializeClient() {
@@ -85,6 +89,18 @@ public class Flywheel implements ClientModInitializer {
 		if (FabricLoader.getInstance().isModLoaded("embeddium")) {
 			EmbeddiumCompat.init();
 		}
+
+		try {
+			VersionPredicate predicate0_5 = VersionPredicateParser.parse(">=0.5 <0.6");
+			VersionPredicate predicate0_6 = VersionPredicateParser.parse(">0.6.0-beta.2");
+			Version sodiumVersion = FabricLoader.getInstance()
+					.getModContainer("sodium")
+					.orElseThrow()
+					.getMetadata()
+					.getVersion();
+			isSodium0_5 = predicate0_5.test(sodiumVersion);
+			isSodium0_6 = predicate0_6.test(sodiumVersion);
+		} catch(Throwable ignored) {}
 
 		VanillaInstances.init();
 
