@@ -92,8 +92,8 @@ public class Flywheel implements ClientModInitializer {
 
 		if (IS_SODIUM_LOADED.get()) {
 			try {
-				VersionPredicate predicate0_5 = VersionPredicateParser.parse(">=0.5 <0.6");
-				VersionPredicate predicate0_6 = VersionPredicateParser.parse(">0.6.0-beta.2");
+				VersionPredicate predicate0_5 = VersionPredicateParser.parse(">=0.5.0 <0.6.0");
+				VersionPredicate predicate0_6 = VersionPredicateParser.parse("<0.6 >=0.6.0-beta.2");
 				Version sodiumVersion = FabricLoader.getInstance()
 						.getModContainer("sodium")
 						.orElseThrow()
