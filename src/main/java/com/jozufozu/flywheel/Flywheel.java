@@ -1,8 +1,11 @@
 package com.jozufozu.flywheel;
 
+import java.util.function.Supplier;
+
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.slf4j.Logger;
 
+import com.google.common.base.Suppliers;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.compat.EmbeddiumCompat;
@@ -32,6 +35,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.network.NetworkConstants;
 import net.minecraftforge.registries.RegisterEvent;
 
@@ -41,6 +45,8 @@ public class Flywheel {
 	public static final String ID = "flywheel";
 	public static final Logger LOGGER = LogUtils.getLogger();
 	private static ArtifactVersion version;
+
+	public static final Supplier<Boolean> IS_SODIUM_LOADED = Suppliers.memoize(() -> LoadingModList.get().getModFileById("sodium") != null);
 
 	public Flywheel() {
 		ModLoadingContext modLoadingContext = ModLoadingContext.get();

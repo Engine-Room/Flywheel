@@ -35,3 +35,10 @@ mandatory = false
 versionRange = "[0.3.25,)"
 ordering = "NONE"
 side = "CLIENT"
+
+[[dependencies.flywheel]]
+modId = "sodium"
+mandatory = false
+versionRange = "[0.6.0-beta.2,)"
+ordering = "NONE"
+side = "CLIENT"
