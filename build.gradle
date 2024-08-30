@@ -122,7 +122,7 @@ dependencies {
     // switch to implementation for debugging
     compileOnly fg.deobf('maven.modrinth:starlight-forge:1.1.2+1.20')
 
-    compileOnly('libs:sodium-neoforge:0.6.0-snapshot+mc1.21-build.320')
+    compileOnly('libs:sodium-fabric:0.6.0-snapshot+mc1.20.1-local')
 
     compileOnly fg.deobf('maven.modrinth:embeddium:FI3Xe9Px')
     compileOnly fg.deobf('maven.modrinth:oculus:1.20.1-1.7.0')
