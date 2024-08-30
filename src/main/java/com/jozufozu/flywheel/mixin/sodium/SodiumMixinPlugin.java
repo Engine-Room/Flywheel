@@ -12,6 +12,9 @@ import com.google.common.base.Suppliers;
 import com.jozufozu.flywheel.Flywheel;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.Version;
+import net.fabricmc.loader.api.metadata.version.VersionPredicate;
+import net.fabricmc.loader.impl.util.version.VersionPredicateParser;
 
 public class SodiumMixinPlugin implements IMixinConfigPlugin {
 	private static final Supplier<Boolean> IS_EMBEDDIUM_LOADED = Suppliers.memoize(() -> FabricLoader.getInstance().isModLoaded("embeddium"));
@@ -27,7 +30,18 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		return Flywheel.IS_SODIUM_LOADED.get() && !IS_EMBEDDIUM_LOADED.get();
+		boolean shouldUseMixin = false;
+		try {
+			VersionPredicate predicate = VersionPredicateParser.parse(">=0.5 <0.6");
+			Version sodiumVersion = FabricLoader.getInstance()
+					.getModContainer("sodium")
+					.orElseThrow()
+					.getMetadata()
+					.getVersion();
+			shouldUseMixin = predicate.test(sodiumVersion);
+		} catch(Throwable ignored) {}
+
+		return Flywheel.IS_SODIUM_LOADED.get() && !IS_EMBEDDIUM_LOADED.get() && shouldUseMixin;
 	}
 
 	@Override
