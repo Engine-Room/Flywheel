@@ -90,17 +90,19 @@ public class Flywheel implements ClientModInitializer {
 			EmbeddiumCompat.init();
 		}
 
-		try {
-			VersionPredicate predicate0_5 = VersionPredicateParser.parse(">=0.5 <0.6");
-			VersionPredicate predicate0_6 = VersionPredicateParser.parse(">0.6.0-beta.2");
-			Version sodiumVersion = FabricLoader.getInstance()
-					.getModContainer("sodium")
-					.orElseThrow()
-					.getMetadata()
-					.getVersion();
-			isSodium0_5 = predicate0_5.test(sodiumVersion);
-			isSodium0_6 = predicate0_6.test(sodiumVersion);
-		} catch(Throwable ignored) {}
+		if (IS_SODIUM_LOADED.get()) {
+			try {
+				VersionPredicate predicate0_5 = VersionPredicateParser.parse(">=0.5 <0.6");
+				VersionPredicate predicate0_6 = VersionPredicateParser.parse(">0.6.0-beta.2");
+				Version sodiumVersion = FabricLoader.getInstance()
+						.getModContainer("sodium")
+						.orElseThrow()
+						.getMetadata()
+						.getVersion();
+				isSodium0_5 = predicate0_5.test(sodiumVersion);
+				isSodium0_6 = predicate0_6.test(sodiumVersion);
+			} catch (Throwable ignored) {}
+		}
 
 		VanillaInstances.init();
 
