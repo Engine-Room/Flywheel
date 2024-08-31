@@ -46,7 +46,7 @@ public class LightStorage {
 
 	private final LevelAccessor level;
 
-	private final Arena arena;
+	private final CpuArena arena;
 	private final Long2IntMap section2ArenaIndex = new Long2IntOpenHashMap();
 	{
 		section2ArenaIndex.defaultReturnValue(INVALID_SECTION);
@@ -62,7 +62,7 @@ public class LightStorage {
 	public LightStorage(LevelAccessor level) {
 		this.level = level;
 
-		arena = new Arena(SECTION_SIZE_BYTES, DEFAULT_ARENA_CAPACITY_SECTIONS);
+		arena = new CpuArena(SECTION_SIZE_BYTES, DEFAULT_ARENA_CAPACITY_SECTIONS);
 	}
 
 	/**

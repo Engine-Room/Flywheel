@@ -122,12 +122,12 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 
 		if (writePos < newSize) {
 			// Since we'll be shifting everything into this space we can consider it all changed.
-			changed.set(writePos, newSize);
+			setRangeChanged(writePos, newSize);
 		}
 
 		// We definitely shouldn't consider the deleted instances as changed though,
 		// else we might try some out of bounds accesses later.
-		changed.clear(newSize, oldSize);
+		clearChangedRange(newSize, oldSize);
 
 		// Punch out the deleted instances, shifting over surviving instances to fill their place.
 		for (int scanPos = writePos; (scanPos < oldSize) && (writePos < newSize); scanPos++, writePos++) {
@@ -153,6 +153,14 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 				.clear();
 		handles.subList(newSize, oldSize)
 				.clear();
+	}
+
+	protected void clearChangedRange(int start, int end) {
+		changed.clear(start, end);
+	}
+
+	protected void setRangeChanged(int start, int end) {
+		changed.set(start, end);
 	}
 
 	/**

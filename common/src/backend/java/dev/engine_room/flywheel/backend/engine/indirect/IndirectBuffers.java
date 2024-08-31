@@ -61,9 +61,9 @@ public class IndirectBuffers {
 	 */
 	private final MemoryBlock multiBindBlock;
 	private final long instanceStride;
-	public final ResizableStorageArray instance;
+
+	public final InstancePager pageFile;
 	public final ResizableStorageArray target;
-	public final ResizableStorageArray modelIndex;
 	public final ResizableStorageArray model;
 	public final ResizableStorageArray draw;
 
@@ -71,30 +71,27 @@ public class IndirectBuffers {
 		this.instanceStride = instanceStride;
 		this.multiBindBlock = MemoryBlock.calloc(BUFFERS_SIZE_BYTES, 1);
 
-		instance = new ResizableStorageArray(instanceStride, INSTANCE_GROWTH_FACTOR);
+		pageFile = new InstancePager(instanceStride);
 		target = new ResizableStorageArray(INT_SIZE, INSTANCE_GROWTH_FACTOR);
-		modelIndex = new ResizableStorageArray(INT_SIZE, INSTANCE_GROWTH_FACTOR);
 		model = new ResizableStorageArray(MODEL_STRIDE, MODEL_GROWTH_FACTOR);
 		draw = new ResizableStorageArray(DRAW_COMMAND_STRIDE, DRAW_GROWTH_FACTOR);
 	}
 
 	void updateCounts(int instanceCount, int modelCount, int drawCount) {
-		instance.ensureCapacity(instanceCount);
 		target.ensureCapacity(instanceCount);
-		modelIndex.ensureCapacity(instanceCount);
 		model.ensureCapacity(modelCount);
 		draw.ensureCapacity(drawCount);
 
 		final long ptr = multiBindBlock.ptr();
-		MemoryUtil.memPutInt(ptr + INSTANCE_HANDLE_OFFSET, instance.handle());
+		MemoryUtil.memPutInt(ptr + INSTANCE_HANDLE_OFFSET, pageFile.storage.handle());
 		MemoryUtil.memPutInt(ptr + TARGET_HANDLE_OFFSET, target.handle());
-		MemoryUtil.memPutInt(ptr + MODEL_INDEX_HANDLE_OFFSET, modelIndex.handle());
+		MemoryUtil.memPutInt(ptr + MODEL_INDEX_HANDLE_OFFSET, pageFile.pageTable.handle());
 		MemoryUtil.memPutInt(ptr + MODEL_HANDLE_OFFSET, model.handle());
 		MemoryUtil.memPutInt(ptr + DRAW_HANDLE_OFFSET, draw.handle());
 
-		MemoryUtil.memPutAddress(ptr + INSTANCE_SIZE_OFFSET, instanceStride * instanceCount);
+		MemoryUtil.memPutAddress(ptr + INSTANCE_SIZE_OFFSET, pageFile.storage.byteCapacity());
 		MemoryUtil.memPutAddress(ptr + TARGET_SIZE_OFFSET, INT_SIZE * instanceCount);
-		MemoryUtil.memPutAddress(ptr + MODEL_INDEX_SIZE_OFFSET, INT_SIZE * instanceCount);
+		MemoryUtil.memPutAddress(ptr + MODEL_INDEX_SIZE_OFFSET, pageFile.pageTable.byteCapacity());
 		MemoryUtil.memPutAddress(ptr + MODEL_SIZE_OFFSET, MODEL_STRIDE * modelCount);
 		MemoryUtil.memPutAddress(ptr + DRAW_SIZE_OFFSET, DRAW_COMMAND_STRIDE * drawCount);
 	}
@@ -124,9 +121,8 @@ public class IndirectBuffers {
 	public void delete() {
 		multiBindBlock.free();
 
-		instance.delete();
+		pageFile.delete();
 		target.delete();
-		modelIndex.delete();
 		model.delete();
 		draw.delete();
 	}

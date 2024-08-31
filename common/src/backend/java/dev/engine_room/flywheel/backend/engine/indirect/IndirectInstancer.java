@@ -12,6 +12,7 @@ import dev.engine_room.flywheel.api.instance.InstanceWriter;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.backend.engine.AbstractInstancer;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
+import dev.engine_room.flywheel.backend.util.AtomicBitSet;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 
 public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> {
@@ -20,11 +21,12 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	private final List<IndirectDraw> associatedDraws = new ArrayList<>();
 	private final Vector4fc boundingSphere;
 
-	public int modelIndex = -1;
-	public int baseInstance = -1;
-	private int lastModelIndex = -1;
-	private int lastBaseInstance = -1;
-	private int lastInstanceCount = -1;
+	private final AtomicBitSet changedPages = new AtomicBitSet();
+
+	public InstancePager.Allocation pageFile;
+
+	private int modelIndex = -1;
+	private int baseInstance = -1;
 
 	public IndirectInstancer(InstanceType<I> type, Environment environment, Model model) {
 		super(type, environment);
@@ -32,6 +34,29 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 				.byteSize());
 		writer = this.type.writer();
 		boundingSphere = model.boundingSphere();
+	}
+
+	@Override
+	public void notifyDirty(int index) {
+		if (index < 0 || index >= instanceCount()) {
+			return;
+		}
+		changed.set(index);
+		changedPages.set(pageFile.object2Page(index));
+	}
+
+	@Override
+	protected void setRangeChanged(int start, int end) {
+		super.setRangeChanged(start, end);
+
+		changedPages.set(pageFile.object2Page(start), pageFile.object2Page(end));
+	}
+
+	@Override
+	protected void clearChangedRange(int start, int end) {
+		super.clearChangedRange(start, end);
+
+		// changedPages.clear(pageFile.object2Page(start), pageFile);
 	}
 
 	public void addDraw(IndirectDraw draw) {
@@ -44,6 +69,8 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 
 	public void update() {
 		removeDeletedInstances();
+
+		pageFile.activeCount(instanceCount());
 	}
 
 	public void writeModel(long ptr) {
@@ -57,71 +84,38 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	}
 
 	public void uploadInstances(StagingBuffer stagingBuffer, int instanceVbo) {
-		long baseByte = baseInstance * instanceStride;
+		int numPages = pageFile.pageCount();
 
-		if (baseInstance != lastBaseInstance) {
-			uploadAllInstances(stagingBuffer, baseByte, instanceVbo);
-		} else {
-			uploadChangedInstances(stagingBuffer, baseByte, instanceVbo);
-		}
-	}
+		var instanceCount = instances.size();
 
-	public void uploadModelIndices(StagingBuffer stagingBuffer, int modelIndexVbo) {
-		long modelIndexBaseByte = baseInstance * IndirectBuffers.INT_SIZE;
+		for (int page = 0; page < numPages; page++) {
+			page = changedPages.nextSetBit(0);
 
-		if (baseInstance != lastBaseInstance || modelIndex != lastModelIndex || instances.size() > lastInstanceCount) {
-			uploadAllModelIndices(stagingBuffer, modelIndexBaseByte, modelIndexVbo);
-		}
-	}
-
-	public void resetChanged() {
-		lastModelIndex = modelIndex;
-		lastBaseInstance = baseInstance;
-		lastInstanceCount = instances.size();
-		changed.clear();
-	}
-
-	private void uploadChangedInstances(StagingBuffer stagingBuffer, long baseByte, int instanceVbo) {
-		changed.forEachSetSpan((startInclusive, endInclusive) -> {
-			// Generally we're good about ensuring we don't have changed bits set out of bounds, but check just in case
-			if (startInclusive >= instances.size()) {
-				return;
+			if (page == -1) {
+				break;
 			}
-			int actualEnd = Math.min(endInclusive, instances.size() - 1);
 
-			int instanceCount = actualEnd - startInclusive + 1;
-			long totalSize = instanceCount * instanceStride;
+			int startObject = pageFile.page2Object(page);
 
-			stagingBuffer.enqueueCopy(totalSize, instanceVbo, baseByte + startInclusive * instanceStride, ptr -> {
-				for (int i = startInclusive; i <= actualEnd; i++) {
-					var instance = instances.get(i);
-					writer.write(ptr, instance);
+			if (startObject >= instanceCount) {
+				break;
+			}
+
+			int endObject = Math.min(instanceCount, pageFile.page2Object(page + 1) - 1);
+
+			long baseByte = pageFile.page2ByteOffset(page);
+			long size = (endObject - startObject) * instanceStride;
+
+			stagingBuffer.enqueueCopy(size, instanceVbo, baseByte, ptr -> {
+				for (int i = startObject; i < endObject; i++) {
+					writer.write(ptr, instances.get(i));
 					ptr += instanceStride;
 				}
 			});
-		});
-	}
+		}
 
-	private void uploadAllInstances(StagingBuffer stagingBuffer, long baseByte, int instanceVbo) {
-		long totalSize = instances.size() * instanceStride;
-
-		stagingBuffer.enqueueCopy(totalSize, instanceVbo, baseByte, ptr -> {
-			for (I instance : instances) {
-				writer.write(ptr, instance);
-				ptr += instanceStride;
-			}
-		});
-	}
-
-	private void uploadAllModelIndices(StagingBuffer stagingBuffer, long modelIndexBaseByte, int modelIndexVbo) {
-		long modelIndexTotalSize = instances.size() * IndirectBuffers.INT_SIZE;
-
-		stagingBuffer.enqueueCopy(modelIndexTotalSize, modelIndexVbo, modelIndexBaseByte, ptr -> {
-			for (int i = 0; i < instances.size(); i++) {
-				MemoryUtil.memPutInt(ptr, modelIndex);
-				ptr += IndirectBuffers.INT_SIZE;
-			}
-		});
+		changed.clear();
+		changedPages.clear();
 	}
 
 	@Override
@@ -129,5 +123,22 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		for (IndirectDraw draw : draws()) {
 			draw.delete();
 		}
+	}
+
+	public void modelIndex(int modelIndex) {
+		this.modelIndex = modelIndex;
+		pageFile.modelIndex(modelIndex);
+	}
+
+	public int modelIndex() {
+		return modelIndex;
+	}
+
+	public void baseInstance(int baseInstance) {
+		this.baseInstance = baseInstance;
+	}
+
+	public int baseInstance() {
+		return baseInstance;
 	}
 }
