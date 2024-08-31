@@ -4,14 +4,19 @@
 #include "flywheel:util/matrix.glsl"
 #include "flywheel:internal/indirect/matrices.glsl"
 
-layout(local_size_x = _FLW_SUBGROUP_SIZE) in;
+layout(local_size_x = 32) in;
 
 layout(std430, binding = _FLW_TARGET_BUFFER_BINDING) restrict writeonly buffer TargetBuffer {
     uint _flw_instanceIndices[];
 };
 
+// High 6 bits for the number of instances in the page.
+const uint _FLW_PAGE_COUNT_OFFSET = 25u;
+// Bottom 24 bits for the model index.
+const uint _FLW_MODEL_INDEX_MASK = 0x3FFFFFF;
+
 layout(std430, binding = _FLW_MODEL_INDEX_BUFFER_BINDING) restrict readonly buffer ModelIndexBuffer {
-    uint _flw_modelIndices[];
+    uint _flw_pageTable[];
 };
 
 layout(std430, binding = _FLW_MODEL_BUFFER_BINDING) restrict buffer ModelBuffer {
@@ -55,13 +60,23 @@ bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
 }
 
 void main() {
-    uint instanceIndex = gl_GlobalInvocationID.x;
+    uint pageIndex = gl_WorkGroupID.x;
 
-    if (instanceIndex >= _flw_modelIndices.length()) {
+    if (pageIndex >= _flw_pageTable.length()) {
         return;
     }
 
-    uint modelIndex = _flw_modelIndices[instanceIndex];
+    uint packedModelIndexAndCount = _flw_pageTable[pageIndex];
+
+    uint pageInstanceCount = packedModelIndexAndCount >> _FLW_PAGE_COUNT_OFFSET;
+
+    if (gl_LocalInvocationID.x >= pageInstanceCount) {
+        return;
+    }
+
+    uint instanceIndex = gl_GlobalInvocationID.x;
+
+    uint modelIndex = packedModelIndexAndCount & _FLW_MODEL_INDEX_MASK;
 
     if (_flw_isVisible(instanceIndex, modelIndex)) {
         uint localIndex = atomicAdd(_flw_models[modelIndex].instanceCount, 1);

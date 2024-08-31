@@ -74,8 +74,8 @@ public class IndirectCullingGroup<I extends Instance> {
 				continue;
 			}
 
-			instancer.modelIndex = modelIndex;
-			instancer.baseInstance = instanceCountThisFrame;
+			instancer.modelIndex(modelIndex);
+			instancer.baseInstance(instanceCountThisFrame);
 			instanceCountThisFrame += instanceCount;
 
 			modelIndex++;
@@ -95,6 +95,8 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		// Upload only instances that have changed.
 		uploadInstances(stagingBuffer);
+
+		buffers.pageFile.uploadTable(stagingBuffer);
 
 		// We need to upload the models every frame to reset the instance count.
 		uploadModels(stagingBuffer);
@@ -118,7 +120,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		cullProgram.bind();
 
 		buffers.bindForCompute();
-		glDispatchCompute(GlCompat.getComputeGroupCount(instanceCountThisFrame), 1, 1);
+		glDispatchCompute(buffers.pageFile.capacity(), 1, 1);
 	}
 
 	public void dispatchApply() {
@@ -171,7 +173,9 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	public void add(IndirectInstancer<I> instancer, InstancerKey<I> key, MeshPool meshPool) {
-		instancer.modelIndex = instancers.size();
+		instancer.pageFile = buffers.pageFile.createPage();
+		instancer.modelIndex(instancers.size());
+
 		instancers.add(instancer);
 
         List<Model.ConfiguredMesh> meshes = key.model()
@@ -242,12 +246,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private void uploadInstances(StagingBuffer stagingBuffer) {
 		for (var instancer : instancers) {
-			instancer.uploadInstances(stagingBuffer, buffers.instance.handle());
-		}
-
-		for (var instancer : instancers) {
-			instancer.uploadModelIndices(stagingBuffer, buffers.modelIndex.handle());
-			instancer.resetChanged();
+			instancer.uploadInstances(stagingBuffer, buffers.pageFile.storage.handle());
 		}
 	}
 

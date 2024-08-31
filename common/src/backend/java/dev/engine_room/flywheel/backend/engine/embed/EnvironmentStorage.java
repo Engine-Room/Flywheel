@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.backend.engine.embed;
 
-import dev.engine_room.flywheel.backend.engine.Arena;
+import dev.engine_room.flywheel.backend.engine.CpuArena;
 import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 
@@ -13,7 +13,7 @@ public class EnvironmentStorage {
 
 	// Note than the arena starts indexing at zero, but we reserve zero for the identity matrix.
 	// Any time an ID from the arena is written we want to add one to it.
-	public final Arena arena = new Arena(MATRIX_SIZE_BYTES, 32);
+	public final CpuArena arena = new CpuArena(MATRIX_SIZE_BYTES, 32);
 
 	{
 		// Reserve the identity matrix. Burns a few bytes but oh well.
