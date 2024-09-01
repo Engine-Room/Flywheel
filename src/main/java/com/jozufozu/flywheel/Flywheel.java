@@ -1,13 +1,11 @@
 package com.jozufozu.flywheel;
 
-import java.util.function.Supplier;
-
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.slf4j.Logger;
 
-import com.google.common.base.Suppliers;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
+import com.jozufozu.flywheel.compat.CompatHelper;
 import com.jozufozu.flywheel.compat.EmbeddiumCompat;
 import com.jozufozu.flywheel.config.BackendTypeArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
@@ -31,11 +29,9 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.CrashReportCallables;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.IExtensionPoint;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.network.NetworkConstants;
 import net.minecraftforge.registries.RegisterEvent;
 
@@ -45,8 +41,6 @@ public class Flywheel {
 	public static final String ID = "flywheel";
 	public static final Logger LOGGER = LogUtils.getLogger();
 	private static ArtifactVersion version;
-
-	public static final Supplier<Boolean> IS_SODIUM_LOADED = Suppliers.memoize(() -> LoadingModList.get().getModFileById("sodium") != null);
 
 	public Flywheel() {
 		ModLoadingContext modLoadingContext = ModLoadingContext.get();
@@ -85,7 +79,7 @@ public class Flywheel {
 		modEventBus.addListener(PartialModel::onModelBake);
 		modEventBus.addListener(StitchedSprite::onTextureStitchPost);
 
-		if (ModList.get().isLoaded("embeddium")) {
+		if (CompatHelper.IS_EMBEDDIUM_LOADED.get()) {
 			EmbeddiumCompat.init();
 		}
 
