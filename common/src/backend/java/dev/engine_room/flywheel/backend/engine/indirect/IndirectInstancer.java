@@ -42,14 +42,14 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 			return;
 		}
 		changed.set(index);
-		changedPages.set(pageFile.object2Page(index));
+		changedPages.set(InstancePager.object2Page(index));
 	}
 
 	@Override
 	protected void setRangeChanged(int start, int end) {
 		super.setRangeChanged(start, end);
 
-		changedPages.set(pageFile.object2Page(start), pageFile.object2Page(end));
+		changedPages.set(InstancePager.object2Page(start), InstancePager.object2Page(end) + 1);
 	}
 
 	@Override
@@ -88,20 +88,14 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 
 		var instanceCount = instances.size();
 
-		for (int page = 0; page < numPages; page++) {
-			page = changedPages.nextSetBit(0);
-
-			if (page == -1) {
-				break;
-			}
-
-			int startObject = pageFile.page2Object(page);
+		for (int page = changedPages.nextSetBit(0); page >= 0 && page < numPages; page = changedPages.nextSetBit(page + 1)) {
+			int startObject = InstancePager.page2Object(page);
 
 			if (startObject >= instanceCount) {
 				break;
 			}
 
-			int endObject = Math.min(instanceCount, pageFile.page2Object(page + 1) - 1);
+			int endObject = Math.min(instanceCount, InstancePager.page2Object(page + 1));
 
 			long baseByte = pageFile.page2ByteOffset(page);
 			long size = (endObject - startObject) * instanceStride;

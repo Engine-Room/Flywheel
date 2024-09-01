@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jetbrains.annotations.UnknownNullability;
 import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.backend.engine.AbstractArena;
@@ -12,39 +11,39 @@ import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 
 public class InstancePager extends AbstractArena {
 	// 32 objects per page. Allows for convenient bitsets on the gpu.
-	public static final int DEFAULT_PAGE_SIZE_OBJECTS = 5;
-	public static final int INITIAL_PAGES_ALLOCATED = 4;
+	public static final int LOG_2_PAGE_SIZE = 5;
+	public static final int PAGE_SIZE = 1 << LOG_2_PAGE_SIZE;
+	public static final int PAGE_MASK = PAGE_SIZE - 1;
 
-	private final int log2PageSize;
-	/**
-	 * The number of objects in a page.
-	 */
-	private final int pageSize;
+	public static final int INITIAL_PAGES_ALLOCATED = 4;
 
 	private final long objectSizeBytes;
 
-	@UnknownNullability
 	private MemoryBlock pageData;
 
-	private final int pageMask;
-	public final ResizableStorageArray storage;
-	public final ResizableStorageArray pageTable;
+	public final ResizableStorageBuffer storage;
+	public final ResizableStorageBuffer pageTable;
 
 	private final List<Allocation> allocations = new ArrayList<>();
 
 	public InstancePager(long objectSizeBytes) {
-		this(DEFAULT_PAGE_SIZE_OBJECTS, objectSizeBytes);
-	}
-
-	public InstancePager(int log2PageSize, long objectSizeBytes) {
-		super((1L << log2PageSize) * objectSizeBytes);
-		this.log2PageSize = log2PageSize;
-		this.pageSize = 1 << log2PageSize;
-		this.pageMask = pageSize - 1;
+		super(PAGE_SIZE * objectSizeBytes);
 		this.objectSizeBytes = objectSizeBytes;
 
-		this.storage = new ResizableStorageArray(this.elementSizeBytes);
-		this.pageTable = new ResizableStorageArray(Integer.BYTES);
+		this.storage = new ResizableStorageBuffer();
+		this.pageTable = new ResizableStorageBuffer();
+
+		pageData = MemoryBlock.malloc(INITIAL_PAGES_ALLOCATED * Integer.BYTES);
+		storage.ensureCapacity(INITIAL_PAGES_ALLOCATED * elementSizeBytes);
+		pageTable.ensureCapacity(INITIAL_PAGES_ALLOCATED * Integer.BYTES);
+	}
+
+	public static int object2Page(int objectIndex) {
+		return objectIndex >> LOG_2_PAGE_SIZE;
+	}
+
+	public static int page2Object(int pageIndex) {
+		return pageIndex << LOG_2_PAGE_SIZE;
 	}
 
 	public Allocation createPage() {
@@ -55,20 +54,14 @@ public class InstancePager extends AbstractArena {
 
 	@Override
 	public long byteCapacity() {
-		return storage.byteCapacity();
+		return storage.capacity();
 	}
 
 	@Override
-	protected void resize() {
-		if (pageData == null) {
-			pageData = MemoryBlock.malloc(INITIAL_PAGES_ALLOCATED * Integer.BYTES);
-			storage.ensureCapacity(INITIAL_PAGES_ALLOCATED);
-			pageTable.ensureCapacity(INITIAL_PAGES_ALLOCATED);
-		} else {
-			pageData = pageData.realloc(pageData.size() * 2);
-			storage.ensureCapacity(storage.capacity() * 2);
-			pageTable.ensureCapacity(pageTable.capacity() * 2);
-		}
+	protected void grow() {
+		pageData = pageData.realloc(pageData.size() * 2);
+		storage.ensureCapacity(storage.capacity() * 2);
+		pageTable.ensureCapacity(pageTable.capacity() * 2);
 	}
 
 	public void uploadTable(StagingBuffer stagingBuffer) {
@@ -88,6 +81,7 @@ public class InstancePager extends AbstractArena {
 		public int[] pages = new int[0];
 
 		private int modelIndex = -1;
+		private int activeCount = 0;
 
 		public void modelIndex(int modelIndex) {
 			if (this.modelIndex != modelIndex) {
@@ -96,17 +90,28 @@ public class InstancePager extends AbstractArena {
 		}
 
 		private void updatePageTable() {
+			if (pages.length == 0) {
+				return;
+			}
+
 			var ptr = pageData.ptr();
 
-			int fullPage = (modelIndex & 0x3FFFFF) | 0x8000000;
+			int fullPage = (modelIndex & 0x3FFFFF) | (32 << 26);
 
-			for (int page : pages) {
+			int remainder = activeCount;
+
+			for (int i = 0; i < pages.length - 1; i++) {
+				int page = pages[i];
 				MemoryUtil.memPutInt(ptr + page * Integer.BYTES, fullPage);
+				remainder -= PAGE_SIZE;
 			}
+
+			MemoryUtil.memPutInt(ptr + pages[pages.length - 1] * Integer.BYTES, (modelIndex & 0x3FFFFF) | (remainder << 26));
 		}
 
 		public void activeCount(int objectCount) {
-			var neededPages = object2Page((objectCount + pageMask));
+			var neededPages = object2Page((objectCount + PAGE_MASK));
+			activeCount = objectCount;
 
 			var oldLength = pages.length;
 
@@ -126,7 +131,7 @@ public class InstancePager extends AbstractArena {
 		}
 
 		private void shrink(int oldLength, int neededPages) {
-			for (int i = oldLength - 1; i > neededPages; i--) {
+			for (int i = oldLength - 1; i >= neededPages; i--) {
 				var page = pages[i];
 				InstancePager.this.free(page);
 				MemoryUtil.memPutInt(pageData.ptr() + page * Integer.BYTES, 0);
@@ -136,19 +141,11 @@ public class InstancePager extends AbstractArena {
 		}
 
 		public int capacity() {
-			return pages.length << log2PageSize;
+			return pages.length << LOG_2_PAGE_SIZE;
 		}
 
 		public int pageCount() {
 			return pages.length;
-		}
-
-		public int object2Page(int objectIndex) {
-			return objectIndex >> log2PageSize;
-		}
-
-		public int page2Object(int pageIndex) {
-			return pageIndex << log2PageSize;
 		}
 
 		public long page2ByteOffset(int page) {

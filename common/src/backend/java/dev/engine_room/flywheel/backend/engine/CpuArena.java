@@ -24,7 +24,7 @@ public class CpuArena extends AbstractArena {
 		return memoryBlock.size();
 	}
 
-	protected void resize() {
+	protected void grow() {
 		memoryBlock = memoryBlock.realloc(memoryBlock.size() * 2);
 	}
 }
