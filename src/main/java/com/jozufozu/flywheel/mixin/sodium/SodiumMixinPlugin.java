@@ -1,21 +1,14 @@
 package com.jozufozu.flywheel.mixin.sodium;
 
-import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
-
+import com.jozufozu.flywheel.compat.CompatHelper;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import com.google.common.base.Suppliers;
-import com.jozufozu.flywheel.Flywheel;
-
-import net.fabricmc.loader.api.FabricLoader;
+import java.util.List;
+import java.util.Set;
 
 public class SodiumMixinPlugin implements IMixinConfigPlugin {
-	private static final Supplier<Boolean> IS_EMBEDDIUM_LOADED = Suppliers.memoize(() -> FabricLoader.getInstance().isModLoaded("embeddium"));
-
 	@Override
 	public void onLoad(String mixinPackage) {
 	}
@@ -27,7 +20,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		return Flywheel.IS_SODIUM_LOADED.get() && !IS_EMBEDDIUM_LOADED.get() && Flywheel.isSodium0_5;
+		return CompatHelper.IS_SODIUM_LOADED.get() && !CompatHelper.IS_EMBEDDIUM_LOADED.get() && CompatHelper.IS_SODIUM_0_5;
 	}
 
 	@Override

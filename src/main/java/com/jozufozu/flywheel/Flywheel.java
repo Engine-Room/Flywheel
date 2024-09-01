@@ -1,15 +1,13 @@
 package com.jozufozu.flywheel;
 
-import java.util.function.Supplier;
-
 import org.slf4j.Logger;
 
-import com.google.common.base.Suppliers;
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.Loader;
 import com.jozufozu.flywheel.backend.RenderWork;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
+import com.jozufozu.flywheel.compat.CompatHelper;
 import com.jozufozu.flywheel.compat.EmbeddiumCompat;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
@@ -34,8 +32,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
-import net.fabricmc.loader.api.metadata.version.VersionPredicate;
-import net.fabricmc.loader.impl.util.version.VersionPredicateParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 
@@ -45,9 +41,7 @@ public class Flywheel implements ClientModInitializer {
 	public static final Logger LOGGER = LogUtils.getLogger();
 	private static Version version;
 
-	public static final Supplier<Boolean> IS_SODIUM_LOADED = Suppliers.memoize(() -> FabricLoader.getInstance().isModLoaded("sodium"));
-	public static boolean isSodium0_5 = false;
-	public static boolean isSodium0_6 = false;
+
 
 	@Override
 	public void onInitializeClient() {
@@ -86,23 +80,11 @@ public class Flywheel implements ClientModInitializer {
 		ClientEntityEvents.ENTITY_UNLOAD.register(EntityWorldHandler::onEntityLeaveWorld);
 		ClientTickEvents.END_CLIENT_TICK.register(ForgeEvents::tickLight);
 
-		if (FabricLoader.getInstance().isModLoaded("embeddium")) {
+		if (CompatHelper.IS_EMBEDDIUM_LOADED.get()) {
 			EmbeddiumCompat.init();
 		}
 
-		if (IS_SODIUM_LOADED.get()) {
-			try {
-				VersionPredicate predicate0_5 = VersionPredicateParser.parse(">=0.5.0 <0.6.0");
-				VersionPredicate predicate0_6 = VersionPredicateParser.parse("<0.6 >=0.6.0-beta.2");
-				Version sodiumVersion = FabricLoader.getInstance()
-						.getModContainer("sodium")
-						.orElseThrow()
-						.getMetadata()
-						.getVersion();
-				isSodium0_5 = predicate0_5.test(sodiumVersion);
-				isSodium0_6 = predicate0_6.test(sodiumVersion);
-			} catch (Throwable ignored) {}
-		}
+		CompatHelper.initSodiumVersion();
 
 		VanillaInstances.init();
 
