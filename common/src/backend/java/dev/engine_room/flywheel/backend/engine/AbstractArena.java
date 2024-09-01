@@ -22,7 +22,7 @@ public abstract class AbstractArena {
 
 		// Make sure there's room to increment top.
 		if (top * elementSizeBytes >= byteCapacity()) {
-			resize();
+			grow();
 		}
 
 		// Return the top index and increment.
@@ -44,5 +44,5 @@ public abstract class AbstractArena {
 
 	public abstract long byteCapacity();
 
-	protected abstract void resize();
+	protected abstract void grow();
 }

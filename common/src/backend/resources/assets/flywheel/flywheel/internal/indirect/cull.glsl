@@ -11,8 +11,8 @@ layout(std430, binding = _FLW_TARGET_BUFFER_BINDING) restrict writeonly buffer T
 };
 
 // High 6 bits for the number of instances in the page.
-const uint _FLW_PAGE_COUNT_OFFSET = 25u;
-// Bottom 24 bits for the model index.
+const uint _FLW_PAGE_COUNT_OFFSET = 26u;
+// Bottom 26 bits for the model index.
 const uint _FLW_MODEL_INDEX_MASK = 0x3FFFFFF;
 
 layout(std430, binding = _FLW_MODEL_INDEX_BUFFER_BINDING) restrict readonly buffer ModelIndexBuffer {
