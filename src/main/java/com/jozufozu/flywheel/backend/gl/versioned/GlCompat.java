@@ -30,13 +30,11 @@ public class GlCompat {
 	}
 
 	public final InstancedArrays instancedArrays;
-	public final BufferStorage bufferStorage;
 	public final boolean amd;
 
 	private GlCompat() {
 		GLCapabilities caps = GL.createCapabilities();
 		instancedArrays = getLatest(InstancedArrays.class, caps);
-		bufferStorage = getLatest(BufferStorage.class, caps);
 
 		if (Util.getPlatform() == Util.OS.WINDOWS) {
 			String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
@@ -53,10 +51,6 @@ public class GlCompat {
 
     public boolean instancedArraysSupported() {
 		return instancedArrays != InstancedArrays.UNSUPPORTED;
-	}
-
-	public boolean bufferStorageSupported() {
-		return bufferStorage != BufferStorage.UNSUPPORTED;
 	}
 
 	/**
