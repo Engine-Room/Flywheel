@@ -18,7 +18,7 @@ A modern engine for modded minecraft.'''
 [[dependencies.flywheel]]
 modId = "forge"
 mandatory = true
-versionRange = "[47.0.0,)"
+versionRange = "[47.1.3,)"
 ordering = "NONE"
 side = "CLIENT"
 
@@ -30,8 +30,15 @@ ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.flywheel]]
-modId = "rubidium"
+modId = "embeddium"
 mandatory = false
-versionRange = "[0.7.0,)"
+versionRange = "[0.3.25,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.flywheel]]
+modId = "sodium"
+mandatory = false
+versionRange = "[0.6.0-beta.2,)"
 ordering = "NONE"
 side = "CLIENT"

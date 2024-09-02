@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.ShadersModHandler;
+import com.jozufozu.flywheel.compat.CompatHelper;
+import com.jozufozu.flywheel.compat.EmbeddiumCompat;
 import com.jozufozu.flywheel.config.BackendTypeArgument;
 import com.jozufozu.flywheel.config.FlwCommands;
 import com.jozufozu.flywheel.config.FlwConfig;
@@ -76,6 +78,10 @@ public class Flywheel {
 		modEventBus.addListener(PartialModel::onModelRegistry);
 		modEventBus.addListener(PartialModel::onModelBake);
 		modEventBus.addListener(StitchedSprite::onTextureStitchPost);
+
+		if (CompatHelper.IS_EMBEDDIUM_LOADED.get()) {
+			EmbeddiumCompat.init();
+		}
 
 		VanillaInstances.init();
 
