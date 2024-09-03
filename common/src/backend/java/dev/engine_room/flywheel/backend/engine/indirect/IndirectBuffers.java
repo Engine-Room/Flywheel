@@ -83,13 +83,13 @@ public class IndirectBuffers {
 		draw.ensureCapacity(drawCount);
 
 		final long ptr = multiBindBlock.ptr();
-		MemoryUtil.memPutInt(ptr + INSTANCE_HANDLE_OFFSET, pageFile.storage.handle());
+		MemoryUtil.memPutInt(ptr + INSTANCE_HANDLE_OFFSET, pageFile.objects.handle());
 		MemoryUtil.memPutInt(ptr + TARGET_HANDLE_OFFSET, target.handle());
 		MemoryUtil.memPutInt(ptr + MODEL_INDEX_HANDLE_OFFSET, pageFile.pageTable.handle());
 		MemoryUtil.memPutInt(ptr + MODEL_HANDLE_OFFSET, model.handle());
 		MemoryUtil.memPutInt(ptr + DRAW_HANDLE_OFFSET, draw.handle());
 
-		MemoryUtil.memPutAddress(ptr + INSTANCE_SIZE_OFFSET, pageFile.storage.capacity());
+		MemoryUtil.memPutAddress(ptr + INSTANCE_SIZE_OFFSET, pageFile.objects.capacity());
 		MemoryUtil.memPutAddress(ptr + TARGET_SIZE_OFFSET, INT_SIZE * instanceCount);
 		MemoryUtil.memPutAddress(ptr + MODEL_INDEX_SIZE_OFFSET, pageFile.pageTable.capacity());
 		MemoryUtil.memPutAddress(ptr + MODEL_SIZE_OFFSET, MODEL_STRIDE * modelCount);
