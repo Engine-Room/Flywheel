@@ -1,8 +1,6 @@
 package dev.engine_room.flywheel.backend.engine.indirect;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.lwjgl.system.MemoryUtil;
 
@@ -17,24 +15,20 @@ public class InstancePager extends AbstractArena {
 
 	public static final int INITIAL_PAGES_ALLOCATED = 4;
 
-	private final long objectSizeBytes;
-
-	private MemoryBlock pageData;
-
-	public final ResizableStorageBuffer storage;
+	private MemoryBlock pageTableData;
+	public final ResizableStorageBuffer objects;
 	public final ResizableStorageBuffer pageTable;
 
-	private final List<Allocation> allocations = new ArrayList<>();
+	private boolean needsUpload = false;
 
 	public InstancePager(long objectSizeBytes) {
 		super(PAGE_SIZE * objectSizeBytes);
-		this.objectSizeBytes = objectSizeBytes;
 
-		this.storage = new ResizableStorageBuffer();
+		this.objects = new ResizableStorageBuffer();
 		this.pageTable = new ResizableStorageBuffer();
 
-		pageData = MemoryBlock.malloc(INITIAL_PAGES_ALLOCATED * Integer.BYTES);
-		storage.ensureCapacity(INITIAL_PAGES_ALLOCATED * elementSizeBytes);
+		pageTableData = MemoryBlock.malloc(INITIAL_PAGES_ALLOCATED * Integer.BYTES);
+		objects.ensureCapacity(INITIAL_PAGES_ALLOCATED * elementSizeBytes);
 		pageTable.ensureCapacity(INITIAL_PAGES_ALLOCATED * Integer.BYTES);
 	}
 
@@ -46,79 +40,122 @@ public class InstancePager extends AbstractArena {
 		return pageIndex << LOG_2_PAGE_SIZE;
 	}
 
-	public Allocation createPage() {
-		var out = new Allocation();
-		allocations.add(out);
-		return out;
+	public Allocation createAllocation() {
+		return new Allocation();
 	}
 
 	@Override
 	public long byteCapacity() {
-		return storage.capacity();
+		return objects.capacity();
+	}
+
+	@Override
+	public void free(int i) {
+		super.free(i);
+		MemoryUtil.memPutInt(ptrForPage(i), 0);
 	}
 
 	@Override
 	protected void grow() {
-		pageData = pageData.realloc(pageData.size() * 2);
-		storage.ensureCapacity(storage.capacity() * 2);
+		pageTableData = pageTableData.realloc(pageTableData.size() * 2);
+		objects.ensureCapacity(objects.capacity() * 2);
 		pageTable.ensureCapacity(pageTable.capacity() * 2);
 	}
 
 	public void uploadTable(StagingBuffer stagingBuffer) {
-		for (Allocation allocation : allocations) {
-			allocation.updatePageTable();
+		if (!needsUpload) {
+			return;
 		}
-		stagingBuffer.enqueueCopy(pageData.ptr(), pageData.size(), pageTable.handle(), 0);
+		// We could be smarter about which spans are uploaded but this thing is so small it's probably not worth it.
+		stagingBuffer.enqueueCopy(pageTableData.ptr(), pageTableData.size(), pageTable.handle(), 0);
+		needsUpload = false;
 	}
 
 	public void delete() {
-		storage.delete();
+		objects.delete();
 		pageTable.delete();
-		pageData.free();
+		pageTableData.free();
+	}
+
+	private long ptrForPage(int page) {
+		return pageTableData.ptr() + (long) page * Integer.BYTES;
 	}
 
 	public class Allocation {
-		public int[] pages = new int[0];
+		public static final int[] EMPTY_ALLOCATION = new int[0];
+		public int[] pages = EMPTY_ALLOCATION;
 
 		private int modelIndex = -1;
-		private int activeCount = 0;
+		private int objectCount = 0;
 
-		public void modelIndex(int modelIndex) {
-			if (this.modelIndex != modelIndex) {
-				this.modelIndex = modelIndex;
+		/**
+		 * Calculates the page descriptor for the given page index.
+		 * Runs under the assumption than all pages are full except maybe the last one.
+		 */
+		private int calculatePageDescriptor(int pageIndex) {
+			int countInPage;
+			if (objectCount % PAGE_SIZE != 0 && pageIndex == pages.length - 1) {
+				// Last page && it isn't full -> use the remainder.
+				countInPage = objectCount & PAGE_MASK;
+			} else if (objectCount > 0) {
+				// Full page.
+				countInPage = PAGE_SIZE;
+			} else {
+				// Empty page, this shouldn't be reachable because we eagerly free empty pages.
+				countInPage = 0;
 			}
+			return (modelIndex & 0x3FFFFF) | (countInPage << 26);
 		}
 
-		private void updatePageTable() {
-			if (pages.length == 0) {
+		public void update(int modelIndex, int objectCount) {
+			boolean incremental = this.modelIndex == modelIndex;
+
+			if (incremental && objectCount == this.objectCount) {
+				// Nothing will change.
 				return;
 			}
 
-			var ptr = pageData.ptr();
+			InstancePager.this.needsUpload = true;
 
-			int fullPage = (modelIndex & 0x3FFFFF) | (32 << 26);
-
-			int remainder = activeCount;
-
-			for (int i = 0; i < pages.length - 1; i++) {
-				int page = pages[i];
-				MemoryUtil.memPutInt(ptr + page * Integer.BYTES, fullPage);
-				remainder -= PAGE_SIZE;
-			}
-
-			MemoryUtil.memPutInt(ptr + pages[pages.length - 1] * Integer.BYTES, (modelIndex & 0x3FFFFF) | (remainder << 26));
-		}
-
-		public void activeCount(int objectCount) {
-			var neededPages = object2Page((objectCount + PAGE_MASK));
-			activeCount = objectCount;
+			this.modelIndex = modelIndex;
+			this.objectCount = objectCount;
 
 			var oldLength = pages.length;
+			var newLength = object2Page((objectCount + PAGE_MASK));
 
-			if (oldLength > neededPages) {
-				shrink(oldLength, neededPages);
-			} else if (oldLength < neededPages) {
-				grow(neededPages, oldLength);
+			if (oldLength > newLength) {
+				// Eagerly free the now unnecessary pages.
+				// shrink will zero out the pageTable entries for the freed pages.
+				shrink(oldLength, newLength);
+
+				if (incremental) {
+					// Only update the last page, everything else is unchanged.
+					updateRange(newLength - 1, newLength);
+				}
+			} else if (oldLength < newLength) {
+				// Allocate new pages to fit the new object count.
+				grow(newLength, oldLength);
+
+				if (incremental) {
+					// Update the old last page + all new pages
+					updateRange(oldLength - 1, newLength);
+				}
+			} else {
+				if (incremental) {
+					// Only update the last page.
+					updateRange(oldLength - 1, oldLength);
+				}
+			}
+
+			if (!incremental) {
+				// Update all pages.
+				updateRange(0, newLength);
+			}
+		}
+
+		private void updateRange(int start, int oldLength) {
+			for (int i = start; i < oldLength; i++) {
+				MemoryUtil.memPutInt(ptrForPage(pages[i]), calculatePageDescriptor(i));
 			}
 		}
 
@@ -126,7 +163,8 @@ public class InstancePager extends AbstractArena {
 			pages = Arrays.copyOf(pages, neededPages);
 
 			for (int i = oldLength; i < neededPages; i++) {
-				pages[i] = InstancePager.this.alloc();
+				var page = InstancePager.this.alloc();
+				pages[i] = page;
 			}
 		}
 
@@ -134,7 +172,6 @@ public class InstancePager extends AbstractArena {
 			for (int i = oldLength - 1; i >= neededPages; i--) {
 				var page = pages[i];
 				InstancePager.this.free(page);
-				MemoryUtil.memPutInt(pageData.ptr() + page * Integer.BYTES, 0);
 			}
 
 			pages = Arrays.copyOf(pages, neededPages);
@@ -150,6 +187,15 @@ public class InstancePager extends AbstractArena {
 
 		public long page2ByteOffset(int page) {
 			return InstancePager.this.byteOffsetOf(pages[page]);
+		}
+
+		public void delete() {
+			for (int page : pages) {
+				InstancePager.this.free(page);
+			}
+			pages = EMPTY_ALLOCATION;
+			modelIndex = -1;
+			objectCount = 0;
 		}
 	}
 }

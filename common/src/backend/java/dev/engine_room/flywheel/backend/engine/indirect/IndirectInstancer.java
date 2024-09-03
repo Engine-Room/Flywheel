@@ -52,13 +52,6 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		changedPages.set(InstancePager.object2Page(start), InstancePager.object2Page(end) + 1);
 	}
 
-	@Override
-	protected void clearChangedRange(int start, int end) {
-		super.clearChangedRange(start, end);
-
-		// changedPages.clear(pageFile.object2Page(start), pageFile);
-	}
-
 	public void addDraw(IndirectDraw draw) {
 		associatedDraws.add(draw);
 	}
@@ -69,8 +62,12 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 
 	public void update() {
 		removeDeletedInstances();
+	}
 
-		pageFile.activeCount(instanceCount());
+	public void postUpdate(int modelIndex, int baseInstance) {
+		this.modelIndex = modelIndex;
+		this.baseInstance = baseInstance;
+		pageFile.update(modelIndex, instanceCount());
 	}
 
 	public void writeModel(long ptr) {
@@ -117,19 +114,12 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		for (IndirectDraw draw : draws()) {
 			draw.delete();
 		}
-	}
 
-	public void modelIndex(int modelIndex) {
-		this.modelIndex = modelIndex;
-		pageFile.modelIndex(modelIndex);
+		pageFile.delete();
 	}
 
 	public int modelIndex() {
 		return modelIndex;
-	}
-
-	public void baseInstance(int baseInstance) {
-		this.baseInstance = baseInstance;
 	}
 
 	public int baseInstance() {

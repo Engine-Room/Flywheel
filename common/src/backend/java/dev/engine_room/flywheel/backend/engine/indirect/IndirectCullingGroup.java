@@ -74,8 +74,7 @@ public class IndirectCullingGroup<I extends Instance> {
 				continue;
 			}
 
-			instancer.modelIndex(modelIndex);
-			instancer.baseInstance(instanceCountThisFrame);
+			instancer.postUpdate(modelIndex, instanceCountThisFrame);
 			instanceCountThisFrame += instanceCount;
 
 			modelIndex++;
@@ -173,8 +172,8 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	public void add(IndirectInstancer<I> instancer, InstancerKey<I> key, MeshPool meshPool) {
-		instancer.pageFile = buffers.pageFile.createPage();
-		instancer.modelIndex(instancers.size());
+		instancer.pageFile = buffers.pageFile.createAllocation();
+		instancer.postUpdate(instancers.size(), -1);
 
 		instancers.add(instancer);
 
@@ -246,7 +245,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private void uploadInstances(StagingBuffer stagingBuffer) {
 		for (var instancer : instancers) {
-			instancer.uploadInstances(stagingBuffer, buffers.pageFile.storage.handle());
+			instancer.uploadInstances(stagingBuffer, buffers.pageFile.objects.handle());
 		}
 	}
 
