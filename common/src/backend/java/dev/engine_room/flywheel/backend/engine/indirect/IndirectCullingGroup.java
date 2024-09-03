@@ -95,7 +95,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		// Upload only instances that have changed.
 		uploadInstances(stagingBuffer);
 
-		buffers.pageFile.uploadTable(stagingBuffer);
+		buffers.objectStorage.uploadDescriptors(stagingBuffer);
 
 		// We need to upload the models every frame to reset the instance count.
 		uploadModels(stagingBuffer);
@@ -119,7 +119,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		cullProgram.bind();
 
 		buffers.bindForCompute();
-		glDispatchCompute(buffers.pageFile.capacity(), 1, 1);
+		glDispatchCompute(buffers.objectStorage.capacity(), 1, 1);
 	}
 
 	public void dispatchApply() {
@@ -172,7 +172,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	public void add(IndirectInstancer<I> instancer, InstancerKey<I> key, MeshPool meshPool) {
-		instancer.pageFile = buffers.pageFile.createAllocation();
+		instancer.mapping = buffers.objectStorage.createMapping();
 		instancer.postUpdate(instancers.size(), -1);
 
 		instancers.add(instancer);
@@ -245,7 +245,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private void uploadInstances(StagingBuffer stagingBuffer) {
 		for (var instancer : instancers) {
-			instancer.uploadInstances(stagingBuffer, buffers.pageFile.objects.handle());
+			instancer.uploadInstances(stagingBuffer, buffers.objectStorage.objectBuffer.handle());
 		}
 	}
 

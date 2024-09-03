@@ -3,6 +3,7 @@ package dev.engine_room.flywheel.backend.engine.indirect;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.UnknownNullability;
 import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryUtil;
 
@@ -23,7 +24,7 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 
 	private final AtomicBitSet changedPages = new AtomicBitSet();
 
-	public InstancePager.Allocation pageFile;
+	public ObjectStorage.@UnknownNullability Mapping mapping;
 
 	private int modelIndex = -1;
 	private int baseInstance = -1;
@@ -42,14 +43,14 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 			return;
 		}
 		changed.set(index);
-		changedPages.set(InstancePager.object2Page(index));
+		changedPages.set(ObjectStorage.objectIndex2PageIndex(index));
 	}
 
 	@Override
 	protected void setRangeChanged(int start, int end) {
 		super.setRangeChanged(start, end);
 
-		changedPages.set(InstancePager.object2Page(start), InstancePager.object2Page(end) + 1);
+		changedPages.set(ObjectStorage.objectIndex2PageIndex(start), ObjectStorage.objectIndex2PageIndex(end) + 1);
 	}
 
 	public void addDraw(IndirectDraw draw) {
@@ -67,7 +68,7 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	public void postUpdate(int modelIndex, int baseInstance) {
 		this.modelIndex = modelIndex;
 		this.baseInstance = baseInstance;
-		pageFile.update(modelIndex, instanceCount());
+		mapping.update(modelIndex, instanceCount());
 	}
 
 	public void writeModel(long ptr) {
@@ -81,20 +82,20 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	}
 
 	public void uploadInstances(StagingBuffer stagingBuffer, int instanceVbo) {
-		int numPages = pageFile.pageCount();
+		int numPages = mapping.pageCount();
 
 		var instanceCount = instances.size();
 
 		for (int page = changedPages.nextSetBit(0); page >= 0 && page < numPages; page = changedPages.nextSetBit(page + 1)) {
-			int startObject = InstancePager.page2Object(page);
+			int startObject = ObjectStorage.pageIndex2ObjectIndex(page);
 
 			if (startObject >= instanceCount) {
 				break;
 			}
 
-			int endObject = Math.min(instanceCount, InstancePager.page2Object(page + 1));
+			int endObject = Math.min(instanceCount, ObjectStorage.pageIndex2ObjectIndex(page + 1));
 
-			long baseByte = pageFile.page2ByteOffset(page);
+			long baseByte = mapping.page2ByteOffset(page);
 			long size = (endObject - startObject) * instanceStride;
 
 			stagingBuffer.enqueueCopy(size, instanceVbo, baseByte, ptr -> {
@@ -115,7 +116,7 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 			draw.delete();
 		}
 
-		pageFile.delete();
+		mapping.delete();
 	}
 
 	public int modelIndex() {

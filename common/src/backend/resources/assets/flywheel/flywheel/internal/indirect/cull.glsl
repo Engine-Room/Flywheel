@@ -15,8 +15,8 @@ const uint _FLW_PAGE_COUNT_OFFSET = 26u;
 // Bottom 26 bits for the model index.
 const uint _FLW_MODEL_INDEX_MASK = 0x3FFFFFF;
 
-layout(std430, binding = _FLW_MODEL_INDEX_BUFFER_BINDING) restrict readonly buffer ModelIndexBuffer {
-    uint _flw_pageTable[];
+layout(std430, binding = _FLW_PAGE_FRAME_DESCRIPTOR_BUFFER_BINDING) restrict readonly buffer PageFrameDescriptorBuffer {
+    uint _flw_pageFrameDescriptors[];
 };
 
 layout(std430, binding = _FLW_MODEL_BUFFER_BINDING) restrict buffer ModelBuffer {
@@ -62,11 +62,11 @@ bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
 void main() {
     uint pageIndex = gl_WorkGroupID.x;
 
-    if (pageIndex >= _flw_pageTable.length()) {
+    if (pageIndex >= _flw_pageFrameDescriptors.length()) {
         return;
     }
 
-    uint packedModelIndexAndCount = _flw_pageTable[pageIndex];
+    uint packedModelIndexAndCount = _flw_pageFrameDescriptors[pageIndex];
 
     uint pageInstanceCount = packedModelIndexAndCount >> _FLW_PAGE_COUNT_OFFSET;
 
