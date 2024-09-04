@@ -30,6 +30,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	private static final ResourceLocation CULL_SHADER_MAIN = Flywheel.rl("internal/indirect/cull.glsl");
 	private static final ResourceLocation APPLY_SHADER_MAIN = Flywheel.rl("internal/indirect/apply.glsl");
 	private static final ResourceLocation SCATTER_SHADER_MAIN = Flywheel.rl("internal/indirect/scatter.glsl");
+	private static final ResourceLocation DEPTH_REDUCE_SHADER_MAIN = Flywheel.rl("internal/indirect/depth_reduce.glsl");
 
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private static final Compile<ResourceLocation> UTIL = new Compile<>();
@@ -44,12 +45,14 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	private final Map<InstanceType<?>, GlProgram> culling;
 	private final GlProgram apply;
 	private final GlProgram scatter;
+	private final GlProgram depthReduce;
 
-	private IndirectPrograms(Map<PipelineProgramKey, GlProgram> pipeline, Map<InstanceType<?>, GlProgram> culling, GlProgram apply, GlProgram scatter) {
+	private IndirectPrograms(Map<PipelineProgramKey, GlProgram> pipeline, Map<InstanceType<?>, GlProgram> culling, GlProgram apply, GlProgram scatter, GlProgram depthReduce) {
 		this.pipeline = pipeline;
 		this.culling = culling;
 		this.apply = apply;
 		this.scatter = scatter;
+		this.depthReduce = depthReduce;
 	}
 
 	private static List<String> getExtensions(GlslVersion glslVersion) {
@@ -94,10 +97,10 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		try {
 			var pipelineResult = pipelineCompiler.compileAndReportErrors(pipelineKeys);
 			var cullingResult = cullingCompiler.compileAndReportErrors(createCullingKeys());
-			var utils = utilCompiler.compileAndReportErrors(List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN));
+			var utils = utilCompiler.compileAndReportErrors(List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN, DEPTH_REDUCE_SHADER_MAIN));
 
 			if (pipelineResult != null && cullingResult != null && utils != null) {
-				newInstance = new IndirectPrograms(pipelineResult, cullingResult, utils.get(APPLY_SHADER_MAIN), utils.get(SCATTER_SHADER_MAIN));
+				newInstance = new IndirectPrograms(pipelineResult, cullingResult, utils.get(APPLY_SHADER_MAIN), utils.get(SCATTER_SHADER_MAIN), utils.get(DEPTH_REDUCE_SHADER_MAIN));
 			}
 		} catch (Throwable t) {
 			FlwPrograms.LOGGER.error("Failed to compile indirect programs", t);
@@ -182,6 +185,10 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 	public GlProgram getScatterProgram() {
 		return scatter;
+	}
+
+	public GlProgram getDepthReduceProgram() {
+		return depthReduce;
 	}
 
 	@Override

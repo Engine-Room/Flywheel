@@ -9,6 +9,16 @@ struct FrustumPlanes {
     vec2 zW; // <nz.w, pz.w>
 };
 
+struct _FlwCullData {
+    float znear;
+    float zfar;
+    float P00;
+    float P11;
+    float pyramidWidth;
+    float pyramidHeight;
+    uint useMin;
+};
+
 layout(std140) uniform _FlwFrameUniforms {
     FrustumPlanes flw_frustumPlanes;
 
@@ -47,6 +57,8 @@ layout(std140) uniform _FlwFrameUniforms {
     uint flw_cameraInBlock;
 
     uint _flw_debugMode;
+
+    _FlwCullData _flw_cullData;
 };
 
 #define flw_renderOrigin (_flw_renderOrigin.xyz)
