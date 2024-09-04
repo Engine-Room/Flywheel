@@ -17,7 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public final class FrameUniforms extends UniformWriter {
-	private static final int SIZE = 96 + 64 * 9 + 16 * 5 + 8 * 2 + 8 + 4 * 10;
+	private static final int SIZE = 96 + 64 * 9 + 16 * 5 + 8 * 2 + 8 + 4 * 16;
 	static final UniformBuffer BUFFER = new UniformBuffer(Uniforms.FRAME_INDEX, SIZE);
 
 	private static final Matrix4f VIEW = new Matrix4f();
@@ -112,6 +112,8 @@ public final class FrameUniforms extends UniformWriter {
 
 		ptr = writeInt(ptr, debugMode);
 
+		ptr = writeCullData(ptr);
+
 		firstWrite = false;
 		BUFFER.markDirty();
 	}
@@ -177,6 +179,18 @@ public final class FrameUniforms extends UniformWriter {
 		BlockPos blockPos = camera.getBlockPosition();
 		Vec3 cameraPos = camera.getPosition();
 		return writeInFluidAndBlock(ptr, level, blockPos, cameraPos);
+	}
+
+	private static long writeCullData(long ptr) {
+		ptr = writeFloat(ptr, 0.05F); // zNear
+		ptr = writeFloat(ptr, Minecraft.getInstance().gameRenderer.getDepthFar()); // zFar
+		ptr = writeFloat(ptr, PROJECTION.m00()); // P00
+		ptr = writeFloat(ptr, PROJECTION.m11()); // P11
+		ptr = writeFloat(ptr, Minecraft.getInstance().getMainRenderTarget().width >> 1); // pyramidWidth
+		ptr = writeFloat(ptr, Minecraft.getInstance().getMainRenderTarget().height >> 1); // pyramidHeight
+		ptr = writeInt(ptr, 0); // useMin
+
+		return ptr;
 	}
 
 	/**

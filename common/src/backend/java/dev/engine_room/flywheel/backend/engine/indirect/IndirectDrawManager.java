@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.lwjgl.opengl.GL46;
+
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
@@ -46,6 +48,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	private final LightBuffers lightBuffers;
 	private final MatrixBuffer matrixBuffer;
 
+	private final DepthPyramid depthPyramid;
+
 	private boolean needsBarrier = false;
 
 	public IndirectDrawManager(IndirectPrograms programs) {
@@ -58,6 +62,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		meshPool.bind(vertexArray);
 		lightBuffers = new LightBuffers();
 		matrixBuffer = new MatrixBuffer();
+
+		depthPyramid = new DepthPyramid(programs.getDepthReduceProgram());
 	}
 
 	@Override
@@ -136,12 +142,17 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		stagingBuffer.flush();
 
+		depthPyramid.generate();
+
 		// We could probably save some driver calls here when there are
 		// actually zero instances, but that feels like a very rare case
 
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
 		matrixBuffer.bind();
+
+		GL46.glActiveTexture(GL46.GL_TEXTURE0);
+		GL46.glBindTexture(GL46.GL_TEXTURE_2D, depthPyramid.pyramidTextureId);
 
 		for (var group : cullingGroups.values()) {
 			group.dispatchCull();
