@@ -43,7 +43,8 @@ bool _flw_testSphere(vec3 center, float radius) {
 }
 
 bool projectSphere(vec3 c, float r, float znear, float P00, float P11, out vec4 aabb) {
-    if (c.z > r + znear) {
+    // Closest point on the sphere is between the camera and the near plane, don't even attempt to cull.
+    if (c.z + r > -znear) {
         return false;
     }
 
@@ -91,7 +92,7 @@ bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
             float width = (aabb.z - aabb.x) * _flw_cullData.pyramidWidth;
             float height = (aabb.w - aabb.y) * _flw_cullData.pyramidHeight;
 
-            int level = clamp(0, int(ceil(log2(max(width, height)))), _flw_cullData.pyramidLevels);
+            int level = clamp(int(ceil(log2(max(width, height)))), 0, _flw_cullData.pyramidLevels);
 
             ivec2 levelSize = textureSize(_flw_depthPyramid, level);
 
