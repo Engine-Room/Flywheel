@@ -16,6 +16,7 @@ struct _FlwCullData {
     float P11;
     float pyramidWidth;
     float pyramidHeight;
+    int pyramidLevels;
     uint useMin;
 };
 

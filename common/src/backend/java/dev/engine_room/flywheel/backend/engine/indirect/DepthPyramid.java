@@ -35,8 +35,8 @@ public class DepthPyramid {
 		var mainRenderTarget = Minecraft.getInstance()
 				.getMainRenderTarget();
 
-		int width = mainRenderTarget.width;
-		int height = mainRenderTarget.height;
+		int width = mip0Size(mainRenderTarget.width);
+		int height = mip0Size(mainRenderTarget.height);
 
 		int mipLevels = getImageMipLevels(width, height);
 
@@ -53,15 +53,15 @@ public class DepthPyramid {
 		depthReduceProgram.bind();
 
 		for (int i = 0; i < mipLevels; i++) {
-			int mipWidth = Math.max(1, width >> i);
-			int mipHeight = Math.max(1, height >> i);
+			int mipWidth = mipSize(width, i);
+			int mipHeight = mipSize(height, i);
 
 			int srcTexture = (i == 0) ? depthBufferId : pyramidTextureId;
 			GL46.glBindTexture(GL32.GL_TEXTURE_2D, srcTexture);
 
 			GL46.glBindImageTexture(0, pyramidTextureId, i, false, 0, GL32.GL_WRITE_ONLY, GL32.GL_R32F);
 
-			depthReduceProgram.setUVec2("imageSize", mipWidth, mipHeight);
+			depthReduceProgram.setVec2("imageSize", mipWidth, mipHeight);
 			depthReduceProgram.setInt("lod", Math.max(0, i - 1));
 
 			GL46.glDispatchCompute(MoreMath.ceilingDiv(mipWidth, 8), MoreMath.ceilingDiv(mipHeight, 8), 1);
@@ -85,20 +85,28 @@ public class DepthPyramid {
 		GL32.glBindTexture(GL32.GL_TEXTURE_2D, pyramidTextureId);
 
 		for (int i = 0; i < mipLevels; i++) {
-			int mipWidth = Math.max(1, width >> (i + 1));
-			int mipHeight = Math.max(1, height >> (i + 1));
+			int mipWidth = mipSize(width, i);
+			int mipHeight = mipSize(height, i);
 
 			GL32.glTexImage2D(GL32.GL_TEXTURE_2D, i, GL32.GL_R32F, mipWidth, mipHeight, 0, GL32.GL_RED, GL32.GL_FLOAT, 0);
 		}
 	}
 
-	private static int getImageMipLevels(int width, int height) {
+	public static int mipSize(int mip0Size, int level) {
+		return Math.max(1, mip0Size >> level);
+	}
+
+	public static int mip0Size(int screenSize) {
+		return Integer.highestOneBit(screenSize);
+	}
+
+	public static int getImageMipLevels(int width, int height) {
 		int result = 1;
 
 		while (width > 2 && height > 2) {
 			result++;
-			width /= 2;
-			height /= 2;
+			width >>= 1;
+			height >>= 1;
 		}
 
 		return result;
