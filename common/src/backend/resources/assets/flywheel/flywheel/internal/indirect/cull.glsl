@@ -91,12 +91,18 @@ bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
             float width = (aabb.z - aabb.x) * _flw_cullData.pyramidWidth;
             float height = (aabb.w - aabb.y) * _flw_cullData.pyramidHeight;
 
-            float level = floor(log2(max(width, height)));
+            int level = clamp(0, int(ceil(log2(max(width, height)))), _flw_cullData.pyramidLevels);
 
-            float depth01 = textureLod(_flw_depthPyramid, aabb.xw, level).r;
-            float depth11 = textureLod(_flw_depthPyramid, aabb.zw, level).r;
-            float depth10 = textureLod(_flw_depthPyramid, aabb.zy, level).r;
-            float depth00 = textureLod(_flw_depthPyramid, aabb.xy, level).r;
+            ivec2 levelSize = textureSize(_flw_depthPyramid, level);
+
+            ivec4 levelSizePair = ivec4(levelSize, levelSize);
+
+            ivec4 bounds = ivec4(aabb * vec4(levelSizePair));
+
+            float depth01 = texelFetch(_flw_depthPyramid, bounds.xw, level).r;
+            float depth11 = texelFetch(_flw_depthPyramid, bounds.zw, level).r;
+            float depth10 = texelFetch(_flw_depthPyramid, bounds.zy, level).r;
+            float depth00 = texelFetch(_flw_depthPyramid, bounds.xy, level).r;
 
             float depth;
             if (_flw_cullData.useMin == 0) {
