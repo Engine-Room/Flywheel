@@ -13,9 +13,7 @@ uniform sampler2D _flw_crumblingTex;
 in vec2 _flw_crumblingTexCoord;
 #endif
 
-flat in uint _flw_instanceID;
-
-out vec4 _flw_outputColor;
+layout(location = 0) out vec4 _flw_outputColor;
 
 float _flw_diffuseFactor() {
     if (flw_material.diffuse) {
@@ -29,7 +27,7 @@ float _flw_diffuseFactor() {
     }
 }
 
-void _flw_main() {
+void _flw_main(uint instanceID) {
     flw_sampleColor = texture(flw_diffuseTex, flw_vertexTexCoord);
     flw_fragColor = flw_vertexColor * flw_sampleColor;
     flw_fragOverlay = flw_vertexOverlay;
@@ -72,7 +70,7 @@ void _flw_main() {
         color = vec4(flw_vertexNormal * .5 + .5, 1.);
         break;
         case 2u:
-        color = _flw_id2Color(_flw_instanceID);
+        color = _flw_id2Color(instanceID);
         break;
         case 3u:
         color = vec4(vec2((flw_fragLight * 15.0 + 0.5) / 16.), 0., 1.);

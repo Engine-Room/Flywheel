@@ -21,7 +21,13 @@ layout(std430, binding = _FLW_MATRIX_BUFFER_BINDING) restrict buffer MatrixBuffe
 
 uniform uint _flw_baseDraw;
 
+// We read the visibility buffer for all culling groups into a single shared buffer.
+// This offset is used to know where each culling group starts.
+uniform uint _flw_globalInstanceIdOffset = 0;
+
 flat out uvec3 _flw_packedMaterial;
+
+flat out uint _flw_instanceID;
 
 void main() {
 #if __VERSION__ < 460
@@ -49,5 +55,8 @@ void main() {
 #endif
     FlwInstance instance = _flw_unpackInstance(instanceIndex);
 
-    _flw_main(instance, instanceIndex);
+    _flw_main(instance);
+
+    // Add 1 because a 0 instance id means null.
+    _flw_instanceID = _flw_globalInstanceIdOffset + instanceIndex + 1;
 }

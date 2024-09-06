@@ -10,6 +10,8 @@ uniform mat4 _flw_modelMatrixUniform;
 uniform mat3 _flw_normalMatrixUniform;
 #endif
 
+flat out uint _flw_instanceID;
+
 void main() {
     _flw_uberMaterialVertexIndex = _flw_packedMaterial.x;
     _flw_unpackMaterialProperties(_flw_packedMaterial.w, flw_material);
@@ -21,5 +23,7 @@ void main() {
     _flw_normalMatrix = _flw_normalMatrixUniform;
     #endif
 
-    _flw_main(instance, uint(gl_InstanceID));
+    _flw_main(instance);
+
+    _flw_instanceID = gl_InstanceID;
 }

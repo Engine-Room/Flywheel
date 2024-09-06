@@ -49,6 +49,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	private final MatrixBuffer matrixBuffer;
 
 	private final DepthPyramid depthPyramid;
+	private final VisibilityBuffer visibilityBuffer;
 
 	private boolean needsBarrier = false;
 
@@ -64,6 +65,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		matrixBuffer = new MatrixBuffer();
 
 		depthPyramid = new DepthPyramid(programs.getDepthReduceProgram());
+		visibilityBuffer = new VisibilityBuffer();
 	}
 
 	@Override
@@ -100,6 +102,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			matrixBuffer.bind();
 			Uniforms.bindAll();
 
+			visibilityBuffer.attach();
+
 			if (needsBarrier) {
 				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 				needsBarrier = false;
@@ -111,6 +115,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 			MaterialRenderState.reset();
 			TextureBinder.resetLightAndOverlay();
+
+			visibilityBuffer.detach();
 		}
 	}
 
@@ -185,6 +191,10 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		crumblingDrawBuffer.delete();
 
 		programs.release();
+
+		depthPyramid.delete();
+
+		visibilityBuffer.delete();
 	}
 
 	public void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks) {

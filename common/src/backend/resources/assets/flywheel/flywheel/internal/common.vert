@@ -71,9 +71,7 @@ mat4 _flw_modelMatrix;
 mat3 _flw_normalMatrix;
 #endif
 
-flat out uint _flw_instanceID;
-
-void _flw_main(in FlwInstance instance, in uint stableInstanceID) {
+void _flw_main(in FlwInstance instance) {
     _flw_layoutVertex();
     flw_instanceVertex(instance);
     flw_materialVertex();
@@ -92,6 +90,4 @@ void _flw_main(in FlwInstance instance, in uint stableInstanceID) {
     flw_distance = fogDistance(flw_vertexPos.xyz, flw_cameraPos, flw_fogShape);
 
     gl_Position = flw_viewProjection * flw_vertexPos;
-
-    _flw_instanceID = stableInstanceID;
 }
