@@ -25,7 +25,7 @@ public class ChunkBuilderMeshingTaskMixin {
 					remap = true
 			)
 	)
-	private BlockEntityRenderer<?> flywheel$redirectGetRenderer(BlockEntityRenderDispatcher instance, BlockEntity blockEntity, Operation<BlockEntityRenderer<BlockEntity>> original) {
+	private BlockEntityRenderer<?> flywheel$wrapGetRenderer(BlockEntityRenderDispatcher instance, BlockEntity blockEntity, Operation<BlockEntityRenderer<BlockEntity>> original) {
 		if (InstancedRenderDispatcher.tryAddBlockEntity(blockEntity)) {
 			return null;
 		}

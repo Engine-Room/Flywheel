@@ -41,8 +41,6 @@ public class Flywheel implements ClientModInitializer {
 	public static final Logger LOGGER = LogUtils.getLogger();
 	private static Version version;
 
-
-
 	@Override
 	public void onInitializeClient() {
 		Version version = FabricLoader.getInstance()
