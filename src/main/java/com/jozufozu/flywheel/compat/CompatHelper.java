@@ -28,8 +28,8 @@ public class CompatHelper {
 						.getVersion();
 
 				try {
-					VersionPredicate predicate0_5 = VersionPredicate.parse(">=0.5.0 <0.6.0");
-					VersionPredicate predicate0_6 = VersionPredicate.parse("<0.6 >=0.6.0-beta.2");
+					VersionPredicate predicate0_5 = VersionPredicate.parse("~0.5.0 >=0.5.0");
+					VersionPredicate predicate0_6 = VersionPredicate.parse(">=0.6.0-beta.2");
 					is0_5Loaded = predicate0_5.test(sodiumVersion);
 					is0_6Loaded = predicate0_6.test(sodiumVersion);
 				} catch (Throwable ignored) {}
