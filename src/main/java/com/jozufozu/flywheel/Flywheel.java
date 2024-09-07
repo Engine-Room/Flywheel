@@ -82,8 +82,6 @@ public class Flywheel implements ClientModInitializer {
 			EmbeddiumCompat.init();
 		}
 
-		CompatHelper.initSodiumVersion();
-
 		VanillaInstances.init();
 
 		// https://github.com/Jozufozu/Flywheel/issues/69
