@@ -93,7 +93,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	}
 
 	public void render(VisualType visualType) {
-		if (!hasVisualType(visualType)) {
+		// FIXME: Two pass occlusion prefers to render everything at once
+		if (visualType != VisualType.BLOCK_ENTITY) {
 			return;
 		}
 
@@ -105,21 +106,71 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			matrixBuffer.bind();
 			Uniforms.bindAll();
 
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+			visibilityBuffer.bind();
+
+			for (var group1 : cullingGroups.values()) {
+				group1.dispatchCull();
+			}
+
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+			dispatchApply();
+
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
 			visibilityBuffer.attach();
 
-			if (needsBarrier) {
-				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-				needsBarrier = false;
-			}
+			submitDraws();
+
+			depthPyramid.generate();
+
+			programs.getZeroModelProgram()
+					.bind();
 
 			for (var group : cullingGroups.values()) {
-				group.submit(visualType);
+				group.dispatchModelReset();
 			}
+
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+			GlTextureUnit.T0.makeActive();
+			GlStateManager._bindTexture(depthPyramid.pyramidTextureId);
+
+			for (var group1 : cullingGroups.values()) {
+				group1.dispatchCullPassTwo();
+			}
+
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+			dispatchApply();
+
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+			submitDraws();
 
 			MaterialRenderState.reset();
 			TextureBinder.resetLightAndOverlay();
 
 			visibilityBuffer.detach();
+		}
+	}
+
+	private void dispatchApply() {
+		programs.getApplyProgram()
+				.bind();
+
+		for (var group1 : cullingGroups.values()) {
+			group1.dispatchApply();
+		}
+	}
+
+	private void submitDraws() {
+		for (var group : cullingGroups.values()) {
+			group.submit(VisualType.BLOCK_ENTITY);
+			group.submit(VisualType.ENTITY);
+			group.submit(VisualType.EFFECT);
 		}
 	}
 
@@ -159,30 +210,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		stagingBuffer.flush();
 
-		depthPyramid.generate();
-
 		// We could probably save some driver calls here when there are
 		// actually zero instances, but that feels like a very rare case
-
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-		matrixBuffer.bind();
-
-		GlTextureUnit.T0.makeActive();
-		GlStateManager._bindTexture(depthPyramid.pyramidTextureId);
-
-		for (var group : cullingGroups.values()) {
-			group.dispatchCull();
-		}
-
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-		programs.getApplyProgram()
-				.bind();
-
-		for (var group : cullingGroups.values()) {
-			group.dispatchApply();
-		}
 
 		needsBarrier = true;
 

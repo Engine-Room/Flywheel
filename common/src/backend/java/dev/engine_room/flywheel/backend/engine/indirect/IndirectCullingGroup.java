@@ -165,6 +165,15 @@ public class IndirectCullingGroup<I extends Instance> {
 		glDispatchCompute(GlCompat.getComputeGroupCount(indirectDraws.size()), 1, 1);
 	}
 
+	public void dispatchModelReset() {
+		if (nothingToDo()) {
+			return;
+		}
+
+		buffers.bindForModelReset();
+		glDispatchCompute(GlCompat.getComputeGroupCount(instancers.size()), 1, 1);
+	}
+
 	private boolean nothingToDo() {
 		return indirectDraws.isEmpty() || instanceCountThisFrame == 0;
 	}

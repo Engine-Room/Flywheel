@@ -54,12 +54,16 @@ public class VisibilityBuffer {
 		}
 
 		readVisibilityProgram.bind();
-		GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, BufferBindings.LAST_FRAME_VISIBILITY, lastFrameVisibility.handle());
+		bind();
 
 		GlTextureUnit.T0.makeActive();
 		GlStateManager._bindTexture(textureId);
 
 		GL46.glDispatchCompute(MoreMath.ceilingDiv(lastWidth, READ_GROUP_SIZE), MoreMath.ceilingDiv(lastHeight, READ_GROUP_SIZE), 1);
+	}
+
+	public void bind() {
+		GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, BufferBindings.LAST_FRAME_VISIBILITY, lastFrameVisibility.handle());
 	}
 
 	public void attach() {

@@ -126,6 +126,10 @@ public class IndirectBuffers {
 		multiBind(5, 2);
 	}
 
+	public void bindForModelReset() {
+		multiBind(5, 1);
+	}
+
 	public void bindForDraw() {
 		multiBind(3, 4);
 		GlBufferType.DRAW_INDIRECT_BUFFER.bind(draw.handle());

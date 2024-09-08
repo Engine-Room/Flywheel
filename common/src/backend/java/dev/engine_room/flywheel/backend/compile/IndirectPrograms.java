@@ -33,7 +33,8 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	private static final ResourceLocation SCATTER_SHADER_MAIN = Flywheel.rl("internal/indirect/scatter.glsl");
 	private static final ResourceLocation DEPTH_REDUCE_SHADER_MAIN = Flywheel.rl("internal/indirect/depth_reduce.glsl");
 	private static final ResourceLocation READ_VISIBILITY_SHADER_MAIN = Flywheel.rl("internal/indirect/read_visibility.glsl");
-	public static final List<ResourceLocation> UTIL_SHADERS = List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN, DEPTH_REDUCE_SHADER_MAIN, READ_VISIBILITY_SHADER_MAIN);
+	private static final ResourceLocation ZERO_MODELS_SHADER_MAIN = Flywheel.rl("internal/indirect/zero_models.glsl");
+	public static final List<ResourceLocation> UTIL_SHADERS = List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN, DEPTH_REDUCE_SHADER_MAIN, READ_VISIBILITY_SHADER_MAIN, ZERO_MODELS_SHADER_MAIN);
 
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private static final Compile<ResourceLocation> UTIL = new Compile<>();
@@ -47,19 +48,13 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	private final Map<PipelineProgramKey, GlProgram> pipeline;
 	private final Map<InstanceType<?>, GlProgram> culling;
 	private final Map<InstanceType<?>, GlProgram> cullPassTwo;
-	private final GlProgram apply;
-	private final GlProgram scatter;
-	private final GlProgram depthReduce;
-	private final GlProgram readVisibility;
+	private final Map<ResourceLocation, GlProgram> utils;
 
-	private IndirectPrograms(Map<PipelineProgramKey, GlProgram> pipeline, Map<InstanceType<?>, GlProgram> culling, Map<InstanceType<?>, GlProgram> cullPassTwo, GlProgram apply, GlProgram scatter, GlProgram depthReduce, GlProgram readVisibility) {
+	private IndirectPrograms(Map<PipelineProgramKey, GlProgram> pipeline, Map<InstanceType<?>, GlProgram> culling, Map<InstanceType<?>, GlProgram> cullPassTwo, Map<ResourceLocation, GlProgram> utils) {
 		this.pipeline = pipeline;
 		this.culling = culling;
 		this.cullPassTwo = cullPassTwo;
-		this.apply = apply;
-		this.scatter = scatter;
-		this.depthReduce = depthReduce;
-		this.readVisibility = readVisibility;
+		this.utils = utils;
 	}
 
 	private static List<String> getExtensions(GlslVersion glslVersion) {
@@ -110,7 +105,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 			var utils = utilCompiler.compileAndReportErrors(UTIL_SHADERS);
 
 			if (pipelineResult != null && pass1Result != null && pass2Result != null && utils != null) {
-				newInstance = new IndirectPrograms(pipelineResult, pass1Result, pass2Result, utils.get(APPLY_SHADER_MAIN), utils.get(SCATTER_SHADER_MAIN), utils.get(DEPTH_REDUCE_SHADER_MAIN), utils.get(READ_VISIBILITY_SHADER_MAIN));
+				newInstance = new IndirectPrograms(pipelineResult, pass1Result, pass2Result, utils);
 			}
 		} catch (Throwable t) {
 			FlwPrograms.LOGGER.error("Failed to compile indirect programs", t);
@@ -195,19 +190,23 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	}
 
 	public GlProgram getApplyProgram() {
-		return apply;
+		return utils.get(APPLY_SHADER_MAIN);
+	}
+
+	public GlProgram getZeroModelProgram() {
+		return utils.get(ZERO_MODELS_SHADER_MAIN);
 	}
 
 	public GlProgram getScatterProgram() {
-		return scatter;
+		return utils.get(SCATTER_SHADER_MAIN);
 	}
 
 	public GlProgram getDepthReduceProgram() {
-		return depthReduce;
+		return utils.get(DEPTH_REDUCE_SHADER_MAIN);
 	}
 
 	public GlProgram getReadVisibilityProgram() {
-		return readVisibility;
+		return utils.get(READ_VISIBILITY_SHADER_MAIN);
 	}
 
 	@Override
@@ -216,6 +215,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 				.forEach(GlProgram::delete);
 		culling.values()
 				.forEach(GlProgram::delete);
-		apply.delete();
+		utils.values()
+				.forEach(GlProgram::delete);
 	}
 }
