@@ -1,9 +1,11 @@
+#include "flywheel:internal/indirect/buffer_bindings.glsl"
+
 layout(local_size_x = 8, local_size_y = 8) in;
 
 layout(binding = 0) uniform usampler2D visBuffer;
 
-layout(std430) restrict buffer VisibleFlagBuffer {
-    uint _flw_visibleFlag[];
+layout(std430, binding = _FLW_LAST_FRAME_VISIBILITY_BUFFER_BINDING) restrict buffer LastFrameVisibilityBuffer {
+    uint _flw_lastFrameVisibility[];
 };
 
 void main() {
@@ -21,5 +23,5 @@ void main() {
 
     uint mask = 1u << (instanceID & 31u);
 
-    atomicOr(_flw_visibleFlag[index], mask);
+    atomicOr(_flw_lastFrameVisibility[index], mask);
 }

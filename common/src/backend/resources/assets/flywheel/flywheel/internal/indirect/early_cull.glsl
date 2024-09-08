@@ -8,12 +8,23 @@ layout(local_size_x = 32) in;
 
 uniform uint _flw_visibilityReadOffsetPages;
 
-layout(std430, binding = _FLW_TARGET_BUFFER_BINDING) restrict writeonly buffer DrawIndexBuffer {
-    uint _flw_drawIndices[];
+struct _FlwLateCullDispatch {
+    uint x;
+    uint y;
+    uint z;
+    uint threadCount;
 };
 
-layout(std430, binding = _FLW_PASS_TWO_BUFFER_BINDING) restrict writeonly buffer PassTwoIndexBuffer {
+layout(std430, binding = _FLW_PASS_TWO_DISPATCH_BUFFER_BINDING) restrict buffer PassTwoDispatchBuffer {
+    _FlwLateCullDispatch _flw_lateCullDispatch;
+};
+
+layout(std430, binding = _FLW_PASS_TWO_INSTANCE_INDEX_BUFFER_BINDING) restrict readonly buffer PassTwoIndexBuffer {
     uint _flw_passTwoIndicies[];
+};
+
+layout(std430, binding = _FLW_DRAW_INSTANCE_INDEX_BUFFER_BINDING) restrict writeonly buffer DrawIndexBuffer {
+    uint _flw_drawIndices[];
 };
 
 // High 6 bits for the number of instances in the page.
@@ -26,7 +37,7 @@ layout(std430, binding = _FLW_PAGE_FRAME_DESCRIPTOR_BUFFER_BINDING) restrict rea
 };
 
 layout(std430, binding = _FLW_LAST_FRAME_VISIBILITY_BUFFER_BINDING) restrict readonly buffer LastFrameVisibilityBuffer {
-    uint _flw_visibleFlag[];
+    uint _flw_lastFrameVisibility[];
 };
 
 layout(std430, binding = _FLW_MODEL_BUFFER_BINDING) restrict buffer ModelBuffer {
@@ -35,17 +46,6 @@ layout(std430, binding = _FLW_MODEL_BUFFER_BINDING) restrict buffer ModelBuffer 
 
 layout(std430, binding = _FLW_MATRIX_BUFFER_BINDING) restrict readonly buffer MatrixBuffer {
     Matrices _flw_matrices[];
-};
-
-struct _FlwLateCullDispatch {
-    uint x;
-    uint y;
-    uint z;
-    uint threadCount;
-};
-
-layout(std430, binding = _FLW_LATE_CULL_BUFFER_BINDING) restrict buffer LateCullBuffer {
-    _FlwLateCullDispatch _flw_lateCullDispatch;
 };
 
 // Disgustingly vectorized sphere frustum intersection taking advantage of ahead of time packing.
@@ -103,7 +103,7 @@ void main() {
         return;
     }
 
-    uint pageVisibility = _flw_visibleFlag[_flw_visibilityReadOffsetPages + pageIndex];
+    uint pageVisibility = _flw_lastFrameVisibility[_flw_visibilityReadOffsetPages + pageIndex];
 
     if ((pageVisibility & (1u << gl_LocalInvocationID.x)) != 0u) {
         // This instance was visibile last frame, it should be rendered early.

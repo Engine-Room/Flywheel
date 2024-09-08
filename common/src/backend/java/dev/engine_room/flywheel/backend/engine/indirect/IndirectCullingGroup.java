@@ -6,6 +6,7 @@ import static org.lwjgl.opengl.GL30.glUniform1ui;
 import static org.lwjgl.opengl.GL42.GL_COMMAND_BARRIER_BIT;
 import static org.lwjgl.opengl.GL42.glMemoryBarrier;
 import static org.lwjgl.opengl.GL43.glDispatchCompute;
+import static org.lwjgl.opengl.GL43.glDispatchComputeIndirect;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -44,7 +45,8 @@ public class IndirectCullingGroup<I extends Instance> {
 	private final Map<VisualType, List<MultiDraw>> multiDraws = new EnumMap<>(VisualType.class);
 
 	private final IndirectPrograms programs;
-	private final GlProgram cullProgram;
+	private final GlProgram earlyCull;
+	private final GlProgram lateCull;
 
 	private boolean needsDrawBarrier;
 	private boolean needsDrawSort;
@@ -63,7 +65,8 @@ public class IndirectCullingGroup<I extends Instance> {
 		buffers = new IndirectBuffers(instanceStride);
 
 		this.programs = programs;
-		cullProgram = programs.getCullingProgram(instanceType);
+		earlyCull = programs.getCullingProgram(instanceType);
+		lateCull = programs.getCullPassTwoProgram(instanceType);
 	}
 
 	public void flushInstancers() {
@@ -133,12 +136,24 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 
 		Uniforms.bindAll();
-		cullProgram.bind();
+		earlyCull.bind();
 
-		cullProgram.setUInt("_flw_visibilityReadOffsetPages", visibilityReadOffsetPages);
+		earlyCull.setUInt("_flw_visibilityReadOffsetPages", visibilityReadOffsetPages);
 
-		buffers.bindForCompute();
+		buffers.bindForCullPassOne();
 		glDispatchCompute(buffers.objectStorage.capacity(), 1, 1);
+	}
+
+	public void dispatchCullPassTwo() {
+		if (nothingToDo()) {
+			return;
+		}
+
+		Uniforms.bindAll();
+		lateCull.bind();
+
+		buffers.bindForCullPassTwo();
+		glDispatchComputeIndirect(0);
 	}
 
 	public void dispatchApply() {
@@ -146,7 +161,7 @@ public class IndirectCullingGroup<I extends Instance> {
 			return;
 		}
 
-		buffers.bindForCompute();
+		buffers.bindForApply();
 		glDispatchCompute(GlCompat.getComputeGroupCount(indirectDraws.size()), 1, 1);
 	}
 

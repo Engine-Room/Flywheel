@@ -20,7 +20,7 @@ public class VisibilityBuffer {
 	private static final int ATTACHMENT = GL30.GL_COLOR_ATTACHMENT1;
 
 	private final GlProgram readVisibilityProgram;
-	private final ResizableStorageBuffer visibilityBitset;
+	private final ResizableStorageBuffer lastFrameVisibility;
 	private final int textureId;
 
 	private int lastWidth = -1;
@@ -30,7 +30,7 @@ public class VisibilityBuffer {
 
 	public VisibilityBuffer(GlProgram readVisibilityProgram) {
 		this.readVisibilityProgram = readVisibilityProgram;
-		visibilityBitset = new ResizableStorageBuffer();
+		lastFrameVisibility = new ResizableStorageBuffer();
 		textureId = GL32.glGenTextures();
 
 		GlStateManager._bindTexture(textureId);
@@ -45,16 +45,16 @@ public class VisibilityBuffer {
 			return;
 		}
 
-		visibilityBitset.ensureCapacity((long) pageCount << 2);
+		lastFrameVisibility.ensureCapacity((long) pageCount << 2);
 
-		GL46.nglClearNamedBufferData(visibilityBitset.handle(), GL46.GL_R32UI, GL46.GL_RED_INTEGER, GL46.GL_UNSIGNED_INT, 0);
+		GL46.nglClearNamedBufferData(lastFrameVisibility.handle(), GL46.GL_R32UI, GL46.GL_RED_INTEGER, GL46.GL_UNSIGNED_INT, 0);
 
 		if (lastWidth == -1 || lastHeight == -1) {
 			return;
 		}
 
 		readVisibilityProgram.bind();
-		GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, visibilityBitset.handle());
+		GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, BufferBindings.LAST_FRAME_VISIBILITY, lastFrameVisibility.handle());
 
 		GlTextureUnit.T0.makeActive();
 		GlStateManager._bindTexture(textureId);

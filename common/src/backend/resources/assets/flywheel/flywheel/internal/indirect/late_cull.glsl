@@ -6,12 +6,12 @@
 
 layout(local_size_x = 32) in;
 
-layout(std430, binding = _FLW_TARGET_BUFFER_BINDING) restrict writeonly buffer DrawIndexBuffer {
-    uint _flw_drawIndices[];
+layout(std430, binding = _FLW_PASS_TWO_INSTANCE_INDEX_BUFFER_BINDING) restrict readonly buffer PassTwoIndexBuffer {
+    uint _flw_passTwoIndicies[];
 };
 
-layout(std430, binding = _FLW_PASS_TWO_BUFFER_BINDING) restrict readonly buffer PassTwoIndexBuffer {
-    uint _flw_passTwoIndicies[];
+layout(std430, binding = _FLW_DRAW_INSTANCE_INDEX_BUFFER_BINDING) restrict writeonly buffer DrawIndexBuffer {
+    uint _flw_drawIndices[];
 };
 
 layout(std430, binding = _FLW_PAGE_FRAME_DESCRIPTOR_BUFFER_BINDING) restrict readonly buffer PageFrameDescriptorBuffer {
