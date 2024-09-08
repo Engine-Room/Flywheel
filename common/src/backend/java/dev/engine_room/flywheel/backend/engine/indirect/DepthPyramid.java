@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL46;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 
+import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 import net.minecraft.client.Minecraft;
@@ -44,6 +45,7 @@ public class DepthPyramid {
 
 		int depthBufferId = mainRenderTarget.getDepthTextureId();
 
+		GlTextureUnit.T1.makeActive();
 		GlStateManager._bindTexture(depthBufferId);
 
 		GL46.glMemoryBarrier(GL46.GL_FRAMEBUFFER_BARRIER_BIT);
@@ -57,7 +59,7 @@ public class DepthPyramid {
 			int mipHeight = mipSize(height, i);
 
 			int srcTexture = (i == 0) ? depthBufferId : pyramidTextureId;
-			GL46.glBindTexture(GL32.GL_TEXTURE_2D, srcTexture);
+			GlStateManager._bindTexture(srcTexture);
 
 			GL46.glBindImageTexture(0, pyramidTextureId, i, false, 0, GL32.GL_WRITE_ONLY, GL32.GL_R32F);
 

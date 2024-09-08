@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.lwjgl.opengl.GL46;
+import com.mojang.blaze3d.platform.GlStateManager;
 
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
@@ -31,6 +31,7 @@ import dev.engine_room.flywheel.backend.engine.TextureBinder;
 import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
+import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
 import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBufferType;
@@ -51,6 +52,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	private final DepthPyramid depthPyramid;
 	private final VisibilityBuffer visibilityBuffer;
 
+	private int totalPagesLastFrame = 0;
+
 	private boolean needsBarrier = false;
 
 	public IndirectDrawManager(IndirectPrograms programs) {
@@ -65,7 +68,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		matrixBuffer = new MatrixBuffer();
 
 		depthPyramid = new DepthPyramid(programs.getDepthReduceProgram());
-		visibilityBuffer = new VisibilityBuffer();
+		visibilityBuffer = new VisibilityBuffer(programs.getReadVisibilityProgram());
 	}
 
 	@Override
@@ -128,11 +131,19 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.flushInstancers();
 		}
 
+		visibilityBuffer.read(totalPagesLastFrame);
+		visibilityBuffer.clear();
+
 		cullingGroups.values()
 				.removeIf(IndirectCullingGroup::checkEmptyAndDelete);
 
 		instancers.values()
 				.removeIf(instancer -> instancer.instanceCount() == 0);
+
+		int totalPagesThisFrame = 0;
+		for (var group : cullingGroups.values()) {
+			totalPagesThisFrame += group.flipVisibilityOffsets(totalPagesThisFrame);
+		}
 
 		meshPool.flush();
 
@@ -157,8 +168,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		matrixBuffer.bind();
 
-		GL46.glActiveTexture(GL46.GL_TEXTURE0);
-		GL46.glBindTexture(GL46.GL_TEXTURE_2D, depthPyramid.pyramidTextureId);
+		GlTextureUnit.T0.makeActive();
+		GlStateManager._bindTexture(depthPyramid.pyramidTextureId);
 
 		for (var group : cullingGroups.values()) {
 			group.dispatchCull();
@@ -174,6 +185,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		}
 
 		needsBarrier = true;
+
+		totalPagesLastFrame = totalPagesThisFrame;
 	}
 
 	@Override

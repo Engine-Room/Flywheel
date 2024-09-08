@@ -48,7 +48,13 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private boolean needsDrawBarrier;
 	private boolean needsDrawSort;
-	private int instanceCountThisFrame;
+	public int instanceCountThisFrame;
+
+	private int pagesLastFrame = 0;
+	private int pagesThisFrame = 0;
+
+	private int visibilityWriteOffsetPages = 0;
+	private int visibilityReadOffsetPages = 0;
 
 	IndirectCullingGroup(InstanceType<I> instanceType, IndirectPrograms programs) {
 		this.instanceType = instanceType;
@@ -85,6 +91,17 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 	}
 
+	public int flipVisibilityOffsets(int visibilityWriteOffsetPages) {
+		this.visibilityReadOffsetPages = this.visibilityWriteOffsetPages;
+		this.visibilityWriteOffsetPages = visibilityWriteOffsetPages;
+
+		pagesLastFrame = pagesThisFrame;
+
+		pagesThisFrame = buffers.objectStorage.capacity();
+
+		return pagesThisFrame;
+	}
+
 	public void upload(StagingBuffer stagingBuffer) {
 		if (nothingToDo()) {
 			return;
@@ -117,6 +134,8 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		Uniforms.bindAll();
 		cullProgram.bind();
+
+		cullProgram.setUInt("_flw_visibilityReadOffsetPages", visibilityReadOffsetPages);
 
 		buffers.bindForCompute();
 		glDispatchCompute(buffers.objectStorage.capacity(), 1, 1);
@@ -211,6 +230,8 @@ public class IndirectCullingGroup<I extends Instance> {
 				// Don't need to do this unless the program changes.
 				drawProgram.bind();
 				baseDrawUniformLoc = drawProgram.getUniformLocation("_flw_baseDraw");
+
+				drawProgram.setUInt("_flw_visibilityWriteOffsetInstances", visibilityWriteOffsetPages << ObjectStorage.LOG_2_PAGE_SIZE);
 			}
 
 			glUniform1ui(baseDrawUniformLoc, multiDraw.start);

@@ -27,10 +27,13 @@ import net.minecraft.resources.ResourceLocation;
 
 public class IndirectPrograms extends AtomicReferenceCounted {
 	private static final ResourceLocation CULL_SHADER_API_IMPL = Flywheel.rl("internal/indirect/cull_api_impl.glsl");
-	private static final ResourceLocation CULL_SHADER_MAIN = Flywheel.rl("internal/indirect/cull.glsl");
+	private static final ResourceLocation CULL_SHADER_MAIN = Flywheel.rl("internal/indirect/early_cull.glsl");
+	private static final ResourceLocation PASS2_SHADER_MAIN = Flywheel.rl("internal/indirect/late_cull.glsl");
 	private static final ResourceLocation APPLY_SHADER_MAIN = Flywheel.rl("internal/indirect/apply.glsl");
 	private static final ResourceLocation SCATTER_SHADER_MAIN = Flywheel.rl("internal/indirect/scatter.glsl");
 	private static final ResourceLocation DEPTH_REDUCE_SHADER_MAIN = Flywheel.rl("internal/indirect/depth_reduce.glsl");
+	private static final ResourceLocation READ_VISIBILITY_SHADER_MAIN = Flywheel.rl("internal/indirect/read_visibility.glsl");
+	public static final List<ResourceLocation> UTIL_SHADERS = List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN, DEPTH_REDUCE_SHADER_MAIN, READ_VISIBILITY_SHADER_MAIN);
 
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private static final Compile<ResourceLocation> UTIL = new Compile<>();
@@ -43,16 +46,20 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 	private final Map<PipelineProgramKey, GlProgram> pipeline;
 	private final Map<InstanceType<?>, GlProgram> culling;
+	private final Map<InstanceType<?>, GlProgram> cullPassTwo;
 	private final GlProgram apply;
 	private final GlProgram scatter;
 	private final GlProgram depthReduce;
+	private final GlProgram readVisibility;
 
-	private IndirectPrograms(Map<PipelineProgramKey, GlProgram> pipeline, Map<InstanceType<?>, GlProgram> culling, GlProgram apply, GlProgram scatter, GlProgram depthReduce) {
+	private IndirectPrograms(Map<PipelineProgramKey, GlProgram> pipeline, Map<InstanceType<?>, GlProgram> culling, Map<InstanceType<?>, GlProgram> cullPassTwo, GlProgram apply, GlProgram scatter, GlProgram depthReduce, GlProgram readVisibility) {
 		this.pipeline = pipeline;
 		this.culling = culling;
+		this.cullPassTwo = cullPassTwo;
 		this.apply = apply;
 		this.scatter = scatter;
 		this.depthReduce = depthReduce;
+		this.readVisibility = readVisibility;
 	}
 
 	private static List<String> getExtensions(GlslVersion glslVersion) {
@@ -91,23 +98,27 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		IndirectPrograms newInstance = null;
 
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, vertexComponents, fragmentComponents, EXTENSIONS);
-		var cullingCompiler = createCullingCompiler(sources);
+		var pass1Compiler = createCullingCompiler(sources, CULL_SHADER_MAIN, "early_cull");
+		var pass2Compiler = createCullingCompiler(sources, PASS2_SHADER_MAIN, "late_cull");
 		var utilCompiler = createUtilCompiler(sources);
+		var cullingKeys = createCullingKeys();
 
 		try {
 			var pipelineResult = pipelineCompiler.compileAndReportErrors(pipelineKeys);
-			var cullingResult = cullingCompiler.compileAndReportErrors(createCullingKeys());
-			var utils = utilCompiler.compileAndReportErrors(List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN, DEPTH_REDUCE_SHADER_MAIN));
+			var pass1Result = pass1Compiler.compileAndReportErrors(cullingKeys);
+			var pass2Result = pass2Compiler.compileAndReportErrors(cullingKeys);
+			var utils = utilCompiler.compileAndReportErrors(UTIL_SHADERS);
 
-			if (pipelineResult != null && cullingResult != null && utils != null) {
-				newInstance = new IndirectPrograms(pipelineResult, cullingResult, utils.get(APPLY_SHADER_MAIN), utils.get(SCATTER_SHADER_MAIN), utils.get(DEPTH_REDUCE_SHADER_MAIN));
+			if (pipelineResult != null && pass1Result != null && pass2Result != null && utils != null) {
+				newInstance = new IndirectPrograms(pipelineResult, pass1Result, pass2Result, utils.get(APPLY_SHADER_MAIN), utils.get(SCATTER_SHADER_MAIN), utils.get(DEPTH_REDUCE_SHADER_MAIN), utils.get(READ_VISIBILITY_SHADER_MAIN));
 			}
 		} catch (Throwable t) {
 			FlwPrograms.LOGGER.error("Failed to compile indirect programs", t);
 		}
 
 		pipelineCompiler.delete();
-		cullingCompiler.delete();
+		pass1Compiler.delete();
+		pass2Compiler.delete();
 		utilCompiler.delete();
 
 		setInstance(newInstance);
@@ -116,19 +127,19 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	/**
 	 * A compiler for cull shaders, parameterized by the instance type.
 	 */
-	private static CompilationHarness<InstanceType<?>> createCullingCompiler(ShaderSources sources) {
+	private static CompilationHarness<InstanceType<?>> createCullingCompiler(ShaderSources sources, ResourceLocation main, String name) {
 		return CULL.program()
 				.link(CULL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.COMPUTE)
-						.nameMapper(instanceType -> "culling/" + ResourceUtil.toDebugFileNameNoExtension(instanceType.cullShader()))
+						.nameMapper(instanceType -> name + "/" + ResourceUtil.toDebugFileNameNoExtension(instanceType.cullShader()))
 						.requireExtensions(COMPUTE_EXTENSIONS)
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(CULL_SHADER_API_IMPL)
 						.withComponent(InstanceStructComponent::new)
 						.withResource(InstanceType::cullShader)
 						.withComponent(SsboInstanceComponent::new)
-						.withResource(CULL_SHADER_MAIN))
+						.withResource(main))
 				.postLink((key, program) -> Uniforms.setUniformBlockBindings(program))
-				.harness("culling", sources);
+				.harness(name, sources);
 	}
 
 	/**
@@ -179,6 +190,10 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		return culling.get(instanceType);
 	}
 
+	public GlProgram getCullPassTwoProgram(InstanceType<?> instanceType) {
+		return cullPassTwo.get(instanceType);
+	}
+
 	public GlProgram getApplyProgram() {
 		return apply;
 	}
@@ -189,6 +204,10 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 	public GlProgram getDepthReduceProgram() {
 		return depthReduce;
+	}
+
+	public GlProgram getReadVisibilityProgram() {
+		return readVisibility;
 	}
 
 	@Override

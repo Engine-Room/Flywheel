@@ -23,7 +23,7 @@ uniform uint _flw_baseDraw;
 
 // We read the visibility buffer for all culling groups into a single shared buffer.
 // This offset is used to know where each culling group starts.
-uniform uint _flw_globalInstanceIdOffset = 0;
+uniform uint _flw_visibilityWriteOffsetInstances = 0;
 
 flat out uvec3 _flw_packedMaterial;
 
@@ -58,5 +58,5 @@ void main() {
     _flw_main(instance);
 
     // Add 1 because a 0 instance id means null.
-    _flw_instanceID = _flw_globalInstanceIdOffset + instanceIndex + 1;
+    _flw_instanceID = _flw_visibilityWriteOffsetInstances + instanceIndex + 1;
 }
