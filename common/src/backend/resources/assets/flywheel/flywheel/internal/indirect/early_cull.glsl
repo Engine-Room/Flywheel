@@ -19,8 +19,8 @@ layout(std430, binding = _FLW_PASS_TWO_DISPATCH_BUFFER_BINDING) restrict buffer 
     _FlwLateCullDispatch _flw_lateCullDispatch;
 };
 
-layout(std430, binding = _FLW_PASS_TWO_INSTANCE_INDEX_BUFFER_BINDING) restrict readonly buffer PassTwoIndexBuffer {
-    uint _flw_passTwoIndicies[];
+layout(std430, binding = _FLW_PASS_TWO_INSTANCE_INDEX_BUFFER_BINDING) restrict writeonly buffer PassTwoIndexBuffer {
+    uint _flw_passTwoIndices[];
 };
 
 layout(std430, binding = _FLW_DRAW_INSTANCE_INDEX_BUFFER_BINDING) restrict writeonly buffer DrawIndexBuffer {

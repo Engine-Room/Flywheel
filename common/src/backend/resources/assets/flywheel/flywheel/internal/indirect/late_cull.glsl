@@ -7,12 +7,19 @@
 layout(local_size_x = 32) in;
 
 layout(std430, binding = _FLW_PASS_TWO_INSTANCE_INDEX_BUFFER_BINDING) restrict readonly buffer PassTwoIndexBuffer {
-    uint _flw_passTwoIndicies[];
+    uint _flw_passTwoIndices[];
 };
 
 layout(std430, binding = _FLW_DRAW_INSTANCE_INDEX_BUFFER_BINDING) restrict writeonly buffer DrawIndexBuffer {
     uint _flw_drawIndices[];
 };
+
+
+// High 6 bits for the number of instances in the page.
+const uint _FLW_PAGE_COUNT_OFFSET = 26u;
+// Bottom 26 bits for the model index.
+const uint _FLW_MODEL_INDEX_MASK = 0x3FFFFFF;
+
 
 layout(std430, binding = _FLW_PAGE_FRAME_DESCRIPTOR_BUFFER_BINDING) restrict readonly buffer PageFrameDescriptorBuffer {
     uint _flw_pageFrameDescriptors[];
@@ -104,7 +111,7 @@ bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
 }
 
 void main() {
-    if (gl_GlobalInvocationID.x >= _flw_passTwoIndicies.length()) {
+    if (gl_GlobalInvocationID.x >= _flw_passTwoIndices.length()) {
         return;
     }
 
@@ -119,6 +126,6 @@ void main() {
     if (_flw_isVisible(instanceIndex, modelIndex)) {
         uint localIndex = atomicAdd(_flw_models[modelIndex].instanceCount, 1);
         uint targetIndex = _flw_models[modelIndex].baseInstance + localIndex;
-        _flw_instanceIndices[targetIndex] = instanceIndex;
+        _flw_drawIndices[targetIndex] = instanceIndex;
     }
 }

@@ -5,8 +5,8 @@
 #include "flywheel:internal/indirect/light.glsl"
 #include "flywheel:internal/indirect/matrices.glsl"
 
-layout(std430, binding = _FLW_TARGET_BUFFER_BINDING) restrict readonly buffer TargetBuffer {
-    uint _flw_instanceIndices[];
+layout(std430, binding = _FLW_DRAW_INSTANCE_INDEX_BUFFER_BINDING) restrict readonly buffer DrawIndexBuffer {
+    uint _flw_drawIndices[];
 };
 
 layout(std430, binding = _FLW_DRAW_BUFFER_BINDING) restrict readonly buffer DrawBuffer {
@@ -49,9 +49,9 @@ void main() {
     #endif
 
     #if __VERSION__ < 460
-    uint instanceIndex = _flw_instanceIndices[gl_BaseInstanceARB + gl_InstanceID];
+    uint instanceIndex = _flw_drawIndices[gl_BaseInstanceARB + gl_InstanceID];
 #else
-    uint instanceIndex = _flw_instanceIndices[gl_BaseInstance + gl_InstanceID];
+    uint instanceIndex = _flw_drawIndices[gl_BaseInstance + gl_InstanceID];
 #endif
     FlwInstance instance = _flw_unpackInstance(instanceIndex);
 

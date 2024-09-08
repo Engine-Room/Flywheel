@@ -90,14 +90,14 @@ public class IndirectBuffers {
 
 	void updateCounts(int instanceCount, int modelCount, int drawCount) {
 		drawInstanceIndex.ensureCapacity(instanceCount);
-		passTwoDispatch.ensureCapacity(instanceCount);
+		passTwoInstanceIndex.ensureCapacity(instanceCount);
 		model.ensureCapacity(modelCount);
 		draw.ensureCapacity(drawCount);
 
 		final long ptr = multiBindBlock.ptr();
 
 		MemoryUtil.memPutInt(ptr + PASS_TWO_DISPATCH_HANDLE_OFFSET, passTwoDispatch.handle());
-		MemoryUtil.memPutInt(ptr + PASS_TWO_INSTANCE_INDEX_HANDLE_OFFSET, objectStorage.frameDescriptorBuffer.handle());
+		MemoryUtil.memPutInt(ptr + PASS_TWO_INSTANCE_INDEX_HANDLE_OFFSET, passTwoInstanceIndex.handle());
 		MemoryUtil.memPutInt(ptr + PAGE_FRAME_DESCRIPTOR_HANDLE_OFFSET, objectStorage.frameDescriptorBuffer.handle());
 		MemoryUtil.memPutInt(ptr + INSTANCE_HANDLE_OFFSET, objectStorage.objectBuffer.handle());
 		MemoryUtil.memPutInt(ptr + DRAW_INSTANCE_INDEX_HANDLE_OFFSET, drawInstanceIndex.handle());
@@ -105,7 +105,7 @@ public class IndirectBuffers {
 		MemoryUtil.memPutInt(ptr + DRAW_HANDLE_OFFSET, draw.handle());
 
 		MemoryUtil.memPutAddress(ptr + PASS_TWO_DISPATCH_SIZE_OFFSET, passTwoDispatch.capacity());
-		MemoryUtil.memPutAddress(ptr + PASS_TWO_INSTANCE_INDEX_SIZE_OFFSET, objectStorage.frameDescriptorBuffer.capacity());
+		MemoryUtil.memPutAddress(ptr + PASS_TWO_INSTANCE_INDEX_SIZE_OFFSET, passTwoInstanceIndex.capacity());
 		MemoryUtil.memPutAddress(ptr + PAGE_FRAME_DESCRIPTOR_SIZE_OFFSET, objectStorage.frameDescriptorBuffer.capacity());
 		MemoryUtil.memPutAddress(ptr + INSTANCE_SIZE_OFFSET, objectStorage.objectBuffer.capacity());
 		MemoryUtil.memPutAddress(ptr + DRAW_INSTANCE_INDEX_SIZE_OFFSET, INT_SIZE * instanceCount);
@@ -144,7 +144,10 @@ public class IndirectBuffers {
 
 	private void multiBind(int base, int count) {
 		final long ptr = multiBindBlock.ptr();
-		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, base, count, ptr + base * INT_SIZE, ptr + OFFSET_OFFSET + base * PTR_SIZE, ptr + SIZE_OFFSET + base * PTR_SIZE);
+		long handlePtr = ptr + HANDLE_OFFSET + base * INT_SIZE;
+		long offsetPtr = ptr + OFFSET_OFFSET + base * PTR_SIZE;
+		long sizePtr = ptr + SIZE_OFFSET + base * PTR_SIZE;
+		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, base, count, handlePtr, offsetPtr, sizePtr);
 	}
 
 	public void delete() {

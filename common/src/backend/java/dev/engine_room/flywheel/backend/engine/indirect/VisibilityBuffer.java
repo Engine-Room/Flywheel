@@ -99,6 +99,10 @@ public class VisibilityBuffer {
 	}
 
 	public void clear() {
+		if (lastWidth == -1 || lastHeight == -1) {
+			return;
+		}
+
 		GL46C.nglClearTexImage(textureId, 0, GL32.GL_RED_INTEGER, GL32.GL_UNSIGNED_INT, 0);
 	}
 
