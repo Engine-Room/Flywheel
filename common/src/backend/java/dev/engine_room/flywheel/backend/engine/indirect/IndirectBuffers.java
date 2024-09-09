@@ -105,7 +105,7 @@ public class IndirectBuffers {
 		MemoryUtil.memPutInt(ptr + DRAW_HANDLE_OFFSET, draw.handle());
 
 		MemoryUtil.memPutAddress(ptr + PASS_TWO_DISPATCH_SIZE_OFFSET, passTwoDispatch.capacity());
-		MemoryUtil.memPutAddress(ptr + PASS_TWO_INSTANCE_INDEX_SIZE_OFFSET, passTwoInstanceIndex.capacity());
+		MemoryUtil.memPutAddress(ptr + PASS_TWO_INSTANCE_INDEX_SIZE_OFFSET, INT_SIZE * instanceCount);
 		MemoryUtil.memPutAddress(ptr + PAGE_FRAME_DESCRIPTOR_SIZE_OFFSET, objectStorage.frameDescriptorBuffer.capacity());
 		MemoryUtil.memPutAddress(ptr + INSTANCE_SIZE_OFFSET, objectStorage.objectBuffer.capacity());
 		MemoryUtil.memPutAddress(ptr + DRAW_INSTANCE_INDEX_SIZE_OFFSET, INT_SIZE * instanceCount);
@@ -118,7 +118,7 @@ public class IndirectBuffers {
 	}
 
 	public void bindForCullPassTwo() {
-		multiBind(1, 5);
+		multiBind(0, 6);
 		GlBufferType.DISPATCH_INDIRECT_BUFFER.bind(passTwoDispatch.handle());
 	}
 

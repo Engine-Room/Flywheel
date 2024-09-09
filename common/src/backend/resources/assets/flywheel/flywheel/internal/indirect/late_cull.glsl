@@ -3,8 +3,14 @@
 #include "flywheel:internal/uniforms/uniforms.glsl"
 #include "flywheel:util/matrix.glsl"
 #include "flywheel:internal/indirect/matrices.glsl"
+#include "flywheel:internal/indirect/dispatch.glsl"
 
 layout(local_size_x = 32) in;
+
+
+layout(std430, binding = _FLW_PASS_TWO_DISPATCH_BUFFER_BINDING) restrict buffer PassTwoDispatchBuffer {
+    _FlwLateCullDispatch _flw_lateCullDispatch;
+};
 
 layout(std430, binding = _FLW_PASS_TWO_INSTANCE_INDEX_BUFFER_BINDING) restrict readonly buffer PassTwoIndexBuffer {
     uint _flw_passTwoIndices[];
@@ -111,7 +117,7 @@ bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
 }
 
 void main() {
-    if (gl_GlobalInvocationID.x >= _flw_passTwoIndices.length()) {
+    if (gl_GlobalInvocationID.x >= _flw_lateCullDispatch.threadCount) {
         return;
     }
 

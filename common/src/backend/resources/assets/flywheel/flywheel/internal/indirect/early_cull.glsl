@@ -3,17 +3,11 @@
 #include "flywheel:internal/uniforms/uniforms.glsl"
 #include "flywheel:util/matrix.glsl"
 #include "flywheel:internal/indirect/matrices.glsl"
+#include "flywheel:internal/indirect/dispatch.glsl"
 
 layout(local_size_x = 32) in;
 
 uniform uint _flw_visibilityReadOffsetPages;
-
-struct _FlwLateCullDispatch {
-    uint x;
-    uint y;
-    uint z;
-    uint threadCount;
-};
 
 layout(std430, binding = _FLW_PASS_TWO_DISPATCH_BUFFER_BINDING) restrict buffer PassTwoDispatchBuffer {
     _FlwLateCullDispatch _flw_lateCullDispatch;

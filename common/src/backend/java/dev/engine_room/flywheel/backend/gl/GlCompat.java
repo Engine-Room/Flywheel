@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL31C;
 import org.lwjgl.opengl.GL40;
 import org.lwjgl.opengl.GL43;
+import org.lwjgl.opengl.GL46;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.KHRShaderSubgroup;
 import org.lwjgl.system.MemoryStack;
@@ -41,6 +42,8 @@ public final class GlCompat {
 
 	public static final boolean SUPPORTS_INSTANCING = isInstancingSupported();
 	public static final boolean SUPPORTS_INDIRECT = isIndirectSupported();
+
+	public static final int MAX_SHADER_STORAGE_BUFFER_BINDINGS = GL46.glGetInteger(GL46.GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS);
 
 	private GlCompat() {
 	}

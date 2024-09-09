@@ -20,8 +20,8 @@ public class VisibilityBuffer {
 	private static final int ATTACHMENT = GL30.GL_COLOR_ATTACHMENT1;
 
 	private final GlProgram readVisibilityProgram;
-	private final ResizableStorageBuffer lastFrameVisibility;
-	private final int textureId;
+	private final ResizableStorageArray lastFrameVisibility;
+	private int textureId = -1;
 
 	private int lastWidth = -1;
 	private int lastHeight = -1;
@@ -30,14 +30,7 @@ public class VisibilityBuffer {
 
 	public VisibilityBuffer(GlProgram readVisibilityProgram) {
 		this.readVisibilityProgram = readVisibilityProgram;
-		lastFrameVisibility = new ResizableStorageBuffer();
-		textureId = GL32.glGenTextures();
-
-		GlStateManager._bindTexture(textureId);
-		GlStateManager._texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_MIN_FILTER, GL32.GL_NEAREST);
-		GlStateManager._texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_MAG_FILTER, GL32.GL_NEAREST);
-		GlStateManager._texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_WRAP_S, GL32.GL_CLAMP_TO_EDGE);
-		GlStateManager._texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_WRAP_T, GL32.GL_CLAMP_TO_EDGE);
+		lastFrameVisibility = new ResizableStorageArray(Integer.BYTES, 1.25f);
 	}
 
 	public void read(int pageCount) {
@@ -45,7 +38,7 @@ public class VisibilityBuffer {
 			return;
 		}
 
-		lastFrameVisibility.ensureCapacity((long) pageCount << 2);
+		lastFrameVisibility.ensureCapacity(pageCount);
 
 		GL46.nglClearNamedBufferData(lastFrameVisibility.handle(), GL46.GL_R32UI, GL46.GL_RED_INTEGER, GL46.GL_UNSIGNED_INT, 0);
 
@@ -95,7 +88,15 @@ public class VisibilityBuffer {
 	}
 
 	public void delete() {
-		GL32.glDeleteTextures(textureId);
+		deleteTexture();
+		lastFrameVisibility.delete();
+	}
+
+	private void deleteTexture() {
+		if (textureId != -1) {
+			GL32.glDeleteTextures(textureId);
+			textureId = -1;
+		}
 	}
 
 	public void clear() {
@@ -117,11 +118,14 @@ public class VisibilityBuffer {
 		lastWidth = width;
 		lastHeight = height;
 
-		GlTextureUnit.T0.makeActive();
-		GlStateManager._bindTexture(textureId);
+		deleteTexture();
 
-		// TODO: DSA texture storage?
-		GL32.glTexImage2D(GL32.GL_TEXTURE_2D, 0, GL32.GL_R32UI, width, height, 0, GL32.GL_RED_INTEGER, GL32.GL_UNSIGNED_INT, 0);
-		GlStateManager._bindTexture(0);
+		textureId = GL46.glCreateTextures(GL46.GL_TEXTURE_2D);
+		GL46.glTextureStorage2D(textureId, 1, GL32.GL_R32UI, width, height);
+
+		GL46.glTextureParameteri(textureId, GL32.GL_TEXTURE_MIN_FILTER, GL32.GL_NEAREST);
+		GL46.glTextureParameteri(textureId, GL32.GL_TEXTURE_MAG_FILTER, GL32.GL_NEAREST);
+		GL46.glTextureParameteri(textureId, GL32.GL_TEXTURE_WRAP_S, GL32.GL_CLAMP_TO_EDGE);
+		GL46.glTextureParameteri(textureId, GL32.GL_TEXTURE_WRAP_T, GL32.GL_CLAMP_TO_EDGE);
 	}
 }
