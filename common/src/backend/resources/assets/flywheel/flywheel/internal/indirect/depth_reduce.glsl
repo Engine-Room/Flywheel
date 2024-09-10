@@ -1,9 +1,9 @@
-layout(local_size_x = 8, local_size_y = 8) in;
+layout(local_size_x = 16, local_size_y = 16) in;
 
 layout(binding = 0, r32f) uniform writeonly image2D outImage;
 layout(binding = 1) uniform sampler2D inImage;
 
-uniform vec2 imageSize;
+uniform vec2 oneOverImageSize;
 uniform int lod;
 
 uniform int useMin = 0;
@@ -13,7 +13,7 @@ void main() {
 
     // Map the output texel to an input texel. Properly do the division because generating mip0 maps from the actual
     // full resolution depth buffer and the aspect ratio may be different from our Po2 pyramid.
-    ivec2 samplePos = ivec2(floor(vec2(pos) * vec2(textureSize(inImage, lod)) / imageSize));
+    ivec2 samplePos = ivec2(floor(vec2(pos) * vec2(textureSize(inImage, lod)) * oneOverImageSize));
 
     float depth01 = texelFetchOffset(inImage, samplePos, lod, ivec2(0, 1)).r;
     float depth11 = texelFetchOffset(inImage, samplePos, lod, ivec2(1, 1)).r;

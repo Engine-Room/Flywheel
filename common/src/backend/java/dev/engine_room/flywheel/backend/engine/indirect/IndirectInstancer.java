@@ -82,6 +82,11 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	}
 
 	public void uploadInstances(StagingBuffer stagingBuffer, int instanceVbo) {
+		if (changedPages.cardinality() == 0) {
+			// Early return because checking the cardinality is faster than clearing.
+			return;
+		}
+
 		int numPages = mapping.pageCount();
 
 		var instanceCount = instances.size();

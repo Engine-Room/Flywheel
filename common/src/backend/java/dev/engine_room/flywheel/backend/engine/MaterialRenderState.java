@@ -35,7 +35,6 @@ public final class MaterialRenderState {
 		setupBackfaceCulling(material.backfaceCulling());
 		setupPolygonOffset(material.polygonOffset());
 		setupDepthTest(material.depthTest());
-//		setupDepthTest(DepthTest.OFF);
 		setupTransparency(material.transparency());
 		setupWriteMask(material.writeMask());
 	}

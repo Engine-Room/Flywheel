@@ -11,6 +11,8 @@ import dev.engine_room.flywheel.lib.math.MoreMath;
 import net.minecraft.client.Minecraft;
 
 public class DepthPyramid {
+	private static final int GROUP_SIZE = 16;
+
 	private final GlProgram depthReduceProgram;
 
 	public int pyramidTextureId = -1;
@@ -50,10 +52,10 @@ public class DepthPyramid {
 
 			GL46.glBindImageTexture(0, pyramidTextureId, i, false, 0, GL32.GL_WRITE_ONLY, GL32.GL_R32F);
 
-			depthReduceProgram.setVec2("imageSize", mipWidth, mipHeight);
+			depthReduceProgram.setVec2("oneOverImageSize", 1f / (float) mipWidth, 1f / (float) mipHeight);
 			depthReduceProgram.setInt("lod", Math.max(0, i - 1));
 
-			GL46.glDispatchCompute(MoreMath.ceilingDiv(mipWidth, 8), MoreMath.ceilingDiv(mipHeight, 8), 1);
+			GL46.glDispatchCompute(MoreMath.ceilingDiv(mipWidth, GROUP_SIZE), MoreMath.ceilingDiv(mipHeight, GROUP_SIZE), 1);
 
 			GL46.glMemoryBarrier(GL46.GL_TEXTURE_FETCH_BARRIER_BIT);
 		}
