@@ -37,7 +37,7 @@ public final class ModelPartConverter {
 
 		VertexView vertexView = new PosTexNormalVertexView();
 		vertexView.load(data);
-		return new SimpleQuadMesh(vertexView, data, "source=ModelPartConverter");
+		return new SimpleQuadMesh(vertexView, "source=ModelPartConverter");
 	}
 
 	public static Mesh convert(ModelLayerLocation layer, @Nullable TextureAtlasSprite sprite, String... childPath) {

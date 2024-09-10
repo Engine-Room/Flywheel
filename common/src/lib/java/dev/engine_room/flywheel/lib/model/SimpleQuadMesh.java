@@ -6,25 +6,21 @@ import org.joml.Vector4fc;
 
 import dev.engine_room.flywheel.api.vertex.MutableVertexList;
 import dev.engine_room.flywheel.api.vertex.VertexList;
-import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 
 public final class SimpleQuadMesh implements QuadMesh {
 	private final VertexList vertexList;
-	// Unused but we need to hold on to a reference so the cleaner doesn't nuke us.
-	private final MemoryBlock data;
 	private final Vector4f boundingSphere;
 	@Nullable
 	private final String descriptor;
 
-	public SimpleQuadMesh(VertexList vertexList, MemoryBlock data, @Nullable String descriptor) {
+	public SimpleQuadMesh(VertexList vertexList, @Nullable String descriptor) {
 		this.vertexList = vertexList;
-		this.data = data;
 		boundingSphere = ModelUtil.computeBoundingSphere(vertexList);
 		this.descriptor = descriptor;
 	}
 
-	public SimpleQuadMesh(VertexList vertexList, MemoryBlock data) {
-		this(vertexList, data, null);
+	public SimpleQuadMesh(VertexList vertexList) {
+		this(vertexList, null);
 	}
 
 	@Override
