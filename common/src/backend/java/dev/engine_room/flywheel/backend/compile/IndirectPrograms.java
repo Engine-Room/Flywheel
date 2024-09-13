@@ -30,8 +30,9 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	private static final ResourceLocation CULL_SHADER_MAIN = Flywheel.rl("internal/indirect/cull.glsl");
 	private static final ResourceLocation APPLY_SHADER_MAIN = Flywheel.rl("internal/indirect/apply.glsl");
 	private static final ResourceLocation SCATTER_SHADER_MAIN = Flywheel.rl("internal/indirect/scatter.glsl");
-	private static final ResourceLocation DEPTH_REDUCE_SHADER_MAIN = Flywheel.rl("internal/indirect/depth_reduce.glsl");
-	public static final List<ResourceLocation> UTIL_SHADERS = List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN, DEPTH_REDUCE_SHADER_MAIN);
+	private static final ResourceLocation DOWNSAMPLE_FIRST = Flywheel.rl("internal/indirect/downsample_first.glsl");
+	private static final ResourceLocation DOWNSAMPLE_SECOND = Flywheel.rl("internal/indirect/downsample_second.glsl");
+	public static final List<ResourceLocation> UTIL_SHADERS = List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN, DOWNSAMPLE_FIRST, DOWNSAMPLE_SECOND);
 
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private static final Compile<ResourceLocation> UTIL = new Compile<>();
@@ -184,9 +185,14 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		return utils.get(SCATTER_SHADER_MAIN);
 	}
 
-	public GlProgram getDepthReduceProgram() {
-		return utils.get(DEPTH_REDUCE_SHADER_MAIN);
+	public GlProgram getDownsampleFirstProgram() {
+		return utils.get(DOWNSAMPLE_FIRST);
 	}
+
+	public GlProgram getDownsampleSecondProgram() {
+		return utils.get(DOWNSAMPLE_SECOND);
+	}
+
 	@Override
 	protected void _delete() {
 		pipeline.values()
