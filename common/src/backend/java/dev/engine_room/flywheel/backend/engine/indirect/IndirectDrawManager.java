@@ -4,6 +4,7 @@ import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
 import static org.lwjgl.opengl.GL30.glBindBufferRange;
 import static org.lwjgl.opengl.GL40.glDrawElementsIndirect;
+import static org.lwjgl.opengl.GL42.GL_BUFFER_UPDATE_BARRIER_BIT;
 import static org.lwjgl.opengl.GL42.glMemoryBarrier;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BARRIER_BIT;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
@@ -67,7 +68,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		lightBuffers = new LightBuffers();
 		matrixBuffer = new MatrixBuffer();
 
-		depthPyramid = new DepthPyramid(programs.getDepthReduceProgram());
+		depthPyramid = new DepthPyramid(programs.getDepthReduceProgram(), programs.getDownsampleFirstProgram(), programs.getDownsampleSecondProgram());
 		visibilityBuffer = new VisibilityBuffer(programs.getReadVisibilityProgram());
 	}
 
@@ -124,7 +125,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 			submitDraws();
 
-			depthPyramid.generate();
+			depthPyramid.generateSPD();
 
 			programs.getZeroModelProgram()
 					.bind();

@@ -14,14 +14,18 @@ public class DepthPyramid {
 	private static final int GROUP_SIZE = 16;
 
 	private final GlProgram depthReduceProgram;
+	private final GlProgram downsampleFirstProgram;
+	private final GlProgram downsampleSecondProgram;
 
 	public int pyramidTextureId = -1;
 
 	private int lastWidth = -1;
 	private int lastHeight = -1;
 
-	public DepthPyramid(GlProgram depthReduceProgram) {
+	public DepthPyramid(GlProgram depthReduceProgram, GlProgram downsampleFirstProgram, GlProgram downsampleSecondProgram) {
 		this.depthReduceProgram = depthReduceProgram;
+		this.downsampleFirstProgram = downsampleFirstProgram;
+		this.downsampleSecondProgram = downsampleSecondProgram;
 	}
 
 	public void generate() {
@@ -59,6 +63,54 @@ public class DepthPyramid {
 
 			GL46.glMemoryBarrier(GL46.GL_TEXTURE_FETCH_BARRIER_BIT);
 		}
+	}
+
+	public void generateSPD() {
+		var mainRenderTarget = Minecraft.getInstance()
+				.getMainRenderTarget();
+
+		int width = mip0Size(mainRenderTarget.width);
+		int height = mip0Size(mainRenderTarget.height);
+
+		int mipLevels = getImageMipLevels(width, height);
+
+		createPyramidMips(mipLevels, width, height);
+
+		int depthBufferId = mainRenderTarget.getDepthTextureId();
+
+		GL46.glMemoryBarrier(GL46.GL_FRAMEBUFFER_BARRIER_BIT);
+
+		GlTextureUnit.T0.makeActive();
+		GlStateManager._bindTexture(depthBufferId);
+
+		downsampleFirstProgram.bind();
+		downsampleFirstProgram.setUInt("max_mip_level", mipLevels);
+
+		for (int i = 0; i < Math.min(6, mipLevels); i++) {
+			GL46.glBindImageTexture(i + 1, pyramidTextureId, i, false, 0, GL32.GL_WRITE_ONLY, GL32.GL_R32F);
+		}
+
+		GL46.glDispatchCompute(MoreMath.ceilingDiv(width << 1, 64), MoreMath.ceilingDiv(height << 1, 64), 1);
+
+		if (mipLevels < 7) {
+			GL46.glMemoryBarrier(GL46.GL_TEXTURE_FETCH_BARRIER_BIT);
+
+			return;
+		}
+
+		GL46.glMemoryBarrier(GL46.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+		downsampleSecondProgram.bind();
+		downsampleSecondProgram.setUInt("max_mip_level", mipLevels);
+
+		GL46.glBindImageTexture(0, pyramidTextureId, 5, false, 0, GL32.GL_READ_ONLY, GL32.GL_R32F);
+		for (int i = 6; i < Math.min(12, mipLevels); i++) {
+			GL46.glBindImageTexture(i - 5, pyramidTextureId, i, false, 0, GL32.GL_WRITE_ONLY, GL32.GL_R32F);
+		}
+
+		GL46.glDispatchCompute(1, 1, 1);
+
+		GL46.glMemoryBarrier(GL46.GL_TEXTURE_FETCH_BARRIER_BIT);
 	}
 
 	public void delete() {
