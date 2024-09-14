@@ -18,8 +18,6 @@ displayTest = "IGNORE_ALL_VERSION"
 config = "flywheel.backend.mixins.json"
 [[mixins]]
 config = "flywheel.impl.mixins.json"
-[[mixins]]
-config = "flywheel.impl.sodium.mixins.json"
 
 [[dependencies.${mod_id}]]
 modId = "minecraft"

@@ -67,12 +67,6 @@ loom {
         add(backend, "backend-flywheel.refmap.json")
     }
 
-    forge {
-        mixinConfig("flywheel.backend.mixins.json")
-        mixinConfig("flywheel.impl.mixins.json")
-        mixinConfig("flywheel.impl.sodium.mixins.json")
-    }
-
     runs {
         configureEach {
             property("forge.logging.markers", "")
@@ -88,7 +82,7 @@ repositories {
 dependencies {
     neoForge("net.neoforged:neoforge:${property("neoforge_version")}")
 
-    modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-neoforge")
+    modCompileOnly(":sodium-neoforge-0.6.0-beta.2+mc1.21.1")
     modCompileOnly("maven.modrinth:iris:${property("iris_version")}-neoforge")
 
     //modCompileOnly("maven.modrinth:embeddium:${property("embeddium_version")}")

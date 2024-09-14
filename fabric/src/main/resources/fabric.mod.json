@@ -24,7 +24,6 @@
   "mixins": [
     "flywheel.backend.mixins.json",
     "flywheel.impl.mixins.json",
-    "flywheel.impl.sodium.mixins.json",
     "flywheel.impl.fabric.mixins.json"
   ],
   "depends": {
@@ -32,6 +31,6 @@
     "fabric-api": "${fabric_api_version_range}"
   },
   "breaks": {
-    "sodium": "<0.5.0"
+    "sodium": ["<0.6.0-beta.2"]
   }
 }
