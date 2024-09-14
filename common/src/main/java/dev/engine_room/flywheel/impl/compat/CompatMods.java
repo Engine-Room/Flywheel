@@ -2,18 +2,17 @@ package dev.engine_room.flywheel.impl.compat;
 
 import java.util.function.Supplier;
 
-import com.google.common.base.Suppliers;
-
-import net.fabricmc.loader.api.FabricLoader;
+import dev.engine_room.flywheel.impl.FlwImplXplat;
 
 public enum CompatMods {
 	SODIUM,
-	EMBEDDIUM;
+	EMBEDDIUM,
+	IRIS;
 
 	private final Supplier<Boolean> isLoaded;
 
 	CompatMods() {
-		isLoaded = Suppliers.memoize(() -> FabricLoader.getInstance().isModLoaded(name()));
+		isLoaded = FlwImplXplat.INSTANCE.getModLoaded(name());
 	}
 
 	public boolean isLoaded() {
