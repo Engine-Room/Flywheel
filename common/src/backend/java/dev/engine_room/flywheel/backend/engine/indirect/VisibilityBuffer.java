@@ -16,7 +16,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.client.Minecraft;
 
 public class VisibilityBuffer {
-	private static final int READ_GROUP_SIZE = 16;
+	private static final int READ_GROUP_SIZE = 32;
 	private static final int ATTACHMENT = GL30.GL_COLOR_ATTACHMENT1;
 
 	private final GlProgram readVisibilityProgram;
