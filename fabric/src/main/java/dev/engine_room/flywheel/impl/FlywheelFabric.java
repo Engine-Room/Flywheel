@@ -12,6 +12,7 @@ import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
 import dev.engine_room.flywheel.lib.model.ModelCache;
 import dev.engine_room.flywheel.lib.model.ModelHolder;
 import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
+import dev.engine_room.flywheel.lib.model.part.MeshTree;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
@@ -71,6 +72,8 @@ public final class FlywheelFabric implements ClientModInitializer {
 				ModelCache.onEndClientResourceReload());
 		EndClientResourceReloadCallback.EVENT.register((minecraft, resourceManager, initialReload, error) ->
 				ModelHolder.onEndClientResourceReload());
+		EndClientResourceReloadCallback.EVENT.register((minecraft, resourceManager, initialReload, error) ->
+				MeshTree.onEndClientResourceReload());
 
 		ModelLoadingPlugin.register(ctx -> {
 			ctx.addModels(PartialModelEventHandler.onRegisterAdditional());
