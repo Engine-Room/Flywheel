@@ -18,6 +18,7 @@ import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.model.RetexturedMesh;
 import dev.engine_room.flywheel.lib.model.part.InstanceTree;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
+import dev.engine_room.flywheel.lib.util.RecyclingPoseStack;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
@@ -59,7 +60,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 	@Nullable
 	private final InstanceTree lock;
 
-	private final PoseStack poseStack = new PoseStack();
+	private final PoseStack poseStack = new RecyclingPoseStack();
 	private final BrightnessCombiner brightnessCombiner = new BrightnessCombiner();
 	@Nullable
 	private final DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> neighborCombineResult;

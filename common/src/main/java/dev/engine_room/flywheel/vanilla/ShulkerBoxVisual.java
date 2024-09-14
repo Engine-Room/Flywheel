@@ -17,6 +17,7 @@ import dev.engine_room.flywheel.lib.model.ModelCache;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
 import dev.engine_room.flywheel.lib.model.part.ModelPartConverter;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
+import dev.engine_room.flywheel.lib.util.RecyclingPoseStack;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -45,7 +46,7 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	private final TransformedInstance base;
 	private final TransformedInstance lid;
 
-	private final PoseStack stack = new PoseStack();
+	private final PoseStack stack = new RecyclingPoseStack();
 
 	private float lastProgress = Float.NaN;
 

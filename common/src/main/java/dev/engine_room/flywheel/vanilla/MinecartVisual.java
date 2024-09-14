@@ -16,6 +16,7 @@ import dev.engine_room.flywheel.lib.model.ModelHolder;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
 import dev.engine_room.flywheel.lib.model.part.ModelPartConverter;
+import dev.engine_room.flywheel.lib.util.RecyclingPoseStack;
 import dev.engine_room.flywheel.lib.visual.ComponentEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
@@ -52,7 +53,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 
 	private final ModelHolder bodyModel;
 
-	private final PoseStack stack = new PoseStack();
+	private final PoseStack stack = new RecyclingPoseStack();
 
 	private BlockState blockState;
 	private boolean active;
