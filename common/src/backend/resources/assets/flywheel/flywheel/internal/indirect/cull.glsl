@@ -6,7 +6,7 @@
 
 layout(local_size_x = 32) in;
 
-layout(std430, binding = _FLW_TARGET_BUFFER_BINDING) restrict writeonly buffer TargetBuffer {
+layout(std430, binding = _FLW_DRAW_INSTANCE_INDEX_BUFFER_BINDING) restrict writeonly buffer TargetBuffer {
     uint _flw_instanceIndices[];
 };
 

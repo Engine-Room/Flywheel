@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL46;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 
+import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 import net.minecraft.client.Minecraft;
@@ -12,23 +13,13 @@ import net.minecraft.client.Minecraft;
 public class DepthPyramid {
 	private final GlProgram depthReduceProgram;
 
-	public final int pyramidTextureId;
+	public int pyramidTextureId = -1;
 
 	private int lastWidth = -1;
 	private int lastHeight = -1;
 
 	public DepthPyramid(GlProgram depthReduceProgram) {
 		this.depthReduceProgram = depthReduceProgram;
-
-		pyramidTextureId = GL32.glGenTextures();
-
-		GlStateManager._bindTexture(pyramidTextureId);
-		GlStateManager._texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_MIN_FILTER, GL32.GL_NEAREST);
-		GlStateManager._texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_MAG_FILTER, GL32.GL_NEAREST);
-		GlStateManager._texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_COMPARE_MODE, GL32.GL_NONE);
-		GlStateManager._texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_WRAP_S, GL32.GL_CLAMP_TO_EDGE);
-		GlStateManager._texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_WRAP_T, GL32.GL_CLAMP_TO_EDGE);
-
 	}
 
 	public void generate() {
@@ -44,11 +35,9 @@ public class DepthPyramid {
 
 		int depthBufferId = mainRenderTarget.getDepthTextureId();
 
-		GlStateManager._bindTexture(depthBufferId);
-
 		GL46.glMemoryBarrier(GL46.GL_FRAMEBUFFER_BARRIER_BIT);
 
-		GL46.glActiveTexture(GL32.GL_TEXTURE1);
+		GlTextureUnit.T1.makeActive();
 
 		depthReduceProgram.bind();
 
@@ -57,7 +46,7 @@ public class DepthPyramid {
 			int mipHeight = mipSize(height, i);
 
 			int srcTexture = (i == 0) ? depthBufferId : pyramidTextureId;
-			GL46.glBindTexture(GL32.GL_TEXTURE_2D, srcTexture);
+			GlStateManager._bindTexture(srcTexture);
 
 			GL46.glBindImageTexture(0, pyramidTextureId, i, false, 0, GL32.GL_WRITE_ONLY, GL32.GL_R32F);
 
@@ -71,7 +60,10 @@ public class DepthPyramid {
 	}
 
 	public void delete() {
-		GL32.glDeleteTextures(pyramidTextureId);
+		if (pyramidTextureId != -1) {
+			GL32.glDeleteTextures(pyramidTextureId);
+			pyramidTextureId = -1;
+		}
 	}
 
 	private void createPyramidMips(int mipLevels, int width, int height) {
@@ -82,14 +74,16 @@ public class DepthPyramid {
 		lastWidth = width;
 		lastHeight = height;
 
-		GL32.glBindTexture(GL32.GL_TEXTURE_2D, pyramidTextureId);
+		delete();
 
-		for (int i = 0; i < mipLevels; i++) {
-			int mipWidth = mipSize(width, i);
-			int mipHeight = mipSize(height, i);
+		pyramidTextureId = GL46.glCreateTextures(GL46.GL_TEXTURE_2D);
+		GL46.glTextureStorage2D(pyramidTextureId, mipLevels, GL32.GL_R32F, width, height);
 
-			GL32.glTexImage2D(GL32.GL_TEXTURE_2D, i, GL32.GL_R32F, mipWidth, mipHeight, 0, GL32.GL_RED, GL32.GL_FLOAT, 0);
-		}
+		GL46.glTextureParameteri(pyramidTextureId, GL32.GL_TEXTURE_MIN_FILTER, GL32.GL_NEAREST);
+		GL46.glTextureParameteri(pyramidTextureId, GL32.GL_TEXTURE_MAG_FILTER, GL32.GL_NEAREST);
+		GL46.glTextureParameteri(pyramidTextureId, GL32.GL_TEXTURE_COMPARE_MODE, GL32.GL_NONE);
+		GL46.glTextureParameteri(pyramidTextureId, GL32.GL_TEXTURE_WRAP_S, GL32.GL_CLAMP_TO_EDGE);
+		GL46.glTextureParameteri(pyramidTextureId, GL32.GL_TEXTURE_WRAP_T, GL32.GL_CLAMP_TO_EDGE);
 	}
 
 	public static int mipSize(int mip0Size, int level) {

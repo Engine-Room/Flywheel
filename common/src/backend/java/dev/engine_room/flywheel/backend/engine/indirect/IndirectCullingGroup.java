@@ -118,7 +118,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		Uniforms.bindAll();
 		cullProgram.bind();
 
-		buffers.bindForCompute();
+		buffers.bindForCull();
 		glDispatchCompute(buffers.objectStorage.capacity(), 1, 1);
 	}
 
@@ -127,7 +127,7 @@ public class IndirectCullingGroup<I extends Instance> {
 			return;
 		}
 
-		buffers.bindForCompute();
+		buffers.bindForApply();
 		glDispatchCompute(GlCompat.getComputeGroupCount(indirectDraws.size()), 1, 1);
 	}
 
