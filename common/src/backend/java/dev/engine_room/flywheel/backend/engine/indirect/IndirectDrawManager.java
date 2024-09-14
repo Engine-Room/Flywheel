@@ -107,7 +107,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			matrixBuffer.bind();
 			Uniforms.bindAll();
 
-			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
 
 			visibilityBuffer.bind();
 

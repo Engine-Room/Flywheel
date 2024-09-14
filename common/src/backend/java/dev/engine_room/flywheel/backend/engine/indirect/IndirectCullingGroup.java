@@ -14,7 +14,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.opengl.GL46;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
@@ -129,12 +129,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		uploadDraws(stagingBuffer);
 
-		stagingBuffer.enqueueCopy(4 * Integer.BYTES, buffers.passTwoDispatch.handle(), 0, ptr -> {
-			MemoryUtil.memPutInt(ptr, 0);
-			MemoryUtil.memPutInt(ptr + 4, 1);
-			MemoryUtil.memPutInt(ptr + 8, 1);
-			MemoryUtil.memPutInt(ptr + 12, 0);
-		});
+		GL46.nglClearNamedBufferData(buffers.passTwoDispatch.handle(), GL46.GL_R32UI, GL46.GL_RED, GL46.GL_UNSIGNED_INT, 0);
 	}
 
 	public void dispatchCull() {

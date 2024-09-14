@@ -112,6 +112,11 @@ void main() {
         if (targetIndex % 32u == 0u) {
             // This thread wrote an index that will be at the start of a new workgroup later
             atomicAdd(_flw_lateCullDispatch.x, 1);
+
+            if (targetIndex == 0) {
+                _flw_lateCullDispatch.y = 1;
+                _flw_lateCullDispatch.z = 1;
+            }
         }
     }
 }
