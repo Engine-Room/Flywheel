@@ -60,6 +60,14 @@ defaultPackageInfos {
     sources(api, lib, backend, main)
 }
 
+loom {
+    mixin {
+        useLegacyMixinAp = true
+        add(main, "flywheel.refmap.json")
+        add(backend, "backend-flywheel.refmap.json")
+    }
+}
+
 dependencies {
     modImplementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
     modApi("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")

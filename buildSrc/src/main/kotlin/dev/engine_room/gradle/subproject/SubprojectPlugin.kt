@@ -51,9 +51,6 @@ class SubprojectPlugin: Plugin<Project> {
     private fun setupLoom(project: Project) {
         val loom = project.the<LoomGradleExtensionAPI>()
         loom.silentMojangMappingsLicense()
-
-        //fixme is this still needed?
-//        loom.mixin.defaultRefmapName = "flywheel.refmap.json"
     }
 
     private fun setupJava(project: Project) {

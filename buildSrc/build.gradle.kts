@@ -1,7 +1,8 @@
+import java.util.Properties
+
 plugins {
-    id("java-gradle-plugin")
-    kotlin("jvm") version "1.9.23"
     `kotlin-dsl`
+    idea
 }
 
 repositories {
@@ -17,6 +18,11 @@ repositories {
     maven("https://maven.parchmentmc.org")
 }
 
+idea.module {
+    isDownloadJavadoc = true
+    isDownloadSources = true
+}
+
 gradlePlugin {
     plugins {
         create("platformPlugin") {
@@ -30,7 +36,12 @@ gradlePlugin {
     }
 }
 
+val properties by lazy {
+    Properties().apply {
+        load(rootDir.parentFile.resolve("gradle.properties").inputStream())
+    }
+}
+
 dependencies {
-    // FIXME: This should not hard-code the Loom version.
-    implementation("dev.architectury.loom:dev.architectury.loom.gradle.plugin:1.7.+")
+    implementation("dev.architectury.loom:dev.architectury.loom.gradle.plugin:${properties["arch_loom_version"]}")
 }

@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.lib.vertex;
 
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.api.vertex.MutableVertexList;
@@ -14,6 +15,17 @@ public interface VertexView extends MutableVertexList {
 
 	long stride();
 
+	@Nullable
+	Object nativeMemoryOwner();
+
+	/**
+	 * The memory referenced by this vertex view's pointer may be owned by another object, such that the memory is
+	 * automatically freed when the other object becomes phantom reachable or is garbage collected. Use this method to
+	 * ensure this vertex view retains a strong reference to the memory owner so this vertex view's pointer remains
+	 * valid even when no other references to the memory owner are retained.
+	 */
+	void nativeMemoryOwner(@Nullable Object owner);
+
 	default void load(MemoryBlock data) {
 		long bytes = data.size();
 		long stride = stride();
@@ -24,6 +36,7 @@ public interface VertexView extends MutableVertexList {
 
 		ptr(data.ptr());
 		vertexCount(vertexCount);
+		nativeMemoryOwner(data);
 	}
 
 	@Override

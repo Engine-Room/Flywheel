@@ -2,12 +2,10 @@ package dev.engine_room.flywheel.api.model;
 
 import java.util.List;
 
-import dev.engine_room.flywheel.api.instance.InstanceType;
-
-import dev.engine_room.flywheel.api.instance.InstancerProvider;
-
 import org.joml.Vector4fc;
 
+import dev.engine_room.flywheel.api.instance.InstanceType;
+import dev.engine_room.flywheel.api.instance.InstancerProvider;
 import dev.engine_room.flywheel.api.material.Material;
 
 public interface Model {

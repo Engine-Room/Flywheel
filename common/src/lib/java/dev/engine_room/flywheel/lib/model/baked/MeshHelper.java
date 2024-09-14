@@ -41,7 +41,8 @@ final class MeshHelper {
 
 		vertexView.ptr(dstPtr);
 		vertexView.vertexCount(vertexCount);
+		vertexView.nativeMemoryOwner(dst);
 
-		return new SimpleQuadMesh(vertexView, dst, meshDescriptor);
+		return new SimpleQuadMesh(vertexView, meshDescriptor);
 	}
 }

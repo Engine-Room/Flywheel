@@ -61,6 +61,18 @@ defaultPackageInfos {
 }
 
 loom {
+    mixin {
+        useLegacyMixinAp = true
+        add(main, "flywheel.refmap.json")
+        add(backend, "backend-flywheel.refmap.json")
+    }
+
+    forge {
+        mixinConfig("flywheel.backend.mixins.json")
+        mixinConfig("flywheel.impl.mixins.json")
+        mixinConfig("flywheel.impl.sodium.mixins.json")
+    }
+
     runs {
         configureEach {
             property("forge.logging.markers", "")
