@@ -1,7 +1,6 @@
 package dev.engine_room.flywheel.lib.model.part;
 
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,7 +8,6 @@ import java.util.function.Consumer;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -35,12 +33,13 @@ public final class MeshTree {
 	@Nullable
 	private final Mesh mesh;
 	private final PartPose initialPose;
-	@Unmodifiable
-	private final Map<String, MeshTree> children;
+	private final MeshTree[] children;
+	private final String[] childKeys;
 
-	private MeshTree(@Nullable Mesh mesh, PartPose initialPose, @Unmodifiable Map<String, MeshTree> children) {
+	private MeshTree(@Nullable Mesh mesh, PartPose initialPose, MeshTree[] children, String[] childKeys) {
 		this.mesh = mesh;
 		this.initialPose = initialPose;
+		this.childKeys = childKeys;
 		this.children = children;
 	}
 
@@ -58,13 +57,17 @@ public final class MeshTree {
 
 	private static MeshTree convert(ModelPart modelPart, ThreadLocalObjects objects) {
 		var modelPartChildren = FlwLibLink.INSTANCE.getModelPartChildren(modelPart);
-		Map<String, MeshTree> children = new HashMap<>();
 
-		modelPartChildren.forEach((name, modelPartChild) -> {
-			children.put(name, convert(modelPartChild, objects));
-		});
+		// Freeze the ordering here. Maybe we want to sort this?
+		String[] childKeys = modelPartChildren.keySet()
+				.toArray(new String[0]);
 
-		return new MeshTree(compile(modelPart, objects), modelPart.getInitialPose(), Collections.unmodifiableMap(children));
+		MeshTree[] children = new MeshTree[modelPartChildren.size()];
+		for (int i = 0; i < childKeys.length; i++) {
+			children[i] = convert(modelPartChildren.get(childKeys[i]), objects);
+		}
+
+		return new MeshTree(compile(modelPart, objects), modelPart.getInitialPose(), children, childKeys);
 	}
 
 	@Nullable
@@ -91,18 +94,35 @@ public final class MeshTree {
 		return initialPose;
 	}
 
-	@Unmodifiable
-	public Map<String, MeshTree> children() {
-		return children;
+	public int childCount() {
+		return children.length;
+	}
+
+	public MeshTree child(int index) {
+		return children[index];
+	}
+
+	public String childName(int index) {
+		return childKeys[index];
+	}
+
+	public int childIndex(String name) {
+		return Arrays.binarySearch(childKeys, name);
 	}
 
 	public boolean hasChild(String name) {
-		return children.containsKey(name);
+		return childIndex(name) >= 0;
 	}
 
 	@Nullable
 	public MeshTree child(String name) {
-		return children.get(name);
+		int index = childIndex(name);
+
+		if (index < 0) {
+			return null;
+		}
+
+		return child(index);
 	}
 
 	public MeshTree childOrThrow(String name) {
@@ -119,7 +139,7 @@ public final class MeshTree {
 		if (mesh != null) {
 			consumer.accept(mesh);
 		}
-		for (MeshTree child : children.values()) {
+		for (MeshTree child : children) {
 			child.traverse(consumer);
 		}
 	}

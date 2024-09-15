@@ -1,10 +1,6 @@
 package dev.engine_room.flywheel.lib.model.part;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
@@ -32,11 +28,12 @@ import net.minecraft.client.model.geom.PartPose;
 public final class InstanceTree {
 	private static final ModelCache<Model.ConfiguredMesh> MODEL_CACHE = new ModelCache<>(entry -> new SingleMeshModel(entry.mesh(), entry.material()));
 
+	private final MeshTree source;
 	@Nullable
 	private final TransformedInstance instance;
 	private final PartPose initialPose;
 	@Unmodifiable
-	private final Map<String, InstanceTree> children;
+	private final InstanceTree[] children;
 
 	private final Quaternionf rotation = new Quaternionf();
 
@@ -52,7 +49,8 @@ public final class InstanceTree {
 	public boolean visible = true;
 	public boolean skipDraw;
 
-	private InstanceTree(@Nullable TransformedInstance instance, PartPose initialPose, @Unmodifiable Map<String, InstanceTree> children) {
+	private InstanceTree(MeshTree source, @Nullable TransformedInstance instance, PartPose initialPose, InstanceTree[] children) {
+		this.source = source;
 		this.instance = instance;
 		this.initialPose = initialPose;
 		this.children = children;
@@ -60,12 +58,15 @@ public final class InstanceTree {
 	}
 
 	private static InstanceTree create(InstancerProvider provider, MeshTree meshTree, BiFunction<String, Mesh, Model.ConfiguredMesh> meshFinalizerFunc, String path) {
-		Map<String, InstanceTree> children = new HashMap<>();
+		InstanceTree[] children = new InstanceTree[meshTree.childCount()];
 		String pathSlash = path + "/";
 
-		meshTree.children().forEach((name, meshTreeChild) -> {
-			children.put(name, InstanceTree.create(provider, meshTreeChild, meshFinalizerFunc, pathSlash + name));
-		});
+		for (int i = 0; i < meshTree.childCount(); i++) {
+			var meshTreeChild = meshTree.child(i);
+			String name = meshTree.childName(i);
+			children[i] = InstanceTree.create(provider, meshTreeChild, meshFinalizerFunc, pathSlash + name);
+
+		}
 
 		Mesh mesh = meshTree.mesh();
 		TransformedInstance instance;
@@ -77,7 +78,7 @@ public final class InstanceTree {
 			instance = null;
 		}
 
-		return new InstanceTree(instance, meshTree.initialPose(), Collections.unmodifiableMap(children));
+		return new InstanceTree(meshTree, instance, meshTree.initialPose(), children);
 	}
 
 	public static InstanceTree create(InstancerProvider provider, MeshTree meshTree, BiFunction<String, Mesh, Model.ConfiguredMesh> meshFinalizerFunc) {
@@ -105,18 +106,17 @@ public final class InstanceTree {
 		return initialPose;
 	}
 
-	@Unmodifiable
-	public Map<String, InstanceTree> children() {
-		return children;
-	}
-
-	public boolean hasChild(String name) {
-		return children.containsKey(name);
+	@Nullable
+	public InstanceTree child(int index) {
+		if (index < 0 || index >= children.length) {
+			return null;
+		}
+		return children[index];
 	}
 
 	@Nullable
 	public InstanceTree child(String name) {
-		return children.get(name);
+		return child(source.childIndex(name));
 	}
 
 	public InstanceTree childOrThrow(String name) {
@@ -133,7 +133,7 @@ public final class InstanceTree {
 		if (instance != null) {
 			consumer.accept(instance);
 		}
-		for (InstanceTree child : children.values()) {
+		for (InstanceTree child : children) {
 			child.traverse(consumer);
 		}
 	}
@@ -143,7 +143,7 @@ public final class InstanceTree {
 		if (instance != null) {
 			consumer.accept(instance, i);
 		}
-		for (InstanceTree child : children.values()) {
+		for (InstanceTree child : children) {
 			child.traverse(i, consumer);
 		}
 	}
@@ -153,7 +153,7 @@ public final class InstanceTree {
 		if (instance != null) {
 			consumer.accept(instance, i, j);
 		}
-		for (InstanceTree child : children.values()) {
+		for (InstanceTree child : children) {
 			child.traverse(i, j, consumer);
 		}
 	}
@@ -171,16 +171,6 @@ public final class InstanceTree {
 	}
 
 	public void updateInstances(PoseStack poseStack) {
-		// Need to use an anonymous class so it can reference this.
-		updateInstancesInner(poseStack, new Walker() {
-			@Override
-			public void accept(InstanceTree child) {
-				child.updateInstancesInner(poseStack, this);
-			}
-		});
-	}
-
-	private void updateInstancesInner(PoseStack poseStack, Walker walker) {
 		if (visible) {
 			poseStack.pushPose();
 			translateAndRotate(poseStack);
@@ -192,7 +182,9 @@ public final class InstanceTree {
 
 			// Use the bare HashMap.forEach because .values() always allocates a new collection.
 			// We also don't want to store an array of children because that would statically use a lot more memory.
-			children.forEach(walker);
+			for (InstanceTree child : children) {
+				child.updateInstances(poseStack);
+			}
 
 			poseStack.popPose();
 		}
@@ -294,23 +286,14 @@ public final class InstanceTree {
 		if (instance != null) {
 			instance.delete();
 		}
-		children.values()
-				.forEach(InstanceTree::delete);
+		for (InstanceTree child : children) {
+			child.delete();
+		}
 	}
 
 	@ApiStatus.Experimental
 	@FunctionalInterface
 	public interface ObjIntIntConsumer<T> {
 		void accept(T t, int i, int j);
-	}
-
-	// Helper interface for writing walking classes.
-	private interface Walker extends BiConsumer<String, InstanceTree> {
-		void accept(InstanceTree child);
-
-		@Override
-		default void accept(String name, InstanceTree child) {
-			accept(child);
-		}
 	}
 }

@@ -24,7 +24,7 @@ public class RecyclingPoseStack extends PoseStack {
 			super.pushPose();
 		} else {
 			var last = last();
-			var recycle = recycleBin.pop();
+			var recycle = recycleBin.removeLast();
 			recycle.pose()
 					.set(last.pose());
 			recycle.normal()
@@ -36,7 +36,7 @@ public class RecyclingPoseStack extends PoseStack {
 
 	@Override
 	public void popPose() {
-		recycleBin.push(FlwLibLink.INSTANCE.getPoseStack(this)
+		recycleBin.addLast(FlwLibLink.INSTANCE.getPoseStack(this)
 				.removeLast());
 	}
 }
