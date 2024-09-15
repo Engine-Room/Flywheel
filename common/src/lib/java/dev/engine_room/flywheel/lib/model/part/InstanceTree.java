@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
@@ -170,6 +171,16 @@ public final class InstanceTree {
 	}
 
 	public void updateInstances(PoseStack poseStack) {
+		// Need to use an anonymous class so it can reference this.
+		updateInstancesInner(poseStack, new Walker() {
+			@Override
+			public void accept(InstanceTree child) {
+				child.updateInstancesInner(poseStack, this);
+			}
+		});
+	}
+
+	private void updateInstancesInner(PoseStack poseStack, Walker walker) {
 		if (visible) {
 			poseStack.pushPose();
 			translateAndRotate(poseStack);
@@ -179,9 +190,9 @@ public final class InstanceTree {
 						.setChanged();
 			}
 
-			for (InstanceTree child : children.values()) {
-				child.updateInstances(poseStack);
-			}
+			// Use the bare HashMap.forEach because .values() always allocates a new collection.
+			// We also don't want to store an array of children because that would statically use a lot more memory.
+			children.forEach(walker);
 
 			poseStack.popPose();
 		}
@@ -291,5 +302,15 @@ public final class InstanceTree {
 	@FunctionalInterface
 	public interface ObjIntIntConsumer<T> {
 		void accept(T t, int i, int j);
+	}
+
+	// Helper interface for writing walking classes.
+	private interface Walker extends BiConsumer<String, InstanceTree> {
+		void accept(InstanceTree child);
+
+		@Override
+		default void accept(String name, InstanceTree child) {
+			accept(child);
+		}
 	}
 }
