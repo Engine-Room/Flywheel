@@ -1,22 +1,19 @@
 package dev.engine_room.flywheel.vanilla;
 
 import org.jetbrains.annotations.Nullable;
-
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
+import dev.engine_room.flywheel.lib.instance.FlatLit;
 import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
-import dev.engine_room.flywheel.lib.model.ModelHolder;
 import dev.engine_room.flywheel.lib.model.Models;
-import dev.engine_room.flywheel.lib.model.SingleMeshModel;
-import dev.engine_room.flywheel.lib.model.part.ModelPartConverter;
-import dev.engine_room.flywheel.lib.util.RecyclingPoseStack;
+import dev.engine_room.flywheel.lib.model.part.InstanceTree;
 import dev.engine_room.flywheel.lib.visual.ComponentEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
@@ -24,7 +21,6 @@ import dev.engine_room.flywheel.lib.visual.component.FireComponent;
 import dev.engine_room.flywheel.lib.visual.component.HitboxComponent;
 import dev.engine_room.flywheel.lib.visual.component.ShadowComponent;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -39,31 +35,19 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 			.mipmap(false)
 			.build();
 
-	public static final ModelHolder CHEST_BODY_MODEL = createBodyModelHolder(ModelLayers.CHEST_MINECART);
-	public static final ModelHolder COMMAND_BLOCK_BODY_MODEL = createBodyModelHolder(ModelLayers.COMMAND_BLOCK_MINECART);
-	public static final ModelHolder FURNACE_BODY_MODEL = createBodyModelHolder(ModelLayers.FURNACE_MINECART);
-	public static final ModelHolder HOPPER_BODY_MODEL = createBodyModelHolder(ModelLayers.HOPPER_MINECART);
-	public static final ModelHolder STANDARD_BODY_MODEL = createBodyModelHolder(ModelLayers.MINECART);
-	public static final ModelHolder SPAWNER_BODY_MODEL = createBodyModelHolder(ModelLayers.SPAWNER_MINECART);
-	public static final ModelHolder TNT_BODY_MODEL = createBodyModelHolder(ModelLayers.TNT_MINECART);
-
-	private final TransformedInstance body;
+	private final InstanceTree instances;
 	@Nullable
 	private TransformedInstance contents;
 
-	private final ModelHolder bodyModel;
-
-	private final RecyclingPoseStack stack = new RecyclingPoseStack();
+	private final Matrix4fStack stack = new Matrix4fStack(2);
 
 	private BlockState blockState;
 	private boolean active;
 
-	public MinecartVisual(VisualizationContext ctx, T entity, float partialTick, ModelHolder bodyModel) {
+	public MinecartVisual(VisualizationContext ctx, T entity, float partialTick, ModelLayerLocation layerLocation) {
 		super(ctx, entity, partialTick);
 
-		this.bodyModel = bodyModel;
-
-		body = createBodyInstance();
+		instances = InstanceTree.create(instancerProvider(), layerLocation, MATERIAL);
 		blockState = entity.getDisplayBlockState();
 		contents = createContentsInstance();
 
@@ -75,23 +59,12 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 		updateLight(partialTick);
 	}
 
-	private static ModelHolder createBodyModelHolder(ModelLayerLocation layer) {
-		return new ModelHolder(() -> {
-			return new SingleMeshModel(ModelPartConverter.convert(layer), MATERIAL);
-		});
-	}
-
-	private TransformedInstance createBodyInstance() {
-		return instancerProvider().instancer(InstanceTypes.TRANSFORMED, bodyModel.get())
-				.createInstance();
-	}
-
 	@Nullable
 	private TransformedInstance createContentsInstance() {
 		RenderShape shape = blockState.getRenderShape();
 
 		if (shape == RenderShape.ENTITYBLOCK_ANIMATED) {
-			body.setZeroTransform();
+			instances.traverse(instance -> instance.setZeroTransform().setChanged());
 			active = false;
 			return null;
 		}
@@ -135,14 +108,14 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 	}
 
 	private void updateInstances(float partialTick) {
-		stack.setIdentity();
+		stack.identity();
 
 		double posX = Mth.lerp(partialTick, entity.xOld, entity.getX());
 		double posY = Mth.lerp(partialTick, entity.yOld, entity.getY());
 		double posZ = Mth.lerp(partialTick, entity.zOld, entity.getZ());
 
 		var renderOrigin = renderOrigin();
-		stack.translate(posX - renderOrigin.getX(), posY - renderOrigin.getY(), posZ - renderOrigin.getZ());
+		stack.translate((float) (posX - renderOrigin.getX()), (float) (posY - renderOrigin.getY()), (float) (posZ - renderOrigin.getZ()));
 		float yaw = Mth.lerp(partialTick, entity.yRotO, entity.getYRot());
 
 		long randomBits = entity.getId() * 493286711L;
@@ -166,7 +139,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 				offset2 = pos;
 			}
 
-			stack.translate(pos.x - posX, (offset1.y + offset2.y) / 2.0D - posY, pos.z - posZ);
+			stack.translate((float) (pos.x - posX), (float) ((offset1.y + offset2.y) / 2.0D - posY), (float) (pos.z - posZ));
 			Vec3 vec = offset2.add(-offset1.x, -offset1.y, -offset1.z);
 			if (vec.length() != 0.0D) {
 				vec = vec.normalize();
@@ -175,9 +148,9 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 			}
 		}
 
-		stack.translate(0.0D, 0.375D, 0.0D);
-		stack.mulPose(Axis.YP.rotationDegrees(180 - yaw));
-		stack.mulPose(Axis.ZP.rotationDegrees(-pitch));
+		stack.translate(0.0F, 0.375F, 0.0F);
+		stack.rotateY((180 - yaw) * Mth.DEG_TO_RAD);
+		stack.rotateZ(-pitch * Mth.DEG_TO_RAD);
 
 		float hurtTime = entity.getHurtTime() - partialTick;
 		float damage = entity.getDamage() - partialTick;
@@ -187,40 +160,44 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 		}
 
 		if (hurtTime > 0) {
-			stack.mulPose(Axis.XP.rotationDegrees(Mth.sin(hurtTime) * hurtTime * damage / 10.0F * (float) entity.getHurtDir()));
+			stack.rotateX((Mth.sin(hurtTime) * hurtTime * damage / 10.0F * (float) entity.getHurtDir()) * Mth.DEG_TO_RAD);
 		}
 
-		int displayOffset = entity.getDisplayOffset();
 		if (contents != null) {
-			stack.pushPose();
+			int displayOffset = entity.getDisplayOffset();
+			stack.pushMatrix();
 			stack.scale(0.75F, 0.75F, 0.75F);
 			stack.translate(-0.5F, (float) (displayOffset - 8) / 16, 0.5F);
-			stack.mulPose(Axis.YP.rotationDegrees(90));
+			stack.rotateY(90 * Mth.DEG_TO_RAD);
 			updateContents(contents, stack, partialTick);
-			stack.popPose();
+			stack.popMatrix();
 		}
 
 		stack.scale(-1.0F, -1.0F, 1.0F);
-		body.setTransform(stack)
-				.setChanged();
+		instances.updateInstances(stack);
 
 		// TODO: Use LightUpdatedVisual/ShaderLightVisual if possible.
 		updateLight(partialTick);
 	}
 
-	protected void updateContents(TransformedInstance contents, PoseStack stack, float partialTick) {
-		contents.setTransform(stack)
+	protected void updateContents(TransformedInstance contents, Matrix4f pose, float partialTick) {
+		contents.setTransform(pose)
 				.setChanged();
 	}
 
 	public void updateLight(float partialTick) {
-		relight(partialTick, body, contents);
+		int packedLight = computePackedLight(partialTick);
+		instances.traverse(instance -> {
+			instance.light(packedLight)
+					.setChanged();
+		});
+		FlatLit.relight(packedLight, contents);
 	}
 
 	@Override
 	protected void _delete() {
 		super._delete();
-		body.delete();
+		instances.delete();
 		if (contents != null) {
 			contents.delete();
 		}

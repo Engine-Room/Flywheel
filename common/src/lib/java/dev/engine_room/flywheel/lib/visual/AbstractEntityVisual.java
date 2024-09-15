@@ -92,11 +92,14 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 		return entity.noCulling || visibilityTester.check(frustum);
 	}
 
-	protected void relight(float partialTick, @Nullable FlatLit... instances) {
+	protected int computePackedLight(float partialTick) {
 		BlockPos pos = BlockPos.containing(entity.getLightProbePosition(partialTick));
 		int blockLight = entity.isOnFire() ? 15 : level.getBrightness(LightLayer.BLOCK, pos);
 		int skyLight = level.getBrightness(LightLayer.SKY, pos);
-		int light = LightTexture.pack(blockLight, skyLight);
-		FlatLit.relight(light, instances);
+		return LightTexture.pack(blockLight, skyLight);
+	}
+
+	protected void relight(float partialTick, @Nullable FlatLit... instances) {
+		FlatLit.relight(computePackedLight(partialTick), instances);
 	}
 }

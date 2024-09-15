@@ -99,6 +99,10 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 				.shouldUpdate(pos.distToCenterSqr(context.camera().getPosition()));
 	}
 
+	protected int computePackedLight() {
+		return LevelRenderer.getLightColor(level, pos);
+	}
+
 	protected void relight(BlockPos pos, @Nullable FlatLit... instances) {
 		FlatLit.relight(LevelRenderer.getLightColor(level, pos), instances);
 	}

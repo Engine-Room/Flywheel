@@ -1,6 +1,7 @@
 package dev.engine_room.flywheel.lib.instance;
 
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Quaternionfc;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -37,6 +38,11 @@ public class TransformedInstance extends ColoredLitInstance implements Affine<Tr
 	@Override
 	public TransformedInstance scale(float x, float y, float z) {
 		pose.scale(x, y, z);
+		return this;
+	}
+
+	public TransformedInstance setTransform(Matrix4fc pose) {
+		this.pose.set(pose);
 		return this;
 	}
 

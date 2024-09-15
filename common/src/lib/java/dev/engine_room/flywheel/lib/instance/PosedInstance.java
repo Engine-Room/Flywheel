@@ -73,6 +73,12 @@ public class PosedInstance extends ColoredLitInstance implements Transform<Posed
 		return this;
 	}
 
+	public PosedInstance setTransform(Matrix4fc pose, Matrix3fc normal) {
+		this.pose.set(pose);
+		this.normal.set(normal);
+		return this;
+	}
+
 	public PosedInstance setTransform(PoseStack.Pose pose) {
 		this.pose.set(pose.pose());
 		normal.set(pose.normal());

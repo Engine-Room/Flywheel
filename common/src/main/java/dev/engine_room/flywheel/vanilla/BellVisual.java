@@ -2,23 +2,22 @@ package dev.engine_room.flywheel.vanilla;
 
 import java.util.function.Consumer;
 
-import org.joml.AxisAngle4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.material.Material;
+import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
-import dev.engine_room.flywheel.lib.instance.InstanceTypes;
-import dev.engine_room.flywheel.lib.instance.OrientedInstance;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
-import dev.engine_room.flywheel.lib.model.ModelHolder;
-import dev.engine_room.flywheel.lib.model.SingleMeshModel;
-import dev.engine_room.flywheel.lib.model.part.ModelPartConverter;
+import dev.engine_room.flywheel.lib.model.RetexturedMesh;
+import dev.engine_room.flywheel.lib.model.part.InstanceTree;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.blockentity.BellRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BellBlockEntity;
 
@@ -27,27 +26,26 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 			.mipmap(false)
 			.build();
 
-	private static final ModelHolder BELL_MODEL = new ModelHolder(() -> {
-		return new SingleMeshModel(ModelPartConverter.convert(ModelLayers.BELL, BellRenderer.BELL_RESOURCE_LOCATION.sprite(), "bell_body"), MATERIAL);
-	});
+	private final InstanceTree instances;
+	private final InstanceTree bellBody;
 
-	private final OrientedInstance bell;
+	private final Matrix4fc initialPose;
 
 	private boolean wasShaking = false;
 
 	public BellVisual(VisualizationContext ctx, BellBlockEntity blockEntity, float partialTick) {
 		super(ctx, blockEntity, partialTick);
 
-		bell = createBellInstance().pivot(0.5f, 0.75f, 0.5f)
-				.position(getVisualPosition());
-		bell.setChanged();
+		TextureAtlasSprite sprite = BellRenderer.BELL_RESOURCE_LOCATION.sprite();
+		instances = InstanceTree.create(instancerProvider(), ModelLayers.BELL, (path, mesh) -> {
+			return new Model.ConfiguredMesh(MATERIAL, new RetexturedMesh(mesh, sprite));
+		});
+		bellBody = instances.childOrThrow("bell_body");
+
+		BlockPos visualPos = getVisualPosition();
+		initialPose = new Matrix4f().translate(visualPos.getX(), visualPos.getY(), visualPos.getZ());
 
 		updateRotation(partialTick);
-	}
-
-	private OrientedInstance createBellInstance() {
-		return instancerProvider().instancer(InstanceTypes.ORIENTED, BELL_MODEL.get())
-				.createInstance();
 	}
 
 	@Override
@@ -60,37 +58,46 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	}
 
 	private void updateRotation(float partialTick) {
+		float xRot = 0;
+		float zRot = 0;
+
 		if (blockEntity.shaking) {
 			float ringTime = (float) blockEntity.ticks + partialTick;
 			float angle = Mth.sin(ringTime / (float) Math.PI) / (4.0F + ringTime / 3.0F);
 
-			Vector3f ringAxis = blockEntity.clickDirection.getCounterClockWise()
-					.step();
-
-			bell.rotation(new Quaternionf(new AxisAngle4f(angle, ringAxis)))
-					.setChanged();
+			switch (blockEntity.clickDirection) {
+				case NORTH -> xRot = -angle;
+				case SOUTH -> xRot = angle;
+				case EAST -> zRot = -angle;
+				case WEST -> zRot = angle;
+			}
 
 			wasShaking = true;
 		} else if (wasShaking) {
-			bell.rotation(new Quaternionf())
-					.setChanged();
-
 			wasShaking = false;
 		}
+
+		bellBody.xRot(xRot);
+		bellBody.zRot(zRot);
+		instances.updateInstancesStatic(initialPose);
 	}
 
 	@Override
 	public void updateLight(float partialTick) {
-		relight(bell);
+		int packedLight = computePackedLight();
+		instances.traverse(instance -> {
+			instance.light(packedLight)
+					.setChanged();
+		});
 	}
 
 	@Override
 	public void collectCrumblingInstances(Consumer<Instance> consumer) {
-		consumer.accept(bell);
+		instances.traverse(consumer);
 	}
 
 	@Override
 	protected void _delete() {
-		bell.delete();
+		instances.delete();
 	}
 }

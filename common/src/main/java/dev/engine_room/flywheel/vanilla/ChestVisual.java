@@ -6,19 +6,17 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
-
 import dev.engine_room.flywheel.api.instance.Instance;
+import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.material.CutoutShaders;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.model.RetexturedMesh;
 import dev.engine_room.flywheel.lib.model.part.InstanceTree;
-import dev.engine_room.flywheel.lib.transform.TransformStack;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
@@ -29,7 +27,9 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.AbstractChestBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ChestBlock;
@@ -40,7 +40,7 @@ import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends AbstractBlockEntityVisual<T> implements SimpleDynamicVisual {
-	private static final dev.engine_room.flywheel.api.material.Material MATERIAL = SimpleMaterial.builder()
+	private static final Material MATERIAL = SimpleMaterial.builder()
 			.cutout(CutoutShaders.ONE_TENTH)
 			.texture(Sheets.CHEST_SHEET)
 			.mipmap(false)
@@ -84,14 +84,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 			lid = instances.childOrThrow("lid");
 			lock = instances.childOrThrow("lock");
 
-			PoseStack poseStack = new PoseStack();
-			TransformStack.of(poseStack).translate(getVisualPosition());
-			float horizontalAngle = blockState.getValue(ChestBlock.FACING).toYRot();
-			poseStack.translate(0.5F, 0.5F, 0.5F);
-			poseStack.mulPose(Axis.YP.rotationDegrees(-horizontalAngle));
-			poseStack.translate(-0.5F, -0.5F, -0.5F);
-			initialPose = poseStack.last().pose();
-
+			initialPose = createInitialPose();
 			neighborCombineResult = chestBlock.combine(blockState, level, pos, true);
 			lidProgress = neighborCombineResult.apply(ChestBlock.opennessCombiner(blockEntity));
 
@@ -110,6 +103,15 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 	private static boolean isChristmas() {
 		Calendar calendar = Calendar.getInstance();
 		return calendar.get(Calendar.MONTH) + 1 == 12 && calendar.get(Calendar.DATE) >= 24 && calendar.get(Calendar.DATE) <= 26;
+	}
+
+	private Matrix4f createInitialPose() {
+		BlockPos visualPos = getVisualPosition();
+		float horizontalAngle = blockState.getValue(ChestBlock.FACING).toYRot();
+		return new Matrix4f().translate(visualPos.getX(), visualPos.getY(), visualPos.getZ())
+				.translate(0.5F, 0.5F, 0.5F)
+				.rotateY(-horizontalAngle * Mth.DEG_TO_RAD)
+				.translate(-0.5F, -0.5F, -0.5F);
 	}
 
 	@Override

@@ -193,7 +193,7 @@ public final class InstanceTree {
 			affine.rotate(tempQuaternion.rotationZYX(zRot, yRot, xRot));
 		}
 
-		if (xScale != 1.0F || yScale != 1.0F || zScale != 1.0F) {
+		if (xScale != ModelPart.DEFAULT_SCALE || yScale != ModelPart.DEFAULT_SCALE || zScale != ModelPart.DEFAULT_SCALE) {
 			affine.scale(xScale, yScale, zScale);
 		}
 	}
@@ -300,13 +300,6 @@ public final class InstanceTree {
 		return zScale;
 	}
 
-	public void pos(float x, float y, float z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		setChanged();
-	}
-
 	public void xPos(float x) {
 		this.x = x;
 		setChanged();
@@ -322,10 +315,10 @@ public final class InstanceTree {
 		setChanged();
 	}
 
-	public void rotation(float xRot, float yRot, float zRot) {
-		this.xRot = xRot;
-		this.yRot = yRot;
-		this.zRot = zRot;
+	public void pos(float x, float y, float z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
 		setChanged();
 	}
 
@@ -344,10 +337,10 @@ public final class InstanceTree {
 		setChanged();
 	}
 
-	public void scale(float xScale, float yScale, float zScale) {
-		this.xScale = xScale;
-		this.yScale = yScale;
-		this.zScale = zScale;
+	public void rotation(float xRot, float yRot, float zRot) {
+		this.xRot = xRot;
+		this.yRot = yRot;
+		this.zRot = zRot;
 		setChanged();
 	}
 
@@ -362,6 +355,13 @@ public final class InstanceTree {
 	}
 
 	public void zScale(float zScale) {
+		this.zScale = zScale;
+		setChanged();
+	}
+
+	public void scale(float xScale, float yScale, float zScale) {
+		this.xScale = xScale;
+		this.yScale = yScale;
 		this.zScale = zScale;
 		setChanged();
 	}
@@ -388,6 +388,10 @@ public final class InstanceTree {
 		setChanged();
 	}
 
+	public void offsetPos(Vector3fc offset) {
+		offsetPos(offset.x(), offset.y(), offset.z());
+	}
+
 	public void offsetRotation(float xOffset, float yOffset, float zOffset) {
 		xRot += xOffset;
 		yRot += yOffset;
@@ -410,6 +414,10 @@ public final class InstanceTree {
 		setChanged();
 	}
 
+	public void offsetRotation(Vector3fc offset) {
+		offsetRotation(offset.x(), offset.y(), offset.z());
+	}
+
 	public void offsetScale(float xOffset, float yOffset, float zOffset) {
 		xScale += xOffset;
 		yScale += yOffset;
@@ -430,14 +438,6 @@ public final class InstanceTree {
 	public void offsetZScale(float zOffset) {
 		zScale += zOffset;
 		setChanged();
-	}
-
-	public void offsetPos(Vector3fc offset) {
-		offsetPos(offset.x(), offset.y(), offset.z());
-	}
-
-	public void offsetRotation(Vector3fc offset) {
-		offsetRotation(offset.x(), offset.y(), offset.z());
 	}
 
 	public void offsetScale(Vector3fc offset) {
@@ -491,6 +491,10 @@ public final class InstanceTree {
 		setChanged();
 	}
 
+	private void setChanged() {
+		changed = true;
+	}
+
 	public void delete() {
 		if (instance != null) {
 			instance.delete();
@@ -498,10 +502,6 @@ public final class InstanceTree {
 		for (InstanceTree child : children) {
 			child.delete();
 		}
-	}
-
-	private void setChanged() {
-		changed = true;
 	}
 
 	@ApiStatus.Experimental
