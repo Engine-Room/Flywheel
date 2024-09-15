@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -15,8 +16,11 @@ import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.material.CutoutShaders;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
-import dev.engine_room.flywheel.lib.model.RetexturedMesh;
+import dev.engine_room.flywheel.lib.model.ResourceReloadCache;
 import dev.engine_room.flywheel.lib.model.part.InstanceTree;
+import dev.engine_room.flywheel.lib.model.part.LoweringVisitor;
+import dev.engine_room.flywheel.lib.model.part.ModelTree;
+import dev.engine_room.flywheel.lib.transform.TransformStack;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
@@ -53,6 +57,8 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		LAYER_LOCATIONS.put(ChestType.RIGHT, ModelLayers.DOUBLE_CHEST_RIGHT);
 	}
 
+	private static final Function<TextureAtlasSprite, LoweringVisitor> VISITOR = new ResourceReloadCache<>(s -> LoweringVisitor.retexturingVisitor(MATERIAL, s));
+
 	@Nullable
 	private final InstanceTree instances;
 	@Nullable
@@ -77,10 +83,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		if (block instanceof AbstractChestBlock<?> chestBlock) {
 			ChestType chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
 			TextureAtlasSprite sprite = Sheets.chooseMaterial(blockEntity, chestType, isChristmas()).sprite();
-
-			instances = InstanceTree.create(instancerProvider(), LAYER_LOCATIONS.get(chestType), (path, mesh) -> {
-				return new Model.ConfiguredMesh(MATERIAL, new RetexturedMesh(mesh, sprite));
-			});
+			instances = InstanceTree.create(instancerProvider(), ModelTree.of(LAYER_LOCATIONS.get(chestType), VISITOR.apply(sprite)));
 			lid = instances.childOrThrow("lid");
 			lock = instances.childOrThrow("lock");
 

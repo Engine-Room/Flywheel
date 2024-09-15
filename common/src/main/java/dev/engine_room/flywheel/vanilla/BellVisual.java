@@ -7,16 +7,16 @@ import org.joml.Matrix4fc;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.material.Material;
-import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
-import dev.engine_room.flywheel.lib.model.RetexturedMesh;
+import dev.engine_room.flywheel.lib.model.ResourceReloadHolder;
 import dev.engine_room.flywheel.lib.model.part.InstanceTree;
+import dev.engine_room.flywheel.lib.model.part.LoweringVisitor;
+import dev.engine_room.flywheel.lib.model.part.ModelTree;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.blockentity.BellRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BellBlockEntity;
@@ -25,6 +25,9 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	private static final Material MATERIAL = SimpleMaterial.builder()
 			.mipmap(false)
 			.build();
+
+	// Need to hold the visitor in a ResourceReloadHolder to ensure we have a valid sprite.
+	private static final ResourceReloadHolder<LoweringVisitor> VISITOR = new ResourceReloadHolder<>(() -> LoweringVisitor.retexturingVisitor(MATERIAL, BellRenderer.BELL_RESOURCE_LOCATION.sprite()));
 
 	private final InstanceTree instances;
 	private final InstanceTree bellBody;
@@ -36,10 +39,7 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	public BellVisual(VisualizationContext ctx, BellBlockEntity blockEntity, float partialTick) {
 		super(ctx, blockEntity, partialTick);
 
-		TextureAtlasSprite sprite = BellRenderer.BELL_RESOURCE_LOCATION.sprite();
-		instances = InstanceTree.create(instancerProvider(), ModelLayers.BELL, (path, mesh) -> {
-			return new Model.ConfiguredMesh(MATERIAL, new RetexturedMesh(mesh, sprite));
-		});
+		instances = InstanceTree.create(instancerProvider(), ModelTree.of(ModelLayers.BELL, VISITOR.get()));
 		bellBody = instances.childOrThrow("bell_body");
 
 		BlockPos visualPos = getVisualPosition();

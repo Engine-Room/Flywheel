@@ -10,10 +10,11 @@ import dev.engine_room.flywheel.backend.LightSmoothnessArgument;
 import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
-import dev.engine_room.flywheel.lib.model.ModelCache;
-import dev.engine_room.flywheel.lib.model.ModelHolder;
+import dev.engine_room.flywheel.lib.model.ResourceReloadCache;
+import dev.engine_room.flywheel.lib.model.ResourceReloadHolder;
 import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
 import dev.engine_room.flywheel.lib.model.part.MeshTree;
+import dev.engine_room.flywheel.lib.model.part.ModelTree;
 import dev.engine_room.flywheel.lib.util.LevelAttached;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
@@ -110,9 +111,10 @@ public final class FlywheelForge {
 	private static void registerLibEventListeners(IEventBus forgeEventBus, IEventBus modEventBus) {
 		forgeEventBus.addListener((LevelEvent.Unload e) -> LevelAttached.invalidateLevel(e.getLevel()));
 
-		modEventBus.addListener((EndClientResourceReloadEvent e) -> ModelCache.onEndClientResourceReload());
-		modEventBus.addListener((EndClientResourceReloadEvent e) -> ModelHolder.onEndClientResourceReload());
+		modEventBus.addListener((EndClientResourceReloadEvent e) -> ResourceReloadCache.onEndClientResourceReload());
+		modEventBus.addListener((EndClientResourceReloadEvent e) -> ResourceReloadHolder.onEndClientResourceReload());
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> MeshTree.onEndClientResourceReload());
+		modEventBus.addListener((EndClientResourceReloadEvent e) -> ModelTree.onEndClientResourceReload());
 
 		modEventBus.addListener(PartialModelEventHandler::onRegisterAdditional);
 		modEventBus.addListener(PartialModelEventHandler::onBakingCompleted);

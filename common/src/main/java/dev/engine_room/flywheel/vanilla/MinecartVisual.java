@@ -14,6 +14,8 @@ import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.model.part.InstanceTree;
+import dev.engine_room.flywheel.lib.model.part.LoweringVisitor;
+import dev.engine_room.flywheel.lib.model.part.ModelTree;
 import dev.engine_room.flywheel.lib.visual.ComponentEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
@@ -34,6 +36,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 			.texture(TEXTURE)
 			.mipmap(false)
 			.build();
+	private static final LoweringVisitor VISITOR = LoweringVisitor.materialApplyingVisitor(MATERIAL);
 
 	private final InstanceTree instances;
 	@Nullable
@@ -47,7 +50,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 	public MinecartVisual(VisualizationContext ctx, T entity, float partialTick, ModelLayerLocation layerLocation) {
 		super(ctx, entity, partialTick);
 
-		instances = InstanceTree.create(instancerProvider(), layerLocation, MATERIAL);
+		instances = InstanceTree.create(instancerProvider(), ModelTree.of(layerLocation, VISITOR));
 		blockState = entity.getDisplayBlockState();
 		contents = createContentsInstance();
 

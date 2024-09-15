@@ -1,7 +1,6 @@
 package dev.engine_room.flywheel.lib.model.part;
 
 import java.util.NoSuchElementException;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
 
@@ -15,23 +14,16 @@ import org.joml.Vector3fc;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.engine_room.flywheel.api.instance.InstancerProvider;
-import dev.engine_room.flywheel.api.material.Material;
-import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
-import dev.engine_room.flywheel.lib.model.ModelCache;
-import dev.engine_room.flywheel.lib.model.SingleMeshModel;
 import dev.engine_room.flywheel.lib.transform.Affine;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
-import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 
 public final class InstanceTree {
-	private static final ModelCache<Model.ConfiguredMesh> MODEL_CACHE = new ModelCache<>(entry -> new SingleMeshModel(entry.mesh(), entry.material()));
-
-	private final MeshTree source;
+	private final ModelTree source;
 	@Nullable
 	private final TransformedInstance instance;
 	private final InstanceTree[] children;
@@ -54,7 +46,7 @@ public final class InstanceTree {
 
 	private boolean changed;
 
-	private InstanceTree(MeshTree source, @Nullable TransformedInstance instance, InstanceTree[] children) {
+	private InstanceTree(ModelTree source, @Nullable TransformedInstance instance, InstanceTree[] children) {
 		this.source = source;
 		this.instance = instance;
 		this.children = children;
@@ -68,43 +60,22 @@ public final class InstanceTree {
 		resetPose();
 	}
 
-	private static InstanceTree create(InstancerProvider provider, MeshTree meshTree, BiFunction<String, Mesh, Model.ConfiguredMesh> meshFinalizerFunc, String path) {
+	public static InstanceTree create(InstancerProvider provider, ModelTree meshTree) {
 		InstanceTree[] children = new InstanceTree[meshTree.childCount()];
-		String pathSlash = path + "/";
-
 		for (int i = 0; i < meshTree.childCount(); i++) {
-			var meshTreeChild = meshTree.child(i);
-			String name = meshTree.childName(i);
-			children[i] = create(provider, meshTreeChild, meshFinalizerFunc, pathSlash + name);
+			children[i] = create(provider, meshTree.child(i));
 		}
 
-		Mesh mesh = meshTree.mesh();
+		Model model = meshTree.model();
 		TransformedInstance instance;
-		if (mesh != null) {
-			Model.ConfiguredMesh configuredMesh = meshFinalizerFunc.apply(path, mesh);
-			instance = provider.instancer(InstanceTypes.TRANSFORMED, MODEL_CACHE.get(configuredMesh))
+		if (model != null) {
+			instance = provider.instancer(InstanceTypes.TRANSFORMED, model)
 					.createInstance();
 		} else {
 			instance = null;
 		}
 
 		return new InstanceTree(meshTree, instance, children);
-	}
-
-	public static InstanceTree create(InstancerProvider provider, MeshTree meshTree, BiFunction<String, Mesh, Model.ConfiguredMesh> meshFinalizerFunc) {
-		return create(provider, meshTree, meshFinalizerFunc, "");
-	}
-
-	public static InstanceTree create(InstancerProvider provider, ModelLayerLocation layer, BiFunction<String, Mesh, Model.ConfiguredMesh> meshFinalizerFunc) {
-		return create(provider, MeshTree.of(layer), meshFinalizerFunc);
-	}
-
-	public static InstanceTree create(InstancerProvider provider, MeshTree meshTree, Material material) {
-		return create(provider, meshTree, (path, mesh) -> new Model.ConfiguredMesh(material, mesh));
-	}
-
-	public static InstanceTree create(InstancerProvider provider, ModelLayerLocation layer, Material material) {
-		return create(provider, MeshTree.of(layer), material);
 	}
 
 	@Nullable
