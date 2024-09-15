@@ -36,7 +36,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 			.texture(TEXTURE)
 			.mipmap(false)
 			.build();
-	private static final LoweringVisitor VISITOR = LoweringVisitor.materialApplyingVisitor(MATERIAL);
+	private static final LoweringVisitor VISITOR = LoweringVisitor.create(MATERIAL);
 
 	private final InstanceTree instances;
 	@Nullable

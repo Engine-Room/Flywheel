@@ -27,7 +27,7 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 			.build();
 
 	// Need to hold the visitor in a ResourceReloadHolder to ensure we have a valid sprite.
-	private static final ResourceReloadHolder<LoweringVisitor> VISITOR = new ResourceReloadHolder<>(() -> LoweringVisitor.retexturingVisitor(MATERIAL, BellRenderer.BELL_RESOURCE_LOCATION.sprite()));
+	private static final ResourceReloadHolder<LoweringVisitor> VISITOR = new ResourceReloadHolder<>(() -> LoweringVisitor.create(MATERIAL, BellRenderer.BELL_RESOURCE_LOCATION.sprite()));
 
 	private final InstanceTree instances;
 	private final InstanceTree bellBody;

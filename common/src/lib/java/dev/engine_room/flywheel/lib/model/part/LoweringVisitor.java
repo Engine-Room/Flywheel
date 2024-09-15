@@ -1,6 +1,7 @@
 package dev.engine_room.flywheel.lib.model.part;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -24,12 +25,46 @@ public interface LoweringVisitor {
 		return ModelTree.create(model, initialPose, new ModelTree[0], new String[0]);
 	}
 
-	static LoweringVisitor materialApplyingVisitor(Material material) {
+	static LoweringVisitor create(Material material) {
 		return (path, mesh) -> new SingleMeshModel(mesh, material);
 	}
 
-	static LoweringVisitor retexturingVisitor(Material material, TextureAtlasSprite sprite) {
+	static LoweringVisitor create(Material material, TextureAtlasSprite sprite) {
 		return (path, mesh) -> new SingleMeshModel(new RetexturedMesh(mesh, sprite), material);
+	}
+
+	static LoweringVisitor pruning(Set<String> prune, Material material) {
+		return new LoweringVisitor() {
+			@Override
+			public @Nullable ModelTree visit(String path, MeshTree meshTree) {
+				if (prune.contains(path)) {
+					return null;
+				}
+				return LoweringVisitor.super.visit(path, meshTree);
+			}
+
+			@Override
+			public Model visit(String path, Mesh mesh) {
+				return new SingleMeshModel(mesh, material);
+			}
+		};
+	}
+
+	static LoweringVisitor pruning(Set<String> prune, Material material, TextureAtlasSprite sprite) {
+		return new LoweringVisitor() {
+			@Override
+			public @Nullable ModelTree visit(String path, MeshTree meshTree) {
+				if (prune.contains(path)) {
+					return null;
+				}
+				return LoweringVisitor.super.visit(path, meshTree);
+			}
+
+			@Override
+			public Model visit(String path, Mesh mesh) {
+				return new SingleMeshModel(new RetexturedMesh(mesh, sprite), material);
+			}
+		};
 	}
 
 	static String append(String path, String child) {

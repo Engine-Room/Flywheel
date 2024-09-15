@@ -12,7 +12,6 @@ import org.joml.Matrix4fc;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.material.Material;
-import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.material.CutoutShaders;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
@@ -20,7 +19,6 @@ import dev.engine_room.flywheel.lib.model.ResourceReloadCache;
 import dev.engine_room.flywheel.lib.model.part.InstanceTree;
 import dev.engine_room.flywheel.lib.model.part.LoweringVisitor;
 import dev.engine_room.flywheel.lib.model.part.ModelTree;
-import dev.engine_room.flywheel.lib.transform.TransformStack;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
@@ -57,7 +55,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		LAYER_LOCATIONS.put(ChestType.RIGHT, ModelLayers.DOUBLE_CHEST_RIGHT);
 	}
 
-	private static final Function<TextureAtlasSprite, LoweringVisitor> VISITOR = new ResourceReloadCache<>(s -> LoweringVisitor.retexturingVisitor(MATERIAL, s));
+	private static final Function<TextureAtlasSprite, LoweringVisitor> VISITOR = new ResourceReloadCache<>(s -> LoweringVisitor.create(MATERIAL, s));
 
 	@Nullable
 	private final InstanceTree instances;
