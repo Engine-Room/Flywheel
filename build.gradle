@@ -148,7 +148,6 @@ publishing {
         if (project.hasProperty('mavendir')) {
             maven { url mavendir }
         }
-        mavenLocal()
     }
 }
 
