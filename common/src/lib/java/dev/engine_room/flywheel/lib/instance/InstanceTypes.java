@@ -17,6 +17,26 @@ public final class InstanceTypes {
 					.vector("overlay", IntegerRepr.SHORT, 2)
 					.vector("light", FloatRepr.UNSIGNED_SHORT, 2)
 					.matrix("pose", FloatRepr.FLOAT, 4)
+					.build())
+			.writer((ptr, instance) -> {
+				MemoryUtil.memPutByte(ptr, instance.red);
+				MemoryUtil.memPutByte(ptr + 1, instance.green);
+				MemoryUtil.memPutByte(ptr + 2, instance.blue);
+				MemoryUtil.memPutByte(ptr + 3, instance.alpha);
+				ExtraMemoryOps.put2x16(ptr + 4, instance.overlay);
+				ExtraMemoryOps.put2x16(ptr + 8, instance.light);
+				ExtraMemoryOps.putMatrix4f(ptr + 12, instance.model);
+			})
+			.vertexShader(Flywheel.rl("instance/transformed.vert"))
+			.cullShader(Flywheel.rl("instance/cull/transformed.glsl"))
+			.register();
+
+	public static final InstanceType<PosedInstance> POSED = SimpleInstanceType.builder(PosedInstance::new)
+			.layout(LayoutBuilder.create()
+					.vector("color", FloatRepr.NORMALIZED_UNSIGNED_BYTE, 4)
+					.vector("overlay", IntegerRepr.SHORT, 2)
+					.vector("light", FloatRepr.UNSIGNED_SHORT, 2)
+					.matrix("pose", FloatRepr.FLOAT, 4)
 					.matrix("normal", FloatRepr.FLOAT, 3)
 					.build())
 			.writer((ptr, instance) -> {
@@ -29,8 +49,8 @@ public final class InstanceTypes {
 				ExtraMemoryOps.putMatrix4f(ptr + 12, instance.model);
 				ExtraMemoryOps.putMatrix3f(ptr + 76, instance.normal);
 			})
-			.vertexShader(Flywheel.rl("instance/transformed.vert"))
-			.cullShader(Flywheel.rl("instance/cull/transformed.glsl"))
+			.vertexShader(Flywheel.rl("instance/posed.vert"))
+			.cullShader(Flywheel.rl("instance/cull/posed.glsl"))
 			.register();
 
 	public static final InstanceType<OrientedInstance> ORIENTED = SimpleInstanceType.builder(OrientedInstance::new)
