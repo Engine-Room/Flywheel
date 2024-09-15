@@ -9,9 +9,8 @@ import dev.engine_room.flywheel.api.instance.InstanceHandle;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.lib.transform.Affine;
 
-
 public class TransformedInstance extends ColoredLitInstance implements Affine<TransformedInstance> {
-	public final Matrix4f model = new Matrix4f();
+	public final Matrix4f pose = new Matrix4f();
 
 	public TransformedInstance(InstanceType<? extends TransformedInstance> type, InstanceHandle handle) {
 		super(type, handle);
@@ -19,30 +18,30 @@ public class TransformedInstance extends ColoredLitInstance implements Affine<Tr
 
 	@Override
 	public TransformedInstance rotateAround(Quaternionfc quaternion, float x, float y, float z) {
-		model.rotateAround(quaternion, x, y, z);
+		pose.rotateAround(quaternion, x, y, z);
 		return this;
 	}
 
 	@Override
 	public TransformedInstance translate(float x, float y, float z) {
-		model.translate(x, y, z);
+		pose.translate(x, y, z);
 		return this;
 	}
 
 	@Override
 	public TransformedInstance rotate(Quaternionfc quaternion) {
-		model.rotate(quaternion);
+		pose.rotate(quaternion);
 		return this;
 	}
 
 	@Override
 	public TransformedInstance scale(float x, float y, float z) {
-		model.scale(x, y, z);
+		pose.scale(x, y, z);
 		return this;
 	}
 
 	public TransformedInstance setTransform(PoseStack.Pose pose) {
-		model.set(pose.pose());
+		this.pose.set(pose.pose());
 		return this;
 	}
 
@@ -51,7 +50,7 @@ public class TransformedInstance extends ColoredLitInstance implements Affine<Tr
 	}
 
 	public TransformedInstance setIdentityTransform() {
-		model.identity();
+		pose.identity();
 		return this;
 	}
 
@@ -63,7 +62,7 @@ public class TransformedInstance extends ColoredLitInstance implements Affine<Tr
 	 * </p>
 	 */
 	public TransformedInstance setZeroTransform() {
-		model.zero();
+		pose.zero();
 		return this;
 	}
 }

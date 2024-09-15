@@ -53,7 +53,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 
 	private final ModelHolder bodyModel;
 
-	private final PoseStack stack = new RecyclingPoseStack();
+	private final RecyclingPoseStack stack = new RecyclingPoseStack();
 
 	private BlockState blockState;
 	private boolean active;

@@ -7,7 +7,8 @@ import java.util.function.ObjIntConsumer;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
 import org.joml.Vector3fc;
 
@@ -21,6 +22,8 @@ import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.ModelCache;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
+import dev.engine_room.flywheel.lib.transform.Affine;
+import dev.engine_room.flywheel.lib.transform.TransformStack;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -32,10 +35,9 @@ public final class InstanceTree {
 	@Nullable
 	private final TransformedInstance instance;
 	private final PartPose initialPose;
-	@Unmodifiable
 	private final InstanceTree[] children;
 
-	private final Quaternionf rotation = new Quaternionf();
+	private final Matrix4f poseMatrix;
 
 	public float x;
 	public float y;
@@ -46,7 +48,9 @@ public final class InstanceTree {
 	public float xScale;
 	public float yScale;
 	public float zScale;
+	@ApiStatus.Experimental
 	public boolean visible = true;
+	@ApiStatus.Experimental
 	public boolean skipDraw;
 
 	private InstanceTree(MeshTree source, @Nullable TransformedInstance instance, PartPose initialPose, InstanceTree[] children) {
@@ -54,6 +58,13 @@ public final class InstanceTree {
 		this.instance = instance;
 		this.initialPose = initialPose;
 		this.children = children;
+
+		if (instance != null) {
+			poseMatrix = instance.pose;
+		} else {
+			poseMatrix = new Matrix4f();
+		}
+
 		resetPose();
 	}
 
@@ -64,8 +75,7 @@ public final class InstanceTree {
 		for (int i = 0; i < meshTree.childCount(); i++) {
 			var meshTreeChild = meshTree.child(i);
 			String name = meshTree.childName(i);
-			children[i] = InstanceTree.create(provider, meshTreeChild, meshFinalizerFunc, pathSlash + name);
-
+			children[i] = create(provider, meshTreeChild, meshFinalizerFunc, pathSlash + name);
 		}
 
 		Mesh mesh = meshTree.mesh();
@@ -106,17 +116,35 @@ public final class InstanceTree {
 		return initialPose;
 	}
 
-	@Nullable
+	public int childCount() {
+		return children.length;
+	}
+
 	public InstanceTree child(int index) {
-		if (index < 0 || index >= children.length) {
-			return null;
-		}
 		return children[index];
+	}
+
+	public String childName(int index) {
+		return source.childName(index);
+	}
+
+	public int childIndex(String name) {
+		return source.childIndex(name);
+	}
+
+	public boolean hasChild(String name) {
+		return childIndex(name) >= 0;
 	}
 
 	@Nullable
 	public InstanceTree child(String name) {
-		return child(source.childIndex(name));
+		int index = childIndex(name);
+
+		if (index < 0) {
+			return null;
+		}
+
+		return child(index);
 	}
 
 	public InstanceTree childOrThrow(String name) {
@@ -158,35 +186,48 @@ public final class InstanceTree {
 		}
 	}
 
-	public void translateAndRotate(PoseStack poseStack) {
-		poseStack.translate(x / 16.0F, y / 16.0F, z / 16.0F);
+	public void translateAndRotate(Affine<?> affine, Quaternionf tempQuaternion) {
+		affine.translate(x / 16.0F, y / 16.0F, z / 16.0F);
 
 		if (xRot != 0.0F || yRot != 0.0F || zRot != 0.0F) {
-			poseStack.mulPose(rotation.rotationZYX(zRot, yRot, xRot));
+			affine.rotate(tempQuaternion.rotationZYX(zRot, yRot, xRot));
 		}
 
 		if (xScale != 1.0F || yScale != 1.0F || zScale != 1.0F) {
-			poseStack.scale(xScale, yScale, zScale);
+			affine.scale(xScale, yScale, zScale);
 		}
 	}
 
-	public void updateInstances(PoseStack poseStack) {
-		if (visible) {
-			poseStack.pushPose();
-			translateAndRotate(poseStack);
+	public void translateAndRotate(PoseStack poseStack, Quaternionf tempQuaternion) {
+		translateAndRotate(TransformStack.of(poseStack), tempQuaternion);
+	}
 
-			if (instance != null && !skipDraw) {
-				instance.setTransform(poseStack.last())
-						.setChanged();
-			}
+	public void translateAndRotate(Matrix4f pose) {
+		pose.translate(x / 16.0F, y / 16.0F, z / 16.0F);
 
-			// Use the bare HashMap.forEach because .values() always allocates a new collection.
-			// We also don't want to store an array of children because that would statically use a lot more memory.
-			for (InstanceTree child : children) {
-				child.updateInstances(poseStack);
-			}
+		if (xRot != 0.0F || yRot != 0.0F || zRot != 0.0F) {
+			pose.rotateZYX(zRot, yRot, xRot);
+		}
 
-			poseStack.popPose();
+		if (xScale != ModelPart.DEFAULT_SCALE || yScale != ModelPart.DEFAULT_SCALE || zScale != ModelPart.DEFAULT_SCALE) {
+			pose.scale(xScale, yScale, zScale);
+		}
+	}
+
+	public void updateInstances(Matrix4fc initialPose) {
+		if (!visible) {
+			return;
+		}
+
+		poseMatrix.set(initialPose);
+		translateAndRotate(poseMatrix);
+
+		if (instance != null && !skipDraw) {
+			instance.setChanged();
+		}
+
+		for (InstanceTree child : children) {
+			child.updateInstances(poseMatrix);
 		}
 	}
 

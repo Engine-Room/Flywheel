@@ -14,7 +14,7 @@ import dev.engine_room.flywheel.lib.transform.Transform;
 import net.minecraft.util.Mth;
 
 public class PosedInstance extends ColoredLitInstance implements Transform<PosedInstance> {
-	public final Matrix4f model = new Matrix4f();
+	public final Matrix4f pose = new Matrix4f();
 	public final Matrix3f normal = new Matrix3f();
 
 	public PosedInstance(InstanceType<? extends PosedInstance> type, InstanceHandle handle) {
@@ -23,7 +23,7 @@ public class PosedInstance extends ColoredLitInstance implements Transform<Posed
 
 	@Override
 	public PosedInstance mulPose(Matrix4fc pose) {
-		this.model.mul(pose);
+		this.pose.mul(pose);
 		return this;
 	}
 
@@ -35,27 +35,27 @@ public class PosedInstance extends ColoredLitInstance implements Transform<Posed
 
 	@Override
 	public PosedInstance rotateAround(Quaternionfc quaternion, float x, float y, float z) {
-		model.rotateAround(quaternion, x, y, z);
+		pose.rotateAround(quaternion, x, y, z);
 		normal.rotate(quaternion);
 		return this;
 	}
 
 	@Override
 	public PosedInstance translate(float x, float y, float z) {
-		model.translate(x, y, z);
+		pose.translate(x, y, z);
 		return this;
 	}
 
 	@Override
 	public PosedInstance rotate(Quaternionfc quaternion) {
-		model.rotate(quaternion);
+		pose.rotate(quaternion);
 		normal.rotate(quaternion);
 		return this;
 	}
 
 	@Override
 	public PosedInstance scale(float x, float y, float z) {
-		model.scale(x, y, z);
+		pose.scale(x, y, z);
 
 		if (x == y && y == z) {
 			if (x < 0.0f) {
@@ -74,7 +74,7 @@ public class PosedInstance extends ColoredLitInstance implements Transform<Posed
 	}
 
 	public PosedInstance setTransform(PoseStack.Pose pose) {
-		model.set(pose.pose());
+		this.pose.set(pose.pose());
 		normal.set(pose.normal());
 		return this;
 	}
@@ -84,7 +84,7 @@ public class PosedInstance extends ColoredLitInstance implements Transform<Posed
 	}
 
 	public PosedInstance setIdentityTransform() {
-		model.identity();
+		pose.identity();
 		normal.identity();
 		return this;
 	}
@@ -97,7 +97,7 @@ public class PosedInstance extends ColoredLitInstance implements Transform<Posed
 	 * </p>
 	 */
 	public PosedInstance setZeroTransform() {
-		model.zero();
+		pose.zero();
 		normal.zero();
 		return this;
 	}

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4fc;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -18,7 +19,6 @@ import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.model.RetexturedMesh;
 import dev.engine_room.flywheel.lib.model.part.InstanceTree;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
-import dev.engine_room.flywheel.lib.util.RecyclingPoseStack;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
@@ -60,7 +60,8 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 	@Nullable
 	private final InstanceTree lock;
 
-	private final PoseStack poseStack = new RecyclingPoseStack();
+	@Nullable
+	private final Matrix4fc initialPose;
 	private final BrightnessCombiner brightnessCombiner = new BrightnessCombiner();
 	@Nullable
 	private final DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> neighborCombineResult;
@@ -83,12 +84,13 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 			lid = instances.childOrThrow("lid");
 			lock = instances.childOrThrow("lock");
 
-			poseStack.pushPose();
+			PoseStack poseStack = new PoseStack();
 			TransformStack.of(poseStack).translate(getVisualPosition());
 			float horizontalAngle = blockState.getValue(ChestBlock.FACING).toYRot();
 			poseStack.translate(0.5F, 0.5F, 0.5F);
 			poseStack.mulPose(Axis.YP.rotationDegrees(-horizontalAngle));
 			poseStack.translate(-0.5F, -0.5F, -0.5F);
+			initialPose = poseStack.last().pose();
 
 			neighborCombineResult = chestBlock.combine(blockState, level, pos, true);
 			lidProgress = neighborCombineResult.apply(ChestBlock.opennessCombiner(blockEntity));
@@ -99,6 +101,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 			instances = null;
 			lid = null;
 			lock = null;
+			initialPose = null;
 			neighborCombineResult = null;
 			lidProgress = null;
 		}
@@ -145,7 +148,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 
 		lid.xRot = -(progress * ((float) Math.PI / 2F));
 		lock.xRot = lid.xRot;
-		instances.updateInstances(poseStack);
+		instances.updateInstances(initialPose);
 	}
 
 	@Override

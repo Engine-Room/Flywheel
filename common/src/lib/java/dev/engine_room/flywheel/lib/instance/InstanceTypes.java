@@ -25,7 +25,7 @@ public final class InstanceTypes {
 				MemoryUtil.memPutByte(ptr + 3, instance.alpha);
 				ExtraMemoryOps.put2x16(ptr + 4, instance.overlay);
 				ExtraMemoryOps.put2x16(ptr + 8, instance.light);
-				ExtraMemoryOps.putMatrix4f(ptr + 12, instance.model);
+				ExtraMemoryOps.putMatrix4f(ptr + 12, instance.pose);
 			})
 			.vertexShader(Flywheel.rl("instance/transformed.vert"))
 			.cullShader(Flywheel.rl("instance/cull/transformed.glsl"))
@@ -46,7 +46,7 @@ public final class InstanceTypes {
 				MemoryUtil.memPutByte(ptr + 3, instance.alpha);
 				ExtraMemoryOps.put2x16(ptr + 4, instance.overlay);
 				ExtraMemoryOps.put2x16(ptr + 8, instance.light);
-				ExtraMemoryOps.putMatrix4f(ptr + 12, instance.model);
+				ExtraMemoryOps.putMatrix4f(ptr + 12, instance.pose);
 				ExtraMemoryOps.putMatrix3f(ptr + 76, instance.normal);
 			})
 			.vertexShader(Flywheel.rl("instance/posed.vert"))

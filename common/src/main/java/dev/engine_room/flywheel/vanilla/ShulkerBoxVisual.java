@@ -4,7 +4,6 @@ import java.util.function.Consumer;
 
 import org.joml.Quaternionf;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
 import dev.engine_room.flywheel.api.instance.Instance;
@@ -46,7 +45,7 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	private final TransformedInstance base;
 	private final TransformedInstance lid;
 
-	private final PoseStack stack = new RecyclingPoseStack();
+	private final RecyclingPoseStack stack = new RecyclingPoseStack();
 
 	private float lastProgress = Float.NaN;
 

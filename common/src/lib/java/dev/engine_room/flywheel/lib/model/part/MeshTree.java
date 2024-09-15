@@ -34,13 +34,13 @@ public final class MeshTree {
 	private final Mesh mesh;
 	private final PartPose initialPose;
 	private final MeshTree[] children;
-	private final String[] childKeys;
+	private final String[] childNames;
 
-	private MeshTree(@Nullable Mesh mesh, PartPose initialPose, MeshTree[] children, String[] childKeys) {
+	private MeshTree(@Nullable Mesh mesh, PartPose initialPose, MeshTree[] children, String[] childNames) {
 		this.mesh = mesh;
 		this.initialPose = initialPose;
-		this.childKeys = childKeys;
 		this.children = children;
+		this.childNames = childNames;
 	}
 
 	public static MeshTree of(ModelLayerLocation layer) {
@@ -59,15 +59,15 @@ public final class MeshTree {
 		var modelPartChildren = FlwLibLink.INSTANCE.getModelPartChildren(modelPart);
 
 		// Freeze the ordering here. Maybe we want to sort this?
-		String[] childKeys = modelPartChildren.keySet()
-				.toArray(new String[0]);
+		String[] childNames = modelPartChildren.keySet()
+				.toArray(String[]::new);
 
-		MeshTree[] children = new MeshTree[modelPartChildren.size()];
-		for (int i = 0; i < childKeys.length; i++) {
-			children[i] = convert(modelPartChildren.get(childKeys[i]), objects);
+		MeshTree[] children = new MeshTree[childNames.length];
+		for (int i = 0; i < childNames.length; i++) {
+			children[i] = convert(modelPartChildren.get(childNames[i]), objects);
 		}
 
-		return new MeshTree(compile(modelPart, objects), modelPart.getInitialPose(), children, childKeys);
+		return new MeshTree(compile(modelPart, objects), modelPart.getInitialPose(), children, childNames);
 	}
 
 	@Nullable
@@ -103,11 +103,11 @@ public final class MeshTree {
 	}
 
 	public String childName(int index) {
-		return childKeys[index];
+		return childNames[index];
 	}
 
 	public int childIndex(String name) {
-		return Arrays.binarySearch(childKeys, name);
+		return Arrays.binarySearch(childNames, name);
 	}
 
 	public boolean hasChild(String name) {
