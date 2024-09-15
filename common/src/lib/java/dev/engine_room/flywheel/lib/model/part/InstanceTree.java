@@ -34,29 +34,29 @@ public final class InstanceTree {
 	private final MeshTree source;
 	@Nullable
 	private final TransformedInstance instance;
-	private final PartPose initialPose;
 	private final InstanceTree[] children;
 
 	private final Matrix4f poseMatrix;
 
-	public float x;
-	public float y;
-	public float z;
-	public float xRot;
-	public float yRot;
-	public float zRot;
-	public float xScale;
-	public float yScale;
-	public float zScale;
+	private float x;
+	private float y;
+	private float z;
+	private float xRot;
+	private float yRot;
+	private float zRot;
+	private float xScale;
+	private float yScale;
+	private float zScale;
 	@ApiStatus.Experimental
 	public boolean visible = true;
 	@ApiStatus.Experimental
 	public boolean skipDraw;
 
-	private InstanceTree(MeshTree source, @Nullable TransformedInstance instance, PartPose initialPose, InstanceTree[] children) {
+	private boolean changed;
+
+	private InstanceTree(MeshTree source, @Nullable TransformedInstance instance, InstanceTree[] children) {
 		this.source = source;
 		this.instance = instance;
-		this.initialPose = initialPose;
 		this.children = children;
 
 		if (instance != null) {
@@ -88,7 +88,7 @@ public final class InstanceTree {
 			instance = null;
 		}
 
-		return new InstanceTree(meshTree, instance, meshTree.initialPose(), children);
+		return new InstanceTree(meshTree, instance, children);
 	}
 
 	public static InstanceTree create(InstancerProvider provider, MeshTree meshTree, BiFunction<String, Mesh, Model.ConfiguredMesh> meshFinalizerFunc) {
@@ -113,7 +113,7 @@ public final class InstanceTree {
 	}
 
 	public PartPose initialPose() {
-		return initialPose;
+		return source.initialPose();
 	}
 
 	public int childCount() {
@@ -214,57 +214,222 @@ public final class InstanceTree {
 		}
 	}
 
+	/**
+	 * Update the instances in this tree, assuming initialPose changes.
+	 *
+	 * <p>This is the preferred method for entity visuals, or if you're not sure which you need.
+	 *
+	 * @param initialPose The root transformation matrix.
+	 */
 	public void updateInstances(Matrix4fc initialPose) {
+		propagateAnimation(initialPose, true);
+	}
+
+	/**
+	 * Update the instances in this tree, assuming initialPose doesn't change between invocations.
+	 *
+	 * <p>This is the preferred method for block entity visuals.
+	 *
+	 * @param initialPose The root transformation matrix.
+	 */
+	public void updateInstancesStatic(Matrix4fc initialPose) {
+		propagateAnimation(initialPose, false);
+	}
+
+	/**
+	 * Propagate pose transformations to this tree and all its children.
+	 *
+	 * @param initialPose The root transformation matrix.
+	 * @param force       Whether to force the update even if this node's transformations haven't changed.
+	 */
+	public void propagateAnimation(Matrix4fc initialPose, boolean force) {
 		if (!visible) {
 			return;
 		}
 
-		poseMatrix.set(initialPose);
-		translateAndRotate(poseMatrix);
+		if (changed || force) {
+			poseMatrix.set(initialPose);
+			translateAndRotate(poseMatrix);
+			force = true;
 
-		if (instance != null && !skipDraw) {
-			instance.setChanged();
+			if (instance != null && !skipDraw) {
+				instance.setChanged();
+			}
 		}
 
 		for (InstanceTree child : children) {
-			child.updateInstances(poseMatrix);
+			child.propagateAnimation(poseMatrix, force);
 		}
+
+		changed = false;
+	}
+
+	public float xPos() {
+		return x;
+	}
+
+	public float yPos() {
+		return y;
+	}
+
+	public float zPos() {
+		return z;
+	}
+
+	public float xRot() {
+		return xRot;
+	}
+
+	public float yRot() {
+		return yRot;
+	}
+
+	public float zRot() {
+		return zRot;
+	}
+
+	public float xScale() {
+		return xScale;
+	}
+
+	public float yScale() {
+		return yScale;
+	}
+
+	public float zScale() {
+		return zScale;
 	}
 
 	public void pos(float x, float y, float z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
+		setChanged();
+	}
+
+	public void xPos(float x) {
+		this.x = x;
+		setChanged();
+	}
+
+	public void yPos(float y) {
+		this.y = y;
+		setChanged();
+	}
+
+	public void zPos(float z) {
+		this.z = z;
+		setChanged();
 	}
 
 	public void rotation(float xRot, float yRot, float zRot) {
 		this.xRot = xRot;
 		this.yRot = yRot;
 		this.zRot = zRot;
+		setChanged();
+	}
+
+	public void xRot(float xRot) {
+		this.xRot = xRot;
+		setChanged();
+	}
+
+	public void yRot(float yRot) {
+		this.yRot = yRot;
+		setChanged();
+	}
+
+	public void zRot(float zRot) {
+		this.zRot = zRot;
+		setChanged();
 	}
 
 	public void scale(float xScale, float yScale, float zScale) {
 		this.xScale = xScale;
 		this.yScale = yScale;
 		this.zScale = zScale;
+		setChanged();
+	}
+
+	public void xScale(float xScale) {
+		this.xScale = xScale;
+		setChanged();
+	}
+
+	public void yScale(float yScale) {
+		this.yScale = yScale;
+		setChanged();
+	}
+
+	public void zScale(float zScale) {
+		this.zScale = zScale;
+		setChanged();
 	}
 
 	public void offsetPos(float xOffset, float yOffset, float zOffset) {
 		x += xOffset;
 		y += yOffset;
 		z += zOffset;
+		setChanged();
+	}
+
+	public void offsetXPos(float xOffset) {
+		x += xOffset;
+		setChanged();
+	}
+
+	public void offsetYPos(float yOffset) {
+		y += yOffset;
+		setChanged();
+	}
+
+	public void offsetZPos(float zOffset) {
+		z += zOffset;
+		setChanged();
 	}
 
 	public void offsetRotation(float xOffset, float yOffset, float zOffset) {
 		xRot += xOffset;
 		yRot += yOffset;
 		zRot += zOffset;
+		setChanged();
+	}
+
+	public void offsetXRot(float xOffset) {
+		xRot += xOffset;
+		setChanged();
+	}
+
+	public void offsetYRot(float yOffset) {
+		yRot += yOffset;
+		setChanged();
+	}
+
+	public void offsetZRot(float zOffset) {
+		zRot += zOffset;
+		setChanged();
 	}
 
 	public void offsetScale(float xOffset, float yOffset, float zOffset) {
 		xScale += xOffset;
 		yScale += yOffset;
 		zScale += zOffset;
+		setChanged();
+	}
+
+	public void offsetXScale(float xOffset) {
+		xScale += xOffset;
+		setChanged();
+	}
+
+	public void offsetYScale(float yOffset) {
+		yScale += yOffset;
+		setChanged();
+	}
+
+	public void offsetZScale(float zOffset) {
+		zScale += zOffset;
+		setChanged();
 	}
 
 	public void offsetPos(Vector3fc offset) {
@@ -293,10 +458,11 @@ public final class InstanceTree {
 		xScale = ModelPart.DEFAULT_SCALE;
 		yScale = ModelPart.DEFAULT_SCALE;
 		zScale = ModelPart.DEFAULT_SCALE;
+		setChanged();
 	}
 
 	public void resetPose() {
-		loadPose(initialPose);
+		loadPose(source.initialPose());
 	}
 
 	public void copyTransform(InstanceTree tree) {
@@ -309,6 +475,7 @@ public final class InstanceTree {
 		xScale = tree.xScale;
 		yScale = tree.yScale;
 		zScale = tree.zScale;
+		setChanged();
 	}
 
 	public void copyTransform(ModelPart modelPart) {
@@ -321,6 +488,7 @@ public final class InstanceTree {
 		xScale = modelPart.xScale;
 		yScale = modelPart.yScale;
 		zScale = modelPart.zScale;
+		setChanged();
 	}
 
 	public void delete() {
@@ -330,6 +498,10 @@ public final class InstanceTree {
 		for (InstanceTree child : children) {
 			child.delete();
 		}
+	}
+
+	private void setChanged() {
+		changed = true;
 	}
 
 	@ApiStatus.Experimental

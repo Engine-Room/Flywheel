@@ -146,9 +146,9 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		progress = 1.0F - progress;
 		progress = 1.0F - progress * progress * progress;
 
-		lid.xRot = -(progress * ((float) Math.PI / 2F));
-		lock.xRot = lid.xRot;
-		instances.updateInstances(initialPose);
+		lid.xRot(-(progress * ((float) Math.PI / 2F)));
+		lock.xRot(lid.xRot());
+		instances.updateInstancesStatic(initialPose);
 	}
 
 	@Override
