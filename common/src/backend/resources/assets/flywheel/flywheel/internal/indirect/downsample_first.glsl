@@ -1,12 +1,12 @@
 #include "flywheel:internal/indirect/downsample.glsl"
 
 layout(binding = 0) uniform sampler2D mip_0;
-layout(binding = 1, r32f) uniform writeonly image2D mip_1;
-layout(binding = 2, r32f) uniform writeonly image2D mip_2;
-layout(binding = 3, r32f) uniform writeonly image2D mip_3;
-layout(binding = 4, r32f) uniform writeonly image2D mip_4;
-layout(binding = 5, r32f) uniform writeonly image2D mip_5;
-layout(binding = 6, r32f) uniform writeonly image2D mip_6;
+layout(binding = 1, r32f) uniform restrict writeonly image2D mip_1;
+layout(binding = 2, r32f) uniform restrict writeonly image2D mip_2;
+layout(binding = 3, r32f) uniform restrict writeonly image2D mip_3;
+layout(binding = 4, r32f) uniform restrict writeonly image2D mip_4;
+layout(binding = 5, r32f) uniform restrict writeonly image2D mip_5;
+layout(binding = 6, r32f) uniform restrict writeonly image2D mip_6;
 
 float reduce_load_mip_0(uvec2 tex) {
     // NOTE: mip_0 is the actual depth buffer, and mip_1 is the "base" of our depth pyramid and has the next

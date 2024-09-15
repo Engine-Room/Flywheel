@@ -1,12 +1,12 @@
 #include "flywheel:internal/indirect/downsample.glsl"
 
-layout(binding = 0, r32f) uniform readonly image2D mip_6;
-layout(binding = 1, r32f) uniform writeonly image2D mip_7;
-layout(binding = 2, r32f) uniform writeonly image2D mip_8;
-layout(binding = 3, r32f) uniform writeonly image2D mip_9;
-layout(binding = 4, r32f) uniform writeonly image2D mip_10;
-layout(binding = 5, r32f) uniform writeonly image2D mip_11;
-layout(binding = 6, r32f) uniform writeonly image2D mip_12;
+layout(binding = 0, r32f) uniform restrict readonly image2D mip_6;
+layout(binding = 1, r32f) uniform restrict writeonly image2D mip_7;
+layout(binding = 2, r32f) uniform restrict writeonly image2D mip_8;
+layout(binding = 3, r32f) uniform restrict writeonly image2D mip_9;
+layout(binding = 4, r32f) uniform restrict writeonly image2D mip_10;
+layout(binding = 5, r32f) uniform restrict writeonly image2D mip_11;
+layout(binding = 6, r32f) uniform restrict writeonly image2D mip_12;
 
 float reduce_load_mip_6(ivec2 tex) {
     // NOTE: We could bind mip_6 as a sampler2D and use textureGather,

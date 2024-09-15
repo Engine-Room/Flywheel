@@ -82,6 +82,10 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	}
 
 	public void uploadInstances(StagingBuffer stagingBuffer, int instanceVbo) {
+		if (changedPages.isEmpty()) {
+			return;
+		}
+
 		int numPages = mapping.pageCount();
 
 		var instanceCount = instances.size();
