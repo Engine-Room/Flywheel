@@ -170,6 +170,8 @@ public class ObjectStorage extends AbstractArena {
 			pages = EMPTY_ALLOCATION;
 			modelIndex = -1;
 			objectCount = 0;
+
+			ObjectStorage.this.needsUpload = true;
 		}
 
 		/**
