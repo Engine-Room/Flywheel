@@ -78,7 +78,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 			ChestType chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
 			TextureAtlasSprite sprite = Sheets.chooseMaterial(blockEntity, chestType, isChristmas()).sprite();
 
-			instances = InstanceTree.create(instancerProvider, LAYER_LOCATIONS.get(chestType), (path, mesh) -> {
+			instances = InstanceTree.create(instancerProvider(), LAYER_LOCATIONS.get(chestType), (path, mesh) -> {
 				return new Model.ConfiguredMesh(MATERIAL, new RetexturedMesh(mesh, sprite));
 			});
 			lid = instances.childOrThrow("lid");

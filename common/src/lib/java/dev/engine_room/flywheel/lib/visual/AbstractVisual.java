@@ -13,16 +13,12 @@ public abstract class AbstractVisual implements Visual {
 	 * Useful for passing to child visuals.
 	 */
 	protected final VisualizationContext visualizationContext;
-	protected final InstancerProvider instancerProvider;
-	protected final Vec3i renderOrigin;
 	protected final Level level;
 
 	protected boolean deleted = false;
 
 	public AbstractVisual(VisualizationContext ctx, Level level, float partialTick) {
 		this.visualizationContext = ctx;
-		this.instancerProvider = ctx.instancerProvider();
-		this.renderOrigin = ctx.renderOrigin();
 		this.level = level;
 	}
 
@@ -31,6 +27,14 @@ public abstract class AbstractVisual implements Visual {
 	}
 
     protected abstract void _delete();
+
+	protected InstancerProvider instancerProvider() {
+		return visualizationContext.instancerProvider();
+	}
+
+	protected Vec3i renderOrigin() {
+		return visualizationContext.renderOrigin();
+	}
 
 	@Override
 	public final void delete() {

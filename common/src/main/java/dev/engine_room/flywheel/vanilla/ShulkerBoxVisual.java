@@ -78,12 +78,12 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 	}
 
 	private TransformedInstance createBaseInstance(Material texture) {
-		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, BASE_MODELS.get(texture))
+		return instancerProvider().instancer(InstanceTypes.TRANSFORMED, BASE_MODELS.get(texture))
 				.createInstance();
 	}
 
 	private TransformedInstance createLidInstance(Material texture) {
-		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, LID_MODELS.get(texture))
+		return instancerProvider().instancer(InstanceTypes.TRANSFORMED, LID_MODELS.get(texture))
 				.createInstance();
 	}
 

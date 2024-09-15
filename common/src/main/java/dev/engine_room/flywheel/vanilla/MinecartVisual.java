@@ -82,7 +82,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 	}
 
 	private TransformedInstance createBodyInstance() {
-		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, bodyModel.get())
+		return instancerProvider().instancer(InstanceTypes.TRANSFORMED, bodyModel.get())
 				.createInstance();
 	}
 
@@ -101,7 +101,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 			return null;
 		}
 
-		return instancerProvider.instancer(InstanceTypes.TRANSFORMED, Models.block(blockState))
+		return instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.block(blockState))
 				.createInstance();
 	}
 
@@ -141,6 +141,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 		double posY = Mth.lerp(partialTick, entity.yOld, entity.getY());
 		double posZ = Mth.lerp(partialTick, entity.zOld, entity.getZ());
 
+		var renderOrigin = renderOrigin();
 		stack.translate(posX - renderOrigin.getX(), posY - renderOrigin.getY(), posZ - renderOrigin.getZ());
 		float yaw = Mth.lerp(partialTick, entity.yRotO, entity.getYRot());
 

@@ -52,7 +52,7 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 		this.blockEntity = blockEntity;
 		this.pos = blockEntity.getBlockPos();
 		this.blockState = blockEntity.getBlockState();
-		this.visualPos = pos.subtract(renderOrigin);
+		this.visualPos = pos.subtract(ctx.renderOrigin());
 	}
 
 	@Override

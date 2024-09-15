@@ -46,7 +46,7 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	}
 
 	private OrientedInstance createBellInstance() {
-		return instancerProvider.instancer(InstanceTypes.ORIENTED, BELL_MODEL.get())
+		return instancerProvider().instancer(InstanceTypes.ORIENTED, BELL_MODEL.get())
 				.createInstance();
 	}
 
