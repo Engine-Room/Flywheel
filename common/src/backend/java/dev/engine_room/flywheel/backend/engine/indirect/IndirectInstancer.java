@@ -42,7 +42,6 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		if (index < 0 || index >= instanceCount()) {
 			return;
 		}
-		changed.set(index);
 		changedPages.set(ObjectStorage.objectIndex2PageIndex(index));
 	}
 
@@ -102,15 +101,34 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 			long baseByte = mapping.page2ByteOffset(page);
 			long size = (endObject - startObject) * instanceStride;
 
-			stagingBuffer.enqueueCopy(size, instanceVbo, baseByte, ptr -> {
+			// Because writes are broken into pages, we end up with significantly more calls into
+			// StagingBuffer#enqueueCopy and the allocations for the writer got out of hand. Here
+			// we've inlined the enqueueCopy call and do not allocate the write lambda at all.
+			// Doing so cut upload times in half.
+
+			// Try to write directly into the staging buffer if there is enough contiguous space.
+			long direct = stagingBuffer.reserveForCopy(size, instanceVbo, baseByte);
+
+			if (direct != MemoryUtil.NULL) {
 				for (int i = startObject; i < endObject; i++) {
-					writer.write(ptr, instances.get(i));
-					ptr += instanceStride;
+					var instance = instances.get(i);
+					writer.write(direct, instance);
+					direct += instanceStride;
 				}
-			});
+				continue;
+			}
+
+			// Otherwise, write to a scratch buffer and enqueue a copy.
+			var block = stagingBuffer.getScratch(size);
+			var ptr = block.ptr();
+			for (int i = startObject; i < endObject; i++) {
+				var instance = instances.get(i);
+				writer.write(ptr, instance);
+				ptr += instanceStride;
+			}
+			stagingBuffer.enqueueCopy(block.ptr(), size, instanceVbo, baseByte);
 		}
 
-		changed.clear();
 		changedPages.clear();
 	}
 
