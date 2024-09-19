@@ -13,8 +13,6 @@ import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
 import dev.engine_room.flywheel.lib.model.ResourceReloadCache;
 import dev.engine_room.flywheel.lib.model.ResourceReloadHolder;
 import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
-import dev.engine_room.flywheel.lib.model.part.MeshTree;
-import dev.engine_room.flywheel.lib.model.part.ModelTree;
 import dev.engine_room.flywheel.lib.util.LevelAttached;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
@@ -113,8 +111,6 @@ public final class FlywheelForge {
 
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> ResourceReloadCache.onEndClientResourceReload());
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> ResourceReloadHolder.onEndClientResourceReload());
-		modEventBus.addListener((EndClientResourceReloadEvent e) -> MeshTree.onEndClientResourceReload());
-		modEventBus.addListener((EndClientResourceReloadEvent e) -> ModelTree.onEndClientResourceReload());
 
 		modEventBus.addListener(PartialModelEventHandler::onRegisterAdditional);
 		modEventBus.addListener(PartialModelEventHandler::onBakingCompleted);

@@ -2,23 +2,20 @@ package dev.engine_room.flywheel.vanilla;
 
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import org.joml.Matrix4f;
 
 import dev.engine_room.flywheel.api.instance.Instance;
+import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.material.CutoutShaders;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
-import dev.engine_room.flywheel.lib.model.ResourceReloadCache;
 import dev.engine_room.flywheel.lib.model.part.InstanceTree;
-import dev.engine_room.flywheel.lib.model.part.LoweringVisitor;
-import dev.engine_room.flywheel.lib.model.part.ModelTree;
+import dev.engine_room.flywheel.lib.model.part.ModelTrees;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.DyeColor;
@@ -26,15 +23,13 @@ import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
 public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockEntity> implements SimpleDynamicVisual {
-	private static final dev.engine_room.flywheel.api.material.Material MATERIAL = SimpleMaterial.builder()
+	private static final Material MATERIAL = SimpleMaterial.builder()
 			.cutout(CutoutShaders.ONE_TENTH)
 			.texture(Sheets.SHULKER_SHEET)
 			.mipmap(false)
 			.backfaceCulling(false)
 			.build();
-
-
-	private static final Function<Material, LoweringVisitor> VISITORS = new ResourceReloadCache<>(m -> LoweringVisitor.pruning(Set.of("head"), MATERIAL, m.sprite()));
+	private static final Set<String> PATHS_TO_PRUNE = Set.of("/head");
 
 	private final InstanceTree instances;
 	private final InstanceTree lid;
@@ -47,23 +42,22 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 		super(ctx, blockEntity, partialTick);
 
 		DyeColor color = blockEntity.getColor();
-		Material texture;
+		net.minecraft.client.resources.model.Material texture;
 		if (color == null) {
 			texture = Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION;
 		} else {
 			texture = Sheets.SHULKER_TEXTURE_LOCATION.get(color.getId());
 		}
 
-		instances = InstanceTree.create(instancerProvider(), ModelTree.of(ModelLayers.SHULKER, VISITORS.apply(texture)));
+		instances = InstanceTree.create(instancerProvider(), ModelTrees.of(ModelLayers.SHULKER, PATHS_TO_PRUNE, texture, MATERIAL));
+		lid = instances.childOrThrow("lid");
 
 		initialPose = createInitialPose();
-
-		lid = instances.childOrThrow("lid");
 	}
 
 	private Matrix4f createInitialPose() {
-		var rotation = getDirection().getRotation();
 		var visualPosition = getVisualPosition();
+		var rotation = getDirection().getRotation();
 		return new Matrix4f().translate(visualPosition.getX(), visualPosition.getY(), visualPosition.getZ())
 				.translate(0.5f, 0.5f, 0.5f)
 				.scale(0.9995f)

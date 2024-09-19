@@ -1,12 +1,8 @@
 package dev.engine_room.flywheel.lib.model.part;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -14,6 +10,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.lib.internal.FlwLibLink;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
+import dev.engine_room.flywheel.lib.model.ResourceReloadCache;
 import dev.engine_room.flywheel.lib.model.SimpleQuadMesh;
 import dev.engine_room.flywheel.lib.vertex.PosTexNormalVertexView;
 import dev.engine_room.flywheel.lib.vertex.VertexView;
@@ -28,7 +25,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 public final class MeshTree {
 	private static final ThreadLocal<ThreadLocalObjects> THREAD_LOCAL_OBJECTS = ThreadLocal.withInitial(ThreadLocalObjects::new);
 	private static final PoseStack.Pose IDENTITY_POSE = new PoseStack().last();
-	private static final Map<ModelLayerLocation, MeshTree> CACHE = new ConcurrentHashMap<>();
+	private static final ResourceReloadCache<ModelLayerLocation, MeshTree> CACHE = new ResourceReloadCache<>(MeshTree::convert);
 
 	@Nullable
 	private final Mesh mesh;
@@ -44,7 +41,7 @@ public final class MeshTree {
 	}
 
 	public static MeshTree of(ModelLayerLocation layer) {
-		return CACHE.computeIfAbsent(layer, MeshTree::convert);
+		return CACHE.get(layer);
 	}
 
 	private static MeshTree convert(ModelLayerLocation layer) {
@@ -58,9 +55,9 @@ public final class MeshTree {
 	private static MeshTree convert(ModelPart modelPart, ThreadLocalObjects objects) {
 		var modelPartChildren = FlwLibLink.INSTANCE.getModelPartChildren(modelPart);
 
-		// Freeze the ordering here. Maybe we want to sort this?
 		String[] childNames = modelPartChildren.keySet()
 				.toArray(String[]::new);
+		Arrays.sort(childNames);
 
 		MeshTree[] children = new MeshTree[childNames.length];
 		for (int i = 0; i < childNames.length; i++) {
@@ -133,20 +130,6 @@ public final class MeshTree {
 		}
 
 		return child;
-	}
-
-	public void traverse(Consumer<Mesh> consumer) {
-		if (mesh != null) {
-			consumer.accept(mesh);
-		}
-		for (MeshTree child : children) {
-			child.traverse(consumer);
-		}
-	}
-
-	@ApiStatus.Internal
-	public static void onEndClientResourceReload() {
-		CACHE.clear();
 	}
 
 	private static class ThreadLocalObjects {

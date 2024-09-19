@@ -9,10 +9,8 @@ import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
-import dev.engine_room.flywheel.lib.model.ResourceReloadHolder;
 import dev.engine_room.flywheel.lib.model.part.InstanceTree;
-import dev.engine_room.flywheel.lib.model.part.LoweringVisitor;
-import dev.engine_room.flywheel.lib.model.part.ModelTree;
+import dev.engine_room.flywheel.lib.model.part.ModelTrees;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -26,9 +24,6 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 			.mipmap(false)
 			.build();
 
-	// Need to hold the visitor in a ResourceReloadHolder to ensure we have a valid sprite.
-	private static final ResourceReloadHolder<LoweringVisitor> VISITOR = new ResourceReloadHolder<>(() -> LoweringVisitor.create(MATERIAL, BellRenderer.BELL_RESOURCE_LOCATION.sprite()));
-
 	private final InstanceTree instances;
 	private final InstanceTree bellBody;
 
@@ -39,7 +34,7 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	public BellVisual(VisualizationContext ctx, BellBlockEntity blockEntity, float partialTick) {
 		super(ctx, blockEntity, partialTick);
 
-		instances = InstanceTree.create(instancerProvider(), ModelTree.of(ModelLayers.BELL, VISITOR.get()));
+		instances = InstanceTree.create(instancerProvider(), ModelTrees.of(ModelLayers.BELL, BellRenderer.BELL_RESOURCE_LOCATION, MATERIAL));
 		bellBody = instances.childOrThrow("bell_body");
 
 		BlockPos visualPos = getVisualPosition();

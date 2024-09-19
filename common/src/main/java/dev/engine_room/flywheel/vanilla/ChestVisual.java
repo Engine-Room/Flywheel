@@ -4,7 +4,6 @@ import java.util.Calendar;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -15,10 +14,8 @@ import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.material.CutoutShaders;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
-import dev.engine_room.flywheel.lib.model.ResourceReloadCache;
 import dev.engine_room.flywheel.lib.model.part.InstanceTree;
-import dev.engine_room.flywheel.lib.model.part.LoweringVisitor;
-import dev.engine_room.flywheel.lib.model.part.ModelTree;
+import dev.engine_room.flywheel.lib.model.part.ModelTrees;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
@@ -28,7 +25,6 @@ import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
@@ -55,8 +51,6 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		LAYER_LOCATIONS.put(ChestType.RIGHT, ModelLayers.DOUBLE_CHEST_RIGHT);
 	}
 
-	private static final Function<TextureAtlasSprite, LoweringVisitor> VISITOR = new ResourceReloadCache<>(s -> LoweringVisitor.create(MATERIAL, s));
-
 	@Nullable
 	private final InstanceTree instances;
 	@Nullable
@@ -80,8 +74,8 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		Block block = blockState.getBlock();
 		if (block instanceof AbstractChestBlock<?> chestBlock) {
 			ChestType chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
-			TextureAtlasSprite sprite = Sheets.chooseMaterial(blockEntity, chestType, isChristmas()).sprite();
-			instances = InstanceTree.create(instancerProvider(), ModelTree.of(LAYER_LOCATIONS.get(chestType), VISITOR.apply(sprite)));
+			net.minecraft.client.resources.model.Material texture = Sheets.chooseMaterial(blockEntity, chestType, isChristmas());
+			instances = InstanceTree.create(instancerProvider(), ModelTrees.of(LAYER_LOCATIONS.get(chestType), texture, MATERIAL));
 			lid = instances.childOrThrow("lid");
 			lock = instances.childOrThrow("lock");
 
