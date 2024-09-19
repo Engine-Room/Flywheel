@@ -128,7 +128,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 	@Override
 	protected <I extends Instance> InstancedInstancer<I> create(InstancerKey<I> key) {
-		return new InstancedInstancer<>(key.type(), key.environment());
+		return new InstancedInstancer<>(key, () -> getInstancer(key));
 	}
 
 	@Override

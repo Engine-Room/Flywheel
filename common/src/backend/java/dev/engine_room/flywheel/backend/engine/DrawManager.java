@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
-import dev.engine_room.flywheel.api.instance.Instancer;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.FlwBackend;
@@ -36,9 +35,13 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 	 */
 	protected final Queue<UninitializedInstancer<N, ?>> initializationQueue = new ConcurrentLinkedQueue<>();
 
+	public <I extends Instance> AbstractInstancer<I> getInstancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType, int bias) {
+		return getInstancer(new InstancerKey<>(environment, type, model, visualType, bias));
+	}
+
 	@SuppressWarnings("unchecked")
-	public <I extends Instance> Instancer<I> getInstancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType, int bias) {
-		return (Instancer<I>) instancers.computeIfAbsent(new InstancerKey<>(environment, type, model, visualType, bias), this::createAndDeferInit);
+	public <I extends Instance> AbstractInstancer<I> getInstancer(InstancerKey<I> key) {
+		return (AbstractInstancer<I>) instancers.computeIfAbsent(key, this::createAndDeferInit);
 	}
 
 	public void flush(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
@@ -94,8 +97,8 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 		return false;
 	}
 
-	protected static <I extends AbstractInstancer<?>> Map<GroupKey<?>, Int2ObjectMap<List<Pair<I, InstanceHandleImpl>>>> doCrumblingSort(Class<I> clazz, List<Engine.CrumblingBlock> crumblingBlocks) {
-		Map<GroupKey<?>, Int2ObjectMap<List<Pair<I, InstanceHandleImpl>>>> byType = new HashMap<>();
+	protected static <I extends AbstractInstancer<?>> Map<GroupKey<?>, Int2ObjectMap<List<Pair<I, InstanceHandleImpl<?>>>>> doCrumblingSort(Class<I> clazz, List<Engine.CrumblingBlock> crumblingBlocks) {
+		Map<GroupKey<?>, Int2ObjectMap<List<Pair<I, InstanceHandleImpl<?>>>>> byType = new HashMap<>();
 		for (Engine.CrumblingBlock block : crumblingBlocks) {
 			int progress = block.progress();
 
@@ -107,7 +110,7 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 				// Filter out instances that weren't created by this engine.
 				// If all is well, we probably shouldn't take the `continue`
 				// branches but better to do checked casts.
-				if (!(instance.handle() instanceof InstanceHandleImpl impl)) {
+				if (!(instance.handle() instanceof InstanceHandleImpl<?> impl)) {
 					continue;
 				}
 

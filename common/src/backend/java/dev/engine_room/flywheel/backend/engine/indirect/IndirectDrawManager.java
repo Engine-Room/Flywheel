@@ -66,7 +66,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 	@Override
 	protected <I extends Instance> IndirectInstancer<?> create(InstancerKey<I> key) {
-		return new IndirectInstancer<>(key.type(), key.environment(), key.model());
+		return new IndirectInstancer<>(key, () -> getInstancer(key));
 	}
 
 	@SuppressWarnings("unchecked")

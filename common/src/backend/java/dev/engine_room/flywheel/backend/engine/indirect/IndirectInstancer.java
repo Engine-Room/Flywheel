@@ -2,17 +2,16 @@ package dev.engine_room.flywheel.backend.engine.indirect;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.UnknownNullability;
 import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.api.instance.Instance;
-import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.instance.InstanceWriter;
-import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.backend.engine.AbstractInstancer;
-import dev.engine_room.flywheel.backend.engine.embed.Environment;
+import dev.engine_room.flywheel.backend.engine.InstancerKey;
 import dev.engine_room.flywheel.backend.util.AtomicBitSet;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 
@@ -29,12 +28,12 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	private int modelIndex = -1;
 	private int baseInstance = -1;
 
-	public IndirectInstancer(InstanceType<I> type, Environment environment, Model model) {
-		super(type, environment);
+	public IndirectInstancer(InstancerKey<I> key, Supplier<AbstractInstancer<I>> recreate) {
+		super(key, recreate);
 		instanceStride = MoreMath.align4(type.layout()
 				.byteSize());
 		writer = this.type.writer();
-		boundingSphere = model.boundingSphere();
+		boundingSphere = key.model().boundingSphere();
 	}
 
 	@Override
