@@ -180,8 +180,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 					TextureBinder.bind(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
 
 					for (var instanceHandlePair : progressEntry.getValue()) {
-						InstancedInstancer<?> instancer = instanceHandlePair.first();
-						var index = instanceHandlePair.second().index;
+						InstancedInstancer<?> instancer = instanceHandlePair.getFirst();
+						var index = instanceHandlePair.getSecond().index;
 
 						program.setInt("_flw_baseInstance", index);
 

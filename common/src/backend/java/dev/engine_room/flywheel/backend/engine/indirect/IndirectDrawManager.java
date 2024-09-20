@@ -219,8 +219,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 					TextureBinder.bind(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
 
 					for (var instanceHandlePair : progressEntry.getValue()) {
-						IndirectInstancer<?> instancer = instanceHandlePair.first();
-						int instanceIndex = instanceHandlePair.second().index;
+						IndirectInstancer<?> instancer = instanceHandlePair.getFirst();
+						int instanceIndex = instanceHandlePair.getSecond().index;
 
 						for (IndirectDraw draw : instancer.draws()) {
 							// Transform the material to be suited for crumbling.

@@ -16,7 +16,6 @@ import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.backend.BackendManager;
 import dev.engine_room.flywheel.backend.BackendConfig;
 import dev.engine_room.flywheel.backend.FlwBackend;
-import dev.engine_room.flywheel.backend.FlwBackendXplatImpl;
 import dev.engine_room.flywheel.backend.compile.LightSmoothness;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ResourceLocationException;
@@ -39,16 +38,14 @@ public class FabricFlwConfig implements FlwConfig {
 
 	private final File file;
 
-	public final FabricBackendConfig backendConfig = new FabricBackendConfig();
-
 	public Backend backend = BackendManager.defaultBackend();
 	public boolean limitUpdates = LIMIT_UPDATES_DEFAULT;
 	public int workerThreads = WORKER_THREADS_DEFAULT;
 
+	public final FabricBackendConfig backendConfig = new FabricBackendConfig();
+
 	public FabricFlwConfig(File file) {
 		this.file = file;
-
-		FlwBackendXplatImpl.CONFIG = backendConfig;
 	}
 
 	@Override
@@ -64,6 +61,11 @@ public class FabricFlwConfig implements FlwConfig {
 	@Override
 	public int workerThreads() {
 		return workerThreads;
+	}
+
+	@Override
+	public BackendConfig backendConfig() {
+		return backendConfig;
 	}
 
 	public void load() {
@@ -177,7 +179,7 @@ public class FabricFlwConfig implements FlwConfig {
 		object.addProperty("backend", Backend.REGISTRY.getIdOrThrow(backend).toString());
 		object.addProperty("limitUpdates", limitUpdates);
 		object.addProperty("workerThreads", workerThreads);
-		object.add("flw_backend", backendConfig.toJson());
+		object.add("flw_backends", backendConfig.toJson());
 		return object;
 	}
 

@@ -10,9 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.api.model.Model;
-import dev.engine_room.flywheel.lib.model.ResourceReloadCache;
 import dev.engine_room.flywheel.lib.model.RetexturedMesh;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
+import dev.engine_room.flywheel.lib.util.ResourceReloadCache;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 

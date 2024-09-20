@@ -35,7 +35,7 @@ public final class FlwImpl {
 		StandardMaterialShaders.init();
 
 		// backend
-		FlwBackend.init();
+		FlwBackend.init(FlwConfig.INSTANCE.backendConfig());
 
 		// vanilla
 		VanillaVisuals.init();

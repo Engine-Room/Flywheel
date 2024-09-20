@@ -8,11 +8,6 @@ public class SpanHighlightLine implements ErrorLine {
 	}
 
 	@Override
-	public String left() {
-		return "";
-	}
-
-	@Override
 	public String right() {
 		return line;
 	}

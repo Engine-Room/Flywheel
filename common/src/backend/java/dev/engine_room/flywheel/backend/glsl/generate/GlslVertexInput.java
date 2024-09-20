@@ -1,7 +1,6 @@
 package dev.engine_room.flywheel.backend.glsl.generate;
 
 public class GlslVertexInput implements GlslBuilder.Declaration {
-
 	private int binding;
 	private String type;
 	private String name;

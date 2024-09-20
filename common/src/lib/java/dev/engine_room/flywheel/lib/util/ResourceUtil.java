@@ -53,10 +53,11 @@ public final class ResourceUtil {
 		}
 	}
 
+	/**
+	 * Same as {@link ResourceLocation#toDebugFileName()}, but also removes the file extension.
+	 */
 	public static String toDebugFileNameNoExtension(ResourceLocation resourceLocation) {
-		var stringLoc = resourceLocation.toString();
-		return stringLoc.substring(0, stringLoc.lastIndexOf('.'))
-				.replace('/', '_')
-				.replace(':', '_');
+		var stringLoc = resourceLocation.toDebugFileName();
+		return stringLoc.substring(0, stringLoc.lastIndexOf('.'));
 	}
 }

@@ -44,7 +44,9 @@ public class BufferTextureInstanceComponent extends InstanceAssemblerComponent {
 
 		fnBody.ret(GlslExpr.call(STRUCT_NAME, unpackArgs));
 
-		builder._addRaw("uniform usamplerBuffer _flw_instances;");
+		builder.uniform()
+				.type("usamplerBuffer")
+				.name("_flw_instances");
 		builder.blankLine();
 		builder.function()
 				.signature(FnSignature.create()

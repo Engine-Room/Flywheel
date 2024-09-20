@@ -13,19 +13,20 @@ public class ShaderStruct {
 	// https://regexr.com/61rpe
 	public static final Pattern PATTERN = Pattern.compile("struct\\s+([\\w_]*)\\s*\\{(.*?)}\\s*([\\w_]*)?\\s*;\\s", Pattern.DOTALL);
 
+	public final Span self;
 	public final Span name;
 	public final Span body;
-	public final Span self;
 	public final Span variableName;
 
-	private final ImmutableList<StructField> fields;
-	private final ImmutableMap<String, Span> fields2Types;
+	public final ImmutableList<StructField> fields;
+	public final ImmutableMap<String, Span> fields2Types;
 
 	public ShaderStruct(Span self, Span name, Span body, Span variableName) {
 		this.self = self;
 		this.name = name;
 		this.body = body;
 		this.variableName = variableName;
+
 		this.fields = parseFields();
 		this.fields2Types = createTypeLookup();
 	}
@@ -51,29 +52,8 @@ public class ShaderStruct {
 		return structs.build();
 	}
 
-	public Span getName() {
-		return name;
-	}
-
-	public Span getBody() {
-		return body;
-	}
-
-	public ImmutableList<StructField> getFields() {
-		return fields;
-	}
-
-	private ImmutableMap<String, Span> createTypeLookup() {
-		ImmutableMap.Builder<String, Span> lookup = ImmutableMap.builder();
-		for (StructField field : fields) {
-			lookup.put(field.name.get(), field.type);
-		}
-
-		return lookup.build();
-	}
-
 	private ImmutableList<StructField> parseFields() {
-		Matcher matcher = StructField.fieldPattern.matcher(body);
+		Matcher matcher = StructField.PATTERN.matcher(body);
 
 		ImmutableList.Builder<StructField> fields = ImmutableList.builder();
 
@@ -86,6 +66,15 @@ public class ShaderStruct {
 		}
 
 		return fields.build();
+	}
+
+	private ImmutableMap<String, Span> createTypeLookup() {
+		ImmutableMap.Builder<String, Span> lookup = ImmutableMap.builder();
+		for (StructField field : fields) {
+			lookup.put(field.name.get(), field.type);
+		}
+
+		return lookup.build();
 	}
 
 	@Override

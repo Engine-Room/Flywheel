@@ -9,6 +9,4 @@ public interface FlwBackendXplat {
 	FlwBackendXplat INSTANCE = DependencyInjection.load(FlwBackendXplat.class, "dev.engine_room.flywheel.backend.FlwBackendXplatImpl");
 
 	int getLightEmission(BlockState state, BlockGetter level, BlockPos pos);
-
-	BackendConfig getConfig();
 }

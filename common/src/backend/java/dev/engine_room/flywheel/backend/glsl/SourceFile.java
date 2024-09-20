@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.mojang.datafixers.util.Pair;
 
 import dev.engine_room.flywheel.backend.glsl.parse.Import;
 import dev.engine_room.flywheel.backend.glsl.parse.ShaderField;
@@ -18,7 +18,6 @@ import dev.engine_room.flywheel.backend.glsl.parse.ShaderFunction;
 import dev.engine_room.flywheel.backend.glsl.parse.ShaderStruct;
 import dev.engine_room.flywheel.backend.glsl.span.Span;
 import dev.engine_room.flywheel.backend.glsl.span.StringSpan;
-import dev.engine_room.flywheel.lib.util.Pair;
 import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
@@ -172,44 +171,48 @@ public class SourceFile implements SourceComponent {
 	 * @param name The name of the struct to find.
 	 * @return null if no definition matches the name.
 	 */
-	public Optional<ShaderStruct> findStructByName(String name) {
+	@Nullable
+	public ShaderStruct findStruct(String name) {
 		ShaderStruct struct = structs.get(name);
 
 		if (struct != null) {
-			return Optional.of(struct);
+			return struct;
 		}
 
 		for (var include : included) {
-			var external = include.structs.get(name);
+			var external = include.findStruct(name);
 
 			if (external != null) {
-				return Optional.of(external);
+				return external;
 			}
 		}
 
-		return Optional.empty();
+		return null;
 	}
 
 	/**
 	 * Search this file and recursively search all imports to find a function definition matching the given name.
 	 *
 	 * @param name The name of the function to find.
-	 * @return Optional#empty() if no definition matches the name.
+	 * @return null if no definition matches the name.
 	 */
-	public Optional<ShaderFunction> findFunction(String name) {
-		ShaderFunction local = functions.get(name);
+	@Nullable
+	public ShaderFunction findFunction(String name) {
+		ShaderFunction function = functions.get(name);
 
-		if (local != null) return Optional.of(local);
+		if (function != null) {
+			return function;
+		}
 
 		for (var include : included) {
-			var external = include.functions.get(name);
+			var external = include.findFunction(name);
 
 			if (external != null) {
-				return Optional.of(external);
+				return external;
 			}
 		}
 
-		return Optional.empty();
+		return null;
 	}
 
 	@Override

@@ -34,7 +34,7 @@ public class InstanceStructComponent implements SourceComponent {
 		var builder = new GlslBuilder();
 
 		var instance = builder.struct();
-		instance.setName(STRUCT_NAME);
+		instance.name(STRUCT_NAME);
 		for (var element : layout.elements()) {
 			instance.addField(LayoutInterpreter.typeName(element.type()), element.name());
 		}

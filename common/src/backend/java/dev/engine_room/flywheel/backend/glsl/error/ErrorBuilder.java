@@ -29,7 +29,6 @@ public class ErrorBuilder {
 	private final List<ErrorLine> lines = new ArrayList<>();
 
 	private ErrorBuilder() {
-
 	}
 
 	public static ErrorBuilder create() {

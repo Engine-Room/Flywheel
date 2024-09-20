@@ -8,6 +8,8 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.mojang.datafixers.util.Pair;
+
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
@@ -16,7 +18,6 @@ import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.FlwBackend;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
 import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
-import dev.engine_room.flywheel.lib.util.Pair;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.resources.model.ModelBakery;

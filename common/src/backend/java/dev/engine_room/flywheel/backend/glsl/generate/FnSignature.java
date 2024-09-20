@@ -3,12 +3,12 @@ package dev.engine_room.flywheel.backend.glsl.generate;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableList;
+import org.jetbrains.annotations.Nullable;
 
-import dev.engine_room.flywheel.lib.util.Pair;
+import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Pair;
 
 public record FnSignature(String returnType, String name, ImmutableList<Pair<String, String>> args) {
-
 	public static Builder create() {
 		return new Builder();
 	}
@@ -26,7 +26,7 @@ public record FnSignature(String returnType, String name, ImmutableList<Pair<Str
 
 	public Collection<? extends GlslExpr> createArgExpressions() {
 		return args.stream()
-				.map(Pair::second)
+				.map(Pair::getSecond)
 				.map(GlslExpr::variable)
 				.collect(Collectors.toList());
 	}
@@ -37,18 +37,20 @@ public record FnSignature(String returnType, String name, ImmutableList<Pair<Str
 
 	public String fullDeclaration() {
 		return returnType + ' ' + name + '(' + args.stream()
-				.map(p -> p.first() + ' ' + p.second())
+				.map(p -> p.getFirst() + ' ' + p.getSecond())
 				.collect(Collectors.joining(", ")) + ')';
 	}
 
 	public String signatureDeclaration() {
 		return returnType + ' ' + name + '(' + args.stream()
-				.map(Pair::first)
+				.map(Pair::getFirst)
 				.collect(Collectors.joining(", ")) + ')';
 	}
 
 	public static class Builder {
+		@Nullable
 		private String returnType;
+		@Nullable
 		private String name;
 		private final ImmutableList.Builder<Pair<String, String>> args = ImmutableList.builder();
 
@@ -77,5 +79,4 @@ public record FnSignature(String returnType, String name, ImmutableList<Pair<Str
 			return new FnSignature(returnType, name, args.build());
 		}
 	}
-
 }

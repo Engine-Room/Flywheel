@@ -1,16 +1,16 @@
-package dev.engine_room.flywheel.lib.model;
+package dev.engine_room.flywheel.lib.util;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import dev.engine_room.flywheel.lib.util.FlwUtil;
-
-public class ResourceReloadCache<T, U> implements Function<T, U> {
-	private static final Set<ResourceReloadCache<?, ?>> ALL = FlwUtil.createWeakHashSet();
+public final class ResourceReloadCache<T, U> implements Function<T, U> {
+	private static final Set<ResourceReloadCache<?, ?>> ALL = Collections.newSetFromMap(new WeakHashMap<>());
 	private final Function<T, U> factory;
 	private final Map<T, U> map = new ConcurrentHashMap<>();
 

@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.backend.gl.array;
 
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
@@ -9,13 +10,13 @@ import org.lwjgl.system.Checks;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBufferType;
-import dev.engine_room.flywheel.lib.util.FlwUtil;
+import net.minecraft.Util;
 
 public class GlVertexArraySeparateAttributes extends GlVertexArray {
 	public static final boolean SUPPORTED = isSupported();
 	private final BitSet attributeEnabled = new BitSet(MAX_ATTRIBS);
 	private final VertexAttribute[] attributes = new VertexAttribute[MAX_ATTRIBS];
-	private final int[] attributeBindings = FlwUtil.initArray(MAX_ATTRIBS, -1);
+	private final int[] attributeBindings = Util.make(new int[MAX_ATTRIBS], a -> Arrays.fill(a, -1));
 	private final int[] bindingBuffers = new int[MAX_ATTRIB_BINDINGS];
 	private final long[] bindingOffsets = new long[MAX_ATTRIB_BINDINGS];
 	private final int[] bindingStrides = new int[MAX_ATTRIB_BINDINGS];
