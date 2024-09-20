@@ -74,7 +74,7 @@ public final class MeshTree {
 		}
 
 		VertexWriter vertexWriter = objects.vertexWriter;
-		FlwLibLink.INSTANCE.compileModelPart(modelPart, IDENTITY_POSE, vertexWriter, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		FlwLibLink.INSTANCE.compileModelPart(modelPart, IDENTITY_POSE, vertexWriter, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
 		MemoryBlock data = vertexWriter.copyDataAndReset();
 
 		VertexView vertexView = new PosTexNormalVertexView();
