@@ -30,10 +30,10 @@ public class TestBase {
 
 		var pair = assertSingletonList(includeError.innerErrors());
 		for (int i = 1; i < depth; i++) {
-			includeError = assertInstanceOf(LoadError.IncludeError.class, pair.second());
+			includeError = assertInstanceOf(LoadError.IncludeError.class, pair.getSecond());
 			pair = assertSingletonList(includeError.innerErrors());
 		}
-		return assertInstanceOf(finalErrType, pair.second());
+		return assertInstanceOf(finalErrType, pair.getSecond());
 	}
 
 	public static SourceFile findAndAssertSuccess(MockShaderSources sources, ResourceLocation loc) {

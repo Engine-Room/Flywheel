@@ -6,7 +6,6 @@ import org.jetbrains.annotations.Nullable;
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.backend.BackendManager;
 import dev.engine_room.flywheel.backend.BackendConfig;
-import dev.engine_room.flywheel.backend.FlwBackendXplatImpl;
 import dev.engine_room.flywheel.backend.compile.LightSmoothness;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
@@ -24,8 +23,6 @@ public class ForgeFlwConfig implements FlwConfig {
 		Pair<ClientConfig, ModConfigSpec> clientPair = new ModConfigSpec.Builder().configure(ClientConfig::new);
 		this.client = clientPair.getLeft();
 		clientSpec = clientPair.getRight();
-
-		FlwBackendXplatImpl.CONFIG = client.backendConfig;
 	}
 
 	@Override
@@ -68,6 +65,11 @@ public class ForgeFlwConfig implements FlwConfig {
 		return client.workerThreads.get();
 	}
 
+	@Override
+	public BackendConfig backendConfig() {
+		return client.backendConfig;
+	}
+
 	public void registerSpecs(ModContainer context) {
 		context.registerConfig(ModConfig.Type.CLIENT, clientSpec);
 	}
@@ -90,7 +92,7 @@ public class ForgeFlwConfig implements FlwConfig {
 					.defineInRange("workerThreads", -1, -1, Runtime.getRuntime()
 							.availableProcessors());
 
-			builder.comment("Config options for flywheel's build-in backends.")
+			builder.comment("Config options for Flywheel's built-in backends.")
 					.push("flw_backends");
 
 			backendConfig = new ForgeBackendConfig(builder);

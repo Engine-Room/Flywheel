@@ -8,7 +8,6 @@ import com.mojang.brigadier.context.CommandContext;
 
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.backend.BackendManager;
-import dev.engine_room.flywheel.backend.LightSmoothnessArgument;
 import dev.engine_room.flywheel.backend.compile.LightSmoothness;
 import dev.engine_room.flywheel.backend.engine.uniform.DebugMode;
 import dev.engine_room.flywheel.backend.engine.uniform.FrameUniforms;

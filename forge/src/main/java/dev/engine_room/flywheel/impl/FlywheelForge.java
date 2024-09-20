@@ -8,14 +8,13 @@ import org.jetbrains.annotations.UnknownNullability;
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.event.EndClientResourceReloadEvent;
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererEvent;
-import dev.engine_room.flywheel.backend.LightSmoothnessArgument;
 import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
-import dev.engine_room.flywheel.lib.model.ModelCache;
-import dev.engine_room.flywheel.lib.model.ModelHolder;
 import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
 import dev.engine_room.flywheel.lib.util.LevelAttached;
+import dev.engine_room.flywheel.lib.util.ResourceReloadCache;
+import dev.engine_room.flywheel.lib.util.ResourceReloadHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.core.registries.Registries;
@@ -109,8 +108,8 @@ public final class FlywheelForge {
 	private static void registerLibEventListeners(IEventBus forgeEventBus, IEventBus modEventBus) {
 		forgeEventBus.addListener((LevelEvent.Unload e) -> LevelAttached.invalidateLevel(e.getLevel()));
 
-		modEventBus.addListener((EndClientResourceReloadEvent e) -> ModelCache.onEndClientResourceReload());
-		modEventBus.addListener((EndClientResourceReloadEvent e) -> ModelHolder.onEndClientResourceReload());
+		modEventBus.addListener((EndClientResourceReloadEvent e) -> ResourceReloadCache.onEndClientResourceReload());
+		modEventBus.addListener((EndClientResourceReloadEvent e) -> ResourceReloadHolder.onEndClientResourceReload());
 
 		modEventBus.addListener(PartialModelEventHandler::onRegisterAdditional);
 		modEventBus.addListener(PartialModelEventHandler::onBakingCompleted);

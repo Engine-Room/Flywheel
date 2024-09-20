@@ -128,10 +128,6 @@ public class SourceLines implements CharSequence {
 		return raw.length();
 	}
 
-	public int lineStartCol(int spanLine) {
-		return 0;
-	}
-
 	public int lineWidth(int spanLine) {
 		return lines.get(spanLine)
 				.length();

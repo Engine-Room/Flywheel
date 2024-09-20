@@ -2,14 +2,14 @@ package dev.engine_room.flywheel.backend.engine.instancing;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.instance.Instance;
-import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.instance.InstanceWriter;
 import dev.engine_room.flywheel.backend.engine.AbstractInstancer;
-import dev.engine_room.flywheel.backend.engine.embed.Environment;
+import dev.engine_room.flywheel.backend.engine.InstancerKey;
 import dev.engine_room.flywheel.backend.gl.TextureBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBufferUsage;
@@ -25,8 +25,8 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 
 	private final List<InstancedDraw> draws = new ArrayList<>();
 
-	public InstancedInstancer(InstanceType<I> type, Environment environment) {
-		super(type, environment);
+	public InstancedInstancer(InstancerKey<I> key, Supplier<AbstractInstancer<I>> recreate) {
+		super(key, recreate);
 		var layout = type.layout();
 		// Align to one texel in the texture buffer
 		instanceStride = MoreMath.align16(layout.byteSize());

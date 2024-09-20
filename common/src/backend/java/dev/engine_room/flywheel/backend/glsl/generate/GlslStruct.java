@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import dev.engine_room.flywheel.lib.util.Pair;
+import com.mojang.datafixers.util.Pair;
+
 import dev.engine_room.flywheel.lib.util.StringUtil;
 
 public class GlslStruct implements GlslBuilder.Declaration {
-
-	private final List<Pair<String, String>> fields = new ArrayList<>();
 	private String name;
+	private final List<Pair<String, String>> fields = new ArrayList<>();
 
-	public GlslStruct setName(String name) {
+	public GlslStruct name(String name) {
 		this.name = name;
 		return this;
 	}
@@ -22,17 +22,17 @@ public class GlslStruct implements GlslBuilder.Declaration {
 		return this;
 	}
 
-	private String buildFields() {
-		return fields.stream()
-				.map(p -> p.first() + ' ' + p.second() + ';')
-				.collect(Collectors.joining("\n"));
-	}
-
 	@Override
 	public String prettyPrint() {
 		return """
 				struct %s {
 				%s
 				};""".formatted(name, StringUtil.indent(buildFields(), 4));
+	}
+
+	private String buildFields() {
+		return fields.stream()
+				.map(p -> p.getFirst() + ' ' + p.getSecond() + ';')
+				.collect(Collectors.joining("\n"));
 	}
 }

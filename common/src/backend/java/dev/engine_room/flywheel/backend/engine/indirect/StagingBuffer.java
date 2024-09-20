@@ -223,7 +223,7 @@ public class StagingBuffer {
 		FlwMemoryTracker._freeCpuMemory(capacity);
 	}
 
-	private MemoryBlock getScratch(long size) {
+	public MemoryBlock getScratch(long size) {
 		if (scratch == null) {
 			scratch = MemoryBlock.malloc(size);
 		} else if (scratch.size() < size) {

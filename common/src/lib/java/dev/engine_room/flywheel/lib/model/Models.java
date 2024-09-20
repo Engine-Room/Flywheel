@@ -9,6 +9,7 @@ import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
+import dev.engine_room.flywheel.lib.util.ResourceReloadCache;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -19,11 +20,11 @@ import net.minecraft.world.level.block.state.BlockState;
  * method with the same parameters will return the same object.
  */
 public final class Models {
-	private static final ModelCache<BlockState> BLOCK_STATE = new ModelCache<>(it -> BlockModelBuilder.create(it)
+	private static final ResourceReloadCache<BlockState, Model> BLOCK_STATE = new ResourceReloadCache<>(it -> BlockModelBuilder.create(it)
 			.build());
-	private static final ModelCache<PartialModel> PARTIAL = new ModelCache<>(it -> BakedModelBuilder.create(it.get())
+	private static final ResourceReloadCache<PartialModel, Model> PARTIAL = new ResourceReloadCache<>(it -> BakedModelBuilder.create(it.get())
 			.build());
-	private static final ModelCache<TransformedPartial<?>> TRANSFORMED_PARTIAL = new ModelCache<>(TransformedPartial::create);
+	private static final ResourceReloadCache<TransformedPartial<?>, Model> TRANSFORMED_PARTIAL = new ResourceReloadCache<>(TransformedPartial::create);
 
 	private Models() {
 	}

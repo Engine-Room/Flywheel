@@ -3,7 +3,6 @@ package dev.engine_room.flywheel.backend.glsl.span;
 import dev.engine_room.flywheel.backend.glsl.SourceLines;
 
 public class StringSpan extends Span {
-
 	public StringSpan(SourceLines in, int start, int end) {
 		super(in, start, end);
 	}

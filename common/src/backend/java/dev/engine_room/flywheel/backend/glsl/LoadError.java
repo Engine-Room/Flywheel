@@ -5,9 +5,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.mojang.datafixers.util.Pair;
+
 import dev.engine_room.flywheel.backend.glsl.error.ErrorBuilder;
 import dev.engine_room.flywheel.backend.glsl.span.Span;
-import dev.engine_room.flywheel.lib.util.Pair;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
 
@@ -38,9 +39,9 @@ sealed public interface LoadError {
 					.pointAtFile(location);
 
 			for (var innerError : innerErrors) {
-				var err = innerError.second()
+				var err = innerError.getSecond()
 						.generateMessage();
-				out.pointAt(innerError.first())
+				out.pointAt(innerError.getFirst())
 						.nested(err);
 			}
 

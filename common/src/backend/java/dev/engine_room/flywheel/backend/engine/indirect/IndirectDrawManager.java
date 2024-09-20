@@ -46,6 +46,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	private final LightBuffers lightBuffers;
 	private final MatrixBuffer matrixBuffer;
 
+	private final DepthPyramid depthPyramid;
+
 	private boolean needsBarrier = false;
 
 	public IndirectDrawManager(IndirectPrograms programs) {
@@ -58,11 +60,13 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		meshPool.bind(vertexArray);
 		lightBuffers = new LightBuffers();
 		matrixBuffer = new MatrixBuffer();
+
+		depthPyramid = new DepthPyramid(programs.getDownsampleFirstProgram(), programs.getDownsampleSecondProgram());
 	}
 
 	@Override
 	protected <I extends Instance> IndirectInstancer<?> create(InstancerKey<I> key) {
-		return new IndirectInstancer<>(key.type(), key.environment(), key.model());
+		return new IndirectInstancer<>(key, () -> getInstancer(key));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -136,12 +140,16 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		stagingBuffer.flush();
 
+		depthPyramid.generate();
+
 		// We could probably save some driver calls here when there are
 		// actually zero instances, but that feels like a very rare case
 
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
 		matrixBuffer.bind();
+
+		depthPyramid.bindForCull();
 
 		for (var group : cullingGroups.values()) {
 			group.dispatchCull();
@@ -174,6 +182,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		crumblingDrawBuffer.delete();
 
 		programs.release();
+
+		depthPyramid.delete();
 	}
 
 	public void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks) {
@@ -209,8 +219,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 					TextureBinder.bind(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
 
 					for (var instanceHandlePair : progressEntry.getValue()) {
-						IndirectInstancer<?> instancer = instanceHandlePair.first();
-						int instanceIndex = instanceHandlePair.second().index;
+						IndirectInstancer<?> instancer = instanceHandlePair.getFirst();
+						int instanceIndex = instanceHandlePair.getSecond().index;
 
 						for (IndirectDraw draw : instancer.draws()) {
 							// Transform the material to be suited for crumbling.

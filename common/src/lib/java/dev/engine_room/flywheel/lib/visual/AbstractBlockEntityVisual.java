@@ -52,7 +52,7 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 		this.blockEntity = blockEntity;
 		this.pos = blockEntity.getBlockPos();
 		this.blockState = blockEntity.getBlockState();
-		this.visualPos = pos.subtract(renderOrigin);
+		this.visualPos = pos.subtract(ctx.renderOrigin());
 	}
 
 	@Override
@@ -97,6 +97,10 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	public boolean doDistanceLimitThisFrame(DynamicVisual.Context context) {
 		return !context.limiter()
 				.shouldUpdate(pos.distToCenterSqr(context.camera().getPosition()));
+	}
+
+	protected int computePackedLight() {
+		return LevelRenderer.getLightColor(level, pos);
 	}
 
 	protected void relight(BlockPos pos, @Nullable FlatLit... instances) {

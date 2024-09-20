@@ -15,9 +15,9 @@ import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.material.Materials;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
-import dev.engine_room.flywheel.lib.model.ModelCache;
 import dev.engine_room.flywheel.lib.model.QuadMesh;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
+import dev.engine_room.flywheel.lib.util.ResourceReloadCache;
 import dev.engine_room.flywheel.lib.visual.util.SmartRecycler;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -36,7 +36,7 @@ public final class FireComponent implements EntityComponent {
 	// Parameterize by the material instead of the sprite
 	// because Material#sprite is a surprisingly heavy operation
 	// and because sprites are invalidated after a resource reload.
-	private static final ModelCache<net.minecraft.client.resources.model.Material> FIRE_MODELS = new ModelCache<>(texture -> {
+	private static final ResourceReloadCache<net.minecraft.client.resources.model.Material, Model> FIRE_MODELS = new ResourceReloadCache<>(texture -> {
 		return new SingleMeshModel(new FireMesh(texture.sprite()), FIRE_MATERIAL);
 	});
 

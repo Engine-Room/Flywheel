@@ -57,12 +57,6 @@ public final class StringUtil {
 		return "0x" + Long.toHexString(address);
 	}
 
-	public static String args(String functionName, Object... args) {
-		return functionName + '(' + Arrays.stream(args)
-				.map(Object::toString)
-				.collect(Collectors.joining(", ")) + ')';
-	}
-
 	public static String trimPrefix(String s, String prefix) {
 		if (s.startsWith(prefix)) {
 			return s.substring(prefix.length());

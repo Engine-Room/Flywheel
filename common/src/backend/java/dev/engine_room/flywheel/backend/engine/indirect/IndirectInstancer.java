@@ -2,16 +2,17 @@ package dev.engine_room.flywheel.backend.engine.indirect;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
+import org.jetbrains.annotations.UnknownNullability;
 import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.api.instance.Instance;
-import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.instance.InstanceWriter;
-import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.backend.engine.AbstractInstancer;
-import dev.engine_room.flywheel.backend.engine.embed.Environment;
+import dev.engine_room.flywheel.backend.engine.InstancerKey;
+import dev.engine_room.flywheel.backend.util.AtomicBitSet;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 
 public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> {
@@ -20,18 +21,34 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	private final List<IndirectDraw> associatedDraws = new ArrayList<>();
 	private final Vector4fc boundingSphere;
 
-	public int modelIndex = -1;
-	public int baseInstance = -1;
-	private int lastModelIndex = -1;
-	private int lastBaseInstance = -1;
-	private int lastInstanceCount = -1;
+	private final AtomicBitSet changedPages = new AtomicBitSet();
 
-	public IndirectInstancer(InstanceType<I> type, Environment environment, Model model) {
-		super(type, environment);
+	public ObjectStorage.@UnknownNullability Mapping mapping;
+
+	private int modelIndex = -1;
+	private int baseInstance = -1;
+
+	public IndirectInstancer(InstancerKey<I> key, Supplier<AbstractInstancer<I>> recreate) {
+		super(key, recreate);
 		instanceStride = MoreMath.align4(type.layout()
 				.byteSize());
 		writer = this.type.writer();
-		boundingSphere = model.boundingSphere();
+		boundingSphere = key.model().boundingSphere();
+	}
+
+	@Override
+	public void notifyDirty(int index) {
+		if (index < 0 || index >= instanceCount()) {
+			return;
+		}
+		changedPages.set(ObjectStorage.objectIndex2PageIndex(index));
+	}
+
+	@Override
+	protected void setRangeChanged(int start, int end) {
+		super.setRangeChanged(start, end);
+
+		changedPages.set(ObjectStorage.objectIndex2PageIndex(start), ObjectStorage.objectIndex2PageIndex(end) + 1);
 	}
 
 	public void addDraw(IndirectDraw draw) {
@@ -46,6 +63,12 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		removeDeletedInstances();
 	}
 
+	public void postUpdate(int modelIndex, int baseInstance) {
+		this.modelIndex = modelIndex;
+		this.baseInstance = baseInstance;
+		mapping.update(modelIndex, instanceCount());
+	}
+
 	public void writeModel(long ptr) {
 		MemoryUtil.memPutInt(ptr, 0); // instanceCount - to be incremented by the cull shader
 		MemoryUtil.memPutInt(ptr + 4, baseInstance); // baseInstance
@@ -57,71 +80,55 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	}
 
 	public void uploadInstances(StagingBuffer stagingBuffer, int instanceVbo) {
-		long baseByte = baseInstance * instanceStride;
-
-		if (baseInstance != lastBaseInstance) {
-			uploadAllInstances(stagingBuffer, baseByte, instanceVbo);
-		} else {
-			uploadChangedInstances(stagingBuffer, baseByte, instanceVbo);
+		if (changedPages.isEmpty()) {
+			return;
 		}
-	}
 
-	public void uploadModelIndices(StagingBuffer stagingBuffer, int modelIndexVbo) {
-		long modelIndexBaseByte = baseInstance * IndirectBuffers.INT_SIZE;
+		int numPages = mapping.pageCount();
 
-		if (baseInstance != lastBaseInstance || modelIndex != lastModelIndex || instances.size() > lastInstanceCount) {
-			uploadAllModelIndices(stagingBuffer, modelIndexBaseByte, modelIndexVbo);
-		}
-	}
+		var instanceCount = instances.size();
 
-	public void resetChanged() {
-		lastModelIndex = modelIndex;
-		lastBaseInstance = baseInstance;
-		lastInstanceCount = instances.size();
-		changed.clear();
-	}
+		for (int page = changedPages.nextSetBit(0); page >= 0 && page < numPages; page = changedPages.nextSetBit(page + 1)) {
+			int startObject = ObjectStorage.pageIndex2ObjectIndex(page);
 
-	private void uploadChangedInstances(StagingBuffer stagingBuffer, long baseByte, int instanceVbo) {
-		changed.forEachSetSpan((startInclusive, endInclusive) -> {
-			// Generally we're good about ensuring we don't have changed bits set out of bounds, but check just in case
-			if (startInclusive >= instances.size()) {
-				return;
+			if (startObject >= instanceCount) {
+				break;
 			}
-			int actualEnd = Math.min(endInclusive, instances.size() - 1);
 
-			int instanceCount = actualEnd - startInclusive + 1;
-			long totalSize = instanceCount * instanceStride;
+			int endObject = Math.min(instanceCount, ObjectStorage.pageIndex2ObjectIndex(page + 1));
 
-			stagingBuffer.enqueueCopy(totalSize, instanceVbo, baseByte + startInclusive * instanceStride, ptr -> {
-				for (int i = startInclusive; i <= actualEnd; i++) {
+			long baseByte = mapping.page2ByteOffset(page);
+			long size = (endObject - startObject) * instanceStride;
+
+			// Because writes are broken into pages, we end up with significantly more calls into
+			// StagingBuffer#enqueueCopy and the allocations for the writer got out of hand. Here
+			// we've inlined the enqueueCopy call and do not allocate the write lambda at all.
+			// Doing so cut upload times in half.
+
+			// Try to write directly into the staging buffer if there is enough contiguous space.
+			long direct = stagingBuffer.reserveForCopy(size, instanceVbo, baseByte);
+
+			if (direct != MemoryUtil.NULL) {
+				for (int i = startObject; i < endObject; i++) {
 					var instance = instances.get(i);
-					writer.write(ptr, instance);
-					ptr += instanceStride;
+					writer.write(direct, instance);
+					direct += instanceStride;
 				}
-			});
-		});
-	}
+				continue;
+			}
 
-	private void uploadAllInstances(StagingBuffer stagingBuffer, long baseByte, int instanceVbo) {
-		long totalSize = instances.size() * instanceStride;
-
-		stagingBuffer.enqueueCopy(totalSize, instanceVbo, baseByte, ptr -> {
-			for (I instance : instances) {
+			// Otherwise, write to a scratch buffer and enqueue a copy.
+			var block = stagingBuffer.getScratch(size);
+			var ptr = block.ptr();
+			for (int i = startObject; i < endObject; i++) {
+				var instance = instances.get(i);
 				writer.write(ptr, instance);
 				ptr += instanceStride;
 			}
-		});
-	}
+			stagingBuffer.enqueueCopy(block.ptr(), size, instanceVbo, baseByte);
+		}
 
-	private void uploadAllModelIndices(StagingBuffer stagingBuffer, long modelIndexBaseByte, int modelIndexVbo) {
-		long modelIndexTotalSize = instances.size() * IndirectBuffers.INT_SIZE;
-
-		stagingBuffer.enqueueCopy(modelIndexTotalSize, modelIndexVbo, modelIndexBaseByte, ptr -> {
-			for (int i = 0; i < instances.size(); i++) {
-				MemoryUtil.memPutInt(ptr, modelIndex);
-				ptr += IndirectBuffers.INT_SIZE;
-			}
-		});
+		changedPages.clear();
 	}
 
 	@Override
@@ -129,5 +136,15 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		for (IndirectDraw draw : draws()) {
 			draw.delete();
 		}
+
+		mapping.delete();
+	}
+
+	public int modelIndex() {
+		return modelIndex;
+	}
+
+	public int baseInstance() {
+		return baseInstance;
 	}
 }

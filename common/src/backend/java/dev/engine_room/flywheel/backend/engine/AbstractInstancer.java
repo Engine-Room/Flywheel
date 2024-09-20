@@ -1,6 +1,7 @@
 package dev.engine_room.flywheel.backend.engine;
 
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -13,26 +14,32 @@ import dev.engine_room.flywheel.backend.util.AtomicBitSet;
 public abstract class AbstractInstancer<I extends Instance> implements Instancer<I> {
 	public final InstanceType<I> type;
 	public final Environment environment;
+	private final Supplier<AbstractInstancer<I>> recreate;
 
 	// Lock for all instances, only needs to be used in methods that may run on the TaskExecutor.
 	protected final Object lock = new Object();
 	protected final ArrayList<I> instances = new ArrayList<>();
-	protected final ArrayList<InstanceHandleImpl> handles = new ArrayList<>();
+	protected final ArrayList<InstanceHandleImpl<I>> handles = new ArrayList<>();
 
 	protected final AtomicBitSet changed = new AtomicBitSet();
 	protected final AtomicBitSet deleted = new AtomicBitSet();
 
-	protected AbstractInstancer(InstanceType<I> type, Environment environment) {
-		this.type = type;
-		this.environment = environment;
+	protected AbstractInstancer(InstancerKey<I> key, Supplier<AbstractInstancer<I>> recreate) {
+		this.type = key.type();
+		this.environment = key.environment();
+		this.recreate = recreate;
 	}
 
 	@Override
 	public I createInstance() {
 		synchronized (lock) {
 			var i = instances.size();
-			var handle = new InstanceHandleImpl(this, i);
+			var handle = new InstanceHandleImpl<I>();
+			handle.instancer = this;
+			handle.recreate = recreate;
+			handle.index = i;
 			I instance = type.create(handle);
+			handle.instance = instance;
 
 			addLocked(instance, handle);
 			return instance;
@@ -47,12 +54,15 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 
 		var instanceHandle = instance.handle();
 
-		if (!(instanceHandle instanceof InstanceHandleImpl handle)) {
+		if (!(instanceHandle instanceof InstanceHandleImpl<?>)) {
 			// UB: do nothing
 			return;
 		}
 
-		if (handle.instancer == this) {
+		// Should InstanceType have an isInstance method?
+		var handle = (InstanceHandleImpl<I>) instanceHandle;
+
+		if (handle.instancer == this && handle.visible) {
 			return;
 		}
 
@@ -65,19 +75,23 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		// is filtering deleted instances later, so is safe.
 		handle.setDeleted();
 
-		// Only lock now that we'll be mutating our state.
-		synchronized (lock) {
-			// Add the instance to this instancer.
-			handle.instancer = this;
-			handle.index = instances.size();
-			addLocked(instance, handle);
+		// Add the instance to this instancer.
+		handle.instancer = this;
+		handle.recreate = recreate;
+
+		if (handle.visible) {
+			// Only lock now that we'll be mutating our state.
+			synchronized (lock) {
+				handle.index = instances.size();
+				addLocked(instance, handle);
+			}
 		}
 	}
 
 	/**
 	 * Calls must be synchronized on {@link #lock}.
 	 */
-	private void addLocked(I instance, InstanceHandleImpl handle) {
+	private void addLocked(I instance, InstanceHandleImpl<I> handle) {
 		instances.add(instance);
 		handles.add(handle);
 		changed.set(handle.index);
@@ -122,7 +136,7 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 
 		if (writePos < newSize) {
 			// Since we'll be shifting everything into this space we can consider it all changed.
-			changed.set(writePos, newSize);
+			setRangeChanged(writePos, newSize);
 		}
 
 		// We definitely shouldn't consider the deleted instances as changed though,
@@ -155,11 +169,15 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 				.clear();
 	}
 
+	protected void setRangeChanged(int start, int end) {
+		changed.set(start, end);
+	}
+
 	/**
 	 * Clear all instances without freeing resources.
 	 */
 	public void clear() {
-		for (InstanceHandleImpl handle : handles) {
+		for (InstanceHandleImpl<I> handle : handles) {
 			// Only clear instances that belong to this instancer.
 			// If one of these handles was stolen by another instancer,
 			// clearing it here would cause significant visual artifacts and instance leaks.

@@ -19,29 +19,33 @@ public class GlslBuilder {
 		return add(new GlslStruct());
 	}
 
-	public GlslFn function() {
-		return add(new GlslFn());
-	}
-
 	public GlslVertexInput vertexInput() {
 		return add(new GlslVertexInput());
+	}
+
+	public GlslUniform uniform() {
+		return add(new GlslUniform());
 	}
 
 	public GlslUniformBlock uniformBlock() {
 		return add(new GlslUniformBlock());
 	}
 
-	public <T extends Declaration> T add(T element) {
-		elements.add(element);
-		return element;
+	public GlslFn function() {
+		return add(new GlslFn());
 	}
 
 	public void blankLine() {
-		elements.add(Separators.BLANK_LINE);
+		add(Separators.BLANK_LINE);
 	}
 
-	public void _addRaw(String sourceString) {
-		elements.add(() -> sourceString);
+	public void _raw(String sourceString) {
+		add(new Raw(sourceString));
+	}
+
+	public <T extends Declaration> T add(T element) {
+		elements.add(element);
+		return element;
 	}
 
 	public String build() {
@@ -52,6 +56,20 @@ public class GlslBuilder {
 
 	public interface Declaration {
 		String prettyPrint();
+	}
+
+	public record Define(String name, String value) implements Declaration {
+		@Override
+		public String prettyPrint() {
+			return "#define " + name + " " + value;
+		}
+	}
+
+	public record Undef(String name) implements Declaration {
+		@Override
+		public String prettyPrint() {
+			return "#undef " + name;
+		}
 	}
 
 	public enum Separators implements Declaration {
@@ -70,18 +88,10 @@ public class GlslBuilder {
 		}
 	}
 
-	public record Define(String name, String value) implements Declaration {
+	public record Raw(String sourceString) implements Declaration {
 		@Override
 		public String prettyPrint() {
-			return "#define " + name + " " + value;
+			return sourceString;
 		}
 	}
-
-	public record Undef(String name) implements Declaration {
-		@Override
-		public String prettyPrint() {
-			return "#undef " + name;
-		}
-	}
-
 }

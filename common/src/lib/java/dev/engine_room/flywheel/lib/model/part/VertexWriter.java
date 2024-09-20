@@ -1,24 +1,17 @@
 package dev.engine_room.flywheel.lib.model.part;
 
-import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2f;
 import org.lwjgl.system.MemoryUtil;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import dev.engine_room.flywheel.lib.math.DataPacker;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
-import dev.engine_room.flywheel.lib.model.part.ModelPartConverter.TextureMapper;
 import dev.engine_room.flywheel.lib.vertex.PosTexNormalVertexView;
 
 class VertexWriter implements VertexConsumer {
 	private static final int STRIDE = (int) PosTexNormalVertexView.STRIDE;
 
 	private MemoryBlock data;
-
-	@Nullable
-	private TextureMapper textureMapper;
-	private final Vector2f uvVec = new Vector2f();
 
 	private int vertexCount;
 	private boolean filledPosition;
@@ -27,10 +20,6 @@ class VertexWriter implements VertexConsumer {
 
 	public VertexWriter() {
 		data = MemoryBlock.malloc(128 * STRIDE);
-	}
-
-	public void setTextureMapper(@Nullable TextureMapper mapper) {
-		textureMapper = mapper;
 	}
 
 	@Override
@@ -53,13 +42,6 @@ class VertexWriter implements VertexConsumer {
 	@Override
 	public VertexConsumer setUv(float u, float v) {
 		if (!filledTexture) {
-			if (textureMapper != null) {
-				uvVec.set(u, v);
-				textureMapper.map(uvVec);
-				u = uvVec.x;
-				v = uvVec.y;
-			}
-
 			long ptr = vertexPtr();
 			MemoryUtil.memPutFloat(ptr + 12, u);
 			MemoryUtil.memPutFloat(ptr + 16, v);
@@ -123,7 +105,6 @@ class VertexWriter implements VertexConsumer {
 		filledPosition = false;
 		filledTexture = false;
 		filledNormal = false;
-		textureMapper = null;
 
 		return dataCopy;
 	}

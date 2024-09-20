@@ -72,9 +72,9 @@ public class IndirectDraw {
 		MemoryUtil.memPutInt(ptr + 4, 0); // instanceCount - to be set by the apply shader
 		MemoryUtil.memPutInt(ptr + 8, mesh.firstIndex()); // firstIndex
 		MemoryUtil.memPutInt(ptr + 12, mesh.baseVertex()); // baseVertex
-		MemoryUtil.memPutInt(ptr + 16, instancer.baseInstance); // baseInstance
+		MemoryUtil.memPutInt(ptr + 16, instancer.baseInstance()); // baseInstance
 
-		MemoryUtil.memPutInt(ptr + 20, instancer.modelIndex); // modelIndex
+		MemoryUtil.memPutInt(ptr + 20, instancer.modelIndex()); // modelIndex
 
 		MemoryUtil.memPutInt(ptr + 24, instancer.environment.matrixIndex()); // matrixIndex
 
@@ -89,9 +89,9 @@ public class IndirectDraw {
 		MemoryUtil.memPutInt(ptr + 4, 1); // instanceCount - only drawing one instance
 		MemoryUtil.memPutInt(ptr + 8, mesh.firstIndex()); // firstIndex
 		MemoryUtil.memPutInt(ptr + 12, mesh.baseVertex()); // baseVertex
-		MemoryUtil.memPutInt(ptr + 16, instancer.baseInstance + instanceIndex); // baseInstance
+		MemoryUtil.memPutInt(ptr + 16, instancer.baseInstance() + instanceIndex); // baseInstance
 
-		MemoryUtil.memPutInt(ptr + 20, instancer.modelIndex); // modelIndex
+		MemoryUtil.memPutInt(ptr + 20, instancer.modelIndex()); // modelIndex
 
 		MemoryUtil.memPutInt(ptr + 24, instancer.environment.matrixIndex()); // matrixIndex
 

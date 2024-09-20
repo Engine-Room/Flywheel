@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.backend;
+package dev.engine_room.flywheel.impl;
 
 import dev.engine_room.flywheel.backend.compile.LightSmoothness;
 import net.minecraft.commands.arguments.StringRepresentableArgument;

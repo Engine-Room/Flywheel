@@ -11,6 +11,7 @@ import static org.lwjgl.opengl.GL20.glUniform4f;
 import static org.lwjgl.opengl.GL20.glUniformMatrix3fv;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL30.glUniform1ui;
+import static org.lwjgl.opengl.GL30.glUniform2ui;
 import static org.lwjgl.opengl.GL31.GL_INVALID_INDEX;
 import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
 import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
@@ -116,6 +117,16 @@ public class GlProgram extends GlObject {
 		}
 
 		glUniform1ui(uniform, value);
+	}
+
+	public void setUVec2(String name, int x, int y) {
+		int uniform = getUniformLocation(name);
+
+		if (uniform < 0) {
+			return;
+		}
+
+		glUniform2ui(uniform, x, y);
 	}
 
 	public void setInt(String glslName, int value) {

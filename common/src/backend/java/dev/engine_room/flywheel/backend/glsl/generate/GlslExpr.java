@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 
 public interface GlslExpr {
-
 	/**
 	 * Create a glsl variable with the given name.
 	 *
@@ -129,7 +128,6 @@ public interface GlslExpr {
 		public String prettyPrint() {
 			return name;
 		}
-
 	}
 
 	record FunctionCall(String name, Collection<? extends GlslExpr> args) implements GlslExpr {
@@ -144,7 +142,6 @@ public interface GlslExpr {
 					.collect(Collectors.joining(", "));
 			return name + "(" + args + ")";
 		}
-
 	}
 
 	record FunctionCall0(String name) implements GlslExpr {
@@ -152,7 +149,6 @@ public interface GlslExpr {
 		public String prettyPrint() {
 			return name + "()";
 		}
-
 	}
 
 	record Swizzle(GlslExpr target, String selection) implements GlslExpr {
@@ -160,7 +156,6 @@ public interface GlslExpr {
 		public String prettyPrint() {
 			return target.prettyPrint() + "." + selection;
 		}
-
 	}
 
 	record Access(GlslExpr target, String argName) implements GlslExpr {
@@ -168,7 +163,6 @@ public interface GlslExpr {
 		public String prettyPrint() {
 			return target.prettyPrint() + "." + argName;
 		}
-
 	}
 
 	record Clamp(GlslExpr value, GlslExpr from, GlslExpr to) implements GlslExpr {

@@ -67,6 +67,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	 */
 	public Vector3f getVisualPosition() {
 		Vec3 pos = entity.position();
+		var renderOrigin = renderOrigin();
 		return new Vector3f((float) (pos.x - renderOrigin.getX()),
 				(float) (pos.y - renderOrigin.getY()),
 				(float) (pos.z - renderOrigin.getZ()));
@@ -81,6 +82,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	 */
 	public Vector3f getVisualPosition(float partialTick) {
 		Vec3 pos = entity.position();
+		var renderOrigin = renderOrigin();
 		return new Vector3f((float) (Mth.lerp(partialTick, entity.xOld, pos.x) - renderOrigin.getX()),
 				(float) (Mth.lerp(partialTick, entity.yOld, pos.y) - renderOrigin.getY()),
 				(float) (Mth.lerp(partialTick, entity.zOld, pos.z) - renderOrigin.getZ()));
@@ -90,11 +92,14 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 		return entity.noCulling || visibilityTester.check(frustum);
 	}
 
-	protected void relight(float partialTick, @Nullable FlatLit... instances) {
+	protected int computePackedLight(float partialTick) {
 		BlockPos pos = BlockPos.containing(entity.getLightProbePosition(partialTick));
 		int blockLight = entity.isOnFire() ? 15 : level.getBrightness(LightLayer.BLOCK, pos);
 		int skyLight = level.getBrightness(LightLayer.SKY, pos);
-		int light = LightTexture.pack(blockLight, skyLight);
-		FlatLit.relight(light, instances);
+		return LightTexture.pack(blockLight, skyLight);
+	}
+
+	protected void relight(float partialTick, @Nullable FlatLit... instances) {
+		FlatLit.relight(computePackedLight(partialTick), instances);
 	}
 }

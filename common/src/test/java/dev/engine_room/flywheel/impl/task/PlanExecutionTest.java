@@ -21,8 +21,8 @@ import dev.engine_room.flywheel.lib.task.SimplePlan;
 import dev.engine_room.flywheel.lib.task.Synchronizer;
 import dev.engine_room.flywheel.lib.task.UnitPlan;
 import dev.engine_room.flywheel.lib.task.functional.RunnableWithContext;
-import dev.engine_room.flywheel.lib.util.Unit;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import net.minecraft.util.Unit;
 
 class PlanExecutionTest {
 	protected static ParallelTaskExecutor EXECUTOR;

@@ -5,16 +5,11 @@ import java.util.function.Consumer;
 import dev.engine_room.flywheel.lib.util.StringUtil;
 
 public class GlslFn implements GlslBuilder.Declaration {
-	private GlslBlock body = new GlslBlock();
 	private FnSignature signature;
+	private GlslBlock body = new GlslBlock();
 
 	public GlslFn signature(FnSignature signature) {
 		this.signature = signature;
-		return this;
-	}
-
-	public GlslFn body(Consumer<GlslBlock> f) {
-		f.accept(body);
 		return this;
 	}
 
@@ -23,6 +18,12 @@ public class GlslFn implements GlslBuilder.Declaration {
 		return this;
 	}
 
+	public GlslFn body(Consumer<GlslBlock> f) {
+		f.accept(body);
+		return this;
+	}
+
+	@Override
 	public String prettyPrint() {
 		return """
 				%s {

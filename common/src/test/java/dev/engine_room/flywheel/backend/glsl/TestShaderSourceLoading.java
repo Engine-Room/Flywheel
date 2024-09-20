@@ -129,11 +129,11 @@ public class TestShaderSourceLoading extends TestBase {
 
 		var shouldBeRecursiveIncludePair = assertSingletonList(aErr.innerErrors());
 
-		var circularDependency = assertInstanceOf(LoadError.CircularDependency.class, shouldBeRecursiveIncludePair.second());
+		var circularDependency = assertInstanceOf(LoadError.CircularDependency.class, shouldBeRecursiveIncludePair.getSecond());
 		assertEquals(ImmutableList.of(FLW_A, FLW_A), circularDependency.stack());
 		assertEquals(FLW_A, circularDependency.offender());
 
-		assertEquals(FLW_A.toString(), shouldBeRecursiveIncludePair.first()
+		assertEquals(FLW_A.toString(), shouldBeRecursiveIncludePair.getFirst()
 				.toString());
 	}
 

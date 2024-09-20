@@ -5,13 +5,12 @@ import org.jetbrains.annotations.UnknownNullability;
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.event.EndClientResourceReloadCallback;
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererCallback;
-import dev.engine_room.flywheel.backend.LightSmoothnessArgument;
 import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
-import dev.engine_room.flywheel.lib.model.ModelCache;
-import dev.engine_room.flywheel.lib.model.ModelHolder;
 import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
+import dev.engine_room.flywheel.lib.util.ResourceReloadCache;
+import dev.engine_room.flywheel.lib.util.ResourceReloadHolder;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
@@ -67,10 +66,8 @@ public final class FlywheelFabric implements ClientModInitializer {
 	}
 
 	private static void setupLib() {
-		EndClientResourceReloadCallback.EVENT.register((minecraft, resourceManager, initialReload, error) ->
-				ModelCache.onEndClientResourceReload());
-		EndClientResourceReloadCallback.EVENT.register((minecraft, resourceManager, initialReload, error) ->
-				ModelHolder.onEndClientResourceReload());
+		EndClientResourceReloadCallback.EVENT.register((minecraft, resourceManager, initialReload, error) -> ResourceReloadCache.onEndClientResourceReload());
+		EndClientResourceReloadCallback.EVENT.register((minecraft, resourceManager, initialReload, error) -> ResourceReloadHolder.onEndClientResourceReload());
 
 		ModelLoadingPlugin.register(ctx -> {
 			ctx.addModels(PartialModelEventHandler.onRegisterAdditional());

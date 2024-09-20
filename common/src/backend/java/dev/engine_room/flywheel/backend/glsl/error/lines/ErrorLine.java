@@ -1,7 +1,6 @@
 package dev.engine_room.flywheel.backend.glsl.error.lines;
 
 public interface ErrorLine {
-
 	default int neededMargin() {
 		return left().length();
 	}
@@ -17,6 +16,7 @@ public interface ErrorLine {
 	default String left() {
 		return "";
 	}
+
 	default String right() {
 		return "";
 	}

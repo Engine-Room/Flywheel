@@ -17,17 +17,16 @@ import dev.engine_room.flywheel.backend.glsl.span.StringSpan;
 public class ShaderFunction {
 	// https://regexr.com/60n3d
 	public static final Pattern PATTERN = Pattern.compile("(\\w+)\\s+(\\w+)\\s*\\(([\\w,\\s]*)\\)\\s*\\{");
+	public static final Pattern ARGUMENT_PATTERN = Pattern.compile("(?:(inout|in|out) )?(\\w+)\\s+(\\w+)");
+	public static final Pattern ASSIGNMENT_PATTERN = Pattern.compile("(\\w+)\\s*=");
 
-	public static final Pattern argument = Pattern.compile("(?:(inout|in|out) )?(\\w+)\\s+(\\w+)");
-	public static final Pattern assignment = Pattern.compile("(\\w+)\\s*=");
 	public final Span self;
+	public final Span type;
+	public final Span name;
+	public final Span args;
+	public final Span body;
 
-	private final Span type;
-	private final Span name;
-	private final Span args;
-	private final Span body;
-
-	private final ImmutableList<ShaderVariable> parameters;
+	public final ImmutableList<ShaderVariable> parameters;
 
 	public ShaderFunction(Span self, Span type, Span name, Span args, Span body) {
 		this.self = self;
@@ -95,22 +94,6 @@ public class ShaderFunction {
 		return -1;
 	}
 
-	public Span getType() {
-		return type;
-	}
-
-	public Span getName() {
-		return name;
-	}
-
-	public Span getArgs() {
-		return args;
-	}
-
-	public Span getBody() {
-		return body;
-	}
-
 	public String call(String... args) {
 		return name + "(" + String.join(", ", args) + ")";
 	}
@@ -119,18 +102,10 @@ public class ShaderFunction {
 		return parameters.get(index).type;
 	}
 
-	public ImmutableList<ShaderVariable> getParameters() {
-		return parameters;
-	}
-
-	public String returnTypeName() {
-		return type.get();
-	}
-
 	protected ImmutableList<ShaderVariable> parseArguments() {
 		if (args.isErr() || args.isEmpty()) return ImmutableList.of();
 
-		Matcher arguments = argument.matcher(args.get());
+		Matcher arguments = ARGUMENT_PATTERN.matcher(args.get());
 
 		ImmutableList.Builder<ShaderVariable> builder = ImmutableList.builder();
 

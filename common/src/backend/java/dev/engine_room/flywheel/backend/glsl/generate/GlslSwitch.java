@@ -4,13 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import dev.engine_room.flywheel.lib.util.Pair;
+import org.jetbrains.annotations.Nullable;
+
+import com.mojang.datafixers.util.Pair;
+
 import dev.engine_room.flywheel.lib.util.StringUtil;
 
 public class GlslSwitch implements GlslStmt {
 	private final GlslExpr on;
 
 	private final List<Pair<GlslExpr, GlslBlock>> cases = new ArrayList<>();
+	@Nullable
 	private GlslBlock defaultCase = null;
 
 	private GlslSwitch(GlslExpr on) {
@@ -52,9 +56,9 @@ public class GlslSwitch implements GlslStmt {
 	}
 
 	private static String prettyPrintCase(Pair<GlslExpr, GlslBlock> p) {
-		var variant = p.first()
+		var variant = p.getFirst()
 				.prettyPrint();
-		var block = p.second()
+		var block = p.getSecond()
 				.prettyPrint();
 		return """
 				case %s:

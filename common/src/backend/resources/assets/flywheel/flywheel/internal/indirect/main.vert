@@ -5,7 +5,7 @@
 #include "flywheel:internal/indirect/light.glsl"
 #include "flywheel:internal/indirect/matrices.glsl"
 
-layout(std430, binding = _FLW_TARGET_BUFFER_BINDING) restrict readonly buffer TargetBuffer {
+layout(std430, binding = _FLW_DRAW_INSTANCE_INDEX_BUFFER_BINDING) restrict readonly buffer TargetBuffer {
     uint _flw_instanceIndices[];
 };
 
