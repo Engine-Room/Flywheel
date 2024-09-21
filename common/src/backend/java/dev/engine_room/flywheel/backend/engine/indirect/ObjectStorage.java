@@ -216,5 +216,9 @@ public class ObjectStorage extends AbstractArena {
 
 			pages = Arrays.copyOf(pages, neededPages);
 		}
+
+		public int objectIndex2GlobalIndex(int objectIndex) {
+			return (pages[objectIndex2PageIndex(objectIndex)] << LOG_2_PAGE_SIZE) + (objectIndex & PAGE_MASK);
+		}
 	}
 }

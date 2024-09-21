@@ -144,4 +144,8 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	public int baseInstance() {
 		return baseInstance;
 	}
+
+	public int local2GlobalInstanceIndex(int instanceIndex) {
+		return mapping.objectIndex2GlobalIndex(instanceIndex);
+	}
 }

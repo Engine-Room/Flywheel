@@ -21,6 +21,7 @@ import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
 import dev.engine_room.flywheel.backend.engine.CommonCrumbling;
 import dev.engine_room.flywheel.backend.engine.DrawManager;
+import dev.engine_room.flywheel.backend.engine.GroupKey;
 import dev.engine_room.flywheel.backend.engine.InstancerKey;
 import dev.engine_room.flywheel.backend.engine.LightStorage;
 import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
@@ -204,15 +205,21 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			// Scratch memory for writing draw commands.
 			var block = MemoryBlock.malloc(IndirectBuffers.DRAW_COMMAND_STRIDE);
 
+			// Set up the crumbling program buffers. Nothing changes here between draws.
 			GlBufferType.DRAW_INDIRECT_BUFFER.bind(crumblingDrawBuffer.handle());
 			glBindBufferRange(GL_SHADER_STORAGE_BUFFER, BufferBindings.DRAW, crumblingDrawBuffer.handle(), 0, IndirectBuffers.DRAW_COMMAND_STRIDE);
 
 			for (var groupEntry : byType.entrySet()) {
 				var byProgress = groupEntry.getValue();
 
-				// Set up the crumbling program buffers. Nothing changes here between draws.
-				cullingGroups.get(groupEntry.getKey())
-						.bindWithContextShader(ContextShader.CRUMBLING);
+				GroupKey<?> groupKey = groupEntry.getKey();
+				IndirectCullingGroup<?> cullingGroup = cullingGroups.get(groupKey.instanceType());
+
+				if (cullingGroup == null) {
+					continue;
+				}
+
+				cullingGroup.bindWithContextShader(ContextShader.CRUMBLING);
 
 				for (var progressEntry : byProgress.int2ObjectEntrySet()) {
 					Samplers.CRUMBLING.makeActive();

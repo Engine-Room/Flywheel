@@ -113,7 +113,7 @@ public class IndirectBuffers {
 	 * Bind all buffers except the draw command buffer.
 	 */
 	public void bindForCrumbling() {
-		multiBind(3, 3);
+		multiBind(1, 4);
 	}
 
 	private void multiBind(int base, int count) {
