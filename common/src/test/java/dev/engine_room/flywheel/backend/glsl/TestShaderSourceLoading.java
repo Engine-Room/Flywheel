@@ -38,7 +38,6 @@ public class TestShaderSourceLoading extends TestBase {
 		sources.add(FLW_B, "");
 
 		findAndAssertSuccess(sources, FLW_A);
-		sources.assertLoaded(FLW_B);
 	}
 
 	@Test
@@ -78,7 +77,6 @@ public class TestShaderSourceLoading extends TestBase {
 		sources.add(FLW_B, "");
 
 		SourceFile a = findAndAssertSuccess(sources, FLW_A);
-		sources.assertLoaded(FLW_B);
 
 		var includeB = assertSingletonList(a.imports);
 		assertEquals(FLW_B.toString(), includeB.file()
@@ -99,7 +97,6 @@ public class TestShaderSourceLoading extends TestBase {
 		sources.add(FLW_B, "");
 
 		SourceFile a = findAndAssertSuccess(sources, FLW_A);
-		sources.assertLoaded(FLW_B);
 
 		assertEquals(2, a.imports.size());
 		for (Import include : a.imports) {
@@ -112,7 +109,7 @@ public class TestShaderSourceLoading extends TestBase {
 
 				""", a.finalSource, "Both include statements should be elided.");
 
-		LoadResult bResult = sources.assertLoaded(FLW_B);
+		LoadResult bResult = sources.find(FLW_B);
 		SourceFile b = assertSuccessAndUnwrap(FLW_B, bResult);
 
 		assertEquals(ImmutableList.of(b), a.included);
@@ -148,7 +145,6 @@ public class TestShaderSourceLoading extends TestBase {
 				""");
 
 		var aErr = findAndAssertError(LoadError.IncludeError.class, sources, FLW_A);
-		sources.assertLoaded(FLW_B);
 
 		var recursiveInclude = assertSimpleNestedErrorsToDepth(LoadError.CircularDependency.class, aErr, 2);
 		assertEquals(ImmutableList.of(FLW_A, FLW_B, FLW_A), recursiveInclude.stack());
@@ -168,8 +164,6 @@ public class TestShaderSourceLoading extends TestBase {
 				""");
 
 		var aErr = findAndAssertError(LoadError.IncludeError.class, sources, FLW_A);
-		sources.assertLoaded(FLW_B);
-		sources.assertLoaded(FLW_C);
 
 		var recursiveInclude = assertSimpleNestedErrorsToDepth(LoadError.CircularDependency.class, aErr, 3);
 		assertEquals(ImmutableList.of(FLW_A, FLW_B, FLW_C, FLW_A), recursiveInclude.stack());

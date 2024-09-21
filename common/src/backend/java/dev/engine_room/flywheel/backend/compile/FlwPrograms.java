@@ -6,11 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
-
 import dev.engine_room.flywheel.api.Flywheel;
-import dev.engine_room.flywheel.api.instance.InstanceType;
-import dev.engine_room.flywheel.api.material.LightShader;
 import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.compile.component.UberShaderComponent;
 import dev.engine_room.flywheel.backend.compile.core.CompilerStats;
@@ -43,9 +39,11 @@ public final class FlwPrograms {
 		var vertexComponentsHeader = loader.find(COMPONENTS_HEADER_VERT);
 		var fragmentComponentsHeader = loader.find(COMPONENTS_HEADER_FRAG);
 
+		// TODO: de-uber material shaders
 		var vertexMaterialComponent = createVertexMaterialComponent(loader);
 		var fragmentMaterialComponent = createFragmentMaterialComponent(loader);
 		var fogComponent = createFogComponent(loader);
+		// TODO: separate compilation for cutout OFF, but keep the rest uber'd
 		var cutoutComponent = createCutoutComponent(loader);
 
 		if (stats.errored() || vertexComponentsHeader == null || fragmentComponentsHeader == null || vertexMaterialComponent == null || fragmentMaterialComponent == null || fogComponent == null || cutoutComponent == null) {
@@ -57,21 +55,8 @@ public final class FlwPrograms {
 		List<SourceComponent> vertexComponents = List.of(vertexComponentsHeader, vertexMaterialComponent);
 		List<SourceComponent> fragmentComponents = List.of(fragmentComponentsHeader, fragmentMaterialComponent, fogComponent, cutoutComponent);
 
-		var pipelineKeys = createPipelineKeys();
-		InstancingPrograms.reload(sources, pipelineKeys, vertexComponents, fragmentComponents);
-		IndirectPrograms.reload(sources, pipelineKeys, vertexComponents, fragmentComponents);
-	}
-
-	private static ImmutableList<PipelineProgramKey> createPipelineKeys() {
-		ImmutableList.Builder<PipelineProgramKey> builder = ImmutableList.builder();
-		for (ContextShader contextShader : ContextShader.values()) {
-			for (InstanceType<?> instanceType : InstanceType.REGISTRY) {
-				for (LightShader light : LightShader.REGISTRY.getAll()) {
-					builder.add(new PipelineProgramKey(instanceType, contextShader, light));
-				}
-			}
-		}
-		return builder.build();
+		InstancingPrograms.reload(sources, vertexComponents, fragmentComponents);
+		IndirectPrograms.reload(sources, vertexComponents, fragmentComponents);
 	}
 
 	@Nullable

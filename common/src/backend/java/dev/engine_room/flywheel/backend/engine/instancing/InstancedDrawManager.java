@@ -25,12 +25,12 @@ import dev.engine_room.flywheel.backend.engine.MeshPool;
 import dev.engine_room.flywheel.backend.engine.TextureBinder;
 import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
-import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.backend.gl.TextureBuffer;
 import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.lib.material.LightShaders;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
@@ -94,17 +94,15 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 			return;
 		}
 
-		try (var state = GlStateTracker.getRestoreState()) {
-			Uniforms.bindAll();
-			vao.bindForDraw();
-			TextureBinder.bindLightAndOverlay();
-			light.bind();
+		Uniforms.bindAll();
+		vao.bindForDraw();
+		TextureBinder.bindLightAndOverlay();
+		light.bind();
 
-			stage.draw(instanceTexture, programs);
+		stage.draw(instanceTexture, programs);
 
-			MaterialRenderState.reset();
-			TextureBinder.resetLightAndOverlay();
-		}
+		MaterialRenderState.reset();
+		TextureBinder.resetLightAndOverlay();
 	}
 
 	@Override
@@ -162,46 +160,50 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 		var crumblingMaterial = SimpleMaterial.builder();
 
-		try (var state = GlStateTracker.getRestoreState()) {
-			Uniforms.bindAll();
-			vao.bindForDraw();
-			TextureBinder.bindLightAndOverlay();
+		Uniforms.bindAll();
+		vao.bindForDraw();
+		TextureBinder.bindLightAndOverlay();
 
-			for (var groupEntry : byType.entrySet()) {
-				var byProgress = groupEntry.getValue();
+		for (var groupEntry : byType.entrySet()) {
+			var byProgress = groupEntry.getValue();
 
-				GroupKey<?> shader = groupEntry.getKey();
+			GroupKey<?> shader = groupEntry.getKey();
 
-				var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, LightShaders.SMOOTH_WHEN_EMBEDDED);
-				program.bind();
+			var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, LightShaders.SMOOTH_WHEN_EMBEDDED);
+			program.bind();
 
-				for (var progressEntry : byProgress.int2ObjectEntrySet()) {
-					Samplers.CRUMBLING.makeActive();
-					TextureBinder.bind(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
+			for (var progressEntry : byProgress.int2ObjectEntrySet()) {
+				Samplers.CRUMBLING.makeActive();
+				TextureBinder.bind(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
 
-					for (var instanceHandlePair : progressEntry.getValue()) {
-						InstancedInstancer<?> instancer = instanceHandlePair.getFirst();
-						var index = instanceHandlePair.getSecond().index;
+				for (var instanceHandlePair : progressEntry.getValue()) {
+					InstancedInstancer<?> instancer = instanceHandlePair.getFirst();
+					var index = instanceHandlePair.getSecond().index;
 
-						program.setInt("_flw_baseInstance", index);
+					program.setInt("_flw_baseInstance", index);
 
-						for (InstancedDraw draw : instancer.draws()) {
-							CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
-							uploadMaterialUniform(program, crumblingMaterial);
+					for (InstancedDraw draw : instancer.draws()) {
+						CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
+						uploadMaterialUniform(program, crumblingMaterial);
 
-							MaterialRenderState.setup(crumblingMaterial);
+						MaterialRenderState.setup(crumblingMaterial);
 
-							Samplers.INSTANCE_BUFFER.makeActive();
+						Samplers.INSTANCE_BUFFER.makeActive();
 
-							draw.renderOne(instanceTexture);
-						}
+						draw.renderOne(instanceTexture);
 					}
 				}
 			}
-
-			MaterialRenderState.reset();
-			TextureBinder.resetLightAndOverlay();
 		}
+
+		MaterialRenderState.reset();
+		TextureBinder.resetLightAndOverlay();
+	}
+
+	@Override
+	public void triggerFallback() {
+		InstancingPrograms.kill();
+		Minecraft.getInstance().levelRenderer.allChanged();
 	}
 
 	public static void uploadMaterialUniform(GlProgram program, Material material) {

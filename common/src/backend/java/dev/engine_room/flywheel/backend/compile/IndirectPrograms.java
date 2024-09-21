@@ -1,7 +1,6 @@
 package dev.engine_room.flywheel.backend.compile;
 
 import java.util.List;
-import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -43,11 +42,11 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	@Nullable
 	private static IndirectPrograms instance;
 
-	private final Map<PipelineProgramKey, GlProgram> pipeline;
-	private final Map<InstanceType<?>, GlProgram> culling;
-	private final Map<ResourceLocation, GlProgram> utils;
+	private final CompilationHarness<PipelineProgramKey> pipeline;
+	private final CompilationHarness<InstanceType<?>> culling;
+	private final CompilationHarness<ResourceLocation> utils;
 
-	private IndirectPrograms(Map<PipelineProgramKey, GlProgram> pipeline, Map<InstanceType<?>, GlProgram> culling, Map<ResourceLocation, GlProgram> utils) {
+	private IndirectPrograms(CompilationHarness<PipelineProgramKey> pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<ResourceLocation> utils) {
 		this.pipeline = pipeline;
 		this.culling = culling;
 		this.utils = utils;
@@ -81,32 +80,16 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		return extensions.build();
 	}
 
-	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
+	static void reload(ShaderSources sources, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
 		if (!GlCompat.SUPPORTS_INDIRECT) {
 			return;
 		}
-
-		IndirectPrograms newInstance = null;
 
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, vertexComponents, fragmentComponents, EXTENSIONS);
 		var cullingCompiler = createCullingCompiler(sources);
 		var utilCompiler = createUtilCompiler(sources);
 
-		try {
-			var pipelineResult = pipelineCompiler.compileAndReportErrors(pipelineKeys);
-			var cullingResult = cullingCompiler.compileAndReportErrors(createCullingKeys());
-			var utils = utilCompiler.compileAndReportErrors(UTIL_SHADERS);
-
-			if (pipelineResult != null && cullingResult != null && utils != null) {
-				newInstance = new IndirectPrograms(pipelineResult, cullingResult, utils);
-			}
-		} catch (Throwable t) {
-			FlwPrograms.LOGGER.error("Failed to compile indirect programs", t);
-		}
-
-		pipelineCompiler.delete();
-		cullingCompiler.delete();
-		utilCompiler.delete();
+		IndirectPrograms newInstance = new IndirectPrograms(pipelineCompiler, cullingCompiler, utilCompiler);
 
 		setInstance(newInstance);
 	}
@@ -142,14 +125,6 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 				.harness("utilities", sources);
 	}
 
-	private static ImmutableList<InstanceType<?>> createCullingKeys() {
-		ImmutableList.Builder<InstanceType<?>> builder = ImmutableList.builder();
-		for (InstanceType<?> instanceType : InstanceType.REGISTRY) {
-			builder.add(instanceType);
-		}
-		return builder.build();
-	}
-
 	static void setInstance(@Nullable IndirectPrograms newInstance) {
 		if (instance != null) {
 			instance.release();
@@ -167,6 +142,10 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 	public static boolean allLoaded() {
 		return instance != null;
+	}
+
+	public static void kill() {
+		setInstance(null);
 	}
 
 	public GlProgram getIndirectProgram(InstanceType<?> instanceType, ContextShader contextShader, LightShader light) {
@@ -195,11 +174,8 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 	@Override
 	protected void _delete() {
-		pipeline.values()
-				.forEach(GlProgram::delete);
-		culling.values()
-				.forEach(GlProgram::delete);
-		utils.values()
-				.forEach(GlProgram::delete);
+		pipeline.delete();
+		culling.delete();
+		utils.delete();
 	}
 }

@@ -13,6 +13,7 @@ import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.visualization.VisualEmbedding;
 import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
+import dev.engine_room.flywheel.backend.compile.core.ShaderException;
 import dev.engine_room.flywheel.backend.engine.embed.EmbeddedEnvironment;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
 import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
@@ -90,17 +91,27 @@ public class EngineImpl implements Engine {
 			Uniforms.update(context);
 			environmentStorage.flush();
 			drawManager.flush(lightStorage, environmentStorage);
+		} catch (ShaderException e) {
+			triggerFallback();
 		}
 	}
 
 	@Override
 	public void render(RenderContext context, VisualType visualType) {
-		drawManager.render(visualType);
+		try (var state = GlStateTracker.getRestoreState()) {
+			drawManager.render(visualType);
+		} catch (ShaderException e) {
+			triggerFallback();
+		}
 	}
 
 	@Override
 	public void renderCrumbling(RenderContext context, List<CrumblingBlock> crumblingBlocks) {
-		drawManager.renderCrumbling(crumblingBlocks);
+		try (var state = GlStateTracker.getRestoreState()) {
+			drawManager.renderCrumbling(crumblingBlocks);
+		} catch (ShaderException e) {
+			triggerFallback();
+		}
 	}
 
 	@Override
@@ -108,6 +119,10 @@ public class EngineImpl implements Engine {
 		drawManager.delete();
 		lightStorage.delete();
 		environmentStorage.delete();
+	}
+
+	private void triggerFallback() {
+		drawManager.triggerFallback();
 	}
 
 	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType, int bias) {

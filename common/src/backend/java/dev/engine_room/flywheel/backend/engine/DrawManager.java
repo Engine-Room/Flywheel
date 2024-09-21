@@ -135,6 +135,8 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 		initializationQueue.clear();
 	}
 
+	public abstract void triggerFallback();
+
 	protected record UninitializedInstancer<N, I extends Instance>(InstancerKey<I> key, N instancer) {
 	}
 }
