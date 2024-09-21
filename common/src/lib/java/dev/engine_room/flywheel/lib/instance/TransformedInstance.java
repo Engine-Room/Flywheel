@@ -41,6 +41,19 @@ public class TransformedInstance extends ColoredLitInstance implements Affine<Tr
 		return this;
 	}
 
+	public TransformedInstance mul(Matrix4fc other) {
+		pose.mul(other);
+		return this;
+	}
+
+	public TransformedInstance mul(PoseStack.Pose other) {
+		return mul(other.pose());
+	}
+
+	public TransformedInstance mul(PoseStack stack) {
+		return mul(stack.last());
+	}
+
 	public TransformedInstance setTransform(Matrix4fc pose) {
 		this.pose.set(pose);
 		return this;
