@@ -216,8 +216,6 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 				continue;
 			}
 
-			cullingGroup.bindWithContextShader(ContextShader.CRUMBLING);
-
 			for (var progressEntry : byProgress.int2ObjectEntrySet()) {
 				Samplers.CRUMBLING.makeActive();
 				TextureBinder.bind(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
@@ -229,6 +227,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 					for (IndirectDraw draw : instancer.draws()) {
 						// Transform the material to be suited for crumbling.
 						CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
+
+						cullingGroup.bindWithContextShader(ContextShader.CRUMBLING, crumblingMaterial);
 
 						MaterialRenderState.setup(crumblingMaterial);
 

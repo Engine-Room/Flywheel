@@ -26,7 +26,6 @@ import dev.engine_room.flywheel.backend.engine.MeshPool;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
-import dev.engine_room.flywheel.lib.material.LightShaders;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 
 public class IndirectCullingGroup<I extends Instance> {
@@ -204,7 +203,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		int baseDrawUniformLoc = -1;
 
 		for (var multiDraw : multiDraws.get(visualType)) {
-			var drawProgram = programs.getIndirectProgram(instanceType, multiDraw.embedded ? ContextShader.EMBEDDED : ContextShader.DEFAULT, multiDraw.material.light());
+			var drawProgram = programs.getIndirectProgram(instanceType, multiDraw.embedded ? ContextShader.EMBEDDED : ContextShader.DEFAULT, multiDraw.material.light(), multiDraw.material.cutout(), multiDraw.material.shaders());
 			if (drawProgram != lastProgram) {
 				lastProgram = drawProgram;
 
@@ -221,8 +220,8 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 	}
 
-	public void bindWithContextShader(ContextShader override) {
-		var program = programs.getIndirectProgram(instanceType, override, LightShaders.SMOOTH_WHEN_EMBEDDED);
+	public void bindWithContextShader(ContextShader override, Material material) {
+		var program = programs.getIndirectProgram(instanceType, override, material.light(), material.cutout(), material.shaders());
 
 		program.bind();
 

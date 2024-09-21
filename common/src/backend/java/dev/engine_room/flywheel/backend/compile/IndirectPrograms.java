@@ -8,7 +8,9 @@ import com.google.common.collect.ImmutableList;
 
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.instance.InstanceType;
+import dev.engine_room.flywheel.api.material.CutoutShader;
 import dev.engine_room.flywheel.api.material.LightShader;
+import dev.engine_room.flywheel.api.material.MaterialShaders;
 import dev.engine_room.flywheel.backend.compile.component.InstanceStructComponent;
 import dev.engine_room.flywheel.backend.compile.component.SsboInstanceComponent;
 import dev.engine_room.flywheel.backend.compile.core.CompilationHarness;
@@ -148,8 +150,8 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		setInstance(null);
 	}
 
-	public GlProgram getIndirectProgram(InstanceType<?> instanceType, ContextShader contextShader, LightShader light) {
-		return pipeline.get(new PipelineProgramKey(instanceType, contextShader, light));
+	public GlProgram getIndirectProgram(InstanceType<?> instanceType, ContextShader contextShader, LightShader light, CutoutShader cutout, MaterialShaders shaders) {
+		return pipeline.get(new PipelineProgramKey(instanceType, contextShader, light, cutout, shaders));
 	}
 
 	public GlProgram getCullingProgram(InstanceType<?> instanceType) {

@@ -7,7 +7,9 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.ImmutableList;
 
 import dev.engine_room.flywheel.api.instance.InstanceType;
+import dev.engine_room.flywheel.api.material.CutoutShader;
 import dev.engine_room.flywheel.api.material.LightShader;
+import dev.engine_room.flywheel.api.material.MaterialShaders;
 import dev.engine_room.flywheel.backend.compile.core.CompilationHarness;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
@@ -71,8 +73,8 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 		setInstance(null);
 	}
 
-	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, LightShader light) {
-		return pipeline.get(new PipelineProgramKey(instanceType, contextShader, light));
+	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, LightShader light, CutoutShader cutout, MaterialShaders materialShaders) {
+		return pipeline.get(new PipelineProgramKey(instanceType, contextShader, light, cutout, materialShaders));
 	}
 
 	@Override

@@ -28,7 +28,6 @@ import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.TextureBuffer;
 import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
-import dev.engine_room.flywheel.lib.material.LightShaders;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -169,9 +168,6 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 			GroupKey<?> shader = groupEntry.getKey();
 
-			var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, LightShaders.SMOOTH_WHEN_EMBEDDED);
-			program.bind();
-
 			for (var progressEntry : byProgress.int2ObjectEntrySet()) {
 				Samplers.CRUMBLING.makeActive();
 				TextureBinder.bind(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
@@ -180,10 +176,11 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 					InstancedInstancer<?> instancer = instanceHandlePair.getFirst();
 					var index = instanceHandlePair.getSecond().index;
 
-					program.setInt("_flw_baseInstance", index);
-
 					for (InstancedDraw draw : instancer.draws()) {
 						CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
+						var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, crumblingMaterial.light(), crumblingMaterial.cutout(), crumblingMaterial.shaders());
+						program.bind();
+						program.setInt("_flw_baseInstance", index);
 						uploadMaterialUniform(program, crumblingMaterial);
 
 						MaterialRenderState.setup(crumblingMaterial);

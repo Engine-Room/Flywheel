@@ -35,9 +35,11 @@ public final class PipelineCompiler {
 							var instance = ResourceUtil.toDebugFileNameNoExtension(key.instanceType()
 									.vertexShader());
 
+							var material = ResourceUtil.toDebugFileNameNoExtension(key.materialShaders()
+									.vertexSource());
 							var context = key.contextShader()
 									.nameLowerCase();
-							return "pipeline/" + pipeline.compilerMarker() + "/" + instance + "_" + context;
+							return "pipeline/" + pipeline.compilerMarker() + "/" + instance + "/" + material + "_" + context;
 						})
 						.requireExtensions(extensions)
 						.onCompile((key, comp) -> key.contextShader()
@@ -47,6 +49,8 @@ public final class PipelineCompiler {
 						.withComponent(key -> new InstanceStructComponent(key.instanceType()))
 						.withResource(key -> key.instanceType()
 								.vertexShader())
+						.withResource(key -> key.materialShaders()
+								.vertexSource())
 						.withComponents(vertexComponents)
 						.withResource(InternalVertex.LAYOUT_SHADER)
 						.withComponent(key -> pipeline.assembler()
@@ -56,8 +60,16 @@ public final class PipelineCompiler {
 						.nameMapper(key -> {
 							var context = key.contextShader()
 									.nameLowerCase();
-							return "pipeline/" + pipeline.compilerMarker() + "/" + ResourceUtil.toDebugFileNameNoExtension(key.light()
-									.source()) + "_" + context;
+
+							var material = ResourceUtil.toDebugFileNameNoExtension(key.materialShaders()
+									.fragmentSource());
+
+							var cutout = ResourceUtil.toDebugFileNameNoExtension(key.cutout()
+									.source());
+
+							var light = ResourceUtil.toDebugFileNameNoExtension(key.light()
+									.source());
+							return "pipeline/" + pipeline.compilerMarker() + "/frag/" + material + "/" + light + "_" + cutout + "_" + context;
 						})
 						.requireExtensions(extensions)
 						.enableExtension("GL_ARB_conservative_depth")
@@ -65,8 +77,12 @@ public final class PipelineCompiler {
 								.onCompile(comp))
 						.onCompile((key, comp) -> lightSmoothness.onCompile(comp))
 						.withResource(API_IMPL_FRAG)
+						.withResource(key -> key.materialShaders()
+								.fragmentSource())
 						.withComponents(fragmentComponents)
 						.withResource(key -> key.light()
+								.source())
+						.withResource(key -> key.cutout()
 								.source())
 						.withResource(pipeline.fragmentMain()))
 				.preLink((key, program) -> {

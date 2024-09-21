@@ -5,6 +5,7 @@ import dev.engine_room.flywheel.api.material.Transparency;
 import dev.engine_room.flywheel.api.material.WriteMask;
 import dev.engine_room.flywheel.lib.material.CutoutShaders;
 import dev.engine_room.flywheel.lib.material.FogShaders;
+import dev.engine_room.flywheel.lib.material.LightShaders;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 
 public class CommonCrumbling {
@@ -12,6 +13,7 @@ public class CommonCrumbling {
 		crumblingMaterial.copyFrom(baseMaterial)
 				.fog(FogShaders.NONE)
 				.cutout(CutoutShaders.ONE_TENTH)
+				.light(LightShaders.SMOOTH_WHEN_EMBEDDED)
 				.polygonOffset(true)
 				.transparency(Transparency.CRUMBLING)
 				.writeMask(WriteMask.COLOR)

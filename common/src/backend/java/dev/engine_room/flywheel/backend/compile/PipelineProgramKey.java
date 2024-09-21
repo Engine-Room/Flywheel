@@ -1,7 +1,9 @@
 package dev.engine_room.flywheel.backend.compile;
 
 import dev.engine_room.flywheel.api.instance.InstanceType;
+import dev.engine_room.flywheel.api.material.CutoutShader;
 import dev.engine_room.flywheel.api.material.LightShader;
+import dev.engine_room.flywheel.api.material.MaterialShaders;
 
 /**
  * Represents the entire context of a program's usage.
@@ -10,5 +12,6 @@ import dev.engine_room.flywheel.api.material.LightShader;
  * @param contextShader The context shader to use.
  * @param light The light shader to use.
  */
-public record PipelineProgramKey(InstanceType<?> instanceType, ContextShader contextShader, LightShader light) {
+public record PipelineProgramKey(InstanceType<?> instanceType, ContextShader contextShader, LightShader light,
+								 CutoutShader cutout, MaterialShaders materialShaders) {
 }

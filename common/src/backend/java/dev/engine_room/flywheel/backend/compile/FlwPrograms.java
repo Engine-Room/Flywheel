@@ -39,44 +39,20 @@ public final class FlwPrograms {
 		var vertexComponentsHeader = loader.find(COMPONENTS_HEADER_VERT);
 		var fragmentComponentsHeader = loader.find(COMPONENTS_HEADER_FRAG);
 
-		// TODO: de-uber material shaders
-		var vertexMaterialComponent = createVertexMaterialComponent(loader);
-		var fragmentMaterialComponent = createFragmentMaterialComponent(loader);
 		var fogComponent = createFogComponent(loader);
-		// TODO: separate compilation for cutout OFF, but keep the rest uber'd
-		var cutoutComponent = createCutoutComponent(loader);
 
-		if (stats.errored() || vertexComponentsHeader == null || fragmentComponentsHeader == null || vertexMaterialComponent == null || fragmentMaterialComponent == null || fogComponent == null || cutoutComponent == null) {
+		// TODO: separate compilation for cutout OFF, but keep the rest uber'd?
+		if (stats.errored() || vertexComponentsHeader == null || fragmentComponentsHeader == null || fogComponent == null) {
 			// Probably means the shader sources are missing.
 			stats.emitErrorLog();
 			return;
 		}
 
-		List<SourceComponent> vertexComponents = List.of(vertexComponentsHeader, vertexMaterialComponent);
-		List<SourceComponent> fragmentComponents = List.of(fragmentComponentsHeader, fragmentMaterialComponent, fogComponent, cutoutComponent);
+		List<SourceComponent> vertexComponents = List.of(vertexComponentsHeader);
+		List<SourceComponent> fragmentComponents = List.of(fragmentComponentsHeader, fogComponent);
 
 		InstancingPrograms.reload(sources, vertexComponents, fragmentComponents);
 		IndirectPrograms.reload(sources, vertexComponents, fragmentComponents);
-	}
-
-	@Nullable
-	private static UberShaderComponent createVertexMaterialComponent(SourceLoader loader) {
-		return UberShaderComponent.builder(Flywheel.rl("material_vertex"))
-				.materialSources(MaterialShaderIndices.vertexSources()
-						.all())
-				.adapt(FnSignature.ofVoid("flw_materialVertex"))
-				.switchOn(GlslExpr.variable("_flw_uberMaterialVertexIndex"))
-				.build(loader);
-	}
-
-	@Nullable
-	private static UberShaderComponent createFragmentMaterialComponent(SourceLoader loader) {
-		return UberShaderComponent.builder(Flywheel.rl("material_fragment"))
-				.materialSources(MaterialShaderIndices.fragmentSources()
-						.all())
-				.adapt(FnSignature.ofVoid("flw_materialFragment"))
-				.switchOn(GlslExpr.variable("_flw_uberMaterialFragmentIndex"))
-				.build(loader);
 	}
 
 	@Nullable
