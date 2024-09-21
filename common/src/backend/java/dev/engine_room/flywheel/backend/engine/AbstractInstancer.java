@@ -94,7 +94,7 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	private void addLocked(I instance, InstanceHandleImpl<I> handle) {
 		instances.add(instance);
 		handles.add(handle);
-		changed.set(handle.index);
+		setIndexChanged(handle.index);
 	}
 
 	public int instanceCount() {
@@ -105,6 +105,10 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		if (index < 0 || index >= instanceCount()) {
 			return;
 		}
+		setIndexChanged(index);
+	}
+
+	protected void setIndexChanged(int index) {
 		changed.set(index);
 	}
 

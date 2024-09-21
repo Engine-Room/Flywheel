@@ -37,10 +37,7 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	}
 
 	@Override
-	public void notifyDirty(int index) {
-		if (index < 0 || index >= instanceCount()) {
-			return;
-		}
+	public void setIndexChanged(int index) {
 		changedPages.set(ObjectStorage.objectIndex2PageIndex(index));
 	}
 
