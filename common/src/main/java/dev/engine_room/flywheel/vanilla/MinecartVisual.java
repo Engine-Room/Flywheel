@@ -43,7 +43,6 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 	private final Matrix4fStack stack = new Matrix4fStack(2);
 
 	private BlockState blockState;
-	private boolean active;
 
 	public MinecartVisual(VisualizationContext ctx, T entity, float partialTick, ModelLayerLocation layerLocation) {
 		super(ctx, entity, partialTick);
@@ -65,11 +64,9 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 		RenderShape shape = blockState.getRenderShape();
 
 		if (shape == RenderShape.ENTITYBLOCK_ANIMATED) {
-			instances.traverse(instance -> instance.setZeroTransform().setChanged());
-			active = false;
+			instances.visible(false);
 			return null;
 		}
-		active = true;
 
 		if (shape == RenderShape.INVISIBLE) {
 			return null;
@@ -100,8 +97,7 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 			return;
 		}
 
-		// TODO: add proper way to temporarily disable rendering a specific instance
-		if (!active) {
+		if (!instances.visible()) {
 			return;
 		}
 
