@@ -13,5 +13,5 @@ import dev.engine_room.flywheel.api.material.MaterialShaders;
  * @param light The light shader to use.
  */
 public record PipelineProgramKey(InstanceType<?> instanceType, ContextShader contextShader, LightShader light,
-								 CutoutShader cutout, MaterialShaders materialShaders) {
+								 CutoutShader cutout, MaterialShaders materialShaders, boolean debugEnabled) {
 }

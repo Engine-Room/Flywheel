@@ -315,4 +315,8 @@ public final class FrameUniforms extends UniformWriter {
 		MemoryUtil.memPutFloat(ptr + 88, nzW);
 		MemoryUtil.memPutFloat(ptr + 92, pzW);
 	}
+
+	public static boolean debugOn() {
+		return debugMode != DebugMode.OFF.ordinal();
+	}
 }

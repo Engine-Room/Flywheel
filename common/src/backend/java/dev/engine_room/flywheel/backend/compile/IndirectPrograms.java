@@ -15,6 +15,7 @@ import dev.engine_room.flywheel.backend.compile.component.InstanceStructComponen
 import dev.engine_room.flywheel.backend.compile.component.SsboInstanceComponent;
 import dev.engine_room.flywheel.backend.compile.core.CompilationHarness;
 import dev.engine_room.flywheel.backend.compile.core.Compile;
+import dev.engine_room.flywheel.backend.engine.uniform.FrameUniforms;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
@@ -151,7 +152,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	}
 
 	public GlProgram getIndirectProgram(InstanceType<?> instanceType, ContextShader contextShader, LightShader light, CutoutShader cutout, MaterialShaders shaders) {
-		return pipeline.get(new PipelineProgramKey(instanceType, contextShader, light, cutout, shaders));
+		return pipeline.get(new PipelineProgramKey(instanceType, contextShader, light, cutout, shaders, FrameUniforms.debugOn()));
 	}
 
 	public GlProgram getCullingProgram(InstanceType<?> instanceType) {

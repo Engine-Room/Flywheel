@@ -16,6 +16,7 @@ import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.backend.gl.shader.ShaderType;
 import dev.engine_room.flywheel.backend.glsl.ShaderSources;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
+import dev.engine_room.flywheel.lib.material.CutoutShaders;
 import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.resources.ResourceLocation;
 
@@ -39,12 +40,18 @@ public final class PipelineCompiler {
 									.vertexSource());
 							var context = key.contextShader()
 									.nameLowerCase();
-							return "pipeline/" + pipeline.compilerMarker() + "/" + instance + "/" + material + "_" + context;
+							var debug = key.debugEnabled() ? "_debug" : "";
+							return "pipeline/" + pipeline.compilerMarker() + "/" + instance + "/" + material + "_" + context + debug;
 						})
 						.requireExtensions(extensions)
 						.onCompile((key, comp) -> key.contextShader()
 								.onCompile(comp))
 						.onCompile((key, comp) -> lightSmoothness.onCompile(comp))
+						.onCompile((key, comp) -> {
+							if (key.debugEnabled()) {
+								comp.define("_FLW_DEBUG");
+							}
+						})
 						.withResource(API_IMPL_VERT)
 						.withComponent(key -> new InstanceStructComponent(key.instanceType()))
 						.withResource(key -> key.instanceType()
@@ -69,13 +76,24 @@ public final class PipelineCompiler {
 
 							var light = ResourceUtil.toDebugFileNameNoExtension(key.light()
 									.source());
-							return "pipeline/" + pipeline.compilerMarker() + "/frag/" + material + "/" + light + "_" + cutout + "_" + context;
+							var debug = key.debugEnabled() ? "_debug" : "";
+							return "pipeline/" + pipeline.compilerMarker() + "/frag/" + material + "/" + light + "_" + cutout + "_" + context + debug;
 						})
 						.requireExtensions(extensions)
 						.enableExtension("GL_ARB_conservative_depth")
 						.onCompile((key, comp) -> key.contextShader()
 								.onCompile(comp))
 						.onCompile((key, comp) -> lightSmoothness.onCompile(comp))
+						.onCompile((key, comp) -> {
+							if (key.debugEnabled()) {
+								comp.define("_FLW_DEBUG");
+							}
+						})
+						.onCompile((key, comp) -> {
+							if (key.cutout() != CutoutShaders.OFF) {
+								comp.define("_FLW_USE_DISCARD");
+							}
+						})
 						.withResource(API_IMPL_FRAG)
 						.withResource(key -> key.materialShaders()
 								.fragmentSource())
