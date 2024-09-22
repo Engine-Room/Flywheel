@@ -1,14 +1,16 @@
 package dev.engine_room.flywheel.backend.compile;
 
 import java.util.List;
-import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
 import dev.engine_room.flywheel.api.instance.InstanceType;
+import dev.engine_room.flywheel.api.material.CutoutShader;
 import dev.engine_room.flywheel.api.material.LightShader;
+import dev.engine_room.flywheel.api.material.MaterialShaders;
+import dev.engine_room.flywheel.backend.compile.core.CompilationHarness;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.backend.glsl.GlslVersion;
@@ -22,9 +24,9 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 	@Nullable
 	private static InstancingPrograms instance;
 
-	private final Map<PipelineProgramKey, GlProgram> pipeline;
+	private final CompilationHarness<PipelineProgramKey> pipeline;
 
-	private InstancingPrograms(Map<PipelineProgramKey, GlProgram> pipeline) {
+	private InstancingPrograms(CompilationHarness<PipelineProgramKey> pipeline) {
 		this.pipeline = pipeline;
 	}
 
@@ -36,26 +38,14 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 		return extensions.build();
 	}
 
-	static void reload(ShaderSources sources, ImmutableList<PipelineProgramKey> pipelineKeys, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
+	static void reload(ShaderSources sources, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents) {
 		if (!GlCompat.SUPPORTS_INSTANCING) {
 			return;
 		}
 
-		InstancingPrograms newInstance = null;
 
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCING, vertexComponents, fragmentComponents, EXTENSIONS);
-
-		try {
-			var pipelineResult = pipelineCompiler.compileAndReportErrors(pipelineKeys);
-
-			if (pipelineResult != null) {
-				newInstance = new InstancingPrograms(pipelineResult);
-			}
-		} catch (Throwable t) {
-			FlwPrograms.LOGGER.error("Failed to compile instancing programs", t);
-		}
-
-		pipelineCompiler.delete();
+		InstancingPrograms newInstance = new InstancingPrograms(pipelineCompiler);
 
 		setInstance(newInstance);
 	}
@@ -79,13 +69,16 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 		return instance != null;
 	}
 
-	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, LightShader light) {
-		return pipeline.get(new PipelineProgramKey(instanceType, contextShader, light));
+	public static void kill() {
+		setInstance(null);
+	}
+
+	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, LightShader light, CutoutShader cutout, MaterialShaders materialShaders) {
+		return pipeline.get(new PipelineProgramKey(instanceType, contextShader, light, cutout, materialShaders));
 	}
 
 	@Override
 	protected void _delete() {
-		pipeline.values()
-				.forEach(GlProgram::delete);
+		pipeline.delete();
 	}
 }

@@ -115,8 +115,11 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 					continue;
 				}
 
-				AbstractInstancer<?> abstractInstancer = impl.instancer;
+				InstanceHandleImpl.State<?> abstractInstancer = impl.state;
+				// AbstractInstancer directly implement HandleState, so this check is valid.
 				if (!clazz.isInstance(abstractInstancer)) {
+					// This rejects instances that were created by a different engine,
+					// and also instances that are hidden or deleted.
 					continue;
 				}
 
@@ -134,6 +137,8 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 		instancers.clear();
 		initializationQueue.clear();
 	}
+
+	public abstract void triggerFallback();
 
 	protected record UninitializedInstancer<N, I extends Instance>(InstancerKey<I> key, N instancer) {
 	}

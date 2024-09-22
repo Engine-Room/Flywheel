@@ -89,7 +89,7 @@ public class IndirectDraw {
 		MemoryUtil.memPutInt(ptr + 4, 1); // instanceCount - only drawing one instance
 		MemoryUtil.memPutInt(ptr + 8, mesh.firstIndex()); // firstIndex
 		MemoryUtil.memPutInt(ptr + 12, mesh.baseVertex()); // baseVertex
-		MemoryUtil.memPutInt(ptr + 16, instancer.baseInstance() + instanceIndex); // baseInstance
+		MemoryUtil.memPutInt(ptr + 16, instancer.local2GlobalInstanceIndex(instanceIndex)); // baseInstance
 
 		MemoryUtil.memPutInt(ptr + 20, instancer.modelIndex()); // modelIndex
 

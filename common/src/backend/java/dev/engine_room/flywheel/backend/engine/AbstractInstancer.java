@@ -1,7 +1,6 @@
 package dev.engine_room.flywheel.backend.engine;
 
 import java.util.ArrayList;
-import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -11,10 +10,10 @@ import dev.engine_room.flywheel.api.instance.Instancer;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
 import dev.engine_room.flywheel.backend.util.AtomicBitSet;
 
-public abstract class AbstractInstancer<I extends Instance> implements Instancer<I> {
+public abstract class AbstractInstancer<I extends Instance> implements Instancer<I>, InstanceHandleImpl.State<I> {
 	public final InstanceType<I> type;
 	public final Environment environment;
-	private final Supplier<AbstractInstancer<I>> recreate;
+	private final Recreate<I> recreate;
 
 	// Lock for all instances, only needs to be used in methods that may run on the TaskExecutor.
 	protected final Object lock = new Object();
@@ -24,25 +23,57 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	protected final AtomicBitSet changed = new AtomicBitSet();
 	protected final AtomicBitSet deleted = new AtomicBitSet();
 
-	protected AbstractInstancer(InstancerKey<I> key, Supplier<AbstractInstancer<I>> recreate) {
+	protected AbstractInstancer(InstancerKey<I> key, Recreate<I> recreate) {
 		this.type = key.type();
 		this.environment = key.environment();
 		this.recreate = recreate;
 	}
 
 	@Override
-	public I createInstance() {
-		synchronized (lock) {
-			var i = instances.size();
-			var handle = new InstanceHandleImpl<I>();
-			handle.instancer = this;
-			handle.recreate = recreate;
-			handle.index = i;
-			I instance = type.create(handle);
-			handle.instance = instance;
+	public InstanceHandleImpl.State<I> setChanged(int index) {
+		notifyDirty(index);
+		return this;
+	}
 
+	@Override
+	public InstanceHandleImpl.State<I> setDeleted(int index) {
+		notifyRemoval(index);
+		return InstanceHandleImpl.Deleted.instance();
+	}
+
+	@Override
+	public InstanceHandleImpl.State<I> setVisible(InstanceHandleImpl<I> handle, int index, boolean visible) {
+		if (visible) {
+			return this;
+		}
+
+		notifyRemoval(index);
+
+		I instance;
+		synchronized (lock) {
+			// I think we need to lock to prevent wacky stuff from happening if the array gets resized.
+			instance = instances.get(index);
+		}
+
+		return new InstanceHandleImpl.Hidden<>(recreate, instance);
+	}
+
+	@Override
+	public I createInstance() {
+		var handle = new InstanceHandleImpl<>(this);
+		I instance = type.create(handle);
+
+		synchronized (lock) {
+			handle.index = instances.size();
 			addLocked(instance, handle);
 			return instance;
+		}
+	}
+
+	public void revealInstance(InstanceHandleImpl<I> handle, I instance) {
+		synchronized (lock) {
+			handle.index = instances.size();
+			addLocked(instance, handle);
 		}
 	}
 
@@ -60,9 +91,19 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		}
 
 		// Should InstanceType have an isInstance method?
+		@SuppressWarnings("unchecked")
 		var handle = (InstanceHandleImpl<I>) instanceHandle;
 
-		if (handle.instancer == this && handle.visible) {
+		// No need to steal if this instance is already owned by this instancer.
+		if (handle.state == this) {
+			return;
+		}
+		// Not allowed to steal deleted instances.
+		if (handle.state instanceof InstanceHandleImpl.Deleted) {
+			return;
+		}
+		// No need to steal if the instance will recreate to us.
+		if (handle.state instanceof InstanceHandleImpl.Hidden<I> hidden && recreate.equals(hidden.recreate())) {
 			return;
 		}
 
@@ -70,21 +111,21 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		//  is somehow being stolen by 2 different instancers between threads.
 		//  That seems kinda impossible so I'm fine leaving it as is for now.
 
-		// Remove the instance from its old instancer.
-		// This won't have any unwanted effect when the old instancer
-		// is filtering deleted instances later, so is safe.
-		handle.setDeleted();
-
 		// Add the instance to this instancer.
-		handle.instancer = this;
-		handle.recreate = recreate;
+		if (handle.state instanceof AbstractInstancer<I> other) {
+			// Remove the instance from its old instancer.
+			// This won't have any unwanted effect when the old instancer
+			// is filtering deleted instances later, so is safe.
+			other.notifyRemoval(handle.index);
 
-		if (handle.visible) {
+			handle.state = this;
 			// Only lock now that we'll be mutating our state.
 			synchronized (lock) {
 				handle.index = instances.size();
 				addLocked(instance, handle);
 			}
+		} else if (handle.state instanceof InstanceHandleImpl.Hidden<I>) {
+			handle.state = new InstanceHandleImpl.Hidden<>(recreate, instance);
 		}
 	}
 
@@ -94,7 +135,7 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	private void addLocked(I instance, InstanceHandleImpl<I> handle) {
 		instances.add(instance);
 		handles.add(handle);
-		changed.set(handle.index);
+		setIndexChanged(handle.index);
 	}
 
 	public int instanceCount() {
@@ -105,6 +146,10 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		if (index < 0 || index >= instanceCount()) {
 			return;
 		}
+		setIndexChanged(index);
+	}
+
+	protected void setIndexChanged(int index) {
 		changed.set(index);
 	}
 
@@ -183,8 +228,9 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 			// clearing it here would cause significant visual artifacts and instance leaks.
 			// At the same time, we need to clear handles we own to prevent
 			// instances from changing/deleting positions in this instancer that no longer exist.
-			if (handle.instancer == this) {
+			if (handle.state == this) {
 				handle.clear();
+				handle.state = InstanceHandleImpl.Deleted.instance();
 			}
 		}
 		instances.clear();
@@ -198,5 +244,11 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	@Override
 	public String toString() {
 		return "AbstractInstancer[" + instanceCount() + ']';
+	}
+
+	public record Recreate<I extends Instance>(InstancerKey<I> key, DrawManager<?> drawManager) {
+		public AbstractInstancer<I> recreate() {
+			return drawManager.getInstancer(key);
+		}
 	}
 }

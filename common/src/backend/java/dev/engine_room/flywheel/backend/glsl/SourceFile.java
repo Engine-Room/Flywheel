@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -69,7 +70,7 @@ public class SourceFile implements SourceComponent {
 		return new LoadResult.Success(new SourceFile(name, new SourceLines(name, ""), ImmutableMap.of(), ImmutableMap.of(), ImmutableList.of(), ImmutableMap.of(), ImmutableList.of(), ""));
 	}
 
-	public static LoadResult parse(ShaderSources sourceFinder, ResourceLocation name, String stringSource) {
+	public static LoadResult parse(Function<ResourceLocation, LoadResult> sourceFinder, ResourceLocation name, String stringSource) {
 		var source = new SourceLines(name, stringSource);
 
 		var imports = Import.parseImports(source);
@@ -93,7 +94,7 @@ public class SourceFile implements SourceComponent {
 				continue;
 			}
 
-			var result = sourceFinder.find(location);
+			var result = sourceFinder.apply(location);
 
 			if (result instanceof LoadResult.Success s) {
 				included.add(s.unwrap());

@@ -12,4 +12,8 @@ public interface Instance {
 	default void delete() {
 		handle().setDeleted();
 	}
+
+	default void setVisible(boolean visible) {
+		handle().setVisible(visible);
+	}
 }

@@ -100,6 +100,10 @@ bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
 
             ivec4 bounds = ivec4(aabb * vec4(levelSizePair));
 
+            // Clamp to the texture bounds.
+            // Since we're not going through a sampler out of bounds texel fetches will return 0.
+            bounds = clamp(bounds, ivec4(0), levelSizePair);
+
             float depth01 = texelFetch(_flw_depthPyramid, bounds.xw, level).r;
             float depth11 = texelFetch(_flw_depthPyramid, bounds.zw, level).r;
             float depth10 = texelFetch(_flw_depthPyramid, bounds.zy, level).r;

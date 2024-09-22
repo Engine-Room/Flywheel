@@ -1,56 +1,93 @@
 package dev.engine_room.flywheel.backend.engine;
 
-import java.util.function.Supplier;
-
-import org.jetbrains.annotations.UnknownNullability;
-
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceHandle;
 
 public class InstanceHandleImpl<I extends Instance> implements InstanceHandle {
-	@UnknownNullability
-	public AbstractInstancer<I> instancer;
-	@UnknownNullability
-	public I instance;
-	@UnknownNullability
-	public Supplier<AbstractInstancer<I>> recreate;
-	public boolean visible = true;
+	public State<I> state;
 	public int index;
+
+	public InstanceHandleImpl(State<I> state) {
+		this.state = state;
+	}
 
 	@Override
 	public void setChanged() {
-		instancer.notifyDirty(index);
+		state = state.setChanged(index);
 	}
 
 	@Override
 	public void setDeleted() {
-		instancer.notifyRemoval(index);
+		state = state.setDeleted(index);
 		// invalidate ourselves
 		clear();
 	}
 
 	@Override
 	public void setVisible(boolean visible) {
-		if (this.visible == visible) {
-			return;
-		}
-
-		this.visible = visible;
-
-		if (visible) {
-			recreate.get().stealInstance(instance);
-		} else {
-			instancer.notifyRemoval(index);
-			clear();
-		}
+		state = state.setVisible(this, index, visible);
 	}
 
 	@Override
 	public boolean isVisible() {
-		return visible;
+		return state instanceof AbstractInstancer<?>;
 	}
 
 	public void clear() {
 		index = -1;
+	}
+
+	public interface State<I extends Instance> {
+		State<I> setChanged(int index);
+
+		State<I> setDeleted(int index);
+
+		State<I> setVisible(InstanceHandleImpl<I> handle, int index, boolean visible);
+	}
+
+	public record Hidden<I extends Instance>(AbstractInstancer.Recreate<I> recreate, I instance) implements State<I> {
+		@Override
+		public State<I> setChanged(int index) {
+			return this;
+		}
+
+		@Override
+		public State<I> setDeleted(int index) {
+			return this;
+		}
+
+		@Override
+		public State<I> setVisible(InstanceHandleImpl<I> handle, int index, boolean visible) {
+			if (!visible) {
+				return this;
+			}
+			var instancer = recreate.recreate();
+			instancer.revealInstance(handle, instance);
+			return instancer;
+		}
+	}
+
+	public record Deleted<I extends Instance>() implements State<I> {
+		private static final Deleted<?> INSTANCE = new Deleted<>();
+
+		@SuppressWarnings("unchecked")
+		public static <I extends Instance> Deleted<I> instance() {
+			return (Deleted<I>) INSTANCE;
+		}
+
+		@Override
+		public State<I> setChanged(int index) {
+			return this;
+		}
+
+		@Override
+		public State<I> setDeleted(int index) {
+			return this;
+		}
+
+		@Override
+		public State<I> setVisible(InstanceHandleImpl<I> handle, int index, boolean visible) {
+			return this;
+		}
 	}
 }

@@ -39,10 +39,8 @@ public final class InstanceTree {
 	private float xScale;
 	private float yScale;
 	private float zScale;
-	@ApiStatus.Experimental
-	public boolean visible = true;
-	@ApiStatus.Experimental
-	public boolean skipDraw;
+	private boolean visible = true;
+	private boolean skipDraw = false;
 
 	private boolean changed;
 
@@ -233,6 +231,48 @@ public final class InstanceTree {
 		}
 
 		changed = false;
+	}
+
+	/**
+	 * Set the visibility of this tree and all its children, recursively.
+	 *
+	 * @param visible Whether to make this tree visible.
+	 */
+	public void visible(boolean visible) {
+		this.visible = visible;
+
+		updateVisible();
+
+		// I think you'll get weird behavior if you mark a parent invisible and then mark its child visible.
+		// Not sure if there's a good way to solve that, though.
+		for (InstanceTree child : children) {
+			child.visible(visible);
+		}
+	}
+
+	/**
+	 * Set the visibility of this specific node in the tree.
+	 *
+	 * @param skipDraw Whether this node should skip rendering.
+	 */
+	public void skipDraw(boolean skipDraw) {
+		this.skipDraw = skipDraw;
+
+		updateVisible();
+	}
+
+	private void updateVisible() {
+		if (instance != null) {
+			instance.setVisible(visible && !skipDraw);
+		}
+	}
+
+	public boolean visible() {
+		return visible;
+	}
+
+	public boolean skipDraw() {
+		return skipDraw;
 	}
 
 	public float xPos() {

@@ -23,12 +23,16 @@ uniform uint _flw_baseDraw;
 
 flat out uvec3 _flw_packedMaterial;
 
-void main() {
 #if __VERSION__ < 460
-    uint drawIndex = gl_DrawIDARB + _flw_baseDraw;
+#define flw_baseInstance gl_BaseInstanceARB
+#define flw_drawId gl_DrawIDARB
 #else
-    uint drawIndex = gl_DrawID + _flw_baseDraw;
+#define flw_baseInstance gl_BaseInstance
+#define flw_drawId gl_DrawID
 #endif
+
+void main() {
+    uint drawIndex = flw_drawId + _flw_baseDraw;
     MeshDrawCommand draw = _flw_drawCommands[drawIndex];
 
     _flw_uberMaterialVertexIndex = draw.materialVertexIndex;
@@ -42,11 +46,12 @@ void main() {
     //    _flw_normalMatrix = mat3(1.);
     #endif
 
-    #if __VERSION__ < 460
-    uint instanceIndex = _flw_instanceIndices[gl_BaseInstanceARB + gl_InstanceID];
-#else
-    uint instanceIndex = _flw_instanceIndices[gl_BaseInstance + gl_InstanceID];
-#endif
+    #ifdef _FLW_CRUMBLING
+    uint instanceIndex = flw_baseInstance;
+    #else
+    uint instanceIndex = _flw_instanceIndices[flw_baseInstance + gl_InstanceID];
+    #endif
+
     FlwInstance instance = _flw_unpackInstance(instanceIndex);
 
     _flw_main(instance, instanceIndex);

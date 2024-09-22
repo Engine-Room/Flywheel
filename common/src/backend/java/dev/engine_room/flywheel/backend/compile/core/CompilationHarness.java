@@ -1,6 +1,5 @@
 package dev.engine_room.flywheel.backend.compile.core;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +15,8 @@ public class CompilationHarness<K> {
 	private final ProgramLinker programLinker;
 	private final CompilerStats stats;
 
+	private final Map<K, GlProgram> programs = new HashMap<>();
+
 	public CompilationHarness(String marker, ShaderSources sources, KeyCompiler<K> compiler) {
 		this.compiler = compiler;
 		stats = new CompilerStats(marker);
@@ -24,23 +25,16 @@ public class CompilationHarness<K> {
 		programLinker = new ProgramLinker(stats);
 	}
 
-	@Nullable
-	public Map<K, GlProgram> compileAndReportErrors(Collection<K> keys) {
-		stats.start();
-		Map<K, GlProgram> out = new HashMap<>();
-		for (var key : keys) {
-			GlProgram glProgram = compiler.compile(key, sourceLoader, shaderCache, programLinker);
-			if (out != null && glProgram != null) {
-				out.put(key, glProgram);
-			} else {
-				out = null; // Return null when a preloading error occurs.
-			}
-		}
-		stats.finish();
+	public GlProgram get(K key) {
+		return programs.computeIfAbsent(key, this::compile);
+	}
 
-		if (stats.errored()) {
-			stats.emitErrorLog();
-			return null;
+	private GlProgram compile(K key) {
+		var out = compiler.compile(key, sourceLoader, shaderCache, programLinker);
+
+		if (out == null) {
+			// TODO: populate exception with error details
+			throw new ShaderException();
 		}
 
 		return out;
@@ -48,6 +42,10 @@ public class CompilationHarness<K> {
 
 	public void delete() {
 		shaderCache.delete();
+
+		for (var program : programs.values()) {
+			program.delete();
+		}
 	}
 
 	public interface KeyCompiler<K> {

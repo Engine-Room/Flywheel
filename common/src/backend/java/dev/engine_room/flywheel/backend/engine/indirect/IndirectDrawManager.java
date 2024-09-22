@@ -19,8 +19,10 @@ import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
+import dev.engine_room.flywheel.backend.engine.AbstractInstancer;
 import dev.engine_room.flywheel.backend.engine.CommonCrumbling;
 import dev.engine_room.flywheel.backend.engine.DrawManager;
+import dev.engine_room.flywheel.backend.engine.GroupKey;
 import dev.engine_room.flywheel.backend.engine.InstancerKey;
 import dev.engine_room.flywheel.backend.engine.LightStorage;
 import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
@@ -28,12 +30,12 @@ import dev.engine_room.flywheel.backend.engine.MeshPool;
 import dev.engine_room.flywheel.backend.engine.TextureBinder;
 import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
-import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBufferType;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
@@ -66,7 +68,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 	@Override
 	protected <I extends Instance> IndirectInstancer<?> create(InstancerKey<I> key) {
-		return new IndirectInstancer<>(key, () -> getInstancer(key));
+		return new IndirectInstancer<>(key, new AbstractInstancer.Recreate<>(key, this));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -90,26 +92,24 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			return;
 		}
 
-		try (var state = GlStateTracker.getRestoreState()) {
-			TextureBinder.bindLightAndOverlay();
+		TextureBinder.bindLightAndOverlay();
 
-			vertexArray.bindForDraw();
-			lightBuffers.bind();
-			matrixBuffer.bind();
-			Uniforms.bindAll();
+		vertexArray.bindForDraw();
+		lightBuffers.bind();
+		matrixBuffer.bind();
+		Uniforms.bindAll();
 
-			if (needsBarrier) {
-				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-				needsBarrier = false;
-			}
-
-			for (var group : cullingGroups.values()) {
-				group.submit(visualType);
-			}
-
-			MaterialRenderState.reset();
-			TextureBinder.resetLightAndOverlay();
+		if (needsBarrier) {
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+			needsBarrier = false;
 		}
+
+		for (var group : cullingGroups.values()) {
+			group.submit(visualType);
+		}
+
+		MaterialRenderState.reset();
+		TextureBinder.resetLightAndOverlay();
 	}
 
 	@Override
@@ -193,57 +193,67 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			return;
 		}
 
-		try (var state = GlStateTracker.getRestoreState()) {
-			TextureBinder.bindLightAndOverlay();
+		TextureBinder.bindLightAndOverlay();
 
-			vertexArray.bindForDraw();
-			Uniforms.bindAll();
+		vertexArray.bindForDraw();
+		Uniforms.bindAll();
 
-			var crumblingMaterial = SimpleMaterial.builder();
+		var crumblingMaterial = SimpleMaterial.builder();
 
-			// Scratch memory for writing draw commands.
-			var block = MemoryBlock.malloc(IndirectBuffers.DRAW_COMMAND_STRIDE);
+		// Scratch memory for writing draw commands.
+		var block = MemoryBlock.malloc(IndirectBuffers.DRAW_COMMAND_STRIDE);
 
-			GlBufferType.DRAW_INDIRECT_BUFFER.bind(crumblingDrawBuffer.handle());
-			glBindBufferRange(GL_SHADER_STORAGE_BUFFER, BufferBindings.DRAW, crumblingDrawBuffer.handle(), 0, IndirectBuffers.DRAW_COMMAND_STRIDE);
+		// Set up the crumbling program buffers. Nothing changes here between draws.
+		GlBufferType.DRAW_INDIRECT_BUFFER.bind(crumblingDrawBuffer.handle());
+		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, BufferBindings.DRAW, crumblingDrawBuffer.handle(), 0, IndirectBuffers.DRAW_COMMAND_STRIDE);
 
-			for (var groupEntry : byType.entrySet()) {
-				var byProgress = groupEntry.getValue();
+		for (var groupEntry : byType.entrySet()) {
+			var byProgress = groupEntry.getValue();
 
-				// Set up the crumbling program buffers. Nothing changes here between draws.
-				cullingGroups.get(groupEntry.getKey())
-						.bindWithContextShader(ContextShader.CRUMBLING);
+			GroupKey<?> groupKey = groupEntry.getKey();
+			IndirectCullingGroup<?> cullingGroup = cullingGroups.get(groupKey.instanceType());
 
-				for (var progressEntry : byProgress.int2ObjectEntrySet()) {
-					Samplers.CRUMBLING.makeActive();
-					TextureBinder.bind(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
-
-					for (var instanceHandlePair : progressEntry.getValue()) {
-						IndirectInstancer<?> instancer = instanceHandlePair.getFirst();
-						int instanceIndex = instanceHandlePair.getSecond().index;
-
-						for (IndirectDraw draw : instancer.draws()) {
-							// Transform the material to be suited for crumbling.
-							CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
-
-							MaterialRenderState.setup(crumblingMaterial);
-
-							// Upload the draw command.
-							draw.writeWithOverrides(block.ptr(), instanceIndex, crumblingMaterial);
-							crumblingDrawBuffer.upload(block);
-
-							// Submit! Everything is already bound by here.
-							glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0);
-						}
-					}
-
-				}
+			if (cullingGroup == null) {
+				continue;
 			}
 
-			MaterialRenderState.reset();
-			TextureBinder.resetLightAndOverlay();
+			for (var progressEntry : byProgress.int2ObjectEntrySet()) {
+				Samplers.CRUMBLING.makeActive();
+				TextureBinder.bind(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
 
-			block.free();
+				for (var instanceHandlePair : progressEntry.getValue()) {
+					IndirectInstancer<?> instancer = instanceHandlePair.getFirst();
+					int instanceIndex = instanceHandlePair.getSecond().index;
+
+					for (IndirectDraw draw : instancer.draws()) {
+						// Transform the material to be suited for crumbling.
+						CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
+
+						cullingGroup.bindWithContextShader(ContextShader.CRUMBLING, crumblingMaterial);
+
+						MaterialRenderState.setup(crumblingMaterial);
+
+						// Upload the draw command.
+						draw.writeWithOverrides(block.ptr(), instanceIndex, crumblingMaterial);
+						crumblingDrawBuffer.upload(block);
+
+						// Submit! Everything is already bound by here.
+						glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0);
+					}
+				}
+
+			}
 		}
+
+		MaterialRenderState.reset();
+		TextureBinder.resetLightAndOverlay();
+
+		block.free();
+	}
+
+	@Override
+	public void triggerFallback() {
+		IndirectPrograms.kill();
+		Minecraft.getInstance().levelRenderer.allChanged();
 	}
 }

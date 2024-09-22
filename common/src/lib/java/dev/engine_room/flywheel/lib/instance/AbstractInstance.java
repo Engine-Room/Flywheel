@@ -34,4 +34,10 @@ public abstract class AbstractInstance implements Instance {
 		// Override to mark final.
 		handle.setDeleted();
 	}
+
+	@Override
+	public final void setVisible(boolean visible) {
+		// Override to mark final.
+		handle.setVisible(visible);
+	}
 }

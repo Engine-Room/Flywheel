@@ -6,11 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
-
 import dev.engine_room.flywheel.api.Flywheel;
-import dev.engine_room.flywheel.api.instance.InstanceType;
-import dev.engine_room.flywheel.api.material.LightShader;
 import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.compile.component.UberShaderComponent;
 import dev.engine_room.flywheel.backend.compile.core.CompilerStats;
@@ -43,55 +39,20 @@ public final class FlwPrograms {
 		var vertexComponentsHeader = loader.find(COMPONENTS_HEADER_VERT);
 		var fragmentComponentsHeader = loader.find(COMPONENTS_HEADER_FRAG);
 
-		var vertexMaterialComponent = createVertexMaterialComponent(loader);
-		var fragmentMaterialComponent = createFragmentMaterialComponent(loader);
 		var fogComponent = createFogComponent(loader);
-		var cutoutComponent = createCutoutComponent(loader);
 
-		if (stats.errored() || vertexComponentsHeader == null || fragmentComponentsHeader == null || vertexMaterialComponent == null || fragmentMaterialComponent == null || fogComponent == null || cutoutComponent == null) {
+		// TODO: separate compilation for cutout OFF, but keep the rest uber'd?
+		if (stats.errored() || vertexComponentsHeader == null || fragmentComponentsHeader == null || fogComponent == null) {
 			// Probably means the shader sources are missing.
 			stats.emitErrorLog();
 			return;
 		}
 
-		List<SourceComponent> vertexComponents = List.of(vertexComponentsHeader, vertexMaterialComponent);
-		List<SourceComponent> fragmentComponents = List.of(fragmentComponentsHeader, fragmentMaterialComponent, fogComponent, cutoutComponent);
+		List<SourceComponent> vertexComponents = List.of(vertexComponentsHeader);
+		List<SourceComponent> fragmentComponents = List.of(fragmentComponentsHeader, fogComponent);
 
-		var pipelineKeys = createPipelineKeys();
-		InstancingPrograms.reload(sources, pipelineKeys, vertexComponents, fragmentComponents);
-		IndirectPrograms.reload(sources, pipelineKeys, vertexComponents, fragmentComponents);
-	}
-
-	private static ImmutableList<PipelineProgramKey> createPipelineKeys() {
-		ImmutableList.Builder<PipelineProgramKey> builder = ImmutableList.builder();
-		for (ContextShader contextShader : ContextShader.values()) {
-			for (InstanceType<?> instanceType : InstanceType.REGISTRY) {
-				for (LightShader light : LightShader.REGISTRY.getAll()) {
-					builder.add(new PipelineProgramKey(instanceType, contextShader, light));
-				}
-			}
-		}
-		return builder.build();
-	}
-
-	@Nullable
-	private static UberShaderComponent createVertexMaterialComponent(SourceLoader loader) {
-		return UberShaderComponent.builder(Flywheel.rl("material_vertex"))
-				.materialSources(MaterialShaderIndices.vertexSources()
-						.all())
-				.adapt(FnSignature.ofVoid("flw_materialVertex"))
-				.switchOn(GlslExpr.variable("_flw_uberMaterialVertexIndex"))
-				.build(loader);
-	}
-
-	@Nullable
-	private static UberShaderComponent createFragmentMaterialComponent(SourceLoader loader) {
-		return UberShaderComponent.builder(Flywheel.rl("material_fragment"))
-				.materialSources(MaterialShaderIndices.fragmentSources()
-						.all())
-				.adapt(FnSignature.ofVoid("flw_materialFragment"))
-				.switchOn(GlslExpr.variable("_flw_uberMaterialFragmentIndex"))
-				.build(loader);
+		InstancingPrograms.reload(sources, vertexComponents, fragmentComponents);
+		IndirectPrograms.reload(sources, vertexComponents, fragmentComponents);
 	}
 
 	@Nullable

@@ -12,12 +12,14 @@ import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 
+import dev.engine_room.flywheel.backend.compile.FlwPrograms;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.backend.gl.shader.GlShader;
 import dev.engine_room.flywheel.backend.gl.shader.ShaderType;
 import dev.engine_room.flywheel.backend.glsl.GlslVersion;
 import dev.engine_room.flywheel.backend.glsl.ShaderSources;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
+import dev.engine_room.flywheel.lib.util.StringUtil;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -122,6 +124,8 @@ public class Compile<K> {
 
 		@Nullable
 		private GlShader compile(K key, ShaderCache compiler, SourceLoader loader) {
+			long start = System.nanoTime();
+
 			var components = new ArrayList<SourceComponent>();
 			boolean ok = true;
 			for (var fetcher : fetchers) {
@@ -137,7 +141,14 @@ public class Compile<K> {
 			}
 
 			Consumer<Compilation> cb = ctx -> compilationCallbacks.accept(key, ctx);
-			return compiler.compile(glslVersion, shaderType, nameMapper.apply(key), cb, components);
+			var name = nameMapper.apply(key);
+			var out = compiler.compile(glslVersion, shaderType, name, cb, components);
+
+			long end = System.nanoTime();
+
+			FlwPrograms.LOGGER.debug("Compiled {} in {}", name, StringUtil.formatTime(end - start));
+
+			return out;
 		}
 	}
 
@@ -177,6 +188,8 @@ public class Compile<K> {
 				throw new IllegalStateException("No shader compilers were added!");
 			}
 
+			long start = System.nanoTime();
+
 			List<GlShader> shaders = new ArrayList<>();
 
 			boolean ok = true;
@@ -197,6 +210,10 @@ public class Compile<K> {
 			if (out != null) {
 				postLink.accept(key, out);
 			}
+
+			long end = System.nanoTime();
+
+			FlwPrograms.LOGGER.debug("Linked {} in {}", key, StringUtil.formatTime(end - start));
 
 			return out;
 		}

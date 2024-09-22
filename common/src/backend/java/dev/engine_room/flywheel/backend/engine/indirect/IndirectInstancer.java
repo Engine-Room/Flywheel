@@ -2,7 +2,6 @@ package dev.engine_room.flywheel.backend.engine.indirect;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.jetbrains.annotations.UnknownNullability;
 import org.joml.Vector4fc;
@@ -28,7 +27,7 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	private int modelIndex = -1;
 	private int baseInstance = -1;
 
-	public IndirectInstancer(InstancerKey<I> key, Supplier<AbstractInstancer<I>> recreate) {
+	public IndirectInstancer(InstancerKey<I> key, Recreate<I> recreate) {
 		super(key, recreate);
 		instanceStride = MoreMath.align4(type.layout()
 				.byteSize());
@@ -37,10 +36,7 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	}
 
 	@Override
-	public void notifyDirty(int index) {
-		if (index < 0 || index >= instanceCount()) {
-			return;
-		}
+	public void setIndexChanged(int index) {
 		changedPages.set(ObjectStorage.objectIndex2PageIndex(index));
 	}
 
@@ -146,5 +142,9 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 
 	public int baseInstance() {
 		return baseInstance;
+	}
+
+	public int local2GlobalInstanceIndex(int instanceIndex) {
+		return mapping.objectIndex2GlobalIndex(instanceIndex);
 	}
 }
