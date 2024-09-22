@@ -18,6 +18,12 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 public final class MaterialRenderState {
 	public static final Comparator<Material> COMPARATOR = Comparator.comparing((Material m) -> m.light()
 					.source())
+			.thenComparing(material -> material.cutout()
+					.source())
+			.thenComparing(material -> material.shaders()
+					.vertexSource())
+			.thenComparing(material -> material.shaders()
+					.fragmentSource())
 			.thenComparing(Material::texture)
 			.thenComparing(Material::blur)
 			.thenComparing(Material::mipmap)
@@ -185,12 +191,21 @@ public final class MaterialRenderState {
 			return true;
 		}
 
-		// Not here because ubershader: useLight, useOverlay, diffuse, shaders, fog shader, and cutout shader
+		// Not here because ubershader: useLight, useOverlay, diffuse, fog shader
 		// Everything in the comparator should be here.
-		return lhs.blur() == rhs.blur() && lhs.mipmap() == rhs.mipmap() && lhs.backfaceCulling() == rhs.backfaceCulling() && lhs.polygonOffset() == rhs.polygonOffset() && lhs.light()
-				.source()
-				.equals(rhs.light()
-						.source()) && lhs.texture()
-				.equals(rhs.texture()) && lhs.depthTest() == rhs.depthTest() && lhs.transparency() == rhs.transparency() && lhs.writeMask() == rhs.writeMask();
+		// @formatter:off
+		return lhs.blur() == rhs.blur()
+				&& lhs.mipmap() == rhs.mipmap()
+				&& lhs.backfaceCulling() == rhs.backfaceCulling()
+				&& lhs.polygonOffset() == rhs.polygonOffset()
+				&& lhs.depthTest() == rhs.depthTest()
+				&& lhs.transparency() == rhs.transparency()
+				&& lhs.writeMask() == rhs.writeMask()
+				&& lhs.light().source().equals(rhs.light().source())
+				&& lhs.texture().equals(rhs.texture())
+				&& lhs.cutout().source().equals(rhs.cutout().source())
+				&& lhs.shaders().fragmentSource().equals(rhs.shaders().fragmentSource())
+				&& lhs.shaders().vertexSource().equals(rhs.shaders().vertexSource());
+		// @formatter:on
 	}
 }
