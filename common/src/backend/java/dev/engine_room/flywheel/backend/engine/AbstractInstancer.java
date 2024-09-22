@@ -1,7 +1,6 @@
 package dev.engine_room.flywheel.backend.engine;
 
 import java.util.ArrayList;
-import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +13,7 @@ import dev.engine_room.flywheel.backend.util.AtomicBitSet;
 public abstract class AbstractInstancer<I extends Instance> implements Instancer<I>, InstanceHandleImpl.State<I> {
 	public final InstanceType<I> type;
 	public final Environment environment;
-	private final InstanceHandleImpl.Hidden<I> hidden;
+	private final Recreate<I> recreate;
 
 	// Lock for all instances, only needs to be used in methods that may run on the TaskExecutor.
 	protected final Object lock = new Object();
@@ -24,10 +23,10 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	protected final AtomicBitSet changed = new AtomicBitSet();
 	protected final AtomicBitSet deleted = new AtomicBitSet();
 
-	protected AbstractInstancer(InstancerKey<I> key, Supplier<AbstractInstancer<I>> recreate) {
+	protected AbstractInstancer(InstancerKey<I> key, Recreate<I> recreate) {
 		this.type = key.type();
 		this.environment = key.environment();
-		this.hidden = new InstanceHandleImpl.Hidden<>(recreate);
+		this.recreate = recreate;
 	}
 
 	@Override
@@ -43,31 +42,38 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	}
 
 	@Override
-	public InstanceHandleImpl.State<I> setVisible(int index, I instance, boolean visible) {
+	public InstanceHandleImpl.State<I> setVisible(InstanceHandleImpl<I> handle, int index, boolean visible) {
 		if (visible) {
 			return this;
 		}
 
 		notifyRemoval(index);
 
-		return hidden;
-	}
+		I instance;
+		synchronized (lock) {
+			// I think we need to lock to prevent wacky stuff from happening if the array gets resized.
+			instance = instances.get(index);
+		}
 
-	@Override
-	public InstanceHandleImpl.Status status() {
-		return InstanceHandleImpl.Status.VISIBLE;
+		return new InstanceHandleImpl.Hidden<>(recreate, instance);
 	}
 
 	@Override
 	public I createInstance() {
 		var handle = new InstanceHandleImpl<>(this);
 		I instance = type.create(handle);
-		handle.instance = instance;
 
 		synchronized (lock) {
 			handle.index = instances.size();
 			addLocked(instance, handle);
 			return instance;
+		}
+	}
+
+	public void revealInstance(InstanceHandleImpl<I> handle, I instance) {
+		synchronized (lock) {
+			handle.index = instances.size();
+			addLocked(instance, handle);
 		}
 	}
 
@@ -85,10 +91,19 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		}
 
 		// Should InstanceType have an isInstance method?
+		@SuppressWarnings("unchecked")
 		var handle = (InstanceHandleImpl<I>) instanceHandle;
 
-		// Should you be allowed to steal deleted instances?
-		if (handle.state == this || handle.state.status() == InstanceHandleImpl.Status.DELETED) {
+		// No need to steal if this instance is already owned by this instancer.
+		if (handle.state == this) {
+			return;
+		}
+		// Not allowed to steal deleted instances.
+		if (handle.state instanceof InstanceHandleImpl.Deleted) {
+			return;
+		}
+		// No need to steal if the instance will recreate to us.
+		if (handle.state instanceof InstanceHandleImpl.Hidden<I> hidden && recreate.equals(hidden.recreate())) {
 			return;
 		}
 
@@ -96,24 +111,21 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		//  is somehow being stolen by 2 different instancers between threads.
 		//  That seems kinda impossible so I'm fine leaving it as is for now.
 
-		// Remove the instance from its old instancer.
-		// This won't have any unwanted effect when the old instancer
-		// is filtering deleted instances later, so is safe.
-		handle.setDeleted();
-
 		// Add the instance to this instancer.
-		switch (handle.state.status()) {
-		case VISIBLE:
+		if (handle.state instanceof AbstractInstancer<I> other) {
+			// Remove the instance from its old instancer.
+			// This won't have any unwanted effect when the old instancer
+			// is filtering deleted instances later, so is safe.
+			other.notifyRemoval(handle.index);
+
 			handle.state = this;
 			// Only lock now that we'll be mutating our state.
 			synchronized (lock) {
 				handle.index = instances.size();
 				addLocked(instance, handle);
 			}
-			break;
-		case HIDDEN:
-			handle.state = hidden;
-			break;
+		} else if (handle.state instanceof InstanceHandleImpl.Hidden<I>) {
+			handle.state = new InstanceHandleImpl.Hidden<>(recreate, instance);
 		}
 	}
 
@@ -216,7 +228,7 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 			// clearing it here would cause significant visual artifacts and instance leaks.
 			// At the same time, we need to clear handles we own to prevent
 			// instances from changing/deleting positions in this instancer that no longer exist.
-			if (handle.state == this || handle.state == hidden) {
+			if (handle.state == this) {
 				handle.clear();
 				handle.state = InstanceHandleImpl.Deleted.instance();
 			}
@@ -232,5 +244,11 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 	@Override
 	public String toString() {
 		return "AbstractInstancer[" + instanceCount() + ']';
+	}
+
+	public record Recreate<I extends Instance>(InstancerKey<I> key, DrawManager<?> drawManager) {
+		public AbstractInstancer<I> recreate() {
+			return drawManager.getInstancer(key);
+		}
 	}
 }

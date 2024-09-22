@@ -19,6 +19,7 @@ import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
+import dev.engine_room.flywheel.backend.engine.AbstractInstancer;
 import dev.engine_room.flywheel.backend.engine.CommonCrumbling;
 import dev.engine_room.flywheel.backend.engine.DrawManager;
 import dev.engine_room.flywheel.backend.engine.GroupKey;
@@ -67,7 +68,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 	@Override
 	protected <I extends Instance> IndirectInstancer<?> create(InstancerKey<I> key) {
-		return new IndirectInstancer<>(key, () -> getInstancer(key));
+		return new IndirectInstancer<>(key, new AbstractInstancer.Recreate<>(key, this));
 	}
 
 	@SuppressWarnings("unchecked")

@@ -14,6 +14,7 @@ import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.InstancingPrograms;
+import dev.engine_room.flywheel.backend.engine.AbstractInstancer;
 import dev.engine_room.flywheel.backend.engine.CommonCrumbling;
 import dev.engine_room.flywheel.backend.engine.DrawManager;
 import dev.engine_room.flywheel.backend.engine.GroupKey;
@@ -125,7 +126,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 	@Override
 	protected <I extends Instance> InstancedInstancer<I> create(InstancerKey<I> key) {
-		return new InstancedInstancer<>(key, () -> getInstancer(key));
+		return new InstancedInstancer<>(key, new AbstractInstancer.Recreate<>(key, this));
 	}
 
 	@Override

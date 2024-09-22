@@ -1,16 +1,10 @@
 package dev.engine_room.flywheel.backend.engine;
 
-import java.util.function.Supplier;
-
-import org.jetbrains.annotations.UnknownNullability;
-
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceHandle;
 
 public class InstanceHandleImpl<I extends Instance> implements InstanceHandle {
 	public State<I> state;
-	@UnknownNullability
-	public I instance;
 	public int index;
 
 	public InstanceHandleImpl(State<I> state) {
@@ -31,22 +25,16 @@ public class InstanceHandleImpl<I extends Instance> implements InstanceHandle {
 
 	@Override
 	public void setVisible(boolean visible) {
-		state = state.setVisible(index, instance, visible);
+		state = state.setVisible(this, index, visible);
 	}
 
 	@Override
 	public boolean isVisible() {
-		return state.status() == Status.VISIBLE;
+		return state instanceof AbstractInstancer<?>;
 	}
 
 	public void clear() {
 		index = -1;
-	}
-
-	public enum Status {
-		HIDDEN,
-		DELETED,
-		VISIBLE
 	}
 
 	public interface State<I extends Instance> {
@@ -54,12 +42,10 @@ public class InstanceHandleImpl<I extends Instance> implements InstanceHandle {
 
 		State<I> setDeleted(int index);
 
-		State<I> setVisible(int index, I instance, boolean visible);
-
-		Status status();
+		State<I> setVisible(InstanceHandleImpl<I> handle, int index, boolean visible);
 	}
 
-	public record Hidden<I extends Instance>(Supplier<AbstractInstancer<I>> supplier) implements State<I> {
+	public record Hidden<I extends Instance>(AbstractInstancer.Recreate<I> recreate, I instance) implements State<I> {
 		@Override
 		public State<I> setChanged(int index) {
 			return this;
@@ -71,18 +57,13 @@ public class InstanceHandleImpl<I extends Instance> implements InstanceHandle {
 		}
 
 		@Override
-		public State<I> setVisible(int index, I instance, boolean visible) {
+		public State<I> setVisible(InstanceHandleImpl<I> handle, int index, boolean visible) {
 			if (!visible) {
 				return this;
 			}
-			var instancer = supplier.get();
-			instancer.stealInstance(instance);
+			var instancer = recreate.recreate();
+			instancer.revealInstance(handle, instance);
 			return instancer;
-		}
-
-		@Override
-		public Status status() {
-			return Status.HIDDEN;
 		}
 	}
 
@@ -105,13 +86,8 @@ public class InstanceHandleImpl<I extends Instance> implements InstanceHandle {
 		}
 
 		@Override
-		public State<I> setVisible(int index, I instance, boolean visible) {
+		public State<I> setVisible(InstanceHandleImpl<I> handle, int index, boolean visible) {
 			return this;
-		}
-
-		@Override
-		public Status status() {
-			return Status.DELETED;
 		}
 	}
 }

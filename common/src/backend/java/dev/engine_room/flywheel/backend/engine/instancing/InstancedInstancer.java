@@ -2,7 +2,6 @@ package dev.engine_room.flywheel.backend.engine.instancing;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +24,7 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 
 	private final List<InstancedDraw> draws = new ArrayList<>();
 
-	public InstancedInstancer(InstancerKey<I> key, Supplier<AbstractInstancer<I>> recreate) {
+	public InstancedInstancer(InstancerKey<I> key, Recreate<I> recreate) {
 		super(key, recreate);
 		var layout = type.layout();
 		// Align to one texel in the texture buffer
