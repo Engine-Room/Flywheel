@@ -40,7 +40,7 @@ public final class PlayerUniforms extends UniformWriter {
 		Vec3 eyePos = player.getEyePosition(context.partialTick());
 		ptr = writeVec3(ptr, (float) eyePos.x, (float) eyePos.y, (float) eyePos.z);
 
-		ptr = writeTeamColor(ptr, info.getTeam());
+		ptr = writeTeamColor(ptr, info == null ? null : info.getTeam());
 
 		ptr = writeEyeBrightness(ptr, player);
 
@@ -54,7 +54,8 @@ public final class PlayerUniforms extends UniformWriter {
 
 		ptr = writeInt(ptr, player.isShiftKeyDown() ? 1 : 0);
 
-		ptr = writeInt(ptr, info.getGameMode().getId());
+		ptr = writeInt(ptr, info == null ? 0 : info.getGameMode()
+				.getId());
 
 		BUFFER.markDirty();
 	}
