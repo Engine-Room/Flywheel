@@ -83,6 +83,10 @@ public class GlyphInstance extends AbstractInstance {
 		return color((byte) red, (byte) green, (byte) blue);
 	}
 
+	public GlyphInstance color(float red, float green, float blue, float alpha) {
+		return color((byte) (red * 255f), (byte) (green * 255f), (byte) (blue * 255f), (byte) (alpha * 255f));
+	}
+
 	public GlyphInstance color(byte red, byte green, byte blue, byte alpha) {
 		this.red = red;
 		this.green = green;

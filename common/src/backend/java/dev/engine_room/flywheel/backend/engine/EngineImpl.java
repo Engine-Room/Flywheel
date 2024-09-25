@@ -92,6 +92,7 @@ public class EngineImpl implements Engine {
 	@Override
 	public void setupRender(RenderContext context) {
 		try (var state = GlStateTracker.getRestoreState()) {
+			// Process the render queue for font updates
 			RenderSystem.replayQueue();
 			Uniforms.update(context);
 			environmentStorage.flush();
