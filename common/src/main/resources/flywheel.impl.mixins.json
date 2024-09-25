@@ -5,9 +5,11 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "flywheel.refmap.json",
   "client": [
+    "BakedGlyphMixin",
     "BlockEntityTypeMixin",
     "ClientChunkCacheMixin",
     "EntityTypeMixin",
+    "FontAccessor",
     "LevelMixin",
     "LevelRendererMixin",
     "MinecraftMixin",

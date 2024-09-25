@@ -12,3 +12,5 @@ out vec3 flw_vertexNormal;
 out float flw_distance;
 
 FlwMaterial flw_material;
+
+#define flw_vertexId gl_VertexID

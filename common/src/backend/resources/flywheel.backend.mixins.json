@@ -6,6 +6,8 @@
   "refmap": "backend-flywheel.refmap.json",
   "client": [
     "AbstractClientPlayerAccessor",
+    "CodePointMapMixin",
+    "FontSetMixin",
     "GlStateManagerMixin",
     "LevelRendererAccessor",
     "OptionsMixin",

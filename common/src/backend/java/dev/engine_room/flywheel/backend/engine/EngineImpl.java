@@ -2,6 +2,8 @@ package dev.engine_room.flywheel.backend.engine;
 
 import java.util.List;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+
 import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
@@ -90,6 +92,7 @@ public class EngineImpl implements Engine {
 	@Override
 	public void setupRender(RenderContext context) {
 		try (var state = GlStateTracker.getRestoreState()) {
+			RenderSystem.replayQueue();
 			Uniforms.update(context);
 			environmentStorage.flush();
 			drawManager.flush(lightStorage, environmentStorage);

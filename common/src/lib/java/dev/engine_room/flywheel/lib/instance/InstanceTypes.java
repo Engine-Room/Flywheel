@@ -103,6 +103,37 @@ public final class InstanceTypes {
 			.cullShader(Flywheel.rl("instance/cull/shadow.glsl"))
 			.build();
 
+	public static final InstanceType<GlyphInstance> GLYPH = SimpleInstanceType.builder(GlyphInstance::new)
+			.layout(LayoutBuilder.create()
+					.matrix("pose", FloatRepr.FLOAT, 4)
+					.vector("u0u1v0v1", FloatRepr.FLOAT, 4)
+					.vector("x", FloatRepr.FLOAT, 4)
+					.vector("y", FloatRepr.FLOAT, 2)
+					.vector("color", FloatRepr.UNSIGNED_BYTE, 4)
+					.vector("light", FloatRepr.UNSIGNED_SHORT, 2)
+					.build())
+			.writer((ptr, instance) -> {
+				ExtraMemoryOps.putMatrix4f(ptr, instance.pose);
+				MemoryUtil.memPutFloat(ptr + 64, instance.u0);
+				MemoryUtil.memPutFloat(ptr + 68, instance.u1);
+				MemoryUtil.memPutFloat(ptr + 72, instance.v0);
+				MemoryUtil.memPutFloat(ptr + 76, instance.v1);
+				MemoryUtil.memPutFloat(ptr + 80, instance.x0);
+				MemoryUtil.memPutFloat(ptr + 84, instance.x1);
+				MemoryUtil.memPutFloat(ptr + 88, instance.x2);
+				MemoryUtil.memPutFloat(ptr + 92, instance.x3);
+				MemoryUtil.memPutFloat(ptr + 96, instance.y0);
+				MemoryUtil.memPutFloat(ptr + 100, instance.y1);
+				MemoryUtil.memPutByte(ptr + 104, instance.red);
+				MemoryUtil.memPutByte(ptr + 105, instance.green);
+				MemoryUtil.memPutByte(ptr + 106, instance.blue);
+				MemoryUtil.memPutByte(ptr + 107, instance.alpha);
+				ExtraMemoryOps.put2x16(ptr + 108, instance.light);
+			})
+			.vertexShader(Flywheel.rl("instance/glyph.vert"))
+			.cullShader(Flywheel.rl("instance/cull/glyph.glsl"))
+			.build();
+
 	private InstanceTypes() {
 	}
 }
