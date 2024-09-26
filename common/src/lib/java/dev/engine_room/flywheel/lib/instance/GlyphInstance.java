@@ -9,20 +9,16 @@ import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.util.FastColor;
 
 public class GlyphInstance extends AbstractInstance {
+	// Skew x by 1 - 0.25 * y
+	// Note that columns are written as rows.
+	private static final Matrix4f ITALIC_SKEW = new Matrix4f(1, 0, 0, 0, -0.25f, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1);
+
 	public final Matrix4f pose = new Matrix4f();
 
 	public float u0;
 	public float u1;
 	public float v0;
 	public float v1;
-
-	public float x0;
-	public float x1;
-	public float x2;
-	public float x3;
-
-	public float y0;
-	public float y1;
 
 	public byte red = (byte) 0xFF;
 	public byte green = (byte) 0xFF;
@@ -47,22 +43,26 @@ public class GlyphInstance extends AbstractInstance {
 		float up = glyphReader.flywheel$up();
 		float down = glyphReader.flywheel$down();
 
-		float f = x + left;
-		float g = x + right;
-		float h = up - 3.0f;
-		float j = down - 3.0f;
-		float k = y + h;
-		float l = y + j;
-		float m = italic ? 1.0f - 0.25f * h : 0.0f;
-		float n = italic ? 1.0f - 0.25f * j : 0.0f;
+		pose.translate(x + left, y + up - 3.0f, 0.0f);
+		pose.scale(right - left, down - up, 1.0f);
 
-		y0 = k;
-		y1 = l;
+		if (italic) {
+			pose.mul(ITALIC_SKEW);
+		}
 
-		x0 = f + m;
-		x1 = f + n;
-		x2 = g + n;
-		x3 = g + m;
+		return this;
+	}
+
+	public GlyphInstance setEffect(BakedGlyph glyph, float x0, float y0, float x1, float y1, float depth) {
+		var glyphReader = FlwLibLink.INSTANCE.getGlyphExtension(glyph);
+
+		u0 = glyphReader.flywheel$u0();
+		u1 = glyphReader.flywheel$u1();
+		v0 = glyphReader.flywheel$v0();
+		v1 = glyphReader.flywheel$v1();
+
+		pose.translate(x0, y0, depth);
+		pose.scale(x1 - x0, y1 - y0, 1.0f);
 
 		return this;
 	}

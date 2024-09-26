@@ -39,6 +39,8 @@ import net.minecraft.util.FormattedCharSink;
  * A visual that renders a single line of text.
  */
 public class TextVisual {
+	public static final float ONE_PIXEL = 0.125f;
+
 	public boolean dropShadow;
 	public boolean with8xOutline;
 	public int backgroundColor = 0;
@@ -120,9 +122,9 @@ public class TextVisual {
 
 				GlyphInstance glyph = recycler.get(new GlyphModelKey(glyphExtension.flywheel$texture(), new GlyphSettings(bold, dropShadow, with8xOutline)));
 
+				glyph.pose.set(pose);
 				glyph.setGlyph(bakedGlyph, this.x, this.y, style.isItalic());
 				glyph.color(r, g, b, this.a);
-				glyph.pose.set(pose);
 				glyph.light = light;
 				glyph.setChanged();
 			}
@@ -146,20 +148,9 @@ public class TextVisual {
 
 			GlyphInstance glyph = recycler.get(new GlyphModelKey(glyphExtension.flywheel$texture(), new GlyphSettings(false, dropShadow, with8xOutline)));
 
-			glyph.u0 = glyphExtension.flywheel$u0();
-			glyph.u1 = glyphExtension.flywheel$u1();
-			glyph.v0 = glyphExtension.flywheel$v0();
-			glyph.v1 = glyphExtension.flywheel$v1();
-
-			glyph.y0 = y0;
-			glyph.y1 = y1;
-
-			glyph.x0 = x0;
-			glyph.x1 = x1;
-			glyph.x2 = x1;
-			glyph.x3 = x0;
-			glyph.color(r, g, b, this.a);
 			glyph.pose.set(pose);
+			glyph.setEffect(bakedGlyph, x0, y0, x1, y1, depth);
+			glyph.color(r, g, b, this.a);
 			glyph.light = light;
 			glyph.setChanged();
 		}
@@ -181,7 +172,6 @@ public class TextVisual {
 
 	private static final Material GLYPH_MATERIAL = SimpleMaterial.builder()
 			.cutout(CutoutShaders.ONE_TENTH)
-			.backfaceCulling(false)
 			.build();
 
 	private record GlyphModelKey(ResourceLocation font, GlyphSettings settings) {
@@ -207,7 +197,7 @@ public class TextVisual {
 							continue;
 						}
 
-						out.add(new Vector3f(x, y, 0));
+						out.add(new Vector3f(x * ONE_PIXEL, y * ONE_PIXEL, 0));
 					}
 				}
 			} else {
@@ -215,11 +205,11 @@ public class TextVisual {
 			}
 
 			if (bold) {
-				out.add(new Vector3f(1, 0, 0));
+				out.add(new Vector3f(ONE_PIXEL, 0, 0));
 			}
 
 			if (dropShadow) {
-				out.add(new Vector3f(1, 1, 0));
+				out.add(new Vector3f(ONE_PIXEL, ONE_PIXEL, 0));
 			}
 
 			return new GlyphMesh(out.toArray(new Vector3f[0]));
@@ -232,6 +222,8 @@ public class TextVisual {
 	 * @param quads Each quad will be expanded into 4 vertices.
 	 */
 	private record GlyphMesh(Vector3f[] quads) implements QuadMesh {
+		private static final float[] X = new float[]{0, 0, 1, 1};
+		private static final float[] Y = new float[]{0, 1, 1, 0};
 
 		@Override
 		public int vertexCount() {
@@ -245,8 +237,8 @@ public class TextVisual {
 				var quadStart = i * 4;
 
 				for (int j = 0; j < 4; j++) {
-					vertexList.x(quadStart + j, quad.x);
-					vertexList.y(quadStart + j, quad.y);
+					vertexList.x(quadStart + j, quad.x + X[j]);
+					vertexList.y(quadStart + j, quad.y + Y[j]);
 					vertexList.z(quadStart + j, quad.z);
 					vertexList.normalX(quadStart + j, 0);
 					vertexList.normalY(quadStart + j, 0);

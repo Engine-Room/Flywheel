@@ -3,9 +3,6 @@ void flw_instanceVertex(in FlwInstance i) {
 
     uint yIndex = ((vertexInGlyph + 1u) >> 1u) & 1u;
 
-    flw_vertexPos.x += i.x[vertexInGlyph];
-    flw_vertexPos.y += i.y[yIndex];
-
     flw_vertexPos = i.pose * flw_vertexPos;
 
     flw_vertexTexCoord.s = i.u0u1v0v1[(vertexInGlyph & 2u) >> 1u];
