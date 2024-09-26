@@ -8,6 +8,8 @@
     "AbstractClientPlayerAccessor",
     "CodePointMapMixin",
     "FontSetMixin",
+    "FontTexture$NodeAccessor",
+    "FontTextureMixin",
     "GlStateManagerMixin",
     "LevelRendererAccessor",
     "OptionsMixin",
