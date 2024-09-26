@@ -107,7 +107,7 @@ public final class InstanceTypes {
 			.layout(LayoutBuilder.create()
 					.matrix("pose", FloatRepr.FLOAT, 4)
 					.vector("u0u1v0v1", FloatRepr.FLOAT, 4)
-					.vector("color", FloatRepr.UNSIGNED_BYTE, 4)
+					.vector("color", FloatRepr.NORMALIZED_UNSIGNED_BYTE, 4)
 					.vector("light", FloatRepr.UNSIGNED_SHORT, 2)
 					.build())
 			.writer((ptr, instance) -> {

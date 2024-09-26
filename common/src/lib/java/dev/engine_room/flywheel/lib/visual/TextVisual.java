@@ -60,16 +60,21 @@ public class TextVisual {
 
 	public void setup() {
 		sink.recycler.resetCount();
+		sink.pose = pose;
+		sink.light = light;
+
+		if (with8xOutline) {
+			sink.x = x;
+			sink.y = y;
+			sink.setup(GlyphMode.OUTLINE, this.backgroundColor);
+			content.accept(sink);
+		}
+
+		sink.setup(GlyphMode.SIMPLE, this.color);
 		sink.x = x;
 		sink.y = y;
-		sink.dimFactor = dropShadow ? 0.25f : 1.0f;
-		sink.r = (float) (color >> 16 & 0xFF) / 255.0f * sink.dimFactor;
-		sink.g = (float) (color >> 8 & 0xFF) / 255.0f * sink.dimFactor;
-		sink.b = (float) (color & 0xFF) / 255.0f * sink.dimFactor;
-		sink.a = (float) (color >> 24 & 0xFF) / 255.0f;
-		// FIXME: Need separate instances for the 8x outline and the center.
-		//  Right now we just show the outline.
 		content.accept(sink);
+
 		sink.recycler.discardExtra();
 	}
 
@@ -77,24 +82,34 @@ public class TextVisual {
 		sink.recycler.delete();
 	}
 
-	private class Sink implements FormattedCharSink {
+	private static class Sink implements FormattedCharSink {
 		private final SmartRecycler<GlyphModelKey, GlyphInstance> recycler;
 
-		Font font;
-		private float dimFactor;
+		private final Font font;
+		private int light;
+		private Matrix4f pose;
+		private GlyphMode mode = GlyphMode.SIMPLE;
 		private float r;
 		private float g;
 		private float b;
 		private float a;
 
 		// Separate x and y from TextVisual because these advance as we accept glyphs
-		float x;
-		float y;
+		private float x;
+		private float y;
 
 		private Sink(InstancerProvider instancerProvider) {
-			recycler = new SmartRecycler<>(key -> instancerProvider.instancer(InstanceTypes.GLYPH, GLYPH_CACHE.get(key))
+			recycler = new SmartRecycler<>(key -> instancerProvider.instancer(InstanceTypes.GLYPH, GLYPH_CACHE.get(key), key.settings.glyphMode.bias)
 					.createInstance());
 			font = Minecraft.getInstance().font;
+		}
+
+		private void setup(GlyphMode mode, int color) {
+			this.mode = mode;
+			r = (float) (color >> 16 & 0xFF) / 255.0f * mode.dimFactor;
+			g = (float) (color >> 8 & 0xFF) / 255.0f * mode.dimFactor;
+			b = (float) (color & 0xFF) / 255.0f * mode.dimFactor;
+			a = (float) (color >> 24 & 0xFF) / 255.0f;
 		}
 
 		@Override
@@ -109,9 +124,9 @@ public class TextVisual {
 			TextColor textColor = style.getColor();
 			if (textColor != null) {
 				int color = textColor.getValue();
-				r = (float) (color >> 16 & 0xFF) / 255.0f * this.dimFactor;
-				g = (float) (color >> 8 & 0xFF) / 255.0f * this.dimFactor;
-				b = (float) (color & 0xFF) / 255.0f * this.dimFactor;
+				r = (float) (color >> 16 & 0xFF) / 255.0f * mode.dimFactor;
+				g = (float) (color >> 8 & 0xFF) / 255.0f * mode.dimFactor;
+				b = (float) (color & 0xFF) / 255.0f * mode.dimFactor;
 			} else {
 				r = this.r;
 				g = this.g;
@@ -120,7 +135,7 @@ public class TextVisual {
 			if (!(bakedGlyph instanceof EmptyGlyph)) {
 				var glyphExtension = FlwLibLink.INSTANCE.getGlyphExtension(bakedGlyph);
 
-				GlyphInstance glyph = recycler.get(new GlyphModelKey(glyphExtension.flywheel$texture(), new GlyphSettings(bold, dropShadow, with8xOutline)));
+				GlyphInstance glyph = recycler.get(new GlyphModelKey(glyphExtension.flywheel$texture(), new GlyphSettings(mode, bold)));
 
 				glyph.pose.set(pose);
 				glyph.setGlyph(bakedGlyph, this.x, this.y, style.isItalic());
@@ -129,7 +144,7 @@ public class TextVisual {
 				glyph.setChanged();
 			}
 			float advance = glyphInfo.getAdvance(bold);
-			float o = dropShadow ? 1.0f : 0.0f;
+			float o = mode.effectShift;
 			if (style.isStrikethrough()) {
 				this.addEffect(this.x + o - 1.0f, this.y + o + 4.5f, this.x + o + advance, this.y + o + 4.5f - 1.0f, 0.01f, r, g, b, this.a);
 			}
@@ -146,7 +161,7 @@ public class TextVisual {
 
 			var glyphExtension = FlwLibLink.INSTANCE.getGlyphExtension(bakedGlyph);
 
-			GlyphInstance glyph = recycler.get(new GlyphModelKey(glyphExtension.flywheel$texture(), new GlyphSettings(false, dropShadow, with8xOutline)));
+			GlyphInstance glyph = recycler.get(new GlyphModelKey(glyphExtension.flywheel$texture(), new GlyphSettings(GlyphMode.SIMPLE, false)));
 
 			glyph.pose.set(pose);
 			glyph.setEffect(bakedGlyph, x0, y0, x1, y1, depth);
@@ -172,47 +187,70 @@ public class TextVisual {
 
 	private static final Material GLYPH_MATERIAL = SimpleMaterial.builder()
 			.cutout(CutoutShaders.ONE_TENTH)
+			.diffuse(false)
 			.build();
 
 	private record GlyphModelKey(ResourceLocation font, GlyphSettings settings) {
 		private Model into() {
 			return new SingleMeshModel(MESH_CACHE.get(settings), SimpleMaterial.builderOf(GLYPH_MATERIAL)
 					.texture(font)
+					.polygonOffset(settings.glyphMode.polygonOffset)
 					.build());
 		}
 	}
 
-	// FIXME: probably replace with an enum
-	private record GlyphSettings(boolean bold, boolean dropShadow, boolean with8xOutline) {
-		public GlyphMesh into() {
-			// bold -> x + 1
-			// shadow -> x + 1, y + 1
+	// This could probably be made a public interface and a TextVisual could render an arbitrary number of layers
+	private enum GlyphMode {
+		SIMPLE(1, 1, 0, true),
+		OUTLINE(1, 0, 0, false),
+		SHADOW(0.25f, 0, 1, false),
+		;
 
+		private final float dimFactor;
+		private final int bias;
+		private final float effectShift;
+		private final boolean polygonOffset;
+
+		GlyphMode(float dimFactor, int bias, float effectShift, boolean polygonOffset) {
+			this.dimFactor = dimFactor;
+			this.bias = bias;
+			this.effectShift = effectShift;
+			this.polygonOffset = polygonOffset;
+		}
+	}
+
+	private record GlyphSettings(GlyphMode glyphMode, boolean bold) {
+		public GlyphMesh into() {
 			List<Vector3f> out = new ArrayList<>();
 
-			if (with8xOutline) {
+			switch (glyphMode) {
+			case SIMPLE:
+				add(out, 0, 0);
+				break;
+			case OUTLINE:
 				for (int x = -1; x <= 1; ++x) {
 					for (int y = -1; y <= 1; ++y) {
 						if (x == 0 && y == 0) {
 							continue;
 						}
 
-						out.add(new Vector3f(x * ONE_PIXEL, y * ONE_PIXEL, 0));
+						add(out, x * ONE_PIXEL, y * ONE_PIXEL);
 					}
 				}
-			} else {
-				out.add(new Vector3f(0, 0, 0));
-			}
-
-			if (bold) {
-				out.add(new Vector3f(ONE_PIXEL, 0, 0));
-			}
-
-			if (dropShadow) {
-				out.add(new Vector3f(ONE_PIXEL, ONE_PIXEL, 0));
+				break;
+			case SHADOW:
+				add(out, ONE_PIXEL, ONE_PIXEL);
+				break;
 			}
 
 			return new GlyphMesh(out.toArray(new Vector3f[0]));
+		}
+
+		private void add(List<Vector3f> out, float x, float y) {
+			out.add(new Vector3f(x, y, 0));
+			if (bold) {
+				out.add(new Vector3f(x + ONE_PIXEL, y, 0));
+			}
 		}
 	}
 
