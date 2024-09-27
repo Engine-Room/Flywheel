@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.backend.mixin;
+package dev.engine_room.flywheel.impl.mixin.text;
 
 import java.util.function.IntFunction;
 

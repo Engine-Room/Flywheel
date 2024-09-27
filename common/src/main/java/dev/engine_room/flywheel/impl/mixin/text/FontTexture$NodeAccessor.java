@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.backend.mixin;
+package dev.engine_room.flywheel.impl.mixin.text;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;

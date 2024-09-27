@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.backend.mixin;
+package dev.engine_room.flywheel.impl.mixin.text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ import com.mojang.blaze3d.font.SheetGlyphInfo;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import dev.engine_room.flywheel.backend.util.FontTextureUpload;
+import dev.engine_room.flywheel.impl.FontTextureUpload;
 import dev.engine_room.flywheel.lib.internal.FontTextureExtension;
 import dev.engine_room.flywheel.lib.internal.GlyphExtension;
 import net.minecraft.client.gui.font.FontTexture;

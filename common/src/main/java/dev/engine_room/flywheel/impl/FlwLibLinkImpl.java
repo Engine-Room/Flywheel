@@ -9,9 +9,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import dev.engine_room.flywheel.impl.extension.PoseStackExtension;
-import dev.engine_room.flywheel.impl.mixin.FontAccessor;
 import dev.engine_room.flywheel.impl.mixin.ModelPartAccessor;
 import dev.engine_room.flywheel.impl.mixin.PoseStackAccessor;
+import dev.engine_room.flywheel.impl.mixin.text.FontAccessor;
 import dev.engine_room.flywheel.lib.internal.FlwLibLink;
 import dev.engine_room.flywheel.lib.internal.GlyphExtension;
 import dev.engine_room.flywheel.lib.transform.PoseTransformStack;
