@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.vanilla;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -17,10 +18,11 @@ import dev.engine_room.flywheel.lib.model.part.ModelTrees;
 import dev.engine_room.flywheel.lib.util.ResourceReloadCache;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
-import dev.engine_room.flywheel.lib.visual.TextVisual;
+import dev.engine_room.flywheel.lib.visual.text.SimpleTextLayer;
+import dev.engine_room.flywheel.lib.visual.text.TextLayer;
+import dev.engine_room.flywheel.lib.visual.text.TextVisual;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.FormattedCharSequence;
@@ -123,12 +125,11 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 					.setChanged();
 		});
 
-		// FIXME: fullbright
 		for (var text : frontText) {
-			text.light = packedLight;
+			text.light(packedLight);
 		}
 		for (var text : backText) {
-			text.light = packedLight;
+			text.light(packedLight);
 		}
 	}
 
@@ -158,54 +159,58 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 	}
 
 	void setupText(SignText text, TextVisual[] dst, boolean isFrontText) {
-		var font = Minecraft.getInstance().font;
 		FormattedCharSequence[] formattedCharSequences = text.getRenderMessages(Minecraft.getInstance()
 				.isTextFilteringEnabled(), component -> {
-			List<FormattedCharSequence> list = font.split(component, blockEntity.getMaxTextLineWidth());
+			List<FormattedCharSequence> list = Minecraft.getInstance().font.split(component, blockEntity.getMaxTextLineWidth());
 			return list.isEmpty() ? FormattedCharSequence.EMPTY : list.get(0);
 		});
 
-		int light;
-		boolean outline;
+		List<TextLayer> layers = new ArrayList<>();
+
 		int darkColor = adjustColor(getDarkColor(text));
 		int textColor;
 		if (text.hasGlowingText()) {
 			textColor = adjustColor(text.getColor()
 					.getTextColor());
-			outline = true;
-			light = LightTexture.FULL_BRIGHT;
+
+			layers.add(new SimpleTextLayer.Builder().style(TextLayer.GlyphMeshStyle.OUTLINE)
+					.material(TextLayer.GlyphMaterial.SIMPLE)
+					.color(TextLayer.GlyphColor.always(darkColor))
+					.build());
 		} else {
 			textColor = darkColor;
-			outline = false;
-			light = LightTexture.FULL_BLOCK;
 		}
+
+		layers.add(new SimpleTextLayer.Builder().style(TextLayer.GlyphMeshStyle.SIMPLE)
+				.material(TextLayer.GlyphMaterial.POLYGON_OFFSET)
+				.color(TextLayer.GlyphColor.defaultTo(textColor))
+				.bias(1)
+				.build());
 
 		int lineHeight = blockEntity.getTextLineHeight();
 		int lineDelta = 4 * lineHeight / 2;
 		for (int m = 0; m < 4; ++m) {
 			FormattedCharSequence formattedCharSequence = formattedCharSequences[m];
-			float f = (float) -font.width(formattedCharSequence) / 2;
+			float f = (float) -Minecraft.getInstance().font.width(formattedCharSequence) / 2;
 
-			var textVisual = dst[m];
-			textVisual.color = textColor;
-			textVisual.dropShadow = false;
-			textVisual.with8xOutline = outline;
-			textVisual.backgroundColor = darkColor;
-			textVisual.x = f;
-			textVisual.y = m * lineHeight - lineDelta;
-			textVisual.content = formattedCharSequence;
-			// FIXME: separate flag for full bright?
-			textVisual.light = light;
+			var textVisual = dst[m].content(formattedCharSequence)
+					.layers(layers)
+					.fullBright(text.hasGlowingText())
+					.backgroundColor(0)
+					.x(f)
+					.y(m * lineHeight - lineDelta);
 
-			textVisual.pose.set(pose);
+			var textPose = textVisual.pose();
+
+			textPose.set(pose);
 
 			if (!isFrontText) {
-				textVisual.pose.rotateY(Mth.PI);
+				textPose.rotateY(Mth.PI);
 			}
 			var offset = getTextOffset();
 			float scale = 0.015625f * this.getSignTextRenderScale();
-			textVisual.pose.translate((float) offset.x, (float) offset.y, (float) offset.z);
-			textVisual.pose.scale(scale, -scale, scale);
+			textPose.translate((float) offset.x, (float) offset.y, (float) offset.z);
+			textPose.scale(scale, -scale, scale);
 
 			textVisual.setup();
 		}
