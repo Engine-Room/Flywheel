@@ -43,7 +43,6 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 			return;
 		}
 
-
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCING, vertexComponents, fragmentComponents, EXTENSIONS);
 		InstancingPrograms newInstance = new InstancingPrograms(pipelineCompiler);
 

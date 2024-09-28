@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.engine_room.flywheel.api.Flywheel;
-import dev.engine_room.flywheel.backend.compile.core.CompilerStats;
 import dev.engine_room.flywheel.backend.glsl.ShaderSources;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -29,16 +28,8 @@ public final class FlwPrograms {
 
 		var sources = new ShaderSources(resourceManager);
 		SOURCES = sources;
-		var stats = new CompilerStats("ubershaders");
 
 		var fragmentComponentsHeader = sources.get(COMPONENTS_HEADER_FRAG);
-
-		// TODO: separate compilation for cutout OFF, but keep the rest uber'd?
-		if (stats.errored() || fragmentComponentsHeader == null) {
-			// Probably means the shader sources are missing.
-			stats.emitErrorLog();
-			return;
-		}
 
 		List<SourceComponent> vertexComponents = List.of();
 		List<SourceComponent> fragmentComponents = List.of(fragmentComponentsHeader);

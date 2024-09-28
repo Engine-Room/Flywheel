@@ -5,23 +5,21 @@ import org.lwjgl.opengl.GL46;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 
+import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
 import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
-import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 import net.minecraft.client.Minecraft;
 
 public class DepthPyramid {
-	private final GlProgram downsampleFirstProgram;
-	private final GlProgram downsampleSecondProgram;
+	private final IndirectPrograms programs;
 
 	public int pyramidTextureId = -1;
 
 	private int lastWidth = -1;
 	private int lastHeight = -1;
 
-	public DepthPyramid(GlProgram downsampleFirstProgram, GlProgram downsampleSecondProgram) {
-		this.downsampleFirstProgram = downsampleFirstProgram;
-		this.downsampleSecondProgram = downsampleSecondProgram;
+	public DepthPyramid(IndirectPrograms programs) {
+		this.programs = programs;
 	}
 
 	public void generate() {
@@ -42,6 +40,7 @@ public class DepthPyramid {
 		GlTextureUnit.T0.makeActive();
 		GlStateManager._bindTexture(depthBufferId);
 
+		var downsampleFirstProgram = programs.getDownsampleFirstProgram();
 		downsampleFirstProgram.bind();
 		downsampleFirstProgram.setUInt("max_mip_level", mipLevels);
 
@@ -59,6 +58,7 @@ public class DepthPyramid {
 
 		GL46.glMemoryBarrier(GL46.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
+		var downsampleSecondProgram = programs.getDownsampleSecondProgram();
 		downsampleSecondProgram.bind();
 		downsampleSecondProgram.setUInt("max_mip_level", mipLevels);
 

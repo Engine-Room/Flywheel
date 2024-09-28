@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import dev.engine_room.flywheel.backend.compile.FlwPrograms;
@@ -50,7 +49,6 @@ public class ShaderSources {
 		return cache.computeIfAbsent(location, loc -> new LoadResult.Failure(new LoadError.ResourceError(loc)));
 	}
 
-	@Nullable
 	public SourceFile get(ResourceLocation location) {
 		return find(location).unwrap();
 	}

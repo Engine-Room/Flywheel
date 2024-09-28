@@ -4,11 +4,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
-
-import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.backend.gl.shader.GlShader;
 import dev.engine_room.flywheel.backend.gl.shader.ShaderType;
@@ -17,13 +14,10 @@ import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 
 public class ShaderCache {
 	private final Map<ShaderKey, ShaderResult> inner = new HashMap<>();
-	private final CompilerStats stats;
 
-	public ShaderCache(CompilerStats stats) {
-		this.stats = stats;
+	public ShaderCache() {
 	}
 
-	@Nullable
 	public GlShader compile(GlslVersion glslVersion, ShaderType shaderType, String name, Consumer<Compilation> callback, List<SourceComponent> sourceComponents) {
 		var key = new ShaderKey(glslVersion, shaderType, name);
 		var cached = inner.get(key);
@@ -41,15 +35,14 @@ public class ShaderCache {
 
 		ShaderResult out = ctx.compile(shaderType, name);
 		inner.put(key, out);
-		stats.shaderResult(out);
 		return out.unwrap();
 	}
 
 	public void delete() {
 		inner.values()
 				.stream()
+				.filter(r -> r instanceof ShaderResult.Success)
 				.map(ShaderResult::unwrap)
-				.filter(Objects::nonNull)
 				.forEach(GlShader::delete);
 		inner.clear();
 	}

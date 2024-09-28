@@ -13,6 +13,7 @@ import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.visualization.VisualEmbedding;
 import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
+import dev.engine_room.flywheel.backend.FlwBackend;
 import dev.engine_room.flywheel.backend.compile.core.ShaderException;
 import dev.engine_room.flywheel.backend.engine.embed.EmbeddedEnvironment;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
@@ -93,6 +94,7 @@ public class EngineImpl implements Engine {
 			environmentStorage.flush();
 			drawManager.flush(lightStorage, environmentStorage);
 		} catch (ShaderException e) {
+			FlwBackend.LOGGER.error("Falling back", e);
 			triggerFallback();
 		}
 	}
@@ -102,6 +104,7 @@ public class EngineImpl implements Engine {
 		try (var state = GlStateTracker.getRestoreState()) {
 			drawManager.render(visualType);
 		} catch (ShaderException e) {
+			FlwBackend.LOGGER.error("Falling back", e);
 			triggerFallback();
 		}
 	}
@@ -111,6 +114,7 @@ public class EngineImpl implements Engine {
 		try (var state = GlStateTracker.getRestoreState()) {
 			drawManager.renderCrumbling(crumblingBlocks);
 		} catch (ShaderException e) {
+			FlwBackend.LOGGER.error("Falling back", e);
 			triggerFallback();
 		}
 	}
