@@ -51,6 +51,7 @@ public class ShaderCache {
 				.map(ShaderResult::unwrap)
 				.filter(Objects::nonNull)
 				.forEach(GlShader::delete);
+		inner.clear();
 	}
 
 	private static void expand(List<SourceComponent> rootSources, Consumer<SourceComponent> out) {

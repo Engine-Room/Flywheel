@@ -6,8 +6,10 @@ import java.util.List;
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.backend.BackendConfig;
 import dev.engine_room.flywheel.backend.InternalVertex;
+import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.component.InstanceStructComponent;
+import dev.engine_room.flywheel.backend.compile.component.UberShaderComponent;
 import dev.engine_room.flywheel.backend.compile.core.CompilationHarness;
 import dev.engine_room.flywheel.backend.compile.core.Compile;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
@@ -16,12 +18,17 @@ import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.backend.gl.shader.ShaderType;
 import dev.engine_room.flywheel.backend.glsl.ShaderSources;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
+import dev.engine_room.flywheel.backend.glsl.generate.FnSignature;
+import dev.engine_room.flywheel.backend.glsl.generate.GlslExpr;
 import dev.engine_room.flywheel.lib.material.CutoutShaders;
 import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.resources.ResourceLocation;
 
 public final class PipelineCompiler {
 	private static final Compile<PipelineProgramKey> PIPELINE = new Compile<>();
+
+	private static UberShaderComponent FOG;
+	private static UberShaderComponent CUTOUT;
 
 	private static final ResourceLocation API_IMPL_VERT = Flywheel.rl("internal/api_impl.vert");
 	private static final ResourceLocation API_IMPL_FRAG = Flywheel.rl("internal/api_impl.frag");
@@ -98,6 +105,7 @@ public final class PipelineCompiler {
 						.withResource(key -> key.materialShaders()
 								.fragmentSource())
 						.withComponents(fragmentComponents)
+						.withComponent(key -> FOG)
 						.withResource(key -> key.light()
 								.source())
 						.withResource(key -> key.cutout()
@@ -127,5 +135,31 @@ public final class PipelineCompiler {
 					GlProgram.unbind();
 				})
 				.harness(pipeline.compilerMarker(), sources);
+	}
+
+	public static void createFogComponent() {
+		FOG = UberShaderComponent.builder(Flywheel.rl("fog"))
+				.materialSources(MaterialShaderIndices.fogSources()
+						.all())
+				.adapt(FnSignature.create()
+						.returnType("vec4")
+						.name("flw_fogFilter")
+						.arg("vec4", "color")
+						.build(), GlslExpr.variable("color"))
+				.switchOn(GlslExpr.variable("_flw_uberFogIndex"))
+				.build(FlwPrograms.SOURCES);
+	}
+
+	private static void createCutoutComponent() {
+		CUTOUT = UberShaderComponent.builder(Flywheel.rl("cutout"))
+				.materialSources(MaterialShaderIndices.cutoutSources()
+						.all())
+				.adapt(FnSignature.create()
+						.returnType("bool")
+						.name("flw_discardPredicate")
+						.arg("vec4", "color")
+						.build(), GlslExpr.boolLiteral(false))
+				.switchOn(GlslExpr.variable("_flw_uberCutoutIndex"))
+				.build(FlwPrograms.SOURCES);
 	}
 }

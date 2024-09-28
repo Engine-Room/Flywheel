@@ -11,7 +11,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import dev.engine_room.flywheel.api.Flywheel;
-import dev.engine_room.flywheel.backend.compile.core.SourceLoader;
+import dev.engine_room.flywheel.backend.glsl.ShaderSources;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 import dev.engine_room.flywheel.backend.glsl.SourceFile;
 import dev.engine_room.flywheel.backend.glsl.generate.FnSignature;
@@ -137,7 +137,7 @@ public class UberShaderComponent implements SourceComponent {
 		}
 
 		@Nullable
-		public UberShaderComponent build(SourceLoader sources) {
+		public UberShaderComponent build(ShaderSources sources) {
 			if (switchArg == null) {
 				throw new NullPointerException("Switch argument must be set");
 			}
@@ -147,7 +147,7 @@ public class UberShaderComponent implements SourceComponent {
 			boolean errored = false;
 			int index = 0;
 			for (var rl : materialSources) {
-				SourceFile sourceFile = sources.find(rl);
+				SourceFile sourceFile = sources.get(rl);
 				if (sourceFile != null) {
 					final int finalIndex = index;
 					var adapterMap = createAdapterMap(adaptedFunctions, fnName -> "_" + fnName + "_" + finalIndex);

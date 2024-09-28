@@ -44,7 +44,7 @@ public class Compile<K> {
 	public static class ShaderCompiler<K> {
 		private final GlslVersion glslVersion;
 		private final ShaderType shaderType;
-		private final List<BiFunction<K, SourceLoader, @Nullable SourceComponent>> fetchers = new ArrayList<>();
+		private final List<BiFunction<K, ShaderSources, @Nullable SourceComponent>> fetchers = new ArrayList<>();
 		private BiConsumer<K, Compilation> compilationCallbacks = ($, $$) -> {
 		};
 		private Function<K, String> nameMapper = Object::toString;
@@ -59,7 +59,7 @@ public class Compile<K> {
 			return this;
 		}
 
-		public ShaderCompiler<K> with(BiFunction<K, SourceLoader, @Nullable SourceComponent> fetch) {
+		public ShaderCompiler<K> with(BiFunction<K, ShaderSources, @Nullable SourceComponent> fetch) {
 			fetchers.add(fetch);
 			return this;
 		}
@@ -78,7 +78,7 @@ public class Compile<K> {
 		}
 
 		public ShaderCompiler<K> withResource(Function<K, ResourceLocation> sourceFetcher) {
-			return with((key, loader) -> loader.find(sourceFetcher.apply(key)));
+			return with((key, loader) -> loader.get(sourceFetcher.apply(key)));
 		}
 
 		public ShaderCompiler<K> withResource(ResourceLocation resourceLocation) {
@@ -123,7 +123,7 @@ public class Compile<K> {
 		}
 
 		@Nullable
-		private GlShader compile(K key, ShaderCache compiler, SourceLoader loader) {
+		private GlShader compile(K key, ShaderCache compiler, ShaderSources loader) {
 			long start = System.nanoTime();
 
 			var components = new ArrayList<SourceComponent>();
@@ -183,7 +183,7 @@ public class Compile<K> {
 
 		@Override
 		@Nullable
-		public GlProgram compile(K key, SourceLoader loader, ShaderCache shaderCache, ProgramLinker programLinker) {
+		public GlProgram compile(K key, ShaderSources loader, ShaderCache shaderCache, ProgramLinker programLinker) {
 			if (compilers.isEmpty()) {
 				throw new IllegalStateException("No shader compilers were added!");
 			}

@@ -7,9 +7,8 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.ImmutableList;
 
 import dev.engine_room.flywheel.api.instance.InstanceType;
-import dev.engine_room.flywheel.api.material.CutoutShader;
-import dev.engine_room.flywheel.api.material.LightShader;
-import dev.engine_room.flywheel.api.material.MaterialShaders;
+import dev.engine_room.flywheel.api.material.Material;
+import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.compile.core.CompilationHarness;
 import dev.engine_room.flywheel.backend.engine.uniform.FrameUniforms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
@@ -74,7 +73,20 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 		setInstance(null);
 	}
 
-	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, LightShader light, CutoutShader cutout, MaterialShaders materialShaders) {
+	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material) {
+		var light = material.light();
+		var cutout = material.cutout();
+		var materialShaders = material.shaders();
+
+		var fog = material.fog();
+
+		var fogIndex = MaterialShaderIndices.fogSources();
+		if (fogIndex.index(fog.source()) == -1) {
+			fogIndex.add(fog.source());
+			pipeline.delete();
+			PipelineCompiler.createFogComponent();
+		}
+
 		return pipeline.get(new PipelineProgramKey(instanceType, contextShader, light, cutout, materialShaders, FrameUniforms.debugOn()));
 	}
 

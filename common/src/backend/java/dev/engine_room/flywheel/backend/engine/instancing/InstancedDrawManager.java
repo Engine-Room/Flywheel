@@ -174,7 +174,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 					for (InstancedDraw draw : instancer.draws()) {
 						CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
-						var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, crumblingMaterial.light(), crumblingMaterial.cutout(), crumblingMaterial.shaders());
+						var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, crumblingMaterial);
 						program.bind();
 						program.setInt("_flw_baseInstance", index);
 						uploadMaterialUniform(program, crumblingMaterial);

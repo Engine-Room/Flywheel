@@ -57,7 +57,7 @@ public class InstancedRenderStage {
 			for (var drawCall : drawCalls.draws) {
 				var material = drawCall.material();
 
-				var program = programs.get(shader.instanceType(), environment.contextShader(), material.light(), material.cutout(), material.shaders());
+				var program = programs.get(shader.instanceType(), environment.contextShader(), material);
 				program.bind();
 
 				environment.setupDraw(program);
