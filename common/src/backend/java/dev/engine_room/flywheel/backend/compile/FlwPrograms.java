@@ -21,7 +21,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 public final class FlwPrograms {
 	public static final Logger LOGGER = LoggerFactory.getLogger(Flywheel.ID + "/backend/shaders");
 
-	private static final ResourceLocation COMPONENTS_HEADER_VERT = Flywheel.rl("internal/components_header.vert");
 	private static final ResourceLocation COMPONENTS_HEADER_FRAG = Flywheel.rl("internal/components_header.frag");
 
 	private FlwPrograms() {
@@ -36,19 +35,18 @@ public final class FlwPrograms {
 		var stats = new CompilerStats("ubershaders");
 		var loader = new SourceLoader(sources, stats);
 
-		var vertexComponentsHeader = loader.find(COMPONENTS_HEADER_VERT);
 		var fragmentComponentsHeader = loader.find(COMPONENTS_HEADER_FRAG);
 
 		var fogComponent = createFogComponent(loader);
 
 		// TODO: separate compilation for cutout OFF, but keep the rest uber'd?
-		if (stats.errored() || vertexComponentsHeader == null || fragmentComponentsHeader == null || fogComponent == null) {
+		if (stats.errored() || fragmentComponentsHeader == null || fogComponent == null) {
 			// Probably means the shader sources are missing.
 			stats.emitErrorLog();
 			return;
 		}
 
-		List<SourceComponent> vertexComponents = List.of(vertexComponentsHeader);
+		List<SourceComponent> vertexComponents = List.of();
 		List<SourceComponent> fragmentComponents = List.of(fragmentComponentsHeader, fogComponent);
 
 		InstancingPrograms.reload(sources, vertexComponents, fragmentComponents);

@@ -8,8 +8,6 @@ struct MeshDrawCommand {
     uint modelIndex;
     uint matrixIndex;
 
-    uint materialVertexIndex;
-    uint materialFragmentIndex;
     uint packedFogAndCutout;
     uint packedMaterialProperties;
 };

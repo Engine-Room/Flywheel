@@ -1,6 +1,5 @@
 package dev.engine_room.flywheel.lib.instance;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.api.Flywheel;
@@ -29,7 +28,7 @@ public final class InstanceTypes {
 			})
 			.vertexShader(Flywheel.rl("instance/transformed.vert"))
 			.cullShader(Flywheel.rl("instance/cull/transformed.glsl"))
-			.register();
+			.build();
 
 	public static final InstanceType<PosedInstance> POSED = SimpleInstanceType.builder(PosedInstance::new)
 			.layout(LayoutBuilder.create()
@@ -51,7 +50,7 @@ public final class InstanceTypes {
 			})
 			.vertexShader(Flywheel.rl("instance/posed.vert"))
 			.cullShader(Flywheel.rl("instance/cull/posed.glsl"))
-			.register();
+			.build();
 
 	public static final InstanceType<OrientedInstance> ORIENTED = SimpleInstanceType.builder(OrientedInstance::new)
 			.layout(LayoutBuilder.create()
@@ -79,7 +78,7 @@ public final class InstanceTypes {
 			})
 			.vertexShader(Flywheel.rl("instance/oriented.vert"))
 			.cullShader(Flywheel.rl("instance/cull/oriented.glsl"))
-			.register();
+			.build();
 
 	public static final InstanceType<ShadowInstance> SHADOW = SimpleInstanceType.builder(ShadowInstance::new)
 			.layout(LayoutBuilder.create()
@@ -102,12 +101,8 @@ public final class InstanceTypes {
 			})
 			.vertexShader(Flywheel.rl("instance/shadow.vert"))
 			.cullShader(Flywheel.rl("instance/cull/shadow.glsl"))
-			.register();
+			.build();
 
 	private InstanceTypes() {
-	}
-
-	@ApiStatus.Internal
-	public static void init() {
 	}
 }

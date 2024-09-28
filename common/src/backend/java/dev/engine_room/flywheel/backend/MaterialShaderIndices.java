@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import dev.engine_room.flywheel.api.material.CutoutShader;
 import dev.engine_room.flywheel.api.material.FogShader;
-import dev.engine_room.flywheel.api.material.MaterialShaders;
 import dev.engine_room.flywheel.api.registry.Registry;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -18,29 +17,11 @@ import net.minecraft.resources.ResourceLocation;
 
 public final class MaterialShaderIndices {
 	@Nullable
-	private static Index vertexSources;
-	@Nullable
-	private static Index fragmentSources;
-	@Nullable
 	private static Index fogSources;
 	@Nullable
 	private static Index cutoutSources;
 
 	private MaterialShaderIndices() {
-	}
-
-	public static Index vertexSources() {
-		if (vertexSources == null) {
-			vertexSources = indexFromRegistry(MaterialShaders.REGISTRY, MaterialShaders::vertexSource);
-		}
-		return vertexSources;
-	}
-
-	public static Index fragmentSources() {
-		if (fragmentSources == null) {
-			fragmentSources = indexFromRegistry(MaterialShaders.REGISTRY, MaterialShaders::fragmentSource);
-		}
-		return fragmentSources;
 	}
 
 	public static Index fogSources() {
@@ -51,18 +32,10 @@ public final class MaterialShaderIndices {
 	}
 
 	public static Index cutoutSources() {
-		if (cutoutSources == null) {
-			cutoutSources = indexFromRegistry(CutoutShader.REGISTRY, CutoutShader::source);
-		}
+		//		if (cutoutSources == null) {
+		//			cutoutSources = indexFromRegistry(CutoutShader.REGISTRY, CutoutShader::source);
+		//		}
 		return cutoutSources;
-	}
-
-	public static int vertexIndex(MaterialShaders shaders) {
-		return vertexSources().index(shaders.vertexSource());
-	}
-
-	public static int fragmentIndex(MaterialShaders shaders) {
-		return fragmentSources().index(shaders.fragmentSource());
 	}
 
 	public static int fogIndex(FogShader fogShader) {
@@ -70,7 +43,7 @@ public final class MaterialShaderIndices {
 	}
 
 	public static int cutoutIndex(CutoutShader cutoutShader) {
-		return cutoutSources().index(cutoutShader.source());
+		return 0;//cutoutSources().index(cutoutShader.source());
 	}
 
 	private static <T> Index indexFromRegistry(Registry<T> registry, Function<T, ResourceLocation> sourceFunc) {
