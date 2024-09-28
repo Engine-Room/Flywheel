@@ -44,12 +44,7 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 		vbo = new GlBuffer(GlBufferUsage.DYNAMIC_DRAW);
 	}
 
-	public void update() {
-		removeDeletedInstances();
-		updateBuffer();
-	}
-
-	private void updateBuffer() {
+	public void updateBuffer() {
 		if (changed.isEmpty() || vbo == null) {
 			return;
 		}

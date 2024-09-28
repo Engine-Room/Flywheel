@@ -64,7 +64,6 @@ public class IndirectCullingGroup<I extends Instance> {
 		int modelIndex = 0;
         for (var iterator = instancers.iterator(); iterator.hasNext(); ) {
             var instancer = iterator.next();
-            instancer.update();
 			var instanceCount = instancer.instanceCount();
 
 			if (instanceCount == 0) {
@@ -73,7 +72,7 @@ public class IndirectCullingGroup<I extends Instance> {
 				continue;
 			}
 
-			instancer.postUpdate(modelIndex, instanceCountThisFrame);
+			instancer.update(modelIndex, instanceCountThisFrame);
 			instanceCountThisFrame += instanceCount;
 
 			modelIndex++;
@@ -172,7 +171,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	public void add(IndirectInstancer<I> instancer, InstancerKey<I> key, MeshPool meshPool) {
 		instancer.mapping = buffers.objectStorage.createMapping();
-		instancer.postUpdate(instancers.size(), -1);
+		instancer.update(instancers.size(), -1);
 
 		instancers.add(instancer);
 

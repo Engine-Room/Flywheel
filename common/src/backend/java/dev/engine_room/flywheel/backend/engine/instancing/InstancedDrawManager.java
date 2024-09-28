@@ -65,13 +65,11 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 		this.instancers.values()
 				.removeIf(instancer -> {
-			// Update the instancers and remove any that are empty.
-			instancer.update();
-
 			if (instancer.instanceCount() == 0) {
 				instancer.delete();
 				return true;
 			} else {
+				instancer.updateBuffer();
 				return false;
 			}
 		});

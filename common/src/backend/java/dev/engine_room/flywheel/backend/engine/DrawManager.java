@@ -10,14 +10,17 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.mojang.datafixers.util.Pair;
 
+import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.model.Model;
+import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.FlwBackend;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
 import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
+import dev.engine_room.flywheel.lib.task.ForEachPlan;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -43,6 +46,11 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 	@SuppressWarnings("unchecked")
 	public <I extends Instance> AbstractInstancer<I> getInstancer(InstancerKey<I> key) {
 		return (AbstractInstancer<I>) instancers.computeIfAbsent(key, this::createAndDeferInit);
+	}
+
+	public Plan<RenderContext> createFramePlan() {
+		// Go wide on instancers to process deletions in parallel.
+		return ForEachPlan.of(() -> new ArrayList<>(instancers.values()), AbstractInstancer::removeDeletedInstances);
 	}
 
 	public void flush(LightStorage lightStorage, EnvironmentStorage environmentStorage) {

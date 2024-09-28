@@ -50,7 +50,8 @@ public class EngineImpl implements Engine {
 
 	@Override
 	public Plan<RenderContext> createFramePlan() {
-		return lightStorage.createFramePlan();
+		return drawManager.createFramePlan()
+				.and(lightStorage.createFramePlan());
 	}
 
 	@Override
