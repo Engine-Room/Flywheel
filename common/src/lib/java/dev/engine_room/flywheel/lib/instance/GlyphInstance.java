@@ -5,6 +5,7 @@ import org.joml.Matrix4f;
 import dev.engine_room.flywheel.api.instance.InstanceHandle;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.lib.internal.FlwLibLink;
+import dev.engine_room.flywheel.lib.internal.GlyphExtension;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.util.FastColor;
 
@@ -15,10 +16,8 @@ public class GlyphInstance extends AbstractInstance {
 
 	public final Matrix4f pose = new Matrix4f();
 
-	public float u0;
-	public float u1;
-	public float v0;
-	public float v1;
+	public int us;
+	public int vs;
 
 	public byte red = (byte) 0xFF;
 	public byte green = (byte) 0xFF;
@@ -34,10 +33,7 @@ public class GlyphInstance extends AbstractInstance {
 	public GlyphInstance setGlyph(BakedGlyph glyph, float x, float y, boolean italic) {
 		var glyphReader = FlwLibLink.INSTANCE.getGlyphExtension(glyph);
 
-		u0 = glyphReader.flywheel$u0();
-		u1 = glyphReader.flywheel$u1();
-		v0 = glyphReader.flywheel$v0();
-		v1 = glyphReader.flywheel$v1();
+		setUvs(glyphReader);
 		float left = glyphReader.flywheel$left();
 		float right = glyphReader.flywheel$right();
 		float up = glyphReader.flywheel$up();
@@ -56,10 +52,7 @@ public class GlyphInstance extends AbstractInstance {
 	public GlyphInstance setEffect(BakedGlyph glyph, float x0, float y0, float x1, float y1, float depth) {
 		var glyphReader = FlwLibLink.INSTANCE.getGlyphExtension(glyph);
 
-		u0 = glyphReader.flywheel$u0();
-		u1 = glyphReader.flywheel$u1();
-		v0 = glyphReader.flywheel$v0();
-		v1 = glyphReader.flywheel$v1();
+		setUvs(glyphReader);
 
 		pose.translate(x0, y0, depth);
 		pose.scale(x1 - x0, y1 - y0, 1.0f);
@@ -100,5 +93,15 @@ public class GlyphInstance extends AbstractInstance {
 		this.green = green;
 		this.blue = blue;
 		return this;
+	}
+
+	private void setUvs(GlyphExtension glyphReader) {
+		float u0 = glyphReader.flywheel$u0();
+		float u1 = glyphReader.flywheel$u1();
+		float v0 = glyphReader.flywheel$v0();
+		float v1 = glyphReader.flywheel$v1();
+
+		us = (int) (u0 * 65536) | ((int) (u1 * 65536) << 16);
+		vs = (int) (v0 * 65536) | ((int) (v1 * 65536) << 16);
 	}
 }
