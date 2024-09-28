@@ -54,6 +54,10 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 	private final TextVisual[] frontText = new TextVisual[4];
 	private final TextVisual[] backText = new TextVisual[4];
 
+	// Need to update these every frame, so just remember which ones are obfuscated
+	// Most of the time this will be empty.
+	private final List<TextVisual> obfuscated = new ArrayList<>();
+
 	private SignText lastFrontText;
 	private SignText lastBackText;
 
@@ -93,22 +97,34 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 
 		lastFrontText = blockEntity.getFrontText();
 		lastBackText = blockEntity.getBackText();
-		this.setupText(lastFrontText, frontText, true);
-		this.setupText(lastBackText, backText, false);
+		this.setupText(lastFrontText, true);
+		this.setupText(lastBackText, false);
 	}
 
 	@Override
 	public void beginFrame(Context ctx) {
-		// Need to update every frame if the text is obfuscated
-
+		boolean setup = false;
 		if (lastFrontText != blockEntity.getFrontText()) {
 			lastFrontText = blockEntity.getFrontText();
-			this.setupText(lastFrontText, frontText, true);
+			setup = true;
 		}
 
 		if (lastBackText != blockEntity.getBackText()) {
 			lastBackText = blockEntity.getBackText();
-			this.setupText(lastBackText, backText, false);
+			setup = true;
+		}
+
+		if (setup) {
+			// Setup both to make it easier to track obfuscation
+			obfuscated.clear();
+			this.setupText(lastBackText, false);
+			this.setupText(lastFrontText, true);
+		} else {
+			// The is visible check is relatively expensive compared to the boolean checks above,
+			// so only do it when it'll actually save some work in obfuscating.
+			if (isVisible(ctx.frustum())) {
+				obfuscated.forEach(TextVisual::setup);
+			}
 		}
 	}
 
@@ -158,7 +174,7 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 		return TEXT_OFFSET;
 	}
 
-	void setupText(SignText text, TextVisual[] dst, boolean isFrontText) {
+	protected void setupText(SignText text, boolean isFrontText) {
 		FormattedCharSequence[] formattedCharSequences = text.getRenderMessages(Minecraft.getInstance()
 				.isTextFilteringEnabled(), component -> {
 			List<FormattedCharSequence> list = Minecraft.getInstance().font.split(component, blockEntity.getMaxTextLineWidth());
@@ -167,10 +183,10 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 
 		List<TextLayer> layers = new ArrayList<>();
 
-		int darkColor = adjustColor(getDarkColor(text));
+		int darkColor = TextLayer.GlyphColor.adjustColor(getDarkColor(text));
 		int textColor;
 		if (text.hasGlowingText()) {
-			textColor = adjustColor(text.getColor()
+			textColor = TextLayer.GlyphColor.adjustColor(text.getColor()
 					.getTextColor());
 
 			layers.add(new SimpleTextLayer.Builder().style(TextLayer.GlyphMeshStyle.OUTLINE)
@@ -186,6 +202,8 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 				.color(TextLayer.GlyphColor.defaultTo(textColor))
 				.bias(1)
 				.build());
+
+		var dst = isFrontText ? frontText : backText;
 
 		int lineHeight = blockEntity.getTextLineHeight();
 		int lineDelta = 4 * lineHeight / 2;
@@ -213,17 +231,18 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 			textPose.scale(scale, -scale, scale);
 
 			textVisual.setup();
+
+			if (hasObfuscation(formattedCharSequence)) {
+				this.obfuscated.add(textVisual);
+			}
 		}
 	}
 
-	private static int adjustColor(int color) {
-		if ((color & 0xFC000000) == 0) {
-			return color | 0xFF000000;
-		}
-		return color;
+	public static boolean hasObfuscation(FormattedCharSequence text) {
+		return text.accept((i, s, j) -> s.isObfuscated());
 	}
 
-	static int getDarkColor(SignText signText) {
+	public static int getDarkColor(SignText signText) {
 		int i = signText.getColor()
 				.getTextColor();
 		if (i == DyeColor.BLACK.getTextColor() && signText.hasGlowingText()) {

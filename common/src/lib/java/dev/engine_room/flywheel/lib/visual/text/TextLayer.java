@@ -95,7 +95,7 @@ public interface TextLayer {
 		 * @return A new GlyphColor.
 		 */
 		static GlyphColor always(int color) {
-			return style -> adjustColor(color);
+			return style -> color;
 		}
 
 		/**
