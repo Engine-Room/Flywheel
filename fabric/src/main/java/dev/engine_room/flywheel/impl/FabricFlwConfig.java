@@ -185,16 +185,24 @@ public class FabricFlwConfig implements FlwConfig {
 
 	public static class FabricBackendConfig implements BackendConfig {
 		public static final LightSmoothness LIGHT_SMOOTHNESS_DEFAULT = LightSmoothness.SMOOTH;
+		public static final boolean USE_LIGHT_DIRECTIONS_DEFAULT = true;
 
 		public LightSmoothness lightSmoothness = LIGHT_SMOOTHNESS_DEFAULT;
+		public boolean useLightDirections = USE_LIGHT_DIRECTIONS_DEFAULT;
 
 		@Override
 		public LightSmoothness lightSmoothness() {
 			return lightSmoothness;
 		}
 
+		@Override
+		public boolean useLightDirections() {
+			return useLightDirections;
+		}
+
 		public void fromJson(JsonObject object) {
 			readLightSmoothness(object);
+			readUseLightDirections(object);
 		}
 
 		private void readLightSmoothness(JsonObject object) {
@@ -224,9 +232,23 @@ public class FabricFlwConfig implements FlwConfig {
 			lightSmoothness = LIGHT_SMOOTHNESS_DEFAULT;
 		}
 
+		private void readUseLightDirections(JsonObject object) {
+			var useLightDirectionsJson = object.get("useLightDirections");
+
+			if (useLightDirectionsJson instanceof JsonPrimitive primitive && primitive.isBoolean()) {
+				useLightDirections = primitive.getAsBoolean();
+				return;
+			} else if (useLightDirectionsJson != null) {
+				FlwBackend.LOGGER.warn("'useLightDirections' value must be a boolean");
+			}
+
+			useLightDirections = USE_LIGHT_DIRECTIONS_DEFAULT;
+		}
+
 		public JsonObject toJson() {
 			JsonObject object = new JsonObject();
 			object.addProperty("lightSmoothness", lightSmoothness.getSerializedName());
+			object.addProperty("useLightDirections", useLightDirections);
 			return object;
 		}
 	}

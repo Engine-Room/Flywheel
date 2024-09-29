@@ -11,4 +11,6 @@ public interface BackendConfig {
 	 * @return The current light smoothness setting.
 	 */
 	LightSmoothness lightSmoothness();
+
+	boolean useLightDirections();
 }

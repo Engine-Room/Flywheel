@@ -1,6 +1,7 @@
 package dev.engine_room.flywheel.backend.engine.uniform;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3fc;
 import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.lib.util.ExtraMemoryOps;
@@ -35,6 +36,10 @@ class UniformWriter {
 		MemoryUtil.memPutFloat(ptr + 8, z);
 		MemoryUtil.memPutFloat(ptr + 12, 0f); // empty component of vec4 because we don't trust std140
 		return ptr + 16;
+	}
+
+	static long writeVec3(long ptr, Vector3fc vec) {
+		return writeVec3(ptr, vec.x(), vec.y(), vec.z());
 	}
 
 	static long writeVec4(long ptr, float x, float y, float z, float w) {

@@ -50,15 +50,15 @@ public final class ModelUtil {
 	}
 
 	@Nullable
-	public static Material getItemMaterial(RenderType renderType, boolean shaded) {
-		var chunkMaterial = getMaterial(renderType, shaded);
+	public static Material getItemMaterial(RenderType renderType) {
+		var chunkMaterial = getMaterial(renderType, true);
 
 		if (chunkMaterial != null) {
 			return chunkMaterial;
 		}
 
 		if (renderType == Sheets.translucentCullBlockSheet() || renderType == Sheets.translucentItemSheet()) {
-			return shaded ? Materials.CUTOUT_BLOCK : Materials.CUTOUT_UNSHADED_BLOCK;
+			return Materials.CUTOUT_BLOCK;
 		}
 		if (renderType == RenderType.glint() || renderType == RenderType.glintDirect()) {
 			return Materials.GLINT;

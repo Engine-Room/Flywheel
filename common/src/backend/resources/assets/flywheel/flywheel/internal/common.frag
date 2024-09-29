@@ -21,10 +21,14 @@ out vec4 _flw_outputColor;
 
 float _flw_diffuseFactor() {
     if (flw_material.diffuse) {
-        if (flw_constantAmbientLight == 1u) {
-            return diffuseNether(flw_vertexNormal);
+        if (flw_useLightDirections == 1u) {
+            return diffuseFromLightDirections(flw_vertexNormal);
         } else {
-            return diffuse(flw_vertexNormal);
+            if (flw_constantAmbientLight == 1u) {
+                return diffuseNether(flw_vertexNormal);
+            } else {
+                return diffuse(flw_vertexNormal);
+            }
         }
     } else {
         return 1.;

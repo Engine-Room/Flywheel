@@ -1,14 +1,20 @@
 package dev.engine_room.flywheel.backend.engine.uniform;
 
+import org.joml.Vector3f;
+
 import dev.engine_room.flywheel.api.RenderContext;
+import dev.engine_room.flywheel.backend.BackendConfig;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public final class LevelUniforms extends UniformWriter {
-	private static final int SIZE = 16 * 2 + 4 * 13;
+	private static final int SIZE = 16 * 4 + 4 * 13;
 	static final UniformBuffer BUFFER = new UniformBuffer(Uniforms.LEVEL_INDEX, SIZE);
+
+	public static final Vector3f LIGHT0_DIRECTION = new Vector3f();
+	public static final Vector3f LIGHT1_DIRECTION = new Vector3f();
 
 	private LevelUniforms() {
 	}
@@ -23,6 +29,9 @@ public final class LevelUniforms extends UniformWriter {
 		Vec3 cloudColor = level.getCloudColor(partialTick);
 		ptr = writeVec4(ptr, (float) skyColor.x, (float) skyColor.y, (float) skyColor.z, 1f);
 		ptr = writeVec4(ptr, (float) cloudColor.x, (float) cloudColor.y, (float) cloudColor.z, 1f);
+
+		ptr = writeVec3(ptr, LIGHT0_DIRECTION);
+		ptr = writeVec3(ptr, LIGHT1_DIRECTION);
 
 		long dayTime = level.getDayTime();
 		long levelDay = dayTime / 24000L;
@@ -45,6 +54,8 @@ public final class LevelUniforms extends UniformWriter {
 		ptr = writeFloat(ptr, level.getSkyDarken(partialTick));
 
 		ptr = writeInt(ptr, level.effects().constantAmbientLight() ? 1 : 0);
+
+		ptr = writeInt(ptr, BackendConfig.INSTANCE.useLightDirections() ? 1 : 0);
 
 		// TODO: use defines for custom dimension ids
         int dimensionId;
