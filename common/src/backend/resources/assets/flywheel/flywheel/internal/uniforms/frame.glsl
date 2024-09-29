@@ -23,6 +23,8 @@ struct _FlwCullData {
 layout(std140) uniform _FlwFrameUniforms {
     FrustumPlanes flw_frustumPlanes;
 
+    _FlwCullData _flw_cullData;
+
     mat4 flw_view;
     mat4 flw_viewInverse;
     mat4 flw_viewPrev;
@@ -51,6 +53,8 @@ layout(std140) uniform _FlwFrameUniforms {
     float flw_partialTick;
     float flw_renderTicks;
     float flw_renderSeconds;
+    float flw_systemSeconds;
+    uint flw_systemMillis;
 
     /** 0 means no fluid. Use FLW_CAMERA_IN_FLUID_* defines to detect fluid type. */
     uint flw_cameraInFluid;
@@ -58,8 +62,6 @@ layout(std140) uniform _FlwFrameUniforms {
     uint flw_cameraInBlock;
 
     uint _flw_debugMode;
-
-    _FlwCullData _flw_cullData;
 };
 
 #define flw_renderOrigin (_flw_renderOrigin.xyz)
