@@ -7,7 +7,6 @@
   "client": [
     "BlockEntityTypeMixin",
     "ClientChunkCacheMixin",
-    "ClientLevelMixin",
     "EntityTypeMixin",
     "LevelMixin",
     "LevelRendererMixin",
