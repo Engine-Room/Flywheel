@@ -4,6 +4,10 @@ import java.util.Collection;
 import java.util.List;
 
 import dev.engine_room.flywheel.api.Flywheel;
+import dev.engine_room.flywheel.api.instance.InstanceType;
+import dev.engine_room.flywheel.api.material.LightShader;
+import dev.engine_room.flywheel.api.material.Material;
+import dev.engine_room.flywheel.api.material.MaterialShaders;
 import dev.engine_room.flywheel.backend.BackendConfig;
 import dev.engine_room.flywheel.backend.InternalVertex;
 import dev.engine_room.flywheel.backend.MaterialShaderIndices;
@@ -12,6 +16,7 @@ import dev.engine_room.flywheel.backend.compile.component.InstanceStructComponen
 import dev.engine_room.flywheel.backend.compile.component.UberShaderComponent;
 import dev.engine_room.flywheel.backend.compile.core.CompilationHarness;
 import dev.engine_room.flywheel.backend.compile.core.Compile;
+import dev.engine_room.flywheel.backend.engine.uniform.FrameUniforms;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
@@ -25,6 +30,8 @@ import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.resources.ResourceLocation;
 
 public final class PipelineCompiler {
+	private static final List<PipelineCompiler> ALL = List.of();
+
 	private static final Compile<PipelineProgramKey> PIPELINE = new Compile<>();
 
 	private static UberShaderComponent FOG;
@@ -33,11 +40,48 @@ public final class PipelineCompiler {
 	private static final ResourceLocation API_IMPL_VERT = Flywheel.rl("internal/api_impl.vert");
 	private static final ResourceLocation API_IMPL_FRAG = Flywheel.rl("internal/api_impl.frag");
 
-	static CompilationHarness<PipelineProgramKey> create(ShaderSources sources, Pipeline pipeline, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents, Collection<String> extensions) {
+	private final CompilationHarness<PipelineProgramKey> harness;
+
+	public PipelineCompiler(CompilationHarness<PipelineProgramKey> harness) {
+		this.harness = harness;
+	}
+
+	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material) {
+		var light = material.light();
+		var cutout = material.cutout();
+		var shaders = material.shaders();
+		var fog = material.fog();
+
+		// Tell fogSources to index the fog shader if we haven't seen it before.
+		// If it is new, this will trigger a deletion of all programs.
+		MaterialShaderIndices.fogSources()
+				.index(fog.source());
+
+		boolean useCutout = cutout != CutoutShaders.OFF;
+
+		if (useCutout) {
+			// Same thing for cutout.
+			MaterialShaderIndices.cutoutSources()
+					.index(cutout.source());
+		}
+
+		return harness.get(new PipelineProgramKey(instanceType, contextShader, light, shaders, useCutout, FrameUniforms.debugOn()));
+	}
+
+	public void delete() {
+		harness.delete();
+	}
+
+	public static void deleteAll() {
+		createFogComponent();
+		createCutoutComponent();
+		ALL.forEach(PipelineCompiler::delete);
+	}
+
+	static PipelineCompiler create(ShaderSources sources, Pipeline pipeline, List<SourceComponent> vertexComponents, List<SourceComponent> fragmentComponents, Collection<String> extensions) {
 		// We could technically compile every version of light smoothness ahead of time,
 		// but that seems unnecessary as I doubt most folks will be changing this option often.
-		var lightSmoothness = BackendConfig.INSTANCE.lightSmoothness();
-		return PIPELINE.program()
+		var harness = PIPELINE.program()
 				.link(PIPELINE.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.VERTEX)
 						.nameMapper(key -> {
 							var instance = ResourceUtil.toDebugFileNameNoExtension(key.instanceType()
@@ -53,7 +97,8 @@ public final class PipelineCompiler {
 						.requireExtensions(extensions)
 						.onCompile((key, comp) -> key.contextShader()
 								.onCompile(comp))
-						.onCompile((key, comp) -> lightSmoothness.onCompile(comp))
+						.onCompile((key, comp) -> BackendConfig.INSTANCE.lightSmoothness()
+								.onCompile(comp))
 						.onCompile((key, comp) -> {
 							if (key.debugEnabled()) {
 								comp.define("_FLW_DEBUG");
@@ -78,26 +123,25 @@ public final class PipelineCompiler {
 							var material = ResourceUtil.toDebugFileNameNoExtension(key.materialShaders()
 									.fragmentSource());
 
-							var cutout = ResourceUtil.toDebugFileNameNoExtension(key.cutout()
-									.source());
-
 							var light = ResourceUtil.toDebugFileNameNoExtension(key.light()
 									.source());
 							var debug = key.debugEnabled() ? "_debug" : "";
-							return "pipeline/" + pipeline.compilerMarker() + "/frag/" + material + "/" + light + "_" + cutout + "_" + context + debug;
+							var cutout = key.useCutout() ? "_cutout" : "";
+							return "pipeline/" + pipeline.compilerMarker() + "/frag/" + material + "/" + light + "_" + context + cutout + debug;
 						})
 						.requireExtensions(extensions)
 						.enableExtension("GL_ARB_conservative_depth")
 						.onCompile((key, comp) -> key.contextShader()
 								.onCompile(comp))
-						.onCompile((key, comp) -> lightSmoothness.onCompile(comp))
+						.onCompile((key, comp) -> BackendConfig.INSTANCE.lightSmoothness()
+								.onCompile(comp))
 						.onCompile((key, comp) -> {
 							if (key.debugEnabled()) {
 								comp.define("_FLW_DEBUG");
 							}
 						})
 						.onCompile((key, comp) -> {
-							if (key.cutout() != CutoutShaders.OFF) {
+							if (key.useCutout()) {
 								comp.define("_FLW_USE_DISCARD");
 							}
 						})
@@ -108,8 +152,7 @@ public final class PipelineCompiler {
 						.withComponent(key -> FOG)
 						.withResource(key -> key.light()
 								.source())
-						.withResource(key -> key.cutout()
-								.source())
+						.with((key, fetcher) -> (key.useCutout() ? CUTOUT : fetcher.get(CutoutShaders.OFF.source())))
 						.withResource(pipeline.fragmentMain()))
 				.preLink((key, program) -> {
 					program.bindAttribLocation("_flw_aPos", 0);
@@ -135,6 +178,8 @@ public final class PipelineCompiler {
 					GlProgram.unbind();
 				})
 				.harness(pipeline.compilerMarker(), sources);
+
+		return new PipelineCompiler(harness);
 	}
 
 	public static void createFogComponent() {
@@ -161,5 +206,16 @@ public final class PipelineCompiler {
 						.build(), GlslExpr.boolLiteral(false))
 				.switchOn(GlslExpr.variable("_flw_uberCutoutIndex"))
 				.build(FlwPrograms.SOURCES);
+	}
+
+	/**
+	 * Represents the entire context of a program's usage.
+	 *
+	 * @param instanceType  The instance shader to use.
+	 * @param contextShader The context shader to use.
+	 * @param light         The light shader to use.
+	 */
+	public record PipelineProgramKey(InstanceType<?> instanceType, ContextShader contextShader, LightShader light,
+									 MaterialShaders materialShaders, boolean useCutout, boolean debugEnabled) {
 	}
 }

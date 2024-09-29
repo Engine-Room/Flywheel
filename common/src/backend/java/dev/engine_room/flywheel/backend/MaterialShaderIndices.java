@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import dev.engine_room.flywheel.api.material.CutoutShader;
 import dev.engine_room.flywheel.api.material.FogShader;
+import dev.engine_room.flywheel.backend.compile.PipelineCompiler;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -45,23 +46,31 @@ public final class MaterialShaderIndices {
 			this.sources = new ObjectArrayList<>();
 		}
 
-		public void add(ResourceLocation source) {
-			if (sources2Index.putIfAbsent(source, sources.size()) == -1) {
-				sources.add(source);
-			}
+		public ResourceLocation get(int index) {
+			return sources.get(index);
 		}
 
 		public int index(ResourceLocation source) {
-			return sources2Index.getInt(source);
-		}
+			var out = sources2Index.getInt(source);
 
-		public ResourceLocation get(int index) {
-			return sources.get(index);
+			if (out == -1) {
+				add(source);
+				PipelineCompiler.deleteAll();
+				return sources2Index.getInt(source);
+			}
+
+			return out;
 		}
 
 		@Unmodifiable
 		public List<ResourceLocation> all() {
 			return sources;
+		}
+
+		private void add(ResourceLocation source) {
+			if (sources2Index.putIfAbsent(source, sources.size()) == -1) {
+				sources.add(source);
+			}
 		}
 	}
 }

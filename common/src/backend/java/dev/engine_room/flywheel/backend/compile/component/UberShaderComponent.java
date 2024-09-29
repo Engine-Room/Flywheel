@@ -136,7 +136,6 @@ public class UberShaderComponent implements SourceComponent {
 			return this;
 		}
 
-		@Nullable
 		public UberShaderComponent build(ShaderSources sources) {
 			if (switchArg == null) {
 				throw new NullPointerException("Switch argument must be set");
@@ -144,22 +143,13 @@ public class UberShaderComponent implements SourceComponent {
 
 			var transformed = ImmutableList.<StringSubstitutionComponent>builder();
 
-			boolean errored = false;
 			int index = 0;
 			for (var rl : materialSources) {
 				SourceFile sourceFile = sources.get(rl);
-				if (sourceFile != null) {
-					final int finalIndex = index;
-					var adapterMap = createAdapterMap(adaptedFunctions, fnName -> "_" + fnName + "_" + finalIndex);
-					transformed.add(new StringSubstitutionComponent(sourceFile, adapterMap));
-				} else {
-					errored = true;
-				}
+				final int finalIndex = index;
+				var adapterMap = createAdapterMap(adaptedFunctions, fnName -> "_" + fnName + "_" + finalIndex);
+				transformed.add(new StringSubstitutionComponent(sourceFile, adapterMap));
 				index++;
-			}
-
-			if (errored) {
-				return null;
 			}
 
 			return new UberShaderComponent(name, switchArg, adaptedFunctions, transformed.build());

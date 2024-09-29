@@ -9,12 +9,10 @@ import com.google.common.collect.ImmutableList;
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.material.Material;
-import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.compile.component.InstanceStructComponent;
 import dev.engine_room.flywheel.backend.compile.component.SsboInstanceComponent;
 import dev.engine_room.flywheel.backend.compile.core.CompilationHarness;
 import dev.engine_room.flywheel.backend.compile.core.Compile;
-import dev.engine_room.flywheel.backend.engine.uniform.FrameUniforms;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
@@ -44,11 +42,11 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	@Nullable
 	private static IndirectPrograms instance;
 
-	private final CompilationHarness<PipelineProgramKey> pipeline;
+	private final PipelineCompiler pipeline;
 	private final CompilationHarness<InstanceType<?>> culling;
 	private final CompilationHarness<ResourceLocation> utils;
 
-	private IndirectPrograms(CompilationHarness<PipelineProgramKey> pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<ResourceLocation> utils) {
+	private IndirectPrograms(PipelineCompiler pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<ResourceLocation> utils) {
 		this.pipeline = pipeline;
 		this.culling = culling;
 		this.utils = utils;
@@ -151,19 +149,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	}
 
 	public GlProgram getIndirectProgram(InstanceType<?> instanceType, ContextShader contextShader, Material material) {
-		var light = material.light();
-		var cutout = material.cutout();
-		var shaders = material.shaders();
-		var fog = material.fog();
-
-		var fogIndex = MaterialShaderIndices.fogSources();
-		if (fogIndex.index(fog.source()) == -1) {
-			fogIndex.add(fog.source());
-			pipeline.delete();
-			PipelineCompiler.createFogComponent();
-		}
-
-		return pipeline.get(new PipelineProgramKey(instanceType, contextShader, light, cutout, shaders, FrameUniforms.debugOn()));
+		return pipeline.get(instanceType, contextShader, material);
 	}
 
 	public GlProgram getCullingProgram(InstanceType<?> instanceType) {

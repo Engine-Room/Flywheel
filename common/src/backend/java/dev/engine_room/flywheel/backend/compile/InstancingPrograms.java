@@ -8,9 +8,6 @@ import com.google.common.collect.ImmutableList;
 
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.material.Material;
-import dev.engine_room.flywheel.backend.MaterialShaderIndices;
-import dev.engine_room.flywheel.backend.compile.core.CompilationHarness;
-import dev.engine_room.flywheel.backend.engine.uniform.FrameUniforms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.backend.glsl.GlslVersion;
@@ -24,9 +21,9 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 	@Nullable
 	private static InstancingPrograms instance;
 
-	private final CompilationHarness<PipelineProgramKey> pipeline;
+	private final PipelineCompiler pipeline;
 
-	private InstancingPrograms(CompilationHarness<PipelineProgramKey> pipeline) {
+	private InstancingPrograms(PipelineCompiler pipeline) {
 		this.pipeline = pipeline;
 	}
 
@@ -73,20 +70,7 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 	}
 
 	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material) {
-		var light = material.light();
-		var cutout = material.cutout();
-		var materialShaders = material.shaders();
-
-		var fog = material.fog();
-
-		var fogIndex = MaterialShaderIndices.fogSources();
-		if (fogIndex.index(fog.source()) == -1) {
-			fogIndex.add(fog.source());
-			pipeline.delete();
-			PipelineCompiler.createFogComponent();
-		}
-
-		return pipeline.get(new PipelineProgramKey(instanceType, contextShader, light, cutout, materialShaders, FrameUniforms.debugOn()));
+		return pipeline.get(instanceType, contextShader, material);
 	}
 
 	@Override
