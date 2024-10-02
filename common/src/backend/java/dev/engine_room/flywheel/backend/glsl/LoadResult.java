@@ -1,22 +1,22 @@
 package dev.engine_room.flywheel.backend.glsl;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import dev.engine_room.flywheel.backend.compile.core.ShaderException;
 
 public sealed interface LoadResult {
-	@Nullable
-	default SourceFile unwrap() {
-		return null;
-	}
+	SourceFile unwrap();
 
 	record Success(SourceFile source) implements LoadResult {
 		@Override
-		@NotNull
 		public SourceFile unwrap() {
 			return source;
 		}
 	}
 
 	record Failure(LoadError error) implements LoadResult {
+		@Override
+		public SourceFile unwrap() {
+			throw new ShaderException.Load(error.generateMessage()
+					.build());
+		}
 	}
 }

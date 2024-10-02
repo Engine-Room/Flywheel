@@ -6,13 +6,11 @@ import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.internal.FlwApiLink;
 import dev.engine_room.flywheel.api.layout.LayoutBuilder;
 import dev.engine_room.flywheel.api.registry.IdRegistry;
-import dev.engine_room.flywheel.api.registry.Registry;
 import dev.engine_room.flywheel.api.visualization.BlockEntityVisualizer;
 import dev.engine_room.flywheel.api.visualization.EntityVisualizer;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.impl.layout.LayoutBuilderImpl;
 import dev.engine_room.flywheel.impl.registry.IdRegistryImpl;
-import dev.engine_room.flywheel.impl.registry.RegistryImpl;
 import dev.engine_room.flywheel.impl.visualization.VisualizationManagerImpl;
 import dev.engine_room.flywheel.impl.visualization.VisualizerRegistryImpl;
 import net.minecraft.world.entity.Entity;
@@ -22,11 +20,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class FlwApiLinkImpl implements FlwApiLink {
-	@Override
-	public <T> Registry<T> createRegistry() {
-		return new RegistryImpl<>();
-	}
-
 	@Override
 	public <T> IdRegistry<T> createIdRegistry() {
 		return new IdRegistryImpl<>();

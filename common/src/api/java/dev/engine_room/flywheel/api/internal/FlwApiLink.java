@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.layout.LayoutBuilder;
 import dev.engine_room.flywheel.api.registry.IdRegistry;
-import dev.engine_room.flywheel.api.registry.Registry;
 import dev.engine_room.flywheel.api.visualization.BlockEntityVisualizer;
 import dev.engine_room.flywheel.api.visualization.EntityVisualizer;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
@@ -17,8 +16,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public interface FlwApiLink {
 	FlwApiLink INSTANCE = DependencyInjection.load(FlwApiLink.class, "dev.engine_room.flywheel.impl.FlwApiLinkImpl");
-
-	<T> Registry<T> createRegistry();
 
 	<T> IdRegistry<T> createIdRegistry();
 

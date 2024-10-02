@@ -11,24 +11,17 @@ import static org.lwjgl.opengl.GL20.glLinkProgram;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.jetbrains.annotations.Nullable;
-
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.backend.gl.shader.GlShader;
 
 public class ProgramLinker {
-	private final CompilerStats stats;
 
-	public ProgramLinker(CompilerStats stats) {
-		this.stats = stats;
+	public ProgramLinker() {
 	}
 
-	@Nullable
 	public GlProgram link(List<GlShader> shaders, Consumer<GlProgram> preLink) {
 		// this probably doesn't need caching
-		var linkResult = linkInternal(shaders, preLink);
-		stats.linkResult(linkResult);
-		return linkResult.unwrap();
+		return linkInternal(shaders, preLink).unwrap();
 	}
 
 	private LinkResult linkInternal(List<GlShader> shaders, Consumer<GlProgram> preLink) {

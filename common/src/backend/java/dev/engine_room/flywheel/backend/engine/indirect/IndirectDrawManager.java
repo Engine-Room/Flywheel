@@ -56,6 +56,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		this.programs = programs;
 		programs.acquire();
 
+		// WARN: We should avoid eagerly grabbing GlPrograms here as catching compile
+		// errors and falling back during construction is a bit more complicated.
 		stagingBuffer = new StagingBuffer(this.programs);
 		meshPool = new MeshPool();
 		vertexArray = GlVertexArray.create();
@@ -63,7 +65,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		lightBuffers = new LightBuffers();
 		matrixBuffer = new MatrixBuffer();
 
-		depthPyramid = new DepthPyramid(programs.getDownsampleFirstProgram(), programs.getDownsampleSecondProgram());
+		depthPyramid = new DepthPyramid(programs);
 	}
 
 	@Override

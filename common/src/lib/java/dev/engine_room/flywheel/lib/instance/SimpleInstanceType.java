@@ -89,14 +89,13 @@ public final class SimpleInstanceType<I extends Instance> implements InstanceTyp
 			return this;
 		}
 
-		public SimpleInstanceType<I> register() {
+		public SimpleInstanceType<I> build() {
 			Objects.requireNonNull(layout);
 			Objects.requireNonNull(writer);
 			Objects.requireNonNull(vertexShader);
 			Objects.requireNonNull(cullShader);
 
-			var out = new SimpleInstanceType<>(factory, layout, writer, vertexShader, cullShader);
-			return InstanceType.REGISTRY.registerAndGet(out);
+			return new SimpleInstanceType<>(factory, layout, writer, vertexShader, cullShader);
 		}
 	}
 }

@@ -64,7 +64,6 @@ public class IndirectCullingGroup<I extends Instance> {
 		int modelIndex = 0;
         for (var iterator = instancers.iterator(); iterator.hasNext(); ) {
             var instancer = iterator.next();
-            instancer.update();
 			var instanceCount = instancer.instanceCount();
 
 			if (instanceCount == 0) {
@@ -73,7 +72,7 @@ public class IndirectCullingGroup<I extends Instance> {
 				continue;
 			}
 
-			instancer.postUpdate(modelIndex, instanceCountThisFrame);
+			instancer.update(modelIndex, instanceCountThisFrame);
 			instanceCountThisFrame += instanceCount;
 
 			modelIndex++;
@@ -172,7 +171,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	public void add(IndirectInstancer<I> instancer, InstancerKey<I> key, MeshPool meshPool) {
 		instancer.mapping = buffers.objectStorage.createMapping();
-		instancer.postUpdate(instancers.size(), -1);
+		instancer.update(instancers.size(), -1);
 
 		instancers.add(instancer);
 
@@ -203,7 +202,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		int baseDrawUniformLoc = -1;
 
 		for (var multiDraw : multiDraws.get(visualType)) {
-			var drawProgram = programs.getIndirectProgram(instanceType, multiDraw.embedded ? ContextShader.EMBEDDED : ContextShader.DEFAULT, multiDraw.material.light(), multiDraw.material.cutout(), multiDraw.material.shaders());
+			var drawProgram = programs.getIndirectProgram(instanceType, multiDraw.embedded ? ContextShader.EMBEDDED : ContextShader.DEFAULT, multiDraw.material);
 			if (drawProgram != lastProgram) {
 				lastProgram = drawProgram;
 
@@ -221,7 +220,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	public void bindWithContextShader(ContextShader override, Material material) {
-		var program = programs.getIndirectProgram(instanceType, override, material.light(), material.cutout(), material.shaders());
+		var program = programs.getIndirectProgram(instanceType, override, material);
 
 		program.bind();
 

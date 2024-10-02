@@ -7,10 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.ImmutableList;
 
 import dev.engine_room.flywheel.api.instance.InstanceType;
-import dev.engine_room.flywheel.api.material.CutoutShader;
-import dev.engine_room.flywheel.api.material.LightShader;
-import dev.engine_room.flywheel.api.material.MaterialShaders;
-import dev.engine_room.flywheel.backend.compile.core.CompilationHarness;
+import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.backend.glsl.GlslVersion;
@@ -24,9 +21,9 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 	@Nullable
 	private static InstancingPrograms instance;
 
-	private final CompilationHarness<PipelineProgramKey> pipeline;
+	private final PipelineCompiler pipeline;
 
-	private InstancingPrograms(CompilationHarness<PipelineProgramKey> pipeline) {
+	private InstancingPrograms(PipelineCompiler pipeline) {
 		this.pipeline = pipeline;
 	}
 
@@ -42,7 +39,6 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 		if (!GlCompat.SUPPORTS_INSTANCING) {
 			return;
 		}
-
 
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCING, vertexComponents, fragmentComponents, EXTENSIONS);
 		InstancingPrograms newInstance = new InstancingPrograms(pipelineCompiler);
@@ -73,8 +69,8 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 		setInstance(null);
 	}
 
-	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, LightShader light, CutoutShader cutout, MaterialShaders materialShaders) {
-		return pipeline.get(new PipelineProgramKey(instanceType, contextShader, light, cutout, materialShaders));
+	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material) {
+		return pipeline.get(instanceType, contextShader, material);
 	}
 
 	@Override

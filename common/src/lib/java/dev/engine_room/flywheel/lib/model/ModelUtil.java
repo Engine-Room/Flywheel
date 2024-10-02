@@ -15,6 +15,7 @@ import dev.engine_room.flywheel.lib.material.Materials;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 import dev.engine_room.flywheel.lib.vertex.PosVertexView;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 
 public final class ModelUtil {
@@ -44,6 +45,26 @@ public final class ModelUtil {
 		}
 		if (chunkRenderType == RenderType.tripwire()) {
 			return shaded ? Materials.TRIPWIRE_BLOCK : Materials.TRIPWIRE_UNSHADED_BLOCK;
+		}
+		return null;
+	}
+
+	@Nullable
+	public static Material getItemMaterial(RenderType renderType) {
+		var chunkMaterial = getMaterial(renderType, true);
+
+		if (chunkMaterial != null) {
+			return chunkMaterial;
+		}
+
+		if (renderType == Sheets.translucentCullBlockSheet() || renderType == Sheets.translucentItemSheet()) {
+			return Materials.CUTOUT_BLOCK;
+		}
+		if (renderType == RenderType.glint() || renderType == RenderType.glintDirect()) {
+			return Materials.GLINT;
+		}
+		if (renderType == RenderType.entityGlint() || renderType == RenderType.entityGlintDirect()) {
+			return Materials.GLINT_ENTITY;
 		}
 		return null;
 	}

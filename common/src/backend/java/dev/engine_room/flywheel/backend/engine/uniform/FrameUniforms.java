@@ -10,6 +10,7 @@ import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.backend.engine.indirect.DepthPyramid;
 import dev.engine_room.flywheel.backend.mixin.LevelRendererAccessor;
+import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -18,7 +19,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public final class FrameUniforms extends UniformWriter {
-	private static final int SIZE = 96 + 64 * 9 + 16 * 5 + 8 * 2 + 8 + 4 * 17;
+	private static final int SIZE = 96 + 64 * 9 + 16 * 5 + 8 * 2 + 8 + 4 * 19;
 	static final UniformBuffer BUFFER = new UniformBuffer(Uniforms.FRAME_INDEX, SIZE);
 
 	private static final Matrix4f VIEW = new Matrix4f();
@@ -93,6 +94,8 @@ public final class FrameUniforms extends UniformWriter {
 
 		ptr += 96;
 
+		ptr = writeCullData(ptr);
+
 		ptr = writeMatrices(ptr);
 
 		ptr = writeRenderOrigin(ptr, renderOrigin);
@@ -112,8 +115,6 @@ public final class FrameUniforms extends UniformWriter {
 		ptr = writeCameraIn(ptr, camera);
 
 		ptr = writeInt(ptr, debugMode);
-
-		ptr = writeCullData(ptr);
 
 		firstWrite = false;
 		BUFFER.markDirty();
@@ -161,11 +162,15 @@ public final class FrameUniforms extends UniformWriter {
 		float partialTick = context.partialTick();
 		float renderTicks = ticks + partialTick;
 		float renderSeconds = renderTicks / 20f;
+		float systemSeconds = Util.getMillis() / 1000f;
+		int systemMillis = (int) (Util.getMillis() % Integer.MAX_VALUE);
 
 		ptr = writeInt(ptr, ticks);
 		ptr = writeFloat(ptr, partialTick);
 		ptr = writeFloat(ptr, renderTicks);
 		ptr = writeFloat(ptr, renderSeconds);
+		ptr = writeFloat(ptr, systemSeconds);
+		ptr = writeInt(ptr, systemMillis);
 		return ptr;
 	}
 
@@ -314,5 +319,9 @@ public final class FrameUniforms extends UniformWriter {
 		MemoryUtil.memPutFloat(ptr + 84, pzZ);
 		MemoryUtil.memPutFloat(ptr + 88, nzW);
 		MemoryUtil.memPutFloat(ptr + 92, pzW);
+	}
+
+	public static boolean debugOn() {
+		return debugMode != DebugMode.OFF.ordinal();
 	}
 }

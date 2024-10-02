@@ -19,7 +19,7 @@ public class IndirectBuffers {
 	public static final long MODEL_STRIDE = 28;
 
 	// Byte size of a draw command, plus our added mesh data.
-	public static final long DRAW_COMMAND_STRIDE = 44;
+	public static final long DRAW_COMMAND_STRIDE = 36;
 	public static final long DRAW_COMMAND_OFFSET = 0;
 
 	// Offsets to the 3 segments

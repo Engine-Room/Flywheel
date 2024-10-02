@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.impl.FlwImplXplat;
 import dev.engine_room.flywheel.impl.event.RenderContextImpl;
+import dev.engine_room.flywheel.lib.visualization.VisualizationHelper;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -24,8 +25,10 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.server.level.BlockDestructionProgress;
+import net.minecraft.world.entity.Entity;
 
 @Mixin(value = LevelRenderer.class, priority = 1001) // Higher priority to go after Sodium
 abstract class LevelRendererMixin {
@@ -117,6 +120,13 @@ abstract class LevelRendererMixin {
 			if (manager != null) {
 				manager.renderDispatcher().afterParticles(flywheel$renderContext);
 			}
+		}
+	}
+
+	@Inject(method = "renderEntity", at = @At("HEAD"), cancellable = true)
+	private void flywheel$decideNotToRenderEntity(Entity pEntity, double pCamX, double pCamY, double pCamZ, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBufferSource, CallbackInfo ci) {
+		if (VisualizationManager.supportsVisualization(pEntity.level()) && VisualizationHelper.skipVanillaRender(pEntity)) {
+			ci.cancel();
 		}
 	}
 }

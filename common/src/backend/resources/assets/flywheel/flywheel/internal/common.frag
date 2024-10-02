@@ -3,7 +3,7 @@
 #include "flywheel:internal/colorizer.glsl"
 
 // optimize discard usage
-#ifdef GL_ARB_conservative_depth
+#if defined(GL_ARB_conservative_depth) && defined(_FLW_USE_DISCARD)
 layout (depth_greater) out float gl_FragDepth;
 #endif
 
@@ -13,16 +13,22 @@ uniform sampler2D _flw_crumblingTex;
 in vec2 _flw_crumblingTexCoord;
 #endif
 
+#ifdef _FLW_DEBUG
 flat in uint _flw_instanceID;
+#endif
 
 out vec4 _flw_outputColor;
 
 float _flw_diffuseFactor() {
     if (flw_material.diffuse) {
-        if (flw_constantAmbientLight == 1u) {
-            return diffuseNether(flw_vertexNormal);
+        if (flw_useLightDirections == 1u) {
+            return diffuseFromLightDirections(flw_vertexNormal);
         } else {
-            return diffuse(flw_vertexNormal);
+            if (flw_constantAmbientLight == 1u) {
+                return diffuseNether(flw_vertexNormal);
+            } else {
+                return diffuse(flw_vertexNormal);
+            }
         }
     } else {
         return 1.;
@@ -49,9 +55,11 @@ void _flw_main() {
 
     vec4 color = flw_fragColor;
 
+    #ifdef _FLW_USE_DISCARD
     if (flw_discardPredicate(color)) {
         discard;
     }
+    #endif
 
     float diffuseFactor = _flw_diffuseFactor();
     color.rgb *= diffuseFactor;
@@ -67,6 +75,7 @@ void _flw_main() {
         color *= lightColor;
     }
 
+    #ifdef _FLW_DEBUG
     switch (_flw_debugMode) {
         case 1u:
         color = vec4(flw_vertexNormal * .5 + .5, 1.);
@@ -87,6 +96,7 @@ void _flw_main() {
         color = vec4(vec3(diffuseFactor), 1.);
         break;
     }
+    #endif
 
     _flw_outputColor = flw_fogFilter(color);
 }

@@ -10,8 +10,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.jetbrains.annotations.Nullable;
-
 import dev.engine_room.flywheel.backend.compile.FlwPrograms;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.backend.gl.shader.GlShader;
@@ -44,7 +42,7 @@ public class Compile<K> {
 	public static class ShaderCompiler<K> {
 		private final GlslVersion glslVersion;
 		private final ShaderType shaderType;
-		private final List<BiFunction<K, SourceLoader, @Nullable SourceComponent>> fetchers = new ArrayList<>();
+		private final List<BiFunction<K, ShaderSources, SourceComponent>> fetchers = new ArrayList<>();
 		private BiConsumer<K, Compilation> compilationCallbacks = ($, $$) -> {
 		};
 		private Function<K, String> nameMapper = Object::toString;
@@ -59,26 +57,26 @@ public class Compile<K> {
 			return this;
 		}
 
-		public ShaderCompiler<K> with(BiFunction<K, SourceLoader, @Nullable SourceComponent> fetch) {
+		public ShaderCompiler<K> with(BiFunction<K, ShaderSources, SourceComponent> fetch) {
 			fetchers.add(fetch);
 			return this;
 		}
 
-		public ShaderCompiler<K> withComponents(Collection<@Nullable SourceComponent> components) {
+		public ShaderCompiler<K> withComponents(Collection<SourceComponent> components) {
 			components.forEach(this::withComponent);
 			return this;
 		}
 
-		public ShaderCompiler<K> withComponent(@Nullable SourceComponent component) {
+		public ShaderCompiler<K> withComponent(SourceComponent component) {
 			return withComponent($ -> component);
 		}
 
-		public ShaderCompiler<K> withComponent(Function<K, @Nullable SourceComponent> sourceFetcher) {
+		public ShaderCompiler<K> withComponent(Function<K, SourceComponent> sourceFetcher) {
 			return with((key, $) -> sourceFetcher.apply(key));
 		}
 
 		public ShaderCompiler<K> withResource(Function<K, ResourceLocation> sourceFetcher) {
-			return with((key, loader) -> loader.find(sourceFetcher.apply(key)));
+			return with((key, loader) -> loader.get(sourceFetcher.apply(key)));
 		}
 
 		public ShaderCompiler<K> withResource(ResourceLocation resourceLocation) {
@@ -122,22 +120,12 @@ public class Compile<K> {
 			});
 		}
 
-		@Nullable
-		private GlShader compile(K key, ShaderCache compiler, SourceLoader loader) {
+		private GlShader compile(K key, ShaderCache compiler, ShaderSources loader) {
 			long start = System.nanoTime();
 
 			var components = new ArrayList<SourceComponent>();
-			boolean ok = true;
 			for (var fetcher : fetchers) {
-				SourceComponent apply = fetcher.apply(key, loader);
-				if (apply == null) {
-					ok = false;
-				}
-				components.add(apply);
-			}
-
-			if (!ok) {
-				return null;
+				components.add(fetcher.apply(key, loader));
 			}
 
 			Consumer<Compilation> cb = ctx -> compilationCallbacks.accept(key, ctx);
@@ -182,8 +170,7 @@ public class Compile<K> {
 		}
 
 		@Override
-		@Nullable
-		public GlProgram compile(K key, SourceLoader loader, ShaderCache shaderCache, ProgramLinker programLinker) {
+		public GlProgram compile(K key, ShaderSources loader, ShaderCache shaderCache, ProgramLinker programLinker) {
 			if (compilers.isEmpty()) {
 				throw new IllegalStateException("No shader compilers were added!");
 			}
@@ -192,24 +179,13 @@ public class Compile<K> {
 
 			List<GlShader> shaders = new ArrayList<>();
 
-			boolean ok = true;
 			for (ShaderCompiler<K> compiler : compilers.values()) {
-				var shader = compiler.compile(key, shaderCache, loader);
-				if (shader == null) {
-					ok = false;
-				}
-				shaders.add(shader);
-			}
-
-			if (!ok) {
-				return null;
+				shaders.add(compiler.compile(key, shaderCache, loader));
 			}
 
 			var out = programLinker.link(shaders, p -> preLink.accept(key, p));
 
-			if (out != null) {
-				postLink.accept(key, out);
-			}
+			postLink.accept(key, out);
 
 			long end = System.nanoTime();
 

@@ -1,25 +1,22 @@
 package dev.engine_room.flywheel.backend.compile.core;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import dev.engine_room.flywheel.backend.gl.shader.GlShader;
 
 public sealed interface ShaderResult {
-	@Nullable
-	default GlShader unwrap() {
-		return null;
-	}
+	GlShader unwrap();
 
 	record Success(GlShader shader, String infoLog) implements ShaderResult {
 		@Override
-		@NotNull
 		public GlShader unwrap() {
 			return shader;
 		}
 	}
 
 	record Failure(FailedCompilation failure) implements ShaderResult {
+		@Override
+		public GlShader unwrap() {
+			throw new ShaderException.Compile(failure.generateMessage());
+		}
 	}
 
 	static ShaderResult success(GlShader program, String infoLog) {

@@ -49,6 +49,10 @@ public class ShaderSources {
 		return cache.computeIfAbsent(location, loc -> new LoadResult.Failure(new LoadError.ResourceError(loc)));
 	}
 
+	public SourceFile get(ResourceLocation location) {
+		return find(location).unwrap();
+	}
+
 	private static boolean isShader(ResourceLocation loc) {
 		var path = loc.getPath();
 		return path.endsWith(".glsl") || path.endsWith(".vert") || path.endsWith(".frag") || path.endsWith(".comp");

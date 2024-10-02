@@ -55,11 +55,7 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		return associatedDraws;
 	}
 
-	public void update() {
-		removeDeletedInstances();
-	}
-
-	public void postUpdate(int modelIndex, int baseInstance) {
+	public void update(int modelIndex, int baseInstance) {
 		this.modelIndex = modelIndex;
 		this.baseInstance = baseInstance;
 		mapping.update(modelIndex, instanceCount());

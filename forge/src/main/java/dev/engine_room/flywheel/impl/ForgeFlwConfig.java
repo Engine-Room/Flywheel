@@ -101,15 +101,24 @@ public class ForgeFlwConfig implements FlwConfig {
 
 	public static class ForgeBackendConfig implements BackendConfig {
 		public final ModConfigSpec.EnumValue<LightSmoothness> lightSmoothness;
+		public final ForgeConfigSpec.BooleanValue useLightDirections;
 
 		public ForgeBackendConfig(ModConfigSpec.Builder builder) {
 			lightSmoothness = builder.comment("How smooth flywheel's shader-based lighting should be. May have a large performance impact.")
 					.defineEnum("lightSmoothness", LightSmoothness.SMOOTH);
+
+			useLightDirections = builder.comment("If true, diffuse lighting is accurate to vanilla entities and block entities. If false, diffuse lighting is accurate to vanilla chunks. Zero performance impact, just a matter of visual preference.")
+					.define("useLightDirections", true);
 		}
 
 		@Override
 		public LightSmoothness lightSmoothness() {
 			return lightSmoothness.get();
+		}
+
+		@Override
+		public boolean useLightDirections() {
+			return useLightDirections.get();
 		}
 	}
 }

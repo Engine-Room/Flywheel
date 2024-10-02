@@ -8,7 +8,6 @@
     "BlockEntityTypeMixin",
     "BufferBuilderAccessor",
     "ClientChunkCacheMixin",
-    "ClientLevelMixin",
     "EntityTypeMixin",
     "LevelMixin",
     "LevelRendererMixin",

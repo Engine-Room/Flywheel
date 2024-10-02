@@ -160,7 +160,7 @@ public abstract class AbstractInstancer<I extends Instance> implements Instancer
 		deleted.set(index);
 	}
 
-	protected void removeDeletedInstances() {
+	public void removeDeletedInstances() {
 		if (deleted.isEmpty()) {
 			return;
 		}

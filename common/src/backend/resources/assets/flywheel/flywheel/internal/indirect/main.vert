@@ -21,7 +21,7 @@ layout(std430, binding = _FLW_MATRIX_BUFFER_BINDING) restrict buffer MatrixBuffe
 
 uniform uint _flw_baseDraw;
 
-flat out uvec3 _flw_packedMaterial;
+flat out uvec2 _flw_packedMaterial;
 
 #if __VERSION__ < 460
 #define flw_baseInstance gl_BaseInstanceARB
@@ -35,15 +35,12 @@ void main() {
     uint drawIndex = flw_drawId + _flw_baseDraw;
     MeshDrawCommand draw = _flw_drawCommands[drawIndex];
 
-    _flw_uberMaterialVertexIndex = draw.materialVertexIndex;
     uint packedMaterialProperties = draw.packedMaterialProperties;
     _flw_unpackMaterialProperties(packedMaterialProperties, flw_material);
-    _flw_packedMaterial = uvec3(draw.materialFragmentIndex, draw.packedFogAndCutout, packedMaterialProperties);
+    _flw_packedMaterial = uvec2(draw.packedFogAndCutout, packedMaterialProperties);
 
     #ifdef FLW_EMBEDDED
     _flw_unpackMatrices(_flw_matrices[draw.matrixIndex], _flw_modelMatrix, _flw_normalMatrix);
-    //    _flw_modelMatrix = mat4(1.);
-    //    _flw_normalMatrix = mat3(1.);
     #endif
 
     #ifdef _FLW_CRUMBLING

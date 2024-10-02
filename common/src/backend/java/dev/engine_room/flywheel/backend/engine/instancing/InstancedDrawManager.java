@@ -4,13 +4,10 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import org.lwjgl.opengl.GL32;
-
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.visualization.VisualType;
-import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.InstancingPrograms;
@@ -65,13 +62,11 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 		this.instancers.values()
 				.removeIf(instancer -> {
-			// Update the instancers and remove any that are empty.
-			instancer.update();
-
 			if (instancer.instanceCount() == 0) {
 				instancer.delete();
 				return true;
 			} else {
+				instancer.updateBuffer();
 				return false;
 			}
 		});
@@ -179,7 +174,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 					for (InstancedDraw draw : instancer.draws()) {
 						CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
-						var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, crumblingMaterial.light(), crumblingMaterial.cutout(), crumblingMaterial.shaders());
+						var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, crumblingMaterial);
 						program.bind();
 						program.setInt("_flw_baseInstance", index);
 						uploadMaterialUniform(program, crumblingMaterial);
@@ -205,11 +200,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	}
 
 	public static void uploadMaterialUniform(GlProgram program, Material material) {
-		int uniformLocation = program.getUniformLocation("_flw_packedMaterial");
-		int vertexIndex = MaterialShaderIndices.vertexIndex(material.shaders());
-		int fragmentIndex = MaterialShaderIndices.fragmentIndex(material.shaders());
 		int packedFogAndCutout = MaterialEncoder.packUberShader(material);
 		int packedMaterialProperties = MaterialEncoder.packProperties(material);
-		GL32.glUniform4ui(uniformLocation, vertexIndex, fragmentIndex, packedFogAndCutout, packedMaterialProperties);
+		program.setUVec2("_flw_packedMaterial", packedFogAndCutout, packedMaterialProperties);
 	}
 }

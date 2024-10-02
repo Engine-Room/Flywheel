@@ -7,6 +7,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.backend.BackendManager;
 import dev.engine_room.flywheel.backend.compile.LightSmoothness;
+import dev.engine_room.flywheel.backend.compile.PipelineCompiler;
 import dev.engine_room.flywheel.backend.engine.uniform.DebugMode;
 import dev.engine_room.flywheel.backend.engine.uniform.FrameUniforms;
 import net.minecraft.client.Minecraft;
@@ -131,9 +132,31 @@ public final class FlwCommands {
 
 							if (oldValue != newValue) {
 								lightSmoothnessValue.set(newValue);
-								Minecraft.getInstance()
-										.reloadResourcePacks();
+								PipelineCompiler.deleteAll();
 							}
+							return Command.SINGLE_SUCCESS;
+						})));
+
+		var useLightDirectionsValue = ForgeFlwConfig.INSTANCE.client.backendConfig.useLightDirections;
+		command.then(Commands.literal("useLightDirections")
+				.executes(context -> {
+					if (useLightDirectionsValue.get()) {
+						sendMessage(context.getSource(), Component.translatable("command.flywheel.use_light_directions.get.on"));
+					} else {
+						sendMessage(context.getSource(), Component.translatable("command.flywheel.use_light_directions.get.off"));
+					}
+					return Command.SINGLE_SUCCESS;
+				})
+				.then(Commands.literal("on")
+						.executes(context -> {
+							useLightDirectionsValue.set(true);
+							sendMessage(context.getSource(), Component.translatable("command.flywheel.use_light_directions.set.on"));
+							return Command.SINGLE_SUCCESS;
+						}))
+				.then(Commands.literal("off")
+						.executes(context -> {
+							useLightDirectionsValue.set(false);
+							sendMessage(context.getSource(), Component.translatable("command.flywheel.use_light_directions.set.off"));
 							return Command.SINGLE_SUCCESS;
 						})));
 

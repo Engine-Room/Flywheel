@@ -9,6 +9,7 @@ import com.mojang.brigadier.context.CommandContext;
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.backend.BackendManager;
 import dev.engine_room.flywheel.backend.compile.LightSmoothness;
+import dev.engine_room.flywheel.backend.compile.PipelineCompiler;
 import dev.engine_room.flywheel.backend.engine.uniform.DebugMode;
 import dev.engine_room.flywheel.backend.engine.uniform.FrameUniforms;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -133,9 +134,36 @@ public final class FlwCommands {
 							if (oldValue != newValue) {
 								FabricFlwConfig.INSTANCE.backendConfig.lightSmoothness = newValue;
 								FabricFlwConfig.INSTANCE.save();
-								Minecraft.getInstance()
-										.reloadResourcePacks();
+								PipelineCompiler.deleteAll();
 							}
+							return Command.SINGLE_SUCCESS;
+						})));
+
+		command.then(ClientCommandManager.literal("useLightDirections")
+				.executes(context -> {
+					if (FabricFlwConfig.INSTANCE.backendConfig.useLightDirections) {
+						context.getSource()
+								.sendFeedback(Component.translatable("command.flywheel.use_light_directions.get.on"));
+					} else {
+						context.getSource()
+								.sendFeedback(Component.translatable("command.flywheel.use_light_directions.get.off"));
+					}
+					return Command.SINGLE_SUCCESS;
+				})
+				.then(ClientCommandManager.literal("on")
+						.executes(context -> {
+							FabricFlwConfig.INSTANCE.backendConfig.useLightDirections = true;
+							FabricFlwConfig.INSTANCE.save();
+							context.getSource()
+									.sendFeedback(Component.translatable("command.flywheel.use_light_directions.set.on"));
+							return Command.SINGLE_SUCCESS;
+						}))
+				.then(ClientCommandManager.literal("off")
+						.executes(context -> {
+							FabricFlwConfig.INSTANCE.backendConfig.useLightDirections = false;
+							FabricFlwConfig.INSTANCE.save();
+							context.getSource()
+									.sendFeedback(Component.translatable("command.flywheel.use_light_directions.set.off"));
 							return Command.SINGLE_SUCCESS;
 						})));
 

@@ -71,7 +71,9 @@ mat4 _flw_modelMatrix;
 mat3 _flw_normalMatrix;
 #endif
 
+#ifdef _FLW_DEBUG
 flat out uint _flw_instanceID;
+#endif
 
 void _flw_main(in FlwInstance instance, in uint stableInstanceID) {
     _flw_layoutVertex();
@@ -93,5 +95,7 @@ void _flw_main(in FlwInstance instance, in uint stableInstanceID) {
 
     gl_Position = flw_viewProjection * flw_vertexPos;
 
+    #ifdef _FLW_DEBUG
     _flw_instanceID = stableInstanceID;
+    #endif
 }
