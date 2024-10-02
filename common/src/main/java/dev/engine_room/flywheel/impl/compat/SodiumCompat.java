@@ -6,6 +6,7 @@ import net.caffeinemc.mods.sodium.api.blockentity.BlockEntityRenderPredicate;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
+@SuppressWarnings({"unchecked", "UnstableApiUsage"})
 public class SodiumCompat {
 	public static <T extends BlockEntity> Object forBlockEntityType(BlockEntityType<T> type) {
 		BlockEntityRenderPredicate<T> predicate = (getter, pos, be) -> VisualizationHelper.tryAddBlockEntity(be);

@@ -85,9 +85,6 @@ dependencies {
     modCompileOnly(":sodium-neoforge-0.6.0-beta.2+mc1.21.1")
     modCompileOnly("maven.modrinth:iris:${property("iris_version")}-neoforge")
 
-    //modCompileOnly("maven.modrinth:embeddium:${property("embeddium_version")}")
-    //modCompileOnly("maven.modrinth:oculus:${property("oculus_version")}")
-
     "forApi"(project(path = ":common", configuration = "commonApiOnly"))
     "forLib"(project(path = ":common", configuration = "commonLib"))
     "forBackend"(project(path = ":common", configuration = "commonBackend"))

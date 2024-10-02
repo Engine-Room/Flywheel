@@ -14,6 +14,8 @@ import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.impl.FlwImplXplat;
 import dev.engine_room.flywheel.impl.event.RenderContextImpl;
@@ -124,8 +126,8 @@ abstract class LevelRendererMixin {
 	}
 
 	@Inject(method = "renderEntity", at = @At("HEAD"), cancellable = true)
-	private void flywheel$decideNotToRenderEntity(Entity pEntity, double pCamX, double pCamY, double pCamZ, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBufferSource, CallbackInfo ci) {
-		if (VisualizationManager.supportsVisualization(pEntity.level()) && VisualizationHelper.skipVanillaRender(pEntity)) {
+	private void flywheel$decideNotToRenderEntity(Entity entity, double camX, double camY, double camZ, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, CallbackInfo ci) {
+		if (VisualizationManager.supportsVisualization(entity.level()) && VisualizationHelper.skipVanillaRender(entity)) {
 			ci.cancel();
 		}
 	}

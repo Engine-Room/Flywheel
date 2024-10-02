@@ -60,7 +60,7 @@ public final class ModelUtil {
 		if (renderType == Sheets.translucentCullBlockSheet() || renderType == Sheets.translucentItemSheet()) {
 			return Materials.CUTOUT_BLOCK;
 		}
-		if (renderType == RenderType.glint() || renderType == RenderType.glintDirect()) {
+		if (renderType == RenderType.glint() || renderType == RenderType.glintTranslucent()) {
 			return Materials.GLINT;
 		}
 		if (renderType == RenderType.entityGlint() || renderType == RenderType.entityGlintDirect()) {

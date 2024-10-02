@@ -30,3 +30,8 @@ modId = "neoforge"
 type = "required"
 versionRange = "${neoforge_version_range}"
 side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "embeddium"
+type = "incompatible"
+reason = "Remove Embeddium and install Sodium"
