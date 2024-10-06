@@ -308,9 +308,8 @@ public final class TextVisual {
 		private static final float[] X = new float[] { 0, 0, 1, 1 };
 		private static final float[] Y = new float[] { 0, 1, 1, 0 };
 
-		// FIXME: what is the actual bounding sphere??
 		public GlyphMesh(float glyphWidth, float glyphHeight, Vector2fc[] offsets) {
-			this(glyphWidth, glyphHeight, offsets, new Vector4f(0, 0, 0, Math.max(glyphWidth, glyphHeight) * 2 * Mth.SQRT_OF_TWO));
+			this(glyphWidth, glyphHeight, offsets, boundingSphere(glyphWidth, glyphHeight, offsets));
 		}
 
 		@Override
@@ -343,6 +342,36 @@ public final class TextVisual {
 		@Override
 		public Vector4fc boundingSphere() {
 			return boundingSphere;
+		}
+
+		private static Vector4fc boundingSphere(float glyphWidth, float glyphHeight, Vector2fc[] offsets) {
+			if (offsets.length == 0) {
+				return new Vector4f(0, 0, 0, 0);
+			}
+
+			float minX = Float.POSITIVE_INFINITY;
+			float minY = Float.POSITIVE_INFINITY;
+			float maxX = Float.NEGATIVE_INFINITY;
+			float maxY = Float.NEGATIVE_INFINITY;
+			for (Vector2fc offset : offsets) {
+				for (int j = 0; j < 4; j++) {
+					var x = offset.x() + (glyphWidth * X[j]);
+					var y = offset.y() + (glyphHeight * Y[j]);
+					minX = Math.min(minX, x);
+					minY = Math.min(minY, y);
+					maxX = Math.max(maxX, x);
+					maxY = Math.max(maxY, y);
+				}
+			}
+
+			float x = (minX + maxX) / 2;
+			float y = (minY + maxY) / 2;
+
+			float sizeX = maxX - minX;
+			float sizeY = maxY - minY;
+			float maxSize = Math.max(sizeX, sizeY);
+
+			return new Vector4f(x, y, 0, Mth.SQRT_OF_TWO * maxSize / 2);
 		}
 	}
 
