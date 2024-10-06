@@ -23,7 +23,7 @@ public final class ShadersModHandler {
 		Package optifinePackage = Package.getPackage(OPTIFINE_ROOT_PACKAGE);
 		IS_OPTIFINE_INSTALLED = optifinePackage != null;
 
-		// OptiFine and Iris/Oculus are assumed to be mutually exclusive
+		// OptiFine and Iris are assumed to be mutually exclusive
 
 		if (IS_IRIS_LOADED) {
 			FlwLibLink.INSTANCE.getLogger().debug("Iris detected.");
