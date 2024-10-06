@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 
-import dev.engine_room.flywheel.lib.internal.FontTextureExtension;
+import dev.engine_room.flywheel.impl.extension.FontTextureExtension;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.FontTexture;
 import net.minecraft.resources.ResourceLocation;

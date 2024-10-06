@@ -12,8 +12,8 @@ import dev.engine_room.flywheel.impl.extension.PoseStackExtension;
 import dev.engine_room.flywheel.impl.mixin.ModelPartAccessor;
 import dev.engine_room.flywheel.impl.mixin.PoseStackAccessor;
 import dev.engine_room.flywheel.impl.mixin.text.FontAccessor;
+import dev.engine_room.flywheel.lib.internal.BakedGlyphExtension;
 import dev.engine_room.flywheel.lib.internal.FlwLibLink;
-import dev.engine_room.flywheel.lib.internal.GlyphExtension;
 import dev.engine_room.flywheel.lib.transform.PoseTransformStack;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.font.FontSet;
@@ -48,12 +48,17 @@ public class FlwLibLinkImpl implements FlwLibLink {
 	}
 
 	@Override
-	public GlyphExtension getGlyphExtension(BakedGlyph glyph) {
-		return (GlyphExtension) glyph;
+	public FontSet getFontSet(Font font, ResourceLocation loc) {
+		return ((FontAccessor) font).flywheel$getFontSet(loc);
 	}
 
 	@Override
-	public FontSet getFontSet(Font font, ResourceLocation loc) {
-		return ((FontAccessor) font).flywheel$getFontSet(loc);
+	public boolean getFilterFishyGlyphs(Font font) {
+		return ((FontAccessor) font).flywheel$getFilterFishyGlyphs();
+	}
+
+	@Override
+	public BakedGlyphExtension getBakedGlyphExtension(BakedGlyph glyph) {
+		return (BakedGlyphExtension) glyph;
 	}
 }

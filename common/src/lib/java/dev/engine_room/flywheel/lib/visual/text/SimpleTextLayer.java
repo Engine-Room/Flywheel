@@ -3,25 +3,24 @@ package dev.engine_room.flywheel.lib.visual.text;
 import java.util.Objects;
 
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2f;
+import org.joml.Vector2fc;
 
-public record SimpleTextLayer(GlyphMeshStyle style, GlyphMaterial material, GlyphColor color, int bias, float offsetX,
-							  float offsetY, float effectOffsetX, float effectOffsetY) implements TextLayer {
+public record SimpleTextLayer(GlyphPattern pattern, GlyphMaterial material, GlyphColor color, Vector2fc offset, int bias) implements TextLayer {
 	public static class Builder {
+		private static final Vector2fc NO_OFFSET = new Vector2f();
+
 		@Nullable
-		private GlyphMeshStyle style;
+		private GlyphPattern pattern;
 		@Nullable
 		private GlyphMaterial material;
 		@Nullable
 		private GlyphColor color;
+		private Vector2fc offset = NO_OFFSET;
+		private int bias = 0;
 
-		private int bias;
-		private float offsetX = 0;
-		private float offsetY = 0;
-		private float effectOffsetX = 1;
-		private float effectOffsetY = 1;
-
-		public Builder style(GlyphMeshStyle style) {
-			this.style = style;
+		public Builder pattern(GlyphPattern pattern) {
+			this.pattern = pattern;
 			return this;
 		}
 
@@ -35,37 +34,27 @@ public record SimpleTextLayer(GlyphMeshStyle style, GlyphMaterial material, Glyp
 			return this;
 		}
 
+		public Builder offset(Vector2fc offset) {
+			this.offset = offset;
+			return this;
+		}
+
+		public Builder offset(float offsetX, float offsetY) {
+			offset = new Vector2f(offsetX, offsetY);
+			return this;
+		}
+
 		public Builder bias(int bias) {
 			this.bias = bias;
 			return this;
 		}
 
-		public Builder offsetX(float offsetX) {
-			this.offsetX = offsetX;
-			return this;
-		}
-
-		public Builder offsetY(float offsetY) {
-			this.offsetY = offsetY;
-			return this;
-		}
-
-		public Builder effectOffsetX(float effectOffsetX) {
-			this.effectOffsetX = effectOffsetX;
-			return this;
-		}
-
-		public Builder effectOffsetY(float effectOffsetY) {
-			this.effectOffsetY = effectOffsetY;
-			return this;
-		}
-
 		public SimpleTextLayer build() {
-			Objects.requireNonNull(style);
+			Objects.requireNonNull(pattern);
 			Objects.requireNonNull(material);
 			Objects.requireNonNull(color);
 
-			return new SimpleTextLayer(style, material, color, bias, offsetX, offsetY, effectOffsetX, effectOffsetY);
+			return new SimpleTextLayer(pattern, material, color, offset, bias);
 		}
 	}
 }

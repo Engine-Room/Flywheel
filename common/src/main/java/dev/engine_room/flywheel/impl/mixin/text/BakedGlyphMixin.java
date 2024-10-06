@@ -5,12 +5,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
-import dev.engine_room.flywheel.lib.internal.GlyphExtension;
+import dev.engine_room.flywheel.lib.internal.BakedGlyphExtension;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.resources.ResourceLocation;
 
 @Mixin(BakedGlyph.class)
-public class BakedGlyphMixin implements GlyphExtension {
+public class BakedGlyphMixin implements BakedGlyphExtension {
 	@Shadow
 	@Final
 	private float u0;

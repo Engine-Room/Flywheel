@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.lib.internal;
 
 import net.minecraft.resources.ResourceLocation;
 
-public interface GlyphExtension {
+public interface BakedGlyphExtension {
 	float flywheel$u0();
 
 	float flywheel$u1();

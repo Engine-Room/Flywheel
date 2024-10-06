@@ -10,7 +10,7 @@ import dev.engine_room.flywheel.api.instance.InstanceHandle;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.lib.transform.Affine;
 
-public class TransformedInstance extends ColoredLitInstance implements Affine<TransformedInstance> {
+public class TransformedInstance extends ColoredLitOverlayInstance implements Affine<TransformedInstance> {
 	public final Matrix4f pose = new Matrix4f();
 
 	public TransformedInstance(InstanceType<? extends TransformedInstance> type, InstanceHandle handle) {

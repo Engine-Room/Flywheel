@@ -112,8 +112,8 @@ public final class InstanceTypes {
 					.build())
 			.writer((ptr, instance) -> {
 				ExtraMemoryOps.putMatrix4f(ptr, instance.pose);
-				ExtraMemoryOps.put2x16(ptr + 64, instance.us);
-				ExtraMemoryOps.put2x16(ptr + 68, instance.vs);
+				ExtraMemoryOps.put2x16(ptr + 64, instance.packedUs);
+				ExtraMemoryOps.put2x16(ptr + 68, instance.packedVs);
 				MemoryUtil.memPutByte(ptr + 72, instance.red);
 				MemoryUtil.memPutByte(ptr + 73, instance.green);
 				MemoryUtil.memPutByte(ptr + 74, instance.blue);

@@ -18,11 +18,13 @@ import dev.engine_room.flywheel.lib.model.part.ModelTrees;
 import dev.engine_room.flywheel.lib.util.ResourceReloadCache;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
-import dev.engine_room.flywheel.lib.visual.text.SimpleTextLayer;
 import dev.engine_room.flywheel.lib.visual.text.TextLayer;
+import dev.engine_room.flywheel.lib.visual.text.TextLayers;
 import dev.engine_room.flywheel.lib.visual.text.TextVisual;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.FormattedCharSequence;
@@ -36,8 +38,8 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.phys.Vec3;
 
 public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> implements SimpleDynamicVisual {
-
 	private static final Vec3 TEXT_OFFSET = new Vec3(0.0, 0.3333333432674408, 0.046666666865348816);
+	private static final Font FONT = Minecraft.getInstance().font;
 
 	private static final ResourceReloadCache<WoodType, ModelTree> SIGN_MODELS = new ResourceReloadCache<>(SignVisual::createSignModel);
 
@@ -47,12 +49,12 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 			.backfaceCulling(false)
 			.build();
 
-	private final Matrix4f pose = new Matrix4f();
 	private final InstanceTree instances;
+	private final Matrix4f initialPose;
 
 	// The 8 lines of text we render
-	private final TextVisual[] frontText = new TextVisual[4];
-	private final TextVisual[] backText = new TextVisual[4];
+	private final TextVisual[] frontTextVisuals = new TextVisual[4];
+	private final TextVisual[] backTextVisuals = new TextVisual[4];
 
 	// Need to update these every frame, so just remember which ones are obfuscated
 	// Most of the time this will be empty.
@@ -65,8 +67,8 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 		super(ctx, blockEntity, partialTick);
 
 		for (int i = 0; i < 4; i++) {
-			frontText[i] = new TextVisual(ctx.instancerProvider());
-			backText[i] = new TextVisual(ctx.instancerProvider());
+			frontTextVisuals[i] = new TextVisual(ctx.instancerProvider());
+			backTextVisuals[i] = new TextVisual(ctx.instancerProvider());
 		}
 
 		var block = (SignBlock) blockState.getBlock();
@@ -79,46 +81,48 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 		instances.childOrThrow("stick")
 				.visible(isStanding);
 
-		var rotation = -block.getYRotationDegrees(blockState);
-
 		var visualPosition = getVisualPosition();
-		var signModelRenderScale = this.getSignModelRenderScale();
-		pose.translate(visualPosition.getX() + 0.5f, visualPosition.getY() + 0.75f * signModelRenderScale, visualPosition.getZ() + 0.5f)
+		var signModelRenderScale = getSignModelRenderScale();
+		var rotation = -block.getYRotationDegrees(blockState);
+		initialPose = new Matrix4f().translate(visualPosition.getX() + 0.5f, visualPosition.getY() + 0.75f * signModelRenderScale, visualPosition.getZ() + 0.5f)
 				.rotateY(Mth.DEG_TO_RAD * rotation);
 
-		if (!(isStanding)) {
-			pose.translate(0.0f, -0.3125f, -0.4375f);
+		if (!isStanding) {
+			initialPose.translate(0.0f, -0.3125f, -0.4375f);
 		}
 
 		// Only apply this to the instances because text gets a separate scaling.
-		instances.scale(signModelRenderScale, -signModelRenderScale, -signModelRenderScale);
-
-		instances.updateInstancesStatic(pose);
+		Matrix4f initialModelPose = new Matrix4f(initialPose).scale(signModelRenderScale, -signModelRenderScale, -signModelRenderScale);
+		instances.updateInstancesStatic(initialModelPose);
 
 		lastFrontText = blockEntity.getFrontText();
 		lastBackText = blockEntity.getBackText();
-		this.setupText(lastFrontText, true);
-		this.setupText(lastBackText, false);
+		setupText(lastFrontText, true);
+		setupText(lastBackText, false);
+	}
+
+	private static ModelTree createSignModel(WoodType woodType) {
+		return ModelTrees.of(ModelLayers.createSignModelName(woodType), Sheets.getSignMaterial(woodType), MATERIAL);
 	}
 
 	@Override
 	public void beginFrame(Context ctx) {
-		boolean setup = false;
+		boolean doSetup = false;
 		if (lastFrontText != blockEntity.getFrontText()) {
 			lastFrontText = blockEntity.getFrontText();
-			setup = true;
+			doSetup = true;
 		}
 
 		if (lastBackText != blockEntity.getBackText()) {
 			lastBackText = blockEntity.getBackText();
-			setup = true;
+			doSetup = true;
 		}
 
-		if (setup) {
+		if (doSetup) {
 			// Setup both to make it easier to track obfuscation
 			obfuscated.clear();
-			this.setupText(lastBackText, false);
-			this.setupText(lastFrontText, true);
+			setupText(lastFrontText, true);
+			setupText(lastBackText, false);
 		} else {
 			// The is visible check is relatively expensive compared to the boolean checks above,
 			// so only do it when it'll actually save some work in obfuscating.
@@ -129,11 +133,6 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 	}
 
 	@Override
-	public void collectCrumblingInstances(Consumer<@Nullable Instance> consumer) {
-		instances.traverse(consumer);
-	}
-
-	@Override
 	public void updateLight(float partialTick) {
 		int packedLight = computePackedLight();
 		instances.traverse(instance -> {
@@ -141,120 +140,123 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 					.setChanged();
 		});
 
-		for (var text : frontText) {
-			text.light(packedLight);
+		if (!lastFrontText.hasGlowingText()) {
+			for (var text : frontTextVisuals) {
+				text.light(packedLight);
+				text.setup();
+			}
 		}
-		for (var text : backText) {
-			text.light(packedLight);
+
+		if (!lastBackText.hasGlowingText()) {
+			for (var text : backTextVisuals) {
+				text.light(packedLight);
+				text.setup();
+			}
 		}
+	}
+
+	@Override
+	public void collectCrumblingInstances(Consumer<@Nullable Instance> consumer) {
+		instances.traverse(consumer);
 	}
 
 	@Override
 	protected void _delete() {
 		instances.delete();
 
-		for (var text : frontText) {
+		for (var text : frontTextVisuals) {
 			text.delete();
 		}
 
-		for (var text : backText) {
+		for (var text : backTextVisuals) {
 			text.delete();
 		}
 	}
 
-	public float getSignModelRenderScale() {
+	protected float getSignModelRenderScale() {
 		return 0.6666667f;
 	}
 
-	public float getSignTextRenderScale() {
+	protected float getSignTextRenderScale() {
 		return 0.6666667f;
 	}
 
-	public Vec3 getTextOffset() {
+	protected Vec3 getTextOffset() {
 		return TEXT_OFFSET;
 	}
 
-	protected void setupText(SignText text, boolean isFrontText) {
-		FormattedCharSequence[] formattedCharSequences = text.getRenderMessages(Minecraft.getInstance()
+	private void setupText(SignText text, boolean isFrontText) {
+		FormattedCharSequence[] textLines = text.getRenderMessages(Minecraft.getInstance()
 				.isTextFilteringEnabled(), component -> {
-			List<FormattedCharSequence> list = Minecraft.getInstance().font.split(component, blockEntity.getMaxTextLineWidth());
+			List<FormattedCharSequence> list = FONT.split(component, blockEntity.getMaxTextLineWidth());
 			return list.isEmpty() ? FormattedCharSequence.EMPTY : list.get(0);
 		});
 
 		List<TextLayer> layers = new ArrayList<>();
 
-		int darkColor = TextLayer.GlyphColor.adjustColor(getDarkColor(text));
+		int darkColor = getDarkColor(text);
 		int textColor;
 		if (text.hasGlowingText()) {
-			textColor = TextLayer.GlyphColor.adjustColor(text.getColor()
-					.getTextColor());
+			textColor = text.getColor()
+					.getTextColor();
 
-			layers.add(new SimpleTextLayer.Builder().style(TextLayer.GlyphMeshStyle.OUTLINE)
-					.material(TextLayer.GlyphMaterial.SIMPLE)
-					.color(TextLayer.GlyphColor.always(darkColor))
-					.build());
+			layers.add(TextLayers.outline(darkColor));
 		} else {
 			textColor = darkColor;
 		}
 
-		layers.add(new SimpleTextLayer.Builder().style(TextLayer.GlyphMeshStyle.SIMPLE)
-				.material(TextLayer.GlyphMaterial.POLYGON_OFFSET)
-				.color(TextLayer.GlyphColor.defaultTo(textColor))
-				.bias(1)
-				.build());
+		layers.add(TextLayers.normal(textColor, Font.DisplayMode.POLYGON_OFFSET, 1));
 
-		var dst = isFrontText ? frontText : backText;
+		var textVisuals = isFrontText ? frontTextVisuals : backTextVisuals;
 
 		int lineHeight = blockEntity.getTextLineHeight();
 		int lineDelta = 4 * lineHeight / 2;
-		for (int m = 0; m < 4; ++m) {
-			FormattedCharSequence formattedCharSequence = formattedCharSequences[m];
-			float f = (float) -Minecraft.getInstance().font.width(formattedCharSequence) / 2;
+		for (int i = 0; i < 4; ++i) {
+			FormattedCharSequence textLine = textLines[i];
+			float x = (float) (-FONT.width(textLine) / 2);
+			float y = i * lineHeight - lineDelta;
 
-			var textVisual = dst[m].content(formattedCharSequence)
-					.layers(layers)
-					.fullBright(text.hasGlowingText())
-					.backgroundColor(0)
-					.x(f)
-					.y(m * lineHeight - lineDelta);
+			var textVisual = textVisuals[i].layers(layers)
+					.text(textLine)
+					.pos(x, y)
+					.backgroundColor(0);
 
-			var textPose = textVisual.pose();
-
-			textPose.set(pose);
-
+			var pose = textVisual.pose().set(initialPose);
 			if (!isFrontText) {
-				textPose.rotateY(Mth.PI);
+				pose.rotateY(Mth.PI);
 			}
-			var offset = getTextOffset();
-			float scale = 0.015625f * this.getSignTextRenderScale();
-			textPose.translate((float) offset.x, (float) offset.y, (float) offset.z);
-			textPose.scale(scale, -scale, scale);
+			float scale = 0.015625f * getSignTextRenderScale();
+			var textOffset = getTextOffset();
+			pose.translate((float) textOffset.x, (float) textOffset.y, (float) textOffset.z);
+			pose.scale(scale, -scale, scale);
+
+			if (text.hasGlowingText()) {
+				textVisual.light(LightTexture.FULL_BRIGHT);
+			}
+			// FIXME: incorrect light when going from glowing to non-glowing
 
 			textVisual.setup();
 
-			if (hasObfuscation(formattedCharSequence)) {
-				this.obfuscated.add(textVisual);
+			if (hasObfuscation(textLine)) {
+				obfuscated.add(textVisual);
 			}
 		}
 	}
 
-	public static boolean hasObfuscation(FormattedCharSequence text) {
-		return text.accept((i, s, j) -> s.isObfuscated());
-	}
-
-	public static int getDarkColor(SignText signText) {
-		int i = signText.getColor()
+	private static int getDarkColor(SignText signText) {
+		int colorArgb = signText.getColor()
 				.getTextColor();
-		if (i == DyeColor.BLACK.getTextColor() && signText.hasGlowingText()) {
-			return -988212;
+		if (colorArgb == DyeColor.BLACK.getTextColor() && signText.hasGlowingText()) {
+			return 0xFFF0EBCC;
 		}
-		int j = (int) ((double) FastColor.ARGB32.red(i) * 0.4);
-		int k = (int) ((double) FastColor.ARGB32.green(i) * 0.4);
-		int l = (int) ((double) FastColor.ARGB32.blue(i) * 0.4);
-		return FastColor.ARGB32.color(0, j, k, l);
+
+		int r = (int) ((double) FastColor.ARGB32.red(colorArgb) * 0.4);
+		int g = (int) ((double) FastColor.ARGB32.green(colorArgb) * 0.4);
+		int b = (int) ((double) FastColor.ARGB32.blue(colorArgb) * 0.4);
+		return FastColor.ARGB32.color(0, r, g, b);
 	}
 
-	private static ModelTree createSignModel(WoodType woodType) {
-		return ModelTrees.of(ModelLayers.createSignModelName(woodType), Sheets.getSignMaterial(woodType), MATERIAL);
+	private static boolean hasObfuscation(FormattedCharSequence text) {
+		return text.accept((i, s, j) -> s.isObfuscated());
 	}
 }

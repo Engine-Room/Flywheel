@@ -29,7 +29,9 @@ public interface FlwLibLink {
 
 	Deque<PoseStack.Pose> getPoseStack(PoseStack stack);
 
-	GlyphExtension getGlyphExtension(BakedGlyph glyph);
-
 	FontSet getFontSet(Font font, ResourceLocation loc);
+
+	boolean getFilterFishyGlyphs(Font font);
+
+	BakedGlyphExtension getBakedGlyphExtension(BakedGlyph glyph);
 }

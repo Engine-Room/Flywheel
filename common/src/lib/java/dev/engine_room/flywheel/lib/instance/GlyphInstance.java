@@ -1,107 +1,66 @@
 package dev.engine_room.flywheel.lib.instance;
 
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 
 import dev.engine_room.flywheel.api.instance.InstanceHandle;
 import dev.engine_room.flywheel.api.instance.InstanceType;
+import dev.engine_room.flywheel.lib.internal.BakedGlyphExtension;
 import dev.engine_room.flywheel.lib.internal.FlwLibLink;
-import dev.engine_room.flywheel.lib.internal.GlyphExtension;
+import dev.engine_room.flywheel.lib.math.DataPacker;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
-import net.minecraft.util.FastColor;
 
-public class GlyphInstance extends AbstractInstance {
+public class GlyphInstance extends ColoredLitInstance {
 	// Skew x by 1 - 0.25 * y
 	// Note that columns are written as rows.
-	private static final Matrix4f ITALIC_SKEW = new Matrix4f(1, 0, 0, 0, -0.25f, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1);
+	private static final Matrix4fc ITALIC_SKEW = new Matrix4f(1, 0, 0, 0, -0.25f, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1);
 
 	public final Matrix4f pose = new Matrix4f();
 
-	public int us;
-	public int vs;
+	public int packedUs;
+	public int packedVs;
 
-	public byte red = (byte) 0xFF;
-	public byte green = (byte) 0xFF;
-	public byte blue = (byte) 0xFF;
-	public byte alpha = (byte) 0xFF;
-
-	public int light = 0;
-
-	public GlyphInstance(InstanceType<?> type, InstanceHandle handle) {
+	public GlyphInstance(InstanceType<? extends GlyphInstance> type, InstanceHandle handle) {
 		super(type, handle);
 	}
 
-	public GlyphInstance setGlyph(BakedGlyph glyph, float x, float y, boolean italic) {
-		var glyphReader = FlwLibLink.INSTANCE.getGlyphExtension(glyph);
+	public GlyphInstance setGlyph(BakedGlyph glyph, Matrix4fc initialPose, float x, float y, boolean italic) {
+		var glyphExtension = FlwLibLink.INSTANCE.getBakedGlyphExtension(glyph);
+		setUvs(glyphExtension);
 
-		setUvs(glyphReader);
-		float left = glyphReader.flywheel$left();
-		float right = glyphReader.flywheel$right();
-		float up = glyphReader.flywheel$up();
-		float down = glyphReader.flywheel$down();
+		float left = glyphExtension.flywheel$left();
+		float up = glyphExtension.flywheel$up();
 
-		pose.translate(x + left, y + up - 3.0f, 0.0f);
-		pose.scale(right - left, down - up, 1.0f);
+		pose.set(initialPose);
+		pose.translate(x, y, 0.0f);
 
 		if (italic) {
 			pose.mul(ITALIC_SKEW);
 		}
 
+		pose.translate(left, up - 3.0f, 0.0f);
+
 		return this;
 	}
 
-	public GlyphInstance setEffect(BakedGlyph glyph, float x0, float y0, float x1, float y1, float depth) {
-		var glyphReader = FlwLibLink.INSTANCE.getGlyphExtension(glyph);
+	public GlyphInstance setEffect(BakedGlyph glyph, Matrix4fc initialPose, float x0, float y0, float x1, float y1, float depth) {
+		var glyphExtension = FlwLibLink.INSTANCE.getBakedGlyphExtension(glyph);
+		setUvs(glyphExtension);
 
-		setUvs(glyphReader);
-
+		pose.set(initialPose);
 		pose.translate(x0, y0, depth);
 		pose.scale(x1 - x0, y1 - y0, 1.0f);
 
 		return this;
 	}
 
-	public GlyphInstance colorArgb(int argb) {
-		return color(FastColor.ARGB32.red(argb), FastColor.ARGB32.green(argb), FastColor.ARGB32.blue(argb), FastColor.ARGB32.alpha(argb));
-	}
+	private void setUvs(BakedGlyphExtension glyphExtension) {
+		float u0 = glyphExtension.flywheel$u0();
+		float u1 = glyphExtension.flywheel$u1();
+		float v0 = glyphExtension.flywheel$v0();
+		float v1 = glyphExtension.flywheel$v1();
 
-	public GlyphInstance colorRgb(int rgb) {
-		return color(FastColor.ARGB32.red(rgb), FastColor.ARGB32.green(rgb), FastColor.ARGB32.blue(rgb));
-	}
-
-	public GlyphInstance color(int red, int green, int blue, int alpha) {
-		return color((byte) red, (byte) green, (byte) blue, (byte) alpha);
-	}
-
-	public GlyphInstance color(int red, int green, int blue) {
-		return color((byte) red, (byte) green, (byte) blue);
-	}
-
-	public GlyphInstance color(float red, float green, float blue, float alpha) {
-		return color((byte) (red * 255f), (byte) (green * 255f), (byte) (blue * 255f), (byte) (alpha * 255f));
-	}
-
-	public GlyphInstance color(byte red, byte green, byte blue, byte alpha) {
-		this.red = red;
-		this.green = green;
-		this.blue = blue;
-		this.alpha = alpha;
-		return this;
-	}
-
-	public GlyphInstance color(byte red, byte green, byte blue) {
-		this.red = red;
-		this.green = green;
-		this.blue = blue;
-		return this;
-	}
-
-	private void setUvs(GlyphExtension glyphReader) {
-		float u0 = glyphReader.flywheel$u0();
-		float u1 = glyphReader.flywheel$u1();
-		float v0 = glyphReader.flywheel$v0();
-		float v1 = glyphReader.flywheel$v1();
-
-		us = (int) (u0 * 65536) | ((int) (u1 * 65536) << 16);
-		vs = (int) (v0 * 65536) | ((int) (v1 * 65536) << 16);
+		packedUs = ((int) DataPacker.packNormU16(u1) << 16) | (int) DataPacker.packNormU16(u0);
+		packedVs = ((int) DataPacker.packNormU16(v1) << 16) | (int) DataPacker.packNormU16(v0);
 	}
 }

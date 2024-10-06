@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
+import org.joml.Vector2f;
+import org.joml.Vector2fc;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
 import com.mojang.blaze3d.font.GlyphInfo;
 
 import dev.engine_room.flywheel.api.instance.InstancerProvider;
+import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.vertex.MutableVertexList;
 import dev.engine_room.flywheel.lib.instance.GlyphInstance;
@@ -27,53 +30,46 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.gui.font.glyphs.EmptyGlyph;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.FormattedCharSink;
+import net.minecraft.util.Mth;
 
 /**
  * A visual that renders a single line of text.
  */
-public class TextVisual {
+public final class TextVisual {
+	private static final Font FONT = Minecraft.getInstance().font;
+
+	private static final ResourceReloadCache<GlyphMeshKey, GlyphMesh> GLYPH_MESH_CACHE = new ResourceReloadCache<>(GlyphMeshKey::into);
+	private static final ResourceReloadCache<GlyphModelKey, Model> GLYPH_MODEL_CACHE = new ResourceReloadCache<>(GlyphModelKey::into);
+
 	private static final ThreadLocal<Sink> SINKS = ThreadLocal.withInitial(Sink::new);
 
-	private final SmartRecycler<GlyphInstancerKey, GlyphInstance> recycler;
+	private final SmartRecycler<GlyphInstanceKey, GlyphInstance> recycler;
+	private final List<TextLayer> layers = new ArrayList<>();
+	private final Matrix4f pose = new Matrix4f();
 
-	private FormattedCharSequence content = FormattedCharSequence.EMPTY;
+	private FormattedCharSequence text = FormattedCharSequence.EMPTY;
 	private float x;
 	private float y;
 	private int backgroundColor = 0;
 	private int light;
-	private boolean fullBright;
-
-	private final List<TextLayer> layers = new ArrayList<>();
-
-	private final Matrix4f pose = new Matrix4f();
 
 	public TextVisual(InstancerProvider provider) {
-		recycler = new SmartRecycler<>(key -> provider.instancer(InstanceTypes.GLYPH, GLYPH_CACHE.get(key.modelKey), key.bias)
+		recycler = new SmartRecycler<>(key -> provider.instancer(InstanceTypes.GLYPH, GLYPH_MODEL_CACHE.get(key.modelKey), key.bias)
 				.createInstance());
-	}
-
-	public TextVisual content(FormattedCharSequence content) {
-		this.content = content;
-		return this;
-	}
-
-	public Matrix4f pose() {
-		return pose;
-	}
-
-	public TextVisual clearLayers() {
-		layers.clear();
-		return this;
 	}
 
 	public TextVisual addLayer(TextLayer layer) {
 		layers.add(layer);
+		return this;
+	}
+
+	public TextVisual addLayers(Collection<TextLayer> layers) {
+		this.layers.addAll(layers);
 		return this;
 	}
 
@@ -83,9 +79,17 @@ public class TextVisual {
 		return this;
 	}
 
-	public TextVisual pos(float x, float y) {
-		this.x = x;
-		this.y = y;
+	public TextVisual clearLayers() {
+		layers.clear();
+		return this;
+	}
+
+	public Matrix4f pose() {
+		return pose;
+	}
+
+	public TextVisual text(FormattedCharSequence text) {
+		this.text = text;
 		return this;
 	}
 
@@ -95,6 +99,12 @@ public class TextVisual {
 	}
 
 	public TextVisual y(float y) {
+		this.y = y;
+		return this;
+	}
+
+	public TextVisual pos(float x, float y) {
+		this.x = x;
 		this.y = y;
 		return this;
 	}
@@ -109,33 +119,35 @@ public class TextVisual {
 		return this;
 	}
 
-	public TextVisual fullBright(boolean fullBright) {
-		this.fullBright = fullBright;
+	public TextVisual reset() {
+		layers.clear();
+		pose.identity();
+
+		text = FormattedCharSequence.EMPTY;
+		x = 0;
+		y = 0;
+		backgroundColor = 0;
+		light = 0;
+
 		return this;
 	}
 
-	// TODO: method to just update pose or light without recalculating text
+	// TODO: track glyph instances and add method to update only UVs of obfuscated glyphs, method to update only
+	//  background color, and method to only update light
 	public void setup() {
 		recycler.resetCount();
 
 		var sink = SINKS.get();
-
-		var light = fullBright ? LightTexture.FULL_BRIGHT : this.light;
 		sink.prepare(recycler, pose, light);
 
 		int maxX = 0;
-		// Can we flip the inner and outer loops here?
-		// Would that even be better?
 		for (TextLayer layer : layers) {
-			sink.x = x;
-			sink.y = y;
-			sink.layer = layer;
-			content.accept(sink);
+			sink.prepareForLayer(layer, x, y);
+			text.accept(sink);
 			maxX = Math.max(maxX, (int) sink.x);
 		}
 
 		sink.addBackground(backgroundColor, x, maxX);
-
 		sink.clear();
 
 		recycler.discardExtra();
@@ -145,166 +157,226 @@ public class TextVisual {
 		recycler.delete();
 	}
 
-	private static class Sink implements FormattedCharSink {
-		private final Font font;
+	private record GlyphMeshKey(float glyphWidth, float glyphHeight, TextLayer.GlyphPattern pattern, boolean bold, float boldOffset, float shadowOffset) {
+		public GlyphMesh into() {
+			List<Vector2fc> out = new ArrayList<>();
 
+			pattern.addGlyphs(offsetc -> {
+				Vector2f offset = new Vector2f(offsetc).mul(shadowOffset);
+				out.add(offset);
+
+				if (bold) {
+					out.add(new Vector2f(offset.x() + boldOffset, offset.y()));
+				}
+			});
+
+			return new GlyphMesh(glyphWidth, glyphHeight, out.toArray(Vector2fc[]::new));
+		}
+	}
+
+	private record GlyphModelKey(@Nullable GlyphMeshKey meshKey, TextLayer.GlyphMaterial material, ResourceLocation texture) {
+		public Model into() {
+			Mesh mesh;
+
+			if (meshKey != null) {
+				mesh = GLYPH_MESH_CACHE.get(meshKey);
+			} else {
+				mesh = GlyphEffectMesh.INSTANCE;
+			}
+
+			return new SingleMeshModel(mesh, material.create(texture));
+		}
+	}
+
+	private record GlyphInstanceKey(GlyphModelKey modelKey, int bias) {
+	}
+
+	private static class Sink implements FormattedCharSink {
 		@UnknownNullability
-		private SmartRecycler<GlyphInstancerKey, GlyphInstance> recycler;
+		private SmartRecycler<GlyphInstanceKey, GlyphInstance> recycler;
 		@UnknownNullability
 		private Matrix4f pose;
-		@UnknownNullability
-		private TextLayer layer;
-
 		private int light;
 
+		@UnknownNullability
+		private TextLayer layer;
 		private float x;
 		private float y;
 
-		private Sink() {
-			font = Minecraft.getInstance().font;
-		}
-
-		private void prepare(SmartRecycler<GlyphInstancerKey, GlyphInstance> recycler, Matrix4f pose, int light) {
+		public void prepare(SmartRecycler<GlyphInstanceKey, GlyphInstance> recycler, Matrix4f pose, int light) {
 			this.recycler = recycler;
 			this.pose = pose;
 			this.light = light;
 		}
 
-		private void clear() {
+		public void prepareForLayer(TextLayer layer, float x, float y) {
+			this.layer = layer;
+			this.x = x;
+			this.y = y;
+		}
+
+		public void clear() {
 			recycler = null;
 			pose = null;
 			layer = null;
 		}
 
 		@Override
-		public boolean accept(int i, Style style, int j) {
-			FontSet fontSet = FlwLibLink.INSTANCE.getFontSet(font, style.getFont());
-			GlyphInfo glyphInfo = fontSet.getGlyphInfo(j, false);
-			BakedGlyph bakedGlyph = style.isObfuscated() && j != 32 ? fontSet.getRandomGlyph(glyphInfo) : fontSet.getGlyph(j);
+		public boolean accept(int index, Style style, int codePoint) {
+			FontSet fontSet = FlwLibLink.INSTANCE.getFontSet(FONT, style.getFont());
+			GlyphInfo glyphInfo = fontSet.getGlyphInfo(codePoint, FlwLibLink.INSTANCE.getFilterFishyGlyphs(FONT));
+			BakedGlyph glyph = style.isObfuscated() && codePoint != ' ' ? fontSet.getRandomGlyph(glyphInfo) : fontSet.getGlyph(codePoint);
+
 			boolean bold = style.isBold();
-
 			int color = layer.color()
-					.color(style);
+					.color(style.getColor());
+			Vector2fc offset = layer.offset();
 
-			if (!(bakedGlyph instanceof EmptyGlyph)) {
-				var glyphExtension = FlwLibLink.INSTANCE.getGlyphExtension(bakedGlyph);
-
-				GlyphInstance glyph = recycler.get(key(glyphExtension.flywheel$texture(), bold, layer.style()));
-
-				glyph.pose.set(pose);
-				glyph.setGlyph(bakedGlyph, this.x + layer.offsetX(), this.y + layer.offsetY(), style.isItalic());
-				glyph.colorArgb(color);
-				glyph.light = light;
-				glyph.setChanged();
+			if (!(glyph instanceof EmptyGlyph)) {
+				GlyphInstance instance = recycler.get(key(glyphInfo, glyph, layer.pattern(), bold));
+				float shadowOffset = glyphInfo.getShadowOffset();
+				instance.setGlyph(glyph, pose, x + offset.x() * shadowOffset, y + offset.y() * shadowOffset, style.isItalic());
+				instance.colorArgb(color);
+				instance.light(light);
+				instance.setChanged();
 			}
+
 			float advance = glyphInfo.getAdvance(bold);
-			float effectX = layer.effectOffsetX();
-			float effectY = layer.effectOffsetY();
+			// SpecialGlyphs.WHITE, which effects use, has a shadowOffset of 1, so don't modify the offset returned by the layer.
+			float effectOffsetX = offset.x();
+			float effectOffsetY = offset.y();
 			if (style.isStrikethrough()) {
-				this.addEffect(this.x + effectX - 1.0f, this.y + effectY + 4.5f, this.x + effectX + advance, this.y + effectY + 4.5f - 1.0f, 0.01f, color);
+				addEffect(x + effectOffsetX - 1.0f, y + effectOffsetY + 4.5f, x + effectOffsetX + advance, y + effectOffsetY + 4.5f - 1.0f, 0.01f, color);
 			}
 			if (style.isUnderlined()) {
-				this.addEffect(this.x + effectX - 1.0f, this.y + effectY + 9.0f, this.x + effectX + advance, this.y + effectY + 9.0f - 1.0f, 0.01f, color);
+				addEffect(x + effectOffsetX - 1.0f, y + effectOffsetY + 9.0f, x + effectOffsetX + advance, y + effectOffsetY + 9.0f - 1.0f, 0.01f, color);
 			}
-			this.x += advance;
+
+			x += advance;
 			return true;
-		}
-
-		private void addEffect(float x0, float y0, float x1, float y1, float depth, int colorArgb) {
-			BakedGlyph bakedGlyph = FlwLibLink.INSTANCE.getFontSet(font, Style.DEFAULT_FONT)
-					.whiteGlyph();
-
-			var glyphExtension = FlwLibLink.INSTANCE.getGlyphExtension(bakedGlyph);
-
-			GlyphInstance glyph = recycler.get(key(glyphExtension.flywheel$texture(), false, TextLayer.GlyphMeshStyle.SIMPLE));
-
-			glyph.pose.set(pose);
-			glyph.setEffect(bakedGlyph, x0, y0, x1, y1, depth);
-			glyph.colorArgb(colorArgb);
-			glyph.light = light;
-			glyph.setChanged();
 		}
 
 		public void addBackground(int backgroundColor, float startX, float endX) {
 			if (backgroundColor != 0) {
-				this.addEffect(startX - 1.0f, this.y + 9.0f, endX + 1.0f, this.y - 1.0f, 0.01f, backgroundColor);
+				addEffect(startX - 1.0f, y + 9.0f, endX + 1.0f, y - 1.0f, 0.01f, backgroundColor);
 			}
 		}
 
-		private GlyphInstancerKey key(ResourceLocation texture, boolean bold, TextLayer.GlyphMeshStyle style) {
-			var meshKey = new GlyphMeshKey(style, bold);
-			var modelKey = new GlyphModelKey(texture, meshKey, layer.material());
-			return new GlyphInstancerKey(modelKey, layer.bias());
+		private void addEffect(float x0, float y0, float x1, float y1, float depth, int colorArgb) {
+			BakedGlyph glyph = FlwLibLink.INSTANCE.getFontSet(FONT, Style.DEFAULT_FONT)
+					.whiteGlyph();
+
+			GlyphInstance instance = recycler.get(effectKey(glyph));
+			instance.setEffect(glyph, pose, x0, y0, x1, y1, depth);
+			instance.colorArgb(colorArgb);
+			instance.light(light);
+			instance.setChanged();
 		}
-	}
 
-	private record GlyphInstancerKey(GlyphModelKey modelKey, int bias) {
-	}
+		private GlyphInstanceKey key(GlyphInfo glyphInfo, BakedGlyph glyph, TextLayer.GlyphPattern pattern, boolean bold) {
+			var glyphExtension = FlwLibLink.INSTANCE.getBakedGlyphExtension(glyph);
+			float glyphWidth = glyphExtension.flywheel$right() - glyphExtension.flywheel$left();
+			float glyphHeight = glyphExtension.flywheel$down() - glyphExtension.flywheel$up();
 
-	private static final ResourceReloadCache<GlyphModelKey, Model> GLYPH_CACHE = new ResourceReloadCache<>(GlyphModelKey::into);
-	private static final ResourceReloadCache<GlyphMeshKey, GlyphMesh> MESH_CACHE = new ResourceReloadCache<>(GlyphMeshKey::into);
-
-	private record GlyphModelKey(ResourceLocation font, GlyphMeshKey meshKey, TextLayer.GlyphMaterial material) {
-		private Model into() {
-			return new SingleMeshModel(MESH_CACHE.get(meshKey), material.create(font));
+			return key(glyphWidth, glyphHeight, glyphExtension.flywheel$texture(), pattern, bold, bold ? glyphInfo.getBoldOffset() : 0, glyphInfo.getShadowOffset());
 		}
-	}
 
-	private record GlyphMeshKey(TextLayer.GlyphMeshStyle style, boolean bold) {
-		public GlyphMesh into() {
-			List<Vector3f> out = new ArrayList<>();
+		private GlyphInstanceKey key(float glyphWidth, float glyphHeight, ResourceLocation texture, TextLayer.GlyphPattern pattern, boolean bold, float boldOffset, float shadowOffset) {
+			var meshKey = new GlyphMeshKey(glyphWidth, glyphHeight, pattern, bold, boldOffset, shadowOffset);
+			var modelKey = new GlyphModelKey(meshKey, layer.material(), texture);
+			return new GlyphInstanceKey(modelKey, layer.bias());
+		}
 
-			style.addQuads(quad -> {
-				out.add(quad);
-				if (bold) {
-					out.add(new Vector3f(quad.x + TextLayer.ONE_PIXEL, quad.y, quad.z));
-				}
-			});
+		private GlyphInstanceKey effectKey(BakedGlyph glyph) {
+			var glyphExtension = FlwLibLink.INSTANCE.getBakedGlyphExtension(glyph);
+			return effectKey(glyphExtension.flywheel$texture());
+		}
 
-			return new GlyphMesh(out.toArray(new Vector3f[0]));
+		private GlyphInstanceKey effectKey(ResourceLocation texture) {
+			var modelKey = new GlyphModelKey(null, layer.material(), texture);
+			return new GlyphInstanceKey(modelKey, layer.bias());
 		}
 	}
 
 	/**
-	 * A mesh that represents a single glyph. Expects to be drawn with the glyph instance type.
+	 * A mesh that represents a pattern of a glyph with a certain width and height. Expects to be drawn with the glyph
+	 * instance type.
 	 *
-	 * @param quads Each quad will be expanded into 4 vertices.
+	 * @param offsets Each offset will be expanded into a glyph quad.
 	 */
-	private record GlyphMesh(Vector3f[] quads) implements QuadMesh {
-		private static final float[] X = new float[]{0, 0, 1, 1};
-		private static final float[] Y = new float[]{0, 1, 1, 0};
+	private record GlyphMesh(float glyphWidth, float glyphHeight, Vector2fc[] offsets, Vector4fc boundingSphere) implements QuadMesh {
+		private static final float[] X = new float[] { 0, 0, 1, 1 };
+		private static final float[] Y = new float[] { 0, 1, 1, 0 };
+
+		// FIXME: what is the actual bounding sphere??
+		public GlyphMesh(float glyphWidth, float glyphHeight, Vector2fc[] offsets) {
+			this(glyphWidth, glyphHeight, offsets, new Vector4f(0, 0, 0, Math.max(glyphWidth, glyphHeight) * 2 * Mth.SQRT_OF_TWO));
+		}
 
 		@Override
 		public int vertexCount() {
-			return 4 * quads.length;
+			return 4 * offsets.length;
 		}
 
 		@Override
 		public void write(MutableVertexList vertexList) {
-			for (int i = 0; i < quads.length; i++) {
-				Vector3f quad = quads[i];
-				var quadStart = i * 4;
+			for (int i = 0; i < offsets.length; i++) {
+				Vector2fc offset = offsets[i];
+				var startVertex = i * 4;
 
 				for (int j = 0; j < 4; j++) {
-					vertexList.x(quadStart + j, quad.x + X[j]);
-					vertexList.y(quadStart + j, quad.y + Y[j]);
-					vertexList.z(quadStart + j, quad.z);
-					vertexList.normalX(quadStart + j, 0);
-					vertexList.normalY(quadStart + j, 0);
-					vertexList.normalZ(quadStart + j, 1);
-					vertexList.overlay(quadStart + j, OverlayTexture.NO_OVERLAY);
-					vertexList.r(quadStart + j, 1);
-					vertexList.g(quadStart + j, 1);
-					vertexList.b(quadStart + j, 1);
-					vertexList.a(quadStart + j, 1);
+					vertexList.x(startVertex + j, offset.x() + (glyphWidth * X[j]));
+					vertexList.y(startVertex + j, offset.y() + (glyphHeight * Y[j]));
+					vertexList.z(startVertex + j, 0);
+					vertexList.r(startVertex + j, 1);
+					vertexList.g(startVertex + j, 1);
+					vertexList.b(startVertex + j, 1);
+					vertexList.a(startVertex + j, 1);
+					vertexList.overlay(startVertex + j, OverlayTexture.NO_OVERLAY);
+					vertexList.normalX(startVertex + j, 0);
+					vertexList.normalY(startVertex + j, 0);
+					vertexList.normalZ(startVertex + j, 1);
 				}
 			}
 		}
 
 		@Override
 		public Vector4fc boundingSphere() {
-			// FIXME: what is the actual bounding sphere??
-			return new Vector4f(0, 0, 0, 2);
+			return boundingSphere;
+		}
+	}
+
+	private record GlyphEffectMesh() implements QuadMesh {
+		private static final float[] X = new float[] { 0, 1, 1, 0 };
+		private static final float[] Y = new float[] { 0, 0, 1, 1 };
+		private static final Vector4fc BOUNDING_SPHERE = new Vector4f(0.5f, 0.5f, 0, Mth.SQRT_OF_TWO * 0.5f);
+
+		public static final GlyphEffectMesh INSTANCE = new GlyphEffectMesh();
+
+		@Override
+		public int vertexCount() {
+			return 4;
+		}
+
+		@Override
+		public void write(MutableVertexList vertexList) {
+			for (int i = 0; i < 4; i++) {
+				vertexList.x(i, X[i]);
+				vertexList.y(i, Y[i]);
+				vertexList.z(i, 0);
+				vertexList.r(i, 1);
+				vertexList.g(i, 1);
+				vertexList.b(i, 1);
+				vertexList.a(i, 1);
+				vertexList.normalX(i, 0);
+				vertexList.normalY(i, 0);
+				vertexList.normalZ(i, 1);
+			}
+		}
+
+		@Override
+		public Vector4fc boundingSphere() {
+			return BOUNDING_SPHERE;
 		}
 	}
 }

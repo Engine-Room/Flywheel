@@ -10,7 +10,7 @@ import dev.engine_room.flywheel.lib.transform.Rotate;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 
-public class OrientedInstance extends ColoredLitInstance implements Rotate<OrientedInstance> {
+public class OrientedInstance extends ColoredLitOverlayInstance implements Rotate<OrientedInstance> {
 	public float posX;
 	public float posY;
 	public float posZ;

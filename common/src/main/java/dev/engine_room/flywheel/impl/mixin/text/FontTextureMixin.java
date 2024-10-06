@@ -21,8 +21,8 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.engine_room.flywheel.impl.FontTextureUpload;
-import dev.engine_room.flywheel.lib.internal.FontTextureExtension;
-import dev.engine_room.flywheel.lib.internal.GlyphExtension;
+import dev.engine_room.flywheel.impl.extension.FontTextureExtension;
+import dev.engine_room.flywheel.lib.internal.BakedGlyphExtension;
 import net.minecraft.client.gui.font.FontTexture;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -90,7 +90,7 @@ public abstract class FontTextureMixin extends AbstractTexture implements FontTe
 
 	@ModifyExpressionValue(method = "add", at = @At(value = "NEW", target = "net/minecraft/client/gui/font/glyphs/BakedGlyph"))
 	private BakedGlyph flywheel$setGlyphExtensionName(BakedGlyph original) {
-		((GlyphExtension) original).flywheel$texture(flywheel$name);
+		((BakedGlyphExtension) original).flywheel$texture(flywheel$name);
 		return original;
 	}
 
@@ -108,7 +108,7 @@ public abstract class FontTextureMixin extends AbstractTexture implements FontTe
 	}
 
 	@Override
-	public void flywheel$setName(ResourceLocation value) {
-		flywheel$name = value;
+	public void flywheel$setName(ResourceLocation name) {
+		flywheel$name = name;
 	}
 }
