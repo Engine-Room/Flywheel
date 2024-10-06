@@ -60,7 +60,9 @@ public class GlyphInstance extends ColoredLitInstance {
 		float v0 = glyphExtension.flywheel$v0();
 		float v1 = glyphExtension.flywheel$v1();
 
-		packedUs = ((int) DataPacker.packNormU16(u1) << 16) | (int) DataPacker.packNormU16(u0);
-		packedVs = ((int) DataPacker.packNormU16(v1) << 16) | (int) DataPacker.packNormU16(v0);
+		// Need to make sure at least u0/v0 don't get their sign bit extended in the cast.
+		// It causes u1/v1 to be completely saturated.
+		packedUs = (Short.toUnsignedInt(DataPacker.packNormU16(u1)) << 16) | Short.toUnsignedInt(DataPacker.packNormU16(u0));
+		packedVs = (Short.toUnsignedInt(DataPacker.packNormU16(v1)) << 16) | Short.toUnsignedInt(DataPacker.packNormU16(v0));
 	}
 }
