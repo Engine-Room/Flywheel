@@ -60,6 +60,8 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 	// Most of the time this will be empty.
 	private final List<TextVisual> obfuscated = new ArrayList<>();
 
+	private int packedLight = 0;
+
 	private SignText lastFrontText;
 	private SignText lastBackText;
 
@@ -127,14 +129,14 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 			// The is visible check is relatively expensive compared to the boolean checks above,
 			// so only do it when it'll actually save some work in obfuscating.
 			if (isVisible(ctx.frustum())) {
-				obfuscated.forEach(TextVisual::setup);
+				obfuscated.forEach(TextVisual::updateObfuscated);
 			}
 		}
 	}
 
 	@Override
 	public void updateLight(float partialTick) {
-		int packedLight = computePackedLight();
+		packedLight = computePackedLight();
 		instances.traverse(instance -> {
 			instance.light(packedLight)
 					.setChanged();
@@ -142,15 +144,13 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 
 		if (!lastFrontText.hasGlowingText()) {
 			for (var text : frontTextVisuals) {
-				text.light(packedLight);
-				text.setup();
+				text.updateLight(packedLight);
 			}
 		}
 
 		if (!lastBackText.hasGlowingText()) {
 			for (var text : backTextVisuals) {
-				text.light(packedLight);
-				text.setup();
+				text.updateLight(packedLight);
 			}
 		}
 	}
@@ -216,12 +216,7 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 			float x = (float) (-FONT.width(textLine) / 2);
 			float y = i * lineHeight - lineDelta;
 
-			var textVisual = textVisuals[i].layers(layers)
-					.text(textLine)
-					.pos(x, y)
-					.backgroundColor(0);
-
-			var pose = textVisual.pose().set(initialPose);
+			var pose = new Matrix4f(initialPose);
 			if (!isFrontText) {
 				pose.rotateY(Mth.PI);
 			}
@@ -229,13 +224,12 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 			var textOffset = getTextOffset();
 			pose.translate((float) textOffset.x, (float) textOffset.y, (float) textOffset.z);
 			pose.scale(scale, -scale, scale);
+			pose.translate(x, y, 0.0f);
 
-			if (text.hasGlowingText()) {
-				textVisual.light(LightTexture.FULL_BRIGHT);
-			}
-			// FIXME: incorrect light when going from glowing to non-glowing
 
-			textVisual.setup();
+			var textVisual = textVisuals[i];
+			int light = text.hasGlowingText() ? LightTexture.FULL_BRIGHT : packedLight;
+			textVisual.setup(textLine, layers, pose, light);
 
 			if (hasObfuscation(textLine)) {
 				obfuscated.add(textVisual);

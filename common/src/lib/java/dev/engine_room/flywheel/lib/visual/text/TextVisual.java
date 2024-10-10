@@ -1,7 +1,6 @@
 package dev.engine_room.flywheel.lib.visual.text;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
@@ -53,8 +52,6 @@ public final class TextVisual {
 	private final Matrix4f pose = new Matrix4f();
 
 	private FormattedCharSequence text = FormattedCharSequence.EMPTY;
-	private float x;
-	private float y;
 	private int backgroundColor = 0;
 	private int light;
 
@@ -63,89 +60,58 @@ public final class TextVisual {
 				.createInstance());
 	}
 
-	public TextVisual addLayer(TextLayer layer) {
-		layers.add(layer);
-		return this;
-	}
-
-	public TextVisual addLayers(Collection<TextLayer> layers) {
-		this.layers.addAll(layers);
-		return this;
-	}
-
-	public TextVisual layers(Collection<TextLayer> layers) {
+	public void setup(FormattedCharSequence textLine, List<TextLayer> layers, Matrix4f pose, int light) {
+		// TODO: probably don't store everything
+		this.text = textLine;
 		this.layers.clear();
 		this.layers.addAll(layers);
-		return this;
-	}
-
-	public TextVisual clearLayers() {
-		layers.clear();
-		return this;
-	}
-
-	public Matrix4f pose() {
-		return pose;
-	}
-
-	public TextVisual text(FormattedCharSequence text) {
-		this.text = text;
-		return this;
-	}
-
-	public TextVisual x(float x) {
-		this.x = x;
-		return this;
-	}
-
-	public TextVisual y(float y) {
-		this.y = y;
-		return this;
-	}
-
-	public TextVisual pos(float x, float y) {
-		this.x = x;
-		this.y = y;
-		return this;
-	}
-
-	public TextVisual backgroundColor(int backgroundColor) {
-		this.backgroundColor = backgroundColor;
-		return this;
-	}
-
-	public TextVisual light(int light) {
+		this.pose.set(pose);
 		this.light = light;
-		return this;
+
+		setup();
 	}
 
-	public TextVisual reset() {
+	public void updateObfuscated() {
+		// TODO: track obfuscated glyphs and update here
+		setup();
+	}
+
+	public void backgroundColor(int backgroundColor) {
+		// TODO: don't setup the whole thing
+		this.backgroundColor = backgroundColor;
+		setup();
+	}
+
+	public void updateLight(int packedLight) {
+		// TODO: just iterate over instances and update light
+		light = packedLight;
+		setup();
+	}
+
+	private void setup() {
+		recycler.resetCount();
+
+		var sink = SINKS.get();
+		sink.prepare(recycler, layers, pose, light);
+
+		text.accept(sink);
+
+		sink.addBackground(backgroundColor, 0, sink.x);
+		sink.clear();
+
+		recycler.discardExtra();
+	}
+
+	private TextVisual reset() {
+		// TODO: should this be public? what should it do?
 		layers.clear();
 		pose.identity();
 
 		text = FormattedCharSequence.EMPTY;
-		x = 0;
-		y = 0;
 		backgroundColor = 0;
 		light = 0;
 
 		return this;
-	}
-
-	// TODO: track glyph instances and add method to update only UVs of obfuscated glyphs, method to update only
-	//  background color, and method to only update light
-	public void setup() {
-		recycler.resetCount();
-
-		var sink = SINKS.get();
-		sink.prepare(recycler, layers, pose, light, x, y);
-
-		text.accept(sink);
-
-		sink.addBackground(backgroundColor, x, sink.x);
-		sink.clear();
-
-		recycler.discardExtra();
 	}
 
 	public void delete() {
@@ -196,15 +162,13 @@ public final class TextVisual {
 		private int light;
 
 		private float x;
-		private float y;
 
-		public void prepare(SmartRecycler<GlyphInstanceKey, GlyphInstance> recycler, List<TextLayer> layers, Matrix4f pose, int light, float x, float y) {
+		public void prepare(SmartRecycler<GlyphInstanceKey, GlyphInstance> recycler, List<TextLayer> layers, Matrix4f pose, int light) {
 			this.recycler = recycler;
 			this.layers = layers;
 			this.pose = pose;
 			this.light = light;
-			this.x = x;
-			this.y = y;
+			this.x = 0;
 		}
 
 		public void clear() {
@@ -233,7 +197,7 @@ public final class TextVisual {
 				if (!(glyph instanceof EmptyGlyph)) {
 					GlyphInstance instance = recycler.get(key(layer, glyphInfo, glyph, bold));
 					float shadowOffset = glyphInfo.getShadowOffset();
-					instance.setGlyph(glyph, pose, x + offset.x() * shadowOffset, y + offset.y() * shadowOffset, style.isItalic());
+					instance.setGlyph(glyph, pose, x + offset.x() * shadowOffset, offset.y() * shadowOffset, style.isItalic());
 					instance.colorArgb(color);
 					instance.light(light);
 					instance.setChanged();
@@ -241,10 +205,10 @@ public final class TextVisual {
 
 				// SpecialGlyphs.WHITE, which effects use, has a shadowOffset of 1, so don't modify the offset returned by the layer.
 				if (style.isStrikethrough()) {
-					addEffect(layer, x + offset.x() - 1.0f, y + offset.y() + 4.5f, x + offset.x() + advance, y + offset.y() + 4.5f - 1.0f, 0.01f, color);
+					addEffect(layer, x + offset.x() - 1.0f, offset.y() + 4.5f, x + offset.x() + advance, offset.y() + 4.5f - 1.0f, 0.01f, color);
 				}
 				if (style.isUnderlined()) {
-					addEffect(layer, x + offset.x() - 1.0f, y + offset.y() + 9.0f, x + offset.x() + advance, y + offset.y() + 9.0f - 1.0f, 0.01f, color);
+					addEffect(layer, x + offset.x() - 1.0f, offset.y() + 9.0f, x + offset.x() + advance, offset.y() + 9.0f - 1.0f, 0.01f, color);
 				}
 			}
 
@@ -260,7 +224,7 @@ public final class TextVisual {
 				var glyphExtension = FlwLibLink.INSTANCE.getBakedGlyphExtension(glyph);
 
 				GlyphInstance instance = recycler.get(effectKey(glyphExtension.flywheel$texture(), TextLayer.GlyphMaterial.SEE_THROUGH, 0));
-				instance.setEffect(glyph, pose, startX - 1.0f, y + 9.0f, endX + 1.0f, y - 1.0f, 0.01f);
+				instance.setEffect(glyph, pose, startX - 1.0f, 9.0f, endX + 1.0f, 1.0f, 0.01f);
 				instance.colorArgb(backgroundColor);
 				instance.light(light);
 				instance.setChanged();
