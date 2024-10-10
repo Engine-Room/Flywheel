@@ -138,16 +138,11 @@ public final class TextVisual {
 		recycler.resetCount();
 
 		var sink = SINKS.get();
-		sink.prepare(recycler, pose, light);
+		sink.prepare(recycler, layers, pose, light, x, y);
 
-		int maxX = 0;
-		for (TextLayer layer : layers) {
-			sink.prepareForLayer(layer, x, y);
-			text.accept(sink);
-			maxX = Math.max(maxX, (int) sink.x);
-		}
+		text.accept(sink);
 
-		sink.addBackground(backgroundColor, x, maxX);
+		sink.addBackground(backgroundColor, x, sink.x);
 		sink.clear();
 
 		recycler.discardExtra();
@@ -195,30 +190,27 @@ public final class TextVisual {
 		@UnknownNullability
 		private SmartRecycler<GlyphInstanceKey, GlyphInstance> recycler;
 		@UnknownNullability
+		private List<TextLayer> layers;
+		@UnknownNullability
 		private Matrix4f pose;
 		private int light;
 
-		@UnknownNullability
-		private TextLayer layer;
 		private float x;
 		private float y;
 
-		public void prepare(SmartRecycler<GlyphInstanceKey, GlyphInstance> recycler, Matrix4f pose, int light) {
+		public void prepare(SmartRecycler<GlyphInstanceKey, GlyphInstance> recycler, List<TextLayer> layers, Matrix4f pose, int light, float x, float y) {
 			this.recycler = recycler;
+			this.layers = layers;
 			this.pose = pose;
 			this.light = light;
-		}
-
-		public void prepareForLayer(TextLayer layer, float x, float y) {
-			this.layer = layer;
 			this.x = x;
 			this.y = y;
 		}
 
 		public void clear() {
 			recycler = null;
+			layers = null;
 			pose = null;
-			layer = null;
 		}
 
 		@Override
@@ -228,28 +220,32 @@ public final class TextVisual {
 			BakedGlyph glyph = style.isObfuscated() && codePoint != ' ' ? fontSet.getRandomGlyph(glyphInfo) : fontSet.getGlyph(codePoint);
 
 			boolean bold = style.isBold();
-			int color = layer.color()
-					.color(style.getColor());
-			Vector2fc offset = layer.offset();
-
-			if (!(glyph instanceof EmptyGlyph)) {
-				GlyphInstance instance = recycler.get(key(glyphInfo, glyph, layer.pattern(), bold));
-				float shadowOffset = glyphInfo.getShadowOffset();
-				instance.setGlyph(glyph, pose, x + offset.x() * shadowOffset, y + offset.y() * shadowOffset, style.isItalic());
-				instance.colorArgb(color);
-				instance.light(light);
-				instance.setChanged();
-			}
-
 			float advance = glyphInfo.getAdvance(bold);
-			// SpecialGlyphs.WHITE, which effects use, has a shadowOffset of 1, so don't modify the offset returned by the layer.
-			float effectOffsetX = offset.x();
-			float effectOffsetY = offset.y();
-			if (style.isStrikethrough()) {
-				addEffect(x + effectOffsetX - 1.0f, y + effectOffsetY + 4.5f, x + effectOffsetX + advance, y + effectOffsetY + 4.5f - 1.0f, 0.01f, color);
-			}
-			if (style.isUnderlined()) {
-				addEffect(x + effectOffsetX - 1.0f, y + effectOffsetY + 9.0f, x + effectOffsetX + advance, y + effectOffsetY + 9.0f - 1.0f, 0.01f, color);
+
+			// Process layers in the inner loop for 2 reasons:
+			// 1. So we don't have to iterate over all the text and to the same glyph lookups for each layer
+			// 2. So we get the same random draw in each layer for obfuscated text
+			for (TextLayer layer : layers) {
+				int color = layer.color()
+						.color(style.getColor());
+				Vector2fc offset = layer.offset();
+
+				if (!(glyph instanceof EmptyGlyph)) {
+					GlyphInstance instance = recycler.get(key(layer, glyphInfo, glyph, bold));
+					float shadowOffset = glyphInfo.getShadowOffset();
+					instance.setGlyph(glyph, pose, x + offset.x() * shadowOffset, y + offset.y() * shadowOffset, style.isItalic());
+					instance.colorArgb(color);
+					instance.light(light);
+					instance.setChanged();
+				}
+
+				// SpecialGlyphs.WHITE, which effects use, has a shadowOffset of 1, so don't modify the offset returned by the layer.
+				if (style.isStrikethrough()) {
+					addEffect(layer, x + offset.x() - 1.0f, y + offset.y() + 4.5f, x + offset.x() + advance, y + offset.y() + 4.5f - 1.0f, 0.01f, color);
+				}
+				if (style.isUnderlined()) {
+					addEffect(layer, x + offset.x() - 1.0f, y + offset.y() + 9.0f, x + offset.x() + advance, y + offset.y() + 9.0f - 1.0f, 0.01f, color);
+				}
 			}
 
 			x += advance;
@@ -258,43 +254,52 @@ public final class TextVisual {
 
 		public void addBackground(int backgroundColor, float startX, float endX) {
 			if (backgroundColor != 0) {
-				addEffect(startX - 1.0f, y + 9.0f, endX + 1.0f, y - 1.0f, 0.01f, backgroundColor);
+				BakedGlyph glyph = FlwLibLink.INSTANCE.getFontSet(FONT, Style.DEFAULT_FONT)
+						.whiteGlyph();
+
+				var glyphExtension = FlwLibLink.INSTANCE.getBakedGlyphExtension(glyph);
+
+				GlyphInstance instance = recycler.get(effectKey(glyphExtension.flywheel$texture(), TextLayer.GlyphMaterial.SEE_THROUGH, 0));
+				instance.setEffect(glyph, pose, startX - 1.0f, y + 9.0f, endX + 1.0f, y - 1.0f, 0.01f);
+				instance.colorArgb(backgroundColor);
+				instance.light(light);
+				instance.setChanged();
 			}
 		}
 
-		private void addEffect(float x0, float y0, float x1, float y1, float depth, int colorArgb) {
+		private void addEffect(TextLayer layer, float x0, float y0, float x1, float y1, float depth, int colorArgb) {
 			BakedGlyph glyph = FlwLibLink.INSTANCE.getFontSet(FONT, Style.DEFAULT_FONT)
 					.whiteGlyph();
 
-			GlyphInstance instance = recycler.get(effectKey(glyph));
+			GlyphInstance instance = recycler.get(effectKey(glyph, layer));
 			instance.setEffect(glyph, pose, x0, y0, x1, y1, depth);
 			instance.colorArgb(colorArgb);
 			instance.light(light);
 			instance.setChanged();
 		}
 
-		private GlyphInstanceKey key(GlyphInfo glyphInfo, BakedGlyph glyph, TextLayer.GlyphPattern pattern, boolean bold) {
+		private static GlyphInstanceKey key(TextLayer layer, GlyphInfo glyphInfo, BakedGlyph glyph, boolean bold) {
 			var glyphExtension = FlwLibLink.INSTANCE.getBakedGlyphExtension(glyph);
 			float glyphWidth = glyphExtension.flywheel$right() - glyphExtension.flywheel$left();
 			float glyphHeight = glyphExtension.flywheel$down() - glyphExtension.flywheel$up();
 
-			return key(glyphWidth, glyphHeight, glyphExtension.flywheel$texture(), pattern, bold, bold ? glyphInfo.getBoldOffset() : 0, glyphInfo.getShadowOffset());
+			return key(layer, glyphWidth, glyphHeight, glyphExtension.flywheel$texture(), bold, bold ? glyphInfo.getBoldOffset() : 0, glyphInfo.getShadowOffset());
 		}
 
-		private GlyphInstanceKey key(float glyphWidth, float glyphHeight, ResourceLocation texture, TextLayer.GlyphPattern pattern, boolean bold, float boldOffset, float shadowOffset) {
-			var meshKey = new GlyphMeshKey(glyphWidth, glyphHeight, pattern, bold, boldOffset, shadowOffset);
+		private static GlyphInstanceKey key(TextLayer layer, float glyphWidth, float glyphHeight, ResourceLocation texture, boolean bold, float boldOffset, float shadowOffset) {
+			var meshKey = new GlyphMeshKey(glyphWidth, glyphHeight, layer.pattern(), bold, boldOffset, shadowOffset);
 			var modelKey = new GlyphModelKey(meshKey, layer.material(), texture);
 			return new GlyphInstanceKey(modelKey, layer.bias());
 		}
 
-		private GlyphInstanceKey effectKey(BakedGlyph glyph) {
+		private static GlyphInstanceKey effectKey(BakedGlyph glyph, TextLayer layer) {
 			var glyphExtension = FlwLibLink.INSTANCE.getBakedGlyphExtension(glyph);
-			return effectKey(glyphExtension.flywheel$texture());
+			return effectKey(glyphExtension.flywheel$texture(), layer.material(), layer.bias());
 		}
 
-		private GlyphInstanceKey effectKey(ResourceLocation texture) {
-			var modelKey = new GlyphModelKey(null, layer.material(), texture);
-			return new GlyphInstanceKey(modelKey, layer.bias());
+		private static GlyphInstanceKey effectKey(ResourceLocation texture, TextLayer.GlyphMaterial material, int bias) {
+			var modelKey = new GlyphModelKey(null, material, texture);
+			return new GlyphInstanceKey(modelKey, bias);
 		}
 	}
 
