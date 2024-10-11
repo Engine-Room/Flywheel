@@ -72,7 +72,7 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
     modApi("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
 
-    modCompileOnly(":sodium-fabric-0.6.0-beta.2+mc1.21.1")
+    modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-fabric")
     modCompileOnly("maven.modrinth:iris:${property("iris_version")}-fabric")
 
     "forApi"(project(path = ":common", configuration = "commonApiOnly"))

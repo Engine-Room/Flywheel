@@ -82,7 +82,7 @@ repositories {
 dependencies {
     neoForge("net.neoforged:neoforge:${property("neoforge_version")}")
 
-    modCompileOnly(":sodium-neoforge-0.6.0-beta.2+mc1.21.1")
+    modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-neoforge")
     modCompileOnly("maven.modrinth:iris:${property("iris_version")}-neoforge")
 
     "forApi"(project(path = ":common", configuration = "commonApiOnly"))
