@@ -15,7 +15,7 @@ import dev.engine_room.flywheel.api.event.EndClientResourceReloadEvent;
 import dev.engine_room.flywheel.impl.FlwImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
-import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.fml.ModLoader;
 
 @Mixin(Minecraft.class)
 abstract class MinecraftMixin {
@@ -30,11 +30,11 @@ abstract class MinecraftMixin {
 
 	@Inject(method = "lambda$new$8", at = @At("HEAD"), remap = false)
 	private void flywheel$onEndInitialResourceReload(@Coerce Object gameLoadCookie, Optional<Throwable> error, CallbackInfo ci) {
-		NeoForge.EVENT_BUS.post(new EndClientResourceReloadEvent((Minecraft) (Object) this, resourceManager, true, error));
+		ModLoader.postEvent(new EndClientResourceReloadEvent((Minecraft) (Object) this, resourceManager, true, error));
 	}
 
 	@Inject(method = "lambda$reloadResourcePacks$21", at = @At("HEAD"), remap = false)
 	private void flywheel$onEndManualResourceReload(boolean recovery, @Coerce Object gameLoadCookie, CompletableFuture<Void> completablefuture, Optional<Throwable> error, CallbackInfo ci) {
-		NeoForge.EVENT_BUS.post(new EndClientResourceReloadEvent((Minecraft) (Object) this, resourceManager, false, error));
+		ModLoader.postEvent(new EndClientResourceReloadEvent((Minecraft) (Object) this, resourceManager, false, error));
 	}
 }

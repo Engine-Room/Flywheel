@@ -41,13 +41,13 @@ public final class FlywheelNeoForge {
 				.getModInfo()
 				.getVersion();
 
-		IEventBus forgeEventBus = NeoForge.EVENT_BUS;
+		IEventBus gameEventBus = NeoForge.EVENT_BUS;
 
 		NeoForgeFlwConfig.INSTANCE.registerSpecs(modContainer);
 
-		registerImplEventListeners(forgeEventBus, modEventBus);
-		registerLibEventListeners(forgeEventBus, modEventBus);
-		registerBackendEventListeners(forgeEventBus, modEventBus);
+		registerImplEventListeners(gameEventBus, modEventBus);
+		registerLibEventListeners(gameEventBus, modEventBus);
+		registerBackendEventListeners(gameEventBus, modEventBus);
 
 		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManagerImpl::getBackendString);
 		FlwImpl.init();
