@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.impl;
 
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
 import dev.engine_room.flywheel.api.internal.DependencyInjection;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -14,5 +14,5 @@ public interface FlwImplXplat {
 
 	FlwConfig getConfig();
 
-	Supplier<Boolean> getModLoaded(String modId);
+	BooleanSupplier getModLoaded(String modId);
 }

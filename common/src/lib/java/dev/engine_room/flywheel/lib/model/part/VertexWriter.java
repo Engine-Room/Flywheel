@@ -76,6 +76,7 @@ class VertexWriter implements VertexConsumer {
 
 	public VertexConsumer endVertexIfNeeded() {
 		if (!filledPosition || !filledTexture || !filledNormal) {
+			// We do not throw here as that matched what vanilla does
 			return this;
 		}
 

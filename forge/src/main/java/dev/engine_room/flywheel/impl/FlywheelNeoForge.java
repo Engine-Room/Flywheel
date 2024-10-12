@@ -1,7 +1,5 @@
 package dev.engine_room.flywheel.impl;
 
-import java.util.function.Supplier;
-
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -18,13 +16,12 @@ import dev.engine_room.flywheel.lib.util.ResourceReloadHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.core.registries.Registries;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.CrashReportCallables;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -34,14 +31,12 @@ import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
-@Mod(Flywheel.ID)
-public final class FlywheelForge {
+@Mod(value = Flywheel.ID, dist = Dist.CLIENT)
+public final class FlywheelNeoForge {
 	@UnknownNullability
 	private static ArtifactVersion version;
 
-	public FlywheelForge(IEventBus modEventBus, ModContainer modContainer) {
-		ModLoadingContext modLoadingContext = ModLoadingContext.get();
-
+	public FlywheelNeoForge(IEventBus modEventBus, ModContainer modContainer) {
 		version = modContainer
 				.getModInfo()
 				.getVersion();
@@ -50,13 +45,6 @@ public final class FlywheelForge {
 
 		ForgeFlwConfig.INSTANCE.registerSpecs(modContainer);
 
-		if (FMLLoader.getDist().isClient()) {
-			Supplier<Runnable> toRun = () -> () -> FlywheelForge.clientInit(forgeEventBus, modEventBus);
-			toRun.get().run();
-		}
-	}
-
-	private static void clientInit(IEventBus forgeEventBus, IEventBus modEventBus) {
 		registerImplEventListeners(forgeEventBus, modEventBus);
 		registerLibEventListeners(forgeEventBus, modEventBus);
 		registerBackendEventListeners(forgeEventBus, modEventBus);
@@ -70,7 +58,7 @@ public final class FlywheelForge {
 
 		forgeEventBus.addListener((LevelTickEvent.Post e) -> {
 			// Make sure we don't tick on the server somehow.
-			if (FMLLoader.getDist().isClient()) {
+			if (e.getLevel().isClientSide()) {
 				VisualizationEventHandler.onClientTick(Minecraft.getInstance(), e.getLevel());
 			}
 		});

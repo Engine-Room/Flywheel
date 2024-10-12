@@ -44,11 +44,10 @@ class MeshEmitter implements VertexConsumer {
 	}
 
 	void prepareForGeometry(boolean shade) {
-		if (!((BufferBuilderAccessor) bufferBuilder).flywheel$getBuilding()) {
-			bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-		} else if (shade != currentShade) {
+		bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+
+		if (((BufferBuilderAccessor) bufferBuilder).flywheel$getBuilding() && shade != currentShade) {
 			emit();
-			bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 		}
 
 		currentShade = shade;

@@ -1,6 +1,7 @@
 package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -12,45 +13,38 @@ import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
-public final class ForgeBakedModelBuilder extends BakedModelBuilder {
+public final class NeoForgeMultiBlockModelBuilder extends MultiBlockModelBuilder {
 	@Nullable
-	private ModelData modelData;
+	private Function<BlockPos, ModelData> modelDataLookup;
 
-	public ForgeBakedModelBuilder(BakedModel bakedModel) {
-		super(bakedModel);
+	public NeoForgeMultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
+		super(level, positions);
 	}
 
 	@Override
-	public ForgeBakedModelBuilder level(BlockAndTintGetter level) {
-		super.level(level);
-		return this;
-	}
-
-	@Override
-	public ForgeBakedModelBuilder blockState(BlockState blockState) {
-		super.blockState(blockState);
-		return this;
-	}
-
-	@Override
-	public ForgeBakedModelBuilder poseStack(PoseStack poseStack) {
+	public NeoForgeMultiBlockModelBuilder poseStack(PoseStack poseStack) {
 		super.poseStack(poseStack);
 		return this;
 	}
 
 	@Override
-	public ForgeBakedModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public NeoForgeMultiBlockModelBuilder enableFluidRendering() {
+		super.enableFluidRendering();
+		return this;
+	}
+
+	@Override
+	public NeoForgeMultiBlockModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
 		super.materialFunc(materialFunc);
 		return this;
 	}
 
-	public ForgeBakedModelBuilder modelData(ModelData modelData) {
-		this.modelData = modelData;
+	public NeoForgeMultiBlockModelBuilder modelDataLookup(Function<BlockPos, ModelData> modelDataLookup) {
+		this.modelDataLookup = modelDataLookup;
 		return this;
 	}
 
@@ -59,16 +53,16 @@ public final class ForgeBakedModelBuilder extends BakedModelBuilder {
 		if (materialFunc == null) {
 			materialFunc = ModelUtil::getMaterial;
 		}
-		if (modelData == null) {
-			modelData = ModelData.EMPTY;
+		if (modelDataLookup == null) {
+			modelDataLookup = pos -> ModelData.EMPTY;
 		}
 
 		var builder = ChunkLayerSortedListBuilder.<Model.ConfiguredMesh>getThreadLocal();
 
-		BakedModelBufferer.bufferSingle(ModelUtil.VANILLA_RENDERER.getModelRenderer(), level, bakedModel, blockState, poseStack, modelData, (renderType, shaded, data) -> {
+		BakedModelBufferer.bufferMultiBlock(ModelUtil.VANILLA_RENDERER, positions.iterator(), level, poseStack, modelDataLookup, renderFluids, (renderType, shaded, data) -> {
 			Material material = materialFunc.apply(renderType, shaded);
 			if (material != null) {
-				Mesh mesh = MeshHelper.blockVerticesToMesh(data, "source=BakedModelBuilder," + "bakedModel=" + bakedModel + ",renderType=" + renderType + ",shaded=" + shaded);
+				Mesh mesh = MeshHelper.blockVerticesToMesh(data, "source=MultiBlockModelBuilder," + "renderType=" + renderType + ",shaded=" + shaded);
 				builder.add(renderType, new Model.ConfiguredMesh(material, mesh));
 			}
 		});

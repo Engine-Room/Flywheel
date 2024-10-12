@@ -1,8 +1,6 @@
 package dev.engine_room.flywheel.impl;
 
-import java.util.function.Supplier;
-
-import com.google.common.base.Suppliers;
+import java.util.function.BooleanSupplier;
 
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -17,7 +15,7 @@ public class FlwImplXplatImpl implements FlwImplXplat {
 
 	@Override
 	public String getVersionStr() {
-		return FlywheelForge.version().toString();
+		return FlywheelNeoForge.version().toString();
 	}
 
 	@Override
@@ -26,7 +24,7 @@ public class FlwImplXplatImpl implements FlwImplXplat {
 	}
 
 	@Override
-	public Supplier<Boolean> getModLoaded(String modId) {
-		return Suppliers.memoize(() -> LoadingModList.get().getModFileById(modId) != null);
+	public BooleanSupplier getModLoaded(String modId) {
+		return () -> LoadingModList.get().getModFileById(modId) != null;
 	}
 }

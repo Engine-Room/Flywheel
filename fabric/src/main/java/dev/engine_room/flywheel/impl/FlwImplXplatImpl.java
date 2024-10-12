@@ -1,8 +1,6 @@
 package dev.engine_room.flywheel.impl;
 
-import java.util.function.Supplier;
-
-import com.google.common.base.Suppliers;
+import java.util.function.BooleanSupplier;
 
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererCallback;
 import net.fabricmc.loader.api.FabricLoader;
@@ -25,7 +23,7 @@ public class FlwImplXplatImpl implements FlwImplXplat {
 	}
 
 	@Override
-	public Supplier<Boolean> getModLoaded(String modId) {
-		return Suppliers.memoize(() -> FabricLoader.getInstance().isModLoaded(modId));
+	public BooleanSupplier getModLoaded(String modId) {
+		return () -> FabricLoader.getInstance().isModLoaded(modId);
 	}
 }

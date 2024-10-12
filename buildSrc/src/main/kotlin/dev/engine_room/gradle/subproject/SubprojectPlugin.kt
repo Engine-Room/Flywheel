@@ -89,9 +89,6 @@ class SubprojectPlugin: Plugin<Project> {
                     includeGroup("maven.modrinth")
                 }
             }
-            flatDir {
-                dirs = setOf(project.rootProject.file("libs"))
-            }
         }
     }
 

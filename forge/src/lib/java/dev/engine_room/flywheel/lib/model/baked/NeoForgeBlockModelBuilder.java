@@ -1,7 +1,6 @@
 package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -13,38 +12,38 @@ import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
-public final class ForgeMultiBlockModelBuilder extends MultiBlockModelBuilder {
+public final class NeoForgeBlockModelBuilder extends BlockModelBuilder {
 	@Nullable
-	private Function<BlockPos, ModelData> modelDataLookup;
+	private ModelData modelData;
 
-	public ForgeMultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
-		super(level, positions);
+	public NeoForgeBlockModelBuilder(BlockState state) {
+		super(state);
 	}
 
 	@Override
-	public ForgeMultiBlockModelBuilder poseStack(PoseStack poseStack) {
+	public NeoForgeBlockModelBuilder level(BlockAndTintGetter level) {
+		super.level(level);
+		return this;
+	}
+
+	@Override
+	public NeoForgeBlockModelBuilder poseStack(PoseStack poseStack) {
 		super.poseStack(poseStack);
 		return this;
 	}
 
 	@Override
-	public ForgeMultiBlockModelBuilder enableFluidRendering() {
-		super.enableFluidRendering();
-		return this;
-	}
-
-	@Override
-	public ForgeMultiBlockModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public NeoForgeBlockModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
 		super.materialFunc(materialFunc);
 		return this;
 	}
 
-	public ForgeMultiBlockModelBuilder modelDataLookup(Function<BlockPos, ModelData> modelDataLookup) {
-		this.modelDataLookup = modelDataLookup;
+	public NeoForgeBlockModelBuilder modelData(ModelData modelData) {
+		this.modelData = modelData;
 		return this;
 	}
 
@@ -53,16 +52,16 @@ public final class ForgeMultiBlockModelBuilder extends MultiBlockModelBuilder {
 		if (materialFunc == null) {
 			materialFunc = ModelUtil::getMaterial;
 		}
-		if (modelDataLookup == null) {
-			modelDataLookup = pos -> ModelData.EMPTY;
+		if (modelData == null) {
+			modelData = ModelData.EMPTY;
 		}
 
 		var builder = ChunkLayerSortedListBuilder.<Model.ConfiguredMesh>getThreadLocal();
 
-		BakedModelBufferer.bufferMultiBlock(ModelUtil.VANILLA_RENDERER, positions.iterator(), level, poseStack, modelDataLookup, renderFluids, (renderType, shaded, data) -> {
+		BakedModelBufferer.bufferBlock(ModelUtil.VANILLA_RENDERER, level, state, poseStack, modelData, (renderType, shaded, data) -> {
 			Material material = materialFunc.apply(renderType, shaded);
 			if (material != null) {
-				Mesh mesh = MeshHelper.blockVerticesToMesh(data, "source=MultiBlockModelBuilder," + "renderType=" + renderType + ",shaded=" + shaded);
+				Mesh mesh = MeshHelper.blockVerticesToMesh(data, "source=BlockModelBuilder," + "blockState=" + state + ",renderType=" + renderType + ",shaded=" + shaded);
 				builder.add(renderType, new Model.ConfiguredMesh(material, mesh));
 			}
 		});

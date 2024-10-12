@@ -2,6 +2,9 @@ package dev.engine_room.flywheel.impl;
 
 import java.lang.reflect.Field;
 
+import dev.engine_room.flywheel.lib.model.baked.NeoForgeBlockModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.NeoForgeMultiBlockModelBuilder;
+
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -9,9 +12,7 @@ import dev.engine_room.flywheel.impl.compat.CompatMods;
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
-import dev.engine_room.flywheel.lib.model.baked.ForgeBakedModelBuilder;
-import dev.engine_room.flywheel.lib.model.baked.ForgeBlockModelBuilder;
-import dev.engine_room.flywheel.lib.model.baked.ForgeMultiBlockModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.NeoForgeBakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.MultiBlockModelBuilder;
 import dev.engine_room.flywheel.lib.util.ShadersModHandler;
 import net.irisshaders.iris.api.v0.IrisApi;
@@ -53,17 +54,17 @@ public class FlwLibXplatImpl implements FlwLibXplat {
 
 	@Override
 	public BakedModelBuilder createBakedModelBuilder(BakedModel bakedModel) {
-		return new ForgeBakedModelBuilder(bakedModel);
+		return new NeoForgeBakedModelBuilder(bakedModel);
 	}
 
 	@Override
 	public BlockModelBuilder createBlockModelBuilder(BlockState state) {
-		return new ForgeBlockModelBuilder(state);
+		return new NeoForgeBlockModelBuilder(state);
 	}
 
 	@Override
 	public MultiBlockModelBuilder createMultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
-		return new ForgeMultiBlockModelBuilder(level, positions);
+		return new NeoForgeMultiBlockModelBuilder(level, positions);
 	}
 
 	@Override

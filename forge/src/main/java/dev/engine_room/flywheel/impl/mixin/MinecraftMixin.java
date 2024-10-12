@@ -2,7 +2,6 @@ package dev.engine_room.flywheel.impl.mixin;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -10,7 +9,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import dev.engine_room.flywheel.api.event.EndClientResourceReloadEvent;
@@ -25,11 +23,9 @@ abstract class MinecraftMixin {
 	@Final
 	private ReloadableResourceManager resourceManager;
 
-	// Inject at invoke cannot be used in constructors in vanilla Mixin, so use ModifyArg instead.
-	@ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/ReloadableResourceManager;createReload(Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Ljava/util/List;)Lnet/minecraft/server/packs/resources/ReloadInstance;"), index = 0)
-	private Executor flywheel$onBeginInitialResourceReload(Executor arg0) {
+	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/ReloadableResourceManager;createReload(Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Ljava/util/List;)Lnet/minecraft/server/packs/resources/ReloadInstance;"))
+	private void flywheel$onBeginInitialResourceReload(CallbackInfo ci) {
 		FlwImpl.freezeRegistries();
-		return arg0;
 	}
 
 	@Inject(method = "lambda$new$8", at = @At("HEAD"), remap = false)

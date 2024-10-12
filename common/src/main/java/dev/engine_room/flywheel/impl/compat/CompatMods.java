@@ -1,22 +1,21 @@
 package dev.engine_room.flywheel.impl.compat;
 
-import java.util.Locale;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
 import dev.engine_room.flywheel.impl.FlwImplXplat;
 
 public enum CompatMods {
-	SODIUM,
-	EMBEDDIUM,
-	IRIS;
+	SODIUM("sodium"),
+	EMBEDDIUM("embeddium"),
+	IRIS("iris");
 
-	private final Supplier<Boolean> isLoaded;
+	private final BooleanSupplier isLoaded;
 
-	CompatMods() {
-		isLoaded = FlwImplXplat.INSTANCE.getModLoaded(name().toLowerCase(Locale.ROOT));
+	CompatMods(String modid) {
+		isLoaded = FlwImplXplat.INSTANCE.getModLoaded(modid);
 	}
 
 	public boolean isLoaded() {
-		return isLoaded.get();
+		return isLoaded.getAsBoolean();
 	}
 }
