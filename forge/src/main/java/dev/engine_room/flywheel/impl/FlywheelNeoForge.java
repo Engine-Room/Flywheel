@@ -43,7 +43,7 @@ public final class FlywheelNeoForge {
 
 		IEventBus forgeEventBus = NeoForge.EVENT_BUS;
 
-		ForgeFlwConfig.INSTANCE.registerSpecs(modContainer);
+		NeoForgeFlwConfig.INSTANCE.registerSpecs(modContainer);
 
 		registerImplEventListeners(forgeEventBus, modEventBus);
 		registerLibEventListeners(forgeEventBus, modEventBus);

@@ -20,7 +20,7 @@ public class FlwImplXplatImpl implements FlwImplXplat {
 
 	@Override
 	public FlwConfig getConfig() {
-		return ForgeFlwConfig.INSTANCE;
+		return NeoForgeFlwConfig.INSTANCE;
 	}
 
 	@Override

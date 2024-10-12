@@ -13,13 +13,13 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
-public class ForgeFlwConfig implements FlwConfig {
-	public static final ForgeFlwConfig INSTANCE = new ForgeFlwConfig();
+public class NeoForgeFlwConfig implements FlwConfig {
+	public static final NeoForgeFlwConfig INSTANCE = new NeoForgeFlwConfig();
 
 	public final ClientConfig client;
 	private final ModConfigSpec clientSpec;
 
-	private ForgeFlwConfig() {
+	private NeoForgeFlwConfig() {
 		Pair<ClientConfig, ModConfigSpec> clientPair = new ModConfigSpec.Builder().configure(ClientConfig::new);
 		this.client = clientPair.getLeft();
 		clientSpec = clientPair.getRight();
