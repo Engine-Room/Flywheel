@@ -7,7 +7,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class SodiumCompat {
-	public static <T extends BlockEntity> Object forBlockEntityType(BlockEntityType<T> type) {
+	public static <T extends BlockEntity> Object addPredicate(BlockEntityType<T> type) {
 		BlockEntityRenderPredicate<T> predicate = (getter, pos, be) -> VisualizationHelper.tryAddBlockEntity(be);
 		BlockEntityRenderHandler.instance().addRenderPredicate(type, predicate);
 		return predicate;

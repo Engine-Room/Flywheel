@@ -26,7 +26,7 @@ mandatory = true
 versionRange = "${forge_version_range}"
 side = "CLIENT"
 
-[[dependencies.flywheel]]
+[[dependencies.${mod_id}]]
 modId = "embeddium"
 mandatory = false
 versionRange = "[0.3.25,)"

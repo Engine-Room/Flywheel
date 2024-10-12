@@ -31,7 +31,7 @@ abstract class BlockEntityTypeMixin<T extends BlockEntity> implements BlockEntit
 	public void flywheel$setVisualizer(@Nullable BlockEntityVisualizer<? super T> visualizer) {
 		if (CompatMods.SODIUM.isLoaded() && !CompatMods.EMBEDDIUM.isLoaded()) {
 			if (flywheel$visualizer == null && visualizer != null) {
-				flywheel$sodiumPredicate = SodiumCompat.forBlockEntityType((BlockEntityType<?>) (Object) this);
+				flywheel$sodiumPredicate = SodiumCompat.addPredicate((BlockEntityType<?>) (Object) this);
 			} else if (flywheel$visualizer != null && visualizer == null && flywheel$sodiumPredicate != null) {
 				SodiumCompat.removePredicate((BlockEntityType<?>) (Object) this, flywheel$sodiumPredicate);
 			}
