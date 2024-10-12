@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.backend.FlwBackend;
-import dev.engine_room.flywheel.impl.compat.CompatMods;
 import dev.engine_room.flywheel.impl.registry.IdRegistryImpl;
 import dev.engine_room.flywheel.lib.util.ShadersModHandler;
 import dev.engine_room.flywheel.vanilla.VanillaVisuals;
@@ -29,10 +28,6 @@ public final class FlwImpl {
 
 		// vanilla
 		VanillaVisuals.init();
-
-		// Embeddium Compat
-		if (CompatMods.EMBEDDIUM.isLoaded())
-			EmbeddiumCompat.init();
 	}
 
 	public static void freezeRegistries() {
