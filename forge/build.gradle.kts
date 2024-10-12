@@ -83,7 +83,7 @@ loom {
 dependencies {
     forge("net.minecraftforge:forge:${property("minecraft_version")}-${property("forge_version")}")
 
-
+    modCompileOnly("maven.modrinth:embeddium:${property("embeddium_version")}")
     modCompileOnly("maven.modrinth:oculus:${property("oculus_version")}")
 
     "forApi"(project(path = ":common", configuration = "commonApiOnly"))

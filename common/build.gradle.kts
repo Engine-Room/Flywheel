@@ -72,7 +72,6 @@ jarSets {
 dependencies {
     modCompileOnly("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
 
-    modCompileOnly("maven.modrinth:embeddium:${property("embeddium_version")}")
     modCompileOnly(":sodium-fabric-1.20.1-0.6.0-intermediary-mappings")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")

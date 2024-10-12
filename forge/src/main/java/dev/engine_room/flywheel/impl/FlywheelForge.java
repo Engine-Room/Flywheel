@@ -1,5 +1,7 @@
 package dev.engine_room.flywheel.impl;
 
+import dev.engine_room.flywheel.impl.compat.CompatMods;
+import dev.engine_room.flywheel.impl.compat.EmbeddiumCompat;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -63,6 +65,9 @@ public final class FlywheelForge {
 
 		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManagerImpl::getBackendString);
 		FlwImpl.init();
+
+		if (CompatMods.EMBEDDIUM.isLoaded())
+			EmbeddiumCompat.init();
 	}
 
 	private static void registerImplEventListeners(IEventBus forgeEventBus, IEventBus modEventBus) {
