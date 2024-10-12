@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.backend.compile;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,7 +31,7 @@ import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.resources.ResourceLocation;
 
 public final class PipelineCompiler {
-	private static final List<PipelineCompiler> ALL = List.of();
+	private static final List<PipelineCompiler> ALL = new ArrayList<>();
 
 	private static final Compile<PipelineProgramKey> PIPELINE = new Compile<>();
 
@@ -44,6 +45,7 @@ public final class PipelineCompiler {
 
 	public PipelineCompiler(CompilationHarness<PipelineProgramKey> harness) {
 		this.harness = harness;
+		ALL.add(this);
 	}
 
 	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material) {
