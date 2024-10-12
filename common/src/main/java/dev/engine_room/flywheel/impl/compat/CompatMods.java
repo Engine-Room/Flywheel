@@ -6,7 +6,6 @@ import dev.engine_room.flywheel.impl.FlwImplXplat;
 
 public enum CompatMods {
 	SODIUM("sodium"),
-	EMBEDDIUM("embeddium"),
 	IRIS("iris");
 
 	private final BooleanSupplier isLoaded;
