@@ -36,6 +36,7 @@ class VertexWriter implements VertexConsumer {
 
 	@Override
 	public VertexConsumer setColor(int red, int green, int blue, int alpha) {
+		// ignore color
 		return endVertexIfNeeded();
 	}
 
