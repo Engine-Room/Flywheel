@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
+import dev.engine_room.flywheel.impl.compat.CompatMods;
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
@@ -23,7 +24,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 public class FlwLibXplatImpl implements FlwLibXplat {
@@ -68,8 +68,7 @@ public class FlwLibXplatImpl implements FlwLibXplat {
 	@Override
 	@Nullable
 	public ShadersModHandler.InternalHandler createIrisHandler() {
-		if (!ModList.get()
-				.isLoaded("oculus")) {
+		if (!(CompatMods.IRIS.isLoaded() || CompatMods.OCULUS.isLoaded())) {
 			return null;
 		}
 

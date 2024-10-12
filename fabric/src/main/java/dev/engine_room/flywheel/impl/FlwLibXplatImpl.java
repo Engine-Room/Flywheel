@@ -3,6 +3,7 @@ package dev.engine_room.flywheel.impl;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
+import dev.engine_room.flywheel.impl.compat.CompatMods;
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
@@ -11,7 +12,6 @@ import dev.engine_room.flywheel.lib.model.baked.FabricBlockModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.FabricMultiBlockModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.MultiBlockModelBuilder;
 import dev.engine_room.flywheel.lib.util.ShadersModHandler;
-import net.fabricmc.loader.api.FabricLoader;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -52,8 +52,7 @@ public class FlwLibXplatImpl implements FlwLibXplat {
 	@Override
 	@Nullable
 	public ShadersModHandler.InternalHandler createIrisHandler() {
-		if (!FabricLoader.getInstance()
-				.isModLoaded("iris")) {
+		if (!CompatMods.IRIS.isLoaded()) {
 			return null;
 		}
 

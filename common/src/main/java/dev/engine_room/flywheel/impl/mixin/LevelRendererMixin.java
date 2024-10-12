@@ -125,8 +125,8 @@ abstract class LevelRendererMixin {
 	}
 
 	@Inject(method = "renderEntity", at = @At("HEAD"), cancellable = true)
-	private void flywheel$decideNotToRenderEntity(Entity pEntity, double pCamX, double pCamY, double pCamZ, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBufferSource, CallbackInfo ci) {
-		if (VisualizationManager.supportsVisualization(pEntity.level()) && VisualizationHelper.skipVanillaRender(pEntity)) {
+	private void flywheel$decideNotToRenderEntity(Entity entity, double camX, double camY, double camZ, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, CallbackInfo ci) {
+		if (VisualizationManager.supportsVisualization(entity.level()) && VisualizationHelper.skipVanillaRender(entity)) {
 			ci.cancel();
 		}
 	}
