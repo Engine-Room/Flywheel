@@ -53,21 +53,21 @@ public final class FlywheelNeoForge {
 		FlwImpl.init();
 	}
 
-	private static void registerImplEventListeners(IEventBus forgeEventBus, IEventBus modEventBus) {
-		forgeEventBus.addListener((ReloadLevelRendererEvent e) -> BackendManagerImpl.onReloadLevelRenderer(e.level()));
+	private static void registerImplEventListeners(IEventBus gameEventBus, IEventBus modEventBus) {
+		gameEventBus.addListener((ReloadLevelRendererEvent e) -> BackendManagerImpl.onReloadLevelRenderer(e.level()));
 
-		forgeEventBus.addListener((LevelTickEvent.Post e) -> {
+		gameEventBus.addListener((LevelTickEvent.Post e) -> {
 			// Make sure we don't tick on the server somehow.
 			if (e.getLevel().isClientSide()) {
 				VisualizationEventHandler.onClientTick(Minecraft.getInstance(), e.getLevel());
 			}
 		});
-		forgeEventBus.addListener((EntityJoinLevelEvent e) -> VisualizationEventHandler.onEntityJoinLevel(e.getLevel(), e.getEntity()));
-		forgeEventBus.addListener((EntityLeaveLevelEvent e) -> VisualizationEventHandler.onEntityLeaveLevel(e.getLevel(), e.getEntity()));
+		gameEventBus.addListener((EntityJoinLevelEvent e) -> VisualizationEventHandler.onEntityJoinLevel(e.getLevel(), e.getEntity()));
+		gameEventBus.addListener((EntityLeaveLevelEvent e) -> VisualizationEventHandler.onEntityLeaveLevel(e.getLevel(), e.getEntity()));
 
-		forgeEventBus.addListener(FlwCommands::registerClientCommands);
+		gameEventBus.addListener(FlwCommands::registerClientCommands);
 
-		forgeEventBus.addListener((CustomizeGuiOverlayEvent.DebugText e) -> {
+		gameEventBus.addListener((CustomizeGuiOverlayEvent.DebugText e) -> {
 			Minecraft minecraft = Minecraft.getInstance();
 
 			if (!minecraft.getDebugOverlay().showDebugScreen()) {
@@ -93,8 +93,8 @@ public final class FlywheelNeoForge {
 		});
 	}
 
-	private static void registerLibEventListeners(IEventBus forgeEventBus, IEventBus modEventBus) {
-		forgeEventBus.addListener((LevelEvent.Unload e) -> LevelAttached.invalidateLevel(e.getLevel()));
+	private static void registerLibEventListeners(IEventBus gameEventBus, IEventBus modEventBus) {
+		gameEventBus.addListener((LevelEvent.Unload e) -> LevelAttached.invalidateLevel(e.getLevel()));
 
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> ResourceReloadCache.onEndClientResourceReload());
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> ResourceReloadHolder.onEndClientResourceReload());
@@ -103,8 +103,8 @@ public final class FlywheelNeoForge {
 		modEventBus.addListener(PartialModelEventHandler::onBakingCompleted);
 	}
 
-	private static void registerBackendEventListeners(IEventBus forgeEventBus, IEventBus modEventBus) {
-		forgeEventBus.addListener((ReloadLevelRendererEvent e) -> Uniforms.onReloadLevelRenderer());
+	private static void registerBackendEventListeners(IEventBus gameEventBus, IEventBus modEventBus) {
+		gameEventBus.addListener((ReloadLevelRendererEvent e) -> Uniforms.onReloadLevelRenderer());
 
 		modEventBus.addListener((RegisterClientReloadListenersEvent e) -> {
 			e.registerReloadListener(FlwProgramsReloader.INSTANCE);
