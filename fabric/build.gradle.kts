@@ -72,6 +72,8 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
     modApi("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
 
+    modCompileOnly(":sodium-fabric-1.20.1-0.6.0-intermediary-mappings")
+
     modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}")
     modCompileOnly("maven.modrinth:iris:${property("iris_version")}")
 
