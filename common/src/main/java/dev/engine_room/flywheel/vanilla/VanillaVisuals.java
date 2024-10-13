@@ -47,6 +47,9 @@ public class VanillaVisuals {
 				.factory(ShulkerBoxVisual::new)
 				.apply();
 
+		builder(BlockEntityType.SIGN).factory(SignVisual::new)
+				.apply();
+
 		builder(EntityType.CHEST_MINECART)
 				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, ModelLayers.CHEST_MINECART))
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)

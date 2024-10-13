@@ -178,6 +178,7 @@ public class SimpleMaterial implements Material {
 			shaders = material.shaders();
 			fog = material.fog();
 			cutout = material.cutout();
+			light = material.light();
 			texture = material.texture();
 			blur = material.blur();
 			mipmap = material.mipmap();

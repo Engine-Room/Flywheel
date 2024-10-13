@@ -125,7 +125,7 @@ public final class FireComponent implements EntityComponent {
 	}
 
 	private record FireMesh(TextureAtlasSprite sprite) implements QuadMesh {
-		private static final Vector4fc BOUNDING_SPHERE = new Vector4f(0, 0.5f, 0, (float) (Math.sqrt(2) * 0.5));
+		private static final Vector4fc BOUNDING_SPHERE = new Vector4f(0, 0.5f, 0, Mth.SQRT_OF_TWO * 0.5f);
 
 		@Override
 		public int vertexCount() {

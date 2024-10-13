@@ -87,38 +87,46 @@ bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
         transformBoundingSphere(flw_view, center, radius);
 
         vec4 aabb;
-        if (projectSphere(center, radius, _flw_cullData.znear, _flw_cullData.P00, _flw_cullData.P11, aabb))
-        {
-            float width = (aabb.z - aabb.x) * _flw_cullData.pyramidWidth;
-            float height = (aabb.w - aabb.y) * _flw_cullData.pyramidHeight;
+        if (projectSphere(center, radius, _flw_cullData.znear, _flw_cullData.P00, _flw_cullData.P11, aabb)) {
+            vec2 size = aabb.zw - aabb.xy;
 
-            int level = clamp(int(ceil(log2(max(width, height)))), 0, _flw_cullData.pyramidLevels);
+            vec2 sizeInPixels = size * flw_viewportSize;
 
-            ivec2 levelSize = textureSize(_flw_depthPyramid, level);
+            // Cull objects that are less than a pixel in size. Could probably make this configurable.
+            isVisible = isVisible && any(greaterThan(sizeInPixels, vec2(1.)));
 
-            ivec4 levelSizePair = ivec4(levelSize, levelSize);
+            if (isVisible) {
+                float width = size.x * _flw_cullData.pyramidWidth;
+                float height = size.y * _flw_cullData.pyramidHeight;
 
-            ivec4 bounds = ivec4(aabb * vec4(levelSizePair));
+                int level = clamp(int(ceil(log2(max(width, height)))), 0, _flw_cullData.pyramidLevels);
 
-            // Clamp to the texture bounds.
-            // Since we're not going through a sampler out of bounds texel fetches will return 0.
-            bounds = clamp(bounds, ivec4(0), levelSizePair);
+                ivec2 levelSize = textureSize(_flw_depthPyramid, level);
 
-            float depth01 = texelFetch(_flw_depthPyramid, bounds.xw, level).r;
-            float depth11 = texelFetch(_flw_depthPyramid, bounds.zw, level).r;
-            float depth10 = texelFetch(_flw_depthPyramid, bounds.zy, level).r;
-            float depth00 = texelFetch(_flw_depthPyramid, bounds.xy, level).r;
+                ivec4 levelSizePair = ivec4(levelSize, levelSize);
 
-            float depth;
-            if (_flw_cullData.useMin == 0) {
-                depth = max(max(depth00, depth01), max(depth10, depth11));
-            } else {
-                depth = min(min(depth00, depth01), min(depth10, depth11));
+                ivec4 bounds = ivec4(aabb * vec4(levelSizePair));
+
+                // Clamp to the texture bounds.
+                // Since we're not going through a sampler out of bounds texel fetches will return 0.
+                bounds = clamp(bounds, ivec4(0), levelSizePair);
+
+                float depth01 = texelFetch(_flw_depthPyramid, bounds.xw, level).r;
+                float depth11 = texelFetch(_flw_depthPyramid, bounds.zw, level).r;
+                float depth10 = texelFetch(_flw_depthPyramid, bounds.zy, level).r;
+                float depth00 = texelFetch(_flw_depthPyramid, bounds.xy, level).r;
+
+                float depth;
+                if (_flw_cullData.useMin == 0) {
+                    depth = max(max(depth00, depth01), max(depth10, depth11));
+                } else {
+                    depth = min(min(depth00, depth01), min(depth10, depth11));
+                }
+
+                float depthSphere = 1. + _flw_cullData.znear / (center.z + radius);
+
+                isVisible = isVisible && depthSphere <= depth;
             }
-
-            float depthSphere = 1. + _flw_cullData.znear / (center.z + radius);
-
-            isVisible = isVisible && depthSphere <= depth;
         }
     }
 

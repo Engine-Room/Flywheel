@@ -33,4 +33,32 @@ public final class DataPacker {
 	public static float unpackNormI8(byte b) {
 		return (float) b / 127f;
 	}
+
+	/**
+	 * Pack a float as an unsigned, normalized short.
+	 */
+	public static short packNormU16(float f) {
+		return (short) (int) (Mth.clamp(f, 0.0f, 1.0f) * 65535);
+	}
+
+	/**
+	 * Unpack an unsigned, normalized short to a float.
+	 */
+	public static float unpackNormU16(short s) {
+		return (float) (Short.toUnsignedInt(s)) / 65535f;
+	}
+
+	/**
+	 * Pack a float as a signed, normalized byte.
+	 */
+	public static short packNormI16(float f) {
+		return (short) (Mth.clamp(f, -1.0f, 1.0f) * 32767);
+	}
+
+	/**
+	 * Unpack a signed, normalized byte to a float.
+	 */
+	public static float unpackNormI16(short s) {
+		return (float) s / 32767f;
+	}
 }
