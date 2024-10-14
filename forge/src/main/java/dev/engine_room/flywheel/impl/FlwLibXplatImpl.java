@@ -2,9 +2,6 @@ package dev.engine_room.flywheel.impl;
 
 import java.lang.reflect.Field;
 
-import dev.engine_room.flywheel.lib.model.baked.NeoForgeBlockModelBuilder;
-import dev.engine_room.flywheel.lib.model.baked.NeoForgeMultiBlockModelBuilder;
-
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -12,8 +9,10 @@ import dev.engine_room.flywheel.impl.compat.CompatMods;
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
-import dev.engine_room.flywheel.lib.model.baked.NeoForgeBakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.MultiBlockModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.NeoForgeBakedModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.NeoForgeBlockModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.NeoForgeMultiBlockModelBuilder;
 import dev.engine_room.flywheel.lib.util.ShadersModHandler;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.Minecraft;
@@ -70,7 +69,7 @@ public class FlwLibXplatImpl implements FlwLibXplat {
 	@Override
 	@Nullable
 	public ShadersModHandler.InternalHandler createIrisHandler() {
-		if (!CompatMods.IRIS.isLoaded()) {
+		if (!CompatMods.IRIS.isLoaded) {
 			return null;
 		}
 
