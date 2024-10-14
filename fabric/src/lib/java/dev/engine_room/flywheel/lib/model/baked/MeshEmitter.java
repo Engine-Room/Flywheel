@@ -31,9 +31,7 @@ class MeshEmitter {
 	public void end() {
 		if (((BufferBuilderAccessor) bufferBuilder).flywheel$getBuilding()) {
 			emit();
-			bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 		}
-
 		resultConsumer = null;
 	}
 
@@ -47,7 +45,6 @@ class MeshEmitter {
 			bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 		} else if (shade != currentShade) {
 			emit();
-			bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 		}
 
 		currentShade = shade;
@@ -60,5 +57,7 @@ class MeshEmitter {
 			resultConsumer.accept(renderType, currentShade, renderedBuffer);
 			renderedBuffer.close();
 		}
+
+		bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 	}
 }
