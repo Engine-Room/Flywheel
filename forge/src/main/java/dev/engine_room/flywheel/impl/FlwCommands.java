@@ -17,9 +17,9 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.client.event.RegisterClientCommandsEvent;
-import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.common.ModConfigSpec.BooleanValue;
+import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 
 public final class FlwCommands {
 	private FlwCommands() {
@@ -28,7 +28,7 @@ public final class FlwCommands {
 	public static void registerClientCommands(RegisterClientCommandsEvent event) {
 		LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("flywheel");
 
-		ConfigValue<String> backendValue = ForgeFlwConfig.INSTANCE.client.backend;
+		ConfigValue<String> backendValue = NeoForgeFlwConfig.INSTANCE.client.backend;
 		command.then(Commands.literal("backend")
 				.executes(context -> {
 					Backend backend = BackendManager.currentBackend();
@@ -58,7 +58,7 @@ public final class FlwCommands {
 						return Command.SINGLE_SUCCESS;
 					})));
 
-		BooleanValue limitUpdatesValue = ForgeFlwConfig.INSTANCE.client.limitUpdates;
+		BooleanValue limitUpdatesValue = NeoForgeFlwConfig.INSTANCE.client.limitUpdates;
 		command.then(Commands.literal("limitUpdates")
 				.executes(context -> {
 					if (limitUpdatesValue.get()) {
@@ -123,7 +123,7 @@ public final class FlwCommands {
 							return Command.SINGLE_SUCCESS;
 						})));
 
-		var lightSmoothnessValue = ForgeFlwConfig.INSTANCE.client.backendConfig.lightSmoothness;
+		var lightSmoothnessValue = NeoForgeFlwConfig.INSTANCE.client.backendConfig.lightSmoothness;
 		command.then(Commands.literal("lightSmoothness")
 				.then(Commands.argument("mode", LightSmoothnessArgument.INSTANCE)
 						.executes(context -> {
@@ -137,7 +137,7 @@ public final class FlwCommands {
 							return Command.SINGLE_SUCCESS;
 						})));
 
-		var useLightDirectionsValue = ForgeFlwConfig.INSTANCE.client.backendConfig.useLightDirections;
+		var useLightDirectionsValue = NeoForgeFlwConfig.INSTANCE.client.backendConfig.useLightDirections;
 		command.then(Commands.literal("useLightDirections")
 				.executes(context -> {
 					if (useLightDirectionsValue.get()) {

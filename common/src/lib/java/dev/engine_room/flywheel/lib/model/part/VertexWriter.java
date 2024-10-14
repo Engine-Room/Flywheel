@@ -23,48 +23,48 @@ class VertexWriter implements VertexConsumer {
 	}
 
 	@Override
-	public VertexConsumer vertex(double x, double y, double z) {
+	public VertexConsumer addVertex(float x, float y, float z) {
 		if (!filledPosition) {
 			long ptr = vertexPtr();
-			MemoryUtil.memPutFloat(ptr, (float) x);
-			MemoryUtil.memPutFloat(ptr + 4, (float) y);
-			MemoryUtil.memPutFloat(ptr + 8, (float) z);
+			MemoryUtil.memPutFloat(ptr, x);
+			MemoryUtil.memPutFloat(ptr + 4, y);
+			MemoryUtil.memPutFloat(ptr + 8, z);
 			filledPosition = true;
 		}
-		return this;
+		return endVertexIfNeeded();
 	}
 
 	@Override
-	public VertexConsumer color(int red, int green, int blue, int alpha) {
+	public VertexConsumer setColor(int red, int green, int blue, int alpha) {
 		// ignore color
-		return this;
+		return endVertexIfNeeded();
 	}
 
 	@Override
-	public VertexConsumer uv(float u, float v) {
+	public VertexConsumer setUv(float u, float v) {
 		if (!filledTexture) {
 			long ptr = vertexPtr();
 			MemoryUtil.memPutFloat(ptr + 12, u);
 			MemoryUtil.memPutFloat(ptr + 16, v);
 			filledTexture = true;
 		}
-		return this;
+		return endVertexIfNeeded();
 	}
 
 	@Override
-	public VertexConsumer overlayCoords(int u, int v) {
+	public VertexConsumer setUv1(int u, int v) {
 		// ignore overlay
-		return this;
+		return endVertexIfNeeded();
 	}
 
 	@Override
-	public VertexConsumer uv2(int u, int v) {
+	public VertexConsumer setUv2(int u, int v) {
 		// ignore light
-		return this;
+		return endVertexIfNeeded();
 	}
 
 	@Override
-	public VertexConsumer normal(float x, float y, float z) {
+	public VertexConsumer setNormal(float x, float y, float z) {
 		if (!filledNormal) {
 			long ptr = vertexPtr();
 			MemoryUtil.memPutByte(ptr + 20, DataPacker.packNormI8(x));
@@ -72,13 +72,13 @@ class VertexWriter implements VertexConsumer {
 			MemoryUtil.memPutByte(ptr + 22, DataPacker.packNormI8(z));
 			filledNormal = true;
 		}
-		return this;
+		return endVertexIfNeeded();
 	}
 
-	@Override
-	public void endVertex() {
+	public VertexConsumer endVertexIfNeeded() {
 		if (!filledPosition || !filledTexture || !filledNormal) {
-			throw new IllegalStateException("Not filled all elements of the vertex");
+			// We do not throw here as that matched what vanilla does
+			return this;
 		}
 
 		filledPosition = false;
@@ -91,14 +91,8 @@ class VertexWriter implements VertexConsumer {
 		if (byteSize > capacity) {
 			data = data.realloc(capacity * 2);
 		}
-	}
 
-	@Override
-	public void defaultColor(int red, int green, int blue, int alpha) {
-	}
-
-	@Override
-	public void unsetDefaultColor() {
+		return this;
 	}
 
 	private long vertexPtr() {

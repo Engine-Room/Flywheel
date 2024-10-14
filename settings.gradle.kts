@@ -2,8 +2,8 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         mavenCentral()
-        maven("https://maven.minecraftforge.net/") {
-            name = "MinecraftForge"
+        maven("https://maven.neoforged.net/releases/") {
+            name = "NeoForged"
         }
         maven("https://maven.architectury.dev/") {
             name = "Architectury"

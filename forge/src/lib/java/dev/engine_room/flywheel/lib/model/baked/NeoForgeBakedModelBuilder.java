@@ -12,37 +12,44 @@ import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelData;
 
-public final class ForgeBlockModelBuilder extends BlockModelBuilder {
+public final class NeoForgeBakedModelBuilder extends BakedModelBuilder {
 	@Nullable
 	private ModelData modelData;
 
-	public ForgeBlockModelBuilder(BlockState state) {
-		super(state);
+	public NeoForgeBakedModelBuilder(BakedModel bakedModel) {
+		super(bakedModel);
 	}
 
 	@Override
-	public ForgeBlockModelBuilder level(BlockAndTintGetter level) {
+	public NeoForgeBakedModelBuilder level(BlockAndTintGetter level) {
 		super.level(level);
 		return this;
 	}
 
 	@Override
-	public ForgeBlockModelBuilder poseStack(PoseStack poseStack) {
+	public NeoForgeBakedModelBuilder blockState(BlockState blockState) {
+		super.blockState(blockState);
+		return this;
+	}
+
+	@Override
+	public NeoForgeBakedModelBuilder poseStack(PoseStack poseStack) {
 		super.poseStack(poseStack);
 		return this;
 	}
 
 	@Override
-	public ForgeBlockModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public NeoForgeBakedModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
 		super.materialFunc(materialFunc);
 		return this;
 	}
 
-	public ForgeBlockModelBuilder modelData(ModelData modelData) {
+	public NeoForgeBakedModelBuilder modelData(ModelData modelData) {
 		this.modelData = modelData;
 		return this;
 	}
@@ -58,10 +65,10 @@ public final class ForgeBlockModelBuilder extends BlockModelBuilder {
 
 		var builder = ChunkLayerSortedListBuilder.<Model.ConfiguredMesh>getThreadLocal();
 
-		BakedModelBufferer.bufferBlock(ModelUtil.VANILLA_RENDERER, level, state, poseStack, modelData, (renderType, shaded, data) -> {
+		BakedModelBufferer.bufferSingle(ModelUtil.VANILLA_RENDERER.getModelRenderer(), level, bakedModel, blockState, poseStack, modelData, (renderType, shaded, data) -> {
 			Material material = materialFunc.apply(renderType, shaded);
 			if (material != null) {
-				Mesh mesh = MeshHelper.blockVerticesToMesh(data, "source=BlockModelBuilder," + "blockState=" + state + ",renderType=" + renderType + ",shaded=" + shaded);
+				Mesh mesh = MeshHelper.blockVerticesToMesh(data, "source=BakedModelBuilder," + "bakedModel=" + bakedModel + ",renderType=" + renderType + ",shaded=" + shaded);
 				builder.add(renderType, new Model.ConfiguredMesh(material, mesh));
 			}
 		});

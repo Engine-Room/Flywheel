@@ -21,7 +21,7 @@ public interface FlwLibLink {
 
 	Map<String, ModelPart> getModelPartChildren(ModelPart part);
 
-	void compileModelPart(ModelPart part, PoseStack.Pose pose, VertexConsumer consumer, int light, int overlay, float red, float green, float blue, float alpha);
+	void compileModelPart(ModelPart part, PoseStack.Pose pose, VertexConsumer consumer, int light, int overlay, int color);
 
 	Deque<PoseStack.Pose> getPoseStack(PoseStack stack);
 }

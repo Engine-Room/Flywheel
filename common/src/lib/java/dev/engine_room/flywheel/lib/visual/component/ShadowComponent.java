@@ -42,7 +42,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * The shadow will be cast on blocks at most {@code min(radius, 2 * strength)} blocks below the entity.</p>
  */
 public final class ShadowComponent implements EntityComponent {
-	private static final ResourceLocation SHADOW_TEXTURE = new ResourceLocation("textures/misc/shadow.png");
+	private static final ResourceLocation SHADOW_TEXTURE = ResourceLocation.withDefaultNamespace("textures/misc/shadow.png");
 	private static final Material SHADOW_MATERIAL = SimpleMaterial.builder()
 			.texture(SHADOW_TEXTURE)
 			.mipmap(false)

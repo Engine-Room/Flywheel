@@ -30,7 +30,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityVisual<T> implements SimpleTickableVisual, SimpleDynamicVisual {
-	private static final ResourceLocation TEXTURE = new ResourceLocation("textures/entity/minecart.png");
+	private static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/minecart.png");
 	private static final Material MATERIAL = SimpleMaterial.builder()
 			.texture(TEXTURE)
 			.mipmap(false)

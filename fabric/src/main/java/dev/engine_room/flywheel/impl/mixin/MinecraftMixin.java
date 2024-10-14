@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -30,14 +31,14 @@ abstract class MinecraftMixin {
 		FabricFlwConfig.INSTANCE.load();
 	}
 
-	@Inject(method = "method_24040", at = @At("HEAD"))
-	private void flywheel$onEndInitialResourceReload(Optional<Throwable> error, CallbackInfo ci) {
+	@Inject(method = "method_53522", at = @At("HEAD"))
+	private void flywheel$onEndInitialResourceReload(@Coerce Object gameLoadCookie, Optional<Throwable> error, CallbackInfo ci) {
 		EndClientResourceReloadCallback.EVENT.invoker()
 				.onEndClientResourceReload((Minecraft) (Object) this, resourceManager, true, error);
 	}
 
 	@Inject(method = "method_24228", at = @At("HEAD"))
-	private void flywheel$onEndManualResourceReload(boolean recovery, CompletableFuture<Void> future,
+	private void flywheel$onEndManualResourceReload(boolean recovery, @Coerce Object gameLoadCookie, CompletableFuture<Void> future,
 													Optional<Throwable> error, CallbackInfo ci) {
 		EndClientResourceReloadCallback.EVENT.invoker()
 				.onEndClientResourceReload((Minecraft) (Object) this, resourceManager, false, error);

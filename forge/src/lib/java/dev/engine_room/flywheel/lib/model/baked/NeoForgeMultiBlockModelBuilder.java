@@ -15,35 +15,35 @@ import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelData;
 
-public final class ForgeMultiBlockModelBuilder extends MultiBlockModelBuilder {
+public final class NeoForgeMultiBlockModelBuilder extends MultiBlockModelBuilder {
 	@Nullable
 	private Function<BlockPos, ModelData> modelDataLookup;
 
-	public ForgeMultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
+	public NeoForgeMultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
 		super(level, positions);
 	}
 
 	@Override
-	public ForgeMultiBlockModelBuilder poseStack(PoseStack poseStack) {
+	public NeoForgeMultiBlockModelBuilder poseStack(PoseStack poseStack) {
 		super.poseStack(poseStack);
 		return this;
 	}
 
 	@Override
-	public ForgeMultiBlockModelBuilder enableFluidRendering() {
+	public NeoForgeMultiBlockModelBuilder enableFluidRendering() {
 		super.enableFluidRendering();
 		return this;
 	}
 
 	@Override
-	public ForgeMultiBlockModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public NeoForgeMultiBlockModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
 		super.materialFunc(materialFunc);
 		return this;
 	}
 
-	public ForgeMultiBlockModelBuilder modelDataLookup(Function<BlockPos, ModelData> modelDataLookup) {
+	public NeoForgeMultiBlockModelBuilder modelDataLookup(Function<BlockPos, ModelData> modelDataLookup) {
 		this.modelDataLookup = modelDataLookup;
 		return this;
 	}

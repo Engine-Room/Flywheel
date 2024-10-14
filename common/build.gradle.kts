@@ -72,6 +72,8 @@ jarSets {
 dependencies {
     modCompileOnly("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
 
+    modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-fabric")
+
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 }
 

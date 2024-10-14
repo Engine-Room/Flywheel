@@ -96,6 +96,7 @@ class SubprojectPlugin: Plugin<Project> {
     private fun setupDependencies(project: Project) {
         project.dependencies.apply {
             val minecraft_version: String by project
+            val parchment_minecraft_version: String by project
             val parchment_version: String by project
             val loom = project.the<LoomGradleExtensionAPI>()
 
@@ -103,7 +104,7 @@ class SubprojectPlugin: Plugin<Project> {
 
             add("mappings", loom.layered {
                 officialMojangMappings()
-                parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
+                parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_version}@zip")
             })
 
             add("api", "com.google.code.findbugs:jsr305:3.0.2")
@@ -165,7 +166,7 @@ class SubprojectPlugin: Plugin<Project> {
     }
 }
 
-val processResourcesExpandFiles = listOf("pack.mcmeta", "fabric.mod.json", "META-INF/mods.toml")
+val processResourcesExpandFiles = listOf("pack.mcmeta", "fabric.mod.json", "META-INF/neoforge.mods.toml")
 
 val processResourcesExpandProperties = listOf(
     "mod_id",
@@ -179,6 +180,6 @@ val processResourcesExpandProperties = listOf(
     "minecraft_semver_version_range",
     "minecraft_maven_version_range",
     "fabric_api_version_range",
-    "forge_version_range",
+    "neoforge_version_range",
 )
 

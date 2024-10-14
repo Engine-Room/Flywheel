@@ -67,12 +67,6 @@ loom {
         add(backend, "backend-flywheel.refmap.json")
     }
 
-    forge {
-        mixinConfig("flywheel.backend.mixins.json")
-        mixinConfig("flywheel.impl.mixins.json")
-        mixinConfig("flywheel.impl.sodium.mixins.json")
-    }
-
     runs {
         configureEach {
             property("forge.logging.markers", "")
@@ -81,11 +75,15 @@ loom {
     }
 }
 
-dependencies {
-    forge("net.minecraftforge:forge:${property("minecraft_version")}-${property("forge_version")}")
+repositories {
+    maven("https://maven.neoforged.net/releases/")
+}
 
-    modCompileOnly("maven.modrinth:embeddium:${property("embeddium_version")}")
-    modCompileOnly("maven.modrinth:oculus:${property("oculus_version")}")
+dependencies {
+    neoForge("net.neoforged:neoforge:${property("neoforge_version")}")
+
+    modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-neoforge")
+    modCompileOnly("maven.modrinth:iris:${property("iris_version")}-neoforge")
 
     "forApi"(project(path = ":common", configuration = "commonApiOnly"))
     "forLib"(project(path = ":common", configuration = "commonLib"))

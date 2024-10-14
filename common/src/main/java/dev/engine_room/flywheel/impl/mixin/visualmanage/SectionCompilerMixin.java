@@ -7,11 +7,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import dev.engine_room.flywheel.lib.visualization.VisualizationHelper;
+import net.minecraft.client.renderer.chunk.SectionCompiler;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-@Mixin(targets = "net.minecraft.client.renderer.chunk.ChunkRenderDispatcher$RenderChunk$RebuildTask")
-abstract class RebuildTaskMixin {
-	@Inject(method = "handleBlockEntity(Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk$RebuildTask$CompileResults;Lnet/minecraft/world/level/block/entity/BlockEntity;)V", at = @At("HEAD"), cancellable = true)
+@Mixin(SectionCompiler.class)
+abstract class SectionCompilerMixin {
+	@Inject(method = "handleBlockEntity", at = @At("HEAD"), cancellable = true)
 	private void flywheel$tryAddBlockEntity(@Coerce Object compileResults, BlockEntity blockEntity, CallbackInfo ci) {
 		if (VisualizationHelper.tryAddBlockEntity(blockEntity)) {
 			ci.cancel();

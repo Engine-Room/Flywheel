@@ -32,8 +32,8 @@ public class FlwLibLinkImpl implements FlwLibLink {
 	}
 
 	@Override
-	public void compileModelPart(ModelPart part, PoseStack.Pose pose, VertexConsumer consumer, int light, int overlay, float red, float green, float blue, float alpha) {
-		((ModelPartAccessor) (Object) part).flywheel$compile(pose, consumer, light, overlay, red, green, blue, alpha);
+	public void compileModelPart(ModelPart part, PoseStack.Pose pose, VertexConsumer consumer, int light, int overlay, int color) {
+		((ModelPartAccessor) (Object) part).flywheel$compile(pose, consumer, light, overlay, color);
 	}
 
 	@Override

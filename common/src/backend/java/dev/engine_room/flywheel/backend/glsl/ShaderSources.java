@@ -41,7 +41,7 @@ public class ShaderSources {
 	}
 
 	private static ResourceLocation locationWithoutFlywheelPrefix(ResourceLocation loc) {
-		return new ResourceLocation(loc.getNamespace(), loc.getPath()
+		return ResourceLocation.fromNamespaceAndPath(loc.getNamespace(), loc.getPath()
 				.substring(SHADER_DIR.length()));
 	}
 

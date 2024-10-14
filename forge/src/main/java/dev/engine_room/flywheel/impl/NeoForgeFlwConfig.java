@@ -9,18 +9,18 @@ import dev.engine_room.flywheel.backend.BackendConfig;
 import dev.engine_room.flywheel.backend.compile.LightSmoothness;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
-public class ForgeFlwConfig implements FlwConfig {
-	public static final ForgeFlwConfig INSTANCE = new ForgeFlwConfig();
+public class NeoForgeFlwConfig implements FlwConfig {
+	public static final NeoForgeFlwConfig INSTANCE = new NeoForgeFlwConfig();
 
 	public final ClientConfig client;
-	private final ForgeConfigSpec clientSpec;
+	private final ModConfigSpec clientSpec;
 
-	private ForgeFlwConfig() {
-		Pair<ClientConfig, ForgeConfigSpec> clientPair = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
+	private NeoForgeFlwConfig() {
+		Pair<ClientConfig, ModConfigSpec> clientPair = new ModConfigSpec.Builder().configure(ClientConfig::new);
 		this.client = clientPair.getLeft();
 		clientSpec = clientPair.getRight();
 	}
@@ -40,7 +40,7 @@ public class ForgeFlwConfig implements FlwConfig {
 	private static Backend parseBackend(String idStr) {
 		ResourceLocation backendId;
 		try {
-			backendId = new ResourceLocation(idStr);
+			backendId = ResourceLocation.parse(idStr);
 		} catch (ResourceLocationException e) {
 			FlwImpl.CONFIG_LOGGER.warn("'backend' value '{}' is not a valid resource location", idStr);
 			return null;
@@ -70,18 +70,18 @@ public class ForgeFlwConfig implements FlwConfig {
 		return client.backendConfig;
 	}
 
-	public void registerSpecs(ModLoadingContext context) {
+	public void registerSpecs(ModContainer context) {
 		context.registerConfig(ModConfig.Type.CLIENT, clientSpec);
 	}
 
 	public static class ClientConfig {
-		public final ForgeConfigSpec.ConfigValue<String> backend;
-		public final ForgeConfigSpec.BooleanValue limitUpdates;
-		public final ForgeConfigSpec.IntValue workerThreads;
+		public final ModConfigSpec.ConfigValue<String> backend;
+		public final ModConfigSpec.BooleanValue limitUpdates;
+		public final ModConfigSpec.IntValue workerThreads;
 
 		public final ForgeBackendConfig backendConfig;
 
-		private ClientConfig(ForgeConfigSpec.Builder builder) {
+		private ClientConfig(ModConfigSpec.Builder builder) {
 			backend = builder.comment("Select the backend to use.")
 					.define("backend", Backend.REGISTRY.getIdOrThrow(BackendManager.defaultBackend()).toString());
 
@@ -100,10 +100,10 @@ public class ForgeFlwConfig implements FlwConfig {
 	}
 
 	public static class ForgeBackendConfig implements BackendConfig {
-		public final ForgeConfigSpec.EnumValue<LightSmoothness> lightSmoothness;
-		public final ForgeConfigSpec.BooleanValue useLightDirections;
+		public final ModConfigSpec.EnumValue<LightSmoothness> lightSmoothness;
+		public final ModConfigSpec.BooleanValue useLightDirections;
 
-		public ForgeBackendConfig(ForgeConfigSpec.Builder builder) {
+		public ForgeBackendConfig(ModConfigSpec.Builder builder) {
 			lightSmoothness = builder.comment("How smooth flywheel's shader-based lighting should be. May have a large performance impact.")
 					.defineEnum("lightSmoothness", LightSmoothness.SMOOTH);
 

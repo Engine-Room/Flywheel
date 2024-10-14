@@ -2,10 +2,11 @@
   "required": true,
   "minVersion": "0.8",
   "package": "dev.engine_room.flywheel.impl.mixin",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_21",
   "refmap": "flywheel.refmap.json",
   "client": [
     "BlockEntityTypeMixin",
+    "BufferBuilderAccessor",
     "ClientChunkCacheMixin",
     "EntityTypeMixin",
     "LevelMixin",
@@ -15,11 +16,10 @@
     "PoseStackAccessor",
     "PoseStackMixin",
     "fix.FixFabulousDepthMixin",
-    "fix.FixNormalScalingMixin",
     "visualmanage.BlockEntityMixin",
     "visualmanage.LevelChunkMixin",
     "visualmanage.LevelRendererMixin",
-    "visualmanage.RebuildTaskMixin"
+    "visualmanage.SectionCompilerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

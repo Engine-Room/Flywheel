@@ -8,8 +8,8 @@ public final class VertexTransformations {
 	}
 
 	public static void retexture(MutableVertexList vertexList, int index, TextureAtlasSprite sprite) {
-		vertexList.u(index, sprite.getU(vertexList.u(index) * 16));
-		vertexList.v(index, sprite.getV(vertexList.v(index) * 16));
+		vertexList.u(index, sprite.getU(vertexList.u(index)));
+		vertexList.v(index, sprite.getV(vertexList.v(index)));
 	}
 
 	public static void retexture(MutableVertexList vertexList, TextureAtlasSprite sprite) {

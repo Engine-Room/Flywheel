@@ -26,67 +26,46 @@ class TransformingVertexConsumer implements VertexConsumer {
 	}
 
 	@Override
-	public VertexConsumer vertex(double x, double y, double z) {
+	public VertexConsumer addVertex(float x, float y, float z) {
 		Matrix4f matrix = poseStack.last().pose();
-		float fx = (float) x;
-		float fy = (float) y;
-		float fz = (float) z;
-		delegate.vertex(
-				MatrixMath.transformPositionX(matrix, fx, fy, fz),
-				MatrixMath.transformPositionY(matrix, fx, fy, fz),
-				MatrixMath.transformPositionZ(matrix, fx, fy, fz));
+		delegate.addVertex(
+				MatrixMath.transformPositionX(matrix, x, y, z),
+				MatrixMath.transformPositionY(matrix, x, y, z),
+				MatrixMath.transformPositionZ(matrix, x, y, z));
 		return this;
 	}
 
 	@Override
-	public VertexConsumer color(int red, int green, int blue, int alpha) {
-		delegate.color(red, green, blue, alpha);
+	public VertexConsumer setColor(int red, int green, int blue, int alpha) {
+		delegate.setColor(red, green, blue, alpha);
 		return this;
 	}
 
 	@Override
-	public VertexConsumer uv(float u, float v) {
-		delegate.uv(u, v);
+	public VertexConsumer setUv(float u, float v) {
+		delegate.setUv(u, v);
 		return this;
 	}
 
 	@Override
-	public VertexConsumer overlayCoords(int u, int v) {
-		delegate.overlayCoords(u, v);
+	public VertexConsumer setUv1(int u, int v) {
+		delegate.setUv1(u, v);
 		return this;
 	}
 
 	@Override
-	public VertexConsumer uv2(int u, int v) {
-		delegate.uv2(u, v);
+	public VertexConsumer setUv2(int u, int v) {
+		delegate.setUv2(u, v);
 		return this;
 	}
 
 	@Override
-	public VertexConsumer normal(float x, float y, float z) {
+	public VertexConsumer setNormal(float x, float y, float z) {
 		Matrix3f matrix = poseStack.last().normal();
-		float fx = (float) x;
-		float fy = (float) y;
-		float fz = (float) z;
-		delegate.normal(
-				MatrixMath.transformNormalX(matrix, fx, fy, fz),
-				MatrixMath.transformNormalY(matrix, fx, fy, fz),
-				MatrixMath.transformNormalZ(matrix, fx, fy, fz));
+		delegate.setNormal(
+				MatrixMath.transformNormalX(matrix, x, y, z),
+				MatrixMath.transformNormalY(matrix, x, y, z),
+				MatrixMath.transformNormalZ(matrix, x, y, z));
 		return this;
-	}
-
-	@Override
-	public void endVertex() {
-		delegate.endVertex();
-	}
-
-	@Override
-	public void defaultColor(int red, int green, int blue, int alpha) {
-		delegate.defaultColor(red, green, blue, alpha);
-	}
-
-	@Override
-	public void unsetDefaultColor() {
-		delegate.unsetDefaultColor();
 	}
 }
