@@ -6,7 +6,6 @@ public enum CompatMods {
 	EMBEDDIUM("embeddium"),
 	IRIS("iris"),
 	OCULUS("oculus"),
-	RUBIDIUM("rubidium"),
 	SODIUM("sodium");
 
 	public final boolean isLoaded;

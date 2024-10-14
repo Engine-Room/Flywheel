@@ -26,6 +26,14 @@ mandatory = true
 versionRange = "${forge_version_range}"
 side = "CLIENT"
 
+# Simulates a breaks/incompatible dependency
+[[dependencies.${mod_id}]]
+modId = "rubidium"
+mandatory = false
+versionRange = "[0.0-INCOMPATIBLE]"
+ordering = "NONE"
+side = "CLIENT"
+
 [[dependencies.${mod_id}]]
 modId = "embeddium"
 mandatory = false
