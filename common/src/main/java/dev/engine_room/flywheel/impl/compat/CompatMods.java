@@ -6,6 +6,7 @@ import dev.engine_room.flywheel.impl.FlwImplXplat;
 
 public enum CompatMods {
 	SODIUM("sodium"),
+	RUBIDIUM("rubidium"),
 	EMBEDDIUM("embeddium"),
 	IRIS("iris"),
 	OCULUS("oculus");

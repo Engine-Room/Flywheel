@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.impl.compat;
+package dev.engine_room.flywheel.impl.compat.sodium;
 
 import dev.engine_room.flywheel.lib.visualization.VisualizationHelper;
 import net.caffeinemc.mods.sodium.api.blockentity.BlockEntityRenderHandler;
