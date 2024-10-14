@@ -68,7 +68,7 @@ public class FlwLibXplatImpl implements FlwLibXplat {
 	@Override
 	@Nullable
 	public ShadersModHandler.InternalHandler createIrisHandler() {
-		if (!(CompatMods.IRIS.isLoaded() || CompatMods.OCULUS.isLoaded())) {
+		if (!(CompatMods.IRIS.isLoaded || CompatMods.OCULUS.isLoaded)) {
 			return null;
 		}
 

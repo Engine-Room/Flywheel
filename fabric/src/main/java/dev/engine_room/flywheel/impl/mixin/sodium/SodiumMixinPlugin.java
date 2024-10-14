@@ -22,7 +22,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		return CompatMods.SODIUM.isLoaded() && SodiumCompatHelper.IS_SODIUM_0_5;
+		return CompatMods.SODIUM.isLoaded && SodiumCompatHelper.IS_SODIUM_0_5;
 	}
 
 	@Override

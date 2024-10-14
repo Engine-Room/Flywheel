@@ -66,7 +66,7 @@ public final class FlywheelForge {
 		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManagerImpl::getBackendString);
 		FlwImpl.init();
 
-		if (CompatMods.EMBEDDIUM.isLoaded()) {
+		if (CompatMods.EMBEDDIUM.isLoaded) {
 			EmbeddiumCompat.init();
 		}
 	}

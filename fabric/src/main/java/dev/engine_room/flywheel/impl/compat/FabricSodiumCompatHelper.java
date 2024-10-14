@@ -8,7 +8,7 @@ import net.fabricmc.loader.api.metadata.version.VersionPredicate;
 
 public class FabricSodiumCompatHelper {
 	public static void init() {
-		if (CompatMods.SODIUM.isLoaded() && !CompatMods.EMBEDDIUM.isLoaded()) {
+		if (CompatMods.SODIUM.isLoaded && !CompatMods.EMBEDDIUM.isLoaded) {
 			FabricLoader.getInstance().getModContainer("sodium").ifPresent(c -> {
 				Version sodiumVersion = c.getMetadata().getVersion();
 
