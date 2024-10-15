@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.impl;
 
+import dev.engine_room.flywheel.impl.compat.ForgeSodiumCompatHelper;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -69,6 +70,8 @@ public final class FlywheelForge {
 		if (CompatMods.EMBEDDIUM.isLoaded) {
 			EmbeddiumCompat.init();
 		}
+
+		ForgeSodiumCompatHelper.init();
 	}
 
 	private static void registerImplEventListeners(IEventBus forgeEventBus, IEventBus modEventBus) {
