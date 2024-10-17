@@ -9,6 +9,7 @@ plugins {
 val api = sourceSets.create("api")
 val lib = sourceSets.create("lib")
 val backend = sourceSets.create("backend")
+val stubs = sourceSets.create("stubs")
 val main = sourceSets.getByName("main")
 
 transitiveSourceSets {
@@ -25,8 +26,11 @@ transitiveSourceSets {
         rootCompile()
         compile(api, lib)
     }
+    sourceSet(stubs) {
+        rootCompile()
+    }
     sourceSet(main) {
-        compile(api, lib, backend)
+        compile(api, lib, backend, stubs)
     }
     sourceSet(sourceSets.getByName("test")) {
         implementation(api, lib, backend)
@@ -42,6 +46,7 @@ jarSets {
     outgoing("commonApiOnly", api)
     outgoing("commonLib", lib)
     outgoing("commonBackend", backend)
+    outgoing("commonStubs", stubs)
     outgoing("commonImpl", main)
 
     // For publishing.
@@ -71,6 +76,8 @@ jarSets {
 
 dependencies {
     modCompileOnly("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
+
+    modCompileOnly(":sodium-fabric-1.20.1-0.6.0-intermediary-mappings")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 }

@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.impl;
 
+import dev.engine_room.flywheel.impl.compat.ForgeSodiumCompatHelper;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -8,6 +9,8 @@ import dev.engine_room.flywheel.api.event.EndClientResourceReloadEvent;
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererEvent;
 import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
+import dev.engine_room.flywheel.impl.compat.CompatMods;
+import dev.engine_room.flywheel.impl.compat.EmbeddiumCompat;
 import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
 import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
 import dev.engine_room.flywheel.lib.util.LevelAttached;
@@ -63,6 +66,12 @@ public final class FlywheelForge {
 
 		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManagerImpl::getBackendString);
 		FlwImpl.init();
+
+		if (CompatMods.EMBEDDIUM.isLoaded) {
+			EmbeddiumCompat.init();
+		}
+
+		ForgeSodiumCompatHelper.init();
 	}
 
 	private static void registerImplEventListeners(IEventBus forgeEventBus, IEventBus modEventBus) {

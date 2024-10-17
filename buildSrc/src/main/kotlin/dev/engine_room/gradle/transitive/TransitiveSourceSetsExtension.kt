@@ -4,6 +4,7 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.SourceSet
+import java.util.*
 
 open class TransitiveSourceSetsExtension(private val project: Project) {
     var compileClasspath: FileCollection? = null
@@ -25,7 +26,7 @@ open class TransitiveSourceSetsExtension(private val project: Project) {
 
     fun createCompileConfigurations() {
         val configs = transitives.mapValues { (sourceSet, _) ->
-            project.configurations.create("for${sourceSet.name.capitalize()}") {
+            project.configurations.create("for${sourceSet.name.replaceFirstChar { it.uppercase() }}") {
                 isCanBeConsumed = true
                 isCanBeResolved = false
             }
@@ -43,7 +44,7 @@ open class TransitiveSourceSetsExtension(private val project: Project) {
 
     fun createRuntimeConfigurations() {
         val configs = transitives.mapValues { (sourceSet, _) ->
-            project.configurations.create("run${sourceSet.name.capitalize()}") {
+            project.configurations.create("run${sourceSet.name.replaceFirstChar { it.uppercase() }}") {
                 isCanBeConsumed = true
                 isCanBeResolved = false
             }
