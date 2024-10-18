@@ -5,8 +5,8 @@
 #include "flywheel:internal/indirect/light.glsl"
 #include "flywheel:internal/indirect/matrices.glsl"
 
-layout(std430, binding = _FLW_DRAW_INSTANCE_INDEX_BUFFER_BINDING) restrict readonly buffer TargetBuffer {
-    uint _flw_instanceIndices[];
+layout(std430, binding = _FLW_DRAW_INSTANCE_INDEX_BUFFER_BINDING) restrict readonly buffer DrawIndexBuffer {
+    uint _flw_drawIndices[];
 };
 
 layout(std430, binding = _FLW_DRAW_BUFFER_BINDING) restrict readonly buffer DrawBuffer {
@@ -21,7 +21,13 @@ layout(std430, binding = _FLW_MATRIX_BUFFER_BINDING) restrict buffer MatrixBuffe
 
 uniform uint _flw_baseDraw;
 
+// We read the visibility buffer for all culling groups into a single shared buffer.
+// This offset is used to know where each culling group starts.
+uniform uint _flw_visibilityWriteOffsetInstances = 0;
+
 flat out uvec2 _flw_packedMaterial;
+
+flat out uint _flw_instanceID;
 
 #if __VERSION__ < 460
 #define flw_baseInstance gl_BaseInstanceARB
@@ -46,10 +52,13 @@ void main() {
     #ifdef _FLW_CRUMBLING
     uint instanceIndex = flw_baseInstance;
     #else
-    uint instanceIndex = _flw_instanceIndices[flw_baseInstance + gl_InstanceID];
+    uint instanceIndex = _flw_drawIndices[flw_baseInstance + gl_InstanceID];
     #endif
 
     FlwInstance instance = _flw_unpackInstance(instanceIndex);
 
-    _flw_main(instance, instanceIndex);
+    _flw_main(instance);
+
+    // Add 1 because a 0 instance id means null.
+    _flw_instanceID = _flw_visibilityWriteOffsetInstances + instanceIndex + 1;
 }

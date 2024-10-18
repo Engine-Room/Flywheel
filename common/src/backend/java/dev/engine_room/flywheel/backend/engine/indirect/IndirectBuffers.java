@@ -11,7 +11,7 @@ import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 
 public class IndirectBuffers {
 	// Number of vbos created.
-	public static final int BUFFER_COUNT = 5;
+	public static final int BUFFER_COUNT = 7;
 
 	public static final long INT_SIZE = Integer.BYTES;
 	public static final long PTR_SIZE = Pointer.POINTER_SIZE;
@@ -30,6 +30,8 @@ public class IndirectBuffers {
 	private static final long BUFFERS_SIZE_BYTES = SIZE_OFFSET + BUFFER_COUNT * PTR_SIZE;
 
 	// Offsets to the vbos
+	private static final long PASS_TWO_DISPATCH_HANDLE_OFFSET = HANDLE_OFFSET + BufferBindings.PASS_TWO_DISPATCH * INT_SIZE;
+	private static final long PASS_TWO_INSTANCE_INDEX_HANDLE_OFFSET = HANDLE_OFFSET + BufferBindings.PASS_TWO_INSTANCE_INDEX * INT_SIZE;
 	private static final long PAGE_FRAME_DESCRIPTOR_HANDLE_OFFSET = HANDLE_OFFSET + BufferBindings.PAGE_FRAME_DESCRIPTOR * INT_SIZE;
 	private static final long INSTANCE_HANDLE_OFFSET = HANDLE_OFFSET + BufferBindings.INSTANCE * INT_SIZE;
 	private static final long DRAW_INSTANCE_INDEX_HANDLE_OFFSET = HANDLE_OFFSET + BufferBindings.DRAW_INSTANCE_INDEX * INT_SIZE;
@@ -37,6 +39,8 @@ public class IndirectBuffers {
 	private static final long DRAW_HANDLE_OFFSET = HANDLE_OFFSET + BufferBindings.DRAW * INT_SIZE;
 
 	// Offsets to the sizes
+	private static final long PASS_TWO_DISPATCH_SIZE_OFFSET = SIZE_OFFSET + BufferBindings.PASS_TWO_DISPATCH * PTR_SIZE;
+	private static final long PASS_TWO_INSTANCE_INDEX_SIZE_OFFSET = SIZE_OFFSET + BufferBindings.PASS_TWO_INSTANCE_INDEX * PTR_SIZE;
 	private static final long PAGE_FRAME_DESCRIPTOR_SIZE_OFFSET = SIZE_OFFSET + BufferBindings.PAGE_FRAME_DESCRIPTOR * PTR_SIZE;
 	private static final long INSTANCE_SIZE_OFFSET = SIZE_OFFSET + BufferBindings.INSTANCE * PTR_SIZE;
 	private static final long DRAW_INSTANCE_INDEX_SIZE_OFFSET = SIZE_OFFSET + BufferBindings.DRAW_INSTANCE_INDEX * PTR_SIZE;
@@ -62,6 +66,8 @@ public class IndirectBuffers {
 	 */
 	private final MemoryBlock multiBindBlock;
 
+	public final ResizableStorageBuffer passTwoDispatch;
+	public final ResizableStorageArray passTwoInstanceIndex;
 	public final ObjectStorage objectStorage;
 	public final ResizableStorageArray drawInstanceIndex;
 	public final ResizableStorageArray model;
@@ -70,25 +76,34 @@ public class IndirectBuffers {
 	IndirectBuffers(long instanceStride) {
 		this.multiBindBlock = MemoryBlock.calloc(BUFFERS_SIZE_BYTES, 1);
 
+		passTwoDispatch = new ResizableStorageBuffer();
+		passTwoInstanceIndex = new ResizableStorageArray(INT_SIZE, INSTANCE_GROWTH_FACTOR);
 		objectStorage = new ObjectStorage(instanceStride);
 		drawInstanceIndex = new ResizableStorageArray(INT_SIZE, INSTANCE_GROWTH_FACTOR);
 		model = new ResizableStorageArray(MODEL_STRIDE, MODEL_GROWTH_FACTOR);
 		draw = new ResizableStorageArray(DRAW_COMMAND_STRIDE, DRAW_GROWTH_FACTOR);
+
+		passTwoDispatch.ensureCapacity(INT_SIZE * 4);
 	}
 
 	void updateCounts(int instanceCount, int modelCount, int drawCount) {
 		drawInstanceIndex.ensureCapacity(instanceCount);
+		passTwoInstanceIndex.ensureCapacity(instanceCount);
 		model.ensureCapacity(modelCount);
 		draw.ensureCapacity(drawCount);
 
 		final long ptr = multiBindBlock.ptr();
 
+		MemoryUtil.memPutInt(ptr + PASS_TWO_DISPATCH_HANDLE_OFFSET, passTwoDispatch.handle());
+		MemoryUtil.memPutInt(ptr + PASS_TWO_INSTANCE_INDEX_HANDLE_OFFSET, passTwoInstanceIndex.handle());
 		MemoryUtil.memPutInt(ptr + PAGE_FRAME_DESCRIPTOR_HANDLE_OFFSET, objectStorage.frameDescriptorBuffer.handle());
 		MemoryUtil.memPutInt(ptr + INSTANCE_HANDLE_OFFSET, objectStorage.objectBuffer.handle());
 		MemoryUtil.memPutInt(ptr + DRAW_INSTANCE_INDEX_HANDLE_OFFSET, drawInstanceIndex.handle());
 		MemoryUtil.memPutInt(ptr + MODEL_HANDLE_OFFSET, model.handle());
 		MemoryUtil.memPutInt(ptr + DRAW_HANDLE_OFFSET, draw.handle());
 
+		MemoryUtil.memPutAddress(ptr + PASS_TWO_DISPATCH_SIZE_OFFSET, passTwoDispatch.capacity());
+		MemoryUtil.memPutAddress(ptr + PASS_TWO_INSTANCE_INDEX_SIZE_OFFSET, INT_SIZE * instanceCount);
 		MemoryUtil.memPutAddress(ptr + PAGE_FRAME_DESCRIPTOR_SIZE_OFFSET, objectStorage.frameDescriptorBuffer.capacity());
 		MemoryUtil.memPutAddress(ptr + INSTANCE_SIZE_OFFSET, objectStorage.objectBuffer.capacity());
 		MemoryUtil.memPutAddress(ptr + DRAW_INSTANCE_INDEX_SIZE_OFFSET, INT_SIZE * instanceCount);
@@ -96,16 +111,25 @@ public class IndirectBuffers {
 		MemoryUtil.memPutAddress(ptr + DRAW_SIZE_OFFSET, DRAW_COMMAND_STRIDE * drawCount);
 	}
 
-	public void bindForCull() {
-		multiBind(0, 4);
+	public void bindForCullPassOne() {
+		multiBind(0, 6);
+	}
+
+	public void bindForCullPassTwo() {
+		multiBind(0, 6);
+		GlBufferType.DISPATCH_INDIRECT_BUFFER.bind(passTwoDispatch.handle());
 	}
 
 	public void bindForApply() {
-		multiBind(3, 2);
+		multiBind(5, 2);
+	}
+
+	public void bindForModelReset() {
+		multiBind(5, 1);
 	}
 
 	public void bindForDraw() {
-		multiBind(1, 4);
+		multiBind(3, 4);
 		GlBufferType.DRAW_INDIRECT_BUFFER.bind(draw.handle());
 	}
 
@@ -113,12 +137,15 @@ public class IndirectBuffers {
 	 * Bind all buffers except the draw command buffer.
 	 */
 	public void bindForCrumbling() {
-		multiBind(1, 4);
+		multiBind(3, 3);
 	}
 
 	private void multiBind(int base, int count) {
 		final long ptr = multiBindBlock.ptr();
-		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, base, count, ptr + base * INT_SIZE, ptr + OFFSET_OFFSET + base * PTR_SIZE, ptr + SIZE_OFFSET + base * PTR_SIZE);
+		long handlePtr = ptr + HANDLE_OFFSET + base * INT_SIZE;
+		long offsetPtr = ptr + OFFSET_OFFSET + base * PTR_SIZE;
+		long sizePtr = ptr + SIZE_OFFSET + base * PTR_SIZE;
+		nglBindBuffersRange(GL_SHADER_STORAGE_BUFFER, base, count, handlePtr, offsetPtr, sizePtr);
 	}
 
 	public void delete() {
@@ -128,5 +155,7 @@ public class IndirectBuffers {
 		drawInstanceIndex.delete();
 		model.delete();
 		draw.delete();
+		passTwoDispatch.delete();
+		passTwoInstanceIndex.delete();
 	}
 }

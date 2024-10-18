@@ -4,6 +4,7 @@ import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
 import static org.lwjgl.opengl.GL30.glBindBufferRange;
 import static org.lwjgl.opengl.GL40.glDrawElementsIndirect;
+import static org.lwjgl.opengl.GL42.GL_BUFFER_UPDATE_BARRIER_BIT;
 import static org.lwjgl.opengl.GL42.glMemoryBarrier;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BARRIER_BIT;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
@@ -11,6 +12,8 @@ import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.mojang.blaze3d.platform.GlStateManager;
 
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
@@ -30,6 +33,7 @@ import dev.engine_room.flywheel.backend.engine.MeshPool;
 import dev.engine_room.flywheel.backend.engine.TextureBinder;
 import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
+import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
 import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBufferType;
@@ -49,6 +53,9 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	private final MatrixBuffer matrixBuffer;
 
 	private final DepthPyramid depthPyramid;
+	private final VisibilityBuffer visibilityBuffer;
+
+	private int totalPagesLastFrame = 0;
 
 	private boolean needsBarrier = false;
 
@@ -66,6 +73,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		matrixBuffer = new MatrixBuffer();
 
 		depthPyramid = new DepthPyramid(programs);
+		visibilityBuffer = new VisibilityBuffer(programs);
 	}
 
 	@Override
@@ -90,7 +98,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	}
 
 	public void render(VisualType visualType) {
-		if (!hasVisualType(visualType)) {
+		// FIXME: Two pass occlusion prefers to render everything at once
+		if (visualType != VisualType.BLOCK_ENTITY) {
 			return;
 		}
 
@@ -101,17 +110,71 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		matrixBuffer.bind();
 		Uniforms.bindAll();
 
-		if (needsBarrier) {
-			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-			needsBarrier = false;
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
+
+		visibilityBuffer.bind();
+
+		for (var group1 : cullingGroups.values()) {
+			group1.dispatchCull();
 		}
 
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+		dispatchApply();
+
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+		visibilityBuffer.attach();
+
+		submitDraws();
+
+		depthPyramid.generate();
+
+		programs.getZeroModelProgram()
+				.bind();
+
 		for (var group : cullingGroups.values()) {
-			group.submit(visualType);
+			group.dispatchModelReset();
 		}
+
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+		GlTextureUnit.T0.makeActive();
+		GlStateManager._bindTexture(depthPyramid.pyramidTextureId);
+
+		for (var group1 : cullingGroups.values()) {
+			group1.dispatchCullPassTwo();
+		}
+
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+		dispatchApply();
+
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+		submitDraws();
 
 		MaterialRenderState.reset();
 		TextureBinder.resetLightAndOverlay();
+
+		visibilityBuffer.detach();
+	}
+
+	private void dispatchApply() {
+		programs.getApplyProgram()
+				.bind();
+
+		for (var group1 : cullingGroups.values()) {
+			group1.dispatchApply();
+		}
+	}
+
+	private void submitDraws() {
+		for (var group : cullingGroups.values()) {
+			group.submit(VisualType.BLOCK_ENTITY);
+			group.submit(VisualType.ENTITY);
+			group.submit(VisualType.EFFECT);
+		}
 	}
 
 	@Override
@@ -122,11 +185,19 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.flushInstancers();
 		}
 
+		visibilityBuffer.read(totalPagesLastFrame);
+		visibilityBuffer.clear();
+
 		cullingGroups.values()
 				.removeIf(IndirectCullingGroup::checkEmptyAndDelete);
 
 		instancers.values()
 				.removeIf(instancer -> instancer.instanceCount() == 0);
+
+		int totalPagesThisFrame = 0;
+		for (var group : cullingGroups.values()) {
+			totalPagesThisFrame += group.flipVisibilityOffsets(totalPagesThisFrame);
+		}
 
 		meshPool.flush();
 
@@ -142,31 +213,12 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		stagingBuffer.flush();
 
-		depthPyramid.generate();
-
 		// We could probably save some driver calls here when there are
 		// actually zero instances, but that feels like a very rare case
 
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-		matrixBuffer.bind();
-
-		depthPyramid.bindForCull();
-
-		for (var group : cullingGroups.values()) {
-			group.dispatchCull();
-		}
-
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-		programs.getApplyProgram()
-				.bind();
-
-		for (var group : cullingGroups.values()) {
-			group.dispatchApply();
-		}
-
 		needsBarrier = true;
+
+		totalPagesLastFrame = totalPagesThisFrame;
 	}
 
 	@Override
@@ -186,6 +238,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		programs.release();
 
 		depthPyramid.delete();
+
+		visibilityBuffer.delete();
 	}
 
 	public void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks) {

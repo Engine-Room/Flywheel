@@ -22,6 +22,8 @@ public class StagingBuffer {
 	private static final int STORAGE_FLAGS = GL45C.GL_MAP_PERSISTENT_BIT | GL45C.GL_MAP_WRITE_BIT | GL45C.GL_CLIENT_STORAGE_BIT;
 	private static final int MAP_FLAGS = GL45C.GL_MAP_PERSISTENT_BIT | GL45C.GL_MAP_WRITE_BIT | GL45C.GL_MAP_FLUSH_EXPLICIT_BIT | GL45C.GL_MAP_INVALIDATE_BUFFER_BIT;
 
+	private static final int SSBO_ALIGNMENT = GL45.glGetInteger(GL45.GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT);
+
 	private final int vbo;
 	private final long map;
 	private final long capacity;
@@ -252,7 +254,6 @@ public class StagingBuffer {
 				.bind();
 
 		// These bindings don't change between dstVbos.
-		GL45.glBindBufferBase(GL45C.GL_SHADER_STORAGE_BUFFER, 0, scatterBuffer.handle());
 		GL45.glBindBufferBase(GL45C.GL_SHADER_STORAGE_BUFFER, 1, vbo);
 
 		int dstVbo;
@@ -274,7 +275,24 @@ public class StagingBuffer {
 	}
 
 	private void dispatchScatter(int dstVbo) {
-		scatterBuffer.upload(scatterList.ptr(), scatterList.usedBytes());
+		var scatterSize = scatterList.usedBytes();
+
+		long alignedPos = pos + SSBO_ALIGNMENT - 1 - (pos + SSBO_ALIGNMENT - 1) % SSBO_ALIGNMENT;
+
+		long remaining = capacity - alignedPos;
+		if (scatterSize <= remaining && scatterSize <= totalAvailable) {
+			MemoryUtil.memCopy(scatterList.ptr(), map + alignedPos, scatterSize);
+			GL45.glBindBufferRange(GL45C.GL_SHADER_STORAGE_BUFFER, 0, vbo, alignedPos, scatterSize);
+
+			long alignmentCost = alignedPos - pos;
+
+			usedCapacity += scatterSize + alignmentCost;
+			totalAvailable -= scatterSize + alignmentCost;
+			pos += scatterSize + alignmentCost;
+		} else {
+			scatterBuffer.upload(scatterList.ptr(), scatterSize);
+			GL45.glBindBufferBase(GL45C.GL_SHADER_STORAGE_BUFFER, 0, scatterBuffer.handle());
+		}
 
 		GL45.glBindBufferBase(GL45C.GL_SHADER_STORAGE_BUFFER, 2, dstVbo);
 

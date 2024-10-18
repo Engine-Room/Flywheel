@@ -26,12 +26,15 @@ import net.minecraft.resources.ResourceLocation;
 
 public class IndirectPrograms extends AtomicReferenceCounted {
 	private static final ResourceLocation CULL_SHADER_API_IMPL = Flywheel.rl("internal/indirect/cull_api_impl.glsl");
-	private static final ResourceLocation CULL_SHADER_MAIN = Flywheel.rl("internal/indirect/cull.glsl");
+	private static final ResourceLocation CULL_SHADER_MAIN = Flywheel.rl("internal/indirect/early_cull.glsl");
+	private static final ResourceLocation PASS2_SHADER_MAIN = Flywheel.rl("internal/indirect/late_cull.glsl");
 	private static final ResourceLocation APPLY_SHADER_MAIN = Flywheel.rl("internal/indirect/apply.glsl");
 	private static final ResourceLocation SCATTER_SHADER_MAIN = Flywheel.rl("internal/indirect/scatter.glsl");
+	private static final ResourceLocation READ_VISIBILITY_SHADER_MAIN = Flywheel.rl("internal/indirect/read_visibility.glsl");
+	private static final ResourceLocation ZERO_MODELS_SHADER_MAIN = Flywheel.rl("internal/indirect/zero_models.glsl");
 	private static final ResourceLocation DOWNSAMPLE_FIRST = Flywheel.rl("internal/indirect/downsample_first.glsl");
 	private static final ResourceLocation DOWNSAMPLE_SECOND = Flywheel.rl("internal/indirect/downsample_second.glsl");
-	public static final List<ResourceLocation> UTIL_SHADERS = List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN, DOWNSAMPLE_FIRST, DOWNSAMPLE_SECOND);
+	public static final List<ResourceLocation> UTIL_SHADERS = List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN, READ_VISIBILITY_SHADER_MAIN, ZERO_MODELS_SHADER_MAIN, DOWNSAMPLE_FIRST, DOWNSAMPLE_SECOND);
 
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private static final Compile<ResourceLocation> UTIL = new Compile<>();
@@ -44,11 +47,13 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 	private final PipelineCompiler pipeline;
 	private final CompilationHarness<InstanceType<?>> culling;
+	private final CompilationHarness<InstanceType<?>> cullPassTwo;
 	private final CompilationHarness<ResourceLocation> utils;
 
-	private IndirectPrograms(PipelineCompiler pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<ResourceLocation> utils) {
+	private IndirectPrograms(PipelineCompiler pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<InstanceType<?>> cullPassTwo, CompilationHarness<ResourceLocation> utils) {
 		this.pipeline = pipeline;
 		this.culling = culling;
+		this.cullPassTwo = cullPassTwo;
 		this.utils = utils;
 	}
 
@@ -86,10 +91,11 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		}
 
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, vertexComponents, fragmentComponents, EXTENSIONS);
-		var cullingCompiler = createCullingCompiler(sources);
+		var pass1Compiler = createCullingCompiler(sources, CULL_SHADER_MAIN, "early_cull");
+		var pass2Compiler = createCullingCompiler(sources, PASS2_SHADER_MAIN, "late_cull");
 		var utilCompiler = createUtilCompiler(sources);
 
-		IndirectPrograms newInstance = new IndirectPrograms(pipelineCompiler, cullingCompiler, utilCompiler);
+		IndirectPrograms newInstance = new IndirectPrograms(pipelineCompiler, pass1Compiler, pass2Compiler, utilCompiler);
 
 		setInstance(newInstance);
 	}
@@ -97,19 +103,19 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	/**
 	 * A compiler for cull shaders, parameterized by the instance type.
 	 */
-	private static CompilationHarness<InstanceType<?>> createCullingCompiler(ShaderSources sources) {
+	private static CompilationHarness<InstanceType<?>> createCullingCompiler(ShaderSources sources, ResourceLocation main, String name) {
 		return CULL.program()
 				.link(CULL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.COMPUTE)
-						.nameMapper(instanceType -> "culling/" + ResourceUtil.toDebugFileNameNoExtension(instanceType.cullShader()))
+						.nameMapper(instanceType -> name + "/" + ResourceUtil.toDebugFileNameNoExtension(instanceType.cullShader()))
 						.requireExtensions(COMPUTE_EXTENSIONS)
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(CULL_SHADER_API_IMPL)
 						.withComponent(InstanceStructComponent::new)
 						.withResource(InstanceType::cullShader)
 						.withComponent(SsboInstanceComponent::new)
-						.withResource(CULL_SHADER_MAIN))
+						.withResource(main))
 				.postLink((key, program) -> Uniforms.setUniformBlockBindings(program))
-				.harness("culling", sources);
+				.harness(name, sources);
 	}
 
 	/**
@@ -156,8 +162,16 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		return culling.get(instanceType);
 	}
 
+	public GlProgram getCullPassTwoProgram(InstanceType<?> instanceType) {
+		return cullPassTwo.get(instanceType);
+	}
+
 	public GlProgram getApplyProgram() {
 		return utils.get(APPLY_SHADER_MAIN);
+	}
+
+	public GlProgram getZeroModelProgram() {
+		return utils.get(ZERO_MODELS_SHADER_MAIN);
 	}
 
 	public GlProgram getScatterProgram() {
@@ -172,10 +186,15 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		return utils.get(DOWNSAMPLE_SECOND);
 	}
 
+	public GlProgram getReadVisibilityProgram() {
+		return utils.get(READ_VISIBILITY_SHADER_MAIN);
+	}
+
 	@Override
 	protected void _delete() {
 		pipeline.delete();
 		culling.delete();
+		cullPassTwo.delete();
 		utils.delete();
 	}
 }
