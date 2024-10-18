@@ -7,16 +7,6 @@
 
 layout(local_size_x = 32) in;
 
-uniform uint _flw_visibilityReadOffsetPages;
-
-layout(std430, binding = _FLW_PASS_TWO_DISPATCH_BUFFER_BINDING) restrict buffer PassTwoDispatchBuffer {
-    _FlwLateCullDispatch _flw_lateCullDispatch;
-};
-
-layout(std430, binding = _FLW_PASS_TWO_INSTANCE_INDEX_BUFFER_BINDING) restrict writeonly buffer PassTwoIndexBuffer {
-    uint _flw_passTwoIndices[];
-};
-
 layout(std430, binding = _FLW_DRAW_INSTANCE_INDEX_BUFFER_BINDING) restrict writeonly buffer DrawIndexBuffer {
     uint _flw_drawIndices[];
 };
@@ -31,7 +21,7 @@ layout(std430, binding = _FLW_PAGE_FRAME_DESCRIPTOR_BUFFER_BINDING) restrict rea
 };
 
 layout(std430, binding = _FLW_LAST_FRAME_VISIBILITY_BUFFER_BINDING) restrict readonly buffer LastFrameVisibilityBuffer {
-    uint _flw_lastFrameVisibility[];
+    uint _flw_visibility[];
 };
 
 layout(std430, binding = _FLW_MODEL_BUFFER_BINDING) restrict buffer ModelBuffer {
@@ -74,6 +64,10 @@ bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
     return _flw_testSphere(center, radius);
 }
 
+// TODO: There's an opportunity here to write out the transformed bounding spheres to a buffer and use them in pass 2,
+//  instead of pulling the entire instance again. It would save a lot of memory bandwidth and matrix multiplications in
+//  pass 2, but it would also be a good bit of writes in pass 1. It's worth investigating, but it would be nice to have
+//  nsight trace working to be more sure.
 void main() {
     uint pageIndex = gl_WorkGroupID.x;
 
@@ -97,26 +91,12 @@ void main() {
         return;
     }
 
-    uint pageVisibility = _flw_lastFrameVisibility[_flw_visibilityReadOffsetPages + pageIndex];
+    uint pageVisibility = _flw_visibility[pageIndex];
 
     if ((pageVisibility & (1u << gl_LocalInvocationID.x)) != 0u) {
         // This instance was visibile last frame, it should be rendered early.
         uint localIndex = atomicAdd(_flw_models[modelIndex].instanceCount, 1);
         uint targetIndex = _flw_models[modelIndex].baseInstance + localIndex;
         _flw_drawIndices[targetIndex] = instanceIndex;
-    } else {
-        // Try again later to see if it's been disoccluded.
-        uint targetIndex = atomicAdd(_flw_lateCullDispatch.threadCount, 1);
-        _flw_passTwoIndices[targetIndex] = instanceIndex;
-
-        if (targetIndex % 32u == 0u) {
-            // This thread wrote an index that will be at the start of a new workgroup later
-            atomicAdd(_flw_lateCullDispatch.x, 1);
-
-            if (targetIndex == 0) {
-                _flw_lateCullDispatch.y = 1;
-                _flw_lateCullDispatch.z = 1;
-            }
-        }
     }
 }

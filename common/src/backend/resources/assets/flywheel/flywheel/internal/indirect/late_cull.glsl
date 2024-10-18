@@ -7,15 +7,6 @@
 
 layout(local_size_x = 32) in;
 
-
-layout(std430, binding = _FLW_PASS_TWO_DISPATCH_BUFFER_BINDING) restrict buffer PassTwoDispatchBuffer {
-    _FlwLateCullDispatch _flw_lateCullDispatch;
-};
-
-layout(std430, binding = _FLW_PASS_TWO_INSTANCE_INDEX_BUFFER_BINDING) restrict readonly buffer PassTwoIndexBuffer {
-    uint _flw_passTwoIndices[];
-};
-
 layout(std430, binding = _FLW_DRAW_INSTANCE_INDEX_BUFFER_BINDING) restrict writeonly buffer DrawIndexBuffer {
     uint _flw_drawIndices[];
 };
@@ -29,6 +20,10 @@ const uint _FLW_MODEL_INDEX_MASK = 0x3FFFFFF;
 
 layout(std430, binding = _FLW_PAGE_FRAME_DESCRIPTOR_BUFFER_BINDING) restrict readonly buffer PageFrameDescriptorBuffer {
     uint _flw_pageFrameDescriptors[];
+};
+
+layout(std430, binding = _FLW_LAST_FRAME_VISIBILITY_BUFFER_BINDING) restrict buffer LastFrameVisibilityBuffer {
+    uint _flw_visibility[];
 };
 
 layout(std430, binding = _FLW_MODEL_BUFFER_BINDING) restrict buffer ModelBuffer {
@@ -64,22 +59,20 @@ bool projectSphere(vec3 c, float r, float znear, float P00, float P11, out vec4 
     return true;
 }
 
-bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
-    uint matrixIndex = _flw_models[modelIndex].matrixIndex;
-    BoundingSphere sphere = _flw_models[modelIndex].boundingSphere;
+// Disgustingly vectorized sphere frustum intersection taking advantage of ahead of time packing.
+// Only uses 6 fmas and some boolean ops.
+// See also:
+// flywheel:uniform/flywheel.glsl
+// dev.engine_room.flywheel.lib.math.MatrixMath.writePackedFrustumPlanes
+// org.joml.FrustumIntersection.testSphere
+bool _flw_testSphere(vec3 center, float radius) {
+    bvec4 xyInside = greaterThanEqual(fma(flw_frustumPlanes.xyX, center.xxxx, fma(flw_frustumPlanes.xyY, center.yyyy, fma(flw_frustumPlanes.xyZ, center.zzzz, flw_frustumPlanes.xyW))), -radius.xxxx);
+    bvec2 zInside = greaterThanEqual(fma(flw_frustumPlanes.zX, center.xx, fma(flw_frustumPlanes.zY, center.yy, fma(flw_frustumPlanes.zZ, center.zz, flw_frustumPlanes.zW))), -radius.xx);
 
-    vec3 center;
-    float radius;
-    _flw_unpackBoundingSphere(sphere, center, radius);
+    return all(xyInside) && all(zInside);
+}
 
-    FlwInstance instance = _flw_unpackInstance(instanceIndex);
-
-    flw_transformBoundingSphere(instance, center, radius);
-
-    if (matrixIndex > 0) {
-        transformBoundingSphere(_flw_matrices[matrixIndex].pose, center, radius);
-    }
-
+bool _flw_hizTest(vec3 center, float radius) {
     transformBoundingSphere(flw_view, center, radius);
 
     vec4 aabb;
@@ -116,22 +109,63 @@ bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
     return true;
 }
 
+bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
+    uint matrixIndex = _flw_models[modelIndex].matrixIndex;
+    BoundingSphere sphere = _flw_models[modelIndex].boundingSphere;
+
+    vec3 center;
+    float radius;
+    _flw_unpackBoundingSphere(sphere, center, radius);
+
+    FlwInstance instance = _flw_unpackInstance(instanceIndex);
+
+    flw_transformBoundingSphere(instance, center, radius);
+
+    if (matrixIndex > 0) {
+        transformBoundingSphere(_flw_matrices[matrixIndex].pose, center, radius);
+    }
+
+    bool visible = _flw_testSphere(center, radius);
+
+    if (visible) {
+        visible = visible && _flw_hizTest(center, radius);
+    }
+
+    return visible;
+}
+
 void main() {
-    if (gl_GlobalInvocationID.x >= _flw_lateCullDispatch.threadCount) {
+    uint pageIndex = gl_WorkGroupID.x;
+
+    if (pageIndex >= _flw_pageFrameDescriptors.length()) {
         return;
     }
 
-    uint instanceIndex = _flw_passTwoIndices[gl_GlobalInvocationID.x];
-
-    uint pageIndex = instanceIndex >> 5;
-
     uint packedModelIndexAndCount = _flw_pageFrameDescriptors[pageIndex];
+
+    uint pageInstanceCount = packedModelIndexAndCount >> _FLW_PAGE_COUNT_OFFSET;
+
+    if (gl_LocalInvocationID.x >= pageInstanceCount) {
+        return;
+    }
+
+    uint instanceIndex = gl_GlobalInvocationID.x;
 
     uint modelIndex = packedModelIndexAndCount & _FLW_MODEL_INDEX_MASK;
 
-    if (_flw_isVisible(instanceIndex, modelIndex)) {
+    bool visible = _flw_isVisible(instanceIndex, modelIndex);
+    bool visibleLastFrame = (_flw_visibility[pageIndex] & (1u << gl_LocalInvocationID.x)) != 0u;
+
+    if (visible && !visibleLastFrame) {
         uint localIndex = atomicAdd(_flw_models[modelIndex].instanceCount, 1);
         uint targetIndex = _flw_models[modelIndex].baseInstance + localIndex;
         _flw_drawIndices[targetIndex] = instanceIndex;
+    }
+
+    // FIXME: need a non-subgroup path
+    uvec4 visibility = subgroupBallot(visible);
+
+    if (subgroupElect()) {
+        _flw_visibility[pageIndex] = visibility.x;
     }
 }

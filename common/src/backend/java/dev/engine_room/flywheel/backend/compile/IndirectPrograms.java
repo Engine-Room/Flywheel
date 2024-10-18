@@ -109,6 +109,8 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 						.nameMapper(instanceType -> name + "/" + ResourceUtil.toDebugFileNameNoExtension(instanceType.cullShader()))
 						.requireExtensions(COMPUTE_EXTENSIONS)
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
+						.enableExtension("GL_KHR_shader_subgroup_basic")
+						.enableExtension("GL_KHR_shader_subgroup_ballot")
 						.withResource(CULL_SHADER_API_IMPL)
 						.withComponent(InstanceStructComponent::new)
 						.withResource(InstanceType::cullShader)

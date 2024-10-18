@@ -6,15 +6,12 @@ import static org.lwjgl.opengl.GL30.glUniform1ui;
 import static org.lwjgl.opengl.GL42.GL_COMMAND_BARRIER_BIT;
 import static org.lwjgl.opengl.GL42.glMemoryBarrier;
 import static org.lwjgl.opengl.GL43.glDispatchCompute;
-import static org.lwjgl.opengl.GL43.glDispatchComputeIndirect;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-
-import org.lwjgl.opengl.GL46;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
@@ -29,7 +26,6 @@ import dev.engine_room.flywheel.backend.engine.MeshPool;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
-import dev.engine_room.flywheel.lib.material.LightShaders;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 
 public class IndirectCullingGroup<I extends Instance> {
@@ -53,12 +49,6 @@ public class IndirectCullingGroup<I extends Instance> {
 	private boolean needsDrawBarrier;
 	private boolean needsDrawSort;
 	public int instanceCountThisFrame;
-
-	private int pagesLastFrame = 0;
-	private int pagesThisFrame = 0;
-
-	private int visibilityWriteOffsetPages = 0;
-	private int visibilityReadOffsetPages = 0;
 
 	IndirectCullingGroup(InstanceType<I> instanceType, IndirectPrograms programs) {
 		this.instanceType = instanceType;
@@ -95,17 +85,6 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 	}
 
-	public int flipVisibilityOffsets(int visibilityWriteOffsetPages) {
-		this.visibilityReadOffsetPages = this.visibilityWriteOffsetPages;
-		this.visibilityWriteOffsetPages = visibilityWriteOffsetPages;
-
-		pagesLastFrame = pagesThisFrame;
-
-		pagesThisFrame = buffers.objectStorage.capacity();
-
-		return pagesThisFrame;
-	}
-
 	public void upload(StagingBuffer stagingBuffer) {
 		if (nothingToDo()) {
 			return;
@@ -127,8 +106,6 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 
 		uploadDraws(stagingBuffer);
-
-		GL46.nglClearNamedBufferData(buffers.passTwoDispatch.handle(), GL46.GL_R32UI, GL46.GL_RED, GL46.GL_UNSIGNED_INT, 0);
 	}
 
 	public void dispatchCull() {
@@ -138,8 +115,6 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		Uniforms.bindAll();
 		earlyCull.bind();
-
-		earlyCull.setUInt("_flw_visibilityReadOffsetPages", visibilityReadOffsetPages);
 
 		buffers.bindForCullPassOne();
 		glDispatchCompute(buffers.objectStorage.capacity(), 1, 1);
@@ -154,7 +129,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		lateCull.bind();
 
 		buffers.bindForCullPassTwo();
-		glDispatchComputeIndirect(0);
+		glDispatchCompute(buffers.objectStorage.capacity(), 1, 1);
 	}
 
 	public void dispatchApply() {
@@ -257,8 +232,6 @@ public class IndirectCullingGroup<I extends Instance> {
 				// Don't need to do this unless the program changes.
 				drawProgram.bind();
 				baseDrawUniformLoc = drawProgram.getUniformLocation("_flw_baseDraw");
-
-				drawProgram.setUInt("_flw_visibilityWriteOffsetInstances", visibilityWriteOffsetPages << ObjectStorage.LOG_2_PAGE_SIZE);
 			}
 
 			glUniform1ui(baseDrawUniformLoc, multiDraw.start);

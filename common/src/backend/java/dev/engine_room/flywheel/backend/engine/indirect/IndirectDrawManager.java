@@ -53,11 +53,6 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	private final MatrixBuffer matrixBuffer;
 
 	private final DepthPyramid depthPyramid;
-	private final VisibilityBuffer visibilityBuffer;
-
-	private int totalPagesLastFrame = 0;
-
-	private boolean needsBarrier = false;
 
 	public IndirectDrawManager(IndirectPrograms programs) {
 		this.programs = programs;
@@ -73,7 +68,6 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		matrixBuffer = new MatrixBuffer();
 
 		depthPyramid = new DepthPyramid(programs);
-		visibilityBuffer = new VisibilityBuffer(programs);
 	}
 
 	@Override
@@ -112,8 +106,6 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
 
-		visibilityBuffer.bind();
-
 		for (var group1 : cullingGroups.values()) {
 			group1.dispatchCull();
 		}
@@ -123,8 +115,6 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		dispatchApply();
 
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-		visibilityBuffer.attach();
 
 		submitDraws();
 
@@ -156,8 +146,6 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		MaterialRenderState.reset();
 		TextureBinder.resetLightAndOverlay();
-
-		visibilityBuffer.detach();
 	}
 
 	private void dispatchApply() {
@@ -185,19 +173,11 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.flushInstancers();
 		}
 
-		visibilityBuffer.read(totalPagesLastFrame);
-		visibilityBuffer.clear();
-
 		cullingGroups.values()
 				.removeIf(IndirectCullingGroup::checkEmptyAndDelete);
 
 		instancers.values()
 				.removeIf(instancer -> instancer.instanceCount() == 0);
-
-		int totalPagesThisFrame = 0;
-		for (var group : cullingGroups.values()) {
-			totalPagesThisFrame += group.flipVisibilityOffsets(totalPagesThisFrame);
-		}
 
 		meshPool.flush();
 
@@ -215,10 +195,6 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		// We could probably save some driver calls here when there are
 		// actually zero instances, but that feels like a very rare case
-
-		needsBarrier = true;
-
-		totalPagesLastFrame = totalPagesThisFrame;
 	}
 
 	@Override
@@ -238,8 +214,6 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		programs.release();
 
 		depthPyramid.delete();
-
-		visibilityBuffer.delete();
 	}
 
 	public void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks) {
