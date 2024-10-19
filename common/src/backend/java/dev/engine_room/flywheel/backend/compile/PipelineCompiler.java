@@ -61,15 +61,12 @@ public final class PipelineCompiler {
 		MaterialShaderIndices.fogSources()
 				.index(fog.source());
 
-		boolean useCutout = cutout != CutoutShaders.OFF;
+		// Same thing for cutout.
+		// Add OFF to the index here anyway to ensure MaterialEncoder doesn't deleteAll at an inappropriate time.
+		MaterialShaderIndices.cutoutSources()
+				.index(cutout.source());
 
-		if (useCutout) {
-			// Same thing for cutout.
-			MaterialShaderIndices.cutoutSources()
-					.index(cutout.source());
-		}
-
-		return harness.get(new PipelineProgramKey(instanceType, contextShader, light, shaders, useCutout, FrameUniforms.debugOn()));
+		return harness.get(new PipelineProgramKey(instanceType, contextShader, light, shaders, cutout != CutoutShaders.OFF, FrameUniforms.debugOn()));
 	}
 
 	public void delete() {
