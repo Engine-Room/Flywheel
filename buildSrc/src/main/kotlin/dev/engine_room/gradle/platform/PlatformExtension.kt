@@ -23,16 +23,11 @@ open class PlatformExtension(val project: Project) {
 
     var apiArtifactId: String = "flywheel-${project.name}-api-${project.property("artifact_minecraft_version")}"
 
-    private val sources = mutableSetOf<SourceSet>()
     private val commonSourceSets: SourceSetContainer by lazy { commonProject.the<SourceSetContainer>() }
 
-    fun sources(vararg sourceSets: SourceSet) {
-        this.sources.addAll(sourceSets)
-    }
-
-    fun setupLoomMod() {
+    fun setupLoomMod(vararg sourceSets: SourceSet) {
         project.the<LoomGradleExtensionAPI>().mods.maybeCreate("main").apply {
-            sources.forEach(::sourceSet)
+            sourceSets.forEach(::sourceSet)
         }
     }
 
@@ -61,13 +56,13 @@ open class PlatformExtension(val project: Project) {
         }
     }
 
-    fun compileWithCommonSourceSets() {
+    fun compileWithCommonSourceSets(vararg sourceSets: SourceSet) {
         project.tasks.apply {
             withType<JavaCompile>().configureEach {
                 JarTaskSet.excludeDuplicatePackageInfos(this)
             }
 
-            sources.forEach {
+            sourceSets.forEach {
                 val commonSourceSet = commonSourceSets.named(it.name).get()
 
                 named<JavaCompile>(it.compileJavaTaskName).configure {
@@ -80,10 +75,10 @@ open class PlatformExtension(val project: Project) {
         }
     }
 
-    fun setupFatJar() {
+    fun setupFatJar(vararg sourceSets: SourceSet) {
         project.tasks.apply {
-            val extraSourceSets = sources.filter { it.name != "main" }.toList()
-            val commonSources = sources.map { commonSourceSets.named(it.name).get() }
+            val extraSourceSets = sourceSets.filter { it.name != "main" }.toList()
+            val commonSources = sourceSets.map { commonSourceSets.named(it.name).get() }
 
             named<Jar>("jar").configure {
                 extraSourceSets.forEach { from(it.output) }

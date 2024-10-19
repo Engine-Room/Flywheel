@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import dev.engine_room.flywheel.impl.compat.IrisCompat;
+import dev.engine_room.flywheel.impl.compat.OptifineCompat;
 import dev.engine_room.flywheel.impl.extension.PoseStackExtension;
 import dev.engine_room.flywheel.impl.mixin.ModelPartAccessor;
 import dev.engine_room.flywheel.impl.mixin.PoseStackAccessor;
@@ -39,5 +41,37 @@ public class FlwLibLinkImpl implements FlwLibLink {
 	@Override
 	public Deque<PoseStack.Pose> getPoseStack(PoseStack stack) {
 		return ((PoseStackAccessor) stack).flywheel$getPoseStack();
+	}
+
+	@Override
+	public boolean isIrisLoaded() {
+		return IrisCompat.ACTIVE;
+	}
+
+	@Override
+	public boolean isOptifineInstalled() {
+		return OptifineCompat.IS_INSTALLED;
+	}
+
+	@Override
+	public boolean isShaderPackInUse() {
+		if (IrisCompat.ACTIVE) {
+			return IrisCompat.isShaderPackInUse();
+		} else if (OptifineCompat.IS_INSTALLED) {
+			return OptifineCompat.isShaderPackInUse();
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isRenderingShadowPass() {
+		if (IrisCompat.ACTIVE) {
+			return IrisCompat.isRenderingShadowPass();
+		} else if (OptifineCompat.IS_INSTALLED) {
+			return OptifineCompat.isRenderingShadowPass();
+		} else {
+			return false;
+		}
 	}
 }
