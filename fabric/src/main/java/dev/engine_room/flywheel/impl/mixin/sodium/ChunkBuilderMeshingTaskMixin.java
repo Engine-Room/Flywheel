@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.impl.mixin.sodium;
 
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -22,6 +23,7 @@ abstract class ChunkBuilderMeshingTaskMixin {
 					remap = true
 			)
 	)
+	@Nullable
 	private BlockEntityRenderer<?> flywheel$wrapGetRenderer(BlockEntityRenderDispatcher instance, BlockEntity blockEntity, Operation<BlockEntityRenderer<BlockEntity>> original) {
 		if (VisualizationHelper.tryAddBlockEntity(blockEntity)) {
 			return null;

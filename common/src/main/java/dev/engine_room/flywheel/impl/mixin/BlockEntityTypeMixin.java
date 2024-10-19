@@ -5,9 +5,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 import dev.engine_room.flywheel.api.visualization.BlockEntityVisualizer;
-import dev.engine_room.flywheel.impl.compat.CompatMods;
-import dev.engine_room.flywheel.impl.compat.sodium.SodiumCompat;
-import dev.engine_room.flywheel.impl.compat.sodium.SodiumCompatHelper;
+import dev.engine_room.flywheel.impl.compat.SodiumCompat;
 import dev.engine_room.flywheel.impl.extension.BlockEntityTypeExtension;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -30,13 +28,10 @@ abstract class BlockEntityTypeMixin<T extends BlockEntity> implements BlockEntit
 
 	@Override
 	public void flywheel$setVisualizer(@Nullable BlockEntityVisualizer<? super T> visualizer) {
-		if (CompatMods.SODIUM.isLoaded && !CompatMods.EMBEDDIUM.isLoaded && SodiumCompatHelper.IS_SODIUM_0_6) {
-			if (flywheel$visualizer == null && visualizer != null) {
-				flywheel$sodiumPredicate = SodiumCompat.addPredicate((BlockEntityType<?>) (Object) this);
-			} else if (flywheel$visualizer != null && visualizer == null && flywheel$sodiumPredicate != null) {
-				SodiumCompat.removePredicate((BlockEntityType<?>) (Object) this, flywheel$sodiumPredicate);
-			}
+		if (SodiumCompat.USE_0_6_COMPAT) {
+			flywheel$sodiumPredicate = SodiumCompat.onSetBlockEntityVisualizer((BlockEntityType<T>) (Object) this, flywheel$visualizer, visualizer, flywheel$sodiumPredicate);
 		}
-		this.flywheel$visualizer = visualizer;
+
+		flywheel$visualizer = visualizer;
 	}
 }

@@ -31,19 +31,16 @@ side = "CLIENT"
 modId = "rubidium"
 mandatory = false
 versionRange = "[0.0-INCOMPATIBLE]"
-ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.${mod_id}]]
 modId = "embeddium"
 mandatory = false
 versionRange = "[0.3.25,)"
-ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.${mod_id}]]
 modId = "sodium"
 mandatory = false
 versionRange = "[0.6.0-beta.2,)"
-ordering = "NONE"
 side = "CLIENT"

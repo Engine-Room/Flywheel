@@ -23,6 +23,6 @@ abstract class EntityTypeMixin<T extends Entity> implements EntityTypeExtension<
 
 	@Override
 	public void flywheel$setVisualizer(@Nullable EntityVisualizer<? super T> visualizer) {
-		this.flywheel$visualizer = visualizer;
+		flywheel$visualizer = visualizer;
 	}
 }

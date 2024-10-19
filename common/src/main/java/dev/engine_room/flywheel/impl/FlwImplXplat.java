@@ -6,11 +6,15 @@ import net.minecraft.client.multiplayer.ClientLevel;
 public interface FlwImplXplat {
 	FlwImplXplat INSTANCE = DependencyInjection.load(FlwImplXplat.class, "dev.engine_room.flywheel.impl.FlwImplXplatImpl");
 
-	boolean getModLoaded(String modId);
+	boolean isModLoaded(String modId);
 
 	void dispatchReloadLevelRendererEvent(ClientLevel level);
 
 	String getVersionStr();
 
 	FlwConfig getConfig();
+
+	boolean useSodium0_6Compat();
+
+	boolean useIrisCompat();
 }

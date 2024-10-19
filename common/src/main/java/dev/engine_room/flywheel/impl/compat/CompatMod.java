@@ -2,15 +2,17 @@ package dev.engine_room.flywheel.impl.compat;
 
 import dev.engine_room.flywheel.impl.FlwImplXplat;
 
-public enum CompatMods {
+public enum CompatMod {
 	EMBEDDIUM("embeddium"),
 	IRIS("iris"),
 	OCULUS("oculus"),
 	SODIUM("sodium");
 
+	public final String id;
 	public final boolean isLoaded;
 
-	CompatMods(String modId) {
-		isLoaded = FlwImplXplat.INSTANCE.getModLoaded(modId);
+	CompatMod(String modId) {
+		id = modId;
+		isLoaded = FlwImplXplat.INSTANCE.isModLoaded(modId);
 	}
 }

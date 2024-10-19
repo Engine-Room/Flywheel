@@ -7,7 +7,6 @@ import dev.engine_room.flywheel.api.event.EndClientResourceReloadCallback;
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererCallback;
 import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
-import dev.engine_room.flywheel.impl.compat.FabricSodiumCompatHelper;
 import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
 import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
 import dev.engine_room.flywheel.lib.util.ResourceReloadCache;
@@ -39,8 +38,6 @@ public final class FlywheelFabric implements ClientModInitializer {
 		setupBackend();
 
 		FlwImpl.init();
-
-		FabricSodiumCompatHelper.init();
 	}
 
 	private static void setupImpl() {

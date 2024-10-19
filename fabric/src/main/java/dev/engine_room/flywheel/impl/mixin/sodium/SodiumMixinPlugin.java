@@ -3,12 +3,12 @@ package dev.engine_room.flywheel.impl.mixin.sodium;
 import java.util.List;
 import java.util.Set;
 
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import dev.engine_room.flywheel.impl.compat.CompatMods;
-import dev.engine_room.flywheel.impl.compat.sodium.SodiumCompatHelper;
+import dev.engine_room.flywheel.impl.compat.FabricSodiumCompat;
 
 public class SodiumMixinPlugin implements IMixinConfigPlugin {
 	@Override
@@ -16,13 +16,14 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 	}
 
 	@Override
+	@Nullable
 	public String getRefMapperConfig() {
 		return null;
 	}
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		return CompatMods.SODIUM.isLoaded && SodiumCompatHelper.IS_SODIUM_0_5;
+		return FabricSodiumCompat.USE_0_5_COMPAT;
 	}
 
 	@Override
@@ -30,6 +31,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 	}
 
 	@Override
+	@Nullable
 	public List<String> getMixins() {
 		return null;
 	}
