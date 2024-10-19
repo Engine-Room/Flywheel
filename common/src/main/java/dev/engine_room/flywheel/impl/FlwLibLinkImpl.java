@@ -11,9 +11,15 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.engine_room.flywheel.impl.extension.PoseStackExtension;
 import dev.engine_room.flywheel.impl.mixin.ModelPartAccessor;
 import dev.engine_room.flywheel.impl.mixin.PoseStackAccessor;
+import dev.engine_room.flywheel.impl.mixin.text.FontAccessor;
+import dev.engine_room.flywheel.lib.internal.BakedGlyphExtension;
 import dev.engine_room.flywheel.lib.internal.FlwLibLink;
 import dev.engine_room.flywheel.lib.transform.PoseTransformStack;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.font.FontSet;
+import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.resources.ResourceLocation;
 
 public class FlwLibLinkImpl implements FlwLibLink {
 	@Override
@@ -39,5 +45,20 @@ public class FlwLibLinkImpl implements FlwLibLink {
 	@Override
 	public Deque<PoseStack.Pose> getPoseStack(PoseStack stack) {
 		return ((PoseStackAccessor) stack).flywheel$getPoseStack();
+	}
+
+	@Override
+	public FontSet getFontSet(Font font, ResourceLocation loc) {
+		return ((FontAccessor) font).flywheel$getFontSet(loc);
+	}
+
+	@Override
+	public boolean getFilterFishyGlyphs(Font font) {
+		return ((FontAccessor) font).flywheel$getFilterFishyGlyphs();
+	}
+
+	@Override
+	public BakedGlyphExtension getBakedGlyphExtension(BakedGlyph glyph) {
+		return (BakedGlyphExtension) glyph;
 	}
 }
