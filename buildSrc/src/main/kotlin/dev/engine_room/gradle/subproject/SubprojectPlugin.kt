@@ -96,6 +96,7 @@ class SubprojectPlugin: Plugin<Project> {
     private fun setupDependencies(project: Project) {
         project.dependencies.apply {
             val minecraft_version: String by project
+            val parchment_minecraft_version: String by project
             val parchment_version: String by project
             val loom = project.the<LoomGradleExtensionAPI>()
 
@@ -103,7 +104,7 @@ class SubprojectPlugin: Plugin<Project> {
 
             add("mappings", loom.layered {
                 officialMojangMappings()
-                parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
+                parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_version}@zip")
             })
 
             add("api", "com.google.code.findbugs:jsr305:3.0.2")

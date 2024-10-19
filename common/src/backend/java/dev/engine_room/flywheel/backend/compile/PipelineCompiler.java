@@ -1,7 +1,10 @@
 package dev.engine_room.flywheel.backend.compile;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.instance.InstanceType;
@@ -30,7 +33,7 @@ import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.resources.ResourceLocation;
 
 public final class PipelineCompiler {
-	private static final List<PipelineCompiler> ALL = List.of();
+	private static final Set<PipelineCompiler> ALL = Collections.newSetFromMap(new WeakHashMap<>());
 
 	private static final Compile<PipelineProgramKey> PIPELINE = new Compile<>();
 
@@ -44,6 +47,7 @@ public final class PipelineCompiler {
 
 	public PipelineCompiler(CompilationHarness<PipelineProgramKey> harness) {
 		this.harness = harness;
+		ALL.add(this);
 	}
 
 	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material) {
@@ -57,15 +61,12 @@ public final class PipelineCompiler {
 		MaterialShaderIndices.fogSources()
 				.index(fog.source());
 
-		boolean useCutout = cutout != CutoutShaders.OFF;
+		// Same thing for cutout.
+		// Add OFF to the index here anyway to ensure MaterialEncoder doesn't deleteAll at an inappropriate time.
+		MaterialShaderIndices.cutoutSources()
+				.index(cutout.source());
 
-		if (useCutout) {
-			// Same thing for cutout.
-			MaterialShaderIndices.cutoutSources()
-					.index(cutout.source());
-		}
-
-		return harness.get(new PipelineProgramKey(instanceType, contextShader, light, shaders, useCutout, FrameUniforms.debugOn()));
+		return harness.get(new PipelineProgramKey(instanceType, contextShader, light, shaders, cutout != CutoutShaders.OFF, FrameUniforms.debugOn()));
 	}
 
 	public void delete() {

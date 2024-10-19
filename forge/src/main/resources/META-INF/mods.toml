@@ -26,10 +26,21 @@ mandatory = true
 versionRange = "${forge_version_range}"
 side = "CLIENT"
 
+# Simulates a breaks/incompatible dependency
 [[dependencies.${mod_id}]]
-# This replicates a "breaks" dependency.
-# There's a mixin crash with Rubidium <0.7.0.
 modId = "rubidium"
 mandatory = false
-versionRange = "[0.7.0,)"
+versionRange = "[0.0-INCOMPATIBLE]"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "embeddium"
+mandatory = false
+versionRange = "[0.3.25,)"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "sodium"
+mandatory = false
+versionRange = "[0.6.0-beta.2,)"
 side = "CLIENT"

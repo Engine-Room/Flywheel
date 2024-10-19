@@ -2,31 +2,28 @@ package dev.engine_room.flywheel.impl.mixin.sodium;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import com.google.common.base.Suppliers;
-
-import net.fabricmc.loader.api.FabricLoader;
+import dev.engine_room.flywheel.impl.compat.FabricSodiumCompat;
 
 public class SodiumMixinPlugin implements IMixinConfigPlugin {
-	private static final Supplier<Boolean> IS_SODIUM_LOADED = Suppliers.memoize(() -> FabricLoader.getInstance().isModLoaded("sodium"));
-
 	@Override
 	public void onLoad(String mixinPackage) {
 	}
 
 	@Override
+	@Nullable
 	public String getRefMapperConfig() {
 		return null;
 	}
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		return IS_SODIUM_LOADED.get();
+		return FabricSodiumCompat.USE_0_5_COMPAT;
 	}
 
 	@Override
@@ -34,6 +31,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 	}
 
 	@Override
+	@Nullable
 	public List<String> getMixins() {
 		return null;
 	}

@@ -24,4 +24,12 @@ public interface FlwLibLink {
 	void compileModelPart(ModelPart part, PoseStack.Pose pose, VertexConsumer consumer, int light, int overlay, float red, float green, float blue, float alpha);
 
 	Deque<PoseStack.Pose> getPoseStack(PoseStack stack);
+
+	boolean isIrisLoaded();
+
+	boolean isOptifineInstalled();
+
+	boolean isShaderPackInUse();
+
+	boolean isRenderingShadowPass();
 }

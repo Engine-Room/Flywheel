@@ -2,7 +2,6 @@ package dev.engine_room.flywheel.impl;
 
 import java.lang.reflect.Field;
 
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
@@ -12,8 +11,6 @@ import dev.engine_room.flywheel.lib.model.baked.ForgeBakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.ForgeBlockModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.ForgeMultiBlockModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.MultiBlockModelBuilder;
-import dev.engine_room.flywheel.lib.util.ShadersModHandler;
-import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
@@ -23,7 +20,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 public class FlwLibXplatImpl implements FlwLibXplat {
@@ -63,28 +59,5 @@ public class FlwLibXplatImpl implements FlwLibXplat {
 	@Override
 	public MultiBlockModelBuilder createMultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
 		return new ForgeMultiBlockModelBuilder(level, positions);
-	}
-
-	@Override
-	@Nullable
-	public ShadersModHandler.InternalHandler createIrisHandler() {
-		if (!ModList.get()
-				.isLoaded("oculus")) {
-			return null;
-		}
-
-		return new ShadersModHandler.InternalHandler() {
-			@Override
-			public boolean isShaderPackInUse() {
-				return IrisApi.getInstance()
-						.isShaderPackInUse();
-			}
-
-			@Override
-			public boolean isRenderingShadowPass() {
-				return IrisApi.getInstance()
-						.isRenderingShadowPass();
-			}
-		};
 	}
 }

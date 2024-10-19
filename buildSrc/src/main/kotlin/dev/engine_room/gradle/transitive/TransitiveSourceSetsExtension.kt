@@ -25,7 +25,7 @@ open class TransitiveSourceSetsExtension(private val project: Project) {
 
     fun createCompileConfigurations() {
         val configs = transitives.mapValues { (sourceSet, _) ->
-            project.configurations.create("for${sourceSet.name.capitalize()}") {
+            project.configurations.create("for${sourceSet.name.replaceFirstChar { it.uppercase() }}") {
                 isCanBeConsumed = true
                 isCanBeResolved = false
             }
@@ -43,7 +43,7 @@ open class TransitiveSourceSetsExtension(private val project: Project) {
 
     fun createRuntimeConfigurations() {
         val configs = transitives.mapValues { (sourceSet, _) ->
-            project.configurations.create("run${sourceSet.name.capitalize()}") {
+            project.configurations.create("run${sourceSet.name.replaceFirstChar { it.uppercase() }}") {
                 isCanBeConsumed = true
                 isCanBeResolved = false
             }
