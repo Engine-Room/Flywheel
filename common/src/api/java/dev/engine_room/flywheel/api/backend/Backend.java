@@ -14,6 +14,13 @@ public interface Backend {
 	Engine createEngine(LevelAccessor level);
 
 	/**
+	 * The version of flywheel this backend was written against.
+	 *
+	 * @return A backend version.
+	 */
+	BackendVersion version();
+
+	/**
 	 * The priority of this backend.
 	 * <p>The backend with the highest priority upon first launch will be chosen as the default backend.
 	 *
