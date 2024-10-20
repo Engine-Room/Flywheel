@@ -34,7 +34,6 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	private static final ResourceLocation ZERO_MODELS_SHADER_MAIN = Flywheel.rl("internal/indirect/zero_models.glsl");
 	private static final ResourceLocation DOWNSAMPLE_FIRST = Flywheel.rl("internal/indirect/downsample_first.glsl");
 	private static final ResourceLocation DOWNSAMPLE_SECOND = Flywheel.rl("internal/indirect/downsample_second.glsl");
-	public static final List<ResourceLocation> UTIL_SHADERS = List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN, READ_VISIBILITY_SHADER_MAIN, ZERO_MODELS_SHADER_MAIN, DOWNSAMPLE_FIRST, DOWNSAMPLE_SECOND);
 
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private static final Compile<ResourceLocation> UTIL = new Compile<>();
