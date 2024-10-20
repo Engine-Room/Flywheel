@@ -14,6 +14,10 @@ authors = "Jozufozu, PepperCode1"
 displayURL = "${mod_homepage}"
 displayTest = "IGNORE_ALL_VERSION"
 
+[modproperties.${ mod_id }.flywheel]
+backend_major_version = 1
+backend_minor_version = 0
+
 [[dependencies.${mod_id}]]
 modId = "minecraft"
 mandatory = true

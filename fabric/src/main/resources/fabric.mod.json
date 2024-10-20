@@ -35,5 +35,11 @@
   "breaks": {
     "sodium": ["<0.5.0", "~0.6.0- <0.6.0-beta.2"],
     "embeddium": "*"
+  },
+  "custom" : {
+    "flywheel" : {
+      "backend_major_version" : 1,
+      "backend_minor_version" : 0
+    }
   }
 }

@@ -1,9 +1,11 @@
 package dev.engine_room.flywheel.impl;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.backend.Backend;
+import dev.engine_room.flywheel.api.backend.BackendVersion;
 import dev.engine_room.flywheel.impl.visualization.VisualizationManagerImpl;
 import dev.engine_room.flywheel.lib.backend.SimpleBackend;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -15,6 +17,7 @@ public final class BackendManagerImpl {
 				throw new UnsupportedOperationException("Cannot create engine when backend is off.");
 			})
 			.supported(() -> true)
+			.version(new BackendVersion(0, 0))
 			.register(Flywheel.rl("off"));
 
 	public static final Backend DEFAULT_BACKEND = findDefaultBackend();
@@ -33,7 +36,7 @@ public final class BackendManagerImpl {
 	}
 
 	// Don't store this statically because backends can theoretically change their priorities at runtime.
-	private static ArrayList<Backend> backendsByPriority() {
+	private static List<Backend> backendsByPriority() {
 		var backends = new ArrayList<>(Backend.REGISTRY.getAll());
 
 		// Sort with keys backwards so that the highest priority is first.
@@ -53,27 +56,46 @@ public final class BackendManagerImpl {
 	}
 
 	private static void chooseBackend() {
+		var requirements = FlwImplXplat.INSTANCE.modRequirements();
+
 		var preferred = FlwConfig.INSTANCE.backend();
 		if (preferred.isSupported()) {
-			backend = preferred;
-			return;
+			if (meetsModRequirements(requirements, preferred)) {
+				backend = preferred;
+				return;
+			} else {
+				var minVersion = requirements.minimumBackendVersion();
+				FlwImpl.LOGGER.warn("Preferred backend '{}' does not meet minimum version requirement {}.{}", Backend.REGISTRY.getIdOrThrow(preferred), minVersion.major(), minVersion.minor());
+			}
 		}
 
+		backend = fallback(preferred, requirements);
+
+		FlwImpl.LOGGER.warn("Flywheel backend fell back from '{}' to '{}'", Backend.REGISTRY.getIdOrThrow(preferred), Backend.REGISTRY.getIdOrThrow(backend));
+	}
+
+	private static Backend fallback(Backend preferred, ModRequirements requirements) {
 		var backendsByPriority = backendsByPriority();
 
 		var startIndex = backendsByPriority.indexOf(preferred) + 1;
 
 		// For safety in case we don't find anything
-		backend = OFF_BACKEND;
+		var out = OFF_BACKEND;
 		for (int i = startIndex; i < backendsByPriority.size(); i++) {
 			var candidate = backendsByPriority.get(i);
 			if (candidate.isSupported()) {
-				backend = candidate;
-				break;
+				if (meetsModRequirements(requirements, candidate)) {
+					out = candidate;
+					break;
+				}
 			}
 		}
+		return out;
+	}
 
-		FlwImpl.LOGGER.warn("Flywheel backend fell back from '{}' to '{}'", Backend.REGISTRY.getIdOrThrow(preferred), Backend.REGISTRY.getIdOrThrow(backend));
+	private static boolean meetsModRequirements(ModRequirements requirements, Backend candidate) {
+		return candidate.version()
+				.compareTo(requirements.minimumBackendVersion()) >= 0;
 	}
 
 	public static String getBackendString() {

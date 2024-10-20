@@ -4,7 +4,10 @@ import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
+import org.jetbrains.annotations.Nullable;
+
 import dev.engine_room.flywheel.api.backend.Backend;
+import dev.engine_room.flywheel.api.backend.BackendVersion;
 import dev.engine_room.flywheel.api.backend.Engine;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
@@ -13,11 +16,13 @@ public final class SimpleBackend implements Backend {
 	private final Function<LevelAccessor, Engine> engineFactory;
 	private final int priority;
 	private final BooleanSupplier isSupported;
+	private final BackendVersion version;
 
-	public SimpleBackend(int priority, Function<LevelAccessor, Engine> engineFactory, BooleanSupplier isSupported) {
+	public SimpleBackend(int priority, Function<LevelAccessor, Engine> engineFactory, BooleanSupplier isSupported, BackendVersion version) {
 		this.priority = priority;
 		this.engineFactory = engineFactory;
 		this.isSupported = isSupported;
+		this.version = version;
 	}
 
 	public static Builder builder() {
@@ -27,6 +32,11 @@ public final class SimpleBackend implements Backend {
 	@Override
 	public Engine createEngine(LevelAccessor level) {
 		return engineFactory.apply(level);
+	}
+
+	@Override
+	public BackendVersion version() {
+		return version;
 	}
 
 	@Override
@@ -40,9 +50,13 @@ public final class SimpleBackend implements Backend {
 	}
 
 	public static final class Builder {
-		private Function<LevelAccessor, Engine> engineFactory;
 		private int priority = 0;
+		@Nullable
+		private Function<LevelAccessor, Engine> engineFactory;
+		@Nullable
 		private BooleanSupplier isSupported;
+		@Nullable
+		private BackendVersion version;
 
 		public Builder engineFactory(Function<LevelAccessor, Engine> engineFactory) {
 			this.engineFactory = engineFactory;
@@ -59,11 +73,17 @@ public final class SimpleBackend implements Backend {
 			return this;
 		}
 
+		public Builder version(BackendVersion version) {
+			this.version = version;
+			return this;
+		}
+
 		public Backend register(ResourceLocation id) {
 			Objects.requireNonNull(engineFactory);
 			Objects.requireNonNull(isSupported);
+			Objects.requireNonNull(version);
 
-			return Backend.REGISTRY.registerAndGet(id, new SimpleBackend(priority, engineFactory, isSupported));
+			return Backend.REGISTRY.registerAndGet(id, new SimpleBackend(priority, engineFactory, isSupported, version));
 		}
 	}
 }

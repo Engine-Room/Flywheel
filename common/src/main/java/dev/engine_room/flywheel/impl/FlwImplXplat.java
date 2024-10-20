@@ -17,4 +17,6 @@ public interface FlwImplXplat {
 	boolean useSodium0_6Compat();
 
 	boolean useIrisCompat();
+
+	ModRequirements modRequirements();
 }

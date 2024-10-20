@@ -2,6 +2,7 @@ package dev.engine_room.flywheel.backend;
 
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.backend.Backend;
+import dev.engine_room.flywheel.api.backend.BackendVersion;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
 import dev.engine_room.flywheel.backend.compile.InstancingPrograms;
 import dev.engine_room.flywheel.backend.engine.EngineImpl;
@@ -12,11 +13,14 @@ import dev.engine_room.flywheel.lib.backend.SimpleBackend;
 import dev.engine_room.flywheel.lib.util.ShadersModHelper;
 
 public final class Backends {
+	private static final BackendVersion VERSION = new BackendVersion(1, 0);
+
 	/**
 	 * Use GPU instancing to render everything.
 	 */
 	public static final Backend INSTANCING = SimpleBackend.builder()
 			.engineFactory(level -> new EngineImpl(level, new InstancedDrawManager(InstancingPrograms.get()), 256))
+			.version(VERSION)
 			.priority(500)
 			.supported(() -> GlCompat.SUPPORTS_INSTANCING && InstancingPrograms.allLoaded() && !ShadersModHelper.isShaderPackInUse())
 			.register(Flywheel.rl("instancing"));
@@ -26,6 +30,7 @@ public final class Backends {
 	 */
 	public static final Backend INDIRECT = SimpleBackend.builder()
 			.engineFactory(level -> new EngineImpl(level, new IndirectDrawManager(IndirectPrograms.get()), 256))
+			.version(VERSION)
 			.priority(1000)
 			.supported(() -> GlCompat.SUPPORTS_INDIRECT && IndirectPrograms.allLoaded() && !ShadersModHelper.isShaderPackInUse())
 			.register(Flywheel.rl("indirect"));
