@@ -27,7 +27,10 @@ abstract class RenderSystemMixin {
 		FogUniforms.update();
 	}
 
-	@Inject(method = "setShaderFogShape(Lcom/mojang/blaze3d/shaders/FogShape;)V", at = @At("RETURN"))
+	// Fabric fails to resolve the mixin in prod when the full signature is specified.
+	// I suspect it's because this method references a class name in its signature,
+	// and that needs to be remapped while the function names in RenderSystem are marked with @DontObfuscate.
+	@Inject(method = "setShaderFogShape", at = @At("RETURN"))
 	private static void flywheel$onSetFogShape(CallbackInfo ci) {
 		FogUniforms.update();
 	}
