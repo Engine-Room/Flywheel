@@ -139,23 +139,21 @@ bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
 }
 
 void main() {
-    uint pageIndex = gl_WorkGroupID.x;
+    uint pageIndex = gl_WorkGroupID.x << 1u;
 
     if (pageIndex >= _flw_pageFrameDescriptors.length()) {
         return;
     }
 
-    uint packedModelIndexAndCount = _flw_pageFrameDescriptors[pageIndex];
+    uint modelIndex = _flw_pageFrameDescriptors[pageIndex];
 
-    uint pageInstanceCount = packedModelIndexAndCount >> _FLW_PAGE_COUNT_OFFSET;
+    uint pageValidity = _flw_pageFrameDescriptors[pageIndex + 1];
 
-    if (gl_LocalInvocationID.x >= pageInstanceCount) {
+    if (((1u << gl_LocalInvocationID.x) & pageValidity) == 0) {
         return;
     }
 
     uint instanceIndex = gl_GlobalInvocationID.x;
-
-    uint modelIndex = packedModelIndexAndCount & _FLW_MODEL_INDEX_MASK;
 
     bool visible = _flw_isVisible(instanceIndex, modelIndex);
     bool visibleLastFrame = (_flw_visibility[pageIndex] & (1u << gl_LocalInvocationID.x)) != 0u;

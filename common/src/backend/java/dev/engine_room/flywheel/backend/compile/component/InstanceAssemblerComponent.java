@@ -62,7 +62,7 @@ public abstract class InstanceAssemblerComponent implements SourceComponent {
 		FLOAT_UNPACKING_FUNCS.put(FloatRepr.UNSIGNED_INT, e -> e.cast("float"));
 		FLOAT_UNPACKING_FUNCS.put(FloatRepr.NORMALIZED_UNSIGNED_INT, e -> e.cast("float").div(4294967295f));
 
-		FLOAT_UNPACKING_FUNCS.put(FloatRepr.FLOAT, e -> e.callFunction("uintBitsToFloat")); // FIXME: GLSL 330+
+		FLOAT_UNPACKING_FUNCS.put(FloatRepr.FLOAT, e -> e.callFunction("uintBitsToFloat"));
 	}
 
 	protected final Layout layout;

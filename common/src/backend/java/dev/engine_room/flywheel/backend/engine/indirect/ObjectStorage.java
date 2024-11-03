@@ -1,6 +1,7 @@
 package dev.engine_room.flywheel.backend.engine.indirect;
 
 import java.util.Arrays;
+import java.util.BitSet;
 
 import org.lwjgl.system.MemoryUtil;
 
@@ -13,8 +14,12 @@ public class ObjectStorage extends AbstractArena {
 	public static final int PAGE_SIZE = 1 << LOG_2_PAGE_SIZE;
 	public static final int PAGE_MASK = PAGE_SIZE - 1;
 
-	public static final int INITIAL_PAGES_ALLOCATED = 4;
+	public static final int INVALID_PAGE = -1;
 
+	public static final int INITIAL_PAGES_ALLOCATED = 4;
+	public static final int DESCRIPTOR_SIZE_BYTES = Integer.BYTES * 2;
+
+	private final BitSet changedFrames = new BitSet();
 	/**
 	 * The GPU side buffer containing all the objects, logically divided into page frames.
 	 */
@@ -28,8 +33,6 @@ public class ObjectStorage extends AbstractArena {
 	 */
 	private MemoryBlock frameDescriptors;
 
-	private boolean needsUpload = false;
-
 	public ObjectStorage(long objectSizeBytes) {
 		super(PAGE_SIZE * objectSizeBytes);
 
@@ -37,8 +40,8 @@ public class ObjectStorage extends AbstractArena {
 		this.frameDescriptorBuffer = new ResizableStorageBuffer();
 
 		objectBuffer.ensureCapacity(INITIAL_PAGES_ALLOCATED * elementSizeBytes);
-		frameDescriptorBuffer.ensureCapacity(INITIAL_PAGES_ALLOCATED * Integer.BYTES);
-		frameDescriptors = MemoryBlock.malloc(INITIAL_PAGES_ALLOCATED * Integer.BYTES);
+		frameDescriptorBuffer.ensureCapacity(INITIAL_PAGES_ALLOCATED * DESCRIPTOR_SIZE_BYTES);
+		frameDescriptors = MemoryBlock.malloc(INITIAL_PAGES_ALLOCATED * DESCRIPTOR_SIZE_BYTES);
 	}
 
 	public Mapping createMapping() {
@@ -52,8 +55,23 @@ public class ObjectStorage extends AbstractArena {
 
 	@Override
 	public void free(int i) {
+		if (i == INVALID_PAGE) {
+			return;
+		}
 		super.free(i);
-		MemoryUtil.memPutInt(ptrForPage(i), 0);
+		var ptr = ptrForPage(i);
+		MemoryUtil.memPutInt(ptr, 0);
+		MemoryUtil.memPutInt(ptr + 4, 0);
+
+		changedFrames.set(i);
+	}
+
+	private void set(int i, int modelIndex, int validBits) {
+		var ptr = ptrForPage(i);
+		MemoryUtil.memPutInt(ptr, modelIndex);
+		MemoryUtil.memPutInt(ptr + 4, validBits);
+
+		changedFrames.set(i);
 	}
 
 	@Override
@@ -64,12 +82,17 @@ public class ObjectStorage extends AbstractArena {
 	}
 
 	public void uploadDescriptors(StagingBuffer stagingBuffer) {
-		if (!needsUpload) {
+		if (changedFrames.isEmpty()) {
 			return;
 		}
-		// We could be smarter about which spans are uploaded but this thing is so small it's probably not worth it.
-		stagingBuffer.enqueueCopy(frameDescriptors.ptr(), frameDescriptors.size(), frameDescriptorBuffer.handle(), 0);
-		needsUpload = false;
+
+		var ptr = frameDescriptors.ptr();
+		for (int i = changedFrames.nextSetBit(0); i >= 0 && i < capacity(); i = changedFrames.nextSetBit(i + 1)) {
+			var offset = (long) i * DESCRIPTOR_SIZE_BYTES;
+			stagingBuffer.enqueueCopy(ptr + offset, DESCRIPTOR_SIZE_BYTES, frameDescriptorBuffer.handle(), offset);
+		}
+
+		changedFrames.clear();
 	}
 
 	public void delete() {
@@ -79,7 +102,7 @@ public class ObjectStorage extends AbstractArena {
 	}
 
 	private long ptrForPage(int page) {
-		return frameDescriptors.ptr() + (long) page * Integer.BYTES;
+		return frameDescriptors.ptr() + (long) page * DESCRIPTOR_SIZE_BYTES;
 	}
 
 	public static int objectIndex2PageIndex(int objectIndex) {
@@ -97,61 +120,52 @@ public class ObjectStorage extends AbstractArena {
 		private static final int[] EMPTY_ALLOCATION = new int[0];
 		private int[] pages = EMPTY_ALLOCATION;
 
-		private int modelIndex = -1;
-		private int objectCount = 0;
-
-		/**
-		 * Adjust this allocation to the given model index and object count.
-		 *
-		 * <p>This method triggers eager resizing of the allocation to fit the new object count.
-		 * If the model index is different from the current one, all frame descriptors will be updated.
-		 *
-		 * @param modelIndex The model index the objects in this allocation are associated with.
-		 * @param objectCount The number of objects in this allocation.
-		 */
-		public void update(int modelIndex, int objectCount) {
-			boolean incremental = this.modelIndex == modelIndex;
-
-			if (incremental && objectCount == this.objectCount) {
-				// Nothing will change.
+		public void updatePage(int index, int modelIndex, int validBits) {
+			if (validBits == 0) {
+				holePunch(index);
 				return;
 			}
+			var frame = pages[index];
 
-			ObjectStorage.this.needsUpload = true;
+			if (frame == INVALID_PAGE) {
+				// Un-holed punch.
+				frame = unHolePunch(index);
+			}
 
-			this.modelIndex = modelIndex;
-			this.objectCount = objectCount;
+			ObjectStorage.this.set(frame, modelIndex, validBits);
+		}
 
+		/**
+		 * Free a page on the inside of the mapping, maintaining the same virtual mapping size.
+		 *
+		 * @param index The index of the page to free.
+		 */
+		public void holePunch(int index) {
+			ObjectStorage.this.free(pages[index]);
+			pages[index] = INVALID_PAGE;
+		}
+
+		/**
+		 * Allocate a new page on the inside of the mapping, maintaining the same virtual mapping size.
+		 *
+		 * @param index The index of the page to allocate.
+		 * @return The allocated page.
+		 */
+		private int unHolePunch(int index) {
+			int page = ObjectStorage.this.alloc();
+			pages[index] = page;
+			return page;
+		}
+
+		public void updateCount(int newLength) {
 			var oldLength = pages.length;
-			var newLength = objectIndex2PageIndex((objectCount + PAGE_MASK));
-
 			if (oldLength > newLength) {
 				// Eagerly free the now unnecessary pages.
 				// shrink will zero out the pageTable entries for the freed pages.
 				shrink(oldLength, newLength);
-
-				if (incremental) {
-					// Only update the last page, everything else is unchanged.
-					updateRange(newLength - 1, newLength);
-				}
 			} else if (oldLength < newLength) {
 				// Allocate new pages to fit the new object count.
 				grow(newLength, oldLength);
-
-				if (incremental) {
-					// Update the old last page + all new pages
-					updateRange(oldLength - 1, newLength);
-				}
-			} else {
-				if (incremental) {
-					// Only update the last page.
-					updateRange(oldLength - 1, oldLength);
-				}
-			}
-
-			if (!incremental) {
-				// Update all pages.
-				updateRange(0, newLength);
 			}
 		}
 
@@ -159,8 +173,8 @@ public class ObjectStorage extends AbstractArena {
 			return pages.length;
 		}
 
-		public long page2ByteOffset(int page) {
-			return ObjectStorage.this.byteOffsetOf(pages[page]);
+		public long page2ByteOffset(int index) {
+			return ObjectStorage.this.byteOffsetOf(pages[index]);
 		}
 
 		public void delete() {
@@ -168,35 +182,6 @@ public class ObjectStorage extends AbstractArena {
 				ObjectStorage.this.free(page);
 			}
 			pages = EMPTY_ALLOCATION;
-			modelIndex = -1;
-			objectCount = 0;
-
-			ObjectStorage.this.needsUpload = true;
-		}
-
-		/**
-		 * Calculates the page descriptor for the given page index.
-		 * Runs under the assumption than all pages are full except maybe the last one.
-		 */
-		private int calculatePageDescriptor(int pageIndex) {
-			int countInPage;
-			if (objectCount % PAGE_SIZE != 0 && pageIndex == pages.length - 1) {
-				// Last page && it isn't full -> use the remainder.
-				countInPage = objectCount & PAGE_MASK;
-			} else if (objectCount > 0) {
-				// Full page.
-				countInPage = PAGE_SIZE;
-			} else {
-				// Empty page, this shouldn't be reachable because we eagerly free empty pages.
-				countInPage = 0;
-			}
-			return (modelIndex & 0x3FFFFF) | (countInPage << 26);
-		}
-
-		private void updateRange(int start, int oldLength) {
-			for (int i = start; i < oldLength; i++) {
-				MemoryUtil.memPutInt(ptrForPage(pages[i]), calculatePageDescriptor(i));
-			}
 		}
 
 		private void grow(int neededPages, int oldLength) {

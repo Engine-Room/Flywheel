@@ -22,7 +22,6 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.lighting.LayerLightEventListener;
 
 /**
- * TODO: AO data
  * A managed arena of light sections for uploading to the GPU.
  *
  * <p>Each section represents an 18x18x18 block volume of light data.
@@ -116,7 +115,6 @@ public class LightStorage {
 			}
 
 			// Now actually do the collection.
-			// TODO: Should this be done in parallel?
 			sectionsToCollect.forEach(this::collectSection);
 
 			updatedSections.clear();

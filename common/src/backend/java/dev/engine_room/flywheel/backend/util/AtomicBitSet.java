@@ -43,6 +43,14 @@ public class AtomicBitSet {
 		segments = new AtomicReference<>(new AtomicBitSetSegments(numSegmentsToPreallocate, numLongsPerSegment));
 	}
 
+	public void set(int position, boolean value) {
+		if (value) {
+			set(position);
+		} else {
+			clear(position);
+		}
+	}
+
 	public void set(int position) {
 		int longPosition = longIndexInSegmentForPosition(position);
 

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceWriter;
-import dev.engine_room.flywheel.backend.engine.AbstractInstancer;
+import dev.engine_room.flywheel.backend.engine.BaseInstancer;
 import dev.engine_room.flywheel.backend.engine.InstancerKey;
 import dev.engine_room.flywheel.backend.gl.TextureBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
@@ -15,7 +15,7 @@ import dev.engine_room.flywheel.backend.gl.buffer.GlBufferUsage;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 
-public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I> {
+public class InstancedInstancer<I extends Instance> extends BaseInstancer<I> {
 	private final int instanceStride;
 
 	private final InstanceWriter<I> writer;
@@ -108,6 +108,60 @@ public class InstancedInstancer<I extends Instance> extends AbstractInstancer<I>
 
         return capacity > vbo.size();
     }
+
+	public void parallelUpdate() {
+		if (deleted.isEmpty()) {
+			return;
+		}
+
+		// Figure out which elements are to be removed.
+		final int oldSize = this.instances.size();
+		int removeCount = deleted.cardinality();
+
+		if (oldSize == removeCount) {
+			clear();
+			return;
+		}
+
+		final int newSize = oldSize - removeCount;
+
+		// Start from the first deleted index.
+		int writePos = deleted.nextSetBit(0);
+
+		if (writePos < newSize) {
+			// Since we'll be shifting everything into this space we can consider it all changed.
+			changed.set(writePos, newSize);
+		}
+
+		// We definitely shouldn't consider the deleted instances as changed though,
+		// else we might try some out of bounds accesses later.
+		changed.clear(newSize, oldSize);
+
+		// Punch out the deleted instances, shifting over surviving instances to fill their place.
+		for (int scanPos = writePos; (scanPos < oldSize) && (writePos < newSize); scanPos++, writePos++) {
+			// Find next non-deleted element.
+			scanPos = deleted.nextClearBit(scanPos);
+
+			if (scanPos != writePos) {
+				// Grab the old instance/handle from scanPos...
+				var handle = handles.get(scanPos);
+				I instance = instances.get(scanPos);
+
+				// ... and move it to writePos.
+				handles.set(writePos, handle);
+				instances.set(writePos, instance);
+
+				// Make sure the handle knows it's been moved
+				handle.index = writePos;
+			}
+		}
+
+		deleted.clear();
+		instances.subList(newSize, oldSize)
+				.clear();
+		handles.subList(newSize, oldSize)
+				.clear();
+	}
 
 	public void delete() {
 		if (vbo == null) {

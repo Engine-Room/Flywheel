@@ -11,7 +11,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
-// TODO: Add freezing
 @SuppressWarnings("unchecked")
 public final class VisualizerRegistryImpl {
 	@Nullable

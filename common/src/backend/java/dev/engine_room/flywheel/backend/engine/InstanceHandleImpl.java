@@ -1,13 +1,16 @@
 package dev.engine_room.flywheel.backend.engine;
 
+import org.jetbrains.annotations.UnknownNullability;
+
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceHandle;
 
 public class InstanceHandleImpl<I extends Instance> implements InstanceHandle {
+	@UnknownNullability
 	public State<I> state;
 	public int index;
 
-	public InstanceHandleImpl(State<I> state) {
+	public InstanceHandleImpl(@UnknownNullability State<I> state) {
 		this.state = state;
 	}
 
@@ -62,8 +65,7 @@ public class InstanceHandleImpl<I extends Instance> implements InstanceHandle {
 				return this;
 			}
 			var instancer = recreate.recreate();
-			instancer.revealInstance(handle, instance);
-			return instancer;
+			return instancer.revealInstance(handle, instance);
 		}
 	}
 

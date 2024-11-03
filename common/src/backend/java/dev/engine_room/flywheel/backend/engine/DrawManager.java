@@ -50,7 +50,7 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 
 	public Plan<RenderContext> createFramePlan() {
 		// Go wide on instancers to process deletions in parallel.
-		return ForEachPlan.of(() -> new ArrayList<>(instancers.values()), AbstractInstancer::removeDeletedInstances);
+		return ForEachPlan.of(() -> new ArrayList<>(instancers.values()), AbstractInstancer::parallelUpdate);
 	}
 
 	public void flush(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
