@@ -12,10 +12,11 @@ import net.minecraftforge.fml.loading.FMLLoader;
 
 @Mod("flywheel_testmod")
 public class FlywheelTestModClient {
-	private static final Logger LOGGER = LoggerFactory.getLogger("Flywheel Test Mod");
+	public static final String NAME = "Flywheel Test Mod";
+	private static final Logger LOGGER = LoggerFactory.getLogger(NAME);
 
 	public FlywheelTestModClient() {
-		LOGGER.info("Starting Test Mod, on Dist: {}", FMLLoader.getDist());
+		LOGGER.info("Starting {} on Dist: {}", NAME, FMLLoader.getDist());
 
 		MinecraftForge.EVENT_BUS.addListener((TickEvent.ClientTickEvent e) -> {
 			if (e.phase == TickEvent.Phase.END) {
@@ -23,7 +24,7 @@ public class FlywheelTestModClient {
 				MixinEnvironment.getCurrentEnvironment()
 						.audit();
 
-				LOGGER.info("Ran mixin audit, stopping client.");
+				LOGGER.info("Stopping client");
 				Minecraft.getInstance()
 						.stop();
 			}
