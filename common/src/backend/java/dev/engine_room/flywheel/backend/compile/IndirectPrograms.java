@@ -23,6 +23,7 @@ import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 import dev.engine_room.flywheel.backend.util.AtomicReferenceCounted;
 import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Unit;
 
 public class IndirectPrograms extends AtomicReferenceCounted {
 	private static final ResourceLocation CULL_SHADER_API_IMPL = Flywheel.rl("internal/indirect/cull_api_impl.glsl");
@@ -37,6 +38,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private static final Compile<ResourceLocation> UTIL = new Compile<>();
+	private static final Compile<Unit> UNIT = new Compile<>();
 
 	private static final List<String> EXTENSIONS = getExtensions(GlCompat.MAX_GLSL_VERSION);
 	private static final List<String> COMPUTE_EXTENSIONS = getComputeExtensions(GlCompat.MAX_GLSL_VERSION);
@@ -46,10 +48,10 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 	private final PipelineCompiler pipeline;
 	private final CompilationHarness<InstanceType<?>> culling;
-	private final CompilationHarness<InstanceType<?>> cullPassTwo;
+	private final CompilationHarness<Unit> cullPassTwo;
 	private final CompilationHarness<ResourceLocation> utils;
 
-	private IndirectPrograms(PipelineCompiler pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<InstanceType<?>> cullPassTwo, CompilationHarness<ResourceLocation> utils) {
+	private IndirectPrograms(PipelineCompiler pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<Unit> cullPassTwo, CompilationHarness<ResourceLocation> utils) {
 		this.pipeline = pipeline;
 		this.culling = culling;
 		this.cullPassTwo = cullPassTwo;
@@ -91,7 +93,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, vertexComponents, fragmentComponents, EXTENSIONS);
 		var pass1Compiler = createCullingCompiler(sources, CULL_SHADER_MAIN, "early_cull");
-		var pass2Compiler = createCullingCompiler(sources, PASS2_SHADER_MAIN, "late_cull");
+		var pass2Compiler = createPassTwoCompiler(sources, PASS2_SHADER_MAIN, "late_cull");
 		var utilCompiler = createUtilCompiler(sources);
 
 		IndirectPrograms newInstance = new IndirectPrograms(pipelineCompiler, pass1Compiler, pass2Compiler, utilCompiler);
@@ -114,6 +116,19 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 						.withComponent(InstanceStructComponent::new)
 						.withResource(InstanceType::cullShader)
 						.withComponent(SsboInstanceComponent::new)
+						.withResource(main))
+				.postLink((key, program) -> Uniforms.setUniformBlockBindings(program))
+				.harness(name, sources);
+	}
+
+	private static CompilationHarness<Unit> createPassTwoCompiler(ShaderSources sources, ResourceLocation main, String name) {
+		return UNIT.program()
+				.link(UNIT.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.COMPUTE)
+						.nameMapper(instanceType -> name)
+						.requireExtensions(COMPUTE_EXTENSIONS)
+						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
+						.enableExtension("GL_KHR_shader_subgroup_basic")
+						.enableExtension("GL_KHR_shader_subgroup_ballot")
 						.withResource(main))
 				.postLink((key, program) -> Uniforms.setUniformBlockBindings(program))
 				.harness(name, sources);
@@ -163,8 +178,8 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		return culling.get(instanceType);
 	}
 
-	public GlProgram getCullPassTwoProgram(InstanceType<?> instanceType) {
-		return cullPassTwo.get(instanceType);
+	public GlProgram getCullPassTwoProgram() {
+		return cullPassTwo.get(Unit.INSTANCE);
 	}
 
 	public GlProgram getApplyProgram() {

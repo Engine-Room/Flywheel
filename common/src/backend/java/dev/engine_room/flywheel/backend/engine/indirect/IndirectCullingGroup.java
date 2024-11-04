@@ -23,7 +23,6 @@ import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
 import dev.engine_room.flywheel.backend.engine.InstancerKey;
 import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
-import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.lib.math.MoreMath;
@@ -44,7 +43,6 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private final IndirectPrograms programs;
 	private final GlProgram earlyCull;
-	private final GlProgram lateCull;
 
 	private boolean needsDrawBarrier;
 	private boolean needsDrawSort;
@@ -58,7 +56,6 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		this.programs = programs;
 		earlyCull = programs.getCullingProgram(instanceType);
-		lateCull = programs.getCullPassTwoProgram(instanceType);
 	}
 
 	public void flushInstancers() {
@@ -113,7 +110,6 @@ public class IndirectCullingGroup<I extends Instance> {
 			return;
 		}
 
-		Uniforms.bindAll();
 		earlyCull.bind();
 
 		buffers.bindForCullPassOne();
@@ -124,9 +120,6 @@ public class IndirectCullingGroup<I extends Instance> {
 		if (nothingToDo()) {
 			return;
 		}
-
-		Uniforms.bindAll();
-		lateCull.bind();
 
 		buffers.bindForCullPassTwo();
 		glDispatchCompute(buffers.objectStorage.capacity(), 1, 1);

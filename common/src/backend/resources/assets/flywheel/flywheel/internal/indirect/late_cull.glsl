@@ -2,7 +2,6 @@
 #include "flywheel:internal/indirect/model_descriptor.glsl"
 #include "flywheel:internal/uniforms/uniforms.glsl"
 #include "flywheel:util/matrix.glsl"
-#include "flywheel:internal/indirect/matrices.glsl"
 #include "flywheel:internal/indirect/dispatch.glsl"
 
 layout(local_size_x = 32) in;
@@ -11,12 +10,9 @@ layout(std430, binding = _FLW_DRAW_INSTANCE_INDEX_BUFFER_BINDING) restrict write
     uint _flw_drawIndices[];
 };
 
-
-// High 6 bits for the number of instances in the page.
-const uint _FLW_PAGE_COUNT_OFFSET = 26u;
-// Bottom 26 bits for the model index.
-const uint _FLW_MODEL_INDEX_MASK = 0x3FFFFFF;
-
+layout(std430, binding = _FLW_BOUNDING_SPHERE_BINDING) restrict readonly buffer BoundingSphereBuffer {
+    vec4 _flw_boundingSpheres[];
+};
 
 layout(std430, binding = _FLW_PAGE_FRAME_DESCRIPTOR_BUFFER_BINDING) restrict readonly buffer PageFrameDescriptorBuffer {
     uint _flw_pageFrameDescriptors[];
@@ -28,10 +24,6 @@ layout(std430, binding = _FLW_LAST_FRAME_VISIBILITY_BUFFER_BINDING) restrict buf
 
 layout(std430, binding = _FLW_MODEL_BUFFER_BINDING) restrict buffer ModelBuffer {
     ModelDescriptor _flw_models[];
-};
-
-layout(std430, binding = _FLW_MATRIX_BUFFER_BINDING) restrict readonly buffer MatrixBuffer {
-    Matrices _flw_matrices[];
 };
 
 layout(binding = 0) uniform sampler2D _flw_depthPyramid;
@@ -113,21 +105,11 @@ bool _flw_hizTest(vec3 center, float radius) {
     return true;
 }
 
-bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
-    uint matrixIndex = _flw_models[modelIndex].matrixIndex;
-    BoundingSphere sphere = _flw_models[modelIndex].boundingSphere;
+bool _flw_isVisible(uint instanceIndex) {
+    vec4 boundingSphere = _flw_boundingSpheres[instanceIndex];
 
-    vec3 center;
-    float radius;
-    _flw_unpackBoundingSphere(sphere, center, radius);
-
-    FlwInstance instance = _flw_unpackInstance(instanceIndex);
-
-    flw_transformBoundingSphere(instance, center, radius);
-
-    if (matrixIndex > 0) {
-        transformBoundingSphere(_flw_matrices[matrixIndex].pose, center, radius);
-    }
+    vec3 center = boundingSphere.xyz;
+    float radius = boundingSphere.w;
 
     bool visible = _flw_testSphere(center, radius);
 
@@ -155,8 +137,8 @@ void main() {
 
     uint instanceIndex = gl_GlobalInvocationID.x;
 
-    bool visible = _flw_isVisible(instanceIndex, modelIndex);
-    bool visibleLastFrame = (_flw_visibility[pageIndex] & (1u << gl_LocalInvocationID.x)) != 0u;
+    bool visible = _flw_isVisible(instanceIndex);
+    bool visibleLastFrame = (_flw_visibility[gl_WorkGroupID.x] & (1u << gl_LocalInvocationID.x)) != 0u;
 
     if (visible && !visibleLastFrame) {
         uint localIndex = atomicAdd(_flw_models[modelIndex].instanceCount, 1);
@@ -168,6 +150,6 @@ void main() {
     uvec4 visibility = subgroupBallot(visible);
 
     if (subgroupElect()) {
-        _flw_visibility[pageIndex] = visibility.x;
+        _flw_visibility[gl_WorkGroupID.x] = visibility.x;
     }
 }

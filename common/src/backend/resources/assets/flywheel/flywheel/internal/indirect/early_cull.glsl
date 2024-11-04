@@ -7,14 +7,13 @@
 
 layout(local_size_x = 32) in;
 
+layout(std430, binding = _FLW_BOUNDING_SPHERE_BINDING) restrict writeonly buffer BoundingSphereBuffer {
+    vec4 _flw_boundingSpheres[];
+};
+
 layout(std430, binding = _FLW_DRAW_INSTANCE_INDEX_BUFFER_BINDING) restrict writeonly buffer DrawIndexBuffer {
     uint _flw_drawIndices[];
 };
-
-// High 6 bits for the number of instances in the page.
-const uint _FLW_PAGE_COUNT_OFFSET = 26u;
-// Bottom 26 bits for the model index.
-const uint _FLW_MODEL_INDEX_MASK = 0x3FFFFFF;
 
 layout(std430, binding = _FLW_PAGE_FRAME_DESCRIPTOR_BUFFER_BINDING) restrict readonly buffer PageFrameDescriptorBuffer {
     uint _flw_pageFrameDescriptors[];
@@ -61,39 +60,36 @@ bool _flw_isVisible(uint instanceIndex, uint modelIndex) {
         transformBoundingSphere(_flw_matrices[matrixIndex].pose, center, radius);
     }
 
+    _flw_boundingSpheres[instanceIndex] = vec4(center, radius);
+
     return _flw_testSphere(center, radius);
 }
 
-// TODO: There's an opportunity here to write out the transformed bounding spheres to a buffer and use them in pass 2,
-//  instead of pulling the entire instance again. It would save a lot of memory bandwidth and matrix multiplications in
-//  pass 2, but it would also be a good bit of writes in pass 1. It's worth investigating, but it would be nice to have
-//  nsight trace working to be more sure.
 void main() {
-    uint pageIndex = gl_WorkGroupID.x;
+    uint pageIndex = gl_WorkGroupID.x << 1u;
 
     if (pageIndex >= _flw_pageFrameDescriptors.length()) {
         return;
     }
 
-    uint packedModelIndexAndCount = _flw_pageFrameDescriptors[pageIndex];
+    uint modelIndex = _flw_pageFrameDescriptors[pageIndex];
 
-    uint pageInstanceCount = packedModelIndexAndCount >> _FLW_PAGE_COUNT_OFFSET;
+    uint pageValidity = _flw_pageFrameDescriptors[pageIndex + 1];
 
-    if (gl_LocalInvocationID.x >= pageInstanceCount) {
+    if (((1u << gl_LocalInvocationID.x) & pageValidity) == 0) {
         return;
     }
 
     uint instanceIndex = gl_GlobalInvocationID.x;
 
-    uint modelIndex = packedModelIndexAndCount & _FLW_MODEL_INDEX_MASK;
-
     if (!_flw_isVisible(instanceIndex, modelIndex)) {
         return;
     }
 
-    uint pageVisibility = _flw_visibility[pageIndex];
+    uint pageVisibility = _flw_visibility[gl_WorkGroupID.x];
+    bool visibleLastFrame = (_flw_visibility[gl_WorkGroupID.x] & (1u << gl_LocalInvocationID.x)) != 0u;
 
-    if ((pageVisibility & (1u << gl_LocalInvocationID.x)) != 0u) {
+    if (visibleLastFrame) {
         // This instance was visibile last frame, it should be rendered early.
         uint localIndex = atomicAdd(_flw_models[modelIndex].instanceCount, 1);
         uint targetIndex = _flw_models[modelIndex].baseInstance + localIndex;

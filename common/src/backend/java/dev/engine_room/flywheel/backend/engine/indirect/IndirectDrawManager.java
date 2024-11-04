@@ -132,6 +132,9 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		GlTextureUnit.T0.makeActive();
 		GlStateManager._bindTexture(depthPyramid.pyramidTextureId);
 
+		programs.getCullPassTwoProgram()
+				.bind();
+
 		for (var group1 : cullingGroups.values()) {
 			group1.dispatchCullPassTwo();
 		}
