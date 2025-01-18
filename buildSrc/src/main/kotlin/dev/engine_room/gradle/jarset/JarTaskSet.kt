@@ -30,11 +30,19 @@ class JarTaskSet(
     val remapSources: TaskProvider<RemapSourcesJarTask>
 ) {
 
-    fun publish(artifactId: String) {
+    fun publishWithRawSources(artifactId: String) {
+        publish(artifactId, sources)
+    }
+
+    fun publishWithRemappedSources(artifactId: String) {
+        publish(artifactId, remapSources)
+    }
+
+    private fun publish(artifactId: String, sourceJar: TaskProvider<out Jar>) {
         project.the<PublishingExtension>().publications {
             register<MavenPublication>("${name}RemapMaven") {
                 artifact(remapJar)
-                artifact(remapSources)
+                artifact(sourceJar)
                 artifact(javadocJar)
                 this.artifactId = artifactId
             }

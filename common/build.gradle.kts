@@ -58,7 +58,7 @@ jarSets {
     // For publishing.
     create("api", api, lib).apply {
         addToAssemble()
-        publish("flywheel-common-intermediary-api-${property("artifact_minecraft_version")}")
+        publishWithRemappedSources("flywheel-common-intermediary-api-${property("artifact_minecraft_version")}")
 
         configureJar {
             manifest {
@@ -75,7 +75,7 @@ jarSets {
                 targetNamespace = "named"
             }
 
-            publish("flywheel-common-mojmap-api-${property("artifact_minecraft_version")}")
+            publishWithRawSources("flywheel-common-mojmap-api-${property("artifact_minecraft_version")}")
         }
     }
 }

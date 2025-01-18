@@ -27,7 +27,7 @@ transitiveSourceSets {
 }
 
 jarSets {
-    mainSet.publish("vanillin-forge-${project.property("artifact_minecraft_version")}")
+    mainSet.publishWithRawSources("vanillin-forge-${project.property("artifact_minecraft_version")}")
 }
 
 defaultPackageInfos {
