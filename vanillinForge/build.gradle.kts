@@ -27,7 +27,9 @@ transitiveSourceSets {
 }
 
 jarSets {
-    mainSet.publishWithRawSources("vanillin-forge-${project.property("artifact_minecraft_version")}")
+    mainSet.publishWithRawSources {
+        artifactId = "vanillin-forge-${project.property("artifact_minecraft_version")}"
+    }
 }
 
 defaultPackageInfos {
@@ -38,11 +40,6 @@ loom {
     mixin {
         useLegacyMixinAp = true
         add(main, "vanillin.refmap.json")
-    }
-
-    forge {
-//        mixinConfig("flywheel.backend.mixins.json")
-//        mixinConfig("flywheel.impl.mixins.json")
     }
 
     runs {

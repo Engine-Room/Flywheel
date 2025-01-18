@@ -4,6 +4,7 @@ import net.fabricmc.loom.task.AbstractRemapJarTask
 import net.fabricmc.loom.task.RemapJarTask
 import net.fabricmc.loom.task.RemapSourcesJarTask
 import org.gradle.api.Action
+import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.publish.PublishingExtension
@@ -30,22 +31,23 @@ class JarTaskSet(
     val remapSources: TaskProvider<RemapSourcesJarTask>
 ) {
 
-    fun publishWithRawSources(artifactId: String) {
-        publish(artifactId, sources)
+    fun publishWithRawSources(action: Action<MavenPublication>): NamedDomainObjectProvider<MavenPublication> {
+        return publish(sources, action)
     }
 
-    fun publishWithRemappedSources(artifactId: String) {
-        publish(artifactId, remapSources)
+    fun publishWithRemappedSources(action: Action<MavenPublication>): NamedDomainObjectProvider<MavenPublication> {
+        return publish(remapSources, action)
     }
 
-    private fun publish(artifactId: String, sourceJar: TaskProvider<out Jar>) {
-        project.the<PublishingExtension>().publications {
-            register<MavenPublication>("${name}RemapMaven") {
-                artifact(remapJar)
-                artifact(sourceJar)
-                artifact(javadocJar)
-                this.artifactId = artifactId
-            }
+    private fun publish(
+        sourceJar: TaskProvider<out Jar>,
+        action: Action<MavenPublication>
+    ): NamedDomainObjectProvider<MavenPublication> {
+        return project.the<PublishingExtension>().publications.register<MavenPublication>("${name}RemapMaven") {
+            artifact(remapJar)
+            artifact(sourceJar)
+            artifact(javadocJar)
+            action.execute(this)
         }
     }
 

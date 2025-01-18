@@ -65,12 +65,16 @@ platform {
 }
 
 jarSets {
-    mainSet.publishWithRawSources("flywheel-forge-${project.property("artifact_minecraft_version")}")
+    mainSet.publishWithRawSources {
+        artifactId = "flywheel-forge-${project.property("artifact_minecraft_version")}"
+    }
     mainSet.outgoing("flywheel")
 
     create("api", api, lib).apply {
         addToAssemble()
-        publishWithRawSources("flywheel-forge-api-${project.property("artifact_minecraft_version")}")
+        publishWithRawSources {
+            artifactId = "flywheel-forge-api-${project.property("artifact_minecraft_version")}"
+        }
 
         configureJar {
             manifest {
