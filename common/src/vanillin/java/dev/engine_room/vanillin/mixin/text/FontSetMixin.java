@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.impl.mixin.text;
+package dev.engine_room.vanillin.mixin.text;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 
-import dev.engine_room.flywheel.impl.extension.FontTextureExtension;
+import dev.engine_room.vanillin.text.FontTextureExtension;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.FontTexture;
 import net.minecraft.resources.ResourceLocation;

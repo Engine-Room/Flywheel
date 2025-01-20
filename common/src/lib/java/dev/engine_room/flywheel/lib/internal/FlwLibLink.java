@@ -10,11 +10,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import dev.engine_room.flywheel.api.internal.DependencyInjection;
 import dev.engine_room.flywheel.lib.transform.PoseTransformStack;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.font.FontSet;
-import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.resources.ResourceLocation;
 
 public interface FlwLibLink {
 	FlwLibLink INSTANCE = DependencyInjection.load(FlwLibLink.class, "dev.engine_room.flywheel.impl.FlwLibLinkImpl");
@@ -36,10 +32,4 @@ public interface FlwLibLink {
 	boolean isShaderPackInUse();
 
 	boolean isRenderingShadowPass();
-
-	FontSet getFontSet(Font font, ResourceLocation loc);
-
-	boolean getFilterFishyGlyphs(Font font);
-
-	BakedGlyphExtension getBakedGlyphExtension(BakedGlyph glyph);
 }

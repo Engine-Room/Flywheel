@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.lib.visual.text;
+package dev.engine_room.vanillin.text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,13 +17,12 @@ import dev.engine_room.flywheel.api.instance.InstancerProvider;
 import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.vertex.MutableVertexList;
-import dev.engine_room.flywheel.lib.instance.GlyphInstance;
-import dev.engine_room.flywheel.lib.instance.InstanceTypes;
-import dev.engine_room.flywheel.lib.internal.FlwLibLink;
 import dev.engine_room.flywheel.lib.model.QuadMesh;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
-import dev.engine_room.flywheel.lib.util.ResourceReloadCache;
+import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.visual.util.SmartRecycler;
+import dev.engine_room.vanillin.GlyphInstance;
+import dev.engine_room.vanillin.VanillinInstanceTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.font.FontSet;
@@ -42,8 +41,8 @@ import net.minecraft.util.Mth;
 public final class TextVisual {
 	private static final Font FONT = Minecraft.getInstance().font;
 
-	private static final ResourceReloadCache<GlyphMeshKey, GlyphMesh> GLYPH_MESH_CACHE = new ResourceReloadCache<>(GlyphMeshKey::into);
-	private static final ResourceReloadCache<GlyphModelKey, Model> GLYPH_MODEL_CACHE = new ResourceReloadCache<>(GlyphModelKey::into);
+	private static final RendererReloadCache<GlyphMeshKey, GlyphMesh> GLYPH_MESH_CACHE = new RendererReloadCache<>(GlyphMeshKey::into);
+	private static final RendererReloadCache<GlyphModelKey, Model> GLYPH_MODEL_CACHE = new RendererReloadCache<>(GlyphModelKey::into);
 
 	private static final ThreadLocal<Sink> SINKS = ThreadLocal.withInitial(Sink::new);
 
@@ -56,7 +55,7 @@ public final class TextVisual {
 	private int light;
 
 	public TextVisual(InstancerProvider provider) {
-		recycler = new SmartRecycler<>(key -> provider.instancer(InstanceTypes.GLYPH, GLYPH_MODEL_CACHE.get(key.modelKey), key.bias)
+		recycler = new SmartRecycler<>(key -> provider.instancer(VanillinInstanceTypes.GLYPH, GLYPH_MODEL_CACHE.get(key.modelKey), key.bias)
 				.createInstance());
 	}
 
@@ -179,8 +178,8 @@ public final class TextVisual {
 
 		@Override
 		public boolean accept(int index, Style style, int codePoint) {
-			FontSet fontSet = FlwLibLink.INSTANCE.getFontSet(FONT, style.getFont());
-			GlyphInfo glyphInfo = fontSet.getGlyphInfo(codePoint, FlwLibLink.INSTANCE.getFilterFishyGlyphs(FONT));
+			FontSet fontSet = TextUtil.getFontSet(FONT, style.getFont());
+			GlyphInfo glyphInfo = fontSet.getGlyphInfo(codePoint, TextUtil.getFilterFishyGlyphs(FONT));
 			BakedGlyph glyph = style.isObfuscated() && codePoint != ' ' ? fontSet.getRandomGlyph(glyphInfo) : fontSet.getGlyph(codePoint);
 
 			boolean bold = style.isBold();
@@ -218,10 +217,10 @@ public final class TextVisual {
 
 		public void addBackground(int backgroundColor, float startX, float endX) {
 			if (backgroundColor != 0) {
-				BakedGlyph glyph = FlwLibLink.INSTANCE.getFontSet(FONT, Style.DEFAULT_FONT)
+				BakedGlyph glyph = TextUtil.getFontSet(FONT, Style.DEFAULT_FONT)
 						.whiteGlyph();
 
-				var glyphExtension = FlwLibLink.INSTANCE.getBakedGlyphExtension(glyph);
+				var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
 
 				GlyphInstance instance = recycler.get(effectKey(glyphExtension.flywheel$texture(), TextLayer.GlyphMaterial.SEE_THROUGH, 0));
 				instance.setEffect(glyph, pose, startX - 1.0f, 9.0f, endX + 1.0f, 1.0f, 0.01f);
@@ -232,7 +231,7 @@ public final class TextVisual {
 		}
 
 		private void addEffect(TextLayer layer, float x0, float y0, float x1, float y1, float depth, int colorArgb) {
-			BakedGlyph glyph = FlwLibLink.INSTANCE.getFontSet(FONT, Style.DEFAULT_FONT)
+			BakedGlyph glyph = TextUtil.getFontSet(FONT, Style.DEFAULT_FONT)
 					.whiteGlyph();
 
 			GlyphInstance instance = recycler.get(effectKey(glyph, layer));
@@ -243,7 +242,7 @@ public final class TextVisual {
 		}
 
 		private static GlyphInstanceKey key(TextLayer layer, GlyphInfo glyphInfo, BakedGlyph glyph, boolean bold) {
-			var glyphExtension = FlwLibLink.INSTANCE.getBakedGlyphExtension(glyph);
+			var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
 			float glyphWidth = glyphExtension.flywheel$right() - glyphExtension.flywheel$left();
 			float glyphHeight = glyphExtension.flywheel$down() - glyphExtension.flywheel$up();
 
@@ -257,7 +256,7 @@ public final class TextVisual {
 		}
 
 		private static GlyphInstanceKey effectKey(BakedGlyph glyph, TextLayer layer) {
-			var glyphExtension = FlwLibLink.INSTANCE.getBakedGlyphExtension(glyph);
+			var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
 			return effectKey(glyphExtension.flywheel$texture(), layer.material(), layer.bias());
 		}
 

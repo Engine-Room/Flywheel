@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.vanilla;
+package dev.engine_room.vanillin.visuals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +15,12 @@ import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.model.part.InstanceTree;
 import dev.engine_room.flywheel.lib.model.part.ModelTree;
 import dev.engine_room.flywheel.lib.model.part.ModelTrees;
-import dev.engine_room.flywheel.lib.util.ResourceReloadCache;
+import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
-import dev.engine_room.flywheel.lib.visual.text.TextLayer;
-import dev.engine_room.flywheel.lib.visual.text.TextLayers;
-import dev.engine_room.flywheel.lib.visual.text.TextVisual;
+import dev.engine_room.vanillin.text.TextLayer;
+import dev.engine_room.vanillin.text.TextLayers;
+import dev.engine_room.vanillin.text.TextVisual;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -41,7 +41,7 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 	private static final Vec3 TEXT_OFFSET = new Vec3(0.0, 0.3333333432674408, 0.046666666865348816);
 	private static final Font FONT = Minecraft.getInstance().font;
 
-	private static final ResourceReloadCache<WoodType, ModelTree> SIGN_MODELS = new ResourceReloadCache<>(SignVisual::createSignModel);
+	private static final RendererReloadCache<WoodType, ModelTree> SIGN_MODELS = new RendererReloadCache<>(SignVisual::createSignModel);
 
 	private static final Material MATERIAL = SimpleMaterial.builder()
 			.cutout(CutoutShaders.ONE_TENTH)

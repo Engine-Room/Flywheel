@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.impl;
+package dev.engine_room.vanillin.text;
 
 import com.mojang.blaze3d.font.SheetGlyphInfo;
 

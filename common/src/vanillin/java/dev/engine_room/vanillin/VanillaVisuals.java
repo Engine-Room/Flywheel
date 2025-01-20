@@ -4,6 +4,7 @@ import dev.engine_room.vanillin.visuals.BellVisual;
 import dev.engine_room.vanillin.visuals.ChestVisual;
 import dev.engine_room.vanillin.visuals.MinecartVisual;
 import dev.engine_room.vanillin.visuals.ShulkerBoxVisual;
+import dev.engine_room.vanillin.visuals.SignVisual;
 import dev.engine_room.vanillin.visuals.TntMinecartVisual;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.world.entity.Entity;
@@ -32,6 +33,9 @@ public class VanillaVisuals {
 		builder(BlockEntityType.SHULKER_BOX)
 				.factory(ShulkerBoxVisual::new)
 				.apply(true);
+
+		builder(BlockEntityType.SIGN).factory(SignVisual::new)
+				.apply(false);
 
 		builder(EntityType.CHEST_MINECART)
 				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, ModelLayers.CHEST_MINECART))

@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.lib.visual.text;
+package dev.engine_room.vanillin.text;
 
 import java.util.Objects;
 

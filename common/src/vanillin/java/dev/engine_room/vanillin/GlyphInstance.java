@@ -1,13 +1,14 @@
-package dev.engine_room.flywheel.lib.instance;
+package dev.engine_room.vanillin;
 
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 
 import dev.engine_room.flywheel.api.instance.InstanceHandle;
 import dev.engine_room.flywheel.api.instance.InstanceType;
-import dev.engine_room.flywheel.lib.internal.BakedGlyphExtension;
-import dev.engine_room.flywheel.lib.internal.FlwLibLink;
+import dev.engine_room.flywheel.lib.instance.ColoredLitInstance;
 import dev.engine_room.flywheel.lib.math.DataPacker;
+import dev.engine_room.vanillin.text.BakedGlyphExtension;
+import dev.engine_room.vanillin.text.TextUtil;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 
 public class GlyphInstance extends ColoredLitInstance {
@@ -25,7 +26,7 @@ public class GlyphInstance extends ColoredLitInstance {
 	}
 
 	public GlyphInstance setGlyph(BakedGlyph glyph, Matrix4fc initialPose, float x, float y, boolean italic) {
-		var glyphExtension = FlwLibLink.INSTANCE.getBakedGlyphExtension(glyph);
+		var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
 		setUvs(glyphExtension);
 
 		float left = glyphExtension.flywheel$left();
@@ -44,7 +45,7 @@ public class GlyphInstance extends ColoredLitInstance {
 	}
 
 	public GlyphInstance setEffect(BakedGlyph glyph, Matrix4fc initialPose, float x0, float y0, float x1, float y1, float depth) {
-		var glyphExtension = FlwLibLink.INSTANCE.getBakedGlyphExtension(glyph);
+		var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
 		setUvs(glyphExtension);
 
 		pose.set(initialPose);

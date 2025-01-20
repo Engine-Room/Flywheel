@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.impl.extension;
+package dev.engine_room.vanillin.text;
 
 import net.minecraft.resources.ResourceLocation;
 

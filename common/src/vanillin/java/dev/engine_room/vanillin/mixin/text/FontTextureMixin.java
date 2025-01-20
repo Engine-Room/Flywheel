@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.impl.mixin.text;
+package dev.engine_room.vanillin.mixin.text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +20,9 @@ import com.mojang.blaze3d.font.SheetGlyphInfo;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import dev.engine_room.flywheel.impl.FontTextureUpload;
-import dev.engine_room.flywheel.impl.extension.FontTextureExtension;
-import dev.engine_room.flywheel.lib.internal.BakedGlyphExtension;
+import dev.engine_room.vanillin.text.BakedGlyphExtension;
+import dev.engine_room.vanillin.text.FontTextureExtension;
+import dev.engine_room.vanillin.text.FontTextureUpload;
 import net.minecraft.client.gui.font.FontTexture;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.renderer.texture.AbstractTexture;

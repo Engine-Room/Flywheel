@@ -1,11 +1,11 @@
-package dev.engine_room.flywheel.impl.mixin.text;
+package dev.engine_room.vanillin.mixin.text;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
-import dev.engine_room.flywheel.lib.internal.BakedGlyphExtension;
+import dev.engine_room.vanillin.text.BakedGlyphExtension;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.resources.ResourceLocation;
 
