@@ -42,6 +42,10 @@ public class InstancedDraw {
 		return deleted;
 	}
 
+	public MeshPool.PooledMesh mesh() {
+		return mesh;
+	}
+
 	public void render(TextureBuffer buffer) {
 		if (mesh.isInvalid()) {
 			return;

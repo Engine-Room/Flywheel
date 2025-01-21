@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.backend.FlwBackend;
 import dev.engine_room.flywheel.impl.registry.IdRegistryImpl;
-import dev.engine_room.flywheel.vanilla.VanillaVisuals;
 
 public final class FlwImpl {
 	public static final Logger LOGGER = LoggerFactory.getLogger(Flywheel.ID);
@@ -23,9 +22,6 @@ public final class FlwImpl {
 
 		// backend
 		FlwBackend.init(FlwConfig.INSTANCE.backendConfig());
-
-		// vanilla
-		VanillaVisuals.init();
 	}
 
 	public static void freezeRegistries() {

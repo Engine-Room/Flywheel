@@ -1,11 +1,10 @@
 package dev.engine_room.flywheel.impl.compat;
 
 import dev.engine_room.flywheel.impl.FlwImpl;
-import dev.engine_room.flywheel.impl.FlwImplXplat;
 import net.irisshaders.iris.api.v0.IrisApi;
 
 public final class IrisCompat {
-	public static final boolean ACTIVE = FlwImplXplat.INSTANCE.useIrisCompat();
+	public static final boolean ACTIVE = CompatMod.IRIS.isLoaded;
 
 	static {
 		if (ACTIVE) {

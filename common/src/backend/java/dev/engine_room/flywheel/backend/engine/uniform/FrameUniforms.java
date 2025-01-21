@@ -73,7 +73,7 @@ public final class FrameUniforms extends UniformWriter {
 		var camY = (float) (cameraPos.y - renderOrigin.getY());
 		var camZ = (float) (cameraPos.z - renderOrigin.getZ());
 
-		VIEW.set(context.stack().last().pose());
+		VIEW.set(context.modelView());
 		VIEW.translate(-camX, -camY, -camZ);
 		PROJECTION.set(context.projection());
 		VIEW_PROJECTION.set(context.viewProjection());

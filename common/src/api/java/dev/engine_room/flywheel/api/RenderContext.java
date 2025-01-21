@@ -2,8 +2,6 @@ package dev.engine_room.flywheel.api;
 
 import org.joml.Matrix4fc;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -16,7 +14,7 @@ public interface RenderContext {
 
 	RenderBuffers buffers();
 
-	PoseStack stack();
+	Matrix4fc modelView();
 
 	Matrix4fc projection();
 

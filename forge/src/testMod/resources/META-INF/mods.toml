@@ -1,8 +1,0 @@
-modLoader = "javafml"
-loaderVersion = "[0,)"
-license = "${mod_license}"
-
-[[mods]]
-modId = "${mod_id}_testmod"
-version = "1.0.0"
-displayName = "${mod_name} Test Mod"

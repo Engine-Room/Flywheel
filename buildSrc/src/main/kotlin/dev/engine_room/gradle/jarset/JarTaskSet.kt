@@ -23,11 +23,11 @@ import org.gradle.language.jvm.tasks.ProcessResources
 class JarTaskSet(
     private val project: Project,
     private val name: String,
-    private val jar: TaskProvider<Jar>,
-    private val sources: TaskProvider<Jar>,
-    private val javadocJar: TaskProvider<Jar>,
-    private val remapJar: TaskProvider<RemapJarTask>,
-    private val remapSources: TaskProvider<RemapSourcesJarTask>
+    val jar: TaskProvider<Jar>,
+    val sources: TaskProvider<Jar>,
+    val javadocJar: TaskProvider<Jar>,
+    val remapJar: TaskProvider<RemapJarTask>,
+    val remapSources: TaskProvider<RemapSourcesJarTask>
 ) {
 
     fun publish(artifactId: String) {
@@ -41,10 +41,21 @@ class JarTaskSet(
         }
     }
 
-    /**
-     * Create a new configuration that can be consumed by other projects, and export the base jar.
-     */
-    fun createOutgoingConfiguration() {
+    fun outgoing(name: String) {
+        outgoingRemapJar("${name}Remap")
+        outgoingJar("${name}Dev")
+    }
+
+    fun outgoingRemapJar(name: String) {
+        val config = project.configurations.register(name) {
+            isCanBeConsumed = true
+            isCanBeResolved = false
+        }
+
+        project.artifacts.add(config.name, remapJar)
+    }
+
+    fun outgoingJar(name: String) {
         val config = project.configurations.register(name) {
             isCanBeConsumed = true
             isCanBeResolved = false

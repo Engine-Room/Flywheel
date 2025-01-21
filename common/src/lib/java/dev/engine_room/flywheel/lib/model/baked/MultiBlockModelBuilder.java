@@ -2,20 +2,19 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
+import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 
-@ApiStatus.NonExtendable
-public abstract class MultiBlockModelBuilder {
+public final class MultiBlockModelBuilder {
 	final BlockAndTintGetter level;
 	final Iterable<BlockPos> positions;
 	@Nullable
@@ -24,13 +23,9 @@ public abstract class MultiBlockModelBuilder {
 	@Nullable
 	BiFunction<RenderType, Boolean, Material> materialFunc;
 
-	MultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
+	public MultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
 		this.level = level;
 		this.positions = positions;
-	}
-
-	public static MultiBlockModelBuilder create(BlockAndTintGetter level, Iterable<BlockPos> positions) {
-		return FlwLibXplat.INSTANCE.createMultiBlockModelBuilder(level, positions);
 	}
 
 	public MultiBlockModelBuilder poseStack(PoseStack poseStack) {
@@ -48,5 +43,11 @@ public abstract class MultiBlockModelBuilder {
 		return this;
 	}
 
-	public abstract SimpleModel build();
+	public SimpleModel build() {
+		if (materialFunc == null) {
+			materialFunc = ModelUtil::getMaterial;
+		}
+
+		return FlwLibXplat.INSTANCE.buildMultiBlockModelBuilder(this);
+	}
 }

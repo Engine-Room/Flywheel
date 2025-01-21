@@ -3,6 +3,7 @@ package dev.engine_room.flywheel.lib.model.baked;
 import org.jetbrains.annotations.UnknownNullability;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
@@ -10,14 +11,16 @@ import net.minecraft.client.renderer.RenderType;
 
 class MeshEmitter {
 	private final RenderType renderType;
-	private final BufferBuilder bufferBuilder;
+	private final ByteBufferBuilder byteBufferBuilder;
+	@UnknownNullability
+	private BufferBuilder bufferBuilder;
 
 	private BakedModelBufferer.@UnknownNullability ResultConsumer resultConsumer;
 	private boolean currentShade;
 
 	MeshEmitter(RenderType renderType) {
 		this.renderType = renderType;
-		this.bufferBuilder = new BufferBuilder(renderType.bufferSize());
+		this.byteBufferBuilder = new ByteBufferBuilder(renderType.bufferSize());
 	}
 
 	public void prepare(BakedModelBufferer.ResultConsumer resultConsumer) {
@@ -25,7 +28,7 @@ class MeshEmitter {
 	}
 
 	public void end() {
-		if (bufferBuilder.building()) {
+		if (bufferBuilder != null) {
 			emit();
 		}
 		resultConsumer = null;
@@ -36,23 +39,24 @@ class MeshEmitter {
 		return bufferBuilder;
 	}
 
-	void prepareForGeometry(boolean shade) {
-		if (!bufferBuilder.building()) {
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+	private void prepareForGeometry(boolean shade) {
+		if (bufferBuilder == null) {
+			bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 		} else if (shade != currentShade) {
 			emit();
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+			bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 		}
 
 		currentShade = shade;
 	}
 
-	void emit() {
-		var renderedBuffer = bufferBuilder.endOrDiscardIfEmpty();
+	private void emit() {
+		var data = bufferBuilder.build();
+		bufferBuilder = null;
 
-		if (renderedBuffer != null) {
-			resultConsumer.accept(renderType, currentShade, renderedBuffer);
-			renderedBuffer.release();
+		if (data != null) {
+			resultConsumer.accept(renderType, currentShade, data);
+			data.close();
 		}
 	}
 }

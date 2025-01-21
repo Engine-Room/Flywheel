@@ -72,10 +72,10 @@ mat3 _flw_normalMatrix;
 #endif
 
 #ifdef _FLW_DEBUG
-flat out uint _flw_instanceID;
+flat out uvec2 _flw_ids;
 #endif
 
-void _flw_main(in FlwInstance instance, in uint stableInstanceID) {
+void _flw_main(in FlwInstance instance, in uint stableInstanceID, in uint modelID) {
     _flw_layoutVertex();
     flw_instanceVertex(instance);
     flw_materialVertex();
@@ -96,6 +96,6 @@ void _flw_main(in FlwInstance instance, in uint stableInstanceID) {
     gl_Position = flw_viewProjection * flw_vertexPos;
 
     #ifdef _FLW_DEBUG
-    _flw_instanceID = stableInstanceID;
+    _flw_ids = uvec2(stableInstanceID, modelID);
     #endif
 }

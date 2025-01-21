@@ -2,20 +2,19 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
+import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
-@ApiStatus.NonExtendable
-public abstract class BlockModelBuilder {
+public final class BlockModelBuilder {
 	final BlockState state;
 	@Nullable
 	BlockAndTintGetter level;
@@ -24,12 +23,8 @@ public abstract class BlockModelBuilder {
 	@Nullable
 	BiFunction<RenderType, Boolean, Material> materialFunc;
 
-	BlockModelBuilder(BlockState state) {
+	public BlockModelBuilder(BlockState state) {
 		this.state = state;
-	}
-
-	public static BlockModelBuilder create(BlockState state) {
-		return FlwLibXplat.INSTANCE.createBlockModelBuilder(state);
 	}
 
 	public BlockModelBuilder level(BlockAndTintGetter level) {
@@ -47,5 +42,11 @@ public abstract class BlockModelBuilder {
 		return this;
 	}
 
-	public abstract SimpleModel build();
+	public SimpleModel build() {
+		if (materialFunc == null) {
+			materialFunc = ModelUtil::getMaterial;
+		}
+
+		return FlwLibXplat.INSTANCE.buildBlockModelBuilder(this);
+	}
 }

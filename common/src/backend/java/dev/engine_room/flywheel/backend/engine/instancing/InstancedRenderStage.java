@@ -64,6 +64,9 @@ public class InstancedRenderStage {
 
 				uploadMaterialUniform(program, material);
 
+				program.setUInt("_flw_vertexOffset", drawCall.mesh()
+						.baseVertex());
+
 				MaterialRenderState.setup(material);
 
 				Samplers.INSTANCE_BUFFER.makeActive();

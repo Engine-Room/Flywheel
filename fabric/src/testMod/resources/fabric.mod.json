@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "id" : "${mod_id}_testmod",
-  "name": "${mod_name} Test Mod",
+  "id" : "${flywheel_id}_testmod",
+  "name" : "${flywheel_name} Test Mod",
   "version": "1.0.0",
   "environment": "*",
   "license": "${mod_license}",

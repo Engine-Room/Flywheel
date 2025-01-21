@@ -1,0 +1,34 @@
+{
+  "schemaVersion" : 1,
+  "id" : "${vanillin_id}",
+  "version" : "${vanillin_version}",
+  "name" : "${vanillin_name}",
+  "description" : "${vanillin_description}",
+  "authors" : [
+    "Jozufozu",
+    "PepperCode1"
+  ],
+  "contact" : {
+    "homepage" : "${mod_homepage}",
+    "sources" : "${mod_sources}",
+    "issues" : "${mod_issues}"
+  },
+  "license" : "${mod_license}",
+  "icon" : "logo.png",
+  "environment" : "client",
+  "entrypoints" : {
+    "client" : [
+      "dev.engine_room.vanillin.VanillinFabric"
+    ]
+  },
+  "mixins" : [
+  ],
+  "depends" : {
+    "minecraft" : "${minecraft_semver_version_range}",
+    "fabricloader" : ">=0.15.0",
+    "fabric-api" : "${fabric_api_version_range}",
+    "${flywheel_id}" : "${flywheel_semver_version_range}"
+  },
+  "breaks" : {
+  }
+}

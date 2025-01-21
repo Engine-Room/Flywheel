@@ -2,8 +2,8 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         mavenCentral()
-        maven("https://maven.minecraftforge.net/") {
-            name = "MinecraftForge"
+        maven("https://maven.neoforged.net/releases/") {
+            name = "NeoForged"
         }
         maven("https://maven.architectury.dev/") {
             name = "Architectury"
@@ -17,4 +17,6 @@ rootProject.name = "Flywheel"
 
 include("common")
 include("fabric")
-include("forge")
+include("neoforge")
+include("vanillinNeoForge")
+include("vanillinFabric")

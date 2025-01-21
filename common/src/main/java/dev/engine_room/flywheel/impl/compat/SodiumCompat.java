@@ -4,7 +4,6 @@ import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.visualization.BlockEntityVisualizer;
 import dev.engine_room.flywheel.impl.FlwImpl;
-import dev.engine_room.flywheel.impl.FlwImplXplat;
 import dev.engine_room.flywheel.lib.visualization.VisualizationHelper;
 import net.caffeinemc.mods.sodium.api.blockentity.BlockEntityRenderHandler;
 import net.caffeinemc.mods.sodium.api.blockentity.BlockEntityRenderPredicate;
@@ -12,11 +11,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public final class SodiumCompat {
-	public static final boolean USE_0_6_COMPAT = FlwImplXplat.INSTANCE.useSodium0_6Compat();
+	public static final boolean ACTIVE = CompatMod.SODIUM.isLoaded;
 
 	static {
-		if (USE_0_6_COMPAT) {
-			FlwImpl.LOGGER.debug("Detected Sodium 0.6");
+		if (ACTIVE) {
+			FlwImpl.LOGGER.debug("Detected Sodium");
 		}
 	}
 
@@ -25,7 +24,7 @@ public final class SodiumCompat {
 
 	@Nullable
 	public static <T extends BlockEntity> Object onSetBlockEntityVisualizer(BlockEntityType<T> type, @Nullable BlockEntityVisualizer<? super T> oldVisualizer, @Nullable BlockEntityVisualizer<? super T> newVisualizer, @Nullable Object predicate) {
-		if (!USE_0_6_COMPAT) {
+		if (!ACTIVE) {
 			return null;
 		}
 
@@ -49,7 +48,7 @@ public final class SodiumCompat {
 
 	private static final class Internals {
 		static <T extends BlockEntity> Object addPredicate(BlockEntityType<T> type) {
-			BlockEntityRenderPredicate<T> predicate = (getter, pos, be) -> VisualizationHelper.tryAddBlockEntity(be);
+			BlockEntityRenderPredicate<T> predicate = (getter, pos, be) -> !VisualizationHelper.tryAddBlockEntity(be);
 			BlockEntityRenderHandler.instance().addRenderPredicate(type, predicate);
 			return predicate;
 		}

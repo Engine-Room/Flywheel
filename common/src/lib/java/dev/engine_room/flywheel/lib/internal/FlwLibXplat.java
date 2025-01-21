@@ -3,15 +3,13 @@ package dev.engine_room.flywheel.lib.internal;
 import org.jetbrains.annotations.UnknownNullability;
 
 import dev.engine_room.flywheel.api.internal.DependencyInjection;
+import dev.engine_room.flywheel.lib.model.SimpleModel;
 import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.MultiBlockModelBuilder;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.block.state.BlockState;
 
 public interface FlwLibXplat {
 	FlwLibXplat INSTANCE = DependencyInjection.load(FlwLibXplat.class, "dev.engine_room.flywheel.impl.FlwLibXplatImpl");
@@ -19,9 +17,9 @@ public interface FlwLibXplat {
 	@UnknownNullability
 	BakedModel getBakedModel(ModelManager modelManager, ResourceLocation location);
 
-	BakedModelBuilder createBakedModelBuilder(BakedModel bakedModel);
+	SimpleModel buildBakedModelBuilder(BakedModelBuilder builder);
 
-	BlockModelBuilder createBlockModelBuilder(BlockState state);
+	SimpleModel buildBlockModelBuilder(BlockModelBuilder builder);
 
-	MultiBlockModelBuilder createMultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions);
+	SimpleModel buildMultiBlockModelBuilder(MultiBlockModelBuilder builder);
 }

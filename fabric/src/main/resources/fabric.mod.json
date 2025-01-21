@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "${mod_id}",
-  "version": "${mod_version}",
-  "name": "${mod_name}",
-  "description": "${mod_description}",
+  "id" : "${flywheel_id}",
+  "version" : "${flywheel_version}",
+  "name" : "${flywheel_name}",
+  "description" : "${flywheel_description}",
   "authors": [
     "Jozufozu",
     "PepperCode1"
@@ -24,8 +24,7 @@
   "mixins": [
     "flywheel.backend.mixins.json",
     "flywheel.impl.mixins.json",
-    "flywheel.impl.fabric.mixins.json",
-    "flywheel.impl.sodium.mixins.json"
+    "flywheel.impl.fabric.mixins.json"
   ],
   "depends": {
     "minecraft": "${minecraft_semver_version_range}",
@@ -33,7 +32,6 @@
     "fabric-api": "${fabric_api_version_range}"
   },
   "breaks": {
-    "sodium": ["<0.5.0", "~0.6.0- <0.6.0-beta.2"],
-    "embeddium": "*"
+    "sodium": "<0.6.0-beta.2"
   }
 }

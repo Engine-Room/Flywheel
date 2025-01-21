@@ -1,0 +1,44 @@
+modLoader = "javafml"
+# The loader version doesn't matter. Modify the NeoForge and/or Minecraft version ranges instead.
+loaderVersion = "[0,)"
+license = "${mod_license}"
+issueTrackerURL = "${mod_issues}"
+
+[[mods]]
+modId = "${flywheel_id}"
+version = "${flywheel_version}"
+displayName = "${flywheel_name}"
+description = "${flywheel_description}"
+logoFile = "logo.png"
+authors = "Jozufozu, PepperCode1"
+displayURL = "${mod_homepage}"
+displayTest = "IGNORE_ALL_VERSION"
+
+[[mixins]]
+config = "flywheel.backend.mixins.json"
+[[mixins]]
+config = "flywheel.impl.mixins.json"
+
+[[dependencies.${ flywheel_id }]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_maven_version_range}"
+side = "CLIENT"
+
+[[dependencies.${ flywheel_id }]]
+modId = "neoforge"
+type = "required"
+versionRange = "${neoforge_version_range}"
+side = "CLIENT"
+
+[[dependencies.${ flywheel_id }]]
+modId = "embeddium"
+type = "optional"
+versionRange = "[0.3.25,)"
+side = "CLIENT"
+
+[[dependencies.${ flywheel_id }]]
+modId = "sodium"
+type = "optional"
+versionRange = "[0.6.0-beta.2,)"
+side = "CLIENT"

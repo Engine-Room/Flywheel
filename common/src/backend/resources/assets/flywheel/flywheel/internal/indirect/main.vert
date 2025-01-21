@@ -51,5 +51,5 @@ void main() {
 
     FlwInstance instance = _flw_unpackInstance(instanceIndex);
 
-    _flw_main(instance, instanceIndex);
+    _flw_main(instance, instanceIndex, draw.vertexOffset);
 }

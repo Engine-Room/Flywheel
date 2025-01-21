@@ -20,9 +20,9 @@ import net.minecraft.world.level.block.state.BlockState;
  * method with the same parameters will return the same object.
  */
 public final class Models {
-	private static final RendererReloadCache<BlockState, Model> BLOCK_STATE = new RendererReloadCache<>(it -> BlockModelBuilder.create(it)
+	private static final RendererReloadCache<BlockState, Model> BLOCK_STATE = new RendererReloadCache<>(it -> new BlockModelBuilder(it)
 			.build());
-	private static final RendererReloadCache<PartialModel, Model> PARTIAL = new RendererReloadCache<>(it -> BakedModelBuilder.create(it.get())
+	private static final RendererReloadCache<PartialModel, Model> PARTIAL = new RendererReloadCache<>(it -> new BakedModelBuilder(it.get())
 			.build());
 	private static final RendererReloadCache<TransformedPartial<?>, Model> TRANSFORMED_PARTIAL = new RendererReloadCache<>(TransformedPartial::create);
 
@@ -88,7 +88,7 @@ public final class Models {
 		private Model create() {
 			var stack = new PoseStack();
 			transformer.accept(key, stack);
-			return BakedModelBuilder.create(partial.get())
+			return new BakedModelBuilder(partial.get())
 					.poseStack(stack)
 					.build();
 		}

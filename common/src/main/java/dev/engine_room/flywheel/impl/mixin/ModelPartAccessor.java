@@ -17,5 +17,5 @@ public interface ModelPartAccessor {
 	Map<String, ModelPart> flywheel$children();
 
 	@Invoker("compile")
-	void flywheel$compile(PoseStack.Pose pose, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha);
+	void flywheel$compile(PoseStack.Pose pose, VertexConsumer buffer, int packedLight, int packedOverlay, int color);
 }

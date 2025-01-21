@@ -13,10 +13,6 @@ open class JarSetExtension(private val project: Project) {
         return JarTaskSet.create(project, name, *sourceSetSet)
     }
 
-    fun outgoing(name: String, vararg sourceSetSet: SourceSet): JarTaskSet {
-        return JarTaskSet.create(project, name, *sourceSetSet).also { it.createOutgoingConfiguration() }
-    }
-
     val mainSet: JarTaskSet by lazy {
         val jarTask = project.tasks.named<Jar>("jar")
         val remapJarTask = project.tasks.named<RemapJarTask>("remapJar")

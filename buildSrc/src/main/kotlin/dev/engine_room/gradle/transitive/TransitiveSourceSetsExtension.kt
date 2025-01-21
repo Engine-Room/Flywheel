@@ -5,7 +5,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.SourceSet
 
-open class TransitiveSourceSetsExtension(private val project: Project) {
+open class TransitiveSourceSetsExtension(val project: Project) {
     var compileClasspath: FileCollection? = null
     var runtimeClasspath: FileCollection? = null
 

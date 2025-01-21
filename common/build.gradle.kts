@@ -6,49 +6,55 @@ plugins {
     id("flywheel.subproject")
 }
 
+subproject.init("flywheel-common", "flywheel_group", "flywheel_version")
+
 val api = sourceSets.create("api")
 val lib = sourceSets.create("lib")
 val backend = sourceSets.create("backend")
 val stubs = sourceSets.create("stubs")
 val main = sourceSets.getByName("main")
+val vanillin = sourceSets.create("vanillin")
 
 transitiveSourceSets {
     compileClasspath = main.compileClasspath
 
     sourceSet(api) {
         rootCompile()
+        outgoingClasses()
     }
     sourceSet(lib) {
         rootCompile()
-        compile(api)
+        compileClasspath(api)
+        outgoing()
     }
     sourceSet(backend) {
         rootCompile()
-        compile(api, lib)
+        compileClasspath(api, lib)
+        outgoing()
     }
     sourceSet(stubs) {
         rootCompile()
+        outgoingClasses()
     }
     sourceSet(main) {
-        compile(api, lib, backend, stubs)
+        compileClasspath(api, lib, backend)
+        outgoing()
     }
     sourceSet(sourceSets.getByName("test")) {
         implementation(api, lib, backend)
     }
+    sourceSet(vanillin) {
+        rootCompile()
+        compileClasspath(api, lib)
+        outgoing()
+    }
 }
 
 defaultPackageInfos {
-    sources(api, lib, backend, main)
+    sources(api, lib, backend, main, vanillin)
 }
 
 jarSets {
-    // For sharing with other subprojects.
-    outgoing("commonApiOnly", api)
-    outgoing("commonLib", lib)
-    outgoing("commonBackend", backend)
-    outgoing("commonStubs", stubs)
-    outgoing("commonImpl", main)
-
     // For publishing.
     create("api", api, lib).apply {
         addToAssemble()
@@ -76,6 +82,9 @@ jarSets {
 
 dependencies {
     modCompileOnly("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
+
+    modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-fabric")
+    modCompileOnly("maven.modrinth:iris:${property("iris_version")}-fabric")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 }

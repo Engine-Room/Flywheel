@@ -3,7 +3,7 @@ name: Build
 on: [ workflow_dispatch, pull_request, push ]
 
 env:
-  JAVA_VERSION: 17
+  JAVA_VERSION: 21
 
 jobs:
   build:
@@ -43,13 +43,15 @@ jobs:
           path: |
             common/build/libs/
             fabric/build/libs/
-            forge/build/libs/
+            neoforge/build/libs/
+            vanillinFabric/build/libs/
+            vanillinNeoForge/build/libs/
 
   test:
     strategy:
       fail-fast: false
       matrix:
-        loader: [ forge, fabric ]
+        loader: [ neoforge, fabric ]
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -63,15 +65,15 @@ jobs:
 
       - name: Setup Environment Variables
         run: |
-          echo "MOD_VERSION=$(grep '^mod_version =' gradle.properties | cut -d'=' -f2 | tr -d ' ')" >> "$GITHUB_ENV"
           echo "MINECRAFT_VERSION=$(grep '^minecraft_version =' gradle.properties | cut -d'=' -f2 | tr -d ' ')" >> "$GITHUB_ENV"
           echo "FABRIC_API_VERSION=$(grep '^fabric_api_version =' gradle.properties | cut -d'=' -f2 | tr -d ' ' | sed 's/+.*//')" >> "$GITHUB_ENV"
 
       - name: Move Test Mod and Flywheel into run/mods
+        # We don't want to recreate the jar name formatting so glob everything over then remove the sources and javadoc jars
         run: |
           mkdir -p run/mods
-          cp ${{ matrix.loader }}/build/libs/flywheel-${{ matrix.loader }}-${{ env.MINECRAFT_VERSION }}-${{ env.MOD_VERSION }}.jar run/mods
-          cp ${{ matrix.loader }}/build/libs/flywheel-${{ matrix.loader }}-${{ env.MINECRAFT_VERSION }}-${{ env.MOD_VERSION }}-testmod.jar run/mods
+          cp ${{ matrix.loader }}/build/libs/*.jar run/mods
+          rm -f run/mods/*-sources.jar run/mods/*-javadoc.jar
 
       # Lock to a specific commit, it would be bad if the tag is re-pushed with unwanted changes
       - name: Run the MC client

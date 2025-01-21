@@ -39,8 +39,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly fg.deobf("dev.engine_room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}")
-    runtimeOnly fg.deobf("dev.engine_room.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}")
+    compileOnly fg.deobf("dev.engine_room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}")
+    runtimeOnly fg.deobf("dev.engine_room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}")
 }
 ```
 `${flywheel_version}` gets replaced by the version of Flywheel you want to use, eg. `1.0.0-beta`

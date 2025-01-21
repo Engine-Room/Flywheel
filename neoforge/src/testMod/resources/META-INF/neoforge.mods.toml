@@ -1,0 +1,8 @@
+modLoader = "javafml"
+loaderVersion = "[0,)"
+license = "${mod_license}"
+
+[[mods]]
+modId = "${flywheel_id}_testmod"
+version = "1.0.0"
+displayName = "${flywheel_name} Test Mod"

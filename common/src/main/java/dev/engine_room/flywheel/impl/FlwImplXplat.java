@@ -13,8 +13,4 @@ public interface FlwImplXplat {
 	String getVersionStr();
 
 	FlwConfig getConfig();
-
-	boolean useSodium0_6Compat();
-
-	boolean useIrisCompat();
 }

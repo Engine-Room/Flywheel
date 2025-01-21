@@ -14,7 +14,7 @@ in vec2 _flw_crumblingTexCoord;
 #endif
 
 #ifdef _FLW_DEBUG
-flat in uint _flw_instanceID;
+flat in uvec2 _flw_ids;
 #endif
 
 out vec4 _flw_outputColor;
@@ -79,7 +79,7 @@ void _flw_main() {
         color = vec4(flw_vertexNormal * .5 + .5, 1.);
         break;
         case 2u:
-        color = _flw_id2Color(_flw_instanceID);
+        color = _flw_id2Color(_flw_ids.x);
         break;
         case 3u:
         color = vec4(vec2((flw_fragLight * 15.0 + 0.5) / 16.), 0., 1.);
@@ -92,6 +92,9 @@ void _flw_main() {
         break;
         case 6u:
         color = vec4(vec3(diffuseFactor), 1.);
+        break;
+        case 7u:
+        color = _flw_id2Color(_flw_ids.y);
         break;
     }
     #endif

@@ -1,0 +1,6 @@
+{
+  "pack": {
+      "description": "${flywheel_name} resources",
+    "pack_format": 34
+  }
+}
