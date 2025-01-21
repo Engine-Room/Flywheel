@@ -65,12 +65,16 @@ platform {
 }
 
 jarSets {
-    mainSet.publish("flywheel-neoforge-${project.property("artifact_minecraft_version")}")
+    mainSet.publishWithRawSources {
+        artifactId = "flywheel-neoforge-${project.property("artifact_minecraft_version")}"
+    }
     mainSet.outgoing("flywheel")
 
     create("api", api, lib).apply {
         addToAssemble()
-        publish("flywheel-neoforge-api-${project.property("artifact_minecraft_version")}")
+        publishWithRawSources {
+            artifactId = "flywheel-neoforge-api-${project.property("artifact_minecraft_version")}"
+        }
 
         configureJar {
             manifest {

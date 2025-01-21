@@ -58,7 +58,9 @@ jarSets {
     // For publishing.
     create("api", api, lib).apply {
         addToAssemble()
-        publish("flywheel-common-intermediary-api-${property("artifact_minecraft_version")}")
+        publishWithRemappedSources {
+            artifactId = "flywheel-common-intermediary-api-${property("artifact_minecraft_version")}"
+        }
 
         configureJar {
             manifest {
@@ -75,7 +77,38 @@ jarSets {
                 targetNamespace = "named"
             }
 
-            publish("flywheel-common-mojmap-api-${property("artifact_minecraft_version")}")
+            publishWithRawSources {
+                artifactId = "flywheel-common-mojmap-api-${property("artifact_minecraft_version")}"
+            }
+        }
+    }
+
+    create("vanillin", vanillin).apply {
+        addToAssemble()
+        publishWithRemappedSources {
+            artifactId = "vanillin-common-intermediary-${property("artifact_minecraft_version")}"
+            groupId = property("vanillin_group") as String
+        }
+
+        configureJar {
+            manifest {
+                attributes("Fabric-Loom-Remap" to "true")
+            }
+        }
+
+        // Don't publish the un-remapped jars because they don't have the correct manifest populated by Loom.
+        forkRemap("vanillinMojmap").apply {
+            addToAssemble()
+            configureRemap {
+                // "named" == mojmap
+                // We're probably remapping from named to named so Loom should noop this.
+                targetNamespace = "named"
+            }
+
+            publishWithRawSources {
+                artifactId = "vanillin-common-mojmap-${property("artifact_minecraft_version")}"
+                groupId = property("vanillin_group") as String
+            }
         }
     }
 }

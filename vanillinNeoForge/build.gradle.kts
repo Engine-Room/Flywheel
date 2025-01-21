@@ -27,7 +27,9 @@ transitiveSourceSets {
 }
 
 jarSets {
-    mainSet.publish("vanillin-neoforge-${project.property("artifact_minecraft_version")}")
+    mainSet.publishWithRawSources {
+        artifactId = "vanillin-neoforge-${project.property("artifact_minecraft_version")}"
+    }
 }
 
 defaultPackageInfos {

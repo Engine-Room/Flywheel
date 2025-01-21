@@ -8,6 +8,7 @@ import org.joml.Vector3fc;
 import com.mojang.math.Axis;
 
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 
 public interface Rotate<Self extends Rotate<Self>> {
 	Self rotate(Quaternionfc quaternion);
@@ -16,11 +17,12 @@ public interface Rotate<Self extends Rotate<Self>> {
 		return rotate(new Quaternionf(axisAngle));
 	}
 
-	default Self rotate(float radians, Vector3fc axis) {
+	default Self rotate(float radians, float axisX, float axisY, float axisZ) {
 		if (radians == 0) {
 			return self();
 		}
-		return rotate(new Quaternionf().setAngleAxis(radians, axis.x(), axis.y(), axis.z()));
+		return rotate(new Quaternionf().setAngleAxis(radians, axisX, axisY, axisZ));
+
 	}
 
 	default Self rotate(float radians, Axis axis) {
@@ -30,47 +32,36 @@ public interface Rotate<Self extends Rotate<Self>> {
 		return rotate(axis.rotation(radians));
 	}
 
+	default Self rotate(float radians, Vector3fc axis) {
+		return rotate(radians, axis.x(), axis.y(), axis.z());
+	}
+
 	default Self rotate(float radians, Direction axis) {
-		if (radians == 0) {
-			return self();
-		}
-		return rotate(radians, axis.step());
+		return rotate(radians, axis.getStepX(), axis.getStepY(), axis.getStepZ());
 	}
 
 	default Self rotate(float radians, Direction.Axis axis) {
-		return switch (axis) {
-		case X -> rotateX(radians);
-		case Y -> rotateY(radians);
-		case Z -> rotateZ(radians);
-		};
+		return rotate(radians, Direction.fromAxisAndDirection(axis, Direction.AxisDirection.POSITIVE));
 	}
 
-	default Self rotateDegrees(float degrees, Vector3fc axis) {
-		if (degrees == 0) {
-			return self();
-		}
-		return rotate((float) Math.toRadians(degrees), axis);
+	default Self rotateDegrees(float degrees, float axisX, float axisY, float axisZ) {
+		return rotate(Mth.DEG_TO_RAD * degrees, axisX, axisY, axisZ);
 	}
 
 	default Self rotateDegrees(float degrees, Axis axis) {
-		if (degrees == 0) {
-			return self();
-		}
-		return rotate(axis.rotationDegrees(degrees));
+		return rotate(Mth.DEG_TO_RAD * degrees, axis);
+	}
+
+	default Self rotateDegrees(float degrees, Vector3fc axis) {
+		return rotate(Mth.DEG_TO_RAD * degrees, axis);
 	}
 
 	default Self rotateDegrees(float degrees, Direction axis) {
-		if (degrees == 0) {
-			return self();
-		}
-		return rotate((float) Math.toRadians(degrees), axis);
+		return rotate(Mth.DEG_TO_RAD * degrees, axis);
 	}
 
 	default Self rotateDegrees(float degrees, Direction.Axis axis) {
-		if (degrees == 0) {
-			return self();
-		}
-		return rotate((float) Math.toRadians(degrees), axis);
+		return rotate(Mth.DEG_TO_RAD * degrees, axis);
 	}
 
 	default Self rotateX(float radians) {
@@ -86,15 +77,15 @@ public interface Rotate<Self extends Rotate<Self>> {
 	}
 
 	default Self rotateXDegrees(float degrees) {
-		return rotateDegrees(degrees, Axis.XP);
+		return rotateX(Mth.DEG_TO_RAD * degrees);
 	}
 
 	default Self rotateYDegrees(float degrees) {
-		return rotateDegrees(degrees, Axis.YP);
+		return rotateY(Mth.DEG_TO_RAD * degrees);
 	}
 
 	default Self rotateZDegrees(float degrees) {
-		return rotateDegrees(degrees, Axis.ZP);
+		return rotateZ(Mth.DEG_TO_RAD * degrees);
 	}
 
 	default Self rotateToFace(Direction facing) {
@@ -106,6 +97,10 @@ public interface Rotate<Self extends Rotate<Self>> {
 			case WEST -> rotateYDegrees(90);
 			case EAST -> rotateYDegrees(270);
 		};
+	}
+
+	default Self rotateTo(Vector3fc from, Vector3fc to) {
+		return rotate(new Quaternionf().rotateTo(from, to));
 	}
 
 	@SuppressWarnings("unchecked")

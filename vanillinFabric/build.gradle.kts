@@ -27,7 +27,9 @@ transitiveSourceSets {
 }
 
 jarSets {
-    mainSet.publish("vanillin-fabric-${project.property("artifact_minecraft_version")}")
+    mainSet.publishWithRemappedSources {
+        artifactId = "vanillin-fabric-${project.property("artifact_minecraft_version")}"
+    }
 }
 
 defaultPackageInfos {

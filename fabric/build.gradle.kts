@@ -67,12 +67,16 @@ platform {
 }
 
 jarSets {
-    mainSet.publish("flywheel-fabric-${project.property("artifact_minecraft_version")}")
+    mainSet.publishWithRemappedSources {
+        artifactId = "flywheel-fabric-${project.property("artifact_minecraft_version")}"
+    }
     mainSet.outgoing("flywheel")
 
     create("api", api, lib).apply {
         addToAssemble()
-        publish("flywheel-fabric-api-${project.property("artifact_minecraft_version")}")
+        publishWithRemappedSources {
+            artifactId = "flywheel-fabric-api-${project.property("artifact_minecraft_version")}"
+        }
 
         configureJar {
             manifest {
