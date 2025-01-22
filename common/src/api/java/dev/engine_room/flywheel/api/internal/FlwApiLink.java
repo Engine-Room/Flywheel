@@ -42,7 +42,7 @@ public interface FlwApiLink {
 	@Nullable
 	<T extends Entity> EntityVisualizer<? super T> getVisualizer(EntityType<T> type);
 
-	<T extends BlockEntity> void setVisualizer(BlockEntityType<T> type, BlockEntityVisualizer<? super T> visualizer);
+	<T extends BlockEntity> void setVisualizer(BlockEntityType<T> type, @Nullable BlockEntityVisualizer<? super T> visualizer);
 
-	<T extends Entity> void setVisualizer(EntityType<T> type, EntityVisualizer<? super T> visualizer);
+	<T extends Entity> void setVisualizer(EntityType<T> type, @Nullable EntityVisualizer<? super T> visualizer);
 }

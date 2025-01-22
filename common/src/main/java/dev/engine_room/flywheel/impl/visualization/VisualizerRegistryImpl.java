@@ -23,11 +23,11 @@ public final class VisualizerRegistryImpl {
 		return ((EntityTypeExtension<T>) type).flywheel$getVisualizer();
 	}
 
-	public static <T extends BlockEntity> void setVisualizer(BlockEntityType<T> type, BlockEntityVisualizer<? super T> visualizer) {
+	public static <T extends BlockEntity> void setVisualizer(BlockEntityType<T> type, @Nullable BlockEntityVisualizer<? super T> visualizer) {
 		((BlockEntityTypeExtension<T>) type).flywheel$setVisualizer(visualizer);
 	}
 
-	public static <T extends Entity> void setVisualizer(EntityType<T> type, EntityVisualizer<? super T> visualizer) {
+	public static <T extends Entity> void setVisualizer(EntityType<T> type, @Nullable EntityVisualizer<? super T> visualizer) {
 		((EntityTypeExtension<T>) type).flywheel$setVisualizer(visualizer);
 	}
 
