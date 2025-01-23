@@ -113,6 +113,9 @@ dependencies {
 
     modCompileOnly("maven.modrinth:embeddium:${property("embeddium_version")}")
 
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1")!!)
+    implementation(include("io.github.llamalad7:mixinextras-forge:0.4.1")!!)
+
     "forApi"(project(path = common, configuration = "apiClasses"))
     "forLib"(project(path = common, configuration = "libClasses"))
     "forBackend"(project(path = common, configuration = "backendClasses"))
