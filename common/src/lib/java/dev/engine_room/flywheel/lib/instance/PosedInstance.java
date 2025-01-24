@@ -13,7 +13,7 @@ import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.lib.transform.Transform;
 import net.minecraft.util.Mth;
 
-public class PosedInstance extends ColoredLitInstance implements Transform<PosedInstance> {
+public class PosedInstance extends ColoredLitOverlayInstance implements Transform<PosedInstance> {
 	public final Matrix4f pose = new Matrix4f();
 	public final Matrix3f normal = new Matrix3f();
 

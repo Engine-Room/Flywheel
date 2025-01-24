@@ -119,6 +119,8 @@ dependencies {
     modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-fabric")
     modCompileOnly("maven.modrinth:iris:${property("iris_version")}-fabric")
 
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1")!!)
+
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 }
 

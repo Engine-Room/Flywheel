@@ -22,6 +22,7 @@
     ]
   },
   "mixins" : [
+    "vanillin.mixins.json"
   ],
   "depends" : {
     "minecraft" : "${minecraft_semver_version_range}",

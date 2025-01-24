@@ -43,7 +43,7 @@ public final class VisualizerRegistry {
 	 * @param visualizer The visualizer to set.
 	 * @param <T> The type of the block entity.
 	 */
-	public static <T extends BlockEntity> void setVisualizer(BlockEntityType<T> type, BlockEntityVisualizer<? super T> visualizer) {
+	public static <T extends BlockEntity> void setVisualizer(BlockEntityType<T> type, @Nullable BlockEntityVisualizer<? super T> visualizer) {
 		FlwApiLink.INSTANCE.setVisualizer(type, visualizer);
 	}
 
@@ -53,7 +53,7 @@ public final class VisualizerRegistry {
 	 * @param visualizer The visualizer to set.
 	 * @param <T> The type of the entity.
 	 */
-	public static <T extends Entity> void setVisualizer(EntityType<T> type, EntityVisualizer<? super T> visualizer) {
+	public static <T extends Entity> void setVisualizer(EntityType<T> type, @Nullable EntityVisualizer<? super T> visualizer) {
 		FlwApiLink.INSTANCE.setVisualizer(type, visualizer);
 	}
 }

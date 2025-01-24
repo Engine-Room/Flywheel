@@ -79,12 +79,12 @@ public class FlwApiLinkImpl implements FlwApiLink {
 	}
 
 	@Override
-	public <T extends BlockEntity> void setVisualizer(BlockEntityType<T> type, BlockEntityVisualizer<? super T> visualizer) {
+	public <T extends BlockEntity> void setVisualizer(BlockEntityType<T> type, @Nullable BlockEntityVisualizer<? super T> visualizer) {
 		VisualizerRegistryImpl.setVisualizer(type, visualizer);
 	}
 
 	@Override
-	public <T extends Entity> void setVisualizer(EntityType<T> type, EntityVisualizer<? super T> visualizer) {
+	public <T extends Entity> void setVisualizer(EntityType<T> type, @Nullable EntityVisualizer<? super T> visualizer) {
 		VisualizerRegistryImpl.setVisualizer(type, visualizer);
 	}
 }
