@@ -42,10 +42,6 @@ loom {
         add(main, "vanillin.refmap.json")
     }
 
-    forge {
-        mixinConfig("vanillin.mixins.json")
-    }
-
     runs {
         configureEach {
             property("forge.logging.markers", "")
@@ -70,7 +66,6 @@ dependencies {
     compileOnly(project(path = common, configuration = "vanillinResources"))
 
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1")!!)
-    implementation(include("io.github.llamalad7:mixinextras-forge:0.4.1")!!)
 
     // JiJ flywheel proper
     include(project(path = platform, configuration = "flywheelRemap"))

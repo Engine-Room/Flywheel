@@ -13,24 +13,24 @@ import dev.engine_room.vanillin.config.ModOverrides;
 import dev.engine_room.vanillin.config.VisualConfigValue;
 import dev.engine_room.vanillin.config.VisualOverride;
 import dev.engine_room.vanillin.config.VisualOverrideValue;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.forgespi.language.IModInfo;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforgespi.language.IModInfo;
 
-public class ForgeVanillinConfig {
-	public static final ForgeVanillinConfig INSTANCE = new ForgeVanillinConfig(VanillaVisuals.CONFIGURATOR);
+public class NeoForgeVanillinConfig {
+	public static final NeoForgeVanillinConfig INSTANCE = new NeoForgeVanillinConfig(VanillaVisuals.CONFIGURATOR);
 
 	private final Configurator configurator;
-	private final ForgeConfigSpec clientSpec;
+	private final ModConfigSpec clientSpec;
 
 	private final ConfigSection blockEntities;
 	private final ConfigSection entities;
 
-	private ForgeVanillinConfig(Configurator configurator) {
+	private NeoForgeVanillinConfig(Configurator configurator) {
 		this.configurator = configurator;
-		var builder = new ForgeConfigSpec.Builder();
+		var builder = new ModConfigSpec.Builder();
 
 		// Seems like we need to register all field ahead of time so this constructor must run after VanillaVisuals#init
 		var blockEntities = setup(builder, configurator.blockEntities.values(), "block_entities");
@@ -49,7 +49,7 @@ public class ForgeVanillinConfig {
 	}
 
 	public void registerSpecs(ModLoadingContext context) {
-		context.registerConfig(ModConfig.Type.CLIENT, clientSpec);
+		context.getActiveContainer().registerConfig(ModConfig.Type.CLIENT, clientSpec);
 	}
 
 	private static ModOverrides modOverrides() {
@@ -111,8 +111,8 @@ public class ForgeVanillinConfig {
 		}
 	}
 
-	private static Map<String, ForgeConfigSpec.EnumValue<VisualConfigValue>> setup(ForgeConfigSpec.Builder builder, Collection<? extends Configurator.ConfiguredVisual> configuredVisuals, String push) {
-		var out = new HashMap<String, ForgeConfigSpec.EnumValue<VisualConfigValue>>();
+	private static Map<String, ModConfigSpec.EnumValue<VisualConfigValue>> setup(ModConfigSpec.Builder builder, Collection<? extends Configurator.ConfiguredVisual> configuredVisuals, String push) {
+		var out = new HashMap<String, ModConfigSpec.EnumValue<VisualConfigValue>>();
 		builder.push(push);
 
 		for (var configured : configuredVisuals) {
@@ -126,7 +126,7 @@ public class ForgeVanillinConfig {
 		return out;
 	}
 
-	private record ConfigSection(Map<String, ForgeConfigSpec.EnumValue<VisualConfigValue>> config, Map<String, List<VisualOverride>> overrides) {
+	private record ConfigSection(Map<String, ModConfigSpec.EnumValue<VisualConfigValue>> config, Map<String, List<VisualOverride>> overrides) {
 		void apply(Collection<? extends Configurator.ConfiguredVisual> values) {
 			for (var configured : values) {
 				var key = configured.configKey();

@@ -12,6 +12,6 @@ public class Vanillin {
 	public static final Logger CONFIG_LOGGER = LoggerFactory.getLogger(ID + "/config");
 
 	public static ResourceLocation rl(String path) {
-		return new ResourceLocation(ID, path);
+		return ResourceLocation.fromNamespaceAndPath(ID, path);
 	}
 }

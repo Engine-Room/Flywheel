@@ -14,6 +14,9 @@ authors = "Jozufozu, PepperCode1"
 displayURL = "${mod_homepage}"
 displayTest = "IGNORE_ALL_VERSION"
 
+[[mixins]]
+config = "vanillin.mixins.json"
+
 [[dependencies.${ vanillin_id }]]
 modId = "minecraft"
 type = "required"
