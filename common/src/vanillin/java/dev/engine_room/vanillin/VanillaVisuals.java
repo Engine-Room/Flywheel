@@ -1,11 +1,9 @@
 package dev.engine_room.vanillin;
 
-import dev.engine_room.vanillin.visuals.BellVisual;
-import dev.engine_room.vanillin.visuals.ChestVisual;
-import dev.engine_room.vanillin.visuals.MinecartVisual;
-import dev.engine_room.vanillin.visuals.ShulkerBoxVisual;
-import dev.engine_room.vanillin.visuals.SignVisual;
-import dev.engine_room.vanillin.visuals.TntMinecartVisual;
+import dev.engine_room.vanillin.config.BlockEntityVisualizerBuilder;
+import dev.engine_room.vanillin.config.Configurator;
+import dev.engine_room.vanillin.config.EntityVisualizerBuilder;
+import dev.engine_room.vanillin.visuals.*;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;

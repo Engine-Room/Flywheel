@@ -1,4 +1,4 @@
-package dev.engine_room.vanillin;
+package dev.engine_room.vanillin.config;
 
 import java.util.Objects;
 import java.util.function.Predicate;
