@@ -18,8 +18,6 @@ public final class FlwImpl {
 		// impl
 		BackendManagerImpl.init();
 
-		// lib
-
 		// backend
 		FlwBackend.init(FlwConfig.INSTANCE.backendConfig());
 	}
