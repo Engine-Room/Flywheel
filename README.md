@@ -33,21 +33,27 @@ Add the following repo and dependency to your `build.gradle`:
 ```groovy
 repositories {
     maven {
-        name "tterrag maven"
-        url "https://maven.tterrag.com/"
+        name "createmod maven"
+        url "https://maven.createmod.net/"
     }
 }
 
 dependencies {
-    compileOnly fg.deobf("dev.engine_room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}")
-    runtimeOnly fg.deobf("dev.engine_room.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}")
+    // On forge
+    compileOnly fg.deobf("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}")
+    runtimeOnly fg.deobf("dev.engine-room.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}")
+
+    // With loom
+    modApi "dev.engine-room.flywheel:flywheel-fabric-api-${minecraft_version}:${flywheel_version}"
+    modImplementation "dev.engine-room.flywheel:flywheel-fabric-${minecraft_version}:${flywheel_version}"
 }
 ```
 `${flywheel_version}` gets replaced by the version of Flywheel you want to use, eg. `1.0.0-beta`
 
 `${minecraft_version}` gets replaced by the version of Minecraft you're on, eg. `1.20.1`
 
-For a list of available Flywheel versions, you can check [the maven](https://maven.tterrag.com/com/jozufozu/flywheel/Flywheel-Forge/).
+For a list of available Flywheel versions, you can
+check [the maven](https://maven.createmod.net/dev/engine-room/flywheel/).
 
 If you aren't using mixed mappings (or just want to be safe), add the following properties to your run configurations:
 ```groovy
