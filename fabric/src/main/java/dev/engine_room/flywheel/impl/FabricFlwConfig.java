@@ -38,7 +38,8 @@ public class FabricFlwConfig implements FlwConfig {
 
 	private final File file;
 
-	public Backend backend = BackendManager.defaultBackend();
+	// Don't actually default to off, we'll find the true default in #load
+	public Backend backend = BackendManager.offBackend();
 	public boolean limitUpdates = LIMIT_UPDATES_DEFAULT;
 	public int workerThreads = WORKER_THREADS_DEFAULT;
 
@@ -69,6 +70,10 @@ public class FabricFlwConfig implements FlwConfig {
 	}
 
 	public void load() {
+		// Grab the default backend here because this object is constructed
+		// very early in flywheel loading and not all backends may be registered
+		backend = BackendManager.defaultBackend();
+
 		if (file.exists()) {
 			try (FileReader reader = new FileReader(file)) {
 				fromJson(JsonParser.parseReader(reader));
