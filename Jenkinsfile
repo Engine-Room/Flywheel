@@ -23,8 +23,13 @@ pipeline {
         stage('Build') {
 
             steps {
-                echo 'Building project.'
-                sh './gradlew build publish --stacktrace --warn'
+                withCredentials([
+                    // build_secrets is parsed in SubprojectExtension#loadSecrets
+                    file(credentialsId: 'build_secrets', variable: 'ORG_GRADLE_PROJECT_secretFile'),
+                ]) {
+                    echo 'Building project.'
+                    sh './gradlew build publish --stacktrace --warn'
+                }
             }
         }
     }
@@ -33,7 +38,7 @@ pipeline {
 
         always {
 
-            archiveArtifacts artifacts: '**/build/libs/*.jar', fingerprint: true
+            archiveArtifacts artifacts: '**/build/libs/**/*.jar', fingerprint: true
 
             withCredentials([
                     string(credentialsId: 'discord_webhook_url', variable: 'DISCORD_URL')
