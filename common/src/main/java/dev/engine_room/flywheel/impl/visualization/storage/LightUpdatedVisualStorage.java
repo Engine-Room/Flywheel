@@ -86,9 +86,6 @@ public class LightUpdatedVisualStorage {
 	}
 
 	public void add(LightUpdatedVisual visual, SectionTracker tracker) {
-		var moved = new MovedVisual(visual, tracker);
-		tracker.addListener(() -> movedVisuals.add(moved));
-
 		addInner(visual, tracker);
 	}
 
@@ -194,6 +191,20 @@ public class LightUpdatedVisualStorage {
 		}
 	}
 
-	private record MovedVisual(LightUpdatedVisual visual, SectionTracker tracker) {
+	public static final class MovedVisual implements Runnable {
+		private final LightUpdatedVisual visual;
+		private final SectionTracker tracker;
+		private final LightUpdatedVisualStorage parent;
+
+		public MovedVisual(LightUpdatedVisual visual, SectionTracker tracker, LightUpdatedVisualStorage parent) {
+			this.visual = visual;
+			this.tracker = tracker;
+			this.parent = parent;
+		}
+
+		@Override
+		public void run() {
+			parent.movedVisuals.add(this);
+		}
 	}
 }

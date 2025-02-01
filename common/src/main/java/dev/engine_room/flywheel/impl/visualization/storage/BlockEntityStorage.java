@@ -3,6 +3,7 @@ package dev.engine_room.flywheel.impl.visualization.storage;
 import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.visual.BlockEntityVisual;
+import dev.engine_room.flywheel.api.visual.Visual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.visualization.VisualizationHelper;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -50,18 +51,21 @@ public class BlockEntityStorage extends Storage<BlockEntity> {
 
 	@Override
 	@Nullable
-	protected BlockEntityVisual<?> createRaw(BlockEntity obj, float partialTick) {
+	public BlockEntityVisual<?> createRaw(BlockEntity obj, float partialTick) {
 		var visualizer = VisualizationHelper.getVisualizer(obj);
 		if (visualizer == null) {
 			return null;
 		}
 
-		var visual = visualizer.createVisual(visualizationContext, obj, partialTick);
+		return visualizer.createVisual(visualizationContext, obj, partialTick);
+	}
+
+	@Override
+	public void add(BlockEntity obj, Visual visual, @Nullable SectionTracker tracker) {
+		super.add(obj, visual, tracker);
 
 		BlockPos blockPos = obj.getBlockPos();
-		posLookup.put(blockPos.asLong(), visual);
-
-		return visual;
+		posLookup.put(blockPos.asLong(), (BlockEntityVisual<?>) visual);
 	}
 
 	@Override

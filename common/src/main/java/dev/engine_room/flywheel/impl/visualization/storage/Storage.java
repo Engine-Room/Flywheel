@@ -151,7 +151,7 @@ public abstract class Storage<T> {
 	}
 
 	@Nullable
-	protected abstract Visual createRaw(T obj, float partialTick);
+	public abstract Visual createRaw(T obj, float partialTick);
 
 	private void setup(Visual visual, float partialTick) {
 		if (visual instanceof DynamicVisual dynamic) {
@@ -179,6 +179,36 @@ public abstract class Storage<T> {
 			if (visual instanceof LightUpdatedVisual lightUpdated) {
 				lightUpdatedVisuals.add(lightUpdated, tracker);
 				lightUpdated.updateLight(partialTick);
+			}
+
+			if (visual instanceof ShaderLightVisual shaderLight) {
+				shaderLightVisuals.add(shaderLight, tracker);
+			}
+		}
+	}
+
+	public void add(T obj, Visual visual, @Nullable SectionTracker tracker) {
+		visuals.put(obj, visual);
+
+		if (visual instanceof DynamicVisual dynamic) {
+			if (visual instanceof SimpleDynamicVisual simpleDynamic) {
+				simpleDynamicVisuals.add(simpleDynamic);
+			} else {
+				dynamicVisuals.add(dynamic, dynamic.planFrame());
+			}
+		}
+
+		if (visual instanceof TickableVisual tickable) {
+			if (visual instanceof SimpleTickableVisual simpleTickable) {
+				simpleTickableVisuals.add(simpleTickable);
+			} else {
+				tickableVisuals.add(tickable, tickable.planTick());
+			}
+		}
+
+		if (tracker != null) {
+			if (visual instanceof LightUpdatedVisual lightUpdated) {
+				lightUpdatedVisuals.add(lightUpdated, tracker);
 			}
 
 			if (visual instanceof ShaderLightVisual shaderLight) {

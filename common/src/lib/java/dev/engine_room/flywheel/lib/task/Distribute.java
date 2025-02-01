@@ -69,6 +69,57 @@ public final class Distribute {
 		}
 	}
 
+	public interface IndexedConsumer<T, C> {
+		void accept(int i, T t, C context);
+	}
+
+	public static <C, T> void indexed(TaskExecutor taskExecutor, C context, Runnable onCompletion, List<T> list, IndexedConsumer<T, C> action) {
+		final int size = list.size();
+
+		if (size == 0) {
+			onCompletion.run();
+			return;
+		}
+
+		final int sliceSize = sliceSize(taskExecutor, size);
+
+		if (size <= sliceSize) {
+			for (int i = 0; i < list.size(); i++) {
+				T t = list.get(i);
+				action.accept(i, t, context);
+			}
+			onCompletion.run();
+		} else if (sliceSize == 1) {
+			var synchronizer = new Synchronizer(size, onCompletion);
+			for (int i = 0; i < list.size(); i++) {
+				T t = list.get(i);
+				final int index = i;
+				taskExecutor.execute(() -> {
+					action.accept(index, t, context);
+					synchronizer.decrementAndEventuallyRun();
+				});
+			}
+		} else {
+			var synchronizer = new Synchronizer(MoreMath.ceilingDiv(size, sliceSize), onCompletion);
+			int remaining = size;
+
+			while (remaining > 0) {
+				int end = remaining;
+				remaining -= sliceSize;
+				final int start = Math.max(remaining, 0);
+
+				var subList = list.subList(start, end);
+				taskExecutor.execute(() -> {
+					for (int i = 0; i < subList.size(); i++) {
+						T t = subList.get(i);
+						action.accept(start + i, t, context);
+					}
+					synchronizer.decrementAndEventuallyRun();
+				});
+			}
+		}
+	}
+
 	/**
 	 * Distribute the given list of tasks in chunks across the threads of the task executor.
 	 *

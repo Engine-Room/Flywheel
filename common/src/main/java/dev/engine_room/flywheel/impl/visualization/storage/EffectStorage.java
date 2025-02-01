@@ -10,7 +10,7 @@ public class EffectStorage extends Storage<Effect> {
 	}
 
 	@Override
-	protected EffectVisual<?> createRaw(Effect obj, float partialTick) {
+	public EffectVisual<?> createRaw(Effect obj, float partialTick) {
 		return obj.visualize(visualizationContext, partialTick);
 	}
 

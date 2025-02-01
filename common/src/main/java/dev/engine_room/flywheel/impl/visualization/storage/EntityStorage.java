@@ -12,7 +12,7 @@ public class EntityStorage extends Storage<Entity> {
 	}
 
 	@Override
-	protected EntityVisual<?> createRaw(Entity obj, float partialTick) {
+	public EntityVisual<?> createRaw(Entity obj, float partialTick) {
 		var visualizer = VisualizationHelper.getVisualizer(obj);
 		if (visualizer == null) {
 			return null;

@@ -13,6 +13,8 @@ public class ShaderLightVisualStorage {
 	private final LongSet sections = new LongOpenHashSet();
 	private boolean isDirty;
 
+	public final Runnable sectionListener = this::markDirty;
+
 	public LongSet sections() {
 		if (isDirty) {
 			sections.clear();
@@ -35,7 +37,7 @@ public class ShaderLightVisualStorage {
 	public void add(ShaderLightVisual visual, SectionTracker tracker) {
 		trackers.put(visual, tracker);
 
-		tracker.addListener(this::markDirty);
+		tracker.addListener(sectionListener);
 
 		if (!tracker.sections().isEmpty()) {
 			markDirty();
