@@ -116,7 +116,7 @@ public class DepthPyramid {
 	public static int getImageMipLevels(int width, int height) {
 		int result = 1;
 
-		while (width > 2 && height > 2) {
+		while (width > 1 && height > 1) {
 			result++;
 			width >>= 1;
 			height >>= 1;
