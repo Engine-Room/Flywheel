@@ -99,8 +99,16 @@ public interface Rotate<Self extends Rotate<Self>> {
 		};
 	}
 
+	default Self rotateTo(float fromX, float fromY, float fromZ, float toX, float toY, float toZ) {
+		return rotate(new Quaternionf().rotateTo(fromX, fromY, fromZ, toX, toY, toZ));
+	}
+
 	default Self rotateTo(Vector3fc from, Vector3fc to) {
-		return rotate(new Quaternionf().rotateTo(from, to));
+		return rotateTo(from.x(), from.y(), from.z(), to.x(), to.y(), to.z());
+	}
+
+	default Self rotateTo(Direction from, Direction to) {
+		return rotateTo(from.getStepX(), from.getStepY(), from.getStepZ(), to.getStepX(), to.getStepY(), to.getStepZ());
 	}
 
 	@SuppressWarnings("unchecked")

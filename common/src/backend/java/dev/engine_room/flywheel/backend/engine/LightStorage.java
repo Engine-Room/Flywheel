@@ -250,10 +250,9 @@ public class LightStorage implements Effect {
 				for (int x = -1; x < 17; x++) {
 					blockPos.set(xMin + x, yMin + y, zMin + z);
 
-					boolean isFullBlock = level.getBlockState(blockPos)
-							.isCollisionShapeFullBlock(level, blockPos);
+					var blockState = level.getBlockState(blockPos);
 
-					if (isFullBlock) {
+					if (blockState.canOcclude() && blockState.isCollisionShapeFullBlock(level, blockPos)) {
 						bitSet.set(index);
 					}
 
