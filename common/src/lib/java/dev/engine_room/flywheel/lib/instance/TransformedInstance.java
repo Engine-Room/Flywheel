@@ -10,7 +10,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.engine_room.flywheel.api.instance.InstanceHandle;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.lib.transform.Affine;
-import net.minecraft.core.Direction;
 
 public class TransformedInstance extends ColoredLitOverlayInstance implements Affine<TransformedInstance> {
 	public final Matrix4f pose = new Matrix4f();
@@ -146,14 +145,6 @@ public class TransformedInstance extends ColoredLitOverlayInstance implements Af
 	@Override
 	public TransformedInstance rotateZ(float radians) {
 		pose.rotateZ(radians);
-		return this;
-	}
-
-	@Override
-	public TransformedInstance rotateToFace(Direction facing) {
-		// Need to invert the step because the super default method rotates from North (-Z),
-		// but rotateTowards rotates from South (+Z)
-		pose.rotateTowards(-facing.getStepX(), -facing.getStepY(), -facing.getStepZ(), 0, 1, 0);
 		return this;
 	}
 }
