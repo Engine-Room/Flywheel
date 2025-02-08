@@ -100,7 +100,7 @@ public interface Rotate<Self extends Rotate<Self>> {
 	}
 
 	default Self rotateTo(float fromX, float fromY, float fromZ, float toX, float toY, float toZ) {
-		return rotate(new Quaternionf().rotateTo(fromX, fromY, fromZ, toX, toY, toZ));
+		return rotate(new Quaternionf().rotationTo(fromX, fromY, fromZ, toX, toY, toZ));
 	}
 
 	default Self rotateTo(Vector3fc from, Vector3fc to) {
