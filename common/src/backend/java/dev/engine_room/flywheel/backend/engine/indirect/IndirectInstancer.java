@@ -141,12 +141,8 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 						// This is safe because only one bit position changes at a time.
 						parent.fullPages.set(pageNo);
 					}
-					if (isEmpty(currentValue)) {
-						// Value we just saw was zero, so since we added something we are now mergeable!
+					if (isMergeable(newValue)) {
 						parent.mergeablePages.set(pageNo);
-					} else if (Integer.bitCount(currentValue) == 16) {
-						// We just filled the 17th instance, so we are no longer mergeable.
-						parent.mergeablePages.clear(pageNo);
 					}
 
 					parent.instanceCount.incrementAndGet();
@@ -199,11 +195,7 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 
 				if (valid.compareAndSet(currentValue, newValue)) {
 					parent.validityChanged.set(pageNo);
-					if (isEmpty(newValue)) {
-						// If we decremented to zero then we're no longer mergeable.
-						parent.mergeablePages.clear(pageNo);
-					} else if (Integer.bitCount(newValue) == 16) {
-						// If we decremented to 16 then we're now mergeable.
+					if (isMergeable(newValue)) {
 						parent.mergeablePages.set(pageNo);
 					}
 					// Set full page last so that other threads don't race to set the other bitsets.
@@ -223,6 +215,13 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 			// Fill the holes in this page with instances from the other page.
 
 			int valid = this.valid.get();
+
+			if (isFull(valid)) {
+				// We got filled after being marked mergeable, nothing to do
+				parent.mergeablePages.clear(pageNo);
+				return;
+			}
+
 			int otherValid = other.valid.get();
 
 			for (int i = 0; i < ObjectStorage.PAGE_SIZE; i++) {
