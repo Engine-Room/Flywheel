@@ -1,13 +1,10 @@
 package dev.engine_room.flywheel.backend.engine.instancing;
 
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.material.Material;
-import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.InstancingPrograms;
@@ -31,10 +28,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
-	/**
-	 * The set of draw calls to make for each {@link VisualType}.
-	 */
-	private final Map<VisualType, InstancedRenderStage> stages = new EnumMap<>(VisualType.class);
+	private final InstancedRenderStage draws = new InstancedRenderStage();
 	private final InstancingPrograms programs;
 	/**
 	 * A map of vertex types to their mesh pools.
@@ -71,10 +65,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 			}
 		});
 
-		for (InstancedRenderStage stage : stages.values()) {
-			// Remove the draw calls for any instancers we deleted.
-			stage.flush();
-		}
+		// Remove the draw calls for any instancers we deleted.
+		draws.flush();
 
 		meshPool.flush();
 
@@ -82,10 +74,10 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	}
 
 	@Override
-	public void render(VisualType visualType) {
-		var stage = stages.get(visualType);
+	public void render() {
+		var stage = draws;
 
-		if (stage == null || stage.isEmpty()) {
+		if (stage.isEmpty()) {
 			return;
 		}
 
@@ -105,9 +97,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		instancers.values()
 				.forEach(InstancedInstancer::delete);
 
-		stages.values()
-				.forEach(InstancedRenderStage::delete);
-		stages.clear();
+		draws.delete();
 
 		meshPool.delete();
 		instanceTexture.delete();
@@ -128,8 +118,6 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	protected <I extends Instance> void initialize(InstancerKey<I> key, InstancedInstancer<?> instancer) {
 		instancer.init();
 
-		InstancedRenderStage stage = stages.computeIfAbsent(key.visualType(), $ -> new InstancedRenderStage());
-
 		var meshes = key.model()
 				.meshes();
 		for (int i = 0; i < meshes.size(); i++) {
@@ -139,7 +127,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 			GroupKey<?> groupKey = new GroupKey<>(key.type(), key.environment());
 			InstancedDraw instancedDraw = new InstancedDraw(instancer, mesh, groupKey, entry.material(), key.bias(), i);
 
-			stage.put(groupKey, instancedDraw);
+			draws.put(groupKey, instancedDraw);
 			instancer.addDrawCall(instancedDraw);
 		}
 	}

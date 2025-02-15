@@ -8,15 +8,12 @@ import static org.lwjgl.opengl.GL43.glDispatchCompute;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.model.Model;
-import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
 import dev.engine_room.flywheel.backend.engine.InstancerKey;
@@ -28,8 +25,7 @@ import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 
 public class IndirectCullingGroup<I extends Instance> {
-	private static final Comparator<IndirectDraw> DRAW_COMPARATOR = Comparator.comparing(IndirectDraw::visualType)
-			.thenComparing(IndirectDraw::isEmbedded)
+	private static final Comparator<IndirectDraw> DRAW_COMPARATOR = Comparator.comparing(IndirectDraw::isEmbedded)
 			.thenComparing(IndirectDraw::bias)
 			.thenComparing(IndirectDraw::indexOfMeshInModel)
 			.thenComparing(IndirectDraw::material, MaterialRenderState.COMPARATOR);
@@ -39,7 +35,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	private final IndirectBuffers buffers;
 	private final List<IndirectInstancer<I>> instancers = new ArrayList<>();
 	private final List<IndirectDraw> indirectDraws = new ArrayList<>();
-	private final Map<VisualType, List<MultiDraw>> multiDraws = new EnumMap<>(VisualType.class);
+	private final List<MultiDraw> multiDraws = new ArrayList<>();
 
 	private final IndirectPrograms programs;
 	private final GlProgram cullProgram;
@@ -132,10 +128,6 @@ public class IndirectCullingGroup<I extends Instance> {
 		return indirectDraws.isEmpty() || instanceCountThisFrame == 0;
 	}
 
-	private boolean nothingToDo(VisualType visualType) {
-		return nothingToDo() || !multiDraws.containsKey(visualType);
-	}
-
 	private void sortDraws() {
 		multiDraws.clear();
 		// sort by visual type, then material
@@ -146,26 +138,17 @@ public class IndirectCullingGroup<I extends Instance> {
 
 			// if the next draw call has a different VisualType or Material, start a new MultiDraw
 			if (i == indirectDraws.size() - 1 || incompatibleDraws(draw1, indirectDraws.get(i + 1))) {
-				multiDraws.computeIfAbsent(draw1.visualType(), s -> new ArrayList<>())
-						.add(new MultiDraw(draw1.material(), draw1.isEmbedded(), start, i + 1));
+				multiDraws.add(new MultiDraw(draw1.material(), draw1.isEmbedded(), start, i + 1));
 				start = i + 1;
 			}
 		}
 	}
 
 	private boolean incompatibleDraws(IndirectDraw draw1, IndirectDraw draw2) {
-		if (draw1.visualType() != draw2.visualType()) {
-			return true;
-		}
-
 		if (draw1.isEmbedded() != draw2.isEmbedded()) {
 			return true;
 		}
 		return !MaterialRenderState.materialEquals(draw1.material(), draw2.material());
-	}
-
-	public boolean hasVisualType(VisualType visualType) {
-		return multiDraws.containsKey(visualType);
 	}
 
 	public void add(IndirectInstancer<I> instancer, InstancerKey<I> key, MeshPool meshPool) {
@@ -180,7 +163,7 @@ public class IndirectCullingGroup<I extends Instance> {
             var entry = meshes.get(i);
 
             MeshPool.PooledMesh mesh = meshPool.alloc(entry.mesh());
-            var draw = new IndirectDraw(instancer, entry.material(), mesh, key.visualType(), key.bias(), i);
+			var draw = new IndirectDraw(instancer, entry.material(), mesh, key.bias(), i);
             indirectDraws.add(draw);
             instancer.addDraw(draw);
         }
@@ -188,8 +171,8 @@ public class IndirectCullingGroup<I extends Instance> {
 		needsDrawSort = true;
 	}
 
-	public void submit(VisualType visualType) {
-		if (nothingToDo(visualType)) {
+	public void submit() {
+		if (nothingToDo()) {
 			return;
 		}
 
@@ -199,7 +182,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 		GlProgram lastProgram = null;
 
-		for (var multiDraw : multiDraws.get(visualType)) {
+		for (var multiDraw : multiDraws) {
 			var drawProgram = programs.getIndirectProgram(instanceType, multiDraw.embedded ? ContextShader.EMBEDDED : ContextShader.DEFAULT, multiDraw.material);
 			if (drawProgram != lastProgram) {
 				lastProgram = drawProgram;

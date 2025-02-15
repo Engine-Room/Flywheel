@@ -13,7 +13,6 @@ import dev.engine_room.flywheel.api.instance.InstancerProvider;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.visualization.VisualEmbedding;
-import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.backend.FlwBackend;
 import dev.engine_room.flywheel.backend.compile.core.ShaderException;
@@ -47,8 +46,8 @@ public class EngineImpl implements Engine {
 	}
 
 	@Override
-	public VisualizationContext createVisualizationContext(VisualType visualType) {
-		return new VisualizationContextImpl(visualType);
+	public VisualizationContext createVisualizationContext() {
+		return new VisualizationContextImpl();
 	}
 
 	@Override
@@ -104,9 +103,9 @@ public class EngineImpl implements Engine {
 	}
 
 	@Override
-	public void render(RenderContext context, VisualType visualType) {
+	public void render(RenderContext context) {
 		try (var state = GlStateTracker.getRestoreState()) {
-			drawManager.render(visualType);
+			drawManager.render();
 		} catch (ShaderException e) {
 			FlwBackend.LOGGER.error("Falling back", e);
 			triggerFallback();
@@ -134,8 +133,8 @@ public class EngineImpl implements Engine {
 		drawManager.triggerFallback();
 	}
 
-	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType, int bias) {
-		return drawManager.getInstancer(environment, type, model, visualType, bias);
+	public <I extends Instance> Instancer<I> instancer(Environment environment, InstanceType<I> type, Model model, int bias) {
+		return drawManager.getInstancer(environment, type, model, bias);
 	}
 
 	public EnvironmentStorage environmentStorage() {
@@ -148,11 +147,9 @@ public class EngineImpl implements Engine {
 
 	private class VisualizationContextImpl implements VisualizationContext {
 		private final InstancerProviderImpl instancerProvider;
-		private final VisualType visualType;
 
-		public VisualizationContextImpl(VisualType visualType) {
-			instancerProvider = new InstancerProviderImpl(EngineImpl.this, visualType);
-			this.visualType = visualType;
+		public VisualizationContextImpl() {
+			instancerProvider = new InstancerProviderImpl(EngineImpl.this);
 		}
 
 		@Override
@@ -167,7 +164,7 @@ public class EngineImpl implements Engine {
 
 		@Override
 		public VisualEmbedding createEmbedding(Vec3i renderOrigin) {
-			var out = new EmbeddedEnvironment(EngineImpl.this, visualType, renderOrigin);
+			var out = new EmbeddedEnvironment(EngineImpl.this, renderOrigin);
 			environmentStorage.track(out);
 			return out;
 		}

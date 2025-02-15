@@ -49,12 +49,8 @@ public interface VisualizationManager {
 	interface RenderDispatcher {
 		void onStartLevelRender(RenderContext ctx);
 
-		void afterBlockEntities(RenderContext ctx);
-
 		void afterEntities(RenderContext ctx);
 
 		void beforeCrumbling(RenderContext ctx, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress);
-
-		void afterParticles(RenderContext ctx);
 	}
 }

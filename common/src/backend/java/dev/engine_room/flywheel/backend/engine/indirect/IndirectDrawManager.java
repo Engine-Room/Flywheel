@@ -15,7 +15,6 @@ import java.util.Map;
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
-import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
 import dev.engine_room.flywheel.backend.engine.AbstractInstancer;
@@ -79,20 +78,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		group.add((IndirectInstancer<I>) instancer, key, meshPool);
 	}
 
-	public boolean hasVisualType(VisualType visualType) {
-		for (var group : cullingGroups.values()) {
-			if (group.hasVisualType(visualType)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public void render(VisualType visualType) {
-		if (!hasVisualType(visualType)) {
-			return;
-		}
-
+	public void render() {
 		TextureBinder.bindLightAndOverlay();
 
 		vertexArray.bindForDraw();
@@ -106,7 +92,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		}
 
 		for (var group : cullingGroups.values()) {
-			group.submit(visualType);
+			group.submit();
 		}
 
 		MaterialRenderState.reset();

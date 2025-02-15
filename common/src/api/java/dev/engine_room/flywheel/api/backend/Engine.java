@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Range;
 import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.task.Plan;
-import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.Camera;
@@ -22,10 +21,9 @@ public interface Engine {
 	/**
 	 * Create a visualization context that will be used to create visuals of the given type.
 	 *
-	 * @param visualType The type of visual.
 	 * @return A new visualization context.
 	 */
-	VisualizationContext createVisualizationContext(VisualType visualType);
+	VisualizationContext createVisualizationContext();
 
 	/**
 	 * Create a plan that will start execution after the start of the level render and
@@ -78,9 +76,8 @@ public interface Engine {
 	 * level render. This method is guaranteed to be called on the render thread.
 	 *
 	 * @param context The context for the current level render.
-	 * @param visualType The type of visual.
 	 */
-	void render(RenderContext context, VisualType visualType);
+	void render(RenderContext context);
 
 	/**
 	 * Render the given instances as a crumbling overlay.

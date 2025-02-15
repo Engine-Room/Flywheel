@@ -18,7 +18,6 @@ import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.task.Plan;
-import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.FlwBackend;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
 import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
@@ -43,8 +42,8 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 	 */
 	protected final Queue<UninitializedInstancer<N, ?>> initializationQueue = new ConcurrentLinkedQueue<>();
 
-	public <I extends Instance> AbstractInstancer<I> getInstancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType, int bias) {
-		return getInstancer(new InstancerKey<>(environment, type, model, visualType, bias));
+	public <I extends Instance> AbstractInstancer<I> getInstancer(Environment environment, InstanceType<I> type, Model model, int bias) {
+		return getInstancer(new InstancerKey<>(environment, type, model, bias));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -76,7 +75,7 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 				.forEach(AbstractInstancer::clear);
 	}
 
-	public abstract void render(VisualType visualType);
+	public abstract void render();
 
 	public abstract void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks);
 

@@ -18,7 +18,6 @@ import dev.engine_room.flywheel.api.visual.DynamicVisual;
 import dev.engine_room.flywheel.api.visual.Effect;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visualization.VisualManager;
-import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.api.visualization.VisualizationLevel;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.impl.FlwConfig;
@@ -82,9 +81,10 @@ public class VisualizationManagerImpl implements VisualizationManager {
 				.createEngine(level);
 		frameLimiter = createUpdateLimiter();
 
-		var blockEntitiesStorage = new BlockEntityStorage(engine.createVisualizationContext(VisualType.BLOCK_ENTITY));
-		var entitiesStorage = new EntityStorage(engine.createVisualizationContext(VisualType.ENTITY));
-		var effectsStorage = new EffectStorage(engine.createVisualizationContext(VisualType.EFFECT));
+		var visualizationContext = engine.createVisualizationContext();
+		var blockEntitiesStorage = new BlockEntityStorage(visualizationContext);
+		var entitiesStorage = new EntityStorage(visualizationContext);
+		var effectsStorage = new EffectStorage(visualizationContext);
 
 		blockEntities = new VisualManagerImpl<>(blockEntitiesStorage);
 		entities = new VisualManagerImpl<>(entitiesStorage);
@@ -257,9 +257,9 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	/**
 	 * Draw all visuals of the given type.
 	 */
-	private void render(RenderContext context, VisualType visualType) {
+	private void render(RenderContext context) {
 		ensureCanRender(context);
-		engine.render(context, visualType);
+		engine.render(context);
 	}
 
 	private void renderCrumbling(RenderContext context, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress) {
@@ -338,23 +338,13 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		}
 
 		@Override
-		public void afterBlockEntities(RenderContext ctx) {
-			render(ctx, VisualType.BLOCK_ENTITY);
-		}
-
-		@Override
 		public void afterEntities(RenderContext ctx) {
-			render(ctx, VisualType.ENTITY);
+			render(ctx);
 		}
 
 		@Override
 		public void beforeCrumbling(RenderContext ctx, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress) {
 			renderCrumbling(ctx, destructionProgress);
-		}
-
-		@Override
-		public void afterParticles(RenderContext ctx) {
-			render(ctx, VisualType.EFFECT);
 		}
 	}
 
