@@ -27,7 +27,7 @@ public interface Engine {
 
 	/**
 	 * Create a plan that will start execution after the start of the level render and
-	 * finish execution before {@link #setupRender} is called.
+	 * finish execution before {@link #render} is called.
 	 *
 	 * @return A new plan.
 	 */
