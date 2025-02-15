@@ -89,23 +89,13 @@ public class EngineImpl implements Engine {
 	}
 
 	@Override
-	public void setupRender(RenderContext context) {
+	public void render(RenderContext context) {
 		try (var state = GlStateTracker.getRestoreState()) {
 			// Process the render queue for font updates
 			RenderSystem.replayQueue();
 			Uniforms.update(context);
 			environmentStorage.flush();
-			drawManager.flush(lightStorage, environmentStorage);
-		} catch (ShaderException e) {
-			FlwBackend.LOGGER.error("Falling back", e);
-			triggerFallback();
-		}
-	}
-
-	@Override
-	public void render(RenderContext context) {
-		try (var state = GlStateTracker.getRestoreState()) {
-			drawManager.render();
+			drawManager.render(lightStorage, environmentStorage);
 		} catch (ShaderException e) {
 			FlwBackend.LOGGER.error("Falling back", e);
 			triggerFallback();

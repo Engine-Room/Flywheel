@@ -58,22 +58,11 @@ public interface Engine {
 	void onLightUpdate(SectionPos sectionPos, LightLayer layer);
 
 	/**
-	 * Set up rendering for the current level render.
+	 * Render all instances necessary for the given visual type.
 	 *
 	 * <p>This method is guaranteed to be called after
 	 * {@linkplain #createFramePlan() the frame plan} has finished execution and before
-	 * {@link #render} and {@link #renderCrumbling} are called. This method is guaranteed to
-	 * be called on the render thread.
-	 *
-	 * @param context The context for the current level render.
-	 */
-	void setupRender(RenderContext context);
-
-	/**
-	 * Render all instances necessary for the given visual type.
-	 *
-	 * <p>This method is guaranteed to be called after {@link #setupRender} for the current
-	 * level render. This method is guaranteed to be called on the render thread.
+	 * {@link #renderCrumbling} are called. This method is guaranteed to be called on the render thread.
 	 *
 	 * @param context The context for the current level render.
 	 */
@@ -82,7 +71,7 @@ public interface Engine {
 	/**
 	 * Render the given instances as a crumbling overlay.
 	 *
-	 * <p>This method is guaranteed to be called after {@link #setupRender} for the current
+	 * <p>This method is guaranteed to be called after {@link #render} for the current
 	 * level render. This method is guaranteed to be called on the render thread.
 	 *
 	 * @param context The context for the current level render.

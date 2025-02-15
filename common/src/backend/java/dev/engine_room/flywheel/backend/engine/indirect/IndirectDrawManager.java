@@ -48,8 +48,6 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 	private final DepthPyramid depthPyramid;
 
-	private boolean needsBarrier = false;
-
 	public IndirectDrawManager(IndirectPrograms programs) {
 		this.programs = programs;
 		programs.acquire();
@@ -78,30 +76,9 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		group.add((IndirectInstancer<I>) instancer, key, meshPool);
 	}
 
-	public void render() {
-		TextureBinder.bindLightAndOverlay();
-
-		vertexArray.bindForDraw();
-		lightBuffers.bind();
-		matrixBuffer.bind();
-		Uniforms.bindAll();
-
-		if (needsBarrier) {
-			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-			needsBarrier = false;
-		}
-
-		for (var group : cullingGroups.values()) {
-			group.submit();
-		}
-
-		MaterialRenderState.reset();
-		TextureBinder.resetLightAndOverlay();
-	}
-
 	@Override
-	public void flush(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
-		super.flush(lightStorage, environmentStorage);
+	public void render(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
+		super.render(lightStorage, environmentStorage);
 
 		for (var group : cullingGroups.values()) {
 			group.flushInstancers();
@@ -151,7 +128,21 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.dispatchApply();
 		}
 
-		needsBarrier = true;
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+		TextureBinder.bindLightAndOverlay();
+
+		vertexArray.bindForDraw();
+		lightBuffers.bind();
+		matrixBuffer.bind();
+		Uniforms.bindAll();
+
+		for (var group : cullingGroups.values()) {
+			group.submit();
+		}
+
+		MaterialRenderState.reset();
+		TextureBinder.resetLightAndOverlay();
 	}
 
 	@Override

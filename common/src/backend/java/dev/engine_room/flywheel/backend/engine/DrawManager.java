@@ -38,7 +38,7 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 	/**
 	 * A list of instancers that have not yet been initialized.
 	 * <br>
-	 * All new instancers land here before having resources allocated in {@link #flush}.
+	 * All new instancers land here before having resources allocated in {@link #render}.
 	 */
 	protected final Queue<UninitializedInstancer<N, ?>> initializationQueue = new ConcurrentLinkedQueue<>();
 
@@ -56,7 +56,7 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 		return ForEachPlan.of(() -> new ArrayList<>(instancers.values()), AbstractInstancer::parallelUpdate);
 	}
 
-	public void flush(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
+	public void render(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
 		// Thread safety: flush is called from the render thread after all visual updates have been made,
 		// so there are no:tm: threads we could be racing with.
 		for (var init : initializationQueue) {
@@ -74,8 +74,6 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 		instancers.values()
 				.forEach(AbstractInstancer::clear);
 	}
-
-	public abstract void render();
 
 	public abstract void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks);
 

@@ -73,8 +73,6 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	private final Plan<RenderContext> framePlan;
 	private final Plan<TickableVisual.Context> tickPlan;
 
-	private boolean canEngineRender;
-
 	private VisualizationManagerImpl(LevelAccessor level) {
 		taskExecutor = FlwTaskExecutor.get();
 		engine = BackendManager.currentBackend()
@@ -241,24 +239,15 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		frameFlag.lower();
 
 		frameLimiter.tick();
-		canEngineRender = false;
 
 		framePlan.execute(taskExecutor, context);
-	}
-
-	private void ensureCanRender(RenderContext context) {
-		taskExecutor.syncUntil(frameFlag::isRaised);
-		if (!canEngineRender) {
-			engine.setupRender(context);
-			canEngineRender = true;
-		}
 	}
 
 	/**
 	 * Draw all visuals of the given type.
 	 */
 	private void render(RenderContext context) {
-		ensureCanRender(context);
+		taskExecutor.syncUntil(frameFlag::isRaised);
 		engine.render(context);
 	}
 
@@ -266,8 +255,6 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		if (destructionProgress.isEmpty()) {
 			return;
 		}
-
-		ensureCanRender(context);
 
 		List<Engine.CrumblingBlock> crumblingBlocks = new ArrayList<>();
 

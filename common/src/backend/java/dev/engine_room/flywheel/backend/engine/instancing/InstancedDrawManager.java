@@ -51,8 +51,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	}
 
 	@Override
-	public void flush(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
-		super.flush(lightStorage, environmentStorage);
+	public void render(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
+		super.render(lightStorage, environmentStorage);
 
 		this.instancers.values()
 				.removeIf(instancer -> {
@@ -71,13 +71,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		meshPool.flush();
 
 		light.flush(lightStorage);
-	}
 
-	@Override
-	public void render() {
-		var stage = draws;
-
-		if (stage.isEmpty()) {
+		if (draws.isEmpty()) {
 			return;
 		}
 
@@ -86,7 +81,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		TextureBinder.bindLightAndOverlay();
 		light.bind();
 
-		stage.draw(instanceTexture, programs);
+		draws.draw(instanceTexture, programs);
 
 		MaterialRenderState.reset();
 		TextureBinder.resetLightAndOverlay();
