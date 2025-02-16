@@ -45,6 +45,17 @@ public final class MaterialRenderState {
 		setupWriteMask(material.writeMask());
 	}
 
+	public static void setupOit(Material material) {
+		setupTexture(material);
+		setupBackfaceCulling(material.backfaceCulling());
+		setupPolygonOffset(material.polygonOffset());
+		setupDepthTest(material.depthTest());
+
+		WriteMask mask = material.writeMask();
+		boolean writeColor = mask.color();
+		RenderSystem.colorMask(writeColor, writeColor, writeColor, writeColor);
+	}
+
 	private static void setupTexture(Material material) {
 		Samplers.DIFFUSE.makeActive();
 		AbstractTexture texture = Minecraft.getInstance()

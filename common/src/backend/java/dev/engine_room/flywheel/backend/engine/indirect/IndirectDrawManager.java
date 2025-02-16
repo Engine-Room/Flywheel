@@ -48,6 +48,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 	private final DepthPyramid depthPyramid;
 
+	private final WboitFrameBuffer wboitFrameBuffer;
+
 	public IndirectDrawManager(IndirectPrograms programs) {
 		this.programs = programs;
 		programs.acquire();
@@ -62,6 +64,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		matrixBuffer = new MatrixBuffer();
 
 		depthPyramid = new DepthPyramid(programs);
+
+		wboitFrameBuffer = new WboitFrameBuffer(programs);
 	}
 
 	@Override
@@ -138,8 +142,16 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		Uniforms.bindAll();
 
 		for (var group : cullingGroups.values()) {
-			group.submit();
+			group.submitSolid();
 		}
+
+		wboitFrameBuffer.setup();
+
+		for (var group : cullingGroups.values()) {
+			group.submitTransparent();
+		}
+
+		wboitFrameBuffer.composite();
 
 		MaterialRenderState.reset();
 		TextureBinder.resetLightAndOverlay();

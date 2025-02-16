@@ -17,7 +17,19 @@ in vec2 _flw_crumblingTexCoord;
 flat in uvec2 _flw_ids;
 #endif
 
+#ifdef _FLW_OIT
+
+// your first render target which is used to accumulate pre-multiplied color values
+layout (location = 0) out vec4 accum;
+
+// your second render target which is used to store pixel revealage
+layout (location = 1) out float reveal;
+
+#else
+
 out vec4 _flw_outputColor;
+
+#endif
 
 float _flw_diffuseFactor() {
     if (flw_material.cardinalLightingMode == 2u) {
@@ -31,6 +43,11 @@ float _flw_diffuseFactor() {
     } else {
         return 1.;
     }
+}
+
+float linearize_depth(float d, float zNear, float zFar) {
+    float z_n = 2.0 * d - 1.0;
+    return 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
 }
 
 void _flw_main() {
@@ -99,5 +116,31 @@ void _flw_main() {
     }
     #endif
 
-    _flw_outputColor = flw_fogFilter(color);
+    color = flw_fogFilter(color);
+
+    color.a = 0.9;
+
+    #ifdef _FLW_OIT
+
+    float depth = linearize_depth(gl_FragCoord.z, _flw_cullData.znear, _flw_cullData.zfar);
+
+    // insert your favorite weighting function here. the color-based factor
+    // avoids color pollution from the edges of wispy clouds. the z-based
+    // factor gives precedence to nearer surfaces
+    //float weight = clamp(pow(min(1.0, color.a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - gl_FragCoord.z * 0.9, 3.0), 1e-2, 3e3);
+    float weight = max(min(1.0, max(max(color.r, color.g), color.b) * color.a), color.a) *
+    clamp(0.03 / (1e-5 + pow(depth / 200, 4.0)), 1e-2, 3e3);
+
+    // blend func: GL_ONE, GL_ONE
+    // switch to pre-multiplied alpha and weight
+    accum = vec4(color.rgb * color.a, color.a) * weight;
+
+    // blend func: GL_ZERO, GL_ONE_MINUS_SRC_ALPHA
+    reveal = color.a;
+
+    #else
+
+    _flw_outputColor = color;
+
+    #endif
 }

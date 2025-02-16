@@ -13,6 +13,7 @@ import java.util.List;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.material.Material;
+import dev.engine_room.flywheel.api.material.Transparency;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
@@ -36,6 +37,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	private final List<IndirectInstancer<I>> instancers = new ArrayList<>();
 	private final List<IndirectDraw> indirectDraws = new ArrayList<>();
 	private final List<MultiDraw> multiDraws = new ArrayList<>();
+	private final List<MultiDraw> transparentDraws = new ArrayList<>();
 
 	private final IndirectPrograms programs;
 	private final GlProgram cullProgram;
@@ -130,6 +132,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private void sortDraws() {
 		multiDraws.clear();
+		transparentDraws.clear();
 		// sort by visual type, then material
 		indirectDraws.sort(DRAW_COMPARATOR);
 
@@ -138,7 +141,9 @@ public class IndirectCullingGroup<I extends Instance> {
 
 			// if the next draw call has a different VisualType or Material, start a new MultiDraw
 			if (i == indirectDraws.size() - 1 || incompatibleDraws(draw1, indirectDraws.get(i + 1))) {
-				multiDraws.add(new MultiDraw(draw1.material(), draw1.isEmbedded(), start, i + 1));
+				var dst = draw1.material()
+						.transparency() == Transparency.TRANSLUCENT ? transparentDraws : multiDraws;
+				dst.add(new MultiDraw(draw1.material(), draw1.isEmbedded(), start, i + 1));
 				start = i + 1;
 			}
 		}
@@ -171,7 +176,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		needsDrawSort = true;
 	}
 
-	public void submit() {
+	public void submitSolid() {
 		if (nothingToDo()) {
 			return;
 		}
@@ -183,7 +188,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		GlProgram lastProgram = null;
 
 		for (var multiDraw : multiDraws) {
-			var drawProgram = programs.getIndirectProgram(instanceType, multiDraw.embedded ? ContextShader.EMBEDDED : ContextShader.DEFAULT, multiDraw.material);
+			var drawProgram = programs.getIndirectProgram(instanceType, multiDraw.embedded ? ContextShader.EMBEDDED : ContextShader.DEFAULT, multiDraw.material, false);
 			if (drawProgram != lastProgram) {
 				lastProgram = drawProgram;
 
@@ -197,8 +202,34 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 	}
 
+	public void submitTransparent() {
+		if (nothingToDo()) {
+			return;
+		}
+
+		buffers.bindForDraw();
+
+		drawBarrier();
+
+		GlProgram lastProgram = null;
+
+		for (var multiDraw : transparentDraws) {
+			var drawProgram = programs.getIndirectProgram(instanceType, multiDraw.embedded ? ContextShader.EMBEDDED : ContextShader.DEFAULT, multiDraw.material, true);
+			if (drawProgram != lastProgram) {
+				lastProgram = drawProgram;
+
+				// Don't need to do this unless the program changes.
+				drawProgram.bind();
+			}
+
+			MaterialRenderState.setupOit(multiDraw.material);
+
+			multiDraw.submit(drawProgram);
+		}
+	}
+
 	public void bindForCrumbling(Material material) {
-		var program = programs.getIndirectProgram(instanceType, ContextShader.CRUMBLING, material);
+		var program = programs.getIndirectProgram(instanceType, ContextShader.CRUMBLING, material, false);
 
 		program.bind();
 

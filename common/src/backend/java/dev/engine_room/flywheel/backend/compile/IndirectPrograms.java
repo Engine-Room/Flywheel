@@ -31,7 +31,9 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	private static final ResourceLocation SCATTER_SHADER_MAIN = Flywheel.rl("internal/indirect/scatter.glsl");
 	private static final ResourceLocation DOWNSAMPLE_FIRST = Flywheel.rl("internal/indirect/downsample_first.glsl");
 	private static final ResourceLocation DOWNSAMPLE_SECOND = Flywheel.rl("internal/indirect/downsample_second.glsl");
-	public static final List<ResourceLocation> UTIL_SHADERS = List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN, DOWNSAMPLE_FIRST, DOWNSAMPLE_SECOND);
+
+	private static final ResourceLocation FULLSCREEN = Flywheel.rl("internal/indirect/fullscreen.vert");
+	private static final ResourceLocation OIT_COMPOSITE = Flywheel.rl("internal/indirect/oit_composite.frag");
 
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private static final Compile<ResourceLocation> UTIL = new Compile<>();
@@ -45,11 +47,13 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	private final PipelineCompiler pipeline;
 	private final CompilationHarness<InstanceType<?>> culling;
 	private final CompilationHarness<ResourceLocation> utils;
+	private final CompilationHarness<ResourceLocation> fullscreen;
 
-	private IndirectPrograms(PipelineCompiler pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<ResourceLocation> utils) {
+	private IndirectPrograms(PipelineCompiler pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<ResourceLocation> utils, CompilationHarness<ResourceLocation> fullscreen) {
 		this.pipeline = pipeline;
 		this.culling = culling;
 		this.utils = utils;
+		this.fullscreen = fullscreen;
 	}
 
 	private static List<String> getExtensions(GlslVersion glslVersion) {
@@ -88,8 +92,9 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, vertexComponents, fragmentComponents, EXTENSIONS);
 		var cullingCompiler = createCullingCompiler(sources);
 		var utilCompiler = createUtilCompiler(sources);
+		var fullscreenCompiler = createFullscreenCompiler(sources);
 
-		IndirectPrograms newInstance = new IndirectPrograms(pipelineCompiler, cullingCompiler, utilCompiler);
+		IndirectPrograms newInstance = new IndirectPrograms(pipelineCompiler, cullingCompiler, utilCompiler, fullscreenCompiler);
 
 		setInstance(newInstance);
 	}
@@ -125,6 +130,17 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 				.harness("utilities", sources);
 	}
 
+	private static CompilationHarness<ResourceLocation> createFullscreenCompiler(ShaderSources sources) {
+		return UTIL.program()
+				.link(UTIL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.VERTEX)
+						.nameMapper($ -> "fullscreen/fullscreen")
+						.withResource(FULLSCREEN))
+				.link(UTIL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.FRAGMENT)
+						.nameMapper(rl -> "fullscreen/" + ResourceUtil.toDebugFileNameNoExtension(rl))
+						.withResource(s -> s))
+				.harness("fullscreen", sources);
+	}
+
 	static void setInstance(@Nullable IndirectPrograms newInstance) {
 		if (instance != null) {
 			instance.release();
@@ -148,8 +164,8 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		setInstance(null);
 	}
 
-	public GlProgram getIndirectProgram(InstanceType<?> instanceType, ContextShader contextShader, Material material) {
-		return pipeline.get(instanceType, contextShader, material);
+	public GlProgram getIndirectProgram(InstanceType<?> instanceType, ContextShader contextShader, Material material, boolean oit) {
+		return pipeline.get(instanceType, contextShader, material, oit);
 	}
 
 	public GlProgram getCullingProgram(InstanceType<?> instanceType) {
@@ -172,10 +188,15 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		return utils.get(DOWNSAMPLE_SECOND);
 	}
 
+	public GlProgram getOitCompositeProgram() {
+		return fullscreen.get(OIT_COMPOSITE);
+	}
+
 	@Override
 	protected void _delete() {
 		pipeline.delete();
 		culling.delete();
 		utils.delete();
+		fullscreen.delete();
 	}
 }

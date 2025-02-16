@@ -50,7 +50,7 @@ public final class PipelineCompiler {
 		ALL.add(this);
 	}
 
-	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material) {
+	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material, boolean oit) {
 		var light = material.light();
 		var cutout = material.cutout();
 		var shaders = material.shaders();
@@ -66,7 +66,7 @@ public final class PipelineCompiler {
 		MaterialShaderIndices.cutoutSources()
 				.index(cutout.source());
 
-		return harness.get(new PipelineProgramKey(instanceType, contextShader, light, shaders, cutout != CutoutShaders.OFF, FrameUniforms.debugOn()));
+		return harness.get(new PipelineProgramKey(instanceType, contextShader, light, shaders, cutout != CutoutShaders.OFF, FrameUniforms.debugOn(), oit));
 	}
 
 	public void delete() {
@@ -128,7 +128,8 @@ public final class PipelineCompiler {
 									.source());
 							var debug = key.debugEnabled() ? "_debug" : "";
 							var cutout = key.useCutout() ? "_cutout" : "";
-							return "pipeline/" + pipeline.compilerMarker() + "/frag/" + material + "/" + light + "_" + context + cutout + debug;
+							var oit = key.oit() ? "_oit" : "";
+							return "pipeline/" + pipeline.compilerMarker() + "/frag/" + material + "/" + light + "_" + context + cutout + debug + oit;
 						})
 						.requireExtensions(extensions)
 						.enableExtension("GL_ARB_conservative_depth")
@@ -144,6 +145,11 @@ public final class PipelineCompiler {
 						.onCompile((key, comp) -> {
 							if (key.useCutout()) {
 								comp.define("_FLW_USE_DISCARD");
+							}
+						})
+						.onCompile((key, comp) -> {
+							if (key.oit()) {
+								comp.define("_FLW_OIT");
 							}
 						})
 						.withResource(API_IMPL_FRAG)
@@ -217,6 +223,7 @@ public final class PipelineCompiler {
 	 * @param light         The light shader to use.
 	 */
 	public record PipelineProgramKey(InstanceType<?> instanceType, ContextShader contextShader, LightShader light,
-									 MaterialShaders materialShaders, boolean useCutout, boolean debugEnabled) {
+									 MaterialShaders materialShaders, boolean useCutout, boolean debugEnabled,
+									 boolean oit) {
 	}
 }
