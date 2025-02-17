@@ -1,7 +1,5 @@
 package dev.engine_room.flywheel.backend.gl;
 
-import java.nio.ByteBuffer;
-
 import org.jetbrains.annotations.UnknownNullability;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL;
@@ -13,6 +11,7 @@ import org.lwjgl.opengl.GL43;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.KHRShaderSubgroup;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.backend.FlwBackend;
 import dev.engine_room.flywheel.backend.compile.core.Compilation;
@@ -67,10 +66,11 @@ public final class GlCompat {
 	 */
 	public static void safeShaderSource(int glId, CharSequence source) {
 		try (MemoryStack stack = MemoryStack.stackPush()) {
-			final ByteBuffer sourceBuffer = stack.UTF8(source, true);
+			var sourceBuffer = MemoryUtil.memUTF8(source, true);
 			final PointerBuffer pointers = stack.mallocPointer(1);
 			pointers.put(sourceBuffer);
 			GL20C.nglShaderSource(glId, 1, pointers.address0(), 0);
+			MemoryUtil.memFree(sourceBuffer);
 		}
 	}
 

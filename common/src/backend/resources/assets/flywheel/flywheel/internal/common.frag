@@ -1,6 +1,7 @@
 #include "flywheel:internal/packed_material.glsl"
 #include "flywheel:internal/diffuse.glsl"
 #include "flywheel:internal/colorizer.glsl"
+#include "flywheel:internal/mboit/moment_oit.glsl"
 
 // optimize discard usage
 #if defined(GL_ARB_conservative_depth) && defined(_FLW_USE_DISCARD)
@@ -18,13 +19,13 @@ flat in uvec2 _flw_ids;
 #endif
 
 #ifdef _FLW_OIT
-
-// your first render target which is used to accumulate pre-multiplied color values
-layout (location = 0) out vec4 accum;
-
-// your second render target which is used to store pixel revealage
-layout (location = 1) out float reveal;
-
+#ifdef _FLW_GENERATE_MOMENTS
+layout (location = 0) out float _flw_zerothMoment_out;
+layout (location = 1) out vec4 _flw_moments_out;
+#endif
+#ifdef _FLW_RESOLVE_MOMENTS
+layout (location = 0) out vec4 _flw_accumulate_out;
+#endif
 #else
 
 out vec4 _flw_outputColor;
@@ -118,26 +119,40 @@ void _flw_main() {
 
     color = flw_fogFilter(color);
 
-    color.a = 0.9;
-
     #ifdef _FLW_OIT
+    float linearDepth = linearize_depth(gl_FragCoord.z, _flw_cullData.znear, _flw_cullData.zfar);
 
-    float depth = linearize_depth(gl_FragCoord.z, _flw_cullData.znear, _flw_cullData.zfar);
+    float lnNear = log(_flw_cullData.znear);
+    float lnFar = log(_flw_cullData.zfar);
 
-    // insert your favorite weighting function here. the color-based factor
-    // avoids color pollution from the edges of wispy clouds. the z-based
-    // factor gives precedence to nearer surfaces
-    //float weight = clamp(pow(min(1.0, color.a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - gl_FragCoord.z * 0.9, 3.0), 1e-2, 3e3);
-    float weight = max(min(1.0, max(max(color.r, color.g), color.b) * color.a), color.a) *
-    clamp(0.03 / (1e-5 + pow(depth / 200, 4.0)), 1e-2, 3e3);
+    float depth = (log(linearDepth) - lnNear);
 
-    // blend func: GL_ONE, GL_ONE
-    // switch to pre-multiplied alpha and weight
-    accum = vec4(color.rgb * color.a, color.a) * weight;
+    depth /= lnFar - lnNear;
 
-    // blend func: GL_ZERO, GL_ONE_MINUS_SRC_ALPHA
-    reveal = color.a;
+    depth = clamp(depth * 2. - 1., -1., 1.);
 
+    #ifdef _FLW_GENERATE_MOMENTS
+
+    generateMoments(depth, 1 - color.a, vec4(0), _flw_zerothMoment_out, _flw_moments_out);
+
+    #endif
+    #ifdef _FLW_RESOLVE_MOMENTS
+
+    float tt;
+    float td;
+    resolveMoments(td, tt, depth, gl_FragCoord.xy);
+
+    if (abs(td) < 1e-5) {
+        discard;
+    }
+
+    color.rgb *= color.a;
+
+    color *= td;
+
+    _flw_accumulate_out = color;
+
+    #endif
     #else
 
     _flw_outputColor = color;

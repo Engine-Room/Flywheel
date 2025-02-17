@@ -164,7 +164,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		setInstance(null);
 	}
 
-	public GlProgram getIndirectProgram(InstanceType<?> instanceType, ContextShader contextShader, Material material, boolean oit) {
+	public GlProgram getIndirectProgram(InstanceType<?> instanceType, ContextShader contextShader, Material material, PipelineCompiler.OitMode oit) {
 		return pipeline.get(instanceType, contextShader, material, oit);
 	}
 

@@ -50,7 +50,7 @@ public final class PipelineCompiler {
 		ALL.add(this);
 	}
 
-	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material, boolean oit) {
+	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material, OitMode oit) {
 		var light = material.light();
 		var cutout = material.cutout();
 		var shaders = material.shaders();
@@ -128,7 +128,7 @@ public final class PipelineCompiler {
 									.source());
 							var debug = key.debugEnabled() ? "_debug" : "";
 							var cutout = key.useCutout() ? "_cutout" : "";
-							var oit = key.oit() ? "_oit" : "";
+							var oit = key.oit().name;
 							return "pipeline/" + pipeline.compilerMarker() + "/frag/" + material + "/" + light + "_" + context + cutout + debug + oit;
 						})
 						.requireExtensions(extensions)
@@ -148,8 +148,9 @@ public final class PipelineCompiler {
 							}
 						})
 						.onCompile((key, comp) -> {
-							if (key.oit()) {
+							if (key.oit() != OitMode.OFF) {
 								comp.define("_FLW_OIT");
+								comp.define(key.oit().define);
 							}
 						})
 						.withResource(API_IMPL_FRAG)
@@ -224,6 +225,21 @@ public final class PipelineCompiler {
 	 */
 	public record PipelineProgramKey(InstanceType<?> instanceType, ContextShader contextShader, LightShader light,
 									 MaterialShaders materialShaders, boolean useCutout, boolean debugEnabled,
-									 boolean oit) {
+									 OitMode oit) {
+	}
+
+	public enum OitMode {
+		OFF("", ""),
+		GENERATE("_FLW_GENERATE_MOMENTS", "_generate"),
+		RESOLVE("_FLW_RESOLVE_MOMENTS", "_resolve"),
+		;
+
+		public final String define;
+		public final String name;
+
+		OitMode(String define, String name) {
+			this.define = define;
+			this.name = name;
+		}
 	}
 }

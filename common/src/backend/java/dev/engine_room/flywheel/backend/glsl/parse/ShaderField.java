@@ -1,6 +1,5 @@
 package dev.engine_room.flywheel.backend.glsl.parse;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.Nullable;
@@ -34,20 +33,21 @@ public class ShaderField {
 	 * Scan the source for function definitions and "parse" them into objects that contain properties of the function.
 	 */
 	public static ImmutableMap<String, ShaderField> parseFields(SourceLines source) {
-		Matcher matcher = PATTERN.matcher(source);
+		//		Matcher matcher = PATTERN.matcher(source);
+		//
+		//		ImmutableMap.Builder<String, ShaderField> fields = ImmutableMap.builder();
+		//		while (matcher.find()) {
+		//			Span self = Span.fromMatcher(source, matcher);
+		//			Span location = Span.fromMatcher(source, matcher, 1);
+		//			Span decoration = Span.fromMatcher(source, matcher, 2);
+		//			Span type = Span.fromMatcher(source, matcher, 3);
+		//			Span name = Span.fromMatcher(source, matcher, 4);
+		//
+		//			fields.put(location.get(), new ShaderField(self, location, decoration, type, name));
+		//		}
 
-		ImmutableMap.Builder<String, ShaderField> fields = ImmutableMap.builder();
-		while (matcher.find()) {
-			Span self = Span.fromMatcher(source, matcher);
-			Span location = Span.fromMatcher(source, matcher, 1);
-			Span decoration = Span.fromMatcher(source, matcher, 2);
-			Span type = Span.fromMatcher(source, matcher, 3);
-			Span name = Span.fromMatcher(source, matcher, 4);
-
-			fields.put(location.get(), new ShaderField(self, location, decoration, type, name));
-		}
-
-		return fields.build();
+		return ImmutableMap.<String, ShaderField>builder()
+				.build();
 	}
 
 	public enum Qualifier {

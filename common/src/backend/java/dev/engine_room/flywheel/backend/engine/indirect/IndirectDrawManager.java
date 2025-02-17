@@ -17,6 +17,7 @@ import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
+import dev.engine_room.flywheel.backend.compile.PipelineCompiler;
 import dev.engine_room.flywheel.backend.engine.AbstractInstancer;
 import dev.engine_room.flywheel.backend.engine.CommonCrumbling;
 import dev.engine_room.flywheel.backend.engine.DrawManager;
@@ -48,7 +49,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 	private final DepthPyramid depthPyramid;
 
-	private final WboitFrameBuffer wboitFrameBuffer;
+	private final MboitFramebuffer wboitFrameBuffer;
 
 	public IndirectDrawManager(IndirectPrograms programs) {
 		this.programs = programs;
@@ -65,7 +66,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		depthPyramid = new DepthPyramid(programs);
 
-		wboitFrameBuffer = new WboitFrameBuffer(programs);
+		wboitFrameBuffer = new MboitFramebuffer(programs);
 	}
 
 	@Override
@@ -145,10 +146,16 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.submitSolid();
 		}
 
-		wboitFrameBuffer.setup();
+		wboitFrameBuffer.generateMoments();
 
 		for (var group : cullingGroups.values()) {
-			group.submitTransparent();
+			group.submitTransparent(PipelineCompiler.OitMode.GENERATE);
+		}
+
+		wboitFrameBuffer.resolveMoments();
+
+		for (var group : cullingGroups.values()) {
+			group.submitTransparent(PipelineCompiler.OitMode.RESOLVE);
 		}
 
 		wboitFrameBuffer.composite();

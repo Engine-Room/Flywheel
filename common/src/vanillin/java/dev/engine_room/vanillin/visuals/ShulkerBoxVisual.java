@@ -52,6 +52,13 @@ public class ShulkerBoxVisual extends AbstractBlockEntityVisual<ShulkerBoxBlockE
 		instances = InstanceTree.create(instancerProvider(), ModelTrees.of(ModelLayers.SHULKER, PATHS_TO_PRUNE, texture, MATERIAL));
 		lid = instances.childOrThrow("lid");
 
+		lid.instance()
+				.color(255, 255, 255, 255);
+
+		instances.childOrThrow("base")
+				.instance()
+				.color(255, 255, 255, 255);
+
 		initialPose = createInitialPose();
 		applyTransform(partialTick);
 	}

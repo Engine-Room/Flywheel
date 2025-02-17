@@ -70,7 +70,7 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 	}
 
 	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material) {
-		return pipeline.get(instanceType, contextShader, material, false);
+		return pipeline.get(instanceType, contextShader, material, PipelineCompiler.OitMode.OFF);
 	}
 
 	@Override

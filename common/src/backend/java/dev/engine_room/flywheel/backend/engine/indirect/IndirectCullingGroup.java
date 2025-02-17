@@ -17,6 +17,7 @@ import dev.engine_room.flywheel.api.material.Transparency;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
+import dev.engine_room.flywheel.backend.compile.PipelineCompiler;
 import dev.engine_room.flywheel.backend.engine.InstancerKey;
 import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
@@ -188,7 +189,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		GlProgram lastProgram = null;
 
 		for (var multiDraw : multiDraws) {
-			var drawProgram = programs.getIndirectProgram(instanceType, multiDraw.embedded ? ContextShader.EMBEDDED : ContextShader.DEFAULT, multiDraw.material, false);
+			var drawProgram = programs.getIndirectProgram(instanceType, multiDraw.embedded ? ContextShader.EMBEDDED : ContextShader.DEFAULT, multiDraw.material, PipelineCompiler.OitMode.OFF);
 			if (drawProgram != lastProgram) {
 				lastProgram = drawProgram;
 
@@ -202,7 +203,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		}
 	}
 
-	public void submitTransparent() {
+	public void submitTransparent(PipelineCompiler.OitMode oit) {
 		if (nothingToDo()) {
 			return;
 		}
@@ -214,7 +215,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		GlProgram lastProgram = null;
 
 		for (var multiDraw : transparentDraws) {
-			var drawProgram = programs.getIndirectProgram(instanceType, multiDraw.embedded ? ContextShader.EMBEDDED : ContextShader.DEFAULT, multiDraw.material, true);
+			var drawProgram = programs.getIndirectProgram(instanceType, multiDraw.embedded ? ContextShader.EMBEDDED : ContextShader.DEFAULT, multiDraw.material, oit);
 			if (drawProgram != lastProgram) {
 				lastProgram = drawProgram;
 
@@ -229,7 +230,7 @@ public class IndirectCullingGroup<I extends Instance> {
 	}
 
 	public void bindForCrumbling(Material material) {
-		var program = programs.getIndirectProgram(instanceType, ContextShader.CRUMBLING, material, false);
+		var program = programs.getIndirectProgram(instanceType, ContextShader.CRUMBLING, material, PipelineCompiler.OitMode.OFF);
 
 		program.bind();
 
