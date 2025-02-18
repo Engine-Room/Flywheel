@@ -21,7 +21,7 @@ float circleToParameter(vec2 circle_point){
 	returns 1.0, otherwise 0.0 or a linear ramp in the wrapping zone.*/
 float getRootWeightFactor(float reference_parameter, float root_parameter, vec4 wrapping_zone_parameters){
     float binary_weight_factor=(root_parameter<reference_parameter)?1.0f:0.0f;
-    float linear_weight_factor=saturate(mad(root_parameter, wrapping_zone_parameters.z, wrapping_zone_parameters.w));
+    float linear_weight_factor=saturate(fma(root_parameter, wrapping_zone_parameters.z, wrapping_zone_parameters.w));
     return binary_weight_factor+linear_weight_factor;
 }
 
@@ -47,7 +47,7 @@ float computeTransmittanceAtDepthFrom2TrigonometricMoments(float b_0, vec2 trig_
     float D22=RealPart(b[0]-D00*Multiply(L20, Conjugate(L20))-D11*Multiply(L21, Conjugate(L21)));
     float InvD22=1.0f/D22;
     // Solve a linear system to get the relevant polynomial
-    float phase = mad(depth, wrapping_zone_parameters.y, wrapping_zone_parameters.y);
+    float phase = fma(depth, wrapping_zone_parameters.y, wrapping_zone_parameters.y);
     vec2 circle_point;
     sincos(phase, circle_point.y, circle_point.x);
     vec2 c[3] = {
@@ -125,7 +125,7 @@ float computeTransmittanceAtDepthFrom3TrigonometricMoments(float b_0, vec2 trig_
     float D33=RealPart(b[0]-D00*Multiply(L30, Conjugate(L30))-D11*Multiply(L31, Conjugate(L31))-D22*Multiply(L32, Conjugate(L32)));
     float InvD33=1.0f/D33;
     // Solve a linear system to get the relevant polynomial
-    float phase = mad(depth, wrapping_zone_parameters.y, wrapping_zone_parameters.y);
+    float phase = fma(depth, wrapping_zone_parameters.y, wrapping_zone_parameters.y);
     vec2 circle_point;
     sincos(phase, circle_point.y, circle_point.x);
     vec2 circle_point_pow2 = Multiply(circle_point, circle_point);
@@ -230,7 +230,7 @@ float computeTransmittanceAtDepthFrom4TrigonometricMoments(float b_0, vec2 trig_
     float D44=RealPart(b[0]-D00*Multiply(L40, Conjugate(L40))-D11*Multiply(L41, Conjugate(L41))-D22*Multiply(L42, Conjugate(L42))-D33*Multiply(L43, Conjugate(L43)));
     float InvD44=1.0/D44;
     // Solve a linear system to get the relevant polynomial
-    float phase = mad(depth, wrapping_zone_parameters.y, wrapping_zone_parameters.y);
+    float phase = fma(depth, wrapping_zone_parameters.y, wrapping_zone_parameters.y);
     vec2 circle_point;
     sincos(phase, circle_point.y, circle_point.x);
     vec2 circle_point_pow2 = Multiply(circle_point, circle_point);

@@ -5,17 +5,7 @@
 	roots of polynomials up to degree four are defined.
 */
 
-//#include "flywheel:internal/mboit/trigonometric_moment_math.glsl"
-
-void sincos(float theta, out float s, out float c) {
-    s = sin(theta);
-    c = cos(theta);
-}
-
-float saturate(float a) {
-    return clamp(a, 0., 1.);
-}
-
+#include "flywheel:internal/mboit/trigonometric_moment_math.glsl"
 
 
 /*! Given coefficients of a quadratic polynomial A*x^2+B*x+C, this function

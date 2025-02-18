@@ -21,7 +21,8 @@ flat in uvec2 _flw_ids;
 #ifdef _FLW_OIT
 #ifdef _FLW_GENERATE_MOMENTS
 layout (location = 0) out float _flw_zerothMoment_out;
-layout (location = 1) out vec4 _flw_moments_out;
+layout (location = 1) out vec4 _flw_moments0_out;
+layout (location = 2) out vec4 _flw_moments1_out;
 #endif
 #ifdef _FLW_RESOLVE_MOMENTS
 layout (location = 0) out vec4 _flw_accumulate_out;
@@ -133,7 +134,7 @@ void _flw_main() {
 
     #ifdef _FLW_GENERATE_MOMENTS
 
-    generateMoments(depth, 1 - color.a, vec4(0), _flw_zerothMoment_out, _flw_moments_out);
+    generateMoments(depth, 1 - color.a, _flw_zerothMoment_out, _flw_moments0_out, _flw_moments1_out);
 
     #endif
     #ifdef _FLW_RESOLVE_MOMENTS

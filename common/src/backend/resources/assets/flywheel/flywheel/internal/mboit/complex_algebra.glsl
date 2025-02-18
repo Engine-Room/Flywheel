@@ -2,6 +2,16 @@
    This header defines utility functions to deal with complex numbers and
    complex polynomials.*/
 
+void sincos(float theta, out float s, out float c) {
+    s = sin(theta);
+    c = cos(theta);
+}
+
+float saturate(float a) {
+    return clamp(a, 0., 1.);
+}
+
+
 /*! Returns the complex conjugate of the given complex number (i.e. it changes
 	the sign of the y-component).*/
 vec2 Conjugate(vec2 Z){
@@ -45,11 +55,11 @@ vec2 Cube(vec2 Z){
   \sa SquareRoot() */
 vec2 SquareRootUnsafe(vec2 Z){
     float ZLengthSq=dot(Z, Z);
-    float ZLengthInv=rsqrt(ZLengthSq);
+    float ZLengthInv=inversesqrt(ZLengthSq);
     vec2 UnnormalizedRoot=Z*ZLengthInv+vec2(1.0f, 0.0f);
     float UnnormalizedRootLengthSq=dot(UnnormalizedRoot, UnnormalizedRoot);
     float NormalizationFactorInvSq=UnnormalizedRootLengthSq*ZLengthInv;
-    float NormalizationFactor=rsqrt(NormalizationFactorInvSq);
+    float NormalizationFactor=inversesqrt(NormalizationFactorInvSq);
     return NormalizationFactor*UnnormalizedRoot;
 }
 /*! This utility function computes one square root of the given complex value.
@@ -65,7 +75,7 @@ vec2 SquareRoot(vec2 Z){
    other roots can be found by multiplication by cubic roots of unity.
   \note This function has various discontinuities.*/
 vec2 CubicRoot(vec2 Z){
-    float Argument=atan2(Z.y, Z.x);
+    float Argument=atan(Z.y, Z.x);
     float NewArgument=Argument/3.0f;
     vec2 NormalizedRoot;
     sincos(NewArgument, NormalizedRoot.y, NormalizedRoot.x);

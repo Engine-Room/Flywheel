@@ -17,7 +17,7 @@
 
 const float moment_bias = 0.25;
 const float overestimation = 0.25;
-const vec4 wrapping_zone_parameters = vec4(0.);
+const vec4 wrapping_zone_parameters = vec4(0.31415927, 2.984513, 2.7934167, -18.553917);
 
 
 void clip(float a) {
@@ -28,7 +28,7 @@ void clip(float a) {
 
 // jozu: The trigonometric moments and higher order power moments rely on a second render target
 //  which the java side is not set up to support. Trying to enable them as is will cause compile errors also.
-#define NUM_MOMENTS 4
+#define NUM_MOMENTS 8
 
 #define SINGLE_PRECISION 1
 
@@ -40,15 +40,15 @@ void clip(float a) {
 	vector of moments.moment vector. The shader that calls this function must
 	provide the required render targets.*/
 #if NUM_MOMENTS == 4
-void generateMoments(float depth, float transmittance, vec4 wrapping_zone_parameters, out float b_0, out vec4 b)
+void generateMoments(float depth, float transmittance, out float b_0, out vec4 b)
 #elif NUM_MOMENTS == 6
 #if USE_R_RG_RBBA_FOR_MBOIT6
-void generateMoments(float depth, float transmittance, vec4 wrapping_zone_parameters, out float b_0, out vec2 b_12, out vec4 b_3456)
+void generateMoments(float depth, float transmittance, out float b_0, out vec2 b_12, out vec4 b_3456)
 #else
-void generateMoments(float depth, float transmittance, vec4 wrapping_zone_parameters, out float b_0, out vec2 b_12, out vec2 b_34, out vec2 b_56)
+void generateMoments(float depth, float transmittance, out float b_0, out vec2 b_12, out vec2 b_34, out vec2 b_56)
 #endif
 #elif NUM_MOMENTS == 8
-void generateMoments(float depth, float transmittance, vec4 wrapping_zone_parameters, out float b_0, out vec4 b_even, out vec4 b_odd)
+void generateMoments(float depth, float transmittance, out float b_0, out vec4 b_even, out vec4 b_odd)
 #endif
 {
     transmittance = max(transmittance, 0.000001);
@@ -57,7 +57,7 @@ void generateMoments(float depth, float transmittance, vec4 wrapping_zone_parame
     b_0 = absorbance;
     #if TRIGONOMETRIC
     float phase = fma(depth, wrapping_zone_parameters.y, wrapping_zone_parameters.y);
-    vec2 circle_point = vec2(sin(phas), cos(phase));
+    vec2 circle_point = vec2(sin(phase), cos(phase));
 
     vec2 circle_point_pow2 = Multiply(circle_point, circle_point);
     #if NUM_MOMENTS == 4
@@ -98,10 +98,8 @@ void generateMoments(float depth, float transmittance, vec4 wrapping_zone_parame
 #else//MOMENT_GENERATION is disabled
 
 layout (binding = 7) uniform sampler2D _flw_zeroth_moment_sampler;
-layout (binding = 8) uniform sampler2D _flw_moments_sampler;
-#if USE_R_RG_RBBA_FOR_MBOIT6
-uniform sampler2D extra_moments;
-#endif
+layout (binding = 8) uniform sampler2D _flw_moments0_sampler;
+layout (binding = 9) uniform sampler2D _flw_moments1_sampler;
 
 /*! This function is to be called from the shader that composites the
 	transparent fragments. It reads the moments and calls the appropriate
@@ -120,7 +118,7 @@ void resolveMoments(out float transmittance_at_depth, out float total_transmitta
 
     #if NUM_MOMENTS == 4
     #if TRIGONOMETRIC
-    vec4 b_tmp = texelFetch(_flw_moments_sampler, idx0, 0);
+    vec4 b_tmp = texelFetch(_flw_moments0_sampler, idx0, 0);
     vec2 trig_b[2];
     trig_b[0] = b_tmp.xy;
     trig_b[1] = b_tmp.zw;
@@ -133,7 +131,7 @@ void resolveMoments(out float transmittance_at_depth, out float total_transmitta
     #endif
     transmittance_at_depth = computeTransmittanceAtDepthFrom2TrigonometricMoments(b_0, trig_b, depth, moment_bias, overestimation, wrapping_zone_parameters);
     #else
-    vec4 b_1234 = texelFetch(_flw_moments_sampler, idx0, 0).xyzw;
+    vec4 b_1234 = texelFetch(_flw_moments0_sampler, idx0, 0).xyzw;
     #if SINGLE_PRECISION
     vec2 b_even = b_1234.yw;
     vec2 b_odd = b_1234.xz;
@@ -158,14 +156,14 @@ void resolveMoments(out float transmittance_at_depth, out float total_transmitta
     ivec2 idx2 = idx0;
     #if TRIGONOMETRIC
     vec2 trig_b[3];
-    trig_b[0] = texelFetch(_flw_moments_sampler, idx0, 0).xy;
+    trig_b[0] = texelFetch(_flw_moments0_sampler, idx0, 0).xy;
     #if USE_R_RG_RBBA_FOR_MBOIT6
     vec4 tmp = texelFetch(extra_moments, idx0, 0);
     trig_b[1] = tmp.xy;
     trig_b[2] = tmp.zw;
     #else
-    trig_b[1] = texelFetch(_flw_moments_sampler, idx1, 0).xy;
-    trig_b[2] = texelFetch(_flw_moments_sampler, idx2, 0).xy;
+    trig_b[1] = texelFetch(_flw_moments1_sampler, idx1, 0).xy;
+    trig_b[2] = texelFetch(_flw_moments0_sampler, idx2, 0).xy;
     #endif
     #if SINGLE_PRECISION
     trig_b[0] /= b_0;
@@ -178,14 +176,14 @@ void resolveMoments(out float transmittance_at_depth, out float total_transmitta
     #endif
     transmittance_at_depth = computeTransmittanceAtDepthFrom3TrigonometricMoments(b_0, trig_b, depth, moment_bias, overestimation, wrapping_zone_parameters);
     #else
-    vec2 b_12 = texelFetch(_flw_moments_sampler, idx0, 0).xy;
+    vec2 b_12 = texelFetch(_flw_moments0_sampler, idx0, 0).xy;
     #if USE_R_RG_RBBA_FOR_MBOIT6
     vec4 tmp = texelFetch(extra_moments, idx0, 0);
     vec2 b_34 = tmp.xy;
     vec2 b_56 = tmp.zw;
     #else
-    vec2 b_34 = texelFetch(_flw_moments_sampler, idx1, 0).xy;
-    vec2 b_56 = texelFetch(_flw_moments_sampler, idx2, 0).xy;
+    vec2 b_34 = texelFetch(_flw_moments1_sampler, idx1, 0).xy;
+    vec2 b_56 = texelFetch(_flw_moments0_sampler, idx2, 0).xy;
     #endif
     #if SINGLE_PRECISION
     vec3 b_even = vec3(b_12.y, b_34.y, b_56.y);
@@ -209,8 +207,8 @@ void resolveMoments(out float transmittance_at_depth, out float total_transmitta
     #endif
     #elif NUM_MOMENTS == 8
     #if TRIGONOMETRIC
-    vec4 b_tmp = texelFetch(_flw_moments_sampler, idx0, 0);
-    vec4 b_tmp2 = texelFetch(_flw_moments_sampler, idx1, 0);
+    vec4 b_tmp = texelFetch(_flw_moments0_sampler, idx0, 0);
+    vec4 b_tmp2 = texelFetch(_flw_moments1_sampler, idx1, 0);
     #if SINGLE_PRECISION
     vec2 trig_b[4] = {
     b_tmp2.xy / b_0,
@@ -229,15 +227,15 @@ void resolveMoments(out float transmittance_at_depth, out float total_transmitta
     transmittance_at_depth = computeTransmittanceAtDepthFrom4TrigonometricMoments(b_0, trig_b, depth, moment_bias, overestimation, wrapping_zone_parameters);
     #else
     #if SINGLE_PRECISION
-    vec4 b_even = texelFetch(_flw_moments_sampler, idx0, 0);
-    vec4 b_odd = texelFetch(_flw_moments_sampler, idx1, 0);
+    vec4 b_even = texelFetch(_flw_moments0_sampler, idx0, 0);
+    vec4 b_odd = texelFetch(_flw_moments1_sampler, idx1, 0);
 
     b_even /= b_0;
     b_odd /= b_0;
     const float bias_vector[8] = { 0, 0.75, 0, 0.67666666666666664, 0, 0.63, 0, 0.60030303030303034 };
     #else
-    vec4 b_even_q = texelFetch(_flw_moments_sampler, idx0, 0);
-    vec4 b_odd_q = texelFetch(_flw_moments_sampler, idx1, 0);
+    vec4 b_even_q = texelFetch(_flw_moments0_sampler, idx0, 0);
+    vec4 b_odd_q = texelFetch(_flw_moments1_sampler, idx1, 0);
 
     // Dequantize the moments
     vec4 b_even;

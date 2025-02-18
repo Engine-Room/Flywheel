@@ -12,5 +12,6 @@ public class Samplers {
 	public static final GlTextureUnit LIGHT_SECTIONS = GlTextureUnit.T6;
 
 	public static final GlTextureUnit ZEROTH_MOMENT = GlTextureUnit.T7;
-	public static final GlTextureUnit MOMENTS = GlTextureUnit.T8;
+	public static final GlTextureUnit MOMENTS0 = GlTextureUnit.T8;
+	public static final GlTextureUnit MOMENTS1 = GlTextureUnit.T9;
 }
