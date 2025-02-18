@@ -49,7 +49,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 	private final DepthPyramid depthPyramid;
 
-	private final MboitFramebuffer wboitFrameBuffer;
+	private final OitFramebuffer wboitFrameBuffer;
 
 	public IndirectDrawManager(IndirectPrograms programs) {
 		this.programs = programs;
@@ -66,7 +66,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		depthPyramid = new DepthPyramid(programs);
 
-		wboitFrameBuffer = new MboitFramebuffer(programs);
+		wboitFrameBuffer = new OitFramebuffer(programs);
 	}
 
 	@Override
@@ -146,16 +146,26 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.submitSolid();
 		}
 
-		wboitFrameBuffer.generateMoments();
+		wboitFrameBuffer.depthRange();
 
 		for (var group : cullingGroups.values()) {
-			group.submitTransparent(PipelineCompiler.OitMode.GENERATE);
+			group.submitTransparent(PipelineCompiler.OitMode.DEPTH_RANGE);
 		}
 
-		wboitFrameBuffer.resolveMoments();
+		wboitFrameBuffer.renderTransmittance();
 
 		for (var group : cullingGroups.values()) {
-			group.submitTransparent(PipelineCompiler.OitMode.RESOLVE);
+			group.submitTransparent(PipelineCompiler.OitMode.GENERATE_COEFFICIENTS);
+		}
+
+		//		wboitFrameBuffer.adjustBackgroundForTotalTransmittance();
+
+		//		vertexArray.bindForDraw();
+
+		wboitFrameBuffer.shade();
+
+		for (var group : cullingGroups.values()) {
+			group.submitTransparent(PipelineCompiler.OitMode.EVALUATE);
 		}
 
 		wboitFrameBuffer.composite();

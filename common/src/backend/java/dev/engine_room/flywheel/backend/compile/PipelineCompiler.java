@@ -230,8 +230,9 @@ public final class PipelineCompiler {
 
 	public enum OitMode {
 		OFF("", ""),
-		GENERATE("_FLW_GENERATE_MOMENTS", "_generate"),
-		RESOLVE("_FLW_RESOLVE_MOMENTS", "_resolve"),
+		DEPTH_RANGE("_FLW_DEPTH_RANGE", "_depth_range"),
+		GENERATE_COEFFICIENTS("_FLW_COLLECT_COEFFS", "_generate_coefficients"),
+		EVALUATE("_FLW_EVALUATE", "_resolve"),
 		;
 
 		public final String define;
