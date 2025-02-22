@@ -27,6 +27,42 @@ layout (binding = 7) uniform sampler2D _flw_depthRange;
 
 layout (binding = 8) uniform sampler2DArray _flw_coefficients;
 
+layout (binding = 9) uniform sampler2D _flw_blueNoise;
+
+
+uniform float _flw_blueNoiseFactor = 0.08;
+
+float tented_blue_noise(float normalizedDepth) {
+
+    float tentIn = abs(normalizedDepth * 2. - 1);
+    float tentIn2 = tentIn * tentIn;
+    float tentIn4 = tentIn2 * tentIn2;
+    float tent = 1 - (tentIn2 * tentIn4);
+
+    float b = texture(_flw_blueNoise, gl_FragCoord.xy / vec2(64)).r;
+
+    return b * tent;
+}
+
+float linearize_depth(float d, float zNear, float zFar) {
+    float z_n = 2.0 * d - 1.0;
+    return 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
+}
+
+float linear_depth() {
+    return linearize_depth(gl_FragCoord.z, _flw_cullData.znear, _flw_cullData.zfar);
+}
+
+float depth() {
+    float linearDepth = linear_depth();
+
+    vec2 depthRange = texelFetch(_flw_depthRange, ivec2(gl_FragCoord.xy), 0).rg;
+    float delta = depthRange.x + depthRange.y;
+    float depth = (linearDepth + depthRange.x) / delta;
+
+    return depth - tented_blue_noise(depth) * _flw_blueNoiseFactor;
+}
+
 #ifdef _FLW_DEPTH_RANGE
 
 layout (location = 0) out vec2 _flw_depthRange_out;
@@ -154,80 +190,6 @@ float evaluate_transmittance_wavelets(in sampler2DArray coefficients, float dept
 }
 
 #endif
-
-// TODO: blue noise texture
-uint HilbertIndex(uvec2 p) {
-    uint i = 0u;
-    for (uint l = 0x4000u; l > 0u; l >>= 1u) {
-        uvec2 r = min(p & l, 1u);
-
-        i = (i << 2u) | ((r.x * 3u) ^ r.y);
-        p = r.y == 0u ? (0x7FFFu * r.x) ^ p.yx : p;
-    }
-    return i;
-}
-
-uint ReverseBits(uint x) {
-    x = ((x & 0xaaaaaaaau) >> 1) | ((x & 0x55555555u) << 1);
-    x = ((x & 0xccccccccu) >> 2) | ((x & 0x33333333u) << 2);
-    x = ((x & 0xf0f0f0f0u) >> 4) | ((x & 0x0f0f0f0fu) << 4);
-    x = ((x & 0xff00ff00u) >> 8) | ((x & 0x00ff00ffu) << 8);
-    return (x >> 16) | (x << 16);
-}
-
-// from: https://psychopath.io/post/2021_01_30_building_a_better_lk_hash
-uint OwenHash(uint x, uint seed) { // seed is any random number
-    x ^= x * 0x3d20adeau;
-    x += seed;
-    x *= (seed >> 16) | 1u;
-    x ^= x * 0x05526c56u;
-    x ^= x * 0x53a22864u;
-    return x;
-}
-
-// https://www.shadertoy.com/view/ssBBW1
-float blue() {
-    uint m = HilbertIndex(uvec2(gl_FragCoord.xy));// map pixel coords to hilbert curve index
-    m = OwenHash(ReverseBits(m), 0xe7843fbfu);// owen-scramble hilbert index
-    m = OwenHash(ReverseBits(m), 0x8d8fb1e0u);// map hilbert index to sobol sequence and owen-scramble
-    float mask = float(ReverseBits(m)) / 4294967296.0;// convert to float
-
-    return mask;
-}
-
-uniform float _flw_blueNoiseFactor = 0.08;
-
-float tented_blue_noise(float normalizedDepth) {
-
-    float tentIn = abs(normalizedDepth * 2. - 1);
-    float tentIn2 = tentIn * tentIn;
-    float tentIn4 = tentIn2 * tentIn2;
-    float tent = 1 - (tentIn2 * tentIn4);
-
-    float b = blue();
-
-    return b * tent;
-}
-
-float linearize_depth(float d, float zNear, float zFar) {
-    float z_n = 2.0 * d - 1.0;
-    return 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
-}
-
-float linear_depth() {
-    return linearize_depth(gl_FragCoord.z, _flw_cullData.znear, _flw_cullData.zfar);
-}
-
-float depth() {
-    float linearDepth = linear_depth();
-
-    vec2 depthRange = texelFetch(_flw_depthRange, ivec2(gl_FragCoord.xy), 0).rg;
-    float delta = depthRange.x + depthRange.y;
-    float depth = (linearDepth + depthRange.x) / delta;
-
-    return depth - tented_blue_noise(depth) * _flw_blueNoiseFactor;
-}
-
 
 #else
 

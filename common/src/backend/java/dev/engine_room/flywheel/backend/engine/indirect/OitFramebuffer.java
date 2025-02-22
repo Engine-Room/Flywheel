@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL46;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import dev.engine_room.flywheel.backend.NoiseTextures;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
 import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
@@ -63,6 +64,14 @@ public class OitFramebuffer {
 		Samplers.DEPTH_RANGE.makeActive();
 		GlStateManager._bindTexture(depthBounds);
 
+		Samplers.NOISE.makeActive();
+		NoiseTextures.BLUE_NOISE.bind();
+
+		NoiseTextures.BLUE_NOISE.setFilter(true, false);
+		GL46.glTextureParameteri(NoiseTextures.BLUE_NOISE.getId(), GL32.GL_TEXTURE_WRAP_S, GL32.GL_REPEAT);
+		GL46.glTextureParameteri(NoiseTextures.BLUE_NOISE.getId(), GL32.GL_TEXTURE_WRAP_T, GL32.GL_REPEAT);
+
+
 		GL46.glNamedFramebufferDrawBuffers(fbo, new int[]{GL46.GL_COLOR_ATTACHMENT1, GL46.GL_COLOR_ATTACHMENT2, GL46.GL_COLOR_ATTACHMENT3, GL46.GL_COLOR_ATTACHMENT4});
 
 		GL46.glClearNamedFramebufferfv(fbo, GL46.GL_COLOR, 0, new float[]{0, 0, 0, 0});
@@ -85,8 +94,10 @@ public class OitFramebuffer {
 
 		Samplers.COEFFICIENTS.makeActive();
 		GlStateManager._bindTexture(0);
-
 		GL46.glBindTextureUnit(Samplers.COEFFICIENTS.number, coefficients);
+
+		Samplers.NOISE.makeActive();
+		NoiseTextures.BLUE_NOISE.bind();
 
 		GL46.glNamedFramebufferDrawBuffers(fbo, new int[]{GL46.GL_COLOR_ATTACHMENT5});
 

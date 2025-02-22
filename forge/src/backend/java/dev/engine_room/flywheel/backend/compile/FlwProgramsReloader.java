@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.backend.compile;
 
+import dev.engine_room.flywheel.backend.NoiseTextures;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
@@ -12,5 +13,6 @@ public final class FlwProgramsReloader implements ResourceManagerReloadListener 
 	@Override
 	public void onResourceManagerReload(ResourceManager manager) {
 		FlwPrograms.reload(manager);
+		NoiseTextures.reload(manager);
 	}
 }
