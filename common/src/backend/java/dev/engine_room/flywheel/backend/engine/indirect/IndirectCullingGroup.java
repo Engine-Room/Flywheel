@@ -221,6 +221,8 @@ public class IndirectCullingGroup<I extends Instance> {
 
 				// Don't need to do this unless the program changes.
 				drawProgram.bind();
+
+				drawProgram.setFloat("_flw_blueNoiseFactor", 0.08f);
 			}
 
 			MaterialRenderState.setupOit(multiDraw.material);

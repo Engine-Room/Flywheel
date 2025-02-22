@@ -21,18 +21,11 @@ flat in uvec2 _flw_ids;
 
 #define TRANSPARENCY_WAVELET_RANK 3
 #define TRANSPARENCY_WAVELET_COEFFICIENT_COUNT 16
-#define floatN float
-#define all(e) (e)
-#define mad fma
-#define lerp mix
-#define Coefficients_Out vec4[4]
-#define Coefficients_In sampler2DArray
+#define REMOVE_SIGNAL true
 
 layout (binding = 7) uniform sampler2D _flw_depthRange;
 
 layout (binding = 8) uniform sampler2DArray _flw_coefficients;
-
-#define REMOVE_SIGNAL true
 
 #ifdef _FLW_DEPTH_RANGE
 
@@ -49,11 +42,11 @@ layout (location = 1) out vec4 _flw_coeffs1;
 layout (location = 2) out vec4 _flw_coeffs2;
 layout (location = 3) out vec4 _flw_coeffs3;
 
-void add_to_index(inout Coefficients_Out coefficients, uint index, floatN addend) {
+void add_to_index(inout vec4[4] coefficients, uint index, float addend) {
     coefficients[index >> 2][index & 3u] = addend;
 }
 
-void add_event_to_wavelets(inout Coefficients_Out coefficients, floatN signal, float depth)
+void add_event_to_wavelets(inout vec4[4] coefficients, float signal, float depth)
 {
     depth *= float(TRANSPARENCY_WAVELET_COEFFICIENT_COUNT-1) / TRANSPARENCY_WAVELET_COEFFICIENT_COUNT;
 
@@ -68,17 +61,17 @@ void add_event_to_wavelets(inout Coefficients_Out coefficients, floatN signal, f
 
         int wavelet_sign = ((index & 1) << 1) - 1;
         float wavelet_phase = ((index + 1) & 1) * exp2(-power);
-        floatN addend = mad(mad(-exp2(-power), k, depth), wavelet_sign, wavelet_phase) * exp2(power * 0.5) * signal;
+        float addend = fma(fma(-exp2(-power), k, depth), wavelet_sign, wavelet_phase) * exp2(power * 0.5) * signal;
         add_to_index(coefficients, new_index, addend);
 
         index = new_index;
     }
 
-        floatN addend = mad(signal, -depth, signal);
+    float addend = fma(signal, -depth, signal);
     add_to_index(coefficients, TRANSPARENCY_WAVELET_COEFFICIENT_COUNT - 1, addend);
 }
 
-void add_transmittance_event_to_wavelets(inout Coefficients_Out coefficients, floatN transmittance, float depth)
+void add_transmittance_event_to_wavelets(inout vec4[4] coefficients, float transmittance, float depth)
 {
     float absorbance = -log(max(transmittance, 0.00001));// transforming the signal from multiplicative transmittance to additive absorbance
     add_event_to_wavelets(coefficients, absorbance, depth);
@@ -91,24 +84,25 @@ void add_transmittance_event_to_wavelets(inout Coefficients_Out coefficients, fl
 layout (location = 0) out vec4 _flw_accumulate;
 
 
-floatN get_coefficients(in Coefficients_In coefficients, uint index) {
+float get_coefficients(in sampler2DArray coefficients, uint index) {
     return texelFetch(coefficients, ivec3(gl_FragCoord.xy, index >> 2), 0)[index & 3u];
 }
 
-    floatN evaluate_wavelets(in Coefficients_In coefficients, float depth, floatN signal)
+float evaluate_wavelets(in sampler2DArray coefficients, float depth, float signal)
 {
-    floatN scale_coefficient = get_coefficients(coefficients, TRANSPARENCY_WAVELET_COEFFICIENT_COUNT - 1);
-    if (all(scale_coefficient == 0))
+    float scale_coefficient = get_coefficients(coefficients, TRANSPARENCY_WAVELET_COEFFICIENT_COUNT - 1);
+    if (scale_coefficient == 0)
     {
         return 0;
     }
-    if (REMOVE_SIGNAL)
-    {
-        floatN scale_coefficient_addend = mad(signal, -depth, signal);
-        scale_coefficient -= scale_coefficient_addend;
-    }
 
     depth *= float(TRANSPARENCY_WAVELET_COEFFICIENT_COUNT-1) / TRANSPARENCY_WAVELET_COEFFICIENT_COUNT;
+
+    if (REMOVE_SIGNAL)
+    {
+        float scale_coefficient_addend = fma(signal, -depth, signal);
+        scale_coefficient -= scale_coefficient_addend;
+    }
 
     float coefficient_depth = depth * TRANSPARENCY_WAVELET_COEFFICIENT_COUNT;
     int index_b = clamp(int(floor(coefficient_depth)), 0, TRANSPARENCY_WAVELET_COEFFICIENT_COUNT - 1);
@@ -118,8 +112,8 @@ floatN get_coefficients(in Coefficients_In coefficients, uint index) {
     index_b += TRANSPARENCY_WAVELET_COEFFICIENT_COUNT - 1;
     index_a += TRANSPARENCY_WAVELET_COEFFICIENT_COUNT - 1;
 
-    floatN b = scale_coefficient;
-floatN a = sample_a ? scale_coefficient : 0;
+    float b = scale_coefficient;
+    float a = sample_a ? scale_coefficient : 0;
 
     for (int i = 0; i < (TRANSPARENCY_WAVELET_RANK+1); ++i)
     {
@@ -127,12 +121,12 @@ floatN a = sample_a ? scale_coefficient : 0;
 
         int new_index_b = (index_b - 1) >> 1;
         int wavelet_sign_b = ((index_b & 1) << 1) - 1;
-        floatN coeff_b = get_coefficients(coefficients, new_index_b);
+        float coeff_b = get_coefficients(coefficients, new_index_b);
         if (REMOVE_SIGNAL)
         {
             float wavelet_phase_b = ((index_b + 1) & 1) * exp2(-power);
             float k = float((new_index_b + 1) & ((1 << power) - 1));
-            floatN addend = mad(mad(-exp2(-power), k, depth), wavelet_sign_b, wavelet_phase_b) * exp2(power * 0.5) * signal;
+            float addend = fma(fma(-exp2(-power), k, depth), wavelet_sign_b, wavelet_phase_b) * exp2(power * 0.5) * signal;
             coeff_b -= addend;
         }
         b -= exp2(float(power) * 0.5) * coeff_b * wavelet_sign_b;
@@ -142,7 +136,7 @@ floatN a = sample_a ? scale_coefficient : 0;
         {
             int new_index_a = (index_a - 1) >> 1;
             int wavelet_sign_a = ((index_a & 1) << 1) - 1;
-            floatN coeff_a = (new_index_a == new_index_b) ? coeff_b : get_coefficients(coefficients, new_index_a);// No addend here on purpose, the original signal didn't contribute to this coefficient
+            float coeff_a = (new_index_a == new_index_b) ? coeff_b : get_coefficients(coefficients, new_index_a);// No addend here on purpose, the original signal didn't contribute to this coefficient
             a -= exp2(float(power) * 0.5) * coeff_a * wavelet_sign_a;
             index_a = new_index_a;
         }
@@ -150,12 +144,12 @@ floatN a = sample_a ? scale_coefficient : 0;
 
     float t = coefficient_depth >= TRANSPARENCY_WAVELET_COEFFICIENT_COUNT ? 1.0 : fract(coefficient_depth);
 
-    return lerp(a, b, t);
+    return mix(a, b, t);
 }
 
-    floatN evaluate_transmittance_wavelets(in Coefficients_In coefficients, float depth, floatN signal)
+float evaluate_transmittance_wavelets(in sampler2DArray coefficients, float depth, float signal)
 {
-    floatN absorbance = evaluate_wavelets(coefficients, depth, signal);
+    float absorbance = evaluate_wavelets(coefficients, depth, signal);
     return clamp(exp(-absorbance), 0., 1.);// undoing the transformation from absorbance back to transmittance
 }
 
@@ -201,9 +195,9 @@ float blue() {
     return mask;
 }
 
-uniform vec3 _flw_depthAdjust;
+uniform float _flw_blueNoiseFactor = 0.08;
 
-float adjust_depth(float normalizedDepth) {
+float tented_blue_noise(float normalizedDepth) {
 
     float tentIn = abs(normalizedDepth * 2. - 1);
     float tentIn2 = tentIn * tentIn;
@@ -212,7 +206,7 @@ float adjust_depth(float normalizedDepth) {
 
     float b = blue();
 
-    return normalizedDepth - b * tent * 0.08;
+    return b * tent;
 }
 
 float linearize_depth(float d, float zNear, float zFar) {
@@ -228,9 +222,10 @@ float depth() {
     float linearDepth = linear_depth();
 
     vec2 depthRange = texelFetch(_flw_depthRange, ivec2(gl_FragCoord.xy), 0).rg;
-    float depth = (linearDepth + depthRange.x) / (depthRange.x + depthRange.y);
+    float delta = depthRange.x + depthRange.y;
+    float depth = (linearDepth + depthRange.x) / delta;
 
-    return adjust_depth(depth);
+    return depth - tented_blue_noise(depth) * _flw_blueNoiseFactor;
 }
 
 
@@ -335,7 +330,7 @@ void _flw_main() {
 
     #ifdef _FLW_COLLECT_COEFFS
 
-    Coefficients_Out result;
+    vec4[4] result;
     result[0] = vec4(0.);
     result[1] = vec4(0.);
     result[2] = vec4(0.);
@@ -352,7 +347,7 @@ void _flw_main() {
 
     #ifdef _FLW_EVALUATE
 
-    floatN transmittance = evaluate_transmittance_wavelets(_flw_coefficients, depth(), 1. - color.a);
+    float transmittance = evaluate_transmittance_wavelets(_flw_coefficients, depth(), 1. - color.a);
 
     _flw_accumulate = vec4(color.rgb * color.a, color.a) * transmittance;
 
