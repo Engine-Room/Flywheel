@@ -85,19 +85,23 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	public void render(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
 		super.render(lightStorage, environmentStorage);
 
-		for (var group : cullingGroups.values()) {
-			group.flushInstancers();
-		}
-
+		// Flush instance counts, page mappings, and prune empty groups.
 		cullingGroups.values()
-				.removeIf(IndirectCullingGroup::checkEmptyAndDelete);
+				.removeIf(IndirectCullingGroup::flushInstancers);
 
+		// Instancers may have been emptied in the above call, now remove them here.
 		instancers.values()
 				.removeIf(instancer -> instancer.instanceCount() == 0);
 
 		meshPool.flush();
 
 		stagingBuffer.reclaim();
+
+		// Genuinely nothing to do, we can just early out.
+		// Still process the mesh pool and reclaim fenced staging regions though.
+		if (cullingGroups.isEmpty()) {
+			return;
+		}
 
 		lightBuffers.flush(stagingBuffer, lightStorage);
 
@@ -146,32 +150,43 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.submitSolid();
 		}
 
-		oitFramebuffer.prepare();
-
-		oitFramebuffer.depthRange();
-
+		// Let's avoid invoking the oit chain if we don't have anything to do
+		boolean useOit = false;
 		for (var group : cullingGroups.values()) {
-			group.submitTransparent(PipelineCompiler.OitMode.DEPTH_RANGE);
+			if (group.hasOitDraws()) {
+				useOit = true;
+				break;
+			}
 		}
 
-		oitFramebuffer.renderTransmittance();
+		if (useOit) {
+			oitFramebuffer.prepare();
 
-		for (var group : cullingGroups.values()) {
-			group.submitTransparent(PipelineCompiler.OitMode.GENERATE_COEFFICIENTS);
+			oitFramebuffer.depthRange();
+
+			for (var group : cullingGroups.values()) {
+				group.submitTransparent(PipelineCompiler.OitMode.DEPTH_RANGE);
+			}
+
+			oitFramebuffer.renderTransmittance();
+
+			for (var group : cullingGroups.values()) {
+				group.submitTransparent(PipelineCompiler.OitMode.GENERATE_COEFFICIENTS);
+			}
+
+			oitFramebuffer.renderDepthFromTransmittance();
+
+			// Need to bind this again because we just drew a full screen quad for OIT.
+			vertexArray.bindForDraw();
+
+			oitFramebuffer.shade();
+
+			for (var group : cullingGroups.values()) {
+				group.submitTransparent(PipelineCompiler.OitMode.EVALUATE);
+			}
+
+			oitFramebuffer.composite();
 		}
-
-		oitFramebuffer.renderDepthFromTransmittance();
-
-		// Need to bind this again because we just drew a full screen quad for OIT.
-		vertexArray.bindForDraw();
-
-		oitFramebuffer.shade();
-
-		for (var group : cullingGroups.values()) {
-			group.submitTransparent(PipelineCompiler.OitMode.EVALUATE);
-		}
-
-		oitFramebuffer.composite();
 
 		MaterialRenderState.reset();
 		TextureBinder.resetLightAndOverlay();
