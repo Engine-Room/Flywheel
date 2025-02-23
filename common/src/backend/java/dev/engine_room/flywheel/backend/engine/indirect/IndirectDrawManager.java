@@ -158,9 +158,9 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.submitTransparent(PipelineCompiler.OitMode.GENERATE_COEFFICIENTS);
 		}
 
-		//		wboitFrameBuffer.adjustBackgroundForTotalTransmittance();
+		wboitFrameBuffer.renderDepth();
 
-		//		vertexArray.bindForDraw();
+		vertexArray.bindForDraw();
 
 		wboitFrameBuffer.shade();
 

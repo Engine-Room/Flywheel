@@ -34,6 +34,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 	private static final ResourceLocation FULLSCREEN = Flywheel.rl("internal/indirect/fullscreen.vert");
 	private static final ResourceLocation OIT_COMPOSITE = Flywheel.rl("internal/indirect/oit_composite.frag");
+	private static final ResourceLocation OIT_DEPTH = Flywheel.rl("internal/indirect/oit_depth.frag");
 
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private static final Compile<ResourceLocation> UTIL = new Compile<>();
@@ -138,6 +139,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 				.link(UTIL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.FRAGMENT)
 						.nameMapper(rl -> "fullscreen/" + ResourceUtil.toDebugFileNameNoExtension(rl))
 						.withResource(s -> s))
+				.postLink((key, program) -> Uniforms.setUniformBlockBindings(program))
 				.harness("fullscreen", sources);
 	}
 
@@ -190,6 +192,10 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 	public GlProgram getOitCompositeProgram() {
 		return fullscreen.get(OIT_COMPOSITE);
+	}
+
+	public GlProgram getOitDepthProgram() {
+		return fullscreen.get(OIT_DEPTH);
 	}
 
 	@Override

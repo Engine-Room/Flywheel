@@ -14,13 +14,13 @@ import net.minecraft.client.Minecraft;
 
 public class OitFramebuffer {
 
-	public final int fbo;
 	private final IndirectPrograms programs;
 	private final int vao;
 
-	public int depthBounds;
-	public int coefficients;
-	public int accumulate;
+	public int fbo = -1;
+	public int depthBounds = -1;
+	public int coefficients = -1;
+	public int accumulate = -1;
 
 	private int lastWidth = -1;
 	private int lastHeight = -1;
@@ -39,6 +39,7 @@ public class OitFramebuffer {
 
 		// No depth writes, but we'll still use the depth test
 		RenderSystem.depthMask(false);
+		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
 		RenderSystem.blendEquation(GL46.GL_MAX);
@@ -57,6 +58,7 @@ public class OitFramebuffer {
 	public void renderTransmittance() {
 		// No depth writes, but we'll still use the depth test
 		RenderSystem.depthMask(false);
+		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
 		RenderSystem.blendEquation(GL46.GL_FUNC_ADD);
@@ -85,6 +87,7 @@ public class OitFramebuffer {
 	public void shade() {
 		// No depth writes, but we'll still use the depth test
 		RenderSystem.depthMask(false);
+		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
 		RenderSystem.blendEquation(GL46.GL_FUNC_ADD);
@@ -106,9 +109,34 @@ public class OitFramebuffer {
 		GlStateManager._glBindFramebuffer(GL46.GL_FRAMEBUFFER, fbo);
 	}
 
+	public void renderDepth() {
+		// No depth writes, but we'll still use the depth test
+		RenderSystem.depthMask(true);
+		RenderSystem.colorMask(false, false, false, false);
+		RenderSystem.disableBlend();
+
+		Samplers.COEFFICIENTS.makeActive();
+		GlStateManager._bindTexture(0);
+		GL46.glBindTextureUnit(0, coefficients);
+
+		Samplers.DEPTH_RANGE.makeActive();
+		GlStateManager._bindTexture(depthBounds);
+
+		GL46.glNamedFramebufferDrawBuffers(fbo, new int[]{});
+
+		programs.getOitDepthProgram()
+				.bind();
+
+		// Empty VAO, the actual full screen triangle is generated in the vertex shader
+		GlStateManager._glBindVertexArray(vao);
+
+		GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, 3);
+	}
+
 	public void composite() {
 		// No depth writes, but we'll still use the depth test
 		RenderSystem.depthMask(false);
+		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.DestFactor.SRC_ALPHA);
 		RenderSystem.blendEquation(GL46.GL_FUNC_ADD);
@@ -141,9 +169,15 @@ public class OitFramebuffer {
 	}
 
 	private void deleteTextures() {
-		GL46.glDeleteTextures(depthBounds);
-		GL46.glDeleteTextures(coefficients);
-		GL46.glDeleteTextures(accumulate);
+		if (depthBounds != -1) {
+			GL46.glDeleteTextures(depthBounds);
+		}
+		if (coefficients != -1) {
+			GL46.glDeleteTextures(coefficients);
+		}
+		if (accumulate != -1) {
+			GL46.glDeleteTextures(accumulate);
+		}
 	}
 
 	private void createTextures(int width, int height) {
