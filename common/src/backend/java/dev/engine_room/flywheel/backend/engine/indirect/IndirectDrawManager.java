@@ -49,7 +49,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 	private final DepthPyramid depthPyramid;
 
-	private final OitFramebuffer wboitFrameBuffer;
+	private final OitFramebuffer oitFramebuffer;
 
 	public IndirectDrawManager(IndirectPrograms programs) {
 		this.programs = programs;
@@ -66,7 +66,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		depthPyramid = new DepthPyramid(programs);
 
-		wboitFrameBuffer = new OitFramebuffer(programs);
+		oitFramebuffer = new OitFramebuffer(programs);
 	}
 
 	@Override
@@ -146,29 +146,32 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.submitSolid();
 		}
 
-		wboitFrameBuffer.depthRange();
+		oitFramebuffer.prepare();
+
+		oitFramebuffer.depthRange();
 
 		for (var group : cullingGroups.values()) {
 			group.submitTransparent(PipelineCompiler.OitMode.DEPTH_RANGE);
 		}
 
-		wboitFrameBuffer.renderTransmittance();
+		oitFramebuffer.renderTransmittance();
 
 		for (var group : cullingGroups.values()) {
 			group.submitTransparent(PipelineCompiler.OitMode.GENERATE_COEFFICIENTS);
 		}
 
-		wboitFrameBuffer.renderDepth();
+		oitFramebuffer.renderDepth();
 
+		// Need to bind this again because we just drew a full screen quad for OIT.
 		vertexArray.bindForDraw();
 
-		wboitFrameBuffer.shade();
+		oitFramebuffer.shade();
 
 		for (var group : cullingGroups.values()) {
 			group.submitTransparent(PipelineCompiler.OitMode.EVALUATE);
 		}
 
-		wboitFrameBuffer.composite();
+		oitFramebuffer.composite();
 
 		MaterialRenderState.reset();
 		TextureBinder.resetLightAndOverlay();

@@ -116,6 +116,9 @@ public final class FrameUniforms extends UniformWriter {
 
 		ptr = writeInt(ptr, debugMode);
 
+		// OIT noise factor
+		ptr = writeFloat(ptr, 0.07f);
+
 		firstWrite = false;
 		BUFFER.markDirty();
 	}

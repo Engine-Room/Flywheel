@@ -27,9 +27,6 @@ layout (binding = 8) uniform sampler2DArray _flw_coefficients;
 
 layout (binding = 9) uniform sampler2D _flw_blueNoise;
 
-
-uniform float _flw_blueNoiseFactor = 0.08;
-
 float tented_blue_noise(float normalizedDepth) {
 
     float tentIn = abs(normalizedDepth * 2. - 1);
@@ -53,7 +50,7 @@ float depth() {
     float delta = depthRange.x + depthRange.y;
     float depth = (linearDepth + depthRange.x) / delta;
 
-    return depth - tented_blue_noise(depth) * _flw_blueNoiseFactor;
+    return depth - tented_blue_noise(depth) * _flw_oitNoise;
 }
 
 #ifdef _FLW_DEPTH_RANGE

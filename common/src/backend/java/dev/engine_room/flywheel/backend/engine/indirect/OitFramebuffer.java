@@ -13,7 +13,6 @@ import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
 import net.minecraft.client.Minecraft;
 
 public class OitFramebuffer {
-
 	private final IndirectPrograms programs;
 	private final int vao;
 
@@ -27,24 +26,31 @@ public class OitFramebuffer {
 
 	public OitFramebuffer(IndirectPrograms programs) {
 		this.programs = programs;
-		fbo = GL46.glCreateFramebuffers();
 		vao = GL46.glCreateVertexArrays();
 	}
 
-	public void depthRange() {
+	/**
+	 * Set up the framebuffer.
+	 */
+	public void prepare() {
 		var mainRenderTarget = Minecraft.getInstance()
 				.getMainRenderTarget();
 
-		createTextures(mainRenderTarget.width, mainRenderTarget.height);
+		maybeResizeFBO(mainRenderTarget.width, mainRenderTarget.height);
 
+		GL46.glNamedFramebufferTexture(fbo, GL46.GL_DEPTH_ATTACHMENT, mainRenderTarget.getDepthTextureId(), 0);
+	}
+
+	/**
+	 * Render out the min and max depth per fragment.
+	 */
+	public void depthRange() {
 		// No depth writes, but we'll still use the depth test
 		RenderSystem.depthMask(false);
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
 		RenderSystem.blendEquation(GL46.GL_MAX);
-
-		GL46.glNamedFramebufferTexture(fbo, GL46.GL_DEPTH_ATTACHMENT, mainRenderTarget.getDepthTextureId(), 0);
 
 		GL46.glNamedFramebufferDrawBuffers(fbo, new int[]{GL46.GL_COLOR_ATTACHMENT0});
 
@@ -55,6 +61,9 @@ public class OitFramebuffer {
 		GlStateManager._glBindFramebuffer(GL46.GL_FRAMEBUFFER, fbo);
 	}
 
+	/**
+	 * Generate the coefficients to the transmittance function.
+	 */
 	public void renderTransmittance() {
 		// No depth writes, but we'll still use the depth test
 		RenderSystem.depthMask(false);
@@ -69,11 +78,6 @@ public class OitFramebuffer {
 		Samplers.NOISE.makeActive();
 		NoiseTextures.BLUE_NOISE.bind();
 
-		NoiseTextures.BLUE_NOISE.setFilter(true, false);
-		GL46.glTextureParameteri(NoiseTextures.BLUE_NOISE.getId(), GL32.GL_TEXTURE_WRAP_S, GL32.GL_REPEAT);
-		GL46.glTextureParameteri(NoiseTextures.BLUE_NOISE.getId(), GL32.GL_TEXTURE_WRAP_T, GL32.GL_REPEAT);
-
-
 		GL46.glNamedFramebufferDrawBuffers(fbo, new int[]{GL46.GL_COLOR_ATTACHMENT1, GL46.GL_COLOR_ATTACHMENT2, GL46.GL_COLOR_ATTACHMENT3, GL46.GL_COLOR_ATTACHMENT4});
 
 		GL46.glClearNamedFramebufferfv(fbo, GL46.GL_COLOR, 0, new float[]{0, 0, 0, 0});
@@ -84,6 +88,34 @@ public class OitFramebuffer {
 		GlStateManager._glBindFramebuffer(GL46.GL_FRAMEBUFFER, fbo);
 	}
 
+	/**
+	 * If any fragment has its transmittance fall off to zero, search the transmittance
+	 * function to determine at what depth that occurs and write out to the depth buffer.
+	 */
+	public void renderDepth() {
+		// No depth writes, but we'll still use the depth test
+		RenderSystem.depthMask(true);
+		RenderSystem.colorMask(false, false, false, false);
+		RenderSystem.disableBlend();
+
+		Samplers.COEFFICIENTS.makeActive();
+		RenderSystem.bindTexture(0);
+		GL46.glBindTextureUnit(0, coefficients);
+
+		Samplers.DEPTH_RANGE.makeActive();
+		RenderSystem.bindTexture(depthBounds);
+
+		GL46.glNamedFramebufferDrawBuffers(fbo, new int[]{});
+
+		programs.getOitDepthProgram()
+				.bind();
+
+		drawFullscreenQuad();
+	}
+
+	/**
+	 * Sample the transmittance function and accumulate.
+	 */
 	public void shade() {
 		// No depth writes, but we'll still use the depth test
 		RenderSystem.depthMask(false);
@@ -109,30 +141,9 @@ public class OitFramebuffer {
 		GlStateManager._glBindFramebuffer(GL46.GL_FRAMEBUFFER, fbo);
 	}
 
-	public void renderDepth() {
-		// No depth writes, but we'll still use the depth test
-		RenderSystem.depthMask(true);
-		RenderSystem.colorMask(false, false, false, false);
-		RenderSystem.disableBlend();
-
-		Samplers.COEFFICIENTS.makeActive();
-		GlStateManager._bindTexture(0);
-		GL46.glBindTextureUnit(0, coefficients);
-
-		Samplers.DEPTH_RANGE.makeActive();
-		GlStateManager._bindTexture(depthBounds);
-
-		GL46.glNamedFramebufferDrawBuffers(fbo, new int[]{});
-
-		programs.getOitDepthProgram()
-				.bind();
-
-		// Empty VAO, the actual full screen triangle is generated in the vertex shader
-		GlStateManager._glBindVertexArray(vao);
-
-		GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, 3);
-	}
-
+	/**
+	 * Composite the accumulated luminance onto the main framebuffer.
+	 */
 	public void composite() {
 		// No depth writes, but we'll still use the depth test
 		RenderSystem.depthMask(false);
@@ -147,25 +158,28 @@ public class OitFramebuffer {
 		mainRenderTarget.bindWrite(false);
 
 		GlTextureUnit.T0.makeActive();
-		GlStateManager._bindTexture(0);
+		RenderSystem.bindTexture(0);
 		GL46.glBindTextureUnit(0, coefficients);
 
 		GlTextureUnit.T1.makeActive();
-		GlStateManager._bindTexture(accumulate);
+		RenderSystem.bindTexture(accumulate);
 
 		programs.getOitCompositeProgram()
 				.bind();
 
-		// Empty VAO, the actual full screen triangle is generated in the vertex shader
-		GlStateManager._glBindVertexArray(vao);
-
-		GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, 3);
+		drawFullscreenQuad();
 	}
 
 	public void delete() {
 		deleteTextures();
-		GL46.glDeleteFramebuffers(fbo);
 		GL46.glDeleteVertexArrays(vao);
+	}
+
+	private void drawFullscreenQuad() {
+		// Empty VAO, the actual full screen triangle is generated in the vertex shader
+		GlStateManager._glBindVertexArray(vao);
+
+		GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, 3);
 	}
 
 	private void deleteTextures() {
@@ -178,9 +192,19 @@ public class OitFramebuffer {
 		if (accumulate != -1) {
 			GL46.glDeleteTextures(accumulate);
 		}
+		if (fbo != -1) {
+			GL46.glDeleteFramebuffers(fbo);
+		}
+
+		// We sometimes get the same texture ID back when creating new textures,
+		// so bind zero to clear the GlStateManager
+		Samplers.COEFFICIENTS.makeActive();
+		RenderSystem.bindTexture(0);
+		Samplers.DEPTH_RANGE.makeActive();
+		RenderSystem.bindTexture(0);
 	}
 
-	private void createTextures(int width, int height) {
+	private void maybeResizeFBO(int width, int height) {
 		if (lastWidth == width && lastHeight == height) {
 			return;
 		}
@@ -190,13 +214,14 @@ public class OitFramebuffer {
 
 		deleteTextures();
 
+		fbo = GL46.glCreateFramebuffers();
+
 		depthBounds = GL46.glCreateTextures(GL46.GL_TEXTURE_2D);
 		coefficients = GL46.glCreateTextures(GL46.GL_TEXTURE_2D_ARRAY);
 		accumulate = GL46.glCreateTextures(GL46.GL_TEXTURE_2D);
 
 		GL46.glTextureStorage2D(depthBounds, 1, GL32.GL_RG32F, width, height);
 		GL46.glTextureStorage3D(coefficients, 1, GL32.GL_RGBA16F, width, height, 4);
-
 		GL46.glTextureStorage2D(accumulate, 1, GL32.GL_RGBA16F, width, height);
 
 		//		for (int tex : new int[]{zerothMoment, moments, composite}) {

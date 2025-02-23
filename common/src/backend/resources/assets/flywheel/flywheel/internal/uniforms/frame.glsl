@@ -62,6 +62,8 @@ layout(std140) uniform _FlwFrameUniforms {
     uint flw_cameraInBlock;
 
     uint _flw_debugMode;
+
+    float _flw_oitNoise;
 };
 
 #define flw_renderOrigin (_flw_renderOrigin.xyz)
