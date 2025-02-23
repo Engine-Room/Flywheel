@@ -160,7 +160,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.submitTransparent(PipelineCompiler.OitMode.GENERATE_COEFFICIENTS);
 		}
 
-		oitFramebuffer.renderDepth();
+		oitFramebuffer.renderDepthFromTransmittance();
 
 		// Need to bind this again because we just drew a full screen quad for OIT.
 		vertexArray.bindForDraw();
@@ -198,6 +198,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		lightBuffers.delete();
 
 		matrixBuffer.delete();
+
+		oitFramebuffer.delete();
 	}
 
 	public void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks) {
