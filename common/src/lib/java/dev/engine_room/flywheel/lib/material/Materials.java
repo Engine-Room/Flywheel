@@ -32,20 +32,20 @@ public final class Materials {
 			.build();
 
 	public static final Material TRANSLUCENT_BLOCK = SimpleMaterial.builder()
-			.transparency(Transparency.TRANSLUCENT)
+			.transparency(Transparency.ORDER_INDEPENDENT)
 			.build();
 	public static final Material TRANSLUCENT_UNSHADED_BLOCK = SimpleMaterial.builder()
-			.transparency(Transparency.TRANSLUCENT)
+			.transparency(Transparency.ORDER_INDEPENDENT)
 			.diffuse(false)
 			.build();
 
 	public static final Material TRIPWIRE_BLOCK = SimpleMaterial.builder()
 			.cutout(CutoutShaders.ONE_TENTH)
-			.transparency(Transparency.TRANSLUCENT)
+			.transparency(Transparency.ORDER_INDEPENDENT)
 			.build();
 	public static final Material TRIPWIRE_UNSHADED_BLOCK = SimpleMaterial.builder()
 			.cutout(CutoutShaders.ONE_TENTH)
-			.transparency(Transparency.TRANSLUCENT)
+			.transparency(Transparency.ORDER_INDEPENDENT)
 			.diffuse(false)
 			.build();
 

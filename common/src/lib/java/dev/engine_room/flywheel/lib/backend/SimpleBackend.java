@@ -11,10 +11,10 @@ import net.minecraft.world.level.LevelAccessor;
 
 public final class SimpleBackend implements Backend {
 	private final Function<LevelAccessor, Engine> engineFactory;
-	private final int priority;
+	private final PriorityProvider priority;
 	private final BooleanSupplier isSupported;
 
-	public SimpleBackend(int priority, Function<LevelAccessor, Engine> engineFactory, BooleanSupplier isSupported) {
+	public SimpleBackend(PriorityProvider priority, Function<LevelAccessor, Engine> engineFactory, BooleanSupplier isSupported) {
 		this.priority = priority;
 		this.engineFactory = engineFactory;
 		this.isSupported = isSupported;
@@ -31,7 +31,7 @@ public final class SimpleBackend implements Backend {
 
 	@Override
 	public int priority() {
-		return priority;
+		return priority.get();
 	}
 
 	@Override
@@ -39,9 +39,13 @@ public final class SimpleBackend implements Backend {
 		return isSupported.getAsBoolean();
 	}
 
+	public interface PriorityProvider {
+		int get();
+	}
+
 	public static final class Builder {
 		private Function<LevelAccessor, Engine> engineFactory;
-		private int priority = 0;
+		private PriorityProvider priority = () -> 0;
 		private BooleanSupplier isSupported;
 
 		public Builder engineFactory(Function<LevelAccessor, Engine> engineFactory) {
@@ -50,6 +54,10 @@ public final class SimpleBackend implements Backend {
 		}
 
 		public Builder priority(int priority) {
+			return priority(() -> priority);
+		}
+
+		public Builder priority(PriorityProvider priority) {
 			this.priority = priority;
 			return this;
 		}
