@@ -14,7 +14,6 @@ import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
 import dev.engine_room.flywheel.lib.util.LevelAttached;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.util.ResourceReloadHolder;
-import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraftforge.api.distmarker.Dist;
@@ -33,8 +32,6 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
 
 @Mod(Flywheel.ID)
 public final class FlywheelForge {
@@ -96,16 +93,11 @@ public final class FlywheelForge {
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> BackendManagerImpl.onEndClientResourceReload(e.error().isPresent()));
 
 		modEventBus.addListener((FMLCommonSetupEvent e) -> {
+			// We can't register anything to BuiltInRegistries.COMMAND_ARGUMENT_TYPE because it is a synced registry but
+			// Flywheel is a client-side only mod.
 			ArgumentTypeInfos.registerByClass(BackendArgument.class, BackendArgument.INFO);
 			ArgumentTypeInfos.registerByClass(DebugModeArgument.class, DebugModeArgument.INFO);
 			ArgumentTypeInfos.registerByClass(LightSmoothnessArgument.class, LightSmoothnessArgument.INFO);
-		});
-		modEventBus.addListener((RegisterEvent e) -> {
-			if (e.getRegistryKey().equals(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES)) {
-				e.register(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, ResourceUtil.rl("backend"), () -> BackendArgument.INFO);
-				e.register(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, ResourceUtil.rl("debug_mode"), () -> DebugModeArgument.INFO);
-				e.register(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, ResourceUtil.rl("light_smoothness"), () -> LightSmoothnessArgument.INFO);
-			}
 		});
 	}
 

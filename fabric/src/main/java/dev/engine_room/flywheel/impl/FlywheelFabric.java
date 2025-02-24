@@ -7,17 +7,16 @@ import dev.engine_room.flywheel.api.event.EndClientResourceReloadCallback;
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererCallback;
 import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
+import dev.engine_room.flywheel.impl.mixin.fabric.ArgumentTypeInfosAccessor;
 import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
 import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.util.ResourceReloadHolder;
-import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
-import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -61,9 +60,12 @@ public final class FlywheelFabric implements ClientModInitializer {
 		EndClientResourceReloadCallback.EVENT.register((minecraft, resourceManager, initialReload, error) ->
 				BackendManagerImpl.onEndClientResourceReload(error.isPresent()));
 
-		ArgumentTypeRegistry.registerArgumentType(ResourceUtil.rl("backend"), BackendArgument.class, BackendArgument.INFO);
-		ArgumentTypeRegistry.registerArgumentType(ResourceUtil.rl("debug_mode"), DebugModeArgument.class, DebugModeArgument.INFO);
-		ArgumentTypeRegistry.registerArgumentType(ResourceUtil.rl("light_smoothness"), LightSmoothnessArgument.class, LightSmoothnessArgument.INFO);
+		// We can't use ArgumentTypeRegistry from Fabric API here as it also registers to BuiltInRegistries.COMMAND_ARGUMENT_TYPE.
+		// We can't register anything to BuiltInRegistries.COMMAND_ARGUMENT_TYPE because it is a synced registry but
+		// Flywheel is a client-side only mod.
+		ArgumentTypeInfosAccessor.getBY_CLASS().put(BackendArgument.class, BackendArgument.INFO);
+		ArgumentTypeInfosAccessor.getBY_CLASS().put(DebugModeArgument.class, DebugModeArgument.INFO);
+		ArgumentTypeInfosAccessor.getBY_CLASS().put(LightSmoothnessArgument.class, LightSmoothnessArgument.INFO);
 	}
 
 	private static void setupLib() {
