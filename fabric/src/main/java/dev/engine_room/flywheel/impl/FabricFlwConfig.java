@@ -38,8 +38,8 @@ public class FabricFlwConfig implements FlwConfig {
 
 	private final File file;
 
-	// Don't actually default to off, we'll find the true default in #load
 	public Backend backend = BackendManager.offBackend();
+	public boolean useDefaultBackend = true;
 	public boolean limitUpdates = LIMIT_UPDATES_DEFAULT;
 	public int workerThreads = WORKER_THREADS_DEFAULT;
 
@@ -51,6 +51,10 @@ public class FabricFlwConfig implements FlwConfig {
 
 	@Override
 	public Backend backend() {
+		if (useDefaultBackend) {
+			return BackendManager.defaultBackend();
+		}
+
 		return backend;
 	}
 
@@ -70,10 +74,6 @@ public class FabricFlwConfig implements FlwConfig {
 	}
 
 	public void load() {
-		// Grab the default backend here because this object is constructed
-		// very early in flywheel loading and not all backends may be registered
-		backend = BackendManager.defaultBackend();
-
 		if (file.exists()) {
 			try (FileReader reader = new FileReader(file)) {
 				fromJson(JsonParser.parseReader(reader));
@@ -96,7 +96,8 @@ public class FabricFlwConfig implements FlwConfig {
 	public void fromJson(JsonElement json) {
 		if (!(json instanceof JsonObject object)) {
 			FlwImpl.CONFIG_LOGGER.warn("Config JSON must be an object");
-			backend = BackendManager.defaultBackend();
+			backend = BackendManager.offBackend();
+			useDefaultBackend = true;
 			limitUpdates = LIMIT_UPDATES_DEFAULT;
 			workerThreads = WORKER_THREADS_DEFAULT;
 			return;
@@ -114,8 +115,15 @@ public class FabricFlwConfig implements FlwConfig {
 
 		if (backendJson instanceof JsonPrimitive primitive && primitive.isString()) {
 			var value = primitive.getAsString();
+			if (value.equals(DEFAULT_BACKEND_STR)) {
+				backend = BackendManager.offBackend();
+				useDefaultBackend = true;
+				return;
+			}
+
 			try {
-				this.backend = Backend.REGISTRY.getOrThrow(new ResourceLocation(value));
+				backend = Backend.REGISTRY.getOrThrow(new ResourceLocation(value));
+				useDefaultBackend = false;
 				return;
 			} catch (ResourceLocationException e) {
 				msg = "'backend' value '" + value + "' is not a valid resource location";
@@ -133,7 +141,8 @@ public class FabricFlwConfig implements FlwConfig {
 		if (msg != null) {
 			FlwImpl.CONFIG_LOGGER.warn(msg);
 		}
-		backend = BackendManager.defaultBackend();
+		backend = BackendManager.offBackend();
+		useDefaultBackend = true;
 	}
 
 	private void readLimitUpdates(JsonObject object) {
@@ -181,7 +190,7 @@ public class FabricFlwConfig implements FlwConfig {
 
 	public JsonObject toJson() {
 		JsonObject object = new JsonObject();
-		object.addProperty("backend", Backend.REGISTRY.getIdOrThrow(backend).toString());
+		object.addProperty("backend", useDefaultBackend ? DEFAULT_BACKEND_STR : Backend.REGISTRY.getIdOrThrow(backend).toString());
 		object.addProperty("limitUpdates", limitUpdates);
 		object.addProperty("workerThreads", workerThreads);
 		object.add("flw_backends", backendConfig.toJson());
