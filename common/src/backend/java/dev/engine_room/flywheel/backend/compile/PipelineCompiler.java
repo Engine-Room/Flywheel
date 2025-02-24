@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.material.LightShader;
 import dev.engine_room.flywheel.api.material.Material;
@@ -40,8 +39,8 @@ public final class PipelineCompiler {
 	private static UberShaderComponent FOG;
 	private static UberShaderComponent CUTOUT;
 
-	private static final ResourceLocation API_IMPL_VERT = Flywheel.rl("internal/api_impl.vert");
-	private static final ResourceLocation API_IMPL_FRAG = Flywheel.rl("internal/api_impl.frag");
+	private static final ResourceLocation API_IMPL_VERT = ResourceUtil.rl("internal/api_impl.vert");
+	private static final ResourceLocation API_IMPL_FRAG = ResourceUtil.rl("internal/api_impl.frag");
 
 	private final CompilationHarness<PipelineProgramKey> harness;
 
@@ -184,7 +183,7 @@ public final class PipelineCompiler {
 	}
 
 	public static void createFogComponent() {
-		FOG = UberShaderComponent.builder(Flywheel.rl("fog"))
+		FOG = UberShaderComponent.builder(ResourceUtil.rl("fog"))
 				.materialSources(MaterialShaderIndices.fogSources()
 						.all())
 				.adapt(FnSignature.create()
@@ -197,7 +196,7 @@ public final class PipelineCompiler {
 	}
 
 	private static void createCutoutComponent() {
-		CUTOUT = UberShaderComponent.builder(Flywheel.rl("cutout"))
+		CUTOUT = UberShaderComponent.builder(ResourceUtil.rl("cutout"))
 				.materialSources(MaterialShaderIndices.cutoutSources()
 						.all())
 				.adapt(FnSignature.create()

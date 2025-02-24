@@ -36,7 +36,7 @@ class MeshEmitter {
 		return bufferBuilder;
 	}
 
-	void prepareForGeometry(boolean shade) {
+	private void prepareForGeometry(boolean shade) {
 		if (!bufferBuilder.building()) {
 			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 		} else if (shade != currentShade) {
@@ -47,7 +47,7 @@ class MeshEmitter {
 		currentShade = shade;
 	}
 
-	void emit() {
+	private void emit() {
 		var renderedBuffer = bufferBuilder.endOrDiscardIfEmpty();
 
 		if (renderedBuffer != null) {

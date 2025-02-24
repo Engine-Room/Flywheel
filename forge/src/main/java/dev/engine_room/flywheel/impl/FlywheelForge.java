@@ -14,6 +14,7 @@ import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
 import dev.engine_room.flywheel.lib.util.LevelAttached;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.util.ResourceReloadHolder;
+import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraftforge.api.distmarker.Dist;
@@ -101,9 +102,9 @@ public final class FlywheelForge {
 		});
 		modEventBus.addListener((RegisterEvent e) -> {
 			if (e.getRegistryKey().equals(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES)) {
-				e.register(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, Flywheel.rl("backend"), () -> BackendArgument.INFO);
-				e.register(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, Flywheel.rl("debug_mode"), () -> DebugModeArgument.INFO);
-				e.register(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, Flywheel.rl("light_smoothness"), () -> LightSmoothnessArgument.INFO);
+				e.register(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, ResourceUtil.rl("backend"), () -> BackendArgument.INFO);
+				e.register(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, ResourceUtil.rl("debug_mode"), () -> DebugModeArgument.INFO);
+				e.register(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, ResourceUtil.rl("light_smoothness"), () -> LightSmoothnessArgument.INFO);
 			}
 		});
 	}

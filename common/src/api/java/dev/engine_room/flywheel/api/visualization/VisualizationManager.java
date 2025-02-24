@@ -5,7 +5,7 @@ import java.util.SortedSet;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import dev.engine_room.flywheel.api.RenderContext;
+import dev.engine_room.flywheel.api.backend.RenderContext;
 import dev.engine_room.flywheel.api.internal.FlwApiLink;
 import dev.engine_room.flywheel.api.visual.Effect;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;

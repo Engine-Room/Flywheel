@@ -2,7 +2,6 @@ package dev.engine_room.flywheel.backend.compile.component;
 
 import java.util.ArrayList;
 
-import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.layout.Layout;
 import dev.engine_room.flywheel.backend.glsl.generate.FnSignature;
@@ -11,6 +10,7 @@ import dev.engine_room.flywheel.backend.glsl.generate.GlslBuilder;
 import dev.engine_room.flywheel.backend.glsl.generate.GlslExpr;
 import dev.engine_room.flywheel.backend.glsl.generate.GlslStmt;
 import dev.engine_room.flywheel.lib.math.MoreMath;
+import dev.engine_room.flywheel.lib.util.ResourceUtil;
 
 public class BufferTextureInstanceComponent extends InstanceAssemblerComponent {
 	private static final String[] SWIZZLE_SELECTORS = { "x", "y", "z", "w" };
@@ -21,7 +21,7 @@ public class BufferTextureInstanceComponent extends InstanceAssemblerComponent {
 
 	@Override
 	public String name() {
-		return Flywheel.rl("buffer_texture_instance_assembler").toString();
+		return ResourceUtil.rl("buffer_texture_instance_assembler").toString();
 	}
 
 	@Override

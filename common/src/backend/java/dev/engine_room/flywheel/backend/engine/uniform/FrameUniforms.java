@@ -6,7 +6,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
 
-import dev.engine_room.flywheel.api.RenderContext;
+import dev.engine_room.flywheel.api.backend.RenderContext;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.backend.engine.indirect.DepthPyramid;
 import dev.engine_room.flywheel.backend.mixin.LevelRendererAccessor;

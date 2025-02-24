@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.backend.engine.uniform;
 
 import org.joml.Vector3f;
 
-import dev.engine_room.flywheel.api.RenderContext;
+import dev.engine_room.flywheel.api.backend.RenderContext;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;

@@ -6,7 +6,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
-import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.backend.compile.component.InstanceStructComponent;
@@ -25,12 +24,12 @@ import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.resources.ResourceLocation;
 
 public class IndirectPrograms extends AtomicReferenceCounted {
-	private static final ResourceLocation CULL_SHADER_API_IMPL = Flywheel.rl("internal/indirect/cull_api_impl.glsl");
-	private static final ResourceLocation CULL_SHADER_MAIN = Flywheel.rl("internal/indirect/cull.glsl");
-	private static final ResourceLocation APPLY_SHADER_MAIN = Flywheel.rl("internal/indirect/apply.glsl");
-	private static final ResourceLocation SCATTER_SHADER_MAIN = Flywheel.rl("internal/indirect/scatter.glsl");
-	private static final ResourceLocation DOWNSAMPLE_FIRST = Flywheel.rl("internal/indirect/downsample_first.glsl");
-	private static final ResourceLocation DOWNSAMPLE_SECOND = Flywheel.rl("internal/indirect/downsample_second.glsl");
+	private static final ResourceLocation CULL_SHADER_API_IMPL = ResourceUtil.rl("internal/indirect/cull_api_impl.glsl");
+	private static final ResourceLocation CULL_SHADER_MAIN = ResourceUtil.rl("internal/indirect/cull.glsl");
+	private static final ResourceLocation APPLY_SHADER_MAIN = ResourceUtil.rl("internal/indirect/apply.glsl");
+	private static final ResourceLocation SCATTER_SHADER_MAIN = ResourceUtil.rl("internal/indirect/scatter.glsl");
+	private static final ResourceLocation DOWNSAMPLE_FIRST = ResourceUtil.rl("internal/indirect/downsample_first.glsl");
+	private static final ResourceLocation DOWNSAMPLE_SECOND = ResourceUtil.rl("internal/indirect/downsample_second.glsl");
 	public static final List<ResourceLocation> UTIL_SHADERS = List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN, DOWNSAMPLE_FIRST, DOWNSAMPLE_SECOND);
 
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();

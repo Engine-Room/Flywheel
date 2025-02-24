@@ -11,6 +11,7 @@ import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
 import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.util.ResourceReloadHolder;
+import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
@@ -60,9 +61,9 @@ public final class FlywheelFabric implements ClientModInitializer {
 		EndClientResourceReloadCallback.EVENT.register((minecraft, resourceManager, initialReload, error) ->
 				BackendManagerImpl.onEndClientResourceReload(error.isPresent()));
 
-		ArgumentTypeRegistry.registerArgumentType(Flywheel.rl("backend"), BackendArgument.class, BackendArgument.INFO);
-		ArgumentTypeRegistry.registerArgumentType(Flywheel.rl("debug_mode"), DebugModeArgument.class, DebugModeArgument.INFO);
-		ArgumentTypeRegistry.registerArgumentType(Flywheel.rl("light_smoothness"), LightSmoothnessArgument.class, LightSmoothnessArgument.INFO);
+		ArgumentTypeRegistry.registerArgumentType(ResourceUtil.rl("backend"), BackendArgument.class, BackendArgument.INFO);
+		ArgumentTypeRegistry.registerArgumentType(ResourceUtil.rl("debug_mode"), DebugModeArgument.class, DebugModeArgument.INFO);
+		ArgumentTypeRegistry.registerArgumentType(ResourceUtil.rl("light_smoothness"), LightSmoothnessArgument.class, LightSmoothnessArgument.INFO);
 	}
 
 	private static void setupLib() {

@@ -1,6 +1,5 @@
 package dev.engine_room.flywheel.backend;
 
-import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
 import dev.engine_room.flywheel.backend.compile.InstancingPrograms;
@@ -10,6 +9,7 @@ import dev.engine_room.flywheel.backend.engine.instancing.InstancedDrawManager;
 import dev.engine_room.flywheel.backend.gl.Driver;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.lib.backend.SimpleBackend;
+import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import dev.engine_room.flywheel.lib.util.ShadersModHelper;
 
 public final class Backends {
@@ -20,7 +20,7 @@ public final class Backends {
 			.engineFactory(level -> new EngineImpl(level, new InstancedDrawManager(InstancingPrograms.get()), 256))
 			.priority(500)
 			.supported(() -> GlCompat.SUPPORTS_INSTANCING && InstancingPrograms.allLoaded() && !ShadersModHelper.isShaderPackInUse())
-			.register(Flywheel.rl("instancing"));
+			.register(ResourceUtil.rl("instancing"));
 
 	/**
 	 * Use Compute shaders to cull instances.
@@ -38,7 +38,7 @@ public final class Backends {
 				}
 			})
 			.supported(() -> GlCompat.SUPPORTS_INDIRECT && IndirectPrograms.allLoaded() && !ShadersModHelper.isShaderPackInUse())
-			.register(Flywheel.rl("indirect"));
+			.register(ResourceUtil.rl("indirect"));
 
 	private Backends() {
 	}

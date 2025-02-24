@@ -15,6 +15,10 @@ public final class ResourceUtil {
 	private ResourceUtil() {
 	}
 
+	public static ResourceLocation rl(String path) {
+		return new ResourceLocation(Flywheel.ID, path);
+	}
+
 	/**
 	 * Same as {@link ResourceLocation#ResourceLocation(String)}, but defaults to Flywheel namespace.
 	 */
