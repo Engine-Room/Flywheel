@@ -179,7 +179,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			// Need to bind this again because we just drew a full screen quad for OIT.
 			vertexArray.bindForDraw();
 
-			oitFramebuffer.shade();
+			oitFramebuffer.accumulate();
 
 			for (var group : cullingGroups.values()) {
 				group.submitTransparent(PipelineCompiler.OitMode.EVALUATE);

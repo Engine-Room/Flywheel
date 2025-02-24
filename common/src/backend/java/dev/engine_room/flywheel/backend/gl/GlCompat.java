@@ -39,6 +39,8 @@ public final class GlCompat {
 	public static final boolean ALLOW_DSA = true;
 	public static final GlslVersion MAX_GLSL_VERSION = maxGlslVersion();
 
+	public static final boolean SUPPORTS_DSA = ALLOW_DSA && isDsaSupported();
+
 	public static final boolean SUPPORTS_INSTANCING = isInstancingSupported();
 	public static final boolean SUPPORTS_INDIRECT = isIndirectSupported();
 
@@ -163,6 +165,14 @@ public final class GlCompat {
 				&& CAPABILITIES.GL_ARB_shader_storage_buffer_object
 				&& CAPABILITIES.GL_ARB_shading_language_420pack
 				&& CAPABILITIES.GL_ARB_vertex_attrib_binding;
+	}
+
+	private static boolean isDsaSupported() {
+		if (CAPABILITIES == null) {
+			return false;
+		}
+
+		return CAPABILITIES.GL_ARB_direct_state_access;
 	}
 
 	/**
