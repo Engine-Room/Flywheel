@@ -32,10 +32,6 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	private static final ResourceLocation DOWNSAMPLE_FIRST = Flywheel.rl("internal/indirect/downsample_first.glsl");
 	private static final ResourceLocation DOWNSAMPLE_SECOND = Flywheel.rl("internal/indirect/downsample_second.glsl");
 
-	private static final ResourceLocation FULLSCREEN = Flywheel.rl("internal/indirect/fullscreen.vert");
-	private static final ResourceLocation OIT_COMPOSITE = Flywheel.rl("internal/indirect/oit_composite.frag");
-	private static final ResourceLocation OIT_DEPTH = Flywheel.rl("internal/indirect/oit_depth.frag");
-
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private static final Compile<ResourceLocation> UTIL = new Compile<>();
 
@@ -48,13 +44,13 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	private final PipelineCompiler pipeline;
 	private final CompilationHarness<InstanceType<?>> culling;
 	private final CompilationHarness<ResourceLocation> utils;
-	private final CompilationHarness<ResourceLocation> fullscreen;
+	private final OitPrograms oitPrograms;
 
-	private IndirectPrograms(PipelineCompiler pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<ResourceLocation> utils, CompilationHarness<ResourceLocation> fullscreen) {
+	private IndirectPrograms(PipelineCompiler pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<ResourceLocation> utils, OitPrograms oitPrograms) {
 		this.pipeline = pipeline;
 		this.culling = culling;
 		this.utils = utils;
-		this.fullscreen = fullscreen;
+		this.oitPrograms = oitPrograms;
 	}
 
 	private static List<String> getExtensions(GlslVersion glslVersion) {
@@ -64,9 +60,11 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		}
 		if (glslVersion.compareTo(GlslVersion.V420) < 0) {
 			extensions.add("GL_ARB_shading_language_420pack");
+			extensions.add("GL_ARB_shader_image_load_store");
 		}
 		if (glslVersion.compareTo(GlslVersion.V430) < 0) {
 			extensions.add("GL_ARB_shader_storage_buffer_object");
+			extensions.add("GL_ARB_shader_image_size");
 		}
 		if (glslVersion.compareTo(GlslVersion.V460) < 0) {
 			extensions.add("GL_ARB_shader_draw_parameters");
@@ -93,7 +91,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, vertexComponents, fragmentComponents, EXTENSIONS);
 		var cullingCompiler = createCullingCompiler(sources);
 		var utilCompiler = createUtilCompiler(sources);
-		var fullscreenCompiler = createFullscreenCompiler(sources);
+		var fullscreenCompiler = OitPrograms.createFullscreenCompiler(sources);
 
 		IndirectPrograms newInstance = new IndirectPrograms(pipelineCompiler, cullingCompiler, utilCompiler, fullscreenCompiler);
 
@@ -129,18 +127,6 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(s -> s))
 				.harness("utilities", sources);
-	}
-
-	private static CompilationHarness<ResourceLocation> createFullscreenCompiler(ShaderSources sources) {
-		return UTIL.program()
-				.link(UTIL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.VERTEX)
-						.nameMapper($ -> "fullscreen/fullscreen")
-						.withResource(FULLSCREEN))
-				.link(UTIL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.FRAGMENT)
-						.nameMapper(rl -> "fullscreen/" + ResourceUtil.toDebugFileNameNoExtension(rl))
-						.withResource(s -> s))
-				.postLink((key, program) -> Uniforms.setUniformBlockBindings(program))
-				.harness("fullscreen", sources);
 	}
 
 	static void setInstance(@Nullable IndirectPrograms newInstance) {
@@ -190,12 +176,8 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		return utils.get(DOWNSAMPLE_SECOND);
 	}
 
-	public GlProgram getOitCompositeProgram() {
-		return fullscreen.get(OIT_COMPOSITE);
-	}
-
-	public GlProgram getOitDepthProgram() {
-		return fullscreen.get(OIT_DEPTH);
+	public OitPrograms oitPrograms() {
+		return oitPrograms;
 	}
 
 	@Override
@@ -203,6 +185,6 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		pipeline.delete();
 		culling.delete();
 		utils.delete();
-		fullscreen.delete();
+		oitPrograms.delete();
 	}
 }

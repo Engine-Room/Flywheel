@@ -1,13 +1,12 @@
 #define TRANSPARENCY_WAVELET_RANK 3
 #define TRANSPARENCY_WAVELET_COEFFICIENT_COUNT 16
 
-
 // -------------------------------------------------------------------------
 // WRITING
 // -------------------------------------------------------------------------
 
-void add_to_index(inout vec4[4] coefficients, uint index, float addend) {
-    coefficients[index >> 2][index & 3u] = addend;
+void add_to_index(inout vec4[4] coefficients, int index, float addend) {
+    coefficients[index >> 2][index & 3] = addend;
 }
 
 void add_absorbance(inout vec4[4] coefficients, float signal, float depth) {
@@ -43,8 +42,8 @@ void add_transmittance(inout vec4[4] coefficients, float transmittance, float de
 // -------------------------------------------------------------------------
 
 // TODO: maybe we could reduce the number of texel fetches below?
-float get_coefficients(in sampler2DArray coefficients, uint index) {
-    return texelFetch(coefficients, ivec3(gl_FragCoord.xy, index >> 2), 0)[index & 3u];
+float get_coefficients(in sampler2DArray coefficients, int index) {
+    return texelFetch(coefficients, ivec3(gl_FragCoord.xy, index >> 2), 0)[index & 3];
 }
 
 /// Compute the total absorbance, as if at infinite depth.

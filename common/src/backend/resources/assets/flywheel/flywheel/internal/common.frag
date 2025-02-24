@@ -21,11 +21,11 @@ flat in uvec2 _flw_ids;
 
 #ifdef _FLW_OIT
 
-layout (binding = 7) uniform sampler2D _flw_depthRange;
+uniform sampler2D _flw_depthRange;
 
-layout (binding = 8) uniform sampler2DArray _flw_coefficients;
+uniform sampler2DArray _flw_coefficients;
 
-layout (binding = 9) uniform sampler2D _flw_blueNoise;
+uniform sampler2D _flw_blueNoise;
 
 float tented_blue_noise(float normalizedDepth) {
 
@@ -55,22 +55,22 @@ float depth() {
 
 #ifdef _FLW_DEPTH_RANGE
 
-layout (location = 0) out vec2 _flw_depthRange_out;
+out vec2 _flw_depthRange_out;
 
 #endif
 
 #ifdef _FLW_COLLECT_COEFFS
 
-layout (location = 0) out vec4 _flw_coeffs0;
-layout (location = 1) out vec4 _flw_coeffs1;
-layout (location = 2) out vec4 _flw_coeffs2;
-layout (location = 3) out vec4 _flw_coeffs3;
+out vec4 _flw_coeffs0;
+out vec4 _flw_coeffs1;
+out vec4 _flw_coeffs2;
+out vec4 _flw_coeffs3;
 
 #endif
 
 #ifdef _FLW_EVALUATE
 
-layout (location = 0) out vec4 _flw_accumulate;
+out vec4 _flw_accumulate;
 
 #endif
 

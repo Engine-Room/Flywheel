@@ -163,8 +163,7 @@ public final class GlCompat {
 				&& CAPABILITIES.GL_ARB_multi_draw_indirect
 				&& CAPABILITIES.GL_ARB_shader_draw_parameters
 				&& CAPABILITIES.GL_ARB_shader_storage_buffer_object
-				&& CAPABILITIES.GL_ARB_shading_language_420pack
-				&& CAPABILITIES.GL_ARB_vertex_attrib_binding;
+				&& CAPABILITIES.GL_ARB_shading_language_420pack && CAPABILITIES.GL_ARB_vertex_attrib_binding && CAPABILITIES.GL_ARB_shader_image_load_store && CAPABILITIES.GL_ARB_shader_image_size;
 	}
 
 	private static boolean isDsaSupported() {

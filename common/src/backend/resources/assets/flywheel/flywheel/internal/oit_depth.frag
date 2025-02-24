@@ -2,9 +2,9 @@
 #include "flywheel:internal/wavelet.glsl"
 #include "flywheel:internal/depth.glsl"
 
-layout (binding = 7) uniform sampler2D _flw_depthRange;
+uniform sampler2D _flw_depthRange;
 
-layout (binding = 8) uniform sampler2DArray _flw_coefficients;
+uniform sampler2DArray _flw_coefficients;
 
 float eye_depth_from_normalized_transparency_depth(float tDepth) {
     vec2 depthRange = texelFetch(_flw_depthRange, ivec2(gl_FragCoord.xy), 0).rg;

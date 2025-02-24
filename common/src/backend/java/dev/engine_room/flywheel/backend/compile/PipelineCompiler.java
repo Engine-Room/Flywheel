@@ -24,6 +24,7 @@ import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.backend.gl.shader.ShaderType;
+import dev.engine_room.flywheel.backend.glsl.GlslVersion;
 import dev.engine_room.flywheel.backend.glsl.ShaderSources;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 import dev.engine_room.flywheel.backend.glsl.generate.FnSignature;
@@ -96,6 +97,12 @@ public final class PipelineCompiler {
 							return "pipeline/" + pipeline.compilerMarker() + "/" + instance + "/" + material + "_" + context + debug;
 						})
 						.requireExtensions(extensions)
+						.onCompile((rl, compilation) -> {
+							if (GlCompat.MAX_GLSL_VERSION.compareTo(GlslVersion.V400) < 0 && !extensions.contains("GL_ARB_gpu_shader5")) {
+								// Only define fma if it wouldn't be declared by gpu shader 5
+								compilation.define("fma(a, b, c) ((a) * (b) + (c))");
+							}
+						})
 						.onCompile((key, comp) -> key.contextShader()
 								.onCompile(comp))
 						.onCompile((key, comp) -> BackendConfig.INSTANCE.lightSmoothness()
@@ -133,6 +140,12 @@ public final class PipelineCompiler {
 						})
 						.requireExtensions(extensions)
 						.enableExtension("GL_ARB_conservative_depth")
+						.onCompile((rl, compilation) -> {
+							if (GlCompat.MAX_GLSL_VERSION.compareTo(GlslVersion.V400) < 0 && !extensions.contains("GL_ARB_gpu_shader5")) {
+								// Only define fma if it wouldn't be declared by gpu shader 5
+								compilation.define("fma(a, b, c) ((a) * (b) + (c))");
+							}
+						})
 						.onCompile((key, comp) -> key.contextShader()
 								.onCompile(comp))
 						.onCompile((key, comp) -> BackendConfig.INSTANCE.lightSmoothness()
@@ -178,6 +191,9 @@ public final class PipelineCompiler {
 					program.setSamplerBinding("flw_diffuseTex", Samplers.DIFFUSE);
 					program.setSamplerBinding("flw_overlayTex", Samplers.OVERLAY);
 					program.setSamplerBinding("flw_lightTex", Samplers.LIGHT);
+					program.setSamplerBinding("_flw_depthRange", Samplers.DEPTH_RANGE);
+					program.setSamplerBinding("_flw_coefficients", Samplers.COEFFICIENTS);
+					program.setSamplerBinding("_flw_blueNoise", Samplers.NOISE);
 					pipeline.onLink()
 							.accept(program);
 					key.contextShader()

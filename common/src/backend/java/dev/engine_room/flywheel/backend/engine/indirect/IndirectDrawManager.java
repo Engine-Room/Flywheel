@@ -66,7 +66,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		depthPyramid = new DepthPyramid(programs);
 
-		oitFramebuffer = new OitFramebuffer(programs);
+		oitFramebuffer = new OitFramebuffer(programs.oitPrograms());
 	}
 
 	@Override

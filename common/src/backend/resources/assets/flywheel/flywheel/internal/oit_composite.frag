@@ -2,11 +2,11 @@
 #include "flywheel:internal/depth.glsl"
 #include "flywheel:internal/uniforms/frame.glsl"
 
-layout (location = 0) out vec4 frag;
+out vec4 frag;
 
-layout (binding = 0) uniform sampler2D _flw_accumulate;
-layout (binding = 7) uniform sampler2D _flw_depthRange;
-layout (binding = 8) uniform sampler2DArray _flw_coefficients;
+uniform sampler2D _flw_accumulate;
+uniform sampler2D _flw_depthRange;
+uniform sampler2DArray _flw_coefficients;
 
 void main() {
     vec4 texel = texelFetch(_flw_accumulate, ivec2(gl_FragCoord.xy), 0);

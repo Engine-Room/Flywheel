@@ -9,7 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.engine_room.flywheel.backend.NoiseTextures;
 import dev.engine_room.flywheel.backend.Samplers;
-import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
+import dev.engine_room.flywheel.backend.compile.OitPrograms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
 import net.minecraft.client.Minecraft;
@@ -21,7 +21,7 @@ public class OitFramebuffer {
 	public static final int[] ACCUMULATE_DRAW_BUFFERS = {GL46.GL_COLOR_ATTACHMENT5};
 	public static final int[] DEPTH_ONLY_DRAW_BUFFERS = {};
 
-	private final IndirectPrograms programs;
+	private final OitPrograms programs;
 	private final int vao;
 
 	public int fbo = -1;
@@ -32,7 +32,7 @@ public class OitFramebuffer {
 	private int lastWidth = -1;
 	private int lastHeight = -1;
 
-	public OitFramebuffer(IndirectPrograms programs) {
+	public OitFramebuffer(OitPrograms programs) {
 		this.programs = programs;
 		if (GlCompat.SUPPORTS_DSA) {
 			vao = GL46.glCreateVertexArrays();
