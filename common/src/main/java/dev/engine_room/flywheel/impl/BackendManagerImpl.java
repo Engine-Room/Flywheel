@@ -2,10 +2,10 @@ package dev.engine_room.flywheel.impl;
 
 import java.util.ArrayList;
 
-import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.impl.visualization.VisualizationManagerImpl;
 import dev.engine_room.flywheel.lib.backend.SimpleBackend;
+import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
 
@@ -15,7 +15,7 @@ public final class BackendManagerImpl {
 				throw new UnsupportedOperationException("Cannot create engine when backend is off.");
 			})
 			.supported(() -> true)
-			.register(Flywheel.rl("off"));
+			.register(ResourceUtil.rl("off"));
 
 	private static Backend backend = OFF_BACKEND;
 

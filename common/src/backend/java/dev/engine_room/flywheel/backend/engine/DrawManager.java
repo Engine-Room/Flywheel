@@ -12,13 +12,12 @@ import org.jetbrains.annotations.Nullable;
 
 import com.mojang.datafixers.util.Pair;
 
-import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.api.backend.Engine;
+import dev.engine_room.flywheel.api.backend.RenderContext;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.task.Plan;
-import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.FlwBackend;
 import dev.engine_room.flywheel.backend.engine.embed.Environment;
 import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
@@ -39,12 +38,12 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 	/**
 	 * A list of instancers that have not yet been initialized.
 	 * <br>
-	 * All new instancers land here before having resources allocated in {@link #flush}.
+	 * All new instancers land here before having resources allocated in {@link #render}.
 	 */
 	protected final Queue<UninitializedInstancer<N, ?>> initializationQueue = new ConcurrentLinkedQueue<>();
 
-	public <I extends Instance> AbstractInstancer<I> getInstancer(Environment environment, InstanceType<I> type, Model model, VisualType visualType, int bias) {
-		return getInstancer(new InstancerKey<>(environment, type, model, visualType, bias));
+	public <I extends Instance> AbstractInstancer<I> getInstancer(Environment environment, InstanceType<I> type, Model model, int bias) {
+		return getInstancer(new InstancerKey<>(environment, type, model, bias));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -57,7 +56,7 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 		return ForEachPlan.of(() -> new ArrayList<>(instancers.values()), AbstractInstancer::parallelUpdate);
 	}
 
-	public void flush(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
+	public void render(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
 		// Thread safety: flush is called from the render thread after all visual updates have been made,
 		// so there are no:tm: threads we could be racing with.
 		for (var init : initializationQueue) {
@@ -75,8 +74,6 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 		instancers.values()
 				.forEach(AbstractInstancer::clear);
 	}
-
-	public abstract void render(VisualType visualType);
 
 	public abstract void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks);
 

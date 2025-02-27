@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.backend.glsl.ShaderSources;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 import dev.engine_room.flywheel.backend.glsl.SourceFile;
@@ -19,6 +18,7 @@ import dev.engine_room.flywheel.backend.glsl.generate.GlslBlock;
 import dev.engine_room.flywheel.backend.glsl.generate.GlslBuilder;
 import dev.engine_room.flywheel.backend.glsl.generate.GlslExpr;
 import dev.engine_room.flywheel.backend.glsl.generate.GlslSwitch;
+import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.resources.ResourceLocation;
 
 public class UberShaderComponent implements SourceComponent {
@@ -40,7 +40,7 @@ public class UberShaderComponent implements SourceComponent {
 
 	@Override
 	public String name() {
-		return Flywheel.rl("uber_shader").toString() + " / " + name;
+		return ResourceUtil.rl("uber_shader").toString() + " / " + name;
 	}
 
 	@Override

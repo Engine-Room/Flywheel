@@ -38,6 +38,19 @@ public final class FlwCommands {
 					sendMessage(context.getSource(), Component.translatable("command.flywheel.backend.get", idStr));
 					return Command.SINGLE_SUCCESS;
 				})
+				.then(Commands.literal("DEFAULT")
+					.executes(context -> {
+						backendValue.set(FlwConfig.DEFAULT_BACKEND_STR);
+
+						// Reload renderers so we can report the actual backend.
+						Minecraft.getInstance().levelRenderer.allChanged();
+
+						Backend actualBackend = BackendManager.currentBackend();
+						String actualIdStr = Backend.REGISTRY.getIdOrThrow(actualBackend)
+								.toString();
+						sendMessage(context.getSource(), Component.translatable("command.flywheel.backend.set", actualIdStr));
+						return Command.SINGLE_SUCCESS;
+					}))
 				.then(Commands.argument("id", BackendArgument.INSTANCE)
 					.executes(context -> {
 						Backend requestedBackend = context.getArgument("id", Backend.class);

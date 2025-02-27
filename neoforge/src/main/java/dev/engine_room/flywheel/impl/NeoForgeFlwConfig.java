@@ -29,20 +29,24 @@ public class NeoForgeFlwConfig implements FlwConfig {
 	public Backend backend() {
 		Backend backend = parseBackend(client.backend.get());
 		if (backend == null) {
+			client.backend.set(DEFAULT_BACKEND_STR);
 			backend = BackendManager.defaultBackend();
-			client.backend.set(Backend.REGISTRY.getIdOrThrow(backend).toString());
 		}
 
 		return backend;
 	}
 
 	@Nullable
-	private static Backend parseBackend(String idStr) {
+	private static Backend parseBackend(String value) {
+		if (value.equals(DEFAULT_BACKEND_STR)) {
+			return BackendManager.defaultBackend();
+		}
+
 		ResourceLocation backendId;
 		try {
-			backendId = ResourceLocation.parse(idStr);
+			backendId = ResourceLocation.parse(value);
 		} catch (ResourceLocationException e) {
-			FlwImpl.CONFIG_LOGGER.warn("'backend' value '{}' is not a valid resource location", idStr);
+			FlwImpl.CONFIG_LOGGER.warn("'backend' value '{}' is not a valid resource location", value);
 			return null;
 		}
 
@@ -82,8 +86,8 @@ public class NeoForgeFlwConfig implements FlwConfig {
 		public final NeoForgeBackendConfig backendConfig;
 
 		private ClientConfig(ModConfigSpec.Builder builder) {
-			backend = builder.comment("Select the backend to use.")
-					.define("backend", () -> Backend.REGISTRY.getIdOrThrow(BackendManager.defaultBackend()).toString(), o -> o != null && String.class.isAssignableFrom(o.getClass()));
+			backend = builder.comment("Select the backend to use. Set to \"DEFAULT\" to let Flywheel decide.")
+					.define("backend", DEFAULT_BACKEND_STR);
 
 			limitUpdates = builder.comment("Enable or disable instance update limiting with distance.")
 					.define("limitUpdates", true);
@@ -103,7 +107,7 @@ public class NeoForgeFlwConfig implements FlwConfig {
 		public final ModConfigSpec.EnumValue<LightSmoothness> lightSmoothness;
 
 		public NeoForgeBackendConfig(ModConfigSpec.Builder builder) {
-			lightSmoothness = builder.comment("How smooth flywheel's shader-based lighting should be. May have a large performance impact.")
+			lightSmoothness = builder.comment("How smooth Flywheel's shader-based lighting should be. May have a large performance impact.")
 					.defineEnum("lightSmoothness", LightSmoothness.SMOOTH);
 		}
 

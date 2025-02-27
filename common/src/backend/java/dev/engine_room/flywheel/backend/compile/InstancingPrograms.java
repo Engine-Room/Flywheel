@@ -23,8 +23,11 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 
 	private final PipelineCompiler pipeline;
 
-	private InstancingPrograms(PipelineCompiler pipeline) {
+	private final OitPrograms oitPrograms;
+
+	private InstancingPrograms(PipelineCompiler pipeline, OitPrograms oitPrograms) {
 		this.pipeline = pipeline;
+		this.oitPrograms = oitPrograms;
 	}
 
 	private static List<String> getExtensions(GlslVersion glslVersion) {
@@ -41,7 +44,8 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 		}
 
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INSTANCING, vertexComponents, fragmentComponents, EXTENSIONS);
-		InstancingPrograms newInstance = new InstancingPrograms(pipelineCompiler);
+		var fullscreen = OitPrograms.createFullscreenCompiler(sources);
+		InstancingPrograms newInstance = new InstancingPrograms(pipelineCompiler, fullscreen);
 
 		setInstance(newInstance);
 	}
@@ -69,12 +73,17 @@ public class InstancingPrograms extends AtomicReferenceCounted {
 		setInstance(null);
 	}
 
-	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material) {
-		return pipeline.get(instanceType, contextShader, material);
+	public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material, PipelineCompiler.OitMode mode) {
+		return pipeline.get(instanceType, contextShader, material, mode);
+	}
+
+	public OitPrograms oitPrograms() {
+		return oitPrograms;
 	}
 
 	@Override
 	protected void _delete() {
 		pipeline.delete();
+		oitPrograms.delete();
 	}
 }

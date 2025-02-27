@@ -5,10 +5,8 @@ import java.util.List;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Range;
 
-import dev.engine_room.flywheel.api.RenderContext;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.task.Plan;
-import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.Camera;
@@ -22,14 +20,13 @@ public interface Engine {
 	/**
 	 * Create a visualization context that will be used to create visuals of the given type.
 	 *
-	 * @param visualType The type of visual.
 	 * @return A new visualization context.
 	 */
-	VisualizationContext createVisualizationContext(VisualType visualType);
+	VisualizationContext createVisualizationContext();
 
 	/**
 	 * Create a plan that will start execution after the start of the level render and
-	 * finish execution before {@link #setupRender} is called.
+	 * finish execution before {@link #render} is called.
 	 *
 	 * @return A new plan.
 	 */
@@ -60,32 +57,20 @@ public interface Engine {
 	void onLightUpdate(SectionPos sectionPos, LightLayer layer);
 
 	/**
-	 * Set up rendering for the current level render.
+	 * Render all instances necessary for the given visual type.
 	 *
 	 * <p>This method is guaranteed to be called after
 	 * {@linkplain #createFramePlan() the frame plan} has finished execution and before
-	 * {@link #render} and {@link #renderCrumbling} are called. This method is guaranteed to
-	 * be called on the render thread.
+	 * {@link #renderCrumbling} are called. This method is guaranteed to be called on the render thread.
 	 *
 	 * @param context The context for the current level render.
 	 */
-	void setupRender(RenderContext context);
-
-	/**
-	 * Render all instances necessary for the given visual type.
-	 *
-	 * <p>This method is guaranteed to be called after {@link #setupRender} for the current
-	 * level render. This method is guaranteed to be called on the render thread.
-	 *
-	 * @param context The context for the current level render.
-	 * @param visualType The type of visual.
-	 */
-	void render(RenderContext context, VisualType visualType);
+	void render(RenderContext context);
 
 	/**
 	 * Render the given instances as a crumbling overlay.
 	 *
-	 * <p>This method is guaranteed to be called after {@link #setupRender} for the current
+	 * <p>This method is guaranteed to be called after {@link #render} for the current
 	 * level render. This method is guaranteed to be called on the render thread.
 	 *
 	 * @param context The context for the current level render.

@@ -2,7 +2,6 @@ package dev.engine_room.flywheel.backend.compile.component;
 
 import java.util.ArrayList;
 
-import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.layout.Layout;
 import dev.engine_room.flywheel.backend.engine.indirect.BufferBindings;
@@ -12,6 +11,7 @@ import dev.engine_room.flywheel.backend.glsl.generate.GlslBuilder;
 import dev.engine_room.flywheel.backend.glsl.generate.GlslExpr;
 import dev.engine_room.flywheel.backend.glsl.generate.GlslStmt;
 import dev.engine_room.flywheel.lib.math.MoreMath;
+import dev.engine_room.flywheel.lib.util.ResourceUtil;
 
 public class SsboInstanceComponent extends InstanceAssemblerComponent {
 	public SsboInstanceComponent(InstanceType<?> type) {
@@ -20,7 +20,7 @@ public class SsboInstanceComponent extends InstanceAssemblerComponent {
 
 	@Override
 	public String name() {
-		return Flywheel.rl("ssbo_instance_assembler").toString();
+		return ResourceUtil.rl("ssbo_instance_assembler").toString();
 	}
 
 	@Override

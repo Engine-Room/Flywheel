@@ -3,7 +3,7 @@ package dev.engine_room.flywheel.impl.event;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 
-import dev.engine_room.flywheel.api.RenderContext;
+import dev.engine_room.flywheel.api.backend.RenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;

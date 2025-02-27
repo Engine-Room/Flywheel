@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
 
-import dev.engine_room.flywheel.backend.glsl.parse.Import;
-
 public class TestShaderSourceLoading extends TestBase {
 	@Test
 	void testSimpleFind() {

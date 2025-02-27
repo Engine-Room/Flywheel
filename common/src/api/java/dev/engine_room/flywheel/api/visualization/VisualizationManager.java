@@ -5,7 +5,7 @@ import java.util.SortedSet;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import dev.engine_room.flywheel.api.RenderContext;
+import dev.engine_room.flywheel.api.backend.RenderContext;
 import dev.engine_room.flywheel.api.internal.FlwApiLink;
 import dev.engine_room.flywheel.api.visual.Effect;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -47,14 +47,31 @@ public interface VisualizationManager {
 
 	@ApiStatus.NonExtendable
 	interface RenderDispatcher {
+		/**
+		 * Prepare visuals for render.
+		 *
+		 * <p>Guaranteed to be called before {@link #afterEntities} and {@link #beforeCrumbling}.
+		 * <br>Guaranteed to be called after the render thread has processed all light updates.
+		 * <br>The caller is otherwise free to choose an invocation site, but it is recommended to call
+		 * this as early as possible to give the VisualizationManager time to process things off-thread.
+		 */
 		void onStartLevelRender(RenderContext ctx);
 
-		void afterBlockEntities(RenderContext ctx);
-
+		/**
+		 * Render instances.
+		 *
+		 * <p>Guaranteed to be called after {@link #onStartLevelRender} and before {@link #beforeCrumbling}.
+		 * <br>The caller is otherwise free to choose an invocation site, but it is recommended to call
+		 * this between rendering entities and block entities.
+		 */
 		void afterEntities(RenderContext ctx);
 
+		/**
+		 * Render crumbling block entities.
+		 *
+		 * <p>Guaranteed to be called after {@link #onStartLevelRender} and {@link #afterEntities}
+		 * @param destructionProgress The destruction progress map from {@link net.minecraft.client.renderer.LevelRenderer LevelRenderer}.
+		 */
 		void beforeCrumbling(RenderContext ctx, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress);
-
-		void afterParticles(RenderContext ctx);
 	}
 }

@@ -6,13 +6,14 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
 
-import dev.engine_room.flywheel.api.RenderContext;
+import dev.engine_room.flywheel.api.backend.RenderContext;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.backend.engine.indirect.DepthPyramid;
 import dev.engine_room.flywheel.backend.mixin.LevelRendererAccessor;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.Level;
@@ -116,6 +117,9 @@ public final class FrameUniforms extends UniformWriter {
 
 		ptr = writeInt(ptr, debugMode);
 
+		// OIT noise factor
+		ptr = writeFloat(ptr, 0.07f);
+
 		firstWrite = false;
 		BUFFER.markDirty();
 	}
@@ -195,7 +199,7 @@ public final class FrameUniforms extends UniformWriter {
 		int pyramidHeight = DepthPyramid.mip0Size(mainRenderTarget.height);
 		int pyramidDepth = DepthPyramid.getImageMipLevels(pyramidWidth, pyramidHeight);
 
-		ptr = writeFloat(ptr, 0.05F); // zNear
+		ptr = writeFloat(ptr, GameRenderer.PROJECTION_Z_NEAR); // zNear
 		ptr = writeFloat(ptr, mc.gameRenderer.getDepthFar()); // zFar
 		ptr = writeFloat(ptr, PROJECTION.m00()); // P00
 		ptr = writeFloat(ptr, PROJECTION.m11()); // P11

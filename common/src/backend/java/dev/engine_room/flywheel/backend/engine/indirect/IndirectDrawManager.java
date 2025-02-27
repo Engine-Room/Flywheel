@@ -15,9 +15,9 @@ import java.util.Map;
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
-import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
+import dev.engine_room.flywheel.backend.compile.PipelineCompiler;
 import dev.engine_room.flywheel.backend.engine.AbstractInstancer;
 import dev.engine_room.flywheel.backend.engine.CommonCrumbling;
 import dev.engine_room.flywheel.backend.engine.DrawManager;
@@ -49,7 +49,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 	private final DepthPyramid depthPyramid;
 
-	private boolean needsBarrier = false;
+	private final OitFramebuffer oitFramebuffer;
 
 	public IndirectDrawManager(IndirectPrograms programs) {
 		this.programs = programs;
@@ -65,6 +65,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		matrixBuffer = new MatrixBuffer();
 
 		depthPyramid = new DepthPyramid(programs);
+
+		oitFramebuffer = new OitFramebuffer(programs.oitPrograms());
 	}
 
 	@Override
@@ -79,57 +81,27 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		group.add((IndirectInstancer<I>) instancer, key, meshPool);
 	}
 
-	public boolean hasVisualType(VisualType visualType) {
-		for (var group : cullingGroups.values()) {
-			if (group.hasVisualType(visualType)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public void render(VisualType visualType) {
-		if (!hasVisualType(visualType)) {
-			return;
-		}
-
-		TextureBinder.bindLightAndOverlay();
-
-		vertexArray.bindForDraw();
-		lightBuffers.bind();
-		matrixBuffer.bind();
-		Uniforms.bindAll();
-
-		if (needsBarrier) {
-			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-			needsBarrier = false;
-		}
-
-		for (var group : cullingGroups.values()) {
-			group.submit(visualType);
-		}
-
-		MaterialRenderState.reset();
-		TextureBinder.resetLightAndOverlay();
-	}
-
 	@Override
-	public void flush(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
-		super.flush(lightStorage, environmentStorage);
+	public void render(LightStorage lightStorage, EnvironmentStorage environmentStorage) {
+		super.render(lightStorage, environmentStorage);
 
-		for (var group : cullingGroups.values()) {
-			group.flushInstancers();
-		}
-
+		// Flush instance counts, page mappings, and prune empty groups.
 		cullingGroups.values()
-				.removeIf(IndirectCullingGroup::checkEmptyAndDelete);
+				.removeIf(IndirectCullingGroup::flushInstancers);
 
+		// Instancers may have been emptied in the above call, now remove them here.
 		instancers.values()
 				.removeIf(instancer -> instancer.instanceCount() == 0);
 
 		meshPool.flush();
 
 		stagingBuffer.reclaim();
+
+		// Genuinely nothing to do, we can just early out.
+		// Still process the mesh pool and reclaim fenced staging regions though.
+		if (cullingGroups.isEmpty()) {
+			return;
+		}
 
 		lightBuffers.flush(stagingBuffer, lightStorage);
 
@@ -165,7 +137,59 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.dispatchApply();
 		}
 
-		needsBarrier = true;
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+		TextureBinder.bindLightAndOverlay();
+
+		vertexArray.bindForDraw();
+		lightBuffers.bind();
+		matrixBuffer.bind();
+		Uniforms.bindAll();
+
+		for (var group : cullingGroups.values()) {
+			group.submitSolid();
+		}
+
+		// Let's avoid invoking the oit chain if we don't have anything to do
+		boolean useOit = false;
+		for (var group : cullingGroups.values()) {
+			if (group.hasOitDraws()) {
+				useOit = true;
+				break;
+			}
+		}
+
+		if (useOit) {
+			oitFramebuffer.prepare();
+
+			oitFramebuffer.depthRange();
+
+			for (var group : cullingGroups.values()) {
+				group.submitTransparent(PipelineCompiler.OitMode.DEPTH_RANGE);
+			}
+
+			oitFramebuffer.renderTransmittance();
+
+			for (var group : cullingGroups.values()) {
+				group.submitTransparent(PipelineCompiler.OitMode.GENERATE_COEFFICIENTS);
+			}
+
+			oitFramebuffer.renderDepthFromTransmittance();
+
+			// Need to bind this again because we just drew a full screen quad for OIT.
+			vertexArray.bindForDraw();
+
+			oitFramebuffer.accumulate();
+
+			for (var group : cullingGroups.values()) {
+				group.submitTransparent(PipelineCompiler.OitMode.EVALUATE);
+			}
+
+			oitFramebuffer.composite();
+		}
+
+		MaterialRenderState.reset();
+		TextureBinder.resetLightAndOverlay();
 	}
 
 	@Override
@@ -189,6 +213,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		lightBuffers.delete();
 
 		matrixBuffer.delete();
+
+		oitFramebuffer.delete();
 	}
 
 	public void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks) {

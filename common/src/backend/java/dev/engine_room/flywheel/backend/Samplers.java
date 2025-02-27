@@ -10,4 +10,8 @@ public class Samplers {
 	public static final GlTextureUnit INSTANCE_BUFFER = GlTextureUnit.T4;
 	public static final GlTextureUnit LIGHT_LUT = GlTextureUnit.T5;
 	public static final GlTextureUnit LIGHT_SECTIONS = GlTextureUnit.T6;
+
+	public static final GlTextureUnit DEPTH_RANGE = GlTextureUnit.T7;
+	public static final GlTextureUnit COEFFICIENTS = GlTextureUnit.T8;
+	public static final GlTextureUnit NOISE = GlTextureUnit.T9;
 }

@@ -3,8 +3,8 @@ package dev.engine_room.flywheel.backend.compile.component;
 import java.util.Collection;
 import java.util.Map;
 
-import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
+import dev.engine_room.flywheel.lib.util.ResourceUtil;
 
 public final class StringSubstitutionComponent implements SourceComponent {
 	private final SourceComponent source;
@@ -42,7 +42,7 @@ public final class StringSubstitutionComponent implements SourceComponent {
 
 	@Override
 	public String name() {
-		return Flywheel.rl("string_substitution").toString() + " / " + source.name();
+		return ResourceUtil.rl("string_substitution").toString() + " / " + source.name();
 	}
 
 	@Override

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import dev.engine_room.flywheel.api.Flywheel;
+import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.Minecraft;
@@ -32,7 +32,7 @@ public final class PartialModelEventHandler {
 	public static final class ReloadListener implements SimpleSynchronousResourceReloadListener {
 		public static final ReloadListener INSTANCE = new ReloadListener();
 
-		public static final ResourceLocation ID = Flywheel.rl("partial_models");
+		public static final ResourceLocation ID = ResourceUtil.rl("partial_models");
 		public static final List<ResourceLocation> DEPENDENCIES = List.of(ResourceReloadListenerKeys.MODELS);
 
 		private ReloadListener() {

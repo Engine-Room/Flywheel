@@ -3,7 +3,6 @@ package dev.engine_room.flywheel.backend.engine.indirect;
 import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.api.material.Material;
-import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.engine.MaterialEncoder;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
 import dev.engine_room.flywheel.backend.engine.embed.EmbeddedEnvironment;
@@ -12,7 +11,6 @@ public class IndirectDraw {
 	private final IndirectInstancer<?> instancer;
 	private final Material material;
 	private final MeshPool.PooledMesh mesh;
-	private final VisualType visualType;
 	private final int bias;
 	private final int indexOfMeshInModel;
 
@@ -20,11 +18,10 @@ public class IndirectDraw {
 	private final int packedMaterialProperties;
 	private boolean deleted;
 
-	public IndirectDraw(IndirectInstancer<?> instancer, Material material, MeshPool.PooledMesh mesh, VisualType visualType, int bias, int indexOfMeshInModel) {
+	public IndirectDraw(IndirectInstancer<?> instancer, Material material, MeshPool.PooledMesh mesh, int bias, int indexOfMeshInModel) {
 		this.instancer = instancer;
 		this.material = material;
 		this.mesh = mesh;
-		this.visualType = visualType;
 		this.bias = bias;
 		this.indexOfMeshInModel = indexOfMeshInModel;
 
@@ -48,10 +45,6 @@ public class IndirectDraw {
 
 	public MeshPool.PooledMesh mesh() {
 		return mesh;
-	}
-
-	public VisualType visualType() {
-		return visualType;
 	}
 
 	public int bias() {

@@ -9,8 +9,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.At.Shift;
-import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -83,44 +81,12 @@ abstract class LevelRendererMixin {
 		}
 	}
 
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OutlineBufferSource;endOutlineBatch()V", ordinal = 0))
-	private void flywheel$afterBlockEntities(CallbackInfo ci) {
-		if (flywheel$renderContext != null) {
-			VisualizationManager manager = VisualizationManager.get(level);
-			if (manager != null) {
-				manager.renderDispatcher().afterBlockEntities(flywheel$renderContext);
-			}
-		}
-	}
-
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=destroyProgress"))
 	private void flywheel$beforeRenderCrumbling(CallbackInfo ci) {
 		if (flywheel$renderContext != null) {
 			VisualizationManager manager = VisualizationManager.get(level);
 			if (manager != null) {
 				manager.renderDispatcher().beforeCrumbling(flywheel$renderContext, destructionProgress);
-			}
-		}
-	}
-
-	@Group(name = "afterParticles", min = 2, max = 3)
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V", shift = Shift.AFTER))
-	private void flywheel$afterParticles$fabric(CallbackInfo ci) {
-		if (flywheel$renderContext != null) {
-			VisualizationManager manager = VisualizationManager.get(level);
-			if (manager != null) {
-				manager.renderDispatcher().afterParticles(flywheel$renderContext);
-			}
-		}
-	}
-
-	@Group(name = "afterParticles")
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V", shift = Shift.AFTER))
-	private void flywheel$afterParticles$neoforge(CallbackInfo ci) {
-		if (flywheel$renderContext != null) {
-			VisualizationManager manager = VisualizationManager.get(level);
-			if (manager != null) {
-				manager.renderDispatcher().afterParticles(flywheel$renderContext);
 			}
 		}
 	}

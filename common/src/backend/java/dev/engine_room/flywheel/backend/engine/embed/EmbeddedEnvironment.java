@@ -12,7 +12,6 @@ import dev.engine_room.flywheel.api.instance.Instancer;
 import dev.engine_room.flywheel.api.instance.InstancerProvider;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.visualization.VisualEmbedding;
-import dev.engine_room.flywheel.api.visualization.VisualType;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.engine.EngineImpl;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
@@ -21,7 +20,6 @@ import net.minecraft.core.Vec3i;
 
 public class EmbeddedEnvironment implements VisualEmbedding, Environment {
 	private final EngineImpl engine;
-	private final VisualType visualType;
 	private final Vec3i renderOrigin;
 	@Nullable
 	private final EmbeddedEnvironment parent;
@@ -36,9 +34,8 @@ public class EmbeddedEnvironment implements VisualEmbedding, Environment {
 
 	private boolean deleted = false;
 
-	public EmbeddedEnvironment(EngineImpl engine, VisualType visualType, Vec3i renderOrigin, @Nullable EmbeddedEnvironment parent) {
+	public EmbeddedEnvironment(EngineImpl engine, Vec3i renderOrigin, @Nullable EmbeddedEnvironment parent) {
 		this.engine = engine;
-		this.visualType = visualType;
 		this.renderOrigin = renderOrigin;
 		this.parent = parent;
 
@@ -46,13 +43,13 @@ public class EmbeddedEnvironment implements VisualEmbedding, Environment {
 			@Override
 			public <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, int bias) {
 				// Kinda cursed usage of anonymous classes here, but it does the job.
-				return engine.instancer(EmbeddedEnvironment.this, type, model, visualType, bias);
+				return engine.instancer(EmbeddedEnvironment.this, type, model, bias);
 			}
 		};
 	}
 
-	public EmbeddedEnvironment(EngineImpl engine, VisualType visualType, Vec3i renderOrigin) {
-		this(engine, visualType, renderOrigin, null);
+	public EmbeddedEnvironment(EngineImpl engine, Vec3i renderOrigin) {
+		this(engine, renderOrigin, null);
 	}
 
 	@Override
@@ -73,7 +70,7 @@ public class EmbeddedEnvironment implements VisualEmbedding, Environment {
 
 	@Override
 	public VisualEmbedding createEmbedding(Vec3i renderOrigin) {
-		var out = new EmbeddedEnvironment(engine, visualType, renderOrigin, this);
+		var out = new EmbeddedEnvironment(engine, renderOrigin, this);
 		engine.environmentStorage()
 				.track(out);
 		return out;

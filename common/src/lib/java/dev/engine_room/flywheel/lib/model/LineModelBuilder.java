@@ -1,7 +1,6 @@
 package dev.engine_room.flywheel.lib.model;
 
 import org.jetbrains.annotations.UnknownNullability;
-import org.joml.Vector4f;
 import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryUtil;
 
@@ -32,14 +31,37 @@ public final class LineModelBuilder {
 	private MemoryBlock data;
 	private int vertexCount = 0;
 
-	public LineModelBuilder(int segmentCount) {
-		vertexView = new FullVertexView();
-		data = MemoryBlock.mallocTracked(segmentCount * 4 * vertexView.stride());
-		vertexView.ptr(data.ptr());
+	public LineModelBuilder() {
+	}
+
+	public LineModelBuilder(int initialSegmentCount) {
+		ensureCapacity(initialSegmentCount);
+	}
+
+	public void ensureCapacity(int segmentCount) {
+		if (segmentCount < 0) {
+			throw new IllegalArgumentException("Segment count must be greater than or equal to 0");
+		} else if (segmentCount == 0) {
+			return;
+		}
+
+		if (data == null) {
+			vertexView = new FullVertexView();
+			data = MemoryBlock.mallocTracked(segmentCount * 4 * vertexView.stride());
+			vertexView.ptr(data.ptr());
+			vertexCount = 0;
+		} else {
+			long requiredCapacity = (vertexCount + segmentCount * 4) * vertexView.stride();
+
+			if (requiredCapacity > data.size()) {
+				data = data.realloc(requiredCapacity);
+				vertexView.ptr(data.ptr());
+			}
+		}
 	}
 
 	public LineModelBuilder line(float x1, float y1, float z1, float x2, float y2, float z2) {
-		ensureCapacity(vertexCount + 4);
+		ensureCapacity(1);
 
 		// We'll use the normal to figure out the orientation of the line in the vertex shader.
 		float dx = x2 - x1;
@@ -79,8 +101,19 @@ public final class LineModelBuilder {
 	}
 
 	public Model build() {
-		vertexView.vertexCount(vertexCount);
+		if (vertexCount == 0) {
+			return EmptyModel.INSTANCE;
+		}
+
+		long requiredCapacity = vertexCount * vertexView.stride();
+
+		if (data.size() > requiredCapacity) {
+			data = data.realloc(requiredCapacity);
+			vertexView.ptr(data.ptr());
+		}
+
 		vertexView.nativeMemoryOwner(data);
+		vertexView.vertexCount(vertexCount);
 
 		var boundingSphere = ModelUtil.computeBoundingSphere(vertexView);
 		boundingSphere.w += 0.1f; // make the bounding sphere a little bigger to account for line width
@@ -92,17 +125,6 @@ public final class LineModelBuilder {
 		vertexCount = 0;
 
 		return model;
-	}
-
-	private void ensureCapacity(int vertexCount) {
-		if (data == null) {
-			vertexView = new FullVertexView();
-			data = MemoryBlock.mallocTracked(vertexCount * vertexView.stride());
-			vertexView.ptr(data.ptr());
-		} else if (vertexCount * vertexView.stride() > data.size()) {
-			data = data.realloc(vertexCount * vertexView.stride());
-			vertexView.ptr(data.ptr());
-		}
 	}
 
 	private static class LineMesh implements Mesh {
@@ -124,9 +146,9 @@ public final class LineModelBuilder {
 			}
 		};
 		private final VertexList vertexList;
-		private final Vector4f boundingSphere;
+		private final Vector4fc boundingSphere;
 
-		public LineMesh(VertexList vertexList, Vector4f boundingSphere) {
+		public LineMesh(VertexList vertexList, Vector4fc boundingSphere) {
 			this.vertexList = vertexList;
 			this.boundingSphere = boundingSphere;
 		}

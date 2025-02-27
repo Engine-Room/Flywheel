@@ -6,13 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 
-import dev.engine_room.flywheel.api.Flywheel;
+import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.resources.ResourceLocation;
 
 public class TestBase {
-	public static final ResourceLocation FLW_A = Flywheel.rl("a.glsl");
-	public static final ResourceLocation FLW_B = Flywheel.rl("b.glsl");
-	public static final ResourceLocation FLW_C = Flywheel.rl("c.glsl");
+	public static final ResourceLocation FLW_A = ResourceUtil.rl("a.glsl");
+	public static final ResourceLocation FLW_B = ResourceUtil.rl("b.glsl");
+	public static final ResourceLocation FLW_C = ResourceUtil.rl("c.glsl");
 
 	public static <T> T assertSingletonList(List<T> list) {
 		assertEquals(1, list.size());

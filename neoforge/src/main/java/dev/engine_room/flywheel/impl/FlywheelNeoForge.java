@@ -16,7 +16,6 @@ import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.util.ResourceReloadHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
-import net.minecraft.core.registries.Registries;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.CrashReportCallables;
@@ -30,7 +29,6 @@ import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
-import net.neoforged.neoforge.registries.RegisterEvent;
 
 @Mod(value = Flywheel.ID, dist = Dist.CLIENT)
 public final class FlywheelNeoForge {
@@ -83,16 +81,11 @@ public final class FlywheelNeoForge {
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> BackendManagerImpl.onEndClientResourceReload(e.error().isPresent()));
 
 		modEventBus.addListener((FMLCommonSetupEvent e) -> {
+			// We can't register anything to Registries.COMMAND_ARGUMENT_TYPE because it is a synced registry but
+			// Flywheel is a client-side only mod.
 			ArgumentTypeInfos.registerByClass(BackendArgument.class, BackendArgument.INFO);
 			ArgumentTypeInfos.registerByClass(DebugModeArgument.class, DebugModeArgument.INFO);
 			ArgumentTypeInfos.registerByClass(LightSmoothnessArgument.class, LightSmoothnessArgument.INFO);
-		});
-		modEventBus.addListener((RegisterEvent e) -> {
-			if (e.getRegistryKey().equals(Registries.COMMAND_ARGUMENT_TYPE)) {
-				e.register(Registries.COMMAND_ARGUMENT_TYPE, Flywheel.rl("backend"), () -> BackendArgument.INFO);
-				e.register(Registries.COMMAND_ARGUMENT_TYPE, Flywheel.rl("debug_mode"), () -> DebugModeArgument.INFO);
-				e.register(Registries.COMMAND_ARGUMENT_TYPE, Flywheel.rl("light_smoothness"), () -> LightSmoothnessArgument.INFO);
-			}
 		});
 	}
 

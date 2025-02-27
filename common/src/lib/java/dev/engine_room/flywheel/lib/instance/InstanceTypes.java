@@ -2,12 +2,12 @@ package dev.engine_room.flywheel.lib.instance;
 
 import org.lwjgl.system.MemoryUtil;
 
-import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.layout.FloatRepr;
 import dev.engine_room.flywheel.api.layout.IntegerRepr;
 import dev.engine_room.flywheel.api.layout.LayoutBuilder;
 import dev.engine_room.flywheel.lib.util.ExtraMemoryOps;
+import dev.engine_room.flywheel.lib.util.ResourceUtil;
 
 public final class InstanceTypes {
 	public static final InstanceType<TransformedInstance> TRANSFORMED = SimpleInstanceType.builder(TransformedInstance::new)
@@ -26,8 +26,8 @@ public final class InstanceTypes {
 				ExtraMemoryOps.put2x16(ptr + 8, instance.light);
 				ExtraMemoryOps.putMatrix4f(ptr + 12, instance.pose);
 			})
-			.vertexShader(Flywheel.rl("instance/transformed.vert"))
-			.cullShader(Flywheel.rl("instance/cull/transformed.glsl"))
+			.vertexShader(ResourceUtil.rl("instance/transformed.vert"))
+			.cullShader(ResourceUtil.rl("instance/cull/transformed.glsl"))
 			.build();
 
 	public static final InstanceType<PosedInstance> POSED = SimpleInstanceType.builder(PosedInstance::new)
@@ -48,8 +48,8 @@ public final class InstanceTypes {
 				ExtraMemoryOps.putMatrix4f(ptr + 12, instance.pose);
 				ExtraMemoryOps.putMatrix3f(ptr + 76, instance.normal);
 			})
-			.vertexShader(Flywheel.rl("instance/posed.vert"))
-			.cullShader(Flywheel.rl("instance/cull/posed.glsl"))
+			.vertexShader(ResourceUtil.rl("instance/posed.vert"))
+			.cullShader(ResourceUtil.rl("instance/cull/posed.glsl"))
 			.build();
 
 	public static final InstanceType<OrientedInstance> ORIENTED = SimpleInstanceType.builder(OrientedInstance::new)
@@ -76,8 +76,8 @@ public final class InstanceTypes {
 				MemoryUtil.memPutFloat(ptr + 32, instance.pivotZ);
 				ExtraMemoryOps.putQuaternionf(ptr + 36, instance.rotation);
 			})
-			.vertexShader(Flywheel.rl("instance/oriented.vert"))
-			.cullShader(Flywheel.rl("instance/cull/oriented.glsl"))
+			.vertexShader(ResourceUtil.rl("instance/oriented.vert"))
+			.cullShader(ResourceUtil.rl("instance/cull/oriented.glsl"))
 			.build();
 
 	public static final InstanceType<ShadowInstance> SHADOW = SimpleInstanceType.builder(ShadowInstance::new)
@@ -99,8 +99,8 @@ public final class InstanceTypes {
 				MemoryUtil.memPutFloat(ptr + 28, instance.alpha);
 				MemoryUtil.memPutFloat(ptr + 32, instance.radius);
 			})
-			.vertexShader(Flywheel.rl("instance/shadow.vert"))
-			.cullShader(Flywheel.rl("instance/cull/shadow.glsl"))
+			.vertexShader(ResourceUtil.rl("instance/shadow.vert"))
+			.cullShader(ResourceUtil.rl("instance/cull/shadow.glsl"))
 			.build();
 
 	private InstanceTypes() {
