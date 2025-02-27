@@ -33,17 +33,17 @@ public abstract class MultiBlockModelBuilder {
 		return FlwLibXplat.INSTANCE.createMultiBlockModelBuilder(level, positions);
 	}
 
-	public MultiBlockModelBuilder poseStack(PoseStack poseStack) {
+	public MultiBlockModelBuilder poseStack(@Nullable PoseStack poseStack) {
 		this.poseStack = poseStack;
 		return this;
 	}
 
-	public MultiBlockModelBuilder enableFluidRendering() {
-		renderFluids = true;
+	public MultiBlockModelBuilder renderFluids(boolean renderFluids) {
+		this.renderFluids = renderFluids;
 		return this;
 	}
 
-	public MultiBlockModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public MultiBlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
 		this.materialFunc = materialFunc;
 		return this;
 	}

@@ -2,6 +2,8 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.engine_room.flywheel.api.material.Material;
@@ -19,19 +21,19 @@ public final class FabricMultiBlockModelBuilder extends MultiBlockModelBuilder {
 	}
 
 	@Override
-	public FabricMultiBlockModelBuilder poseStack(PoseStack poseStack) {
+	public FabricMultiBlockModelBuilder poseStack(@Nullable PoseStack poseStack) {
 		super.poseStack(poseStack);
 		return this;
 	}
 
 	@Override
-	public FabricMultiBlockModelBuilder enableFluidRendering() {
-		super.enableFluidRendering();
+	public FabricMultiBlockModelBuilder renderFluids(boolean renderFluids) {
+		super.renderFluids(renderFluids);
 		return this;
 	}
 
 	@Override
-	public FabricMultiBlockModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public FabricMultiBlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
 		super.materialFunc(materialFunc);
 		return this;
 	}

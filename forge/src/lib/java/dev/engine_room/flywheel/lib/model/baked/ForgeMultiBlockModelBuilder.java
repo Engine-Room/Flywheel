@@ -15,6 +15,7 @@ import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.client.model.data.ModelData;
 
 public final class ForgeMultiBlockModelBuilder extends MultiBlockModelBuilder {
@@ -26,24 +27,24 @@ public final class ForgeMultiBlockModelBuilder extends MultiBlockModelBuilder {
 	}
 
 	@Override
-	public ForgeMultiBlockModelBuilder poseStack(PoseStack poseStack) {
+	public ForgeMultiBlockModelBuilder poseStack(@Nullable PoseStack poseStack) {
 		super.poseStack(poseStack);
 		return this;
 	}
 
 	@Override
-	public ForgeMultiBlockModelBuilder enableFluidRendering() {
-		super.enableFluidRendering();
+	public ForgeMultiBlockModelBuilder renderFluids(boolean renderFluids) {
+		super.renderFluids(renderFluids);
 		return this;
 	}
 
 	@Override
-	public ForgeMultiBlockModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public ForgeMultiBlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
 		super.materialFunc(materialFunc);
 		return this;
 	}
 
-	public ForgeMultiBlockModelBuilder modelDataLookup(Function<BlockPos, ModelData> modelDataLookup) {
+	public ForgeMultiBlockModelBuilder modelDataLookup(@Nullable Function<BlockPos, ModelData> modelDataLookup) {
 		this.modelDataLookup = modelDataLookup;
 		return this;
 	}
@@ -54,7 +55,10 @@ public final class ForgeMultiBlockModelBuilder extends MultiBlockModelBuilder {
 			materialFunc = ModelUtil::getMaterial;
 		}
 		if (modelDataLookup == null) {
-			modelDataLookup = pos -> ModelData.EMPTY;
+			modelDataLookup = pos -> {
+				BlockEntity blockEntity = level.getBlockEntity(pos);
+				return blockEntity != null ? blockEntity.getModelData() : ModelData.EMPTY;
+			};
 		}
 
 		var builder = ChunkLayerSortedListBuilder.<Model.ConfiguredMesh>getThreadLocal();

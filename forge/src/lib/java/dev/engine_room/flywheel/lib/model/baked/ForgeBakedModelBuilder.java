@@ -13,7 +13,9 @@ import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelData;
 
@@ -26,46 +28,54 @@ public final class ForgeBakedModelBuilder extends BakedModelBuilder {
 	}
 
 	@Override
-	public ForgeBakedModelBuilder level(BlockAndTintGetter level) {
+	public ForgeBakedModelBuilder level(@Nullable BlockAndTintGetter level) {
 		super.level(level);
 		return this;
 	}
 
 	@Override
-	public ForgeBakedModelBuilder blockState(BlockState blockState) {
-		super.blockState(blockState);
+	public ForgeBakedModelBuilder pos(@Nullable BlockPos pos) {
+		super.pos(pos);
 		return this;
 	}
 
 	@Override
-	public ForgeBakedModelBuilder poseStack(PoseStack poseStack) {
+	public ForgeBakedModelBuilder poseStack(@Nullable PoseStack poseStack) {
 		super.poseStack(poseStack);
 		return this;
 	}
 
 	@Override
-	public ForgeBakedModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public ForgeBakedModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
 		super.materialFunc(materialFunc);
 		return this;
 	}
 
-	public ForgeBakedModelBuilder modelData(ModelData modelData) {
+	public ForgeBakedModelBuilder modelData(@Nullable ModelData modelData) {
 		this.modelData = modelData;
 		return this;
 	}
 
 	@Override
 	public SimpleModel build() {
+		if (level == null) {
+			level = EmptyVirtualBlockGetter.FULL_DARK;
+		}
+		if (pos == null) {
+			pos = BlockPos.ZERO;
+		}
 		if (materialFunc == null) {
 			materialFunc = ModelUtil::getMaterial;
 		}
 		if (modelData == null) {
-			modelData = ModelData.EMPTY;
+			BlockEntity blockEntity = level.getBlockEntity(pos);
+			modelData = blockEntity != null ? blockEntity.getModelData() : ModelData.EMPTY;
 		}
+		BlockState blockState = level.getBlockState(pos);
 
 		var builder = ChunkLayerSortedListBuilder.<Model.ConfiguredMesh>getThreadLocal();
 
-		BakedModelBufferer.bufferSingle(level, bakedModel, blockState, poseStack, modelData, (renderType, shaded, data) -> {
+		BakedModelBufferer.bufferModel(bakedModel, pos, level, blockState, poseStack, modelData, (renderType, shaded, data) -> {
 			Material material = materialFunc.apply(renderType, shaded);
 			if (material != null) {
 				Mesh mesh = MeshHelper.blockVerticesToMesh(data, "source=BakedModelBuilder," + "bakedModel=" + bakedModel + ",renderType=" + renderType + ",shaded=" + shaded);

@@ -11,6 +11,7 @@ import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -26,8 +27,8 @@ public final class FabricBakedModelBuilder extends BakedModelBuilder {
 	}
 
 	@Override
-	public FabricBakedModelBuilder blockState(BlockState blockState) {
-		super.blockState(blockState);
+	public FabricBakedModelBuilder pos(BlockPos pos) {
+		super.pos(pos);
 		return this;
 	}
 
@@ -45,13 +46,20 @@ public final class FabricBakedModelBuilder extends BakedModelBuilder {
 
 	@Override
 	public SimpleModel build() {
+		if (level == null) {
+			level = EmptyVirtualBlockGetter.FULL_DARK;
+		}
+		if (pos == null) {
+			pos = BlockPos.ZERO;
+		}
 		if (materialFunc == null) {
 			materialFunc = ModelUtil::getMaterial;
 		}
+		BlockState blockState = level.getBlockState(pos);
 
 		var builder = ChunkLayerSortedListBuilder.<Model.ConfiguredMesh>getThreadLocal();
 
-		BakedModelBufferer.bufferSingle(level, bakedModel, blockState, poseStack, (renderType, shaded, data) -> {
+		BakedModelBufferer.bufferModel(bakedModel, pos, level, blockState, poseStack, (renderType, shaded, data) -> {
 			Material material = materialFunc.apply(renderType, shaded);
 			if (material != null) {
 				Mesh mesh = MeshHelper.blockVerticesToMesh(data, "source=BakedModelBuilder," + "bakedModel=" + bakedModel + ",renderType=" + renderType + ",shaded=" + shaded);
