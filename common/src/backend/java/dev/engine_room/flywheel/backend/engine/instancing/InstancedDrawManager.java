@@ -1,13 +1,17 @@
 package dev.engine_room.flywheel.backend.engine.instancing;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.material.Material;
+import dev.engine_room.flywheel.api.material.Transparency;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.InstancingPrograms;
+import dev.engine_room.flywheel.backend.compile.PipelineCompiler;
 import dev.engine_room.flywheel.backend.engine.AbstractInstancer;
 import dev.engine_room.flywheel.backend.engine.CommonCrumbling;
 import dev.engine_room.flywheel.backend.engine.DrawManager;
@@ -19,6 +23,7 @@ import dev.engine_room.flywheel.backend.engine.MaterialRenderState;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
 import dev.engine_room.flywheel.backend.engine.TextureBinder;
 import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
+import dev.engine_room.flywheel.backend.engine.indirect.OitFramebuffer;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.TextureBuffer;
 import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
@@ -28,7 +33,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
-	private final InstancedRenderStage draws = new InstancedRenderStage();
+	private static final Comparator<InstancedDraw> DRAW_COMPARATOR = Comparator.comparing(InstancedDraw::bias)
+			.thenComparing(InstancedDraw::indexOfMeshInModel)
+			.thenComparing(InstancedDraw::material, MaterialRenderState.COMPARATOR);
+
+	private final List<InstancedDraw> allDraws = new ArrayList<>();
+	private boolean needSort = false;
+
+	private final List<InstancedDraw> draws = new ArrayList<>();
+	private final List<InstancedDraw> oitDraws = new ArrayList<>();
+
 	private final InstancingPrograms programs;
 	/**
 	 * A map of vertex types to their mesh pools.
@@ -37,6 +51,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	private final GlVertexArray vao;
 	private final TextureBuffer instanceTexture;
 	private final InstancedLight light;
+
+	private final OitFramebuffer oitFramebuffer;
 
 	public InstancedDrawManager(InstancingPrograms programs) {
 		programs.acquire();
@@ -48,6 +64,9 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		light = new InstancedLight();
 
 		meshPool.bind(vao);
+
+		oitFramebuffer = new OitFramebuffer(programs.oitPrograms());
+
 	}
 
 	@Override
@@ -66,13 +85,31 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		});
 
 		// Remove the draw calls for any instancers we deleted.
-		draws.flush();
+		needSort |= allDraws.removeIf(InstancedDraw::deleted);
+
+		if (needSort) {
+			allDraws.sort(DRAW_COMPARATOR);
+
+			draws.clear();
+			oitDraws.clear();
+
+			for (var draw : allDraws) {
+				if (draw.material()
+						.transparency() == Transparency.ORDER_INDEPENDENT) {
+					oitDraws.add(draw);
+				} else {
+					draws.add(draw);
+				}
+			}
+
+			needSort = false;
+		}
 
 		meshPool.flush();
 
 		light.flush(lightStorage);
 
-		if (draws.isEmpty()) {
+		if (allDraws.isEmpty()) {
 			return;
 		}
 
@@ -81,10 +118,81 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		TextureBinder.bindLightAndOverlay();
 		light.bind();
 
-		draws.draw(instanceTexture, programs);
+		submitDraws();
+
+		if (!oitDraws.isEmpty()) {
+			oitFramebuffer.prepare();
+
+			oitFramebuffer.depthRange();
+
+			submitOitDraws(PipelineCompiler.OitMode.DEPTH_RANGE);
+
+			oitFramebuffer.renderTransmittance();
+
+			submitOitDraws(PipelineCompiler.OitMode.GENERATE_COEFFICIENTS);
+
+			oitFramebuffer.renderDepthFromTransmittance();
+
+			// Need to bind this again because we just drew a full screen quad for OIT.
+			vao.bindForDraw();
+
+			oitFramebuffer.accumulate();
+
+			submitOitDraws(PipelineCompiler.OitMode.EVALUATE);
+
+			oitFramebuffer.composite();
+		}
 
 		MaterialRenderState.reset();
 		TextureBinder.resetLightAndOverlay();
+	}
+
+	private void submitDraws() {
+		for (var drawCall : draws) {
+			var material = drawCall.material();
+			var groupKey = drawCall.groupKey;
+			var environment = groupKey.environment();
+
+			var program = programs.get(groupKey.instanceType(), environment.contextShader(), material, PipelineCompiler.OitMode.OFF);
+			program.bind();
+
+			environment.setupDraw(program);
+
+			uploadMaterialUniform(program, material);
+
+			program.setUInt("_flw_vertexOffset", drawCall.mesh()
+					.baseVertex());
+
+			MaterialRenderState.setup(material);
+
+			Samplers.INSTANCE_BUFFER.makeActive();
+
+			drawCall.render(instanceTexture);
+		}
+	}
+
+	private void submitOitDraws(PipelineCompiler.OitMode mode) {
+		for (var drawCall : oitDraws) {
+			var material = drawCall.material();
+			var groupKey = drawCall.groupKey;
+			var environment = groupKey.environment();
+
+			var program = programs.get(groupKey.instanceType(), environment.contextShader(), material, mode);
+			program.bind();
+
+			environment.setupDraw(program);
+
+			uploadMaterialUniform(program, material);
+
+			program.setUInt("_flw_vertexOffset", drawCall.mesh()
+					.baseVertex());
+
+			MaterialRenderState.setupOit(material);
+
+			Samplers.INSTANCE_BUFFER.makeActive();
+
+			drawCall.render(instanceTexture);
+		}
 	}
 
 	@Override
@@ -92,7 +200,10 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		instancers.values()
 				.forEach(InstancedInstancer::delete);
 
-		draws.delete();
+		allDraws.forEach(InstancedDraw::delete);
+		allDraws.clear();
+		draws.clear();
+		oitDraws.clear();
 
 		meshPool.delete();
 		instanceTexture.delete();
@@ -100,6 +211,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		vao.delete();
 
 		light.delete();
+
+		oitFramebuffer.delete();
 
 		super.delete();
 	}
@@ -122,7 +235,8 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 			GroupKey<?> groupKey = new GroupKey<>(key.type(), key.environment());
 			InstancedDraw instancedDraw = new InstancedDraw(instancer, mesh, groupKey, entry.material(), key.bias(), i);
 
-			draws.put(groupKey, instancedDraw);
+			allDraws.add(instancedDraw);
+			needSort = true;
 			instancer.addDrawCall(instancedDraw);
 		}
 	}
@@ -165,7 +279,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 					for (InstancedDraw draw : instancer.draws()) {
 						CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
-						var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, crumblingMaterial);
+						var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, crumblingMaterial, PipelineCompiler.OitMode.OFF);
 						program.bind();
 						program.setInt("_flw_baseInstance", index);
 						uploadMaterialUniform(program, crumblingMaterial);

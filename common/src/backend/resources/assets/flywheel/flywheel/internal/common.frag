@@ -1,6 +1,8 @@
 #include "flywheel:internal/packed_material.glsl"
 #include "flywheel:internal/diffuse.glsl"
 #include "flywheel:internal/colorizer.glsl"
+#include "flywheel:internal/wavelet.glsl"
+#include "flywheel:internal/depth.glsl"
 
 // optimize discard usage
 #if defined(GL_ARB_conservative_depth) && defined(_FLW_USE_DISCARD)
@@ -17,7 +19,66 @@ in vec2 _flw_crumblingTexCoord;
 flat in uvec2 _flw_ids;
 #endif
 
+#ifdef _FLW_OIT
+
+uniform sampler2D _flw_depthRange;
+
+uniform sampler2DArray _flw_coefficients;
+
+uniform sampler2D _flw_blueNoise;
+
+float tented_blue_noise(float normalizedDepth) {
+
+    float tentIn = abs(normalizedDepth * 2. - 1);
+    float tentIn2 = tentIn * tentIn;
+    float tentIn4 = tentIn2 * tentIn2;
+    float tent = 1 - (tentIn2 * tentIn4);
+
+    float b = texture(_flw_blueNoise, gl_FragCoord.xy / vec2(64)).r;
+
+    return b * tent;
+}
+
+float linear_depth() {
+    return linearize_depth(gl_FragCoord.z, _flw_cullData.znear, _flw_cullData.zfar);
+}
+
+float depth() {
+    float linearDepth = linear_depth();
+
+    vec2 depthRange = texelFetch(_flw_depthRange, ivec2(gl_FragCoord.xy), 0).rg;
+    float delta = depthRange.x + depthRange.y;
+    float depth = (linearDepth + depthRange.x) / delta;
+
+    return depth - tented_blue_noise(depth) * _flw_oitNoise;
+}
+
+#ifdef _FLW_DEPTH_RANGE
+
+out vec2 _flw_depthRange_out;
+
+#endif
+
+#ifdef _FLW_COLLECT_COEFFS
+
+out vec4 _flw_coeffs0;
+out vec4 _flw_coeffs1;
+out vec4 _flw_coeffs2;
+out vec4 _flw_coeffs3;
+
+#endif
+
+#ifdef _FLW_EVALUATE
+
+out vec4 _flw_accumulate;
+
+#endif
+
+#else
+
 out vec4 _flw_outputColor;
+
+#endif
 
 float _flw_diffuseFactor() {
     if (flw_material.cardinalLightingMode == 2u) {
@@ -99,5 +160,47 @@ void _flw_main() {
     }
     #endif
 
-    _flw_outputColor = flw_fogFilter(color);
+    color = flw_fogFilter(color);
+
+    #ifdef _FLW_OIT
+
+    #ifdef _FLW_DEPTH_RANGE
+    float linearDepth = linear_depth();
+
+    // Pad the depth by some unbalanced epsilons because minecraft has a lot of single-quad tranparency.
+    // The unbalance means our fragment will be considered closer to the screen in the normalization,
+    // which helps prevent unnecessary noise as it'll be closer to the edge of our tent function.
+    _flw_depthRange_out = vec2(-linearDepth + 1e-5, linearDepth + 1e-2);
+    #endif
+
+    #ifdef _FLW_COLLECT_COEFFS
+
+    vec4[4] result;
+    result[0] = vec4(0.);
+    result[1] = vec4(0.);
+    result[2] = vec4(0.);
+    result[3] = vec4(0.);
+
+    add_transmittance(result, 1. - color.a, depth());
+
+    _flw_coeffs0 = result[0];
+    _flw_coeffs1 = result[1];
+    _flw_coeffs2 = result[2];
+    _flw_coeffs3 = result[3];
+
+    #endif
+
+    #ifdef _FLW_EVALUATE
+
+    float transmittance = signal_corrected_transmittance(_flw_coefficients, depth(), 1. - color.a);
+
+    _flw_accumulate = vec4(color.rgb * color.a, color.a) * transmittance;
+
+    #endif
+
+    #else
+
+    _flw_outputColor = color;
+
+    #endif
 }

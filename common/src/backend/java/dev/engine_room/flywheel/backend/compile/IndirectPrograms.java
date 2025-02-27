@@ -30,7 +30,6 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	private static final ResourceLocation SCATTER_SHADER_MAIN = ResourceUtil.rl("internal/indirect/scatter.glsl");
 	private static final ResourceLocation DOWNSAMPLE_FIRST = ResourceUtil.rl("internal/indirect/downsample_first.glsl");
 	private static final ResourceLocation DOWNSAMPLE_SECOND = ResourceUtil.rl("internal/indirect/downsample_second.glsl");
-	public static final List<ResourceLocation> UTIL_SHADERS = List.of(APPLY_SHADER_MAIN, SCATTER_SHADER_MAIN, DOWNSAMPLE_FIRST, DOWNSAMPLE_SECOND);
 
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
 	private static final Compile<ResourceLocation> UTIL = new Compile<>();
@@ -44,11 +43,13 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	private final PipelineCompiler pipeline;
 	private final CompilationHarness<InstanceType<?>> culling;
 	private final CompilationHarness<ResourceLocation> utils;
+	private final OitPrograms oitPrograms;
 
-	private IndirectPrograms(PipelineCompiler pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<ResourceLocation> utils) {
+	private IndirectPrograms(PipelineCompiler pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<ResourceLocation> utils, OitPrograms oitPrograms) {
 		this.pipeline = pipeline;
 		this.culling = culling;
 		this.utils = utils;
+		this.oitPrograms = oitPrograms;
 	}
 
 	private static List<String> getExtensions(GlslVersion glslVersion) {
@@ -58,9 +59,11 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		}
 		if (glslVersion.compareTo(GlslVersion.V420) < 0) {
 			extensions.add("GL_ARB_shading_language_420pack");
+			extensions.add("GL_ARB_shader_image_load_store");
 		}
 		if (glslVersion.compareTo(GlslVersion.V430) < 0) {
 			extensions.add("GL_ARB_shader_storage_buffer_object");
+			extensions.add("GL_ARB_shader_image_size");
 		}
 		if (glslVersion.compareTo(GlslVersion.V460) < 0) {
 			extensions.add("GL_ARB_shader_draw_parameters");
@@ -87,8 +90,9 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		var pipelineCompiler = PipelineCompiler.create(sources, Pipelines.INDIRECT, vertexComponents, fragmentComponents, EXTENSIONS);
 		var cullingCompiler = createCullingCompiler(sources);
 		var utilCompiler = createUtilCompiler(sources);
+		var fullscreenCompiler = OitPrograms.createFullscreenCompiler(sources);
 
-		IndirectPrograms newInstance = new IndirectPrograms(pipelineCompiler, cullingCompiler, utilCompiler);
+		IndirectPrograms newInstance = new IndirectPrograms(pipelineCompiler, cullingCompiler, utilCompiler, fullscreenCompiler);
 
 		setInstance(newInstance);
 	}
@@ -147,8 +151,8 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		setInstance(null);
 	}
 
-	public GlProgram getIndirectProgram(InstanceType<?> instanceType, ContextShader contextShader, Material material) {
-		return pipeline.get(instanceType, contextShader, material);
+	public GlProgram getIndirectProgram(InstanceType<?> instanceType, ContextShader contextShader, Material material, PipelineCompiler.OitMode oit) {
+		return pipeline.get(instanceType, contextShader, material, oit);
 	}
 
 	public GlProgram getCullingProgram(InstanceType<?> instanceType) {
@@ -171,10 +175,15 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 		return utils.get(DOWNSAMPLE_SECOND);
 	}
 
+	public OitPrograms oitPrograms() {
+		return oitPrograms;
+	}
+
 	@Override
 	protected void _delete() {
 		pipeline.delete();
 		culling.delete();
 		utils.delete();
+		oitPrograms.delete();
 	}
 }

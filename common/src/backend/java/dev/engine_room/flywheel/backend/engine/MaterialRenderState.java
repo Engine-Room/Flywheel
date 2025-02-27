@@ -45,6 +45,17 @@ public final class MaterialRenderState {
 		setupWriteMask(material.writeMask());
 	}
 
+	public static void setupOit(Material material) {
+		setupTexture(material);
+		setupBackfaceCulling(material.backfaceCulling());
+		setupPolygonOffset(material.polygonOffset());
+		setupDepthTest(material.depthTest());
+
+		WriteMask mask = material.writeMask();
+		boolean writeColor = mask.color();
+		RenderSystem.colorMask(writeColor, writeColor, writeColor, writeColor);
+	}
+
 	private static void setupTexture(Material material) {
 		Samplers.DIFFUSE.makeActive();
 		AbstractTexture texture = Minecraft.getInstance()
@@ -135,7 +146,7 @@ public final class MaterialRenderState {
 			RenderSystem.enableBlend();
 			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.DST_COLOR, GlStateManager.DestFactor.SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		}
-		case TRANSLUCENT, ORDER_INDEPENDENT -> {
+		case TRANSLUCENT -> {
 			RenderSystem.enableBlend();
 			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		}

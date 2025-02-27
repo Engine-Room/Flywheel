@@ -1,12 +1,12 @@
-const uint _FLW_BLOCKS_PER_SECTION = 18 * 18 * 18;
+const uint _FLW_BLOCKS_PER_SECTION = 18u * 18u * 18u;
 const uint _FLW_LIGHT_SIZE_BYTES = _FLW_BLOCKS_PER_SECTION;
-const uint _FLW_SOLID_SIZE_BYTES = ((_FLW_BLOCKS_PER_SECTION + 31) / 32) * 4;
+const uint _FLW_SOLID_SIZE_BYTES = ((_FLW_BLOCKS_PER_SECTION + 31u) / 32u) * 4u;
 const uint _FLW_LIGHT_START_BYTES = _FLW_SOLID_SIZE_BYTES;
 const uint _FLW_LIGHT_SECTION_SIZE_BYTES = _FLW_SOLID_SIZE_BYTES + _FLW_LIGHT_SIZE_BYTES;
 
-const uint _FLW_SOLID_START_INTS = 0;
-const uint _FLW_LIGHT_START_INTS = _FLW_SOLID_SIZE_BYTES / 4;
-const uint _FLW_LIGHT_SECTION_SIZE_INTS = _FLW_LIGHT_SECTION_SIZE_BYTES / 4;
+const uint _FLW_SOLID_START_INTS = 0u;
+const uint _FLW_LIGHT_START_INTS = _FLW_SOLID_SIZE_BYTES / 4u;
+const uint _FLW_LIGHT_SECTION_SIZE_INTS = _FLW_LIGHT_SECTION_SIZE_BYTES / 4u;
 
 const uint _FLW_COMPLETELY_SOLID = 0x7FFFFFFu;
 const float _FLW_EPSILON = 1e-5;
@@ -29,39 +29,39 @@ bool _flw_nextLut(uint base, int coord, out uint next) {
     // The base coordinate.
     int start = int(_flw_indexLut(base));
     // The width of the coordinate span.
-    uint size = _flw_indexLut(base + 1);
+    uint size = _flw_indexLut(base + 1u);
 
     // Index of the coordinate in the span.
     int i = coord - start;
 
-    if (i < 0 || i >= size) {
+    if (i < 0 || i >= int(size)) {
         // We missed.
         return true;
     }
 
-    next = _flw_indexLut(base + 2 + i);
+    next = _flw_indexLut(base + 2u + uint(i));
 
     return false;
 }
 
 bool _flw_chunkCoordToSectionIndex(ivec3 sectionPos, out uint index) {
     uint first;
-    if (_flw_nextLut(0, sectionPos.y, first) || first == 0) {
+    if (_flw_nextLut(0u, sectionPos.y, first) || first == 0u) {
         return true;
     }
 
     uint second;
-    if (_flw_nextLut(first, sectionPos.x, second) || second == 0) {
+    if (_flw_nextLut(first, sectionPos.x, second) || second == 0u) {
         return true;
     }
 
     uint sectionIndex;
-    if (_flw_nextLut(second, sectionPos.z, sectionIndex) || sectionIndex == 0) {
+    if (_flw_nextLut(second, sectionPos.z, sectionIndex) || sectionIndex == 0u) {
         return true;
     }
 
     // The index is written as 1-based so we can properly detect missing sections.
-    index = sectionIndex - 1;
+    index = sectionIndex - 1u;
 
     return false;
 }
@@ -87,7 +87,7 @@ bool _flw_isSolid(uint sectionOffset, uvec3 blockInSectionPos) {
 
     uint word = _flw_indexLight(sectionOffset + _FLW_SOLID_START_INTS + uintOffset);
 
-    return (word & (1u << bitInWordOffset)) != 0;
+    return (word & (1u << bitInWordOffset)) != 0u;
 }
 
 bool flw_lightFetch(ivec3 blockPos, out vec2 lightCoord) {
@@ -98,7 +98,7 @@ bool flw_lightFetch(ivec3 blockPos, out vec2 lightCoord) {
     // The offset of the section in the light buffer.
     uint sectionOffset = lightSectionIndex * _FLW_LIGHT_SECTION_SIZE_INTS;
 
-    uvec3 blockInSectionPos = (blockPos & 0xF) + 1;
+    uvec3 blockInSectionPos = uvec3((blockPos & 0xF) + 1);
 
     lightCoord = vec2(_flw_lightAt(sectionOffset, blockInSectionPos)) * _FLW_LIGHT_NORMALIZER;
     return true;
@@ -106,7 +106,7 @@ bool flw_lightFetch(ivec3 blockPos, out vec2 lightCoord) {
 
 
 uint _flw_fetchSolid3x3x3(uint sectionOffset, ivec3 blockInSectionPos) {
-    uint ret = 0;
+    uint ret = 0u;
 
     // The formatter does NOT like these macros
     // @formatter:off

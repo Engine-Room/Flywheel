@@ -1,7 +1,5 @@
 package dev.engine_room.flywheel.backend.gl;
 
-import java.nio.ByteBuffer;
-
 import org.jetbrains.annotations.UnknownNullability;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL;
@@ -13,6 +11,7 @@ import org.lwjgl.opengl.GL43;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.KHRShaderSubgroup;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.backend.FlwBackend;
 import dev.engine_room.flywheel.backend.compile.core.Compilation;
@@ -39,6 +38,8 @@ public final class GlCompat {
 	public static final int SUBGROUP_SIZE = subgroupSize();
 	public static final boolean ALLOW_DSA = true;
 	public static final GlslVersion MAX_GLSL_VERSION = maxGlslVersion();
+
+	public static final boolean SUPPORTS_DSA = ALLOW_DSA && isDsaSupported();
 
 	public static final boolean SUPPORTS_INSTANCING = isInstancingSupported();
 	public static final boolean SUPPORTS_INDIRECT = isIndirectSupported();
@@ -67,10 +68,11 @@ public final class GlCompat {
 	 */
 	public static void safeShaderSource(int glId, CharSequence source) {
 		try (MemoryStack stack = MemoryStack.stackPush()) {
-			final ByteBuffer sourceBuffer = stack.UTF8(source, true);
+			var sourceBuffer = MemoryUtil.memUTF8(source, true);
 			final PointerBuffer pointers = stack.mallocPointer(1);
 			pointers.put(sourceBuffer);
 			GL20C.nglShaderSource(glId, 1, pointers.address0(), 0);
+			MemoryUtil.memFree(sourceBuffer);
 		}
 	}
 
@@ -161,8 +163,15 @@ public final class GlCompat {
 				&& CAPABILITIES.GL_ARB_multi_draw_indirect
 				&& CAPABILITIES.GL_ARB_shader_draw_parameters
 				&& CAPABILITIES.GL_ARB_shader_storage_buffer_object
-				&& CAPABILITIES.GL_ARB_shading_language_420pack
-				&& CAPABILITIES.GL_ARB_vertex_attrib_binding;
+				&& CAPABILITIES.GL_ARB_shading_language_420pack && CAPABILITIES.GL_ARB_vertex_attrib_binding && CAPABILITIES.GL_ARB_shader_image_load_store && CAPABILITIES.GL_ARB_shader_image_size;
+	}
+
+	private static boolean isDsaSupported() {
+		if (CAPABILITIES == null) {
+			return false;
+		}
+
+		return CAPABILITIES.GL_ARB_direct_state_access;
 	}
 
 	/**
