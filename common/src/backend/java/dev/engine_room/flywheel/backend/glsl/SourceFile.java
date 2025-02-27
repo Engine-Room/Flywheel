@@ -10,13 +10,8 @@ import java.util.function.Function;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 
-import dev.engine_room.flywheel.backend.glsl.parse.Import;
-import dev.engine_room.flywheel.backend.glsl.parse.ShaderField;
-import dev.engine_room.flywheel.backend.glsl.parse.ShaderFunction;
-import dev.engine_room.flywheel.backend.glsl.parse.ShaderStruct;
 import dev.engine_room.flywheel.backend.glsl.span.Span;
 import dev.engine_room.flywheel.backend.glsl.span.StringSpan;
 import dev.engine_room.flywheel.lib.util.ResourceUtil;
@@ -36,38 +31,24 @@ public class SourceFile implements SourceComponent {
 	public final SourceLines source;
 
 	/**
-	 * Function lookup by name.
-	 */
-	public final ImmutableMap<String, ShaderFunction> functions;
-
-	/**
-	 * Struct lookup by name.
-	 */
-	public final ImmutableMap<String, ShaderStruct> structs;
-
-	/**
 	 * Includes ordered as defined in the source.
 	 */
 	public final ImmutableList<Import> imports;
-	public final ImmutableMap<String, ShaderField> fields;
 
 	public final List<SourceFile> included;
 
 	public final String finalSource;
 
-	private SourceFile(ResourceLocation name, SourceLines source, ImmutableMap<String, ShaderFunction> functions, ImmutableMap<String, ShaderStruct> structs, ImmutableList<Import> imports, ImmutableMap<String, ShaderField> fields, List<SourceFile> included, String finalSource) {
+	private SourceFile(ResourceLocation name, SourceLines source, ImmutableList<Import> imports, List<SourceFile> included, String finalSource) {
 		this.name = name;
 		this.source = source;
-		this.functions = functions;
-		this.structs = structs;
 		this.imports = imports;
-		this.fields = fields;
 		this.included = included;
 		this.finalSource = finalSource;
 	}
 
 	public static LoadResult empty(ResourceLocation name) {
-		return new LoadResult.Success(new SourceFile(name, new SourceLines(name, ""), ImmutableMap.of(), ImmutableMap.of(), ImmutableList.of(), ImmutableMap.of(), ImmutableList.of(), ""));
+		return new LoadResult.Success(new SourceFile(name, new SourceLines(name, ""), ImmutableList.of(), ImmutableList.of(), ""));
 	}
 
 	public static LoadResult parse(Function<ResourceLocation, LoadResult> sourceFinder, ResourceLocation name, String stringSource) {
@@ -106,12 +87,8 @@ public class SourceFile implements SourceComponent {
 			return new LoadResult.Failure(new LoadError.IncludeError(name, failures));
 		}
 
-		var functions = ShaderFunction.parseFunctions(source);
-		var structs = ShaderStruct.parseStructs(source);
-		var fields = ShaderField.parseFields(source);
-
 		var finalSource = generateFinalSource(imports, source);
-		return new LoadResult.Success(new SourceFile(name, source, functions, structs, imports, fields, included, finalSource));
+		return new LoadResult.Success(new SourceFile(name, source, imports, included, finalSource));
 	}
 
 	@Override
@@ -127,13 +104,6 @@ public class SourceFile implements SourceComponent {
 	@Override
 	public String name() {
 		return name.toString();
-	}
-
-	public Span getLineSpan(int lineNo) {
-		int begin = source.lineStartIndex(lineNo);
-		int end = begin + source.lineString(lineNo)
-				.length();
-		return new StringSpan(source, begin, end);
 	}
 
 	public Span getLineSpanNoWhitespace(int line) {
@@ -164,56 +134,6 @@ public class SourceFile implements SourceComponent {
 		int end = begin + match.length();
 
 		return new StringSpan(source, begin, end);
-	}
-
-	/**
-	 * Search this file and recursively search all imports to find a struct definition matching the given name.
-	 *
-	 * @param name The name of the struct to find.
-	 * @return null if no definition matches the name.
-	 */
-	@Nullable
-	public ShaderStruct findStruct(String name) {
-		ShaderStruct struct = structs.get(name);
-
-		if (struct != null) {
-			return struct;
-		}
-
-		for (var include : included) {
-			var external = include.findStruct(name);
-
-			if (external != null) {
-				return external;
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * Search this file and recursively search all imports to find a function definition matching the given name.
-	 *
-	 * @param name The name of the function to find.
-	 * @return null if no definition matches the name.
-	 */
-	@Nullable
-	public ShaderFunction findFunction(String name) {
-		ShaderFunction function = functions.get(name);
-
-		if (function != null) {
-			return function;
-		}
-
-		for (var include : included) {
-			var external = include.findFunction(name);
-
-			if (external != null) {
-				return external;
-			}
-		}
-
-		return null;
 	}
 
 	@Override

@@ -1,11 +1,10 @@
-package dev.engine_room.flywheel.backend.glsl.parse;
+package dev.engine_room.flywheel.backend.glsl;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableList;
 
-import dev.engine_room.flywheel.backend.glsl.SourceLines;
 import dev.engine_room.flywheel.backend.glsl.span.Span;
 
 public record Import(Span self, Span file) {
