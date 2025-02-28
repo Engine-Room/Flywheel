@@ -134,7 +134,6 @@ final class BakedModelBufferer {
 	}
 
 	private static class ThreadLocalObjects {
-		public final FabricSinglePosVirtualBlockGetter level = new FabricSinglePosVirtualBlockGetter(p -> 0, p -> 0);
 		public final PoseStack identityPoseStack = new PoseStack();
 		public final RandomSource random = RandomSource.createNewThreadLocalInstance();
 
