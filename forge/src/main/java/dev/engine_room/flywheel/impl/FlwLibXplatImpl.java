@@ -5,8 +5,8 @@ import org.jetbrains.annotations.UnknownNullability;
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.ForgeBakedModelBuilder;
-import dev.engine_room.flywheel.lib.model.baked.ForgeMultiBlockModelBuilder;
-import dev.engine_room.flywheel.lib.model.baked.MultiBlockModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.ForgeBlockModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
@@ -26,7 +26,7 @@ public class FlwLibXplatImpl implements FlwLibXplat {
 	}
 
 	@Override
-	public MultiBlockModelBuilder createMultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
-		return new ForgeMultiBlockModelBuilder(level, positions);
+	public BlockModelBuilder createBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
+		return new ForgeBlockModelBuilder(level, positions);
 	}
 }

@@ -18,33 +18,33 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.client.model.data.ModelData;
 
-public final class ForgeMultiBlockModelBuilder extends MultiBlockModelBuilder {
+public final class ForgeBlockModelBuilder extends BlockModelBuilder {
 	@Nullable
 	private Function<BlockPos, ModelData> modelDataLookup;
 
-	public ForgeMultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
+	public ForgeBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
 		super(level, positions);
 	}
 
 	@Override
-	public ForgeMultiBlockModelBuilder poseStack(@Nullable PoseStack poseStack) {
+	public ForgeBlockModelBuilder poseStack(@Nullable PoseStack poseStack) {
 		super.poseStack(poseStack);
 		return this;
 	}
 
 	@Override
-	public ForgeMultiBlockModelBuilder renderFluids(boolean renderFluids) {
+	public ForgeBlockModelBuilder renderFluids(boolean renderFluids) {
 		super.renderFluids(renderFluids);
 		return this;
 	}
 
 	@Override
-	public ForgeMultiBlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public ForgeBlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
 		super.materialFunc(materialFunc);
 		return this;
 	}
 
-	public ForgeMultiBlockModelBuilder modelDataLookup(@Nullable Function<BlockPos, ModelData> modelDataLookup) {
+	public ForgeBlockModelBuilder modelDataLookup(@Nullable Function<BlockPos, ModelData> modelDataLookup) {
 		this.modelDataLookup = modelDataLookup;
 		return this;
 	}
@@ -63,10 +63,10 @@ public final class ForgeMultiBlockModelBuilder extends MultiBlockModelBuilder {
 
 		var builder = ChunkLayerSortedListBuilder.<Model.ConfiguredMesh>getThreadLocal();
 
-		BakedModelBufferer.bufferMultiBlock(positions.iterator(), level, poseStack, modelDataLookup, renderFluids, (renderType, shaded, data) -> {
+		BakedModelBufferer.bufferBlocks(positions.iterator(), level, poseStack, modelDataLookup, renderFluids, (renderType, shaded, data) -> {
 			Material material = materialFunc.apply(renderType, shaded);
 			if (material != null) {
-				Mesh mesh = MeshHelper.blockVerticesToMesh(data, "source=MultiBlockModelBuilder," + "renderType=" + renderType + ",shaded=" + shaded);
+				Mesh mesh = MeshHelper.blockVerticesToMesh(data, "source=BlockModelBuilder," + "renderType=" + renderType + ",shaded=" + shaded);
 				builder.add(renderType, new Model.ConfiguredMesh(material, mesh));
 			}
 		});

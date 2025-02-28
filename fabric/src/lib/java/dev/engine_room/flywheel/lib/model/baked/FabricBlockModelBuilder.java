@@ -15,25 +15,25 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 
-public final class FabricMultiBlockModelBuilder extends MultiBlockModelBuilder {
-	public FabricMultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
+public final class FabricBlockModelBuilder extends BlockModelBuilder {
+	public FabricBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
 		super(level, positions);
 	}
 
 	@Override
-	public FabricMultiBlockModelBuilder poseStack(@Nullable PoseStack poseStack) {
+	public FabricBlockModelBuilder poseStack(@Nullable PoseStack poseStack) {
 		super.poseStack(poseStack);
 		return this;
 	}
 
 	@Override
-	public FabricMultiBlockModelBuilder renderFluids(boolean renderFluids) {
+	public FabricBlockModelBuilder renderFluids(boolean renderFluids) {
 		super.renderFluids(renderFluids);
 		return this;
 	}
 
 	@Override
-	public FabricMultiBlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public FabricBlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
 		super.materialFunc(materialFunc);
 		return this;
 	}
@@ -46,10 +46,10 @@ public final class FabricMultiBlockModelBuilder extends MultiBlockModelBuilder {
 
 		var builder = ChunkLayerSortedListBuilder.<Model.ConfiguredMesh>getThreadLocal();
 
-		BakedModelBufferer.bufferMultiBlock(positions.iterator(), level, poseStack, renderFluids, (renderType, shaded, data) -> {
+		BakedModelBufferer.bufferBlocks(positions.iterator(), level, poseStack, renderFluids, (renderType, shaded, data) -> {
 			Material material = materialFunc.apply(renderType, shaded);
 			if (material != null) {
-				Mesh mesh = MeshHelper.blockVerticesToMesh(data, "source=MultiBlockModelBuilder," + "renderType=" + renderType + ",shaded=" + shaded);
+				Mesh mesh = MeshHelper.blockVerticesToMesh(data, "source=BlockModelBuilder," + "renderType=" + renderType + ",shaded=" + shaded);
 				builder.add(renderType, new Model.ConfiguredMesh(material, mesh));
 			}
 		});

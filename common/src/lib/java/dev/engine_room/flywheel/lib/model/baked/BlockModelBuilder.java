@@ -15,7 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 
 @ApiStatus.NonExtendable
-public abstract class MultiBlockModelBuilder {
+public abstract class BlockModelBuilder {
 	final BlockAndTintGetter level;
 	final Iterable<BlockPos> positions;
 	@Nullable
@@ -24,26 +24,26 @@ public abstract class MultiBlockModelBuilder {
 	@Nullable
 	BiFunction<RenderType, Boolean, Material> materialFunc;
 
-	MultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
+	BlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
 		this.level = level;
 		this.positions = positions;
 	}
 
-	public static MultiBlockModelBuilder create(BlockAndTintGetter level, Iterable<BlockPos> positions) {
-		return FlwLibXplat.INSTANCE.createMultiBlockModelBuilder(level, positions);
+	public static BlockModelBuilder create(BlockAndTintGetter level, Iterable<BlockPos> positions) {
+		return FlwLibXplat.INSTANCE.createBlockModelBuilder(level, positions);
 	}
 
-	public MultiBlockModelBuilder poseStack(@Nullable PoseStack poseStack) {
+	public BlockModelBuilder poseStack(@Nullable PoseStack poseStack) {
 		this.poseStack = poseStack;
 		return this;
 	}
 
-	public MultiBlockModelBuilder renderFluids(boolean renderFluids) {
+	public BlockModelBuilder renderFluids(boolean renderFluids) {
 		this.renderFluids = renderFluids;
 		return this;
 	}
 
-	public MultiBlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public BlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
 		this.materialFunc = materialFunc;
 		return this;
 	}

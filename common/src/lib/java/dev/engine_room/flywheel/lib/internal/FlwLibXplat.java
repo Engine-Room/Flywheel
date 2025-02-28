@@ -4,7 +4,7 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import dev.engine_room.flywheel.api.internal.DependencyInjection;
 import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
-import dev.engine_room.flywheel.lib.model.baked.MultiBlockModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
@@ -19,5 +19,5 @@ public interface FlwLibXplat {
 
 	BakedModelBuilder createBakedModelBuilder(BakedModel bakedModel);
 
-	MultiBlockModelBuilder createMultiBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions);
+	BlockModelBuilder createBlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions);
 }
