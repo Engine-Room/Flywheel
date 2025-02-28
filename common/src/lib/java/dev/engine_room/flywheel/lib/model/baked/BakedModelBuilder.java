@@ -12,15 +12,15 @@ import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.block.state.BlockState;
 
 public final class BakedModelBuilder {
 	final BakedModel bakedModel;
 	@Nullable
 	BlockAndTintGetter level;
 	@Nullable
-	BlockState blockState;
+	BlockPos pos;
 	@Nullable
 	PoseStack poseStack;
 	@Nullable
@@ -30,27 +30,33 @@ public final class BakedModelBuilder {
 		this.bakedModel = bakedModel;
 	}
 
-	public BakedModelBuilder level(BlockAndTintGetter level) {
+	public BakedModelBuilder level(@Nullable BlockAndTintGetter level) {
 		this.level = level;
 		return this;
 	}
 
-	public BakedModelBuilder blockState(BlockState blockState) {
-		this.blockState = blockState;
+	public BakedModelBuilder pos(@Nullable BlockPos pos) {
+		this.pos = pos;
 		return this;
 	}
 
-	public BakedModelBuilder poseStack(PoseStack poseStack) {
+	public BakedModelBuilder poseStack(@Nullable PoseStack poseStack) {
 		this.poseStack = poseStack;
 		return this;
 	}
 
-	public BakedModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public BakedModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
 		this.materialFunc = materialFunc;
 		return this;
 	}
 
 	public SimpleModel build() {
+		if (level == null) {
+			level = EmptyVirtualBlockGetter.FULL_DARK;
+		}
+		if (pos == null) {
+			pos = BlockPos.ZERO;
+		}
 		if (materialFunc == null) {
 			materialFunc = ModelUtil::getMaterial;
 		}

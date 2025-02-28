@@ -5,24 +5,18 @@ import java.util.function.ToIntFunction;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 
-public class VirtualEmptyBlockGetter extends VirtualBlockGetter {
-	public static final VirtualEmptyBlockGetter INSTANCE = new VirtualEmptyBlockGetter(p -> 0, p -> 15);
-	public static final VirtualEmptyBlockGetter FULL_BRIGHT = new VirtualEmptyBlockGetter(p -> 15, p -> 15);
-	public static final VirtualEmptyBlockGetter FULL_DARK = new VirtualEmptyBlockGetter(p -> 0, p -> 0);
+public class EmptyVirtualBlockGetter extends VirtualBlockGetter {
+	public static final EmptyVirtualBlockGetter FULL_DARK = new EmptyVirtualBlockGetter(p -> 0, p -> 0);
+	public static final EmptyVirtualBlockGetter FULL_BRIGHT = new EmptyVirtualBlockGetter(p -> 15, p -> 15);
 
-	public VirtualEmptyBlockGetter(ToIntFunction<BlockPos> blockLightFunc, ToIntFunction<BlockPos> skyLightFunc) {
+	public EmptyVirtualBlockGetter(ToIntFunction<BlockPos> blockLightFunc, ToIntFunction<BlockPos> skyLightFunc) {
 		super(blockLightFunc, skyLightFunc);
-	}
-
-	public static boolean is(BlockAndTintGetter blockGetter) {
-		return blockGetter instanceof VirtualEmptyBlockGetter;
 	}
 
 	@Override

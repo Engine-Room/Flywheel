@@ -17,7 +17,6 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -33,26 +32,17 @@ final class BakedModelBufferer {
 	private BakedModelBufferer() {
 	}
 
-	public static void bufferSingle(@Nullable BlockAndTintGetter level, BakedModel model, @Nullable BlockState state, @Nullable PoseStack poseStack, ResultConsumer resultConsumer) {
+	public static void bufferModel(BakedModel model, BlockPos pos, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, ResultConsumer resultConsumer) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
-		if (level == null) {
-			if (state == null) {
-				state = Blocks.AIR.defaultBlockState();
-			}
-			OriginBlockAndTintGetter originLevel = objects.level;
-			originLevel.originBlockState(state);
-			level = originLevel;
-		} else if (state == null) {
-			state = level.getBlockState(BlockPos.ZERO);
-		}
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
 		RandomSource random = objects.random;
 		MeshEmitter[] emitters = objects.emitters;
 
-		ModelData modelData = model.getModelData(level, BlockPos.ZERO, state, level.getModelData(BlockPos.ZERO));
-		random.setSeed(42L);
+		long seed = state.getSeed(pos);
+		ModelData modelData = model.getModelData(level, pos, state, level.getModelData(pos));
+		random.setSeed(seed);
 		ChunkRenderTypeSet renderTypes = model.getRenderTypes(state, random, modelData);
 
 		ModelBlockRenderer blockRenderer = Minecraft.getInstance()
@@ -66,25 +56,14 @@ final class BakedModelBufferer {
 			emitter.prepare(resultConsumer);
 
 			poseStack.pushPose();
-			blockRenderer.tesselateBlock(level, model, state, BlockPos.ZERO, poseStack, emitter, false, random, 42L, OverlayTexture.NO_OVERLAY, modelData, renderType);
+			blockRenderer.tesselateBlock(level, model, state, pos, poseStack, emitter, false, random, seed, OverlayTexture.NO_OVERLAY, modelData, renderType);
 			poseStack.popPose();
 
 			emitter.end();
 		}
 	}
 
-	public static void bufferBlock(@Nullable BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, ResultConsumer resultConsumer) {
-		if (state.getRenderShape() != RenderShape.MODEL) {
-			return;
-		}
-
-		var blockModel = Minecraft.getInstance()
-				.getBlockRenderer()
-				.getBlockModel(state);
-		bufferSingle(level, blockModel, state, poseStack, resultConsumer);
-	}
-
-	public static void bufferMultiBlock(Iterator<BlockPos> posIterator, BlockAndTintGetter level, @Nullable PoseStack poseStack, boolean renderFluids, ResultConsumer resultConsumer) {
+	public static void bufferBlocks(Iterator<BlockPos> posIterator, BlockAndTintGetter level, @Nullable PoseStack poseStack, boolean renderFluids, ResultConsumer resultConsumer) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
@@ -154,7 +133,6 @@ final class BakedModelBufferer {
 	}
 
 	private static class ThreadLocalObjects {
-		public final OriginBlockAndTintGetter level = new OriginBlockAndTintGetter(p -> 0, p -> 0);
 		public final PoseStack identityPoseStack = new PoseStack();
 		public final RandomSource random = RandomSource.createNewThreadLocalInstance();
 

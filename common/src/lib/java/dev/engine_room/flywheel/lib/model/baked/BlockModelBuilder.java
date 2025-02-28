@@ -11,33 +11,34 @@ import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.block.state.BlockState;
 
 public final class BlockModelBuilder {
-	final BlockState state;
-	@Nullable
-	BlockAndTintGetter level;
+	final BlockAndTintGetter level;
+	final Iterable<BlockPos> positions;
 	@Nullable
 	PoseStack poseStack;
+	boolean renderFluids = false;
 	@Nullable
 	BiFunction<RenderType, Boolean, Material> materialFunc;
 
-	public BlockModelBuilder(BlockState state) {
-		this.state = state;
-	}
-
-	public BlockModelBuilder level(BlockAndTintGetter level) {
+	public BlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
 		this.level = level;
-		return this;
+		this.positions = positions;
 	}
 
-	public BlockModelBuilder poseStack(PoseStack poseStack) {
+	public BlockModelBuilder poseStack(@Nullable PoseStack poseStack) {
 		this.poseStack = poseStack;
 		return this;
 	}
 
-	public BlockModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public BlockModelBuilder renderFluids(boolean renderFluids) {
+		this.renderFluids = renderFluids;
+		return this;
+	}
+
+	public BlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
 		this.materialFunc = materialFunc;
 		return this;
 	}

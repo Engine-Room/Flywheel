@@ -7,7 +7,6 @@ import dev.engine_room.flywheel.lib.model.SimpleModel;
 import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.ModelBuilderImpl;
-import dev.engine_room.flywheel.lib.model.baked.MultiBlockModelBuilder;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.resources.ResourceLocation;
@@ -27,10 +26,5 @@ public class FlwLibXplatImpl implements FlwLibXplat {
 	@Override
 	public SimpleModel buildBlockModelBuilder(BlockModelBuilder builder) {
 		return ModelBuilderImpl.buildBlockModelBuilder(builder);
-	}
-
-	@Override
-	public SimpleModel buildMultiBlockModelBuilder(MultiBlockModelBuilder builder) {
-		return ModelBuilderImpl.buildMultiBlockModelBuilder(builder);
 	}
 }
