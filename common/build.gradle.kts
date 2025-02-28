@@ -87,6 +87,7 @@ jarSets {
         addToAssemble()
         publishWithRemappedSources {
             artifactId = "vanillin-common-intermediary-${property("artifact_minecraft_version")}"
+            version = property("vanillin_version") as String
             groupId = property("vanillin_group") as String
         }
 
@@ -107,6 +108,7 @@ jarSets {
 
             publishWithRawSources {
                 artifactId = "vanillin-common-mojmap-${property("artifact_minecraft_version")}"
+                version = property("vanillin_version") as String
                 groupId = property("vanillin_group") as String
             }
         }

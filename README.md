@@ -48,7 +48,8 @@ dependencies {
     modImplementation "dev.engine-room.flywheel:flywheel-fabric-${minecraft_version}:${flywheel_version}"
 }
 ```
-`${flywheel_version}` gets replaced by the version of Flywheel you want to use, eg. `1.0.0-beta`
+
+`${flywheel_version}` gets replaced by the version of Flywheel you want to use, eg. `1.0.0`
 
 `${minecraft_version}` gets replaced by the version of Minecraft you're on, eg. `1.20.1`
 
