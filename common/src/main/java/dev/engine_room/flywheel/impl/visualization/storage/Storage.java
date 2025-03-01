@@ -25,8 +25,6 @@ import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 public abstract class Storage<T> {
-	protected final VisualizationContext visualizationContext;
-
 	private final Map<T, Visual> visuals = new Reference2ObjectOpenHashMap<>();
 	protected final PlanMap<DynamicVisual, DynamicVisual.Context> dynamicVisuals = new PlanMap<>();
 	protected final PlanMap<TickableVisual, TickableVisual.Context> tickableVisuals = new PlanMap<>();
@@ -34,10 +32,6 @@ public abstract class Storage<T> {
 	protected final List<SimpleTickableVisual> simpleTickableVisuals = new ArrayList<>();
 	protected final LightUpdatedVisualStorage lightUpdatedVisuals = new LightUpdatedVisualStorage();
 	protected final ShaderLightVisualStorage shaderLightVisuals = new ShaderLightVisualStorage();
-
-	public Storage(VisualizationContext visualizationContext) {
-		this.visualizationContext = visualizationContext;
-	}
 
 	public Collection<Visual> getAllVisuals() {
 		return visuals.values();
@@ -71,11 +65,16 @@ public abstract class Storage<T> {
 	 */
 	public abstract boolean willAccept(T obj);
 
-	public void add(T obj, float partialTick) {
+	public void add(VisualizationContext visualizationContext, T obj, float partialTick) {
 		Visual visual = visuals.get(obj);
 
 		if (visual == null) {
-			create(obj, partialTick);
+			visual = createRaw(visualizationContext, obj, partialTick);
+
+			if (visual != null) {
+				setup(visual, partialTick);
+				visuals.put(obj, visual);
+			}
 		}
 	}
 
@@ -120,7 +119,7 @@ public abstract class Storage<T> {
 		visual.update(partialTick);
 	}
 
-	public void recreateAll(float partialTick) {
+	public void recreateAll(VisualizationContext visualizationContext, float partialTick) {
 		dynamicVisuals.clear();
 		tickableVisuals.clear();
 		simpleDynamicVisuals.clear();
@@ -131,7 +130,7 @@ public abstract class Storage<T> {
 		visuals.replaceAll((obj, visual) -> {
 			visual.delete();
 
-			var out = createRaw(obj, partialTick);
+			var out = createRaw(visualizationContext, obj, partialTick);
 
 			if (out != null) {
 				setup(out, partialTick);
@@ -141,17 +140,8 @@ public abstract class Storage<T> {
 		});
 	}
 
-	private void create(T obj, float partialTick) {
-		var visual = createRaw(obj, partialTick);
-
-		if (visual != null) {
-			setup(visual, partialTick);
-			visuals.put(obj, visual);
-		}
-	}
-
 	@Nullable
-	protected abstract Visual createRaw(T obj, float partialTick);
+	protected abstract Visual createRaw(VisualizationContext visualizationContext, T obj, float partialTick);
 
 	private void setup(Visual visual, float partialTick) {
 		if (visual instanceof DynamicVisual dynamic) {

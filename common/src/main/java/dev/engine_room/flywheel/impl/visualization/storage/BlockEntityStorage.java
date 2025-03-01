@@ -15,10 +15,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public class BlockEntityStorage extends Storage<BlockEntity> {
 	private final Long2ObjectMap<BlockEntityVisual<?>> posLookup = new Long2ObjectOpenHashMap<>();
 
-	public BlockEntityStorage(VisualizationContext visualizationContext) {
-		super(visualizationContext);
-	}
-
 	@Nullable
 	public BlockEntityVisual<?> visualAtPos(long pos) {
 		return posLookup.get(pos);
@@ -50,7 +46,7 @@ public class BlockEntityStorage extends Storage<BlockEntity> {
 
 	@Override
 	@Nullable
-	protected BlockEntityVisual<?> createRaw(BlockEntity obj, float partialTick) {
+	protected BlockEntityVisual<?> createRaw(VisualizationContext visualizationContext, BlockEntity obj, float partialTick) {
 		var visualizer = VisualizationHelper.getVisualizer(obj);
 		if (visualizer == null) {
 			return null;
@@ -72,9 +68,9 @@ public class BlockEntityStorage extends Storage<BlockEntity> {
 	}
 
 	@Override
-	public void recreateAll(float partialTick) {
+	public void recreateAll(VisualizationContext visualizationContext, float partialTick) {
 		posLookup.clear();
-		super.recreateAll(partialTick);
+		super.recreateAll(visualizationContext, partialTick);
 	}
 
 	@Override

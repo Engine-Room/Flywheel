@@ -5,12 +5,8 @@ import dev.engine_room.flywheel.api.visual.EffectVisual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 
 public class EffectStorage extends Storage<Effect> {
-	public EffectStorage(VisualizationContext visualizationContext) {
-		super(visualizationContext);
-	}
-
 	@Override
-	protected EffectVisual<?> createRaw(Effect obj, float partialTick) {
+	protected EffectVisual<?> createRaw(VisualizationContext visualizationContext, Effect obj, float partialTick) {
 		return obj.visualize(visualizationContext, partialTick);
 	}
 

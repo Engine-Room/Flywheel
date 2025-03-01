@@ -7,18 +7,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 
 public class EntityStorage extends Storage<Entity> {
-	public EntityStorage(VisualizationContext visualizationContext) {
-		super(visualizationContext);
-	}
-
 	@Override
-	protected EntityVisual<?> createRaw(Entity obj, float partialTick) {
+	protected EntityVisual<?> createRaw(VisualizationContext context, Entity obj, float partialTick) {
 		var visualizer = VisualizationHelper.getVisualizer(obj);
 		if (visualizer == null) {
 			return null;
 		}
 
-		return visualizer.createVisual(visualizationContext, obj, partialTick);
+		return visualizer.createVisual(context, obj, partialTick);
 	}
 
 	@Override

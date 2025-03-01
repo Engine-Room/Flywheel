@@ -7,6 +7,7 @@ import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visualization.VisualManager;
+import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.impl.visualization.storage.Storage;
 import dev.engine_room.flywheel.impl.visualization.storage.Transaction;
 import dev.engine_room.flywheel.lib.task.SimplePlan;
@@ -54,21 +55,25 @@ public class VisualManagerImpl<T, S extends Storage<T>> implements VisualManager
 		queue.add(Transaction.update(obj));
 	}
 
-	public void processQueue(float partialTick) {
+	public void processQueue(VisualizationContext visualizationContext, float partialTick) {
 		var storage = getStorage();
 		Transaction<T> transaction;
 		while ((transaction = queue.poll()) != null) {
-			transaction.apply(storage, partialTick);
+			switch (transaction.action()) {
+			case ADD -> storage.add(visualizationContext, transaction.obj(), partialTick);
+			case REMOVE -> storage.remove(transaction.obj());
+			case UPDATE -> storage.update(transaction.obj(), partialTick);
+			}
 		}
 	}
 
-	public Plan<DynamicVisual.Context> framePlan() {
-		return SimplePlan.<DynamicVisual.Context>of(context -> processQueue(context.partialTick()))
+	public Plan<DynamicVisual.Context> framePlan(VisualizationContext visualizationContext) {
+		return SimplePlan.<DynamicVisual.Context>of(context -> processQueue(visualizationContext, context.partialTick()))
 				.then(storage.framePlan());
 	}
 
-	public Plan<TickableVisual.Context> tickPlan() {
-		return SimplePlan.<TickableVisual.Context>of(context -> processQueue(1))
+	public Plan<TickableVisual.Context> tickPlan(VisualizationContext visualizationContext) {
+		return SimplePlan.<TickableVisual.Context>of(context -> processQueue(visualizationContext, 1))
 				.then(storage.tickPlan());
 	}
 
