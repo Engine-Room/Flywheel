@@ -374,8 +374,11 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 		contentsChanged.clear();
 	}
 
+	@Override
 	public void parallelUpdate() {
 		var pages = this.pages.get();
+
+		mergeablePages.clear(pages.length, mergeablePages.currentCapacity() + 1);
 
 		int page = 0;
 		while (mergeablePages.cardinality() > 1) {

@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.Nullable;
+
 import dev.engine_room.flywheel.backend.glsl.SourceFile;
 import dev.engine_room.flywheel.backend.glsl.SourceLines;
 import dev.engine_room.flywheel.backend.glsl.error.ConsoleColors;
@@ -56,18 +58,22 @@ public class FailedCompilation {
 			return;
 		}
 
-		Matcher matcher;
+		try {
+			Matcher matcher;
 
-		matcher = PATTERN_ONE.matcher(s);
-		if (matcher.find()) {
-			out.accept(interpretPattern1(matcher));
-			return;
-		}
+			matcher = PATTERN_ONE.matcher(s);
+			if (matcher.find()) {
+				out.accept(interpretPattern1(matcher));
+				return;
+			}
 
-		matcher = PATTERN_TWO.matcher(s);
-		if (matcher.find()) {
-			out.accept(interpretPattern2(matcher));
-			return;
+			matcher = PATTERN_TWO.matcher(s);
+			if (matcher.find()) {
+				out.accept(interpretPattern2(matcher));
+				return;
+			}
+		} catch (Throwable ignored) {
+			// noop, if parsing/span matching fails somehow lets just emit the raw error string.
 		}
 
 		out.accept(ErrorBuilder.create()
@@ -114,15 +120,10 @@ public class FailedCompilation {
 				.pointAt(span, 1);
 	}
 
-	private ErrorBuilder interpretWithSpan(ErrorLevel errorLevel, int fileId, int lineNo, String span, String msg) {
+	private ErrorBuilder interpretWithSpan(ErrorLevel errorLevel, int fileId, int lineNo, @Nullable String span, String msg) {
 		var sourceFile = files.get(fileId - 1);
 
-		Span errorSpan;
-		if (span != null) {
-			errorSpan = sourceFile.getLineSpanMatching(lineNo, span);
-		} else {
-			errorSpan = sourceFile.getLineSpanNoWhitespace(lineNo);
-		}
+		Span errorSpan = sourceFile.getLineSpanMatching(lineNo, span);
 
 		return ErrorBuilder.create()
 				.header(errorLevel, msg)
