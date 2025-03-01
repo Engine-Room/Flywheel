@@ -59,9 +59,15 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	private static final LevelAttached<VisualizationManagerImpl> MANAGERS = new LevelAttached<>(VisualizationManagerImpl::new, VisualizationManagerImpl::delete);
 
 	private final TaskExecutorImpl taskExecutor;
-	private final Engine engine;
 	private final DistanceUpdateLimiterImpl frameLimiter;
 	private final RenderDispatcherImpl renderDispatcher = new RenderDispatcherImpl();
+	private final LevelAccessor level;
+
+	// VisualizationManagerImpl can (and should!) be constructed off of the main thread, but it may be
+	// difficult for engines to avoid OpenGL calls which would not be safe. Shove all the init logic
+	// that depends on engine construction into here, and defer until we get invoked on the main thread.
+	@Nullable
+	private LateInit lateInit;
 
 	private final VisualManagerImpl<BlockEntity, BlockEntityStorage> blockEntities;
 	private final VisualManagerImpl<Entity, EntityStorage> entities;
@@ -70,49 +76,14 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	private final Flag frameFlag = new Flag("frame");
 	private final Flag tickFlag = new Flag("tick");
 
-	private final Plan<RenderContext> framePlan;
-	private final Plan<TickableVisual.Context> tickPlan;
-
 	private VisualizationManagerImpl(LevelAccessor level) {
+		this.level = level;
 		taskExecutor = FlwTaskExecutor.get();
-		engine = BackendManager.currentBackend()
-				.createEngine(level);
 		frameLimiter = createUpdateLimiter();
 
-		var visualizationContext = engine.createVisualizationContext();
-		var blockEntitiesStorage = new BlockEntityStorage(visualizationContext);
-		var entitiesStorage = new EntityStorage(visualizationContext);
-		var effectsStorage = new EffectStorage(visualizationContext);
-
-		blockEntities = new VisualManagerImpl<>(blockEntitiesStorage);
-		entities = new VisualManagerImpl<>(entitiesStorage);
-		effects = new VisualManagerImpl<>(effectsStorage);
-
-		var recreate = SimplePlan.<RenderContext>of(context -> blockEntitiesStorage.recreateAll(context.partialTick()),
-				context -> entitiesStorage.recreateAll(context.partialTick()),
-				context -> effectsStorage.recreateAll(context.partialTick()));
-
-		var update = MapContextPlan.map(this::createVisualFrameContext)
-				.to(NestedPlan.of(blockEntities.framePlan(), entities.framePlan(), effects.framePlan()));
-
-		framePlan = IfElsePlan.on((RenderContext ctx) -> engine.updateRenderOrigin(ctx.camera()))
-				.ifTrue(recreate)
-				.ifFalse(update)
-				.plan()
-				.then(SimplePlan.of(() -> {
-					if (blockEntities.areGpuLightSectionsDirty() || entities.areGpuLightSectionsDirty() || effects.areGpuLightSectionsDirty()) {
-						var out = new LongOpenHashSet();
-						out.addAll(blockEntities.gpuLightSections());
-						out.addAll(entities.gpuLightSections());
-						out.addAll(effects.gpuLightSections());
-						engine.lightSections(out);
-					}
-				}))
-				.then(engine.createFramePlan())
-				.then(RaisePlan.raise(frameFlag));
-
-		tickPlan = NestedPlan.of(blockEntities.tickPlan(), entities.tickPlan(), effects.tickPlan())
-				.then(RaisePlan.raise(tickFlag));
+		blockEntities = new VisualManagerImpl<>(new BlockEntityStorage());
+		entities = new VisualManagerImpl<>(new EntityStorage());
+		effects = new VisualManagerImpl<>(new EffectStorage());
 
 		if (level instanceof Level l) {
 			LevelExtension.getAllLoadedEntities(l)
@@ -120,16 +91,65 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		}
 	}
 
-	private DynamicVisual.Context createVisualFrameContext(RenderContext ctx) {
-		Vec3i renderOrigin = engine.renderOrigin();
-		var cameraPos = ctx.camera()
-				.getPosition();
+	private class LateInit {
+		private final Engine engine;
 
-		Matrix4f viewProjection = new Matrix4f(ctx.viewProjection());
-		viewProjection.translate((float) (renderOrigin.getX() - cameraPos.x), (float) (renderOrigin.getY() - cameraPos.y), (float) (renderOrigin.getZ() - cameraPos.z));
-		FrustumIntersection frustum = new FrustumIntersection(viewProjection);
+		private final Plan<RenderContext> framePlan;
+		private final Plan<TickableVisual.Context> tickPlan;
 
-		return new DynamicVisualContextImpl(ctx.camera(), frustum, ctx.partialTick(), frameLimiter);
+		private LateInit(LevelAccessor level) {
+			engine = BackendManager.currentBackend()
+					.createEngine(level);
+
+			var visualizationContext = engine.createVisualizationContext();
+
+			var recreate = SimplePlan.<RenderContext>of(context -> blockEntities.getStorage()
+					.recreateAll(visualizationContext, context.partialTick()), context -> entities.getStorage()
+					.recreateAll(visualizationContext, context.partialTick()), context -> effects.getStorage()
+					.recreateAll(visualizationContext, context.partialTick()));
+
+			var update = MapContextPlan.map(this::createVisualFrameContext)
+					.to(NestedPlan.of(blockEntities.framePlan(visualizationContext), entities.framePlan(visualizationContext), effects.framePlan(visualizationContext)));
+
+			framePlan = IfElsePlan.on((RenderContext ctx) -> engine.updateRenderOrigin(ctx.camera()))
+					.ifTrue(recreate)
+					.ifFalse(update)
+					.plan()
+					.then(SimplePlan.of(() -> {
+						if (blockEntities.areGpuLightSectionsDirty() || entities.areGpuLightSectionsDirty() || effects.areGpuLightSectionsDirty()) {
+							var out = new LongOpenHashSet();
+							out.addAll(blockEntities.gpuLightSections());
+							out.addAll(entities.gpuLightSections());
+							out.addAll(effects.gpuLightSections());
+							engine.lightSections(out);
+						}
+					}))
+					.then(engine.createFramePlan())
+					.then(RaisePlan.raise(frameFlag));
+
+			tickPlan = NestedPlan.of(blockEntities.tickPlan(visualizationContext), entities.tickPlan(visualizationContext), effects.tickPlan(visualizationContext))
+					.then(RaisePlan.raise(tickFlag));
+		}
+
+		private DynamicVisual.Context createVisualFrameContext(RenderContext ctx) {
+			Vec3i renderOrigin = engine.renderOrigin();
+			var cameraPos = ctx.camera()
+					.getPosition();
+
+			Matrix4f viewProjection = new Matrix4f(ctx.viewProjection());
+			viewProjection.translate((float) (renderOrigin.getX() - cameraPos.x), (float) (renderOrigin.getY() - cameraPos.y), (float) (renderOrigin.getZ() - cameraPos.z));
+			FrustumIntersection frustum = new FrustumIntersection(viewProjection);
+
+			return new DynamicVisualContextImpl(ctx.camera(), frustum, ctx.partialTick(), frameLimiter);
+		}
+	}
+
+	private LateInit lateInit() {
+		if (lateInit == null) {
+			lateInit = new LateInit(level);
+		}
+
+		return lateInit;
 	}
 
 	private DistanceUpdateLimiterImpl createUpdateLimiter() {
@@ -191,7 +211,11 @@ public class VisualizationManagerImpl implements VisualizationManager {
 
 	@Override
 	public Vec3i renderOrigin() {
-		return engine.renderOrigin();
+		if (lateInit == null) {
+			return Vec3i.ZERO;
+		} else {
+			return lateInit.engine.renderOrigin();
+		}
 	}
 
 	@Override
@@ -225,7 +249,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		taskExecutor.syncUntil(tickFlag::isRaised);
 		tickFlag.lower();
 
-		tickPlan.execute(taskExecutor, TickableVisualContextImpl.INSTANCE);
+		lateInit().tickPlan.execute(taskExecutor, TickableVisualContextImpl.INSTANCE);
 	}
 
 	/**
@@ -240,7 +264,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 
 		frameLimiter.tick();
 
-		framePlan.execute(taskExecutor, context);
+		lateInit().framePlan.execute(taskExecutor, context);
 	}
 
 	/**
@@ -248,7 +272,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 	 */
 	private void render(RenderContext context) {
 		taskExecutor.syncUntil(frameFlag::isRaised);
-		engine.render(context);
+		lateInit().engine.render(context);
 	}
 
 	private void renderCrumbling(RenderContext context, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress) {
@@ -292,12 +316,12 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		}
 
 		if (!crumblingBlocks.isEmpty()) {
-			engine.renderCrumbling(context, crumblingBlocks);
+			lateInit().engine.renderCrumbling(context, crumblingBlocks);
 		}
 	}
 
 	public void onLightUpdate(SectionPos sectionPos, LightLayer layer) {
-		engine.onLightUpdate(sectionPos, layer);
+		lateInit().engine.onLightUpdate(sectionPos, layer);
 		long longPos = sectionPos.asLong();
 		blockEntities.onLightUpdate(longPos);
 		entities.onLightUpdate(longPos);
@@ -315,7 +339,9 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		blockEntities.invalidate();
 		entities.invalidate();
 		effects.invalidate();
-		engine.delete();
+		if (lateInit != null) {
+			lateInit.engine.delete();
+		}
 	}
 
 	private class RenderDispatcherImpl implements RenderDispatcher {
@@ -335,6 +361,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		}
 	}
 
-	private record CrumblingBlockImpl(BlockPos pos, int progress, List<Instance> instances) implements Engine.CrumblingBlock {
+	private record CrumblingBlockImpl(BlockPos pos, int progress,
+									  List<Instance> instances) implements dev.engine_room.flywheel.api.backend.Engine.CrumblingBlock {
 	}
 }
