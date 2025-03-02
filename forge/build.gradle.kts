@@ -64,16 +64,37 @@ platform {
     setupTestMod(testMod)
 }
 
+val replaceProperties = listOf(
+    "mod_license",
+    "mod_sources",
+    "mod_issues",
+    "mod_homepage",
+    "flywheel_id",
+    "flywheel_name",
+    "flywheel_description",
+    "minecraft_maven_version_range",
+    "forge_version_range",
+).associateWith { property(it) as String }
+    .plus("flywheel_version" to "${property("flywheel_version")}${if (subproject.buildNumber != null) "-${subproject.buildNumber}" else ""}")
+
+tasks.withType<ProcessResources>().configureEach {
+    inputs.properties(replaceProperties)
+
+    filesMatching(listOf("pack.mcmeta", "META-INF/mods.toml")) {
+        expand(replaceProperties)
+    }
+}
+
 jarSets {
     mainSet.publishWithRawSources {
-        artifactId = "flywheel-forge-${project.property("artifact_minecraft_version")}"
+        artifactId = "flywheel-forge-${property("artifact_minecraft_version")}"
     }
     mainSet.outgoing("flywheel")
 
     create("api", api, lib).apply {
         addToAssemble()
         publishWithRawSources {
-            artifactId = "flywheel-forge-api-${project.property("artifact_minecraft_version")}"
+            artifactId = "flywheel-forge-api-${property("artifact_minecraft_version")}"
         }
 
         configureJar {

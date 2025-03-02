@@ -26,9 +26,38 @@ transitiveSourceSets {
     }
 }
 
+var vanillinVersion = "${property("vanillin_version")}+${property("minecraft_version")}"
+
+if (subproject.buildNumber != null) {
+    vanillinVersion += ".build.${subproject.buildNumber}"
+}
+
+val replaceProperties = listOf(
+    "mod_license",
+    "mod_sources",
+    "mod_issues",
+    "mod_homepage",
+    "flywheel_id",
+    "vanillin_id",
+    "vanillin_name",
+    "vanillin_description",
+    "minecraft_semver_version_range",
+    "flywheel_semver_version_range",
+    "fabric_api_version_range",
+).associateWith { property(it) as String }
+    .plus("vanillin_version" to vanillinVersion)
+
+tasks.withType<ProcessResources>().configureEach {
+    inputs.properties(replaceProperties)
+
+    filesMatching(listOf("fabric.mod.json")) {
+        expand(replaceProperties)
+    }
+}
+
 jarSets {
     mainSet.publishWithRemappedSources {
-        artifactId = "vanillin-fabric-${project.property("artifact_minecraft_version")}"
+        artifactId = "vanillin-fabric-${property("artifact_minecraft_version")}"
     }
 }
 

@@ -66,16 +66,43 @@ platform {
     setupTestMod(testMod)
 }
 
+var flywheelVersion = "${property("flywheel_version")}+${property("minecraft_version")}"
+
+if (subproject.buildNumber != null) {
+    flywheelVersion += ".build.${subproject.buildNumber}"
+}
+
+val replaceProperties = listOf(
+    "mod_license",
+    "mod_sources",
+    "mod_issues",
+    "mod_homepage",
+    "flywheel_id",
+    "flywheel_name",
+    "flywheel_description",
+    "minecraft_semver_version_range",
+    "fabric_api_version_range",
+).associateWith { property(it) as String }
+    .plus("flywheel_version" to flywheelVersion)
+
+tasks.withType<ProcessResources>().configureEach {
+    inputs.properties(replaceProperties)
+
+    filesMatching(listOf("fabric.mod.json")) {
+        expand(replaceProperties)
+    }
+}
+
 jarSets {
     mainSet.publishWithRemappedSources {
-        artifactId = "flywheel-fabric-${project.property("artifact_minecraft_version")}"
+        artifactId = "flywheel-fabric-${property("artifact_minecraft_version")}"
     }
     mainSet.outgoing("flywheel")
 
     create("api", api, lib).apply {
         addToAssemble()
         publishWithRemappedSources {
-            artifactId = "flywheel-fabric-api-${project.property("artifact_minecraft_version")}"
+            artifactId = "flywheel-fabric-api-${property("artifact_minecraft_version")}"
         }
 
         configureJar {

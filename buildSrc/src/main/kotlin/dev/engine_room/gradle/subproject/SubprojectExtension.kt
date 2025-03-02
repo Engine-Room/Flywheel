@@ -13,7 +13,6 @@ import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.jvm.tasks.Jar
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.*
-import org.gradle.language.jvm.tasks.ProcessResources
 import java.io.File
 import java.net.URI
 import java.util.*
@@ -31,11 +30,18 @@ open class SubprojectExtension(val project: Project) {
         setupPublishing()
     }
 
-    private fun setBaseProperties(archiveBase: String, group: String, version: String) {
+    val buildNumber: String? by lazy {
         val dev = System.getenv("RELEASE")?.contentEquals("false", true) ?: true
-        val buildNumber = System.getenv("BUILD_NUMBER")
 
-        val versionSuffix = if (dev && buildNumber != null) "-${buildNumber}" else ""
+        if (dev) {
+            System.getenv("BUILD_NUMBER")
+        } else {
+            null
+        }
+    }
+
+    private fun setBaseProperties(archiveBase: String, group: String, version: String) {
+        val versionSuffix = if (buildNumber != null) "-${buildNumber}" else ""
 
         project.group = project.property(group) as String
         project.version = "${project.property(version)}${versionSuffix}"
@@ -139,16 +145,6 @@ open class SubprojectExtension(val project: Project) {
                 options.optionFiles(project.rootProject.file("javadoc-options.txt"))
                 options.encoding = "UTF-8"
             }
-
-            val replaceProperties = processResourcesExpandProperties.associateWith { project.property(it) as String }
-
-            withType<ProcessResources>().configureEach {
-                inputs.properties(replaceProperties)
-
-                filesMatching(processResourcesExpandFiles) {
-                    expand(replaceProperties)
-                }
-            }
         }
     }
 
@@ -207,26 +203,3 @@ open class SubprojectExtension(val project: Project) {
         }
     }
 }
-
-val processResourcesExpandFiles = listOf("pack.mcmeta", "fabric.mod.json", "META-INF/mods.toml")
-
-val processResourcesExpandProperties = listOf(
-    "mod_license",
-    "mod_sources",
-    "mod_issues",
-    "mod_homepage",
-    "flywheel_id",
-    "flywheel_name",
-    "flywheel_description",
-    "flywheel_version",
-    "vanillin_id",
-    "vanillin_name",
-    "vanillin_version",
-    "vanillin_description",
-    "flywheel_maven_version_range",
-    "flywheel_semver_version_range",
-    "minecraft_semver_version_range",
-    "minecraft_maven_version_range",
-    "fabric_api_version_range",
-    "forge_version_range",
-)
