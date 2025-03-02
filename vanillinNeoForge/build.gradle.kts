@@ -26,9 +26,32 @@ transitiveSourceSets {
     }
 }
 
+val replaceProperties = listOf(
+    "mod_license",
+    "mod_sources",
+    "mod_issues",
+    "mod_homepage",
+    "flywheel_id",
+    "vanillin_id",
+    "vanillin_name",
+    "vanillin_description",
+    "flywheel_maven_version_range",
+    "minecraft_maven_version_range",
+    "neoforge_version_range",
+).associateWith { property(it) as String }
+    .plus("vanillin_version" to "${property("vanillin_version")}${if (subproject.buildNumber != null) "-${subproject.buildNumber}" else ""}")
+
+tasks.withType<ProcessResources>().configureEach {
+    inputs.properties(replaceProperties)
+
+    filesMatching(listOf("pack.mcmeta", "META-INF/neoforge.mods.toml")) {
+        expand(replaceProperties)
+    }
+}
+
 jarSets {
     mainSet.publishWithRawSources {
-        artifactId = "vanillin-neoforge-${project.property("artifact_minecraft_version")}"
+        artifactId = "vanillin-neoforge-${property("artifact_minecraft_version")}"
     }
 }
 

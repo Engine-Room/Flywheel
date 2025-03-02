@@ -64,16 +64,37 @@ platform {
     setupTestMod(testMod)
 }
 
+val replaceProperties = listOf(
+    "mod_license",
+    "mod_sources",
+    "mod_issues",
+    "mod_homepage",
+    "flywheel_id",
+    "flywheel_name",
+    "flywheel_description",
+    "minecraft_maven_version_range",
+    "neoforge_version_range",
+).associateWith { property(it) as String }
+    .plus("flywheel_version" to "${property("flywheel_version")}${if (subproject.buildNumber != null) "-${subproject.buildNumber}" else ""}")
+
+tasks.withType<ProcessResources>().configureEach {
+    inputs.properties(replaceProperties)
+
+    filesMatching(listOf("pack.mcmeta", "META-INF/neoforge.mods.toml")) {
+        expand(replaceProperties)
+    }
+}
+
 jarSets {
     mainSet.publishWithRawSources {
-        artifactId = "flywheel-neoforge-${project.property("artifact_minecraft_version")}"
+        artifactId = "flywheel-neoforge-${property("artifact_minecraft_version")}"
     }
     mainSet.outgoing("flywheel")
 
     create("api", api, lib).apply {
         addToAssemble()
         publishWithRawSources {
-            artifactId = "flywheel-neoforge-api-${project.property("artifact_minecraft_version")}"
+            artifactId = "flywheel-neoforge-api-${property("artifact_minecraft_version")}"
         }
 
         configureJar {
