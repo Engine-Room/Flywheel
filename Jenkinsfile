@@ -8,6 +8,15 @@ pipeline {
         jdk "jdk-17.0.1"
     }
 
+    options {
+        // Sometimes builds freeze, but this doesn't have to be super aggressive.
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
+    parameters {
+        booleanParam(name: 'RELEASE', defaultValue: false, description: 'Publish artifacts without a build number.')
+    }
+
     stages {
 
         stage('Setup') {
@@ -21,6 +30,10 @@ pipeline {
         }
 
         stage('Build') {
+
+            environment {
+                RELEASE="${params.RELEASE}"
+            }
 
             steps {
                 withCredentials([
