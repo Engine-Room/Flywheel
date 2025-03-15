@@ -32,6 +32,7 @@ import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBufferType;
+import dev.engine_room.flywheel.backend.gl.buffer.GlBufferUsage;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 import net.minecraft.client.Minecraft;
@@ -43,7 +44,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	private final MeshPool meshPool;
 	private final GlVertexArray vertexArray;
 	private final Map<InstanceType<?>, IndirectCullingGroup<?>> cullingGroups = new HashMap<>();
-	private final GlBuffer crumblingDrawBuffer = new GlBuffer();
+	private final GlBuffer crumblingDrawBuffer = new GlBuffer(GlBufferUsage.STREAM_DRAW);
 	private final LightBuffers lightBuffers;
 	private final MatrixBuffer matrixBuffer;
 

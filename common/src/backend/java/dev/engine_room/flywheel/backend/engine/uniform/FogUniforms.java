@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.backend.engine.uniform;
 
+import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 public final class FogUniforms extends UniformWriter {
@@ -17,8 +18,10 @@ public final class FogUniforms extends UniformWriter {
 		ptr = writeFloat(ptr, color[3]);
 		ptr = writeFloat(ptr, RenderSystem.getShaderFogStart());
 		ptr = writeFloat(ptr, RenderSystem.getShaderFogEnd());
-		ptr = writeInt(ptr, RenderSystem.getShaderFogShape()
-				.getIndex());
+
+		var fogShape = RenderSystem.getShaderFogShape();
+		// Shouldn't ever be null, but we've seen crashes here.
+		ptr = writeInt(ptr, (fogShape == null ? FogShape.SPHERE : fogShape).getIndex());
 
 		BUFFER.markDirty();
 	}
