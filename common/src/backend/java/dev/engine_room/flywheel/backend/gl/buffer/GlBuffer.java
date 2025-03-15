@@ -13,10 +13,6 @@ public class GlBuffer extends GlObject {
 	 */
 	protected long size;
 
-	public GlBuffer() {
-		this(GlBufferUsage.STATIC_DRAW);
-	}
-
 	public GlBuffer(GlBufferUsage usage) {
 		handle(Buffer.IMPL.create());
 		this.usage = usage;

@@ -13,6 +13,7 @@ import dev.engine_room.flywheel.backend.InternalVertex;
 import dev.engine_room.flywheel.backend.gl.GlPrimitive;
 import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
+import dev.engine_room.flywheel.backend.gl.buffer.GlBufferUsage;
 import dev.engine_room.flywheel.backend.util.ReferenceCounted;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 import dev.engine_room.flywheel.lib.vertex.VertexView;
@@ -34,7 +35,7 @@ public class MeshPool {
 	 */
 	public MeshPool() {
 		vertexView = InternalVertex.createVertexView();
-		vbo = new GlBuffer();
+		vbo = new GlBuffer(GlBufferUsage.DYNAMIC_DRAW);
 		indexPool = new IndexPool();
 	}
 

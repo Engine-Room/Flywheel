@@ -7,6 +7,7 @@ import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.engine.LightStorage;
 import dev.engine_room.flywheel.backend.gl.TextureBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
+import dev.engine_room.flywheel.backend.gl.buffer.GlBufferUsage;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 
 public class InstancedLight {
@@ -16,8 +17,8 @@ public class InstancedLight {
 	private final TextureBuffer sectionsTexture;
 
 	public InstancedLight() {
-		lut = new GlBuffer();
-		sections = new GlBuffer();
+		lut = new GlBuffer(GlBufferUsage.DYNAMIC_DRAW);
+		sections = new GlBuffer(GlBufferUsage.DYNAMIC_DRAW);
 		lutTexture = new TextureBuffer(GL32.GL_R32UI);
 		sectionsTexture = new TextureBuffer(GL32.GL_R32UI);
 	}
