@@ -5,6 +5,7 @@ import dev.engine_room.vanillin.config.Configurator;
 import dev.engine_room.vanillin.config.EntityVisualizerBuilder;
 import dev.engine_room.vanillin.visuals.BellVisual;
 import dev.engine_room.vanillin.visuals.ChestVisual;
+import dev.engine_room.vanillin.visuals.ItemVisual;
 import dev.engine_room.vanillin.visuals.MinecartVisual;
 import dev.engine_room.vanillin.visuals.ShulkerBoxVisual;
 import dev.engine_room.vanillin.visuals.SignVisual;
@@ -73,6 +74,11 @@ public class VanillaVisuals {
 				.factory(TntMinecartVisual::new)
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply(STABLE);
+
+
+		builder(EntityType.ITEM).factory(ItemVisual::new)
+				.skipVanillaRender(ItemVisual::isSupported)
+				.apply(EXPERIMENTAL);
 	}
 
 	public static <T extends BlockEntity> BlockEntityVisualizerBuilder<T> builder(BlockEntityType<T> type) {
