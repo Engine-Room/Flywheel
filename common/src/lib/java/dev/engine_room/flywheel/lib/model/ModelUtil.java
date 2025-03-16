@@ -50,9 +50,18 @@ public final class ModelUtil {
 			return chunkMaterial;
 		}
 
-		if (renderType == Sheets.translucentCullBlockSheet() || renderType == Sheets.translucentItemSheet()) {
+		if (renderType == Sheets.cutoutBlockSheet()) {
 			return Materials.CUTOUT_BLOCK;
 		}
+
+		if (renderType == Sheets.solidBlockSheet()) {
+			return Materials.SOLID_BLOCK;
+		}
+
+		if (renderType == Sheets.translucentCullBlockSheet() || renderType == Sheets.translucentItemSheet()) {
+			return Materials.TRANSLUCENT_ENTITY;
+		}
+
 		if (renderType == RenderType.glint() || renderType == RenderType.glintTranslucent()) {
 			return Materials.GLINT;
 		}

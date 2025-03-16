@@ -64,6 +64,13 @@ public final class Materials {
 			.texture(ItemRenderer.ENCHANTED_GLINT_ENTITY)
 			.build();
 
+	public static final Material TRANSLUCENT_ENTITY = SimpleMaterial.builder()
+			.transparency(Transparency.TRANSLUCENT)
+			.cutout(CutoutShaders.ONE_TENTH)
+			.blur(false)
+			.mipmap(false)
+			.build();
+
 	private Materials() {
 	}
 }
