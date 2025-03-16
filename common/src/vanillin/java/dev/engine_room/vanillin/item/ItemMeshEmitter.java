@@ -3,7 +3,9 @@ package dev.engine_room.vanillin.item;
 import org.jetbrains.annotations.UnknownNullability;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.renderer.RenderType;
@@ -11,13 +13,15 @@ import net.minecraft.client.renderer.RenderType;
 // Basically a copy of flywheel lib's private mesh emitter, but this does not consider shade.
 class ItemMeshEmitter {
 	private final RenderType renderType;
-	private final BufferBuilder bufferBuilder;
+	private final ByteBufferBuilder byteBufferBuilder;
+	@UnknownNullability
+	private BufferBuilder bufferBuilder;
 
 	private @UnknownNullability ResultConsumer resultConsumer;
 
 	ItemMeshEmitter(RenderType renderType) {
 		this.renderType = renderType;
-		this.bufferBuilder = new BufferBuilder(renderType.bufferSize());
+		this.byteBufferBuilder = new ByteBufferBuilder(renderType.bufferSize());
 	}
 
 	public void prepare(ResultConsumer resultConsumer) {
@@ -25,7 +29,7 @@ class ItemMeshEmitter {
 	}
 
 	public void end() {
-		if (bufferBuilder.building()) {
+		if (bufferBuilder != null) {
 			emit();
 		}
 		resultConsumer = null;
@@ -37,21 +41,22 @@ class ItemMeshEmitter {
 	}
 
 	private void prepareForGeometry() {
-		if (!bufferBuilder.building()) {
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+		if (bufferBuilder == null) {
+			bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 		}
 	}
 
 	private void emit() {
-		var renderedBuffer = bufferBuilder.endOrDiscardIfEmpty();
+		var data = bufferBuilder.build();
+		bufferBuilder = null;
 
-		if (renderedBuffer != null) {
-			resultConsumer.accept(renderType, renderedBuffer);
-			renderedBuffer.release();
+		if (data != null) {
+			resultConsumer.accept(renderType, data);
+			data.close();
 		}
 	}
-
 	public interface ResultConsumer {
-		void accept(RenderType renderType, BufferBuilder.RenderedBuffer data);
+		void accept(RenderType renderType, MeshData data);
 	}
 }
+

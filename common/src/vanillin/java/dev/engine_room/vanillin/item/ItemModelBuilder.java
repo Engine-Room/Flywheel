@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -141,16 +141,16 @@ public class ItemModelBuilder {
 		emitterSource.end();
 	}
 
-	public static SimpleQuadMesh blockVerticesToMesh(BufferBuilder.RenderedBuffer buffer, @Nullable String meshDescriptor) {
-		BufferBuilder.DrawState drawState = buffer.drawState();
+	public static SimpleQuadMesh blockVerticesToMesh(MeshData data, @Nullable String meshDescriptor) {
+		MeshData.DrawState drawState = data.drawState();
 		int vertexCount = drawState.vertexCount();
 		long srcStride = drawState.format()
-				.getVertexSize();
+			.getVertexSize();
 
 		VertexView vertexView = new NoOverlayVertexView();
 		long dstStride = vertexView.stride();
 
-		ByteBuffer src = buffer.vertexBuffer();
+		ByteBuffer src = data.vertexBuffer();
 		MemoryBlock dst = MemoryBlock.mallocTracked((long) vertexCount * dstStride);
 		long srcPtr = MemoryUtil.memAddress(src);
 		long dstPtr = dst.ptr();

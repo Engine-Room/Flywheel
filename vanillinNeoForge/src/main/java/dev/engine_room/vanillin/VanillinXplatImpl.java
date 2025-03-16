@@ -1,6 +1,6 @@
 package dev.engine_room.vanillin;
 
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 public class VanillinXplatImpl implements VanillinXplat {
 	@Override
