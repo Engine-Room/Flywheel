@@ -43,16 +43,6 @@ float linear_depth() {
     return linearize_depth(gl_FragCoord.z, _flw_cullData.znear, _flw_cullData.zfar);
 }
 
-float depth() {
-    float linearDepth = linear_depth();
-
-    vec2 depthRange = texelFetch(_flw_depthRange, ivec2(gl_FragCoord.xy), 0).rg;
-    float delta = depthRange.x + depthRange.y;
-    float depth = (linearDepth + depthRange.x) / delta;
-
-    return depth - tented_blue_noise(depth) * _flw_oitNoise;
-}
-
 #ifdef _FLW_DEPTH_RANGE
 
 out vec2 _flw_depthRange_out;
@@ -164,13 +154,27 @@ void _flw_main() {
 
     #ifdef _FLW_OIT
 
-    #ifdef _FLW_DEPTH_RANGE
     float linearDepth = linear_depth();
+    #ifdef _FLW_DEPTH_RANGE
 
     // Pad the depth by some unbalanced epsilons because minecraft has a lot of single-quad tranparency.
     // The unbalance means our fragment will be considered closer to the screen in the normalization,
     // which helps prevent unnecessary noise as it'll be closer to the edge of our tent function.
     _flw_depthRange_out = vec2(-linearDepth + 1e-5, linearDepth + 1e-2);
+    #else
+    // This section is common to both other passes.
+
+    vec2 depthRange = texelFetch(_flw_depthRange, ivec2(gl_FragCoord.xy), 0).rg;
+    float delta = depthRange.x + depthRange.y;
+    float our_depth = (linearDepth + depthRange.x) / delta;
+
+    float depth_adjustment = tented_blue_noise(our_depth) * _flw_oitNoise;
+
+    float our_transmittance = 1. - color.a;
+    // Don't do the depth adjustment if this fragment is opaque.
+    if (our_transmittance > 1e-5) {
+        our_depth -= depth_adjustment;
+    }
     #endif
 
     #ifdef _FLW_COLLECT_COEFFS
@@ -181,7 +185,7 @@ void _flw_main() {
     result[2] = vec4(0.);
     result[3] = vec4(0.);
 
-    add_transmittance(result, 1. - color.a, depth());
+    add_transmittance(result, our_transmittance, our_depth);
 
     _flw_coeffs0 = result[0];
     _flw_coeffs1 = result[1];
@@ -192,7 +196,7 @@ void _flw_main() {
 
     #ifdef _FLW_EVALUATE
 
-    float transmittance = signal_corrected_transmittance(_flw_coefficients, depth(), 1. - color.a);
+    float transmittance = signal_corrected_transmittance(_flw_coefficients, our_depth, our_transmittance);
 
     _flw_accumulate = vec4(color.rgb * color.a, color.a) * transmittance;
 
