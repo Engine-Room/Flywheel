@@ -18,56 +18,61 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 public class VanillaVisuals {
 	public static final Configurator CONFIGURATOR = new Configurator();
 
+	// Stable visuals are enabled by default always.
+	public static final boolean STABLE = true;
+	// Experimental visuals are enabled by default in dev.
+	public static final boolean EXPERIMENTAL = VanillinXplat.INSTANCE.isDevelopmentEnvironment();
+
 	public static void init() {
 		builder(BlockEntityType.CHEST)
 				.factory(ChestVisual::new)
-				.apply(true);
+				.apply(STABLE);
 		builder(BlockEntityType.ENDER_CHEST)
 				.factory(ChestVisual::new)
-				.apply(true);
+				.apply(STABLE);
 		builder(BlockEntityType.TRAPPED_CHEST)
 				.factory(ChestVisual::new)
-				.apply(true);
+				.apply(STABLE);
 
 		builder(BlockEntityType.BELL)
 				.factory(BellVisual::new)
-				.apply(true);
+				.apply(STABLE);
 
 		builder(BlockEntityType.SHULKER_BOX)
 				.factory(ShulkerBoxVisual::new)
-				.apply(true);
+				.apply(STABLE);
 
 		builder(BlockEntityType.SIGN).factory(SignVisual::new)
-				.apply(false);
+				.apply(EXPERIMENTAL);
 
 		builder(EntityType.CHEST_MINECART)
 				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, ModelLayers.CHEST_MINECART))
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
-				.apply(true);
+				.apply(STABLE);
 		builder(EntityType.COMMAND_BLOCK_MINECART)
 				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, ModelLayers.COMMAND_BLOCK_MINECART))
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
-				.apply(true);
+				.apply(STABLE);
 		builder(EntityType.FURNACE_MINECART)
 				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, ModelLayers.FURNACE_MINECART))
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
-				.apply(true);
+				.apply(STABLE);
 		builder(EntityType.HOPPER_MINECART)
 				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, ModelLayers.HOPPER_MINECART))
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
-				.apply(true);
+				.apply(STABLE);
 		builder(EntityType.MINECART)
 				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, ModelLayers.MINECART))
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
-				.apply(true);
+				.apply(STABLE);
 		builder(EntityType.SPAWNER_MINECART)
 				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, ModelLayers.SPAWNER_MINECART))
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
-				.apply(true);
+				.apply(STABLE);
 		builder(EntityType.TNT_MINECART)
 				.factory(TntMinecartVisual::new)
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
-				.apply(true);
+				.apply(STABLE);
 	}
 
 	public static <T extends BlockEntity> BlockEntityVisualizerBuilder<T> builder(BlockEntityType<T> type) {
