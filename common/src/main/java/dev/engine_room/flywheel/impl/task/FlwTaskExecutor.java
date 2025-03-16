@@ -1,13 +1,12 @@
 package dev.engine_room.flywheel.impl.task;
 
-import org.apache.commons.lang3.concurrent.AtomicSafeInitializer;
-import org.apache.commons.lang3.concurrent.ConcurrentUtils;
+import java.util.concurrent.atomic.AtomicReference;
 
 import dev.engine_room.flywheel.impl.FlwConfig;
 import net.minecraft.util.Mth;
 
 public final class FlwTaskExecutor {
-	private static final Initializer INITIALIZER = new Initializer();
+	private static final AtomicLazy INSTANCE = new AtomicLazy();
 
 	private FlwTaskExecutor() {
 	}
@@ -17,7 +16,7 @@ public final class FlwTaskExecutor {
 	 * @return A global Flywheel thread pool.
 	 */
 	public static TaskExecutorImpl get() {
-		return ConcurrentUtils.initializeUnchecked(INITIALIZER);
+		return INSTANCE.get();
 	}
 
 	/**
@@ -32,8 +31,26 @@ public final class FlwTaskExecutor {
 				.availableProcessors();
 	}
 
-	private static class Initializer extends AtomicSafeInitializer<TaskExecutorImpl> {
-		@Override
+	/**
+	 * Copy of apache commons' {@code AtomicSafeInitializer}
+	 */
+	private static class AtomicLazy {
+		private final AtomicReference<AtomicLazy> factory = new AtomicReference<>();
+
+		private final AtomicReference<TaskExecutorImpl> reference = new AtomicReference<>();
+
+		public final TaskExecutorImpl get() {
+			TaskExecutorImpl result;
+
+			while ((result = reference.get()) == null) {
+				if (factory.compareAndSet(null, this)) {
+					reference.set(initialize());
+				}
+			}
+
+			return result;
+		}
+
 		protected TaskExecutorImpl initialize() {
 			int threadCount = FlwConfig.INSTANCE
 					.workerThreads();
