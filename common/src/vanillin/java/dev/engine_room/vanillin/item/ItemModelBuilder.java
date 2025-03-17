@@ -47,6 +47,8 @@ public class ItemModelBuilder {
 				.transparency() == Transparency.GLINT ? 1 : -1;
 	};
 
+	private static final ThreadLocal<ThreadLocalObjects> THREAD_LOCAL_OBJECTS = ThreadLocal.withInitial(ThreadLocalObjects::new);
+
 	private final ItemStack itemStack;
 	private final BakedModel model;
 	@Nullable
@@ -81,12 +83,6 @@ public class ItemModelBuilder {
 		this.materialFunc = materialFunc;
 		return this;
 	}
-
-	private static final RenderType[] CHUNK_LAYERS = RenderType.chunkBufferLayers()
-			.toArray(RenderType[]::new);
-	private static final int CHUNK_LAYER_AMOUNT = CHUNK_LAYERS.length;
-
-	private static final ThreadLocal<ThreadLocalObjects> THREAD_LOCAL_OBJECTS = ThreadLocal.withInitial(ThreadLocalObjects::new);
 
 	public SimpleModel build() {
 		if (displayContext == null) {
@@ -174,17 +170,7 @@ public class ItemModelBuilder {
 
 	private static class ThreadLocalObjects {
 		public final PoseStack identityPoseStack = new PoseStack();
-
 		public final MeshEmitterSource emitterSource = new MeshEmitterSource();
-
-		public final ItemMeshEmitter[] emitters = new ItemMeshEmitter[CHUNK_LAYER_AMOUNT];
-
-		{
-			for (int layerIndex = 0; layerIndex < CHUNK_LAYER_AMOUNT; layerIndex++) {
-				var renderType = CHUNK_LAYERS[layerIndex];
-				emitters[layerIndex] = new ItemMeshEmitter(renderType);
-			}
-		}
 	}
 
 	private static class MeshEmitterSource implements MultiBufferSource {
