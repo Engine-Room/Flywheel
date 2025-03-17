@@ -2,7 +2,7 @@
 <img src=".github/logo.png" alt="Logo by jnix" width="250">
 <h1>Flywheel</h1>
 <h6>Reinventing the wheel so you don't have to.</h6>
-<a href='https://ci.tterrag.com/job/Flywheel/job/1.20.1/'><img src='https://ci.tterrag.com/job/Flywheel/job/1.20.1/badge/icon' alt="Jenkins"></a>
+<a href='https://ci.createmod.net/job/Engine-Room/job/Flywheel/job/1.20.1%252Fdev/'><img src='https://ci.createmod.net/job/Engine-Room/job/Flywheel/job/1.20.1%252Fdev/badge/icon' alt="Jenkins"></a>
 <a href="/LICENSE.md"><img src="https://img.shields.io/github/license/Engine-Room/Flywheel?style=flat&color=900c3f" alt="License"></a>
 <br>
 <a href="https://discord.gg/xjD59ThnXy"><img src="https://img.shields.io/discord/841464837406195712?color=5865f2&label=Discord&style=flat" alt="Discord"></a>
