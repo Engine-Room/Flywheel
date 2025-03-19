@@ -4,6 +4,7 @@ import dev.engine_room.vanillin.config.BlockEntityVisualizerBuilder;
 import dev.engine_room.vanillin.config.Configurator;
 import dev.engine_room.vanillin.config.EntityVisualizerBuilder;
 import dev.engine_room.vanillin.visuals.BellVisual;
+import dev.engine_room.vanillin.visuals.BlockDisplayVisual;
 import dev.engine_room.vanillin.visuals.ChestVisual;
 import dev.engine_room.vanillin.visuals.ItemVisual;
 import dev.engine_room.vanillin.visuals.MinecartVisual;
@@ -45,6 +46,9 @@ public class VanillaVisuals {
 
 		builder(BlockEntityType.SIGN).factory(SignVisual::new)
 				.apply(EXPERIMENTAL);
+
+		builder(EntityType.BLOCK_DISPLAY).factory(BlockDisplayVisual::new)
+				.apply(STABLE);
 
 		builder(EntityType.CHEST_MINECART)
 				.factory((ctx, entity, partialTick) -> new MinecartVisual<>(ctx, entity, partialTick, ModelLayers.CHEST_MINECART))
