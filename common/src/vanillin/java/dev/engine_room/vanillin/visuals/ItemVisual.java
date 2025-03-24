@@ -11,11 +11,8 @@ import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
-import dev.engine_room.flywheel.lib.visual.ComponentEntityVisual;
+import dev.engine_room.flywheel.lib.visual.AbstractEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
-import dev.engine_room.flywheel.lib.visual.component.FireComponent;
-import dev.engine_room.flywheel.lib.visual.component.HitboxComponent;
-import dev.engine_room.flywheel.lib.visual.component.ShadowComponent;
 import dev.engine_room.flywheel.lib.visual.util.InstanceRecycler;
 import dev.engine_room.vanillin.item.ItemModelBuilder;
 import net.minecraft.client.Minecraft;
@@ -33,7 +30,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
 
-public class ItemVisual extends ComponentEntityVisual<ItemEntity> implements SimpleDynamicVisual {
+public class ItemVisual extends AbstractEntityVisual<ItemEntity> implements SimpleDynamicVisual {
 
 	private static final ThreadLocal<RandomSource> RANDOM = ThreadLocal.withInitial(RandomSource::createNewThreadLocalInstance);
 
@@ -50,11 +47,6 @@ public class ItemVisual extends ComponentEntityVisual<ItemEntity> implements Sim
 	public ItemVisual(VisualizationContext ctx, ItemEntity entity, float partialTick) {
 		super(ctx, entity, partialTick);
 
-		addComponent(new ShadowComponent(visualizationContext, entity).radius(0.15f)
-				.strength(0.75f));
-		addComponent(new HitboxComponent(visualizationContext, entity));
-		addComponent(new FireComponent(visualizationContext, entity));
-
 		var item = entity.getItem();
 		model = getModel(item);
 
@@ -68,8 +60,12 @@ public class ItemVisual extends ComponentEntityVisual<ItemEntity> implements Sim
 	}
 
 	public static boolean isSupported(ItemEntity entity) {
-		// Maybe we could cache this by item?
-		return isSupported(getModel(entity.getItem()));
+		return isSupported(entity.getItem());
+	}
+
+	public static boolean isSupported(ItemStack stack) {
+		// Maybe we could cache this?
+		return isSupported(getModel(stack));
 	}
 
 	public static BakedModel getModel(ItemStack stack) {
@@ -102,8 +98,6 @@ public class ItemVisual extends ComponentEntityVisual<ItemEntity> implements Sim
 		if (!isSupported || !isVisible(ctx.frustum())) {
 			return;
 		}
-
-		super.beginFrame(ctx);
 
 		pPoseStack.setIdentity();
 		TransformStack.of(pPoseStack)
@@ -191,8 +185,6 @@ public class ItemVisual extends ComponentEntityVisual<ItemEntity> implements Sim
 
 	@Override
 	protected void _delete() {
-		super._delete();
-
 		instances.delete();
 	}
 

@@ -15,12 +15,9 @@ import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.model.part.InstanceTree;
 import dev.engine_room.flywheel.lib.model.part.ModelTrees;
-import dev.engine_room.flywheel.lib.visual.ComponentEntityVisual;
+import dev.engine_room.flywheel.lib.visual.AbstractEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
-import dev.engine_room.flywheel.lib.visual.component.FireComponent;
-import dev.engine_room.flywheel.lib.visual.component.HitboxComponent;
-import dev.engine_room.flywheel.lib.visual.component.ShadowComponent;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -29,7 +26,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityVisual<T> implements SimpleTickableVisual, SimpleDynamicVisual {
+public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVisual<T> implements SimpleTickableVisual, SimpleDynamicVisual {
 	private static final ResourceLocation TEXTURE = new ResourceLocation("textures/entity/minecart.png");
 	private static final Material MATERIAL = SimpleMaterial.builder()
 			.texture(TEXTURE)
@@ -50,10 +47,6 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 		instances = InstanceTree.create(instancerProvider(), ModelTrees.of(layerLocation, MATERIAL));
 		blockState = entity.getDisplayBlockState();
 		contents = createContentsInstance();
-
-		addComponent(new ShadowComponent(visualizationContext, entity).radius(0.7f));
-		addComponent(new FireComponent(visualizationContext, entity));
-		addComponent(new HitboxComponent(visualizationContext, entity));
 
 		updateInstances(partialTick);
 		updateLight(partialTick);
@@ -91,8 +84,6 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 
 	@Override
 	public void beginFrame(DynamicVisual.Context context) {
-		super.beginFrame(context);
-
 		if (!isVisible(context.frustum())) {
 			return;
 		}
@@ -193,7 +184,6 @@ public class MinecartVisual<T extends AbstractMinecart> extends ComponentEntityV
 
 	@Override
 	protected void _delete() {
-		super._delete();
 		instances.delete();
 		if (contents != null) {
 			contents.delete();
