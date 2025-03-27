@@ -223,7 +223,7 @@ public final class TextVisual {
 				var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
 
 				GlyphInstance instance = recycler.get(effectKey(glyphExtension.flywheel$texture(), TextLayer.GlyphMaterial.SEE_THROUGH, 0));
-				instance.setEffect(glyph, pose, startX - 1.0f, 9.0f, endX + 1.0f, 1.0f, 0.01f);
+				instance.setEffect(glyph, pose, startX - 1.0f, 9.0f, endX + 1.0f, -1.0f, 0.01f);
 				instance.colorArgb(backgroundColor);
 				instance.light(light);
 				instance.setChanged();

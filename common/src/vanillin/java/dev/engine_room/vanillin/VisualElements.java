@@ -3,6 +3,7 @@ package dev.engine_room.vanillin;
 import dev.engine_room.vanillin.compose.VisualElement;
 import dev.engine_room.vanillin.elements.FireElement;
 import dev.engine_room.vanillin.elements.HitboxElement;
+import dev.engine_room.vanillin.elements.NametagElement;
 import dev.engine_room.vanillin.elements.ShadowElement;
 import dev.engine_room.vanillin.visuals.ItemFrameVisual;
 import dev.engine_room.vanillin.visuals.ItemVisual;
@@ -20,6 +21,7 @@ public class VisualElements {
 	public static final VisualElement<Entity, Boolean> HITBOX = HitboxElement::new;
 	public static final VisualElement<Entity, ShadowElement.Config> SHADOW = ShadowElement::new;
 	public static final VisualElement.Unit<Entity> FIRE = FireElement::new;
+	public static final VisualElement.Unit<Entity> NAMETAG = NametagElement::new;
 
 	public static final VisualElement.Unit<ItemEntity> ITEM_ENTITY = ItemVisual::new;
 	public static final VisualElement.Unit<ItemFrame> ITEM_FRAME = ItemFrameVisual::new;

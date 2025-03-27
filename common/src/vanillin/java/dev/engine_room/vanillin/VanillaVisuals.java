@@ -99,7 +99,8 @@ public class VanillaVisuals {
 
 	public static <T extends Entity> void commonElements(EntityBuilder<T> builder) {
 		builder.with(element(VisualElements.HITBOX).configure(false)
-				.build());
+						.build())
+				.with(element(VisualElements.NAMETAG).build());
 	}
 
 	public static <T extends ItemFrame> EntityVisualizerBuilder<T> itemFrame(EntityType<T> type) {
