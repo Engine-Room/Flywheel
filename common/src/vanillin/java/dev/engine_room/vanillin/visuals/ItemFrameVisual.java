@@ -13,7 +13,7 @@ import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.visual.AbstractVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
-import dev.engine_room.vanillin.item.ItemModelBuilder;
+import dev.engine_room.vanillin.item.ItemModels;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.resources.model.ModelManager;
@@ -44,11 +44,6 @@ public class ItemFrameVisual extends AbstractVisual implements EntityVisual<Item
 				.build();
 	});
 
-	public static final RendererReloadCache<ItemVisual.ItemKey, Model> ITEMS = new RendererReloadCache<>(stack -> {
-		return new ItemModelBuilder(stack.stack(), stack.model()).displayContext(ItemDisplayContext.FIXED)
-				.build();
-	});
-
 	private final Matrix4f baseTransform = new Matrix4f();
 
 	private final TransformedInstance frame;
@@ -75,7 +70,7 @@ public class ItemFrameVisual extends AbstractVisual implements EntityVisual<Item
 		frame.setTransform(baseTransform);
 
 		item = ctx.instancerProvider()
-				.instancer(InstanceTypes.TRANSFORMED, ITEMS.get(new ItemVisual.ItemKey(lastItemStack.copy(), ItemVisual.getModel(lastItemStack))))
+				.instancer(InstanceTypes.TRANSFORMED, ItemModels.get(lastItemStack, ItemDisplayContext.FIXED))
 				.createInstance();
 
 		animate(partialTick);
@@ -84,7 +79,7 @@ public class ItemFrameVisual extends AbstractVisual implements EntityVisual<Item
 	public static boolean shouldVisualize(ItemFrame entity) {
 		// We don't support map rendering, and we can't support exotic item models.
 		return !entity.getItem()
-				.is(Items.FILLED_MAP) && ItemVisual.isSupported(entity.getItem());
+				.is(Items.FILLED_MAP) && ItemModels.isSupported(entity.getItem());
 	}
 
 	@Override
@@ -129,7 +124,7 @@ public class ItemFrameVisual extends AbstractVisual implements EntityVisual<Item
 		if (!ItemStack.matches(lastItemStack, stack)) {
 			lastItemStack = stack.copy();
 			visualizationContext.instancerProvider()
-					.instancer(InstanceTypes.TRANSFORMED, ITEMS.get(new ItemVisual.ItemKey(lastItemStack.copy(), ItemVisual.getModel(lastItemStack))))
+					.instancer(InstanceTypes.TRANSFORMED, ItemModels.get(lastItemStack, ItemDisplayContext.FIXED))
 					.stealInstance(item);
 		}
 

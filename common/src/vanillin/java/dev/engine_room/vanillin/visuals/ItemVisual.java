@@ -1,27 +1,18 @@
 package dev.engine_room.vanillin.visuals;
 
-import java.util.Objects;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
-import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
-import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.visual.AbstractEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.util.InstanceRecycler;
-import dev.engine_room.vanillin.item.ItemModelBuilder;
-import net.minecraft.client.Minecraft;
+import dev.engine_room.vanillin.item.ItemModels;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.MultiPartBakedModel;
-import net.minecraft.client.resources.model.SimpleBakedModel;
-import net.minecraft.client.resources.model.WeightedBakedModel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -34,10 +25,6 @@ public class ItemVisual extends AbstractEntityVisual<ItemEntity> implements Simp
 
 	private static final ThreadLocal<RandomSource> RANDOM = ThreadLocal.withInitial(RandomSource::createNewThreadLocalInstance);
 
-	public static final RendererReloadCache<ItemKey, Model> MODEL_CACHE = new RendererReloadCache<>(stack -> {
-		return new ItemModelBuilder(stack.stack(), stack.model()).build();
-	});
-
 	private final PoseStack pPoseStack = new PoseStack();
 	private final BakedModel model;
 	private final boolean isSupported;
@@ -48,49 +35,15 @@ public class ItemVisual extends AbstractEntityVisual<ItemEntity> implements Simp
 		super(ctx, entity, partialTick);
 
 		var item = entity.getItem();
-		model = getModel(item);
+		model = ItemModels.getModel(item);
 
-		isSupported = isSupported(model);
+		isSupported = ItemModels.isSupported(model);
 
-		var key = new ItemKey(item.copy(), model);
+		var key = new ItemModels.ItemKey(item.copy(), model, ItemDisplayContext.GROUND);
 
 		instances = new InstanceRecycler<>(() -> ctx.instancerProvider()
-				.instancer(InstanceTypes.TRANSFORMED, MODEL_CACHE.get(key))
+				.instancer(InstanceTypes.TRANSFORMED, ItemModels.get(key))
 				.createInstance());
-	}
-
-	public static boolean isSupported(ItemEntity entity) {
-		return isSupported(entity.getItem());
-	}
-
-	public static boolean isSupported(ItemStack stack) {
-		// Maybe we could cache this?
-		return isSupported(getModel(stack));
-	}
-
-	public static BakedModel getModel(ItemStack stack) {
-		return Minecraft.getInstance()
-				.getItemRenderer()
-				.getItemModelShaper()
-				.getItemModel(stack);
-	}
-
-	public static boolean isSupported(BakedModel model) {
-		if (model.isCustomRenderer()) {
-			return false;
-		}
-
-		if (model.getOverrides() != ItemOverrides.EMPTY) {
-			return false;
-		}
-
-		// Check for class equality rather than instanceof to ensure subclasses are *not* handled by vanillin.
-		Class<? extends BakedModel> c = model.getClass();
-		if (!(c == SimpleBakedModel.class || c == MultiPartBakedModel.class || c == WeightedBakedModel.class)) {
-			return false;
-		}
-
-		return true;
 	}
 
 	@Override
@@ -188,25 +141,4 @@ public class ItemVisual extends AbstractEntityVisual<ItemEntity> implements Simp
 		instances.delete();
 	}
 
-	public record ItemKey(ItemStack stack, BakedModel model) {
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-
-			var o1 = (ItemKey) o;
-			return Objects.equals(model, o1.model) && stack.hasFoil() == o1.stack.hasFoil();
-		}
-
-		@Override
-		public int hashCode() {
-			int out = model.hashCode();
-			out = 31 * out + Boolean.hashCode(stack.hasFoil());
-			return out;
-		}
-	}
 }

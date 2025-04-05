@@ -15,11 +15,12 @@ import dev.engine_room.vanillin.config.BlockEntityVisualizerBuilder;
 import dev.engine_room.vanillin.config.Configurator;
 import dev.engine_room.vanillin.config.EntityVisualizerBuilder;
 import dev.engine_room.vanillin.elements.ShadowElement;
+import dev.engine_room.vanillin.item.ItemModels;
 import dev.engine_room.vanillin.visuals.BellVisual;
 import dev.engine_room.vanillin.visuals.BlockDisplayVisual;
 import dev.engine_room.vanillin.visuals.ChestVisual;
+import dev.engine_room.vanillin.visuals.ItemDisplayVisual;
 import dev.engine_room.vanillin.visuals.ItemFrameVisual;
-import dev.engine_room.vanillin.visuals.ItemVisual;
 import dev.engine_room.vanillin.visuals.MinecartVisual;
 import dev.engine_room.vanillin.visuals.ShulkerBoxVisual;
 import dev.engine_room.vanillin.visuals.SignVisual;
@@ -65,6 +66,12 @@ public class VanillaVisuals {
 		builder(EntityType.BLOCK_DISPLAY).factory(BlockDisplayVisual::new)
 				.apply(STABLE);
 
+		composable(EntityType.ITEM_DISPLAY).with(element(VisualElements.ITEM_DISPLAY).build())
+				.shouldVisualize((ctx, e) -> ItemDisplayVisual.shouldVisualize(e))
+				.build()
+				.skipVanillaRender(ItemDisplayVisual::shouldVisualize)
+				.apply(EXPERIMENTAL);
+
 		minecart(EntityType.CHEST_MINECART, ModelLayers.CHEST_MINECART)
 				.apply(STABLE);
 		minecart(EntityType.COMMAND_BLOCK_MINECART, ModelLayers.COMMAND_BLOCK_MINECART)
@@ -96,7 +103,7 @@ public class VanillaVisuals {
 						.build())
 				.with(element(VisualElements.ITEM_ENTITY).build())
 				.build()
-				.skipVanillaRender(ItemVisual::isSupported)
+				.skipVanillaRender(ItemModels::isSupported)
 				.apply(EXPERIMENTAL);
 
 	}
