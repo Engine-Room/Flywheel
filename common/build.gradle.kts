@@ -45,7 +45,7 @@ transitiveSourceSets {
     }
     sourceSet(vanillin) {
         rootCompile()
-        compileClasspath(api, lib)
+        compileClasspath(api, lib, main)
         outgoing()
     }
 }

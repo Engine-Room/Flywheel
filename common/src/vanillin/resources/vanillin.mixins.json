@@ -10,7 +10,8 @@
     "text.FontAccessor",
     "text.FontSetMixin",
     "text.FontTexture$NodeAccessor",
-    "text.FontTextureMixin"
+    "text.FontTextureMixin",
+    "text.VisualizationManagerImplMixin"
   ],
   "injectors" : {
     "defaultRequire" : 1

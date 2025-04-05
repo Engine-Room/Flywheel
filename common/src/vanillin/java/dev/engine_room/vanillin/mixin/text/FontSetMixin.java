@@ -16,10 +16,10 @@ import net.minecraft.util.RandomSource;
 
 @Mixin(FontSet.class)
 public abstract class FontSetMixin {
-	// Replace serial random with thread-local random
+	// Replace serial random with thread safe random
 	@Shadow
 	@Final
-	private static final RandomSource RANDOM = RandomSource.createNewThreadLocalInstance();
+	private static final RandomSource RANDOM = RandomSource.createThreadSafe();
 
 	@ModifyExpressionValue(method = "stitch", at = @At(value = "NEW", target = "net/minecraft/client/gui/font/FontTexture"))
 	private FontTexture flywheel$setNameAfterCreate(FontTexture original, @Local ResourceLocation name) {
