@@ -3,6 +3,7 @@ package dev.engine_room.vanillin.mixin.text;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,6 +21,7 @@ import com.mojang.blaze3d.font.SheetGlyphInfo;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import dev.engine_room.vanillin.text.AsyncFontUploads;
 import dev.engine_room.vanillin.text.BakedGlyphExtension;
 import dev.engine_room.vanillin.text.FontTextureExtension;
 import dev.engine_room.vanillin.text.FontTextureUpload;
@@ -30,6 +32,9 @@ import net.minecraft.resources.ResourceLocation;
 
 @Mixin(FontTexture.class)
 public abstract class FontTextureMixin extends AbstractTexture implements FontTextureExtension {
+	@Unique
+	@Nullable
+	private Runnable flywheel$lateInit = null;
 	@Unique
 	private final List<FontTextureUpload> flywheel$uploads = new ArrayList<>();
 	@Unique
@@ -54,7 +59,8 @@ public abstract class FontTextureMixin extends AbstractTexture implements FontTe
 		if (RenderSystem.isOnRenderThreadOrInit()) {
 			original.call(arg, i, j, k);
 		} else {
-			RenderSystem.recordRenderCall(() -> original.call(arg, getId(), j, k));
+			flywheel$lateInit = () -> original.call(arg, getId(), j, k);
+			flywheel$requireFlush();
 		}
 	}
 
@@ -82,10 +88,7 @@ public abstract class FontTextureMixin extends AbstractTexture implements FontTe
 		// Saves a lot of lambda allocations that would be spent binding the same texture over and over.
 		flywheel$uploads.add(new FontTextureUpload(glyphInfo, accessor.flywheel$getX(), accessor.flywheel$getY()));
 
-		if (!flywheel$flushScheduled) {
-			RenderSystem.recordRenderCall(this::flywheel$flush);
-			flywheel$flushScheduled = true;
-		}
+		flywheel$requireFlush();
 	}
 
 	@ModifyExpressionValue(method = "add", at = @At(value = "NEW", target = "net/minecraft/client/gui/font/glyphs/BakedGlyph"))
@@ -95,14 +98,28 @@ public abstract class FontTextureMixin extends AbstractTexture implements FontTe
 	}
 
 	@Unique
-	public void flywheel$flush() {
-		this.bind();
-		for (FontTextureUpload upload : flywheel$uploads) {
-			upload.info()
-					.upload(upload.x(), upload.y());
+	private void flywheel$requireFlush() {
+		if (!flywheel$flushScheduled) {
+			AsyncFontUploads.push(this);
+			flywheel$flushScheduled = true;
 		}
+	}
 
-		flywheel$uploads.clear();
+	@Override
+	public void flywheel$flush() {
+		if (flywheel$lateInit != null) {
+			flywheel$lateInit.run();
+			flywheel$lateInit = null;
+		}
+		if (!flywheel$uploads.isEmpty()) {
+			this.bind();
+			for (FontTextureUpload upload : flywheel$uploads) {
+				upload.info()
+						.upload(upload.x(), upload.y());
+			}
+
+			flywheel$uploads.clear();
+		}
 
 		flywheel$flushScheduled = false;
 	}

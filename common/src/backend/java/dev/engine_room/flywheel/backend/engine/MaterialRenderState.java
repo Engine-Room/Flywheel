@@ -2,6 +2,7 @@ package dev.engine_room.flywheel.backend.engine;
 
 import java.util.Comparator;
 
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -16,22 +17,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 
 public final class MaterialRenderState {
-	public static final Comparator<Material> COMPARATOR = Comparator.comparing((Material m) -> m.light()
-					.source())
-			.thenComparing(material -> material.cutout()
-					.source())
-			.thenComparing(material -> material.shaders()
-					.vertexSource())
-			.thenComparing(material -> material.shaders()
-					.fragmentSource())
-			.thenComparing(Material::texture)
-			.thenComparing(Material::blur)
-			.thenComparing(Material::mipmap)
-			.thenComparing(Material::backfaceCulling)
-			.thenComparing(Material::polygonOffset)
-			.thenComparing(Material::depthTest)
-			.thenComparing(Material::transparency)
-			.thenComparing(Material::writeMask);
+	public static final Comparator<Material> COMPARATOR = MaterialRenderState::compare;
 
 	private MaterialRenderState() {
 	}
@@ -218,5 +204,99 @@ public final class MaterialRenderState {
 				&& lhs.shaders().fragmentSource().equals(rhs.shaders().fragmentSource())
 				&& lhs.shaders().vertexSource().equals(rhs.shaders().vertexSource());
 		// @formatter:on
+	}
+
+	public static boolean materialIsAllNonNull(@Nullable Material material) {
+		// We do not trust people to give us valid NotNull objects.
+		// @formatter:off
+		return material != null &&
+				material.shaders() != null &&
+				material.shaders().fragmentSource() != null &&
+				material.shaders().vertexSource() != null &&
+				material.fog() != null &&
+				material.fog().source() != null &&
+				material.cutout() != null &&
+				material.cutout().source() != null &&
+				material.light() != null &&
+				material.light().source() != null &&
+				material.texture() != null &&
+				material.depthTest() != null &&
+				material.transparency() != null &&
+				material.writeMask() != null &&
+				material.cardinalLightingMode() != null;
+		// @formatter:on
+	}
+
+	public static int compare(Material lhs, Material rhs) {
+		if (lhs == rhs) {
+			return 0;
+		}
+
+		int cmp;
+		cmp = lhs.transparency()
+				.compareTo(rhs.transparency());
+		if (cmp != 0) {
+			return cmp;
+		}
+		cmp = lhs.light()
+				.source()
+				.compareTo(rhs.light()
+						.source());
+		if (cmp != 0) {
+			return cmp;
+		}
+		cmp = lhs.cutout()
+				.source()
+				.compareTo(rhs.cutout()
+						.source());
+		if (cmp != 0) {
+			return cmp;
+		}
+		cmp = lhs.shaders()
+				.fragmentSource()
+				.compareTo(rhs.shaders()
+						.fragmentSource());
+		if (cmp != 0) {
+			return cmp;
+		}
+		cmp = lhs.shaders()
+				.vertexSource()
+				.compareTo(rhs.shaders()
+						.vertexSource());
+		if (cmp != 0) {
+			return cmp;
+		}
+		cmp = lhs.texture()
+				.compareTo(rhs.texture());
+		if (cmp != 0) {
+			return cmp;
+		}
+		cmp = Boolean.compare(lhs.blur(), rhs.blur());
+		if (cmp != 0) {
+			return cmp;
+		}
+		cmp = Boolean.compare(lhs.mipmap(), rhs.mipmap());
+		if (cmp != 0) {
+			return cmp;
+		}
+		cmp = Boolean.compare(lhs.backfaceCulling(), rhs.backfaceCulling());
+		if (cmp != 0) {
+			return cmp;
+		}
+		cmp = Boolean.compare(lhs.polygonOffset(), rhs.polygonOffset());
+		if (cmp != 0) {
+			return cmp;
+		}
+		cmp = lhs.depthTest()
+				.compareTo(rhs.depthTest());
+		if (cmp != 0) {
+			return cmp;
+		}
+		cmp = lhs.writeMask()
+				.compareTo(rhs.writeMask());
+		if (cmp != 0) {
+			return cmp;
+		}
+		return 0;
 	}
 }

@@ -1,13 +1,15 @@
-package dev.engine_room.flywheel.lib.visual.component;
+package dev.engine_room.vanillin.elements;
 
 import org.joml.Quaternionf;
 
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
+import dev.engine_room.flywheel.api.visual.Visual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.LineModelBuilder;
+import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.util.SmartRecycler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
@@ -15,7 +17,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
-public final class HitboxComponent implements EntityComponent {
+public final class HitboxElement implements Visual, SimpleDynamicVisual {
 	//    010------110
 	//    /|       /|
 	//   / |      / |
@@ -44,8 +46,7 @@ public final class HitboxComponent implements EntityComponent {
 			.line(1, 1, 0, 0, 1, 0)
 			.build();
 
-	public static final Model LINE_MODEL = new LineModelBuilder(1)
-			.line(0, 0, 0, 0, 2, 0)
+	public static final Model LINE_MODEL = new LineModelBuilder(1).line(0, 0, 0, 0, 2, 0)
 			.build();
 
 	private final VisualizationContext context;
@@ -55,12 +56,19 @@ public final class HitboxComponent implements EntityComponent {
 
 	private boolean showEyeBox;
 
-	public HitboxComponent(VisualizationContext context, Entity entity) {
+	public HitboxElement(VisualizationContext context, Entity entity, float partialTick) {
 		this.context = context;
 		this.entity = entity;
 		this.showEyeBox = entity instanceof LivingEntity;
 
 		this.recycler = new SmartRecycler<>(this::createInstance);
+
+		animate(partialTick);
+	}
+
+	public HitboxElement(VisualizationContext context, Entity entity, float partialTick, boolean showEyeBox) {
+		this(context, entity, partialTick);
+		this.showEyeBox = showEyeBox;
 	}
 
 	private TransformedInstance createInstance(Model model) {
@@ -76,13 +84,27 @@ public final class HitboxComponent implements EntityComponent {
 		return showEyeBox;
 	}
 
-	public HitboxComponent showEyeBox(boolean showEyeBox) {
+	public HitboxElement showEyeBox(boolean showEyeBox) {
 		this.showEyeBox = showEyeBox;
 		return this;
 	}
 
 	@Override
 	public void beginFrame(DynamicVisual.Context context) {
+		animate(context.partialTick());
+	}
+
+	@Override
+	public void update(float partialTick) {
+
+	}
+
+	@Override
+	public void delete() {
+		recycler.delete();
+	}
+
+	public void animate(float partialTick) {
 		recycler.resetCount();
 
 		var shouldRenderHitBoxes = Minecraft.getInstance()
@@ -90,8 +112,6 @@ public final class HitboxComponent implements EntityComponent {
 				.shouldRenderHitBoxes();
 		if (shouldRenderHitBoxes && !entity.isInvisible() && !Minecraft.getInstance()
 				.showOnlyReducedInfo()) {
-			float partialTick = context.partialTick();
-
 			double entityX = Mth.lerp(partialTick, entity.xOld, entity.getX());
 			double entityY = Mth.lerp(partialTick, entity.yOld, entity.getY());
 			double entityZ = Mth.lerp(partialTick, entity.zOld, entity.getZ());
@@ -134,10 +154,5 @@ public final class HitboxComponent implements EntityComponent {
 		}
 
 		recycler.discardExtra();
-	}
-
-	@Override
-	public void delete() {
-		recycler.delete();
 	}
 }
