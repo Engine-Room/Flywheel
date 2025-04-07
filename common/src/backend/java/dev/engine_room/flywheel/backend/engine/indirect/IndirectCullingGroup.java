@@ -28,8 +28,8 @@ import dev.engine_room.flywheel.lib.math.MoreMath;
 
 public class IndirectCullingGroup<I extends Instance> {
 	private static final Comparator<IndirectDraw> DRAW_COMPARATOR = Comparator.comparing(IndirectDraw::isEmbedded)
-			.thenComparing(IndirectDraw::bias)
-			.thenComparing(IndirectDraw::indexOfMeshInModel)
+			.thenComparingInt(IndirectDraw::bias)
+			.thenComparingInt(IndirectDraw::indexOfMeshInModel)
 			.thenComparing(IndirectDraw::material, MaterialRenderState.COMPARATOR);
 
 	private final InstanceType<I> instanceType;

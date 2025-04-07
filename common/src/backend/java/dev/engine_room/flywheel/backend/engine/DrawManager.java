@@ -27,7 +27,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public abstract class DrawManager<N extends AbstractInstancer<?>> {
-	private static final boolean WARN_EMPTY_MODELS = Boolean.getBoolean("flywheel.warnEmptyModels");
+	private static final boolean MODEL_WARNINGS = Boolean.getBoolean("flywheel.modelWarnings");
 
 	/**
 	 * A map of instancer keys to instancers.
@@ -85,7 +85,7 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 		var out = create(key);
 
 		// Only queue the instancer for initialization if it has anything to render.
-		if (checkAndWarnEmptyModel(key.model())) {
+		if (modelHasNoIssues(key.model())) {
 			// Thread safety: this method is called atomically from within computeIfAbsent,
 			// so you'd think we don't need extra synchronization to protect the queue, but
 			// somehow threads can race here and wind up never initializing an instancer.
@@ -94,23 +94,44 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 		return out;
 	}
 
-	private static boolean checkAndWarnEmptyModel(Model model) {
-		if (!model.meshes().isEmpty()) {
-			return true;
+	private static boolean modelHasNoIssues(Model model) {
+		// No point in setting up resources for something that will never be rendered.
+		if (model.meshes().isEmpty()) {
+			if (MODEL_WARNINGS) {
+				StringBuilder builder = new StringBuilder();
+				builder.append("Creating an instancer for a model with no meshes! Stack trace:");
+
+				StackWalker.getInstance()
+						.forEach(f -> builder.append("\n\t")
+								.append(f.toString()));
+
+				FlwBackend.LOGGER.warn(builder.toString());
+			}
+			return false;
 		}
 
-		if (WARN_EMPTY_MODELS) {
-			StringBuilder builder = new StringBuilder();
-			builder.append("Creating an instancer for a model with no meshes! Stack trace:");
+		// Catch nullability issues here so the backend doesn't explode later.
+		List<Model.ConfiguredMesh> meshes = model.meshes();
+		for (int i = 0; i < meshes.size(); i++) {
+			var mesh = meshes.get(i);
+			if (!MaterialRenderState.materialIsAllNonNull(mesh.material())) {
+				if (MODEL_WARNINGS) {
+					StringBuilder builder = new StringBuilder();
+					builder.append("ConfiguredMesh at index ")
+							.append(i)
+							.append(" has null components in its material! Stack trace:");
 
-			StackWalker.getInstance()
-					.forEach(f -> builder.append("\n\t")
-							.append(f.toString()));
+					StackWalker.getInstance()
+							.forEach(f -> builder.append("\n\t")
+									.append(f.toString()));
 
-			FlwBackend.LOGGER.warn(builder.toString());
+					FlwBackend.LOGGER.warn(builder.toString());
+				}
+				return false;
+			}
 		}
 
-		return false;
+		return true;
 	}
 
 	@FunctionalInterface

@@ -33,8 +33,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
 
 public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
-	private static final Comparator<InstancedDraw> DRAW_COMPARATOR = Comparator.comparing(InstancedDraw::bias)
-			.thenComparing(InstancedDraw::indexOfMeshInModel)
+	private static final Comparator<InstancedDraw> DRAW_COMPARATOR = Comparator.comparingInt(InstancedDraw::bias)
+			.thenComparingInt(InstancedDraw::indexOfMeshInModel)
 			.thenComparing(InstancedDraw::material, MaterialRenderState.COMPARATOR);
 
 	private final List<InstancedDraw> allDraws = new ArrayList<>();
