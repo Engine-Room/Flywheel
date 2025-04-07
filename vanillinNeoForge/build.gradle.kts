@@ -20,7 +20,7 @@ platform {
 
 transitiveSourceSets {
     sourceSet(main) {
-        compileClasspath(project(platform), "api", "lib")
+        compileClasspath(project(platform), "api", "lib", "main")
 
         bundleFrom(project(common), "vanillin")
     }
