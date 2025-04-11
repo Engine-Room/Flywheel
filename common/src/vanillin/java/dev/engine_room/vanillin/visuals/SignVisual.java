@@ -53,12 +53,8 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 	private final Matrix4f initialPose;
 
 	// The 8 lines of text we render
-	private final TextVisual[] frontTextVisuals = new TextVisual[4];
-	private final TextVisual[] backTextVisuals = new TextVisual[4];
-
-	// Need to update these every frame, so just remember which ones are obfuscated
-	// Most of the time this will be empty.
-	private final List<TextVisual> obfuscated = new ArrayList<>();
+	private final @Nullable TextVisual[] frontTextVisuals = new TextVisual[4];
+	private final @Nullable TextVisual[] backTextVisuals = new TextVisual[4];
 
 	private int packedLight = 0;
 
@@ -67,11 +63,6 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 
 	public SignVisual(VisualizationContext ctx, SignBlockEntity blockEntity, float partialTick) {
 		super(ctx, blockEntity, partialTick);
-
-		for (int i = 0; i < 4; i++) {
-			frontTextVisuals[i] = new TextVisual(ctx.instancerProvider());
-			backTextVisuals[i] = new TextVisual(ctx.instancerProvider());
-		}
 
 		var block = (SignBlock) blockState.getBlock();
 		WoodType woodType = SignBlock.getWoodType(block);
@@ -109,27 +100,29 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 
 	@Override
 	public void beginFrame(Context ctx) {
-		boolean doSetup = false;
 		if (lastFrontText != blockEntity.getFrontText()) {
 			lastFrontText = blockEntity.getFrontText();
-			doSetup = true;
+			setupText(lastFrontText, true);
 		}
 
 		if (lastBackText != blockEntity.getBackText()) {
 			lastBackText = blockEntity.getBackText();
-			doSetup = true;
+			setupText(lastBackText, false);
 		}
 
-		if (doSetup) {
-			// Setup both to make it easier to track obfuscation
-			obfuscated.clear();
-			setupText(lastFrontText, true);
-			setupText(lastBackText, false);
-		} else {
-			// The is visible check is relatively expensive compared to the boolean checks above,
-			// so only do it when it'll actually save some work in obfuscating.
-			if (isVisible(ctx.frustum())) {
-				obfuscated.forEach(TextVisual::updateObfuscated);
+		// The is visible check is relatively expensive compared to the boolean checks above,
+		// so only do it when it'll actually save some work in obfuscating.
+		if (isVisible(ctx.frustum())) {
+			for (var visual : backTextVisuals) {
+				if (visual != null) {
+					visual.updateObfuscated();
+				}
+			}
+
+			for (var visual : frontTextVisuals) {
+				if (visual != null) {
+					visual.updateObfuscated();
+				}
 			}
 		}
 	}
@@ -144,13 +137,17 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 
 		if (!lastFrontText.hasGlowingText()) {
 			for (var text : frontTextVisuals) {
-				text.updateLight(packedLight);
+				if (text != null) {
+					text.updateLight(packedLight);
+				}
 			}
 		}
 
 		if (!lastBackText.hasGlowingText()) {
 			for (var text : backTextVisuals) {
-				text.updateLight(packedLight);
+				if (text != null) {
+					text.updateLight(packedLight);
+				}
 			}
 		}
 	}
@@ -165,11 +162,15 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 		instances.delete();
 
 		for (var text : frontTextVisuals) {
-			text.delete();
+			if (text != null) {
+				text.delete();
+			}
 		}
 
 		for (var text : backTextVisuals) {
-			text.delete();
+			if (text != null) {
+				text.delete();
+			}
 		}
 	}
 
@@ -226,14 +227,16 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 			pose.scale(scale, -scale, scale);
 			pose.translate(x, y, 0.0f);
 
-
-			var textVisual = textVisuals[i];
-			int light = text.hasGlowingText() ? LightTexture.FULL_BRIGHT : packedLight;
-			textVisual.setup(textLine, layers, pose, light);
-
-			if (hasObfuscation(textLine)) {
-				obfuscated.add(textVisual);
+			if (textVisuals[i] != null) {
+				textVisuals[i].delete();
 			}
+
+			var textVisual = new TextVisual(instancerProvider(), textLine, layers);
+
+			textVisual.updatePose(pose);
+			textVisual.updateLight(text.hasGlowingText() ? LightTexture.FULL_BRIGHT : packedLight);
+
+			textVisuals[i] = textVisual;
 		}
 	}
 
