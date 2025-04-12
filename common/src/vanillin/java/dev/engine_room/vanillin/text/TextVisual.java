@@ -43,6 +43,8 @@ public final class TextVisual {
 	private static final RendererReloadCache<GlyphMeshKey, GlyphMesh> GLYPH_MESH_CACHE = new RendererReloadCache<>(GlyphMeshKey::into);
 	private static final RendererReloadCache<GlyphModelKey, Model> GLYPH_MODEL_CACHE = new RendererReloadCache<>(GlyphModelKey::into);
 
+	public final float width;
+
 	@Nullable
 	private final BakedGlyphs glyphs;
 	@Nullable
@@ -58,6 +60,8 @@ public final class TextVisual {
 		var sink = new Sink(instancerProvider, layers);
 
 		textLine.accept(sink);
+
+		this.width = sink.x;
 
 		this.glyphs = sink.glyphs;
 		this.effectGlyphs = sink.effectGlyphs;
@@ -117,7 +121,7 @@ public final class TextVisual {
 		}
 	}
 
-	private record GlyphMeshKey(float glyphWidth, float glyphHeight, TextLayer.GlyphPattern pattern, boolean bold, float boldOffset, float shadowOffset) {
+	private record GlyphMeshKey(float glyphWidth, float glyphHeight, TextLayer.GlyphPattern pattern, float boldOffset, float shadowOffset) {
 		public GlyphMesh into() {
 			List<Vector2fc> out = new ArrayList<>();
 
@@ -125,7 +129,7 @@ public final class TextVisual {
 				Vector2f offset = new Vector2f(offsetc).mul(shadowOffset);
 				out.add(offset);
 
-				if (bold) {
+				if (boldOffset != 0.0f) {
 					out.add(new Vector2f(offset.x() + boldOffset, offset.y()));
 				}
 			});
@@ -305,9 +309,10 @@ public final class TextVisual {
 		public boolean[] italic = new boolean[0];
 		public FontSet[] font = new FontSet[0];
 		public GlyphInfo[] glyphInfo = new GlyphInfo[0];
+		public float[] boldOffset = new float[0];
+		public float[] shadowOffset = new float[0];
 
 		// Per-instance arrays. Length must be at least count * layers.size()
-		public GlyphMeshKey[] meshKeys = new GlyphMeshKey[0];
 		public GlyphInstance[] instances = new GlyphInstance[0];
 
 		private final Matrix4f cachedPose = new Matrix4f();
@@ -326,27 +331,25 @@ public final class TextVisual {
 			this.glyphInfo[count] = glyphInfo;
 			this.italic[count] = style.isItalic();
 
-			BakedGlyph glyph = this.font[count].getRandomGlyph(this.glyphInfo[count]);
+			BakedGlyph glyph = this.font[count].getRandomGlyph(glyphInfo);
 
-			boolean bold = style.isBold();
 			var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
 			float glyphWidth = glyphExtension.flywheel$right() - glyphExtension.flywheel$left();
 			float glyphHeight = glyphExtension.flywheel$down() - glyphExtension.flywheel$up();
 
 			ResourceLocation texture = glyphExtension.flywheel$texture();
-			float boldOffset = bold ? this.glyphInfo[count].getBoldOffset() : 0;
-			float shadowOffset = this.glyphInfo[count].getShadowOffset();
+			this.boldOffset[count] = style.isBold() ? glyphInfo.getBoldOffset() : 0.0f;
+			this.shadowOffset[count] = glyphInfo.getShadowOffset();
 
 			int instanceIndex = count * layers.length;
 			for (TextLayer layer : layers) {
-				int color = layer.color()
-						.color(style.getColor());
-				meshKeys[instanceIndex] = new GlyphMeshKey(glyphWidth, glyphHeight, layer.pattern(), bold, boldOffset, shadowOffset);
-				var modelKey = new GlyphModelKey(meshKeys[instanceIndex], layer.material(), texture);
+				var meshKeys = new GlyphMeshKey(glyphWidth, glyphHeight, layer.pattern(), this.boldOffset[count], this.shadowOffset[count]);
+				var modelKey = new GlyphModelKey(meshKeys, layer.material(), texture);
 
 				instances[instanceIndex] = instancerProvider.instancer(VanillinInstanceTypes.GLYPH, GLYPH_MODEL_CACHE.get(modelKey), layer.bias())
 						.createInstance();
-				instances[instanceIndex].colorArgb(color);
+				instances[instanceIndex].colorArgb(layer.color()
+						.color(style.getColor()));
 				instanceIndex++;
 			}
 
@@ -364,19 +367,25 @@ public final class TextVisual {
 			for (int glyphIndex = 0; glyphIndex < count; glyphIndex++) {
 				BakedGlyph glyph = font[glyphIndex].getRandomGlyph(glyphInfo[glyphIndex]);
 
-				ResourceLocation texture = TextUtil.getBakedGlyphExtension(glyph)
-						.flywheel$texture();
+				var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
+				float glyphWidth = glyphExtension.flywheel$right() - glyphExtension.flywheel$left();
+				float glyphHeight = glyphExtension.flywheel$down() - glyphExtension.flywheel$up();
 
-				for (var layer : layers) {
+				float boldOffset = this.boldOffset[glyphIndex];
+				float shadowOffset = this.shadowOffset[glyphIndex];
+
+				ResourceLocation texture = glyphExtension.flywheel$texture();
+				for (TextLayer layer : layers) {
 					Vector2fc offset = layer.offset();
 
-					var modelKey = new GlyphModelKey(meshKeys[instanceIndex], layer.material(), texture);
+					var meshKey = new GlyphMeshKey(glyphWidth, glyphHeight, layer.pattern(), boldOffset, shadowOffset);
+					var modelKey = new GlyphModelKey(meshKey, layer.material(), texture);
 
 					var instance = instances[instanceIndex];
 					instancerProvider.instancer(VanillinInstanceTypes.GLYPH, GLYPH_MODEL_CACHE.get(modelKey), layer.bias())
 							.stealInstance(instance);
 
-					instance.setGlyph(glyph, cachedPose, x[glyphIndex] + offset.x(), offset.y(), italic[glyphIndex]);
+					instance.setGlyph(glyph, cachedPose, x[glyphIndex] + offset.x() * shadowOffset, offset.y() * shadowOffset, italic[glyphIndex]);
 					instance.setChanged();
 
 					instanceIndex++;
@@ -385,9 +394,9 @@ public final class TextVisual {
 		}
 
 		private void updateLight(int light) {
-			for (var instance : instances) {
-				instance.light(light);
-				instance.setChanged();
+			for (int i = 0; i < count * layers.length; i++) {
+				instances[i].light(light);
+				instances[i].setChanged();
 			}
 		}
 
@@ -400,14 +409,16 @@ public final class TextVisual {
 			font = Arrays.copyOf(font, capacity);
 			glyphInfo = Arrays.copyOf(glyphInfo, capacity);
 			italic = Arrays.copyOf(italic, capacity);
+			boldOffset = Arrays.copyOf(boldOffset, capacity);
+			shadowOffset = Arrays.copyOf(shadowOffset, capacity);
 
-			meshKeys = Arrays.copyOf(meshKeys, capacity * layers.length);
 			instances = Arrays.copyOf(instances, capacity * layers.length);
 		}
 
 		public void delete() {
-			for (var instance : instances) {
-				instance.delete();
+			for (int i = 0; i < count * layers.length; i++) {
+				instances[i].delete();
+				instances[i] = null;
 			}
 			count = 0;
 		}
@@ -464,7 +475,7 @@ public final class TextVisual {
 								.color(style.getColor());
 						Vector2fc offset = layer.offset();
 
-						var meshKey = new GlyphMeshKey(glyphWidth, glyphHeight, layer.pattern(), bold, boldOffset, shadowOffset);
+						var meshKey = new GlyphMeshKey(glyphWidth, glyphHeight, layer.pattern(), boldOffset, shadowOffset);
 						var modelKey = new GlyphModelKey(meshKey, layer.material(), texture);
 						GlyphInstance instance = instancerProvider.instancer(VanillinInstanceTypes.GLYPH, GLYPH_MODEL_CACHE.get(modelKey), layer.bias())
 								.createInstance();
@@ -562,15 +573,18 @@ public final class TextVisual {
 				for (int j = 0; j < 4; j++) {
 					vertexList.x(startVertex + j, offset.x() + (glyphWidth * X[j]));
 					vertexList.y(startVertex + j, offset.y() + (glyphHeight * Y[j]));
-					vertexList.z(startVertex + j, 0);
-					vertexList.r(startVertex + j, 1);
-					vertexList.g(startVertex + j, 1);
-					vertexList.b(startVertex + j, 1);
-					vertexList.a(startVertex + j, 1);
+					vertexList.z(startVertex + j, 0.0f);
+					vertexList.r(startVertex + j, 1.0f);
+					vertexList.g(startVertex + j, 1.0f);
+					vertexList.b(startVertex + j, 1.0f);
+					vertexList.a(startVertex + j, 1.0f);
+					vertexList.u(startVertex + j, 0.0f);
+					vertexList.v(startVertex + j, 0.0f);
 					vertexList.overlay(startVertex + j, OverlayTexture.NO_OVERLAY);
-					vertexList.normalX(startVertex + j, 0);
-					vertexList.normalY(startVertex + j, 0);
-					vertexList.normalZ(startVertex + j, 1);
+					vertexList.light(startVertex + j, 0);
+					vertexList.normalX(startVertex + j, 0.0f);
+					vertexList.normalY(startVertex + j, 0.0f);
+					vertexList.normalZ(startVertex + j, 1.0f);
 				}
 			}
 		}
@@ -628,14 +642,18 @@ public final class TextVisual {
 			for (int i = 0; i < 4; i++) {
 				vertexList.x(i, X[i]);
 				vertexList.y(i, Y[i]);
-				vertexList.z(i, 0);
-				vertexList.r(i, 1);
-				vertexList.g(i, 1);
-				vertexList.b(i, 1);
-				vertexList.a(i, 1);
-				vertexList.normalX(i, 0);
-				vertexList.normalY(i, 0);
-				vertexList.normalZ(i, 1);
+				vertexList.z(i, 0.0f);
+				vertexList.r(i, 1.0f);
+				vertexList.g(i, 1.0f);
+				vertexList.b(i, 1.0f);
+				vertexList.a(i, 1.0f);
+				vertexList.u(i, 0.0f);
+				vertexList.v(i, 0.0f);
+				vertexList.overlay(i, OverlayTexture.NO_OVERLAY);
+				vertexList.light(i, 0);
+				vertexList.normalX(i, 0.0f);
+				vertexList.normalY(i, 0.0f);
+				vertexList.normalZ(i, 1.0f);
 			}
 		}
 

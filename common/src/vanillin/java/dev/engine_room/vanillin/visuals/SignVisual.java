@@ -210,14 +210,23 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 
 		var textVisuals = isFrontText ? frontTextVisuals : backTextVisuals;
 
+		var pose = new Matrix4f();
+
 		int lineHeight = blockEntity.getTextLineHeight();
 		int lineDelta = 4 * lineHeight / 2;
 		for (int i = 0; i < 4; ++i) {
 			FormattedCharSequence textLine = textLines[i];
-			float x = (float) (-FONT.width(textLine) / 2);
+
+			if (textVisuals[i] != null) {
+				textVisuals[i].delete();
+			}
+
+			var textVisual = new TextVisual(instancerProvider(), textLine, layers);
+
+			float x = -textVisual.width / 2.0f;
 			float y = i * lineHeight - lineDelta;
 
-			var pose = new Matrix4f(initialPose);
+			pose.set(initialPose);
 			if (!isFrontText) {
 				pose.rotateY(Mth.PI);
 			}
@@ -226,12 +235,6 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 			pose.translate((float) textOffset.x, (float) textOffset.y, (float) textOffset.z);
 			pose.scale(scale, -scale, scale);
 			pose.translate(x, y, 0.0f);
-
-			if (textVisuals[i] != null) {
-				textVisuals[i].delete();
-			}
-
-			var textVisual = new TextVisual(instancerProvider(), textLine, layers);
 
 			textVisual.updatePose(pose);
 			textVisual.updateLight(text.hasGlowingText() ? LightTexture.FULL_BRIGHT : packedLight);
