@@ -22,6 +22,9 @@ import dev.engine_room.flywheel.lib.model.SingleMeshModel;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.vanillin.GlyphInstance;
 import dev.engine_room.vanillin.VanillinInstanceTypes;
+import dev.engine_room.vanillin.mixin.text.FontSetAccessor;
+import io.netty.util.internal.ThreadLocalRandom;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.font.FontSet;
@@ -162,35 +165,36 @@ public final class TextVisual {
 		// Array lengths must be kept in sync.
 		public float[] x = new float[INITIAL_CAPACITY];
 		public float[] y = new float[INITIAL_CAPACITY];
+		public float[] left = new float[INITIAL_CAPACITY];
+		public float[] up = new float[INITIAL_CAPACITY];
 		public boolean[] italic = new boolean[INITIAL_CAPACITY];
-		public BakedGlyph[] glyph = new BakedGlyph[INITIAL_CAPACITY];
 		public GlyphInstance[] instance = new GlyphInstance[INITIAL_CAPACITY];
 
 		public void delete() {
 			for (int i = 0; i < count; i++) {
 				instance[i].delete();
 				instance[i] = null;
-				glyph[i] = null;
 			}
 			count = 0;
 		}
 
 		public void updatePose(Matrix4f pose) {
 			for (int i = 0; i < count; i++) {
-				instance[i].setGlyph(glyph[i], pose, x[i], y[i], italic[i]);
+				instance[i].updatePose(pose, x[i], y[i], left[i], up[i], italic[i]);
 				instance[i].setChanged();
 			}
 		}
 
-		public void add(float x, float y, boolean italic, BakedGlyph glyph, GlyphInstance instance) {
+		public void add(float x, float y, float left, float up, boolean italic, GlyphInstance instance) {
 			if (count >= capacity()) {
 				reallocate(Math.max(2, capacity()) * 2);
 			}
 
 			this.x[count] = x;
 			this.y[count] = y;
+			this.left[count] = left;
+			this.up[count] = up - 3.0f;
 			this.italic[count] = italic;
-			this.glyph[count] = glyph;
 			this.instance[count] = instance;
 
 			count++;
@@ -203,8 +207,9 @@ public final class TextVisual {
 		private void reallocate(int capacity) {
 			x = Arrays.copyOf(x, capacity);
 			y = Arrays.copyOf(y, capacity);
+			left = Arrays.copyOf(left, capacity);
+			up = Arrays.copyOf(up, capacity);
 			italic = Arrays.copyOf(italic, capacity);
-			glyph = Arrays.copyOf(glyph, capacity);
 			instance = Arrays.copyOf(instance, capacity);
 		}
 
@@ -231,8 +236,8 @@ public final class TextVisual {
 		// Array lengths must be kept in sync.
 		private float[] x0 = new float[INITIAL_CAPACITY];
 		private float[] y0 = new float[INITIAL_CAPACITY];
-		private float[] x1 = new float[INITIAL_CAPACITY];
-		private float[] y1 = new float[INITIAL_CAPACITY];
+		private float[] width = new float[INITIAL_CAPACITY];
+		private float[] height = new float[INITIAL_CAPACITY];
 		private float[] depth = new float[INITIAL_CAPACITY];
 		private GlyphInstance[] instance = new GlyphInstance[INITIAL_CAPACITY];
 
@@ -246,11 +251,8 @@ public final class TextVisual {
 		}
 
 		private void updatePose(Matrix4f pose) {
-			BakedGlyph glyph = TextUtil.getFontSet(FONT, Style.DEFAULT_FONT)
-					.whiteGlyph();
-
 			for (int i = 0; i < count; i++) {
-				instance[i].setEffect(glyph, pose, x0[i], y0[i], x1[i], y1[i], depth[i]);
+				instance[i].setEffect(pose, x0[i], y0[i], width[i], height[i], depth[i]);
 				instance[i].setChanged();
 			}
 		}
@@ -262,8 +264,8 @@ public final class TextVisual {
 
 			this.x0[count] = x0;
 			this.y0[count] = y0;
-			this.x1[count] = x1;
-			this.y1[count] = y1;
+			this.width[count] = x1 - x0;
+			this.height[count] = y1 - y0;
 			this.depth[count] = depth;
 			this.instance[count] = instance;
 
@@ -277,8 +279,8 @@ public final class TextVisual {
 		private void reallocate(int capacity) {
 			x0 = Arrays.copyOf(x0, capacity);
 			y0 = Arrays.copyOf(y0, capacity);
-			x1 = Arrays.copyOf(x1, capacity);
-			y1 = Arrays.copyOf(y1, capacity);
+			width = Arrays.copyOf(width, capacity);
+			height = Arrays.copyOf(height, capacity);
 			depth = Arrays.copyOf(depth, capacity);
 			instance = Arrays.copyOf(instance, capacity);
 		}
@@ -299,7 +301,12 @@ public final class TextVisual {
 	 * Obfuscated glyphs. More complex than the other 2 SoAs.
 	 */
 	private static class ObfuscatedGlyphs {
+		public static final IntList MISSING = IntList.of(-1);
+
 		public int count = 0;
+
+		// No need for RandomSource objects here, we can just do things locally.
+		private long random = ThreadLocalRandom.current().nextLong();
 
 		// One layer per layer. This array is sized separately from all others.
 		public final TextLayer[] layers;
@@ -308,7 +315,8 @@ public final class TextVisual {
 		public float[] x = new float[0];
 		public boolean[] italic = new boolean[0];
 		public FontSet[] font = new FontSet[0];
-		public GlyphInfo[] glyphInfo = new GlyphInfo[0];
+		public IntList[] possibleCharacters = new IntList[0];
+		public int[] possibleCharacterSizes = new int[0];
 		public float[] boldOffset = new float[0];
 		public float[] shadowOffset = new float[0];
 
@@ -321,6 +329,32 @@ public final class TextVisual {
 			this.layers = layers.toArray(new TextLayer[0]);
 		}
 
+		private int next() {
+			// See SingleThreadedRandomSource#next
+			long l;
+			this.random = l = this.random * 25214903917L + 11L & 0xFFFFFFFFFFFFL;
+			return (int)(l >> 48 - 31);
+		}
+
+		private int nextInt(int bound) {
+			// This is what RandomSource#nextInt(bound) would do,
+			// but I don't think we need such high quality randomness here.
+			// int j;
+			// int i;
+			// if ((bound & bound - 1) == 0) {
+			// 	return (int)((long)bound * (long)this.next() >> 31);
+			// }
+			// while ((i = this.next()) - (j = i % bound) + (bound - 1) < 0) {
+			// }
+			return next() % bound;
+		}
+
+		private int randomCharacter(int glyphIndex) {
+			int size = this.possibleCharacterSizes[glyphIndex];
+
+			return this.possibleCharacters[glyphIndex].getInt(nextInt(size));
+		}
+
 		public void add(InstancerProvider instancerProvider, float x, FontSet font, GlyphInfo glyphInfo, Style style) {
 			if (count >= capacity()) {
 				reallocate(Math.max(2, capacity()) * 2);
@@ -328,10 +362,16 @@ public final class TextVisual {
 
 			this.x[count] = x;
 			this.font[count] = font;
-			this.glyphInfo[count] = glyphInfo;
 			this.italic[count] = style.isItalic();
 
-			BakedGlyph glyph = this.font[count].getRandomGlyph(glyphInfo);
+			// Replicate the logic from FontSet#getRandomGlyph
+			this.possibleCharacters[count] = ((FontSetAccessor) font).vanillin$glyphsByWidth()
+					.getOrDefault(Mth.ceil(glyphInfo.getAdvance(false)), MISSING);
+
+			// Save this in an array too so we don't have to go through the indirection.
+			this.possibleCharacterSizes[count] = this.possibleCharacters[count].size();
+
+			BakedGlyph glyph = this.font[count].getGlyph(randomCharacter(count));
 
 			var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
 			float glyphWidth = glyphExtension.flywheel$right() - glyphExtension.flywheel$left();
@@ -365,11 +405,13 @@ public final class TextVisual {
 		public void update(InstancerProvider instancerProvider) {
 			int instanceIndex = 0;
 			for (int glyphIndex = 0; glyphIndex < count; glyphIndex++) {
-				BakedGlyph glyph = font[glyphIndex].getRandomGlyph(glyphInfo[glyphIndex]);
+				BakedGlyph glyph = font[glyphIndex].getGlyph(randomCharacter(glyphIndex));
 
 				var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
-				float glyphWidth = glyphExtension.flywheel$right() - glyphExtension.flywheel$left();
-				float glyphHeight = glyphExtension.flywheel$down() - glyphExtension.flywheel$up();
+				float left = glyphExtension.flywheel$left();
+				float up = glyphExtension.flywheel$up();
+				float glyphWidth = glyphExtension.flywheel$right() - left;
+				float glyphHeight = glyphExtension.flywheel$down() - up;
 
 				float boldOffset = this.boldOffset[glyphIndex];
 				float shadowOffset = this.shadowOffset[glyphIndex];
@@ -385,7 +427,8 @@ public final class TextVisual {
 					instancerProvider.instancer(VanillinInstanceTypes.GLYPH, GLYPH_MODEL_CACHE.get(modelKey), layer.bias())
 							.stealInstance(instance);
 
-					instance.setGlyph(glyph, cachedPose, x[glyphIndex] + offset.x() * shadowOffset, offset.y() * shadowOffset, italic[glyphIndex]);
+					instance.setUvs(glyphExtension);
+					instance.updatePose(cachedPose, x[glyphIndex] + offset.x() * shadowOffset, offset.y() * shadowOffset, left, up, italic[glyphIndex]);
 					instance.setChanged();
 
 					instanceIndex++;
@@ -407,7 +450,8 @@ public final class TextVisual {
 		private void reallocate(int capacity) {
 			x = Arrays.copyOf(x, capacity);
 			font = Arrays.copyOf(font, capacity);
-			glyphInfo = Arrays.copyOf(glyphInfo, capacity);
+			possibleCharacters = Arrays.copyOf(possibleCharacters, capacity);
+			possibleCharacterSizes = Arrays.copyOf(possibleCharacterSizes, capacity);
 			italic = Arrays.copyOf(italic, capacity);
 			boldOffset = Arrays.copyOf(boldOffset, capacity);
 			shadowOffset = Arrays.copyOf(shadowOffset, capacity);
@@ -480,8 +524,9 @@ public final class TextVisual {
 						GlyphInstance instance = instancerProvider.instancer(VanillinInstanceTypes.GLYPH, GLYPH_MODEL_CACHE.get(modelKey), layer.bias())
 								.createInstance();
 						instance.colorArgb(color);
+						instance.setUvs(glyphExtension);
 
-						bakedGlyphs().add(x + offset.x() * shadowOffset, offset.y() * shadowOffset, style.isItalic(), glyph, instance);
+						bakedGlyphs().add(x + offset.x() * shadowOffset, offset.y() * shadowOffset, glyphExtension.flywheel$left(), glyphExtension.flywheel$up(), style.isItalic(), instance);
 					}
 				}
 			}
@@ -517,6 +562,7 @@ public final class TextVisual {
 			GlyphInstance instance = instancerProvider.instancer(VanillinInstanceTypes.GLYPH, GLYPH_MODEL_CACHE.get(modelKey), layer.bias())
 					.createInstance();
 			instance.colorArgb(colorArgb);
+			instance.setUvs(glyphExtension);
 
 			effectGlyphs().add(x0, y0, x1, y1, depth, instance);
 		}
