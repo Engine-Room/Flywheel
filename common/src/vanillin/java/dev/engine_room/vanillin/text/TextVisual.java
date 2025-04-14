@@ -1,10 +1,10 @@
 package dev.engine_room.vanillin.text;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
@@ -20,9 +20,11 @@ import dev.engine_room.flywheel.api.vertex.MutableVertexList;
 import dev.engine_room.flywheel.lib.model.QuadMesh;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
-import dev.engine_room.flywheel.lib.visual.util.SmartRecycler;
 import dev.engine_room.vanillin.GlyphInstance;
 import dev.engine_room.vanillin.VanillinInstanceTypes;
+import dev.engine_room.vanillin.mixin.text.FontSetAccessor;
+import io.netty.util.internal.ThreadLocalRandom;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.font.FontSet;
@@ -44,80 +46,85 @@ public final class TextVisual {
 	private static final RendererReloadCache<GlyphMeshKey, GlyphMesh> GLYPH_MESH_CACHE = new RendererReloadCache<>(GlyphMeshKey::into);
 	private static final RendererReloadCache<GlyphModelKey, Model> GLYPH_MODEL_CACHE = new RendererReloadCache<>(GlyphModelKey::into);
 
-	private static final ThreadLocal<Sink> SINKS = ThreadLocal.withInitial(Sink::new);
+	public final float width;
 
-	private final SmartRecycler<GlyphInstanceKey, GlyphInstance> recycler;
-	private final List<TextLayer> layers = new ArrayList<>();
-	private final Matrix4f pose = new Matrix4f();
+	@Nullable
+	private final BakedGlyphs glyphs;
+	@Nullable
+	private final EffectGlyphs effectGlyphs;
+	@Nullable
+	private final ObfuscatedGlyphs obfuscatedGlyphs;
 
-	private FormattedCharSequence text = FormattedCharSequence.EMPTY;
-	private int backgroundColor = 0;
-	private int light;
+	private final InstancerProvider instancerProvider;
 
-	public TextVisual(InstancerProvider provider) {
-		recycler = new SmartRecycler<>(key -> provider.instancer(VanillinInstanceTypes.GLYPH, GLYPH_MODEL_CACHE.get(key.modelKey), key.bias)
-				.createInstance());
+	public TextVisual(InstancerProvider instancerProvider, FormattedCharSequence textLine, List<TextLayer> layers) {
+		this.instancerProvider = instancerProvider;
+
+		var sink = new Sink(instancerProvider, layers);
+
+		textLine.accept(sink);
+
+		this.width = sink.x;
+
+		this.glyphs = sink.glyphs;
+		this.effectGlyphs = sink.effectGlyphs;
+		this.obfuscatedGlyphs = sink.obfuscatedGlyphs;
+
+		// Nuke unused memory, may not actually be necessary.
+		if (glyphs != null) {
+			glyphs.shrinkToFit();
+		}
+		if (effectGlyphs != null) {
+			effectGlyphs.shrinkToFit();
+		}
+		if (obfuscatedGlyphs != null) {
+			obfuscatedGlyphs.shrinkToFit();
+		}
 	}
 
-	public void setup(FormattedCharSequence textLine, List<TextLayer> layers, Matrix4f pose, int light) {
-		// TODO: probably don't store everything
-		this.text = textLine;
-		this.layers.clear();
-		this.layers.addAll(layers);
-		this.pose.set(pose);
-		this.light = light;
-
-		setup();
+	public void updatePose(Matrix4f pose) {
+		if (glyphs != null) {
+			glyphs.updatePose(pose);
+		}
+		if (effectGlyphs != null) {
+			effectGlyphs.updatePose(pose);
+		}
+		if (obfuscatedGlyphs != null) {
+			obfuscatedGlyphs.updatePose(instancerProvider, pose);
+		}
 	}
 
 	public void updateObfuscated() {
-		// TODO: track obfuscated glyphs and update here
-		setup();
-	}
-
-	public void backgroundColor(int backgroundColor) {
-		// TODO: don't setup the whole thing
-		this.backgroundColor = backgroundColor;
-		setup();
+		if (obfuscatedGlyphs != null) {
+			obfuscatedGlyphs.update(instancerProvider);
+		}
 	}
 
 	public void updateLight(int packedLight) {
-		// TODO: just iterate over instances and update light
-		light = packedLight;
-		setup();
-	}
-
-	private void setup() {
-		recycler.resetCount();
-
-		var sink = SINKS.get();
-		sink.prepare(recycler, layers, pose, light);
-
-		text.accept(sink);
-
-		sink.addBackground(backgroundColor, 0, sink.x);
-		sink.clear();
-
-		recycler.discardExtra();
-	}
-
-	private TextVisual reset() {
-		// TODO: should this be public? what should it do?
-		layers.clear();
-		pose.identity();
-
-		text = FormattedCharSequence.EMPTY;
-		backgroundColor = 0;
-		light = 0;
-
-		return this;
+		if (glyphs != null) {
+			glyphs.updateLight(packedLight);
+		}
+		if (effectGlyphs != null) {
+			effectGlyphs.updateLight(packedLight);
+		}
+		if (obfuscatedGlyphs != null) {
+			obfuscatedGlyphs.updateLight(packedLight);
+		}
 	}
 
 	public void delete() {
-		recycler.delete();
+		if (glyphs != null) {
+			glyphs.delete();
+		}
+		if (effectGlyphs != null) {
+			effectGlyphs.delete();
+		}
+		if (obfuscatedGlyphs != null) {
+			obfuscatedGlyphs.delete();
+		}
 	}
 
-	private record GlyphMeshKey(float glyphWidth, float glyphHeight, TextLayer.GlyphPattern pattern, boolean bold, float boldOffset, float shadowOffset) {
+	private record GlyphMeshKey(float glyphWidth, float glyphHeight, TextLayer.GlyphPattern pattern, float boldOffset, float shadowOffset) {
 		public GlyphMesh into() {
 			List<Vector2fc> out = new ArrayList<>();
 
@@ -125,7 +132,7 @@ public final class TextVisual {
 				Vector2f offset = new Vector2f(offsetc).mul(shadowOffset);
 				out.add(offset);
 
-				if (bold) {
+				if (boldOffset != 0.0f) {
 					out.add(new Vector2f(offset.x() + boldOffset, offset.y()));
 				}
 			});
@@ -148,59 +155,387 @@ public final class TextVisual {
 		}
 	}
 
-	private record GlyphInstanceKey(GlyphModelKey modelKey, int bias) {
+	/**
+	 * Static glyphs. One entry for every glyph, times the number of layers.
+	 */
+	private static class BakedGlyphs {
+		private static final int INITIAL_CAPACITY = 16;
+		public int count = 0;
+
+		// Array lengths must be kept in sync.
+		public float[] x = new float[INITIAL_CAPACITY];
+		public float[] y = new float[INITIAL_CAPACITY];
+		public float[] left = new float[INITIAL_CAPACITY];
+		public float[] up = new float[INITIAL_CAPACITY];
+		public boolean[] italic = new boolean[INITIAL_CAPACITY];
+		public GlyphInstance[] instance = new GlyphInstance[INITIAL_CAPACITY];
+
+		public void delete() {
+			for (int i = 0; i < count; i++) {
+				instance[i].delete();
+				instance[i] = null;
+			}
+			count = 0;
+		}
+
+		public void updatePose(Matrix4f pose) {
+			for (int i = 0; i < count; i++) {
+				instance[i].updatePose(pose, x[i], y[i], left[i], up[i], italic[i]);
+				instance[i].setChanged();
+			}
+		}
+
+		public void add(float x, float y, float left, float up, boolean italic, GlyphInstance instance) {
+			if (count >= capacity()) {
+				reallocate(Math.max(2, capacity()) * 2);
+			}
+
+			this.x[count] = x;
+			this.y[count] = y;
+			this.left[count] = left;
+			this.up[count] = up - 3.0f;
+			this.italic[count] = italic;
+			this.instance[count] = instance;
+
+			count++;
+		}
+
+		private int capacity() {
+			return x.length;
+		}
+
+		private void reallocate(int capacity) {
+			x = Arrays.copyOf(x, capacity);
+			y = Arrays.copyOf(y, capacity);
+			left = Arrays.copyOf(left, capacity);
+			up = Arrays.copyOf(up, capacity);
+			italic = Arrays.copyOf(italic, capacity);
+			instance = Arrays.copyOf(instance, capacity);
+		}
+
+		private void shrinkToFit() {
+			reallocate(count);
+		}
+
+		public void updateLight(int packedLight) {
+			for (int i = 0; i < count; i++) {
+				instance[i].light(packedLight);
+				instance[i].setChanged();
+			}
+		}
+	}
+
+
+	/**
+	 * Effect glyphs. One entry for every effect, times the number of layers.
+	 */
+	private static class EffectGlyphs {
+		private static final int INITIAL_CAPACITY = 16;
+		private int count = 0;
+
+		// Array lengths must be kept in sync.
+		private float[] x0 = new float[INITIAL_CAPACITY];
+		private float[] y0 = new float[INITIAL_CAPACITY];
+		private float[] width = new float[INITIAL_CAPACITY];
+		private float[] height = new float[INITIAL_CAPACITY];
+		private float[] depth = new float[INITIAL_CAPACITY];
+		private GlyphInstance[] instance = new GlyphInstance[INITIAL_CAPACITY];
+
+		public void delete() {
+			for (int i = 0; i < count; i++) {
+				instance[i].delete();
+				instance[i] = null;
+			}
+
+			count = 0;
+		}
+
+		private void updatePose(Matrix4f pose) {
+			for (int i = 0; i < count; i++) {
+				instance[i].setEffect(pose, x0[i], y0[i], width[i], height[i], depth[i]);
+				instance[i].setChanged();
+			}
+		}
+
+		public void add(float x0, float y0, float x1, float y1, float depth, GlyphInstance instance) {
+			if (count >= capacity()) {
+				reallocate(Math.max(2, capacity()) * 2);
+			}
+
+			this.x0[count] = x0;
+			this.y0[count] = y0;
+			this.width[count] = x1 - x0;
+			this.height[count] = y1 - y0;
+			this.depth[count] = depth;
+			this.instance[count] = instance;
+
+			count++;
+		}
+
+		private int capacity() {
+			return x0.length;
+		}
+
+		private void reallocate(int capacity) {
+			x0 = Arrays.copyOf(x0, capacity);
+			y0 = Arrays.copyOf(y0, capacity);
+			width = Arrays.copyOf(width, capacity);
+			height = Arrays.copyOf(height, capacity);
+			depth = Arrays.copyOf(depth, capacity);
+			instance = Arrays.copyOf(instance, capacity);
+		}
+
+		private void shrinkToFit() {
+			reallocate(count);
+		}
+
+		public void updateLight(int packedLight) {
+			for (int i = 0; i < count; i++) {
+				instance[i].light(packedLight);
+				instance[i].setChanged();
+			}
+		}
+	}
+
+	/**
+	 * Obfuscated glyphs. More complex than the other 2 SoAs.
+	 */
+	private static class ObfuscatedGlyphs {
+		public static final IntList MISSING = IntList.of(-1);
+
+		public int count = 0;
+
+		// No need for RandomSource objects here, we can just do things locally.
+		private long random = ThreadLocalRandom.current().nextLong();
+
+		// One layer per layer. This array is sized separately from all others.
+		public final TextLayer[] layers;
+
+		// Per-glyph arrays. Lengths must be kept in sync.
+		public float[] x = new float[0];
+		public boolean[] italic = new boolean[0];
+		public FontSet[] font = new FontSet[0];
+		public IntList[] possibleCharacters = new IntList[0];
+		public int[] possibleCharacterSizes = new int[0];
+		public float[] boldOffset = new float[0];
+		public float[] shadowOffset = new float[0];
+
+		// Per-instance arrays. Length must be at least count * layers.size()
+		public GlyphInstance[] instances = new GlyphInstance[0];
+
+		private final Matrix4f cachedPose = new Matrix4f();
+
+		private ObfuscatedGlyphs(List<TextLayer> layers) {
+			this.layers = layers.toArray(new TextLayer[0]);
+		}
+
+		private int next() {
+			// See SingleThreadedRandomSource#next
+			long l;
+			this.random = l = this.random * 25214903917L + 11L & 0xFFFFFFFFFFFFL;
+			return (int)(l >> 48 - 31);
+		}
+
+		private int nextInt(int bound) {
+			// This is what RandomSource#nextInt(bound) would do,
+			// but I don't think we need such high quality randomness here.
+			// int j;
+			// int i;
+			// if ((bound & bound - 1) == 0) {
+			// 	return (int)((long)bound * (long)this.next() >> 31);
+			// }
+			// while ((i = this.next()) - (j = i % bound) + (bound - 1) < 0) {
+			// }
+			return next() % bound;
+		}
+
+		private int randomCharacter(int glyphIndex) {
+			int size = this.possibleCharacterSizes[glyphIndex];
+
+			return this.possibleCharacters[glyphIndex].getInt(nextInt(size));
+		}
+
+		public void add(InstancerProvider instancerProvider, float x, FontSet font, GlyphInfo glyphInfo, Style style) {
+			if (count >= capacity()) {
+				reallocate(Math.max(2, capacity()) * 2);
+			}
+
+			this.x[count] = x;
+			this.font[count] = font;
+			this.italic[count] = style.isItalic();
+
+			// Replicate the logic from FontSet#getRandomGlyph
+			this.possibleCharacters[count] = ((FontSetAccessor) font).vanillin$glyphsByWidth()
+					.getOrDefault(Mth.ceil(glyphInfo.getAdvance(false)), MISSING);
+
+			// Save this in an array too so we don't have to go through the indirection.
+			this.possibleCharacterSizes[count] = this.possibleCharacters[count].size();
+
+			BakedGlyph glyph = this.font[count].getGlyph(randomCharacter(count));
+
+			var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
+			float glyphWidth = glyphExtension.flywheel$right() - glyphExtension.flywheel$left();
+			float glyphHeight = glyphExtension.flywheel$down() - glyphExtension.flywheel$up();
+
+			ResourceLocation texture = glyphExtension.flywheel$texture();
+			this.boldOffset[count] = style.isBold() ? glyphInfo.getBoldOffset() : 0.0f;
+			this.shadowOffset[count] = glyphInfo.getShadowOffset();
+
+			int instanceIndex = count * layers.length;
+			for (TextLayer layer : layers) {
+				var meshKeys = new GlyphMeshKey(glyphWidth, glyphHeight, layer.pattern(), this.boldOffset[count], this.shadowOffset[count]);
+				var modelKey = new GlyphModelKey(meshKeys, layer.material(), texture);
+
+				instances[instanceIndex] = instancerProvider.instancer(VanillinInstanceTypes.GLYPH, GLYPH_MODEL_CACHE.get(modelKey), layer.bias())
+						.createInstance();
+				instances[instanceIndex].colorArgb(layer.color()
+						.color(style.getColor()));
+				instanceIndex++;
+			}
+
+			count++;
+		}
+
+		public void updatePose(InstancerProvider instancerProvider, Matrix4f pose) {
+			cachedPose.set(pose);
+
+			update(instancerProvider);
+		}
+
+		public void update(InstancerProvider instancerProvider) {
+			int instanceIndex = 0;
+			for (int glyphIndex = 0; glyphIndex < count; glyphIndex++) {
+				BakedGlyph glyph = font[glyphIndex].getGlyph(randomCharacter(glyphIndex));
+
+				var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
+				float left = glyphExtension.flywheel$left();
+				float up = glyphExtension.flywheel$up();
+				float glyphWidth = glyphExtension.flywheel$right() - left;
+				float glyphHeight = glyphExtension.flywheel$down() - up;
+
+				float boldOffset = this.boldOffset[glyphIndex];
+				float shadowOffset = this.shadowOffset[glyphIndex];
+
+				ResourceLocation texture = glyphExtension.flywheel$texture();
+				for (TextLayer layer : layers) {
+					Vector2fc offset = layer.offset();
+
+					var meshKey = new GlyphMeshKey(glyphWidth, glyphHeight, layer.pattern(), boldOffset, shadowOffset);
+					var modelKey = new GlyphModelKey(meshKey, layer.material(), texture);
+
+					var instance = instances[instanceIndex];
+					instancerProvider.instancer(VanillinInstanceTypes.GLYPH, GLYPH_MODEL_CACHE.get(modelKey), layer.bias())
+							.stealInstance(instance);
+
+					instance.setUvs(glyphExtension);
+					instance.updatePose(cachedPose, x[glyphIndex] + offset.x() * shadowOffset, offset.y() * shadowOffset, left, up, italic[glyphIndex]);
+					instance.setChanged();
+
+					instanceIndex++;
+				}
+			}
+		}
+
+		private void updateLight(int light) {
+			for (int i = 0; i < count * layers.length; i++) {
+				instances[i].light(light);
+				instances[i].setChanged();
+			}
+		}
+
+		private int capacity() {
+			return x.length;
+		}
+
+		private void reallocate(int capacity) {
+			x = Arrays.copyOf(x, capacity);
+			font = Arrays.copyOf(font, capacity);
+			possibleCharacters = Arrays.copyOf(possibleCharacters, capacity);
+			possibleCharacterSizes = Arrays.copyOf(possibleCharacterSizes, capacity);
+			italic = Arrays.copyOf(italic, capacity);
+			boldOffset = Arrays.copyOf(boldOffset, capacity);
+			shadowOffset = Arrays.copyOf(shadowOffset, capacity);
+
+			instances = Arrays.copyOf(instances, capacity * layers.length);
+		}
+
+		public void delete() {
+			for (int i = 0; i < count * layers.length; i++) {
+				instances[i].delete();
+				instances[i] = null;
+			}
+			count = 0;
+		}
+
+		public void shrinkToFit() {
+			reallocate(count);
+		}
 	}
 
 	private static class Sink implements FormattedCharSink {
-		@UnknownNullability
-		private SmartRecycler<GlyphInstanceKey, GlyphInstance> recycler;
-		@UnknownNullability
-		private List<TextLayer> layers;
-		@UnknownNullability
-		private Matrix4f pose;
-		private int light;
+		private float x = 0;
 
-		private float x;
+		private final InstancerProvider instancerProvider;
+		private final List<TextLayer> layers;
 
-		public void prepare(SmartRecycler<GlyphInstanceKey, GlyphInstance> recycler, List<TextLayer> layers, Matrix4f pose, int light) {
-			this.recycler = recycler;
+		@Nullable
+		private BakedGlyphs glyphs;
+		@Nullable
+		private EffectGlyphs effectGlyphs;
+		@Nullable
+		private ObfuscatedGlyphs obfuscatedGlyphs;
+
+		private Sink(InstancerProvider instancerProvider, List<TextLayer> layers) {
+			this.instancerProvider = instancerProvider;
 			this.layers = layers;
-			this.pose = pose;
-			this.light = light;
-			this.x = 0;
-		}
-
-		public void clear() {
-			recycler = null;
-			layers = null;
-			pose = null;
 		}
 
 		@Override
 		public boolean accept(int index, Style style, int codePoint) {
 			FontSet fontSet = TextUtil.getFontSet(FONT, style.getFont());
 			GlyphInfo glyphInfo = fontSet.getGlyphInfo(codePoint, TextUtil.getFilterFishyGlyphs(FONT));
-			BakedGlyph glyph = style.isObfuscated() && codePoint != ' ' ? fontSet.getRandomGlyph(glyphInfo) : fontSet.getGlyph(codePoint);
 
 			boolean bold = style.isBold();
 			float advance = glyphInfo.getAdvance(bold);
 
-			// Process layers in the inner loop for 2 reasons:
-			// 1. So we don't have to iterate over all the text and to the same glyph lookups for each layer
-			// 2. So we get the same random draw in each layer for obfuscated text
+			// Write out obfuscated glyphs to a separate target that can better handle them.
+			if (style.isObfuscated() && codePoint != ' ') {
+				obfuscatedGlyphs().add(instancerProvider, x, fontSet, glyphInfo, style);
+			} else {
+				// Normal glyphs can be more thoroughly baked right here.
+				BakedGlyph glyph = fontSet.getGlyph(codePoint);
+
+				if (!(glyph instanceof EmptyGlyph)) {
+					var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
+					float glyphWidth = glyphExtension.flywheel$right() - glyphExtension.flywheel$left();
+					float glyphHeight = glyphExtension.flywheel$down() - glyphExtension.flywheel$up();
+
+					ResourceLocation texture = glyphExtension.flywheel$texture();
+					float boldOffset = bold ? glyphInfo.getBoldOffset() : 0;
+					float shadowOffset = glyphInfo.getShadowOffset();
+
+					for (TextLayer layer : layers) {
+						int color = layer.color()
+								.color(style.getColor());
+						Vector2fc offset = layer.offset();
+
+						var meshKey = new GlyphMeshKey(glyphWidth, glyphHeight, layer.pattern(), boldOffset, shadowOffset);
+						var modelKey = new GlyphModelKey(meshKey, layer.material(), texture);
+						GlyphInstance instance = instancerProvider.instancer(VanillinInstanceTypes.GLYPH, GLYPH_MODEL_CACHE.get(modelKey), layer.bias())
+								.createInstance();
+						instance.colorArgb(color);
+						instance.setUvs(glyphExtension);
+
+						bakedGlyphs().add(x + offset.x() * shadowOffset, offset.y() * shadowOffset, glyphExtension.flywheel$left(), glyphExtension.flywheel$up(), style.isItalic(), instance);
+					}
+				}
+			}
+
+			// Now write out the strikethrough/underline glyphs.
 			for (TextLayer layer : layers) {
 				int color = layer.color()
 						.color(style.getColor());
 				Vector2fc offset = layer.offset();
-
-				if (!(glyph instanceof EmptyGlyph)) {
-					GlyphInstance instance = recycler.get(key(layer, glyphInfo, glyph, bold));
-					float shadowOffset = glyphInfo.getShadowOffset();
-					instance.setGlyph(glyph, pose, x + offset.x() * shadowOffset, offset.y() * shadowOffset, style.isItalic());
-					instance.colorArgb(color);
-					instance.light(light);
-					instance.setChanged();
-				}
 
 				// SpecialGlyphs.WHITE, which effects use, has a shadowOffset of 1, so don't modify the offset returned by the layer.
 				if (style.isStrikethrough()) {
@@ -215,54 +550,44 @@ public final class TextVisual {
 			return true;
 		}
 
-		public void addBackground(int backgroundColor, float startX, float endX) {
-			if (backgroundColor != 0) {
-				BakedGlyph glyph = TextUtil.getFontSet(FONT, Style.DEFAULT_FONT)
-						.whiteGlyph();
-
-				var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
-
-				GlyphInstance instance = recycler.get(effectKey(glyphExtension.flywheel$texture(), TextLayer.GlyphMaterial.SEE_THROUGH, 0));
-				instance.setEffect(glyph, pose, startX - 1.0f, 9.0f, endX + 1.0f, 1.0f, 0.01f);
-				instance.colorArgb(backgroundColor);
-				instance.light(light);
-				instance.setChanged();
-			}
-		}
-
 		private void addEffect(TextLayer layer, float x0, float y0, float x1, float y1, float depth, int colorArgb) {
 			BakedGlyph glyph = TextUtil.getFontSet(FONT, Style.DEFAULT_FONT)
 					.whiteGlyph();
 
-			GlyphInstance instance = recycler.get(effectKey(glyph, layer));
-			instance.setEffect(glyph, pose, x0, y0, x1, y1, depth);
-			instance.colorArgb(colorArgb);
-			instance.light(light);
-			instance.setChanged();
-		}
-
-		private static GlyphInstanceKey key(TextLayer layer, GlyphInfo glyphInfo, BakedGlyph glyph, boolean bold) {
 			var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
-			float glyphWidth = glyphExtension.flywheel$right() - glyphExtension.flywheel$left();
-			float glyphHeight = glyphExtension.flywheel$down() - glyphExtension.flywheel$up();
-
-			return key(layer, glyphWidth, glyphHeight, glyphExtension.flywheel$texture(), bold, bold ? glyphInfo.getBoldOffset() : 0, glyphInfo.getShadowOffset());
-		}
-
-		private static GlyphInstanceKey key(TextLayer layer, float glyphWidth, float glyphHeight, ResourceLocation texture, boolean bold, float boldOffset, float shadowOffset) {
-			var meshKey = new GlyphMeshKey(glyphWidth, glyphHeight, layer.pattern(), bold, boldOffset, shadowOffset);
-			var modelKey = new GlyphModelKey(meshKey, layer.material(), texture);
-			return new GlyphInstanceKey(modelKey, layer.bias());
-		}
-
-		private static GlyphInstanceKey effectKey(BakedGlyph glyph, TextLayer layer) {
-			var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
-			return effectKey(glyphExtension.flywheel$texture(), layer.material(), layer.bias());
-		}
-
-		private static GlyphInstanceKey effectKey(ResourceLocation texture, TextLayer.GlyphMaterial material, int bias) {
+			ResourceLocation texture = glyphExtension.flywheel$texture();
+			TextLayer.GlyphMaterial material = layer.material();
 			var modelKey = new GlyphModelKey(null, material, texture);
-			return new GlyphInstanceKey(modelKey, bias);
+
+			GlyphInstance instance = instancerProvider.instancer(VanillinInstanceTypes.GLYPH, GLYPH_MODEL_CACHE.get(modelKey), layer.bias())
+					.createInstance();
+			instance.colorArgb(colorArgb);
+			instance.setUvs(glyphExtension);
+
+			effectGlyphs().add(x0, y0, x1, y1, depth, instance);
+		}
+
+		private ObfuscatedGlyphs obfuscatedGlyphs() {
+			if (obfuscatedGlyphs == null) {
+				obfuscatedGlyphs = new ObfuscatedGlyphs(layers);
+			}
+			return obfuscatedGlyphs;
+		}
+
+		private BakedGlyphs bakedGlyphs() {
+			if (glyphs == null) {
+				glyphs = new BakedGlyphs();
+			}
+
+			return glyphs;
+		}
+
+		private EffectGlyphs effectGlyphs() {
+			if (effectGlyphs == null) {
+				effectGlyphs = new EffectGlyphs();
+			}
+
+			return effectGlyphs;
 		}
 	}
 
@@ -294,15 +619,18 @@ public final class TextVisual {
 				for (int j = 0; j < 4; j++) {
 					vertexList.x(startVertex + j, offset.x() + (glyphWidth * X[j]));
 					vertexList.y(startVertex + j, offset.y() + (glyphHeight * Y[j]));
-					vertexList.z(startVertex + j, 0);
-					vertexList.r(startVertex + j, 1);
-					vertexList.g(startVertex + j, 1);
-					vertexList.b(startVertex + j, 1);
-					vertexList.a(startVertex + j, 1);
+					vertexList.z(startVertex + j, 0.0f);
+					vertexList.r(startVertex + j, 1.0f);
+					vertexList.g(startVertex + j, 1.0f);
+					vertexList.b(startVertex + j, 1.0f);
+					vertexList.a(startVertex + j, 1.0f);
+					vertexList.u(startVertex + j, 0.0f);
+					vertexList.v(startVertex + j, 0.0f);
 					vertexList.overlay(startVertex + j, OverlayTexture.NO_OVERLAY);
-					vertexList.normalX(startVertex + j, 0);
-					vertexList.normalY(startVertex + j, 0);
-					vertexList.normalZ(startVertex + j, 1);
+					vertexList.light(startVertex + j, 0);
+					vertexList.normalX(startVertex + j, 0.0f);
+					vertexList.normalY(startVertex + j, 0.0f);
+					vertexList.normalZ(startVertex + j, 1.0f);
 				}
 			}
 		}
@@ -360,14 +688,18 @@ public final class TextVisual {
 			for (int i = 0; i < 4; i++) {
 				vertexList.x(i, X[i]);
 				vertexList.y(i, Y[i]);
-				vertexList.z(i, 0);
-				vertexList.r(i, 1);
-				vertexList.g(i, 1);
-				vertexList.b(i, 1);
-				vertexList.a(i, 1);
-				vertexList.normalX(i, 0);
-				vertexList.normalY(i, 0);
-				vertexList.normalZ(i, 1);
+				vertexList.z(i, 0.0f);
+				vertexList.r(i, 1.0f);
+				vertexList.g(i, 1.0f);
+				vertexList.b(i, 1.0f);
+				vertexList.a(i, 1.0f);
+				vertexList.u(i, 0.0f);
+				vertexList.v(i, 0.0f);
+				vertexList.overlay(i, OverlayTexture.NO_OVERLAY);
+				vertexList.light(i, 0);
+				vertexList.normalX(i, 0.0f);
+				vertexList.normalY(i, 0.0f);
+				vertexList.normalZ(i, 1.0f);
 			}
 		}
 

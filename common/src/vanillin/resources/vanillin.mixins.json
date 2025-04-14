@@ -8,6 +8,7 @@
     "text.BakedGlyphMixin",
     "text.CodePointMapMixin",
     "text.FontAccessor",
+    "text.FontSetAccessor",
     "text.FontSetMixin",
     "text.FontTexture$NodeAccessor",
     "text.FontTextureMixin",

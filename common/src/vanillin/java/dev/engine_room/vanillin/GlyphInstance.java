@@ -8,8 +8,6 @@ import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.lib.instance.ColoredLitInstance;
 import dev.engine_room.flywheel.lib.math.DataPacker;
 import dev.engine_room.vanillin.text.BakedGlyphExtension;
-import dev.engine_room.vanillin.text.TextUtil;
-import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 
 public class GlyphInstance extends ColoredLitInstance {
 	// Skew x by 1 - 0.25 * y
@@ -25,13 +23,7 @@ public class GlyphInstance extends ColoredLitInstance {
 		super(type, handle);
 	}
 
-	public GlyphInstance setGlyph(BakedGlyph glyph, Matrix4fc initialPose, float x, float y, boolean italic) {
-		var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
-		setUvs(glyphExtension);
-
-		float left = glyphExtension.flywheel$left();
-		float up = glyphExtension.flywheel$up();
-
+	public GlyphInstance updatePose(Matrix4fc initialPose, float x, float y, float left, float up, boolean italic) {
 		pose.set(initialPose);
 		pose.translate(x, y, 0.0f);
 
@@ -39,23 +31,20 @@ public class GlyphInstance extends ColoredLitInstance {
 			pose.mul(ITALIC_SKEW);
 		}
 
-		pose.translate(left, up - 3.0f, 0.0f);
+		pose.translate(left, up, 0.0f);
 
 		return this;
 	}
 
-	public GlyphInstance setEffect(BakedGlyph glyph, Matrix4fc initialPose, float x0, float y0, float x1, float y1, float depth) {
-		var glyphExtension = TextUtil.getBakedGlyphExtension(glyph);
-		setUvs(glyphExtension);
-
+	public GlyphInstance setEffect(Matrix4fc initialPose, float x0, float y0, float width, float height, float depth) {
 		pose.set(initialPose);
 		pose.translate(x0, y0, depth);
-		pose.scale(x1 - x0, y1 - y0, 1.0f);
+		pose.scale(width, height, 1.0f);
 
 		return this;
 	}
 
-	private void setUvs(BakedGlyphExtension glyphExtension) {
+	public void setUvs(BakedGlyphExtension glyphExtension) {
 		float u0 = glyphExtension.flywheel$u0();
 		float u1 = glyphExtension.flywheel$u1();
 		float v0 = glyphExtension.flywheel$v0();

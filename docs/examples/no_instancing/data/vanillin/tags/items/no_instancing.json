@@ -1,0 +1,7 @@
+{
+  "replace" : false,
+  "values" : [
+    "mymodid:my_fancy_item",
+    "#minecraft:anvil"
+  ]
+}

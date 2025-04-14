@@ -4,19 +4,25 @@ import java.util.Objects;
 
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
+import dev.engine_room.vanillin.Vanillin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.MultiPartBakedModel;
 import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.client.resources.model.WeightedBakedModel;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 public class ItemModels {
+	public static final TagKey<Item> NO_INSTANCING = TagKey.create(Registries.ITEM, Vanillin.rl("no_instancing"));
+
 	public static final RendererReloadCache<ItemKey, Model> MODEL_CACHE = new RendererReloadCache<>(stack -> {
-		return new ItemModelBuilder(stack.stack(), stack.model()).displayContext(stack.context).build();
+		return new ItemModelBuilder(stack.stack(), stack.model()).displayContext(stack.context())
+				.build();
 	});
 
 	public static Model get(ItemKey key) {
@@ -27,13 +33,9 @@ public class ItemModels {
 		return get(new ItemKey(stack.copy(), getModel(stack), context));
 	}
 
-	public static boolean isSupported(ItemEntity entity) {
-		return isSupported(entity.getItem());
-	}
-
 	public static boolean isSupported(ItemStack stack) {
 		// Maybe we could cache this?
-		return isSupported(getModel(stack));
+		return !stack.is(NO_INSTANCING) && isSupported(getModel(stack));
 	}
 
 	public static BakedModel getModel(ItemStack stack) {

@@ -13,6 +13,8 @@ import net.minecraft.util.Mth;
 // https://github.com/CaffeineMC/sodium-fabric/blob/5d364ed5ba63f9067fcf72a078ca310bff4db3e9/src/main/java/me/jellysquid/mods/sodium/client/render/chunk/compile/ChunkBuilder.java
 // https://stackoverflow.com/questions/29655531
 public class ParallelTaskExecutor implements TaskExecutorImpl {
+	private static final int MAX_ERRORS_LOGGED_PER_THREAD = 10;
+
 	private final String name;
 	private final int threadCount;
 
@@ -25,6 +27,8 @@ public class ParallelTaskExecutor implements TaskExecutorImpl {
 	private final Deque<Runnable> taskQueue = new ConcurrentLinkedDeque<>();
 	private final ThreadGroupNotifier taskNotifier = new ThreadGroupNotifier();
 	private final WaitGroup waitGroup = new WaitGroup();
+
+	private int mainThreadErrorLogLatch = MAX_ERRORS_LOGGED_PER_THREAD;
 
 	public ParallelTaskExecutor(String name, int threadCount) {
 		this.name = name;
@@ -170,13 +174,23 @@ public class ParallelTaskExecutor implements TaskExecutorImpl {
 		try {
 			task.run();
 		} catch (Exception e) {
-			FlwImpl.LOGGER.error("Error running task", e);
+			if (mainThreadErrorLogLatch > 0) {
+				FlwImpl.LOGGER.error("Error running task", e);
+
+				mainThreadErrorLogLatch--;
+			} else if (mainThreadErrorLogLatch == 0) {
+				FlwImpl.LOGGER.error("Too many errors emitted by main thread, silencing.");
+
+				mainThreadErrorLogLatch--;
+			}
 		} finally {
 			waitGroup.done();
 		}
 	}
 
 	private class WorkerThread extends Thread {
+		private int errorLogLatch = MAX_ERRORS_LOGGED_PER_THREAD;
+
 		public WorkerThread(String name) {
 			super(name);
 		}
@@ -188,11 +202,29 @@ public class ParallelTaskExecutor implements TaskExecutorImpl {
 				Runnable task = taskQueue.pollFirst();
 
 				if (task != null) {
-					processTask(task);
+					this.processTask(task);
 				} else {
 					// Nothing to do, time to sleep.
 					spinThenWait();
 				}
+			}
+		}
+
+		private void processTask(Runnable task) {
+			try {
+				task.run();
+			} catch (Exception e) {
+				if (errorLogLatch > 0) {
+					FlwImpl.LOGGER.error("Error running task", e);
+
+					errorLogLatch--;
+				} else if (errorLogLatch == 0) {
+					FlwImpl.LOGGER.error("Too many errors emitted by thread {}, silencing.", this);
+
+					errorLogLatch--;
+				}
+			} finally {
+				waitGroup.done();
 			}
 		}
 

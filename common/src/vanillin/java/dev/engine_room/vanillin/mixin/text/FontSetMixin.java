@@ -1,8 +1,6 @@
 package dev.engine_room.vanillin.mixin.text;
 
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
@@ -12,15 +10,9 @@ import dev.engine_room.vanillin.text.FontTextureExtension;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.FontTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
 
 @Mixin(FontSet.class)
 public abstract class FontSetMixin {
-	// Replace serial random with thread safe random
-	@Shadow
-	@Final
-	private static final RandomSource RANDOM = RandomSource.createThreadSafe();
-
 	@ModifyExpressionValue(method = "stitch", at = @At(value = "NEW", target = "net/minecraft/client/gui/font/FontTexture"))
 	private FontTexture flywheel$setNameAfterCreate(FontTexture original, @Local ResourceLocation name) {
 		// Forward the name to the FontTexture so we can forward the name to the BakedGlyphs it creates.
