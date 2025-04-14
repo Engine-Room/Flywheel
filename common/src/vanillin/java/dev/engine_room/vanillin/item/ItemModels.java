@@ -62,6 +62,7 @@ import net.minecraft.world.level.block.StainedGlassPaneBlock;
 public class ItemModels {
 	public static final TagKey<Item> NO_INSTANCING = TagKey.create(Registries.ITEM, Vanillin.rl("no_instancing"));
 
+	private static final Model EMPTY_MODEL = new SimpleModel(List.of());
 	private static final RendererReloadCache<BakedMeshKey, Mesh> MESH_CACHE = new RendererReloadCache<>(key -> bakeMesh(key.model(), key.displayContext()));
 	private static final RendererReloadCache<BakedModelKey, Model> MODEL_CACHE = new RendererReloadCache<>(key -> bakeModel(key.model(), key.displayContext(), key.material(), key.foil()));
 
@@ -106,11 +107,10 @@ public class ItemModels {
 				.getItemModel(stack);
 	}
 
+	@Nullable
 	public static BakedModel getActualBakedModel(@Nullable ClientLevel clientLevel, ItemStack itemStack, ItemDisplayContext displayContext) {
 		if (itemStack.isEmpty()) {
-			return Minecraft.getInstance()
-					.getModelManager()
-					.getMissingModel();
+			return null;
 		}
 
 		var baseModel = getModel(itemStack);
@@ -123,9 +123,7 @@ public class ItemModels {
 
 		boolean notEquipped = displayContext == ItemDisplayContext.GUI || displayContext == ItemDisplayContext.GROUND || displayContext == ItemDisplayContext.FIXED;
 		if (model.isCustomRenderer() || itemStack.is(Items.TRIDENT) && !notEquipped) {
-			return Minecraft.getInstance()
-					.getModelManager()
-					.getMissingModel();
+			return null;
 		}
 
 		if (notEquipped) {
@@ -190,6 +188,10 @@ public class ItemModels {
 		ClientLevel clientLevel = (level instanceof ClientLevel) ? (ClientLevel) level : null;
 
 		BakedModel model = getActualBakedModel(clientLevel, itemStack, displayContext);
+
+		if (model == null) {
+			return EMPTY_MODEL;
+		}
 
 		return MODEL_CACHE.get(new BakedModelKey(model, displayContext, material, itemStack.hasFoil()));
 	}
