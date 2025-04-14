@@ -26,8 +26,7 @@ public class ItemVisual extends AbstractEntityVisual<ItemEntity> implements Simp
 	private static final ThreadLocal<RandomSource> RANDOM = ThreadLocal.withInitial(RandomSource::createNewThreadLocalInstance);
 
 	private final PoseStack pPoseStack = new PoseStack();
-	private final BakedModel model;
-	private final boolean isSupported;
+	private final BakedModel bakedModel;
 
 	private final InstanceRecycler<TransformedInstance> instances;
 
@@ -35,14 +34,12 @@ public class ItemVisual extends AbstractEntityVisual<ItemEntity> implements Simp
 		super(ctx, entity, partialTick);
 
 		var item = entity.getItem();
-		model = ItemModels.getModel(item);
+		bakedModel = ItemModels.getModel(item);
 
-		isSupported = ItemModels.isSupported(model);
-
-		var key = new ItemModels.ItemKey(item.copy(), model, ItemDisplayContext.GROUND);
+		var model = ItemModels.get(level, item, ItemDisplayContext.GROUND);
 
 		instances = new InstanceRecycler<>(() -> ctx.instancerProvider()
-				.instancer(InstanceTypes.TRANSFORMED, ItemModels.get(key))
+				.instancer(InstanceTypes.TRANSFORMED, model)
 				.createInstance());
 	}
 
@@ -52,7 +49,7 @@ public class ItemVisual extends AbstractEntityVisual<ItemEntity> implements Simp
 
 	@Override
 	public void beginFrame(Context ctx) {
-		if (!isSupported || !isVisible(ctx.frustum())) {
+		if (!isVisible(ctx.frustum())) {
 			return;
 		}
 
@@ -65,11 +62,11 @@ public class ItemVisual extends AbstractEntityVisual<ItemEntity> implements Simp
 		int i = itemstack.isEmpty() ? 187 : Item.getId(itemstack.getItem()) + itemstack.getDamageValue();
 		var random = RANDOM.get();
 		random.setSeed(i);
-		boolean flag = model.isGui3d();
+		boolean flag = bakedModel.isGui3d();
 		int j = this.getRenderAmount(itemstack);
 		float f = 0.25F;
 		float f1 = shouldBob() ? Mth.sin(((float) entity.getAge() + ctx.partialTick()) / 10.0F + entity.bobOffs) * 0.1F + 0.1F : 0;
-		float f2 = model.getTransforms()
+		float f2 = bakedModel.getTransforms()
 				.getTransform(ItemDisplayContext.GROUND).scale.y();
 		pPoseStack.translate(0.0F, f1 + 0.25F * f2, 0.0F);
 		float f3 = entity.getSpin(ctx.partialTick());
