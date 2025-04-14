@@ -67,6 +67,7 @@ loom {
 
     forge {
         mixinConfig("vanillin.mixins.json")
+        mixinConfig("vanillin.forge.mixins.json")
     }
 
     runs {

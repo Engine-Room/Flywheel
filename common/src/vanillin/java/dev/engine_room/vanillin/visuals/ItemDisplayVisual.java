@@ -1,9 +1,5 @@
 package dev.engine_room.vanillin.visuals;
 
-import java.util.Objects;
-
-import org.jetbrains.annotations.Nullable;
-
 import com.mojang.math.Transformation;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
@@ -18,13 +14,14 @@ import net.minecraft.client.Camera;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 public class ItemDisplayVisual extends AbstractEntityVisual<Display.ItemDisplay> implements SimpleDynamicVisual {
 	private final TransformedInstance instance;
-	@Nullable
-	private ItemModels.ItemKey currentItemKey;
+
+	private ItemStack currentStack;
 
 	private final ShadowComponent shadowComponent;
 
@@ -34,15 +31,15 @@ public class ItemDisplayVisual extends AbstractEntityVisual<Display.ItemDisplay>
 		var itemRenderState = entity.itemRenderState();
 
 		if (itemRenderState == null) {
+			currentStack = ItemStack.EMPTY;
 			instance = ctx.instancerProvider()
 					.instancer(InstanceTypes.TRANSFORMED, Models.block(Blocks.AIR.defaultBlockState()))
 					.createInstance();
 		} else {
-			var itemStack = itemRenderState.itemStack();
-			currentItemKey = new ItemModels.ItemKey(itemStack.copy(), ItemModels.getModel(itemStack), itemRenderState.itemTransform());
-
+			currentStack = itemRenderState.itemStack()
+					.copy();
 			instance = ctx.instancerProvider()
-					.instancer(InstanceTypes.TRANSFORMED, ItemModels.get(currentItemKey))
+					.instancer(InstanceTypes.TRANSFORMED, ItemModels.get(level, currentStack, itemRenderState.itemTransform()))
 					.createInstance();
 		}
 
@@ -69,12 +66,10 @@ public class ItemDisplayVisual extends AbstractEntityVisual<Display.ItemDisplay>
 
 		var itemStack = object.itemStack();
 
-		var itemKey = new ItemModels.ItemKey(itemStack.copy(), ItemModels.getModel(itemStack), object.itemTransform());
-
-		if (!Objects.equals(itemKey, currentItemKey)) {
-			currentItemKey = itemKey;
+		if (ItemStack.matches(itemStack, currentStack)) {
+			currentStack = itemStack.copy();
 			visualizationContext.instancerProvider()
-					.instancer(InstanceTypes.TRANSFORMED, ItemModels.get(currentItemKey))
+					.instancer(InstanceTypes.TRANSFORMED, ItemModels.get(level, currentStack, object.itemTransform()))
 					.stealInstance(instance);
 		}
 

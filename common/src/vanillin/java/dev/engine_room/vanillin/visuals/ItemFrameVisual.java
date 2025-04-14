@@ -70,7 +70,7 @@ public class ItemFrameVisual extends AbstractVisual implements EntityVisual<Item
 		frame.setTransform(baseTransform);
 
 		item = ctx.instancerProvider()
-				.instancer(InstanceTypes.TRANSFORMED, ItemModels.get(lastItemStack, ItemDisplayContext.FIXED))
+				.instancer(InstanceTypes.TRANSFORMED, ItemModels.get(level, lastItemStack, ItemDisplayContext.FIXED))
 				.createInstance();
 
 		animate(partialTick);
@@ -124,7 +124,7 @@ public class ItemFrameVisual extends AbstractVisual implements EntityVisual<Item
 		if (!ItemStack.matches(lastItemStack, stack)) {
 			lastItemStack = stack.copy();
 			visualizationContext.instancerProvider()
-					.instancer(InstanceTypes.TRANSFORMED, ItemModels.get(lastItemStack, ItemDisplayContext.FIXED))
+					.instancer(InstanceTypes.TRANSFORMED, ItemModels.get(level, lastItemStack, ItemDisplayContext.FIXED))
 					.stealInstance(item);
 		}
 
