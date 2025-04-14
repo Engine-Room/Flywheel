@@ -46,6 +46,10 @@ public class ItemVisual extends AbstractEntityVisual<ItemEntity> implements Simp
 				.createInstance());
 	}
 
+	public static boolean isSupported(ItemEntity entity) {
+		return ItemModels.isSupported(entity.getItem());
+	}
+
 	@Override
 	public void beginFrame(Context ctx) {
 		if (!isSupported || !isVisible(ctx.frustum())) {
