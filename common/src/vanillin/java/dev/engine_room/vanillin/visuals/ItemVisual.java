@@ -41,6 +41,8 @@ public class ItemVisual extends AbstractEntityVisual<ItemEntity> implements Simp
 		instances = new InstanceRecycler<>(() -> ctx.instancerProvider()
 				.instancer(InstanceTypes.TRANSFORMED, model)
 				.createInstance());
+
+		animate(partialTick);
 	}
 
 	public static boolean isSupported(ItemEntity entity) {
@@ -53,9 +55,13 @@ public class ItemVisual extends AbstractEntityVisual<ItemEntity> implements Simp
 			return;
 		}
 
+		animate(ctx.partialTick());
+	}
+
+	private void animate(float partialTick) {
 		pPoseStack.setIdentity();
 		TransformStack.of(pPoseStack)
-				.translate(getVisualPosition(ctx.partialTick()));
+				.translate(getVisualPosition(partialTick));
 
 		instances.resetCount();
 		ItemStack itemstack = entity.getItem();
@@ -65,16 +71,17 @@ public class ItemVisual extends AbstractEntityVisual<ItemEntity> implements Simp
 		boolean flag = bakedModel.isGui3d();
 		int j = this.getRenderAmount(itemstack);
 		float f = 0.25F;
-		float f1 = shouldBob() ? Mth.sin(((float) entity.getAge() + ctx.partialTick()) / 10.0F + entity.bobOffs) * 0.1F + 0.1F : 0;
-		float f2 = bakedModel.getTransforms()
-				.getTransform(ItemDisplayContext.GROUND).scale.y();
-		pPoseStack.translate(0.0F, f1 + 0.25F * f2, 0.0F);
-		float f3 = entity.getSpin(ctx.partialTick());
+		float f1 = shouldBob() ? Mth.sin(((float) entity.getAge() + partialTick) / 10.0F + entity.bobOffs) * 0.1F + 0.1F : 0;
+		float groundScaleX = bakedModel.getTransforms().ground.scale.y();
+		float groundScaleY = bakedModel.getTransforms().ground.scale.y();
+		float groundScaleZ = bakedModel.getTransforms().ground.scale.y();
+		pPoseStack.translate(0.0F, f1 + 0.25F * groundScaleZ, 0.0F);
+		float f3 = entity.getSpin(partialTick);
 		pPoseStack.mulPose(Axis.YP.rotation(f3));
 		if (!flag) {
-			float f7 = -0.0F * (float) (j - 1) * 0.5F;
-			float f8 = -0.0F * (float) (j - 1) * 0.5F;
-			float f9 = -0.09375F * (float) (j - 1) * 0.5F;
+			float f7 = -0.0F * (float) (j - 1) * 0.5F * groundScaleX;
+			float f8 = -0.0F * (float) (j - 1) * 0.5F * groundScaleY;
+			float f9 = -0.09375F * (float) (j - 1) * 0.5F * groundScaleZ;
 			pPoseStack.translate(f7, f8, f9);
 		}
 
@@ -101,7 +108,7 @@ public class ItemVisual extends AbstractEntityVisual<ItemEntity> implements Simp
 					.setChanged();
 			pPoseStack.popPose();
 			if (!flag) {
-				pPoseStack.translate(0.0, 0.0, 0.09375F);
+				pPoseStack.translate(0.0, 0.0, 0.09375F * groundScaleZ);
 			}
 		}
 
