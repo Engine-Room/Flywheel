@@ -12,4 +12,6 @@ public interface VanillinXplat {
 	boolean isDevelopmentEnvironment();
 
 	@Nullable ItemColor itemColors(Item item);
+
+	boolean isModLoaded(String modId);
 }

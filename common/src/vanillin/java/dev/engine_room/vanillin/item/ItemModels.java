@@ -199,14 +199,11 @@ public class ItemModels {
 	public static Model bakeModel(BakedModel model, ItemDisplayContext displayContext, Material material, boolean foil) {
 		var mesh = MESH_CACHE.get(new BakedMeshKey(model, displayContext));
 
-		Model out;
 		if (foil) {
-			out = new SimpleModel(List.of(new Model.ConfiguredMesh(material, mesh), new Model.ConfiguredMesh(Materials.GLINT, mesh)));
+			return new SimpleModel(List.of(new Model.ConfiguredMesh(material, mesh), new Model.ConfiguredMesh(Materials.GLINT, mesh)));
 		} else {
-			out = new SingleMeshModel(mesh, material);
+			return new SingleMeshModel(mesh, material);
 		}
-
-		return out;
 	}
 
 	public static Mesh bakeMesh(BakedModel model, ItemDisplayContext displayContext) {
@@ -251,6 +248,8 @@ public class ItemModels {
 			int vertex = 0;
 
 			for (BakedQuad quad : allQuads) {
+				SodiumAnimatedTextureCompat.add(quad.getSprite());
+
 				int[] js = quad.getVertices();
 				var direction = quad.getDirection();
 

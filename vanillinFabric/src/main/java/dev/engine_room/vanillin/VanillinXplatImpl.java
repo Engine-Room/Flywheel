@@ -23,4 +23,10 @@ public class VanillinXplatImpl implements VanillinXplat {
 		var itemColors = ((ItemColorsAccessor) ((MinecraftAccessor) Minecraft.getInstance()).vanillin$itemColors()).vanillin$itemColors();
 		return itemColors.byId(BuiltInRegistries.ITEM.getId(item));
 	}
+
+	@Override
+	public boolean isModLoaded(String modId) {
+		return FabricLoader.getInstance()
+				.isModLoaded(modId);
+	}
 }
