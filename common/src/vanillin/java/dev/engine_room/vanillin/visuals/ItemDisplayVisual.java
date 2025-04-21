@@ -66,7 +66,7 @@ public class ItemDisplayVisual extends AbstractEntityVisual<Display.ItemDisplay>
 
 		var itemStack = object.itemStack();
 
-		if (ItemStack.matches(itemStack, currentStack)) {
+		if (!ItemStack.matches(itemStack, currentStack)) {
 			currentStack = itemStack.copy();
 			visualizationContext.instancerProvider()
 					.instancer(InstanceTypes.TRANSFORMED, ItemModels.get(level, currentStack, object.itemTransform()))
