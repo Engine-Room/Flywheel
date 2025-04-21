@@ -23,7 +23,6 @@ import dev.engine_room.vanillin.visuals.ItemFrameVisual;
 import dev.engine_room.vanillin.visuals.ItemVisual;
 import dev.engine_room.vanillin.visuals.MinecartVisual;
 import dev.engine_room.vanillin.visuals.ShulkerBoxVisual;
-import dev.engine_room.vanillin.visuals.SignVisual;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.world.entity.Entity;
@@ -59,9 +58,6 @@ public class VanillaVisuals {
 		builder(BlockEntityType.SHULKER_BOX)
 				.factory(ShulkerBoxVisual::new)
 				.apply(STABLE);
-
-		builder(BlockEntityType.SIGN).factory(SignVisual::new)
-				.apply(EXPERIMENTAL);
 
 		builder(EntityType.BLOCK_DISPLAY).factory(BlockDisplayVisual::new)
 				.apply(STABLE);
