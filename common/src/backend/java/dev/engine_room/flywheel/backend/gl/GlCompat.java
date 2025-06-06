@@ -140,7 +140,7 @@ public final class GlCompat {
 	}
 
 	private static boolean isInstancingSupported() {
-		if (CAPABILITIES == null) {
+		if (CAPABILITIES == null || Workarounds.isIntelHDGraphics()) {
 			return false;
 		}
 		if (CAPABILITIES.OpenGL33) {
@@ -150,7 +150,7 @@ public final class GlCompat {
 	}
 
 	private static boolean isIndirectSupported() {
-		if (CAPABILITIES == null) {
+		if (CAPABILITIES == null || Workarounds.isIntelHDGraphics()) {
 			return false;
 		}
 		if (CAPABILITIES.OpenGL46) {
@@ -214,5 +214,18 @@ public final class GlCompat {
 		GL20.glDeleteShader(handle);
 
 		return success;
+	}
+
+	static class Workarounds {
+		// Intel HD Graphics support* instancing and indirect rendering.
+		// * However, in reality the support is horrible and doesn't actually work
+		// so whenever we encounter these, we have to fall back to flywheel:off
+		public static boolean isIntelHDGraphics() {
+			if (DRIVER != Driver.INTEL)
+				return false;
+
+			String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
+			return vendor != null && vendor.contains("Intel(R) HD Graphics");
+		}
 	}
 }
