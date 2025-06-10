@@ -221,11 +221,7 @@ public final class GlCompat {
 		// * However, in reality the support is horrible and doesn't actually work
 		// so whenever we encounter these, we have to fall back to flywheel:off
 		public static boolean isIntelHDGraphics() {
-			if (DRIVER != Driver.INTEL)
-				return false;
-
-			String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
-			return vendor != null && vendor.contains("Intel(R) HD Graphics");
+			return DRIVER.vendor.contains("Intel(R) HD Graphics");
 		}
 	}
 }
