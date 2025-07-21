@@ -39,11 +39,6 @@ public final class GlCompat {
 	public static final boolean ALLOW_DSA = true;
 	public static final GlslVersion MAX_GLSL_VERSION = maxGlslVersion();
 
-	public static final String VENDOR = glGetString(GL20C.GL_VENDOR);
-	public static final String RENDERER = glGetString(GL20C.GL_RENDERER);
-	public static final String VERSION = glGetString(GL20C.GL_VERSION);
-	public static final String EXTENSIONS = glGetString(GL20C.GL_EXTENSIONS);
-
 	public static final boolean SUPPORTS_DSA = ALLOW_DSA && isDsaSupported();
 
 	public static final boolean SUPPORTS_INSTANCING = isInstancingSupported();
@@ -108,18 +103,20 @@ public final class GlCompat {
 			return Driver.UNKNOWN;
 		}
 
-		if (VENDOR == null) {
+		String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
+
+		if (vendor == null) {
 			return Driver.UNKNOWN;
 		}
 
 		// vendor string I got was "ATI Technologies Inc."
-		if (VENDOR.contains("ATI") || VENDOR.contains("AMD")) {
+		if (vendor.contains("ATI") || vendor.contains("AMD")) {
 			return Driver.AMD;
-		} else if (VENDOR.contains("NVIDIA")) {
+		} else if (vendor.contains("NVIDIA")) {
 			return Driver.NVIDIA;
-		} else if (VENDOR.contains("Intel")) {
+		} else if (vendor.contains("Intel")) {
 			return Driver.INTEL;
-		} else if (VENDOR.contains("Mesa")) {
+		} else if (vendor.contains("Mesa")) {
 			return Driver.MESA;
 		}
 
@@ -219,15 +216,11 @@ public final class GlCompat {
 		return success;
 	}
 
-	private static String glGetString(int name) {
-		String s = GL20.glGetString(name);
-		return s != null ? s : "";
-	}
-
 	// Intel HD Graphics support* instancing and indirect rendering.
 	// * However, in reality the support is horrible and doesn't actually work
 	// so whenever we encounter these, we have to fall back to flywheel:off
 	public static boolean isIntelHDGraphics() {
-		return VENDOR.contains("Intel(R) HD Graphics");
+		String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
+		return vendor != null && vendor.contains("Intel(R) HD Graphics");
 	}
 }
