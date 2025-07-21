@@ -108,20 +108,18 @@ public final class GlCompat {
 			return Driver.UNKNOWN;
 		}
 
-		String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
-
-		if (vendor == null) {
+		if (VENDOR == null) {
 			return Driver.UNKNOWN;
 		}
 
 		// vendor string I got was "ATI Technologies Inc."
-		if (vendor.contains("ATI") || vendor.contains("AMD")) {
+		if (VENDOR.contains("ATI") || VENDOR.contains("AMD")) {
 			return Driver.AMD;
-		} else if (vendor.contains("NVIDIA")) {
+		} else if (VENDOR.contains("NVIDIA")) {
 			return Driver.NVIDIA;
-		} else if (vendor.contains("Intel")) {
+		} else if (VENDOR.contains("Intel")) {
 			return Driver.INTEL;
-		} else if (vendor.contains("Mesa")) {
+		} else if (VENDOR.contains("Mesa")) {
 			return Driver.MESA;
 		}
 
