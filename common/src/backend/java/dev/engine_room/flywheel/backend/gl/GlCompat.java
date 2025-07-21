@@ -39,6 +39,11 @@ public final class GlCompat {
 	public static final boolean ALLOW_DSA = true;
 	public static final GlslVersion MAX_GLSL_VERSION = maxGlslVersion();
 
+	public static final String VENDOR = glGetString(GL20C.GL_VENDOR);
+	public static final String RENDERER = glGetString(GL20C.GL_RENDERER);
+	public static final String VERSION = glGetString(GL20C.GL_VERSION);
+	public static final String EXTENSIONS = glGetString(GL20C.GL_EXTENSIONS);
+
 	public static final boolean SUPPORTS_DSA = ALLOW_DSA && isDsaSupported();
 
 	public static final boolean SUPPORTS_INSTANCING = isInstancingSupported();
@@ -140,7 +145,7 @@ public final class GlCompat {
 	}
 
 	private static boolean isInstancingSupported() {
-		if (CAPABILITIES == null || Workarounds.isIntelHDGraphics()) {
+		if (CAPABILITIES == null || isIntelHDGraphics()) {
 			return false;
 		}
 		if (CAPABILITIES.OpenGL33) {
@@ -150,7 +155,7 @@ public final class GlCompat {
 	}
 
 	private static boolean isIndirectSupported() {
-		if (CAPABILITIES == null || Workarounds.isIntelHDGraphics()) {
+		if (CAPABILITIES == null || isIntelHDGraphics()) {
 			return false;
 		}
 		if (CAPABILITIES.OpenGL46) {
@@ -216,12 +221,15 @@ public final class GlCompat {
 		return success;
 	}
 
-	static class Workarounds {
-		// Intel HD Graphics support* instancing and indirect rendering.
-		// * However, in reality the support is horrible and doesn't actually work
-		// so whenever we encounter these, we have to fall back to flywheel:off
-		public static boolean isIntelHDGraphics() {
-			return DRIVER.vendor.contains("Intel(R) HD Graphics");
-		}
+	private static String glGetString(int name) {
+		String s = GL20.glGetString(name);
+		return s != null ? s : "";
+	}
+
+	// Intel HD Graphics support* instancing and indirect rendering.
+	// * However, in reality the support is horrible and doesn't actually work
+	// so whenever we encounter these, we have to fall back to flywheel:off
+	public static boolean isIntelHDGraphics() {
+		return VENDOR.contains("Intel(R) HD Graphics");
 	}
 }
