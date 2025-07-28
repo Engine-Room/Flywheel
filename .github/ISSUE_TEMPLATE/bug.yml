@@ -27,7 +27,7 @@ body:
     attributes:
       label: Debug Information
       description: >
-        Please run the \"/flywheel info\" command in-game.
+        Please run the \"/flywheel debug info\" command in-game.
         This will allow you to copy useful information to your clipboard that will greatly help with debugging.
         Please paste this information here.
     validations:
