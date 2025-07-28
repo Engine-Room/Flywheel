@@ -51,19 +51,30 @@ public final class FlwDebugInfo {
 		addVisualizationManagerDebugInfo(manager, out);
 
 		// Write out to a string both to emit to chat and include in the click event.
-		var debugInfoString = out.toString();
+		String debugInfoString = out.toString();
 
 		return Component.literal(debugInfoString)
 				.append(Component.literal("\n\nClick to copy debug info to clipboard")
 						.withStyle(Style.EMPTY.withUnderlined(true)
-								.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, debugInfoString))
+								.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, formatForIssue(debugInfoString)))
 								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(debugInfoString)))))
 				.append(Component.literal("\n\nClick to open an issue on GitHub")
 						.withStyle(Style.EMPTY.withUnderlined(true)
 								.withColor(ChatFormatting.BLUE)
-								.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/Engine-Room/Flywheel/issues"))
+								.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/Engine-Room/Flywheel/issues/new"))
 								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Opens URL:\nhttps://github.com/Engine-Room/Flywheel/issues")))));
 
+	}
+
+	private static String formatForIssue(String original) {
+		return """
+            <details>
+            <summary>Debug Info</summary>
+
+            %s
+
+            </details>
+            """.formatted(original);
 	}
 
 	private static void addBackendDebugInfo(@Nullable VisualizationManagerImpl manager, StringBuilder out) {
