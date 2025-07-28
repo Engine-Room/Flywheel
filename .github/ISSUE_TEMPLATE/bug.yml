@@ -13,7 +13,6 @@ body:
       required: true
 
   - type: input
-    id: game_log
     attributes:
       label: Game Log
       description: >
@@ -25,7 +24,6 @@ body:
       required: true
 
   - type: textarea
-    id: debug_info
     attributes:
       label: Debug Information
       description: >
