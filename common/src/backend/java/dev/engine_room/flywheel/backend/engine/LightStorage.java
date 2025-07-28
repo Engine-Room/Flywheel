@@ -54,7 +54,7 @@ public class LightStorage implements Effect {
 
 	private final LevelAccessor level;
 	private final LightLut lut;
-	private final CpuArena arena;
+	public final CpuArena arena;
 	private final Long2IntMap section2ArenaIndex;
 	private final LightDataCollector collector;
 
@@ -286,9 +286,11 @@ public class LightStorage implements Effect {
 
 						var instance = boxes.get();
 
+						// Slightly smaller than a full 16x16x16 section to make it obvious which sections
+						// are actually represented when many are tiled next to each other.
 						instance.setIdentityTransform()
-								.translate(x, y, z)
-								.scale(16)
+								.translate(x + 1, y + 1, z + 1)
+								.scale(14)
 								.color(255, 255, 0)
 								.light(LightTexture.FULL_BRIGHT)
 								.setChanged();

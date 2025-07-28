@@ -183,6 +183,13 @@ public final class FlwCommands {
 							return Command.SINGLE_SUCCESS;
 						})));
 
+		debug.then(Commands.literal("info")
+				.executes(context -> {
+					context.getSource()
+							.sendSystemMessage(FlwDebugInfo.getDebugCommandInfo());
+					return Command.SINGLE_SUCCESS;
+				}));
+
 		return debug;
 	}
 
