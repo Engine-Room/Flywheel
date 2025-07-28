@@ -10,6 +10,7 @@
     "LevelRendererAccessor",
     "OptionsMixin",
     "RenderSystemMixin",
+    "light.LayerLightSectionStorageAccessor",
     "light.LightEngineAccessor",
     "light.SkyDataLayerStorageMapAccessor",
     "light.SkyLightSectionStorageMixin"

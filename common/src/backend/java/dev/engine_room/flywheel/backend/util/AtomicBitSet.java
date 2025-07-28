@@ -52,33 +52,46 @@ public class AtomicBitSet {
 	}
 
 	public void set(int position) {
+		if (position < 0) {
+			return;
+		}
 		int longPosition = longIndexInSegmentForPosition(position);
 
-		AtomicLongArray segment = getSegmentForPosition(position);
+		AtomicLongArray segment = getOrCreateSegmentForPosition(position);
 
 		setOr(segment, longPosition, maskForPosition(position));
 	}
 
 	public void clear(int position) {
+		if (position < 0) {
+			return;
+		}
+
 		int longPosition = longIndexInSegmentForPosition(position);
+		int segmentIndex = segmentIndexForPosition(position);
 
-		AtomicLongArray segment = getSegmentForPosition(position);
+		var segments = this.segments.get();
 
-		setAnd(segment, longPosition, ~maskForPosition(position));
+		if (segmentIndex >= segments.numSegments()) {
+			// If the segment index is out of bounds, we don't need to do anything.
+			return;
+		}
+
+		setAnd(segments.getSegment(segmentIndex), longPosition, ~maskForPosition(position));
 	}
 
 	public void set(int fromIndex, int toIndex) {
-		if (fromIndex == toIndex) {
+		if (toIndex <= fromIndex) {
 			return;
 		}
 
 		int firstSegmentIndex = segmentIndexForPosition(fromIndex);
-		int toSegmentIndex = segmentIndexForPosition(toIndex);
+		int toSegmentIndex = segmentIndexForPosition(toIndex - 1);
 
 		var segments = expandToFit(toSegmentIndex);
 
 		int fromLongIndex = longIndexInSegmentForPosition(fromIndex);
-		int toLongIndex = longIndexInSegmentForPosition(toIndex);
+		int toLongIndex = longIndexInSegmentForPosition(toIndex - 1);
 
 		long fromLongMask = WORD_MASK << fromIndex;
 		long toLongMask = WORD_MASK >>> -toIndex;
@@ -139,7 +152,7 @@ public class AtomicBitSet {
 	}
 
 	public void clear(int fromIndex, int toIndex) {
-		if (fromIndex == toIndex) {
+		if (toIndex <= fromIndex) {
 			return;
 		}
 
@@ -152,14 +165,15 @@ public class AtomicBitSet {
 			return;
 		}
 
-		int toSegmentIndex = segmentIndexForPosition(toIndex);
+		int toSegmentIndex = segmentIndexForPosition(toIndex - 1);
 
 		if (toSegmentIndex >= numSegments) {
 			toSegmentIndex = numSegments - 1;
+			toIndex = numSegments * (1 << log2SegmentSize);
 		}
 
 		int fromLongIndex = longIndexInSegmentForPosition(fromIndex);
-		int toLongIndex = longIndexInSegmentForPosition(toIndex);
+		int toLongIndex = longIndexInSegmentForPosition(toIndex - 1);
 
 		long fromLongMask = WORD_MASK << fromIndex;
 		long toLongMask = WORD_MASK >>> -toIndex;
@@ -471,7 +485,7 @@ public class AtomicBitSet {
 		return 1L << bitPosInLongForPosition(position);
 	}
 
-	private AtomicLongArray getSegmentForPosition(int position) {
+	private AtomicLongArray getOrCreateSegmentForPosition(int position) {
 		return segmentForPosition(segmentIndexForPosition(position));
 	}
 
