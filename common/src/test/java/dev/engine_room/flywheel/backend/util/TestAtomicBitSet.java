@@ -1,5 +1,8 @@
 package dev.engine_room.flywheel.backend.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -179,6 +182,76 @@ public class TestAtomicBitSet {
 		}
 	}
 
+	@Test
+	void testThreadContention() {
+		// This test is designed to stress the AtomicBitSet implementation by
+		// performing a large number of set and clear operations in parallel.
+
+		var numWordsToTest = 1024;
+		var numBitsPerWord = 64;
+
+		var numTotalBits = numWordsToTest * numBitsPerWord;
+
+		// Run the test many times to ensure stability.
+		for (int testIter = 0; testIter < 1024; testIter++) {
+
+			var bs = new AtomicBitSet(7, numTotalBits);
+
+			List<Thread> threads = new ArrayList<>();
+			// Each thread will set a single bit in many words of the bit set.
+			for (int i = 0; i < 64; i++) {
+				final int index = i;
+				var thread = new Thread(() -> {
+					for (int word = 0; word < numWordsToTest; word++) {
+						bs.set(index + word * numBitsPerWord);
+					}
+				});
+				thread.start();
+				threads.add(thread);
+			}
+
+			// Wait for all threads to finish.
+			for (int i = 0; i < threads.size(); ) {
+				Thread thread = threads.get(i);
+				try {
+					thread.join();
+					i++;
+				} catch (InterruptedException e) {
+					// Ignore, try to join again.
+				}
+			}
+
+			threads.clear();
+
+			Assertions.assertEquals(numTotalBits, bs.cardinality(), "All bits should be set after parallel operations");
+
+			// Same thing, but now clear the bits.
+			for (int i = 0; i < 64; i++) {
+				final int index = i;
+				var thread = new Thread(() -> {
+					for (int word = 0; word < numWordsToTest; word++) {
+						bs.clear(index + word * numBitsPerWord);
+					}
+				});
+				thread.start();
+				threads.add(thread);
+			}
+
+			// Wait for all threads to finish.
+			for (int i = 0; i < threads.size(); ) {
+				Thread thread = threads.get(i);
+				try {
+					thread.join();
+					i++;
+				} catch (InterruptedException e) {
+					// Ignore, try to join again.
+				}
+			}
+
+			Assertions.assertEquals(0, bs.cardinality(), "All bits should be cleared after parallel operations");
+		}
+	}
+
 	/**
 	 * Replicates a problematic code segment from IndirectInstancer.
 	 */
@@ -205,7 +278,7 @@ public class TestAtomicBitSet {
 		// 			pages[page].takeFrom(pages[next]);
 		// 		}
 
-		// Unused, but we'll try to index it to trigger out of bounds errors.
+		// Unused, but we'll try to index it to trigger out-of-bounds errors.
 		var pages = new int[25];
 		var mergeablePages = new AtomicBitSet();
 

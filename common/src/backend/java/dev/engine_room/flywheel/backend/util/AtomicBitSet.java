@@ -1,8 +1,9 @@
 package dev.engine_room.flywheel.backend.util;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +15,10 @@ public class AtomicBitSet {
 	public static final int DEFAULT_LOG2_SEGMENT_SIZE_IN_BITS = 10;
 
 	private static final long WORD_MASK = 0xffffffffffffffffL;
+
+	// We directly use VarHandle instead of going through AtomicLongArray, both to avoid a layer of indirection
+	// and to use atomic bitwise operations which are not exposed by AtomicLongArray.
+	private static final VarHandle AA = MethodHandles.arrayElementVarHandle(long[].class);
 
 	private final int numLongsPerSegment;
 	private final int log2SegmentSize;
@@ -57,7 +62,7 @@ public class AtomicBitSet {
 		}
 		int longPosition = longIndexInSegmentForPosition(position);
 
-		AtomicLongArray segment = getOrCreateSegmentForPosition(position);
+		long[] segment = getOrCreateSegmentForPosition(position);
 
 		setOr(segment, longPosition, maskForPosition(position));
 	}
@@ -111,7 +116,7 @@ public class AtomicBitSet {
 
 				// Handle intermediate words, if any
 				for (int i = fromLongIndex + 1; i < toLongIndex; i++) {
-					segment.set(i, WORD_MASK);
+					AA.setRelease(segment, i, WORD_MASK);
 				}
 
 				// Handle last word
@@ -126,15 +131,15 @@ public class AtomicBitSet {
 
 			// Handle trailing words, if any
 			for (int i = fromLongIndex + 1; i < numLongsPerSegment; i++) {
-				segment.set(i, WORD_MASK);
+				AA.setRelease(segment, i, WORD_MASK);
 			}
 
 			// Nuke intermediate segments, if any
 			for (int i = firstSegmentIndex + 1; i < toSegmentIndex; i++) {
 				segment = segments.getSegment(i);
 
-				for (int j = 0; j < segment.length(); j++) {
-					segment.set(j, WORD_MASK);
+				for (int j = 0; j < segment.length; j++) {
+					AA.setRelease(segment, j, WORD_MASK);
 				}
 			}
 
@@ -143,7 +148,7 @@ public class AtomicBitSet {
 
 			// Handle leading words, if any
 			for (int i = 0; i < toLongIndex; i++) {
-				segment.set(i, WORD_MASK);
+				AA.setRelease(segment, i, WORD_MASK);
 			}
 
 			// Handle last word
@@ -193,7 +198,7 @@ public class AtomicBitSet {
 
 				// Handle intermediate words, if any
 				for (int i = fromLongIndex + 1; i < toLongIndex; i++) {
-					segment.set(i, 0);
+					AA.setRelease(segment, i, 0);
 				}
 
 				// Handle last word
@@ -208,15 +213,15 @@ public class AtomicBitSet {
 
 			// Handle trailing words, if any
 			for (int i = fromLongIndex + 1; i < numLongsPerSegment; i++) {
-				segment.set(i, 0);
+				AA.setRelease(segment, i, 0);
 			}
 
 			// Nuke intermediate segments, if any
 			for (int i = firstSegmentIndex + 1; i < toSegmentIndex; i++) {
 				segment = segments.getSegment(i);
 
-				for (int j = 0; j < segment.length(); j++) {
-					segment.set(j, 0);
+				for (int j = 0; j < segment.length; j++) {
+					AA.setRelease(segment, j, 0);
 				}
 			}
 
@@ -225,7 +230,7 @@ public class AtomicBitSet {
 
 			// Handle leading words, if any
 			for (int i = 0; i < toLongIndex; i++) {
-				segment.set(i, 0);
+				AA.setRelease(segment, i, 0);
 			}
 
 			// Handle last word
@@ -233,43 +238,23 @@ public class AtomicBitSet {
 		}
 	}
 
-	private void setOr(AtomicLongArray segment, int indexInSegment, long mask) {
-		// Thread safety: we need to loop until we win the race to set the long value.
-		while (true) {
-			// determine what the new long value will be after we set the appropriate bit.
-			long currentLongValue = segment.get(indexInSegment);
-			long newLongValue = currentLongValue | mask;
-
-			// if no other thread has modified the value since we read it, we won the race and we are done.
-			if (segment.compareAndSet(indexInSegment, currentLongValue, newLongValue)) {
-				break;
-			}
-		}
+	private void setOr(long[] segment, int indexInSegment, long mask) {
+		AA.getAndBitwiseOrRelease(segment, indexInSegment, mask);
 	}
 
-	private void setAnd(AtomicLongArray segment, int indexInSegment, long mask) {
-		// Thread safety: we need to loop until we win the race to set the long value.
-		while (true) {
-			// determine what the new long value will be after we set the appropriate bit.
-			long currentLongValue = segment.get(indexInSegment);
-			long newLongValue = currentLongValue & mask;
-
-			// if no other thread has modified the value since we read it, we won the race and we are done.
-			if (segment.compareAndSet(indexInSegment, currentLongValue, newLongValue)) {
-				break;
-			}
-		}
+	private void setAnd(long[] segment, int indexInSegment, long mask) {
+		AA.getAndBitwiseAndRelease(segment, indexInSegment, mask);
 	}
 
 	public boolean get(int position) {
 		int segmentPosition = segmentIndexForPosition(position);
 		int longPosition = longIndexInSegmentForPosition(position);
 
-		AtomicLongArray segment = segmentForPosition(segmentPosition);
+		long[] segment = segmentForPosition(segmentPosition);
 
 		long mask = maskForPosition(position);
 
-		return ((segment.get(longPosition) & mask) != 0);
+		return (((long) AA.getAcquire(segment, longPosition) & mask) != 0);
 	}
 
 	public long maxSetBit() {
@@ -278,9 +263,9 @@ public class AtomicBitSet {
 		int segmentIdx = segments.numSegments() - 1;
 
 		for (; segmentIdx >= 0; segmentIdx--) {
-			AtomicLongArray segment = segments.getSegment(segmentIdx);
-			for (int longIdx = segment.length() - 1; longIdx >= 0; longIdx--) {
-				long l = segment.get(longIdx);
+			long[] segment = segments.getSegment(segmentIdx);
+			for (int longIdx = segment.length - 1; longIdx >= 0; longIdx--) {
+				long l = (long) AA.getAcquire(segment, longIdx);
 				if (l != 0) {
 					return ((long) segmentIdx << log2SegmentSize) + (longIdx * 64L) + (63 - Long.numberOfLeadingZeros(l));
 				}
@@ -303,9 +288,9 @@ public class AtomicBitSet {
 		}
 
 		int longPosition = longIndexInSegmentForPosition(fromIndex);
-		AtomicLongArray segment = segments.getSegment(segmentPosition);
+		long[] segment = segments.getSegment(segmentPosition);
 
-		long word = segment.get(longPosition) & (0xffffffffffffffffL << bitPosInLongForPosition(fromIndex));
+		long word = (long) AA.getAcquire(segment, longPosition) & (0xffffffffffffffffL << bitPosInLongForPosition(fromIndex));
 
 		while (true) {
 			if (word != 0) {
@@ -320,7 +305,7 @@ public class AtomicBitSet {
 				longPosition = 0;
 			}
 
-			word = segment.get(longPosition);
+			word = (long) AA.getAcquire(segment, longPosition);
 		}
 	}
 
@@ -338,9 +323,9 @@ public class AtomicBitSet {
 		}
 
 		int longPosition = longIndexInSegmentForPosition(fromIndex);
-		AtomicLongArray segment = segments.getSegment(segmentPosition);
+		long[] segment = segments.getSegment(segmentPosition);
 
-		long word = ~segment.get(longPosition) & (0xffffffffffffffffL << bitPosInLongForPosition(fromIndex));
+		long word = ~((long) AA.getAcquire(segment, longPosition)) & (0xffffffffffffffffL << bitPosInLongForPosition(fromIndex));
 
 		while (true) {
 			if (word != 0) {
@@ -355,7 +340,7 @@ public class AtomicBitSet {
 				longPosition = 0;
 			}
 
-			word = ~segment.get(longPosition);
+			word = ~((long) AA.getAcquire(segment, longPosition));
 		}
 	}
 
@@ -384,9 +369,9 @@ public class AtomicBitSet {
 		int end = -1;
 
 		for (int segmentIndex = 0; segmentIndex < segments.numSegments(); segmentIndex++) {
-			AtomicLongArray segment = segments.getSegment(segmentIndex);
-			for (int longIndex = 0; longIndex < segment.length(); longIndex++) {
-				long l = segment.get(longIndex);
+			long[] segment = segments.getSegment(segmentIndex);
+			for (int longIndex = 0; longIndex < segment.length; longIndex++) {
+				long l = (long) AA.getAcquire(segment, longIndex);
 				if (l != 0) {
 					// The JIT loves this loop. Trying to be clever by starting from Long.numberOfLeadingZeros(l)
 					// causes it to be much slower.
@@ -440,10 +425,10 @@ public class AtomicBitSet {
 		AtomicBitSetSegments segments = this.segments.get();
 
 		for (int i = 0; i < segments.numSegments(); i++) {
-			AtomicLongArray segment = segments.getSegment(i);
+			long[] segment = segments.getSegment(i);
 
-			for (int j = 0; j < segment.length(); j++) {
-				segment.set(j, 0L);
+			for (int j = 0; j < segment.length; j++) {
+				AA.setRelease(segment, j, 0L);
 			}
 		}
 	}
@@ -485,7 +470,7 @@ public class AtomicBitSet {
 		return 1L << bitPosInLongForPosition(position);
 	}
 
-	private AtomicLongArray getOrCreateSegmentForPosition(int position) {
+	private long[] getOrCreateSegmentForPosition(int position) {
 		return segmentForPosition(segmentIndexForPosition(position));
 	}
 
@@ -495,7 +480,7 @@ public class AtomicBitSet {
 	 * @param segmentIndex the segment index
 	 * @return the segment
 	 */
-	private AtomicLongArray segmentForPosition(int segmentIndex) {
+	private long[] segmentForPosition(int segmentIndex) {
 		return expandToFit(segmentIndex).getSegment(segmentIndex);
 	}
 
@@ -504,7 +489,7 @@ public class AtomicBitSet {
 		AtomicBitSetSegments visibleSegments = segments.get();
 
 		while (visibleSegments.numSegments() <= segmentIndex) {
-			// Thread safety:  newVisibleSegments contains all of the segments from the currently visible segments, plus extra.
+			// Thread safety: newVisibleSegments contains all of the segments from the currently visible segments, plus extra.
 			// all of the segments in the currently visible segments are canonical and will not change.
 			AtomicBitSetSegments newVisibleSegments = new AtomicBitSetSegments(visibleSegments, segmentIndex + 1, numLongsPerSegment);
 
@@ -523,13 +508,13 @@ public class AtomicBitSet {
 	}
 
 	private static class AtomicBitSetSegments {
-		private final AtomicLongArray[] segments;
+		private final long[][] segments;
 
 		private AtomicBitSetSegments(int numSegments, int segmentLength) {
-			AtomicLongArray[] segments = new AtomicLongArray[numSegments];
+			long[][] segments = new long[numSegments][];
 
 			for (int i = 0; i < numSegments; i++) {
-				segments[i] = new AtomicLongArray(segmentLength);
+				segments[i] = new long[segmentLength];
 			}
 
 			// Thread safety: Because this.segments is final, the preceding operations in this constructor are guaranteed to be visible to any
@@ -538,10 +523,10 @@ public class AtomicBitSet {
 		}
 
 		private AtomicBitSetSegments(AtomicBitSetSegments copyFrom, int numSegments, int segmentLength) {
-			AtomicLongArray[] segments = new AtomicLongArray[numSegments];
+			long[][] segments = new long[numSegments][];
 
 			for (int i = 0; i < numSegments; i++) {
-				segments[i] = i < copyFrom.numSegments() ? copyFrom.getSegment(i) : new AtomicLongArray(segmentLength);
+				segments[i] = i < copyFrom.numSegments() ? copyFrom.getSegment(i) : new long[segmentLength];
 			}
 
 			// see above re: thread-safety of this assignment
@@ -552,9 +537,9 @@ public class AtomicBitSet {
 			int numSetBits = 0;
 
 			for (int i = 0; i < numSegments(); i++) {
-				AtomicLongArray segment = getSegment(i);
-				for (int j = 0; j < segment.length(); j++) {
-					numSetBits += Long.bitCount(segment.get(j));
+				long[] segment = getSegment(i);
+				for (int j = 0; j < segment.length; j++) {
+					numSetBits += Long.bitCount((long) AA.getAcquire(segment, j));
 				}
 			}
 			return numSetBits;
@@ -564,7 +549,7 @@ public class AtomicBitSet {
 			return segments.length;
 		}
 
-		public AtomicLongArray getSegment(int index) {
+		public long[] getSegment(int index) {
 			return segments[index];
 		}
 
@@ -584,12 +569,12 @@ public class AtomicBitSet {
 		AtomicBitSetSegments otherSegments = other.segments.get();
 
 		for (int i = 0; i < thisSegments.numSegments(); i++) {
-			AtomicLongArray thisArray = thisSegments.getSegment(i);
-			AtomicLongArray otherArray = (i < otherSegments.numSegments()) ? otherSegments.getSegment(i) : null;
+			long[] thisArray = thisSegments.getSegment(i);
+			long[] otherArray = (i < otherSegments.numSegments()) ? otherSegments.getSegment(i) : null;
 
-			for (int j = 0; j < thisArray.length(); j++) {
-				long thisLong = thisArray.get(j);
-				long otherLong = (otherArray == null) ? 0 : otherArray.get(j);
+			for (int j = 0; j < thisArray.length; j++) {
+				long thisLong = (long) AA.getAcquire(thisArray, j);
+				long otherLong = (otherArray == null) ? 0 : (long) AA.getAcquire(otherArray, j);
 
 				if (thisLong != otherLong) {
 					return false;
@@ -598,10 +583,10 @@ public class AtomicBitSet {
 		}
 
 		for (int i = thisSegments.numSegments(); i < otherSegments.numSegments(); i++) {
-			AtomicLongArray otherArray = otherSegments.getSegment(i);
+			long[] otherArray = otherSegments.getSegment(i);
 
-			for (int j = 0; j < otherArray.length(); j++) {
-				long l = otherArray.get(j);
+			for (int j = 0; j < otherArray.length; j++) {
+				long l = (long) AA.getAcquire(otherArray, j);
 
 				if (l != 0) {
 					return false;
@@ -615,7 +600,7 @@ public class AtomicBitSet {
 	@Override
 	public int hashCode() {
 		int result = log2SegmentSize;
-		result = 31 * result + Arrays.hashCode(segments.get().segments);
+		result = 31 * result + Arrays.deepHashCode(segments.get().segments);
 		return result;
 	}
 
