@@ -11,46 +11,55 @@ import net.minecraft.core.SectionPos;
 // Massive kudos to RogueLogix for figuring out this LUT scheme.
 // First layer is Y, then X, then Z.
 public final class LightLut {
-	public final Layer<Layer<IntLayer>> indices = new Layer<>();
+	public final Layer<Layer<Layer<IntLayer>>> indices = new Layer<>();
 
-	public void add(long position, int index) {
+	public void add(int scene, long position, int index) {
 		final var x = SectionPos.x(position);
 		final var y = SectionPos.y(position);
 		final var z = SectionPos.z(position);
 
-		indices.computeIfAbsent(y, Layer::new)
+		indices.computeIfAbsent(scene, Layer::new)
+				.computeIfAbsent(y, Layer::new)
 				.computeIfAbsent(x, IntLayer::new)
 				.set(z, index + 1);
 	}
 
 	public void prune() {
 		// Maybe this could be done better incrementally?
-		indices.prune((middle) -> middle.prune(IntLayer::prune));
+		indices.prune((scene) -> scene.prune((middle) -> middle.prune(IntLayer::prune)));
 	}
 
-	public void remove(long section) {
+	public void remove(int scene, long section) {
 		final var x = SectionPos.x(section);
 		final var y = SectionPos.y(section);
 		final var z = SectionPos.z(section);
 
-		var first = indices.get(y);
+		var first = indices.get(scene);
 
 		if (first == null) {
 			return;
 		}
 
-		var second = first.get(x);
+		var second = first.get(y);
 
 		if (second == null) {
 			return;
 		}
 
-		second.clear(z);
+		var third = second.get(x);
+
+		if (third == null) {
+			return;
+		}
+
+		third.clear(z);
 	}
 
 	public IntArrayList flatten() {
 		final var out = new IntArrayList();
-		indices.fillLut(out, (yIndices, lut) -> yIndices.fillLut(lut, IntLayer::fillLut));
+		this.indices.fillLut(out, (sceneIndices, lut1) -> sceneIndices.fillLut(lut1,
+				(yIndices, lut2) -> yIndices.fillLut(lut2, IntLayer::fillLut)
+		));
 		return out;
 	}
 

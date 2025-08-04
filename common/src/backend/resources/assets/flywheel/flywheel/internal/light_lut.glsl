@@ -44,9 +44,14 @@ bool _flw_nextLut(uint base, int coord, out uint next) {
     return false;
 }
 
-bool _flw_chunkCoordToSectionIndex(ivec3 sectionPos, out uint index) {
+bool _flw_chunkCoordToSectionIndex(uint sceneId, ivec3 sectionPos, out uint index) {
+    uint scene;
+    if (_flw_nextLut(0u, int(sceneId), scene) || scene == 0u) {
+        return true;
+    }
+
     uint first;
-    if (_flw_nextLut(0u, sectionPos.y, first) || first == 0u) {
+    if (_flw_nextLut(scene, sectionPos.y, first) || first == 0u) {
         return true;
     }
 
@@ -90,9 +95,9 @@ bool _flw_isSolid(uint sectionOffset, uvec3 blockInSectionPos) {
     return (word & (1u << bitInWordOffset)) != 0u;
 }
 
-bool flw_lightFetch(ivec3 blockPos, out vec2 lightCoord) {
+bool flw_lightFetch(uint scene, ivec3 blockPos, out vec2 lightCoord) {
     uint lightSectionIndex;
-    if (_flw_chunkCoordToSectionIndex(blockPos >> 4, lightSectionIndex)) {
+    if (_flw_chunkCoordToSectionIndex(scene, blockPos >> 4, lightSectionIndex)) {
         return false;
     }
     // The offset of the section in the light buffer.
@@ -118,40 +123,40 @@ uint _flw_fetchSolid3x3x3(uint sectionOffset, ivec3 blockInSectionPos) {
 
     /// fori y, z, x: unrolled
     _FLW_FETCH_SOLID(-1, -1, -1, 0)
-    _FLW_FETCH_SOLID(0, -1, -1, 1)
-    _FLW_FETCH_SOLID(1, -1, -1, 2)
+        _FLW_FETCH_SOLID(0, -1, -1, 1)
+        _FLW_FETCH_SOLID(1, -1, -1, 2)
 
-    _FLW_FETCH_SOLID(-1, -1, 0, 3)
-    _FLW_FETCH_SOLID(0, -1, 0, 4)
-    _FLW_FETCH_SOLID(1, -1, 0, 5)
+        _FLW_FETCH_SOLID(-1, -1, 0, 3)
+        _FLW_FETCH_SOLID(0, -1, 0, 4)
+        _FLW_FETCH_SOLID(1, -1, 0, 5)
 
-    _FLW_FETCH_SOLID(-1, -1, 1, 6)
-    _FLW_FETCH_SOLID(0, -1, 1, 7)
-    _FLW_FETCH_SOLID(1, -1, 1, 8)
+        _FLW_FETCH_SOLID(-1, -1, 1, 6)
+        _FLW_FETCH_SOLID(0, -1, 1, 7)
+        _FLW_FETCH_SOLID(1, -1, 1, 8)
 
-    _FLW_FETCH_SOLID(-1, 0, -1, 9)
-    _FLW_FETCH_SOLID(0, 0, -1, 10)
-    _FLW_FETCH_SOLID(1, 0, -1, 11)
+        _FLW_FETCH_SOLID(-1, 0, -1, 9)
+        _FLW_FETCH_SOLID(0, 0, -1, 10)
+        _FLW_FETCH_SOLID(1, 0, -1, 11)
 
-    _FLW_FETCH_SOLID(-1, 0, 0, 12)
-    _FLW_FETCH_SOLID(0, 0, 0, 13)
-    _FLW_FETCH_SOLID(1, 0, 0, 14)
+        _FLW_FETCH_SOLID(-1, 0, 0, 12)
+        _FLW_FETCH_SOLID(0, 0, 0, 13)
+        _FLW_FETCH_SOLID(1, 0, 0, 14)
 
-    _FLW_FETCH_SOLID(-1, 0, 1, 15)
-    _FLW_FETCH_SOLID(0, 0, 1, 16)
-    _FLW_FETCH_SOLID(1, 0, 1, 17)
+        _FLW_FETCH_SOLID(-1, 0, 1, 15)
+        _FLW_FETCH_SOLID(0, 0, 1, 16)
+        _FLW_FETCH_SOLID(1, 0, 1, 17)
 
-    _FLW_FETCH_SOLID(-1, 1, -1, 18)
-    _FLW_FETCH_SOLID(0, 1, -1, 19)
-    _FLW_FETCH_SOLID(1, 1, -1, 20)
+        _FLW_FETCH_SOLID(-1, 1, -1, 18)
+        _FLW_FETCH_SOLID(0, 1, -1, 19)
+        _FLW_FETCH_SOLID(1, 1, -1, 20)
 
-    _FLW_FETCH_SOLID(-1, 1, 0, 21)
-    _FLW_FETCH_SOLID(0, 1, 0, 22)
-    _FLW_FETCH_SOLID(1, 1, 0, 23)
+        _FLW_FETCH_SOLID(-1, 1, 0, 21)
+        _FLW_FETCH_SOLID(0, 1, 0, 22)
+        _FLW_FETCH_SOLID(1, 1, 0, 23)
 
-    _FLW_FETCH_SOLID(-1, 1, 1, 24)
-    _FLW_FETCH_SOLID(0, 1, 1, 25)
-    _FLW_FETCH_SOLID(1, 1, 1, 26)
+        _FLW_FETCH_SOLID(-1, 1, 1, 24)
+        _FLW_FETCH_SOLID(0, 1, 1, 25)
+        _FLW_FETCH_SOLID(1, 1, 1, 26)
 
     // @formatter:on
 
@@ -177,40 +182,40 @@ uint[27] _flw_fetchLight3x3x3(uint sectionOffset, ivec3 blockInSectionPos, uint 
 
     /// fori y, z, x: unrolled
     _FLW_FETCH_LIGHT(-1, -1, -1, 0)
-    _FLW_FETCH_LIGHT(0, -1, -1, 1)
-    _FLW_FETCH_LIGHT(1, -1, -1, 2)
+        _FLW_FETCH_LIGHT(0, -1, -1, 1)
+        _FLW_FETCH_LIGHT(1, -1, -1, 2)
 
-    _FLW_FETCH_LIGHT(-1, -1, 0, 3)
-    _FLW_FETCH_LIGHT(0, -1, 0, 4)
-    _FLW_FETCH_LIGHT(1, -1, 0, 5)
+        _FLW_FETCH_LIGHT(-1, -1, 0, 3)
+        _FLW_FETCH_LIGHT(0, -1, 0, 4)
+        _FLW_FETCH_LIGHT(1, -1, 0, 5)
 
-    _FLW_FETCH_LIGHT(-1, -1, 1, 6)
-    _FLW_FETCH_LIGHT(0, -1, 1, 7)
-    _FLW_FETCH_LIGHT(1, -1, 1, 8)
+        _FLW_FETCH_LIGHT(-1, -1, 1, 6)
+        _FLW_FETCH_LIGHT(0, -1, 1, 7)
+        _FLW_FETCH_LIGHT(1, -1, 1, 8)
 
-    _FLW_FETCH_LIGHT(-1, 0, -1, 9)
-    _FLW_FETCH_LIGHT(0, 0, -1, 10)
-    _FLW_FETCH_LIGHT(1, 0, -1, 11)
+        _FLW_FETCH_LIGHT(-1, 0, -1, 9)
+        _FLW_FETCH_LIGHT(0, 0, -1, 10)
+        _FLW_FETCH_LIGHT(1, 0, -1, 11)
 
-    _FLW_FETCH_LIGHT(-1, 0, 0, 12)
-    _FLW_FETCH_LIGHT(0, 0, 0, 13)
-    _FLW_FETCH_LIGHT(1, 0, 0, 14)
+        _FLW_FETCH_LIGHT(-1, 0, 0, 12)
+        _FLW_FETCH_LIGHT(0, 0, 0, 13)
+        _FLW_FETCH_LIGHT(1, 0, 0, 14)
 
-    _FLW_FETCH_LIGHT(-1, 0, 1, 15)
-    _FLW_FETCH_LIGHT(0, 0, 1, 16)
-    _FLW_FETCH_LIGHT(1, 0, 1, 17)
+        _FLW_FETCH_LIGHT(-1, 0, 1, 15)
+        _FLW_FETCH_LIGHT(0, 0, 1, 16)
+        _FLW_FETCH_LIGHT(1, 0, 1, 17)
 
-    _FLW_FETCH_LIGHT(-1, 1, -1, 18)
-    _FLW_FETCH_LIGHT(0, 1, -1, 19)
-    _FLW_FETCH_LIGHT(1, 1, -1, 20)
+        _FLW_FETCH_LIGHT(-1, 1, -1, 18)
+        _FLW_FETCH_LIGHT(0, 1, -1, 19)
+        _FLW_FETCH_LIGHT(1, 1, -1, 20)
 
-    _FLW_FETCH_LIGHT(-1, 1, 0, 21)
-    _FLW_FETCH_LIGHT(0, 1, 0, 22)
-    _FLW_FETCH_LIGHT(1, 1, 0, 23)
+        _FLW_FETCH_LIGHT(-1, 1, 0, 21)
+        _FLW_FETCH_LIGHT(0, 1, 0, 22)
+        _FLW_FETCH_LIGHT(1, 1, 0, 23)
 
-    _FLW_FETCH_LIGHT(-1, 1, 1, 24)
-    _FLW_FETCH_LIGHT(0, 1, 1, 25)
-    _FLW_FETCH_LIGHT(1, 1, 1, 26)
+        _FLW_FETCH_LIGHT(-1, 1, 1, 24)
+        _FLW_FETCH_LIGHT(0, 1, 1, 25)
+        _FLW_FETCH_LIGHT(1, 1, 1, 26)
 
     // @formatter:on
 
@@ -243,13 +248,13 @@ vec3 _flw_lightForDirection(uint[27] lights, vec3 interpolant, uint c00, uint c0
     }
 
     _FLW_SUM_CORNER(0u, 0u, 0u, 0)
-    _FLW_SUM_CORNER(1u, 0u, 0u, 1)
-    _FLW_SUM_CORNER(0u, 0u, 1u, 2)
-    _FLW_SUM_CORNER(1u, 0u, 1u, 3)
-    _FLW_SUM_CORNER(0u, 1u, 0u, 4)
-    _FLW_SUM_CORNER(1u, 1u, 0u, 5)
-    _FLW_SUM_CORNER(0u, 1u, 1u, 6)
-    _FLW_SUM_CORNER(1u, 1u, 1u, 7)
+        _FLW_SUM_CORNER(1u, 0u, 0u, 1)
+        _FLW_SUM_CORNER(0u, 0u, 1u, 2)
+        _FLW_SUM_CORNER(1u, 0u, 1u, 3)
+        _FLW_SUM_CORNER(0u, 1u, 0u, 4)
+        _FLW_SUM_CORNER(1u, 1u, 0u, 5)
+        _FLW_SUM_CORNER(0u, 1u, 1u, 6)
+        _FLW_SUM_CORNER(1u, 1u, 1u, 7)
 
     // @formatter:on
 
@@ -278,13 +283,13 @@ vec3 _flw_lightForDirection(uint[27] lights, vec3 interpolant, uint c00, uint c0
     }
 
     _FLW_ADJUST_CORNER(0)
-    _FLW_ADJUST_CORNER(1)
-    _FLW_ADJUST_CORNER(2)
-    _FLW_ADJUST_CORNER(3)
-    _FLW_ADJUST_CORNER(4)
-    _FLW_ADJUST_CORNER(5)
-    _FLW_ADJUST_CORNER(6)
-    _FLW_ADJUST_CORNER(7)
+        _FLW_ADJUST_CORNER(1)
+        _FLW_ADJUST_CORNER(2)
+        _FLW_ADJUST_CORNER(3)
+        _FLW_ADJUST_CORNER(4)
+        _FLW_ADJUST_CORNER(5)
+        _FLW_ADJUST_CORNER(6)
+        _FLW_ADJUST_CORNER(7)
 
     // @formatter:on
 
@@ -307,14 +312,14 @@ vec3 _flw_lightForDirection(uint[27] lights, vec3 interpolant, uint c00, uint c0
     return light;
 }
 
-bool flw_light(vec3 worldPos, vec3 normal, out FlwLightAo light) {
+bool flw_light(uint scene, vec3 worldPos, vec3 normal, out FlwLightAo light) {
     // Always use the section of the block we are contained in to ensure accuracy.
     // We don't want to interpolate between sections, but also we might not be able
     // to rely on the existence neighboring sections, so don't do any extra rounding here.
     ivec3 blockPos = ivec3(floor(worldPos)) + flw_renderOrigin;
 
     uint lightSectionIndex;
-    if (_flw_chunkCoordToSectionIndex(blockPos >> 4, lightSectionIndex)) {
+    if (_flw_chunkCoordToSectionIndex(scene, blockPos >> 4, lightSectionIndex)) {
         return false;
     }
     // The offset of the section in the light buffer.

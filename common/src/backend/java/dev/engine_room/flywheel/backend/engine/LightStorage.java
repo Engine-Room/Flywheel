@@ -195,12 +195,12 @@ public class LightStorage implements Effect {
 	}
 
 	private void beginTrackingSection(long section, int index) {
-		lut.add(section, index);
+		lut.add(0, section, index);
 		needsLutRebuild = true;
 	}
 
 	private void endTrackingSection(long section) {
-		lut.remove(section);
+		lut.remove(0, section);
 		needsLutRebuild = true;
 	}
 
