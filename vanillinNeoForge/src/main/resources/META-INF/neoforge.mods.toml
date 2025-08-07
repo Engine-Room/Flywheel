@@ -16,6 +16,8 @@ displayTest = "IGNORE_ALL_VERSION"
 
 [[mixins]]
 config = "vanillin.mixins.json"
+[[mixins]]
+config = "vanillin.neoforge.mixins.json"
 
 [[dependencies.${ vanillin_id }]]
 modId = "minecraft"
