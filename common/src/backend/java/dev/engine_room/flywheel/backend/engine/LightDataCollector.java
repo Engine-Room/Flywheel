@@ -247,8 +247,8 @@ public abstract class LightDataCollector {
 		}
 
 		private void collectCorners(long ptr, long section) {
-			var skyLayerListener = this.skyLayerListener;
 			var blockLayerListener = this.blockLayerListener;
+			var skyLayerListener = this.skyLayerListener;
 
 			var blockPos = new BlockPos.MutableBlockPos();
 			int xMin = SectionPos.sectionToBlockCoord(SectionPos.x(section));
@@ -259,7 +259,7 @@ public abstract class LightDataCollector {
 				for (SectionEdge z : SectionEdge.VALUES) {
 					for (SectionEdge x : SectionEdge.VALUES) {
 						blockPos.set(x.relative + xMin, y.relative + yMin, z.relative + zMin);
-						write(ptr, x.relative, y.relative, z.relative, skyLayerListener.getLightValue(blockPos), blockLayerListener.getLightValue(blockPos));
+						write(ptr, x.relative, y.relative, z.relative, blockLayerListener.getLightValue(blockPos), skyLayerListener.getLightValue(blockPos));
 					}
 				}
 			}
@@ -300,8 +300,8 @@ public abstract class LightDataCollector {
 
 		@Override
 		protected void collectLightData(long ptr, long section) {
-			var skyLayerListener = this.skyLayerListener;
 			var blockLayerListener = this.blockLayerListener;
+			var skyLayerListener = this.skyLayerListener;
 
 			var blockPos = new BlockPos.MutableBlockPos();
 			int xMin = SectionPos.sectionToBlockCoord(SectionPos.x(section));
@@ -312,7 +312,7 @@ public abstract class LightDataCollector {
 				for (int z = -1; z < 17; z++) {
 					for (int x = -1; x < 17; x++) {
 						blockPos.set(xMin + x, yMin + y, zMin + z);
-						write(ptr, x, y, z, skyLayerListener.getLightValue(blockPos), blockLayerListener.getLightValue(blockPos));
+						write(ptr, x, y, z, blockLayerListener.getLightValue(blockPos), skyLayerListener.getLightValue(blockPos));
 					}
 				}
 			}
