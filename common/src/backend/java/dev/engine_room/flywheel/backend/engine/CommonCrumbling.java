@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.backend.engine;
 
+import dev.engine_room.flywheel.api.material.CardinalLightingMode;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.material.Transparency;
 import dev.engine_room.flywheel.api.material.WriteMask;
@@ -19,6 +20,6 @@ public class CommonCrumbling {
 				.writeMask(WriteMask.COLOR)
 				.useOverlay(false)
 				.useLight(false)
-				.diffuse(false);
+				.cardinalLightingMode(CardinalLightingMode.OFF);
 	}
 }

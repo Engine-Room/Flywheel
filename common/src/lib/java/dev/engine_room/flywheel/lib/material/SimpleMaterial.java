@@ -264,6 +264,10 @@ public class SimpleMaterial implements Material {
 			return this;
 		}
 
+		/**
+		 * @deprecated Use {@link #cardinalLightingMode(CardinalLightingMode)} instead.
+		 */
+		@Deprecated(forRemoval = true)
 		public Builder diffuse(boolean value) {
 			return cardinalLightingMode(value ? CardinalLightingMode.ENTITY : CardinalLightingMode.OFF);
 		}
