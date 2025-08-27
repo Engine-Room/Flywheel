@@ -24,6 +24,11 @@ public final class ModelUtil {
 
 	@Nullable
 	public static Material getMaterial(RenderType chunkRenderType, boolean shaded) {
+		return getMaterial(chunkRenderType, shaded, true);
+	}
+
+	@Nullable
+	public static Material getMaterial(RenderType chunkRenderType, boolean shaded, boolean ambientOcclusion) {
 		if (chunkRenderType == RenderType.solid()) {
 			return shaded ? Materials.SOLID_BLOCK : Materials.SOLID_UNSHADED_BLOCK;
 		}

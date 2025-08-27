@@ -10,15 +10,14 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 public final class Materials {
 	public static final Material SOLID_BLOCK = SimpleMaterial.builder()
 			.build();
-	public static final Material SOLID_UNSHADED_BLOCK = SimpleMaterial.builder()
+	public static final Material SOLID_UNSHADED_BLOCK = SimpleMaterial.builderOf(SOLID_BLOCK)
 			.cardinalLightingMode(CardinalLightingMode.OFF)
 			.build();
 
 	public static final Material CUTOUT_MIPPED_BLOCK = SimpleMaterial.builder()
 			.cutout(CutoutShaders.HALF)
 			.build();
-	public static final Material CUTOUT_MIPPED_UNSHADED_BLOCK = SimpleMaterial.builder()
-			.cutout(CutoutShaders.HALF)
+	public static final Material CUTOUT_MIPPED_UNSHADED_BLOCK = SimpleMaterial.builderOf(CUTOUT_MIPPED_BLOCK)
 			.cardinalLightingMode(CardinalLightingMode.OFF)
 			.build();
 
@@ -26,17 +25,14 @@ public final class Materials {
 			.cutout(CutoutShaders.ONE_TENTH)
 			.mipmap(false)
 			.build();
-	public static final Material CUTOUT_UNSHADED_BLOCK = SimpleMaterial.builder()
-			.cutout(CutoutShaders.ONE_TENTH)
-			.mipmap(false)
+	public static final Material CUTOUT_UNSHADED_BLOCK = SimpleMaterial.builderOf(CUTOUT_BLOCK)
 			.cardinalLightingMode(CardinalLightingMode.OFF)
 			.build();
 
 	public static final Material TRANSLUCENT_BLOCK = SimpleMaterial.builder()
 			.transparency(Transparency.ORDER_INDEPENDENT)
 			.build();
-	public static final Material TRANSLUCENT_UNSHADED_BLOCK = SimpleMaterial.builder()
-			.transparency(Transparency.ORDER_INDEPENDENT)
+	public static final Material TRANSLUCENT_UNSHADED_BLOCK = SimpleMaterial.builderOf(TRANSLUCENT_BLOCK)
 			.cardinalLightingMode(CardinalLightingMode.OFF)
 			.build();
 
@@ -44,9 +40,7 @@ public final class Materials {
 			.cutout(CutoutShaders.ONE_TENTH)
 			.transparency(Transparency.ORDER_INDEPENDENT)
 			.build();
-	public static final Material TRIPWIRE_UNSHADED_BLOCK = SimpleMaterial.builder()
-			.cutout(CutoutShaders.ONE_TENTH)
-			.transparency(Transparency.ORDER_INDEPENDENT)
+	public static final Material TRIPWIRE_UNSHADED_BLOCK = SimpleMaterial.builderOf(TRIPWIRE_BLOCK)
 			.cardinalLightingMode(CardinalLightingMode.OFF)
 			.build();
 

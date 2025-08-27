@@ -2,11 +2,11 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.engine_room.flywheel.api.material.Material;
-import dev.engine_room.flywheel.api.model.Mesh;
-import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.renderer.RenderType;
@@ -21,25 +21,32 @@ public final class FabricBakedModelBuilder extends BakedModelBuilder {
 	}
 
 	@Override
-	public FabricBakedModelBuilder level(BlockAndTintGetter level) {
+	public FabricBakedModelBuilder level(@Nullable BlockAndTintGetter level) {
 		super.level(level);
 		return this;
 	}
 
 	@Override
-	public FabricBakedModelBuilder pos(BlockPos pos) {
+	public FabricBakedModelBuilder pos(@Nullable BlockPos pos) {
 		super.pos(pos);
 		return this;
 	}
 
 	@Override
-	public FabricBakedModelBuilder poseStack(PoseStack poseStack) {
+	public FabricBakedModelBuilder poseStack(@Nullable PoseStack poseStack) {
 		super.poseStack(poseStack);
 		return this;
 	}
 
 	@Override
-	public FabricBakedModelBuilder materialFunc(BiFunction<RenderType, Boolean, Material> materialFunc) {
+	@Deprecated(forRemoval = true)
+	public FabricBakedModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, @Nullable Material> materialFunc) {
+		super.materialFunc(materialFunc);
+		return this;
+	}
+
+	@Override
+	public FabricBakedModelBuilder materialFunc(@Nullable BlockMaterialFunction materialFunc) {
 		super.materialFunc(materialFunc);
 		return this;
 	}
@@ -57,16 +64,8 @@ public final class FabricBakedModelBuilder extends BakedModelBuilder {
 		}
 		BlockState blockState = level.getBlockState(pos);
 
-		var builder = ChunkLayerSortedListBuilder.<Model.ConfiguredMesh>getThreadLocal();
-
-		BakedModelBufferer.bufferModel(bakedModel, pos, level, blockState, poseStack, (renderType, shaded, data) -> {
-			Material material = materialFunc.apply(renderType, shaded);
-			if (material != null) {
-				Mesh mesh = MeshHelper.blockVerticesToMesh(data, "source=BakedModelBuilder," + "bakedModel=" + bakedModel + ",renderType=" + renderType + ",shaded=" + shaded);
-				builder.add(renderType, new Model.ConfiguredMesh(material, mesh));
-			}
-		});
-
-		return new SimpleModel(builder.build());
+		ModelBuilderResultConsumer resultConsumer = new ModelBuilderResultConsumer(materialFunc);
+		BakedModelBufferer.bufferModel(bakedModel, pos, level, blockState, poseStack, resultConsumer);
+		return resultConsumer.build();
 	}
 }
