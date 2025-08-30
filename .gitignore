@@ -43,6 +43,24 @@ local.properties
 # PDT-specific
 .buildpath
 
+# Vitepress
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# Logs
+docs/logs
+docs/*.log
+docs/npm-debug.log*
+docs/yarn-debug.log*
+docs/yarn-error.log*
+docs/pnpm-debug.log*
+docs/lerna-debug.log*
+
+docs/node_modules
+docs/dist
+docs/dist-ssr
+docs/*.local
+
 # Other
 .DS_Store
 mcmodsrepo
