@@ -1,41 +1,27 @@
 #!/usr/bin/env groovy
 
 pipeline {
-
-    agent any
+    agent none
 
     tools {
         jdk "jdk-17.0.1"
     }
 
-    options {
-        // Sometimes builds freeze, but this doesn't have to be super aggressive.
-        timeout(time: 30, unit: 'MINUTES')
-    }
-
-    parameters {
-        booleanParam(name: 'RELEASE', defaultValue: false, description: 'Publish artifacts without a build number.')
-    }
-
     stages {
-
-        stage('Setup') {
-
-            steps {
-
-                echo 'Setup Project'
-                sh 'chmod +x gradlew'
-                sh './gradlew clean'
-            }
-        }
-
         stage('Build') {
 
-            environment {
-                RELEASE="${params.RELEASE}"
+            options {
+                // Sometimes builds freeze, but this doesn't have to be super aggressive.
+                timeout(time: 30, unit: 'MINUTES')
             }
 
+            agent any
+
             steps {
+                echo 'Setup project.'
+                sh 'chmod +x gradlew'
+                sh './gradlew clean'
+
                 withCredentials([
                     // build_secrets is parsed in SubprojectExtension#loadSecrets
                     file(credentialsId: 'build_secrets', variable: 'ORG_GRADLE_PROJECT_secretFile'),
@@ -46,7 +32,7 @@ pipeline {
             }
 
             post {
-                success {
+                always {
                     archiveArtifacts artifacts: '**/build/libs/**/*.jar', fingerprint: true
 
                     withCredentials([
@@ -59,20 +45,36 @@ pipeline {
             }
         }
 
-        stage('Publish Concrete Version') {
-            // Wait for user input and publish a release build.
+        stage('Release') {
             when {
                 expression {
-                    input message: 'Confirm'
-                    // if input is Aborted, the whole build will fail, otherwise
-                    // we must return true to continue
+                    input(message: 'Publish without build number?', ok: 'Yes', cancel: 'No')
+                    // If input is cancelled the entire step will abort. Return true so we continue on confirmation.
                     return true
                 }
                 beforeAgent true
             }
 
+            options {
+                // Sometimes builds freeze, but this doesn't have to be super aggressive.
+                timeout(time: 30, unit: 'MINUTES')
+            }
+
+            agent any
+
+            environment {
+                RELEASE="true"
+            }
+
             steps {
-                echo 'Test complete'
+                // Prevent older builds from being released.
+                milestone(label: 'Release Guardian')
+
+                echo 'Building for release.'
+                echo '$RELEASE'
+                echo './gradlew build publish --stacktrace --warn'
+
+                milestone(label: 'Release')
             }
         }
     }
