@@ -17,13 +17,15 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs/
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: cd to docs/
-        run: cd docs/
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -33,10 +35,11 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
+          cache-dependency-path: docs/pnpm-lock.yaml
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Build with VitePress
         run: pnpm run build
       - name: Upload artifact
