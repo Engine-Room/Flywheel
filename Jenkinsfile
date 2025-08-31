@@ -68,13 +68,13 @@ pipeline {
 
             steps {
                 // Prevent older builds from being released.
-                milestone(label: 'Release Guardian')
+                milestone(ordinal: 1, label: 'Release Guardian')
 
                 echo 'Building for release.'
                 echo '$RELEASE'
                 echo './gradlew build publish --stacktrace --warn'
 
-                milestone(label: 'Release')
+                milestone(ordinal: 2, label: 'Release')
             }
         }
     }
