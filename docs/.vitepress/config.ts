@@ -1,7 +1,7 @@
 // noinspection JSUnusedGlobalSymbols
 
 import { defineConfig } from "vitepress";
-import users from "./sidebars/users";
+import tutorial from "./sidebars/tutorial";
 import developers from "./sidebars/developers";
 
 // https://vitepress.dev/reference/site-config
@@ -30,8 +30,8 @@ export default defineConfig({
     nav: [{ text: "Home", link: "/" }],
 
     sidebar: {
-      ...users,
       ...developers,
+      ...tutorial,
     },
 
     socialLinks: [
