@@ -9,12 +9,6 @@ pipeline {
 
     stages {
         stage('Build') {
-
-            options {
-                // Sometimes builds freeze, but this doesn't have to be super aggressive.
-                timeout(time: 30, unit: 'MINUTES')
-            }
-
             agent any
 
             steps {
@@ -27,7 +21,10 @@ pipeline {
                     file(credentialsId: 'build_secrets', variable: 'ORG_GRADLE_PROJECT_secretFile'),
                 ]) {
                     echo 'Building project.'
-                    sh './gradlew build publish --stacktrace --warn'
+                    // Sometimes builds freeze, so wrap in a timeout.
+                    timeout(time: 30, unit: 'MINUTES') {
+                        sh './gradlew build publish --stacktrace --warn'
+                    }
                 }
             }
 
@@ -46,6 +43,7 @@ pipeline {
         }
 
         stage('Release') {
+            // Take the input in our when block so that we don't block any agents.
             when {
                 expression {
                     input(message: 'Publish without build number?', ok: 'Yes', cancel: 'No')
@@ -53,11 +51,6 @@ pipeline {
                     return true
                 }
                 beforeAgent true
-            }
-
-            options {
-                // Sometimes builds freeze, but this doesn't have to be super aggressive.
-                timeout(time: 30, unit: 'MINUTES')
             }
 
             agent any
@@ -70,9 +63,22 @@ pipeline {
                 // Prevent older builds from being released.
                 milestone(ordinal: 1, label: 'Release Guardian')
 
-                echo 'Building for release.'
-                echo '$RELEASE'
-                echo './gradlew build publish --stacktrace --warn'
+                echo 'Setup project for release.'
+                sh 'chmod +x gradlew'
+
+                // Clean again because the agent may have changed.
+                sh './gradlew clean'
+
+                withCredentials([
+                    // build_secrets is parsed in SubprojectExtension#loadSecrets
+                    file(credentialsId: 'build_secrets', variable: 'ORG_GRADLE_PROJECT_secretFile'),
+                ]) {
+                    echo 'Building project for release.'
+                    // Sometimes builds freeze, so wrap in a timeout.
+                    timeout(time: 30, unit: 'MINUTES') {
+                        sh './gradlew build publish --stacktrace --warn'
+                    }
+                }
 
                 milestone(ordinal: 2, label: 'Release')
             }
