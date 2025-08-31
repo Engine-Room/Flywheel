@@ -44,20 +44,35 @@ pipeline {
                     sh './gradlew build publish --stacktrace --warn'
                 }
             }
+
+            post {
+                success {
+                    archiveArtifacts artifacts: '**/build/libs/**/*.jar', fingerprint: true
+
+                    withCredentials([
+                            string(credentialsId: 'discord_webhook_url', variable: 'DISCORD_URL')
+                    ]) {
+                        echo 'Notifying Discord..'
+                        discordSend description: "Build: #${currentBuild.number}", link: env.BUILD_URL, result: currentBuild.currentResult, title: env.JOB_NAME, webhookURL: env.DISCORD_URL, showChangeset: true, enableArtifactsList: true
+                    }
+                }
+            }
         }
-    }
 
-    post {
+        stage('Publish Concrete Version') {
+            // Wait for user input and publish a release build.
+            when {
+                expression {
+                    input message: 'Confirm'
+                    // if input is Aborted, the whole build will fail, otherwise
+                    // we must return true to continue
+                    return true
+                }
+                beforeAgent true
+            }
 
-        always {
-
-            archiveArtifacts artifacts: '**/build/libs/**/*.jar', fingerprint: true
-
-            withCredentials([
-                    string(credentialsId: 'discord_webhook_url', variable: 'DISCORD_URL')
-            ]) {
-                echo 'Notifying Discord..'
-                discordSend description: "Build: #${currentBuild.number}", link: env.BUILD_URL, result: currentBuild.currentResult, title: env.JOB_NAME, webhookURL: env.DISCORD_URL, showChangeset: true, enableArtifactsList: true
+            steps {
+                echo 'Test complete'
             }
         }
     }
