@@ -6,8 +6,8 @@ hero:
   name: Engine-Room
   tagline: Graphics tech for Minecraft.
   image:
-    src: /flywheel-icon-large.webp
-    alt: Flywheel Icon
+    src: /engine-room-icon-large.webp
+    alt: Engine-Room Icon
 
 features:
   - title: Flywheel

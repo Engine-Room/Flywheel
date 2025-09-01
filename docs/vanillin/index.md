@@ -6,6 +6,9 @@ layout: home
 hero:
     name: Vanillin
     tagline: Vanilla optimizations using Flywheel.
+    image:
+        src: /vanillin-icon-large.webp
+        alt: Vanillin Icon
 
 features:
     - title: Settings & Config

@@ -43,12 +43,8 @@
  *   in custom container, badges, etc.
  * -------------------------------------------------------------------------- */
 
-:root {
-  --vp-c-default-1: var(--vp-c-gray-1);
-  --vp-c-default-2: var(--vp-c-gray-2);
-  --vp-c-default-3: var(--vp-c-gray-3);
-  --vp-c-default-soft: var(--vp-c-gray-soft);
 
+.flywheel {
   --vp-c-brand-1: #4fddfa;
   --vp-c-brand-2: #54d9f4;
   --vp-c-brand-3: #82e5f9;
@@ -59,39 +55,17 @@
   --vp-c-tip-3: var(--vp-c-brand-3);
   --vp-c-tip-soft: var(--vp-c-brand-soft);
 
-  --vp-c-warning-1: var(--vp-c-yellow-1);
-  --vp-c-warning-2: var(--vp-c-yellow-2);
-  --vp-c-warning-3: var(--vp-c-yellow-3);
-  --vp-c-warning-soft: var(--vp-c-yellow-soft);
+  --vp-c-note-1: var(--vp-c-brand-1);
+  --vp-c-note-2: var(--vp-c-brand-2);
+  --vp-c-note-3: var(--vp-c-brand-3);
+  --vp-c-note-soft: var(--vp-c-brand-soft);
 
-  --vp-c-danger-1: var(--vp-c-red-1);
-  --vp-c-danger-2: var(--vp-c-red-2);
-  --vp-c-danger-3: var(--vp-c-red-3);
-  --vp-c-danger-soft: var(--vp-c-red-soft);
-}
+  --vp-code-color: var(--vp-c-brand-1);
+  --vp-code-link-color: var(--vp-c-brand-1);
+  --vp-code-link-hover-color: var(--vp-c-brand-2);
 
-/**
- * Component: Button
- * -------------------------------------------------------------------------- */
+  --vp-code-tab-active-bar-color: var(--vp-c-brand-1);
 
-:root {
-  --vp-button-brand-border: transparent;
-  --vp-button-brand-text: var(--vp-c-white);
-  --vp-button-brand-bg: var(--vp-c-brand-3);
-  --vp-button-brand-hover-border: transparent;
-  --vp-button-brand-hover-text: var(--vp-c-white);
-  --vp-button-brand-hover-bg: var(--vp-c-brand-2);
-  --vp-button-brand-active-border: transparent;
-  --vp-button-brand-active-text: var(--vp-c-white);
-  --vp-button-brand-active-bg: var(--vp-c-brand-1);
-}
-
-/**
- * Component: Home
- * -------------------------------------------------------------------------- */
-
-:root {
-  --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: var(--vp-c-brand-1);
 
   --vp-home-hero-image-background-image: linear-gradient(
@@ -99,7 +73,93 @@
     var(--vp-c-brand-2) 50%,
     var(--vp-c-brand-2) 50%
   );
+
+  --vp-button-brand-bg: var(--vp-c-brand-3);
+  --vp-button-brand-hover-bg: var(--vp-c-brand-2);
+  --vp-button-brand-active-bg: var(--vp-c-brand-1);
+
+  --vp-local-search-result-selected-border: var(--vp-c-brand-1);
+  --vp-local-search-highlight-bg: var(--vp-c-brand-1);
+}
+
+.vanillin {
+  --vp-c-brand-1: #FF6162;
+  --vp-c-brand-2: #FF6162;
+  --vp-c-brand-3: #FF6162;
+  --vp-c-brand-soft: rgba(163, 218, 249, 0.14);
+
+
+  --vp-c-tip-1: var(--vp-c-brand-1);
+  --vp-c-tip-2: var(--vp-c-brand-2);
+  --vp-c-tip-3: var(--vp-c-brand-3);
+  --vp-c-tip-soft: var(--vp-c-brand-soft);
+
+  --vp-c-note-1: var(--vp-c-brand-1);
+  --vp-c-note-2: var(--vp-c-brand-2);
+  --vp-c-note-3: var(--vp-c-brand-3);
+  --vp-c-note-soft: var(--vp-c-brand-soft);
+
+  --vp-code-color: var(--vp-c-brand-1);
+  --vp-code-link-color: var(--vp-c-brand-1);
+  --vp-code-link-hover-color: var(--vp-c-brand-2);
+
+  --vp-code-tab-active-bar-color: var(--vp-c-brand-1);
+
+  --vp-home-hero-name-background: var(--vp-c-brand-1);
+
+  --vp-home-hero-image-background-image: linear-gradient(
+    -45deg,
+    var(--vp-c-brand-2) 50%,
+    var(--vp-c-brand-2) 50%
+  );
+
+  --vp-button-brand-bg: var(--vp-c-brand-3);
+  --vp-button-brand-hover-bg: var(--vp-c-brand-2);
+  --vp-button-brand-active-bg: var(--vp-c-brand-1);
+
+  --vp-local-search-result-selected-border: var(--vp-c-brand-1);
+  --vp-local-search-highlight-bg: var(--vp-c-brand-1);
+}
+
+:root {
+  --vp-c-brand-1: #1CFF67;
+  --vp-c-brand-2: #1CFF67;
+  --vp-c-brand-3: #1CFF67;
+  --vp-c-brand-soft: rgba(163, 218, 249, 0.14);
+
+  --vp-home-hero-name-color: transparent;
   --vp-home-hero-image-filter: blur(44px);
+
+  --vp-c-tip-1: var(--vp-c-brand-1);
+  --vp-c-tip-2: var(--vp-c-brand-2);
+  --vp-c-tip-3: var(--vp-c-brand-3);
+  --vp-c-tip-soft: var(--vp-c-brand-soft);
+
+  --vp-c-note-1: var(--vp-c-brand-1);
+  --vp-c-note-2: var(--vp-c-brand-2);
+  --vp-c-note-3: var(--vp-c-brand-3);
+  --vp-c-note-soft: var(--vp-c-brand-soft);
+
+  --vp-code-color: var(--vp-c-brand-1);
+  --vp-code-link-color: var(--vp-c-brand-1);
+  --vp-code-link-hover-color: var(--vp-c-brand-2);
+
+  --vp-code-tab-active-bar-color: var(--vp-c-brand-1);
+
+  --vp-home-hero-name-background: var(--vp-c-brand-1);
+
+  --vp-home-hero-image-background-image: linear-gradient(
+    -45deg,
+    var(--vp-c-brand-2) 50%,
+    var(--vp-c-brand-2) 50%
+  );
+
+  --vp-button-brand-bg: var(--vp-c-brand-3);
+  --vp-button-brand-hover-bg: var(--vp-c-brand-2);
+  --vp-button-brand-active-bg: var(--vp-c-brand-1);
+
+  --vp-local-search-result-selected-border: var(--vp-c-brand-1);
+  --vp-local-search-highlight-bg: var(--vp-c-brand-1);
 }
 
 @media (min-width: 640px) {
@@ -112,30 +172,4 @@
   :root {
     --vp-home-hero-image-filter: blur(68px);
   }
-}
-
-/**
- * Component: Custom Block
- * -------------------------------------------------------------------------- */
-
-:root {
-  --vp-custom-block-tip-border: transparent;
-  --vp-custom-block-tip-text: var(--vp-c-text-1);
-  --vp-custom-block-tip-bg: var(--vp-c-brand-soft);
-  --vp-custom-block-tip-code-bg: var(--vp-c-brand-soft);
-}
-
-/**
- * Component: Algolia
- * -------------------------------------------------------------------------- */
-
-.DocSearch {
-  --docsearch-primary-color: var(--vp-c-brand-1) !important;
-}
-
-/**
- * Custom
- * -------------------------------------------------------------------------- */
-.image-container {
-  padding-top: 230px;
 }

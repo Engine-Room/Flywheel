@@ -47,3 +47,6 @@ ij_javascript_enforce_trailing_comma = whenmultiline
 ij_javascript_force_quote_style = true
 ij_javascript_use_double_quotes = true
 
+[*.css]
+indent_size = 2
+

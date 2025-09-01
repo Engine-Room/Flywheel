@@ -10,11 +10,21 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
 
-  head: [["link", { rel: "icon", href: "/flywheel-icon-small.webp" }]],
+  head: [["link", { rel: "icon", href: "/engine-room-icon-small.webp" }]],
+
+  transformPageData(pageData, _) {
+    const [ base] = pageData.relativePath.split("/")
+
+    if (base == "flywheel") {
+      pageData.frontmatter.pageClass = "flywheel"
+    } else if (base == "vanillin") {
+      pageData.frontmatter.pageClass = "vanillin"
+    }
+  },
 
   themeConfig: {
     logo: {
-      src: "/flywheel-icon-small.webp",
+      src: "/engine-room-icon-small.webp",
       width: 24,
       height: 24,
     },
