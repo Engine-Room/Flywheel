@@ -1,13 +1,11 @@
 // noinspection JSUnusedGlobalSymbols
 
 import { defineConfig } from "vitepress";
-import tutorial from "./sidebars/tutorial";
-import developers from "./sidebars/developers";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "Flywheel Docs",
-  description: "A modern engine for modded Minecraft.",
+  title: "Engine-Room",
+  description: "Graphics tech for Minecraft.",
 
   cleanUrls: true,
   lastUpdated: true,
@@ -27,11 +25,49 @@ export default defineConfig({
     },
 
     // https://vitepress.dev/reference/default-theme-config
-    nav: [{ text: "Home", link: "/" }],
+    nav: [
+      {
+        text: "Home",
+        link: "/",
+      },
+      {
+        text: 'Flywheel',
+        link: '/flywheel/',
+        activeMatch: '/flywheel/',
+      },
+      {
+        text: 'Vanillin',
+        link: '/vanillin/',
+        activeMatch: '/vanillin/',
+      },
+    ],
 
     sidebar: {
-      ...developers,
-      ...tutorial,
+      "/flywheel/api": [
+        {
+          text: "Flywheel API",
+          items: [
+            { text: "Index", link: "/flywheel/api" },
+            { text: "GLSL API", link: "/flywheel/api/glsl-api" },
+          ]
+        },
+      ],
+      "/flywheel/tutorial": [
+        {
+          text: "Flywheel Tutorial",
+          items: [
+            { text: "Index", link: "/flywheel/tutorial" },
+          ]
+        },
+      ],
+      "/vanillin/": [
+        {
+          text: "Vanillin",
+          items: [
+            { text: "Settings", link: "/vanillin/settings" },
+          ]
+        }
+      ]
     },
 
     socialLinks: [
@@ -43,7 +79,8 @@ export default defineConfig({
     ],
 
     editLink: {
-      pattern: "https://github.com/Engine-Room/Flywheel/edit/main/docs/:path",
+      // Can we get this to automatically pick the main branch?
+      pattern: "https://github.com/Engine-Room/Flywheel/edit/1.20.1/dev/docs/:path",
       text: "Edit this page on GitHub",
     },
   },

@@ -1,5 +1,4 @@
 ---
-title: API Docs
 description: Documentation related to Flywheel's API.
 
 next: false

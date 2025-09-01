@@ -3,19 +3,19 @@
 layout: home
 
 hero:
-  name: Flywheel Docs
-  tagline: A modern engine for modded Minecraft.
+  name: Engine-Room
+  tagline: Graphics tech for Minecraft.
   image:
     src: /flywheel-icon-large.webp
     alt: Flywheel Icon
 
 features:
-  - title: Getting Started
+  - title: Flywheel
     details: Learn how to get up and running with Flywheel in your mod.
-    link: ./tutorial/
+    link: ./flywheel/
     linkText: Start using Flywheel
-  - title: API Docs
-    details: View in-depth documentation regarding Flywheel's public facing API.
-    link: ./api/
-    linkText: Head there
+  - title: Vanillin
+    details: Vanilla optimizations using Flywheel's tech.
+    link: ./vanillin/
+    linkText: Get Vanillin
 ---
