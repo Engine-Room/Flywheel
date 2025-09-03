@@ -1,5 +1,5 @@
 name: I found a bug!
-description: "Report some other kind of issue. You should ask in the Discord first to make sure it's actually a bug with Flywheel."
+description: "Report some other kind of issue."
 labels: [ "type: bug" ]
 body:
   - type: textarea
@@ -17,7 +17,7 @@ body:
       label: Game Log
       description: >
         We need the game log for additional information about the bug.
-        This file can be found in the \"logs\" folder of your Minecraft folder as \"latest.log\".
+        This file can be found in the `logs` folder of your Minecraft folder as \"debug.log\".
         Please upload the file to https://mclo.gs/ and put the link here.
         Do **not** paste the *contents* of the file here, because that will make this issue very hard to read.
     validations:
@@ -27,7 +27,7 @@ body:
     attributes:
       label: Debug Information
       description: >
-        Please run the \"/flywheel debug info\" command in-game.
+        Please run the `/flywheel debug info` command in-game.
         This will allow you to copy useful information to your clipboard that will greatly help with debugging.
         Please paste this information here.
     validations:
