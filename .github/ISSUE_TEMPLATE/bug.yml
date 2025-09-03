@@ -17,7 +17,7 @@ body:
       label: Game Log
       description: >
         We need the game log for additional information about the bug.
-        This file can be found in the `logs` folder of your Minecraft folder as \"debug.log\".
+        This file can be found in the `logs` folder of your Minecraft folder as `debug.log`.
         Please upload the file to https://mclo.gs/ and put the link here.
         Do **not** paste the *contents* of the file here, because that will make this issue very hard to read.
     validations:
