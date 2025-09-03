@@ -56,25 +56,14 @@ public final class FlwDebugInfo {
 		return Component.literal(debugInfoString)
 				.append(Component.literal("\n\nClick to copy debug info to clipboard")
 						.withStyle(Style.EMPTY.withUnderlined(true)
-								.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, formatForIssue(debugInfoString)))
+								.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, debugInfoString))
 								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(debugInfoString)))))
 				.append(Component.literal("\n\nClick to open an issue on GitHub")
 						.withStyle(Style.EMPTY.withUnderlined(true)
 								.withColor(ChatFormatting.BLUE)
 								.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/Engine-Room/Flywheel/issues/new"))
-								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Opens URL:\nhttps://github.com/Engine-Room/Flywheel/issues")))));
+								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Opens URL:\nhttps://github.com/Engine-Room/Flywheel/issues/new")))));
 
-	}
-
-	private static String formatForIssue(String original) {
-		return """
-            <details>
-            <summary>Debug Info</summary>
-
-            %s
-
-            </details>
-            """.formatted(original);
 	}
 
 	private static void addBackendDebugInfo(@Nullable VisualizationManagerImpl manager, StringBuilder out) {
