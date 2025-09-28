@@ -1,10 +1,4 @@
----
-description: Documentation related to Flywheel's API.
-
-next: false
----
-
-# API Docs {#api-docs}
+# Flywheel API
 
 This section of the wiki has information that is useful for developers wanting to interact with Flywheel in any way.
 

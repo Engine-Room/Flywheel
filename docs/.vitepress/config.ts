@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 
-import { defineConfig } from "vitepress";
+import {defineConfig} from "vitepress";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -56,8 +56,9 @@ export default defineConfig({
       "/flywheel/api": [
         {
           text: "Flywheel API",
+          link: "/flywheel/api/",
           items: [
-            { text: "Index", link: "/flywheel/api" },
+            {text: "Concept Reference", link: "/flywheel/api/concepts"},
             { text: "GLSL API", link: "/flywheel/api/glsl-api" },
           ]
         },
