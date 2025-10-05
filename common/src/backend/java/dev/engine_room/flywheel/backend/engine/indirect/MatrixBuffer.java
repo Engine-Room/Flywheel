@@ -6,7 +6,7 @@ import org.lwjgl.system.MemoryUtil;
 import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
 
 public class MatrixBuffer {
-	private final ResizableStorageArray matrices = new ResizableStorageArray(EnvironmentStorage.MATRIX_SIZE_BYTES);
+	private final ResizableStorageArray matrices = new ResizableStorageArray(EnvironmentStorage.INFO_SIZE_BYTES);
 
 	public void flush(StagingBuffer stagingBuffer, EnvironmentStorage environmentStorage) {
 		var arena = environmentStorage.arena;

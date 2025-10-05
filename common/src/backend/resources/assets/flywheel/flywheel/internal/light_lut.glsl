@@ -44,9 +44,14 @@ bool _flw_nextLut(uint base, int coord, out uint next) {
     return false;
 }
 
-bool _flw_chunkCoordToSectionIndex(ivec3 sectionPos, out uint index) {
+bool _flw_chunkCoordToSectionIndex(uint sceneId, ivec3 sectionPos, out uint index) {
+    uint scene;
+    if (_flw_nextLut(0u, int(sceneId), scene) || scene == 0u) {
+        return true;
+    }
+
     uint first;
-    if (_flw_nextLut(0u, sectionPos.y, first) || first == 0u) {
+    if (_flw_nextLut(scene, sectionPos.y, first) || first == 0u) {
         return true;
     }
 
@@ -90,9 +95,9 @@ bool _flw_isSolid(uint sectionOffset, uvec3 blockInSectionPos) {
     return (word & (1u << bitInWordOffset)) != 0u;
 }
 
-bool flw_lightFetch(ivec3 blockPos, out vec2 lightCoord) {
+bool flw_lightFetch(uint scene, ivec3 blockPos, out vec2 lightCoord) {
     uint lightSectionIndex;
-    if (_flw_chunkCoordToSectionIndex(blockPos >> 4, lightSectionIndex)) {
+    if (_flw_chunkCoordToSectionIndex(scene, blockPos >> 4, lightSectionIndex)) {
         return false;
     }
     // The offset of the section in the light buffer.
@@ -307,14 +312,14 @@ vec3 _flw_lightForDirection(uint[27] lights, vec3 interpolant, uint c00, uint c0
     return light;
 }
 
-bool flw_light(vec3 worldPos, vec3 normal, out FlwLightAo light) {
+bool flw_light(uint scene, vec3 worldPos, vec3 normal, ivec3 renderOrigin, out FlwLightAo light) {
     // Always use the section of the block we are contained in to ensure accuracy.
     // We don't want to interpolate between sections, but also we might not be able
     // to rely on the existence neighboring sections, so don't do any extra rounding here.
-    ivec3 blockPos = ivec3(floor(worldPos)) + flw_renderOrigin;
+    ivec3 blockPos = ivec3(floor(worldPos)) + renderOrigin;
 
     uint lightSectionIndex;
-    if (_flw_chunkCoordToSectionIndex(blockPos >> 4, lightSectionIndex)) {
+    if (_flw_chunkCoordToSectionIndex(scene, blockPos >> 4, lightSectionIndex)) {
         return false;
     }
     // The offset of the section in the light buffer.

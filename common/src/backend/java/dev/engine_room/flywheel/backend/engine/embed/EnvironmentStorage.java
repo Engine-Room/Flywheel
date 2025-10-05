@@ -5,7 +5,11 @@ import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 
 public class EnvironmentStorage {
-	public static final int MATRIX_SIZE_BYTES = (16 + 12) * Float.BYTES;
+	public static final int INFO_SIZE_BYTES = (16 + 12) * Float.BYTES +
+			Float.BYTES + // sky light scale
+			Integer.BYTES + // scene ID
+			2 * Float.BYTES + // padding
+			16 * Float.BYTES; // scene matrix
 
 	protected final Object lock = new Object();
 
@@ -13,7 +17,7 @@ public class EnvironmentStorage {
 
 	// Note than the arena starts indexing at zero, but we reserve zero for the identity matrix.
 	// Any time an ID from the arena is written we want to add one to it.
-	public final CpuArena arena = new CpuArena(MATRIX_SIZE_BYTES, 32);
+	public final CpuArena arena = new CpuArena(INFO_SIZE_BYTES, 32);
 
 	{
 		// Reserve the identity matrix. Burns a few bytes but oh well.
@@ -23,7 +27,7 @@ public class EnvironmentStorage {
 	public void track(EmbeddedEnvironment environment) {
 		synchronized (lock) {
 			if (environments.add(environment)) {
-				environment.matrixIndex = arena.alloc();
+				environment.infoIndex = arena.alloc();
 			}
 		}
 	}
@@ -31,13 +35,13 @@ public class EnvironmentStorage {
 	public void flush() {
 		environments.removeIf(embeddedEnvironment -> {
 			var deleted = embeddedEnvironment.isDeleted();
-			if (deleted && embeddedEnvironment.matrixIndex > 0) {
-				arena.free(embeddedEnvironment.matrixIndex);
+			if (deleted && embeddedEnvironment.infoIndex > 0) {
+				arena.free(embeddedEnvironment.infoIndex);
 			}
 			return deleted;
 		});
 		for (EmbeddedEnvironment environment : environments) {
-			environment.flush(arena.indexToPointer(environment.matrixIndex));
+			environment.flush(arena.indexToPointer(environment.infoIndex));
 		}
 	}
 

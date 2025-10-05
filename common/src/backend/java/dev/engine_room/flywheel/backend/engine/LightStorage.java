@@ -2,8 +2,9 @@ package dev.engine_room.flywheel.backend.engine;
 
 import java.util.BitSet;
 
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.visual.Effect;
@@ -20,15 +21,18 @@ import dev.engine_room.flywheel.lib.task.SimplePlan;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.component.HitboxComponent;
 import dev.engine_room.flywheel.lib.visual.util.InstanceRecycler;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
-import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.LevelAccessor;
+
+import org.lwjgl.system.MemoryUtil;
 
 /**
  * A managed arena of light sections for uploading to the GPU.
@@ -52,17 +56,18 @@ public class LightStorage implements Effect {
 	private static final int DEFAULT_ARENA_CAPACITY_SECTIONS = 64;
 	private static final int INVALID_SECTION = -1;
 
+	public static final int STATIC_SCENE_ID = 0;
+
 	private final LevelAccessor level;
 	private final LightLut lut;
 	public final CpuArena arena;
-	private final Long2IntMap section2ArenaIndex;
+	private final Int2ObjectMap<Long2IntMap> scene2SectionArenaIndexMap;
 	private final LightDataCollector collector;
 
 	private final BitSet changed = new BitSet();
+	private final LongSet updatedSections = new LongOpenHashSet();
 	private boolean needsLutRebuild = false;
 	private boolean isDebugOn = false;
-
-	private final LongSet updatedSections = new LongOpenHashSet();
 	@Nullable
 	private LongSet requestedSections;
 
@@ -70,8 +75,7 @@ public class LightStorage implements Effect {
 		this.level = level;
 		lut = new LightLut();
 		arena = new CpuArena(SECTION_SIZE_BYTES, DEFAULT_ARENA_CAPACITY_SECTIONS);
-		section2ArenaIndex = new Long2IntOpenHashMap();
-		section2ArenaIndex.defaultReturnValue(INVALID_SECTION);
+		scene2SectionArenaIndexMap = new Int2ObjectOpenHashMap<>();
 		collector = LightDataCollector.of(level);
 	}
 
@@ -121,42 +125,82 @@ public class LightStorage implements Effect {
 				return;
 			}
 
-			removeUnusedSections();
+			updateLightSections();
+		});
+	}
 
-			// Start building the set of sections we need to collect this frame.
-			LongSet sectionsToCollect;
-			if (requestedSections == null) {
-				// If none were requested, then we need to collect all sections that received updates.
-				sectionsToCollect = new LongOpenHashSet();
-			} else {
-				// If we did receive a new set of requested sections, we only
-				// need to collect the sections that weren't yet tracked.
-				sectionsToCollect = new LongOpenHashSet(requestedSections);
+	private void updateLightSections() {
+		removeUnusedSections();
+
+		int scene = STATIC_SCENE_ID;
+
+		// Start building the set of sections we need to collect this frame.
+		LongSet sectionsToCollect;
+		Long2IntMap section2ArenaIndex = scene2SectionArenaIndexMap.get(scene);
+		if (requestedSections == null) {
+			// If none were requested, then we need to collect all sections that received updates.
+			sectionsToCollect = new LongOpenHashSet();
+		} else {
+			// If we did receive a new set of requested sections, we only
+			// need to collect the sections that weren't yet tracked.
+			sectionsToCollect = new LongOpenHashSet(requestedSections);
+
+			if (section2ArenaIndex != null) {
 				sectionsToCollect.removeAll(section2ArenaIndex.keySet());
 			}
+		}
 
-			// updatedSections contains all sections that received light updates,
-			// but we only care about its intersection with our tracked sections.
-			for (long updatedSection : updatedSections) {
-				// Since sections contain the border light of their neighbors, we need to collect the neighbors as well.
-				for (int x = -1; x <= 1; x++) {
-					for (int y = -1; y <= 1; y++) {
-						for (int z = -1; z <= 1; z++) {
-							long section = SectionPos.offset(updatedSection, x, y, z);
-							if (section2ArenaIndex.containsKey(section)) {
-								sectionsToCollect.add(section);
-							}
+		// updatedSections contains all sections that received light updates,
+		// but we only care about its intersection with our tracked sections.
+		for (long updatedSection : updatedSections) {
+			// Since sections contain the border light of their neighbors, we need to collect the neighbors as well.
+			for (int x = -1; x <= 1; x++) {
+				for (int y = -1; y <= 1; y++) {
+					for (int z = -1; z <= 1; z++) {
+						long section = SectionPos.offset(updatedSection, x, y, z);
+						if (section2ArenaIndex != null && section2ArenaIndex.containsKey(section)) {
+							sectionsToCollect.add(section);
 						}
 					}
 				}
 			}
+		}
 
-			// Now actually do the collection.
-			sectionsToCollect.forEach(this::collectSection);
+		// Now actually do the collection.
+		sectionsToCollect.forEach(section -> this.collectSection(scene, section));
 
-			updatedSections.clear();
-			requestedSections = null;
-		});
+		updatedSections.clear();
+		requestedSections = null;
+	}
+
+	public void collectSection(int scene, long section) {
+		int index = indexForSection(scene, section);
+
+		changed.set(index);
+
+		long ptr = arena.indexToPointer(index);
+
+		// Zero it out first. This is basically free and makes it easier to handle missing sections later.
+		MemoryUtil.memSet(ptr, 0, SECTION_SIZE_BYTES);
+
+		collector.collectSection(ptr, scene, section);
+	}
+
+	private int indexForSection(int scene, long section) {
+		Long2IntMap map = this.scene2SectionArenaIndexMap.get(scene);
+		int out = map != null ? map.get(section) : INVALID_SECTION;
+
+		// Need to allocate.
+		if (out == INVALID_SECTION) {
+			out = arena.alloc();
+			this.scene2SectionArenaIndexMap.computeIfAbsent(scene, (ignored) -> {
+				Long2IntOpenHashMap newMap = new Long2IntOpenHashMap();
+				newMap.defaultReturnValue(INVALID_SECTION);
+				return newMap;
+			}).put(section, out);
+			beginTrackingSection(scene, section, out);
+		}
+		return out;
 	}
 
 	private void removeUnusedSections() {
@@ -166,17 +210,22 @@ public class LightStorage implements Effect {
 
 		boolean anyRemoved = false;
 
-		var entries = section2ArenaIndex.long2IntEntrySet();
-		var it = entries.iterator();
-		while (it.hasNext()) {
-			var entry = it.next();
-			var section = entry.getLongKey();
+		for (Int2ObjectMap.Entry<Long2IntMap> sceneEntry : this.scene2SectionArenaIndexMap.int2ObjectEntrySet()) {
+			int sceneId = sceneEntry.getIntKey();
+			Long2IntMap section2ArenaIndex = sceneEntry.getValue();
 
-			if (!requestedSections.contains(section)) {
-				arena.free(entry.getIntValue());
-				endTrackingSection(section);
-				it.remove();
-				anyRemoved = true;
+			var entries = section2ArenaIndex.long2IntEntrySet();
+			var it = entries.iterator();
+			while (it.hasNext()) {
+				var entry = it.next();
+				var section = entry.getLongKey();
+
+				if (!requestedSections.contains(section)) {
+					arena.free(entry.getIntValue());
+					endTrackingSection(sceneId, section);
+					it.remove();
+					anyRemoved = true;
+				}
 			}
 		}
 
@@ -186,43 +235,18 @@ public class LightStorage implements Effect {
 		}
 	}
 
-	private void beginTrackingSection(long section, int index) {
-		lut.add(section, index);
+	private void beginTrackingSection(int scene, long section, int index) {
+		lut.add(scene, section, index);
 		needsLutRebuild = true;
 	}
 
-	private void endTrackingSection(long section) {
-		lut.remove(section);
+	private void endTrackingSection(int scene, long section) {
+		lut.remove(scene, section);
 		needsLutRebuild = true;
 	}
 
 	public int capacity() {
 		return arena.capacity();
-	}
-
-	public void collectSection(long section) {
-		int index = indexForSection(section);
-
-		changed.set(index);
-
-		long ptr = arena.indexToPointer(index);
-
-		// Zero it out first. This is basically free and makes it easier to handle missing sections later.
-		MemoryUtil.memSet(ptr, 0, SECTION_SIZE_BYTES);
-
-		collector.collectSection(ptr, section);
-	}
-
-	private int indexForSection(long section) {
-		int out = section2ArenaIndex.get(section);
-
-		// Need to allocate.
-		if (out == INVALID_SECTION) {
-			out = arena.alloc();
-			section2ArenaIndex.put(section, out);
-			beginTrackingSection(section, out);
-		}
-		return out;
 	}
 
 	public void delete() {
@@ -278,7 +302,10 @@ public class LightStorage implements Effect {
 		}
 
 		private void setupSectionBoxes() {
-			section2ArenaIndex.keySet()
+			for (Int2ObjectMap.Entry<Long2IntMap> entry : scene2SectionArenaIndexMap.int2ObjectEntrySet()) {
+				int sceneId = entry.getIntKey();
+				Long2IntMap section2ArenaIndex = entry.getValue();
+				section2ArenaIndex.keySet()
 					.forEach(l -> {
 						var x = SectionPos.x(l) * 16 - renderOrigin.getX();
 						var y = SectionPos.y(l) * 16 - renderOrigin.getY();
@@ -291,10 +318,12 @@ public class LightStorage implements Effect {
 						instance.setIdentityTransform()
 								.translate(x + 1, y + 1, z + 1)
 								.scale(14)
-								.color(255, 255, 0)
+								.color(255, 255, sceneId * 64)
 								.light(LightTexture.FULL_BRIGHT)
 								.setChanged();
 					});
+			}
+
 		}
 
 		private void setupLutRangeBoxes() {

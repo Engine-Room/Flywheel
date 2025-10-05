@@ -8,6 +8,9 @@ uniform int _flw_baseInstance = 0;
 #ifdef FLW_EMBEDDED
 uniform mat4 _flw_modelMatrixUniform;
 uniform mat3 _flw_normalMatrixUniform;
+uniform uint _flw_lightingSceneUniform;
+uniform float _flw_lightingSkyLightScaleUniform;
+uniform mat4 _flw_lightingSceneMatrixUniform;
 #endif
 
 uniform uint _flw_baseVertex;
@@ -20,6 +23,9 @@ void main() {
     #ifdef FLW_EMBEDDED
     _flw_modelMatrix = _flw_modelMatrixUniform;
     _flw_normalMatrix = _flw_normalMatrixUniform;
+    _flw_lightingSceneMatrix = _flw_lightingSceneMatrixUniform;
+    _flw_lightingSceneId = _flw_lightingSceneUniform;
+    _flw_skyLightScale = _flw_lightingSkyLightScaleUniform;
     #endif
 
     _flw_main(instance, uint(gl_InstanceID), _flw_baseVertex);

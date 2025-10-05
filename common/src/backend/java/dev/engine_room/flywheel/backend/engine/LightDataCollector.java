@@ -91,12 +91,12 @@ public abstract class LightDataCollector {
 		return null;
 	}
 
-	public void collectSection(long ptr, long section) {
-		collectSolidData(ptr, section);
-		collectLightData(ptr, section);
+	public void collectSection(long ptr, int scene, long section) {
+		collectSolidData(ptr, scene, section);
+		collectLightData(ptr, scene, section);
 	}
 
-	private void collectSolidData(long ptr, long section) {
+	private void collectSolidData(long ptr, int scene, long section) {
 		var blockPos = new BlockPos.MutableBlockPos();
 		int xMin = SectionPos.sectionToBlockCoord(SectionPos.x(section));
 		int yMin = SectionPos.sectionToBlockCoord(SectionPos.y(section));
@@ -127,7 +127,7 @@ public abstract class LightDataCollector {
 		}
 	}
 
-	protected abstract void collectLightData(long ptr, long section);
+	protected abstract void collectLightData(long ptr, int scene, long section);
 
 	/**
 	 * Write to the given section.
@@ -162,7 +162,7 @@ public abstract class LightDataCollector {
 		}
 
 		@Override
-		protected void collectLightData(long ptr, long section) {
+		protected void collectLightData(long ptr, int scene, long section) {
 			collectCenter(ptr, section);
 
 			for (SectionEdge i : SectionEdge.VALUES) {
@@ -299,7 +299,7 @@ public abstract class LightDataCollector {
 		}
 
 		@Override
-		protected void collectLightData(long ptr, long section) {
+		protected void collectLightData(long ptr, int scene, long section) {
 			var blockLayerListener = this.blockLayerListener;
 			var skyLayerListener = this.skyLayerListener;
 

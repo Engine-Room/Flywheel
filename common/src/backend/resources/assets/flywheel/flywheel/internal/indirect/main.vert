@@ -40,7 +40,7 @@ void main() {
     _flw_packedMaterial = uvec2(draw.packedFogAndCutout, packedMaterialProperties);
 
     #ifdef FLW_EMBEDDED
-    _flw_unpackMatrices(_flw_matrices[draw.matrixIndex], _flw_modelMatrix, _flw_normalMatrix);
+    _flw_unpackMatrices(_flw_matrices[draw.matrixIndex], _flw_modelMatrix, _flw_normalMatrix, _flw_lightingSceneId, _flw_skyLightScale, _flw_lightingSceneMatrix);
     #endif
 
     #ifdef _FLW_CRUMBLING

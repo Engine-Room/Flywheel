@@ -1,6 +1,7 @@
 package dev.engine_room.flywheel.api.visualization;
 
 import org.joml.Matrix3fc;
+import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 
 import dev.engine_room.flywheel.api.backend.BackendImplemented;
@@ -23,6 +24,11 @@ public interface VisualEmbedding extends VisualizationContext {
 	 * @param normal The normal matrix.
 	 */
 	void transforms(Matrix4fc pose, Matrix3fc normal);
+
+	/**
+	 * Set the scene ID used for lighting in this embedding
+	 */
+	void setLightingInfo(Matrix4fc sceneMatrix, int scene, float skyLightScale);
 
 	/**
 	 * Delete this embedding.
