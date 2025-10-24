@@ -1,12 +1,8 @@
 layout(local_size_x = 256) in;
 
-uniform uint max_mip_level;
-
 /// Generates a hierarchical depth buffer.
 /// Based on FidelityFX SPD v2.1 https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/blob/d7531ae47d8b36a5d4025663e731a47a38be882f/sdk/include/FidelityFX/gpu/spd/ffx_spd.h#L528
 /// Based on Bevy's more readable implementation https://github.com/JMS55/bevy/blob/ca2c8e63b9562f88c8cd7e1d88a17a4eea20aaf4/crates/bevy_pbr/src/meshlet/downsample_depth.wgsl
-
-shared float[16][16] intermediate_memory;
 
 // These are builtins in wgsl but we can trivially emulate them.
 uint extractBits(uint e, uint offset, uint count) {
@@ -25,6 +21,13 @@ uvec2 remap_for_wave_reduction(uint a) {
     insertBits(extractBits(a, 2u, 3u), a, 0u, 1u),
     insertBits(extractBits(a, 3u, 3u), extractBits(a, 1u, 2u), 0u, 2u)
     );
+}
+
+uvec2 get_xy() {
+    uvec2 sub_xy = remap_for_wave_reduction(gl_LocalInvocationIndex % 64u);
+    uint x = sub_xy.x + 8u * ((gl_LocalInvocationIndex >> 6u) % 2u);
+    uint y = sub_xy.y + 8u * (gl_LocalInvocationIndex >> 7u);
+    return uvec2(x, y);
 }
 
 float reduce_4(vec4 v) {

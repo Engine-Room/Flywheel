@@ -4,6 +4,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryUtil;
 
+import dev.engine_room.flywheel.api.material.CardinalLightingMode;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.model.IndexSequence;
 import dev.engine_room.flywheel.api.model.Mesh;
@@ -22,7 +23,7 @@ public final class LineModelBuilder {
 	private static final Material MATERIAL = SimpleMaterial.builder()
 			.shaders(StandardMaterialShaders.LINE)
 			.backfaceCulling(false)
-			.diffuse(false)
+			.cardinalLightingMode(CardinalLightingMode.OFF)
 			.build();
 
 	@UnknownNullability

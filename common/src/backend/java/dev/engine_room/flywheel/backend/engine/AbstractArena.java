@@ -42,6 +42,10 @@ public abstract class AbstractArena {
 		return top;
 	}
 
+	public int occupancy() {
+		return top - freeStack.size();
+	}
+
 	public abstract long byteCapacity();
 
 	protected abstract void grow();
