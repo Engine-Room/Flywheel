@@ -361,10 +361,6 @@ public class AtomicBitSet {
 	public void forEachSetSpan(BitSpanConsumer consumer) {
 		AtomicBitSetSegments segments = this.segments.get();
 
-		if (segments.cardinality() == 0) {
-			return;
-		}
-
 		int start = -1;
 		int end = -1;
 
@@ -415,7 +411,8 @@ public class AtomicBitSet {
 	}
 
 	public boolean isEmpty() {
-		return cardinality() == 0;
+		return segments.get()
+				.isEmpty();
 	}
 
 	/**
@@ -543,6 +540,20 @@ public class AtomicBitSet {
 				}
 			}
 			return numSetBits;
+		}
+
+		private boolean isEmpty() {
+			// No need to count all set bits to just check if it's empty.
+			// As soon as we encounter a set bit we can early out.
+			for (int i = 0; i < numSegments(); i++) {
+				long[] segment = getSegment(i);
+				for (int j = 0; j < segment.length; j++) {
+					if ((long) AA.getAcquire(segment, j) != 0) {
+						return false;
+					}
+				}
+			}
+			return true;
 		}
 
 		public int numSegments() {
