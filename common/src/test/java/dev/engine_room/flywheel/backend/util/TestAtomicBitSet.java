@@ -29,7 +29,9 @@ public class TestAtomicBitSet {
 
 		Assertions.assertEquals(5000, bs.nextClearBit(5000));
 
+		Assertions.assertTrue(bs.isEmpty());
 		bs.set(16);
+		Assertions.assertFalse(bs.isEmpty());
 
 		Assertions.assertEquals(0, bs.nextClearBit(0));
 		Assertions.assertEquals(17, bs.nextClearBit(16));
@@ -57,10 +59,12 @@ public class TestAtomicBitSet {
 			var bs = new AtomicBitSet(log2SegmentSize, CAPACITY);
 
 			Assertions.assertEquals(0, bs.cardinality(), "BitSet should be empty initially");
+			Assertions.assertTrue(bs.isEmpty());
 
 			bs.set(0, NUM_BITS_TO_SET);
 
 			Assertions.assertEquals(NUM_BITS_TO_SET, bs.cardinality(), "BitSet should have " + NUM_BITS_TO_SET + " bits set");
+			Assertions.assertFalse(bs.isEmpty());
 
 			for (int i = 0; i < NUM_BITS_TO_SET; i++) {
 				Assertions.assertTrue(bs.get(i), "Bit " + i + " should be set");
@@ -74,6 +78,7 @@ public class TestAtomicBitSet {
 			var bs = new AtomicBitSet(log2SegmentSize, CAPACITY);
 
 			Assertions.assertEquals(0, bs.cardinality(), "BitSet should be empty initially");
+			Assertions.assertTrue(bs.isEmpty());
 
 			// Fill it halfway.
 			bs.set(0, NUM_BITS_TO_SET);
@@ -105,10 +110,12 @@ public class TestAtomicBitSet {
 		// Just clear everything.
 		bs.clear();
 		Assertions.assertEquals(0, bs.cardinality(), "BitSet should be empty after clearing");
+		Assertions.assertTrue(bs.isEmpty());
 
 		// Should only fill the single long.
 		bs.set(0, 64);
 		Assertions.assertEquals(64, bs.cardinality(), "BitSet should have 64 bits set after setting all");
+		Assertions.assertFalse(bs.isEmpty());
 
 		bs.clear(fromIndex, toIndex);
 
@@ -124,16 +131,19 @@ public class TestAtomicBitSet {
 
 		Assertions.assertEquals(0, bs.cardinality(), "set with negative should have no effect");
 		Assertions.assertEquals(64, bs.currentCapacity(), "set with negative should have no effect");
+		Assertions.assertTrue(bs.isEmpty());
 
 		bs.clear(Integer.MAX_VALUE);
 
 		Assertions.assertEquals(0, bs.cardinality(), "clear with out of bounds index should have no effect");
 		Assertions.assertEquals(64, bs.currentCapacity(), "clear with out of bounds index should have no effect");
+		Assertions.assertTrue(bs.isEmpty());
 
 		bs.clear(-5);
 
 		Assertions.assertEquals(0, bs.cardinality(), "clear with negative index should have no effect");
 		Assertions.assertEquals(64, bs.currentCapacity(), "clear with negative index should have no effect");
+		Assertions.assertTrue(bs.isEmpty());
 	}
 
 	@Test
@@ -147,13 +157,16 @@ public class TestAtomicBitSet {
 				for (int toIndex = 0; toIndex < maxIndex; toIndex++) {
 					bs.clear();
 
+					Assertions.assertTrue(bs.isEmpty());
 					Assertions.assertEquals(0, bs.cardinality());
 
 					bs.set(fromIndex, toIndex);
 
 					if (toIndex <= fromIndex) {
 						Assertions.assertEquals(0, bs.cardinality(), "Setting range with toIndex < fromIndex should not set any bits");
+						Assertions.assertTrue(bs.isEmpty());
 					} else {
+						Assertions.assertFalse(bs.isEmpty());
 						assertRangeSet(bs, fromIndex, toIndex);
 
 						Assertions.assertEquals(toIndex - 1, bs.maxSetBit());
@@ -163,6 +176,7 @@ public class TestAtomicBitSet {
 
 					// Now fill it completely and clear the range.
 					bs.set(0, maxIndex);
+					Assertions.assertFalse(bs.isEmpty());
 
 					assertRangeSet(bs, 0, maxIndex);
 
