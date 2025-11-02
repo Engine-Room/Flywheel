@@ -64,8 +64,6 @@ public final class FabricBakedModelBuilder extends BakedModelBuilder {
 		}
 		BlockState blockState = level.getBlockState(pos);
 
-		ModelBuilderResultConsumer resultConsumer = new ModelBuilderResultConsumer(materialFunc);
-		BakedModelBufferer.bufferModel(bakedModel, pos, level, blockState, poseStack, resultConsumer);
-		return resultConsumer.build();
+		return BakedModelBufferer.bufferModel(bakedModel, pos, level, blockState, poseStack, materialFunc);
 	}
 }

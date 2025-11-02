@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
 import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
@@ -45,9 +46,9 @@ class FabricMeshEmitterManager extends MeshEmitterManager<MeshEmitter> implement
 	}
 
 	@Override
-	public void end() {
+	public SimpleModel end() {
 		wrapperModel.setWrapped(null);
-		super.end();
+		return super.end();
 	}
 
 	private void prepareForGeometry(RenderMaterial material) {

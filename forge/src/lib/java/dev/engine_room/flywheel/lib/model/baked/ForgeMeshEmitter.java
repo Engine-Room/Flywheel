@@ -36,7 +36,7 @@ public class ForgeMeshEmitter extends MeshEmitter implements VertexConsumer {
 
 	@Nullable
 	private BufferBuilder getBuffer(boolean shade, boolean ao) {
-		Material key = resultConsumer.createKey(renderType, shade, ao);
+		Material key = blockMaterialFunction.apply(renderType, shade, ao);
 		if (key != null) {
 			return getBuffer(key);
 		} else {

@@ -49,8 +49,6 @@ public final class FabricBlockModelBuilder extends BlockModelBuilder {
 			materialFunc = ModelUtil::getMaterial;
 		}
 
-		ModelBuilderResultConsumer resultConsumer = new ModelBuilderResultConsumer(materialFunc);
-		BakedModelBufferer.bufferBlocks(positions.iterator(), level, poseStack, renderFluids, resultConsumer);
-		return resultConsumer.build();
+		return BakedModelBufferer.bufferBlocks(positions.iterator(), level, poseStack, renderFluids, materialFunc);
 	}
 }

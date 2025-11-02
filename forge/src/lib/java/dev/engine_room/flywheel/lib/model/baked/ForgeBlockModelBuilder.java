@@ -66,8 +66,6 @@ public final class ForgeBlockModelBuilder extends BlockModelBuilder {
 			};
 		}
 
-		ModelBuilderResultConsumer resultConsumer = new ModelBuilderResultConsumer(materialFunc);
-		BakedModelBufferer.bufferBlocks(positions.iterator(), level, poseStack, modelDataLookup, renderFluids, resultConsumer);
-		return resultConsumer.build();
+		return BakedModelBufferer.bufferBlocks(positions.iterator(), level, poseStack, modelDataLookup, renderFluids, materialFunc);
 	}
 }

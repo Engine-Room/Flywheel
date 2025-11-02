@@ -78,8 +78,6 @@ public final class ForgeBakedModelBuilder extends BakedModelBuilder {
 		}
 		BlockState blockState = level.getBlockState(pos);
 
-		ModelBuilderResultConsumer resultConsumer = new ModelBuilderResultConsumer(materialFunc);
-		BakedModelBufferer.bufferModel(bakedModel, pos, level, blockState, poseStack, modelData, resultConsumer);
-		return resultConsumer.build();
+		return BakedModelBufferer.bufferModel(bakedModel, pos, level, blockState, poseStack, modelData, materialFunc);
 	}
 }

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -27,7 +28,7 @@ final class BakedModelBufferer {
 	private BakedModelBufferer() {
 	}
 
-	public static void bufferModel(BakedModel model, BlockPos pos, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, ModelBuilderResultConsumer resultConsumer) {
+	public static SimpleModel bufferModel(BakedModel model, BlockPos pos, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, BlockMaterialFunction resultConsumer) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
@@ -51,10 +52,10 @@ final class BakedModelBufferer {
 				.tesselateBlock(level, model, state, pos, poseStack, emitters, false, random, seed, OverlayTexture.NO_OVERLAY);
 		poseStack.popPose();
 
-		emitters.end();
+		return emitters.end();
 	}
 
-	public static void bufferBlocks(Iterator<BlockPos> posIterator, BlockAndTintGetter level, @Nullable PoseStack poseStack, boolean renderFluids, ModelBuilderResultConsumer resultConsumer) {
+	public static SimpleModel bufferBlocks(Iterator<BlockPos> posIterator, BlockAndTintGetter level, @Nullable PoseStack poseStack, boolean renderFluids, BlockMaterialFunction resultConsumer) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
@@ -114,7 +115,7 @@ final class BakedModelBufferer {
 
 		ModelBlockRenderer.clearCache();
 		transformingWrapper.clear();
-		emitters.end();
+		return emitters.end();
 	}
 
 	private static class ThreadLocalObjects {
