@@ -2,6 +2,7 @@ package dev.engine_room.gradle.transitive
 
 import dev.engine_room.gradle.jarset.JarTaskSet
 import org.gradle.api.Project
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.compile.JavaCompile
@@ -83,20 +84,17 @@ class TransitiveSourceSetConfigurator(private val parent: TransitiveSourceSetsEx
     }
 
     fun bundleFrom(otherProject: Project, vararg names: String) {
-        val otherSourceSets = otherProject.the<SourceSetContainer>()
+        val otherSourceSets = names.map { otherProject.the<SourceSetContainer>().getByName(it) }.toTypedArray()
 
-        bundleFrom(*names.map { otherSourceSets.getByName(it) }.toTypedArray())
-    }
+        from(*otherSourceSets)
 
-    fun bundleFrom(vararg sourceSets: SourceSet) {
-        from(*sourceSets)
         // The external sourceSets will be included in the jar by default since we bring it into the java compile task,
         // however we need to make sure that the javadoc and sources jars also include the external sourceSets
-        bundleJavadocAndSources(*sourceSets)
+        bundleJavadocAndSources(otherProject, *otherSourceSets)
     }
 
     fun bundleOutput(vararg sourceSets: SourceSet) {
-        bundleJavadocAndSources(*sourceSets)
+        bundleJavadocAndSources(parent.project, *sourceSets)
 
         parent.project.tasks.apply {
             named<Jar>(sourceSet.jarTaskName).configure {
@@ -107,19 +105,26 @@ class TransitiveSourceSetConfigurator(private val parent: TransitiveSourceSetsEx
         }
     }
 
-    private fun bundleJavadocAndSources(vararg sourceSets: SourceSet) {
-        parent.project.tasks.apply {
-            named<Javadoc>(sourceSet.javadocTaskName).configure {
-                sourceSets.forEach { source(it.allJava) }
-
-                JarTaskSet.excludeDuplicatePackageInfos(this)
+    private fun bundleJavadocAndSources(project: Project, vararg sourceSets: SourceSet) {
+        parent.project.tasks.named<Javadoc>(sourceSet.javadocTaskName).configure {
+            sourceSets.forEach { sourceSetToBundle ->
+                source(
+                    project.tasks.named<JavaCompile>(sourceSetToBundle.compileJavaTaskName)
+                        .map { it.source.asFileTree })
             }
 
-            named<Jar>(sourceSet.sourcesJarTaskName).configure {
-                sourceSets.forEach { from(it.allJava) }
+            JarTaskSet.excludeDuplicatePackageInfos(this)
+        }
 
-                JarTaskSet.excludeDuplicatePackageInfos(this)
+        parent.project.tasks.named<Jar>(sourceSet.sourcesJarTaskName).configure {
+            sourceSets.forEach { sourceSetToBundle ->
+                from(project.tasks.named<ProcessResources>(sourceSetToBundle.processResourcesTaskName))
+                from(
+                    project.tasks.named<JavaCompile>(sourceSetToBundle.compileJavaTaskName)
+                        .map { it.source.asFileTree })
             }
+
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
     }
 
