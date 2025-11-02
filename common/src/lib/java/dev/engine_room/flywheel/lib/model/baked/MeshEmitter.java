@@ -1,7 +1,6 @@
 package dev.engine_room.flywheel.lib.model.baked;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -15,15 +14,20 @@ import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.api.model.Model;
 
 class MeshEmitter {
+	private static final int INITIAL_CAPACITY = 4;
+
 	private final BufferBuilderStack bufferBuilderStack;
 
-	private final List<BufferBuilder> activeBufferBuilders = new ArrayList<>();
-	private final List<Material> activeKeys = new ArrayList<>();
+	private Material @UnknownNullability [] materials = new Material[INITIAL_CAPACITY];
+	private BufferBuilder @UnknownNullability [] bufferBuilders = new BufferBuilder[INITIAL_CAPACITY];
+
+	// The number of valid elements in the above parallel arrays.
+	private int numBufferBuildersPopulated = 0;
 
 	@UnknownNullability
 	BlockMaterialFunction blockMaterialFunction;
 
-	private int currentIndex = -1;
+	private int currentIndex = 0;
 
 	MeshEmitter(BufferBuilderStack bufferBuilderStack) {
 		this.bufferBuilderStack = bufferBuilderStack;
@@ -37,47 +41,72 @@ class MeshEmitter {
 		// Quad render order within blocks must be preserved for correctness, however between blocks we should try to
 		// reduce the number of generated meshes as much as possible. Here we reset the head index without flushing
 		// any buffers, so that the next block can start over scanning through the parallel arrays looking for a
-		// matching Material, BufferBuilder pair.
-		currentIndex = -1;
+		// matching Material/BufferBuilder pair.
+		currentIndex = 0;
 	}
 
 	public void end(ImmutableList.Builder<Model.ConfiguredMesh> out) {
-		for (int index = 0; index < activeBufferBuilders.size(); index++) {
-			var renderedBuffer = activeBufferBuilders.get(index)
+		for (int index = 0; index < numBufferBuildersPopulated; index++) {
+			var renderedBuffer = bufferBuilders[index]
 					.endOrDiscardIfEmpty();
 
 			if (renderedBuffer != null) {
-				Material material = activeKeys.get(index);
+				Material material = materials[index];
 				Mesh mesh = MeshHelper.blockVerticesToMesh(renderedBuffer, "source=ModelBuilder" + ",material=" + material);
 				out.add(new Model.ConfiguredMesh(material, mesh));
 				renderedBuffer.release();
 			}
 		}
 
-		activeBufferBuilders.clear();
-		activeKeys.clear();
-		currentIndex = -1;
+		// Not strictly necessary to clear the arrays, but best not to hold on to references for too long here.
+		Arrays.fill(bufferBuilders, 0, numBufferBuildersPopulated, null);
+		Arrays.fill(materials, 0, numBufferBuildersPopulated, null);
+
+		currentIndex = 0;
+		numBufferBuildersPopulated = 0;
 	}
 
-	public BufferBuilder getBuffer(Material key) {
-		if (currentIndex < 0 || !key.equals(activeKeys.get(currentIndex))) {
-			while (true) {
-				currentIndex++;
-
-				if (currentIndex >= activeBufferBuilders.size()) {
-					BufferBuilder bufferBuilder = bufferBuilderStack.getOrCreateBufferBuilder();
-					bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-					activeBufferBuilders.add(bufferBuilder);
-					activeKeys.add(key);
-					break;
-				}
-
-				if (key.equals(activeKeys.get(currentIndex))) {
-					break;
-				}
+	public BufferBuilder getBuffer(Material material) {
+		// First, scan through and try to find a matching Material.
+		while (currentIndex < numBufferBuildersPopulated) {
+			if (material.equals(materials[currentIndex])) {
+				// Return the matching BufferBuilder, but do not increment as we
+				// may still be able to use the same BufferBuilder in the next quad.
+				return bufferBuilders[currentIndex];
 			}
+			++currentIndex;
 		}
 
-		return activeBufferBuilders.get(currentIndex);
+		// Nothing matched so we need to grab a new BufferBuilder.
+		// Make sure we have room to represent it in the arrays.
+		if (currentIndex >= materials.length) {
+			// Only technically need to grow one at a time here, but doubling is
+			// fine and should reduce the number of reallocations.
+			resize(materials.length * 2);
+		}
+
+		BufferBuilder bufferBuilder = bufferBuilderStack.getOrCreateBufferBuilder();
+		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+
+		// currentIndex == numBufferBuildersPopulated here.
+		materials[currentIndex] = material;
+		bufferBuilders[currentIndex] = bufferBuilder;
+
+		// Again, do not increment currentIndex so we can re-use the new
+		// BufferBuilder for the next quad if it matches.
+		++numBufferBuildersPopulated;
+
+		return bufferBuilder;
+	}
+
+	private void resize(int capacity) {
+		BufferBuilder[] newBufferBuilders = new BufferBuilder[capacity];
+		Material[] newMaterials = new Material[capacity];
+
+		System.arraycopy(bufferBuilders, 0, newBufferBuilders, 0, numBufferBuildersPopulated);
+		System.arraycopy(materials, 0, newMaterials, 0, numBufferBuildersPopulated);
+
+		bufferBuilders = newBufferBuilders;
+		materials = newMaterials;
 	}
 }
