@@ -14,7 +14,7 @@ import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.api.model.Model;
 
 class MeshEmitter {
-	private static final int INITIAL_CAPACITY = 4;
+	private static final int INITIAL_CAPACITY = 1;
 
 	private final BufferBuilderStack bufferBuilderStack;
 
@@ -64,6 +64,7 @@ class MeshEmitter {
 
 		currentIndex = 0;
 		numBufferBuildersPopulated = 0;
+		blockMaterialFunction = null;
 	}
 
 	public BufferBuilder getBuffer(Material material) {

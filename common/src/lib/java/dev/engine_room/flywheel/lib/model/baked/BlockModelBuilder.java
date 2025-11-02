@@ -53,10 +53,10 @@ public abstract class BlockModelBuilder {
 		return this;
 	}
 
+	public abstract SimpleModel build();
+
 	public BlockModelBuilder materialFunc(@Nullable BlockMaterialFunction materialFunc) {
 		this.materialFunc = materialFunc;
 		return this;
 	}
-
-	public abstract SimpleModel build();
 }

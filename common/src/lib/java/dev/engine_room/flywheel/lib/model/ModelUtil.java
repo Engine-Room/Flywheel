@@ -6,11 +6,13 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import dev.engine_room.flywheel.api.material.CardinalLightingMode;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.api.vertex.VertexList;
 import dev.engine_room.flywheel.lib.material.Materials;
+import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 import dev.engine_room.flywheel.lib.vertex.PosVertexView;
 import net.minecraft.client.renderer.RenderType;
@@ -18,6 +20,36 @@ import net.minecraft.client.renderer.Sheets;
 
 public final class ModelUtil {
 	private static final float BOUNDING_SPHERE_EPSILON = 1e-4f;
+
+	private static final RenderType[] CHUNK_LAYERS = new RenderType[]{RenderType.solid(), RenderType.cutoutMipped(), RenderType.cutout(), RenderType.translucent(), RenderType.tripwire()};
+
+	// Array of chunk materials to make lookups easier.
+	// Index by (renderTypeIdx * 4 + shaded * 2 + ambientOcclusion).
+	private static final Material[] CHUNK_MATERIALS = new Material[20];
+
+	static {
+		Material[] baseChunkMaterials = new Material[]{Materials.SOLID_BLOCK, Materials.CUTOUT_MIPPED_BLOCK, Materials.CUTOUT_BLOCK, Materials.TRANSLUCENT_BLOCK, Materials.TRIPWIRE_BLOCK,};
+		for (int chunkLayerIdx = 0; chunkLayerIdx < CHUNK_LAYERS.length; chunkLayerIdx++) {
+			int baseMaterialIdx = chunkLayerIdx * 4;
+			Material baseChunkMaterial = baseChunkMaterials[chunkLayerIdx];
+
+			// shaded: false, ambientOcclusion: false
+			CHUNK_MATERIALS[baseMaterialIdx] = SimpleMaterial.builderOf(baseChunkMaterial)
+					.cardinalLightingMode(CardinalLightingMode.OFF)
+					.ambientOcclusion(false)
+					.build();
+			// shaded: false, ambientOcclusion: true
+			CHUNK_MATERIALS[baseMaterialIdx + 1] = SimpleMaterial.builderOf(baseChunkMaterial)
+					.cardinalLightingMode(CardinalLightingMode.OFF)
+					.build();
+			// shaded: true, ambientOcclusion: false
+			CHUNK_MATERIALS[baseMaterialIdx + 2] = SimpleMaterial.builderOf(baseChunkMaterial)
+					.ambientOcclusion(false)
+					.build();
+			// shaded: true, ambientOcclusion: true
+			CHUNK_MATERIALS[baseMaterialIdx + 3] = baseChunkMaterial;
+		}
+	}
 
 	private ModelUtil() {
 	}
@@ -29,27 +61,22 @@ public final class ModelUtil {
 
 	@Nullable
 	public static Material getMaterial(RenderType chunkRenderType, boolean shaded, boolean ambientOcclusion) {
-		if (chunkRenderType == RenderType.solid()) {
-			return shaded ? Materials.SOLID_BLOCK : Materials.SOLID_UNSHADED_BLOCK;
-		}
-		if (chunkRenderType == RenderType.cutoutMipped()) {
-			return shaded ? Materials.CUTOUT_MIPPED_BLOCK : Materials.CUTOUT_MIPPED_UNSHADED_BLOCK;
-		}
-		if (chunkRenderType == RenderType.cutout()) {
-			return shaded ? Materials.CUTOUT_BLOCK : Materials.CUTOUT_UNSHADED_BLOCK;
-		}
-		if (chunkRenderType == RenderType.translucent()) {
-			return shaded ? Materials.TRANSLUCENT_BLOCK : Materials.TRANSLUCENT_UNSHADED_BLOCK;
-		}
-		if (chunkRenderType == RenderType.tripwire()) {
-			return shaded ? Materials.TRIPWIRE_BLOCK : Materials.TRIPWIRE_UNSHADED_BLOCK;
+		for (int chunkLayerIdx = 0; chunkLayerIdx < CHUNK_LAYERS.length; ++chunkLayerIdx) {
+			if (chunkRenderType == CHUNK_LAYERS[chunkLayerIdx]) {
+				int shadedIdx = shaded ? 1 : 0;
+				int ambientOcclusionIdx = ambientOcclusion ? 1 : 0;
+
+				int materialIdx = chunkLayerIdx * 4 + shadedIdx * 2 + ambientOcclusionIdx;
+
+				return CHUNK_MATERIALS[materialIdx];
+			}
 		}
 		return null;
 	}
 
 	@Nullable
 	public static Material getItemMaterial(RenderType renderType) {
-		var chunkMaterial = getMaterial(renderType, true);
+		var chunkMaterial = getMaterial(renderType, true, false);
 
 		if (chunkMaterial != null) {
 			return chunkMaterial;

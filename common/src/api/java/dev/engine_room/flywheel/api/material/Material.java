@@ -56,6 +56,15 @@ public interface Material {
 	CardinalLightingMode cardinalLightingMode();
 
 	/**
+	 * Whether this material should receive ambient occlusion from nearby chunk geometry.
+	 *
+	 * @return {@code true} if this material should receive ambient occlusion.
+	 */
+	default boolean ambientOcclusion() {
+		return true;
+	}
+
+	/**
 	 * Check for field-wise equality between this Material and another.
 	 *
 	 * @param other The nullable material to check equality against.
@@ -81,6 +90,7 @@ public interface Material {
 				&& this.useOverlay() == other.useOverlay()
 				&& this.useLight() == other.useLight()
 				&& this.cardinalLightingMode() == other.cardinalLightingMode()
+				&& this.ambientOcclusion() == other.ambientOcclusion()
 				&& this.shaders().fragmentSource().equals(other.shaders().fragmentSource())
 				&& this.shaders().vertexSource().equals(other.shaders().vertexSource())
 				&& this.fog().source().equals(other.fog().source())

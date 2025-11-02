@@ -28,7 +28,7 @@ final class BakedModelBufferer {
 	private BakedModelBufferer() {
 	}
 
-	public static SimpleModel bufferModel(BakedModel model, BlockPos pos, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, BlockMaterialFunction resultConsumer) {
+	public static SimpleModel bufferModel(BakedModel model, BlockPos pos, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, BlockMaterialFunction blockMaterialFunction) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
@@ -36,7 +36,7 @@ final class BakedModelBufferer {
 		RandomSource random = objects.random;
 		FabricMeshEmitterManager emitters = objects.emitters;
 
-		emitters.prepare(resultConsumer);
+		emitters.prepare(blockMaterialFunction);
 
 		long seed = state.getSeed(pos);
 
@@ -55,7 +55,7 @@ final class BakedModelBufferer {
 		return emitters.end();
 	}
 
-	public static SimpleModel bufferBlocks(Iterator<BlockPos> posIterator, BlockAndTintGetter level, @Nullable PoseStack poseStack, boolean renderFluids, BlockMaterialFunction resultConsumer) {
+	public static SimpleModel bufferBlocks(Iterator<BlockPos> posIterator, BlockAndTintGetter level, @Nullable PoseStack poseStack, boolean renderFluids, BlockMaterialFunction blockMaterialFunction) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
@@ -64,7 +64,7 @@ final class BakedModelBufferer {
 		FabricMeshEmitterManager emitters = objects.emitters;
 		TransformingVertexConsumer transformingWrapper = objects.transformingWrapper;
 
-		emitters.prepare(resultConsumer);
+		emitters.prepare(blockMaterialFunction);
 
 		BlockRenderDispatcher renderDispatcher = Minecraft.getInstance()
 				.getBlockRenderer();
