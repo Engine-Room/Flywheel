@@ -11,7 +11,7 @@ import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.renderer.RenderType;
 
-class ModelBuilderResultConsumer implements ResultConsumer<Material> {
+class ModelBuilderResultConsumer {
 	private final BlockMaterialFunction materialFunc;
 	private final ImmutableList.Builder<Model.ConfiguredMesh> meshes = ImmutableList.builder();
 
@@ -19,13 +19,11 @@ class ModelBuilderResultConsumer implements ResultConsumer<Material> {
 		this.materialFunc = materialFunc;
 	}
 
-	@Override
 	@Nullable
 	public Material createKey(RenderType renderType, boolean shade, boolean ambientOcclusion) {
 		return materialFunc.apply(renderType, shade, ambientOcclusion);
 	}
 
-	@Override
 	public void accept(Material material, BufferBuilder.RenderedBuffer data) {
 		Mesh mesh = MeshHelper.blockVerticesToMesh(data, "source=ModelBuilder" + ",material=" + material);
 		meshes.add(new Model.ConfiguredMesh(material, mesh));

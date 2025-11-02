@@ -30,13 +30,13 @@ final class BakedModelBufferer {
 	private BakedModelBufferer() {
 	}
 
-	public static void bufferModel(BakedModel model, BlockPos pos, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, ModelData modelData, ResultConsumer<?> resultConsumer) {
+	public static void bufferModel(BakedModel model, BlockPos pos, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, ModelData modelData, ModelBuilderResultConsumer resultConsumer) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
 		RandomSource random = objects.random;
-		ForgeMeshEmitterManager emitters = objects.emitters;
+		MeshEmitterManager<ForgeMeshEmitter> emitters = objects.emitters;
 
 		emitters.prepare(resultConsumer);
 
@@ -65,13 +65,13 @@ final class BakedModelBufferer {
 		emitters.end();
 	}
 
-	public static void bufferBlocks(Iterator<BlockPos> posIterator, BlockAndTintGetter level, @Nullable PoseStack poseStack, Function<BlockPos, ModelData> modelDataLookup, boolean renderFluids, ResultConsumer<?> resultConsumer) {
+	public static void bufferBlocks(Iterator<BlockPos> posIterator, BlockAndTintGetter level, @Nullable PoseStack poseStack, Function<BlockPos, ModelData> modelDataLookup, boolean renderFluids, ModelBuilderResultConsumer resultConsumer) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
 		RandomSource random = objects.random;
-		ForgeMeshEmitterManager emitters = objects.emitters;
+		MeshEmitterManager<ForgeMeshEmitter> emitters = objects.emitters;
 		TransformingVertexConsumer transformingWrapper = objects.transformingWrapper;
 
 		emitters.prepare(resultConsumer);
@@ -141,7 +141,7 @@ final class BakedModelBufferer {
 		public final PoseStack identityPoseStack = new PoseStack();
 		public final RandomSource random = RandomSource.createNewThreadLocalInstance();
 
-		public final ForgeMeshEmitterManager emitters = new ForgeMeshEmitterManager();
+		public final MeshEmitterManager<ForgeMeshEmitter> emitters = new MeshEmitterManager<>(ForgeMeshEmitter::new);
 		public final TransformingVertexConsumer transformingWrapper = new TransformingVertexConsumer();
 	}
 }

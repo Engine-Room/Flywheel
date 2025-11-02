@@ -1,38 +1,39 @@
 package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
+import dev.engine_room.flywheel.api.material.Material;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
-import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.renderer.RenderType;
 
 class MeshEmitterManager<T extends MeshEmitter> {
 	private static final RenderType[] CHUNK_LAYERS = RenderType.chunkBufferLayers().toArray(RenderType[]::new);
 
-	final Reference2ReferenceMap<RenderType, T> emitterMap = new Reference2ReferenceLinkedOpenHashMap<>();
-	private final ReferenceArrayList<BufferBuilder> bufferBuilders = new ReferenceArrayList<>();
+	final Reference2ReferenceMap<RenderType, T> emitterMap = new Reference2ReferenceArrayMap<>();
 
-	@UnknownNullability
-	private ResultConsumer<?> resultConsumer;
-	private int nextBufferBuilderIndex;
+	private ModelBuilderResultConsumer resultConsumer;
 
-	MeshEmitterManager(BiFunction<Supplier<BufferBuilder>, RenderType, T> meshEmitterFactory) {
+	private final BufferBuilderStack bufferBuilderStack = new BufferBuilderStack();
+
+	MeshEmitterManager(BiFunction<BufferBuilderStack, RenderType, T> meshEmitterFactory) {
 		for (RenderType renderType : CHUNK_LAYERS) {
-			T emitter = meshEmitterFactory.apply(this::getOrCreateBufferBuilder, renderType);
+			T emitter = meshEmitterFactory.apply(bufferBuilderStack, renderType);
 			emitterMap.put(renderType, emitter);
 		}
 	}
 
-	public void prepare(ResultConsumer<?> resultConsumer) {
+	public T getEmitter(RenderType renderType) {
+		return emitterMap.get(renderType);
+	}
+
+	public void prepare(ModelBuilderResultConsumer resultConsumer) {
 		this.resultConsumer = resultConsumer;
-		nextBufferBuilderIndex = 0;
+		bufferBuilderStack.reset();
 
 		for (MeshEmitter emitter : emitterMap.values()) {
 			emitter.prepare(resultConsumer);
@@ -47,7 +48,7 @@ class MeshEmitterManager<T extends MeshEmitter> {
 
 	public void end() {
 		resultConsumer = null;
-		nextBufferBuilderIndex = 0;
+		bufferBuilderStack.reset();
 
 		for (MeshEmitter emitter : emitterMap.values()) {
 			emitter.end();
@@ -56,23 +57,11 @@ class MeshEmitterManager<T extends MeshEmitter> {
 
 	@Nullable
 	public BufferBuilder getBuffer(RenderType renderType, boolean shade, boolean ao) {
-		Object key = resultConsumer.createKey(renderType, shade, ao);
+		Material key = resultConsumer.createKey(renderType, shade, ao);
 		if (key != null) {
 			return emitterMap.get(renderType).getBuffer(key);
 		} else {
 			return null;
 		}
-	}
-
-	private BufferBuilder getOrCreateBufferBuilder() {
-		BufferBuilder bufferBuilder;
-		if (nextBufferBuilderIndex < bufferBuilders.size()) {
-			bufferBuilder = bufferBuilders.get(nextBufferBuilderIndex);
-		} else {
-			bufferBuilder = new BufferBuilder(0);
-			bufferBuilders.add(bufferBuilder);
-		}
-		nextBufferBuilderIndex++;
-		return bufferBuilder;
 	}
 }

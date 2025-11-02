@@ -2,42 +2,33 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
-
-import org.jetbrains.annotations.UnknownNullability;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import dev.engine_room.flywheel.api.material.Material;
+
 class MeshEmitter {
-	private final Supplier<BufferBuilder> bufferBuilderSupplier;
+	private final BufferBuilderStack bufferBuilderStack;
 
 	private final List<BufferBuilder> activeBufferBuilders = new ArrayList<>();
-	private final List<Object> activeKeys = new ArrayList<>();
+	private final List<Material> activeKeys = new ArrayList<>();
 
-	@UnknownNullability
-	ResultConsumer<Object> resultConsumer;
+	ModelBuilderResultConsumer resultConsumer;
 
 	private int currentIndex = -1;
-	@UnknownNullability
-	private BufferBuilder currentBufferBuilder;
-	@UnknownNullability
-	private Object currentKey;
 
-	MeshEmitter(Supplier<BufferBuilder> bufferBuilderSupplier) {
-		this.bufferBuilderSupplier = bufferBuilderSupplier;
+	MeshEmitter(BufferBuilderStack bufferBuilderStack) {
+		this.bufferBuilderStack = bufferBuilderStack;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void prepare(ResultConsumer<?> resultConsumer) {
-		this.resultConsumer = (ResultConsumer<Object>) resultConsumer;
+	public void prepare(ModelBuilderResultConsumer resultConsumer) {
+		this.resultConsumer = resultConsumer;
 	}
 
 	public void prepareForBlock() {
 		currentIndex = -1;
-		currentBufferBuilder = null;
-		currentKey = null;
 	}
 
 	public void end() {
@@ -54,34 +45,27 @@ class MeshEmitter {
 		activeKeys.clear();
 		resultConsumer = null;
 		currentIndex = -1;
-		currentBufferBuilder = null;
-		currentKey = null;
 	}
 
-	public BufferBuilder getBuffer(Object key) {
-		if (currentIndex < 0 || !key.equals(currentKey)) {
+	public BufferBuilder getBuffer(Material key) {
+		if (currentIndex < 0 || !key.equals(activeKeys.get(currentIndex))) {
 			while (true) {
 				currentIndex++;
 
 				if (currentIndex >= activeBufferBuilders.size()) {
-					BufferBuilder bufferBuilder = bufferBuilderSupplier.get();
+					BufferBuilder bufferBuilder = bufferBuilderStack.getOrCreateBufferBuilder();
 					bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 					activeBufferBuilders.add(bufferBuilder);
 					activeKeys.add(key);
-					currentBufferBuilder = bufferBuilder;
-					currentKey = key;
 					break;
 				}
 
-				Object searchKey = activeKeys.get(currentIndex);
-				if (key.equals(searchKey)) {
-					currentBufferBuilder = activeBufferBuilders.get(currentIndex);
-					currentKey = searchKey;
+				if (key.equals(activeKeys.get(currentIndex))) {
 					break;
 				}
 			}
 		}
 
-		return currentBufferBuilder;
+		return activeBufferBuilders.get(currentIndex);
 	}
 }

@@ -1,7 +1,5 @@
 package dev.engine_room.flywheel.lib.model.baked;
 
-import java.util.function.Supplier;
-
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,6 +7,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import dev.engine_room.flywheel.api.material.Material;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -19,8 +18,8 @@ public class ForgeMeshEmitter extends MeshEmitter implements VertexConsumer {
 
 	private boolean defaultAo;
 
-	ForgeMeshEmitter(Supplier<BufferBuilder> bufferBuilderSupplier, RenderType renderType) {
-		super(bufferBuilderSupplier);
+	ForgeMeshEmitter(BufferBuilderStack bufferBuilderStack, RenderType renderType) {
+		super(bufferBuilderStack);
 		this.renderType = renderType;
 	}
 
@@ -37,7 +36,7 @@ public class ForgeMeshEmitter extends MeshEmitter implements VertexConsumer {
 
 	@Nullable
 	private BufferBuilder getBuffer(boolean shade, boolean ao) {
-		Object key = resultConsumer.createKey(renderType, shade, ao);
+		Material key = resultConsumer.createKey(renderType, shade, ao);
 		if (key != null) {
 			return getBuffer(key);
 		} else {
