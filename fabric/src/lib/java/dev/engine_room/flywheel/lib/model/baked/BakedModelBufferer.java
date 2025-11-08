@@ -42,6 +42,7 @@ final class BakedModelBufferer {
 
 		RenderType defaultLayer = ItemBlockRenderTypes.getChunkRenderType(state);
 		boolean useAo = Minecraft.useAmbientOcclusion();
+		// See ModelBlockRenderer#tesselateBlock
 		boolean defaultAo = useAo && state.getLightEmission() == 0 && model.useAmbientOcclusion();
 		model = emitters.prepareForModel(model, defaultLayer, useAo, defaultAo);
 
@@ -103,6 +104,8 @@ final class BakedModelBufferer {
 				BakedModel model = renderDispatcher.getBlockModel(state);
 
 				RenderType defaultLayer = ItemBlockRenderTypes.getChunkRenderType(state);
+
+				// See ModelBlockRenderer#tesselateBlock
 				boolean defaultAo = useAo && state.getLightEmission() == 0 && model.useAmbientOcclusion();
 				model = emitters.prepareForModel(model, defaultLayer, useAo, defaultAo);
 

@@ -289,6 +289,11 @@ public class SimpleMaterial implements Material {
 			return this;
 		}
 
+		public Builder ambientOcclusion(boolean ambientOcclusion) {
+			this.ambientOcclusion = ambientOcclusion;
+			return this;
+		}
+
 		@Override
 		public MaterialShaders shaders() {
 			return shaders;
@@ -364,18 +369,13 @@ public class SimpleMaterial implements Material {
 			return cardinalLightingMode;
 		}
 
-		public SimpleMaterial build() {
-			return new SimpleMaterial(this);
-		}
-
-		public Builder ambientOcclusion(boolean ambientOcclusion) {
-			this.ambientOcclusion = ambientOcclusion;
-			return this;
-		}
-
 		@Override
 		public boolean ambientOcclusion() {
 			return ambientOcclusion;
+		}
+
+		public SimpleMaterial build() {
+			return new SimpleMaterial(this);
 		}
 	}
 }

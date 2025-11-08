@@ -50,6 +50,7 @@ final class BakedModelBufferer {
 		random.setSeed(seed);
 		ChunkRenderTypeSet renderTypes = model.getRenderTypes(state, random, modelData);
 
+		// See ModelBlockRenderer#tesselateBlock
 		boolean defaultAo = Minecraft.useAmbientOcclusion() && state.getLightEmission(level, pos) == 0;
 
 		for (RenderType renderType : renderTypes) {
@@ -117,6 +118,7 @@ final class BakedModelBufferer {
 				random.setSeed(seed);
 				ChunkRenderTypeSet renderTypes = model.getRenderTypes(state, random, modelData);
 
+				// See ModelBlockRenderer#tesselateBlock
 				boolean defaultAo = useAo && state.getLightEmission(level, pos) == 0;
 
 				for (RenderType renderType : renderTypes) {
