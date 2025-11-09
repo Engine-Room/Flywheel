@@ -15,5 +15,5 @@ layout(std140) uniform _FlwOptionsUniforms {
     uint flw_textBackgroundForChatOnlyOption;
     float flw_darknessPulsingOption;
     float flw_damageTiltOption;
-    uint hideLightningFlashesOption;
+    uint flw_hideLightningFlashesOption;
 };

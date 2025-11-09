@@ -20,11 +20,17 @@ client/server synchronization.
 
 ## Visuals
 
-Visuals are the analog to Renderers in vanilla Minecraft. Each Entity/BlockEntity/Effect that is rendered will have a
-corresponding Visual. This way, Visuals can maintain state independent of the client representation of the game object,
+Visuals are the analog to Renderers in vanilla Minecraft. Each game object that is rendered will have a
+corresponding Visual object. This way, Visuals can maintain state independent of the client representation of the game
+object,
 and update in parallel to other Visuals of the same type.
 
-Statefulness and parallelism are the core motivation behind this abstraction.
+Statefulness and parallelism are the core motivations behind this abstraction.
+
+::: danger IMPLEMENTATION CONTRACT
+Your Visual _must_ be in a correct state upon construction, where all created Instances are be at their expected
+position. The most common bug when implementing Visuals is having your instances appear at the render origin.
+:::
 
 ## Instances
 
@@ -37,6 +43,11 @@ instance shader.
 
 Users of Flywheel are encouraged to only update Instances when necessary.
 
+::: warning
+Ensure you `.delete()` all Instances you create when your Visual is deleted. Failure to do so will result in orphaned
+instances that continue to be rendered.
+:::
+
 ## Render Origin
 
 The render origin is an integer coordinate in world space which serves as the origin for rendering.
@@ -46,3 +57,25 @@ Such an approach is not viable for Flywheel, as that would require every instanc
 Flywheel maintains a render origin that is nearby, but not necessarily exactly at, the camera position. As the camera
 moves in the level Flywheel will update the render origin once it gets too far away. All instances are deleted and all
 visuals are recreated when the render origin updates.
+
+::: tip
+To map from world space to render space, subtract the render origin from the world space position. e.g.
+
+```java
+BlockPos renderSpacePos = worldSpacePos.subtract(visualizationContext.renderOrigin());
+```
+
+:::
+
+## Plans
+
+Plans are Flywheel's way to expose the thread pool to Visuals. Plans are created once, and executed many times.
+When executed, Plans receive a generic context object, a reference to the Executor they're running on, and a Runnable
+to call when all the work in the Plan is complete. This simple abstraction allows for incredibly complex composition
+of tasks and allows for easy parallelization of work.
+
+Implementing `DynamicVisual` and `TickableVisual` requires you to construct Plans that will be executed every frame or
+tick, respectively.
+
+_Most_ Visuals will not need the full complexity of Plans, so the Flywheel lib provides `Simple` counterparts to both
+interfaces.
