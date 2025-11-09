@@ -21,7 +21,7 @@ public final class BlockModelBuilder {
 	PoseStack poseStack;
 	boolean renderFluids = false;
 	@Nullable
-	BiFunction<RenderType, Boolean, Material> materialFunc;
+	BlockMaterialFunction materialFunc;
 
 	public BlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
 		this.level = level;
@@ -38,7 +38,17 @@ public final class BlockModelBuilder {
 		return this;
 	}
 
-	public BlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
+	@Deprecated(forRemoval = true)
+	public BlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, @Nullable Material> materialFunc) {
+		if (materialFunc != null) {
+			this.materialFunc = (chunkRenderType, shaded, ambientOcclusion) -> materialFunc.apply(chunkRenderType, shaded);
+		} else {
+			this.materialFunc = null;
+		}
+		return this;
+	}
+
+	public BlockModelBuilder materialFunc(@Nullable BlockMaterialFunction materialFunc) {
 		this.materialFunc = materialFunc;
 		return this;
 	}
