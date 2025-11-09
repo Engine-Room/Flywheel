@@ -10,7 +10,7 @@ uniform mat4 _flw_modelMatrixUniform;
 uniform mat3 _flw_normalMatrixUniform;
 #endif
 
-uniform uint _flw_vertexOffset;
+uniform uint _flw_baseVertex;
 
 void main() {
     _flw_unpackMaterialProperties(_flw_packedMaterial.y, flw_material);
@@ -22,5 +22,5 @@ void main() {
     _flw_normalMatrix = _flw_normalMatrixUniform;
     #endif
 
-    _flw_main(instance, uint(gl_InstanceID), _flw_vertexOffset);
+    _flw_main(instance, uint(gl_InstanceID), _flw_baseVertex);
 }

@@ -8,6 +8,9 @@ ivec2 flw_vertexOverlay;
 vec2 flw_vertexLight;
 vec3 flw_vertexNormal;
 
+// The index of the current vertex in the mesh that is being drawn.
+/*const*/ uint flw_vertexId;
+
 /*const*/ FlwMaterial flw_material;
 
 // To be implemented by the instance shader.
