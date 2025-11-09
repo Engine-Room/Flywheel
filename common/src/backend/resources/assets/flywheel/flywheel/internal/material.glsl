@@ -34,4 +34,5 @@ struct FlwMaterial {
     bool useOverlay;
     bool useLight;
     uint cardinalLightingMode;
+    bool ambientOcclusion;
 };

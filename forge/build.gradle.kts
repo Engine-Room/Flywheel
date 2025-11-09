@@ -119,6 +119,7 @@ loom {
     forge {
         mixinConfig("flywheel.backend.mixins.json")
         mixinConfig("flywheel.impl.mixins.json")
+        mixinConfig("flywheel.impl.forge.mixins.json")
     }
 
     runs {

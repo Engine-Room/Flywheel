@@ -5,9 +5,10 @@ import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.blaze3d.vertex.BufferBuilder.RenderedBuffer;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -25,81 +26,87 @@ import net.minecraftforge.client.ChunkRenderTypeSet;
 import net.minecraftforge.client.model.data.ModelData;
 
 final class BakedModelBufferer {
-	static final RenderType[] CHUNK_LAYERS = RenderType.chunkBufferLayers().toArray(RenderType[]::new);
-	static final int CHUNK_LAYER_AMOUNT = CHUNK_LAYERS.length;
-
 	private static final ThreadLocal<ThreadLocalObjects> THREAD_LOCAL_OBJECTS = ThreadLocal.withInitial(ThreadLocalObjects::new);
 
 	private BakedModelBufferer() {
 	}
 
-	public static void bufferModel(BakedModel model, BlockPos pos, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, ModelData modelData, ResultConsumer resultConsumer) {
+	public static SimpleModel bufferModel(BakedModel model, BlockPos pos, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, ModelData modelData, BlockMaterialFunction blockMaterialFunction) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
 		RandomSource random = objects.random;
-		MeshEmitter[] emitters = objects.emitters;
+		MeshEmitterManager<ForgeMeshEmitter> emitters = objects.emitters;
+
+		emitters.prepare(blockMaterialFunction);
+
+		ModelBlockRenderer blockRenderer = Minecraft.getInstance()
+				.getBlockRenderer()
+				.getModelRenderer();
 
 		long seed = state.getSeed(pos);
 		modelData = model.getModelData(level, pos, state, modelData);
 		random.setSeed(seed);
 		ChunkRenderTypeSet renderTypes = model.getRenderTypes(state, random, modelData);
 
-		ModelBlockRenderer blockRenderer = Minecraft.getInstance()
-				.getBlockRenderer()
-				.getModelRenderer();
+		// See ModelBlockRenderer#tesselateBlock
+		boolean defaultAo = Minecraft.useAmbientOcclusion() && state.getLightEmission(level, pos) == 0;
 
 		for (RenderType renderType : renderTypes) {
-			int layerIndex = renderType.getChunkLayerId();
-			MeshEmitter emitter = emitters[layerIndex];
+			boolean defaultAoLayer = defaultAo && model.useAmbientOcclusion(state, renderType);
 
-			emitter.prepare(resultConsumer);
+			ForgeMeshEmitter emitter = emitters.getEmitter(renderType);
+			emitter.prepareForModelLayer(defaultAoLayer);
 
 			poseStack.pushPose();
 			blockRenderer.tesselateBlock(level, model, state, pos, poseStack, emitter, false, random, seed, OverlayTexture.NO_OVERLAY, modelData, renderType);
 			poseStack.popPose();
-
-			emitter.end();
 		}
+
+		return emitters.end();
 	}
 
-	public static void bufferBlocks(Iterator<BlockPos> posIterator, BlockAndTintGetter level, @Nullable PoseStack poseStack, Function<BlockPos, ModelData> modelDataLookup, boolean renderFluids, ResultConsumer resultConsumer) {
+	public static SimpleModel bufferBlocks(Iterator<BlockPos> posIterator, BlockAndTintGetter level, @Nullable PoseStack poseStack, Function<BlockPos, ModelData> modelDataLookup, boolean renderFluids, BlockMaterialFunction blockMaterialFunction) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
 		RandomSource random = objects.random;
-		MeshEmitter[] emitters = objects.emitters;
+		MeshEmitterManager<ForgeMeshEmitter> emitters = objects.emitters;
 		TransformingVertexConsumer transformingWrapper = objects.transformingWrapper;
 
-		for (MeshEmitter emitter : emitters) {
-			emitter.prepare(resultConsumer);
-		}
+		emitters.prepare(blockMaterialFunction);
 
 		BlockRenderDispatcher renderDispatcher = Minecraft.getInstance()
 				.getBlockRenderer();
-
 		ModelBlockRenderer blockRenderer = renderDispatcher.getModelRenderer();
 		ModelBlockRenderer.enableCaching();
+
+		boolean useAo = Minecraft.useAmbientOcclusion();
 
 		while (posIterator.hasNext()) {
 			BlockPos pos = posIterator.next();
 			BlockState state = level.getBlockState(pos);
+
+			emitters.prepareForBlock();
 
 			if (renderFluids) {
 				FluidState fluidState = state.getFluidState();
 
 				if (!fluidState.isEmpty()) {
 					RenderType renderType = ItemBlockRenderTypes.getRenderLayer(fluidState);
-					int layerIndex = renderType.getChunkLayerId();
 
-					transformingWrapper.prepare(emitters[layerIndex].unwrap(true), poseStack);
+					BufferBuilder bufferBuilder = emitters.getBuffer(renderType, true, false);
 
-					poseStack.pushPose();
-					poseStack.translate(pos.getX() - (pos.getX() & 0xF), pos.getY() - (pos.getY() & 0xF), pos.getZ() - (pos.getZ() & 0xF));
-					renderDispatcher.renderLiquid(pos, level, transformingWrapper, state, fluidState);
-					poseStack.popPose();
+					if (bufferBuilder != null) {
+						transformingWrapper.prepare(bufferBuilder, poseStack);
+
+						poseStack.pushPose();
+						poseStack.translate(pos.getX() - (pos.getX() & 0xF), pos.getY() - (pos.getY() & 0xF), pos.getZ() - (pos.getZ() & 0xF));
+						renderDispatcher.renderLiquid(pos, level, transformingWrapper, state, fluidState);
+						poseStack.popPose();
+					}
 				}
 			}
 
@@ -111,12 +118,18 @@ final class BakedModelBufferer {
 				random.setSeed(seed);
 				ChunkRenderTypeSet renderTypes = model.getRenderTypes(state, random, modelData);
 
+				// See ModelBlockRenderer#tesselateBlock
+				boolean defaultAo = useAo && state.getLightEmission(level, pos) == 0;
+
 				for (RenderType renderType : renderTypes) {
-					int layerIndex = renderType.getChunkLayerId();
+					boolean defaultAoLayer = defaultAo && model.useAmbientOcclusion(state, renderType);
+
+					ForgeMeshEmitter emitter = emitters.getEmitter(renderType);
+					emitter.prepareForModelLayer(defaultAoLayer);
 
 					poseStack.pushPose();
 					poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
-					blockRenderer.tesselateBlock(level, model, state, pos, poseStack, emitters[layerIndex], true, random, seed, OverlayTexture.NO_OVERLAY, modelData, renderType);
+					blockRenderer.tesselateBlock(level, model, state, pos, poseStack, emitter, true, random, seed, OverlayTexture.NO_OVERLAY, modelData, renderType);
 					poseStack.popPose();
 				}
 			}
@@ -124,28 +137,14 @@ final class BakedModelBufferer {
 
 		ModelBlockRenderer.clearCache();
 		transformingWrapper.clear();
-
-		for (MeshEmitter emitter : emitters) {
-			emitter.end();
-		}
-	}
-
-	public interface ResultConsumer {
-		void accept(RenderType renderType, boolean shaded, RenderedBuffer data);
+		return emitters.end();
 	}
 
 	private static class ThreadLocalObjects {
 		public final PoseStack identityPoseStack = new PoseStack();
 		public final RandomSource random = RandomSource.createNewThreadLocalInstance();
 
-		public final MeshEmitter[] emitters = new MeshEmitter[CHUNK_LAYER_AMOUNT];
+		public final MeshEmitterManager<ForgeMeshEmitter> emitters = new MeshEmitterManager<>(ForgeMeshEmitter::new);
 		public final TransformingVertexConsumer transformingWrapper = new TransformingVertexConsumer();
-
-		{
-			for (int layerIndex = 0; layerIndex < CHUNK_LAYER_AMOUNT; layerIndex++) {
-				RenderType renderType = CHUNK_LAYERS[layerIndex];
-				emitters[layerIndex] = new MeshEmitter(renderType);
-			}
-		}
 	}
 }
