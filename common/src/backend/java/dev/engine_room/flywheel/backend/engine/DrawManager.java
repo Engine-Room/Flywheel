@@ -185,6 +185,12 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 
 	public abstract void triggerFallback();
 
+	public abstract MeshPool meshPool();
+
+	public Map<InstancerKey<?>, N> instancers() {
+		return instancers;
+	}
+
 	protected record UninitializedInstancer<N, I extends Instance>(InstancerKey<I> key, N instancer) {
 	}
 }

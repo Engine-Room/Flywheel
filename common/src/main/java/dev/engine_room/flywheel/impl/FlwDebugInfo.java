@@ -5,10 +5,15 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
+import dev.engine_room.flywheel.backend.engine.AbstractInstancer;
+import dev.engine_room.flywheel.backend.engine.DrawManager;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.impl.visualization.VisualizationManagerImpl;
 import dev.engine_room.flywheel.lib.memory.FlwMemoryTracker;
 import dev.engine_room.flywheel.lib.util.StringUtil;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntComparators;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
@@ -32,10 +37,15 @@ public final class FlwDebugInfo {
 	}
 
 	/**
-	 * Append a header to the given StringBuilder, preceded by two new lines for separation.
+	 * Append a header to the given StringBuilder.
 	 */
 	public static void appendHeader(StringBuilder dst, String str) {
-		dst.append("\n\n## ");
+		dst.append("\n## ");
+		dst.append(str);
+	}
+
+	public static void appendHeader2(StringBuilder dst, String str) {
+		dst.append("\n### ");
 		dst.append(str);
 	}
 
@@ -92,7 +102,93 @@ public final class FlwDebugInfo {
 		var lut = engineImpl.lightStorage()
 				.createLut();
 
-		appendLine(out, "Light LUT Size: ").append(lut.size() * Integer.BYTES);
+		appendLine(out, "Light LUT Size: ").append(lut.size() * Integer.BYTES)
+				.append(" bytes");
+
+		DrawManager<? extends AbstractInstancer<?>> drawManager = engineImpl.drawManager();
+		addMeshDebugInfo(out, drawManager);
+		addInstancerDebugInfo(out, drawManager);
+	}
+
+	private static void addInstancerDebugInfo(StringBuilder out, DrawManager<? extends AbstractInstancer<?>> drawManager) {
+		appendHeader2(out, "Instancers");
+
+		var instancers = drawManager.instancers();
+
+		appendLine(out, "Count: ").append(instancers.size());
+
+		{
+			IntList meshCountsToSort = new IntArrayList();
+			for (var instancerKey : instancers.keySet()) {
+				meshCountsToSort.add(instancerKey.model()
+						.meshes()
+						.size());
+			}
+			appendPercentiles(out, "Mesh Count Percentiles", meshCountsToSort);
+		}
+
+		{
+			int totalInstanceCount = 0;
+			IntList instanceCountsToSort = new IntArrayList();
+			for (var instancer : instancers.values()) {
+				var instanceCount = instancer.instanceCount();
+				totalInstanceCount += instanceCount;
+				instanceCountsToSort.add(instanceCount);
+			}
+			appendLine(out, "Total Instance Count: ").append(totalInstanceCount);
+			appendPercentiles(out, "Instance Count Percentiles", instanceCountsToSort);
+		}
+	}
+
+	private static void addMeshDebugInfo(StringBuilder out, DrawManager<? extends AbstractInstancer<?>> drawManager) {
+		var meshPool = drawManager.meshPool()
+				.pooledMeshes();
+
+		appendHeader2(out, "Meshes");
+
+		var numMeshes = meshPool.size();
+
+		appendLine(out, "Count: ").append(numMeshes);
+
+		{
+			int totalVertices = 0;
+			IntList vertexCountsToSort = new IntArrayList();
+			for (var pooledMesh : meshPool) {
+				int vertexCount = pooledMesh.vertexCount();
+
+				vertexCountsToSort.add(vertexCount);
+				totalVertices += vertexCount;
+			}
+
+			appendLine(out, "Total Vertex Count: ").append(totalVertices);
+			appendPercentiles(out, "Vertex Count Percentiles", vertexCountsToSort);
+		}
+	}
+
+	private static void appendPercentiles(StringBuilder out, String prefix, IntList unsortedCounts) {
+		var size = unsortedCounts.size();
+
+		if (size == 0) {
+			// Append
+			appendLine(out, "Empty dataset, no percentiles.");
+			return;
+		}
+
+		unsortedCounts.sort(IntComparators.NATURAL_COMPARATOR);
+
+		int p10Index = Math.min(size / 10, size - 1);
+		int p50Index = Math.min(size / 2, size - 1);
+		int p90Index = Math.min(size * 9 / 10, size - 1);
+
+		appendLine(out, prefix).append(":\n   ")
+				.append("P10: ")
+				.append(unsortedCounts.getInt(p10Index))
+				.append(", P50: ")
+				.append(unsortedCounts.getInt(p50Index))
+				.append(", P90: ")
+				.append(unsortedCounts.getInt(p90Index))
+				.append(", Max: ")
+				.append(unsortedCounts.getInt(size - 1));
 	}
 
 	private static void addVisualizationManagerDebugInfo(@Nullable VisualizationManagerImpl manager, StringBuilder out) {
@@ -137,8 +233,10 @@ public final class FlwDebugInfo {
 				.append(" (")
 				.append(System.getProperty("os.arch"))
 				.append(")");
-		appendLine(out, "Flw CPU Memory: ").append(FlwMemoryTracker.getCpuMemory());
-		appendLine(out, "Flw GPU Memory: ").append(FlwMemoryTracker.getGpuMemory());
+		appendLine(out, "Flw CPU Memory: ").append(FlwMemoryTracker.getCpuMemory())
+				.append(" bytes");
+		appendLine(out, "Flw GPU Memory: ").append(FlwMemoryTracker.getGpuMemory())
+				.append(" bytes");
 	}
 
 	private static void addOpenGLDebugInfo(StringBuilder out) {
