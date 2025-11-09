@@ -137,6 +137,10 @@ public class MeshPool {
 		meshList.clear();
 	}
 
+	public List<PooledMesh> pooledMeshes() {
+		return meshList;
+	}
+
 	public class PooledMesh extends ReferenceCounted {
 		public static final int INVALID_BASE_VERTEX = -1;
 
