@@ -12,9 +12,24 @@ Some functions/variables are only available for specific shader stages.
 
 ::: code-group
 
-<<< snippets/common.glsl
-<<< snippets/material.glsl
-<<< snippets/vertex.glsl
-<<< snippets/fragment.glsl
+<<< stage/common.glsl
+<<< stage/material.glsl
+<<< stage/vertex.glsl
+<<< stage/fragment.glsl
+
+:::
+
+### Uniforms
+
+In addition to the stage-specific variables above, every stage has access to the following uniforms.
+All uniforms are included in the prelude and do not have to be manually included.
+
+::: code-group
+
+<<< uniforms/fog.glsl
+<<< uniforms/frame.glsl
+<<< uniforms/level.glsl
+<<< uniforms/options.glsl
+<<< uniforms/player.glsl
 
 :::
