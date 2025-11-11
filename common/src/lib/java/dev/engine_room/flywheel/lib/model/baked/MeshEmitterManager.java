@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.lib.model.baked;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -19,13 +19,14 @@ class MeshEmitterManager<T extends MeshEmitter> {
 	private static final RenderType[] CHUNK_LAYERS = RenderType.chunkBufferLayers().toArray(RenderType[]::new);
 
 	private final Reference2ReferenceMap<RenderType, T> emitterMap = new Reference2ReferenceArrayMap<>();
+	private final ByteBufferBuilderStack byteBufferBuilderStack = new ByteBufferBuilderStack();
 
 	@UnknownNullability
 	private BlockMaterialFunction blockMaterialFunction;
 
-	MeshEmitterManager(Function<RenderType, T> meshEmitterFactory) {
+	MeshEmitterManager(BiFunction<ByteBufferBuilderStack, RenderType, T> meshEmitterFactory) {
 		for (RenderType renderType : CHUNK_LAYERS) {
-			emitterMap.put(renderType, meshEmitterFactory.apply(renderType));
+			emitterMap.put(renderType, meshEmitterFactory.apply(byteBufferBuilderStack, renderType));
 		}
 	}
 
@@ -35,6 +36,7 @@ class MeshEmitterManager<T extends MeshEmitter> {
 
 	public void prepare(BlockMaterialFunction blockMaterialFunction) {
 		this.blockMaterialFunction = blockMaterialFunction;
+		byteBufferBuilderStack.reset();
 
 		for (MeshEmitter emitter : emitterMap.values()) {
 			emitter.prepare(blockMaterialFunction);

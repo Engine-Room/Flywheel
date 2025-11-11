@@ -18,8 +18,8 @@ public class NeoforgeMeshEmitter extends MeshEmitter implements VertexConsumer {
 
 	private boolean defaultAo;
 
-	NeoforgeMeshEmitter(RenderType renderType) {
-		super(renderType);
+	NeoforgeMeshEmitter(ByteBufferBuilderStack byteBufferBuilderStack, RenderType renderType) {
+		super(byteBufferBuilderStack);
 		this.renderType = renderType;
 	}
 

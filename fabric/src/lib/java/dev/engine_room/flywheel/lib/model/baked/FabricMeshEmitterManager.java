@@ -34,7 +34,7 @@ class FabricMeshEmitterManager extends MeshEmitterManager<MeshEmitter> implement
 	private BufferBuilder currentDelegate;
 
 	FabricMeshEmitterManager() {
-		super(MeshEmitter::new);
+		super((bufferBuilderStack, $) -> new MeshEmitter(bufferBuilderStack));
 	}
 
 	public BakedModel prepareForModel(BakedModel model, RenderType defaultLayer, boolean useAo, boolean defaultAo) {
