@@ -7,17 +7,17 @@ import org.jetbrains.annotations.UnknownNullability;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
 
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.api.model.Model;
+import net.minecraft.client.renderer.RenderType;
 
 class MeshEmitter {
 	private static final int INITIAL_CAPACITY = 1;
 
 	private final ByteBufferBuilderStack byteBufferBuilderStack;
+	private final RenderType renderType;
 
 	private Material @UnknownNullability [] materials = new Material[INITIAL_CAPACITY];
 	private BufferBuilder @UnknownNullability [] bufferBuilders = new BufferBuilder[INITIAL_CAPACITY];
@@ -30,8 +30,9 @@ class MeshEmitter {
 
 	private int currentIndex = 0;
 
-	MeshEmitter(ByteBufferBuilderStack byteBufferBuilderStack) {
+	MeshEmitter(ByteBufferBuilderStack byteBufferBuilderStack, RenderType renderType) {
 		this.byteBufferBuilderStack = byteBufferBuilderStack;
+		this.renderType = renderType;
 	}
 
 	public void prepare(BlockMaterialFunction blockMaterialFunction) {
@@ -88,8 +89,8 @@ class MeshEmitter {
 
 		ByteBufferBuilder byteBufferBuilder = byteBufferBuilderStack.nextOrCreate();
 
-		// This is only used for block models in the 5 chunk render types, so we can hard-code the mode and format.
-		BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.BLOCK);
+		// Trust that the RenderType mode/format don't change out from underneath us.
+		BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, renderType.mode(), renderType.format());
 
 		// currentIndex == numBufferBuildersPopulated here.
 		materials[currentIndex] = material;
