@@ -3,7 +3,7 @@ package dev.engine_room.flywheel.backend.engine;
 import java.util.BitSet;
 import java.util.Objects;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.api.task.Plan;

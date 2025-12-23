@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.backend.mixin.light;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 
 import dev.engine_room.flywheel.backend.SkyLightSectionStorageExtension;

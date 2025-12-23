@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.lib.visual;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.FrustumIntersection;
 
 import dev.engine_room.flywheel.lib.math.MoreMath;

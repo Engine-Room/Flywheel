@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.impl.task;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A flag that can be raised and lowered in a thread-safe fashion.

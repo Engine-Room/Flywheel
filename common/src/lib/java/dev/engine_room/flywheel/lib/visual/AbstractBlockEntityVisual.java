@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.lib.visual;
 
 import java.util.Iterator;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.joml.FrustumIntersection;
 

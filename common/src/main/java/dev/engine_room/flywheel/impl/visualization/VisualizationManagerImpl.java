@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.SortedSet;
 
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
 

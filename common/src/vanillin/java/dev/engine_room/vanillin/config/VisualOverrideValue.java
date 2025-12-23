@@ -1,6 +1,6 @@
 package dev.engine_room.vanillin.config;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public enum VisualOverrideValue {
 	DEFAULT,

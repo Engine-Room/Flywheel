@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.backend.engine.indirect;
 
 import java.util.function.LongConsumer;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.opengl.GL45;
 import org.lwjgl.opengl.GL45C;
 import org.lwjgl.system.MemoryUtil;

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.vanillin.compose.ComposableEntityVisual;
 import dev.engine_room.vanillin.compose.ConfiguredElement;

@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.lib.visualization;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.visual.Effect;
 import dev.engine_room.flywheel.api.visual.Visual;

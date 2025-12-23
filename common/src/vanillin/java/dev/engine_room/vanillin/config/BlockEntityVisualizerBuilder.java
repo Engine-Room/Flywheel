@@ -3,7 +3,7 @@ package dev.engine_room.vanillin.config;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.lib.visualization.SimpleBlockEntityVisualizer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;

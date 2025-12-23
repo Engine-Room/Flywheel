@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.impl.mixin;
 
 import java.util.SortedSet;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

@@ -2,7 +2,7 @@ package dev.engine_room.vanillin.text;
 
 import java.util.Objects;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 

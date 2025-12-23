@@ -2,7 +2,7 @@ package dev.engine_room.vanillin.visuals;
 
 import java.util.Objects;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.mojang.math.Transformation;
 

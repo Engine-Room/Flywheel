@@ -1,6 +1,6 @@
 package dev.engine_room.vanillin.compose;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
 import dev.engine_room.flywheel.api.visual.EntityVisual;

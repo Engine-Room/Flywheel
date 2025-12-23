@@ -3,7 +3,7 @@ package dev.engine_room.flywheel.lib.model.part;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 

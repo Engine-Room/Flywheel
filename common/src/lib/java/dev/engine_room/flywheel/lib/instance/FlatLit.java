@@ -3,7 +3,7 @@ package dev.engine_room.flywheel.lib.instance;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;

@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.lib.vertex;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class AbstractVertexView implements VertexView {
 	protected long ptr;

@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.backend.engine;
 
 import java.util.Comparator;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.platform.GlStateManager;

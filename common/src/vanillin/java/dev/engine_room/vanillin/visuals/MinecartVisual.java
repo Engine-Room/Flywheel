@@ -1,6 +1,6 @@
 package dev.engine_room.vanillin.visuals;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 

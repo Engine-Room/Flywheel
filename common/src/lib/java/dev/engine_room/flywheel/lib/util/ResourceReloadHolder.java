@@ -6,7 +6,7 @@ import java.util.WeakHashMap;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class ResourceReloadHolder<T> implements Supplier<T> {
 	private static final Set<ResourceReloadHolder<?>> ALL = Collections.newSetFromMap(new WeakHashMap<>());
