@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.jspecify.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.material.Material;
@@ -26,7 +26,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.DyeColor;
@@ -244,10 +244,10 @@ public class SignVisual extends AbstractBlockEntityVisual<SignBlockEntity> imple
 			return 0xFFF0EBCC;
 		}
 
-		int r = (int) ((double) FastColor.ARGB32.red(colorArgb) * 0.4);
-		int g = (int) ((double) FastColor.ARGB32.green(colorArgb) * 0.4);
-		int b = (int) ((double) FastColor.ARGB32.blue(colorArgb) * 0.4);
-		return FastColor.ARGB32.color(0, r, g, b);
+		int r = (int) ((double) ARGB.red(colorArgb) * 0.4);
+		int g = (int) ((double) ARGB.green(colorArgb) * 0.4);
+		int b = (int) ((double) ARGB.blue(colorArgb) * 0.4);
+		return ARGB.color(0, r, g, b);
 	}
 
 	private static boolean hasObfuscation(FormattedCharSequence text) {

@@ -2,9 +2,9 @@ package dev.engine_room.vanillin.text;
 
 import java.util.function.Consumer;
 
-import org.jspecify.annotations.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.material.DepthTest;
 import dev.engine_room.flywheel.api.material.Material;
@@ -16,7 +16,7 @@ import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 
 public interface TextLayer {
 	/**
@@ -145,11 +145,11 @@ public interface TextLayer {
 		static GlyphColor defaultTo(int color, float dimFactor) {
 			int finalColor;
 			if (dimFactor != 1.0f) {
-				finalColor = FastColor.ARGB32.color(
-						FastColor.ARGB32.alpha(color),
-						(int) (FastColor.ARGB32.red(color) * dimFactor),
-						(int) (FastColor.ARGB32.green(color) * dimFactor),
-						(int) (FastColor.ARGB32.blue(color) * dimFactor)
+				finalColor = ARGB.color(
+						ARGB.alpha(color),
+						(int) (ARGB.red(color) * dimFactor),
+						(int) (ARGB.green(color) * dimFactor),
+						(int) (ARGB.blue(color) * dimFactor)
 				);
 			} else {
 				finalColor = color;
@@ -159,11 +159,11 @@ public interface TextLayer {
 				if (textColor != null) {
 					int textColorArgb = textColor.getValue();
 					if (dimFactor != 1.0f) {
-						return FastColor.ARGB32.color(
-								FastColor.ARGB32.alpha(finalColor),
-								(int) (FastColor.ARGB32.red(textColorArgb) * dimFactor),
-								(int) (FastColor.ARGB32.green(textColorArgb) * dimFactor),
-								(int) (FastColor.ARGB32.blue(textColorArgb) * dimFactor)
+						return ARGB.color(
+								ARGB.alpha(finalColor),
+								(int) (ARGB.red(textColorArgb) * dimFactor),
+								(int) (ARGB.green(textColorArgb) * dimFactor),
+								(int) (ARGB.blue(textColorArgb) * dimFactor)
 						);
 					} else {
 						return (finalColor & 0xFF000000) | (textColorArgb & 0xFFFFFF);
