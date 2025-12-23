@@ -4,12 +4,12 @@ import java.util.List;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import dev.engine_room.flywheel.lib.util.ResourceUtil;
+import dev.engine_room.flywheel.lib.util.IdentifierUtil;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 @ApiStatus.Internal
@@ -17,23 +17,23 @@ public final class PartialModelEventHandler {
 	private PartialModelEventHandler() {
 	}
 
-	public static ResourceLocation[] onRegisterAdditional() {
-		return PartialModel.ALL.keySet().toArray(ResourceLocation[]::new);
+	public static Identifier[] onRegisterAdditional() {
+		return PartialModel.ALL.keySet().toArray(Identifier[]::new);
 	}
 
 	public static void onBakingCompleted(ModelManager manager) {
 		PartialModel.populateOnInit = true;
 
 		for (PartialModel partial : PartialModel.ALL.values()) {
-			partial.bakedModel = manager.getModel(partial.modelLocation());
+			partial.bakedModel = manager.getModel(partial.modelId());
 		}
 	}
 
 	public static final class ReloadListener implements SimpleSynchronousResourceReloadListener {
 		public static final ReloadListener INSTANCE = new ReloadListener();
 
-		public static final ResourceLocation ID = ResourceUtil.rl("partial_models");
-		public static final List<ResourceLocation> DEPENDENCIES = List.of(ResourceReloadListenerKeys.MODELS);
+		public static final Identifier ID = IdentifierUtil.id("partial_models");
+		public static final List<Identifier> DEPENDENCIES = List.of(ResourceReloadListenerKeys.MODELS);
 
 		private ReloadListener() {
 		}
@@ -44,12 +44,12 @@ public final class PartialModelEventHandler {
 		}
 
 		@Override
-		public ResourceLocation getFabricId() {
+		public Identifier getFabricId() {
 			return ID;
 		}
 
 		@Override
-		public List<ResourceLocation> getFabricDependencies() {
+		public List<Identifier> getFabricDependencies() {
 			return DEPENDENCIES;
 		}
 	}

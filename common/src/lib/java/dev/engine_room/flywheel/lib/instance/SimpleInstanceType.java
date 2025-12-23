@@ -7,16 +7,16 @@ import dev.engine_room.flywheel.api.instance.InstanceHandle;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.instance.InstanceWriter;
 import dev.engine_room.flywheel.api.layout.Layout;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public final class SimpleInstanceType<I extends Instance> implements InstanceType<I> {
 	private final Factory<I> factory;
 	private final Layout layout;
 	private final InstanceWriter<I> writer;
-	private final ResourceLocation vertexShader;
-	private final ResourceLocation cullShader;
+	private final Identifier vertexShader;
+	private final Identifier cullShader;
 
-	public SimpleInstanceType(Factory<I> factory, Layout layout, InstanceWriter<I> writer, ResourceLocation vertexShader, ResourceLocation cullShader) {
+	public SimpleInstanceType(Factory<I> factory, Layout layout, InstanceWriter<I> writer, Identifier vertexShader, Identifier cullShader) {
 		this.factory = factory;
 		this.layout = layout;
 		this.writer = writer;
@@ -44,12 +44,12 @@ public final class SimpleInstanceType<I extends Instance> implements InstanceTyp
 	}
 
 	@Override
-	public ResourceLocation vertexShader() {
+	public Identifier vertexShader() {
 		return vertexShader;
 	}
 
 	@Override
-	public ResourceLocation cullShader() {
+	public Identifier cullShader() {
 		return cullShader;
 	}
 
@@ -62,8 +62,8 @@ public final class SimpleInstanceType<I extends Instance> implements InstanceTyp
 		private final Factory<I> factory;
 		private Layout layout;
 		private InstanceWriter<I> writer;
-		private ResourceLocation vertexShader;
-		private ResourceLocation cullShader;
+		private Identifier vertexShader;
+		private Identifier cullShader;
 
 		public Builder(Factory<I> factory) {
 			this.factory = factory;
@@ -79,12 +79,12 @@ public final class SimpleInstanceType<I extends Instance> implements InstanceTyp
 			return this;
 		}
 
-		public Builder<I> vertexShader(ResourceLocation vertexShader) {
+		public Builder<I> vertexShader(Identifier vertexShader) {
 			this.vertexShader = vertexShader;
 			return this;
 		}
 
-		public Builder<I> cullShader(ResourceLocation cullShader) {
+		public Builder<I> cullShader(Identifier cullShader) {
 			this.cullShader = cullShader;
 			return this;
 		}

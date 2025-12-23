@@ -2,11 +2,12 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.Map;
 
+import net.minecraft.resources.Identifier;
+
 import org.jetbrains.annotations.ApiStatus;
 
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.client.event.ModelEvent;
 
 @ApiStatus.Internal
@@ -15,8 +16,8 @@ public final class PartialModelEventHandler {
 	}
 
 	public static void onRegisterAdditional(ModelEvent.RegisterAdditional event) {
-		for (ResourceLocation modelLocation : PartialModel.ALL.keySet()) {
-			event.register(ModelResourceLocation.standalone(modelLocation));
+		for (Identifier modelId : PartialModel.ALL.keySet()) {
+			event.register(ModelResourceLocation.standalone(modelId));
 		}
 	}
 
@@ -25,7 +26,7 @@ public final class PartialModelEventHandler {
 		Map<ModelResourceLocation, BakedModel> models = event.getModels();
 
 		for (PartialModel partial : PartialModel.ALL.values()) {
-			partial.bakedModel = models.get(ModelResourceLocation.standalone(partial.modelLocation()));
+			partial.bakedModel = models.get(ModelResourceLocation.standalone(partial.modelId()));
 		}
 	}
 }

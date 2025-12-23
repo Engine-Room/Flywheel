@@ -1,5 +1,7 @@
 package dev.engine_room.flywheel.impl;
 
+import net.minecraft.resources.Identifier;
+
 import org.jetbrains.annotations.UnknownNullability;
 
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
@@ -10,13 +12,12 @@ import dev.engine_room.flywheel.lib.model.baked.ModelBuilderImpl;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.resources.ResourceLocation;
 
 public class FlwLibXplatImpl implements FlwLibXplat {
 	@Override
 	@UnknownNullability
-	public BakedModel getBakedModel(ModelManager modelManager, ResourceLocation location) {
-		return modelManager.getModel(ModelResourceLocation.standalone(location));
+	public BakedModel getBakedModel(ModelManager modelManager, Identifier id) {
+		return modelManager.getModel(ModelResourceLocation.standalone(id));
 	}
 
 	@Override

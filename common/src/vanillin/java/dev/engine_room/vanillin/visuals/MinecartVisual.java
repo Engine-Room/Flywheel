@@ -19,7 +19,7 @@ import dev.engine_room.flywheel.lib.visual.AbstractEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.block.RenderShape;
@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVisual<T> implements SimpleTickableVisual, SimpleDynamicVisual {
-	private static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/minecart.png");
+	private static final Identifier TEXTURE = Identifier.withDefaultNamespace("textures/entity/minecart.png");
 	private static final Material MATERIAL = SimpleMaterial.builder()
 			.texture(TEXTURE)
 			.mipmap(false)

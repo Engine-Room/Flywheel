@@ -1,9 +1,9 @@
 package dev.engine_room.vanillin.text;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface FontTextureExtension {
-	void flywheel$setName(ResourceLocation name);
+	void flywheel$setName(Identifier name);
 
 	void flywheel$flush();
 }

@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.font.FontSet;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 @Mixin(Font.class)
 public interface FontAccessor {
@@ -14,5 +14,5 @@ public interface FontAccessor {
 	boolean flywheel$getFilterFishyGlyphs();
 
 	@Invoker("getFontSet")
-	FontSet flywheel$getFontSet(ResourceLocation fontLocation);
+	FontSet flywheel$getFontSet(Identifier fontId);
 }

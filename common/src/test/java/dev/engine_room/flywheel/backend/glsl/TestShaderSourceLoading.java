@@ -48,7 +48,7 @@ public class TestShaderSourceLoading extends TestBase {
 		var aErr = findAndAssertError(LoadError.IncludeError.class, sources, FLW_A);
 
 		var ioErr = assertSimpleNestedErrorsToDepth(LoadError.IOError.class, aErr, 1);
-		assertEquals(FLW_B, ioErr.location());
+		assertEquals(FLW_B, ioErr.id());
 	}
 
 	@Test
@@ -63,7 +63,7 @@ public class TestShaderSourceLoading extends TestBase {
 		var malformedInclude = assertSimpleNestedErrorsToDepth(LoadError.MalformedInclude.class, aErr, 1);
 		var message = malformedInclude.exception()
 				.getMessage();
-		assertEquals("Non [a-z0-9/._-] character in path of location: flywheel:evil - wow", message);
+		assertEquals("Non [a-z0-9/._-] character in path of id: flywheel:evil - wow", message);
 	}
 
 	@Test

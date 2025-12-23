@@ -20,19 +20,19 @@ import dev.engine_room.flywheel.backend.glsl.GlslVersion;
 import dev.engine_room.flywheel.backend.glsl.ShaderSources;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 import dev.engine_room.flywheel.backend.util.AtomicReferenceCounted;
-import dev.engine_room.flywheel.lib.util.ResourceUtil;
-import net.minecraft.resources.ResourceLocation;
+import dev.engine_room.flywheel.lib.util.IdentifierUtil;
+import net.minecraft.resources.Identifier;
 
 public class IndirectPrograms extends AtomicReferenceCounted {
-	private static final ResourceLocation CULL_SHADER_API_IMPL = ResourceUtil.rl("internal/indirect/cull_api_impl.glsl");
-	private static final ResourceLocation CULL_SHADER_MAIN = ResourceUtil.rl("internal/indirect/cull.glsl");
-	private static final ResourceLocation APPLY_SHADER_MAIN = ResourceUtil.rl("internal/indirect/apply.glsl");
-	private static final ResourceLocation SCATTER_SHADER_MAIN = ResourceUtil.rl("internal/indirect/scatter.glsl");
-	private static final ResourceLocation DOWNSAMPLE_FIRST = ResourceUtil.rl("internal/indirect/downsample_first.glsl");
-	private static final ResourceLocation DOWNSAMPLE_SECOND = ResourceUtil.rl("internal/indirect/downsample_second.glsl");
+	private static final Identifier CULL_SHADER_API_IMPL = IdentifierUtil.id("internal/indirect/cull_api_impl.glsl");
+	private static final Identifier CULL_SHADER_MAIN = IdentifierUtil.id("internal/indirect/cull.glsl");
+	private static final Identifier APPLY_SHADER_MAIN = IdentifierUtil.id("internal/indirect/apply.glsl");
+	private static final Identifier SCATTER_SHADER_MAIN = IdentifierUtil.id("internal/indirect/scatter.glsl");
+	private static final Identifier DOWNSAMPLE_FIRST = IdentifierUtil.id("internal/indirect/downsample_first.glsl");
+	private static final Identifier DOWNSAMPLE_SECOND = IdentifierUtil.id("internal/indirect/downsample_second.glsl");
 
 	private static final Compile<InstanceType<?>> CULL = new Compile<>();
-	private static final Compile<ResourceLocation> UTIL = new Compile<>();
+	private static final Compile<Identifier> UTIL = new Compile<>();
 
 	private static final List<String> EXTENSIONS = getExtensions(GlCompat.MAX_GLSL_VERSION);
 	private static final List<String> COMPUTE_EXTENSIONS = getComputeExtensions(GlCompat.MAX_GLSL_VERSION);
@@ -42,10 +42,10 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 
 	private final PipelineCompiler pipeline;
 	private final CompilationHarness<InstanceType<?>> culling;
-	private final CompilationHarness<ResourceLocation> utils;
+	private final CompilationHarness<Identifier> utils;
 	private final OitPrograms oitPrograms;
 
-	private IndirectPrograms(PipelineCompiler pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<ResourceLocation> utils, OitPrograms oitPrograms) {
+	private IndirectPrograms(PipelineCompiler pipeline, CompilationHarness<InstanceType<?>> culling, CompilationHarness<Identifier> utils, OitPrograms oitPrograms) {
 		this.pipeline = pipeline;
 		this.culling = culling;
 		this.utils = utils;
@@ -103,7 +103,7 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	private static CompilationHarness<InstanceType<?>> createCullingCompiler(ShaderSources sources) {
 		return CULL.program()
 				.link(CULL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.COMPUTE)
-						.nameMapper(instanceType -> "culling/" + ResourceUtil.toDebugFileNameNoExtension(instanceType.cullShader()))
+						.nameMapper(instanceType -> "culling/" + IdentifierUtil.toDebugFileNameNoExtension(instanceType.cullShader()))
 						.requireExtensions(COMPUTE_EXTENSIONS)
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(CULL_SHADER_API_IMPL)
@@ -116,12 +116,12 @@ public class IndirectPrograms extends AtomicReferenceCounted {
 	}
 
 	/**
-	 * A compiler for utility shaders, directly compiles the shader at the resource location specified by the parameter.
+	 * A compiler for utility shaders, directly compiles the shader at the resource id specified by the parameter.
 	 */
-	private static CompilationHarness<ResourceLocation> createUtilCompiler(ShaderSources sources) {
+	private static CompilationHarness<Identifier> createUtilCompiler(ShaderSources sources) {
 		return UTIL.program()
 				.link(UTIL.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.COMPUTE)
-						.nameMapper(resourceLocation -> "utilities/" + ResourceUtil.toDebugFileNameNoExtension(resourceLocation))
+						.nameMapper(id -> "utilities/" + IdentifierUtil.toDebugFileNameNoExtension(id))
 						.requireExtensions(COMPUTE_EXTENSIONS)
 						.define("_FLW_SUBGROUP_SIZE", GlCompat.SUBGROUP_SIZE)
 						.withResource(s -> s))

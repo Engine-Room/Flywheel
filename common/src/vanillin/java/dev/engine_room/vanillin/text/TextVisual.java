@@ -30,7 +30,7 @@ import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.gui.font.glyphs.EmptyGlyph;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.FormattedCharSink;
 import net.minecraft.util.Mth;
@@ -134,7 +134,7 @@ public final class TextVisual {
 		}
 	}
 
-	private record GlyphModelKey(@Nullable GlyphMeshKey meshKey, TextLayer.GlyphMaterial material, ResourceLocation texture) {
+	private record GlyphModelKey(@Nullable GlyphMeshKey meshKey, TextLayer.GlyphMaterial material, Identifier texture) {
 		public Model into() {
 			Mesh mesh;
 
@@ -249,7 +249,7 @@ public final class TextVisual {
 			return key(layer, glyphWidth, glyphHeight, glyphExtension.flywheel$texture(), bold, bold ? glyphInfo.getBoldOffset() : 0, glyphInfo.getShadowOffset());
 		}
 
-		private static GlyphInstanceKey key(TextLayer layer, float glyphWidth, float glyphHeight, ResourceLocation texture, boolean bold, float boldOffset, float shadowOffset) {
+		private static GlyphInstanceKey key(TextLayer layer, float glyphWidth, float glyphHeight, Identifier texture, boolean bold, float boldOffset, float shadowOffset) {
 			var meshKey = new GlyphMeshKey(glyphWidth, glyphHeight, layer.pattern(), bold, boldOffset, shadowOffset);
 			var modelKey = new GlyphModelKey(meshKey, layer.material(), texture);
 			return new GlyphInstanceKey(modelKey, layer.bias());
@@ -260,7 +260,7 @@ public final class TextVisual {
 			return effectKey(glyphExtension.flywheel$texture(), layer.material(), layer.bias());
 		}
 
-		private static GlyphInstanceKey effectKey(ResourceLocation texture, TextLayer.GlyphMaterial material, int bias) {
+		private static GlyphInstanceKey effectKey(Identifier texture, TextLayer.GlyphMaterial material, int bias) {
 			var modelKey = new GlyphModelKey(null, material, texture);
 			return new GlyphInstanceKey(modelKey, bias);
 		}

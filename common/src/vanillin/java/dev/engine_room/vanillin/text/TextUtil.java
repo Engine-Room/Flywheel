@@ -4,11 +4,11 @@ import dev.engine_room.vanillin.mixin.text.FontAccessor;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class TextUtil {
-	public static FontSet getFontSet(Font font, ResourceLocation loc) {
-		return ((FontAccessor) font).flywheel$getFontSet(loc);
+	public static FontSet getFontSet(Font font, Identifier id) {
+		return ((FontAccessor) font).flywheel$getFontSet(id);
 	}
 
 	public static boolean getFilterFishyGlyphs(Font font) {

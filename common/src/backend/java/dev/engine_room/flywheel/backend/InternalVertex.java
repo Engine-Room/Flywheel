@@ -6,10 +6,10 @@ import dev.engine_room.flywheel.api.layout.FloatRepr;
 import dev.engine_room.flywheel.api.layout.Layout;
 import dev.engine_room.flywheel.api.layout.LayoutBuilder;
 import dev.engine_room.flywheel.backend.gl.array.VertexAttribute;
-import dev.engine_room.flywheel.lib.util.ResourceUtil;
+import dev.engine_room.flywheel.lib.util.IdentifierUtil;
 import dev.engine_room.flywheel.lib.vertex.FullVertexView;
 import dev.engine_room.flywheel.lib.vertex.VertexView;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public final class InternalVertex {
 	public static final Layout LAYOUT = LayoutBuilder.create()
@@ -24,7 +24,7 @@ public final class InternalVertex {
 	public static final List<VertexAttribute> ATTRIBUTES = LayoutAttributes.attributes(LAYOUT);
 	public static final int STRIDE = LAYOUT.byteSize();
 
-	public static final ResourceLocation LAYOUT_SHADER = ResourceUtil.rl("internal/vertex_input.vert");
+	public static final Identifier LAYOUT_SHADER = IdentifierUtil.id("internal/vertex_input.vert");
 
 	private InternalVertex() {
 	}

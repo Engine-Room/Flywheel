@@ -1,5 +1,7 @@
 package dev.engine_room.flywheel.lib.visual.component;
 
+import net.minecraft.resources.Identifier;
+
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
@@ -23,7 +25,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction.Axis;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -42,7 +43,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * The shadow will be cast on blocks at most {@code min(radius, 2 * strength)} blocks below the entity.</p>
  */
 public final class ShadowComponent implements EntityComponent {
-	private static final ResourceLocation SHADOW_TEXTURE = ResourceLocation.withDefaultNamespace("textures/misc/shadow.png");
+	private static final Identifier SHADOW_TEXTURE = Identifier.withDefaultNamespace("textures/misc/shadow.png");
 	private static final Material SHADOW_MATERIAL = SimpleMaterial.builder()
 			.texture(SHADOW_TEXTURE)
 			.mipmap(false)

@@ -1,6 +1,6 @@
 package dev.engine_room.vanillin.text;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface BakedGlyphExtension {
 	float flywheel$u0();
@@ -19,7 +19,7 @@ public interface BakedGlyphExtension {
 
 	float flywheel$down();
 
-	ResourceLocation flywheel$texture();
+	Identifier flywheel$texture();
 
-	void flywheel$texture(ResourceLocation location);
+	void flywheel$texture(Identifier id);
 }

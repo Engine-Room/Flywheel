@@ -28,7 +28,7 @@ import dev.engine_room.vanillin.text.FontTextureUpload;
 import net.minecraft.client.gui.font.FontTexture;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 @Mixin(FontTexture.class)
 public abstract class FontTextureMixin extends AbstractTexture implements FontTextureExtension {
@@ -41,7 +41,7 @@ public abstract class FontTextureMixin extends AbstractTexture implements FontTe
 	private boolean flywheel$flushScheduled = false;
 
 	@Unique
-	private ResourceLocation flywheel$name;
+	private Identifier flywheel$name;
 
 	@WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/font/FontTexture;getId()I"))
 	private int flywheel$skipGetId(FontTexture instance, Operation<Integer> original) {
@@ -125,7 +125,7 @@ public abstract class FontTextureMixin extends AbstractTexture implements FontTe
 	}
 
 	@Override
-	public void flywheel$setName(ResourceLocation name) {
+	public void flywheel$setName(Identifier name) {
 		flywheel$name = name;
 	}
 }

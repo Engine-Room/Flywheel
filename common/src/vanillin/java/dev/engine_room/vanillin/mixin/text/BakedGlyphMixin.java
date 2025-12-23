@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Unique;
 
 import dev.engine_room.vanillin.text.BakedGlyphExtension;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 @Mixin(BakedGlyph.class)
 public class BakedGlyphMixin implements BakedGlyphExtension {
@@ -37,7 +37,7 @@ public class BakedGlyphMixin implements BakedGlyphExtension {
 	private float down;
 
 	@Unique
-	private ResourceLocation flywheel$texture;
+	private Identifier flywheel$texture;
 
 	@Override
 	public float flywheel$u0() {
@@ -80,12 +80,12 @@ public class BakedGlyphMixin implements BakedGlyphExtension {
 	}
 
 	@Override
-	public ResourceLocation flywheel$texture() {
+	public Identifier flywheel$texture() {
 		return flywheel$texture;
 	}
 
 	@Override
-	public void flywheel$texture(ResourceLocation location) {
-		flywheel$texture = location;
+	public void flywheel$texture(Identifier id) {
+		flywheel$texture = id;
 	}
 }

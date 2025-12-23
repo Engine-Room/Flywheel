@@ -20,14 +20,14 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceCollection;
 import it.unimi.dsi.fastutil.objects.ReferenceCollections;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class IdRegistryImpl<T> implements IdRegistry<T> {
 	private static final ObjectList<IdRegistryImpl<?>> ALL = new ObjectArrayList<>();
 
-	private final Object2ReferenceMap<ResourceLocation, T> map = Object2ReferenceMaps.synchronize(new Object2ReferenceOpenHashMap<>());
-	private final Reference2ObjectMap<T, ResourceLocation> reverseMap = Reference2ObjectMaps.synchronize(new Reference2ObjectOpenHashMap<>());
-	private final ObjectSet<ResourceLocation> keysView = ObjectSets.unmodifiable(map.keySet());
+	private final Object2ReferenceMap<Identifier, T> map = Object2ReferenceMaps.synchronize(new Object2ReferenceOpenHashMap<>());
+	private final Reference2ObjectMap<T, Identifier> reverseMap = Reference2ObjectMaps.synchronize(new Reference2ObjectOpenHashMap<>());
+	private final ObjectSet<Identifier> keysView = ObjectSets.unmodifiable(map.keySet());
 	private final ReferenceCollection<T> valuesView = ReferenceCollections.unmodifiable(map.values());
 	private boolean frozen;
 
@@ -36,7 +36,7 @@ public class IdRegistryImpl<T> implements IdRegistry<T> {
 	}
 
 	@Override
-	public void register(ResourceLocation id, T object) {
+	public void register(Identifier id, T object) {
 		if (frozen) {
 			throw new IllegalStateException("Cannot register to frozen registry!");
 		}
@@ -44,32 +44,32 @@ public class IdRegistryImpl<T> implements IdRegistry<T> {
 		if (oldValue != null) {
 			throw new IllegalArgumentException("Cannot override registration for ID '" + id + "'!");
 		}
-		ResourceLocation oldId = reverseMap.put(object, id);
+		Identifier oldId = reverseMap.put(object, id);
 		if (oldId != null) {
 			throw new IllegalArgumentException("Cannot override ID '" + id + "' with registration for ID '" + oldId + "'!");
 		}
 	}
 
 	@Override
-	public <S extends T> S registerAndGet(ResourceLocation id, S object) {
+	public <S extends T> S registerAndGet(Identifier id, S object) {
 		register(id, object);
 		return object;
 	}
 
 	@Override
 	@Nullable
-	public T get(ResourceLocation id) {
+	public T get(Identifier id) {
 		return map.get(id);
 	}
 
 	@Override
 	@Nullable
-	public ResourceLocation getId(T object) {
+	public Identifier getId(T object) {
 		return reverseMap.get(object);
 	}
 
 	@Override
-	public T getOrThrow(ResourceLocation id) {
+	public T getOrThrow(Identifier id) {
 		T object = get(id);
 		if (object == null) {
 			throw new IllegalArgumentException("Could not find object for ID '" + id + "'!");
@@ -78,8 +78,8 @@ public class IdRegistryImpl<T> implements IdRegistry<T> {
 	}
 
 	@Override
-	public ResourceLocation getIdOrThrow(T object) {
-		ResourceLocation id = getId(object);
+	public Identifier getIdOrThrow(T object) {
+		Identifier id = getId(object);
 		if (id == null) {
 			throw new IllegalArgumentException("Could not find ID for object!");
 		}
@@ -88,7 +88,7 @@ public class IdRegistryImpl<T> implements IdRegistry<T> {
 
 	@Override
 	@UnmodifiableView
-	public Set<ResourceLocation> getAllIds() {
+	public Set<Identifier> getAllIds() {
 		return keysView;
 	}
 

@@ -26,7 +26,7 @@ public class VanillinInstanceTypes {
 				MemoryUtil.memPutByte(ptr + 75, instance.alpha);
 				ExtraMemoryOps.put2x16(ptr + 76, instance.light);
 			})
-			.vertexShader(Vanillin.rl("instance/glyph.vert"))
-			.cullShader(Vanillin.rl("instance/cull/glyph.glsl"))
+			.vertexShader(Vanillin.id("instance/glyph.vert"))
+			.cullShader(Vanillin.id("instance/cull/glyph.glsl"))
 			.build();
 }

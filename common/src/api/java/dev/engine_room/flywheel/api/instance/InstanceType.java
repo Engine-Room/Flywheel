@@ -1,7 +1,7 @@
 package dev.engine_room.flywheel.api.instance;
 
 import dev.engine_room.flywheel.api.layout.Layout;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * An InstanceType contains metadata for a specific instance that Flywheel can interface with.
@@ -44,9 +44,9 @@ public interface InstanceType<I extends Instance> {
 	 * space to world space in whatever way the instance type requires.
 	 *
 	 * @return The vertex shader for this instance type.
-	 * @apiNote {@code flywheel/} is implicitly prepended to the {@link ResourceLocation}'s path.
+	 * @apiNote {@code flywheel/} is implicitly prepended to the {@link Identifier}'s path.
 	 */
-	ResourceLocation vertexShader();
+	Identifier vertexShader();
 
 	/**
 	 * The cull shader of this instance type.
@@ -56,7 +56,7 @@ public interface InstanceType<I extends Instance> {
 	 * by the vertex shader would be contained by the output bounding sphere.
 	 *
 	 * @return The cull shader for this instance type.
-	 * @apiNote {@code flywheel/} is implicitly prepended to the {@link ResourceLocation}'s path.
+	 * @apiNote {@code flywheel/} is implicitly prepended to the {@link Identifier}'s path.
 	 */
-	ResourceLocation cullShader();
+	Identifier cullShader();
 }

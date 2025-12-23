@@ -9,7 +9,7 @@ import dev.engine_room.flywheel.backend.engine.instancing.InstancedDrawManager;
 import dev.engine_room.flywheel.backend.gl.Driver;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.lib.backend.SimpleBackend;
-import dev.engine_room.flywheel.lib.util.ResourceUtil;
+import dev.engine_room.flywheel.lib.util.IdentifierUtil;
 import dev.engine_room.flywheel.lib.util.ShadersModHelper;
 
 public final class Backends {
@@ -20,7 +20,7 @@ public final class Backends {
 			.engineFactory(level -> new EngineImpl(level, new InstancedDrawManager(InstancingPrograms.get()), 256))
 			.priority(500)
 			.supported(() -> GlCompat.SUPPORTS_INSTANCING && InstancingPrograms.allLoaded() && !ShadersModHelper.isShaderPackInUse())
-			.register(ResourceUtil.rl("instancing"));
+			.register(IdentifierUtil.id("instancing"));
 
 	/**
 	 * Use Compute shaders to cull instances.
@@ -38,7 +38,7 @@ public final class Backends {
 				}
 			})
 			.supported(() -> GlCompat.SUPPORTS_INDIRECT && IndirectPrograms.allLoaded() && !ShadersModHelper.isShaderPackInUse())
-			.register(ResourceUtil.rl("indirect"));
+			.register(IdentifierUtil.id("indirect"));
 
 	private Backends() {
 	}

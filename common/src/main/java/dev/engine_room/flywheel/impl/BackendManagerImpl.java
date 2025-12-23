@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.impl.visualization.VisualizationManagerImpl;
 import dev.engine_room.flywheel.lib.backend.SimpleBackend;
-import dev.engine_room.flywheel.lib.util.ResourceUtil;
+import dev.engine_room.flywheel.lib.util.IdentifierUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public final class BackendManagerImpl {
 	public static final Backend OFF_BACKEND = SimpleBackend.builder()
@@ -15,7 +15,7 @@ public final class BackendManagerImpl {
 				throw new UnsupportedOperationException("Cannot create engine when backend is off.");
 			})
 			.supported(() -> true)
-			.register(ResourceUtil.rl("off"));
+			.register(IdentifierUtil.id("off"));
 
 	private static Backend backend = OFF_BACKEND;
 
@@ -75,7 +75,7 @@ public final class BackendManagerImpl {
 	}
 
 	public static String getBackendString() {
-		ResourceLocation backendId = Backend.REGISTRY.getId(backend);
+		Identifier backendId = Backend.REGISTRY.getId(backend);
 		if (backendId == null) {
 			return "[unregistered]";
 		}

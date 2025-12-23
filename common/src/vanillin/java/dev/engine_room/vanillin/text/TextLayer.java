@@ -15,7 +15,7 @@ import dev.engine_room.flywheel.lib.material.FogShaders;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FastColor;
 
 public interface TextLayer {
@@ -27,7 +27,7 @@ public interface TextLayer {
 	GlyphPattern pattern();
 
 	/**
-	 * A mapping from texture ResourceLocations to Flywheel materials.
+	 * A mapping from texture Identifiers to Flywheel materials.
 	 *
 	 * @return A GlyphMaterial.
 	 */
@@ -131,7 +131,7 @@ public interface TextLayer {
 		 * @param texture The texture to use.
 		 * @return A material.
 		 */
-		Material create(ResourceLocation texture);
+		Material create(Identifier texture);
 	}
 
 	@FunctionalInterface
