@@ -2,13 +2,13 @@ package dev.engine_room.flywheel.impl;
 
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.neoforged.fml.loading.LoadingModList;
+import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.common.NeoForge;
 
 public class FlwImplXplatImpl implements FlwImplXplat {
 	@Override
 	public boolean isModLoaded(String modId) {
-		return LoadingModList.get().getModFileById(modId) != null;
+		return FMLLoader.getCurrent().getLoadingModList().getModFileById(modId) != null;
 	}
 
 	@Override
