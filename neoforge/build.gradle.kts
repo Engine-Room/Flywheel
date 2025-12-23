@@ -131,10 +131,10 @@ repositories {
 dependencies {
     neoForge("net.neoforged:neoforge:${property("neoforge_version")}")
 
-    modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-neoforge")
-    modCompileOnly("maven.modrinth:iris:${property("iris_version")}-neoforge")
-
-    modCompileOnly("maven.modrinth:embeddium:${property("embeddium_version")}")
+    if (property("enable_sodium_and_iris").toString().toBoolean()) {
+        modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-neoforge")
+        modCompileOnly("maven.modrinth:iris:${property("iris_version")}-neoforge")
+    }
 
     "forApi"(project(path = common, configuration = "apiClasses"))
     "forLib"(project(path = common, configuration = "libClasses"))
