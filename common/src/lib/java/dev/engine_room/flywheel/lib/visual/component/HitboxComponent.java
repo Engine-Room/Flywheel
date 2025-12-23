@@ -10,6 +10,7 @@ import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.LineModelBuilder;
 import dev.engine_room.flywheel.lib.visual.util.SmartRecycler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -85,9 +86,7 @@ public final class HitboxComponent implements EntityComponent {
 	public void beginFrame(DynamicVisual.Context context) {
 		recycler.resetCount();
 
-		var shouldRenderHitBoxes = Minecraft.getInstance()
-				.getEntityRenderDispatcher()
-				.shouldRenderHitBoxes();
+		var shouldRenderHitBoxes = Minecraft.getInstance().debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES);
 		if (shouldRenderHitBoxes && !entity.isInvisible() && !Minecraft.getInstance()
 				.showOnlyReducedInfo()) {
 			float partialTick = context.partialTick();

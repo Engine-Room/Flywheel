@@ -97,7 +97,7 @@ public final class FireElement extends AbstractVisual implements SimpleDynamicVi
 		stack.translate(entityX - renderOrigin.getX(), entityY - renderOrigin.getY(), entityZ - renderOrigin.getZ());
 		stack.scale(scale, scale, scale);
 		stack.mulPose(Axis.YP.rotationDegrees(-context.camera()
-				.getYRot()));
+				.yRot()));
 		stack.translate(0.0F, 0.0F, -0.3F + (float) ((int) maxHeight) * 0.02F);
 
 		for (int i = 0; y < maxHeight; ++i) {

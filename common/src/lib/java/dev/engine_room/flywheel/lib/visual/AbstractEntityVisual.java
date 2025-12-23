@@ -1,8 +1,8 @@
 package dev.engine_room.flywheel.lib.visual;
 
-import org.jspecify.annotations.Nullable;
 import org.joml.FrustumIntersection;
 import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
 import dev.engine_room.flywheel.api.visual.EntityVisual;
@@ -12,6 +12,7 @@ import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.lib.instance.FlatLit;
+import dev.engine_room.flywheel.lib.internal.FlwLibLink;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -89,7 +90,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	}
 
 	public boolean isVisible(FrustumIntersection frustum) {
-		return entity.noCulling || visibilityTester.check(frustum);
+		return FlwLibLink.INSTANCE.isAffectedByCulling(entity) || visibilityTester.check(frustum);
 	}
 
 	protected int computePackedLight(float partialTick) {

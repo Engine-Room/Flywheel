@@ -107,11 +107,11 @@ public class BlockDisplayVisual extends AbstractEntityVisual<Display.BlockDispla
 	}
 
 	private static float cameraYrot(Camera camera) {
-		return camera.getYRot() - 180.0F;
+		return camera.yRot() - 180.0F;
 	}
 
 	private static float cameraXRot(Camera camera) {
-		return -camera.getXRot();
+		return -camera.xRot();
 	}
 
 	private static float entityYRot(Entity entity, float partialTick) {

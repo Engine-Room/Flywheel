@@ -52,6 +52,16 @@ public final class Materials {
 	public static final Material GLINT = SimpleMaterial.builder()
 			.texture(ItemRenderer.ENCHANTED_GLINT_ITEM)
 			.shaders(StandardMaterialShaders.GLINT)
+			.writeMask(WriteMask.COLOR)
+			.depthTest(DepthTest.EQUAL)
+			.backfaceCulling(false)
+			.blur(true)
+			.mipmap(false)
+			.build();
+
+	public static final Material TRANSLUCENT_GLINT = SimpleMaterial.builder()
+			.texture(ItemRenderer.ENCHANTED_GLINT_ITEM)
+			.shaders(StandardMaterialShaders.GLINT)
 			.transparency(Transparency.GLINT)
 			.writeMask(WriteMask.COLOR)
 			.depthTest(DepthTest.EQUAL)
@@ -61,7 +71,7 @@ public final class Materials {
 			.build();
 
 	public static final Material GLINT_ENTITY = SimpleMaterial.builderOf(GLINT)
-			.texture(ItemRenderer.ENCHANTED_GLINT_ENTITY)
+			.texture(ItemRenderer.ENCHANTED_GLINT_ARMOR)
 			.build();
 
 	public static final Material TRANSLUCENT_ENTITY = SimpleMaterial.builder()

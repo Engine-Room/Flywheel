@@ -41,7 +41,7 @@ public class EmptyVirtualBlockGetter extends VirtualBlockGetter {
 	}
 
 	@Override
-	public final int getMinBuildHeight() {
+	public int getMinY() {
 		return 0;
 	}
 }

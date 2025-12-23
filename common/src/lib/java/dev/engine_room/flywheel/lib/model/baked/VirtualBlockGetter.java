@@ -37,7 +37,7 @@ public abstract class VirtualBlockGetter implements BlockAndTintGetter {
 
 	@Override
 	public int getBlockTint(BlockPos pos, ColorResolver resolver) {
-		Biome plainsBiome = Minecraft.getInstance().getConnection().registryAccess().registryOrThrow(Registries.BIOME).getOrThrow(Biomes.PLAINS);
+		Biome plainsBiome = Minecraft.getInstance().getConnection().registryAccess().lookupOrThrow(Registries.BIOME).getValueOrThrow(Biomes.PLAINS);
 		return resolver.getColor(plainsBiome, pos.getX(), pos.getZ());
 	}
 }

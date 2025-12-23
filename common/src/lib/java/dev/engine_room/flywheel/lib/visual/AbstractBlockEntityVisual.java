@@ -96,7 +96,7 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	 */
 	public boolean doDistanceLimitThisFrame(DynamicVisual.Context context) {
 		return !context.limiter()
-				.shouldUpdate(pos.distToCenterSqr(context.camera().getPosition()));
+				.shouldUpdate(pos.distToCenterSqr(context.camera().position()));
 	}
 
 	protected int computePackedLight() {

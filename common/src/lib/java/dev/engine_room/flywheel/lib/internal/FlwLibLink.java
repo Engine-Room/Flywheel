@@ -11,6 +11,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.engine_room.flywheel.api.internal.DependencyInjection;
 import dev.engine_room.flywheel.lib.transform.PoseTransformStack;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
 
 public interface FlwLibLink {
 	FlwLibLink INSTANCE = DependencyInjection.load(FlwLibLink.class, "dev.engine_room.flywheel.impl.FlwLibLinkImpl");
@@ -32,4 +34,8 @@ public interface FlwLibLink {
 	boolean isShaderPackInUse();
 
 	boolean isRenderingShadowPass();
+
+	<T extends Entity> boolean isAffectedByCulling(T entity);
+
+	<T extends Entity> AABB getCullingBoundingBox(T entity);
 }

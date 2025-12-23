@@ -78,6 +78,6 @@ public final class ModelTrees {
 		return new ModelTree(model, meshTree.initialPose(), children);
 	}
 
-	private record ModelTreeKey(ModelLayerLocation layer, Set<String> pathsToPrune, @Nullable net.minecraft.client.resources.model.Material texture, Material material) {
+	private record ModelTreeKey(ModelLayerLocation layer, Set<String> pathsToPrune, net.minecraft.client.resources.model.@Nullable Material texture, Material material) {
 	}
 }

@@ -32,8 +32,8 @@ public class OitPrograms {
 						.nameMapper($ -> "fullscreen/fullscreen")
 						.withResource(FULLSCREEN))
 				.link(COMPILE.shader(GlCompat.MAX_GLSL_VERSION, ShaderType.FRAGMENT)
-						.nameMapper(rl -> "fullscreen/" + IdentifierUtil.toDebugFileNameNoExtension(rl))
-						.onCompile((rl, compilation) -> {
+						.nameMapper(id -> "fullscreen/" + IdentifierUtil.toDebugFileNameNoExtension(id))
+						.onCompile((id, compilation) -> {
 							if (GlCompat.MAX_GLSL_VERSION.compareTo(GlslVersion.V400) < 0) {
 								// Need to define FMA for the wavelet calculations
 								compilation.define("fma(a, b, c) ((a) * (b) + (c))");

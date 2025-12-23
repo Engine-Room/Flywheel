@@ -2,9 +2,9 @@ package dev.engine_room.flywheel.lib.model;
 
 import java.util.Collection;
 
-import org.jspecify.annotations.Nullable;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.model.Mesh;
@@ -13,8 +13,10 @@ import dev.engine_room.flywheel.api.vertex.VertexList;
 import dev.engine_room.flywheel.lib.material.Materials;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 import dev.engine_room.flywheel.lib.vertex.PosVertexView;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 
 public final class ModelUtil {
 	private static final float BOUNDING_SPHERE_EPSILON = 1e-4f;
@@ -23,20 +25,17 @@ public final class ModelUtil {
 	}
 
 	@Nullable
-	public static Material getMaterial(RenderType chunkRenderType, boolean shaded) {
-		if (chunkRenderType == RenderType.solid()) {
+	public static Material getMaterial(ChunkSectionLayer chunkSectionLayer, boolean shaded) {
+		if (chunkSectionLayer == ChunkSectionLayer.SOLID) {
 			return shaded ? Materials.SOLID_BLOCK : Materials.SOLID_UNSHADED_BLOCK;
 		}
-		if (chunkRenderType == RenderType.cutoutMipped()) {
-			return shaded ? Materials.CUTOUT_MIPPED_BLOCK : Materials.CUTOUT_MIPPED_UNSHADED_BLOCK;
-		}
-		if (chunkRenderType == RenderType.cutout()) {
+		if (chunkSectionLayer == ChunkSectionLayer.CUTOUT) {
 			return shaded ? Materials.CUTOUT_BLOCK : Materials.CUTOUT_UNSHADED_BLOCK;
 		}
-		if (chunkRenderType == RenderType.translucent()) {
+		if (chunkSectionLayer == ChunkSectionLayer.TRANSLUCENT) {
 			return shaded ? Materials.TRANSLUCENT_BLOCK : Materials.TRANSLUCENT_UNSHADED_BLOCK;
 		}
-		if (chunkRenderType == RenderType.tripwire()) {
+		if (chunkSectionLayer == ChunkSectionLayer.TRIPWIRE) {
 			return shaded ? Materials.TRIPWIRE_BLOCK : Materials.TRIPWIRE_UNSHADED_BLOCK;
 		}
 		return null;
@@ -44,7 +43,7 @@ public final class ModelUtil {
 
 	@Nullable
 	public static Material getItemMaterial(RenderType renderType) {
-		var chunkMaterial = getMaterial(renderType, true);
+		var chunkMaterial = getMaterial(convertLayerToType(renderType), true);
 
 		if (chunkMaterial != null) {
 			return chunkMaterial;
@@ -58,14 +57,17 @@ public final class ModelUtil {
 			return Materials.SOLID_BLOCK;
 		}
 
-		if (renderType == Sheets.translucentCullBlockSheet() || renderType == Sheets.translucentItemSheet()) {
+		if (renderType == Sheets.translucentItemSheet()) {
 			return Materials.TRANSLUCENT_ENTITY;
 		}
 
-		if (renderType == RenderType.glint() || renderType == RenderType.glintTranslucent()) {
+		if (renderType == RenderTypes.glint()) {
 			return Materials.GLINT;
 		}
-		if (renderType == RenderType.entityGlint() || renderType == RenderType.entityGlintDirect()) {
+		if (renderType == RenderTypes.glintTranslucent()) {
+			return Materials.TRANSLUCENT_GLINT;
+		}
+		if (renderType == RenderTypes.entityGlint()) {
 			return Materials.GLINT_ENTITY;
 		}
 		return null;
@@ -148,5 +150,22 @@ public final class ModelUtil {
 
 		return min.add(max)
 				.mul(0.5f);
+	}
+
+	private static ChunkSectionLayer convertLayerToType(RenderType type) {
+		if (type == RenderTypes.solidMovingBlock()) {
+			return ChunkSectionLayer.SOLID;
+		}
+		if (type == RenderTypes.cutoutMovingBlock()) {
+			return ChunkSectionLayer.CUTOUT;
+		}
+		if (type == RenderTypes.translucentMovingBlock()) {
+			return ChunkSectionLayer.TRANSLUCENT;
+		}
+		if (type == RenderTypes.tripwireMovingBlock()) {
+			return ChunkSectionLayer.TRIPWIRE;
+		}
+
+		return null;
 	}
 }

@@ -10,7 +10,7 @@ import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 
@@ -21,7 +21,7 @@ public final class BlockModelBuilder {
 	PoseStack poseStack;
 	boolean renderFluids = false;
 	@Nullable
-	BiFunction<RenderType, Boolean, Material> materialFunc;
+	BiFunction<ChunkSectionLayer, Boolean, Material> materialFunc;
 
 	public BlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
 		this.level = level;
@@ -38,7 +38,7 @@ public final class BlockModelBuilder {
 		return this;
 	}
 
-	public BlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public BlockModelBuilder materialFunc(@Nullable BiFunction<ChunkSectionLayer, Boolean, Material> materialFunc) {
 		this.materialFunc = materialFunc;
 		return this;
 	}

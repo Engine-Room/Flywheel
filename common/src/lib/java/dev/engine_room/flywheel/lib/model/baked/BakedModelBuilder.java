@@ -2,6 +2,8 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
 
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+
 import org.jspecify.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -10,7 +12,6 @@ import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -24,7 +25,7 @@ public final class BakedModelBuilder {
 	@Nullable
 	PoseStack poseStack;
 	@Nullable
-	BiFunction<RenderType, Boolean, Material> materialFunc;
+	BiFunction<ChunkSectionLayer, Boolean, Material> materialFunc;
 
 	public BakedModelBuilder(BakedModel bakedModel) {
 		this.bakedModel = bakedModel;
@@ -45,7 +46,7 @@ public final class BakedModelBuilder {
 		return this;
 	}
 
-	public BakedModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, Material> materialFunc) {
+	public BakedModelBuilder materialFunc(@Nullable BiFunction<ChunkSectionLayer, Boolean, Material> materialFunc) {
 		this.materialFunc = materialFunc;
 		return this;
 	}
