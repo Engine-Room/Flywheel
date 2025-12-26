@@ -2,13 +2,11 @@ package dev.engine_room.flywheel.backend.engine;
 
 import java.util.Comparator;
 
-import com.mojang.blaze3d.opengl.GlConst;
-import com.mojang.blaze3d.opengl.GlStateManager;
-
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlConst;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.engine_room.flywheel.api.material.DepthTest;
@@ -76,69 +74,69 @@ public final class MaterialRenderState {
 
 	private static void setupDepthTest(DepthTest depthTest) {
 		switch (depthTest) {
-		case OFF -> {
-			GlStateManager._disableDepthTest();
-		}
-		case NEVER -> {
-			GlStateManager._enableDepthTest();
-			GlStateManager._depthFunc(GL11.GL_NEVER);
-		}
-		case LESS -> {
-			GlStateManager._enableDepthTest();
-			GlStateManager._depthFunc(GL11.GL_LESS);
-		}
-		case EQUAL -> {
-			GlStateManager._enableDepthTest();
-			GlStateManager._depthFunc(GL11.GL_EQUAL);
-		}
-		case LEQUAL -> {
-			GlStateManager._enableDepthTest();
-			GlStateManager._depthFunc(GL11.GL_LEQUAL);
-		}
-		case GREATER -> {
-			GlStateManager._enableDepthTest();
-			GlStateManager._depthFunc(GL11.GL_GREATER);
-		}
-		case NOTEQUAL -> {
-			GlStateManager._enableDepthTest();
-			GlStateManager._depthFunc(GL11.GL_NOTEQUAL);
-		}
-		case GEQUAL -> {
-			GlStateManager._enableDepthTest();
-			GlStateManager._depthFunc(GL11.GL_GEQUAL);
-		}
-		case ALWAYS -> {
-			GlStateManager._enableDepthTest();
-			GlStateManager._depthFunc(GL11.GL_ALWAYS);
-		}
+			case OFF -> {
+				GlStateManager._disableDepthTest();
+			}
+			case NEVER -> {
+				GlStateManager._enableDepthTest();
+				GlStateManager._depthFunc(GL11.GL_NEVER);
+			}
+			case LESS -> {
+				GlStateManager._enableDepthTest();
+				GlStateManager._depthFunc(GL11.GL_LESS);
+			}
+			case EQUAL -> {
+				GlStateManager._enableDepthTest();
+				GlStateManager._depthFunc(GL11.GL_EQUAL);
+			}
+			case LEQUAL -> {
+				GlStateManager._enableDepthTest();
+				GlStateManager._depthFunc(GL11.GL_LEQUAL);
+			}
+			case GREATER -> {
+				GlStateManager._enableDepthTest();
+				GlStateManager._depthFunc(GL11.GL_GREATER);
+			}
+			case NOTEQUAL -> {
+				GlStateManager._enableDepthTest();
+				GlStateManager._depthFunc(GL11.GL_NOTEQUAL);
+			}
+			case GEQUAL -> {
+				GlStateManager._enableDepthTest();
+				GlStateManager._depthFunc(GL11.GL_GEQUAL);
+			}
+			case ALWAYS -> {
+				GlStateManager._enableDepthTest();
+				GlStateManager._depthFunc(GL11.GL_ALWAYS);
+			}
 		}
 	}
 
 	private static void setupTransparency(Transparency transparency) {
 		switch (transparency) {
-		case OPAQUE -> {
-			GlStateManager._disableBlend();
-		}
-		case ADDITIVE -> {
-			GlStateManager._enableBlend();
-			GlStateManager._blendFuncSeparate(GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE);
-		}
-		case LIGHTNING -> {
-			GlStateManager._enableBlend();
-			GlStateManager._blendFuncSeparate(GlConst.GL_SRC_ALPHA, GlConst.GL_ONE, GlConst.GL_SRC_ALPHA, GlConst.GL_ONE);
-		}
-		case GLINT -> {
-			GlStateManager._enableBlend();
-			GlStateManager._blendFuncSeparate(GlConst.GL_SRC_COLOR, GlConst.GL_ONE, GlConst.GL_ZERO, GlConst.GL_ONE);
-		}
-		case CRUMBLING -> {
-			GlStateManager._enableBlend();
-			GlStateManager._blendFuncSeparate(GlConst.GL_DST_COLOR, GlConst.GL_SRC_COLOR, GlConst.GL_ONE, GlConst.GL_ZERO);
-		}
-		case TRANSLUCENT -> {
-			GlStateManager._enableBlend();
-			GlStateManager._blendFuncSeparate(GlConst.GL_SRC_ALPHA, GlConst.GL_ONE_MINUS_SRC_ALPHA, GlConst.GL_ONE, GlConst.GL_ONE_MINUS_SRC_ALPHA);
-		}
+			case OPAQUE -> {
+				GlStateManager._disableBlend();
+			}
+			case ADDITIVE -> {
+				GlStateManager._enableBlend();
+				GlStateManager._blendFuncSeparate(GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE);
+			}
+			case LIGHTNING -> {
+				GlStateManager._enableBlend();
+				GlStateManager._blendFuncSeparate(GlConst.GL_SRC_ALPHA, GlConst.GL_ONE, GlConst.GL_SRC_ALPHA, GlConst.GL_ONE);
+			}
+			case GLINT -> {
+				GlStateManager._enableBlend();
+				GlStateManager._blendFuncSeparate(GlConst.GL_SRC_COLOR, GlConst.GL_ONE, GlConst.GL_ZERO, GlConst.GL_ONE);
+			}
+			case CRUMBLING -> {
+				GlStateManager._enableBlend();
+				GlStateManager._blendFuncSeparate(GlConst.GL_DST_COLOR, GlConst.GL_SRC_COLOR, GlConst.GL_ONE, GlConst.GL_ZERO);
+			}
+			case TRANSLUCENT -> {
+				GlStateManager._enableBlend();
+				GlStateManager._blendFuncSeparate(GlConst.GL_SRC_ALPHA, GlConst.GL_ONE_MINUS_SRC_ALPHA, GlConst.GL_ONE, GlConst.GL_ONE_MINUS_SRC_ALPHA);
+			}
 		}
 	}
 
@@ -297,9 +295,6 @@ public final class MaterialRenderState {
 		}
 		cmp = lhs.writeMask()
 				.compareTo(rhs.writeMask());
-		if (cmp != 0) {
-			return cmp;
-		}
-		return 0;
+		return cmp;
 	}
 }

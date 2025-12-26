@@ -2,21 +2,15 @@ package dev.engine_room.flywheel.backend;
 
 import java.io.IOException;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
-
-import com.mojang.blaze3d.opengl.GlTexture;
-
-import dev.engine_room.flywheel.lib.util.IdentifierUtil;
-
-import net.minecraft.client.gui.render.TextureSetup;
-
 import org.jetbrains.annotations.UnknownNullability;
 import org.lwjgl.opengl.GL32;
 
+import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
+import dev.engine_room.flywheel.lib.util.IdentifierUtil;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
