@@ -191,8 +191,8 @@ public final class ShadowComponent implements EntityComponent {
 		instance.x = (float) minX;
 		instance.y = (float) minY;
 		instance.z = (float) minZ;
-		instance.entityX = entityX;
-		instance.entityZ = entityZ;
+		instance.entityX = entityX - renderOrigin.getX();
+		instance.entityZ = entityZ - renderOrigin.getZ();
 		instance.sizeX = (float) (maxX - minX);
 		instance.sizeZ = (float) (maxZ - minZ);
 		instance.alpha = alpha;

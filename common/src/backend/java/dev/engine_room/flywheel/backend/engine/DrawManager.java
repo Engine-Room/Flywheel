@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
 
@@ -31,16 +32,22 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 
 	/**
 	 * A map of instancer keys to instancers.
-	 * <br>
-	 * This map is populated as instancers are requested and contains both initialized and uninitialized instancers.
+	 *
+	 * <p>This map is populated as instancers are requested and contains both initialized and uninitialized instancers.
 	 */
 	protected final Map<InstancerKey<?>, N> instancers = new ConcurrentHashMap<>();
 	/**
 	 * A list of instancers that have not yet been initialized.
-	 * <br>
-	 * All new instancers land here before having resources allocated in {@link #render}.
+	 *
+	 * <p>All new instancers land here before having resources allocated in {@link #render}.
 	 */
 	protected final Queue<UninitializedInstancer<N, ?>> initializationQueue = new ConcurrentLinkedQueue<>();
+
+	/**
+	 * Function object to pass into computeIfAbsent.
+	 * <p>Create once and cache to avoid allocating every time.
+	 */
+	protected final Function<InstancerKey<?>, N> createAndDeferInit = this::createAndDeferInit;
 
 	public <I extends Instance> AbstractInstancer<I> getInstancer(Environment environment, InstanceType<I> type, Model model, int bias) {
 		return getInstancer(new InstancerKey<>(environment, type, model, bias));
@@ -48,7 +55,7 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 
 	@SuppressWarnings("unchecked")
 	public <I extends Instance> AbstractInstancer<I> getInstancer(InstancerKey<I> key) {
-		return (AbstractInstancer<I>) instancers.computeIfAbsent(key, this::createAndDeferInit);
+		return (AbstractInstancer<I>) instancers.computeIfAbsent(key, createAndDeferInit);
 	}
 
 	public Plan<RenderContext> createFramePlan() {
@@ -177,6 +184,12 @@ public abstract class DrawManager<N extends AbstractInstancer<?>> {
 	}
 
 	public abstract void triggerFallback();
+
+	public abstract MeshPool meshPool();
+
+	public Map<InstancerKey<?>, N> instancers() {
+		return instancers;
+	}
 
 	protected record UninitializedInstancer<N, I extends Instance>(InstancerKey<I> key, N instancer) {
 	}

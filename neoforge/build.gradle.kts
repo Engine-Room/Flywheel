@@ -26,6 +26,8 @@ transitiveSourceSets {
         rootCompile()
 
         from(commonProject)
+
+        outgoingClasses()
     }
     sourceSet(lib) {
         rootCompile()

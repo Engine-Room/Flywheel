@@ -144,13 +144,13 @@ public final class ShadowElement extends AbstractVisual implements SimpleDynamic
 				for (int y = minYPos; y <= maxYPos; ++y) {
 					pos.setY(y);
 					float strengthGivenYFalloff = strength - (float) (entityY - pos.getY()) * 0.5F;
-					setupInstance(chunk, pos, (float) entityX, (float) entityZ, strengthGivenYFalloff);
+					setupInstance(chunk, pos, entityX, entityZ, strengthGivenYFalloff);
 				}
 			}
 		}
 	}
 
-	private void setupInstance(ChunkAccess chunk, MutableBlockPos pos, float entityX, float entityZ, float strength) {
+	private void setupInstance(ChunkAccess chunk, MutableBlockPos pos, double entityX, double entityZ, float strength) {
 		// TODO: cache this?
 		var maxLocalRawBrightness = level.getMaxLocalRawBrightness(pos);
 		if (maxLocalRawBrightness <= 3) {
@@ -190,8 +190,8 @@ public final class ShadowElement extends AbstractVisual implements SimpleDynamic
 		instance.x = (float) minX;
 		instance.y = (float) minY;
 		instance.z = (float) minZ;
-		instance.entityX = entityX;
-		instance.entityZ = entityZ;
+		instance.entityX = (float) (entityX - renderOrigin.getX());
+		instance.entityZ = (float) (entityZ - renderOrigin.getZ());
 		instance.sizeX = (float) (maxX - minX);
 		instance.sizeZ = (float) (maxZ - minZ);
 		instance.alpha = alpha;

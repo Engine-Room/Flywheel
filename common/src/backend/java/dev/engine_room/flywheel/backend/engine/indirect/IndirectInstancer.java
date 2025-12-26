@@ -378,7 +378,8 @@ public class IndirectInstancer<I extends Instance> extends AbstractInstancer<I> 
 	public void parallelUpdate() {
 		var pages = this.pages.get();
 
-		mergeablePages.clear(pages.length, mergeablePages.currentCapacity() + 1);
+		// Clear the tail so we don't have to worry about out of bounds access.
+		mergeablePages.clear(pages.length, mergeablePages.currentCapacity());
 
 		int page = 0;
 		while (mergeablePages.cardinality() > 1) {

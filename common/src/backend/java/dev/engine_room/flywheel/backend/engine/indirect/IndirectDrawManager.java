@@ -288,4 +288,9 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		IndirectPrograms.kill();
 		Minecraft.getInstance().levelRenderer.allChanged();
 	}
+
+	@Override
+	public MeshPool meshPool() {
+		return meshPool;
+	}
 }

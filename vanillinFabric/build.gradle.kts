@@ -83,6 +83,8 @@ dependencies {
     compileOnly(project(path = common, configuration = "vanillinClasses"))
     compileOnly(project(path = common, configuration = "vanillinResources"))
 
+    compileOnly(project(path = platform, configuration = "apiClasses"))
+
     // JiJ flywheel proper
     include(project(path = platform, configuration = "flywheelRemap"))
     runtimeOnly(project(path = platform, configuration = "flywheelDev"))

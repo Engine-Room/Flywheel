@@ -18,6 +18,8 @@ displayTest = "IGNORE_ALL_VERSION"
 config = "flywheel.backend.mixins.json"
 [[mixins]]
 config = "flywheel.impl.mixins.json"
+[[mixins]]
+config = "flywheel.impl.neoforge.mixins.json"
 
 [[dependencies.${ flywheel_id }]]
 modId = "minecraft"

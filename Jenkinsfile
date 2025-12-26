@@ -1,63 +1,86 @@
 #!/usr/bin/env groovy
 
 pipeline {
-
-    agent any
+    agent none
 
     tools {
         jdk "jdk-21"
     }
 
-    options {
-        // Sometimes builds freeze, but this doesn't have to be super aggressive.
-        timeout(time: 30, unit: 'MINUTES')
-    }
-
-    parameters {
-        booleanParam(name: 'RELEASE', defaultValue: false, description: 'Publish artifacts without a build number.')
-    }
-
     stages {
-
-        stage('Setup') {
+        stage('Build') {
+            agent any
 
             steps {
-
-                echo 'Setup Project'
+                echo 'Setup project.'
                 sh 'chmod +x gradlew'
                 sh './gradlew clean'
-            }
-        }
 
-        stage('Build') {
-
-            environment {
-                RELEASE="${params.RELEASE}"
-            }
-
-            steps {
                 withCredentials([
                     // build_secrets is parsed in SubprojectExtension#loadSecrets
                     file(credentialsId: 'build_secrets', variable: 'ORG_GRADLE_PROJECT_secretFile'),
                 ]) {
                     echo 'Building project.'
-                    sh './gradlew build publish --stacktrace --warn'
+                    // Sometimes builds freeze, so wrap in a timeout.
+                    timeout(time: 30, unit: 'MINUTES') {
+                        sh './gradlew build publish --stacktrace --warn'
+                    }
+                }
+            }
+
+            post {
+                always {
+                    archiveArtifacts artifacts: '**/build/libs/**/*.jar', fingerprint: true
+
+                    withCredentials([
+                            string(credentialsId: 'discord_webhook_url', variable: 'DISCORD_URL')
+                    ]) {
+                        echo 'Notifying Discord..'
+                        discordSend description: "Build: #${currentBuild.number}", link: env.BUILD_URL, result: currentBuild.currentResult, title: env.JOB_NAME, webhookURL: env.DISCORD_URL, showChangeset: true, enableArtifactsList: true
+                    }
                 }
             }
         }
-    }
 
-    post {
+        stage('Release') {
+            // Take the input in our when block so that we don't block any agents.
+            when {
+                expression {
+                    input(message: 'Publish without build number?', ok: 'Yes', cancel: 'No')
+                    // If input is cancelled the entire step will abort. Return true so we continue on confirmation.
+                    return true
+                }
+                beforeAgent true
+            }
 
-        always {
+            agent any
 
-            archiveArtifacts artifacts: '**/build/libs/**/*.jar', fingerprint: true
+            environment {
+                RELEASE="true"
+            }
 
-            withCredentials([
-                    string(credentialsId: 'discord_webhook_url', variable: 'DISCORD_URL')
-            ]) {
-                echo 'Notifying Discord..'
-                discordSend description: "Build: #${currentBuild.number}", link: env.BUILD_URL, result: currentBuild.currentResult, title: env.JOB_NAME, webhookURL: env.DISCORD_URL, showChangeset: true, enableArtifactsList: true
+            steps {
+                // Prevent older builds from being released.
+                milestone(ordinal: 1, label: 'Release Guardian')
+
+                echo 'Setup project for release.'
+                sh 'chmod +x gradlew'
+
+                // Clean again because the agent may have changed.
+                sh './gradlew clean'
+
+                withCredentials([
+                    // build_secrets is parsed in SubprojectExtension#loadSecrets
+                    file(credentialsId: 'build_secrets', variable: 'ORG_GRADLE_PROJECT_secretFile'),
+                ]) {
+                    echo 'Building project for release.'
+                    // Sometimes builds freeze, so wrap in a timeout.
+                    timeout(time: 30, unit: 'MINUTES') {
+                        sh './gradlew build publish --stacktrace --warn'
+                    }
+                }
+
+                milestone(ordinal: 2, label: 'Release')
             }
         }
     }

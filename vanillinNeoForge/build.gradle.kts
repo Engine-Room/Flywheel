@@ -87,6 +87,8 @@ dependencies {
     compileOnly(project(path = common, configuration = "vanillinClasses"))
     compileOnly(project(path = common, configuration = "vanillinResources"))
 
+    compileOnly(project(path = platform, configuration = "apiClasses"))
+
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1")!!)
 
     // JiJ flywheel proper

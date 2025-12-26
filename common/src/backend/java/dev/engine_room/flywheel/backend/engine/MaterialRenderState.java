@@ -191,7 +191,7 @@ public final class MaterialRenderState {
 			return true;
 		}
 
-		// Not here because ubershader: useLight, useOverlay, diffuse, fog shader
+		// Not here because ubershader: useLight, useOverlay, diffuse, fog shader, ambient occlusion
 		// Everything in the comparator should be here.
 		// @formatter:off
 		return lhs.blur() == rhs.blur()

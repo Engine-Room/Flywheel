@@ -188,6 +188,13 @@ public final class FlwCommands {
 							return Command.SINGLE_SUCCESS;
 						})));
 
+		debug.then(ClientCommandManager.literal("info")
+				.executes(context -> {
+					context.getSource()
+							.sendFeedback(FlwDebugInfo.getDebugCommandInfo());
+					return Command.SINGLE_SUCCESS;
+				}));
+
 		return debug;
 	}
 

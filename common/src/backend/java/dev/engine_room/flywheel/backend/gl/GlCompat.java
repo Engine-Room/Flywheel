@@ -34,6 +34,11 @@ public final class GlCompat {
 		CAPABILITIES = caps;
 	}
 
+	public static final String GL_VENDOR_STRING = safeGetString(GL20C.GL_VENDOR);
+	public static final String GL_RENDERER_STRING = safeGetString(GL20C.GL_RENDERER);
+	public static final String GL_VERSION_STRING = safeGetString(GL20C.GL_VERSION);
+	public static final String GL_SHADING_LANGUAGE_VERSION_STRING = safeGetString(GL20C.GL_SHADING_LANGUAGE_VERSION);
+
 	public static final Driver DRIVER = readVendorString();
 	public static final int SUBGROUP_SIZE = subgroupSize();
 	public static final boolean ALLOW_DSA = true;
@@ -103,20 +108,14 @@ public final class GlCompat {
 			return Driver.UNKNOWN;
 		}
 
-		String vendor = GL20C.glGetString(GL20C.GL_VENDOR);
-
-		if (vendor == null) {
-			return Driver.UNKNOWN;
-		}
-
-		// vendor string I got was "ATI Technologies Inc."
-		if (vendor.contains("ATI") || vendor.contains("AMD")) {
+		// The vendor string I got was "ATI Technologies Inc."
+		if (GL_VENDOR_STRING.contains("ATI") || GL_VENDOR_STRING.contains("AMD")) {
 			return Driver.AMD;
-		} else if (vendor.contains("NVIDIA")) {
+		} else if (GL_VENDOR_STRING.contains("NVIDIA")) {
 			return Driver.NVIDIA;
-		} else if (vendor.contains("Intel")) {
+		} else if (GL_VENDOR_STRING.contains("Intel")) {
 			return Driver.INTEL;
-		} else if (vendor.contains("Mesa")) {
+		} else if (GL_VENDOR_STRING.contains("Mesa")) {
 			return Driver.MESA;
 		}
 
@@ -214,5 +213,16 @@ public final class GlCompat {
 		GL20.glDeleteShader(handle);
 
 		return success;
+	}
+
+	/**
+	 * Get a non-null string from OpenGL, or "invalid" if no capabilities are available.
+	 */
+	private static String safeGetString(int name) {
+		if (CAPABILITIES == null) {
+			return "invalid";
+		}
+		String str = GL20C.glGetString(name);
+		return str == null ? "null" : str;
 	}
 }

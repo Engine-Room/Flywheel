@@ -5,13 +5,7 @@
   "compatibilityLevel" : "JAVA_21",
   "refmap" : "vanillin.refmap.json",
   "client" : [
-    "text.BakedGlyphMixin",
-    "text.CodePointMapMixin",
-    "text.FontAccessor",
-    "text.FontSetMixin",
-    "text.FontTexture$NodeAccessor",
-    "text.FontTextureMixin",
-    "text.VisualizationManagerImplMixin"
+    "item.ItemOverridesAccessor"
   ],
   "injectors" : {
     "defaultRequire" : 1

@@ -21,6 +21,7 @@ public final class MaterialEncoder {
 	private static final int USE_OVERLAY_LENGTH = 1;
 	private static final int USE_LIGHT_LENGTH = 1;
 	private static final int CARDINAL_LIGHTING_MODE_LENGTH = Mth.ceillog2(CardinalLightingMode.values().length);
+	private static final int AMBIENT_OCCLUSION_LENGTH = 1;
 
 	// The bit offset of each property
 	private static final int BLUR_OFFSET = 0;
@@ -33,6 +34,7 @@ public final class MaterialEncoder {
 	private static final int USE_OVERLAY_OFFSET = WRITE_MASK_OFFSET + WRITE_MASK_LENGTH;
 	private static final int USE_LIGHT_OFFSET = USE_OVERLAY_OFFSET + USE_OVERLAY_LENGTH;
 	private static final int CARDINAL_LIGHTING_MODE_OFFSET = USE_LIGHT_OFFSET + USE_LIGHT_LENGTH;
+	private static final int AMBIENT_OCCLUSION_OFFSET = CARDINAL_LIGHTING_MODE_OFFSET + CARDINAL_LIGHTING_MODE_LENGTH;
 
 	// The bit mask for each property
 	private static final int BLUR_MASK = bitMask(BLUR_LENGTH, BLUR_OFFSET);
@@ -45,6 +47,7 @@ public final class MaterialEncoder {
 	private static final int USE_OVERLAY_MASK = bitMask(USE_OVERLAY_LENGTH, USE_OVERLAY_OFFSET);
 	private static final int USE_LIGHT_MASK = bitMask(USE_LIGHT_LENGTH, USE_LIGHT_OFFSET);
 	private static final int CARDINAL_LIGHTING_MODE_MASK = bitMask(CARDINAL_LIGHTING_MODE_LENGTH, CARDINAL_LIGHTING_MODE_OFFSET);
+	private static final int AMBIENT_OCCLUSION_MASK = bitMask(AMBIENT_OCCLUSION_LENGTH, AMBIENT_OCCLUSION_OFFSET);
 
 	private MaterialEncoder() {
 	}
@@ -60,7 +63,7 @@ public final class MaterialEncoder {
 	}
 
 	// Packed format:
-	// cardinalLightingMode[2] | useLight[1] | useOverlay[1] | writeMask[2] | transparency[3] | depthTest[4] | polygonOffset[1] | backfaceCulling[1] | mipmap[1] | blur[1]
+	// ambientOcclusion[1] | cardinalLightingMode[2] | useLight[1] | useOverlay[1] | writeMask[2] | transparency[3] | depthTest[4] | polygonOffset[1] | backfaceCulling[1] | mipmap[1] | blur[1]
 	public static int packProperties(Material material) {
 		int bits = 0;
 
@@ -75,6 +78,7 @@ public final class MaterialEncoder {
 		if (material.useLight()) bits |= USE_LIGHT_MASK;
 		bits |= (material.cardinalLightingMode()
 				.ordinal() << CARDINAL_LIGHTING_MODE_OFFSET) & CARDINAL_LIGHTING_MODE_MASK;
+		if (material.ambientOcclusion()) bits |= AMBIENT_OCCLUSION_MASK;
 
 		return bits;
 	}

@@ -160,7 +160,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 			uploadMaterialUniform(program, material);
 
-			program.setUInt("_flw_vertexOffset", drawCall.mesh()
+			program.setUInt("_flw_baseVertex", drawCall.mesh()
 					.baseVertex());
 
 			MaterialRenderState.setup(material);
@@ -184,7 +184,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 			uploadMaterialUniform(program, material);
 
-			program.setUInt("_flw_vertexOffset", drawCall.mesh()
+			program.setUInt("_flw_baseVertex", drawCall.mesh()
 					.baseVertex());
 
 			MaterialRenderState.setupOit(material);
@@ -302,6 +302,11 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	public void triggerFallback() {
 		InstancingPrograms.kill();
 		Minecraft.getInstance().levelRenderer.allChanged();
+	}
+
+	@Override
+	public MeshPool meshPool() {
+		return meshPool;
 	}
 
 	public static void uploadMaterialUniform(GlProgram program, Material material) {

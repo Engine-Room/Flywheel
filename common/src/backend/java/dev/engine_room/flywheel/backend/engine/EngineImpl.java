@@ -130,6 +130,10 @@ public class EngineImpl implements Engine {
 		return lightStorage;
 	}
 
+	public DrawManager<? extends AbstractInstancer<?>> drawManager() {
+		return drawManager;
+	}
+
 	private class VisualizationContextImpl implements VisualizationContext {
 		private final InstancerProviderImpl instancerProvider;
 

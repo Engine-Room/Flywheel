@@ -20,6 +20,7 @@ import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visualization.VisualManager;
 import dev.engine_room.flywheel.api.visualization.VisualizationLevel;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
+import dev.engine_room.flywheel.backend.engine.EngineImpl;
 import dev.engine_room.flywheel.impl.FlwConfig;
 import dev.engine_room.flywheel.impl.extension.LevelExtension;
 import dev.engine_room.flywheel.impl.task.Flag;
@@ -342,6 +343,22 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		if (lateInit != null) {
 			lateInit.engine.delete();
 		}
+	}
+
+	/**
+	 * Expose the raw engine, iff it has been initialized and is a default Flywheel engine.
+	 * <p>For debug information gathering only.
+	 */
+	@Nullable
+	public EngineImpl getEngineImpl() {
+		if (lateInit == null) {
+			return null;
+		}
+		var engine = lateInit.engine;
+		if (engine instanceof EngineImpl engineImpl) {
+			return engineImpl;
+		}
+		return null;
 	}
 
 	private class RenderDispatcherImpl implements RenderDispatcher {
