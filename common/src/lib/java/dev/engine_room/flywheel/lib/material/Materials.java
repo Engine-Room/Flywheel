@@ -14,13 +14,6 @@ public final class Materials {
 			.cardinalLightingMode(CardinalLightingMode.OFF)
 			.build();
 
-	public static final Material CUTOUT_MIPPED_BLOCK = SimpleMaterial.builder()
-			.cutout(CutoutShaders.HALF)
-			.build();
-	public static final Material CUTOUT_MIPPED_UNSHADED_BLOCK = SimpleMaterial.builderOf(CUTOUT_MIPPED_BLOCK)
-			.cardinalLightingMode(CardinalLightingMode.OFF)
-			.build();
-
 	public static final Material CUTOUT_BLOCK = SimpleMaterial.builder()
 			.cutout(CutoutShaders.ONE_TENTH)
 			.mipmap(false)
