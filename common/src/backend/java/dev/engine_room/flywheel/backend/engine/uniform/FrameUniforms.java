@@ -10,12 +10,12 @@ import dev.engine_room.flywheel.api.backend.RenderContext;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.backend.engine.indirect.DepthPyramid;
 import dev.engine_room.flywheel.backend.mixin.LevelRendererAccessor;
-import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -69,7 +69,7 @@ public final class FrameUniforms extends UniformWriter {
 		Vec3i renderOrigin = VisualizationManager.getOrThrow(context.level())
 				.renderOrigin();
 		var camera = context.camera();
-		Vec3 cameraPos = camera.getPosition();
+		Vec3 cameraPos = camera.position();
 		var camX = (float) (cameraPos.x - renderOrigin.getX());
 		var camY = (float) (cameraPos.y - renderOrigin.getY());
 		var camZ = (float) (cameraPos.z - renderOrigin.getZ());
@@ -81,8 +81,8 @@ public final class FrameUniforms extends UniformWriter {
 		VIEW_PROJECTION.translate(-camX, -camY, -camZ);
 
 		CAMERA_POS.set(camX, camY, camZ);
-		CAMERA_LOOK.set(camera.getLookVector());
-		CAMERA_ROT.set(camera.getXRot(), camera.getYRot());
+		CAMERA_LOOK.set(camera.forwardVector());
+		CAMERA_ROT.set(camera.xRot(), camera.yRot());
 
 		if (firstWrite) {
 			setPrev();
@@ -185,9 +185,9 @@ public final class FrameUniforms extends UniformWriter {
 			return ptr;
 		}
 
-		Level level = camera.getEntity().level();
-		BlockPos blockPos = camera.getBlockPosition();
-		Vec3 cameraPos = camera.getPosition();
+		Level level = camera.entity().level();
+		BlockPos blockPos = camera.blockPosition();
+		Vec3 cameraPos = camera.position();
 		return writeInFluidAndBlock(ptr, level, blockPos, cameraPos);
 	}
 

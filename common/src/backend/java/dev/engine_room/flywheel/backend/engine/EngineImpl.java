@@ -60,7 +60,7 @@ public class EngineImpl implements Engine {
 
 	@Override
 	public boolean updateRenderOrigin(Camera camera) {
-		Vec3 cameraPos = camera.getPosition();
+		Vec3 cameraPos = camera.position();
 		double dx = renderOrigin.getX() - cameraPos.x;
 		double dy = renderOrigin.getY() - cameraPos.y;
 		double dz = renderOrigin.getZ() - cameraPos.z;

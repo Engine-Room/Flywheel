@@ -1,27 +1,20 @@
 package dev.engine_room.flywheel.backend.engine.uniform;
 
-import com.mojang.blaze3d.shaders.FogShape;
-import com.mojang.blaze3d.systems.RenderSystem;
+import org.joml.Vector4f;
 
 public final class FogUniforms extends UniformWriter {
-	private static final int SIZE = 4 * 7;
+	private static final int SIZE = 4 * 8;
 	static final UniformBuffer BUFFER = new UniformBuffer(Uniforms.FOG_INDEX, SIZE);
 
-	public static void update() {
+	public static void update(Vector4f color, float environmentalStart, float environmentalEnd,
+							  float renderDistanceStart, float renderDistanceEnd) {
 		long ptr = BUFFER.ptr();
 
-		var color = RenderSystem.getShaderFogColor();
-
-		ptr = writeFloat(ptr, color[0]);
-		ptr = writeFloat(ptr, color[1]);
-		ptr = writeFloat(ptr, color[2]);
-		ptr = writeFloat(ptr, color[3]);
-		ptr = writeFloat(ptr, RenderSystem.getShaderFogStart());
-		ptr = writeFloat(ptr, RenderSystem.getShaderFogEnd());
-
-		var fogShape = RenderSystem.getShaderFogShape();
-		// Shouldn't ever be null, but we've seen crashes here.
-		ptr = writeInt(ptr, (fogShape == null ? FogShape.SPHERE : fogShape).getIndex());
+		ptr = writeVec4(ptr, color);
+		ptr = writeFloat(ptr, environmentalStart);
+		ptr = writeFloat(ptr, environmentalEnd);
+		ptr = writeFloat(ptr, renderDistanceStart);
+		ptr = writeFloat(ptr, renderDistanceEnd);
 
 		BUFFER.markDirty();
 	}

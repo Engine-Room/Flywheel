@@ -6,7 +6,6 @@ import dev.engine_room.flywheel.api.backend.RenderContext;
 import dev.engine_room.flywheel.backend.FlwBackendXplat;
 import dev.engine_room.flywheel.backend.mixin.AbstractClientPlayerAccessor;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -14,8 +13,10 @@ import net.minecraft.util.ARGB;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.lighting.LightEngine;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
 
@@ -78,10 +79,10 @@ public final class PlayerUniforms extends UniformWriter {
 	}
 
 	private static long writeEyeBrightness(long ptr, LocalPlayer player) {
-		ClientLevel level = player.clientLevel;
+		Level level = player.level();
 		int blockBrightness = level.getBrightness(LightLayer.BLOCK, player.blockPosition());
 		int skyBrightness = level.getBrightness(LightLayer.SKY, player.blockPosition());
-		int maxBrightness = level.getMaxLightLevel();
+		int maxBrightness = LightEngine.MAX_LEVEL;
 
 		return writeVec2(ptr, (float) blockBrightness / (float) maxBrightness,
 				(float) skyBrightness / (float) maxBrightness);
@@ -95,7 +96,7 @@ public final class PlayerUniforms extends UniformWriter {
 			if (handItem instanceof BlockItem blockItem) {
 				Block block = blockItem.getBlock();
 				int blockLight = FlwBackendXplat.INSTANCE
-						.getLightEmission(block.defaultBlockState(), player.clientLevel, player.blockPosition());
+						.getLightEmission(block.defaultBlockState(), player.level(), player.blockPosition());
 				if (heldLight < blockLight) {
 					heldLight = blockLight;
 				}
@@ -106,7 +107,7 @@ public final class PlayerUniforms extends UniformWriter {
 	}
 
 	private static long writeEyeIn(long ptr, LocalPlayer player) {
-		ClientLevel level = player.clientLevel;
+		Level level = player.level();
 		Vec3 eyePos = player.getEyePosition();
 		BlockPos blockPos = BlockPos.containing(eyePos);
 		return writeInFluidAndBlock(ptr, level, blockPos, eyePos);

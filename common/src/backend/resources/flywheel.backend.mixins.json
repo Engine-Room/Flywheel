@@ -6,9 +6,11 @@
   "refmap" : "backend-flywheel.refmap.json",
   "client" : [
     "AbstractClientPlayerAccessor",
+    "FogRendererMixin",
     "GlStateManagerAccessor",
     "GlStateManagerMixin",
     "LevelRendererAccessor",
+    "LightingMixin",
     "OptionsMixin",
     "RenderSystemMixin",
     "light.LayerLightSectionStorageAccessor",

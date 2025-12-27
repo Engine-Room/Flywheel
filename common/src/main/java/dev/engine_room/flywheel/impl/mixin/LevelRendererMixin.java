@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.impl.mixin;
 
+import java.util.Iterator;
 import java.util.SortedSet;
 
 import org.joml.Matrix4f;
@@ -13,9 +14,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.google.common.collect.Iterators;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.impl.FlwImplXplat;
@@ -26,7 +28,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.entity.Entity;
@@ -72,7 +73,7 @@ abstract class LevelRendererMixin {
 		}
 	}
 
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=blockentities"))
+	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=blockEntities"))
 	private void flywheel$beforeBlockEntities(CallbackInfo ci) {
 		if (flywheel$renderContext != null) {
 			VisualizationManager manager = VisualizationManager.get(level);
@@ -82,7 +83,7 @@ abstract class LevelRendererMixin {
 		}
 	}
 
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=destroyProgress"))
+	@Inject(method = "renderBlockDestroyAnimation", at = @At("HEAD"))
 	private void flywheel$beforeRenderCrumbling(CallbackInfo ci) {
 		if (flywheel$renderContext != null) {
 			VisualizationManager manager = VisualizationManager.get(level);
@@ -92,10 +93,9 @@ abstract class LevelRendererMixin {
 		}
 	}
 
-	@Inject(method = "renderEntity", at = @At("HEAD"), cancellable = true)
-	private void flywheel$decideNotToRenderEntity(Entity entity, double camX, double camY, double camZ, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, CallbackInfo ci) {
-		if (VisualizationManager.supportsVisualization(entity.level()) && VisualizationHelper.skipVanillaRender(entity)) {
-			ci.cancel();
-		}
+	@ModifyExpressionValue(method = "extractVisibleEntities", at = @At(value = "INVOKE", target = "Ljava/lang/Iterable;iterator()Ljava/util/Iterator;"))
+	private Iterator<Entity> flywheel$decideNotToRenderEntity(Iterator<Entity> original) {
+		return Iterators.filter(original, entity -> !(VisualizationManager.supportsVisualization(entity.level()) &&
+				VisualizationHelper.skipVanillaRender(entity)));
 	}
 }

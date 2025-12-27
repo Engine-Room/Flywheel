@@ -17,24 +17,20 @@ public class TextureBinder {
 		var gameRenderer = Minecraft.getInstance().gameRenderer;
 
 		Samplers.OVERLAY.makeActive();
-		gameRenderer.overlayTexture()
-				.setupOverlayColor();
-		RenderSystem.bindTexture(RenderSystem.getShaderTexture(1));
+		gameRenderer.overlayTexture().setupOverlayColor();
+		GlStateManager._bindTexture(RenderSystem.getShaderTexture(1));
 
 
 		Samplers.LIGHT.makeActive();
-		gameRenderer.lightTexture()
-				.turnOnLightLayer();
-		RenderSystem.bindTexture(RenderSystem.getShaderTexture(2));
+		gameRenderer.lightTexture().turnOnLightLayer();
+		GlStateManager._bindTexture(RenderSystem.getShaderTexture(2));
 	}
 
 	public static void resetLightAndOverlay() {
 		var gameRenderer = Minecraft.getInstance().gameRenderer;
 
-		gameRenderer.overlayTexture()
-				.teardownOverlayColor();
-		gameRenderer.lightTexture()
-				.turnOffLightLayer();
+		gameRenderer.overlayTexture().teardownOverlayColor();
+		gameRenderer.lightTexture().turnOffLightLayer();
 	}
 
 	/**

@@ -4,10 +4,18 @@ import java.util.Comparator;
 
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL33C;
 
 import com.mojang.blaze3d.opengl.GlConst;
+import com.mojang.blaze3d.opengl.GlSampler;
 import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuSampler;
+import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
 
 import dev.engine_room.flywheel.api.material.DepthTest;
 import dev.engine_room.flywheel.api.material.Material;
@@ -48,10 +56,25 @@ public final class MaterialRenderState {
 		AbstractTexture texture = Minecraft.getInstance()
 				.getTextureManager()
 				.getTexture(material.texture());
-		texture.setFilter(material.blur(), material.mipmap());
-		var textureId = texture.getId();
-		RenderSystem.setShaderTexture(0, textureId);
-		RenderSystem.bindTexture(textureId);
+
+		GpuTextureView textureView = texture.getTextureView();
+		GlTexture glTexture = ((GlTexture) texture.getTexture());
+		int i;
+		if ((glTexture.usage() & GpuTexture.USAGE_CUBEMAP_COMPATIBLE) != 0) {
+			i = GL32.GL_TEXTURE_CUBE_MAP;
+			GL11.glBindTexture(i, glTexture.glId());
+		} else {
+			i = GL32.GL_TEXTURE_2D;
+			GlStateManager._bindTexture(glTexture.glId());
+		}
+
+		FilterMode filterMode = material.blur() ? FilterMode.LINEAR : FilterMode.NEAREST;
+		GpuSampler textureSampler = texture.getSampler();
+		GlSampler sampler = (GlSampler) RenderSystem.getSamplerCache()
+				.getSampler(textureSampler.getAddressModeU(), textureSampler.getAddressModeV(), filterMode, filterMode, material.mipmap());
+		GL33C.glBindSampler(Samplers.DIFFUSE.number, sampler.getId());
+		GlStateManager._texParameter(i, GL32.GL_TEXTURE_BASE_LEVEL, textureView.baseMipLevel());
+		GlStateManager._texParameter(i, GL32.GL_TEXTURE_MAX_LEVEL, textureView.baseMipLevel() + textureView.mipLevels() - 1);
 	}
 
 	private static void setupBackfaceCulling(boolean backfaceCulling) {
@@ -157,7 +180,6 @@ public final class MaterialRenderState {
 
 	private static void resetTexture() {
 		Samplers.DIFFUSE.makeActive();
-		RenderSystem.setShaderTexture(0, 0);
 	}
 
 	private static void resetBackfaceCulling() {

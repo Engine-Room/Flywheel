@@ -10,7 +10,7 @@ import org.lwjgl.system.Checks;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBufferType;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 public class GlVertexArraySeparateAttributes extends GlVertexArray {
 	public static final boolean SUPPORTED = isSupported();

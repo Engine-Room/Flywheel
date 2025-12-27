@@ -3,10 +3,15 @@ package dev.engine_room.flywheel.backend.engine.uniform;
 import org.joml.Vector3f;
 
 import dev.engine_room.flywheel.api.backend.RenderContext;
+import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.ARGB;
+import net.minecraft.world.attribute.EnvironmentAttributeProbe;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.DimensionType.CardinalLightType;
 
 public final class LevelUniforms extends UniformWriter {
 	private static final int SIZE = 16 * 4 + 4 * 12;
@@ -23,11 +28,13 @@ public final class LevelUniforms extends UniformWriter {
 
 		ClientLevel level = context.level();
 		float partialTick = context.partialTick();
+		Camera camera = context.camera();
+		EnvironmentAttributeProbe probe = camera.attributeProbe();
 
-		Vec3 skyColor = level.getSkyColor(context.camera().getPosition(), partialTick);
-		Vec3 cloudColor = level.getCloudColor(partialTick);
-		ptr = writeVec4(ptr, (float) skyColor.x, (float) skyColor.y, (float) skyColor.z, 1f);
-		ptr = writeVec4(ptr, (float) cloudColor.x, (float) cloudColor.y, (float) cloudColor.z, 1f);
+		int skyColor = probe.getValue(EnvironmentAttributes.SKY_COLOR, partialTick);
+		int cloudColor = probe.getValue(EnvironmentAttributes.CLOUD_COLOR, partialTick);
+		ptr = writeVec4(ptr, ARGB.redFloat(skyColor), ARGB.greenFloat(skyColor), ARGB.blueFloat(skyColor), 1f);
+		ptr = writeVec4(ptr, ARGB.redFloat(cloudColor), ARGB.greenFloat(cloudColor), ARGB.blueFloat(cloudColor), 1f);
 
 		ptr = writeVec3(ptr, LIGHT0_DIRECTION);
 		ptr = writeVec3(ptr, LIGHT1_DIRECTION);
@@ -40,19 +47,22 @@ public final class LevelUniforms extends UniformWriter {
 
 		ptr = writeInt(ptr, level.dimensionType().hasSkyLight() ? 1 : 0);
 
-		ptr = writeFloat(ptr, level.getSunAngle(partialTick));
+		float sunAngle = probe.getValue(EnvironmentAttributes.SUN_ANGLE, partialTick);
+		ptr = writeFloat(ptr, sunAngle);
 
-		ptr = writeFloat(ptr, level.getMoonBrightness());
-		ptr = writeInt(ptr, level.getMoonPhase());
+		int moonPhase = probe.getValue(EnvironmentAttributes.MOON_PHASE, partialTick).index();
+		ptr = writeFloat(ptr, DimensionType.MOON_BRIGHTNESS_PER_PHASE[moonPhase]);
+		ptr = writeInt(ptr, moonPhase);
 
 		ptr = writeInt(ptr, level.isRaining() ? 1 : 0);
 		ptr = writeFloat(ptr, level.getRainLevel(partialTick));
 		ptr = writeInt(ptr, level.isThundering() ? 1 : 0);
 		ptr = writeFloat(ptr, level.getThunderLevel(partialTick));
 
-		ptr = writeFloat(ptr, level.getSkyDarken(partialTick));
+		ptr = writeFloat(ptr, level.getSkyDarken());
 
-		ptr = writeInt(ptr, level.effects().constantAmbientLight() ? 1 : 0);
+		CardinalLightType lightType = level.dimensionType().cardinalLightType();
+		ptr = writeInt(ptr, lightType == CardinalLightType.NETHER ? 1 : 0);
 
 		// TODO: use defines for custom dimension ids
         int dimensionId;
