@@ -2,22 +2,17 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.function.Supplier;
 
-import org.jspecify.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import dev.engine_room.flywheel.lib.model.SimpleModel;
-import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
-import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
-import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
-import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.util.TriState;
-import net.minecraft.client.renderer.RenderType;
+import net.irisshaders.iris.gl.blending.BlendMode;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -123,9 +118,9 @@ class FabricMeshEmitterManager extends MeshEmitterManager<MeshEmitter> implement
 	}
 
 	@Override
-	public void putBulkData(PoseStack.Pose pose, BakedQuad quad, float[] brightness, float red, float green, float blue, float alpha, int[] lightmap, int packedOverlay, boolean readAlpha) {
+	public void putBulkData(PoseStack.Pose pose, BakedQuad quad, float[] brightness, float red, float green, float blue, float alpha, int[] lightmap, int packedOverlay) {
 		if (currentDelegate != null) {
-			currentDelegate.putBulkData(pose, quad, brightness, red, green, blue, alpha, lightmap, packedOverlay, readAlpha);
+			currentDelegate.putBulkData(pose, quad, brightness, red, green, blue, alpha, lightmap, packedOverlay);
 		}
 	}
 

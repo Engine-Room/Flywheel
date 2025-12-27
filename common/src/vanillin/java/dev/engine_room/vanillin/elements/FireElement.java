@@ -21,6 +21,7 @@ import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.visual.AbstractVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.util.SmartRecycler;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -39,7 +40,8 @@ public final class FireElement extends AbstractVisual implements SimpleDynamicVi
 	// because Material#sprite is a surprisingly heavy operation
 	// and because sprites are invalidated after a resource reload.
 	private static final RendererReloadCache<net.minecraft.client.resources.model.Material, Model> FIRE_MODELS = new RendererReloadCache<>(texture -> {
-		return new SingleMeshModel(new FireMesh(texture.sprite()), FIRE_MATERIAL);
+		TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().get(texture);
+		return new SingleMeshModel(new FireMesh(sprite), FIRE_MATERIAL);
 	});
 
 	private final Entity entity;

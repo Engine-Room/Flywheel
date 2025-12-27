@@ -12,6 +12,7 @@ import dev.engine_room.flywheel.lib.model.LineModelBuilder;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.util.SmartRecycler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -108,8 +109,8 @@ public final class HitboxElement implements Visual, SimpleDynamicVisual {
 		recycler.resetCount();
 
 		var shouldRenderHitBoxes = Minecraft.getInstance()
-				.getEntityRenderDispatcher()
-				.shouldRenderHitBoxes();
+				.debugEntries
+				.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES);
 		if (shouldRenderHitBoxes && !entity.isInvisible() && !Minecraft.getInstance()
 				.showOnlyReducedInfo()) {
 			double entityX = Mth.lerp(partialTick, entity.xOld, entity.getX());

@@ -17,6 +17,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
@@ -199,7 +200,7 @@ public final class FlwCommands {
 	}
 
 	// Client version of BlockPosArgument.getBlockPos
-	private static BlockPos getBlockPos(CommandContext<FabricClientCommandSource> context, String name) {
-		return context.getArgument(name, Coordinates.class).getBlockPos(context.getSource().getPlayer().createCommandSourceStack());
+	public static BlockPos getBlockPos(CommandContext<FabricClientCommandSource> context, String name) {
+		return context.getArgument(name, Coordinates.class).getBlockPos((CommandSourceStack) context.getSource());
 	}
 }

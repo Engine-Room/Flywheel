@@ -34,7 +34,7 @@ public class BellVisual extends AbstractBlockEntityVisual<BellBlockEntity> imple
 	public BellVisual(VisualizationContext ctx, BellBlockEntity blockEntity, float partialTick) {
 		super(ctx, blockEntity, partialTick);
 
-		instances = InstanceTree.create(instancerProvider(), ModelTrees.of(ModelLayers.BELL, BellRenderer.BELL_RESOURCE_LOCATION, MATERIAL));
+		instances = InstanceTree.create(instancerProvider(), ModelTrees.of(ModelLayers.BELL, BellRenderer.BELL_TEXTURE, MATERIAL));
 		bellBody = instances.childOrThrow("bell_body");
 
 		BlockPos visualPos = getVisualPosition();

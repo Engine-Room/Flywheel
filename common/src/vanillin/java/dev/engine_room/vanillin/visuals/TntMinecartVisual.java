@@ -7,7 +7,7 @@ import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.vehicle.MinecartTNT;
+import net.minecraft.world.entity.vehicle.minecart.MinecartTNT;
 
 public class TntMinecartVisual<T extends MinecartTNT> extends MinecartVisual<T> {
 	private static final int WHITE_OVERLAY = OverlayTexture.pack(OverlayTexture.u(1.0F), 10);

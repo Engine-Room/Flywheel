@@ -39,7 +39,7 @@ public final class BlockModelBuilder {
 	}
 
 	@Deprecated(forRemoval = true)
-	public BlockModelBuilder materialFunc(@Nullable BiFunction<ChunkSectionLayer, Boolean, @org.jetbrains.annotations.Nullable Material> materialFunc) {
+	public BlockModelBuilder materialFunc(@Nullable BiFunction<ChunkSectionLayer, Boolean, @Nullable Material> materialFunc) {
 		if (materialFunc != null) {
 			this.materialFunc = (chunkRenderType, shaded, ambientOcclusion) -> materialFunc.apply(chunkRenderType, shaded);
 		} else {
@@ -48,7 +48,7 @@ public final class BlockModelBuilder {
 		return this;
 	}
 
-	public BlockModelBuilder materialFunc(@org.jetbrains.annotations.Nullable BlockMaterialFunction materialFunc) {
+	public BlockModelBuilder materialFunc(@Nullable BlockMaterialFunction materialFunc) {
 		this.materialFunc = materialFunc;
 		return this;
 	}

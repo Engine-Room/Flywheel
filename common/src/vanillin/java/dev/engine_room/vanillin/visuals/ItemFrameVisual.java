@@ -14,8 +14,8 @@ import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.vanillin.item.ItemModels;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.resources.model.BlockStateDefinitions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -25,29 +25,18 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class ItemFrameVisual extends AbstractVisual implements EntityVisual<ItemFrame>, SimpleDynamicVisual {
-	private static final ModelResourceLocation FRAME_LOCATION = ModelResourceLocation.vanilla("item_frame", "map=false");
-	private static final ModelResourceLocation MAP_FRAME_LOCATION = ModelResourceLocation.vanilla("item_frame", "map=true");
-	private static final ModelResourceLocation GLOW_FRAME_LOCATION = ModelResourceLocation.vanilla("glow_item_frame", "map=false");
-	private static final ModelResourceLocation GLOW_MAP_FRAME_LOCATION = ModelResourceLocation.vanilla("glow_item_frame", "map=true");
-
-	public static final RendererReloadCache<ModelResourceLocation, Model> MODEL_RESOURCE_LOCATION = new RendererReloadCache<>(mrl -> {
-		ModelManager modelManager = Minecraft.getInstance()
-				.getModelManager()
-				.getBlockModelShaper()
-				.getModelManager();
-
-		return new BakedModelBuilder(modelManager.getModel(mrl))
-				.build();
-	});
+	public static final RendererReloadCache<BlockStateModel, Model> MODEL_RESOURCE_LOCATION = new RendererReloadCache<>(model ->
+			new BakedModelBuilder(model).build());
 
 	private final Matrix4f baseTransform = new Matrix4f();
 
 	private final TransformedInstance frame;
 	private final TransformedInstance item;
 	private final ItemFrame entity;
-	private ModelResourceLocation lastFrameLocation;
+	private BlockStateModel lastFrameModel;
 	private ItemStack lastItemStack;
 
 	public ItemFrameVisual(VisualizationContext ctx, ItemFrame entity, float partialTick) {
@@ -58,8 +47,8 @@ public class ItemFrameVisual extends AbstractVisual implements EntityVisual<Item
 		lastItemStack = entity.getItem()
 				.copy();
 
-		lastFrameLocation = getFrameModelResourceLoc(entity, lastItemStack);
-		var frameModel = MODEL_RESOURCE_LOCATION.get(lastFrameLocation);
+		lastFrameModel = getFrameModel();
+		var frameModel = MODEL_RESOURCE_LOCATION.get(lastFrameModel);
 
 		frame = ctx.instancerProvider()
 				.instancer(InstanceTypes.TRANSFORMED, frameModel)
@@ -103,13 +92,13 @@ public class ItemFrameVisual extends AbstractVisual implements EntityVisual<Item
 		baseTransform.rotateXYZ(Mth.DEG_TO_RAD * entity.getXRot(), Mth.DEG_TO_RAD * (180.0f - entity.getYRot()), 0.0f);
 
 		var stack = entity.getItem();
-		var frameLocation = getFrameModelResourceLoc(entity, stack);
+		var frameModel = getFrameModel();
 
-		if (frameLocation != lastFrameLocation) {
+		if (frameModel != lastFrameModel) {
 			visualizationContext.instancerProvider()
-					.instancer(InstanceTypes.TRANSFORMED, MODEL_RESOURCE_LOCATION.get(frameLocation))
+					.instancer(InstanceTypes.TRANSFORMED, MODEL_RESOURCE_LOCATION.get(frameModel))
 					.stealInstance(frame);
-			lastFrameLocation = frameLocation;
+			lastFrameModel = frameModel;
 		}
 
 		frame.setVisible(!invisible);
@@ -171,12 +160,9 @@ public class ItemFrameVisual extends AbstractVisual implements EntityVisual<Item
 		return entity.getType() == EntityType.GLOW_ITEM_FRAME ? Math.max(5, getBlockLightLevelBase(pos)) : getBlockLightLevelBase(pos);
 	}
 
-	public static ModelResourceLocation getFrameModelResourceLoc(ItemFrame entity, ItemStack item) {
-		boolean bl = entity.getType() == EntityType.GLOW_ITEM_FRAME;
-		if (item.is(Items.FILLED_MAP)) {
-			return bl ? GLOW_MAP_FRAME_LOCATION : MAP_FRAME_LOCATION;
-		} else {
-			return bl ? GLOW_FRAME_LOCATION : FRAME_LOCATION;
-		}
+	public BlockStateModel getFrameModel() {
+		boolean isGlowing = entity.getType() == EntityType.GLOW_ITEM_FRAME;
+		BlockState state = BlockStateDefinitions.getItemFrameFakeState(isGlowing, false);
+		return Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
 	}
 }

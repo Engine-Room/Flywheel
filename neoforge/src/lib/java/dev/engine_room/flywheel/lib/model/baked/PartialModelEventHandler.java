@@ -6,8 +6,6 @@ import net.minecraft.resources.Identifier;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.neoforged.neoforge.client.event.ModelEvent;
 
 @ApiStatus.Internal

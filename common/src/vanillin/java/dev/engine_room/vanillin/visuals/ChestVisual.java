@@ -1,13 +1,12 @@
 package dev.engine_room.vanillin.visuals;
 
-import java.util.Calendar;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.jspecify.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.material.Material;
@@ -18,13 +17,16 @@ import dev.engine_room.flywheel.lib.model.part.InstanceTree;
 import dev.engine_room.flywheel.lib.model.part.ModelTrees;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
+import dev.engine_room.vanillin.mixin.ChestRendererAccessor;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.blockentity.ChestRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
@@ -61,8 +63,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 	@Nullable
 	private final Matrix4fc initialPose;
 	private final BrightnessCombiner brightnessCombiner = new BrightnessCombiner();
-	@Nullable
-	private final DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> neighborCombineResult;
+	private final DoubleBlockCombiner.@Nullable NeighborCombineResult<? extends ChestBlockEntity> neighborCombineResult;
 	@Nullable
 	private final Float2FloatFunction lidProgress;
 
@@ -74,7 +75,11 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		Block block = blockState.getBlock();
 		if (block instanceof AbstractChestBlock<?> chestBlock) {
 			ChestType chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
-			net.minecraft.client.resources.model.Material texture = Sheets.chooseMaterial(blockEntity, chestType, isChristmas());
+			ChestRenderer<?> renderer = (ChestRenderer) Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(blockEntity);
+			net.minecraft.client.resources.model.Material texture = Sheets.chooseMaterial(
+					((ChestRendererAccessor) renderer).flywheel$getChestMaterial(blockEntity, ChestRenderer.xmasTextures()),
+					chestType
+			);
 			instances = InstanceTree.create(instancerProvider(), ModelTrees.of(LAYER_LOCATIONS.get(chestType), texture, MATERIAL));
 			lid = instances.childOrThrow("lid");
 			lock = instances.childOrThrow("lock");
@@ -93,11 +98,6 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 			neighborCombineResult = null;
 			lidProgress = null;
 		}
-	}
-
-	private static boolean isChristmas() {
-		Calendar calendar = Calendar.getInstance();
-		return calendar.get(Calendar.MONTH) + 1 == 12 && calendar.get(Calendar.DATE) >= 24 && calendar.get(Calendar.DATE) <= 26;
 	}
 
 	private Matrix4f createInitialPose() {

@@ -1,8 +1,8 @@
 package dev.engine_room.vanillin.visuals;
 
-import org.jspecify.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
@@ -21,7 +21,7 @@ import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;

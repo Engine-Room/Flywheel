@@ -8,19 +8,19 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import dev.engine_room.flywheel.api.material.Material;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
 @ApiStatus.Internal
 public class NeoforgeMeshEmitter extends MeshEmitter implements VertexConsumer {
-	private final RenderType renderType;
+	private final ChunkSectionLayer chunkSectionLayer;
 
 	private boolean defaultAo;
 
-	NeoforgeMeshEmitter(ByteBufferBuilderStack byteBufferBuilderStack, RenderType renderType) {
-		super(byteBufferBuilderStack, renderType);
-		this.renderType = renderType;
+	NeoforgeMeshEmitter(ByteBufferBuilderStack byteBufferBuilderStack, ChunkSectionLayer chunkSectionLayer) {
+		super(byteBufferBuilderStack, chunkSectionLayer);
+		this.chunkSectionLayer = chunkSectionLayer;
 	}
 
 	/**
@@ -36,7 +36,7 @@ public class NeoforgeMeshEmitter extends MeshEmitter implements VertexConsumer {
 
 	@Nullable
 	private BufferBuilder getBuffer(boolean shade, boolean ao) {
-		Material key = blockMaterialFunction.apply(renderType, shade, ao);
+		Material key = blockMaterialFunction.apply(chunkSectionLayer, shade, ao);
 		if (key != null) {
 			return getBuffer(key);
 		} else {
@@ -46,7 +46,7 @@ public class NeoforgeMeshEmitter extends MeshEmitter implements VertexConsumer {
 
 	@Nullable
 	private BufferBuilder getBuffer(BakedQuad quad) {
-		boolean shade = quad.isShade();
+		boolean shade = quad.shade();
 		boolean ao = quad.hasAmbientOcclusion() && defaultAo;
 		return getBuffer(shade, ao);
 	}
@@ -60,40 +60,50 @@ public class NeoforgeMeshEmitter extends MeshEmitter implements VertexConsumer {
 	}
 
 	@Override
-	public void putBulkData(PoseStack.Pose pose, BakedQuad quad, float[] brightness, float red, float green, float blue, float alpha, int[] lightmap, int packedOverlay, boolean readAlpha) {
+	public void putBulkData(PoseStack.Pose pose, BakedQuad quad, float[] brightness, float red, float green, float blue, float alpha, int[] lightmap, int packedOverlay) {
 		BufferBuilder bufferBuilder = getBuffer(quad);
 		if (bufferBuilder != null) {
-			bufferBuilder.putBulkData(pose, quad, brightness, red, green, blue, alpha, lightmap, packedOverlay, readAlpha);
+			bufferBuilder.putBulkData(pose, quad, brightness, red, green, blue, alpha, lightmap, packedOverlay);
 		}
 	}
 
 	@Override
 	public VertexConsumer addVertex(float x, float y, float z) {
-		throw new UnsupportedOperationException("ForgeMeshEmitter only supports putBulkData!");
+		throw new UnsupportedOperationException("NeoForgeMeshEmitter only supports putBulkData!");
 	}
 
 	@Override
 	public VertexConsumer setColor(int red, int green, int blue, int alpha) {
-		throw new UnsupportedOperationException("ForgeMeshEmitter only supports putBulkData!");
+		throw new UnsupportedOperationException("NeoForgeMeshEmitter only supports putBulkData!");
+	}
+
+	@Override
+	public VertexConsumer setColor(int color) {
+		throw new UnsupportedOperationException("NeoForgeMeshEmitter only supports putBulkData!");
 	}
 
 	@Override
 	public VertexConsumer setUv(float u, float v) {
-		throw new UnsupportedOperationException("ForgeMeshEmitter only supports putBulkData!");
+		throw new UnsupportedOperationException("NeoForgeMeshEmitter only supports putBulkData!");
 	}
 
 	@Override
 	public VertexConsumer setUv1(int u, int v) {
-		throw new UnsupportedOperationException("ForgeMeshEmitter only supports putBulkData!");
+		throw new UnsupportedOperationException("NeoForgeMeshEmitter only supports putBulkData!");
 	}
 
 	@Override
 	public VertexConsumer setUv2(int u, int v) {
-		throw new UnsupportedOperationException("ForgeMeshEmitter only supports putBulkData!");
+		throw new UnsupportedOperationException("NeoForgeMeshEmitter only supports putBulkData!");
 	}
 
 	@Override
 	public VertexConsumer setNormal(float normalX, float normalY, float normalZ) {
-		throw new UnsupportedOperationException("ForgeMeshEmitter only supports putBulkData!");
+		throw new UnsupportedOperationException("NeoForgeMeshEmitter only supports putBulkData!");
+	}
+
+	@Override
+	public VertexConsumer setLineWidth(float f) {
+		throw new UnsupportedOperationException("NeoForgeMeshEmitter only supports putBulkData!");
 	}
 }

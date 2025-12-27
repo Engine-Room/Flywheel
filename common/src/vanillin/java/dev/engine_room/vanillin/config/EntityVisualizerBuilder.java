@@ -18,8 +18,7 @@ import net.minecraft.world.entity.EntityType;
 public final class EntityVisualizerBuilder<T extends Entity> {
 	private final Configurator configurator;
 	private final EntityType<T> type;
-	@Nullable
-	private SimpleEntityVisualizer.Factory<T> visualFactory;
+	private SimpleEntityVisualizer.@Nullable Factory<T> visualFactory;
 	@Nullable
 	private Predicate<T> skipVanillaRender;
 

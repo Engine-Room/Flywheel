@@ -13,8 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 public class BlockEntityVisualizerBuilder<T extends BlockEntity> {
 	private final Configurator configurator;
 	private final BlockEntityType<T> type;
-	@Nullable
-	private SimpleBlockEntityVisualizer.Factory<T> visualFactory;
+	private SimpleBlockEntityVisualizer.@Nullable Factory<T> visualFactory;
 	@Nullable
 	private Predicate<T> skipVanillaRender;
 

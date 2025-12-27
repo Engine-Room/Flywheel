@@ -86,7 +86,9 @@ public final class HitboxComponent implements EntityComponent {
 	public void beginFrame(DynamicVisual.Context context) {
 		recycler.resetCount();
 
-		var shouldRenderHitBoxes = Minecraft.getInstance().debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES);
+		var shouldRenderHitBoxes = Minecraft.getInstance()
+				.debugEntries
+				.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES);
 		if (shouldRenderHitBoxes && !entity.isInvisible() && !Minecraft.getInstance()
 				.showOnlyReducedInfo()) {
 			float partialTick = context.partialTick();

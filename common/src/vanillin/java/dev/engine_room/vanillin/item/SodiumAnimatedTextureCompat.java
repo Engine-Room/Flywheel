@@ -4,7 +4,7 @@ import dev.engine_room.vanillin.VanillinXplat;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSets;
-import net.caffeinemc.mods.sodium.client.render.texture.SpriteUtil;
+import net.caffeinemc.mods.sodium.api.texture.SpriteUtil;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 /**
@@ -42,14 +42,14 @@ public class SodiumAnimatedTextureCompat {
 
 	private static final class Internals {
 		private static void add(TextureAtlasSprite sprite) {
-			if (SpriteUtil.hasAnimation(sprite)) {
+			if (SpriteUtil.INSTANCE.hasAnimation(sprite)) {
 				VISIBLE.add(sprite);
 			}
 		}
 
 		private static void beginFrame() {
 			for (var sprite : VISIBLE) {
-				SpriteUtil.markSpriteActive(sprite);
+				SpriteUtil.INSTANCE.markSpriteActive(sprite);
 			}
 		}
 	}
