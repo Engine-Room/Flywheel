@@ -1,5 +1,9 @@
 package dev.engine_room.flywheel.impl;
 
+import dev.engine_room.flywheel.impl.FlwDebugInfo.FlwDebugEntry;
+import dev.engine_room.flywheel.lib.util.IdentifierUtil;
+import net.neoforged.neoforge.client.event.RegisterDebugEntriesEvent;
+
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -64,15 +68,7 @@ public final class FlywheelNeoForge {
 
 		gameEventBus.addListener(FlwCommands::registerClientCommands);
 
-		gameEventBus.addListener((CustomizeGuiOverlayEvent.DebugText e) -> {
-			Minecraft minecraft = Minecraft.getInstance();
-
-			if (!minecraft.getDebugOverlay().showDebugScreen()) {
-				return;
-			}
-
-			FlwDebugInfo.addDebugInfo(minecraft, e.getRight());
-		});
+		gameEventBus.addListener((RegisterDebugEntriesEvent e) -> e.register(IdentifierUtil.id("flw_debug_info"), new FlwDebugEntry()));
 
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> BackendManagerImpl.onEndClientResourceReload(e.error().isPresent()));
 

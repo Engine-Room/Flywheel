@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.impl;
 
-import java.util.List;
+import java.net.URI;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -16,11 +16,16 @@ import it.unimi.dsi.fastutil.ints.IntComparators;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.debug.DebugScreenDisplayer;
+import net.minecraft.client.gui.components.debug.DebugScreenEntry;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.ClickEvent.CopyToClipboard;
+import net.minecraft.network.chat.ClickEvent.OpenUrl;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.HoverEvent.ShowText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 public final class FlwDebugInfo {
 
@@ -66,13 +71,13 @@ public final class FlwDebugInfo {
 		return Component.literal(debugInfoString)
 				.append(Component.literal("\n\nClick to copy debug info to clipboard")
 						.withStyle(Style.EMPTY.withUnderlined(true)
-								.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, debugInfoString))
-								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(debugInfoString)))))
+								.withClickEvent(new CopyToClipboard(debugInfoString))
+								.withHoverEvent(new ShowText(Component.literal(debugInfoString)))))
 				.append(Component.literal("\n\nClick to open an issue on GitHub")
 						.withStyle(Style.EMPTY.withUnderlined(true)
 								.withColor(ChatFormatting.BLUE)
-								.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/Engine-Room/Flywheel/issues"))
-								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Opens URL:\nhttps://github.com/Engine-Room/Flywheel/issues")))));
+								.withClickEvent(new OpenUrl(URI.create("https://github.com/Engine-Room/Flywheel/issues")))
+								.withHoverEvent(new ShowText(Component.literal("Opens URL:\nhttps://github.com/Engine-Room/Flywheel/issues")))));
 
 	}
 
@@ -247,25 +252,25 @@ public final class FlwDebugInfo {
 		appendLine(out, "Shading Language Version: ").append(GlCompat.GL_SHADING_LANGUAGE_VERSION_STRING);
 	}
 
-	public static void addDebugInfo(Minecraft minecraft, List<String> systemInfo) {
-		if (minecraft.showOnlyReducedInfo()) {
-			return;
+	public static class FlwDebugEntry implements DebugScreenEntry {
+		// TODO - Check if this should use a group instead
+		@Override
+		public void display(DebugScreenDisplayer displayer, @Nullable Level level, @Nullable LevelChunk clientChunk, @Nullable LevelChunk serverChunk) {
+			displayer.addLine("");
+			displayer.addLine("Flywheel: " + FlwImplXplat.INSTANCE.getVersionStr());
+			displayer.addLine("Backend: " + BackendManagerImpl.getBackendString());
+			displayer.addLine("Update limiting: " + (FlwConfig.INSTANCE.limitUpdates() ? "on" : "off"));
+
+			VisualizationManager manager = VisualizationManager.get(level);
+			if (manager != null) {
+				displayer.addLine("B: " + manager.blockEntities().visualCount()
+						+ ", E: " + manager.entities().visualCount()
+						+ ", F: " + manager.effects().visualCount());
+				Vec3i renderOrigin = manager.renderOrigin();
+				displayer.addLine("Origin: " + renderOrigin.getX() + ", " + renderOrigin.getY() + ", " + renderOrigin.getZ());
+			}
+
+			displayer.addLine("Memory Usage: CPU: " + StringUtil.formatBytes(FlwMemoryTracker.getCpuMemory()) + ", GPU: " + StringUtil.formatBytes(FlwMemoryTracker.getGpuMemory()));
 		}
-
-		systemInfo.add("");
-		systemInfo.add("Flywheel: " + FlwImplXplat.INSTANCE.getVersionStr());
-		systemInfo.add("Backend: " + BackendManagerImpl.getBackendString());
-		systemInfo.add("Update limiting: " + (FlwConfig.INSTANCE.limitUpdates() ? "on" : "off"));
-
-		VisualizationManager manager = VisualizationManager.get(minecraft.level);
-		if (manager != null) {
-			systemInfo.add("B: " + manager.blockEntities().visualCount()
-					+ ", E: " + manager.entities().visualCount()
-					+ ", F: " + manager.effects().visualCount());
-			Vec3i renderOrigin = manager.renderOrigin();
-			systemInfo.add("Origin: " + renderOrigin.getX() + ", " + renderOrigin.getY() + ", " + renderOrigin.getZ());
-		}
-
-		systemInfo.add("Memory Usage: CPU: " + StringUtil.formatBytes(FlwMemoryTracker.getCpuMemory()) + ", GPU: " + StringUtil.formatBytes(FlwMemoryTracker.getGpuMemory()));
 	}
 }

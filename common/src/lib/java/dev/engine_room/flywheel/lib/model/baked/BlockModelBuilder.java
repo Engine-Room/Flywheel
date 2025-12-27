@@ -10,31 +10,38 @@ import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 
 public final class BlockModelBuilder {
-	final BlockAndTintGetter level;
-	final Iterable<BlockPos> positions;
+	final BlockStateModel blockModel;
+	@Nullable
+	BlockAndTintGetter level;
+	@Nullable
+	BlockPos pos;
 	@Nullable
 	PoseStack poseStack;
-	boolean renderFluids = false;
 	@Nullable
 	BlockMaterialFunction materialFunc;
 
-	public BlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
+	public BlockModelBuilder(BlockStateModel blockModel) {
+		this.blockModel = blockModel;
+	}
+
+	public BlockModelBuilder level(@Nullable BlockAndTintGetter level) {
 		this.level = level;
-		this.positions = positions;
+		return this;
+	}
+
+	public BlockModelBuilder pos(@Nullable BlockPos pos) {
+		this.pos = pos;
+		return this;
 	}
 
 	public BlockModelBuilder poseStack(@Nullable PoseStack poseStack) {
 		this.poseStack = poseStack;
-		return this;
-	}
-
-	public BlockModelBuilder renderFluids(boolean renderFluids) {
-		this.renderFluids = renderFluids;
 		return this;
 	}
 
@@ -54,6 +61,12 @@ public final class BlockModelBuilder {
 	}
 
 	public SimpleModel build() {
+		if (level == null) {
+			level = EmptyVirtualBlockGetter.FULL_DARK;
+		}
+		if (pos == null) {
+			pos = BlockPos.ZERO;
+		}
 		if (materialFunc == null) {
 			materialFunc = ModelUtil::getMaterial;
 		}

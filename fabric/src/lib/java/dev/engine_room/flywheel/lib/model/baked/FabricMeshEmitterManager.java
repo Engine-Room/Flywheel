@@ -2,6 +2,9 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.function.Supplier;
 
+import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+
 import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
 
@@ -22,7 +25,7 @@ class FabricMeshEmitterManager extends MeshEmitterManager<MeshEmitter> implement
 	private final WrapperModel wrapperModel = new WrapperModel();
 
 	@UnknownNullability
-	private RenderType defaultLayer;
+	private ChunkSectionLayer defaultLayer;
 	private boolean useAo;
 	private boolean defaultAo;
 	@Nullable
@@ -32,7 +35,7 @@ class FabricMeshEmitterManager extends MeshEmitterManager<MeshEmitter> implement
 		super(MeshEmitter::new);
 	}
 
-	public BakedModel prepareForModel(BakedModel model, RenderType defaultLayer, boolean useAo, boolean defaultAo) {
+	public BlockStateModel prepareForModel(BlockStateModel model, ChunkSectionLayer defaultLayer, boolean useAo, boolean defaultAo) {
 		this.defaultLayer = defaultLayer;
 		this.useAo = useAo;
 		this.defaultAo = defaultAo;

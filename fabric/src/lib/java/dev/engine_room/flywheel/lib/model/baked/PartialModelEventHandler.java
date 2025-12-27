@@ -25,7 +25,7 @@ public final class PartialModelEventHandler {
 		PartialModel.populateOnInit = true;
 
 		for (PartialModel partial : PartialModel.ALL.values()) {
-			partial.bakedModel = manager.getModel(partial.modelId());
+			partial.blockStateModel = manager.getModel(partial.modelId());
 		}
 	}
 

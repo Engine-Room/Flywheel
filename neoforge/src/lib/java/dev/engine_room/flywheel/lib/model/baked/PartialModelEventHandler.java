@@ -24,7 +24,7 @@ public final class PartialModelEventHandler {
 		Map<ModelResourceLocation, BakedModel> models = event.getModels();
 
 		for (PartialModel partial : PartialModel.ALL.values()) {
-			partial.bakedModel = models.get(ModelResourceLocation.standalone(partial.modelId()));
+			partial.blockStateModel = models.get(ModelResourceLocation.standalone(partial.modelId()));
 		}
 	}
 }

@@ -1,5 +1,7 @@
 package dev.engine_room.vanillin.visuals;
 
+import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
+
 import org.joml.Matrix4f;
 
 import dev.engine_room.flywheel.api.model.Model;
@@ -7,7 +9,6 @@ import dev.engine_room.flywheel.api.visual.EntityVisual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
-import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.visual.AbstractVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
@@ -29,7 +30,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class ItemFrameVisual extends AbstractVisual implements EntityVisual<ItemFrame>, SimpleDynamicVisual {
 	public static final RendererReloadCache<BlockStateModel, Model> MODEL_RESOURCE_LOCATION = new RendererReloadCache<>(model ->
-			new BakedModelBuilder(model).build());
+			new BlockModelBuilder(model).build());
 
 	private final Matrix4f baseTransform = new Matrix4f();
 

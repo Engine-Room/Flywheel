@@ -1,6 +1,12 @@
 package dev.engine_room.flywheel.lib.model.baked;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
 import org.jspecify.annotations.Nullable;
 
@@ -10,11 +16,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -28,19 +32,16 @@ final class BakedModelBufferer {
 	private BakedModelBufferer() {
 	}
 
-	public static SimpleModel bufferModel(BakedModel model, BlockPos pos, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, BlockMaterialFunction blockMaterialFunction) {
+	public static SimpleModel bufferModel(BlockStateModel model, BlockPos pos, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, BlockMaterialFunction blockMaterialFunction) {
 		ThreadLocalObjects objects = THREAD_LOCAL_OBJECTS.get();
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
-		RandomSource random = objects.random;
 		FabricMeshEmitterManager emitters = objects.emitters;
 
 		emitters.prepare(blockMaterialFunction);
 
-		long seed = state.getSeed(pos);
-
-		RenderType defaultLayer = ItemBlockRenderTypes.getChunkRenderType(state);
+		ChunkSectionLayer defaultLayer = ItemBlockRenderTypes.getChunkRenderType(state);
 		boolean useAo = Minecraft.useAmbientOcclusion();
 		// See ModelBlockRenderer#tesselateBlock
 		boolean defaultAo = useAo && state.getLightEmission() == 0 && model.useAmbientOcclusion();
@@ -50,7 +51,7 @@ final class BakedModelBufferer {
 		Minecraft.getInstance()
 				.getBlockRenderer()
 				.getModelRenderer()
-				.tesselateBlock(level, model, state, pos, poseStack, emitters, false, random, seed, OverlayTexture.NO_OVERLAY);
+				.tesselateBlock(level, model, state, pos, poseStack, emitters, false, OverlayTexture.NO_OVERLAY);
 		poseStack.popPose();
 
 		return emitters.end();
@@ -84,9 +85,9 @@ final class BakedModelBufferer {
 				FluidState fluidState = state.getFluidState();
 
 				if (!fluidState.isEmpty()) {
-					RenderType renderType = ItemBlockRenderTypes.getRenderLayer(fluidState);
+					ChunkSectionLayer layer = ItemBlockRenderTypes.getRenderLayer(fluidState);
 
-					BufferBuilder bufferBuilder = emitters.getBuffer(renderType, true, false);
+					BufferBuilder bufferBuilder = emitters.getBuffer(layer, true, false);
 
 					if (bufferBuilder != null) {
 						transformingWrapper.prepare(bufferBuilder, poseStack);
@@ -100,18 +101,18 @@ final class BakedModelBufferer {
 			}
 
 			if (state.getRenderShape() == RenderShape.MODEL) {
-				long seed = state.getSeed(pos);
-				BakedModel model = renderDispatcher.getBlockModel(state);
+				BlockStateModel model = renderDispatcher.getBlockModel(state);
 
-				RenderType defaultLayer = ItemBlockRenderTypes.getChunkRenderType(state);
+				ChunkSectionLayer defaultLayer = ItemBlockRenderTypes.getChunkRenderType(state);
 
 				// See ModelBlockRenderer#tesselateBlock
-				boolean defaultAo = useAo && state.getLightEmission() == 0 && model.useAmbientOcclusion();
+				boolean defaultAo = useAo && state.getLightEmission() == 0 && ((BlockModelPart) parts.getFirst()).useAmbientOcclusion();
 				model = emitters.prepareForModel(model, defaultLayer, useAo, defaultAo);
 
 				poseStack.pushPose();
 				poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
-				blockRenderer.tesselateBlock(level, model, state, pos, poseStack, emitters, true, random, seed, OverlayTexture.NO_OVERLAY);
+				List<BlockModelPart> parts = model.collectParts(random);
+				blockRenderer.tesselateBlock(level, parts, state, pos, poseStack, emitters, true, OverlayTexture.NO_OVERLAY);
 				poseStack.popPose();
 			}
 		}

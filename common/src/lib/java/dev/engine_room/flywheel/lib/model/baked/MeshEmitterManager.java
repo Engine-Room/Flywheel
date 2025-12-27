@@ -14,7 +14,6 @@ import dev.engine_room.flywheel.lib.model.SimpleModel;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
-import net.minecraft.client.renderer.rendertype.RenderType;
 
 class MeshEmitterManager<T extends MeshEmitter> {
 	private static final ChunkSectionLayer[] CHUNK_LAYERS = ChunkSectionLayer.values();
@@ -31,8 +30,8 @@ class MeshEmitterManager<T extends MeshEmitter> {
 		}
 	}
 
-	public T getEmitter(RenderType renderType) {
-		return emitterMap.get(renderType);
+	public T getEmitter(ChunkSectionLayer chunkSectionLayer) {
+		return emitterMap.get(chunkSectionLayer);
 	}
 
 	public void prepare(BlockMaterialFunction blockMaterialFunction) {
