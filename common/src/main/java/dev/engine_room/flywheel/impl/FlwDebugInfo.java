@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.impl;
 
 import java.net.URI;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.backend.engine.AbstractInstancer;

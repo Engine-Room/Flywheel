@@ -14,10 +14,10 @@ public final class ModelBuilderImpl {
 	public static SimpleModel buildBlockModelBuilder(BlockModelBuilder builder) {
 		BlockState blockState = builder.level.getBlockState(builder.pos);
 
-		return BakedModelBufferer.bufferModel(builder.blockModel, builder.pos, builder.level, blockState, builder.poseStack, builder.materialFunc);
+		return BlockStateModelBufferer.bufferModel(builder.blockModel, builder.pos, builder.level, blockState, builder.poseStack, builder.materialFunc);
 	}
 
 	public static SimpleModel buildLevelModelBuilder(LevelModelBuilder builder) {
-		return BakedModelBufferer.bufferBlocks(builder.positions.iterator(), builder.level, builder.poseStack, builder.renderFluids, builder.materialFunc);
+		return BlockStateModelBufferer.bufferBlocks(builder.positions.iterator(), builder.level, builder.poseStack, builder.renderFluids, builder.materialFunc);
 	}
 }

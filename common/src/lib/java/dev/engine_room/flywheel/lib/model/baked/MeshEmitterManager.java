@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import com.google.common.collect.ImmutableList;

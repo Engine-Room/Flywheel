@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.api.material;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import net.minecraft.resources.Identifier;
 

@@ -1,9 +1,6 @@
 package dev.engine_room.flywheel.lib.model.baked;
 
-import java.util.function.Supplier;
-
-import net.minecraft.client.renderer.block.model.BlockStateModel;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import java.util.function.Predicate;
 
 import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
@@ -13,10 +10,16 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import dev.engine_room.flywheel.lib.model.SimpleModel;
+import net.fabricmc.fabric.api.client.model.loading.v1.wrapper.WrapperBlockStateModel;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadTransform;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
 import net.fabricmc.fabric.api.util.TriState;
-import net.irisshaders.iris.gl.blending.BlendMode;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
@@ -35,8 +38,7 @@ class FabricMeshEmitterManager extends MeshEmitterManager<MeshEmitter> implement
 		super(MeshEmitter::new);
 	}
 
-	public BlockStateModel prepareForModel(BlockStateModel model, ChunkSectionLayer defaultLayer, boolean useAo, boolean defaultAo) {
-		this.defaultLayer = defaultLayer;
+	public BlockStateModel prepareForModel(BlockStateModel model, boolean useAo, boolean defaultAo) {
 		this.useAo = useAo;
 		this.defaultAo = defaultAo;
 		wrapperModel.setWrapped(model);
@@ -49,13 +51,12 @@ class FabricMeshEmitterManager extends MeshEmitterManager<MeshEmitter> implement
 		return super.end();
 	}
 
-	private void prepareForGeometry(RenderMaterial material) {
-		BlendMode blendMode = material.blendMode();
-		RenderType layer = blendMode == BlendMode.DEFAULT ? defaultLayer : blendMode.blockRenderLayer;
-		boolean shade = !material.disableDiffuse();
-		TriState aoMode = material.ambientOcclusion();
+	private void prepareForGeometry(QuadView quad) {
+		ChunkSectionLayer renderLayer = quad.renderLayer();
+		boolean shade = !quad.diffuseShade();
+		TriState aoMode = quad.ambientOcclusion();
 		boolean ao = useAo && aoMode.orElse(defaultAo);
-		currentDelegate = getBuffer(layer, shade, ao);
+		currentDelegate = getBuffer(renderLayer, shade, ao);
 	}
 
 	@Override
@@ -70,6 +71,14 @@ class FabricMeshEmitterManager extends MeshEmitterManager<MeshEmitter> implement
 	public VertexConsumer setColor(int red, int green, int blue, int alpha) {
 		if (currentDelegate != null) {
 			currentDelegate.setColor(red, green, blue, alpha);
+		}
+		return this;
+	}
+
+	@Override
+	public VertexConsumer setColor(int color) {
+		if (currentDelegate != null) {
+			currentDelegate.setColor(color);
 		}
 		return this;
 	}
@@ -107,6 +116,14 @@ class FabricMeshEmitterManager extends MeshEmitterManager<MeshEmitter> implement
 	}
 
 	@Override
+	public VertexConsumer setLineWidth(float f) {
+		if (currentDelegate != null) {
+			currentDelegate.setLineWidth(f);
+		}
+		return this;
+	}
+
+	@Override
 	public void addVertex(float x, float y, float z, int color, float u, float v, int packedOverlay, int packedLight, float normalX, float normalY, float normalZ) {
 		if (currentDelegate != null) {
 			currentDelegate.addVertex(x, y, z, color, u, v, packedOverlay, packedLight, normalX, normalY, normalZ);
@@ -127,26 +144,21 @@ class FabricMeshEmitterManager extends MeshEmitterManager<MeshEmitter> implement
 		}
 	}
 
-	private class WrapperModel extends ForwardingBakedModel {
-		private final RenderContext.QuadTransform quadTransform = quad -> {
-			FabricMeshEmitterManager.this.prepareForGeometry(quad.material());
+	private class WrapperModel extends WrapperBlockStateModel {
+		private final QuadTransform quadTransform = quad -> {
+			FabricMeshEmitterManager.this.prepareForGeometry(quad);
 			return true;
 		};
 
-		public void setWrapped(@Nullable BakedModel wrapped) {
+		public void setWrapped(@Nullable BlockStateModel wrapped) {
 			this.wrapped = wrapped;
 		}
 
 		@Override
-		public boolean isVanillaAdapter() {
-			return false;
-		}
-
-		@Override
-		public void emitBlockQuads(BlockAndTintGetter level, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
-			context.pushTransform(quadTransform);
-			super.emitBlockQuads(level, state, pos, randomSupplier, context);
-			context.popTransform();
+		public void emitQuads(QuadEmitter emitter, BlockAndTintGetter blockView, BlockPos pos, BlockState state, RandomSource random, Predicate<@Nullable Direction> cullTest) {
+			emitter.pushTransform(quadTransform);
+			super.emitQuads(emitter, blockView, pos, state, random, cullTest);
+			emitter.popTransform();
 		}
 	}
 }

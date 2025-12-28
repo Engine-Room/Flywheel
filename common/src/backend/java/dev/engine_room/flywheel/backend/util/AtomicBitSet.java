@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 // https://github.com/Netflix/hollow/blob/master/hollow/src/main/java/com/netflix/hollow/core/memory/ThreadSafeBitSet.java
 // Refactored to remove unused methods, deduplicate some code segments, and add extra functionality with #forEachSetSpan
@@ -481,8 +481,7 @@ public class AtomicBitSet {
 		return expandToFit(segmentIndex).getSegment(segmentIndex);
 	}
 
-	@NotNull
-	private AtomicBitSet.AtomicBitSetSegments expandToFit(int segmentIndex) {
+	private AtomicBitSet.@NonNull AtomicBitSetSegments expandToFit(int segmentIndex) {
 		AtomicBitSetSegments visibleSegments = segments.get();
 
 		while (visibleSegments.numSegments() <= segmentIndex) {

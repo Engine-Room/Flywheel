@@ -16,21 +16,18 @@ import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.TriState;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.neoforged.neoforge.model.data.ModelData;
 
-final class BakedModelBufferer {
+final class BlockStateModelBufferer {
 	private static final ThreadLocal<ThreadLocalObjects> THREAD_LOCAL_OBJECTS = ThreadLocal.withInitial(ThreadLocalObjects::new);
 
-	private BakedModelBufferer() {
+	private BlockStateModelBufferer() {
 	}
 
 	public static SimpleModel bufferModel(BlockStateModel model, BlockPos pos, BlockAndTintGetter level, BlockState state, @Nullable PoseStack poseStack, BlockMaterialFunction blockMaterialFunction) {
@@ -39,33 +36,23 @@ final class BakedModelBufferer {
 			poseStack = objects.identityPoseStack;
 		}
 		RandomSource random = objects.random;
-		MeshEmitterManager<NeoforgeMeshEmitter> emitters = objects.emitters;
+		FabricMeshEmitterManager emitters = objects.emitters;
 
 		emitters.prepare(blockMaterialFunction);
 
-		ModelBlockRenderer blockRenderer = Minecraft.getInstance()
-				.getBlockRenderer()
-				.getModelRenderer();
-
-		List<BlockModelPart> parts = model.collectParts(level, pos, state, random);
-
-		long seed = state.getSeed(pos);
-		random.setSeed(seed);
-		ChunkSectionLayer layer = parts.getFirst().getRenderType(state);
+		List<BlockModelPart> parts = model.collectParts(random);
 
 		// See ModelBlockRenderer#tesselateBlock
-		boolean defaultAo = state.getLightEmission(level, pos) == 0;
-		boolean aoEnabled = Minecraft.useAmbientOcclusion();
-
-		TriState useAo = parts.getFirst().ambientOcclusion();
-
-		boolean defaultAoLayer = aoEnabled && (useAo.isTrue() || (useAo.isDefault() && defaultAo));
-
-		NeoforgeMeshEmitter emitter = emitters.getEmitter(layer);
-		emitter.prepareForModelLayer(defaultAoLayer);
+		boolean useAo = Minecraft.useAmbientOcclusion();
+		boolean defaultAo = useAo && state.getLightEmission() == 0 && parts.getFirst().useAmbientOcclusion();
+		model = emitters.prepareForModel(model, useAo, defaultAo);
+		parts = model.collectParts(random);
 
 		poseStack.pushPose();
-		blockRenderer.tesselateBlock(level, parts, state, pos, poseStack, emitter, false, OverlayTexture.NO_OVERLAY);
+		Minecraft.getInstance()
+				.getBlockRenderer()
+				.getModelRenderer()
+				.tesselateBlock(level, parts, state, pos, poseStack, emitters, false, OverlayTexture.NO_OVERLAY);
 		poseStack.popPose();
 
 		return emitters.end();
@@ -77,7 +64,7 @@ final class BakedModelBufferer {
 			poseStack = objects.identityPoseStack;
 		}
 		RandomSource random = objects.random;
-		MeshEmitterManager<NeoforgeMeshEmitter> emitters = objects.emitters;
+		FabricMeshEmitterManager emitters = objects.emitters;
 		TransformingVertexConsumer transformingWrapper = objects.transformingWrapper;
 
 		emitters.prepare(blockMaterialFunction);
@@ -87,7 +74,7 @@ final class BakedModelBufferer {
 		ModelBlockRenderer blockRenderer = renderDispatcher.getModelRenderer();
 		ModelBlockRenderer.enableCaching();
 
-		boolean aoEnabled = Minecraft.useAmbientOcclusion();
+		boolean useAo = Minecraft.useAmbientOcclusion();
 
 		while (posIterator.hasNext()) {
 			BlockPos pos = posIterator.next();
@@ -115,28 +102,18 @@ final class BakedModelBufferer {
 			}
 
 			if (state.getRenderShape() == RenderShape.MODEL) {
-				long seed = state.getSeed(pos);
 				BlockStateModel model = renderDispatcher.getBlockModel(state);
-				ModelData modelData = model.getModelData(level, pos, state, level.getModelData(pos));
-				random.setSeed(seed);
-				ChunkRenderTypeSet renderTypes = model.getRenderTypes(state, random, modelData);
+				List<BlockModelPart> parts = model.collectParts(random);
 
 				// See ModelBlockRenderer#tesselateBlock
-				boolean defaultAo = state.getLightEmission(level, pos) == 0;
+				boolean defaultAo = useAo && state.getLightEmission() == 0 && parts.getFirst().useAmbientOcclusion();
+				model = emitters.prepareForModel(model, useAo, defaultAo);
+				parts = model.collectParts(random);
 
-				for (RenderType renderType : renderTypes) {
-					TriState useAo = model.useAmbientOcclusion(state, modelData, renderType);
-
-					boolean defaultAoLayer = aoEnabled && (useAo.isTrue() || (useAo.isDefault() && defaultAo));
-
-					NeoforgeMeshEmitter emitter = emitters.getEmitter(renderType);
-					emitter.prepareForModelLayer(defaultAoLayer);
-
-					poseStack.pushPose();
-					poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
-					blockRenderer.tesselateBlock(level, model, state, pos, poseStack, emitter, true, random, seed, OverlayTexture.NO_OVERLAY, modelData, renderType);
-					poseStack.popPose();
-				}
+				poseStack.pushPose();
+				poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
+				blockRenderer.tesselateBlock(level, parts, state, pos, poseStack, emitters, true, OverlayTexture.NO_OVERLAY);
+				poseStack.popPose();
 			}
 		}
 
@@ -149,7 +126,7 @@ final class BakedModelBufferer {
 		public final PoseStack identityPoseStack = new PoseStack();
 		public final RandomSource random = RandomSource.createNewThreadLocalInstance();
 
-		public final MeshEmitterManager<NeoforgeMeshEmitter> emitters = new MeshEmitterManager<>(NeoforgeMeshEmitter::new);
+		public final FabricMeshEmitterManager emitters = new FabricMeshEmitterManager();
 		public final TransformingVertexConsumer transformingWrapper = new TransformingVertexConsumer();
 	}
 }

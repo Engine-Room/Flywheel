@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.lib.model;
 
 import java.util.Collection;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -78,12 +78,6 @@ public final class ModelUtil {
 
 	@Nullable
 	public static Material getItemMaterial(RenderType renderType) {
-		var chunkMaterial = getMaterial(renderType, true, false);
-
-		if (chunkMaterial != null) {
-			return chunkMaterial;
-		}
-
 		if (renderType == Sheets.cutoutBlockSheet()) {
 			return Materials.CUTOUT_BLOCK;
 		}
