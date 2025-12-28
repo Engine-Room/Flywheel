@@ -7,11 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.system.MemoryStack;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -38,6 +38,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -45,6 +46,7 @@ import net.minecraft.client.resources.model.MultiPartBakedModel;
 import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.client.resources.model.WeightedBakedModel;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.models.ItemModelGenerators;
 import net.minecraft.resources.ResourceLocation;
@@ -60,7 +62,7 @@ import net.minecraft.world.level.block.HalfTransparentBlock;
 import net.minecraft.world.level.block.StainedGlassPaneBlock;
 
 public class ItemModels {
-	public static final TagKey<Item> NO_INSTANCING = TagKey.create(Registries.ITEM, Vanillin.rl("no_instancing"));
+	public static final TagKey<Item> NO_INSTANCING = TagKey.create(Registries.ITEM, Vanillin.id("no_instancing"));
 
 	private static final Model EMPTY_MODEL = new SimpleModel(List.of());
 	private static final RendererReloadCache<BakedMeshKey, Mesh> MESH_CACHE = new RendererReloadCache<>(key -> bakeMesh(key.model(), key.displayContext()));
@@ -100,11 +102,10 @@ public class ItemModels {
 		return VanillinXplat.INSTANCE.itemColors(item) == null;
 	}
 
-	public static BakedModel getModel(ItemStack stack) {
+	public static ItemModel getModel(ItemStack stack) {
 		return Minecraft.getInstance()
-				.getItemRenderer()
-				.getItemModelShaper()
-				.getItemModel(stack);
+				.getModelManager()
+				.getItemModel(stack.get(DataComponents.ITEM_MODEL));
 	}
 
 	@Nullable
