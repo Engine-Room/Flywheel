@@ -3,6 +3,13 @@
 pipeline {
     agent none
 
+    options {
+        // After the Build stage the pipeline stalls, waiting for user input to confirm the release stage.
+        // This leaves the builds in a running state even though no work is being done. Enable this option
+        // to automatically cancel earlier stalled builds when a new one is started.
+        disableConcurrentBuilds(abortPrevious: true)
+    }
+
     tools {
         jdk "jdk-17.0.1"
     }
