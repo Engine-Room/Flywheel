@@ -29,14 +29,14 @@ public class RecyclingPoseStack extends PoseStack {
 					.set(last.pose());
 			recycle.normal()
 					.set(last.normal());
-			FlwLibLink.INSTANCE.getPoseStack(this)
+			FlwLibLink.INSTANCE.getPoses(this)
 					.addLast(recycle);
 		}
 	}
 
 	@Override
 	public void popPose() {
-		recycleBin.addLast(FlwLibLink.INSTANCE.getPoseStack(this)
+		recycleBin.addLast(FlwLibLink.INSTANCE.getPoses(this)
 				.removeLast());
 	}
 }

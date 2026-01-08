@@ -127,14 +127,16 @@ loom {
     }
 }
 
+repositories {
+    maven("https://maven.caffeinemc.net/releases/")
+}
+
 dependencies {
     modImplementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
     modApi("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
 
-    if (property("enable_sodium_and_iris").toString().toBoolean()) {
-        modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-fabric")
-        modCompileOnly("maven.modrinth:iris:${property("iris_version")}-fabric")
-    }
+    modCompileOnly("net.caffeinemc:sodium-fabric-api:${property("sodium_version")}")
+    modCompileOnly("maven.modrinth:iris:${property("iris_version")}-fabric")
 
     "forApi"(project(path = common, configuration = "apiClasses"))
     "forLib"(project(path = common, configuration = "libClasses"))

@@ -75,14 +75,13 @@ loom {
 
 repositories {
     maven("https://maven.neoforged.net/releases/")
+    maven("https://maven.caffeinemc.net/releases/")
 }
 
 dependencies {
     neoForge("net.neoforged:neoforge:${property("neoforge_version")}")
 
-    if (property("enable_sodium_and_iris").toString().toBoolean()) {
-        modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-neoforge")
-    }
+    modCompileOnly("net.caffeinemc:sodium-neoforge-api:${property("sodium_version")}")
 
     compileOnly(project(path = common, configuration = "vanillinClasses"))
     compileOnly(project(path = common, configuration = "vanillinResources"))
